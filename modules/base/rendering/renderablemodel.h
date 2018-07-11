@@ -65,15 +65,23 @@ protected:
     void loadTexture();
 
 private:
+    void updateUniformCache();
+
     std::unique_ptr<modelgeometry::ModelGeometry> _geometry;
 
     properties::StringProperty _colorTexturePath;
+
+    properties::FloatProperty _ambientIntensity;
+    properties::FloatProperty _diffuseIntensity;
+    properties::FloatProperty _specularIntensity;
+
     properties::BoolProperty _performShading;
     properties::Mat3Property _modelTransform;
 
     ghoul::opengl::ProgramObject* _programObject = nullptr;
     UniformCache(opacity, directionToSunViewSpace, modelViewTransform,
-        projectionTransform, performShading, texture) _uniformCache;
+        projectionTransform, performShading, texture, ambientIntensity,
+        diffuseIntensity, specularIntensity) _uniformCache;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 

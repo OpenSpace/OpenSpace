@@ -52,6 +52,24 @@ namespace {
         "rendered in this object."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
+        "AmbientIntensity",
+        "Ambient Intensity",
+        "A multiplier for ambient lighting."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DiffuseIntensityInfo = {
+        "DiffuseIntensity",
+        "Diffuse Intensity",
+        "A multiplier for diffuse lighting."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SpecularIntensityInfo = {
+        "SpecularIntensity",
+        "Specular Intensity",
+        "A multiplier for specular lighting."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ShadingInfo = {
         "PerformShading",
         "Perform Shading",
@@ -88,6 +106,24 @@ documentation::Documentation RenderableModel::Documentation() {
                 TextureInfo.description
             },
             {
+                AmbientIntensityInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                AmbientIntensityInfo.description
+            },
+            {
+                DiffuseIntensityInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                DiffuseIntensityInfo.description
+            },
+            {
+                SpecularIntensityInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                SpecularIntensityInfo.description
+            },
+            {
                 ShadingInfo.identifier,
                 new BoolVerifier,
                 Optional::Yes,
@@ -106,6 +142,9 @@ documentation::Documentation RenderableModel::Documentation() {
 RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _colorTexturePath(TextureInfo)
+    , _ambientIntensity(AmbientIntensityInfo, 0.2, 0.0, 1.0)
+    , _diffuseIntensity(DiffuseIntensityInfo, 1.0, 0.0, 1.0)
+    , _specularIntensity(SpecularIntensityInfo, 1.0, 0.0, 1.0)
     , _performShading(ShadingInfo, true)
     , _modelTransform(ModelTransformInfo, glm::mat3(1.0))
 {
@@ -134,6 +173,16 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         _modelTransform = dictionary.value<glm::dmat3>(ModelTransformInfo.identifier);
     }
 
+    if (dictionary.hasKey(AmbientIntensityInfo.identifier)) {
+        _ambientIntensity = dictionary.value<float>(AmbientIntensityInfo.identifier);
+    }
+    if (dictionary.hasKey(DiffuseIntensityInfo.identifier)) {
+        _diffuseIntensity = dictionary.value<float>(DiffuseIntensityInfo.identifier);
+    }
+    if (dictionary.hasKey(SpecularIntensityInfo.identifier)) {
+        _specularIntensity = dictionary.value<float>(SpecularIntensityInfo.identifier);
+    }
+
     if (dictionary.hasKey(ShadingInfo.identifier)) {
         _performShading = dictionary.value<bool>(ShadingInfo.identifier);
     }
@@ -143,6 +192,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderableModel::loadTexture, this));
 
+
+    addProperty(_ambientIntensity);
+    addProperty(_diffuseIntensity);
+    addProperty(_specularIntensity);
     addProperty(_performShading);
 }
 
@@ -161,21 +214,7 @@ void RenderableModel::initializeGL() {
             );
         }
     );
-
-    _uniformCache.opacity = _programObject->uniformLocation("opacity");
-    _uniformCache.directionToSunViewSpace = _programObject->uniformLocation(
-        "directionToSunViewSpace"
-    );
-    _uniformCache.modelViewTransform = _programObject->uniformLocation(
-        "modelViewTransform"
-    );
-    _uniformCache.projectionTransform = _programObject->uniformLocation(
-        "projectionTransform"
-    );
-    _uniformCache.performShading = _programObject->uniformLocation(
-        "performShading"
-    );
-    _uniformCache.texture = _programObject->uniformLocation("texture1");
+    updateUniformCache();
 
     loadTexture();
 
@@ -232,6 +271,18 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         data.camera.projectionMatrix()
     );
     _programObject->setUniform(
+        _uniformCache.ambientIntensity,
+        _ambientIntensity
+    );
+    _programObject->setUniform(
+        _uniformCache.diffuseIntensity,
+        _diffuseIntensity
+    );
+    _programObject->setUniform(
+        _uniformCache.specularIntensity,
+        _specularIntensity
+    );
+    _programObject->setUniform(
         _uniformCache.performShading,
         _performShading
     );
@@ -252,26 +303,39 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 void RenderableModel::update(const UpdateData&) {
     if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
-
-        _uniformCache.opacity = _programObject->uniformLocation("opacity");
-        _uniformCache.directionToSunViewSpace = _programObject->uniformLocation(
-            "directionToSunViewSpace"
-        );
-        _uniformCache.modelViewTransform = _programObject->uniformLocation(
-            "modelViewTransform"
-        );
-        _uniformCache.projectionTransform = _programObject->uniformLocation(
-            "projectionTransform"
-        );
-        _uniformCache.performShading = _programObject->uniformLocation(
-            "performShading"
-        );
-        _uniformCache.texture = _programObject->uniformLocation("texture1");
+        updateUniformCache();
     }
 
     _sunPos = OsEng.renderEngine().scene()->sceneGraphNode(
         "SolarSystemBarycenter"
     )->worldPosition();
+}
+
+
+void RenderableModel::updateUniformCache() {
+    _uniformCache.opacity = _programObject->uniformLocation("opacity");
+    _uniformCache.directionToSunViewSpace = _programObject->uniformLocation(
+        "directionToSunViewSpace"
+    );
+    _uniformCache.modelViewTransform = _programObject->uniformLocation(
+        "modelViewTransform"
+    );
+    _uniformCache.projectionTransform = _programObject->uniformLocation(
+        "projectionTransform"
+    );
+    _uniformCache.performShading = _programObject->uniformLocation(
+        "performShading"
+    );
+    _uniformCache.ambientIntensity = _programObject->uniformLocation(
+        "ambientIntensity"
+    );
+    _uniformCache.diffuseIntensity = _programObject->uniformLocation(
+        "diffuseIntensity"
+    );
+    _uniformCache.specularIntensity = _programObject->uniformLocation(
+        "specularIntensity"
+    );
+    _uniformCache.texture = _programObject->uniformLocation("texture1");
 }
 
 void RenderableModel::loadTexture() {

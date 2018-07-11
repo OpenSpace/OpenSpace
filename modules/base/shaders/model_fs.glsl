@@ -29,6 +29,10 @@ in vec3 vs_normalViewSpace;
 in vec4 vs_positionCameraSpace;
 in float vs_screenSpaceDepth;
 
+uniform float ambientIntensity = 0.2;
+uniform float diffuseIntensity = 1.0;
+uniform float specularIntensity = 1.0;
+
 uniform bool performShading = true;
 uniform vec3 directionToSunViewSpace;
 uniform sampler2D texture1;
@@ -50,10 +54,6 @@ Fragment getFragment() {
         vec3 l = directionToSunViewSpace;
         vec3 c = normalize(vs_positionCameraSpace.xyz);
         vec3 r = reflect(l, n);
-
-        const float ambientIntensity = 0.2;
-        const float diffuseIntensity = 1;
-        const float specularIntensity = 1;
 
         float diffuseCosineFactor = dot(n,l);
         float specularCosineFactor = dot(c,r);

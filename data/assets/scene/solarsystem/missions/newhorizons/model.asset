@@ -7,7 +7,7 @@ local textures = asset.syncedResource({
     Name = "New Horizons Textures",
     Type = "HttpSynchronization",
     Identifier = "newhorizons_textures",
-    Version = 2
+    Version = 3
 })
 
 local models = asset.syncedResource({
@@ -27,7 +27,10 @@ local NewHorizons = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/NewHorizonsCleanModel.obj"
         }, 
-        ColorTexture = textures .. "/NHTexture.jpg"
+        ColorTexture = textures .. "/NHTexture.jpg",
+        AmbientIntensity = 0.4,
+        DiffuseIntensity = 1.0,
+        SpecularIntensity = 1.0
     },
     GUI = {
         Name = "New Horizons",
