@@ -791,8 +791,12 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
                 );
 
                 if (!newImageTimes.empty()) {
-                    double lastExposure = newImageTimes[0].timeRange.end;
-                    clearProjectionBufferAfterTime(lastExposure);
+                    double firstNewImage = newImageTimes[0].timeRange.end;
+                    // Make sure images are always projected in the correct order
+                    // (Remove buffered images with a later timestamp)
+                    clearProjectionBufferAfterTime(firstNewImage);
+
+                    // Now, insert the new images to the buffer
                     insertImageProjections(newImageTimes);
                 }
             }
