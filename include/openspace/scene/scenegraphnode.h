@@ -48,6 +48,8 @@ class Scale;
 class Scene;
 struct UpdateData;
 struct SurfacePositionHandle;
+class TimeFrame;
+class Time;
 
 namespace documentation { struct Documentation; }
 
@@ -120,6 +122,7 @@ public:
     glm::dmat4 modelTransform() const;
     glm::dmat4 inverseModelTransform() const;
     double worldScale() const;
+    bool isTimeFrameActive(const Time& time) const;
 
     SceneGraphNode* parent() const;
     std::vector<SceneGraphNode*> children() const;
@@ -167,6 +170,8 @@ private:
         std::unique_ptr<Rotation> rotation;
         std::unique_ptr<Scale> scale;
     } _transform;
+
+    std::unique_ptr<TimeFrame> _timeFrame;
 
     // Cached transform data
     glm::dvec3 _worldPositionCached;
