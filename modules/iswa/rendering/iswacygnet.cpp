@@ -211,7 +211,7 @@ void IswaCygnet::update(const UpdateData&) {
         updateTexture();
         _textureDirty = false;
 
-        double clockwiseSign = (OsEng.timeManager().time().deltaTime() > 0) ? 1.0 : -1.0;
+        double clockwiseSign = (OsEng.timeManager().deltaTime() > 0) ? 1.0 : -1.0;
         downloadTextureResource(_openSpaceTime + clockwiseSign * _data.updateTime);
         _lastUpdateRealTime = _realTime;
         _lastUpdateOpenSpaceTime = _openSpaceTime;
