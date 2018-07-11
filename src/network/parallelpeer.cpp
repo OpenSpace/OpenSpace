@@ -279,9 +279,12 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
     switch (static_cast<datamessagestructures::Type>(type)) {
         case datamessagestructures::Type::CameraData: {
             datamessagestructures::CameraKeyframe kf(buffer);
-            kf._timestamp = convertTimestamp(kf._timestamp);
+            const double convertedTimestamp = convertTimestamp(kf._timestamp);
 
-            OsEng.navigationHandler().keyframeNavigator().removeKeyframesAfter(kf._timestamp);
+            OsEng.navigationHandler().keyframeNavigator().removeKeyframesAfter(
+                convertedTimestamp
+            );
+
             interaction::KeyframeNavigator::CameraPose pose;
             pose.focusNode = kf._focusNode;
             pose.position = kf._position;
@@ -289,7 +292,8 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
             pose.scale = kf._scale;
             pose.followFocusNodeRotation = kf._followNodeRotation;
 
-            OsEng.navigationHandler().keyframeNavigator().addKeyframe(kf._timestamp, pose);
+            OsEng.navigationHandler().keyframeNavigator().addKeyframe(convertedTimestamp,
+                                                                      pose);
             break;
         }
         case datamessagestructures::Type::TimelineData: {
@@ -297,7 +301,10 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
             datamessagestructures::TimeTimeline timelineMessage(buffer);
 
             if (timelineMessage._clear) {
-                OsEng.timeManager().removeKeyframesAfter(timestamp, true);
+                OsEng.timeManager().removeKeyframesAfter(
+                    convertTimestamp(timestamp),
+                    true
+                );
             }
 
             const std::vector<datamessagestructures::TimeKeyframe>& keyframesMessage =
@@ -306,8 +313,10 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
             // If there are new keyframes incoming, make sure to erase all keyframes
             // that already exist after the first new keyframe.
             if (keyframesMessage.size() > 0) {
-                OsEng.timeManager().removeKeyframesAfter(
-                    convertTimestamp(keyframesMessage[0]._timestamp), true);
+                const double convertedTimestamp =
+                    convertTimestamp(keyframesMessage[0]._timestamp);
+
+                OsEng.timeManager().removeKeyframesAfter(convertedTimestamp, true);
             }
 
             for (const datamessagestructures::TimeKeyframe& kfMessage : keyframesMessage)
