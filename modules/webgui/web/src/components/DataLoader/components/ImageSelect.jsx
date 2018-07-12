@@ -17,8 +17,9 @@ class ImageSelect extends React.Component {
     }
 
     handleClick(event) {
-        console.log('clicked', event.target.src);
-        this.setState({selectedImgSrc: event.target.src});
+        const clickedSrc = event.target.src;
+        this.setState({selectedImgSrc: clickedSrc});
+        this.props.onSelect(clickedSrc);
     }
 
     render () {
@@ -51,7 +52,8 @@ ImageSelect.propTypes = {
     imageSources: PropTypes.arrayOf(PropTypes.shape({
         label: PropTypes.string,
         images: PropTypes.arrayOf(PropTypes.string)
-    }))
+    })),
+    onSelect: PropTypes.func
 }
 
 ImageSelect.defaultProps = {

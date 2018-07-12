@@ -67,6 +67,7 @@ class PrepareUploadedData extends Component {
     this.handleTranslationTypeChange = this.handleTranslationTypeChange.bind(this);
     this.handleSetStaticTranslation = this.handleSetStaticTranslation.bind(this);
     this.handleSetTranslationTarget = this.handleSetTranslationTarget.bind(this);
+    this.handleSelectedTFImage = this.handleSelectedTFImage.bind(this);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -151,25 +152,27 @@ class PrepareUploadedData extends Component {
     this.setState({ translationTarget: event.value})
   }
 
+  handleSelectedTFImage(imgSource) {
+    const filename = imgSource.substring(imgSource.lastIndexOf('/')+1);
+    filename.replace(/\.[^/.]+$/, '');
+    console.log(filename)
+  }
+
   upload() {
     this.setState({uploadButtonIsClicked: true});
 
     const { translationType, translationPos, translationTarget, translationObserver } = this.state;
     const { dimensions, variable, lowerDomainBounds, upperDomainBounds, rSquared } = this.state.data;
     
-    let transform;
-    if (translationType === KEY_STATIC_TRANSLATION) {
-      transform = ` 
+    let transform = ` 
+      Type = "${translationType}",
+      ${translationType === KEY_STATIC_TRANSLATION ? `
         Position={${translationPos.x}, ${translationPos.y}, ${translationPos.z}},
-        Type = "${translationType}"
-      `      
-    } else {
-      transform = `
-        Type = "${translationType}",
+      ` : `
         Target = "${translationTarget}",
         Observer = "${translationObserver}"
-      `
-    }
+      `}
+    }`
 
     let payload = `\'
       return {
@@ -294,7 +297,8 @@ class PrepareUploadedData extends Component {
             <Column className={styles.spaceFirstChildren}
                     widthPercentage={50}>
               <Label>Here be trafnser functions</Label>
-              <ImageSelect imageSources={tfImages}/>
+              <ImageSelect imageSources={tfImages}
+                           onSelect={this.handleSelectedTFImage} />
             </Column>
           </Row>
 
