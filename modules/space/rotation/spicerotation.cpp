@@ -124,16 +124,11 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
 }
 
 glm::dmat3 SpiceRotation::matrix(const Time& time) const {
-    try {
-        return SpiceManager::ref().positionTransformMatrix(
-            _sourceFrame,
-            _destinationFrame,
-            time.j2000Seconds()
-        );
-    }
-    catch (const SpiceManager::SpiceException&) {
-        return glm::dmat3(1.0);
-    }
+    return SpiceManager::ref().positionTransformMatrix(
+        _sourceFrame,
+        _destinationFrame,
+        time.j2000Seconds()
+    );
 }
 
 } // namespace openspace

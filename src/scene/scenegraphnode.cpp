@@ -52,6 +52,10 @@ namespace {
 
 namespace openspace {
 
+#ifdef Debugging_Core_SceneGraphNode_Indices
+int SceneGraphNode::nextIndex = 0;
+#endif // Debugging_Core_SceneGraphNode_Indices
+
 std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
@@ -62,6 +66,9 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     );
 
     std::unique_ptr<SceneGraphNode> result = std::make_unique<SceneGraphNode>();
+#ifdef Debugging_Core_SceneGraphNode_Indices
+    result->index = nextIndex++;
+#endif // Debugging_Core_SceneGraphNode_Indices
 
     std::string identifier = dictionary.value<std::string>(KeyIdentifier);
     result->setIdentifier(std::move(identifier));
@@ -614,7 +621,7 @@ glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
 }
 
 bool SceneGraphNode::isTimeFrameActive(const Time& time) const {
-    for (const auto& dep : _dependencies) {
+    for (SceneGraphNode* dep : _dependencies) {
         if (!dep->isTimeFrameActive(time)) {
             return false;
         }
