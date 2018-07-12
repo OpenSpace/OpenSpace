@@ -123,6 +123,7 @@ void HttpRequest::perform(RequestOptions opt) {
     // NOLINTNEXTLINE
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlfunctions::writeCallback);
 
+    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L); // NOLINT
     curl_easy_setopt(curl, CURLOPT_XFERINFODATA, this); // NOLINT
     // NOLINTNEXTLINE
     curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, curlfunctions::progressCallback);
