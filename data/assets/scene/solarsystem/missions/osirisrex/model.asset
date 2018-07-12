@@ -178,6 +178,20 @@ local OsirisRexKernels = {
     --openspace.spice.loadKernel(kernels .. "/Case11_60negLatitude.wmv")
 }
 
+local LightSources = {
+    {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sunTransforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+    },
+    {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+    }
+}
+
 -- Append the CaseDependentKernels at the end of the OsirisRexKernels set
 for i = 0, #CaseDependentKernels do
     OsirisRexKernels[#OsirisRexKernels + 1] = CaseDependentKernels[i]
@@ -206,7 +220,8 @@ local OsirisRex = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/orx_base_resized_12_sep_2016.obj"
         },
-        ColorTexture = textures .. "/osirisTex.png"
+        ColorTexture = textures .. "/osirisTex.png",
+        LightSources = LightSources
     },
     GUI = {
         Name = "OSIRIS REx",
@@ -235,7 +250,8 @@ local PolyCam = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/orx_polycam_resized_12_sep_2016.obj"
         }, 
-        ColorTexture = textures .. "/osirisTex.png"
+        ColorTexture = textures .. "/osirisTex.png",
+        LightSources = LightSources
     },
     GUI = {
         Name = "OCAMS POLYCAM",
@@ -253,7 +269,8 @@ local Rexis = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/orx_rexis_resized_12_sep_2016.obj"
         }, 
-        ColorTexture = textures .. "/osirisTex.png"
+        ColorTexture = textures .. "/osirisTex.png",
+        LightSources = LightSources
     },
     Transform = {
         Translation = {
