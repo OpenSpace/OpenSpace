@@ -3,8 +3,12 @@ import PropTypes from 'prop-types';
 
 import styles from './Label.scss';
 
-const getClassNames = (size) => {
+const getClassNames = (size, inheritedClassName) => {
   let classes = styles.base
+
+  if (inheritedClassName) {
+    classes += ` ${inheritedClassName}`
+  }
 
   switch(size) {
     case 'small':
@@ -25,9 +29,10 @@ const getClassNames = (size) => {
 
 const Label = (props) => {
   const { children, size } = props;
+  const inheritedClassName = props.className;
 
   return (
-    <span {...props} className={getClassNames(size)}>
+    <span {...props} className={getClassNames(size, inheritedClassName)}>
       { children }
     </span>
   );
@@ -40,7 +45,7 @@ Label.propTypes = {
 
 Label.defaultProps = {
   children: [],
-  size: 'small'
+  size: 'medium'
 };
 
 export default Label;

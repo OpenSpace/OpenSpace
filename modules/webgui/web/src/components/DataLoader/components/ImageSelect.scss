@@ -1,0 +1,23 @@
+.image {
+        float: left;
+        width: 30%;
+        border: solid 2px transparent;
+
+    &:hover {
+        cursor: pointer;
+        opacity: 0.8;
+    }
+
+    &.selected {
+        border: 2px solid #aff7c0;
+        // width: calc(30% - 4px);
+    }
+}
+
+.container {
+    padding: 0 10px;
+}
+
+.label {
+    padding: 15px 0 5px 0;
+}

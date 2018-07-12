@@ -14,6 +14,8 @@ import Button from '../common/Input/Button/Button';
 import RadioButtons from '../common/Input/RadioButtons/RadioButtons';
 import Label from '../common/Label/Label';
 import Window from '../common/Window/Window';
+import Column from './components/FlexColumn';
+import ImageSelect from './components/ImageSelect';
 import ProgressBar from '../common/ProgressBar/ProgressBar';
 import Checkbox from '../common/Input/Checkbox/Checkbox';
 import provideWindowWidth from './HOC/provideWindowSize';
@@ -171,9 +173,9 @@ class PrepareUploadedData extends Component {
 
     let payload = `\'
       return {
-        ${transform},
         ItemName = "${this.state.itemName || this.getDefaultItemName()}",
         GridType = "${this.state.gridType}",
+        ${transform},
         Task = {
           Dimensions={${dimensions.x}, ${dimensions.y}, ${dimensions.z}}, 
           Variable="${variable.toLowerCase()}",
@@ -185,7 +187,6 @@ class PrepareUploadedData extends Component {
       }
     \'`
     payload = removeLineBreakCharacters(payload);
-    transform = removeLineBreakCharacters(transform);
     
     const payloadScript = UploadDataItemScript.replace(ValuePlaceholder, payload);
     DataManager.runScript(payloadScript);
@@ -205,7 +206,9 @@ class PrepareUploadedData extends Component {
     const { dimensions, variable, lowerDomainBounds, upperDomainBounds } = this.state.data;
     const spiceOptions = 'SUN EARTH'.split(' ').map(v => ({ value: v, label: v }));
 
-    const WINDOW_MAX_WIDTH = 400;
+    const isUnEditable = (this.state.uploadButtonIsClicked && (currentVolumesConvertedCount !== currentVolumesToConvertCount));
+
+    const WINDOW_MAX_WIDTH = 800;
     const w = width / 2;
     const h = height / 2;
     const windowSize = {
@@ -219,60 +222,102 @@ class PrepareUploadedData extends Component {
       return null;
     }
 
+    const IMAGE_URI_BASE = 'http://localhost:1337';
+    const tfImages = [
+      { 
+        label: 'MAS',
+        images: [
+          `${IMAGE_URI_BASE}/mas_mhd_r_squared.png`,
+          `${IMAGE_URI_BASE}/mas_mhd_temperature.png`,
+          `${IMAGE_URI_BASE}/mas_mhd_velocity.png`
+        ],
+      },
+      {
+        label: 'ENLIL', 
+        images: [
+        `${IMAGE_URI_BASE}/enlil.png`
+        ]
+      }
+    ]
+
     return(
       <Window type="small"
               title="Prepare Data"
               size={windowSize}
               position={{ x: 100, y: 200 }}
               closeCallback={() => this.setState({ activated: false })}>
-        <div className={styles.content}>
-          <div>
-          <Input onChange={(event) => this.changeItemName(event)}
-                 label='Item name'
-                 placeholder='name'
-                 value={this.state.itemName || this.getDefaultItemName()} />
-          </div>
+        <Column widthPercentage={100} className={styles.content}>
+          <Row>
+            <Column widthPercentage={50} className={styles.spaceFirstChildren}>
+              <div>
+                <Input onChange={(event) => this.changeItemName(event)}
+                      label='Item name'
+                      placeholder='name'
+                      value={this.state.itemName || this.getDefaultItemName()} />
+              </div>
           <NumericInput label={"Scale data with" + scale + "times the Sun Radius "}
                         placeholder={'test'}
                         value={scale}
                         onChange={(event) => this.setState({ scale: event.currentTarget.value}) }/>
-          <MultiInputs label='Dimensions'
-                        options={dimensions} 
-                        onChange={(target) => this.onChangeMultiInputs(target, KEY_DIMENSIONS)}/>
-          <Variables variable={variable}
-                      onChange={this.changeVariable} />
-          <MultiInputs label='Lower Domain Bounds'
-                        options={lowerDomainBounds} 
-                        onChange={(target) => this.onChangeMultiInputs(target, KEY_LOWER_DOMAIN_BOUNDS)}/>
-          <MultiInputs label='Upper Domain Bounds'
-                        options={upperDomainBounds} 
-                        onChange={(target) => this.onChangeMultiInputs(target, KEY_UPPER_DOMAIN_BOUNDS)}/>
-          <div><RadioButtons options={['Spherical', 'Cartesian']}
-                             defaultOption='Spherical'
-                             label='Grid type'
-                             onChange={this.handleGridTypeChange} /></div>
-          <Checkbox label={'Multiply '+ variable + ' with radius^2?'}
-                    onChange={this.changeRSquared}/>
-          <Translation translationType={translationType} 
-                        translationPos={translationPos}
-                        onTranslationTypeChange={this.handleTranslationTypeChange}
-                        onSetTranslation={(target) => this.handleSetStaticTranslation(target)}
-                        onSetTranslationTarget={this.handleSetTranslationTarget}
-                        target={translationTarget} />
-          <Button onClick={() => this.upload()}> Convert </Button>
-          {this.state.uploadButtonIsClicked && (
-            <div>
-              <Row>
-                <ProgressBar label='Volume conversion progress'
-                            initializingMsg='Reading'
-                            progressPercent={volumeProgressPercent} />
-              </Row>
-              <Row className={styles.filesConverted}>
-                <Label size="small">{currentVolumesConvertedCount} / {currentVolumesToConvertCount} files complete</Label>
-              </Row>
-            </div>
-          )} 
-        </div>
+              <MultiInputs label='Dimensions'
+                          options={dimensions} 
+                          disabled={isUnEditable}
+                          onChange={(target) => this.onChangeMultiInputs(target, KEY_DIMENSIONS)}/>
+              <Variables variable={variable}
+                        disabled={isUnEditable}
+                        onChange={this.changeVariable} />
+              <MultiInputs label='Lower Domain Bounds'
+                          options={lowerDomainBounds} 
+                          disabled={isUnEditable}
+                          onChange={(target) => this.onChangeMultiInputs(target, KEY_LOWER_DOMAIN_BOUNDS)}/>
+              <MultiInputs label='Upper Domain Bounds'
+                          options={upperDomainBounds} 
+                          disabled={isUnEditable}
+                          onChange={(target) => this.onChangeMultiInputs(target, KEY_UPPER_DOMAIN_BOUNDS)}/>
+              <div>
+                <RadioButtons options={['Spherical', 'Cartesian']}
+                              defaultOption='Spherical'
+                              label='Grid type'
+                              disabled={isUnEditable}
+                              onChange={this.handleGridTypeChange} />
+              </div>
+              <Translation translationType={translationType} 
+                           translationPos={translationPos}
+                           onTranslationTypeChange={this.handleTranslationTypeChange}
+                           onSetTranslation={(target) => this.handleSetStaticTranslation(target)}
+                           onSetTranslationTarget={this.handleSetTranslationTarget}
+                           target={translationTarget} />
+              <Checkbox label='Factor r^2?'
+                        onChange={this.changeRSquared}
+                        disabled={isUnEditable}/>
+            </Column>
+            <Column className={styles.spaceFirstChildren}
+                    widthPercentage={50}>
+              <Label>Here be trafnser functions</Label>
+              <ImageSelect imageSources={tfImages}/>
+            </Column>
+          </Row>
+
+          <Column className={styles.footer}>
+            <Button onClick={() => this.upload()} 
+                    className={styles.convertButton}
+                    disabled={isUnEditable}> 
+                    Convert 
+            </Button>
+            {this.state.uploadButtonIsClicked && (
+              <div>
+                <Row>
+                  <ProgressBar label='Volume conversion progress'
+                              initializingMsg='Reading'
+                              progressPercent={volumeProgressPercent} />
+                </Row>
+                <Row className={styles.filesConverted}>
+                  <Label size="small">{currentVolumesConvertedCount} / {currentVolumesToConvertCount} files complete</Label>
+                </Row>
+              </div>
+            )} 
+          </Column>
+        </Column>
       </Window>
     );
   }

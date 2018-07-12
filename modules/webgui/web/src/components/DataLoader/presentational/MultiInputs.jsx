@@ -8,7 +8,7 @@ import Row from '../../common/Row/Row';
 import styles from './MultiInputs.scss';
 
 const MultiInputs = (props) => {
-  const { options, onChange, label, subLabel } = props;
+  const { options, onChange, label, subLabel, disabled } = props;
   return (
     <div className={styles.multiInputs}>
       <Label size='medium'>{label}:</Label>
@@ -19,6 +19,7 @@ const MultiInputs = (props) => {
                 label={key}
                 placeholder={key}
                 value={options[key]}
+                disabled={disabled}
                 onChange={onChange}
               />
           ))}

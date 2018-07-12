@@ -225,6 +225,8 @@ void Loader::loadDataItem(const std::string& absPathToItem) {
 
     // TODO: Variables to let user initialize in GUI
     std::string sunKey = "SUN";
+    const float sunRadiusScale = 695508000;
+    const float auScale = 149600000000;
     const std::string parent = "SolarSystemBarycenter"; // valid for all volume data?
     
     std::string stateFile = openspace::dataloader::helpers::getFileWithExtensionFromItemFolder(absPathToItem, "state");
@@ -363,6 +365,7 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
         ghoul::Dictionary stateDict(stateList);
         ghoul::DictionaryLuaFormatter formatter;
         std::string stateString = formatter.format(stateDict);
+        LINFO(stateString);
         std::fstream stateStream(absPath(itemPathBase + "/" + itemName + ".state"), std::ios::out);
         if (!stateStream) {
             LERROR("Could not create state file");
