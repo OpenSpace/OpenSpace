@@ -82,11 +82,14 @@ constexpr const char* KeyType = "Type";
 constexpr const char* KeyObserver = "Observer";
 constexpr const char* KeyTarget = "Target";
 constexpr const char* KeyStaticTranslation = "StaticTranslation";
+constexpr const char* KeyStaticScale = "StaticScale";
+constexpr const char* KeyScale = "Scale";
 
 const double DefaultStepSize = 0.02;
 const std::string DefaultGridType = "Spherical";
 const double DefaultSecondsAfter = 24*60;
 const double DefaultSecondsBefore = 24*60;
+const float sunRadiusScale = 695508000;
 
 const bool guiHidden = false;
 } 
@@ -222,7 +225,6 @@ void Loader::loadDataItem(const std::string& absPathToItem) {
 
     // TODO: Variables to let user initialize in GUI
     std::string sunKey = "SUN";
-    float sunRadiusScale = 695508000;
     const std::string parent = "SolarSystemBarycenter"; // valid for all volume data?
     
     std::string stateFile = openspace::dataloader::helpers::getFileWithExtensionFromItemFolder(absPathToItem, "state");
@@ -288,7 +290,6 @@ void Loader::goToFirstTimeStep(const std::string& absPathToItem) {
 
 void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryString) {
     // Determine path to new volume item
-    LINFO(fmt::format("dictionaryString: {}", std::string(dictionaryString)));
 
     _currentVolumeConversionDictionary = ghoul::lua::loadDictionaryFromString(dictionaryString);
 
@@ -317,6 +318,7 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
         std::string translationType = _currentVolumeConversionDictionary.value<std::string>(KeyType);
 
         // Check if user selected a Translation of type Static or Spice
+        // and create Translation Dictionary
         ghoul::Dictionary translationDictionary;
         if(translationType == KeyStaticTranslation) {
             glm::dvec3 position = _currentVolumeConversionDictionary.value<glm::dvec3>(KeyPosition);  
@@ -333,11 +335,16 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
             translationDictionary.setValue<std::string>(KeyObserver, observer);
         }
 
-        // READ AND CREATE SCALE DICTIONARY HERE
+        // Read and create Scale Dictionary
+        float scale = _currentVolumeConversionDictionary.value<float>(KeyScale) * sunRadiusScale;
+        ghoul::Dictionary scaleDictionary;
+        scaleDictionary.setValue<std::string>(KeyType, KeyStaticScale);
+        scaleDictionary.setValue<float>(KeyScale, scale);
 
+        // Create Transform Dictionary 
         ghoul::Dictionary transformDictionary;
         transformDictionary.setValue<ghoul::Dictionary>(KeyTranslation, translationDictionary);
-        // transformDictionary.setValue<ghoul::Dictionary>(KeyScale, scaleDictionary);  // STILL TO DO
+        transformDictionary.setValue<ghoul::Dictionary>(KeyScale, scaleDictionary); 
 
         std::string gridType = _currentVolumeConversionDictionary.value<std::string>(KeyGridType);
 

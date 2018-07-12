@@ -20,6 +20,8 @@ import provideWindowWidth from './HOC/provideWindowSize';
 import MultiInputs from './presentational/MultiInputs';
 import Variables from './presentational/Variables';
 import Translation from './presentational/Translation';
+import NumericInput from '../common/Input/NumericInput/NumericInput';
+
 import { KEY_DIMENSIONS, 
   KEY_UPPER_DOMAIN_BOUNDS, 
   KEY_LOWER_DOMAIN_BOUNDS, 
@@ -40,6 +42,7 @@ class PrepareUploadedData extends Component {
       translationPos: { x: 0, y: 0, z: 0 },
       translationTarget: 'SUN',
       translationObserver: 'SUN',
+      scale: 1,
 
       data: {
         dimensions: { x: 100, y: 100, z: 128 },
@@ -178,6 +181,7 @@ class PrepareUploadedData extends Component {
           UpperDomainBound={${upperDomainBounds.r}, ${upperDomainBounds.theta}, ${upperDomainBounds.phi}}, 
           FactorRSquared="${rSquared.toString()}",          
         },
+        Scale = ${this.state.scale}
       }
     \'`
     payload = removeLineBreakCharacters(payload);
@@ -197,7 +201,7 @@ class PrepareUploadedData extends Component {
 
   render() {
     const { width, height, currentVolumesConvertedCount, currentVolumesToConvertCount } = this.props;
-    const { volumeProgress, translationType, translationPos, translationTarget } = this.state;
+    const { volumeProgress, translationType, translationPos, translationTarget, scale } = this.state;
     const { dimensions, variable, lowerDomainBounds, upperDomainBounds } = this.state.data;
     const spiceOptions = 'SUN EARTH'.split(' ').map(v => ({ value: v, label: v }));
 
@@ -228,6 +232,10 @@ class PrepareUploadedData extends Component {
                  placeholder='name'
                  value={this.state.itemName || this.getDefaultItemName()} />
           </div>
+          <NumericInput label={"Scale data with" + scale + "times the Sun Radius "}
+                        placeholder={'test'}
+                        value={scale}
+                        onChange={(event) => this.setState({ scale: event.currentTarget.value}) }/>
           <MultiInputs label='Dimensions'
                         options={dimensions} 
                         onChange={(target) => this.onChangeMultiInputs(target, KEY_DIMENSIONS)}/>
@@ -243,7 +251,7 @@ class PrepareUploadedData extends Component {
                              defaultOption='Spherical'
                              label='Grid type'
                              onChange={this.handleGridTypeChange} /></div>
-          <Checkbox label='Factor r^2?'
+          <Checkbox label={'Multiply '+ variable + ' with radius^2?'}
                     onChange={this.changeRSquared}/>
           <Translation translationType={translationType} 
                         translationPos={translationPos}
