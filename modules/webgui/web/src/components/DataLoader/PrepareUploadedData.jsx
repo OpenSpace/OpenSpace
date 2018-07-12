@@ -155,26 +155,20 @@ class PrepareUploadedData extends Component {
     let transform;
     if (translationType === KEY_STATIC_TRANSLATION) {
       transform = ` 
-      Transform = {
-        Translation = {
-          Type = "${translationType}",
-          Position = { ${translationPos.x}, ${translationPos.y}, ${translationPos.z}}
-        }
-      },
-    `      
+        Position={${translationPos.x}, ${translationPos.y}, ${translationPos.z}},
+        Type = "${translationType}"
+      `      
     } else {
       transform = `
-        Transform = {
-          Translation = {
-            Type = "${translationType}",
-            Target = "${translationTarget}",
-            Observer = "${translationObserver}",
-          }
-        },`
+        Type = "${translationType}",
+        Target = "${translationTarget}",
+        Observer = "${translationObserver}"
+      `
     }
 
     let payload = `\'
       return {
+        ${transform},
         ItemName = "${this.state.itemName || this.getDefaultItemName()}",
         GridType = "${this.state.gridType}",
         Task = {
@@ -182,14 +176,19 @@ class PrepareUploadedData extends Component {
           Variable="${variable.toLowerCase()}",
           LowerDomainBound={${lowerDomainBounds.r}, ${lowerDomainBounds.theta}, ${lowerDomainBounds.phi}}, 
           UpperDomainBound={${upperDomainBounds.r}, ${upperDomainBounds.theta}, ${upperDomainBounds.phi}}, 
-          FactorRSquared="${rSquared.toString()}"
+          FactorRSquared="${rSquared.toString()}",          
         },
-        ${transform}
       }
     \'`
     payload = removeLineBreakCharacters(payload);
-    const script = UploadDataItemScript.replace(ValuePlaceholder, payload);
-    DataManager.runScript(script);
+    transform = removeLineBreakCharacters(transform);
+    
+    const payloadScript = UploadDataItemScript.replace(ValuePlaceholder, payload);
+    DataManager.runScript(payloadScript);
+
+    // const transformScript = UploadDataItemScript.replace(ValuePlaceholder, transform);
+    // DataManager.runScript(transformScript);
+
   }
 
   changeVariable(event) {

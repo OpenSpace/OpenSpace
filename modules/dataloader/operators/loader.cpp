@@ -47,7 +47,7 @@
 #include <ghoul/misc/dictionary.h>
 
 #include <fstream>
-
+#include <ghoul/glm.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -75,6 +75,13 @@ const std::string KeySecondsBefore = "SecondsBefore";
 
 constexpr const char* KeyTask = "Task";
 constexpr const char* KeyItemName = "ItemName";
+constexpr const char* KeyTransform = "Transform";
+constexpr const char* KeyTranslation = "Translation";
+constexpr const char* KeyPosition = "Position";
+constexpr const char* KeyType = "Type";
+constexpr const char* KeyObserver = "Observer";
+constexpr const char* KeyTarget = "Target";
+constexpr const char* KeyStaticTranslation = "StaticTranslation";
 
 const double DefaultStepSize = 0.02;
 const std::string DefaultGridType = "Spherical";
@@ -229,23 +236,23 @@ void Loader::loadDataItem(const std::string& absPathToItem) {
     renderableDictionary.setValue("SourceDirectory", sourceDir);
     renderableDictionary.setValue("TransferFunction", tfFilePath);
 
-    std::initializer_list<std::pair<std::string, ghoul::any>> translation = {
-        std::make_pair( "Type", translationTypeKey ),
-        std::make_pair( "Target", sunKey ),
-        std::make_pair( "Observer", sunKey )
-    };
-    std::initializer_list<std::pair<std::string, ghoul::any>> scale = {
-        std::make_pair( "Type", scaleTypeKey ),
-        std::make_pair( "Scale", sunRadiusScale )
-    };
-    ghoul::Dictionary translationDictionary(translation);
-    ghoul::Dictionary scaleDictionary(scale);
+    // std::initializer_list<std::pair<std::string, ghoul::any>> translation = {
+    //     std::make_pair( "Type", translationTypeKey ),
+    //     std::make_pair( "Target", sunKey ),
+    //     std::make_pair( "Observer", sunKey )
+    // };
+    // std::initializer_list<std::pair<std::string, ghoul::any>> scale = {
+    //     std::make_pair( "Type", scaleTypeKey ),
+    //     std::make_pair( "Scale", sunRadiusScale )
+    // };
+    // ghoul::Dictionary translationDictionary(translation);
+    // ghoul::Dictionary scaleDictionary(scale);
 
-    std::initializer_list<std::pair<std::string, ghoul::any>> transform = {
-        std::make_pair( "Translation", translationDictionary ),
-        std::make_pair( "Scale", scaleDictionary )
-    };
-    ghoul::Dictionary transformDictionary(transform);
+    // std::initializer_list<std::pair<std::string, ghoul::any>> transform = {
+    //     std::make_pair( "Translation", translationDictionary ),
+    //     std::make_pair( "Scale", scaleDictionary )
+    // };
+    // ghoul::Dictionary transformDictionary(transform);
 
     std::initializer_list<std::pair<std::string, ghoul::any>> gui = {
         std::make_pair( "Path", volumesGuiPathKey ),
@@ -257,7 +264,7 @@ void Loader::loadDataItem(const std::string& absPathToItem) {
         std::make_pair( "Identifier", dirLeaf ),
         std::make_pair( "Parent", parent ),
         std::make_pair( "Renderable", renderableDictionary ),
-        std::make_pair( "Transform", transformDictionary ),
+        // std::make_pair( "Transform", transformDictionary ),
         std::make_pair( "GUI", guiDictionary )
     };
 
@@ -281,12 +288,13 @@ void Loader::goToFirstTimeStep(const std::string& absPathToItem) {
 
 void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryString) {
     // Determine path to new volume item
+    LINFO(fmt::format("dictionaryString: {}", std::string(dictionaryString)));
 
     _currentVolumeConversionDictionary = ghoul::lua::loadDictionaryFromString(dictionaryString);
 
     // Schedule tasks? How to loop through several CDF timesteps and run VolumeToRaw for each
     // Create instance of KameleonVolumeToRaw and run
-
+    
     {
     std::thread t([&](){
         // ??? won't work multithreaded
@@ -306,6 +314,33 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
         Directory d(itemPathBase, RawPath::No);
         FileSys.createDirectory(d);
 
+        std::string translationType = _currentVolumeConversionDictionary.value<std::string>(KeyType);
+
+        // Check if user selected a Translation of type Static or Spice
+        ghoul::Dictionary translationDictionary;
+        if(translationType == KeyStaticTranslation) {
+            glm::dvec3 position = _currentVolumeConversionDictionary.value<glm::dvec3>(KeyPosition);  
+
+            translationDictionary.setValue<glm::dvec3>(KeyPosition, position);
+            translationDictionary.setValue<std::string>(KeyType, translationType);
+
+        } else {
+            std::string target = _currentVolumeConversionDictionary.value<std::string>(KeyTarget);
+            std::string observer = _currentVolumeConversionDictionary.value<std::string>(KeyObserver);
+
+            translationDictionary.setValue<std::string>(KeyType, translationType);
+            translationDictionary.setValue<std::string>(KeyTarget, target);
+            translationDictionary.setValue<std::string>(KeyObserver, observer);
+        }
+
+        // READ AND CREATE SCALE DICTIONARY HERE
+
+        ghoul::Dictionary transformDictionary;
+        transformDictionary.setValue<ghoul::Dictionary>(KeyTranslation, translationDictionary);
+        // transformDictionary.setValue<ghoul::Dictionary>(KeyScale, scaleDictionary);  // STILL TO DO
+
+        std::string gridType = _currentVolumeConversionDictionary.value<std::string>(KeyGridType);
+
         /*** create state file ***/
         // Check if file exists
         // If it exists, clear contents? delete and create new?
@@ -315,7 +350,8 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
             std::make_pair( KeyStepSize, DefaultStepSize ),
             std::make_pair( KeyGridType, gridType ),
             std::make_pair( KeySecondsAfter, DefaultSecondsAfter ),
-            std::make_pair( KeySecondsBefore, DefaultSecondsBefore )
+            std::make_pair( KeySecondsBefore, DefaultSecondsBefore ),
+            std::make_pair( KeyTransform, transformDictionary )
         };
         ghoul::Dictionary stateDict(stateList);
         ghoul::DictionaryLuaFormatter formatter;
@@ -394,7 +430,7 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
     // const int lowerDomainBound[3] = {1, -90, 0};
     // const int upperDomainBound[3] = {15, 90, 360};
 
-    // Set item dirLeaf as name
+    // Set item dirLeaf as namelowerDomainBound
     // const std::string itemName = openspace::dataloader::helpers::getDirLeaf(inputPath);
     // const std::string itemOutputFilePath = outputBasePath + 
     //     ghoul::filesystem::FileSystem::PathSeparator +
