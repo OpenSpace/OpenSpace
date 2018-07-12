@@ -54,6 +54,12 @@ documentation::Documentation SceneGraphLightSource::Documentation() {
         "base_scene_graph_light_source",
         {
             {
+                "Type",
+                new StringEqualVerifier("SceneGraphLightSource"),
+                Optional::No,
+                "The type of this light source"
+            },
+            {
                 IntensityInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,

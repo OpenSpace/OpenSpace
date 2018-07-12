@@ -45,6 +45,12 @@ documentation::Documentation CameraLightSource::Documentation() {
         "base_camera_light_source",
         {
             {
+                "Type",
+                new StringEqualVerifier("CameraLightSource"),
+                Optional::No,
+                "The type of this light source"
+            },
+            {
                 IntensityInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
