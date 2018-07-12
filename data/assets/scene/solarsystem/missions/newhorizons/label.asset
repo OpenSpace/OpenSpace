@@ -19,9 +19,7 @@ local Labels = {
             GeometryFile = models .. "/Labels.obj"
         }, 
         ColorTexture =  textures .. "/labels.png",
-        AmbientIntensity = 0.8,
-        DiffuseIntensity = 1.0,
-        SpecularIntensity = 1.0
+        AmbientIntensity = 0.8
     },
     GUI = {
         Path = "/Solar System/Missions/New Horizons"
