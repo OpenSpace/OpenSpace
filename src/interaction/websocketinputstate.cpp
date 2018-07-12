@@ -24,7 +24,6 @@
 
 #include <openspace/interaction/websocketinputstate.h>
 
-#include <ghoul/glm.h>
 #include <ghoul/misc/invariants.h>
 #include <algorithm>
 #include <map>
@@ -49,8 +48,7 @@ float WebsocketInputStates::axis(int axis) const {
 
     // If multiple websockets are connected, we might get values outside the -1,1 range by
     // summing them up
-    glm::clamp(res, -1.f, 1.f);
-    return res;
+    return std::clamp(res, -1.f, 1.f);
 }
 
 bool WebsocketInputStates::button(int button, WebsocketAction action) const {
