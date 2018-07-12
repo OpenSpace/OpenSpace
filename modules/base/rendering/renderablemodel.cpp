@@ -240,6 +240,12 @@ bool RenderableModel::isReady() const {
     return _programObject && _texture;
 }
 
+void RenderableModel::initialize() {
+    for (auto& ls : _lightSources) {
+        ls->initialize();
+    }
+}
+
 void RenderableModel::initializeGL() {
     _programObject = BaseModule::ProgramObjectManager.requestProgramObject(
         ProgramName,
@@ -289,13 +295,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
                                           modelTransform;
 
-    /*const glm::vec3 directionToSun = glm::normalize(
-        _sunPos - data.modelTransform.translation
-    );
-    const glm::vec3 directionToSunViewSpace =
-        glm::normalize(glm::mat3(data.camera.combinedViewMatrix()) * directionToSun);*/
-
-
     int nLightSources = 0;
     _lightIntensitiesBuffer.resize(_lightSources.size());
     _lightDirectionsViewSpaceBuffer.resize(_lightSources.size());
@@ -304,7 +303,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             continue;
         }
         _lightIntensitiesBuffer[nLightSources] = lightSource->intensity();
-        _lightDirectionsViewSpaceBuffer[nLightSources] = glm::normalize(glm::vec3(1.0));
+        _lightDirectionsViewSpaceBuffer[nLightSources] = lightSource->directionViewSpace(data);
         ++nLightSources;
     }
 

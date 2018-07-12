@@ -49,8 +49,7 @@ public:
     LightSource(const ghoul::Dictionary& dictionary);
     virtual ~LightSource() = default;
 
-    virtual glm::vec3 positionRelativeTo(const SceneGraphNode& node,
-                                         const RenderData& renderData) const = 0;
+    virtual glm::vec3 directionViewSpace(const RenderData& renderData) const = 0;
 
     virtual float intensity() const = 0;
 

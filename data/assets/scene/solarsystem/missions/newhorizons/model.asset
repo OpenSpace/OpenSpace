@@ -27,21 +27,21 @@ local NewHorizons = {
             GeometryFile = models .. "/NewHorizonsCleanModel.obj"
         }, 
         ColorTexture = textures .. "/NHTexture.jpg",
-        AmbientIntensity = 0.4,
+        AmbientIntensity = 0.0,
         DiffuseIntensity = 1.0,
         SpecularIntensity = 1.0,
         LightSources = {
             {
                 Type = "SceneGraphLightSource",
                 Identifier = "Sun",
-                Reference = sunTransforms.SolarSystemBarycenter.Identifier,
+                Node = sunTransforms.SolarSystemBarycenter.Identifier,
                 Intensity = 1.0
+            },
+            {
+                Identifier = "Camera",
+                Type = "CameraLightSource",
+                Intensity = 0.5
             }
-            --{
-            --    Identifier = "Sun"
-            --    Type = "CameraLightSource",
-            --    Intensity = 1.0
-            --}
         }
     },
     GUI = {

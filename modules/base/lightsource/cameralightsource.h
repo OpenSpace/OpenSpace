@@ -22,80 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEMODEL___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEMODEL___H__
+#ifndef __OPENSPACE_MODULE_BASE___CAMREALIGHTSOURCE___H__
+#define __OPENSPACE_MODULE_BASE___CAMREALIGHTSOURCE___H__
 
-#include <openspace/rendering/renderable.h>
+#include <openspace/scene/lightsource.h>
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/matrix/mat3property.h>
-#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <ghoul/opengl/uniformcache.h>
-#include <memory>
-
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
 
-struct RenderData;
-struct UpdateData;
-class LightSource;
-
 namespace documentation { struct Documentation; }
-namespace modelgeometry { class ModelGeometry; }
 
-class RenderableModel : public Renderable {
+class CameraLightSource : public LightSource {
 public:
-    RenderableModel(const ghoul::Dictionary& dictionary);
-    ~RenderableModel();
-
-    void initialize() override;
-    void initializeGL() override;
-    void deinitializeGL() override;
-
-    bool isReady() const override;
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
+    CameraLightSource();
+    CameraLightSource(const ghoul::Dictionary& dictionary);
 
     static documentation::Documentation Documentation();
 
-protected:
-    void loadTexture();
+    glm::vec3 directionViewSpace(const RenderData& renderData) const override;
 
+    float intensity() const override;
 private:
-    void updateUniformCache();
-
-    std::unique_ptr<modelgeometry::ModelGeometry> _geometry;
-
-    properties::StringProperty _colorTexturePath;
-
-    properties::FloatProperty _ambientIntensity;
-    properties::FloatProperty _diffuseIntensity;
-    properties::FloatProperty _specularIntensity;
-
-    properties::BoolProperty _performShading;
-    properties::Mat3Property _modelTransform;
-
-    ghoul::opengl::ProgramObject* _programObject = nullptr;
-    UniformCache(opacity, nLightSources, lightDirectionsViewSpace, lightIntensities,
-        modelViewTransform, projectionTransform, performShading, texture,
-        ambientIntensity, diffuseIntensity, specularIntensity) _uniformCache;
-
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-    std::vector<std::unique_ptr<LightSource>> _lightSources;
-
-    // Buffers for uniform uploading
-    std::vector<float> _lightIntensitiesBuffer;
-    std::vector<glm::vec3> _lightDirectionsViewSpaceBuffer;
-
-    properties::PropertyOwner _lightSourcePropertyOwner;
+    properties::FloatProperty _intensity;
 };
 
-}  // namespace openspace
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEMODEL___H__
+#endif // __OPENSPACE_MODULE_BASE___CAMREALIGHTSOURCE___H__

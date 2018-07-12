@@ -22,13 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/lightsource/scenegraphlightsource.h>
+#include <modules/base/lightsource/cameralightsource.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
 
 namespace {
@@ -37,58 +34,42 @@ namespace {
         "Intensity",
         "The intensity of this light source"
     };
-
-    constexpr const openspace::properties::Property::PropertyInfo NodeInfo = {
-        "Node",
-        "Node",
-        "The identifier of the scene graph node to follow"
-    };
 } // namespace
 
 namespace openspace {
 
-documentation::Documentation SceneGraphLightSource::Documentation() {
+documentation::Documentation CameraLightSource::Documentation() {
     using namespace openspace::documentation;
     return {
-        "Scene Graph Light Source",
-        "base_scene_graph_light_source",
+        "Camera Light Source",
+        "base_camera_light_source",
         {
             {
                 IntensityInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
                 IntensityInfo.description
-            },
-            {
-                NodeInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                NodeInfo.description
-            },
+            }
         }
     };
 }
 
-SceneGraphLightSource::SceneGraphLightSource()
+CameraLightSource::CameraLightSource()
     : LightSource()
     , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
-    , _sceneGraphNodeReference(NodeInfo, "")
 {
     addProperty(_intensity);
-    addProperty(_sceneGraphNodeReference);
 }
 
-SceneGraphLightSource::SceneGraphLightSource(const ghoul::Dictionary& dictionary)
+CameraLightSource::CameraLightSource(const ghoul::Dictionary& dictionary)
     : LightSource(dictionary)
     , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
-    , _sceneGraphNodeReference(NodeInfo, "")
 {
     addProperty(_intensity);
-    addProperty(_sceneGraphNodeReference);
  
     documentation::testSpecificationAndThrow(Documentation(),
                                              dictionary,
-                                             "SceneGraphLightSource");
+                                             "CameraLightSource");
 
 
     if (dictionary.hasValue<double>(IntensityInfo.identifier)) {
@@ -96,44 +77,14 @@ SceneGraphLightSource::SceneGraphLightSource(const ghoul::Dictionary& dictionary
             dictionary.value<double>(IntensityInfo.identifier)
         );
     }
-
-    if (dictionary.hasValue<std::string>(NodeInfo.identifier)) {
-        _sceneGraphNodeReference =
-            dictionary.value<std::string>(NodeInfo.identifier);
-    }
-
-    _sceneGraphNodeReference.onChange([this]() {
-        _sceneGraphNode =
-            OsEng.renderEngine().scene()->sceneGraphNode(_sceneGraphNodeReference);
-    });
-
 }
 
-bool SceneGraphLightSource::initialize() {
-    _sceneGraphNode =
-        OsEng.renderEngine().scene()->sceneGraphNode(_sceneGraphNodeReference);
-    return _sceneGraphNode != nullptr;
-}
-
-float SceneGraphLightSource::intensity() const {
+float CameraLightSource::intensity() const {
     return _intensity;
 }
 
-glm::vec3 SceneGraphLightSource::directionViewSpace(const RenderData& renderData) const {
-    if (!_sceneGraphNode) {
-        return glm::vec3(0.0);
-    }
-
-    glm::dvec3 lightPosition = glm::vec4(
-        _sceneGraphNode->modelTransform() * glm::dvec4(0.0, 0.0, 0.0, 1.0)
-    );
-
-    glm::dvec3 renderNodePosition = renderData.modelTransform.translation;
-
-    glm::dvec3 lightDirectionViewSpace = renderData.camera.viewRotationMatrix() *
-        glm::dvec4((lightPosition - renderNodePosition), 1.0);
-
-    return glm::normalize(lightDirectionViewSpace);
+glm::vec3 CameraLightSource::directionViewSpace(const RenderData& renderData) const {
+    return glm::vec3(0.0, 0.0, 1.0);
 }
 
 

@@ -28,7 +28,6 @@
 #include <openspace/scene/lightsource.h>
 
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/stringproperty.h>
 
 namespace openspace {
@@ -42,15 +41,16 @@ public:
 
     static documentation::Documentation Documentation();
 
-    glm::vec3 positionRelativeTo(const SceneGraphNode& node,
-                                 const RenderData& renderData) const override;
+    glm::vec3 directionViewSpace(const RenderData& renderData) const override;
 
     float intensity() const override;
 
-    bool initialize();
+    bool initialize() override;
 private:
     properties::FloatProperty _intensity;
     properties::StringProperty _sceneGraphNodeReference;
+
+    SceneGraphNode* _sceneGraphNode;
 };
 
 } // namespace openspace

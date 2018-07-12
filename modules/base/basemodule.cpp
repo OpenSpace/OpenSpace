@@ -33,6 +33,7 @@
 #include <modules/base/dashboard/dashboarditempropertyvalue.h>
 #include <modules/base/dashboard/dashboarditemsimulationincrement.h>
 #include <modules/base/dashboard/dashboarditemspacing.h>
+#include <modules/base/lightsource/cameralightsource.h>
 #include <modules/base/lightsource/scenegraphlightsource.h>
 #include <modules/base/rendering/renderablemodel.h>
 #include <modules/base/rendering/renderablesphere.h>
@@ -146,6 +147,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     auto fLightSource = FactoryManager::ref().factory<LightSource>();
     ghoul_assert(fLightSource, "Light Source factory was not created");
 
+    fLightSource->registerClass<CameraLightSource>("CameraLightSource");
     fLightSource->registerClass<SceneGraphLightSource>("SceneGraphLightSource");
 
     auto fGeometry = FactoryManager::ref().factory<modelgeometry::ModelGeometry>();
@@ -191,6 +193,9 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
 
         TimeFrameInterval::Documentation(),
         TimeFrameUnion::Documentation(),
+
+        SceneGraphLightSource::Documentation(),
+        CameraLightSource::Documentation(),
 
         modelgeometry::ModelGeometry::Documentation(),
     };
