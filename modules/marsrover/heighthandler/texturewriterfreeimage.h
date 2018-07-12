@@ -40,7 +40,7 @@ namespace ghoul::io {
 class TextureWriterFreeImage {
 public:
    
-    static void writeTexture(unsigned char* texturePixels); 
+    static void writeTexture(std::vector<GLubyte> texturePixels, int w, int h); 
     static bool success(int ok);
 
    

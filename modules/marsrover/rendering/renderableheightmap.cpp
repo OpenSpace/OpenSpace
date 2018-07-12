@@ -38,11 +38,15 @@
 
 #include <freeimage.h>
 
-
-
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/geometry/geodetic3.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
+
+#include <openspace/util/camera.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/framebufferrenderer.h>
+#include <openspace/util/syncbuffer.h>
+#include <openspace/query/query.h>
 
 
 
@@ -53,6 +57,12 @@ namespace {
     static const openspace::properties::Property::PropertyInfo FrustumInfo = {
         "FrustumSize",
         "FrustumSize",
+        ""
+    };    
+
+    static const openspace::properties::Property::PropertyInfo TriggerHeightmap = {
+        "TriggerHeightmap",
+        "TriggerHeightmap",
         ""
     };
 
@@ -79,368 +89,434 @@ documentation::Documentation RenderableHeightMap::Documentation() {
     };
 }
 
-    RenderableHeightMap::RenderableHeightMap(const ghoul::Dictionary& dictionary)
-    :Renderable(dictionary)
-    , _frustumSize(FrustumInfo)
-    , _shader(nullptr)
-    {
+RenderableHeightMap::RenderableHeightMap(const ghoul::Dictionary& dictionary)
+:Renderable(dictionary)
+, _frustumSize(FrustumInfo)
+, _shader(nullptr)
+,_triggerHeightmap(TriggerHeightmap)
+{
 
 
-        _frustumSize = dictionary.value<glm::vec2>(FrustumInfo.identifier);
-        addProperty(_frustumSize);
+    _frustumSize = dictionary.value<glm::vec2>(FrustumInfo.identifier);
 
-        //use _frustumSize as size of camera frustum of the camera used for creatign the height map
+    addProperty(_frustumSize);
 
-    }
+    //use _frustumSize as size of camera frustum of the camera used for creating the height map
+}
+
+bool RenderableHeightMap::isReady() const {
+    return true;
+}
+
+void RenderableHeightMap::initializeGL() {
+
+    ////Load shader
+    //_shader = MarsroverModule::ProgramObjectManager.requestProgramObject(
+    //    ProgramName,
+    //    []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+    //        return OsEng.renderEngine().buildRenderProgram(
+    //            ProgramName,
+    //            //absPath("${MODULE_MARSROVER}/shaders/heightmap_vs.glsl"),
+    //            //absPath("${MODULE_MARSROVER}/shaders/heightmap_fs.glsl")                
+    //            absPath("${MODULE_BASE}/shaders/model_vs.glsl"),
+    //            absPath("${MODULE_BASE}/shaders/model_fs.glsl")
+    //        );
+    //    }
+    //);
+
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    _shader = renderEngine.buildRenderProgram("HeightMap",
+        absPath("${MODULE_MARSROVER}/shaders/heightmap_vs.glsl"),
+        absPath("${MODULE_MARSROVER}/shaders/heightmap_fs.glsl") 
+    );
+    
+    _mars = OsEng.renderEngine().scene()->sceneGraphNode("Mars"); //change name?
+    _globe = (globebrowsing::RenderableGlobe*)_mars->renderable();
+    _orthoCamera = OsEng.navigationHandler().camera();   //gets the main camera object for the scene
+
+    /***************************************/
 
 
-    bool RenderableHeightMap::isReady() const {
-        return true;
-    }
+    glm::dvec3 orthoCameraPosition = glm::dvec3(350000, 350000, 350000);    //change to 4 and 137 degrees (lat/lon)
+   
+    //_orthoCamera->setParent(_mars);
+    //_orthoCamera->setFocusPositionVec3(_mars->worldPosition());
+    //_orthoCamera->setPositionVec3(orthoCameraPosition);
+
+    //_orthoCamera->Camera::SgctInternal::setViewMatrix(_globe->modelTransform());
+    //_orthoCamera->sgctInternal.setViewMatrix(_globe->modelTransform());
+
+    /***************************************/
 
 
-    void RenderableHeightMap::initializeGL() {
 
-        //load shader
-        _shader = MarsroverModule::ProgramObjectManager.requestProgramObject(
-            ProgramName,
-            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                return OsEng.renderEngine().buildRenderProgram(
-                    ProgramName,
-                    absPath("${MODULE_MARSROVER}/shaders/heightmap_vs.glsl"),
-                    absPath("${MODULE_MARSROVER}/shaders/heightmap_fs.glsl")
-                );
-            }
-        );
-        
-        _mars = OsEng.renderEngine().scene()->sceneGraphNode("Mars"); //change name?
-        _globe = (globebrowsing::RenderableGlobe*)_mars->renderable();
-        _camera = OsEng.navigationHandler().camera();   //gets the main camera object for the scene
-  
- 
+    glGenVertexArrays(1, &_vertexArrayID);
+    glGenBuffers(1, &_vertexArrayID);
+    
 
-        glGenVertexArrays(1, &_vertexArrayID);
-        glGenBuffers(1, &_vertexArrayID);
-
-        bool success = renderTexture();
-        if(!success) {
+    _triggerHeightmap.onChange([this] () {
+        succeded = renderTexture();
+        if(!succeded) {
             LERROR("Could not create depth texture");
         }
-        else if(success) {
-            LERROR("SUCCESS");
-        }
+        else 
+            LERROR("Finished creating depth image");
+    });
+    addProperty(_triggerHeightmap);
+}
 
 
+void RenderableHeightMap::render(const RenderData& data, RendererTasks&) {  //data is the camera object
+
+    _shader->activate();
 
 
+    //glEnable(GL_DEPTH_TEST);
+    //dont include triangles which normals is not towards the camera
+    //glEnable(GL_CULL_FACE);
 
-    }
- 
+    //gale crater
+    double latitude = 4.5895;
+    double longitude = 137.4417;    //calculate the height vector to send as third argument of lookAt-function
+    double altitude = 0.0;          //the above comment is done, need to be zero now!
 
+    globebrowsing::Geodetic3 pos = {
+        { latitude, longitude}, altitude    //check altitude, done 
+    };
 
-    void RenderableHeightMap::render(const RenderData& data, RendererTasks&) {  //data is the camera object
+    globebrowsing::Geodetic3 posNorth = {
+        { latitude + 0.001, longitude}, altitude    //check altitude, done 
+    };
 
-        _shader->activate();
+    glm::dvec3 marsPos = _mars->worldPosition();
+    glm::dmat4 modelTransform = _globe->modelTransform();// Camera is described in world OpenSpace//generates unit matrix
+    glm::dvec3 positionModelSpace =  _globe->ellipsoid().cartesianPosition(pos);
+    glm::dvec3 cameraPosition = data.camera.positionVec3();//camera position in model space
 
+    glm::dvec3 slightlyNorth = _globe->ellipsoid().cartesianPosition(posNorth);
+    glm::dvec3 lookUpModelSpace = glm::normalize(slightlyNorth - positionModelSpace);
+    glm::dvec3 lookUpWorldSpace = glm::dmat3(modelTransform) * lookUpModelSpace;
 
-        glEnable(GL_DEPTH_TEST);
-        //cull triangles which normals is not towards the camera
-        glEnable(GL_CULL_FACE);
+    // Lookat vector
+    glm::dvec3 lookAtWorldSpace = glm::dvec3(modelTransform * glm::dvec4(positionModelSpace, 1.0));
 
-
-        double latitude = 4.5895;
-        double longitude = 137.4417;        //calculate the height vector to send as third argument of lookAt-function
-        double altitude = 0.0;          //the above comment is done, need to be zero now!
-
-        globebrowsing::Geodetic3 pos = {
-            { latitude, longitude}, altitude    //check altitude, done 
-        };
-
-        globebrowsing::Geodetic3 posNorth = {
-            { latitude + 0.001, longitude}, altitude    //check altitude, done 
-        };
-
-        glm::dvec3 marsPos = _mars->worldPosition();
-        glm::dmat4 modelTransform = _globe->modelTransform();// Camera is described in world OpenSpace//generates unit matrix
-        glm::dvec3 positionModelSpace =  _globe->ellipsoid().cartesianPosition(pos);
-        glm::dvec3 cameraPosition = data.camera.positionVec3();//camera position in model space
-
-        glm::dvec3 slightlyNorth = _globe->ellipsoid().cartesianPosition(posNorth);
-        glm::dvec3 lookUpModelSpace = glm::normalize(slightlyNorth - positionModelSpace);
-        glm::dvec3 lookUpWorldSpace = glm::dmat3(modelTransform) * lookUpModelSpace;
-
-        // Lookat vector
-        glm::dvec3 lookAtWorldSpace = glm::dvec3(modelTransform *
-                                  glm::dvec4(positionModelSpace, 1.0));
-
-        //LERROR(fmt::format("marsPos  '{}'", marsPos));
-        //LERROR(fmt::format("modeltransform    '{}'",  modelTransform));
-        //LERROR(fmt::format("positionModelSpace  '{}'", positionModelSpace));    //positionModelSpace is correct pos to look at
-        //LERROR(fmt::format("cameraPosition    '{}'",  cameraPosition));
-        //LERROR(fmt::format("slightlyNorth    '{}'",  slightlyNorth));
-        //LERROR(fmt::format("lookUpModelSpace    '{}'",  lookUpModelSpace));
-        //LERROR(fmt::format("lookUpWorldSpace    '{}'",  lookUpWorldSpace));
-        //LERROR(fmt::format("lookAtWorldSpace    '{}'",  lookAtWorldSpace));
 /*        
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
 
-        gluLookAt(
-            cameraPosition[0], 
-            cameraPosition[1], 
-            cameraPosition[2], 
-            lookAtWorldSpace[0], 
-            lookAtWorldSpace[1], 
-            lookAtWorldSpace[2], 
-            lookUpWorldSpace[0],
-            lookUpWorldSpace[1],
-            lookUpWorldSpace[2]);
-        glOrtho(0.0, 1920.0, 0.0, 1080.0, 1.0, -1000000.0);
-        glPushMatrix();
+    gluLookAt(
+        cameraPosition[0], 
+        cameraPosition[1], 
+        cameraPosition[2], 
+        lookAtWorldSpace[0], 
+        lookAtWorldSpace[1], 
+        lookAtWorldSpace[2], 
+        lookUpWorldSpace[0],
+        lookUpWorldSpace[1],
+        lookUpWorldSpace[2]);
+    glOrtho(0.0, 1920.0, 0.0, 1080.0, 1.0, -1000000.0);
+    glPushMatrix();
 
 */
-        glm::dmat4 lookAtCamera = glm::lookAt(    //creates a matrix that will look from cameraPosition to marsPos
-            cameraPosition, 
-            lookAtWorldSpace, 
-            lookUpWorldSpace //find the normal of normal texture of Mars flat surface
-        ); //location of camera, location of object you are looking at, location of up in scene
-        //LERROR(fmt::format("lookAtCamera        '{}'", lookAtCamera)); 
-        //glMatrixMode(GL_PROJECTION);//Applies subsequent matrix operations to the projection matrix stack.
-        //glLoadIdentity();  //enhetsmatris
-        //glViewport(0, 0, 1920, 1080);   //1000 = screenwith/screenheight
-        glm::dmat4 orthoView = glm::ortho(0.0, 1280.0, 0.0, 720.0, -10000.0, -1000000.0);
-        //left, right, bottom, top, near, far
-        //LERROR(fmt::format("orthoView        '{}'", orthoView)); 
- 
+    //creates a matrix that will look from cameraPosition to marsPos
+    //lookAt(camera location, object location to look at, up in scene vector)
+    glm::dmat4 lookAtCamera = glm::lookAt(    
+        cameraPosition, 
+        lookAtWorldSpace, 
+        lookUpWorldSpace //find the normal of normal texture of Mars flat surface.
+                         //Should be negative lookAtWorldSpace
+    ); 
+    
 
-        //glm::dmat4 test1 = lookAtCamera * orthoView;
+    //ortho(left, right, bottom, top, near, far)
+    glm::dmat4 orthoView = glm::ortho(0.0, 1280.0, 0.0, 720.0, -10.0, -1000000.0);
 
-        //glm::dquat rotation = glm::quat_cast(test1);//converts to quaternions
-
-        //_camera->setRotation(rotation);  //rotates from current rotation,
-
-
-        _shader->setUniform(_uniformCache.viewmatte, lookAtCamera);
-        _shader->setUniform(_uniformCache.projectionMatrix, orthoView);
- 
-      
-
-
-        //bool success = renderTexture();
-        //if(!success) {
-        //    LERROR("Could not create depth texture");
-        //}
-        //else if(success) {
-
-
-             //dimension of current window
-            GLint dimensions[4];
-            glGetIntegerv(GL_VIEWPORT, dimensions);
-            GLint width = dimensions[2];
-            GLint height = dimensions[3];
-            
-            GLenum err = glGetError();
-            //LERROR(fmt::format("error:   '{}'", err));
-
-            //dimension of current window
-            //GLint dimensions[4];
-            //glGetIntegerv(GL_VIEWPORT, dimensions);
-            //GLint width = dimensions[2];
-            //GLint height = dimensions[3];
-
-
-            //glViewport(0,0,width,height);
-            //glMatrixMode(GL_PROJECTION);
-            //glLoadIdentity();
-            //glOrtho(0.0, width, 0.0, height, -1.0, 1.0); 
-            //glMatrixMode(GL_MODELVIEW);
-            //glLoadIdentity();
+    _shader->setUniform(_uniformCache.viewmatte, lookAtCamera);
+    _shader->setUniform(_uniformCache.projectionMatrix, orthoView);
 
 
 
-            //not working?? GLint size = 0;
-            //not working?? glGetBufferParameteriv(GL_FRAMEBUFFER, GL_BUFFER_SIZE, &size);
-            //not working?? LERROR(fmt::format("size   '{}'", size));
-//            GLubyte* pixels = (GLubyte*)malloc(4 * width * height* sizeof(GLubyte));
-            //GLsizei buffsize = 8;
-            //GLfloat pek[2];
-            //GLubyte pixels[4 * width * height];
-            //GLfloat windowDepth [4];
-
-            //glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels); // read a block of pixels from the frame buffer, THIS ONE GIVES THE BLURRY
-//            glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, pixels);
-            //glGetFloatv(GL_DEPTH_SCALE, windowDepth);
-            //glGetTexImage (GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, GL_FLOAT, windowDepth);
-            
-
-            //pointer to image array with glByte
-            //GLubyte ptrImage[4];
-            //glGetTexImage (GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, GL_FLOAT, ptrImage);
-            //LERROR(fmt::format("texture:   '{}'", ptrImage));
+    
 
 
-            //TO FIX: maybe linearize before sending to writeTexture
-            //for( size_t i = 0; i < (4*width*height); ++i )
-            //{
-            //    pixels[i] = ( 2.0 * near ) / ( far + near - pixels[i] * ( far - near ) );
-            //}
-            //LERROR(fmt::format("pek values:   '{}'", pek[0]));
-            //LERROR(fmt::format("pek values:   '{}'", pek[1]));
-
- //           LERROR(fmt::format("pixel values:   '{}'", pixels[0]));
- //           LERROR(fmt::format("pixel values:   '{}'", pixels[1]));
-
- //           ghoul::io::TextureWriterFreeImage::writeTexture(pixels);
-            
-
-  //          free(pixels);
-        //}
-
-
-        _shader->deactivate();
+    /*
+    if(!succeded) {
+        LERROR("Could not create depth texture");
     }
-
-    void RenderableHeightMap::update(const UpdateData&) {
-        //updatera alla uniformlocations here
-
-    } 
-
-    void RenderableHeightMap::deinitializeGL() {
-
-        MarsroverModule::ProgramObjectManager.releaseProgramObject(
-            ProgramName,
-            [](ghoul::opengl::ProgramObject* p) {
-                OsEng.renderEngine().removeRenderProgram(p);
-            }
-        );
-
-
-        glDeleteTextures(1, &_zbuffer);
-        //Bind 0, which means render to back buffer, as a result, fb is unbound
-        
-        glDeleteFramebuffers(1, &_fbo);
-        //FIX: glDeleteRenderbuffers(1, &_rbo);
-        glBindTexture(GL_TEXTURE_2D, 0);//unbind texture
-        glBindRenderbuffer(GL_RENDERBUFFER, 0);
-        glDisable(GL_DEPTH_TEST);
-        _shader = nullptr;
-    }
-
-
-    bool RenderableHeightMap::renderTexture() {
-
-        
-        //do not need the color buffer at all
+    else if(succeded) {
+        //dimension of current window
         GLint dimensions[4];
         glGetIntegerv(GL_VIEWPORT, dimensions);
         GLint width = dimensions[2];
         GLint height = dimensions[3];
-        //******************Create Buffers****************//
         
-        glGenFramebuffers(1, &_fbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+        GLenum err = glGetError();
+        //LERROR(fmt::format("error:   '{}'", err));
 
-
-        //create a texture object
-        glGenTextures(1, &_zbuffer);    //generate texture names
-        glBindTexture(GL_TEXTURE_2D, _zbuffer); //bind a named texture to a texturing target
-        
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);    //set texture parameters
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_STENCIL_TEXTURE_MODE, GL_DEPTH_COMPONENT);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-
-        glTexImage2D(GL_TEXTURE_2D, 2, GL_DEPTH_COMPONENT, width, height, 0, 
-            GL_DEPTH_COMPONENT, GL_FLOAT, NULL);     //specify a two-dimensional texture image
-        //glGenerateMipmap(GL_TEXTURE_2D);
-        
-
-        //create a render buffer object _rbo, to store depth info
-        GLuint _rbo;
-        glGenRenderbuffers(1, &_rbo);
-        glBindRenderbuffer(GL_RENDERBUFFER, _rbo);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-        
-
-        glPixelStorei(GL_PACK_ALIGNMENT, 8);
-
-        //GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT1};
-        //glDrawBuffers(1, DrawBuffers);
+        //dimension of current window
+        //GLint dimensions[4];
+        //glGetIntegerv(GL_VIEWPORT, dimensions);
+        //GLint width = dimensions[2];
+        //GLint height = dimensions[3];
 
         //glViewport(0,0,width,height);
-        //******************Attach Buffers****************//
-
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _zbuffer, 0);
-        //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _rbo);
-
-
-        GLubyte* pixelsDOWN = (GLubyte*)malloc(4 * width * height* sizeof(GLubyte));
-        glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, pixelsDOWN);
-        LERROR(fmt::format("pixel valuesDOWN:   '{}'", pixelsDOWN[1000]));
-        LERROR(fmt::format("pixel valuesDOWN:   '{}'", pixelsDOWN[599]));
-
-
-
-
-        //_uniformCache.texture = _shader->uniformLocation("heightmapTexture");
-        //const GLint locationHeightmapTexture = _shader->uniformLocation("heightmapTexture");
-        //_shader->setUniform(_uniformCache.texture, _fbo);
-        //glUniform1i(locationHeightmapTexture, 0);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        /******************************************************************************************/
-       
-        GLenum status;  
-        status = glCheckFramebufferStatus(GL_FRAMEBUFFER);        
-        if(status != GL_FRAMEBUFFER_COMPLETE)
-            return false;
-        else
-            return true;
-        
-        
-    }
-
-
-    void RenderableHeightMap::renderOrthoCamera() {
-
-
-
-        glMatrixMode(GL_PROJECTION);//Applies subsequent matrix operations to the projection matrix stack.
-        glLoadIdentity();  //enhetsmatris
-
-        //glViewport(0, 0, 1920, 1080);   //1000 = screenwith/screenheight
-        //glOrtho(0, 1920, 0, 1080, 1, -1000000000000); // Origin in lower-left corner      //check if angle of camera???
-        glOrtho(0, 1920, 0, 1080, 1, 1000000);
-        //glTranslatef(-1.5f,0.0f,-995.0f);
-        //glOrtho(0, 1000, 1000, 0, 1, -1); // Origin in upper-left corner
-        //left, right, bottom, top, near, far
-
-        //GLboolean pek = false;
-        GLfloat pek;
-        //glGetBooleanv(GL_MATRIX_MODE, &pek);
-        glGetFloatv(GL_PROJECTION_STACK_DEPTH, &pek);
-        //if(pek ){
-            LERROR("HURRA");
-            LERROR(fmt::format("peeek   '{}'", pek));
-        //}
-        //else
-            //LERROR("NOOO");
-
+        //glMatrixMode(GL_PROJECTION);
+        //glLoadIdentity();
+        //glOrtho(0.0, width, 0.0, height, -1.0, 1.0); 
         //glMatrixMode(GL_MODELVIEW);
-        
-        GLdouble orthoMatrix[16]; 
-        glGetDoublev(GL_PROJECTION_MATRIX, orthoMatrix); 
+        //glLoadIdentity();
 
-        for (int i = 0; i < 16; i++){
-            LERROR(fmt::format("ortho matrix: '{}'", orthoMatrix[i]));
+        //not working?? GLint size = 0;
+        //not working?? glGetBufferParameteriv(GL_FRAMEBUFFER, GL_BUFFER_SIZE, &size);
+        //not working?? LERROR(fmt::format("size   '{}'", size));
+        
+        //use vector instead of malloc. 
+        //GLubyte* pixels = vector.data
+        GLubyte* pixels = (GLubyte*)malloc(4 * width * height* sizeof(GLubyte));
+        //GLsizei buffsize = 8;
+        //GLfloat test_value[2];
+        //GLubyte pixels[4 * width * height];
+        //GLfloat windowDepth [4];
+
+        double *testDepth;
+        glGetDoublev( DEPTH, testDepth );
+
+        //glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels); // read a block of pixels from the frame buffer, THIS ONE GIVES THE BLURRY
+        glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, pixels);
+        //glGetFloatv(GL_DEPTH_SCALE, windowDepth);
+        //glGetTexImage (GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, GL_FLOAT, windowDepth);
+        
+        //pointer to image array with glByte
+        //GLubyte ptrImage[4];
+        //glGetTexImage (GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, GL_FLOAT, ptrImage);
+        //LERROR(fmt::format("texture:   '{}'", ptrImage));
+
+        //TO FIX: maybe linearize before sending to writeTexture
+        //for( size_t i = 0; i < (4*width*height); ++i )
+        //{
+        //    pixels[i] = ( 2.0 * near ) / ( far + near - pixels[i] * ( far - near ) );
+        //}
+        //LERROR(fmt::format("test_value values:   '{}'", test_value[0]));
+        //LERROR(fmt::format("test_value values:   '{}'", test_value[1]));
+        //LERROR(fmt::format("pixel values: '{}'", pixels[0]));
+        //LERROR(fmt::format("pixel values: '{}'", pixels[1]));
+
+        ghoul::io::TextureWriterFreeImage::writeTexture(pixels);
+        
+        free(pixels);
+        succeded = false;
+    } */
+
+    
+    //}
+
+   _shader->deactivate();
+}
+
+
+void RenderableHeightMap::update(const UpdateData&) {
+    //Update all uniform locations 
+
+} 
+
+void RenderableHeightMap::deinitializeGL() {
+
+    MarsroverModule::ProgramObjectManager.releaseProgramObject(
+        ProgramName,
+        [](ghoul::opengl::ProgramObject* p) {
+            OsEng.renderEngine().removeRenderProgram(p);
         }
+    );
+
+    glDeleteTextures(1, &_zbuffer);
+    //Bind 0, which means render to back buffer, as a result, fb is unbound
+    
+    glDeleteFramebuffers(1, &_fbo);
+    //FIX: glDeleteRenderbuffers(1, &_rbo);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    //unbind texture
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glDisable(GL_DEPTH_TEST);
+    _shader = nullptr;
+}
+
+
+bool RenderableHeightMap::renderTexture() {
+
+
+    /*
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+
+    //Don't need the color buffer
+    GLint dimensions[4];
+    glGetIntegerv(GL_VIEWPORT, dimensions);
+    GLint width = dimensions[2];
+    GLint height = dimensions[3];
+
+
+    // ********** Create Buffers **********
+    
+    glGenFramebuffers(1, &_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+
+    //Create a texture object
+    glGenTextures(1, &_zbuffer);            //generate texture names
+    glBindTexture(GL_TEXTURE_2D, _zbuffer); //bind a named texture to a texturing target
+    
+    //Set texture parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_STENCIL_TEXTURE_MODE, GL_DEPTH_COMPONENT);
+
+    //Specify a two-dimensional texture image
+    glTexImage2D(GL_TEXTURE_2D, 2, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);     
+
+    //Create a render buffer object _rbo, to store depth info
+    //GLuint _rbo;
+    //glGenRenderbuffers(1, &_rbo);
+    //glBindRenderbuffer(GL_RENDERBUFFER, _rbo);
+    //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+    //glPixelStorei(GL_PACK_ALIGNMENT, 8);
+
+    // ********** Attach Buffers **********
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _zbuffer, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    */
+
+    /***************************************/
+
+    //std::unique_ptr<Renderer> newRenderer = nullptr;
+    //newRenderer = std::make_unique<FramebufferRenderer>();
+    //const std::string renderingMethod = "Framebuffer";
+    //OsEng.renderEngine().setRendererFromString(renderingMethod);
+
+    //dimension of current window
+    GLint dimensions[4];
+    glGetIntegerv(GL_VIEWPORT, dimensions);
+    GLint width = dimensions[2];
+    GLint height = dimensions[3];
+    
+    LERROR(fmt::format("width   '{}'", width));
+    LERROR(fmt::format("height   '{}'", height));
+
+
+    FramebufferRenderer renderer;
+    renderer.setResolution(glm::ivec2(width, height));
+    renderer.setNAaSamples(1);
+    renderer.initialize();
+    //renderer.render(OsEng.renderEngine().scene(), _orthoCamera, 1.0, false);
+    renderer.render(OsEng.renderEngine().scene(), OsEng.navigationHandler().camera(), 1.0, true);
+
+
+
+    /***************************************/
+    // ***********************************************
+    /*
+    GLenum status;  
+    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);        
+    if (status != GL_FRAMEBUFFER_COMPLETE) 
+        return false;
+    */
+    
+
+
+
+    //Write to file
+    //else {
+
+        //GLenum err = glGetError();
+
+        //std::vector<GLubyte> pixels;
+        //pixels.resize(4 * width * height * sizeof(GLubyte));
+        //
+        ////GLubyte* pixels = (GLubyte*)malloc(4 * width * height * sizeof(GLubyte));
+//
+//        //glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, pixels.data());
+//        //LERROR(fmt::format("pixelsdata    '{}'", pixels.data()));
+        //LERROR(fmt::format("pixelssize    '{}'", pixels.size()));
+
+
+        //float* fdata = reinterpret_cast<float*>(pixels.data());
+        //LERROR(fmt::format("fData  size   '{}'", length(fdata)));   //sizeof
+
+        //while(fdata) {
+        //    LERROR(fmt::format("fData   '{}'", *fdata));  
+        //    fdata = fdata+4;
+        //}
+
+        //treat the data as floats so we can read the entire pixel value
+        //map values
+        //float max = fdata[0];
+        //float min = fdata[0];
+        //int size = width*height;
+        //for ( int i = 0; i < size; i++)          
+        //{
+        //    //LERROR(fmt::format("fdata    '{}'", *fdata));
+        //    if (fdata[i] > max) {
+        //        max = fdata[i];
+        //    }
+        //    else if (fdata[i] < min) {
+        //        min = fdata[i];
+        //    }
+//
+//        //}
+//        //LERROR(fmt::format("max fdata    '{}'", max));
+        //LERROR(fmt::format("min fdata    '{}'", min));
+
+        std::vector<float> pixels;
+
+        pixels = renderer.getDepthTexture(OsEng.renderEngine().scene(), _orthoCamera, glm::ivec2(width, height));
+
+        //float max = pixels[0];
+        //float min = pixels[0];
+        //int size = width*height;
+        //for ( int i = 0; i < size; i++)          
+        //{
+        //    if (pixels[i] > max) {
+        //        max = pixels[i];
+        //    }
+        //    else if (pixels[i] < min) {
+        //        min = pixels[i];
+        //    }
+        //}
+        //LERROR(fmt::format("max pixels    '{}'", max));
+        //LERROR(fmt::format("min pixels    '{}'", min));
+
+        //, width, height
+        //ghoul::io::TextureWriterFreeImage::writeTexture(pixels, width, height);
         
+        //free(pixels);
+        
+        return true;
+    //}
+}
 
 
+void RenderableHeightMap::renderOrthoCamera() {
+
+    //Applies subsequent matrix operations to the projection matrix stack.
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity(); //Unit Matrix
+    
+    glOrtho(0, 1920, 0, 1080, 1, 1000000);
+
+    GLfloat test_value;
+    glGetFloatv(GL_PROJECTION_STACK_DEPTH, &test_value);
+    //glGetBooleanv(GL_MATRIX_MODE, &test_value);
+    //glMatrixMode(GL_MODELVIEW);
+    
+    GLdouble orthoMatrix[16]; 
+    glGetDoublev(GL_PROJECTION_MATRIX, orthoMatrix); 
+
+    for (int i = 0; i < 16; i++){
+        LERROR(fmt::format("ortho matrix: '{}'", orthoMatrix[i]));
     }
+}
 
 
 } // namespace openspace

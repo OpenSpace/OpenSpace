@@ -52,7 +52,9 @@
 //#include <modules/roverterrainrenderer/shaders/fullsubsite_vs.glsl>
 #include <modules/roverterrainrenderer/filehandler/roverpathfilereader.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
+
 #include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/optionproperty.h>
 
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -67,6 +69,8 @@
 
 #include <freeimage.h>
 
+
+#include <openspace/util/camera.h>
 
 namespace openspace {
 
@@ -97,9 +101,12 @@ private:
 	bool renderTexture();
 	void renderOrthoCamera();
 
-	
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+
+
     properties::Vec2Property _frustumSize;
-	ghoul::opengl::ProgramObject* _shader;
+	//ghoul::opengl::ProgramObject* _shader;
+	properties::TriggerProperty _triggerHeightmap;
 
  	UniformCache(viewmatte, projectionMatrix, texture) _uniformCache;
 
@@ -118,10 +125,12 @@ private:
 
  	//glm::dmat4 mvp;
 
- 	Camera* _camera;	//camera object
+ 	Camera* _orthoCamera;	//camera object
 
- 	const int windowWidth = 1920;
- 	const int windowHeight = 1080;
+ 	//const int windowWidth = 1920;
+ 	//const int windowHeight = 1080;
+
+ 	bool succeded = false;
 
 
 };

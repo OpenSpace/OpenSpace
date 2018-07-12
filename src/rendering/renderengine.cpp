@@ -569,7 +569,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
             _performanceManager != nullptr
         );
     }
-
+    
     if (_showFrameNumber) {
         const glm::vec2 penPosition = glm::vec2(
             fontResolution().x / 2 - 50,

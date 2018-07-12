@@ -375,7 +375,7 @@ glm::dvec3 SpacecraftProjection::position(const Time& time) const
 
     //static height correction
     //newPosition.x = newPosition.x + 428.6;
-    newPosition.x = newPosition.x + 556.0;
+    newPosition.x = newPosition.x + 557.5;
 
     newPosition = SpiceManager::ref().fromLatitudinalToCartesian(newPosition);
 

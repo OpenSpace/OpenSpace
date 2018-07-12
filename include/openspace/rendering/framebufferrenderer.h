@@ -82,15 +82,19 @@ public:
     void render(Scene* scene, Camera* camera, float blackoutFactor,
         bool doPerformanceMeasurements) override;
 
+    
     /**
      * Update render data
      * Responsible for calling renderEngine::setRenderData
      */
     virtual void updateRendererData() override;
+    
+    std::vector<float> getDepthTexture(Scene* scene, Camera* camera, glm::ivec2 size);
 
     virtual void raycastersChanged(VolumeRaycaster& raycaster, bool attached) override;
     virtual void deferredcastersChanged(Deferredcaster& deferredcaster,
         isAttached isAttached) override;
+
 
 private:
     std::map<VolumeRaycaster*, RaycastData> _raycastData;

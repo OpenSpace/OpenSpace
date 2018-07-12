@@ -57,7 +57,6 @@ local renderTestMarsrover = {
     }
 }
 
--- yellow texture, tex_01
 local Body = {
     Identifier = "body",
     Parent = CuriosityModel.Identifier, --transforms.RoverLocation.Identifier,
@@ -75,8 +74,23 @@ local Body = {
     }
 }
 
+local Body_detail = {
+    Identifier = "Body_detail",
+    Parent = Body.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "MARS SCIENCE LABORATORY",
+        Geometry = {
+          Type = "MultiModelGeometry",
+          GeometryFile = models .. "/MSL_BODY_new_1_new_detail.obj"
+        },
+        ColorTexture = textures .. "/tex_01.png",
+        GUI = {
+            Path = "/Solar System/Planets/Mars/Curiosity/Model"
+        }
+    }
+}
 
--- pink texture, tex_02
 local Body_staticParts_1 = {
     Identifier = "Body_staticParts_1",
     Parent = Body.Identifier,
@@ -94,7 +108,6 @@ local Body_staticParts_1 = {
     }
 }
 
--- green texture, tex_03
 local Body_staticParts_2 = {
     Identifier = "Body_staticParts_2",
     Parent = Body.Identifier,
@@ -112,7 +125,6 @@ local Body_staticParts_2 = {
     }
 }
 
--- orange texture, tex_04
 local Body_staticParts_3 = {
     Identifier = "Body_staticParts_3",
     Parent = Body.Identifier,
@@ -130,7 +142,6 @@ local Body_staticParts_3 = {
     }
 }
 
--- purple texture, tex_05
 local Body_staticParts_4 = {
     Identifier = "Body_staticParts_4",
     Parent = Body.Identifier,
@@ -148,7 +159,6 @@ local Body_staticParts_4 = {
     }
 }
 
--- red texture, tex_A0
 local Body_staticParts_5 = {
     Identifier = "Body_staticParts_5",
     Parent = Body.Identifier,
@@ -1109,6 +1119,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     Curiosity,
     CuriosityModel, 
     Body,
+    Body_detail,
     Body_staticParts_1,
     Body_staticParts_2,
     Body_staticParts_3,
@@ -1146,7 +1157,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     SAM_Cover_2,
     CHEMIN_Bottom,
     Submodules,
-    --HeightMap,
+    HeightMap,
 
     Wheel_Base,
     Wheel_Base_2,

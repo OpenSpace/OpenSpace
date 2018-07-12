@@ -9,6 +9,7 @@ local kernels = asset.syncedResource({
 
 local CuriosityKernels = {
     --if you are in a hurry--
+    kernels .. "/PCK/pck00008.tpc", --b
     kernels .. "/SCLK/msl.tsc",
     kernels .. "/SCLK/msl_lmst_ops120808_v1.tsc",
     kernels .. "/CK/msl_surf_rover_tlm.bc",
@@ -20,16 +21,22 @@ local CuriosityKernels = {
     kernels .. "/CK/msl_surf_ra_tlmres.bc",
     kernels .. "/CK/msl_surf_rsm_tlmenc.bc",
     kernels .. "/CK/msl_surf_rsm_tlmres.bc",
+    --kernels .. "/FK/msl_v08.tf", --b
+    kernels .. "/FK/msl.tf",
+    kernels .. "/SPK/msl_surf_rover_loc.bsp",   --boris new file --b
     kernels .. "/SPK/msl_struct_v02.bsp",
     kernels .. "/SPK/de425s.bsp",
     kernels .. "/SPK/mar085s.bsp",
     kernels .. "/SPK/msl_cruise_v1.bsp",
     kernels .. "/SPK/msl_edl_v01.bsp",
-    kernels .. "/SPK/msl_ls_ops120808_iau2000_v1.bsp",
-    kernels .. "/SPK/msl_surf_rover_loc.bsp",   --boris new file
-    kernels .. "/FK/msl.tf",
+    kernels .. "/SPK/msl_ls_ops120808_iau2000_v1.bsp", --b
+    -- kernels .. "/SPK/msl_surf_rover_tlm.bsp",
     kernels .. "/LSK/msl.tls",
-    kernels .. "/PCK/pck00008.tpc",
+
+    --boris
+    -- kernels .. "/LSK/naif0012.tls", --b
+    -- kernels .. "/SCLK/MSL_76_SCLKSCET.00015.tsc", --b
+    -- kernels .. "/FK/msl_v08.tf", --b
 
 
 }

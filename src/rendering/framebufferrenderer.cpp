@@ -918,6 +918,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     // Capture standard fbo
     GLint defaultFbo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
+    //LERROR(fmt::format("fbo:   '{}'", defaultFbo));
 
     glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
     // deferred g-buffer
@@ -1057,7 +1058,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
                 raycastProgram->setUniform("nAaSamples", _nAaSamples);
                 raycastProgram->setUniform("windowSize", _resolution);
-
+//CAROLINE
                 glDisable(GL_DEPTH_TEST);
                 glDepthMask(false);
                 if (cameraIsInside) {
@@ -1084,6 +1085,11 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
             }
         }
     }
+
+
+    //GLint depthTest;
+    //glGetIntegerv(GL_ACTIVE_TEXTURE, &depthTest);
+    //LERROR(fmt::format("depth:   '{}'", depthTest));
 
     // g-buffer
     if (!tasks.deferredcasterTasks.empty()) {
@@ -1266,6 +1272,117 @@ void FramebufferRenderer::updateRendererData() {
 
     OsEng.renderEngine().setRendererData(dict);
 }
+//KRISTIN
+std::vector<float> FramebufferRenderer::getDepthTexture(Scene* scene, Camera* camera, glm::ivec2 size) {
+
+    std::vector<float> memory;
+    float *tempMemory = new float[size.x * size.y * 4];
+    
+    if (!memory.empty()) 
+        memory.clear();
+
+    std::unique_ptr<performance::PerformanceMeasurement> perf;
+
+    if (!scene) {
+        return memory;
+    }
+
+    if (!camera) {
+        return memory;
+    }
+
+    glEnable(GL_DEPTH_TEST);
+
+
+    Time time = OsEng.timeManager().time();
+
+    // Capture standard fbo
+    GLint defaultFbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
+    // deferred g-buffer
+    GLenum textureBuffers[3] = {
+        GL_COLOR_ATTACHMENT0,
+        GL_COLOR_ATTACHMENT1,
+        GL_COLOR_ATTACHMENT2,
+    };
+    glDrawBuffers(3, textureBuffers);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glEnablei(GL_BLEND, 0);
+    glDisablei(GL_BLEND, 1);
+    glDisablei(GL_BLEND, 2);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+
+    ghoul::opengl::TextureUnit mainDepthTextureUnit;
+    mainDepthTextureUnit.activate();
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture);
+
+
+    glGenTextures(1, &_mainDepthTexture);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture);
+    glTexStorage2D(GL_TEXTURE_2D_MULTISAMPLE, 1, GL_DEPTH_COMPONENT, size.x, size.y);
+    glTexSubImage2D(GL_TEXTURE_2D_MULTISAMPLE, 0, 0, 0, size.x, size.y, GL_DEPTH_COMPONENT, GL_FLOAT, tempMemory);
+
+    //_resolveProgram->activate();
+
+    //ghoul::opengl::TextureUnit mainColorTextureUnit;
+    //mainColorTextureUnit.activate();
+
+    //glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
+    //_resolveProgram->setUniform(_uniformCache.mainColorTexture, mainColorTextureUnit);
+    //_resolveProgram->setUniform(_uniformCache.blackoutFactor, 1.0);
+    //_resolveProgram->setUniform(_uniformCache.nAaSamples, _nAaSamples);
+    glBindVertexArray(_screenQuad);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+    
+    memory.resize(size.x * size.y * 4); // * 4
+
+
+    glReadPixels(0, 0, size.x, size.y, GL_DEPTH_COMPONENT, GL_FLOAT, tempMemory); 
+    float max = tempMemory[0];
+    float min = tempMemory[0];
+
+    for (auto i = 0; i < size.x * size.y * 4; i++) {
+        memory[i] = static_cast<float>(tempMemory[i]);
+        if (memory[i] > max) {
+            max = memory[i];
+        }
+        else if (memory[i] < min) {
+            min = memory[i];
+        }
+
+        //LERROR(fmt::format("pixels    '{}'", memory[i]));
+    }
+    LERROR(fmt::format("max pixels    '{}'", max));
+    LERROR(fmt::format("min pixels    '{}'", min));
+
+
+    //find out index of active texture:
+    int result = 0;
+    GLuint boundTexture = 0;
+    //glGetIntegerv(GL_TEXTURE_BINDING_2D, (GLint*) &boundTexture);
+    //glBindTexture(GL_TEXTURE_2D, 91);
+    //glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_COMPONENT, _mainColorTexture);
+    //glBindTexture(GL_TEXTURE_2D, boundTexture);
+    //LERROR(fmt::format("booundtexture     '{}'", boundTexture));
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &result);
+    LERROR(fmt::format("index of active texture   '{}'", static_cast<GLuint>(result)));
+
+
+    //glGetIntegerv(GL_DEPTH_RANGE, &result); // returns near and far mapping limits for depth buffer (int)
+
+    //deactivate all running framebuffers and shaders//
+    //glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);  //bind to default framebuffer
+    //_resolveProgram->deactivate();
+    //mainColorTextureUnit.deactivate();
+    
+    return memory;
+}
 
 void saveTextureToPPMFile(const GLenum color_buffer_attachment,
                           const std::string & fileName, const int width, const int height)
@@ -1342,5 +1459,6 @@ void saveTextureToMemory(const GLenum color_buffer_attachment,
 
     delete[] tempMemory;
 }
+
 
 } // namespace openspace

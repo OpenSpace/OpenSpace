@@ -72,7 +72,10 @@ private:
     Timeline<WheelDataProvider::Node> QUAT_Y_Timeline;
     Timeline<WheelDataProvider::Node> QUAT_Z_Timeline;
 
+    //const int timelinesNr = 18;
 };
+
+
 } // namespace openspace
 
 #endif //__OPENSPACE_MODULE_MARSROVER___WHEEL_DATA_PROVIDER___H__

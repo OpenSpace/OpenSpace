@@ -32,14 +32,19 @@ layout(location = 1) in vec2 textureCoords;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
+//varying double DEPTH;
+out double DEPTH;
 out vec4 vs_position;
 out vec2 pass_textureCoords;
 
 void main(){
 	
 	pass_textureCoords = textureCoords;
-	
+
 	vs_position = projectionMatrix * viewMatrix * in_position;
+	
+	DEPTH = vs_position.z;
+
 	gl_Position = vs_position;
 }
 

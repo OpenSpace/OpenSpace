@@ -45,10 +45,7 @@ WheelDataProvider::WheelDataProvider(const ghoul::Dictionary& dictionary)
  : ProjectionProvider(dictionary) {
 }
 
-//put functions here!
 void WheelDataProvider::loadData(std::string path) {
-
-
 	std::string fileName;
 
     const int start = 28;
@@ -74,12 +71,6 @@ void WheelDataProvider::loadData(std::string path) {
     }
     std::string testFile = path + "/00048/rksml_playback_filt_eha.rksml";
     parseFile(testFile);
-
-
-
-
-
-	LERROR(fmt::format("HEJE"));
 }
 
 void WheelDataProvider::parseFile(std::string path) 
@@ -158,8 +149,6 @@ void WheelDataProvider::parseFile(std::string path)
         myfile.close();
     }
     else LERROR(fmt::format("never opened file")); */
-
-	LERROR(fmt::format("HEJE"));
 }
 
 Timeline<WheelDataProvider::Node>& WheelDataProvider::getNode(std::string s)
@@ -224,7 +213,7 @@ Timeline<WheelDataProvider::Node>& WheelDataProvider::getNode(std::string s)
 }
 
 void WheelDataProvider::initialize() {
- return;
+    return;
 }
 
 } // namespace openspace

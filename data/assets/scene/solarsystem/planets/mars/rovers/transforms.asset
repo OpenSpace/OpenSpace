@@ -68,6 +68,11 @@ local MSL_Location = {
         --    HeightTexture = "HeightmapTesting.jpg",                        
         --    Kernels = kernels.CuriosityKernels    
         --},
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "MSL_ROVER",
+            DestinationFrame = "IAU_MARS"   
+        },
         Translation = {
             Type = "SpacecraftProjection",
             Target = "MSL",                 
@@ -75,11 +80,6 @@ local MSL_Location = {
             Frame = "IAU_MARS",
             HeightTexture = "HeightmapTesting.jpg",                        
             Kernels = kernels.CuriosityKernels    
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "MSL_ROVER",
-            DestinationFrame = "IAU_MARS"   
         }
     },
     GUI = {
@@ -90,16 +90,19 @@ local MSL_Location = {
 local MSL_Body = {
     Identifier = "MSL_Body",
     Parent =  MSL_Location.Identifier,
-    --Transform = {   
-    --    Translation = {
-    --        Type = "StaticTranslation",
-    --        Position = { 0.17, 0.0, -0.844 }
-    --    },
-    --    --Scale = {
-    --    --    Type = "StaticScale",
-    --    --    Scale = 10.0
-    --    --}
-    --},
+    Transform = {   
+        --Translation = {
+        --    Type = "SpiceTranslation",
+        --    Target = "MSL",
+        --    Observer = "MSL_LANDING_SITE",
+        --    Frame = "MSL_TOPO",
+        --    Kernels = Kernels  
+        --}
+        --Scale = {
+        --    Type = "StaticScale",
+        --    Scale = 10.0
+        --}
+    },
     GUI = {
         Path = "/Solar System/Planets/Mars/Curiosity/Model"
     }

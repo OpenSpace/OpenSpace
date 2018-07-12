@@ -53,30 +53,68 @@
 
 
 namespace ghoul::io {
-    void TextureWriterFreeImage::writeTexture(unsigned char* texturePixels) {
-        //const std::char filename = "heightmap.png";
+    void TextureWriterFreeImage::writeTexture(std::vector<GLubyte> texturePixels, int w, int h) {
 
-        //Maybe we need to use FreeImage and create an own function to handle this. Look at on Wednesday!!
         FreeImage_Initialise();
 
 
         /***CREATE BITMAP***/
         //FIBITMAP* bitmap = FreeImage_Allocate(1024, 768, 24);
         //RGBQUAD color;
-
+        //int w = 1920;
+        //int h = 1137;
         //fullscreen window size 1920,1080
-        FIBITMAP* Image = FreeImage_ConvertFromRawBits(texturePixels, 1280, 720, 4*1280, 24, 0xFF0000, 0x00FF00, 0x0000FF, false); 
-        FreeImage_Save(FIF_PNG, Image, "kristin.png", 0);
+        //FIBITMAP* Image = FreeImage_ConvertFromRawBits(texturePixels, w, h, 4*w, 8, 0xFF0000, 0x00FF00, 0x0000FF, false); 
+        //FreeImage_Save(FIF_PNG, Image, "kristin.png", 0);
 
+
+        //unsigned char texturePixels2[1920][1080];
+        //for (int i = 0; i < 1920; i++) {
+        //    for (int j = 0; j < 1080; j++) {
+        //        texturePixels2[i][j] = 255;
+        //    }
+        //}
+        //unsigned char* pix = texturePixels2[0][0];
+
+        //FIBITMAP* Image2 = FreeImage_ConvertFromRawBits(pix, 1920, 1080, 3*1920, 24, 0xFF0000, 0xFF0000, 0xFF0000, false); 
+        //FreeImage_Save(FIF_PNG, Image2, "caroline.png", 0);
+
+
+        //FIBITMAP* bitmap = FreeImage_Allocate(1920, 1080, 24);
+        //RGBQUAD color;
         //for (int i = 0; i < 1920; i++) {
         //    for (int j = 0; j< 1080; j++) {
-        //        color.rgbRed = 0;
-        //        color.rgbGreen = 0;
-        //        color.rgbBlue = 0;
+        //        color.rgbRed = 255.0;
+        //        color.rgbGreen = 0; //(double)i / 1920 * 255.0;
+        //        color.rgbBlue = 0; //(double)j / 1080 * 255.0;
         //        FreeImage_SetPixelColor(bitmap, i, j, &color);
         //    }
         //}
-        //FreeImage_Save(FIF_PNG, bitmap, "newKristin.png", 0);
+        //FreeImage_Save(FIF_PNG, bitmap, "redImage.png", 0);
+
+        //Use iterator
+        
+        //FIBITMAP* bitmap = FreeImage_Allocate(w, h, 24);    //w = 1280, h=720
+        //RGBQUAD color;
+        //for (std::vector<GLubyte>::iterator it = texturePixels.begin(); it != texturePixels.end(); ++it)          
+        //{
+        //    color.rgbRed = it->data(); 
+        //    color.rgbGreen = 0; //(double)i / 1920 * 255.0;
+        //    color.rgbBlue = 0; //(double)j / 1080 * 255.0;
+        //    FreeImage_SetPixelColor(bitmap, 1, 2, &color);
+        //}
+
+        //FIBITMAP* bitmap = FreeImage_Allocate(w, h, 24);    //w = 1280, h=720
+        //RGBQUAD color;
+        //for (int i = 0; i < w; i++) {
+        //    for (int j = 0; j< h; j++) {
+        //        color.rgbRed = texturePixels[i][j]; 
+        //        color.rgbGreen = 0; //(double)i / 1920 * 255.0;
+        //        color.rgbBlue = 0; //(double)j / 1080 * 255.0;
+        //        FreeImage_SetPixelColor(bitmap, i, j, &color);
+        //    }
+        //}
+        //FreeImage_Save(FIF_PNG, bitmap, "redImage.png", 0);
 
         FreeImage_DeInitialise();
 
