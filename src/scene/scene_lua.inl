@@ -107,12 +107,12 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
                 foundMatching = true;
 
                 if (interpolationDuration == 0.0) {
-                    OsEng.renderEngine().scene()->removeInterpolation(prop);
+                    OsEng.renderEngine().scene()->removePropertyInterpolation(prop);
                     prop->setLuaValue(L);
                 }
                 else {
                     prop->setLuaInterpolationTarget(L);
-                    OsEng.renderEngine().scene()->addInterpolation(
+                    OsEng.renderEngine().scene()->addPropertyInterpolation(
                         prop,
                         static_cast<float>(interpolationDuration),
                         easingFunction
@@ -184,12 +184,12 @@ int setPropertyCall_single(properties::Property& prop, const std::string& uri,
     }
     else {
         if (duration == 0.0) {
-            OsEng.renderEngine().scene()->removeInterpolation(&prop);
+            OsEng.renderEngine().scene()->removePropertyInterpolation(&prop);
             prop.setLuaValue(L);
         }
         else {
             prop.setLuaInterpolationTarget(L);
-            OsEng.renderEngine().scene()->addInterpolation(
+            OsEng.renderEngine().scene()->addPropertyInterpolation(
                 &prop,
                 static_cast<float>(duration),
                 eastingFunction

@@ -30,6 +30,7 @@
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/triggerproperty.h>
 #include <ghoul/opengl/uniformcache.h>
 
 namespace openspace {
@@ -64,6 +65,9 @@ protected:
 private:
     void imageProjectGPU(std::shared_ptr<ghoul::opengl::Texture> projectionTexture);
 
+    void clearProjectionBufferAfterTime(double time);
+    void insertImageProjections(const std::vector<Image>& images);
+
     ProjectionComponent _projectionComponent;
 
     properties::OptionProperty _colorTexturePaths;
@@ -90,6 +94,9 @@ private:
     properties::FloatProperty _heightExaggeration;
     properties::BoolProperty _meridianShift;
     properties::FloatProperty _ambientBrightness;
+    properties::IntProperty _maxProjectionsPerFrame;
+    properties::IntProperty _projectionsInBuffer;
+    properties::TriggerProperty _clearProjectionBuffer;
 
     std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
 
@@ -102,11 +109,7 @@ private:
     glm::dmat3 _instrumentMatrix;
     glm::vec3 _boresight;
 
-    double _time = -std::numeric_limits<double>::max();
-
     std::vector<Image> _imageTimes;
-
-    bool _shouldCapture = false;
 
     GLuint _quad = 0;
     GLuint _vertexPositionBuffer = 0;

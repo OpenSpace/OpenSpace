@@ -36,6 +36,8 @@
 #include <numeric>
 
 namespace {
+    constexpr const char* _loggerCat = "HttpSynchronization";
+
     constexpr const char* KeyIdentifier = "Identifier";
     constexpr const char* KeyVersion = "Version";
 
@@ -204,10 +206,16 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
 
     std::string line;
 
-    std::unordered_map<std::string, size_t> fileSizes;
-    std::mutex fileSizeMutex;
+    struct SizeData {
+        bool totalKnown;
+        size_t totalBytes;
+        size_t downloadedBytes;
+    };
+
+    std::unordered_map<std::string, SizeData> sizeData;
+    std::mutex sizeDataMutex;
+
     std::atomic_bool startedAllDownloads(false);
-    std::atomic_size_t nDownloads(0);
 
     std::vector<std::unique_ptr<AsyncHttpFileDownload>> downloads;
 
@@ -219,33 +227,60 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             ghoul::filesystem::FileSystem::PathSeparator +
             filename + TempSuffix;
 
+        if (sizeData.find(line) != sizeData.end()) {
+            LWARNING(fmt::format(
+                "{}: Duplicate entries: {}", _identifier, line
+            ));
+            continue;
+        }
+
         downloads.push_back(std::make_unique<AsyncHttpFileDownload>(
-            line, fileDestination, HttpFileDownload::Overwrite::Yes));
+            line,
+            fileDestination,
+            HttpFileDownload::Overwrite::Yes
+        ));
 
-        auto& fileDownload = downloads.back();
+        std::unique_ptr<AsyncHttpFileDownload>& fileDownload = downloads.back();
 
-        ++nDownloads;
+        sizeData[line] = {
+            false,
+            0,
+            0,
+        };
 
         fileDownload->onProgress(
-            [this, line, &fileSizes, &fileSizeMutex,
-             &startedAllDownloads, &nDownloads](HttpRequest::Progress p)
+            [this, line, &sizeData, &sizeDataMutex,
+             &startedAllDownloads](HttpRequest::Progress p)
         {
-            if (p.totalBytesKnown) {
-                std::lock_guard<std::mutex> guard(fileSizeMutex);
-                fileSizes[line] = p.totalBytes;
-
-                if (!_nTotalBytesKnown && startedAllDownloads &&
-                    fileSizes.size() == nDownloads)
-                {
-                    _nTotalBytesKnown = true;
-                    _nTotalBytes = std::accumulate(
-                        fileSizes.begin(),
-                        fileSizes.end(),
-                        size_t(0),
-                        [](size_t a, auto b) { return a + b.second; }
-                    );
-                }
+            if (!p.totalBytesKnown || !startedAllDownloads) {
+                return !_shouldCancel;
             }
+
+            std::lock_guard<std::mutex> guard(sizeDataMutex);
+
+            sizeData[line] = {
+                p.totalBytesKnown,
+                p.totalBytes,
+                p.downloadedBytes,
+            };
+
+            SizeData size = std::accumulate(
+                sizeData.begin(),
+                sizeData.end(),
+                SizeData{ true, 0, 0 },
+                [](const SizeData& a, const std::pair<const std::string, SizeData>& b) {
+                    return SizeData {
+                        a.totalKnown && b.second.totalKnown,
+                        a.totalBytes + b.second.totalBytes,
+                        a.downloadedBytes + b.second.downloadedBytes
+                    };
+                }
+            );
+
+            _nTotalBytesKnown = size.totalKnown;
+            _nTotalBytes = size.totalBytes;
+            _nSynchronizedBytes = size.downloadedBytes;
+
             return !_shouldCancel;
         });
 
@@ -270,18 +305,16 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             FileSys.deleteFile(originalName);
             int success = rename(tempName.c_str(), originalName.c_str());
             if (success != 0) {
-                LERRORC(
-                    "HTTPSynchronization",
-                    fmt::format("Error renaming file {} to {}", tempName, originalName)
-                );
+                LERROR(fmt::format(
+                    "Error renaming file {} to {}", tempName, originalName
+                ));
                 failed = true;
             }
         }
         else {
-            LERRORC(
-                "HTTPSynchronization",
-                fmt::format("Error downloading file from URL {}", d->url())
-            );
+            LERROR(fmt::format(
+                "Error downloading file from URL {}", d->url()
+            ));
             failed = true;
         }
     }

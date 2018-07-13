@@ -33,6 +33,8 @@
 #include <modules/base/dashboard/dashboarditempropertyvalue.h>
 #include <modules/base/dashboard/dashboarditemsimulationincrement.h>
 #include <modules/base/dashboard/dashboarditemspacing.h>
+#include <modules/base/lightsource/cameralightsource.h>
+#include <modules/base/lightsource/scenegraphlightsource.h>
 #include <modules/base/rendering/renderablemodel.h>
 #include <modules/base/rendering/renderablesphere.h>
 #include <modules/base/rendering/renderablesphericalgrid.h>
@@ -142,6 +144,12 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fTimeFrame->registerClass<TimeFrameInterval>("TimeFrameInterval");
     fTimeFrame->registerClass<TimeFrameUnion>("TimeFrameUnion");
 
+    auto fLightSource = FactoryManager::ref().factory<LightSource>();
+    ghoul_assert(fLightSource, "Light Source factory was not created");
+
+    fLightSource->registerClass<CameraLightSource>("CameraLightSource");
+    fLightSource->registerClass<SceneGraphLightSource>("SceneGraphLightSource");
+
     auto fGeometry = FactoryManager::ref().factory<modelgeometry::ModelGeometry>();
     ghoul_assert(fGeometry, "Model geometry factory was not created");
     fGeometry->registerClass<modelgeometry::MultiModelGeometry>("MultiModelGeometry");
@@ -185,6 +193,9 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
 
         TimeFrameInterval::Documentation(),
         TimeFrameUnion::Documentation(),
+
+        SceneGraphLightSource::Documentation(),
+        CameraLightSource::Documentation(),
 
         modelgeometry::ModelGeometry::Documentation(),
     };

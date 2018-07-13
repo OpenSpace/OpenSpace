@@ -22,71 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SYNCDATA___H__
-#define __OPENSPACE_CORE___SYNCDATA___H__
+#ifndef __OPENSPACE_CORE___LIGHTSOURCE___H__
+#define __OPENSPACE_CORE___LIGHTSOURCE___H__
 
-#include <openspace/util/syncable.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/scalar/boolproperty.h>
 
-#include <mutex>
+#include <ghoul/glm.h>
+#include <memory>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-/**
- * A double buffered implementation of the Syncable interface.
- * Users are encouraged to used this class as a default way to synchronize different
- * C++ data types using the SyncEngine.
- *
- * This class aims to handle the synchronization parts and yet act like a regular
- * instance of T. Implicit casts are supported, however, when accessing member functions
- * or variables, user may have to do explicit casts.
- *
- * ((T&) t).method();
- *
- */
-template<class T>
-class SyncData : public Syncable {
+namespace documentation { struct Documentation; }
+
+class SceneGraphNode;
+class RenderData;
+
+class LightSource : public properties::PropertyOwner {
 public:
-    SyncData() = default;
-    SyncData(const T& val);
-    SyncData(const SyncData<T>& o);
+    static std::unique_ptr<LightSource> createFromDictionary(
+        const ghoul::Dictionary& dictionary);
 
-    /**
-     * Allowing assignment of data as if
-     */
-    SyncData& operator=(const T& rhs);
+    LightSource();
+    LightSource(const ghoul::Dictionary& dictionary);
+    virtual ~LightSource() = default;
 
-    /**
-     * Allow implicit cast to referenced T
-     */
-    operator T&();
+    virtual glm::vec3 directionViewSpace(const RenderData& renderData) const = 0;
 
-    /**
-     * Allow implicit cast to const referenced T
-     */
-    operator const T&() const;
+    virtual float intensity() const = 0;
 
-    /**
-     * Explicitly access data
-     */
-    T& data();
+    bool isEnabled() const;
 
-    /**
-    * Explicitly access const data
-    */
-    const T& data() const;
+    virtual bool initialize();
 
-protected:
-    virtual void encode(SyncBuffer* syncBuffer) override;
-    virtual void decode(SyncBuffer* syncBuffer) override;
-    virtual void postSync(bool isMaster) override;
+    static documentation::Documentation Documentation();
 
-    T _data;
-    T _doubleBufferedData;
-    std::mutex _mutex;
+private:
+    properties::BoolProperty _enabled;
 };
 
-} // namespace openspace
+}  // namespace openspace
 
-#include "syncdata.inl"
-
-#endif // __OPENSPACE_CORE___SYNCDATA___H__
+#endif // __OPENSPACE_CORE___LIGHTSOURCE___H__

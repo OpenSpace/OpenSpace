@@ -43,6 +43,7 @@ namespace openspace {
 
 struct RenderData;
 struct UpdateData;
+class LightSource;
 
 namespace documentation { struct Documentation; }
 namespace modelgeometry { class ModelGeometry; }
@@ -50,7 +51,9 @@ namespace modelgeometry { class ModelGeometry; }
 class RenderableModel : public Renderable {
 public:
     RenderableModel(const ghoul::Dictionary& dictionary);
+    ~RenderableModel();
 
+    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
 
@@ -65,19 +68,32 @@ protected:
     void loadTexture();
 
 private:
+    void updateUniformCache();
+
     std::unique_ptr<modelgeometry::ModelGeometry> _geometry;
 
     properties::StringProperty _colorTexturePath;
+
+    properties::FloatProperty _ambientIntensity;
+    properties::FloatProperty _diffuseIntensity;
+    properties::FloatProperty _specularIntensity;
+
     properties::BoolProperty _performShading;
     properties::Mat3Property _modelTransform;
 
     ghoul::opengl::ProgramObject* _programObject = nullptr;
-    UniformCache(opacity, directionToSunViewSpace, modelViewTransform,
-        projectionTransform, performShading, texture) _uniformCache;
+    UniformCache(opacity, nLightSources, lightDirectionsViewSpace, lightIntensities,
+        modelViewTransform, projectionTransform, performShading, texture,
+        ambientIntensity, diffuseIntensity, specularIntensity) _uniformCache;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::vector<std::unique_ptr<LightSource>> _lightSources;
 
-    glm::dvec3 _sunPos;
+    // Buffers for uniform uploading
+    std::vector<float> _lightIntensitiesBuffer;
+    std::vector<glm::vec3> _lightDirectionsViewSpaceBuffer;
+
+    properties::PropertyOwner _lightSourcePropertyOwner;
 };
 
 }  // namespace openspace

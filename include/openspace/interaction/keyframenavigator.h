@@ -28,6 +28,7 @@
 #include <openspace/util/timeline.h>
 #include <openspace/network/messagestructures.h>
 #include <ghoul/glm.h>
+#include <ghoul/misc/boolean.h>
 #include <glm/gtx/quaternion.hpp>
 
 namespace openspace { class Camera; }
@@ -36,6 +37,8 @@ namespace openspace::interaction {
 
 class KeyframeNavigator {
 public:
+    BooleanType(Inclusive);
+
     struct CameraPose {
         glm::dvec3 position;
         glm::quat rotation;
@@ -48,10 +51,9 @@ public:
     Timeline<CameraPose>& timeline();
 
     void addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose);
-    void removeKeyframesAfter(double timestamp);
+    void removeKeyframesAfter(double timestamp, Inclusive inclusive = Inclusive::No);
     void clearKeyframes();
     size_t nKeyframes() const;
-    const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
 
 private:
     Timeline<CameraPose> _cameraPoseTimeline;

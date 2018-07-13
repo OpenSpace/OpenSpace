@@ -51,6 +51,7 @@
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
 #include <openspace/scene/timeframe.h>
+#include <openspace/scene/lightsource.h>
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scene/translation.h>
 #include <openspace/scripting/scriptscheduler.h>
@@ -166,6 +167,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     _navigationHandler->setPropertyOwner(_rootPropertyOwner.get());
     // New property subowners also have to be added to the ImGuiModule callback!
     _rootPropertyOwner->addPropertySubOwner(_navigationHandler.get());
+    _rootPropertyOwner->addPropertySubOwner(_timeManager.get());
 
     _rootPropertyOwner->addPropertySubOwner(_renderEngine.get());
     _rootPropertyOwner->addPropertySubOwner(_renderEngine->screenSpaceOwner());
@@ -206,6 +208,10 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<TimeFrame>>(),
         "TimeFrame"
+    );
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<LightSource>>(),
+        "LightSource"
     );
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Task>>(),

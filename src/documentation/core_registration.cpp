@@ -38,6 +38,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scene/lightsource.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -64,6 +65,7 @@ void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(TimeRange::Documentation());
     engine.addDocumentation(Translation::Documentation());
     engine.addDocumentation(TimeFrame::Documentation());
+    engine.addDocumentation(LightSource::Documentation());
 }
 
 void registerCoreClasses(scripting::ScriptEngine& engine) {

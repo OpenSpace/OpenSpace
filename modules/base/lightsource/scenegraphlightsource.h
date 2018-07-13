@@ -22,71 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SYNCDATA___H__
-#define __OPENSPACE_CORE___SYNCDATA___H__
+#ifndef __OPENSPACE_MODULE_BASE___SCENEGRAPHLIGHTSOURCE___H__
+#define __OPENSPACE_MODULE_BASE___SCENEGRAPHLIGHTSOURCE___H__
 
-#include <openspace/util/syncable.h>
+#include <openspace/scene/lightsource.h>
 
-#include <mutex>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
 
-/**
- * A double buffered implementation of the Syncable interface.
- * Users are encouraged to used this class as a default way to synchronize different
- * C++ data types using the SyncEngine.
- *
- * This class aims to handle the synchronization parts and yet act like a regular
- * instance of T. Implicit casts are supported, however, when accessing member functions
- * or variables, user may have to do explicit casts.
- *
- * ((T&) t).method();
- *
- */
-template<class T>
-class SyncData : public Syncable {
+namespace documentation { struct Documentation; }
+
+class SceneGraphLightSource : public LightSource {
 public:
-    SyncData() = default;
-    SyncData(const T& val);
-    SyncData(const SyncData<T>& o);
+    SceneGraphLightSource();
+    SceneGraphLightSource(const ghoul::Dictionary& dictionary);
 
-    /**
-     * Allowing assignment of data as if
-     */
-    SyncData& operator=(const T& rhs);
+    static documentation::Documentation Documentation();
 
-    /**
-     * Allow implicit cast to referenced T
-     */
-    operator T&();
+    bool initialize() override;
+    glm::vec3 directionViewSpace(const RenderData& renderData) const override;
+    float intensity() const override;
 
-    /**
-     * Allow implicit cast to const referenced T
-     */
-    operator const T&() const;
+private:
+    properties::FloatProperty _intensity;
+    properties::StringProperty _sceneGraphNodeReference;
 
-    /**
-     * Explicitly access data
-     */
-    T& data();
-
-    /**
-    * Explicitly access const data
-    */
-    const T& data() const;
-
-protected:
-    virtual void encode(SyncBuffer* syncBuffer) override;
-    virtual void decode(SyncBuffer* syncBuffer) override;
-    virtual void postSync(bool isMaster) override;
-
-    T _data;
-    T _doubleBufferedData;
-    std::mutex _mutex;
+    SceneGraphNode* _sceneGraphNode = nullptr;
 };
 
 } // namespace openspace
 
-#include "syncdata.inl"
-
-#endif // __OPENSPACE_CORE___SYNCDATA___H__
+#endif // __OPENSPACE_MODULE_BASE___SCENEGRAPHLIGHTSOURCE___H__

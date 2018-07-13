@@ -22,71 +22,76 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SYNCDATA___H__
-#define __OPENSPACE_CORE___SYNCDATA___H__
+#include <modules/base/lightsource/cameralightsource.h>
 
-#include <openspace/util/syncable.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
+#include <openspace/util/updatestructures.h>
 
-#include <mutex>
+namespace {
+    constexpr openspace::properties::Property::PropertyInfo IntensityInfo = {
+        "Intensity",
+        "Intensity",
+        "The intensity of this light source"
+    };
+} // namespace
 
 namespace openspace {
 
-/**
- * A double buffered implementation of the Syncable interface.
- * Users are encouraged to used this class as a default way to synchronize different
- * C++ data types using the SyncEngine.
- *
- * This class aims to handle the synchronization parts and yet act like a regular
- * instance of T. Implicit casts are supported, however, when accessing member functions
- * or variables, user may have to do explicit casts.
- *
- * ((T&) t).method();
- *
- */
-template<class T>
-class SyncData : public Syncable {
-public:
-    SyncData() = default;
-    SyncData(const T& val);
-    SyncData(const SyncData<T>& o);
+documentation::Documentation CameraLightSource::Documentation() {
+    using namespace openspace::documentation;
+    return {
+        "Camera Light Source",
+        "base_camera_light_source",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("CameraLightSource"),
+                Optional::No,
+                "The type of this light source"
+            },
+            {
+                IntensityInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                IntensityInfo.description
+            }
+        }
+    };
+}
 
-    /**
-     * Allowing assignment of data as if
-     */
-    SyncData& operator=(const T& rhs);
+CameraLightSource::CameraLightSource()
+    : LightSource()
+    , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
+{
+    addProperty(_intensity);
+}
 
-    /**
-     * Allow implicit cast to referenced T
-     */
-    operator T&();
+CameraLightSource::CameraLightSource(const ghoul::Dictionary& dictionary)
+    : LightSource(dictionary)
+    , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
+{
+    addProperty(_intensity);
+ 
+    documentation::testSpecificationAndThrow(Documentation(),
+                                             dictionary,
+                                             "CameraLightSource");
 
-    /**
-     * Allow implicit cast to const referenced T
-     */
-    operator const T&() const;
 
-    /**
-     * Explicitly access data
-     */
-    T& data();
+    if (dictionary.hasValue<double>(IntensityInfo.identifier)) {
+        _intensity = static_cast<float>(
+            dictionary.value<double>(IntensityInfo.identifier)
+        );
+    }
+}
 
-    /**
-    * Explicitly access const data
-    */
-    const T& data() const;
+float CameraLightSource::intensity() const {
+    return _intensity;
+}
 
-protected:
-    virtual void encode(SyncBuffer* syncBuffer) override;
-    virtual void decode(SyncBuffer* syncBuffer) override;
-    virtual void postSync(bool isMaster) override;
+glm::vec3 CameraLightSource::directionViewSpace(const RenderData& renderData) const {
+    return glm::vec3(0.f, 0.f, 1.f);
+}
 
-    T _data;
-    T _doubleBufferedData;
-    std::mutex _mutex;
-};
 
 } // namespace openspace
-
-#include "syncdata.inl"
-
-#endif // __OPENSPACE_CORE___SYNCDATA___H__

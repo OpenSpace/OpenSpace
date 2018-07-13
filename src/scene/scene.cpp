@@ -28,12 +28,15 @@
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scripting/lualibrary.h>
-#include <ghoul/logging/logmanager.h>
-#include <openspace/util/camera.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scenelicensewriter.h>
 #include <openspace/scene/sceneinitializer.h>
+#include <openspace/scripting/lualibrary.h>
+#include <openspace/util/camera.h>
+
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/logging/logmanager.h>
+
 #include <string>
 #include <stack>
 
@@ -107,7 +110,7 @@ void Scene::unregisterNode(SceneGraphNode* node) {
     // Just try to remove all properties; if the property doesn't exist, the
     // removeInterpolation will not do anything
     for (properties::Property* p : node->properties()) {
-        removeInterpolation(p);
+        removePropertyInterpolation(p);
     }
     removePropertySubOwner(node);
     _dirtyNodeRegistry = true;
@@ -428,29 +431,29 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
     return rawNodePointer;
 }
 
-void Scene::addInterpolation(properties::Property* prop, float durationSeconds,
+void Scene::addPropertyInterpolation(properties::Property* prop, float durationSeconds,
                              ghoul::EasingFunction easingFunction)
 {
     ghoul_precondition(prop != nullptr, "prop must not be nullptr");
-    ghoul_precondition(durationSeconds > 0.0, "durationSeconds must be positive");
+    ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
     ghoul_postcondition(
         std::find_if(
-            _interpolationInfos.begin(),
-            _interpolationInfos.end(),
-            [prop](const InterpolationInfo& info) {
+            _propertyInterpolationInfos.begin(),
+            _propertyInterpolationInfos.end(),
+            [prop](const PropertyInterpolationInfo& info) {
                 return info.prop == prop && !info.isExpired;
             }
-        ) != _interpolationInfos.end(),
+        ) != _propertyInterpolationInfos.end(),
         "A new interpolation record exists for p that is not expired"
     );
 
     ghoul::EasingFunc<float> func =
-        easingFunction == ghoul::EasingFunction::Linear ?
+        (easingFunction == ghoul::EasingFunction::Linear) ?
         nullptr :
         ghoul::easingFunction<float>(easingFunction);
 
     // First check if the current property already has an interpolation information
-    for (InterpolationInfo& info : _interpolationInfos) {
+    for (PropertyInterpolationInfo& info : _propertyInterpolationInfos) {
         if (info.prop == prop) {
             info.beginTime = std::chrono::steady_clock::now();
             info.durationSeconds = durationSeconds;
@@ -461,36 +464,36 @@ void Scene::addInterpolation(properties::Property* prop, float durationSeconds,
         }
     }
 
-    InterpolationInfo i = {
+    PropertyInterpolationInfo i = {
         prop,
         std::chrono::steady_clock::now(),
         durationSeconds,
         func
     };
 
-    _interpolationInfos.push_back(std::move(i));
+    _propertyInterpolationInfos.push_back(std::move(i));
 }
 
-void Scene::removeInterpolation(properties::Property* prop) {
+void Scene::removePropertyInterpolation(properties::Property* prop) {
     ghoul_precondition(prop != nullptr, "prop must not be nullptr");
     ghoul_postcondition(
         std::find_if(
-            _interpolationInfos.begin(),
-            _interpolationInfos.end(),
-            [prop](const InterpolationInfo& info) {
+            _propertyInterpolationInfos.begin(),
+            _propertyInterpolationInfos.end(),
+            [prop](const PropertyInterpolationInfo& info) {
                 return info.prop == prop;
             }
-        ) == _interpolationInfos.end(),
+        ) == _propertyInterpolationInfos.end(),
         "No interpolation record exists for prop"
     );
 
-    _interpolationInfos.erase(
+    _propertyInterpolationInfos.erase(
         std::remove_if(
-            _interpolationInfos.begin(),
-            _interpolationInfos.end(),
-            [prop](const InterpolationInfo& info) { return info.prop == prop; }
+            _propertyInterpolationInfos.begin(),
+            _propertyInterpolationInfos.end(),
+            [prop](const PropertyInterpolationInfo& info) { return info.prop == prop; }
         ),
-        _interpolationInfos.end()
+        _propertyInterpolationInfos.end()
     );
 }
 
@@ -499,14 +502,19 @@ void Scene::updateInterpolations() {
 
     auto now = steady_clock::now();
 
-    for (InterpolationInfo& i : _interpolationInfos) {
+    // First, let's update the properties
+    for (PropertyInterpolationInfo& i : _propertyInterpolationInfos) {
         long long usPassed = duration_cast<std::chrono::microseconds>(
             now - i.beginTime
         ).count();
 
-        float t = static_cast<float>(
-            static_cast<double>(usPassed) /
-            static_cast<double>(i.durationSeconds * 1000000)
+        const float t = glm::clamp(
+            static_cast<float>(
+                static_cast<double>(usPassed) /
+                static_cast<double>(i.durationSeconds * 1000000)
+            ),
+            0.f,
+            1.f
         );
 
         // @FRAGILE(abock): This method might crash if someone deleted the property
@@ -515,20 +523,20 @@ void Scene::updateInterpolations() {
         //                  SceneGraphNodes. This is true in general, but if Propertys are
         //                  created and destroyed often by the SceneGraphNode, this might
         //                  become a problem.
-        i.prop->interpolateValue(glm::clamp(t, 0.f, 1.f), i.easingFunction);
+        i.prop->interpolateValue(t, i.easingFunction);
 
-        i.isExpired = (t >= 1.f);
+        i.isExpired = (t == 1.f);
     }
 
-    _interpolationInfos.erase(
+    _propertyInterpolationInfos.erase(
         std::remove_if(
-            _interpolationInfos.begin(),
-            _interpolationInfos.end(),
-            [](const InterpolationInfo& i) {
+            _propertyInterpolationInfos.begin(),
+            _propertyInterpolationInfos.end(),
+            [](const PropertyInterpolationInfo& i) {
                 return i.isExpired;
             }
         ),
-        _interpolationInfos.end()
+        _propertyInterpolationInfos.end()
     );
 }
 

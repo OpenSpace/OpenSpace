@@ -78,12 +78,6 @@ public:
     bool isReady();
 
     /**
-     * Updates sequencer with current <code>time</code>. This is used internally for
-     * keeping track of both current simulation time and the time of the previously
-     * rendered frame.
-     */
-    void updateSequencer(const Time& time);
-    /**
      * Runs parser and recieves the datastructures filled by it.
      * \see SequenceParser
      */
@@ -92,35 +86,36 @@ public:
     /**
      * Retrieves the next upcoming target in time.
      */
-    std::pair<double, std::string> nextTarget();
+    std::pair<double, std::string> nextTarget(double time);
 
     /**
      * Retrieves the most current target in time.
      */
-    std::pair<double, std::string> currentTarget();
+    std::pair<double, std::string> currentTarget(double time);
 
     /**
      * Retrieves current target and (in the list) adjacent targets, the number to retrieve
      * is user set
      */
-    std::pair<double, std::vector<std::string>> incidentTargetList(int range = 2);
+    std::pair<double, std::vector<std::string>> incidentTargetList(double time,
+                                                                   int range = 2);
 
     /**
      * Retrieves the next upcoming time of image capture.
      */
-    double nextCaptureTime();
+    double nextCaptureTime(double time);
 
     /**
      * Retrieves the time interval length between the current time and an upcoming
      * capture.
      */
-    double intervalLength();
+    double intervalLength(double time);
 
     /**
      * Returns a vector with key instrument names whose value indicate whether an
      * instrument is active or not.
      */
-    std::vector<std::pair<std::string, bool>> activeInstruments();
+    std::vector<std::pair<std::string, bool>> activeInstruments(double time);
 
     /**
      * Retrieves the relevant data from a specific subset based on the what instance
@@ -128,14 +123,14 @@ public:
      * returns false and no projections will occur.
      */
     bool imagePaths(std::vector<Image>& captures, const std::string& projectee,
-        const std::string& instrumentRequest, double sinceTime);
+        const std::string& instrumentRequest, double time, double sinceTime);
 
     /**
      * returns true if instrumentID is within a capture range.
      */
-    bool isInstrumentActive(const std::string& instrumentID);
+    bool isInstrumentActive(double time, const std::string& instrumentID);
 
-    float instrumentActiveTime(const std::string& instrumentID) const;
+    float instrumentActiveTime(double time, const std::string& instrumentID) const;
 
     /**
      * returns latest captured image
@@ -187,8 +182,6 @@ private:
      */
     std::vector<double> _captureProgression;
 
-    // current simulation time
-    double _currentTime = 0.0;
     // time between current simulation time and an upcoming capture
     double _intervalLength = 0.0;
     // next consecutive capture in time

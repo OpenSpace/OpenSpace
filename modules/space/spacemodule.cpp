@@ -37,14 +37,32 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/spicemanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
+
+namespace {
+    constexpr openspace::properties::Property::PropertyInfo SpiceExceptionInfo = {
+        "ShowExceptions",
+        "Show Exceptions",
+        "If enabled, errors from SPICE will be thrown and show up in the log. If "
+        "disabled, the errors will be ignored silently."
+    };
+} // namespace
 
 namespace openspace {
 
 ghoul::opengl::ProgramObjectManager SpaceModule::ProgramObjectManager;
 
-SpaceModule::SpaceModule() : OpenSpaceModule(Name) {}
+SpaceModule::SpaceModule()
+    : OpenSpaceModule(Name)
+    , _showSpiceExceptions(SpiceExceptionInfo, true)
+{
+    _showSpiceExceptions.onChange([&t = _showSpiceExceptions](){
+        SpiceManager::ref().setExceptionHandling(SpiceManager::UseException(t));
+    });
+    addProperty(_showSpiceExceptions);
+}
 
 void SpaceModule::internalInitialize(const ghoul::Dictionary&) {
     FactoryManager::ref().addFactory(
