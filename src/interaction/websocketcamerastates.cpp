@@ -71,43 +71,43 @@ void WebsocketCameraStates::updateStateFromInput(const InputState& inputState,
             case AxisType::None:
                 break;
             case AxisType::OrbitX:
-                globalRotation.first = hasValue;
+                globalRotation.first = hasValue || globalRotation.first;
                 globalRotation.second.x = value;
                 break;
             case AxisType::OrbitY:
-                globalRotation.first = hasValue;
+                globalRotation.first = hasValue || globalRotation.first;
                 globalRotation.second.y = value;
                 break;
             case AxisType::ZoomIn:
-                zoom.first = hasValue;
+                zoom.first = hasValue || zoom.first;
                 zoom.second += value;
                 break;
             case AxisType::ZoomOut:
-                zoom.first = hasValue;
+                zoom.first = hasValue || zoom.first;
                 zoom.second -= value;
                 break;
             case AxisType::LocalRollX:
-                localRoll.first = hasValue;
+                localRoll.first = hasValue || localRoll.first;
                 localRoll.second.x = value;
                 break;
             case AxisType::LocalRollY:
-                localRoll.first = hasValue;
+                localRoll.first = hasValue || localRoll.first;
                 localRoll.second.y = value;
                 break;
             case AxisType::GlobalRollX:
-                globalRoll.first = hasValue;
+                globalRoll.first = hasValue || globalRoll.first;
                 globalRoll.second.x = value;
                 break;
             case AxisType::GlobalRollY:
-                globalRoll.first = hasValue;
+                globalRoll.first = hasValue || globalRoll.first;
                 globalRoll.second.y = value;
                 break;
             case AxisType::PanX:
-                localRotation.first = hasValue;
+                localRotation.first = hasValue || localRotation.first;
                 localRotation.second.x = value;
                 break;
             case AxisType::PanY:
-                localRotation.first = hasValue;
+                localRotation.first = hasValue || localRotation.first;
                 localRotation.second.y = value;
                 break;
         }

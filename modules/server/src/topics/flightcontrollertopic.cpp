@@ -101,7 +101,7 @@ bool FlightControllerTopic::isDone() const {
 
 void FlightControllerTopic::handleJson(const nlohmann::json& json) {
     auto state = _inputStates.begin();
-    std::fill(state->axes.begin(), state->axes.end(), 0.0f);
+    std::fill(state->axes.begin(), state->axes.end(), 0);
     state->isConnected = true;
 
     for (auto it = json.begin(); it != json.end(); ++it) {
