@@ -258,7 +258,8 @@ class PrepareUploadedData extends Component {
                       placeholder='name'
                       value={this.state.itemName || this.getDefaultItemName()} />
               </div>
-          <NumericInput label={"Scale data with" + scale + "times the Sun Radius "}
+          <Label>Scale Data:</Label>
+          <NumericInput label={scale + "times the Sun Radius "}
                         placeholder={'test'}
                         value={scale}
                         onChange={(event) => this.setState({ scale: event.currentTarget.value}) }/>
@@ -290,7 +291,7 @@ class PrepareUploadedData extends Component {
                            onSetTranslation={(target) => this.handleSetStaticTranslation(target)}
                            onSetTranslationTarget={this.handleSetTranslationTarget}
                            target={translationTarget} />
-              <Checkbox label='Factor r^2?'
+              <Checkbox label={"Multiply " + variable + " with radius^2?"}
                         onChange={this.changeRSquared}
                         disabled={isUnEditable}/>
             </Column>

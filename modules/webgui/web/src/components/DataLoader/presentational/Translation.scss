@@ -2,9 +2,10 @@
 
 
 .wrapper {
-  overflow: auto;
+  height: 100%;
+  width: 100%;
 }
 
 .translation {
-  float: right;
+  margin-left: 15px;
 }

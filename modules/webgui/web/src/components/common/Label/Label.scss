@@ -1,6 +1,8 @@
 .base {
   letter-spacing: 0.15em;
   text-transform: uppercase;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .smallLabel {

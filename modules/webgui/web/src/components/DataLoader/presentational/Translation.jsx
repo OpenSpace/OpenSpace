@@ -20,8 +20,7 @@ const Translation = (props) => {
   const spiceOptions = 'SUN EARTH'.split(' ').map(v => ({ value: v, label: v }));
 
   return(
-    <Row className={styles.translation}>
-
+    <Row>
       <div><RadioButtons label='Translation type'
                           options={['Static', 'Spice']}
                           defaultOption='Static'
@@ -31,18 +30,18 @@ const Translation = (props) => {
         {translationType === KEY_SPICE_TRANSLATION 
           ?
             <div className={styles.translation}>
-              <Label size={'medium'}>Translation Target: </Label>
+              <Label size='medium'>Translate Data: </Label>
               <Select label={target}
-                options={spiceOptions}
-                onChange={onSetTranslationTarget}
-                placeholder=''
+                      options={spiceOptions}
+                      onChange={onSetTranslationTarget}
+                      placeholder=''
               />
             </div>
           :
             <div className={styles.translation}>
               <MultiInputs label='Translate Data'
-                options={translationPos}
-                onChange={onSetTranslation}/>
+                            options={translationPos}
+                            onChange={onSetTranslation}/>
             </div>}
       </div>
     </Row>

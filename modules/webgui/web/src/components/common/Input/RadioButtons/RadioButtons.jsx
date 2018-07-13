@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { excludeKeys } from '../../../../utils/helpers';
 import styles from './RadioButtons.scss';
+import Label from '../../Label/Label';
 
 // TODO: intitial double render
 class RadioButtons extends Component {
@@ -35,9 +36,9 @@ class RadioButtons extends Component {
 
     return (
         <div className={styles.wrapper}>
-            <div className={styles.label}>
-            { label }
-            </div>
+            <Label size={'medium'}>
+              { label }
+            </Label>
             <div className={`${isHorizontal ? styles.optionsHorizontal : styles.optionsVertical}`}>
             {options.map(option => (
                 <label key={option}>
