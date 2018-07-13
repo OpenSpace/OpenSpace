@@ -22,73 +22,76 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
+#include <modules/base/lightsource/cameralightsource.h>
 
-in vec2 vs_st;
-in vec3 vs_normalViewSpace;
-in vec4 vs_positionCameraSpace;
-in float vs_screenSpaceDepth;
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
+#include <openspace/util/updatestructures.h>
 
-uniform float ambientIntensity = 0.2;
-uniform float diffuseIntensity = 1.0;
-uniform float specularIntensity = 1.0;
+namespace {
+    constexpr openspace::properties::Property::PropertyInfo IntensityInfo = {
+        "Intensity",
+        "Intensity",
+        "The intensity of this light source"
+    };
+} // namespace
 
-uniform bool performShading = true;
+namespace openspace {
 
-uniform sampler2D texture1;
-
-uniform int nLightSources;
-uniform vec3 lightDirectionsViewSpace[8];
-uniform float lightIntensities[8];
-
-uniform float opacity = 1.0;
-
-const vec3 SpecularAlbedo = vec3(1.0);
-
-Fragment getFragment() {
-    vec3 diffuseAlbedo = texture(texture1, vs_st).rgb;
-
-    Fragment frag;
-
-    if (performShading) {
-        // Some of these values could be passed in as uniforms
-        const vec3 lightColorAmbient = vec3(1.0);
-        const vec3 lightColor = vec3(1.0);
-        
-        vec3 n = normalize(vs_normalViewSpace);
-        vec3 c = normalize(vs_positionCameraSpace.xyz);
-
-        vec3 color = ambientIntensity * lightColorAmbient * diffuseAlbedo;
-
-        for (int i = 0; i < nLightSources; ++i) {
-            vec3 l = lightDirectionsViewSpace[i];
-            vec3 r = reflect(l, n);
-
-            float diffuseCosineFactor = dot(n,l);
-            float specularCosineFactor = dot(c,r);
-            const float specularPower = 100.0;
-
-            vec3 diffuseColor =
-                diffuseIntensity * lightColor * diffuseAlbedo *
-                max(diffuseCosineFactor, 0);
-
-            vec3 specularColor =
-                specularIntensity * lightColor * SpecularAlbedo *
-                pow(max(specularCosineFactor, 0), specularPower);
-
-            color += lightIntensities[i] * (diffuseColor + specularColor);
+documentation::Documentation CameraLightSource::Documentation() {
+    using namespace openspace::documentation;
+    return {
+        "Camera Light Source",
+        "base_camera_light_source",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("CameraLightSource"),
+                Optional::No,
+                "The type of this light source"
+            },
+            {
+                IntensityInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                IntensityInfo.description
+            }
         }
-        frag.color.rgb = color;
-    }
-    else {
-        frag.color.rgb = diffuseAlbedo;
-    }
-
-    frag.color.a    = opacity;
-    frag.depth      = vs_screenSpaceDepth;
-    frag.gPosition  = vs_positionCameraSpace;
-    frag.gNormal    = vec4(vs_normalViewSpace, 1.0);
-
-
-    return frag;
+    };
 }
+
+CameraLightSource::CameraLightSource()
+    : LightSource()
+    , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
+{
+    addProperty(_intensity);
+}
+
+CameraLightSource::CameraLightSource(const ghoul::Dictionary& dictionary)
+    : LightSource(dictionary)
+    , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
+{
+    addProperty(_intensity);
+ 
+    documentation::testSpecificationAndThrow(Documentation(),
+                                             dictionary,
+                                             "CameraLightSource");
+
+
+    if (dictionary.hasValue<double>(IntensityInfo.identifier)) {
+        _intensity = static_cast<float>(
+            dictionary.value<double>(IntensityInfo.identifier)
+        );
+    }
+}
+
+float CameraLightSource::intensity() const {
+    return _intensity;
+}
+
+glm::vec3 CameraLightSource::directionViewSpace(const RenderData& renderData) const {
+    return glm::vec3(0.f, 0.f, 1.f);
+}
+
+
+} // namespace openspace

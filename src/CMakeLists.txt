@@ -144,7 +144,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/scene/assetloader_lua.inl
     ${OPENSPACE_BASE_DIR}/src/scene/assetmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/assetmanager_lua.inl
-    ${OPENSPACE_BASE_DIR}/src/scene/translation.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/lightsource.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/rotation.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scale.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scene.cpp
@@ -155,6 +155,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode_doc.inl
     ${OPENSPACE_BASE_DIR}/src/scene/timeframe.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/translation.cpp
     ${OPENSPACE_BASE_DIR}/src/scripting/lualibrary.cpp
     ${OPENSPACE_BASE_DIR}/src/scripting/scriptengine.cpp
     ${OPENSPACE_BASE_DIR}/src/scripting/scriptengine_lua.inl
@@ -325,7 +326,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetlistener.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetloader.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetmanager.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/scene/translation.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/lightsource.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/rotation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scale.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scene.h
@@ -334,6 +335,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenelicensewriter.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenegraphnode.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/timeframe.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/translation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/lualibrary.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/scriptengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/scriptscheduler.h

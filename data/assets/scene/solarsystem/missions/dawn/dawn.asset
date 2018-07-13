@@ -1,7 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/sun/transforms')
 local kernels = asset.require('./dawn_kernels').Kernels
-
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
 
 local textures = asset.syncedResource({
@@ -616,6 +616,20 @@ local KernelFiles = {
     -- kernels .. "/dawn_sa_120910_120916.bc",
 }
 
+local LightSources = {
+    {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sunTransforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+    },
+    {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+    }
+}
+
 local Dawn = {
     Identifier = "Dawn",
     Parent = transforms.SolarSystemBarycenter.Identifier,
@@ -640,7 +654,8 @@ local Dawn = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/mainbodydawn.obj"
         },
-        ColorTexture = textures .. "/gray.png"
+        ColorTexture = textures .. "/gray.png",
+        LightSources = LightSources
     },
     GUI = {
         Path = "/Solar System/Missions/Dawn"
@@ -665,7 +680,8 @@ local DawnSolarArray1 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/solarpanelleft.obj"
         },
-        ColorTexture = textures .. "/gray.png"
+        ColorTexture = textures .. "/gray.png",
+        LightSources = LightSources
     },
     GUI = {
         Name = "Dawn Solar 1",
@@ -691,7 +707,8 @@ local DawnSolarArray2 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/solarpanelright.obj"
         },
-        ColorTexture = textures .. "/gray.png"
+        ColorTexture = textures .. "/gray.png",
+        LightSources = LightSources
     },
     GUI = {
         Name = "Dawn Solar 2",

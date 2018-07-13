@@ -1,5 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/planets/jupiter/transforms')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
 
 local textures = asset.syncedResource({
@@ -159,7 +160,20 @@ local Juno = {
             GeometryFile = model .. "/Juno.obj"
         }, 
         ColorTexture =  textures .. "/gray.png",
-        ModelTransform = RotationMatrix
+        ModelTransform = RotationMatrix,
+        LightSources = {
+            {
+                Type = "SceneGraphLightSource",
+                Identifier = "Sun",
+                Node = sunTransforms.SolarSystemBarycenter.Identifier,
+                Intensity = 1.0
+            },
+            {
+                Identifier = "Camera",
+                Type = "CameraLightSource",
+                Intensity = 0.5
+            }
+        }
     },
     GUI = {
         Path = "/Solar System/Missions/Juno"
