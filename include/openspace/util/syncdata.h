@@ -65,13 +65,23 @@ public:
      */
     operator const T&() const;
 
+    /**
+     * Explicitly access data
+     */
+    T& data();
+
+    /**
+    * Explicitly access const data
+    */
+    const T& data() const;
+
 protected:
     virtual void encode(SyncBuffer* syncBuffer) override;
     virtual void decode(SyncBuffer* syncBuffer) override;
     virtual void postSync(bool isMaster) override;
 
-    T data;
-    T doubleBufferedData;
+    T _data;
+    T _doubleBufferedData;
     std::mutex _mutex;
 };
 

@@ -101,10 +101,8 @@ public:
 private:
     void progressTime(double dt);
     void applyKeyframeData(const TimeKeyframeData& keyframe);
-    TimeKeyframeData interpolate(
-        const Keyframe<TimeKeyframeData>& past,
-        const Keyframe<TimeKeyframeData>& future,
-        double time);
+    TimeKeyframeData interpolate(const Keyframe<TimeKeyframeData>& past,
+        const Keyframe<TimeKeyframeData>& future, double time);
 
     Timeline<TimeKeyframeData> _timeline;
     SyncData<Time> _currentTime;

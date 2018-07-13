@@ -226,7 +226,7 @@ struct ScriptMessage {
 
     std::string _script;
 
-    void serialize(std::vector<char> &buffer) {
+    void serialize(std::vector<char> &buffer) const {
         buffer.insert(buffer.end(), _script.begin(), _script.end());
     };
 

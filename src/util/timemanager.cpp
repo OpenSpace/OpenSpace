@@ -36,21 +36,21 @@ namespace {
     // These are used when setting the time from lua time interpolation functions,
     // when called without arguments.
 
-    static const openspace::properties::Property::PropertyInfo
+    constexpr openspace::properties::Property::PropertyInfo
     DefaultTimeInterpolationDurationInfo = {
         "DefaultTimeInterpolationDuration",
         "Default Time Interpolation Duration",
         "The default duration taken to interpolate between times"
     };
 
-    static const openspace::properties::Property::PropertyInfo
+    constexpr openspace::properties::Property::PropertyInfo
     DefaultDeltaTimeInterpolationDurationInfo = {
         "DefaultDeltaTimeInterpolationDuration",
         "Default Delta Time Interpolation Duration",
         "The default duration taken to interpolate between delta times"
     };
 
-    static const openspace::properties::Property::PropertyInfo
+    constexpr openspace::properties::Property::PropertyInfo
         DefaultPauseInterpolationDurationInfo = {
         "DefaultPauseInterpolationDuration",
         "Default Pause Interpolation Duration",
@@ -58,7 +58,7 @@ namespace {
         "when interpolating"
     };
 
-    static const openspace::properties::Property::PropertyInfo
+    constexpr openspace::properties::Property::PropertyInfo
         DefaultUnpauseInterpolationDurationInfo = {
         "DefaultUnpauseInterpolationDuration",
         "Default Unpause Interpolation Duration",
@@ -66,7 +66,7 @@ namespace {
         "when interpolating"
     };
 
-    const char* _loggerCat = "TimeManager";
+    constexpr const char* _loggerCat = "TimeManager";
 }
 
 namespace openspace {
@@ -152,7 +152,11 @@ TimeKeyframeData TimeManager::interpolate(double applicationTime) {
         keyframes.end();
 
     if (hasPastKeyframes && hasFutureKeyframes && !firstFutureKeyframe->data.jump) {
-        return interpolate(*lastPastKeyframe, *firstFutureKeyframe, applicationTime);
+        return interpolate(
+            *lastPastKeyframe,
+            *firstFutureKeyframe,
+            applicationTime
+        );
     } else if (hasPastKeyframes) {
         // Extrapolate based on last past keyframe
         const double deltaApplicationTime = applicationTime - lastPastKeyframe->timestamp;
@@ -173,7 +177,7 @@ TimeKeyframeData TimeManager::interpolate(double applicationTime) {
 }
 
 void TimeManager::progressTime(double dt) {
-    static_cast<Time&>(_integrateFromTime) = _currentTime;
+    _integrateFromTime = static_cast<Time&>(_currentTime);
     // Frames     |    1                    2          |
     //            |------------------------------------|
     // Keyframes  | a     b             c       d   e  |
@@ -187,8 +191,8 @@ void TimeManager::progressTime(double dt) {
     if (_shouldSetTime) {
         // Setting the time using `setTimeNextFrame`
         // will override any timeline operations.
-        static_cast<Time&>(_currentTime).setTime(_timeNextFrame.j2000Seconds());
-        static_cast<Time&>(_integrateFromTime).setTime(_timeNextFrame.j2000Seconds());
+        _currentTime.data().setTime(_timeNextFrame.j2000Seconds());
+        _integrateFromTime.data().setTime(_timeNextFrame.j2000Seconds());
         _shouldSetTime = false;
 
         using K = const CallbackHandle;
@@ -223,9 +227,14 @@ void TimeManager::progressTime(double dt) {
     if (hasFutureKeyframes && hasPastKeyframes && !firstFutureKeyframe->data.jump) {
         // If keyframes exist before and after this frame,
         // interpolate between those.
-        TimeKeyframeData interpolated =
-            interpolate(*lastPastKeyframe, *firstFutureKeyframe, now);
-        static_cast<Time&>(_currentTime).setTime(interpolated.time.j2000Seconds());
+        TimeKeyframeData interpolated = interpolate(
+            *lastPastKeyframe,
+            *firstFutureKeyframe,
+            now
+        );
+
+
+        _currentTime.data().setTime(interpolated.time.j2000Seconds());
         _deltaTime = interpolated.delta;
     } else if (!hasConsumedLastPastKeyframe) {
         applyKeyframeData(lastPastKeyframe->data);
@@ -233,7 +242,7 @@ void TimeManager::progressTime(double dt) {
         // If there are no keyframes to consider
         // and time is not paused, just advance time.
         _deltaTime = _targetDeltaTime;
-        static_cast<Time&>(_currentTime).advanceTime(dt * _deltaTime);
+        _currentTime.data().advanceTime(dt * _deltaTime);
     }
 
     if (hasPastKeyframes) {
@@ -315,7 +324,7 @@ TimeKeyframeData TimeManager::interpolate(
 
 void TimeManager::applyKeyframeData(const TimeKeyframeData& keyframeData) {
     const Time& currentTime = keyframeData.time;
-    static_cast<Time&>(_currentTime).setTime(currentTime.j2000Seconds());
+    _currentTime.data().setTime(currentTime.j2000Seconds());
     _timePaused = keyframeData.pause;
     _targetDeltaTime = keyframeData.delta;
     _deltaTime = _targetDeltaTime;

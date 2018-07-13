@@ -84,7 +84,7 @@ public:
 
     ParallelConnection::Message receiveMessage();
 
-    static unsigned int protocolVersion();
+    static const unsigned int ProtocolVersion;
 private:
     std::unique_ptr<ghoul::io::TcpSocket> _socket;
 };

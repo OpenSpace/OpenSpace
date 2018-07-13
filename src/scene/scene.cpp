@@ -22,9 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#pragma optimize ("", off)
-#include <fstream>
-
 #include <openspace/scene/scene.h>
 
 #include <openspace/engine/openspaceengine.h>
@@ -44,8 +41,6 @@
 #include <stack>
 
 #include "scene_lua.inl"
-
-std::fstream ff("d:/test.csv", std::fstream::out);
 
 namespace {
     constexpr const char* _loggerCat = "Scene";

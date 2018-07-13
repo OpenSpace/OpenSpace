@@ -108,20 +108,20 @@ namespace {
         "This value determines the ambient brightness of the dark side of the planet."
     };
 
-    const openspace::properties::Property::PropertyInfo MaxProjectionsPerFrameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo MaxProjectionsPerFrameInfo = {
         "MaxProjectionsPerFrame",
         "Max Projections Per Frame",
         "The maximum number of image projections to perform per frame. "
         "Useful to avoid freezing the system for large delta times."
     };
 
-    const openspace::properties::Property::PropertyInfo ProjectionsInBufferInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ProjectionsInBufferInfo = {
         "ProjectionsInBuffer",
         "Projections In Buffer",
         "(Read only) The number of images that are currently waiting to be projected"
     };
 
-    const openspace::properties::Property::PropertyInfo ClearProjectionBufferInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ClearProjectionBufferInfo = {
         "ClearProjectionBuffer",
         "Clear Projection Buffer",
         "Remove all pending projections from the buffer"
@@ -339,7 +339,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 
     _clearProjectionBuffer.onChange([this]() {
         _imageTimes.clear();
-        _projectionsInBuffer = _imageTimes.size();
+        _projectionsInBuffer = static_cast<int>(_imageTimes.size());
     });
 
     addProperty(_clearProjectionBuffer);
@@ -596,7 +596,7 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
     if (_projectionComponent.needsClearProjection()) {
         _projectionComponent.clearAllProjections();
         _imageTimes.clear();
-        _projectionsInBuffer = _imageTimes.size();
+        _projectionsInBuffer = static_cast<int>(_imageTimes.size());
     }
 
     if (_projectionComponent.needsMipMapGeneration()) {
@@ -617,9 +617,11 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
             imageProjectGPU(_projectionComponent.loadProjectionTexture(img.path));
             ++nPerformedProjections;
         }
-        _imageTimes.erase(_imageTimes.begin(),
-                          _imageTimes.begin() + nPerformedProjections);
-        _projectionsInBuffer = _imageTimes.size();
+        _imageTimes.erase(
+            _imageTimes.begin(),
+            _imageTimes.begin() + nPerformedProjections
+        );
+        _projectionsInBuffer = static_cast<int>(_imageTimes.size());
 
     }
     attitudeParameters(data.time.j2000Seconds());
@@ -823,8 +825,9 @@ void RenderablePlanetProjection::insertImageProjections(const std::vector<Image>
 {
     _imageTimes.insert(_imageTimes.end(),
         images.begin(),
-        images.end());
-    _projectionsInBuffer = _imageTimes.size();
+        images.end()
+    );
+    _projectionsInBuffer = static_cast<int>(_imageTimes.size());
 }
 
 

@@ -892,8 +892,10 @@ void RenderableFov::render(const RenderData& data, RendererTasks&) {
 void RenderableFov::update(const UpdateData& data) {
     _drawFOV = false;
     if (openspace::ImageSequencer::ref().isReady()) {
-        _drawFOV = ImageSequencer::ref().isInstrumentActive(data.time.j2000Seconds(),
-                                                            _instrument.name);
+        _drawFOV = ImageSequencer::ref().isInstrumentActive(
+            data.time.j2000Seconds(),
+            _instrument.name
+        );
     }
 
     // TODO: figure out if time has changed

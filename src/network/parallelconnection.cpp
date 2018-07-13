@@ -32,11 +32,12 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const uint32_t ProtocolVersion = 5;
     constexpr const char* _loggerCat = "ParallelConnection";
 } // namespace
 
 namespace openspace {
+
+const unsigned int ParallelConnection::ProtocolVersion = 5;
 
 ParallelConnection::Message::Message(MessageType t, std::vector<char> c)
     : type(t)
@@ -186,10 +187,6 @@ ParallelConnection::Message ParallelConnection::receiveMessage() {
 
     // And delegate decoding depending on type
     return Message(static_cast<MessageType>(messageTypeIn), messageBuffer);
-}
-
-unsigned int ParallelConnection::protocolVersion() {
-    return ProtocolVersion;
 }
 
 } // namespace openspace

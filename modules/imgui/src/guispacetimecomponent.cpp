@@ -233,7 +233,7 @@ void GuiSpaceTimeComponent::render() {
 
     const bool minusHour = ImGui::Button("-Hour");
     if (minusHour) {
-        incrementTime(-1/24.0);
+        incrementTime(-1/24.f);
     }
     ImGui::SameLine();
 
@@ -258,7 +258,7 @@ void GuiSpaceTimeComponent::render() {
 
     const bool plusHour = ImGui::Button("+Hour");
     if (plusHour) {
-        incrementTime(1/24.0);
+        incrementTime(1/24.f);
     }
     ImGui::SameLine();
 
