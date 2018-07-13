@@ -69,7 +69,14 @@ public:
     void setDeltaTime(double deltaTime);
     void setPause(bool pause);
 
+    /**
+     * Returns the delta time, unaffected by pause
+     */
     double targetDeltaTime() const;
+
+    /*
+     * Returns the current delta time, as affected by pause
+     */
     double deltaTime() const;
     bool isPaused() const;
 
