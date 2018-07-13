@@ -162,11 +162,11 @@ documentation::Documentation RenderableModel::Documentation() {
 RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _colorTexturePath(TextureInfo)
-    , _ambientIntensity(AmbientIntensityInfo, 0.2, 0.0, 1.0)
-    , _diffuseIntensity(DiffuseIntensityInfo, 1.0, 0.0, 1.0)
-    , _specularIntensity(SpecularIntensityInfo, 1.0, 0.0, 1.0)
+    , _ambientIntensity(AmbientIntensityInfo, 0.2f, 0.f, 1.f)
+    , _diffuseIntensity(DiffuseIntensityInfo, 1.f, 0.f, 1.f)
+    , _specularIntensity(SpecularIntensityInfo, 1.f, 0.f, 1.f)
     , _performShading(ShadingInfo, true)
-    , _modelTransform(ModelTransformInfo, glm::mat3(1.0))
+    , _modelTransform(ModelTransformInfo, glm::mat3(1.f))
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
 {
     documentation::testSpecificationAndThrow(

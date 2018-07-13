@@ -38,7 +38,7 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 
 class SceneGraphNode;
-class RenderData;
+struct RenderData;
 
 class LightSource : public properties::PropertyOwner {
 public:

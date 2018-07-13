@@ -1100,28 +1100,38 @@ void OpenSpaceEngine::initializeGL() {
     }
 
     if (_configuration->isLoggingOpenGLCalls) {
-        using namespace glbinding;
+        LogLevel level = ghoul::logging::levelFromString(_configuration->logging.level);
+        if (level > LogLevel::Trace) {
+            LWARNING(
+                "Logging OpenGL calls is enabled, but the selected log level does "
+                "not include TRACE, so no OpenGL logs will be printed");
+        }
+        else {
+            using namespace glbinding;
 
-        setCallbackMask(CallbackMask::After | CallbackMask::ParametersAndReturnValue);
-        glbinding::setAfterCallback([](const glbinding::FunctionCall& call) {
-            std::string arguments = std::accumulate(
-                call.parameters.begin(),
-                call.parameters.end(),
-                std::string("("),
-                [](std::string a, AbstractValue* v) {
-                    return a + ", " + v->asString();
-                }
-            );
+            setCallbackMask(CallbackMask::After | CallbackMask::ParametersAndReturnValue);
+            glbinding::setAfterCallback([](const glbinding::FunctionCall& call) {
+                std::string arguments = std::accumulate(
+                    call.parameters.begin(),
+                    call.parameters.end(),
+                    std::string("("),
+                    [](std::string a, AbstractValue* v) {
+                        return a + v->asString() + ", ";
+                    }
+                );
+                // Remove the final ", "
+                arguments = arguments.substr(0, arguments.size() - 2) + ")";
 
-            std::string returnValue = call.returnValue ?
-                " -> " + call.returnValue->asString() :
-                "";
+                std::string returnValue = call.returnValue ?
+                    " -> " + call.returnValue->asString() :
+                    "";
 
-            LTRACEC(
-                "OpenGL",
-                call.function->name() + arguments + returnValue
-            );
-        });
+                LTRACEC(
+                    "OpenGL",
+                    call.function->name() + std::move(arguments) + std::move(returnValue)
+                );
+            });
+        }
     }
 
     LDEBUG("Initializing Rendering Engine");

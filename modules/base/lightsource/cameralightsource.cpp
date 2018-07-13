@@ -89,9 +89,8 @@ float CameraLightSource::intensity() const {
     return _intensity;
 }
 
-glm::vec3 CameraLightSource::directionViewSpace(const RenderData& renderData) const {
+glm::vec3 CameraLightSource::directionViewSpace(const RenderData&) const {
     return glm::vec3(0.f, 0.f, 1.f);
 }
-
 
 } // namespace openspace
