@@ -250,10 +250,9 @@ void TimeManager::progressTime(double dt) {
     }
 }
 
-TimeKeyframeData TimeManager::interpolate(
-    const Keyframe<TimeKeyframeData>& past,
-    const Keyframe<TimeKeyframeData>& future,
-    double appTime)
+TimeKeyframeData TimeManager::interpolate(const Keyframe<TimeKeyframeData>& past,
+                                          const Keyframe<TimeKeyframeData>& future,
+                                          double appTime)
 {
     // https://en.wikipedia.org/wiki/Spline_interpolation
     // interpolatedTime = (1 - t)y1 + t*y2 + t(1 - t)(a(1 - t) + bt), where
@@ -289,37 +288,6 @@ TimeKeyframeData TimeManager::interpolate(
     };
 
     return data;
-
-    /*
-    const double secondsOffTolerance = OsEng.parallelPeer().timeTolerance();
-    double predictedTime = time().j2000Seconds() + time().deltaTime() *
-        (next.timestamp - now);
-    bool withinTolerance = std::abs(predictedTime - nextTime.j2000Seconds()) <
-        std::abs(nextTime.deltaTime() * secondsOffTolerance);
-
-    if (nextTime.deltaTime() == time().deltaTime() && withinTolerance) {
-        time().advanceTime(dt);
-        return;
-    }*/
-    /*
-    double t0 = now - dt;
-    double t1 = now;
-    double t2 = next.timestamp;
-
-    double parameter = (t1 - t0) / (t2 - t0);
-
-    double y0 = time().j2000Seconds();
-    // double yPrime0 = time().deltaTime();
-
-    double y2 = nextTime.j2000Seconds();
-    // double yPrime2 = nextTime.deltaTime();
-
-    double y1 = (1 - parameter) * y0 + parameter * y2;
-    double y1Prime = (y1 - y0) / dt;
-
-    time().setDeltaTime(y1Prime);
-    time().setTime(y1);
-    */
 }
 
 void TimeManager::applyKeyframeData(const TimeKeyframeData& keyframeData) {
