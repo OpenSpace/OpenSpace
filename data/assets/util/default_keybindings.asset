@@ -52,9 +52,15 @@ openspace.setPropertyValueSingle('Modules.ImGUI.Main.IsHidden', b);]],
     },
     {
         Key = "SPACE",
+        Command = "openspace.time.interpolateTogglePause()",
+        Documentation = "Smoothly starts and stops the simulation time.",
+        Local = true
+    },
+    {
+        Key = "Shift+SPACE",
         Command = "openspace.time.togglePause()",
-        Documentation = "Starts and stops the simulation time.",
-        Local = false
+        Documentation = "Immediately starts and stops the simulation time.",
+        Local = true
     },
     {
         Key = "f",

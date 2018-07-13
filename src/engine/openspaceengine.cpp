@@ -167,6 +167,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     _navigationHandler->setPropertyOwner(_rootPropertyOwner.get());
     // New property subowners also have to be added to the ImGuiModule callback!
     _rootPropertyOwner->addPropertySubOwner(_navigationHandler.get());
+    _rootPropertyOwner->addPropertySubOwner(_timeManager.get());
 
     _rootPropertyOwner->addPropertySubOwner(_renderEngine.get());
     _rootPropertyOwner->addPropertySubOwner(_renderEngine->screenSpaceOwner());

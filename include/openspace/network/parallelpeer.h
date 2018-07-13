@@ -25,6 +25,10 @@
 #ifndef __OPENSPACE_CORE___PARALLELPEER___H__
 #define __OPENSPACE_CORE___PARALLELPEER___H__
 
+#include <openspace/network/parallelconnection.h>
+#include <openspace/network/messagestructures.h>
+#include <openspace/util/timemanager.h>
+
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/network/parallelconnection.h>
@@ -62,7 +66,6 @@ public:
     void sendScript(std::string script);
     void resetTimeOffset();
     double latencyStandardDeviation() const;
-    double timeTolerance() const;
 
     /**
     * Returns the Lua library that contains all Lua functions available to affect the
@@ -85,24 +88,26 @@ private:
     void nConnectionsMessageReceived(const std::vector<char>& message);
 
     void sendCameraKeyframe();
-    void sendTimeKeyframe();
+    void sendTimeTimeline();
 
     void setStatus(ParallelConnection::Status status);
     void setHostName(const std::string& hostName);
     void setNConnections(size_t nConnections);
 
-    double calculateBufferedKeyframeTime(double originalTime);
+    double convertTimestamp(double originalTime);
+    void analyzeTimeDifference(double messageTimestamp);
 
     properties::StringProperty _password;
     properties::StringProperty _hostPassword;
-    // Change to properties::IntProperty ? ---abock
+
+    // While the port should in theory be an int,
+    // we use a StringProperty to avoid a slider in the GUI.
     properties::StringProperty _port;
     properties::StringProperty _address;
     properties::StringProperty _name;
     properties::FloatProperty _bufferTime;
     properties::FloatProperty _timeKeyframeInterval;
     properties::FloatProperty _cameraKeyframeInterval;
-    properties::FloatProperty _timeTolerance;
 
     double _lastTimeKeyframeTimestamp = 0.0;
     double _lastCameraKeyframeTimestamp = 0.0;
@@ -119,6 +124,7 @@ private:
     std::mutex _receiveBufferMutex;
 
     std::atomic<bool> _timeJumped;
+    std::atomic<bool> _timeTimelineChanged;
     std::mutex _latencyMutex;
     std::deque<double> _latencyDiffs;
     double _initialTimeDiff;
@@ -127,6 +133,9 @@ private:
     std::shared_ptr<ghoul::Event<>> _connectionEvent;
 
     ParallelConnection _connection;
+
+    TimeManager::CallbackHandle _timeJumpCallback = -1;
+    TimeManager::CallbackHandle _timeTimelineChangeCallback = -1;
 };
 
 } // namespace openspace

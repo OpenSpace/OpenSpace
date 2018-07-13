@@ -105,7 +105,11 @@ void RenderablePlaneProjection::deinitializeGL() {
 }
 
 void RenderablePlaneProjection::render(const RenderData& data, RendererTasks&) {
-    bool active = ImageSequencer::ref().isInstrumentActive(_instrument);
+    bool active = ImageSequencer::ref().isInstrumentActive(
+        data.time.j2000Seconds(),
+        _instrument
+    );
+
     if (!_hasImage || (_moving && !active)) {
         return;
     }

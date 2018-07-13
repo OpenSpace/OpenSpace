@@ -249,7 +249,11 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
     );
 
     if (ImageSequencer::ref().isReady()) {
-        _imageSequenceTime = ImageSequencer::ref().instrumentActiveTime(_instrumentName);
+        _imageSequenceTime = ImageSequencer::ref().instrumentActiveTime(
+            data.time.j2000Seconds(),
+            _instrumentName
+        );
+
         _drawLine = _imageSequenceTime != -1.f;
     }
 }

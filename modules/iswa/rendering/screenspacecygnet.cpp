@@ -69,7 +69,7 @@ void ScreenSpaceCygnet::update() {
     bool timeToUpdate = fabs(_openSpaceTime - _lastUpdateOpenSpaceTime) >= _updateTime &&
            (_realTime.count() - _lastUpdateRealTime.count()) > _minRealTimeUpdateInterval;
 
-    if (OsEng.timeManager().time().timeJumped() || timeToUpdate ) {
+    if (timeToUpdate) {
         _texturePath = IswaManager::ref().iswaUrl(
             _cygnetId,
             OsEng.timeManager().time().j2000Seconds()
