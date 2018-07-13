@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___CAMREALIGHTSOURCE___H__
-#define __OPENSPACE_MODULE_BASE___CAMREALIGHTSOURCE___H__
+#ifndef __OPENSPACE_MODULE_BASE___CAMERALIGHTSOURCE___H__
+#define __OPENSPACE_MODULE_BASE___CAMERALIGHTSOURCE___H__
 
 #include <openspace/scene/lightsource.h>
 
@@ -42,12 +42,12 @@ public:
     static documentation::Documentation Documentation();
 
     glm::vec3 directionViewSpace(const RenderData& renderData) const override;
-
     float intensity() const override;
+
 private:
     properties::FloatProperty _intensity;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___CAMREALIGHTSOURCE___H__
+#endif // __OPENSPACE_MODULE_BASE___CAMERALIGHTSOURCE___H__

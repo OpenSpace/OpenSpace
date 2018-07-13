@@ -29,7 +29,7 @@
 #include <openspace/util/updatestructures.h>
 
 namespace {
-    constexpr const openspace::properties::Property::PropertyInfo IntensityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo IntensityInfo = {
         "Intensity",
         "Intensity",
         "The intensity of this light source"
@@ -90,7 +90,7 @@ float CameraLightSource::intensity() const {
 }
 
 glm::vec3 CameraLightSource::directionViewSpace(const RenderData& renderData) const {
-    return glm::vec3(0.0, 0.0, 1.0);
+    return glm::vec3(0.f, 0.f, 1.f);
 }
 
 

@@ -27,10 +27,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/factorymanager.h>
-
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
@@ -40,7 +38,7 @@ namespace {
 
     constexpr const char* KeyIdentifier = "Identifier";
 
-    constexpr const openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "Whether the light source is enabled or not"
@@ -49,8 +47,7 @@ namespace {
 
 namespace openspace {
 
-bool LightSource::isEnabled() const
-{
+bool LightSource::isEnabled() const {
     return _enabled;
 }
 
@@ -61,7 +58,6 @@ documentation::Documentation LightSource::Documentation() {
         "Light Source",
         "core_light_source",
         {
-
             {
                 KeyType,
                 new StringAnnotationVerifier("Must name a valid LightSource type"),
@@ -87,7 +83,9 @@ documentation::Documentation LightSource::Documentation() {
     };
 }
 
-std::unique_ptr<LightSource> LightSource::createFromDictionary(const ghoul::Dictionary& dictionary) {
+std::unique_ptr<LightSource> LightSource::createFromDictionary(
+    const ghoul::Dictionary& dictionary)
+{
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "LightSource");
 
     const std::string timeFrameType = dictionary.value<std::string>(KeyType);

@@ -32,13 +32,13 @@
 #include <openspace/util/updatestructures.h>
 
 namespace {
-    constexpr const openspace::properties::Property::PropertyInfo IntensityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo IntensityInfo = {
         "Intensity",
         "Intensity",
         "The intensity of this light source"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo NodeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo NodeInfo = {
         "Node",
         "Node",
         "The identifier of the scene graph node to follow"
@@ -127,16 +127,15 @@ float SceneGraphLightSource::intensity() const {
 
 glm::vec3 SceneGraphLightSource::directionViewSpace(const RenderData& renderData) const {
     if (!_sceneGraphNode) {
-        return glm::vec3(0.0);
+        return glm::vec3(0.f);
     }
 
-    glm::dvec3 lightPosition = glm::vec4(
-        _sceneGraphNode->modelTransform() * glm::dvec4(0.0, 0.0, 0.0, 1.0)
-    );
+    const glm::dvec3 lightPosition =
+        _sceneGraphNode->modelTransform() * glm::dvec4(0.0, 0.0, 0.0, 1.0);
 
-    glm::dvec3 renderNodePosition = renderData.modelTransform.translation;
+    const glm::dvec3 renderNodePosition = renderData.modelTransform.translation;
 
-    glm::dvec3 lightDirectionViewSpace = renderData.camera.viewRotationMatrix() *
+    const glm::dvec3 lightDirectionViewSpace = renderData.camera.viewRotationMatrix() *
         glm::dvec4((lightPosition - renderNodePosition), 1.0);
 
     return glm::normalize(lightDirectionViewSpace);

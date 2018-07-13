@@ -41,16 +41,15 @@ public:
 
     static documentation::Documentation Documentation();
 
+    bool initialize() override;
     glm::vec3 directionViewSpace(const RenderData& renderData) const override;
-
     float intensity() const override;
 
-    bool initialize() override;
 private:
     properties::FloatProperty _intensity;
     properties::StringProperty _sceneGraphNodeReference;
 
-    SceneGraphNode* _sceneGraphNode;
+    SceneGraphNode* _sceneGraphNode = nullptr;
 };
 
 } // namespace openspace

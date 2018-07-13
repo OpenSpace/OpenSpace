@@ -241,7 +241,7 @@ bool RenderableModel::isReady() const {
 }
 
 void RenderableModel::initialize() {
-    for (auto& ls : _lightSources) {
+    for (const std::unique_ptr<LightSource>& ls : _lightSources) {
         ls->initialize();
     }
 }
@@ -298,12 +298,14 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     int nLightSources = 0;
     _lightIntensitiesBuffer.resize(_lightSources.size());
     _lightDirectionsViewSpaceBuffer.resize(_lightSources.size());
-    for (const auto& lightSource : _lightSources) {
+    for (const std::unique_ptr<LightSource>& lightSource : _lightSources) {
         if (!lightSource->isEnabled()) {
             continue;
         }
         _lightIntensitiesBuffer[nLightSources] = lightSource->intensity();
-        _lightDirectionsViewSpaceBuffer[nLightSources] = lightSource->directionViewSpace(data);
+        _lightDirectionsViewSpaceBuffer[nLightSources] =
+            lightSource->directionViewSpace(data);
+
         ++nLightSources;
     }
 
