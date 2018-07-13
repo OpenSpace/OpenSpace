@@ -228,16 +228,19 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             filename + TempSuffix;
 
         if (sizeData.find(line) != sizeData.end()) {
-            LWARNING(
-                fmt::format("{}: Duplicate entries: {}", _identifier, line)
-            );
+            LWARNING(fmt::format(
+                "{}: Duplicate entries: {}", _identifier, line
+            ));
             continue;
         }
 
         downloads.push_back(std::make_unique<AsyncHttpFileDownload>(
-            line, fileDestination, HttpFileDownload::Overwrite::Yes));
+            line,
+            fileDestination,
+            HttpFileDownload::Overwrite::Yes
+        ));
 
-        auto& fileDownload = downloads.back();
+        std::unique_ptr<AsyncHttpFileDownload>& fileDownload = downloads.back();
 
         sizeData[line] = {
             false,
@@ -265,7 +268,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
                 sizeData.begin(),
                 sizeData.end(),
                 SizeData{ true, 0, 0 },
-                [](const SizeData& a, const auto& b) -> SizeData {
+                [](const SizeData& a, const std::pair<const std::string, SizeData>& b) {
                     return SizeData {
                         a.totalKnown && b.second.totalKnown,
                         a.totalBytes + b.second.totalBytes,
@@ -302,16 +305,16 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             FileSys.deleteFile(originalName);
             int success = rename(tempName.c_str(), originalName.c_str());
             if (success != 0) {
-                LERROR(
-                    fmt::format("Error renaming file {} to {}", tempName, originalName)
-                );
+                LERROR(fmt::format(
+                    "Error renaming file {} to {}", tempName, originalName
+                ));
                 failed = true;
             }
         }
         else {
-            LERROR(
-                fmt::format("Error downloading file from URL {}", d->url())
-            );
+            LERROR(fmt::format(
+                "Error downloading file from URL {}", d->url()
+            ));
             failed = true;
         }
     }
