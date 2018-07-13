@@ -72,7 +72,7 @@ CameraLightSource::CameraLightSource(const ghoul::Dictionary& dictionary)
     , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
 {
     addProperty(_intensity);
- 
+
     documentation::testSpecificationAndThrow(Documentation(),
                                              dictionary,
                                              "CameraLightSource");

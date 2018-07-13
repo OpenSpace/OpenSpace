@@ -75,10 +75,30 @@ using datamessagestructures::TimeKeyframe;
 
 TimeManager::TimeManager()
     : properties::PropertyOwner({ "TimeManager" })
-    , _defaultTimeInterpolationDuration(DefaultTimeInterpolationDurationInfo, 2.0f, 0.f, 5.f)
-    , _defaultDeltaTimeInterpolationDuration(DefaultDeltaTimeInterpolationDurationInfo, 1.0f, 0.f, 5.f)
-    , _defaultPauseInterpolationDuration(DefaultPauseInterpolationDurationInfo, 0.5f, 0.f, 5.f)
-    , _defaultUnpauseInterpolationDuration(DefaultUnpauseInterpolationDurationInfo, 1.0f, 0.f, 5.f)
+    , _defaultTimeInterpolationDuration(
+        DefaultTimeInterpolationDurationInfo,
+        2.f,
+        0.f,
+        5.f
+    )
+    , _defaultDeltaTimeInterpolationDuration(
+        DefaultDeltaTimeInterpolationDurationInfo,
+        1.f,
+        0.f,
+        5.f
+    )
+    , _defaultPauseInterpolationDuration(
+        DefaultPauseInterpolationDurationInfo,
+        0.5f,
+        0.f,
+        5.f
+    )
+    , _defaultUnpauseInterpolationDuration(
+        DefaultUnpauseInterpolationDurationInfo,
+        1.f,
+        0.f,
+        5.f
+    )
 {
     addProperty(_defaultTimeInterpolationDuration);
     addProperty(_defaultDeltaTimeInterpolationDuration);
@@ -379,7 +399,8 @@ TimeManager::CallbackHandle TimeManager::addTimeJumpCallback(TimeChangeCallback 
     return handle;
 }
 
-TimeManager::CallbackHandle TimeManager::addTimelineChangeCallback(TimeChangeCallback cb) {
+TimeManager::CallbackHandle TimeManager::addTimelineChangeCallback(TimeChangeCallback cb)
+{
     CallbackHandle handle = _nextCallbackHandle++;
     _timelineChangeCallbacks.push_back({ handle, std::move(cb) });
     return handle;
@@ -441,8 +462,8 @@ void TimeManager::removeTimelineChangeCallback(CallbackHandle handle) {
         _timelineChangeCallbacks.begin(),
         _timelineChangeCallbacks.end(),
         [handle](const std::pair<CallbackHandle, std::function<void()>>& cb) {
-        return cb.first == handle;
-    }
+            return cb.first == handle;
+        }
     );
 
     ghoul_assert(
@@ -481,7 +502,8 @@ double TimeManager::targetDeltaTime() const {
     return _targetDeltaTime;
 }
 
-void TimeManager::interpolateDeltaTime(double newDeltaTime, double interpolationDuration) {
+void TimeManager::interpolateDeltaTime(double newDeltaTime, double interpolationDuration)
+{
     if (newDeltaTime == _targetDeltaTime) {
         return;
     }

@@ -40,7 +40,10 @@ class TSP;
 
 class AtlasManager {
 public:
-    enum BufferIndex { EVEN = 0, ODD = 1 };
+    enum BufferIndex {
+        EVEN = 0,
+        ODD = 1
+    };
 
     AtlasManager(TSP* tsp);
     ~AtlasManager() = default;
@@ -54,14 +57,15 @@ public:
 
     void pboToAtlas(BufferIndex bufferIndex);
     ghoul::opengl::Texture& textureAtlas();
-    glm::size3_t textureSize();
 
-    unsigned int getNumDiskReads();
-    unsigned int getNumUsedBricks();
-    unsigned int getNumStreamedBricks();
+    unsigned int numDiskReads() const;
+    unsigned int numUsedBricks() const;
+    unsigned int numStreamedBricks() const;
+
+    glm::size3_t textureSize() const;
 
 private:
-    const unsigned int NOT_USED = std::numeric_limits<unsigned int>::max();
+    const unsigned int NotUsedIndex = std::numeric_limits<unsigned int>::max();
 
     TSP* _tsp;
     unsigned int _pboHandle[2];

@@ -606,7 +606,6 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
     _camScaling = glm::vec2(1.f, 0.f); // Unit scaling
     _up = data.camera.lookUpVectorCameraSpace();
 
-    
     if (_projectionComponent.doesPerformProjection()) {
         int nPerformedProjections = 0;
         for (const Image& img : _imageTimes) {

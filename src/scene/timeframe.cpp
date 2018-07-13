@@ -58,7 +58,9 @@ documentation::Documentation TimeFrame::Documentation() {
     };
 }
 
-std::unique_ptr<TimeFrame> TimeFrame::createFromDictionary(const ghoul::Dictionary& dictionary) {
+std::unique_ptr<TimeFrame> TimeFrame::createFromDictionary(
+                                                      const ghoul::Dictionary& dictionary)
+{
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "TimeFrame");
 
     const std::string timeFrameType = dictionary.value<std::string>(KeyType);

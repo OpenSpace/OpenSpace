@@ -370,8 +370,12 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
         list.at(0).getScreenY(res.y)
     );
     const float bottomCornerSizeForZoomTap_fraction = 0.08f;
-    int zoomTapThresholdX = static_cast<int>(res.x * (1.0f - bottomCornerSizeForZoomTap_fraction));
-    int zoomTapThresholdY = static_cast<int>(res.y * (1.0f - bottomCornerSizeForZoomTap_fraction));
+    int zoomTapThresholdX = static_cast<int>(
+        res.x * (1.0f - bottomCornerSizeForZoomTap_fraction)
+    );
+    int zoomTapThresholdY = static_cast<int>(
+        res.y * (1.0f - bottomCornerSizeForZoomTap_fraction)
+    );
 
     bool isTapInLowerCorner = std::abs(pos.x) > zoomTapThresholdX &&
                               std::abs(pos.y) > zoomTapThresholdY;

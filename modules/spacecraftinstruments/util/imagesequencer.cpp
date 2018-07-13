@@ -200,7 +200,9 @@ bool ImageSequencer::isInstrumentActive(double time, const std::string& instrume
     return false;
 }
 
-float ImageSequencer::instrumentActiveTime(double time, const std::string& instrumentID) const {
+float ImageSequencer::instrumentActiveTime(double time,
+                                           const std::string& instrumentID) const
+{
     for (const std::pair<std::string, TimeRange>& i : _instrumentTimes) {
         //check if this instrument is in range
         if (i.second.includes(time)){

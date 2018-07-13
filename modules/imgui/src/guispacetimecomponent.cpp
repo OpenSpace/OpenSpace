@@ -324,14 +324,9 @@ void GuiSpaceTimeComponent::render() {
         if (valueChanged) {
             // If the value changed, we want to change the delta time to the new value
 
-            double newDeltaTime = convertTime(
-                _deltaTime,
-                _deltaTimeUnit,
-                TimeUnit::Second
-            );
-
+            double newDt = convertTime(_deltaTime, _deltaTimeUnit, TimeUnit::Second);
             OsEng.scriptEngine().queueScript(
-                "openspace.time.interpolateDeltaTime(" + std::to_string(newDeltaTime) + ")",
+                "openspace.time.interpolateDeltaTime(" + std::to_string(newDt) + ")",
                 scripting::ScriptEngine::RemoteScripting::No
             );
         }

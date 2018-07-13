@@ -91,7 +91,7 @@ SceneGraphLightSource::SceneGraphLightSource(const ghoul::Dictionary& dictionary
 {
     addProperty(_intensity);
     addProperty(_sceneGraphNodeReference);
- 
+
     documentation::testSpecificationAndThrow(Documentation(),
                                              dictionary,
                                              "SceneGraphLightSource");

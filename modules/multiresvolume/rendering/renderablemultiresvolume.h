@@ -25,23 +25,17 @@
 #ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___RENDERABLEMULTIRESVOLUME___H__
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___RENDERABLEMULTIRESVOLUME___H__
 
-#include <vector>
-#include <chrono>
-#include <memory>
 #include <openspace/rendering/renderable.h>
-#include <openspace/rendering/transferfunction.h>
-#include <openspace/util/powerscaledcoordinate.h>
-#include <ghoul/misc/dictionary.h>
+
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <modules/multiresvolume/rendering/multiresvolumeraycaster.h>
+#include <chrono>
 
-// Forward declare to minimize dependencies
+namespace ghoul { class Dictionary; }
 namespace ghoul::filesystem { class File; }
-
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
@@ -49,25 +43,30 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
-class TSP;
 class AtlasManager;
 class BrickSelector;
-class TfBrickSelector;
-class SimpleTfBrickSelector;
-class LocalTfBrickSelector;
-class HistogramManager;
 class ErrorHistogramManager;
+class HistogramManager;
 class LocalErrorHistogramManager;
-
+class LocalTfBrickSelector;
+class MultiresVolumeRaycaster;
+class SimpleTfBrickSelector;
+class TfBrickSelector;
+class TransferFunction;
+class TSP;
 
 class RenderableMultiresVolume : public Renderable {
 public:
     RenderableMultiresVolume(const ghoul::Dictionary& dictionary);
     ~RenderableMultiresVolume();
 
-    enum Selector {TF, SIMPLE, LOCAL};
+    enum Selector {
+        TF,
+        SIMPLE,
+        LOCAL
+    };
 
-    bool setSelectorType(Selector selector);
+    void setSelectorType(Selector selector);
     bool initializeSelector();
 
     void initializeGL() override;
@@ -85,10 +84,6 @@ public:
     //virtual std::vector<unsigned int> getBuffers() override;
 
 private:
-    double _time;
-    double _startTime;
-    double _endTime;
-
     properties::BoolProperty _useGlobalTime;
     properties::BoolProperty _loop;
     // used to vary time, if not using global time nor looping
@@ -99,6 +94,15 @@ private:
     properties::StringProperty _selectorName;
     properties::BoolProperty _statsToFile;
     properties::StringProperty _statsToFileName;
+    properties::IntProperty _scalingExponent;
+    properties::Vec3Property _translation;
+    properties::Vec3Property _rotation;
+    properties::Vec3Property _scaling;
+
+    double _time;
+    double _startTime;
+    double _endTime;
+
 
     // Stats timers
     std::string _statsFileName;
@@ -133,24 +137,15 @@ private:
 
     std::unique_ptr<MultiresVolumeRaycaster> _raycaster;
 
-    TfBrickSelector* _tfBrickSelector = nullptr;
-    SimpleTfBrickSelector* _simpleTfBrickSelector = nullptr;
-    LocalTfBrickSelector* _localTfBrickSelector = nullptr;
+    std::unique_ptr<TfBrickSelector> _tfBrickSelector;
+    std::unique_ptr<SimpleTfBrickSelector> _simpleTfBrickSelector;
+    std::unique_ptr<LocalTfBrickSelector> _localTfBrickSelector;
 
     Selector _selector;
 
-    HistogramManager* _histogramManager = nullptr;
-    ErrorHistogramManager* _errorHistogramManager = nullptr;
-    LocalErrorHistogramManager* _localErrorHistogramManager = nullptr;
-
-    float _w;
-    PowerScaledCoordinate _pscOffset;
-
-    properties::IntProperty _scalingExponent;
-    properties::Vec3Property _translation;
-    properties::Vec3Property _rotation;
-    properties::Vec3Property _scaling;
-
+    std::unique_ptr<HistogramManager> _histogramManager;
+    std::unique_ptr<ErrorHistogramManager> _errorHistogramManager;
+    std::unique_ptr<LocalErrorHistogramManager> _localErrorHistogramManager;
 };
 
 } // namespace openspace

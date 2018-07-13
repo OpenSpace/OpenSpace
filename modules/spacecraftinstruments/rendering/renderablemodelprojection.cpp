@@ -395,7 +395,7 @@ void RenderableModelProjection::update(const UpdateData& data) {
                     _imageTimes,
                     _projectionComponent.projecteeId(),
                     _projectionComponent.instrumentId(),
-                    time, 
+                    time,
                     integrateFromTime
                 );
             }
