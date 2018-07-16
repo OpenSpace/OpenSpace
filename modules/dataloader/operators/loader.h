@@ -41,6 +41,8 @@ namespace ghoul {
   class Dictionary;
 }
 
+namespace documentation { struct Documentation; }
+
 namespace openspace::dataloader {
 
 using properties::PropertyOwner;
@@ -70,11 +72,7 @@ class Loader : public PropertyOwner, public Operator {
 
     void processCurrentlySelectedUploadData(const std::string& dictionaryString);
 
-    // ghoul::Dictionary createTaskDictionaryForOneVolumeItem(std::string inputPath, std::string outputBasePath);
-
-    // Perfom tasks that create dictionaries and converts
-    // .CDF formatted volume files into .rawvolume
-    // void performTasks(std::string& path);
+    static documentation::Documentation volumeConversionDocumentation();
 
   private:
     properties::StringListProperty _selectedFilePaths;
@@ -84,9 +82,8 @@ class Loader : public PropertyOwner, public Operator {
     ghoul::Dictionary _currentVolumeConversionDictionary;
     properties::UIntProperty _currentVolumesConvertedCount;
     properties::UIntProperty _currentVolumesToConvertCount;
+    bool _volumeConversionThreadCanRun = false;
   
-    // State properties
-
     TaskLoader taskLoader;
     std::vector<std::unique_ptr<Task>> tasks;
 

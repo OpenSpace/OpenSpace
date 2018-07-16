@@ -40,6 +40,8 @@
 #include <ghoul/logging/logmanager.h>
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <modules/dataloader/helpers.cpp>
 
 #include <ghoul/filesystem/file.h>
@@ -58,6 +60,7 @@ using Directory = ghoul::filesystem::Directory;
 using File = ghoul::filesystem::File;
 using RawPath = ghoul::filesystem::Directory::RawPath;
 using Recursive = ghoul::filesystem::Directory::Recursive;
+using TestResult = openspace::documentation::TestResult;
 
 namespace {
 constexpr const char* _loggerCat = "Loader";
@@ -149,6 +152,8 @@ Loader::Loader()
     addProperty(_currentVolumesToConvertCount);
     addProperty(_uploadDataTrigger);
     addProperty(_volumeConversionProgress);
+
+    _volumeConversionThreadCanRun = false;
 }
 
 void Loader::selectData() {
@@ -165,8 +170,10 @@ void Loader::selectData() {
                 paths.push_back(static_cast<std::string>(path));
             }
 
+            // TODO: reset function
             _volumeConversionProgress = FLT_MIN;
             _currentVolumesConvertedCount = 0;
+            _volumeConversionThreadCanRun = false;
             _currentVolumesToConvertCount = count;
             _selectedFilePaths = paths;
             NFD_PathSet_Free(&outPathSet);
@@ -288,22 +295,29 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
     LINFO(dictionaryString);
     _currentVolumeConversionDictionary = ghoul::lua::loadDictionaryFromString(dictionaryString);
 
+    TestResult result;
+    result.success = false;
+    result = openspace::documentation::testSpecification(
+        volumeConversionDocumentation(),
+        _currentVolumeConversionDictionary
+    );
+
+    if (!result.success) {
+        throw "Error in specification for volume conversion dictionary: " + dictionaryString;
+    } else {
+        _volumeConversionThreadCanRun = true;
+    }
+
     {
     std::thread t([&](){
         // ??? won't work multithreaded
-        // std::string itemPathBase = "${DATA}" +
+        // std::string testPath = "${DATA}" +
         //     ghoul::filesystem::FileSystem::PathSeparator;
-        // LDEBUG(itemPathBase);
-        // itemPathBase += ".internal" +
-        //     ghoul::filesystem::FileSystem::PathSeparator;
-        // LDEBUG(itemPathBase);
-        // itemPathBase += "volumes_from_cdf" +
-        //     ghoul::filesystem::FileSystem::PathSeparator;
-        // LDEBUG(itemPathBase);
-        // itemPathBase += openspace::dataloader::helpers::getDirLeaf(_filePaths) + "_" + variable;
+        // testPath += ".internal";
+        // LINFO(testPath);
 
-        // TODO: stop thread exactly until dictionary exists
-        std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+        // Hold up thread until dictionary is loaded and valid
+        while(!_volumeConversionThreadCanRun) {}
 
 
         std::string itemName = _currentVolumeConversionDictionary.value<std::string>(KeyItemName);
@@ -404,6 +418,7 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
 
         LINFO("Created files in " + d.path());
 
+        _volumeConversionThreadCanRun = false;
         loadDataItem(absPath(itemPathBase));
     });
 
@@ -450,5 +465,45 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
 
 // }
 
+documentation::Documentation Loader::volumeConversionDocumentation() {
+    using namespace documentation;
+    return {
+        "LoaderVolumeConversion",
+        "",
+        {
+            {
+                KeyItemName,
+                new StringAnnotationVerifier("A name for the volume item"),
+                Optional::No,
+                "The volume item name",
+            },
+            {
+                KeyGridType,
+                new StringAnnotationVerifier("What type of grid for ray caster"),
+                Optional::No,
+                "What type of grid for ray caster",
+            },
+            {
+                KeyTranslation,
+                new TableAnnotationVerifier("A table with values for translation"),
+                Optional::No,
+                "The table with values for translation transform",
+            },
+            {
+                KeyTask,
+                new TableAnnotationVerifier("A table with values for volume conversion task"),
+                Optional::No,
+                "The table with values for volume conversion task",
+            },
+            {
+                KeyTransferFunctionPath,
+                new StringAnnotationVerifier("An absolute path to a transfer function file"),
+                Optional::No,
+                "An absolute path to a transfer function file to copy to the item directory"
+            }
+        }
+    };
 }
+
+} // namespace openspace::dataloader
 
