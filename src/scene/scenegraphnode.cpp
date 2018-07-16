@@ -207,7 +207,8 @@ SceneGraphNode::SceneGraphNode()
 SceneGraphNode::~SceneGraphNode() {} // NOLINT
 
 void SceneGraphNode::initialize() {
-    LDEBUG(fmt::format("Initialize: {}", identifier()));
+    LDEBUG(fmt::format("Initializing: {}", identifier()));
+
     if (_renderable) {
         _renderable->initialize();
     }
@@ -222,17 +223,23 @@ void SceneGraphNode::initialize() {
         _transform.scale->initialize();
     }
     _state = State::Initialized;
+
+    LDEBUG(fmt::format("Finished initializing: {}", identifier()));
 }
 
 void SceneGraphNode::initializeGL() {
+    LDEBUG(fmt::format("Initializing GL: {}", identifier()));
+
     if (_renderable) {
         _renderable->initializeGL();
     }
     _state = State::GLInitialized;
+
+    LDEBUG(fmt::format("Finished initializating GL: {}", identifier()));
 }
 
 void SceneGraphNode::deinitialize() {
-    LDEBUG(fmt::format("Deinitialize: {}", identifier()));
+    LDEBUG(fmt::format("Deinitializing: {}", identifier()));
 
     setScene(nullptr);
 
@@ -241,12 +248,18 @@ void SceneGraphNode::deinitialize() {
     }
     clearChildren();
     _parent = nullptr;
+
+    LDEBUG(fmt::format("Finished deinitializing: {}", identifier()));
 }
 
 void SceneGraphNode::deinitializeGL() {
+    LDEBUG(fmt::format("Deinitializing GL: {}", identifier()));
+
     if (_renderable) {
         _renderable->deinitializeGL();
     }
+
+    LDEBUG(fmt::format("Finished deinitializing GL: {}", identifier()));
 }
 
 void SceneGraphNode::traversePreOrder(const std::function<void(SceneGraphNode*)>& fn) {
