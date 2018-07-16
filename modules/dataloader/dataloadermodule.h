@@ -28,6 +28,7 @@
 #include <openspace/util/openspacemodule.h>
 #include <openspace/properties/property.h> // do we need this
 #include <openspace/properties/stringlistproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
 
 namespace openspace::dataloader {
@@ -61,6 +62,7 @@ public:
 
     std::vector<std::string> volumeDataItems();
     void setVolumeDataItems(std::vector<std::string> items);
+    void setTransferFunctionPresets();
 
     void loadDataItem(const std::string& absPathToItem);
     void uploadDataItem(const std::string& dictionaryString);
@@ -77,7 +79,10 @@ private:
     std::unique_ptr<dataloader::Loader> _loader;
 
     properties::StringListProperty _volumeDataItems;
+    properties::StringProperty _transferFunctionPresetsJSON;
+
     properties::TriggerProperty _showInternalVolumesTrigger;
+    properties::TriggerProperty _readTransferFunctionPresets;
 };
 
 } // namespace openspace

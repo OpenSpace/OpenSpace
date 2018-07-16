@@ -14,6 +14,20 @@ class ImageSelect extends React.Component {
         }
 
         this.handleClick = this.handleClick.bind(this);
+        this.selectFirst = this.selectFirst.bind(this);
+    }
+
+    componentDidUpdate() {
+        const { defaultToFirst, imageSources } = this.props;
+
+        if (defaultToFirst && imageSources.length > 0 && this.state.selectedImgSrc === '') {
+            this.selectFirst();
+        }
+    }
+
+    selectFirst() {
+        const firstImageSrc = this.props.imageSources[0].images[0];
+        this.setState({selectedImgSrc: firstImageSrc}, this.props.onSelect(firstImageSrc))
     }
 
     handleClick(event) {
@@ -48,17 +62,19 @@ class ImageSelect extends React.Component {
 }
 
 ImageSelect.propTypes = {
-    selectedImgSrc: PropTypes.string,
+    defaultToFirst: PropTypes.bool,
     imageSources: PropTypes.arrayOf(PropTypes.shape({
         label: PropTypes.string,
         images: PropTypes.arrayOf(PropTypes.string)
     })),
-    onSelect: PropTypes.func
+    onSelect: PropTypes.func,
+    selectedImgSrc: PropTypes.string
 }
 
 ImageSelect.defaultProps = {
-    selectedImgSrc: '',
-    imageSources: []
+    defaultToFirst: true,
+    imageSources: [],
+    selectedImgSrc: ''
 }
 
 export default ImageSelect;

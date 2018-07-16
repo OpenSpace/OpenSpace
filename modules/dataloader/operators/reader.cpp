@@ -25,17 +25,19 @@
 #include <modules/dataloader/operators/reader.h>
 #include <modules/dataloader/dataloadermodule.h>
 
+#include <ext/json/json.hpp>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/moduleengine.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 
+#include <fstream>
+#include <iterator>
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <regex>
-#include <iostream>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -44,7 +46,9 @@
 
 using Directory = ghoul::filesystem::Directory;
 using Recursive = ghoul::filesystem::Directory::Recursive;
+using RawPath = ghoul::filesystem::Directory::RawPath;
 using Sort = ghoul::filesystem::Directory::Sort;
+using json = nlohmann::json;
 
 namespace {
     constexpr const char* _loggerCat = "Reader";
@@ -70,10 +74,7 @@ Reader::Reader()
     : PropertyOwner({ "Reader" })
     // , _readVolumesTrigger(ReadVolumesTriggerInfo)
 {
-    _topDir = ghoul::filesystem::Directory(
-      "${DATA}/.internal",
-      ghoul::filesystem::Directory::RawPath::No
-    );
+    _topDir = ghoul::filesystem::Directory("${DATA}/.internal", RawPath::No);
 
     // _readVolumesTrigger.onChange([this](){
     //     readVolumeDataItems();
@@ -112,6 +113,34 @@ void Reader::readVolumeDataItems() {
     // }
 
     // Store a reference somehow if necessary 
+}
+
+std::string Reader::readTransferFunctionPresets() {
+    Directory d(_topDir.path() + ghoul::filesystem::FileSystem::PathSeparator + "tf_presets", RawPath::Yes);
+
+    std::vector<std::string> tfFiles = d.readFiles(Recursive::No, Sort::No);
+    std::vector<std::pair<std::string, std::string>> tfLinkList;
+
+    // Put last line of transferfunction preset files together with file path in tfLinkList
+    for (auto file : tfFiles) {
+        std::ifstream in;
+        in.open(file);
+        if (in.is_open()) {
+            std::vector<std::string> lines;
+            copy(std::istream_iterator<std::string>(in), 
+                 std::istream_iterator<std::string>(), 
+                 back_inserter(lines));
+            tfLinkList.push_back(std::make_pair(file, lines.back()));
+        }
+        in.close();
+    }
+
+    auto j = json::array();
+    for (auto pair : tfLinkList) {
+        j.push_back(json::object({ {"path", pair.first}, {"image", pair.second} }));
+    }
+
+    return j.dump();
 }
 
 Directory Reader::getVolumeDir() {

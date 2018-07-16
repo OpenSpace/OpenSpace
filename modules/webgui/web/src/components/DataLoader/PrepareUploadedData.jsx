@@ -40,6 +40,11 @@ class PrepareUploadedData extends Component {
       uploadButtonIsClicked: false,
       itemName: '',
       gridType: '',
+      tfLinkList: [{
+        image: '',
+        path: ''
+      }],
+      activeTfFilePath: '',
       translationType: KEY_STATIC_TRANSLATION,
       translationPos: { x: 0, y: 0, z: 0 },
       translationTarget: 'SUN',
@@ -55,6 +60,7 @@ class PrepareUploadedData extends Component {
       }
     };
 
+
     this.onChangeMultiInputs = this.onChangeMultiInputs.bind(this);
     this.changeVariable = this.changeVariable.bind(this);
     this.changeRSquared = this.changeRSquared.bind(this);
@@ -68,6 +74,7 @@ class PrepareUploadedData extends Component {
     this.handleSetStaticTranslation = this.handleSetStaticTranslation.bind(this);
     this.handleSetTranslationTarget = this.handleSetTranslationTarget.bind(this);
     this.handleSelectedTFImage = this.handleSelectedTFImage.bind(this);
+    this.handleTfPresetsJSON = this.handleTfPresetsJSON.bind(this);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -83,12 +90,26 @@ class PrepareUploadedData extends Component {
     this.subscribeToVolumeConversionProgress();
   }
 
-  handleProgressValue(data) {
-    this.setState({volumeProgress: data.Value});
+  componentDidMount() {
+    DataManager.trigger('Modules.DataLoader.ReadTransferFunctionPresets');
+    DataManager.subscribe('Modules.DataLoader.TransferFunctionPresetsJSON', this.handleTfPresetsJSON);
+  }
+
+  handleTfPresetsJSON(jsonData) {
+    let json = jsonData.Value;
+    json = json.replace(/\\"/g, '"');
+    const parsedJson = JSON.parse(json);
+    console.log(parsedJson)
+
+    this.setState({tfLinkList: JSON.parse(json)});
   }
 
   subscribeToVolumeConversionProgress() {
     DataManager.subscribe('Modules.DataLoader.Loader.VolumeConversionProgress', this.handleProgressValue);
+  }
+
+  handleProgressValue(data) {
+    this.setState({volumeProgress: data.Value});
   }
 
   onChangeMultiInputs({ currentTarget }, dataToChange) {
@@ -153,54 +174,58 @@ class PrepareUploadedData extends Component {
   }
 
   handleSelectedTFImage(imgSource) {
-    const filename = imgSource.substring(imgSource.lastIndexOf('/')+1);
-    filename.replace(/\.[^/.]+$/, '');
-    console.log(filename)
+    let activeTfFilePath = '';
+    this.state.tfLinkList.map(pair => {
+      console.log(pair)
+      if (pair.image === imgSource) {
+        activeTfFilePath = pair.path;
+      }
+    })
+
+    this.setState({activeTfFilePath});
   }
 
   upload() {
     this.setState({uploadButtonIsClicked: true});
 
-    const { translationType, translationPos, translationTarget, translationObserver } = this.state;
+    const { translationType, translationPos, translationTarget, translationObserver, activeTfFilePath } = this.state;
     const { dimensions, variable, lowerDomainBounds, upperDomainBounds, rSquared } = this.state.data;
     
-    let transform = ` 
-      Type = "${translationType}",
-      ${translationType === KEY_STATIC_TRANSLATION ? `
-        Position={${translationPos.x}, ${translationPos.y}, ${translationPos.z}},
-      ` : `
-        Target = "${translationTarget}",
-        Observer = "${translationObserver}"
-      `}
-    }`
-
     let payload = `\'
       return {
-        ItemName = "${this.state.itemName || this.getDefaultItemName()}",
-        GridType = "${this.state.gridType}",
-        ${transform},
-        Task = {
+        ItemName="${this.state.itemName || this.getDefaultItemName()}",
+        GridType="${this.state.gridType}",
+        Translation={
+          Type="${translationType}",
+          ${translationType === KEY_STATIC_TRANSLATION ? `
+          Position={${translationPos.x}, ${translationPos.y}, ${translationPos.z}},
+          ` : `
+          Target="${translationTarget}",
+          Observer="${translationObserver}",
+          `}
+        },
+        Task={
           Dimensions={${dimensions.x}, ${dimensions.y}, ${dimensions.z}}, 
           Variable="${variable.toLowerCase()}",
           LowerDomainBound={${lowerDomainBounds.r}, ${lowerDomainBounds.theta}, ${lowerDomainBounds.phi}}, 
           UpperDomainBound={${upperDomainBounds.r}, ${upperDomainBounds.theta}, ${upperDomainBounds.phi}}, 
           FactorRSquared="${rSquared.toString()}",          
         },
-        Scale = ${this.state.scale}
+        Scale=${this.state.scale},
+        TransferFunctionPath="${activeTfFilePath}"
       }
     \'`
     payload = removeLineBreakCharacters(payload);
     
+    // let p2 = `\'
+    //   return {
+    //     ItemName="STRING"
+    //   }
+    // \'`
+    // p2 = removeLineBreakCharacters(p2);
+
     const payloadScript = UploadDataItemScript.replace(ValuePlaceholder, payload);
     DataManager.runScript(payloadScript);
-
-    // const transformScript = UploadDataItemScript.replace(ValuePlaceholder, transform);
-    // DataManager.runScript(transformScript);
-
-  }
-
-  changeVariable(event) {
-    this.setState({ variable: event.value});
   }
 
   render() {

@@ -56,6 +56,18 @@ namespace {
         "List of fieldline items stored internally and ready to load",
         "This list contains names of fieldline data files converted from the CDF format"
     };
+
+    static const openspace::properties::Property::PropertyInfo TransferFunctionPresetsJSONInfo = {
+        "TransferFunctionPresetsJSON",
+        "JSON formatted string of a list of paths to transferfunction files and corresponding screenshot image paths",
+        ""
+    };
+
+    static const openspace::properties::Property::PropertyInfo ReadTransferFunctionPresetsInfo = {
+        "ReadTransferFunctionPresets",
+        "Trigger a read of the directory of transfer function presets and their screenshot image links",
+        ""
+    };
 }
 
 namespace openspace {
@@ -64,6 +76,8 @@ DataLoaderModule::DataLoaderModule()
     : OpenSpaceModule(Name)
     , _showInternalVolumesTrigger(ShowInternalVolumesInfo)
     , _volumeDataItems(VolumesInfo)
+    , _transferFunctionPresetsJSON(TransferFunctionPresetsJSONInfo)
+    , _readTransferFunctionPresets(ReadTransferFunctionPresetsInfo)
 {
     _showInternalVolumesTrigger.onChange([this](){
         // showInternalDataType(DataTypes.volume);
@@ -71,8 +85,14 @@ DataLoaderModule::DataLoaderModule()
         _loader->createInternalDataItemProperties();
     });
 
+    _readTransferFunctionPresets.onChange([this](){
+        setTransferFunctionPresets();
+    });
+
     addProperty(_volumeDataItems);
+    addProperty(_transferFunctionPresetsJSON);
     addProperty(_showInternalVolumesTrigger);
+    addProperty(_readTransferFunctionPresets);
 }
 
 DataLoaderModule::~DataLoaderModule() {}
@@ -87,7 +107,6 @@ void DataLoaderModule::internalInitialize(const ghoul::Dictionary&) {
 }
 
 void DataLoaderModule::setDataDirectoryRead(bool isRead) {
-    LDEBUG("Called a module function");
     _dataDirectoryIsRead = isRead;
 }
 
@@ -114,6 +133,11 @@ void DataLoaderModule::uploadDataItem(const std::string& dictionaryString) {
 
 void DataLoaderModule::setVolumeDataItems(std::vector<std::string> items) {
     _volumeDataItems = items;
+}
+
+void DataLoaderModule::setTransferFunctionPresets() {
+    const std::string presetsString = _reader->readTransferFunctionPresets();
+    _transferFunctionPresetsJSON = presetsString;
 }
 
 openspace::dataloader::Reader* DataLoaderModule::reader() {

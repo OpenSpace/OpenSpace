@@ -5,6 +5,7 @@
 /cache/
 /data/.internal/*
 !/data/.internal/readme.md
+!/data/.internal/tf_presets
 /doc
 /documentation
 /ext/SGCT

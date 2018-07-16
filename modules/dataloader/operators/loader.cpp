@@ -47,6 +47,7 @@
 #include <ghoul/misc/dictionary.h>
 
 #include <fstream>
+#include <chrono>
 #include <ghoul/glm.h>
 
 #ifdef _WIN32
@@ -84,6 +85,8 @@ constexpr const char* KeyTarget = "Target";
 constexpr const char* KeyStaticTranslation = "StaticTranslation";
 constexpr const char* KeyStaticScale = "StaticScale";
 constexpr const char* KeyScale = "Scale";
+constexpr const char* KeyTransferFunctionPath = "TransferFunctionPath";
+constexpr const char* KeyTranslationValues = "TranslationValues";
 
 const double DefaultStepSize = 0.02;
 const std::string DefaultGridType = "Spherical";
@@ -291,13 +294,9 @@ void Loader::goToFirstTimeStep(const std::string& absPathToItem) {
 }
 
 void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryString) {
-    // Determine path to new volume item
-
+    LINFO(dictionaryString);
     _currentVolumeConversionDictionary = ghoul::lua::loadDictionaryFromString(dictionaryString);
 
-    // Schedule tasks? How to loop through several CDF timesteps and run VolumeToRaw for each
-    // Create instance of KameleonVolumeToRaw and run
-    
     {
     std::thread t([&](){
         // ??? won't work multithreaded
@@ -312,30 +311,22 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
         // LDEBUG(itemPathBase);
         // itemPathBase += openspace::dataloader::helpers::getDirLeaf(_filePaths) + "_" + variable;
 
+        // TODO: stop thread exactly until dictionary exists
+        std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+
         std::string itemName = _currentVolumeConversionDictionary.value<std::string>(KeyItemName);
         std::string itemPathBase = "${DATA}/.internal/volumes_from_cdf/" + itemName;
         Directory d(itemPathBase, RawPath::No);
         FileSys.createDirectory(d);
 
-        std::string translationType = _currentVolumeConversionDictionary.value<std::string>(KeyType);
-
-        // Check if user selected a Translation of type Static or Spice
-        // and create Translation Dictionary
         ghoul::Dictionary translationDictionary;
-        if(translationType == KeyStaticTranslation) {
-            glm::dvec3 position = _currentVolumeConversionDictionary.value<glm::dvec3>(KeyPosition);  
-
-            translationDictionary.setValue<glm::dvec3>(KeyPosition, position);
-            translationDictionary.setValue<std::string>(KeyType, translationType);
-
-        } else {
-            std::string target = _currentVolumeConversionDictionary.value<std::string>(KeyTarget);
-            std::string observer = _currentVolumeConversionDictionary.value<std::string>(KeyObserver);
-
-            translationDictionary.setValue<std::string>(KeyType, translationType);
-            translationDictionary.setValue<std::string>(KeyTarget, target);
-            translationDictionary.setValue<std::string>(KeyObserver, observer);
+        if (!_currentVolumeConversionDictionary.getValue<ghoul::Dictionary>(KeyTranslation, translationDictionary)) {
+            throw ghoul::RuntimeError("Must provide Translation table for volume conversion.");
         }
+
+        // Quick fix to make formatter handle nestled dvec3 type correctly
+        glm::dvec3 position = translationDictionary.value<glm::dvec3>(KeyPosition);  
+        translationDictionary.setValue<glm::dvec3>(KeyPosition, position);
 
         // Read and create Scale Dictionary
         float scale = _currentVolumeConversionDictionary.value<float>(KeyScale) * sunRadiusScale;
@@ -347,8 +338,6 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
         ghoul::Dictionary transformDictionary;
         transformDictionary.setValue<ghoul::Dictionary>(KeyTranslation, translationDictionary);
         transformDictionary.setValue<ghoul::Dictionary>(KeyScale, scaleDictionary); 
-
-        std::string gridType = _currentVolumeConversionDictionary.value<std::string>(KeyGridType);
 
         /*** create state file ***/
         // Check if file exists
@@ -374,7 +363,8 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
         stateStream.close();
 
         /*** copy over tf file ***/
-        std::ifstream tfSource(absPath("${DATA}/assets/scene/solarsystem/model/mas/transferfunctions/mas_mhd_r_squared.txt"));
+        const std::string tfFileToCopyPath = _currentVolumeConversionDictionary.value<std::string>(KeyTransferFunctionPath);
+        std::ifstream tfSource(tfFileToCopyPath);
         std::ofstream tfDest(absPath(itemPathBase + "/transferfunction.txt"));
         if (!tfSource) {
             LERROR("Could not open source transferfunction file.");

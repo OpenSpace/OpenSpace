@@ -42,6 +42,7 @@ class Reader : public PropertyOwner, public Operator {
 
     Directory getVolumeDir();
     void readVolumeDataItems();
+    std::string readTransferFunctionPresets();
 
   private:
     ghoul::filesystem::Directory _topDir;
