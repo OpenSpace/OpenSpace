@@ -216,13 +216,6 @@ class PrepareUploadedData extends Component {
       }
     \'`
     payload = removeLineBreakCharacters(payload);
-    
-    // let p2 = `\'
-    //   return {
-    //     ItemName="STRING"
-    //   }
-    // \'`
-    // p2 = removeLineBreakCharacters(p2);
 
     const payloadScript = UploadDataItemScript.replace(ValuePlaceholder, payload);
     DataManager.runScript(payloadScript);
@@ -288,47 +281,46 @@ class PrepareUploadedData extends Component {
                         placeholder={'test'}
                         value={scale}
                         onChange={(event) => this.setState({ scale: event.currentTarget.value}) }/>
-              <MultiInputs label='Dimensions'
-                          options={dimensions} 
+          <MultiInputs label='Dimensions'
+                      options={dimensions} 
+                      disabled={isUnEditable}
+                      onChange={(target) => this.onChangeMultiInputs(target, KEY_DIMENSIONS)}/>
+          <Variables variable={variable}
+                    disabled={isUnEditable}
+                    onChange={this.changeVariable} />
+          <MultiInputs label='Lower Domain Bounds'
+                      options={lowerDomainBounds} 
+                      disabled={isUnEditable}
+                      onChange={(target) => this.onChangeMultiInputs(target, KEY_LOWER_DOMAIN_BOUNDS)}/>
+          <MultiInputs label='Upper Domain Bounds'
+                      options={upperDomainBounds} 
+                      disabled={isUnEditable}
+                      onChange={(target) => this.onChangeMultiInputs(target, KEY_UPPER_DOMAIN_BOUNDS)}/>
+          <div>
+            <RadioButtons options={['Spherical', 'Cartesian']}
+                          defaultOption='Spherical'
+                          label='Grid type'
                           disabled={isUnEditable}
-                          onChange={(target) => this.onChangeMultiInputs(target, KEY_DIMENSIONS)}/>
-              <Variables variable={variable}
-                        disabled={isUnEditable}
-                        onChange={this.changeVariable} />
-              <MultiInputs label='Lower Domain Bounds'
-                          options={lowerDomainBounds} 
-                          disabled={isUnEditable}
-                          onChange={(target) => this.onChangeMultiInputs(target, KEY_LOWER_DOMAIN_BOUNDS)}/>
-              <MultiInputs label='Upper Domain Bounds'
-                          options={upperDomainBounds} 
-                          disabled={isUnEditable}
-                          onChange={(target) => this.onChangeMultiInputs(target, KEY_UPPER_DOMAIN_BOUNDS)}/>
-              <div>
-                <RadioButtons options={['Spherical', 'Cartesian']}
-                              defaultOption='Spherical'
-                              label='Grid type'
-                              disabled={isUnEditable}
-                              onChange={this.handleGridTypeChange} />
-              </div>
-              <Translation translationType={translationType} 
-                           translationPos={translationPos}
-                           onTranslationTypeChange={this.handleTranslationTypeChange}
-                           onSetTranslation={(target) => this.handleSetStaticTranslation(target)}
-                           onSetTranslationTarget={this.handleSetTranslationTarget}
-                           target={translationTarget} />
-              <Checkbox label={"Multiply " + variable + " with radius^2?"}
-                        onChange={this.changeRSquared}
-                        disabled={isUnEditable}/>
-            </Column>
-            <Column className={styles.spaceFirstChildren}
-                    widthPercentage={50}>
-              <Label>Here be trafnser functions</Label>
-              <ImageSelect imageSources={tfImages}
-                           onSelect={this.handleSelectedTFImage} />
-            </Column>
-          </Row>
-
-          <Column className={styles.footer}>
+                          onChange={this.handleGridTypeChange} />
+          </div>
+          <Translation translationType={translationType} 
+                        translationPos={translationPos}
+                        onTranslationTypeChange={this.handleTranslationTypeChange}
+                        onSetTranslation={(target) => this.handleSetStaticTranslation(target)}
+                        onSetTranslationTarget={this.handleSetTranslationTarget}
+                        target={translationTarget} />
+          <Checkbox label={"Multiply " + variable + " with radius^2?"}
+                    onChange={this.changeRSquared}
+                    disabled={isUnEditable}/>
+        </Column>
+        <Column className={styles.spaceFirstChildren}
+                widthPercentage={50}>
+          <Label>Here be trafnser functions</Label>
+          <ImageSelect imageSources={tfImages}
+                        onSelect={this.handleSelectedTFImage} />
+        </Column>
+        </Row>
+        <Column className={styles.footer}>
             <Button onClick={() => this.upload()} 
                     className={styles.convertButton}
                     disabled={isUnEditable}> 
