@@ -235,6 +235,13 @@ void Loader::loadDataItem(const std::string& absPathToItem) {
     std::string stateFile = openspace::dataloader::helpers::getFileWithExtensionFromItemFolder(absPathToItem, "state");
     ghoul::Dictionary renderableDictionary = ghoul::lua::loadDictionaryFromFile(stateFile);
 
+    if( !renderableDictionary.hasKey(KeyTransform)) {
+      LERROR("Transform was not declared in the .state file!");
+    }
+
+    ghoul::Dictionary transformDictionary;
+    renderableDictionary.getValue<ghoul::Dictionary>(KeyTransform, transformDictionary);
+
     std::string tfFilePath = absPathToItem +
         ghoul::filesystem::FileSystem::PathSeparator +
         "transferfunction.txt";
@@ -242,24 +249,6 @@ void Loader::loadDataItem(const std::string& absPathToItem) {
     renderableDictionary.setValue("Type", KeyRenderableType);
     renderableDictionary.setValue("SourceDirectory", sourceDir);
     renderableDictionary.setValue("TransferFunction", tfFilePath);
-
-    // std::initializer_list<std::pair<std::string, ghoul::any>> translation = {
-    //     std::make_pair( "Type", translationTypeKey ),
-    //     std::make_pair( "Target", sunKey ),
-    //     std::make_pair( "Observer", sunKey )
-    // };
-    // std::initializer_list<std::pair<std::string, ghoul::any>> scale = {
-    //     std::make_pair( "Type", scaleTypeKey ),
-    //     std::make_pair( "Scale", sunRadiusScale )
-    // };
-    // ghoul::Dictionary translationDictionary(translation);
-    // ghoul::Dictionary scaleDictionary(scale);
-
-    // std::initializer_list<std::pair<std::string, ghoul::any>> transform = {
-    //     std::make_pair( "Translation", translationDictionary ),
-    //     std::make_pair( "Scale", scaleDictionary )
-    // };
-    // ghoul::Dictionary transformDictionary(transform);
 
     std::initializer_list<std::pair<std::string, ghoul::any>> gui = {
         std::make_pair( "Path", volumesGuiPathKey ),
@@ -271,11 +260,13 @@ void Loader::loadDataItem(const std::string& absPathToItem) {
         std::make_pair( "Identifier", dirLeaf ),
         std::make_pair( "Parent", parent ),
         std::make_pair( "Renderable", renderableDictionary ),
-        // std::make_pair( "Transform", transformDictionary ),
         std::make_pair( "GUI", guiDictionary )
-    };
+    }; 
 
-    const ghoul::Dictionary completeDictionary(completeList);
+    LINFO("Before setting transformDictionary to completeDictionary");
+    ghoul::Dictionary completeDictionary(completeList);
+    completeDictionary.setValue<ghoul::Dictionary>(KeyTransform, transformDictionary);
+    LINFO("Before setting transformDictionary to completeDictionary");
     initializeNode(completeDictionary);
 
     goToFirstTimeStep(absPathToItem);
@@ -313,6 +304,7 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
 
         // TODO: stop thread exactly until dictionary exists
         std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+
 
         std::string itemName = _currentVolumeConversionDictionary.value<std::string>(KeyItemName);
         std::string itemPathBase = "${DATA}/.internal/volumes_from_cdf/" + itemName;
