@@ -7,15 +7,19 @@ asset.require('spice/base')
 
 assetHelper.requestAll(asset, 'scene/solarsystem/sun')
 assetHelper.requestAll(asset, 'scene/digitaluniverse')
--- asset.require('scene/solarsystem/planets')
--- asset.require('scene/digitaluniverse/stars')
+asset.require('scene/solarsystem/planets')
+asset.require('scene/digitaluniverse/stars')
 
--- Load default key bindings applicable to most scenes
+-- Loadkeybindings and most scenes
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
--- asset.request('customization/globebrowsing')
+asset.request('scene/digitaluniverse/milkyway')
+asset.require('scene/solarsystem/missions/newhorizons/newhorizons')
+asset.request('customization/globebrowsing')
 
 local sunAsset = asset.require('scene/solarsystem/sun/sun')
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+local NewHorizonsAsset = asset.require('scene/solarsystem/missions/newhorizons/model')
 -- local masMhdAsset = asset.require('scene/solarsystem/model/mas/mas_mhd')
 asset.require('scene/solarsystem/model/mas/mas_mhd')
 
@@ -125,6 +129,34 @@ local Keybindings = {
         Documentation = "Reset the camera focus",
         Local = true
     },
+    {
+        Key = "s",
+        Command = propertyHelper.invert('Scene.Earth.RenderableGlobe.Layers.NightLayers.Earth_at_Night_2012.Enabled') ..
+                  propertyHelper.invert('Scene.Earth.RenderableGlobe.PerformShading') ..
+                  propertyHelper.invert('Scene.Earth.RenderableGlobe.Atmosphere') ..
+                  propertyHelper.invert('Scene.Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled'),
+        Documentation = "Toggle night texture, shading, atmosphere, and water for Earth.",
+        Local = false
+    },
+    {
+        Key = "g",
+        Command = propertyHelper.invert('Scene.MilkyWay.renderable.Enabled') ..
+                  propertyHelper.invert('Scene.Stars.renderable.Enabled') ..
+                  propertyHelper.invert('Scene.Earth.RenderableGlobe.Layers.NightLayers.Earth_at_Night_2012.Enabled') ..
+                  propertyHelper.invert('Scene.EarthAtmosphere.renderable.Enabled') ..
+                  propertyHelper.invert('Scene.MarsAtmosphere.renderable.Enabled') ..
+                  propertyHelper.invert('Scene.Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled') ..
+                  propertyHelper.invert('Scene.Moon.RenderableGlobe.Enabled') ..
+                  propertyHelper.invert('Scene.Sun.renderable.Enabled'),
+        Documentation = "Toogles background and shading mode on the Earth and Mars alongside visibility of the Moon and the Sun",
+        Local = false
+    },
+    {
+        Key = "h",
+        Command = "openspace.setPropertyValue('Scene.*Trail.renderable.Enabled', false)",
+        Documentation = "Disables visibility of the trails",
+        Local = false
+    },
 }
 
 -- FIELDLINES --
@@ -144,7 +176,9 @@ asset.require('./fieldlines/mas')
 
 asset.onInitialize(function ()
     -- openspace.time.setTime("2017 JUN 01 00:00:00")
-    openspace.time.setTime("2000 JUL 14 08:33:37.100")
+    -- openspace.time.setTime("2000 JUL 14 08:33:37.100")
+    openspace.time.setTime("2015-07-14T08:00:00.00")    
+
 
     -- openspace.time.setTime(openspace.time.currentWallTime())
     sceneHelper.bindKeys(Keybindings)

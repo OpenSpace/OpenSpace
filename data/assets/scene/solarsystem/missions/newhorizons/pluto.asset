@@ -267,6 +267,11 @@ local PlutoTrailBarycentric = {
 local PlutoTrail = {
     Identifier = "PlutoTrail",
     Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2015-JAN-01",
+        End = "2015-AUG-01"
+    },
     Renderable = {
         Type = "RenderableTrailOrbit",
         Enabled = false,
