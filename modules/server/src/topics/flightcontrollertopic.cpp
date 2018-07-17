@@ -40,6 +40,11 @@
 #include <unordered_map>
 
 namespace {
+    enum class Command {
+        Connect = 0,
+        Disconnect,
+        InputState
+    };
 
     using AxisType = openspace::interaction::WebsocketCameraStates::AxisType;
 
@@ -59,6 +64,10 @@ namespace {
     const std::string PanX = "panX";
     const std::string PanY = "panY";
 
+    const std::string Connect = "connect";
+    const std::string Disconnect = "disconnect";
+    const std::string InputState = "inputState";
+
     const static std::unordered_map<std::string, AxisType> AxisIndexMap ({
         {OrbitX, AxisType::OrbitX},
         {OrbitY, AxisType::OrbitY},
@@ -70,6 +79,12 @@ namespace {
         {GlobalRollY, AxisType::GlobalRollY},
         {PanX, AxisType::PanX},
         {PanY, AxisType::PanY}
+    });
+
+    const static std::unordered_map<std::string, Command> CommandMap ({
+        {Connect, Command::Connect},
+        {Disconnect, Command::Disconnect},
+        {InputState, Command::InputState}
     });
 
     const int Axes = 10;
@@ -89,7 +104,7 @@ FlightControllerTopic::FlightControllerTopic()
             it->second);
     }
 
-    OsEng.navigationHandler().setWebsocketInputStates(_inputStates);
+    OsEng.navigationHandler().addWebsocketInputState(_topicId, _inputState);
 }
 
 FlightControllerTopic::~FlightControllerTopic() {
@@ -100,21 +115,51 @@ bool FlightControllerTopic::isDone() const {
 }
 
 void FlightControllerTopic::handleJson(const nlohmann::json& json) {
-    auto state = _inputStates.begin();
-    std::fill(state->axes.begin(), state->axes.end(), 0);
-    state->isConnected = true;
+    switch (CommandMap.at(json[TypeKey])) {
+        case Command::Connect:
+            connect();
+            break;
+        case Command::Disconnect:
+            disconnect();
+            break;
+        case Command::InputState:
+            processInputState(json);
+            break;
+        default:
+            LWARNING(fmt::format("Unrecognized action: {}", json[TypeKey]));
+            break;
+    }
+}
+
+void FlightControllerTopic::connect() {
+    _isDone = false;
+    std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0);
+}
+
+void FlightControllerTopic::disconnect() {
+    OsEng.navigationHandler().removeWebsocketInputState(_topicId);
+    _isDone = true;
+}
+
+void FlightControllerTopic::processInputState(const nlohmann::json& json) {
+
+    std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0);
+    _inputState.isConnected = true;
 
     for (auto it = json.begin(); it != json.end(); ++it) {
         const auto mapIt = AxisIndexMap.find(it.key());
         if (mapIt == AxisIndexMap.end()) {
-            LWARNING(fmt::format(
-                "No axis named {} (value: {})", it.key() , it.value()
-            ));
+            if (it.key() != TypeKey
+                || CommandMap.find(it.value()) == CommandMap.end()) {
+                LWARNING(fmt::format(
+                                 "No axis, button, or command named {} (value: {})", it.key() , it.value()
+                                 ));
+            }
             continue;
         }
-
-        state->axes[std::distance(AxisIndexMap.begin(), mapIt)] = float(it.value());
+        _inputState.axes[std::distance(AxisIndexMap.begin(), mapIt)] = float(it.value());
     }
 }
+
 
 } // namespace openspace

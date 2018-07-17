@@ -105,6 +105,8 @@ public:
 
     // Websockets
     void setWebsocketInputStates(WebsocketInputStates& states);
+    void addWebsocketInputState(size_t id, WebsocketInputState& state);
+    void removeWebsocketInputState(size_t id);
     void setWebsocketAxisMapping(int axis, WebsocketCameraStates::AxisType mapping,
                                 WebsocketCameraStates::AxisInvert shouldInvert =
                                 WebsocketCameraStates::AxisInvert::No,

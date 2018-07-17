@@ -32,6 +32,7 @@
 namespace openspace::interaction {
 
     struct WebsocketInputStates;
+    struct WebsocketInputState;
 }
 
 namespace openspace {
@@ -47,7 +48,11 @@ public:
 private:
     bool _isDone;
     openspace::interaction::WebsocketInputStates _inputStates;
+    openspace::interaction::WebsocketInputState _inputState;
 
+    void connect();
+    void disconnect();
+    void processInputState(const nlohmann::json& json);
 };
 
 } // namespace openspace

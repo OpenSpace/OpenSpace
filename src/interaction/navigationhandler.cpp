@@ -361,6 +361,14 @@ void NavigationHandler::setWebsocketInputStates(WebsocketInputStates& states) {
     _inputState->setWebsocketInputStates(states);
 }
 
+void NavigationHandler::addWebsocketInputState(size_t id, openspace::interaction::WebsocketInputState &state) {
+    _inputState->addWebsocketInputState(id, state);
+}
+
+void NavigationHandler::removeWebsocketInputState(size_t id) {
+    _inputState->removeWebsocketInputState(id);
+}
+
 scripting::LuaLibrary NavigationHandler::luaLibrary() {
     return {
         "navigation",

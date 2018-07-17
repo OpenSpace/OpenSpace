@@ -44,75 +44,77 @@ void WebsocketCameraStates::updateStateFromInput(const InputState& inputState,
     std::pair<bool, glm::dvec2> globalRoll = { false, glm::dvec2(0.0) };
     std::pair<bool, glm::dvec2> localRotation = { false, glm::dvec2(0.0) };
 
-    for (int i = 0; i < WebsocketInputState::MaxAxes; ++i) {
-        AxisInformation t = _axisMapping[i];
-        if (t.type == AxisType::None) {
-            continue;
-        }
+    if (inputState.hasWebsocketStates()) {
+        for (int i = 0; i < WebsocketInputState::MaxAxes; ++i) {
+            AxisInformation t = _axisMapping[i];
+            if (t.type == AxisType::None) {
+                continue;
+            }
 
-        float value = inputState.websocketAxis(i);
-        bool hasValue = abs(value) > t.deadzone;
+            float value = inputState.websocketAxis(i);
+            bool hasValue = abs(value) > t.deadzone;
 
-        if (!hasValue) {
-            value = 0.f;
-        }
+            if (!hasValue) {
+                value = 0.f;
+            }
 
-        if (t.normalize) {
-            value = (value + 1.f) / 2.f;
-        }
+            if (t.normalize) {
+                value = (value + 1.f) / 2.f;
+            }
 
-        if (t.invert) {
-            value *= -1.f;
-        }
+            if (t.invert) {
+                value *= -1.f;
+            }
 
-        value = static_cast<float>(value * _sensitivity);
+            value = static_cast<float>(value * _sensitivity);
 
-        switch (t.type) {
-            case AxisType::None:
-                break;
-            case AxisType::OrbitX:
-                globalRotation.first = hasValue || globalRotation.first;
-                globalRotation.second.x = value;
-                break;
-            case AxisType::OrbitY:
-                globalRotation.first = hasValue || globalRotation.first;
-                globalRotation.second.y = value;
-                break;
-            case AxisType::ZoomIn:
-                zoom.first = hasValue || zoom.first;
-                zoom.second += value;
-                break;
-            case AxisType::ZoomOut:
-                zoom.first = hasValue || zoom.first;
-                zoom.second -= value;
-                break;
-            case AxisType::LocalRollX:
-                localRoll.first = hasValue || localRoll.first;
-                localRoll.second.x = value;
-                break;
-            case AxisType::LocalRollY:
-                localRoll.first = hasValue || localRoll.first;
-                localRoll.second.y = value;
-                break;
-            case AxisType::GlobalRollX:
-                globalRoll.first = hasValue || globalRoll.first;
-                globalRoll.second.x = value;
-                break;
-            case AxisType::GlobalRollY:
-                globalRoll.first = hasValue || globalRoll.first;
-                globalRoll.second.y = value;
-                break;
-            case AxisType::PanX:
-                localRotation.first = hasValue || localRotation.first;
-                localRotation.second.x = value;
-                break;
-            case AxisType::PanY:
-                localRotation.first = hasValue || localRotation.first;
-                localRotation.second.y = value;
-                break;
+            switch (t.type) {
+                case AxisType::None:
+                    break;
+                case AxisType::OrbitX:
+                    globalRotation.first = hasValue || globalRotation.first;
+                    globalRotation.second.x = value;
+                    break;
+                case AxisType::OrbitY:
+                    globalRotation.first = hasValue || globalRotation.first;
+                    globalRotation.second.y = value;
+                    break;
+                case AxisType::ZoomIn:
+                    zoom.first = hasValue || zoom.first;
+                    zoom.second += value;
+                    break;
+                case AxisType::ZoomOut:
+                    zoom.first = hasValue || zoom.first;
+                    zoom.second -= value;
+                    break;
+                case AxisType::LocalRollX:
+                    localRoll.first = hasValue || localRoll.first;
+                    localRoll.second.x = value;
+                    break;
+                case AxisType::LocalRollY:
+                    localRoll.first = hasValue || localRoll.first;
+                    localRoll.second.y = value;
+                    break;
+                case AxisType::GlobalRollX:
+                    globalRoll.first = hasValue || globalRoll.first;
+                    globalRoll.second.x = value;
+                    break;
+                case AxisType::GlobalRollY:
+                    globalRoll.first = hasValue || globalRoll.first;
+                    globalRoll.second.y = value;
+                    break;
+                case AxisType::PanX:
+                    localRotation.first = hasValue || localRotation.first;
+                    localRotation.second.x = value;
+                    break;
+                case AxisType::PanY:
+                    localRotation.first = hasValue || localRotation.first;
+                    localRotation.second.y = value;
+                    break;
+            }
         }
     }
-
+    
     if (globalRotation.first) {
         _globalRotationState.velocity.set(globalRotation.second, deltaTime);
     }

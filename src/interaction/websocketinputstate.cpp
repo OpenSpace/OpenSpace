@@ -25,7 +25,6 @@
 #include <openspace/interaction/websocketinputstate.h>
 
 #include <ghoul/misc/invariants.h>
-#include <algorithm>
 #include <map>
 #include <numeric>
 
@@ -36,11 +35,11 @@ float WebsocketInputStates::axis(int axis) const {
 
     float res = std::accumulate(
         begin(),
-        begin()+1,
+        end(),
         0.f,
-        [axis](float value, const WebsocketInputState& state) {
-            if (state.isConnected) {
-                value += state.axes[axis];
+        [axis](float value, const std::pair<const size_t, const WebsocketInputState *> state) {
+            if (state.second->isConnected) {
+                value += state.second->axes[axis];
             }
             return value;
         }
@@ -57,8 +56,10 @@ bool WebsocketInputStates::button(int button, WebsocketAction action) const {
     bool res = std::any_of(
         begin(),
         end(),
-        [button, action](const WebsocketInputState& state) {
-            return state.isConnected ? (state.buttons[button] == action) : false;
+        [button, action](const std::pair<const size_t, const WebsocketInputState *> state) {
+            return state.second->isConnected ?
+                ( state.second->buttons[button] == action )
+                : false;
         }
     );
     return res;

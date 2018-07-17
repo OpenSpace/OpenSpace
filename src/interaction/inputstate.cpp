@@ -78,6 +78,14 @@ void InputState::setWebsocketInputStates(WebsocketInputStates& states) {
     _websocketInputStates = &states;
 }
 
+void InputState::addWebsocketInputState(size_t id, WebsocketInputState& states) {
+    _websocketInputs[id] = &states;
+}
+
+void InputState::removeWebsocketInputState(size_t id) {
+    _websocketInputs.erase(id);
+}
+
 const std::vector<std::pair<Key, KeyModifier>>& InputState::pressedKeys() const {
     return _keysDown;
 }
@@ -124,26 +132,27 @@ bool InputState::joystickButton(int i) const {
 }
 
 WebsocketInputStates& InputState::websocketInputStates() {
-    return *_websocketInputStates;
+    return _websocketInputs;
 }
 
 float InputState::websocketAxis(int i) const {
-    return _websocketInputStates->axis(i);
+    return _websocketInputs.axis(i);
 }
 
 bool InputState::websocketButton(int i) const {
-    return _websocketInputStates->button(i, WebsocketAction::Press);
+    return _websocketInputs.button(i, WebsocketAction::Press);
 }
 
 void InputState::resetWebsockets() {
-    if(!_websocketInputStates) { return; }
+    //if(!_websocketInputs) { return; }
     
-    for (auto it = _websocketInputStates->begin(); it < _websocketInputStates->end(); ++it) {
-        it->isConnected = false;
+    for (auto it = _websocketInputs.begin(); it != _websocketInputs.end(); ++it) {
+        it->second->isConnected = false;
     }
-
 }
 
-
+bool InputState::hasWebsocketStates() const {
+    return _websocketInputs.size() > 0;
+}
 
 } // namespace openspace::interaction

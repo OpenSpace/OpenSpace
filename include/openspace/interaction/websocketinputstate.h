@@ -28,6 +28,7 @@
 #include <ghoul/misc/fromstring.h>
 #include <array>
 #include <memory>
+#include <unordered_map>
 #include <string>
 
 namespace openspace::interaction {
@@ -79,7 +80,8 @@ struct WebsocketInputState {
 /// The maximum number of websockets that are supported by this system. This number is
 /// derived from the available GLFW constants
 constexpr const int MaxWebsockets = 16;
-struct WebsocketInputStates : public std::array<WebsocketInputState, MaxWebsockets> {
+//struct WebsocketInputStates : public std::array<WebsocketInputState, MaxWebsockets> {
+struct WebsocketInputStates : public std::unordered_map<size_t, WebsocketInputState*> {
     /**
      * This function adds the contributions of all connected websockets for the provided
      * \p axis. After adding each websockets contribution, the result is clamped to [-1,1].

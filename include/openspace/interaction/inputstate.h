@@ -47,6 +47,8 @@ public:
 
     void setJoystickInputStates(JoystickInputStates& states);
     void setWebsocketInputStates(WebsocketInputStates& states);
+    void addWebsocketInputState(size_t id, WebsocketInputState& states);
+    void removeWebsocketInputState(size_t id);
 
 
     // Accessors
@@ -66,6 +68,7 @@ public:
     WebsocketInputStates& websocketInputStates();
     float websocketAxis(int i) const;
     bool websocketButton(int i) const;
+    bool hasWebsocketStates() const;
     void resetWebsockets();
 
 private:
@@ -83,7 +86,7 @@ private:
 
     // Input from websockets
     WebsocketInputStates* _websocketInputStates = nullptr;
-
+    WebsocketInputStates _websocketInputs;
 };
 
 } // namespace openspace::interaction
