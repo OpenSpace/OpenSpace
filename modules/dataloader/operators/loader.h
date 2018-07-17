@@ -34,16 +34,18 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
-
+#include <openspace/util/time.h>
 #include <openspace/util/taskloader.h>
 
 namespace ghoul {
   class Dictionary;
 }
 
+namespace openspace {
+
 namespace documentation { struct Documentation; }
 
-namespace openspace::dataloader {
+namespace dataloader {
 
 using properties::PropertyOwner;
 
@@ -57,13 +59,13 @@ class Loader : public PropertyOwner, public Operator {
     /**
      * Creates and adds trigger properties for data items in the internal directory
      */
-    void createInternalDataItemProperties();
+    //void createInternalDataItemProperties();
 
     // Add one data item trigger property
-    void addDataItemProperty();
+    //void addDataItemProperty();
 
     // Remove the trigger properties 
-    void removeDataItemProperties();
+    //void removeDataItemProperties();
 
     // Load a data item with an abs path to the item under its data type subfolder in data/.internal
     void loadDataItem(const std::string& absPathToItem);
@@ -92,6 +94,7 @@ class Loader : public PropertyOwner, public Operator {
 
 };
 
-}
+} // namespace dataloader
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_DATALOADER___LOADER___H__

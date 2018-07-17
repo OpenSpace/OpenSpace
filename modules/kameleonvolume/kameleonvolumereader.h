@@ -92,8 +92,6 @@ public:
 
     void setReaderCallback(callback_t& cb);
 
-    void setReaderCallback(callback_t& cb);
-
 private:
     static void addAttributeToDictionary(ghoul::Dictionary& dictionary,
         const std::string& key, ccmc::Attribute& attr);

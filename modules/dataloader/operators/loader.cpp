@@ -43,7 +43,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <modules/dataloader/helpers.cpp>
-
+#include <openspace/util/time.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/dictionary.h>
@@ -187,32 +187,33 @@ void Loader::selectData() {
     }
 }
 
-void Loader::createInternalDataItemProperties() {
-    module()->validateDataDirectory();
-    std::vector<std::string> volumeItems = module()->volumeDataItems();
-
-    // LDEBUG("volume items vec size " + std::to_string(volumeItems.size()));
-
-    for (auto item : volumeItems) {
-        const std::string dirLeaf = openspace::dataloader::helpers::getDirLeaf(item);
-        const openspace::properties::Property::PropertyInfo info = {
-            "ItemTrigger_" + dirLeaf,
-            dirLeaf,
-            ""
-        };
-
-        // Initialize trigger property with data item name (are they unique?)
-        auto volumeItemTrigger = properties::TriggerProperty(info);
-
-        // Set onChange method to call loadDataItem with the path as argument
-        volumeItemTrigger.onChange([this](){
-            // loadDataItem(item);
-        });
-
-        // addProperty(volumeItemTrigger);
-        // LDEBUG("Added property " + dirLeaf);
-    }
-}
+//void Loader::createInternalDataItemProperties() {
+//    module()->validateDataDirectory();
+//    std::vector<std::string> volumeItems = module()->volumeDataItems();
+//
+//    // LDEBUG("volume items vec size " + std::to_string(volumeItems.size()));
+//
+//    for (auto item : volumeItems) {
+//        const char* dirLeaf = openspace::dataloader::helpers::getDirLeaf(item).c_str();
+//        const char* ItemTrigger = "ItemTrigger_";
+//        const openspace::properties::Property::PropertyInfo info = {
+//            ItemTrigger + dirLeaf,
+//            dirLeaf,
+//            ""
+//        };
+//
+//        // Initialize trigger property with data item name (are they unique?)
+//        auto volumeItemTrigger = properties::TriggerProperty(info);
+//
+//        // Set onChange method to call loadDataItem with the path as argument
+//        volumeItemTrigger.onChange([this](){
+//            // loadDataItem(item);
+//        });
+//
+//        // addProperty(volumeItemTrigger);
+//        // LDEBUG("Added property " + dirLeaf);
+//    }
+//}
 
 // addDataItemProperty();
 // removeDataItemProperties();
@@ -284,7 +285,7 @@ void Loader::goToFirstTimeStep(const std::string& absPathToItem) {
     std::string firstDictionaryFilePath = openspace::dataloader::helpers::getFileWithExtensionFromItemFolder(absPathToItem, "dictionary");
     ghoul::Dictionary dict = ghoul::lua::loadDictionaryFromFile(firstDictionaryFilePath);
     std::string firstTimeStep = dict.value<std::string>(KeyTime);
-    time().setTime(firstTimeStep);
+    setTime(firstTimeStep);
 }
 
 void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryString) {

@@ -26,9 +26,6 @@
 #define __OPENSPACE_CORE___TIMEMANAGER___H__
 
 #include <openspace/util/syncdata.h>
-#include <openspace/util/time.h>
-#include <openspace/util/timeline.h>
-#include <functional>
 #include <utility>
 #include <vector>
 

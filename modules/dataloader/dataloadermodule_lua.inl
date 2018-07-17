@@ -36,7 +36,7 @@ int loadItem(lua_State* L) {
 
     using ghoul::lua::errorLocation;
 
-    const char* path = ghoul::lua::checkStringAndPop(L);
+    const std::string& path = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
 
     /** handle path to check item type or handle it in different function **/
 
@@ -56,7 +56,7 @@ int uploadItem(lua_State* L) {
 
     using ghoul::lua::errorLocation;
 
-    const char* dictionaryString = ghoul::lua::checkStringAndPop(L);
+    const std::string& dictionaryString = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
     OsEng.moduleEngine().module<DataLoaderModule>()->uploadDataItem(dictionaryString);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");

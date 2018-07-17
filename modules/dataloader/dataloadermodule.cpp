@@ -82,7 +82,7 @@ DataLoaderModule::DataLoaderModule()
     _showInternalVolumesTrigger.onChange([this](){
         // showInternalDataType(DataTypes.volume);
         validateDataDirectory();
-        _loader->createInternalDataItemProperties();
+//        _loader->createInternalDataItemProperties();
     });
 
     _readTransferFunctionPresets.onChange([this](){

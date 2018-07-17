@@ -49,7 +49,8 @@ local setup = function ()
         "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.Flow.speed', 19);" ..
         "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.Color.uniform', {0.575, 0, 0.75, 1});" ..
         "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.Flow.color', {1, 0, 0.65, 1});" ..
-        "openspace.setPropertyValueSingle('Scene.Sun.renderable.ColorTexture', MasScene.SunTextures[1]);"
+        "openspace.setPropertyValueSingle('Scene.Sun.renderable.ColorTexture', MasScene.SunTextures[1]);" ..
+        "openspace.setPropertyValueSingle('Scene.Sun.renderable.Enabled', true);"
 end
 
 local Keybindings = {
@@ -116,6 +117,12 @@ local Keybindings = {
         Key = "d",
         Command = propertyHelper.invert('Scene.Mas_MHD_rho.renderable.Enabled'),
         Documentation = "Toggle mas rho asset on/off",
+        Local = true
+    },
+    {
+        Key = "c",
+        Command = "openspace.navigation.resetCameraDirection();",
+        Documentation = "Reset the camera focus",
         Local = true
     },
 }

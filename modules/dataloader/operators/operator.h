@@ -2,11 +2,14 @@
 #ifndef __OPENSPACE_MODULE_DATALOADER___OPERATOR___H__
 #define __OPENSPACE_MODULE_DATALOADER___OPERATOR___H__
 
+#include <string>
+
 namespace openspace {
 
 class DataLoaderModule;
 class Scene;
 class Time;
+class RenderEngine;
 
 namespace dataloader {
 
@@ -17,7 +20,7 @@ class Operator {
     protected:
         DataLoaderModule* module();
         Scene* scene();
-        Time& time();
+        void setTime(std::string value);
 };
 
 } // namespace dataloader
