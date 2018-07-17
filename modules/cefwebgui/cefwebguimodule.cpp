@@ -45,7 +45,7 @@ CefWebGuiModule::CefWebGuiModule()
 {}
 
 void CefWebGuiModule::internalInitialize(const ghoul::Dictionary&) {
-    _guiInstance = std::make_shared<BrowserInstance>(new GUIRenderHandler);
+    _guiInstance = std::make_shared<BrowserInstance>(new GUIRenderHandler());
     _guiLocation = OsEng.configuration().cefWebGuiUrl;
 
     OsEng.registerModuleCallback(

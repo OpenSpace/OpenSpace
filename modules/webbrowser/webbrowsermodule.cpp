@@ -66,12 +66,11 @@ void WebBrowserModule::internalDeinitialize() {
 
 std::string WebBrowserModule::findHelperExecutable() {
     if (!OsEng.configuration().webHelperLocation.empty()) {
-        std::string execLocation = absPath(
-            OsEng.configuration().webHelperLocation + SUBPROCESS_ENDING
-        );
+        auto execLocation = absPath(
+            OsEng.configuration().webHelperLocation + SUBPROCESS_ENDING);
         if (!FileSys.fileExists(execLocation)) {
             LERROR(fmt::format(
-                "Could not find web helper executable at location: {}" , execLocation
+                "Could not find web helper executable at location: {}", execLocation
             ));
         }
         return execLocation;

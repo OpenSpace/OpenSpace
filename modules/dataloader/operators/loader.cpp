@@ -52,10 +52,6 @@
 #include <chrono>
 #include <ghoul/glm.h>
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
 using Directory = ghoul::filesystem::Directory;
 using File = ghoul::filesystem::File;
 using RawPath = ghoul::filesystem::Directory::RawPath;
@@ -390,7 +386,7 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
 
         std::mutex m;
         std::function<void(float)> cb = [&](float progress) {
-            std::lock_guard g(m);
+            std::lock_guard<std::mutex> g(m);
             _volumeConversionProgress = progress;
         };
 
