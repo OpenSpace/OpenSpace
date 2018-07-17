@@ -39,11 +39,11 @@
 
 namespace {
     constexpr const char* GlslRaycastPath =
-        "${MODULE_TOYVOLUME}/toyvolume/shaders/raycast.glsl";
+        "${MODULE_TOYVOLUME}/shaders/raycast.glsl";
     constexpr const char* GlslBoundsVsPath =
-        "${MODULE_TOYVOLUME}/toyvolume/shaders/boundsvs.glsl";
+        "${MODULE_TOYVOLUME}/shaders/boundsvs.glsl";
     constexpr const char* GlslBoundsFsPath =
-        "${MODULE_TOYVOLUME}/toyvolume/shaders/boundsfs.glsl";
+        "${MODULE_TOYVOLUME}/shaders/boundsfs.glsl";
 } // namespace
 
 namespace openspace {

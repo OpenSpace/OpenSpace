@@ -118,7 +118,7 @@ std::vector<Time> TimeQuantizer::quantized(const Time& start, const Time& end) c
 
     std::vector<Time> result(nSteps + 1);
     for (int i = 0; i <= nSteps; ++i) {
-        result[i].setTime(startSeconds + i * _resolution, false);
+        result[i].setTime(startSeconds + i * _resolution);
     }
 
     return result;

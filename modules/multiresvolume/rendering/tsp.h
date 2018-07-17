@@ -25,27 +25,26 @@
 #ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___TSP___H__
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___TSP___H__
 
+#include <ghoul/opengl/ghoul_gl.h>
+#include <fstream>
+#include <list>
 #include <string>
 #include <vector>
-#include <list>
-#include <iostream>
-#include <fstream>
-
-#include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
+
 class TSP {
 public:
     struct Header {
-        unsigned int gridType_;
-        unsigned int numOrigTimesteps_;
-        unsigned int numTimesteps_;
-        unsigned int xBrickDim_;
-        unsigned int yBrickDim_;
-        unsigned int zBrickDim_;
-        unsigned int xNumBricks_;
-        unsigned int yNumBricks_;
-        unsigned int zNumBricks_;
+        unsigned int gridType;
+        unsigned int numOrigTimesteps;
+        unsigned int numTimesteps;
+        unsigned int xBrickDim;
+        unsigned int yBrickDim;
+        unsigned int zBrickDim;
+        unsigned int xNumBricks;
+        unsigned int yNumBricks;
+        unsigned int zNumBricks;
     };
 
     enum NodeData {
@@ -86,59 +85,58 @@ public:
     bool calculateSpatialError();
     bool calculateTemporalError();
 
-    float getSpatialError(unsigned int _brickIndex);
-    float getTemporalError(unsigned int _brickIndex);
-    unsigned int getFirstOctreeChild(unsigned int _brickIndex);
+    float spatialError(unsigned int brickIndex) const;
+    float temporalError(unsigned int brickIndex) const;
+    unsigned int firstOctreeChild(unsigned int brickIndex) const;
 
-    unsigned int getBstLeft(unsigned int _brickIndex);
-    unsigned int getBstRight(unsigned int _brickIndex);
+    unsigned int bstLeft(unsigned int brickIndex) const;
+    unsigned int bstRight(unsigned int brickIndex) const;
 
-    bool isBstLeaf(unsigned int _brickIndex);
-    bool isOctreeLeaf(unsigned int _brickIndex);
+    bool isBstLeaf(unsigned int brickIndex) const;
+    bool isOctreeLeaf(unsigned int brickIndex) const;
 
 private:
     // Returns a list of the octree leaf nodes that a given input
     // brick covers. If the input is already a leaf, the list will
     // only contain that one index.
-    std::list<unsigned int> CoveredLeafBricks(unsigned int _brickIndex);
+    std::list<unsigned int> coveredLeafBricks(unsigned int brickIndex) const;
 
     // Returns a list of the BST leaf nodes that a given input brick
     // covers (at the same spatial subdivision level).
-    std::list<unsigned int> CoveredBSTLeafBricks(unsigned int _brickIndex);
+    std::list<unsigned int> coveredBSTLeafBricks(unsigned int brickIndex) const;
 
     // Return a list of eight children brick incices given a brick index
-    std::list<unsigned int> ChildBricks(unsigned int _brickIndex);
+    std::list<unsigned int> childBricks(unsigned int brickIndex);
 
     std::string _filename;
     std::ifstream _file;
     std::streampos _dataOffset;
 
     // Holds the actual structure
-    std::vector<int> data_;
-    GLuint _dataSSBO;
+    std::vector<int> _data;
+    GLuint _dataSSBO = 0;
 
     // Data from file
     Header _header;
 
     // Additional metadata
-    unsigned int paddedBrickDim_;
-    unsigned int numTotalNodes_;
-    unsigned int numBSTLevels_;
-    unsigned int numBSTNodes_;
-    unsigned int numOTLevels_;
-    unsigned int numOTNodes_;
+    unsigned int _paddedBrickDim = 0;
+    unsigned int _numTotalNodes = 0;
+    unsigned int _numBSTLevels = 0;
+    unsigned int _numBSTNodes = 0;
+    unsigned int _numOTLevels = 0;
+    unsigned int _numOTNodes = 0;
 
-    const unsigned int paddingWidth_ = 1;
+    const unsigned int _paddingWidth = 1;
 
     // Error stats
-    float minSpatialError_;
-    float maxSpatialError_;
-    float medianSpatialError_;
-    float minTemporalError_;
-    float maxTemporalError_;
-    float medianTemporalError_;
-
-}; // class TSP
+    float _minSpatialError = 0.f;
+    float _maxSpatialError = 0.f;
+    float _medianSpatialError = 0.f;
+    float _minTemporalError = 0.f;
+    float _maxTemporalError = 0.f;
+    float _medianTemporalError = 0.f;
+};
 
 }  // namespace openspace
 

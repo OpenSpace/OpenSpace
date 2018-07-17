@@ -51,6 +51,7 @@
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
 #include <openspace/scene/timeframe.h>
+#include <openspace/scene/lightsource.h>
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scene/translation.h>
 #include <openspace/scripting/scriptscheduler.h>
@@ -166,6 +167,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     _navigationHandler->setPropertyOwner(_rootPropertyOwner.get());
     // New property subowners also have to be added to the ImGuiModule callback!
     _rootPropertyOwner->addPropertySubOwner(_navigationHandler.get());
+    _rootPropertyOwner->addPropertySubOwner(_timeManager.get());
 
     _rootPropertyOwner->addPropertySubOwner(_renderEngine.get());
     _rootPropertyOwner->addPropertySubOwner(_renderEngine->screenSpaceOwner());
@@ -206,6 +208,10 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<TimeFrame>>(),
         "TimeFrame"
+    );
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<LightSource>>(),
+        "LightSource"
     );
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Task>>(),
@@ -1094,28 +1100,38 @@ void OpenSpaceEngine::initializeGL() {
     }
 
     if (_configuration->isLoggingOpenGLCalls) {
-        using namespace glbinding;
+        LogLevel level = ghoul::logging::levelFromString(_configuration->logging.level);
+        if (level > LogLevel::Trace) {
+            LWARNING(
+                "Logging OpenGL calls is enabled, but the selected log level does "
+                "not include TRACE, so no OpenGL logs will be printed");
+        }
+        else {
+            using namespace glbinding;
 
-        setCallbackMask(CallbackMask::After | CallbackMask::ParametersAndReturnValue);
-        glbinding::setAfterCallback([](const glbinding::FunctionCall& call) {
-            std::string arguments = std::accumulate(
-                call.parameters.begin(),
-                call.parameters.end(),
-                std::string("("),
-                [](std::string a, AbstractValue* v) {
-                    return a + ", " + v->asString();
-                }
-            );
+            setCallbackMask(CallbackMask::After | CallbackMask::ParametersAndReturnValue);
+            glbinding::setAfterCallback([](const glbinding::FunctionCall& call) {
+                std::string arguments = std::accumulate(
+                    call.parameters.begin(),
+                    call.parameters.end(),
+                    std::string("("),
+                    [](std::string a, AbstractValue* v) {
+                        return a + v->asString() + ", ";
+                    }
+                );
+                // Remove the final ", "
+                arguments = arguments.substr(0, arguments.size() - 2) + ")";
 
-            std::string returnValue = call.returnValue ?
-                " -> " + call.returnValue->asString() :
-                "";
+                std::string returnValue = call.returnValue ?
+                    " -> " + call.returnValue->asString() :
+                    "";
 
-            LTRACEC(
-                "OpenGL",
-                call.function->name() + arguments + returnValue
-            );
-        });
+                LTRACEC(
+                    "OpenGL",
+                    call.function->name() + std::move(arguments) + std::move(returnValue)
+                );
+            });
+        }
     }
 
     LDEBUG("Initializing Rendering Engine");

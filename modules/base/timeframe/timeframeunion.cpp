@@ -34,7 +34,7 @@ namespace {
     constexpr const openspace::properties::Property::PropertyInfo TimeFramesInfo = {
         "TimeFrames",
         "Time Frames",
-        "A vector of time frames to combine into one." 
+        "A vector of time frames to combine into one. "
         "The time frame is active when any of the contained time frames are, "
         "but not in gaps between contained time frames."
     };
@@ -94,8 +94,6 @@ TimeFrameUnion::TimeFrameUnion(const ghoul::Dictionary& dictionary)
         subFrame.setDescription(k);
         addPropertySubOwner(*_timeFrames.back());
     }
-    
-
 }
 
 } // namespace openspace

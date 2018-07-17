@@ -1,4 +1,4 @@
-local helper = asset.require('util/slidedeck_helper')
+local helper = asset.require('util/slide_deck_helper')
 local deck = nil
 
 asset.onInitialize(function ()

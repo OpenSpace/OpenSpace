@@ -95,7 +95,8 @@ void NetworkEngine::publishStatusMessage() {
 
     const double time = currentTime.j2000Seconds();
     const std::string timeString = currentTime.UTC();
-    const double delta = currentTime.deltaTime();
+    double delta = OsEng.timeManager().deltaTime();
+
 
     messageSize += sizeof(time);
     messageSize += static_cast<uint16_t>(timeString.length());

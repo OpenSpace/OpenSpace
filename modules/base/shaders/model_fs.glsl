@@ -29,9 +29,18 @@ in vec3 vs_normalViewSpace;
 in vec4 vs_positionCameraSpace;
 in float vs_screenSpaceDepth;
 
+uniform float ambientIntensity = 0.2;
+uniform float diffuseIntensity = 1.0;
+uniform float specularIntensity = 1.0;
+
 uniform bool performShading = true;
-uniform vec3 directionToSunViewSpace;
+
 uniform sampler2D texture1;
+
+uniform int nLightSources;
+uniform vec3 lightDirectionsViewSpace[8];
+uniform float lightIntensities[8];
+
 uniform float opacity = 1.0;
 
 const vec3 SpecularAlbedo = vec3(1.0);
@@ -47,23 +56,29 @@ Fragment getFragment() {
         const vec3 lightColor = vec3(1.0);
         
         vec3 n = normalize(vs_normalViewSpace);
-        vec3 l = directionToSunViewSpace;
         vec3 c = normalize(vs_positionCameraSpace.xyz);
-        vec3 r = reflect(l, n);
 
-        const float ambientIntensity = 0.2;
-        const float diffuseIntensity = 1;
-        const float specularIntensity = 1;
+        vec3 color = ambientIntensity * lightColorAmbient * diffuseAlbedo;
 
-        float diffuseCosineFactor = dot(n,l);
-        float specularCosineFactor = dot(c,r);
-        const float specularPower = 100.0;
+        for (int i = 0; i < nLightSources; ++i) {
+            vec3 l = lightDirectionsViewSpace[i];
+            vec3 r = reflect(l, n);
 
-        vec3 ambientColor = ambientIntensity * lightColorAmbient * diffuseAlbedo;
-        vec3 diffuseColor = diffuseIntensity * lightColor * diffuseAlbedo * max(diffuseCosineFactor, 0);
-        vec3 specularColor = specularIntensity * lightColor * SpecularAlbedo * pow(max(specularCosineFactor, 0), specularPower);
+            float diffuseCosineFactor = dot(n,l);
+            float specularCosineFactor = dot(c,r);
+            const float specularPower = 100.0;
 
-        frag.color.rgb = ambientColor + diffuseColor + specularColor;
+            vec3 diffuseColor =
+                diffuseIntensity * lightColor * diffuseAlbedo *
+                max(diffuseCosineFactor, 0);
+
+            vec3 specularColor =
+                specularIntensity * lightColor * SpecularAlbedo *
+                pow(max(specularCosineFactor, 0), specularPower);
+
+            color += lightIntensities[i] * (diffuseColor + specularColor);
+        }
+        frag.color.rgb = color;
     }
     else {
         frag.color.rgb = diffuseAlbedo;

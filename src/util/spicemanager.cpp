@@ -401,7 +401,7 @@ bool SpiceManager::hasFrameId(const std::string& frame) const {
 }
 
 void getValueInternal(const std::string& body, const std::string& value, int size,
-    double* v)
+                      double* v)
 {
     ghoul_assert(!body.empty(), "Empty body");
     ghoul_assert(!value.empty(), "Empty value");

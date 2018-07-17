@@ -108,7 +108,7 @@ json TimeTopic::currentTime() {
 }
 
 json TimeTopic::deltaTime() {
-    json timeJson = { { "deltaTime", OsEng.timeManager().time().deltaTime() } };
+    json timeJson = { { "deltaTime", OsEng.timeManager().deltaTime() } };
     return wrappedPayload(timeJson);
 }
 

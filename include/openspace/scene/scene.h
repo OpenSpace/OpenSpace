@@ -184,7 +184,7 @@ public:
      * \pre \p durationSeconds must be positive and not 0
      * \post A new interpolation record exists for \p that is not expired
      */
-    void addInterpolation(properties::Property* prop, float durationSeconds,
+    void addPropertyInterpolation(properties::Property* prop, float durationSeconds,
         ghoul::EasingFunction easingFunction = ghoul::EasingFunction::Linear);
 
     /**
@@ -196,7 +196,7 @@ public:
      * \pre \prop must not be nullptr
      * \post No interpolation record exists for \p prop
      */
-    void removeInterpolation(properties::Property* prop);
+    void removePropertyInterpolation(properties::Property* prop);
 
     /**
      * Informs all Property%s with active interpolations about applying a new update tick
@@ -241,14 +241,14 @@ private:
     std::set<ghoul::opengl::ProgramObject*> _programsToUpdate;
     std::vector<std::unique_ptr<ghoul::opengl::ProgramObject>> _programs;
 
-    struct InterpolationInfo {
+    struct PropertyInterpolationInfo {
         properties::Property* prop;
         std::chrono::time_point<std::chrono::steady_clock> beginTime;
         float durationSeconds;
         ghoul::EasingFunc<float> easingFunction;
         bool isExpired = false;
     };
-    std::vector<InterpolationInfo> _interpolationInfos;
+    std::vector<PropertyInterpolationInfo> _propertyInterpolationInfos;
 };
 
 } // namespace openspace

@@ -34,6 +34,8 @@
 #include <memory>
 #include <vector>
 
+ //#define Debugging_Core_SceneGraphNode_Indices
+
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
@@ -180,6 +182,11 @@ private:
 
     glm::dmat4 _modelTransformCached;
     glm::dmat4 _inverseModelTransformCached;
+
+#ifdef Debugging_Core_SceneGraphNode_Indices
+    int index = 0;
+    static int nextIndex;
+#endif // Debugging_Core_SceneGraphNode_Indices
 };
 
 } // namespace openspace

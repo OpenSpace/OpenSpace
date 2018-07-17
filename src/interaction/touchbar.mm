@@ -90,7 +90,7 @@ NSArray* focusIdentifiers;
         if ([identifier isEqualToString:pauseResultId]) {
             NSButton* button = [NSButton 
                 buttonWithTitle:NSLocalizedString(
-                    (OsEng.timeManager().time().paused() ? @"Resume" : @"Pause"),
+                    (OsEng.timeManager().isPaused() ? @"Resume" : @"Pause"),
                     @""
                 )
                 target:self action:@selector(pauseResumeButtonAction:)
@@ -177,7 +177,7 @@ NSArray* focusIdentifiers;
 
         NSButton* button = static_cast<NSButton*>(sender);
         // This check is inverted since the togglePause script has not run yet
-        [button setTitle: OsEng.timeManager().time().paused() ? @"Pause" : @"Resume"];
+        [button setTitle: OsEng.timeManager().isPaused() ? @"Pause" : @"Resume"];
     }
 
     - (void)focusObjectAction:(id)sender {

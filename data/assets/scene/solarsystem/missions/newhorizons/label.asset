@@ -18,7 +18,8 @@ local Labels = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/Labels.obj"
         }, 
-        ColorTexture =  textures .. "/labels.png"
+        ColorTexture =  textures .. "/labels.png",
+        AmbientIntensity = 0.8
     },
     GUI = {
         Path = "/Solar System/Missions/New Horizons"

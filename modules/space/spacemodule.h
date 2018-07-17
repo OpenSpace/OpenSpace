@@ -27,6 +27,7 @@
 
 #include <openspace/util/openspacemodule.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/opengl/programobjectmanager.h>
 
 namespace openspace {
@@ -44,6 +45,8 @@ public:
 private:
     void internalInitialize(const ghoul::Dictionary&) override;
     void internalDeinitializeGL() override;
+
+    properties::BoolProperty _showSpiceExceptions;
 };
 
 } // namespace openspace
