@@ -71,10 +71,7 @@ documentation::Documentation TimeFrameInterval::Documentation() {
             },
             {
                 StartInfo.identifier,
-                new OrVerifier{
-                    new DoubleVerifier,
-                    new StringVerifier,
-                },
+                new OrVerifier({ new DoubleVerifier, new StringVerifier }),
                 Optional::Yes,
                 StartInfo.description
             },
@@ -86,10 +83,7 @@ documentation::Documentation TimeFrameInterval::Documentation() {
             },
             {
                 EndInfo.identifier,
-                new OrVerifier{
-                    new DoubleVerifier,
-                    new StringVerifier,
-                },
+                new OrVerifier({ new DoubleVerifier, new StringVerifier }),
                 Optional::Yes,
                 EndInfo.description
             },

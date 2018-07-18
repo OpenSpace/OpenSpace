@@ -100,10 +100,7 @@ documentation::Documentation SpiceTranslation::Documentation() {
             },
             {
                 KeyKernels,
-                new OrVerifier(
-                    new StringListVerifier,
-                    new StringVerifier
-                ),
+                new OrVerifier({ new StringListVerifier, new StringVerifier }),
                 Optional::Yes,
                 "A single kernel or list of kernels that this SpiceTranslation depends "
                 "on. All provided kernels will be loaded before any other operation is "

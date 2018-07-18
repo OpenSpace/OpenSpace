@@ -201,10 +201,7 @@ documentation::Documentation ScreenSpaceRenderable::Documentation() {
             },
             {
                 KeyTag,
-                new OrVerifier(
-                    new StringVerifier,
-                    new StringListVerifier
-                ),
+                new OrVerifier({ new StringVerifier, new StringListVerifier }),
                 Optional::Yes,
                 "Defines either a single or multiple tags that apply to this "
                 "ScreenSpaceRenderable, thus making it possible to address multiple, "

@@ -939,27 +939,25 @@ struct ReferencingVerifier : public TableVerifier {
  */
 struct AndVerifier : public Verifier {
     /**
-     * Constructs an AndVerifier with two Verifiers which must be cleared by incoming
-     * values in order to pass this Verifier.
+     * Constructs an AndVerifier with Verifiers that must be cleared by incoming values in
+     * order to pass this Verifier.
      *
-     * \param l The first Verifier that is to be tested
-     * \param r The second Verifier that is to be tested
+     * \param values The list of Verifiers that are to be tested
      *
-     * \pre l must not be nullptr
-     * \pre r must not be nullptr
+     * \pre values must contain at least two values
      */
-    AndVerifier(Verifier* l, Verifier* r);
+    AndVerifier(const std::vector<Verifier*> values);
 
     /**
      * Checks whether the \p dictionary contains the \p key and whether this key passes
-     * both Verifier%'s that were passed in the constructor. If the value fails either
-     * of the two Verifiers, it is only added once to the TestResult::offenses list with
-     * a reason of TestResult::Offense::Reason::Verification.
+     * all Verifier%s that were passed in the constructor. If the value fails at least
+     * one Verifiers, it is only added once to the TestResult::offenses list with a reason
+     * of TestResult::Offense::Reason::Verification.
      *
      * \param dictionary The ghoul::Dictionary that is to be tested
      * \param key The key contained in \p dictionary that is to be tested
      * \return A TestResult object that contains the test results. If the value fails
-     *         either of the two Verifiers, TestResult::success is \c false and the
+     *         any passed  Verifiers, TestResult::success is \c false and the
      *         TestResult::offenses list contains \p with a reason of
      *         TestResult::Offense::Reason::Verification. If \p key%'s value passes both
      *         Verifier%s, the result's TestResult::success is \c true and the
@@ -971,10 +969,7 @@ struct AndVerifier : public Verifier {
     std::string type() const override;
     std::string documentation() const override;
 
-    /// The first Verifier that incoming values are tested against
-    std::shared_ptr<Verifier> lhs;
-    /// The second Verifier that incoming values are tested against
-    std::shared_ptr<Verifier> rhs;
+    std::vector<std::shared_ptr<Verifier>> values;
 };
 
 /**
@@ -985,27 +980,25 @@ struct AndVerifier : public Verifier {
  */
 struct OrVerifier : public Verifier {
     /**
-     * Constructs an OrVerifier with two Verifiers, either of which must be cleared by
-     * incoming values in order to pass this Verifier.
+     * Constructs an OrVerifier with Verifiers that must be cleared by incoming values in
+     * order to pass this Verifier.
      *
-     * \param l The first Verifier that is to be tested
-     * \param r The second Verifier that is to be tested
+     * \param values The list of Verifiers that are to be tested
      *
-     * \pre l must not be nullptr
-     * \pre r must not be nullptr
+     * \pre values must contain at least two values
      */
-    OrVerifier(Verifier* l, Verifier* r);
+    OrVerifier(const std::vector<Verifier*> values);
 
     /**
      * Checks whether the \p dictionary contains the \p key and whether this key passes
-     * either of the two Verifier%'s that were passed in the constructor. If the value
-     * fails both Verifiers, it is added to the TestResult::offenses list with a reason of
+     * any of the Verifier%s that were passed in the constructor. If the value fails all
+     * Verifiers, it is added to the TestResult::offenses list with a reason of
      * TestResult::Offense::Reason::Verification.
      *
      * \param dictionary The ghoul::Dictionary that is to be tested
      * \param key The key contained in \p dictionary that is to be tested
      * \return A TestResult object that contains the test results. If the value fails
-     *         both Verifiers, TestResult::success is \c false and the
+     *         all Verifiers, TestResult::success is \c false and the
      *         TestResult::offenses list contains \p with a reason of
      *         TestResult::Offense::Reason::Verification. If \p key%'s value passes either
      *         of the two Verifier%s, the result's TestResult::success is \c true and the
@@ -1017,10 +1010,7 @@ struct OrVerifier : public Verifier {
     std::string type() const override;
     std::string documentation() const override;
 
-    /// The first Verifier that incoming values are tested against
-    std::shared_ptr<Verifier> lhs;
-    /// The second Verifier that incoming values are tested against
-    std::shared_ptr<Verifier> rhs;
+    std::vector<std::shared_ptr<Verifier>> values;
 };
 
 /// A short-hand definition for a Verifier checking for <code>glm::bvec2</code>
