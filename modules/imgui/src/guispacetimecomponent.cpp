@@ -342,78 +342,102 @@ void GuiSpaceTimeComponent::render() {
     }
 
     ImGui::Text("%s", "Time Slider");
-    bool accelerationDeltaChanged = ImGui::SliderFloat(
-        "Delta Time Acceleration",
-        &_accelerationDelta,
-        -100.f,
-        100.f,
-        "%.6f"
-    );
-
-    if (accelerationDeltaChanged || ImGui::IsItemActive() || ImGui::IsItemClicked()) {
-        // We want the value to change by _accelerationDelta every 100 ms real world time
-        const double newDeltaTime = convertTime(
-            _deltaTime + _accelerationDelta * OsEng.windowWrapper().deltaTime() * 10,
-            static_cast<TimeUnit>(_deltaTimeUnit),
-            TimeUnit::Second
-        );
-
-        OsEng.scriptEngine().queueScript(
-            "openspace.time.setDeltaTime(" + std::to_string(newDeltaTime) + ")",
-            scripting::ScriptEngine::RemoteScripting::No
+    ImGui::Checkbox("Reset time after shuttle", &_resetTimeAfterShuttle);
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip(
+            "%s",
+            "If this is enabled, after moving time with the slider below the delta time "
+            "is reset to its old value. If this is disabled, the end value of the slider "
+            "is retained"
         );
     }
-    else {
-        _accelerationDelta = 0.f;
-    }
 
-    _deltaTime -= _slidingDelta;
-
-    bool firstSlidingValue = _slidingDelta == 0.f;
-    const bool slidingDeltaChanged = ImGui::SliderFloat(
-        "Delta Time Slider",
-        &_slidingDelta,
-        -100.f,
-        100.f,
-        "%.6f"
-    );
-    firstSlidingValue &= _slidingDelta != 0.f;
-
-    if (slidingDeltaChanged) {
-        if (firstSlidingValue) {
-            _oldDeltaTime = _deltaTime;
-        }
-
-        const double newDeltaTime = convertTime(
-            _deltaTime + _slidingDelta,
-            _deltaTimeUnit,
-            TimeUnit::Second
+    if (_resetTimeAfterShuttle) {
+        bool firstSlidingValue = _slidingDelta == 0.f;
+        const bool slidingDeltaChanged = ImGui::SliderFloat(
+            "Delta Time Slider",
+            &_slidingDelta,
+            -100.f,
+            100.f,
+            "%.6f"
         );
+        firstSlidingValue &= _slidingDelta != 0.f;
 
-        OsEng.scriptEngine().queueScript(
-            "openspace.time.setDeltaTime(" + std::to_string(newDeltaTime) + ")",
-            scripting::ScriptEngine::RemoteScripting::No
-        );
-    }
-    if (!ImGui::IsItemActive() && !ImGui::IsItemClicked()) {
-        if (_slidingDelta != 0.f) {
-            OsEng.scriptEngine().queueScript(
-                "openspace.time.setDeltaTime(" + std::to_string(_oldDeltaTime) + ")",
-                scripting::ScriptEngine::RemoteScripting::No
+        if (slidingDeltaChanged) {
+            if (firstSlidingValue) {
+                _oldDeltaTime = _deltaTime;
+            }
+
+            const double newDeltaTime = convertTime(
+                _deltaTime + _slidingDelta,
+                _deltaTimeUnit,
+                TimeUnit::Second
             );
 
+            OsEng.scriptEngine().queueScript(
+                "openspace.time.setDeltaTime(" + std::to_string(newDeltaTime) + ")",
+                scripting::ScriptEngine::RemoteScripting::No
+            );
         }
-        _slidingDelta = 0.f;
-    }
+        if (!ImGui::IsItemActive() && !ImGui::IsItemClicked()) {
+            if (_slidingDelta != 0.f) {
+                OsEng.scriptEngine().queueScript(
+                    "openspace.time.setDeltaTime(" + std::to_string(_oldDeltaTime) + ")",
+                    scripting::ScriptEngine::RemoteScripting::No
+                );
 
+            }
+            _slidingDelta = 0.f;
+        }
+    }
+    else {
+        bool accelerationDeltaChanged = ImGui::SliderFloat(
+            "Delta Time Slider",
+            &_accelerationDelta,
+            -100.f,
+            100.f,
+            "%.6f"
+        );
+
+        if (accelerationDeltaChanged || ImGui::IsItemActive() || ImGui::IsItemClicked()) {
+            // We want the value to change by _accelerationDelta every 100 real world ms
+            const double newDeltaTime = convertTime(
+                _deltaTime + _accelerationDelta * OsEng.windowWrapper().deltaTime() * 10,
+                static_cast<TimeUnit>(_deltaTimeUnit),
+                TimeUnit::Second
+            );
+
+            OsEng.scriptEngine().queueScript(
+                "openspace.time.setDeltaTime(" + std::to_string(newDeltaTime) + ")",
+                scripting::ScriptEngine::RemoteScripting::No
+            );
+        }
+        else {
+            _accelerationDelta = 0.f;
+        }
+
+        _deltaTime -= _slidingDelta;
+    }
+    
     const bool isPaused = OsEng.timeManager().isPaused();
     const bool pauseChanged = ImGui::Button(
         isPaused ? "Resume" : "Pause",
-        { ImGui::GetWindowWidth() - 7.5f, 0.f }
+        { ImGui::GetWindowWidth() / 2 - 7.5f, 0.f }
     );
     if (pauseChanged) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.interpolateTogglePause()",
+            scripting::ScriptEngine::RemoteScripting::No
+        );
+    }
+    ImGui::SameLine();
+    const bool invert = ImGui::Button(
+        "Invert",
+        { ImGui::GetWindowWidth() / 2 - 7.5f, 0.f }
+    );
+    if (invert) {
+        OsEng.scriptEngine().queueScript(
+            "openspace.time.interpolateDeltaTime(-1 * openspace.time.deltaTime());",
             scripting::ScriptEngine::RemoteScripting::No
         );
     }
@@ -498,7 +522,6 @@ void GuiSpaceTimeComponent::render() {
             scripting::ScriptEngine::RemoteScripting::No
         );
     }
-    ImGui::SameLine();
 
     ImGui::End();
 }
