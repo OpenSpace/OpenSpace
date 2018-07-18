@@ -224,7 +224,12 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
         // ... fill all of the values
         for (int i = 0; i < nValues; ++i) {
-            const glm::vec3 p = _translation->position(_start + i * totalSampleInterval);
+            const glm::vec3 p = _translation->position({
+                {},
+                _start + i * totalSampleInterval,
+                0.0,
+                false
+            });
             _vertexArray[i] = { p.x, p.y, p.z };
         }
 
@@ -283,7 +288,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         );
 
         // And get the current location of the object
-        const glm::dvec3 p = _translation->position(data.time.j2000Seconds());
+        const glm::dvec3 p = _translation->position(data);
         const glm::dvec3 v1 = { p.x, p.y, p.z };
 
         // Comptue the difference between the points in double precision

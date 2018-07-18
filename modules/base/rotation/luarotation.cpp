@@ -95,7 +95,7 @@ LuaRotation::LuaRotation(const ghoul::Dictionary& dictionary) : LuaRotation() {
     _luaScriptFile = absPath(dictionary.value<std::string>(ScriptInfo.identifier));
 }
 
-glm::dmat3 LuaRotation::matrix(const Time& time) const {
+glm::dmat3 LuaRotation::matrix(const UpdateData& data) const {
     ghoul::lua::runScriptFile(_state, _luaScriptFile);
 
     // Get the scaling function
@@ -110,9 +110,12 @@ glm::dmat3 LuaRotation::matrix(const Time& time) const {
     }
 
     // First argument is the number of seconds past the J2000 epoch in ingame time
-    ghoul::lua::push(_state, time.j2000Seconds());
+    ghoul::lua::push(_state, data.time.j2000Seconds());
 
-    // Second argument is the number of milliseconds past the J2000 epoch in wallclock
+    // Second argument is the number of seconds past the J2000 epoch of the last frame
+    ghoul::lua::push(_state, data.previousFrameTime.j2000Seconds());
+
+    // Third argument is the number of milliseconds past the J2000 epoch in wallclock
     using namespace std::chrono;
     auto now = high_resolution_clock::now();
     ghoul::lua::push(_state, duration_cast<milliseconds>(now.time_since_epoch()).count());

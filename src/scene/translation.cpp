@@ -77,13 +77,13 @@ bool Translation::initialize() {
     return true;
 }
 
-void Translation::update(const Time& time) {
-    if (!_needsUpdate && time.j2000Seconds() == _cachedTime) {
+void Translation::update(const UpdateData& data) {
+    if (!_needsUpdate && data.time.j2000Seconds() == _cachedTime) {
         return;
     }
     const glm::dvec3 oldPosition = _cachedPosition;
-    _cachedPosition = position(time);
-    _cachedTime = time.j2000Seconds();
+    _cachedPosition = position(data);
+    _cachedTime = data.time.j2000Seconds();
     _needsUpdate = false;
 
     if (oldPosition != _cachedPosition) {

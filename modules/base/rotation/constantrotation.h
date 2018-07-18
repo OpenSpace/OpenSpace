@@ -22,47 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SCALE___H__
-#define __OPENSPACE_CORE___SCALE___H__
+#ifndef __OPENSPACE_MODULE_BASE___CONSTANTROTATION___H__
+#define __OPENSPACE_MODULE_BASE___CONSTANTROTATION___H__
 
-#include <openspace/properties/propertyowner.h>
+#include <openspace/scene/rotation.h>
 
-#include <ghoul/glm.h>
-#include <memory>
-
-namespace ghoul { class Dictionary; }
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/dvec3property.h>
 
 namespace openspace {
 
-struct UpdateData;
-
 namespace documentation { struct Documentation; }
 
-class Scale : public properties::PropertyOwner {
+class ConstantRotation : public Rotation {
 public:
-    static std::unique_ptr<Scale> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
+    ConstantRotation(const ghoul::Dictionary& dictionary);
 
-    Scale();
-    virtual ~Scale() = default;
-
-    virtual bool initialize();
-
-    double scaleValue() const;
-    virtual double scaleValue(const UpdateData& data) const = 0;
-    virtual void update(const UpdateData& data);
+    glm::dmat3 matrix(const UpdateData& data) const override;
 
     static documentation::Documentation Documentation();
 
-protected:
-    void requireUpdate();
-
 private:
-    bool _needsUpdate = true;
-    double _cachedTime = -std::numeric_limits<double>::max();
-    double _cachedScale = 1.0;
+    properties::DVec3Property _rotationAxis;
+    properties::FloatProperty _rotationRate;
+
+    mutable double _accumulatedRotation = 0.0;
 };
 
-}  // namespace openspace
+} // namespace openspace
 
-#endif // __OPENSPACE_CORE___SCALE___H__
+#endif // __OPENSPACE_MODULE_BASE___CONSTANTROTATION___H__

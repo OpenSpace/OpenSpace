@@ -197,7 +197,12 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
 
     // 2
     // Write the current location into the floating position
-    const glm::vec3 p = _translation->position(data.time.j2000Seconds());
+    const glm::vec3 p = _translation->position({
+        {},
+        data.time.j2000Seconds(),
+        0.0,
+        false
+    });
     _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
 
     glBindVertexArray(_primaryRenderInformation._vaoID);
@@ -371,7 +376,12 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
 
             // Get the new permanent point and write it into the (previously) floating
             // location
-            const glm::vec3 p = _translation->position(_lastPointTime);
+            const glm::vec3 p = _translation->position({
+                {},
+                _lastPointTime,
+                0.0,
+                false
+            });
             _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
 
             // Move the current pointer back one step to be used as the new floating
@@ -406,7 +416,12 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
 
             // Get the new permanent point and write it into the (previously) floating
             // location
-            const glm::vec3 p = _translation->position(_firstPointTime);
+            const glm::vec3 p = _translation->position({
+                {},
+                _firstPointTime,
+                0.0,
+                false
+            });
             _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
 
             // if we are on the upper bounds of the array, we start at 0
@@ -447,7 +462,7 @@ void RenderableTrailOrbit::fullSweep(double time) {
     const double secondsPerPoint = _period / (_resolution - 1);
     // starting at 1 because the first position is a floating current one
     for (int i = 1; i < _resolution; ++i) {
-        const glm::vec3 p = _translation->position(time);
+        const glm::vec3 p = _translation->position({ {}, time, 0.0, false });
         _vertexArray[i] = { p.x, p.y, p.z };
 
         time -= secondsPerPoint;

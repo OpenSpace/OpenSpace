@@ -526,7 +526,7 @@ bool FixedRotation::initialize() {
     return res;
 }
 
-glm::dmat3 FixedRotation::matrix(const Time&) const {
+glm::dmat3 FixedRotation::matrix(const UpdateData&) const {
     if (!_enabled) {
         return glm::dmat3();
     }

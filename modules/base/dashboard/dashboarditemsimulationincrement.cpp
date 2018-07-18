@@ -177,29 +177,55 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
 }
 
 void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
-    const double t = OsEng.timeManager().targetDeltaTime();
-    std::pair<double, std::string> deltaTime;
+    const double targetDt = OsEng.timeManager().targetDeltaTime();
+    const double currentDt = OsEng.timeManager().deltaTime();
+    std::pair<double, std::string> targetDeltaTime;
+    std::pair<double, std::string> currentDeltaTime;
     if (_doSimplification) {
-        deltaTime = simplifyTime(t);
+        targetDeltaTime = simplifyTime(targetDt);
+        if (targetDt != currentDt) {
+            currentDeltaTime = simplifyTime(currentDt);
+        }
     }
     else {
         const TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
-        const double convertedT = convertTime(t, TimeUnit::Second, unit);
-        deltaTime = { convertedT, nameForTimeUnit(unit, convertedT != 1.0) };
+
+        const double convTarget = convertTime(targetDt, TimeUnit::Second, unit);
+        targetDeltaTime = { convTarget, nameForTimeUnit(unit, convTarget != 1.0) };
+
+        if (targetDt != currentDt) {
+            const double convCurrent = convertTime(currentDt, TimeUnit::Second, unit);
+            currentDeltaTime = { convCurrent, nameForTimeUnit(unit, convCurrent != 1.0) };
+        }
     }
 
     std::string pauseText = OsEng.timeManager().isPaused() ? " (Paused)" : "";
 
     penPosition.y -= _font->height();
-    RenderFont(
-        *_font,
-        penPosition,
-        fmt::format(
-            "Simulation increment: {:.1f} {:s} / second{:s}",
-            deltaTime.first, deltaTime.second,
-            pauseText
-        )
-    );
+    if (targetDt != currentDt && !OsEng.timeManager().isPaused()) {
+        // We are in the middle of a transition
+        RenderFont(
+            *_font,
+            penPosition,
+            fmt::format(
+                "Simulation increment: {:.1f} {:s} / second{:s} (current: {:.1f} {:s})",
+                targetDeltaTime.first, targetDeltaTime.second,
+                pauseText,
+                currentDeltaTime.first, currentDeltaTime.second
+            )
+        );
+    }
+    else {
+        RenderFont(
+            *_font,
+            penPosition,
+            fmt::format(
+                "Simulation increment: {:.1f} {:s} / second{:s}",
+                targetDeltaTime.first, targetDeltaTime.second,
+                pauseText
+            )
+        );
+    }
 }
 
 glm::vec2 DashboardItemSimulationIncrement::size() const {

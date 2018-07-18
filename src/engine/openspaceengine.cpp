@@ -1367,9 +1367,11 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
         }
     }
 
-    const bool isConsoleConsumed = _console->keyboardCallback(key, mod, action);
-    if (isConsoleConsumed) {
-        return;
+    if (!_configuration->isConsoleDisabled) {
+        const bool isConsoleConsumed = _console->keyboardCallback(key, mod, action);
+        if (isConsoleConsumed) {
+            return;
+        }
     }
 
     _navigationHandler->keyboardCallback(key, mod, action);

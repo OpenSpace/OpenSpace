@@ -67,6 +67,7 @@ namespace {
     constexpr const char* KeyRenderingMethod = "RenderingMethod";
     constexpr const char* KeyDisableRenderingOnMaster = "DisableRenderingOnMaster";
     constexpr const char* KeyDisableSceneOnMaster = "DisableSceneOnMaster";
+    constexpr const char* KeyDisableInGameConsole = "DisableInGameConsole";
     constexpr const char* KeyScreenshotUseDate = "ScreenshotUseDate";
     constexpr const char* KeyHttpProxy = "HttpProxy";
     constexpr const char* KeyAddress = "Address";
@@ -284,6 +285,7 @@ void parseLuaState(Configuration& configuration) {
     getValue(s, KeyPerSceneCache, c.usePerSceneCache);
     getValue(s, KeyDisableRenderingOnMaster, c.isRenderingOnMasterDisabled);
     getValue(s, KeyDisableSceneOnMaster, c.isSceneTranslationOnMasterDisabled);
+    getValue(s, KeyDisableInGameConsole, c.isConsoleDisabled);
     getValue(s, KeyRenderingMethod, c.renderingMethod);
     getValue(s, KeyServerPasskey, c.serverPasskey);
     getValue(s, KeyRequireSocketAuthentication, c.doesRequireSocketAuthentication);
