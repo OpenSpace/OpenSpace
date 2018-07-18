@@ -115,7 +115,13 @@ bool FlightControllerTopic::isDone() const {
 }
 
 void FlightControllerTopic::handleJson(const nlohmann::json& json) {
-    switch (CommandMap.at(json[TypeKey])) {
+    auto it = CommandMap.find(json[TypeKey]);
+    if (it == CommandMap.end()) {
+        LWARNING(fmt::format("Poorly formatted JSON command: no '{}' in payload", TypeKey));
+        return;
+    }
+
+    switch (it->second) {
         case Command::Connect:
             connect();
             break;
@@ -126,7 +132,7 @@ void FlightControllerTopic::handleJson(const nlohmann::json& json) {
             processInputState(json);
             break;
         default:
-            LWARNING(fmt::format("Unrecognized action: {}", json[TypeKey]));
+            LWARNING(fmt::format("Unrecognized action: {}", it->first));
             break;
     }
 }
