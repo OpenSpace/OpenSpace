@@ -51,14 +51,14 @@ struct TimeKeyframeData {
 
 class TimeManager : public properties::PropertyOwner {
 public:
-    TimeManager();
-
     using CallbackHandle = int;
     using TimeChangeCallback = std::function<void()>;
 
+    TimeManager();
+
     const Time& time() const;
     const Time& integrateFromTime() const;
-    const Timeline<TimeKeyframeData>& timeline();
+    const Timeline<TimeKeyframeData>& timeline() const;
 
     std::vector<Syncable*> getSyncables();
     void preSynchronization(double dt);
@@ -105,6 +105,7 @@ public:
     void removeDeltaTimeChangeCallback(CallbackHandle handle);
     void removeTimeJumpCallback(CallbackHandle handle);
     void removeTimelineChangeCallback(CallbackHandle handle);
+
 private:
     void progressTime(double dt);
     void applyKeyframeData(const TimeKeyframeData& keyframe);

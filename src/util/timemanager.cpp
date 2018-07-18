@@ -28,7 +28,6 @@
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/timeline.h>
-
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -75,8 +74,7 @@ using datamessagestructures::TimeKeyframe;
 
 TimeManager::TimeManager()
     : properties::PropertyOwner({ "TimeManager" })
-    , _defaultTimeInterpolationDuration(
-        DefaultTimeInterpolationDurationInfo,
+    , _defaultTimeInterpolationDuration(DefaultTimeInterpolationDurationInfo,
         2.f,
         0.f,
         5.f
@@ -354,7 +352,6 @@ void TimeManager::setTimeNextFrame(Time t) {
     clearKeyframes();
 }
 
-
 void TimeManager::setDeltaTime(double deltaTime) {
     interpolateDeltaTime(deltaTime, 0.0);
 }
@@ -371,7 +368,7 @@ const Time& TimeManager::integrateFromTime() const {
     return _integrateFromTime;
 }
 
-const Timeline<TimeKeyframeData>& TimeManager::timeline() {
+const Timeline<TimeKeyframeData>& TimeManager::timeline() const {
     return _timeline;
 }
 
@@ -392,8 +389,7 @@ TimeManager::CallbackHandle TimeManager::addDeltaTimeChangeCallback(TimeChangeCa
     return handle;
 }
 
-TimeManager::CallbackHandle TimeManager::addTimeJumpCallback(TimeChangeCallback cb)
-{
+TimeManager::CallbackHandle TimeManager::addTimeJumpCallback(TimeChangeCallback cb) {
     CallbackHandle handle = _nextCallbackHandle++;
     _timeJumpCallbacks.emplace_back(handle, std::move(cb));
     return handle;
@@ -441,12 +437,12 @@ void TimeManager::removeDeltaTimeChangeCallback(CallbackHandle handle) {
 }
 
 void TimeManager::removeTimeJumpCallback(CallbackHandle handle) {
-    auto it = std::find_if(
+    const auto it = std::find_if(
         _timeJumpCallbacks.begin(),
         _timeJumpCallbacks.end(),
         [handle](const std::pair<CallbackHandle, std::function<void()>>& cb) {
-        return cb.first == handle;
-    }
+            return cb.first == handle;
+        }
     );
 
     ghoul_assert(
@@ -458,7 +454,7 @@ void TimeManager::removeTimeJumpCallback(CallbackHandle handle) {
 }
 
 void TimeManager::removeTimelineChangeCallback(CallbackHandle handle) {
-    auto it = std::find_if(
+    const auto it = std::find_if(
         _timelineChangeCallbacks.begin(),
         _timelineChangeCallbacks.end(),
         [handle](const std::pair<CallbackHandle, std::function<void()>>& cb) {
