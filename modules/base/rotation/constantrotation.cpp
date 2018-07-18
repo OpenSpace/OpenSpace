@@ -22,75 +22,104 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rotation/staticrotation.h>
+#include <modules/base/rotation/constantrotation.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/util/updatestructures.h>
+#include <glm/gtx/quaternion.hpp>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
-        "Rotation",
-        "Rotation",
-        "This value is the used as a 3x3 rotation matrix that is applied to the scene "
-        "graph node that this transformation is attached to relative to its parent."
+        "RotationAxis",
+        "Rotation Axis",
+        "This value is the rotation axis around which the object will rotate."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RotationRateInfo = {
+        "RotationRate",
+        "Rotation Rate",
+        "This value determines the number of revolutions per in-game second"
     };
 } // namespace
 
 namespace openspace {
 
-documentation::Documentation StaticRotation::Documentation() {
+documentation::Documentation ConstantRotation::Documentation() {
     using namespace openspace::documentation;
     return {
         "Static Rotation",
-        "base_transform_rotation_static",
+        "base_transform_rotation_constant",
         {
             {
                 "Type",
-                new StringEqualVerifier("StaticRotation"),
+                new StringEqualVerifier("ConstantRotation"),
                 Optional::No
             },
             {
                 RotationInfo.identifier,
-                new OrVerifier(
-                    new DoubleVector3Verifier(),
-                    new DoubleMatrix3Verifier()
-                ),
-                Optional::No,
-                "Stores the static rotation as either a vector containing Euler angles "
-                "or by specifiying the 3x3 rotation matrix directly"
+                new DoubleVector3Verifier(),
+                Optional::Yes,
+                RotationInfo.description
+            },
+            {
+                RotationRateInfo.identifier,
+                new DoubleVerifier(),
+                Optional::Yes,
+                RotationRateInfo.description
             }
         }
     };
 }
 
-StaticRotation::StaticRotation()
-    : _rotationMatrix(RotationInfo, glm::dmat3(1.0), glm::dmat3(-1.0), glm::dmat3(1.0))
+ConstantRotation::ConstantRotation(const ghoul::Dictionary& dictionary)
+    : _rotationAxis(
+        RotationInfo,
+        glm::dvec3(0.0, 0.0, 1.0),
+        glm::dvec3(-1.0),
+        glm::dvec3(1.0)
+    )
+    , _rotationRate(RotationRateInfo, 1.f, -1000.f, 1000.f)
 {
-    addProperty(_rotationMatrix);
-    _rotationMatrix.onChange([this]() { requireUpdate(); });
-}
-
-StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary) : StaticRotation() {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "StaticRotation"
-    );
-
+    addProperty(_rotationAxis);
+    addProperty(_rotationRate);
 
     if (dictionary.hasKeyAndValue<glm::dvec3>(RotationInfo.identifier)) {
-        _rotationMatrix = glm::mat3_cast(
-            glm::dquat(dictionary.value<glm::dvec3>(RotationInfo.identifier))
-        );
+        _rotationAxis = dictionary.value<glm::dvec3>(RotationInfo.identifier);
     }
-    else {
-        // Must be glm::dmat3 due to specification restriction
-        _rotationMatrix = dictionary.value<glm::dmat3>(RotationInfo.identifier);
+
+    if (dictionary.hasKeyAndValue<double>(RotationRateInfo.identifier)) {
+        _rotationRate = static_cast<float>(
+            dictionary.value<double>(RotationRateInfo.identifier)
+        );
     }
 }
 
-glm::dmat3 StaticRotation::matrix(const UpdateData&) const {
-    return _rotationMatrix;
+glm::dmat3 ConstantRotation::matrix(const UpdateData& data) const {
+    if (data.time.j2000Seconds() == data.previousFrameTime.j2000Seconds()) {
+        return glm::dmat3();
+    }
+
+    const double rotPerSec = _rotationRate;
+    const double secPerFrame = data.time.j2000Seconds() -
+                               data.previousFrameTime.j2000Seconds();
+
+    const double rotPerFrame = rotPerSec * secPerFrame;
+    const double radPerFrame = rotPerFrame * glm::tau<double>();
+
+    _accumulatedRotation += radPerFrame;
+    // Renormalize the rotation to prevent potential overflow (which probably will never
+    // happen, but whatever)
+    if (_accumulatedRotation > glm::tau<double>()) {
+        _accumulatedRotation -= glm::tau<double>();
+    }
+    if (_accumulatedRotation < -glm::tau<double>()) {
+        _accumulatedRotation += glm::tau<double>();
+    }
+    
+    const glm::dvec3 axis = _rotationAxis;
+    glm::dquat q = glm::angleAxis(_accumulatedRotation, _rotationAxis.value());
+    return glm::toMat3(q);
 }
 
 } // namespace openspace

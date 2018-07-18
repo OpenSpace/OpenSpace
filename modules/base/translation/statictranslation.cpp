@@ -88,7 +88,7 @@ StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
     _position = dictionary.value<glm::dvec3>(PositionInfo.identifier);
 }
 
-glm::dvec3 StaticTranslation::position(const Time&) const {
+glm::dvec3 StaticTranslation::position(const UpdateData&) const {
     return _position;
 }
 

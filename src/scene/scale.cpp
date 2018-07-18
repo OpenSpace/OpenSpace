@@ -83,12 +83,12 @@ double Scale::scaleValue() const {
     return _cachedScale;
 }
 
-void Scale::update(const Time& time) {
-    if (!_needsUpdate && time.j2000Seconds() == _cachedTime) {
+void Scale::update(const UpdateData& data) {
+    if (!_needsUpdate && data.time.j2000Seconds() == _cachedTime) {
         return;
     }
-    _cachedScale = scaleValue(time);
-    _cachedTime = time.j2000Seconds();
+    _cachedScale = scaleValue(data);
+    _cachedTime = data.time.j2000Seconds();
     _needsUpdate = false;
 }
 

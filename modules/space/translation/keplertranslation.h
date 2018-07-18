@@ -66,7 +66,7 @@ public:
     *
     * \param time The time to use when doing the position lookup
     */
-    glm::dvec3 position(const Time& time) const override;
+    glm::dvec3 position(const UpdateData& data) const override;
 
     /**
      * Method returning the openspace::Documentation that describes the ghoul::Dictinoary

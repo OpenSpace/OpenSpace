@@ -174,14 +174,14 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     addProperty(_frame);
 }
 
-glm::dvec3 SpiceTranslation::position(const Time& time) const {
+glm::dvec3 SpiceTranslation::position(const UpdateData& data) const {
     double lightTime = 0.0;
     return SpiceManager::ref().targetPosition(
         _target,
         _observer,
         _frame,
         {},
-        time.j2000Seconds(),
+        data.time.j2000Seconds(),
         lightTime
     ) * glm::pow(10.0, 3.0);
 }
