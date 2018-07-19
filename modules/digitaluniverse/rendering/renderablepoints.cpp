@@ -45,17 +45,22 @@
 #include <string>
 
 namespace {
-    constexpr const char* _loggerCat        = "RenderablePoints";
+    constexpr const char* _loggerCat = "RenderablePoints";
 
-    constexpr const char* KeyFile           = "File";
-    constexpr const char* keyColor          = "Color";
-    constexpr const char* keyUnit           = "Unit";
-    constexpr const char* MeterUnit         = "m";
-    constexpr const char* KilometerUnit     = "Km";
-    constexpr const char* ParsecUnit        = "pc";
-    constexpr const char* KiloparsecUnit    = "Kpc";
-    constexpr const char* MegaparsecUnit    = "Mpc";
-    constexpr const char* GigaparsecUnit    = "Gpc";
+    constexpr const std::array<const char*, 7> UniformNames = {
+        "modelViewProjectionTransform", "color", "sides", "alphaValue", "scaleFactor",
+        "spriteTexture", "hasColorMap"
+    };
+
+    constexpr const char* KeyFile = "File";
+    constexpr const char* keyColor = "Color";
+    constexpr const char* keyUnit = "Unit";
+    constexpr const char* MeterUnit = "m";
+    constexpr const char* KilometerUnit = "Km";
+    constexpr const char* ParsecUnit = "pc";
+    constexpr const char* KiloparsecUnit = "Kpc";
+    constexpr const char* MegaparsecUnit = "Mpc";
+    constexpr const char* GigaparsecUnit = "Gpc";
     constexpr const char* GigalightyearUnit = "Gly";
 
     constexpr int8_t CurrentCacheVersion = 1;
@@ -271,16 +276,6 @@ void RenderablePoints::initializeGL() {
                 );
             }
         );
-
-        _uniformCache.modelViewProjectionTransform = _program->uniformLocation(
-            "modelViewProjectionTransform"
-        );
-        _uniformCache.color = _program->uniformLocation("color");
-        _uniformCache.sides = _program->uniformLocation("sides");
-        _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-        _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
-        _uniformCache.spriteTexture = _program->uniformLocation("spriteTexture");
-        _uniformCache.hasColorMap = _program->uniformLocation("hasColorMap");
     }
     else {
         _program = DigitalUniverseModule::ProgramObjectManager.request(
@@ -293,16 +288,8 @@ void RenderablePoints::initializeGL() {
                 );
             }
         );
-
-        _uniformCache.modelViewProjectionTransform = _program->uniformLocation(
-            "modelViewProjectionTransform"
-        );
-        _uniformCache.color = _program->uniformLocation("color");
-        _uniformCache.sides = _program->uniformLocation("sides");
-        _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-        _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
-        _uniformCache.hasColorMap = _program->uniformLocation("hasColorMap");
     }
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 }
 
 void RenderablePoints::deinitializeGL() {

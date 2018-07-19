@@ -56,6 +56,14 @@ namespace {
     constexpr const char* ProgramObjectName = "RenderableBillboardsCloud";
     constexpr const char* RenderToPolygonProgram = "RenderableBillboardsCloud_Polygon";
 
+    constexpr const std::array<const char*, 19> UniformNames = {
+        "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
+        "renderOption", "minBillboardSize", "maxBillboardSize",
+        "correctionSizeEndDistance", "correctionSizeFactor", "color", "alphaValue",
+        "scaleFactor", "up", "right", "fadeInValue", "screenSize", "spriteTexture",
+        "hasColorMap", "enabledRectSizeControl"
+    };
+
     constexpr const char* KeyFile = "File";
     constexpr const char* keyColor = "Color";
     constexpr const char* keyUnit = "Unit";
@@ -677,37 +685,7 @@ void RenderableBillboardsCloud::initializeGL() {
         }
     );
 
-    _uniformCache.cameraViewProjectionMatrix = _program->uniformLocation(
-        "cameraViewProjectionMatrix"
-    );
-
-    _uniformCache.modelMatrix = _program->uniformLocation(
-        "modelMatrix"
-    );
-
-    _uniformCache.cameraPos = _program->uniformLocation("cameraPosition");
-    _uniformCache.cameraLookup = _program->uniformLocation("cameraLookUp");
-    _uniformCache.renderOption = _program->uniformLocation("renderOption");
-    _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
-    _uniformCache.maxBillboardSize = _program->uniformLocation("maxBillboardSize");
-    _uniformCache.correctionSizeEndDistance = _program->uniformLocation(
-        "correctionSizeEndDistance"
-    );
-    _uniformCache.correctionSizeFactor = _program->uniformLocation(
-        "correctionSizeFactor"
-    );
-    _uniformCache.color = _program->uniformLocation("color");
-    _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-    _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
-    _uniformCache.up = _program->uniformLocation("up");
-    _uniformCache.right = _program->uniformLocation("right");
-    _uniformCache.fadeInValue = _program->uniformLocation("fadeInValue");
-    _uniformCache.screenSize = _program->uniformLocation("screenSize");
-    _uniformCache.spriteTexture = _program->uniformLocation("spriteTexture");
-    _uniformCache.hasColormap = _program->uniformLocation("hasColorMap");
-    _uniformCache.enabledRectSizeControl = _program->uniformLocation(
-        "enabledRectSizeControl"
-    );
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
     if (_hasPolygon) {
         createPolygonTexture();

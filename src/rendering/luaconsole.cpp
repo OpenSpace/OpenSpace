@@ -66,6 +66,10 @@ namespace {
     // when horizontal scrolling is required.
     constexpr const int NVisibleCharsAfterCursor = 5;
 
+    constexpr std::array<const char*, 4> UniformNames = {
+        "res", "color", "height", "ortho"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo VisibleInfo = {
         "IsVisible",
         "Is Visible",
@@ -242,10 +246,7 @@ void LuaConsole::initialize() {
         absPath("${SHADERS}/luaconsole.frag")
     );
 
-    _uniformCache.res = _program->uniformLocation("res");
-    _uniformCache.color = _program->uniformLocation("color");
-    _uniformCache.height = _program->uniformLocation("height");
-    _uniformCache.ortho = _program->uniformLocation("ortho");
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
     const GLfloat data[] = {
         0.f, 0.f,
@@ -701,10 +702,7 @@ void LuaConsole::render() {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
 
-        _uniformCache.res = _program->uniformLocation("res");
-        _uniformCache.color = _program->uniformLocation("color");
-        _uniformCache.height = _program->uniformLocation("height");
-        _uniformCache.ortho = _program->uniformLocation("ortho");
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 
     const glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();

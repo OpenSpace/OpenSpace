@@ -110,9 +110,11 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
         absPath("${SHADERS}/loadingscreen.frag")
     );
 
-    _uniformCache.logoTexture = _program->uniformLocation("logoTexture");
-    _uniformCache.useTexture = _program->uniformLocation("useTexture");
-    _uniformCache.color = _program->uniformLocation("color");
+    ghoul::opengl::updateUniformLocations(
+        *_program,
+        _uniformCache,
+        { "logoTexture", "useTexture", "color" }
+    );
 
     _loadingFont = OsEng.fontManager().font(
         "Loading",

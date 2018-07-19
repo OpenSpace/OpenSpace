@@ -39,6 +39,10 @@ namespace {
     constexpr const char* ProgramName = "ShadowCylinderProgram";
     constexpr const char* MainFrame = "GALACTIC";
 
+    constexpr const std::array<const char*, 2> UniformNames = {
+        "modelViewProjectionTransform", "shadowColor"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo NumberPointsInfo = {
         "AmountOfPoints",
         "Points",
@@ -292,12 +296,7 @@ void RenderableShadowCylinder::initializeGL() {
         }
     );
 
-    _uniformCache.modelViewProjectionTransform = _shader->uniformLocation(
-        "modelViewProjectionTransform"
-    );
-    _uniformCache.shadowColor = _shader->uniformLocation(
-        "shadowColor"
-    );
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 }
 
 void RenderableShadowCylinder::deinitializeGL() {
@@ -352,15 +351,10 @@ void RenderableShadowCylinder::update(const UpdateData& data) {
         MainFrame,
         data.time.j2000Seconds()
     );
+
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
-
-        _uniformCache.modelViewProjectionTransform = _shader->uniformLocation(
-            "modelViewProjectionTransform"
-        );
-        _uniformCache.shadowColor = _shader->uniformLocation(
-            "shadowColor"
-        );
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
     }
     createCylinder(data.time.j2000Seconds());
 }

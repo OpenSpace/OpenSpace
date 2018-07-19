@@ -42,6 +42,10 @@ namespace {
     constexpr const char* KeyTag = "Tag";
     constexpr const float PlaneDepth = -2.f;
 
+    constexpr const std::array<const char*, 5> UniformNames = {
+        "OcclusionDepth", "Alpha", "ModelTransform", "ViewProjectionMatrix", "texture1"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
@@ -471,12 +475,7 @@ void ScreenSpaceRenderable::createShaders() {
         dict
     );
 
-    _uniformCache.occlusionDepth = _shader->uniformLocation("OcclusionDepth");
-    _uniformCache.alpha = _shader->uniformLocation("Alpha");
-    _uniformCache.modelTransform = _shader->uniformLocation("ModelTransform");
-    _uniformCache.viewProj = _shader->uniformLocation("ViewProjectionMatrix");
-    _uniformCache.texture = _shader->uniformLocation("texture1");
-
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 }
 
 glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
