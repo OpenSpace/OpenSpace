@@ -105,7 +105,6 @@ private:
     bool _hasColorMapFile = false;
     bool _hasPolygon = false;
     bool _hasLabel = false;
-    bool _labelDataIsDirty = true;
 
     int _polygonSides = 0;
 
@@ -133,10 +132,8 @@ private:
     // DEBUG:
     properties::OptionProperty _renderOption;
 
-
-    std::unique_ptr<ghoul::opengl::Texture> _polygonTexture;
-    std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
-    std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
+    ghoul::opengl::Texture* _polygonTexture;
+    ghoul::opengl::Texture* _spriteTexture;
     ghoul::opengl::ProgramObject* _program = nullptr;
     ghoul::opengl::ProgramObject* _renderToPolygonProgram = nullptr;
 

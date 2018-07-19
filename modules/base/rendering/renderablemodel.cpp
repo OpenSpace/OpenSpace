@@ -247,7 +247,7 @@ void RenderableModel::initialize() {
 }
 
 void RenderableModel::initializeGL() {
-    _programObject = BaseModule::ProgramObjectManager.requestProgramObject(
+    _programObject = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return OsEng.renderEngine().buildRenderProgram(
@@ -271,7 +271,7 @@ void RenderableModel::deinitializeGL() {
     }
     _texture = nullptr;
 
-    BaseModule::ProgramObjectManager.releaseProgramObject(
+    BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
             OsEng.renderEngine().removeRenderProgram(p);

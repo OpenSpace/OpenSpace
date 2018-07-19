@@ -225,7 +225,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableTrail::initializeGL() {
-    _programObject = BaseModule::ProgramObjectManager.requestProgramObject(
+    _programObject = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return OsEng.renderEngine().buildRenderProgram(
@@ -253,7 +253,7 @@ void RenderableTrail::initializeGL() {
 }
 
 void RenderableTrail::deinitializeGL() {
-    BaseModule::ProgramObjectManager.releaseProgramObject(
+    BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
             OsEng.renderEngine().removeRenderProgram(p);

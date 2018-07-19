@@ -237,7 +237,7 @@ void RenderableSphere::initializeGL() {
     );
     _sphere->initialize();
 
-    _shader = BaseModule::ProgramObjectManager.requestProgramObject(
+    _shader = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return OsEng.renderEngine().buildRenderProgram(
@@ -259,7 +259,7 @@ void RenderableSphere::initializeGL() {
 void RenderableSphere::deinitializeGL() {
     _texture = nullptr;
 
-    BaseModule::ProgramObjectManager.releaseProgramObject(
+    BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
             OsEng.renderEngine().removeRenderProgram(p);

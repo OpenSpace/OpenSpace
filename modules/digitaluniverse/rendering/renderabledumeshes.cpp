@@ -392,7 +392,7 @@ bool RenderableDUMeshes::isReady() const {
 }
 
 void RenderableDUMeshes::initializeGL() {
-    _program = DigitalUniverseModule::ProgramObjectManager.requestProgramObject(
+    _program = DigitalUniverseModule::ProgramObjectManager.request(
         ProgramObjectName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return OsEng.renderEngine().buildRenderProgram(
@@ -437,7 +437,7 @@ void RenderableDUMeshes::deinitializeGL() {
         }
     }
 
-    DigitalUniverseModule::ProgramObjectManager.releaseProgramObject(
+    DigitalUniverseModule::ProgramObjectManager.release(
         ProgramObjectName,
         [](ghoul::opengl::ProgramObject* p) {
             OsEng.renderEngine().removeRenderProgram(p);

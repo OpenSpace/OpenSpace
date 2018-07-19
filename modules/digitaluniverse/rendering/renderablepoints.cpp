@@ -261,7 +261,7 @@ void RenderablePoints::initializeGL() {
     //       end of the program.
 
     if (_hasSpriteTexture) {
-        _program = DigitalUniverseModule::ProgramObjectManager.requestProgramObject(
+        _program = DigitalUniverseModule::ProgramObjectManager.request(
             "RenderablePoints Sprite",
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
                 return OsEng.renderEngine().buildRenderProgram(
@@ -283,7 +283,7 @@ void RenderablePoints::initializeGL() {
         _uniformCache.hasColorMap = _program->uniformLocation("hasColorMap");
     }
     else {
-        _program = DigitalUniverseModule::ProgramObjectManager.requestProgramObject(
+        _program = DigitalUniverseModule::ProgramObjectManager.request(
             "RenderablePoints",
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
                 return OsEng.renderEngine().buildRenderProgram(
@@ -311,7 +311,7 @@ void RenderablePoints::deinitializeGL() {
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
 
-    DigitalUniverseModule::ProgramObjectManager.releaseProgramObject(
+    DigitalUniverseModule::ProgramObjectManager.release(
         _program->name(),
         [](ghoul::opengl::ProgramObject* p) {
             OsEng.renderEngine().removeRenderProgram(p);

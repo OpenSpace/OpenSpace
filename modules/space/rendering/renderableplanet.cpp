@@ -349,7 +349,7 @@ void RenderablePlanet::initializeGL() {
     //           correct one.
 
     if (!_programObject && _shadowEnabled && _hasNightTexture) {
-        _programObject = SpaceModule::ProgramObjectManager.requestProgramObject(
+        _programObject = SpaceModule::ProgramObjectManager.request(
             ShadowNightProgramName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
                 return OsEng.renderEngine().buildRenderProgram(
@@ -361,7 +361,7 @@ void RenderablePlanet::initializeGL() {
         );
     }
     else if (!_programObject && _shadowEnabled) {
-        _programObject = SpaceModule::ProgramObjectManager.requestProgramObject(
+        _programObject = SpaceModule::ProgramObjectManager.request(
             ShadowProgramName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
                 return OsEng.renderEngine().buildRenderProgram(
@@ -373,7 +373,7 @@ void RenderablePlanet::initializeGL() {
         );
     }
     else if (!_programObject && _hasNightTexture) {
-        _programObject = SpaceModule::ProgramObjectManager.requestProgramObject(
+        _programObject = SpaceModule::ProgramObjectManager.request(
             NightProgramName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
                 return OsEng.renderEngine().buildRenderProgram(
@@ -385,7 +385,7 @@ void RenderablePlanet::initializeGL() {
         );
     }
     else if (!_programObject) {
-        _programObject = SpaceModule::ProgramObjectManager.requestProgramObject(
+        _programObject = SpaceModule::ProgramObjectManager.request(
             PlainProgramName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
                 return OsEng.renderEngine().buildRenderProgram(
@@ -416,7 +416,7 @@ void RenderablePlanet::deinitializeGL() {
         _geometry = nullptr;
     }
 
-    SpaceModule::ProgramObjectManager.releaseProgramObject(
+    SpaceModule::ProgramObjectManager.release(
         _programObject->name(),
         [](ghoul::opengl::ProgramObject* p) {
             OsEng.renderEngine().removeRenderProgram(p);

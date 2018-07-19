@@ -277,7 +277,7 @@ void RenderableShadowCylinder::initializeGL() {
     glGenVertexArrays(1, &_vao);
     glGenBuffers(1, &_vbo);
 
-    _shader = SpacecraftInstrumentsModule::ProgramObjectManager.requestProgramObject(
+    _shader = SpacecraftInstrumentsModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return OsEng.renderEngine().buildRenderProgram(
@@ -301,7 +301,7 @@ void RenderableShadowCylinder::initializeGL() {
 }
 
 void RenderableShadowCylinder::deinitializeGL() {
-    SpacecraftInstrumentsModule::ProgramObjectManager.releaseProgramObject(
+    SpacecraftInstrumentsModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
             OsEng.renderEngine().removeRenderProgram(p);

@@ -349,7 +349,7 @@ RenderablePlanetProjection::~RenderablePlanetProjection() {} // NOLINT
 
 void RenderablePlanetProjection::initializeGL() {
     _programObject =
-        SpacecraftInstrumentsModule::ProgramObjectManager.requestProgramObject(
+        SpacecraftInstrumentsModule::ProgramObjectManager.request(
             ProjectiveProgramName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
                 return OsEng.renderEngine().buildRenderProgram(
@@ -388,7 +388,7 @@ void RenderablePlanetProjection::initializeGL() {
     _mainUniformCache.heightTexture = _programObject->uniformLocation("heightTexture");
 
     _fboProgramObject =
-        SpacecraftInstrumentsModule::ProgramObjectManager.requestProgramObject(
+        SpacecraftInstrumentsModule::ProgramObjectManager.request(
             FBOPassProgramName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
                 return ghoul::opengl::ProgramObject::Build(
@@ -464,7 +464,7 @@ void RenderablePlanetProjection::deinitializeGL() {
     glDeleteVertexArrays(1, &_quad);
     glDeleteBuffers(1, &_vertexPositionBuffer);
 
-    SpacecraftInstrumentsModule::ProgramObjectManager.releaseProgramObject(
+    SpacecraftInstrumentsModule::ProgramObjectManager.release(
         ProjectiveProgramName,
         [](ghoul::opengl::ProgramObject* p) {
             OsEng.renderEngine().removeRenderProgram(p);
@@ -472,7 +472,7 @@ void RenderablePlanetProjection::deinitializeGL() {
     );
     _programObject = nullptr;
 
-    SpacecraftInstrumentsModule::ProgramObjectManager.releaseProgramObject(
+    SpacecraftInstrumentsModule::ProgramObjectManager.release(
         FBOPassProgramName
     );
     _fboProgramObject = nullptr;

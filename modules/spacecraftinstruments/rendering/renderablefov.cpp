@@ -327,7 +327,7 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 
 void RenderableFov::initializeGL() {
     _programObject =
-        SpacecraftInstrumentsModule::ProgramObjectManager.requestProgramObject(
+        SpacecraftInstrumentsModule::ProgramObjectManager.request(
             ProgramName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
                 return OsEng.renderEngine().buildRenderProgram(
@@ -493,7 +493,7 @@ void RenderableFov::initializeGL() {
 }
 
 void RenderableFov::deinitializeGL() {
-    SpacecraftInstrumentsModule::ProgramObjectManager.releaseProgramObject(
+    SpacecraftInstrumentsModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
             OsEng.renderEngine().removeRenderProgram(p);

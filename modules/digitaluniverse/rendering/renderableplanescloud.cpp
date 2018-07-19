@@ -488,7 +488,7 @@ void RenderablePlanesCloud::initialize() {
 }
 
 void RenderablePlanesCloud::initializeGL() {
-    _program = DigitalUniverseModule::ProgramObjectManager.requestProgramObject(
+    _program = DigitalUniverseModule::ProgramObjectManager.request(
         ProgramObjectName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return OsEng.renderEngine().buildRenderProgram(
@@ -534,7 +534,7 @@ void RenderablePlanesCloud::deleteDataGPU() {
 void RenderablePlanesCloud::deinitializeGL() {
     deleteDataGPU();
 
-    DigitalUniverseModule::ProgramObjectManager.releaseProgramObject(
+    DigitalUniverseModule::ProgramObjectManager.release(
         ProgramObjectName,
         [](ghoul::opengl::ProgramObject* p) {
             OsEng.renderEngine().removeRenderProgram(p);
