@@ -737,17 +737,6 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
     float fadeInVariable = 1.f;
     if (!_disableFadeInDistance) {
         double distCamera = glm::length(data.camera.positionVec3());
-        //float funcValue = static_cast<float>(
-            //(1.0 / double(_fadeInDistance))*(distCamera / scale)
-        //);
-        //
-        //// Let's not waste performance
-        //if (funcValue < 0.01) {
-        //    return;
-        //}
-
-        //fadeInVariable = funcValue > 1.0 ? 1.0 : funcValue;
-
         const glm::vec2 fadeRange = _fadeInDistance;
         const float a = 1.0f / ((fadeRange.y - fadeRange.x) * scale);
         const float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
@@ -769,20 +758,6 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
     const glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) *
                                                  modelViewMatrix;
 
-    //glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
-    //glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
-    //glm::vec3 right = glm::cross(viewDirection, lookup);
-    //glm::vec3 up = glm::cross(right, viewDirection);
-
-    //glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
-    //glm::vec3 orthoRight = glm::normalize(
-    //    glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
-    //);
-    //glm::vec3 orthoUp = glm::normalize(
-    //    glm::vec3(worldToModelTransform * glm::vec4(up, 0.0))
-    //);
-
-    //glm::dmat4 invMVP = glm::inverse(modelViewProjectionMatrix);
     const glm::dmat4 invMVPParts = glm::inverse(modelMatrix) *
                                    glm::inverse(data.camera.combinedViewMatrix()) *
                                    glm::inverse(glm::dmat4(projectionMatrix));
