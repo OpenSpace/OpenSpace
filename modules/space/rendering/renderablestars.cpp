@@ -48,6 +48,11 @@ namespace {
 
     constexpr const char* KeyFile = "File";
 
+    constexpr const std::array<const char*, 10> UniformNames = {
+        "view", "projection", "colorOption", "alphaValue", "scaleFactor",
+        "minBillboardSize", "screenSize", "scaling", "psfTexture", "colorTexture"
+    };
+
     constexpr int8_t CurrentCacheVersion = 1;
 
     struct ColorVBOLayout {
@@ -296,16 +301,7 @@ void RenderableStars::initializeGL() {
         absPath("${MODULE_SPACE}/shaders/star_ge.glsl")
     );
 
-    _uniformCache.view = _program->uniformLocation("view");
-    _uniformCache.projection = _program->uniformLocation("projection");
-    _uniformCache.colorOption = _program->uniformLocation("colorOption");
-    _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-    _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
-    _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
-    _uniformCache.screenSize = _program->uniformLocation("screenSize");
-    _uniformCache.scaling = _program->uniformLocation("scaling");
-    _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
-    _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
     bool success = loadData();
     if (!success) {
@@ -555,17 +551,7 @@ void RenderableStars::update(const UpdateData&) {
 
     if (_program->isDirty()) {
         _program->rebuildFromFile();
-
-        _uniformCache.view = _program->uniformLocation("view");
-        _uniformCache.projection = _program->uniformLocation("projection");
-        _uniformCache.colorOption = _program->uniformLocation("colorOption");
-        _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-        _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
-        _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
-        _uniformCache.screenSize = _program->uniformLocation("screenSize");
-        _uniformCache.scaling = _program->uniformLocation("scaling");
-        _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
-        _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 }
 

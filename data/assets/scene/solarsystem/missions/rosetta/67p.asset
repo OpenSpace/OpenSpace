@@ -88,6 +88,9 @@ local Comet67P = {
                         CHURYUMOVGERASIMENKO11969R1 = { "CHURYUMOV-GERASIMENKO" },
                         CHURYUMOVGERASIMENKO = { "CHURYUMOV-GERASIMENKO" },
                         ["CHURYUMOV-GERASIMENKO1(1969R1)"] = { "CHURYUMOV-GERASIMENKO" },
+                        CALIBRATION = { "CALIBRATION" },
+                        ALPHALYR = { "ALPHALYR" },
+                        ZETACAS = { "ZETACAS" }
                     }
                 }
             },

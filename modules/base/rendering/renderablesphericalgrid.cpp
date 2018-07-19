@@ -176,7 +176,7 @@ bool RenderableSphericalGrid::isReady() const {
 }
 
 void RenderableSphericalGrid::initializeGL() {
-    _gridProgram = BaseModule::ProgramObjectManager.requestProgramObject(
+    _gridProgram = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return OsEng.renderEngine().buildRenderProgram(
@@ -208,7 +208,7 @@ void RenderableSphericalGrid::deinitializeGL() {
     glDeleteBuffers(1, &_iBufferID);
     _iBufferID = 0;
 
-    BaseModule::ProgramObjectManager.releaseProgramObject(
+    BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
             OsEng.renderEngine().removeRenderProgram(p);

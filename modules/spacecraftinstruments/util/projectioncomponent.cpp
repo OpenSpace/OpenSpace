@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#pragma optimize ("", off)
+
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
 
 #include <modules/spacecraftinstruments/util/hongkangparser.h>
@@ -120,10 +122,7 @@ documentation::Documentation ProjectionComponent::Documentation() {
         {
             {
                 keySequenceDir,
-                new OrVerifier(
-                    new StringVerifier,
-                    new StringListVerifier
-                ),
+                new OrVerifier({ new StringVerifier, new StringListVerifier }),
                 Optional::Yes,
                 "This value specifies one or more directories from which images are "
                 "being used for image projections. If the sequence type is set to "

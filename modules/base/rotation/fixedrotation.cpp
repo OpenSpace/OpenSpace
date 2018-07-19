@@ -202,15 +202,14 @@ documentation::Documentation FixedRotation::Documentation() {
             },
             {
                 KeyXAxis,
-                new OrVerifier(
-                    new StringVerifier,
-                    new DoubleVector3Verifier
-                ),
+                new OrVerifier({ new StringVerifier, new DoubleVector3Verifier, }),
                 Optional::Yes,
                 "This value specifies the direction of the new X axis. If this value is "
                 "not specified, it will be computed by completing a right handed "
                 "coordinate system from the Y and Z axis, which must be specified "
-                "instead."
+                "instead. If this value is a string, it is interpreted as the identifier "
+                "of another scenegraph node. If this value is a 3-vector, it is "
+                "interpreted as a direction vector."
             },
             {
                 KeyXAxisOrthogonal,
@@ -220,15 +219,14 @@ documentation::Documentation FixedRotation::Documentation() {
             },
             {
                 KeyYAxis,
-                new OrVerifier(
-                    new StringVerifier,
-                    new DoubleVector3Verifier
-                ),
+                new OrVerifier({ new StringVerifier, new DoubleVector3Verifier, }),
                 Optional::Yes,
                 "This value specifies the direction of the new Y axis. If this value is "
                 "not specified, it will be computed by completing a right handed "
                 "coordinate system from the X and Z axis, which must be specified "
-                "instead."
+                "instead. If this value is a string, it is interpreted as the identifier "
+                "of another scenegraph node. If this value is a 3-vector, it is "
+                "interpreted as a direction vector."
             },
             {
                 KeyYAxisOrthogonal,
@@ -238,15 +236,14 @@ documentation::Documentation FixedRotation::Documentation() {
             },
             {
                 KeyZAxis,
-                new OrVerifier(
-                    new StringVerifier,
-                    new DoubleVector3Verifier
-                ),
+                new OrVerifier({ new StringVerifier, new DoubleVector3Verifier, }),
                 Optional::Yes,
                 "This value specifies the direction of the new Z axis. If this value is "
                 "not specified, it will be computed by completing a right handed "
                 "coordinate system from the X and Y axis, which must be specified "
-                "instead."
+                "instead. If this value is a string, it is interpreted as the identifier "
+                "of another scenegraph node. If this value is a 3-vector, it is "
+                "interpreted as a direction vector."
             },
             {
                 KeyZAxisOrthogonal,
@@ -276,7 +273,7 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         properties::Vec3Property(
             XAxisVectorInfo,
             glm::vec3(1.f, 0.f, 0.f),
-            glm::vec3(0.f),
+            glm::vec3(-1.f),
             glm::vec3(1.f)
         ),
         properties::BoolProperty(XAxisOrthogonalVectorInfo, false),
@@ -292,7 +289,7 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         properties::Vec3Property(
             YAxisVectorInfo,
             glm::vec3(0.f, 1.f, 0.f),
-            glm::vec3(0.f),
+            glm::vec3(-1.f),
             glm::vec3(1.f)
         ),
         properties::BoolProperty(YAxisOrthogonalVectorInfo, false),
@@ -308,7 +305,7 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         properties::Vec3Property(
             ZAxisVectorInfo,
             glm::vec3(0.f, 0.f, 1.f),
-            glm::vec3(0.f),
+            glm::vec3(-1.f),
             glm::vec3(1.f)
         ),
         properties::BoolProperty(ZAxisOrthogonalVectorInfo, false),
@@ -454,10 +451,8 @@ bool FixedRotation::initialize() {
         }
     }
 
-    if (_constructorDictionary.hasKey(XAxisOrthogonalVectorInfo.identifier)) {
-        _xAxis.isOrthogonal = _constructorDictionary.value<bool>(
-            XAxisOrthogonalVectorInfo.identifier
-        );
+    if (_constructorDictionary.hasKey(KeyXAxisOrthogonal)) {
+        _xAxis.isOrthogonal = _constructorDictionary.value<bool>(KeyXAxisOrthogonal);
     }
     if (_xAxis.isOrthogonal) {
         _xAxis.type = Axis::Type::OrthogonalVector;
@@ -476,10 +471,8 @@ bool FixedRotation::initialize() {
         }
     }
 
-    if (_constructorDictionary.hasKey(YAxisOrthogonalVectorInfo.identifier)) {
-        _yAxis.isOrthogonal = _constructorDictionary.value<bool>(
-            YAxisOrthogonalVectorInfo.identifier
-        );
+    if (_constructorDictionary.hasKey(KeyYAxisOrthogonal)) {
+        _yAxis.isOrthogonal = _constructorDictionary.value<bool>(KeyYAxisOrthogonal);
     }
     if (_yAxis.isOrthogonal) {
         _yAxis.type = Axis::Type::OrthogonalVector;
@@ -498,10 +491,8 @@ bool FixedRotation::initialize() {
         }
     }
 
-    if (_constructorDictionary.hasKey(ZAxisOrthogonalVectorInfo.identifier)) {
-        _zAxis.isOrthogonal = _constructorDictionary.value<bool>(
-            ZAxisOrthogonalVectorInfo.identifier
-        );
+    if (_constructorDictionary.hasKey(KeyZAxisOrthogonal)) {
+        _zAxis.isOrthogonal = _constructorDictionary.value<bool>(KeyZAxisOrthogonal);
     }
     if (_zAxis.isOrthogonal) {
         _zAxis.type = Axis::Type::OrthogonalVector;
@@ -543,7 +534,7 @@ glm::dmat3 FixedRotation::matrix(const UpdateData&) const {
     {
         LWARNINGC(
             "FixedRotation",
-            fmt::format("Near-ollinear vectors detected: x ({}) y ({}) z ({})", x, y, z)
+            fmt::format("Near-collinear vectors detected: x ({}) y ({}) z ({})", x, y, z)
         );
         return glm::dmat3();
     }
@@ -619,6 +610,8 @@ glm::vec3 FixedRotation::yAxis() const {
         case Axis::Type::Object:
             if (_yAxis.node && _attachedNode) {
                 glm::vec3 dir = glm::vec3(glm::normalize(
+                    // @TODO(abock): This should be changed to be in the coordinate system
+                    // of the attached node // same with xAxis and zAxis ofc
                     _yAxis.node->worldPosition() - _attachedNode->worldPosition()
                 ));
                 return _yAxis.invertObject ? -dir : dir;

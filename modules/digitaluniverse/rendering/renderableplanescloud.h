@@ -129,7 +129,7 @@ private:
     properties::OptionProperty _renderOption;
 
     ghoul::opengl::ProgramObject* _program = nullptr;
-    UniformCache(modelViewProjectionTransform, alphaValue, scaleFactor, fadeInValue,
+    UniformCache(modelViewProjectionTransform, alphaValue, fadeInValue,
         galaxyTexture) _uniformCache;
     std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
     std::unordered_map<int, std::unique_ptr<ghoul::opengl::Texture>> _textureMap;

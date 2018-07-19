@@ -43,6 +43,10 @@
 namespace {
     constexpr const char* ProgramName = "Sphere";
 
+    constexpr const std::array<const char*, 4> UniformNames = {
+        "opacity", "ViewProjection", "ModelTransform", "texture1"
+    };
+
     enum Orientation {
         Outside = 1,
         Inside = 2
@@ -237,7 +241,7 @@ void RenderableSphere::initializeGL() {
     );
     _sphere->initialize();
 
-    _shader = BaseModule::ProgramObjectManager.requestProgramObject(
+    _shader = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return OsEng.renderEngine().buildRenderProgram(
@@ -248,10 +252,7 @@ void RenderableSphere::initializeGL() {
         }
     );
 
-    _uniformCache.opacity = _shader->uniformLocation("opacity");
-    _uniformCache.viewProjection = _shader->uniformLocation("ViewProjection");
-    _uniformCache.modelTransform = _shader->uniformLocation("ModelTransform");
-    _uniformCache.texture = _shader->uniformLocation("texture1");
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 
     loadTexture();
 }
@@ -259,7 +260,7 @@ void RenderableSphere::initializeGL() {
 void RenderableSphere::deinitializeGL() {
     _texture = nullptr;
 
-    BaseModule::ProgramObjectManager.releaseProgramObject(
+    BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
             OsEng.renderEngine().removeRenderProgram(p);
@@ -348,11 +349,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 void RenderableSphere::update(const UpdateData&) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
-
-        _uniformCache.opacity = _shader->uniformLocation("opacity");
-        _uniformCache.viewProjection = _shader->uniformLocation("ViewProjection");
-        _uniformCache.modelTransform = _shader->uniformLocation("ModelTransform");
-        _uniformCache.texture = _shader->uniformLocation("texture1");
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
     }
 
     if (_sphereIsDirty) {
