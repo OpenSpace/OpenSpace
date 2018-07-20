@@ -53,10 +53,7 @@ class WindowWrapper;
 namespace interaction { struct JoystickInputStates; }
 namespace gui { class GUI; }
 namespace properties { class PropertyOwner; }
-namespace scripting {
-    struct LuaLibrary;
-    class ScriptScheduler;
-} // namespace scripting
+namespace scripting { struct LuaLibrary; }
 
   // Structure that is responsible for the delayed shutdown of the application
 struct ShutdownInformation {
@@ -116,7 +113,6 @@ public:
     ghoul::fontrendering::FontManager& fontManager();
     properties::PropertyOwner& rootPropertyOwner();
     properties::PropertyOwner& globalPropertyOwner();
-    scripting::ScriptScheduler& scriptScheduler();
     VirtualPropertyManager& virtualPropertyManager();
 
 
@@ -189,7 +185,6 @@ private:
     std::unique_ptr<ghoul::cmdparser::CommandlineParser> _commandlineParser;
     std::unique_ptr<ghoul::fontrendering::FontManager> _fontManager;
 
-    std::unique_ptr<scripting::ScriptScheduler> _scriptScheduler;
     std::unique_ptr<VirtualPropertyManager> _virtualPropertyManager;
 
     // Others

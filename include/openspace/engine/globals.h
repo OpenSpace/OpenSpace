@@ -37,8 +37,11 @@ class TimeManager;
 namespace interaction {
     class KeybindingManager;
     class NavigationHandler;
-}
-namespace scripting { class ScriptEngine; }
+} // namespace interaction
+namespace scripting {
+    class ScriptEngine;
+    class ScriptScheduler;
+} // namespace scripting
 
 namespace detail {
 
@@ -52,6 +55,7 @@ TimeManager& gTimeManager();
 interaction::KeybindingManager& gKeybindingManager();
 interaction::NavigationHandler& gNavigationHandler();
 scripting::ScriptEngine& gScriptEngine();
+scripting::ScriptScheduler& gScriptScheduler();
 
 } // namespace detail
 
@@ -67,6 +71,7 @@ static TimeManager& timeManager = detail::gTimeManager();
 static interaction::KeybindingManager& keybindingManager = detail::gKeybindingManager();
 static interaction::NavigationHandler& navigationHandler = detail::gNavigationHandler();
 static scripting::ScriptEngine& scriptEngine = detail::gScriptEngine();
+static scripting::ScriptScheduler& scriptScheduler = detail::gScriptScheduler();
 
 } // namespace global
 

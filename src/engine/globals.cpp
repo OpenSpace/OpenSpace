@@ -33,6 +33,7 @@
 #include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/scripting/scriptscheduler.h>
 #include <openspace/util/timemanager.h>
 
 namespace openspace::detail {
@@ -84,6 +85,11 @@ interaction::NavigationHandler& gNavigationHandler() {
 
 scripting::ScriptEngine& gScriptEngine() {
     static scripting::ScriptEngine g;
+    return g;
+}
+
+scripting::ScriptScheduler& gScriptScheduler() {
+    static scripting::ScriptScheduler g;
     return g;
 }
 

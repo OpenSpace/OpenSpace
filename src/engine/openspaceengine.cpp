@@ -143,7 +143,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
         std::move(programName),
         ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
     ))
-    , _scriptScheduler(new scripting::ScriptScheduler)
     , _virtualPropertyManager(new VirtualPropertyManager)
     , _rootPropertyOwner(new properties::PropertyOwner({ "" }))
     , _loadingScreen(nullptr)
@@ -1186,7 +1185,7 @@ void OpenSpaceEngine::preSynchronization() {
         global::timeManager.preSynchronization(dt);
 
         using Iter = std::vector<std::string>::const_iterator;
-        std::pair<Iter, Iter> scheduledScripts = _scriptScheduler->progressTo(
+        std::pair<Iter, Iter> scheduledScripts = global::scriptScheduler.progressTo(
             global::timeManager.time().j2000Seconds()
         );
         for (Iter it = scheduledScripts.first; it != scheduledScripts.second; ++it) {
@@ -1660,11 +1659,6 @@ properties::PropertyOwner& OpenSpaceEngine::rootPropertyOwner() {
 VirtualPropertyManager& OpenSpaceEngine::virtualPropertyManager() {
     ghoul_assert(_virtualPropertyManager, "Virtual Property Manager must not be nullptr");
     return *_virtualPropertyManager;
-}
-
-ScriptScheduler& OpenSpaceEngine::scriptScheduler() {
-    ghoul_assert(_scriptScheduler, "ScriptScheduler must not be nullptr");
-    return *_scriptScheduler;
 }
 
 }  // namespace openspace
