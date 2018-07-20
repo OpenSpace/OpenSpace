@@ -325,7 +325,7 @@ void GuiGlobeBrowsingComponent::render() {
                 std::remove(layerName.begin(), layerName.end(), ' '),
                 layerName.end()
             );
-            OsEng.scriptEngine().queueScript(
+            global::scriptEngine.queueScript(
                 fmt::format(
                     "openspace.globebrowsing.addLayer(\
                         '{}', \

@@ -24,7 +24,7 @@
 
 #include <openspace/interaction/keybindingmanager.h>
 
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/glm.h>
@@ -54,7 +54,7 @@ void KeyBindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyActio
         for (auto it = ret.first; it != ret.second; ++it) {
             using RS = scripting::ScriptEngine::RemoteScripting;
 
-            OsEng.scriptEngine().queueScript(
+            global::scriptEngine.queueScript(
                 it->second.command,
                 it->second.synchronization ? RS::Yes : RS::No
             );

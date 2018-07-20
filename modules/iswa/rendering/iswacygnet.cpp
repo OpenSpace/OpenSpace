@@ -27,7 +27,6 @@
 #include <modules/iswa/rendering/iswabasegroup.h>
 #include <modules/iswa/util/iswamanager.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
@@ -115,7 +114,7 @@ void IswaCygnet::initializeGL() {
     } else {
         _delete.onChange([this]() {
             deinitialize();
-            OsEng.scriptEngine().queueScript(
+            global::scriptEngine.queueScript(
                 "openspace.removeSceneGraphNode('" + identifier() + "')",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
@@ -271,7 +270,7 @@ void IswaCygnet::initializeGroup() {
 
     groupEvent.subscribe(identifier(), "clearGroup", [&](ghoul::Dictionary) {
         LDEBUG(identifier() + " Event clearGroup");
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             "openspace.removeSceneGraphNode('" + identifier() + "')",
             scripting::ScriptEngine::RemoteScripting::Yes
         );

@@ -489,7 +489,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         std::string cmd = _commands.at(_activeCommand);
         if (!cmd.empty()) {
             using RemoteScripting = scripting::ScriptEngine::RemoteScripting;
-            OsEng.scriptEngine().queueScript(cmd, RemoteScripting(_remoteScripting));
+            global::scriptEngine.queueScript(cmd, RemoteScripting(_remoteScripting));
 
             // Only add the current command to the history if it hasn't been
             // executed before. We don't want two of the same commands in a row
@@ -518,7 +518,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         if (_autoCompleteInfo.lastIndex != NoAutoComplete && modifierShift) {
             _autoCompleteInfo.lastIndex -= 2;
         }
-        std::vector<std::string> allCommands = OsEng.scriptEngine().allLuaFunctions();
+        std::vector<std::string> allCommands = global::scriptEngine.allLuaFunctions();
         std::sort(allCommands.begin(), allCommands.end());
 
         std::string currentCommand = _commands.at(_activeCommand);

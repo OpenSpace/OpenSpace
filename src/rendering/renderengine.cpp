@@ -588,7 +588,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RotationalFriction';
             openspace.setPropertyValue(f, not openspace.getPropertyValue(f));)";
 
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             ToggleRotationFrictionScript,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -600,7 +600,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
             local f = 'NavigationHandler.OrbitalNavigator.Friction.ZoomFriction';
             openspace.setPropertyValue(f, not openspace.getPropertyValue(f));)";
 
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             ToggleZoomFrictionScript,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -612,7 +612,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RollFriction';
             openspace.setPropertyValue(f, not openspace.getPropertyValue(f));)";
 
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             ToggleRollFrictionScript,
             scripting::ScriptEngine::RemoteScripting::Yes
         );

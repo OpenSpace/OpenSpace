@@ -145,7 +145,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     ))
     , _navigationHandler(new interaction::NavigationHandler)
     , _keyBindingManager(new interaction::KeyBindingManager)
-    , _scriptEngine(new scripting::ScriptEngine)
     , _scriptScheduler(new scripting::ScriptScheduler)
     , _virtualPropertyManager(new VirtualPropertyManager)
     , _rootPropertyOwner(new properties::PropertyOwner({ "" }))
@@ -222,7 +221,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     SpiceManager::initialize();
     TransformationManager::initialize();
 
-    _syncEngine->addSyncable(_scriptEngine.get());
+    _syncEngine->addSyncable(&global::scriptEngine);
 }
 
 OpenSpaceEngine& OpenSpaceEngine::ref() {
@@ -456,7 +455,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
 
     _engine->_assetManager = std::make_unique<AssetManager>(
         std::make_unique<AssetLoader>(
-            *OsEng.scriptEngine().luaState(),
+            *global::scriptEngine.luaState(),
             rawWatcher,
             FileSys.absPath("${ASSETS}")
         ),
@@ -480,7 +479,7 @@ void OpenSpaceEngine::destroy() {
     global::moduleEngine.deinitialize();
     _engine->_console->deinitialize();
 
-    _engine->_scriptEngine->deinitialize();
+    global::scriptEngine.deinitialize();
 
     delete _engine;
     _engine = nullptr;
@@ -558,19 +557,19 @@ void OpenSpaceEngine::initialize() {
 
     // Register Lua script functions
     LDEBUG("Registering Lua libraries");
-    registerCoreClasses(*_scriptEngine);
+    registerCoreClasses(global::scriptEngine);
 
-    _scriptEngine->addLibrary(_engine->_assetManager->luaLibrary());
+    global::scriptEngine.addLibrary(_engine->_assetManager->luaLibrary());
 
     for (OpenSpaceModule* module : global::moduleEngine.modules()) {
-        _scriptEngine->addLibrary(module->luaLibrary());
+        global::scriptEngine.addLibrary(module->luaLibrary());
 
         for (scripting::LuaLibrary& l : module->luaLibraries()) {
-            _scriptEngine->addLibrary(l);
+            global::scriptEngine.addLibrary(l);
         }
     }
 
-    scriptEngine().initialize();
+    global::scriptEngine.initialize();
 
     writeStaticDocumentation();
 
@@ -777,7 +776,7 @@ void OpenSpaceEngine::deinitialize() {
 void OpenSpaceEngine::writeStaticDocumentation() {
     // If a LuaDocumentationFile was specified, generate it now
     if (!global::configuration.documentation.lua.empty()) {
-        _scriptEngine->writeDocumentation(
+        global::scriptEngine.writeDocumentation(
             absPath(global::configuration.documentation.lua)
         );
     }
@@ -839,7 +838,7 @@ void OpenSpaceEngine::gatherCommandlineArguments() {
 void OpenSpaceEngine::runGlobalCustomizationScripts() {
     LINFO("Running Global initialization scripts");
     ghoul::lua::LuaState state;
-    OsEng.scriptEngine().initializeLuaState(state);
+    global::scriptEngine.initializeLuaState(state);
 
     for (const std::string& script : global::configuration.globalCustomizationScripts) {
         std::string s = absPath(script);
@@ -1193,7 +1192,7 @@ void OpenSpaceEngine::preSynchronization() {
             global::timeManager.time().j2000Seconds()
         );
         for (Iter it = scheduledScripts.first; it != scheduledScripts.second; ++it) {
-            _scriptEngine->queueScript(
+            global::scriptEngine.queueScript(
                 *it,
                 ScriptEngine::RemoteScripting::Yes
             );
@@ -1673,11 +1672,6 @@ properties::PropertyOwner& OpenSpaceEngine::rootPropertyOwner() {
 VirtualPropertyManager& OpenSpaceEngine::virtualPropertyManager() {
     ghoul_assert(_virtualPropertyManager, "Virtual Property Manager must not be nullptr");
     return *_virtualPropertyManager;
-}
-
-ScriptEngine& OpenSpaceEngine::scriptEngine() {
-    ghoul_assert(_scriptEngine, "ScriptEngine must not be nullptr");
-    return *_scriptEngine;
 }
 
 ScriptScheduler& OpenSpaceEngine::scriptScheduler() {

@@ -62,7 +62,7 @@ bool NetworkEngine::handleMessage(const std::string& message) {
     const char type = message[0];
     switch (type) {
         case MessageTypeLuaScript:  // LuaScript
-            OsEng.scriptEngine().queueScript(
+            global::scriptEngine.queueScript(
                 message.substr(1),
                 scripting::ScriptEngine::RemoteScripting::No
             );

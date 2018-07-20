@@ -30,6 +30,7 @@
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/timemanager.h>
 
 namespace openspace::detail {
@@ -66,6 +67,11 @@ RenderEngine& gRenderEngine() {
 
 TimeManager& gTimeManager() {
     static TimeManager g;
+    return g;
+}
+
+scripting::ScriptEngine& gScriptEngine() {
+    static scripting::ScriptEngine g;
     return g;
 }
 

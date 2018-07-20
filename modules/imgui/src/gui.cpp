@@ -36,7 +36,6 @@
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
@@ -62,7 +61,7 @@ namespace {
             return;
         }
 
-        OsEng.scriptEngine().queueScript(
+        openspace::global::scriptEngine.queueScript(
             fmt::format(
                 "openspace.addScreenSpaceRenderable({{\
                     Type = 'ScreenSpaceImageLocal',\
@@ -75,7 +74,7 @@ namespace {
     }
 
     void addScreenSpaceRenderableOnline(std::string texturePath) {
-        OsEng.scriptEngine().queueScript(
+        openspace::global::scriptEngine.queueScript(
             fmt::format(
                 "openspace.addScreenSpaceRenderable({{\
                     Type = 'ScreenSpaceImageOnline', URL = '{}'\
@@ -654,7 +653,7 @@ void GUI::render() {
 
     bool addDashboard = ImGui::Button("Add New Dashboard");
     if (addDashboard) {
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             "openspace.addScreenSpaceRenderable({ Type = 'ScreenSpaceDashboard' });",
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -662,7 +661,7 @@ void GUI::render() {
 
     bool addDashboardCopy = ImGui::Button("Add Copy of Main Dashboard");
     if (addDashboardCopy) {
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             "openspace.addScreenSpaceRenderable({ "
                 "Type = 'ScreenSpaceDashboard', UseMainDashboard = true "
             "});",

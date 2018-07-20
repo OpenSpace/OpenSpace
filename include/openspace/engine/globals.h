@@ -35,6 +35,8 @@ class ParallelPeer;
 class RenderEngine;
 class TimeManager;
 
+namespace scripting { class ScriptEngine; }
+
 namespace detail {
 
 Configuration& gConfiguration();
@@ -44,6 +46,7 @@ NetworkEngine& gNetworkEngine();
 ParallelPeer& gParallelPeer();
 RenderEngine& gRenderEngine();
 TimeManager& gTimeManager();
+scripting::ScriptEngine& gScriptEngine();
 
 } // namespace detail
 
@@ -56,6 +59,7 @@ static NetworkEngine& networkEngine = detail::gNetworkEngine();
 static ParallelPeer& parallelPeer = detail::gParallelPeer();
 static RenderEngine& renderEngine = detail::gRenderEngine();
 static TimeManager& timeManager = detail::gTimeManager();
+static scripting::ScriptEngine& scriptEngine = detail::gScriptEngine();
 
 } // namespace global
 

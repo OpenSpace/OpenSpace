@@ -35,7 +35,6 @@
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/json.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/spicemanager.h>
@@ -85,7 +84,7 @@ namespace {
 
     void createScreenSpace(int id) {
         std::string idStr = std::to_string(id);
-        OsEng.scriptEngine().queueScript(
+        openspace::global::scriptEngine.queueScript(
             "openspace.iswa.addScreenSpaceCygnet({CygnetId =" + idStr + "});",
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -513,7 +512,7 @@ void IswaManager::createPlane(MetadataFuture& data) {
     std::string luaTable = jsonPlaneToLuaTable(data);
     if (!luaTable.empty()) {
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             script,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -545,7 +544,7 @@ void IswaManager::createSphere(MetadataFuture& data) {
     std::string luaTable = jsonSphereToLuaTable(data);
     if (luaTable != "") {
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             script,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -579,7 +578,7 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
         std::string luaTable = parseKWToLuaTable(info, cut);
         if (!luaTable.empty()) {
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-            OsEng.scriptEngine().queueScript(
+            global::scriptEngine.queueScript(
                 script,
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
@@ -618,7 +617,7 @@ void IswaManager::createFieldline(std::string name, std::string cdfPath,
         "}";
         if (!luaTable.empty()) {
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-            OsEng.scriptEngine().queueScript(
+            global::scriptEngine.queueScript(
                 script,
                 scripting::ScriptEngine::RemoteScripting::Yes
             );

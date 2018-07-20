@@ -26,7 +26,6 @@
 
 #include <modules/iswa/util/iswamanager.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/timemanager.h>
 
@@ -54,7 +53,7 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     _minRealTimeUpdateInterval = 100;
 
     _delete.onChange([this]() {
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             "openspace.iswa.removeScreenSpaceCygnet("+std::to_string(_cygnetId)+");",
             scripting::ScriptEngine::RemoteScripting::Yes
         );

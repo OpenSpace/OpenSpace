@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/openspaceengine.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace openspace::luascriptfunctions {

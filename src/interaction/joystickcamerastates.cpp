@@ -24,7 +24,7 @@
 
 #include <openspace/interaction/joystickcamerastates.h>
 
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/interaction/inputstate.h>
 #include <openspace/scripting/scriptengine.h>
 #include <utility>
@@ -155,7 +155,7 @@ void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
             bool active = inputState.joystickInputStates().button(i, it->second.action);
 
             if (active) {
-                OsEng.scriptEngine().queueScript(
+                global::scriptEngine.queueScript(
                     it->second.command,
                     scripting::ScriptEngine::RemoteScripting(it->second.synchronization)
                 );

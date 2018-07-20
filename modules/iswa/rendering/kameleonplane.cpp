@@ -30,7 +30,6 @@
 #include <modules/iswa/util/iswamanager.h>
 #include <openspace/json.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
@@ -281,7 +280,7 @@ void KameleonPlane::updateFieldlineSeeds() {
             }
 
             LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
-            OsEng.scriptEngine().queueScript(
+            global::scriptEngine.queueScript(
                 "openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );

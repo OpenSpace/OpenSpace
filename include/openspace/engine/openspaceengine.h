@@ -59,7 +59,6 @@ namespace gui { class GUI; }
 namespace properties { class PropertyOwner; }
 namespace scripting {
     struct LuaLibrary;
-    class ScriptEngine;
     class ScriptScheduler;
 } // namespace scripting
 
@@ -123,7 +122,6 @@ public:
     interaction::KeyBindingManager& keyBindingManager();
     properties::PropertyOwner& rootPropertyOwner();
     properties::PropertyOwner& globalPropertyOwner();
-    scripting::ScriptEngine& scriptEngine();
     scripting::ScriptScheduler& scriptScheduler();
     VirtualPropertyManager& virtualPropertyManager();
 
@@ -199,7 +197,6 @@ private:
     std::unique_ptr<interaction::NavigationHandler> _navigationHandler;
     std::unique_ptr<interaction::KeyBindingManager> _keyBindingManager;
 
-    std::unique_ptr<scripting::ScriptEngine> _scriptEngine;
     std::unique_ptr<scripting::ScriptScheduler> _scriptScheduler;
     std::unique_ptr<VirtualPropertyManager> _virtualPropertyManager;
 

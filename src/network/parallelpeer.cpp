@@ -346,7 +346,7 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
             datamessagestructures::ScriptMessage sm;
             sm.deserialize(buffer);
 
-            OsEng.scriptEngine().queueScript(
+            global::scriptEngine.queueScript(
                 sm._script,
                 scripting::ScriptEngine::RemoteScripting::No
             );
