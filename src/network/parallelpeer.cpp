@@ -282,7 +282,7 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
             datamessagestructures::CameraKeyframe kf(buffer);
             const double convertedTimestamp = convertTimestamp(kf._timestamp);
 
-            OsEng.navigationHandler().keyframeNavigator().removeKeyframesAfter(
+            global::navigationHandler.keyframeNavigator().removeKeyframesAfter(
                 convertedTimestamp
             );
 
@@ -293,7 +293,7 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
             pose.scale = kf._scale;
             pose.followFocusNodeRotation = kf._followNodeRotation;
 
-            OsEng.navigationHandler().keyframeNavigator().addKeyframe(convertedTimestamp,
+            global::navigationHandler.keyframeNavigator().addKeyframe(convertedTimestamp,
                                                                       pose);
             break;
         }
@@ -406,7 +406,7 @@ void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& mess
 
     setStatus(status);
 
-    OsEng.navigationHandler().keyframeNavigator().clearKeyframes();
+    global::navigationHandler.keyframeNavigator().clearKeyframes();
     global::timeManager.clearKeyframes();
 }
 
@@ -499,7 +499,7 @@ void ParallelPeer::sendScript(std::string script) {
 }
 
 void ParallelPeer::resetTimeOffset() {
-    OsEng.navigationHandler().keyframeNavigator().clearKeyframes();
+    global::navigationHandler.keyframeNavigator().clearKeyframes();
     global::timeManager.clearKeyframes();
     std::lock_guard<std::mutex> latencyLock(_latencyMutex);
     _latencyDiffs.clear();
@@ -588,27 +588,27 @@ const std::string& ParallelPeer::hostName() {
 }
 
 void ParallelPeer::sendCameraKeyframe() {
-    SceneGraphNode* focusNode = OsEng.navigationHandler().focusNode();
+    SceneGraphNode* focusNode = global::navigationHandler.focusNode();
     if (!focusNode) {
         return;
     }
 
     // Create a keyframe with current position and orientation of camera
     datamessagestructures::CameraKeyframe kf;
-    kf._position = OsEng.navigationHandler().focusNodeToCameraVector();
+    kf._position = global::navigationHandler.focusNodeToCameraVector();
 
     kf._followNodeRotation =
-        OsEng.navigationHandler().orbitalNavigator().followingNodeRotation();
+        global::navigationHandler.orbitalNavigator().followingNodeRotation();
     if (kf._followNodeRotation) {
         kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
-        kf._rotation = OsEng.navigationHandler().focusNodeToCameraRotation();
+        kf._rotation = global::navigationHandler.focusNodeToCameraRotation();
     }
     else {
-        kf._rotation = OsEng.navigationHandler().camera()->rotationQuaternion();
+        kf._rotation = global::navigationHandler.camera()->rotationQuaternion();
     }
 
     kf._focusNode = focusNode->identifier();
-    kf._scale = OsEng.navigationHandler().camera()->scaling();
+    kf._scale = global::navigationHandler.camera()->scaling();
 
     // Timestamp as current runtime of OpenSpace instance
     kf._timestamp = OsEng.windowWrapper().applicationTime();

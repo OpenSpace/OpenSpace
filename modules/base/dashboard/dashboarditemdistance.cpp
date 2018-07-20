@@ -403,7 +403,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
         }
         case Type::Focus:
             return {
-                OsEng.navigationHandler().focusNode()->worldPosition(),
+                global::navigationHandler.focusNode()->worldPosition(),
                 "focus"
             };
         case Type::Camera:

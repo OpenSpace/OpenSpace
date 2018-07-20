@@ -50,10 +50,7 @@ class SyncEngine;
 class VirtualPropertyManager;
 class WindowWrapper;
 
-namespace interaction {
-    struct JoystickInputStates;
-    class NavigationHandler;
-} // namespace interaction
+namespace interaction { struct JoystickInputStates; }
 namespace gui { class GUI; }
 namespace properties { class PropertyOwner; }
 namespace scripting {
@@ -117,7 +114,6 @@ public:
     LoadingScreen& loadingScreen();
     WindowWrapper& windowWrapper();
     ghoul::fontrendering::FontManager& fontManager();
-    interaction::NavigationHandler& navigationHandler();
     properties::PropertyOwner& rootPropertyOwner();
     properties::PropertyOwner& globalPropertyOwner();
     scripting::ScriptScheduler& scriptScheduler();
@@ -192,7 +188,6 @@ private:
     std::unique_ptr<WindowWrapper> _windowWrapper;
     std::unique_ptr<ghoul::cmdparser::CommandlineParser> _commandlineParser;
     std::unique_ptr<ghoul::fontrendering::FontManager> _fontManager;
-    std::unique_ptr<interaction::NavigationHandler> _navigationHandler;
 
     std::unique_ptr<scripting::ScriptScheduler> _scriptScheduler;
     std::unique_ptr<VirtualPropertyManager> _virtualPropertyManager;

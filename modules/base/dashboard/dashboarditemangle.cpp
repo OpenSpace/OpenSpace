@@ -381,7 +381,7 @@ std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
         case Type::Node:
             return { comp.node->worldPosition(), comp.node->guiName() };
         case Type::Focus:
-            return { OsEng.navigationHandler().focusNode()->worldPosition(), "focus" };
+            return { global::navigationHandler.focusNode()->worldPosition(), "focus" };
         case Type::Camera:
             return { global::renderEngine.scene()->camera()->positionVec3(), "camera" };
         default:

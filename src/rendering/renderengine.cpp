@@ -1051,7 +1051,7 @@ void RenderEngine::renderCameraInformation() {
     constexpr const float YSeparation = 5.f;
     constexpr const float XSeparation = 5.f;
 
-    interaction::OrbitalNavigator nav = OsEng.navigationHandler().orbitalNavigator();
+    interaction::OrbitalNavigator nav = global::navigationHandler.orbitalNavigator();
 
     _cameraButtonLocations.rotation = {
         fontResolution().x - rotationBox.boundingBox.x - XSeparation,

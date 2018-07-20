@@ -25,7 +25,7 @@
 #include <modules/imgui/include/guijoystickcomponent.h>
 
 #include <modules/imgui/include/imgui_include.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/joystickinputstate.h>
@@ -51,7 +51,7 @@ void GuiJoystickComponent::render() {
     _isCollapsed = ImGui::IsWindowCollapsed();
 
     const JoystickInputStates& states =
-        OsEng.navigationHandler().inputState().joystickInputStates();
+        global::navigationHandler.inputState().joystickInputStates();
 
     for (size_t i = 0; i < states.size(); ++i) {
         const JoystickInputState& state = states[i];

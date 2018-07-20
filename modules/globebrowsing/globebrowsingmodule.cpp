@@ -331,13 +331,13 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
 }
 
 void GlobeBrowsingModule::goToChunk(int x, int y, int level) {
-    Camera* cam = OsEng.navigationHandler().camera();
+    Camera* cam = global::navigationHandler.camera();
     goToChunk(*cam, globebrowsing::TileIndex(x,y,level), glm::vec2(0.5f, 0.5f), true);
 }
 
 void GlobeBrowsingModule::goToGeo(double latitude, double longitude) {
     using namespace globebrowsing;
-    Camera* cam = OsEng.navigationHandler().camera();
+    Camera* cam = global::navigationHandler.camera();
     goToGeodetic2(*cam, Geodetic2(
         Angle<double>::fromDegrees(latitude).asRadians(),
         Angle<double>::fromDegrees(longitude).asRadians()), true);
@@ -348,7 +348,7 @@ void GlobeBrowsingModule::goToGeo(double latitude, double longitude,
 {
     using namespace globebrowsing;
 
-    Camera* cam = OsEng.navigationHandler().camera();
+    Camera* cam = global::navigationHandler.camera();
     goToGeodetic3(
         *cam,
         {
@@ -427,9 +427,9 @@ void GlobeBrowsingModule::goToGeodetic2(Camera& camera, globebrowsing::Geodetic2
         return;
     }
 
-    const glm::dvec3 cameraPosition = OsEng.navigationHandler().camera()->positionVec3();
+    const glm::dvec3 cameraPosition = global::navigationHandler.camera()->positionVec3();
     const glm::dmat4 inverseModelTransform =
-        OsEng.navigationHandler().focusNode()->inverseModelTransform();
+        global::navigationHandler.focusNode()->inverseModelTransform();
     const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
     const SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
@@ -512,7 +512,7 @@ GlobeBrowsingModule::castFocusNodeRenderableToGlobe()
 {
     using namespace globebrowsing;
 
-    const Renderable* renderable = OsEng.navigationHandler().focusNode()->renderable();
+    const Renderable* renderable = global::navigationHandler.focusNode()->renderable();
     if (!renderable) {
         return nullptr;
     }

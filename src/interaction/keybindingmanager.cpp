@@ -34,7 +34,7 @@
 
 namespace openspace::interaction {
 
-KeyBindingManager::KeyBindingManager()
+KeybindingManager::KeybindingManager()
     : DocumentationGenerator(
         "Documentation",
         "keybindings",
@@ -46,7 +46,7 @@ KeyBindingManager::KeyBindingManager()
     )
 {}
 
-void KeyBindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
+void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
 {
     if (action == KeyAction::Press || action == KeyAction::Repeat) {
         // iterate over key bindings
@@ -62,11 +62,11 @@ void KeyBindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyActio
     }
 }
 
-void KeyBindingManager::resetKeyBindings() {
+void KeybindingManager::resetKeyBindings() {
     _keyLua.clear();
 }
 
-void KeyBindingManager::bindKeyLocal(Key key, KeyModifier modifier,
+void KeybindingManager::bindKeyLocal(Key key, KeyModifier modifier,
                                      std::string luaCommand, std::string documentation)
 {
     _keyLua.insert({
@@ -79,7 +79,7 @@ void KeyBindingManager::bindKeyLocal(Key key, KeyModifier modifier,
     });
 }
 
-void KeyBindingManager::bindKey(Key key, KeyModifier modifier,
+void KeybindingManager::bindKey(Key key, KeyModifier modifier,
                                 std::string luaCommand, std::string documentation)
 {
     _keyLua.insert({
@@ -92,7 +92,7 @@ void KeyBindingManager::bindKey(Key key, KeyModifier modifier,
     });
 }
 
-void KeyBindingManager::removeKeyBinding(const std::string& key) {
+void KeybindingManager::removeKeyBinding(const std::string& key) {
     // Erase-remove idiom does not work for std::multimap so we have to do this on foot
 
     KeyWithModifier k = stringToKey(key);
@@ -110,8 +110,8 @@ void KeyBindingManager::removeKeyBinding(const std::string& key) {
     }
 }
 
-std::vector<std::pair<KeyWithModifier, KeyBindingManager::KeyInformation>>
-KeyBindingManager::keyBinding(const std::string& key) const
+std::vector<std::pair<KeyWithModifier, KeybindingManager::KeyInformation>>
+KeybindingManager::keyBinding(const std::string& key) const
 {
     std::vector<std::pair<KeyWithModifier, KeyInformation>> result;
 
@@ -123,7 +123,7 @@ KeyBindingManager::keyBinding(const std::string& key) const
     return result;
 }
 
-std::string KeyBindingManager::generateJson() const {
+std::string KeybindingManager::generateJson() const {
     std::stringstream json;
     json << "[";
     bool first = true;
@@ -145,7 +145,7 @@ std::string KeyBindingManager::generateJson() const {
     return json.str();
 }
 
-scripting::LuaLibrary KeyBindingManager::luaLibrary() {
+scripting::LuaLibrary KeybindingManager::luaLibrary() {
     return {
         "",
         {

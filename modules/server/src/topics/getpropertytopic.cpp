@@ -90,7 +90,7 @@ json GetPropertyTopic::allProperties() {
                 OsEng.console(),
                 global::parallelPeer,
                 OsEng.windowWrapper(),
-                OsEng.navigationHandler(),
+                global::navigationHandler,
                 OsEng.virtualPropertyManager(),
             }
         }

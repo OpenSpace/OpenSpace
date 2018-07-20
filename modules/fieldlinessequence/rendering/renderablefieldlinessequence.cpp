@@ -764,8 +764,8 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
             ));
             return;
         }
-        OsEng.navigationHandler().setFocusNode(node->parent());
-        OsEng.navigationHandler().resetCameraDirection();
+        global::navigationHandler.setFocusNode(node->parent());
+        global::navigationHandler.resetCameraDirection();
     });
 
     _pJumpToStartBtn.onChange([this] {

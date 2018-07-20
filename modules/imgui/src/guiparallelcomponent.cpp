@@ -26,7 +26,6 @@
 
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/interaction/keyframenavigator.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -88,7 +87,7 @@ void GuiParallelComponent::renderClientWithHost() {
 
     const size_t nTimeKeyframes = global::timeManager.nKeyframes();
     const size_t nCameraKeyframes =
-        OsEng.navigationHandler().keyframeNavigator().nKeyframes();
+        global::navigationHandler.keyframeNavigator().nKeyframes();
 
     std::string timeKeyframeInfo = "TimeKeyframes : " + std::to_string(nTimeKeyframes);
     std::string cameraKeyframeInfo = "CameraKeyframes : " +

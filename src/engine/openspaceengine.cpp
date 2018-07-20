@@ -143,7 +143,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
         std::move(programName),
         ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
     ))
-    , _navigationHandler(new interaction::NavigationHandler)
     , _scriptScheduler(new scripting::ScriptScheduler)
     , _virtualPropertyManager(new VirtualPropertyManager)
     , _rootPropertyOwner(new properties::PropertyOwner({ "" }))
@@ -155,9 +154,9 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
 {
     _rootPropertyOwner->addPropertySubOwner(global::moduleEngine);
 
-    _navigationHandler->setPropertyOwner(_rootPropertyOwner.get());
+    global::navigationHandler.setPropertyOwner(_rootPropertyOwner.get());
     // New property subowners also have to be added to the ImGuiModule callback!
-    _rootPropertyOwner->addPropertySubOwner(_navigationHandler.get());
+    _rootPropertyOwner->addPropertySubOwner(global::navigationHandler);
     _rootPropertyOwner->addPropertySubOwner(global::timeManager);
 
     _rootPropertyOwner->addPropertySubOwner(global::renderEngine);
@@ -579,7 +578,7 @@ void OpenSpaceEngine::initialize() {
     }
 
     // Initialize the NavigationHandler
-    _navigationHandler->initialize();
+    global::navigationHandler.initialize();
 
     // Load a light and a monospaced font
     loadFonts();
@@ -633,7 +632,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
         }
         global::renderEngine.setScene(nullptr);
         global::renderEngine.setCamera(nullptr);
-        _navigationHandler->setCamera(nullptr);
+        global::navigationHandler.setCamera(nullptr);
         _scene->clear();
         _rootPropertyOwner->removePropertySubOwner(_scene.get());
     }
@@ -654,8 +653,8 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     camera->setParent(_scene->root());
 
     global::renderEngine.setCamera(camera);
-    _navigationHandler->setCamera(camera);
-    _navigationHandler->setFocusNode(camera->parent());
+    global::navigationHandler.setCamera(camera);
+    global::navigationHandler.setFocusNode(camera->parent());
 
     global::renderEngine.setScene(_scene.get());
 
@@ -766,7 +765,7 @@ void OpenSpaceEngine::deinitialize() {
     _engine->assetManager().deinitialize();
     _engine->_scene = nullptr;
 
-    _navigationHandler->deinitialize();
+    global::navigationHandler.deinitialize();
     global::renderEngine.deinitialize();
 
     LTRACE("OpenSpaceEngine::deinitialize(end)");
@@ -1202,7 +1201,7 @@ void OpenSpaceEngine::preSynchronization() {
 
         Camera* camera = _scene->camera();
         if (camera) {
-            _navigationHandler->updateCamera(dt);
+            global::navigationHandler.updateCamera(dt);
             camera->invalidateCache();
         }
         global::parallelPeer.preSynchronization();
@@ -1381,7 +1380,7 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
         }
     }
 
-    _navigationHandler->keyboardCallback(key, mod, action);
+    global::navigationHandler.keyboardCallback(key, mod, action);
     global::keybindingManager.keyboardCallback(key, mod, action);
 }
 
@@ -1424,7 +1423,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
         }
     }
 
-    _navigationHandler->mouseButtonCallback(button, action);
+    global::navigationHandler.mouseButtonCallback(button, action);
 }
 
 void OpenSpaceEngine::mousePositionCallback(double x, double y) {
@@ -1435,7 +1434,7 @@ void OpenSpaceEngine::mousePositionCallback(double x, double y) {
 
     _mousePosition = { x, y };
 
-    _navigationHandler->mousePositionCallback(x, y);
+    global::navigationHandler.mousePositionCallback(x, y);
 }
 
 void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
@@ -1447,11 +1446,11 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
         }
     }
 
-    _navigationHandler->mouseScrollWheelCallback(posY);
+    global::navigationHandler.mouseScrollWheelCallback(posY);
 }
 
 void OpenSpaceEngine::setJoystickInputStates(interaction::JoystickInputStates& states) {
-    _navigationHandler->setJoystickInputStates(states);
+    global::navigationHandler.setJoystickInputStates(states);
 }
 
 void OpenSpaceEngine::encode() {
@@ -1651,11 +1650,6 @@ AssetManager& OpenSpaceEngine::assetManager() {
 ghoul::fontrendering::FontManager& OpenSpaceEngine::fontManager() {
     ghoul_assert(_fontManager, "Font Manager must not be nullptr");
     return *_fontManager;
-}
-
-interaction::NavigationHandler& OpenSpaceEngine::navigationHandler() {
-    ghoul_assert(_navigationHandler, "NavigationHandler must not be nullptr");
-    return *_navigationHandler;
 }
 
 properties::PropertyOwner& OpenSpaceEngine::rootPropertyOwner() {

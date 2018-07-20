@@ -30,7 +30,6 @@
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
@@ -125,7 +124,7 @@ void GuiGlobeBrowsingComponent::render() {
         // node
 
         // Check if the focus node is a RenderableGlobe
-        const SceneGraphNode* const focus = OsEng.navigationHandler().focusNode();
+        const SceneGraphNode* const focus = global::navigationHandler.focusNode();
         const auto it = std::find(nodes.cbegin(), nodes.cend(), focus);
         if (it != nodes.end()) {
             _currentNode = focus->identifier();
@@ -148,7 +147,7 @@ void GuiGlobeBrowsingComponent::render() {
     ImGui::SameLine();
     bool selectFocusNode = ImGui::Button("From Focus");
     if (selectFocusNode) {
-        const SceneGraphNode* const focus = OsEng.navigationHandler().focusNode();
+        const SceneGraphNode* const focus = global::navigationHandler.focusNode();
         const auto it = std::find(nodes.cbegin(), nodes.cend(), focus);
         if (it != nodes.end()) {
             _currentNode = focus->identifier();

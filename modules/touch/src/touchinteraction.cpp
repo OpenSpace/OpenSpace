@@ -1143,7 +1143,7 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
                 setFocusNode(_pickingSelected);
                  // cant do setFocusNode() since TouchInteraction is not subclass of
                  // InteractionMode
-                OsEng.navigationHandler().setFocusNode(_focusNode);
+                global::navigationHandler.setFocusNode(_focusNode);
 
                 // rotate camera to look at new focus, using slerp quat
                 glm::dvec3 camToFocus = _focusNode->worldPosition() -
@@ -1203,7 +1203,7 @@ void TouchInteraction::step(double dt) {
 
      // since functions cant be called directly (TouchInteraction not a subclass of
      // InteractionMode)
-    setFocusNode(OsEng.navigationHandler().focusNode());
+    setFocusNode(global::navigationHandler.focusNode());
     if (_focusNode && _camera) {
         // Create variables from current state
         dvec3 camPos = _camera->positionVec3();

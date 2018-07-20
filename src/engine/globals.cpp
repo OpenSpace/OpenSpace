@@ -28,6 +28,7 @@
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/interaction/keybindingmanager.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/renderengine.h>
@@ -73,6 +74,11 @@ TimeManager& gTimeManager() {
 
 interaction::KeybindingManager& gKeybindingManager() {
     static interaction::KeybindingManager g;
+    return g;
+}
+
+interaction::NavigationHandler& gNavigationHandler() {
+    static interaction::NavigationHandler g;
     return g;
 }
 

@@ -34,7 +34,10 @@ class NetworkEngine;
 class ParallelPeer;
 class RenderEngine;
 class TimeManager;
-namespace interaction { class KeybindingManager; }
+namespace interaction {
+    class KeybindingManager;
+    class NavigationHandler;
+}
 namespace scripting { class ScriptEngine; }
 
 namespace detail {
@@ -47,6 +50,7 @@ ParallelPeer& gParallelPeer();
 RenderEngine& gRenderEngine();
 TimeManager& gTimeManager();
 interaction::KeybindingManager& gKeybindingManager();
+interaction::NavigationHandler& gNavigationHandler();
 scripting::ScriptEngine& gScriptEngine();
 
 } // namespace detail
@@ -61,6 +65,7 @@ static ParallelPeer& parallelPeer = detail::gParallelPeer();
 static RenderEngine& renderEngine = detail::gRenderEngine();
 static TimeManager& timeManager = detail::gTimeManager();
 static interaction::KeybindingManager& keybindingManager = detail::gKeybindingManager();
+static interaction::NavigationHandler& navigationHandler = detail::gNavigationHandler();
 static scripting::ScriptEngine& scriptEngine = detail::gScriptEngine();
 
 } // namespace global

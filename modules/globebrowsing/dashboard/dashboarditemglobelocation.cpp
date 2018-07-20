@@ -28,6 +28,7 @@
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -147,15 +148,15 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
 void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
     using namespace globebrowsing;
 
-    SceneGraphNode* n = OsEng.navigationHandler().focusNode();
+    SceneGraphNode* n = global::navigationHandler.focusNode();
     const RenderableGlobe* globe = dynamic_cast<const  RenderableGlobe*>(n->renderable());
     if (!globe) {
         return;
     }
 
-    const glm::dvec3 cameraPosition = OsEng.navigationHandler().camera()->positionVec3();
+    const glm::dvec3 cameraPosition = global::navigationHandler.camera()->positionVec3();
     const glm::dmat4 inverseModelTransform =
-        OsEng.navigationHandler().focusNode()->inverseModelTransform();
+        global::navigationHandler.focusNode()->inverseModelTransform();
     const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
     const SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(

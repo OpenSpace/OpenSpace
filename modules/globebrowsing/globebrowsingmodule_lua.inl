@@ -205,9 +205,9 @@ int getGeoPositionForCamera(lua_State* L) {
         return ghoul::lua::luaError(L, "Focus node must be a RenderableGlobe");
     }
 
-    const glm::dvec3 cameraPosition = OsEng.navigationHandler().camera()->positionVec3();
+    const glm::dvec3 cameraPosition = global::navigationHandler.camera()->positionVec3();
     const glm::dmat4 inverseModelTransform =
-        OsEng.navigationHandler().focusNode()->inverseModelTransform();
+        global::navigationHandler.focusNode()->inverseModelTransform();
     const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
     const SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
