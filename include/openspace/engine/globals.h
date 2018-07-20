@@ -29,10 +29,12 @@ namespace openspace {
 
 struct Configuration;
 class RenderEngine;
+class TimeManager;
 
 namespace detail {
     Configuration& gConfiguration();
     RenderEngine& gRenderEngine();
+    TimeManager& gTimeManager();
 
 } // namespace detail
 
@@ -40,6 +42,7 @@ namespace global {
 
 static Configuration& configuration = detail::gConfiguration();
 static RenderEngine& renderEngine = detail::gRenderEngine();
+static TimeManager& timeManager = detail::gTimeManager();
 
 } // namespace global
 

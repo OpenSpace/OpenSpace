@@ -33,7 +33,6 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/histogram.h>
@@ -423,7 +422,7 @@ RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::currentTimes
     if (_volumeTimesteps.empty()) {
         return nullptr;
     }
-    double currentTime = OsEng.timeManager().time().j2000Seconds();
+    double currentTime = global::timeManager.time().j2000Seconds();
 
     // Get the first item with time > currentTime
     auto currentTimestepIt = _volumeTimesteps.upper_bound(currentTime);
@@ -484,7 +483,7 @@ RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::timestepFrom
 void RenderableTimeVaryingVolume::jumpToTimestep(int target) {
     Timestep* t = timestepFromIndex(target);
     if (t) {
-        OsEng.timeManager().setTimeNextFrame(t->metadata.time);
+        global::timeManager.setTimeNextFrame(t->metadata.time);
     }
 }
 

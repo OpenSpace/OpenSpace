@@ -26,6 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
@@ -132,7 +133,7 @@ DashboardItemMission::DashboardItemMission(const ghoul::Dictionary& dictionary)
 
 void DashboardItemMission::render(glm::vec2& penPosition) {
     if (MissionManager::ref().hasCurrentMission()) {
-        double currentTime = OsEng.timeManager().time().j2000Seconds();
+        double currentTime = global::timeManager.time().j2000Seconds();
         const Mission& mission = MissionManager::ref().currentMission();
 
         if (!mission.phases().empty()) {

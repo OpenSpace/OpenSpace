@@ -769,7 +769,7 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
     });
 
     _pJumpToStartBtn.onChange([this] {
-        OsEng.timeManager().setTimeNextFrame(_startTimes[0]);
+        global::timeManager.setTimeNextFrame(_startTimes[0]);
     });
 }
 

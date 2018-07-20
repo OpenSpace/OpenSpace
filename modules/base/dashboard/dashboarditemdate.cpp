@@ -26,6 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/font/font.h>
@@ -116,14 +117,14 @@ void DashboardItemDate::render(glm::vec2& penPosition) {
     RenderFont(
         *_font,
         penPosition,
-        fmt::format("Date: {} UTC", OsEng.timeManager().time().UTC())
+        fmt::format("Date: {} UTC", global::timeManager.time().UTC())
     );
 }
 
 glm::vec2 DashboardItemDate::size() const {
     return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
         *_font,
-        fmt::format("Date: {} UTC", OsEng.timeManager().time().UTC())
+        fmt::format("Date: {} UTC", global::timeManager.time().UTC())
     ).boundingBox;
 }
 

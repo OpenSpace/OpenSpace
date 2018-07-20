@@ -945,7 +945,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     glDisablei(GL_BLEND, 2);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    Time time = OsEng.timeManager().time();
+    Time time = global::timeManager.time();
 
     RenderData data = {
         *camera,

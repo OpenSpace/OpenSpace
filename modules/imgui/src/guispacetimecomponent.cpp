@@ -26,7 +26,6 @@
 
 #include <modules/imgui/include/gui.h>
 #include <modules/imgui/include/imgui_include.h>
-
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
@@ -166,7 +165,7 @@ void GuiSpaceTimeComponent::render() {
     CaptionText("Time Controls");
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
 
-    ImGui::Text("Current Date: %s", OsEng.timeManager().time().UTC().c_str());
+    ImGui::Text("Current Date: %s", global::timeManager.time().UTC().c_str());
 
     constexpr int BufferSize = 256;
     static char Buffer[BufferSize];
@@ -194,9 +193,9 @@ void GuiSpaceTimeComponent::render() {
     auto incrementTime = [](float days) {
         using namespace std::chrono;
 
-        const float duration = OsEng.timeManager().defaultTimeInterpolationDuration();
+        const float duration = global::timeManager.defaultTimeInterpolationDuration();
 
-        const TimeKeyframeData predictedTime = OsEng.timeManager().interpolate(
+        const TimeKeyframeData predictedTime = global::timeManager.interpolate(
             OsEng.windowWrapper().applicationTime() + duration
         );
         const double j2000 = predictedTime.time.j2000Seconds();
@@ -282,7 +281,7 @@ void GuiSpaceTimeComponent::render() {
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
 //
     {
-        const float dt = static_cast<float>(OsEng.timeManager().targetDeltaTime());
+        const float dt = static_cast<float>(global::timeManager.targetDeltaTime());
         if (_firstFrame) {
             const std::pair<double, std::string>& dtInfo = simplifyTime(dt);
             _deltaTime = static_cast<float>(dtInfo.first);
@@ -420,7 +419,7 @@ void GuiSpaceTimeComponent::render() {
         _deltaTime -= _slidingDelta;
     }
     
-    const bool isPaused = OsEng.timeManager().isPaused();
+    const bool isPaused = global::timeManager.isPaused();
     const bool pauseChanged = ImGui::Button(
         isPaused ? "Resume" : "Pause",
         { ImGui::GetWindowWidth() / 2 - 7.5f, 0.f }

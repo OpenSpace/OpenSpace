@@ -24,6 +24,7 @@
 
 #include <openspace/network/networkengine.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/scripting/scriptengine.h>
@@ -89,13 +90,13 @@ void NetworkEngine::publishStatusMessage() {
     // 8 bytes: delta time as double
     // Total: 40
 
-    const Time& currentTime = OsEng.timeManager().time();
+    const Time& currentTime = global::timeManager.time();
 
     uint16_t messageSize = 0;
 
     const double time = currentTime.j2000Seconds();
     const std::string timeString = currentTime.UTC();
-    double delta = OsEng.timeManager().deltaTime();
+    double delta = global::timeManager.deltaTime();
 
 
     messageSize += sizeof(time);

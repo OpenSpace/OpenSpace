@@ -124,7 +124,7 @@ void IswaCygnet::initializeGL() {
 
     initializeTime();
     createGeometry();
-    downloadTextureResource(OsEng.timeManager().time().j2000Seconds());
+    downloadTextureResource(global::timeManager.time().j2000Seconds());
 }
 
 void IswaCygnet::deinitializeGL() {
@@ -187,7 +187,7 @@ void IswaCygnet::update(const UpdateData&) {
 
     // the texture resource is downloaded ahead of time, so we need to
     // now if we are going backwards or forwards
-    _openSpaceTime = OsEng.timeManager().time().j2000Seconds();
+    _openSpaceTime = global::timeManager.time().j2000Seconds();
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()
     );
@@ -212,7 +212,7 @@ void IswaCygnet::update(const UpdateData&) {
         updateTexture();
         _textureDirty = false;
 
-        double clockwiseSign = (OsEng.timeManager().deltaTime() > 0) ? 1.0 : -1.0;
+        double clockwiseSign = (global::timeManager.deltaTime() > 0) ? 1.0 : -1.0;
         downloadTextureResource(_openSpaceTime + clockwiseSign * _data.updateTime);
         _lastUpdateRealTime = _realTime;
         _lastUpdateOpenSpaceTime = _openSpaceTime;
@@ -234,7 +234,7 @@ void IswaCygnet::registerProperties() {}
 void IswaCygnet::unregisterProperties() {}
 
 void IswaCygnet::initializeTime() {
-    _openSpaceTime = OsEng.timeManager().time().j2000Seconds();
+    _openSpaceTime = global::timeManager.time().j2000Seconds();
     _lastUpdateOpenSpaceTime = 0.0;
 
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(

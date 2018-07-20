@@ -126,7 +126,6 @@ public:
     LoadingScreen& loadingScreen();
     NetworkEngine& networkEngine();
     ParallelPeer& parallelPeer();
-    TimeManager& timeManager();
     WindowWrapper& windowWrapper();
     ghoul::fontrendering::FontManager& fontManager();
     interaction::NavigationHandler& navigationHandler();
@@ -207,7 +206,6 @@ private:
     std::unique_ptr<NetworkEngine> _networkEngine;
     std::unique_ptr<ParallelPeer> _parallelPeer;
     std::unique_ptr<SyncEngine> _syncEngine;
-    std::unique_ptr<TimeManager> _timeManager;
     std::unique_ptr<WindowWrapper> _windowWrapper;
     std::unique_ptr<ghoul::cmdparser::CommandlineParser> _commandlineParser;
     std::unique_ptr<ghoul::fontrendering::FontManager> _fontManager;

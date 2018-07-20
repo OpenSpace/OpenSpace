@@ -108,7 +108,7 @@ void TimeManager::interpolateTime(double targetTime, double durationSeconds) {
     ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
 
     const double now = OsEng.windowWrapper().applicationTime();
-    const bool pause = OsEng.timeManager().isPaused();
+    const bool pause = isPaused();
 
     const TimeKeyframeData current = { time(), deltaTime(), false, false };
     const TimeKeyframeData next = { targetTime, targetDeltaTime(), pause, false };

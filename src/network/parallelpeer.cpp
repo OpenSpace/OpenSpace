@@ -24,6 +24,7 @@
 
 #include <openspace/network/parallelpeer.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/keyframenavigator.h>
@@ -127,10 +128,10 @@ ParallelPeer::ParallelPeer()
 ParallelPeer::~ParallelPeer() {
     disconnect();
     if (_timeJumpCallback != -1) {
-        OsEng.timeManager().removeTimeJumpCallback(_timeJumpCallback);
+        global::timeManager.removeTimeJumpCallback(_timeJumpCallback);
     }
     if (_timeJumpCallback != -1) {
-        OsEng.timeManager().removeTimeJumpCallback(_timeJumpCallback);
+        global::timeManager.removeTimeJumpCallback(_timeJumpCallback);
     }
 
 }
@@ -301,7 +302,7 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
             datamessagestructures::TimeTimeline timelineMessage(buffer);
 
             if (timelineMessage._clear) {
-                OsEng.timeManager().removeKeyframesAfter(
+                global::timeManager.removeKeyframesAfter(
                     convertTimestamp(timestamp),
                     true
                 );
@@ -316,7 +317,7 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
                 const double convertedTimestamp =
                     convertTimestamp(keyframesMessage[0]._timestamp);
 
-                OsEng.timeManager().removeKeyframesAfter(convertedTimestamp, true);
+                global::timeManager.removeKeyframesAfter(convertedTimestamp, true);
             }
 
             for (const datamessagestructures::TimeKeyframe& kfMessage : keyframesMessage)
@@ -332,9 +333,9 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
                 // We only need at least one keyframe before the current timestamp,
                 // so we can remove any other previous ones
                 if (kfTimestamp < now) {
-                    OsEng.timeManager().removeKeyframesBefore(kfTimestamp, true);
+                    global::timeManager.removeKeyframesBefore(kfTimestamp, true);
                 }
-                OsEng.timeManager().addKeyframe(
+                global::timeManager.addKeyframe(
                     kfTimestamp,
                     timeKeyframeData
                 );
@@ -406,7 +407,7 @@ void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& mess
     setStatus(status);
 
     OsEng.navigationHandler().keyframeNavigator().clearKeyframes();
-    OsEng.timeManager().clearKeyframes();
+    global::timeManager.clearKeyframes();
 }
 
 void ParallelPeer::nConnectionsMessageReceived(const std::vector<char>& message)
@@ -499,7 +500,7 @@ void ParallelPeer::sendScript(std::string script) {
 
 void ParallelPeer::resetTimeOffset() {
     OsEng.navigationHandler().keyframeNavigator().clearKeyframes();
-    OsEng.timeManager().clearKeyframes();
+    global::timeManager.clearKeyframes();
     std::lock_guard<std::mutex> latencyLock(_latencyMutex);
     _latencyDiffs.clear();
 }
@@ -540,18 +541,18 @@ void ParallelPeer::setStatus(ParallelConnection::Status status) {
         _connectionEvent->publish("statusChanged");
     }
     if (isHost()) {
-        OsEng.timeManager().addTimeJumpCallback([this]() {
+        global::timeManager.addTimeJumpCallback([this]() {
             _timeJumped = true;
         });
-        OsEng.timeManager().addTimelineChangeCallback([this]() {
+        global::timeManager.addTimelineChangeCallback([this]() {
             _timeTimelineChanged = true;
         });
     } else {
         if (_timeJumpCallback != -1) {
-            OsEng.timeManager().removeTimeJumpCallback(_timeJumpCallback);
+            global::timeManager.removeTimeJumpCallback(_timeJumpCallback);
         }
         if (_timeTimelineChangeCallback != -1) {
-            OsEng.timeManager().removeTimelineChangeCallback(_timeTimelineChangeCallback);
+            global::timeManager.removeTimelineChangeCallback(_timeTimelineChangeCallback);
         }
     }
 }
@@ -629,7 +630,7 @@ void ParallelPeer::sendCameraKeyframe() {
 
 void ParallelPeer::sendTimeTimeline() {
     // Create a keyframe with current position and orientation of camera
-    const Timeline<TimeKeyframeData> timeline = OsEng.timeManager().timeline();
+    const Timeline<TimeKeyframeData> timeline = global::timeManager.timeline();
     std::deque<Keyframe<TimeKeyframeData>> keyframes = timeline.keyframes();
 
     datamessagestructures::TimeTimeline timelineMessage;
@@ -654,9 +655,9 @@ void ParallelPeer::sendTimeTimeline() {
     // If time jumped this frame, this is represented in the keyframe.
     if (timeline.nKeyframes() == 0) {
         datamessagestructures::TimeKeyframe kfMessage;
-        kfMessage._time = OsEng.timeManager().time().j2000Seconds();
-        kfMessage._dt = OsEng.timeManager().targetDeltaTime();
-        kfMessage._paused = OsEng.timeManager().isPaused();
+        kfMessage._time = global::timeManager.time().j2000Seconds();
+        kfMessage._dt = global::timeManager.targetDeltaTime();
+        kfMessage._paused = global::timeManager.isPaused();
         kfMessage._timestamp = OsEng.windowWrapper().applicationTime();
         kfMessage._requiresTimeJump = _timeJumped;
         timelineMessage._keyframes.push_back(kfMessage);

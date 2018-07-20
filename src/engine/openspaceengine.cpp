@@ -143,7 +143,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _networkEngine(new NetworkEngine)
     , _parallelPeer(new ParallelPeer)
     , _syncEngine(std::make_unique<SyncEngine>(4096))
-    , _timeManager(new TimeManager)
     , _windowWrapper(std::move(windowWrapper))
     , _commandlineParser(new ghoul::cmdparser::CommandlineParser(
         std::move(programName),
@@ -166,7 +165,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     _navigationHandler->setPropertyOwner(_rootPropertyOwner.get());
     // New property subowners also have to be added to the ImGuiModule callback!
     _rootPropertyOwner->addPropertySubOwner(_navigationHandler.get());
-    _rootPropertyOwner->addPropertySubOwner(_timeManager.get());
+    _rootPropertyOwner->addPropertySubOwner(global::timeManager);
 
     _rootPropertyOwner->addPropertySubOwner(global::renderEngine);
     _rootPropertyOwner->addPropertySubOwner(global::renderEngine.screenSpaceOwner());
@@ -475,7 +474,7 @@ void OpenSpaceEngine::destroy() {
         _engine->parallelPeer().disconnect();
     }
 
-    _engine->_syncEngine->removeSyncables(_engine->timeManager().getSyncables());
+    _engine->_syncEngine->removeSyncables(global::timeManager.getSyncables());
     if (_engine->_scene && _engine->_scene->camera()) {
         _engine->_syncEngine->removeSyncables(_engine->_scene->camera()->getSyncables());
     }
@@ -635,7 +634,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
         return;
     }
     if (_scene) {
-        _syncEngine->removeSyncables(_timeManager->getSyncables());
+        _syncEngine->removeSyncables(global::timeManager.getSyncables());
         if (_scene && _scene->camera()) {
             _syncEngine->removeSyncables(_scene->camera()->getSyncables());
         }
@@ -744,7 +743,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     global::renderEngine.setGlobalBlackOutFactor(0.f);
     global::renderEngine.startFading(1, 3.f);
 
-    _syncEngine->addSyncables(_timeManager->getSyncables());
+    _syncEngine->addSyncables(global::timeManager.getSyncables());
     if (_scene && _scene->camera()) {
         _syncEngine->addSyncables(_scene->camera()->getSyncables());
     }
@@ -1192,11 +1191,11 @@ void OpenSpaceEngine::preSynchronization() {
     _syncEngine->preSynchronization(SyncEngine::IsMaster(master));
     if (master) {
         double dt = _windowWrapper->averageDeltaTime();
-        _timeManager->preSynchronization(dt);
+        global::timeManager.preSynchronization(dt);
 
         using Iter = std::vector<std::string>::const_iterator;
         std::pair<Iter, Iter> scheduledScripts = _scriptScheduler->progressTo(
-            timeManager().time().j2000Seconds()
+            global::timeManager.time().j2000Seconds()
         );
         for (Iter it = scheduledScripts.first; it != scheduledScripts.second; ++it) {
             _scriptEngine->queueScript(
@@ -1659,11 +1658,6 @@ ModuleEngine& OpenSpaceEngine::moduleEngine() {
 ParallelPeer& OpenSpaceEngine::parallelPeer() {
     ghoul_assert(_parallelPeer, "ParallelPeer must not be nullptr");
     return *_parallelPeer;
-}
-
-TimeManager& OpenSpaceEngine::timeManager() {
-    ghoul_assert(_timeManager, "Download Manager must not be nullptr");
-    return *_timeManager;
 }
 
 LoadingScreen& OpenSpaceEngine::loadingScreen() {

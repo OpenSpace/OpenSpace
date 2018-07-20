@@ -427,8 +427,8 @@ void RenderEngine::updateScene() {
 
     _scene->updateInterpolations();
 
-    const Time& currentTime = OsEng.timeManager().time();
-    const Time& integrateFromTime = OsEng.timeManager().integrateFromTime();
+    const Time& currentTime = global::timeManager.time();
+    const Time& integrateFromTime = global::timeManager.integrateFromTime();
 
     _scene->update({
         { glm::dvec3(0.0), glm::dmat3(11.), 1.0 },
@@ -689,7 +689,7 @@ void RenderEngine::renderDashboard() {
 }
 
 void RenderEngine::postDraw() {
-    const Time& currentTime = OsEng.timeManager().time();
+    const Time& currentTime = global::timeManager.time();
 
     if (_shouldTakeScreenshot) {
         // We only create the directory here, as we don't want to spam the users

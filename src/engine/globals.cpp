@@ -26,6 +26,7 @@
 
 #include <openspace/engine/configuration.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/util/timemanager.h>
 
 namespace openspace::detail {
 
@@ -36,6 +37,11 @@ Configuration& gConfiguration() {
 
 RenderEngine& gRenderEngine() {
     static RenderEngine g;
+    return g;
+}
+
+TimeManager& gTimeManager() {
+    static TimeManager g;
     return g;
 }
 

@@ -584,7 +584,7 @@ void ABufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor,
         static_cast<int>(Renderable::RenderBin::Transparent) |
         static_cast<int>(Renderable::RenderBin::Overlay);
 
-    Time time = OsEng.timeManager().time();
+    Time time = global::timeManager.time();
     RenderData data{ *camera, psc(), time, doPerformanceMeasurements, renderBinMask, {} };
     RendererTasks tasks;
     scene->render(data, tasks);

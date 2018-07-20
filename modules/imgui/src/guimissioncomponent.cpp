@@ -26,7 +26,7 @@
 
 #include <modules/imgui/include/gui.h>
 #include <modules/imgui/include/imgui_include.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/util/timerange.h>
@@ -42,7 +42,7 @@ namespace {
         std::string missionHashname = "##" + mission.name();
 
 
-        const double currentTime = OsEng.timeManager().time().j2000Seconds();
+        const double currentTime = openspace::global::timeManager.time().j2000Seconds();
         openspace::MissionPhase::Trace t = mission.phaseTrace(currentTime, 0);
 
         int treeOption = t.empty() ? 0 : ImGuiTreeNodeFlags_DefaultOpen;
@@ -74,7 +74,7 @@ namespace {
                 &v,
                 s,
                 e,
-                OsEng.timeManager().time().UTC().c_str()
+                openspace::global::timeManager.time().UTC().c_str()
             );
             ImGui::SameLine();
             ImGui::Text("%s", endTime.UTC().c_str());

@@ -25,7 +25,7 @@
 #include <modules/imgui/include/guiparallelcomponent.h>
 
 #include <modules/imgui/include/imgui_include.h>
-
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/interaction/keyframenavigator.h>
@@ -86,7 +86,7 @@ void GuiParallelComponent::renderClientWithHost() {
     ImGui::Text("%s", connectionInfo.c_str());
     renderClientCommon();
 
-    const size_t nTimeKeyframes = OsEng.timeManager().nKeyframes();
+    const size_t nTimeKeyframes = global::timeManager.nKeyframes();
     const size_t nCameraKeyframes =
         OsEng.navigationHandler().keyframeNavigator().nKeyframes();
 
