@@ -25,6 +25,7 @@
 #include <modules/multiresvolume/rendering/histogrammanager.h>
 
 #include <modules/multiresvolume/rendering/tsp.h>
+#include <cstring>
 #include <string>
 
 namespace openspace {
