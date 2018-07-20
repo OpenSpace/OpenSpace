@@ -24,6 +24,7 @@
 
 #include <openspace/rendering/luaconsole.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/network/parallelpeer.h>
@@ -281,11 +282,11 @@ void LuaConsole::initialize() {
         ghoul::fontrendering::FontManager::Outline::No
     );
 
-    OsEng.parallelPeer().connectionEvent().subscribe(
+    global::parallelPeer.connectionEvent().subscribe(
         "luaConsole",
         "statusChanged",
         [this]() {
-            ParallelConnection::Status status = OsEng.parallelPeer().status();
+            ParallelConnection::Status status = global::parallelPeer.status();
             parallelConnectionChanged(status);
         }
     );
@@ -325,7 +326,7 @@ void LuaConsole::deinitialize() {
 
     _program = nullptr;
 
-    OsEng.parallelPeer().connectionEvent().unsubscribe("luaConsole");
+    global::parallelPeer.connectionEvent().unsubscribe("luaConsole");
 }
 
 bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
@@ -348,7 +349,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         }
         else {
             _isVisible = true;
-            if (OsEng.parallelPeer().status() == ParallelConnection::Status::Host) {
+            if (global::parallelPeer.status() == ParallelConnection::Status::Host) {
                 _remoteScripting = true;
             }
         }
@@ -888,10 +889,10 @@ void LuaConsole::render() {
     if (_remoteScripting) {
         const glm::vec4 Red(1, 0, 0, 1);
 
-        ParallelConnection::Status status = OsEng.parallelPeer().status();
+        ParallelConnection::Status status = global::parallelPeer.status();
         const int nClients =
             status != ParallelConnection::Status::Disconnected ?
-            OsEng.parallelPeer().nConnections() - 1 :
+            global::parallelPeer.nConnections() - 1 :
             0;
 
         const std::string nClientsText =
@@ -901,7 +902,7 @@ void LuaConsole::render() {
 
         const glm::vec2 loc = locationForRightJustifiedText(nClientsText);
         RenderFont(*_font, loc, nClientsText, Red);
-    } else if (OsEng.parallelPeer().isHost()) {
+    } else if (global::parallelPeer.isHost()) {
         const glm::vec4 LightBlue(0.4, 0.4, 1, 1);
 
         const std::string localExecutionText = "Local script execution";

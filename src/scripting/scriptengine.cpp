@@ -634,8 +634,8 @@ void ScriptEngine::preSync(bool isMaster) {
         _receivedScripts.push_back(_currentSyncedScript);
         _queuedScripts.pop_back();
 
-        if (OsEng.parallelPeer().isHost() && remoteScripting) {
-            OsEng.parallelPeer().sendScript(_currentSyncedScript);
+        if (global::parallelPeer.isHost() && remoteScripting) {
+            global::parallelPeer.sendScript(_currentSyncedScript);
         }
     }
     _mutex.unlock();

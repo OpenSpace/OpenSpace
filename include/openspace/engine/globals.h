@@ -31,6 +31,7 @@ struct Configuration;
 class DownloadManager;
 class ModuleEngine;
 class NetworkEngine;
+class ParallelPeer;
 class RenderEngine;
 class TimeManager;
 
@@ -40,6 +41,7 @@ Configuration& gConfiguration();
 DownloadManager& gDownloadManager();
 ModuleEngine& gModuleEngine();
 NetworkEngine& gNetworkEngine();
+ParallelPeer& gParallelPeer();
 RenderEngine& gRenderEngine();
 TimeManager& gTimeManager();
 
@@ -51,6 +53,7 @@ static Configuration& configuration = detail::gConfiguration();
 static DownloadManager& downloadManager = detail::gDownloadManager();
 static ModuleEngine& moduleEngine = detail::gModuleEngine();
 static NetworkEngine& networkEngine = detail::gNetworkEngine();
+static ParallelPeer& parallelPeer = detail::gParallelPeer();
 static RenderEngine& renderEngine = detail::gRenderEngine();
 static TimeManager& timeManager = detail::gTimeManager();
 

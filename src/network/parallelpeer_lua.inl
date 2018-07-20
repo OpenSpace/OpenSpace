@@ -28,7 +28,7 @@ int connect(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::connect");
 
     if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelPeer().connect();
+        global::parallelPeer.connect();
     }
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -39,7 +39,7 @@ int disconnect(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::disconnect");
 
     if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelPeer().connect();
+        global::parallelPeer.connect();
     }
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -50,7 +50,7 @@ int requestHostship(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::requestHostship");
 
     if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelPeer().requestHostship();
+        global::parallelPeer.requestHostship();
     }
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -61,7 +61,7 @@ int resignHostship(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::resignHostship");
 
     if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelPeer().resignHostship();
+        global::parallelPeer.resignHostship();
     }
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");

@@ -88,7 +88,7 @@ json GetPropertyTopic::allProperties() {
             {
                 global::renderEngine,
                 OsEng.console(),
-                OsEng.parallelPeer(),
+                global::parallelPeer,
                 OsEng.windowWrapper(),
                 OsEng.navigationHandler(),
                 OsEng.virtualPropertyManager(),

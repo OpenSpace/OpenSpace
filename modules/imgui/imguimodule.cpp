@@ -62,9 +62,9 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                     std::vector<properties::PropertyOwner*> res = {
                         &(OsEng.windowWrapper()),
                         &(OsEng.navigationHandler()),
-                        &(global::timeManager),
-                        &(global::renderEngine),
-                        &(OsEng.parallelPeer()),
+                        &global::timeManager,
+                        &global::renderEngine,
+                        &global::parallelPeer,
                         &(OsEng.console()),
                         &(OsEng.dashboard())
                     };

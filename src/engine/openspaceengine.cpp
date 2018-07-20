@@ -137,7 +137,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     : _scene(nullptr)
     , _dashboard(new Dashboard)
     , _console(new LuaConsole)
-    , _parallelPeer(new ParallelPeer)
     , _syncEngine(std::make_unique<SyncEngine>(4096))
     , _windowWrapper(std::move(windowWrapper))
     , _commandlineParser(new ghoul::cmdparser::CommandlineParser(
@@ -173,7 +172,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     if (_windowWrapper) {
         _rootPropertyOwner->addPropertySubOwner(_windowWrapper.get());
     }
-    _rootPropertyOwner->addPropertySubOwner(_parallelPeer.get());
+    _rootPropertyOwner->addPropertySubOwner(global::parallelPeer);
     _rootPropertyOwner->addPropertySubOwner(_console.get());
     _rootPropertyOwner->addPropertySubOwner(_dashboard.get());
 
@@ -466,8 +465,8 @@ void OpenSpaceEngine::create(int argc, char** argv,
 }
 
 void OpenSpaceEngine::destroy() {
-    if (_engine->parallelPeer().status() != ParallelConnection::Status::Disconnected) {
-        _engine->parallelPeer().disconnect();
+    if (global::parallelPeer.status() != ParallelConnection::Status::Disconnected) {
+        global::parallelPeer.disconnect();
     }
 
     _engine->_syncEngine->removeSyncables(global::timeManager.getSyncables());
@@ -1208,7 +1207,7 @@ void OpenSpaceEngine::preSynchronization() {
             _navigationHandler->updateCamera(dt);
             camera->invalidateCache();
         }
-        _parallelPeer->preSynchronization();
+        global::parallelPeer.preSynchronization();
     }
 
     for (const std::function<void()>& func : _moduleCallbacks.preSync) {
@@ -1634,11 +1633,6 @@ LuaConsole& OpenSpaceEngine::console() {
 Dashboard& OpenSpaceEngine::dashboard() {
     ghoul_assert(_dashboard, "Dashboard must not be nullptr");
     return *_dashboard;
-}
-
-ParallelPeer& OpenSpaceEngine::parallelPeer() {
-    ghoul_assert(_parallelPeer, "ParallelPeer must not be nullptr");
-    return *_parallelPeer;
 }
 
 LoadingScreen& OpenSpaceEngine::loadingScreen() {

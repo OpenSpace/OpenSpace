@@ -28,6 +28,7 @@
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/network/networkengine.h>
+#include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/timemanager.h>
 
@@ -50,6 +51,11 @@ ModuleEngine& gModuleEngine() {
 
 NetworkEngine& gNetworkEngine() {
     static NetworkEngine g;
+    return g;
+}
+
+ParallelPeer& gParallelPeer() {
+    static ParallelPeer g;
     return g;
 }
 
