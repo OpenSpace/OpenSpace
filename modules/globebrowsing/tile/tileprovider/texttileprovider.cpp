@@ -28,6 +28,7 @@
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/moduleengine.h>
 
@@ -45,7 +46,7 @@ TextTileProvider::TextTileProvider(const TileTextureInitData& initData, size_t f
     : _initData(initData)
     , _fontSize(fontSize)
 {
-    _tileCache = OsEng.moduleEngine().module<GlobeBrowsingModule>()->tileCache();
+    _tileCache = global::moduleEngine.module<GlobeBrowsingModule>()->tileCache();
 }
 
 TextTileProvider::~TextTileProvider() {} // NOLINT

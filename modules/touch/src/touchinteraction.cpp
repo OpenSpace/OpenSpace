@@ -422,7 +422,7 @@ bool TouchInteraction::guiMode(const std::vector<TuioCursor>& list) {
         list.at(0).getScreenY(res.y)
     );
 
-    ImGUIModule& module = *(OsEng.moduleEngine().module<ImGUIModule>());
+    ImGUIModule& module = *(global::moduleEngine.module<ImGUIModule>());
     _guiON = module.gui.isEnabled();
 
     if (_tap && list.size() == 1 &&
@@ -638,7 +638,7 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
              // normalized -1 to 1 coordinates on screen
             screenPoints.emplace_back(2 * (c->getX() - 0.5), -2 * (c->getY() - 0.5));
         } else {
-            OsEng.moduleEngine().module<ImGUIModule>()->touchInput = {
+            global::moduleEngine.module<ImGUIModule>()->touchInput = {
                 true,
                 glm::dvec2(0.0, 0.0),
                 1
@@ -696,7 +696,7 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
     else {
         // prevents touch to infinitely be active (due to windows bridge case where event
         // doesnt get consumed sometimes when LMA fails to converge)
-        OsEng.moduleEngine().module<ImGUIModule>()->touchInput = {
+        global::moduleEngine.module<ImGUIModule>()->touchInput = {
             true,
             glm::dvec2(0.0, 0.0),
             1
@@ -1408,7 +1408,7 @@ void TouchInteraction::resetAfterInput() {
         }
     }
     // Reset emulated mouse values
-    ImGUIModule& module = *(OsEng.moduleEngine().module<ImGUIModule>());
+    ImGUIModule& module = *(global::moduleEngine.module<ImGUIModule>());
     if (_guiON) {
         bool activeLastFrame = module.touchInput.action;
         module.touchInput.active = false;

@@ -81,7 +81,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             gui._moduleProperty.setSource(
                 []() {
                     std::vector<properties::PropertyOwner*> v;
-                    v.push_back(&(OsEng.moduleEngine()));
+                    v.push_back(&(global::moduleEngine));
                     return v;
                 }
             );

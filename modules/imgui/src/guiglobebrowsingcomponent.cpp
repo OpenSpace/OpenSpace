@@ -51,7 +51,7 @@ GuiGlobeBrowsingComponent::GuiGlobeBrowsingComponent()
 {}
 
 void GuiGlobeBrowsingComponent::render() {
-    GlobeBrowsingModule* module = OsEng.moduleEngine().module<GlobeBrowsingModule>();
+    GlobeBrowsingModule* module = global::moduleEngine.module<GlobeBrowsingModule>();
     using UrlInfo = GlobeBrowsingModule::UrlInfo;
     using Capabilities = GlobeBrowsingModule::Capabilities;
     using Layer = GlobeBrowsingModule::Layer;

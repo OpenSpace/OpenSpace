@@ -24,7 +24,7 @@
 
 #include <modules/spacecraftinstruments/util/sequenceparser.h>
 
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/util/spicemanager.h>
 
 #include <ghoul/logging/logmanager.h>
@@ -94,7 +94,7 @@ void writeToBuffer<std::string>(std::vector<char>& buffer, size_t& currentWriteL
 
 void SequenceParser::sendPlaybookInformation(const std::string& name) {
     std::string fullName = std::string(PlaybookIdentifierName) + "_" + name;
-    _messageIdentifier = OsEng.networkEngine().identifier(fullName);
+    _messageIdentifier = global::networkEngine.identifier(fullName);
 
     std::vector<char> buffer(1024);
     size_t currentWriteLocation = 0;
@@ -189,7 +189,7 @@ void SequenceParser::sendPlaybookInformation(const std::string& name) {
     buffer.resize(currentWriteLocation);
 
     //OsEng.networkEngine()->publishMessage(PlaybookIdentifier, buffer);
-    OsEng.networkEngine().setInitialConnectionMessage(_messageIdentifier, buffer);
+    global::networkEngine.setInitialConnectionMessage(_messageIdentifier, buffer);
 }
 
-}
+} // namespace openspace

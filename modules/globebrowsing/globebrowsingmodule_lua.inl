@@ -134,7 +134,7 @@ int goToChunk(lua_State* L) {
     const int level = ghoul::lua::value<int>(L, 3);
     lua_pop(L, 3);
 
-    OsEng.moduleEngine().module<GlobeBrowsingModule>()->goToChunk(x, y, level);
+    global::moduleEngine.module<GlobeBrowsingModule>()->goToChunk(x, y, level);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -147,11 +147,11 @@ int goToGeo(lua_State* L) {
     const double longitude = ghoul::lua::value<double>(L, 2);
 
     if (nArguments == 2) {
-        OsEng.moduleEngine().module<GlobeBrowsingModule>()->goToGeo(latitude, longitude);
+        global::moduleEngine.module<GlobeBrowsingModule>()->goToGeo(latitude, longitude);
     }
     else if (nArguments == 3) {
         const double altitude = ghoul::lua::value<double>(L, 3);
-        OsEng.moduleEngine().module<GlobeBrowsingModule>()->goToGeo(
+        global::moduleEngine.module<GlobeBrowsingModule>()->goToGeo(
             latitude,
             longitude,
             altitude
@@ -182,7 +182,7 @@ int getGeoPosition(lua_State* L) {
         return ghoul::lua::luaError(L, "Name must be a RenderableGlobe");
     }
 
-    GlobeBrowsingModule& mod = *(OsEng.moduleEngine().module<GlobeBrowsingModule>());
+    GlobeBrowsingModule& mod = *(global::moduleEngine.module<GlobeBrowsingModule>());
     glm::vec3 pos = mod.cartesianCoordinatesFromGeo(
         *globe,
         latitude,
@@ -199,7 +199,7 @@ int getGeoPosition(lua_State* L) {
 int getGeoPositionForCamera(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getGeoPositionForCamera");
 
-    GlobeBrowsingModule* module = OsEng.moduleEngine().module<GlobeBrowsingModule>();
+    GlobeBrowsingModule* module = global::moduleEngine.module<GlobeBrowsingModule>();
     const RenderableGlobe* globe = module->castFocusNodeRenderableToGlobe();
     if (!globe) {
         return ghoul::lua::luaError(L, "Focus node must be a RenderableGlobe");
@@ -239,7 +239,7 @@ int loadWMSCapabilities(lua_State* L) {
     std::string globe = ghoul::lua::value<std::string>(L, 2);
     std::string url = ghoul::lua::value<std::string>(L, 3);
 
-    OsEng.moduleEngine().module<GlobeBrowsingModule>()->loadWMSCapabilities(
+    global::moduleEngine.module<GlobeBrowsingModule>()->loadWMSCapabilities(
         std::move(name),
         std::move(globe),
         std::move(url)
@@ -260,7 +260,7 @@ int removeWMSServer(lua_State* L) {
         ghoul::lua::PopValue::Yes
     );
 
-    OsEng.moduleEngine().module<GlobeBrowsingModule>()->removeWMSServer(name);
+    global::moduleEngine.module<GlobeBrowsingModule>()->removeWMSServer(name);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -275,7 +275,7 @@ int capabilities(lua_State* L) {
         ghoul::lua::PopValue::Yes
     );
     GlobeBrowsingModule::Capabilities cap =
-        OsEng.moduleEngine().module<GlobeBrowsingModule>()->capabilities(name);
+        global::moduleEngine.module<GlobeBrowsingModule>()->capabilities(name);
 
     lua_newtable(L);
     for (unsigned long i = 0; i < cap.size(); ++i) {

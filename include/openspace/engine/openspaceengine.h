@@ -46,12 +46,9 @@ class DownloadManager;
 class GUI;
 class LoadingScreen;
 class LuaConsole;
-class ModuleEngine;
-class NetworkEngine;
 class ParallelPeer;
 class Scene;
 class SyncEngine;
-class TimeManager;
 class VirtualPropertyManager;
 class WindowWrapper;
 
@@ -122,9 +119,7 @@ public:
     AssetManager& assetManager();
     Dashboard& dashboard();
     DownloadManager& downloadManager();
-    ModuleEngine& moduleEngine();
     LoadingScreen& loadingScreen();
-    NetworkEngine& networkEngine();
     ParallelPeer& parallelPeer();
     WindowWrapper& windowWrapper();
     ghoul::fontrendering::FontManager& fontManager();
@@ -202,8 +197,6 @@ private:
     std::unique_ptr<Dashboard> _dashboard;
     std::unique_ptr<DownloadManager> _downloadManager;
     std::unique_ptr<LuaConsole> _console;
-    std::unique_ptr<ModuleEngine> _moduleEngine;
-    std::unique_ptr<NetworkEngine> _networkEngine;
     std::unique_ptr<ParallelPeer> _parallelPeer;
     std::unique_ptr<SyncEngine> _syncEngine;
     std::unique_ptr<WindowWrapper> _windowWrapper;

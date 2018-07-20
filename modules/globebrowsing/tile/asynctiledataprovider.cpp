@@ -30,7 +30,7 @@
 #include <modules/globebrowsing/tile/tileloadjob.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
@@ -46,7 +46,7 @@ AsyncTileDataProvider::AsyncTileDataProvider(std::string name,
     , _rawTileDataReader(std::move(rawTileDataReader))
     , _concurrentJobManager(LRUThreadPool<TileIndex::TileHashKey>(1, 10))
 {
-    _globeBrowsingModule = OsEng.moduleEngine().module<GlobeBrowsingModule>();
+    _globeBrowsingModule = global::moduleEngine.module<GlobeBrowsingModule>();
     performReset(ResetRawTileDataReader::No);
 }
 

@@ -25,6 +25,8 @@
 #include <openspace/engine/globals.h>
 
 #include <openspace/engine/configuration.h>
+#include <openspace/engine/moduleengine.h>
+#include <openspace/network/networkengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/timemanager.h>
 
@@ -32,6 +34,16 @@ namespace openspace::detail {
 
 Configuration& gConfiguration() {
     static Configuration g;
+    return g;
+}
+
+ModuleEngine& gModuleEngine() {
+    static ModuleEngine g;
+    return g;
+}
+
+NetworkEngine& gNetworkEngine() {
+    static NetworkEngine g;
     return g;
 }
 

@@ -139,8 +139,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _dashboard(new Dashboard)
     , _downloadManager(std::make_unique<DownloadManager>())
     , _console(new LuaConsole)
-    , _moduleEngine(new ModuleEngine)
-    , _networkEngine(new NetworkEngine)
     , _parallelPeer(new ParallelPeer)
     , _syncEngine(std::make_unique<SyncEngine>(4096))
     , _windowWrapper(std::move(windowWrapper))
@@ -160,7 +158,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
         properties::StringProperty(SourceControlInfo, OPENSPACE_GIT_FULL)
     }
 {
-    _rootPropertyOwner->addPropertySubOwner(_moduleEngine.get());
+    _rootPropertyOwner->addPropertySubOwner(global::moduleEngine);
 
     _navigationHandler->setPropertyOwner(_rootPropertyOwner.get());
     // New property subowners also have to be added to the ImGuiModule callback!
@@ -411,11 +409,11 @@ void OpenSpaceEngine::create(int argc, char** argv,
     LINFOC("Commit", std::string(OPENSPACE_GIT_FULL));
 
     // Register modules
-    _engine->_moduleEngine->initialize(global::configuration.moduleConfigurations);
+    global::moduleEngine.initialize(global::configuration.moduleConfigurations);
 
     // After registering the modules, the documentations for the available classes
     // can be added as well
-    for (OpenSpaceModule* m : _engine->_moduleEngine->modules()) {
+    for (OpenSpaceModule* m : global::moduleEngine.modules()) {
         for (const documentation::Documentation& doc : m->documentations()) {
             DocEng.addDocumentation(doc);
         }
@@ -481,8 +479,8 @@ void OpenSpaceEngine::destroy() {
 
     global::renderEngine.deinitializeGL();
 
-    _engine->_moduleEngine->deinitializeGL();
-    _engine->_moduleEngine->deinitialize();
+    global::moduleEngine.deinitializeGL();
+    global::moduleEngine.deinitialize();
     _engine->_console->deinitialize();
 
     _engine->_scriptEngine->deinitialize();
@@ -534,7 +532,7 @@ void OpenSpaceEngine::initialize() {
 
     // Check the required OpenGL versions of the registered modules
     ghoul::systemcapabilities::Version version =
-        _engine->_moduleEngine->requiredOpenGLVersion();
+        global::moduleEngine.requiredOpenGLVersion();
     LINFO(fmt::format("Required OpenGL version: {}", ghoul::to_string(version)));
 
     if (OpenGLCap.openGLVersion() < version) {
@@ -548,7 +546,7 @@ void OpenSpaceEngine::initialize() {
     {
         // Check the available OpenGL extensions against the required extensions
         using OCC = ghoul::systemcapabilities::OpenGLCapabilitiesComponent;
-        for (OpenSpaceModule* m : _engine->_moduleEngine->modules()) {
+        for (OpenSpaceModule* m : global::moduleEngine.modules()) {
             for (const std::string& ext : m->requiredOpenGLExtensions()) {
                 if (!SysCap.component<OCC>().isExtensionSupported(ext)) {
                     LFATAL(fmt::format(
@@ -567,7 +565,7 @@ void OpenSpaceEngine::initialize() {
 
     _scriptEngine->addLibrary(_engine->_assetManager->luaLibrary());
 
-    for (OpenSpaceModule* module : _moduleEngine->modules()) {
+    for (OpenSpaceModule* module : global::moduleEngine.modules()) {
         _scriptEngine->addLibrary(module->luaLibrary());
 
         for (scripting::LuaLibrary& l : module->luaLibraries()) {
@@ -1151,7 +1149,7 @@ void OpenSpaceEngine::initializeGL() {
     LDEBUG("Initializing Rendering Engine");
     global::renderEngine.initializeGL();
 
-    _moduleEngine->initializeGL();
+    global::moduleEngine.initializeGL();
 
     for (const std::function<void()>& func : _moduleCallbacks.initializeGL) {
         func();
@@ -1464,8 +1462,8 @@ void OpenSpaceEngine::setJoystickInputStates(interaction::JoystickInputStates& s
 void OpenSpaceEngine::encode() {
     _syncEngine->encodeSyncables();
 
-    _networkEngine->publishStatusMessage();
-    _networkEngine->sendMessages();
+    global::networkEngine.publishStatusMessage();
+    global::networkEngine.sendMessages();
 }
 
 void OpenSpaceEngine::decode() {
@@ -1479,7 +1477,7 @@ void OpenSpaceEngine::externalControlCallback(const char* receivedChars, int siz
         return;
     }
 
-    _networkEngine->handleMessage(std::string(receivedChars, size));
+    global::networkEngine.handleMessage(std::string(receivedChars, size));
 }
 
 void OpenSpaceEngine::toggleShutdownMode() {
@@ -1643,16 +1641,6 @@ Dashboard& OpenSpaceEngine::dashboard() {
 DownloadManager& OpenSpaceEngine::downloadManager() {
     ghoul_assert(_downloadManager, "Download Manager must not be nullptr");
     return *_downloadManager;
-}
-
-NetworkEngine& OpenSpaceEngine::networkEngine() {
-    ghoul_assert(_networkEngine, "NetworkEngine must not be nullptr");
-    return *_networkEngine;
-}
-
-ModuleEngine& OpenSpaceEngine::moduleEngine() {
-    ghoul_assert(_moduleEngine, "ModuleEngine must not be nullptr");
-    return *_moduleEngine;
 }
 
 ParallelPeer& OpenSpaceEngine::parallelPeer() {
