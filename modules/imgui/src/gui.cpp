@@ -48,7 +48,7 @@ namespace {
     constexpr const char* configurationFile = "imgui.ini";
     constexpr const char* GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
     constexpr const float FontSize = 14.f;
-    const ImVec2 Size = ImVec2(500, 500);
+    const glm::vec2 Size = { 500.f, 500.f };
 
     char* iniFileBuffer = nullptr;
 

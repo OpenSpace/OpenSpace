@@ -24,6 +24,7 @@
 
 #include <openspace/engine/globals.h>
 
+#include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/network/networkengine.h>
@@ -34,6 +35,11 @@ namespace openspace::detail {
 
 Configuration& gConfiguration() {
     static Configuration g;
+    return g;
+}
+
+DownloadManager& gDownloadManager() {
+    static DownloadManager g;
     return g;
 }
 

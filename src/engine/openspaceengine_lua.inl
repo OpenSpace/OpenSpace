@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scene/scenegraphnode.h>
 
@@ -244,14 +245,14 @@ int downloadFile(lua_State* L) {
     lua_settop(L, 0);
 
     LINFOC("OpenSpaceEngine", fmt::format("Downloading file from {}", uri));
-    DownloadManager dm = DownloadManager(DownloadManager::UseMultipleThreads::No);
-    std::shared_ptr<DownloadManager::FileFuture> future = dm.downloadFile(
-        uri,
-        savePath,
-        DownloadManager::OverrideFile::Yes,
-        DownloadManager::FailOnError::Yes,
-        5
-    );
+    std::shared_ptr<DownloadManager::FileFuture> future =
+        global::downloadManager.downloadFile(
+            uri,
+            savePath,
+            DownloadManager::OverrideFile::Yes,
+            DownloadManager::FailOnError::Yes,
+            5
+        );
     if (!future || (future && !future->isFinished)) {
         return ghoul::lua::luaError(
             L,

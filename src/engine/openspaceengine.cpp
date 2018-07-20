@@ -29,7 +29,6 @@
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/configuration.h>
-#include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
@@ -137,7 +136,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
                                  std::unique_ptr<WindowWrapper> windowWrapper)
     : _scene(nullptr)
     , _dashboard(new Dashboard)
-    , _downloadManager(std::make_unique<DownloadManager>())
     , _console(new LuaConsole)
     , _parallelPeer(new ParallelPeer)
     , _syncEngine(std::make_unique<SyncEngine>(4096))
@@ -1636,11 +1634,6 @@ LuaConsole& OpenSpaceEngine::console() {
 Dashboard& OpenSpaceEngine::dashboard() {
     ghoul_assert(_dashboard, "Dashboard must not be nullptr");
     return *_dashboard;
-}
-
-DownloadManager& OpenSpaceEngine::downloadManager() {
-    ghoul_assert(_downloadManager, "Download Manager must not be nullptr");
-    return *_downloadManager;
 }
 
 ParallelPeer& OpenSpaceEngine::parallelPeer() {

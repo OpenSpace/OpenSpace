@@ -42,7 +42,6 @@ namespace openspace {
 
 class AssetManager;
 class Dashboard;
-class DownloadManager;
 class GUI;
 class LoadingScreen;
 class LuaConsole;
@@ -118,7 +117,6 @@ public:
     LuaConsole& console();
     AssetManager& assetManager();
     Dashboard& dashboard();
-    DownloadManager& downloadManager();
     LoadingScreen& loadingScreen();
     ParallelPeer& parallelPeer();
     WindowWrapper& windowWrapper();
@@ -195,7 +193,6 @@ private:
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
     std::unique_ptr<Dashboard> _dashboard;
-    std::unique_ptr<DownloadManager> _downloadManager;
     std::unique_ptr<LuaConsole> _console;
     std::unique_ptr<ParallelPeer> _parallelPeer;
     std::unique_ptr<SyncEngine> _syncEngine;

@@ -26,7 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/downloadmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
@@ -161,7 +161,7 @@ void ScreenSpaceImageOnline::update() {
 std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageToMemory(
                                                                    const std::string& url)
 {
-    return OsEng.downloadManager().fetchFile(
+    return global::downloadManager.fetchFile(
         url,
         [url](const DownloadManager::MemoryFile&) {
             LDEBUGC(
