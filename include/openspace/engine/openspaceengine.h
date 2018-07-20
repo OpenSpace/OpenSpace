@@ -52,7 +52,6 @@ class WindowWrapper;
 
 namespace interaction {
     struct JoystickInputStates;
-    class KeyBindingManager;
     class NavigationHandler;
 } // namespace interaction
 namespace gui { class GUI; }
@@ -119,7 +118,6 @@ public:
     WindowWrapper& windowWrapper();
     ghoul::fontrendering::FontManager& fontManager();
     interaction::NavigationHandler& navigationHandler();
-    interaction::KeyBindingManager& keyBindingManager();
     properties::PropertyOwner& rootPropertyOwner();
     properties::PropertyOwner& globalPropertyOwner();
     scripting::ScriptScheduler& scriptScheduler();
@@ -195,7 +193,6 @@ private:
     std::unique_ptr<ghoul::cmdparser::CommandlineParser> _commandlineParser;
     std::unique_ptr<ghoul::fontrendering::FontManager> _fontManager;
     std::unique_ptr<interaction::NavigationHandler> _navigationHandler;
-    std::unique_ptr<interaction::KeyBindingManager> _keyBindingManager;
 
     std::unique_ptr<scripting::ScriptScheduler> _scriptScheduler;
     std::unique_ptr<VirtualPropertyManager> _virtualPropertyManager;

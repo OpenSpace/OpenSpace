@@ -144,7 +144,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
         ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
     ))
     , _navigationHandler(new interaction::NavigationHandler)
-    , _keyBindingManager(new interaction::KeyBindingManager)
     , _scriptScheduler(new scripting::ScriptScheduler)
     , _virtualPropertyManager(new VirtualPropertyManager)
     , _rootPropertyOwner(new properties::PropertyOwner({ "" }))
@@ -943,7 +942,7 @@ void OpenSpaceEngine::configureLogging(bool consoleLog) {
 void OpenSpaceEngine::writeSceneDocumentation() {
     // Write keyboard documentation.
     if (!global::configuration.documentation.keyboard.empty()) {
-        keyBindingManager().writeDocumentation(
+        global::keybindingManager.writeDocumentation(
             absPath(global::configuration.documentation.keyboard)
         );
     }
@@ -1383,7 +1382,7 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
     }
 
     _navigationHandler->keyboardCallback(key, mod, action);
-    _keyBindingManager->keyboardCallback(key, mod, action);
+    global::keybindingManager.keyboardCallback(key, mod, action);
 }
 
 void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier) {
@@ -1657,11 +1656,6 @@ ghoul::fontrendering::FontManager& OpenSpaceEngine::fontManager() {
 interaction::NavigationHandler& OpenSpaceEngine::navigationHandler() {
     ghoul_assert(_navigationHandler, "NavigationHandler must not be nullptr");
     return *_navigationHandler;
-}
-
-interaction::KeyBindingManager& OpenSpaceEngine::keyBindingManager() {
-    ghoul_assert(_keyBindingManager, "KeyBindingManager must not be nullptr");
-    return *_keyBindingManager;
 }
 
 properties::PropertyOwner& OpenSpaceEngine::rootPropertyOwner() {

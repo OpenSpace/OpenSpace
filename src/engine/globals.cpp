@@ -27,6 +27,7 @@
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/interaction/keybindingmanager.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/renderengine.h>
@@ -67,6 +68,11 @@ RenderEngine& gRenderEngine() {
 
 TimeManager& gTimeManager() {
     static TimeManager g;
+    return g;
+}
+
+interaction::KeybindingManager& gKeybindingManager() {
+    static interaction::KeybindingManager g;
     return g;
 }
 
