@@ -51,7 +51,7 @@ namespace {
     constexpr const char* _loggerCat = "FramebufferRenderer";
 
     constexpr const std::array<const char*, 3> UniformNames = {
-        "mainColorTextures", "blackoutFactor", "nAaSamples"
+        "mainColorTexture", "blackoutFactor", "nAaSamples"
     };
 
     constexpr const char* ExitFragmentShaderPath =
@@ -64,7 +64,7 @@ namespace {
         "${SHADERS}/framebuffer/renderframebuffer.frag";
 
     void saveTextureToMemory(GLenum attachment, int width, int height,
-        std::vector<double>& memory)
+                             std::vector<double>& memory)
     {
         memory.clear();
         memory.resize(width * height * 3);
