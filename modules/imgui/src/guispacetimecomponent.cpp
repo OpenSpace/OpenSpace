@@ -27,6 +27,7 @@
 #include <modules/imgui/include/gui.h>
 #include <modules/imgui/include/imgui_include.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -80,7 +81,7 @@ void GuiSpaceTimeComponent::render() {
     _isCollapsed = ImGui::IsWindowCollapsed();
 
     std::vector<SceneGraphNode*> nodes =
-        OsEng.renderEngine().scene()->allSceneGraphNodes();
+        global::renderEngine.scene()->allSceneGraphNodes();
 
     std::sort(
         nodes.begin(),

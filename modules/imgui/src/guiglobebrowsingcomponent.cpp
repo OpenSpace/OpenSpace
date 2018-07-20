@@ -28,6 +28,7 @@
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/imgui/include/imgui_include.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -66,7 +67,7 @@ void GuiGlobeBrowsingComponent::render() {
 
     // Render the list of planets
     std::vector<SceneGraphNode*> nodes =
-        OsEng.renderEngine().scene()->allSceneGraphNodes();
+        global::renderEngine.scene()->allSceneGraphNodes();
 
     nodes.erase(
         std::remove_if(

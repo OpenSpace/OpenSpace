@@ -32,6 +32,7 @@
 #include <modules/volume/volumegridtype.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderengine.h>
@@ -353,13 +354,13 @@ void RenderableTimeVaryingVolume::initializeGL() {
     );
 
     _raycaster->initialize();
-    OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
+    global::renderEngine.raycasterManager().attachRaycaster(*_raycaster.get());
     onEnabledChange([&](bool enabled) {
         if (enabled) {
-            OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
+            global::renderEngine.raycasterManager().attachRaycaster(*_raycaster.get());
         }
         else {
-            OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
+            global::renderEngine.raycasterManager().detachRaycaster(*_raycaster.get());
         }
     });
 
@@ -544,7 +545,7 @@ bool RenderableTimeVaryingVolume::isReady() const {
 
 void RenderableTimeVaryingVolume::deinitializeGL() {
     if (_raycaster) {
-        OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
+        global::renderEngine.raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
 }

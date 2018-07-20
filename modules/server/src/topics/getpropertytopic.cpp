@@ -27,6 +27,7 @@
 #include <modules/server/include/connection.h>
 #include <modules/server/include/jsonconverters.h>
 #include <modules/volume/transferfunctionhandler.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
@@ -64,7 +65,7 @@ void GetPropertyTopic::handleJson(const nlohmann::json& json) {
     }
     else if (requestedKey == AllScreenSpaceRenderablesValue) {
         response = wrappedPayload({
-            { "value", OsEng.renderEngine().screenSpaceRenderables() }
+            { "value", global::renderEngine.screenSpaceRenderables() }
         });
     }
     else if (requestedKey == RootPropertyOwner) {
@@ -85,7 +86,7 @@ json GetPropertyTopic::allProperties() {
         {
             "value",
             {
-                OsEng.renderEngine(),
+                global::renderEngine,
                 OsEng.console(),
                 OsEng.parallelPeer(),
                 OsEng.windowWrapper(),

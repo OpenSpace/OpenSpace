@@ -25,6 +25,7 @@
 #include <openspace/scripting/scriptengine.h>
 
 #include <openspace/engine/configuration.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/syncbuffer.h>
@@ -582,8 +583,8 @@ bool ScriptEngine::writeLog(const std::string& script) {
     // Check that logging is enabled and initialize if necessary
     if (!_logFileExists) {
         // If a ScriptLogFile was specified, generate it now
-        if (!OsEng.configuration().scriptLog.empty()) {
-            _logFilename = absPath(OsEng.configuration().scriptLog);
+        if (!global::configuration.scriptLog.empty()) {
+            _logFilename = absPath(global::configuration.scriptLog);
             _logFileExists = true;
 
             LDEBUG(fmt::format(

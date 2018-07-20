@@ -26,7 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
@@ -110,14 +110,14 @@ SceneGraphLightSource::SceneGraphLightSource(const ghoul::Dictionary& dictionary
 
     _sceneGraphNodeReference.onChange([this]() {
         _sceneGraphNode =
-            OsEng.renderEngine().scene()->sceneGraphNode(_sceneGraphNodeReference);
+            global::renderEngine.scene()->sceneGraphNode(_sceneGraphNodeReference);
     });
 
 }
 
 bool SceneGraphLightSource::initialize() {
     _sceneGraphNode =
-        OsEng.renderEngine().scene()->sceneGraphNode(_sceneGraphNodeReference);
+        global::renderEngine.scene()->sceneGraphNode(_sceneGraphNodeReference);
     return _sceneGraphNode != nullptr;
 }
 

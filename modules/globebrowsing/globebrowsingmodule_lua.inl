@@ -30,6 +30,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
@@ -52,7 +53,7 @@ int addLayer(lua_State* L) {
     const std::string& layerGroupName = ghoul::lua::value<std::string>(L, 2);
 
     // Get the node and make sure it exists
-    SceneGraphNode* n = OsEng.renderEngine().scene()->sceneGraphNode(globeName);
+    SceneGraphNode* n = global::renderEngine.scene()->sceneGraphNode(globeName);
     if (!n) {
         return ghoul::lua::luaError(L, "Unknown globe name: " + globeName);
     }
@@ -102,7 +103,7 @@ int deleteLayer(lua_State* L) {
     lua_pop(L, 3);
 
     // Get the node and make sure it exists
-    SceneGraphNode* n = OsEng.renderEngine().scene()->sceneGraphNode(globeName);
+    SceneGraphNode* n = global::renderEngine.scene()->sceneGraphNode(globeName);
     if (!n) {
         return ghoul::lua::luaError(L, "Unknown globe name: " + globeName);
     }

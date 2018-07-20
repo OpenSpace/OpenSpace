@@ -36,6 +36,7 @@ set(OPENSPACE_SOURCE
     # ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager.cpp
     # ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager_doc.inl
     ${OPENSPACE_BASE_DIR}/src/engine/downloadmanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/engine/globals.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/logfactory.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/moduleengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/moduleengine_lua.inl
@@ -209,6 +210,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/verifier.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/configuration.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/downloadmanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/engine/globals.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/logfactory.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/moduleengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/moduleengine.inl

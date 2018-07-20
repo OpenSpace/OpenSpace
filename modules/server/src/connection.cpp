@@ -34,7 +34,7 @@
 #include <modules/server/include/topics/topic.h>
 #include <modules/server/include/topics/triggerpropertytopic.h>
 #include <openspace/engine/configuration.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <ghoul/io/socket/socket.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
 #include <ghoul/io/socket/websocketserver.h>
@@ -76,7 +76,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
     _topicFactory.registerClass<BounceTopic>(BounceTopicKey);
 
     // see if the default config for requiring auth (on) is overwritten
-    _requireAuthorization = OsEng.configuration().doesRequireSocketAuthentication;
+    _requireAuthorization = global::configuration.doesRequireSocketAuthentication;
 }
 
 void Connection::handleMessage(const std::string& message) {
@@ -188,7 +188,7 @@ void Connection::setAuthorized(bool status) {
 }
 
 bool Connection::isWhitelisted() const {
-    const std::vector<std::string>& wl = OsEng.configuration().clientAddressWhitelist;
+    const std::vector<std::string>& wl = global::configuration.clientAddressWhitelist;
     return std::find(wl.begin(), wl.end(), _address) != wl.end();
 }
 

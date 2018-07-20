@@ -22,51 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/query/query.h>
-
-#include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/virtualpropertymanager.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
+#ifndef __OPENSPACE_CORE___GLOBALS___H__
+#define __OPENSPACE_CORE___GLOBALS___H__
 
 namespace openspace {
 
-Scene* sceneGraph() {
-    return global::renderEngine.scene();
-}
+struct Configuration;
+class RenderEngine;
 
-SceneGraphNode* sceneGraphNode(const std::string& name) {
-    const Scene* graph = sceneGraph();
-    return graph->sceneGraphNode(name);
-}
+namespace detail {
+    Configuration& gConfiguration();
+    RenderEngine& gRenderEngine();
 
-const Renderable* renderable(const std::string& name) {
-    SceneGraphNode* node = sceneGraphNode(name);
-    return node->renderable();
-}
+} // namespace detail
 
-properties::Property* property(const std::string& uri) {
-    properties::Property* property = OsEng.rootPropertyOwner().property(uri);
-    return property;
-}
+namespace global {
 
-std::vector<properties::Property*> allProperties() {
-    std::vector<properties::Property*> properties;
+static Configuration& configuration = detail::gConfiguration();
+static RenderEngine& renderEngine = detail::gRenderEngine();
 
-    std::vector<properties::Property*> p =
-        OsEng.rootPropertyOwner().propertiesRecursive();
+} // namespace global
 
-    properties.insert(properties.end(), p.begin(), p.end());
 
-    // The virtual property manager is not part of the rootProperty owner since it cannot
-    // have an identifier or the "regex as identifier" trick would not work
-    std::vector<properties::Property*> p2 =
-        OsEng.virtualPropertyManager().propertiesRecursive();
 
-    properties.insert(properties.end(), p2.begin(), p2.end());
+} // namespace openspace
 
-    return properties;
-}
-
-}  // namespace
+#endif // __OPENSPACE_CORE___GLOBALS___H__

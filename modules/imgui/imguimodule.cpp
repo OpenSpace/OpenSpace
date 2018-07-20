@@ -24,6 +24,7 @@
 
 #include <modules/imgui/imguimodule.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
@@ -62,7 +63,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                         &(OsEng.windowWrapper()),
                         &(OsEng.navigationHandler()),
                         &(OsEng.timeManager()),
-                        &(OsEng.renderEngine()),
+                        &(global::renderEngine),
                         &(OsEng.parallelPeer()),
                         &(OsEng.console()),
                         &(OsEng.dashboard())
@@ -73,7 +74,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
             gui._screenSpaceProperty.setSource(
                 []() {
-                    return OsEng.renderEngine().screenSpaceOwner().propertySubOwners();
+                    return global::renderEngine.screenSpaceOwner().propertySubOwners();
                 }
             );
 
@@ -87,7 +88,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
             gui._sceneProperty.setSource(
                 []() {
-                    const Scene* scene = OsEng.renderEngine().scene();
+                    const Scene* scene = global::renderEngine.scene();
                     const std::vector<SceneGraphNode*>& nodes = scene ?
                         scene->allSceneGraphNodes() :
                         std::vector<SceneGraphNode*>();
@@ -112,7 +113,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             gui._featuredProperties.setSource(
                 [](){
                     std::vector<SceneGraphNode*> nodes =
-                        OsEng.renderEngine().scene()->allSceneGraphNodes();
+                        global::renderEngine.scene()->allSceneGraphNodes();
 
                     nodes.erase(
                         std::remove_if(

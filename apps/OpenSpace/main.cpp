@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/engine/configuration.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/sgctwindowwrapper.h>
 #include <openspace/interaction/joystickinputstate.h>
@@ -318,7 +319,7 @@ void mainInitFunc() {
     std::string screenshotPath = "${SCREENSHOTS}";
     std::string screenshotNames = "OpenSpace";
 
-    if (OsEng.configuration().shouldUseScreenshotDate) {
+    if (openspace::global::configuration.shouldUseScreenshotDate) {
         std::time_t now = std::time(nullptr);
         std::tm* nowTime = std::localtime(&now);
         char mbstr[100];

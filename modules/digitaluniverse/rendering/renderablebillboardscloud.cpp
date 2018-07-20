@@ -27,9 +27,10 @@
 #include <modules/digitaluniverse/digitaluniversemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/util/updatestructures.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -664,7 +665,7 @@ void RenderableBillboardsCloud::initializeGL() {
     _program = DigitalUniverseModule::ProgramObjectManager.request(
         ProgramObjectName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return OsEng.renderEngine().buildRenderProgram(
+            return global::renderEngine.buildRenderProgram(
                 ProgramObjectName,
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_vs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_fs.glsl"),
@@ -713,7 +714,7 @@ void RenderableBillboardsCloud::deinitializeGL() {
     DigitalUniverseModule::ProgramObjectManager.release(
         ProgramObjectName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
     _program = nullptr;
@@ -768,7 +769,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     const glm::dmat4 projMatrix = glm::dmat4(data.camera.projectionMatrix());
     _program->setUniform(
         "screenSize",
-        glm::vec2(OsEng.renderEngine().renderingResolution())
+        glm::vec2(global::renderEngine.renderingResolution())
     );
 
     _program->setUniform(_uniformCache.cameraPos, data.camera.positionVec3());

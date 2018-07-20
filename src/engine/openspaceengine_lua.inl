@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/globals.h>
 #include <openspace/scene/scenegraphnode.h>
 
 namespace openspace::luascriptfunctions {
@@ -190,7 +191,7 @@ int addTag(lua_State* L) {
     std::string tag = ghoul::lua::value<std::string>(L, 2);
     lua_settop(L, 0);
 
-    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(uri);
+    SceneGraphNode* node = global::renderEngine.scene()->sceneGraphNode(uri);
     if (!node) {
         return ghoul::lua::luaError(
             L,
@@ -216,7 +217,7 @@ int removeTag(lua_State* L) {
     const std::string& tag = ghoul::lua::value<std::string>(L, 2);
     lua_settop(L, 0);
 
-    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(uri);
+    SceneGraphNode* node = global::renderEngine.scene()->sceneGraphNode(uri);
     if (!node) {
         return ghoul::lua::luaError(
             L,

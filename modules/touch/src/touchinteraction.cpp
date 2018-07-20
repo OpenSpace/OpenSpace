@@ -26,6 +26,7 @@
 #include <modules/imgui/imguimodule.h>
 
 #include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/query/query.h>
@@ -715,7 +716,7 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
         "Kerberos", "Hydra", "Charon", "Tethys", "OsirisRex", "Bennu"
     };
     std::vector<SceneGraphNode*> selectableNodes;
-    for (SceneGraphNode* node : OsEng.renderEngine().scene()->allSceneGraphNodes()) {
+    for (SceneGraphNode* node : global::renderEngine.scene()->allSceneGraphNodes()) {
         for (const std::string& name : selectables) {
             if (node->identifier() == name) {
                 selectableNodes.push_back(node);

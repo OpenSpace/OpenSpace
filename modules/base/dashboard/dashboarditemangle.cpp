@@ -26,6 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
@@ -364,7 +365,7 @@ std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
 {
     if (comp.type == Type::Node) {
         if (!comp.node) {
-            comp.node = OsEng.renderEngine().scene()->sceneGraphNode(comp.nodeName);
+            comp.node = global::renderEngine.scene()->sceneGraphNode(comp.nodeName);
 
             if (!comp.node) {
                 LERRORC(
@@ -382,7 +383,7 @@ std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
         case Type::Focus:
             return { OsEng.navigationHandler().focusNode()->worldPosition(), "focus" };
         case Type::Camera:
-            return { OsEng.renderEngine().scene()->camera()->positionVec3(), "camera" };
+            return { global::renderEngine.scene()->camera()->positionVec3(), "camera" };
         default:
             return { glm::dvec3(0.0), "Unknown" };
     }

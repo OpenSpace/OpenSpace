@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 
@@ -84,7 +85,7 @@ int iswa_addScreenSpaceCygnet(lua_State* L) {
     int updateInterval = info->updateInterval;
     info->selected = true;
 
-    if (OsEng.renderEngine().screenSpaceRenderable(name)) {
+    if (global::renderEngine.screenSpaceRenderable(name)) {
         LERROR("A cygnet with the name \"" + name +"\" already exist");
         return 0;
     } else {
@@ -95,7 +96,7 @@ int iswa_addScreenSpaceCygnet(lua_State* L) {
         std::unique_ptr<ScreenSpaceRenderable> s(
             ScreenSpaceRenderable::createFromDictionary(d)
         );
-        OsEng.renderEngine().addScreenSpaceRenderable(std::move(s));
+        global::renderEngine.addScreenSpaceRenderable(std::move(s));
     }
     return 0;
 }

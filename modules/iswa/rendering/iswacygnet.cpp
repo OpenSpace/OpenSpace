@@ -26,6 +26,7 @@
 
 #include <modules/iswa/rendering/iswabasegroup.h>
 #include <modules/iswa/util/iswamanager.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
@@ -135,7 +136,7 @@ void IswaCygnet::deinitializeGL() {
     destroyGeometry();
 
     if (_shader) {
-        OsEng.renderEngine().removeRenderProgram(_shader.get());
+        global::renderEngine.removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
 }

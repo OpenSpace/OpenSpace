@@ -28,6 +28,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/renderengine.h>
@@ -399,7 +400,7 @@ void RenderableDUMeshes::initializeGL() {
     _program = DigitalUniverseModule::ProgramObjectManager.request(
         ProgramObjectName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return OsEng.renderEngine().buildRenderProgram(
+            return global::renderEngine.buildRenderProgram(
                 "RenderableDUMeshes",
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_vs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_fs.glsl")
@@ -440,7 +441,7 @@ void RenderableDUMeshes::deinitializeGL() {
     DigitalUniverseModule::ProgramObjectManager.release(
         ProgramObjectName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
 }

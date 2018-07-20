@@ -26,6 +26,7 @@
 
 #include <openspace/openspace.h>
 #include <openspace/engine/configuration.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
@@ -235,8 +236,8 @@ RenderEngine::RenderEngine()
         if (_doPerformanceMeasurements) {
             if (!_performanceManager) {
                 _performanceManager = std::make_shared<performance::PerformanceManager>(
-                    OsEng.configuration().logging.directory,
-                    OsEng.configuration().logging.performancePrefix
+                    global::configuration.logging.directory,
+                    global::configuration.logging.performancePrefix
                 );
             }
         }
@@ -317,7 +318,7 @@ void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
 }
 
 void RenderEngine::initialize() {
-    std::string renderingMethod = OsEng.configuration().renderingMethod;
+    std::string renderingMethod = global::configuration.renderingMethod;
     if (renderingMethod == "ABuffer") {
         using Version = ghoul::systemcapabilities::Version;
 
@@ -332,8 +333,8 @@ void RenderEngine::initialize() {
     // We have to perform these initializations here as the OsEng has not been initialized
     // in our constructor
     _disableSceneTranslationOnMaster =
-        OsEng.configuration().isSceneTranslationOnMasterDisabled;
-    _disableMasterRendering = OsEng.configuration().isRenderingOnMasterDisabled;
+        global::configuration.isSceneTranslationOnMasterDisabled;
+    _disableMasterRendering = global::configuration.isRenderingOnMasterDisabled;
 
     _raycasterManager = std::make_unique<RaycasterManager>();
     _deferredcasterManager = std::make_unique<DeferredcasterManager>();
@@ -416,6 +417,7 @@ void RenderEngine::deinitializeGL() {
     for (std::unique_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
         ssr->deinitializeGL();
     }
+    _renderer = nullptr;
 }
 
 void RenderEngine::updateScene() {
@@ -481,7 +483,7 @@ glm::ivec2 RenderEngine::renderingResolution() const {
 }
 
 glm::ivec2 RenderEngine::fontResolution() const {
-    const std::string& value = OsEng.configuration().onScreenTextScaling;
+    const std::string& value = global::configuration.onScreenTextScaling;
     if (value == "framebuffer") {
         return OsEng.windowWrapper().getCurrentViewportSize();
         //return OsEng.windowWrapper().currentWindowResolution();
@@ -675,7 +677,7 @@ void RenderEngine::renderDashboard() {
     if (_performanceManager) {
         perf = std::make_unique<performance::PerformanceMeasurement>(
             "Main Dashboard::render",
-            OsEng.renderEngine().performanceManager()
+            _performanceManager
         );
     }
     glm::vec2 penPosition = glm::vec2(

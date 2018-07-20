@@ -25,7 +25,7 @@
 #include <modules/imgui/include/guiperformancecomponent.h>
 
 #include <modules/imgui/include/imgui_include.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/performance/performancelayout.h>
 #include <openspace/performance/performancemanager.h>
 #include <openspace/rendering/renderengine.h>
@@ -91,7 +91,7 @@ GuiPerformanceComponent::GuiPerformanceComponent()
 GuiPerformanceComponent::~GuiPerformanceComponent() {} // NOLINT
 
 void GuiPerformanceComponent::render() {
-    if (!OsEng.renderEngine().doesPerformanceMeasurements()) {
+    if (!global::renderEngine.doesPerformanceMeasurements()) {
         return;
     }
 
@@ -105,7 +105,7 @@ void GuiPerformanceComponent::render() {
     _isCollapsed = ImGui::IsWindowCollapsed();
 
     PerformanceLayout* layout =
-        OsEng.renderEngine().performanceManager()->performanceData();
+        global::renderEngine.performanceManager()->performanceData();
 
     v = _sceneGraphIsEnabled;
     ImGui::Checkbox("SceneGraph", &v);
@@ -115,15 +115,15 @@ void GuiPerformanceComponent::render() {
     _functionsIsEnabled = v;
     v = _outputLogs;
     ImGui::Checkbox("Output Logs", &v);
-    OsEng.renderEngine().performanceManager()->setLogging(v);
+    global::renderEngine.performanceManager()->setLogging(v);
     // Need to catch if it's unsuccessful
-    v = OsEng.renderEngine().performanceManager()->loggingEnabled();
+    v = global::renderEngine.performanceManager()->loggingEnabled();
     _outputLogs = v;
 
     ImGui::Spacing();
 
     if (ImGui::Button("Reset measurements")) {
-        OsEng.renderEngine().performanceManager()->resetPerformanceMeasurements();
+        global::renderEngine.performanceManager()->resetPerformanceMeasurements();
     }
 
     if (_sceneGraphIsEnabled) {

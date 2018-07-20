@@ -41,7 +41,6 @@ namespace ghoul::fontrendering { class FontManager; }
 namespace openspace {
 
 class AssetManager;
-struct Configuration;
 class Dashboard;
 class DownloadManager;
 class GUI;
@@ -50,7 +49,6 @@ class LuaConsole;
 class ModuleEngine;
 class NetworkEngine;
 class ParallelPeer;
-class RenderEngine;
 class Scene;
 class SyncEngine;
 class TimeManager;
@@ -119,11 +117,6 @@ public:
     void scheduleLoadSingleAsset(std::string assetPath);
     void toggleShutdownMode();
 
-    // On purpose, there is no function that returns a non-const reference to
-    // Configuration;  that guards us against anyone in the program changing the
-    // configuration values underneath our feet
-    const Configuration& configuration() const;
-
     // Guaranteed to return a valid pointer
     LuaConsole& console();
     AssetManager& assetManager();
@@ -133,7 +126,6 @@ public:
     LoadingScreen& loadingScreen();
     NetworkEngine& networkEngine();
     ParallelPeer& parallelPeer();
-    RenderEngine& renderEngine();
     TimeManager& timeManager();
     WindowWrapper& windowWrapper();
     ghoul::fontrendering::FontManager& fontManager();
@@ -205,8 +197,6 @@ private:
     void runGlobalCustomizationScripts();
     void configureLogging();
 
-    std::unique_ptr<Configuration> _configuration;
-
     // Components
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
@@ -216,7 +206,6 @@ private:
     std::unique_ptr<ModuleEngine> _moduleEngine;
     std::unique_ptr<NetworkEngine> _networkEngine;
     std::unique_ptr<ParallelPeer> _parallelPeer;
-    std::unique_ptr<RenderEngine> _renderEngine;
     std::unique_ptr<SyncEngine> _syncEngine;
     std::unique_ptr<TimeManager> _timeManager;
     std::unique_ptr<WindowWrapper> _windowWrapper;

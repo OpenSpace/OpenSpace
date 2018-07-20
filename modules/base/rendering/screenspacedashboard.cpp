@@ -26,6 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/renderengine.h>
@@ -70,7 +71,7 @@ int addDashboardItemToScreenSpace(lua_State* L) {
         return 0;
     }
 
-    ScreenSpaceRenderable* ssr = OsEng.renderEngine().screenSpaceRenderable(name);
+    ScreenSpaceRenderable* ssr = global::renderEngine.screenSpaceRenderable(name);
 
     if (!ssr) {
         return ghoul::lua::luaError(L, "Provided name is not a ScreenSpace item");
@@ -98,7 +99,7 @@ int removeDashboardItemsFromScreenSpace(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeDashboardItemsFromScreenSpace");
 
     const std::string& name = ghoul::lua::value<std::string>(L, 1);
-    ScreenSpaceRenderable* ssr = OsEng.renderEngine().screenSpaceRenderable(name);
+    ScreenSpaceRenderable* ssr = global::renderEngine.screenSpaceRenderable(name);
 
     if (!ssr) {
         return ghoul::lua::luaError(L, "Provided name is not a ScreenSpace item");

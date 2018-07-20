@@ -26,6 +26,7 @@
 
 #include <modules/imgui/imguimodule.h>
 #include <modules/imgui/include/imgui_include.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/mission/missionmanager.h>
@@ -422,7 +423,7 @@ void GUI::endFrame() {
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 
-    _performance.setEnabled(OsEng.renderEngine().doesPerformanceMeasurements());
+    _performance.setEnabled(global::renderEngine.doesPerformanceMeasurements());
 
     if (_performance.isEnabled()) {
         _performance.render();

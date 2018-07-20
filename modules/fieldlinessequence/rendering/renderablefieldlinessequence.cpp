@@ -26,6 +26,7 @@
 
 #include <modules/fieldlinessequence/fieldlinessequencemodule.h>
 #include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -347,7 +348,7 @@ void RenderableFieldlinesSequence::initializeGL() {
     setupProperties();
 
     // Setup shader program
-    _shaderProgram = OsEng.renderEngine().buildRenderProgram(
+    _shaderProgram = global::renderEngine.buildRenderProgram(
         "FieldlinesSequence",
         absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_vs.glsl"),
         absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl")
@@ -756,7 +757,7 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
     }
 
     _pFocusOnOriginBtn.onChange([this] {
-        SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(_identifier);
+        SceneGraphNode* node = global::renderEngine.scene()->sceneGraphNode(_identifier);
         if (!node) {
             LWARNING(fmt::format(
                 "Could not find a node in scenegraph called '{}'", _identifier
@@ -1023,9 +1024,8 @@ void RenderableFieldlinesSequence::deinitializeGL() {
     glDeleteBuffers(1, &_vertexMaskingBuffer);
     _vertexMaskingBuffer = 0;
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shaderProgram) {
-        renderEngine.removeRenderProgram(_shaderProgram.get());
+        global::renderEngine.removeRenderProgram(_shaderProgram.get());
         _shaderProgram = nullptr;
     }
 
@@ -1095,7 +1095,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
 
         bool additiveBlending = false;
         if (_pColorABlendEnabled) {
-            const auto renderer = OsEng.renderEngine().rendererImplementation();
+            const auto renderer = global::renderEngine.rendererImplementation();
             const bool usingFBufferRenderer = renderer ==
                                         RenderEngine::RendererImplementation::Framebuffer;
 

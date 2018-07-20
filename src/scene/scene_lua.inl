@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/misc/easing.h>
 #include <regex>
@@ -107,12 +108,12 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
                 foundMatching = true;
 
                 if (interpolationDuration == 0.0) {
-                    OsEng.renderEngine().scene()->removePropertyInterpolation(prop);
+                    global::renderEngine.scene()->removePropertyInterpolation(prop);
                     prop->setLuaValue(L);
                 }
                 else {
                     prop->setLuaInterpolationTarget(L);
-                    OsEng.renderEngine().scene()->addPropertyInterpolation(
+                    global::renderEngine.scene()->addPropertyInterpolation(
                         prop,
                         static_cast<float>(interpolationDuration),
                         easingFunction
@@ -184,12 +185,12 @@ int setPropertyCall_single(properties::Property& prop, const std::string& uri,
     }
     else {
         if (duration == 0.0) {
-            OsEng.renderEngine().scene()->removePropertyInterpolation(&prop);
+            global::renderEngine.scene()->removePropertyInterpolation(&prop);
             prop.setLuaValue(L);
         }
         else {
             prop.setLuaInterpolationTarget(L);
-            OsEng.renderEngine().scene()->addPropertyInterpolation(
+            global::renderEngine.scene()->addPropertyInterpolation(
                 &prop,
                 static_cast<float>(duration),
                 eastingFunction
@@ -428,13 +429,13 @@ int addSceneGraphNode(lua_State* L) {
     }
 
     try {
-        SceneGraphNode* node = OsEng.renderEngine().scene()->loadNode(d);
+        SceneGraphNode* node = global::renderEngine.scene()->loadNode(d);
         if (!node) {
             LERRORC("Scene", "Could not load scene graph node");
             return ghoul::lua::luaError(L, "Error loading scene graph node");
         }
 
-        OsEng.renderEngine().scene()->initializeNode(node);
+        global::renderEngine.scene()->initializeNode(node);
     }
     catch (const documentation::SpecificationError& e) {
         return ghoul::lua::luaError(
@@ -462,7 +463,7 @@ int removeSceneGraphNode(lua_State* L) {
         1,
         ghoul::lua::PopValue::Yes
     );
-    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(nodeName);
+    SceneGraphNode* node = global::renderEngine.scene()->sceneGraphNode(nodeName);
     if (!node) {
         LERRORC(
             "removeSceneGraphNode",
@@ -512,7 +513,7 @@ int hasSceneGraphNode(lua_State* L) {
         1,
         ghoul::lua::PopValue::Yes
     );
-    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(nodeName);
+    SceneGraphNode* node = global::renderEngine.scene()->sceneGraphNode(nodeName);
 
     ghoul::lua::push(L, node != nullptr);
 

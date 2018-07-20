@@ -26,7 +26,7 @@
 
 #include <modules/iswa/rendering/iswabasegroup.h>
 #include <modules/iswa/util/dataprocessortext.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
@@ -39,7 +39,7 @@ void DataPlane::initializeGL() {
     IswaCygnet::initialize();
 
     if (!_shader) {
-        _shader = OsEng.renderEngine().buildRenderProgram(
+        _shader = global::renderEngine.buildRenderProgram(
             "DataPlaneProgram",
             absPath("${MODULE_ISWA}/shaders/dataplane_vs.glsl"),
             absPath("${MODULE_ISWA}/shaders/dataplane_fs.glsl")

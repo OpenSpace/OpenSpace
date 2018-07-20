@@ -34,6 +34,7 @@
 #include <modules/iswa/rendering/textureplane.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/json.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
@@ -504,7 +505,7 @@ void IswaManager::createPlane(MetadataFuture& data) {
 
     data.name = name;
 
-    if (OsEng.renderEngine().scene()->sceneGraphNode(name)) {
+    if (global::renderEngine.scene()->sceneGraphNode(name)) {
         LERROR("A node with name \"" + name + "\" already exist");
         return;
     }
@@ -537,7 +538,7 @@ void IswaManager::createSphere(MetadataFuture& data) {
 
     data.name = name;
 
-    if (OsEng.renderEngine().scene()->sceneGraphNode(name)) {
+    if (global::renderEngine.scene()->sceneGraphNode(name)) {
         LERROR("A node with name \"" + name +"\" already exist");
         return;
     }
@@ -570,7 +571,7 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
 
         info.name = info.name + "-" + cut;
 
-        if (OsEng.renderEngine().scene()->sceneGraphNode(info.name)) {
+        if (global::renderEngine.scene()->sceneGraphNode(info.name)) {
             LERROR("A node with name \"" + info.name +"\" already exist");
             return;
         }

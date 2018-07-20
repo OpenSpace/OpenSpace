@@ -22,51 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/query/query.h>
-
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/virtualpropertymanager.h>
+
+#include <openspace/engine/configuration.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
 
-namespace openspace {
+namespace openspace::detail {
 
-Scene* sceneGraph() {
-    return global::renderEngine.scene();
+Configuration& gConfiguration() {
+    static Configuration g;
+    return g;
 }
 
-SceneGraphNode* sceneGraphNode(const std::string& name) {
-    const Scene* graph = sceneGraph();
-    return graph->sceneGraphNode(name);
+RenderEngine& gRenderEngine() {
+    static RenderEngine g;
+    return g;
 }
 
-const Renderable* renderable(const std::string& name) {
-    SceneGraphNode* node = sceneGraphNode(name);
-    return node->renderable();
-}
-
-properties::Property* property(const std::string& uri) {
-    properties::Property* property = OsEng.rootPropertyOwner().property(uri);
-    return property;
-}
-
-std::vector<properties::Property*> allProperties() {
-    std::vector<properties::Property*> properties;
-
-    std::vector<properties::Property*> p =
-        OsEng.rootPropertyOwner().propertiesRecursive();
-
-    properties.insert(properties.end(), p.begin(), p.end());
-
-    // The virtual property manager is not part of the rootProperty owner since it cannot
-    // have an identifier or the "regex as identifier" trick would not work
-    std::vector<properties::Property*> p2 =
-        OsEng.virtualPropertyManager().propertiesRecursive();
-
-    properties.insert(properties.end(), p2.begin(), p2.end());
-
-    return properties;
-}
-
-}  // namespace
+} // namespace openspace::detail

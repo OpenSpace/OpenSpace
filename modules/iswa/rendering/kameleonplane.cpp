@@ -29,6 +29,7 @@
 #include <modules/iswa/util/dataprocessorkameleon.h>
 #include <modules/iswa/util/iswamanager.h>
 #include <openspace/json.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
@@ -112,7 +113,7 @@ void KameleonPlane::deinitializeGL() {
 
 void KameleonPlane::initializeGL() {
     if (!_shader) {
-        _shader = OsEng.renderEngine().buildRenderProgram(
+        _shader = global::renderEngine.buildRenderProgram(
             "DataPlaneProgram",
             absPath("${MODULE_ISWA}/shaders/dataplane_vs.glsl"),
             absPath("${MODULE_ISWA}/shaders/dataplane_fs.glsl")
@@ -272,7 +273,7 @@ void KameleonPlane::updateFieldlineSeeds() {
             seedPath.first
         );
         if (it == selectedOptions.end() && std::get<2>(seedPath.second)) {
-            SceneGraphNode* n = OsEng.renderEngine().scene()->sceneGraphNode(
+            SceneGraphNode* n = global::renderEngine.scene()->sceneGraphNode(
                 std::get<0>(seedPath.second)
             );
             if (!n) {
@@ -287,7 +288,7 @@ void KameleonPlane::updateFieldlineSeeds() {
             std::get<2>(seedPath.second) = false;
         // if this option was turned on
         } else if (it != selectedOptions.end() && !std::get<2>(seedPath.second)) {
-            SceneGraphNode* n = OsEng.renderEngine().scene()->sceneGraphNode(
+            SceneGraphNode* n = global::renderEngine.scene()->sceneGraphNode(
                 std::get<0>(seedPath.second)
             );
             if (n) {
