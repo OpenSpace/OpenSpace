@@ -29,7 +29,7 @@
 
 #include <openspace/interaction/joystickinputstate.h>
 #include <ghoul/misc/boolean.h>
-#include <ghoul/misc/fromstring.h>
+#include <ghoul/misc/stringconversion.h>
 #include <map>
 #include <vector>
 
@@ -103,13 +103,10 @@ private:
 
 } // namespace openspace::interaction
 
-namespace std {
-
-std::string to_string(const openspace::interaction::JoystickCameraStates::AxisType& type);
-
-} // namespace std
-
 namespace ghoul {
+
+template <>
+std::string to_string(const openspace::interaction::JoystickCameraStates::AxisType& type);
 
 template <>
 openspace::interaction::JoystickCameraStates::AxisType

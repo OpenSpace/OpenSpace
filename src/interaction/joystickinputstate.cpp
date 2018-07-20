@@ -26,6 +26,7 @@
 
 #include <ghoul/glm.h>
 #include <ghoul/misc/invariants.h>
+#include <ghoul/misc/stringconversion.h>
 #include <algorithm>
 #include <map>
 #include <numeric>
@@ -68,9 +69,10 @@ bool JoystickInputStates::button(int button, JoystickAction action) const {
 
 } // namespace openspace::interaction
 
-namespace std {
+namespace ghoul {
 
-std::string to_string(openspace::interaction::JoystickAction action) {
+template <>
+std::string to_string(const openspace::interaction::JoystickAction& action) {
     switch (action) {
         case openspace::interaction::JoystickAction::Idle:    return "Idle";
         case openspace::interaction::JoystickAction::Press:   return "Press";
@@ -79,10 +81,6 @@ std::string to_string(openspace::interaction::JoystickAction action) {
         default:                                              return "";
     }
 }
-
-} // namespace std
-
-namespace ghoul {
 
 template <>
 openspace::interaction::JoystickAction from_string(const std::string& string) {

@@ -223,8 +223,9 @@ std::vector<std::string> JoystickCameraStates::buttonCommand(int button) const {
 
 } // namespace openspace::interaction
 
-namespace std {
+namespace ghoul {
 
+template <>
 std::string to_string(const openspace::interaction::JoystickCameraStates::AxisType& type)
 {
     using T = openspace::interaction::JoystickCameraStates::AxisType;
@@ -243,10 +244,6 @@ std::string to_string(const openspace::interaction::JoystickCameraStates::AxisTy
         default:             return "";
     }
 }
-
-} // namespace std
-
-namespace ghoul {
 
 template <>
 openspace::interaction::JoystickCameraStates::AxisType from_string(
