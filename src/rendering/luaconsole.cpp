@@ -270,13 +270,13 @@ void LuaConsole::initialize() {
 
     glBindVertexArray(0);
 
-    _font = OsEng.fontManager().font(
+    _font = global::fontManager.font(
         FontName,
         EntryFontSize,
         ghoul::fontrendering::FontManager::Outline::No
     );
 
-    _historyFont = OsEng.fontManager().font(
+    _historyFont = global::fontManager.font(
         FontName,
         HistoryFontSize,
         ghoul::fontrendering::FontManager::Outline::No

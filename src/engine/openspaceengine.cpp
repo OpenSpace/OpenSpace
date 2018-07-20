@@ -101,8 +101,6 @@ namespace {
 
     constexpr const int CacheVersion = 1;
 
-    const glm::ivec3 FontAtlasSize{ 1536, 1536, 1 };
-
     struct {
         std::string configurationName;
         std::string sgctConfigurationName;
@@ -488,6 +486,8 @@ void OpenSpaceEngine::destroy() {
 
     LogManager::deinitialize();
 
+    global::fontManager.deinitialize();
+
     ghoul::deinitialize();
     LTRACE("OpenSpaceEngine::destroy(end)");
 }
@@ -854,7 +854,7 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
 }
 
 void OpenSpaceEngine::loadFonts() {
-    _fontManager = std::make_unique<ghoul::fontrendering::FontManager>(FontAtlasSize);
+    global::fontManager.initialize();
 
     for (const std::pair<std::string, std::string>& font : global::configuration.fonts) {
         std::string key = font.first;
@@ -866,7 +866,7 @@ void OpenSpaceEngine::loadFonts() {
         }
 
         LDEBUG(fmt::format("Registering font '{}' with key '{}'", fontName, key));
-        bool success = _fontManager->registerFontPath(key, fontName);
+        bool success = global::fontManager.registerFontPath(key, fontName);
 
         if (!success) {
             LERROR(fmt::format(
@@ -1644,11 +1644,6 @@ WindowWrapper& OpenSpaceEngine::windowWrapper() {
 AssetManager& OpenSpaceEngine::assetManager() {
     ghoul_assert(_assetManager, "Asset Manager must not be nullptr");
     return *_assetManager;
-}
-
-ghoul::fontrendering::FontManager& OpenSpaceEngine::fontManager() {
-    ghoul_assert(_fontManager, "Font Manager must not be nullptr");
-    return *_fontManager;
 }
 
 properties::PropertyOwner& OpenSpaceEngine::rootPropertyOwner() {

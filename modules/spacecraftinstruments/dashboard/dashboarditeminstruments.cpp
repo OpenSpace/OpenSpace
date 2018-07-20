@@ -145,7 +145,7 @@ DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dict
         glm::vec3(0.f),
         glm::vec3(1.f)
     )
-    , _font(OsEng.fontManager().font(KeyFontMono, 10))
+    , _font(global::fontManager.font(KeyFontMono, 10))
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -161,12 +161,12 @@ DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dict
     }
 
     _fontName.onChange([this]() {
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
     _fontSize.onChange([this]() {
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
@@ -175,7 +175,7 @@ DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dict
     _activeFlash.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_activeFlash);
 
-    _font = OsEng.fontManager().font(_fontName, _fontSize);
+    _font = global::fontManager.font(_fontName, _fontSize);
 }
 
 void DashboardItemInstruments::render(glm::vec2& penPosition) {

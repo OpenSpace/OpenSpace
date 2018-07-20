@@ -512,7 +512,7 @@ void RenderablePlanesCloud::initializeGL() {
     if (_hasLabel) {
         if (!_font) {
             constexpr const int FontSize = 30;
-            _font = OsEng.fontManager().font(
+            _font = global::fontManager.font(
                 "Mono",
                 static_cast<float>(FontSize),
                 ghoul::fontrendering::FontManager::Outline::Yes,

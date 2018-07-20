@@ -384,13 +384,13 @@ void RenderEngine::initializeGL() {
     OsEng.windowWrapper().setNearFarClippingPlane(0.001f, 1000.f);
 
     constexpr const float FontSizeBig = 50.f;
-    _fontBig = OsEng.fontManager().font(KeyFontMono, FontSizeBig);
+    _fontBig = global::fontManager.font(KeyFontMono, FontSizeBig);
     constexpr const float FontSizeTime = 15.f;
-    _fontDate = OsEng.fontManager().font(KeyFontMono, FontSizeTime);
+    _fontDate = global::fontManager.font(KeyFontMono, FontSizeTime);
     constexpr const float FontSizeMono = 10.f;
-    _fontInfo = OsEng.fontManager().font(KeyFontMono, FontSizeMono);
+    _fontInfo = global::fontManager.font(KeyFontMono, FontSizeMono);
     constexpr const float FontSizeLight = 8.f;
-    _fontLog = OsEng.fontManager().font(KeyFontLight, FontSizeLight);
+    _fontLog = global::fontManager.font(KeyFontLight, FontSizeLight);
 
     LINFO("Initializing Log");
     std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);

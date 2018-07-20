@@ -36,7 +36,6 @@
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::cmdparser { class CommandlineParser; }
-namespace ghoul::fontrendering { class FontManager; }
 
 namespace openspace {
 
@@ -110,7 +109,6 @@ public:
     Dashboard& dashboard();
     LoadingScreen& loadingScreen();
     WindowWrapper& windowWrapper();
-    ghoul::fontrendering::FontManager& fontManager();
     properties::PropertyOwner& rootPropertyOwner();
     properties::PropertyOwner& globalPropertyOwner();
     VirtualPropertyManager& virtualPropertyManager();
@@ -183,7 +181,6 @@ private:
     std::unique_ptr<SyncEngine> _syncEngine;
     std::unique_ptr<WindowWrapper> _windowWrapper;
     std::unique_ptr<ghoul::cmdparser::CommandlineParser> _commandlineParser;
-    std::unique_ptr<ghoul::fontrendering::FontManager> _fontManager;
 
     std::unique_ptr<VirtualPropertyManager> _virtualPropertyManager;
 

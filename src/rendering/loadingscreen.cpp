@@ -24,6 +24,7 @@
 
 #include <openspace/rendering/loadingscreen.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <ghoul/fmt.h>
@@ -116,7 +117,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
         { "logoTexture", "useTexture", "color" }
     );
 
-    _loadingFont = OsEng.fontManager().font(
+    _loadingFont = global::fontManager.font(
         "Loading",
         LoadingFontSize,
         ghoul::fontrendering::FontManager::Outline::No,
@@ -124,7 +125,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     );
 
     if (_showMessage) {
-        _messageFont = OsEng.fontManager().font(
+        _messageFont = global::fontManager.font(
             "Loading",
             MessageFontSize,
             ghoul::fontrendering::FontManager::Outline::No,
@@ -133,7 +134,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     }
 
     if (_showNodeNames) {
-        _itemFont = OsEng.fontManager().font(
+        _itemFont = global::fontManager.font(
             "Loading",
             ItemFontSize,
             ghoul::fontrendering::FontManager::Outline::No,

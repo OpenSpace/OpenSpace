@@ -35,8 +35,16 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/util/timemanager.h>
+#include <ghoul/glm.h>
+#include <ghoul/font/fontmanager.h>
+#include <ghoul/opengl/texture.h>
 
 namespace openspace::detail {
+
+ghoul::fontrendering::FontManager& gFontManager() {
+    static ghoul::fontrendering::FontManager g({ 1536, 1536, 1 });
+    return g;
+}
 
 Configuration& gConfiguration() {
     static Configuration g;

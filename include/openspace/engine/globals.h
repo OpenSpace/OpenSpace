@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_CORE___GLOBALS___H__
 #define __OPENSPACE_CORE___GLOBALS___H__
 
+namespace ghoul::fontrendering { class FontManager; }
+
 namespace openspace {
 
 struct Configuration;
@@ -45,6 +47,7 @@ namespace scripting {
 
 namespace detail {
 
+ghoul::fontrendering::FontManager& gFontManager();
 Configuration& gConfiguration();
 DownloadManager& gDownloadManager();
 ModuleEngine& gModuleEngine();
@@ -61,6 +64,7 @@ scripting::ScriptScheduler& gScriptScheduler();
 
 namespace global {
 
+static ghoul::fontrendering::FontManager& fontManager = detail::gFontManager();
 static Configuration& configuration = detail::gConfiguration();
 static DownloadManager& downloadManager = detail::gDownloadManager();
 static ModuleEngine& moduleEngine = detail::gModuleEngine();
