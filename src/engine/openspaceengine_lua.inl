@@ -24,6 +24,8 @@
 
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/globals.h>
+#include <openspace/properties/triggerproperty.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 
 namespace openspace::luascriptfunctions {

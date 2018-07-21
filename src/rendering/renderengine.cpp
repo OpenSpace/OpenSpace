@@ -234,18 +234,7 @@ RenderEngine::RenderEngine()
     , _screenSpaceOwner({ "ScreenSpace" })
 {
     _doPerformanceMeasurements.onChange([this](){
-        if (_doPerformanceMeasurements) {
-            if (!_performanceManager) {
-                _performanceManager = std::make_shared<performance::PerformanceManager>(
-                    global::configuration.logging.directory,
-                    global::configuration.logging.performancePrefix
-                );
-            }
-        }
-        else {
-            _performanceManager = nullptr;
-        }
-
+        global::performanceManager.setEnabled(_doPerformanceMeasurements);
     });
     addProperty(_doPerformanceMeasurements);
 
@@ -434,8 +423,7 @@ void RenderEngine::updateScene() {
     _scene->update({
         { glm::dvec3(0.0), glm::dmat3(11.), 1.0 },
         currentTime,
-        integrateFromTime,
-        _performanceManager != nullptr
+        integrateFromTime
     });
 
     LTRACE("RenderEngine::updateSceneGraph(end)");
@@ -552,8 +540,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         _renderer->render(
             _scene,
             _camera,
-            _globalBlackOutFactor,
-            _performanceManager != nullptr
+            _globalBlackOutFactor
         );
     }
 
@@ -674,10 +661,9 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 
 void RenderEngine::renderDashboard() {
     std::unique_ptr<performance::PerformanceMeasurement> perf;
-    if (_performanceManager) {
+    if (global::performanceManager.isEnabled()) {
         perf = std::make_unique<performance::PerformanceMeasurement>(
-            "Main Dashboard::render",
-            _performanceManager
+            "Main Dashboard::render"
         );
     }
     glm::vec2 penPosition = glm::vec2(
@@ -689,8 +675,6 @@ void RenderEngine::renderDashboard() {
 }
 
 void RenderEngine::postDraw() {
-    const Time& currentTime = global::timeManager.time();
-
     if (_shouldTakeScreenshot) {
         // We only create the directory here, as we don't want to spam the users
         // screenshot folder everytime we start OpenSpace even when we are not taking any
@@ -706,8 +690,8 @@ void RenderEngine::postDraw() {
         _shouldTakeScreenshot = false;
     }
 
-    if (_performanceManager) {
-        _performanceManager->storeScenePerformanceMeasurements(
+    if (global::performanceManager.isEnabled()) {
+        global::performanceManager.storeScenePerformanceMeasurements(
             scene()->allSceneGraphNodes()
         );
     }
@@ -943,14 +927,6 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
             },
         },
     };
-}
-
-bool RenderEngine::doesPerformanceMeasurements() const {
-    return _performanceManager != nullptr;
-}
-
-std::shared_ptr<performance::PerformanceManager> RenderEngine::performanceManager() {
-    return _performanceManager;
 }
 
 void RenderEngine::addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderable> s) {

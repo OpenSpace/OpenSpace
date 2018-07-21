@@ -91,7 +91,7 @@ GuiPerformanceComponent::GuiPerformanceComponent()
 GuiPerformanceComponent::~GuiPerformanceComponent() {} // NOLINT
 
 void GuiPerformanceComponent::render() {
-    if (!global::renderEngine.doesPerformanceMeasurements()) {
+    if (!global::performanceManager.isEnabled()) {
         return;
     }
 
@@ -104,8 +104,7 @@ void GuiPerformanceComponent::render() {
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 
-    PerformanceLayout* layout =
-        global::renderEngine.performanceManager()->performanceData();
+    PerformanceLayout* layout = global::performanceManager.performanceData();
 
     v = _sceneGraphIsEnabled;
     ImGui::Checkbox("SceneGraph", &v);
@@ -115,15 +114,15 @@ void GuiPerformanceComponent::render() {
     _functionsIsEnabled = v;
     v = _outputLogs;
     ImGui::Checkbox("Output Logs", &v);
-    global::renderEngine.performanceManager()->setLogging(v);
+    global::performanceManager.setLogging(v);
     // Need to catch if it's unsuccessful
-    v = global::renderEngine.performanceManager()->loggingEnabled();
+    v = global::performanceManager.loggingEnabled();
     _outputLogs = v;
 
     ImGui::Spacing();
 
     if (ImGui::Button("Reset measurements")) {
-        global::renderEngine.performanceManager()->resetPerformanceMeasurements();
+        global::performanceManager.resetPerformanceMeasurements();
     }
 
     if (_sceneGraphIsEnabled) {

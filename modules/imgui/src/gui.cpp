@@ -29,7 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/mission/missionmanager.h>
-#include <openspace/rendering/renderengine.h>
+#include <openspace/performance/performancemanager.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/cachemanager.h>
@@ -421,7 +421,7 @@ void GUI::endFrame() {
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 
-    _performance.setEnabled(global::renderEngine.doesPerformanceMeasurements());
+    _performance.setEnabled(global::performanceManager.isEnabled());
 
     if (_performance.isEnabled()) {
         _performance.render();

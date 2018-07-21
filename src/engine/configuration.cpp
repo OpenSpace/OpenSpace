@@ -167,8 +167,6 @@ void getValue(ghoul::lua::LuaState& L, const char* name, T& value) {
         ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
 
         d.getValue(KeyLogLevel, v.level);
-        d.getValue(KeyLogDir, v.directory);
-        d.getValue(KeyPerformancePrefix, v.performancePrefix);
         d.getValue(KeyImmediateFlush, v.forceImmediateFlush);
         d.getValue(KeyCapabilitiesVerbosity, v.capabilitiesVerbosity);
 

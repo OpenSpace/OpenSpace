@@ -542,9 +542,7 @@ void ABufferRenderer::updateMSAASamplingPattern() {
     glDeleteVertexArrays(1, &nOneStripVAO);
 }
 
-void ABufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor,
-                             bool doPerformanceMeasurements)
-{
+void ABufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor) {
     PerfMeasure("ABufferRenderer::render");
 
     if (!scene || !camera) {

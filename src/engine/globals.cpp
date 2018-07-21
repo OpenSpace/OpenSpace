@@ -32,12 +32,14 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelpeer.h>
+#include <openspace/performance/performancemanager.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/glm.h>
 #include <ghoul/font/fontmanager.h>
+#include <ghoul/misc/sharedmemory.h>
 #include <ghoul/opengl/texture.h>
 
 namespace openspace::detail {
@@ -94,6 +96,11 @@ interaction::KeybindingManager& gKeybindingManager() {
 
 interaction::NavigationHandler& gNavigationHandler() {
     static interaction::NavigationHandler g;
+    return g;
+}
+
+performance::PerformanceManager& gPerformanceManager() {
+    static performance::PerformanceManager g;
     return g;
 }
 

@@ -39,6 +39,7 @@
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/performance/performancemeasurement.h>
+#include <openspace/performance/performancemanager.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/loadingscreen.h>
@@ -1152,10 +1153,9 @@ void OpenSpaceEngine::preSynchronization() {
     LTRACE("OpenSpaceEngine::preSynchronization(begin)");
 
     std::unique_ptr<performance::PerformanceMeasurement> perf;
-    if (global::renderEngine.performanceManager()) {
+    if (global::performanceManager.isEnabled()) {
         perf = std::make_unique<performance::PerformanceMeasurement>(
-            "OpenSpaceEngine::preSynchronization",
-            global::renderEngine.performanceManager()
+            "OpenSpaceEngine::preSynchronization"
         );
     }
 
@@ -1211,10 +1211,9 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     LTRACE("OpenSpaceEngine::postSynchronizationPreDraw(begin)");
 
     std::unique_ptr<performance::PerformanceMeasurement> perf;
-    if (global::renderEngine.performanceManager()) {
+    if (global::performanceManager.isEnabled()) {
         perf = std::make_unique<performance::PerformanceMeasurement>(
-            "OpenSpaceEngine::postSynchronizationPreDraw",
-            global::renderEngine.performanceManager()
+            "OpenSpaceEngine::postSynchronizationPreDraw"
         );
     }
 
@@ -1285,10 +1284,9 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
     LTRACE("OpenSpaceEngine::render(begin)");
 
     std::unique_ptr<performance::PerformanceMeasurement> perf;
-    if (global::renderEngine.performanceManager()) {
+    if (global::performanceManager.isEnabled()) {
         perf = std::make_unique<performance::PerformanceMeasurement>(
-            "OpenSpaceEngine::render",
-            global::renderEngine.performanceManager()
+            "OpenSpaceEngine::render"
         );
     }
 
@@ -1314,10 +1312,9 @@ void OpenSpaceEngine::drawOverlays() {
     LTRACE("OpenSpaceEngine::drawOverlays(begin)");
 
     std::unique_ptr<performance::PerformanceMeasurement> perf;
-    if (global::renderEngine.performanceManager()) {
+    if (global::performanceManager.isEnabled()) {
         perf = std::make_unique<performance::PerformanceMeasurement>(
-            "OpenSpaceEngine::drawOverlays",
-            global::renderEngine.performanceManager()
+            "OpenSpaceEngine::drawOverlays"
         );
     }
 
@@ -1342,10 +1339,9 @@ void OpenSpaceEngine::postDraw() {
     LTRACE("OpenSpaceEngine::postDraw(begin)");
 
     std::unique_ptr<performance::PerformanceMeasurement> perf;
-    if (global::renderEngine.performanceManager()) {
+    if (global::performanceManager.isEnabled()) {
         perf = std::make_unique<performance::PerformanceMeasurement>(
-            "OpenSpaceEngine::postDraw",
-            global::renderEngine.performanceManager()
+            "OpenSpaceEngine::postDraw"
         );
     }
 

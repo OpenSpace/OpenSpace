@@ -26,6 +26,7 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/performance/performancemanager.h>
 #include <openspace/performance/performancemeasurement.h>
 #include <openspace/rendering/deferredcaster.h>
 #include <openspace/rendering/deferredcastermanager.h>
@@ -907,14 +908,13 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
     _dirtyMsaaSamplingPattern = false;
 }
 
-void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor,
-                                 bool doPerformanceMeasurements)
-{
+void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor) {
+    const bool doPerformanceMeasurements = global::performanceManager.isEnabled();
+
     std::unique_ptr<performance::PerformanceMeasurement> perf;
     if (doPerformanceMeasurements) {
         perf = std::make_unique<performance::PerformanceMeasurement>(
-            "FramebufferRenderer::render",
-            global::renderEngine.performanceManager()
+            "FramebufferRenderer::render"
         );
     }
 
@@ -970,8 +970,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
         if (doPerformanceMeasurements) {
             perfInternal = std::make_unique<performance::PerformanceMeasurement>(
-                "FramebufferRenderer::render::raycasterTasks",
-                global::renderEngine.performanceManager()
+                "FramebufferRenderer::render::raycasterTasks"
             );
         }
         performRaycasterTasks(tasks.raycasterTasks);
@@ -985,8 +984,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
         if (doPerformanceMeasurements) {
             perfInternal = std::make_unique<performance::PerformanceMeasurement>(
-                "FramebufferRenderer::render::deferredTasks",
-                global::renderEngine.performanceManager()
+                "FramebufferRenderer::render::deferredTasks"
             );
         }
         performDeferredTasks(tasks.deferredcasterTasks);

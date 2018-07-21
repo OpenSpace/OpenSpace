@@ -46,8 +46,6 @@ struct Configuration {
 
     struct Logging {
         std::string level = "Info";
-        std::string directory = "${BASE}";
-        std::string performancePrefix = "PM-";
         bool forceImmediateFlush = false;
         std::string capabilitiesVerbosity = "Default";
         std::vector<ghoul::Dictionary> logs;

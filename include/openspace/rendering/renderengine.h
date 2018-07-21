@@ -42,7 +42,6 @@ namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
-namespace performance { class PerformanceManager; }
 namespace scripting { struct LuaLibrary; }
 
 class Camera;
@@ -94,10 +93,6 @@ public:
 
     void renderOverlays(const ShutdownInformation& shutdownInfo);
     void postDraw();
-
-    // Performance measurements
-    bool doesPerformanceMeasurements() const;
-    std::shared_ptr<performance::PerformanceManager> performanceManager();
 
     float globalBlackOutFactor();
     void setGlobalBlackOutFactor(float opacity);
@@ -179,7 +174,6 @@ private:
     std::unique_ptr<DeferredcasterManager> _deferredcasterManager;
 
     properties::BoolProperty _doPerformanceMeasurements;
-    std::shared_ptr<performance::PerformanceManager> _performanceManager;
 
     std::unique_ptr<Renderer> _renderer;
     RendererImplementation _rendererImplementation = RendererImplementation::Invalid;

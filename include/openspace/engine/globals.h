@@ -41,6 +41,7 @@ namespace interaction {
     class KeybindingManager;
     class NavigationHandler;
 } // namespace interaction
+namespace performance { class PerformanceManager; }
 namespace scripting {
     class ScriptEngine;
     class ScriptScheduler;
@@ -59,6 +60,7 @@ TimeManager& gTimeManager();
 WindowDelegate& gWindowDelegate();
 interaction::KeybindingManager& gKeybindingManager();
 interaction::NavigationHandler& gNavigationHandler();
+performance::PerformanceManager& gPerformanceManager();
 scripting::ScriptEngine& gScriptEngine();
 scripting::ScriptScheduler& gScriptScheduler();
 
@@ -77,6 +79,8 @@ static TimeManager& timeManager = detail::gTimeManager();
 static WindowDelegate& windowDelegate = detail::gWindowDelegate();
 static interaction::KeybindingManager& keybindingManager = detail::gKeybindingManager();
 static interaction::NavigationHandler& navigationHandler = detail::gNavigationHandler();
+static performance::PerformanceManager& performanceManager =
+    detail::gPerformanceManager();
 static scripting::ScriptEngine& scriptEngine = detail::gScriptEngine();
 static scripting::ScriptScheduler& scriptScheduler = detail::gScriptScheduler();
 
