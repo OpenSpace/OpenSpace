@@ -28,7 +28,7 @@
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/rendering/layer/layer.h>
 
-#include <openspace/engine/openspaceengine.h>
+//#include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>

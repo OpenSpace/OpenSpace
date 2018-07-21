@@ -29,7 +29,6 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/distanceconversion.h>

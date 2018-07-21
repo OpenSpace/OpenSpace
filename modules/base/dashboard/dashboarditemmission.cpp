@@ -27,7 +27,6 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/util/timemanager.h>

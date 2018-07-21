@@ -38,6 +38,7 @@
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbylevel.h>
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbyindex.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>

@@ -28,7 +28,6 @@
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>

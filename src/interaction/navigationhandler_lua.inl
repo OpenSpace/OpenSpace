@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/openspaceengine.h>
-
 #include <numeric>
 
 namespace openspace::luascriptfunctions {

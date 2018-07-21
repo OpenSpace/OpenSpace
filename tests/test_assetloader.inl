@@ -45,7 +45,7 @@
 #include <memory>
 
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
+//#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 
 class AssetLoaderTest;

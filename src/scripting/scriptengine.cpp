@@ -26,7 +26,6 @@
 
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/syncbuffer.h>
 #include <ghoul/filesystem/filesystem.h>

@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___PERFORMANCEMEASUREMENT___H__
 #define __OPENSPACE_CORE___PERFORMANCEMEASUREMENT___H__
 
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <chrono>
 #include <string>
@@ -55,7 +54,7 @@ private:
     auto __LABEL_PerfMeasure(__LINE__) = \
         openspace::performance::PerformanceMeasurement(\
             (name), \
-            OsEng.renderEngine().performanceManager() \
+            global::renderEngine.performanceManager() \
         )
 
 } // namespace openspace::performance

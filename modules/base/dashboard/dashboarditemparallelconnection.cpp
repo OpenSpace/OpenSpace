@@ -27,7 +27,6 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/scene/scenegraphnode.h>
