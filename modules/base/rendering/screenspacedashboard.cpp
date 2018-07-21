@@ -210,8 +210,8 @@ bool ScreenSpaceDashboard::isReady() const {
 }
 
 void ScreenSpaceDashboard::update() {
-    if (OsEng.windowWrapper().windowHasResized()) {
-        const glm::ivec2 size = OsEng.windowWrapper().currentWindowResolution();
+    if (global::windowDelegate.windowHasResized()) {
+        const glm::ivec2 size = global::windowDelegate.currentWindowResolution();
         _size = { 0.f, 0.f, size.x, size.y };
         _originalViewportSize = size;
         createFramebuffer();

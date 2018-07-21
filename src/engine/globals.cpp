@@ -27,6 +27,7 @@
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/network/networkengine.h>
@@ -78,6 +79,11 @@ RenderEngine& gRenderEngine() {
 
 TimeManager& gTimeManager() {
     static TimeManager g;
+    return g;
+}
+
+WindowDelegate& gWindowDelegate() {
+    static WindowDelegate g;
     return g;
 }
 

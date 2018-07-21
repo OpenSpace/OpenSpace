@@ -33,8 +33,6 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/documentation/verifier.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/configuration.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/configuration_doc.inl
-    # ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager.cpp
-    # ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager_doc.inl
     ${OPENSPACE_BASE_DIR}/src/engine/downloadmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/globals.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/logfactory.cpp
@@ -43,8 +41,6 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/syncengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/virtualpropertymanager.cpp
-    ${OPENSPACE_BASE_DIR}/src/engine/wrapper/sgctwindowwrapper.cpp
-    ${OPENSPACE_BASE_DIR}/src/engine/wrapper/windowwrapper.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/camerainteractionstates.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/inputstate.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/joystickinputstate.cpp
@@ -217,8 +213,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/openspaceengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/syncengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/virtualpropertymanager.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/engine/wrapper/sgctwindowwrapper.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/engine/wrapper/windowwrapper.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/engine/windowdelegate.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/camerainteractionstates.h

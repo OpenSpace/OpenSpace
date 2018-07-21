@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___OPENSPACEENGINE___H__
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
@@ -47,7 +48,6 @@ class LuaConsole;
 class Scene;
 class SyncEngine;
 class VirtualPropertyManager;
-class WindowWrapper;
 
 namespace interaction { struct JoystickInputStates; }
 namespace gui { class GUI; }
@@ -69,7 +69,7 @@ struct ShutdownInformation {
 class OpenSpaceEngine {
 public:
     static void create(int argc, char** argv,
-        std::unique_ptr<WindowWrapper> windowWrapper,
+        WindowDelegate windowDelegate,
         std::vector<std::string>& sgctArguments, bool& requestClose,
         bool consoleLog = true);
 
@@ -99,7 +99,6 @@ public:
     void encode();
     void decode();
 
-
     void scheduleLoadSingleAsset(std::string assetPath);
     void toggleShutdownMode();
 
@@ -108,7 +107,6 @@ public:
     AssetManager& assetManager();
     Dashboard& dashboard();
     LoadingScreen& loadingScreen();
-    WindowWrapper& windowWrapper();
     properties::PropertyOwner& rootPropertyOwner();
     properties::PropertyOwner& globalPropertyOwner();
     VirtualPropertyManager& virtualPropertyManager();
@@ -161,8 +159,7 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    OpenSpaceEngine(std::string programName,
-        std::unique_ptr<WindowWrapper> windowWrapper);
+    OpenSpaceEngine(std::string programName);
 
     void loadSingleAsset(const std::string& assetPath);
     void gatherCommandlineArguments();
@@ -179,7 +176,6 @@ private:
     std::unique_ptr<Dashboard> _dashboard;
     std::unique_ptr<LuaConsole> _console;
     std::unique_ptr<SyncEngine> _syncEngine;
-    std::unique_ptr<WindowWrapper> _windowWrapper;
     std::unique_ptr<ghoul::cmdparser::CommandlineParser> _commandlineParser;
 
     std::unique_ptr<VirtualPropertyManager> _virtualPropertyManager;

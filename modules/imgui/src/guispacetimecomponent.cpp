@@ -196,7 +196,7 @@ void GuiSpaceTimeComponent::render() {
         const float duration = global::timeManager.defaultTimeInterpolationDuration();
 
         const TimeKeyframeData predictedTime = global::timeManager.interpolate(
-            OsEng.windowWrapper().applicationTime() + duration
+            global::windowDelegate.applicationTime() + duration
         );
         const double j2000 = predictedTime.time.j2000Seconds();
         const long long seconds = duration_cast<std::chrono::seconds>(
@@ -402,7 +402,7 @@ void GuiSpaceTimeComponent::render() {
         if (accelerationDeltaChanged || ImGui::IsItemActive() || ImGui::IsItemClicked()) {
             // We want the value to change by _accelerationDelta every 100 real world ms
             const double newDeltaTime = convertTime(
-                _deltaTime + _accelerationDelta * OsEng.windowWrapper().deltaTime() * 10,
+                _deltaTime + _accelerationDelta * global::windowDelegate.deltaTime() * 10,
                 static_cast<TimeUnit>(_deltaTimeUnit),
                 TimeUnit::Second
             );

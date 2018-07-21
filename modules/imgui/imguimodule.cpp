@@ -60,7 +60,6 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             gui._globalProperty.setSource(
                 []() {
                     std::vector<properties::PropertyOwner*> res = {
-                        &(OsEng.windowWrapper()),
                         &global::navigationHandler,
                         &global::timeManager,
                         &global::renderEngine,
@@ -170,16 +169,16 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             // TODO emiax: Make sure this is only called for one of the eyes, in the case
             // of side-by-side / top-bottom stereo.
 
-            WindowWrapper& wrapper = OsEng.windowWrapper();
-            const bool showGui = wrapper.hasGuiWindow() ? wrapper.isGuiWindow() : true;
-            if (wrapper.isMaster() && showGui) {
-                const glm::ivec2 windowSize = wrapper.currentWindowSize();
-                const glm::ivec2 resolution = wrapper.currentWindowResolution();
+            WindowDelegate& delegate = global::windowDelegate;
+            const bool showGui = delegate.hasGuiWindow() ? delegate.isGuiWindow() : true;
+            if (delegate.isMaster() && showGui) {
+                const glm::ivec2 windowSize = delegate.currentWindowSize();
+                const glm::ivec2 resolution = delegate.currentWindowResolution();
 
-                glm::vec2 mousePosition = wrapper.mousePosition();
-                uint32_t mouseButtons = wrapper.mouseButtons(2);
+                glm::vec2 mousePosition = delegate.mousePosition();
+                uint32_t mouseButtons = delegate.mouseButtons(2);
 
-                const double dt = std::max(wrapper.averageDeltaTime(), 0.0);
+                const double dt = std::max(delegate.averageDeltaTime(), 0.0);
                 if (touchInput.active && mouseButtons == 0) {
                     mouseButtons = touchInput.action;
                     mousePosition = touchInput.pos;

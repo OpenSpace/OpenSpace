@@ -138,7 +138,7 @@ TouchModule::TouchModule()
         touch.setCamera(global::navigationHandler.camera());
         touch.setFocusNode(global::navigationHandler.focusNode());
 
-        if (hasNewInput() && OsEng.windowWrapper().isMaster()) {
+        if (hasNewInput() && global::windowDelegate.isMaster()) {
             touch.updateStateFromInput(listOfContactPoints, lastProcessed);
         }
         else if (listOfContactPoints.empty()) {
@@ -154,7 +154,7 @@ TouchModule::TouchModule()
          // in GUI
         touch.unitTest();
          // calculate the new camera state for this frame
-        touch.step(OsEng.windowWrapper().deltaTime());
+        touch.step(global::windowDelegate.deltaTime());
     }
     );
 

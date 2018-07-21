@@ -447,7 +447,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     _renderOption.addOption(0, "Camera View Direction");
     _renderOption.addOption(1, "Camera Position Normal");
     _renderOption.set(1);
-    if (OsEng.windowWrapper().isFisheyeRendering()) {
+    if (global::windowDelegate.isFisheyeRendering()) {
         _renderOption.set(1);
     }
     else {

@@ -354,7 +354,7 @@ bool ScreenSpaceRenderable::initialize() {
 }
 
 bool ScreenSpaceRenderable::initializeGL() {
-    _originalViewportSize = OsEng.windowWrapper().currentWindowResolution();
+    _originalViewportSize = global::windowDelegate.currentWindowResolution();
 
     createPlane();
     createShaders();
@@ -459,7 +459,7 @@ void ScreenSpaceRenderable::useEuclideanCoordinates(bool b) {
 void ScreenSpaceRenderable::createShaders() {
     ghoul::Dictionary dict = ghoul::Dictionary();
 
-    auto res = OsEng.windowWrapper().currentWindowResolution();
+    auto res = global::windowDelegate.currentWindowResolution();
     ghoul::Dictionary rendererData = {
         { "fragmentRendererPath", "${SHADERS}/framebuffer/renderframebuffer.frag" },
         { "windowWidth" , res.x },
@@ -479,7 +479,7 @@ void ScreenSpaceRenderable::createShaders() {
 }
 
 glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
-    glm::vec2 resolution = OsEng.windowWrapper().currentWindowResolution();
+    glm::vec2 resolution = global::windowDelegate.currentWindowResolution();
 
     //to scale the plane
     float textureRatio =
@@ -499,7 +499,7 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
 
 glm::mat4 ScreenSpaceRenderable::rotationMatrix() {
     // Get the scene transform
-    glm::mat4 rotation = glm::inverse(OsEng.windowWrapper().modelMatrix());
+    glm::mat4 rotation = glm::inverse(global::windowDelegate.modelMatrix());
     if (!_useEuclideanCoordinates) {
         glm::vec2 position = _sphericalPosition.value();
 

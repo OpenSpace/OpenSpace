@@ -213,9 +213,9 @@ void LoadingScreen::render() {
     // We have to recalculate the positions here because we will not be informed about a
     // window size change
 
-    const glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();
+    const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
     const glm::ivec2 res =
-        glm::vec2(OsEng.windowWrapper().currentDrawBufferResolution()) / dpiScaling;
+        glm::vec2(global::windowDelegate.currentDrawBufferResolution()) / dpiScaling;
 
     float screenAspectRatio = static_cast<float>(res.x) / static_cast<float>(res.y);
 
@@ -583,7 +583,7 @@ void LoadingScreen::render() {
     glEnable(GL_DEPTH_TEST);
 
     std::this_thread::sleep_for(RefreshRate);
-    OsEng.windowWrapper().swapBuffer();
+    global::windowDelegate.swapBuffer();
 }
 
 void LoadingScreen::postMessage(std::string message) {

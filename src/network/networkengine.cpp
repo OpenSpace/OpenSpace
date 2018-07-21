@@ -25,8 +25,7 @@
 #include <openspace/network/networkengine.h>
 
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
@@ -80,7 +79,7 @@ bool NetworkEngine::handleMessage(const std::string& message) {
 
 void NetworkEngine::publishStatusMessage() {
     if (!_shouldPublishStatusMessage ||
-        !OsEng.windowWrapper().isExternalControlConnected())
+        !global::windowDelegate.isExternalControlConnected())
     {
         return;
     }
@@ -170,7 +169,7 @@ void NetworkEngine::publishMessage(MessageIdentifier identifier,
 }
 
 void NetworkEngine::sendMessages() {
-    if (!OsEng.windowWrapper().isExternalControlConnected()) {
+    if (!global::windowDelegate.isExternalControlConnected()) {
         return;
     }
 
@@ -187,7 +186,7 @@ void NetworkEngine::sendMessages() {
 
         // Prepending the message identifier to the front
         m.body.insert(m.body.begin(), identifier.data.begin(), identifier.data.end());
-        OsEng.windowWrapper().sendMessageToExternalControl(m.body);
+        global::windowDelegate.sendMessageToExternalControl(m.body);
     }
 
     _messagesToSend.clear();
@@ -205,7 +204,7 @@ void NetworkEngine::sendInitialInformation() {
 
         std::vector<char> payload = m.body;
         payload.insert(payload.begin(), identifier.data.begin(), identifier.data.end());
-        OsEng.windowWrapper().sendMessageToExternalControl(payload);
+        global::windowDelegate.sendMessageToExternalControl(payload);
         LINFO(fmt::format(
             "Sent initial message: (s={}) [i={}]", m.body.size(), identifier.value
         ));
@@ -225,7 +224,7 @@ void NetworkEngine::sendInitialInformation() {
     std::vector<char> d;
     d.insert(d.begin(), identifier.data.begin(), identifier.data.end());
 
-    OsEng.windowWrapper().sendMessageToExternalControl(d);
+    global::windowDelegate.sendMessageToExternalControl(d);
     _shouldPublishStatusMessage = true;
 }
 

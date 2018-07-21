@@ -338,7 +338,7 @@ void RenderEngine::initialize() {
 
     _raycasterManager = std::make_unique<RaycasterManager>();
     _deferredcasterManager = std::make_unique<DeferredcasterManager>();
-    _nAaSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
+    _nAaSamples = global::windowDelegate.currentNumberOfAaSamples();
 
     LINFO(fmt::format("Setting renderer from string: {}", renderingMethod));
     setRendererFromString(renderingMethod);
@@ -381,7 +381,7 @@ void RenderEngine::initializeGL() {
 
     // set the close clip plane and the far clip plane to extreme values while in
     // development
-    OsEng.windowWrapper().setNearFarClippingPlane(0.001f, 1000.f);
+    global::windowDelegate.setNearFarClippingPlane(0.001f, 1000.f);
 
     constexpr const float FontSizeBig = 50.f;
     _fontBig = global::fontManager.font(KeyFontMono, FontSizeBig);
@@ -454,7 +454,7 @@ void RenderEngine::updateShaderPrograms() {
 }
 
 void RenderEngine::updateRenderer() {
-    const bool windowResized = OsEng.windowWrapper().windowHasResized();
+    const bool windowResized = global::windowDelegate.windowHasResized();
 
     if (windowResized) {
         _renderer->setResolution(renderingResolution());
@@ -474,22 +474,21 @@ void RenderEngine::updateScreenSpaceRenderables() {
 }
 
 glm::ivec2 RenderEngine::renderingResolution() const {
-    if (OsEng.windowWrapper().isRegularRendering()) {
-        return OsEng.windowWrapper().currentWindowResolution();
+    if (global::windowDelegate.isRegularRendering()) {
+        return global::windowDelegate.currentWindowResolution();
     }
     else {
-        return OsEng.windowWrapper().currentDrawBufferResolution();
+        return global::windowDelegate.currentDrawBufferResolution();
     }
 }
 
 glm::ivec2 RenderEngine::fontResolution() const {
     const std::string& value = global::configuration.onScreenTextScaling;
     if (value == "framebuffer") {
-        return OsEng.windowWrapper().getCurrentViewportSize();
-        //return OsEng.windowWrapper().currentWindowResolution();
+        return global::windowDelegate.currentViewportSize();
     }
     else {
-        return OsEng.windowWrapper().currentWindowSize();
+        return global::windowDelegate.currentWindowSize();
     }
 }
 
@@ -525,7 +524,7 @@ void RenderEngine::updateFade() {
                 );
             }
             _currentFadeTime += static_cast<float>(
-                OsEng.windowWrapper().averageDeltaTime()
+                global::windowDelegate.averageDeltaTime()
             );
         }
     }
@@ -535,9 +534,9 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
                           const glm::mat4& projectionMatrix)
 {
     LTRACE("RenderEngine::render(begin)");
-    const WindowWrapper& wrapper = OsEng.windowWrapper();
+    const WindowDelegate& delegate = global::windowDelegate;
     if (_camera) {
-        if (_disableSceneTranslationOnMaster && wrapper.isMaster()) {
+        if (_disableSceneTranslationOnMaster && delegate.isMaster()) {
             _camera->sgctInternal.setViewMatrix(viewMatrix);
         }
         else {
@@ -547,8 +546,8 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         _camera->sgctInternal.setProjectionMatrix(projectionMatrix);
     }
 
-    const bool masterEnabled = wrapper.isMaster() ? !_disableMasterRendering : true;
-    if (masterEnabled && !wrapper.isGuiWindow() && _globalBlackOutFactor > 0.f) {
+    const bool masterEnabled = delegate.isMaster() ? !_disableMasterRendering : true;
+    if (masterEnabled && !delegate.isGuiWindow() && _globalBlackOutFactor > 0.f) {
         _renderer->render(
             _scene,
             _camera,
@@ -623,7 +622,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
 }
 
 void RenderEngine::renderOverlays(const ShutdownInformation& shutdownInfo) {
-    const bool isMaster = OsEng.windowWrapper().isMaster();
+    const bool isMaster = global::windowDelegate.isMaster();
     if (isMaster || _showOverlayOnSlaves) {
         renderScreenLog();
         renderVersionInformation();
@@ -702,7 +701,7 @@ void RenderEngine::postDraw() {
             );
         }
 
-        OsEng.windowWrapper().takeScreenshot(_applyWarping);
+        global::windowDelegate.takeScreenshot(_applyWarping);
         _shouldTakeScreenshot = false;
     }
 

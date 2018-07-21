@@ -364,8 +364,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
     }
 
     //Code for lower-right corner double-tap to zoom-out
-    WindowWrapper& wrapper = OsEng.windowWrapper();
-    glm::ivec2 res = wrapper.currentWindowSize();
+    glm::ivec2 res = global::windowDelegate.currentWindowSize();
     glm::dvec2 pos = glm::vec2(
         list.at(0).getScreenX(res.x),
         list.at(0).getScreenY(res.y)
@@ -415,8 +414,7 @@ bool TouchInteraction::guiMode(const std::vector<TuioCursor>& list) {
     if (_ignoreGui) {
         return false;
     }
-    WindowWrapper& wrapper = OsEng.windowWrapper();
-    glm::ivec2 res = wrapper.currentWindowSize();
+    glm::ivec2 res = global::windowDelegate.currentWindowSize();
     glm::dvec2 pos = glm::vec2(
         list.at(0).getScreenX(res.x),
         list.at(0).getScreenY(res.y)
@@ -1401,7 +1399,7 @@ void TouchInteraction::resetAfterInput() {
     _debugProperties.interactionMode = "None";
 #endif
     if (_directTouchMode && !_selected.empty() && _lmSuccess) {
-        double spinDelta = _spinSensitivity / OsEng.windowWrapper().averageDeltaTime();
+        double spinDelta = _spinSensitivity / global::windowDelegate.averageDeltaTime();
         if (glm::length(_lastVel.orbit) > _orbitSpeedThreshold) {
              // allow node to start "spinning" after direct-manipulation finger is let go
             _vel.orbit = _lastVel.orbit * spinDelta;

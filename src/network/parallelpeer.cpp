@@ -227,7 +227,7 @@ void ParallelPeer::handleMessage(const ParallelConnection::Message& message) {
 void ParallelPeer::analyzeTimeDifference(double messageTimestamp) {
     std::lock_guard<std::mutex> latencyLock(_latencyMutex);
 
-    const double timeDiff = OsEng.windowWrapper().applicationTime() - messageTimestamp;
+    const double timeDiff = global::windowDelegate.applicationTime() - messageTimestamp;
     if (_latencyDiffs.empty()) {
         _initialTimeDiff = timeDiff;
     }
@@ -298,7 +298,7 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
             break;
         }
         case datamessagestructures::Type::TimelineData: {
-            const double now = OsEng.windowWrapper().applicationTime();
+            const double now = global::windowDelegate.applicationTime();
             datamessagestructures::TimeTimeline timelineMessage(buffer);
 
             if (timelineMessage._clear) {
@@ -453,7 +453,7 @@ void ParallelPeer::requestHostship() {
         reinterpret_cast<char*>(&passwordHash) + sizeof(uint64_t)
     );
 
-    const double now = OsEng.windowWrapper().applicationTime();
+    const double now = global::windowDelegate.applicationTime();
     _connection.sendMessage(ParallelConnection::Message(
         ParallelConnection::MessageType::HostshipRequest,
         buffer
@@ -461,7 +461,7 @@ void ParallelPeer::requestHostship() {
 }
 
 void ParallelPeer::resignHostship() {
-    const double now = OsEng.windowWrapper().applicationTime();
+    const double now = global::windowDelegate.applicationTime();
 
     std::vector<char> buffer;
     _connection.sendMessage(ParallelConnection::Message(
@@ -489,7 +489,7 @@ void ParallelPeer::sendScript(std::string script) {
     std::vector<char> buffer;
     sm.serialize(buffer);
 
-    double timestamp = OsEng.windowWrapper().applicationTime();
+    double timestamp = global::windowDelegate.applicationTime();
     ParallelConnection::DataMessage message(
         datamessagestructures::Type::ScriptData,
         timestamp,
@@ -514,7 +514,7 @@ void ParallelPeer::preSynchronization() {
     }
 
     if (isHost()) {
-        double now = OsEng.windowWrapper().applicationTime();
+        double now = global::windowDelegate.applicationTime();
 
         if (_lastCameraKeyframeTimestamp + _cameraKeyframeInterval < now) {
             sendCameraKeyframe();
@@ -611,7 +611,7 @@ void ParallelPeer::sendCameraKeyframe() {
     kf._scale = global::navigationHandler.camera()->scaling();
 
     // Timestamp as current runtime of OpenSpace instance
-    kf._timestamp = OsEng.windowWrapper().applicationTime();
+    kf._timestamp = global::windowDelegate.applicationTime();
 
     // Create a buffer for the keyframe
     std::vector<char> buffer;
@@ -619,7 +619,7 @@ void ParallelPeer::sendCameraKeyframe() {
     // Fill the keyframe buffer
     kf.serialize(buffer);
 
-    const double timestamp = OsEng.windowWrapper().applicationTime();
+    const double timestamp = global::windowDelegate.applicationTime();
     // Send message
     _connection.sendDataMessage(ParallelConnection::DataMessage(
         datamessagestructures::Type::CameraData,
@@ -658,7 +658,7 @@ void ParallelPeer::sendTimeTimeline() {
         kfMessage._time = global::timeManager.time().j2000Seconds();
         kfMessage._dt = global::timeManager.targetDeltaTime();
         kfMessage._paused = global::timeManager.isPaused();
-        kfMessage._timestamp = OsEng.windowWrapper().applicationTime();
+        kfMessage._timestamp = global::windowDelegate.applicationTime();
         kfMessage._requiresTimeJump = _timeJumped;
         timelineMessage._keyframes.push_back(kfMessage);
     }
@@ -668,7 +668,7 @@ void ParallelPeer::sendTimeTimeline() {
     // Fill the timeline buffer
     timelineMessage.serialize(buffer);
 
-    double timestamp = OsEng.windowWrapper().applicationTime();
+    double timestamp = global::windowDelegate.applicationTime();
     // Send message
     _connection.sendDataMessage(ParallelConnection::DataMessage(
         datamessagestructures::Type::TimelineData,

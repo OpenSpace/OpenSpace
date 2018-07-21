@@ -34,7 +34,6 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/network/networkengine.h>
@@ -130,13 +129,11 @@ class Scene;
 
 OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 
-OpenSpaceEngine::OpenSpaceEngine(std::string programName,
-                                 std::unique_ptr<WindowWrapper> windowWrapper)
+OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     : _scene(nullptr)
     , _dashboard(new Dashboard)
     , _console(new LuaConsole)
     , _syncEngine(std::make_unique<SyncEngine>(4096))
-    , _windowWrapper(std::move(windowWrapper))
     , _commandlineParser(new ghoul::cmdparser::CommandlineParser(
         std::move(programName),
         ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
@@ -163,9 +160,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     // have an identifier or the "regex as identifier" trick would not work
     //_rootPropertyOwner->addPropertySubOwner(_virtualPropertyManager.get());
 
-    if (_windowWrapper) {
-        _rootPropertyOwner->addPropertySubOwner(_windowWrapper.get());
-    }
     _rootPropertyOwner->addPropertySubOwner(global::parallelPeer);
     _rootPropertyOwner->addPropertySubOwner(_console.get());
     _rootPropertyOwner->addPropertySubOwner(_dashboard.get());
@@ -228,12 +222,13 @@ bool OpenSpaceEngine::isCreated() {
     return _engine != nullptr;
 }
 
-void OpenSpaceEngine::create(int argc, char** argv,
-                             std::unique_ptr<WindowWrapper> windowWrapper,
+void OpenSpaceEngine::create(int argc, char** argv, WindowDelegate windowDelegate,
                              std::vector<std::string>& sgctArguments,
                              bool& requestClose, bool consoleLog)
 {
     ghoul_assert(!_engine, "OpenSpaceEngine was already created");
+
+    global::windowDelegate = windowDelegate;
 
     requestClose = false;
 
@@ -264,7 +259,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
 
     // Create other objects
     LDEBUG("Creating OpenSpaceEngine");
-    _engine = new OpenSpaceEngine(std::string(argv[0]), std::move(windowWrapper));
+    _engine = new OpenSpaceEngine(std::string(argv[0]));
 
     // Query modules for commandline arguments
     _engine->gatherCommandlineArguments();
@@ -501,7 +496,7 @@ void OpenSpaceEngine::initialize() {
     // clear the screen so the user doesn't have to see old buffer contents left on the
     // graphics card
     LDEBUG("Clearing all Windows");
-    _windowWrapper->clearAllWindows(glm::vec4(0.f, 0.f, 0.f, 1.f));
+    global::windowDelegate.clearAllWindows(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
     LDEBUG("Adding system components");
     // Detect and log OpenCL and OpenGL versions and available devices
@@ -614,11 +609,11 @@ void OpenSpaceEngine::scheduleLoadSingleAsset(std::string assetPath) {
 void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     LTRACE("OpenSpaceEngine::loadSingleAsset(begin)");
 
-    windowWrapper().setBarrier(false);
-    windowWrapper().setSynchronization(false);
+    global::windowDelegate.setBarrier(false);
+    global::windowDelegate.setSynchronization(false);
     defer {
-        windowWrapper().setSynchronization(true);
-        windowWrapper().setBarrier(true);
+        global::windowDelegate.setSynchronization(true);
+        global::windowDelegate.setBarrier(true);
     };
 
     if (assetPath.empty()) {
@@ -1174,14 +1169,14 @@ void OpenSpaceEngine::preSynchronization() {
     }
 
     if (_isFirstRenderingFirstFrame) {
-        _windowWrapper->setSynchronization(false);
+        global::windowDelegate.setSynchronization(false);
     }
 
-    bool master = _windowWrapper->isMaster();
+    bool master = global::windowDelegate.isMaster();
 
     _syncEngine->preSynchronization(SyncEngine::IsMaster(master));
     if (master) {
-        double dt = _windowWrapper->averageDeltaTime();
+        double dt = global::windowDelegate.averageDeltaTime();
         global::timeManager.preSynchronization(dt);
 
         using Iter = std::vector<std::string>::const_iterator;
@@ -1223,7 +1218,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         );
     }
 
-    bool master = _windowWrapper->isMaster();
+    bool master = global::windowDelegate.isMaster();
     _syncEngine->postSynchronization(SyncEngine::IsMaster(master));
 
     // This probably doesn't have to be done here every frame, but doing it earlier gives
@@ -1237,9 +1232,9 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 
     if (_shutdown.inShutdown) {
         if (_shutdown.timer <= 0.f) {
-            _windowWrapper->terminate();
+            global::windowDelegate.terminate();
         }
-        _shutdown.timer -= static_cast<float>(_windowWrapper->averageDeltaTime());
+        _shutdown.timer -= static_cast<float>(global::windowDelegate.averageDeltaTime());
     }
 
 
@@ -1298,7 +1293,10 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
     }
 
     const bool isGuiWindow =
-        _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
+        global::windowDelegate.hasGuiWindow() ?
+        global::windowDelegate.isGuiWindow() :
+        true;
+
     if (isGuiWindow) {
         _console->update();
     }
@@ -1324,7 +1322,9 @@ void OpenSpaceEngine::drawOverlays() {
     }
 
     const bool isGuiWindow =
-        _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
+        global::windowDelegate.hasGuiWindow() ?
+        global::windowDelegate.isGuiWindow() :
+        true;
 
     if (isGuiWindow) {
         global::renderEngine.renderOverlays(_shutdown);
@@ -1356,7 +1356,7 @@ void OpenSpaceEngine::postDraw() {
     }
 
     if (_isFirstRenderingFirstFrame) {
-        _windowWrapper->setSynchronization(true);
+        global::windowDelegate.setSynchronization(true);
         _isFirstRenderingFirstFrame = false;
     }
 
@@ -1634,11 +1634,6 @@ Dashboard& OpenSpaceEngine::dashboard() {
 LoadingScreen& OpenSpaceEngine::loadingScreen() {
     ghoul_assert(_loadingScreen, "Loading Screen must not be nullptr");
     return *_loadingScreen;
-}
-
-WindowWrapper& OpenSpaceEngine::windowWrapper() {
-    ghoul_assert(_windowWrapper, "Window Wrapper must not be nullptr");
-    return *_windowWrapper;
 }
 
 AssetManager& OpenSpaceEngine::assetManager() {

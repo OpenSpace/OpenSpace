@@ -676,13 +676,13 @@ void LuaConsole::update() {
     // The first frame is going to be finished in approx 10 us, which causes a floating
     // point overflow when computing dHeight
     constexpr double Epsilon = 1e-4;
-    const double frametime = std::max(OsEng.windowWrapper().deltaTime(), Epsilon);
+    const double frametime = std::max(global::windowDelegate.deltaTime(), Epsilon);
 
     // Update the current height.
     // The current height is the offset that is used to slide
     // the console in from the top.
-    const glm::ivec2 res = OsEng.windowWrapper().currentWindowResolution();
-    const glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();
+    const glm::ivec2 res = global::windowDelegate.currentWindowResolution();
+    const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
     const double dHeight = (_targetHeight - _currentHeight) *
         std::pow(0.98, 1.0 / (ConsoleOpenSpeed / dpiScaling.y * frametime));
 
@@ -706,9 +706,9 @@ void LuaConsole::render() {
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 
-    const glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();
+    const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
     const glm::ivec2 res =
-        glm::vec2(OsEng.windowWrapper().currentWindowResolution()) / dpiScaling;
+        glm::vec2(global::windowDelegate.currentWindowResolution()) / dpiScaling;
 
 
     // Render background

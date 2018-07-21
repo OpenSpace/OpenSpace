@@ -184,7 +184,7 @@ void GUI::initialize() {
     strcpy(iniFileBuffer, cachedFile.c_str());
 #endif
 
-    int nWindows = OsEng.windowWrapper().nWindows();
+    int nWindows = global::windowDelegate.nWindows();
     _contexts.resize(nWindows);
 
     for (int i = 0; i < nWindows; ++i) {
@@ -290,7 +290,7 @@ void GUI::initialize() {
 void GUI::deinitialize() {
     ImGui::Shutdown();
 
-    int nWindows = OsEng.windowWrapper().nWindows();
+    int nWindows = global::windowDelegate.nWindows();
     for (int i = 0; i < nWindows; ++i) {
         ImGui::DestroyContext(_contexts[i]);
     }
@@ -311,7 +311,7 @@ void GUI::initializeGL() {
     
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
-    int nWindows = OsEng.windowWrapper().nWindows();
+    int nWindows = global::windowDelegate.nWindows();
     {
         unsigned char* texData;
         glm::ivec2 texSize;
@@ -400,7 +400,7 @@ void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
                      const glm::vec2& dpiScaling, const glm::vec2& mousePos,
                      uint32_t mouseButtonsPressed)
 {
-    const int iWindow = OsEng.windowWrapper().currentWindowId();
+    const int iWindow = global::windowDelegate.currentWindowId();
     ImGui::SetCurrentContext(_contexts[iWindow]);
 
     ImGuiIO& io = ImGui::GetIO();
