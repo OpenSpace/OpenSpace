@@ -25,7 +25,7 @@
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/sgctwindowwrapper.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/util/keys.h>
 

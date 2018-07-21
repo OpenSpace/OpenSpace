@@ -50,7 +50,7 @@
 #endif // GHL_THROW_ON_ASSERTGHL_THROW_ON_ASSERT
 
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
@@ -122,7 +122,7 @@ int main(int argc, char** argv) {
         openspace::OpenSpaceEngine::create(
             argc,
             argv,
-            std::make_unique<openspace::WindowWrapper>(),
+            openspace::WindowDelegate(),
             args,
             close,
             consoleLog

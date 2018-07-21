@@ -25,8 +25,7 @@
 #include <openspace/rendering/luaconsole.h>
 
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/cachemanager.h>

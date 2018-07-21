@@ -38,7 +38,7 @@
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
 
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/dashboarditem.h>
@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
 
     std::vector<std::string> remainingArguments;
     bool unusedBool;
-    OpenSpaceEngine::create(argc, argv, nullptr, remainingArguments, unusedBool);
+    OpenSpaceEngine::create(argc, argv, WindowDelegate(), remainingArguments, unusedBool);
 
     ghoul::cmdparser::CommandlineParser commandlineParser(
         "OpenSpace TaskRunner",

@@ -27,7 +27,7 @@
 #include <openspace/openspace.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/mission/missionmanager.h>

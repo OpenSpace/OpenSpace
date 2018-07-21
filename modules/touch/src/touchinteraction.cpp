@@ -63,7 +63,8 @@
 #pragma warning (pop)
 #endif // WIN32
 
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
 
 namespace {

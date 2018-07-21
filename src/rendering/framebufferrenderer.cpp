@@ -25,7 +25,7 @@
 #include <openspace/rendering/framebufferrenderer.h>
 
 #include <openspace/engine/globals.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/performance/performancemeasurement.h>
 #include <openspace/rendering/deferredcaster.h>
 #include <openspace/rendering/deferredcastermanager.h>

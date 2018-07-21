@@ -24,7 +24,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/progressbar.h>
 #include <openspace/util/resourcesynchronization.h>
@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
 
     std::vector<std::string> unusedStringlist;
     bool unusedBool;
-    OpenSpaceEngine::create(argc, argv, nullptr, unusedStringlist, unusedBool);
+    OpenSpaceEngine::create(argc, argv, WindowDelegate(), unusedStringlist, unusedBool);
 
     TaskLoader taskLoader;
     std::vector<std::unique_ptr<Task>> tasks = taskLoader.tasksFromFile(
