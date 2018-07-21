@@ -30,10 +30,12 @@ namespace ghoul::fontrendering { class FontManager; }
 namespace openspace {
 
 struct Configuration;
+class DeferredcasterManager;
 class DownloadManager;
 class ModuleEngine;
 class NetworkEngine;
 class ParallelPeer;
+class RaycasterManager;
 class RenderEngine;
 class TimeManager;
 struct WindowDelegate;
@@ -51,10 +53,12 @@ namespace detail {
 
 ghoul::fontrendering::FontManager& gFontManager();
 Configuration& gConfiguration();
+DeferredcasterManager& gDeferredcasterManager();
 DownloadManager& gDownloadManager();
 ModuleEngine& gModuleEngine();
 NetworkEngine& gNetworkEngine();
 ParallelPeer& gParallelPeer();
+RaycasterManager& gRaycasterManager();
 RenderEngine& gRenderEngine();
 TimeManager& gTimeManager();
 WindowDelegate& gWindowDelegate();
@@ -70,10 +74,12 @@ namespace global {
 
 static ghoul::fontrendering::FontManager& fontManager = detail::gFontManager();
 static Configuration& configuration = detail::gConfiguration();
+static DeferredcasterManager& deferredcasterManager = detail::gDeferredcasterManager();
 static DownloadManager& downloadManager = detail::gDownloadManager();
 static ModuleEngine& moduleEngine = detail::gModuleEngine();
 static NetworkEngine& networkEngine = detail::gNetworkEngine();
 static ParallelPeer& parallelPeer = detail::gParallelPeer();
+static RaycasterManager& raycasterManager = detail::gRaycasterManager();
 static RenderEngine& renderEngine = detail::gRenderEngine();
 static TimeManager& timeManager = detail::gTimeManager();
 static WindowDelegate& windowDelegate = detail::gWindowDelegate();

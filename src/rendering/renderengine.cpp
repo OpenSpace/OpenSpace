@@ -326,8 +326,6 @@ void RenderEngine::initialize() {
         global::configuration.isSceneTranslationOnMasterDisabled;
     _disableMasterRendering = global::configuration.isRenderingOnMasterDisabled;
 
-    _raycasterManager = std::make_unique<RaycasterManager>();
-    _deferredcasterManager = std::make_unique<DeferredcasterManager>();
     _nAaSamples = global::windowDelegate.currentNumberOfAaSamples();
 
     LINFO(fmt::format("Setting renderer from string: {}", renderingMethod));
@@ -699,14 +697,6 @@ void RenderEngine::postDraw() {
 
 Scene* RenderEngine::scene() {
     return _scene;
-}
-
-RaycasterManager& RenderEngine::raycasterManager() {
-    return *_raycasterManager;
-}
-
-DeferredcasterManager& RenderEngine::deferredcasterManager() {
-    return *_deferredcasterManager;
 }
 
 void RenderEngine::setScene(Scene* scene) {

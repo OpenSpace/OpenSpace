@@ -167,14 +167,14 @@ void RenderableGalaxy::initializeGL() {
     _raycaster = std::make_unique<GalaxyRaycaster>(*_texture);
     _raycaster->initialize();
 
-    global::renderEngine.raycasterManager().attachRaycaster(*_raycaster.get());
+    global::raycasterManager.attachRaycaster(*_raycaster.get());
 
     auto onChange = [&](bool enabled) {
         if (enabled) {
-            global::renderEngine.raycasterManager().attachRaycaster(*_raycaster.get());
+            global::raycasterManager.attachRaycaster(*_raycaster.get());
         }
         else {
-            global::renderEngine.raycasterManager().detachRaycaster(*_raycaster.get());
+            global::raycasterManager.detachRaycaster(*_raycaster.get());
         }
     };
 
@@ -269,7 +269,7 @@ void RenderableGalaxy::initializeGL() {
 
 void RenderableGalaxy::deinitializeGL() {
     if (_raycaster) {
-        global::renderEngine.raycasterManager().detachRaycaster(*_raycaster.get());
+        global::raycasterManager.detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
 }

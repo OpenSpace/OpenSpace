@@ -230,8 +230,8 @@ void FramebufferRenderer::initialize() {
 
     ghoul::opengl::updateUniformLocations(*_resolveProgram, _uniformCache, UniformNames);
 
-    global::renderEngine.raycasterManager().addListener(*this);
-    global::renderEngine.deferredcasterManager().addListener(*this);
+    global::raycasterManager.addListener(*this);
+    global::deferredcasterManager.addListener(*this);
 }
 
 void FramebufferRenderer::deinitialize() {
@@ -255,8 +255,8 @@ void FramebufferRenderer::deinitialize() {
     glDeleteBuffers(1, &_vertexPositionBuffer);
     glDeleteVertexArrays(1, &_screenQuad);
 
-    global::renderEngine.raycasterManager().removeListener(*this);
-    global::renderEngine.deferredcasterManager().removeListener(*this);
+    global::raycasterManager.removeListener(*this);
+    global::deferredcasterManager.removeListener(*this);
 }
 
 void FramebufferRenderer::raycastersChanged(VolumeRaycaster&,
@@ -461,7 +461,8 @@ void FramebufferRenderer::updateRaycastData() {
     _insideRaycastPrograms.clear();
 
     const std::vector<VolumeRaycaster*>& raycasters =
-        global::renderEngine.raycasterManager().raycasters();
+        global::raycasterManager.raycasters();
+
     int nextId = 0;
     for (VolumeRaycaster* raycaster : raycasters) {
         RaycastData data = { nextId++, "Helper" };
@@ -530,7 +531,7 @@ void FramebufferRenderer::updateDeferredcastData() {
     _deferredcastPrograms.clear();
 
     const std::vector<Deferredcaster*>& deferredcasters =
-        global::renderEngine.deferredcasterManager().deferredcasters();
+        global::deferredcasterManager.deferredcasters();
     int nextId = 0;
     for (Deferredcaster* caster : deferredcasters) {
         DeferredcastData data = { nextId++, "HELPER" };

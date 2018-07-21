@@ -112,14 +112,14 @@ void RenderableToyVolume::initializeGL() {
     _raycaster = std::make_unique<ToyVolumeRaycaster>(_color);
     _raycaster->initialize();
 
-    global::renderEngine.raycasterManager().attachRaycaster(*_raycaster.get());
+    global::raycasterManager.attachRaycaster(*_raycaster.get());
 
     std::function<void(bool)> onChange = [&](bool enabled) {
         if (enabled) {
-            global::renderEngine.raycasterManager().attachRaycaster(*_raycaster.get());
+            global::raycasterManager.attachRaycaster(*_raycaster.get());
         }
         else {
-            global::renderEngine.raycasterManager().detachRaycaster(*_raycaster.get());
+            global::raycasterManager.detachRaycaster(*_raycaster.get());
         }
     };
 
@@ -135,7 +135,7 @@ void RenderableToyVolume::initializeGL() {
 
 void RenderableToyVolume::deinitializeGL() {
     if (_raycaster) {
-        global::renderEngine.raycasterManager().detachRaycaster(*_raycaster.get());
+        global::raycasterManager.detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
 }

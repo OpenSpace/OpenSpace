@@ -33,6 +33,8 @@
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/performance/performancemanager.h>
+#include <openspace/rendering/deferredcastermanager.h>
+#include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
@@ -54,6 +56,11 @@ Configuration& gConfiguration() {
     return g;
 }
 
+DeferredcasterManager& gDeferredcasterManager() {
+    static DeferredcasterManager g;
+    return g;
+}
+
 DownloadManager& gDownloadManager() {
     static DownloadManager g;
     return g;
@@ -71,6 +78,11 @@ NetworkEngine& gNetworkEngine() {
 
 ParallelPeer& gParallelPeer() {
     static ParallelPeer g;
+    return g;
+}
+
+RaycasterManager& gRaycasterManager() {
+    static RaycasterManager g;
     return g;
 }
 

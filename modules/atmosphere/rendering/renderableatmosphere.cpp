@@ -668,9 +668,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
 
 void RenderableAtmosphere::deinitialize() {
     if (_deferredcaster) {
-        global::renderEngine.deferredcasterManager().detachDeferredcaster(
-            *_deferredcaster
-        );
+        global::deferredcasterManager.detachDeferredcaster(*_deferredcaster);
         _deferredcaster = nullptr;
     }
 }
@@ -713,9 +711,7 @@ void RenderableAtmosphere::initializeGL() {
             _deferredcaster->initialize();
         }
 
-        global::renderEngine.deferredcasterManager().attachDeferredcaster(
-            *_deferredcaster
-        );
+        global::deferredcasterManager.attachDeferredcaster(*_deferredcaster);
     }
 
     return;

@@ -138,7 +138,7 @@ void ABufferRenderer::initialize() {
         LERRORC(e.component, e.message);
     }
 
-    global::renderEngine.raycasterManager().addListener(*this);
+    global::raycasterManager.addListener(*this);
 }
 
 void ABufferRenderer::deinitialize() {
@@ -153,7 +153,7 @@ void ABufferRenderer::deinitialize() {
     glDeleteBuffers(1, &_vertexPositionBuffer);
     glDeleteVertexArrays(1, &_screenQuad);
 
-    global::renderEngine.raycasterManager().removeListener(*this);
+    global::raycasterManager.removeListener(*this);
 }
 
 void ABufferRenderer::raycastersChanged(VolumeRaycaster&, IsAttached) {

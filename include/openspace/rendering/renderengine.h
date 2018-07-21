@@ -78,9 +78,6 @@ public:
 
     const Renderer& renderer() const;
     RendererImplementation rendererImplementation() const;
-    RaycasterManager& raycasterManager();
-    DeferredcasterManager& deferredcasterManager();
-
 
     void updateShaderPrograms();
     void updateFade();
@@ -167,11 +164,8 @@ private:
     void renderShutdownInformation(float timer, float fullTime);
     void renderDashboard();
 
-
     Camera* _camera = nullptr;
     Scene* _scene = nullptr;
-    std::unique_ptr<RaycasterManager> _raycasterManager;
-    std::unique_ptr<DeferredcasterManager> _deferredcasterManager;
 
     properties::BoolProperty _doPerformanceMeasurements;
 

@@ -353,13 +353,13 @@ void RenderableTimeVaryingVolume::initializeGL() {
     );
 
     _raycaster->initialize();
-    global::renderEngine.raycasterManager().attachRaycaster(*_raycaster.get());
+    global::raycasterManager.attachRaycaster(*_raycaster.get());
     onEnabledChange([&](bool enabled) {
         if (enabled) {
-            global::renderEngine.raycasterManager().attachRaycaster(*_raycaster.get());
+            global::raycasterManager.attachRaycaster(*_raycaster.get());
         }
         else {
-            global::renderEngine.raycasterManager().detachRaycaster(*_raycaster.get());
+            global::raycasterManager.detachRaycaster(*_raycaster.get());
         }
     });
 
@@ -544,7 +544,7 @@ bool RenderableTimeVaryingVolume::isReady() const {
 
 void RenderableTimeVaryingVolume::deinitializeGL() {
     if (_raycaster) {
-        global::renderEngine.raycasterManager().detachRaycaster(*_raycaster.get());
+        global::raycasterManager.detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
 }
