@@ -146,6 +146,24 @@ local Apollo15 = {
     }
 }
 
+local Apollo15Big = {
+    Identifier = "Apollo15Big",
+    Parent = Apollo15.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+           GeometryFile = models .. "/Apollo_Spacecraft.obj"
+        },
+        ColorTexture = models .. "/gray.png",
+        LightSources = LightSources
+    },
+    GUI = {
+        Name = "Apollo 15 Big",
+        Path = "/Solar System/Missions/Apollo 15"
+    }   
+}
+
 local Apollo15Main = {
     Identifier = "Apollo15Main",
     Parent = Apollo15.Identifier,
@@ -153,7 +171,8 @@ local Apollo15Main = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/Apollo_Spacecraft.obj"
+--            GeometryFile = models .. "/Apollo_Spacecraft.obj"
+            GeometryFile = models .. "/Apollo_CSM_shrunk_rotated.obj"
         },
         ColorTexture = models .. "/gray.png",
         LightSources = LightSources
@@ -189,6 +208,7 @@ local Apollo15Trail = {
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Apollo15,
+    Apollo15Big,
     Apollo15Main,
     Apollo15Trail
 })

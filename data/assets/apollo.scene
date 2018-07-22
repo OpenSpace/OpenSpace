@@ -36,7 +36,7 @@ local Keybindings = {
     	Key = "F5",
         Command =   "openspace.setPropertyValue('Scene.Moon.RenderableGlobe.Layers.ColorLayers.LRO_NAC_Apollo*.Enabled', false);" ..
                     "openspace.setPropertyValue('Scene.Moon.RenderableGlobe.Layers.HeightLayers.LRO_NAC_Apollo*.Enabled', false);" ..
-                    "openspace.setPropertyValueSingle('Scene.Moon.RenderableGlobe.Layers.HeightLayers.Apollo_15_Metric_Cam_180.Enabled', true);" ..
+                    "openspace.setPropertyValueSingle('Scene.Moon.RenderableGlobe.Layers.HeightLayers.LRO_NAC_Apollo15_DEM_180.Enabled', true);" ..
                     "openspace.setPropertyValueSingle('Scene.Moon.RenderableGlobe.Layers.ColorLayers.Apollo_15_LRO_NAC_Mosaic.Enabled', true); " ..
                     "openspace.setPropertyValueSingle('Scene.Moon.RenderableGlobe.Layers.ColorLayers.Apollo_15_LRO_NAC_Mosaic.Settings.Gamma', 1.2);" ..
                     "openspace.setPropertyValueSingle('Scene.Moon.RenderableGlobe.Layers.ColorLayers.Apollo_15_LRO_NAC_Mosaic.Settings.Multiplier', 2.0);" ..
@@ -92,8 +92,24 @@ local Keybindings = {
         Local = false
     },
     {
+        Key = "U",
+        Command = "openspace.time.setTime('1968-12-21T12:50:00.00')" ..
+                  "openspace.setPropertyValueSingle('Scene.Apollo15.Rotation.DestinationFrame', [[GALACTIC]]);",
+
+        Documentation = "Jump to time right before A8 liftoff",
+        Local = false
+    },
+    {
+        Key = "I",
+        Command =   "openspace.time.setTime('1971-07-30T02:22:00.00')" ..
+                    "openspace.setPropertyValueSingle('Scene.Apollo15.Rotation.DestinationFrame', [[A15_METRIC]]);",
+        Documentation = "Jump to time right before A8 liftoff",
+        Local = false
+    },
+    {
         Key = "O",
         Command = "openspace.time.setTime('1971-08-01T01:51:01.00');" ..
+                  "openspace.setPropertyValueSingle('Scene.Apollo15.Rotation.DestinationFrame', [[A15_METRIC]]);" ..
                   "openspace.setPropertyValueSingle('Scene.Moon.RenderableGlobe.Layers.ColorLayers.Apollo_15_Metric_Cam_Fix1.Settings.Gamma', 1.906);" ..
                   "openspace.setPropertyValueSingle('Scene.Moon.RenderableGlobe.Layers.ColorLayers.Apollo_15_Metric_Cam_Fix1.Settings.Multiplier', 1.87);",
         Documentation = "Jump to a specific time with lighting adjustments to compensate for shading",
@@ -102,15 +118,10 @@ local Keybindings = {
     {
         Key = "P",
         Command = "openspace.time.setTime('1971-08-01T05:38:29.00');" ..
+                  "openspace.setPropertyValueSingle('Scene.Apollo15.Rotation.DestinationFrame', [[A15_METRIC]]);" ..
                   "openspace.setPropertyValueSingle('Scene.Moon.RenderableGlobe.Layers.ColorLayers.Apollo_15_Metric_Cam_Fix1.Settings.Gamma', 2.535);" ..
                   "openspace.setPropertyValueSingle('Scene.Moon.RenderableGlobe.Layers.ColorLayers.Apollo_15_Metric_Cam_Fix1.Settings.Multiplier', 1.12);",
         Documentation = "Jump to a specific time with lighting adjustments to compensate for shading",
-        Local = false
-    },
-    {
-        Key = "I",
-        Command = "openspace.time.setTime('1968-12-21T12:50:00.00')",
-        Documentation = "Jump to time right before A8 liftoff",
         Local = false
     },
     {
@@ -228,6 +239,7 @@ asset.onInitialize(function ()
     openspace.setPropertyValueSingle('RenderEngine.Background Exposure', 5.0);
     openspace.setPropertyValueSingle('Scene.MilkyWay.renderable.Opacity', 0.11);
     openspace.setPropertyValueSingle('Scene.Earth.RenderableGlobe.Layers.ColorLayers.ESRI_VIIRS_Combo.Settings.Gamma', 1.85);
+    openspace.setPropertyValueSingle('Scene.Stars.renderable.ScaleFactor', 0.84);
 
     openspace.navigation.setCameraState({
         Focus = "Earth",
