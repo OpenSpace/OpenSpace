@@ -21,6 +21,21 @@ local LocalKernels = {
     kernels .. '/apollo8.bsp'
 }
 
+local LightSources = {
+    {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sunTransforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+    },
+    {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+    }
+}
+
+
 local Apollo_8_CSM = {
     Identifier = "Apollo8CSM",
     Parent = "Moon",
@@ -29,6 +44,7 @@ local Apollo_8_CSM = {
             Type = "SpiceTranslation",
             Target = "-908",
             Observer = "MOON",
+            Frame = "IAU_MOON",
             Kernels = LocalKernels
         }
     },
@@ -39,6 +55,7 @@ local Apollo_8_CSM = {
             GeometryFile = models .. "/Apollo_Spacecraft.obj"
         },
         ColorTexture = models .. "/gray.png",
+        LightSources = LightSources
 
         --ModelTransform = RotationMatrix
     },
@@ -73,12 +90,13 @@ local Apollo_8_Trail = {
             Type = "SpiceTranslation",
             Target = "-908",
             Observer = "MOON",
+            Frame = "IAU_MOON",            
             Kernels = LocalKernels
         },
         Color = { 0.70, 0.50, 0.20 },
         StartTime = "1968 DEC 21",
         EndTime = "1968 DEC 28",
-        SampleInterval = 2
+        SampleInterval = 30
     },
     GUI = {
         Name = "Apollo 8 Trail",

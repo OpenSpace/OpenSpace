@@ -6,6 +6,12 @@ asset.require('spice/base')
 asset.request('./trail')
 
 
+local textures = asset.syncedResource({
+    Name = "Moon Textures",
+    Type = "HttpSynchronization",
+    Identifier = "moon_textures",
+    Version = 1
+})
 
 local mapServiceConfigs = asset.localResource("map_service_configs")
 
@@ -91,6 +97,13 @@ local Moon = {
                     Name = "Lola Shade [Sweden]",
                     FilePath = mapServiceConfigs .. "/LiU/Lola_Shade.wms"
                 },
+                --local textures, these are mineral abundance maps
+                {
+                    Identifier = "Kaguya_LGM2011_FreeairGravity_Colorized_Global_mgal3m_20ppd",
+                    FilePath = textures .. "/Kaguya_LGM2011_FreeairGravity_Colorized_Global_mgal3m_20ppd.tif",
+                    Enabled = false,
+                    BlendMode = "Multiply",
+                }
             },
             HeightLayers = {
                 {
