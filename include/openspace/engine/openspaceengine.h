@@ -44,7 +44,6 @@ class AssetManager;
 class GUI;
 class LoadingScreen;
 class Scene;
-class SyncEngine;
 
 namespace interaction { struct JoystickInputStates; }
 namespace gui { class GUI; }
@@ -161,7 +160,6 @@ private:
 
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
-    std::unique_ptr<SyncEngine> _syncEngine;
     std::unique_ptr<LoadingScreen> _loadingScreen;
 
     struct {

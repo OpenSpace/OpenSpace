@@ -132,7 +132,6 @@ OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 
 OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     : _scene(nullptr)
-    , _syncEngine(std::make_unique<SyncEngine>(4096))
     , _loadingScreen(nullptr)
     , _versionInformation{
         properties::StringProperty(VersionInfo, OPENSPACE_VERSION_STRING_FULL),
@@ -186,8 +185,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
 
     SpiceManager::initialize();
     TransformationManager::initialize();
-
-    _syncEngine->addSyncable(&global::scriptEngine);
 }
 
 OpenSpaceEngine& OpenSpaceEngine::ref() {
@@ -474,10 +471,8 @@ void OpenSpaceEngine::destroy() {
     if (global::parallelPeer.status() != ParallelConnection::Status::Disconnected) {
         global::parallelPeer.disconnect();
     }
-
-    _engine->_syncEngine->removeSyncables(global::timeManager.getSyncables());
     if (_engine->_scene && _engine->_scene->camera()) {
-        _engine->_syncEngine->removeSyncables(_engine->_scene->camera()->getSyncables());
+        global::syncEngine.removeSyncables(_engine->_scene->camera()->getSyncables());
     }
 
     global::deinitializeGL();
@@ -627,9 +622,9 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
         return;
     }
     if (_scene) {
-        _syncEngine->removeSyncables(global::timeManager.getSyncables());
+        global::syncEngine.removeSyncables(global::timeManager.getSyncables());
         if (_scene && _scene->camera()) {
-            _syncEngine->removeSyncables(_scene->camera()->getSyncables());
+            global::syncEngine.removeSyncables(_scene->camera()->getSyncables());
         }
         global::renderEngine.setScene(nullptr);
         global::renderEngine.setCamera(nullptr);
@@ -736,9 +731,9 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     global::renderEngine.setGlobalBlackOutFactor(0.f);
     global::renderEngine.startFading(1, 3.f);
 
-    _syncEngine->addSyncables(global::timeManager.getSyncables());
+    global::syncEngine.addSyncables(global::timeManager.getSyncables());
     if (_scene && _scene->camera()) {
-        _syncEngine->addSyncables(_scene->camera()->getSyncables());
+        global::syncEngine.addSyncables(_scene->camera()->getSyncables());
     }
 
 #ifdef __APPLE__
@@ -1140,7 +1135,7 @@ void OpenSpaceEngine::preSynchronization() {
 
     bool master = global::windowDelegate.isMaster();
 
-    _syncEngine->preSynchronization(SyncEngine::IsMaster(master));
+    global::syncEngine.preSynchronization(SyncEngine::IsMaster(master));
     if (master) {
         double dt = global::windowDelegate.averageDeltaTime();
         global::timeManager.preSynchronization(dt);
@@ -1184,7 +1179,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     }
 
     bool master = global::windowDelegate.isMaster();
-    _syncEngine->postSynchronization(SyncEngine::IsMaster(master));
+    global::syncEngine.postSynchronization(SyncEngine::IsMaster(master));
 
     // This probably doesn't have to be done here every frame, but doing it earlier gives
     // weird results when using side_by_side stereo --- abock
@@ -1415,14 +1410,14 @@ void OpenSpaceEngine::setJoystickInputStates(interaction::JoystickInputStates& s
 }
 
 void OpenSpaceEngine::encode() {
-    _syncEngine->encodeSyncables();
+    global::syncEngine.encodeSyncables();
 
     global::networkEngine.publishStatusMessage();
     global::networkEngine.sendMessages();
 }
 
 void OpenSpaceEngine::decode() {
-    _syncEngine->decodeSyncables();
+    global::syncEngine.decodeSyncables();
 }
 
 void OpenSpaceEngine::externalControlCallback(const char* receivedChars, int size,

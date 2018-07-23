@@ -27,6 +27,7 @@
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/keybindingmanager.h>
@@ -113,6 +114,11 @@ std::vector<std::unique_ptr<ScreenSpaceRenderable>>& gScreenspaceRenderables() {
     return g;
 }
 
+SyncEngine& gSyncEngine() {
+    static SyncEngine g(4096);
+    return g;
+}
+
 TimeManager& gTimeManager() {
     static TimeManager g;
     return g;
@@ -180,6 +186,7 @@ void initialize() {
     global::rootPropertyOwner.addPropertySubOwner(global::luaConsole);
     global::rootPropertyOwner.addPropertySubOwner(global::dashboard);
 
+    global::syncEngine.addSyncable(&global::scriptEngine);
 }
 
 void initializeGL() {
@@ -190,6 +197,8 @@ void deinitialize() {
     for (std::unique_ptr<ScreenSpaceRenderable>& ssr : global::screenSpaceRenderables) {
         ssr->deinitialize();
     }
+
+    global::syncEngine.removeSyncables(global::timeManager.getSyncables());
 
     global::moduleEngine.deinitialize();
     global::luaConsole.deinitialize();
