@@ -26,14 +26,22 @@ asset.require('scene/solarsystem/model/mas/mas_mhd')
 -- Namespaced global lua state
 MasScene = {
     Options = {
-        TexIndex = 1
+        TexIndex = 1,
+        StepSize = 0.003,
+        TrailsEnabled = true
     },
     SunTextures = {
-        asset.require('../mas/bastille_day_sun_textures').TexturesPath .. "/br_photo_bas05_trans_20G_offset.png",
-        asset.require('../mas/bastille_day_sun_textures').TexturesPath .. "/br_photo_bas05_trans_100G_offset.png",
-        asset.require('../mas/bastille_day_sun_textures').TexturesPath .. "/br_photo_bas05_trans_1000G_offset.png",
-        asset.require('../mas/bastille_day_sun_textures').TexturesPath .. "/black.png",
-        asset.require('./scene/solarsystem/sun/sun_textures').TexturesPath .. "/sun.jpg",
+        -- asset.require('../mas/bastille_day_sun_textures').TexturesPath .. "/br_photo_bas05_trans_20G_offset.png",
+        -- asset.require('../mas/bastille_day_sun_textures').TexturesPath .. "/br_photo_bas05_trans_100G_offset.png",
+        -- asset.require('../mas/bastille_day_sun_textures').TexturesPath .. "/br_photo_bas05_trans_1000G_offset.png",
+    asset.require('./scene/solarsystem/sun/sun_textures').TexturesPath .. "/sun.jpg",        
+    asset.require('../mas/bastille_day_sun_textures').TexturesPath .. "/black.png",
+    '../../data/mas/br_bas05_20G_inv_redblue.png',           
+    '../../data/mas/br_bas05_100G_inv_redblue.png', 
+    '../../data/mas/br_bas05_1000G_inv_redblue.png',
+        
+          
+        
     }
 }
 
@@ -47,14 +55,23 @@ end
 
 local setup = function ()
     return
-        "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.aBlendingEnabled', false);" ..
-        "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.Flow.particleSize', 7);" ..
-        "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.Flow.particleSpacing', 59);" ..
-        "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.Flow.speed', 19);" ..
-        "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.Color.uniform', {0.575, 0, 0.75, 1});" ..
-        "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.Flow.color', {1, 0, 0.65, 1});" ..
+
+        -- DISABLES MAS-VOLUME TEMPERATURE AND SET 'NORMAL' SUN TEXTURE  
+        "openspace.setPropertyValueSingle('Scene.Mas_MHD_temperature.renderable.Enabled', false);" ..
         "openspace.setPropertyValueSingle('Scene.Sun.renderable.ColorTexture', MasScene.SunTextures[1]);" ..
-        "openspace.setPropertyValueSingle('Scene.Sun.renderable.Enabled', true);"
+        "openspace.setPropertyValueSingle('Scene.Sun.renderable.Enabled', true);" ..
+
+        -- DISABLES MAS FIELDLIENS && FLOW, SETS COLOR AND ALPHA
+        "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.Enabled', false);" ..
+        "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.flowEnabled', false);" ..
+        "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.Color.uniform', {0, 0.725, 0.75, 0.6});" ..
+
+        -- DISABLES ENLIL FIELDLIES FLOW
+        "openspace.setPropertyValue('Scene.FL_ENLIL_slice_eqPlane_011AU_1.renderable.flowEnabled', false)" ..
+        "openspace.setPropertyValue('Scene.FL_ENLIL_slice_eqPlane_011AU_2.renderable.flowEnabled', false)" ..
+        "openspace.setPropertyValue('Scene.FL_ENLIL_slice_lat4_011AU_1.renderable.flowEnabled', false)" ..
+        "openspace.setPropertyValue('Scene.FL_ENLIL_slice_lat4_011AU_2.renderable.flowEnabled', false)"
+
 end
 
 local Keybindings = {
@@ -72,26 +89,35 @@ local Keybindings = {
     },
     {
         Key = "F7",
-        Command = "openspace.time.setTime('2012 JUL 01 00:07:00.000');",
-        Documentation = "Jumps to first of the Enlil-fieldline timesteps",
+        Command = "openspace.time.setTime('2015-07-14T08:00:00.00');",
+        Documentation = "Go to new horizons time",
         Local = true
     },
     {
         Key = "F8",
-        Command = propertyHelper.invert('Scene.SunGlare.renderable.Enabled'),
-        Documentation = "Toggle sun glare",
+        Command = [[
+            local now = openspace.time.currentWallTime()
+            openspace.time.setTime(openspace.time.advancedTime(now, "-1d"))
+        ]],
+        Documentation = "Go to yesterday",
         Local = false
     },
     {
         Key = "F9",
-        Command = propertyHelper.invert('Scene.Sun.renderable.Enabled'),
-        Documentation = "Toggle sun",
-        Local = false
+        Command = "openspace.time.setTime('2012 JUL 01 00:07:00.000');",
+        Documentation = "Go to beginning of ENLIL-fieldlines timestep",
+        Local = true
     },
     {
         Key = "F10",
         Command = setup(),
         Documentation = "Setup scene property values after initialization",
+        Local = false
+    },
+    {
+        Key = "F11",
+        Command = propertyHelper.invert('Scene.Sun.renderable.Enabled'),
+        Documentation = "Toggle sun",
         Local = false
     },
     {
@@ -130,7 +156,7 @@ local Keybindings = {
         Local = true
     },
     {
-        Key = "s",
+        Key = "a",
         Command = propertyHelper.invert('Scene.Earth.RenderableGlobe.Layers.NightLayers.Earth_at_Night_2012.Enabled') ..
                   propertyHelper.invert('Scene.Earth.RenderableGlobe.PerformShading') ..
                   propertyHelper.invert('Scene.Earth.RenderableGlobe.Atmosphere') ..
@@ -146,50 +172,190 @@ local Keybindings = {
                   propertyHelper.invert('Scene.EarthAtmosphere.renderable.Enabled') ..
                   propertyHelper.invert('Scene.MarsAtmosphere.renderable.Enabled') ..
                   propertyHelper.invert('Scene.Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled') ..
-                  propertyHelper.invert('Scene.Moon.RenderableGlobe.Enabled') ..
-                  propertyHelper.invert('Scene.Sun.renderable.Enabled'),
+                  propertyHelper.invert('Scene.Moon.RenderableGlobe.Enabled'),
         Documentation = "Toogles background and shading mode on the Earth and Mars alongside visibility of the Moon and the Sun",
         Local = false
     },
     {
         Key = "h",
-        Command = "openspace.setPropertyValue('Scene.*Trail.renderable.Enabled', false)",
-        Documentation = "Disables visibility of the trails",
+        Command = [[
+            if (MasScene.Options.TrailsEnabled == nil) then 
+                MasScene.Options.TrailsEnabled = true 
+            end;
+
+            if (MasScene.Options.TrailsEnabled == true) then
+                MasScene.Options.TrailsEnabled = false
+            else
+                MasScene.Options.TrailsEnabled = true
+            end
+
+            openspace.setPropertyValue('Scene.*Trail.renderable.Enabled', MasScene.Options.TrailsEnabled)
+        ]],
+        Documentation = "Toggles visibility of the trails",
         Local = false
     },
+    {
+        Key = "s",
+        Command = propertyHelper.invert('Scene.EarthAtmosphere.renderable.Enabled') ..
+                  propertyHelper.invert('Scene.MarsAtmosphere.renderable.Enabled'),
+        Documentation = "Toggle Earth and Mars atmosphere",
+        Local = false
+    },
+    {
+        Key = "o",
+        Command = [[
+            if (MasScene.Options.StepSize == nil) then 
+                MasScene.Options.StepSize = 0.02 
+            end; 
+
+            MasScene.Options.StepSize = MasScene.Options.StepSize + 0.001
+
+            openspace.setPropertyValueSingle('Scene.Mas_MHD_rho.renderable.stepSize', MasScene.Options.StepSize);
+        ]],
+        Documentation = "Increment step size for volume",
+        Local = false
+    },
+    {
+        Key = "l",
+        Command = [[
+            if (MasScene.Options.StepSize == nil) then 
+                MasScene.Options.StepSize = 0.02 
+            end; 
+
+            MasScene.Options.StepSize = MasScene.Options.StepSize - 0.001
+            
+            if (MasScene.Options.StepSize <= 0.001) then
+                MasScene.Options.StepSize = 0.001
+            end;
+
+            openspace.setPropertyValueSingle('Scene.Mas_MHD_rho.renderable.stepSize', MasScene.Options.StepSize);
+        ]],
+        Documentation = "Decrement step size for volume",
+        Local = false
+    },
+    {
+        Key = "Shift+F1",
+        Command = propertyHelper.invert("RenderEngine.PerformanceMeasurements"),
+        Documentation = "Toogles performance measurements that shows rendering time informations.",
+        Local = true
+    },
+    {
+        Key = "Shift+s",
+        Command = [[
+            openspace.time.setTime('2000 JUL 14 08:33:37.100')
+            openspace.setPropertyValue('NavigationHandler.Origin', 'Sun')
+
+            openspace.setPropertyValue('Scene.EarthAtmosphere.renderable.Enabled', false)
+            openspace.setPropertyValue('Scene.MarsAtmosphere.renderable.Enabled', false)
+            openspace.setPropertyValue('Scene.Earth.RenderableGlobe.PerformShading', false)
+            openspace.setPropertyValue('Scene.Earth.RenderableGlobe.Atmosphere', false)
+            openspace.setPropertyValue('Scene.MarsAtmosphere.renderable.Enabled', false)
+        ]],
+        Documentation = "Sets the focus of the camera on 'Sun'",
+        Local = false
+    },
+    {
+        Key = "Shift+m",
+        Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'Mars')",
+        Documentation = "Sets the focus of the camera on 'Mars'",
+        Local = false
+    },
+    {
+        Key = "Shift+e",
+        Command = [[
+            local now = openspace.time.currentWallTime()
+            openspace.time.setTime(openspace.time.advancedTime(now, "-1d"))
+
+            openspace.setPropertyValue('NavigationHandler.Origin', 'Earth')
+
+            openspace.setPropertyValue('Scene.EarthAtmosphere.renderable.Enabled', true)
+            openspace.setPropertyValue('Scene.MarsAtmosphere.renderable.Enabled', true)
+            openspace.setPropertyValue('Scene.Earth.RenderableGlobe.PerformShading', true)
+            openspace.setPropertyValue('Scene.Earth.RenderableGlobe.Atmosphere', true)
+        ]],
+        Documentation = "Sets the focus of the camera on 'Earth'",
+        Local = false
+    },
+    {
+        Key = "Shift+p",
+        Command = [[
+            if (openspace.time.currentTime() > 504899022) then
+                openspace.time.setTime('2015-07-14T08:00:00.00');
+            end
+
+            openspace.setPropertyValue('NavigationHandler.Origin', 'Pluto')
+        ]],
+        Documentation = "Sets the focus of the camera on 'Pluto'",
+        Local = false
+    },
+    {
+        Key = "Shift+n",
+        Command = [[
+            if (openspace.time.currentTime() > 504899022) then
+                openspace.time.setTime('2015-07-14T08:00:00.00');
+            end
+
+            openspace.setPropertyValue('NavigationHandler.Origin', 'NewHorizons')
+        ]],
+        Documentation = "Sets the focus of the camera on 'NewHorizons'",
+        Local = false
+    },
+    {
+        Key = "b",
+        Command = propertyHelper.invert('Scene.Mars.RenderableGlobe.Layers.ColorLayers.West_Candor.Enabled'),
+        Documentation = "Toggle the HiRISE image for the Mars area: West Candor",
+        Local = false
+    },
+    {
+        Key = "r",
+        Command = propertyHelper.invert('Scene.FL_MAS.renderable.Enabled'),
+        Documentation = "Toggle the MAS fieldlines",
+        Local = false
+    },    
 }
 
 -- FIELDLINES --
 
 -- We need to specify paths to the prepared fieldline files before requesting the BATSRUS, ENLIL, and PFSS fieldline assets:
 -- local FieldLineBasePath = "E:/FieldlineBinaries/"
--- ENLILPaths = {
---     EqPlane011AU1 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_eq_plane_1/",
---     EqPlane011AU2 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_eq_plane_2/",
---     Lat4011AU1 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_lat4_1/",
---     Lat4011AU2 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_lat4_2/",
---     Earth = FieldLineBasePath .. "enlil/july2012/downsampled40/earth/",
---     StereoA = FieldLineBasePath .. "enlil/july2012/downsampled40/stereoa/"
--- }
--- asset.require('./fieldlines/enlil')
+local FieldLineBasePath = asset.localResource('../../../FieldlineBinaries/')
+ENLILPaths = {
+    EqPlane011AU1 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_eq_plane_1/",
+    EqPlane011AU2 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_eq_plane_2/",
+    Lat4011AU1 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_lat4_1/",
+    Lat4011AU2 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_lat4_2/",
+    -- Earth = FieldLineBasePath .. "enlil/july2012/downsampled40/earth/",
+    -- StereoA = FieldLineBasePath .. "enlil/july2012/downsampled40/stereoa/"
+}
+asset.require('./fieldlines/enlil')
 asset.require('./fieldlines/mas')
 
 asset.onInitialize(function ()
     -- openspace.time.setTime("2017 JUN 01 00:00:00")
     -- openspace.time.setTime("2000 JUL 14 08:33:37.100")
-    openspace.time.setTime("2015-07-14T08:00:00.00")    
+    -- openspace.time.setTime("2015-07-14T08:00:00.00")    
 
+    local now = openspace.time.currentWallTime()
+    -- Jump back one day to show a complete planet
+    openspace.time.setTime(openspace.time.advancedTime(now, "-1d"))
 
-    -- openspace.time.setTime(openspace.time.currentWallTime())
     sceneHelper.bindKeys(Keybindings)
 
     openspace.setPropertyValueSingle('Scene.SunGlare.renderable.Enabled', false);
 
     openspace.setDefaultGuiSorting()
 
+    openspace.setPropertyValue('Scene.Mas_MHD_temperature.renderable.Enabled', false);
+
+    openspace.globebrowsing.loadWMSServersFromFile(
+        openspace.absPath("${DATA}/globebrowsing_servers.lua")
+    )
+
     openspace.markInterestingNodes({
-        "Earth", "Sun", "Moon", "FL_ENLIL_earth", "FL_MAS", "Mas_MHD"
+        "Earth", "Sun", "Moon", "Mars", "FL_ENLIL_earth", "FL_MAS", "Mas_MHD"
     })
+
+    setup()
 
     openspace.addVirtualProperty(
         "BoolProperty",
@@ -202,7 +368,7 @@ asset.onInitialize(function ()
     )
 
     openspace.navigation.setCameraState({
-        Focus = sunAsset.Sun.Identifier,
+        Focus = "Mars",
         Position = {-92160702466.762482, 188131804731.671265, -27180258494.341042},
         Rotation = {0.655461, -0.629141, -0.410504, -0.077712},
     })
@@ -213,7 +379,7 @@ asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
 
     openspace.removeInterestingNodes({
-        "Earth", "Sun", "Moon", "FL_ENLIL_earth", "FL_MAS", "Mas_MHD"
+        "Earth", "Sun", "Moon", "Mars", "FL_ENLIL_earth", "FL_MAS", "Mas_MHD"
     })
 
     openspace.removeVirtualProperty("*Trail.renderable.Enabled")

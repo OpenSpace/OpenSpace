@@ -14,7 +14,8 @@ local Mas_MHD_rho = {
             StepSize = 0.003,
             Opacity = 0.3,
             TransferFunction = asset.localResource("transferfunctions/mas_mhd_r_squared.txt"),
-            SourceDirectory = "E:/MAS_Bastille/MHD_rawvolumes/density_15_06_2018/",
+            -- SourceDirectory = "H:/MAS_Bastille/MHD_rawvolumes/density_15_06_2018/",
+            SourceDirectory = asset.localResource("../../../../../../../MAS_Bastille/MHD_rawvolumes/density_15_06_2018/"),
             LowerValueBound = 0,
             UpperValueBound = 1,
             GridType = "Spherical",
@@ -31,7 +32,7 @@ local Mas_MHD_rho = {
                 Type = "StaticScale",
                 Scale = sunRadius
             }
-        },
+    },
         GUI = {
             Path = "/Solar System/Mas",
             Hidden = false
@@ -43,10 +44,11 @@ local Mas_MHD_temperature = {
     Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTimeVaryingVolume",
-        StepSize = 0.004,
+        StepSize = 0.01,
         Opacity = 0.3,
         TransferFunction = asset.localResource("transferfunctions/mas_mhd_temperature.txt"),
-        SourceDirectory = "E:/MAS_Bastille/MHD_rawvolumes/T_14_06_2018/",
+        -- SourceDirectory = "H:/MAS_Bastille/MHD_rawvolumes/T_14_06_2018/",
+        SourceDirectory = asset.localResource("../../../../../../../MAS_Bastille/MHD_rawvolumes/T_14_06_2018/"),
         LowerValueBound = 0,
         UpperValueBound = 1,
         GridType = "Spherical",

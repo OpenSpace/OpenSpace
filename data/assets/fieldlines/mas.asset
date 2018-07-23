@@ -25,7 +25,10 @@ local MAS = {
     Parent = transforms.HNMReferenceFrame.Identifier,
     Renderable = {
         Type = "RenderableFieldlinesSequence",
-        SourceFolder = "E:/MAS_Bastille/fieldlines/osfls",
+        -- SourceFolder = "H:/MAS_Bastille/fieldlines/osfls",
+        SourceFolder = asset.localResource('../../../../MAS_Bastille/fieldlines/osfls'),
+        FlowEnabled = false,
+        AlphaBlendlingEnabled = false,
         InputFileType = "osfls",
         -- StartStateOffset = 309,
         -- MaxNumStates = 1,
@@ -33,7 +36,7 @@ local MAS = {
             masDensityColorTable,
             masVelocityColorTable,
         },
-        DefaultColor = { 0.8, 0.8, 0.8, 0.5 },
+        -- DefaultColor = { 0.8, 0.8, 0.8, 0.5 },
         ColorTableMinMax = {
             { 0, 1000000 },
             { 100, 2000 }
@@ -43,6 +46,9 @@ local MAS = {
         SecondsBefore = 50*365*24*60*60, -- 50 years before
         SecondsAfter = 50*365*24*60*60, -- 50 years after
         SimulationModel = "mas",
+        Color = {
+            Uniform = {0, 0.725, 0.75, 1}
+        }
     },
     GUI = {
         Name = "Fieldlines MAS"
@@ -53,10 +59,21 @@ local MAS = {
             Target = "SUN",
             Observer = "SUN"
         },
+        -- Rotation = {
+        --     Type = "SpiceRotation",
+        --     SourceFrame = "GALACTIC",
+        --     DestinationFrame = "ECLIPTIC"
+        -- },
+        -- Rotation = {
+        --     Type = "StaticRotation",
+        --     Rotation = {
+        --         180, 0, 180
+        --     }
+        -- },
         Scale = {
             Type = "StaticScale",
             Scale = sunRadius
-        }
+        },
     }
 } 
 
@@ -68,7 +85,7 @@ local MAS = {
 --         Type = "RenderableFieldlinesSequence",
 --         -- TracingMethod = "PreTracedBinary",
 --         -- SourceFolder = "C:/Users/CCMC/data/fieldlines_json/mas_multiple_timesteps/JSON/",
---         SourceFolder = "E:/MAS_Bastille/fieldlines/JSON_renamed/",
+--         SourceFolder = "H:/MAS_Bastille/fieldlines/JSON_renamed/",
 --         InputFileType = "json",
 --         -- StartStateOffset = 309,
 --         -- MaxNumStates = 1,
