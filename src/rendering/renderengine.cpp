@@ -231,7 +231,6 @@ RenderEngine::RenderEngine()
     , _hdrExposure(HDRExposureInfo, 0.4f, 0.01f, 10.0f)
     , _hdrBackground(BackgroundExposureInfo, 2.8f, 0.01f, 10.0f)
     , _gamma(GammaInfo, 2.2f, 0.01f, 10.0f)
-    , _screenSpaceOwner({ "ScreenSpace" })
 {
     _doPerformanceMeasurements.onChange([this](){
         global::performanceManager.setEnabled(_doPerformanceMeasurements);
@@ -405,6 +404,7 @@ void RenderEngine::deinitializeGL() {
     for (std::unique_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
         ssr->deinitializeGL();
     }
+
     _renderer = nullptr;
 }
 
@@ -923,7 +923,7 @@ void RenderEngine::addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderabl
     s->initialize();
     s->initializeGL();
 
-    _screenSpaceOwner.addPropertySubOwner(s.get());
+    global::screenSpaceRootPropertyOwner.addPropertySubOwner(s.get());
 
     _screenSpaceRenderables.push_back(std::move(s));
 }
@@ -937,7 +937,7 @@ void RenderEngine::removeScreenSpaceRenderable(ScreenSpaceRenderable* s) {
 
     if (it != _screenSpaceRenderables.end()) {
         s->deinitialize();
-        _screenSpaceOwner.removePropertySubOwner(s);
+        global::screenSpaceRootPropertyOwner.removePropertySubOwner(s);
 
         _screenSpaceRenderables.erase(it);
     }
@@ -1206,10 +1206,6 @@ void RenderEngine::renderScreenLog() {
         );
         ++nr;
     }
-}
-
-properties::PropertyOwner& RenderEngine::screenSpaceOwner() {
-    return _screenSpaceOwner;
 }
 
 } // namespace openspace

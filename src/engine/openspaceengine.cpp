@@ -147,7 +147,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     global::rootPropertyOwner.addPropertySubOwner(global::timeManager);
 
     global::rootPropertyOwner.addPropertySubOwner(global::renderEngine);
-    global::rootPropertyOwner.addPropertySubOwner(global::renderEngine.screenSpaceOwner());
+    global::rootPropertyOwner.addPropertySubOwner(global::screenSpaceRootPropertyOwner);
 
     global::rootPropertyOwner.addPropertySubOwner(global::parallelPeer);
     global::rootPropertyOwner.addPropertySubOwner(global::luaConsole);
@@ -600,12 +600,9 @@ void OpenSpaceEngine::initialize() {
         global::configuration.asset = commandlineArgumentPlaceholders.sceneName;
     }
 
-    // Initialize the NavigationHandler
     global::navigationHandler.initialize();
 
-    // Load a light and a monospaced font
     loadFonts();
-
 
     global::renderEngine.initialize();
     _loadingScreen = std::make_unique<LoadingScreen>(

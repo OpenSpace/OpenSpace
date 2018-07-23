@@ -75,6 +75,7 @@ interaction::KeybindingManager& gKeybindingManager();
 interaction::NavigationHandler& gNavigationHandler();
 performance::PerformanceManager& gPerformanceManager();
 properties::PropertyOwner& gRootPropertyOwner();
+properties::PropertyOwner& gScreenSpaceRootPropertyOwner();
 scripting::ScriptEngine& gScriptEngine();
 scripting::ScriptScheduler& gScriptScheduler();
 
@@ -99,6 +100,8 @@ static interaction::NavigationHandler& navigationHandler = detail::gNavigationHa
 static performance::PerformanceManager& performanceManager =
     detail::gPerformanceManager();
 static properties::PropertyOwner& rootPropertyOwner = detail::gRootPropertyOwner();
+static properties::PropertyOwner& screenSpaceRootPropertyOwner =
+    detail::gScreenSpaceRootPropertyOwner();
 static scripting::ScriptEngine& scriptEngine = detail::gScriptEngine();
 static scripting::ScriptScheduler& scriptScheduler = detail::gScriptScheduler();
 

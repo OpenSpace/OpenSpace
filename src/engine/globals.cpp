@@ -140,6 +140,11 @@ properties::PropertyOwner& gRootPropertyOwner() {
     return g;
 }
 
+properties::PropertyOwner& gScreenSpaceRootPropertyOwner() {
+    static properties::PropertyOwner g({ "ScreenSpace" });
+    return g;
+}
+
 scripting::ScriptEngine& gScriptEngine() {
     static scripting::ScriptEngine g;
     return g;

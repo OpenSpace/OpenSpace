@@ -73,7 +73,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
             gui._screenSpaceProperty.setSource(
                 []() {
-                    return global::renderEngine.screenSpaceOwner().propertySubOwners();
+                    return global::screenSpaceRootPropertyOwner.propertySubOwners();
                 }
             );
 

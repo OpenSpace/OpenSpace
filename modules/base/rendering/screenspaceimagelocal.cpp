@@ -104,6 +104,12 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
     }
 }
 
+bool ScreenSpaceImageLocal::deinitializeGL() {
+    _texture = nullptr;
+
+    return ScreenSpaceRenderable::deinitializeGL();
+}
+
 void ScreenSpaceImageLocal::update() {
     if (_textureIsDirty && !_texturePath.value().empty()) {
         std::unique_ptr<ghoul::opengl::Texture> texture =

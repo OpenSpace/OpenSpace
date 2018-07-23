@@ -152,8 +152,6 @@ public:
     glm::ivec2 renderingResolution() const;
     glm::ivec2 fontResolution() const;
 
-    properties::PropertyOwner& screenSpaceOwner();
-
 private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
     RendererImplementation rendererFromString(const std::string& renderingMethod) const;
@@ -199,7 +197,6 @@ private:
     uint64_t _frameNumber = 0;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
-    properties::PropertyOwner _screenSpaceOwner;
     std::vector<std::unique_ptr<ScreenSpaceRenderable>> _screenSpaceRenderables;
 
     std::shared_ptr<ghoul::fontrendering::Font> _fontBig;

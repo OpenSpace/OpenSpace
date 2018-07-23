@@ -110,6 +110,12 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
 
 ScreenSpaceImageOnline::~ScreenSpaceImageOnline() {} // NOLINT
 
+bool ScreenSpaceImageOnline::deinitializeGL() {
+    _texture = nullptr;
+
+    return ScreenSpaceRenderable::deinitializeGL();
+}
+
 void ScreenSpaceImageOnline::update() {
     if (_textureIsDirty) {
         if (!_imageFuture.valid()) {
