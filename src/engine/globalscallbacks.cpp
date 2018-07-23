@@ -22,51 +22,78 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/iswa/iswamodule.h>
-
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/util/factorymanager.h>
-
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
-
-#include <openspace/engine/openspaceengine.h>
-
 #include <openspace/engine/globalscallbacks.h>
 
-#include <modules/iswa/rendering/textureplane.h>
-#include <modules/iswa/rendering/dataplane.h>
-#include <modules/iswa/rendering/kameleonplane.h>
-#include <modules/iswa/rendering/datasphere.h>
-#include <modules/iswa/rendering/screenspacecygnet.h>
+namespace openspace::global::detail {
 
-#include <modules/iswa/util/iswamanager.h>
-#include <openspace/scripting/lualibrary.h>
-
-namespace openspace {
-
-IswaModule::IswaModule() : OpenSpaceModule(Name) {
-    global::callback::initialize.push_back([]() { IswaManager::initialize(); });
+std::vector<std::function<void()>>& gInitialize() {
+    static std::vector<std::function<void()>> g;
+    return g;
 }
 
-void IswaModule::internalInitialize(const ghoul::Dictionary&) {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-
-    fRenderable->registerClass<TexturePlane>("TexturePlane");
-    fRenderable->registerClass<DataPlane>("DataPlane");
-    fRenderable->registerClass<KameleonPlane>("KameleonPlane");
-    fRenderable->registerClass<DataSphere>("DataSphere");
-
-    auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ghoul_assert(fScreenSpaceRenderable, "No fScreenSpaceRenderable factory existed");
-
-    fScreenSpaceRenderable->registerClass<ScreenSpaceCygnet>("ScreenSpaceCygnet");
+std::vector<std::function<void()>>& gDeinitialize() {
+    static std::vector<std::function<void()>> g;
+    return g;
 }
 
-scripting::LuaLibrary IswaModule::luaLibrary() const {
-    return IswaManager::luaLibrary();
+std::vector<std::function<void()>>& gInitializeGL() {
+    static std::vector<std::function<void()>> g;
+    return g;
 }
 
-} // namespace openspace
+std::vector<std::function<void()>>& gDeinitializeGL() {
+    static std::vector<std::function<void()>> g;
+    return g;
+}
+
+std::vector<std::function<void()>>& gPreSync() {
+    static std::vector<std::function<void()>> g;
+    return g;
+}
+
+std::vector<std::function<void()>>& gPostSyncPreDraw() {
+    static std::vector<std::function<void()>> g;
+    return g;
+}
+
+std::vector<std::function<void()>>& gRender() {
+    static std::vector<std::function<void()>> g;
+    return g;
+}
+
+std::vector<std::function<void()>>& gDraw2D() {
+    static std::vector<std::function<void()>> g;
+    return g;
+}
+
+std::vector<std::function<void()>>& gPostDraw() {
+    static std::vector<std::function<void()>> g;
+    return g;
+}
+
+std::vector<std::function<bool(Key, KeyModifier, KeyAction)>>& gKeyboard() {
+    static std::vector<std::function<bool(Key, KeyModifier, KeyAction)>> g;
+    return g;
+}
+
+std::vector<std::function<bool(unsigned int, KeyModifier)>>& gCharacter() {
+    static std::vector<std::function<bool(unsigned int, KeyModifier)>> g;
+    return g;
+}
+
+std::vector<std::function<bool(MouseButton, MouseAction)>>& gMouseButton() {
+    static std::vector<std::function<bool(MouseButton, MouseAction)>> g;
+    return g;
+}
+
+std::vector<std::function<void(double, double)>>& gMousePosition() {
+    static std::vector<std::function<void(double, double)>> g;
+    return g;
+}
+
+std::vector<std::function<bool(double, double)>>& gMouseScrollWheel() {
+    static std::vector<std::function<bool(double, double)>> g;
+    return g;
+}
+
+} // namespace openspace::global::callback

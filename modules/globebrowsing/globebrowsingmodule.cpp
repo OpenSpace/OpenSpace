@@ -38,6 +38,7 @@
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbylevel.h>
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbyindex.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
@@ -143,37 +144,28 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
     using namespace globebrowsing;
 
     // Initialize
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::Initialize,
-        [&]() {
-            _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>();
-            addPropertySubOwner(*_tileCache);
+    global::callback::initialize.push_back([&]() {
+        _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>();
+        addPropertySubOwner(*_tileCache);
+
 #ifdef GLOBEBROWSING_USE_GDAL
-            // Convert from MB to Bytes
-            GdalWrapper::create(
-                16ULL * 1024ULL * 1024ULL, // 16 MB
-                static_cast<size_t>(CpuCap.installedMainMemory() * 0.25 * 1024 * 1024)
-            );
-            addPropertySubOwner(GdalWrapper::ref());
+        // Convert from MB to Bytes
+        GdalWrapper::create(
+            16ULL * 1024ULL * 1024ULL, // 16 MB
+            static_cast<size_t>(CpuCap.installedMainMemory() * 0.25 * 1024 * 1024)
+        );
+        addPropertySubOwner(GdalWrapper::ref());
 #endif // GLOBEBROWSING_USE_GDAL
-        }
-    );
+    });
+
 
     // Render
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::Render,
-        [&]() { _tileCache->update(); }
-    );
+    global::callback::render.push_back([&]() { _tileCache->update(); });
 
     // Deinitialize
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::Deinitialize,
-        [&]() {
 #ifdef GLOBEBROWSING_USE_GDAL
-            GdalWrapper::ref().destroy();
+    global::callback::deinitialize.push_back([&]() { GdalWrapper::ref().destroy(); });
 #endif // GLOBEBROWSING_USE_GDAL
-        }
-    );
 
     // Get factories
     auto fRenderable = FactoryManager::ref().factory<Renderable>();

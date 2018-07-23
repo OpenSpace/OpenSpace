@@ -30,6 +30,7 @@
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/syncengine.h>
@@ -593,7 +594,7 @@ void OpenSpaceEngine::initialize() {
 
     _loadingScreen->render();
 
-    for (const std::function<void()>& func : _moduleCallbacks.initialize) {
+    for (const std::function<void()>& func : global::callback::initialize) {
         func();
     }
 
@@ -750,11 +751,11 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 void OpenSpaceEngine::deinitialize() {
     LTRACE("OpenSpaceEngine::deinitialize(begin)");
 
-    for (const std::function<void()>& func : _engine->_moduleCallbacks.deinitializeGL) {
+    for (const std::function<void()>& func : global::callback::deinitializeGL) {
         func();
     }
 
-    for (const std::function<void()>& func : _engine->_moduleCallbacks.deinitialize) {
+    for (const std::function<void()>& func : global::callback::deinitialize) {
         func();
     }
 
@@ -1101,7 +1102,7 @@ void OpenSpaceEngine::initializeGL() {
 
     global::moduleEngine.initializeGL();
 
-    for (const std::function<void()>& func : _moduleCallbacks.initializeGL) {
+    for (const std::function<void()>& func : global::callback::initializeGL) {
         func();
     }
 
@@ -1162,7 +1163,7 @@ void OpenSpaceEngine::preSynchronization() {
         global::parallelPeer.preSynchronization();
     }
 
-    for (const std::function<void()>& func : _moduleCallbacks.preSync) {
+    for (const std::function<void()>& func : global::callback::preSync) {
         func();
     }
     LTRACE("OpenSpaceEngine::preSynchronization(end)");
@@ -1213,7 +1214,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         _scene->camera()->invalidateCache();
     }
 
-    for (const std::function<void()>& func : _moduleCallbacks.postSyncPreDraw) {
+    for (const std::function<void()>& func : global::callback::postSyncPreDraw) {
         func();
     }
 
@@ -1262,7 +1263,7 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
 
     global::renderEngine.render(sceneMatrix, viewMatrix, projectionMatrix);
 
-    for (const std::function<void()>& func : _moduleCallbacks.render) {
+    for (const std::function<void()>& func : global::callback::render) {
         func();
     }
 
@@ -1289,7 +1290,7 @@ void OpenSpaceEngine::drawOverlays() {
         global::luaConsole.render();
     }
 
-    for (const std::function<void()>& func : _moduleCallbacks.draw2D) {
+    for (const std::function<void()>& func : global::callback::draw2D) {
         func();
     }
 
@@ -1308,7 +1309,7 @@ void OpenSpaceEngine::postDraw() {
 
     global::renderEngine.postDraw();
 
-    for (const std::function<void()>& func : _moduleCallbacks.postDraw) {
+    for (const std::function<void()>& func : global::callback::postDraw) {
         func();
     }
 
@@ -1322,7 +1323,7 @@ void OpenSpaceEngine::postDraw() {
 
 void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action) {
     using F = std::function<bool (Key, KeyModifier, KeyAction)>;
-    for (const F& func : _moduleCallbacks.keyboard) {
+    for (const F& func : global::callback::keyboard) {
         const bool isConsumed = func(key, mod, action);
         if (isConsumed) {
             return;
@@ -1342,7 +1343,7 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
 
 void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier) {
     using F = std::function<bool (unsigned int, KeyModifier)>;
-    for (const F& func : _moduleCallbacks.character) {
+    for (const F& func : global::callback::character) {
         bool isConsumed = func(codepoint, modifier);
         if (isConsumed) {
             return;
@@ -1354,7 +1355,7 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier)
 
 void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action) {
     using F = std::function<bool (MouseButton, MouseAction)>;
-    for (const F& func : _moduleCallbacks.mouseButton) {
+    for (const F& func : global::callback::mouseButton) {
         bool isConsumed = func(button, action);
         if (isConsumed) {
             // If the mouse was released, we still want to forward it to the navigation
@@ -1384,7 +1385,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
 
 void OpenSpaceEngine::mousePositionCallback(double x, double y) {
     using F = std::function<void (double, double)>;
-    for (const F& func : _moduleCallbacks.mousePosition) {
+    for (const F& func : global::callback::mousePosition) {
         func(x, y);
     }
 
@@ -1395,7 +1396,7 @@ void OpenSpaceEngine::mousePositionCallback(double x, double y) {
 
 void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
     using F = std::function<bool (double, double)>;
-    for (const F& func : _moduleCallbacks.mouseScrollWheel) {
+    for (const F& func : global::callback::mouseScrollWheel) {
         bool isConsumed = func(posX, posY);
         if (isConsumed) {
             return;
@@ -1509,73 +1510,6 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             absPath("${SCRIPTS}/core_scripts.lua")
         }
     };
-}
-
-// Registers a callback for a specific CallbackOption
-void OpenSpaceEngine::registerModuleCallback(OpenSpaceEngine::CallbackOption option,
-                                             std::function<void()> function)
-{
-    switch (option) {
-        case CallbackOption::Initialize:
-            _moduleCallbacks.initialize.push_back(std::move(function));
-            break;
-        case CallbackOption::Deinitialize:
-            _moduleCallbacks.deinitialize.push_back(std::move(function));
-            break;
-        case CallbackOption::InitializeGL:
-            _moduleCallbacks.initializeGL.push_back(std::move(function));
-            break;
-        case CallbackOption::DeinitializeGL:
-            _moduleCallbacks.deinitializeGL.push_back(std::move(function));
-            break;
-        case CallbackOption::PreSync:
-            _moduleCallbacks.preSync.push_back(std::move(function));
-            break;
-        case CallbackOption::PostSyncPreDraw:
-            _moduleCallbacks.postSyncPreDraw.push_back(std::move(function));
-            break;
-        case CallbackOption::Render:
-            _moduleCallbacks.render.push_back(std::move(function));
-            break;
-        case CallbackOption::Draw2D:
-            _moduleCallbacks.draw2D.push_back(std::move(function));
-            break;
-        case CallbackOption::PostDraw:
-            _moduleCallbacks.postDraw.push_back(std::move(function));
-            break;
-        default:
-            throw ghoul::MissingCaseException();
-    }
-}
-
-void OpenSpaceEngine::registerModuleKeyboardCallback(
-                               std::function<bool (Key, KeyModifier, KeyAction)> function)
-{
-    _moduleCallbacks.keyboard.push_back(std::move(function));
-}
-
-void OpenSpaceEngine::registerModuleCharCallback(
-                                 std::function<bool (unsigned int, KeyModifier)> function)
-{
-    _moduleCallbacks.character.push_back(std::move(function));
-}
-
-void OpenSpaceEngine::registerModuleMouseButtonCallback(
-                                  std::function<bool (MouseButton, MouseAction)> function)
-{
-    _moduleCallbacks.mouseButton.push_back(std::move(function));
-}
-
-void OpenSpaceEngine::registerModuleMousePositionCallback(
-                                            std::function<void (double, double)> function)
-{
-    _moduleCallbacks.mousePosition.push_back(std::move(function));
-}
-
-void OpenSpaceEngine::registerModuleMouseScrollWheelCallback(
-                                            std::function<bool (double, double)> function)
-{
-    _moduleCallbacks.mouseScrollWheel.push_back(std::move(function));
 }
 
 LoadingScreen& OpenSpaceEngine::loadingScreen() {

@@ -101,43 +101,6 @@ public:
     AssetManager& assetManager();
     LoadingScreen& loadingScreen();
 
-    // This method is only to be called from Modules
-    enum class CallbackOption {
-        Initialize = 0,  // Callback for the end of the initialization
-        Deinitialize,    // Callback for the end of the deinitialization
-        InitializeGL,    // Callback for the end of the OpenGL initialization
-        DeinitializeGL,  // Callback for the end of the OpenGL deinitialization
-        PreSync,         // Callback for the end of the pre-sync function
-        PostSyncPreDraw, // Callback for the end of the post-sync-pre-draw function
-        Render,          // Callback for the end of the render function
-        Draw2D,          // Callback for the two-dimensional rendering functions
-        PostDraw         // Callback for the end of the post-draw function
-    };
-
-    // Registers a callback for a specific CallbackOption
-    void registerModuleCallback(CallbackOption option, std::function<void()> function);
-
-    // Registers a callback that is called when a new keyboard event is received
-    void registerModuleKeyboardCallback(
-        std::function<bool (Key, KeyModifier, KeyAction)> function);
-
-    // Registers a callback that is called when a new character event is received
-    void registerModuleCharCallback(
-        std::function<bool (unsigned int, KeyModifier)> function);
-
-    // Registers a callback that is called when a new mouse button is received
-    void registerModuleMouseButtonCallback(
-       std::function<bool (MouseButton, MouseAction)> function);
-
-    // Registers a callback that is called when a new mouse movement is received
-    void registerModuleMousePositionCallback(
-        std::function<void (double, double)> function);
-
-    // Registers a callback that is called when a scroll wheel change is received
-    void registerModuleMouseScrollWheelCallback(
-        std::function<bool (double, double)> function
-    );
-
     void writeSceneDocumentation();
     void writeStaticDocumentation();
 
@@ -169,27 +132,6 @@ private:
 
     bool _hasScheduledAssetLoading = false;
     std::string _scheduledAssetPathToLoad;
-
-    struct {
-        std::vector<std::function<void()>> initialize;
-        std::vector<std::function<void()>> deinitialize;
-
-        std::vector<std::function<void()>> initializeGL;
-        std::vector<std::function<void()>> deinitializeGL;
-
-        std::vector<std::function<void()>> preSync;
-        std::vector<std::function<void()>> postSyncPreDraw;
-        std::vector<std::function<void()>> render;
-        std::vector<std::function<void()>> draw2D;
-        std::vector<std::function<void()>> postDraw;
-
-        std::vector<std::function<bool (Key, KeyModifier, KeyAction)>> keyboard;
-        std::vector<std::function<bool (unsigned int, KeyModifier)>> character;
-
-        std::vector<std::function<bool (MouseButton, MouseAction)>> mouseButton;
-        std::vector<std::function<void (double, double)>> mousePosition;
-        std::vector<std::function<bool (double, double)>> mouseScrollWheel;
-    } _moduleCallbacks;
 
     ShutdownInformation _shutdown;
 

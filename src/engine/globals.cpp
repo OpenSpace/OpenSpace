@@ -213,8 +213,6 @@ void deinitializeGL() {
 
     global::renderEngine.deinitializeGL();
     global::moduleEngine.deinitializeGL();
-
 }
-
 
 } // namespace openspace::global

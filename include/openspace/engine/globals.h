@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___GLOBALS___H__
 #define __OPENSPACE_CORE___GLOBALS___H__
 
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -119,7 +120,6 @@ void initialize();
 void initializeGL();
 void deinitialize();
 void deinitializeGL();
-
 
 } // namespace global
 
