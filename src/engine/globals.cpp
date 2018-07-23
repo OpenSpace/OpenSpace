@@ -33,7 +33,9 @@
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/performance/performancemanager.h>
+#include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/deferredcastermanager.h>
+#include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
@@ -44,7 +46,7 @@
 #include <ghoul/misc/sharedmemory.h>
 #include <ghoul/opengl/texture.h>
 
-namespace openspace::detail {
+namespace openspace::global::detail {
 
 ghoul::fontrendering::FontManager& gFontManager() {
     static ghoul::fontrendering::FontManager g({ 1536, 1536, 1 });
@@ -56,6 +58,11 @@ Configuration& gConfiguration() {
     return g;
 }
 
+Dashboard& gDashboard() {
+    static Dashboard g;
+    return g;
+}
+
 DeferredcasterManager& gDeferredcasterManager() {
     static DeferredcasterManager g;
     return g;
@@ -63,6 +70,11 @@ DeferredcasterManager& gDeferredcasterManager() {
 
 DownloadManager& gDownloadManager() {
     static DownloadManager g;
+    return g;
+}
+
+LuaConsole& gLuaConsole() {
+    static LuaConsole g;
     return g;
 }
 

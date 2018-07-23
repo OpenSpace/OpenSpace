@@ -666,10 +666,10 @@ void RenderEngine::renderDashboard() {
     }
     glm::vec2 penPosition = glm::vec2(
         10.f,
-        fontResolution().y - OsEng.console().currentHeight()
+        fontResolution().y - global::luaConsole.currentHeight()
     );
 
-    OsEng.dashboard().render(penPosition);
+    global::dashboard.render(penPosition);
 }
 
 void RenderEngine::postDraw() {

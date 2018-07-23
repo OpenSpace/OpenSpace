@@ -27,7 +27,6 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/dashboarditem.h>
@@ -187,7 +186,7 @@ bool ScreenSpaceDashboard::initializeGL() {
         glm::vec2 penPosition = glm::vec2(10.f, _size.value().w );
 
         if (_useMainDashboard) {
-            OsEng.dashboard().render(penPosition);
+            global::dashboard.render(penPosition);
         }
         else {
             _dashboard.render(penPosition);

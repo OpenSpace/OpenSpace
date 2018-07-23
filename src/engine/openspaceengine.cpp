@@ -132,8 +132,6 @@ OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 
 OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     : _scene(nullptr)
-    , _dashboard(new Dashboard)
-    , _console(new LuaConsole)
     , _syncEngine(std::make_unique<SyncEngine>(4096))
     , _commandlineParser(new ghoul::cmdparser::CommandlineParser(
         std::move(programName),
@@ -162,8 +160,8 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     //_rootPropertyOwner->addPropertySubOwner(_virtualPropertyManager.get());
 
     _rootPropertyOwner->addPropertySubOwner(global::parallelPeer);
-    _rootPropertyOwner->addPropertySubOwner(_console.get());
-    _rootPropertyOwner->addPropertySubOwner(_dashboard.get());
+    _rootPropertyOwner->addPropertySubOwner(global::luaConsole);
+    _rootPropertyOwner->addPropertySubOwner(global::dashboard);
 
     _versionInformation.versionString.setReadOnly(true);
     _rootPropertyOwner->addProperty(_versionInformation.versionString);
@@ -468,7 +466,7 @@ void OpenSpaceEngine::destroy() {
 
     global::moduleEngine.deinitializeGL();
     global::moduleEngine.deinitialize();
-    _engine->_console->deinitialize();
+    global::luaConsole.deinitialize();
 
     global::scriptEngine.deinitialize();
 
@@ -965,7 +963,7 @@ void OpenSpaceEngine::initializeGL() {
 
     LTRACE("OpenSpaceEngine::initializeGL::Console::initialize(begin)");
     try {
-        _engine->_console->initialize();
+        global::luaConsole.initialize();
     }
     catch (ghoul::RuntimeError& e) {
         LERROR("Error initializing Console with error:");
@@ -1296,7 +1294,7 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
         true;
 
     if (isGuiWindow) {
-        _console->update();
+        global::luaConsole.update();
     }
 
     global::renderEngine.render(sceneMatrix, viewMatrix, projectionMatrix);
@@ -1325,7 +1323,7 @@ void OpenSpaceEngine::drawOverlays() {
 
     if (isGuiWindow) {
         global::renderEngine.renderOverlays(_shutdown);
-        _console->render();
+        global::luaConsole.render();
     }
 
     for (const std::function<void()>& func : _moduleCallbacks.draw2D) {
@@ -1369,7 +1367,7 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
     }
 
     if (!global::configuration.isConsoleDisabled) {
-        const bool isConsoleConsumed = _console->keyboardCallback(key, mod, action);
+        bool isConsoleConsumed = global::luaConsole.keyboardCallback(key, mod, action);
         if (isConsoleConsumed) {
             return;
         }
@@ -1388,7 +1386,7 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier)
         }
     }
 
-    _console->charCallback(codepoint, modifier);
+    global::luaConsole.charCallback(codepoint, modifier);
 }
 
 void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action) {
@@ -1615,16 +1613,6 @@ void OpenSpaceEngine::registerModuleMouseScrollWheelCallback(
                                             std::function<bool (double, double)> function)
 {
     _moduleCallbacks.mouseScrollWheel.push_back(std::move(function));
-}
-
-LuaConsole& OpenSpaceEngine::console() {
-    ghoul_assert(_console, "LuaConsole must not be nullptr");
-    return *_console;
-}
-
-Dashboard& OpenSpaceEngine::dashboard() {
-    ghoul_assert(_dashboard, "Dashboard must not be nullptr");
-    return *_dashboard;
 }
 
 LoadingScreen& OpenSpaceEngine::loadingScreen() {

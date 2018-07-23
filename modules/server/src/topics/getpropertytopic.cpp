@@ -87,7 +87,7 @@ json GetPropertyTopic::allProperties() {
             "value",
             {
                 global::renderEngine,
-                OsEng.console(),
+                global::luaConsole,
                 global::parallelPeer,
                 global::navigationHandler,
                 OsEng.virtualPropertyManager(),

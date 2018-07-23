@@ -41,10 +41,8 @@ namespace ghoul::cmdparser { class CommandlineParser; }
 namespace openspace {
 
 class AssetManager;
-class Dashboard;
 class GUI;
 class LoadingScreen;
-class LuaConsole;
 class Scene;
 class SyncEngine;
 class VirtualPropertyManager;
@@ -79,7 +77,6 @@ public:
 
     ~OpenSpaceEngine() = default;
 
-    // callbacks
     void initialize();
     void initializeGL();
     void deinitialize();
@@ -103,9 +100,7 @@ public:
     void toggleShutdownMode();
 
     // Guaranteed to return a valid pointer
-    LuaConsole& console();
     AssetManager& assetManager();
-    Dashboard& dashboard();
     LoadingScreen& loadingScreen();
     properties::PropertyOwner& rootPropertyOwner();
     properties::PropertyOwner& globalPropertyOwner();
@@ -170,11 +165,8 @@ private:
     void runGlobalCustomizationScripts();
     void configureLogging();
 
-    // Components
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
-    std::unique_ptr<Dashboard> _dashboard;
-    std::unique_ptr<LuaConsole> _console;
     std::unique_ptr<SyncEngine> _syncEngine;
     std::unique_ptr<ghoul::cmdparser::CommandlineParser> _commandlineParser;
 

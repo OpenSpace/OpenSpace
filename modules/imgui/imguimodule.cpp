@@ -64,8 +64,8 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                         &global::timeManager,
                         &global::renderEngine,
                         &global::parallelPeer,
-                        &(OsEng.console()),
-                        &(OsEng.dashboard())
+                        &global::luaConsole,
+                        &global::dashboard
                     };
                     return res;
                 }

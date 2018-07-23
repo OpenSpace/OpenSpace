@@ -27,8 +27,7 @@
 #include <modules/fieldlinessequence/fieldlinessequencemodule.h>
 #include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
@@ -1090,7 +1089,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         _shaderProgram->setUniform("particleSpeed",   _pFlowSpeed);
         _shaderProgram->setUniform(
             "time",
-            OsEng.windowWrapper().applicationTime() * (_pFlowReversed ? -1 : 1)
+            global::windowDelegate.applicationTime() * (_pFlowReversed ? -1 : 1)
         );
 
         bool additiveBlending = false;

@@ -30,8 +30,10 @@ namespace ghoul::fontrendering { class FontManager; }
 namespace openspace {
 
 struct Configuration;
+class Dashboard;
 class DeferredcasterManager;
 class DownloadManager;
+class LuaConsole;
 class ModuleEngine;
 class NetworkEngine;
 class ParallelPeer;
@@ -49,12 +51,16 @@ namespace scripting {
     class ScriptScheduler;
 } // namespace scripting
 
+namespace global {
+
 namespace detail {
 
 ghoul::fontrendering::FontManager& gFontManager();
 Configuration& gConfiguration();
+Dashboard& gDashboard();
 DeferredcasterManager& gDeferredcasterManager();
 DownloadManager& gDownloadManager();
+LuaConsole& gLuaConsole();
 ModuleEngine& gModuleEngine();
 NetworkEngine& gNetworkEngine();
 ParallelPeer& gParallelPeer();
@@ -70,12 +76,12 @@ scripting::ScriptScheduler& gScriptScheduler();
 
 } // namespace detail
 
-namespace global {
-
 static ghoul::fontrendering::FontManager& fontManager = detail::gFontManager();
 static Configuration& configuration = detail::gConfiguration();
+static Dashboard& dashboard = detail::gDashboard();
 static DeferredcasterManager& deferredcasterManager = detail::gDeferredcasterManager();
 static DownloadManager& downloadManager = detail::gDownloadManager();
+static LuaConsole& luaConsole = detail::gLuaConsole();
 static ModuleEngine& moduleEngine = detail::gModuleEngine();
 static NetworkEngine& networkEngine = detail::gNetworkEngine();
 static ParallelPeer& parallelPeer = detail::gParallelPeer();
@@ -91,8 +97,6 @@ static scripting::ScriptEngine& scriptEngine = detail::gScriptEngine();
 static scripting::ScriptScheduler& scriptScheduler = detail::gScriptScheduler();
 
 } // namespace global
-
-
 
 } // namespace openspace
 
