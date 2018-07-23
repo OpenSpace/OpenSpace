@@ -132,15 +132,6 @@ namespace openspace {
 GlobeBrowsingModule::GlobeBrowsingModule() : OpenSpaceModule(Name) {}
 
 void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
-    // TODO: Remove dependency on OsEng.
-    // Instead, make this class implement an interface that OsEng depends on.
-    // Do not try to register module callbacks if OsEng does not exist,
-    // for example in the TaskRunner.
-
-    if (!OpenSpaceEngine::isCreated()) {
-        return;
-    }
-
     using namespace globebrowsing;
 
     // Initialize

@@ -98,7 +98,7 @@ GuiMissionComponent::GuiMissionComponent()
 {}
 
 void GuiMissionComponent::render() {
-    if (!MissionManager::ref().hasCurrentMission()) {
+    if (!global::missionManager.hasCurrentMission()) {
         return;
     }
 
@@ -109,7 +109,7 @@ void GuiMissionComponent::render() {
 
     _isCollapsed = ImGui::IsWindowCollapsed();
 
-    const Mission& currentMission = MissionManager::ref().currentMission();
+    const Mission& currentMission = global::missionManager.currentMission();
     renderMission(currentMission);
 
     ImGui::End();

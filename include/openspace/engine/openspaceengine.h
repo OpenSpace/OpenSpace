@@ -30,7 +30,6 @@
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 #include <ghoul/glm.h>
-#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -41,13 +40,10 @@ namespace ghoul::cmdparser { class CommandlineParser; }
 namespace openspace {
 
 class AssetManager;
-class GUI;
 class LoadingScreen;
 class Scene;
 
 namespace interaction { struct JoystickInputStates; }
-namespace gui { class GUI; }
-namespace properties { class PropertyOwner; }
 namespace scripting { struct LuaLibrary; }
 
   // Structure that is responsible for the delayed shutdown of the application
@@ -71,7 +67,6 @@ public:
 
     static void destroy();
     static OpenSpaceEngine& ref();
-    static bool isCreated();
 
     ~OpenSpaceEngine() = default;
 

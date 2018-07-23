@@ -193,17 +193,13 @@ OpenSpaceEngine& OpenSpaceEngine::ref() {
     return *_engine;
 }
 
-bool OpenSpaceEngine::isCreated() {
-    return _engine != nullptr;
-}
-
 void OpenSpaceEngine::create(int argc, char** argv, WindowDelegate windowDelegate,
                              std::vector<std::string>& sgctArguments,
                              bool& requestClose, bool consoleLog)
 {
     ghoul_assert(!_engine, "OpenSpaceEngine was already created");
 
-    global::windowDelegate = windowDelegate;
+    global::windowDelegate = std::move(windowDelegate);
 
     requestClose = false;
 
@@ -763,7 +759,6 @@ void OpenSpaceEngine::deinitialize() {
     _engine->_scene = nullptr;
 
     global::navigationHandler.deinitialize();
-    global::renderEngine.deinitialize();
 
     LTRACE("OpenSpaceEngine::deinitialize(end)");
 }

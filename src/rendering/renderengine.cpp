@@ -357,8 +357,6 @@ void RenderEngine::initialize() {
     ghoul::io::TextureReader::ref().addReader(
         std::make_unique<ghoul::io::TextureReaderCMAP>()
     );
-
-    MissionManager::initialize();
 }
 
 void RenderEngine::initializeGL() {
@@ -386,10 +384,6 @@ void RenderEngine::initializeGL() {
 
     LINFO("Finished initializing GL");
     LTRACE("RenderEngine::initializeGL(end)");
-}
-
-void RenderEngine::deinitialize() {
-    MissionManager::deinitialize();
 }
 
 void RenderEngine::deinitializeGL() {

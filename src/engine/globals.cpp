@@ -32,6 +32,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/mission/missionmanager.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/performance/performancemanager.h>
@@ -81,6 +82,11 @@ DownloadManager& gDownloadManager() {
 
 LuaConsole& gLuaConsole() {
     static LuaConsole g;
+    return g;
+}
+
+MissionManager& gMissionManager() {
+    static MissionManager g;
     return g;
 }
 

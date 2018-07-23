@@ -131,9 +131,9 @@ DashboardItemMission::DashboardItemMission(const ghoul::Dictionary& dictionary)
 }
 
 void DashboardItemMission::render(glm::vec2& penPosition) {
-    if (MissionManager::ref().hasCurrentMission()) {
+    if (global::missionManager.hasCurrentMission()) {
         double currentTime = global::timeManager.time().j2000Seconds();
-        const Mission& mission = MissionManager::ref().currentMission();
+        const Mission& mission = global::missionManager.currentMission();
 
         if (!mission.phases().empty()) {
             static const glm::vec4 nextMissionColor(0.7f, 0.3f, 0.3f, 1.f);
