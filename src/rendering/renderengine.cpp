@@ -384,27 +384,15 @@ void RenderEngine::initializeGL() {
     _log = log.get();
     ghoul::logging::LogManager::ref().addLog(std::move(log));
 
-    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
-        ssr->initializeGL();
-    }
-
     LINFO("Finished initializing GL");
     LTRACE("RenderEngine::initializeGL(end)");
 }
 
 void RenderEngine::deinitialize() {
-    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
-        ssr->deinitialize();
-    }
-
     MissionManager::deinitialize();
 }
 
 void RenderEngine::deinitializeGL() {
-    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
-        ssr->deinitializeGL();
-    }
-
     _renderer = nullptr;
 }
 
@@ -455,7 +443,7 @@ void RenderEngine::updateRenderer() {
 }
 
 void RenderEngine::updateScreenSpaceRenderables() {
-    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
+    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : global::screenSpaceRenderables) {
         ssr->update();
     }
 }
@@ -553,7 +541,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 
     ++_frameNumber;
 
-    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
+    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : global::screenSpaceRenderables) {
         if (ssr->isEnabled() && ssr->isReady()) {
             ssr->render();
         }
@@ -925,21 +913,21 @@ void RenderEngine::addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderabl
 
     global::screenSpaceRootPropertyOwner.addPropertySubOwner(s.get());
 
-    _screenSpaceRenderables.push_back(std::move(s));
+    global::screenSpaceRenderables.push_back(std::move(s));
 }
 
 void RenderEngine::removeScreenSpaceRenderable(ScreenSpaceRenderable* s) {
     const auto it = std::find_if(
-        _screenSpaceRenderables.begin(),
-        _screenSpaceRenderables.end(),
+        global::screenSpaceRenderables.begin(),
+        global::screenSpaceRenderables.end(),
         [s](const std::unique_ptr<ScreenSpaceRenderable>& r) { return r.get() == s; }
     );
 
-    if (it != _screenSpaceRenderables.end()) {
+    if (it != global::screenSpaceRenderables.end()) {
         s->deinitialize();
         global::screenSpaceRootPropertyOwner.removePropertySubOwner(s);
 
-        _screenSpaceRenderables.erase(it);
+        global::screenSpaceRenderables.erase(it);
     }
 }
 
@@ -954,14 +942,14 @@ ScreenSpaceRenderable* RenderEngine::screenSpaceRenderable(
                                                             const std::string& identifier)
 {
     const auto it = std::find_if(
-        _screenSpaceRenderables.begin(),
-        _screenSpaceRenderables.end(),
+        global::screenSpaceRenderables.begin(),
+        global::screenSpaceRenderables.end(),
         [&identifier](const std::unique_ptr<ScreenSpaceRenderable>& s) {
             return s->identifier() == identifier;
         }
     );
 
-    if (it != _screenSpaceRenderables.end()) {
+    if (it != global::screenSpaceRenderables.end()) {
         return it->get();
     }
     else {
@@ -970,10 +958,10 @@ ScreenSpaceRenderable* RenderEngine::screenSpaceRenderable(
 }
 
 std::vector<ScreenSpaceRenderable*> RenderEngine::screenSpaceRenderables() const {
-    std::vector<ScreenSpaceRenderable*> res(_screenSpaceRenderables.size());
+    std::vector<ScreenSpaceRenderable*> res(global::screenSpaceRenderables.size());
     std::transform(
-        _screenSpaceRenderables.begin(),
-        _screenSpaceRenderables.end(),
+        global::screenSpaceRenderables.begin(),
+        global::screenSpaceRenderables.end(),
         res.begin(),
         [](const std::unique_ptr<ScreenSpaceRenderable>& p) { return p.get(); }
     );

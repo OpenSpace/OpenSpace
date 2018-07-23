@@ -25,6 +25,9 @@
 #ifndef __OPENSPACE_CORE___GLOBALS___H__
 #define __OPENSPACE_CORE___GLOBALS___H__
 
+#include <memory>
+#include <vector>
+
 namespace ghoul::fontrendering { class FontManager; }
 
 namespace openspace {
@@ -39,6 +42,7 @@ class NetworkEngine;
 class ParallelPeer;
 class RaycasterManager;
 class RenderEngine;
+class ScreenSpaceRenderable;
 class TimeManager;
 class VirtualPropertyManager;
 struct WindowDelegate;
@@ -68,6 +72,7 @@ NetworkEngine& gNetworkEngine();
 ParallelPeer& gParallelPeer();
 RaycasterManager& gRaycasterManager();
 RenderEngine& gRenderEngine();
+std::vector<std::unique_ptr<ScreenSpaceRenderable>>& gScreenspaceRenderables();
 TimeManager& gTimeManager();
 VirtualPropertyManager& gVirtualPropertyManager();
 WindowDelegate& gWindowDelegate();
@@ -92,6 +97,8 @@ static NetworkEngine& networkEngine = detail::gNetworkEngine();
 static ParallelPeer& parallelPeer = detail::gParallelPeer();
 static RaycasterManager& raycasterManager = detail::gRaycasterManager();
 static RenderEngine& renderEngine = detail::gRenderEngine();
+static std::vector<std::unique_ptr<ScreenSpaceRenderable>>& screenSpaceRenderables =
+    detail::gScreenspaceRenderables();
 static TimeManager& timeManager = detail::gTimeManager();
 static VirtualPropertyManager& virtualPropertyManager = detail::gVirtualPropertyManager();
 static WindowDelegate& windowDelegate = detail::gWindowDelegate();
@@ -104,6 +111,12 @@ static properties::PropertyOwner& screenSpaceRootPropertyOwner =
     detail::gScreenSpaceRootPropertyOwner();
 static scripting::ScriptEngine& scriptEngine = detail::gScriptEngine();
 static scripting::ScriptScheduler& scriptScheduler = detail::gScriptScheduler();
+
+void initialize();
+void initializeGL();
+void deinitialize();
+void deinitializeGL();
+
 
 } // namespace global
 

@@ -197,7 +197,6 @@ private:
     uint64_t _frameNumber = 0;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
-    std::vector<std::unique_ptr<ScreenSpaceRenderable>> _screenSpaceRenderables;
 
     std::shared_ptr<ghoul::fontrendering::Font> _fontBig;
     std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;

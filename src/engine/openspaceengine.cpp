@@ -139,19 +139,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
         properties::StringProperty(SourceControlInfo, OPENSPACE_GIT_FULL)
     }
 {
-    global::rootPropertyOwner.addPropertySubOwner(global::moduleEngine);
-
-    global::navigationHandler.setPropertyOwner(&global::rootPropertyOwner);
-    // New property subowners also have to be added to the ImGuiModule callback!
-    global::rootPropertyOwner.addPropertySubOwner(global::navigationHandler);
-    global::rootPropertyOwner.addPropertySubOwner(global::timeManager);
-
-    global::rootPropertyOwner.addPropertySubOwner(global::renderEngine);
-    global::rootPropertyOwner.addPropertySubOwner(global::screenSpaceRootPropertyOwner);
-
-    global::rootPropertyOwner.addPropertySubOwner(global::parallelPeer);
-    global::rootPropertyOwner.addPropertySubOwner(global::luaConsole);
-    global::rootPropertyOwner.addPropertySubOwner(global::dashboard);
+    global::initialize();
 
     _versionInformation.versionString.setReadOnly(true);
     global::rootPropertyOwner.addProperty(_versionInformation.versionString);
@@ -492,13 +480,8 @@ void OpenSpaceEngine::destroy() {
         _engine->_syncEngine->removeSyncables(_engine->_scene->camera()->getSyncables());
     }
 
-    global::renderEngine.deinitializeGL();
-
-    global::moduleEngine.deinitializeGL();
-    global::moduleEngine.deinitialize();
-    global::luaConsole.deinitialize();
-
-    global::scriptEngine.deinitialize();
+    global::deinitializeGL();
+    global::deinitialize();
 
     delete _engine;
     _engine = nullptr;
@@ -509,8 +492,6 @@ void OpenSpaceEngine::destroy() {
     ghoul::fontrendering::FontRenderer::deinitialize();
 
     LogManager::deinitialize();
-
-    global::fontManager.deinitialize();
 
     ghoul::deinitialize();
     LTRACE("OpenSpaceEngine::destroy(end)");

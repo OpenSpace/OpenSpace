@@ -40,6 +40,7 @@
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/util/timemanager.h>
@@ -48,7 +49,9 @@
 #include <ghoul/misc/sharedmemory.h>
 #include <ghoul/opengl/texture.h>
 
-namespace openspace::global::detail {
+namespace openspace::global {
+
+namespace detail {
 
 ghoul::fontrendering::FontManager& gFontManager() {
     static ghoul::fontrendering::FontManager g({ 1536, 1536, 1 });
@@ -105,6 +108,11 @@ RenderEngine& gRenderEngine() {
     return g;
 }
 
+std::vector<std::unique_ptr<ScreenSpaceRenderable>>& gScreenspaceRenderables() {
+    static std::vector<std::unique_ptr<ScreenSpaceRenderable>> g;
+    return g;
+}
+
 TimeManager& gTimeManager() {
     static TimeManager g;
     return g;
@@ -155,4 +163,49 @@ scripting::ScriptScheduler& gScriptScheduler() {
     return g;
 }
 
-} // namespace openspace::detail
+} // namespace detail
+
+void initialize() {
+    global::rootPropertyOwner.addPropertySubOwner(global::moduleEngine);
+
+    global::navigationHandler.setPropertyOwner(&global::rootPropertyOwner);
+    // New property subowners also have to be added to the ImGuiModule callback!
+    global::rootPropertyOwner.addPropertySubOwner(global::navigationHandler);
+    global::rootPropertyOwner.addPropertySubOwner(global::timeManager);
+
+    global::rootPropertyOwner.addPropertySubOwner(global::renderEngine);
+    global::rootPropertyOwner.addPropertySubOwner(global::screenSpaceRootPropertyOwner);
+
+    global::rootPropertyOwner.addPropertySubOwner(global::parallelPeer);
+    global::rootPropertyOwner.addPropertySubOwner(global::luaConsole);
+    global::rootPropertyOwner.addPropertySubOwner(global::dashboard);
+
+}
+
+void initializeGL() {
+
+}
+
+void deinitialize() {
+    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : global::screenSpaceRenderables) {
+        ssr->deinitialize();
+    }
+
+    global::moduleEngine.deinitialize();
+    global::luaConsole.deinitialize();
+    global::scriptEngine.deinitialize();
+    global::fontManager.deinitialize();
+}
+
+void deinitializeGL() {
+    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : global::screenSpaceRenderables) {
+        ssr->deinitializeGL();
+    }
+
+    global::renderEngine.deinitializeGL();
+    global::moduleEngine.deinitializeGL();
+
+}
+
+
+} // namespace openspace::global
