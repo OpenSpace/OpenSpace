@@ -97,9 +97,7 @@ using namespace ghoul::cmdparser;
 
 namespace {
     constexpr const char* _loggerCat = "OpenSpaceEngine";
-
     constexpr const char* SgctConfigArgumentCommand = "-config";
-
     constexpr const int CacheVersion = 1;
 
     struct {
@@ -109,43 +107,16 @@ namespace {
         std::string cacheFolder;
         std::string configurationOverwrite;
     } commandlineArgumentPlaceholders;
-
-    constexpr const openspace::properties::Property::PropertyInfo VersionInfo = {
-        "VersionInfo",
-        "Version Information",
-        "This value contains the full string identifying this OpenSpace Version"
-    };
-
-    constexpr const openspace::properties::Property::PropertyInfo SourceControlInfo = {
-        "SCMInfo",
-        "Source Control Management Information",
-        "This value contains information from the SCM, such as commit hash and branch"
-    };
 } // namespace
 
 namespace openspace {
 
-namespace properties { class Property; }
-
 class Scene;
 
-OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
-
-OpenSpaceEngine::OpenSpaceEngine(std::string programName)
+OpenSpaceEngine::OpenSpaceEngine()
     : _scene(nullptr)
     , _loadingScreen(nullptr)
-    , _versionInformation{
-        properties::StringProperty(VersionInfo, OPENSPACE_VERSION_STRING_FULL),
-        properties::StringProperty(SourceControlInfo, OPENSPACE_GIT_FULL)
-    }
 {
-    global::initialize();
-
-    _versionInformation.versionString.setReadOnly(true);
-    global::rootPropertyOwner.addProperty(_versionInformation.versionString);
-    _versionInformation.sourceControlInformation.setReadOnly(true);
-    global::rootPropertyOwner.addProperty(_versionInformation.sourceControlInformation);
-
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Renderable>>(),
@@ -188,17 +159,12 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     TransformationManager::initialize();
 }
 
-OpenSpaceEngine& OpenSpaceEngine::ref() {
-    ghoul_assert(_engine, "OpenSpaceEngine not created");
-    return *_engine;
-}
+OpenSpaceEngine::~OpenSpaceEngine() {} // NOLINT
 
 void OpenSpaceEngine::create(int argc, char** argv, WindowDelegate windowDelegate,
                              std::vector<std::string>& sgctArguments,
                              bool& requestClose, bool consoleLog)
 {
-    ghoul_assert(!_engine, "OpenSpaceEngine was already created");
-
     global::windowDelegate = std::move(windowDelegate);
 
     requestClose = false;
@@ -228,9 +194,10 @@ void OpenSpaceEngine::create(int argc, char** argv, WindowDelegate windowDelegat
         );
     }
 
-    // Create other objects
-    LDEBUG("Creating OpenSpaceEngine");
-    _engine = new OpenSpaceEngine(std::string(argv[0]));
+    //// Create other objects
+    //LDEBUG("Creating OpenSpaceEngine");
+    //_engine = new OpenSpaceEngine(std::string(argv[0]));
+    global::initialize();
 
     // Parse commandline arguments
     ghoul::cmdparser::CommandlineParser parser(
@@ -400,7 +367,7 @@ void OpenSpaceEngine::create(int argc, char** argv, WindowDelegate windowDelegat
     }
 
     // Initialize the requested logs from the configuration file
-    _engine->configureLogging(consoleLog);
+    global::openSpaceEngine.configureLogging(consoleLog);
 
     LINFOC("OpenSpace Version", std::string(OPENSPACE_VERSION_STRING_FULL));
     LINFOC("Commit", std::string(OPENSPACE_GIT_FULL));
@@ -454,7 +421,7 @@ void OpenSpaceEngine::create(int argc, char** argv, WindowDelegate windowDelegat
         std::make_unique<SynchronizationWatcher>();
     SynchronizationWatcher* rawWatcher = w.get();
 
-    _engine->_assetManager = std::make_unique<AssetManager>(
+    global::openSpaceEngine._assetManager = std::make_unique<AssetManager>(
         std::make_unique<AssetLoader>(
             *global::scriptEngine.luaState(),
             rawWatcher,
@@ -468,15 +435,15 @@ void OpenSpaceEngine::destroy() {
     if (global::parallelPeer.status() != ParallelConnection::Status::Disconnected) {
         global::parallelPeer.disconnect();
     }
-    if (_engine->_scene && _engine->_scene->camera()) {
-        global::syncEngine.removeSyncables(_engine->_scene->camera()->getSyncables());
+    if (global::openSpaceEngine._scene && global::openSpaceEngine._scene->camera()) {
+        global::syncEngine.removeSyncables(
+            global::openSpaceEngine._scene->camera()->getSyncables()
+        );
     }
 
     global::deinitializeGL();
     global::deinitialize();
 
-    delete _engine;
-    _engine = nullptr;
     FactoryManager::deinitialize();
     TransformationManager::deinitialize();
     SpiceManager::deinitialize();
@@ -553,7 +520,7 @@ void OpenSpaceEngine::initialize() {
     LDEBUG("Registering Lua libraries");
     registerCoreClasses(global::scriptEngine);
 
-    global::scriptEngine.addLibrary(_engine->_assetManager->luaLibrary());
+    global::scriptEngine.addLibrary(global::openSpaceEngine._assetManager->luaLibrary());
 
     for (OpenSpaceModule* module : global::moduleEngine.modules()) {
         global::scriptEngine.addLibrary(module->luaLibrary());
@@ -594,7 +561,7 @@ void OpenSpaceEngine::initialize() {
         func();
     }
 
-    _engine->_assetManager->initialize();
+    global::openSpaceEngine._assetManager->initialize();
     scheduleLoadSingleAsset(global::configuration.asset);
 
     LTRACE("OpenSpaceEngine::initialize(end)");
@@ -723,6 +690,9 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
     _loadingScreen->postMessage("Initializing OpenGL");
     _loadingScreen->finalize();
+
+    _loadingScreen = nullptr;
+
     global::renderEngine.updateScene();
 
     global::renderEngine.setGlobalBlackOutFactor(0.f);
@@ -755,8 +725,8 @@ void OpenSpaceEngine::deinitialize() {
         func();
     }
 
-    _engine->assetManager().deinitialize();
-    _engine->_scene = nullptr;
+    global::openSpaceEngine.assetManager().deinitialize();
+    global::openSpaceEngine._scene = nullptr;
 
     global::navigationHandler.deinitialize();
 

@@ -68,7 +68,8 @@ public:
     static void destroy();
     static OpenSpaceEngine& ref();
 
-    ~OpenSpaceEngine() = default;
+    OpenSpaceEngine();
+    ~OpenSpaceEngine();
 
     void initialize();
     void initializeGL();
@@ -106,7 +107,6 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    OpenSpaceEngine(std::string programName);
 
     void loadSingleAsset(const std::string& assetPath);
     void loadFonts();
@@ -120,11 +120,6 @@ private:
     std::unique_ptr<AssetManager> _assetManager;
     std::unique_ptr<LoadingScreen> _loadingScreen;
 
-    struct {
-        properties::StringProperty versionString;
-        properties::StringProperty sourceControlInformation;
-    } _versionInformation;
-
     bool _hasScheduledAssetLoading = false;
     std::string _scheduledAssetPathToLoad;
 
@@ -136,10 +131,10 @@ private:
 
     glm::dvec2 _mousePosition;
 
-    static OpenSpaceEngine* _engine;
+    //static OpenSpaceEngine* _engine;
 };
 
-#define OsEng (openspace::OpenSpaceEngine::ref())
+#define OsEng (openspace::global::openSpaceEngine)
 
 } // namespace openspace
 

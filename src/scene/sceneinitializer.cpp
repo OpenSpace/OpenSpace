@@ -24,6 +24,7 @@
 
 #include <openspace/scene/sceneinitializer.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/scene/scenegraphnode.h>

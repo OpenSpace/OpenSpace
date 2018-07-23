@@ -42,7 +42,7 @@
 #ifdef WIN32
 
 #include <openspace/openspace.h>
-
+#include <openspace/engine/globals.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/stacktrace.h>
 

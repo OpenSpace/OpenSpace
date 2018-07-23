@@ -27,6 +27,7 @@
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
@@ -97,6 +98,11 @@ ModuleEngine& gModuleEngine() {
 
 NetworkEngine& gNetworkEngine() {
     static NetworkEngine g;
+    return g;
+}
+
+OpenSpaceEngine& gOpenSpaceEngine() {
+    static OpenSpaceEngine g;
     return g;
 }
 

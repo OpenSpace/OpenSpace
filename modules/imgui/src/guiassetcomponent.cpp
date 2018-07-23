@@ -26,6 +26,7 @@
 
 #include <modules/imgui/include/imgui_include.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/asset.h>
