@@ -157,7 +157,6 @@ private:
     OpenSpaceEngine(std::string programName);
 
     void loadSingleAsset(const std::string& assetPath);
-    void gatherCommandlineArguments();
     void loadFonts();
 
     void configureLogging(bool consoleLog);
@@ -168,7 +167,6 @@ private:
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
     std::unique_ptr<SyncEngine> _syncEngine;
-    std::unique_ptr<ghoul::cmdparser::CommandlineParser> _commandlineParser;
 
     std::unique_ptr<VirtualPropertyManager> _virtualPropertyManager;
 

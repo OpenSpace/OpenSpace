@@ -133,10 +133,6 @@ OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     : _scene(nullptr)
     , _syncEngine(std::make_unique<SyncEngine>(4096))
-    , _commandlineParser(new ghoul::cmdparser::CommandlineParser(
-        std::move(programName),
-        ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
-    ))
     , _virtualPropertyManager(new VirtualPropertyManager)
     , _rootPropertyOwner(new properties::PropertyOwner({ "" }))
     , _loadingScreen(nullptr)
@@ -260,17 +256,57 @@ void OpenSpaceEngine::create(int argc, char** argv, WindowDelegate windowDelegat
     LDEBUG("Creating OpenSpaceEngine");
     _engine = new OpenSpaceEngine(std::string(argv[0]));
 
-    // Query modules for commandline arguments
-    _engine->gatherCommandlineArguments();
-
     // Parse commandline arguments
+    ghoul::cmdparser::CommandlineParser parser(
+        std::string(argv[0]),
+        ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
+    );
+
+    commandlineArgumentPlaceholders.configurationName = "";
+    parser.addCommand(std::make_unique<SingleCommand<std::string>>(
+        commandlineArgumentPlaceholders.configurationName, "--config", "-c",
+        "Provides the path to the OpenSpace configuration file."
+    ));
+
+    commandlineArgumentPlaceholders.sgctConfigurationName = "";
+    parser.addCommand(std::make_unique<SingleCommand<std::string>>(
+        commandlineArgumentPlaceholders.sgctConfigurationName, "--sgct", "-s",
+        "Provides the path to the SGCT configuration file, overriding the value set in "
+        "the OpenSpace configuration file."
+    ));
+
+    commandlineArgumentPlaceholders.sceneName = "";
+    parser.addCommand(std::make_unique<SingleCommand<std::string>>(
+        commandlineArgumentPlaceholders.sceneName, "--scene", "", "Provides the path to "
+        "the scene file, overriding the value set in the OpenSpace configuration file."
+    ));
+
+    commandlineArgumentPlaceholders.cacheFolder = "";
+    parser.addCommand(std::make_unique<SingleCommand<std::string>>(
+        commandlineArgumentPlaceholders.cacheFolder, "--cacheDir", "", "Provides the "
+        "path to a cache file, overriding the value set in the OpenSpace configuration "
+        "file."
+    ));
+
+    commandlineArgumentPlaceholders.configurationOverwrite = "";
+    parser.addCommand(std::make_unique<SingleCommand<std::string>>(
+        commandlineArgumentPlaceholders.configurationOverwrite, "--lua", "-l",
+        "Provides the ability to pass arbitrary Lua code to the application that will be "
+        "evaluated after the configuration file has been loaded but before the other "
+        "commandline arguments are triggered. This can be used to manipulate the "
+        "configuration file without editing the file on disk, for example in a "
+        "planetarium environment. Please not that the Lua script must not contain any - "
+        "or they will be interpreted as a new command. Similar, in Bash, ${...} will be "
+        "evaluated before it is passed to OpenSpace."
+    ));
+
     std::vector<std::string> args(argv, argv + argc);
     std::vector<std::string> arguments =
-        _engine->_commandlineParser->setCommandLine(args);
+        parser.setCommandLine(args);
 
-    bool showHelp = _engine->_commandlineParser->execute();
+    bool showHelp = parser.execute();
     if (showHelp) {
-        _engine->_commandlineParser->displayHelp(std::cout);
+        parser.displayHelp(std::cout);
         requestClose = true;
         return;
     }
@@ -784,46 +820,6 @@ void OpenSpaceEngine::writeStaticDocumentation() {
             absPath(global::configuration.documentation.factory)
         );
     }
-}
-
-void OpenSpaceEngine::gatherCommandlineArguments() {
-    commandlineArgumentPlaceholders.configurationName = "";
-    _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
-        commandlineArgumentPlaceholders.configurationName, "--config", "-c",
-        "Provides the path to the OpenSpace configuration file."
-    ));
-
-    commandlineArgumentPlaceholders.sgctConfigurationName = "";
-    _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
-        commandlineArgumentPlaceholders.sgctConfigurationName, "--sgct", "-s",
-        "Provides the path to the SGCT configuration file, overriding the value set in "
-        "the OpenSpace configuration file."
-    ));
-
-    commandlineArgumentPlaceholders.sceneName = "";
-    _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
-        commandlineArgumentPlaceholders.sceneName, "--scene", "", "Provides the path to "
-        "the scene file, overriding the value set in the OpenSpace configuration file."
-    ));
-
-    commandlineArgumentPlaceholders.cacheFolder = "";
-    _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
-        commandlineArgumentPlaceholders.cacheFolder, "--cacheDir", "", "Provides the "
-        "path to a cache file, overriding the value set in the OpenSpace configuration "
-        "file."
-    ));
-
-    commandlineArgumentPlaceholders.configurationOverwrite = "";
-    _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
-        commandlineArgumentPlaceholders.configurationOverwrite, "--lua", "-l",
-        "Provides the ability to pass arbitrary Lua code to the application that will be "
-        "evaluated after the configuration file has been loaded but before the other "
-        "commandline arguments are triggered. This can be used to manipulate the "
-        "configuration file without editing the file on disk, for example in a "
-        "planetarium environment. Please not that the Lua script must not contain any - "
-        "or they will be interpreted as a new command. Similar, in Bash, ${...} will be "
-        "evaluated before it is passed to OpenSpace."
-    ));
 }
 
 void OpenSpaceEngine::runGlobalCustomizationScripts() {
