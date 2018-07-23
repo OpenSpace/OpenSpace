@@ -69,7 +69,7 @@ void GetPropertyTopic::handleJson(const nlohmann::json& json) {
         });
     }
     else if (requestedKey == RootPropertyOwner) {
-        response = wrappedPayload(OsEng.rootPropertyOwner());
+        response = wrappedPayload(global::rootPropertyOwner);
     }
     else {
         response = propertyFromKey(requestedKey);
@@ -90,7 +90,7 @@ json GetPropertyTopic::allProperties() {
                 global::luaConsole,
                 global::parallelPeer,
                 global::navigationHandler,
-                OsEng.virtualPropertyManager(),
+                global::virtualPropertyManager,
             }
         }
     };

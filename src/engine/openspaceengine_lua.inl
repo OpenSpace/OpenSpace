@@ -132,7 +132,7 @@ int addVirtualProperty(lua_State* L) {
     }
 
     lua_settop(L, 0);
-    OsEng.virtualPropertyManager().addProperty(std::move(prop));
+    global::virtualPropertyManager.addProperty(std::move(prop));
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -147,9 +147,9 @@ int removeVirtualProperty(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeVirtualProperty");
 
     const std::string& name = ghoul::lua::value<std::string>(L, 1);
-    properties::Property* p = OsEng.virtualPropertyManager().property(name);
+    properties::Property* p = global::virtualPropertyManager.property(name);
     if (p) {
-        OsEng.virtualPropertyManager().removeProperty(p);
+        global::virtualPropertyManager.removeProperty(p);
     }
     else {
         LWARNINGC(
@@ -172,9 +172,9 @@ int removeAllVirtualProperties(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::removeAllVirtualProperties");
 
     const std::vector<properties::Property*>& ps =
-        OsEng.virtualPropertyManager().properties();
+        global::virtualPropertyManager.properties();
     for (properties::Property* p : ps) {
-        OsEng.virtualPropertyManager().removeProperty(p);
+        global::virtualPropertyManager.removeProperty(p);
         delete p;
     }
 

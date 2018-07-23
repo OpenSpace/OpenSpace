@@ -45,7 +45,6 @@ class GUI;
 class LoadingScreen;
 class Scene;
 class SyncEngine;
-class VirtualPropertyManager;
 
 namespace interaction { struct JoystickInputStates; }
 namespace gui { class GUI; }
@@ -102,10 +101,6 @@ public:
     // Guaranteed to return a valid pointer
     AssetManager& assetManager();
     LoadingScreen& loadingScreen();
-    properties::PropertyOwner& rootPropertyOwner();
-    properties::PropertyOwner& globalPropertyOwner();
-    VirtualPropertyManager& virtualPropertyManager();
-
 
     // This method is only to be called from Modules
     enum class CallbackOption {
@@ -167,13 +162,6 @@ private:
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
     std::unique_ptr<SyncEngine> _syncEngine;
-
-    std::unique_ptr<VirtualPropertyManager> _virtualPropertyManager;
-
-    // Others
-    std::unique_ptr<properties::PropertyOwner> _rootPropertyOwner;
-    std::unique_ptr<properties::PropertyOwner> _globalPropertyOwner;
-
     std::unique_ptr<LoadingScreen> _loadingScreen;
 
     struct {

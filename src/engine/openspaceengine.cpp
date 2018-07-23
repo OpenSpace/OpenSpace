@@ -133,36 +133,30 @@ OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 OpenSpaceEngine::OpenSpaceEngine(std::string programName)
     : _scene(nullptr)
     , _syncEngine(std::make_unique<SyncEngine>(4096))
-    , _virtualPropertyManager(new VirtualPropertyManager)
-    , _rootPropertyOwner(new properties::PropertyOwner({ "" }))
     , _loadingScreen(nullptr)
     , _versionInformation{
         properties::StringProperty(VersionInfo, OPENSPACE_VERSION_STRING_FULL),
         properties::StringProperty(SourceControlInfo, OPENSPACE_GIT_FULL)
     }
 {
-    _rootPropertyOwner->addPropertySubOwner(global::moduleEngine);
+    global::rootPropertyOwner.addPropertySubOwner(global::moduleEngine);
 
-    global::navigationHandler.setPropertyOwner(_rootPropertyOwner.get());
+    global::navigationHandler.setPropertyOwner(&global::rootPropertyOwner);
     // New property subowners also have to be added to the ImGuiModule callback!
-    _rootPropertyOwner->addPropertySubOwner(global::navigationHandler);
-    _rootPropertyOwner->addPropertySubOwner(global::timeManager);
+    global::rootPropertyOwner.addPropertySubOwner(global::navigationHandler);
+    global::rootPropertyOwner.addPropertySubOwner(global::timeManager);
 
-    _rootPropertyOwner->addPropertySubOwner(global::renderEngine);
-    _rootPropertyOwner->addPropertySubOwner(global::renderEngine.screenSpaceOwner());
+    global::rootPropertyOwner.addPropertySubOwner(global::renderEngine);
+    global::rootPropertyOwner.addPropertySubOwner(global::renderEngine.screenSpaceOwner());
 
-    // The virtual property manager is not part of the rootProperty owner since it cannot
-    // have an identifier or the "regex as identifier" trick would not work
-    //_rootPropertyOwner->addPropertySubOwner(_virtualPropertyManager.get());
-
-    _rootPropertyOwner->addPropertySubOwner(global::parallelPeer);
-    _rootPropertyOwner->addPropertySubOwner(global::luaConsole);
-    _rootPropertyOwner->addPropertySubOwner(global::dashboard);
+    global::rootPropertyOwner.addPropertySubOwner(global::parallelPeer);
+    global::rootPropertyOwner.addPropertySubOwner(global::luaConsole);
+    global::rootPropertyOwner.addPropertySubOwner(global::dashboard);
 
     _versionInformation.versionString.setReadOnly(true);
-    _rootPropertyOwner->addProperty(_versionInformation.versionString);
+    global::rootPropertyOwner.addProperty(_versionInformation.versionString);
     _versionInformation.sourceControlInformation.setReadOnly(true);
-    _rootPropertyOwner->addProperty(_versionInformation.sourceControlInformation);
+    global::rootPropertyOwner.addProperty(_versionInformation.sourceControlInformation);
 
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
@@ -663,7 +657,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
         global::renderEngine.setCamera(nullptr);
         global::navigationHandler.setCamera(nullptr);
         _scene->clear();
-        _rootPropertyOwner->removePropertySubOwner(_scene.get());
+        global::rootPropertyOwner.removePropertySubOwner(_scene.get());
     }
 
     std::unique_ptr<SceneInitializer> sceneInitializer;
@@ -676,7 +670,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     }
 
     _scene = std::make_unique<Scene>(std::move(sceneInitializer));
-    _rootPropertyOwner->addPropertySubOwner(_scene.get());
+    global::rootPropertyOwner.addPropertySubOwner(_scene.get());
     _scene->setCamera(std::make_unique<Camera>());
     Camera* camera = _scene->camera();
     camera->setParent(_scene->root());
@@ -948,7 +942,7 @@ void OpenSpaceEngine::writeSceneDocumentation() {
     }
 
     if (!global::configuration.documentation.property.empty()) {
-        _rootPropertyOwner->writeDocumentation(
+        global::rootPropertyOwner.writeDocumentation(
             absPath(global::configuration.documentation.property)
         );
     }
@@ -1619,16 +1613,6 @@ LoadingScreen& OpenSpaceEngine::loadingScreen() {
 AssetManager& OpenSpaceEngine::assetManager() {
     ghoul_assert(_assetManager, "Asset Manager must not be nullptr");
     return *_assetManager;
-}
-
-properties::PropertyOwner& OpenSpaceEngine::rootPropertyOwner() {
-    ghoul_assert(_rootPropertyOwner, "Root Property Namespace must not be nullptr");
-    return *_rootPropertyOwner;
-}
-
-VirtualPropertyManager& OpenSpaceEngine::virtualPropertyManager() {
-    ghoul_assert(_virtualPropertyManager, "Virtual Property Manager must not be nullptr");
-    return *_virtualPropertyManager;
 }
 
 }  // namespace openspace

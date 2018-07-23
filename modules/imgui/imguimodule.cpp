@@ -102,7 +102,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             gui._virtualProperty.setSource(
                 []() {
                     std::vector<properties::PropertyOwner*> res = {
-                        &(OsEng.virtualPropertyManager())
+                        &global::virtualPropertyManager
                     };
 
                     return res;

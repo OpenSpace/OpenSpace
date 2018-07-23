@@ -27,12 +27,14 @@
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/performance/performancemanager.h>
+#include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/deferredcastermanager.h>
 #include <openspace/rendering/luaconsole.h>
@@ -108,6 +110,11 @@ TimeManager& gTimeManager() {
     return g;
 }
 
+VirtualPropertyManager& gVirtualPropertyManager() {
+    static VirtualPropertyManager g;
+    return g;
+}
+
 WindowDelegate& gWindowDelegate() {
     static WindowDelegate g;
     return g;
@@ -125,6 +132,11 @@ interaction::NavigationHandler& gNavigationHandler() {
 
 performance::PerformanceManager& gPerformanceManager() {
     static performance::PerformanceManager g;
+    return g;
+}
+
+properties::PropertyOwner& gRootPropertyOwner() {
+    static properties::PropertyOwner g({ "" });
     return g;
 }
 

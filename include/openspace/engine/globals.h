@@ -40,12 +40,14 @@ class ParallelPeer;
 class RaycasterManager;
 class RenderEngine;
 class TimeManager;
+class VirtualPropertyManager;
 struct WindowDelegate;
 namespace interaction {
     class KeybindingManager;
     class NavigationHandler;
 } // namespace interaction
 namespace performance { class PerformanceManager; }
+namespace properties { class PropertyOwner; }
 namespace scripting {
     class ScriptEngine;
     class ScriptScheduler;
@@ -67,10 +69,12 @@ ParallelPeer& gParallelPeer();
 RaycasterManager& gRaycasterManager();
 RenderEngine& gRenderEngine();
 TimeManager& gTimeManager();
+VirtualPropertyManager& gVirtualPropertyManager();
 WindowDelegate& gWindowDelegate();
 interaction::KeybindingManager& gKeybindingManager();
 interaction::NavigationHandler& gNavigationHandler();
 performance::PerformanceManager& gPerformanceManager();
+properties::PropertyOwner& gRootPropertyOwner();
 scripting::ScriptEngine& gScriptEngine();
 scripting::ScriptScheduler& gScriptScheduler();
 
@@ -88,11 +92,13 @@ static ParallelPeer& parallelPeer = detail::gParallelPeer();
 static RaycasterManager& raycasterManager = detail::gRaycasterManager();
 static RenderEngine& renderEngine = detail::gRenderEngine();
 static TimeManager& timeManager = detail::gTimeManager();
+static VirtualPropertyManager& virtualPropertyManager = detail::gVirtualPropertyManager();
 static WindowDelegate& windowDelegate = detail::gWindowDelegate();
 static interaction::KeybindingManager& keybindingManager = detail::gKeybindingManager();
 static interaction::NavigationHandler& navigationHandler = detail::gNavigationHandler();
 static performance::PerformanceManager& performanceManager =
     detail::gPerformanceManager();
+static properties::PropertyOwner& rootPropertyOwner = detail::gRootPropertyOwner();
 static scripting::ScriptEngine& scriptEngine = detail::gScriptEngine();
 static scripting::ScriptScheduler& scriptScheduler = detail::gScriptScheduler();
 
