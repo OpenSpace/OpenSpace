@@ -28,7 +28,12 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/util/keys.h>
+#include <ghoul/ghoul.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/cmdparser/commandlineparser.h>
+#include <ghoul/cmdparser/singlecommand.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/boolean.h>
@@ -664,10 +669,51 @@ int main(int argc, char** argv) {
     SetUnhandledExceptionFilter(generateMiniDump);
 #endif // WIN32
 
-    // commandline parser here
+    // Initialize the LogManager and add the console log as this will be used every time
+    // and we need a fall back if something goes wrong between here and when we add the
+    // logs from the configuration file. If the user requested as specific loglevel in the
+    // configuration file, we will deinitialize this LogManager and reinitialize it later
+    // with the correct LogLevel
+    {
+        using namespace ghoul::logging;
+        LogManager::initialize(LogLevel::Debug, LogManager::ImmediateFlush::Yes);
+        LogMgr.addLog(std::make_unique<ConsoleLog>());
+    }
 
+    ghoul::initialize();
 
+    // Parse commandline arguments
+    ghoul::cmdparser::CommandlineParser parser(
+        std::string(argv[0]),
+        ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
+    );
 
+    openspace::CommandlineArguments commandlineArguments;
+    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+        commandlineArguments.configurationName, "--config", "-c",
+        "Provides the path to the OpenSpace configuration file. Only the '${TEMPORARY}' "
+        "path token is available and any other path has to be specified relative to the "
+        "current working directory."
+    ));
+
+    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+        commandlineArguments.configurationOverride, "--lua", "-l",
+        "Provides the ability to pass arbitrary Lua code to the application that will be "
+        "evaluated after the configuration file has been loaded but before the other "
+        "commandline arguments are triggered. This can be used to manipulate the "
+        "configuration file without editing the file on disk, for example in a "
+        "planetarium environment. Please not that the Lua script must not contain any - "
+        "or they will be interpreted as a new command. Similar, in Bash, ${...} will be "
+        "evaluated before it is passed to OpenSpace."
+    ));
+
+    std::vector<std::string> sgctArguments = parser.setCommandLine({ argv, argv + argc });
+
+    bool showHelp = parser.execute();
+    if (showHelp) {
+        parser.displayHelp(std::cout);
+        exit(EXIT_SUCCESS);
+    }
 
     std::pair<int, int> glVersion = supportedOpenGLVersion();
     LINFO(fmt::format(
@@ -867,16 +913,9 @@ int main(int argc, char** argv) {
     };
 
     // Create the OpenSpace engine and get arguments for the SGCT engine
-    std::vector<std::string> sgctArguments;
-    bool requestQuit = false;
+    std::string windowConfiguration;
     try {
-        openspace::initialize(
-            argc,
-            argv,
-            sgctDelegate,
-            sgctArguments,
-            requestQuit
-        );
+        windowConfiguration = openspace::initialize(commandlineArguments, sgctDelegate);
     }
     catch (const ghoul::RuntimeError& e) {
         // Write out all of the information about the exception and flush the logs
@@ -907,9 +946,12 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    if (requestQuit) {
-        return EXIT_SUCCESS;
-    }
+    // Prepend the outgoing sgctArguments with the program name
+    // as well as the configuration file that sgct is supposed to use
+    sgctArguments.insert(sgctArguments.begin(), argv[0]);
+    sgctArguments.insert(sgctArguments.begin() + 1, "-config");
+    sgctArguments.insert(sgctArguments.begin() + 2, absPath(windowConfiguration));
+
 
     // Create sgct engine c arguments
     int newArgc = static_cast<int>(sgctArguments.size());

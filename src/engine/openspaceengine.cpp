@@ -64,8 +64,6 @@
 #include <openspace/util/timemanager.h>
 #include <openspace/util/transformationmanager.h>
 #include <ghoul/ghoul.h>
-#include <ghoul/cmdparser/commandlineparser.h>
-#include <ghoul/cmdparser/singlecommand.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -97,7 +95,6 @@ using namespace ghoul::cmdparser;
 
 namespace {
     constexpr const char* _loggerCat = "OpenSpaceEngine";
-    constexpr const char* SgctConfigArgumentCommand = "-config";
     constexpr const int CacheVersion = 1;
 } // namespace
 
@@ -153,85 +150,20 @@ OpenSpaceEngine::OpenSpaceEngine()
 
 OpenSpaceEngine::~OpenSpaceEngine() {} // NOLINT
 
-void initialize(int argc, char** argv, WindowDelegate windowDelegate,
-                std::vector<std::string>& sgctArguments, bool& requestClose,
+std::string initialize(CommandlineArguments arguments, WindowDelegate windowDelegate,
                 bool consoleLog)
 {
-    ghoul_assert(argc >= 1 && argv, "No arguments were passed to this function");
-
     global::windowDelegate = std::move(windowDelegate);
-
-    LDEBUG("Initialize FileSystem");
-    ghoul::initialize();
-
-    // Initialize the LogManager and add the console log as this will be used every time
-    // and we need a fall back if something goes wrong between here and when we add the
-    // logs from the configuration file. If the user requested as specific loglevel in the
-    // configuration file, we will deinitialize this LogManager and reinitialize it later
-    // with the correct LogLevel
-    LogManager::initialize(
-        LogLevel::Debug,
-        ghoul::logging::LogManager::ImmediateFlush::Yes
-    );
-    if (consoleLog) {
-        LogMgr.addLog(std::make_unique<ConsoleLog>());
-    }
-
     global::initialize();
-
-    // Parse commandline arguments
-    ghoul::cmdparser::CommandlineParser parser(
-        std::string(argv[0]),
-        ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
-    );
-
-    struct {
-        std::string configurationName;
-        std::string configurationOverwrite;
-    } commandlineArgumentPlaceholders;
-
-
-    commandlineArgumentPlaceholders.configurationName = "";
-    parser.addCommand(std::make_unique<SingleCommand<std::string>>(
-        commandlineArgumentPlaceholders.configurationName, "--config", "-c",
-        "Provides the path to the OpenSpace configuration file."
-    ));
-
-    commandlineArgumentPlaceholders.configurationOverwrite = "";
-    parser.addCommand(std::make_unique<SingleCommand<std::string>>(
-        commandlineArgumentPlaceholders.configurationOverwrite, "--lua", "-l",
-        "Provides the ability to pass arbitrary Lua code to the application that will be "
-        "evaluated after the configuration file has been loaded but before the other "
-        "commandline arguments are triggered. This can be used to manipulate the "
-        "configuration file without editing the file on disk, for example in a "
-        "planetarium environment. Please not that the Lua script must not contain any - "
-        "or they will be interpreted as a new command. Similar, in Bash, ${...} will be "
-        "evaluated before it is passed to OpenSpace."
-    ));
-
-    std::vector<std::string> args(argv, argv + argc);
-    std::vector<std::string> arguments = parser.setCommandLine(args);
-
-    bool showHelp = parser.execute();
-    if (showHelp) {
-        parser.displayHelp(std::cout);
-        requestClose = true;
-        return;
-    }
-    else {
-        requestClose = false;
-    }
-
-    sgctArguments = std::move(arguments);
 
     // Find configuration
     std::string configurationFilePath;
-    if (commandlineArgumentPlaceholders.configurationName.empty()) {
+    if (arguments.configurationName.empty()) {
         LDEBUG("Finding configuration");
         configurationFilePath = findConfiguration();
     }
     else {
-        configurationFilePath = commandlineArgumentPlaceholders.configurationName;
+        configurationFilePath = arguments.configurationName;
     }
     configurationFilePath = absPath(configurationFilePath);
 
@@ -249,12 +181,12 @@ void initialize(int argc, char** argv, WindowDelegate windowDelegate,
 
         // If the user requested a commandline-based configuation script that should
         // overwrite some of the values, this is the time to do it
-        if (!commandlineArgumentPlaceholders.configurationOverwrite.empty()) {
+        if (!arguments.configurationOverride.empty()) {
             LDEBUG("Executing Lua script passed through the commandline:");
-            LDEBUG(commandlineArgumentPlaceholders.configurationOverwrite);
+            LDEBUG(arguments.configurationOverride);
             ghoul::lua::runScript(
                 global::configuration.state,
-                commandlineArgumentPlaceholders.configurationOverwrite
+                arguments.configurationOverride
             );
             parseLuaState(global::configuration);
         }
@@ -409,14 +341,7 @@ void initialize(int argc, char** argv, WindowDelegate windowDelegate,
     // Register the provided shader directories
     ghoul::opengl::ShaderPreprocessor::addIncludePath(absPath("${SHADERS}"));
 
-    // Prepend the outgoing sgctArguments with the program name
-    // as well as the configuration file that sgct is supposed to use
-    sgctArguments.insert(sgctArguments.begin(), argv[0]);
-    sgctArguments.insert(sgctArguments.begin() + 1, SgctConfigArgumentCommand);
-    sgctArguments.insert(
-        sgctArguments.begin() + 2,
-        absPath(global::configuration.windowConfiguration)
-    );
+    return openspace::global::configuration.windowConfiguration;
 }
 
 void deinitialize() {

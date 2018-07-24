@@ -58,8 +58,12 @@ struct ShutdownInformation {
     float timer = 0.f;
 };
 
-void initialize(int argc, char** argv, WindowDelegate windowDelegate,
-    std::vector<std::string>& sgctArguments, bool& requestClose,
+struct CommandlineArguments {
+    std::string configurationName;
+    std::string configurationOverride;
+};
+
+std::string initialize(CommandlineArguments arguments, WindowDelegate windowDelegate,
     bool consoleLog = true);
 
 void deinitialize();
