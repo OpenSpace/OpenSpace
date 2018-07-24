@@ -66,7 +66,6 @@ public:
         bool consoleLog = true);
 
     static void destroy();
-    static OpenSpaceEngine& ref();
 
     OpenSpaceEngine();
     ~OpenSpaceEngine();
@@ -127,13 +126,7 @@ private:
     // The first frame might take some more time in the update loop, so we need to know to
     // disable the synchronization; otherwise a hardware sync will kill us after 1 minute
     bool _isFirstRenderingFirstFrame = true;
-
-    glm::dvec2 _mousePosition;
-
-    //static OpenSpaceEngine* _engine;
 };
-
-#define OsEng (openspace::global::openSpaceEngine)
 
 } // namespace openspace
 

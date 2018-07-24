@@ -411,7 +411,7 @@ int loadScene(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadScene");
 
     const std::string& sceneFile = ghoul::lua::value<std::string>(L, 1);
-    OsEng.scheduleLoadSingleAsset(sceneFile);
+    global::openSpaceEngine.scheduleLoadSingleAsset(sceneFile);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

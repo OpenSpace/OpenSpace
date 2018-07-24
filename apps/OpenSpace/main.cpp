@@ -217,11 +217,11 @@ void mainInitFunc() {
     LTRACE("main::mainInitFunc(begin)");
 
     LDEBUG("Initializing OpenSpace Engine started");
-    OsEng.initialize();
+    openspace::global::openSpaceEngine.initialize();
     LDEBUG("Initializing OpenSpace Engine finished");
 
     LDEBUG("Initializing OpenGL in OpenSpace Engine started");
-    OsEng.initializeGL();
+    openspace::global::openSpaceEngine.initializeGL();
     LDEBUG("Initializing OpenGL in OpenSpace Engine finished");
 
     // Find if we have at least one OpenVR window
@@ -355,7 +355,7 @@ void mainInitFunc() {
 
 void mainPreSyncFunc() {
     LTRACE("main::mainPreSyncFunc(begin)");
-    OsEng.preSynchronization();
+    openspace::global::openSpaceEngine.preSynchronization();
 
     // Query joystick status
     using namespace openspace::interaction;
@@ -448,7 +448,7 @@ void mainPreSyncFunc() {
 
 void mainPostSyncPreDrawFunc() {
     LTRACE("main::postSynchronizationPreDraw(begin)");
-    OsEng.postSynchronizationPreDraw();
+    openspace::global::openSpaceEngine.postSynchronizationPreDraw();
 
 #ifdef OPENVR_SUPPORT
     if (FirstOpenVRWindow) {
@@ -479,7 +479,11 @@ void mainRenderFunc() {
 #endif
 
     try {
-        OsEng.render(SgctEngine->getModelMatrix(), viewMatrix, projectionMatrix);
+        openspace::global::openSpaceEngine.render(
+            SgctEngine->getModelMatrix(),
+            viewMatrix,
+            projectionMatrix
+        );
     }
     catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
@@ -493,7 +497,7 @@ void mainDraw2DFunc() {
     LTRACE("main::mainDraw2DFunc(begin)");
 
     try {
-        OsEng.drawOverlays();
+        openspace::global::openSpaceEngine.drawOverlays();
     }
     catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
@@ -519,7 +523,7 @@ void mainPostDrawFunc() {
     }
 #endif // OPENVR_SUPPORT
 
-    OsEng.postDraw();
+    openspace::global::openSpaceEngine.postDraw();
 
 #ifdef OPENSPACE_HAS_SPOUT
     for (const SpoutWindow& w : SpoutWindows) {
@@ -557,7 +561,11 @@ void mainPostDrawFunc() {
 void mainExternalControlCallback(const char* receivedChars, int size) {
     LTRACE("main::mainExternalControlCallback(begin)");
     if (SgctEngine->isMaster()) {
-        OsEng.externalControlCallback(receivedChars, size, 0);
+        openspace::global::openSpaceEngine.externalControlCallback(
+            receivedChars,
+            size,
+            0
+        );
     }
     LTRACE("main::mainExternalControlCallback(end)");
 }
@@ -567,7 +575,7 @@ void mainExternalControlCallback(const char* receivedChars, int size) {
 void mainKeyboardCallback(int key, int, int action, int mods) {
     LTRACE("main::mainKeyboardCallback(begin)");
     if (SgctEngine->isMaster()) {
-        OsEng.keyboardCallback(
+        openspace::global::openSpaceEngine.keyboardCallback(
             openspace::Key(key),
             openspace::KeyModifier(mods),
             openspace::KeyAction(action)
@@ -581,7 +589,7 @@ void mainKeyboardCallback(int key, int, int action, int mods) {
 void mainMouseButtonCallback(int key, int action) {
     LTRACE("main::mainMouseButtonCallback(begin)");
     if (SgctEngine->isMaster()) {
-        OsEng.mouseButtonCallback(
+        openspace::global::openSpaceEngine.mouseButtonCallback(
             openspace::MouseButton(key),
             openspace::MouseAction(action)
         );
@@ -593,7 +601,7 @@ void mainMouseButtonCallback(int key, int action) {
 
 void mainMousePosCallback(double x, double y) {
     if (SgctEngine->isMaster()) {
-        OsEng.mousePositionCallback(x, y);
+        openspace::global::openSpaceEngine.mousePositionCallback(x, y);
     }
 }
 
@@ -602,7 +610,7 @@ void mainMousePosCallback(double x, double y) {
 void mainMouseScrollCallback(double posX, double posY) {
     LTRACE("main::mainMouseScrollCallback(begin");
     if (SgctEngine->isMaster()) {
-        OsEng.mouseScrollWheelCallback(posX, posY);
+        openspace::global::openSpaceEngine.mouseScrollWheelCallback(posX, posY);
     }
     LTRACE("main::mainMouseScrollCallback(end)");
 }
@@ -611,7 +619,10 @@ void mainMouseScrollCallback(double posX, double posY) {
 
 void mainCharCallback(unsigned int codepoint, int mods) {
     if (SgctEngine->isMaster()) {
-        OsEng.charCallback(codepoint, openspace::KeyModifier(mods));
+        openspace::global::openSpaceEngine.charCallback(
+            codepoint,
+            openspace::KeyModifier(mods)
+        );
     }
 }
 
@@ -619,7 +630,7 @@ void mainCharCallback(unsigned int codepoint, int mods) {
 
 void mainEncodeFun() {
     LTRACE("main::mainEncodeFun(begin)");
-    OsEng.encode();
+    openspace::global::openSpaceEngine.encode();
     LTRACE("main::mainEncodeFun(end)");
 }
 
@@ -627,7 +638,7 @@ void mainEncodeFun() {
 
 void mainDecodeFun() {
     LTRACE("main::mainDecodeFun(begin)");
-    OsEng.decode();
+    openspace::global::openSpaceEngine.decode();
     LTRACE("main::mainDecodeFun(end)");
 }
 
@@ -968,7 +979,7 @@ int main(int argc, char** argv) {
 
     auto cleanup = [&](bool isInitialized) {
         if (isInitialized) {
-            OsEng.deinitialize();
+            openspace::global::openSpaceEngine.deinitialize();
         }
 
         // Clear function bindings to avoid crash after destroying the OpenSpace Engine

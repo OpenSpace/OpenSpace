@@ -52,7 +52,7 @@ MultiThreadedSceneInitializer::MultiThreadedSceneInitializer(unsigned int nThrea
 
 void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
     auto initFunction = [this, node]() {
-        LoadingScreen& loadingScreen = OsEng.loadingScreen();
+        LoadingScreen& loadingScreen = global::openSpaceEngine.loadingScreen();
 
         loadingScreen.updateItem(
             node->identifier(),
@@ -74,7 +74,7 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
         );
     };
 
-    LoadingScreen& loadingScreen = OsEng.loadingScreen();
+    LoadingScreen& loadingScreen = global::openSpaceEngine.loadingScreen();
     loadingScreen.setItemNumber(loadingScreen.itemNumber() + 1);
     loadingScreen.updateItem(
         node->identifier(),

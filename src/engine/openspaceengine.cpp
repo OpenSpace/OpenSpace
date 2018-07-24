@@ -1338,7 +1338,9 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
 
     // Check if the user clicked on one of the 'buttons' the RenderEngine is drawing
     if (action == MouseAction::Press) {
-        bool isConsumed = global::renderEngine.mouseActivationCallback(_mousePosition);
+        bool isConsumed = global::renderEngine.mouseActivationCallback(
+            global::windowDelegate.mousePosition()
+        );
 
         if (isConsumed) {
             return;
@@ -1353,8 +1355,6 @@ void OpenSpaceEngine::mousePositionCallback(double x, double y) {
     for (const F& func : global::callback::mousePosition) {
         func(x, y);
     }
-
-    _mousePosition = { x, y };
 
     global::navigationHandler.mousePositionCallback(x, y);
 }

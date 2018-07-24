@@ -39,7 +39,7 @@ namespace openspace::luascriptfunctions {
 int toggleShutdown(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::toggleShutdown");
 
-    OsEng.toggleShutdownMode();
+    global::openSpaceEngine.toggleShutdownMode();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -53,8 +53,8 @@ int toggleShutdown(lua_State* L) {
 int writeDocumentation(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::writeDocumentation");
 
-    OsEng.writeStaticDocumentation();
-    OsEng.writeSceneDocumentation();
+    global::openSpaceEngine.writeStaticDocumentation();
+    global::openSpaceEngine.writeSceneDocumentation();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
