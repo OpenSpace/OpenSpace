@@ -51,6 +51,7 @@ class TimeManager;
 class VirtualPropertyManager;
 struct WindowDelegate;
 namespace interaction {
+    struct JoystickInputStates;
     class KeybindingManager;
     class NavigationHandler;
 } // namespace interaction
@@ -83,6 +84,7 @@ SyncEngine& gSyncEngine();
 TimeManager& gTimeManager();
 VirtualPropertyManager& gVirtualPropertyManager();
 WindowDelegate& gWindowDelegate();
+interaction::JoystickInputStates& gJoystickInputStates();
 interaction::KeybindingManager& gKeybindingManager();
 interaction::NavigationHandler& gNavigationHandler();
 performance::PerformanceManager& gPerformanceManager();
@@ -112,6 +114,8 @@ static SyncEngine& syncEngine = detail::gSyncEngine();
 static TimeManager& timeManager = detail::gTimeManager();
 static VirtualPropertyManager& virtualPropertyManager = detail::gVirtualPropertyManager();
 static WindowDelegate& windowDelegate = detail::gWindowDelegate();
+static interaction::JoystickInputStates& joystickInputStates =
+    detail::gJoystickInputStates();
 static interaction::KeybindingManager& keybindingManager = detail::gKeybindingManager();
 static interaction::NavigationHandler& navigationHandler = detail::gNavigationHandler();
 static performance::PerformanceManager& performanceManager =

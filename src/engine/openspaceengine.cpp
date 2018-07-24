@@ -1371,13 +1371,8 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
     global::navigationHandler.mouseScrollWheelCallback(posY);
 }
 
-void OpenSpaceEngine::setJoystickInputStates(interaction::JoystickInputStates& states) {
-    global::navigationHandler.setJoystickInputStates(states);
-}
-
 void OpenSpaceEngine::encode() {
     global::syncEngine.encodeSyncables();
-
     global::networkEngine.publishStatusMessage();
     global::networkEngine.sendMessages();
 }

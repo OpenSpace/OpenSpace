@@ -32,6 +32,7 @@
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/keybindingmanager.h>
+#include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/network/networkengine.h>
@@ -143,6 +144,11 @@ VirtualPropertyManager& gVirtualPropertyManager() {
 
 WindowDelegate& gWindowDelegate() {
     static WindowDelegate g;
+    return g;
+}
+
+interaction::JoystickInputStates& gJoystickInputStates() {
+    static interaction::JoystickInputStates g;
     return g;
 }
 

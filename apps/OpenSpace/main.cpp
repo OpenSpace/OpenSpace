@@ -28,37 +28,22 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/util/keys.h>
-
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/boolean.h>
-
 #include <sgct.h>
 #include <chrono>
 #include <ctime>
 
 #ifdef WIN32
-
 #include <openspace/openspace.h>
-#include <openspace/engine/globals.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/stacktrace.h>
-
 #include <ghoul/fmt.h>
-
-#include <Windows.h>
+#include <dbghelp.h>
 #include <shellapi.h>
 #include <shlobj.h>
-
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable : 4091)
-#include <dbghelp.h>
-#pragma warning (pop)
-#endif // _MSC_VER
-
+#include <Windows.h>
 #endif // WIN32
 
 #ifdef OPENVR_SUPPORT
@@ -69,15 +54,10 @@
 #include "SpoutLibrary.h"
 #endif // OPENSPACE_HAS_SPOUT
 
-
-#define DEVELOPER_MODE
-
 namespace {
 
 constexpr const char* _loggerCat = "main";
 sgct::Engine* SgctEngine;
-
-openspace::interaction::JoystickInputStates joystickInputStates;
 
 constexpr const char* OpenVRTag = "OpenVR";
 constexpr const char* SpoutTag = "Spout";
@@ -135,6 +115,8 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
         nullptr,
         nullptr
     );
+
+    CloseHandle(hDumpFile);
 
     if (success) {
         LINFO("Created successfully");
@@ -350,8 +332,6 @@ void mainInitFunc() {
         }
     }
 
-    OsEng.setJoystickInputStates(joystickInputStates);
-
     LTRACE("main::mainInitFunc(end)");
 }
 
@@ -363,7 +343,7 @@ void mainPreSyncFunc() {
     using namespace openspace::interaction;
 
     for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; ++i) {
-        JoystickInputState& state = joystickInputStates[i];
+        JoystickInputState& state = openspace::global::joystickInputStates[i];
 
         int present = glfwJoystickPresent(i);
         if (present == GLFW_TRUE) {
@@ -630,8 +610,18 @@ void mainLogCallback(const char* msg) {
     LINFOC("SGCT", message.substr(0, message.size() - 1));
 }
 
-int main_main(int argc, char** argv) {
+} // namespace
+
+int main(int argc, char** argv) {
+#ifdef WIN32
+    SetUnhandledExceptionFilter(generateMiniDump);
+#endif // WIN32
+
     std::pair<int, int> glVersion = supportedOpenGLVersion();
+
+    //
+    // Set up SGCT functions for window delegate
+    //
 
     openspace::WindowDelegate sgctDelegate;
     sgctDelegate.terminate = []() { sgct::Engine::instance()->terminate(); };
@@ -639,7 +629,7 @@ int main_main(int argc, char** argv) {
         sgct::SGCTWindow::setBarrier(enabled);
     };
     sgctDelegate.setSynchronization = [](bool enabled) {
-        sgct_core::ClusterManager::instance()->setUseIgnoreSync(enabled); 
+        sgct_core::ClusterManager::instance()->setUseIgnoreSync(enabled);
     };
     sgctDelegate.clearAllWindows = [](const glm::vec4& clearColor) {
         size_t n = sgct::Engine::instance()->getNumberOfWindows();
@@ -650,25 +640,19 @@ int main_main(int argc, char** argv) {
             glfwSwapBuffers(win);
         }
     };
-    sgctDelegate.windowHasResized = []() { 
-        return sgct::Engine::instance()->getCurrentWindowPtr()->isWindowResized(); 
+    sgctDelegate.windowHasResized = []() {
+        return sgct::Engine::instance()->getCurrentWindowPtr()->isWindowResized();
     };
-    sgctDelegate.averageDeltaTime = []() { 
-        return sgct::Engine::instance()->getAvgDt();
-    };
-    sgctDelegate.deltaTime = []() { 
-        return sgct::Engine::instance()->getDt(); 
-    };
-    sgctDelegate.applicationTime = []() { 
-        return sgct::Engine::getTime(); 
-    };
-    sgctDelegate.mousePosition = []() { 
+    sgctDelegate.averageDeltaTime = []() { return sgct::Engine::instance()->getAvgDt(); };
+    sgctDelegate.deltaTime = []() { return sgct::Engine::instance()->getDt(); };
+    sgctDelegate.applicationTime = []() { return sgct::Engine::getTime(); };
+    sgctDelegate.mousePosition = []() {
         int id = sgct::Engine::instance()->getCurrentWindowPtr()->getId();
         double posX, posY;
         sgct::Engine::instance()->getMousePos(id, &posX, &posY);
-        return glm::vec2(posX, posY); 
+        return glm::vec2(posX, posY);
     };
-    sgctDelegate.mouseButtons = [](int maxNumber) { 
+    sgctDelegate.mouseButtons = [](int maxNumber) {
         int id = sgct::Engine::instance()->getCurrentWindowPtr()->getId();
         uint32_t result = 0;
         for (int i = 0; i < maxNumber; ++i) {
@@ -677,15 +661,14 @@ int main_main(int argc, char** argv) {
                 result |= (1 << i);
             }
         }
-        return result; 
+        return result;
     };
-    sgctDelegate.currentWindowSize = []() { 
-        auto window = sgct::Engine::instance()->getCurrentWindowPtr();
+    sgctDelegate.currentWindowSize = []() {
         return glm::ivec2(
-            window->getXResolution(),
-            window->getYResolution()); 
+            sgct::Engine::instance()->getCurrentWindowPtr()->getXResolution(),
+            sgct::Engine::instance()->getCurrentWindowPtr()->getYResolution());
     };
-    sgctDelegate.currentSubwindowSize = []() { 
+    sgctDelegate.currentSubwindowSize = []() {
         auto window = sgct::Engine::instance()->getCurrentWindowPtr();
         switch (window->getStereoMode()) {
             case sgct::SGCTWindow::Side_By_Side_Stereo:
@@ -698,13 +681,13 @@ int main_main(int argc, char** argv) {
                 return glm::ivec2(window->getXResolution(), window->getYResolution());
         }
     };
-    sgctDelegate.currentWindowResolution = []() { 
+    sgctDelegate.currentWindowResolution = []() {
         int x, y;
         auto window = sgct::Engine::instance()->getCurrentWindowPtr();
         window->getFinalFBODimensions(x, y);
-        return glm::ivec2(x, y); 
+        return glm::ivec2(x, y);
     };
-    sgctDelegate.currentDrawBufferResolution = []() { 
+    sgctDelegate.currentDrawBufferResolution = []() {
         sgct_core::Viewport* viewport =
             sgct::Engine::instance()->getCurrentWindowPtr()->getViewport(0);
         if (viewport != nullptr) {
@@ -721,24 +704,25 @@ int main_main(int argc, char** argv) {
         }
         return glm::ivec2(-1, -1);
     };
-    sgctDelegate.currentViewportSize = []() { 
+    sgctDelegate.currentViewportSize = []() {
         sgct_core::Viewport* viewport =
             sgct::Engine::instance()->getCurrentWindowPtr()->getViewport(0);
         if (viewport != nullptr) {
-            int xx = 0, yy = 0;
-            sgct::Engine::instance()->getCurrentViewportSize(xx, yy);
-            return glm::ivec2(xx, yy);
+            int x = 0;
+            int y = 0;
+            sgct::Engine::instance()->getCurrentViewportSize(x, y);
+            return glm::ivec2(x, y);
         }
         return glm::ivec2(-1, -1);
     };
-    sgctDelegate.dpiScaling = []() { 
+    sgctDelegate.dpiScaling = []() {
         return glm::vec2(
             sgct::Engine::instance()->getCurrentWindowPtr()->getXScale(),
             sgct::Engine::instance()->getCurrentWindowPtr()->getYScale()
-        ); 
+        );
     };
-    sgctDelegate.currentNumberOfAaSamples = []() { 
-        return sgct::Engine::instance()->getCurrentWindowPtr()->getNumberOfAASamples(); 
+    sgctDelegate.currentNumberOfAaSamples = []() {
+        return sgct::Engine::instance()->getCurrentWindowPtr()->getNumberOfAASamples();
     };
     sgctDelegate.isRegularRendering = []() {
         sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
@@ -748,72 +732,63 @@ int main_main(int argc, char** argv) {
         );
         sgct_core::Viewport* vp = w->getViewport(0);
         sgct_core::NonLinearProjection* nlp = vp->getNonLinearProjectionPtr();
-        return nlp == nullptr; 
+        return nlp == nullptr;
     };
-    sgctDelegate.hasGuiWindow = []() { 
+    sgctDelegate.hasGuiWindow = []() {
         auto engine = sgct::Engine::instance();
         for (size_t i = 0; i < engine->getNumberOfWindows(); ++i) {
             if (engine->getWindowPtr(i)->checkIfTagExists("GUI")) {
                 return true;
             }
         }
-        return false; 
+        return false;
     };
-    sgctDelegate.isGuiWindow = []() { 
-        return sgct::Engine::instance()->getCurrentWindowPtr()->checkIfTagExists(
-            "GUI"
-        ); 
+    sgctDelegate.isGuiWindow = []() {
+        return sgct::Engine::instance()->getCurrentWindowPtr()->checkIfTagExists("GUI");
     };
-    sgctDelegate.isMaster = []() { 
-        return sgct::Engine::instance()->isMaster(); 
+    sgctDelegate.isMaster = []() { return sgct::Engine::instance()->isMaster(); };
+    sgctDelegate.isUsingSwapGroups = []() {
+        return sgct::Engine::instance()->getCurrentWindowPtr()->isUsingSwapGroups();
     };
-    sgctDelegate.isUsingSwapGroups = []() { 
-        return sgct::Engine::instance()->getCurrentWindowPtr()->isUsingSwapGroups(); 
+    sgctDelegate.isSwapGroupMaster = []() {
+        return sgct::Engine::instance()->getCurrentWindowPtr()->isSwapGroupMaster();
     };
-    sgctDelegate.isSwapGroupMaster = []() { 
-        return sgct::Engine::instance()->getCurrentWindowPtr()->isSwapGroupMaster(); 
+    sgctDelegate.viewProjectionMatrix = []() {
+        return sgct::Engine::instance()->getCurrentModelViewProjectionMatrix();
     };
-    sgctDelegate.viewProjectionMatrix = []() { 
-        return sgct::Engine::instance()->getCurrentModelViewProjectionMatrix(); 
-    };
-    sgctDelegate.modelMatrix = []() { 
-        return sgct::Engine::instance()->getModelMatrix(); 
+    sgctDelegate.modelMatrix = []() {
+        return sgct::Engine::instance()->getModelMatrix();
     };
     sgctDelegate.setNearFarClippingPlane = [](float nearPlane, float farPlane) {
         sgct::Engine::instance()->setNearAndFarClippingPlanes(nearPlane, farPlane);
     };
     sgctDelegate.setEyeSeparationDistance = [](float distance) {
-        sgct::Engine::instance()->setEyeSeparation(distance); 
+        sgct::Engine::instance()->setEyeSeparation(distance);
     };
-    sgctDelegate.viewportPixelCoordinates = []() { 
+    sgctDelegate.viewportPixelCoordinates = []() {
         sgct::SGCTWindow* window = sgct::Engine::instance()->getCurrentWindowPtr();
         if (!window || !window->getCurrentViewport()) {
             return glm::ivec4(0, 0, 0, 0);
         }
-
-        const int* viewportData =
-            sgct::Engine::instance()->getCurrentViewportPixelCoords();
-        return glm::ivec4(
-            viewportData[0],
-            viewportData[2],
-            viewportData[1],
-            viewportData[3]
-        ); 
+        else {
+            const int* data = sgct::Engine::instance()->getCurrentViewportPixelCoords();
+            return glm::ivec4(data[0], data[2], data[1], data[3]);
+        }
     };
-    sgctDelegate.isExternalControlConnected = []() { 
-        return sgct::Engine::instance()->isExternalControlConnected(); 
+    sgctDelegate.isExternalControlConnected = []() {
+        return sgct::Engine::instance()->isExternalControlConnected();
     };
     sgctDelegate.sendMessageToExternalControl = [](const std::vector<char>& message) {
         sgct::Engine::instance()->sendMessageToExternalControl(
             message.data(),
             static_cast<int>(message.size())
-        ); 
+        );
     };
-    sgctDelegate.isSimpleRendering = []() { 
+    sgctDelegate.isSimpleRendering = []() {
         return (sgct::Engine::instance()->getCurrentRenderTarget() !=
-            sgct::Engine::NonLinearBuffer); 
+                sgct::Engine::NonLinearBuffer);
     };
-    sgctDelegate.isFisheyeRendering = []() { 
+    sgctDelegate.isFisheyeRendering = []() {
         sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
         return dynamic_cast<sgct_core::FisheyeProjection*>(
             w->getViewport(0)->getNonLinearProjectionPtr()
@@ -821,18 +796,18 @@ int main_main(int argc, char** argv) {
     };
     sgctDelegate.takeScreenshot = [](bool applyWarping) {
         sgct::SGCTSettings::instance()->setCaptureFromBackBuffer(applyWarping);
-        sgct::Engine::instance()->takeScreenshot(); 
+        sgct::Engine::instance()->takeScreenshot();
     };
     sgctDelegate.swapBuffer = []() {
         GLFWwindow* w = glfwGetCurrentContext();
         glfwSwapBuffers(w);
-        glfwPollEvents(); 
+        glfwPollEvents();
     };
-    sgctDelegate.nWindows = []() { 
-        return static_cast<int>(sgct::Engine::instance()->getNumberOfWindows()); 
+    sgctDelegate.nWindows = []() {
+        return static_cast<int>(sgct::Engine::instance()->getNumberOfWindows());
     };
-    sgctDelegate.currentWindowId = []() { 
-        return sgct::Engine::instance()->getCurrentWindowPtr()->getId(); 
+    sgctDelegate.currentWindowId = []() {
+        return sgct::Engine::instance()->getCurrentWindowPtr()->getId();
     };
 
     // Create the OpenSpace engine and get arguments for the SGCT engine
@@ -949,8 +924,13 @@ int main_main(int argc, char** argv) {
         "Unknown OpenGL version. Missing statement in version mapping map"
     );
 
-    BooleanType(IsInitialized);
-    auto cleanup = [&](IsInitialized isInitialized){
+    bool initSuccess = SgctEngine->init(versionMapping[glVersion]);
+
+    // Do not print message if slaves are waiting for the master
+    // Only timeout after 15 minutes
+    SgctEngine->setSyncParameters(false, 15.f * 60.f);
+
+    auto cleanup = [&](bool isInitialized) {
         if (isInitialized) {
             OsEng.deinitialize();
         }
@@ -964,7 +944,6 @@ int main_main(int argc, char** argv) {
 
         LDEBUG("Destroying SGCT Engine");
         delete SgctEngine;
-
 
 #ifdef OPENVR_SUPPORT
         // Clean up OpenVR
@@ -985,68 +964,17 @@ int main_main(int argc, char** argv) {
 #endif // OPENSPACE_HAS_SPOUT
     };
 
-    bool initSuccess = SgctEngine->init(versionMapping[glVersion]);
-
-    // Do not print message if slaves are waiting for the master
-    // Only timeout after 15 minutes
-    SgctEngine->setSyncParameters(false, 15.f * 60.f);
-
     if (!initSuccess) {
         LFATAL("Initializing failed");
-        cleanup(IsInitialized::No);
+        cleanup(false);
         return EXIT_FAILURE;
     }
 
-    // Main loop
     LINFO("Starting rendering loop");
     SgctEngine->render();
     LINFO("Ending rendering loop");
 
-    cleanup(IsInitialized::Yes);
+    cleanup(true);
 
-    // Exit program
     exit(EXIT_SUCCESS);
-}
-
-} // namespace
-
-int main(int argc, char** argv) {
-#ifdef WIN32
-    SetUnhandledExceptionFilter(generateMiniDump);
-#endif // WIN32
-
-    // If we are working as a developer, we don't want to catch the exceptions in order to
-    // find the locations where the exceptions are raised.
-    // If we are not in developer mode, we want to catch and at least log the error before
-    // dying
-#ifdef DEVELOPER_MODE
-    return main_main(argc, argv);
-#else
-    // We wrap the actual main function in a try catch block so that we can get and print
-    // some additional information in case an exception is raised
-    try {
-        return main_main(argc, argv);
-    }
-    catch (const ghoul::RuntimeError& e) {
-        // Write out all of the information about the exception and flush the logs
-        LFATALC(e.component, e.message);
-        LogMgr.flushLogs();
-        return EXIT_FAILURE;
-    }
-    catch (const ghoul::AssertionException& e) {
-        // We don't want to catch the assertion exception as we won't be able to add a
-        // breakpoint for debugging
-        LFATALC("Assertion failed", e.what());
-        throw;
-    } catch (const std::exception& e) {
-        LFATALC("Exception", e.what());
-        LogMgr.flushLogs();
-        return EXIT_FAILURE;
-    }
-    catch (...) {
-        LFATALC("Exception", "Unknown exception");
-        LogMgr.flushLogs();
-        return EXIT_FAILURE;
-    }
-#endif // DEVELOPER_MODE
 }

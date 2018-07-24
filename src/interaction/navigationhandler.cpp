@@ -196,10 +196,6 @@ void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActio
     _inputState->keyboardCallback(key, modifier, action);
 }
 
-void NavigationHandler::setJoystickInputStates(JoystickInputStates& states) {
-    _inputState->setJoystickInputStates(states);
-}
-
 void NavigationHandler::setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict)
 {
     bool readSuccessful = true;
