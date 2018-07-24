@@ -228,6 +228,7 @@ void mainInitFunc() {
     openspace::global::openSpaceEngine.initialize();
     LDEBUG("Initializing OpenSpace Engine finished");
 
+
     LDEBUG("Initializing OpenGL in OpenSpace Engine started");
     openspace::global::openSpaceEngine.initializeGL();
     LDEBUG("Initializing OpenGL in OpenSpace Engine finished");
@@ -666,68 +667,7 @@ void mainLogCallback(const char* msg) {
 } // namespace
 
 
-
-int main(int argc, char** argv) {
-#ifdef WIN32
-    SetUnhandledExceptionFilter(generateMiniDump);
-#endif // WIN32
-
-    // Initialize the LogManager and add the console log as this will be used every time
-    // and we need a fall back if something goes wrong between here and when we add the
-    // logs from the configuration file. If the user requested as specific loglevel in the
-    // configuration file, we will deinitialize this LogManager and reinitialize it later
-    // with the correct LogLevel
-    {
-        using namespace ghoul::logging;
-        LogManager::initialize(LogLevel::Debug, LogManager::ImmediateFlush::Yes);
-        LogMgr.addLog(std::make_unique<ConsoleLog>());
-    }
-
-    ghoul::initialize();
-
-    // Parse commandline arguments
-    ghoul::cmdparser::CommandlineParser parser(
-        std::string(argv[0]),
-        ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
-    );
-
-    openspace::CommandlineArguments commandlineArguments;
-    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-        commandlineArguments.configurationName, "--config", "-c",
-        "Provides the path to the OpenSpace configuration file. Only the '${TEMPORARY}' "
-        "path token is available and any other path has to be specified relative to the "
-        "current working directory."
-    ));
-
-    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-        commandlineArguments.configurationOverride, "--lua", "-l",
-        "Provides the ability to pass arbitrary Lua code to the application that will be "
-        "evaluated after the configuration file has been loaded but before the other "
-        "commandline arguments are triggered. This can be used to manipulate the "
-        "configuration file without editing the file on disk, for example in a "
-        "planetarium environment. Please not that the Lua script must not contain any - "
-        "or they will be interpreted as a new command. Similar, in Bash, ${...} will be "
-        "evaluated before it is passed to OpenSpace."
-    ));
-
-    std::vector<std::string> sgctArguments = parser.setCommandLine({ argv, argv + argc });
-
-    bool showHelp = parser.execute();
-    if (showHelp) {
-        parser.displayHelp(std::cout);
-        exit(EXIT_SUCCESS);
-    }
-
-    std::pair<int, int> glVersion = supportedOpenGLVersion();
-    LINFO(fmt::format(
-        "Detected OpenGL version: {}.{}", glVersion.first, glVersion.second
-    ));
-
-
-    //
-    // Set up SGCT functions for window delegate
-    //
-
+void setSgctDelegateFunctions() {
     openspace::WindowDelegate& sgctDelegate = openspace::global::windowDelegate;
     sgctDelegate.terminate = []() { sgct::Engine::instance()->terminate(); };
     sgctDelegate.setBarrier = [](bool enabled) {
@@ -914,6 +854,71 @@ int main(int argc, char** argv) {
     sgctDelegate.currentWindowId = []() {
         return sgct::Engine::instance()->getCurrentWindowPtr()->getId();
     };
+}
+
+int main(int argc, char** argv) {
+#ifdef WIN32
+    SetUnhandledExceptionFilter(generateMiniDump);
+#endif // WIN32
+
+    // Initialize the LogManager and add the console log as this will be used every time
+    // and we need a fall back if something goes wrong between here and when we add the
+    // logs from the configuration file. If the user requested as specific loglevel in the
+    // configuration file, we will deinitialize this LogManager and reinitialize it later
+    // with the correct LogLevel
+    {
+        using namespace ghoul::logging;
+        LogManager::initialize(LogLevel::Debug, LogManager::ImmediateFlush::Yes);
+        LogMgr.addLog(std::make_unique<ConsoleLog>());
+    }
+
+    ghoul::initialize();
+
+    //
+    // Parse commandline arguments
+    //
+    ghoul::cmdparser::CommandlineParser parser(
+        std::string(argv[0]),
+        ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
+    );
+
+    openspace::CommandlineArguments commandlineArguments;
+    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+        commandlineArguments.configurationName, "--config", "-c",
+        "Provides the path to the OpenSpace configuration file. Only the '${TEMPORARY}' "
+        "path token is available and any other path has to be specified relative to the "
+        "current working directory."
+    ));
+
+    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+        commandlineArguments.configurationOverride, "--lua", "-l",
+        "Provides the ability to pass arbitrary Lua code to the application that will be "
+        "evaluated after the configuration file has been loaded but before the other "
+        "commandline arguments are triggered. This can be used to manipulate the "
+        "configuration file without editing the file on disk, for example in a "
+        "planetarium environment. Please not that the Lua script must not contain any - "
+        "or they will be interpreted as a new command. Similar, in Bash, ${...} will be "
+        "evaluated before it is passed to OpenSpace."
+    ));
+
+    std::vector<std::string> sgctArguments = parser.setCommandLine({ argv, argv + argc });
+
+    bool showHelp = parser.execute();
+    if (showHelp) {
+        parser.displayHelp(std::cout);
+        exit(EXIT_SUCCESS);
+    }
+
+    std::pair<int, int> glVersion = supportedOpenGLVersion();
+    LINFO(fmt::format(
+        "Detected OpenGL version: {}.{}", glVersion.first, glVersion.second
+    ));
+
+
+    //
+    // Set up SGCT functions for window delegate
+    //
+    setSgctDelegateFunctions();
 
     // Create the OpenSpace engine and get arguments for the SGCT engine
     std::string windowConfiguration;
