@@ -63,11 +63,6 @@ struct CommandlineArguments {
     std::string configurationOverride;
 };
 
-std::string initialize(CommandlineArguments arguments, WindowDelegate windowDelegate,
-    bool consoleLog = true);
-
-void deinitialize();
-
 class OpenSpaceEngine {
 public:
     OpenSpaceEngine();
@@ -76,6 +71,7 @@ public:
     void initialize();
     void initializeGL();
     void deinitialize();
+    void deinitializeGL() {}
     void preSynchronization();
     void postSynchronizationPreDraw();
     void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,

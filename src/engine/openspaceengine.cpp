@@ -150,97 +150,14 @@ OpenSpaceEngine::OpenSpaceEngine()
 
 OpenSpaceEngine::~OpenSpaceEngine() {} // NOLINT
 
-std::string initialize(CommandlineArguments arguments, WindowDelegate windowDelegate,
-                bool consoleLog)
-{
-    global::windowDelegate = std::move(windowDelegate);
+void deinitialize() {
+}
+
+void OpenSpaceEngine::initialize() {
+    LTRACE("OpenSpaceEngine::initialize(begin)");
+
     global::initialize();
 
-    // Find configuration
-    std::string configurationFilePath;
-    if (arguments.configurationName.empty()) {
-        LDEBUG("Finding configuration");
-        configurationFilePath = findConfiguration();
-    }
-    else {
-        configurationFilePath = arguments.configurationName;
-    }
-    configurationFilePath = absPath(configurationFilePath);
-
-    if (!FileSys.fileExists(configurationFilePath)) {
-        throw ghoul::FileNotFoundError(
-            "Configuration file '" + configurationFilePath + "'"
-        );
-    }
-    LINFO(fmt::format("Configuration Path: '{}'", configurationFilePath));
-
-    // Loading configuration from disk
-    LDEBUG("Loading configuration from disk");
-    try {
-        global::configuration = loadConfigurationFromFile(configurationFilePath);
-
-        // If the user requested a commandline-based configuation script that should
-        // overwrite some of the values, this is the time to do it
-        if (!arguments.configurationOverride.empty()) {
-            LDEBUG("Executing Lua script passed through the commandline:");
-            LDEBUG(arguments.configurationOverride);
-            ghoul::lua::runScript(
-                global::configuration.state,
-                arguments.configurationOverride
-            );
-            parseLuaState(global::configuration);
-        }
-    }
-    catch (const documentation::SpecificationError& e) {
-        LFATAL(fmt::format(
-            "Loading of configuration file '{}' failed", configurationFilePath
-        ));
-        for (const documentation::TestResult::Offense& o : e.result.offenses) {
-            LERRORC(o.offender, ghoul::to_string(o.reason));
-        }
-        for (const documentation::TestResult::Warning& w : e.result.warnings) {
-            LWARNINGC(w.offender, ghoul::to_string(w.reason));
-        }
-        throw;
-    }
-    catch (const ghoul::RuntimeError& e) {
-        LFATAL(fmt::format(
-            "Loading of configuration file '{}' failed", configurationFilePath
-        ));
-        LFATALC(e.component, e.message);
-        throw;
-    }
-
-    // Determining SGCT configuration file
-    LDEBUG("SGCT Configuration file: " + global::configuration.windowConfiguration);
-
-    // Registering Path tokens. If the BASE path is set, it is the only one that will
-    // overwrite the default path of the cfg directory
-    for (const std::pair<std::string, std::string>& path :
-         global::configuration.pathTokens)
-    {
-        std::string fullKey = FileSystem::TokenOpeningBraces + path.first +
-                              FileSystem::TokenClosingBraces;
-        LDEBUGC(
-            "ConfigurationManager",
-            fmt::format("Registering path {}: {}", fullKey, path.second)
-        );
-
-        const bool override = (fullKey == "${BASE}");
-        if (override) {
-            LINFOC(
-                "ConfigurationManager",
-                fmt::format("Overriding base path with '{}'", path.second)
-            );
-        }
-
-        using Override = ghoul::filesystem::FileSystem::Override;
-        FileSys.registerPathToken(
-            std::move(fullKey),
-            std::move(path.second),
-            Override(override)
-        );
-    }
 
     std::string cacheFolder = absPath("${CACHE}");
     if (global::configuration.usePerSceneCache) {
@@ -284,9 +201,7 @@ std::string initialize(CommandlineArguments arguments, WindowDelegate windowDele
 
     using ImmediateFlush = ghoul::logging::LogManager::ImmediateFlush;
     LogManager::initialize(level, ImmediateFlush(immediateFlush));
-    if (consoleLog) {
-        LogMgr.addLog(std::make_unique<ConsoleLog>());
-    }
+    LogMgr.addLog(std::make_unique<ConsoleLog>());
 
     for (const ghoul::Dictionary& log : global::configuration.logging.logs) {
         try {
@@ -340,38 +255,6 @@ std::string initialize(CommandlineArguments arguments, WindowDelegate windowDele
 
     // Register the provided shader directories
     ghoul::opengl::ShaderPreprocessor::addIncludePath(absPath("${SHADERS}"));
-
-    return openspace::global::configuration.windowConfiguration;
-}
-
-void deinitialize() {
-    LTRACE("deinitialize(begin)");
-    if (global::parallelPeer.status() != ParallelConnection::Status::Disconnected) {
-        global::parallelPeer.disconnect();
-    }
-    if (global::renderEngine.scene() && global::renderEngine.scene()->camera()) {
-        global::syncEngine.removeSyncables(
-            global::renderEngine.scene()->camera()->getSyncables()
-        );
-    }
-
-    global::deinitializeGL();
-    global::deinitialize();
-
-    FactoryManager::deinitialize();
-    TransformationManager::deinitialize();
-    SpiceManager::deinitialize();
-
-    ghoul::fontrendering::FontRenderer::deinitialize();
-
-    LogManager::deinitialize();
-
-    ghoul::deinitialize();
-    LTRACE("deinitialize(end)");
-}
-
-void OpenSpaceEngine::initialize() {
-    LTRACE("OpenSpaceEngine::initialize(begin)");
 
     glbinding::Binding::useCurrentContext();
     glbinding::Binding::initialize();
@@ -653,6 +536,31 @@ void OpenSpaceEngine::deinitialize() {
     global::openSpaceEngine._scene = nullptr;
 
     global::navigationHandler.deinitialize();
+
+    LTRACE("deinitialize(begin)");
+    if (global::parallelPeer.status() != ParallelConnection::Status::Disconnected) {
+        global::parallelPeer.disconnect();
+    }
+    if (global::renderEngine.scene() && global::renderEngine.scene()->camera()) {
+        global::syncEngine.removeSyncables(
+            global::renderEngine.scene()->camera()->getSyncables()
+        );
+    }
+
+    global::deinitializeGL();
+    global::deinitialize();
+
+    FactoryManager::deinitialize();
+    TransformationManager::deinitialize();
+    SpiceManager::deinitialize();
+
+    ghoul::fontrendering::FontRenderer::deinitialize();
+
+    LogManager::deinitialize();
+
+    ghoul::deinitialize();
+    LTRACE("deinitialize(end)");
+
 
     LTRACE("OpenSpaceEngine::deinitialize(end)");
 }

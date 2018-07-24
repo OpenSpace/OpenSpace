@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/engine/configuration.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
@@ -32,9 +33,11 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/boolean.h>
 #include <sgct.h>
@@ -725,7 +728,7 @@ int main(int argc, char** argv) {
     // Set up SGCT functions for window delegate
     //
 
-    openspace::WindowDelegate sgctDelegate;
+    openspace::WindowDelegate& sgctDelegate = openspace::global::windowDelegate;
     sgctDelegate.terminate = []() { sgct::Engine::instance()->terminate(); };
     sgctDelegate.setBarrier = [](bool enabled) {
         sgct::SGCTWindow::setBarrier(enabled);
@@ -915,7 +918,89 @@ int main(int argc, char** argv) {
     // Create the OpenSpace engine and get arguments for the SGCT engine
     std::string windowConfiguration;
     try {
-        windowConfiguration = openspace::initialize(commandlineArguments, sgctDelegate);
+        using namespace openspace;
+        // Find configuration
+        std::string configurationFilePath;
+        if (commandlineArguments.configurationName.empty()) {
+            LDEBUG("Finding configuration");
+            configurationFilePath = findConfiguration();
+        }
+        else {
+            configurationFilePath = commandlineArguments.configurationName;
+        }
+        configurationFilePath = absPath(configurationFilePath);
+
+        if (!FileSys.fileExists(configurationFilePath)) {
+            throw ghoul::FileNotFoundError(
+                "Configuration file '" + configurationFilePath + "'"
+            );
+        }
+        LINFO(fmt::format("Configuration Path: '{}'", configurationFilePath));
+
+        // Loading configuration from disk
+        LDEBUG("Loading configuration from disk");
+        try {
+            global::configuration = loadConfigurationFromFile(configurationFilePath);
+
+            // If the user requested a commandline-based configuation script that should
+            // overwrite some of the values, this is the time to do it
+            if (!commandlineArguments.configurationOverride.empty()) {
+                LDEBUG("Executing Lua script passed through the commandline:");
+                LDEBUG(commandlineArguments.configurationOverride);
+                ghoul::lua::runScript(
+                    global::configuration.state,
+                    commandlineArguments.configurationOverride
+                );
+                parseLuaState(global::configuration);
+            }
+        }
+        catch (const documentation::SpecificationError& e) {
+            LFATAL(fmt::format(
+                "Loading of configuration file '{}' failed", configurationFilePath
+            ));
+            for (const documentation::TestResult::Offense& o : e.result.offenses) {
+                LERRORC(o.offender, ghoul::to_string(o.reason));
+            }
+            for (const documentation::TestResult::Warning& w : e.result.warnings) {
+                LWARNINGC(w.offender, ghoul::to_string(w.reason));
+            }
+            throw;
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LFATAL(fmt::format(
+                "Loading of configuration file '{}' failed", configurationFilePath
+            ));
+            LFATALC(e.component, e.message);
+            throw;
+        }
+
+        // Determining SGCT configuration file
+        LDEBUG("SGCT Configuration file: " + global::configuration.windowConfiguration);
+
+        // Registering Path tokens. If the BASE path is set, it is the only one that will
+        // overwrite the default path of the cfg directory
+        for (const std::pair<std::string, std::string>& path :
+            global::configuration.pathTokens)
+        {
+            std::string fullKey = ghoul::filesystem::FileSystem::TokenOpeningBraces +
+                                  path.first +
+                                  ghoul::filesystem::FileSystem::TokenClosingBraces;
+            LDEBUG(fmt::format("Registering path {}: {}", fullKey, path.second));
+
+            const bool override = (fullKey == "${BASE}");
+            if (override) {
+                LINFO(fmt::format("Overriding base path with '{}'", path.second));
+            }
+
+            using Override = ghoul::filesystem::FileSystem::Override;
+            FileSys.registerPathToken(
+                std::move(fullKey),
+                std::move(path.second),
+                Override(override)
+            );
+        }
+
+        windowConfiguration = openspace::global::configuration.windowConfiguration;
     }
     catch (const ghoul::RuntimeError& e) {
         // Write out all of the information about the exception and flush the logs
@@ -1026,15 +1111,13 @@ int main(int argc, char** argv) {
 
     auto cleanup = [&](bool isInitialized) {
         if (isInitialized) {
+            openspace::global::openSpaceEngine.deinitializeGL();
             openspace::global::openSpaceEngine.deinitialize();
         }
 
         // Clear function bindings to avoid crash after destroying the OpenSpace Engine
         sgct::MessageHandler::instance()->setLogToCallback(false);
         sgct::MessageHandler::instance()->setLogCallback(nullptr);
-
-        LDEBUG("Destroying OpenSpaceEngine");
-        openspace::deinitialize();
 
         LDEBUG("Destroying SGCT Engine");
         delete SgctEngine;
