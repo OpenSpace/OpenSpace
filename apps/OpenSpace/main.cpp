@@ -58,10 +58,53 @@ namespace {
 
 constexpr const char* _loggerCat = "main";
 sgct::Engine* SgctEngine;
-
-constexpr const char* OpenVRTag = "OpenVR";
 constexpr const char* SpoutTag = "Spout";
+constexpr const char* OpenVRTag = "OpenVR";
 
+#ifdef WIN32
+LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers);
+#endif // WIN32
+
+#ifdef OPENVR_SUPPORT
+sgct::SGCTWindow* FirstOpenVRWindow = nullptr;
+#endif
+
+//
+//  SPOUT-support
+//
+
+#ifdef OPENSPACE_HAS_SPOUT
+/**
+ * This struct stores all information about a single render window. Depending on the
+ * frame setup, each window can be mono or stereo, the information of which is stored in
+ * the \c leftOrMain and \c right members respectively.
+ */
+struct SpoutWindow {
+    struct SpoutData {
+        SPOUTHANDLE handle = nullptr;
+        bool initialized = false;
+    };
+
+    /// The left framebuffer (or main, if there is no stereo rendering)
+    SpoutData leftOrMain;
+
+    /// The right framebuffer
+    SpoutData right;
+
+    /// The window ID of this windows
+    size_t windowId = size_t(-1);
+};
+
+/// The list of all windows with spout senders
+std::vector<SpoutWindow> SpoutWindows;
+
+#endif // OPENSPACE_HAS_SPOUT
+
+
+
+//
+//  MiniDump generation
+//
 #ifdef WIN32
 
 LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
@@ -127,41 +170,11 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
 
     return EXCEPTION_EXECUTE_HANDLER;
 }
-
 #endif // WIN32
 
-#ifdef OPENVR_SUPPORT
-sgct::SGCTWindow* FirstOpenVRWindow = nullptr;
-#endif
-
-#ifdef OPENSPACE_HAS_SPOUT
-/**
- * This struct stores all information about a single render window. Depending on the
- * frame setup, each window can be mono or stereo, the information of which is stored in
- * the \c leftOrMain and \c right members respectively.
- */
-struct SpoutWindow {
-    struct SpoutData {
-        SPOUTHANDLE handle = nullptr;
-        bool initialized = false;
-    };
-
-    /// The left framebuffer (or main, if there is no stereo rendering)
-    SpoutData leftOrMain;
-
-    /// The right framebuffer
-    SpoutData right;
-
-    /// The window ID of this windows
-    size_t windowId = size_t(-1);
-};
-
-/// The list of all windows with spout senders
-std::vector<SpoutWindow> SpoutWindows;
-
-#endif // OPENSPACE_HAS_SPOUT
-
-
+//
+//  Detect OpenGL version
+//
 std::pair<int, int> supportedOpenGLVersion() {
     // Just create a window in order to retrieve the available OpenGL version before we
     // create the real window
@@ -196,6 +209,10 @@ std::pair<int, int> supportedOpenGLVersion() {
     return { major, minor };
 }
 
+
+//
+//  Init function
+//
 void mainInitFunc() {
     LTRACE("main::mainInitFunc(begin)");
 
@@ -298,6 +315,11 @@ void mainInitFunc() {
 #endif // OPENSPACE_HAS_SPOUT
     }
 
+
+    //
+    //  Screenshots
+    //
+
     std::string screenshotPath = "${SCREENSHOTS}";
     std::string screenshotNames = "OpenSpace";
 
@@ -318,22 +340,18 @@ void mainInitFunc() {
             SgctEngine->getWindowPtr(i)->getScreenCapturePointer(1);
 
         if (cpt0) {
-            cpt0->setPathAndFileName(
-                absPath(screenshotPath),
-                screenshotNames
-            );
+            cpt0->setPathAndFileName(absPath(screenshotPath), screenshotNames);
         }
 
         if (cpt1) {
-            cpt1->setPathAndFileName(
-                screenshotPath,
-                screenshotNames
-            );
+            cpt1->setPathAndFileName(screenshotPath, screenshotNames);
         }
     }
 
     LTRACE("main::mainInitFunc(end)");
 }
+
+
 
 void mainPreSyncFunc() {
     LTRACE("main::mainPreSyncFunc(begin)");
@@ -426,6 +444,8 @@ void mainPreSyncFunc() {
     LTRACE("main::mainPreSyncFunc(end)");
 }
 
+
+
 void mainPostSyncPreDrawFunc() {
     LTRACE("main::postSynchronizationPreDraw(begin)");
     OsEng.postSynchronizationPreDraw();
@@ -440,17 +460,13 @@ void mainPostSyncPreDrawFunc() {
     LTRACE("main::postSynchronizationPreDraw(end)");
 }
 
+
+
 void mainRenderFunc() {
     LTRACE("main::mainRenderFunc(begin)");
 
-    glm::mat4 viewMatrix =
-        SgctEngine->getCurrentViewMatrix() *
-        // User matrix
-        glm::translate(
-           glm::mat4(1.f),
-           SgctEngine->getDefaultUserPtr()->getPos()
-       )
-    ;
+    glm::mat4 viewMatrix = SgctEngine->getCurrentViewMatrix() *
+                glm::translate(glm::mat4(1.f), SgctEngine->getDefaultUserPtr()->getPos());
 
     glm::mat4 projectionMatrix = SgctEngine->getCurrentProjectionMatrix();
 #ifdef OPENVR_SUPPORT
@@ -463,17 +479,15 @@ void mainRenderFunc() {
 #endif
 
     try {
-        OsEng.render(
-            SgctEngine->getModelMatrix(),
-            viewMatrix,
-            projectionMatrix
-        );
+        OsEng.render(SgctEngine->getModelMatrix(), viewMatrix, projectionMatrix);
     }
     catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
     }
     LTRACE("main::mainRenderFunc(end)");
 }
+
+
 
 void mainDraw2DFunc() {
     LTRACE("main::mainDraw2DFunc(begin)");
@@ -492,6 +506,8 @@ void mainDraw2DFunc() {
 
     LTRACE("main::mainDraw2DFunc(end)");
 }
+
+
 
 void mainPostDrawFunc() {
     LTRACE("main::mainPostDrawFunc(begin)");
@@ -536,6 +552,8 @@ void mainPostDrawFunc() {
     LTRACE("main::mainPostDrawFunc(end)");
 }
 
+
+
 void mainExternalControlCallback(const char* receivedChars, int size) {
     LTRACE("main::mainExternalControlCallback(begin)");
     if (SgctEngine->isMaster()) {
@@ -543,6 +561,8 @@ void mainExternalControlCallback(const char* receivedChars, int size) {
     }
     LTRACE("main::mainExternalControlCallback(end)");
 }
+
+
 
 void mainKeyboardCallback(int key, int, int action, int mods) {
     LTRACE("main::mainKeyboardCallback(begin)");
@@ -556,6 +576,8 @@ void mainKeyboardCallback(int key, int, int action, int mods) {
     LTRACE("main::mainKeyboardCallback(begin)");
 }
 
+
+
 void mainMouseButtonCallback(int key, int action) {
     LTRACE("main::mainMouseButtonCallback(begin)");
     if (SgctEngine->isMaster()) {
@@ -567,11 +589,15 @@ void mainMouseButtonCallback(int key, int action) {
     LTRACE("main::mainMouseButtonCallback(end)");
 }
 
+
+
 void mainMousePosCallback(double x, double y) {
     if (SgctEngine->isMaster()) {
         OsEng.mousePositionCallback(x, y);
     }
 }
+
+
 
 void mainMouseScrollCallback(double posX, double posY) {
     LTRACE("main::mainMouseScrollCallback(begin");
@@ -581,11 +607,15 @@ void mainMouseScrollCallback(double posX, double posY) {
     LTRACE("main::mainMouseScrollCallback(end)");
 }
 
+
+
 void mainCharCallback(unsigned int codepoint, int mods) {
     if (SgctEngine->isMaster()) {
         OsEng.charCallback(codepoint, openspace::KeyModifier(mods));
     }
 }
+
+
 
 void mainEncodeFun() {
     LTRACE("main::mainEncodeFun(begin)");
@@ -593,11 +623,15 @@ void mainEncodeFun() {
     LTRACE("main::mainEncodeFun(end)");
 }
 
+
+
 void mainDecodeFun() {
     LTRACE("main::mainDecodeFun(begin)");
     OsEng.decode();
     LTRACE("main::mainDecodeFun(end)");
 }
+
+
 
 void mainLogCallback(const char* msg) {
     std::string message = msg;
@@ -612,12 +646,18 @@ void mainLogCallback(const char* msg) {
 
 } // namespace
 
+
+
 int main(int argc, char** argv) {
 #ifdef WIN32
     SetUnhandledExceptionFilter(generateMiniDump);
 #endif // WIN32
 
     std::pair<int, int> glVersion = supportedOpenGLVersion();
+    LINFO(fmt::format(
+        "Detected OpenGL version: {}.{}", glVersion.first, glVersion.second
+    ));
+
 
     //
     // Set up SGCT functions for window delegate
@@ -854,10 +894,6 @@ int main(int argc, char** argv) {
     if (requestQuit) {
         return EXIT_SUCCESS;
     }
-
-    LINFO(fmt::format(
-        "Detected OpenGL version: {}.{}", glVersion.first, glVersion.second
-    ));
 
     // Create sgct engine c arguments
     int newArgc = static_cast<int>(sgctArguments.size());
