@@ -99,14 +99,6 @@ namespace {
     constexpr const char* _loggerCat = "OpenSpaceEngine";
     constexpr const char* SgctConfigArgumentCommand = "-config";
     constexpr const int CacheVersion = 1;
-
-    struct {
-        std::string configurationName;
-        std::string sgctConfigurationName;
-        std::string sceneName;
-        std::string cacheFolder;
-        std::string configurationOverwrite;
-    } commandlineArgumentPlaceholders;
 } // namespace
 
 namespace openspace {
@@ -161,16 +153,15 @@ OpenSpaceEngine::OpenSpaceEngine()
 
 OpenSpaceEngine::~OpenSpaceEngine() {} // NOLINT
 
-void OpenSpaceEngine::create(int argc, char** argv, WindowDelegate windowDelegate,
-                             std::vector<std::string>& sgctArguments,
-                             bool& requestClose, bool consoleLog)
+void initialize(int argc, char** argv, WindowDelegate windowDelegate,
+                std::vector<std::string>& sgctArguments, bool& requestClose,
+                bool consoleLog)
 {
+    ghoul_assert(argc >= 1 && argv, "No arguments were passed to this function");
+
     global::windowDelegate = std::move(windowDelegate);
 
-    requestClose = false;
-
     LDEBUG("Initialize FileSystem");
-
     ghoul::initialize();
 
     // Initialize the LogManager and add the console log as this will be used every time
@@ -186,17 +177,6 @@ void OpenSpaceEngine::create(int argc, char** argv, WindowDelegate windowDelegat
         LogMgr.addLog(std::make_unique<ConsoleLog>());
     }
 
-    // Sanity check of values
-    if (argc < 1 || argv == nullptr) {
-        throw ghoul::RuntimeError(
-            "No arguments were passed to this function",
-            "OpenSpaceEngine"
-        );
-    }
-
-    //// Create other objects
-    //LDEBUG("Creating OpenSpaceEngine");
-    //_engine = new OpenSpaceEngine(std::string(argv[0]));
     global::initialize();
 
     // Parse commandline arguments
@@ -205,30 +185,16 @@ void OpenSpaceEngine::create(int argc, char** argv, WindowDelegate windowDelegat
         ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
     );
 
+    struct {
+        std::string configurationName;
+        std::string configurationOverwrite;
+    } commandlineArgumentPlaceholders;
+
+
     commandlineArgumentPlaceholders.configurationName = "";
     parser.addCommand(std::make_unique<SingleCommand<std::string>>(
         commandlineArgumentPlaceholders.configurationName, "--config", "-c",
         "Provides the path to the OpenSpace configuration file."
-    ));
-
-    commandlineArgumentPlaceholders.sgctConfigurationName = "";
-    parser.addCommand(std::make_unique<SingleCommand<std::string>>(
-        commandlineArgumentPlaceholders.sgctConfigurationName, "--sgct", "-s",
-        "Provides the path to the SGCT configuration file, overriding the value set in "
-        "the OpenSpace configuration file."
-    ));
-
-    commandlineArgumentPlaceholders.sceneName = "";
-    parser.addCommand(std::make_unique<SingleCommand<std::string>>(
-        commandlineArgumentPlaceholders.sceneName, "--scene", "", "Provides the path to "
-        "the scene file, overriding the value set in the OpenSpace configuration file."
-    ));
-
-    commandlineArgumentPlaceholders.cacheFolder = "";
-    parser.addCommand(std::make_unique<SingleCommand<std::string>>(
-        commandlineArgumentPlaceholders.cacheFolder, "--cacheDir", "", "Provides the "
-        "path to a cache file, overriding the value set in the OpenSpace configuration "
-        "file."
     ));
 
     commandlineArgumentPlaceholders.configurationOverwrite = "";
@@ -244,8 +210,7 @@ void OpenSpaceEngine::create(int argc, char** argv, WindowDelegate windowDelegat
     ));
 
     std::vector<std::string> args(argv, argv + argc);
-    std::vector<std::string> arguments =
-        parser.setCommandLine(args);
+    std::vector<std::string> arguments = parser.setCommandLine(args);
 
     bool showHelp = parser.execute();
     if (showHelp) {
@@ -253,14 +218,20 @@ void OpenSpaceEngine::create(int argc, char** argv, WindowDelegate windowDelegat
         requestClose = true;
         return;
     }
+    else {
+        requestClose = false;
+    }
 
     sgctArguments = std::move(arguments);
 
     // Find configuration
-    std::string configurationFilePath = commandlineArgumentPlaceholders.configurationName;
-    if (configurationFilePath.empty()) {
+    std::string configurationFilePath;
+    if (commandlineArgumentPlaceholders.configurationName.empty()) {
         LDEBUG("Finding configuration");
         configurationFilePath = findConfiguration();
+    }
+    else {
+        configurationFilePath = commandlineArgumentPlaceholders.configurationName;
     }
     configurationFilePath = absPath(configurationFilePath);
 
@@ -308,20 +279,22 @@ void OpenSpaceEngine::create(int argc, char** argv, WindowDelegate windowDelegat
         throw;
     }
 
+    // Determining SGCT configuration file
+    LDEBUG("SGCT Configuration file: " + global::configuration.windowConfiguration);
 
     // Registering Path tokens. If the BASE path is set, it is the only one that will
     // overwrite the default path of the cfg directory
     for (const std::pair<std::string, std::string>& path :
-        global::configuration.pathTokens)
+         global::configuration.pathTokens)
     {
-        std::string fullKey =
-            FileSystem::TokenOpeningBraces + path.first + FileSystem::TokenClosingBraces;
+        std::string fullKey = FileSystem::TokenOpeningBraces + path.first +
+                              FileSystem::TokenClosingBraces;
         LDEBUGC(
             "ConfigurationManager",
             fmt::format("Registering path {}: {}", fullKey, path.second)
         );
 
-        bool override = (fullKey == "${BASE}");
+        const bool override = (fullKey == "${BASE}");
         if (override) {
             LINFOC(
                 "ConfigurationManager",
@@ -333,21 +306,14 @@ void OpenSpaceEngine::create(int argc, char** argv, WindowDelegate windowDelegat
         FileSys.registerPathToken(
             std::move(fullKey),
             std::move(path.second),
-            override ? Override::Yes : Override::No
+            Override(override)
         );
     }
 
-    const bool hasCacheCommandline = !commandlineArgumentPlaceholders.cacheFolder.empty();
-    const bool hasCacheConfig = global::configuration.usePerSceneCache;
     std::string cacheFolder = absPath("${CACHE}");
-    if (hasCacheCommandline || hasCacheConfig) {
-        if (hasCacheCommandline) {
-            cacheFolder = commandlineArgumentPlaceholders.cacheFolder;
-        }
-        if (hasCacheConfig) {
-            std::string scene = global::configuration.asset;
-            cacheFolder += "-" + ghoul::filesystem::File(scene).baseName();
-        }
+    if (global::configuration.usePerSceneCache) {
+        std::string scene = global::configuration.asset;
+        cacheFolder += "-" + ghoul::filesystem::File(scene).baseName();
 
         LINFO(fmt::format("Old cache: {}", absPath("${CACHE}")));
         LINFO(fmt::format("New cache: {}", cacheFolder));
@@ -366,8 +332,64 @@ void OpenSpaceEngine::create(int argc, char** argv, WindowDelegate windowDelegat
         }
     }
 
+    try {
+        FileSys.createCacheManager(cacheFolder, CacheVersion);
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LFATAL("Could not create Cache Manager");
+        LFATALC(e.component, e.message);
+    }
+
+
+
     // Initialize the requested logs from the configuration file
-    global::openSpaceEngine.configureLogging(consoleLog);
+    // We previously initialized the LogManager with a console log to provide some logging
+    // until we know which logs should be added
+    LogManager::deinitialize();
+
+    LogLevel level = ghoul::logging::levelFromString(global::configuration.logging.level);
+    bool immediateFlush = global::configuration.logging.forceImmediateFlush;
+
+    using ImmediateFlush = ghoul::logging::LogManager::ImmediateFlush;
+    LogManager::initialize(level, ImmediateFlush(immediateFlush));
+    if (consoleLog) {
+        LogMgr.addLog(std::make_unique<ConsoleLog>());
+    }
+
+    for (const ghoul::Dictionary& log : global::configuration.logging.logs) {
+        try {
+            LogMgr.addLog(createLog(log));
+        }
+        catch (const documentation::SpecificationError& e) {
+            LERROR("Failed loading of log");
+            for (const documentation::TestResult::Offense& o : e.result.offenses) {
+                LERRORC(o.offender, ghoul::to_string(o.reason));
+            }
+            for (const documentation::TestResult::Warning& w : e.result.warnings) {
+                LWARNINGC(w.offender, ghoul::to_string(w.reason));
+            }
+            throw;
+        }
+    }
+
+#ifdef WIN32
+    if (IsDebuggerPresent()) {
+        LogMgr.addLog(std::make_unique<VisualStudioOutputLog>());
+    }
+#endif // WIN32
+
+#ifndef GHOUL_LOGGING_ENABLE_TRACE
+    LogLevel level = ghoul::logging::levelFromString(_configuration->logging.level);
+
+    if (level == ghoul::logging::LogLevel::Trace) {
+        LWARNING(
+            "Desired logging level is set to 'Trace' but application was " <<
+            "compiled without Trace support"
+        );
+    }
+#endif // GHOUL_LOGGING_ENABLE_TRACE
+
+
 
     LINFOC("OpenSpace Version", std::string(OPENSPACE_VERSION_STRING_FULL));
     LINFOC("Commit", std::string(OPENSPACE_GIT_FULL));
@@ -382,62 +404,29 @@ void OpenSpaceEngine::create(int argc, char** argv, WindowDelegate windowDelegat
             DocEng.addDocumentation(doc);
         }
     }
-
     DocEng.addDocumentation(Configuration::Documentation);
-
-    // Create the cachemanager
-    try {
-        FileSys.createCacheManager(cacheFolder, CacheVersion);
-    }
-    catch (const ghoul::RuntimeError& e) {
-        LFATAL("Could not create Cache Manager");
-        LFATALC(e.component, e.message);
-    }
 
     // Register the provided shader directories
     ghoul::opengl::ShaderPreprocessor::addIncludePath(absPath("${SHADERS}"));
-
-    // Determining SGCT configuration file
-    LDEBUG("Determining SGCT configuration file");
-    std::string sgctConfigurationPath = global::configuration.windowConfiguration;
-    LDEBUG(fmt::format("SGCT Configuration file: {}", sgctConfigurationPath));
-
-    if (!commandlineArgumentPlaceholders.sgctConfigurationName.empty()) {
-        LDEBUG(fmt::format(
-            "Overwriting SGCT configuration file with commandline argument: {}",
-            commandlineArgumentPlaceholders.sgctConfigurationName
-        ));
-        sgctConfigurationPath = commandlineArgumentPlaceholders.sgctConfigurationName;
-    }
 
     // Prepend the outgoing sgctArguments with the program name
     // as well as the configuration file that sgct is supposed to use
     sgctArguments.insert(sgctArguments.begin(), argv[0]);
     sgctArguments.insert(sgctArguments.begin() + 1, SgctConfigArgumentCommand);
-    sgctArguments.insert(sgctArguments.begin() + 2, absPath(sgctConfigurationPath));
-
-    // Set up asset loader
-    std::unique_ptr<SynchronizationWatcher> w =
-        std::make_unique<SynchronizationWatcher>();
-    SynchronizationWatcher* rawWatcher = w.get();
-
-    global::openSpaceEngine._assetManager = std::make_unique<AssetManager>(
-        std::make_unique<AssetLoader>(
-            *global::scriptEngine.luaState(),
-            rawWatcher,
-            FileSys.absPath("${ASSETS}")
-        ),
-        std::move(w)
+    sgctArguments.insert(
+        sgctArguments.begin() + 2,
+        absPath(global::configuration.windowConfiguration)
     );
 }
 
-void OpenSpaceEngine::destroy() {
+void deinitialize() {
+    LTRACE("deinitialize(begin)");
     if (global::parallelPeer.status() != ParallelConnection::Status::Disconnected) {
         global::parallelPeer.disconnect();
     }
-    if (global::openSpaceEngine._scene && global::openSpaceEngine._scene->camera()) {
+    if (global::renderEngine.scene() && global::renderEngine.scene()->camera()) {
         global::syncEngine.removeSyncables(
-            global::openSpaceEngine._scene->camera()->getSyncables()
+            global::renderEngine.scene()->camera()->getSyncables()
         );
     }
 
@@ -453,7 +442,7 @@ void OpenSpaceEngine::destroy() {
     LogManager::deinitialize();
 
     ghoul::deinitialize();
-    LTRACE("OpenSpaceEngine::destroy(end)");
+    LTRACE("deinitialize(end)");
 }
 
 void OpenSpaceEngine::initialize() {
@@ -536,10 +525,6 @@ void OpenSpaceEngine::initialize() {
 
     _shutdown.waitTime = global::configuration.shutdownCountdown;
 
-    if (!commandlineArgumentPlaceholders.sceneName.empty()) {
-        global::configuration.asset = commandlineArgumentPlaceholders.sceneName;
-    }
-
     global::navigationHandler.initialize();
 
     loadFonts();
@@ -560,6 +545,20 @@ void OpenSpaceEngine::initialize() {
     for (const std::function<void()>& func : global::callback::initialize) {
         func();
     }
+
+    // Set up asset loader
+    std::unique_ptr<SynchronizationWatcher> w =
+        std::make_unique<SynchronizationWatcher>();
+    SynchronizationWatcher* rawWatcher = w.get();
+
+    global::openSpaceEngine._assetManager = std::make_unique<AssetManager>(
+        std::make_unique<AssetLoader>(
+            *global::scriptEngine.luaState(),
+            rawWatcher,
+            FileSys.absPath("${ASSETS}")
+        ),
+        std::move(w)
+    );
 
     global::openSpaceEngine._assetManager->initialize();
     scheduleLoadSingleAsset(global::configuration.asset);
@@ -807,57 +806,6 @@ void OpenSpaceEngine::loadFonts() {
     catch (const ghoul::RuntimeError& err) {
         LERRORC(err.component, err.message);
     }
-}
-
-void OpenSpaceEngine::configureLogging(bool consoleLog) {
-    // We previously initialized the LogManager with a console log to provide some logging
-    // until we know which logs should be added
-    LogManager::deinitialize();
-
-    LogLevel level = ghoul::logging::levelFromString(global::configuration.logging.level);
-    bool immediateFlush = global::configuration.logging.forceImmediateFlush;
-
-    using ImmediateFlush = ghoul::logging::LogManager::ImmediateFlush;
-    LogManager::initialize(
-        level,
-        ImmediateFlush(immediateFlush)
-    );
-    if (consoleLog) {
-        LogMgr.addLog(std::make_unique<ConsoleLog>());
-    }
-
-    for (const ghoul::Dictionary& log : global::configuration.logging.logs) {
-        try {
-            LogMgr.addLog(createLog(log));
-        }
-        catch (const documentation::SpecificationError& e) {
-            LERROR("Failed loading of log");
-            for (const documentation::TestResult::Offense& o : e.result.offenses) {
-                LERRORC(o.offender, ghoul::to_string(o.reason));
-            }
-            for (const documentation::TestResult::Warning& w : e.result.warnings) {
-                LWARNINGC(w.offender, ghoul::to_string(w.reason));
-            }
-            throw;
-        }
-    }
-
-#ifdef WIN32
-    if (IsDebuggerPresent()) {
-        LogMgr.addLog(std::make_unique<VisualStudioOutputLog>());
-    }
-#endif // WIN32
-
-#ifndef GHOUL_LOGGING_ENABLE_TRACE
-    LogLevel level = ghoul::logging::levelFromString(_configuration->logging.level);
-
-    if (level == ghoul::logging::LogLevel::Trace) {
-        LWARNING(
-            "Desired logging level is set to 'Trace' but application was " <<
-            "compiled without Trace support"
-        );
-    }
-#endif // GHOUL_LOGGING_ENABLE_TRACE
 }
 
 void OpenSpaceEngine::writeSceneDocumentation() {

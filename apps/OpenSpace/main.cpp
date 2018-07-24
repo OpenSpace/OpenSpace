@@ -664,6 +664,11 @@ int main(int argc, char** argv) {
     SetUnhandledExceptionFilter(generateMiniDump);
 #endif // WIN32
 
+    // commandline parser here
+
+
+
+
     std::pair<int, int> glVersion = supportedOpenGLVersion();
     LINFO(fmt::format(
         "Detected OpenGL version: {}.{}", glVersion.first, glVersion.second
@@ -865,7 +870,7 @@ int main(int argc, char** argv) {
     std::vector<std::string> sgctArguments;
     bool requestQuit = false;
     try {
-        openspace::OpenSpaceEngine::create(
+        openspace::initialize(
             argc,
             argv,
             sgctDelegate,
@@ -987,7 +992,7 @@ int main(int argc, char** argv) {
         sgct::MessageHandler::instance()->setLogCallback(nullptr);
 
         LDEBUG("Destroying OpenSpaceEngine");
-        openspace::OpenSpaceEngine::destroy();
+        openspace::deinitialize();
 
         LDEBUG("Destroying SGCT Engine");
         delete SgctEngine;

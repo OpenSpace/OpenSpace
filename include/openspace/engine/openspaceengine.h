@@ -58,15 +58,14 @@ struct ShutdownInformation {
     float timer = 0.f;
 };
 
+void initialize(int argc, char** argv, WindowDelegate windowDelegate,
+    std::vector<std::string>& sgctArguments, bool& requestClose,
+    bool consoleLog = true);
+
+void deinitialize();
+
 class OpenSpaceEngine {
 public:
-    static void create(int argc, char** argv,
-        WindowDelegate windowDelegate,
-        std::vector<std::string>& sgctArguments, bool& requestClose,
-        bool consoleLog = true);
-
-    static void destroy();
-
     OpenSpaceEngine();
     ~OpenSpaceEngine();
 
@@ -105,11 +104,8 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-
     void loadSingleAsset(const std::string& assetPath);
     void loadFonts();
-
-    void configureLogging(bool consoleLog);
 
     void runGlobalCustomizationScripts();
     void configureLogging();
