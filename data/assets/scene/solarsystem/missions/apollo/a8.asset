@@ -28,11 +28,11 @@ local LightSources = {
         Node = sunTransforms.SolarSystemBarycenter.Identifier,
         Intensity = 1.0
     },
-    {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-    }
+    -- {
+    --     Identifier = "Camera",
+    --     Type = "CameraLightSource",
+    --     Intensity = 0.5
+    -- }
 }
 
 
@@ -52,7 +52,7 @@ local Apollo_8_CSM = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/Apollo_Spacecraft.obj"
+            GeometryFile = models .. "/Apollo_CSM_shrunk_rotated_xy_doubble_size.obj"
         },
         ColorTexture = models .. "/gray.png",
         LightSources = LightSources

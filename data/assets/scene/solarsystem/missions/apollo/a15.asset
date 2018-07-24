@@ -115,11 +115,12 @@ local LightSources = {
         Node = sunTransforms.SolarSystemBarycenter.Identifier,
         Intensity = 1.0
     },
-    {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-    }
+    -- {
+    --     Identifier = "Camera",
+    --     Type = "CameraLightSource",
+    --     Intensity = 0.5,
+    --     Enabled = false
+    -- }
 }
 
 
@@ -136,32 +137,19 @@ local Apollo15 = {
         },
         Rotation = {
             Type = "SpiceRotation",
-            SourceFrame = "J2000",
+            SourceFrame = "A15_METRIC",
             DestinationFrame = "GALACTIC"
         }
+    },
+    TimeFrame = { -- Using Spice kernels for 1850-2150
+        Type = "TimeFrameInterval",
+        Start = "1971-07-30T02:22:00.00",
+        End = "1971-08-01T18:05:00.00"
     },
     GUI = {
         Name = "Apollo 15",
         Path = "/Solar System/Missions/Apollo 15"
     }
-}
-
-local Apollo15Big = {
-    Identifier = "Apollo15Big",
-    Parent = Apollo15.Identifier,
-    Renderable = {
-        Type = "RenderableModel",
-        Geometry = {
-            Type = "MultiModelGeometry",
-           GeometryFile = models .. "/Apollo_Spacecraft.obj"
-        },
-        ColorTexture = models .. "/gray.png",
-        LightSources = LightSources
-    },
-    GUI = {
-        Name = "Apollo 15 Big",
-        Path = "/Solar System/Missions/Apollo 15"
-    }   
 }
 
 local Apollo15Main = {
@@ -172,7 +160,7 @@ local Apollo15Main = {
         Geometry = {
             Type = "MultiModelGeometry",
 --            GeometryFile = models .. "/Apollo_Spacecraft.obj"
-            GeometryFile = models .. "/Apollo_CSM_shrunk_rotated.obj"
+            GeometryFile = models .. "/Apollo_CSM_shrunk_rotated_xy_doubble_size.obj"
         },
         ColorTexture = models .. "/gray.png",
         LightSources = LightSources
@@ -208,7 +196,6 @@ local Apollo15Trail = {
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Apollo15,
-    Apollo15Big,
     Apollo15Main,
     Apollo15Trail
 })
