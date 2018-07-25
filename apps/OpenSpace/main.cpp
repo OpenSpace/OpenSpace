@@ -832,14 +832,14 @@ int main(int argc, char** argv) {
 
     openspace::CommandlineArguments commandlineArguments;
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-        commandlineArguments.configurationName, "--config", "-c",
+        commandlineArguments.configurationName, "--file", "-f",
         "Provides the path to the OpenSpace configuration file. Only the '${TEMPORARY}' "
         "path token is available and any other path has to be specified relative to the "
         "current working directory."
     ));
 
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-        commandlineArguments.configurationOverride, "--lua", "-l",
+        commandlineArguments.configurationOverride, "--config", "-c",
         "Provides the ability to pass arbitrary Lua code to the application that will be "
         "evaluated after the configuration file has been loaded but before the other "
         "commandline arguments are triggered. This can be used to manipulate the "
