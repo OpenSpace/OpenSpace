@@ -86,11 +86,8 @@ class Loader : public PropertyOwner, public Operator {
     properties::UIntProperty _currentVolumesToConvertCount;
     bool _volumeConversionThreadCanRun = false;
   
-    TaskLoader taskLoader;
-    std::vector<std::unique_ptr<Task>> tasks;
-
-  void initializeNode(ghoul::Dictionary dict);
-  void goToFirstTimeStep(const std::string& absPathToItem);
+   void initializeNode(ghoul::Dictionary dict);
+   void goToFirstTimeStep(const std::string& absPathToItem);
 
 };
 
