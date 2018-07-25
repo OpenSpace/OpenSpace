@@ -62,11 +62,6 @@ ghoul::fontrendering::FontManager& gFontManager() {
     return g;
 }
 
-Configuration& gConfiguration() {
-    static Configuration g;
-    return g;
-}
-
 Dashboard& gDashboard() {
     static Dashboard g;
     return g;
@@ -144,6 +139,11 @@ VirtualPropertyManager& gVirtualPropertyManager() {
 
 WindowDelegate& gWindowDelegate() {
     static WindowDelegate g;
+    return g;
+}
+
+configuration::Configuration& gConfiguration() {
+    static configuration::Configuration g;
     return g;
 }
 

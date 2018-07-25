@@ -33,7 +33,6 @@ namespace ghoul::fontrendering { class FontManager; }
 
 namespace openspace {
 
-struct Configuration;
 class Dashboard;
 class DeferredcasterManager;
 class DownloadManager;
@@ -50,6 +49,7 @@ class SyncEngine;
 class TimeManager;
 class VirtualPropertyManager;
 struct WindowDelegate;
+namespace configuration { struct Configuration; }
 namespace interaction {
     struct JoystickInputStates;
     class KeybindingManager;
@@ -67,7 +67,6 @@ namespace global {
 namespace detail {
 
 ghoul::fontrendering::FontManager& gFontManager();
-Configuration& gConfiguration();
 Dashboard& gDashboard();
 DeferredcasterManager& gDeferredcasterManager();
 DownloadManager& gDownloadManager();
@@ -84,6 +83,7 @@ SyncEngine& gSyncEngine();
 TimeManager& gTimeManager();
 VirtualPropertyManager& gVirtualPropertyManager();
 WindowDelegate& gWindowDelegate();
+configuration::Configuration& gConfiguration();
 interaction::JoystickInputStates& gJoystickInputStates();
 interaction::KeybindingManager& gKeybindingManager();
 interaction::NavigationHandler& gNavigationHandler();
@@ -96,7 +96,6 @@ scripting::ScriptScheduler& gScriptScheduler();
 } // namespace detail
 
 static ghoul::fontrendering::FontManager& fontManager = detail::gFontManager();
-static Configuration& configuration = detail::gConfiguration();
 static Dashboard& dashboard = detail::gDashboard();
 static DeferredcasterManager& deferredcasterManager = detail::gDeferredcasterManager();
 static DownloadManager& downloadManager = detail::gDownloadManager();
@@ -114,6 +113,7 @@ static SyncEngine& syncEngine = detail::gSyncEngine();
 static TimeManager& timeManager = detail::gTimeManager();
 static VirtualPropertyManager& virtualPropertyManager = detail::gVirtualPropertyManager();
 static WindowDelegate& windowDelegate = detail::gWindowDelegate();
+static configuration::Configuration& configuration = detail::gConfiguration();
 static interaction::JoystickInputStates& joystickInputStates =
     detail::gJoystickInputStates();
 static interaction::KeybindingManager& keybindingManager = detail::gKeybindingManager();

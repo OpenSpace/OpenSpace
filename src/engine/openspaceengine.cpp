@@ -88,11 +88,6 @@
 
 #include "openspaceengine_lua.inl"
 
-using namespace openspace::scripting;
-using namespace ghoul::filesystem;
-using namespace ghoul::logging;
-using namespace ghoul::cmdparser;
-
 namespace {
     constexpr const char* _loggerCat = "OpenSpaceEngine";
     constexpr const int CacheVersion = 1;
@@ -156,6 +151,29 @@ void deinitialize() {
 void OpenSpaceEngine::initialize() {
     LTRACE("OpenSpaceEngine::initialize(begin)");
 
+    // Registering Path tokens. If the BASE path is set, it is the only one that will
+    // overwrite the default path of the cfg directory
+    for (const std::pair<std::string, std::string>& path :
+        global::configuration.pathTokens)
+    {
+        std::string fullKey = ghoul::filesystem::FileSystem::TokenOpeningBraces +
+            path.first +
+            ghoul::filesystem::FileSystem::TokenClosingBraces;
+        LDEBUG(fmt::format("Registering path {}: {}", fullKey, path.second));
+
+        const bool override = (fullKey == "${BASE}");
+        if (override) {
+            LINFO(fmt::format("Overriding base path with '{}'", path.second));
+        }
+
+        using Override = ghoul::filesystem::FileSystem::Override;
+        FileSys.registerPathToken(
+            std::move(fullKey),
+            std::move(path.second),
+            Override(override)
+        );
+    }
+
     global::initialize();
 
 
@@ -194,14 +212,16 @@ void OpenSpaceEngine::initialize() {
     // Initialize the requested logs from the configuration file
     // We previously initialized the LogManager with a console log to provide some logging
     // until we know which logs should be added
-    LogManager::deinitialize();
+    ghoul::logging::LogManager::deinitialize();
 
-    LogLevel level = ghoul::logging::levelFromString(global::configuration.logging.level);
+    ghoul::logging::LogLevel level = ghoul::logging::levelFromString(
+        global::configuration.logging.level
+    );
     bool immediateFlush = global::configuration.logging.forceImmediateFlush;
 
     using ImmediateFlush = ghoul::logging::LogManager::ImmediateFlush;
-    LogManager::initialize(level, ImmediateFlush(immediateFlush));
-    LogMgr.addLog(std::make_unique<ConsoleLog>());
+    ghoul::logging::LogManager::initialize(level, ImmediateFlush(immediateFlush));
+    LogMgr.addLog(std::make_unique<ghoul::logging::ConsoleLog>());
 
     for (const ghoul::Dictionary& log : global::configuration.logging.logs) {
         try {
@@ -221,7 +241,7 @@ void OpenSpaceEngine::initialize() {
 
 #ifdef WIN32
     if (IsDebuggerPresent()) {
-        LogMgr.addLog(std::make_unique<VisualStudioOutputLog>());
+        LogMgr.addLog(std::make_unique<ghoul::logging::VisualStudioOutputLog>());
     }
 #endif // WIN32
 
@@ -251,7 +271,7 @@ void OpenSpaceEngine::initialize() {
             DocEng.addDocumentation(doc);
         }
     }
-    DocEng.addDocumentation(Configuration::Documentation);
+    DocEng.addDocumentation(configuration::Configuration::Documentation);
 
     // Register the provided shader directories
     ghoul::opengl::ShaderPreprocessor::addIncludePath(absPath("${SHADERS}"));
@@ -556,7 +576,7 @@ void OpenSpaceEngine::deinitialize() {
 
     ghoul::fontrendering::FontRenderer::deinitialize();
 
-    LogManager::deinitialize();
+    ghoul::logging::LogManager::deinitialize();
 
     ghoul::deinitialize();
     LTRACE("deinitialize(end)");
@@ -697,8 +717,7 @@ void OpenSpaceEngine::initializeGL() {
         bool synchronous = global::configuration.openGLDebugContext.isSynchronous;
         setDebugOutput(DebugOutput(debugActive), SynchronousOutput(synchronous));
 
-        using IdFilter = Configuration::OpenGLDebugContext::IdentifierFilter;
-        for (const IdFilter&f :
+        for (const configuration::Configuration::OpenGLDebugContext::IdentifierFilter&f :
              global::configuration.openGLDebugContext.identifierFilters)
         {
             setDebugMessageControl(
@@ -807,9 +826,8 @@ void OpenSpaceEngine::initializeGL() {
     }
 
     if (global::configuration.isLoggingOpenGLCalls) {
-        LogLevel level = ghoul::logging::levelFromString(
-            global::configuration.logging.level
-        );
+        using namespace ghoul::logging;
+        LogLevel level = levelFromString(global::configuration.logging.level);
         if (level > LogLevel::Trace) {
             LWARNING(
                 "Logging OpenGL calls is enabled, but the selected log level does "
@@ -894,7 +912,7 @@ void OpenSpaceEngine::preSynchronization() {
         for (Iter it = scheduledScripts.first; it != scheduledScripts.second; ++it) {
             global::scriptEngine.queueScript(
                 *it,
-                ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::RemoteScripting::Yes
             );
         }
 
@@ -967,9 +985,9 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     // Testing this every frame has minimal impact on the performance --- abock
     // Debug build: 1-2 us ; Release build: <= 1 us
     using ghoul::logging::LogManager;
-    int warningCounter = LogMgr.messageCounter(LogLevel::Warning);
-    int errorCounter = LogMgr.messageCounter(LogLevel::Error);
-    int fatalCounter = LogMgr.messageCounter(LogLevel::Fatal);
+    int warningCounter = LogMgr.messageCounter(ghoul::logging::LogLevel::Warning);
+    int errorCounter = LogMgr.messageCounter(ghoul::logging::LogLevel::Error);
+    int fatalCounter = LogMgr.messageCounter(ghoul::logging::LogLevel::Fatal);
 
     if (warningCounter > 0) {
         LWARNINGC("Logging", fmt::format("Number of Warnings: {}", warningCounter));
@@ -1165,6 +1183,8 @@ void OpenSpaceEngine::decode() {
 void OpenSpaceEngine::externalControlCallback(const char* receivedChars, int size,
                                               int /*clientId*/)
 {
+    // Not currently used anymore;  should be replaced with a non-SGCT relient socket
+
     if (size == 0) {
         return;
     }

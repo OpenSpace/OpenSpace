@@ -659,9 +659,9 @@ void RenderEngine::postDraw() {
         // We only create the directory here, as we don't want to spam the users
         // screenshot folder everytime we start OpenSpace even when we are not taking any
         // screenshots. So the first time we actually take one, we create the folder:
-        if (!FileSys.directoryExists(absPath("${THIS_SCREENSHOT_PATH}"))) {
+        if (!FileSys.directoryExists(absPath("${SCREENSHOTS}"))) {
             FileSys.createDirectory(
-                absPath("${THIS_SCREENSHOT_PATH}"),
+                absPath("${SCREENSHOTS}"),
                 ghoul::filesystem::FileSystem::Recursive::Yes
             );
         }
