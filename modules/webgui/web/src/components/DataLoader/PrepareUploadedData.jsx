@@ -80,7 +80,11 @@ class PrepareUploadedData extends Component {
   componentDidUpdate(prevProps, prevState) {
     const { selectedFilePaths } = this.props;
 
-    if (selectedFilePaths.length > 0 && JSON.stringify(selectedFilePaths) !== JSON.stringify(prevProps.selectedFilePaths)) {
+    // const hasFilePaths = selectedFilePaths.length > 0 && selectedFilePaths[0] !== '';
+    const hasFilePaths = selectedFilePaths.length > 0;
+    const filePathsDiffer = JSON.stringify(selectedFilePaths) !== JSON.stringify(prevProps.selectedFilePaths);
+
+    if (hasFilePaths && filePathsDiffer) {
       this.setState({ 
         activated: true, 
         uploadButtonIsClicked: false

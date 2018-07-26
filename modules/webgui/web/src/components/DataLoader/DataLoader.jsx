@@ -7,6 +7,7 @@ import DataItemList from './presentational/DataItemList';
 import { stringListToArray } from './utils/helpers';
 
 import DataManager from '../../api/DataManager';
+import SubscriptionManager from './SubscriptionManager';
 import styles from './DataLoader.scss';
 import Button from '../common/Input/Button/Button';
 import Label from '../common/Label/Label';
@@ -85,6 +86,8 @@ class DataLoader extends Component {
               )}
             </div>
           </div>
+
+          <SubscriptionManager />
       </Popover>
     );  
   }

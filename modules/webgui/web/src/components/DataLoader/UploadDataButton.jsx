@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import Proptypes from 'prop-types'; 
 
@@ -15,17 +14,21 @@ class UploadDataButton extends Component {
 		super(props);
 		
 		this.handleSelectedFiles = this.handleSelectedFiles.bind(this);
+		this.subscribeToFilepaths = this.subscribeToFilepaths.bind(this);
 		this.handleVolumesConvertedCount = this.handleVolumesConvertedCount.bind(this);
 		this.handleVolumesToConvertCount = this.handleVolumesToConvertCount.bind(this);
 	}
 
 	handleClick() {
-    this.subscribeToFilepaths();
     this.triggerFilesToUpload();
   }
 
   triggerFilesToUpload() {
     DataManager.trigger(`Modules.DataLoader.Loader.UploadDataTrigger`)
+  }
+
+  componentDidMount() {
+    this.subscribeToFilepaths();
   }
 
   // This could be in a more fitting component
@@ -35,6 +38,7 @@ class UploadDataButton extends Component {
     DataManager.subscribe('Modules.DataLoader.Loader.CurrentVolumesToConvertCount', this.handleVolumesToConvertCount);
 	}
 	handleSelectedFiles(data) {
+    console.log(data)
     this.props.setSelectedFilePaths(stringListToArray(data.Value));
   }
 	handleVolumesConvertedCount(data) {
