@@ -110,7 +110,7 @@ LightSource::LightSource(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "LightSource" })
     , _enabled(EnabledInfo, true)
 {
-    if (dictionary.hasValue<std::string>(EnabledInfo.identifier)) {
+    if (dictionary.hasValue<bool>(EnabledInfo.identifier)) {
         _enabled = dictionary.value<bool>(EnabledInfo.identifier);
     }
 

@@ -16,7 +16,6 @@ local kernels = asset.syncedResource({
     Version = 1
 })
 
-
 local LocalKernels = {
     kernels .. '/apollo8.bsp'
 }
@@ -28,13 +27,13 @@ local LightSources = {
         Node = sunTransforms.SolarSystemBarycenter.Identifier,
         Intensity = 1.0
     },
-    -- {
-    --     Identifier = "Camera",
-    --     Type = "CameraLightSource",
-    --     Intensity = 0.5
-    -- }
+    {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5,
+        Enabled = false
+    }
 }
-
 
 local Apollo_8_CSM = {
     Identifier = "Apollo8CSM",
@@ -52,34 +51,16 @@ local Apollo_8_CSM = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/Apollo_CSM_shrunk_rotated_xy_doubble_size.obj"
+            GeometryFile = models .. "/Apollo_CSM.obj"
         },
         ColorTexture = models .. "/gray.png",
         LightSources = LightSources
-
-        --ModelTransform = RotationMatrix
     },
     GUI = {
-        Name = "Apollo 8 CSM",
-        Path = "/Solar System/Missions/Apollo"
+        Name = "Apollo 8",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
     }
 }
-
--- local Apollo_8_CSM_Model = {
---     Identifier = "Apollo_8_CSM_model",
---     Parent = Apollo_8_CSM.Identifier,
---     Renderable = {
---         Type = "RenderableModel",
---         Geometry = {
---             Type = "MultiModelGeometry",
---             GeometryFile = mmodels .. "/MessengerProbe_black.obj"
---         },
---         --ColorTexture = models .. "/gray.png",
---         ColorTexture = mmodels .. "/Tex_black.png",
-
---         --ModelTransform = RotationMatrix
---     }
--- }
 
 local Apollo_8_Trail = {
     Identifier = "Apollo8Trail",
@@ -100,7 +81,7 @@ local Apollo_8_Trail = {
     },
     GUI = {
         Name = "Apollo 8 Trail",
-        Path = "/Solar System/Missions/Apollo"
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
     }
 }
 

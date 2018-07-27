@@ -2,13 +2,7 @@ local helper = asset.require('util/slide_deck_helper')
 local deckL = nil
 local deckR = nil
 
--- images from https://www.lroc.asu.edu/featured_sites/view_site/1
-local slides = asset.syncedResource({
-    Name = "Apollo slides",
-    Type = "HttpSynchronization",
-    Identifier = "apollo_slideshows",
-    Version = 1
-})
+local slides = "${DATA}/apollo_photos";
 
 asset.onInitialize(function ()
     deckL = helper.createDeck("slides-apollo11-left", {
@@ -16,8 +10,6 @@ asset.onInitialize(function ()
         SphericalPosition = {3.14159, 2.244},
         Scale = 0.70
     })
-
-  
 
     helper.addSlide(deckL, slides .. "/apollo_11/A11aaa-TLI-earth-1.jpg")
     helper.addSlide(deckL, slides .. "/apollo_11/A11aaa-TLI-earth-2.jpg")
