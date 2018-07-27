@@ -307,18 +307,6 @@ void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
 }
 
 void RenderEngine::initialize() {
-    std::string renderingMethod = global::configuration.renderingMethod;
-    if (renderingMethod == "ABuffer") {
-        using Version = ghoul::systemcapabilities::Version;
-
-        // The default rendering method has a requirement of OpenGL 4.3, so if we are
-        // below that, we will fall back to frame buffer operation
-        if (OpenGLCap.openGLVersion() < Version{ 4,3,0 }) {
-            LINFO("Falling back to framebuffer implementation due to OpenGL limitations");
-            renderingMethod = "Framebuffer";
-        }
-    }
-
     // We have to perform these initializations here as the OsEng has not been initialized
     // in our constructor
     _disableSceneTranslationOnMaster =
@@ -326,9 +314,6 @@ void RenderEngine::initialize() {
     _disableMasterRendering = global::configuration.isRenderingOnMasterDisabled;
 
     _nAaSamples = global::windowDelegate.currentNumberOfAaSamples();
-
-    LINFO(fmt::format("Setting renderer from string: {}", renderingMethod));
-    setRendererFromString(renderingMethod);
 
 #ifdef GHOUL_USE_DEVIL
     ghoul::io::TextureReader::ref().addReader(
@@ -361,6 +346,24 @@ void RenderEngine::initialize() {
 
 void RenderEngine::initializeGL() {
     LTRACE("RenderEngine::initializeGL(begin)");
+
+    std::string renderingMethod = global::configuration.renderingMethod;
+    if (renderingMethod == "ABuffer") {
+        using Version = ghoul::systemcapabilities::Version;
+
+        // The default rendering method has a requirement of OpenGL 4.3, so if we are
+        // below that, we will fall back to frame buffer operation
+        if (OpenGLCap.openGLVersion() < Version{ 4,3,0 }) {
+            LINFO("Falling back to framebuffer implementation due to OpenGL limitations");
+            renderingMethod = "Framebuffer";
+        }
+    }
+
+    LINFO(fmt::format("Setting renderer from string: {}", renderingMethod));
+    setRendererFromString(renderingMethod);
+
+
+
     // TODO:    Fix the power scaled coordinates in such a way that these
     //            values can be set to more realistic values
 

@@ -212,7 +212,9 @@ void OpenSpaceEngine::initialize() {
     // Initialize the requested logs from the configuration file
     // We previously initialized the LogManager with a console log to provide some logging
     // until we know which logs should be added
-    ghoul::logging::LogManager::deinitialize();
+    if (ghoul::logging::LogManager::isInitialized()) {
+        ghoul::logging::LogManager::deinitialize();
+    }
 
     ghoul::logging::LogLevel level = ghoul::logging::levelFromString(
         global::configuration.logging.level
@@ -276,6 +278,57 @@ void OpenSpaceEngine::initialize() {
     // Register the provided shader directories
     ghoul::opengl::ShaderPreprocessor::addIncludePath(absPath("${SHADERS}"));
 
+    // Register Lua script functions
+    LDEBUG("Registering Lua libraries");
+    registerCoreClasses(global::scriptEngine);
+
+    global::scriptEngine.addLibrary(global::openSpaceEngine._assetManager->luaLibrary());
+
+    for (OpenSpaceModule* module : global::moduleEngine.modules()) {
+        global::scriptEngine.addLibrary(module->luaLibrary());
+
+        for (scripting::LuaLibrary& l : module->luaLibraries()) {
+            global::scriptEngine.addLibrary(l);
+        }
+    }
+
+    global::scriptEngine.initialize();
+
+    writeStaticDocumentation();
+
+    _shutdown.waitTime = global::configuration.shutdownCountdown;
+
+    global::navigationHandler.initialize();
+
+    global::renderEngine.initialize();
+
+    for (const std::function<void()>& func : global::callback::initialize) {
+        func();
+    }
+
+    // Set up asset loader
+    std::unique_ptr<SynchronizationWatcher> w =
+        std::make_unique<SynchronizationWatcher>();
+    SynchronizationWatcher* rawWatcher = w.get();
+
+    global::openSpaceEngine._assetManager = std::make_unique<AssetManager>(
+        std::make_unique<AssetLoader>(
+            *global::scriptEngine.luaState(),
+            rawWatcher,
+            FileSys.absPath("${ASSETS}")
+        ),
+        std::move(w)
+    );
+
+    global::openSpaceEngine._assetManager->initialize();
+    scheduleLoadSingleAsset(global::configuration.asset);
+
+    LTRACE("OpenSpaceEngine::initialize(end)");
+}
+
+void OpenSpaceEngine::initializeGL() {
+    LTRACE("OpenSpaceEngine::initializeGL(begin)");
+
     glbinding::Binding::useCurrentContext();
     glbinding::Binding::initialize();
 
@@ -300,7 +353,7 @@ void OpenSpaceEngine::initialize() {
     using Verbosity = ghoul::systemcapabilities::SystemCapabilitiesComponent::Verbosity;
     Verbosity verbosity = ghoul::from_string<Verbosity>(
         global::configuration.logging.capabilitiesVerbosity
-    );
+        );
     SysCap.logCapabilities(verbosity);
 
 
@@ -333,31 +386,8 @@ void OpenSpaceEngine::initialize() {
         }
     }
 
-    // Register Lua script functions
-    LDEBUG("Registering Lua libraries");
-    registerCoreClasses(global::scriptEngine);
-
-    global::scriptEngine.addLibrary(global::openSpaceEngine._assetManager->luaLibrary());
-
-    for (OpenSpaceModule* module : global::moduleEngine.modules()) {
-        global::scriptEngine.addLibrary(module->luaLibrary());
-
-        for (scripting::LuaLibrary& l : module->luaLibraries()) {
-            global::scriptEngine.addLibrary(l);
-        }
-    }
-
-    global::scriptEngine.initialize();
-
-    writeStaticDocumentation();
-
-    _shutdown.waitTime = global::configuration.shutdownCountdown;
-
-    global::navigationHandler.initialize();
-
     loadFonts();
 
-    global::renderEngine.initialize();
     _loadingScreen = std::make_unique<LoadingScreen>(
         LoadingScreen::ShowMessage(global::configuration.loadingScreen.isShowingMessages),
         LoadingScreen::ShowNodeNames(
@@ -366,32 +396,196 @@ void OpenSpaceEngine::initialize() {
         LoadingScreen::ShowProgressbar(
             global::configuration.loadingScreen.isShowingProgressbar
         )
-    );
+        );
 
     _loadingScreen->render();
 
-    for (const std::function<void()>& func : global::callback::initialize) {
+
+
+
+
+    LTRACE("OpenSpaceEngine::initializeGL::Console::initialize(begin)");
+    try {
+        global::luaConsole.initialize();
+    }
+    catch (ghoul::RuntimeError& e) {
+        LERROR("Error initializing Console with error:");
+        LERRORC(e.component, e.message);
+    }
+    LTRACE("OpenSpaceEngine::initializeGL::Console::initialize(end)");
+
+    LTRACE("OpenSpaceEngine::initializeGL::DebugContext(begin)");
+    bool debugActive = global::configuration.openGLDebugContext.isActive;
+
+    // Debug output is not available before 4.3
+    const ghoul::systemcapabilities::Version minVersion = { 4, 3, 0 };
+    if (debugActive && OpenGLCap.openGLVersion() < minVersion) {
+        LINFO("OpenGL Debug context requested, but insufficient version available");
+        debugActive = false;
+    }
+
+    if (debugActive) {
+        using namespace ghoul::opengl::debug;
+
+        bool synchronous = global::configuration.openGLDebugContext.isSynchronous;
+        setDebugOutput(DebugOutput(debugActive), SynchronousOutput(synchronous));
+
+        for (const configuration::Configuration::OpenGLDebugContext::IdentifierFilter&f :
+            global::configuration.openGLDebugContext.identifierFilters)
+        {
+            setDebugMessageControl(
+                ghoul::from_string<Source>(f.source),
+                ghoul::from_string<Type>(f.type),
+                { f.identifier },
+                Enabled::No
+            );
+
+        }
+
+        for (const std::string& sev :
+            global::configuration.openGLDebugContext.severityFilters)
+        {
+            setDebugMessageControl(
+                Source::DontCare,
+                Type::DontCare,
+                ghoul::from_string<Severity>(sev),
+                Enabled::No
+            );
+        }
+
+        auto callback = [](Source source, Type type, Severity severity,
+            unsigned int id, std::string message) -> void
+        {
+            const std::string s = ghoul::to_string(source);
+            const std::string t = ghoul::to_string(type);
+
+            const std::string category =
+                "OpenGL (" + s + ") [" + t + "] {" + std::to_string(id) + "}";
+            switch (severity) {
+                case Severity::High:
+                    LERRORC(category, message);
+                    break;
+                case Severity::Medium:
+                    LWARNINGC(category, message);
+                    break;
+                case Severity::Low:
+                    LINFOC(category, message);
+                    break;
+                case Severity::Notification:
+                    LDEBUGC(category, message);
+                    break;
+                default:
+                    throw ghoul::MissingCaseException();
+            }
+        };
+        ghoul::opengl::debug::setDebugCallback(callback);
+    }
+    LTRACE("OpenSpaceEngine::initializeGL::DebugContext(end)");
+
+    // The ordering of the KeyCheckOpenGLState and KeyLogEachOpenGLCall are important as
+    // the callback mask in glbinding is stateful for each context, and since
+    // KeyLogEachOpenGLCall is more specific, we want it to be able to overwrite the
+    // state from KeyCheckOpenGLState
+    if (global::configuration.isCheckingOpenGLState) {
+        using namespace glbinding;
+
+        // Infinite loop -- welcome to the danger zone
+        setCallbackMaskExcept(CallbackMask::After, { "glGetError" });
+        setAfterCallback([](const FunctionCall& f) {
+            const GLenum error = glGetError();
+            switch (error) {
+                case GL_NO_ERROR:
+                    break;
+                case GL_INVALID_ENUM:
+                    LERRORC(
+                        "OpenGL Invalid State",
+                        fmt::format("Function {}: GL_INVALID_ENUM", f.toString())
+                    );
+                    break;
+                case GL_INVALID_VALUE:
+                    LERRORC(
+                        "OpenGL Invalid State",
+                        fmt::format("Function {}: GL_INVALID_VALUE", f.toString())
+                    );
+                    break;
+                case GL_INVALID_OPERATION:
+                    LERRORC(
+                        "OpenGL Invalid State",
+                        fmt::format("Function {}: GL_INVALID_OPERATION", f.toString())
+                    );
+                    break;
+                case GL_INVALID_FRAMEBUFFER_OPERATION:
+                    LERRORC(
+                        "OpenGL Invalid State",
+                        fmt::format(
+                            "Function {}: GL_INVALID_FRAMEBUFFER_OPERATION",
+                            f.toString()
+                        )
+                    );
+                    break;
+                case GL_OUT_OF_MEMORY:
+                    LERRORC(
+                        "OpenGL Invalid State",
+                        fmt::format("Function {}: GL_OUT_OF_MEMORY", f.toString())
+                    );
+                    break;
+                default:
+                    LERRORC(
+                        "OpenGL Invalid State",
+                        fmt::format("Unknown error code: {0:x}", error)
+                    );
+            }
+        });
+    }
+
+    if (global::configuration.isLoggingOpenGLCalls) {
+        using namespace ghoul::logging;
+        LogLevel level = levelFromString(global::configuration.logging.level);
+        if (level > LogLevel::Trace) {
+            LWARNING(
+                "Logging OpenGL calls is enabled, but the selected log level does "
+                "not include TRACE, so no OpenGL logs will be printed");
+        }
+        else {
+            using namespace glbinding;
+
+            setCallbackMask(CallbackMask::After | CallbackMask::ParametersAndReturnValue);
+            glbinding::setAfterCallback([](const glbinding::FunctionCall& call) {
+                std::string arguments = std::accumulate(
+                    call.parameters.begin(),
+                    call.parameters.end(),
+                    std::string("("),
+                    [](std::string a, AbstractValue* v) {
+                    return a + v->asString() + ", ";
+                }
+                );
+                // Remove the final ", "
+                arguments = arguments.substr(0, arguments.size() - 2) + ")";
+
+                std::string returnValue = call.returnValue ?
+                    " -> " + call.returnValue->asString() :
+                    "";
+
+                LTRACEC(
+                    "OpenGL",
+                    call.function->name() + std::move(arguments) + std::move(returnValue)
+                );
+            });
+        }
+    }
+
+    LDEBUG("Initializing Rendering Engine");
+    global::renderEngine.initializeGL();
+
+    global::moduleEngine.initializeGL();
+
+    for (const std::function<void()>& func : global::callback::initializeGL) {
         func();
     }
 
-    // Set up asset loader
-    std::unique_ptr<SynchronizationWatcher> w =
-        std::make_unique<SynchronizationWatcher>();
-    SynchronizationWatcher* rawWatcher = w.get();
+    LINFO("Finished initializing OpenGL");
 
-    global::openSpaceEngine._assetManager = std::make_unique<AssetManager>(
-        std::make_unique<AssetLoader>(
-            *global::scriptEngine.luaState(),
-            rawWatcher,
-            FileSys.absPath("${ASSETS}")
-        ),
-        std::move(w)
-    );
-
-    global::openSpaceEngine._assetManager->initialize();
-    scheduleLoadSingleAsset(global::configuration.asset);
-
-    LTRACE("OpenSpaceEngine::initialize(end)");
+    LTRACE("OpenSpaceEngine::initializeGL(end)");
 }
 
 void OpenSpaceEngine::scheduleLoadSingleAsset(std::string assetPath) {
@@ -686,193 +880,6 @@ void OpenSpaceEngine::writeSceneDocumentation() {
             absPath(global::configuration.documentation.property)
         );
     }
-}
-
-void OpenSpaceEngine::initializeGL() {
-    LTRACE("OpenSpaceEngine::initializeGL(begin)");
-
-    LTRACE("OpenSpaceEngine::initializeGL::Console::initialize(begin)");
-    try {
-        global::luaConsole.initialize();
-    }
-    catch (ghoul::RuntimeError& e) {
-        LERROR("Error initializing Console with error:");
-        LERRORC(e.component, e.message);
-    }
-    LTRACE("OpenSpaceEngine::initializeGL::Console::initialize(end)");
-
-    LTRACE("OpenSpaceEngine::initializeGL::DebugContext(begin)");
-    bool debugActive = global::configuration.openGLDebugContext.isActive;
-
-    // Debug output is not available before 4.3
-    const ghoul::systemcapabilities::Version minVersion = { 4, 3, 0 };
-    if (debugActive && OpenGLCap.openGLVersion() < minVersion) {
-        LINFO("OpenGL Debug context requested, but insufficient version available");
-        debugActive = false;
-    }
-
-    if (debugActive) {
-        using namespace ghoul::opengl::debug;
-
-        bool synchronous = global::configuration.openGLDebugContext.isSynchronous;
-        setDebugOutput(DebugOutput(debugActive), SynchronousOutput(synchronous));
-
-        for (const configuration::Configuration::OpenGLDebugContext::IdentifierFilter&f :
-             global::configuration.openGLDebugContext.identifierFilters)
-        {
-            setDebugMessageControl(
-                ghoul::from_string<Source>(f.source),
-                ghoul::from_string<Type>(f.type),
-                { f.identifier },
-                Enabled::No
-            );
-
-        }
-
-        for (const std::string& sev :
-             global::configuration.openGLDebugContext.severityFilters)
-        {
-            setDebugMessageControl(
-                Source::DontCare,
-                Type::DontCare,
-                ghoul::from_string<Severity>(sev),
-                Enabled::No
-            );
-        }
-
-        auto callback = [](Source source, Type type, Severity severity,
-            unsigned int id, std::string message) -> void
-        {
-            const std::string s = ghoul::to_string(source);
-            const std::string t = ghoul::to_string(type);
-
-            const std::string category =
-                "OpenGL (" + s + ") [" + t + "] {" + std::to_string(id) + "}";
-            switch (severity) {
-                case Severity::High:
-                    LERRORC(category, message);
-                    break;
-                case Severity::Medium:
-                    LWARNINGC(category, message);
-                    break;
-                case Severity::Low:
-                    LINFOC(category, message);
-                    break;
-                case Severity::Notification:
-                    LDEBUGC(category, message);
-                    break;
-                default:
-                    throw ghoul::MissingCaseException();
-            }
-        };
-        ghoul::opengl::debug::setDebugCallback(callback);
-    }
-    LTRACE("OpenSpaceEngine::initializeGL::DebugContext(end)");
-
-    // The ordering of the KeyCheckOpenGLState and KeyLogEachOpenGLCall are important as
-    // the callback mask in glbinding is stateful for each context, and since
-    // KeyLogEachOpenGLCall is more specific, we want it to be able to overwrite the
-    // state from KeyCheckOpenGLState
-    if (global::configuration.isCheckingOpenGLState) {
-        using namespace glbinding;
-
-        // Infinite loop -- welcome to the danger zone
-        setCallbackMaskExcept(CallbackMask::After, { "glGetError" });
-        setAfterCallback([](const FunctionCall& f) {
-            const GLenum error = glGetError();
-            switch (error) {
-                case GL_NO_ERROR:
-                    break;
-                case GL_INVALID_ENUM:
-                    LERRORC(
-                        "OpenGL Invalid State",
-                        fmt::format("Function {}: GL_INVALID_ENUM", f.toString())
-                    );
-                    break;
-                case GL_INVALID_VALUE:
-                    LERRORC(
-                        "OpenGL Invalid State",
-                        fmt::format("Function {}: GL_INVALID_VALUE", f.toString())
-                    );
-                    break;
-                case GL_INVALID_OPERATION:
-                    LERRORC(
-                        "OpenGL Invalid State",
-                        fmt::format("Function {}: GL_INVALID_OPERATION", f.toString())
-                    );
-                    break;
-                case GL_INVALID_FRAMEBUFFER_OPERATION:
-                    LERRORC(
-                        "OpenGL Invalid State",
-                        fmt::format(
-                            "Function {}: GL_INVALID_FRAMEBUFFER_OPERATION",
-                            f.toString()
-                        )
-                    );
-                    break;
-                case GL_OUT_OF_MEMORY:
-                    LERRORC(
-                        "OpenGL Invalid State",
-                        fmt::format("Function {}: GL_OUT_OF_MEMORY", f.toString())
-                    );
-                    break;
-                default:
-                    LERRORC(
-                        "OpenGL Invalid State",
-                        fmt::format("Unknown error code: {0:x}", error)
-                    );
-            }
-        });
-    }
-
-    if (global::configuration.isLoggingOpenGLCalls) {
-        using namespace ghoul::logging;
-        LogLevel level = levelFromString(global::configuration.logging.level);
-        if (level > LogLevel::Trace) {
-            LWARNING(
-                "Logging OpenGL calls is enabled, but the selected log level does "
-                "not include TRACE, so no OpenGL logs will be printed");
-        }
-        else {
-            using namespace glbinding;
-
-            setCallbackMask(CallbackMask::After | CallbackMask::ParametersAndReturnValue);
-            glbinding::setAfterCallback([](const glbinding::FunctionCall& call) {
-                std::string arguments = std::accumulate(
-                    call.parameters.begin(),
-                    call.parameters.end(),
-                    std::string("("),
-                    [](std::string a, AbstractValue* v) {
-                        return a + v->asString() + ", ";
-                    }
-                );
-                // Remove the final ", "
-                arguments = arguments.substr(0, arguments.size() - 2) + ")";
-
-                std::string returnValue = call.returnValue ?
-                    " -> " + call.returnValue->asString() :
-                    "";
-
-                LTRACEC(
-                    "OpenGL",
-                    call.function->name() + std::move(arguments) + std::move(returnValue)
-                );
-            });
-        }
-    }
-
-    LDEBUG("Initializing Rendering Engine");
-    global::renderEngine.initializeGL();
-
-    global::moduleEngine.initializeGL();
-
-    for (const std::function<void()>& func : global::callback::initializeGL) {
-        func();
-    }
-
-    LINFO("Finished initializing OpenGL");
-
-    LTRACE("OpenSpaceEngine::initializeGL(end)");
 }
 
 void OpenSpaceEngine::preSynchronization() {

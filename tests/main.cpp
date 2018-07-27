@@ -49,6 +49,7 @@
 #define GHL_THROW_ON_ASSERT
 #endif // GHL_THROW_ON_ASSERTGHL_THROW_ON_ASSERT
 
+#include <openspace/engine/configuration.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/util/factorymanager.h>
@@ -60,6 +61,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/ghoul.h>
 #include <iostream>
 
 #include <test_common.inl>
@@ -112,22 +114,16 @@ int main(int argc, char** argv) {
 
     // Workaround for Visual Studio Google Test Adapter:
     // Do not try to initialize osengine if gtest is just listing tests
-    bool skipOsEng = false;
     std::vector<std::string> gtestArgs(argv, argv + argc);
     if (std::find(gtestArgs.begin(), gtestArgs.end(), "--gtest_list_tests") != gtestArgs.end()) {
-        skipOsEng = true;
-    }
+        using namespace openspace;
+        ghoul::initialize();
 
-    if (!skipOsEng) {
-        openspace::OpenSpaceEngine::create(
-            argc,
-            argv,
-            openspace::WindowDelegate(),
-            args,
-            close,
-            consoleLog
-        );
-        FileSys.registerPathToken("${TESTDIR}" , "${BASE}/tests");
+        std::string configFile = configuration::findConfiguration();
+        global::configuration = configuration::loadConfigurationFromFile(configFile);
+        global::openSpaceEngine.initialize();
+
+        FileSys.registerPathToken("${TESTDIR}", "${BASE}/tests");
 
         // All of the relevant tests initialize the SpiceManager
         openspace::SpiceManager::deinitialize();

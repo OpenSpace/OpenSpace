@@ -135,7 +135,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
     using namespace globebrowsing;
 
     // Initialize
-    global::callback::initialize.push_back([&]() {
+    global::callback::initializeGL.push_back([&]() {
         _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>();
         addPropertySubOwner(*_tileCache);
 
