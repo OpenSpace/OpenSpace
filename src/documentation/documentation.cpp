@@ -60,14 +60,10 @@ struct WarningCompare {
 
 } // namespace
 
-// Unfortunately, the standard library does not contain a no-op for the to_string method
-// so we have to include one ourselves
-namespace std {
-std::string to_string(std::string value) {
-    return value;
-}
+namespace ghoul {
 
-std::string to_string(openspace::documentation::TestResult testResult) {
+template <>
+std::string to_string(const openspace::documentation::TestResult& testResult) {
     using namespace openspace::documentation;
 
     if (testResult.success) {
@@ -78,22 +74,25 @@ std::string to_string(openspace::documentation::TestResult testResult) {
         stream << "Failure." << '\n';
 
         for (const TestResult::Offense& offense : testResult.offenses) {
-            stream << "  " << std::to_string(offense) << '\n';
+            stream << "  " << ghoul::to_string(offense) << '\n';
         }
 
         for (const TestResult::Warning& warning : testResult.warnings) {
-            stream << "  " << std::to_string(warning) << '\n';
+            stream << "  " << ghoul::to_string(warning) << '\n';
         }
 
         return stream.str();
     }
 }
 
-std::string to_string(openspace::documentation::TestResult::Offense offense) {
-    return offense.offender + ": " + std::to_string(offense.reason);
+template <>
+std::string to_string(const openspace::documentation::TestResult::Offense& offense) {
+    return offense.offender + ": " + ghoul::to_string(offense.reason);
 }
 
-std::string to_string(openspace::documentation::TestResult::Offense::Reason reason) {
+template <>
+std::string to_string(const openspace::documentation::TestResult::Offense::Reason& reason)
+{
     switch (reason) {
         case openspace::documentation::TestResult::Offense::Reason::ExtraKey:
             return "Extra key";
@@ -110,11 +109,15 @@ std::string to_string(openspace::documentation::TestResult::Offense::Reason reas
     }
 }
 
-std::string to_string(openspace::documentation::TestResult::Warning warning) {
-    return warning.offender + ": " + std::to_string(warning.reason);
+template <>
+std::string to_string(const openspace::documentation::TestResult::Warning& warning) {
+    return warning.offender + ": " + ghoul::to_string(warning.reason);
 }
 
-std::string to_string(openspace::documentation::TestResult::Warning::Reason reason) {
+template <>
+std::string to_string(
+                      const openspace::documentation::TestResult::Warning::Reason& reason)
+{
     switch (reason) {
         case openspace::documentation::TestResult::Warning::Reason::Deprecated:
             return "Deprecated";
@@ -123,7 +126,7 @@ std::string to_string(openspace::documentation::TestResult::Warning::Reason reas
     }
 }
 
-} // namespace std
+} // namespace ghoul
 
 namespace openspace::documentation {
 

@@ -156,7 +156,7 @@ int hasOpenGLVersion(lua_State* L) {
 }
 
 int openGLVersion(lua_State* L) {
-    ghoul::lua::push(L, std::to_string(OpenGLCap.openGLVersion()));
+    ghoul::lua::push(L, ghoul::to_string(OpenGLCap.openGLVersion()));
     return 1;
 }
 
