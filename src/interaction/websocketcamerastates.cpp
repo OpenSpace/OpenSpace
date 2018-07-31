@@ -27,6 +27,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/inputstate.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/misc/stringconversion.h>
 #include <utility>
 
 namespace openspace::interaction {
@@ -211,8 +212,9 @@ std::vector<std::string> WebsocketCameraStates::buttonCommand(int button) const 
 
 } // namespace openspace::interaction
 
-namespace std {
+namespace ghoul {
 
+template <>
 std::string to_string(const openspace::interaction::WebsocketCameraStates::AxisType& type)
 {
     using T = openspace::interaction::WebsocketCameraStates::AxisType;
@@ -231,10 +233,6 @@ std::string to_string(const openspace::interaction::WebsocketCameraStates::AxisT
         default:             return "";
     }
 }
-
-} // namespace std
-
-namespace ghoul {
 
 template <>
 openspace::interaction::WebsocketCameraStates::AxisType from_string(

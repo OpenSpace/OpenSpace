@@ -25,6 +25,7 @@
 #include <openspace/interaction/websocketinputstate.h>
 
 #include <ghoul/misc/invariants.h>
+#include <ghoul/misc/stringconversion.h>
 #include <map>
 #include <numeric>
 
@@ -67,9 +68,10 @@ bool WebsocketInputStates::button(int button, WebsocketAction action) const {
 
 } // namespace openspace::interaction
 
-namespace std {
+namespace ghoul {
 
-std::string to_string(openspace::interaction::WebsocketAction action) {
+template <>
+std::string to_string(const openspace::interaction::WebsocketAction& action) {
     switch (action) {
         case openspace::interaction::WebsocketAction::Idle:    return "Idle";
         case openspace::interaction::WebsocketAction::Press:   return "Press";
@@ -78,10 +80,6 @@ std::string to_string(openspace::interaction::WebsocketAction action) {
         default:                                              return "";
     }
 }
-
-} // namespace std
-
-namespace ghoul {
 
 template <>
 openspace::interaction::WebsocketAction from_string(const std::string& string) {

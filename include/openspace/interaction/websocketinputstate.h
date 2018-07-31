@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___WEBSOCKETINPUTSTATE___H__
 #define __OPENSPACE_CORE___WEBSOCKETINPUTSTATE___H__
 
-#include <ghoul/misc/fromstring.h>
+#include <ghoul/misc/stringconversion.h>
 #include <array>
 #include <memory>
 #include <unordered_map>
@@ -112,13 +112,10 @@ struct WebsocketInputStates : public std::unordered_map<size_t, WebsocketInputSt
 
 } // namespace openspace::interaction
 
-namespace std {
-
-std::string to_string(openspace::interaction::WebsocketAction action);
-
-} // namespace std
-
 namespace ghoul {
+
+template <>
+std::string to_string(const openspace::interaction::WebsocketAction& action);
 
 template <>
 openspace::interaction::WebsocketAction from_string(const std::string& str);
