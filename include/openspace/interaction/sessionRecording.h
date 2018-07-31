@@ -26,16 +26,20 @@
 #define __OPENSPACE_CORE___SESSIONRECORDING___H__
 
 #include <openspace/interaction/externInteraction.h>
+#include <openspace/interaction/keyframenavigator.h>
 #include <openspace/network/messagestructures.h>
 
 #include <ghoul/io/socket/tcpsocket.h>
 
 #include <vector>
 #include <fstream>
+#include <iomanip>
 
-namespace openspace {
-    
-class SessionRecording  {
+namespace openspace::interaction {
+
+class KeyframeNavigator;
+
+class SessionRecording : public properties::PropertyOwner {
 public:
     enum class sessionState {
         idle = 0,
@@ -45,12 +49,9 @@ public:
     SessionRecording();
     bool startRecording(std::string filename);
     void stopRecording();
-    void recordCamera();
-    void recordTimeChange();
-    void recordScript();
     void saveScript(std::string scriptToSave);
     bool isRecording();
-    bool startPlayback(std::string filename);
+    bool startPlayback(std::string filename, KeyframeTimeRef timeMode);
     void saveCameraKeyframe();
     void saveTimeKeyframe();
     void preSynchronization();
@@ -58,17 +59,28 @@ public:
     void playbackCamera(std::string& entry);
     void playbackTimeChange(std::string& entry);
     void playbackScript(std::string& entry);
+    void stopPlayback();
+    /**
+    * \return The Lua library that contains all Lua functions available to affect the
+    * interaction
+    */
+    static scripting::LuaLibrary luaLibrary();
     
 private:
     ExternInteraction _externInteract;
     bool _isRecording = false;
     double _timestampRecordStarted;
+    double _timestampPlaybackStarted_application;
+    double _timestampPlaybackStarted_simulation;
     void saveKeyframeToFile(std::string entry);
+    double getAppropriateTimestamp(std::istringstream& inputLine);
+    double getEquivalentSimulationTime(std::istringstream& inputLine);
     sessionState _state = sessionState::idle;
     std::string _playbackFilename;
     std::ifstream _playbackFile;
     std::ofstream _recordFile;
     int _playbackLineNum = 1;
+    KeyframeTimeRef _playbackTimeReferenceMode;
 };
 
 } // namespace openspace

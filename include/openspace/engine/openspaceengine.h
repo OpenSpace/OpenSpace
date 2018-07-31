@@ -63,6 +63,7 @@ class WindowWrapper;
 namespace interaction {
     class NavigationHandler;
     class KeyBindingManager;
+    class SessionRecording;
 }
 namespace gui { class GUI; }
 namespace properties { class PropertyOwner; }
@@ -130,13 +131,13 @@ public:
     LoadingScreen& loadingScreen();
     NetworkEngine& networkEngine();
     ParallelPeer& parallelPeer();
-    SessionRecording& sessionRecording();
     RenderEngine& renderEngine();
     TimeManager& timeManager();
     WindowWrapper& windowWrapper();
     ghoul::fontrendering::FontManager& fontManager();
     interaction::NavigationHandler& navigationHandler();
     interaction::KeyBindingManager& keyBindingManager();
+    interaction::SessionRecording& sessionRecording();
     properties::PropertyOwner& rootPropertyOwner();
     properties::PropertyOwner& globalPropertyOwner();
     scripting::ScriptEngine& scriptEngine();
@@ -215,7 +216,7 @@ private:
     std::unique_ptr<ModuleEngine> _moduleEngine;
     std::unique_ptr<NetworkEngine> _networkEngine;
     std::unique_ptr<ParallelPeer> _parallelPeer;
-    std::unique_ptr<SessionRecording> _sessionRecorder;
+    std::unique_ptr<interaction::SessionRecording> _sessionRecording;
     std::unique_ptr<RenderEngine> _renderEngine;
     std::unique_ptr<SyncEngine> _syncEngine;
     std::unique_ptr<TimeManager> _timeManager;

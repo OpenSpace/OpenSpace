@@ -32,6 +32,7 @@
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/sessionRecording.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/syncbuffer.h>
 
@@ -646,7 +647,7 @@ void ScriptEngine::presync(bool isMaster) {
         _receivedScripts.push_back(_currentSyncedScript);
         _queuedScripts.pop_back();
 
-        if (OsEng.parallelPeer().isHost() && remoteScripting) {
+        if (OsEng.parallelPeer().isHost()) {
             OsEng.parallelPeer().sendScript(_currentSyncedScript);
         }
         if (OsEng.sessionRecording().isRecording()) {

@@ -140,6 +140,10 @@ KeyframeNavigator& NavigationHandler::keyframeNavigator() const {
     return *_keyframeNavigator;
 }
 
+bool NavigationHandler::isKeyFrameInteractionEnabled() const {
+    return _useKeyFrameInteraction;
+}
+
 void NavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(_inputState != nullptr, "InputState cannot be null!");
     ghoul_assert(_camera != nullptr, "Camera cannot be null!");
@@ -150,7 +154,7 @@ void NavigationHandler::updateCamera(double deltaTime) {
     else {
         if (_camera && focusNode()) {
             if (_useKeyFrameInteraction) {
-                _keyframeNavigator->updateCamera(*_camera);
+                updateCameraWithNextKeyframe();
             }
             else {
                 _orbitalNavigator->updateMouseStatesFromInput(*_inputState, deltaTime);
@@ -159,6 +163,31 @@ void NavigationHandler::updateCamera(double deltaTime) {
             _camera->setFocusPositionVec3(focusNode()->worldPosition());
         }
     }
+}
+
+void NavigationHandler::updateCameraWithNextKeyframe() {
+    bool didUpdateToNextKeyframe = _keyframeNavigator->updateCamera(*_camera);
+
+    if (!didUpdateToNextKeyframe && _playbackModeEnabled) {
+        _playbackModeEnabled = false;
+        _useKeyFrameInteraction = false;
+        if (_playbackEndCallback)
+            _playbackEndCallback();
+    }
+}
+
+void NavigationHandler::setEnableKeyFrameInteraction() {
+    _useKeyFrameInteraction = true;
+}
+
+void NavigationHandler::setDisableKeyFrameInteraction() {
+    _useKeyFrameInteraction = false;
+}
+
+void NavigationHandler::triggerPlaybackStart(std::function<void()> callback) {
+    _playbackModeEnabled = true;
+    _useKeyFrameInteraction = true;
+    _playbackEndCallback = std::move(callback);
 }
 
 SceneGraphNode* NavigationHandler::focusNode() const {
@@ -292,6 +321,7 @@ void NavigationHandler::restoreCameraStateFromFile(const std::string& filepath) 
         LWARNING(e.message);
     }
 }
+
 
 scripting::LuaLibrary NavigationHandler::luaLibrary() {
     return {

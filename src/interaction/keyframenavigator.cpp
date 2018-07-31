@@ -37,11 +37,11 @@
 
 namespace openspace::interaction {
 
-void KeyframeNavigator::updateCamera(Camera& camera) {
-    double now = OsEng.windowWrapper().applicationTime();
+bool KeyframeNavigator::updateCamera(Camera& camera) {
+    double now = currentTime();
 
     if (_cameraPoseTimeline.nKeyframes() == 0) {
-        return;
+        return false;
     }
 
     const Keyframe<CameraPose>* nextKeyframe =
@@ -55,7 +55,7 @@ void KeyframeNavigator::updateCamera(Camera& camera) {
     if (nextKeyframe) {
         nextTime = nextKeyframe->timestamp;
     } else {
-        return;
+        return false;
     }
 
     if (prevKeyframe) {
@@ -78,7 +78,7 @@ void KeyframeNavigator::updateCamera(Camera& camera) {
     SceneGraphNode* nextFocusNode = scene->sceneGraphNode(nextPose.focusNode);
 
     if (!prevFocusNode || !nextFocusNode) {
-        return;
+        return false;
     }
 
     glm::dvec3 prevKeyframeCameraPosition = prevPose.position;
@@ -116,6 +116,21 @@ void KeyframeNavigator::updateCamera(Camera& camera) {
     camera.setRotation(
         glm::slerp(prevKeyframeCameraRotation, nextKeyframeCameraRotation, t)
     );
+    return true;
+}
+
+double KeyframeNavigator::currentTime() const {
+    if( _timeframeMode == KeyframeTimeRef::relative_recordedStart )
+        return (OsEng.windowWrapper().applicationTime() - _referenceTimestamp);
+    else if( _timeframeMode == KeyframeTimeRef::absolute_simTimeJ2000 )
+        return OsEng.timeManager().time().j2000Seconds();
+    else
+        return OsEng.windowWrapper().applicationTime();
+}
+
+void KeyframeNavigator::setTimeReferenceMode(KeyframeTimeRef refType, double referenceTimestamp) {
+    _timeframeMode = refType;
+    _referenceTimestamp = referenceTimestamp;
 }
 
 Timeline<KeyframeNavigator::CameraPose>& KeyframeNavigator::timeline() {

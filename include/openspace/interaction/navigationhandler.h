@@ -57,10 +57,11 @@ public:
     void setFocusNode(SceneGraphNode* node);
     void setCamera(Camera* camera);
     void resetCameraDirection();
-
     void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
-
     void updateCamera(double deltaTime);
+    void setEnableKeyFrameInteraction();
+    void setDisableKeyFrameInteraction();
+    void triggerPlaybackStart(std::function<void()> callback);
 
     // Accessors
     ghoul::Dictionary getCameraStateDictionary();
@@ -71,6 +72,7 @@ public:
     const InputState& inputState() const;
     const OrbitalNavigator& orbitalNavigator() const;
     KeyframeNavigator& keyframeNavigator() const;
+    bool isKeyFrameInteractionEnabled() const;
 
     // Callback functions
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
@@ -88,10 +90,13 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
+    void updateCameraWithNextKeyframe();
     bool _cameraUpdatedFromScript = false;
+    bool _playbackModeEnabled = false;
 
     std::unique_ptr<InputState> _inputState;
     Camera* _camera;
+    std::function<void()> _playbackEndCallback;
 
     std::unique_ptr<OrbitalNavigator> _orbitalNavigator;
     std::unique_ptr<KeyframeNavigator> _keyframeNavigator;

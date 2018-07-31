@@ -159,7 +159,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _moduleEngine(new ModuleEngine)
     , _networkEngine(new NetworkEngine)
     , _parallelPeer(new ParallelPeer)
-    , _sessionRecording(new SessionRecording)
+    , _sessionRecording(new interaction::SessionRecording)
     , _renderEngine(new RenderEngine)
     , _syncEngine(std::make_unique<SyncEngine>(4096))
     , _timeManager(new TimeManager)
@@ -196,7 +196,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
         _rootPropertyOwner->addPropertySubOwner(_windowWrapper.get());
     }
     _rootPropertyOwner->addPropertySubOwner(_parallelPeer.get());
-    _rootPropertyOwner->addPropertySubOwner(_sessionRecorder.get());
+    _rootPropertyOwner->addPropertySubOwner(_sessionRecording.get());
     _rootPropertyOwner->addPropertySubOwner(_console.get());
     _rootPropertyOwner->addPropertySubOwner(_dashboard.get());
 
@@ -1291,7 +1291,7 @@ void OpenSpaceEngine::preSynchronization() {
         }
         _parallelPeer->preSynchronization();
     }
-    _sessionRecorder->preSynchronization();
+    _sessionRecording->preSynchronization();
 
     for (const auto& func : _moduleCallbacks.preSync) {
         func();
@@ -1705,9 +1705,9 @@ ParallelPeer& OpenSpaceEngine::parallelPeer() {
     return *_parallelPeer;
 }
     
-SessionRecording& OpenSpaceEngine::sessionRecording() {
+interaction::SessionRecording& OpenSpaceEngine::sessionRecording() {
     ghoul_assert(_sessionRecording, "SessionRecording must not be nullptr");
-    return *_sessionRecording();
+    return *_sessionRecording;
 }
 
 RenderEngine& OpenSpaceEngine::renderEngine() {

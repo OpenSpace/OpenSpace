@@ -35,8 +35,6 @@
 
 #include <ghoul/logging/logmanager.h>
 
-#include "../network/parallelpeer_lua.inl"
-
 namespace {
 const uint32_t ProtocolVersion = 3;
 const size_t MaxLatencyDiffs = 64;
@@ -139,6 +137,8 @@ void ExternInteraction::generateTimeKeyframe(datamessagestructures::TimeKeyframe
 void ExternInteraction::generateScriptMessage(datamessagestructures::ScriptMessage& sm,
                                               std::string script) {
     sm._script = std::move(script);
+    // Timestamp as current runtime of OpenSpace instance
+    sm._timestamp = OsEng.windowWrapper().applicationTime();
 }
 
 

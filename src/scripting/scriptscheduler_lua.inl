@@ -89,6 +89,33 @@ int loadScheduledScript(lua_State* L) {
     return 0;
 }
 
+int setModeApplicationTime(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::setModeApplicationTime");
+
+    OsEng.scriptScheduler().setModeApplicationTime();
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+int setModeRecordedTime(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::setModeRecordedTime");
+
+    OsEng.scriptScheduler().setModeRecordedTime();
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+int setModeSimulationTime(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::setModeSimulationTime");
+
+    OsEng.scriptScheduler().setModeSimulationTime();
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
 int clear(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clear");
 
