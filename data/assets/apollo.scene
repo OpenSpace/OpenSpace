@@ -284,6 +284,6 @@ asset.onDeinitialize(function ()
     openspace.removeVirtualProperty("*Trail.renderable.Enabled")
 
     openspace.removeInterestingNodes({
-        "Earth", "Moon", "Apollo15"
+        "Earth", "Moon", "Apollo15", "Apollo8CSM"
     })
 end)
