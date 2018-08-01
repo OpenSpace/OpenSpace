@@ -257,19 +257,7 @@ asset.onInitialize(function ()
         nil,
         nil
     )
-    openspace.setPropertyValueSingle('Scene.Moon.RenderableGlobe.Layers.ColorLayers.Kaguya_LGM2011_FreeairGravity_Colorized_Global_mgal3m_20ppd.Enabled', true);
-    openspace.setPropertyValueSingle('Scene.Moon.RenderableGlobe.Layers.ColorLayers.Kaguya_LGM2011_FreeairGravity_Colorized_Global_mgal3m_20ppd.Enabled', false);
 
-    --set for AMNH dome
-    openspace.setPropertyValueSingle('Modules.ImGUI.Main.ShowHelpText', false);
-    openspace.setPropertyValueSingle('RenderEngine.Background Exposure', 5.0);
-    openspace.setPropertyValueSingle('Scene.MilkyWay.renderable.Opacity', 0.11);
-    openspace.setPropertyValueSingle('Scene.Earth.RenderableGlobe.Layers.ColorLayers.ESRI_VIIRS_Combo.Settings.Gamma', 1.85);
-    openspace.setPropertyValueSingle('Scene.Stars.renderable.ScaleFactor', 0.84);
-    
-    --set because we don't have spice data for a15 during the timeframe in which we start the scene.
-    -- openspace.setPropertyValueSingle('Scene.Apollo15.Rotation.SourceFrame', [[GALACTIC]]);
-    
     openspace.navigation.setCameraState({
         Focus = "Earth",
         Position = {-146300361377.021454, -16569225220.310442, 266702346.800725},
