@@ -525,7 +525,7 @@ void RenderablePlanesCloud::initializeGL() {
 
 
 void RenderablePlanesCloud::deleteDataGPUAndCPU() {
-    for (std::pair<int, PlaneAggregate> pAMapItem : _planesMap) {
+    for (std::unordered_map<int, PlaneAggregate>::reference pAMapItem : _planesMap) {
         glDeleteBuffers(1, &pAMapItem.second.vbo);
         glDeleteVertexArrays(1, &pAMapItem.second.vao);
         pAMapItem.second.planesCoordinates.clear();
@@ -593,7 +593,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     _program->setUniform(_uniformCache.galaxyTexture, unit);
     int currentTextureIndex = -1;
 
-    for (const std::pair<int, PlaneAggregate> pAMapItem : _planesMap) {
+    for (const std::unordered_map<int, PlaneAggregate>::reference pAMapItem : _planesMap) {
         // For planes with undefined textures references
         if (pAMapItem.first == 30) {
             continue;
@@ -1020,24 +1020,24 @@ bool RenderablePlanesCloud::readSpeckFile() {
                 (i <= _planeStartingIndexPos + 6)) { // vectors u and v
                 int index = i - _planeStartingIndexPos;
                 switch (index) {
-                case 0:
-                    u.x = values[i];
-                    break;
-                case 1:
-                    u.y = values[i];
-                    break;
-                case 2:
-                    u.z = values[i];
-                    break;
-                case 3:
-                    v.x = values[i];
-                    break;
-                case 4:
-                    v.y = values[i];
-                    break;
-                case 5:
-                    v.z = values[i];
-                    break;
+                    case 0:
+                        u.x = values[i];
+                        break;
+                    case 1:
+                        u.y = values[i];
+                        break;
+                    case 2:
+                        u.z = values[i];
+                        break;
+                    case 3:
+                        v.x = values[i];
+                        break;
+                    case 4:
+                        v.y = values[i];
+                        break;
+                    case 5:
+                        v.z = values[i];
+                        break;
                 }
             }
 
@@ -1256,27 +1256,27 @@ void RenderablePlanesCloud::createPlanes() {
 
             float scale = 0.f;
             switch (_unit) {
-            case Meter:
-                scale = 1.f;
-                break;
-            case Kilometer:
-                scale = 1e3f;
-                break;
-            case Parsec:
-                scale = static_cast<float>(PARSEC);
-                break;
-            case Kiloparsec:
-                scale = static_cast<float>(1e3 * PARSEC);
-                break;
-            case Megaparsec:
-                scale = static_cast<float>(1e6 * PARSEC);
-                break;
-            case Gigaparsec:
-                scale = static_cast<float>(1e9 * PARSEC);
-                break;
-            case GigalightYears:
-                scale = static_cast<float>(306391534.73091 * PARSEC);
-                break;
+                case Meter:
+                    scale = 1.f;
+                    break;
+                case Kilometer:
+                    scale = 1e3f;
+                    break;
+                case Parsec:
+                    scale = static_cast<float>(PARSEC);
+                    break;
+                case Kiloparsec:
+                    scale = static_cast<float>(1e3 * PARSEC);
+                    break;
+                case Megaparsec:
+                    scale = static_cast<float>(1e6 * PARSEC);
+                    break;
+                case Gigaparsec:
+                    scale = static_cast<float>(1e9 * PARSEC);
+                    break;
+                case GigalightYears:
+                    scale = static_cast<float>(306391534.73091 * PARSEC);
+                    break;
             }
 
             for (int i = 0; i < 3; ++i) {
@@ -1330,7 +1330,7 @@ void RenderablePlanesCloud::createPlanes() {
             glBufferData(
                 GL_ARRAY_BUFFER,
                 sizeof(GLfloat) * PLANES_VERTEX_DATA_SIZE * pAMapItem.second.numberOfPlanes,
-                &pAMapItem.second.planesCoordinates[0],
+                pAMapItem.second.planesCoordinates.data(),
                 GL_STATIC_DRAW
             );
             // in_position
