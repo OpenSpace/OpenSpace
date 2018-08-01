@@ -610,6 +610,8 @@ glm::vec3 FixedRotation::yAxis() const {
         case Axis::Type::Object:
             if (_yAxis.node && _attachedNode) {
                 glm::vec3 dir = glm::vec3(glm::normalize(
+                    // @TODO(abock): This should be changed to be in the coordinate system
+                    // of the attached node // same with xAxis and zAxis ofc
                     _yAxis.node->worldPosition() - _attachedNode->worldPosition()
                 ));
                 return _yAxis.invertObject ? -dir : dir;

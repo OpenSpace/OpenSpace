@@ -333,10 +333,10 @@ void OpenSpaceEngine::create(int argc, char** argv,
             "Loading of configuration file '{}' failed", configurationFilePath
         ));
         for (const documentation::TestResult::Offense& o : e.result.offenses) {
-            LERRORC(o.offender, std::to_string(o.reason));
+            LERRORC(o.offender, ghoul::to_string(o.reason));
         }
         for (const documentation::TestResult::Warning& w : e.result.warnings) {
-            LWARNINGC(w.offender, std::to_string(w.reason));
+            LWARNINGC(w.offender, ghoul::to_string(w.reason));
         }
         throw;
     }
@@ -537,7 +537,7 @@ void OpenSpaceEngine::initialize() {
     // Check the required OpenGL versions of the registered modules
     ghoul::systemcapabilities::Version version =
         _engine->_moduleEngine->requiredOpenGLVersion();
-    LINFO(fmt::format("Required OpenGL version: {}", std::to_string(version)));
+    LINFO(fmt::format("Required OpenGL version: {}", ghoul::to_string(version)));
 
     if (OpenGLCap.openGLVersion() < version) {
         throw ghoul::RuntimeError(
@@ -913,10 +913,10 @@ void OpenSpaceEngine::configureLogging(bool consoleLog) {
         catch (const documentation::SpecificationError& e) {
             LERROR("Failed loading of log");
             for (const documentation::TestResult::Offense& o : e.result.offenses) {
-                LERRORC(o.offender, std::to_string(o.reason));
+                LERRORC(o.offender, ghoul::to_string(o.reason));
             }
             for (const documentation::TestResult::Warning& w : e.result.warnings) {
-                LWARNINGC(w.offender, std::to_string(w.reason));
+                LWARNINGC(w.offender, ghoul::to_string(w.reason));
             }
             throw;
         }
@@ -1017,8 +1017,8 @@ void OpenSpaceEngine::initializeGL() {
         auto callback = [](Source source, Type type, Severity severity,
             unsigned int id, std::string message) -> void
         {
-            const std::string s = std::to_string(source);
-            const std::string t = std::to_string(type);
+            const std::string s = ghoul::to_string(source);
+            const std::string t = ghoul::to_string(type);
 
             const std::string category =
                 "OpenGL (" + s + ") [" + t + "] {" + std::to_string(id) + "}";

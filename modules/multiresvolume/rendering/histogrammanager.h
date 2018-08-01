@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___HISTOGRAMMANAGER___H__
 
 #include <openspace/util/histogram.h>
+#include <string>
 
 namespace openspace {
 

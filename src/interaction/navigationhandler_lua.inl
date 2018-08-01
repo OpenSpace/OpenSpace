@@ -131,7 +131,7 @@ int joystickAxis(lua_State* L) {
     lua_settop(L, 0);
     const bool invert = info.invert;
     const bool normalize = info.normalize;
-    ghoul::lua::push(L, std::to_string(info.type), invert, normalize);
+    ghoul::lua::push(L, ghoul::to_string(info.type), invert, normalize);
 
     ghoul_assert(lua_gettop(L) == 3, "Incorrect number of items left on stack");
     return 3;

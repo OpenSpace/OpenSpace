@@ -49,6 +49,11 @@
 
 namespace {
     constexpr const char* _loggerCat = "FramebufferRenderer";
+
+    constexpr const std::array<const char*, 3> UniformNames = {
+        "mainColorTexture", "blackoutFactor", "nAaSamples"
+    };
+
     constexpr const char* ExitFragmentShaderPath =
         "${SHADERS}/framebuffer/exitframebuffer.frag";
     constexpr const char* RaycastFragmentShaderPath =
@@ -59,7 +64,7 @@ namespace {
         "${SHADERS}/framebuffer/renderframebuffer.frag";
 
     void saveTextureToMemory(GLenum attachment, int width, int height,
-        std::vector<double>& memory)
+                             std::vector<double>& memory)
     {
         memory.clear();
         memory.resize(width * height * 3);
@@ -222,9 +227,7 @@ void FramebufferRenderer::initialize() {
         absPath("${SHADERS}/framebuffer/resolveframebuffer.frag")
     );
 
-    _uniformCache.mainColorTexture = _resolveProgram->uniformLocation("mainColorTexture");
-    _uniformCache.blackoutFactor = _resolveProgram->uniformLocation("blackoutFactor");
-    _uniformCache.nAaSamples = _resolveProgram->uniformLocation("nAaSamples");
+    ghoul::opengl::updateUniformLocations(*_resolveProgram, _uniformCache, UniformNames);
 
     OsEng.renderEngine().raycasterManager().addListener(*this);
     OsEng.renderEngine().deferredcasterManager().addListener(*this);
@@ -294,11 +297,11 @@ void FramebufferRenderer::update() {
     if (_resolveProgram->isDirty()) {
         _resolveProgram->rebuildFromFile();
 
-        _uniformCache.mainColorTexture = _resolveProgram->uniformLocation(
-            "mainColorTexture"
+        ghoul::opengl::updateUniformLocations(
+            *_resolveProgram,
+            _uniformCache,
+            UniformNames
         );
-        _uniformCache.blackoutFactor = _resolveProgram->uniformLocation("blackoutFactor");
-        _uniformCache.nAaSamples = _resolveProgram->uniformLocation("nAaSamples");
     }
 
     using K = VolumeRaycaster*;

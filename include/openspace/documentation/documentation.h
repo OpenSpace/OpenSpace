@@ -27,6 +27,7 @@
 
 #include <ghoul/misc/boolean.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/misc/stringconversion.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -304,15 +305,25 @@ void testSpecificationAndThrow(const Documentation& documentation,
 // Make the overload for std::to_string available for the Offense::Reason for easier
 // error logging
 
-namespace std {
+namespace ghoul {
 
-std::string to_string(openspace::documentation::TestResult testResult);
+template <>
+std::string to_string(const openspace::documentation::TestResult& testResult);
 
-std::string to_string(openspace::documentation::TestResult::Offense offense);
-std::string to_string(openspace::documentation::TestResult::Offense::Reason reason);
-std::string to_string(openspace::documentation::TestResult::Warning warning);
-std::string to_string(openspace::documentation::TestResult::Warning::Reason reason);
+template <>
+std::string to_string(const openspace::documentation::TestResult::Offense& offense);
 
-} // namespace std
+template <>
+std::string to_string(
+    const openspace::documentation::TestResult::Offense::Reason& reason);
+
+template <>
+std::string to_string(const openspace::documentation::TestResult::Warning& warning);
+
+template <>
+std::string to_string(
+    const openspace::documentation::TestResult::Warning::Reason& reason);
+
+} // namespace ghoul
 
 #endif // __OPENSPACE_CORE___DOCUMENTATION___H__

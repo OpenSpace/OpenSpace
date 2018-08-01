@@ -43,18 +43,21 @@
 #include <string>
 
 namespace {
-    constexpr const char* _loggerCat        = "RenderablePlanesCloud";
+    constexpr const char* _loggerCat = "RenderablePlanesCloud";
     constexpr const char* ProgramObjectName = "RenderablePlanesCloud";
 
+    constexpr std::array<const char*, 4> UniformNames = {
+        "modelViewProjectionTransform", "alphaValue", "fadeInValue", "galaxyTexture"
+    };
 
-    constexpr const char* KeyFile           = "File";
-    constexpr const char* keyUnit           = "Unit";
-    constexpr const char* MeterUnit         = "m";
-    constexpr const char* KilometerUnit     = "Km";
-    constexpr const char* ParsecUnit        = "pc";
-    constexpr const char* KiloparsecUnit    = "Kpc";
-    constexpr const char* MegaparsecUnit    = "Mpc";
-    constexpr const char* GigaparsecUnit    = "Gpc";
+    constexpr const char* KeyFile = "File";
+    constexpr const char* keyUnit = "Unit";
+    constexpr const char* MeterUnit = "m";
+    constexpr const char* KilometerUnit = "Km";
+    constexpr const char* ParsecUnit = "pc";
+    constexpr const char* KiloparsecUnit = "Kpc";
+    constexpr const char* MegaparsecUnit = "Mpc";
+    constexpr const char* GigaparsecUnit = "Gpc";
     constexpr const char* GigalightyearUnit = "Gly";
 
     constexpr int8_t CurrentCacheVersion = 2;
@@ -488,7 +491,7 @@ void RenderablePlanesCloud::initialize() {
 }
 
 void RenderablePlanesCloud::initializeGL() {
-    _program = DigitalUniverseModule::ProgramObjectManager.requestProgramObject(
+    _program = DigitalUniverseModule::ProgramObjectManager.request(
         ProgramObjectName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return OsEng.renderEngine().buildRenderProgram(
@@ -499,12 +502,7 @@ void RenderablePlanesCloud::initializeGL() {
         }
     );
 
-    _uniformCache.modelViewProjectionTransform = _program->uniformLocation(
-        "modelViewProjectionTransform"
-    );
-    _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-    _uniformCache.fadeInValue = _program->uniformLocation("fadeInValue");
-    _uniformCache.galaxyTexture = _program->uniformLocation("galaxyTexture");
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
     createPlanes();
 
@@ -536,7 +534,7 @@ void RenderablePlanesCloud::deleteDataGPUAndCPU() {
 void RenderablePlanesCloud::deinitializeGL() {
     deleteDataGPUAndCPU();
 
-    DigitalUniverseModule::ProgramObjectManager.releaseProgramObject(
+    DigitalUniverseModule::ProgramObjectManager.release(
         ProgramObjectName,
         [](ghoul::opengl::ProgramObject* p) {
             OsEng.renderEngine().removeRenderProgram(p);
@@ -759,13 +757,7 @@ void RenderablePlanesCloud::update(const UpdateData&) {
 
     if (_program->isDirty()) {
         _program->rebuildFromFile();
-
-        _uniformCache.modelViewProjectionTransform = _program->uniformLocation(
-            "modelViewProjectionTransform"
-        );
-        _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-        _uniformCache.fadeInValue = _program->uniformLocation("fadeInValue");
-        _uniformCache.galaxyTexture = _program->uniformLocation("galaxyTexture");
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 }
 

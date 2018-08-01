@@ -2023,9 +2023,12 @@ TEST_F(DocumentationTest, AndOperator) {
 
     Documentation doc {
         {
-            { "a", new AndVerifier(
-                new IntGreaterEqualVerifier(2), new IntLessEqualVerifier(5)
-                ), Optional::No
+            {
+                "a",
+                new AndVerifier({
+                    new IntGreaterEqualVerifier(2), new IntLessEqualVerifier(5)
+                }),
+                Optional::No
             }
         }
     };
@@ -2061,7 +2064,7 @@ TEST_F(DocumentationTest, OrOperator) {
     using namespace std::string_literals;
 
     Documentation doc {
-        {{ "a", new OrVerifier(new StringVerifier, new IntVerifier), Optional::No}}
+        {{ "a", new OrVerifier({ new StringVerifier, new IntVerifier }), Optional::No }}
     };
 
     ghoul::Dictionary positive {

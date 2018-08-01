@@ -69,6 +69,7 @@
 namespace openspace {
 
 ghoul::opengl::ProgramObjectManager BaseModule::ProgramObjectManager;
+ghoul::opengl::TextureManager BaseModule::TextureManager;
 
 BaseModule::BaseModule() : OpenSpaceModule(BaseModule::Name) {}
 
@@ -159,6 +160,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
 
 void BaseModule::internalDeinitializeGL() {
     ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
+    TextureManager.releaseAll(ghoul::opengl::TextureManager::Warnings::Yes);
 }
 
 std::vector<documentation::Documentation> BaseModule::documentations() const {

@@ -46,18 +46,22 @@
 #include <stdint.h>
 
 namespace {
-    constexpr const char* _loggerCat        = "RenderableDUMeshes";
+    constexpr const char* _loggerCat = "RenderableDUMeshes";
     constexpr const char* ProgramObjectName = "RenderableDUMeshes";
 
-    constexpr const char* KeyFile           = "File";
-    constexpr const char* keyColor          = "Color";
-    constexpr const char* keyUnit           = "Unit";
-    constexpr const char* MeterUnit         = "m";
-    constexpr const char* KilometerUnit     = "Km";
-    constexpr const char* ParsecUnit        = "pc";
-    constexpr const char* KiloparsecUnit    = "Kpc";
-    constexpr const char* MegaparsecUnit    = "Mpc";
-    constexpr const char* GigaparsecUnit    = "Gpc";
+    constexpr const std::array<const char*, 4> UniformNames = {
+        "modelViewTransform", "projectionTransform", "alphaValue", "color"
+    };
+
+    constexpr const char* KeyFile = "File";
+    constexpr const char* keyColor = "Color";
+    constexpr const char* keyUnit = "Unit";
+    constexpr const char* MeterUnit = "m";
+    constexpr const char* KilometerUnit = "Km";
+    constexpr const char* ParsecUnit = "pc";
+    constexpr const char* KiloparsecUnit = "Kpc";
+    constexpr const char* MegaparsecUnit = "Mpc";
+    constexpr const char* GigaparsecUnit = "Gpc";
     constexpr const char* GigalightyearUnit = "Gly";
 
     constexpr const int8_t CurrentCacheVersion = 1;
@@ -392,7 +396,7 @@ bool RenderableDUMeshes::isReady() const {
 }
 
 void RenderableDUMeshes::initializeGL() {
-    _program = DigitalUniverseModule::ProgramObjectManager.requestProgramObject(
+    _program = DigitalUniverseModule::ProgramObjectManager.request(
         ProgramObjectName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return OsEng.renderEngine().buildRenderProgram(
@@ -403,11 +407,7 @@ void RenderableDUMeshes::initializeGL() {
         }
     );
 
-    _uniformCache.modelViewTransform = _program->uniformLocation("modelViewTransform");
-    _uniformCache.projectionTransform = _program->uniformLocation("projectionTransform");
-    _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-    //_uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
-    _uniformCache.color = _program->uniformLocation("color");
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
     bool success = loadData();
     if (!success) {
@@ -437,7 +437,7 @@ void RenderableDUMeshes::deinitializeGL() {
         }
     }
 
-    DigitalUniverseModule::ProgramObjectManager.releaseProgramObject(
+    DigitalUniverseModule::ProgramObjectManager.release(
         ProgramObjectName,
         [](ghoul::opengl::ProgramObject* p) {
             OsEng.renderEngine().removeRenderProgram(p);
@@ -616,16 +616,7 @@ void RenderableDUMeshes::render(const RenderData& data, RendererTasks&) {
 void RenderableDUMeshes::update(const UpdateData&) {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
-
-        _uniformCache.modelViewTransform = _program->uniformLocation(
-            "modelViewTransform"
-        );
-        _uniformCache.projectionTransform = _program->uniformLocation(
-            "projectionTransform"
-        );
-        _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-        //_uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
-        _uniformCache.color = _program->uniformLocation("color");
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 }
 

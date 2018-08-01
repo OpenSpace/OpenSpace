@@ -440,7 +440,7 @@ int addSceneGraphNode(lua_State* L) {
         return ghoul::lua::luaError(
             L,
             fmt::format("Error loading scene graph node: {}: {}",
-                e.what(), std::to_string(e.result))
+                e.what(), ghoul::to_string(e.result))
         );
     } catch (const ghoul::RuntimeError& e) {
         return ghoul::lua::luaError(

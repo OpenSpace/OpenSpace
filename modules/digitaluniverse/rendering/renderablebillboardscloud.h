@@ -105,7 +105,6 @@ private:
     bool _hasColorMapFile = false;
     bool _hasPolygon = false;
     bool _hasLabel = false;
-    bool _labelDataIsDirty = true;
 
     int _polygonSides = 0;
 
@@ -133,17 +132,15 @@ private:
     // DEBUG:
     properties::OptionProperty _renderOption;
 
-
-    std::unique_ptr<ghoul::opengl::Texture> _polygonTexture;
-    std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
-    std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
+    ghoul::opengl::Texture* _polygonTexture;
+    ghoul::opengl::Texture* _spriteTexture;
     ghoul::opengl::ProgramObject* _program = nullptr;
     ghoul::opengl::ProgramObject* _renderToPolygonProgram = nullptr;
 
     UniformCache(cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup,
         renderOption, minBillboardSize, maxBillboardSize, correctionSizeEndDistance,
-        correctionSizeFactor, color, sides, alphaValue, scaleFactor, up, right,
-        fadeInValue, screenSize, spriteTexture, hasColormap, enabledRectSizeControl
+        correctionSizeFactor, color, alphaValue, scaleFactor, up, right, fadeInValue,
+        screenSize, spriteTexture, hasColormap, enabledRectSizeControl
     ) _uniformCache;
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 

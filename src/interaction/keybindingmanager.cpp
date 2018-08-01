@@ -133,7 +133,7 @@ std::string KeyBindingManager::generateJson() const {
         }
         first = false;
         json << "{";
-        json << "\"key\": \"" << std::to_string(p.first) << "\",";
+        json << "\"key\": \"" << ghoul::to_string(p.first) << "\",";
         json << "\"script\": \"" << escapedJson(p.second.command) << "\",";
         json << "\"remoteScripting\": "
              << (p.second.synchronization ? "true," : "false,");
