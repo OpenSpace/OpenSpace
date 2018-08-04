@@ -27,19 +27,27 @@
 #include <modules/server/include/connection.h>
 #include <modules/server/include/jsonconverters.h>
 
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/websocketcamerastates.h>
 #include <openspace/interaction/websocketinputstate.h>
 #include <openspace/interaction/navigationhandler.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/scene.h>
 #include <openspace/util/timemanager.h>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/ghoul_lua.h>
 
 #include <iterator>
 #include <unordered_map>
 
 namespace {
+    constexpr const char* BasePathToken = "${BASE}";
+
     enum class Command {
         Connect = 0,
         Disconnect,
@@ -140,6 +148,29 @@ void FlightControllerTopic::handleJson(const nlohmann::json& json) {
 void FlightControllerTopic::connect() {
     _isDone = false;
     std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0);
+    setFocusNodes();
+}
+
+void FlightControllerTopic::setFocusNodes() {
+    std::vector<SceneGraphNode*> nodes =
+        OsEng.renderEngine().scene()->allSceneGraphNodes();
+
+    std::sort(
+          nodes.begin(),
+          nodes.end(),
+          [](SceneGraphNode* lhs, SceneGraphNode* rhs) {
+              return lhs->guiName() < rhs->guiName();
+          }
+      );;
+
+    for (SceneGraphNode* n : nodes) {
+        const std::vector<std::string>& tags = n->tags();
+        const auto it = std::find(tags.begin(), tags.end(), "GUI.Interesting");
+        if (it != tags.end()) {
+            _focusNodes[n->guiName()] = n->identifier();
+        }
+    }
+    _connection->sendJson(wrappedPayload(_focusNodes));
 }
 
 void FlightControllerTopic::disconnect() {
@@ -166,6 +197,4 @@ void FlightControllerTopic::processInputState(const nlohmann::json& json) {
         _inputState.axes[std::distance(AxisIndexMap.begin(), mapIt)] = float(it.value());
     }
 }
-
-
 } // namespace openspace

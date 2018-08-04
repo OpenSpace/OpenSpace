@@ -47,12 +47,15 @@ public:
 
 private:
     bool _isDone;
+    nlohmann::json _focusNodes;
+
     openspace::interaction::WebsocketInputStates _inputStates;
     openspace::interaction::WebsocketInputState _inputState;
 
     void connect();
     void disconnect();
     void processInputState(const nlohmann::json& json);
+    void setFocusNodes();
 };
 
 } // namespace openspace
