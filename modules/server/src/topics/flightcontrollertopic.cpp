@@ -58,6 +58,7 @@ namespace {
 
     constexpr const char* _loggerCat = "FlightControllerTopic";
     constexpr const char* TypeKey = "type";
+    constexpr const char* ValuesKey = "values";
 
     constexpr const char* FlightControllerType = "flightcontroller";
 
@@ -183,7 +184,10 @@ void FlightControllerTopic::processInputState(const nlohmann::json& json) {
     std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0);
     _inputState.isConnected = true;
 
-    for (auto it = json.begin(); it != json.end(); ++it) {
+    // Get "inputState" object from "payload"
+    auto input = json[InputState][ValuesKey];
+
+    for (auto it = input.begin(); it != input.end(); ++it) {
         const auto mapIt = AxisIndexMap.find(it.key());
         if (mapIt == AxisIndexMap.end()) {
             if (it.key() != TypeKey
