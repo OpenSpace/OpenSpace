@@ -1316,7 +1316,7 @@ void RenderablePlanesCloud::createPlanes() {
         }
 
         // Send data to GPU
-        for (const std::pair<int, PlaneAggregate> pAMapItem : _planesMap) {
+        for (const std::pair<const int, PlaneAggregate>& pAMapItem : _planesMap) {
             glBindVertexArray(pAMapItem.second.vao);
             glBindBuffer(GL_ARRAY_BUFFER, pAMapItem.second.vbo);
             glBufferData(
