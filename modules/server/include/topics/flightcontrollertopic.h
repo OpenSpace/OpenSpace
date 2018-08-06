@@ -47,6 +47,7 @@ public:
 
 private:
     bool _isDone;
+    nlohmann::json _payload;
     nlohmann::json _focusNodes;
 
     openspace::interaction::WebsocketInputStates _inputStates;

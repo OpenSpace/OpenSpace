@@ -59,6 +59,9 @@ namespace {
     constexpr const char* _loggerCat = "FlightControllerTopic";
     constexpr const char* TypeKey = "type";
     constexpr const char* ValuesKey = "values";
+    constexpr const char* SuccessKey = "success";
+
+    constexpr const char* FocusNodesKey = "focusNodes";
 
     constexpr const char* FlightControllerType = "flightcontroller";
 
@@ -149,7 +152,10 @@ void FlightControllerTopic::handleJson(const nlohmann::json& json) {
 void FlightControllerTopic::connect() {
     _isDone = false;
     std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0);
+    _payload[TypeKey] = Connect;
     setFocusNodes();
+    _payload[Connect][FocusNodesKey] = _focusNodes;
+    _connection->sendJson(wrappedPayload(_payload));
 }
 
 void FlightControllerTopic::setFocusNodes() {
@@ -171,12 +177,15 @@ void FlightControllerTopic::setFocusNodes() {
             _focusNodes[n->guiName()] = n->identifier();
         }
     }
-    _connection->sendJson(wrappedPayload(_focusNodes));
 }
 
 void FlightControllerTopic::disconnect() {
     OsEng.navigationHandler().removeWebsocketInputState(_topicId);
     _isDone = true;
+    nlohmann::json j;
+    j[TypeKey] = Disconnect;
+    j[Disconnect][SuccessKey] = true;
+    _connection->sendJson(wrappedPayload(j));
 }
 
 void FlightControllerTopic::processInputState(const nlohmann::json& json) {
