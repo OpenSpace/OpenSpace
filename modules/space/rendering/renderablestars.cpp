@@ -337,20 +337,6 @@ namespace openspace {
         );
         _program->setUniform(_uniformCache.eyePosition, eyePosition);
         
-        // JCC (05/09/2018): Testing solution for scintilating stars
-        // Almost Working
-        glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
-        glm::dmat4 invMVPParts = worldToModelTransform * glm::inverse(data.camera.combinedViewMatrix()) *
-            glm::inverse(glm::dmat4(projectionMatrix));
-        glm::dvec3 orthoRight = glm::dvec3(
-            glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(1.0, 0.0, 0.0, 0.0)))
-        );
-        glm::dvec3 orthoUp = glm::dvec3(
-            glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(0.0, 1.0, 0.0, 0.0)))
-        );
-        _program->setUniform("invariantRight", orthoRight);
-        _program->setUniform("invariantUp", orthoUp);
-
         ghoul::opengl::TextureUnit colorUnit;
         colorUnit.activate();
         _colorTexture->bind();

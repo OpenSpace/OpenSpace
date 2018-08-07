@@ -52,9 +52,6 @@ uniform vec2 screenSize;
 uniform dvec3 eyePosition;
 uniform dvec3 cameraUp;
 
-uniform dvec3 invariantRight;
-uniform dvec3 invariantUp;
-
 uniform dmat4 cameraViewProjectionMatrix;
 uniform dmat4 modelMatrix;
 
@@ -124,6 +121,18 @@ void main() {
     //double scaleMultiply = apparentBrightness;  
     double scaleMultiply = pow(10, magnitudeExponent * (ge_bvLumAbsMag.y + 2.f)) * double(starRadius);  
 
+/*
+    float power = (magnitudeExponent/1.f) + (10.f * ge_bvLumAbsMag.y)/pow(float(distanceToStarInParsecs), 2.f);
+    //float power = (magnitudeExponent/1.f) + float(distanceToStarInParsecs * distanceToStarInParsecs)/1E6;
+    //float power = (60000.f * ge_bvLumAbsMag.y) / float(distanceToStarInParsecs);
+    float absoluteMagnitude = ge_bvLumAbsMag.z;
+    float modifiedSpriteSize =
+        exp((-30.623 - absoluteMagnitude) * 0.462) * magnitudeExponent * 2000.f;
+    double scaleMultiply = 1E20 * modifiedSpriteSize;// * double(starRadius);  
+    //double scaleMultiply = pow(10, power) * double(starRadius);  
+    if (scaleMultiply < float(billboardSize) * 1E15)
+        return;
+*/
     dvec3 scaledRight    = dvec3(0.0);
     dvec3 scaledUp       = dvec3(0.0);
     vec4 bottomLeftVertex, bottomRightVertex, topLeftVertex, topRightVertex;
@@ -147,9 +156,15 @@ void main() {
                             dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));        
 
     // Testing size:
-    vec2 halfViewSize = vec2(screenSize.x, screenSize.y) * 0.5f;
-    vec2 topRight = topRightVertex.xy/topRightVertex.w;
-    vec2 bottomLeft = bottomLeftVertex.xy/bottomLeftVertex.w;
+    // vec3 tmpPos = vec3(eyePositionDelta);
+    // vec4 falseBottomLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
+    //                     dvec4(tmpPos - scaledRight - scaledUp, dpos.w)));
+    
+    // vec4 falseTopRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
+    //                         dvec4(tmpPos + scaledUp + scaledRight, dpos.w)));  
+    // vec2 halfViewSize = vec2(screenSize.x, screenSize.y) * 0.5f;
+    // vec2 topRight = falseTopRightVertex.xy/falseTopRightVertex.w;
+    // vec2 bottomLeft = falseBottomLeftVertex.xy/falseBottomLeftVertex.w;
     
     // Complete algebra
     // topRight =  ((topRight + vec2(1.0)) * halfViewSize) - vec2(0.5);
@@ -157,10 +172,10 @@ void main() {
     //vec2 sizes = abs(topRight - bottomLeft);
     
     // Optimized version
-    vec2 sizes = abs(halfViewSize * (topRight - bottomLeft));
+    // vec2 sizes = abs(halfViewSize * (topRight - bottomLeft));
     
-    float height = sizes.y;
-    float width  = sizes.x;
+    // float height = sizes.y;
+    // float width  = sizes.x;
 
     // if ((height > billboardSize) ||
     //     (width > billboardSize)) { 
@@ -181,6 +196,7 @@ void main() {
         
     //     topLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
     //                     dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
+
     // } else {
         // if (width < 2.0f) {
         //     float maxVar = 2.0f;
@@ -197,7 +213,7 @@ void main() {
                     dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
         topLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
                         dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
-    //} 
+    // } 
 
     // Build primitive
     gl_Position = topLeftVertex;
