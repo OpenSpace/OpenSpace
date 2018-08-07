@@ -44,6 +44,7 @@ out vec2 psfCoords;
 out float ge_observationDistance;
 out float gs_screenSpaceDepth;
 
+uniform int renderingMethod;
 //uniform float viewScaling;
 uniform float scaleFactor;
 uniform float billboardSize;
@@ -120,7 +121,7 @@ void main() {
     
     
     //double scaleMultiply = apparentBrightness;  
-    double scaleMultiply = pow(10, magnitudeExponent * (ge_bvLumAbsMag.y + 2.f)) * double(starRadius);  
+    double scaleMultiply = 5E16;//pow(10, magnitudeExponent * (ge_bvLumAbsMag.y + 2.f)) * double(starRadius);  
 
 /*
     float power = (magnitudeExponent/1.f) + (10.f * ge_bvLumAbsMag.y)/pow(float(distanceToStarInParsecs), 2.f);

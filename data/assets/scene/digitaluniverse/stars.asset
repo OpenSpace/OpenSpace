@@ -28,6 +28,7 @@ local object = {
     Renderable = {
         Type = "RenderableStars",
         File = speck .. "/stars.speck",
+        Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
         MagnitudeExponent = 7.5165,
         BillboardSize = 121.637,
@@ -37,7 +38,5 @@ local object = {
         Path = "/Milky Way/Stars"
     }
 }
-
-
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })

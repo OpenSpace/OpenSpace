@@ -54,9 +54,12 @@ namespace {
 
     constexpr const char* KeyFile = "File";
 
-    constexpr const std::array<const char*, 10> UniformNames = {
-        "view", "projection", "colorOption", "alphaValue", "scaleFactor",
-        "minBillboardSize", "screenSize", "scaling", "psfTexture", "colorTexture"
+    constexpr const std::array<const char*, 18> UniformNames = {
+        "renderingMethod", "modelMatrix", "cameraUp", "cameraViewProjectionMatrix",
+        "colorOption", "magnitudeExponent", "colorContribution", "billboardSize",
+        // Old Method
+        "screenSize", "colorTexture", "eyePosition", "view", "projection", "alphaValue", "scaleFactor",
+        "minBillboardSize", "scaling", "psfTexture",
     };
 
     constexpr int8_t CurrentCacheVersion = 1;
@@ -105,7 +108,37 @@ namespace {
         "stars."
     };
 
-    static const openspace::properties::Property::PropertyInfo MagnitudeExponentInfo = {
+    // Old Method
+    constexpr openspace::properties::Property::PropertyInfo PsfTextureInfo = {
+        "Texture",
+        "Point Spread Function Texture",
+        "The path to the texture that should be used as a point spread function for the "
+        "stars."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
+        "Transparency",
+        "Transparency",
+        "This value is a multiplicative factor that is applied to the transparency of "
+        "all stars."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
+        "ScaleFactor",
+        "Scale Factor",
+        "This value is used as a multiplicative factor that is applied to the apparent "
+        "size of each star."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MinBillboardSizeInfo = {
+        "MinBillboardSize",
+        "Min Billboard Size",
+        "This value is used as a lower limit on the size of stars that are rendered. Any "
+        "stars that have a smaller apparent size will be discarded entirely."
+    };
+
+    // Spencer
+    constexpr openspace::properties::Property::PropertyInfo MagnitudeExponentInfo = {
         "MagnitudeExponent",
         "MagnitudeExponent",
         "Adjust star magnitude by 10^MagnitudeExponent. "
@@ -113,16 +146,40 @@ namespace {
         "Farther away, stars dim proportionally to the logarithm of their distance."
     };
 
-    static const openspace::properties::Property::PropertyInfo ColorContributionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ColorContributionInfo = {
         "ColorContribution",
         "Color Contribution",
         "Adjust the color intensity of the stars"
     };
 
-    static const openspace::properties::Property::PropertyInfo BillboardSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BillboardSizeInfo = {
         "BillboardSize",
         "Billboard Size",
         "Set the billboard size of all stars"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
+        "RenderOptionInfo",
+        "Render Option",
+        "Debug option for different rendering methods for the stars."
+    };
+
+    openspace::properties::PropertyOwner::PropertyOwnerInfo OldMethodOptionInfo = {
+        "OldMethodOptionInfo",
+        "Old Method",
+        ""
+    };
+
+    openspace::properties::PropertyOwner::PropertyOwnerInfo SpencerMethodOptionInfo = {
+        "SpencerMethodOptionInfo",
+        "Spencer Method",
+        ""
+    };
+
+    openspace::properties::PropertyOwner::PropertyOwnerInfo MoffatMethodOptionInfo = {
+        "MoffatMethodOptionInfo",
+        "Moffat Method",
+        ""
     };
 }  // namespace
 
@@ -189,9 +246,23 @@ namespace openspace {
         , _colorTextureIsDirty(true)
         , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _dataIsDirty(true)
+        
+        // Old Method
+        , _pointSpreadFunctionTexturePath(PsfTextureInfo)
+        , _pointSpreadFunctionTexture(nullptr)
+        , _pointSpreadFunctionTextureIsDirty(true)
+        , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
+        , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 10.f)
+        , _minBillboardSize(MinBillboardSizeInfo, 1.f, 1.f, 100.f)
+        // Spencer
         , _magnitudeExponent(MagnitudeExponentInfo, 4.f, 0.f, 12.f)
         , _colorContribution(ColorContributionInfo, 2.f, 0.f, 10.f)
         , _billboardSize(BillboardSizeInfo, 30.f, 1.f, 500.f)
+
+        , _renderingMethodOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+        , _oldMethodOwner(OldMethodOptionInfo)
+        , _spencerMethodOwner(SpencerMethodOptionInfo)
+        , _moffatMethodOwner(MoffatMethodOptionInfo)
         , _program(nullptr)
         , _speckFile("")
         , _nValuesPerStar(0)
@@ -241,26 +312,73 @@ namespace openspace {
         );
         addProperty(_colorTexturePath);
 
+        // DEBUG GUI for Carter:
+        _renderingMethodOption.addOption(0, "Old Rendering Method");
+        _renderingMethodOption.addOption(1, "Spencer Based Method");
+        _renderingMethodOption.addOption(2, "Moffat Based Method");
+        addProperty(_renderingMethodOption);
+        _renderingMethodOption.set(1);        
+
+        // Old Method
+        _pointSpreadFunctionTexturePath = absPath(dictionary.value<std::string>(
+            PsfTextureInfo.identifier
+            ));
+        _pointSpreadFunctionFile = std::make_unique<File>(_pointSpreadFunctionTexturePath);
+        _pointSpreadFunctionTexturePath.onChange(
+            [&] { _pointSpreadFunctionTextureIsDirty = true; }
+        );
+        _pointSpreadFunctionFile->setCallback(
+            [&](const File&) { _pointSpreadFunctionTextureIsDirty = true; }
+        );
+        _oldMethodOwner.addProperty(_pointSpreadFunctionTexturePath);
+        
+        if (dictionary.hasKey(TransparencyInfo.identifier)) {
+            _alphaValue = static_cast<float>(
+                dictionary.value<double>(TransparencyInfo.identifier)
+                );
+        }
+        _oldMethodOwner.addProperty(_alphaValue);
+
+        if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
+            _scaleFactor = static_cast<float>(
+                dictionary.value<double>(ScaleFactorInfo.identifier)
+                );
+        }
+        _oldMethodOwner.addProperty(_scaleFactor);
+
+        if (dictionary.hasKey(MinBillboardSizeInfo.identifier)) {
+            _minBillboardSize = static_cast<float>(
+                dictionary.value<double>(MinBillboardSizeInfo.identifier)
+                );
+        }
+        _oldMethodOwner.addProperty(_minBillboardSize);
+
+        // Spencer
         if (dictionary.hasKey(MagnitudeExponentInfo.identifier)) {
             _magnitudeExponent = static_cast<float>(
                 dictionary.value<double>(MagnitudeExponentInfo.identifier)
                 );
         }
-        addProperty(_magnitudeExponent);
+        _spencerMethodOwner.addProperty(_magnitudeExponent);
 
         if (dictionary.hasKey(ColorContributionInfo.identifier)) {
             _colorContribution = static_cast<float>(
                 dictionary.value<double>(ColorContributionInfo.identifier)
                 );
         }
-        addProperty(_colorContribution);
+        _spencerMethodOwner.addProperty(_colorContribution);
 
         if (dictionary.hasKey(BillboardSizeInfo.identifier)) {
             _billboardSize = static_cast<float>(
                 dictionary.value<double>(BillboardSizeInfo.identifier)
                 );
         }
-        addProperty(_billboardSize);
+        _spencerMethodOwner.addProperty(_billboardSize);
+
+        // DEBUG GUI for Carter:
+        this->addPropertySubOwner(_oldMethodOwner);
+        this->addPropertySubOwner(_spencerMethodOwner);
+        this->addPropertySubOwner(_moffatMethodOwner);
     }
 
     RenderableStars::~RenderableStars() {}
@@ -277,16 +395,7 @@ namespace openspace {
             absPath("${MODULE_SPACE}/shaders/star_ge.glsl")
         );
 
-        _uniformCache.modelMatrix = _program->uniformLocation("modelMatrix");
-        _uniformCache.eyePosition = _program->uniformLocation("eyePosition");
-        _uniformCache.cameraUp = _program->uniformLocation("cameraUp");
-        _uniformCache.cameraViewProjectionMatrix = _program->uniformLocation("cameraViewProjectionMatrix");
-        _uniformCache.colorOption = _program->uniformLocation("colorOption");
-        _uniformCache.magnitudeExponent = _program->uniformLocation("magnitudeExponent");
-        _uniformCache.colorContribution = _program->uniformLocation("colorContribution");
-        _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
-        _uniformCache.screenSize = _program->uniformLocation("screenSize");
-        _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
         
         bool success = loadData();
         if (!success) {
@@ -315,35 +424,64 @@ namespace openspace {
 
         _program->activate();
 
-        glm::dmat4 modelMatrix =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-            glm::dmat4(data.modelTransform.rotation) *
-            glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+        _program->setUniform(_uniformCache.renderingMethod, _renderingMethodOption.value());
 
-        glm::dmat4 modelViewMatrix  = data.camera.combinedViewMatrix() * modelMatrix;
-        glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
+        if (_renderingMethodOption.value() == 0) { // Old Method
+            glm::vec2 scaling = glm::vec2(1, -19);
 
-        glm::dmat4 cameraViewProjectionMatrix = projectionMatrix * data.camera.combinedViewMatrix();
+            _program->setUniform(_uniformCache.view, data.camera.viewMatrix());
+            _program->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
 
-        glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
-        
-        _program->setUniform(_uniformCache.modelMatrix, modelMatrix);
-        _program->setUniform(_uniformCache.cameraViewProjectionMatrix, cameraViewProjectionMatrix);
-        _program->setUniform(_uniformCache.cameraUp, cameraUp);
-        _program->setUniform(_uniformCache.colorOption, _colorOption);
-        _program->setUniform(_uniformCache.magnitudeExponent, _magnitudeExponent);
-        _program->setUniform(_uniformCache.colorContribution, _colorContribution);
-        _program->setUniform(_uniformCache.billboardSize, _billboardSize);
-        _program->setUniform(
-            _uniformCache.screenSize,
-            glm::vec2(OsEng.windowWrapper().getCurrentViewportSize())
-        );
-        
-        glm::dvec3 eyePosition = glm::dvec3(
-            glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
-        );
-        _program->setUniform(_uniformCache.eyePosition, eyePosition);
-        
+            _program->setUniform(_uniformCache.colorOption, _colorOption);
+            _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+            _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
+            _program->setUniform(_uniformCache.minBillboardSize, _minBillboardSize);
+            _program->setUniform(
+                _uniformCache.screenSize,
+                glm::vec2(OsEng.renderEngine().renderingResolution())
+            );
+
+            setPscUniforms(*_program.get(), data.camera, data.position);
+            _program->setUniform(_uniformCache.scaling, scaling);
+
+            ghoul::opengl::TextureUnit psfUnit;
+            psfUnit.activate();
+            _pointSpreadFunctionTexture->bind();
+            _program->setUniform(_uniformCache.psfTexture, psfUnit);
+        }
+        else if (_renderingMethodOption.value() == 1) { // Spencer Method
+            glm::dmat4 modelMatrix =
+                glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+                glm::dmat4(data.modelTransform.rotation) *
+                glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+
+            glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
+            glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
+
+            glm::dmat4 cameraViewProjectionMatrix = projectionMatrix * data.camera.combinedViewMatrix();
+
+            glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
+
+            _program->setUniform(_uniformCache.modelMatrix, modelMatrix);
+            _program->setUniform(_uniformCache.cameraViewProjectionMatrix, cameraViewProjectionMatrix);
+            _program->setUniform(_uniformCache.cameraUp, cameraUp);
+            _program->setUniform(_uniformCache.colorOption, _colorOption);
+            _program->setUniform(_uniformCache.magnitudeExponent, _magnitudeExponent);
+            _program->setUniform(_uniformCache.colorContribution, _colorContribution);
+            _program->setUniform(_uniformCache.billboardSize, _billboardSize);
+            _program->setUniform(
+                _uniformCache.screenSize,
+                glm::vec2(OsEng.windowWrapper().getCurrentViewportSize())
+            );
+
+            glm::dvec3 eyePosition = glm::dvec3(
+                glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
+            );
+            _program->setUniform(_uniformCache.eyePosition, eyePosition);
+        }
+        else if (_renderingMethodOption.value() == 2) { // Moffat Method
+        }
+
         ghoul::opengl::TextureUnit colorUnit;
         colorUnit.activate();
         _colorTexture->bind();
@@ -485,6 +623,37 @@ namespace openspace {
             _dataIsDirty = false;
         }
 
+        if (_pointSpreadFunctionTextureIsDirty) {
+            LDEBUG("Reloading Point Spread Function texture");
+            _pointSpreadFunctionTexture = nullptr;
+            if (_pointSpreadFunctionTexturePath.value() != "") {
+                _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
+                    absPath(_pointSpreadFunctionTexturePath)
+                );
+
+                if (_pointSpreadFunctionTexture) {
+                    LDEBUG(fmt::format(
+                        "Loaded texture from '{}'",
+                        absPath(_pointSpreadFunctionTexturePath)
+                    ));
+                    _pointSpreadFunctionTexture->uploadTexture();
+                }
+                _pointSpreadFunctionTexture->setFilter(
+                    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+                );
+
+                _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
+                    _pointSpreadFunctionTexturePath
+                    );
+                _pointSpreadFunctionFile->setCallback(
+                    [&](const ghoul::filesystem::File&) {
+                    _pointSpreadFunctionTextureIsDirty = true;
+                }
+                );
+            }
+            _pointSpreadFunctionTextureIsDirty = false;
+        }
+
         if (_colorTextureIsDirty) {
             LDEBUG("Reloading Color Texture");
             _colorTexture = nullptr;
@@ -512,16 +681,7 @@ namespace openspace {
 
         if (_program->isDirty()) {
             _program->rebuildFromFile();
-            _uniformCache.modelMatrix = _program->uniformLocation("modelMatrix");
-            _uniformCache.eyePosition = _program->uniformLocation("eyePosition");
-            _uniformCache.cameraUp = _program->uniformLocation("cameraUp");
-            _uniformCache.cameraViewProjectionMatrix = _program->uniformLocation("cameraViewProjectionMatrix");
-            _uniformCache.colorOption = _program->uniformLocation("colorOption");
-            _uniformCache.magnitudeExponent = _program->uniformLocation("magnitudeExponent");
-            _uniformCache.colorContribution = _program->uniformLocation("colorContribution");
-            _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
-            _uniformCache.screenSize = _program->uniformLocation("screenSize");
-            _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
+            ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
         }
     }
 

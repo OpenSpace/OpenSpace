@@ -30,6 +30,8 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/propertyowner.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -81,14 +83,36 @@ namespace openspace {
         properties::OptionProperty _colorOption;
         bool _dataIsDirty;
 
+
+        // Old Method
+        properties::StringProperty _pointSpreadFunctionTexturePath;
+        std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
+        std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
+        bool _pointSpreadFunctionTextureIsDirty;
+
+        properties::FloatProperty _alphaValue;
+        properties::FloatProperty _scaleFactor;
+        properties::FloatProperty _minBillboardSize;
+
+
+        // Spencer
         properties::FloatProperty _magnitudeExponent;
         properties::FloatProperty _colorContribution;
         properties::FloatProperty _billboardSize;
 
+        // Debug GUI for Carter's tests
+        properties::OptionProperty _renderingMethodOption;
+        properties::PropertyOwner _oldMethodOwner;
+        properties::PropertyOwner _spencerMethodOwner;
+        properties::PropertyOwner _moffatMethodOwner;
+
         std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-        UniformCache(modelMatrix, cameraUp, cameraViewProjectionMatrix,
+        UniformCache(renderingMethod, modelMatrix, cameraUp, cameraViewProjectionMatrix,
                      colorOption, magnitudeExponent, colorContribution, billboardSize,
-                     screenSize, colorTexture, eyePosition) 
+                     // Old Method
+                     screenSize, colorTexture, eyePosition,
+                     view, projection, alphaValue, scaleFactor,
+                     minBillboardSize, scaling, psfTexture)
             _uniformCache;
 
         std::string _speckFile;
