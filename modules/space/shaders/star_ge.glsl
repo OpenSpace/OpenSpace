@@ -53,6 +53,11 @@ uniform vec2 screenSize;
 uniform dvec3 eyePosition;
 uniform dvec3 cameraUp;
 
+uniform int useApparentBrightness;
+uniform int useLumAndStarRadius;
+uniform float lumCent;
+uniform float radiusCent;
+
 uniform dmat4 cameraViewProjectionMatrix;
 uniform dmat4 modelMatrix;
 
@@ -98,7 +103,6 @@ void main() {
         return;
     }
 
-// NEW
     ge_bvLumAbsMag = vs_bvLumAbsMag[0];
     ge_velocity    = vs_velocity[0];
     ge_speed       = vs_speed[0];
@@ -108,20 +112,22 @@ void main() {
     float absMag = ge_bvLumAbsMag.z;
     float appMag = absMag + 5 * (log(float(distanceToStarInParsecs))-1.0);
     
-    // Working like Partiview
-    double pSize              = pow(10, magnitudeExponent + 14.0);
-    // double apparentBrightness = (pSize * luminosity) /
-    //  (distanceToStarInParsecs * distanceToStarInParsecs);
-    double apparentBrightness = pSize * luminosity / distanceToStarInParsecs;
-    //double apparentBrightness = pSize * appMag / distanceToStarInParsecs;
-    
-    float L_over_Lsun = pow(2.51f, SunAbsMagnitude - ge_bvLumAbsMag.z);
-    float starTemperature = bvToKelvin(ge_bvLumAbsMag.x);
-    float starRadius = SunRadius * pow(SunTemperature/starTemperature, 2.f) * sqrt(L_over_Lsun);
-    
-    
-    //double scaleMultiply = apparentBrightness;  
-    double scaleMultiply = 5E16;//pow(10, magnitudeExponent * (ge_bvLumAbsMag.y + 2.f)) * double(starRadius);  
+    double scaleMultiply = 1.0;
+
+    if (useApparentBrightness == 1) {
+        // Working like Partiview
+        double pSize              = pow(10, magnitudeExponent + 9.0);
+        // double apparentBrightness = (pSize * luminosity) /
+        //  (distanceToStarInParsecs * distanceToStarInParsecs);
+        double apparentBrightness = pSize * luminosity / distanceToStarInParsecs;
+        scaleMultiply = apparentBrightness;
+    } else if (useLumAndStarRadius == 1) {\
+        float L_over_Lsun = pow(2.51f, SunAbsMagnitude - ge_bvLumAbsMag.z);
+        float starTemperature = bvToKelvin(ge_bvLumAbsMag.x);
+        float starRadius = SunRadius * pow(SunTemperature/starTemperature, 2.f) * sqrt(L_over_Lsun);
+        scaleMultiply = ((lumCent * (ge_bvLumAbsMag.y + 5E9)) + 
+                        (radiusCent * double(starRadius))) * pow(10.0, magnitudeExponent);
+    }
 
 /*
     float power = (magnitudeExponent/1.f) + (10.f * ge_bvLumAbsMag.y)/pow(float(distanceToStarInParsecs), 2.f);

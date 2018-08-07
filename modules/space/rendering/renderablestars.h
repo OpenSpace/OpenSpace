@@ -96,6 +96,9 @@ namespace openspace {
 
 
         // Spencer
+        properties::OptionProperty _spencerScaleMultiplyOption;
+        properties::FloatProperty _lumCent;
+        properties::FloatProperty _radiusCent;
         properties::FloatProperty _magnitudeExponent;
         properties::FloatProperty _colorContribution;
         properties::FloatProperty _billboardSize;
@@ -107,8 +110,11 @@ namespace openspace {
         properties::PropertyOwner _moffatMethodOwner;
 
         std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-        UniformCache(renderingMethod, modelMatrix, cameraUp, cameraViewProjectionMatrix,
+        UniformCache(renderingMethod, 
+                     // Spencer Method
+                     modelMatrix, cameraUp, cameraViewProjectionMatrix,
                      colorOption, magnitudeExponent, colorContribution, billboardSize,
+                     useApparentBrightness, useLumAndStarRadius, lumCent, radiusCent,
                      // Old Method
                      screenSize, colorTexture, eyePosition,
                      view, projection, alphaValue, scaleFactor,

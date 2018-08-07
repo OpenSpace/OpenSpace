@@ -54,9 +54,12 @@ namespace {
 
     constexpr const char* KeyFile = "File";
 
-    constexpr const std::array<const char*, 18> UniformNames = {
-        "renderingMethod", "modelMatrix", "cameraUp", "cameraViewProjectionMatrix",
+    constexpr const std::array<const char*, 22> UniformNames = {
+        "renderingMethod", 
+        // New Method
+        "modelMatrix", "cameraUp", "cameraViewProjectionMatrix",
         "colorOption", "magnitudeExponent", "colorContribution", "billboardSize",
+        "useApparentBrightness", "useLumAndStarRadius", "lumCent", "radiusCent",
         // Old Method
         "screenSize", "colorTexture", "eyePosition", "view", "projection", "alphaValue", "scaleFactor",
         "minBillboardSize", "scaling", "psfTexture",
@@ -181,6 +184,24 @@ namespace {
         "Moffat Method",
         ""
     };
+
+    constexpr openspace::properties::Property::PropertyInfo SpencerOptionInfo = {
+        "SpencerOptionInfo",
+        "Spencer Option",
+        "Debug option for the base star's size."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LumPercentInfo = {
+        "LumPercentInfo",
+        "LumPercentInfo",
+        "Percentage of Luminosity "        
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RadiusPercentInfo = {
+        "RadiusPercentInfo",
+        "RadiusPercentInfo",
+        "Percentage of Radius "
+    };
 }  // namespace
 
 namespace openspace {
@@ -255,7 +276,10 @@ namespace openspace {
         , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 10.f)
         , _minBillboardSize(MinBillboardSizeInfo, 1.f, 1.f, 100.f)
         // Spencer
-        , _magnitudeExponent(MagnitudeExponentInfo, 4.f, 0.f, 12.f)
+        , _spencerScaleMultiplyOption(SpencerOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+        , _lumCent(LumPercentInfo, 0.5f, 0.f, 1.f)
+        , _radiusCent(RadiusPercentInfo, 0.5f, 0.f, 1.f)
+        , _magnitudeExponent(MagnitudeExponentInfo, 4.f, 0.f, 8.f)
         , _colorContribution(ColorContributionInfo, 2.f, 0.f, 10.f)
         , _billboardSize(BillboardSizeInfo, 30.f, 1.f, 500.f)
 
@@ -354,6 +378,13 @@ namespace openspace {
         _oldMethodOwner.addProperty(_minBillboardSize);
 
         // Spencer
+        _spencerScaleMultiplyOption.addOption(0, "Use Star's Apparent Brightness");
+        _spencerScaleMultiplyOption.addOption(1, "Use Star's Luminosity and Size");
+        _spencerScaleMultiplyOption.set(1);
+        _spencerMethodOwner.addProperty(_spencerScaleMultiplyOption);
+        _spencerMethodOwner.addProperty(_lumCent);
+        _spencerMethodOwner.addProperty(_radiusCent);
+
         if (dictionary.hasKey(MagnitudeExponentInfo.identifier)) {
             _magnitudeExponent = static_cast<float>(
                 dictionary.value<double>(MagnitudeExponentInfo.identifier)
@@ -461,6 +492,11 @@ namespace openspace {
             glm::dmat4 cameraViewProjectionMatrix = projectionMatrix * data.camera.combinedViewMatrix();
 
             glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
+
+            _program->setUniform(_uniformCache.useApparentBrightness, (_spencerScaleMultiplyOption.value() == 0 ? 1 : 0));
+            _program->setUniform(_uniformCache.useLumAndStarRadius, (_spencerScaleMultiplyOption.value() == 1 ? 1 : 0));
+            _program->setUniform(_uniformCache.lumCent, _lumCent);
+            _program->setUniform(_uniformCache.radiusCent, _radiusCent);
 
             _program->setUniform(_uniformCache.modelMatrix, modelMatrix);
             _program->setUniform(_uniformCache.cameraViewProjectionMatrix, cameraViewProjectionMatrix);
