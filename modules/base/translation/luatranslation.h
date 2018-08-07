@@ -28,11 +28,10 @@
 #include <openspace/scene/translation.h>
 
 #include <openspace/properties/stringproperty.h>
-
-#include <ghoul/filesystem/file.h>
 #include <ghoul/lua/luastate.h>
-
 #include <memory>
+
+namespace ghoul::filesystem { class File; }
 
 namespace openspace {
 
@@ -43,7 +42,7 @@ public:
     LuaTranslation();
     LuaTranslation(const ghoul::Dictionary& dictionary);
 
-    glm::dvec3 position(const Time& time) const override;
+    glm::dvec3 position(const UpdateData& data) const override;
 
     static documentation::Documentation Documentation();
 

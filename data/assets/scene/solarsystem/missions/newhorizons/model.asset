@@ -1,13 +1,12 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
-
-
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
 local textures = asset.syncedResource({
     Name = "New Horizons Textures",
     Type = "HttpSynchronization",
     Identifier = "newhorizons_textures",
-    Version = 2
+    Version = 3
 })
 
 local models = asset.syncedResource({
@@ -27,7 +26,23 @@ local NewHorizons = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/NewHorizonsCleanModel.obj"
         }, 
-        ColorTexture = textures .. "/NHTexture.jpg"
+        ColorTexture = textures .. "/NHTexture.jpg",
+        AmbientIntensity = 0.0,
+        DiffuseIntensity = 1.0,
+        SpecularIntensity = 1.0,
+        LightSources = {
+            {
+                Type = "SceneGraphLightSource",
+                Identifier = "Sun",
+                Node = sunTransforms.SolarSystemBarycenter.Identifier,
+                Intensity = 1.0
+            },
+            {
+                Identifier = "Camera",
+                Type = "CameraLightSource",
+                Intensity = 0.5
+            }
+        }
     },
     GUI = {
         Name = "New Horizons",

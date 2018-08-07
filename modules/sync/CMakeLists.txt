@@ -53,7 +53,7 @@ create_new_module(
 #####
 # Libtorrent
 #####
-option(OPENSPACE_MODULE_SYNC_USE_LIBTORRENT "Use libtorrent" ON)
+option(OPENSPACE_MODULE_SYNC_USE_LIBTORRENT "Use libtorrent" OFF)
 
 if (OPENSPACE_MODULE_SYNC_USE_LIBTORRENT)
     set(Boost_USE_STATIC_LIBS ON)

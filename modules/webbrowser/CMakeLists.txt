@@ -178,7 +178,6 @@ set(OPENSPACE_HEADER_FILES
     webbrowsermodule.h
     include/webrenderhandler.h
     include/browserclient.h
-    include/screenspacerenderhandler.h
     include/screenspacebrowser.h
     include/browserinstance.h
     include/eventhandler.h
@@ -192,7 +191,6 @@ set(OPENSPACE_SOURCE_FILES
     webbrowsermodule.cpp
     src/webrenderhandler.cpp
     src/browserclient.cpp
-    src/screenspacerenderhandler.cpp
     src/screenspacebrowser.cpp
     src/browserinstance.cpp
     src/eventhandler.cpp
@@ -208,7 +206,7 @@ create_new_module(
     ${WEBBROWSER_MODULE_NAME}
     webbrowser_module
     ${OPENSPACE_HEADER_FILES} ${OPENSPACE_SOURCE_FILES}
-    )
+)
 
 # Display CEF configuration settings.
 PRINT_CEF_CONFIG()

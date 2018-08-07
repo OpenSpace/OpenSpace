@@ -25,36 +25,37 @@
 #ifndef __OPENSPACE_MODULE_SERVER___JSON_CONVERTERS___H__
 #define __OPENSPACE_MODULE_SERVER___JSON_CONVERTERS___H__
 
-#include <openspace/properties/property.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/rendering/renderable.h>
-#include <ext/json/json.hpp>
+#include <openspace/json.h>
 #include <ghoul/glm.h>
-
-using json = nlohmann::json;
 
 namespace openspace::properties {
 
-void to_json(json &j, const Property &p);
-void to_json(json &j, const Property* pP);
-void to_json(json &j, const PropertyOwner &p);
-void to_json(json &j, const PropertyOwner *p);
+class Property;
+class PropertyOwner;
+
+void to_json(nlohmann::json& j, const Property& p);
+void to_json(nlohmann::json& j, const Property* pP);
+void to_json(nlohmann::json& j, const PropertyOwner& p);
+void to_json(nlohmann::json& j, const PropertyOwner* p);
 
 } // namespace openspace::properties
 
 namespace openspace {
 
-void to_json(json &j, const SceneGraphNode &n);
-void to_json(json &j, const SceneGraphNode* pN);
+class Renderable;
+class SceneGraphNode;
 
-void to_json(json &j, const Renderable &r);
-void to_json(json &j, const Renderable* pR);
+void to_json(nlohmann::json& j, const SceneGraphNode& n);
+void to_json(nlohmann::json& j, const SceneGraphNode* pN);
+
+void to_json(nlohmann::json& j, const Renderable& r);
+void to_json(nlohmann::json& j, const Renderable* pR);
 
 } // namespace openspace
 
 namespace glm {
 
-void to_json(json &j, const dvec3 &v);
+void to_json(nlohmann::json& j, const dvec3& v);
 
 } // namespace glm
 

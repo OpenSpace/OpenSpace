@@ -27,12 +27,7 @@
 #include <openspace/moduleregistration.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/openspacemodule.h>
-
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/assert.h>
-
-#include <algorithm>
 
 #include "moduleengine_lua.inl"
 
@@ -42,15 +37,13 @@ namespace {
 
 namespace openspace {
 
-ModuleEngine::ModuleEngine()
-    : properties::PropertyOwner({"Modules"})
-{}
+ModuleEngine::ModuleEngine() : properties::PropertyOwner({ "Modules" }) {}
 
 void ModuleEngine::initialize(
                      const std::map<std::string, ghoul::Dictionary>& moduleConfigurations)
 {
     for (OpenSpaceModule* m : AllModules()) {
-        const std::string identifier = m->identifier();
+        const std::string& identifier = m->identifier();
         auto it = moduleConfigurations.find(identifier);
         ghoul::Dictionary configuration;
         if (it != moduleConfigurations.end()) {
@@ -97,34 +90,35 @@ void ModuleEngine::deinitializeGL() {
     LDEBUG("Finished deinitializing OpenGL of modules");
 }
 
-void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> m,
+void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> mod,
                                   const ghoul::Dictionary& configuration)
 {
-    ghoul_assert(m, "Module must not be nullptr");
+    ghoul_assert(mod, "Module must not be nullptr");
 
     auto it = std::find_if(
         _modules.begin(),
         _modules.end(),
-        [&m](std::unique_ptr<OpenSpaceModule>& rhs) {
-            return rhs->identifier() == m->identifier();
+        [&mod](std::unique_ptr<OpenSpaceModule>& rhs) {
+            return rhs->identifier() == mod->identifier();
         }
     );
     if (it != _modules.end()) {
         throw ghoul::RuntimeError(
-            "Module name '" + m->identifier() + "' was registered before",
+            "Module name '" + mod->identifier() + "' was registered before",
             "ModuleEngine"
         );
     }
 
-    LDEBUG(fmt::format("Registering module '{}'", m->identifier()));
-    m->initialize(this, configuration);
-    addPropertySubOwner(m.get());
-    LDEBUG(fmt::format("Registered module '{}'", m->identifier()));
-    _modules.push_back(std::move(m));
+    LDEBUG(fmt::format("Registering module '{}'", mod->identifier()));
+    mod->initialize(this, configuration);
+    addPropertySubOwner(mod.get());
+    LDEBUG(fmt::format("Registered module '{}'", mod->identifier()));
+    _modules.push_back(std::move(mod));
 }
 
 std::vector<OpenSpaceModule*> ModuleEngine::modules() const {
     std::vector<OpenSpaceModule*> result;
+    result.reserve(_modules.size());
     for (const std::unique_ptr<OpenSpaceModule>& m : _modules) {
         result.push_back(m.get());
     }

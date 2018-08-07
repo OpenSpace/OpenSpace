@@ -28,27 +28,20 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
-
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    constexpr const char* keyStart = "StartTime";
-    constexpr const char* keyEnd = "EndTime";
     constexpr const char* KeyType = "Type";
     constexpr const char* KeyTag = "Tag";
 
-    static const openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
         "This setting determines whether this object will be visible or not."
     };
 
-    static const openspace::properties::Property::PropertyInfo OpacityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",
         "Transparency",
         "This value determines the transparency of this object."
@@ -106,14 +99,9 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "renderable" })
     , _enabled(EnabledInfo, true)
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
-    , _renderBin(RenderBin::Opaque)
-    , _boundingSphere(0.f)
-    , _startTime("")
-    , _endTime("")
-    , _hasTimeInterval(false)
 {
-    dictionary.getValue(keyStart, _startTime);
-    dictionary.getValue(keyEnd, _endTime);
+    // I can't come up with a good reason not to do this for all renderables
+    registerUpdateRenderBinFromOpacity();
 
     if (dictionary.hasKeyAndValue<std::string>(KeyTag)) {
         std::string tagName = dictionary.value<std::string>(KeyTag);
@@ -121,19 +109,14 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
             addTag(std::move(tagName));
         }
     } else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
-        ghoul::Dictionary tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
-        std::vector<std::string> keys = tagNames.keys();
-        std::string tagName;
+        const ghoul::Dictionary& tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
+        const std::vector<std::string>& keys = tagNames.keys();
         for (const std::string& key : keys) {
-            tagName = tagNames.value<std::string>(key);
+            std::string tagName = tagNames.value<std::string>(key);
             if (!tagName.empty()) {
                 addTag(std::move(tagName));
             }
         }
-    }
-
-    if (!_startTime.empty() && !_endTime.empty()) {
-        _hasTimeInterval = true;
     }
 
     if (dictionary.hasKey(EnabledInfo.identifier)) {
@@ -147,8 +130,6 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     addProperty(_enabled);
 }
 
-Renderable::~Renderable() {}
-
 void Renderable::initialize() {}
 
 void Renderable::initializeGL() {}
@@ -156,6 +137,10 @@ void Renderable::initializeGL() {}
 void Renderable::deinitialize() {}
 
 void Renderable::deinitializeGL() {}
+
+void Renderable::update(const UpdateData&) {}
+
+void Renderable::render(const RenderData&, RendererTasks&) {}
 
 void Renderable::setBoundingSphere(float boundingSphere) {
     _boundingSphere = boundingSphere;
@@ -165,14 +150,10 @@ float Renderable::boundingSphere() const {
     return _boundingSphere;
 }
 
-void Renderable::update(const UpdateData&) {}
-
-void Renderable::render(const RenderData&, RendererTasks&) {}
-
 SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
-                                                       const glm::dvec3& targetModelSpace)
+                                                 const glm::dvec3& targetModelSpace) const
 {
-    glm::dvec3 directionFromCenterToTarget = glm::normalize(targetModelSpace);
+    const glm::dvec3 directionFromCenterToTarget = glm::normalize(targetModelSpace);
     return {
         directionFromCenterToTarget * static_cast<double>(boundingSphere()),
         directionFromCenterToTarget,
@@ -187,7 +168,7 @@ void Renderable::setPscUniforms(ghoul::opengl::ProgramObject& program,
     program.setUniform("campos", camera.position().vec4());
     program.setUniform("objpos", position.vec4());
     program.setUniform("camrot", glm::mat4(camera.viewRotationMatrix()));
-    program.setUniform("scaling", camera.scaling());
+    program.setUniform("scaling", glm::vec2(1.f, 0.f));
 }
 
 Renderable::RenderBin Renderable::renderBin() const {
@@ -206,21 +187,6 @@ bool Renderable::isVisible() const {
     return _enabled;
 }
 
-bool Renderable::hasTimeInterval() {
-    return _hasTimeInterval;
-}
-
-bool Renderable::getInterval(double& start, double& end) {
-    if (_startTime != "" && _endTime != "") {
-        start = SpiceManager::ref().ephemerisTimeFromDate(_startTime);
-        end = SpiceManager::ref().ephemerisTimeFromDate(_endTime);
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-
 bool Renderable::isReady() const {
     return true;
 }
@@ -230,7 +196,7 @@ bool Renderable::isEnabled() const {
 }
 
 void Renderable::onEnabledChange(std::function<void(bool)> callback) {
-    _enabled.onChange([this, c{ std::move(callback) }]() {
+    _enabled.onChange([this, c = std::move(callback)]() {
         c(isEnabled());
     });
 }

@@ -27,56 +27,49 @@
 #include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <openspace/util/updatestructures.h>
+#include <array>
 
 namespace openspace::globebrowsing::culling {
 
-bool HorizonCuller::isCullable(const Chunk& chunk, const RenderData& data) {
+bool HorizonCuller::isCullable(const Chunk& chunk, const RenderData& renderData) {
     // Calculations are done in the reference frame of the globe. Hence, the camera
     // position needs to be transformed with the inverse model matrix
-    glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
+    const glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
 
     const Ellipsoid& ellipsoid = chunk.owner().ellipsoid();
     const GeodeticPatch& patch = chunk.surfacePatch();
-    float maxHeight = chunk.boundingHeights().max;
-    glm::dvec3 globePosition = glm::dvec3(0,0,0); // In model space it is 0
-    double minimumGlobeRadius = ellipsoid.minimumRadius();
+    const float maxHeight = chunk.boundingHeights().max;
+    const glm::dvec3 globePos = glm::dvec3(0,0,0); // In model space it is 0
+    const double minimumGlobeRadius = ellipsoid.minimumRadius();
 
-    glm::dvec3 cameraPosition =
-        glm::dvec3(inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1));
+    const glm::dvec3 cameraPos = glm::dvec3(
+        inverseModelTransform * glm::dvec4(renderData.camera.positionVec3(), 1)
+    );
 
-    glm::dvec3 globeToCamera = cameraPosition;
+    const glm::dvec3 globeToCamera = cameraPos;
 
-    Geodetic2 cameraPositionOnGlobe =
-        ellipsoid.cartesianToGeodetic2(globeToCamera);
-    Geodetic2 closestPatchPoint = patch.closestPoint(cameraPositionOnGlobe);
-    glm::dvec3 objectPosition = ellipsoid.cartesianSurfacePosition(closestPatchPoint);
+    const Geodetic2 cameraPositionOnGlobe = ellipsoid.cartesianToGeodetic2(globeToCamera);
+    const Geodetic2 closestPatchPoint = patch.closestPoint(cameraPositionOnGlobe);
+    glm::dvec3 objectPos = ellipsoid.cartesianSurfacePosition(closestPatchPoint);
 
     // objectPosition is closest in latlon space but not guaranteed to be closest in
     // castesian coordinates. Therefore we compare it to the corners and pick the
     // real closest point,
-    glm::dvec3 corners[4];
-    corners[0] = ellipsoid.cartesianSurfacePosition(
-        chunk.surfacePatch().getCorner(NORTH_WEST)
-    );
-    corners[1] = ellipsoid.cartesianSurfacePosition(
-        chunk.surfacePatch().getCorner(NORTH_EAST)
-    );
-    corners[2] = ellipsoid.cartesianSurfacePosition(
-        chunk.surfacePatch().getCorner(SOUTH_WEST)
-    );
-    corners[3] = ellipsoid.cartesianSurfacePosition(
-        chunk.surfacePatch().getCorner(SOUTH_EAST)
-    );
+    std::array<glm::dvec3, 4> corners = {
+        ellipsoid.cartesianSurfacePosition(chunk.surfacePatch().corner(NORTH_WEST)),
+        ellipsoid.cartesianSurfacePosition(chunk.surfacePatch().corner(NORTH_EAST)),
+        ellipsoid.cartesianSurfacePosition(chunk.surfacePatch().corner(SOUTH_WEST)),
+        ellipsoid.cartesianSurfacePosition(chunk.surfacePatch().corner(SOUTH_EAST))
+    };
 
     for (int i = 0; i < 4; ++i) {
-        double distance = glm::length(cameraPosition - corners[i]);
-        if (distance < glm::length(cameraPosition - objectPosition)) {
-            objectPosition = corners[i];
+        const double distance = glm::length(cameraPos - corners[i]);
+        if (distance < glm::length(cameraPos - objectPos)) {
+            objectPos = corners[i];
         }
     }
 
-    return isCullable(cameraPosition, globePosition, objectPosition,
-                        maxHeight, minimumGlobeRadius);
+    return isCullable(cameraPos, globePos, objectPos, maxHeight, minimumGlobeRadius);
 }
 
 bool HorizonCuller::isCullable(const glm::dvec3& cameraPosition,
@@ -97,16 +90,18 @@ bool HorizonCuller::isCullable(const glm::dvec3& cameraPosition,
         return false;
     }
 
-
-    double minimumAllowedDistanceToObjectFromHorizon = sqrt(objectP - horizonP);
-    double distanceToHorizon = sqrt(cameraP - minR);
+    const double minimumAllowedDistanceToObjectFromHorizon = sqrt(objectP - horizonP);
+    const double distanceToHorizon = sqrt(cameraP - minR);
 
     // Minimum allowed for the object to be occluded
-    double minimumAllowedDistanceToObjectSquared =
-        pow(distanceToHorizon + minimumAllowedDistanceToObjectFromHorizon, 2)
-        + pow(objectBoundingSphereRadius, 2);
+    const double minimumAllowedDistanceToObjectSquared =
+        pow(distanceToHorizon + minimumAllowedDistanceToObjectFromHorizon, 2) +
+        pow(objectBoundingSphereRadius, 2);
 
-    double distanceToObjectSquared = pow(length(objectPosition - cameraPosition), 2);
+    const double distanceToObjectSquared = pow(
+        length(objectPosition - cameraPosition),
+        2
+    );
     return distanceToObjectSquared > minimumAllowedDistanceToObjectSquared;
 }
 

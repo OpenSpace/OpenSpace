@@ -29,16 +29,13 @@
 #include <ghoul/misc/boolean.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
-
 #include <memory>
 #include <mutex>
 #include <random>
 
 // #define LOADINGSCREEN_DEBUGGING
 
-namespace ghoul::fontrendering {
-    class Font;
-} // namespace ghoul::fontrendering
+namespace ghoul::fontrendering { class Font; }
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -85,7 +82,7 @@ public:
     };
 
     void updateItem(const std::string& itemIdentifier, const std::string& itemName,
-        ItemStatus newStatus, float progress);
+        ItemStatus newStatus, float newProgress);
 
 private:
     bool _showMessage;
@@ -93,8 +90,8 @@ private:
     bool _showProgressbar;
 
     Phase _phase;
-    int _iProgress;
-    int _nItems;
+    int _iProgress = 0;
+    int _nItems = 0;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(logoTexture, useTexture, color) _uniformCache;
@@ -106,19 +103,19 @@ private:
     std::shared_ptr<ghoul::fontrendering::Font> _itemFont;
 
     struct {
-        GLuint vao;
-        GLuint vbo;
+        GLuint vao = 0;
+        GLuint vbo = 0;
     } _logo;
 
     struct {
-        GLuint vaoFill;
-        GLuint vboFill;
+        GLuint vaoFill = 0;
+        GLuint vboFill = 0;
 
-        GLuint vaoBox;
-        GLuint vboBox;
+        GLuint vaoBox = 0;
+        GLuint vboBox = 0;
     } _progressbar;
 
-    bool _hasCatastrophicErrorOccurred;
+    bool _hasCatastrophicErrorOccurred = false;
     std::string _message;
     std::mutex _messageMutex;
 

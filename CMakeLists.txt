@@ -28,9 +28,9 @@ project(OpenSpace)
 message(STATUS "Generating OpenSpace project")
 
 set(OPENSPACE_VERSION_MAJOR 0)
-set(OPENSPACE_VERSION_MINOR 11)
-set(OPENSPACE_VERSION_PATCH 1)
-set(OPENSPACE_VERSION_STRING "Beta-1")
+set(OPENSPACE_VERSION_MINOR 12)
+set(OPENSPACE_VERSION_PATCH 0)
+set(OPENSPACE_VERSION_STRING "Beta-2")
 
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
 set(OPENSPACE_APPS_DIR "${OPENSPACE_BASE_DIR}/apps")
@@ -271,6 +271,12 @@ handle_applications()
 ##########################################################################################
 # Misc settings                                                                          #
 ##########################################################################################
+option(OPENSPACE_WITH_ABUFFER_RENDERER "Compile ABuffer Renderer" OFF)
+if (OPENSPACE_WITH_ABUFFER_RENDERER)
+    target_compile_definitions(libOpenSpace PUBLIC "OPENSPACE_WITH_ABUFFER_RENDERER")
+endif ()
+
+
 # Just in case, create the bin directory
 add_custom_command(
     TARGET libOpenSpace

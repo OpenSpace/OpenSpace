@@ -24,32 +24,15 @@
 
 #include <openspace/scene/scenegraphnode.h>
 
-#include <modules/base/translation/statictranslation.h>
-#include <modules/base/rotation/staticrotation.h>
 #include <modules/base/scale/staticscale.h>
-
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/query/query.h>
+#include <modules/base/rotation/staticrotation.h>
+#include <modules/base/translation/statictranslation.h>
 #include <openspace/rendering/renderable.h>
-#include <openspace/scene/rotation.h>
-#include <openspace/scene/scale.h>
 #include <openspace/scene/scene.h>
-#include <openspace/scene/translation.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/util/time.h>
+#include <openspace/scene/timeframe.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/logging/consolelog.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/shadermanager.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/shaderobject.h>
-
-#include <cctype>
-#include <chrono>
+#include <ghoul/opengl/ghoul_gl.h>
 
 #include "scenegraphnode_doc.inl"
 
@@ -60,12 +43,18 @@ namespace {
     constexpr const char* KeyGuiPath = "GUI.Path";
     constexpr const char* KeyGuiHidden = "GUI.Hidden";
 
-    constexpr const char* keyTransformTranslation = "Transform.Translation";
-    constexpr const char* keyTransformRotation = "Transform.Rotation";
-    constexpr const char* keyTransformScale = "Transform.Scale";
+    constexpr const char* KeyTransformTranslation = "Transform.Translation";
+    constexpr const char* KeyTransformRotation = "Transform.Rotation";
+    constexpr const char* KeyTransformScale = "Transform.Scale";
+
+    constexpr const char* KeyTimeFrame = "TimeFrame";
 } // namespace
 
 namespace openspace {
+
+#ifdef Debugging_Core_SceneGraphNode_Indices
+int SceneGraphNode::nextIndex = 0;
+#endif // Debugging_Core_SceneGraphNode_Indices
 
 std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
@@ -77,6 +66,9 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     );
 
     std::unique_ptr<SceneGraphNode> result = std::make_unique<SceneGraphNode>();
+#ifdef Debugging_Core_SceneGraphNode_Indices
+    result->index = nextIndex++;
+#endif // Debugging_Core_SceneGraphNode_Indices
 
     std::string identifier = dictionary.value<std::string>(KeyIdentifier);
     result->setIdentifier(std::move(identifier));
@@ -89,9 +81,9 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         result->_guiHintHidden = dictionary.value<bool>(KeyGuiHidden);
     }
 
-    if (dictionary.hasKey(keyTransformTranslation)) {
+    if (dictionary.hasKey(KeyTransformTranslation)) {
         ghoul::Dictionary translationDictionary;
-        dictionary.getValue(keyTransformTranslation, translationDictionary);
+        dictionary.getValue(KeyTransformTranslation, translationDictionary);
         result->_transform.translation = Translation::createFromDictionary(
             translationDictionary
         );
@@ -107,9 +99,9 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         ));
     }
 
-    if (dictionary.hasKey(keyTransformRotation)) {
+    if (dictionary.hasKey(KeyTransformRotation)) {
         ghoul::Dictionary rotationDictionary;
-        dictionary.getValue(keyTransformRotation, rotationDictionary);
+        dictionary.getValue(KeyTransformRotation, rotationDictionary);
         result->_transform.rotation = Rotation::createFromDictionary(rotationDictionary);
         if (result->_transform.rotation == nullptr) {
             LERROR(fmt::format(
@@ -123,9 +115,9 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         ));
     }
 
-    if (dictionary.hasKey(keyTransformScale)) {
+    if (dictionary.hasKey(KeyTransformScale)) {
         ghoul::Dictionary scaleDictionary;
-        dictionary.getValue(keyTransformScale, scaleDictionary);
+        dictionary.getValue(KeyTransformScale, scaleDictionary);
         result->_transform.scale = Scale::createFromDictionary(scaleDictionary);
         if (result->_transform.scale == nullptr) {
             LERROR(fmt::format(
@@ -135,6 +127,24 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         }
         result->addPropertySubOwner(result->_transform.scale.get());
         LDEBUG(fmt::format("Successfully created scale for '{}'", result->identifier()));
+    }
+
+    if (dictionary.hasKey(KeyTimeFrame)) {
+        ghoul::Dictionary timeFrameDictionary;
+        dictionary.getValue(KeyTimeFrame, timeFrameDictionary);
+        result->_timeFrame = TimeFrame::createFromDictionary(timeFrameDictionary);
+        if (result->_timeFrame == nullptr) {
+            LERROR(fmt::format(
+                "Failed to create time frame for SceneGraphNode '{}'",
+                result->identifier()
+            ));
+            return nullptr;
+        }
+        result->addPropertySubOwner(result->_timeFrame.get());
+        LDEBUG(fmt::format(
+            "Successfully created time frame for '{}'",
+            result->identifier()
+        ));
     }
 
     // We initialize the renderable last as it probably has the most dependencies
@@ -187,11 +197,6 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
 SceneGraphNode::SceneGraphNode()
     : properties::PropertyOwner({ "" })
-    , _state(State::Loaded)
-    , _parent(nullptr)
-    , _scene(nullptr)
-    , _performanceRecord({0, 0, 0, 0, 0})
-    , _renderable(nullptr)
     , _transform {
         std::make_unique<StaticTranslation>(),
         std::make_unique<StaticRotation>(),
@@ -199,10 +204,11 @@ SceneGraphNode::SceneGraphNode()
     }
 {}
 
-SceneGraphNode::~SceneGraphNode() {}
+SceneGraphNode::~SceneGraphNode() {} // NOLINT
 
 void SceneGraphNode::initialize() {
-    LDEBUG(fmt::format("Initialize: {}", identifier()));
+    LDEBUG(fmt::format("Initializing: {}", identifier()));
+
     if (_renderable) {
         _renderable->initialize();
     }
@@ -217,17 +223,23 @@ void SceneGraphNode::initialize() {
         _transform.scale->initialize();
     }
     _state = State::Initialized;
+
+    LDEBUG(fmt::format("Finished initializing: {}", identifier()));
 }
 
 void SceneGraphNode::initializeGL() {
+    LDEBUG(fmt::format("Initializing GL: {}", identifier()));
+
     if (_renderable) {
         _renderable->initializeGL();
     }
     _state = State::GLInitialized;
+
+    LDEBUG(fmt::format("Finished initializating GL: {}", identifier()));
 }
 
 void SceneGraphNode::deinitialize() {
-    LDEBUG(fmt::format("Deinitialize: {}", identifier()));
+    LDEBUG(fmt::format("Deinitializing: {}", identifier()));
 
     setScene(nullptr);
 
@@ -236,22 +248,28 @@ void SceneGraphNode::deinitialize() {
     }
     clearChildren();
     _parent = nullptr;
+
+    LDEBUG(fmt::format("Finished deinitializing: {}", identifier()));
 }
 
 void SceneGraphNode::deinitializeGL() {
+    LDEBUG(fmt::format("Deinitializing GL: {}", identifier()));
+
     if (_renderable) {
         _renderable->deinitializeGL();
     }
+
+    LDEBUG(fmt::format("Finished deinitializing GL: {}", identifier()));
 }
 
-void SceneGraphNode::traversePreOrder(std::function<void(SceneGraphNode*)> fn) {
+void SceneGraphNode::traversePreOrder(const std::function<void(SceneGraphNode*)>& fn) {
     fn(this);
     for (std::unique_ptr<SceneGraphNode>& child : _children) {
         child->traversePreOrder(fn);
     }
 }
 
-void SceneGraphNode::traversePostOrder(std::function<void(SceneGraphNode*)> fn) {
+void SceneGraphNode::traversePostOrder(const std::function<void(SceneGraphNode*)>& fn) {
     for (std::unique_ptr<SceneGraphNode>& child : _children) {
         child->traversePostOrder(fn);
     }
@@ -263,51 +281,55 @@ void SceneGraphNode::update(const UpdateData& data) {
     if (s != State::Initialized && _state != State::GLInitialized) {
         return;
     }
+    if (!isTimeFrameActive(data.time)) {
+        return;
+    }
+
     if (_transform.translation) {
         if (data.doPerformanceMeasurement) {
             glFinish();
-            auto start = std::chrono::high_resolution_clock::now();
+            const auto start = std::chrono::high_resolution_clock::now();
 
-            _transform.translation->update(data.time);
+            _transform.translation->update(data);
 
             glFinish();
-            auto end = std::chrono::high_resolution_clock::now();
+            const auto end = std::chrono::high_resolution_clock::now();
             _performanceRecord.updateTimeTranslation = (end - start).count();
         }
         else {
-            _transform.translation->update(data.time);
+            _transform.translation->update(data);
         }
     }
 
     if (_transform.rotation) {
         if (data.doPerformanceMeasurement) {
             glFinish();
-            auto start = std::chrono::high_resolution_clock::now();
+            const auto start = std::chrono::high_resolution_clock::now();
 
-            _transform.rotation->update(data.time);
+            _transform.rotation->update(data);
 
             glFinish();
-            auto end = std::chrono::high_resolution_clock::now();
+            const auto end = std::chrono::high_resolution_clock::now();
             _performanceRecord.updateTimeRotation = (end - start).count();
         }
         else {
-            _transform.rotation->update(data.time);
+            _transform.rotation->update(data);
         }
     }
 
     if (_transform.scale) {
         if (data.doPerformanceMeasurement) {
             glFinish();
-            auto start = std::chrono::high_resolution_clock::now();
+            const auto start = std::chrono::high_resolution_clock::now();
 
-            _transform.scale->update(data.time);
+            _transform.scale->update(data);
 
             glFinish();
-            auto end = std::chrono::high_resolution_clock::now();
+            const auto end = std::chrono::high_resolution_clock::now();
             _performanceRecord.updateTimeScaling = (end - start).count();
         }
         else {
-            _transform.scale->update(data.time);
+            _transform.scale->update(data);
         }
     }
     UpdateData newUpdateData = data;
@@ -321,12 +343,19 @@ void SceneGraphNode::update(const UpdateData& data) {
     newUpdateData.modelTransform.rotation = worldRotationMatrix();
     newUpdateData.modelTransform.scale = worldScale();
 
-    glm::dmat4 translation =
-        glm::translate(glm::dmat4(1.0), newUpdateData.modelTransform.translation);
+    glm::dmat4 translation = glm::translate(
+        glm::dmat4(1.0),
+        newUpdateData.modelTransform.translation
+    );
     glm::dmat4 rotation = glm::dmat4(newUpdateData.modelTransform.rotation);
-    glm::dmat4 scaling =
-        glm::scale(glm::dmat4(1.0), glm::dvec3(newUpdateData.modelTransform.scale,
-            newUpdateData.modelTransform.scale, newUpdateData.modelTransform.scale));
+    glm::dmat4 scaling = glm::scale(
+        glm::dmat4(1.0),
+        glm::dvec3(
+            newUpdateData.modelTransform.scale,
+            newUpdateData.modelTransform.scale,
+            newUpdateData.modelTransform.scale
+        )
+    );
 
     _modelTransformCached = translation * rotation * scaling;
     _inverseModelTransformCached = glm::inverse(_modelTransformCached);
@@ -342,8 +371,9 @@ void SceneGraphNode::update(const UpdateData& data) {
             auto end = std::chrono::high_resolution_clock::now();
             _performanceRecord.updateTimeRenderable = (end - start).count();
         }
-        else
+        else {
             _renderable->update(newUpdateData);
+        }
     }
 }
 
@@ -366,37 +396,38 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         { _worldPositionCached, _worldRotationCached, _worldScaleCached }
     };
 
-    //_performanceRecord.renderTime = 0;
-
-    bool visible = _renderable &&
-        _renderable->isVisible() &&
-        _renderable->isReady() &&
-        _renderable->isEnabled() &&
-        _renderable->matchesRenderBinMask(data.renderBinMask);
-
-    if (visible) {
-        if (data.doPerformanceMeasurement) {
-            glFinish();
-            auto start = std::chrono::high_resolution_clock::now();
-
-            _renderable->render(newData, tasks);
-
-            glFinish();
-            auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.renderTime = (end - start).count();
-        }
-        else
-            _renderable->render(newData, tasks);
+    if (!isTimeFrameActive(data.time)) {
+        return;
     }
 
-    // evaluate all the children, tail-recursive function(?)
+    bool visible = _renderable &&
+                   _renderable->isVisible() &&
+                   _renderable->isReady() &&
+                   _renderable->isEnabled() &&
+                   _renderable->matchesRenderBinMask(data.renderBinMask);
 
-    //for (SceneGraphNode* child : _children)
-    //    child->render(newData);
+    if (!visible) {
+        return;
+    }
+
+    if (data.doPerformanceMeasurement) {
+        glFinish();
+        auto start = std::chrono::high_resolution_clock::now();
+
+        _renderable->render(newData, tasks);
+
+        glFinish();
+        auto end = std::chrono::high_resolution_clock::now();
+        _performanceRecord.renderTime = (end - start).count();
+    }
+    else {
+        _renderable->render(newData, tasks);
+    }
 }
 
 void SceneGraphNode::setParent(SceneGraphNode& parent) {
     ghoul_assert(_parent != nullptr, "Node must be attached to a parent");
+
     parent.attachChild(_parent->detachChild(*this));
 }
 
@@ -414,14 +445,16 @@ void SceneGraphNode::attachChild(std::unique_ptr<SceneGraphNode> child) {
 }
 
 std::unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& child) {
-    ghoul_assert(child._dependentNodes.empty(),
-        "Nodes cannot depend on a node being detached");
+    ghoul_assert(
+        child._dependentNodes.empty(),
+        "Nodes cannot depend on a node being detached"
+    );
     ghoul_assert(child._parent != nullptr, "Node must be attached to a parent");
 
-    auto iter = std::find_if(
+    const auto iter = std::find_if(
         _children.begin(),
         _children.end(),
-        [&child] (const auto& c) {
+        [&child] (const std::unique_ptr<SceneGraphNode>& c) {
             return &child == c.get();
         }
     );
@@ -451,7 +484,7 @@ void SceneGraphNode::clearChildren() {
     traversePreOrder([](SceneGraphNode* node) {
         node->clearDependencies();
     });
-    for (auto& c : _children) {
+    for (const std::unique_ptr<SceneGraphNode>& c : _children) {
         if (_scene) {
             c->setScene(nullptr);
         }
@@ -469,20 +502,22 @@ void SceneGraphNode::addDependency(SceneGraphNode& dependency) {
 }
 
 void SceneGraphNode::removeDependency(SceneGraphNode& dependency) {
-    dependency._dependentNodes.erase(std::remove_if(
-        dependency._dependentNodes.begin(),
-        dependency._dependentNodes.end(),
-        [this](const auto& d) {
-            return this == d;
-        }
-    ), dependency._dependentNodes.end());
-    _dependencies.erase(std::remove_if(
-        _dependencies.begin(),
-        _dependencies.end(),
-        [&dependency](const auto& d) {
-            return &dependency == d;
-        }
-    ), _dependencies.end());
+    dependency._dependentNodes.erase(
+        std::remove(
+            dependency._dependentNodes.begin(),
+            dependency._dependentNodes.end(),
+            this
+        ),
+        dependency._dependentNodes.end()
+    );
+    _dependencies.erase(
+        std::remove(
+            _dependencies.begin(),
+            _dependencies.end(),
+            &dependency
+        ),
+        _dependencies.end()
+    );
 
     if (_scene) {
         _scene->markNodeRegistryDirty();
@@ -490,14 +525,15 @@ void SceneGraphNode::removeDependency(SceneGraphNode& dependency) {
 }
 
 void SceneGraphNode::clearDependencies() {
-    for (auto dependency : _dependencies) {
-        dependency->_dependentNodes.erase(std::remove_if(
-            dependency->_dependentNodes.begin(),
-            dependency->_dependentNodes.end(),
-            [this](const auto& d) {
-                return this == d;
-            }
-        ), dependency->_dependentNodes.end());
+    for (SceneGraphNode* dependency : _dependencies) {
+        dependency->_dependentNodes.erase(
+            std::remove(
+                dependency->_dependentNodes.begin(),
+                dependency->_dependentNodes.end(),
+                this
+            ),
+            dependency->_dependentNodes.end()
+        );
     }
     _dependencies.clear();
 
@@ -510,7 +546,7 @@ void SceneGraphNode::setDependencies(const std::vector<SceneGraphNode*>& depende
     clearDependencies();
 
     _dependencies = dependencies;
-    for (auto dependency : dependencies) {
+    for (SceneGraphNode* dependency : dependencies) {
         dependency->_dependentNodes.push_back(this);
     }
 
@@ -597,6 +633,20 @@ glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
     }
 }
 
+bool SceneGraphNode::isTimeFrameActive(const Time& time) const {
+    for (SceneGraphNode* dep : _dependencies) {
+        if (!dep->isTimeFrameActive(time)) {
+            return false;
+        }
+    }
+
+    if (_parent && !_parent->isTimeFrameActive(time)) {
+        return false;
+    }
+
+    return !_timeFrame || _timeFrame->isActive(time);
+}
+
 glm::dmat3 SceneGraphNode::calculateWorldRotation() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
@@ -649,7 +699,7 @@ void SceneGraphNode::setScene(Scene* scene) {
 
 std::vector<SceneGraphNode*> SceneGraphNode::children() const {
     std::vector<SceneGraphNode*> nodes;
-    for (auto& child : _children) {
+    for (const std::unique_ptr<SceneGraphNode>& child : _children) {
         nodes.push_back(child.get());
     }
     return nodes;
@@ -667,14 +717,13 @@ void SceneGraphNode::setRenderable(std::unique_ptr<Renderable> renderable) {
     _renderable = std::move(renderable);
 }
 
-const Renderable* SceneGraphNode::renderable() const
-{
+const Renderable* SceneGraphNode::renderable() const {
     return _renderable.get();
 }
 
-Renderable* SceneGraphNode::renderable() {
-    return _renderable.get();
-}
+//Renderable* SceneGraphNode::renderable() {
+//    return _renderable.get();
+//}
 
 /*
 bool SceneGraphNode::sphereInsideFrustum(const psc& s_pos, const PowerScaledScalar& s_rad,
@@ -713,14 +762,19 @@ SceneGraphNode* SceneGraphNode::childNode(const std::string& identifier) {
     if (this->identifier() == identifier) {
         return this;
     }
-    else
+    else {
         for (std::unique_ptr<SceneGraphNode>& it : _children) {
             SceneGraphNode* tmp = it->childNode(identifier);
             if (tmp) {
                 return tmp;
             }
         }
+    }
     return nullptr;
+}
+
+const SceneGraphNode::PerformanceRecord& SceneGraphNode::performanceRecord() const {
+    return _performanceRecord;
 }
 
 void SceneGraphNode::updateCamera(Camera* camera) const {

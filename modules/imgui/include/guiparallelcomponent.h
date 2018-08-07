@@ -25,10 +25,7 @@
 #ifndef __OPENSPACE_MODULE_IMGUI___GUIPARALLELCOMPONENT___H__
 #define __OPENSPACE_MODULE_IMGUI___GUIPARALLELCOMPONENT___H__
 
-#include <modules/imgui/include/guicomponent.h>
 #include <modules/imgui/include/guipropertycomponent.h>
-
-#include <string>
 
 namespace openspace::gui {
 
@@ -36,6 +33,7 @@ class GuiParallelComponent : public GuiPropertyComponent {
 public:
     GuiParallelComponent();
     void render() override;
+
 private:
     void renderDisconnected();
     void renderConnecting();

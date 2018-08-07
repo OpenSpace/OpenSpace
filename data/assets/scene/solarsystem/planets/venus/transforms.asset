@@ -2,8 +2,6 @@ local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/sun/transforms')
 asset.require("spice/base")
 
-
-
 local VenusBarycenter = {
     Identifier = "VenusBarycenter",
     Parent = transforms.SolarSystemBarycenter.Identifier,
@@ -19,7 +17,5 @@ local VenusBarycenter = {
         Path = "/Solar System/Planets/Venus"
     }
 }
-
-
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { VenusBarycenter })

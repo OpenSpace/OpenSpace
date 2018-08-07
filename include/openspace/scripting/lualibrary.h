@@ -26,7 +26,6 @@
 #define __OPENSPACE_CORE___LUALIBRARY___H__
 
 #include <ghoul/lua/ghoul_lua.h>
-
 #include <string>
 #include <vector>
 

@@ -24,23 +24,16 @@
 
 #include <modules/imgui/imguimodule.h>
 
-#include <modules/imgui/include/gui.h>
-
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/interaction/navigationhandler.h>
-#include <openspace/network/parallelconnection.h>
+#include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/asset.h>
-#include <openspace/scene/assetloader.h>
-
 #include <ghoul/logging/logmanager.h>
 
 namespace openspace {
@@ -68,6 +61,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                     std::vector<properties::PropertyOwner*> res = {
                         &(OsEng.windowWrapper()),
                         &(OsEng.navigationHandler()),
+                        &(OsEng.timeManager()),
                         &(OsEng.renderEngine()),
                         &(OsEng.parallelPeer()),
                         &(OsEng.console()),
@@ -97,6 +91,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                     const std::vector<SceneGraphNode*>& nodes = scene ?
                         scene->allSceneGraphNodes() :
                         std::vector<SceneGraphNode*>();
+
                     return std::vector<properties::PropertyOwner*>(
                         nodes.begin(),
                         nodes.end()
@@ -125,7 +120,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                             nodes.end(),
                             [](SceneGraphNode* n) {
                                 const std::vector<std::string>& tags = n->tags();
-                                auto it = std::find(
+                                const auto it = std::find(
                                     tags.begin(),
                                     tags.end(),
                                     "GUI.Interesting"
@@ -171,14 +166,19 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::Draw2D,
         [&]() {
+            // TODO emiax: Make sure this is only called for one of the eyes, in the case
+            // of side-by-side / top-bottom stereo.
+
             WindowWrapper& wrapper = OsEng.windowWrapper();
-            bool showGui = wrapper.hasGuiWindow() ? wrapper.isGuiWindow() : true;
+            const bool showGui = wrapper.hasGuiWindow() ? wrapper.isGuiWindow() : true;
             if (wrapper.isMaster() && showGui) {
+                const glm::ivec2 windowSize = wrapper.currentWindowSize();
+                const glm::ivec2 resolution = wrapper.currentWindowResolution();
+
                 glm::vec2 mousePosition = wrapper.mousePosition();
-                glm::ivec2 windowSize = wrapper.currentWindowSize();
                 uint32_t mouseButtons = wrapper.mouseButtons(2);
 
-                double dt = std::max(wrapper.averageDeltaTime(), 0.0);
+                const double dt = std::max(wrapper.averageDeltaTime(), 0.0);
                 if (touchInput.active && mouseButtons == 0) {
                     mouseButtons = touchInput.action;
                     mousePosition = touchInput.pos;
@@ -188,7 +188,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                 gui.startFrame(
                     static_cast<float>(dt),
                     glm::vec2(windowSize),
-                    wrapper.dpiScaling(),
+                    resolution / windowSize,
                     mousePosition,
                     mouseButtons
                 );

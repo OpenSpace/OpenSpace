@@ -29,8 +29,6 @@
 #include <limits>
 #include <sstream>
 
-using std::numeric_limits;
-
 namespace openspace::properties {
 
 // #define DEFAULT_FROM_LUA_LAMBDA(wchar_t, DEFAULT_VALUE)

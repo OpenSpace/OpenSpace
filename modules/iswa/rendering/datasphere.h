@@ -32,16 +32,16 @@ namespace openspace {
 class PowerScaledSphere;
 
 /**
- * DataSphere is a concrete IswaCygnet with data files as its input source.
- * The class handles creation, destruction and rendering of a sphere geometry.
- * It also specifies what uniforms to use and what GUI properties it needs.
+ * DataSphere is a concrete IswaCygnet with data files as its input source. The class
+ * handles creation, destruction and rendering of a sphere geometry. It also specifies
+ * what uniforms to use and what GUI properties it needs.
  */
 class DataSphere : public DataCygnet {
 public:
     DataSphere(const ghoul::Dictionary& dictionary);
     ~DataSphere();
 
-     void initialize() override;
+     void initializeGL() override;
 
 protected:
     /**
@@ -53,7 +53,7 @@ protected:
     void setUniforms() override;
     std::vector<float*> textureData() override;
 
-    std::shared_ptr<PowerScaledSphere> _sphere;
+    std::unique_ptr<PowerScaledSphere> _sphere;
     float _radius;
 };
 

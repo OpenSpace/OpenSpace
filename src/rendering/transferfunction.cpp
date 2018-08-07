@@ -25,17 +25,15 @@
 #include <openspace/rendering/transferfunction.h>
 
 #include <ghoul/filesystem/cachemanager.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
-
-#include <cstring>
 #include <iterator>
 #include <fstream>
 #include <string>
-
-#include <iostream>
 
 namespace {
     constexpr const char* _loggerCat = "TransferFunction";
@@ -61,8 +59,10 @@ TransferFunction::TransferFunction(const std::string& filepath,
     : _filepath(filepath)
 {
     setPath(filepath);
-    setCallback(tfChangedCallback);
+    setCallback(std::move(tfChangedCallback));
 }
+
+TransferFunction::~TransferFunction() {} // NOLINT
 
 void TransferFunction::setPath(const std::string& filepath) {
     if (_file) {
@@ -85,14 +85,14 @@ void TransferFunction::setPath(const std::string& filepath) {
     });
 }
 
-ghoul::opengl::Texture& TransferFunction::getTexture() {
+ghoul::opengl::Texture& TransferFunction::texture() {
     ghoul_assert(_texture != nullptr, "Transfer function is null");
     update();
     return *_texture.get();
 }
 
 void TransferFunction::update() {
-  /*  if (_needsUpdate) {
+    if (_needsUpdate) {
         if (hasExtension(_filepath, "txt")) {
             setTextureFromTxt();
         } else {
@@ -103,7 +103,7 @@ void TransferFunction::update() {
         if (_tfChangedCallback) {
             _tfChangedCallback(*this);
         }
-    }*/
+    }
 }
 
 void TransferFunction::setCallback(TfChangedCallback callback) {
@@ -119,8 +119,8 @@ void TransferFunction::setTextureFromTxt(std::shared_ptr<ghoul::opengl::Texture>
     }
 
     int width = 512;
-    float lower = 0.0f;
-    float upper = 1.0f;
+    float lower = 0.f;
+    float upper = 1.f;
 
     std::vector<MappingKey> mappingKeys;
 
@@ -131,36 +131,36 @@ void TransferFunction::setTextureFromTxt(std::shared_ptr<ghoul::opengl::Texture>
         std::string key;
         iss >> key;
 
-        if(key == "width") {
+        if (key == "width") {
             iss >> width;
-        } else if(key == "lower") {
+        } else if (key == "lower") {
             iss >> lower;
-            lower = glm::clamp(lower, 0.0f, 1.0f);
-        } else if(key == "upper") {
+            lower = glm::clamp(lower, 0.f, 1.f);
+        } else if (key == "upper") {
             iss >> upper;
-            upper = glm::clamp(upper, lower, 1.0f);
-        } else if(key == "mappingkey") {
+            upper = glm::clamp(upper, lower, 1.f);
+        } else if (key == "mappingkey") {
             float intensity;
             glm::vec4 rgba = glm::vec4(0.0f);
             iss >> intensity;
             for(int i = 0; i < 4; ++i) {
                 iss >> rgba[i];
             }
-            mappingKeys.push_back({intensity, rgba});
+            mappingKeys.emplace_back(intensity, rgba);
         }
     }
     in.close();
 
-    if (mappingKeys.size() < 1) {
+    if (mappingKeys.empty()) {
         return;
     }
 
     if (mappingKeys.front().position > lower) {
-        mappingKeys.insert(mappingKeys.begin(), {lower,mappingKeys.front().color});
+        mappingKeys.insert(mappingKeys.begin(), {lower, mappingKeys.front().color});
     }
 
     if (mappingKeys.back().position < upper) {
-        mappingKeys.push_back({upper,mappingKeys.back().color});
+        mappingKeys.emplace_back(upper, mappingKeys.back().color);
     }
 
     // allocate new float array with zeros
@@ -177,7 +177,7 @@ void TransferFunction::setTextureFromTxt(std::shared_ptr<ghoul::opengl::Texture>
     auto lastKey = mappingKeys.end() -1;
 
     for (size_t i = lowerIndex; i <= upperIndex; ++i) {
-        float fpos = static_cast<float>(i) / static_cast<float>(width-1);
+        const float fpos = static_cast<float>(i) / static_cast<float>(width-1);
         if (fpos > currentKey->position) {
             prevKey = currentKey;
             currentKey++;
@@ -186,11 +186,11 @@ void TransferFunction::setTextureFromTxt(std::shared_ptr<ghoul::opengl::Texture>
             }
         }
 
-        float dist = fpos - prevKey->position;
-        float weight = dist / (currentKey->position - prevKey->position);
+        const float dist = fpos - prevKey->position;
+        const float weight = dist / (currentKey->position - prevKey->position);
 
         for (size_t channel = 0; channel < 4; ++channel) {
-            size_t position = 4 * i + channel;
+            const size_t position = 4 * i + channel;
             // Interpolate linearly between prev and next mapping key
             float value = (prevKey->color[channel] * (1.f - weight) +
                           currentKey->color[channel] * weight) / 255.f;
@@ -226,7 +226,7 @@ glm::vec4 TransferFunction::sample(size_t offset) {
         return glm::vec4(0.f);
     }
 
-    int nPixels = _texture->width();
+    const int nPixels = _texture->width();
 
     // Clamp to range.
     if (offset >= nPixels) {
@@ -248,4 +248,5 @@ void TransferFunction::bind() {
     update();
     _texture->bind();
 }
-}
+
+} // namespace openspace

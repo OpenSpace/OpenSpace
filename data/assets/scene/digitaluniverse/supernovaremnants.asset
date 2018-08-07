@@ -31,6 +31,9 @@ local object = {
         ScaleFactor = 440.08,
         TextSize = 17.5,
         TextMinSize = 8.0,
+        TextMaxSize = 30.0,
+        CorrectionSizeEndDistance = 17.5,
+        CorrectionSizeFactor = 13.96,
         Unit = "pc"
     },
     GUI = {

@@ -25,6 +25,8 @@
 #include <modules/kameleon/include/kameleonhelper.h>
 
 #include <openspace/util/time.h>
+#include <ghoul/fmt.h>
+#include <ghoul/logging/logmanager.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -38,24 +40,14 @@
 #pragma warning (pop)
 #endif // _MSC_VER
 
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/fmt.h>
 
 namespace {
-    std::string _loggerCat = "KameleonHelper";
-}
+    constexpr const char* _loggerCat = "KameleonHelper";
+} // namespace
 
 namespace openspace::kameleonHelper {
 
-/**
- * Opens a ccmc::Kameleon object from the provided path to a .cdf file.
- * Path should be absolute.
- *
- * Returns 'nullptr' if the file fails to open!
- */
 std::unique_ptr<ccmc::Kameleon> createKameleonObject(const std::string& cdfFilePath) {
-
-    // ---------------------------- CREATE KAMELEON OBJECT ---------------------------- //
     std::unique_ptr<ccmc::Kameleon> kameleon = std::make_unique<ccmc::Kameleon>();
     LDEBUG(fmt::format("\tOpening the cdf file: {}", cdfFilePath));
     long kamStatus = kameleon->open(cdfFilePath);
@@ -133,14 +125,14 @@ double getTime(ccmc::Kameleon* kameleon) {
             seqStartDbl = 0.0;
         }
 
-        if (seqStartStr.length() == 19){
+        if (seqStartStr.length() == 19) {
             seqStartStr += ".000Z";
         }
 
-        if (seqStartStr.length() == 24){
-            seqStartDbl =
-                    Time::convertTime(
-                            seqStartStr.substr(0, seqStartStr.length() - 2));
+        if (seqStartStr.length() == 24) {
+            seqStartDbl = Time::convertTime(
+                seqStartStr.substr(0, seqStartStr.length() - 2)
+            );
         } else {
             LWARNING("No starting time attribute could be found in the .cdf file."
                 "Starting time is set to 01.JAN.2000 12:00.");
@@ -150,13 +142,11 @@ double getTime(ccmc::Kameleon* kameleon) {
         double stateStartOffset;
 
         if (kameleon->doesAttributeExist("elapsed_time_in_seconds")) {
-            stateStartOffset = static_cast<double>(
-                    kameleon->getGlobalAttribute(
-                            "elapsed_time_in_seconds").getAttributeFloat());
+            ccmc::Attribute att = kameleon->getGlobalAttribute("elapsed_time_in_seconds");
+            stateStartOffset = static_cast<double>(att.getAttributeFloat());
         } else if (kameleon->doesAttributeExist("time_physical_time")) {
-            stateStartOffset = static_cast<double>(
-                    kameleon->getGlobalAttribute(
-                            "time_physical_time").getAttributeFloat());
+            ccmc::Attribute att = kameleon->getGlobalAttribute("time_physical_time");
+            stateStartOffset = static_cast<double>(att.getAttributeFloat());
         } else {
             stateStartOffset = 0.0;
             LWARNING("No time offset attribute could be found in the .cdf file."

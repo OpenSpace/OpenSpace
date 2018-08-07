@@ -23,142 +23,134 @@
  ****************************************************************************************/
 
 #include <modules/iswa/util/dataprocessorkameleon.h>
-//#include <algorithm>
+
+#include <modules/kameleon/include/kameleonwrapper.h>
+#include <openspace/properties/selectionproperty.h>
+#include <openspace/util/histogram.h>
+#include <ghoul/glm.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/glm.h>
+#include <algorithm>
 
 namespace openspace {
 
-DataProcessorKameleon::DataProcessorKameleon()
-    : DataProcessor()
-    , _kw(nullptr)
-    , _kwPath("")
-    , _slice(0.5)
-{}
+DataProcessorKameleon::DataProcessorKameleon() : DataProcessor() {}
 
-DataProcessorKameleon::~DataProcessorKameleon(){}
+DataProcessorKameleon::~DataProcessorKameleon() {}
 
-std::vector<std::string> DataProcessorKameleon::readMetadata(std::string path,
+std::vector<std::string> DataProcessorKameleon::readMetadata(const std::string& path,
                                                              glm::size3_t&)
 {
-    if (!path.empty()) {
-        if (path != _kwPath || !_kw) {
-            initializeKameleonWrapper(path);
-        }
-
-        std::vector<std::string> opts = _kw->getVariables();
-        opts.erase(
-            std::remove_if(
-                opts.begin(),
-                opts.end(),
-                [this](std::string opt) {
-                     return (opt.size() > 3 ||
-                            _coordinateVariables.find(opt) != _coordinateVariables.end());
-                 }
-            ),
-            opts.end()
-        );
-        return opts;
+    if (path.empty()) {
+        return std::vector<std::string>();
     }
 
-    return std::vector<std::string>();
+    if ((path != _kwPath) || !_kw) {
+        initializeKameleonWrapper(path);
+    }
+
+    std::vector<std::string> opts = _kw->variables();
+    opts.erase(
+        std::remove_if(
+            opts.begin(),
+            opts.end(),
+            [this](const std::string& opt) {
+                    return (opt.size() > 3 ||
+                        _coordinateVariables.find(opt) != _coordinateVariables.end());
+                }
+        ),
+        opts.end()
+    );
+    return opts;
 }
 
-void DataProcessorKameleon::addDataValues(std::string path,
+void DataProcessorKameleon::addDataValues(const std::string& path,
                                           properties::SelectionProperty& dataOptions)
 {
     int numOptions = static_cast<int>(dataOptions.options().size());
     initializeVectors(numOptions);
 
-    if (!path.empty()) {
-        if (path != _kwPath || !_kw) {
-            initializeKameleonWrapper(path);
-        }
-
-        std::vector<float> sum(numOptions, 0.0f);
-        std::vector<std::vector<float>> optionValues(numOptions, std::vector<float>());
-        auto options = dataOptions.options();
-
-        int numValues = static_cast<int>(_dimensions.x * _dimensions.y * _dimensions.z);
-
-        float* values;
-        float value;
-
-        for (int i=0; i<numOptions; i++) {
-            //0.5 to gather interesting values for the normalization/histograms.
-            values = _kw->getUniformSliceValues(
-                options[i].description,
-                _dimensions,
-                0.5f
-            );
-
-            for (int j=0; j<numValues; j++) {
-                value = values[j];
-
-                optionValues[i].push_back(value);
-                _min[i] = std::min(_min[i], value);
-                _max[i] = std::max(_max[i], value);
-                sum[i] += value;
-            }
-        }
-
-        add(optionValues, sum);
+    if (path.empty()) {
+        return;
     }
+
+    if ((path != _kwPath) || !_kw) {
+        initializeKameleonWrapper(path);
+    }
+
+    std::vector<float> sum(numOptions, 0.f);
+    std::vector<std::vector<float>> optionValues(numOptions, std::vector<float>());
+    const std::vector<properties::SelectionProperty::Option>& options =
+                                                                    dataOptions.options();
+
+    const int numValues = static_cast<int>(_dimensions.x * _dimensions.y * _dimensions.z);
+
+    for (int i = 0; i < numOptions; ++i) {
+        //0.5 to gather interesting values for the normalization/histograms.
+        float* values = _kw->uniformSliceValues(
+            options[i].description,
+            _dimensions,
+            0.5f
+        );
+
+        for (int j=0; j<numValues; j++) {
+            const float value = values[j];
+
+            optionValues[i].push_back(value);
+            _min[i] = std::min(_min[i], value);
+            _max[i] = std::max(_max[i], value);
+            sum[i] += value;
+        }
+    }
+
+    add(optionValues, sum);
 }
-std::vector<float*> DataProcessorKameleon::processData(std::string path,
-                                               properties::SelectionProperty& dataOptions,
-                                               glm::size3_t& dimensions,
-                                               float slice)
+
+std::vector<float*> DataProcessorKameleon::processData(const std::string& path,
+                                                properties::SelectionProperty& optionProp,
+                                                                 glm::size3_t& dimensions)
 {
+    const int numOptions = static_cast<int>(optionProp.options().size());
+
+    if (path.empty()) {
+        return std::vector<float*>(numOptions, nullptr);
+    }
+
+    if ((path != _kwPath) || !_kw) {
+        initializeKameleonWrapper(path);
+    }
+
+    const std::vector<int>& selectedOptions = optionProp;
+
+    const std::vector<properties::SelectionProperty::Option>& options =
+        optionProp.options();
+
+    const int numValues = static_cast<int>(glm::compMul(dimensions));
+
+    std::vector<float*> dataOptions(numOptions, nullptr);
+    for (int option : selectedOptions) {
+        dataOptions[option] = _kw->uniformSliceValues(
+            options[option].description,
+            dimensions,
+            _slice
+        );
+
+        for (int i = 0; i < numValues; i++) {
+            const float value = dataOptions[option][i];
+            dataOptions[option][i] = processDataPoint(value, option);
+        }
+    }
+
+    calculateFilterValues(selectedOptions);
+    return dataOptions;
+}
+
+void DataProcessorKameleon::setSlice(float slice) {
     _slice = slice;
-    // _dimensions = dimensions;
-    return processData(path, dataOptions, dimensions);
 }
 
-std::vector<float*> DataProcessorKameleon::processData(std::string path,
-                                               properties::SelectionProperty& optionProp,
-                                               glm::size3_t& dimensions)
-{
-    int numOptions = static_cast<int>(optionProp.options().size());
-
-    if (!path.empty()) {
-        if (path != _kwPath || !_kw) {
-            initializeKameleonWrapper(path);
-        }
-
-        std::vector<int> selectedOptions = optionProp.value();
-//        int numSelected = selectedOptions.size();
-
-        const std::vector<properties::SelectionProperty::Option>& options =
-            optionProp.options();
-
-        int numValues = static_cast<int>(glm::compMul(dimensions));
-
-        float value;
-
-        std::vector<float*> dataOptions(numOptions, nullptr);
-        for (int option : selectedOptions) {
-            dataOptions[option] = _kw->getUniformSliceValues(
-                options[option].description,
-                dimensions,
-                _slice
-            );
-
-            for (int i = 0; i < numValues; i++) {
-                value = dataOptions[option][i];
-                dataOptions[option][i] = processDataPoint(value, option);
-            }
-        }
-
-        calculateFilterValues(selectedOptions);
-        return dataOptions;
-    }
-    return std::vector<float*>(numOptions, nullptr);
-}
-
-void DataProcessorKameleon::dimensions(glm::size3_t dimensions) {
-    _dimensions = dimensions;
+void DataProcessorKameleon::setDimensions(glm::size3_t dimensions) {
+    _dimensions = std::move(dimensions);
 }
 
 void DataProcessorKameleon::initializeKameleonWrapper(std::string path) {
@@ -168,7 +160,7 @@ void DataProcessorKameleon::initializeKameleonWrapper(std::string path) {
             _kw->close();
         }
 
-        _kwPath = path;
+        _kwPath = std::move(path);
         _kw = std::make_shared<KameleonWrapper>(absPath(_kwPath));
     }
 }

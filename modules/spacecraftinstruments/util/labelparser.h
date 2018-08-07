@@ -31,31 +31,23 @@ namespace openspace {
 
 class LabelParser : public SequenceParser {
 public:
-    LabelParser();
-    LabelParser(std::string name,
-                std::string fileName,
-                const ghoul::Dictionary& translationDictionary);
+    LabelParser(std::string name, std::string fileName,
+        const ghoul::Dictionary& translationDictionary);
 
     bool create() override;
 
     // temporary need to figure this out
-    //std::map<std::string, Decoder*> getTranslation() { return _fileTranslation; };
+    //std::map<std::string, Decoder*> translations() { return _fileTranslation; };
 
 private:
-    void createImage(Image& image,
-                        double startTime,
-                        double stopTime,
-                        std::vector<std::string> instr,
-                        std::string targ,
-                        std::string path);
+    void createImage(Image& image, double startTime, double stopTime,
+        std::vector<std::string> instr, std::string target, std::string path);
 
-    std::string decode(std::string line);
-    std::string encode(std::string line);
+    std::string encode(const std::string& line) const;
+    std::string decode(const std::string& line);
 
-    bool augmentWithSpice(Image& image,
-                            std::string spacecraft,
-                            std::vector<std::string> payload,
-                            std::vector<std::string> potentialTargets);
+    bool augmentWithSpice(Image& image, std::string spacecraft,
+        std::vector<std::string> payload, std::vector<std::string> potentialTargets);
 
     std::string _name;
     std::string _fileName;
@@ -67,7 +59,7 @@ private:
     std::string _instrumentHostID;
     std::string _detectorType;
     std::string _sequenceID;
-    bool _badDecoding;
+    bool _badDecoding = false;
 };
 
 } // namespace openspace

@@ -30,10 +30,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/time.h>
-
 #include <ghoul/logging/logmanager.h>
-
-#include <glm/gtx/quaternion.hpp>
 
 namespace openspace::interaction {
 
@@ -48,16 +45,16 @@ void KeyframeNavigator::updateCamera(Camera& camera) {
                                               _cameraPoseTimeline.firstKeyframeAfter(now);
     const Keyframe<CameraPose>* prevKeyframe =
                                               _cameraPoseTimeline.lastKeyframeBefore(now);
-    double nextTime = 0;
-    double prevTime = 0;
-    double t = 0;
 
+    double nextTime = 0.0;
     if (nextKeyframe) {
         nextTime = nextKeyframe->timestamp;
     } else {
         return;
     }
 
+    double prevTime = 0.0;
+    double t = 0.0;
     if (prevKeyframe) {
         prevTime = prevKeyframe->timestamp;
         t = (now - prevTime) / (nextTime - prevTime);
@@ -116,6 +113,14 @@ void KeyframeNavigator::updateCamera(Camera& camera) {
     camera.setRotation(
         glm::slerp(prevKeyframeCameraRotation, nextKeyframeCameraRotation, t)
     );
+
+    // We want to affect view scaling, such that we achieve
+    // logarithmic interpolation of distance to an imagined focus node.
+    // To do this, we interpolate the scale reciprocal logarithmically.
+    const float prevInvScaleExp = glm::log(1.0 / prevPose.scale);
+    const float nextInvScaleExp = glm::log(1.0 / nextPose.scale);
+    const float interpolatedInvScaleExp = prevInvScaleExp * (1 - t) + nextInvScaleExp * t;
+    camera.setScaling(1.0 / glm::exp(interpolatedInvScaleExp));
 }
 
 Timeline<KeyframeNavigator::CameraPose>& KeyframeNavigator::timeline() {
@@ -124,11 +129,11 @@ Timeline<KeyframeNavigator::CameraPose>& KeyframeNavigator::timeline() {
 
 void KeyframeNavigator::addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose)
 {
-    timeline().addKeyframe(timestamp, pose);
+    timeline().addKeyframe(timestamp, std::move(pose));
 }
 
-void KeyframeNavigator::removeKeyframesAfter(double timestamp) {
-    timeline().removeKeyframesAfter(timestamp);
+void KeyframeNavigator::removeKeyframesAfter(double timestamp, Inclusive inclusive) {
+    timeline().removeKeyframesAfter(timestamp, inclusive);
 }
 
 void KeyframeNavigator::clearKeyframes() {

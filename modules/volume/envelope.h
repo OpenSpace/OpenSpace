@@ -25,12 +25,10 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___ENVELOPE___H__
 #define __OPENSPACE_MODULE_VOLUME___ENVELOPE___H__
 
-#include <ghoul/opengl/texture.h>
+#include <openspace/json.h>
 #include <ghoul/glm.h>
-#include <ext/json/json.hpp>
-#include <ghoul/lua/ghoul_lua.h>
 
-using json = nlohmann::json;
+struct lua_State;
 
 namespace openspace::volume {
 
@@ -39,10 +37,10 @@ public:
     EnvelopePoint(glm::vec3 c, float x, float y);
     EnvelopePoint(std::string c, float x, float y);
 
-    int HexadecimalToDecimal(std::string hex) const;
-    std::string DecimalToHexadecimal(int dec) const;
-    glm::vec3 hexadecimalToRGBConversion(std::string hex) const;
-    std::string getHexadecimalFromVec3(glm::vec3 vec) const;
+    int hexadecimalToDecimal(const std::string& hex) const;
+    std::string decimalToHexadecimal(int dec) const;
+    glm::vec3 hexadecimalToRGBConversion(const std::string& hex) const;
+    std::string hexadecimalFromVec3(const glm::vec3& vec) const;
 
     glm::vec3 color;
     std::string colorHex;
@@ -51,16 +49,16 @@ public:
 
 class Envelope {
 public:
-    Envelope();
+    Envelope() = default;
     Envelope(std::vector<EnvelopePoint> vec);
 
     void setPoints(std::vector<EnvelopePoint> vec);
-    std::vector<EnvelopePoint> getPoints();
+    const std::vector<EnvelopePoint>& points() const;
 
-    glm::vec4 getValueAtPosition(float pos) const;
+    glm::vec4 valueAtPosition(float pos) const;
     glm::vec3 normalizeColor(glm::vec3 vec) const;
-    json getJSONPoints() const;
-    json getJSONEnvelope() const;
+    nlohmann::json jsonPoints() const;
+    nlohmann::json jsonEnvelope() const;
     void setEnvelopeLuaTable(lua_State* state) const;
 
     bool isValueInEnvelope(float pos) const;

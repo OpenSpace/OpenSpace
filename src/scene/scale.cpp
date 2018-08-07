@@ -28,12 +28,12 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace {
-    const char* KeyType = "Type";
+    constexpr const char* KeyType = "Type";
 } // namespace
 
 namespace openspace {
@@ -58,11 +58,6 @@ documentation::Documentation Scale::Documentation() {
     };
 }
 
-void Scale::requireUpdate() {
-    _needsUpdate = true;
-}
-
-
 std::unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary& dictionary) {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Scale");
 
@@ -74,11 +69,11 @@ std::unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary& dict
     return result;
 }
 
-Scale::Scale()
-    : properties::PropertyOwner({ "Scale" })
-    , _needsUpdate(true)
-    , _cachedScale(1.0)
-{}
+Scale::Scale() : properties::PropertyOwner({ "Scale" }) {}
+
+void Scale::requireUpdate() {
+    _needsUpdate = true;
+}
 
 bool Scale::initialize() {
     return true;
@@ -88,12 +83,12 @@ double Scale::scaleValue() const {
     return _cachedScale;
 }
 
-void Scale::update(const Time& time) {
-    if (!_needsUpdate && time.j2000Seconds() == _cachedTime) {
+void Scale::update(const UpdateData& data) {
+    if (!_needsUpdate && data.time.j2000Seconds() == _cachedTime) {
         return;
     }
-    _cachedScale = scaleValue(time);
-    _cachedTime = time.j2000Seconds();
+    _cachedScale = scaleValue(data);
+    _cachedTime = data.time.j2000Seconds();
     _needsUpdate = false;
 }
 

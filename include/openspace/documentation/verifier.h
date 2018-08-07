@@ -26,9 +26,7 @@
 #define __OPENSPACE_CORE___VERIFIER___H__
 
 #include <openspace/documentation/documentation.h>
-
 #include <ghoul/glm.h>
-
 #include <functional>
 #include <type_traits>
 
@@ -51,15 +49,17 @@ struct Verifier {
      * concrete subclass and can range from type testing (for example IntVerifier or
      * StringVerifier) to more complex testing (for example DoubleInRangeVerifier or
      * TableVerifier).
+     *
      * \param dictionary The dictionary that contains the \p key which is to be tested by
-     * this Verifier
+     *        this Verifier
      * \param key The key inside the \p dictionary that is to be tested
      * \return A TestResult struct that contains information about whether the key adheres
-     * to the demands of the specific Verifier. If it does not, TestResult::offenders will
-     * either contain \p key or, in the case of a TableVerifier, a list of all offending
-     * subkeys as fully qualified names.
+     *         to the demands of the specific Verifier. If it does not,
+     *         TestResult::offenders will either contain \p key or, in the case of a
+     *         TableVerifier, a list of all offending subkeys as fully qualified names.
+     *
      * \post If the return values' TestResult::success is \c true, its
-     * TestResult::offenders is empty
+     *      TestResult::offenders is empty
      */
     virtual TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const = 0;
@@ -68,7 +68,9 @@ struct Verifier {
      * This method returns a human-readable string describing the type of object that is
      * handled by the Verifier subclass. This is only used for generating a human-readable
      * documentation and description of a Documenation object.
+     *
      * \return A human-readable string describing the type of object for the Verifier
+     *
      * \post The return value is not empty
      */
     virtual std::string type() const = 0;
@@ -77,8 +79,10 @@ struct Verifier {
      * This method returns a human-readable string describing the tests that the concrete
      * Verifier subclass implements. This is only used for generating a human-readable
      * documentation and description of a Documentation object.
+     *
      * \return A human-readable string describing the tests that are performed by the
-     * Verifier
+     *         Verifier
+     *
      * \post The return value is not empty
      */
     virtual std::string documentation() const = 0;
@@ -101,13 +105,15 @@ struct TemplateVerifier : public Verifier {
     /**
      * Tests whether the \p key contained in the ghoul::Dictionary \p dictionary exists
      * and has the same type as \c T.
+     *
      * \param dictionary The ghoul::Dictionary that contains the \p key to be tested
      * \param key The key inside the \p dictinoary that is to be tested
      * \return A TestResult that contains the information whether the \p key exists in the
-     * \p dictionary and whether the key's value's type agrees with \c T.
+     *         \p dictionary and whether the key's value's type agrees with \c T.
+     *
      * \post The return values' TestResult::success is either \c true and
-     * TestResult::offenders is empty, or it is \c false and TestResult::offenders
-     * contains \p key
+     *       TestResult::offenders is empty, or it is \c false and TestResult::offenders
+     *       contains \p key
      */
     TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const override;
@@ -124,19 +130,19 @@ struct BoolVerifier : public TemplateVerifier<bool> {
 };
 
 /**
-* A Verifier that checks whether a given key inside a ghoul::Dictionary is of type
-* \c double. No implicit conversion is considered in this testing.
-*/
+ * A Verifier that checks whether a given key inside a ghoul::Dictionary is of type
+ * \c double. No implicit conversion is considered in this testing.
+ */
 struct DoubleVerifier : public TemplateVerifier<double> {
     std::string type() const override;
 };
 
 /**
-* A Verifier that checks whether a given key inside a ghoul::Dictionary is of type
-* \c int. It will also return \c true if the key's value is of type \c double, but is a
-* integer value (for example, <code>0.0</code>, <code>12.0</code>, but not
-* <code>0.5</code>).
-*/
+ * A Verifier that checks whether a given key inside a ghoul::Dictionary is of type
+ * \c int. It will also return \c true if the key's value is of type \c double, but is a
+ * integer value (for example, <code>0.0</code>, <code>12.0</code>, but not
+ * <code>0.5</code>).
+ */
 struct IntVerifier : public TemplateVerifier<int> {
     TestResult operator()(const ghoul::Dictionary& dict,
         const std::string& key) const override;
@@ -145,31 +151,32 @@ struct IntVerifier : public TemplateVerifier<int> {
 };
 
 /**
-* A Verifier that checks whether a given key inside a ghoul::Dictionary is of type
-* <code>std::string</code>. No implicit conversion is considered in this testing.
-*/
+ * A Verifier that checks whether a given key inside a ghoul::Dictionary is of type
+ * <code>std::string</code>. No implicit conversion is considered in this testing.
+ */
 struct StringVerifier : public TemplateVerifier<std::string> {
     std::string type() const override;
 };
 
 /**
-* A Verifier that checks whether a given key inside a ghoul::Dictionary is another
-* ghoul::Dictionary. The constructor takes a list of DocumentationEntry%s, which are used
-* recursively to check the contained table. If this list is empty, a simple type testing
-* is performed instead. If the testing finds any offending keys, it will return those keys
-* with fully qualified names, that is, the name of the table will be prepended to the
-* offending keys. Example: If the key \c Table is tested and a passed DocumentationEntry
-* checks for a nested key \c a and this does not comply, this Verifier will return
-* <code>Table.a</code> as an offender.
-*/
+ * A Verifier that checks whether a given key inside a ghoul::Dictionary is another
+ * ghoul::Dictionary. The constructor takes a list of DocumentationEntry%s, which are used
+ * recursively to check the contained table. If this list is empty, a simple type testing
+ * is performed instead. If the testing finds any offending keys, it will return those
+ * keys with fully qualified names, that is, the name of the table will be prepended to
+ * the offending keys. Example: If the key \c Table is tested and a passed
+ * DocumentationEntry checks for a nested key \c a and this does not comply, this Verifier
+ * will return <code>Table.a</code> as an offender.
+ */
 struct TableVerifier : public TemplateVerifier<ghoul::Dictionary> {
     /**
      * This constructor takes a list of DocumentationEntry%s that are used recursively to
      * check the table (= ghoul::Dictionary) contained in the key's value. Similar to the
      * Documentation, these DocumentationEntry%s can be Exhaustive or not.
+     *
      * \param documentationEntries The DocumentationEntry%s that are used to recursively
-     * test the ghoul::Dictionary that is contained inside. If this list is empty, only a
-     * type check is performed
+     *        test the ghoul::Dictionary that is contained inside. If this list is empty,
+     *        only a type check is performed
      */
     TableVerifier(std::vector<DocumentationEntry> documentationEntries = {});
 
@@ -179,12 +186,13 @@ struct TableVerifier : public TemplateVerifier<ghoul::Dictionary> {
      * provided in the constructor. If the testing finds any offending keys, it will
      * return those keys with fully qualified names, that is, the name of the table will
      * be prepended to the offending keys.
+     *
      * \param dictionary The ghoul::Dictionary that is to be tested for the \p key
      * \param key The key for which the \p dictionary is tested
      * \return A TestResult containing the results of the testing. If DocumentationEntry%s
-     * were specified in the constructor and one of those values find an offending key
-     * inside the table, it's name will be returned with a fully qualified name by
-     * prepending the name (= \key) of the table.
+     *         were specified in the constructor and one of those values find an offending
+     *         key inside the table, it's name will be returned with a fully qualified
+     *         name by prepending the name (= \key) of the table.
      */
     TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const override;
@@ -201,6 +209,7 @@ struct TableVerifier : public TemplateVerifier<ghoul::Dictionary> {
 struct StringListVerifier : public TableVerifier {
     /**
      * Constructor for a StringListVerifier.
+     *
      * \param elementDocumentation The documentation for each string in the list
      */
     StringListVerifier(std::string elementDocumentation = "");
@@ -209,13 +218,14 @@ struct StringListVerifier : public TableVerifier {
 };
 
 /**
-* A Verifier that checks whether all values contained in a Table are of type \c int.
-*/
+ * A Verifier that checks whether all values contained in a Table are of type \c int.
+ */
 struct IntListVerifier : public TableVerifier {
     /**
-    * Constructor for a IntListVerifier.
-    * \param elementDocumentation The documentation for each string in the list
-    */
+     * Constructor for a IntListVerifier.
+     *
+     * \param elementDocumentation The documentation for each string in the list
+     */
     IntListVerifier(std::string elementDocumentation = "");
 
     std::string type() const override;
@@ -242,25 +252,25 @@ struct Vector2Verifier : public TemplateVerifier<glm::tvec2<T>>, public VectorVe
 };
 
 /**
-* This Verifier checks whether the value is of type <code>glm::tvec3<T></code>
-*/
+ * This Verifier checks whether the value is of type <code>glm::tvec3<T></code>
+ */
 template <typename T>
 struct Vector3Verifier : public TemplateVerifier<glm::tvec3<T>>, public VectorVerifier {
     std::string type() const override;
 };
 
 /**
-* This Verifier checks whether the value is of type <code>glm::tvec4<T></code>
-*/
+ * This Verifier checks whether the value is of type <code>glm::tvec4<T></code>
+ */
 template <typename T>
 struct Vector4Verifier : public TemplateVerifier<glm::tvec4<T>>, public VectorVerifier {
     std::string type() const override;
 };
 
 /**
-* A Verifier that checks whether all values contained in a Table are of
-* type <code>glm::tvec2<T></code>
-*/
+ * A Verifier that checks whether all values contained in a Table are of
+ * type <code>glm::tvec2<T></code>
+ */
 template <typename T>
 struct Vector2ListVerifier : public TableVerifier {
     Vector2ListVerifier(std::string elementDocumentation = "") : TableVerifier({
@@ -274,9 +284,9 @@ struct Vector2ListVerifier : public TableVerifier {
 };
 
 /**
-* A Verifier that checks whether all values contained in a Table are of
-* type <code>glm::tvec3<T></code>
-*/
+ * A Verifier that checks whether all values contained in a Table are of
+ * type <code>glm::tvec3<T></code>
+ */
 template <typename T>
 struct Vector3ListVerifier : public TableVerifier {
     Vector3ListVerifier(std::string elementDocumentation = "") : TableVerifier({
@@ -290,9 +300,9 @@ struct Vector3ListVerifier : public TableVerifier {
 };
 
 /**
-* A Verifier that checks whether all values contained in a Table are of
-* type <code>glm::tvec4<T></code>
-*/
+ * A Verifier that checks whether all values contained in a Table are of
+ * type <code>glm::tvec4<T></code>
+ */
 template <typename T>
 struct Vector4ListVerifier : public TableVerifier {
     Vector4ListVerifier(std::string elementDocumentation = "") : TableVerifier({
@@ -309,16 +319,16 @@ struct Vector4ListVerifier : public TableVerifier {
 //----------------------------------------------------------------------------------------
 
 /**
-* This struct is the base class for all Verifier%s that check for \c glm matrix types.
-* The template parameter for the subclasses is the containing type, not the full matrix
-* type. For example to check for <code>glm::dmat4x3</code>, one would create a
-* <code>Matrix4x3Verifier<double></code>.
-*/
+ * This struct is the base class for all Verifier%s that check for \c glm matrix types.
+ * The template parameter for the subclasses is the containing type, not the full matrix
+ * type. For example to check for <code>glm::dmat4x3</code>, one would create a
+ * <code>Matrix4x3Verifier<double></code>.
+ */
 struct MatrixVerifier {};
 
 /**
-* This Verifier checks whether the value is of type <code>glm::mat2x2<T></code>
-*/
+ * This Verifier checks whether the value is of type <code>glm::mat2x2<T></code>
+ */
 template <typename T>
 struct Matrix2x2Verifier :
     public TemplateVerifier<glm::tmat2x2<T>>, public MatrixVerifier
@@ -327,8 +337,8 @@ struct Matrix2x2Verifier :
 };
 
 /**
-* This Verifier checks whether the value is of type <code>glm::mat2x3<T></code>
-*/
+ * This Verifier checks whether the value is of type <code>glm::mat2x3<T></code>
+ */
 template <typename T>
 struct Matrix2x3Verifier :
     public TemplateVerifier<glm::tmat2x3<T>>, public MatrixVerifier {
@@ -336,8 +346,8 @@ struct Matrix2x3Verifier :
 };
 
 /**
-* This Verifier checks whether the value is of type <code>glm::mat2x4<T></code>
-*/
+ * This Verifier checks whether the value is of type <code>glm::mat2x4<T></code>
+ */
 template <typename T>
 struct Matrix2x4Verifier :
     public TemplateVerifier<glm::tmat2x4<T>>, public MatrixVerifier {
@@ -345,8 +355,8 @@ struct Matrix2x4Verifier :
 };
 
 /**
-* This Verifier checks whether the value is of type <code>glm::mat3x2<T></code>
-*/
+ * This Verifier checks whether the value is of type <code>glm::mat3x2<T></code>
+ */
 template <typename T>
 struct Matrix3x2Verifier :
     public TemplateVerifier<glm::tmat3x2<T>>, public MatrixVerifier {
@@ -354,8 +364,8 @@ struct Matrix3x2Verifier :
 };
 
 /**
-* This Verifier checks whether the value is of type <code>glm::mat3x3<T></code>
-*/
+ * This Verifier checks whether the value is of type <code>glm::mat3x3<T></code>
+ */
 template <typename T>
 struct Matrix3x3Verifier :
     public TemplateVerifier<glm::tmat3x3<T>>, public MatrixVerifier {
@@ -363,8 +373,8 @@ struct Matrix3x3Verifier :
 };
 
 /**
-* This Verifier checks whether the value is of type <code>glm::mat3x4<T></code>
-*/
+ * This Verifier checks whether the value is of type <code>glm::mat3x4<T></code>
+ */
 template <typename T>
 struct Matrix3x4Verifier :
     public TemplateVerifier<glm::tmat3x4<T>>, public MatrixVerifier {
@@ -372,8 +382,8 @@ struct Matrix3x4Verifier :
 };
 
 /**
-* This Verifier checks whether the value is of type <code>glm::mat4x2<T></code>
-*/
+ * This Verifier checks whether the value is of type <code>glm::mat4x2<T></code>
+ */
 template <typename T>
 struct Matrix4x2Verifier :
     public TemplateVerifier<glm::tmat4x2<T>>, public MatrixVerifier {
@@ -381,8 +391,8 @@ struct Matrix4x2Verifier :
 };
 
 /**
-* This Verifier checks whether the value is of type <code>glm::mat4x3<T></code>
-*/
+ * This Verifier checks whether the value is of type <code>glm::mat4x3<T></code>
+ */
 template <typename T>
 struct Matrix4x3Verifier :
     public TemplateVerifier<glm::tmat4x3<T>>, public MatrixVerifier {
@@ -390,8 +400,8 @@ struct Matrix4x3Verifier :
 };
 
 /**
-* This Verifier checks whether the value is of type <code>glm::mat4x4<T></code>
-*/
+ * This Verifier checks whether the value is of type <code>glm::mat4x4<T></code>
+ */
 template <typename T>
 struct Matrix4x4Verifier :
     public TemplateVerifier<glm::tmat4x4<T>>, public MatrixVerifier {
@@ -432,13 +442,14 @@ struct OperatorVerifier : public T {
      * \p key%'s value is correct using the template paramater \c T as a verifier. Then,
      * the \p key%'s value is checked against the stored OperatorVerifier::value using the
      * \c Operator.
+     *
      * \param dictionary The ghoul::Dictionary that contains the \p key to be tested
      * \param key The key inside the \p dictinoary that is to be tested
      * \return A TestResult containing the results of the specification testing. If the
-     * \p key%'s value has the wrong type, it will be added to the TestResult's offense
-     * list with the reason TestResult::Offense::Reason::WrongType; if the \c Operator
-     * returns false, it will be added with the reason TestResult::Offense::Verification
-     * instead.
+     *         \p key%'s value has the wrong type, it will be added to the TestResult's
+     *         offense list with the reason TestResult::Offense::Reason::WrongType; if the
+     *         \c Operator returns false, it will be added with the reason
+     *         TestResult::Offense::Verification instead.
      */
     TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const override;
@@ -479,10 +490,10 @@ struct LessVerifier : public OperatorVerifier<T, std::less<typename T::Type>> {
 };
 
 /**
-* This Verifier checks whether the incoming value is smaller than or equal to the stored
-* value. Due to the operator type restrictions, \c T cannot be a subclass of (or the same
-* as) BoolVerifier, StringVerifier, TableVerifier, or VectorVerifier.
-*/
+ * This Verifier checks whether the incoming value is smaller than or equal to the stored
+ * value. Due to the operator type restrictions, \c T cannot be a subclass of (or the same
+ * as) BoolVerifier, StringVerifier, TableVerifier, or VectorVerifier.
+ */
 template <typename T>
 struct LessEqualVerifier : public OperatorVerifier<T, std::less_equal<typename T::Type>> {
     static_assert(
@@ -510,10 +521,10 @@ struct LessEqualVerifier : public OperatorVerifier<T, std::less_equal<typename T
 };
 
 /**
-* This Verifier checks whether the incoming value is strictly greater than the stored
-* value. Due to the operator type restrictions, \c T cannot be a subclass of (or the same
-* as) BoolVerifier, StringVerifier, TableVerifier, or VectorVerifier.
-*/
+ * This Verifier checks whether the incoming value is strictly greater than the stored
+ * value. Due to the operator type restrictions, \c T cannot be a subclass of (or the same
+ * as) BoolVerifier, StringVerifier, TableVerifier, or VectorVerifier.
+ */
 template <typename T>
 struct GreaterVerifier : public OperatorVerifier<T, std::greater<typename T::Type>> {
     static_assert(
@@ -541,10 +552,10 @@ struct GreaterVerifier : public OperatorVerifier<T, std::greater<typename T::Typ
 };
 
 /**
-* This Verifier checks whether the incoming value is greater than or equal to the stored
-* value. Due to the operator type restrictions, \c T cannot be a subclass of (or the same
-* as) BoolVerifier, StringVerifier, TableVerifier, or VectorVerifier.
-*/
+ * This Verifier checks whether the incoming value is greater than or equal to the stored
+ * value. Due to the operator type restrictions, \c T cannot be a subclass of (or the same
+ * as) BoolVerifier, StringVerifier, TableVerifier, or VectorVerifier.
+ */
 template <typename T>
 struct GreaterEqualVerifier : public OperatorVerifier<T,
                                                      std::greater_equal<typename T::Type>>
@@ -574,9 +585,10 @@ struct GreaterEqualVerifier : public OperatorVerifier<T,
 };
 
 /**
-* This Verifier checks whether the incoming value is equal to the stored value. Due to the
-* operator type restrictions, \c T cannot be a subclass of (or the same as) TableVerifier.
-*/
+ * This Verifier checks whether the incoming value is equal to the stored value. Due to
+ * the operator type restrictions, \c T cannot be a subclass of (or the same as)
+ * TableVerifier.
+ */
 template <typename T>
 struct EqualVerifier : public OperatorVerifier<T, std::equal_to<typename T::Type>> {
     static_assert(!std::is_base_of<TableVerifier, T>::value, "T cannot be TableVerifier");
@@ -589,10 +601,10 @@ struct EqualVerifier : public OperatorVerifier<T, std::equal_to<typename T::Type
 };
 
 /**
-* This Verifier checks whether the incoming value is unequal to the store value. Due to
-* the operator type restrictions, \c T cannot be a subclass of (or the same as)
-* TableVerifier.
-*/
+ * This Verifier checks whether the incoming value is unequal to the store value. Due to
+ * the operator type restrictions, \c T cannot be a subclass of (or the same as)
+ * TableVerifier.
+ */
 template <typename T>
 struct UnequalVerifier : public OperatorVerifier<T, std::not_equal_to<typename T::Type>> {
     static_assert(!std::is_base_of<TableVerifier, T>::value, "T cannot be TableVerifier");
@@ -621,6 +633,7 @@ struct InListVerifier : public T {
     /**
      * Constructs an InListVerifier that checks whether the incoming value is of the
      * correct type and whether the value is part of the list passed as \p values.
+     *
      * \param values The list of values against which the incoming value is tested
      */
     InListVerifier(std::vector<typename T::Type> values);
@@ -629,13 +642,14 @@ struct InListVerifier : public T {
      * Tests whether the \p key exists in the \p dictionary, whether it has the correct
      * type by invoking the template parameter \c T, and then tests if the \p key's value
      * is part of the list passed to the constructor.
+     *
      * \param dictionary The ghoul::Dictionary that contains the \p key
      * \param key The key that is contained in the \p dictionary and whose value is tested
      * \return A TestResult containing the results of the specification testing. If the
-     * \p key%'s value has the wrong type, it will be added to the TestResult's offense
-     * list with the reason TestResult::Offense::Reason::WrongType; if the value is not
-     * in the list, it will be added with the reason TestResult::Offense::Verification
-     * instead.
+     *         \p key%'s value has the wrong type, it will be added to the TestResult's
+     *         offense list with the reason TestResult::Offense::Reason::WrongType; if the
+     *         value is not in the list, it will be added with the reason
+     *         TestResult::Offense::Verification instead.
      */
     TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const override;
@@ -647,33 +661,36 @@ struct InListVerifier : public T {
 };
 
 /**
-* This Verifier checks whether the incoming value is of the correct type, using the
-* Verifier passed as a template parameter \c T and then checks whether it is not part of a
-* list that is passed to the constructor. To the missing equality operator, \c T cannot
-* be a subclass of (or the same as) TableVerifier.
-*/
+ * This Verifier checks whether the incoming value is of the correct type, using the
+ * Verifier passed as a template parameter \c T and then checks whether it is not part of
+ * a list that is passed to the constructor. To the missing equality operator, \c T cannot
+ * be a subclass of (or the same as) TableVerifier.
+ */
 template <typename T>
 struct NotInListVerifier : public T {
     static_assert(!std::is_base_of<TableVerifier, T>::value, "T cannot be TableVerifier");
 
     /**
-    * Constructs a NotInListVerifier that checks whether the incoming value is of the
-    * correct type and whether the value is not part of the list passed as \p values.
-    * \param values The list of values against which the incoming value is tested
-    */
+     * Constructs a NotInListVerifier that checks whether the incoming value is of the
+     * correct type and whether the value is not part of the list passed as \p values.
+     *
+     * \param values The list of values against which the incoming value is tested
+     */
     NotInListVerifier(std::vector<typename T::Type> values);
 
     /**
-    * Tests whether the \p key exists in the \p dictionary, whether it has the correct
-    * type by invoking the template parameter \c T, and then tests if the \p key's value
-    * is not part of the list passed to the constructor.
-    * \param dictionary The ghoul::Dictionary that contains the \p key
-    * \param key The key that is contained in the \p dictionary and whose value is tested
-    * \return A TestResult containing the results of the specification testing. If the
-    * \p key%'s value has the wrong type, it will be added to the TestResult's offense
-    * list with the reason TestResult::Offense::Reason::WrongType; if the value is in the
-    * list, it will be added with the reason TestResult::Offense::Verification instead.
-    */
+     * Tests whether the \p key exists in the \p dictionary, whether it has the correct
+     * type by invoking the template parameter \c T, and then tests if the \p key's value
+     * is not part of the list passed to the constructor.
+     *
+     * \param dictionary The ghoul::Dictionary that contains the \p key
+     * \param key The key that is contained in the \p dictionary and whose value is tested
+     * \return A TestResult containing the results of the specification testing. If the
+     *         \p key%'s value has the wrong type, it will be added to the TestResult's
+     *         offense list with the reason TestResult::Offense::Reason::WrongType; if the
+     *         value is in the list, it will be added with the reason
+     *         TestResult::Offense::Verification instead.
+     */
     TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const override;
 
@@ -687,12 +704,12 @@ struct NotInListVerifier : public T {
 //----------------------------------------------------------------------------------------
 
 /**
-* This Verifier checks whether the incoming value is of the correct type, using the
-* Verifier passed as a template parameter \c T and then checks whether it is greater or
-* equal to a lower limit and less or equal to a higher limit. To the missing comparison
-* operators, \c T cannot be a subclass of (or the same as) BoolVerifier, StringVerifier,
-* TableVerifier, or VectorVerifier. Both the lower and the higher limit are inclusive).
-*/
+ * This Verifier checks whether the incoming value is of the correct type, using the
+ * Verifier passed as a template parameter \c T and then checks whether it is greater or
+ * equal to a lower limit and less or equal to a higher limit. To the missing comparison
+ * operators, \c T cannot be a subclass of (or the same as) BoolVerifier, StringVerifier,
+ * TableVerifier, or VectorVerifier. Both the lower and the higher limit are inclusive).
+ */
 template <typename T>
 struct InRangeVerifier : public T {
     static_assert(
@@ -713,28 +730,32 @@ struct InRangeVerifier : public T {
     );
 
     /**
-    * Constructs a InRangeVerifier that checks whether the incoming value is of the
-    * correct type and whether the value is greater or equal to \p lower and less or equal
-    * to \upper.
-    * \param lower The (inclusive) lower limit of the range
-    * \param upper The (inclusive) upper limit of the range
-    * \pre \p lower must be smaller or equal to \p upper
-    */
+     * Constructs a InRangeVerifier that checks whether the incoming value is of the
+     * correct type and whether the value is greater or equal to \p lower and less or
+     * equal to \upper.
+     *
+     * \param lower The (inclusive) lower limit of the range
+     * \param upper The (inclusive) upper limit of the range
+     *
+     * \pre \p lower must be smaller or equal to \p upper
+     */
     InRangeVerifier(typename T::Type lower, typename T::Type upper);
 
     /**
-    * Tests whether the \p key exists in the \p dictionary, whether it has the correct
-    * type by invoking the template parameter \c T, and then tests if the \p key's value
-    * is between the lower and upper limits (both inclusive) that were passed to the
-    * constructor.
-    * \param dictionary The ghoul::Dictionary that contains the \p key
-    * \param key The key that is contained in the \p dictionary and whose value is tested
-    * \return A TestResult containing the results of the specification testing. If the
-    * \p key%'s value has the wrong type, it will be added to the TestResult's offense
-    * list with the reason TestResult::Offense::Reason::WrongType; if the value is outside
-    * the range defined by the lower and upper limits passed to the constructor, it will
-    * be added with the reason TestResult::Offense::Verification instead.
-    */
+     * Tests whether the \p key exists in the \p dictionary, whether it has the correct
+     * type by invoking the template parameter \c T, and then tests if the \p key's value
+     * is between the lower and upper limits (both inclusive) that were passed to the
+     * constructor.
+     *
+     * \param dictionary The ghoul::Dictionary that contains the \p key
+     * \param key The key that is contained in the \p dictionary and whose value is tested
+     * \return A TestResult containing the results of the specification testing. If the
+     *         \p key%'s value has the wrong type, it will be added to the TestResult's
+     *         offense list with the reason TestResult::Offense::Reason::WrongType; if the
+     *         value is outside the range defined by the lower and upper limits passed to
+     *         the constructor, it will be added with the reason
+     *         TestResult::Offense::Verification instead.
+     */
     TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const override;
 
@@ -745,12 +766,12 @@ struct InRangeVerifier : public T {
 };
 
 /**
-* This Verifier checks whether the incoming value is of the correct type, using the
-* Verifier passed as a template parameter \c T and then checks whether it is outside the
-* (exclusive) range defined by a lower and upper limit. To the missing comparison
-* operators, \c T cannot be a subclass of (or the same as) BoolVerifier, StringVerifier,
-* TableVerifier, or VectorVerifier. Both the lower and the higher limit are exclusive).
-*/
+ * This Verifier checks whether the incoming value is of the correct type, using the
+ * Verifier passed as a template parameter \c T and then checks whether it is outside the
+ * (exclusive) range defined by a lower and upper limit. To the missing comparison
+ * operators, \c T cannot be a subclass of (or the same as) BoolVerifier, StringVerifier,
+ * TableVerifier, or VectorVerifier. Both the lower and the higher limit are exclusive).
+ */
 template <typename T>
 struct NotInRangeVerifier : public T {
     static_assert(
@@ -771,27 +792,31 @@ struct NotInRangeVerifier : public T {
     );
 
     /**
-    * Constructs a InRangeVerifier that checks whether the incoming value is of the
-    * correct type and whether the value is less then \p lower and greater than \upper.
-    * \param lower The (exclusive) lower limit of the range
-    * \param upper The (exclusive) upper limit of the range
-    * \pre \p lower must be smaller or equal to \p upper
-    */
+     * Constructs a InRangeVerifier that checks whether the incoming value is of the
+     * correct type and whether the value is less then \p lower and greater than \p upper.
+     *
+     * \param lower The (exclusive) lower limit of the range
+     * \param upper The (exclusive) upper limit of the range
+     *
+     * \pre \p lower must be smaller or equal to \p upper
+     */
     NotInRangeVerifier(typename T::Type lower, typename T::Type upper);
 
     /**
-    * Tests whether the \p key exists in the \p dictionary, whether it has the correct
-    * type by invoking the template parameter \c T, and then tests if the \p key's value
-    * is outside the lower and upper limits (both exclusive) that were passed to the
-    * constructor.
-    * \param dictionary The ghoul::Dictionary that contains the \p key
-    * \param key The key that is contained in the \p dictionary and whose value is tested
-    * \return A TestResult containing the results of the specification testing. If the
-    * \p key%'s value has the wrong type, it will be added to the TestResult's offense
-    * list with the reason TestResult::Offense::Reason::WrongType; if the value is greater
-    * or equal to the lower limit and less or equal to the upper limit, it will be added
-    * with the reason TestResult::Offense::Verification instead.
-    */
+     * Tests whether the \p key exists in the \p dictionary, whether it has the correct
+     * type by invoking the template parameter \c T, and then tests if the \p key's value
+     * is outside the lower and upper limits (both exclusive) that were passed to the
+     * constructor.
+     *
+     * \param dictionary The ghoul::Dictionary that contains the \p key
+     * \param key The key that is contained in the \p dictionary and whose value is tested
+     * \return A TestResult containing the results of the specification testing. If the
+     *         \p key%'s value has the wrong type, it will be added to the TestResult's
+     *         offense list with the reason TestResult::Offense::Reason::WrongType; if the
+     *         value is greater or equal to the lower limit and less or equal to the upper
+     *         limit, it will be added with the reason TestResult::Offense::Verification
+     *         instead.
+     */
     TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const override;
 
@@ -818,8 +843,10 @@ struct AnnotationVerifier : public T {
     /**
      * Constructs an AnnotationVerifier that contains the passed \p annotation which is
      * passed to the user when a documentation is requested.
+     *
      * \param annotation The annotation that is stored and returned to the user when it
-     * is requested.
+     *        is requested.
+     *
      * \pre annotation must not be empty
      */
     AnnotationVerifier(std::string annotation);
@@ -834,7 +861,7 @@ struct AnnotationVerifier : public T {
  * This Verifier is a marker that performs the same testing as the \c T parameter, but
  * also adds a warning to the test result informing the user of the deprecation.
  * Furthermore, the documentation will contain the word <code>(deprecated)</code> in
- * addition to the documentation returned by \c
+ * addition to the documentation returned by \c T
  * \tparam T The Verifier that is to be marked deprecated
  */
 template <typename T>
@@ -842,6 +869,7 @@ struct DeprecatedVerifier : public T {
     /**
      * Tests the \p dictionary%s \p key using the Verifier \c T and adds a warning to the
      * TestResult informing the caller of the deprecation.
+     *
      * \param dictionary The ghoul::Dictionary whose \p key should be tested
      * \param key The key inside the \p dictionary that is to be tested
      * \return A TestResult that contains the results of the testing
@@ -868,11 +896,12 @@ struct DeprecatedVerifier : public T {
 struct ReferencingVerifier : public TableVerifier {
     /**
      * Creates a ReferencingVerifier that references a documentation with the provided
-     * \p identifier. The ReferencingVerifier will use the static DocumentationEngine to
-     * retrieve Documentation%s and find the \p identifier among them.
+     * identifier \p id. The ReferencingVerifier will use the static DocumentationEngine
+     * to retrieve Documentation%s and find the \p identifier among them.
+     *
      * \param identifier The identifier of the Documentation that this Verifier references
      */
-    ReferencingVerifier(std::string identifier);
+    ReferencingVerifier(std::string id);
 
     /**
      * Checks whether the \p key in the \p dictionary exists and is of type Table (similar
@@ -883,6 +912,7 @@ struct ReferencingVerifier : public TableVerifier {
      * signaled. If the identifier exists and the \p key%'s value does not comply with the
      * Documentation, the offending keys will be returned in the TestResult with their
      * fully qualified names.
+     *
      * \param dictionary The ghoul::Dictionary whose \p key should be tested
      * \param key The key contained in the \p dictionary that should be tested
      * \return A TestResult struct that contains the results of the testing
@@ -909,28 +939,29 @@ struct ReferencingVerifier : public TableVerifier {
  */
 struct AndVerifier : public Verifier {
     /**
-     * Constructs an AndVerifier with two Verifiers which must be cleared by incoming
-     * values in order to pass this Verifier.
-     * \param lhs The first Verifier that is to be tested
-     * \param rhs The second Verifier that is to be tested
-     * \pre lhs must not be nullptr
-     * \pre rhs must not be nullptr
+     * Constructs an AndVerifier with Verifiers that must be cleared by incoming values in
+     * order to pass this Verifier.
+     *
+     * \param values The list of Verifiers that are to be tested
+     *
+     * \pre values must contain at least two values
      */
-    AndVerifier(Verifier* lhs, Verifier* rhs);
+    AndVerifier(const std::vector<Verifier*> values);
 
     /**
      * Checks whether the \p dictionary contains the \p key and whether this key passes
-     * both Verifier%'s that were passed in the constructor. If the value fails either
-     * of the two Verifiers, it is only added once to the TestResult::offenses list with
-     * a reason of TestResult::Offense::Reason::Verification.
+     * all Verifier%s that were passed in the constructor. If the value fails at least
+     * one Verifiers, it is only added once to the TestResult::offenses list with a reason
+     * of TestResult::Offense::Reason::Verification.
+     *
      * \param dictionary The ghoul::Dictionary that is to be tested
      * \param key The key contained in \p dictionary that is to be tested
      * \return A TestResult object that contains the test results. If the value fails
-     * either of the two Verifiers, TestResult::success is \c false and the
-     * TestResult::offenses list contains \p with a reason of
-     * TestResult::Offense::Reason::Verification. If \p key%'s value passes both
-     * Verifier%s, the result's TestResult::success is \c true and the
-     * TestResult::offenses is empty.
+     *         any passed  Verifiers, TestResult::success is \c false and the
+     *         TestResult::offenses list contains \p with a reason of
+     *         TestResult::Offense::Reason::Verification. If \p key%'s value passes both
+     *         Verifier%s, the result's TestResult::success is \c true and the
+     *         TestResult::offenses is empty.
      */
     TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const override;
@@ -938,52 +969,48 @@ struct AndVerifier : public Verifier {
     std::string type() const override;
     std::string documentation() const override;
 
-    /// The first Verifier that incoming values are tested against
-    std::shared_ptr<Verifier> lhs;
-    /// The second Verifier that incoming values are tested against
-    std::shared_ptr<Verifier> rhs;
+    std::vector<std::shared_ptr<Verifier>> values;
 };
 
 /**
-* This Verifier takes two Verifiers and performs a boolean \c or operation on their
-* results. In essence, a value only passes this Verifier if it passes either of the two
-* Verifier%s that are passed in the constructor. Opposed to the <code>C++</code>
-* <code>||</code> operator, the OrVerifier does not perform any short-circut evaluation.
-*/
+ * This Verifier takes two Verifiers and performs a boolean \c or operation on their
+ * results. In essence, a value only passes this Verifier if it passes either of the two
+ * Verifier%s that are passed in the constructor. Opposed to the <code>C++</code>
+ * <code>||</code> operator, the OrVerifier does not perform any short-circut evaluation.
+ */
 struct OrVerifier : public Verifier {
     /**
-    * Constructs an OrVerifier with two Verifiers, either of which must be cleared by
-    * incoming values in order to pass this Verifier.
-    * \param lhs The first Verifier that is to be tested
-    * \param rhs The second Verifier that is to be tested
-    * \pre lhs must not be nullptr
-    * \pre rhs must not be nullptr
-    */
-    OrVerifier(Verifier* lhs, Verifier* rhs);
+     * Constructs an OrVerifier with Verifiers that must be cleared by incoming values in
+     * order to pass this Verifier.
+     *
+     * \param values The list of Verifiers that are to be tested
+     *
+     * \pre values must contain at least two values
+     */
+    OrVerifier(const std::vector<Verifier*> values);
 
     /**
-    * Checks whether the \p dictionary contains the \p key and whether this key passes
-    * either of the two Verifier%'s that were passed in the constructor. If the value
-    * fails both Verifiers, it is added to the TestResult::offenses list with a reason of
-    * TestResult::Offense::Reason::Verification.
-    * \param dictionary The ghoul::Dictionary that is to be tested
-    * \param key The key contained in \p dictionary that is to be tested
-    * \return A TestResult object that contains the test results. If the value fails
-    * both Verifiers, TestResult::success is \c false and the TestResult::offenses list
-    * contains \p with a reason of TestResult::Offense::Reason::Verification. If \p key%'s
-    * value passes either of the two Verifier%s, the result's TestResult::success is
-    * \c true and the TestResult::offenses is empty.
-    */
-    TestResult operator()(const ghoul::Dictionary& dict,
+     * Checks whether the \p dictionary contains the \p key and whether this key passes
+     * any of the Verifier%s that were passed in the constructor. If the value fails all
+     * Verifiers, it is added to the TestResult::offenses list with a reason of
+     * TestResult::Offense::Reason::Verification.
+     *
+     * \param dictionary The ghoul::Dictionary that is to be tested
+     * \param key The key contained in \p dictionary that is to be tested
+     * \return A TestResult object that contains the test results. If the value fails
+     *         all Verifiers, TestResult::success is \c false and the
+     *         TestResult::offenses list contains \p with a reason of
+     *         TestResult::Offense::Reason::Verification. If \p key%'s value passes either
+     *         of the two Verifier%s, the result's TestResult::success is \c true and the
+     *         TestResult::offenses is empty.
+     */
+    TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const override;
 
     std::string type() const override;
     std::string documentation() const override;
 
-    /// The first Verifier that incoming values are tested against
-    std::shared_ptr<Verifier> lhs;
-    /// The second Verifier that incoming values are tested against
-    std::shared_ptr<Verifier> rhs;
+    std::vector<std::shared_ptr<Verifier>> values;
 };
 
 /// A short-hand definition for a Verifier checking for <code>glm::bvec2</code>

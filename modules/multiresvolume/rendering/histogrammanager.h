@@ -25,28 +25,28 @@
 #ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___HISTOGRAMMANAGER___H__
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___HISTOGRAMMANAGER___H__
 
-#include <fstream>
-#include <modules/multiresvolume/rendering/tsp.h>
 #include <openspace/util/histogram.h>
+#include <string>
 
 namespace openspace {
 
+class TSP;
+
 class HistogramManager {
 public:
-    HistogramManager();
-    ~HistogramManager();
     bool buildHistograms(TSP* tsp, int numBins);
-    Histogram* getHistogram(unsigned int brickIndex);
+    Histogram* histogram(unsigned int brickIndex);
     bool loadFromFile(const std::string& filename);
     bool saveToFile(const std::string& filename);
-private:
-    std::vector<Histogram> _histograms;
-    float _minBin;
-    float _maxBin;
-    int _numBins;
 
+private:
     bool buildHistogram(TSP* tsp, unsigned int brickIndex);
     std::vector<float> readValues(TSP* tsp, unsigned int brickIndex);
+
+    std::vector<Histogram> _histograms;
+    float _minBin = 0.f;
+    float _maxBin = 0.f;
+    int _numBins = 0;
 };
 
 } // namespace openspace

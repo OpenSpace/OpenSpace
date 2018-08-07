@@ -28,10 +28,9 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/globebrowsing/rendering/layer/layergroupid.h>
-
-#include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/optionproperty.h>
-#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec3property.h>
 
 namespace openspace::globebrowsing {
 
@@ -46,15 +45,17 @@ public:
 
     layergroupid::AdjustmentTypeID type() const;
 
-    // Properties
-    properties::Vec3Property chromaKeyColor;
-    properties::FloatProperty chromaKeyTolerance;
+    glm::vec3 chromaKeyColor() const;
+    float chromaKeyTolerance() const;
 
     void onChange(std::function<void(void)> callback);
 
 private:
     void addVisibleProperties();
     void removeVisibleProperties();
+
+    properties::Vec3Property _chromaKeyColor;
+    properties::FloatProperty _chromaKeyTolerance;
 
     properties::OptionProperty _typeOption;
     layergroupid::AdjustmentTypeID _type;

@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___JOYSTICKINPUTSTATE___H__
 #define __OPENSPACE_CORE___JOYSTICKINPUTSTATE___H__
 
-#include <ghoul/misc/fromstring.h>
+#include <ghoul/misc/stringconversion.h>
 #include <array>
 #include <memory>
 #include <string>
@@ -110,13 +110,10 @@ struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks>
 
 } // namespace openspace::interaction
 
-namespace std {
-
-std::string to_string(openspace::interaction::JoystickAction action);
-
-} // namespace std
-
 namespace ghoul {
+
+template <>
+std::string to_string(const openspace::interaction::JoystickAction& action);
 
 template <>
 openspace::interaction::JoystickAction from_string(const std::string& str);

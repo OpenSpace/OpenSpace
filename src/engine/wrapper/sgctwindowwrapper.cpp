@@ -30,16 +30,16 @@
 #undef far
 
 namespace {
-    const char* GuiWindowTag = "GUI";
+    constexpr const char* GuiWindowTag = "GUI";
 
-    static const openspace::properties::Property::PropertyInfo EyeSeparationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EyeSeparationInfo = {
         "EyeSeparation",
         "Eye Separation",
         "Sets a static eye separation for use in stereoscopic rendering. If no "
         "stereoscopic rendering is performed, this value is unused."
     };
 
-    static const openspace::properties::Property::PropertyInfo ShowStatsGraphInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ShowStatsGraphInfo = {
         "ShowStatsGraph",
         "Show Statistics Graph",
         "Toggles the rendering of the SGCT statistics graph that is rendered on top of "
@@ -51,7 +51,7 @@ namespace {
 namespace openspace {
 
 SGCTWindowWrapper::SGCTWindowWrapper()
-    : _eyeSeparation(EyeSeparationInfo, 0.f, 0.f, 10.f)
+    : _eyeSeparation(EyeSeparationInfo, 0.f, 0.f, 0.2f)
     , _showStatsGraph(ShowStatsGraphInfo, false)
 {
     _showStatsGraph.onChange([this](){
@@ -124,21 +124,22 @@ uint32_t SGCTWindowWrapper::mouseButtons(int maxNumber) const {
 
 glm::ivec2 SGCTWindowWrapper::currentWindowSize() const {
     auto window = sgct::Engine::instance()->getCurrentWindowPtr();
+    return glm::ivec2(
+        window->getXResolution(),
+        window->getYResolution());
+}
+
+glm::ivec2 SGCTWindowWrapper::currentSubwindowSize() const {
+    auto window = sgct::Engine::instance()->getCurrentWindowPtr();
     switch (window->getStereoMode()) {
         case sgct::SGCTWindow::Side_By_Side_Stereo:
         case sgct::SGCTWindow::Side_By_Side_Inverted_Stereo:
-            return glm::ivec2(
-                window->getXResolution() / 2,
-                window->getYResolution());
+            return glm::ivec2(window->getXResolution() / 2, window->getYResolution());
         case sgct::SGCTWindow::Top_Bottom_Stereo:
         case sgct::SGCTWindow::Top_Bottom_Inverted_Stereo:
-            return glm::ivec2(
-                window->getXResolution(),
-                window->getYResolution() / 2);
+            return glm::ivec2(window->getXResolution(), window->getYResolution() / 2);
         default:
-            return glm::ivec2(
-                window->getXResolution(),
-                window->getYResolution());
+            return glm::ivec2(window->getXResolution(), window->getYResolution());
     }
 }
 
@@ -241,14 +242,13 @@ void SGCTWindowWrapper::setEyeSeparationDistance(float distance) {
 }
 
 glm::ivec4 SGCTWindowWrapper::viewportPixelCoordinates() const {
-    int x1, xSize, y1, ySize;
-    sgct::Engine::instance()->getCurrentWindowPtr()->getCurrentViewportPixelCoords(
-        x1,
-        y1,
-        xSize,
-        ySize
-    );
-    return glm::ivec4(x1, xSize, y1, ySize);
+    sgct::SGCTWindow* window = sgct::Engine::instance()->getCurrentWindowPtr();
+    if (!window || !window->getCurrentViewport()) {
+        return glm::ivec4(0, 0, 0, 0);
+    }
+
+    const int* viewportData = sgct::Engine::instance()->getCurrentViewportPixelCoords();
+    return glm::ivec4(viewportData[0], viewportData[2], viewportData[1], viewportData[3]);
 }
 
 bool SGCTWindowWrapper::isExternalControlConnected() const {
@@ -269,6 +269,13 @@ bool SGCTWindowWrapper::isSimpleRendering() const {
             sgct::Engine::NonLinearBuffer);
 }
 
+bool SGCTWindowWrapper::isFisheyeRendering() const {
+    sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
+    return dynamic_cast<sgct_core::FisheyeProjection*>(
+        w->getViewport(0)->getNonLinearProjectionPtr()
+    );
+}
+
 void SGCTWindowWrapper::takeScreenshot(bool applyWarping) const {
     sgct::SGCTSettings::instance()->setCaptureFromBackBuffer(applyWarping);
     sgct::Engine::instance()->takeScreenshot();
@@ -277,7 +284,6 @@ void SGCTWindowWrapper::takeScreenshot(bool applyWarping) const {
 void SGCTWindowWrapper::swapBuffer() const {
     GLFWwindow* w = glfwGetCurrentContext();
     glfwSwapBuffers(w);
-
     glfwPollEvents();
 }
 

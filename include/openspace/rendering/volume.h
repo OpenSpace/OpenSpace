@@ -31,7 +31,7 @@
 namespace ghoul::opengl {
     class Texture;
     class ProgramObject;
-}
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -40,12 +40,12 @@ public:
     /**
      * Constructor
      */
-    Volume() {};
+    Volume() = default;
 
     /**
      * Destructor
      */
-    virtual ~Volume() {};
+    virtual ~Volume() = default;
 
     /**
      * Render the volume's entry points (front face of the bounding geometry)
@@ -83,7 +83,7 @@ public:
      * Should define the function:
      * vec4 getVertex()
      */
-    //virtual std::string getBoundsVsPath() = 0;
+    //virtual std::string boundsVertexShaderPath() = 0;
 
     /*
      * Return a path to a file with the functions, uniforms and fragment shader in
@@ -95,7 +95,7 @@ public:
      * The shader preprocessor will have acceess to
      *   A #{namespace} variable (unique per helper file)
      */
-    //virtual std::string getBoundsFsPath() = 0;
+    //virtual std::string boundsFragmentShaderPath() = 0;
 
     /**
      * Return a path to a file with all the uniforms, functions etc
@@ -124,7 +124,7 @@ public:
      * The shader preprocessor will have access to the #{namespace} variable (unique per
      * helper file) which should be a prefix to all symbols defined by the helper
      */
-    //virtual std::string getHelperPath() = 0;
+    //virtual std::string helperPath() = 0;
 
 };
 

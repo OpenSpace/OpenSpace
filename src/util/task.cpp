@@ -24,11 +24,11 @@
 
 #include <openspace/util/task.h>
 
-#include <ghoul/misc/dictionary.h>
-
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/factorymanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 

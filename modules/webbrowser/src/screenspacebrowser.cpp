@@ -22,39 +22,48 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <webbrowsermodule.h>
-#include "include/screenspacebrowser.h"
+#include <modules/webbrowser/include/screenspacebrowser.h>
 
+#include <modules/webbrowser/webbrowsermodule.h>
+#include <modules/webbrowser/include/browserinstance.h>
+#include <openspace/engine/moduleengine.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/texture.h>
 
 namespace {
-const char* KeyIdentifier = "Indentifier";
-const char* KeyUrl = "URL";
-const std::string _loggerCat = "ScreenSpaceBrowser";
+    constexpr const char* KeyIdentifier = "Indentifier";
+    constexpr const char* KeyUrl = "URL";
+    constexpr const char* _loggerCat = "ScreenSpaceBrowser";
 
-static const openspace::properties::Property::PropertyInfo BrowserDimensionsInfo = {
-    "Dimensions",
-    "Browser Dimensions",
-    "Set the dimensions of the web browser windows."
-};
-static const openspace::properties::Property::PropertyInfo UrlInfo = {
-    "URL",
-    "url",
-    "The URL to load"
-};
+    const openspace::properties::Property::PropertyInfo DimensionsInfo = {
+        "Dimensions",
+        "Browser Dimensions",
+        "Set the dimensions of the web browser windows."
+    };
+    const openspace::properties::Property::PropertyInfo UrlInfo = {
+        "URL",
+        "url",
+        "The URL to load"
+    };
 
 } // namespace
 
 namespace openspace {
 
+void ScreenSpaceBrowser::ScreenSpaceRenderHandler::draw() {}
+
+void ScreenSpaceBrowser::ScreenSpaceRenderHandler::render() {}
+
+void ScreenSpaceBrowser::ScreenSpaceRenderHandler::setTexture(GLuint t) {
+    _texture = t;
+}
+
 ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
-        : ScreenSpaceRenderable(dictionary)
-        , _urlIsDirty(false)
-        , _dimensionsAreDirty(false)
-        , _url(UrlInfo)
-        , _dimensions(BrowserDimensionsInfo,
-                     glm::vec2(0.0f),
-                     glm::vec2(0.0f),
-                     glm::vec2(3000.0f))
+    : ScreenSpaceRenderable(dictionary)
+    , _url(UrlInfo)
+    , _dimensions(DimensionsInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(3000.f))
 {
     if (dictionary.hasKey(KeyIdentifier)) {
         setIdentifier(dictionary.value<std::string>(KeyIdentifier));
@@ -64,35 +73,35 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
         ++id;
     }
 
-    std::string urlToLoad;
-    if (dictionary.getValue(KeyUrl, urlToLoad)) {
+    if (dictionary.hasKeyAndValue<std::string>(KeyUrl)) {
         _url = dictionary.value<std::string>(KeyUrl);
     }
 
-    glm::vec2 windowDimensions = OsEng.windowWrapper().currentWindowSize();
+    glm::vec2 windowDimensions = OsEng.windowWrapper().currentSubwindowSize();
     _dimensions = windowDimensions;
 
     _texture = std::make_unique<ghoul::opengl::Texture>(
         glm::uvec3(windowDimensions, 1.0f)
     );
+
     _renderHandler = new ScreenSpaceRenderHandler();
     _browserInstance = std::make_shared<BrowserInstance>(_renderHandler);
 
-    _url.onChange([this]() { _urlIsDirty = true; });
-    _dimensions.onChange([this]() { _dimensionsAreDirty = true; });
+    _url.onChange([this]() { _isUrlDirty = true; });
+    _dimensions.onChange([this]() { _isDimensionsDirty = true; });
 
     addProperty(_url);
     addProperty(_dimensions);
 
-    auto webBrowser = OsEng.moduleEngine().module<WebBrowserModule>();
-    if (webBrowser != nullptr) {
+    WebBrowserModule* webBrowser = OsEng.moduleEngine().module<WebBrowserModule>();
+    if (webBrowser) {
         webBrowser->addBrowser(_browserInstance);
     }
 }
 
 bool ScreenSpaceBrowser::initialize() {
     _originalViewportSize = OsEng.windowWrapper().currentWindowSize();
-    _renderHandler->setTexture((GLuint) *_texture);
+    _renderHandler->setTexture(*_texture);
 
     createPlane();
     // Load a special version of the regular ScreenRenderable shaders. This mirrors the
@@ -113,7 +122,7 @@ bool ScreenSpaceBrowser::deinitialize() {
 
     _browserInstance->close(true);
 
-    auto webBrowser = OsEng.moduleEngine().module<WebBrowserModule>();
+    WebBrowserModule* webBrowser = OsEng.moduleEngine().module<WebBrowserModule>();
     if (webBrowser != nullptr) {
         webBrowser->removeBrowser(_browserInstance);
         _browserInstance.reset();
@@ -129,15 +138,15 @@ void ScreenSpaceBrowser::render() {
 }
 
 void ScreenSpaceBrowser::update() {
-    if (_urlIsDirty) {
+    if (_isUrlDirty) {
         _browserInstance->loadUrl(_url);
-        _urlIsDirty = false;
+        _isUrlDirty = false;
     }
 
-    if (_dimensionsAreDirty) {
+    if (_isDimensionsDirty) {
         _browserInstance->reshape(_dimensions.value());
         _originalViewportSize = _dimensions.value();
-        _dimensionsAreDirty = false;
+        _isDimensionsDirty = false;
     }
 }
 

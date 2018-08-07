@@ -27,22 +27,15 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#include <ghoul/io/socket/tcpsocketserver.h>
-#include <ghoul/misc/templatefactory.h>
-
 #include <deque>
 #include <memory>
-#include <thread>
 #include <mutex>
-#include <cstdint>
-#include <map>
-#include <ext/json/json.hpp>
-#include <fmt/format.h>
 
-#include "include/connection.h"
-#include "include/topic.h"
+namespace ghoul::io { class SocketServer; }
 
 namespace openspace {
+
+class Connection;
 
 struct Message {
     std::weak_ptr<Connection> connection;
@@ -52,14 +45,17 @@ struct Message {
 class ServerModule : public OpenSpaceModule {
 public:
     static constexpr const char* Name = "Server";
+
     ServerModule();
     virtual ~ServerModule();
+
 protected:
     void internalInitialize(const ghoul::Dictionary& configuration) override;
+
 private:
     struct ConnectionData {
         std::shared_ptr<Connection> connection;
-        bool markedForRemoval = false;
+        bool isMarkedForRemoval = false;
     };
 
     void handleConnection(std::shared_ptr<Connection> connection);

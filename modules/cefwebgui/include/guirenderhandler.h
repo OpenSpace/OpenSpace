@@ -25,14 +25,12 @@
 #ifndef __OPENSPACE_MODULE_CEFWEBGUI___GUI_RENDER_HANDLER___H__
 #define __OPENSPACE_MODULE_CEFWEBGUI___GUI_RENDER_HANDLER___H__
 
-#include <memory>
-#include <include/openspace/engine/openspaceengine.h>
-#include <include/openspace/rendering/renderengine.h>
-#include <include/openspace/engine/wrapper/windowwrapper.h>
+#include <modules/webbrowser/include/webrenderhandler.h>
+
 #include <ghoul/opengl/ghoul_gl.h>
-#include <fmt/format.h>
-#include <include/cef_app.h>
-#include "modules/webbrowser/include/webrenderhandler.h"
+#include <memory>
+
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
@@ -41,14 +39,15 @@ public:
     GUIRenderHandler();
 
     void initializeGL();
+    void deinitializeGL();
+
     void draw();
-    void render() {};
+    void render();
 
 private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-    GLuint _program;
-    GLuint _vao;
-    GLuint _vbo;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 };
 
 } // namespace openspace

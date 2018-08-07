@@ -25,24 +25,24 @@
 #include <modules/globebrowsing/rendering/layer/layeradjustment.h>
 
 namespace {
-    const char* keyType = "Type";
-    const char* keyChromaKeyColor = "ChromaKeyColor";
-    const char* keyChromaKeyTolerance = "ChromaKeyTolerance";
+    constexpr const char* keyType = "Type";
+    constexpr const char* keyChromaKeyColor = "ChromaKeyColor";
+    constexpr const char* keyChromaKeyTolerance = "ChromaKeyTolerance";
 
-    static const openspace::properties::Property::PropertyInfo ChromaKeyColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ChromaKeyColorInfo = {
         "ChromaKeyColor",
         "Chroma Key Color",
         "This color is used as the chroma key for the layer that is adjusted."
     };
 
-    static const openspace::properties::Property::PropertyInfo ChromaKeyToleranceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ChromaKeyToleranceInfo = {
         "ChromaKeyTolerance",
         "Chroma Key Tolerance",
         "This value determines the tolerance that is used to determine whether a color "
         "is matching the selected Chroma key."
     };
 
-    static const openspace::properties::Property::PropertyInfo TypeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
         "Type",
         "The type of layer adjustment that is applied to the underlying layer."
@@ -53,8 +53,8 @@ namespace openspace::globebrowsing {
 
 LayerAdjustment::LayerAdjustment()
     : properties::PropertyOwner({ "adjustment" })
-    , chromaKeyColor(ChromaKeyColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
-    , chromaKeyTolerance(ChromaKeyToleranceInfo, 0.f, 0.f, 1.f)
+    , _chromaKeyColor(ChromaKeyColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _chromaKeyTolerance(ChromaKeyToleranceInfo, 0.f, 0.f, 1.f)
     , _typeOption(TypeInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     // Add options to option properties
@@ -64,7 +64,7 @@ LayerAdjustment::LayerAdjustment()
     _typeOption.setValue(static_cast<int>(layergroupid::AdjustmentTypeID::None));
     _type = static_cast<layergroupid::AdjustmentTypeID>(_typeOption.value());
 
-    _typeOption.onChange([&](){
+    _typeOption.onChange([&]() {
         removeVisibleProperties();
         _type = static_cast<layergroupid::AdjustmentTypeID>(_typeOption.value());
         addVisibleProperties();
@@ -72,28 +72,29 @@ LayerAdjustment::LayerAdjustment()
             _onChangeCallback();
         }
     });
-    chromaKeyColor.setViewOption(properties::Property::ViewOptions::Color);
+    _chromaKeyColor.setViewOption(properties::Property::ViewOptions::Color);
 
     addProperty(_typeOption);
     addVisibleProperties();
 }
 
-void LayerAdjustment::setValuesFromDictionary(
-    const ghoul::Dictionary& adjustmentDict)
-{
-    std::string dictType;
-    glm::vec3 dictChromaKeyColor;
-    float dictChromaKeyTolerance;
+void LayerAdjustment::setValuesFromDictionary(const ghoul::Dictionary& adjustmentDict) {
+    if (adjustmentDict.hasKeyAndValue<std::string>(keyType)) {
+        const std::string& dictType = adjustmentDict.value<std::string>(keyType);
+        _typeOption = static_cast<int>(
+            layergroupid::getAdjustmentTypeIDFromName(dictType)
+        );
 
-    if (adjustmentDict.getValue(keyType, dictType)) {
-        _typeOption.setValue(
-            static_cast<int>(layergroupid::getAdjustmentTypeIDFromName(dictType)));
     }
-    if (adjustmentDict.getValue(keyChromaKeyColor, dictChromaKeyColor)) {
-        chromaKeyColor.setValue(dictChromaKeyColor);
+
+    if (adjustmentDict.hasKeyAndValue<glm::vec3>(keyChromaKeyColor)) {
+        glm::vec3 dictChromaKeyColor = adjustmentDict.value<glm::vec3>(keyChromaKeyColor);
+        _chromaKeyColor = std::move(dictChromaKeyColor);
     }
-    if (adjustmentDict.getValue(keyChromaKeyTolerance, dictChromaKeyTolerance)) {
-        chromaKeyTolerance.setValue(dictChromaKeyTolerance);
+
+    if (adjustmentDict.hasKeyAndValue<float>(keyChromaKeyTolerance)) {
+        float dictChromaKeyTolerance = adjustmentDict.value<float>(keyChromaKeyTolerance);
+        _chromaKeyTolerance = dictChromaKeyTolerance;
     }
 }
 
@@ -106,8 +107,8 @@ void LayerAdjustment::addVisibleProperties() {
         case layergroupid::AdjustmentTypeID::None:
             break;
         case layergroupid::AdjustmentTypeID::ChromaKey: {
-            addProperty(chromaKeyColor);
-            addProperty(chromaKeyTolerance);
+            addProperty(_chromaKeyColor);
+            addProperty(_chromaKeyTolerance);
             break;
         }
         case layergroupid::AdjustmentTypeID::TransferFunction:
@@ -120,13 +121,21 @@ void LayerAdjustment::removeVisibleProperties() {
         case layergroupid::AdjustmentTypeID::None:
             break;
         case layergroupid::AdjustmentTypeID::ChromaKey: {
-            removeProperty(chromaKeyColor);
-            removeProperty(chromaKeyTolerance);
+            removeProperty(_chromaKeyColor);
+            removeProperty(_chromaKeyTolerance);
             break;
         }
         case layergroupid::AdjustmentTypeID::TransferFunction:
             break;
     }
+}
+
+glm::vec3 LayerAdjustment::chromaKeyColor() const {
+    return _chromaKeyColor;
+}
+
+float LayerAdjustment::chromaKeyTolerance() const {
+    return _chromaKeyTolerance;
 }
 
 void LayerAdjustment::onChange(std::function<void(void)> callback) {

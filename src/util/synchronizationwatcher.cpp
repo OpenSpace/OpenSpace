@@ -24,18 +24,20 @@
 
 #include <openspace/util/synchronizationwatcher.h>
 
+#include <algorithm>
+
 namespace openspace {
 
 SynchronizationWatcher::WatchHandle SynchronizationWatcher::watchSynchronization(
-    std::shared_ptr<ResourceSynchronization> synchronization,
-    ResourceSynchronization::StateChangeCallback callback)
+                                 std::shared_ptr<ResourceSynchronization> synchronization,
+                                    ResourceSynchronization::StateChangeCallback callback)
 {
     std::lock_guard<std::mutex> guard(_mutex);
 
     WatchHandle watchHandle = generateWatchHandle();
 
     ResourceSynchronization::CallbackHandle cbh = synchronization->addStateChangeCallback(
-        [this, synchronization, watchHandle, callback]
+        [this, synchronization, watchHandle, cb = std::move(callback)]
         (ResourceSynchronization::State state)
         {
             std::lock_guard<std::mutex> g(_mutex);
@@ -43,25 +45,20 @@ SynchronizationWatcher::WatchHandle SynchronizationWatcher::watchSynchronization
                 synchronization,
                 state,
                 watchHandle,
-                callback
+                cb
             });
         }
     );
 
-    _watchedSyncs.insert({ watchHandle, {
-        synchronization,
-        cbh
-    }});
+    _watchedSyncs.insert({ watchHandle, { std::move(synchronization), cbh } });
 
     return watchHandle;
 }
 
-void SynchronizationWatcher::unwatchSynchronization(
-    WatchHandle watchHandle)
-{
+void SynchronizationWatcher::unwatchSynchronization(WatchHandle watchHandle) {
     std::lock_guard<std::mutex> guard(_mutex);
 
-    auto it = _watchedSyncs.find(watchHandle);
+    const auto it = _watchedSyncs.find(watchHandle);
     if (it == _watchedSyncs.end()) {
         return;
     }
@@ -79,9 +76,7 @@ void SynchronizationWatcher::unwatchSynchronization(
     _pendingNotifications.erase(std::remove_if(
         _pendingNotifications.begin(),
         _pendingNotifications.end(),
-        [watchHandle](const NotificationData& data) {
-            return data.handle == watchHandle;
-        }
+        [watchHandle](const NotificationData& data) { return data.handle == watchHandle; }
     ), _pendingNotifications.end());
 }
 
@@ -96,7 +91,7 @@ void SynchronizationWatcher::notify() {
 
     for (const NotificationData& n : notifications) {
         std::shared_ptr<ResourceSynchronization> sync = n.synchronization.lock();
-        if (sync == nullptr) {
+        if (!sync) {
             continue;
         }
         n.callback(n.state);
@@ -106,7 +101,5 @@ void SynchronizationWatcher::notify() {
 SynchronizationWatcher::WatchHandle SynchronizationWatcher::generateWatchHandle() {
     return nextWatchHandle++;
 }
-
-
 
 } // namespace openspace

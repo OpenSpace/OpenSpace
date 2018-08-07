@@ -31,10 +31,6 @@ Geodetic2::Geodetic2(double latitude, double longitude)
     , lon(longitude)
 {}
 
-Geodetic2::Geodetic2(const Geodetic2& p)
-    : Geodetic2(p.lat, p.lon)
-{}
-
 glm::dvec2 Geodetic2::toLonLatVec2() const {
     return glm::dvec2(lon, lat);
 }

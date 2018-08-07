@@ -1,9 +1,9 @@
 local assetHelper = asset.require('util/asset_helper')
 local proceduralGlobes = asset.require('util/procedural_globe')
 local transforms = asset.require('./transforms')
-local kernels081 = asset.require('./nep081').Kernels
-local kernels086 = asset.require('./nep086').Kernels
-local kernels088 = asset.require('./nep088').Kernels
+local kernels = asset.require('./kernels')
+local kernel081 = kernels.nep081
+local kernel086 = kernels.nep086
 
 
 
@@ -27,7 +27,7 @@ local irregularRetrogradeMoons = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 360.13,
-        Kernels = kernels081
+        Kernels = kernel081
     },
     {
         Identifier = "Sao",
@@ -43,7 +43,7 @@ local irregularRetrogradeMoons = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 2912.72,
-        Kernels = kernels086
+        Kernels = kernel086
     },
     {
         Identifier = "Laomedeia",
@@ -59,7 +59,7 @@ local irregularRetrogradeMoons = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 3171.33,
-        Kernels = kernels086
+        Kernels = kernel086
     }
 }
 

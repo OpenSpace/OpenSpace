@@ -25,17 +25,17 @@
 #ifndef __OPENSPACE_CORE___HTTPREQUEST___H__
 #define __OPENSPACE_CORE___HTTPREQUEST___H__
 
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/directory.h>
-
+#include <ghoul/misc/boolean.h>
 #include <atomic>
+#include <condition_variable>
 #include <fstream>
 #include <functional>
-#include <memory>
 #include <string>
-#include <vector>
 #include <thread>
-#include <condition_variable>
+#include <vector>
+
+// @TODO:  This class is a diamond-of-death;  maybe some redesign to make the things into
+//         components, rather than inheritance?
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -45,27 +45,12 @@
 namespace openspace {
 
 namespace curlfunctions {
-    size_t writeCallback(
-        char *ptr,
-        size_t size,
-        size_t nmemb,
-        void *userdata
-    );
+    size_t writeCallback(char* ptr, size_t size, size_t nmemb, void* userData);
 
-    int progressCallback(
-        void *clientp,
-        int64_t dltotal,
-        int64_t dlnow,
-        int64_t ultotal,
-        int64_t ulnow
-    );
+    int progressCallback(void* userData, int64_t nTotalDownloadBytes,
+        int64_t nDownloadedBytes, int64_t nTotalUploadBytes, int64_t nUploadBytes);
 
-    size_t headerCallback(
-        char* ptr,
-        size_t size,
-        size_t nmemb,
-        void* userData
-    );
+    size_t headerCallback(char* ptr, size_t size, size_t nmemb, void* userData);
 }
 
 // Synchronous http request
@@ -123,6 +108,8 @@ public:
 
     void perform(RequestOptions opt);
 
+    const std::string& url() const;
+
 private:
     void setReadyState(ReadyState state);
 
@@ -137,24 +124,15 @@ private:
     Progress _progress;
     RequestOptions _options;
 
-    friend size_t curlfunctions::writeCallback(
-        char *ptr,
-        size_t size,
-        size_t nmemb,
-        void *userdata);
+    friend size_t curlfunctions::writeCallback(char* ptr, size_t size, size_t nmemb,
+        void* userData);
 
-    friend int curlfunctions::progressCallback(
-        void *clientp,
-        int64_t dltotal,
-        int64_t dlnow,
-        int64_t ultotal,
-        int64_t ulnow);
+    friend int curlfunctions::progressCallback(void* userData,
+        int64_t nTotalDownloadBytes,
+        int64_t nDownloadedBytes, int64_t nTotalUploadBytes, int64_t nUploadBytes);
 
-    friend size_t curlfunctions::headerCallback(
-       char *ptr,
-       size_t size,
-       size_t nmemb,
-       void *userdata);
+    friend size_t curlfunctions::headerCallback(char* ptr, size_t size, size_t nmemb,
+       void* userData);
 };
 
 class HttpDownload {
@@ -167,9 +145,9 @@ public:
     virtual ~HttpDownload() = default;
     void onProgress(ProgressCallback progressCallback);
     void onHeader(HeaderCallback headerCallback);
-    bool hasStarted();
-    bool hasFailed();
-    bool hasSucceeded();
+    bool hasStarted() const;
+    bool hasFailed() const;
+    bool hasSucceeded() const;
 
 protected:
     virtual size_t handleData(HttpRequest::Data d) = 0;
@@ -195,6 +173,8 @@ public:
     virtual ~SyncHttpDownload() = default;
     void download(HttpRequest::RequestOptions opt);
 
+    const std::string& url() const;
+
 protected:
     HttpRequest _httpRequest;
 };
@@ -207,6 +187,8 @@ public:
     void start(HttpRequest::RequestOptions opt);
     void cancel();
     void wait();
+
+    const std::string& url() const;
 
 protected:
     void download(HttpRequest::RequestOptions opt);
@@ -252,7 +234,7 @@ public:
     HttpMemoryDownload() = default;
     HttpMemoryDownload(HttpMemoryDownload&& d) = default;
     virtual ~HttpMemoryDownload() = default;
-    const std::vector<char>& downloadedData();
+    const std::vector<char>& downloadedData() const;
 
 protected:
     bool initDownload() override;

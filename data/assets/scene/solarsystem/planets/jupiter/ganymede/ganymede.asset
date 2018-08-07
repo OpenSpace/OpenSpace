@@ -2,7 +2,7 @@ local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
 asset.require("spice/base")
 asset.request('./trail')
-local kernels = asset.require('../jup310').Kernels
+local kernel = asset.require('../kernels').jup310
 
 
 
@@ -21,13 +21,13 @@ local Ganymede = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_GANYMEDE",
             DestinationFrame = "GALACTIC",
-            Kernels = kernels
+            Kernels = kernel
         },
         Translation = {
             Type = "SpiceTranslation",
             Target = "GANYMEDE",
             Observer = "JUPITER BARYCENTER",
-            Kernels = kernels
+            Kernels = kernel
         }
     },
     Renderable = {

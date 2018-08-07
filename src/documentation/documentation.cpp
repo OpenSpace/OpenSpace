@@ -23,10 +23,9 @@
  ****************************************************************************************/
 
 #include <openspace/documentation/documentation.h>
+
 #include <openspace/documentation/verifier.h>
-
 #include <ghoul/misc/dictionary.h>
-
 #include <algorithm>
 #include <set>
 
@@ -61,14 +60,10 @@ struct WarningCompare {
 
 } // namespace
 
-// Unfortunately, the standard library does not contain a no-op for the to_string method
-// so we have to include one ourselves
-namespace std {
-std::string to_string(std::string value) {
-    return value;
-}
+namespace ghoul {
 
-std::string to_string(openspace::documentation::TestResult testResult) {
+template <>
+std::string to_string(const openspace::documentation::TestResult& testResult) {
     using namespace openspace::documentation;
 
     if (testResult.success) {
@@ -79,22 +74,25 @@ std::string to_string(openspace::documentation::TestResult testResult) {
         stream << "Failure." << '\n';
 
         for (const TestResult::Offense& offense : testResult.offenses) {
-            stream << "  " << std::to_string(offense) << '\n';
+            stream << "  " << ghoul::to_string(offense) << '\n';
         }
 
         for (const TestResult::Warning& warning : testResult.warnings) {
-            stream << "  " << std::to_string(warning) << '\n';
+            stream << "  " << ghoul::to_string(warning) << '\n';
         }
 
         return stream.str();
     }
 }
 
-std::string to_string(openspace::documentation::TestResult::Offense offense) {
-    return offense.offender + ": " + std::to_string(offense.reason);
+template <>
+std::string to_string(const openspace::documentation::TestResult::Offense& offense) {
+    return offense.offender + ": " + ghoul::to_string(offense.reason);
 }
 
-std::string to_string(openspace::documentation::TestResult::Offense::Reason reason) {
+template <>
+std::string to_string(const openspace::documentation::TestResult::Offense::Reason& reason)
+{
     switch (reason) {
         case openspace::documentation::TestResult::Offense::Reason::ExtraKey:
             return "Extra key";
@@ -111,11 +109,15 @@ std::string to_string(openspace::documentation::TestResult::Offense::Reason reas
     }
 }
 
-std::string to_string(openspace::documentation::TestResult::Warning warning) {
-    return warning.offender + ": " + std::to_string(warning.reason);
+template <>
+std::string to_string(const openspace::documentation::TestResult::Warning& warning) {
+    return warning.offender + ": " + ghoul::to_string(warning.reason);
 }
 
-std::string to_string(openspace::documentation::TestResult::Warning::Reason reason) {
+template <>
+std::string to_string(
+                      const openspace::documentation::TestResult::Warning::Reason& reason)
+{
     switch (reason) {
         case openspace::documentation::TestResult::Warning::Reason::Deprecated:
             return "Deprecated";
@@ -124,10 +126,9 @@ std::string to_string(openspace::documentation::TestResult::Warning::Reason reas
     }
 }
 
-} // namespace std
+} // namespace ghoul
 
-namespace openspace {
-namespace documentation {
+namespace openspace::documentation {
 
 const std::string DocumentationEntry::Wildcard = "*";
 
@@ -168,19 +169,22 @@ Documentation::Documentation(std::string n, std::string i, DocumentationEntries 
 {}
 
 Documentation::Documentation(std::string n, DocumentationEntries ents)
-    : Documentation(n, "", ents)
+    : Documentation(std::move(n), "", std::move(ents))
 {}
 
 Documentation::Documentation(DocumentationEntries ents)
-    : Documentation("", "", ents)
+    : Documentation("", "", std::move(ents))
 {}
 
-TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& dict) {
+TestResult testSpecification(const Documentation& documentation,
+                             const ghoul::Dictionary& dictionary)
+{
     TestResult result;
     result.success = true;
 
-    auto applyVerifier = [dict, &result](Verifier& verifier, const std::string& key) {
-        TestResult res = verifier(dict, key);
+    auto applyVerifier = [dictionary, &result](Verifier& verifier, const std::string& key)
+    {
+        TestResult res = verifier(dictionary, key);
         if (!res.success) {
             result.success = false;
             result.offenses.insert(
@@ -196,14 +200,14 @@ TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& di
         );
     };
 
-    for (const auto& p : d.entries) {
+    for (const auto& p : documentation.entries) {
         if (p.key == DocumentationEntry::Wildcard) {
-            for (const std::string& key : dict.keys()) {
+            for (const std::string& key : dictionary.keys()) {
                 applyVerifier(*(p.verifier), key);
             }
         }
         else {
-            if (p.optional && !dict.hasKey(p.key)) {
+            if (p.optional && !dictionary.hasKey(p.key)) {
                 // If the key is optional and it doesn't exist, we don't need to check it
                 // if the key exists, it has to be correct, however
                 continue;
@@ -228,33 +232,17 @@ TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& di
         uniqueWarnings.begin(), uniqueWarnings.end()
     );
 
-    std::sort(
-        result.offenses.begin(),
-        result.offenses.end(),
-        [](const TestResult::Offense& lhs, const TestResult::Offense& rhs) {
-            return OffenseCompare()(lhs, rhs);
-        }
-    );
-    std::sort(
-        result.warnings.begin(),
-        result.warnings.end(),
-        [](const TestResult::Warning& lhs, const TestResult::Warning& rhs) {
-            return WarningCompare()(lhs, rhs);
-        }
-    );
-
     return result;
 }
 
-void testSpecificationAndThrow(const Documentation& doc, const ghoul::Dictionary& dict,
-                               std::string component)
+void testSpecificationAndThrow(const Documentation& documentation,
+                               const ghoul::Dictionary& dictionary, std::string component)
 {
     // Perform testing against the documentation/specification
-    TestResult testResult = testSpecification(doc, dict);
+    TestResult testResult = testSpecification(documentation, dictionary);
     if (!testResult.success) {
         throw SpecificationError(std::move(testResult), std::move(component));
     }
 }
 
-} // namespace documentation
-} // namespace openspace
+} // namespace openspace::documentation

@@ -7,9 +7,9 @@ local earthTransforms = asset.require('scene/solarsystem/planets/earth/transform
 
 local kernels = asset.syncedResource({
     Name = "Osiris Rex Kernels",
-    Type = "TorrentSynchronization",
+    Type = "HttpSynchronization",
     Identifier = "osirisrex_kernels",
-    Magnet = "magnet:?xt=urn:btih:26719889CAAB41792B97639D29AD49B1EDBA051E&dn=OsirisRexKernels&tr=udp%3a%2f%2ftracker.openbittorrent.com%3a80%2fannounce&tr=udp%3a%2f%2ftracker.opentrackr.org%3a1337%2fannounce"
+    Version = 1
 })
 
 local textures = asset.syncedResource({
@@ -33,116 +33,116 @@ KernelCase = 2 -- Right now we only have the image times for case 2
 local CaseDependentKernels
 if KernelCase == 2 then
     CaseDependentKernels = {
-        kernels .. "/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/ORX_Recon_525mSortie_Case02.bsp",
-        kernels .. "/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/Recon_525mSortie_Case02_0Latitude.bc",
-        kernels .. "/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/Recon_525mSortie_Case02_atl_19145_04.atf",
+        kernels .. "/ORX_Recon_525mSortie_Case02.bsp",
+        kernels .. "/Recon_525mSortie_Case02_0Latitude.bc",
+        kernels .. "/Recon_525mSortie_Case02_atl_19145_04.atf",
 
-        kernels .. "/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/ORX_Recon_225mSortie_Case02.bsp",
-        kernels .. "/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Recon_225mSortie_Case02_0Latitude.bc"
+        kernels .. "/ORX_Recon_225mSortie_Case02.bsp",
+        kernels .. "/Recon_225mSortie_Case02_0Latitude.bc"
     }
 elseif KernelCase == 5 then
     CaseDependentKernels = {
-        kernels .. "/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/ORX_Recon_525mSortie_Case05.bsp",
-        kernels .. "/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/Recon_525mSortie_Case05_20negLatitude.bc",
-        kernels .. "/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/Recon_525mSortie_Case05_atl_19145_04.atf",
-        kernels .. "/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/Recon_525mSortie_Case05_NominalProfile.bc",
+        kernels .. "/ORX_Recon_525mSortie_Case05.bsp",
+        kernels .. "/Recon_525mSortie_Case05_20negLatitude.bc",
+        kernels .. "/Recon_525mSortie_Case05_atl_19145_04.atf",
+        kernels .. "/Recon_525mSortie_Case05_NominalProfile.bc",
 
-        kernels .. "/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/ORX_Recon_225mSortie_Case05.bsp",
-        kernels .. "/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Recon_225mSortie_Case05_20negLatitude.bc"
+        kernels .. "/ORX_Recon_225mSortie_Case05.bsp",
+        kernels .. "/Recon_225mSortie_Case05_20negLatitude.bc"
     }
 elseif KernelCase == 8 then
     CaseDependentKernels = {
-        kernels .. "/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/Recon_525mSortie_Case08_NominalProfile.bc",
-        kernels .. "/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/ORX_Recon_225mSortie_Case08.bsp",
-        kernels .. "/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Recon_225mSortie_Case08_40negLatitude.bc"
+        kernels .. "/Recon_525mSortie_Case08_NominalProfile.bc",
+        kernels .. "/ORX_Recon_225mSortie_Case08.bsp",
+        kernels .. "/Recon_225mSortie_Case08_40negLatitude.bc"
     }
 elseif KernelCase == 11 then
     CaseDependentKernels = {
-        kernels .. "/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/ORX_Recon_225mSortie_Case11.bsp",
-        kernels .. "/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Recon_225mSortie_Case11_60negLatitude.bc"
+        kernels .. "/ORX_Recon_225mSortie_Case11.bsp",
+        kernels .. "/Recon_225mSortie_Case11_60negLatitude.bc"
     }
 end
 
 local OsirisRexKernels = {
     -- background 
     -- SCLK kernels needs to be loaded before CK kernels (and generally first)
-    kernels .. "/OsirisRexKernels/background/sclk/ORX_SCLKSCET.00000.tsc",
+    kernels .. "/ORX_SCLKSCET.00000.tsc",
 
     -- This cannot be loaded correctly for some reason!
     --openspace.spice.loadKernel(kernels .. "/OsirisRexKernels/background/dsk/RQ36mod.oct12_CCv0001.bds")
     
-    kernels .. "/OsirisRexKernels/background/fk/orx_v04.tf",
-    kernels .. "/OsirisRexKernels/background/ik/orx_lidar_v00.ti",
-    kernels .. "/OsirisRexKernels/background/ik/orx_ocams_v03.ti",
-    kernels .. "/OsirisRexKernels/background/ik/orx_otes_v00.ti",
-    kernels .. "/OsirisRexKernels/background/ik/orx_rexis_v00.ti",
-    kernels .. "/OsirisRexKernels/background/ik/orx_struct_v00.ti",
-    kernels .. "/OsirisRexKernels/background/ik/orx_navcam_v00.ti",
-    kernels .. "/OsirisRexKernels/background/ik/orx_ola_v00.ti",
-    kernels .. "/OsirisRexKernels/background/ik/orx_ovirs_v00.ti",
-    kernels .. "/OsirisRexKernels/background/ik/orx_stowcam_v00.ti",
-    -- kernels .. "/OsirisRexKernels/background/lsk/naif0011.tls",
-    kernels .. "/OsirisRexKernels/background/pck/bennu_SPH250m.tpc",
-    kernels .. "/OsirisRexKernels/background/pck/bennu_v10.tpc",
+    kernels .. "/orx_v04.tf",
+    kernels .. "/orx_lidar_v00.ti",
+    kernels .. "/orx_ocams_v03.ti",
+    kernels .. "/orx_otes_v00.ti",
+    kernels .. "/orx_rexis_v00.ti",
+    kernels .. "/orx_struct_v00.ti",
+    kernels .. "/orx_navcam_v00.ti",
+    kernels .. "/orx_ola_v00.ti",
+    kernels .. "/orx_ovirs_v00.ti",
+    kernels .. "/orx_stowcam_v00.ti",
+    -- kernels .. "/naif0011.tls",
+    kernels .. "/bennu_SPH250m.tpc",
+    kernels .. "/bennu_v10.tpc",
 
     -- Low res SPK
-    kernels .. "/OsirisRexKernels/background/spk/orx_160917_231024_pgaa3_day15m60_v1.bsp",
-    kernels .. "/OsirisRexKernels/background/spk/orx_160914_231024_pgaa3_day12m60_v1.bsp",
+    kernels .. "/orx_160917_231024_pgaa3_day15m60_v1.bsp",
+    kernels .. "/orx_160914_231024_pgaa3_day12m60_v1.bsp",
     
-    kernels .. "/OsirisRexKernels/background/spk/orx_160908_231024_pgaa3_day06m60_v1.bsp",
-    kernels .. "/OsirisRexKernels/background/spk/spk_orx_160908_231024_pgaa2_day06m60_v3.bsp",
-    kernels .. "/OsirisRexKernels/background/spk/orx_160908_231024_pgaa2_day06m60.bsp",
+    kernels .. "/orx_160908_231024_pgaa3_day06m60_v1.bsp",
+    kernels .. "/spk_orx_160908_231024_pgaa2_day06m60_v3.bsp",
+    kernels .. "/orx_160908_231024_pgaa2_day06m60.bsp",
 
-    kernels .. "/OsirisRexKernels/background/spk/OREX_20160908_M60_complete.bsp",
-    kernels .. "/OsirisRexKernels/background/spk/OREX_20160904_M45_complete.bsp",
+    kernels .. "/OREX_20160908_M60_complete.bsp",
+    kernels .. "/OREX_20160904_M45_complete.bsp",
 
     -- SPK
-    kernels .. "/OsirisRexKernels/background/spk/de421.bsp",
-    kernels .. "/OsirisRexKernels/background/spk/sb-101955-76.bsp",
+    kernels .. "/de421.bsp",
+    kernels .. "/sb-101955-76.bsp",
 
     -- Nominal_Profile_LowRes
-    kernels .. "/OsirisRexKernels/Nominal_Profile_LowRes/Approach_600s_20180816T230000_20181119T010000.bsp",
-    kernels .. "/OsirisRexKernels/Nominal_Profile_LowRes/Approach_NominalProfile_600s_20180816T230000_20181119T010000.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Profile_LowRes/DetailedSurvey_600s_20190108T000000_20190317T000000.bsp",
-    kernels .. "/OsirisRexKernels/Nominal_Profile_LowRes/OrbitalA_600s_20181203T230000_20190109T000000.bsp",
-    kernels .. "/OsirisRexKernels/Nominal_Profile_LowRes/OrbitalA_NominalProfile_600s_20181203T230000_20190109T000000.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Profile_LowRes/OrbitalB_600s_20190316T000000_20190521T000000.bsp",
-    kernels .. "/OsirisRexKernels/Nominal_Profile_LowRes/DetailedSurvey_NominalProfile_600s_20190108T000000_20190317T000000.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Profile_LowRes/OrbitalB_NominalProfile600s_20190316T000000_20190521T000000.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Profile_LowRes/PrelimSurvey_600s_20181119T230000_20181204T010000.bsp",
-    kernels .. "/OsirisRexKernels/Nominal_Profile_LowRes/PrelimSurvey_NominalProfile_600s_20181119T230000_20181204T010000.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Profile_LowRes/Recon_600s_20190519T000000_20190830T000000.bsp",
-    kernels .. "/OsirisRexKernels/Nominal_Profile_LowRes/Recon_NominalProfile_600s_20190519T000000_20190830T000000.bc",
+    kernels .. "/Approach_600s_20180816T230000_20181119T010000.bsp",
+    kernels .. "/Approach_NominalProfile_600s_20180816T230000_20181119T010000.bc",
+    kernels .. "/DetailedSurvey_600s_20190108T000000_20190317T000000.bsp",
+    kernels .. "/OrbitalA_600s_20181203T230000_20190109T000000.bsp",
+    kernels .. "/OrbitalA_NominalProfile_600s_20181203T230000_20190109T000000.bc",
+    kernels .. "/OrbitalB_600s_20190316T000000_20190521T000000.bsp",
+    kernels .. "/DetailedSurvey_NominalProfile_600s_20190108T000000_20190317T000000.bc",
+    kernels .. "/OrbitalB_NominalProfile600s_20190316T000000_20190521T000000.bc",
+    kernels .. "/PrelimSurvey_600s_20181119T230000_20181204T010000.bsp",
+    kernels .. "/PrelimSurvey_NominalProfile_600s_20181119T230000_20181204T010000.bc",
+    kernels .. "/Recon_600s_20190519T000000_20190830T000000.bsp",
+    kernels .. "/Recon_NominalProfile_600s_20190519T000000_20190830T000000.bc",
     
     -- Nominal_Observations_Science
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/03_Approach/DustSearch_v1/Phase03_AP_DustSearch_1.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/03_Approach/LightCurve_v1/Phase03_AP_LightCurve_1.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/03_Approach/LightCurve_v1/Phase03_AP_LightCurve_2.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/03_Approach/NatSatSearch_v1/Phase03_AP_SatSearch_1.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/03_Approach/NatSatSearch_v1/Phase03_AP_SatSearch_2.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/03_Approach/PhaseFunction_v1/Phase03_AP_PhaseFunction_1.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/03_Approach/ShapeModel_v1/Phase03_AP_ShapeModel_1.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/03_Approach/ShapeModel_v1/Phase03_AP_ShapeModel_2.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/03_Approach/ShapeModel_v1/Phase03_AP_ShapeModel_3.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/03_Approach/ShapeModel_v1/Phase03_AP_ShapeModel_4.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/03_Approach/ShapeModel_v1/Phase03_AP_ShapeModel_5.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/03_Approach/ShapeModel_v1/Phase03_AP_ShapeModel_6.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/03_Approach/ShapeModel_v1/Phase03_AP_ShapeModel_7.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/03_Approach/ShapeModel_v1/Phase03_AP_ShapeModel_8.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/03_Approach/ShapeModel_v1/Phase03_AP_ShapeModel_9_Forced4x4.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/03_Approach/SpectraMap_v1/Phase03_AP_SpectraMap_1.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/04_PrelimSurvey/MapCamOLA_v1/Phase04_PS_MC_1_v1_1a.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/04_PrelimSurvey/MapCamOLA_v1/Phase04_PS_MC_2_v1_1a.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/04_PrelimSurvey/OLA_v1/Phase04_PS_OLA_Nominal_1.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/04_PrelimSurvey/OLA_v1/Phase04_PS_OLA_Nominal_2.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/04_PrelimSurvey/OLA_v1/Phase04_PS_OLA_Nominal_3.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/04_PrelimSurvey/OLA_v1/Phase04_PS_OLA_Nominal_4.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/04_PrelimSurvey/PolyCam_v1/Phase04_PS_PolyCam_1.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/04_PrelimSurvey/PolyCam_v1/Phase04_PS_PolyCam_2.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/04_PrelimSurvey/PolyCam_v1/Phase04_PS_PolyCam_3.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/04_PrelimSurvey/PolyCam_v1/Phase04_PS_PolyCam_4.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/04_PrelimSurvey/PolyCam_v1/Phase04_PS_PolyCam_5.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/04_PrelimSurvey/PolyCam_v1/Phase04_PS_PolyCam_6.bc",
+    kernels .. "/Phase03_AP_DustSearch_1.bc",
+    kernels .. "/Phase03_AP_LightCurve_1.bc",
+    kernels .. "/Phase03_AP_LightCurve_2.bc",
+    kernels .. "/Phase03_AP_SatSearch_1.bc",
+    kernels .. "/Phase03_AP_SatSearch_2.bc",
+    kernels .. "/Phase03_AP_PhaseFunction_1.bc",
+    kernels .. "/Phase03_AP_ShapeModel_1.bc",
+    kernels .. "/Phase03_AP_ShapeModel_2.bc",
+    kernels .. "/Phase03_AP_ShapeModel_3.bc",
+    kernels .. "/Phase03_AP_ShapeModel_4.bc",
+    kernels .. "/Phase03_AP_ShapeModel_5.bc",
+    kernels .. "/Phase03_AP_ShapeModel_6.bc",
+    kernels .. "/Phase03_AP_ShapeModel_7.bc",
+    kernels .. "/Phase03_AP_ShapeModel_8.bc",
+    kernels .. "/Phase03_AP_ShapeModel_9_Forced4x4.bc",
+    kernels .. "/Phase03_AP_SpectraMap_1.bc",
+    kernels .. "/Phase04_PS_MC_1_v1_1a.bc",
+    kernels .. "/Phase04_PS_MC_2_v1_1a.bc",
+    kernels .. "/Phase04_PS_OLA_Nominal_1.bc",
+    kernels .. "/Phase04_PS_OLA_Nominal_2.bc",
+    kernels .. "/Phase04_PS_OLA_Nominal_3.bc",
+    kernels .. "/Phase04_PS_OLA_Nominal_4.bc",
+    kernels .. "/Phase04_PS_PolyCam_1.bc",
+    kernels .. "/Phase04_PS_PolyCam_2.bc",
+    kernels .. "/Phase04_PS_PolyCam_3.bc",
+    kernels .. "/Phase04_PS_PolyCam_4.bc",
+    kernels .. "/Phase04_PS_PolyCam_5.bc",
+    kernels .. "/Phase04_PS_PolyCam_6.bc",
 
     --openspace.spice.loadKernel(kernels .. "/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/BaseballDiamond_v2/atl_19013_18_BBD1_info.TXT")
     --openspace.spice.loadKernel(kernels .. "/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/BaseballDiamond_v2/atl_19014_16_BBD2_info.TXT")
@@ -150,32 +150,46 @@ local OsirisRexKernels = {
     --openspace.spice.loadKernel(kernels .. "/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/BaseballDiamond_v2/atl_19021_19_BBD4_info.TXT")
     --openspace.spice.loadKernel(kernels .. "/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/BaseballDiamond_v2/README.txt")
     
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/BaseballDiamond_v2/atl_19013_18_BBD1_v2.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/BaseballDiamond_v2/atl_19014_16_BBD2_v2.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/BaseballDiamond_v2/atl_19020_18_BBD3_v2.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/BaseballDiamond_v2/atl_19021_19_BBD4_v2.bc",
+    kernels .. "/atl_19013_18_BBD1_v2.bc",
+    kernels .. "/atl_19014_16_BBD2_v2.bc",
+    kernels .. "/atl_19020_18_BBD3_v2.bc",
+    kernels .. "/atl_19021_19_BBD4_v2.bc",
     
 
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/EquatorialStations_v1/Phase06_DS_Equatorial_Stations_1.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/EquatorialStations_v1/Phase06_DS_Equatorial_Stations_2.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/EquatorialStations_v1/Phase06_DS_Equatorial_Stations_3.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/EquatorialStations_v1/Phase06_DS_Equatorial_Stations_4.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/EquatorialStations_v1/Phase06_DS_Equatorial_Stations_5.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/EquatorialStations_v1/Phase06_DS_Equatorial_Stations_6.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/EquatorialStations_v1/Phase06_DS_Equatorial_Stations_7.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/PlumeSearch_v1/Phase06_DS_Plume_Search_1.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/PlumeSearch_v1/Phase06_DS_Plume_Search_2.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/07_OrbitalB/CandidateSampleSite_v1/Phase07_OB_CSS_Mapping_1.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/07_OrbitalB/CandidateSampleSite_v1/Phase07_OB_CSS_Mapping_2.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/07_OrbitalB/CandidateSampleSite_v1/Phase07_OB_CSS_Mapping_3.bc",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/07_OrbitalB/CandidateSampleSite_v2/CSS_Mapping_1.a",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/07_OrbitalB/CandidateSampleSite_v2/CSS_Mapping_2.a",
-    kernels .. "/OsirisRexKernels/Nominal_Observations_Science/07_OrbitalB/CandidateSampleSite_v2/CSS_Mapping_3.a",
+    kernels .. "/Phase06_DS_Equatorial_Stations_1.bc",
+    kernels .. "/Phase06_DS_Equatorial_Stations_2.bc",
+    kernels .. "/Phase06_DS_Equatorial_Stations_3.bc",
+    kernels .. "/Phase06_DS_Equatorial_Stations_4.bc",
+    kernels .. "/Phase06_DS_Equatorial_Stations_5.bc",
+    kernels .. "/Phase06_DS_Equatorial_Stations_6.bc",
+    kernels .. "/Phase06_DS_Equatorial_Stations_7.bc",
+    kernels .. "/Phase06_DS_Plume_Search_1.bc",
+    kernels .. "/Phase06_DS_Plume_Search_2.bc",
+    kernels .. "/Phase07_OB_CSS_Mapping_1.bc",
+    kernels .. "/Phase07_OB_CSS_Mapping_2.bc",
+    kernels .. "/Phase07_OB_CSS_Mapping_3.bc",
+    kernels .. "/CSS_Mapping_1.a",
+    kernels .. "/CSS_Mapping_2.a",
+    kernels .. "/CSS_Mapping_3.a",
 
-    --openspace.spice.loadKernel(kernels .. "/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Case02_0Latitude.wmv")
-    --openspace.spice.loadKernel(kernels .. "/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Case05_20negLatitude.wmv")
-    --openspace.spice.loadKernel(kernels .. "/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Case08_40negLatitude.wmv")
-    --openspace.spice.loadKernel(kernels .. "/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Case11_60negLatitude.wmv")
+    --openspace.spice.loadKernel(kernels .. "/Case02_0Latitude.wmv")
+    --openspace.spice.loadKernel(kernels .. "/Case05_20negLatitude.wmv")
+    --openspace.spice.loadKernel(kernels .. "/Case08_40negLatitude.wmv")
+    --openspace.spice.loadKernel(kernels .. "/Case11_60negLatitude.wmv")
+}
+
+local LightSources = {
+    {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sunTransforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+    },
+    {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+    }
 }
 
 -- Append the CaseDependentKernels at the end of the OsirisRexKernels set
@@ -206,7 +220,8 @@ local OsirisRex = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/orx_base_resized_12_sep_2016.obj"
         },
-        ColorTexture = textures .. "/osirisTex.png"
+        ColorTexture = textures .. "/osirisTex.png",
+        LightSources = LightSources
     },
     GUI = {
         Name = "OSIRIS REx",
@@ -235,7 +250,8 @@ local PolyCam = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/orx_polycam_resized_12_sep_2016.obj"
         }, 
-        ColorTexture = textures .. "/osirisTex.png"
+        ColorTexture = textures .. "/osirisTex.png",
+        LightSources = LightSources
     },
     GUI = {
         Name = "OCAMS POLYCAM",
@@ -253,7 +269,8 @@ local Rexis = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/orx_rexis_resized_12_sep_2016.obj"
         }, 
-        ColorTexture = textures .. "/osirisTex.png"
+        ColorTexture = textures .. "/osirisTex.png",
+        LightSources = LightSources
     },
     Transform = {
         Translation = {

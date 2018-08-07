@@ -25,20 +25,16 @@
 #ifndef __OPENSPACE_MODULE_ISWA___SCREENSPACECYGNET___H__
 #define __OPENSPACE_MODULE_ISWA___SCREENSPACECYGNET___H__
 
-#include <chrono>
-#include <future>
-#include <openspace/rendering/screenspacerenderable.h>
 #include <modules/base/rendering/screenspaceimageonline.h>
 
-#include <openspace/engine/downloadmanager.h>
-#include <modules/iswa/util/iswamanager.h>
+#include <chrono>
 
 namespace openspace {
 
 class ScreenSpaceCygnet : public ScreenSpaceImageOnline {
 public:
     ScreenSpaceCygnet(const ghoul::Dictionary& dictionary);
-    ~ScreenSpaceCygnet();
+    ~ScreenSpaceCygnet() = default;
 
     virtual void update() override;
 

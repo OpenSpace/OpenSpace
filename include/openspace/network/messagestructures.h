@@ -25,17 +25,16 @@
 #ifndef __OPENSPACE_CORE___MESSAGESTRUCTURES___H__
 #define __OPENSPACE_CORE___MESSAGESTRUCTURES___H__
 
+#include <ghoul/glm.h>
+#include <cstring>
 #include <string>
 #include <vector>
 
-//#include <glm/gtx/quaternion.hpp>
-
-#include <openspace/util/camera.h>
-
 namespace openspace::datamessagestructures {
+
 enum class Type : uint32_t {
     CameraData = 0,
-    TimeData,
+    TimelineData,
     ScriptData
 };
 
@@ -49,29 +48,31 @@ struct CameraKeyframe {
     glm::dquat _rotation;
     bool _followNodeRotation;
     std::string _focusNode;
+    float _scale;
 
     double _timestamp;
 
-    void serialize(std::vector<char> &buffer) {
+    void serialize(std::vector<char> &buffer) const {
         // Add position
         buffer.insert(
             buffer.end(),
-            reinterpret_cast<char*>(&_position),
-            reinterpret_cast<char*>(&_position) + sizeof(_position)
+            reinterpret_cast<const char*>(&_position),
+            reinterpret_cast<const char*>(&_position) + sizeof(_position)
         );
 
         // Add orientation
         buffer.insert(
             buffer.end(),
-            reinterpret_cast<char*>(&_rotation),
-            reinterpret_cast<char*>(&_rotation) + sizeof(_rotation)
+            reinterpret_cast<const char*>(&_rotation),
+            reinterpret_cast<const char*>(&_rotation) + sizeof(_rotation)
         );
 
         // Follow focus node rotation?
         buffer.insert(
             buffer.end(),
-            reinterpret_cast<char*>(&_followNodeRotation),
-            reinterpret_cast<char*>(&_followNodeRotation) + sizeof(_followNodeRotation)
+            reinterpret_cast<const char*>(&_followNodeRotation),
+            reinterpret_cast<const char*>(&_followNodeRotation) +
+                sizeof(_followNodeRotation)
         );
 
         int nodeNameLength = static_cast<int>(_focusNode.size());
@@ -79,8 +80,8 @@ struct CameraKeyframe {
         // Add focus node
         buffer.insert(
             buffer.end(),
-            reinterpret_cast<char*>(&nodeNameLength),
-            reinterpret_cast<char*>(&nodeNameLength) + sizeof(nodeNameLength)
+            reinterpret_cast<const char*>(&nodeNameLength),
+            reinterpret_cast<const char*>(&nodeNameLength) + sizeof(nodeNameLength)
         );
         buffer.insert(
             buffer.end(),
@@ -88,16 +89,21 @@ struct CameraKeyframe {
             _focusNode.data() + nodeNameLength
         );
 
+        buffer.insert(
+            buffer.end(),
+            reinterpret_cast<const char*>(&_scale),
+            reinterpret_cast<const char*>(&_scale) + sizeof(_scale)
+        );
+
         // Add timestamp
         buffer.insert(
             buffer.end(),
-            reinterpret_cast<char*>(&_timestamp),
-            reinterpret_cast<char*>(&_timestamp) + sizeof(_timestamp)
+            reinterpret_cast<const char*>(&_timestamp),
+            reinterpret_cast<const char*>(&_timestamp) + sizeof(_timestamp)
         );
     };
 
-    void deserialize(const std::vector<char> &buffer) {
-        int offset = 0;
+    size_t deserialize(const std::vector<char> &buffer, size_t offset = 0) {
         int size = 0;
 
         // Position
@@ -124,9 +130,17 @@ struct CameraKeyframe {
         _focusNode = std::string(buffer.data() + offset, buffer.data() + offset + size);
         offset += size;
 
+        // Scale
+        size = sizeof(_scale);
+        memcpy(&_scale, buffer.data() + offset, size);
+        offset += size;
+
         // Timestamp
         size = sizeof(_timestamp);
         memcpy(&_timestamp, buffer.data() + offset, size);
+        offset += size;
+
+        return offset;
     };
 };
 
@@ -142,71 +156,65 @@ struct TimeKeyframe {
     bool _requiresTimeJump;
     double _timestamp;
 
-    void serialize(std::vector<char> &buffer){
-        // Add current time
+    void serialize(std::vector<char> &buffer) const {
         buffer.insert(
             buffer.end(),
-            reinterpret_cast<char*>(&_time),
-            reinterpret_cast<char*>(&_time) + sizeof(_time)
-        );
-
-        // Add delta time
-        buffer.insert(
-            buffer.end(),
-            reinterpret_cast<char*>(&_dt),
-            reinterpret_cast<char*>(&_dt) + sizeof(_dt)
-        );
-
-        // Add whether time is paused or not
-        buffer.insert(
-            buffer.end(),
-            reinterpret_cast<char*>(&_paused),
-            reinterpret_cast<char*>(&_paused) + sizeof(_paused)
-        );
-
-        // Add whether a time jump is necessary (recompute paths etc)
-        buffer.insert(
-            buffer.end(),
-            reinterpret_cast<char*>(&_requiresTimeJump),
-            reinterpret_cast<char*>(&_requiresTimeJump) + sizeof(_requiresTimeJump)
-        );
-
-        // Add timestamp
-        buffer.insert(
-            buffer.end(),
-            reinterpret_cast<char*>(&_timestamp),
-            reinterpret_cast<char*>(&_timestamp) + sizeof(_timestamp)
+            reinterpret_cast<const char*>(this),
+            reinterpret_cast<const char*>(this) + sizeof(TimeKeyframe)
         );
     };
 
-    void deserialize(const std::vector<char> &buffer){
-        int offset = 0;
+    size_t deserialize(const std::vector<char> &buffer, size_t offset = 0){
+        *this = *reinterpret_cast<const TimeKeyframe*>(buffer.data() + offset);
+        offset += sizeof(TimeKeyframe);
+        return offset;
+    };
+};
+
+struct TimeTimeline {
+    TimeTimeline() {}
+    TimeTimeline(const std::vector<char> &buffer) {
+        deserialize(buffer);
+    }
+
+    bool _clear = true;
+    std::vector<TimeKeyframe> _keyframes;
+
+    void serialize(std::vector<char> &buffer) const {
+        buffer.insert(
+            buffer.end(),
+            reinterpret_cast<const char*>(&_clear),
+            reinterpret_cast<const char*>(&_clear) + sizeof(bool)
+        );
+
+        int64_t nKeyframes = _keyframes.size();
+        buffer.insert(
+            buffer.end(),
+            reinterpret_cast<const char*>(&nKeyframes),
+            reinterpret_cast<const char*>(&nKeyframes) + sizeof(int64_t)
+        );
+        for (const auto k : _keyframes) {
+            k.serialize(buffer);
+        }
+    };
+
+    size_t deserialize(const std::vector<char> &buffer, size_t offset = 0) {
         int size = 0;
 
-        // Current time
-        size = sizeof(_time);
-        memcpy(&_time, buffer.data() + offset, size);
+        size = sizeof(_clear);
+        memcpy(&_clear, buffer.data() + offset, size);
         offset += size;
 
-        // Delta time
-        size = sizeof(_dt);
-        memcpy(&_dt, buffer.data() + offset, size);
+        int64_t nKeyframes = _keyframes.size();
+        size = sizeof(nKeyframes);
+        memcpy(&nKeyframes, buffer.data() + offset, size);
         offset += size;
 
-        // Is time paused?
-        size = sizeof(_paused);
-        memcpy(&_paused, buffer.data() + offset, size);
-        offset += sizeof(_paused);
-
-        // Is a time jump required?
-        size = sizeof(_requiresTimeJump);
-        memcpy(&_requiresTimeJump, buffer.data() + offset, size);
-        offset += size;
-
-        // Timestamp
-        size = sizeof(_timestamp);
-        memcpy(&_timestamp, buffer.data() + offset, size);
-        // offset += size;
+        _keyframes.resize(nKeyframes);
+        for (auto& k : _keyframes) {
+            offset = k.deserialize(buffer, offset);
+        }
+        return offset;
     };
 };
 
@@ -218,11 +226,11 @@ struct ScriptMessage {
 
     std::string _script;
 
-    void serialize(std::vector<char> &buffer){
+    void serialize(std::vector<char> &buffer) const {
         buffer.insert(buffer.end(), _script.begin(), _script.end());
     };
 
-    void deserialize(const std::vector<char> &buffer){
+    void deserialize(const std::vector<char> &buffer) {
         _script.assign(buffer.begin(), buffer.end());
     };
 };

@@ -26,16 +26,8 @@
 
 #include <modules/globebrowsing/tile/rawtiledatareader/gdalrawtiledatareader.h>
 
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/geometry/geodeticpatch.h>
-#include <modules/globebrowsing/geometry/angle.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/tiledatatype.h>
-
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/filesystem/filesystem.h> // abspath
-#include <ghoul/filesystem/file.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -66,13 +58,10 @@ GdalRawTileDataReader::GdalRawTileDataReader(const std::string& filePath,
                                              const TileTextureInitData& initData,
                                        RawTileDataReader::PerformPreprocessing preprocess)
     : RawTileDataReader(initData, preprocess)
-    , _dataset(nullptr)
 {
-    // _initDirectory = baseDirectory.empty() ? CPLGetCurrentDir() : baseDirectory;
     _datasetFilePath = filePath;
 
     {
-        // Aquire lock
         std::lock_guard<std::mutex> lockGuard(_datasetLock);
         initialize();
     }
@@ -80,7 +69,7 @@ GdalRawTileDataReader::GdalRawTileDataReader(const std::string& filePath,
 
 GdalRawTileDataReader::~GdalRawTileDataReader() {
     std::lock_guard<std::mutex> lockGuard(_datasetLock);
-    if (_dataset != nullptr) {
+    if (_dataset) {
         GDALClose(_dataset);
         _dataset = nullptr;
     }
@@ -89,7 +78,7 @@ GdalRawTileDataReader::~GdalRawTileDataReader() {
 void GdalRawTileDataReader::reset() {
     std::lock_guard<std::mutex> lockGuard(_datasetLock);
     _cached._maxLevel = -1;
-    if (_dataset != nullptr) {
+    if (_dataset) {
         GDALClose(_dataset);
         _dataset = nullptr;
     }
@@ -124,7 +113,7 @@ float GdalRawTileDataReader::depthScale() const {
     return _gdalDatasetMetaDataCached.scale;
 }
 
-std::array<double, 6> GdalRawTileDataReader::getGeoTransform() const {
+std::array<double, 6> GdalRawTileDataReader::geoTransform() const {
     return _gdalDatasetMetaDataCached.padfTransform;
 }
 
@@ -150,19 +139,21 @@ void GdalRawTileDataReader::initialize() {
     _gdalDatasetMetaDataCached.noDataValue = static_cast<float>(
         _dataset->GetRasterBand(1)->GetNoDataValue()
     );
-    _gdalDatasetMetaDataCached.dataType =
-        tiledatatype::getGdalDataType(_initData.glType());
+    _gdalDatasetMetaDataCached.dataType = tiledatatype::getGdalDataType(
+        _initData.glType()
+    );
 
     CPLErr err = _dataset->GetGeoTransform(&_gdalDatasetMetaDataCached.padfTransform[0]);
     if (err == CE_Failure) {
-        _gdalDatasetMetaDataCached.padfTransform = RawTileDataReader::getGeoTransform();
+        _gdalDatasetMetaDataCached.padfTransform = RawTileDataReader::geoTransform();
     }
 
     _depthTransform = calculateTileDepthTransform();
-    _cached._tileLevelDifference =
-        calculateTileLevelDifference(_initData.dimensions().x);
+    _cached._tileLevelDifference = calculateTileLevelDifference(
+        _initData.dimensions().x
+    );
 
-    int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
+    const int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
     _cached._maxLevel = static_cast<int>(-_cached._tileLevelDifference);
     if (numOverviews > 0) {
         _cached._maxLevel += numOverviews - 1;
@@ -170,8 +161,9 @@ void GdalRawTileDataReader::initialize() {
     _cached._maxLevel = std::max(_cached._maxLevel, 2);
 }
 
-RawTile::ReadError GdalRawTileDataReader::rasterRead(
-    int rasterBand, const IODescription& io, char* dataDestination) const
+RawTile::ReadError GdalRawTileDataReader::rasterRead(int rasterBand,
+                                                     const IODescription& io,
+                                                     char* dataDestination) const
 {
     ghoul_assert(io.read.region.isInside(io.read.fullRegion), "write region of bounds!");
     ghoul_assert(
@@ -179,8 +171,8 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
         "Invalid write region"
     );
 
-    PixelRegion::PixelCoordinate end = io.write.region.end();
-    [[maybe_unused]] size_t largestIndex =
+    const PixelRegion::PixelCoordinate end = io.write.region.end();
+    [[maybe_unused]] const size_t largestIndex =
         (end.y - 1) * io.write.bytesPerLine + (end.x - 1) * _initData.bytesPerPixel();
     ghoul_assert(largestIndex <= io.write.totalNumBytes, "Invalid write region");
 
@@ -213,16 +205,14 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
     );
 
     // Convert error to RawTile::ReadError
-    RawTile::ReadError error;
     switch (readError) {
-        case CE_None: error = RawTile::ReadError::None; break;
-        case CE_Debug: error = RawTile::ReadError::Debug; break;
-        case CE_Warning: error = RawTile::ReadError::Warning; break;
-        case CE_Failure: error = RawTile::ReadError::Failure; break;
-        case CE_Fatal: error = RawTile::ReadError::Fatal; break;
-        default: error = RawTile::ReadError::Failure; break;
+        case CE_None:    return RawTile::ReadError::None;
+        case CE_Debug:   return RawTile::ReadError::Debug;
+        case CE_Warning: return RawTile::ReadError::Warning;
+        case CE_Failure: return RawTile::ReadError::Failure;
+        case CE_Fatal:   return RawTile::ReadError::Fatal;
+        default:         return RawTile::ReadError::Failure;
     }
-    return error;
 }
 
 GDALDataset* GdalRawTileDataReader::openGdalDataset(const std::string& filePath) {
@@ -239,8 +229,8 @@ int GdalRawTileDataReader::calculateTileLevelDifference(int minimumPixelSize) co
     else { // Pick the highest overview.
         maxOverview = firstBand->GetOverview(numOverviews - 1);
     }
-    int sizeLevel0 = maxOverview->GetXSize();
-    double diff = log2(minimumPixelSize) - log2(sizeLevel0);
+    const int sizeLevel0 = maxOverview->GetXSize();
+    const double diff = log2(minimumPixelSize) - log2(sizeLevel0);
     return static_cast<int>(diff);
 }
 

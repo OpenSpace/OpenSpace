@@ -88,6 +88,7 @@ struct Configuration {
 
     bool isRenderingOnMasterDisabled = false;
     bool isSceneTranslationOnMasterDisabled = false;
+    bool isConsoleDisabled = false;
 
     std::map<std::string, ghoul::Dictionary> moduleConfigurations;
 

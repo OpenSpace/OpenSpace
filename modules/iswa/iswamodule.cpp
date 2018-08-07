@@ -29,12 +29,18 @@
 #include <openspace/util/factorymanager.h>
 
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/templatefactory.h>
+
+#include <openspace/engine/openspaceengine.h>
 
 #include <modules/iswa/rendering/textureplane.h>
 #include <modules/iswa/rendering/dataplane.h>
 #include <modules/iswa/rendering/kameleonplane.h>
 #include <modules/iswa/rendering/datasphere.h>
 #include <modules/iswa/rendering/screenspacecygnet.h>
+
+#include <modules/iswa/util/iswamanager.h>
+#include <openspace/scripting/lualibrary.h>
 
 namespace openspace {
 

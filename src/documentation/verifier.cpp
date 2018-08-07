@@ -25,7 +25,7 @@
 #include <openspace/documentation/verifier.h>
 
 #include <openspace/documentation/documentationengine.h>
-
+#include <ghoul/misc/misc.h>
 #include <algorithm>
 
 namespace openspace::documentation {
@@ -134,7 +134,8 @@ std::string DoubleVerifier::type() const {
 }
 
 TestResult IntVerifier::operator()(const ghoul::Dictionary & dict,
-                                   const std::string & key) const {
+                                   const std::string & key) const
+{
     if (dict.hasKeyAndValue<int>(key)) {
         // We we have a key and the value is int, we are done
         return { true, {}, {} };
@@ -176,14 +177,15 @@ std::string StringVerifier::type() const {
     return "String";
 }
 
-TableVerifier::TableVerifier(std::vector<DocumentationEntry> d)
-    : documentations(std::move(d))
+TableVerifier::TableVerifier(std::vector<DocumentationEntry> documentationEntries)
+    : documentations(std::move(documentationEntries))
 {}
 
-TestResult TableVerifier::operator()(const ghoul::Dictionary& dict,
-                                     const std::string& key) const {
-    if (dict.hasKeyAndValue<Type>(key)) {
-        ghoul::Dictionary d = dict.value<ghoul::Dictionary>(key);
+TestResult TableVerifier::operator()(const ghoul::Dictionary& dictionary,
+                                     const std::string& key) const
+{
+    if (dictionary.hasKeyAndValue<Type>(key)) {
+        ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(key);
         TestResult res = testSpecification({documentations}, d);
 
         // Add the 'key' as a prefix to make the new offender a fully qualified identifer
@@ -199,7 +201,7 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dict,
         return res;
     }
     else {
-        if (dict.hasKey(key)) {
+        if (dictionary.hasKey(key)) {
             return { false, { { key, TestResult::Offense::Reason::WrongType } }, {} };
 
         }
@@ -287,25 +289,36 @@ TestResult ReferencingVerifier::operator()(const ghoul::Dictionary& dictionary,
 }
 
 std::string ReferencingVerifier::documentation() const {
-    using namespace std::string_literals;
-    return "Referencing Documentation: '"s + identifier + "'";
+    return "Referencing Documentation: '" + identifier + "'";
 }
 
-AndVerifier::AndVerifier(Verifier* l, Verifier* r)
-    : lhs(l)
-    , rhs(r)
-{
-    ghoul_assert(lhs, "lhs must not be nullptr");
-    ghoul_assert(rhs, "rhs must not be nullptr");
+AndVerifier::AndVerifier(const std::vector<Verifier*> vs) {
+    ghoul_assert(!vs.empty(), "values must not be empty");
+    for (Verifier* v : vs) {
+        values.push_back(std::shared_ptr<Verifier>(v));
+    }
 }
 
-TestResult AndVerifier::operator()(const ghoul::Dictionary& dict,
+TestResult AndVerifier::operator()(const ghoul::Dictionary& dictionary,
                                    const std::string& key) const
 {
-    TestResult resLhs = lhs->operator()(dict, key);
-    TestResult resRhs = rhs->operator()(dict, key);
+    std::vector<TestResult> res(values.size());
+    std::transform(
+        values.begin(),
+        values.end(),
+        res.begin(),
+        [dictionary, key](const std::shared_ptr<Verifier>& v) {
+            return v->operator()(dictionary, key);
+        }
+    );
 
-    if (resLhs.success && resRhs.success) {
+    const bool success = std::all_of(
+        res.begin(),
+        res.end(),
+        [](const TestResult& res) { return res.success; }
+    );
+
+    if (success) {
         return { true, {}, {} };
     }
     else {
@@ -314,32 +327,60 @@ TestResult AndVerifier::operator()(const ghoul::Dictionary& dict,
 }
 
 std::string AndVerifier::type() const {
-    if (lhs->type() != rhs->type()) {
-        return lhs->type() + " and " + rhs->type();
-    }
-    else {
-        return lhs->type();
-    }
+    // Dirty hack to get an "and " inserted before the last element
+    std::vector<std::string> types(values.size() - 1);
+    std::transform(
+        values.begin(),
+        values.end() - 1,
+        types.begin(),
+        [](const std::shared_ptr<Verifier>& v) { return v->type(); }
+    );
+    types.push_back(std::string("and ") + values.back()->type());
+
+    return ghoul::join(types, ", ");
 }
 
 std::string AndVerifier::documentation() const {
-    return lhs->documentation() + " and " + rhs->documentation();
+    // Dirty hack to get an "and " inserted before the last element
+    std::vector<std::string> documentations(values.size() - 1);
+    std::transform(
+        values.begin(),
+        values.end() - 1,
+        documentations.begin(),
+        [](const std::shared_ptr<Verifier>& v) { return v->documentation(); }
+    );
+    documentations.push_back(std::string("and ") + values.back()->documentation());
+
+    return ghoul::join(documentations, ", ");
 }
 
-OrVerifier::OrVerifier(Verifier* l, Verifier* r)
-    : lhs(l)
-    , rhs(r)
+OrVerifier::OrVerifier(const std::vector<Verifier*> vs) {
+    ghoul_assert(!vs.empty(), "values must not be empty");
+    for (Verifier* v : vs) {
+        values.push_back(std::shared_ptr<Verifier>(v));
+    }
+}
+
+TestResult OrVerifier::operator()(const ghoul::Dictionary& dictionary,
+                                  const std::string& key) const
 {
-    ghoul_assert(lhs, "lhs must not be nullptr");
-    ghoul_assert(rhs, "rhs must not be nullptr");
-}
+    std::vector<TestResult> res(values.size());
+    std::transform(
+        values.begin(),
+        values.end(),
+        res.begin(),
+        [dictionary, key](const std::shared_ptr<Verifier>& v) {
+            return v->operator()(dictionary, key);
+        }
+    );
 
-TestResult OrVerifier::operator()(const ghoul::Dictionary& dict,
-                                   const std::string& key) const {
-    TestResult resA = lhs->operator()(dict, key);
-    TestResult resB = rhs->operator()(dict, key);
+    const bool success = std::any_of(
+        res.begin(),
+        res.end(),
+        [](const TestResult& res) { return res.success; }
+    );
 
-    if (resA.success || resB.success) {
+    if (success) {
         return { true, {}, {} };
     }
     else {
@@ -348,17 +389,31 @@ TestResult OrVerifier::operator()(const ghoul::Dictionary& dict,
 }
 
 std::string OrVerifier::type() const {
-    if (lhs->type() != rhs->type()) {
-        return lhs->type() + " or " + rhs->type();
-    }
-    else {
-        return lhs->type();
-    }
+    // Dirty hack to get an "or " inserted before the last element
+    std::vector<std::string> types(values.size() - 1);
+    std::transform(
+        values.begin(),
+        values.end() - 1,
+        types.begin(),
+        [](const std::shared_ptr<Verifier>& v) { return v->type(); }
+    );
+    types.push_back(std::string("or ") + values.back()->type());
+
+    return ghoul::join(types, ", ");
 }
 
 std::string OrVerifier::documentation() const {
-    return lhs->documentation() + " or " + rhs->documentation();
-}
+    // Dirty hack to get an "or " inserted before the last element
+    std::vector<std::string> documentations(values.size() - 1);
+    std::transform(
+        values.begin(),
+        values.end() - 1,
+        documentations.begin(),
+        [](const std::shared_ptr<Verifier>& v) { return v->documentation(); }
+    );
+    documentations.push_back(std::string("or ") + values.back()->documentation());
 
+    return ghoul::join(documentations, ", ");
+}
 
 } // namespace openspace::documentation

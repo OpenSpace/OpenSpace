@@ -24,45 +24,37 @@
 
 #include <modules/multiresvolume/rendering/histogrammanager.h>
 
-#include <openspace/util/histogram.h>
-#include <cassert>
-#include <float.h>
-#include <math.h>
-#include <string.h>
+#include <modules/multiresvolume/rendering/tsp.h>
+#include <cstring>
+#include <string>
 
 namespace openspace {
 
-HistogramManager::HistogramManager() {}
-
-HistogramManager::~HistogramManager() {}
-
 bool HistogramManager::buildHistograms(TSP* tsp, int numBins) {
-    std::cout << "Build histograms with " << numBins << " bins each" << std::endl;
     _numBins = numBins;
 
     std::ifstream& file = tsp->file();
     if (!file.is_open()) {
         return false;
     }
-    _minBin = 0.0; // Should be calculated from tsp file
-    _maxBin = 1.0; // Should be calculated from tsp file
+    _minBin = 0.f; // Should be calculated from tsp file
+    _maxBin = 1.f; // Should be calculated from tsp file
 
-    int numTotalNodes = tsp->numTotalNodes();
+    const int numTotalNodes = tsp->numTotalNodes();
     _histograms = std::vector<Histogram>(numTotalNodes);
 
-    bool success = buildHistogram(tsp, 0);
-
+    const bool success = buildHistogram(tsp, 0);
     return success;
 }
 
-Histogram* HistogramManager::getHistogram(unsigned int brickIndex) {
+Histogram* HistogramManager::histogram(unsigned int brickIndex) {
     return &_histograms[brickIndex];
 }
 
 bool HistogramManager::buildHistogram(TSP* tsp, unsigned int brickIndex) {
     Histogram histogram(_minBin, _maxBin, _numBins);
-    bool isBstLeaf = tsp->isBstLeaf(brickIndex);
-    bool isOctreeLeaf = tsp->isOctreeLeaf(brickIndex);
+    const bool isBstLeaf = tsp->isBstLeaf(brickIndex);
+    const bool isOctreeLeaf = tsp->isOctreeLeaf(brickIndex);
 
     if (isBstLeaf && isOctreeLeaf) {
         // TSP leaf, read from file and build histogram
@@ -74,16 +66,16 @@ bool HistogramManager::buildHistogram(TSP* tsp, unsigned int brickIndex) {
         }
     } else {
         // Has children
-        auto children = std::vector<unsigned int>();
+        std::vector<unsigned int> children;
 
         if (!isBstLeaf) {
             // Push BST children
-            children.push_back(tsp->getBstLeft(brickIndex));
-            children.push_back(tsp->getBstRight(brickIndex));
+            children.push_back(tsp->bstLeft(brickIndex));
+            children.push_back(tsp->bstRight(brickIndex));
         }
         if (!isOctreeLeaf) {
             // Push Octree children
-            unsigned int firstChild = tsp->getFirstOctreeChild(brickIndex);
+            const unsigned int firstChild = tsp->firstOctreeChild(brickIndex);
             for (int c = 0; c < 8; c++) {
                 children.push_back(firstChild + c);
             }
@@ -91,7 +83,7 @@ bool HistogramManager::buildHistogram(TSP* tsp, unsigned int brickIndex) {
         size_t numChildren = children.size();
         for (size_t c = 0; c < numChildren; c++) {
             // Visit child
-            unsigned int childIndex = children[c];
+            const unsigned int childIndex = children[c];
             if (_histograms[childIndex].isValid() || buildHistogram(tsp, childIndex)) {
                 if (numChildren <= 8 || c < 2) {
                     // If node has both BST and Octree children, only add BST ones
@@ -106,21 +98,23 @@ bool HistogramManager::buildHistogram(TSP* tsp, unsigned int brickIndex) {
     //histogram.normalize();
     _histograms[brickIndex] = std::move(histogram);
 
-
     return true;
 }
 
 std::vector<float> HistogramManager::readValues(TSP* tsp, unsigned int brickIndex) {
-    unsigned int paddedBrickDim = tsp->paddedBrickDim();
-    unsigned int numBrickVals = paddedBrickDim * paddedBrickDim * paddedBrickDim;
+    const unsigned int paddedBrickDim = tsp->paddedBrickDim();
+    const unsigned int numBrickVals = paddedBrickDim * paddedBrickDim * paddedBrickDim;
     std::vector<float> voxelValues(numBrickVals);
 
-    std::streampos offset = tsp->dataPosition() + static_cast<long long>(brickIndex*numBrickVals*sizeof(float));
+    std::streampos offset = tsp->dataPosition() +
+                            static_cast<long long>(brickIndex*numBrickVals*sizeof(float));
     std::ifstream& file = tsp->file();
     file.seekg(offset);
 
-    file.read(reinterpret_cast<char*>(&voxelValues[0]),
-        static_cast<size_t>(numBrickVals)*sizeof(float));
+    file.read(
+        reinterpret_cast<char*>(voxelValues.data()),
+        static_cast<size_t>(numBrickVals)*sizeof(float)
+    );
 
     return voxelValues;
 }
@@ -128,7 +122,7 @@ std::vector<float> HistogramManager::readValues(TSP* tsp, unsigned int brickInde
 bool HistogramManager::loadFromFile(const std::string& filename) {
     std::ifstream file(filename, std::ios::in | std::ios::binary);
     if (!file.is_open()) {
-    return false;
+        return false;
     }
 
     int numHistograms;
@@ -138,29 +132,27 @@ bool HistogramManager::loadFromFile(const std::string& filename) {
     file.read(reinterpret_cast<char*>(&_maxBin), sizeof(float));
 
     int nFloats = numHistograms * _numBins;
-    float* histogramData = new float[nFloats];
-    file.read(reinterpret_cast<char*>(histogramData), sizeof(float) * nFloats);
+    std::vector<float> histogramData(nFloats);
+    file.read(reinterpret_cast<char*>(histogramData.data()), sizeof(float) * nFloats);
 
     _histograms = std::vector<Histogram>(numHistograms);
 
     for (int i = 0; i < numHistograms; ++i) {
-    int offset = i*_numBins;
-    float* data = new float[_numBins];
-    memcpy(data, &histogramData[offset], sizeof(float) * _numBins);
-    _histograms[i] = Histogram(_minBin, _maxBin, _numBins, data);
+        int offset = i * _numBins;
+        // No need to deallocate histogram data, since histograms take ownership.
+        float* data = new float[_numBins];
+        memcpy(data, &histogramData[offset], sizeof(float) * _numBins);
+        _histograms[i] = Histogram(_minBin, _maxBin, _numBins, data);
     }
 
-    delete[] histogramData;
-    // No need to deallocate histogram data, since histograms take ownership.
     file.close();
     return true;
 }
 
-
 bool HistogramManager::saveToFile(const std::string& filename) {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     if (!file.is_open()) {
-    return false;
+        return false;
     }
 
     size_t numHistograms = _histograms.size();
@@ -170,15 +162,14 @@ bool HistogramManager::saveToFile(const std::string& filename) {
     file.write(reinterpret_cast<char*>(&_maxBin), sizeof(float));
 
     size_t nFloats = numHistograms * _numBins;
-    float* histogramData = new float[nFloats];
+    std::vector<float> histogramData(nFloats);
 
     for (size_t i = 0; i < numHistograms; ++i) {
         size_t offset = i*_numBins;
         memcpy(&histogramData[offset], _histograms[i].data(), sizeof(float) * _numBins);
     }
 
-    file.write(reinterpret_cast<char*>(histogramData), sizeof(float) * nFloats);
-    delete[] histogramData;
+    file.write(reinterpret_cast<char*>(histogramData.data()), sizeof(float) * nFloats);
 
     file.close();
     return true;

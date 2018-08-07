@@ -25,20 +25,18 @@
 #ifndef __OPENSPACE_CORE___SCENELICENSE___H__
 #define __OPENSPACE_CORE___SCENELICENSE___H__
 
-#include <openspace/documentation/documentation.h>
-
 #include <string>
 #include <vector>
 
-namespace ghoul {
-    class Dictionary;
-} // namespace ghoul
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
+
 struct SceneLicense {
     // module must not be empty
-    SceneLicense(const ghoul::Dictionary& dictionary, std::string module);
+    SceneLicense(const ghoul::Dictionary& dictionary, std::string m);
 
     std::string module;
 

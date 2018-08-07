@@ -1,7 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local proceduralGlobes = asset.require('util/procedural_globe')
 local transforms = asset.require('../transforms')
-local kernels341 = asset.require('../jup341').Kernels
+local kernel = asset.require('../kernels').jup341
 
 
 
@@ -25,7 +25,7 @@ local carmeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 672.75,
-        Kernels = kernels341
+        Kernels = kernel
     },
     {
         Identifier = "Aitne",
@@ -41,7 +41,7 @@ local carmeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 679.64,
-        Kernels = kernels341
+        Kernels = kernel
     },
     {
         Identifier = "Kale",
@@ -57,7 +57,7 @@ local carmeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 685.32,
-        Kernels = kernels341
+        Kernels = kernel
     },
     {
         Identifier = "Taygete",
@@ -73,7 +73,7 @@ local carmeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 686.67,
-        Kernels = kernels341
+        Kernels = kernel
     },
     {
         Identifier = "Chaldene",
@@ -89,7 +89,7 @@ local carmeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 699.33,
-        Kernels = kernels341
+        Kernels = kernel
     },
     {
         Identifier = "Erinome",
@@ -105,7 +105,7 @@ local carmeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 711.96,
-        Kernels = kernels341
+        Kernels = kernel
     },
     {
         Identifier = "Kallichore",
@@ -121,7 +121,7 @@ local carmeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 717.81,
-        Kernels = kernels341
+        Kernels = kernel
     },
     {
         Identifier = "Kalyke",
@@ -137,7 +137,7 @@ local carmeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 721.02,
-        Kernels = kernels341
+        Kernels = kernel
     },
     {
         Identifier = "Pasithee",
@@ -153,7 +153,7 @@ local carmeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 726.93,
-        Kernels = kernel341
+        Kernels = kernel
     },
     {
         Identifier = "S2010J1",
@@ -170,7 +170,7 @@ local carmeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 722.83,
-        Kernels = kernels341
+        Kernels = kernel
     },
     {
         Identifier = "Eukelade",
@@ -186,7 +186,7 @@ local carmeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 735.20,
-        Kernels = kernels341
+        Kernels = kernel
     },
     {
         Identifier = "Arche",
@@ -202,7 +202,7 @@ local carmeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 746.19,
-        Kernels = kernels341
+        Kernels = kernel
     },
     {
         Identifier = "Isonoe",
@@ -218,7 +218,7 @@ local carmeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 750.13,
-        Kernels = kernels341
+        Kernels = kernel
     },
     {
         Identifier = "Carme",
@@ -234,7 +234,7 @@ local carmeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 763.95,
-        Kernels = kernels341
+        Kernels = kernel
     },
     {
         Identifier = "S2003J5",
@@ -251,7 +251,7 @@ local carmeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 758.34,
-        Kernels = kernels341
+        Kernels = kernel
     },
 }
 

@@ -27,12 +27,9 @@
 
 #include <modules/imgui/include/guicomponent.h>
 
-#include <openspace/properties/property.h>
 #include <openspace/properties/stringlistproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-
 #include <ghoul/misc/boolean.h>
-
 #include <functional>
 #include <string>
 #include <vector>
@@ -56,7 +53,7 @@ public:
 
     // This is the function that evaluates to the list of Propertyowners that this
     // component should render
-    void setSource(SourceFunction func);
+    void setSource(SourceFunction function);
 
     void setVisibility(properties::Property::Visibility visibility);
     void setHasRegularProperties(bool hasOnlyRegularProperties);

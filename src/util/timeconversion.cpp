@@ -31,7 +31,7 @@
 namespace openspace {
 
 std::pair<double, std::string> simplifyTime(double seconds, bool forceSingularForm) {
-    double secondsVal = glm::abs(seconds);
+    const double secondsVal = glm::abs(seconds);
 
     if (secondsVal == 0.0) {
         return { 0.0, forceSingularForm ? "second" : "seconds" };
@@ -41,18 +41,18 @@ std::pair<double, std::string> simplifyTime(double seconds, bool forceSingularFo
     }
 
     if (secondsVal <= 1e-9) {
-        double val = seconds / 1e-9;
+        const double val = seconds / 1e-9;
         return { val, (val == 1.0 || forceSingularForm) ? "nanosecond" : "nanoseconds" };
     }
     else if (secondsVal <= 1e-6) {
-        double val = seconds / 1e-6;
+        const double val = seconds / 1e-6;
         return {
             val,
             (val == 1.0 || forceSingularForm) ? "microsecond" : "microseconds"
         };
     }
     else if (secondsVal <= 1e-3) {
-        double val = seconds / 1e-3;
+        const double val = seconds / 1e-3;
         return {
             val,
             (val == 1.0 || forceSingularForm) ? "millisecond" : "milliseconds"
@@ -60,23 +60,23 @@ std::pair<double, std::string> simplifyTime(double seconds, bool forceSingularFo
     }
 
     if (secondsVal >= SecondsPerYear) {
-        double val = seconds / SecondsPerYear;
+        const double val = seconds / SecondsPerYear;
         return { val, (val == 1.0 || forceSingularForm) ? "year" : "years" };
     }
     else if (secondsVal >= SecondsPerMonth) {
-        double val = seconds / SecondsPerMonth;
+        const double val = seconds / SecondsPerMonth;
         return { val, (val == 1.0 || forceSingularForm) ? "month" : "months" };
     }
     else if (secondsVal >= SecondsPerDay) {
-        double val = seconds / SecondsPerDay;
+        const double val = seconds / SecondsPerDay;
         return { val, (val == 1.0 || forceSingularForm) ? "day" : "days" };
     }
     else if (secondsVal >= SecondsPerHour) {
-        double val = seconds / SecondsPerHour;
+        const double val = seconds / SecondsPerHour;
         return { val, (val == 1.0 || forceSingularForm) ? "hour" : "hours" };
     }
     else {
-        double val = seconds / SecondsPerMinute;
+        const double val = seconds / SecondsPerMinute;
         return { val, (val == 1.0 || forceSingularForm) ? "minute" : "minutes" };
     }
 }

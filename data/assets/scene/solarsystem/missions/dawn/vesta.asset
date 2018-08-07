@@ -19,9 +19,9 @@ local images = asset.syncedResource({
 
 local models = asset.syncedResource({
     Name = "Vesta Models",
-    Type = "TorrentSynchronization",
+    Type = "HttpSynchronization",
     Identifier = "vesta_comet",
-    Magnet = "magnet:?xt=urn:btih:4250685907FAEC6AE242485AB3E2018DE0377559&dn=VestaComet"
+    Version = 1
 })
 
 local Vesta = {
@@ -33,8 +33,8 @@ local Vesta = {
             Target = "VESTA",
             Observer = "SUN",
             Kernels = {
-                --kernels .. "/pck/dawn_vesta_v06.tpc",
-                kernels .. "/DawnKernels/spk/sb_vesta_071107.bsp"
+                --kernels .. "/dawn_vesta_v06.tpc",
+                kernels .. "/sb_vesta_071107.bsp"
             }
         },
         Rotation = {

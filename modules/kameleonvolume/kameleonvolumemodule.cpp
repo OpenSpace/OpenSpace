@@ -24,24 +24,22 @@
 
 #include <modules/kameleonvolume/kameleonvolumemodule.h>
 
-#include <openspace/util/factorymanager.h>
-
-#include <ghoul/misc/assert.h>
-#include <vector>
-
 #include <modules/kameleonvolume/rendering/renderablekameleonvolume.h>
 #include <modules/kameleonvolume/tasks/kameleonmetadatatojsontask.h>
 #include <modules/kameleonvolume/tasks/kameleondocumentationtask.h>
 #include <modules/kameleonvolume/tasks/kameleonvolumetorawtask.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/util/factorymanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
-
-
-using namespace kameleonvolume;
 
 KameleonVolumeModule::KameleonVolumeModule() : OpenSpaceModule(Name) {}
 
 void KameleonVolumeModule::internalInitialize(const ghoul::Dictionary&) {
+    using namespace kameleonvolume;
+
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
     fRenderable->registerClass<RenderableKameleonVolume>("RenderableKameleonVolume");
@@ -54,6 +52,8 @@ void KameleonVolumeModule::internalInitialize(const ghoul::Dictionary&) {
 }
 
 std::vector<documentation::Documentation> KameleonVolumeModule::documentations() const {
+    using namespace kameleonvolume;
+
     return { KameleonMetadataToJsonTask::documentation() };
 }
 

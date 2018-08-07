@@ -20,6 +20,10 @@ local Uranus = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_URANUS",
             DestinationFrame = "GALACTIC"
+        },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1.0
         }
     },
     Renderable = {

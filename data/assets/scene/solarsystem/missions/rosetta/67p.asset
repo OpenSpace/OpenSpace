@@ -12,24 +12,17 @@ local textures = asset.syncedResource({
 
 local models = asset.syncedResource({
     Name = "67P Models",
-    Type = "TorrentSynchronization",
+    Type = "HttpSynchronization",
     Identifier = "67p_models",
-    Magnet = "magnet:?xt=urn:btih:16BDDBA5346219C64CD818AE00DEC6FEE095BCEC&dn=67P_rotated_5_130.obj&tr=udp%3a%2f%2ftracker.openbittorrent.com%3a80%2fannounce&tr=udp%3a%2f%2ftracker.publicbt.com%3a80%2fannounce&tr=udp%3a%2f%2ftracker.ccc.de%3a80%2fannounce"
+    Version = 1
 })
 
-local imagesLocal = asset.syncedResource({
+local images = asset.syncedResource({
     Name = "Rosetta Images",
     Type = "HttpSynchronization",
     Identifier = "rosettaimages",
     Version = 1
 })
-
-local imagesTorrent = asset.syncedResource({
-    Name = "Rosetta Image Torrent",
-    Type = "TorrentSynchronization",
-    Identifier = "rosettaimages",
-    Magnet = "magnet:?xt=urn:btih:4218A4C0DA6DFE418A3FD408C1AC9CCB7886165E&dn=rosettaimages&tr=udp%3a%2f%2ftracker.openbittorrent.com%3a80%2fannounce&tr=udp%3a%2f%2ftracker.opentrackr.org%3a1337%2fannounce"
-}) .. "/rosettaimages"
 
 local Barycenter = {
     Identifier = "67PBarycenter",
@@ -65,8 +58,7 @@ local Comet67P = {
         }, 
         ColorTexture = textures .. "/gray.jpg",
         Projection = {
-            Sequence   = { imagesTorrent },
-            -- Sequence   = { imagesLocal, imagesTorrent },
+            Sequence   = { images },
             SequenceType = "image-sequence",
             Observer   = "ROSETTA",
             Target     = "CHURYUMOV-GERASIMENKO",
@@ -96,6 +88,9 @@ local Comet67P = {
                         CHURYUMOVGERASIMENKO11969R1 = { "CHURYUMOV-GERASIMENKO" },
                         CHURYUMOVGERASIMENKO = { "CHURYUMOV-GERASIMENKO" },
                         ["CHURYUMOV-GERASIMENKO1(1969R1)"] = { "CHURYUMOV-GERASIMENKO" },
+                        CALIBRATION = { "CALIBRATION" },
+                        ALPHALYR = { "ALPHALYR" },
+                        ZETACAS = { "ZETACAS" }
                     }
                 }
             },

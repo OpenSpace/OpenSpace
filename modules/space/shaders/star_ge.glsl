@@ -97,6 +97,7 @@ void main() {
         return;
     }
 
+// NEW
     ge_bvLumAbsMag = vs_bvLumAbsMag[0];
     ge_velocity    = vs_velocity[0];
     ge_speed       = vs_speed[0];
@@ -230,3 +231,8 @@ void main() {
     EmitVertex();
     EndPrimitive();     
 }
+// OLD
+/*
+    EndPrimitive();
+}
+*/

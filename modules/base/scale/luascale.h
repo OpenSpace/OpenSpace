@@ -28,9 +28,9 @@
 #include <openspace/scene/scale.h>
 
 #include <openspace/properties/stringproperty.h>
-
 #include <ghoul/lua/luastate.h>
-#include <ghoul/filesystem/file.h>
+
+namespace ghoul::filesystem { class File; }
 
 namespace openspace {
 
@@ -41,7 +41,7 @@ public:
     LuaScale();
     LuaScale(const ghoul::Dictionary& dictionary);
 
-    double scaleValue(const Time& time) const override;
+    double scaleValue(const UpdateData& data) const override;
 
     static documentation::Documentation Documentation();
 

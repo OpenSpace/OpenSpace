@@ -1,6 +1,6 @@
 local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
-local kernels375 = asset.require('../sat375').Kernels
+local kernel = asset.require('../kernels').sat375
 
 
 
@@ -13,7 +13,7 @@ local IapetusTrail = {
             Type = "SpiceTranslation",
             Target = "IAPETUS",
             Observer = "SATURN BARYCENTER",
-            Kernels = kernels375
+            Kernels = kernel
         },
         Color = { 0.5, 0.3, 0.3 },
         Period = 79.0,

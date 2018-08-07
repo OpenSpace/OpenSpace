@@ -24,8 +24,7 @@
 
 #include <modules/base/rendering/multimodelgeometry.h>
 
-#include "ghoul/io/model/modelreadermultiformat.h"
-
+#include <ghoul/io/model/modelreadermultiformat.h>
 #include <cstring>
 
 namespace openspace::modelgeometry {
@@ -36,14 +35,14 @@ MultiModelGeometry::MultiModelGeometry(const ghoul::Dictionary& dictionary)
     loadObj(_file);
 }
 
-bool MultiModelGeometry::loadModel(const std::string& filename)  {
+bool MultiModelGeometry::loadModel(const std::string& filename) {
     std::vector<ghoul::io::ModelReaderBase::Vertex> vertices;
     std::vector<int> indices;
     ghoul::io::ModelReaderMultiFormat().loadModel(filename, vertices, indices);
 
     _vertices.reserve(vertices.size());
     for (const ghoul::io::ModelReaderBase::Vertex& v : vertices) {
-        Vertex vv;
+        Vertex vv {};
         memcpy(vv.location, v.location, sizeof(GLfloat) * 3);
         vv.location[3] = 1.0;
         //memcpy(vv.location, glm::value_ptr(p.vec4()), sizeof(GLfloat) * 4);

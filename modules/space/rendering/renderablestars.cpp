@@ -34,6 +34,7 @@
 
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
@@ -41,6 +42,7 @@
 #include <ghoul/opengl/textureunit.h>
 
 #include <array>
+#include <cstdint>
 #include <fstream>
 #include <stdint.h>
 #include <limits>
@@ -51,6 +53,11 @@ namespace {
     constexpr const char* _loggerCat = "RenderableStars";
 
     constexpr const char* KeyFile = "File";
+
+    constexpr const std::array<const char*, 10> UniformNames = {
+        "view", "projection", "colorOption", "alphaValue", "scaleFactor",
+        "minBillboardSize", "screenSize", "scaling", "psfTexture", "colorTexture"
+    };
 
     constexpr int8_t CurrentCacheVersion = 1;
 
@@ -91,7 +98,7 @@ namespace {
         "to its color. The texture is used as a one dimensional lookup function."
     };
 
-    static const openspace::properties::Property::PropertyInfo ColorOptionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ColorOptionInfo = {
         "ColorOption",
         "Color Option",
         "This value determines which quantity is used for determining the color of the "
@@ -427,16 +434,16 @@ namespace openspace {
                     reinterpret_cast<void*>(offsetof(VelocityVBOLayout, bvColor))
                 );
 
-                GLint velocityAttrib = _program->attributeLocation("in_velocity");
-                glEnableVertexAttribArray(velocityAttrib);
-                glVertexAttribPointer(
-                    velocityAttrib,
-                    3,
-                    GL_FLOAT,
-                    GL_TRUE,
-                    stride,
-                    reinterpret_cast<void*>(offsetof(VelocityVBOLayout, vx))
-                );
+            GLint velocityAttrib = _program->attributeLocation("in_velocity");
+            glEnableVertexAttribArray(velocityAttrib);
+            glVertexAttribPointer(
+                velocityAttrib,
+                3,
+                GL_FLOAT,
+                GL_TRUE,
+                stride,
+                reinterpret_cast<void*>(offsetof(VelocityVBOLayout, vx)) // NOLINT
+            );
 
                 break;
             }

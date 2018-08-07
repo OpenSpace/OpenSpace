@@ -40,6 +40,18 @@ void main() {
     vs_bvLumAbsMag = in_bvLumAbsMag;
     vs_velocity    = in_velocity;
     vs_speed       = in_speed;
-
+// NEW
     gl_Position = vec4(in_position);
+//OLD
+/*
+    vec4 tmp = p;
+    vec4 position = pscTransform(tmp, mat4(1.0));
+    
+    // G-Buffer
+    vs_gPosition = view * (vec4(1E19, 1E19, 1E19, 1.0) * position);
+    
+    position = view * position;
+    
+    gl_Position = position;
+*/
 }

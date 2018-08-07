@@ -28,7 +28,6 @@
 #include <modules/globebrowsing/rendering/gpu/gpulayer.h>
 
 #include <modules/globebrowsing/rendering/gpu/gputiledepthtransform.h>
-#include <openspace/util/gpudata.h>
 #include <string>
 
 namespace ghoul::opengl { class ProgramObject; }
@@ -44,7 +43,6 @@ struct TileIndex;
  */
 class GPUHeightLayer : public GPULayer {
 public:
-
     virtual ~GPUHeightLayer() override = default;
 
     /**

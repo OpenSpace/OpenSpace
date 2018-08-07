@@ -25,27 +25,19 @@
 #include <modules/spacecraftinstruments/util/decoder.h>
 
 #include <openspace/util/factorymanager.h>
-
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 
 std::unique_ptr<Decoder> Decoder::createFromDictionary(
-    const ghoul::Dictionary& dictionary, const std::string& type)
+                                                      const ghoul::Dictionary& dictionary,
+                                                                  const std::string& type)
 {
     ghoul::TemplateFactory<Decoder>* factory = FactoryManager::ref().factory<Decoder>();
     std::unique_ptr<Decoder> result = factory->create(type, dictionary);
-
-    if (!result) {
-        throw ghoul::RuntimeError(
-            "Failed creating payload object of type '" + type + '"',
-            "Decoder"
-        );
-    }
     return result;
 }
-
-Decoder::~Decoder() {}
 
 } // namespace openspace

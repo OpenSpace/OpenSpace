@@ -100,21 +100,21 @@ public:
     std::shared_ptr<performance::PerformanceManager> performanceManager();
 
     float globalBlackOutFactor();
-    void setGlobalBlackOutFactor(float factor);
+    void setGlobalBlackOutFactor(float opacity);
 
     void addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderable> s);
     void removeScreenSpaceRenderable(ScreenSpaceRenderable* s);
-    void removeScreenSpaceRenderable(const std::string& name);
-    ScreenSpaceRenderable* screenSpaceRenderable(const std::string& name);
+    void removeScreenSpaceRenderable(const std::string& identifier);
+    ScreenSpaceRenderable* screenSpaceRenderable(const std::string& identifier);
     std::vector<ScreenSpaceRenderable*> screenSpaceRenderables() const;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
         const std::string& name, const std::string& vsPath, std::string fsPath,
-        ghoul::Dictionary dictionary = ghoul::Dictionary());
+        ghoul::Dictionary data = ghoul::Dictionary());
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
         const std::string& name, const std::string& vsPath, std::string fsPath,
-        const std::string& csPath, ghoul::Dictionary dictionary = ghoul::Dictionary());
+        const std::string& csPath, ghoul::Dictionary data = ghoul::Dictionary());
 
     void removeRenderProgram(ghoul::opengl::ProgramObject* program);
 
@@ -134,7 +134,7 @@ public:
     void setCamera(Camera* camera);
 
 
-    void setRendererFromString(const std::string& method);
+    void setRendererFromString(const std::string& renderingMethod);
 
     /**
      * Lets the renderer update the data to be brought into the rendererer programs
@@ -164,7 +164,7 @@ public:
 
 private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
-    RendererImplementation rendererFromString(const std::string& method) const;
+    RendererImplementation rendererFromString(const std::string& renderingMethod) const;
 
     void renderScreenLog();
     void renderVersionInformation();
@@ -173,8 +173,8 @@ private:
     void renderDashboard();
 
 
-    Camera* _camera;
-    Scene* _scene;
+    Camera* _camera = nullptr;
+    Scene* _scene = nullptr;
     std::unique_ptr<RaycasterManager> _raycasterManager;
     std::unique_ptr<DeferredcasterManager> _deferredcasterManager;
 
@@ -182,10 +182,10 @@ private:
     std::shared_ptr<performance::PerformanceManager> _performanceManager;
 
     std::unique_ptr<Renderer> _renderer;
-    RendererImplementation _rendererImplementation;
+    RendererImplementation _rendererImplementation = RendererImplementation::Invalid;
     ghoul::Dictionary _rendererData;
     ghoul::Dictionary _resolveData;
-    ScreenLog* _log;
+    ScreenLog* _log = nullptr;
 
     properties::BoolProperty _showOverlayOnSlaves;
     properties::BoolProperty _showLog;
@@ -214,10 +214,10 @@ private:
     properties::PropertyOwner _screenSpaceOwner;
     std::vector<std::unique_ptr<ScreenSpaceRenderable>> _screenSpaceRenderables;
 
-    std::shared_ptr<ghoul::fontrendering::Font> _fontBig = nullptr;
-    std::shared_ptr<ghoul::fontrendering::Font> _fontInfo = nullptr;
-    std::shared_ptr<ghoul::fontrendering::Font> _fontDate = nullptr;
-    std::shared_ptr<ghoul::fontrendering::Font> _fontLog = nullptr;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontBig;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontLog;
 
     struct {
         glm::ivec4 rotation;

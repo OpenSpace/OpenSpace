@@ -27,7 +27,6 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-
 #include <chrono>
 #include <string>
 

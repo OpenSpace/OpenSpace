@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/timemanager.h>
 
 // Apple uses 'defer' as named arguments in some functions, so unfortunately, we have to
@@ -89,7 +90,7 @@ NSArray* focusIdentifiers;
         if ([identifier isEqualToString:pauseResultId]) {
             NSButton* button = [NSButton 
                 buttonWithTitle:NSLocalizedString(
-                    (OsEng.timeManager().time().paused() ? @"Resume" : @"Pause"),
+                    (OsEng.timeManager().isPaused() ? @"Resume" : @"Pause"),
                     @""
                 )
                 target:self action:@selector(pauseResumeButtonAction:)
@@ -105,7 +106,7 @@ NSArray* focusIdentifiers;
                 @""
             );
 
-            return touchBarItem;
+            return [touchBarItem autorelease];
         }
 
         if ([identifier isEqualToString:showFullGuiId]) {
@@ -124,7 +125,7 @@ NSArray* focusIdentifiers;
                 @""
             );
 
-            return touchBarItem;
+            return [touchBarItem autorelease];
         }
 
         if ([identifier isEqualToString:showSimpleGuiId]) {
@@ -143,7 +144,7 @@ NSArray* focusIdentifiers;
                 @""
             );
 
-            return touchBarItem;
+            return [touchBarItem autorelease];
         }
 
         if ([focusIdentifiers containsObject:identifier]) {
@@ -162,7 +163,7 @@ NSArray* focusIdentifiers;
                 @""
             );
 
-            return touchBarItem;
+            return [touchBarItem autorelease];
         }
 
         return nil;
@@ -176,7 +177,7 @@ NSArray* focusIdentifiers;
 
         NSButton* button = static_cast<NSButton*>(sender);
         // This check is inverted since the togglePause script has not run yet
-        [button setTitle: OsEng.timeManager().time().paused() ? @"Pause" : @"Resume"];
+        [button setTitle: OsEng.timeManager().isPaused() ? @"Pause" : @"Resume"];
     }
 
     - (void)focusObjectAction:(id)sender {
@@ -214,7 +215,7 @@ NSArray* focusIdentifiers;
         // Remove unused variable warning
         (void)sender;
         OsEng.scriptEngine().queueScript(
-"local b = openspace.getPropertyValue('Modules.ImGUI.Main.Properties.Enabled');\n\
+"local b = openspace.getPropertyValue('Modules.ImGUI.Main.FeaturedProperties.Enabled');\n\
 local c = openspace.getPropertyValue('Modules.ImGUI.Main.IsHidden');\n\
 openspace.setPropertyValue('Modules.ImGUI.*.Enabled', false);\n\
 if b and c then\n\
@@ -223,20 +224,20 @@ if b and c then\n\
     -- enabled, but also all windows are hidden\n\
     openspace.setPropertyValueSingle('Modules.ImGUI.Main.IsHidden', false);\n\
     openspace.setPropertyValueSingle(\n\
-        'Modules.ImGUI.Main.Properties.Enabled',\n\
+        'Modules.ImGUI.Main.FeaturedProperties.Enabled',\n\
         true\n\
     );\n\
     openspace.setPropertyValueSingle(\n\
-        'Modules.ImGUI.Main.Space/Time.Enabled',\n\
+        'Modules.ImGUI.Main.SpaceTime.Enabled',\n\
         true\n\
     );\n\
 else\n\
     openspace.setPropertyValueSingle(\n\
-        'Modules.ImGUI.Main.Properties.Enabled',\n\
+        'Modules.ImGUI.Main.FeaturedProperties.Enabled',\n\
         not b\n\
     );\n\
     openspace.setPropertyValueSingle(\n\
-        'Modules.ImGUI.Main.Space/Time.Enabled',\n\
+        'Modules.ImGUI.Main.SpaceTime.Enabled',\n\
         not b\n\
     );\n\
     openspace.setPropertyValueSingle('Modules.ImGUI.Main.IsHidden', b);\n\

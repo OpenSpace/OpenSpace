@@ -24,58 +24,57 @@
 
 #include <modules/iswa/rendering/iswadatagroup.h>
 
-#include <fstream>
-#include <modules/iswa/ext/json.h>
-
-#include <modules/iswa/util/dataprocessortext.h>
-#include <modules/iswa/util/dataprocessorjson.h>
-#include <modules/iswa/util/dataprocessorkameleon.h>
-
 #include <modules/iswa/rendering/dataplane.h>
 #include <modules/iswa/rendering/datasphere.h>
 #include <modules/iswa/rendering/kameleonplane.h>
+#include <modules/iswa/util/dataprocessor.h>
+#include <modules/iswa/util/dataprocessortext.h>
+#include <modules/iswa/util/dataprocessorjson.h>
+#include <modules/iswa/util/dataprocessorkameleon.h>
+#include <openspace/json.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr const char* _loggerCat = "IswaDataGroup";
     using json = nlohmann::json;
 
-    static const openspace::properties::Property::PropertyInfo UseLogInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UseLogInfo = {
         "UseLog",
         "Use Logarithm",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo UseHistogramInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UseHistogramInfo = {
         "UseHistogram",
         "Auto Contrast",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo AutoFilterInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AutoFilterInfo = {
         "AutoFilter",
         "Auto Filter",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo NormalizeValues = {
+    constexpr openspace::properties::Property::PropertyInfo NormalizeValues = {
         "NormValues",
         "Normalize Values",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo BackgroundInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BackgroundInfo = {
         "BackgroundValues",
         "Background Values",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "Transferfunctions",
         "Transfer Functions",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo DataOptionsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DataOptionsInfo = {
         "DataOptions",
         "Data Options",
         "" // @TODO Missing documentation
@@ -106,43 +105,32 @@ IswaDataGroup::IswaDataGroup(std::string name, std::string type)
     registerProperties();
 }
 
-IswaDataGroup::~IswaDataGroup(){}
+IswaDataGroup::~IswaDataGroup() {}
 
-void IswaDataGroup::registerProperties(){
-    //OsEng.gui()._iswa.registerProperty(&_useLog);
-    //OsEng.gui()._iswa.registerProperty(&_useHistogram);
-    //OsEng.gui()._iswa.registerProperty(&_autoFilter);
-    //if(!_autoFilter.value())
-    //    OsEng.gui()._iswa.registerProperty(&_backgroundValues);
-    //// OsEng.gui()._iswa.registerProperty(&_autoFilter);
-    //OsEng.gui()._iswa.registerProperty(&_normValues);
-    //OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
-    //OsEng.gui()._iswa.registerProperty(&_dataOptions);
-
-
-    _useLog.onChange([this]{
+void IswaDataGroup::registerProperties() {
+    _useLog.onChange([this]() {
         LDEBUG("Group " + identifier() + " published useLogChanged");
-        _groupEvent->publish(
+        _groupEvent.publish(
             "useLogChanged",
-            ghoul::Dictionary({{"useLog", _useLog.value()}})
+            ghoul::Dictionary({ { "useLog", _useLog.value() } })
         );
     });
 
-    _useHistogram.onChange([this]{
+    _useHistogram.onChange([this]() {
         LDEBUG("Group " + identifier() + " published useHistogramChanged");
-        _groupEvent->publish(
+        _groupEvent.publish(
             "useHistogramChanged",
-            ghoul::Dictionary({{"useHistogram", _useHistogram.value()}})
+            ghoul::Dictionary({ { "useHistogram", _useHistogram.value() } })
         );
     });
 
     //If autofiler is on, background values property should be hidden
-    _autoFilter.onChange([this](){
+    _autoFilter.onChange([this]() {
         LDEBUG("Group " + identifier() + " published autoFilterChanged");
         // If autofiler is selected, use _dataProcessor to set backgroundValues
         // and unregister backgroundvalues property.
-        if(_autoFilter.value()){
-            _backgroundValues.setValue(_dataProcessor->filterValues());
+        if (_autoFilter) {
+            _backgroundValues = _dataProcessor->filterValues();
             _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
             //_backgroundValues.setVisible(false);
         // else if autofilter is turned off, register backgroundValues
@@ -150,41 +138,41 @@ void IswaDataGroup::registerProperties(){
             _backgroundValues.setVisibility(properties::Property::Visibility::All);
             //_backgroundValues.setVisible(true);
         }
-        _groupEvent->publish(
+        _groupEvent.publish(
             "autoFilterChanged",
-            ghoul::Dictionary({{"autoFilter", _autoFilter.value()}})
+            ghoul::Dictionary({ { "autoFilter", _autoFilter.value() } })
         );
     });
 
-    _normValues.onChange([this]{
+    _normValues.onChange([this]() {
         LDEBUG("Group " + identifier() + " published normValuesChanged");
-        _groupEvent->publish(
+        _groupEvent.publish(
             "normValuesChanged",
-            ghoul::Dictionary({{"normValues", _normValues.value()}})
+            ghoul::Dictionary({ { "normValues", _normValues.value() } })
         );
     });
 
-    _backgroundValues.onChange([this]{
+    _backgroundValues.onChange([this]() {
         LDEBUG("Group " + identifier() + " published backgroundValuesChanged");
-        _groupEvent->publish(
+        _groupEvent.publish(
             "backgroundValuesChanged",
-            ghoul::Dictionary({{"backgroundValues", _backgroundValues.value()}})
+            ghoul::Dictionary({ { "backgroundValues", _backgroundValues.value() } })
         );
     });
 
-    _transferFunctionsFile.onChange([this]{
+    _transferFunctionsFile.onChange([this]() {
         LDEBUG("Group " + identifier() + " published transferFunctionsChanged");
-        _groupEvent->publish(
+        _groupEvent.publish(
             "transferFunctionsChanged",
-            ghoul::Dictionary({{"transferFunctions", _transferFunctionsFile.value()}})
+            ghoul::Dictionary({ { "transferFunctions", _transferFunctionsFile.value() } })
         );
     });
 
-    _dataOptions.onChange([this]{
+    _dataOptions.onChange([this]() {
         LDEBUG("Group " + identifier() + " published dataOptionsChanged");
         ghoul::Dictionary dict;
         dict.setValue<std::vector<int>>("dataOptions", _dataOptions.value());
-        _groupEvent->publish("dataOptionsChanged", dict);
+        _groupEvent.publish("dataOptionsChanged", dict);
     });
 }
 
@@ -196,10 +184,10 @@ void IswaDataGroup::registerOptions(
     }
 
     if (_dataOptions.options().empty()) {
-        for (auto option : options) {
-            _dataOptions.addOption({option.value, option.description});
+        for (properties::SelectionProperty::Option option : options) {
+            _dataOptions.addOption({ option.value, option.description });
         }
-        _dataOptions.setValue(std::vector<int>(1,0));
+        _dataOptions.setValue(std::vector<int>(1, 0));
     }
 }
 
@@ -213,8 +201,8 @@ void IswaDataGroup::createDataProcessor() {
     }
 }
 
-std::vector<int> IswaDataGroup::dataOptionsValue() {
-    return _dataOptions.value();
+std::vector<int> IswaDataGroup::dataOptionsValue() const {
+    return _dataOptions;
 }
 
 } //namespace openspace

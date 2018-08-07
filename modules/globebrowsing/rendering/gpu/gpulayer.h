@@ -43,7 +43,6 @@ struct TileIndex;
  */
 class GPULayer {
 public:
-
     virtual ~GPULayer() = default;
 
     /**
