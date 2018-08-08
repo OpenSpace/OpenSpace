@@ -202,8 +202,8 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo PSFMultiplyOptionInfo = {
-        "PSFMultiplyOptionInfo",
-        "PSF Multiply Option",
+        "MultiplyOptionInfo",
+        "Multiply Option",
         "Debug option for the base star's size."
     };
 
