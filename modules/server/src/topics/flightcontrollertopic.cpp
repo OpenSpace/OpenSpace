@@ -51,7 +51,8 @@ namespace {
     enum class Command {
         Connect = 0,
         Disconnect,
-        InputState
+        InputState,
+        ChangeFocus
     };
 
     using AxisType = openspace::interaction::WebsocketCameraStates::AxisType;
@@ -59,9 +60,16 @@ namespace {
     constexpr const char* _loggerCat = "FlightControllerTopic";
     constexpr const char* TypeKey = "type";
     constexpr const char* ValuesKey = "values";
+
+    // Disconnect JSON keys
     constexpr const char* SuccessKey = "success";
 
+    // Connect JSON keys
     constexpr const char* FocusNodesKey = "focusNodes";
+    constexpr const char* AllNodesKey = "allNodes";
+
+    // Change focus JSON keys
+    constexpr const char* FocusKey = "focus";
 
     constexpr const char* FlightControllerType = "flightcontroller";
 
@@ -79,6 +87,7 @@ namespace {
     const std::string Connect = "connect";
     const std::string Disconnect = "disconnect";
     const std::string InputState = "inputState";
+    const std::string ChangeFocus = "changeFocus";
 
     const static std::unordered_map<std::string, AxisType> AxisIndexMap ({
         {OrbitX, AxisType::OrbitX},
@@ -96,7 +105,8 @@ namespace {
     const static std::unordered_map<std::string, Command> CommandMap ({
         {Connect, Command::Connect},
         {Disconnect, Command::Disconnect},
-        {InputState, Command::InputState}
+        {InputState, Command::InputState},
+        {ChangeFocus, Command::ChangeFocus}
     });
 
     const int Axes = 10;
@@ -143,6 +153,9 @@ void FlightControllerTopic::handleJson(const nlohmann::json& json) {
         case Command::InputState:
             processInputState(json);
             break;
+        case Command::ChangeFocus:
+            changeFocus(json);
+            break;
         default:
             LWARNING(fmt::format("Unrecognized action: {}", it->first));
             break;
@@ -155,6 +168,7 @@ void FlightControllerTopic::connect() {
     _payload[TypeKey] = Connect;
     setFocusNodes();
     _payload[Connect][FocusNodesKey] = _focusNodes;
+    _payload[Connect][AllNodesKey] = _allNodes;
     _connection->sendJson(wrappedPayload(_payload));
 }
 
@@ -176,6 +190,23 @@ void FlightControllerTopic::setFocusNodes() {
         if (it != tags.end()) {
             _focusNodes[n->guiName()] = n->identifier();
         }
+        _allNodes[n->guiName()] = n->identifier();
+    }
+}
+
+void FlightControllerTopic::changeFocus(const nlohmann::json& json) {
+
+    if (json[ChangeFocus].find(FocusKey) == json[ChangeFocus].end()) {
+        LWARNING(fmt::format("Could not find {} key in JSON. JSON was:\n{}", FocusKey, json));
+        return;
+    }
+
+    const auto node = OsEng.renderEngine().scene()->sceneGraphNode(json[ChangeFocus][FocusKey]);
+    if (node) {
+        OsEng.navigationHandler().setFocusNode(node);
+        OsEng.navigationHandler().resetCameraDirection();
+    } else {
+        LWARNING(fmt::format("Could not find node named {}", json[ChangeFocus][FocusKey]));
     }
 }
 
