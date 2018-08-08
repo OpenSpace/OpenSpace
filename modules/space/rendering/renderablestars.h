@@ -95,8 +95,9 @@ namespace openspace {
         properties::FloatProperty _minBillboardSize;
 
 
-        // Spencer
-        properties::OptionProperty _spencerScaleMultiplyOption;
+        // PSF Based Method
+        properties::OptionProperty _psfMethodOption;
+        properties::OptionProperty _psfMultiplyOption;
         properties::FloatProperty _lumCent;
         properties::FloatProperty _radiusCent;
         properties::FloatProperty _brightnessCent;
@@ -107,23 +108,30 @@ namespace openspace {
         properties::FloatProperty _p0Param;
         properties::FloatProperty _p1Param;
         properties::FloatProperty _p2Param;
-        properties::FloatProperty _alphaConst;
+        properties::FloatProperty _spencerAlphaConst;
+        properties::PropertyOwner _moffatPSFParamOwner;
+        properties::FloatProperty _FWHMConst;
+        properties::FloatProperty _moffatBetaConst;
 
         // Debug GUI for Carter's tests
         properties::OptionProperty _renderingMethodOption;
         properties::PropertyOwner _oldMethodOwner;
-        properties::PropertyOwner _spencerMethodOwner;
+        properties::PropertyOwner _psfParamOwner;
         properties::PropertyOwner _moffatMethodOwner;
 
         std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-        UniformCache(renderingMethod, 
+        UniformCache(renderingMethod, psfMethod,
                      // Spencer Method
                      modelMatrix, cameraUp, cameraViewProjectionMatrix,
                      colorOption, magnitudeExponent, colorContribution, billboardSize,
                      screenSize, eyePosition,
-                     spencerParamConf, lumCent, radiusCent, brightnessCent,
+                     psfParamConf, lumCent, radiusCent, brightnessCent,
                      p0Param, p1Param, p2Param, alphaConst
         ) _uniformCacheSpencer;
+
+        UniformCache(FWHM, betaConstant
+        ) _uniformCacheMoffat;
+
 
         UniformCache(
             // Old Method

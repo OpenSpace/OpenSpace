@@ -53,7 +53,10 @@ uniform vec2 screenSize;
 uniform dvec3 eyePosition;
 uniform dvec3 cameraUp;
 
-uniform int spencerParamConf;
+uniform float FWHM;
+uniform float betaConstant;
+
+uniform int psfParamConf;
 uniform float lumCent;
 uniform float radiusCent;
 uniform float brightnessCent;
@@ -109,20 +112,20 @@ void main() {
         
     double scaleMultiply = 1.0;
 
-    if (spencerParamConf == 0) {
+    if (psfParamConf == 0) {
         // Working like Partiview
         double luminosity              = double(ge_bvLumAbsMag.y);
         double pSize                   = pow(10, magnitudeExponent + 9.0);
         double distanceToStarInParsecs = trunc(length(dpos.xyz - eyePosition) / PARSEC);    
         double apparentBrightness      = pSize * luminosity / distanceToStarInParsecs;
         scaleMultiply                  = apparentBrightness;
-    } else if (spencerParamConf == 1) {\
+    } else if (psfParamConf == 1) {\
         float L_over_Lsun = pow(2.51f, SunAbsMagnitude - ge_bvLumAbsMag.z);
         float starTemperature = bvToKelvin(ge_bvLumAbsMag.x);
         float starRadius = SunRadius * pow(SunTemperature/starTemperature, 2.f) * sqrt(L_over_Lsun);
         scaleMultiply = ((lumCent * (ge_bvLumAbsMag.y + 5E9)) + 
                         (radiusCent * double(starRadius))) * pow(10.0, magnitudeExponent);
-    } else if (spencerParamConf == 2) {
+    } else if (psfParamConf == 2) {
         double luminosity              = double(ge_bvLumAbsMag.y);
         double distanceToStarInParsecs = trunc(length(dpos.xyz - eyePosition) / PARSEC);    
         double apparentBrightness      = luminosity / distanceToStarInParsecs;
@@ -134,10 +137,10 @@ void main() {
                                          (radiusCent * double(starRadius)) + 
                                          (brightnessCent * apparentBrightness * 5E9)) * 
                                          pow(10.0, magnitudeExponent);
-    } else if (spencerParamConf == 3) {
+    } else if (psfParamConf == 3) {
         float absMag = ge_bvLumAbsMag.z;
         scaleMultiply = absMag * pow(10.0, magnitudeExponent + 8.5f);
-    } else if (spencerParamConf == 4) {
+    } else if (psfParamConf == 4) {
         float absMag = ge_bvLumAbsMag.z;
         double distanceToStarInParsecs = trunc(length(dpos.xyz - eyePosition) / PARSEC); 
         float appMag = absMag + 5 * (log(float(distanceToStarInParsecs))-1.0);

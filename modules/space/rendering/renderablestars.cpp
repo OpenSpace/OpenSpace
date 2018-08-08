@@ -54,13 +54,13 @@ namespace {
 
     constexpr const char* KeyFile = "File";
 
-    constexpr const std::array<const char*, 18> UniformNamesSpencer = {
-        "renderingMethod", 
+    constexpr const std::array<const char*, 19> UniformNamesSpencer = {
+        "renderingMethod", "psfMethod",
         // New Method
         "modelMatrix", "cameraUp", "cameraViewProjectionMatrix",
         "colorOption", "magnitudeExponent", "colorContribution", 
         "billboardSize", "screenSize", "eyePosition",
-        "spencerParamConf", "lumCent", "radiusCent", "brightnessCent",
+        "psfParamConf", "lumCent", "radiusCent", "brightnessCent",
         "p0Param", "p1Param", "p2Param", "alphaConst"
     };
 
@@ -68,6 +68,11 @@ namespace {
         // Old Method
         "colorTexture", "view", "projection", "alphaValue", "scaleFactor",
         "minBillboardSize", "scaling", "psfTexture"
+    };
+
+    constexpr const std::array<const char*, 2> UniformNamesMoffat = {
+        // Moffat
+        "FWHM", "betaConstant"
     };
 
     constexpr int8_t CurrentCacheVersion = 1;
@@ -178,9 +183,9 @@ namespace {
         ""
     };
 
-    openspace::properties::PropertyOwner::PropertyOwnerInfo SpencerMethodOptionInfo = {
-        "SpencerMethodOptionInfo",
-        "Spencer Method",
+    openspace::properties::PropertyOwner::PropertyOwnerInfo PSFParametersOwnerInfo = {
+        "PSFParametersOwnerInfo",
+        "PSF Parameters",
         ""
     };
 
@@ -190,9 +195,15 @@ namespace {
         ""
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SpencerOptionInfo = {
-        "SpencerOptionInfo",
-        "Spencer Option",
+    constexpr openspace::properties::Property::PropertyInfo PSFMethodOptionInfo = {
+        "PSFMethodOptionInfo",
+        "PSF Method OptionInfo Option",
+        "Debug option for PSF main function: Spencer or Moffat."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PSFMultiplyOptionInfo = {
+        "PSFMultiplyOptionInfo",
+        "PSF Multiply Option",
         "Debug option for the base star's size."
     };
 
@@ -217,7 +228,7 @@ namespace {
     openspace::properties::PropertyOwner::PropertyOwnerInfo SpencerPSFParamOwnerInfo = {
         "SpencerPSFParamOwnerInfo",
         "SpencerPSFParamOwnerInfo",
-        "SPF parameters for Spencer"
+        "PSF parameters for Spencer"
     };
 
     constexpr openspace::properties::Property::PropertyInfo P0ParamInfo = {
@@ -242,6 +253,24 @@ namespace {
         "AlphaConstInfo",
         "AlphaConstInfo",
         "Empirical Constant Alpha."
+    };
+
+    openspace::properties::PropertyOwner::PropertyOwnerInfo MoffatPSFParamOwnerInfo = {
+        "MoffatPSFParamOwnerInfo",
+        "MoffatPSFParamOwnerInfo",
+        "PSF parameters for Moffat"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FWHMInfo = {
+        "FWHMInfo",
+        "FWHMInfo",
+        "Moffat's FWHM"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BetaInfo = {
+        "BetaInfo",
+        "BetaInfo",
+        "Moffat's Beta Constant."
     };
 }  // namespace
 
@@ -316,11 +345,12 @@ namespace openspace {
         , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
         , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 10.f)
         , _minBillboardSize(MinBillboardSizeInfo, 1.f, 1.f, 100.f)
-        // Spencer
-        , _spencerScaleMultiplyOption(SpencerOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
-        , _lumCent(LumPercentInfo, 0.5f, 0.f, 1.f)
-        , _radiusCent(RadiusPercentInfo, 0.5f, 0.f, 1.f)
-        , _brightnessCent(BrightnessPercentInfo, 0.5f, 0.f, 1.f)
+        // PSF
+        , _psfMethodOption(PSFMethodOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+        , _psfMultiplyOption(PSFMultiplyOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+        , _lumCent(LumPercentInfo, 0.5f, 0.f, 3.f)
+        , _radiusCent(RadiusPercentInfo, 0.5f, 0.f, 3.f)
+        , _brightnessCent(BrightnessPercentInfo, 0.5f, 0.f, 3.f)
         , _magnitudeExponent(MagnitudeExponentInfo, 4.f, 0.f, 8.f)
         , _colorContribution(ColorContributionInfo, 2.f, 0.f, 10.f)
         , _billboardSize(BillboardSizeInfo, 30.f, 1.f, 500.f)
@@ -328,11 +358,14 @@ namespace openspace {
         , _p0Param(P0ParamInfo, 0.384f, 0.f, 1.f)
         , _p1Param(P1ParamInfo, 0.478f, 0.f, 1.f)
         , _p2Param(P2ParamInfo, 0.138f, 0.f, 1.f)
-        , _alphaConst(AlphaConstInfo, 0.02f, 0.000001f, 5.f)
+        , _spencerAlphaConst(AlphaConstInfo, 0.02f, 0.000001f, 5.f)
+        , _moffatPSFParamOwner(MoffatPSFParamOwnerInfo)
+        , _FWHMConst(FWHMInfo, 10.4f, 0.f, 1000.f)
+        , _moffatBetaConst(BetaInfo, 4.765f, 0.f, 100.f)
 
         , _renderingMethodOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _oldMethodOwner(OldMethodOptionInfo)
-        , _spencerMethodOwner(SpencerMethodOptionInfo)
+        , _psfParamOwner(PSFParametersOwnerInfo)
         , _moffatMethodOwner(MoffatMethodOptionInfo)
         , _program(nullptr)
         , _speckFile("")
@@ -385,8 +418,8 @@ namespace openspace {
 
         // DEBUG GUI for Carter:
         _renderingMethodOption.addOption(0, "Old Rendering Method");
-        _renderingMethodOption.addOption(1, "Spencer Based Method");
-        _renderingMethodOption.addOption(2, "Moffat Based Method");
+        _renderingMethodOption.addOption(1, "Point Spread Function Based");
+        _renderingMethodOption.addOption(2, "Textured Based");
         addProperty(_renderingMethodOption);
         _renderingMethodOption.set(1);        
 
@@ -424,48 +457,58 @@ namespace openspace {
         }
         _oldMethodOwner.addProperty(_minBillboardSize);
 
-        // Spencer
-        _spencerScaleMultiplyOption.addOption(0, "Use Star's Apparent Brightness");
-        _spencerScaleMultiplyOption.addOption(1, "Use Star's Luminosity and Size");
-        _spencerScaleMultiplyOption.addOption(2, "Luminosity, Size, App Brightness");
-        _spencerScaleMultiplyOption.addOption(3, "Absolute Magnitude");
-        _spencerScaleMultiplyOption.addOption(4, "Apparent Magnitude");
-        _spencerScaleMultiplyOption.set(1);
-        _spencerMethodOwner.addProperty(_spencerScaleMultiplyOption);
-        _spencerMethodOwner.addProperty(_lumCent);
-        _spencerMethodOwner.addProperty(_radiusCent);
-        _spencerMethodOwner.addProperty(_brightnessCent);
+        // PSF based
+        _psfMethodOption.addOption(0, "Spencer's Function");
+        _psfMethodOption.addOption(1, "Moffat's Function");
+        _psfMethodOption.set(0);
+        _psfParamOwner.addProperty(_psfMethodOption);
+        _psfMultiplyOption.addOption(0, "Use Star's Apparent Brightness");
+        _psfMultiplyOption.addOption(1, "Use Star's Luminosity and Size");
+        _psfMultiplyOption.addOption(2, "Luminosity, Size, App Brightness");
+        _psfMultiplyOption.addOption(3, "Absolute Magnitude");
+        _psfMultiplyOption.addOption(4, "Apparent Magnitude");
+        _psfMultiplyOption.set(1);
+        _psfParamOwner.addProperty(_psfMultiplyOption);
+        _psfParamOwner.addProperty(_lumCent);
+        _psfParamOwner.addProperty(_radiusCent);
+        _psfParamOwner.addProperty(_brightnessCent);
 
         if (dictionary.hasKey(MagnitudeExponentInfo.identifier)) {
             _magnitudeExponent = static_cast<float>(
                 dictionary.value<double>(MagnitudeExponentInfo.identifier)
                 );
         }
-        _spencerMethodOwner.addProperty(_magnitudeExponent);
+        _psfParamOwner.addProperty(_magnitudeExponent);
 
         if (dictionary.hasKey(ColorContributionInfo.identifier)) {
             _colorContribution = static_cast<float>(
                 dictionary.value<double>(ColorContributionInfo.identifier)
                 );
         }
-        _spencerMethodOwner.addProperty(_colorContribution);
+        _psfParamOwner.addProperty(_colorContribution);
 
         if (dictionary.hasKey(BillboardSizeInfo.identifier)) {
             _billboardSize = static_cast<float>(
                 dictionary.value<double>(BillboardSizeInfo.identifier)
                 );
         }
-        _spencerMethodOwner.addProperty(_billboardSize);
+        _psfParamOwner.addProperty(_billboardSize);
 
         _spencerPSFParamOwner.addProperty(_p0Param);
         _spencerPSFParamOwner.addProperty(_p1Param);
         _spencerPSFParamOwner.addProperty(_p2Param);
-        _spencerPSFParamOwner.addProperty(_alphaConst);
-        _spencerMethodOwner.addPropertySubOwner(_spencerPSFParamOwner);
+        _spencerPSFParamOwner.addProperty(_spencerAlphaConst);
+
+        _moffatPSFParamOwner.addProperty(_FWHMConst);
+        _moffatPSFParamOwner.addProperty(_moffatBetaConst);
+        
+        _psfParamOwner.addPropertySubOwner(_spencerPSFParamOwner);
+        _psfParamOwner.addPropertySubOwner(_moffatPSFParamOwner);
+
 
         // DEBUG GUI for Carter:
         this->addPropertySubOwner(_oldMethodOwner);
-        this->addPropertySubOwner(_spencerMethodOwner);
+        this->addPropertySubOwner(_psfParamOwner);
         this->addPropertySubOwner(_moffatMethodOwner);
     }
 
@@ -485,7 +528,8 @@ namespace openspace {
 
         ghoul::opengl::updateUniformLocations(*_program, _uniformCacheSpencer, UniformNamesSpencer);
         ghoul::opengl::updateUniformLocations(*_program, _uniformCacheOld, UniformNamesOld);
-        
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCacheMoffat, UniformNamesMoffat);
+
         bool success = loadData();
         if (!success) {
             throw ghoul::RuntimeError("Error loading data");
@@ -538,7 +582,9 @@ namespace openspace {
             _pointSpreadFunctionTexture->bind();
             _program->setUniform(_uniformCacheOld.psfTexture, psfUnit);
         }
-        else if (_renderingMethodOption.value() == 1) { // Spencer Method
+        else if (_renderingMethodOption.value() == 1) { // PSF Based Methods
+            _program->setUniform(_uniformCacheSpencer.psfMethod, _psfMethodOption.value());
+
             glm::dmat4 modelMatrix =
                 glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
                 glm::dmat4(data.modelTransform.rotation) *
@@ -551,14 +597,16 @@ namespace openspace {
 
             glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
 
-            _program->setUniform(_uniformCacheSpencer.spencerParamConf, _spencerScaleMultiplyOption.value());
+            _program->setUniform(_uniformCacheSpencer.psfParamConf, _psfMultiplyOption.value());
             _program->setUniform(_uniformCacheSpencer.lumCent, _lumCent);
             _program->setUniform(_uniformCacheSpencer.radiusCent, _radiusCent);
             _program->setUniform(_uniformCacheSpencer.brightnessCent, _brightnessCent);
             _program->setUniform(_uniformCacheSpencer.p0Param, _p0Param);
             _program->setUniform(_uniformCacheSpencer.p1Param, _p1Param);
             _program->setUniform(_uniformCacheSpencer.p2Param, _p2Param);
-            _program->setUniform(_uniformCacheSpencer.alphaConst, _alphaConst);
+            _program->setUniform(_uniformCacheSpencer.alphaConst, _spencerAlphaConst);
+            _program->setUniform(_uniformCacheMoffat.FWHM, _FWHMConst);
+            _program->setUniform(_uniformCacheMoffat.betaConstant, _moffatBetaConst);
             _program->setUniform(_uniformCacheSpencer.modelMatrix, modelMatrix);
             _program->setUniform(_uniformCacheSpencer.cameraViewProjectionMatrix, cameraViewProjectionMatrix);
             _program->setUniform(_uniformCacheSpencer.cameraUp, cameraUp);
@@ -576,7 +624,7 @@ namespace openspace {
             );
             _program->setUniform(_uniformCacheSpencer.eyePosition, eyePosition);
         }
-        else if (_renderingMethodOption.value() == 2) { // Moffat Method
+        else if (_renderingMethodOption.value() == 2) { // Textured based Method
         }
 
         ghoul::opengl::TextureUnit colorUnit;
@@ -780,6 +828,7 @@ namespace openspace {
             _program->rebuildFromFile();
             ghoul::opengl::updateUniformLocations(*_program, _uniformCacheSpencer, UniformNamesSpencer);
             ghoul::opengl::updateUniformLocations(*_program, _uniformCacheOld, UniformNamesOld);
+            ghoul::opengl::updateUniformLocations(*_program, _uniformCacheMoffat, UniformNamesMoffat);
         }
     }
 

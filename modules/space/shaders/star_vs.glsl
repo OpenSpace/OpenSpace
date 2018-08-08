@@ -44,6 +44,9 @@ uniform int renderingMethod;
 uniform mat4 view;
 uniform mat4 projection;
 
+uniform float FWHM;
+uniform float betaConstant;
+
 void main() {
     vs_bvLumAbsMag = in_bvLumAbsMag;
     vs_velocity    = in_velocity;
@@ -60,9 +63,9 @@ void main() {
         position = view * position;
     
         gl_Position = position;
-    } else if (renderingMethod == 1) { // Spencer Method
+    } else if (renderingMethod == 1) { // PSF Method
         gl_Position = vec4(in_position);
-    } else {
+    } else { // Textured Based
         gl_Position = vec4(in_position);
     }
 }
