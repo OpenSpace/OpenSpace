@@ -99,9 +99,15 @@ namespace openspace {
         properties::OptionProperty _spencerScaleMultiplyOption;
         properties::FloatProperty _lumCent;
         properties::FloatProperty _radiusCent;
+        properties::FloatProperty _brightnessCent;
         properties::FloatProperty _magnitudeExponent;
         properties::FloatProperty _colorContribution;
         properties::FloatProperty _billboardSize;
+        properties::PropertyOwner _spencerPSFParamOwner;
+        properties::FloatProperty _p0Param;
+        properties::FloatProperty _p1Param;
+        properties::FloatProperty _p2Param;
+        properties::FloatProperty _alphaConst;
 
         // Debug GUI for Carter's tests
         properties::OptionProperty _renderingMethodOption;
@@ -114,12 +120,16 @@ namespace openspace {
                      // Spencer Method
                      modelMatrix, cameraUp, cameraViewProjectionMatrix,
                      colorOption, magnitudeExponent, colorContribution, billboardSize,
-                     useApparentBrightness, useLumAndStarRadius, lumCent, radiusCent,
-                     // Old Method
-                     screenSize, colorTexture, eyePosition,
-                     view, projection, alphaValue, scaleFactor,
-                     minBillboardSize, scaling, psfTexture)
-            _uniformCache;
+                     screenSize, eyePosition,
+                     spencerParamConf, lumCent, radiusCent, brightnessCent,
+                     p0Param, p1Param, p2Param, alphaConst
+        ) _uniformCacheSpencer;
+
+        UniformCache(
+            // Old Method
+            colorTexture, view, projection, alphaValue, 
+            scaleFactor, minBillboardSize, scaling, psfTexture
+        ) _uniformCacheOld;
 
         std::string _speckFile;
 

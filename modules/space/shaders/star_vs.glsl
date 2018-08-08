@@ -63,21 +63,6 @@ void main() {
     } else if (renderingMethod == 1) { // Spencer Method
         gl_Position = vec4(in_position);
     } else {
-
+        gl_Position = vec4(in_position);
     }
-
-// NEW
-    gl_Position = vec4(in_position);
-//OLD
-/*
-    vec4 tmp = p;
-    vec4 position = pscTransform(tmp, mat4(1.0));
-    
-    // G-Buffer
-    vs_gPosition = view * (vec4(1E19, 1E19, 1E19, 1.0) * position);
-    
-    position = view * position;
-    
-    gl_Position = position;
-*/
 }

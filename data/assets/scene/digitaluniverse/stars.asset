@@ -30,7 +30,7 @@ local object = {
         File = speck .. "/stars.speck",
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
-        MagnitudeExponent = 7.5165,
+        MagnitudeExponent = 6.5,
         BillboardSize = 121.637,
         ColorContribution = 2.0
     },
