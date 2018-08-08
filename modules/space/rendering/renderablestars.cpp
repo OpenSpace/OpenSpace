@@ -361,7 +361,7 @@ namespace openspace {
         , _spencerAlphaConst(AlphaConstInfo, 0.02f, 0.000001f, 5.f)
         , _moffatPSFParamOwner(MoffatPSFParamOwnerInfo)
         , _FWHMConst(FWHMInfo, 10.4f, 0.f, 1000.f)
-        , _moffatBetaConst(BetaInfo, 4.765f, 0.f, 100.f)
+        , _moffatBetaConst(BetaInfo, 4.765f, 0.f, 10.f)
 
         , _renderingMethodOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _oldMethodOwner(OldMethodOptionInfo)
@@ -558,6 +558,7 @@ namespace openspace {
         _program->activate();
 
         _program->setUniform(_uniformCacheSpencer.renderingMethod, _renderingMethodOption.value());
+        ghoul::opengl::TextureUnit psfUnit;
 
         if (_renderingMethodOption.value() == 0) { // Old Method
             glm::vec2 scaling = glm::vec2(1, -19);
@@ -577,7 +578,6 @@ namespace openspace {
             setPscUniforms(*_program.get(), data.camera, data.position);
             _program->setUniform(_uniformCacheOld.scaling, scaling);
 
-            ghoul::opengl::TextureUnit psfUnit;
             psfUnit.activate();
             _pointSpreadFunctionTexture->bind();
             _program->setUniform(_uniformCacheOld.psfTexture, psfUnit);
@@ -625,6 +625,42 @@ namespace openspace {
             _program->setUniform(_uniformCacheSpencer.eyePosition, eyePosition);
         }
         else if (_renderingMethodOption.value() == 2) { // Textured based Method
+            glm::dmat4 modelMatrix =
+                glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+                glm::dmat4(data.modelTransform.rotation) *
+                glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+
+            glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
+            glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
+
+            glm::dmat4 cameraViewProjectionMatrix = projectionMatrix * data.camera.combinedViewMatrix();
+
+            glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
+
+            glm::dvec3 eyePosition = glm::dvec3(
+                glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
+            );
+            _program->setUniform(_uniformCacheSpencer.eyePosition, eyePosition);
+            _program->setUniform(_uniformCacheSpencer.psfParamConf, _psfMultiplyOption.value());
+            _program->setUniform(_uniformCacheSpencer.lumCent, _lumCent);
+            _program->setUniform(_uniformCacheSpencer.radiusCent, _radiusCent);
+            _program->setUniform(_uniformCacheSpencer.brightnessCent, _brightnessCent);
+            _program->setUniform(_uniformCacheSpencer.modelMatrix, modelMatrix);
+            _program->setUniform(_uniformCacheSpencer.cameraViewProjectionMatrix, cameraViewProjectionMatrix);
+            _program->setUniform(_uniformCacheSpencer.cameraUp, cameraUp);
+            _program->setUniform(_uniformCacheSpencer.colorOption, _colorOption);
+            _program->setUniform(_uniformCacheSpencer.magnitudeExponent, _magnitudeExponent);
+            _program->setUniform(_uniformCacheSpencer.colorContribution, _colorContribution);
+            _program->setUniform(_uniformCacheSpencer.billboardSize, _billboardSize);
+            _program->setUniform(
+                _uniformCacheSpencer.screenSize,
+                glm::vec2(OsEng.windowWrapper().getCurrentViewportSize())
+            );
+            _program->setUniform(_uniformCacheOld.alphaValue, _alphaValue);
+
+            psfUnit.activate();
+            _pointSpreadFunctionTexture->bind();
+            _program->setUniform(_uniformCacheOld.psfTexture, psfUnit);
         }
 
         ghoul::opengl::TextureUnit colorUnit;
