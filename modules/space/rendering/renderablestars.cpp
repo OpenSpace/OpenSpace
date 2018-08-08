@@ -150,7 +150,7 @@ namespace {
         "stars that have a smaller apparent size will be discarded entirely."
     };
 
-    // Spencer
+    // PSF
     constexpr openspace::properties::Property::PropertyInfo MagnitudeExponentInfo = {
         "MagnitudeExponent",
         "MagnitudeExponent",
@@ -185,7 +185,7 @@ namespace {
 
     openspace::properties::PropertyOwner::PropertyOwnerInfo PSFParametersOwnerInfo = {
         "PSFParametersOwnerInfo",
-        "PSF Parameters",
+        "Parameters",
         ""
     };
 
@@ -197,7 +197,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PSFMethodOptionInfo = {
         "PSFMethodOptionInfo",
-        "PSF Method OptionInfo Option",
+        "PSF Method Option",
         "Debug option for PSF main function: Spencer or Moffat."
     };
 
