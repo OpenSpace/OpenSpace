@@ -40,32 +40,18 @@ out vec4 psc_position;
 out vec3 vs_brightness;
 out vec4 vs_gPosition;
 
-uniform int renderingMethod;
+/*
 uniform mat4 view;
 uniform mat4 projection;
 
 uniform float FWHM;
 uniform float betaConstant;
+*/
 
 void main() {
     vs_bvLumAbsMag = in_bvLumAbsMag;
     vs_velocity    = in_velocity;
     vs_speed       = in_speed;
 
-    if (renderingMethod == 0) { // Old Method
-        psc_position  = in_position;
-        vec4 tmp      = in_position;
-        vec4 position = pscTransform(tmp, mat4(1.0));
-    
-        // G-Buffer
-        vs_gPosition = view * (vec4(1E19, 1E19, 1E19, 1.0) * position);
-    
-        position = view * position;
-    
-        gl_Position = position;
-    } else if (renderingMethod == 1) { // PSF Method
-        gl_Position = vec4(in_position);
-    } else { // Textured Based
-        gl_Position = vec4(in_position);
-    }
+    gl_Position = vec4(in_position);
 }

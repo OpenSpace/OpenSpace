@@ -34,7 +34,6 @@ in vec3 vs_bvLumAbsMag[];
 in vec3 vs_velocity[];
 in vec4 vs_gPosition[];
 in float vs_speed[];
-//in vec4 vs_worldPosition[];
 
 out vec4 vs_position;
 out vec3 ge_bvLumAbsMag;
@@ -44,17 +43,12 @@ out vec2 psfCoords;
 out float ge_observationDistance;
 out float gs_screenSpaceDepth;
 
-uniform int renderingMethod;
-//uniform float viewScaling;
-uniform float scaleFactor;
-uniform float billboardSize;
 uniform float magnitudeExponent;
-uniform vec2 screenSize;
 uniform dvec3 eyePosition;
 uniform dvec3 cameraUp;
 
-uniform float FWHM;
-uniform float betaConstant;
+// uniform float FWHM;
+// uniform float betaConstant;
 
 uniform int psfParamConf;
 uniform float lumCent;
@@ -63,9 +57,6 @@ uniform float brightnessCent;
 
 uniform dmat4 cameraViewProjectionMatrix;
 uniform dmat4 modelMatrix;
-
-uniform dmat4 cameraViewMatrix;
-uniform dmat4 projectionMatrix;
 
 const double PARSEC = 0.308567756e17LF;
 
@@ -119,7 +110,7 @@ void main() {
         double distanceToStarInParsecs = trunc(length(dpos.xyz - eyePosition) / PARSEC);    
         double apparentBrightness      = pSize * luminosity / distanceToStarInParsecs;
         scaleMultiply                  = apparentBrightness;
-    } else if (psfParamConf == 1) {\
+    } else if (psfParamConf == 1) {
         float L_over_Lsun = pow(2.51f, SunAbsMagnitude - ge_bvLumAbsMag.z);
         float starTemperature = bvToKelvin(ge_bvLumAbsMag.x);
         float starRadius = SunRadius * pow(SunTemperature/starTemperature, 2.f) * sqrt(L_over_Lsun);

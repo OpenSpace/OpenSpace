@@ -120,23 +120,23 @@ namespace openspace {
         properties::PropertyOwner _moffatMethodOwner;
 
         std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-        UniformCache(renderingMethod, psfMethod,
-                     // Spencer Method
-                     modelMatrix, cameraUp, cameraViewProjectionMatrix,
-                     colorOption, magnitudeExponent, colorContribution, billboardSize,
-                     screenSize, eyePosition,
-                     psfParamConf, lumCent, radiusCent, brightnessCent,
-                     p0Param, p1Param, p2Param, alphaConst
+        UniformCache(
+            renderingMethod, psfMethod,
+            // Spencer Method
+            modelMatrix, cameraUp, cameraViewProjectionMatrix,
+            colorOption, magnitudeExponent, colorContribution,
+            eyePosition,
+            psfParamConf, lumCent, radiusCent, brightnessCent,
+            p0Param, p1Param, p2Param, alphaConst
         ) _uniformCacheSpencer;
 
-        UniformCache(FWHM, betaConstant
+        UniformCache(
+            FWHM, betaConstant
         ) _uniformCacheMoffat;
 
-
         UniformCache(
-            // Old Method
-            colorTexture, view, projection, alphaValue, 
-            scaleFactor, minBillboardSize, scaling, psfTexture
+            colorTexture, alphaValue, 
+            psfTexture
         ) _uniformCacheOld;
 
         std::string _speckFile;

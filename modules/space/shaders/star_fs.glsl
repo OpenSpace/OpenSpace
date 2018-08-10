@@ -34,7 +34,7 @@ uniform sampler1D colorTexture;
 uniform sampler2D psfTexture;
 uniform float alphaValue;
 
-uniform float magnitudeExponent;
+//uniform float magnitudeExponent;
 uniform float colorContribution;
 uniform int colorOption;
 
@@ -51,9 +51,9 @@ uniform float betaConstant;
 uniform int renderingMethod;
 
 in vec4 vs_position;
+in vec2 psfCoords;
 flat in vec3 ge_bvLumAbsMag;
 flat in vec3 ge_velocity;
-in vec2 psfCoords;
 flat in float ge_speed;
 flat in float ge_observationDistance;
 flat in float gs_screenSpaceDepth;
@@ -84,9 +84,7 @@ Fragment getFragment() {
 
     vec4 fullColor = vec4(color.rgb, 1.0);
     
-    if (renderingMethod == 0) { // Old Method
-
-    } else if (renderingMethod == 1) { // PSF Method
+    if (renderingMethod == 0) { // PSF Method
         if (psfMethod == 0) { 
             // PSF Functions from paper: Physically-Based Galre Effects for Digital
             // Images - Spencer, Shirley, Zimmerman and Greenberg.
