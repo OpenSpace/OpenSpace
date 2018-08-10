@@ -84,16 +84,13 @@ namespace openspace {
         bool _dataIsDirty;
 
 
-        // Old Method
+        // Textured based
         properties::StringProperty _pointSpreadFunctionTexturePath;
         std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
         std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
         bool _pointSpreadFunctionTextureIsDirty;
 
         properties::FloatProperty _alphaValue;
-        properties::FloatProperty _scaleFactor;
-        properties::FloatProperty _minBillboardSize;
-
 
         // PSF Based Method
         properties::OptionProperty _psfMethodOption;
@@ -103,7 +100,6 @@ namespace openspace {
         properties::FloatProperty _brightnessCent;
         properties::FloatProperty _magnitudeExponent;
         properties::FloatProperty _colorContribution;
-        properties::FloatProperty _billboardSize;
         properties::PropertyOwner _spencerPSFParamOwner;
         properties::FloatProperty _p0Param;
         properties::FloatProperty _p1Param;

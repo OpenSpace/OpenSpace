@@ -135,24 +135,10 @@ namespace {
         "all stars."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
-        "ScaleFactor",
-        "Scale Factor",
-        "This value is used as a multiplicative factor that is applied to the apparent "
-        "size of each star."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo MinBillboardSizeInfo = {
-        "MinBillboardSize",
-        "Min Billboard Size",
-        "This value is used as a lower limit on the size of stars that are rendered. Any "
-        "stars that have a smaller apparent size will be discarded entirely."
-    };
-
     // PSF
     constexpr openspace::properties::Property::PropertyInfo MagnitudeExponentInfo = {
         "MagnitudeExponent",
-        "MagnitudeExponent",
+        "Magnitude Exponent",
         "Adjust star magnitude by 10^MagnitudeExponent. "
         "Stars closer than this distance are given full opacity. "
         "Farther away, stars dim proportionally to the logarithm of their distance."
@@ -164,32 +150,26 @@ namespace {
         "Adjust the color intensity of the stars"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BillboardSizeInfo = {
-        "BillboardSize",
-        "Billboard Size",
-        "Set the billboard size of all stars"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
-        "RenderOptionInfo",
+        "RenderOptio",
         "Render Option",
         "Debug option for different rendering methods for the stars."
     };
 
     openspace::properties::PropertyOwner::PropertyOwnerInfo OldMethodOptionInfo = {
-        "OldMethodOptionInfo",
+        "OldMethodOption",
         "Old Method",
         ""
     };
 
     openspace::properties::PropertyOwner::PropertyOwnerInfo PSFParametersOwnerInfo = {
-        "PSFParametersOwnerInfo",
+        "PSFParametersOwner",
         "Parameters",
         ""
     };
 
     openspace::properties::PropertyOwner::PropertyOwnerInfo MoffatMethodOptionInfo = {
-        "MoffatMethodOptionInfo",
+        "MoffatMethodOption",
         "Moffat Method",
         ""
     };
@@ -201,74 +181,74 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo PSFMultiplyOptionInfo = {
-        "MultiplyOptionInfo",
-        "Multiply Option",
+        "SizeOption",
+        "Size Composition Option",
         "Debug option for the base star's size."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LumPercentInfo = {
-        "LumPercentInfo",
-        "LumPercentInfo",
-        "Percentage of Luminosity."        
+        "LumPercent",
+        "Luminosity Contribution",
+        "Luminosity Contribution."        
     };
 
     constexpr openspace::properties::Property::PropertyInfo RadiusPercentInfo = {
-        "RadiusPercentInfo",
-        "RadiusPercentInfo",
-        "Percentage of Radius."
+        "RadiusPercent",
+        "Radius Contribution",
+        "Radius Contribution."
     };
 
     constexpr openspace::properties::Property::PropertyInfo BrightnessPercentInfo = {
-        "BrightnessPercentInfo",
-        "BrightnessPercentInfo",
-        "Percentage of Apparent Brightness."
+        "BrightnessPercen",
+        "App Brightness Contribution",
+        "App Brightness Contribution."
     };
 
     openspace::properties::PropertyOwner::PropertyOwnerInfo SpencerPSFParamOwnerInfo = {
-        "SpencerPSFParamOwnerInfo",
-        "SpencerPSFParamOwnerInfo",
+        "SpencerPSFParamOwner",
+        "Spencer PSF Paramameters",
         "PSF parameters for Spencer"
     };
 
     constexpr openspace::properties::Property::PropertyInfo P0ParamInfo = {
-        "P0ParamInfo",
-        "P0ParamInfo",
+        "P0Param",
+        "P0",
         "P0 parameter contribution."
     };
 
     constexpr openspace::properties::Property::PropertyInfo P1ParamInfo = {
-        "P1ParamInfo",
-        "P1ParamInfo",
+        "P1Param",
+        "P1",
         "P1 parameter contribution."
     };
 
     constexpr openspace::properties::Property::PropertyInfo P2ParamInfo = {
-        "P2ParamInfo",
-        "P2ParamInfo",
+        "P2Param",
+        "P2",
         "P2 parameter contribution."
     };
 
     constexpr openspace::properties::Property::PropertyInfo AlphaConstInfo = {
-        "AlphaConstInfo",
-        "AlphaConstInfo",
-        "Empirical Constant Alpha."
+        "AlphaConst",
+        "Alpha",
+        "Empirical Alpha Constant."
     };
 
     openspace::properties::PropertyOwner::PropertyOwnerInfo MoffatPSFParamOwnerInfo = {
-        "MoffatPSFParamOwnerInfo",
-        "MoffatPSFParamOwnerInfo",
+        "MoffatPSFParam",
+        "Moffat PSF Parameters",
         "PSF parameters for Moffat"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FWHMInfo = {
-        "FWHMInfo",
-        "FWHMInfo",
+        "FWHM",
+        "FWHM",
         "Moffat's FWHM"
     };
 
     constexpr openspace::properties::Property::PropertyInfo BetaInfo = {
-        "BetaInfo",
-        "BetaInfo",
+        "Beta",
+        "Beta",
         "Moffat's Beta Constant."
     };
 }  // namespace
@@ -319,12 +299,6 @@ namespace openspace {
                 Optional::Yes,
                 ColorContributionInfo.description
             },
-            {
-                BillboardSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                BillboardSizeInfo.description
-            }
         }
         };
     }
@@ -342,8 +316,6 @@ namespace openspace {
         , _pointSpreadFunctionTexture(nullptr)
         , _pointSpreadFunctionTextureIsDirty(true)
         , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
-        , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 10.f)
-        , _minBillboardSize(MinBillboardSizeInfo, 1.f, 1.f, 100.f)
         // PSF
         , _psfMethodOption(PSFMethodOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _psfMultiplyOption(PSFMultiplyOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
@@ -352,7 +324,6 @@ namespace openspace {
         , _brightnessCent(BrightnessPercentInfo, 0.5f, 0.f, 3.f)
         , _magnitudeExponent(MagnitudeExponentInfo, 4.f, 0.f, 8.f)
         , _colorContribution(ColorContributionInfo, 2.f, 0.f, 10.f)
-        , _billboardSize(BillboardSizeInfo, 30.f, 1.f, 500.f)
         , _spencerPSFParamOwner(SpencerPSFParamOwnerInfo)
         , _p0Param(P0ParamInfo, 0.384f, 0.f, 1.f)
         , _p1Param(P1ParamInfo, 0.478f, 0.f, 1.f)
@@ -441,20 +412,6 @@ namespace openspace {
         }
         _oldMethodOwner.addProperty(_alphaValue);
 
-        if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
-            _scaleFactor = static_cast<float>(
-                dictionary.value<double>(ScaleFactorInfo.identifier)
-                );
-        }
-        _oldMethodOwner.addProperty(_scaleFactor);
-
-        if (dictionary.hasKey(MinBillboardSizeInfo.identifier)) {
-            _minBillboardSize = static_cast<float>(
-                dictionary.value<double>(MinBillboardSizeInfo.identifier)
-                );
-        }
-        _oldMethodOwner.addProperty(_minBillboardSize);
-
         // PSF based
         _psfMethodOption.addOption(0, "Spencer's Function");
         _psfMethodOption.addOption(1, "Moffat's Function");
@@ -465,6 +422,7 @@ namespace openspace {
         _psfMultiplyOption.addOption(2, "Luminosity, Size, App Brightness");
         _psfMultiplyOption.addOption(3, "Absolute Magnitude");
         _psfMultiplyOption.addOption(4, "Apparent Magnitude");
+        _psfMultiplyOption.addOption(5, "Old Magical Scale");
         _psfMultiplyOption.set(1);
         _psfParamOwner.addProperty(_psfMultiplyOption);
         _psfParamOwner.addProperty(_lumCent);
@@ -484,13 +442,6 @@ namespace openspace {
                 );
         }
         _psfParamOwner.addProperty(_colorContribution);
-
-        if (dictionary.hasKey(BillboardSizeInfo.identifier)) {
-            _billboardSize = static_cast<float>(
-                dictionary.value<double>(BillboardSizeInfo.identifier)
-                );
-        }
-        _psfParamOwner.addProperty(_billboardSize);
 
         _spencerPSFParamOwner.addProperty(_p0Param);
         _spencerPSFParamOwner.addProperty(_p1Param);

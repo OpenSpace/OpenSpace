@@ -136,6 +136,9 @@ void main() {
         double distanceToStarInParsecs = trunc(length(dpos.xyz - eyePosition) / PARSEC); 
         float appMag = absMag + 5 * (log(float(distanceToStarInParsecs))-1.0);
         scaleMultiply = appMag * pow(10.0, magnitudeExponent + 8.5f);
+    } else if (psfParamConf == 5) {
+        float absMag = ge_bvLumAbsMag.z;
+        scaleMultiply = exp((-30.623 - absMag) * 0.462) * pow(10.0, magnitudeExponent + 12.5f) * 2000;
     }
 
 /*
