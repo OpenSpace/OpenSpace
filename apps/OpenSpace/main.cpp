@@ -905,7 +905,7 @@ int main(int argc, char** argv) {
         windowConfiguration = openspace::global::configuration.windowConfiguration;
     }
     catch (const openspace::documentation::SpecificationError& e) {
-        LFATAL("main", "Loading of configuration file failed");
+        LFATALC("main", "Loading of configuration file failed");
         for (const openspace::documentation::TestResult::Offense& o : e.result.offenses) {
             LERRORC(o.offender, ghoul::to_string(o.reason));
         }
