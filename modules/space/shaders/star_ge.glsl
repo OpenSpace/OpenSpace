@@ -107,7 +107,7 @@ void main() {
         // Working like Partiview
         double luminosity              = double(ge_bvLumAbsMag.y);
         double pSize                   = pow(10, magnitudeExponent + 9.0);
-        double distanceToStarInParsecs = trunc(length(dpos.xyz - eyePosition) / PARSEC);    
+        double distanceToStarInParsecs = length(dpos.xyz/PARSEC - eyePosition/PARSEC);  
         double apparentBrightness      = pSize * luminosity / distanceToStarInParsecs;
         scaleMultiply                  = apparentBrightness;
     } else if (psfParamConf == 1) {
@@ -130,12 +130,14 @@ void main() {
                                          pow(10.0, magnitudeExponent);
     } else if (psfParamConf == 3) {
         float absMag = ge_bvLumAbsMag.z;
-        scaleMultiply = absMag * pow(10.0, magnitudeExponent + 8.5f);
+        scaleMultiply = (-absMag + 35.f) * pow(10.0, magnitudeExponent + 8.5f);
     } else if (psfParamConf == 4) {
         float absMag = ge_bvLumAbsMag.z;
-        double distanceToStarInParsecs = trunc(length(dpos.xyz - eyePosition) / PARSEC); 
-        float appMag = absMag + 5 * (log(float(distanceToStarInParsecs))-1.0);
-        scaleMultiply = appMag * pow(10.0, magnitudeExponent + 8.5f);
+        float distanceToStarInParsecs = length(float(dpos.xyz/PARSEC) - float(eyePosition/PARSEC)); 
+        //float appMag = absMag + 5*log(distanceToStarInParsecs+1000) - 5.0;
+        float appMag = absMag + 5*log(distanceToStarInParsecs/10f);
+        //scaleMultiply = appMag * pow(10.0, magnitudeExponent + 8.5f);
+        scaleMultiply = (-appMag + 35.f) * pow(10.0, magnitudeExponent + 7.5f);
     } else if (psfParamConf == 5) {
         float absMag = ge_bvLumAbsMag.z;
         scaleMultiply = exp((-30.623 - absMag) * 0.462) * pow(10.0, magnitudeExponent + 12.5f) * 2000;

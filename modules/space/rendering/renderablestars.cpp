@@ -47,7 +47,7 @@
 #include <stdint.h>
 #include <limits>
 
-//#define USING_STELLAR_TEST_GRID
+#define USING_STELLAR_TEST_GRID
 
 namespace {
     constexpr const char* _loggerCat = "RenderableStars";
