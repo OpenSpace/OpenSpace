@@ -210,6 +210,14 @@ ScriptScheduler::progressTo(double newTime)
         ptrdiff_t n = std::distance(_timings.begin() + prevIndex, it);
         _currentIndex = static_cast<int>(prevIndex + n);
 
+        //Check if playback just reached the final scheduled script and is thus finished
+        if (_playbackModeEnabled && (_currentIndex == _timings.size())) {
+            if (_playbackEndCallback)
+                _playbackEndCallback();
+            _playbackModeEnabled = false;
+        }
+
+
         // Update the new time
         _currentTime = newTime;
 
@@ -247,6 +255,11 @@ void ScriptScheduler::setTimeReferenceMode(KeyframeTimeRef refType,
 {
     _timeframeMode = refType;
     _playbackReferenceTimestamp = playbackReferenceTimestamp;
+}
+
+void ScriptScheduler::triggerPlaybackStart(std::function<void()> callback) {
+    _playbackModeEnabled = true;
+    _playbackEndCallback = std::move(callback);
 }
 
 double ScriptScheduler::currentTime() const {

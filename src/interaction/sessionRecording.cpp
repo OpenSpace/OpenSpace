@@ -56,6 +56,9 @@ bool SessionRecording::startRecording(std::string filename) {
         _playbackFile.close();
     }
     _state = sessionState::recording;
+    _playbackActive_camera = false;
+    _playbackActive_time = false;
+    _playbackActive_script = false;
     _recordFile.open(filename);
     if( ! _recordFile.is_open() || ! _recordFile.good() ) {
         LERROR(fmt::format("Unable to open file {} for keyframe recording", filename.c_str()));
@@ -87,19 +90,51 @@ bool SessionRecording::startPlayback(std::string filename, KeyframeTimeRef timeM
     double now = OsEng.windowWrapper().applicationTime();
     _timestampPlaybackStarted_application = now;
     _timestampPlaybackStarted_simulation = OsEng.timeManager().time().j2000Seconds();
+    _timestampApplicationStarted_simulation = _timestampPlaybackStarted_simulation - now;
     _playbackTimeReferenceMode = timeMode;
+    //Set playback flags to true for all modes
+    _playbackActive_camera = true;
+    _playbackActive_time = true;
+    _playbackActive_script = true;
+
     OsEng.navigationHandler().keyframeNavigator().setTimeReferenceMode(timeMode, now);
     OsEng.scriptScheduler().setTimeReferenceMode(timeMode, now);
     playbackAddEntriesToTimeline();
 
     OsEng.navigationHandler().triggerPlaybackStart([&]() {
+        signalPlaybackFinishedForComponent(recordedType::camera);
+    });
+    OsEng.scriptScheduler().triggerPlaybackStart([&]() {
+        signalPlaybackFinishedForComponent(recordedType::script);
+    });
+    OsEng.timeManager().triggerPlaybackStart([&]() {
+        signalPlaybackFinishedForComponent(recordedType::time);
+    });
+}
+
+void SessionRecording::signalPlaybackFinishedForComponent(recordedType type) {
+    if (type == recordedType::camera) {
+        _playbackActive_camera = false;
+        LINFO("Playback finished signal: camera");
+    }
+    else if (type == recordedType::time) {
+        _playbackActive_time = false;
+        LINFO("Playback finished signal: time");
+    }
+    else if (type == recordedType::script) {
+        _playbackActive_script = false;
+        LINFO("Playback finished signal: script");
+    }
+
+    if (!_playbackActive_camera && !_playbackActive_time && !_playbackActive_script) {
         _playbackFile.close();
         //Reset the script scheduler's time reference to simulation time, which is the
         // default mode for non-playback uses of the scheduler
         OsEng.scriptScheduler().setTimeReferenceMode(
-            KeyframeTimeRef::absolute_simTimeJ2000, now);
+            KeyframeTimeRef::absolute_simTimeJ2000,
+            OsEng.windowWrapper().applicationTime());
         LINFO("Playback session finished");
-    });
+    }
 }
 
 void SessionRecording::stopPlayback() {
@@ -154,20 +189,20 @@ void SessionRecording::saveTimeKeyframe() {
     keyframeLine << "time ";
     keyframeLine << kf._timestamp << " ";
     keyframeLine << (kf._timestamp - _timestampRecordStarted) << " ";
-    keyframeLine << std::fixed << std::setprecision(3) << OsEng.timeManager().time().j2000Seconds();
-    keyframeLine << " ";
-    keyframeLine << kf._dt << " ";
+
+    //keyframeLine << std::fixed << std::setprecision(3) << OsEng.timeManager().time().j2000Seconds();
+    keyframeLine << std::fixed << std::setprecision(3) << kf._time;
+
+    keyframeLine << " " << kf._dt;
     if( kf._paused )
-        keyframeLine << "P ";
+        keyframeLine << " P";
     else
-        keyframeLine << "R ";
+        keyframeLine << " R";
     
     if( kf._requiresTimeJump )
-        keyframeLine << "J ";
+        keyframeLine << " J";
     else
-        keyframeLine << "- ";
-
-    keyframeLine << kf._time;
+        keyframeLine << " -";
     
     saveKeyframeToFile(keyframeLine.str());
 }
@@ -214,8 +249,8 @@ void SessionRecording::playbackAddEntriesToTimeline() {
 
         if( entryType.compare("camera") == 0 )
             playbackCamera(line);
-//        else if( entryType.compare("time") == 0 )
-//            playbackTimeChange(line);
+        else if( entryType.compare("time") == 0 )
+            playbackTimeChange(line);
         else if( entryType.compare("script") == 0 )
             playbackScript(line);
     }
@@ -238,7 +273,7 @@ double SessionRecording::getAppropriateTimestamp(std::istringstream& inputLine) 
 double SessionRecording::getEquivalentSimulationTime(std::istringstream& inputLine) {
     double timeOs, timeRel, timeSim;
     inputLine >> timeOs >> timeRel >> timeSim;
-    int offset = 0;
+    double offset = 0;
 
     if (_playbackTimeReferenceMode == KeyframeTimeRef::relative_recordedStart)
         offset = timeRel;
@@ -246,6 +281,19 @@ double SessionRecording::getEquivalentSimulationTime(std::istringstream& inputLi
         offset = timeOs;
 
     return _timestampPlaybackStarted_simulation + offset;
+}
+
+double SessionRecording::getEquivalentApplicationTime(std::istringstream& inputLine) {
+    double timeOs, timeRel, timeSim;
+    inputLine >> timeOs >> timeRel >> timeSim;
+    double offset = 0;
+
+    if (_playbackTimeReferenceMode == KeyframeTimeRef::relative_recordedStart)
+        return _timestampPlaybackStarted_application + timeRel;
+    else if (_playbackTimeReferenceMode == KeyframeTimeRef::absolute_simTimeJ2000)
+        return timeSim - _timestampApplicationStarted_simulation;
+    else
+        return timeOs;
 }
     
 void SessionRecording::playbackCamera(std::string& entry) {
@@ -283,16 +331,15 @@ void SessionRecording::playbackCamera(std::string& entry) {
 void SessionRecording::playbackTimeChange(std::string& entry) {
     std::istringstream iss(entry);
     std::string entryType;
-    double timeRef;
+    //double timeRef;
     std::string paused, jump;
 
     datamessagestructures::TimeKeyframe pbFrame;
     iss >> entryType;
-    timeRef = getAppropriateTimestamp(iss);
+    /*timeRef*/ pbFrame._timestamp = getEquivalentApplicationTime(iss);
     iss >> pbFrame._dt
         >> paused
-        >> jump
-        >> pbFrame._time;
+        >> jump;
     if( iss.fail() || !iss.eof() ) {
         LERROR(fmt::format("Error parsing time line {} of playback file", _playbackLineNum));
         return;
@@ -307,9 +354,9 @@ void SessionRecording::playbackTimeChange(std::string& entry) {
     else
         pbFrame._requiresTimeJump = false;
 
-    //TODO: keyframeNavigator doesn't handle time info yet
-    OsEng.timeManager().addKeyframe(timeRef, pbFrame._timestamp);
-    //_externInteraction.timeInteraction(pbFrame);
+    pbFrame._time = pbFrame._timestamp + _timestampApplicationStarted_simulation;
+    //OsEng.timeManager().addKeyframe(timeRef, pbFrame._timestamp);
+    _externInteract.timeInteraction(pbFrame);
 }
 
 void SessionRecording::playbackScript(std::string& entry) {

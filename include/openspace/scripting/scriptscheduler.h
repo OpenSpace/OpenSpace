@@ -125,6 +125,13 @@ public:
     */
     void setTimeReferenceMode(openspace::interaction::KeyframeTimeRef refType,
                               double playbackReferenceTimestamp);
+    
+    /**
+    * Sets the callback function for when the script scheduler has no more scripts
+    * to run, informing the sessionRecording that this particular component is finished.
+    * \param callback callback function to be called when scripts are finished
+    */
+    void triggerPlaybackStart(std::function<void()> callback);
 
     static LuaLibrary luaLibrary();
     void setModeApplicationTime();
@@ -140,10 +147,12 @@ private:
 
     int _currentIndex = 0;
     double _currentTime = 0;
+    bool _playbackModeEnabled = false;
 
     openspace::interaction::KeyframeTimeRef _timeframeMode
         = openspace::interaction::KeyframeTimeRef::absolute_simTimeJ2000;
     double _playbackReferenceTimestamp = 0.0;
+    std::function<void()> _playbackEndCallback;
 };
 
 } // namespace openspace::scripting

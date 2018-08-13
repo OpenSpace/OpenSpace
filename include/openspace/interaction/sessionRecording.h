@@ -46,6 +46,12 @@ public:
         recording,
         playback
     };
+    enum class recordedType {
+        camera = 0,
+        time,
+        script
+    };
+
     SessionRecording();
     bool startRecording(std::string filename);
     void stopRecording();
@@ -72,15 +78,21 @@ private:
     double _timestampRecordStarted;
     double _timestampPlaybackStarted_application;
     double _timestampPlaybackStarted_simulation;
+    double _timestampApplicationStarted_simulation;
     void saveKeyframeToFile(std::string entry);
     double getAppropriateTimestamp(std::istringstream& inputLine);
     double getEquivalentSimulationTime(std::istringstream& inputLine);
+    double getEquivalentApplicationTime(std::istringstream& inputLine);
+    void signalPlaybackFinishedForComponent(recordedType type);
     sessionState _state = sessionState::idle;
     std::string _playbackFilename;
     std::ifstream _playbackFile;
     std::ofstream _recordFile;
     int _playbackLineNum = 1;
     KeyframeTimeRef _playbackTimeReferenceMode;
+    bool _playbackActive_camera = false;
+    bool _playbackActive_time = false;
+    bool _playbackActive_script = false;
 };
 
 } // namespace openspace
