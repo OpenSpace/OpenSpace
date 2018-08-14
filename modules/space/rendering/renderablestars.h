@@ -83,6 +83,8 @@ namespace openspace {
         properties::OptionProperty _colorOption;
         bool _dataIsDirty;
 
+        // Test Grid Enabled
+        bool _enableTestGrid;
 
         // Textured based
         properties::StringProperty _pointSpreadFunctionTexturePath;

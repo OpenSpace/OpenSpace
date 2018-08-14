@@ -47,8 +47,6 @@
 #include <stdint.h>
 #include <limits>
 
-#define USING_STELLAR_TEST_GRID
-
 namespace {
     constexpr const char* _loggerCat = "RenderableStars";
 
@@ -118,6 +116,12 @@ namespace {
         "Color Option",
         "This value determines which quantity is used for determining the color of the "
         "stars."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnableTestGridInfo = {
+        "EnableTestGrid",
+        "Enable Test Grid",
+        "Set it to true for rendering the test grid."
     };
 
     // Old Method
@@ -299,6 +303,12 @@ namespace openspace {
                 Optional::Yes,
                 ColorContributionInfo.description
             },
+            {
+                EnableTestGridInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                EnableTestGridInfo.description
+            },
         }
         };
     }
@@ -310,7 +320,7 @@ namespace openspace {
         , _colorTextureIsDirty(true)
         , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _dataIsDirty(true)
-
+        , _enableTestGrid(false)
         // Old Method
         , _pointSpreadFunctionTexturePath(PsfTextureInfo)
         , _pointSpreadFunctionTexture(nullptr)
@@ -386,6 +396,11 @@ namespace openspace {
         );
         addProperty(_colorTexturePath);
 
+        if (dictionary.hasKey(EnableTestGridInfo.identifier)) {
+            _enableTestGrid = dictionary.value<bool>(EnableTestGridInfo.identifier);
+        }
+
+
         // DEBUG GUI for Carter:
         _renderingMethodOption.addOption(0, "Point Spread Function Based");
         _renderingMethodOption.addOption(1, "Textured Based");
@@ -422,7 +437,7 @@ namespace openspace {
         _psfMultiplyOption.addOption(2, "Luminosity, Size, App Brightness");
         _psfMultiplyOption.addOption(3, "Absolute Magnitude");
         _psfMultiplyOption.addOption(4, "Apparent Magnitude");
-        _psfMultiplyOption.addOption(5, "Old Magical Scale");
+        _psfMultiplyOption.addOption(5, "Distance Modulus");
         _psfMultiplyOption.set(1);
         _psfParamOwner.addProperty(_psfMultiplyOption);
         _psfParamOwner.addProperty(_lumCent);
@@ -995,15 +1010,17 @@ namespace openspace {
                         p[0], p[1], p[2], 1.0
                     } };
 
-#ifdef USING_STELLAR_TEST_GRID
-                layout.value.bvColor = 0.650;// _fullData[i + 3];
-                layout.value.luminance = _fullData[i + 4];
-                layout.value.absoluteMagnitude = _fullData[i + 3];
-#else
-                layout.value.bvColor = _fullData[i + 3];
-                layout.value.luminance = _fullData[i + 4];
-                layout.value.absoluteMagnitude = _fullData[i + 5];
-#endif
+                if (_enableTestGrid) {
+                    float sunColor = 0.650f;
+                    layout.value.bvColor = sunColor;// _fullData[i + 3];
+                    layout.value.luminance = _fullData[i + 4];
+                    layout.value.absoluteMagnitude = _fullData[i + 3];
+                }
+                else {
+                    layout.value.bvColor = _fullData[i + 3];
+                    layout.value.luminance = _fullData[i + 4];
+                    layout.value.absoluteMagnitude = _fullData[i + 5];
+                }
 
                 _slicedData.insert(_slicedData.end(),
                     layout.data.begin(),

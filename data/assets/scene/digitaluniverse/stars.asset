@@ -27,8 +27,7 @@ local object = {
     Identifier = "Stars",
     Renderable = {
         Type = "RenderableStars",
-        --File = speck .. "/stars.speck",
-        File = speck .. "/stellar_test_grid3.speck",
+        File = speck .. "/stars.speck",
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
         MagnitudeExponent = 6.44,
@@ -39,4 +38,20 @@ local object = {
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+local testGrid = {
+    Identifier = "StarsTestGrid",
+    Renderable = {
+        Type = "RenderableStars",
+        EnableTestGrid = true,
+        File = speck .. "/stellar_test_grid3.speck",
+        Texture = textures .. "/halo.png",
+        ColorMap = colorLUT .. "/colorbv.cmap",
+        MagnitudeExponent = 6.44,
+        ColorContribution = 2.0
+    },
+    GUI = {
+        Path = "/Milky Way/Stars Test Grid"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { object, testGrid })

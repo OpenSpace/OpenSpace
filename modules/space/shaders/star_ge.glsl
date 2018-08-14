@@ -133,11 +133,14 @@ void main() {
         scaleMultiply = (-absMag + 35.f) * pow(10.0, magnitudeExponent + 8.5f);
     } else if (psfParamConf == 4) {
         float absMag = ge_bvLumAbsMag.z;
-        float distanceToStarInParsecs = length(float(dpos.xyz/PARSEC) - float(eyePosition/PARSEC)); 
-        //float appMag = absMag + 5*log(distanceToStarInParsecs+1000) - 5.0;
-        float appMag = absMag + 5*log(distanceToStarInParsecs/10f);
+        float distanceToStarInParsecs = length(float((dpos.xyz - eyePosition)/PARSEC)); 
+        //float appMag = absMag + 5*log(distanceToStarInParsecs) - 5.0;
+        float appMag = absMag + 5 * (log(distanceToStarInParsecs/10f)/log(2.f));
         //scaleMultiply = appMag * pow(10.0, magnitudeExponent + 8.5f);
-        scaleMultiply = (-appMag + 35.f) * pow(10.0, magnitudeExponent + 7.5f);
+        //scaleMultiply = (-appMag + 50.f) * pow(10.0, magnitudeExponent + 7.5f);
+        //scaleMultiply =  log(35.f + appMag) *  pow(10.0, magnitudeExponent + 6.5f);
+        scaleMultiply = exp((35.f - appMag) * 0.2) * pow(10.0, magnitudeExponent + 2.5f);
+        //scaleMultiply = appMag * pow(10.0, magnitudeExponent + 8.5f);
     } else if (psfParamConf == 5) {
         float absMag = ge_bvLumAbsMag.z;
         scaleMultiply = exp((-30.623 - absMag) * 0.462) * pow(10.0, magnitudeExponent + 12.5f) * 2000;
