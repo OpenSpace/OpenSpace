@@ -56,6 +56,7 @@ namespace openspace {
 
         bool isReady() const override;
 
+        void renderPSFToTexture();
         void render(const RenderData& data, RendererTasks& rendererTask) override;
         void update(const UpdateData& data) override;
 
@@ -67,6 +68,8 @@ namespace openspace {
             Velocity = 1,
             Speed = 2
         };
+
+        static const int _psfTextureSize = 256;
 
         void createDataSlice(ColorOption option);
 
@@ -145,6 +148,9 @@ namespace openspace {
 
         GLuint _vao;
         GLuint _vbo;
+        GLuint _psfVao;
+        GLuint _psfVbo;
+        GLuint _psfTexture;
     };
 
 } // namespace openspace

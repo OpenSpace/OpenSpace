@@ -340,8 +340,8 @@ namespace openspace {
         , _p2Param(P2ParamInfo, 0.138f, 0.f, 1.f)
         , _spencerAlphaConst(AlphaConstInfo, 0.02f, 0.000001f, 5.f)
         , _moffatPSFParamOwner(MoffatPSFParamOwnerInfo)
-        , _FWHMConst(FWHMInfo, 10.4f, 0.f, 1000.f)
-        , _moffatBetaConst(BetaInfo, 4.765f, 0.f, 10.f)
+        , _FWHMConst(FWHMInfo, 10.4f, -100.f, 1000.f)
+        , _moffatBetaConst(BetaInfo, 4.765f, 0.f, 100.f)
 
         , _renderingMethodOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _oldMethodOwner(OldMethodOptionInfo)
@@ -352,6 +352,9 @@ namespace openspace {
         , _nValuesPerStar(0)
         , _vao(0)
         , _vbo(0)
+        , _psfVao(0)
+        , _psfVbo(0)
+        , _psfTexture(0)
     {
         using File = ghoul::filesystem::File;
 
@@ -431,7 +434,11 @@ namespace openspace {
         _psfMethodOption.addOption(0, "Spencer's Function");
         _psfMethodOption.addOption(1, "Moffat's Function");
         _psfMethodOption.set(0);
+        _psfMethodOption.onChange(
+            [&] { renderPSFToTexture(); }
+        );
         _psfParamOwner.addProperty(_psfMethodOption);
+
         _psfMultiplyOption.addOption(0, "Use Star's Apparent Brightness");
         _psfMultiplyOption.addOption(1, "Use Star's Luminosity and Size");
         _psfMultiplyOption.addOption(2, "Luminosity, Size, App Brightness");
@@ -459,13 +466,31 @@ namespace openspace {
         _psfParamOwner.addProperty(_colorContribution);
 
         _spencerPSFParamOwner.addProperty(_p0Param);
+        _p0Param.onChange(
+            [&] { renderPSFToTexture(); }
+        );
         _spencerPSFParamOwner.addProperty(_p1Param);
+        _p1Param.onChange(
+            [&] { renderPSFToTexture(); }
+        );
         _spencerPSFParamOwner.addProperty(_p2Param);
+        _p2Param.onChange(
+            [&] { renderPSFToTexture(); }
+        );
         _spencerPSFParamOwner.addProperty(_spencerAlphaConst);
+        _spencerAlphaConst.onChange(
+            [&] { renderPSFToTexture(); }
+        );
 
         _moffatPSFParamOwner.addProperty(_FWHMConst);
+        _FWHMConst.onChange(
+            [&] { renderPSFToTexture(); }
+        );
         _moffatPSFParamOwner.addProperty(_moffatBetaConst);
-        
+        _moffatBetaConst.onChange(
+            [&] { renderPSFToTexture(); }
+        );
+
         _psfParamOwner.addPropertySubOwner(_spencerPSFParamOwner);
         _psfParamOwner.addPropertySubOwner(_moffatPSFParamOwner);
 
@@ -498,6 +523,50 @@ namespace openspace {
         if (!success) {
             throw ghoul::RuntimeError("Error loading data");
         }
+
+        LDEBUG("Creating Polygon Texture");
+
+        glGenVertexArrays(1, &_psfVao);
+        glGenBuffers(1, &_psfVbo);
+        glBindVertexArray(_psfVao);
+        glBindBuffer(GL_ARRAY_BUFFER, _psfVbo);
+
+        const GLfloat vertex_data[] = {
+            //x      y     z     w
+            -1.0f, -1.0f, 0.0f, 1.0f,
+            1.0f,  1.0f, 0.0f, 1.0f,
+            -1.0f,  1.0f, 0.0f, 1.0f,
+            -1.0f, -1.0f, 0.0f, 1.0f,
+            1.0f, -1.0f, 0.0f, 1.0f,
+            1.0f,  1.0f, 0.0f, 1.0f
+        };
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+        glVertexAttribPointer(
+            0,
+            4,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(GLfloat) * 4,
+            nullptr
+        );
+        glEnableVertexAttribArray(0);
+        glBindVertexArray(0);
+
+        glGenTextures(1, &_psfTexture);
+        glBindTexture(GL_TEXTURE_2D, _psfTexture);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        // Stopped using a buffer object for GL_PIXEL_UNPACK_BUFFER
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        glTexImage2D(
+            GL_TEXTURE_2D, 0, GL_RGBA8, _psfTextureSize,
+            _psfTextureSize, 0, GL_RGBA, GL_BYTE, nullptr
+        );
+
+        renderPSFToTexture();
     }
 
     void RenderableStars::deinitializeGL() {
@@ -515,14 +584,71 @@ namespace openspace {
         }
     }
 
+    void RenderableStars::renderPSFToTexture() {
+        // Saves current FBO first
+        GLint defaultFBO;
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
+
+        GLint m_viewport[4];
+        glGetIntegerv(GL_VIEWPORT, m_viewport);
+
+        // Creates the FBO for the calculations
+        GLuint psfFBO;
+        glGenFramebuffers(1, &psfFBO);
+        glBindFramebuffer(GL_FRAMEBUFFER, psfFBO);
+        GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+        glDrawBuffers(1, drawBuffers);
+        
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _psfTexture, 0);
+        
+        glViewport(0, 0, _psfTextureSize, _psfTextureSize);
+
+        std::unique_ptr<ghoul::opengl::ProgramObject> program =
+            ghoul::opengl::ProgramObject::Build("RenderStarPSFToTexture",
+                absPath("${MODULE_SPACE}/shaders/psfToTexture_vs.glsl"),
+                absPath("${MODULE_SPACE}/shaders/psfToTexture_fs.glsl")
+            );
+
+        program->activate();
+        static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+        glClearBufferfv(GL_COLOR, 0, black);
+
+       /* program->setUniform("sides", _polygonSides);
+        program->setUniform("polygonColor", _pointColor);*/
+
+        //program->setUniform("colorContribution", _colorContribution);
+        program->setUniform("psfMethod", _psfMethodOption.value());
+        program->setUniform("p0Param", _p0Param);
+        program->setUniform("p1Param", _p1Param);
+        program->setUniform("p2Param", _p2Param);
+        program->setUniform("alphaConst", _spencerAlphaConst);
+        program->setUniform("FWHM", _FWHMConst);
+        program->setUniform("betaConstant", _moffatBetaConst);
+
+        glBindVertexArray(_psfVao);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
+        
+        program->deactivate();
+
+        // Restores system state
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+        glViewport(
+            m_viewport[0],
+            m_viewport[1],
+            m_viewport[2],
+            m_viewport[3]
+        );
+        glDeleteFramebuffers(1, &psfFBO);
+    }
+
     void RenderableStars::render(const RenderData& data, RendererTasks&) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         glDepthMask(false);
 
         _program->activate();
 
-        _program->setUniform(_uniformCacheSpencer.renderingMethod, _renderingMethodOption.value());
-        ghoul::opengl::TextureUnit psfUnit;
+        _program->setUniform(_uniformCacheSpencer.renderingMethod, _renderingMethodOption.value());        
 
         glm::dvec3 eyePosition = glm::dvec3(
             glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
@@ -547,63 +673,24 @@ namespace openspace {
         _program->setUniform(_uniformCacheSpencer.colorOption, _colorOption);
         _program->setUniform(_uniformCacheSpencer.magnitudeExponent, _magnitudeExponent);
         
-        
-        /*
-        _program->setUniform(_uniformCacheSpencer.billboardSize, _billboardSize);
-        _program->setUniform(
-            _uniformCacheSpencer.screenSize,
-            glm::vec2(OsEng.windowWrapper().getCurrentViewportSize())
-        );
-        */
-        /*
-        if (_renderingMethodOption.value() == 0) { // Old Method
-            glm::vec2 scaling = glm::vec2(1, -19);
-
-            _program->setUniform(_uniformCacheOld.view, data.camera.viewMatrix());
-            _program->setUniform(_uniformCacheOld.projection, data.camera.projectionMatrix());
-
-            _program->setUniform(_uniformCacheSpencer.colorOption, _colorOption);
-            _program->setUniform(_uniformCacheOld.alphaValue, _alphaValue);
-            _program->setUniform(_uniformCacheOld.scaleFactor, _scaleFactor);
-            _program->setUniform(_uniformCacheOld.minBillboardSize, _minBillboardSize);
-            _program->setUniform(
-                _uniformCacheSpencer.screenSize,
-                glm::vec2(OsEng.renderEngine().renderingResolution())
-            );
-
-            setPscUniforms(*_program.get(), data.camera, data.position);
-            _program->setUniform(_uniformCacheOld.scaling, scaling);
-
-            psfUnit.activate();
-            _pointSpreadFunctionTexture->bind();
-            _program->setUniform(_uniformCacheOld.psfTexture, psfUnit);
-        }
-        else
-        */
-
         _program->setUniform(_uniformCacheSpencer.psfParamConf, _psfMultiplyOption.value());
         _program->setUniform(_uniformCacheSpencer.lumCent, _lumCent);
         _program->setUniform(_uniformCacheSpencer.radiusCent, _radiusCent);
         _program->setUniform(_uniformCacheSpencer.brightnessCent, _brightnessCent);
 
+        _program->setUniform(_uniformCacheOld.alphaValue, _alphaValue);
+
+        ghoul::opengl::TextureUnit psfUnit;
+        psfUnit.activate();
+
         if (_renderingMethodOption.value() == 0) { // PSF Based Methods
-            _program->setUniform(_uniformCacheSpencer.colorContribution, _colorContribution);
-            _program->setUniform(_uniformCacheSpencer.psfMethod, _psfMethodOption.value());            
-            _program->setUniform(_uniformCacheSpencer.p0Param, _p0Param);
-            _program->setUniform(_uniformCacheSpencer.p1Param, _p1Param);
-            _program->setUniform(_uniformCacheSpencer.p2Param, _p2Param);
-            _program->setUniform(_uniformCacheSpencer.alphaConst, _spencerAlphaConst);
-            _program->setUniform(_uniformCacheMoffat.FWHM, _FWHMConst);
-            _program->setUniform(_uniformCacheMoffat.betaConstant, _moffatBetaConst);
+            glBindTexture(GL_TEXTURE_2D, _psfTexture);
         }
         else if (_renderingMethodOption.value() == 1) { // Textured based Method
-            
-            _program->setUniform(_uniformCacheOld.alphaValue, _alphaValue);
-
-            psfUnit.activate();
             _pointSpreadFunctionTexture->bind();
-            _program->setUniform(_uniformCacheOld.psfTexture, psfUnit);
         }
+
+        _program->setUniform(_uniformCacheOld.psfTexture, psfUnit);
 
         ghoul::opengl::TextureUnit colorUnit;
         colorUnit.activate();

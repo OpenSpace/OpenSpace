@@ -107,7 +107,7 @@ void main() {
         // Working like Partiview
         double luminosity              = double(ge_bvLumAbsMag.y);
         double pSize                   = pow(10, magnitudeExponent + 9.0);
-        double distanceToStarInParsecs = length(dpos.xyz/PARSEC - eyePosition/PARSEC);  
+        double distanceToStarInParsecs = length((dpos.xyz - eyePosition)/PARSEC);  
         double apparentBrightness      = pSize * luminosity / distanceToStarInParsecs;
         scaleMultiply                  = apparentBrightness;
     } else if (psfParamConf == 1) {
@@ -126,7 +126,7 @@ void main() {
                                          sqrt(L_over_Lsun);
         scaleMultiply                  = ((lumCent * (ge_bvLumAbsMag.y + 5E9)) + 
                                          (radiusCent * double(starRadius)) + 
-                                         (brightnessCent * apparentBrightness * 5E9)) * 
+                                         (brightnessCent * apparentBrightness * 5E15)) * 
                                          pow(10.0, magnitudeExponent);
     } else if (psfParamConf == 3) {
         float absMag = ge_bvLumAbsMag.z;
@@ -146,18 +146,6 @@ void main() {
         scaleMultiply = exp((-30.623 - absMag) * 0.462) * pow(10.0, magnitudeExponent + 12.5f) * 2000;
     }
 
-/*
-    float power = (magnitudeExponent/1.f) + (10.f * ge_bvLumAbsMag.y)/pow(float(distanceToStarInParsecs), 2.f);
-    //float power = (magnitudeExponent/1.f) + float(distanceToStarInParsecs * distanceToStarInParsecs)/1E6;
-    //float power = (60000.f * ge_bvLumAbsMag.y) / float(distanceToStarInParsecs);
-    float absoluteMagnitude = ge_bvLumAbsMag.z;
-    float modifiedSpriteSize =
-        exp((-30.623 - absoluteMagnitude) * 0.462) * magnitudeExponent * 2000.f;
-    double scaleMultiply = 1E20 * modifiedSpriteSize;// * double(starRadius);  
-    //double scaleMultiply = pow(10, power) * double(starRadius);  
-    if (scaleMultiply < float(billboardSize) * 1E15)
-        return;
-*/
     dvec3 scaledRight    = dvec3(0.0);
     dvec3 scaledUp       = dvec3(0.0);
     vec4 bottomLeftVertex, bottomRightVertex, topLeftVertex, topRightVertex;
@@ -255,8 +243,3 @@ void main() {
     EmitVertex();
     EndPrimitive();     
 }
-// OLD
-/*
-    EndPrimitive();
-}
-*/
