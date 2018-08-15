@@ -130,6 +130,7 @@ FlightControllerTopic::FlightControllerTopic()
 }
 
 FlightControllerTopic::~FlightControllerTopic() {
+    OsEng.navigationHandler().removeWebsocketInputState(_topicId);
 }
 
 bool FlightControllerTopic::isDone() const {
@@ -212,11 +213,11 @@ void FlightControllerTopic::changeFocus(const nlohmann::json& json) {
 
 void FlightControllerTopic::disconnect() {
     OsEng.navigationHandler().removeWebsocketInputState(_topicId);
-    _isDone = true;
     nlohmann::json j;
     j[TypeKey] = Disconnect;
     j[Disconnect][SuccessKey] = true;
     _connection->sendJson(wrappedPayload(j));
+    _isDone = true;
 }
 
 void FlightControllerTopic::processInputState(const nlohmann::json& json) {

@@ -84,6 +84,7 @@ void InputState::addWebsocketInputState(size_t id, WebsocketInputState& states) 
 
 void InputState::removeWebsocketInputState(size_t id) {
     _websocketInputs.erase(id);
+    _websocketInputs = websocketInputStates();
 }
 
 const std::vector<std::pair<Key, KeyModifier>>& InputState::pressedKeys() const {
