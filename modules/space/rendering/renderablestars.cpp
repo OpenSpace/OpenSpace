@@ -52,24 +52,11 @@ namespace {
 
     constexpr const char* KeyFile = "File";
 
-    constexpr const std::array<const char*, 17> UniformNamesSpencer = {
-        "renderingMethod", "psfMethod",
-        // New Method
-        "modelMatrix", "cameraUp", "cameraViewProjectionMatrix",
-        "colorOption", "magnitudeExponent", "colorContribution", 
-        "eyePosition",
-        "psfParamConf", "lumCent", "radiusCent", "brightnessCent",
-        "p0Param", "p1Param", "p2Param", "alphaConst"
-    };
-
-    constexpr const std::array<const char*, 3> UniformNamesOld = {
-        // Textured
-        "colorTexture", "alphaValue", "psfTexture"
-    };
-
-    constexpr const std::array<const char*, 2> UniformNamesMoffat = {
-        // Moffat
-        "FWHM", "betaConstant"
+    constexpr const std::array<const char*, 13> UniformNames = {
+        "modelMatrix", "cameraUp", "cameraViewProjectionMatrix", 
+        "colorOption", "magnitudeExponent", "eyePosition", "psfParamConf", 
+        "lumCent", "radiusCent", "brightnessCent", "colorTexture", 
+        "alphaValue", "psfTexture"
     };
 
     constexpr int8_t CurrentCacheVersion = 1;
@@ -147,28 +134,22 @@ namespace {
         "Stars closer than this distance are given full opacity. "
         "Farther away, stars dim proportionally to the logarithm of their distance."
     };
-
-    constexpr openspace::properties::Property::PropertyInfo ColorContributionInfo = {
-        "ColorContribution",
-        "Color Contribution",
-        "Adjust the color intensity of the stars"
+    
+    constexpr openspace::properties::Property::PropertyInfo RenderMethodOptionInfo = {
+        "RenderMethod",
+        "Render Method",
+        "Render method for the stars."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
-        "RenderOptio",
-        "Render Option",
-        "Debug option for different rendering methods for the stars."
-    };
-
-    openspace::properties::PropertyOwner::PropertyOwnerInfo OldMethodOptionInfo = {
-        "OldMethodOption",
-        "Old Method",
+    openspace::properties::PropertyOwner::PropertyOwnerInfo UserProvidedTextureOptionInfo = {
+        "UserProvidedTexture",
+        "User Provided Texture",
         ""
     };
 
-    openspace::properties::PropertyOwner::PropertyOwnerInfo PSFParametersOwnerInfo = {
-        "PSFParametersOwner",
-        "Parameters",
+    openspace::properties::PropertyOwner::PropertyOwnerInfo ParametersOwnerOptionInfo = {
+        "ParametersOwner",
+        "Parameters Options",
         ""
     };
 
@@ -184,10 +165,10 @@ namespace {
         "Debug option for PSF main function: Spencer or Moffat."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PSFMultiplyOptionInfo = {
-        "SizeOption",
+    constexpr openspace::properties::Property::PropertyInfo SizeCompositionOptionInfo = {
+        "SizeComposition",
         "Size Composition Option",
-        "Debug option for the base star's size."
+        "Base multiplyer for the final stars' sizes."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LumPercentInfo = {
@@ -298,16 +279,22 @@ namespace openspace {
                 MagnitudeExponentInfo.description
             },
             {
-                ColorContributionInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                ColorContributionInfo.description
-            },
-            {
                 EnableTestGridInfo.identifier,
                 new BoolVerifier,
                 Optional::Yes,
                 EnableTestGridInfo.description
+            },
+            {
+                RenderMethodOptionInfo.identifier,
+                new IntVerifier,
+                Optional::No,
+                RenderMethodOptionInfo.description
+            },
+            {
+                SizeCompositionOptionInfo.identifier,
+                new IntVerifier,
+                Optional::No,
+                SizeCompositionOptionInfo.description
             },
         }
         };
@@ -321,19 +308,16 @@ namespace openspace {
         , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _dataIsDirty(true)
         , _enableTestGrid(false)
-        // Old Method
         , _pointSpreadFunctionTexturePath(PsfTextureInfo)
         , _pointSpreadFunctionTexture(nullptr)
         , _pointSpreadFunctionTextureIsDirty(true)
         , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
-        // PSF
         , _psfMethodOption(PSFMethodOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
-        , _psfMultiplyOption(PSFMultiplyOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+        , _psfMultiplyOption(SizeCompositionOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _lumCent(LumPercentInfo, 0.5f, 0.f, 3.f)
         , _radiusCent(RadiusPercentInfo, 0.5f, 0.f, 3.f)
         , _brightnessCent(BrightnessPercentInfo, 0.5f, 0.f, 3.f)
         , _magnitudeExponent(MagnitudeExponentInfo, 4.f, 0.f, 8.f)
-        , _colorContribution(ColorContributionInfo, 2.f, 0.f, 10.f)
         , _spencerPSFParamOwner(SpencerPSFParamOwnerInfo)
         , _p0Param(P0ParamInfo, 0.384f, 0.f, 1.f)
         , _p1Param(P1ParamInfo, 0.478f, 0.f, 1.f)
@@ -342,10 +326,9 @@ namespace openspace {
         , _moffatPSFParamOwner(MoffatPSFParamOwnerInfo)
         , _FWHMConst(FWHMInfo, 10.4f, -100.f, 1000.f)
         , _moffatBetaConst(BetaInfo, 4.765f, 0.f, 100.f)
-
-        , _renderingMethodOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
-        , _oldMethodOwner(OldMethodOptionInfo)
-        , _psfParamOwner(PSFParametersOwnerInfo)
+        , _renderingMethodOption(RenderMethodOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+        , _userProvidedTextureOwner(UserProvidedTextureOptionInfo)
+        , _parametersOwner(ParametersOwnerOptionInfo)
         , _moffatMethodOwner(MoffatMethodOptionInfo)
         , _program(nullptr)
         , _speckFile("")
@@ -403,14 +386,19 @@ namespace openspace {
             _enableTestGrid = dictionary.value<bool>(EnableTestGridInfo.identifier);
         }
 
+        _renderingMethodOption.addOption(0, "0 - Point Spread Function Based");
+        _renderingMethodOption.addOption(1, "1 - Textured Based");
+        addProperty(_renderingMethodOption);     
 
-        // DEBUG GUI for Carter:
-        _renderingMethodOption.addOption(0, "Point Spread Function Based");
-        _renderingMethodOption.addOption(1, "Textured Based");
-        addProperty(_renderingMethodOption);
-        _renderingMethodOption.set(0);        
+        if (dictionary.hasKey(RenderMethodOptionInfo.identifier)) {
+            _renderingMethodOption.set(
+                static_cast<int>(dictionary.value<double>(RenderMethodOptionInfo.identifier))
+            );
+        }
+        else {
+            _renderingMethodOption.set(1);
+        }
 
-        // Old Method
         _pointSpreadFunctionTexturePath = absPath(dictionary.value<std::string>(
             PsfTextureInfo.identifier
             ));
@@ -421,49 +409,52 @@ namespace openspace {
         _pointSpreadFunctionFile->setCallback(
             [&](const File&) { _pointSpreadFunctionTextureIsDirty = true; }
         );
-        _oldMethodOwner.addProperty(_pointSpreadFunctionTexturePath);
+        _userProvidedTextureOwner.addProperty(_pointSpreadFunctionTexturePath);
         
         if (dictionary.hasKey(TransparencyInfo.identifier)) {
             _alphaValue = static_cast<float>(
                 dictionary.value<double>(TransparencyInfo.identifier)
                 );
         }
-        _oldMethodOwner.addProperty(_alphaValue);
+        _parametersOwner.addProperty(_alphaValue);
 
-        // PSF based
-        _psfMethodOption.addOption(0, "Spencer's Function");
-        _psfMethodOption.addOption(1, "Moffat's Function");
+        _psfMethodOption.addOption(0, "0 - Spencer's Function");
+        _psfMethodOption.addOption(1, "1 - Moffat's Function");
         _psfMethodOption.set(0);
         _psfMethodOption.onChange(
             [&] { renderPSFToTexture(); }
         );
-        _psfParamOwner.addProperty(_psfMethodOption);
+        _parametersOwner.addProperty(_psfMethodOption);
 
-        _psfMultiplyOption.addOption(0, "Use Star's Apparent Brightness");
-        _psfMultiplyOption.addOption(1, "Use Star's Luminosity and Size");
-        _psfMultiplyOption.addOption(2, "Luminosity, Size, App Brightness");
-        _psfMultiplyOption.addOption(3, "Absolute Magnitude");
-        _psfMultiplyOption.addOption(4, "Apparent Magnitude");
-        _psfMultiplyOption.addOption(5, "Distance Modulus");
-        _psfMultiplyOption.set(1);
-        _psfParamOwner.addProperty(_psfMultiplyOption);
-        _psfParamOwner.addProperty(_lumCent);
-        _psfParamOwner.addProperty(_radiusCent);
-        _psfParamOwner.addProperty(_brightnessCent);
+        _psfMultiplyOption.addOption(0, "0 - Use Star's Apparent Brightness");
+        _psfMultiplyOption.addOption(1, "1 - Use Star's Luminosity and Size");
+        _psfMultiplyOption.addOption(2, "2 - Luminosity, Size, App Brightness");
+        _psfMultiplyOption.addOption(3, "3 - Absolute Magnitude");
+        _psfMultiplyOption.addOption(4, "4 - Apparent Magnitude");
+        _psfMultiplyOption.addOption(5, "5 - Distance Modulus");
+
+        if (dictionary.hasKey(MagnitudeExponentInfo.identifier)) {
+            _psfMultiplyOption.set(
+                static_cast<int>(
+                    dictionary.value<double>(SizeCompositionOptionInfo.identifier)
+                    )
+            );
+        }
+        else {
+            _psfMultiplyOption.set(5);
+        }
+
+        _parametersOwner.addProperty(_psfMultiplyOption);
+        _parametersOwner.addProperty(_lumCent);
+        _parametersOwner.addProperty(_radiusCent);
+        _parametersOwner.addProperty(_brightnessCent);
 
         if (dictionary.hasKey(MagnitudeExponentInfo.identifier)) {
             _magnitudeExponent = static_cast<float>(
                 dictionary.value<double>(MagnitudeExponentInfo.identifier)
                 );
         }
-        _psfParamOwner.addProperty(_magnitudeExponent);
-
-        if (dictionary.hasKey(ColorContributionInfo.identifier)) {
-            _colorContribution = static_cast<float>(
-                dictionary.value<double>(ColorContributionInfo.identifier)
-                );
-        }
-        _psfParamOwner.addProperty(_colorContribution);
+        _parametersOwner.addProperty(_magnitudeExponent);
 
         _spencerPSFParamOwner.addProperty(_p0Param);
         _p0Param.onChange(
@@ -491,13 +482,13 @@ namespace openspace {
             [&] { renderPSFToTexture(); }
         );
 
-        _psfParamOwner.addPropertySubOwner(_spencerPSFParamOwner);
-        _psfParamOwner.addPropertySubOwner(_moffatPSFParamOwner);
+        _parametersOwner.addPropertySubOwner(_spencerPSFParamOwner);
+        _parametersOwner.addPropertySubOwner(_moffatPSFParamOwner);
 
 
         // DEBUG GUI for Carter:
-        this->addPropertySubOwner(_oldMethodOwner);
-        this->addPropertySubOwner(_psfParamOwner);
+        this->addPropertySubOwner(_userProvidedTextureOwner);
+        this->addPropertySubOwner(_parametersOwner);
         this->addPropertySubOwner(_moffatMethodOwner);
     }
 
@@ -515,10 +506,8 @@ namespace openspace {
             absPath("${MODULE_SPACE}/shaders/star_ge.glsl")
         );
 
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCacheSpencer, UniformNamesSpencer);
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCacheOld, UniformNamesOld);
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCacheMoffat, UniformNamesMoffat);
-
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+        
         bool success = loadData();
         if (!success) {
             throw ghoul::RuntimeError("Error loading data");
@@ -616,7 +605,6 @@ namespace openspace {
        /* program->setUniform("sides", _polygonSides);
         program->setUniform("polygonColor", _pointColor);*/
 
-        //program->setUniform("colorContribution", _colorContribution);
         program->setUniform("psfMethod", _psfMethodOption.value());
         program->setUniform("p0Param", _p0Param);
         program->setUniform("p1Param", _p1Param);
@@ -648,15 +636,13 @@ namespace openspace {
 
         _program->activate();
 
-        _program->setUniform(_uniformCacheSpencer.renderingMethod, _renderingMethodOption.value());        
-
         glm::dvec3 eyePosition = glm::dvec3(
             glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
         );
-        _program->setUniform(_uniformCacheSpencer.eyePosition, eyePosition);
+        _program->setUniform(_uniformCache.eyePosition, eyePosition);
 
         glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
-        _program->setUniform(_uniformCacheSpencer.cameraUp, cameraUp);
+        _program->setUniform(_uniformCache.cameraUp, cameraUp);
 
         glm::dmat4 modelMatrix =
             glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
@@ -668,17 +654,17 @@ namespace openspace {
 
         glm::dmat4 cameraViewProjectionMatrix = projectionMatrix * data.camera.combinedViewMatrix();
 
-        _program->setUniform(_uniformCacheSpencer.modelMatrix, modelMatrix);
-        _program->setUniform(_uniformCacheSpencer.cameraViewProjectionMatrix, cameraViewProjectionMatrix);
-        _program->setUniform(_uniformCacheSpencer.colorOption, _colorOption);
-        _program->setUniform(_uniformCacheSpencer.magnitudeExponent, _magnitudeExponent);
+        _program->setUniform(_uniformCache.modelMatrix, modelMatrix);
+        _program->setUniform(_uniformCache.cameraViewProjectionMatrix, cameraViewProjectionMatrix);
+        _program->setUniform(_uniformCache.colorOption, _colorOption);
+        _program->setUniform(_uniformCache.magnitudeExponent, _magnitudeExponent);
         
-        _program->setUniform(_uniformCacheSpencer.psfParamConf, _psfMultiplyOption.value());
-        _program->setUniform(_uniformCacheSpencer.lumCent, _lumCent);
-        _program->setUniform(_uniformCacheSpencer.radiusCent, _radiusCent);
-        _program->setUniform(_uniformCacheSpencer.brightnessCent, _brightnessCent);
+        _program->setUniform(_uniformCache.psfParamConf, _psfMultiplyOption.value());
+        _program->setUniform(_uniformCache.lumCent, _lumCent);
+        _program->setUniform(_uniformCache.radiusCent, _radiusCent);
+        _program->setUniform(_uniformCache.brightnessCent, _brightnessCent);
 
-        _program->setUniform(_uniformCacheOld.alphaValue, _alphaValue);
+        _program->setUniform(_uniformCache.alphaValue, _alphaValue);
 
         ghoul::opengl::TextureUnit psfUnit;
         psfUnit.activate();
@@ -690,12 +676,12 @@ namespace openspace {
             _pointSpreadFunctionTexture->bind();
         }
 
-        _program->setUniform(_uniformCacheOld.psfTexture, psfUnit);
+        _program->setUniform(_uniformCache.psfTexture, psfUnit);
 
         ghoul::opengl::TextureUnit colorUnit;
         colorUnit.activate();
         _colorTexture->bind();
-        _program->setUniform(_uniformCacheOld.colorTexture, colorUnit);
+        _program->setUniform(_uniformCache.colorTexture, colorUnit);
 
         glBindVertexArray(_vao);
         const GLsizei nStars = static_cast<GLsizei>(_fullData.size() / _nValuesPerStar);
@@ -891,9 +877,7 @@ namespace openspace {
 
         if (_program->isDirty()) {
             _program->rebuildFromFile();
-            ghoul::opengl::updateUniformLocations(*_program, _uniformCacheSpencer, UniformNamesSpencer);
-            ghoul::opengl::updateUniformLocations(*_program, _uniformCacheOld, UniformNamesOld);
-            ghoul::opengl::updateUniformLocations(*_program, _uniformCacheMoffat, UniformNamesMoffat);
+            ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
         }
     }
 

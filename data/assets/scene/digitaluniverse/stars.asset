@@ -31,13 +31,14 @@ local object = {
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
         MagnitudeExponent = 6.44,
-        ColorContribution = 2.0
+        SizeComposition = 5,
+        RenderMethod = 1
     },
     GUI = {
         Path = "/Milky Way/Stars"
     }
 }
-
+--[[
 local testGrid = {
     Identifier = "StarsTestGrid",
     Renderable = {
@@ -46,12 +47,14 @@ local testGrid = {
         File = speck .. "/stellar_test_grid3.speck",
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
-        MagnitudeExponent = 6.44,
-        ColorContribution = 2.0
+        MagnitudeExponent = 5.03,
+        SizeComposition = 5,
+        RenderMethod = 1
     },
     GUI = {
         Path = "/Milky Way/Stars Test Grid"
     }
 }
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { object, testGrid })
+]]
+assetHelper.registerSceneGraphNodesAndExport(asset, { object })

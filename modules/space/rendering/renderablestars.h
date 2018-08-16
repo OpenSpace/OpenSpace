@@ -69,7 +69,7 @@ namespace openspace {
             Speed = 2
         };
 
-        static const int _psfTextureSize = 256;
+        static const int _psfTextureSize = 512;
 
         void createDataSlice(ColorOption option);
 
@@ -89,22 +89,18 @@ namespace openspace {
         // Test Grid Enabled
         bool _enableTestGrid;
 
-        // Textured based
         properties::StringProperty _pointSpreadFunctionTexturePath;
         std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
         std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
         bool _pointSpreadFunctionTextureIsDirty;
 
         properties::FloatProperty _alphaValue;
-
-        // PSF Based Method
         properties::OptionProperty _psfMethodOption;
         properties::OptionProperty _psfMultiplyOption;
         properties::FloatProperty _lumCent;
         properties::FloatProperty _radiusCent;
         properties::FloatProperty _brightnessCent;
         properties::FloatProperty _magnitudeExponent;
-        properties::FloatProperty _colorContribution;
         properties::PropertyOwner _spencerPSFParamOwner;
         properties::FloatProperty _p0Param;
         properties::FloatProperty _p1Param;
@@ -113,33 +109,19 @@ namespace openspace {
         properties::PropertyOwner _moffatPSFParamOwner;
         properties::FloatProperty _FWHMConst;
         properties::FloatProperty _moffatBetaConst;
-
-        // Debug GUI for Carter's tests
         properties::OptionProperty _renderingMethodOption;
-        properties::PropertyOwner _oldMethodOwner;
-        properties::PropertyOwner _psfParamOwner;
+        properties::PropertyOwner _userProvidedTextureOwner;
+        properties::PropertyOwner _parametersOwner;
         properties::PropertyOwner _moffatMethodOwner;
 
         std::unique_ptr<ghoul::opengl::ProgramObject> _program;
         UniformCache(
-            renderingMethod, psfMethod,
-            // Spencer Method
-            modelMatrix, cameraUp, cameraViewProjectionMatrix,
-            colorOption, magnitudeExponent, colorContribution,
-            eyePosition,
-            psfParamConf, lumCent, radiusCent, brightnessCent,
-            p0Param, p1Param, p2Param, alphaConst
-        ) _uniformCacheSpencer;
-
-        UniformCache(
-            FWHM, betaConstant
-        ) _uniformCacheMoffat;
-
-        UniformCache(
-            colorTexture, alphaValue, 
-            psfTexture
-        ) _uniformCacheOld;
-
+            modelMatrix, cameraUp, cameraViewProjectionMatrix, 
+            colorOption, magnitudeExponent, eyePosition, psfParamConf, 
+            lumCent, radiusCent, brightnessCent, colorTexture, 
+            alphaValue, psfTexture
+        ) _uniformCache;
+       
         std::string _speckFile;
 
         std::vector<float> _slicedData;
