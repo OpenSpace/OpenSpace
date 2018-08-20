@@ -191,7 +191,7 @@ void GUI::initialize() {
         ImGui::SetCurrentContext(_contexts[i]);
 
         ImGuiIO& io = ImGui::GetIO();
-        io.IniFilename = cachedFile.c_str();
+        io.IniFilename = iniFileBuffer;
         io.DeltaTime = 1.f / 60.f;
         io.KeyMap[ImGuiKey_Tab] = static_cast<int>(Key::Tab);
         io.KeyMap[ImGuiKey_LeftArrow] = static_cast<int>(Key::Left);
