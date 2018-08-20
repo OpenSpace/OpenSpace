@@ -656,28 +656,42 @@ function sgct.config.single(arg)
         assert(type(arg["fov"]["up"]) == "number",    "fov['up'] must be a number")
         assert(type(arg["fov"]["down"]) == "number",  "fov['down'] must be a number")
     else
+        local defaultFov = 40
+        local defaultRatio = 16/9 -- comes from default res 1280 x 720
+        local tanDefaultFov = math.tan(math.pi * defaultFov / 180)
+
         if (type(arg["windowSize"]) == "table") then
             assert(type(arg["windowSize"][1]) == "number", "windowPos[1] must be a number")
             assert(type(arg["windowSize"][2]) == "number", "windowPos[2] must be a number")
+            local tanHorizontalFov = tanDefaultFov
+            local tanVerticalFov = tanDefaultFov
 
             local ratio = arg["windowSize"][1] / arg["windowSize"][2]
-            local horizontalFov = 40
-            local verticalFov = 40
+
+            -- ratio between w and h should be
+            -- same as tan(horizontalFov) and tan(verticalFov)
 
             if (ratio > 1) then
-                verticalFov = horizontalFov / ratio
+                tanVerticalFov = tanHorizontalFov / ratio
             else
-                horizontalFov = verticalFov * ratio
+                tanHorizontalFov = tanVerticalFov * ratio
             end
 
+            -- sgct expects fov in degrees
             arg["fov"] = {
-                down = verticalFov,
-                up = verticalFov,
-                left = horizontalFov,
-                right = horizontalFov
+                down = 180 * math.atan(tanVerticalFov) / math.pi,
+                up = 180 * math.atan(tanVerticalFov) / math.pi,
+                left = 180 * math.atan(tanHorizontalFov) / math.pi,
+                right = 180 * math.atan(tanHorizontalFov) / math.pi
             }
         else
-            arg["fov"] = { down = 25, up = 25, left = 40.0, right = 40.0 }
+            -- sgct expects fov in degrees
+            arg["fov"] = {
+                down = 180 * math.atan(tanDefaultFov / defaultRatio) / math.pi,
+                up = 180 * math.atan(tanDefaultFov / defaultRatio) / math.pi,
+                left = 180 * math.atan(tanDefaultFov) / math.pi,
+                right = 180 * math.atan(tanDefaultFov) / math.pi
+            }
         end
     end
 
