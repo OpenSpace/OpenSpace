@@ -26,7 +26,6 @@
 
 #include <modules/server/include/connection.h>
 #include <modules/server/include/topics/topic.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <ghoul/fmt.h>
 #include <ghoul/io/socket/socket.h>

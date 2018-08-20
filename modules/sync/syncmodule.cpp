@@ -29,7 +29,6 @@
 #include <modules/sync/syncs/urlsynchronization.h>
 #include <modules/sync/tasks/syncassettask.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>

@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___OPENSPACEENGINE___H__
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
@@ -34,16 +33,12 @@
 #include <string>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::cmdparser { class CommandlineParser; }
-
 namespace openspace {
 
 class AssetManager;
 class LoadingScreen;
 class Scene;
 
-namespace interaction { struct JoystickInputStates; }
 namespace scripting { struct LuaLibrary; }
 
   // Structure that is responsible for the delayed shutdown of the application

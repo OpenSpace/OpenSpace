@@ -35,6 +35,7 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/network/networkengine.h>
