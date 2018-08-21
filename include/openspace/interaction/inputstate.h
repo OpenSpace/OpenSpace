@@ -53,7 +53,6 @@ public:
     double mouseScrollDelta() const;
     bool isMouseButtonPressed(MouseButton mouseButton) const;
 
-    //const JoystickInputStates& joystickInputStates() const;
     float joystickAxis(int i) const;
     bool joystickButton(int i) const;
 

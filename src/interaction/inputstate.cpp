@@ -103,10 +103,6 @@ bool InputState::isMouseButtonPressed(MouseButton mouseButton) const {
     return it != _mouseButtonsDown.end();
 }
 
-//const JoystickInputStates& InputState::joystickInputStates() const {
-//    return *_joystickInputStates;
-//}
-
 float InputState::joystickAxis(int i) const {
     return global::joystickInputStates.axis(i);
 }
