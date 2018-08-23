@@ -211,6 +211,9 @@ namespace openspace {
     }
 
     void RoverTerrain::render(const RenderData& data, RendererTasks& rendererTask) {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         std::vector<std::vector<std::shared_ptr<Subsite>>> subSitesVector = _chunkedLodGlobe->subsites();
         
         if (subSitesVector.size() < 1) {
@@ -399,7 +402,6 @@ namespace openspace {
                 glUniform1i(locationRoverTerrainTextures2, 1);
             }
 
-            glEnable(GL_BLEND);
             if (!_generalProperties.enableDepth.value()) {
                 glDisable(GL_DEPTH_TEST);
             }
@@ -408,16 +410,19 @@ namespace openspace {
                 glDisable(GL_CULL_FACE);
             }
 
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
             subsiteModels->model->render();
+
+            glEnable(GL_DEPTH_TEST);
+            glEnable(GL_CULL_FACE);
         }
+
         _programObject->deactivate();
 
         if (_generalProperties.enablePath.value()) {
             _renderableExplorationPath->setLevel(level);
             _renderableExplorationPath->render(data);
         }
+
         _prevLevel = level;
     }
 
