@@ -132,12 +132,6 @@ local color_layers = {
         Name = "Themis IR Night [AWS]",
         FilePath = mapServiceConfigs .. "/AWS/Themis_IR_Night.wms",
         BlendMode = "Color"
-    },
-    {   
-        Identifier = "HiRISE_texture",
-        Name = "MSL Gale Texture",
-        FilePath = "L:/MSLDATA/MSLBaseMap/MSL_Gale_Orthophoto_Mosaic_25cm_v3_lonlat_Texture.vrt",
-        TilePixelSize = 90
     }
 }
 
@@ -179,17 +173,7 @@ local height_layers = {
         Name = "Mola Elevation [AWS]",
         FilePath = mapServiceConfigs .. "/AWS/Mola_Elevation.wms",
         TilePixelSize = 90
-    },
-    {
-        -- M & R heightmaps, generetaed by highschool students, want it in wms
-        Identifier = "HiRISE",
-        Name = "MSL Gale",
-        Enables = true,
-        FilePath = "L:/MSLDATA/MSLBaseMap/MSL_Gale_DEM_Mosaic_1m_v3_lonlat_Heightmap.vrt",
-        TilePixelSize = 90,
-        Enabled = true
     }
-
 }
 
 local Mars = {
