@@ -13,9 +13,9 @@ asset.require('util/default_joystick')
 assetHelper.requestAll(asset, 'scene/digitaluniverse')
 asset.request('customization/globebrowsing')
 
-local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
-local marsAsset  = asset.require('scene/solarsystem/planets/mars/mars')
-local MSLAsset   = asset.require('scene/solarsystem/planets/mars/rovers/curiosity')
+asset.request('scene/solarsystem/planets')
+
+local MSLAsset = asset.require('scene/solarsystem/planets/mars/rovers/curiosity')
 
 asset.onInitialize(function ()
     openspace.setPropertyValueSingle(
@@ -26,6 +26,11 @@ asset.onInitialize(function ()
         'Scene.Mars.RenderableGlobe.Layers.HeightLayers.MSL_Gale_DEM_Mosaic_1m_v3.Enabled',
         true
     )
+
+    openspace.setPropertyValueSingle(
+        'Scene.Mars.RenderableGlobe.Layers.ColorLayers.MSL_Gale_DEM_Mosaic_1m_v3.BlendMode',
+        1 -- Multiply
+    );
 
     --openspace.time.setTime(openspace.time.currentWallTime())
 
@@ -61,7 +66,6 @@ asset.onInitialize(function ()
 
     openspace.navigation.setCameraState({
         Focus = MSLAsset.CuriosityModel.Identifier,
-        --Focus = marsAsset.Mars.Identifier,
         Position = { 10.0, 10.0, 10.0 },
         Rotation = { 0.0, -0.0, 0.0, 0.0 },
     })
