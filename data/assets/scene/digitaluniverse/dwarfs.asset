@@ -21,7 +21,7 @@ local object = {
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
-        Color = { 0.5, 1.0, 0.2 },
+        Color = { 0.4, 0.0, 0.1 },
         Transparency = 0.999,
         File = speck .. "/dwarfs.speck",
         Texture = textures .. "/point3.png",
@@ -30,6 +30,8 @@ local object = {
         TextSize = 14.6,
         TextMinSize = 10.0,
         ScaleFactor = 360,
+        CorrectionSizeEndDistance = 16.1,
+        CorrectionSizeFactor = 7.75,
         Unit = "pc"
     },
     GUI = {

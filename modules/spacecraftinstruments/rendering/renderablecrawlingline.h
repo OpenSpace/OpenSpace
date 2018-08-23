@@ -59,13 +59,13 @@ private:
     glm::vec4 _lineColorBegin;
     glm::vec4 _lineColorEnd;
 
-    int _frameCounter;
+    int _frameCounter = 0;
 
-    bool _drawLine;
-    float _imageSequenceTime;
+    bool _drawLine = false;
+    float _imageSequenceTime = -1.f;
 
-    GLuint _vao;
-    GLuint _vbo;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 };
 
 } // namespace openspace

@@ -27,45 +27,43 @@
 #include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/rendering/layer/layermanager.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <openspace/util/updatestructures.h>
 
 namespace openspace::globebrowsing::chunklevelevaluator {
 
-int Distance::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
+int Distance::desiredLevel(const Chunk& chunk, const RenderData& data) const {
     // Calculations are done in the reference frame of the globe
     // (model space). Hence, the camera position needs to be transformed
     // with the inverse model matrix
-    glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
+    const glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
     const RenderableGlobe& globe = chunk.owner();
     const Ellipsoid& ellipsoid = globe.ellipsoid();
 
-    glm::dvec3 cameraPosition =
-        glm::dvec3(inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1));
+    const glm::dvec3 cameraPosition = glm::dvec3(inverseModelTransform *
+                                      glm::dvec4(data.camera.positionVec3(), 1.0));
 
-    Geodetic2 pointOnPatch = chunk.surfacePatch().closestPoint(
+    const Geodetic2 pointOnPatch = chunk.surfacePatch().closestPoint(
         ellipsoid.cartesianToGeodetic2(cameraPosition)
     );
-    glm::dvec3 patchNormal = ellipsoid.geodeticSurfaceNormal(pointOnPatch);
+    const glm::dvec3 patchNormal = ellipsoid.geodeticSurfaceNormal(pointOnPatch);
     glm::dvec3 patchPosition = ellipsoid.cartesianSurfacePosition(pointOnPatch);
 
-    Chunk::BoundingHeights heights = chunk.boundingHeights();
-    double heightToChunk = heights.min;
+    const Chunk::BoundingHeights heights = chunk.boundingHeights();
+    const double heightToChunk = heights.min;
 
     // Offset position according to height
     patchPosition += patchNormal * heightToChunk;
 
-    glm::dvec3 cameraToChunk = patchPosition - cameraPosition;
+    const glm::dvec3 cameraToChunk = patchPosition - cameraPosition;
 
     // Calculate desired level based on distance
-    double distanceToPatch = glm::length(cameraToChunk);
-    double distance = distanceToPatch;
+    const double distanceToPatch = glm::length(cameraToChunk);
+    const double distance = distanceToPatch;
 
-    double scaleFactor =
-        globe.generalProperties().lodScaleFactor * ellipsoid.minimumRadius();
-    double projectedScaleFactor = scaleFactor / distance;
-    int desiredLevel = static_cast<int>(ceil(log2(projectedScaleFactor)));
+    const double scaleFactor = globe.generalProperties().lodScaleFactor *
+                               ellipsoid.minimumRadius();
+    const double projectedScaleFactor = scaleFactor / distance;
+    const int desiredLevel = static_cast<int>(ceil(log2(projectedScaleFactor)));
     return desiredLevel;
 }
 

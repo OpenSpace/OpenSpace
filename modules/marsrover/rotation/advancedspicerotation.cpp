@@ -166,14 +166,14 @@ AdvancedSpiceRotation::AdvancedSpiceRotation(const ghoul::Dictionary& dictionary
 
 
 
-glm::dmat3 AdvancedSpiceRotation::matrix(const Time& time) const {
+glm::dmat3 AdvancedSpiceRotation::matrix(const UpdateData& data) const {
     try {
         glm::dmat3 result;
 
         result = SpiceManager::ref().positionTransformMatrix(
             _sourceFrame,
             _destinationFrame,
-            time.j2000Seconds()
+            data.time.j2000Seconds()
         );
         if (_rotationAxisSPICE != 0) 
         {

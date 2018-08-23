@@ -27,16 +27,13 @@
 
 #include <ghoul/glm.h>
 #include <memory>
-#include <math.h>
+//#include <math.h>
 
 namespace openspace::globebrowsing {
 
 template <typename T>
 class Angle {
 public:
-    static const T PI;
-    static const T EPSILON;
-
     /** = 0 radians = 0 degrees = no revolution */
     static const Angle<T> ZERO;
 
@@ -51,20 +48,13 @@ public:
 
     static Angle<T> fromRadians(T radians);
     static Angle<T> fromDegrees(T degrees);
-    static Angle<T> fromRevolutions(T revs);
 
-public:
     /** Copy constructor */
     Angle<T>(const Angle<T>& other);
-
-private:
-    /** Private constructor. Use factory methods to avoid unit confusion */
-    Angle<T>(T rad);
 
 public:
     inline T asRadians() const;
     inline T asDegrees() const;
-    inline T asRevolutions() const;
 
     Angle<T> operator+(const Angle<T>& rhs) const;
     Angle<T> operator-(const Angle<T>& rhs) const;
@@ -101,27 +91,12 @@ public:
     */
     Angle<T>& clamp(const Angle<T>& min = ZERO, const Angle<T>& max = FULL);
 
-    Angle<T>& abs();
-
-    /**
-    * Returns a new angle normalized to the interval [0, 2pi[
-    */
-    Angle<T> getNormalized() const;
-
-    /**
-    * Returns a new angle normalized to the interval [center - pi, center + pi[
-    */
-    Angle<T> getNormalizedAround(const Angle<T>& center) const;
-
-    /**
-    * Returns a new angle clamped to the interval [min, max].
-    * Default arguments are [0, 2pi].
-    */
-    Angle<T> getClamped(const Angle<T>& min = ZERO, const Angle<T>& max = FULL) const;
-
-    Angle<T> getAbs() const;
+    Angle<T> abs() const;
 
 private:
+    /** Private constructor. Use factory methods to avoid unit confusion */
+    Angle<T>(T rad);
+
     T _radians;
 };
 
@@ -130,6 +105,6 @@ using fAngle = Angle<float>;
 
 } // namespace openspace::globebrowsing
 
-#include <modules/globebrowsing/geometry/angle.inl>
+#include "angle.inl"
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___ANGLE___H__

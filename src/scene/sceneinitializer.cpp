@@ -26,7 +26,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/loadingscreen.h>
-
+#include <openspace/scene/scenegraphnode.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace openspace {
@@ -36,7 +36,7 @@ void SingleThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
     _initializedNodes.push_back(node);
 }
 
-std::vector<SceneGraphNode*> SingleThreadedSceneInitializer::getInitializedNodes() {
+std::vector<SceneGraphNode*> SingleThreadedSceneInitializer::takeInitializedNodes() {
     std::vector<SceneGraphNode*> nodes = std::move(_initializedNodes);
     return nodes;
 }
@@ -87,7 +87,7 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
     _threadPool.enqueue(initFunction);
 }
 
-std::vector<SceneGraphNode*> MultiThreadedSceneInitializer::getInitializedNodes() {
+std::vector<SceneGraphNode*> MultiThreadedSceneInitializer::takeInitializedNodes() {
     std::lock_guard<std::mutex> g(_mutex);
     std::vector<SceneGraphNode*> nodes = std::move(_initializedNodes);
     return nodes;

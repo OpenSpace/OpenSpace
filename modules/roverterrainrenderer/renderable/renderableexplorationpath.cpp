@@ -23,11 +23,16 @@
  ****************************************************************************************/
 
 #include <modules/roverterrainrenderer/renderable/renderableexplorationpath.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
+
+#include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/geometry/geodetic3.h>
+
 #include <ghoul/filesystem/filesystem.h>
 
 #include <fstream>

@@ -12,6 +12,12 @@ local mapServiceConfigsPath = asset.localResource("map_service_configs")
 local Earth = {
     Identifier = "Earth",
     Parent = transforms.EarthIAU.Identifier,
+    Transform = {
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1.0
+        }
+    },
     Renderable = {
         Type = "RenderableGlobe",
         Radii = earthEllipsoid,
@@ -33,7 +39,7 @@ local Earth = {
                                 FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
                                     "VIIRS_SNPP_CorrectedReflectance_TrueColor",
                                     "2015-11-24",
-                                    "Yesterday",
+                                    "Today",
                                     "1d",
                                     "250m",
                                     "jpg"
@@ -240,12 +246,27 @@ local Earth = {
                     TilePixelSize = 64,
                     Fallback = {
                         Name = "Earth Bluemarble Height",
+                        Identifier = "Earth_Bluemarble_Height",
                         FilePath = texturesPath .. "/earth_bluemarble_height.jpg",
                         Enabled = true
                     }
                 }
             }
-        }
+        },
+        ShadowGroup = {
+            Source1 = {
+                Name = "Sun",
+                -- All radius in meters
+                Radius = 696.3E6
+            },
+            --Source2 = { Name = "Monolith", Radius = 0.01E6, },
+            Caster1 = { 
+                Name = "Moon",
+                -- All radius in meters
+                Radius = 1.737E6
+            }
+            --Caster2 = { Name = "Independency Day Ship", Radius = 0.0, }
+         }
     },
     Tag = { "planet_solarSystem", "planet_terrestrial" },
     GUI = {

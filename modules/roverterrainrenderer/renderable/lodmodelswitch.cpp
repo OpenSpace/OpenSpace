@@ -23,10 +23,16 @@
 ****************************************************************************************/
 
 #include <modules/roverterrainrenderer/renderable/lodmodelswitch.h>
-#include <ghoul/logging/logmanager.h>
-#include <glm/gtx/matrix_decompose.hpp>
+
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
+
+#include <modules/globebrowsing/geometry/geodetic2.h>
+
+#include <ghoul/logging/logmanager.h>
+
+#include <glm/gtx/matrix_decompose.hpp>
 
 namespace {
  const std::string _loggerCat = "LodModelSwitch";

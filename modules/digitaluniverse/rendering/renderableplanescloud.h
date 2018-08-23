@@ -35,7 +35,6 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 
-#include <ghoul/font/fontrenderer.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 
@@ -43,7 +42,7 @@
 #include <unordered_map>
 
 namespace ghoul::filesystem { class File; }
-
+namespace ghoul::fontrendering { class Font; }
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
@@ -80,18 +79,18 @@ private:
         Kiloparsec = 3,
         Megaparsec = 4,
         Gigaparsec = 5,
-
         GigalightYears = 6
     };
 
-    struct RenderingPlane {
-        int planeIndex;
+    struct PlaneAggregate {
+        int textureIndex;
+        int numberOfPlanes;
         GLuint vao;
         GLuint vbo;
-        GLfloat vertexData[PLANES_VERTEX_DATA_SIZE];
+        std::vector<GLfloat> planesCoordinates;
     };
 
-    void deleteDataGPU();
+    void deleteDataGPUAndCPU();
     void createPlanes();
     void renderPlanes(const RenderData& data, const glm::dmat4& modelViewMatrix,
         const glm::dmat4& projectionMatrix, float fadeInVariable);
@@ -106,16 +105,16 @@ private:
     bool loadCachedFile(const std::string& file);
     bool saveCachedFile(const std::string& file) const;
 
-    bool _hasSpeckFile;
-    bool _dataIsDirty;
-    bool _textColorIsDirty;
-    bool _hasLabel;
-    bool _labelDataIsDirty;
+    bool _hasSpeckFile = false;
+    bool _dataIsDirty = true;
+    bool _textColorIsDirty = true;
+    bool _hasLabel = false;
+    bool _labelDataIsDirty = true;
 
-    int _textMinSize;
-    int _textMaxSize;
-    int _planeStartingIndexPos;
-    int _textureVariableIndex;
+    int _textMinSize = 0;
+    int _textMaxSize = 200;
+    int _planeStartingIndexPos = 0;
+    int _textureVariableIndex = 0;
 
     properties::FloatProperty _alphaValue;
     properties::FloatProperty _scaleFactor;
@@ -130,31 +129,30 @@ private:
     // DEBUG:
     properties::OptionProperty _renderOption;
 
-    ghoul::opengl::ProgramObject* _program;
-    UniformCache(modelViewProjectionTransform, alphaValue, scaleFactor, fadeInValue,
+    ghoul::opengl::ProgramObject* _program = nullptr;
+    UniformCache(modelViewProjectionTransform, alphaValue, fadeInValue,
         galaxyTexture) _uniformCache;
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
+    std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
     std::unordered_map<int, std::unique_ptr<ghoul::opengl::Texture>> _textureMap;
     std::unordered_map<int, std::string> _textureFileMap;
+    std::unordered_map<int, PlaneAggregate> _planesMap;
 
     std::string _speckFile;
     std::string _labelFile;
     std::string _texturesPath;
     std::string _luminosityVar;
 
-    Unit _unit;
+    Unit _unit = Parsec;
 
     std::vector<float> _fullData;
     std::vector<std::pair<glm::vec3, std::string>> _labelData;
     std::unordered_map<std::string, int> _variableDataPositionMap;
 
-    int _nValuesPerAstronomicalObject;
+    int _nValuesPerAstronomicalObject = 0;
 
-    float _sluminosity;
+    float _sluminosity = 1.f;
 
-    glm::dmat4 _transformationMatrix;
-
-    std::vector<RenderingPlane> _renderingPlanesArray;
+    glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 };
 
 

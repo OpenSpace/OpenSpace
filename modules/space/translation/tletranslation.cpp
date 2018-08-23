@@ -27,10 +27,8 @@
 #include <openspace/documentation/verifier.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
 #include <chrono>
 #include <fstream>
-#include <system_error>
 #include <vector>
 
 namespace {
@@ -39,7 +37,7 @@ namespace {
 
     // The list of leap years only goes until 2056 as we need to touch this file then
     // again anyway ;)
-    static const std::vector<int> LeapYears = {
+    const std::vector<int> LeapYears = {
         1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996,
         2000, 2004, 2008, 2012, 2016, 2020, 2024, 2028, 2032, 2036, 2040,
         2044, 2048, 2052, 2056
@@ -51,28 +49,28 @@ namespace {
         // Find the position of the current year in the vector, the difference
         // between its position and the position of 2000 (for J2000) gives the
         // number of leap years
-        const int Epoch = 2000;
-        const int DaysRegularYear = 365;
-        const int DaysLeapYear = 366;
+        constexpr const int Epoch = 2000;
+        constexpr const int DaysRegularYear = 365;
+        constexpr const int DaysLeapYear = 366;
 
         if (year == Epoch) {
             return 0;
         }
 
         // Get the position of the most recent leap year
-        auto lb = std::lower_bound(LeapYears.begin(), LeapYears.end(), year);
+        const auto lb = std::lower_bound(LeapYears.begin(), LeapYears.end(), year);
 
         // Get the position of the epoch
-        auto y2000 = std::find(LeapYears.begin(), LeapYears.end(), Epoch);
+        const auto y2000 = std::find(LeapYears.begin(), LeapYears.end(), Epoch);
 
         // The distance between the two iterators gives us the number of leap years
-        int nLeapYears = static_cast<int>(std::abs(std::distance(y2000, lb)));
+        const int nLeapYears = static_cast<int>(std::abs(std::distance(y2000, lb)));
 
-        int nYears = std::abs(year - Epoch);
-        int nRegularYears = nYears - nLeapYears;
+        const int nYears = std::abs(year - Epoch);
+        const int nRegularYears = nYears - nLeapYears;
 
         // Get the total number of days as the sum of leap years + non leap years
-        int result = nRegularYears * DaysRegularYear + nLeapYears * DaysLeapYear;
+        const int result = nRegularYears * DaysRegularYear + nLeapYears * DaysLeapYear;
         return result;
     }
 
@@ -85,54 +83,57 @@ namespace {
             int year;
             int dayOfYear;
             bool operator<(const LeapSecond& rhs) const {
-                return
-                std::tie(year, dayOfYear) < std::tie(rhs.year, rhs.dayOfYear);
+                return std::tie(year, dayOfYear) < std::tie(rhs.year, rhs.dayOfYear);
             }
         };
 
-        const LeapSecond Epoch = { 2000, 1};
+        const LeapSecond Epoch = { 2000, 1 };
 
         // List taken from: https://www.ietf.org/timezones/data/leap-seconds.list
         static const std::vector<LeapSecond> LeapSeconds = {
-            { 1972, 1 },
+            { 1972,   1 },
             { 1972, 183 },
-            { 1973, 1 },
-            { 1974, 1 },
-            { 1975, 1 },
-            { 1976, 1 },
-            { 1977, 1 },
-            { 1978, 1 },
-            { 1979, 1 },
-            { 1980, 1 },
+            { 1973,   1 },
+            { 1974,   1 },
+            { 1975,   1 },
+            { 1976,   1 },
+            { 1977,   1 },
+            { 1978,   1 },
+            { 1979,   1 },
+            { 1980,   1 },
             { 1981, 182 },
             { 1982, 182 },
             { 1983, 182 },
             { 1985, 182 },
-            { 1988, 1 },
-            { 1990, 1 },
-            { 1991, 1 },
+            { 1988,   1 },
+            { 1990,   1 },
+            { 1991,   1 },
             { 1992, 183 },
             { 1993, 182 },
             { 1994, 182 },
-            { 1996, 1 },
+            { 1996,   1 },
             { 1997, 182 },
-            { 1999, 1 },
-            { 2006, 1 },
-            { 2009, 1 },
+            { 1999,   1 },
+            { 2006,   1 },
+            { 2009,   1 },
             { 2012, 183 },
             { 2015, 182 },
-            { 2017, 1 }
+            { 2017,   1 }
         };
 
         // Get the position of the last leap second before the desired date
         LeapSecond date { year, dayOfYear };
-        auto it = std::lower_bound(LeapSeconds.begin(), LeapSeconds.end(), date);
+        const auto it = std::lower_bound(LeapSeconds.begin(), LeapSeconds.end(), date);
 
         // Get the position of the Epoch
-        auto y2000 = std::lower_bound(LeapSeconds.begin(), LeapSeconds.end(), Epoch);
+        const auto y2000 = std::lower_bound(
+            LeapSeconds.begin(),
+            LeapSeconds.end(),
+            Epoch
+        );
 
         // The distance between the two iterators gives us the number of leap years
-        int nLeapSeconds = static_cast<int>(std::abs(std::distance(y2000, it)));
+        const int nLeapSeconds = static_cast<int>(std::abs(std::distance(y2000, it)));
         return nLeapSeconds;
     }
 
@@ -163,15 +164,15 @@ namespace {
             int year = std::atoi(y.c_str());
             return year >= 57 ? "19" : "20";
         }();
-        int year = std::atoi((yearPrefix + epochString.substr(0, 2)).c_str());
-        int daysSince2000 = countDays(year);
+        const int year = std::atoi((yearPrefix + epochString.substr(0, 2)).c_str());
+        const int daysSince2000 = countDays(year);
 
         // 2.
         // 2.a
         double daysInYear = std::atof(epochString.substr(2).c_str());
 
         // 2.b
-        bool isInLeapYear = std::find(
+        const bool isInLeapYear = std::find(
             LeapYears.begin(),
             LeapYears.end(),
             year
@@ -184,31 +185,32 @@ namespace {
 
         // 3
         using namespace std::chrono;
-        int SecondsPerDay = static_cast<int>(seconds(hours(24)).count());
+        const int SecondsPerDay = static_cast<int>(seconds(hours(24)).count());
         //Need to subtract 1 from daysInYear since it is not a zero-based count
-        double nSecondsSince2000 = (daysSince2000 + daysInYear - 1) * SecondsPerDay;
+        const double nSecondsSince2000 = (daysSince2000 + daysInYear - 1) * SecondsPerDay;
 
         // 4
         // We need to remove additionbal leap seconds past 2000 and add them prior to
         // 2000 to sync up the time zones
-        double nLeapSecondsOffset = -countLeapSeconds(
+        const double nLeapSecondsOffset = -countLeapSeconds(
             year,
             static_cast<int>(std::floor(daysInYear))
         );
 
         // 5
-        double nSecondsEpochOffset = static_cast<double>(seconds(hours(12)).count());
+        const double nSecondsEpochOffset = static_cast<double>(
+            seconds(hours(12)).count()
+        );
 
         // Combine all of the values
-        double epoch = nSecondsSince2000 + nLeapSecondsOffset - nSecondsEpochOffset;
+        const double epoch = nSecondsSince2000 + nLeapSecondsOffset - nSecondsEpochOffset;
         return epoch;
     }
 
     double calculateSemiMajorAxis(double meanMotion) {
-        using namespace std::chrono;
-        const double GravitationalConstant = 6.6740831e-11;
-        const double MassEarth = 5.9721986e24;
-        const double muEarth = GravitationalConstant * MassEarth;
+        constexpr const double GravitationalConstant = 6.6740831e-11;
+        constexpr const double MassEarth = 5.9721986e24;
+        constexpr const double muEarth = GravitationalConstant * MassEarth;
 
         // Use Kepler's 3rd law to calculate semimajor axis
         // a^3 / P^2 = mu / (2pi)^2
@@ -216,8 +218,7 @@ namespace {
         // with a = semimajor axis
         // P = period in seconds
         // mu = G*M_earth
-        using namespace std::chrono;
-        double period = seconds(hours(24)).count() / meanMotion;
+        double period = std::chrono::seconds(std::chrono::hours(24)).count() / meanMotion;
 
         const double pisq = glm::pi<double>() * glm::pi<double>();
         double semiMajorAxis = pow((muEarth * period*period) / (4 * pisq), 1.0 / 3.0);
@@ -250,25 +251,26 @@ documentation::Documentation TLETranslation::Documentation() {
             {
                 KeyLineNumber,
                 new DoubleGreaterVerifier(0),
-                Optional::No,
+                Optional::Yes,
                 "Specifies the line number within the file where the group of 3 TLE "
-                "lines begins (1-based)."
+                "lines begins (1-based). Defaults to 1."
             }
         }
     };
 }
 
-TLETranslation::TLETranslation(const ghoul::Dictionary& dictionary)
-    : KeplerTranslation()
-{
+TLETranslation::TLETranslation(const ghoul::Dictionary& dictionary) {
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
         "TLETranslation"
     );
 
-    std::string file = dictionary.value<std::string>(KeyFile);
-    int lineNum = static_cast<int>(dictionary.value<double>(KeyLineNumber));
+    const std::string& file = dictionary.value<std::string>(KeyFile);
+    int lineNum = 1;
+    if (dictionary.hasKeyAndValue<double>(KeyLineNumber)) {
+        lineNum = static_cast<int>(dictionary.value<double>(KeyLineNumber));
+    }
     readTLEFile(file, lineNum);
 }
 
@@ -318,8 +320,9 @@ void TLETranslation::readTLEFile(const std::string& filename, int lineNum) {
         //    14   69-69   Checksum (modulo 10)
         keplerElements.epoch = epochFromSubstring(line.substr(18, 14));
     } else {
-        throw ghoul::RuntimeError("File " + filename + " @ line "
-                  + std::to_string(lineNum + 1) + " doesn't have '1' header");
+        throw ghoul::RuntimeError(fmt::format(
+            "File {} @ line {} does not have '1' header", filename, lineNum + 1
+        ));
     }
 
     std::getline(file, line); // Get line 2 of TLE format
@@ -369,8 +372,9 @@ void TLETranslation::readTLEFile(const std::string& filename, int lineNum) {
         stream.str(line.substr(52, 11));
         stream >> keplerElements.meanMotion;
     } else {
-        throw ghoul::RuntimeError("File " + filename + " @ line "
-                  + std::to_string(lineNum + 2) + " doesn't have '2' header");
+        throw ghoul::RuntimeError(fmt::format(
+            "File {} @ line {} does not have '2' header", filename, lineNum + 2
+        ));
     }
     file.close();
 

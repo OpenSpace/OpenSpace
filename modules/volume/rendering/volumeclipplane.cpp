@@ -23,11 +23,10 @@
  ****************************************************************************************/
 
 #include <modules/volume/rendering/volumeclipplanes.h>
+
 #include <ghoul/misc/dictionary.h>
 
-
-namespace openspace {
-namespace volume {
+namespace openspace::volume {
 
 VolumeClipPlane::VolumeClipPlane(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "" }) // @TODO Missing name
@@ -44,27 +43,19 @@ VolumeClipPlane::VolumeClipPlane(const ghoul::Dictionary& dictionary)
         glm::vec2(2.f, 1.f)
     )
 {
-    glm::vec3 normal;
-    glm::vec2 offsets;
-    dictionary.getValue("Normal", normal);
-    dictionary.getValue("Offsets", offsets);
+    _normal = dictionary.value<glm::vec3>("Normal");
+    _offsets = dictionary.value<glm::vec2>("Offsets");
 
-    _normal = normal;
-    _offsets = offsets;
-}
-
-void VolumeClipPlane::initialize() {
     addProperty(_normal);
     addProperty(_offsets);
 }
 
-glm::vec3 VolumeClipPlane::normal() {
+glm::vec3 VolumeClipPlane::normal() const {
     return glm::normalize(_normal.value());
 }
 
-glm::vec2 VolumeClipPlane::offsets() {
+glm::vec2 VolumeClipPlane::offsets() const {
     return _offsets;
 }
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume

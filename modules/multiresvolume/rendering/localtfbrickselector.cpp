@@ -22,13 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/multiresvolume/rendering/tsp.h>
 #include <modules/multiresvolume/rendering/localtfbrickselector.h>
+
+#include <modules/multiresvolume/rendering/tsp.h>
 #include <modules/multiresvolume/rendering/localerrorhistogrammanager.h>
-#include <openspace/util/histogram.h>
 #include <openspace/rendering/transferfunction.h>
-#include <algorithm>
-#include <cassert>
+#include <ghoul/misc/assert.h>
+
+namespace {
+    bool compareSplitPoints(const openspace::BrickSelection& a,
+                            const openspace::BrickSelection& b)
+    {
+        return a.splitPoints < b.splitPoints;
+    }
+} // namespace
 
 namespace openspace {
 
@@ -39,9 +46,8 @@ LocalTfBrickSelector::LocalTfBrickSelector(TSP* tsp, LocalErrorHistogramManager*
     , _histogramManager(hm)
     , _transferFunction(tf)
     , _memoryBudget(memoryBudget)
-    , _streamingBudget(streamingBudget) {}
-
-LocalTfBrickSelector::~LocalTfBrickSelector() {}
+    , _streamingBudget(streamingBudget)
+{}
 
 bool LocalTfBrickSelector::initialize() {
     return calculateBrickErrors();
@@ -56,12 +62,12 @@ void LocalTfBrickSelector::setStreamingBudget(int streamingBudget) {
 }
 
 void LocalTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
-    int numTimeSteps = _tsp->header().numTimesteps_;
-    int numBricksPerDim = _tsp->header().xNumBricks_;
+    const int numTimeSteps = _tsp->header().numTimesteps;
+    const int numBricksPerDim = _tsp->header().xNumBricks;
 
     unsigned int rootNode = 0;
     BrickSelection::SplitType splitType;
-    float rootSplitPoints = splitPoints(rootNode, splitType);
+    const float rootSplitPoints = splitPoints(rootNode, splitType);
     BrickSelection brickSelection = BrickSelection(
         numBricksPerDim,
         numTimeSteps,
@@ -80,31 +86,27 @@ void LocalTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) 
         leafSelections.push_back(brickSelection);
     }
 
-    int memoryBudget = _memoryBudget;
     int totalStreamingBudget = _streamingBudget * numTimeSteps;
     int nBricksInMemory = 1;
     int nStreamedBricks = 1;
 
-    while (nBricksInMemory <= memoryBudget - 7 && priorityQueue.size() > 0) {
-        std::pop_heap(
-            priorityQueue.begin(),
-            priorityQueue.end(),
-            BrickSelection::compareSplitPoints
-        );
+    while (nBricksInMemory <= _memoryBudget - 7 && priorityQueue.size() > 0) {
+        std::pop_heap(priorityQueue.begin(), priorityQueue.end(), compareSplitPoints);
         BrickSelection bs = priorityQueue.back();
 
-        // TODO: handle edge case when we can only afford temporal splits or no split (only 1 spot left)
+        // TODO: handle edge case when we can only afford temporal splits or
+        //       no split (only 1 spot left)
 
         unsigned int brickIndex = bs.brickIndex;
         priorityQueue.pop_back();
         if (bs.splitType == BrickSelection::SplitType::Temporal) {
 //            int timeSpanCenter = bs.centerT();
-            unsigned int childBrickIndex;
             bool pickRightTimeChild = bs.timestepInRightChild(timestep);
 
-            // On average on the whole time period, splitting this spatial brick in two time steps
-            // would generate twice as much streaming. Current number of streams of this spatial brick
-            // is 2^nTemporalSplits over the whole time period.
+            // On average on the whole time period, splitting this spatial brick in two
+            // time steps would generate twice as much streaming. Current number of
+            // streams of this spatial brick is 2^nTemporalSplits over the whole time
+            // period.
             int newStreams = static_cast<int>(std::pow(2, bs.nTemporalSplits));
             if (nStreamedBricks + newStreams > totalStreamingBudget) {
                 // Reached dead end (streaming budget would be exceeded)
@@ -113,11 +115,9 @@ void LocalTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) 
             }
             nStreamedBricks += newStreams;
 
-            if (pickRightTimeChild) {
-                childBrickIndex = _tsp->getBstRight(brickIndex);
-            } else {
-                childBrickIndex = _tsp->getBstLeft(brickIndex);
-            }
+            const unsigned int childBrickIndex = pickRightTimeChild ?
+                _tsp->bstRight(brickIndex) :
+                _tsp->bstLeft(brickIndex);
 
             BrickSelection::SplitType childSplitType;
             float childSplitPoints = splitPoints(childBrickIndex, childSplitType);
@@ -133,19 +133,20 @@ void LocalTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) 
                 std::push_heap(
                     priorityQueue.begin(),
                     priorityQueue.end(),
-                    BrickSelection::compareSplitPoints
+                    compareSplitPoints
                 );
             } else {
                 leafSelections.push_back(childSelection);
             }
         } else if (bs.splitType == BrickSelection::SplitType::Spatial) {
             nBricksInMemory += 7; // Remove one and add eight.
-            unsigned int firstChild = _tsp->getFirstOctreeChild(brickIndex);
+            const unsigned int firstChild = _tsp->firstOctreeChild(brickIndex);
 
-            // On average on the whole time period, splitting this spatial brick into eight spatial bricks
-            // would generate eight times as much streaming. Current number of streams of this spatial brick
-            // is 2^nTemporalStreams over the whole time period.
-            int newStreams = 7 * static_cast<int>(std::pow(2, bs.nTemporalSplits));
+            // On average on the whole time period, splitting this spatial brick into
+            // eight spatial bricks would generate eight times as much streaming. Current
+            // number of streams of this spatial brick is 2^nTemporalStreams over the
+            // whole time period.
+            const int newStreams = 7 * static_cast<int>(std::pow(2, bs.nTemporalSplits));
             if (nStreamedBricks + newStreams > totalStreamingBudget) {
                 // Reached dead end (streaming budget would be exceeded)
                 // However, temporal split might be possible
@@ -163,10 +164,13 @@ void LocalTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) 
             nStreamedBricks += newStreams;
 
             for (unsigned int i = 0; i < 8; i++) {
-                unsigned int childBrickIndex = firstChild + i;
+                const unsigned int childBrickIndex = firstChild + i;
 
                 BrickSelection::SplitType childSplitType;
-                float childSplitPoints = splitPoints(childBrickIndex, childSplitType);
+                const float childSplitPoints = splitPoints(
+                    childBrickIndex,
+                    childSplitType
+                );
                 BrickSelection childSelection = bs.splitSpatially(
                     i % 2,
                     (i/2) % 2,
@@ -181,7 +185,7 @@ void LocalTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) 
                     std::push_heap(
                         priorityQueue.begin(),
                         priorityQueue.end(),
-                        BrickSelection::compareSplitPoints
+                        compareSplitPoints
                     );
                 } else {
                     leafSelections.push_back(childSelection);
@@ -204,26 +208,29 @@ void LocalTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) 
                 std::push_heap(
                     temporalSplitQueue.begin(),
                     temporalSplitQueue.end(),
-                    BrickSelection::compareSplitPoints
+                    compareSplitPoints
                 );
             } else {
                 deadEnds.push_back(bs);
             }
         }
 
-        while (nStreamedBricks < totalStreamingBudget - 1 && temporalSplitQueue.size() > 0) {
+        while (nStreamedBricks < totalStreamingBudget - 1 &&
+               temporalSplitQueue.size() > 0)
+        {
             std::pop_heap(
                 temporalSplitQueue.begin(),
                 temporalSplitQueue.end(),
-                BrickSelection::compareSplitPoints
+                compareSplitPoints
             );
             BrickSelection bs = temporalSplitQueue.back();
             temporalSplitQueue.pop_back();
 
-            unsigned int brickIndex = bs.brickIndex;
-            int newStreams = static_cast<int>(std::pow(2, bs.nTemporalSplits));
+            const unsigned int brickIndex = bs.brickIndex;
+            const int newStreams = static_cast<int>(std::pow(2, bs.nTemporalSplits));
             if (nStreamedBricks + newStreams > totalStreamingBudget) {
-                // The current best choice would make us exceed the streaming budget, try next instead.
+                // The current best choice would make us exceed the streaming budget, try
+                // next instead.
                 deadEnds.push_back(bs);
                 continue;
             }
@@ -233,15 +240,15 @@ void LocalTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) 
             bool pickRightTimeChild = bs.timestepInRightChild(timestep);
 
             if (pickRightTimeChild) {
-                childBrickIndex = _tsp->getBstRight(brickIndex);
+                childBrickIndex = _tsp->bstRight(brickIndex);
             } else {
-                childBrickIndex = _tsp->getBstLeft(brickIndex);
+                childBrickIndex = _tsp->bstLeft(brickIndex);
             }
 
             float childSplitPoints = temporalSplitPoints(childBrickIndex);
 
             if (childSplitPoints > -1) {
-                BrickSelection childSelection = bs.splitTemporally(
+                const BrickSelection childSelection = bs.splitTemporally(
                     pickRightTimeChild,
                     childBrickIndex,
                     BrickSelection::SplitType::Temporal,
@@ -251,7 +258,7 @@ void LocalTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) 
                 std::push_heap(
                     temporalSplitQueue.begin(),
                     temporalSplitQueue.end(),
-                    BrickSelection::compareSplitPoints
+                    compareSplitPoints
                 );
             } else {
                 BrickSelection childSelection = bs.splitTemporally(
@@ -267,7 +274,7 @@ void LocalTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) 
         // Write selected inner nodes to brickSelection vector
         for (const BrickSelection& bs : priorityQueue) {
             writeSelection(bs, bricks);
-        } 
+        }
     }
 
     // Write selected inner nodes to brickSelection vector
@@ -282,19 +289,16 @@ void LocalTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) 
     for (const BrickSelection& bs : leafSelections) {
         writeSelection(bs, bricks);
     }
-
-    //std::cout << "Bricks in memory: " << nBricksInMemory << "/" << _memoryBudget << "___\t\t"
-    //          << "Streamed bricks:  " << nStreamedBricks << "/" << totalStreamingBudget << std::flush << "___\r";
 }
 
-float LocalTfBrickSelector::temporalSplitPoints(unsigned int brickIndex) {
+float LocalTfBrickSelector::temporalSplitPoints(unsigned int brickIndex) const {
     if (_tsp->isBstLeaf(brickIndex)) {
         return -1;
     }
     return _brickErrors[brickIndex].temporal * 0.5f;
 }
 
-float LocalTfBrickSelector::spatialSplitPoints(unsigned int brickIndex) {
+float LocalTfBrickSelector::spatialSplitPoints(unsigned int brickIndex) const {
     if (_tsp->isOctreeLeaf(brickIndex)) {
         return -1;
     }
@@ -304,8 +308,8 @@ float LocalTfBrickSelector::spatialSplitPoints(unsigned int brickIndex) {
 float LocalTfBrickSelector::splitPoints(unsigned int brickIndex,
                                         BrickSelection::SplitType& splitType)
 {
-    float temporalPoints = temporalSplitPoints(brickIndex);
-    float spatialPoints = spatialSplitPoints(brickIndex);
+    const float temporalPoints = temporalSplitPoints(brickIndex);
+    const float spatialPoints = spatialSplitPoints(brickIndex);
 
     float splitPoints;
 
@@ -323,31 +327,35 @@ float LocalTfBrickSelector::splitPoints(unsigned int brickIndex,
 }
 
 bool LocalTfBrickSelector::calculateBrickErrors() {
-    TransferFunction *tf = _transferFunction;
-    if (!tf) return false;
+    TransferFunction* tf = _transferFunction;
+    if (!tf) {
+        return false;
+    }
 
     size_t tfWidth = tf->width();
-    if (tfWidth <= 0) return false;
+    if (tfWidth <= 0) {
+        return false;
+    }
 
     std::vector<float> gradients(tfWidth - 1);
     for (size_t offset = 0; offset < tfWidth - 1; offset++) {
-        glm::vec4 prevRgba = tf->sample(offset);
-        glm::vec4 nextRgba = tf->sample(offset + 1);
+        const glm::vec4 prevRgba = tf->sample(offset);
+        const         glm::vec4 nextRgba = tf->sample(offset + 1);
 
-        float colorDifference = glm::distance(prevRgba, nextRgba);
-        float alpha = (prevRgba.w + nextRgba.w) * 0.5f;
+        const float colorDifference = glm::distance(prevRgba, nextRgba);
+        const float alpha = (prevRgba.w + nextRgba.w) * 0.5f;
 
         gradients[offset] = colorDifference*alpha;
     }
 
-    unsigned int nHistograms = _tsp->numTotalNodes();
+    const unsigned int nHistograms = _tsp->numTotalNodes();
     _brickErrors = std::vector<Error>(nHistograms);
 
     for (unsigned int brickIndex = 0; brickIndex < nHistograms; brickIndex++) {
         if (_tsp->isOctreeLeaf(brickIndex)) {
             _brickErrors[brickIndex].spatial = 0.0;
         } else {
-            const Histogram* histogram = _histogramManager->getSpatialHistogram(
+            const Histogram* histogram = _histogramManager->spatialHistogram(
                 brickIndex
             );
             float error = 0;
@@ -364,7 +372,7 @@ bool LocalTfBrickSelector::calculateBrickErrors() {
         if (_tsp->isBstLeaf(brickIndex)) {
             _brickErrors[brickIndex].temporal = 0.0;
         } else {
-            const Histogram* histogram = _histogramManager->getTemporalHistogram(
+            const Histogram* histogram = _histogramManager->temporalHistogram(
                 brickIndex
             );
             float error = 0;
@@ -382,9 +390,9 @@ bool LocalTfBrickSelector::calculateBrickErrors() {
     return true;
 }
 
-int LocalTfBrickSelector::linearCoords(int x, int y, int z) {
+int LocalTfBrickSelector::linearCoordinates(int x, int y, int z) const {
     const TSP::Header &header = _tsp->header();
-    return x + (header.xNumBricks_ * y) + (header.xNumBricks_ * header.yNumBricks_ * z);
+    return x + (header.xNumBricks * y) + (header.xNumBricks * header.yNumBricks * z);
 }
 
 void LocalTfBrickSelector::writeSelection(BrickSelection brickSelection,
@@ -394,11 +402,10 @@ void LocalTfBrickSelector::writeSelection(BrickSelection brickSelection,
     for (int z = coveredBricks.lowZ; z < coveredBricks.highZ; z++) {
         for (int y = coveredBricks.lowY; y < coveredBricks.highY; y++) {
             for (int x = coveredBricks.lowX; x < coveredBricks.highX; x++) {
-                bricks[linearCoords(x, y, z)] = brickSelection.brickIndex;
+                bricks[linearCoordinates(x, y, z)] = brickSelection.brickIndex;
             }
         }
     }
 }
-
 
 } // namespace openspace

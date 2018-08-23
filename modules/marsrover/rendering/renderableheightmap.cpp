@@ -321,7 +321,7 @@ void RenderableHeightMap::update(const UpdateData&) {
 
 void RenderableHeightMap::deinitializeGL() {
 
-    MarsroverModule::ProgramObjectManager.releaseProgramObject(
+    MarsroverModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
             OsEng.renderEngine().removeRenderProgram(p);

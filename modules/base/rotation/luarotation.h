@@ -30,7 +30,8 @@
 #include <openspace/properties/stringproperty.h>
 
 #include <ghoul/lua/luastate.h>
-#include <ghoul/filesystem/file.h>
+
+namespace ghoul::filesystem { class File; }
 
 namespace openspace {
 
@@ -41,7 +42,7 @@ public:
     LuaRotation();
     LuaRotation(const ghoul::Dictionary& dictionary);
 
-    glm::dmat3 matrix(const Time& data) const override;
+    glm::dmat3 matrix(const UpdateData& data) const override;
 
     static documentation::Documentation Documentation();
 

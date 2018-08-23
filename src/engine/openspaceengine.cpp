@@ -45,23 +45,21 @@
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderable.h>
-#include <openspace/scene/asset.h>
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/assetloader.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
-#include <openspace/scene/scenelicense.h>
+#include <openspace/scene/timeframe.h>
+#include <openspace/scene/lightsource.h>
+#include <openspace/scene/sceneinitializer.h>
 #include <openspace/scene/translation.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/util/openspacemodule.h>
-#include <openspace/util/resourcesynchronization.h>
-#include <openspace/util/synchronizationwatcher.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/task.h>
-#include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/transformationmanager.h>
 #include <ghoul/ghoul.h>
@@ -71,12 +69,11 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/consolelog.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
-#include <ghoul/misc/defer.h>
 #include <ghoul/opengl/debugcontext.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/shaderpreprocessor.h>
 #include <ghoul/opengl/texture.h>
-#include <ghoul/systemcapabilities/systemcapabilities.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <glbinding/callbacks.h>
@@ -86,14 +83,9 @@
 #include <vld.h>
 #endif
 
-#ifdef WIN32
-#include <Windows.h>
-#endif
-
 #ifdef __APPLE__
 #include <openspace/interaction/touchbar.h>
 #endif // __APPLE__
-
 
 #include "openspaceengine_lua.inl"
 
@@ -119,13 +111,13 @@ namespace {
         std::string configurationOverwrite;
     } commandlineArgumentPlaceholders;
 
-    static const openspace::properties::Property::PropertyInfo VersionInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo VersionInfo = {
         "VersionInfo",
         "Version Information",
         "This value contains the full string identifying this OpenSpace Version"
     };
 
-    static const openspace::properties::Property::PropertyInfo SourceControlInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo SourceControlInfo = {
         "SCMInfo",
         "Source Control Management Information",
         "This value contains information from the SCM, such as commit hash and branch"
@@ -155,7 +147,8 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _timeManager(new TimeManager)
     , _windowWrapper(std::move(windowWrapper))
     , _commandlineParser(new ghoul::cmdparser::CommandlineParser(
-        programName, ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
+        std::move(programName),
+        ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
     ))
     , _navigationHandler(new interaction::NavigationHandler)
     , _keyBindingManager(new interaction::KeyBindingManager)
@@ -174,6 +167,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     _navigationHandler->setPropertyOwner(_rootPropertyOwner.get());
     // New property subowners also have to be added to the ImGuiModule callback!
     _rootPropertyOwner->addPropertySubOwner(_navigationHandler.get());
+    _rootPropertyOwner->addPropertySubOwner(_timeManager.get());
 
     _rootPropertyOwner->addPropertySubOwner(_renderEngine.get());
     _rootPropertyOwner->addPropertySubOwner(_renderEngine->screenSpaceOwner());
@@ -210,6 +204,14 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Scale>>(),
         "Scale"
+    );
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<TimeFrame>>(),
+        "TimeFrame"
+    );
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<LightSource>>(),
+        "LightSource"
     );
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Task>>(),
@@ -287,7 +289,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
 
     bool showHelp = _engine->_commandlineParser->execute();
     if (showHelp) {
-        _engine->_commandlineParser->displayHelp();
+        _engine->_commandlineParser->displayHelp(std::cout);
         requestClose = true;
         return;
     }
@@ -331,10 +333,10 @@ void OpenSpaceEngine::create(int argc, char** argv,
             "Loading of configuration file '{}' failed", configurationFilePath
         ));
         for (const documentation::TestResult::Offense& o : e.result.offenses) {
-            LERRORC(o.offender, std::to_string(o.reason));
+            LERRORC(o.offender, ghoul::to_string(o.reason));
         }
         for (const documentation::TestResult::Warning& w : e.result.warnings) {
-            LWARNINGC(w.offender, std::to_string(w.reason));
+            LWARNINGC(w.offender, ghoul::to_string(w.reason));
         }
         throw;
     }
@@ -535,13 +537,30 @@ void OpenSpaceEngine::initialize() {
     // Check the required OpenGL versions of the registered modules
     ghoul::systemcapabilities::Version version =
         _engine->_moduleEngine->requiredOpenGLVersion();
-    LINFO(fmt::format("Required OpenGL version: {}", std::to_string(version)));
+    LINFO(fmt::format("Required OpenGL version: {}", ghoul::to_string(version)));
 
     if (OpenGLCap.openGLVersion() < version) {
         throw ghoul::RuntimeError(
-            "Module required higher OpenGL version than is supported",
+            "An included module required a higher OpenGL version than is supported on "
+            "this system",
             "OpenSpaceEngine"
         );
+    }
+
+    {
+        // Check the available OpenGL extensions against the required extensions
+        using OCC = ghoul::systemcapabilities::OpenGLCapabilitiesComponent;
+        for (OpenSpaceModule* m : _engine->_moduleEngine->modules()) {
+            for (const std::string& ext : m->requiredOpenGLExtensions()) {
+                if (!SysCap.component<OCC>().isExtensionSupported(ext)) {
+                    LFATAL(fmt::format(
+                        "Module {} required OpenGL extension {} which is not available "
+                        "on this system. Some functionality related to this module will "
+                        "probably not work.", m->guiName(), ext
+                    ));
+                }
+            }
+        }
     }
 
     // Register Lua script functions
@@ -596,7 +615,7 @@ void OpenSpaceEngine::initialize() {
 
 void OpenSpaceEngine::scheduleLoadSingleAsset(std::string assetPath) {
     _hasScheduledAssetLoading = true;
-    _scheduledAssetPathToLoad = assetPath;
+    _scheduledAssetPathToLoad = std::move(assetPath);
 }
 
 void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
@@ -656,11 +675,11 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     _loadingScreen->setPhase(LoadingScreen::Phase::Synchronization);
     _loadingScreen->postMessage("Synchronizing assets");
 
-    std::vector<std::shared_ptr<Asset>> allAssets =
+    std::vector<std::shared_ptr<const Asset>> allAssets =
         _assetManager->rootAsset()->subTreeAssets();
 
     std::unordered_set<std::shared_ptr<ResourceSynchronization>> resourceSyncs;
-    for (const std::shared_ptr<Asset>& a : allAssets) {
+    for (const std::shared_ptr<const Asset>& a : allAssets) {
         std::vector<std::shared_ptr<ResourceSynchronization>> syncs =
             a->ownSynchronizations();
 
@@ -864,13 +883,6 @@ void OpenSpaceEngine::loadFonts() {
         if (!initSuccess) {
             LERROR("Error initializing default font renderer");
         }
-
-        using FR = ghoul::fontrendering::FontRenderer;
-        FR::defaultRenderer().setFramebufferSize(_renderEngine->fontResolution());
-
-        FR::defaultProjectionRenderer().setFramebufferSize(
-            _renderEngine->renderingResolution()
-        );
     }
     catch (const ghoul::RuntimeError& err) {
         LERRORC(err.component, err.message);
@@ -901,10 +913,10 @@ void OpenSpaceEngine::configureLogging(bool consoleLog) {
         catch (const documentation::SpecificationError& e) {
             LERROR("Failed loading of log");
             for (const documentation::TestResult::Offense& o : e.result.offenses) {
-                LERRORC(o.offender, std::to_string(o.reason));
+                LERRORC(o.offender, ghoul::to_string(o.reason));
             }
             for (const documentation::TestResult::Warning& w : e.result.warnings) {
-                LWARNINGC(w.offender, std::to_string(w.reason));
+                LWARNINGC(w.offender, ghoul::to_string(w.reason));
             }
             throw;
         }
@@ -1005,8 +1017,8 @@ void OpenSpaceEngine::initializeGL() {
         auto callback = [](Source source, Type type, Severity severity,
             unsigned int id, std::string message) -> void
         {
-            const std::string s = std::to_string(source);
-            const std::string t = std::to_string(type);
+            const std::string s = ghoul::to_string(source);
+            const std::string t = ghoul::to_string(type);
 
             const std::string category =
                 "OpenGL (" + s + ") [" + t + "] {" + std::to_string(id) + "}";
@@ -1088,28 +1100,38 @@ void OpenSpaceEngine::initializeGL() {
     }
 
     if (_configuration->isLoggingOpenGLCalls) {
-        using namespace glbinding;
+        LogLevel level = ghoul::logging::levelFromString(_configuration->logging.level);
+        if (level > LogLevel::Trace) {
+            LWARNING(
+                "Logging OpenGL calls is enabled, but the selected log level does "
+                "not include TRACE, so no OpenGL logs will be printed");
+        }
+        else {
+            using namespace glbinding;
 
-        setCallbackMask(CallbackMask::After | CallbackMask::ParametersAndReturnValue);
-        glbinding::setAfterCallback([](const glbinding::FunctionCall& call) {
-            std::string arguments = std::accumulate(
-                call.parameters.begin(),
-                call.parameters.end(),
-                std::string("("),
-                [](std::string a, AbstractValue* v) {
-                    return a + ", " + v->asString();
-                }
-            );
+            setCallbackMask(CallbackMask::After | CallbackMask::ParametersAndReturnValue);
+            glbinding::setAfterCallback([](const glbinding::FunctionCall& call) {
+                std::string arguments = std::accumulate(
+                    call.parameters.begin(),
+                    call.parameters.end(),
+                    std::string("("),
+                    [](std::string a, AbstractValue* v) {
+                        return a + v->asString() + ", ";
+                    }
+                );
+                // Remove the final ", "
+                arguments = arguments.substr(0, arguments.size() - 2) + ")";
 
-            std::string returnValue = call.returnValue ?
-                " -> " + call.returnValue->asString() :
-                "";
+                std::string returnValue = call.returnValue ?
+                    " -> " + call.returnValue->asString() :
+                    "";
 
-            LTRACEC(
-                "OpenGL",
-                call.function->name() + arguments + returnValue
-            );
-        });
+                LTRACEC(
+                    "OpenGL",
+                    call.function->name() + std::move(arguments) + std::move(returnValue)
+                );
+            });
+        }
     }
 
     LDEBUG("Initializing Rendering Engine");
@@ -1198,6 +1220,15 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 
     bool master = _windowWrapper->isMaster();
     _syncEngine->postSynchronization(SyncEngine::IsMaster(master));
+
+    // This probably doesn't have to be done here every frame, but doing it earlier gives
+    // weird results when using side_by_side stereo --- abock
+    using FR = ghoul::fontrendering::FontRenderer;
+    FR::defaultRenderer().setFramebufferSize(_renderEngine->fontResolution());
+
+    FR::defaultProjectionRenderer().setFramebufferSize(
+        _renderEngine->renderingResolution()
+    );
 
     if (_shutdown.inShutdown) {
         if (_shutdown.timer <= 0.f) {
@@ -1336,9 +1367,11 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
         }
     }
 
-    const bool isConsoleConsumed = _console->keyboardCallback(key, mod, action);
-    if (isConsoleConsumed) {
-        return;
+    if (!_configuration->isConsoleDisabled) {
+        const bool isConsoleConsumed = _console->keyboardCallback(key, mod, action);
+        if (isConsoleConsumed) {
+            return;
+        }
     }
 
     _navigationHandler->keyboardCallback(key, mod, action);

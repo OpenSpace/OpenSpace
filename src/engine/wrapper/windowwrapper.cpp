@@ -26,17 +26,13 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/scripting/scriptengine.h>
-
-#include <ghoul/misc/exception.h>
-#include <string>
 
 namespace luascriptfunctions {
 
 int setSynchronization(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setSynchronization");
 
-    bool b = lua_toboolean(L, -1) != 0;
+    const bool b = ghoul::lua::value<bool>(L, 1, ghoul::lua::PopValue::Yes);
     OsEng.windowWrapper().setSynchronization(b);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -109,11 +105,19 @@ glm::ivec2 WindowWrapper::currentWindowSize() const {
     return glm::ivec2(0);
 }
 
+glm::ivec2 WindowWrapper::currentSubwindowSize() const {
+    return currentWindowSize();
+}
+
 glm::ivec2 WindowWrapper::currentWindowResolution() const {
     return currentWindowSize();
 }
 
 glm::ivec2 WindowWrapper::currentDrawBufferResolution() const {
+    return currentWindowSize();
+}
+
+glm::ivec2 WindowWrapper::getCurrentViewportSize() const {
     return currentWindowSize();
 }
 
@@ -180,6 +184,10 @@ void WindowWrapper::sendMessageToExternalControl(const std::vector<char>&) const
 
 bool WindowWrapper::isSimpleRendering() const {
     return true;
+}
+
+bool WindowWrapper::isFisheyeRendering() const {
+    return false;
 }
 
 void WindowWrapper::takeScreenshot(bool) const {}

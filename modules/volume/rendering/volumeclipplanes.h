@@ -26,33 +26,33 @@
 #define __OPENSPACE_MODULE_VOLUME___VOLUMECLIPPLANES___H__
 
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/scalarproperty.h>
 
 #include <modules/volume/rendering/volumeclipplane.h>
-
+#include <openspace/properties/scalar/intproperty.h>
 #include <vector>
-#include <memory>
 
 namespace ghoul { class Dictionary; }
 
-namespace openspace {
-namespace volume {
+namespace openspace::volume {
+
+class VolumeClipPlane;
 
 class VolumeClipPlanes : public properties::PropertyOwner {
 public:
     VolumeClipPlanes(const ghoul::Dictionary& dictionary);
     virtual ~VolumeClipPlanes() = default;
+
     void initialize();
     void deinitialize();
+
     std::vector<glm::vec3> normals();
     std::vector<glm::vec2> offsets();
 
 private:
     properties::IntProperty _nClipPlanes;
-    std::vector<std::shared_ptr<VolumeClipPlane>> _clipPlanes;
+    std::vector<VolumeClipPlane> _clipPlanes;
 };
 
-} // namepsace volume
-} // namespace openspace
+} // namespace openspace::volume
 
 #endif // __OPENSPACE_MODULE_VOLUME___VOLUMECLIPPLANES___H__

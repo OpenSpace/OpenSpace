@@ -25,47 +25,42 @@
 #include <openspace/rendering/deferredcastermanager.h>
 
 #include <openspace/rendering/deferredcasterlistener.h>
-
 #include <algorithm>
 #include <string>
 
 namespace openspace {
 
-DeferredcasterManager::DeferredcasterManager() = default;
-
-DeferredcasterManager::~DeferredcasterManager() = default;
-
 void DeferredcasterManager::attachDeferredcaster(Deferredcaster& deferredcaster) {
     if (!isAttached(deferredcaster)) {
         _deferredcasters.push_back(&deferredcaster);
     }
-    for (auto &listener : _listeners) {
+    for (DeferredcasterListener* listener : _listeners) {
         listener->deferredcastersChanged(
             deferredcaster,
-            DeferredcasterListener::isAttached::Yes
+            DeferredcasterListener::IsAttached::Yes
         );
     }
 }
 
 void DeferredcasterManager::detachDeferredcaster(Deferredcaster& deferredcaster) {
-    auto it = std::find(
+    const auto it = std::find(
         _deferredcasters.begin(),
         _deferredcasters.end(),
         &deferredcaster
     );
     if (it != _deferredcasters.end()) {
         _deferredcasters.erase(it);
-        for (auto &listener : _listeners) {
+        for (DeferredcasterListener* listener : _listeners) {
             listener->deferredcastersChanged(
                 deferredcaster,
-                DeferredcasterListener::isAttached::No
+                DeferredcasterListener::IsAttached::No
             );
         }
     }
 }
 
 bool DeferredcasterManager::isAttached(Deferredcaster& deferredcaster) {
-    auto it = std::find(
+    const auto it = std::find(
         _deferredcasters.begin(),
         _deferredcasters.end(),
         &deferredcaster
@@ -74,14 +69,14 @@ bool DeferredcasterManager::isAttached(Deferredcaster& deferredcaster) {
 }
 
 void DeferredcasterManager::addListener(DeferredcasterListener& listener) {
-    auto it = std::find(_listeners.begin(), _listeners.end(), &listener);
+    const auto it = std::find(_listeners.begin(), _listeners.end(), &listener);
     if (it == _listeners.end()) {
         _listeners.push_back(&listener);
     }
 }
 
 void DeferredcasterManager::removeListener(DeferredcasterListener& listener) {
-    auto it = std::find(_listeners.begin(), _listeners.end(), &listener);
+    const auto it = std::find(_listeners.begin(), _listeners.end(), &listener);
     if (it != _listeners.end()) {
         _listeners.erase(it);
     }

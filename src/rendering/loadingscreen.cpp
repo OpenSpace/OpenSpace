@@ -26,53 +26,51 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
-
+#include <ghoul/fmt.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-
 #include <random>
 #include <thread>
 
 namespace {
-    const float LoadingFontSize = 25.f;
-    const float MessageFontSize = 22.f;
-    const float ItemFontSize = 10.f;
+    constexpr const float LoadingFontSize = 25.f;
+    constexpr const float MessageFontSize = 22.f;
+    constexpr const float ItemFontSize = 10.f;
 
     const glm::vec2 LogoCenter = { 0.f, 0.525f };  // in NDC
     const glm::vec2 LogoSize = { 0.275f, 0.275 };  // in NDC
 
     const glm::vec2 ProgressbarCenter = { 0.f, -0.75f };  // in NDC
     const glm::vec2 ProgressbarSize = { 0.7f, 0.0075f };  // in NDC
-    const float ProgressbarLineWidth = 0.0025f;  // in NDC
+    constexpr const float ProgressbarLineWidth = 0.0025f;  // in NDC
 
-    const glm::vec4 ProgressbarOutlineColor = glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
+    const glm::vec4 ProgressbarOutlineColor = { 0.9f, 0.9f, 0.9f, 1.f };
 
-    const glm::vec4 PhaseColorConstruction = glm::vec4(0.7f, 0.7f, 0.f, 1.f);
-    const glm::vec4 PhaseColorSynchronization = glm::vec4(0.9f, 0.9f, 0.9f, 1.f);
-    const glm::vec4 PhaseColorInitialization = glm::vec4(0.1f, 0.75f, 0.1f, 1.f);
+    const glm::vec4 PhaseColorConstruction = { 0.7f, 0.7f, 0.f, 1.f };
+    const glm::vec4 PhaseColorSynchronization = { 0.9f, 0.9f, 0.9f, 1.f };
+    const glm::vec4 PhaseColorInitialization = { 0.1f, 0.75f, 0.1f, 1.f };
 
-    const glm::vec4 ItemStatusColorStarted = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
-    const glm::vec4 ItemStatusColorInitializing = glm::vec4(0.7f, 0.7f, 0.f, 1.f);
-    const glm::vec4 ItemStatusColorFinished = glm::vec4(0.1f, 0.75f, 0.1f, 1.f);
-    const glm::vec4 ItemStatusColorFailed = glm::vec4(0.8f, 0.1f, 0.1f, 1.f);
+    const glm::vec4 ItemStatusColorStarted = { 0.5f, 0.5f, 0.5f, 1.f };
+    const glm::vec4 ItemStatusColorInitializing = { 0.7f, 0.7f, 0.f, 1.f };
+    const glm::vec4 ItemStatusColorFinished = { 0.1f, 0.75f, 0.1f, 1.f };
+    const glm::vec4 ItemStatusColorFailed = { 0.8f, 0.1f, 0.1f, 1.f };
 
-    const float ItemStandoffDistance = 5.f; // in pixels
+    constexpr const float ItemStandoffDistance = 5.f; // in pixels
 
-    const float LoadingTextPosition = 0.275f;  // in NDC
-    const float StatusMessageOffset = 0.225f;  // in NDC
+    constexpr const float LoadingTextPosition = 0.275f;  // in NDC
+    constexpr const float StatusMessageOffset = 0.225f;  // in NDC
 
-    const int MaxNumberLocationSamples = 1000;
+    constexpr const int MaxNumberLocationSamples = 1000;
 
-    const std::chrono::milliseconds TTL(5000);
+    constexpr const std::chrono::milliseconds TTL(5000);
 
-    const std::chrono::milliseconds RefreshRate(16);
+    constexpr const std::chrono::milliseconds RefreshRate(16);
 
     bool rectOverlaps(glm::vec2 lhsLl, glm::vec2 lhsUr, glm::vec2 rhsLl, glm::vec2 rhsUr)
     {
@@ -104,14 +102,6 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     : _showMessage(showMessage)
     , _showNodeNames(showNodeNames)
     , _showProgressbar(showProgressbar)
-    , _iProgress(0)
-    , _nItems(0)
-    , _loadingFont(nullptr)
-    , _messageFont(nullptr)
-    , _itemFont(nullptr)
-    , _logo{ 0, 0 }
-    , _progressbar{ 0, 0, 0, 0 }
-    , _hasCatastrophicErrorOccurred(false)
     , _randomEngine(_randomDevice())
 {
     _program = ghoul::opengl::ProgramObject::Build(
@@ -120,9 +110,11 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
         absPath("${SHADERS}/loadingscreen.frag")
     );
 
-    _uniformCache.logoTexture = _program->uniformLocation("logoTexture");
-    _uniformCache.useTexture = _program->uniformLocation("useTexture");
-    _uniformCache.color = _program->uniformLocation("color");
+    ghoul::opengl::updateUniformLocations(
+        *_program,
+        _uniformCache,
+        { "logoTexture", "useTexture", "color" }
+    );
 
     _loadingFont = OsEng.fontManager().font(
         "Loading",
@@ -162,14 +154,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
         glBindBuffer(GL_ARRAY_BUFFER, _logo.vbo);
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(
-            0,
-            2,
-            GL_FLOAT,
-            GL_FALSE,
-            4 * sizeof(GLfloat),
-            nullptr
-        );
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
 
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(
@@ -192,14 +177,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
         glBindBuffer(GL_ARRAY_BUFFER, _progressbar.vboFill);
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(
-            0,
-            2,
-            GL_FLOAT,
-            GL_FALSE,
-            2 * sizeof(GLfloat),
-            nullptr
-        );
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
 
         glGenVertexArrays(1, &_progressbar.vaoBox);
         glBindVertexArray(_progressbar.vaoBox);
@@ -207,14 +185,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
         glBindBuffer(GL_ARRAY_BUFFER, _progressbar.vboBox);
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(
-            0,
-            2,
-            GL_FLOAT,
-            GL_FALSE,
-            2 * sizeof(GLfloat),
-            nullptr
-        );
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
 
         glBindVertexArray(0);
     }
@@ -243,22 +214,24 @@ void LoadingScreen::render() {
 
     const glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();
     const glm::ivec2 res =
-        glm::vec2(OsEng.windowWrapper().currentWindowResolution()) / dpiScaling;
+        glm::vec2(OsEng.windowWrapper().currentDrawBufferResolution()) / dpiScaling;
 
     float screenAspectRatio = static_cast<float>(res.x) / static_cast<float>(res.y);
 
     float textureAspectRatio = static_cast<float>(_logoTexture->dimensions().x) /
         static_cast<float>(_logoTexture->dimensions().y);
 
-    glm::vec2 size = {
+    ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(res);
+
+    const glm::vec2 size = {
         LogoSize.x,
         LogoSize.y * textureAspectRatio * screenAspectRatio
     };
 
-    glm::vec2 logoLl = { LogoCenter.x - size.x,  LogoCenter.y - size.y };
-    glm::vec2 logoUr = { LogoCenter.x + size.x,  LogoCenter.y + size.y };
+    const glm::vec2 logoLl = { LogoCenter.x - size.x,  LogoCenter.y - size.y };
+    const glm::vec2 logoUr = { LogoCenter.x + size.x,  LogoCenter.y + size.y };
 
-    GLfloat data[] = {
+    const GLfloat data[] = {
         logoLl.x, logoLl.y, 0.f, 0.f,
         logoUr.x, logoUr.y, 1.f, 1.f,
         logoLl.x, logoUr.y, 0.f, 1.f,
@@ -299,16 +272,16 @@ void LoadingScreen::render() {
     //
     // Render progress bar
     //
-    glm::vec2 progressbarSize = {
+    const glm::vec2 progressbarSize = {
         ProgressbarSize.x,
         ProgressbarSize.y * screenAspectRatio
     };
 
-    glm::vec2 progressbarLl = {
+    const glm::vec2 progressbarLl = {
         ProgressbarCenter.x - progressbarSize.x,
         ProgressbarCenter.y - progressbarSize.y
     };
-    glm::vec2 progressbarUr = {
+    const glm::vec2 progressbarUr = {
         ProgressbarCenter.x + progressbarSize.x ,
         ProgressbarCenter.y + progressbarSize.y
     };
@@ -319,14 +292,14 @@ void LoadingScreen::render() {
         // Depending on the progress, we only want to draw the progress bar to a mixture
         // of the lowerleft and upper right extent
 
-        float progress = _nItems != 0 ?
+        const float progress = _nItems != 0 ?
             static_cast<float>(_iProgress) / static_cast<float>(_nItems) :
             0.f;
 
         glm::vec2 ur = progressbarUr;
         ur.x = glm::mix(progressbarLl.x, progressbarUr.x, progress);
 
-        GLfloat dataFill[] = {
+        const GLfloat dataFill[] = {
             progressbarLl.x, progressbarLl.y,
                        ur.x,            ur.y,
             progressbarLl.x,            ur.y,
@@ -353,9 +326,9 @@ void LoadingScreen::render() {
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         glBindVertexArray(_progressbar.vaoBox);
-        float w = ProgressbarLineWidth / screenAspectRatio;
-        float h = ProgressbarLineWidth;
-        GLfloat dataBox[] = {
+        const float w = ProgressbarLineWidth / screenAspectRatio;
+        const float h = ProgressbarLineWidth;
+        const GLfloat dataBox[] = {
             // In order to avoid the deprecated glLineWidth, we split the lines into
             // separate triangles instead
 
@@ -412,34 +385,26 @@ void LoadingScreen::render() {
     // "Loading" text
     //
     using FR = ghoul::fontrendering::FontRenderer;
-    FR& renderer = FR::defaultRenderer();
+    const FR& renderer = FR::defaultRenderer();
 
-
-    std::string headline =
+    const std::string headline =
         _hasCatastrophicErrorOccurred ?
         "Failure":
         "Loading...";
     // We use "Loading" to center the text, but render "Loading..." to make it look more
     // pleasing
-    FR::BoundingBoxInformation bbox = renderer.boundingBox(
+    const FR::BoundingBoxInformation bbox = renderer.boundingBox(
         *_loadingFont,
-        "%s",
-        headline.substr(0, headline.size() - 2).c_str()
+        headline.substr(0, headline.size() - 2)
     );
 
-    glm::vec2 loadingLl = glm::vec2(
+    const glm::vec2 loadingLl = glm::vec2(
         res.x / 2.f - bbox.boundingBox.x / 2.f,
         res.y * LoadingTextPosition
     );
-    glm::vec2 loadingUr = loadingLl + bbox.boundingBox;
+    const glm::vec2 loadingUr = loadingLl + bbox.boundingBox;
 
-    renderer.render(
-        *_loadingFont,
-        loadingLl,
-        glm::vec4(1.f, 1.f, 1.f, 1.f),
-        "%s",
-        headline.c_str()
-    );
+    renderer.render(*_loadingFont, loadingLl, headline);
 
     glm::vec2 messageLl;
     glm::vec2 messageUr;
@@ -448,8 +413,7 @@ void LoadingScreen::render() {
 
         FR::BoundingBoxInformation bboxMessage = renderer.boundingBox(
             *_messageFont,
-            "%s",
-            _message.c_str()
+            _message
         );
 
         messageLl = glm::vec2(
@@ -459,13 +423,7 @@ void LoadingScreen::render() {
         messageUr = messageLl + bboxMessage.boundingBox;
 
 
-        renderer.render(
-            *_messageFont,
-            messageLl,
-            glm::vec4(1.f, 1.f, 1.f, 1.f),
-            "%s",
-            _message.c_str()
-        );
+        renderer.render(*_messageFont, messageLl, _message);
     }
 
     if (_showNodeNames) {
@@ -477,10 +435,9 @@ void LoadingScreen::render() {
             if (!item.hasLocation) {
                 // Compute a new location
 
-                FR::BoundingBoxInformation b = renderer.boundingBox(
+                const FR::BoundingBoxInformation b = renderer.boundingBox(
                     *_itemFont,
-                    "%s",
-                    (item.name + " 100%").c_str()
+                    (item.name + " 100%")
                 );
 
                 // The maximum count is in here since we can't control the amount of
@@ -491,7 +448,7 @@ void LoadingScreen::render() {
                 glm::vec2 ll;
                 glm::vec2 ur;
                 int i = 0;
-                for ( /* i */; i < MaxNumberLocationSamples && !foundSpace; ++i) {
+                for (; i < MaxNumberLocationSamples && !foundSpace; ++i) {
                     std::uniform_int_distribution<int> distX(
                         15,
                         static_cast<int>(res.x - b.boundingBox.x - 15)
@@ -505,21 +462,21 @@ void LoadingScreen::render() {
                     ur = ll + b.boundingBox;
 
                     // Test against logo and text
-                    bool logoOverlap = rectOverlaps(
+                    const bool logoOverlap = rectOverlaps(
                         ndcToScreen(logoLl, res), ndcToScreen(logoUr, res),
                         ll, ur
                     );
 
-                    bool loadingOverlap = rectOverlaps(
+                    const bool loadingOverlap = rectOverlaps(
                         loadingLl, loadingUr,
                         ll, ur
                     );
 
-                    bool messageOverlap = _showMessage ?
+                    const bool messageOverlap = _showMessage ?
                         rectOverlaps(messageLl, messageUr, ll, ur) :
                         false;
 
-                    bool barOverlap = _showProgressbar ?
+                    const bool barOverlap = _showProgressbar ?
                         rectOverlaps(
                             ndcToScreen(progressbarLl, res),
                             ndcToScreen(progressbarUr, res),
@@ -579,7 +536,7 @@ void LoadingScreen::render() {
             }();
 
             if (item.status == ItemStatus::Finished) {
-                auto t = std::chrono::duration_cast<std::chrono::milliseconds>(
+                const auto t = std::chrono::duration_cast<std::chrono::milliseconds>(
                     now - item.finishedTime
                 );
 
@@ -600,13 +557,7 @@ void LoadingScreen::render() {
                     "%";
             }
 
-            renderer.render(
-                *_itemFont,
-                item.ll,
-                color,
-                "%s",
-                text.c_str()
-            );
+            renderer.render(*_itemFont, item.ll, text, color);
         }
 
         _items.erase(

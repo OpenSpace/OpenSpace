@@ -26,7 +26,6 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/kameleonvolumereader.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/kameleonvolumereader.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablekameleonvolume.h
   ${CMAKE_CURRENT_SOURCE_DIR}/tasks/kameleondocumentationtask.h
   ${CMAKE_CURRENT_SOURCE_DIR}/tasks/kameleonmetadatatojsontask.h
@@ -35,6 +34,7 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/kameleonvolumereader.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablekameleonvolume.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tasks/kameleondocumentationtask.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tasks/kameleonmetadatatojsontask.cpp

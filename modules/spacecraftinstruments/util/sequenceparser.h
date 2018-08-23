@@ -28,6 +28,7 @@
 #include <openspace/network/networkengine.h>
 #include <modules/spacecraftinstruments/util/decoder.h>
 #include <openspace/util/timerange.h>
+#include <modules/spacecraftinstruments/util/image.h>
 
 #include <map>
 #include <memory>
@@ -36,29 +37,15 @@
 
 namespace openspace {
 
-struct Image {
-    TimeRange timeRange;
-    std::string path;
-    std::vector<std::string> activeInstruments;
-    std::string target;
-    bool isPlaceholder = false;
-    bool projected = false;
-};
-
-struct ImageSubset {
-    TimeRange _range;
-    std::vector<Image> _subset;
-};
-
 class SequenceParser {
 public:
     virtual ~SequenceParser() = default;
     virtual bool create() = 0;
-    virtual std::map<std::string, ImageSubset> getSubsetMap() final;
-    virtual std::vector<std::pair<std::string, TimeRange>> getInstrumentTimes() final;
-    virtual std::vector<std::pair<double, std::string>> getTargetTimes() final;
-    std::map<std::string, std::unique_ptr<Decoder>>& getTranslation();
-    virtual std::vector<double> getCaptureProgression() final;
+    std::map<std::string, ImageSubset>& getSubsetMap();
+    const std::vector<std::pair<std::string, TimeRange>>& getInstrumentTimes() const;
+    const std::vector<std::pair<double, std::string>>& getTargetTimes() const ;
+    std::map<std::string, std::unique_ptr<Decoder>>& translations();
+    const std::vector<double>& getCaptureProgression() const;
 
 protected:
     void sendPlaybookInformation(const std::string& name);

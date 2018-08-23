@@ -24,15 +24,19 @@
 
 #include <modules/base/rendering/renderableplaneimagelocal.h>
 
+#include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/crc32.h>
 #include <ghoul/opengl/texture.h>
+#include <fstream>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "This value specifies an image that is loaded from disk and is used as a texture "
@@ -61,8 +65,6 @@ documentation::Documentation RenderablePlaneImageLocal::Documentation() {
 RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _texturePath(TextureInfo)
-    , _texture(nullptr)
-    , _textureIsDirty(false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -81,7 +83,7 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
 }
 
 bool RenderablePlaneImageLocal::isReady() const {
-    return RenderablePlane::isReady() && _texture != nullptr;
+    return RenderablePlane::isReady() && (_texture != nullptr);
 }
 
 void RenderablePlaneImageLocal::initializeGL() {
@@ -92,7 +94,8 @@ void RenderablePlaneImageLocal::initializeGL() {
 
 void RenderablePlaneImageLocal::deinitializeGL() {
     _textureFile = nullptr;
-    _texture = nullptr;
+
+    BaseModule::TextureManager.release(_texture);
     RenderablePlane::deinitializeGL();
 }
 
@@ -111,27 +114,34 @@ void RenderablePlaneImageLocal::update(const UpdateData& data) {
 
 void RenderablePlaneImageLocal::loadTexture() {
     if (!_texturePath.value().empty()) {
-        std::unique_ptr<ghoul::opengl::Texture> texture =
-            ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
+        ghoul::opengl::Texture* t = _texture;
 
-        if (texture) {
-            LDEBUGC(
-                "RenderablePlane",
-                fmt::format("Loaded texture from '{}'", absPath(_texturePath))
-            );
-            texture->uploadTexture();
+        unsigned int hash = ghoul::hashCRC32File(_texturePath);
+        
+        _texture = BaseModule::TextureManager.request(
+            std::to_string(hash),
+            [path = _texturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
+                std::unique_ptr<ghoul::opengl::Texture> texture =
+                    ghoul::io::TextureReader::ref().loadTexture(absPath(path));
 
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than
-            // linear
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+                LDEBUGC(
+                    "RenderablePlaneImageLocal",
+                    fmt::format("Loaded texture from '{}'", absPath(path))
+                );
+                texture->uploadTexture();
 
-            _texture = std::move(texture);
+                texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
 
-            _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
-            _textureFile->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
-            );
-        }
+                return texture;
+            }
+        );
+
+        BaseModule::TextureManager.release(t);
+
+        _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
+        _textureFile->setCallback(
+            [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+        );
     }
 }
 

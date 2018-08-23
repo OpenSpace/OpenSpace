@@ -24,33 +24,30 @@
  ****************************************************************************************/
 
 #include <modules/volume/rendering/volumeclipplanes.h>
+
 #include <ghoul/misc/dictionary.h>
 
-
-namespace openspace {
-namespace volume {
+namespace openspace::volume {
 
 VolumeClipPlanes::VolumeClipPlanes(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "" }) // @TODO Missing name
     // @TODO Missing documentation
     , _nClipPlanes({ "nClipPlanes", "Number of clip planes", "" }, 0, 0, 10)
 {
-    std::vector<std::string> keys = dictionary.keys();
+    const std::vector<std::string>& keys = dictionary.keys();
     for (const std::string& key : keys) {
-        ghoul::Dictionary cutPlaneDictionary;
-        dictionary.getValue(key, cutPlaneDictionary);
-        auto clipPlane = std::make_shared<VolumeClipPlane>(cutPlaneDictionary);
-        clipPlane->setIdentifier(key);
-        _clipPlanes.push_back(clipPlane);
+        ghoul::Dictionary cutPlaneDictionary = dictionary.value<ghoul::Dictionary>(key);
+        VolumeClipPlane clipPlane = VolumeClipPlane(cutPlaneDictionary);
+        clipPlane.setIdentifier(key);
+        _clipPlanes.push_back(std::move(clipPlane));
     }
     _nClipPlanes = static_cast<int>(keys.size());
 }
 
 void VolumeClipPlanes::initialize() {
     addProperty(_nClipPlanes);
-    for (const std::shared_ptr<VolumeClipPlane>& clipPlane : _clipPlanes) {
-        addPropertySubOwner(clipPlane.get());
-        clipPlane->initialize();
+    for (VolumeClipPlane& clipPlane : _clipPlanes) {
+        addPropertySubOwner(clipPlane);
     }
 }
 
@@ -58,19 +55,18 @@ void VolumeClipPlanes::deinitialize() {}
 
 std::vector<glm::vec3> VolumeClipPlanes::normals() {
     std::vector<glm::vec3> normals;
-    for (const std::shared_ptr<VolumeClipPlane>& clipPlane : _clipPlanes) {
-        normals.push_back(clipPlane->normal());
+    for (const VolumeClipPlane& clipPlane : _clipPlanes) {
+        normals.push_back(clipPlane.normal());
     }
     return normals;
 }
 
 std::vector<glm::vec2> VolumeClipPlanes::offsets() {
     std::vector<glm::vec2> offsets;
-    for (const std::shared_ptr<VolumeClipPlane>& clipPlane : _clipPlanes) {
-        offsets.push_back(clipPlane->offsets());
+    for (const VolumeClipPlane& clipPlane : _clipPlanes) {
+        offsets.push_back(clipPlane.offsets());
     }
     return offsets;
 }
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume

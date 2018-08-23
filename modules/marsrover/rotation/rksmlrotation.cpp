@@ -117,12 +117,9 @@ RksmlRotation::RksmlRotation(const ghoul::Dictionary& dictionary)
 
 RksmlRotation::~RksmlRotation() {}
 
-glm::dmat3 RksmlRotation::matrix(const Time& time) const {
+glm::dmat3 RksmlRotation::matrix(const UpdateData& data) const {
     
-    double currentTime = time.j2000Seconds();// * pow(10.0, 8.0);
-
-
-    LERROR(fmt::format("current Time: '{}'", std::to_string(currentTime)));
+    double currentTime = data.time.j2000Seconds();// * pow(10.0, 8.0);
 
     //double tt = 402555992.017; //00057 (middle of two frames)
     const Keyframe<RksmlRotation::Node>* nextKeyframe = Object_Timeline.firstKeyframeAfter(currentTime);
@@ -185,7 +182,6 @@ glm::dmat3 RksmlRotation::matrix(const Time& time) const {
                                     0.0, 0.0, 1.0 );  
             break;
 
-        LERROR(fmt::format("rotMatrix: '{}'", rotMatrix));
     }
 
     return rotMatrix;
@@ -263,7 +259,7 @@ void RksmlRotation::parseFile(std::string path) {
                 std::getline(iss, trash, '>');
                 std::getline(iss, value, '<');
                 //If moved to another file, if statement is not neccessary
-                if (name == std::to_string(_objectPart)) {     
+                if (name == _objectPart.value()) {
                     Node nodeObject;
                     nodeObject.frameName = name;
                     //double te = 399958865.0;
@@ -290,8 +286,9 @@ void RksmlRotation::parseFile(std::string path) {
             //trash = "";
         }
         myfile.close();
+    } else {
+        throw ghoul::RuntimeError("Never opened file");
     }
-    else LERROR(fmt::format("never opened file")); 
 }
 
 } // namespace openspace

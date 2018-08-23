@@ -345,7 +345,7 @@ glm::dvec3 SpacecraftProjection::convertFromRectangularToLatitudinal(glm::dvec3 
 }
 
 
-glm::dvec3 SpacecraftProjection::position(const Time& time) const 
+glm::dvec3 SpacecraftProjection::position(const UpdateData& data) const 
 {
     double lightTime = 0.0;
 
@@ -354,7 +354,7 @@ glm::dvec3 SpacecraftProjection::position(const Time& time) const
         _observer,
         _frame,
         {},
-        time.j2000Seconds(),
+        data.time.j2000Seconds(),
         lightTime
     ) * glm::pow(10.0, 3.0);
 

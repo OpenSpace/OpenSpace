@@ -40,8 +40,9 @@ public:
 
 private:
     int _width;
-    int _previous;
+    int _previous = -1;
     int _end;
+
     std::ostream& _stream;
 };
 

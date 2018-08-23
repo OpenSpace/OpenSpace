@@ -1,8 +1,0 @@
-local Kernels = asset.syncedResource({
-    Name = "Neptune Spice Kernels (nep088)",
-    Type = "TorrentSynchronization",
-    Identifier = "nep088",
-    Magnet = "magnet:?xt=urn:btih:1693A31C360BCABAEDC4B72C910E39C07AF3CA5F&dn=nep088.bsp&tr=udp%3a%2f%2ftracker.openbittorrent.com%3a80%2fannounce&tr=udp%3a%2f%2ftracker.publicbt.com%3a80%2fannounce&tr=udp%3a%2f%2ftracker.ccc.de%3a80%2fannounce"
-})
-
-asset.export("Kernels", Kernels .. '/nep088.bsp')

@@ -31,7 +31,7 @@ local color_layers = {
     },
     {
         Identifier = "MOC_WA_Color_LiU",
-        Name = "MOC WA Color [LiU]",
+        Name = "MOC WA Color [Sweden]",
         FilePath = mapServiceConfigs .. "/LiU/Color.wms",
         Fallback =  {
             Name = "Mars Texture",
@@ -184,6 +184,10 @@ local Mars = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_MARS",
             DestinationFrame = "GALACTIC"
+        },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1.0
         }
     },
     Renderable = {

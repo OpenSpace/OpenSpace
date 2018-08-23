@@ -40,9 +40,9 @@ struct PixelRegion {
         BOTTOM
     };
 
-    PixelRegion(const PixelRegion& o);
     PixelRegion(const PixelCoordinate& pixelStart = PixelCoordinate(0, 0),
         const PixelRange& numberOfPixels = PixelRange(0, 0));
+    PixelRegion(const PixelRegion& o) = default;
 
     /**
      * Sets one of the sides of the pixel region the specified position. This changes

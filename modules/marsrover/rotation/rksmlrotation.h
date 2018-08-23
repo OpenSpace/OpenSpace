@@ -62,7 +62,7 @@ public:
     //Timeline<Node>& timeline();
     //void addKeyframe(double timestamp, RksmlRotation::Node data);     
     
-    glm::dmat3 matrix(const Time& time) const override;
+    glm::dmat3 matrix(const UpdateData& data) const override;
     
 private:
     //void addTimelineObject(std::string s, Node n);

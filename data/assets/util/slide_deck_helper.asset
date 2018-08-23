@@ -1,0 +1,76 @@
+local createDeck = function (identifier, defaultRenderableProperties)
+    return {
+        SlideIdentifiers = {},
+        IdentifierPrefix = identifier,
+        CurrentSlideIndex = 1,
+        DefaultRenderableProperties = defaultRenderableProperties,
+    }
+end
+
+local removeDeck = function (deck)
+    for i, identifier in pairs(deck.SlideIdentifiers) do
+        openspace.removeScreenSpaceRenderable(identifier)
+    end
+end
+
+local addSlide = function (deck, path)
+    local index = #deck.SlideIdentifiers + 1
+    local identifier = deck.IdentifierPrefix .. index
+
+    local spec = {
+        Type = "ScreenSpaceImageLocal",
+        Identifier = identifier,
+        Name = identifier,
+        TexturePath = path
+    };
+
+    for key, value in pairs(deck.DefaultRenderableProperties) do
+        spec[key] = value
+    end
+
+    openspace.addScreenSpaceRenderable(spec)
+
+    deck.SlideIdentifiers[#deck.SlideIdentifiers + 1] = identifier
+end
+
+
+local setCurrentSlide = function (deck, index, interpolationDuration)
+    if (interpolationDuration == nil) then
+        interpolationDuration = 0
+    end
+
+    if (index < 0) then
+        index = 0
+    end
+
+    if (index > #deck.SlideIdentifiers + 1) then
+        index = #deck.SlideIdentifiers + 1
+    end
+
+    deck.CurrentSlideIndex = index
+
+    for i, identifier in pairs(deck.SlideIdentifiers) do
+        local opacity = 0
+        if (index == i) then
+            opacity = 1
+        end
+        openspace.setPropertyValueSingle(
+            "ScreenSpace." .. identifier .. ".Alpha", opacity,
+            interpolationDuration)
+    end
+end
+
+local goToNextSlide = function (deck, interpolationDuration)
+    setCurrentSlide(deck, deck.CurrentSlideIndex + 1, interpolationDuration)
+end
+
+local goToPreviousSlide = function (deck, interpolationDuration)
+    setCurrentSlide(deck, deck.CurrentSlideIndex - 1, interpolationDuration)
+end
+
+asset.export('createDeck', createDeck)
+asset.export('removeDeck', removeDeck)
+asset.export('addSlide', addSlide)
+asset.export('setCurrentSlide', setCurrentSlide)
+asset.export('goToNextSlide', goToNextSlide)
+asset.export('goToPreviousSlide', goToPreviousSlide)

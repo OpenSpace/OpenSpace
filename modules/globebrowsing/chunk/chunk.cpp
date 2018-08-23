@@ -24,13 +24,15 @@
 
 #include <modules/globebrowsing/chunk/chunk.h>
 
+#include <modules/globebrowsing/geometry/geodetic3.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <modules/globebrowsing/tile/chunktile.h>
 #include <modules/globebrowsing/tile/tileselector.h>
 #include <modules/globebrowsing/tile/tilemetadata.h>
-
+#include <modules/globebrowsing/rendering/layer/layerrendersettings.h>
 #include <openspace/util/updatestructures.h>
 
 namespace openspace::globebrowsing {
@@ -59,8 +61,9 @@ bool Chunk::isVisible() const {
 }
 
 Chunk::Status Chunk::update(const RenderData& data) {
-    const auto& savedCamera = _owner.savedCamera();
-    const Camera& camRef = savedCamera != nullptr ? *savedCamera : data.camera;
+    const std::shared_ptr<const Camera>& savedCamera = _owner.savedCamera();
+    const Camera& camRef = savedCamera ? *savedCamera : data.camera;
+
     RenderData myRenderData = {
         camRef,
         data.position,
@@ -76,7 +79,10 @@ Chunk::Status Chunk::update(const RenderData& data) {
         return Status::WantMerge;
     }
 
-    int desiredLevel = _owner.chunkedLodGlobe()->getDesiredLevel(*this, myRenderData);
+    const int desiredLevel = _owner.chunkedLodGlobe()->desiredLevel(
+        *this,
+        myRenderData
+    );
 
     if (desiredLevel < _tileIndex.level) {
         return Status::WantMerge;
@@ -92,10 +98,7 @@ Chunk::Status Chunk::update(const RenderData& data) {
 Chunk::BoundingHeights Chunk::boundingHeights() const {
     using ChunkTileSettingsPair = std::pair<ChunkTile, const LayerRenderSettings*>;
 
-    BoundingHeights boundingHeights {
-        0.f, 0.f,
-        false
-    };
+    BoundingHeights boundingHeights { 0.f, 0.f, false };
 
     // In the future, this should be abstracted away and more easily queryable.
     // One must also handle how to sample pick one out of multiplte heightmaps
@@ -111,25 +114,25 @@ Chunk::BoundingHeights Chunk::boundingHeights() const {
 
     bool lastHadMissingData = true;
     for (const ChunkTileSettingsPair& chunkTileSettingsPair : chunkTileSettingPairs) {
-        ChunkTile chunkTile = chunkTileSettingsPair.first;
+        const ChunkTile& chunkTile = chunkTileSettingsPair.first;
         const LayerRenderSettings* settings = chunkTileSettingsPair.second;
-        bool goodTile = (chunkTile.tile.status() == Tile::Status::OK);
-        bool hasTileMetaData = (chunkTile.tile.metaData() != nullptr);
+        const bool goodTile = (chunkTile.tile.status() == Tile::Status::OK);
+        const bool hasTileMetaData = (chunkTile.tile.metaData() != nullptr);
 
         if (goodTile && hasTileMetaData) {
-            std::shared_ptr<TileMetaData> tileMetaData = chunkTile.tile.metaData();
+            TileMetaData* tileMetaData = chunkTile.tile.metaData();
 
-            float minValue = settings->performLayerSettings(
+            const float minValue = settings->performLayerSettings(
                 tileMetaData->minValues[HeightChannel]
             );
-            float maxValue = settings->performLayerSettings(
+            const float maxValue = settings->performLayerSettings(
                 tileMetaData->maxValues[HeightChannel]
             );
 
             if (!boundingHeights.available) {
                 if (tileMetaData->hasMissingData[HeightChannel]) {
-                    boundingHeights.min = std::min(DEFAULT_HEIGHT, minValue);
-                    boundingHeights.max = std::max(DEFAULT_HEIGHT, maxValue);
+                    boundingHeights.min = std::min(DefaultHeight, minValue);
+                    boundingHeights.max = std::max(DefaultHeight, maxValue);
                 }
                 else {
                     boundingHeights.min = minValue;
@@ -157,12 +160,12 @@ std::vector<glm::dvec4> Chunk::boundingPolyhedronCorners() const {
     const Ellipsoid& ellipsoid = owner().ellipsoid();
     const GeodeticPatch& patch = surfacePatch();
 
-    BoundingHeights boundingHeight = boundingHeights();
+    const BoundingHeights& boundingHeight = boundingHeights();
 
     // assume worst case
-    double patchCenterRadius = ellipsoid.maximumRadius();
+    const double patchCenterRadius = ellipsoid.maximumRadius();
 
-    double maxCenterRadius = patchCenterRadius + boundingHeight.max;
+    const double maxCenterRadius = patchCenterRadius + boundingHeight.max;
     Geodetic2 halfSize = patch.halfSize();
 
     // As the patch is curved, the maximum height offsets at the corners must be long
@@ -175,35 +178,42 @@ std::vector<glm::dvec4> Chunk::boundingPolyhedronCorners() const {
     // close to the equator. Close to the pole this will lead to a bigger than needed
     // value for scaleToCoverCenter. However, this is a simple calculation and a good
     // Approximation.
-    double y1 = tan(halfSize.lat);
-    double y2 = tan(halfSize.lon);
-    double scaleToCoverCenter = sqrt(1 + pow(y1, 2) + pow(y2, 2));
+    const double y1 = tan(halfSize.lat);
+    const double y2 = tan(halfSize.lon);
+    const double scaleToCoverCenter = sqrt(1 + pow(y1, 2) + pow(y2, 2));
 
-    double maxCornerHeight = maxCenterRadius * scaleToCoverCenter - patchCenterRadius;
+    const double maxCornerHeight = maxCenterRadius * scaleToCoverCenter -
+                                   patchCenterRadius;
 
-    bool chunkIsNorthOfEquator = patch.isNorthern();
+    const bool chunkIsNorthOfEquator = patch.isNorthern();
 
     // The minimum height offset, however, we can simply
-    double minCornerHeight = boundingHeight.min;
+    const double minCornerHeight = boundingHeight.min;
     std::vector<glm::dvec4> corners(8);
 
-    double latCloseToEquator = patch.edgeLatitudeNearestEquator();
-    Geodetic3 p1Geodetic = { { latCloseToEquator, patch.minLon() }, maxCornerHeight };
-    Geodetic3 p2Geodetic = { { latCloseToEquator, patch.maxLon() }, maxCornerHeight };
+    const double latCloseToEquator = patch.edgeLatitudeNearestEquator();
+    const Geodetic3 p1Geodetic = {
+        { latCloseToEquator, patch.minLon() },
+        maxCornerHeight
+    };
+    const Geodetic3 p2Geodetic = {
+        { latCloseToEquator, patch.maxLon() },
+        maxCornerHeight
+    };
 
-    glm::vec3 p1 = ellipsoid.cartesianPosition(p1Geodetic);
-    glm::vec3 p2 = ellipsoid.cartesianPosition(p2Geodetic);
-    glm::vec3 p = 0.5f * (p1 + p2);
-    Geodetic2 pGeodetic = ellipsoid.cartesianToGeodetic2(p);
-    double latDiff = latCloseToEquator - pGeodetic.lat;
+    const glm::vec3 p1 = ellipsoid.cartesianPosition(p1Geodetic);
+    const glm::vec3 p2 = ellipsoid.cartesianPosition(p2Geodetic);
+    const glm::vec3 p = 0.5f * (p1 + p2);
+    const Geodetic2 pGeodetic = ellipsoid.cartesianToGeodetic2(p);
+    const double latDiff = latCloseToEquator - pGeodetic.lat;
 
     for (size_t i = 0; i < 8; ++i) {
-        Quad q = static_cast<Quad>(i % 4);
-        double cornerHeight = i < 4 ? minCornerHeight : maxCornerHeight;
-        Geodetic3 cornerGeodetic = { patch.getCorner(q), cornerHeight };
+        const Quad q = static_cast<Quad>(i % 4);
+        const double cornerHeight = i < 4 ? minCornerHeight : maxCornerHeight;
+        Geodetic3 cornerGeodetic = { patch.corner(q), cornerHeight };
 
-        bool cornerIsNorthern = !((i / 2) % 2);
-        bool cornerCloseToEquator = chunkIsNorthOfEquator ^ cornerIsNorthern;
+        const bool cornerIsNorthern = !((i / 2) % 2);
+        const bool cornerCloseToEquator = chunkIsNorthOfEquator ^ cornerIsNorthern;
         if (cornerCloseToEquator) {
             cornerGeodetic.geodetic2.lat += latDiff;
         }

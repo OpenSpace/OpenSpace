@@ -25,17 +25,18 @@
 #ifndef __OPENSPACE_MODULE_DEBUGGING___DEBUGRENDERER___H__
 #define __OPENSPACE_MODULE_DEBUGGING___DEBUGRENDERER___H__
 
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/programobject.h>
-
 #include <openspace/util/updatestructures.h>
+
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 #include <modules/globebrowsing/geometry/aabb.h>
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 
 #include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <memory>
 #include <vector>
 
-#include <ghoul/misc/assert.h>
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
@@ -49,8 +50,7 @@ namespace openspace {
  */
 class DebugRenderer {
 public:
-    typedef std::vector<glm::vec4> Vertices;
-    typedef glm::vec4 RGBA;
+    using Vertices = std::vector<glm::vec4>;
 
     /**
      *  Consider using ref() before creating a new default instance!
@@ -72,7 +72,7 @@ public:
      *  Render the vector of clipping space points in the specified mode and color.
      */
     void renderVertices(const Vertices& clippingSpacePoints, GLenum mode,
-        RGBA color = {1, 0, 0, 1}) const;
+        const glm::vec4& color = { 1.f, 0.f, 0.f, 1.f }) const;
 
     /**
      *  Takes a vector of exactly 8 vertices, i.e. corner points in a box.
@@ -88,7 +88,7 @@ public:
      *
      */
     void renderBoxFaces(const Vertices& clippingSpaceBoxCorners,
-        RGBA rgba = { 1, 0, 0, 1 }) const;
+        const glm::vec4& rgba = { 1.f, 0.f, 0.f, 1.f }) const;
 
     /**
      *  Takes a vector of exactly 8 vertices, i.e. corner points in a box.
@@ -104,7 +104,7 @@ public:
      *
      */
     void renderBoxEdges(const Vertices& clippingSpaceBoxCorners,
-        RGBA rgba = { 1, 0, 0, 1 }) const;
+        const glm::vec4& rgba = { 1.f, 0.f, 0.f, 1.f }) const;
 
     /**
       *  Takes a vector of exactly 8 vertices, i.e. corner points in a box.
@@ -120,7 +120,7 @@ public:
       *
       */
     void renderNiceBox(const Vertices& clippingSpaceBoxCorners,
-        RGBA rgba = { 1, 0, 0, 0.3 }) const;
+        const glm::vec4& rgba = { 1.f, 0.f, 0.f, 0.3f }) const;
 
     /**
      *  Input arguments:
@@ -130,14 +130,14 @@ public:
      *  3. RGBA rgba                   Color to draw the view frustum with
      */
     void renderCameraFrustum(const RenderData& data, const Camera& otherCamera,
-        RGBA rgba = { 1, 1, 1, 0.3 }) const;
+        const glm::vec4& rgba = { 1.f, 1.f, 1.f, 0.3f }) const;
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
     /**
      *  Renders a screen space AABB2 to the screen with the provided color
      */
     void renderAABB2(const globebrowsing::AABB2& screenSpaceAABB,
-        RGBA rgba = { 1, 1, 1, 0.3 }) const;
+        const glm::vec4& rgba = { 1.f, 1.f, 1.f, 0.3f }) const;
 #endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 
 

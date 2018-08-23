@@ -38,19 +38,16 @@ void LRUCache<KeyType, ValueType, HasherType>::clear() {
 }
 
 template<typename KeyType, typename ValueType, typename HasherType>
-void LRUCache<KeyType, ValueType, HasherType>::put(const KeyType& key,
-                                                   const ValueType& value)
-{
-    putWithoutCleaning(key, value);
+void LRUCache<KeyType, ValueType, HasherType>::put(KeyType key, ValueType value) {
+    putWithoutCleaning(std::move(key), std::move(value));
     clean();
 }
 
 template<typename KeyType, typename ValueType, typename HasherType>
 std::vector<std::pair<KeyType, ValueType>>
-LRUCache<KeyType, ValueType, HasherType>::putAndFetchPopped(const KeyType& key,
-                                                            const ValueType& value)
+LRUCache<KeyType, ValueType, HasherType>::putAndFetchPopped(KeyType key, ValueType value)
 {
-    putWithoutCleaning(key, value);
+    putWithoutCleaning(std::move(key), std::move(value));
     return cleanAndFetchPopped();
 }
 
@@ -61,7 +58,7 @@ bool LRUCache<KeyType, ValueType, HasherType>::exist(const KeyType& key) const {
 
 template<typename KeyType, typename ValueType, typename HasherType>
 bool LRUCache<KeyType, ValueType, HasherType>::touch(const KeyType& key) {
-    auto it = _itemMap.find(key);
+    const auto it = _itemMap.find(key);
     if (it != _itemMap.end()) { // Found in cache
         ValueType value = it->second->second;
         // Remove from current position
@@ -70,6 +67,7 @@ bool LRUCache<KeyType, ValueType, HasherType>::touch(const KeyType& key) {
         // Bump to front
         _itemList.emplace_front(key, value);
         _itemMap.emplace(key, _itemList.begin());
+
         return true;
     } else {
         return false;
@@ -84,7 +82,7 @@ bool LRUCache<KeyType, ValueType, HasherType>::isEmpty() const {
 template<typename KeyType, typename ValueType, typename HasherType>
 ValueType LRUCache<KeyType, ValueType, HasherType>::get(const KeyType& key) {
     //ghoul_assert(exist(key), "Key " << key << " must exist");
-    auto it = _itemMap.find(key);
+    const auto it = _itemMap.find(key);
     // Move list iterator pointing to value
     _itemList.splice(_itemList.begin(), _itemList, it->second);
     return it->second->second;
@@ -92,10 +90,8 @@ ValueType LRUCache<KeyType, ValueType, HasherType>::get(const KeyType& key) {
 
 template<typename KeyType, typename ValueType, typename HasherType>
 std::pair<KeyType, ValueType> LRUCache<KeyType, ValueType, HasherType>::popMRU() {
-    ghoul_assert(
-        _itemList.size() > 0,
-        "Can not pop from LRU cache. Ensure cache is not empty."
-    );
+    ghoul_assert(!_itemList.empty(), "Cannot pop LRU cache. Ensure cache is not empty.");
+
     auto first_it = _itemList.begin();
     _itemMap.erase(first_it->first);
     std::pair<KeyType, ValueType> toReturn = _itemList.front();
@@ -105,10 +101,8 @@ std::pair<KeyType, ValueType> LRUCache<KeyType, ValueType, HasherType>::popMRU()
 
 template<typename KeyType, typename ValueType, typename HasherType>
 std::pair<KeyType, ValueType> LRUCache<KeyType, ValueType, HasherType>::popLRU() {
-    ghoul_assert(
-        _itemList.size() > 0,
-        "Can not pop from LRU cache. Ensure cache is not empty."
-    );
+    ghoul_assert(!_itemList.empty(), "Cannot pop LRU cache. Ensure cache is not empty.");
+
     auto lastIt = _itemList.end();
     lastIt--;
     _itemMap.erase(lastIt->first);
@@ -128,16 +122,16 @@ size_t LRUCache<KeyType, ValueType, HasherType>::maximumCacheSize() const {
 }
 
 template<typename KeyType, typename ValueType, typename HasherType>
-void LRUCache<KeyType, ValueType, HasherType>::putWithoutCleaning(const KeyType& key,
-                                                                  const ValueType& value)
+void LRUCache<KeyType, ValueType, HasherType>::putWithoutCleaning(KeyType key,
+                                                                  ValueType value)
 {
-    auto it = _itemMap.find(key);
+    const auto it = _itemMap.find(key);
     if (it != _itemMap.end()) {
         _itemList.erase(it->second);
         _itemMap.erase(it);
     }
-    _itemList.emplace_front(key, value);
-    _itemMap.emplace(key, _itemList.begin());
+    _itemList.emplace_front(key, std::move(value));
+    _itemMap.emplace(std::move(key), _itemList.begin());
 }
 
 template<typename KeyType, typename ValueType, typename HasherType>

@@ -1,7 +1,7 @@
 local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
 asset.require("spice/base")
-local kernels = asset.require('../jup310').Kernels
+local kernel = asset.require('../kernels').jup310
 
 
 
@@ -14,7 +14,7 @@ local EuropaTrail = {
             Type = "SpiceTranslation",
             Target = "EUROPA",
             Observer = "JUPITER BARYCENTER",
-            Kernels = kernels
+            Kernels = kernel
         },
         Color = { 0.5, 0.3, 0.3 },
         Period = 85.0 / 24.0,

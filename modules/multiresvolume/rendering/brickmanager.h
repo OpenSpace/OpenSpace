@@ -27,7 +27,6 @@
 
 #include <modules/multiresvolume/rendering/tsp.h>
 
-#include <string>
 #include <vector>
 
 namespace ghoul::opengl { class Texture; }
@@ -45,61 +44,58 @@ public:
 
     bool initialize();
 
-    bool BuildBrickList(BUFFER_INDEX _bufIdx, std::vector<int> &_brickRequest);
+    bool buildBrickList(BUFFER_INDEX bufferIndex, std::vector<int>& brickRequest);
 
-    bool FillVolume(float *_in, float *_out,
-        unsigned int _x,
-        unsigned int _y,
-        unsigned int _z);
-    bool DiskToPBO(BUFFER_INDEX _pboIndex);
-    bool PBOToAtlas(BUFFER_INDEX _pboIndex);
+    bool fillVolume(float* in, float* out, unsigned int x, unsigned int y,
+        unsigned int z);
+    bool diskToPBO(BUFFER_INDEX pboIndex);
+    bool pboToAtlas(BUFFER_INDEX pboIndex);
 
     ghoul::opengl::Texture* textureAtlas();
-    unsigned int pbo(BUFFER_INDEX _pboIndex);
+    unsigned int pbo(BUFFER_INDEX pboIndex) const;
     const std::vector<int>& brickList(BUFFER_INDEX index) const;
 
 private:
+    void incrementCoordinates();
+    unsigned int linearCoordinates(int x, int y, int z);
+    void coordinatesFromLinear(int idx, int& x, int& y, int& z);
 
-    void IncCoord();
-    unsigned int LinearCoord(int _x, int _y, int _z);
-    void CoordsFromLin(int _idx, int &_x, int &_y, int &_z);
-
-    TSP* _tsp;
+    TSP* _tsp = nullptr;
     TSP::Header _header;
 
-    unsigned int numBricks_;
-    unsigned int brickDim_;
-    unsigned int paddedBrickDim_;
-    unsigned int atlasDim_;
+    unsigned int _numBricks = 0;
+    unsigned int _brickDim = 0;
+    unsigned int _paddedBrickDim = 0;
+    unsigned int _atlasDim = 0;
 
-    const unsigned int paddingWidth_ = 1;
+    const unsigned int _paddingWidth = 1;
 
-    unsigned int numBrickVals_;
-    unsigned int numBricksFrame_;
-    unsigned int numBricksTree_;
-    unsigned int brickSize_;
-    unsigned int volumeSize_;
-    unsigned int numValsTot_;
+    unsigned int _numBrickVals = 0;
+    unsigned int _numBricksFrame = 0;
+    unsigned int _numBricksTree = 0;
+    unsigned int _brickSize = 0;
+    unsigned int _volumeSize = 0;
+    unsigned int _numValsTot = 0;
 
     // Texture coordinates to be assigned
-    int xCoord_;
-    int yCoord_;
-    int zCoord_;
+    int _xCoord = 0;
+    int _yCoord = 0;
+    int _zCoord = 0;
 
     // Texture where the actual atlas is kept
-    ghoul::opengl::Texture* textureAtlas_;
+    ghoul::opengl::Texture* _textureAtlas = nullptr;
 
-    std::vector<std::vector<int> > brickLists_;
+    std::vector<std::vector<int>> _brickLists;
 
-    bool hasReadHeader_;
-    bool atlasInitialized_;
+    bool _hasReadHeader = false;
+    bool _atlasInitialized = false;
 
     // PBOs
-    unsigned int pboHandle_[2];
+    unsigned int _pboHandle[2];
 
     // Caching, one for each PBO
-    std::vector<std::vector<int> > bricksInPBO_;
-    std::vector<std::vector<bool> > usedCoords_;
+    std::vector<std::vector<int>> _bricksInPBO;
+    std::vector<std::vector<bool>> _usedCoords;
 };
 
 } // namespace openspace

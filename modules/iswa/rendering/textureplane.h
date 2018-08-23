@@ -27,6 +27,8 @@
 
 #include <modules/iswa/rendering/texturecygnet.h>
 
+#include <ghoul/opengl/ghoul_gl.h>
+
 namespace openspace {
 
 /**
@@ -34,10 +36,12 @@ namespace openspace {
  * It handles the creation, destruction and rendering of a plane geometry.
  * It also specifies which shaders to use and the uniforms that it needs.
  */
-class TexturePlane : public TextureCygnet{
+class TexturePlane : public TextureCygnet {
 public:
     TexturePlane(const ghoul::Dictionary& dictionary);
-    ~TexturePlane();
+    virtual ~TexturePlane() = default;
+
+    void initializeGL() override;
 
 private:
     bool createGeometry() override;
@@ -45,8 +49,8 @@ private:
     bool destroyGeometry() override;
     void renderGeometry() const override;
 
-    GLuint _quad;
-    GLuint _vertexPositionBuffer;
+    GLuint _quad = 0;
+    GLuint _vertexPositionBuffer = 0;
 };
 
  } // namespace openspace

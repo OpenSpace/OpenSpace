@@ -35,14 +35,15 @@
 
 namespace openspace {
 
+class UpdateData;
+
 namespace documentation { struct Documentation; }
 
 class AdvancedSpiceRotation : public Rotation {
 public:
     AdvancedSpiceRotation(const ghoul::Dictionary& dictionary);
-    const glm::dmat3& matrix() const;
 
-    glm::dmat3 matrix(const Time& time) const override;
+    glm::dmat3 matrix(const UpdateData& time) const override;
 
 	glm::dmat3 getRotationMatrix(int axis, bool posDirection, double radians) const;
 

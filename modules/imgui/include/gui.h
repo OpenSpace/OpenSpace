@@ -25,8 +25,9 @@
 #ifndef __OPENSPACE_MODULE_IMGUI___GUI___H__
 #define __OPENSPACE_MODULE_IMGUI___GUI___H__
 
-#include <modules/imgui/include/guiassetcomponent.h>
 #include <modules/imgui/include/guicomponent.h>
+
+#include <modules/imgui/include/guiassetcomponent.h>
 #include <modules/imgui/include/guifilepathcomponent.h>
 #include <modules/imgui/include/guiglobebrowsingcomponent.h>
 #include <modules/imgui/include/guihelpcomponent.h>
@@ -37,19 +38,47 @@
 #include <modules/imgui/include/guiperformancecomponent.h>
 #include <modules/imgui/include/guipropertycomponent.h>
 #include <modules/imgui/include/guispacetimecomponent.h>
-
 #include <openspace/properties/property.h>
-#include <openspace/scripting/scriptengine.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
+#include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/uniformcache.h>
+#include <array>
+
+//#define SHOW_IMGUI_HELPERS
 
 struct ImGuiContext;
 
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace ghoul::opengl
+
 namespace openspace::gui {
+
+namespace detail {
+    constexpr int nComponents() {
+        const int nRegularComponents = 14;
+        int totalComponents = nRegularComponents;
+#ifdef GLOBEBROWSING_USE_GDAL
+        ++totalComponents;
+#endif
+
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+        ++totalComponents;
+#endif
+
+        return totalComponents;
+    }
+} // namespace detail
 
 class GUI : public GuiComponent {
 public:
     GUI();
+    ~GUI();
 
     void initialize() override;
     void deinitialize() override;
@@ -63,7 +92,8 @@ public:
     bool charCallback(unsigned int character, KeyModifier modifier);
 
     void startFrame(float deltaTime, const glm::vec2& windowSize,
-        const glm::vec2& dpiScaling, const glm::vec2& mousePos, uint32_t mouseButtons);
+        const glm::vec2& dpiScaling, const glm::vec2& mousePos,
+        uint32_t mouseButtonsPressed);
     void endFrame();
 
     void render() override;
@@ -92,7 +122,6 @@ public:
     GuiParallelComponent _parallel;
     GuiPropertyComponent _featuredProperties;
 
-    bool _showInternals;
 
     properties::BoolProperty _showHelpText;
     properties::FloatProperty _helpTextDelay;
@@ -100,8 +129,48 @@ public:
 private:
     void renderAndUpdatePropertyVisibility();
 
-    properties::Property::Visibility _currentVisibility;
+    // The ordering of this array determines the order of components in the in-game menu
+    std::array<GuiComponent*, detail::nComponents()> _components = {
+        &_sceneProperty,
+        &_screenSpaceProperty,
+        &_featuredProperties,
+        &_virtualProperty,
+        &_globalProperty,
+        &_moduleProperty,
 
+        &_spaceTime,
+        &_mission,
+        &_parallel,
+#ifdef GLOBEBROWSING_USE_GDAL
+        &_globeBrowsing,
+#endif
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+        &_iswa,
+#endif
+
+        &_asset,
+        &_joystick,
+        &_filePath,
+
+        &_performance,
+
+        &_help
+    };
+
+
+    GLuint vao = 0;
+    GLuint vbo = 0;
+    GLuint vboElements = 0;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    UniformCache(tex, ortho) _uniformCache;
+    std::unique_ptr<ghoul::opengl::Texture> _fontTexture;
+
+#ifdef SHOW_IMGUI_HELPERS
+    bool _showInternals = false;
+#endif // SHOW_IMGUI_HELPERS
+
+    properties::Property::Visibility _currentVisibility =
+        properties::Property::Visibility::Developer;
     properties::BoolProperty _allHidden;
 
     std::vector<ImGuiContext*> _contexts;

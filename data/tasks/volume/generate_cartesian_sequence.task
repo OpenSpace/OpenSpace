@@ -1,0 +1,27 @@
+local length = 60
+local tasks = {}
+
+for i=1,length do
+	local radius = 0.5 * (1 - i/length)
+	local step = string.format("%02d", i-1)
+	local fn =
+		"return function (x, y, z) " .. "\n" ..
+	    "    local v = math.sqrt(x^2 + y^2 + z^2) - " .. radius .. "\n" ..
+	    "    v = (-v - 0.1) / 0.2 " .. "\n" ..
+	    "    v = math.min(math.max(v, 0), 1) " .. "\n" ..
+	    "    v = 3*v^2 - 2*v^3 " .. "\n" ..
+	    "    return v" .. "\n" ..
+	    "end"
+	tasks[#tasks+1] = {
+	    Type = "GenerateRawVolumeTask",
+	    Dimensions = {32, 32, 32},
+	    LowerDomainBound = {-0.5, -0.5, -0.5},
+	    UpperDomainBound = {0.5, 0.5, 0.5},
+	    ValueFunction = fn,
+	    Time = "2018-05-04T00:00:" .. step,
+	    RawVolumeOutput = "${DATA}/assets/examples/volume/generated/cartesiansequence/" .. step .. ".rawvolume",
+	    DictionaryOutput = "${DATA}/assets/examples/volume/generated/cartesiansequence/" .. step .. ".dictionary"
+	}
+end
+
+return tasks

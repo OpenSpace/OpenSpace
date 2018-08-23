@@ -48,8 +48,6 @@
 #include <ghoul/opengl/programobject.h>
 #include <modules/roverterrainrenderer/renderable/sitemanager.h>
 
-
-//#include <modules/roverterrainrenderer/shaders/fullsubsite_vs.glsl>
 #include <modules/roverterrainrenderer/filehandler/roverpathfilereader.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 
@@ -59,13 +57,14 @@
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <modules/marsrover/heighthandler/texturewriterfreeimage.h>
-//#include <ghoul/io/texture/texturewritersoil.h>
+
 #include <ghoul/io/texture/texturewriter.h>
 #include <ghoul/io/texture/texturewriterbase.h>
 
 #include <ghoul/opengl/uniformcache.h>
 #include <openspace/util/updatestructures.h>	//must be here in order to use globebrowsing and scenegraphnode
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/properties/triggerproperty.h>
 
 #include <freeimage.h>
 

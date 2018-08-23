@@ -26,7 +26,6 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
@@ -35,16 +34,16 @@
 #include <string>
 
 namespace {
-    const char* KeyKernels = "Kernels";
+    constexpr const char* KeyKernels = "Kernels";
 
-    static const openspace::properties::Property::PropertyInfo SourceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SourceInfo = {
         "SourceFrame",
         "Source",
         "This value specifies the source frame that is used as the basis for the "
         "coordinate transformation. This has to be a valid SPICE name."
     };
 
-    static const openspace::properties::Property::PropertyInfo DestinationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DestinationInfo = {
         "DestinationFrame",
         "Destination",
         "This value specifies the destination frame that is used for the coordinate "
@@ -93,10 +92,7 @@ documentation::Documentation SpiceRotation::Documentation() {
             },*/
             {
                 KeyKernels,
-                new OrVerifier(
-                    new StringListVerifier,
-                    new StringVerifier
-                ),
+                new OrVerifier({ new StringListVerifier, new StringVerifier }),
                 Optional::Yes,
                 "A single kernel or list of kernels that this SpiceTranslation depends "
                 "on. All provided kernels will be loaded before any other operation is "
@@ -107,7 +103,7 @@ documentation::Documentation SpiceRotation::Documentation() {
 }
 
 SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
-    : _sourceFrame(SourceInfo) // @TODO Missing documentation
+    : _sourceFrame(SourceInfo)
     , _destinationFrame(DestinationInfo)
     , _InstrumentCoordinateSystem(InstrumentCoordinateSystemInfo)
 {
@@ -150,23 +146,12 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     _InstrumentCoordinateSystem.onChange(update);
 }
 
-glm::dmat3 SpiceRotation::matrix(const Time& time) const {
-    //LERROR(fmt::format("SpiceRotation: '{}' ", time.j2000Seconds()));
-    try {
-        //multiplicate _sourceframe and _destinationframe with the right rotation matrix before sending it to spicemanager!!!!!!!!
-        glm::dmat3 result;
-
-        result = SpiceManager::ref().positionTransformMatrix(
-            _sourceFrame,
-            _destinationFrame,
-            time.j2000Seconds()
-        );
-        return result;
-
-    }
-    catch (const SpiceManager::SpiceException&) {
-        return glm::dmat3(1.0);
-    }
+glm::dmat3 SpiceRotation::matrix(const UpdateData& data) const {
+    return SpiceManager::ref().positionTransformMatrix(
+        _sourceFrame,
+        _destinationFrame,
+        data.time.j2000Seconds()
+    );
 }
 
 } // namespace openspace

@@ -27,12 +27,11 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <ghoul/glm.h>
 #include <memory>
 
 namespace ghoul { class Dictionary; }
-
 namespace openspace { class Renderable; }
-
 namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::planetgeometry {
@@ -44,15 +43,14 @@ public:
     );
 
     PlanetGeometry();
-    virtual ~PlanetGeometry();
-    virtual bool initialize(Renderable* parent);
+    virtual ~PlanetGeometry() = default;
+    virtual void initialize();
     virtual void deinitialize();
     virtual void render() = 0;
 
-    static documentation::Documentation Documentation();
+    virtual float boundingSphere() const = 0;
 
-protected:
-    Renderable* _parent;
+    static documentation::Documentation Documentation();
 };
 
 }  // namespace openspace::planetgeometry

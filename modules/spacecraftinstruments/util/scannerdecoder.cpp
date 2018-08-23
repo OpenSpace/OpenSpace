@@ -29,22 +29,20 @@
 namespace openspace {
 
 ScannerDecoder::ScannerDecoder(const ghoul::Dictionary& dictionary) : _type("SCANNER") {
-    std::string value;
     for (size_t k = 0; k < dictionary.size(); k++) {
-        dictionary.getValue(std::to_string(k + 1), value);
-        _spiceIDs.push_back(value);
+        _spiceIDs.push_back(dictionary.value<std::string>(std::to_string(k + 1)));
     }
 }
-std::string ScannerDecoder::getDecoderType() {
+const std::string& ScannerDecoder::decoderType() const {
     return _type;
 }
 
-std::vector<std::string> ScannerDecoder::getSpiceIDs() {
+const std::vector<std::string>& ScannerDecoder::spiceIDs() const {
     return _spiceIDs;
 }
 
 void ScannerDecoder::setStopCommand(std::string stopCommand) {
-    _abort = stopCommand;
+    _abort = std::move(stopCommand);
 }
 
 } // namespace openspace

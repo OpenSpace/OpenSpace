@@ -24,13 +24,12 @@
 
 #include <modules/debugging/debuggingmodule.h>
 
+#include <modules/debugging/rendering/renderabledebugplane.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
-
 #include <ghoul/misc/assert.h>
-
-#include <modules/debugging/rendering/renderabledebugplane.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 

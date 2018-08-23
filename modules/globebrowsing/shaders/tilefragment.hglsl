@@ -175,7 +175,7 @@ Fragment getTileFragment() {
     );
     // Once deferred light calculations are done in view space this can be removed
     // so that we only need one normal; in view space.
-    normalModelSpace = mat3(invViewModelTransform) * normal;
+    normalModelSpace = normalize(mat3(invViewModelTransform) * normal);
 #endif /// USE_ACCURATE_NORMALS
 
 #if USE_COLORTEXTURE

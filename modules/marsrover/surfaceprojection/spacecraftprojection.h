@@ -58,8 +58,7 @@ public:
     glm::dvec3 getNewHeight(glm::dvec3 p); 
     glm::dvec3 convertFromRectangularToLatitudinal(glm::dvec3 p);
 
-    glm::dvec3 position(const Time& time) const override;
-
+    glm::dvec3 position(const UpdateData& data) const override;
 
 private:
     properties::StringProperty _target;

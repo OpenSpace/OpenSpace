@@ -27,12 +27,18 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/globebrowsing/other/statscollector.h>
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 
+// TODO: remove this dependency towards roverterrainrenderer
 #include <modules/roverterrainrenderer/filehandler/subsite.h>
 
 #include <memory>
+
+//#define DEBUG_GLOBEBROWSING_STATSRECORD
+
+#ifdef DEBUG_GLOBEBROWSING_STATSRECORD
+#include <modules/globebrowsing/other/statscollector.h>
+#endif // DEBUG_GLOBEBROWSING_STATSRECORD
 
 namespace openspace::globebrowsing {
 
@@ -87,7 +93,7 @@ public:
      * <code>Chunk</code>, it wants to split. If it is lower, it wants to merge with
      * its siblings.
      */
-    int getDesiredLevel(const Chunk& chunk, const RenderData& renderData) const;
+    int desiredLevel(const Chunk& chunk, const RenderData& renderData) const;
 
     /**
      * Calculates the height from the surface of the reference ellipsoid to the
@@ -100,7 +106,7 @@ public:
      * cartesian model space.
      * \returns the height from the reference ellipsoid to the globe surface.
      */
-    float getHeight(glm::dvec3 position) const;
+    float getHeight(const glm::dvec3& position) const;
 
     /**
      * Notifies the renderer to recompile its shaders the next time the render function is
@@ -116,21 +122,19 @@ public:
 
     void addSites(const std::vector<std::shared_ptr<Subsite>> subsites);
 
-    const int minSplitDepth;
-    const int maxSplitDepth;
+    constexpr static const int MinSplitDepth = 2;
+    constexpr static const int MaxSplitDepth = 22;
 
     std::shared_ptr<LayerManager> layerManager() const;
 
-    StatsCollector stats;
-    
     std::vector<std::vector<std::shared_ptr<Subsite>>> subsites();
 
-private:
-    void debugRenderChunk(const Chunk& chunk, const glm::dmat4& data) const;
+#ifdef DEBUG_GLOBEBROWSING_STATSRECORD
+    StatsCollector stats;
+#endif // DEBUG_GLOBEBROWSING_STATSRECORD
 
-    static const GeodeticPatch COVERAGE;
-    static const TileIndex LEFT_HEMISPHERE_INDEX;
-    static const TileIndex RIGHT_HEMISPHERE_INDEX;
+private:
+    void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const;
 
     const RenderableGlobe& _owner;
 
@@ -151,7 +155,7 @@ private:
 
     std::shared_ptr<LayerManager> _layerManager;
 
-    bool _shadersNeedRecompilation;
+    bool _shadersNeedRecompilation = true;
     std::vector<std::vector<std::shared_ptr<Subsite>>> _subsites;
 };
 

@@ -33,12 +33,12 @@ class Deferredcaster;
 
 class DeferredcasterListener {
 public:
-    BooleanType(isAttached);
+    BooleanType(IsAttached);
 
     virtual ~DeferredcasterListener() = default;
 
     virtual void deferredcastersChanged(Deferredcaster& deferredcaster,
-        isAttached isAttached) = 0;
+        IsAttached isAttached) = 0;
 };
 
 } // openspace

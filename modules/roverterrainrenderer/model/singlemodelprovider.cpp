@@ -25,12 +25,15 @@
 #include <modules/roverterrainrenderer/model/singlemodelprovider.h>
 
 #include <modules/globebrowsing/globes/renderableglobe.h>
+#include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/geometry/geodetic3.h>
 
-#include <ghoul/logging/logmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
+#include <openspace/util/updatestructures.h>
 
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/glm.h>
 
 namespace {

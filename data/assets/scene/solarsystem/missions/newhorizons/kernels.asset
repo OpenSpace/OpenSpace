@@ -1,44 +1,44 @@
 local Kernels = asset.syncedResource({
     Name = "New Horizons Kernels",
-    Type = "TorrentSynchronization",
+    Type = "HttpSynchronization",
     Identifier = "newhorizons_kernels",
-    Magnet = "magnet:?xt=urn:btih:4AF38BDD42C5B29A0EF1CE4AB274CD91C017B8CC&dn=new_horizons&tr=udp%3a%2f%2ftracker.ccc.de%3a80%2fannounce&tr=udp%3a%2f%2ftracker.openbittorrent.com%3a80%2fannounce&tr=udp%3a%2f%2ftracker.opentrackr.org%3a1337%2fannounce"
+    Version =  1
 })
 
 local NewHorizonsKernels = {
-    Kernels .. "/new_horizons/spk/nh_pred_20141201_20190301_od122.bsp",
-    Kernels .. "/new_horizons/spk/NavSE_plu047_od122.bsp",
-    Kernels .. "/new_horizons/spk/NavPE_de433_od122.bsp",
+    Kernels .. "/nh_pred_20141201_20190301_od122.bsp",
+    Kernels .. "/NavSE_plu047_od122.bsp",
+    Kernels .. "/NavPE_de433_od122.bsp",
 
-    Kernels .. "/new_horizons/sclk/new-horizons_1121.tsc",
+    Kernels .. "/new-horizons_1121.tsc",
 
-    Kernels .. "/new_horizons/ck/nh_scispi_2015_pred.bc",
-    Kernels .. "/new_horizons/ck/nh_scispi_2015_recon.bc",
-    Kernels .. "/new_horizons/ck/nh_lorri_wcs.bc",
+    Kernels .. "/nh_scispi_2015_pred.bc",
+    Kernels .. "/nh_scispi_2015_recon.bc",
+    Kernels .. "/nh_lorri_wcs.bc",
     
-    Kernels .. "/new_horizons/smithed_pc_and_sp/PLU_LORRI_ALL_161216.bc",
+    Kernels .. "/PLU_LORRI_ALL_161216.bc",
 
-    Kernels .. "/new_horizons/pck/nh_targets_v001.tpc",
-    Kernels .. "/new_horizons/pck/nh_pcnh_005.tpc",
+    Kernels .. "/nh_targets_v001.tpc",
+    Kernels .. "/nh_pcnh_005.tpc",
 
-    Kernels .. "/new_horizons/fk/nh_v220.tf",
-    Kernels .. "/new_horizons/ik/nh_allinstruments_v002.ti",
-    Kernels .. "/new_horizons/ik/nh_alice_v200.ti",
-    Kernels .. "/new_horizons/ik/nh_lorri_v201.ti",
-    Kernels .. "/new_horizons/ik/nh_pepssi_v110.ti",
-    Kernels .. "/new_horizons/ik/nh_ralph_v100.ti",
-    Kernels .. "/new_horizons/ik/nh_rex_v100.ti",
-    Kernels .. "/new_horizons/ik/nh_sdc_v101.ti",
-    Kernels .. "/new_horizons/ik/nh_swap_v100.ti",
-    Kernels .. "/new_horizons/ik/nh_astr_v000.ti",
-    Kernels .. "/new_horizons/ik/nh_fss_v000.ti",
-    Kernels .. "/new_horizons/fk/nh_soc_misc_v001.tf",
-    Kernels .. "/new_horizons/spk/nh_stars.bsp",
+    Kernels .. "/nh_v220.tf",
+    Kernels .. "/nh_allinstruments_v002.ti",
+    Kernels .. "/nh_alice_v200.ti",
+    Kernels .. "/nh_lorri_v201.ti",
+    Kernels .. "/nh_pepssi_v110.ti",
+    Kernels .. "/nh_ralph_v100.ti",
+    Kernels .. "/nh_rex_v100.ti",
+    Kernels .. "/nh_sdc_v101.ti",
+    Kernels .. "/nh_swap_v100.ti",
+    Kernels .. "/nh_astr_v000.ti",
+    Kernels .. "/nh_fss_v000.ti",
+    Kernels .. "/nh_soc_misc_v001.tf",
+    Kernels .. "/nh_stars.bsp",
 }
 
 local PlutoKernels = {
-    Kernels .. "/new_horizons/spk/NavPE_de433_od122.bsp",
-    Kernels .. "/new_horizons/spk/NavSE_plu047_od122.bsp"
+    Kernels .. "/NavPE_de433_od122.bsp",
+    Kernels .. "/NavSE_plu047_od122.bsp"
 }
 
 

@@ -39,8 +39,7 @@ public:
         const LayerAdjustment& layerAdjustment);
 
     void bind(const LayerAdjustment& layerAdjustment,
-        ghoul::opengl::ProgramObject* programObject,
-        const std::string& nameBase);
+        ghoul::opengl::ProgramObject* programObject, const std::string& nameBase);
 
 private:
     GPUData<glm::vec3> gpuChromaKeyColor;

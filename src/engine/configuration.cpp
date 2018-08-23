@@ -67,6 +67,7 @@ namespace {
     constexpr const char* KeyRenderingMethod = "RenderingMethod";
     constexpr const char* KeyDisableRenderingOnMaster = "DisableRenderingOnMaster";
     constexpr const char* KeyDisableSceneOnMaster = "DisableSceneOnMaster";
+    constexpr const char* KeyDisableInGameConsole = "DisableInGameConsole";
     constexpr const char* KeyScreenshotUseDate = "ScreenshotUseDate";
     constexpr const char* KeyHttpProxy = "HttpProxy";
     constexpr const char* KeyAddress = "Address";
@@ -126,6 +127,7 @@ void getValue(ghoul::lua::LuaState& L, const char* name, T& value) {
         throw documentation::SpecificationError(std::move(testResult), "Configuration");
     }
 
+    // NOLINTNEXTLINE
     if constexpr (std::is_same_v<T, std::vector<std::string>>) {
         ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
 
@@ -135,6 +137,7 @@ void getValue(ghoul::lua::LuaState& L, const char* name, T& value) {
         }
         value = res;
     }
+    // NOLINTNEXTLINE
     else if constexpr (std::is_same_v<T, std::map<std::string, std::string>>) {
         ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
 
@@ -146,6 +149,7 @@ void getValue(ghoul::lua::LuaState& L, const char* name, T& value) {
         }
         value = res;
     }
+    // NOLINTNEXTLINE
     else if constexpr (std::is_same_v<T, std::map<std::string, ghoul::Dictionary>>) {
         ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
 
@@ -157,6 +161,7 @@ void getValue(ghoul::lua::LuaState& L, const char* name, T& value) {
         }
         value = res;
     }
+    // NOLINTNEXTLINE
     else if constexpr (std::is_same_v<T, Configuration::Logging>) {
         Configuration::Logging& v = static_cast<Configuration::Logging&>(value);
         ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
@@ -176,6 +181,7 @@ void getValue(ghoul::lua::LuaState& L, const char* name, T& value) {
             v.logs = res;
         }
     }
+    // NOLINTNEXTLINE
     else if constexpr (std::is_same_v<T, Configuration::DocumentationInfo>) {
         Configuration::DocumentationInfo& v =
             static_cast<Configuration::DocumentationInfo&>(value);
@@ -189,6 +195,7 @@ void getValue(ghoul::lua::LuaState& L, const char* name, T& value) {
         d.getValue(KeyFactoryDocumentation, v.factory);
         d.getValue(KeyLicenseDocumentation, v.license);
     }
+    // NOLINTNEXTLINE
     else if constexpr (std::is_same_v<T, Configuration::LoadingScreen>) {
         Configuration::LoadingScreen& v =
             static_cast<Configuration::LoadingScreen&>(value);
@@ -198,6 +205,7 @@ void getValue(ghoul::lua::LuaState& L, const char* name, T& value) {
         d.getValue(KeyShowNodeNames, v.isShowingNodeNames);
         d.getValue(KeyShowProgressbar, v.isShowingProgressbar);
     }
+    // NOLINTNEXTLINE
     else if constexpr (std::is_same_v<T, Configuration::OpenGLDebugContext>) {
         Configuration::OpenGLDebugContext& v =
             static_cast<Configuration::OpenGLDebugContext&>(value);
@@ -236,6 +244,7 @@ void getValue(ghoul::lua::LuaState& L, const char* name, T& value) {
             v.severityFilters = res;
         }
     }
+    // NOLINTNEXTLINE
     else if constexpr (std::is_same_v<T, Configuration::HTTPProxy>) {
         Configuration::HTTPProxy& v = static_cast<Configuration::HTTPProxy&>(value);
         ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
@@ -276,6 +285,7 @@ void parseLuaState(Configuration& configuration) {
     getValue(s, KeyPerSceneCache, c.usePerSceneCache);
     getValue(s, KeyDisableRenderingOnMaster, c.isRenderingOnMasterDisabled);
     getValue(s, KeyDisableSceneOnMaster, c.isSceneTranslationOnMasterDisabled);
+    getValue(s, KeyDisableInGameConsole, c.isConsoleDisabled);
     getValue(s, KeyRenderingMethod, c.renderingMethod);
     getValue(s, KeyServerPasskey, c.serverPasskey);
     getValue(s, KeyRequireSocketAuthentication, c.doesRequireSocketAuthentication);

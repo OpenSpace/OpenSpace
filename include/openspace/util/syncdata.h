@@ -25,37 +25,16 @@
 #ifndef __OPENSPACE_CORE___SYNCDATA___H__
 #define __OPENSPACE_CORE___SYNCDATA___H__
 
-#include <memory>
-#include <mutex>
+#include <openspace/util/syncable.h>
 
-#include <ghoul/misc/assert.h>
-#include <openspace/util/syncbuffer.h>
+#include <mutex>
 
 namespace openspace {
 
 /**
- * Interface for synchronizable data
- *
- * Used by <code>SyncEngine</code>
- */
-class Syncable {
-public:
-    virtual ~Syncable() {};
-
-protected:
-    // Allowing SyncEngine synchronization methods and at the same time hiding them
-    // from the used of implementations of the interface
-    friend class SyncEngine;
-    virtual void presync(bool /*isMaster*/) {};
-    virtual void encode(SyncBuffer* /*syncBuffer*/) = 0;
-    virtual void decode(SyncBuffer* /*syncBuffer*/) = 0;
-    virtual void postsync(bool /*isMaster*/) {};
-};
-
-/**
  * A double buffered implementation of the Syncable interface.
  * Users are encouraged to used this class as a default way to synchronize different
- * C++ data types using the <code>SyncEngine</code>
+ * C++ data types using the SyncEngine.
  *
  * This class aims to handle the synchronization parts and yet act like a regular
  * instance of T. Implicit casts are supported, however, when accessing member functions
@@ -67,62 +46,47 @@ protected:
 template<class T>
 class SyncData : public Syncable {
 public:
-
-    SyncData() {};
-    SyncData(const T& val) : data(val) {};
-    SyncData(const SyncData<T>& o) : data(o.data) {
-        // Should not have to be copied!
-    };
+    SyncData() = default;
+    SyncData(const T& val);
+    SyncData(const SyncData<T>& o);
 
     /**
      * Allowing assignment of data as if
      */
-    SyncData& operator=(const T& rhs) {
-        data = rhs;
-        return *this;
-    }
+    SyncData& operator=(const T& rhs);
 
     /**
      * Allow implicit cast to referenced T
      */
-    operator T&() {
-        return data;
-    }
+    operator T&();
 
     /**
      * Allow implicit cast to const referenced T
      */
-    operator const T&() const {
-        return data;
-    }
+    operator const T&() const;
+
+    /**
+     * Explicitly access data
+     */
+    T& data();
+
+    /**
+    * Explicitly access const data
+    */
+    const T& data() const;
 
 protected:
-    virtual void encode(SyncBuffer* syncBuffer) override {
-        _mutex.lock();
-        syncBuffer->encode(data);
-        _mutex.unlock();
-    }
+    virtual void encode(SyncBuffer* syncBuffer) override;
+    virtual void decode(SyncBuffer* syncBuffer) override;
+    virtual void postSync(bool isMaster) override;
 
-    virtual void decode(SyncBuffer* syncBuffer) override {
-        _mutex.lock();
-        syncBuffer->decode(doubleBufferedData);
-        _mutex.unlock();
-    }
-
-    virtual void postsync(bool isMaster) override {
-        // apply synced update
-        if (!isMaster) {
-            _mutex.lock();
-            data = doubleBufferedData;
-            _mutex.unlock();
-        }
-    };
-
-    T data;
-    T doubleBufferedData;
+    T _data;
+    T _doubleBufferedData;
     std::mutex _mutex;
 };
 
 } // namespace openspace
+
+#include "syncdata.inl"
 
 #endif // __OPENSPACE_CORE___SYNCDATA___H__

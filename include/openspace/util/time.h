@@ -25,13 +25,11 @@
 #ifndef __OPENSPACE_CORE___TIME___H__
 #define __OPENSPACE_CORE___TIME___H__
 
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/util/syncdata.h>
-
-#include <mutex>
 #include <string>
 
 namespace openspace {
+
+namespace scripting { struct LuaLibrary; }
 
 /**
  * This singleton class represents the current simulation time in OpenSpace. It
@@ -68,7 +66,7 @@ public:
     static double convertTime(const std::string& time);
 
     Time(double secondsJ2000 = -1);
-    Time(const Time& other);
+    Time(const Time& other) = default;
 
     /**
      * Initializes the Time singleton.
@@ -91,22 +89,16 @@ public:
      * Sets the current time to the specified value in seconds past the J2000 epoch. This
      * value can be negative to represent dates before the epoch.
      * \param value The number of seconds after the J2000 epoch
-     * \param requireJump Whether or not the time change is big enough to require a
-     * time-jump; defaults to true as most calls to set time will require recomputation of
-     * planetary paths etc.
      */
-    void setTime(double j2000Seconds, bool requireJump = true);
+    void setTime(double j2000Seconds);
 
     /**
      * Sets the current time to the specified value given as a Spice compliant string as
      * described in the Spice documentation
      * (http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html)
      * \param time The time to be set as a date string
-     * \param requireJump Whether or not the time change is big enough to require a
-     * time-jump; defaults to true as most calls to set time will require recomputation of
-     * planetary paths etc.
      */
-    void setTime(std::string time, bool requireJump = true);
+    void setTime(std::string time);
 
     /**
      * Returns the current time as the number of seconds past the J2000 epoch. If the
@@ -129,39 +121,6 @@ public:
     std::string ISO8601() const;
 
     /**
-     * Sets the delta time value that is the number of seconds that should pass for each
-     * real-time second. This value is used in the advanceTime(double) method to easily
-     * advance the simulation time.
-     * \param deltaT The number of seconds that should pass for each real-time second
-     */
-    void setDeltaTime(double deltaT);
-
-    /**
-     * Returns the delta time, that is the number of seconds that pass in the simulation
-     * for each real-time second
-     * \return The number of seconds that pass for each real-time second
-     */
-    double deltaTime() const;
-
-    /**
-     * Sets the pause function, i.e. setting the deltaTime to 0 (<code>pause</code> =
-     * <code>true</code>) and restoring it when the function is called with a parameter of
-     * <code>false</code>.
-     * \param pause If <code>true</code>, the simulation time stops;
-     * if <code>false</code>, the simulation time continues at the previous rate
-     */
-    void setPause(bool pause);
-
-    /**
-     * Toggles the pause function, i.e. setting the deltaTime to 0 and restoring it when
-     * the function is called a second time. It returns the pause state (<code>true</code>
-     * if the time is now paused, <code>false</code> otherwise)
-     * \return The new pause state (<code>true</code> if the time is now paused,
-     * <code>false</code> otherwise)
-     */
-    bool togglePause();
-
-    /**
      * Advances the simulation time using the deltaTime() and the <code>tickTime</code>.
      * The deltaTime() is the number of simulation seconds that pass for each real-time
      * second. <code>tickTime</code> is the number of real-time seconds that passed since
@@ -173,30 +132,16 @@ public:
      */
     double advanceTime(double tickTime);
 
-    bool timeJumped() const;
-
-    void setTimeJumped(bool jumped);
-
-    bool paused() const;
-
     /**
      * Returns the Lua library that contains all Lua functions available to change the
-     * current time, retrieve the current time etc. The functions contained are
-     * - openspace::luascriptfunctions::time_setDeltaTime
-     * - openspace::luascriptfunctions::time_deltaTime
-     * - openspace::luascriptfunctions::time_setTime
-     * - openspace::luascriptfunctions::time_currentTime
-     * - openspace::luascriptfunctions::time_currentTimeUTC
+     * current time, retrieve the current time etc.
      * \return The Lua library that contains all Lua functions available to change the
-     * Time singleton
+     * time
      */
     static scripting::LuaLibrary luaLibrary();
 
 private:
     double _time;
-    double _dt;
-    bool _timeJumped;
-    bool _timePaused = false;
 };
 
 } // namespace openspace

@@ -92,7 +92,7 @@ namespace openspace {
         openspace::SceneGraphNode* _parent;
 
         globebrowsing::RenderableGlobe* _globe;
-        std::shared_ptr<globebrowsing::ChunkedLodGlobe> _chunkedLodGlobe;
+        globebrowsing::ChunkedLodGlobe* _chunkedLodGlobe;
 
         std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 

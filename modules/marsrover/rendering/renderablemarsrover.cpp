@@ -31,6 +31,8 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/powerscaledsphere.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/util/powerscaledsphere.h>
+#include <openspace/util/powerscaledscalar.h>
 
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -241,7 +243,7 @@ void RenderableMarsrover::initializeGL() {
     );
     _marsrover->initialize();
 
-    _shader = BaseModule::ProgramObjectManager.requestProgramObject(
+    _shader = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return OsEng.renderEngine().buildRenderProgram(
@@ -263,7 +265,7 @@ void RenderableMarsrover::initializeGL() {
 void RenderableMarsrover::deinitializeGL() {
     _texture = nullptr;
 
-    BaseModule::ProgramObjectManager.releaseProgramObject(
+    BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
             OsEng.renderEngine().removeRenderProgram(p);

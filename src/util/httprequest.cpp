@@ -25,16 +25,10 @@
 #include <openspace/util/httprequest.h>
 
 #include <ghoul/fmt.h>
+#include <ghoul/filesystem/directory.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/thread.h>
-
-#include <chrono>
-#include <cstring>
-#include <fstream>
-#include <stdio.h>
-#include <thread>
 
 #ifdef OPENSPACE_CURL_ENABLED
 #ifdef WIN32
@@ -65,18 +59,14 @@ size_t headerCallback(char* ptr, size_t size, size_t nmemb, void* userData) {
     return nBytes;
 }
 
-int progressCallback(
-    void* userData,
-    int64_t nTotalBytes,
-    int64_t nDownloadedBytes,
-    int64_t,
-    int64_t)
+int progressCallback(void* userData, int64_t nTotalDownloadBytes,
+                     int64_t nDownloadedBytes, int64_t, int64_t)
 {
     HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);
     return r->_onProgress(
         HttpRequest::Progress{
             true,
-            static_cast<size_t>(nTotalBytes),
+            static_cast<size_t>(nTotalDownloadBytes),
             static_cast<size_t>(nDownloadedBytes)
         }
     );
@@ -122,26 +112,30 @@ void HttpRequest::perform(RequestOptions opt) {
         return;
     }
 
-    curl_easy_setopt(curl, CURLOPT_URL, _url.c_str());
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl, CURLOPT_URL, _url.c_str()); // NOLINT
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // NOLINT
 
-    curl_easy_setopt(curl, CURLOPT_HEADERDATA, this);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, this); // NOLINT
+    // NOLINTNEXTLINE
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, curlfunctions::headerCallback);
 
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this); // NOLINT
+    // NOLINTNEXTLINE
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlfunctions::writeCallback);
 
-    curl_easy_setopt(curl, CURLOPT_XFERINFODATA, this);
+    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L); // NOLINT
+    curl_easy_setopt(curl, CURLOPT_XFERINFODATA, this); // NOLINT
+    // NOLINTNEXTLINE
     curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, curlfunctions::progressCallback);
 
     if (opt.requestTimeoutSeconds > 0) {
-        curl_easy_setopt(curl, CURLOPT_TIMEOUT, opt.requestTimeoutSeconds);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, opt.requestTimeoutSeconds); // NOLINT
     }
 
     CURLcode res = curl_easy_perform(curl);
     if (res == CURLE_OK) {
         long responseCode;
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode); // NOLINT
         if (responseCode == StatusCodeOk) {
             setReadyState(ReadyState::Success);
         } else {
@@ -158,23 +152,25 @@ void HttpRequest::setReadyState(openspace::HttpRequest::ReadyState state) {
     _onReadyStateChange(state);
 }
 
-HttpDownload::HttpDownload()
-    : _onProgress([] (HttpRequest::Progress) { return true; })
-{}
-
-void HttpDownload::onProgress(ProgressCallback progressCallback) {
-    _onProgress = progressCallback;
+const std::string& HttpRequest::url() const {
+    return _url;
 }
 
-bool HttpDownload::hasStarted() {
+HttpDownload::HttpDownload() : _onProgress([](HttpRequest::Progress) { return true; }) {}
+
+void HttpDownload::onProgress(ProgressCallback progressCallback) {
+    _onProgress = std::move(progressCallback);
+}
+
+bool HttpDownload::hasStarted() const {
     return _started;
 }
 
-bool HttpDownload::hasFailed() {
+bool HttpDownload::hasFailed() const {
     return _failed;
 }
 
-bool HttpDownload::hasSucceeded() {
+bool HttpDownload::hasSucceeded() const {
     return _successful;
 }
 
@@ -194,9 +190,7 @@ bool HttpDownload::callOnProgress(HttpRequest::Progress p) {
     return _onProgress(p);
 }
 
-SyncHttpDownload::SyncHttpDownload(std::string url)
-    : _httpRequest(std::move(url))
-{}
+SyncHttpDownload::SyncHttpDownload(std::string url) : _httpRequest(std::move(url)) {}
 
 void SyncHttpDownload::download(HttpRequest::RequestOptions opt) {
     if (!initDownload()) {
@@ -222,9 +216,11 @@ void SyncHttpDownload::download(HttpRequest::RequestOptions opt) {
     deinitDownload();
 }
 
-AsyncHttpDownload::AsyncHttpDownload(std::string url)
-    : _httpRequest(std::move(url))
-{}
+const std::string& SyncHttpDownload::url() const {
+    return _httpRequest.url();
+}
+
+AsyncHttpDownload::AsyncHttpDownload(std::string url) : _httpRequest(std::move(url)) {}
 
 AsyncHttpDownload::AsyncHttpDownload(AsyncHttpDownload&& d)
     : _httpRequest(std::move(d._httpRequest))
@@ -268,7 +264,7 @@ void AsyncHttpDownload::download(HttpRequest::RequestOptions opt) {
         // Return a non-zero value to cancel download
         // if onProgress returns false.
         //std::lock_guard<std::mutex> guard(_mutex);
-        bool shouldContinue = callOnProgress(p);
+        const bool shouldContinue = callOnProgress(p);
         if (!shouldContinue) {
             return 1;
         }
@@ -295,7 +291,11 @@ void AsyncHttpDownload::download(HttpRequest::RequestOptions opt) {
     deinitDownload();
 }
 
-const std::vector<char>& HttpMemoryDownload::downloadedData() {
+const std::string& AsyncHttpDownload::url() const {
+    return _httpRequest.url();
+}
+
+const std::vector<char>& HttpMemoryDownload::downloadedData() const {
     return _downloadedData;
 }
 
@@ -312,9 +312,8 @@ size_t HttpMemoryDownload::handleData(HttpRequest::Data d) {
     return d.size;
 }
 
-HttpFileDownload::HttpFileDownload(
-    std::string destination,
-    HttpFileDownload::Overwrite overwrite)
+HttpFileDownload::HttpFileDownload(std::string destination,
+                                   HttpFileDownload::Overwrite overwrite)
     : _destination(std::move(destination))
     , _overwrite(overwrite)
 {}
@@ -338,7 +337,6 @@ bool HttpFileDownload::initDownload() {
     while (nCurrentFilehandles >= MaxFilehandles) {
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
-
 
     ++nCurrentFilehandles;
     _file = std::ofstream(_destination, std::ofstream::binary);
@@ -419,14 +417,10 @@ std::mutex HttpFileDownload::_directoryCreationMutex;
 
 SyncHttpMemoryDownload::SyncHttpMemoryDownload(std::string url)
     : SyncHttpDownload(std::move(url))
-    , HttpMemoryDownload()
 {}
 
-SyncHttpFileDownload::SyncHttpFileDownload(
-    std::string url,
-    std::string destinationPath,
-    HttpFileDownload::Overwrite overwrite
-)
+SyncHttpFileDownload::SyncHttpFileDownload(std::string url, std::string destinationPath,
+                                           HttpFileDownload::Overwrite overwrite)
     : SyncHttpDownload(std::move(url))
     , HttpFileDownload(std::move(destinationPath), overwrite)
 {}
@@ -435,14 +429,10 @@ AsyncHttpMemoryDownload::AsyncHttpMemoryDownload(std::string url)
     : AsyncHttpDownload(std::move(url))
 {}
 
-AsyncHttpFileDownload::AsyncHttpFileDownload(
-    std::string url,
-    std::string destinationPath,
-    HttpFileDownload::Overwrite overwrite
-)
+AsyncHttpFileDownload::AsyncHttpFileDownload(std::string url, std::string destinationPath,
+                                             HttpFileDownload::Overwrite overwrite)
     : AsyncHttpDownload(std::move(url))
     , HttpFileDownload(std::move(destinationPath), overwrite)
 {}
-
 
 } // namespace openspace

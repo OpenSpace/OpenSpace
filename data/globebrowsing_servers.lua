@@ -32,6 +32,18 @@ return {
             URL  = "https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/mars/deimos_simp_cyl.map&service=WMS&request=GetCapabilities"
         },
     },
+    Pluto = {
+        {
+            Name = "USGS Pluto",
+            URL = "https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/pluto/pluto_simp_cyl.map&service=WMS&request=GetCapabilities"
+        }
+    },
+    Charon = {
+        {
+            Name = "USGS Charon",
+            URL = "https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/pluto/charon_simp_cyl.map&service=WMS&request=GetCapabilities"
+        }
+    }
 }
 
 

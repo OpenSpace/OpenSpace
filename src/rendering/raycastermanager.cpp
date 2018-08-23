@@ -25,7 +25,6 @@
 #include <openspace/rendering/raycastermanager.h>
 
 #include <openspace/rendering/raycasterlistener.h>
-
 #include <algorithm>
 #include <string>
 
@@ -36,40 +35,40 @@ void RaycasterManager::attachRaycaster(VolumeRaycaster& raycaster) {
         _raycasters.push_back(&raycaster);
     }
     for (RaycasterListener* listener : _listeners) {
-        listener->raycastersChanged(raycaster, true);
+        listener->raycastersChanged(raycaster, RaycasterListener::IsAttached::Yes);
     }
 }
 
 bool RaycasterManager::isAttached(VolumeRaycaster& raycaster) {
-    auto it = std::find(_raycasters.begin(), _raycasters.end(), &raycaster);
+    const auto it = std::find(_raycasters.begin(), _raycasters.end(), &raycaster);
     return it != _raycasters.end();
 }
 
 void RaycasterManager::detachRaycaster(VolumeRaycaster& raycaster) {
-    auto it = std::find(_raycasters.begin(), _raycasters.end(), &raycaster);
+    const auto it = std::find(_raycasters.begin(), _raycasters.end(), &raycaster);
     if (it != _raycasters.end()) {
         _raycasters.erase(it);
         for (RaycasterListener* listener : _listeners) {
-            listener->raycastersChanged(raycaster, false);
+            listener->raycastersChanged(raycaster, RaycasterListener::IsAttached::No);
         }
     }
 }
 
 void RaycasterManager::addListener(RaycasterListener& listener) {
-    auto it = std::find(_listeners.begin(), _listeners.end(), &listener);
+    const auto it = std::find(_listeners.begin(), _listeners.end(), &listener);
     if (it == _listeners.end()) {
         _listeners.push_back(&listener);
     }
 }
 
 void RaycasterManager::removeListener(RaycasterListener& listener) {
-    auto it = std::find(_listeners.begin(), _listeners.end(), &listener);
+    const auto it = std::find(_listeners.begin(), _listeners.end(), &listener);
     if (it != _listeners.end()) {
         _listeners.erase(it);
     }
 }
 
-const std::vector<VolumeRaycaster*>& RaycasterManager::raycasters() {
+const std::vector<VolumeRaycaster*>& RaycasterManager::raycasters() const {
     return _raycasters;
 }
 

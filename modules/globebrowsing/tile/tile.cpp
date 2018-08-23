@@ -26,16 +26,30 @@
 
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <modules/globebrowsing/tile/tilemetadata.h>
+#include <modules/globebrowsing/tile/tileindex.h>
+#include <modules/globebrowsing/tile/tileuvtransform.h>
 
 namespace openspace::globebrowsing {
 
-const Tile Tile::TileUnavailable = Tile(nullptr, nullptr, Tile::Status::Unavailable);
+const Tile Tile::TileUnavailable(nullptr, nullptr, Tile::Status::Unavailable);
 
-Tile::Tile(ghoul::opengl::Texture* texture,
-    std::shared_ptr<TileMetaData> metaData, Status status)
+Tile::Tile(ghoul::opengl::Texture* texture, std::shared_ptr<TileMetaData> metaData,
+           Status status)
     : _texture(texture)
-    , _metaData(metaData)
+    , _metaData(std::move(metaData))
     , _status(status)
-{ }
+{}
+
+TileMetaData* Tile::metaData() const {
+    return _metaData.get();
+}
+
+Tile::Status Tile::status() const {
+    return _status;
+}
+
+ghoul::opengl::Texture* Tile::texture() const {
+    return _texture;
+}
 
 } // namespace openspace::globebrowsing

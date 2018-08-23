@@ -31,6 +31,7 @@
 
 namespace openspace {
 
+// This should be moved into the touch module ---abock
 struct Touch {
     bool active;
     glm::vec2 pos;

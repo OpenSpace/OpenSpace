@@ -26,15 +26,13 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___PIXEL_BUFFER_CONTAINER___H__
 
 #include <modules/globebrowsing/other/pixelbuffer.h>
-
 #include <map>
 
 namespace openspace::globebrowsing {
 
 /**
- * Templated class which owns one or many <code>PixelBuffer</code>s. The
- * <code>KeyType</code> is used to map a pixel buffer but only if it is not already
- * mapped.
+ * Templated class which owns one or many PixelBuffer%s. The KeyType is used to map a
+ * pixel buffer but only if it is not already mapped.
  */
 template <class KeyType>
 class PixelBufferContainer {
@@ -42,11 +40,13 @@ public:
     /**
      * Creates numPixelBuffers pixel buffer objects, each with numBytesPerBuffer bytes
      * allocated on the GPU.
+     *
      * \param numBytesPerBuffer is the number of bytes per pixel buffer. All pixel
-     * buffers within a <code>PixelBufferContainer</code> have the same number of bytes
+     *        buffers within a <code>PixelBufferContainer</code> have the same number of
+     *        bytes
      * \param usage is the <code>Usage</code> as described by <code>PixelBuffer</code>
      * \param numPixelBuffers is the number of pixel buffers to create for this container.
-     * If numPixelBuffers is omitted, no pixel buffers are created.
+     *        If numPixelBuffers is omitted, no pixel buffers are created.
      */
     PixelBufferContainer(size_t numBytesPerBuffer,
         globebrowsing::PixelBuffer::Usage usage, size_t numPixelBuffers = 0);
@@ -54,46 +54,50 @@ public:
 
     /**
      * Finds a Pixel buffer and maps it if it is available.
+     *
      * \param key is the identifier for the pixel buffer which can be used later when
-     * unmapping the mapped pixel buffer.
+     *        unmapping the mapped pixel buffer.
      * \param access is the access as described by <code>PixelBuffer</code>
-     * \returns an address pointer to DMA if the mapping succeeded. Otherwise a nullptr
-     * is returned. The mapping can fail if the buffer identified with <code>key</code>
-     * is already mapped or if something else failed.
+     * \return An address pointer to DMA if the mapping succeeded. Otherwise a \c nullptr
+     *         is returned. The mapping can fail if the buffer identified with \p key is
+     *         already mapped or if something else failed.
      */
     void* mapBuffer(KeyType key, PixelBuffer::Access access);
 
     /**
      * Finds a Pixel buffer and maps a range of it if it is available.
+     *
      * \param key is the identifier for the pixel buffer which can be used later when
-     * unmapping the mapped pixel buffer.
+     *        unmapping the mapped pixel buffer.
      * \param offet is the number of bytes to the first address to get in the buffer
      * \param length is the number of bytes to access in the buffer
      * \param access is the access as described by <code>PixelBuffer</code>
-     * \returns an address pointer to DMA if the mapping succeeded. Otherwise a nullptr
-     * is returned. The mapping can fail if the buffer identified with <code>key</code>
-     * is already mapped or if something else failed.
+     * \return An address pointer to DMA if the mapping succeeded. Otherwise a nullptr
+     *         is returned. The mapping can fail if the buffer identified with \p key is
+     *         already mapped or if something else failed.
      */
     void* mapBufferRange(KeyType key, GLintptr offset, GLsizeiptr length,
         BufferAccessMask access);
 
     /**
      * Unmaps all buffers in the PixelBufferContainer.
-     * \returns true if the unmapping succeeded, otherwise false.
+     *
+     * \return \c true if the unmapping succeeded, otherwise \c false
      */
     bool resetMappedBuffers();
 
     /**
      * Unmaps a buffer that has previously been mapped. This buffer is identified using
-     * <code>key</code>.
+     * \p key.
+     *
      * \param key is the identifier of the mapped buffer.
-     * \returns true if the unmapping succeeded, otherwise false.
+     * \return \c true if the unmapping succeeded, otherwise \c false
      */
     bool unMapBuffer(KeyType key);
 
     /**
-     * \returns the <code>GLuint</code> id of a pixel buffer identified by
-     * <code>key</code> if it currently is mapped.
+     * \return The \c GLuint id of a pixel buffer identified by \p key if it currently is
+     * mapped.
      */
     GLuint idOfMappedBuffer(KeyType key);
 private:

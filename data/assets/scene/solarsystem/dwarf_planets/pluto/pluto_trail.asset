@@ -1,0 +1,28 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('./transforms')
+asset.require("spice/base")
+
+
+local PlutoTrailBarycentric = {
+    Identifier = "PlutoBarycentricTrail",
+    Parent = transforms.PlutoBarycenter.Identifier,
+    Renderable = {
+        Type = "RenderableTrailOrbit",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "PLUTO",
+            Observer = "PLUTO BARYCENTER"
+        },
+        Color = { 0.00, 0.62, 1.00 },
+        Period = 6.38723,
+        Resolution = 1000
+    },
+    GUI = {
+        Name = "Pluto Barycenteric Trail",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { PlutoTrailBarycentric })

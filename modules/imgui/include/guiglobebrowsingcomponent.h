@@ -29,11 +29,7 @@
 
 #include <modules/imgui/include/guipropertycomponent.h>
 
-#include <openspace/engine/downloadmanager.h>
-
-#include <map>
 #include <string>
-#include <vector>
 
 namespace openspace::gui {
 

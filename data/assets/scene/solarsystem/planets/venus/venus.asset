@@ -25,6 +25,10 @@ local Venus = {
             Type = "SpiceTranslation",
             Target = "VENUS",
             Observer = "VENUS BARYCENTER"
+        },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1.0
         }
     },
     Renderable = {

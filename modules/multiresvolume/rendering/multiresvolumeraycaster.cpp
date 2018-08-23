@@ -22,25 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <sstream>
-#include <memory>
-
 #include <modules/multiresvolume/rendering/multiresvolumeraycaster.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/bufferbinding.h>
 
-#include <ghoul/opengl/programobject.h>
-#include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/updatestructures.h>
+#include <modules/multiresvolume/rendering/atlasmanager.h>
+#include <modules/multiresvolume/rendering/tsp.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/transferfunction.h>
+#include <openspace/util/updatestructures.h>
+#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 
 namespace {
-    const char* GlslRaycastPath = "${MODULES}/multiresvolume/shaders/raycast.glsl";
-    const char* GlslHelperPath = "${MODULES}/multiresvolume/shaders/helper.glsl";
-    const char* GlslBoundsVsPath = "${MODULES}/multiresvolume/shaders/boundsVs.glsl";
-    const char* GlslBoundsFsPath = "${MODULES}/multiresvolume/shaders/boundsFs.glsl";
+    constexpr const char* GlslRaycastPath =
+        "${MODULES}/multiresvolume/shaders/raycast.glsl";
+    constexpr const char* GlslHelperPath =
+        "${MODULES}/multiresvolume/shaders/helper.glsl";
+    constexpr const char* GlslBoundsVsPath =
+        "${MODULES}/multiresvolume/shaders/boundsVs.glsl";
+    constexpr const char* GlslBoundsFsPath =
+        "${MODULES}/multiresvolume/shaders/boundsFs.glsl";
 } // namespace
 
 namespace openspace {
@@ -48,7 +48,7 @@ namespace openspace {
 MultiresVolumeRaycaster::MultiresVolumeRaycaster(std::shared_ptr<TSP> tsp,
                                                std::shared_ptr<AtlasManager> atlasManager,
                                        std::shared_ptr<TransferFunction> transferFunction)
-    : _boundingBox(glm::vec3(1.0))
+    : _boundingBox(glm::vec3(1.f))
     , _tsp(tsp)
     , _atlasManager(atlasManager)
     , _transferFunction(transferFunction)
@@ -69,46 +69,37 @@ void MultiresVolumeRaycaster::renderEntryPoints(const RenderData& data,
     program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
     Renderable::setPscUniforms(program, data.camera, data.position);
 
-    // Cull back face
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
-    // Render bounding geometry
     _boundingBox.render();
 }
 
 void MultiresVolumeRaycaster::renderExitPoints(const RenderData& data,
                                                ghoul::opengl::ProgramObject& program)
 {
-    // Uniforms
     program.setUniform("modelTransform", _modelTransform);
     program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
     Renderable::setPscUniforms(program, data.camera, data.position);
 
-    // Cull front face
     glEnable(GL_CULL_FACE);
     glCullFace(GL_FRONT);
 
-    // Render bounding geometry
     _boundingBox.render();
 
-    // Restore defaults
     glCullFace(GL_BACK);
 }
 
 void MultiresVolumeRaycaster::preRaycast(const RaycastData& data,
                                          ghoul::opengl::ProgramObject& program)
 {
-    std::string timestepUniformName = "timestep" + std::to_string(data.id);
-    std::string stepSizeUniformName = "maxStepSize" + std::to_string(data.id);
-
     std::string id = std::to_string(data.id);
     //program.setUniform("opacity_" + std::to_string(id), visible ? 1.0f : 0.0f);
     program.setUniform("stepSizeCoefficient_" + id, _stepSizeCoefficient);
 
     _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
     _tfUnit->activate();
-    _transferFunction->getTexture().bind();
+    _transferFunction->texture().bind();
     program.setUniform("transferFunction_" + id, _tfUnit->unitNumber());
 
     _atlasUnit = std::make_unique<ghoul::opengl::TextureUnit>();
@@ -126,28 +117,25 @@ void MultiresVolumeRaycaster::preRaycast(const RaycastData& data,
     );
     program.setSsboBinding("atlasMapBlock_" + id, _atlasMapBinding->bindingNumber());
 
-    program.setUniform("gridType_" + id, static_cast<int>(_tsp->header().gridType_));
+    program.setUniform("gridType_" + id, static_cast<int>(_tsp->header().gridType));
     program.setUniform(
         "maxNumBricksPerAxis_" + id,
-        static_cast<unsigned int>(_tsp->header().xNumBricks_)
+        static_cast<unsigned int>(_tsp->header().xNumBricks)
     );
-    program.setUniform(
-        "paddedBrickDim_" + id,
-        static_cast<unsigned int>(_tsp->paddedBrickDim())
-    );
+    program.setUniform("paddedBrickDim_" + id, _tsp->paddedBrickDim());
 
     glm::size3_t size = _atlasManager->textureSize();
     glm::ivec3 atlasSize(size.x, size.y, size.z);
     program.setUniform("atlasSize_" + id, atlasSize);
 }
 
-bool MultiresVolumeRaycaster::cameraIsInside(const RenderData& data,
+bool MultiresVolumeRaycaster::isCameraInside(const RenderData& data,
                                              glm::vec3& localPosition)
 {
     // Camera rig position in world coordinates.
     glm::vec4 rigWorldPos = glm::vec4(data.camera.position().vec3(), 1.0);
     //rigWorldPos /= data.camera.scaling().x * pow(10.0, data.camera.scaling().y);
-    glm::mat4 invSgctMatrix = glm::inverse(data.camera.viewMatrix());
+    //glm::mat4 invSgctMatrix = glm::inverse(data.camera.viewMatrix());
 
     // Camera position in world coordinates.
     glm::vec4 camWorldPos = rigWorldPos;
@@ -167,7 +155,7 @@ bool MultiresVolumeRaycaster::cameraIsInside(const RenderData& data,
 
     localPosition = (glm::vec3(modelPos) + glm::vec3(0.5));
     return (localPosition.x > 0 && localPosition.y > 0 && localPosition.z > 0 &&
-        localPosition.x < 1 && localPosition.y < 1 && localPosition.z < 1);
+            localPosition.x < 1 && localPosition.y < 1 && localPosition.z < 1);
 }
 
 void MultiresVolumeRaycaster::postRaycast(const RaycastData&,
@@ -177,19 +165,19 @@ void MultiresVolumeRaycaster::postRaycast(const RaycastData&,
     _tfUnit = nullptr;
 }
 
-std::string MultiresVolumeRaycaster::getBoundsVsPath() const {
+std::string MultiresVolumeRaycaster::boundsVertexShaderPath() const {
     return GlslBoundsVsPath;
 }
 
-std::string MultiresVolumeRaycaster::getBoundsFsPath() const {
+std::string MultiresVolumeRaycaster::boundsFragmentShaderPath() const {
     return GlslBoundsFsPath;
 }
 
-std::string MultiresVolumeRaycaster::getRaycastPath() const {
+std::string MultiresVolumeRaycaster::raycasterPath() const {
     return GlslRaycastPath;
 }
 
-std::string MultiresVolumeRaycaster::getHelperPath() const {
+std::string MultiresVolumeRaycaster::helperPath() const {
     return GlslHelperPath; // no helper file
 }
 

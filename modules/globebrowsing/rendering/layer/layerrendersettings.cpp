@@ -25,19 +25,19 @@
 #include <modules/globebrowsing/rendering/layer/layerrendersettings.h>
 
 namespace {
-    const char* keyOpacity = "Opacity";
-    const char* keyGamma = "Gamma";
-    const char* keyMultiplier = "Multiplier";
-    const char* keyOffset = "Offset";
+    constexpr const char* keyOpacity = "Opacity";
+    constexpr const char* keyGamma = "Gamma";
+    constexpr const char* keyMultiplier = "Multiplier";
+    constexpr const char* keyOffset = "Offset";
 
-    static const openspace::properties::Property::PropertyInfo SetDefaultInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SetDefaultInfo = {
         "SetDefault",
         "Set Default",
         "If this value is triggered it will reset all of these values to their default "
         "values."
     };
 
-    static const openspace::properties::Property::PropertyInfo OpacityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",
         "Opacity",
         "This value sets the transparency of this layer. If this value is equal to '1', "
@@ -45,20 +45,20 @@ namespace {
         "completely transparent."
     };
 
-    static const openspace::properties::Property::PropertyInfo GammaInfo = {
+    constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
         "Gamma",
         "Gamma",
         "This value is used as an exponent to adjust the color for each tile."
     };
 
-    static const openspace::properties::Property::PropertyInfo MultiplierInfo = {
+    constexpr openspace::properties::Property::PropertyInfo MultiplierInfo = {
         "Multiplier",
         "Multiplier",
         "This value is used as a multiplier to adjust the color applied after taking the "
         "gamma value as an exponent."
     };
 
-    static const openspace::properties::Property::PropertyInfo OffsetInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OffsetInfo = {
         "Offset",
         "Offset",
         "This value is used as an additive modifier to adjust the color applied after "
@@ -93,34 +93,27 @@ LayerRenderSettings::LayerRenderSettings()
 void LayerRenderSettings::setValuesFromDictionary(
                                               const ghoul::Dictionary& renderSettingsDict)
 {
-    float dictOpacity;
-    float dictGamma;
-    float dictMultiplier;
-    float dictOffset;
+    if (renderSettingsDict.hasKeyAndValue<float>(keyOpacity)) {
+        opacity = renderSettingsDict.value<float>(keyOpacity);
+    }
 
-    if (renderSettingsDict.getValue(keyOpacity, dictOpacity)) {
-        opacity = dictOpacity;
+    if (renderSettingsDict.hasKeyAndValue<float>(keyGamma)) {
+        gamma = renderSettingsDict.value<float>(keyGamma);
     }
-    if (renderSettingsDict.getValue(keyGamma, dictGamma)) {
-        gamma = dictGamma;
+
+    if (renderSettingsDict.hasKeyAndValue<float>(keyMultiplier)) {
+        multiplier = renderSettingsDict.value<float>(keyMultiplier);
     }
-    if (renderSettingsDict.getValue(keyMultiplier, dictMultiplier)) {
-        multiplier = dictMultiplier;
-    }
-    if (renderSettingsDict.getValue(keyOffset, dictOffset)) {
-        multiplier = dictOffset;
+
+    if (renderSettingsDict.hasKeyAndValue<float>(keyOffset)) {
+        offset = renderSettingsDict.value<float>(keyOffset);
     }
 }
 
-float LayerRenderSettings::performLayerSettings(float currentValue) const {
-    float newValue = currentValue;
-
-    newValue = glm::sign(newValue) * glm::pow(glm::abs(newValue), gamma);
-    newValue = newValue * multiplier;
-    newValue = newValue + offset;
-    newValue = newValue * opacity;
-
-    return newValue;
+float LayerRenderSettings::performLayerSettings(float value) const {
+    return ((glm::sign(value) * glm::pow(glm::abs(value), gamma) * multiplier) +
+            offset) *
+            opacity;
 }
 
 glm::vec4 LayerRenderSettings::performLayerSettings(glm::vec4 currentValue) const {
@@ -128,7 +121,8 @@ glm::vec4 LayerRenderSettings::performLayerSettings(glm::vec4 currentValue) cons
         performLayerSettings(currentValue.r),
         performLayerSettings(currentValue.g),
         performLayerSettings(currentValue.b),
-        performLayerSettings(currentValue.a));
+        performLayerSettings(currentValue.a)
+    );
 
     return newValue;
 }

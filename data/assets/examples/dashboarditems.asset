@@ -1,0 +1,50 @@
+local assetHelper = asset.require('util/asset_helper')
+
+assetHelper.registerDashboardItems(asset, {
+    {
+        Type = "DashboardItemAngle",
+        Identifier = "Angle",
+        GuiName = "Angle",
+        ReferenceType = "Node",
+        ReferenceNodeName = "Earth",
+        DestinationType = "Node",
+        DestinationNodeName = "Moon"
+    },
+    {
+        Type = "DashboardItemDate",
+        Identifier = "Date",
+        GuiName = "Date"
+    },
+    {
+        Type = "DashboardItemSimulationIncrement",
+        Identifier = "SimulationIncrement",
+        GuiName = "Simulation Increment"
+    },
+    {
+        Type = "DashboardItemDistance",
+        Identifier = "Distance",
+        GuiName = "Distance"
+    },
+    {
+        Type = "DashboardItemFramerate",
+        Identifier = "Framerate",
+        GuiName = "Framerate"
+    },
+    {
+        Type = "DashboardItemParallelConnection",
+        Identifier = "ParallelConnection",
+        GuiName = "Parallel Connection"
+    },
+    {
+        Type = "DashboardItemMission",
+        Identifier = "Mission",
+        GuiName = "Mission"
+    },
+    {
+        Type = "DashboardItemPropertyValue",
+        Identifier = "asd",
+        GuiName = "adasd",
+        URI = "Scene.Earth.RenderableGlobe.Enabled",
+        DisplayString = "Earth is enabled: {}"
+    }
+})

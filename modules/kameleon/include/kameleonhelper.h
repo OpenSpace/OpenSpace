@@ -28,14 +28,18 @@
 #include <memory>
 #include <string>
 
-namespace ccmc {
-    class Kameleon;
-} // namespace ccmc
+namespace ccmc { class Kameleon; }
 
 namespace openspace::kameleonHelper {
 
-    std::unique_ptr<ccmc::Kameleon> createKameleonObject(const std::string& cdfFilePath);
-    double getTime(ccmc::Kameleon* kameleon);
+/**
+ * Opens a ccmc::Kameleon object from the provided path to a .cdf file. Path should be
+ * absolute.
+ *
+ * \return \c nullptr if the file fails to open
+ */
+std::unique_ptr<ccmc::Kameleon> createKameleonObject(const std::string& cdfFilePath);
+double getTime(ccmc::Kameleon* kameleon);
 
 } //namespace openspace::kameleonHelper
 

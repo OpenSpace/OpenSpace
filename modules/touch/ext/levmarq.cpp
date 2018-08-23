@@ -21,8 +21,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <stdio.h>
-#include <math.h>
+#include <cstdio>
+#include <cmath>
 #include <chrono>
 #include <modules/touch/ext/levmarq.h>
 #include <ghoul/logging/logmanager.h>
@@ -34,7 +34,7 @@ namespace {
 }
 
 // set parameters required by levmarq() to default values 
-void levmarq_init(LMstat *lmstat) {
+void levmarq_init(LMstat* lmstat) {
     lmstat->verbose = false;
     lmstat->max_it = 3000;
     lmstat->init_lambda = 1e-6;
@@ -69,7 +69,7 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
 
     int x, i, j, it, nit, ill;
     bool verbose;
-    std::string data = "";
+    std::string data;
     double lambda, up, down, mult, weight, err, newerr, derr, target_derr;
 
     // allocate the arrays
@@ -155,30 +155,35 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
         // calculate the approximation to the Hessian and the "derivative" d
         for (i = 0; i < npar; i++) {
             d[i] = 0;
-            for (j = 0; j <= i; j++)
+            for (j = 0; j <= i; j++) {
                 h[i][j] = 0;
+            }
         }
         for (x = 0; x < ny; x++) {
-            if (dysq) 
-                weight = 1/dysq[x]; // for weighted least-squares
+            if (dysq) {
+                weight = 1 / dysq[x]; // for weighted least-squares
+            }
             grad(g, par, x, fdata, lmstat);
             for (i = 0; i < npar; i++) {
                 d[i] += (0.0 - func(par, x, fdata, lmstat)) * g[i] * weight; //(y[x] - func(par, x, fdata)) * g[i] * weight;
-                for (j = 0; j <= i; j++)
+                for (j = 0; j <= i; j++) {
                     h[i][j] += g[i] * g[j] * weight;
+                }
             }
         }
         // make a step "delta."  If the step is rejected, increase lambda and try again
         mult = 1 + lambda;
         ill = 1; // ill-conditioned?
         while (ill && (it < nit)) {
-            for (i = 0; i < npar; i++)
-                h[i][i] = h[i][i]*mult;
+            for (i = 0; i < npar; i++) {
+                h[i][i] = h[i][i] * mult;
+            }
             ill = cholesky_decomp(npar, ch, h);
             if (!ill) {
                 solve_axb_cholesky(npar, ch, delta, d);
-                for (i = 0; i < npar; i++)
+                for (i = 0; i < npar; i++) {
                     newpar[i] = par[i] + delta[i];
+                }
                 lmstat->pos.clear();
                 newerr = error_func(newpar, ny, dysq, func, fdata, lmstat);
                 derr = newerr - err;
@@ -217,13 +222,15 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
                 it++;
             }
         }
-        for (i = 0; i < npar; i++)
+        for (i = 0; i < npar; i++) {
             par[i] = newpar[i];
+        }
         err = newerr;
         lambda *= down;
 
-        if ((!ill) && (-derr < target_derr)) 
+        if ((!ill) && (-derr < target_derr)) {
             break;
+        }
     }
 
     lmstat->final_it = it;
@@ -243,10 +250,12 @@ double error_func(double *par, int ny, double *dysq,
 
     for (x = 0; x < ny; x++) {
         res = func(par, x, fdata, lmstat);
-        if (dysq) // weighted least-squares 
-            e += res*res/dysq[x];
-        else
-            e += res*res;
+        if (dysq) { // weighted least-squares 
+            e += res * res / dysq[x];
+        }
+        else {
+            e += res * res;
+        }
     }
     return e;
 }
@@ -259,15 +268,17 @@ void solve_axb_cholesky(int n, double** l, double* x, double* b) { // n = npar, 
     // solve L*y = b for y (where x[] is used to store y)
     for (i = 0; i < n; i++) {
         sum = 0;
-        for (j = 0; j < i; j++)
+        for (j = 0; j < i; j++) {
             sum += l[i][j] * x[j];
+        }
         x[i] = (b[i] - sum) / l[i][i]; 
     }
     // solve L^T*x = y for x (where x[] is used to store both y and x)
     for (i = n-1; i >= 0; i--) {
         sum = 0;
-        for (j = i+1; j < n; j++)
+        for (j = i + 1; j < n; j++) {
             sum += l[j][i] * x[j];
+        }
         x[i] = (x[i] - sum) / l[i][i];
     }
 }
@@ -281,16 +292,19 @@ int cholesky_decomp(int n, double** l, double** a) {
     for (i = 0; i < n; i++) {
         for (j = 0; j < i; j++) {
             sum = 0;
-            for (k = 0; k < j; k++)
+            for (k = 0; k < j; k++) {
                 sum += l[i][k] * l[j][k];
+            }
             l[i][j] = (a[i][j] - sum) / l[j][j];
         }
         sum = 0;
-        for (k = 0; k < i; k++)
+        for (k = 0; k < i; k++) {
             sum += l[i][k] * l[i][k];
+        }
         sum = a[i][i] - sum;
-        if (sum < TOL) 
+        if (sum < TOL) {
             return 1; // not positive-definite
+        }
         l[i][i] = sqrt(sum);
     }
     return 0;

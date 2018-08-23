@@ -100,10 +100,9 @@ private:
     void deleteUnusedComputationTextures();
     void executeCalculations(GLuint quadCalcVAO, GLenum drawBuffers[1],
         GLsizei vertexSize);
-    void resetAtmosphereTextures();
     void createRenderQuad(GLuint* vao, GLuint* vbo, GLfloat size);
     void step3DTexture(std::unique_ptr<ghoul::opengl::ProgramObject>& shaderProg,
-        int layer, bool doCalc = true);
+        int layer, bool doCalculation = true);
     void checkFrameBufferState(const std::string& codePosition) const;
     void loadAtmosphereDataIntoShaderProgram(
         std::unique_ptr<ghoul::opengl::ProgramObject> & shaderProg
@@ -111,10 +110,11 @@ private:
     void renderQuadForCalc(GLuint vao, GLsizei numberOfVertices);
     void saveTextureToPPMFile(GLenum color_buffer_attachment, const std::string& fileName,
         int width, int height) const;
-    bool isAtmosphereInFrustum(const double* MVMatrix, const glm::dvec3& position,
+    bool isAtmosphereInFrustum(const glm::dmat4& MVMatrix, const glm::dvec3& position,
         double radius) const;
 
-    const double DISTANCE_CULLING = 1e10;
+    // Number of planet radii to use as distance threshold for culling
+    const double DISTANCE_CULLING_RADII = 5000;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _transmittanceProgramObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _irradianceProgramObject;
@@ -135,9 +135,8 @@ private:
         HO, betaOzoneExtinction, SAMPLES_R,
         SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU) _uniformCache;
     UniformCache(dInverseModelTransformMatrix, dModelTransformMatrix,
-        dInverseSgctProjectionToModelTransformMatrix,
-        dInverseSGCTEyeToTmpRotTransformMatrix,
-        dCampos, dCamPosObj, sunDirectionObj,
+        dSgctProjectionToModelTransformMatrix,
+        dSGCTViewToWorldMatrix, dCamPosObj, sunDirectionObj,
         hardShadows, transmittanceTexture, irradianceTexture,
         inscatterTexture) _uniformCache2;
 

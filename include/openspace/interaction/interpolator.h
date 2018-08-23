@@ -51,9 +51,9 @@ public:
 
 private:
     std::function<T(float)> _transferFunction;
-    float _t;
-    float _interpolationTime;
-    float _scaledDeltaTime;
+    float _t = 0.f;
+    float _interpolationTime = 1.f;
+    float _scaledDeltaTime = 0.f;
 };
 
 } // namespace openspace::interaction
