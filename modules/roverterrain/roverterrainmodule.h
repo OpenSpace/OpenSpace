@@ -29,19 +29,19 @@
 
 namespace openspace {
 
-    class RoverTerrainModule : public OpenSpaceModule {
-    public:
-        constexpr static const char* Name = "RoverTerrain";
+class RoverTerrainModule : public OpenSpaceModule {
+public:
+    constexpr static const char* Name = "RoverTerrain";
 
-        RoverTerrainModule();
-                        
-        std::vector<documentation::Documentation> documentations() const override;
-    protected:
-        void internalInitialize(const ghoul::Dictionary& configuration) override;
+    RoverTerrainModule();
+                    
+    std::vector<documentation::Documentation> documentations() const override;
+protected:
+    void internalInitialize(const ghoul::Dictionary& configuration) override;
 
-    private:
-        std::string _root;
-    };
+private:
+    std::string _root;
+};
 
 } // namespace openspace
 

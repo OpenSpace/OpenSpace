@@ -29,10 +29,12 @@
 #include <ghoul/glm.h>
     
 namespace openspace {
+	
 class TxtReader {
 public:
     static void read(const std::string inputFilename, std::vector<std::string> &filenames);
 };
+
 }
 
 #endif __OPENSPACE_MODULE_ROVER_TERRAIN___TXT_READER___H__

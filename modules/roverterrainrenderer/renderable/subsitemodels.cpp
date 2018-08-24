@@ -27,30 +27,30 @@
 namespace openspace {
 
 float SubsiteModels::alpha() const {
-  return _alpha;
+    return _alpha;
 }
 
 void SubsiteModels::setFadeDirection(const int direction) {
-  _fadeDirection = direction;
+    _fadeDirection = direction;
 }
 
 void SubsiteModels::fade() {
-  if (_fadeDirection == 1 && _alpha < 1.0f)
-    _alpha = _alpha + 0.05f;
-  else if (_fadeDirection == -1 && _alpha > 0.0f)
-    _alpha = _alpha - 0.05f;
+    if (_fadeDirection == 1 && _alpha < 1.0f)
+        _alpha = _alpha + 0.05f;
+    else if (_fadeDirection == -1 && _alpha > 0.0f)
+        _alpha = _alpha - 0.05f;
 }
 
 SubsiteModels::SubsiteHashKey SubsiteModels::hashKey() const {
-  uint64_t key = 0LL;
-  int siteNumber = std::stoi(site);
-  int driveNumber = std::stoi(drive);
+    uint64_t key = 0LL;
+    int siteNumber = std::stoi(site);
+    int driveNumber = std::stoi(drive);
 
-  key |= level;
-  key |= siteNumber << 5;
-  key |= ((uint64_t)driveNumber) << 35;
+    key |= level;
+    key |= siteNumber << 5;
+    key |= ((uint64_t)driveNumber) << 35;
 
-  return key;
+    return key;
 }
 
 } // namespace openspace

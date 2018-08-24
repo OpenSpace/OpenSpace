@@ -70,95 +70,95 @@ flat out int coloredTextureIndexOut;
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main () {
-  int colsize = 1024;
-  vec2 textureSize = vec2(colsize,colsize);
-  int nrOfIterations = size;
-  vec2 center = vec2(0.5,0.5);
-  float maxDist = 100;
-  int bestIndex = -1;
+    int colsize = 1024;
+    vec2 textureSize = vec2(colsize,colsize);
+    int nrOfIterations = size;
+    vec2 center = vec2(0.5,0.5);
+    float maxDist = 100;
+    int bestIndex = -1;
 
-  for (int i = 0; i < nrOfIterations; i++) {
-    vec4 pointToCamera = in_position - vec4(camerasCenters[i], 1);
+    for (int i = 0; i < nrOfIterations; i++) {
+        vec4 pointToCamera = in_position - vec4(camerasCenters[i], 1);
 
-    double floor = dot(pointToCamera, vec4(camerasAxes[i], 0));
+        double floor = dot(pointToCamera, vec4(camerasAxes[i], 0));
 
-    if (floor < 0) {
-      // This means that the point is behind the camera/imageplane
-      continue;
+        if (floor < 0) {
+            // This means that the point is behind the camera/imageplane
+            continue;
+        }
+
+        double xRoof = dot(pointToCamera, vec4(camerasHorizontals[i], 1));
+
+        double yRoof = dot(pointToCamera, vec4(camerasVectors[i], 1));
+
+        double x = xRoof / floor;
+        double y = yRoof / floor;
+
+        vec2 tempUV = vec2((1.0 / textureSize.x) * x, 1.0 - (1.0 / textureSize.y) * y);
+
+        vec2 tempp = tempUV - center;
+        float dist = length(tempp);
+        if (dist < maxDist) {
+            maxDist = dist;
+            bestIndex = i;
+        }
+        vs_stDone[i] = tempUV;
     }
 
-    double xRoof = dot(pointToCamera, vec4(camerasHorizontals[i], 1));
+    textureIndex = bestIndex;
 
-    double yRoof = dot(pointToCamera, vec4(camerasVectors[i], 1));
+    //////////////////////////////////////COLORED
+    int coloredTextureIndex = -1;
 
-    double x = xRoof / floor;
-    double y = yRoof / floor;
+    if (useMastCamColor) {
+        maxDist = 1000;
+        int colsize2 = int(coloredTextureDimensions.y);
+        int linesize2 = int(coloredTextureDimensions.x);
+        vec2 textureSize2 = vec2(linesize2,colsize2);
 
-    vec2 tempUV = vec2((1.0 / textureSize.x) * x, 1.0 - (1.0 / textureSize.y) * y);
+        int nrOfColorIterations = colorSize;
+        for (int i = 0; i < nrOfColorIterations; ++i) {
+            vec4 pointToCameraColored = in_position - camerasColoredCenters[i];
 
-    vec2 tempp = tempUV - center;
-    float dist = length(tempp);
-    if (dist < maxDist) {
-      maxDist = dist;
-      bestIndex = i;
+            double floor2 = dot(pointToCameraColored, camerasColoredAxes[i]);
+
+            if (floor2 < 0) {
+                continue;
+            }
+
+            double xRoof2 = dot(pointToCameraColored, camerasColoredHorizontals[i]);
+
+
+            double yRoof2 = dot(pointToCameraColored, camerasColoredVectors[i]);
+
+            double x2 = xRoof2 / floor2;
+            double y2 = yRoof2 / floor2;
+
+            vec2 tempUV2 = vec2((1.0 / textureSize2.x) * x2, 1.0 - (1.0 / textureSize2.y) * y2);
+
+            vec2 tempp = tempUV2 - center;
+            float dist = length(tempp);
+            if (dist < maxDist) {
+                maxDist = dist;
+                coloredTextureIndex = i;
+            }
+            vs_st_color[i] = tempUV2;
+        }
     }
-    vs_stDone[i] = tempUV;
-  }
 
-  textureIndex = bestIndex;
+    coloredTextureIndexOut = coloredTextureIndex;
+    /////////////////////////////////////////////
 
-  //////////////////////////////////////COLORED
-  int coloredTextureIndex = -1;
+    vec4 position = in_position;
+    position.z = position.z - 0.1;
+    position.xyz *= pow(10, _magnification);
+    vs_positionCameraSpace = modelViewTransform * position;
+    vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
+    vs_vertPosition = position;
 
-  if (useMastCamColor) {
-    maxDist = 1000;
-    int colsize2 = int(coloredTextureDimensions.y);
-    int linesize2 = int(coloredTextureDimensions.x);
-    vec2 textureSize2 = vec2(linesize2,colsize2);
+    vs_positionScreenSpace = z_normalization(positionClipSpace);
+    gl_Position = vs_positionScreenSpace;
 
-    int nrOfColorIterations = colorSize;
-    for (int i = 0; i < nrOfColorIterations; ++i) {
-      vec4 pointToCameraColored = in_position - camerasColoredCenters[i];
-
-      double floor2 = dot(pointToCameraColored, camerasColoredAxes[i]);
-
-      if (floor2 < 0) {
-        continue;
-      }
-
-      double xRoof2 = dot(pointToCameraColored, camerasColoredHorizontals[i]);
-
-
-      double yRoof2 = dot(pointToCameraColored, camerasColoredVectors[i]);
-
-      double x2 = xRoof2 / floor2;
-      double y2 = yRoof2 / floor2;
-
-      vec2 tempUV2 = vec2((1.0 / textureSize2.x) * x2, 1.0 - (1.0 / textureSize2.y) * y2);
-
-      vec2 tempp = tempUV2 - center;
-      float dist = length(tempp);
-      if (dist < maxDist) {
-        maxDist = dist;
-        coloredTextureIndex = i;
-      }
-      vs_st_color[i] = tempUV2;
-    }
-  }
-
-  coloredTextureIndexOut = coloredTextureIndex;
-  /////////////////////////////////////////////
-
-  vec4 position = in_position;
-  position.z = position.z - 0.1;
-  position.xyz *= pow(10, _magnification);
-  vs_positionCameraSpace = modelViewTransform * position;
-  vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
-  vs_vertPosition = position;
-
-  vs_positionScreenSpace = z_normalization(positionClipSpace);
-  gl_Position = vs_positionScreenSpace;
-
-  // The normal transform should be the transposed inverse of the model transform?
-  vs_normalViewSpace = normalize(mat3(modelViewTransform) * in_normal);
+    // The normal transform should be the transposed inverse of the model transform?
+    vs_normalViewSpace = normalize(mat3(modelViewTransform) * in_normal);
 }

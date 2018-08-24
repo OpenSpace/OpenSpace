@@ -26,7 +26,7 @@
 #include <modules/roverterrainrenderer/propertymanager/drivepropertyowner.h>
 
 namespace {
-	const std::string _loggerCat = "SitePropertyOwner";
+    const std::string _loggerCat = "SitePropertyOwner";
     static const openspace::properties::Property::PropertyInfo enabledPropertyInfo = {
         "siteEnabled",
         "Site Enabled",
@@ -36,24 +36,24 @@ namespace {
 
 namespace openspace {
 SitePropertyOwner::SitePropertyOwner(SiteWithDrives swd) 
-	: properties::PropertyOwner(openspace::properties::PropertyOwner::PropertyOwnerInfo{ "siteEnabled", "Site" + swd._site })
-	, _enabled(properties::BoolProperty(enabledPropertyInfo, false))
+    : properties::PropertyOwner(openspace::properties::PropertyOwner::PropertyOwnerInfo{ "siteEnabled", "Site" + swd._site })
+    , _enabled(properties::BoolProperty(enabledPropertyInfo, false))
 {
-	_site = swd._site;
-	int i = 0;
-	for (auto k : swd._drives) {
-		_drivePropertyOwner.push_back(std::make_shared<DrivePropertyOwner>(k, swd.sols.at(i), swd._driveCoords.at(i)));
-		i++;
-	}
+    _site = swd._site;
+    int i = 0;
+    for (auto k : swd._drives) {
+        _drivePropertyOwner.push_back(std::make_shared<DrivePropertyOwner>(k, swd.sols.at(i), swd._driveCoords.at(i)));
+        i++;
+    }
 
-	for (auto k : _drivePropertyOwner) {
-		addPropertySubOwner(k.get());
-	}
+    for (auto k : _drivePropertyOwner) {
+        addPropertySubOwner(k.get());
+    }
 
-	addProperty(_enabled);	
+    addProperty(_enabled);  
 }
 
 void SitePropertyOwner::addDrive(std::string drive) {
-	_drives.push_back(drive);
+    _drives.push_back(drive);
 }
 }

@@ -33,8 +33,8 @@
 namespace openspace {
 
 struct LoadJob : public Job<SubsiteModels> {
- virtual void execute() = 0;
- virtual std::shared_ptr<SubsiteModels> product() = 0;
+    virtual void execute() = 0;
+    virtual std::shared_ptr<SubsiteModels> product() = 0;
 };
 
 } // namespace openspace

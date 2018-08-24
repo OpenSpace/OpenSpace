@@ -32,12 +32,12 @@
 namespace openspace {
 class MultiModelProvider : public ModelProvider {
 public:
- MultiModelProvider(const ghoul::Dictionary& dictionary);
+    MultiModelProvider(const ghoul::Dictionary& dictionary);
 
- virtual std::vector<std::shared_ptr<Subsite>> calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites,
-  const RenderData& data, const SceneGraphNode* parent);
+    virtual std::vector<std::shared_ptr<Subsite>> calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites,
+        const RenderData& data, const SceneGraphNode* parent);
 
- virtual void initialize();
+    virtual void initialize();
 };
 } // namespace openspace
 

@@ -38,37 +38,38 @@ namespace openspace {
     SiteManager::SiteManager(std::string name, std::vector<std::shared_ptr<Subsite>> ss)
         : properties::PropertyOwner(openspace::properties::PropertyOwner::PropertyOwnerInfo{ "siteEnabled", name })
         , _isEnabledProperty(enabledPropertyInfo, false)
-    {
+{
 
-        std::vector<SiteWithDrives> temp;
-        std::vector<std::string> temp2;
-        for (size_t i = 0; i < ss.size(); ++i) {
-            if (std::find(temp2.begin(), temp2.end(), ss.at(i)->site) == temp2.end()) {
-                SiteWithDrives test;
-                test._site = ss.at(i)->site;
+    std::vector<SiteWithDrives> temp;
+    std::vector<std::string> temp2;
+    for (size_t i = 0; i < ss.size(); ++i) {
+        if (std::find(temp2.begin(), temp2.end(), ss.at(i)->site) == temp2.end()) {
+            SiteWithDrives test;
+            test._site = ss.at(i)->site;
 
-                temp2.push_back(ss.at(i)->site);
-                temp.push_back(test);
-            }
+            temp2.push_back(ss.at(i)->site);
+            temp.push_back(test);
         }
-
-        for (size_t i = 0; i < ss.size(); ++i) {
-            for (size_t j = 0; j < temp.size(); ++j) {
-                if (temp.at(j)._site == ss.at(i)->site) {
-                    temp.at(j)._drives.push_back(ss.at(i)->drive);
-                    temp.at(j).sols.push_back(ss.at(i)->sol);
-                    temp.at(j)._driveCoords.push_back(glm::dvec2(ss.at(i)->geodetic.lat, ss.at(i)->geodetic.lon));
-                }
-            }
-        }
-        for (size_t k = 0; k < temp.size(); ++k) {
-            _sitePropertyOwner.push_back(std::make_shared<SitePropertyOwner>(temp.at(k)));
-        }
-        for (auto &s : _sitePropertyOwner) {
-            addPropertySubOwner(s.get( ));
-        }
-
-
-        addProperty(_isEnabledProperty);
     }
+
+    for (size_t i = 0; i < ss.size(); ++i) {
+        for (size_t j = 0; j < temp.size(); ++j) {
+            if (temp.at(j)._site == ss.at(i)->site) {
+                temp.at(j)._drives.push_back(ss.at(i)->drive);
+                temp.at(j).sols.push_back(ss.at(i)->sol);
+                temp.at(j)._driveCoords.push_back(glm::dvec2(ss.at(i)->geodetic.lat, ss.at(i)->geodetic.lon));
+            }
+        }
+    }
+    for (size_t k = 0; k < temp.size(); ++k) {
+        _sitePropertyOwner.push_back(std::make_shared<SitePropertyOwner>(temp.at(k)));
+    }
+    for (auto &s : _sitePropertyOwner) {
+        addPropertySubOwner(s.get( ));
+    }
+
+
+    addProperty(_isEnabledProperty);
+}
+
 } // namespace openspace

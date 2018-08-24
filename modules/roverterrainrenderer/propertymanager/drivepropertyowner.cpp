@@ -31,7 +31,7 @@
 #include <ghoul/lua/lua_helper.h>
 
 namespace {
-	const std::string _loggerCat = "DrivePropertyOwner";
+    const std::string _loggerCat = "DrivePropertyOwner";
     static const openspace::properties::Property::PropertyInfo enabledPropertyInfo = {
         "driveEnabled",
         "Drive enabled",
@@ -45,22 +45,22 @@ namespace {
 }
 
 namespace openspace {
-	DrivePropertyOwner::DrivePropertyOwner(std::string drive, std::string sol, glm::dvec2 driveCoords)
-		: properties::PropertyOwner(openspace::properties::PropertyOwner::PropertyOwnerInfo{ "driveEnabled", "Drive" + drive + " (Sol: " + sol + ")" })
-	, _enabled(properties::BoolProperty(enabledPropertyInfo, false))
-	, _goToSubSite(properties::TriggerProperty(triggerPropertyInfo))
-	, _drive(drive)
-	, _driveCoords(driveCoords)
+    DrivePropertyOwner::DrivePropertyOwner(std::string drive, std::string sol, glm::dvec2 driveCoords)
+        : properties::PropertyOwner(openspace::properties::PropertyOwner::PropertyOwnerInfo{ "driveEnabled", "Drive" + drive + " (Sol: " + sol + ")" })
+    , _enabled(properties::BoolProperty(enabledPropertyInfo, false))
+    , _goToSubSite(properties::TriggerProperty(triggerPropertyInfo))
+    , _drive(drive)
+    , _driveCoords(driveCoords)
 {
-	_goToSubSite.onChange([&] { goToSubsite(_drive); });
+    _goToSubSite.onChange([&] { goToSubsite(_drive); });
 
-	addProperty(_enabled);
-	addProperty(_goToSubSite);
+    addProperty(_enabled);
+    addProperty(_goToSubSite);
 }
 
 void DrivePropertyOwner::goToSubsite(std::string drive) {
-	globebrowsing::Geodetic2 tempGeo = (globebrowsing::Geodetic2{ _driveCoords.x, _driveCoords.y } * 180.0) / glm::pi<double>();
-	//OsEng.ref().interactionHandler().goToGeo(tempGeo.lat, tempGeo.lon);
+    globebrowsing::Geodetic2 tempGeo = (globebrowsing::Geodetic2{ _driveCoords.x, _driveCoords.y } * 180.0) / glm::pi<double>();
+    //OsEng.ref().interactionHandler().goToGeo(tempGeo.lat, tempGeo.lon);
 }
 
 } // namespace openspace

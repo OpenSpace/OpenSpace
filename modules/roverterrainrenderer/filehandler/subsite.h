@@ -35,39 +35,39 @@
 namespace openspace {
 
 struct Subsite {
-	using SubsiteHashKey = uint64_t;
+    using SubsiteHashKey = uint64_t;
 
-	// Site number, drive number and which frame the
-	std::string site, drive, frame, sol;
+    // Site number, drive number and which frame the
+    std::string site, drive, frame, sol;
 
-	// Latitude and longitude for this subsite
-	globebrowsing::Geodetic2 geodetic;
+    // Latitude and longitude for this subsite
+    globebrowsing::Geodetic2 geodetic;
 
-	// Latitude and longitude for the site that this subsite belongs to
-	globebrowsing::Geodetic2 siteGeodetic;
+    // Latitude and longitude for the site that this subsite belongs to
+    globebrowsing::Geodetic2 siteGeodetic;
 
-	// Stores what levels are available for this subsite
-	std::vector<int> availableLevels;
+    // Stores what levels are available for this subsite
+    std::vector<int> availableLevels;
 
-	// The file names of the .obj models and textures for this subsite
-	std::vector<std::string> fileNames;
+    // The file names of the .obj models and textures for this subsite
+    std::vector<std::string> fileNames;
 
-	// The file names of the .obj models and textures for this subsite
-	std::vector<std::string> coloredTextureFileNames;
+    // The file names of the .obj models and textures for this subsite
+    std::vector<std::string> coloredTextureFileNames;
 
-	// Information needed for texture projection
-	std::vector<PointCloudInfo> cameraInfoVector;
+    // Information needed for texture projection
+    std::vector<PointCloudInfo> cameraInfoVector;
 
-	// Information needed for texture projection
-	std::vector<PointCloudInfo> cameraColoredInfoVector;
+    // Information needed for texture projection
+    std::vector<PointCloudInfo> cameraColoredInfoVector;
 
-	// Rotation matrix needed for placement of subsites
-	glm::dmat4 rotationMatrix;
+    // Rotation matrix needed for placement of subsites
+    glm::dmat4 rotationMatrix;
 
-	std::string pathToGeometryFolder;
-	std::string pathToTextureFolder;
+    std::string pathToGeometryFolder;
+    std::string pathToTextureFolder;
 
-	SubsiteHashKey hashKey(const int level) const;
+    SubsiteHashKey hashKey(const int level) const;
 };
 
 } // namespace openspace

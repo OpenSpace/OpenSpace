@@ -30,15 +30,20 @@
 #include <openspace/scene/scenegraphnode.h>
 
 namespace openspace {
+
 class SingleModelProvider : public ModelProvider {
 public:
- SingleModelProvider(const ghoul::Dictionary& dictionary);
+    SingleModelProvider(const ghoul::Dictionary& dictionary);
 
- virtual std::vector<std::shared_ptr<Subsite>> calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites,
-  const RenderData& data, const SceneGraphNode* parent);
+    virtual std::vector<std::shared_ptr<Subsite>> calculate(
+        const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites,
+        const RenderData& data,
+        const SceneGraphNode* parent
+    );
 
- virtual void initialize();
+    virtual void initialize();
 };
+
 } // namespace openspace
 
 #endif //__OPENSPACE_MODULE_GLOBEBROWSING___SINGLE_MODEL_PROVIDER___H__

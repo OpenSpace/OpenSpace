@@ -27,75 +27,75 @@
 #include <ghoul/io/texture/texturereader.h>
 
 namespace {
- const std::string _loggerCat = "SurfaceModelLoadJob";
- const char* keyPathToTexture = "PathToTexture";
- const char* keyGeometryFile = "GeometryFile";
- const char* keyType = "Type";
+    const std::string _loggerCat = "SurfaceModelLoadJob";
+    const char* keyPathToTexture = "PathToTexture";
+    const char* keyGeometryFile = "GeometryFile";
+    const char* keyType = "Type";
 }
 
 namespace openspace {
 
 void SurfaceModelLoadJob::execute() {
- std::string levelString = std::to_string(_level);
- std::string pathToGeometryFolder = _subsite->pathToGeometryFolder + "level" + levelString + "//" + "site" + _subsite->site +
-  "//" + "drive" + _subsite->drive + "//";
- std::string pathToTextureFolder = _subsite->pathToTextureFolder;
- std::string roverSurfaceModelGeometry = "AsyncMultiModelGeometry";
+    std::string levelString = std::to_string(_level);
+    std::string pathToGeometryFolder = _subsite->pathToGeometryFolder + "level" + levelString + "//" + "site" + _subsite->site +
+    "//" + "drive" + _subsite->drive + "//";
+    std::string pathToTextureFolder = _subsite->pathToTextureFolder;
+    std::string roverSurfaceModelGeometry = "AsyncMultiModelGeometry";
 
- _subsiteModels->site = _subsite->site;
- _subsiteModels->drive = _subsite->drive;
- _subsiteModels->geodetic = _subsite->geodetic;
- _subsiteModels->siteGeodetic = _subsite->siteGeodetic;
- _subsiteModels->cameraInfoVector = _subsite->cameraInfoVector;
- _subsiteModels->level = _level;
- _subsiteModels->fileNames = _subsite->fileNames;
- _subsiteModels->coloredCameraInfoVector = _subsite->cameraColoredInfoVector;
- _subsiteModels->rotationMatrix = _subsite->rotationMatrix;
+    _subsiteModels->site = _subsite->site;
+    _subsiteModels->drive = _subsite->drive;
+    _subsiteModels->geodetic = _subsite->geodetic;
+    _subsiteModels->siteGeodetic = _subsite->siteGeodetic;
+    _subsiteModels->cameraInfoVector = _subsite->cameraInfoVector;
+    _subsiteModels->level = _level;
+    _subsiteModels->fileNames = _subsite->fileNames;
+    _subsiteModels->coloredCameraInfoVector = _subsite->cameraColoredInfoVector;
+    _subsiteModels->rotationMatrix = _subsite->rotationMatrix;
 
- ghoul::Dictionary dictionary;
- std::string pathToGeometry2 = pathToGeometryFolder + "OBJ.obj";
- dictionary.setValue(keyGeometryFile, pathToGeometry2);
- dictionary.setValue(keyType, roverSurfaceModelGeometry);
+    ghoul::Dictionary dictionary;
+    std::string pathToGeometry2 = pathToGeometryFolder + "OBJ.obj";
+    dictionary.setValue(keyGeometryFile, pathToGeometry2);
+    dictionary.setValue(keyType, roverSurfaceModelGeometry);
 
- _subsiteModels->model = std::make_shared<modelgeometry::AsyncMultiModelGeometry>(dictionary);
+    _subsiteModels->model = std::make_shared<modelgeometry::AsyncMultiModelGeometry>(dictionary);
 
     glbinding::Binding::useCurrentContext();
     glbinding::Binding::initialize();
 
- for (auto fileName : _subsite->fileNames) {
-  // Load all textures
-  std::string tempFileName = fileName;
-  tempFileName[13] = 'R';
-  tempFileName[14] = 'A';
-  tempFileName[15] = 'S';
+    for (auto fileName : _subsite->fileNames) {
+        // Load all textures
+        std::string tempFileName = fileName;
+        tempFileName[13] = 'R';
+        tempFileName[14] = 'A';
+        tempFileName[15] = 'S';
 
-  std::string textureFormat = SurfaceModelLoadJob::textureFormat(_subsite->site);
-  std::string pathToTexture = pathToTextureFolder + "site" + _subsite->site +
-   "/" + "drive" + _subsite->drive + "/" + tempFileName + textureFormat;
-  _subsiteModels->textures.push_back(ghoul::io::TextureReader::ref().loadTexture(pathToTexture));
- }
+        std::string textureFormat = SurfaceModelLoadJob::textureFormat(_subsite->site);
+        std::string pathToTexture = pathToTextureFolder + "site" + _subsite->site +
+        "/" + "drive" + _subsite->drive + "/" + tempFileName + textureFormat;
+        _subsiteModels->textures.push_back(ghoul::io::TextureReader::ref().loadTexture(pathToTexture));
+    }
 
- for (auto coloredFileName : _subsite->coloredTextureFileNames) {
-  std::string pathToTexture = pathToTextureFolder + "site" + _subsite->site +
-   "//" + "drive" + _subsite->drive + "//" + "colored//" + coloredFileName + ".jpg";
+    for (auto coloredFileName : _subsite->coloredTextureFileNames) {
+        std::string pathToTexture = pathToTextureFolder + "site" + _subsite->site +
+            "//" + "drive" + _subsite->drive + "//" + "colored//" + coloredFileName + ".jpg";
 
-  _subsiteModels->coloredTextures.push_back(ghoul::io::TextureReader::ref().loadTexture(pathToTexture));
- }
+        _subsiteModels->coloredTextures.push_back(ghoul::io::TextureReader::ref().loadTexture(pathToTexture));
+    }
 }
 
 std::shared_ptr<SubsiteModels> SurfaceModelLoadJob::product() {
- return _subsiteModels;
+    return _subsiteModels;
 }
 
 std::string SurfaceModelLoadJob::textureFormat(const std::string site) {
- int siteNumber = std::stoi(site);
- std::string textureFormat;
- if (siteNumber <= 21)
-  textureFormat = ".jpg";
- else if (siteNumber > 21)
-  textureFormat = ".png";
+    int siteNumber = std::stoi(site);
+    std::string textureFormat;
+    if (siteNumber <= 21)
+    textureFormat = ".jpg";
+    else if (siteNumber > 21)
+    textureFormat = ".png";
 
- return textureFormat;
+    return textureFormat;
 }
 
 } // openspace

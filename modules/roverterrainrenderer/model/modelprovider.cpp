@@ -29,24 +29,23 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
- const std::string _loggerCat = "ModelProvider";
- const std::string Type = "Type";
+    const std::string _loggerCat = "ModelProvider";
+    const std::string Type = "Type";
 }
 
 namespace openspace {
 std::unique_ptr<ModelProvider> ModelProvider::createFromDictionary(const ghoul::Dictionary& dictionary) {
- std::string type = "ModelProvider";
- dictionary.getValue(Type, type);
- auto factory = FactoryManager::ref().factory<ModelProvider>();
- std::unique_ptr<ModelProvider> mp = factory->create(type, dictionary);
+    std::string type = "ModelProvider";
+    dictionary.getValue(Type, type);
+    auto factory = FactoryManager::ref().factory<ModelProvider>();
+    std::unique_ptr<ModelProvider> mp = factory->create(type, dictionary);
 
- return mp;
+    return mp;
 }
 
 ModelProvider::ModelProvider(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner(openspace::properties::PropertyOwner::PropertyOwnerInfo{ "modelProvider", "modelProvider" })
-{
-}
+{}
 
 void ModelProvider::initialize() {
  return;

@@ -55,28 +55,27 @@ option(OPENSPACE_MODULE_ROVERTERRAIN_USE_PCL "Use PCL" ON)
 
 
 if( OPENSPACE_MODULE_ROVERTERRAIN_USE_PCL )
+    # Find Packages
+    find_package( PCL 1.8 )
 
-  # Find Packages
-  find_package( PCL 1.8 )
+    target_compile_definitions(openspace-module-roverterrain PRIVATE GLOBEBROWSING_USE_PCL)
 
-  target_compile_definitions(openspace-module-roverterrain PRIVATE GLOBEBROWSING_USE_PCL)
+    # Additional Include Directories
+    # [C/C++]>[General]>[Additional Include Directories]
+    include_directories( ${PCL_INCLUDE_DIRS} )
 
-  # Additional Include Directories
-  # [C/C++]>[General]>[Additional Include Directories]
-  include_directories( ${PCL_INCLUDE_DIRS} )
+    # Preprocessor Definitions
+    # [C/C++]>[Preprocessor]>[Preprocessor Definitions]
+    add_definitions( ${PCL_DEFINITIONS} )
+    #add_definitions( -DPCL_NO_PRECOMPILE )
 
-  # Preprocessor Definitions
-  # [C/C++]>[Preprocessor]>[Preprocessor Definitions]
-  add_definitions( ${PCL_DEFINITIONS} )
-  #add_definitions( -DPCL_NO_PRECOMPILE )
+    # Additional Library Directories
+    # [Linker]>[General]>[Additional Library Directories]
+    link_directories( ${PCL_LIBRARY_DIRS} )
 
-  # Additional Library Directories
-  # [Linker]>[General]>[Additional Library Directories]
-  link_directories( ${PCL_LIBRARY_DIRS} )
+    target_include_directories(openspace-module-roverterrain SYSTEM PUBLIC ${PCL_INCLUDE_DIRS})
 
-  target_include_directories(openspace-module-roverterrain SYSTEM PUBLIC ${PCL_INCLUDE_DIRS})
-
-  # Additional Dependencies
-  # [Linker]>[Input]>[Additional Dependencies]
-  target_link_libraries(openspace-module-roverterrain ${PCL_LIBRARIES} )
+    # Additional Dependencies
+    # [Linker]>[Input]>[Additional Dependencies]
+    target_link_libraries(openspace-module-roverterrain ${PCL_LIBRARIES} )
 endif()

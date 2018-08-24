@@ -39,23 +39,25 @@
 // #include <pcl/point_types.h>
 
 namespace openspace {
-    class CollapsedMeshGeneration {
-    public:
-        static void generateMeshFromBinaries(ghoul::Dictionary);
 
-        static void extractCoordinatesFromArray(pcl::PointCloud<pcl::PointXYZ>::Ptr inputCloud, std::vector<std::vector<float>> xyz, BinaryReader::PointCloudInfo mInfo);
+class CollapsedMeshGeneration {
+public:
+    static void generateMeshFromBinaries(ghoul::Dictionary);
 
-        static void writeTxtFile(const std::string filename, std::string output_path, BinaryReader::PointCloudInfo mInfo);
+    static void extractCoordinatesFromArray(pcl::PointCloud<pcl::PointXYZ>::Ptr inputCloud, std::vector<std::vector<float>> xyz, BinaryReader::PointCloudInfo mInfo);
 
-        static void writeMatrixFile(std::string output_path, glm::dmat4 outputMatrix);
-    private:
+    static void writeTxtFile(const std::string filename, std::string output_path, BinaryReader::PointCloudInfo mInfo);
 
-        // static double computeCloudResolution(pcl::PointCloud<pcl::PointXYZ>::Ptr inCloud);
+    static void writeMatrixFile(std::string output_path, glm::dmat4 outputMatrix);
+private:
 
-        static std::string correctPath(const std::string filename, std::string output_path);
+    // static double computeCloudResolution(pcl::PointCloud<pcl::PointXYZ>::Ptr inCloud);
 
-        int _levelOfDetail;
-    };
+    static std::string correctPath(const std::string filename, std::string output_path);
+
+    int _levelOfDetail;
+};
+
 }
 
 #endif //__OPENSPACE_MODULE_ROVER_TERRAIN___COLLAPSED_MESH_GENERATION___H__

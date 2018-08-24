@@ -53,6 +53,7 @@ namespace {
 } // namespace
 
 namespace openspace {
+
 RoverTerrainTask::RoverTerrainTask(const ghoul::Dictionary& dictionary) {
     openspace::documentation::testSpecificationAndThrow(
         documentation(),
@@ -97,20 +98,21 @@ documentation::Documentation RoverTerrainTask::documentation() {
     return {
         "RoverTerrainTask",
         "rover_terrain_task",
-    {
         {
-            "Type",
-            new StringEqualVerifier("RoverTerrainTask"),
-            Optional::No,
-            "The type of this task"
-        },
             {
-                KeyAsset,
-                new StringAnnotationVerifier("A file path to an asset"),
+                "Type",
+                new StringEqualVerifier("RoverTerrainTask"),
                 Optional::No,
-                "The asset file to sync"
-            }
-    }
+                "The type of this task"
+            },
+                {
+                    KeyAsset,
+                    new StringAnnotationVerifier("A file path to an asset"),
+                    Optional::No,
+                    "The asset file to sync"
+                }
+        }
     };
 }
+
 }

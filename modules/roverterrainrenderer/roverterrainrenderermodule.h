@@ -28,17 +28,19 @@
 #include <openspace/util/openspacemodule.h>
 
 namespace openspace {
-    class RoverTerrainRendererModule : public OpenSpaceModule {
-    public:
-        constexpr static const char* Name = "RoverTerrainRenderer";
 
-        RoverTerrainRendererModule();
-    protected:
-        void internalInitialize(const ghoul::Dictionary& configuration) override;
+class RoverTerrainRendererModule : public OpenSpaceModule {
+public:
+    constexpr static const char* Name = "RoverTerrainRenderer";
 
-    private:
-        std::string _root;
-    };
+    RoverTerrainRendererModule();
+protected:
+    void internalInitialize(const ghoul::Dictionary& configuration) override;
+
+private:
+    std::string _root;
+};
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_ROVER_TERRAIN_RENDERER___ROVER_TERRAIN_RENDERER_MODULE___H__

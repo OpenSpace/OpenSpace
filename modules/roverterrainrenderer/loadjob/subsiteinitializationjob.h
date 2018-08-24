@@ -34,18 +34,18 @@
 namespace openspace {
 
 struct SubsiteInitializationJob : LoadJob {
- SubsiteInitializationJob(const std::shared_ptr<SubsiteModels> subsiteModels)
-  : _subsiteModels(subsiteModels)
- {}
+    SubsiteInitializationJob(const std::shared_ptr<SubsiteModels> subsiteModels)
+    : _subsiteModels(subsiteModels)
+    {}
 
- virtual ~SubsiteInitializationJob() = default;
+    virtual ~SubsiteInitializationJob() = default;
 
- virtual void execute() override;
+    virtual void execute() override;
 
- virtual std::shared_ptr<SubsiteModels> product() override;
+    virtual std::shared_ptr<SubsiteModels> product() override;
 
 protected:
- std::shared_ptr<SubsiteModels> _subsiteModels;
+    std::shared_ptr<SubsiteModels> _subsiteModels;
 };
 
 } // openspace

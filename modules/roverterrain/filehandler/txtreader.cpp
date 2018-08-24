@@ -37,6 +37,7 @@ namespace {
 }
 
 namespace openspace {
+
 void TxtReader::read(const std::string inputFilename, std::vector<std::string> &filenames) {
     inputFilename;
 
@@ -50,4 +51,5 @@ void TxtReader::read(const std::string inputFilename, std::vector<std::string> &
         filenames.push_back(line);
     }
 }
+
 }

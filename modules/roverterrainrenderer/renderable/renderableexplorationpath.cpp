@@ -1,26 +1,26 @@
 /*****************************************************************************************
- *                                                                                       *
- * OpenSpace                                                                             *
- *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
- *                                                                                       *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
- * software and associated documentation files (the "Software"), to deal in the Software *
- * without restriction, including without limitation the rights to use, copy, modify,    *
- * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
- * permit persons to whom the Software is furnished to do so, subject to the following   *
- * conditions:                                                                           *
- *                                                                                       *
- * The above copyright notice and this permission notice shall be included in all copies *
- * or substantial portions of the Software.                                              *
- *                                                                                       *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
- * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
- * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
- * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
- ****************************************************************************************/
+    *                                                                                       *
+    * OpenSpace                                                                             *
+    *                                                                                       *
+    * Copyright (c) 2014-2017                                                               *
+    *                                                                                       *
+    * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+    * software and associated documentation files (the "Software"), to deal in the Software *
+    * without restriction, including without limitation the rights to use, copy, modify,    *
+    * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+    * permit persons to whom the Software is furnished to do so, subject to the following   *
+    * conditions:                                                                           *
+    *                                                                                       *
+    * The above copyright notice and this permission notice shall be included in all copies *
+    * or substantial portions of the Software.                                              *
+    *                                                                                       *
+    * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+    * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+    * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+    * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+    * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+    * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+    ****************************************************************************************/
 
 #include <modules/roverterrainrenderer/renderable/renderableexplorationpath.h>
 
@@ -41,7 +41,7 @@
 #include <gdal_priv.h>
 
 namespace {
- static const std::string _loggerCat = "RenderableExplorationPath";
+    static const std::string _loggerCat = "RenderableExplorationPath";
     static const openspace::properties::Property::PropertyInfo enabledPropertyInfo = {
         "enabled",
         "enabled",
@@ -52,19 +52,22 @@ namespace {
 namespace openspace {
 
 RenderableExplorationPath::RenderableExplorationPath()
- : _pathShader(nullptr)
- , _siteShader(nullptr)
- , _fading(0.0)
- , _fading2(0.0)
- , _isEnabled(properties::BoolProperty(enabledPropertyInfo, false))
+    : _pathShader(nullptr)
+    , _siteShader(nullptr)
+    , _fading(0.0)
+    , _fading2(0.0)
+    , _isEnabled(properties::BoolProperty(enabledPropertyInfo, false))
 {}
 
 RenderableExplorationPath::~RenderableExplorationPath() {}
 void RenderableExplorationPath::initializeGL() {
 
 }
-bool RenderableExplorationPath::initialize(globebrowsing::RenderableGlobe* globe, const std::vector<globebrowsing::Geodetic2> allCoordinates,
- const std::vector<globebrowsing::Geodetic2> coordinatesWithModels) {
+bool RenderableExplorationPath::initialize(
+    globebrowsing::RenderableGlobe* globe,
+    const std::vector<globebrowsing::Geodetic2> allCoordinates,
+    const std::vector<globebrowsing::Geodetic2> coordinatesWithModels)
+{
     std::string vs_path = absPath("${MODULE_ROVERTERRAINRENDERER}/shaders/roverpath_vs.glsl");
     std::string fs_path = absPath("${MODULE_ROVERTERRAINRENDERER}/shaders/roverpath_fs.glsl");
     std::replace(vs_path.begin(), vs_path.end(), '\\', '/');
@@ -124,152 +127,152 @@ bool RenderableExplorationPath::initialize(globebrowsing::RenderableGlobe* globe
 }
 
 bool RenderableExplorationPath::deinitialize() {
- RenderEngine& renderEngine = OsEng.renderEngine();
- if (_pathShader) {
-  renderEngine.removeRenderProgram(_pathShader.get());
-  _pathShader = nullptr;
- }
- if (_siteShader) {
-  renderEngine.removeRenderProgram(_siteShader.get());
-  _siteShader = nullptr;
- }
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_pathShader) {
+        renderEngine.removeRenderProgram(_pathShader.get());
+        _pathShader = nullptr;
+    }
+    if (_siteShader) {
+        renderEngine.removeRenderProgram(_siteShader.get());
+        _siteShader = nullptr;
+    }
 
- glDeleteVertexArrays(1, &_vaPathID);
- glDeleteBuffers(1, &_vbPathID);
+    glDeleteVertexArrays(1, &_vaPathID);
+    glDeleteBuffers(1, &_vbPathID);
 
- glDeleteVertexArrays(1, &_vaModelsID);
- glDeleteBuffers(1, &_vbModelsID);
+    glDeleteVertexArrays(1, &_vaModelsID);
+    glDeleteBuffers(1, &_vbModelsID);
 
- return false;
+    return false;
 }
 
 bool RenderableExplorationPath::isReady() const {
- bool ready = true;
- ready &= (_pathShader != nullptr);
- return true;
+    bool ready = true;
+    ready &= (_pathShader != nullptr);
+    return true;
 }
 
 void RenderableExplorationPath::render(const RenderData& data) {
- glm::dmat4 globeModelTransform;
- glm::dmat4 modelViewTransform;
+    glm::dmat4 globeModelTransform;
+    glm::dmat4 modelViewTransform;
 
- //if(_currentLevel >= 1) {
-  // Only show the path when camera is close enough
-  if (_currentLevel > 0 && _fading < 1.0f)
-   _fading += 0.05f;
-  else if (_currentLevel <= 0 && _fading > 0.0f)
-   _fading -= 0.05f;
+    //if(_currentLevel >= 1) {
+        // Only show the path when camera is close enough
+        if (_currentLevel > 0 && _fading < 1.0f)
+            _fading += 0.05f;
+        else if (_currentLevel <= 0 && _fading > 0.0f)
+            _fading -= 0.05f;
 
-  // Model transform and view transform needs to be in double precision
-  globeModelTransform = _globe->modelTransform();
-  modelViewTransform = data.camera.combinedViewMatrix() * globeModelTransform;
+        // Model transform and view transform needs to be in double precision
+        globeModelTransform = _globe->modelTransform();
+        modelViewTransform = data.camera.combinedViewMatrix() * globeModelTransform;
 
-  _pathShader->activate();
+        _pathShader->activate();
 
-  // Passing model view transform as double to maintain precision for vertices.
-  // Otherwise the path will be twitching.
-  _pathShader->setUniform("modelViewTransform", modelViewTransform);
-  _pathShader->setUniform("projectionTransform", data.camera.projectionMatrix());
-  _pathShader->setUniform("fading", _fading);
+        // Passing model view transform as double to maintain precision for vertices.
+        // Otherwise the path will be twitching.
+        _pathShader->setUniform("modelViewTransform", modelViewTransform);
+        _pathShader->setUniform("projectionTransform", data.camera.projectionMatrix());
+        _pathShader->setUniform("fading", _fading);
 
-  glBindVertexArray(_vaPathID);
-  glBindBuffer(GL_ARRAY_BUFFER, _vbPathID);
-  glLineWidth(1.0f);
-  glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(_stationPointsModelCoordinates.size()));
-  glBindVertexArray(0);
+        glBindVertexArray(_vaPathID);
+        glBindBuffer(GL_ARRAY_BUFFER, _vbPathID);
+        glLineWidth(1.0f);
+        glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(_stationPointsModelCoordinates.size()));
+        glBindVertexArray(0);
 
-  _pathShader->deactivate();
- //}
+        _pathShader->deactivate();
+    //}
 
- if(_currentLevel >= 2) {
-  if (_currentLevel >= 2 && _fading2 < 1.f)
-   _fading2 += 0.01f;
-  else if (_currentLevel < 2 && _fading2 > 0.f)
-   _fading2 -= 0.01f;
+    if(_currentLevel >= 2) {
+        if (_currentLevel >= 2 && _fading2 < 1.f)
+            _fading2 += 0.01f;
+        else if (_currentLevel < 2 && _fading2 > 0.f)
+            _fading2 -= 0.01f;
 
-  _siteShader->activate();
+        _siteShader->activate();
 
-  _siteShader->setUniform("modelViewTransform", modelViewTransform);
-  _siteShader->setUniform("projectionTransform", data.camera.projectionMatrix());
-  _siteShader->setUniform("fading", _fading2);
+        _siteShader->setUniform("modelViewTransform", modelViewTransform);
+        _siteShader->setUniform("projectionTransform", data.camera.projectionMatrix());
+        _siteShader->setUniform("fading", _fading2);
 
-  glBindVertexArray(_vaModelsID);
-  glBindBuffer(GL_ARRAY_BUFFER, _vbModelsID);
+        glBindVertexArray(_vaModelsID);
+        glBindBuffer(GL_ARRAY_BUFFER, _vbModelsID);
 
-  glEnable(GL_PROGRAM_POINT_SIZE);
-  glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_stationPointsModelCoordinatesWithModel.size()));
-  glBindVertexArray(0);
+        glEnable(GL_PROGRAM_POINT_SIZE);
+        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_stationPointsModelCoordinatesWithModel.size()));
+        glBindVertexArray(0);
 
-  _siteShader->deactivate();
- }
+        _siteShader->deactivate();
+    }
 }
 
 void RenderableExplorationPath::update(const UpdateData& data) {
 }
 
 void RenderableExplorationPath::setLevel(const int level) {
- _currentLevel = level;
- if (level != lastLevel) {
-  float offset = 10;
-  if (_currentLevel < 2)
-   offset = 6;
-  else if (_currentLevel == 2)
-   offset = 4;
-  else if (_currentLevel == 3)
-   offset = 1.5;
+    _currentLevel = level;
+    if (level != lastLevel) {
+        float offset = 10;
+        if (_currentLevel < 2)
+            offset = 6;
+        else if (_currentLevel == 2)
+            offset = 4;
+        else if (_currentLevel == 3)
+            offset = 1.5;
 
-  _stationPointsModelCoordinates.clear();
-  _stationPointsModelCoordinates = calculateModelCoordinates(_allGeodetics, offset);
-  reBufferData(_vaPathID, _vbPathID, _stationPointsModelCoordinates);
+        _stationPointsModelCoordinates.clear();
+        _stationPointsModelCoordinates = calculateModelCoordinates(_allGeodetics, offset);
+        reBufferData(_vaPathID, _vbPathID, _stationPointsModelCoordinates);
 
-  _stationPointsModelCoordinatesWithModel.size();
-  _stationPointsModelCoordinatesWithModel = calculateModelCoordinates(_geodeticsWithModel, offset);
-  reBufferData(_vaModelsID, _vbModelsID, _stationPointsModelCoordinatesWithModel);
+        _stationPointsModelCoordinatesWithModel.size();
+        _stationPointsModelCoordinatesWithModel = calculateModelCoordinates(_geodeticsWithModel, offset);
+        reBufferData(_vaModelsID, _vbModelsID, _stationPointsModelCoordinatesWithModel);
 
-  lastLevel = level;
- }
+        lastLevel = level;
+    }
 }
 
 std::vector<glm::vec4> RenderableExplorationPath::calculateModelCoordinates(std::vector<globebrowsing::Geodetic2> geodetics,  const float offset) {
- std::vector<glm::vec4> cartesianCoordinates;
- for (auto geodetic : geodetics) {
-  glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(geodetic);
+    std::vector<glm::vec4> cartesianCoordinates;
+    for (auto geodetic : geodetics) {
+        glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(geodetic);
 
-  double heightToSurface = _globe->getHeight(positionModelSpaceTemp);
+        double heightToSurface = _globe->getHeight(positionModelSpaceTemp);
 
-  globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ geodetic, heightToSurface + offset };
-  glm::dvec3 tempPos2 = _globe->ellipsoid().cartesianPosition(geo3);
-  cartesianCoordinates.push_back(glm::dvec4(tempPos2, 1.0));
- }
- return cartesianCoordinates;
+        globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ geodetic, heightToSurface + offset };
+        glm::dvec3 tempPos2 = _globe->ellipsoid().cartesianPosition(geo3);
+        cartesianCoordinates.push_back(glm::dvec4(tempPos2, 1.0));
+    }
+    return cartesianCoordinates;
 }
 
 void RenderableExplorationPath::bufferData(GLuint vaID, GLuint vbID, const std::vector<glm::vec4> coordinates) {
- glBindVertexArray(vaID);
- glBindBuffer(GL_ARRAY_BUFFER, vbID);
- glBufferData(GL_ARRAY_BUFFER,
-  coordinates.size() * sizeof(coordinates[0]),
-  &coordinates[0],
-  GL_STATIC_DRAW);
+    glBindVertexArray(vaID);
+    glBindBuffer(GL_ARRAY_BUFFER, vbID);
+    glBufferData(GL_ARRAY_BUFFER,
+        coordinates.size() * sizeof(coordinates[0]),
+        &coordinates[0],
+        GL_STATIC_DRAW);
 
- glEnableVertexAttribArray(0);
- glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(coordinates[0]), 0);
- glBindVertexArray(0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(coordinates[0]), 0);
+    glBindVertexArray(0);
 }
 
 void RenderableExplorationPath::reBufferData(GLuint vaID, GLuint vbID, const std::vector<glm::vec4> coordinates) {
- glBindVertexArray(vaID);
- glBindBuffer(GL_ARRAY_BUFFER, vbID);
+    glBindVertexArray(vaID);
+    glBindBuffer(GL_ARRAY_BUFFER, vbID);
 
- glBufferData(GL_ARRAY_BUFFER, coordinates.size() * sizeof(coordinates[0]),
-  NULL, GL_STATIC_DRAW);
- glBufferSubData(GL_ARRAY_BUFFER, 0,
-  coordinates.size() * sizeof(coordinates[0]),
-  &coordinates[0]);
+    glBufferData(GL_ARRAY_BUFFER, coordinates.size() * sizeof(coordinates[0]),
+        NULL, GL_STATIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0,
+        coordinates.size() * sizeof(coordinates[0]),
+        &coordinates[0]);
 
- glEnableVertexAttribArray(0);
- glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
- glBindVertexArray(0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+    glBindVertexArray(0);
 }
 
 } // namespace openspace

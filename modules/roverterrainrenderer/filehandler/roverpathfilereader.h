@@ -29,21 +29,23 @@
 #include <modules/roverterrainrenderer/filehandler/subsite.h>
 
 namespace openspace {
+
 class RoverPathFileReader {
 public:
-	struct TextureInformation{
-		std::vector<std::string> fileNames;
-		std::vector<PointCloudInfo> cameraInfoVector;
-	};
+    struct TextureInformation{
+        std::vector<std::string> fileNames;
+        std::vector<PointCloudInfo> cameraInfoVector;
+    };
 
-	static std::vector<std::shared_ptr<Subsite>> extractAllSubsites(const ghoul::Dictionary dictionary);
-	static std::vector<std::shared_ptr<Subsite>> extractSubsitesWithModels(const ghoul::Dictionary dictionary);
+    static std::vector<std::shared_ptr<Subsite>> extractAllSubsites(const ghoul::Dictionary dictionary);
+    static std::vector<std::shared_ptr<Subsite>> extractSubsitesWithModels(const ghoul::Dictionary dictionary);
 
 private:
-	static std::string convertString(const std::string sitenr, const std::string type);
-	static std::shared_ptr<TextureInformation> extractTextureInfo(const std::string absoluteFilePath);
-	static glm::dmat4 extractRotationMatrix(std::string filename);
+    static std::string convertString(const std::string sitenr, const std::string type);
+    static std::shared_ptr<TextureInformation> extractTextureInfo(const std::string absoluteFilePath);
+    static glm::dmat4 extractRotationMatrix(std::string filename);
 };
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_ROVER_TERRAIN_RENDERER___ROVERPATHFILEREADER___H__

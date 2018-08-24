@@ -31,14 +31,14 @@
 namespace openspace {
 class ModelProvider : public properties::PropertyOwner {
 public:
- static std::unique_ptr<ModelProvider> createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<ModelProvider> createFromDictionary(const ghoul::Dictionary& dictionary);
 
- ModelProvider(const ghoul::Dictionary& dictionary);
+    ModelProvider(const ghoul::Dictionary& dictionary);
 
- virtual std::vector<std::shared_ptr<Subsite>> calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites,
-  const RenderData& data, const SceneGraphNode* parent) = 0;
+    virtual std::vector<std::shared_ptr<Subsite>> calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites,
+    const RenderData& data, const SceneGraphNode* parent) = 0;
 
- virtual void initialize() = 0;
+    virtual void initialize() = 0;
 };
 } // namespace openspace
 

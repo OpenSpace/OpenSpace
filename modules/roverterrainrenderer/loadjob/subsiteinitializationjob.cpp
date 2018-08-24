@@ -31,11 +31,11 @@ namespace {
 namespace openspace {
 
 void SubsiteInitializationJob::execute() {
- _subsiteModels->model->uploadData();
+    _subsiteModels->model->uploadData();
 }
 
 std::shared_ptr<SubsiteModels> SubsiteInitializationJob::product() {
- return _subsiteModels;
+    return _subsiteModels;
 }
 
 } // openspace

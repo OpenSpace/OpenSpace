@@ -43,19 +43,21 @@ namespace {
 }
 
 namespace openspace {
-    RoverTerrainRendererModule::RoverTerrainRendererModule() : OpenSpaceModule(Name) {}
 
-    void RoverTerrainRendererModule::internalInitialize(const ghoul::Dictionary& configuration) {
-        auto fRenderable = FactoryManager::ref().factory<Renderable>();
-        ghoul_assert(fRenderable, "No renderableFactory existed");
+RoverTerrainRendererModule::RoverTerrainRendererModule() : OpenSpaceModule(Name) {}
 
-        fRenderable->registerClass<RoverTerrain>("RoverTerrain");
+void RoverTerrainRendererModule::internalInitialize(const ghoul::Dictionary& configuration) {
+    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "No renderableFactory existed");
 
-        auto fModelProvider = std::make_unique<ghoul::TemplateFactory<ModelProvider>>();
+    fRenderable->registerClass<RoverTerrain>("RoverTerrain");
 
-        fModelProvider->registerClass<MultiModelProvider>("MultiModelProvider");
-        fModelProvider->registerClass<SingleModelProvider>("SingleModelProvider");
+    auto fModelProvider = std::make_unique<ghoul::TemplateFactory<ModelProvider>>();
 
-        FactoryManager::ref().addFactory(std::move(fModelProvider));
-    }
+    fModelProvider->registerClass<MultiModelProvider>("MultiModelProvider");
+    fModelProvider->registerClass<SingleModelProvider>("SingleModelProvider");
+
+    FactoryManager::ref().addFactory(std::move(fModelProvider));
+}
+
 } // namespace openspace

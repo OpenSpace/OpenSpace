@@ -28,15 +28,15 @@
 namespace openspace {
 
 Subsite::SubsiteHashKey Subsite::hashKey(const int level) const {
-	uint64_t key = 0LL;
-	int siteNumber = std::stoi(site);
-	int driveNumber = std::stoi(drive);
+    uint64_t key = 0LL;
+    int siteNumber = std::stoi(site);
+    int driveNumber = std::stoi(drive);
 
-	key |= level;
-	key |= siteNumber << 5;
-	key |= ((uint64_t)driveNumber) << 35;
+    key |= level;
+    key |= siteNumber << 5;
+    key |= ((uint64_t)driveNumber) << 35;
 
-	return key;
+    return key;
 }
 
 } // namespace openspace

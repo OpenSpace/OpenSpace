@@ -47,70 +47,72 @@ struct Subsite;
 namespace Documentation { struct Documentation; }
 
 namespace openspace {
-    class RoverTerrain : public Renderable {
-    public:
-        struct GeneralProperties {
-            properties::BoolProperty isEnabled;
-            properties::BoolProperty enablePath;
-            properties::BoolProperty lockSubsite;
-            properties::BoolProperty useMastCam;
-            properties::BoolProperty enableDepth;
-            properties::BoolProperty enableCulling;
-            properties::FloatProperty heightProp;
-            properties::IntProperty maxLod;
-        };
 
-        RoverTerrain(const ghoul::Dictionary& dictionary);
-
-        void initializeGL() override;
-        void deinitializeGL() override;
-        void initialize() override;
-        void deinitialize() override;
-
-        bool isReady() const override;
-
-        void render(const RenderData& data, RendererTasks& rendererTask) override;
-        void update(const UpdateData& data) override;
-    private:
-        std::vector<std::shared_ptr<SubsiteModels>> calculateSurfacePosition(std::vector<std::shared_ptr<SubsiteModels>> vector);
-        void lockSubsite(std::vector<std::shared_ptr<Subsite>> subsites);
-
-        std::string _modelPath;
-        std::string _texturePath;
-        std::string _roverLocationPath;
-
-        std::vector<std::shared_ptr<Subsite>> _subsites;
-        std::vector<std::shared_ptr<Subsite>> _prevSubsites;
-        std::vector<std::shared_ptr<Subsite>> _subsitesWithModels;
-
-        std::shared_ptr<SiteManager> _siteManager;
-
-        std::shared_ptr<CachingSurfaceModelProvider> _cachingModelProvider;
-
-        std::shared_ptr<RenderableExplorationPath> _renderableExplorationPath;
-        
-        openspace::SceneGraphNode* _parent;
-
-        globebrowsing::RenderableGlobe* _globe;
-        globebrowsing::ChunkedLodGlobe* _chunkedLodGlobe;
-
-        std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-
-        LodModelSwitch _modelSwitch;
-        int _prevLevel;
-
-        GeneralProperties _generalProperties;
-
-        std::vector<Geodetic2> _coordinatesModels;
-
-        properties::Vec3Property _debugModelRotation;
-
-        bool _isFirst;
-        bool _isFirstLow;
-        bool _isFirstHigh;
-
-        bool _pressedOnce = false;
+class RoverTerrain : public Renderable {
+public:
+    struct GeneralProperties {
+        properties::BoolProperty isEnabled;
+        properties::BoolProperty enablePath;
+        properties::BoolProperty lockSubsite;
+        properties::BoolProperty useMastCam;
+        properties::BoolProperty enableDepth;
+        properties::BoolProperty enableCulling;
+        properties::FloatProperty heightProp;
+        properties::IntProperty maxLod;
     };
+
+    RoverTerrain(const ghoul::Dictionary& dictionary);
+
+    void initializeGL() override;
+    void deinitializeGL() override;
+    void initialize() override;
+    void deinitialize() override;
+
+    bool isReady() const override;
+
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void update(const UpdateData& data) override;
+private:
+    std::vector<std::shared_ptr<SubsiteModels>> calculateSurfacePosition(std::vector<std::shared_ptr<SubsiteModels>> vector);
+    void lockSubsite(std::vector<std::shared_ptr<Subsite>> subsites);
+
+    std::string _modelPath;
+    std::string _texturePath;
+    std::string _roverLocationPath;
+
+    std::vector<std::shared_ptr<Subsite>> _subsites;
+    std::vector<std::shared_ptr<Subsite>> _prevSubsites;
+    std::vector<std::shared_ptr<Subsite>> _subsitesWithModels;
+
+    std::shared_ptr<SiteManager> _siteManager;
+
+    std::shared_ptr<CachingSurfaceModelProvider> _cachingModelProvider;
+
+    std::shared_ptr<RenderableExplorationPath> _renderableExplorationPath;
+    
+    openspace::SceneGraphNode* _parent;
+
+    globebrowsing::RenderableGlobe* _globe;
+    globebrowsing::ChunkedLodGlobe* _chunkedLodGlobe;
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+
+    LodModelSwitch _modelSwitch;
+    int _prevLevel;
+
+    GeneralProperties _generalProperties;
+
+    std::vector<Geodetic2> _coordinatesModels;
+
+    properties::Vec3Property _debugModelRotation;
+
+    bool _isFirst;
+    bool _isFirstLow;
+    bool _isFirstHigh;
+
+    bool _pressedOnce = false;
+};
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_ROVER_TERRAIN_RENDERER___ROVER_TERRAIN___H__

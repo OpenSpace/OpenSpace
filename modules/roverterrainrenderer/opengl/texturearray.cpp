@@ -32,82 +32,88 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
- const std::string _loggerCat = "TextureArray";
+    const std::string _loggerCat = "TextureArray";
 }
 
 namespace openspace {
 
- TextureArray::TextureArray(glm::uvec3 dimensions, int size, GLenum format,
-        GLenum internalFormat, GLenum dataType, bool allocateData)
-  : _dimensions(std::move(dimensions)),
-  _size(size),
-  _internalFormat(internalFormat),
-  _format(format),
-  _dataType(dataType),
-  _counter(0) {
+TextureArray::TextureArray(
+    glm::uvec3 dimensions,
+    int size,
+    GLenum format,
+    GLenum internalFormat,
+    GLenum dataType,
+    bool allocateData
+)
+    : _dimensions(std::move(dimensions))
+    , _size(size)
+    , _internalFormat(internalFormat)
+    , _format(format)
+    , _dataType(dataType)
+    , _counter(0)
+{
+    ghoul_assert(_dimensions.x >= 1, "Element of dimensions must be bigger or equal 1");
+    ghoul_assert(_dimensions.y >= 1, "Element of dimensions must be bigger or equal 1");
+    ghoul_assert(_dimensions.z >= 1, "Element of dimensions must be bigger or equal 1");
 
-  ghoul_assert(_dimensions.x >= 1, "Element of dimensions must be bigger or equal 1");
-  ghoul_assert(_dimensions.y >= 1, "Element of dimensions must be bigger or equal 1");
-  ghoul_assert(_dimensions.z >= 1, "Element of dimensions must be bigger or equal 1");
-
-  initialize(allocateData);
- }
+    initialize(allocateData);
+}
 
 /*TextureArray::~TextureArray() {
- if (_id) {
-  glDeleteTextures(1, &_id);
- }
+    if (_id) {
+        glDeleteTextures(1, &_id);
+    }
 }*/
 
 void TextureArray::initialize(bool allocateData) {
- determineTextureType();
- generateId();
- if (allocateData) {
-  allocateMemory();
- }
+    determineTextureType();
+    generateId();
+    if (allocateData) {
+        allocateMemory();
+    }
 }
 
 void TextureArray::setType(GLenum type) {
- ghoul_assert(
-  (type == GL_TEXTURE_2D_ARRAY),
-  "Type must be GL_TEXTURE_2D_ARRAY"
- );
- _type = type;
+    ghoul_assert(
+        (type == GL_TEXTURE_2D_ARRAY),
+        "Type must be GL_TEXTURE_2D_ARRAY"
+    );
+    _type = type;
 }
 
 
 
 void TextureArray::determineTextureType() {
- if (_dimensions.y == 1) {
-  _type = GL_TEXTURE_1D_ARRAY;
- }
- else {
-  _type = GL_TEXTURE_2D_ARRAY;
- }
+    if (_dimensions.y == 1) {
+        _type = GL_TEXTURE_1D_ARRAY;
+    }
+    else {
+        _type = GL_TEXTURE_2D_ARRAY;
+    }
 }
 
 GLuint TextureArray::id() {
- return _id;
+    return _id;
 }
 
 void TextureArray::allocateMemory() {
- bind();
- glTexStorage3D(_type, 1, static_cast<gl::GLenum>(_internalFormat), _dimensions.x, _dimensions.y, _size);
+    bind();
+    glTexStorage3D(_type, 1, static_cast<gl::GLenum>(_internalFormat), _dimensions.x, _dimensions.y, _size);
 }
 
 void TextureArray::generateId() {
- _id = 0;
- glGenTextures(1, &_id);
+    _id = 0;
+    glGenTextures(1, &_id);
 }
 
 void TextureArray::bind() const {
- glBindTexture(_type, _id);
+    glBindTexture(_type, _id);
 }
 
 void TextureArray::uploadTexture(const void* pixels) {
- bind();
- switch (_type) {
- case GL_TEXTURE_2D:
+    bind();
+    switch (_type) {
+    case GL_TEXTURE_2D:
         glTexImage2D(
             _type,
             0,
@@ -116,30 +122,30 @@ void TextureArray::uploadTexture(const void* pixels) {
             GLsizei(_dimensions.y),
             0,
             static_cast<gl::GLenum>(_format),
-   _dataType,
-   pixels
-  );
-  break;
- case GL_TEXTURE_2D_ARRAY: {
-  glTexSubImage3D(
-   _type,
-   0,
-   0,
-   0,
-   _counter,
-   _dimensions.x,
-   _dimensions.y,
-   _dimensions.z,
+            _dataType,
+            pixels
+        );
+        break;
+    case GL_TEXTURE_2D_ARRAY: {
+        glTexSubImage3D(
+            _type,
+            0,
+            0,
+            0,
+            _counter,
+            _dimensions.x,
+            _dimensions.y,
+            _dimensions.z,
             static_cast<gl::GLenum>(_format),
-   _dataType,
-   pixels);
+            _dataType,
+            pixels);
 
-  _counter++;
-  break;
- }
- default:
-  ghoul_assert(false, "Missing case label");
- }
+        _counter++;
+        break;
+    }
+    default:
+        ghoul_assert(false, "Missing case label");
+    }
 }
 
 }

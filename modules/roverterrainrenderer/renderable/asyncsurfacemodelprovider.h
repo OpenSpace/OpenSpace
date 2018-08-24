@@ -37,28 +37,28 @@ namespace openspace {
 
 class AsyncSurfaceModelProvider {
 public:
- AsyncSurfaceModelProvider(Renderable* parent);
+    AsyncSurfaceModelProvider(Renderable* parent);
 
- bool enqueueModelIO(const std::shared_ptr<Subsite> subsite, const int level);
+    bool enqueueModelIO(const std::shared_ptr<Subsite> subsite, const int level);
 
- std::vector<std::shared_ptr<SubsiteModels>> getLoadedModels();
+    std::vector<std::shared_ptr<SubsiteModels>> getLoadedModels();
 protected:
- virtual bool satisfiesEnqueueCriteria(const uint64_t hashKey) const;
+    virtual bool satisfiesEnqueueCriteria(const uint64_t hashKey) const;
 
 private:
- globebrowsing::PrioritizingConcurrentJobManager<SubsiteModels, uint64_t>
-  _diskToRamJobManager;
- globebrowsing::PrioritizingConcurrentJobManager<SubsiteModels, uint64_t>
-  _ramToGpuJobManager;
+    globebrowsing::PrioritizingConcurrentJobManager<SubsiteModels, uint64_t>
+        _diskToRamJobManager;
+    globebrowsing::PrioritizingConcurrentJobManager<SubsiteModels, uint64_t>
+        _ramToGpuJobManager;
 
- Renderable* _parent;
+    Renderable* _parent;
 
- void enqueueSubsiteInitialization(const std::shared_ptr<SubsiteModels> subsiteModels);
- void unmapBuffers(const std::shared_ptr<SubsiteModels> subsiteModels);
+    void enqueueSubsiteInitialization(const std::shared_ptr<SubsiteModels> subsiteModels);
+    void unmapBuffers(const std::shared_ptr<SubsiteModels> subsiteModels);
 
- std::unordered_map <uint64_t, std::shared_ptr<Subsite>> _enqueuedModelRequests;
+    std::unordered_map <uint64_t, std::shared_ptr<Subsite>> _enqueuedModelRequests;
 
- uint64_t hashKey(const std::string site, const std::string drive, const int level);
+    uint64_t hashKey(const std::string site, const std::string drive, const int level);
 };
 
 } // namespace openspace

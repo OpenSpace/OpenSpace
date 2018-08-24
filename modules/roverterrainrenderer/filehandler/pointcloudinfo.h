@@ -29,17 +29,19 @@
 #include <glm/common.hpp>
 
 namespace openspace {
-    struct PointCloudInfo {
-        int _lines;
-        int _cols;
-        int _bands;
-        int _bytes;
-        std::vector<double> _roverQuat;
-        glm::dvec3 _cameraCenter;
-        glm::dvec3 _cameraAxis;
-        glm::dvec3 _cameraHorizontal;
-        glm::dvec3 _cameraVector;
-    };
+
+struct PointCloudInfo {
+    int _lines;
+    int _cols;
+    int _bands;
+    int _bytes;
+    std::vector<double> _roverQuat;
+    glm::dvec3 _cameraCenter;
+    glm::dvec3 _cameraAxis;
+    glm::dvec3 _cameraHorizontal;
+    glm::dvec3 _cameraVector;
+};
+
 }
 
 #endif // __OPENSPACE_MODULE_ROVER_TERRAIN_RENDERER___POINT_CLOUD_INFO___H__

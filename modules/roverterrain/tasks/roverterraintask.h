@@ -36,30 +36,30 @@
 
 namespace openspace {
 
-    class RoverTerrainTask : public Task {
+class RoverTerrainTask : public Task {
+public:
+    class RequestListener : public AssetListener {
     public:
-        class RequestListener : public AssetListener {
-        public:
-            virtual ~RequestListener() = default;
-            void assetStateChanged(std::shared_ptr<Asset> asset,
-                Asset::State state) override;
+        virtual ~RequestListener() = default;
+        void assetStateChanged(std::shared_ptr<Asset> asset,
+            Asset::State state) override;
 
-            void assetRequested(std::shared_ptr<Asset>,
-                std::shared_ptr<Asset>) override {};
+        void assetRequested(std::shared_ptr<Asset>,
+            std::shared_ptr<Asset>) override {};
 
-            void assetUnrequested(std::shared_ptr<Asset>,
-                std::shared_ptr<Asset>) override {};
-        };
-
-        RoverTerrainTask(const ghoul::Dictionary& dictionary);
-
-        std::string description() override;
-        void perform(const Task::ProgressCallback& progressCallback) override;
-        static documentation::Documentation documentation();
-    private:
-        std::string _asset;
-        std::string _outputPath;
+        void assetUnrequested(std::shared_ptr<Asset>,
+            std::shared_ptr<Asset>) override {};
     };
+
+    RoverTerrainTask(const ghoul::Dictionary& dictionary);
+
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation documentation();
+private:
+    std::string _asset;
+    std::string _outputPath;
+};
 
 } // namespace openspace
 

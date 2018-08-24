@@ -32,15 +32,15 @@
 namespace openspace {
 class DrivePropertyOwner : public properties::PropertyOwner {
 public:
-	DrivePropertyOwner(std::string drive, std::string sol, glm::dvec2 driveCoords);
+    DrivePropertyOwner(std::string drive, std::string sol, glm::dvec2 driveCoords);
 private:
 
-	void goToSubsite(std::string drive);
+    void goToSubsite(std::string drive);
 
-	std::string _drive;
-	glm::dvec2 _driveCoords;
-	properties::BoolProperty _enabled;
-	properties::TriggerProperty _goToSubSite;
+    std::string _drive;
+    glm::dvec2 _driveCoords;
+    properties::BoolProperty _enabled;
+    properties::TriggerProperty _goToSubSite;
 };
 }
 

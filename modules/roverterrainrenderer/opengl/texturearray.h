@@ -33,31 +33,37 @@ namespace openspace {
 
 class TextureArray {
 public:
- TextureArray(glm::uvec3 dimensions, int size,
-        GLenum format = (GLenum)GL_RGBA, GLenum internalFormat = (GLenum)GL_RGBA8, GLenum dataType = GL_UNSIGNED_BYTE,
-  bool allocateData = true);
+    TextureArray(
+        glm::uvec3 dimensions, 
+        int size,
+        GLenum format = (GLenum) GL_RGBA,
+        GLenum internalFormat = (GLenum) GL_RGBA8,
+        GLenum dataType = GL_UNSIGNED_BYTE,
+        bool allocateData = true
+    );
 
- //~TextureArray();
+    //~TextureArray();
 
- void setType(GLenum type);
- void uploadTexture(const void* pixels);
- void allocateMemory();
- void determineTextureType();
+    void setType(GLenum type);
+    void uploadTexture(const void* pixels);
+    void allocateMemory();
+    void determineTextureType();
 
- void bind() const;
+    void bind() const;
 
- GLuint id();
+    GLuint id();
 
 private:
- glm::uvec3 _dimensions;
- int _counter;
- int _size;
- GLuint _id;
- GLenum _type, _dataType, _format, _internalFormat;
+    glm::uvec3 _dimensions;
+    int _counter;
+    int _size;
+    GLuint _id;
+    GLenum _type, _dataType, _format, _internalFormat;
 
- void generateId();
- void initialize(bool allocateData);
+    void generateId();
+    void initialize(bool allocateData);
 };
+
 }
 
 #endif //__GHOUL___TEXTURE_ARRAY___H__

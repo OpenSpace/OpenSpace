@@ -28,10 +28,12 @@
 #include <pcl/PolygonMesh.h>
 
 namespace openspace {
+
 class MeshWriter {
 public:
     static void writeObjFileNoTex(const std::string filename, std::string output_path, const pcl::PolygonMesh polyMesh);
 };
+
 }
 
 #endif //__OPENSPACE_MODULE_ROVER_TERRAIN___MESH_WRITER___H__

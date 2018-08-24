@@ -35,27 +35,27 @@
 namespace openspace {
 
 struct SurfaceModelLoadJob : LoadJob {
- SurfaceModelLoadJob(const std::shared_ptr<Subsite> subsite, const int level)
-  : _subsite(subsite)
-  , _level(level)
- {
-  _subsiteModels = std::make_shared<SubsiteModels>();
- }
+    SurfaceModelLoadJob(const std::shared_ptr<Subsite> subsite, const int level)
+    : _subsite(subsite)
+    , _level(level)
+    {
+    _subsiteModels = std::make_shared<SubsiteModels>();
+    }
 
- virtual ~SurfaceModelLoadJob() = default;
+    virtual ~SurfaceModelLoadJob() = default;
 
- virtual void execute() override;
+    virtual void execute() override;
 
- virtual std::shared_ptr<SubsiteModels> product() override;
+    virtual std::shared_ptr<SubsiteModels> product() override;
 
 protected:
- std::shared_ptr<Subsite> _subsite;
- int _level;
- std::shared_ptr<SubsiteModels> _subsiteModels;
+    std::shared_ptr<Subsite> _subsite;
+    int _level;
+    std::shared_ptr<SubsiteModels> _subsiteModels;
 
 private:
- std::string textureFormat(const std::string site);
- std::shared_ptr<modelgeometry::AsyncMultiModelGeometry> mm;
+    std::string textureFormat(const std::string site);
+    std::shared_ptr<modelgeometry::AsyncMultiModelGeometry> mm;
 };
 
 } // openspace

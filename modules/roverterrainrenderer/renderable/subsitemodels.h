@@ -40,51 +40,51 @@ namespace openspace {
 
 struct SubsiteModels {
 public:
- using SubsiteHashKey = uint64_t;
+    using SubsiteHashKey = uint64_t;
 
- std::vector<std::shared_ptr<Model>> models;
+    std::vector<std::shared_ptr<Model>> models;
 
- std::vector <std::shared_ptr<ghoul::opengl::Texture>> textures;
- std::vector <std::shared_ptr<ghoul::opengl::Texture>> coloredTextures;
- std::shared_ptr<modelgeometry::AsyncMultiModelGeometry> model;
- std::shared_ptr<TextureArray> textureArray;
- std::shared_ptr<TextureArray> coloredTextureArray;
- glm::dmat4 rotationMatrix;
+    std::vector <std::shared_ptr<ghoul::opengl::Texture>> textures;
+    std::vector <std::shared_ptr<ghoul::opengl::Texture>> coloredTextures;
+    std::shared_ptr<modelgeometry::AsyncMultiModelGeometry> model;
+    std::shared_ptr<TextureArray> textureArray;
+    std::shared_ptr<TextureArray> coloredTextureArray;
+    glm::dmat4 rotationMatrix;
 
 
- glm::dvec3 cartesianPosition;
+    glm::dvec3 cartesianPosition;
 
- globebrowsing::Geodetic2 geodetic;
- globebrowsing::Geodetic2 siteGeodetic;
+    globebrowsing::Geodetic2 geodetic;
+    globebrowsing::Geodetic2 siteGeodetic;
 
- // The file names of the .obj models and textures for this subsite
- std::vector<std::string> fileNames;
+    // The file names of the .obj models and textures for this subsite
+    std::vector<std::string> fileNames;
 
- // Information needed for texture projection
- std::vector<PointCloudInfo> cameraInfoVector;
+    // Information needed for texture projection
+    std::vector<PointCloudInfo> cameraInfoVector;
 
- // Information needed for colored texture projection
- std::vector<PointCloudInfo> coloredCameraInfoVector;
+    // Information needed for colored texture projection
+    std::vector<PointCloudInfo> coloredCameraInfoVector;
 
- GLuint textureID;
- GLuint coloredTextureID;
+    GLuint textureID;
+    GLuint coloredTextureID;
 
- uint64_t tileHashKey;
- std::string site;
- std::string drive;
- int level;
+    uint64_t tileHashKey;
+    std::string site;
+    std::string drive;
+    int level;
 
- float alpha() const;
+    float alpha() const;
 
- void setFadeDirection(const int direction);
+    void setFadeDirection(const int direction);
 
- void fade();
+    void fade();
 
- SubsiteModels::SubsiteHashKey hashKey() const;
+    SubsiteModels::SubsiteHashKey hashKey() const;
 
 private:
- int _fadeDirection = -1;
- float _alpha = 0.0f;
+    int _fadeDirection = -1;
+    float _alpha = 0.0f;
 };
 
 } // namespace openspace

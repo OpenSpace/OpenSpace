@@ -34,15 +34,15 @@
 namespace openspace {
 class SitePropertyOwner : public properties::PropertyOwner {
 public:
-	SitePropertyOwner(SiteWithDrives swd);
+    SitePropertyOwner(SiteWithDrives swd);
 
-	void addDrive(std::string drive);
-	std::string site() { return _site; };
+    void addDrive(std::string drive);
+    std::string site() { return _site; };
 private:
-	properties::BoolProperty _enabled;
-	std::vector<std::string> _drives;
-	std::string _site;
-	std::vector<std::shared_ptr<DrivePropertyOwner>> _drivePropertyOwner;
+    properties::BoolProperty _enabled;
+    std::vector<std::string> _drives;
+    std::string _site;
+    std::vector<std::shared_ptr<DrivePropertyOwner>> _drivePropertyOwner;
 };
 }
 

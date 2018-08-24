@@ -30,33 +30,35 @@
 #include <openspace/util/updatestructures.h>
 
 namespace openspace {
+
 using namespace globebrowsing;
+
 class LodModelSwitch {
-public :
- enum class Mode {
-  Far,
-  High,
-  Low,
-  Close,
- };
+public:
+    enum class Mode {
+        Far,
+        High,
+        Low,
+        Close,
+    };
 
- LodModelSwitch();
+    LodModelSwitch();
 
- void initialize(RenderableGlobe* owner);
+    void initialize(RenderableGlobe* owner);
 
- Mode getLevel(const RenderData& data);
+    Mode getLevel(const RenderData& data);
 
 private:
- RenderableGlobe* _owner;
- SceneGraphNode* _parent;
+    RenderableGlobe* _owner;
+    SceneGraphNode* _parent;
 
- double _ellipsoidShrinkTerm;
+    double _ellipsoidShrinkTerm;
 
- bool _firstLow;
- bool _firstHigh;
- bool _firstClose;
+    bool _firstLow;
+    bool _firstHigh;
+    bool _firstClose;
 
- glm::dvec3 _prevCam;
+    glm::dvec3 _prevCam;
 };
 
 } // namespace openspace

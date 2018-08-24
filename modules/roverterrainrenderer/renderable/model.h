@@ -34,8 +34,8 @@
 namespace openspace {
 
 struct Model {
- std::shared_ptr<modelgeometry::AsyncMultiModelGeometry> geometry;
- std::shared_ptr<ghoul::opengl::Texture> texture;
+    std::shared_ptr<modelgeometry::AsyncMultiModelGeometry> geometry;
+    std::shared_ptr<ghoul::opengl::Texture> texture;
 };
 
 } // namespace openspace
