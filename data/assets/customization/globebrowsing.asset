@@ -1,6 +1,6 @@
 -- Add require statements for assets exporting the neccessary globes
 -- example:
-asset.require('../scene/solarsystem/planets/mars/mars')
+-- asset.require('../scene/solarsystem/planets/mars/mars')
 
 local CreateFocusNodes = false
 
