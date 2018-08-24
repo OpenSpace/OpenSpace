@@ -59,11 +59,15 @@ public:
     bool isRecording();
     bool startPlayback(std::string filename, KeyframeTimeRef timeMode);
     void saveCameraKeyframe();
+#ifdef SESSION_RECORDING_TIME
     void saveTimeKeyframe();
+#endif
     void preSynchronization();
     void playbackAddEntriesToTimeline();
     void playbackCamera(std::string& entry);
+#ifdef SESSION_RECORDING_TIME
     void playbackTimeChange(std::string& entry);
+#endif
     void playbackScript(std::string& entry);
     void stopPlayback();
     /**
@@ -91,7 +95,9 @@ private:
     int _playbackLineNum = 1;
     KeyframeTimeRef _playbackTimeReferenceMode;
     bool _playbackActive_camera = false;
+#ifdef SESSION_RECORDING_TIME
     bool _playbackActive_time = false;
+#endif
     bool _playbackActive_script = false;
 };
 

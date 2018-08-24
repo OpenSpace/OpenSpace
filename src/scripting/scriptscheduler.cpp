@@ -36,9 +36,13 @@
 
 #include "scriptscheduler_lua.inl"
 
+#define TIMING_DEBUGGING
+
+#ifdef TIMING_DEBUGGING
 namespace {
     const char* _loggerCat = "ScriptScheduler";
 }
+#endif
 
 namespace openspace::scripting {
 
@@ -209,7 +213,10 @@ ScriptScheduler::progressTo(double newTime)
         // How many values did we pass over?
         ptrdiff_t n = std::distance(_timings.begin() + prevIndex, it);
         _currentIndex = static_cast<int>(prevIndex + n);
-
+#ifdef TIMING_DEBUGGING
+        if (n > 0)
+            LINFO(fmt::format("{} scripts dequed @ {:13.3f}", n, _currentTime));
+#endif
         //Check if playback just reached the final scheduled script and is thus finished
         if (_playbackModeEnabled && (_currentIndex == _timings.size())) {
             if (_playbackEndCallback)
@@ -250,11 +257,9 @@ ScriptScheduler::progressTo(double newTime)
     }
 }
 
-void ScriptScheduler::setTimeReferenceMode(KeyframeTimeRef refType,
-                                           double playbackReferenceTimestamp)
+void ScriptScheduler::setTimeReferenceMode(KeyframeTimeRef refType)
 {
     _timeframeMode = refType;
-    _playbackReferenceTimestamp = playbackReferenceTimestamp;
 }
 
 void ScriptScheduler::triggerPlaybackStart(std::function<void()> callback) {

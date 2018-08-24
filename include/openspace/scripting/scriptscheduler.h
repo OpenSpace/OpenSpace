@@ -119,12 +119,8 @@ public:
     * openspace::interaction::KeyframeTimeRef) which is either relative to the
     * application start time, relative to the recorded session playback start time,
     * or according to the absolute simulation time in seconds from J2000 epoch.
-    * \param playbackReferenceTimestamp the timestamp in seconds (double) when the
-    * recorded session file playback was initiated. For modes other than recorded
-    * session, any value is acceptable.
     */
-    void setTimeReferenceMode(openspace::interaction::KeyframeTimeRef refType,
-                              double playbackReferenceTimestamp);
+    void setTimeReferenceMode(openspace::interaction::KeyframeTimeRef refType);
     
     /**
     * Sets the callback function for when the script scheduler has no more scripts
@@ -151,7 +147,6 @@ private:
 
     openspace::interaction::KeyframeTimeRef _timeframeMode
         = openspace::interaction::KeyframeTimeRef::absolute_simTimeJ2000;
-    double _playbackReferenceTimestamp = 0.0;
     std::function<void()> _playbackEndCallback;
 };
 

@@ -62,7 +62,7 @@ public:
     * \param camera A reference to the camera object to have its pose updated.
     * \returns true only if a new future keyframe is available to set camera pose.
     */
-    bool updateCamera(Camera& camera);
+    bool updateCamera(Camera& camera, bool ignoreFutureKeyframes);
     Timeline<CameraPose>& timeline();
 
     void addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose);

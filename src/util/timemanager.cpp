@@ -89,11 +89,13 @@ void TimeManager::consumeKeyframes(double dt) {
         time().setDeltaTime(currentTime.deltaTime());
         time().setPause(currentTime.paused());
         _latestConsumedTimestamp = current.timestamp;
+#ifdef SESSION_RECORDING_TIME
         //Call the playback callback function if mode is enabled
         if (_playbackModeEnabled && _playbackEndCallback) {
             _playbackModeEnabled = false;
             _playbackEndCallback();
         }
+#endif
     }
     else {
         const Keyframe<Time>& next = *firstFutureKeyframe;
@@ -241,9 +243,10 @@ void TimeManager::removeDeltaTimeChangeCallback(CallbackHandle handle) {
     _deltaTimeChangeCallbacks.erase(it);
 }
 
+#ifdef SESSION_RECORDING_TIME
 void TimeManager::triggerPlaybackStart(std::function<void()> callback) {
     _playbackModeEnabled = true;
     _playbackEndCallback = std::move(callback);
 }
-
+#endif
 } // namespace openspace

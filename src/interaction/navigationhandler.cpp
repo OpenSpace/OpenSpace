@@ -166,13 +166,18 @@ void NavigationHandler::updateCamera(double deltaTime) {
 }
 
 void NavigationHandler::updateCameraWithNextKeyframe() {
-    bool didUpdateToNextKeyframe = _keyframeNavigator->updateCamera(*_camera);
+    bool didUpdateToNextKeyframe
+        = _keyframeNavigator->updateCamera(*_camera, _playbackModeEnabled);
 
-    if (!didUpdateToNextKeyframe && _playbackModeEnabled) {
-        _playbackModeEnabled = false;
-        _useKeyFrameInteraction = false;
-        if (_playbackEndCallback)
-            _playbackEndCallback();
+    if (_playbackModeEnabled && !didUpdateToNextKeyframe) {
+        if (_keyframeNavigator->nKeyframes() == 0) {
+            //If in playback mode, didn't update to a new keyframe, and there are no
+            // keyframes left, then execute callback to end camera playback
+            _playbackModeEnabled = false;
+            _useKeyFrameInteraction = false;
+            if (_playbackEndCallback)
+                _playbackEndCallback();
+        }
     }
 }
 

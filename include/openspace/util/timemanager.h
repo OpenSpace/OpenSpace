@@ -54,7 +54,9 @@ public:
     CallbackHandle addDeltaTimeChangeCallback(TimeChangeCallback cb);
     void removeTimeChangeCallback(CallbackHandle handle);
     void removeDeltaTimeChangeCallback(CallbackHandle handle);
+#ifdef SESSION_RECORDING_TIME
     void triggerPlaybackStart(std::function<void()> callback);
+#endif
 
 private:
     bool _shouldSetTime = false;
@@ -64,11 +66,15 @@ private:
     void consumeKeyframes(double dt);
     double _latestConsumedTimestamp;
     int _nextCallbackHandle = 0;
+#ifdef SESSION_RECORDING_TIME
     bool _playbackModeEnabled = false;
+#endif
 
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeChangeCallbacks;
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _deltaTimeChangeCallbacks;
+#ifdef SESSION_RECORDING_TIME
     std::function<void()> _playbackEndCallback;
+#endif
     double _lastTime = 0;
     double _lastDeltaTime = 0;
 };
