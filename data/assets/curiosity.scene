@@ -13,7 +13,34 @@ asset.require('util/default_joystick')
 assetHelper.requestAll(asset, 'scene/digitaluniverse')
 asset.request('customization/globebrowsing')
 
-asset.request('scene/solarsystem/planets')
+-- Would like to do asset.request('./planets') but Curiosity Kernels
+-- seem to conflict with Jupiter moon's kernels.
+-- Therefore, we manually include the whole solar system except Jupiter's moons for now:
+
+asset.request('./planets/mercury/mercury')
+
+asset.request('./planets/venus/venus')
+
+asset.request('./planets/earth/earth')
+asset.request('./planets/earth/atmosphere')
+asset.request('./planets/earth/markers')
+asset.request('./planets/earth/moon/moon')
+
+asset.request('./planets/mars/mars')
+asset.request('./planets/mars/atmosphere')
+
+asset.request('./planets/jupiter/jupiter')
+
+asset.request('./planets/saturn/saturn')
+asset.request('./planets/saturn/major_moons')
+
+asset.request('./planets/uranus/uranus')
+asset.request('./planets/uranus/major_moons')
+
+asset.request('./planets/neptune/neptune')
+asset.request('./planets/neptune/major_moons')
+
+-- Done including planets + moons.
 
 local MSLAsset = asset.require('scene/solarsystem/planets/mars/rovers/curiosity')
 
