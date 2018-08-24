@@ -46,7 +46,6 @@ namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::modelgeometry {
        
-
 class ModelGeometry : public properties::PropertyOwner {
 public:
 

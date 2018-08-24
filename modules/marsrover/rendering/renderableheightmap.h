@@ -56,7 +56,6 @@
 
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <modules/marsrover/heighthandler/texturewriterfreeimage.h>
 
 #include <ghoul/io/texture/texturewriter.h>
 #include <ghoul/io/texture/texturewriterbase.h>
@@ -65,9 +64,6 @@
 #include <openspace/util/updatestructures.h>	//must be here in order to use globebrowsing and scenegraphnode
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/properties/triggerproperty.h>
-
-#include <freeimage.h>
-
 
 #include <openspace/util/camera.h>
 

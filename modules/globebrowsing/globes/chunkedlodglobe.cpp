@@ -338,7 +338,7 @@ void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
             }
         }
     };
-    
+
     _leftRoot->breadthFirst(renderJob);
     _rightRoot->breadthFirst(renderJob);
 

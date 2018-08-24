@@ -27,95 +27,95 @@
 #include "ghoul/io/model/modelreadermultiformat.h"
 
 namespace {
- const std::string _loggerCat = "AsynchMultiModelGeometry";
+	const std::string _loggerCat = "AsynchMultiModelGeometry";
 }
 
 namespace openspace {
 
 namespace modelgeometry {
 AsyncMultiModelGeometry::AsyncMultiModelGeometry(const ghoul::Dictionary& dictionary)
- : ModelGeometry(dictionary)
+	: ModelGeometry(dictionary)
 {
- loadObj(_file);
+	loadObj(_file);
 }
 
 bool AsyncMultiModelGeometry::initialize(Renderable* parent) {
- glGenVertexArrays(1, &_vaoID);
- glBindVertexArray(_vaoID);
- glGenBuffers(1, &_ibo);
- glGenBuffers(1, &_vbo);
+	glGenVertexArrays(1, &_vaoID);
+	glBindVertexArray(_vaoID);
+	glGenBuffers(1, &_ibo);
+	glGenBuffers(1, &_vbo);
 
- glEnableVertexAttribArray(0);
- glEnableVertexAttribArray(1);
- glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
 
- glBindBuffer(GL_ARRAY_BUFFER, _vbo);
- glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-  reinterpret_cast<const GLvoid*>(offsetof(Vertex, location)));
- glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-  reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex)));
- glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-  reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal)));
+	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+		reinterpret_cast<const GLvoid*>(offsetof(Vertex, location)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+		reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex)));
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+		reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal)));
 
- size_t vboBufferSize{ _vertices.size() * sizeof(Vertex) };
- glBufferData(GL_ARRAY_BUFFER, vboBufferSize, nullptr, GL_STATIC_DRAW);
+	size_t vboBufferSize{ _vertices.size() * sizeof(Vertex) };
+	glBufferData(GL_ARRAY_BUFFER, vboBufferSize, nullptr, GL_STATIC_DRAW);
 
- _vertexBufferData = new Vertex[_vertices.size()];
- _vertexBufferData = (Vertex*)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+	_vertexBufferData = new Vertex[_vertices.size()];
+	_vertexBufferData = (Vertex*)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
 
- size_t iboBufferSize{ _indices.size() * sizeof(int) };
- glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
- glBufferData(GL_ELEMENT_ARRAY_BUFFER, iboBufferSize, nullptr, GL_STATIC_DRAW);
+	size_t iboBufferSize{ _indices.size() * sizeof(int) };
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, iboBufferSize, nullptr, GL_STATIC_DRAW);
 
- _indexBufferData = new int[_indices.size()];
- _indexBufferData = (int*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_READ_WRITE);
+	_indexBufferData = new int[_indices.size()];
+	_indexBufferData = (int*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_READ_WRITE);
 
- glBindVertexArray(0);
- return true;
+	glBindVertexArray(0);
+	return true;
 }
 
 void AsyncMultiModelGeometry::deinitialize() {
- ModelGeometry::deinitialize();
+	ModelGeometry::deinitialize();
 }
 
 void AsyncMultiModelGeometry::uploadData() {
- for (int i = 0; i < _vertices.size(); i++) {
-  _vertexBufferData[i] = _vertices.at(i);
- }
+	for (int i = 0; i < _vertices.size(); i++) {
+		_vertexBufferData[i] = _vertices.at(i);
+	}
 
- for (int k = 0; k < _indices.size(); k++) {
-  _indexBufferData[k] = _indices.at(k);
- }
+	for (int k = 0; k < _indices.size(); k++) {
+		_indexBufferData[k] = _indices.at(k);
+	}
 }
 
 void AsyncMultiModelGeometry::unmapBuffers() {
- glBindBuffer(GL_ARRAY_BUFFER, _vbo);
- glUnmapBuffer(GL_ARRAY_BUFFER);
+	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+	glUnmapBuffer(GL_ARRAY_BUFFER);
 
- glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
- glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
+	glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
 }
 
 bool AsyncMultiModelGeometry::loadModel(const std::string& filename) {
- std::vector<ghoul::io::ModelReaderBase::Vertex> vertices;
- std::vector<int> indices;
- ghoul::io::ModelReaderMultiFormat().loadModel(filename, vertices, indices);
+	std::vector<ghoul::io::ModelReaderBase::Vertex> vertices;
+	std::vector<int> indices;
+	ghoul::io::ModelReaderMultiFormat().loadModel(filename, vertices, indices);
 
- _vertices.reserve(vertices.size());
- for (const ghoul::io::ModelReaderBase::Vertex& v : vertices) {
-  Vertex vv;
-  memcpy(vv.location, v.location, sizeof(GLfloat) * 3);
-  vv.location[3] = 1.0;
-  //memcpy(vv.location, glm::value_ptr(p.vec4()), sizeof(GLfloat) * 4);
-  memcpy(vv.tex, v.tex, sizeof(GLfloat) * 2);
-  memcpy(vv.normal, v.normal, sizeof(GLfloat) * 3);
-  _vertices.push_back(vv);
- }
+	_vertices.reserve(vertices.size());
+	for (const ghoul::io::ModelReaderBase::Vertex& v : vertices) {
+		Vertex vv;
+		memcpy(vv.location, v.location, sizeof(GLfloat) * 3);
+		vv.location[3] = 1.0;
+		//memcpy(vv.location, glm::value_ptr(p.vec4()), sizeof(GLfloat) * 4);
+		memcpy(vv.tex, v.tex, sizeof(GLfloat) * 2);
+		memcpy(vv.normal, v.normal, sizeof(GLfloat) * 3);
+		_vertices.push_back(vv);
+	}
 
- _indices.resize(indices.size());
- std::copy(indices.begin(), indices.end(), _indices.begin());
+	_indices.resize(indices.size());
+	std::copy(indices.begin(), indices.end(), _indices.begin());
 
- return true;
+	return true;
 }
 
 } // namespace globebrowsing

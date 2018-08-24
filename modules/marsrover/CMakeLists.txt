@@ -25,8 +25,6 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-
-
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemarsrover.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableheightmap.h
 
@@ -37,15 +35,12 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/surfaceprojection/projectionprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/surfaceprojection/wheeldataprovider.h
 
-
     ${CMAKE_CURRENT_SOURCE_DIR}/heighthandler/extractheightmap.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/heighthandler/texturewriterfreeimage.h
-
 )
+
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemarsrover.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableheightmap.cpp
 
@@ -57,10 +52,8 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/surfaceprojection/wheeldataprovider.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/heighthandler/extractheightmap.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/heighthandler/texturewriterfreeimage.cpp
-
-
 )
+
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES

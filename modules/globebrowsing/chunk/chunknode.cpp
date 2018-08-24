@@ -177,7 +177,7 @@ void ChunkNode::split(int depth) {
             }
             _children[i] = std::move(temp);
 
-            // This is how it should be (beforte merge)
+            // This is how it should be (before merge)
             //Chunk chunk(_chunk.owner(), _chunk.tileIndex().child(static_cast<Quad>(i)));
             //_children[i] = std::make_unique<ChunkNode>(chunk, this);
 

@@ -196,13 +196,12 @@ local HazCam_BleftA = {
     GuiPath = "/Solar System/Missions/Rosetta"
 }
 
-
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-	Mardi,
-	Mahli,
-	MastCam_left,
-	MastCam_right,
-	NavCam_leftA,
-	CHEMNN_RMI,
-	HazCam_BleftA
+    Mardi,
+    Mahli,
+    MastCam_left,
+    MastCam_right,
+    NavCam_leftA,
+    CHEMNN_RMI,
+    HazCam_BleftA
 })

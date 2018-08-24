@@ -95,7 +95,6 @@ public:
     void render(Scene* scene, Camera* camera, float blackoutFactor,
         bool doPerformanceMeasurements) override;
 
-    
     /**
      * Update render data
      * Responsible for calling renderEngine::setRenderData
@@ -108,7 +107,6 @@ public:
         RaycasterListener::IsAttached attached) override;
     virtual void deferredcastersChanged(Deferredcaster& deferredcaster,
         DeferredcasterListener::IsAttached isAttached) override;
-
 
 private:
     std::map<VolumeRaycaster*, RaycastData> _raycastData;

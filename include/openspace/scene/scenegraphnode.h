@@ -166,16 +166,11 @@ private:
 
     std::string _guiPath;
 
-    //std::string* fint;
-
-    //std::string* coordinateSystem;
-
     // Transformation defined by ephemeris, rotation and scale
     struct {
         std::unique_ptr<Translation> translation;
         std::unique_ptr<Rotation> rotation;
         std::unique_ptr<Scale> scale;
-        //std::unique_ptr<Rotation> coordinateSystem;
     } _transform;
 
     std::unique_ptr<TimeFrame> _timeFrame;
@@ -185,7 +180,6 @@ private:
     glm::dmat3 _worldRotationCached;
     double _worldScaleCached = 1.0;
 
-    
     glm::dmat4 _modelTransformCached;
     glm::dmat4 _inverseModelTransformCached;
 

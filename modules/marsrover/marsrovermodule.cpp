@@ -24,27 +24,16 @@
 
 #include <modules/marsrover/marsrovermodule.h>
 
-
-//#include <modules/marsrover/surfaceprojection/marsprojection.h>
-
-
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/assert.h>
+
 #include <modules/marsrover/rendering/renderableheightmap.h>
-
-//#include <modules/marsrover/rendering/renderablemarsrover.h>
-
-
 #include <modules/marsrover/rotation/advancedspicerotation.h>
-
 #include <modules/marsrover/rotation/rksmlrotation.h>
-
 #include <modules/marsrover/surfaceprojection/spacecraftprojection.h>
 #include <modules/marsrover/surfaceprojection/projectionprovider.h>
 #include <modules/marsrover/surfaceprojection/wheeldataprovider.h>
-
-
 
 namespace openspace {
 
@@ -52,9 +41,7 @@ ghoul::opengl::ProgramObjectManager MarsroverModule::ProgramObjectManager;
 
 MarsroverModule::MarsroverModule() : OpenSpaceModule(MarsroverModule::Name) {}   
 
-void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {    
-
-    
+void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {
     //to later
     auto fRenderable = FactoryManager::ref().factory<Renderable>();    
     ghoul_assert(fRenderable, "Renderable factory was not created");    
@@ -63,7 +50,6 @@ void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {
     
     //if we need the heightmap code to be a renderable
     fRenderable->registerClass<RenderableHeightMap>("RenderableHeightMap");
-
 
     auto fRotation = FactoryManager::ref().factory<Rotation>();
     //(fRotation, "Rotation factory was not created");
@@ -78,7 +64,6 @@ void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {
         fProjectionProvider->registerClass<WheelDataProvider>("WheelDataProvider");
     FactoryManager::ref().addFactory(std::move(fProjectionProvider));
 
-
     //Read heightmap once
     //MslTerrain terrainMap;
     //terrainMap.createHeightMap(); 
@@ -86,6 +71,5 @@ void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {
     //auto fTranslation = FactoryManager::ref().factory<Translation>();
     //fTranslation->registerClass<MarsProjection>("MarsProjection");
 }
-
 
 } // namespace openspace

@@ -162,8 +162,6 @@ LRUCache<KeyType, ValueType, HasherType>::cleanAndFetchPopped()
 template<typename KeyType, typename ValueType, typename HasherType>
 std::list<std::pair<KeyType, ValueType>>
 LRUCache<KeyType, ValueType, HasherType>::list() {
-    if (_itemList.size() > 0)
-        return _itemList;
     return _itemList;
 }
 

@@ -273,7 +273,6 @@ void SceneGraphNode::traversePostOrder(const std::function<void(SceneGraphNode*)
     for (std::unique_ptr<SceneGraphNode>& child : _children) {
         child->traversePostOrder(fn);
     }
-
     fn(this);
 }
 
@@ -648,27 +647,8 @@ bool SceneGraphNode::isTimeFrameActive(const Time& time) const {
 }
 
 glm::dmat3 SceneGraphNode::calculateWorldRotation() const {
-    // recursive up the hierarchy if there are parents available                   
+    // recursive up the hierarchy if there are parents available
     if (_parent) {
-
-
-        //if (_parent->name() == "RA_Shoulder_AZ_Location")
-        //{
-            //LERROR(fmt::format("Parent location AZ: '{}'", _parent->name()));
-            //LERROR(fmt::format("Parent rotations matrix '{}'", _parent->worldRotationMatrix() ));
-        //}   
-
-        //if (this->name() == "RA_Shoulder_EL_Location")
-        //{
-            //glm::dmat3 directionTransform_Z = glm::dmat3( 
-            //    -1.0, -1.0, 1.0, 
-            //    -1.0, -1.0, 1.0, 
-            //     1.0,  1.0, 1.0
-            //);
-            //
-            //glm::dmat3 changeDirection = _parent->calculateWorldRotation() * directionTransform_Z;
-        //} 
-
         return _parent->calculateWorldRotation() * rotationMatrix();
     }
     else {

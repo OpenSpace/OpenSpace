@@ -46,7 +46,7 @@ namespace openspace::scripting {
  * other Lua states by passing them to the #initializeLuaState method.
  */
 class ScriptEngine : public Syncable, public DocumentationGenerator {
-public: 
+public:
     BooleanType(RemoteScripting);
 
     static constexpr const char* OpenSpaceLibraryName = "openspace";

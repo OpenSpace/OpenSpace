@@ -793,11 +793,19 @@ public:
         double ephemerisTimeTo) const;
 
 
-    //returns the gimbal angle for spacecrafts
+    /**
+     * Returns the gimbal angle for spacecrafts
+     */
     double getEulerAngle(glm::dmat3 transformMatrix, int a);
 
-    //Converts rectangular coordinates to Latitudinal coordinates dvec3(radius, long, lat)
+    /**
+     * Converts rectangular coordinates to Latitudinal coordinates dvec3(radius, long, lat)
+     */
     glm::dvec3 fromCartesianToLatitudinal(glm::dvec3 point);
+
+    /**
+     * Converts Latitudinal coordinates dvec3(radius, long, lat) to cartesian coordinates
+     */
     glm::dvec3 fromLatitudinalToCartesian(glm::dvec3 point); 
 
     /// The structure returned by the #fieldOfView methods

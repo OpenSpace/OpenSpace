@@ -1116,7 +1116,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
     glm::dvec3 pos;
     if (coveredTimes.lower_bound(ephemerisTime) == coveredTimes.begin()) {
         // coverage later, fetch first position
-          (
+        spkpos_c(
             target.c_str(),
             *(coveredTimes.begin()),
             referenceFrame.c_str(),

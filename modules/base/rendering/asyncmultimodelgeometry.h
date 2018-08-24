@@ -32,21 +32,21 @@ namespace modelgeometry {
 
 class AsyncMultiModelGeometry : public ModelGeometry {
 public:
- AsyncMultiModelGeometry(const ghoul::Dictionary& dictionary);
+    AsyncMultiModelGeometry(const ghoul::Dictionary& dictionary);
 
- bool initialize(Renderable* parent) override;
- void deinitialize() override;
+    bool initialize(Renderable* parent) override;
+    void deinitialize() override;
 
- void uploadData();
- void unmapBuffers();
+    void uploadData();
+    void unmapBuffers();
 
 private:
- Renderable* _parent;
+    Renderable* _parent;
 
- bool loadModel(const std::string& filename);
+    bool loadModel(const std::string& filename);
 
- Vertex* _vertexBufferData;
- int* _indexBufferData;
+    Vertex* _vertexBufferData;
+    int* _indexBufferData;
 };
 
 } // namespace globebrowsing

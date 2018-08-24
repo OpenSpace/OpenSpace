@@ -32,7 +32,7 @@
 //FUNCTIONALITY
 // look at the x,y,z values of each vertex point
 // check if there is several z values for the same point (maybe this is better done in fullsite_vs.glsl?)
-	//decide which z value is the heighest.
+    //decide which z value is the heighest.
 // save the correct and sampled x,y,z values
 //write to a txt file (or maybe png??)
 
@@ -58,24 +58,24 @@ namespace documentation { struct Documentation; }
 
 class ExtractHeightMap {
 public:
-	struct TextureInformation{
-		std::vector<std::string> fileNames; //might not need
-		std::vector<PointCloudInfo> cameraInfoVector;	//might not be able to reach this file, and might not need it
-	};
+    struct TextureInformation{
+        std::vector<std::string> fileNames; //might not need
+        std::vector<PointCloudInfo> cameraInfoVector;   //might not be able to reach this file, and might not need it
+    };
 
-	//ExtractHeightMap(const ghoul::Dictionary& dictionary);
-	static int extractSubsiteInformation(const ghoul::Dictionary dictionary);	//maybe these should be static??
-	
+    //ExtractHeightMap(const ghoul::Dictionary& dictionary);
+    static int extractSubsiteInformation(const ghoul::Dictionary dictionary);   //maybe these should be static??
+    
 
 private:
 
-	std::vector<std::shared_ptr<Subsite>> samplePositionValues(const ghoul::Dictionary dictionary);
-	std::vector<std::shared_ptr<Subsite>> writeToFile(const ghoul::Dictionary dictionary);
+    std::vector<std::shared_ptr<Subsite>> samplePositionValues(const ghoul::Dictionary dictionary);
+    std::vector<std::shared_ptr<Subsite>> writeToFile(const ghoul::Dictionary dictionary);
 
-	std::string _modelPath;
-	std::vector<std::shared_ptr<Subsite>> _subsites;
-	std::vector<std::shared_ptr<SubsiteModels>> vectorOfsubsiteModels;
-	std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    std::string _modelPath;
+    std::vector<std::shared_ptr<Subsite>> _subsites;
+    std::vector<std::shared_ptr<SubsiteModels>> vectorOfsubsiteModels;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
 };
 

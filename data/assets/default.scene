@@ -56,8 +56,7 @@ local Keybindings = {
     },
 }
 
---local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
-local marsAsset = asset.require('scene/solarsystem/planets/mars/mars')
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 
 asset.onInitialize(function ()
     local now = openspace.time.currentWallTime()
@@ -87,7 +86,7 @@ asset.onInitialize(function ()
     )
 
     openspace.navigation.setCameraState({
-        Focus = marsAsset.Mars.Identifier,
+        Focus = earthAsset.Earth.Identifier,
         Position = { 0, 0, 0 },
         Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 },
     })

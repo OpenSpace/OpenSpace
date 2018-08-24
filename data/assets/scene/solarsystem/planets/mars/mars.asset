@@ -15,7 +15,6 @@ local textures = asset.syncedResource({
 local marsRadii = { 3396190.0, 3396190.0, 3396190.0 }
 
 local mapServiceConfigs = asset.localResource("map_service_configs")
-local heightDATA = asset. localResource("map_datasets")  
 
 local color_layers = {
     {

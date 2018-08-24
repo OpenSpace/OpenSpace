@@ -183,11 +183,11 @@ void PropertyOwner::addProperty(Property* prop) {
 
     // If we found the property identifier, we need to bail out
     if (it != _properties.end() && (*it)->identifier() == prop->identifier()) {
-        /*LERROR(fmt::format(
+        LERROR(fmt::format(
             "Property identifier '{}' already present in PropertyOwner '{}'",
             prop->identifier(),
             identifier()
-        ));*/
+        ));
         return;
     } else {
         // Otherwise we still have to look if there is a PropertyOwner with the same name
@@ -228,11 +228,11 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
 
     // If we found the propertyowner's name, we need to bail out
     if (it != _subOwners.end() && (*it)->identifier() == owner->identifier()) {
-        //LERROR(fmt::format(
-        //    "PropertyOwner '{}' already present in PropertyOwner '{}'",
-        //    owner->identifier(),
-        //    identifier()
-        //));
+        LERROR(fmt::format(
+            "PropertyOwner '{}' already present in PropertyOwner '{}'",
+            owner->identifier(),
+            identifier()
+        ));
         return;
     } else {
         // We still need to check if the PropertyOwners name is used in a Property

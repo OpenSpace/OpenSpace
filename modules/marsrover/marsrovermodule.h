@@ -28,10 +28,7 @@
 #include <openspace/util/openspacemodule.h>
 #include <modules/globebrowsing/globebrowsingmodule.h>
 
-
-
 #include <ghoul/opengl/programobjectmanager.h>
-
 
 namespace openspace {
 
@@ -41,7 +38,6 @@ public:
 
     MarsroverModule();
     virtual ~MarsroverModule() = default;
-
 
     static ghoul::opengl::ProgramObjectManager ProgramObjectManager; //nej
 

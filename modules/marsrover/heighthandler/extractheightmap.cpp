@@ -30,48 +30,36 @@
 #include <ghoul/fmt.h>
 
 namespace {
-
 	const char* _loggerCat = "ExtractHeightMap";
-
 } // namespace
 namespace ghoul::filesystem { class File; } //maybe not needed?
 namespace openspace {
 
 //************************Call these functions inside marsrovermodule****************************************//
 
-
 //maybe have function as void and just write to file? yeeees?
-    int extractSubsiteInformation(const ghoul::Dictionary dictionary) {
-    	
-        //RenderEngine& renderEngine = OsEng.renderEngine();
-        //_programObject = renderEngine.buildRenderProgram("RenderableMarsrover",
-        //    absPath("${MODULE_MARSROVER}/shaders/heightmap_vs.glsl"),
-        //    absPath("${MODULE_MARSROVER}/shaders/heightmap_fs.glsl")
-        //);
+int extractSubsiteInformation(const ghoul::Dictionary dictionary) {
+	
+    //RenderEngine& renderEngine = OsEng.renderEngine();
+    //_programObject = renderEngine.buildRenderProgram("RenderableMarsrover",
+    //    absPath("${MODULE_MARSROVER}/shaders/heightmap_vs.glsl"),
+    //    absPath("${MODULE_MARSROVER}/shaders/heightmap_fs.glsl")
+    //);
 
-        //std::vector<std::shared_ptr<Subsite>> pos;
-        //LERROR(fmt::format("position KRIIIIISTIN    '{}'", pos));
-        int pos = 1;
-        return pos;
+    //std::vector<std::shared_ptr<Subsite>> pos;
+    //LERROR(fmt::format("position KRIIIIISTIN    '{}'", pos));
 
-    }
+    return 1;
+}
 
-    std::vector<std::shared_ptr<Subsite>> samplePositionValues(std::vector<std::shared_ptr<Subsite>> vector) {
-
-    	//look at z values and choose the largest one and eliminate the rest of them
-    	std::vector<std::shared_ptr<Subsite>> hej;
-
-    	return hej;
-    }
+std::vector<std::shared_ptr<Subsite>> samplePositionValues(std::vector<std::shared_ptr<Subsite>> vector) {
+	//look at z values and choose the largest one and eliminate the rest of them
+	return std::vector<std::shared_ptr<Subsite>>();
+}
 
 
-    std::vector<std::shared_ptr<Subsite>> writeToFile(const ghoul::Dictionary dictionary) {
-
-    	std::vector<std::shared_ptr<Subsite>> hej;
-
-    	return hej;
-    }
-
-
+std::vector<std::shared_ptr<Subsite>> writeToFile(const ghoul::Dictionary dictionary) {
+	return std::vector<std::shared_ptr<Subsite>>();
+}
 
 } // namespace openspace

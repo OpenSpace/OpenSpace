@@ -72,7 +72,7 @@ public:
     size_t maximumCacheSize() const;
 
     /**
-    * Return the whole list of.
+    * Return the whole list of data.
     */
     std::list<std::pair<KeyType, ValueType>> list();
 
