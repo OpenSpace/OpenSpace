@@ -22,6 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
+
 namespace openspace::luascriptfunctions::asset {
 
 int add(lua_State* state) {
@@ -35,7 +38,16 @@ int add(lua_State* state) {
         1,
         ghoul::lua::PopValue::Yes
     );
-    assetManager->add(assetName);
+
+    if (OsEng.renderEngine().scene()) {
+        assetManager->add(assetName);
+    }
+    else {
+        // The scene might not exist yet if OpenSpace was started without specifying an
+        // initial asset
+        OsEng.scheduleLoadSingleAsset(assetName);
+    }
+
 
     ghoul_assert(lua_gettop(state) == 0, "Incorrect number of items left on stack");
     return 0;

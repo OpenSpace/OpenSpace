@@ -1193,10 +1193,12 @@ void OpenSpaceEngine::preSynchronization() {
         _renderEngine->updateScene();
         //_navigationHandler->updateCamera(dt);
 
-        Camera* camera = _scene->camera();
-        if (camera) {
-            _navigationHandler->updateCamera(dt);
-            camera->invalidateCache();
+        if (_scene) {
+            Camera* camera = _scene->camera();
+            if (camera) {
+                _navigationHandler->updateCamera(dt);
+                camera->invalidateCache();
+            }
         }
         _parallelPeer->preSynchronization();
     }
