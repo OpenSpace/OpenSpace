@@ -75,8 +75,15 @@ namespace {
 
     // Autopilot JSON keys
     constexpr const char* AutopilotEngagedKey = "engaged";
+    constexpr const char* AutopilotInputKey = "autopilotInput";
 
     constexpr const char* FlightControllerType = "flightcontroller";
+
+    constexpr const char* FrictionPropertyUri = "NavigationHandler.OrbitalNavigator.Friction";
+
+    constexpr const char* RotationalFriction = "Friction.RotationalFriction";
+    constexpr const char* ZoomFriction = "Friction.ZoomFriction";
+    constexpr const char* RollFriction = "Friction.RollFriction";
 
     const std::string OrbitX = "orbitX";
     const std::string OrbitY = "orbitY";
@@ -165,7 +172,7 @@ void FlightControllerTopic::handleJson(const nlohmann::json& json) {
             changeFocus(json);
             break;
         case Command::Autopilot:
-            toggleAutopilot();
+            handleAutopilot(json[Autopilot]);
             break;
         default:
             LWARNING(fmt::format("Unrecognized action: {}", it->first));
@@ -230,12 +237,60 @@ void FlightControllerTopic::disconnect() {
     _isDone = true;
 }
 
-void FlightControllerTopic::toggleAutopilot() {
+void FlightControllerTopic::setFriction(const bool &on) {
+    std::vector<std::string> frictions;
+    frictions.push_back(RotationalFriction);
+    frictions.push_back(ZoomFriction);
+    frictions.push_back(RollFriction);
+
+    for (auto &f: frictions) {
+        auto property = OsEng.navigationHandler().orbitalNavigator().property(f);
+        property->set(on);
+    }
+}
+
+void FlightControllerTopic::disengageAutopilot() {
+    setFriction(true);
+}
+
+void FlightControllerTopic::engageAutopilot(const nlohmann::json &json) {
+    // Disable/enable friction
+    setFriction(false);
+    auto input = json[AutopilotInputKey][ValuesKey];
+
+    std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0);
+    _inputState.isConnected = true;
+
+    for (auto it = input.begin(); it != input.end(); ++it) {
+        const auto mapIt = AxisIndexMap.find(it.key());
+        if (mapIt == AxisIndexMap.end()) {
+            if (it.key() != TypeKey
+                || CommandMap.find(it.value()) == CommandMap.end()) {
+                LWARNING(fmt::format(
+                                     "No axis, button, or command named {} (value: {})", it.key() , it.value()
+                                     ));
+            }
+            continue;
+        }
+        _inputState.axes[std::distance(AxisIndexMap.begin(), mapIt)] = float(it.value());
+    }
+}
+
+void FlightControllerTopic::handleAutopilot(const nlohmann::json &json) {
+    const bool engaged = json[AutopilotEngagedKey];
+
+    if(engaged) {
+        engageAutopilot(json);
+    } else {
+        disengageAutopilot();
+    }
+    _autopilotEngaged = engaged;
+
     nlohmann::json j;
     j[TypeKey] = Autopilot;
     j[Autopilot][AutopilotEngagedKey] = _autopilotEngaged;
 
-    _autopilotEngaged = !_autopilotEngaged;
+    _connection->sendJson(wrappedPayload(j));
 }
 
 void FlightControllerTopic::processInputState(const nlohmann::json& json) {

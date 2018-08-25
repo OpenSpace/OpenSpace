@@ -45,7 +45,9 @@ public:
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
 
-    void toggleAutopilot();
+    void engageAutopilot(const nlohmann::json &json);
+    void disengageAutopilot();
+    void handleAutopilot(const nlohmann::json &json);
 
 private:
     bool _isDone;
@@ -62,6 +64,8 @@ private:
     void processInputState(const nlohmann::json& json);
     void setFocusNodes();
     void changeFocus(const nlohmann::json& json);
+
+    void setFriction(const bool &on);
 };
 
 } // namespace openspace
