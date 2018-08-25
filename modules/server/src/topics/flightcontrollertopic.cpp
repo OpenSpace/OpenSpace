@@ -32,6 +32,7 @@
 #include <openspace/interaction/websocketcamerastates.h>
 #include <openspace/interaction/websocketinputstate.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
@@ -52,7 +53,8 @@ namespace {
         Connect = 0,
         Disconnect,
         InputState,
-        ChangeFocus
+        ChangeFocus,
+        Autopilot
     };
 
     using AxisType = openspace::interaction::WebsocketCameraStates::AxisType;
@@ -71,6 +73,9 @@ namespace {
     // Change focus JSON keys
     constexpr const char* FocusKey = "focus";
 
+    // Autopilot JSON keys
+    constexpr const char* AutopilotEngagedKey = "engaged";
+
     constexpr const char* FlightControllerType = "flightcontroller";
 
     const std::string OrbitX = "orbitX";
@@ -88,6 +93,7 @@ namespace {
     const std::string Disconnect = "disconnect";
     const std::string InputState = "inputState";
     const std::string ChangeFocus = "changeFocus";
+    const std::string Autopilot = "autopilot";
 
     const static std::unordered_map<std::string, AxisType> AxisIndexMap ({
         {OrbitX, AxisType::OrbitX},
@@ -106,7 +112,8 @@ namespace {
         {Connect, Command::Connect},
         {Disconnect, Command::Disconnect},
         {InputState, Command::InputState},
-        {ChangeFocus, Command::ChangeFocus}
+        {ChangeFocus, Command::ChangeFocus},
+        {Autopilot, Command::Autopilot}
     });
 
     const int Axes = 10;
@@ -156,6 +163,9 @@ void FlightControllerTopic::handleJson(const nlohmann::json& json) {
             break;
         case Command::ChangeFocus:
             changeFocus(json);
+            break;
+        case Command::Autopilot:
+            toggleAutopilot();
             break;
         default:
             LWARNING(fmt::format("Unrecognized action: {}", it->first));
@@ -218,6 +228,14 @@ void FlightControllerTopic::disconnect() {
     j[Disconnect][SuccessKey] = true;
     _connection->sendJson(wrappedPayload(j));
     _isDone = true;
+}
+
+void FlightControllerTopic::toggleAutopilot() {
+    nlohmann::json j;
+    j[TypeKey] = Autopilot;
+    j[Autopilot][AutopilotEngagedKey] = _autopilotEngaged;
+
+    _autopilotEngaged = !_autopilotEngaged;
 }
 
 void FlightControllerTopic::processInputState(const nlohmann::json& json) {

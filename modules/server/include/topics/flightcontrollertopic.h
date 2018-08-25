@@ -45,8 +45,11 @@ public:
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
 
+    void toggleAutopilot();
+
 private:
     bool _isDone;
+    bool _autopilotEngaged;
     nlohmann::json _payload;
     nlohmann::json _focusNodes;
     nlohmann::json _allNodes;

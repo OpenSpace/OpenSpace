@@ -153,7 +153,7 @@ void InputState::resetWebsockets() {
 }
 
 bool InputState::hasWebsocketStates() const {
-    return _websocketInputs.size() > 0;
+    return !_websocketInputs.empty();
 }
 
 } // namespace openspace::interaction
