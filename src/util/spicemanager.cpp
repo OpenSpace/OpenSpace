@@ -47,8 +47,8 @@ namespace {
     // If an error occurred, true is returned, otherwise, false
     bool throwOnSpiceError(const std::string& errorMessage) {
         SpiceBoolean failed = failed_c();
-        if (openspace::SpiceManager::ref().exceptionHandling()) {
-            if (failed) {
+        if (failed) {
+            if (openspace::SpiceManager::ref().exceptionHandling()) {
                 char buffer[SpiceErrorBufferSize];
                 getmsg_c("LONG", SpiceErrorBufferSize, buffer);
                 reset_c();
@@ -56,13 +56,9 @@ namespace {
                     errorMessage + ": " + buffer
                 );
             }
-            else {
-                return false;
-            }
+            reset_c();
         }
-        else {
-            return failed;
-        }
+        return failed;
     }
 
     const char* toString(openspace::SpiceManager::FieldOfViewMethod m) {
@@ -798,6 +794,8 @@ double SpiceManager::getEulerAngle(glm::dmat3 transformMatrix, int a)
         &rot_y,
         &rot_x
     );
+
+    throwOnSpiceError("Could not get Euler angle from transformation matrix");
 
     //FIX
     if (a == 1)      return rot_x;
