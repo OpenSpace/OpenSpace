@@ -217,6 +217,10 @@ bool SGCTWindowWrapper::isMaster() const {
     return sgct::Engine::instance()->isMaster();
 }
 
+int SGCTWindowWrapper::clusterId() const {
+    return sgct_core::ClusterManager::instance()->getThisNodeId();
+}
+
 bool SGCTWindowWrapper::isSwapGroupMaster() const {
     return sgct::Engine::instance()->getCurrentWindowPtr()->isSwapGroupMaster();
 }
