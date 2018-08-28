@@ -739,6 +739,10 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 void OpenSpaceEngine::deinitialize() {
     LTRACE("OpenSpaceEngine::deinitialize(begin)");
 
+    // We want to render an image informing the user that we are shutting down
+    global::renderEngine.renderEndscreen();
+    global::windowDelegate.swapBuffer();
+
     for (const std::function<void()>& func : global::callback::deinitializeGL) {
         func();
     }
@@ -927,10 +931,12 @@ void OpenSpaceEngine::preSynchronization() {
         global::renderEngine.updateScene();
         //_navigationHandler->updateCamera(dt);
 
-        Camera* camera = _scene->camera();
-        if (camera) {
-            global::navigationHandler.updateCamera(dt);
-            camera->invalidateCache();
+        if (_scene) {
+            Camera* camera = _scene->camera();
+            if (camera) {
+                global::navigationHandler.updateCamera(dt);
+                camera->invalidateCache();
+            }
         }
         global::parallelPeer.preSynchronization();
     }
@@ -966,6 +972,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     if (_shutdown.inShutdown) {
         if (_shutdown.timer <= 0.f) {
             global::windowDelegate.terminate();
+            return;
         }
         _shutdown.timer -= static_cast<float>(global::windowDelegate.averageDeltaTime());
     }

@@ -37,7 +37,7 @@ namespace openspace::configuration {
 
 struct Configuration {
     std::string windowConfiguration = "${CONFIG}/single.xml";
-    std::string asset = "default";
+    std::string asset;
     std::vector<std::string> globalCustomizationScripts;
     std::map<std::string, std::string> pathTokens = {
         { "CACHE" , "CACHE = \"${BASE}/cache\"" }

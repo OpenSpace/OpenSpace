@@ -165,8 +165,9 @@ void ParallelPeer::disconnect() {
 }
 
 void ParallelPeer::sendAuthentication() {
+    std::string name = _name;
     // Length of this nodes name
-    const uint32_t nameLength = static_cast<uint32_t>(_name.value().length());
+    const uint32_t nameLength = static_cast<uint32_t>(name.length());
 
     // Total size of the buffer: (passcode + namelength + name)
     const size_t size = sizeof(uint64_t) + sizeof(uint32_t) + nameLength;
@@ -192,7 +193,7 @@ void ParallelPeer::sendAuthentication() {
     );
 
     // Write this node's name to buffer
-    buffer.insert(buffer.end(), _name.value().begin(), _name.value().end());
+    buffer.insert(buffer.end(), name.begin(), name.end());
 
     // Send message
     _connection.sendMessage(ParallelConnection::Message(

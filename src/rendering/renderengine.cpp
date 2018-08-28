@@ -611,6 +611,23 @@ void RenderEngine::renderOverlays(const ShutdownInformation& shutdownInfo) {
     }
 }
 
+void RenderEngine::renderEndscreen() {
+    glClearColor(0.f, 0.f, 0.f, 0.25f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    using FR = ghoul::fontrendering::FontRenderer;
+    using BBox = FR::BoundingBoxInformation;
+    BBox size = FR::defaultRenderer().boundingBox(
+        *_fontDate,
+        "Shutting down"
+    );
+    glm::vec2 penPosition = glm::vec2(
+        fontResolution().x / 2 - size.boundingBox.x / 2,
+        fontResolution().y / 2- size.boundingBox.y / 2
+    );
+    RenderFont(*_fontDate, penPosition, "Shutting down");
+}
+
 void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
     timer = std::max(timer, 0.f);
 

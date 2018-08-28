@@ -88,6 +88,7 @@ public:
     bool mouseActivationCallback(const glm::dvec2& mousePosition) const;
 
     void renderOverlays(const ShutdownInformation& shutdownInfo);
+    void renderEndscreen();
     void postDraw();
 
     float globalBlackOutFactor();
