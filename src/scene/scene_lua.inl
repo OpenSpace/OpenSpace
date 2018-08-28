@@ -237,12 +237,12 @@ int property_setValue(lua_State* L) {
                 interpolationDuration = ghoul::lua::value<double>(L, 4);
             }
             else {
-                optimization = ghoul::lua::value<std::string>(L, 4);
+                easingMethodName = ghoul::lua::value<std::string>(L, 4);
             }
         }
 
         if (lua_gettop(L) == 5) {
-            easingMethodName = ghoul::lua::value<std::string>(L, 5);
+            optimization = ghoul::lua::value<std::string>(L, 5);
         }
 
         // Later functions expect the value to be at the last position on the stack

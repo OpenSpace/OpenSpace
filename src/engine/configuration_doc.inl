@@ -44,7 +44,7 @@ documentation::Documentation Configuration::Documentation = {
             new StringAnnotationVerifier(
                 "A valid scene file as described in the Scene documentation"
             ),
-            Optional::No,
+            Optional::Yes,
             "The scene description that is used to populate the application after "
             "startup. The scene determines which objects are loaded, the startup "
             "time and other scene-specific settings. More information is provided in "
