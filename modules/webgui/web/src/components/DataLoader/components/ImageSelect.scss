@@ -1,6 +1,9 @@
+$img-size: 30%;
+
 .image {
         float: left;
-        width: 30%;
+        width: $img-size;
+        height: $img-size;
         border: solid 2px transparent;
 
     &:hover {

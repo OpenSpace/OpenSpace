@@ -9,10 +9,19 @@ export const stringListToArray = (stringList) => {
 
 /**
  * 
- * @param {string} directory 
+ * @param {string} filePath 
+ */
+export const backSlashesToForward = (filePath) => {
+  return filePath.replace(/\\/g, '/');
+}
+/**
+ * 
+ * @param {string} directory - A file system path
+ * @returns The last word/filename/directory separated by slashes
  */
 export const getDirectoryLeaf = (directory) => {
-  return directory.match('([^/]+)/?$')[0];
+  const withFixedSlashes = backSlashesToForward(directory);
+  return withFixedSlashes.match('([^/]+)/?$')[0];
 }
 
 /**

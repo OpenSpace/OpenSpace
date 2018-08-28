@@ -235,7 +235,7 @@ class PrepareUploadedData extends Component {
 
     const WINDOW_MAX_WIDTH = 800;
     const w = width / 2;
-    const h = height / 2;
+    const h = 700;
     const windowSize = {
       width: w > WINDOW_MAX_WIDTH ? WINDOW_MAX_WIDTH : w,
       height: h
