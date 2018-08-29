@@ -262,4 +262,16 @@ int downloadFile(lua_State* L) {
     return 0;
 }
 
+int isMaster(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::isMaster");
+    ghoul::lua::push(L, OsEng.windowWrapper().isMaster());
+    return 1;
+}
+
+int clusterId(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clusterId");
+    ghoul::lua::push(L, OsEng.windowWrapper().clusterId());
+    return 1;
+}
+
 } // namespace openspace::luascriptfunctions

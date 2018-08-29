@@ -145,6 +145,10 @@ bool WindowWrapper::isMaster() const {
     return false;
 }
 
+int WindowWrapper::clusterId() const {
+    return 0;
+}
+
 bool WindowWrapper::isSwapGroupMaster() const {
     return false;
 }
