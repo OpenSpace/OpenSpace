@@ -46,7 +46,7 @@ public:
     bool isDone() const override;
 
     void engageAutopilot(const nlohmann::json &json);
-    void disengageAutopilot();
+    void disengageAutopilot() const;
     void handleAutopilot(const nlohmann::json &json);
 
 private:
@@ -65,7 +65,7 @@ private:
     void setFocusNodes();
     void changeFocus(const nlohmann::json& json);
 
-    void setFriction(const bool &on);
+    void setFriction(const bool &on) const;
 };
 
 } // namespace openspace

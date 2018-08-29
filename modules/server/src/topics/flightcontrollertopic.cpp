@@ -148,6 +148,7 @@ FlightControllerTopic::~FlightControllerTopic() {
 }
 
 bool FlightControllerTopic::isDone() const {
+    disengageAutopilot();
     return _isDone;
 }
 
@@ -237,7 +238,7 @@ void FlightControllerTopic::disconnect() {
     _isDone = true;
 }
 
-void FlightControllerTopic::setFriction(const bool &on) {
+void FlightControllerTopic::setFriction(const bool &on) const {
     std::vector<std::string> frictions;
     frictions.push_back(RotationalFriction);
     frictions.push_back(ZoomFriction);
@@ -249,7 +250,7 @@ void FlightControllerTopic::setFriction(const bool &on) {
     }
 }
 
-void FlightControllerTopic::disengageAutopilot() {
+void FlightControllerTopic::disengageAutopilot() const {
     setFriction(true);
 }
 
