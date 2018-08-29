@@ -17,23 +17,59 @@ module.exports = {
     devtool: 'source-map',
 
     module: {
-        rules: [
+      rules: [
+        // Load JS!
+        {
+          test: /\.jsx?$/,
+          use: ['babel-loader'],
+          exclude: /node_modules/,
+        },
+        // Load SASS!
+        {
+          test: /\.scss$/,
+          exclude: /node_modules/,
+          use: [
             {
-                test: /\.jsx?$/,
-                use: [ 'babel-loader', ],
-                exclude: /node_modules/
+              loader: 'style-loader',
+            }, {
+              loader: 'css-loader?modules',
+              options: {
+                sourceMap: true,
+                importLoaders: 2,
+                modules: true,
+                localIdentName: '[path][name]-[local]',
+                minimize: false,
+              },
+            }, {
+              loader: 'sass-loader',
+              options: {
+                sourceMap: true,
+              },
             },
-            {
-                test: /\.css$/,
-                use: [ 'style-loader', 'css-loader?modules', ],
-            },
-        ],
+          ],
+        },
+        {
+          test: /\.css$/,
+          use: ['style-loader', 'css-loader'],
+        },
+        {
+          test: /\.(woff|woff2|ttf|eot)$/,
+          loader: 'file-loader',
+          options: {
+            name: 'fonts/[name].[ext]',
+          },
+        },
+        {
+          test: /\.(png)$/,
+          loader: 'file-loader',
+          options: {
+            name: 'img/[name].[ext]',
+          },
+        },
+      ],
     },
 
-    plugins: [
-        new webpack.optimize.UglifyJsPlugin({
-            sourceMap: true,
-            comments: false
-        })
-    ]
+    resolve: {
+        extensions: ['.js', '.jsx'],
+    }
 };

@@ -1,8 +1,8 @@
 {
   "presets": [
-    ["es2015", {"modules": false}],
-    "react",
-    "flow"
+    ["@babel/preset-env", {"modules": false}],
+    "@babel/preset-react",
+    "@babel/preset-flow"
   ],
   "plugins": [
     "react-hot-loader/babel",

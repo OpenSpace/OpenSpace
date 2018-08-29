@@ -26,6 +26,11 @@
 #define __OPENSPACE_MODULE_WEBGUI___WEBGUIMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+#include <openspace/properties/scalar/boolproperty.h>
+
+#include <ghoul/misc/process.h>
+
+#include <memory>
 
 namespace openspace {
 
@@ -33,6 +38,15 @@ class WebGuiModule : public OpenSpaceModule {
 public:
     static constexpr const char* Name = "WebGui";
     WebGuiModule();
+
+protected:
+    void internalInitialize(const ghoul::Dictionary&) override;
+private:
+    std::unique_ptr<ghoul::Process> _process;
+    properties::BoolProperty _serverProcessEnabled;
+
+    void startProcess();
+    void stopProcess();
 };
 
 } // namespace openspace

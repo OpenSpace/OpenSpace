@@ -1,5 +1,5 @@
-set(DEFAULT_MODULE OFF)
+set(DEFAULT_MODULE ON)
 
 set(OPEMSPACE_DEPENCENCIES
     server
-    )
+)

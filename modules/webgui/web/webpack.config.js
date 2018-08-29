@@ -4,6 +4,7 @@ const webpack = require('webpack');
 const PublicPath = '/';
 
 module.exports = {
+  mode: 'development',
   context: resolve(__dirname, 'src'),
   entry: [
     'react-hot-loader/patch',

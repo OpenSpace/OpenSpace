@@ -38,8 +38,22 @@ source_group("Source Files" FILES ${OPENSPACE_SOURCE_FILES})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+# Specify the NodeJs distribution version.
+set(NODEJS_VERSION "8.11.4")
+
+include(nodejs_support)
+DownloadNodeJs("${NODEJS_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/ext/nodejs")
+
+include(webgui_helpers)
+
+add_custom_target(openspace-module-webgui-javascript)
+build_webgui_source(openspace-module-webgui-javascript)
+
 create_new_module(
     WebGui
     webgui_module
+    STATIC
     ${OPENSPACE_HEADER_FILES} ${OPENSPACE_SOURCE_FILES}
 )

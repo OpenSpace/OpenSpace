@@ -1,0 +1,15 @@
+{
+  "name": "openspace-gui-server",
+  "version": "0.0.1",
+  "description": "OpenSpace Gui Server",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "OpenSpace Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
+}

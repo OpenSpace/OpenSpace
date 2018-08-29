@@ -9,7 +9,7 @@ const InlineInput = props => (
     {...props}
     id={props.id || `inlineinput-${Input.nextId}`}
     value={props.value}
-    onChange={this.onChange}
+    onChange={props.onChange}
     className={`${styles.input} ${props.className}`}
   />
 );
