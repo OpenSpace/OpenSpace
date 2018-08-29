@@ -274,7 +274,7 @@ int isMaster(lua_State* L) {
 
 int clusterId(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clusterId");
-    ghoul::lua::push(L, global::windowDelegate::clusterId());
+    ghoul::lua::push(L, global::windowDelegate.clusterId());
     return 1;
 }
 
