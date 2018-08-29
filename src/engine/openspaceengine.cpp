@@ -661,12 +661,15 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
         for (const std::shared_ptr<ResourceSynchronization>& s : syncs) {
             if (s->state() == ResourceSynchronization::State::Syncing) {
+                LoadingScreen::ProgressInfo progressInfo;
+                progressInfo.progress = s->progress();
+
                 resourceSyncs.insert(s);
                 _loadingScreen->updateItem(
                     s->name(),
                     s->name(),
                     LoadingScreen::ItemStatus::Started,
-                    s->progress()
+                    progressInfo
                 );
             }
         }
@@ -682,21 +685,32 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
         auto it = resourceSyncs.begin();
         while (it != resourceSyncs.end()) {
             if ((*it)->state() == ResourceSynchronization::State::Syncing) {
+                LoadingScreen::ProgressInfo progressInfo;
+                progressInfo.progress = (*it)->progress();
+
+                if ((*it)->nTotalBytesIsKnown()) {
+                    progressInfo.currentSize = static_cast<float>((*it)->nSynchronizedBytes());
+                    progressInfo.totalSize = static_cast<float>((*it)->nTotalBytes());
+                }
+
                 loading = true;
                 _loadingScreen->updateItem(
                     (*it)->name(),
                     (*it)->name(),
                     LoadingScreen::ItemStatus::Started,
-                    (*it)->progress()
+                    progressInfo
                 );
                 ++it;
             } else {
+                LoadingScreen::ProgressInfo progressInfo;
+                progressInfo.progress = 1.f;
+
                 _loadingScreen->tickItem();
                 _loadingScreen->updateItem(
                     (*it)->name(),
                     (*it)->name(),
                     LoadingScreen::ItemStatus::Finished,
-                    1.f
+                    progressInfo
                 );
                 it = resourceSyncs.erase(it);
             }
