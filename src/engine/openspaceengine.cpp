@@ -1294,6 +1294,23 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 {},
                 "string, string",
                 "Removes a tag (second argument) from a scene graph node (first argument)"
+            },
+            {
+                "isMaster",
+                &luascriptfunctions::isMaster,
+                {},
+                "",
+                "Returns whether the current OpenSpace instance is the master node of a "
+                "cluster configuration. If this instance is not part of a cluster, this "
+                "function also returns 'true'."
+            },
+            {
+                "clusterId",
+                &luascriptfunctions::clusterId,
+                {},
+                "Returns the zero-based identifier for this OpenSpace instance in a "
+                "cluster configuration. If this instance is not part of a cluster, this "
+                "identifier is always 0."
             }
         },
         {

@@ -73,6 +73,8 @@ struct WindowDelegate {
 
     bool (*isMaster)() = []() { return false; };
 
+    int (*clusterId)() = []() { return 0; };
+
     bool (*isUsingSwapGroups)() = []() { return false; };
 
     bool (*isSwapGroupMaster)() = []() { return false; };
