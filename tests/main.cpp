@@ -55,9 +55,6 @@
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
-//#include <ghoul/cmdparser/cmdparser>
-//#include <ghoul/filesystem/filesystem>
-//#include <ghoul/logging/logging>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/dictionary.h>
@@ -97,7 +94,6 @@
 
 
 
-using namespace ghoul::cmdparser;
 using namespace ghoul::filesystem;
 using namespace ghoul::logging;
 
