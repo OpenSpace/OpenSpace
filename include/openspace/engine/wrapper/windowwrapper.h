@@ -208,6 +208,13 @@ public:
     virtual bool isMaster() const;
 
     /**
+     * Returns the unique identifier of this OpenSpace instance within the current cluster
+     * configuration. If this instance is not part of a cluster, this value is always 0.
+     * \return The cluster identifier of this OpenSpace instance
+     */
+    virtual int clusterId() const;
+
+    /**
     * Returns <code>true</code> if the current rendering window is using swap groups.
     */
     virtual bool isUsingSwapGroups() const;

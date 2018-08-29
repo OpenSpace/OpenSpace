@@ -84,13 +84,6 @@ namespace {
         "The path to the texture that should be used as the point sprite."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
-        "Transparency",
-        "Transparency",
-        "This value is a multiplicative factor that is applied to the transparency of "
-        "all points."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
@@ -182,7 +175,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
-        "RenderOptionInfo",
+        "RenderOption",
         "Render Option",
         "Debug option for rendering of billboards and texts."
     };
@@ -266,12 +259,6 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
                 new StringVerifier,
                 Optional::Yes,
                 SpriteTextureInfo.description
-            },
-            {
-                TransparencyInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                TransparencyInfo.description
             },
             {
                 ScaleFactorInfo.identifier,
@@ -393,7 +380,6 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
 
 RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
     , _pointColor(
         ColorInfo,
@@ -536,12 +522,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         addProperty(_pointColor);
     }
 
-    if (dictionary.hasKey(TransparencyInfo.identifier)) {
-        _alphaValue = static_cast<float>(
-            dictionary.value<double>(TransparencyInfo.identifier)
-        );
-    }
-    addProperty(_alphaValue);
+    addProperty(_opacity);
 
     if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
         _scaleFactor = static_cast<float>(
@@ -783,7 +764,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.minBillboardSize, _billboardMinSize); // in pixels
     _program->setUniform(_uniformCache.maxBillboardSize, _billboardMaxSize); // in pixels
     _program->setUniform(_uniformCache.color, _pointColor);
-    _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+    _program->setUniform(_uniformCache.alphaValue, _opacity);
     _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
     _program->setUniform(_uniformCache.up, orthoUp);
     _program->setUniform(_uniformCache.right, orthoRight);
@@ -864,6 +845,7 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
 
     glm::vec4 textColor = _textColor;
     textColor.a *= fadeInVariable;
+    textColor.a *= _opacity;
     for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
         //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
         glm::vec3 scaledPos(pair.first);

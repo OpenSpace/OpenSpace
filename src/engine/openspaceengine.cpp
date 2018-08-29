@@ -685,12 +685,15 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
         for (const std::shared_ptr<ResourceSynchronization>& s : syncs) {
             if (s->state() == ResourceSynchronization::State::Syncing) {
+                LoadingScreen::ProgressInfo progressInfo;
+                progressInfo.progress = s->progress();
+
                 resourceSyncs.insert(s);
                 _loadingScreen->updateItem(
                     s->name(),
                     s->name(),
                     LoadingScreen::ItemStatus::Started,
-                    s->progress()
+                    progressInfo
                 );
             }
         }
@@ -706,21 +709,32 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
         auto it = resourceSyncs.begin();
         while (it != resourceSyncs.end()) {
             if ((*it)->state() == ResourceSynchronization::State::Syncing) {
+                LoadingScreen::ProgressInfo progressInfo;
+                progressInfo.progress = (*it)->progress();
+
+                if ((*it)->nTotalBytesIsKnown()) {
+                    progressInfo.currentSize = static_cast<float>((*it)->nSynchronizedBytes());
+                    progressInfo.totalSize = static_cast<float>((*it)->nTotalBytes());
+                }
+
                 loading = true;
                 _loadingScreen->updateItem(
                     (*it)->name(),
                     (*it)->name(),
                     LoadingScreen::ItemStatus::Started,
-                    (*it)->progress()
+                    progressInfo
                 );
                 ++it;
             } else {
+                LoadingScreen::ProgressInfo progressInfo;
+                progressInfo.progress = 1.f;
+
                 _loadingScreen->tickItem();
                 _loadingScreen->updateItem(
                     (*it)->name(),
                     (*it)->name(),
                     LoadingScreen::ItemStatus::Finished,
-                    1.f
+                    progressInfo
                 );
                 it = resourceSyncs.erase(it);
             }
@@ -759,6 +773,11 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
 void OpenSpaceEngine::deinitialize() {
     LTRACE("OpenSpaceEngine::deinitialize(begin)");
+
+    // We want to render an image informing the user that we are shutting down
+    _renderEngine->renderEndscreen();
+
+    _engine->_windowWrapper->swapBuffer();
 
     for (const std::function<void()>& func : _engine->_moduleCallbacks.deinitializeGL) {
         func();
@@ -858,6 +877,7 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
 
 void OpenSpaceEngine::loadFonts() {
     _fontManager = std::make_unique<ghoul::fontrendering::FontManager>(FontAtlasSize);
+    _fontManager->initialize();
 
     for (const std::pair<std::string, std::string>& font : _configuration->fonts) {
         std::string key = font.first;
@@ -1193,10 +1213,12 @@ void OpenSpaceEngine::preSynchronization() {
         _renderEngine->updateScene();
         //_navigationHandler->updateCamera(dt);
 
-        Camera* camera = _scene->camera();
-        if (camera) {
-            _navigationHandler->updateCamera(dt);
-            camera->invalidateCache();
+        if (_scene) {
+            Camera* camera = _scene->camera();
+            if (camera) {
+                _navigationHandler->updateCamera(dt);
+                camera->invalidateCache();
+            }
         }
         _parallelPeer->preSynchronization();
     }
@@ -1233,6 +1255,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     if (_shutdown.inShutdown) {
         if (_shutdown.timer <= 0.f) {
             _windowWrapper->terminate();
+            return;
         }
         _shutdown.timer -= static_cast<float>(_windowWrapper->averageDeltaTime());
     }
@@ -1541,6 +1564,23 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 {},
                 "string, string",
                 "Removes a tag (second argument) from a scene graph node (first argument)"
+            },
+            {
+                "isMaster",
+                &luascriptfunctions::isMaster,
+                {},
+                "",
+                "Returns whether the current OpenSpace instance is the master node of a "
+                "cluster configuration. If this instance is not part of a cluster, this "
+                "function also returns 'true'."
+            },
+            {
+                "clusterId",
+                &luascriptfunctions::clusterId,
+                {},
+                "Returns the zero-based identifier for this OpenSpace instance in a "
+                "cluster configuration. If this instance is not part of a cluster, this "
+                "identifier is always 0."
             }
         },
         {

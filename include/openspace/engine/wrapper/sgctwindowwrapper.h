@@ -65,6 +65,7 @@ public:
     bool hasGuiWindow() const override;
     bool isGuiWindow() const override;
     bool isMaster() const override;
+    int clusterId() const override;
     bool isUsingSwapGroups() const override;
     bool isSwapGroupMaster() const override;
 

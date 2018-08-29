@@ -110,7 +110,6 @@ private:
 
     GLuint _pTexture = 0;
 
-    properties::FloatProperty _alphaValue;
     properties::FloatProperty _scaleFactor;
     properties::Vec3Property _pointColor;
     properties::StringProperty _spriteTexturePath;

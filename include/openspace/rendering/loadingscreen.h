@@ -81,8 +81,15 @@ public:
         Failed
     };
 
+    struct ProgressInfo {
+        float progress = 0.f;
+
+        int currentSize = -1;
+        int totalSize = -1;
+    };
+
     void updateItem(const std::string& itemIdentifier, const std::string& itemName,
-        ItemStatus newStatus, float newProgress);
+        ItemStatus newStatus, ProgressInfo progressInfo);
 
 private:
     bool _showMessage;
@@ -123,7 +130,8 @@ private:
         std::string identifier;
         std::string name;
         ItemStatus status;
-        float progress;
+
+        ProgressInfo progress;
 
         bool hasLocation;
         glm::vec2 ll;
