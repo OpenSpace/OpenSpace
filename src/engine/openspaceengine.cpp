@@ -76,8 +76,12 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
-#include <glbinding/callbacks.h>
+#include <glbinding/glbinding.h>
 #include <numeric>
+
+// @TODO(abock): Replace this with callback in windowdelegate
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
 #if defined(_MSC_VER) && defined(OPENSPACE_ENABLE_VLD)
 #include <vld.h>
@@ -330,8 +334,8 @@ void OpenSpaceEngine::initialize() {
 void OpenSpaceEngine::initializeGL() {
     LTRACE("OpenSpaceEngine::initializeGL(begin)");
 
-    glbinding::Binding::useCurrentContext();
-    glbinding::Binding::initialize();
+    //glbinding::Binding::useCurrentContext();
+    glbinding::Binding::initialize(glfwGetProcAddress);
 
     // clear the screen so the user doesn't have to see old buffer contents left on the
     // graphics card
@@ -500,40 +504,41 @@ void OpenSpaceEngine::initializeGL() {
                 case GL_INVALID_ENUM:
                     LERRORC(
                         "OpenGL Invalid State",
-                        fmt::format("Function {}: GL_INVALID_ENUM", f.toString())
+                        fmt::format("Function {}: GL_INVALID_ENUM", f.function->name())
                     );
                     break;
                 case GL_INVALID_VALUE:
                     LERRORC(
                         "OpenGL Invalid State",
-                        fmt::format("Function {}: GL_INVALID_VALUE", f.toString())
+                        fmt::format("Function {}: GL_INVALID_VALUE", f.function->name())
                     );
                     break;
                 case GL_INVALID_OPERATION:
                     LERRORC(
                         "OpenGL Invalid State",
-                        fmt::format("Function {}: GL_INVALID_OPERATION", f.toString())
-                    );
+                        fmt::format(
+                            "Function {}: GL_INVALID_OPERATION", f.function->name()
+                        ));
                     break;
                 case GL_INVALID_FRAMEBUFFER_OPERATION:
                     LERRORC(
                         "OpenGL Invalid State",
                         fmt::format(
                             "Function {}: GL_INVALID_FRAMEBUFFER_OPERATION",
-                            f.toString()
+                            f.function->name()
                         )
                     );
                     break;
                 case GL_OUT_OF_MEMORY:
                     LERRORC(
                         "OpenGL Invalid State",
-                        fmt::format("Function {}: GL_OUT_OF_MEMORY", f.toString())
+                        fmt::format("Function {}: GL_OUT_OF_MEMORY", f.function->name())
                     );
                     break;
                 default:
                     LERRORC(
                         "OpenGL Invalid State",
-                        fmt::format("Unknown error code: {0:x}", error)
+                        fmt::format("Unknown error code: {0:x}", static_cast<int>(error))
                     );
             }
         });
@@ -556,16 +561,21 @@ void OpenSpaceEngine::initializeGL() {
                     call.parameters.begin(),
                     call.parameters.end(),
                     std::string("("),
-                    [](std::string a, AbstractValue* v) {
-                    return a + v->asString() + ", ";
-                }
+                    [](std::string a, const std::unique_ptr<AbstractValue>& v) {
+                        std::stringstream s;
+                        s << v;
+                        return a + s.str() + ", ";
+                    }
                 );
                 // Remove the final ", "
                 arguments = arguments.substr(0, arguments.size() - 2) + ")";
 
-                std::string returnValue = call.returnValue ?
-                    " -> " + call.returnValue->asString() :
-                    "";
+                std::string returnValue;
+                std::stringstream s;
+                if (call.returnValue) {
+                    s << call.returnValue;
+                    returnValue = " -> " + s.str();
+                }
 
                 LTRACEC(
                     "OpenGL",
