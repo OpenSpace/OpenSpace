@@ -54,7 +54,8 @@ namespace {
         Disconnect,
         InputState,
         ChangeFocus,
-        Autopilot
+        Autopilot,
+        Friction
     };
 
     using AxisType = openspace::interaction::WebsocketCameraStates::AxisType;
@@ -79,6 +80,9 @@ namespace {
 
     constexpr const char* FlightControllerType = "flightcontroller";
 
+    // Friction JSON Keys
+    constexpr const char* FrictionEngagedKey = "engaged";
+
     constexpr const char* FrictionPropertyUri = "NavigationHandler.OrbitalNavigator.Friction";
 
     constexpr const char* RotationalFriction = "Friction.RotationalFriction";
@@ -101,6 +105,7 @@ namespace {
     const std::string InputState = "inputState";
     const std::string ChangeFocus = "changeFocus";
     const std::string Autopilot = "autopilot";
+    const std::string Friction = "friction";
 
     const static std::unordered_map<std::string, AxisType> AxisIndexMap ({
         {OrbitX, AxisType::OrbitX},
@@ -120,7 +125,8 @@ namespace {
         {Disconnect, Command::Disconnect},
         {InputState, Command::InputState},
         {ChangeFocus, Command::ChangeFocus},
-        {Autopilot, Command::Autopilot}
+        {Autopilot, Command::Autopilot},
+        {Friction, Command::Friction}
     });
 
     const int Axes = 10;
@@ -174,6 +180,9 @@ void FlightControllerTopic::handleJson(const nlohmann::json& json) {
             break;
         case Command::Autopilot:
             handleAutopilot(json[Autopilot]);
+            break;
+        case Command::Friction:
+            setFriction(json[Friction][FrictionEngagedKey]);
             break;
         default:
             LWARNING(fmt::format("Unrecognized action: {}", it->first));
@@ -231,10 +240,13 @@ void FlightControllerTopic::changeFocus(const nlohmann::json& json) {
 
 void FlightControllerTopic::disconnect() {
     OsEng.navigationHandler().removeWebsocketInputState(_topicId);
+
+    // Update FlightController
     nlohmann::json j;
     j[TypeKey] = Disconnect;
     j[Disconnect][SuccessKey] = true;
     _connection->sendJson(wrappedPayload(j));
+
     _isDone = true;
 }
 
@@ -248,6 +260,12 @@ void FlightControllerTopic::setFriction(const bool &on) const {
         auto property = OsEng.navigationHandler().orbitalNavigator().property(f);
         property->set(on);
     }
+
+    // Update FlightController
+    nlohmann::json j;
+    j[TypeKey] = Friction;
+    j[Friction][FrictionEngagedKey] = on;
+    _connection->sendJson(wrappedPayload(j));
 }
 
 void FlightControllerTopic::disengageAutopilot() const {
