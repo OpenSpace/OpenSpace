@@ -154,7 +154,9 @@ FlightControllerTopic::~FlightControllerTopic() {
 }
 
 bool FlightControllerTopic::isDone() const {
-    disengageAutopilot();
+    if (_isDone) {
+        disengageAutopilot();
+    }
     return _isDone;
 }
 
