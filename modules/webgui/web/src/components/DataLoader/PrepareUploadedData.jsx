@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 
 import DataManager from '../../api/DataManager';
 import { UploadDataItemScript, ValuePlaceholder } from '../../api/keys';
-import { removeLineBreakCharacters, getDirectoryLeaf, getFileBasename } from './utils/helpers';
+import { removeLineBreakCharacters, getDirectoryLeaf, getFileBasename, backSlashesToForward } from './utils/helpers';
 
 import Row from '../common/Row/Row';
 import Input from '../common/Input/Input/Input';
@@ -103,7 +103,7 @@ class PrepareUploadedData extends Component {
     let json = jsonData.Value;
     json = json.replace(/\\"/g, '"');
     const parsedJson = JSON.parse(json);
-    console.log(parsedJson)
+    // console.log(parsedJson)
 
     this.setState({tfLinkList: JSON.parse(json)});
   }
@@ -180,11 +180,13 @@ class PrepareUploadedData extends Component {
   handleSelectedTFImage(imgSource) {
     let activeTfFilePath = '';
     this.state.tfLinkList.map(pair => {
-      console.log(pair)
+      // console.log(pair)
       if (pair.image === imgSource) {
         activeTfFilePath = pair.path;
       }
     })
+
+    activeTfFilePath = backSlashesToForward(activeTfFilePath)
 
     this.setState({activeTfFilePath});
   }
@@ -219,6 +221,7 @@ class PrepareUploadedData extends Component {
         TransferFunctionPath="${activeTfFilePath}"
       }
     \'`
+
     payload = removeLineBreakCharacters(payload);
 
     const payloadScript = UploadDataItemScript.replace(ValuePlaceholder, payload);
