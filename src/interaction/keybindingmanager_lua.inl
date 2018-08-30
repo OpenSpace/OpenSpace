@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/globals.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace openspace::luascriptfunctions {
@@ -57,7 +58,7 @@ int bindKey(lua_State* L) {
 
     std::string doc = (nArguments == 3) ? ghoul::lua::value<std::string>(L, 3) : "";
 
-    OsEng.keyBindingManager().bindKey(
+    global::keybindingManager.bindKey(
         iKey.key,
         iKey.modifier,
         std::move(command),
@@ -96,7 +97,7 @@ int bindKeyLocal(lua_State* L) {
 
     std::string doc = nArguments == 3 ? ghoul::lua::value<std::string>(L, 3) : "";
 
-    OsEng.keyBindingManager().bindKeyLocal(
+    global::keybindingManager.bindKeyLocal(
         iKey.key,
         iKey.modifier,
         std::move(command),
@@ -124,9 +125,9 @@ int getKeyBindings(lua_State* L) {
     );
 
     using K = KeyWithModifier;
-    using V = interaction::KeyBindingManager::KeyInformation;
+    using V = interaction::KeybindingManager::KeyInformation;
 
-    const std::vector<std::pair<K, V>>& info = OsEng.keyBindingManager().keyBinding(key);
+    const std::vector<std::pair<K, V>>& info = global::keybindingManager.keyBinding(key);
 
     lua_createtable(L, static_cast<int>(info.size()), 0);
     int i = 1;
@@ -161,7 +162,7 @@ int clearKey(lua_State* L) {
     if (t == LUA_TSTRING) {
         // The user provided a single key
         const std::string& key = ghoul::lua::value<std::string>(L, 1);
-        OsEng.keyBindingManager().removeKeyBinding(key);
+        global::keybindingManager.removeKeyBinding(key);
     }
     else {
         // The user provided a list of keys
@@ -169,7 +170,7 @@ int clearKey(lua_State* L) {
         ghoul::lua::luaDictionaryFromState(L, d);
         for (size_t i = 1; i <= d.size(); ++i) {
             const std::string& k = d.value<std::string>(std::to_string(i));
-            OsEng.keyBindingManager().removeKeyBinding(k);
+            global::keybindingManager.removeKeyBinding(k);
         }
         lua_pop(L, 1);
     }
@@ -187,7 +188,7 @@ int clearKey(lua_State* L) {
 int clearKeys(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clearKeys");
 
-    OsEng.keyBindingManager().resetKeyBindings();
+    global::keybindingManager.resetKeyBindings();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

@@ -26,7 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
@@ -94,7 +94,7 @@ DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
         _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
     }
     _fontName.onChange([this](){
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
@@ -104,11 +104,11 @@ DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
         );
     }
     _fontSize.onChange([this](){
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
-    _font = OsEng.fontManager().font(_fontName, _fontSize);
+    _font = global::fontManager.font(_fontName, _fontSize);
 }
 
 void DashboardItemDate::render(glm::vec2& penPosition) {
@@ -116,14 +116,14 @@ void DashboardItemDate::render(glm::vec2& penPosition) {
     RenderFont(
         *_font,
         penPosition,
-        fmt::format("Date: {} UTC", OsEng.timeManager().time().UTC())
+        fmt::format("Date: {} UTC", global::timeManager.time().UTC())
     );
 }
 
 glm::vec2 DashboardItemDate::size() const {
     return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
         *_font,
-        fmt::format("Date: {} UTC", OsEng.timeManager().time().UTC())
+        fmt::format("Date: {} UTC", global::timeManager.time().UTC())
     ).boundingBox;
 }
 

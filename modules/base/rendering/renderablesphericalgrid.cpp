@@ -25,7 +25,7 @@
 #include <modules/base/rendering/renderablesphericalgrid.h>
 
 #include <modules/base/basemodule.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
@@ -179,7 +179,7 @@ void RenderableSphericalGrid::initializeGL() {
     _gridProgram = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return OsEng.renderEngine().buildRenderProgram(
+            return global::renderEngine.buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_BASE}/shaders/grid_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/grid_fs.glsl")
@@ -211,7 +211,7 @@ void RenderableSphericalGrid::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
     _gridProgram = nullptr;

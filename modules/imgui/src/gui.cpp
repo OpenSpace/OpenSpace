@@ -26,15 +26,14 @@
 
 #include <modules/imgui/imguimodule.h>
 #include <modules/imgui/include/imgui_include.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/mission/missionmanager.h>
-#include <openspace/rendering/renderengine.h>
+#include <openspace/performance/performancemanager.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
@@ -47,7 +46,7 @@ namespace {
     constexpr const char* configurationFile = "imgui.ini";
     constexpr const char* GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
     constexpr const float FontSize = 14.f;
-    const ImVec2 Size = ImVec2(500, 500);
+    const glm::vec2 Size = { 500.f, 500.f };
 
     char* iniFileBuffer = nullptr;
 
@@ -61,7 +60,7 @@ namespace {
             return;
         }
 
-        OsEng.scriptEngine().queueScript(
+        openspace::global::scriptEngine.queueScript(
             fmt::format(
                 "openspace.addScreenSpaceRenderable({{\
                     Type = 'ScreenSpaceImageLocal',\
@@ -74,7 +73,7 @@ namespace {
     }
 
     void addScreenSpaceRenderableOnline(std::string texturePath) {
-        OsEng.scriptEngine().queueScript(
+        openspace::global::scriptEngine.queueScript(
             fmt::format(
                 "openspace.addScreenSpaceRenderable({{\
                     Type = 'ScreenSpaceImageOnline', URL = '{}'\
@@ -184,7 +183,7 @@ void GUI::initialize() {
     strcpy(iniFileBuffer, cachedFile.c_str());
 #endif
 
-    int nWindows = OsEng.windowWrapper().nWindows();
+    int nWindows = global::windowDelegate.nWindows();
     _contexts.resize(nWindows);
 
     for (int i = 0; i < nWindows; ++i) {
@@ -192,7 +191,7 @@ void GUI::initialize() {
         ImGui::SetCurrentContext(_contexts[i]);
 
         ImGuiIO& io = ImGui::GetIO();
-        io.IniFilename = cachedFile.c_str();
+        io.IniFilename = iniFileBuffer;
         io.DeltaTime = 1.f / 60.f;
         io.KeyMap[ImGuiKey_Tab] = static_cast<int>(Key::Tab);
         io.KeyMap[ImGuiKey_LeftArrow] = static_cast<int>(Key::Left);
@@ -290,7 +289,7 @@ void GUI::initialize() {
 void GUI::deinitialize() {
     ImGui::Shutdown();
 
-    int nWindows = OsEng.windowWrapper().nWindows();
+    int nWindows = global::windowDelegate.nWindows();
     for (int i = 0; i < nWindows; ++i) {
         ImGui::DestroyContext(_contexts[i]);
     }
@@ -311,7 +310,7 @@ void GUI::initializeGL() {
     
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
-    int nWindows = OsEng.windowWrapper().nWindows();
+    int nWindows = global::windowDelegate.nWindows();
     {
         unsigned char* texData;
         glm::ivec2 texSize;
@@ -400,7 +399,7 @@ void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
                      const glm::vec2& dpiScaling, const glm::vec2& mousePos,
                      uint32_t mouseButtonsPressed)
 {
-    const int iWindow = OsEng.windowWrapper().currentWindowId();
+    const int iWindow = global::windowDelegate.currentWindowId();
     ImGui::SetCurrentContext(_contexts[iWindow]);
 
     ImGuiIO& io = ImGui::GetIO();
@@ -422,7 +421,7 @@ void GUI::endFrame() {
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 
-    _performance.setEnabled(OsEng.renderEngine().doesPerformanceMeasurements());
+    _performance.setEnabled(global::performanceManager.isEnabled());
 
     if (_performance.isEnabled()) {
         _performance.render();
@@ -653,7 +652,7 @@ void GUI::render() {
 
     bool addDashboard = ImGui::Button("Add New Dashboard");
     if (addDashboard) {
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             "openspace.addScreenSpaceRenderable({ Type = 'ScreenSpaceDashboard' });",
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -661,7 +660,7 @@ void GUI::render() {
 
     bool addDashboardCopy = ImGui::Button("Add Copy of Main Dashboard");
     if (addDashboardCopy) {
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             "openspace.addScreenSpaceRenderable({ "
                 "Type = 'ScreenSpaceDashboard', UseMainDashboard = true "
             "});",

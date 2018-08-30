@@ -24,7 +24,7 @@
 
 #include <modules/debugging/rendering/debugrenderer.h>
 
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -42,7 +42,7 @@ namespace openspace {
 DebugRenderer* DebugRenderer::_reference = nullptr;
 
 DebugRenderer::DebugRenderer()  {
-    _programObject = OsEng.renderEngine().buildRenderProgram(
+    _programObject = global::renderEngine.buildRenderProgram(
         "BasicDebugShader",
         absPath("${MODULE_DEBUGGING}/rendering/debugshader_vs.glsl"),
         absPath("${MODULE_DEBUGGING}/rendering/debugshader_fs.glsl")

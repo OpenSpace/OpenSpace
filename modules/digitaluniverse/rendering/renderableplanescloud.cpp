@@ -27,9 +27,9 @@
 #include <modules/digitaluniverse/digitaluniversemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/util/updatestructures.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -494,7 +494,7 @@ void RenderablePlanesCloud::initializeGL() {
     _program = DigitalUniverseModule::ProgramObjectManager.request(
         ProgramObjectName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return OsEng.renderEngine().buildRenderProgram(
+            return global::renderEngine.buildRenderProgram(
                 "RenderablePlanesCloud",
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/plane_vs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/plane_fs.glsl")
@@ -511,7 +511,7 @@ void RenderablePlanesCloud::initializeGL() {
     if (_hasLabel) {
         if (!_font) {
             constexpr const int FontSize = 30;
-            _font = OsEng.fontManager().font(
+            _font = global::fontManager.font(
                 "Mono",
                 static_cast<float>(FontSize),
                 ghoul::fontrendering::FontManager::Outline::Yes,
@@ -537,7 +537,7 @@ void RenderablePlanesCloud::deinitializeGL() {
     DigitalUniverseModule::ProgramObjectManager.release(
         ProgramObjectName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
 }

@@ -32,7 +32,7 @@
 #include <modules/volume/rendering/volumeclipplanes.h>
 #include <modules/volume/transferfunctionhandler.h>
 #include <modules/volume/volumegridtype.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/util/updatestructures.h>
@@ -264,14 +264,14 @@ void RenderableKameleonVolume::initializeGL() {
 
     _raycaster->initialize();
 
-    OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
+    global::raycasterManager.attachRaycaster(*_raycaster.get());
 
     auto onChange = [&](bool enabled) {
         if (enabled) {
-            OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
+            global::raycasterManager.attachRaycaster(*_raycaster.get());
         }
         else {
-            OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
+            global::raycasterManager.detachRaycaster(*_raycaster.get());
         }
     };
 
@@ -436,7 +436,7 @@ void RenderableKameleonVolume::storeRaw(const std::string& path) {
 
 void RenderableKameleonVolume::deinitializeGL() {
     if (_raycaster) {
-        OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
+        global::raycasterManager.detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
 }

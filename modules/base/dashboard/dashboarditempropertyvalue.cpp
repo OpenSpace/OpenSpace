@@ -26,7 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/query/query.h>
 #include <ghoul/font/font.h>
@@ -124,7 +124,7 @@ DashboardItemPropertyValue::DashboardItemPropertyValue(
         _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
     }
     _fontName.onChange([this](){
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
@@ -134,7 +134,7 @@ DashboardItemPropertyValue::DashboardItemPropertyValue(
         );
     }
     _fontSize.onChange([this](){
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
@@ -151,7 +151,7 @@ DashboardItemPropertyValue::DashboardItemPropertyValue(
     }
     addProperty(_displayString);
 
-    _font = OsEng.fontManager().font(_fontName, _fontSize);
+    _font = global::fontManager.font(_fontName, _fontSize);
 }
 
 void DashboardItemPropertyValue::render(glm::vec2& penPosition) {

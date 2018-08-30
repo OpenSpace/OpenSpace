@@ -22,61 +22,78 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/iswa/rendering/screenspacecygnet.h>
+#include <openspace/engine/globalscallbacks.h>
 
-#include <modules/iswa/util/iswamanager.h>
-#include <openspace/engine/globals.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/util/timemanager.h>
+namespace openspace::global::detail {
 
-namespace openspace {
-
-ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
-    : ScreenSpaceImageOnline(dictionary)
-{
-    _cygnetId = static_cast<int>(dictionary.value<double>("CygnetId"));
-    _updateTime = static_cast<int>(dictionary.value<double>("UpdateInterval"));
-
-    _downloadImage = true;
-    _texturePath = IswaManager::ref().iswaUrl(
-        _cygnetId,
-        global::timeManager.time().j2000Seconds()
-    );
-
-    _openSpaceTime = global::timeManager.time().j2000Seconds();
-    _lastUpdateOpenSpaceTime = _openSpaceTime;
-
-    _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now().time_since_epoch()
-    );
-    _lastUpdateRealTime = _realTime;
-    _minRealTimeUpdateInterval = 100;
-
-    _delete.onChange([this]() {
-        global::scriptEngine.queueScript(
-            "openspace.iswa.removeScreenSpaceCygnet("+std::to_string(_cygnetId)+");",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    });
+std::vector<std::function<void()>>& gInitialize() {
+    static std::vector<std::function<void()>> g;
+    return g;
 }
 
-void ScreenSpaceCygnet::update() {
-    _openSpaceTime = global::timeManager.time().j2000Seconds();
-    _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now().time_since_epoch()
-    );
-
-    bool timeToUpdate = fabs(_openSpaceTime - _lastUpdateOpenSpaceTime) >= _updateTime &&
-           (_realTime.count() - _lastUpdateRealTime.count()) > _minRealTimeUpdateInterval;
-
-    if (timeToUpdate) {
-        _texturePath = IswaManager::ref().iswaUrl(
-            _cygnetId,
-            global::timeManager.time().j2000Seconds()
-        );
-        _lastUpdateRealTime = _realTime;
-        _lastUpdateOpenSpaceTime = _openSpaceTime;
-    }
+std::vector<std::function<void()>>& gDeinitialize() {
+    static std::vector<std::function<void()>> g;
+    return g;
 }
 
-} // namespace openspace
+std::vector<std::function<void()>>& gInitializeGL() {
+    static std::vector<std::function<void()>> g;
+    return g;
+}
+
+std::vector<std::function<void()>>& gDeinitializeGL() {
+    static std::vector<std::function<void()>> g;
+    return g;
+}
+
+std::vector<std::function<void()>>& gPreSync() {
+    static std::vector<std::function<void()>> g;
+    return g;
+}
+
+std::vector<std::function<void()>>& gPostSyncPreDraw() {
+    static std::vector<std::function<void()>> g;
+    return g;
+}
+
+std::vector<std::function<void()>>& gRender() {
+    static std::vector<std::function<void()>> g;
+    return g;
+}
+
+std::vector<std::function<void()>>& gDraw2D() {
+    static std::vector<std::function<void()>> g;
+    return g;
+}
+
+std::vector<std::function<void()>>& gPostDraw() {
+    static std::vector<std::function<void()>> g;
+    return g;
+}
+
+std::vector<std::function<bool(Key, KeyModifier, KeyAction)>>& gKeyboard() {
+    static std::vector<std::function<bool(Key, KeyModifier, KeyAction)>> g;
+    return g;
+}
+
+std::vector<std::function<bool(unsigned int, KeyModifier)>>& gCharacter() {
+    static std::vector<std::function<bool(unsigned int, KeyModifier)>> g;
+    return g;
+}
+
+std::vector<std::function<bool(MouseButton, MouseAction)>>& gMouseButton() {
+    static std::vector<std::function<bool(MouseButton, MouseAction)>> g;
+    return g;
+}
+
+std::vector<std::function<void(double, double)>>& gMousePosition() {
+    static std::vector<std::function<void(double, double)>> g;
+    return g;
+}
+
+std::vector<std::function<bool(double, double)>>& gMouseScrollWheel() {
+    static std::vector<std::function<bool(double, double)>> g;
+    return g;
+}
+
+} // namespace openspace::global::callback

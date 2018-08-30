@@ -24,8 +24,8 @@
 
 #include <openspace/interaction/keyframenavigator.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
@@ -35,7 +35,7 @@
 namespace openspace::interaction {
 
 void KeyframeNavigator::updateCamera(Camera& camera) {
-    double now = OsEng.windowWrapper().applicationTime();
+    double now = global::windowDelegate.applicationTime();
 
     if (_cameraPoseTimeline.nKeyframes() == 0) {
         return;
