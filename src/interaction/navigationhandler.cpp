@@ -135,6 +135,14 @@ KeyframeNavigator& NavigationHandler::keyframeNavigator() const {
     return *_keyframeNavigator;
 }
 
+float NavigationHandler::interpolationTime() const {
+    return _orbitalNavigator->rotateToFocusInterpolationTime();
+}
+
+void NavigationHandler::setInterpolationTime(float durationInSeconds) {
+    _orbitalNavigator->setRotateToFocusInterpolationTime(durationInSeconds);
+}
+
 void NavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(_inputState != nullptr, "InputState must not be nullptr");
     ghoul_assert(_camera != nullptr, "Camera must not be nullptr");
