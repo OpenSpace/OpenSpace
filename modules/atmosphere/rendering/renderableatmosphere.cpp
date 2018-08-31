@@ -200,18 +200,6 @@ namespace {
         "Unitless for now"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AtmosphereExposureInfo = {
-        "HdrExposure",
-        "Atmosphere Exposure",
-        "Constant to controls the exposure of the radiance range"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo AtmosphereGammaInfo = {
-        "Gamma",
-        "Gamma Correction",
-        "Gamma Correction"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo
         EnableSunOnCameraPositionInfo =
     {

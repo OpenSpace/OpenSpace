@@ -64,8 +64,6 @@ namespace {
         "The default duration taken to transition to the unpaused state, "
         "when interpolating"
     };
-
-    constexpr const char* _loggerCat = "TimeManager";
 }
 
 namespace openspace {

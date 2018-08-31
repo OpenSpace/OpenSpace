@@ -40,7 +40,6 @@
 #include "parallelpeer_lua.inl"
 
 namespace {
-    constexpr const uint32_t ProtocolVersion = 3;
     constexpr const size_t MaxLatencyDiffs = 64;
     constexpr const char* _loggerCat = "ParallelPeer";
 
@@ -453,7 +452,6 @@ void ParallelPeer::requestHostship() {
         reinterpret_cast<char*>(&passwordHash) + sizeof(uint64_t)
     );
 
-    const double now = global::windowDelegate.applicationTime();
     _connection.sendMessage(ParallelConnection::Message(
         ParallelConnection::MessageType::HostshipRequest,
         buffer
@@ -461,8 +459,6 @@ void ParallelPeer::requestHostship() {
 }
 
 void ParallelPeer::resignHostship() {
-    const double now = global::windowDelegate.applicationTime();
-
     std::vector<char> buffer;
     _connection.sendMessage(ParallelConnection::Message(
         ParallelConnection::MessageType::HostshipResignation,

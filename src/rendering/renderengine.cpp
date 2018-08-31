@@ -92,23 +92,6 @@ namespace {
         "performance."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowDateInfo = {
-        "ShowDate",
-        "Show Date Information",
-        "This values determines whether the date will be printed in the top left corner "
-        "of the rendering window if a regular rendering window is used (as opposed to a "
-        "fisheye rendering, for example)."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ShowInfoInfo = {
-        "ShowInfo",
-        "Show Rendering Information",
-        "This value determines whether the rendering info, which is the delta time and "
-        "the frame time, is shown in the top left corner of the rendering window if a "
-        "regular rendering window is used (as opposed to a fisheye rendering, for "
-        "example)."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo ShowOverlaySlavesInfo = {
         "ShowOverlayOnSlaves",
         "Show Overlay Information on Slaves",
@@ -406,7 +389,8 @@ void RenderEngine::updateScene() {
     _scene->update({
         { glm::dvec3(0.0), glm::dmat3(11.), 1.0 },
         currentTime,
-        integrateFromTime
+        integrateFromTime,
+        _doPerformanceMeasurements
     });
 
     LTRACE("RenderEngine::updateSceneGraph(end)");

@@ -37,6 +37,8 @@ BlockPlaneIntersectionGeometry::BlockPlaneIntersectionGeometry(glm::vec3 blockSi
                                                                glm::vec3 planeNormal,
                                                                float planeDistance)
     : _size(blockSize)
+    , _normal(planeNormal)
+    , _planeDistance(planeDistance)
 {}
 
 BlockPlaneIntersectionGeometry::~BlockPlaneIntersectionGeometry() {
