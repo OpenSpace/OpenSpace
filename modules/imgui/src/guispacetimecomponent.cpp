@@ -417,7 +417,7 @@ void GuiSpaceTimeComponent::render() {
 
         _deltaTime -= _slidingDelta;
     }
-    
+
     const bool isPaused = global::timeManager.isPaused();
     const bool pauseChanged = ImGui::Button(
         isPaused ? "Resume" : "Pause",

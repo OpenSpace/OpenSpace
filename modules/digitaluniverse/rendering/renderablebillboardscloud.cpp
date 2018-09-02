@@ -1042,7 +1042,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                     ghoul::io::TextureReader::ref().loadTexture(
                         absPath(path)
                     );
-             
+
                 t->uploadTexture();
                 t->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
                 return t;

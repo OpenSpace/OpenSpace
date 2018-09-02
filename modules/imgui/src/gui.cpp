@@ -306,7 +306,7 @@ void GUI::initializeGL() {
         absPath("${MODULE_IMGUI}/shaders/gui_vs.glsl"),
         absPath("${MODULE_IMGUI}/shaders/gui_fs.glsl")
     );
-    
+
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
     int nWindows = global::windowDelegate.nWindows();

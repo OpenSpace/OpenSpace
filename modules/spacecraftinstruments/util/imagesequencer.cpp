@@ -235,7 +235,7 @@ bool ImageSequencer::imagePaths(std::vector<Image>& captures,
     const bool instrumentActive = isInstrumentActive(time, instrumentRequest);
     const bool hasCurrentTime = _subsetMap[projectee]._range.includes(time);
     const bool hasSinceTime = _subsetMap[projectee]._range.includes(sinceTime);
-    
+
     if (!instrumentActive || (!hasCurrentTime && !hasSinceTime)) {
         return false;
     }
