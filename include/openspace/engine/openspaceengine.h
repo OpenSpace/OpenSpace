@@ -66,7 +66,7 @@ public:
     void initialize();
     void initializeGL();
     void deinitialize();
-    void deinitializeGL() {}
+    void deinitializeGL();
     void preSynchronization();
     void postSynchronizationPreDraw();
     void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,

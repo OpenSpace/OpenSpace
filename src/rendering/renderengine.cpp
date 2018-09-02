@@ -37,6 +37,7 @@
 #include <openspace/rendering/abufferrenderer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/deferredcastermanager.h>
+#include <openspace/rendering/helper.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/raycastermanager.h>
@@ -596,8 +597,13 @@ void RenderEngine::renderOverlays(const ShutdownInformation& shutdownInfo) {
 }
 
 void RenderEngine::renderEndscreen() {
-    glClearColor(0.f, 0.f, 0.f, 0.25f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glEnable(GL_BLEND);
+
+    rendering::helper::renderBox(
+        glm::vec2(0.f, 0.f),
+        glm::vec2(1.f, 1.f),
+        glm::vec4(0.f, 0.f, 0.f, 0.5f)
+    );
 
     using FR = ghoul::fontrendering::FontRenderer;
     using BBox = FR::BoundingBoxInformation;

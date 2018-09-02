@@ -44,6 +44,7 @@
 #include <openspace/performance/performancemanager.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/dashboarditem.h>
+#include <openspace/rendering/helper.h>
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderable.h>
@@ -336,6 +337,8 @@ void OpenSpaceEngine::initializeGL() {
 
     //glbinding::Binding::useCurrentContext();
     glbinding::Binding::initialize(glfwGetProcAddress);
+
+    rendering::helper::initialize();
 
     // clear the screen so the user doesn't have to see old buffer contents left on the
     // graphics card
@@ -767,20 +770,9 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 void OpenSpaceEngine::deinitialize() {
     LTRACE("OpenSpaceEngine::deinitialize(begin)");
 
-    // We want to render an image informing the user that we are shutting down
-    global::renderEngine.renderEndscreen();
-    global::windowDelegate.swapBuffer();
-
-    for (const std::function<void()>& func : global::callback::deinitializeGL) {
-        func();
-    }
-
     for (const std::function<void()>& func : global::callback::deinitialize) {
         func();
     }
-
-    global::openSpaceEngine.assetManager().deinitialize();
-    global::openSpaceEngine._scene = nullptr;
 
     global::navigationHandler.deinitialize();
 
@@ -794,7 +786,6 @@ void OpenSpaceEngine::deinitialize() {
         );
     }
 
-    global::deinitializeGL();
     global::deinitialize();
 
     FactoryManager::deinitialize();
@@ -810,6 +801,27 @@ void OpenSpaceEngine::deinitialize() {
 
 
     LTRACE("OpenSpaceEngine::deinitialize(end)");
+}
+
+void OpenSpaceEngine::deinitializeGL() {
+    LTRACE("OpenSpaceEngine::deinitializeGL(begin)");
+
+    // We want to render an image informing the user that we are shutting down
+    global::renderEngine.renderEndscreen();
+    global::windowDelegate.swapBuffer();
+
+    global::openSpaceEngine.assetManager().deinitialize();
+    global::openSpaceEngine._scene = nullptr;
+
+    for (const std::function<void()>& func : global::callback::deinitializeGL) {
+        func();
+    }
+
+    global::deinitializeGL();
+
+    rendering::helper::deinitialize();
+
+    LTRACE("OpenSpaceEngine::deinitializeGL(end)");
 }
 
 void OpenSpaceEngine::writeStaticDocumentation() {

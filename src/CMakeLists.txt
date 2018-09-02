@@ -128,6 +128,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/rendering/dashboarditem.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/framebufferrenderer.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/deferredcastermanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/rendering/helper.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/loadingscreen.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/luaconsole.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/raycastermanager.cpp
@@ -311,6 +312,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcastermanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/loadingscreen.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/luaconsole.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/helper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycasterlistener.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycastermanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderable.h
