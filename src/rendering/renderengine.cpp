@@ -297,8 +297,6 @@ void RenderEngine::initialize() {
         global::configuration.isSceneTranslationOnMasterDisabled;
     _disableMasterRendering = global::configuration.isRenderingOnMasterDisabled;
 
-    _nAaSamples = global::windowDelegate.currentNumberOfAaSamples();
-
 #ifdef GHOUL_USE_DEVIL
     ghoul::io::TextureReader::ref().addReader(
         std::make_unique<ghoul::io::TextureReaderDevIL>()
@@ -330,6 +328,8 @@ void RenderEngine::initialize() {
 
 void RenderEngine::initializeGL() {
     LTRACE("RenderEngine::initializeGL(begin)");
+
+    _nAaSamples = global::windowDelegate.currentNumberOfAaSamples();
 
     std::string renderingMethod = global::configuration.renderingMethod;
     if (renderingMethod == "ABuffer") {

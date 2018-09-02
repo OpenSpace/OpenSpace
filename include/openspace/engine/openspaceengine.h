@@ -63,6 +63,7 @@ public:
     OpenSpaceEngine();
     ~OpenSpaceEngine();
 
+    void registerPathTokens();
     void initialize();
     void initializeGL();
     void deinitialize();

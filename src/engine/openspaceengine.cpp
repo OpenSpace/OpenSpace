@@ -151,14 +151,11 @@ OpenSpaceEngine::OpenSpaceEngine()
 
 OpenSpaceEngine::~OpenSpaceEngine() {} // NOLINT
 
-void deinitialize() {
-}
-
-void OpenSpaceEngine::initialize() {
+void OpenSpaceEngine::registerPathTokens() {
     LTRACE("OpenSpaceEngine::initialize(begin)");
 
     // Registering Path tokens. If the BASE path is set, it is the only one that will
-    // overwrite the default path of the cfg directory
+// overwrite the default path of the cfg directory
     for (const std::pair<std::string, std::string>& path :
         global::configuration.pathTokens)
     {
@@ -179,6 +176,12 @@ void OpenSpaceEngine::initialize() {
             Override(override)
         );
     }
+
+    LTRACE("OpenSpaceEngine::initialize(end)");
+}
+
+void OpenSpaceEngine::initialize() {
+    LTRACE("OpenSpaceEngine::initialize(begin)");
 
     global::initialize();
 
@@ -212,7 +215,6 @@ void OpenSpaceEngine::initialize() {
         LFATAL("Could not create Cache Manager");
         LFATALC(e.component, e.message);
     }
-
 
 
     // Initialize the requested logs from the configuration file

@@ -923,6 +923,8 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
+    openspace::global::openSpaceEngine.registerPathTokens();
+
     // Prepend the outgoing sgctArguments with the program name
     // as well as the configuration file that sgct is supposed to use
     sgctArguments.insert(sgctArguments.begin(), argv[0]);
