@@ -193,7 +193,7 @@ struct TimeTimeline {
             reinterpret_cast<const char*>(&nKeyframes),
             reinterpret_cast<const char*>(&nKeyframes) + sizeof(int64_t)
         );
-        for (const auto k : _keyframes) {
+        for (const auto& k : _keyframes) {
             k.serialize(buffer);
         }
     };

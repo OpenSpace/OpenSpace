@@ -26,7 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
@@ -219,12 +219,12 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     }
 
     _fontName.onChange([this]() {
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
     _fontSize.onChange([this]() {
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
@@ -356,7 +356,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
     addProperty(_requestedUnit);
 
-    _font = OsEng.fontManager().font(_fontName, _fontSize);
+    _font = global::fontManager.font(_fontName, _fontSize);
 }
 
 std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
@@ -365,7 +365,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
 {
     if ((mainComp.type == Type::Node) || (mainComp.type == Type::NodeSurface)) {
         if (!mainComp.node) {
-            mainComp.node = OsEng.renderEngine().scene()->sceneGraphNode(
+            mainComp.node = global::renderEngine.scene()->sceneGraphNode(
                 mainComp.nodeName
             );
 
@@ -402,11 +402,11 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
         }
         case Type::Focus:
             return {
-                OsEng.navigationHandler().focusNode()->worldPosition(),
+                global::navigationHandler.focusNode()->worldPosition(),
                 "focus"
             };
         case Type::Camera:
-            return { OsEng.renderEngine().scene()->camera()->positionVec3(), "camera" };
+            return { global::renderEngine.scene()->camera()->positionVec3(), "camera" };
         default:
             return { glm::dvec3(0.0), "Unknown" };
     }

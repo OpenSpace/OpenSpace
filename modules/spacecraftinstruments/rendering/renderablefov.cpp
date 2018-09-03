@@ -28,7 +28,7 @@
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -332,7 +332,7 @@ void RenderableFov::initializeGL() {
         SpacecraftInstrumentsModule::ProgramObjectManager.request(
             ProgramName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                return OsEng.renderEngine().buildRenderProgram(
+                return global::renderEngine.buildRenderProgram(
                     ProgramName,
                     absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_vs.glsl"),
                     absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_fs.glsl")
@@ -480,7 +480,7 @@ void RenderableFov::deinitializeGL() {
     SpacecraftInstrumentsModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
     _program = nullptr;

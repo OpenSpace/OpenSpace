@@ -39,7 +39,7 @@ namespace openspace::scripting { struct LuaLibrary; }
 
 namespace openspace::interaction {
 
-class KeyBindingManager : public DocumentationGenerator {
+class KeybindingManager : public DocumentationGenerator {
 public:
     BooleanType(IsLocalBind);
     BooleanType(IsSynchronized);
@@ -50,7 +50,7 @@ public:
         std::string documentation;
     };
 
-    KeyBindingManager();
+    KeybindingManager();
 
     void resetKeyBindings();
 

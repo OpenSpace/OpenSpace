@@ -22,12 +22,78 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include <openspace/engine/globalscallbacks.h>
 
-out vec4 FragColor;
+namespace openspace::global::detail {
 
-uniform vec4 color;
-
-void main() {
-    FragColor = color;
+std::vector<std::function<void()>>& gInitialize() {
+    static std::vector<std::function<void()>> g;
+    return g;
 }
+
+std::vector<std::function<void()>>& gDeinitialize() {
+    static std::vector<std::function<void()>> g;
+    return g;
+}
+
+std::vector<std::function<void()>>& gInitializeGL() {
+    static std::vector<std::function<void()>> g;
+    return g;
+}
+
+std::vector<std::function<void()>>& gDeinitializeGL() {
+    static std::vector<std::function<void()>> g;
+    return g;
+}
+
+std::vector<std::function<void()>>& gPreSync() {
+    static std::vector<std::function<void()>> g;
+    return g;
+}
+
+std::vector<std::function<void()>>& gPostSyncPreDraw() {
+    static std::vector<std::function<void()>> g;
+    return g;
+}
+
+std::vector<std::function<void()>>& gRender() {
+    static std::vector<std::function<void()>> g;
+    return g;
+}
+
+std::vector<std::function<void()>>& gDraw2D() {
+    static std::vector<std::function<void()>> g;
+    return g;
+}
+
+std::vector<std::function<void()>>& gPostDraw() {
+    static std::vector<std::function<void()>> g;
+    return g;
+}
+
+std::vector<std::function<bool(Key, KeyModifier, KeyAction)>>& gKeyboard() {
+    static std::vector<std::function<bool(Key, KeyModifier, KeyAction)>> g;
+    return g;
+}
+
+std::vector<std::function<bool(unsigned int, KeyModifier)>>& gCharacter() {
+    static std::vector<std::function<bool(unsigned int, KeyModifier)>> g;
+    return g;
+}
+
+std::vector<std::function<bool(MouseButton, MouseAction)>>& gMouseButton() {
+    static std::vector<std::function<bool(MouseButton, MouseAction)>> g;
+    return g;
+}
+
+std::vector<std::function<void(double, double)>>& gMousePosition() {
+    static std::vector<std::function<void(double, double)>> g;
+    return g;
+}
+
+std::vector<std::function<bool(double, double)>>& gMouseScrollWheel() {
+    static std::vector<std::function<bool(double, double)>> g;
+    return g;
+}
+
+} // namespace openspace::global::callback

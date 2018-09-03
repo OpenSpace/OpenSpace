@@ -25,7 +25,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
-namespace openspace {
+namespace openspace::configuration {
 
 using namespace documentation;
 documentation::Documentation Configuration::Documentation = {
@@ -482,4 +482,4 @@ documentation::Documentation Configuration::Documentation = {
     }
 };
 
-} // namespace openspace
+} // namespace openspace::configuration

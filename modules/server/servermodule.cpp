@@ -26,7 +26,7 @@
 
 #include <modules/server/include/connection.h>
 #include <modules/server/include/topics/topic.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <ghoul/fmt.h>
 #include <ghoul/io/socket/socket.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
@@ -68,10 +68,7 @@ void ServerModule::internalInitialize(const ghoul::Dictionary&) {
     _servers.push_back(std::move(tcpServer));
     _servers.push_back(std::move(wsServer));
 
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::PreSync,
-        [this]() { preSync(); }
-    );
+    global::callback::preSync.push_back([this]() { preSync(); });
 }
 
 void ServerModule::preSync() {

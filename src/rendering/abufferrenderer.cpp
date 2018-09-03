@@ -26,8 +26,8 @@
 
 #include <openspace/rendering/abufferrenderer.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/performance/performancemeasurement.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderengine.h>
@@ -138,7 +138,7 @@ void ABufferRenderer::initialize() {
         LERRORC(e.component, e.message);
     }
 
-    OsEng.renderEngine().raycasterManager().addListener(*this);
+    global::raycasterManager.addListener(*this);
 }
 
 void ABufferRenderer::deinitialize() {
@@ -153,7 +153,7 @@ void ABufferRenderer::deinitialize() {
     glDeleteBuffers(1, &_vertexPositionBuffer);
     glDeleteVertexArrays(1, &_screenQuad);
 
-    OsEng.renderEngine().raycasterManager().removeListener(*this);
+    global::raycasterManager.removeListener(*this);
 }
 
 void ABufferRenderer::raycastersChanged(VolumeRaycaster&, IsAttached) {
@@ -542,9 +542,7 @@ void ABufferRenderer::updateMSAASamplingPattern() {
     glDeleteVertexArrays(1, &nOneStripVAO);
 }
 
-void ABufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor,
-                             bool doPerformanceMeasurements)
-{
+void ABufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor) {
     PerfMeasure("ABufferRenderer::render");
 
     if (!scene || !camera) {
@@ -584,7 +582,7 @@ void ABufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor,
         static_cast<int>(Renderable::RenderBin::Transparent) |
         static_cast<int>(Renderable::RenderBin::Overlay);
 
-    Time time = OsEng.timeManager().time();
+    Time time = global::timeManager.time();
     RenderData data{ *camera, psc(), time, doPerformanceMeasurements, renderBinMask, {} };
     RendererTasks tasks;
     scene->render(data, tasks);
@@ -866,7 +864,7 @@ void ABufferRenderer::updateResolveDictionary() {
 
     _resolveDictionary = dict;
 
-    OsEng.renderEngine().setResolveData(dict);
+    global::renderEngine.setResolveData(dict);
 
     _dirtyResolveDictionary = false;
 }
@@ -879,7 +877,7 @@ void ABufferRenderer::updateRaycastData() {
     _helperPaths.clear();
 
     const std::vector<VolumeRaycaster*>& raycasters =
-        OsEng.renderEngine().raycasterManager().raycasters();
+        global::renderEngine.raycasterManager().raycasters();
 
     std::map<std::string, int> namespaceIndices;
     // raycaster ids are positive integers starting at 0. (for raycasters,
@@ -960,7 +958,7 @@ void ABufferRenderer::updateRendererData() {
 
     _rendererData = dict;
 
-    OsEng.renderEngine().setRendererData(dict);
+    global::renderEngine.setRendererData(dict);
     _dirtyRendererData = false;
 }
 

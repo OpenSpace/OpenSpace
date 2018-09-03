@@ -48,6 +48,8 @@ Dashboard::Dashboard()
     addProperty(_isEnabled);
 }
 
+Dashboard::~Dashboard() {}
+
 void Dashboard::addDashboardItem(std::unique_ptr<DashboardItem> item) {
     const std::string& originalIdentifier = item->identifier();
     int suffix = 1;

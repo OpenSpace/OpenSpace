@@ -33,17 +33,15 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/documentation/verifier.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/configuration.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/configuration_doc.inl
-    # ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager.cpp
-    # ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager_doc.inl
     ${OPENSPACE_BASE_DIR}/src/engine/downloadmanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/engine/globals.cpp
+    ${OPENSPACE_BASE_DIR}/src/engine/globalscallbacks.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/logfactory.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/moduleengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/moduleengine_lua.inl
     ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/syncengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/virtualpropertymanager.cpp
-    ${OPENSPACE_BASE_DIR}/src/engine/wrapper/sgctwindowwrapper.cpp
-    ${OPENSPACE_BASE_DIR}/src/engine/wrapper/windowwrapper.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/camerainteractionstates.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/inputstate.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/joystickinputstate.cpp
@@ -130,6 +128,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/rendering/dashboarditem.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/framebufferrenderer.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/deferredcastermanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/rendering/helper.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/loadingscreen.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/luaconsole.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/raycastermanager.cpp
@@ -209,14 +208,15 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/verifier.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/configuration.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/downloadmanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/engine/globals.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/engine/globalscallbacks.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/logfactory.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/moduleengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/moduleengine.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/openspaceengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/syncengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/virtualpropertymanager.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/engine/wrapper/sgctwindowwrapper.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/engine/wrapper/windowwrapper.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/engine/windowdelegate.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/camerainteractionstates.h
@@ -312,6 +312,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcastermanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/loadingscreen.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/luaconsole.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/helper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycasterlistener.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycastermanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderable.h
