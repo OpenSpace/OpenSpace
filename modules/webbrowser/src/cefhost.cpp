@@ -25,7 +25,7 @@
 #include <modules/webbrowser/include/cefhost.h>
 
 #include <modules/webbrowser/include/webbrowserapp.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <ghoul/logging/logmanager.h>
 #include <fmt/format.h>
 
@@ -68,8 +68,7 @@ void CefHost::attachDebugSettings(CefSettings &settings) {
 }
 
 void CefHost::initializeCallbacks() {
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::Render,
+    global::callback::render.push_back(
         [this](){ CefDoMessageLoopWork(); }
     );
 }

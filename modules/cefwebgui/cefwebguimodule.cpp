@@ -25,11 +25,11 @@
 #include <modules/webbrowser/webbrowsermodule.h>
 #include "cefwebguimodule.h"
 
+#include <openspace/engine/globals.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/windowdelegate.h>
 #include <modules/webbrowser/include/browserinstance.h>
 #include <modules/cefwebgui/include/guirenderhandler.h>
 #include <ghoul/fmt.h>
@@ -47,13 +47,13 @@ CefWebGuiModule::CefWebGuiModule()
 
 void CefWebGuiModule::internalInitialize(const ghoul::Dictionary&) {
     _guiInstance = std::make_shared<BrowserInstance>(new GUIRenderHandler);
-    _guiLocation = OsEng.configuration().cefWebGuiUrl;
+    _guiLocation = global::configuration.cefWebGuiUrl;
 
     global::callback::initialize.push_back([this]() {
         LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", _guiLocation));
         _guiInstance->loadUrl(_guiLocation);
         WebBrowserModule* webBrowserModule =
-            OsEng.moduleEngine().module<WebBrowserModule>();
+            global::moduleEngine.module<WebBrowserModule>();
 
         if (webBrowserModule) {
             webBrowserModule->attachEventHandler(_guiInstance);
@@ -62,20 +62,20 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary&) {
     });
 
     global::callback::render.push_back([this](){
-        WindowWrapper& wrapper = OsEng.windowWrapper();
-        if (wrapper.isMaster()) {
-            if (wrapper.windowHasResized()) {
-                _guiInstance->reshape(wrapper.currentWindowSize());
+        WindowDelegate& windowDelegate = global::windowDelegate;
+        if (windowDelegate.isMaster()) {
+            if (windowDelegate.windowHasResized()) {
+                _guiInstance->reshape(windowDelegate.currentWindowSize());
             }
 
             _guiInstance->draw();
         }
     });
 
-    global::callback::deinitialize.push_back()[this]() {
+    global::callback::deinitialize.push_back([this]() {
         _guiInstance->close(true);
         WebBrowserModule* webBrowserModule =
-            OsEng.moduleEngine().module<WebBrowserModule>();
+            global::moduleEngine.module<WebBrowserModule>();
 
         if (webBrowserModule) {
             webBrowserModule->removeBrowser(_guiInstance);

@@ -29,7 +29,7 @@
 #include <modules/webbrowser/include/screenspacebrowser.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
@@ -63,9 +63,9 @@ void WebBrowserModule::internalDeinitialize() {
 }
 
 std::string WebBrowserModule::findHelperExecutable() {
-    if (!OsEng.configuration().webHelperLocation.empty()) {
+    if (!global::configuration.webHelperLocation.empty()) {
         std::string execLocation = absPath(
-            OsEng.configuration().webHelperLocation + SUBPROCESS_ENDING
+            global::configuration.webHelperLocation + SUBPROCESS_ENDING
         );
         if (!FileSys.fileExists(execLocation)) {
             LERROR(fmt::format(

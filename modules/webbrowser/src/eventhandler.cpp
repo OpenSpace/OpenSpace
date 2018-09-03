@@ -25,7 +25,8 @@
 #include <modules/webbrowser/include/eventhandler.h>
 
 #include <modules/webbrowser/include/browserinstance.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globalscallbacks.h>
+
 #include <ghoul/logging/logmanager.h>
 #include <fmt/format.h>
 
@@ -58,7 +59,7 @@ namespace {
 namespace openspace {
 
 void EventHandler::initialize() {
-    OsEng.registerModuleCharCallback(
+    global::callback::character.push_back(
         [this](unsigned int charCode, KeyModifier mod) -> bool {
             if (_browserInstance) {
                 return charCallback(charCode, mod);
@@ -66,7 +67,7 @@ void EventHandler::initialize() {
             return false;
         }
     );
-    OsEng.registerModuleKeyboardCallback(
+    global::callback::keyboard.push_back(
         [this](Key key, KeyModifier mod, KeyAction action) -> bool {
             if (_browserInstance) {
                 return keyboardCallback(key, mod, action);
@@ -74,7 +75,7 @@ void EventHandler::initialize() {
             return false;
         }
     );
-    OsEng.registerModuleMousePositionCallback(
+    global::callback::mousePosition.push_back(
         [this](double x, double y) -> bool {
             if (_browserInstance) {
                 return mousePositionCallback(x, y);
@@ -82,7 +83,7 @@ void EventHandler::initialize() {
             return false;
         }
     );
-    OsEng.registerModuleMouseButtonCallback(
+    global::callback::mouseButton.push_back(
         [this](MouseButton button, MouseAction action) -> bool {
             if (_browserInstance) {
                 return mouseButtonCallback(button, action);
@@ -90,7 +91,7 @@ void EventHandler::initialize() {
             return false;
         }
     );
-    OsEng.registerModuleMouseScrollWheelCallback(
+    global::callback::mouseScrollWheel.push_back(
         [this](double x, double y) -> bool {
             if (_browserInstance) {
                 const glm::ivec2 delta(x, y);

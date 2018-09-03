@@ -26,8 +26,9 @@
 
 #include <modules/webbrowser/include/browserclient.h>
 #include <modules/webbrowser/include/webrenderhandler.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/windowdelegate.h>
+
+#include <openspace/engine/globals.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -66,7 +67,7 @@ BrowserInstance::~BrowserInstance() {
 }
 
 void BrowserInstance::initialize() {
-    reshape(OsEng.windowWrapper().currentWindowSize());
+    reshape(global::windowDelegate.currentWindowSize());
     _isInitialized = true;
 }
 
