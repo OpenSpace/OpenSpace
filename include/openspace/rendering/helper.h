@@ -27,7 +27,10 @@
 
 #include <ghoul/opengl/uniformcache.h>
 
-namespace ghoul::opengl { class ProgramObject; }
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace ghoul::opengl
 
 namespace openspace::rendering::helper {
 
@@ -51,6 +54,9 @@ void renderBox(ghoul::opengl::ProgramObject& program, GLint orthoLocation,
 
 void renderBox(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color,
     Anchor anchor = Anchor::NW);
+
+void renderBox(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color,
+    const ghoul::opengl::Texture& texture, Anchor anchor = Anchor::NW);
 
 struct Shaders {
     struct {

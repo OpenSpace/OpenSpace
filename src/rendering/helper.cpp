@@ -28,6 +28,8 @@
 #include <openspace/engine/windowdelegate.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <fstream>
 #include <string>
 
@@ -297,8 +299,8 @@ glm::mat4 ortho(const glm::vec2& position, const glm::vec2& size, Anchor anchor)
 
 
 void renderBox(ghoul::opengl::ProgramObject& program, GLint orthoLocation,
-    GLint colorLocation, const glm::vec2& position, const glm::vec2& size,
-    const glm::vec4& color, Anchor anchor)
+               GLint colorLocation, const glm::vec2& position, const glm::vec2& size,
+               const glm::vec4& color, Anchor anchor)
 {
     program.setUniform(orthoLocation, ortho(position, size, anchor));
     program.setUniform(colorLocation, color);
@@ -314,11 +316,39 @@ void renderBox(const glm::vec2& position, const glm::vec2& size, const glm::vec4
     auto& shdr = shaders.xyuvrgba;
     shdr.program->activate();
     shdr.program->setUniform(shdr.cache.hasTexture, 0);
-    renderBox(*shdr.program, shdr.cache.ortho, shdr.cache.color, position, size, color,
-        anchor);
+    renderBox(
+        *shdr.program,
+        shdr.cache.ortho,
+        shdr.cache.color,
+        position, size,
+        color,
+        anchor
+    );
     shdr.program->deactivate();
 }
 
+void renderBox(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color,
+               const ghoul::opengl::Texture& texture, Anchor anchor)
+{
+    auto& shdr = shaders.xyuvrgba;
+    shdr.program->activate();
+    shdr.program->setUniform(shdr.cache.hasTexture, 1);
+
+    ghoul::opengl::TextureUnit unit;
+    unit.activate();
+    texture.bind();
+    shdr.program->setUniform(shdr.cache.tex, unit);
+    renderBox(
+        *shdr.program,
+        shdr.cache.ortho,
+        shdr.cache.color,
+        position,
+        size,
+        color,
+        anchor
+    );
+    shdr.program->deactivate();
+}
 
 
 } // namespace openspace::rendering::helper

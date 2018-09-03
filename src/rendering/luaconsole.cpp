@@ -27,6 +27,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/network/parallelpeer.h>
+#include <openspace/rendering/helper.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -90,19 +91,6 @@ namespace {
         "Sets the background color of the console."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HighlightColorInfo = {
-        "HighlightColor",
-        "Highlight Color",
-        "Sets the color of the lines below the console."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SeparatorColorInfo = {
-        "SeparatorColor",
-        "Separator Color",
-        "Sets the color of the separator between the history part and the entry part of "
-        "the console."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo EntryTextColorInfo = {
         "EntryTextColor",
         "Entry Text Color",
@@ -150,18 +138,6 @@ LuaConsole::LuaConsole()
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
-    , _highlightColor(
-        HighlightColorInfo,
-        glm::vec4(1.f, 1.f, 1.f, 0.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
-    , _separatorColor(
-        SeparatorColorInfo,
-        glm::vec4(0.4f, 0.4f, 0.4f, 0.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
     , _entryTextColor(
         EntryTextColorInfo,
         glm::vec4(1.f, 1.f, 1.f, 1.f),
@@ -183,12 +159,6 @@ LuaConsole::LuaConsole()
 
     _backgroundColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_backgroundColor);
-
-    _highlightColor.setViewOption(properties::Property::ViewOptions::Color);
-    addProperty(_highlightColor);
-
-    _separatorColor.setViewOption(properties::Property::ViewOptions::Color);
-    addProperty(_separatorColor);
 
     _entryTextColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_entryTextColor);
@@ -239,35 +209,6 @@ void LuaConsole::initialize() {
     _commands = _commandsHistory;
     _commands.emplace_back("");
     _activeCommand = _commands.size() - 1;
-
-    _program = ghoul::opengl::ProgramObject::Build(
-        "Console",
-        absPath("${SHADERS}/luaconsole.vert"),
-        absPath("${SHADERS}/luaconsole.frag")
-    );
-
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
-
-    const GLfloat data[] = {
-        0.f, 0.f,
-        1.f, 1.f,
-        0.f, 1.f,
-
-        0.f, 0.f,
-        1.f, 0.f,
-        1.f, 1.f
-    };
-
-    glGenVertexArrays(1, &_vao);
-    glBindVertexArray(_vao);
-    glGenBuffers(1, &_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
-
-    glBindVertexArray(0);
 
     _font = global::fontManager.font(
         FontName,
@@ -322,8 +263,6 @@ void LuaConsole::deinitialize() {
             file.write(s.c_str(), length);
         }
     }
-
-    _program = nullptr;
 
     global::parallelPeer.connectionEvent().unsubscribe("luaConsole");
 }
@@ -699,12 +638,6 @@ void LuaConsole::render() {
         return;
     }
 
-    if (_program->isDirty()) {
-        _program->rebuildFromFile();
-
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
-    }
-
     const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
     const glm::ivec2 res =
         glm::vec2(global::windowDelegate.currentWindowResolution()) / dpiScaling;
@@ -716,33 +649,11 @@ void LuaConsole::render() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST);
 
-    _program->activate();
-
-    _program->setUniform(_uniformCache.res, res);
-    _program->setUniform(_uniformCache.color, _backgroundColor);
-    _program->setUniform(_uniformCache.height, _currentHeight / res.y);
-    _program->setUniform(
-        _uniformCache.ortho,
-        glm::ortho(0.f, static_cast<float>(res.x), 0.f, static_cast<float>(res.y))
+    rendering::helper::renderBox(
+        glm::vec2(0.f, 0.f),
+        glm::vec2(1.f, _currentHeight / res.y),
+        _backgroundColor
     );
-
-    // Draw the background color
-    glBindVertexArray(_vao);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-
-    // Draw the highlight lines above and below the background
-    _program->setUniform(_uniformCache.color, _highlightColor);
-    glDrawArrays(GL_LINES, 1, 4);
-
-    // Draw the separator between the current entry box and the history
-    _program->setUniform(_uniformCache.color, _separatorColor);
-    _program->setUniform(
-        _uniformCache.height,
-        _currentHeight / res.y - 2.5f * EntryFontSize / res.y
-    );
-    glDrawArrays(GL_LINES, 1, 2);
-
-    _program->deactivate();
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
