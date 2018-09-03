@@ -404,6 +404,14 @@ void OrbitalNavigator::startInterpolateCameraDirection(const Camera& camera) {
     _cameraToSurfaceDistanceInterpolator.start();
 }
 
+float OrbitalNavigator::rotateToFocusInterpolationTime() const {
+    return _rotateToFocusInterpolationTime;
+}
+
+void OrbitalNavigator::setRotateToFocusInterpolationTime(float durationInSeconds) {
+    _rotateToFocusInterpolationTime = durationInSeconds;
+}
+
 bool OrbitalNavigator::followingNodeRotation() const {
     return _followRotationInterpolator.value() >= 1.0;
 }

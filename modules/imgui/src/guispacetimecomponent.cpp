@@ -153,6 +153,19 @@ void GuiSpaceTimeComponent::render() {
         );
     }
 
+    float interpolationTime = global::navigationHandler.interpolationTime();
+    const bool interpolationTimeChanged = ImGui::SliderFloat(
+        "Interpolation Time",
+        &interpolationTime,
+        0.f,
+        10.f,
+        "%.1f seconds"
+    );
+
+    if (interpolationTimeChanged) {
+        global::navigationHandler.setInterpolationTime(interpolationTime);
+    }
+
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
 
     ImGui::Separator();
