@@ -28,6 +28,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scene/scene.h>
@@ -355,7 +356,6 @@ bool ScreenSpaceRenderable::initialize() {
 bool ScreenSpaceRenderable::initializeGL() {
     _originalViewportSize = global::windowDelegate.currentWindowResolution();
 
-    createPlane();
     createShaders();
 
     return isReady();
@@ -366,12 +366,6 @@ bool ScreenSpaceRenderable::deinitialize() {
 }
 
 bool ScreenSpaceRenderable::deinitializeGL() {
-    glDeleteVertexArrays(1, &_quad);
-    _quad = 0;
-
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
-
     if (_shader) {
         global::renderEngine.removeRenderProgram(_shader.get());
         _shader = nullptr;
@@ -404,44 +398,6 @@ glm::vec3 ScreenSpaceRenderable::sphericalPosition() const {
 
 float ScreenSpaceRenderable::depth() const {
     return _depth;
-}
-
-void ScreenSpaceRenderable::createPlane() {
-    glGenVertexArrays(1, &_quad);
-    glGenBuffers(1, &_vertexPositionBuffer);
-
-    const GLfloat data[] = {
-        // x     y    s    t
-        -1.f, -1.f, 0.f, 0.f,
-         1.f,  1.f, 1.f, 1.f,
-        -1.f,  1.f, 0.f, 1.f,
-        -1.f, -1.f, 0.f, 0.f,
-         1.f, -1.f, 1.f, 0.f,
-         1.f,  1.f, 1.f, 1.f,
-    };
-
-    glBindVertexArray(_quad);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
-        0,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 4,
-        nullptr
-    );
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 4,
-        reinterpret_cast<void*>(sizeof(GLfloat) * 2)
-    );
 }
 
 void ScreenSpaceRenderable::useEuclideanCoordinates(bool b) {
@@ -544,15 +500,15 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     bindTexture();
-    defer { unbindTexture(); };
     _shader->setUniform(_uniformCache.texture, unit);
 
-    glBindVertexArray(_quad);
+    glBindVertexArray(rendering::helper::vertexObjects.square.vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     glEnable(GL_CULL_FACE);
 
     _shader->deactivate();
+    unbindTexture();
 }
 
 void ScreenSpaceRenderable::bindTexture() {}
