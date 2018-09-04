@@ -39,21 +39,13 @@ namespace {
     const char* _loggerCat = "keyframenavigator";
 }
 
-//#define TIMING_DEBUGGING
-
 namespace openspace::interaction {
 
 bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes) {
-#ifdef TIMING_DEBUGGING
-    static int pulledCamKeyframes = 0;
-#endif
     double now = currentTime();
     bool foundPrevKeyframe = false;
 
     if (_cameraPoseTimeline.nKeyframes() == 0) {
-#ifdef TIMING_DEBUGGING
-        LINFO(fmt::format("quit w/ 0 frames left"));
-#endif
         return false;
     }
 
@@ -68,13 +60,7 @@ bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes)
     if (nextKeyframe) {
         nextTime = nextKeyframe->timestamp;
     } else {
-#ifdef TIMING_DEBUGGING
-        LINFO(fmt::format("quit w/ no nextKeyframe"));
-#endif
         if (ignoreFutureKeyframes) {
-#ifdef TIMING_DEBUGGING
-            LINFO(fmt::format("removing previous-time keyframes"));
-#endif
             _cameraPoseTimeline.removeKeyframesBefore(now);
         }
         return false;
@@ -91,17 +77,13 @@ bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes)
         t = 1;
     }
 
+    const CameraPose prevPose = prevKeyframe->data;
+    const CameraPose nextPose = nextKeyframe->data;
     _cameraPoseTimeline.removeKeyframesBefore(prevTime);
 
     if (!foundPrevKeyframe && ignoreFutureKeyframes) {
-//#ifdef TIMING_DEBUGGING
-//        LINFO(fmt::format("quit w/out prevKeyframe ({} left)", _cameraPoseTimeline.nKeyframes()));
-//#endif
         return false;
     }
-
-    const CameraPose& prevPose = prevKeyframe->data;
-    const CameraPose& nextPose = nextKeyframe->data;
 
     Scene* scene = camera.parent()->scene();
     SceneGraphNode* prevFocusNode = scene->sceneGraphNode(prevPose.focusNode);
@@ -134,12 +116,6 @@ bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes)
         nextKeyframeCameraPosition = nextFocusNode->worldRotationMatrix() *
                                      nextPose.position;
     }
-
-#ifdef TIMING_DEBUGGING
-    pulledCamKeyframes++;
-    if ((pulledCamKeyframes == int((pulledCamKeyframes / 20) * 20)) || _cameraPoseTimeline.nKeyframes() < 10)
-        LINFO(fmt::format("cameraPose (timed {:8.3f} with t={:5.3f}) @ {:8.3f} ({} left)", nextTime, t, now, _cameraPoseTimeline.nKeyframes()));
-#endif
 
     // Transform position based on focus node position
     prevKeyframeCameraPosition += prevFocusNode->worldPosition();
@@ -175,15 +151,7 @@ Timeline<KeyframeNavigator::CameraPose>& KeyframeNavigator::timeline() {
 
 void KeyframeNavigator::addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose)
 {
-/*#ifdef TIMING_DEBUGGING
-static int addedCamKeyframes = 0;
-#endif*/
     timeline().addKeyframe(timestamp, pose);
-/*#ifdef TIMING_DEBUGGING
-    addedCamKeyframes++;
-    if(addedCamKeyframes == int((addedCamKeyframes / 40) * 40))
-        LINFO(fmt::format("+ camKeyFrame @ {}", timestamp));
-#endif*/
 }
 
 void KeyframeNavigator::removeKeyframesAfter(double timestamp) {

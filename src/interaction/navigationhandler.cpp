@@ -26,9 +26,11 @@
 
 #include <openspace/openspace.h>
 #include <openspace/engine/openspaceengine.h>
+
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
+
 #include <openspace/util/time.h>
 #include <openspace/util/keys.h>
 
@@ -159,8 +161,8 @@ void NavigationHandler::updateCamera(double deltaTime) {
             else {
                 _orbitalNavigator->updateMouseStatesFromInput(*_inputState, deltaTime);
                 _orbitalNavigator->updateCameraStateFromMouseStates(*_camera, deltaTime);
+                _camera->setFocusPositionVec3(focusNode()->worldPosition());
             }
-            _camera->setFocusPositionVec3(focusNode()->worldPosition());
         }
     }
 }

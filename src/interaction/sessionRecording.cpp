@@ -39,8 +39,6 @@
 
 #include <ghoul/logging/logmanager.h>
 
-#define TIMING_DEBUGGING
-
 namespace {
     const char* _loggerCat = "SessionRecording";
 }
@@ -196,14 +194,14 @@ void SessionRecording::saveCameraKeyframe() {
     keyframeLine << std::fixed << std::setprecision(3) << OsEng.timeManager().time().j2000Seconds();
     keyframeLine << " ";
     //Add camera position
-    keyframeLine << kf._position.x << " "
-                 << kf._position.y << " "
-                 << kf._position.z << " ";
+    keyframeLine << std::fixed << std::setprecision(7) << kf._position.x << " "
+                 << std::fixed << std::setprecision(7) << kf._position.y << " "
+                 << std::fixed << std::setprecision(7) << kf._position.z << " ";
     //Add camera rotation
-    keyframeLine << kf._rotation.x << " "
-                 << kf._rotation.y << " "
-                 << kf._rotation.z << " "
-                 << kf._rotation.w << " ";
+    keyframeLine << std::fixed << std::setprecision(7) << kf._rotation.x << " "
+                 << std::fixed << std::setprecision(7) << kf._rotation.y << " "
+                 << std::fixed << std::setprecision(7) << kf._rotation.z << " "
+                 << std::fixed << std::setprecision(7) << kf._rotation.w << " ";
     if( kf._followNodeRotation )
         keyframeLine << "F ";
     else
@@ -426,9 +424,6 @@ void SessionRecording::playbackScript(std::string& entry) {
     ghoul::Dictionary scriptDict(ghoul::Dictionary{ {KeyTime, timeDescription },
                                                     {KeyForwardScript, pbFrame._script} }
                                 );
-#ifdef TIMING_DEBUGGING
-    LINFO(fmt::format("+ script @ simTime {:13.3f}", timeRef));
-#endif
     OsEng.scriptScheduler().loadScripts({ { "1", scriptDict } });
 }
 
