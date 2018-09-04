@@ -11,38 +11,38 @@ import MultiInputs from './MultiInputs';
 import RadioButtons from '../../common/Input/RadioButtons/RadioButtons';
 
 const Translation = (props) => {
-  const{ translationType, 
-    onSetTranslation, 
-    onTranslationTypeChange, 
-    onSetTranslationTarget, 
+  const { translationType,
+    onSetTranslation,
+    onTranslationTypeChange,
+    onSetTranslationTarget,
     translationPos,
     target } = props;
   const spiceOptions = 'SUN EARTH'.split(' ').map(v => ({ value: v, label: v }));
 
-  return(
+  return (
     <Row>
       <div><RadioButtons label='Translation type'
-                          options={['Static', 'Spice']}
-                          defaultOption='Static'
-                          isHorizontal={false}
-                          onChange={(target) => onTranslationTypeChange(target)}/></div>
+        options={['Static', 'Spice']}
+        defaultOption='Static'
+        isHorizontal={false}
+        onChange={(target) => onTranslationTypeChange(target)} /></div>
       <div className={styles.wrapper}>
-        {translationType === KEY_SPICE_TRANSLATION 
+        {translationType === KEY_SPICE_TRANSLATION
           ?
-            <div className={styles.translation}>
-              <Label size='medium'>Translate Data: </Label>
-              <Select label={target}
-                      options={spiceOptions}
-                      onChange={onSetTranslationTarget}
-                      placeholder=''
-              />
-            </div>
+          <div className={styles.translation}>
+            <Label size='medium'>Translate Data: </Label>
+            <Select label={target}
+              options={spiceOptions}
+              onChange={onSetTranslationTarget}
+              placeholder=''
+            />
+          </div>
           :
-            <div className={styles.translation}>
-              <MultiInputs label='Translate Data'
-                            options={translationPos}
-                            onChange={onSetTranslation}/>
-            </div>}
+          <div className={styles.translation}>
+            <MultiInputs presentationLabel='Translate Data'
+              options={translationPos}
+              onChange={onSetTranslation} />
+          </div>}
       </div>
     </Row>
   );
@@ -60,10 +60,10 @@ Translation.propTypes = {
 Translation.defaultProps = {
   translationType: 'StaticTranslation',
   translationPos: { x: 0, y: 0, z: 0 },
-  onSetTranslation: () => {},
-  onTranslationTypeChange: () => {},
-  onSetTranslationTarget: () => {},
-  target:'Sun',
+  onSetTranslation: () => { },
+  onTranslationTypeChange: () => { },
+  onSetTranslationTarget: () => { },
+  target: 'Sun',
 };
 
 export default Translation;

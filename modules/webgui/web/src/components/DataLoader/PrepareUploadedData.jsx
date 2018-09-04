@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import PropTypes from 'prop-types'; 
+import PropTypes from 'prop-types';
 
 import DataManager from '../../api/DataManager';
 import { UploadDataItemScript, ValuePlaceholder } from '../../api/keys';
@@ -24,16 +24,18 @@ import Variables from './presentational/Variables';
 import Translation from './presentational/Translation';
 import NumericInput from '../common/Input/NumericInput/NumericInput';
 
-import { KEY_DIMENSIONS, 
-  KEY_UPPER_DOMAIN_BOUNDS, 
-  KEY_LOWER_DOMAIN_BOUNDS, 
+import {
+  KEY_DIMENSIONS,
+  KEY_UPPER_DOMAIN_BOUNDS,
+  KEY_LOWER_DOMAIN_BOUNDS,
   KEY_SPICE_TRANSLATION,
-  KEY_STATIC_TRANSLATION } from './constants';
+  KEY_STATIC_TRANSLATION
+} from './constants';
 
 class PrepareUploadedData extends Component {
   constructor(props) {
     super(props);
-    
+
     this.state = {
       activated: false,
       volumeProgress: 0,
@@ -85,8 +87,8 @@ class PrepareUploadedData extends Component {
     const filePathsDiffer = JSON.stringify(selectedFilePaths) !== JSON.stringify(prevProps.selectedFilePaths);
 
     if (hasFilePaths && filePathsDiffer) {
-      this.setState({ 
-        activated: true, 
+      this.setState({
+        activated: true,
         uploadButtonIsClicked: false
       });
     }
@@ -105,7 +107,7 @@ class PrepareUploadedData extends Component {
     const parsedJson = JSON.parse(json);
     // console.log(parsedJson)
 
-    this.setState({tfLinkList: JSON.parse(json)});
+    this.setState({ tfLinkList: JSON.parse(json) });
   }
 
   subscribeToVolumeConversionProgress() {
@@ -113,34 +115,34 @@ class PrepareUploadedData extends Component {
   }
 
   handleProgressValue(data) {
-    this.setState({volumeProgress: data.Value});
+    this.setState({ volumeProgress: data.Value });
   }
 
   onChangeMultiInputs({ currentTarget }, dataToChange) {
     const keyToChange = currentTarget.attributes.label.nodeValue;
     const valueToSet = Number(currentTarget.value);
 
-    this.setState({ 
-      data: { 
-        ...this.state.data, 
-        [dataToChange]: { 
-          ...this.state.data[dataToChange], 
+    this.setState({
+      data: {
+        ...this.state.data,
+        [dataToChange]: {
+          ...this.state.data[dataToChange],
           [keyToChange]: valueToSet
-        } 
+        }
       }
     });
   }
-  
+
   changeVariable(event) {
-    this.setState({ data: { ...this.state.data, variable: event.value }});
+    this.setState({ data: { ...this.state.data, variable: event.value } });
   }
 
   changeItemName(event) {
-    this.setState({ itemName: event.target.value});
+    this.setState({ itemName: event.target.value });
   }
 
   changeRSquared(checked) {
-    this.setState({ data: { ...this.state.data, rSquared: checked }});
+    this.setState({ data: { ...this.state.data, rSquared: checked } });
   }
 
   handleGridTypeChange(option) {
@@ -160,21 +162,21 @@ class PrepareUploadedData extends Component {
 
   handleTranslationTypeChange(target) {
     let translationType;
-    target === 'Spice' 
-      ? translationType = KEY_SPICE_TRANSLATION 
+    target === 'Spice'
+      ? translationType = KEY_SPICE_TRANSLATION
       : translationType = KEY_STATIC_TRANSLATION;
-    this.setState({ translationType });  
+    this.setState({ translationType });
   }
 
   handleSetStaticTranslation({ currentTarget }) {
     const { translationPos } = this.state;
     let label = currentTarget.attributes.label.value;
     let value = Number(currentTarget.value);
-    this.setState({ translationPos: {...translationPos, [label]: value } })
+    this.setState({ translationPos: { ...translationPos, [label]: value } })
   }
 
-  handleSetTranslationTarget(event) {   
-    this.setState({ translationTarget: event.value})
+  handleSetTranslationTarget(event) {
+    this.setState({ translationTarget: event.value })
   }
 
   handleSelectedTFImage(imgSource) {
@@ -188,15 +190,15 @@ class PrepareUploadedData extends Component {
 
     activeTfFilePath = backSlashesToForward(activeTfFilePath)
 
-    this.setState({activeTfFilePath});
+    this.setState({ activeTfFilePath });
   }
 
   upload() {
-    this.setState({uploadButtonIsClicked: true});
+    this.setState({ uploadButtonIsClicked: true });
 
     const { translationType, translationPos, translationTarget, translationObserver, activeTfFilePath } = this.state;
     const { dimensions, variable, lowerDomainBounds, upperDomainBounds, rSquared } = this.state.data;
-    
+
     let payload = `\'
       return {
         ItemName="${this.state.itemName || this.getDefaultItemName()}",
@@ -252,7 +254,7 @@ class PrepareUploadedData extends Component {
 
     const IMAGE_URI_BASE = 'http://localhost:1337';
     const tfImages = [
-      { 
+      {
         label: 'MAS',
         images: [
           `${IMAGE_URI_BASE}/mas_mhd_r_squared.png`,
@@ -261,90 +263,92 @@ class PrepareUploadedData extends Component {
         ],
       },
       {
-        label: 'ENLIL', 
+        label: 'ENLIL',
         images: [
-        `${IMAGE_URI_BASE}/enlil.png`
+          `${IMAGE_URI_BASE}/enlil.png`
         ]
       }
     ]
 
-    return(
+    return (
       <Window type="small"
-              title="Prepare Data"
-              size={windowSize}
-              position={{ x: 100, y: 200 }}
-              closeCallback={() => this.setState({ activated: false })}>
+        title="Prepare Data"
+        size={windowSize}
+        position={{ x: 100, y: 200 }}
+        closeCallback={() => this.setState({ activated: false })}>
         <Column widthPercentage={100} className={styles.content}>
           <Row>
             <Column widthPercentage={50} className={styles.spaceFirstChildren}>
               <div>
                 <Input onChange={(event) => this.changeItemName(event)}
-                      label='Item name'
-                      placeholder='name'
-                      value={this.state.itemName || this.getDefaultItemName()} />
+                  label='Item name'
+                  placeholder='name'
+                  value={this.state.itemName || this.getDefaultItemName()} />
               </div>
-          <Label>Scale Data:</Label>
-          <NumericInput label={scale + "times the Sun Radius "}
-                        placeholder={'test'}
-                        value={scale}
-                        onChange={(event) => this.setState({ scale: event.currentTarget.value}) }/>
-          <MultiInputs label='Dimensions'
-                      options={dimensions} 
-                      disabled={isUnEditable}
-                      onChange={(target) => this.onChangeMultiInputs(target, KEY_DIMENSIONS)}/>
-          <Variables variable={variable}
-                    disabled={isUnEditable}
-                    onChange={this.changeVariable} />
-          <MultiInputs label='Lower Domain Bounds'
-                      options={lowerDomainBounds} 
-                      disabled={isUnEditable}
-                      onChange={(target) => this.onChangeMultiInputs(target, KEY_LOWER_DOMAIN_BOUNDS)}/>
-          <MultiInputs label='Upper Domain Bounds'
-                      options={upperDomainBounds} 
-                      disabled={isUnEditable}
-                      onChange={(target) => this.onChangeMultiInputs(target, KEY_UPPER_DOMAIN_BOUNDS)}/>
-          <div>
-            <RadioButtons options={['Spherical', 'Cartesian']}
-                          defaultOption='Spherical'
-                          label='Grid type'
-                          disabled={isUnEditable}
-                          onChange={this.handleGridTypeChange} />
-          </div>
-          <Translation translationType={translationType} 
-                        translationPos={translationPos}
-                        onTranslationTypeChange={this.handleTranslationTypeChange}
-                        onSetTranslation={(target) => this.handleSetStaticTranslation(target)}
-                        onSetTranslationTarget={this.handleSetTranslationTarget}
-                        target={translationTarget} />
-          <Checkbox label={"Multiply " + variable + " with radius^2?"}
-                    onChange={this.changeRSquared}
-                    disabled={isUnEditable}/>
-        </Column>
-        <Column className={styles.spaceFirstChildren}
-                widthPercentage={50}>
-          <Label>Here be trafnser functions</Label>
-          <ImageSelect imageSources={tfImages}
-                        onSelect={this.handleSelectedTFImage} />
-        </Column>
-        </Row>
-        <Column className={styles.footer}>
-            <Button onClick={() => this.upload()} 
-                    className={styles.convertButton}
-                    disabled={isUnEditable}> 
-                    Convert 
+              <div>
+                <RadioButtons options={['Spherical', 'Cartesian']}
+                  defaultOption='Spherical'
+                  label='Visualization grid type'
+                  disabled={isUnEditable}
+                  onChange={this.handleGridTypeChange} />
+              </div>
+              {/*<Label>Scale Data:</Label>
+              <NumericInput label={scale + "times the Sun Radius "}
+                placeholder={'test'}
+                value={scale}
+                onChange={(event) => this.setState({ scale: event.currentTarget.value })} />
+              */}
+              <MultiInputs presentationLabel='Dimensions'
+                inputLabels={this.state.gridType === 'Spherical' ? ['r', 'theta', 'phi'] : ['x', 'y', 'z']}
+                options={dimensions}
+                disabled={isUnEditable}
+                onChange={(target) => this.onChangeMultiInputs(target, KEY_DIMENSIONS)} />
+              <Variables variable={variable}
+                disabled={isUnEditable}
+                onChange={this.changeVariable} />
+              <MultiInputs presentationLabel='Lower Domain Bounds'
+                options={lowerDomainBounds}
+                disabled={isUnEditable}
+                onChange={(target) => this.onChangeMultiInputs(target, KEY_LOWER_DOMAIN_BOUNDS)} />
+              <MultiInputs presentationLabel='Upper Domain Bounds'
+                options={upperDomainBounds}
+                disabled={isUnEditable}
+                onChange={(target) => this.onChangeMultiInputs(target, KEY_UPPER_DOMAIN_BOUNDS)} />
+              <Translation translationType={translationType}
+                translationPos={translationPos}
+                onTranslationTypeChange={this.handleTranslationTypeChange}
+                onSetTranslation={(target) => this.handleSetStaticTranslation(target)}
+                onSetTranslationTarget={this.handleSetTranslationTarget}
+                target={translationTarget} />
+              <Checkbox label={"Multiply " + variable + " with radius^2?"}
+                onChange={this.changeRSquared}
+                disabled={isUnEditable} />
+            </Column>
+            <Column className={styles.spaceFirstChildren}
+              widthPercentage={50}>
+              <Label>Here be trafnser functions</Label>
+              <ImageSelect imageSources={tfImages}
+                onSelect={this.handleSelectedTFImage} />
+            </Column>
+          </Row>
+          <Column className={styles.footer}>
+            <Button onClick={() => this.upload()}
+              className={styles.convertButton}
+              disabled={isUnEditable}>
+              Convert
             </Button>
             {this.state.uploadButtonIsClicked && (
               <div>
                 <Row>
                   <ProgressBar label='Volume conversion progress'
-                              initializingMsg='Reading'
-                              progressPercent={volumeProgressPercent} />
+                    initializingMsg='Reading'
+                    progressPercent={volumeProgressPercent} />
                 </Row>
                 <Row className={styles.filesConverted}>
                   <Label size="small">{currentVolumesConvertedCount} / {currentVolumesToConvertCount} files complete</Label>
                 </Row>
               </div>
-            )} 
+            )}
           </Column>
         </Column>
       </Window>
