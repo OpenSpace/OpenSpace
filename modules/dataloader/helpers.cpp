@@ -39,7 +39,8 @@ std::string getFileWithExtensionFromItemFolder(std::string absPathToItem, std::s
     std::string filePath = "";
 
     // Find (first) file with the extension
-    std::regex extRegex("^.*\.(" + extension + ")$");
+    // TODO verity regexp below. \ or 
+    std::regex extRegex("^.*\\.(" + extension + ")$");
     std::smatch match;
     for (auto file : itemFiles) {
         if (std::regex_search(file, match, extRegex)) {

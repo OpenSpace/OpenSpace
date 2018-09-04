@@ -37,58 +37,67 @@
 #include <openspace/util/time.h>
 #include <openspace/util/taskloader.h>
 
-namespace ghoul {
-  class Dictionary;
+namespace ghoul
+{
+class Dictionary;
 }
 
-namespace openspace {
+namespace openspace
+{
 
-namespace documentation { struct Documentation; }
+namespace documentation
+{
+struct Documentation;
+}
 
-namespace dataloader {
+namespace dataloader
+{
 
 using properties::PropertyOwner;
 
-class Loader : public PropertyOwner, public Operator {
-  public:
-    Loader();
+class Loader : public PropertyOwner, public Operator
+{
+public:
+  Loader();
 
-    // Select file data path
-    void selectData();
+  // Select file data path
+  void selectData();
 
-    /**
+  /**
      * Creates and adds trigger properties for data items in the internal directory
      */
-    //void createInternalDataItemProperties();
+  //void createInternalDataItemProperties();
 
-    // Add one data item trigger property
-    //void addDataItemProperty();
+  // Add one data item trigger property
+  //void addDataItemProperty();
 
-    // Remove the trigger properties 
-    //void removeDataItemProperties();
+  // Remove the trigger properties
+  //void removeDataItemProperties();
 
-    // Load a data item with an abs path to the item under its data type subfolder in data/.internal
-    void loadDataItem(const std::string& absPathToItem);
+  // Load a data item with an abs path to the item under its data type subfolder in data/.internal
+  void loadDataItem(const std::string &absPathToItem);
 
-    // void createVolumeDataItem(std::string absPath);
+  // void createVolumeDataItem(std::string absPath);
 
-    void processCurrentlySelectedUploadData(const std::string& dictionaryString);
+  void processCurrentlySelectedUploadData(const std::string &dictionaryString);
 
-    static documentation::Documentation volumeConversionDocumentation();
+  static documentation::Documentation volumeConversionDocumentation();
 
-  private:
-    properties::StringListProperty _selectedFilePaths;
-    properties::TriggerProperty _uploadDataTrigger;
-    properties::FloatProperty _volumeConversionProgress;
+private:
+  properties::StringListProperty _selectedFilePaths;
+  properties::TriggerProperty _uploadDataTrigger;
+  properties::FloatProperty _volumeConversionProgress;
+  properties::StringProperty _volumeMetaDataJSON;
 
-    ghoul::Dictionary _currentVolumeConversionDictionary;
-    properties::UIntProperty _currentVolumesConvertedCount;
-    properties::UIntProperty _currentVolumesToConvertCount;
-    bool _volumeConversionThreadCanRun = false;
-  
-   void initializeNode(ghoul::Dictionary dict);
-   void goToFirstTimeStep(const std::string& absPathToItem);
+  ghoul::Dictionary _currentVolumeConversionDictionary;
+  ghoul::Dictionary _volumeMetaDataDictionary;
+  properties::UIntProperty _currentVolumesConvertedCount;
+  properties::UIntProperty _currentVolumesToConvertCount;
+  bool _volumeConversionThreadCanRun = false;
+  void getVolumeMetaData(ghoul::Dictionary &metaDataDictionary);
 
+  void initializeNode(ghoul::Dictionary dict);
+  void goToFirstTimeStep(const std::string &absPathToItem);
 };
 
 } // namespace dataloader

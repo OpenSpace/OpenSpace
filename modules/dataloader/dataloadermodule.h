@@ -40,9 +40,9 @@ namespace openspace {
 
 namespace scripting { struct LuaLibrary; }
 
-enum DataTypes {
-    volume
-};
+// enum class DataTypes {
+//     volume
+// };
 
 /**
  * Reference reader, writer, loader

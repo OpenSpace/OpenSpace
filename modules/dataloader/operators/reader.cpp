@@ -43,16 +43,16 @@
 #include <windows.h>
 #endif
 
-
 using Directory = ghoul::filesystem::Directory;
 using Recursive = ghoul::filesystem::Directory::Recursive;
 using RawPath = ghoul::filesystem::Directory::RawPath;
 using Sort = ghoul::filesystem::Directory::Sort;
 using json = nlohmann::json;
 
-namespace {
-    constexpr const char* _loggerCat = "Reader";
-} 
+namespace
+{
+constexpr const char *_loggerCat = "Reader";
+}
 
 // namespace {
 //     static const openspace::properties::Property::PropertyInfo ReadVolumesTriggerInfo = {
@@ -68,11 +68,12 @@ namespace {
 //     };
 // }
 
-namespace openspace::dataloader {
+namespace openspace::dataloader
+{
 
 Reader::Reader()
-    : PropertyOwner({ "Reader" })
-    // , _readVolumesTrigger(ReadVolumesTriggerInfo)
+    : PropertyOwner({"Reader"})
+// , _readVolumesTrigger(ReadVolumesTriggerInfo)
 {
     _topDir = ghoul::filesystem::Directory("${DATA}/.internal", RawPath::No);
 
@@ -83,13 +84,13 @@ Reader::Reader()
     // addProperty(_readVolumesTrigger);
 }
 
-void Reader::readVolumeDataItems() {
+void Reader::readVolumeDataItems()
+{
     Directory volumeDir = getVolumeDir();
 
     std::vector<std::string> volumeItems = volumeDir.readDirectories(
-      Recursive::No,
-      Sort::Yes
-    );
+        Recursive::No,
+        Sort::Yes);
 
     module()->setVolumeDataItems(volumeItems);
     module()->setDataDirectoryRead(true);
@@ -112,23 +113,26 @@ void Reader::readVolumeDataItems() {
 
     // }
 
-    // Store a reference somehow if necessary 
+    // Store a reference somehow if necessary
 }
 
-std::string Reader::readTransferFunctionPresets() {
+std::string Reader::readTransferFunctionPresets()
+{
     Directory d(_topDir.path() + ghoul::filesystem::FileSystem::PathSeparator + "tf_presets", RawPath::Yes);
 
     std::vector<std::string> tfFiles = d.readFiles(Recursive::No, Sort::No);
     std::vector<std::pair<std::string, std::string>> tfLinkList;
 
     // Put last line of transferfunction preset files together with file path in tfLinkList
-    for (auto file : tfFiles) {
+    for (auto file : tfFiles)
+    {
         std::ifstream in;
         in.open(file);
-        if (in.is_open()) {
+        if (in.is_open())
+        {
             std::vector<std::string> lines;
-            copy(std::istream_iterator<std::string>(in), 
-                 std::istream_iterator<std::string>(), 
+            copy(std::istream_iterator<std::string>(in),
+                 std::istream_iterator<std::string>(),
                  back_inserter(lines));
             tfLinkList.push_back(std::make_pair(file, lines.back()));
         }
@@ -136,19 +140,20 @@ std::string Reader::readTransferFunctionPresets() {
     }
 
     auto j = json::array();
-    for (auto pair : tfLinkList) {
-        j.push_back(json::object({ {"path", pair.first}, {"image", pair.second} }));
+    for (auto pair : tfLinkList)
+    {
+        j.push_back(json::object({{"path", pair.first}, {"image", pair.second}}));
     }
 
     return j.dump();
 }
 
-Directory Reader::getVolumeDir() {
+Directory Reader::getVolumeDir()
+{
     return Directory(
         _topDir.path() +
         ghoul::filesystem::FileSystem::PathSeparator +
-        "volumes_from_cdf" 
-    );
+        "volumes_from_cdf");
 }
 
-}
+} // namespace openspace::dataloader
