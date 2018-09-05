@@ -325,6 +325,7 @@ class PrepareUploadedData extends Component {
                 disabled={isUnEditable}
                 onChange={(target) => this.onChangeMultiInputs(target, KEY_DIMENSIONS)} />
               <Variables variable={variable}
+                options={metaData.variableAttributes}
                 disabled={isUnEditable}
                 onChange={this.changeVariable} />
               <MultiInputs presentationLabel='Lower Domain Bounds'

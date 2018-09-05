@@ -7,16 +7,25 @@ import Row from '../../common/Row/Row';
 import styles from './Variables.scss';
 
 const Variables = (props) => {
-  const{ variable, onChange, disabled } = props;
-  const options = 'r theta phi rho T P ur utheta uphi br btheta bphi jr jtheta jphi'
+  const { variable, onChange, disabled, options } = props;
+
+  let processedOptions = []
+  for (const opt of options) {
+    processedOptions.push({
+      label: opt,
+      value: opt
+    })
+  }
+
+  const standardOptions = 'r theta phi rho T P ur utheta uphi br btheta bphi jr jtheta jphi'
     .split(' ').map(v => ({ value: v, label: v }));
 
-  return(
+  return (
     <div className={styles.variables}>
       <Label size={'medium'}>Variable: </Label>
-      <Select 
+      <Select
         label={variable === '' ? "Select..." : variable}
-        options={options}
+        options={processedOptions || standardOptions}
         disabled={disabled}
         onChange={onChange}
         placeholder={''}
@@ -27,12 +36,14 @@ const Variables = (props) => {
 
 Variables.propTypes = {
   variable: PropTypes.string,
+  options: PropTypes.arrayOf(PropTypes.string),
   onChange: PropTypes.func,
 };
 
 Variables.defaultProps = {
   variable: '',
-  onChange: () => {},
+  options: [],
+  onChange: () => { },
 };
 
 export default Variables;
