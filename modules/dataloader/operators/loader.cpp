@@ -25,6 +25,10 @@
 #include <iostream>
 #include <thread>
 #include <string>
+#include <algorithm>
+#include <sstream>
+#include <fstream>
+#include <regex>
 
 #include <nfd.h>
 #include <stdio.h>  // nfd
@@ -33,6 +37,7 @@
 
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
+#include <ghoul/misc/dictionaryjsonformatter.h>
 #include <modules/dataloader/operators/loader.h>
 #include <modules/dataloader/dataloadermodule.h>
 #include <openspace/scene/scene.h>
@@ -50,7 +55,6 @@
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 #include <ext/json/json.hpp>
 
-#include <fstream>
 #include <chrono>
 #include <ghoul/glm.h>
 
@@ -325,23 +329,108 @@ void Loader::getVolumeMetaData(ghoul::Dictionary &metaDataDictionary)
     _volumeMetaDataDictionary.getValue<ghoul::Dictionary>(KeyGlobalAttributes, gAttribDictionary);
     _volumeMetaDataDictionary.getValue<ghoul::Dictionary>(KeyVariableAttributes, vAttribDictionary);
 
+    constexpr const char *MetaDataModelNameKey = "model_name";
     constexpr const char *MetaDataGridSystemKey = "grid_system_1";
     constexpr const char *MetaDataGridSystemDimension1 = "grid_system_1_dimension_1_size";
     constexpr const char *MetaDataGridSystemDimension2 = "grid_system_1_dimension_2_size";
     constexpr const char *MetaDataGridSystemDimension3 = "grid_system_1_dimension_3_size";
 
     const std::vector<std::string> vKeys = vAttribDictionary.keys();
-    const std::string gridSystem1 = gAttribDictionary.value<std::string>(MetaDataGridSystemKey);
+    const std::string modelName = gAttribDictionary.value<std::string>(MetaDataModelNameKey);
+    std::string gridSystemString = gAttribDictionary.value<std::string>(MetaDataGridSystemKey);
     const int gridSystem1DimensionSize = gAttribDictionary.value<int>(MetaDataGridSystemDimension1);
     const int gridSystem2DimensionSize = gAttribDictionary.value<int>(MetaDataGridSystemDimension2);
     const int gridSystem3DimensionSize = gAttribDictionary.value<int>(MetaDataGridSystemDimension3);
 
+    ghoul::DictionaryJsonFormatter formatter;
+    const std::string variableAttributesJsonString = formatter.format(vAttribDictionary);
+
+    std::string gridType;
+    if (gridSystemString.find("theta") != std::string::npos && gridSystemString.find("phi") != std::string::npos)
+    {
+        gridType = "Spherical";
+    }
+    else
+    {
+        gridType = "Cartesian";
+    }
+
+    std::regex nonAlphanumeric("[^a-zA-Z0-9 $]+");
+    gridSystemString = std::regex_replace(gridSystemString, nonAlphanumeric, " ");
+
+    std::vector<std::string> gridSystem;
+    std::istringstream iss(gridSystemString);
+    for (std::string s; iss >> s;)
+    {
+        gridSystem.push_back(s);
+    }
+
+    std::string radiusUnit;
+    std::vector<int> dataDimensions;
+    if (modelName == "enlil")
+    {
+        dataDimensions = {64, 64, 64};
+        radiusUnit = "AU";
+    }
+    else if (modelName == "batsrus")
+    {
+        dataDimensions = {128, 64, 64};
+        radiusUnit = "Earth radius";
+    }
+    else if (modelName == "mas")
+    {
+        dataDimensions = {100, 100, 128};
+        radiusUnit = "Sun radius";
+    }
+    else
+    {
+        dataDimensions = {100, 100, 100};
+        radiusUnit = "";
+    }
+
+    json variableMinMaxBoundsJson;
+    const std::string KeyActualMax = "actual_max";
+    const std::string KeyActualMin = "actual_min";
+    if (gridType == "Spherical")
+    {
+        const std::string KeyR = "r";
+
+        ghoul::Dictionary rDictionary;
+        vAttribDictionary.getValue<ghoul::Dictionary>(KeyR, rDictionary);
+
+        const float actualMax = rDictionary.value<float>(KeyActualMax);
+        const float actualMin = rDictionary.value<float>(KeyActualMin);
+        const float AUmeters = 149597871000.0;
+
+        variableMinMaxBoundsJson["r"]["min"] = actualMin / AUmeters;
+        variableMinMaxBoundsJson["r"]["max"] = actualMax / AUmeters;
+    }
+    else
+    {
+        std::vector<std::string> keys = {"x", "y", "z"};
+        for (auto key : keys)
+        {
+            ghoul::Dictionary dict;
+            vAttribDictionary.getValue<ghoul::Dictionary>(key, dict);
+            const float actualMax = dict.value<float>(KeyActualMax);
+            const float actualMin = dict.value<float>(KeyActualMin);
+            variableMinMaxBoundsJson[key]["max"] = actualMax;
+            variableMinMaxBoundsJson[key]["min"] = actualMin;
+        }
+    }
+
     json j;
-    j["gridSystem"] = gridSystem1;
+    j["modelName"] = modelName;
+    j["dataDimensions"] = dataDimensions;
+    j["gridSystem"] = gridSystem;
+    j["gridType"] = gridType;
+    j["radiusUnit"] = radiusUnit;
     j["gridSystem1DimensionSize"] = gridSystem1DimensionSize;
     j["gridSystem2DimensionSize"] = gridSystem2DimensionSize;
     j["gridSystem3DimensionSize"] = gridSystem3DimensionSize;
-    j["variableAttributes"] = vKeys;
+    j["variableKeys"] = vKeys;
+    j["variableMinMaxBounds"] = variableMinMaxBoundsJson;
+    j["variableAttributes"] = json::parse(variableAttributesJsonString);
 
     _volumeMetaDataJSON = j.dump();
 }

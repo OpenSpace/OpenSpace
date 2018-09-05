@@ -79,7 +79,6 @@ class PrepareUploadedData extends Component {
     this.handleSetTranslationTarget = this.handleSetTranslationTarget.bind(this);
     this.handleSelectedTFImage = this.handleSelectedTFImage.bind(this);
     this.handleTfPresetsJSON = this.handleTfPresetsJSON.bind(this);
-    this.processMetaData = this.processMetaData.bind(this);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -98,7 +97,7 @@ class PrepareUploadedData extends Component {
 
     if (prevProps.metaDataStringifiedJSON !== this.props.metaDataStringifiedJSON) {
       const metaData = this.props.metaDataStringifiedJSON ? handleReceivedJSON(this.props.metaDataStringifiedJSON) : undefined
-      this.processMetaData(metaData)
+      console.log(metaData)
 
       let newDimensions
       if (metaData && metaData.gridSystem1DimensionSize && metaData.gridSystem2DimensionSize && metaData.gridSystem3DimensionSize) {
@@ -247,17 +246,6 @@ class PrepareUploadedData extends Component {
     DataManager.runScript(payloadScript);
   }
 
-  processMetaData(metaData) {
-    let gridType = ''
-    if (metaData && metaData.gridSystem) {
-      gridType = (metaData.gridSystem.includes('theta') && metaData.gridSystem.includes('phi')) ? 'Spherical' : 'Cartesian'
-      metaData.gridSystem = stringArrayToArray(metaData.gridSystem)
-      metaData.gridType = gridType
-    }
-
-    return metaData
-  }
-
   render() {
     const { width, currentVolumesConvertedCount, currentVolumesToConvertCount } = this.props;
     const { volumeProgress, translationType, translationPos, translationTarget, metaData } = this.state;
@@ -319,13 +307,13 @@ class PrepareUploadedData extends Component {
                 <Row><Label>Visualization grid type </Label></Row>
                 {(metaData && metaData.gridType) ? metaData.gridType : 'undefined'}
               </div>
-              <MultiInputs presentationLabel='Dimensions'
+              <MultiInputs presentationLabel='Data Dimensions'
                 inputLabels={(metaData && metaData.gridSystem) ? metaData.gridSystem : ['x', 'y', 'z']}
                 options={dimensions}
                 disabled={isUnEditable}
                 onChange={(target) => this.onChangeMultiInputs(target, KEY_DIMENSIONS)} />
               <Variables variable={variable}
-                options={metaData.variableAttributes}
+                options={metaData ? metaData.variableKeys : undefined}
                 disabled={isUnEditable}
                 onChange={this.changeVariable} />
               <MultiInputs presentationLabel='Lower Domain Bounds'
