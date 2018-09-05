@@ -78,7 +78,9 @@
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <glbinding/glbinding.h>
+#include <glbinding-aux/types_to_string.h>
 #include <numeric>
+#include <sstream>
 
 // @TODO(abock): Replace this with callback in windowdelegate
 #define GLFW_INCLUDE_NONE
@@ -568,7 +570,7 @@ void OpenSpaceEngine::initializeGL() {
                     std::string("("),
                     [](std::string a, const std::unique_ptr<AbstractValue>& v) {
                         std::stringstream s;
-                        s << v;
+                        s << v.get();
                         return a + s.str() + ", ";
                     }
                 );
@@ -578,7 +580,7 @@ void OpenSpaceEngine::initializeGL() {
                 std::string returnValue;
                 std::stringstream s;
                 if (call.returnValue) {
-                    s << call.returnValue;
+                    s << call.returnValue.get();
                     returnValue = " -> " + s.str();
                 }
 
