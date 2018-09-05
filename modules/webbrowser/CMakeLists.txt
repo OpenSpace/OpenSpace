@@ -39,9 +39,6 @@ set(CMAKE_BUILD_TYPE Debug)
 
 cmake_minimum_required(VERSION 2.8.12.1)
 
-# Only generate Debug and Release configuration types.
-set(CMAKE_CONFIGURATION_TYPES Debug Release)
-
 # Use folders in the resulting project files.
 set_property(GLOBAL PROPERTY OS_FOLDERS ON)
 
@@ -62,8 +59,19 @@ DownloadCEF("${CEF_PLATFORM}" "${CEF_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/ext/
 ##########################################################################################
 # Apply cmake patch
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cmake/patch/cef_variables.cmake
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cmake/patch/CMakeLists.txt
+    DESTINATION ${CEF_ROOT})
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cmake/patch/cmake/cef_variables.cmake
     DESTINATION ${CEF_ROOT}/cmake)
+
+
+
+# CEF does not provide RelWithDebInfo libs, so we use the ones without Debug information
+file(COPY ${CEF_ROOT}/Release/
+    DESTINATION ${CEF_ROOT}/RelWithDebInfo
+    FILES_MATCHING PATTERN *)
+
 
 ##########################################################################################
 
@@ -183,7 +191,7 @@ endif (OS_WINDOWS)
 
 ##########################################################################################
 # Create OpenSpace module.
-set(OPENSPACE_HEADER_FILES
+set(HEADER_FILES
     webbrowsermodule.h
     include/webrenderhandler.h
     include/browserclient.h
@@ -194,9 +202,9 @@ set(OPENSPACE_HEADER_FILES
     include/defaultbrowserlauncher.h
     include/cefhost.h
     )
-source_group("Header Files" FILES ${OPENSPACE_HEADER_FILES})
+source_group("Header Files" FILES ${HEADER_FILES})
 
-set(OPENSPACE_SOURCE_FILES
+set(SOURCE_FILES
     webbrowsermodule.cpp
     src/webrenderhandler.cpp
     src/browserclient.cpp
@@ -207,14 +215,15 @@ set(OPENSPACE_SOURCE_FILES
     src/defaultbrowserlauncher.cpp
     src/cefhost.cpp
     )
-source_group("Source Files" FILES ${OPENSPACE_SOURCE_FILES})
+source_group("Source Files" FILES ${SOURCE_FILES})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 create_new_module(
     ${WEBBROWSER_MODULE_NAME}
     webbrowser_module
-    ${OPENSPACE_HEADER_FILES} ${OPENSPACE_SOURCE_FILES}
+    STATIC
+    ${HEADER_FILES} ${SOURCE_FILES}
 )
 
 # Display CEF configuration settings.

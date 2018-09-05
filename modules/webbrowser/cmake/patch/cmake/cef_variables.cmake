@@ -78,7 +78,7 @@ if(OS_LINUX)
     -pipe                           # Use pipes rather than temporary files for communication between build stages
     -pthread                        # Use the pthread library
     -Wall                           # Enable all warnings
-    -Werror                         # Treat warnings as errors
+    #-Werror                         # Treat warnings as errors
     -Wno-missing-field-initializers # Don't warn about missing field initializers
     -Wno-unused-parameter           # Don't warn about unused parameters
     )
@@ -109,7 +109,7 @@ if(OS_LINUX)
     -fPIC                           # Generate position-independent code for shared libraries
     -pthread                        # Use the pthread library
     -Wl,--disable-new-dtags         # Don't generate new-style dynamic tags in ELF
-    -Wl,--fatal-warnings            # Treat warnings as errors
+    #-Wl,--fatal-warnings            # Treat warnings as errors
     -Wl,-rpath,.                    # Set rpath so that libraries can be placed next to the executable
     -Wl,-z,noexecstack              # Mark the stack as non-executable (security feature)
     -Wl,-z,now                      # Resolve symbols on program start instead of on first use (security feature)
@@ -223,7 +223,7 @@ if(OS_MACOSX)
     -funwind-tables                 # Support stack unwinding for backtrace()
     -fvisibility=hidden             # Give hidden visibility to declarations that are not explicitly marked as visible
     -Wall                           # Enable all warnings
-    -Werror                         # Treat warnings as errors
+    #-Werror                         # Treat warnings as errors
     -Wextra                         # Enable additional warnings
     -Wendif-labels                  # Warn whenever an #else or an #endif is followed by text
     -Wnewline-eof                   # Warn about no newline at end of file
@@ -342,7 +342,7 @@ if(OS_WINDOWS)
     /Gy           # Enable function-level linking
     /GR-          # Disable run-time type information
     /W4           # Warning level 4
-    /WX           # Treat warnings as errors
+    #/WX           # Treat warnings as errors
     /wd4100       # Ignore "unreferenced formal parameter" warning
     /wd4127       # Ignore "conditional expression is constant" warning
     /wd4244       # Ignore "conversion possible loss of data" warning
