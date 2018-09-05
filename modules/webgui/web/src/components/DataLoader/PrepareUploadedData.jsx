@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 
 import DataManager from '../../api/DataManager';
 import { UploadDataItemScript, ValuePlaceholder } from '../../api/keys';
-import { removeLineBreakCharacters, getDirectoryLeaf, getFileBasename, backSlashesToForward } from './utils/helpers';
+import { removeLineBreakCharacters, getDirectoryLeaf, getFileBasename, backSlashesToForward, handleReceivedJSON, stringArrayToArray } from './utils/helpers';
 
 import Row from '../common/Row/Row';
 import Input from '../common/Input/Input/Input';
@@ -22,7 +22,7 @@ import provideWindowWidth from './HOC/provideWindowSize';
 import MultiInputs from './presentational/MultiInputs';
 import Variables from './presentational/Variables';
 import Translation from './presentational/Translation';
-import NumericInput from '../common/Input/NumericInput/NumericInput';
+// import NumericInput from '../common/Input/NumericInput/NumericInput';
 
 import {
   KEY_DIMENSIONS,
@@ -39,9 +39,11 @@ class PrepareUploadedData extends Component {
     this.state = {
       activated: false,
       volumeProgress: 0,
+      metaData: {
+        gridType: ''
+      },
       uploadButtonIsClicked: false,
       itemName: '',
-      gridType: '',
       tfLinkList: [{
         image: '',
         path: ''
@@ -77,6 +79,7 @@ class PrepareUploadedData extends Component {
     this.handleSetTranslationTarget = this.handleSetTranslationTarget.bind(this);
     this.handleSelectedTFImage = this.handleSelectedTFImage.bind(this);
     this.handleTfPresetsJSON = this.handleTfPresetsJSON.bind(this);
+    this.processMetaData = this.processMetaData.bind(this);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -93,6 +96,25 @@ class PrepareUploadedData extends Component {
       });
     }
 
+    if (prevProps.metaDataStringifiedJSON !== this.props.metaDataStringifiedJSON) {
+      const metaData = this.props.metaDataStringifiedJSON ? handleReceivedJSON(this.props.metaDataStringifiedJSON) : undefined
+      this.processMetaData(metaData)
+
+      let newDimensions
+      if (metaData && metaData.gridSystem1DimensionSize && metaData.gridSystem2DimensionSize && metaData.gridSystem3DimensionSize) {
+        newDimensions = {
+          x: metaData.gridSystem1DimensionSize,
+          y: metaData.gridSystem2DimensionSize,
+          z: metaData.gridSystem3DimensionSize,
+        }
+      }
+
+      this.setState({
+        metaData,
+        data: { ...this.state.data, dimensions: newDimensions }
+      })
+    }
+
     this.subscribeToVolumeConversionProgress();
   }
 
@@ -102,12 +124,8 @@ class PrepareUploadedData extends Component {
   }
 
   handleTfPresetsJSON(jsonData) {
-    let json = jsonData.Value;
-    json = json.replace(/\\"/g, '"');
-    const parsedJson = JSON.parse(json);
-    // console.log(parsedJson)
-
-    this.setState({ tfLinkList: JSON.parse(json) });
+    const parsedJson = handleReceivedJSON(jsonData.Value);
+    this.setState({ tfLinkList: parsedJson });
   }
 
   subscribeToVolumeConversionProgress() {
@@ -182,7 +200,6 @@ class PrepareUploadedData extends Component {
   handleSelectedTFImage(imgSource) {
     let activeTfFilePath = '';
     this.state.tfLinkList.map(pair => {
-      // console.log(pair)
       if (pair.image === imgSource) {
         activeTfFilePath = pair.path;
       }
@@ -230,11 +247,24 @@ class PrepareUploadedData extends Component {
     DataManager.runScript(payloadScript);
   }
 
+  processMetaData(metaData) {
+    let gridType = ''
+    if (metaData && metaData.gridSystem) {
+      gridType = (metaData.gridSystem.includes('theta') && metaData.gridSystem.includes('phi')) ? 'Spherical' : 'Cartesian'
+      metaData.gridSystem = stringArrayToArray(metaData.gridSystem)
+      metaData.gridType = gridType
+    }
+
+    return metaData
+  }
+
   render() {
-    const { width, height, currentVolumesConvertedCount, currentVolumesToConvertCount } = this.props;
-    const { volumeProgress, translationType, translationPos, translationTarget, scale } = this.state;
+    const { width, currentVolumesConvertedCount, currentVolumesToConvertCount } = this.props;
+    const { volumeProgress, translationType, translationPos, translationTarget, metaData } = this.state;
     const { dimensions, variable, lowerDomainBounds, upperDomainBounds } = this.state.data;
-    const spiceOptions = 'SUN EARTH'.split(' ').map(v => ({ value: v, label: v }));
+    // const spiceOptions = 'SUN EARTH'.split(' ').map(v => ({ value: v, label: v }));
+
+    console.log(metaData)
 
     const isUnEditable = (this.state.uploadButtonIsClicked && (currentVolumesConvertedCount !== currentVolumesToConvertCount));
 
@@ -286,20 +316,11 @@ class PrepareUploadedData extends Component {
                   value={this.state.itemName || this.getDefaultItemName()} />
               </div>
               <div>
-                <RadioButtons options={['Spherical', 'Cartesian']}
-                  defaultOption='Spherical'
-                  label='Visualization grid type'
-                  disabled={isUnEditable}
-                  onChange={this.handleGridTypeChange} />
+                <Row><Label>Visualization grid type </Label></Row>
+                {(metaData && metaData.gridType) ? metaData.gridType : 'undefined'}
               </div>
-              {/*<Label>Scale Data:</Label>
-              <NumericInput label={scale + "times the Sun Radius "}
-                placeholder={'test'}
-                value={scale}
-                onChange={(event) => this.setState({ scale: event.currentTarget.value })} />
-              */}
               <MultiInputs presentationLabel='Dimensions'
-                inputLabels={this.state.gridType === 'Spherical' ? ['r', 'theta', 'phi'] : ['x', 'y', 'z']}
+                inputLabels={(metaData && metaData.gridSystem) ? metaData.gridSystem : ['x', 'y', 'z']}
                 options={dimensions}
                 disabled={isUnEditable}
                 onChange={(target) => this.onChangeMultiInputs(target, KEY_DIMENSIONS)} />
@@ -372,6 +393,7 @@ PrepareUploadedData.defaultProps = {
 
 const mapStateToProps = state => ({
   selectedFilePaths: state.dataLoader.selectedFilePaths,
+  metaDataStringifiedJSON: state.dataLoader.selectedDataMetaData,
   currentVolumesConvertedCount: state.dataLoader.currentVolumesConvertedCount,
   currentVolumesToConvertCount: state.dataLoader.currentVolumesToConvertCount,
 });

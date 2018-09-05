@@ -1,9 +1,13 @@
-import { actionTypes } from '../Actions/actionTypes';
+import {
+  actionTypes
+} from '../Actions/actionTypes';
 
-export const dataLoader = (state = {}, action) => { 
-  switch(action.type) {
+export const dataLoader = (state = {}, action) => {
+  switch (action.type) {
     case actionTypes.setDataLoaderActivated:
-      const { activated } = action.payload;
+      const {
+        activated
+      } = action.payload;
 
       return {
         ...state,
@@ -11,24 +15,40 @@ export const dataLoader = (state = {}, action) => {
       }
 
     case actionTypes.setSelectedFilesPathName:
-      const { selectedFilePaths } = action.payload;
-      
+      const {
+        selectedFilePaths
+      } = action.payload;
+
       return {
         ...state,
         selectedFilePaths
       }
 
+    case actionTypes.setSelectedFilesMetaData:
+      const {
+        selectedDataMetaData
+      } = action.payload;
+
+      return {
+        ...state,
+        selectedDataMetaData
+      }
+
     case actionTypes.setVolumesConvertedCount:
-      const { currentVolumesConvertedCount } = action.payload;
-      
+      const {
+        currentVolumesConvertedCount
+      } = action.payload;
+
       return {
         ...state,
         currentVolumesConvertedCount
       }
 
     case actionTypes.setVolumesToConvertCount:
-      const { currentVolumesToConvertCount } = action.payload;
-      
+      const {
+        currentVolumesToConvertCount
+      } = action.payload;
+
       return {
         ...state,
         currentVolumesToConvertCount

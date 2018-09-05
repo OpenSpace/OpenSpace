@@ -1,4 +1,6 @@
-import { actionTypes } from './actionTypes';
+import {
+  actionTypes
+} from './actionTypes';
 
 export const setActivated = (isActivated) => ({
   type: actionTypes.setDataLoaderActivated,
@@ -9,15 +11,28 @@ export const setActivated = (isActivated) => ({
 
 export const setSelectedFilePaths = (selectedFilePaths) => ({
   type: actionTypes.setSelectedFilesPathName,
-  payload: { selectedFilePaths }
+  payload: {
+    selectedFilePaths
+  }
+});
+
+export const setMetaData = (stringifiedJson) => ({
+  type: actionTypes.setSelectedFilesMetaData,
+  payload: {
+    selectedDataMetaData: stringifiedJson
+  }
 });
 
 export const setVolumesConvertedCount = (count) => ({
   type: actionTypes.setVolumesConvertedCount,
-  payload: { currentVolumesConvertedCount: count }
+  payload: {
+    currentVolumesConvertedCount: count
+  }
 });
 
 export const setVolumesToConvertCount = (count) => ({
   type: actionTypes.setVolumesToConvertCount,
-  payload: { currentVolumesToConvertCount: count }
+  payload: {
+    currentVolumesToConvertCount: count
+  }
 });

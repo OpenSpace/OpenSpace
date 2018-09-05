@@ -341,6 +341,7 @@ void Loader::getVolumeMetaData(ghoul::Dictionary &metaDataDictionary)
     j["gridSystem1DimensionSize"] = gridSystem1DimensionSize;
     j["gridSystem2DimensionSize"] = gridSystem2DimensionSize;
     j["gridSystem3DimensionSize"] = gridSystem3DimensionSize;
+    j["variableAttributes"] = vKeys;
 
     _volumeMetaDataJSON = j.dump();
 }

@@ -1,4 +1,3 @@
-
 /**
  * 
  * @param {string} stringList = A string list from the StringListProperty in OpenSpace
@@ -7,6 +6,11 @@ export const stringListToArray = (stringList) => {
   return stringList.split(',').map(item => item.trim());
 }
 
+export const stringArrayToArray = (stringArray) => {
+  let arr = stringArray.replace('[', '')
+  arr = arr.replace(']', '')
+  return arr.split(',').map(item => item.trim());
+}
 /**
  * 
  * @param {string} filePath 
@@ -38,4 +42,14 @@ export const removeLineBreakCharacters = (input) => {
  */
 export const getFileBasename = (filename) => {
   return filename.replace(/\.[^.]+$/, '');
+}
+
+/**
+ * 
+ * @param {*} jsonData 
+ */
+export const handleReceivedJSON = (jsonData) => {
+  const json = jsonData.replace(/\\"/g, '"');
+  const parsedJson = JSON.parse(json);
+  return parsedJson;
 }

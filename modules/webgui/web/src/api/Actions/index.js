@@ -1,4 +1,6 @@
-import { actionTypes } from './actionTypes';
+import {
+  actionTypes
+} from './actionTypes';
 
 export const updatePropertyValue = (description, value) => ({
   type: actionTypes.updatePropertyTreeNode,
@@ -24,7 +26,6 @@ export const initializePropertyTree = node => ({
     node,
   },
 });
-
 
 export const startListening = URI => ({
   type: actionTypes.startListeningToNode,

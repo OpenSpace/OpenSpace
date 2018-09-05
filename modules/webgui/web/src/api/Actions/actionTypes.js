@@ -32,6 +32,7 @@ export const actionTypes = {
   // action types for data loader
   setDataLoaderActivated: 'DATA_LOADER_TOGGLE_ACTIVATED',
   setSelectedFilesPathName: 'DATA_LOADER_SET_FILEPATH',
+  setSelectedFilesMetaData: 'DATA_LOADER_SET_META_DATA',
   setVolumesConvertedCount: 'SET_VOLUMES_CONVERTED_COUNT',
   setVolumesToConvertCount: 'SET_VOLUMES_TO_CONVERT_COUNT'
 };
