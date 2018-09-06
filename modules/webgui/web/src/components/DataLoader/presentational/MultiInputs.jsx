@@ -8,17 +8,17 @@ import Row from '../../common/Row/Row';
 import styles from './MultiInputs.scss';
 
 const MultiInputs = (props) => {
-  const { options, onChange, presentationLabel, inputLabels, subLabel, disabled } = props;
+  const { options, onChange, presentationLabel, inputTypes, disabled } = props;
   return (
     <div className={styles.multiInputs}>
       <Label size='medium'>{presentationLabel}:</Label>
       <Row>
-        {Object.keys(options).map((key, index) => (
+        {inputTypes.map((type) => (
           <Input
-            key={key}
-            label={inputLabels ? inputLabels[index] : key}
-            placeholder={key}
-            value={options[key]}
+            key={type}
+            label={type}
+            placeholder={type}
+            value={options[type] !== undefined ? Math.round(options[type]) : 100}
             disabled={disabled}
             onChange={onChange}
           />
@@ -31,14 +31,15 @@ const MultiInputs = (props) => {
 MultiInputs.propTypes = {
   options: PropTypes.object.isRequired,
   presentationLabel: PropTypes.string.isRequired,
-  inputLabels: PropTypes.arrayOf(PropTypes.string),
+  inputTypes: PropTypes.arrayOf(PropTypes.string),
   onChange: PropTypes.func,
 }
 
 MultiInputs.defaultProps = {
-  options: {},
+  options: { x: 0, y: 0, z: 0 },
   label: 'Loading',
   onChange: () => { },
+  inputTypes: ['x', 'y', 'z']
 }
 
 export default MultiInputs;

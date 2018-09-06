@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
@@ -11,7 +10,6 @@ import Row from '../common/Row/Row';
 import Input from '../common/Input/Input/Input';
 import styles from './PrepareUploadedData.scss';
 import Button from '../common/Input/Button/Button';
-import RadioButtons from '../common/Input/RadioButtons/RadioButtons';
 import Label from '../common/Label/Label';
 import Window from '../common/Window/Window';
 import Column from './components/FlexColumn';
@@ -29,7 +27,6 @@ import {
   KEY_UPPER_DOMAIN_BOUNDS,
   KEY_LOWER_DOMAIN_BOUNDS,
   KEY_SPICE_TRANSLATION,
-  KEY_STATIC_TRANSLATION
 } from './constants';
 
 class PrepareUploadedData extends Component {
@@ -40,7 +37,10 @@ class PrepareUploadedData extends Component {
       activated: false,
       volumeProgress: 0,
       metaData: {
-        gridType: ''
+        gridType: '',
+        gridSystem: ['x', 'y', 'z'],
+        variableMinBounds: {},
+        variableMaxBounds: {}
       },
       uploadButtonIsClicked: false,
       itemName: '',
@@ -49,8 +49,6 @@ class PrepareUploadedData extends Component {
         path: ''
       }],
       activeTfFilePath: '',
-      translationType: KEY_STATIC_TRANSLATION,
-      translationPos: { x: 0, y: 0, z: 0 },
       translationTarget: 'SUN',
       translationObserver: 'SUN',
       scale: 1,
@@ -74,11 +72,9 @@ class PrepareUploadedData extends Component {
     this.upload = this.upload.bind(this);
     this.handleProgressValue = this.handleProgressValue.bind(this);
     this.subscribeToVolumeConversionProgress = this.subscribeToVolumeConversionProgress.bind(this);
-    this.handleTranslationTypeChange = this.handleTranslationTypeChange.bind(this);
-    this.handleSetStaticTranslation = this.handleSetStaticTranslation.bind(this);
-    this.handleSetTranslationTarget = this.handleSetTranslationTarget.bind(this);
     this.handleSelectedTFImage = this.handleSelectedTFImage.bind(this);
     this.handleTfPresetsJSON = this.handleTfPresetsJSON.bind(this);
+    this.handleSetTranslationTarget = this.handleSetTranslationTarget.bind(this);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -95,23 +91,20 @@ class PrepareUploadedData extends Component {
       });
     }
 
-    if (prevProps.metaDataStringifiedJSON !== this.props.metaDataStringifiedJSON) {
+    if (prevProps.metaDataStringifiedJSON !== this.props.metaDataStringifiedJSON && this.props.metaDataStringifiedJSON !== '') {
       const metaData = this.props.metaDataStringifiedJSON ? handleReceivedJSON(this.props.metaDataStringifiedJSON) : undefined
-      console.log(metaData)
-
-      let newDimensions
-      if (metaData && metaData.gridSystem1DimensionSize && metaData.gridSystem2DimensionSize && metaData.gridSystem3DimensionSize) {
-        newDimensions = {
-          x: metaData.gridSystem1DimensionSize,
-          y: metaData.gridSystem2DimensionSize,
-          z: metaData.gridSystem3DimensionSize,
-        }
-      }
+      const { dataDimensions, variableMinBounds, variableMaxBounds } = metaData;
 
       this.setState({
         metaData,
-        data: { ...this.state.data, dimensions: newDimensions }
-      })
+        data: {
+          ...this.state.data,
+          variable: 'rho',
+          dimensions: { ...dataDimensions },
+          lowerDomainBounds: { ...variableMinBounds },
+          upperDomainBounds: { ...variableMaxBounds },
+        }
+      }, () => console.log(this.state))
     }
 
     this.subscribeToVolumeConversionProgress();
@@ -177,21 +170,6 @@ class PrepareUploadedData extends Component {
     return `${getFileBasename(getDirectoryLeaf(this.props.selectedFilePaths[0]))}_${this.state.data.variable}`
   }
 
-  handleTranslationTypeChange(target) {
-    let translationType;
-    target === 'Spice'
-      ? translationType = KEY_SPICE_TRANSLATION
-      : translationType = KEY_STATIC_TRANSLATION;
-    this.setState({ translationType });
-  }
-
-  handleSetStaticTranslation({ currentTarget }) {
-    const { translationPos } = this.state;
-    let label = currentTarget.attributes.label.value;
-    let value = Number(currentTarget.value);
-    this.setState({ translationPos: { ...translationPos, [label]: value } })
-  }
-
   handleSetTranslationTarget(event) {
     this.setState({ translationTarget: event.value })
   }
@@ -212,7 +190,7 @@ class PrepareUploadedData extends Component {
   upload() {
     this.setState({ uploadButtonIsClicked: true });
 
-    const { translationType, translationPos, translationTarget, translationObserver, activeTfFilePath } = this.state;
+    const { translationTarget, translationObserver, activeTfFilePath } = this.state;
     const { dimensions, variable, lowerDomainBounds, upperDomainBounds, rSquared } = this.state.data;
 
     let payload = `\'
@@ -220,13 +198,10 @@ class PrepareUploadedData extends Component {
         ItemName="${this.state.itemName || this.getDefaultItemName()}",
         GridType="${this.state.gridType}",
         Translation={
-          Type="${translationType}",
-          ${translationType === KEY_STATIC_TRANSLATION ? `
-          Position={${translationPos.x}, ${translationPos.y}, ${translationPos.z}},
-          ` : `
+          Type="${KEY_SPICE_TRANSLATION}",
           Target="${translationTarget}",
           Observer="${translationObserver}",
-          `}
+          }
         },
         Task={
           Dimensions={${dimensions.x}, ${dimensions.y}, ${dimensions.z}}, 
@@ -248,16 +223,14 @@ class PrepareUploadedData extends Component {
 
   render() {
     const { width, currentVolumesConvertedCount, currentVolumesToConvertCount } = this.props;
-    const { volumeProgress, translationType, translationPos, translationTarget, metaData } = this.state;
-    const { dimensions, variable, lowerDomainBounds, upperDomainBounds } = this.state.data;
+    const { volumeProgress, translationTarget, metaData } = this.state;
+    const { variable, dimensions, lowerDomainBounds, upperDomainBounds } = this.state.data;
     // const spiceOptions = 'SUN EARTH'.split(' ').map(v => ({ value: v, label: v }));
-
-    console.log(metaData)
 
     const isUnEditable = (this.state.uploadButtonIsClicked && (currentVolumesConvertedCount !== currentVolumesToConvertCount));
 
     const WINDOW_MAX_WIDTH = 800;
-    const w = width / 2;
+    const w = width / 1.5;
     const h = 700;
     const windowSize = {
       width: w > WINDOW_MAX_WIDTH ? WINDOW_MAX_WIDTH : w,
@@ -296,7 +269,7 @@ class PrepareUploadedData extends Component {
         closeCallback={() => this.setState({ activated: false })}>
         <Column widthPercentage={100} className={styles.content}>
           <Row>
-            <Column widthPercentage={50} className={styles.spaceFirstChildren}>
+            <Column widthPercentage={33} className={styles.spaceFirstChildren}>
               <div>
                 <Input onChange={(event) => this.changeItemName(event)}
                   label='Item name'
@@ -308,7 +281,7 @@ class PrepareUploadedData extends Component {
                 {(metaData && metaData.gridType) ? metaData.gridType : 'undefined'}
               </div>
               <MultiInputs presentationLabel='Data Dimensions'
-                inputLabels={(metaData && metaData.gridSystem) ? metaData.gridSystem : ['x', 'y', 'z']}
+                inputTypes={metaData && metaData.gridSystem}
                 options={dimensions}
                 disabled={isUnEditable}
                 onChange={(target) => this.onChangeMultiInputs(target, KEY_DIMENSIONS)} />
@@ -317,17 +290,16 @@ class PrepareUploadedData extends Component {
                 disabled={isUnEditable}
                 onChange={this.changeVariable} />
               <MultiInputs presentationLabel='Lower Domain Bounds'
+                inputTypes={metaData && metaData.gridSystem}
                 options={lowerDomainBounds}
                 disabled={isUnEditable}
                 onChange={(target) => this.onChangeMultiInputs(target, KEY_LOWER_DOMAIN_BOUNDS)} />
               <MultiInputs presentationLabel='Upper Domain Bounds'
+                inputTypes={metaData && metaData.gridSystem}
                 options={upperDomainBounds}
                 disabled={isUnEditable}
                 onChange={(target) => this.onChangeMultiInputs(target, KEY_UPPER_DOMAIN_BOUNDS)} />
-              <Translation translationType={translationType}
-                translationPos={translationPos}
-                onTranslationTypeChange={this.handleTranslationTypeChange}
-                onSetTranslation={(target) => this.handleSetStaticTranslation(target)}
+              <Translation
                 onSetTranslationTarget={this.handleSetTranslationTarget}
                 target={translationTarget} />
               <Checkbox label={"Multiply " + variable + " with radius^2?"}
@@ -335,7 +307,11 @@ class PrepareUploadedData extends Component {
                 disabled={isUnEditable} />
             </Column>
             <Column className={styles.spaceFirstChildren}
-              widthPercentage={50}>
+              widthPercentage={33}>
+              <Label>metadata</Label>
+            </Column>
+            <Column className={styles.spaceFirstChildren}
+              widthPercentage={33}>
               <Label>Here be trafnser functions</Label>
               <ImageSelect imageSources={tfImages}
                 onSelect={this.handleSelectedTFImage} />

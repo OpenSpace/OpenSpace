@@ -388,7 +388,8 @@ void Loader::getVolumeMetaData(ghoul::Dictionary &metaDataDictionary)
         radiusUnit = "";
     }
 
-    json variableMinMaxBoundsJson;
+    json variableMaxBoundsJson;
+    json variableMinBoundsJson;
     const std::string KeyActualMax = "actual_max";
     const std::string KeyActualMin = "actual_min";
     if (gridType == "Spherical")
@@ -402,8 +403,13 @@ void Loader::getVolumeMetaData(ghoul::Dictionary &metaDataDictionary)
         const float actualMin = rDictionary.value<float>(KeyActualMin);
         const float AUmeters = 149597871000.0;
 
-        variableMinMaxBoundsJson["r"]["min"] = actualMin / AUmeters;
-        variableMinMaxBoundsJson["r"]["max"] = actualMax / AUmeters;
+        //TODO Make cleaner!
+        variableMinBoundsJson["r"] = actualMin / AUmeters;
+        variableMaxBoundsJson["r"] = actualMax / AUmeters;
+        variableMinBoundsJson["theta"] = -90;
+        variableMaxBoundsJson["theta"] = 90;
+        variableMinBoundsJson["phi"] = 0;
+        variableMaxBoundsJson["phi"] = 360;
     }
     else
     {
@@ -414,14 +420,17 @@ void Loader::getVolumeMetaData(ghoul::Dictionary &metaDataDictionary)
             vAttribDictionary.getValue<ghoul::Dictionary>(key, dict);
             const float actualMax = dict.value<float>(KeyActualMax);
             const float actualMin = dict.value<float>(KeyActualMin);
-            variableMinMaxBoundsJson[key]["max"] = actualMax;
-            variableMinMaxBoundsJson[key]["min"] = actualMin;
+            variableMaxBoundsJson[key] = actualMax;
+            variableMinBoundsJson[key] = actualMin;
         }
     }
 
     json j;
     j["modelName"] = modelName;
-    j["dataDimensions"] = dataDimensions;
+    j["dataDimensions"] = {
+        {gridSystem[0], dataDimensions[0]},
+        {gridSystem[1], dataDimensions[1]},
+        {gridSystem[2], dataDimensions[2]}};
     j["gridSystem"] = gridSystem;
     j["gridType"] = gridType;
     j["radiusUnit"] = radiusUnit;
@@ -429,7 +438,8 @@ void Loader::getVolumeMetaData(ghoul::Dictionary &metaDataDictionary)
     j["gridSystem2DimensionSize"] = gridSystem2DimensionSize;
     j["gridSystem3DimensionSize"] = gridSystem3DimensionSize;
     j["variableKeys"] = vKeys;
-    j["variableMinMaxBounds"] = variableMinMaxBoundsJson;
+    j["variableMinBounds"] = variableMinBoundsJson;
+    j["variableMaxBounds"] = variableMaxBoundsJson;
     j["variableAttributes"] = json::parse(variableAttributesJsonString);
 
     _volumeMetaDataJSON = j.dump();
