@@ -24,13 +24,14 @@
 
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/rendering/layer/layer.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr const char* _loggerCat = "LayerGroup";
     constexpr const char* KeyFallback = "Fallback";
 
-    static const openspace::properties::Property::PropertyInfo BlendTileInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BlendTileInfo = {
         "BlendTileLevels",
         "Blend between levels",
         "If this value is enabled, images between different levels are interpolated, "
@@ -56,9 +57,8 @@ LayerGroup::LayerGroup(layergroupid::GroupID id)
 LayerGroup::LayerGroup(layergroupid::GroupID id, const ghoul::Dictionary& dict)
     : LayerGroup(id)
 {
-    for (size_t i = 0; i < dict.size(); i++) {
-        std::string dictKey = std::to_string(i + 1);
-        ghoul::Dictionary layerDict = dict.value<ghoul::Dictionary>(dictKey);
+    for (size_t i = 1; i <= dict.size(); i++) {
+        ghoul::Dictionary layerDict = dict.value<ghoul::Dictionary>(std::to_string(i));
 
         try {
             addLayer(layerDict);
@@ -69,7 +69,7 @@ LayerGroup::LayerGroup(layergroupid::GroupID id, const ghoul::Dictionary& dict)
             if (layerDict.hasKeyAndValue<ghoul::Dictionary>(KeyFallback)) {
                 LWARNING("Unable to create layer. Initializing fallback layer.");
                 ghoul::Dictionary fallbackLayerDict =
-                layerDict.value<ghoul::Dictionary>(KeyFallback);
+                    layerDict.value<ghoul::Dictionary>(KeyFallback);
                 try {
                     addLayer(fallbackLayerDict);
                 }
@@ -98,7 +98,7 @@ void LayerGroup::deinitialize() {
 void LayerGroup::update() {
     _activeLayers.clear();
 
-    for (const auto& layer : _layers) {
+    for (const std::shared_ptr<Layer>& layer : _layers) {
         if (layer->enabled()) {
             layer->update();
             _activeLayers.push_back(layer);
@@ -111,7 +111,7 @@ std::shared_ptr<Layer> LayerGroup::addLayer(const ghoul::Dictionary& layerDict) 
         LERROR("'Identifier' must be specified for layer.");
         return nullptr;
     }
-    auto layer = std::make_shared<Layer>(_groupId, layerDict, *this);
+    std::shared_ptr<Layer> layer = std::make_shared<Layer>(_groupId, layerDict, *this);
     layer->onChange(_onChangeCallback);
     if (hasPropertySubOwner(layer->identifier())) {
         LINFO("Layer with identifier " + layer->identifier() + " already exists.");
@@ -166,6 +166,10 @@ const std::vector<std::shared_ptr<Layer>>& LayerGroup::activeLayers() const {
 
 int LayerGroup::pileSize() const{
     return _levelBlendingEnabled.value() ? 3 : 1;
+}
+
+bool LayerGroup::layerBlendingEnabled() const {
+    return _levelBlendingEnabled;
 }
 
 void LayerGroup::onChange(std::function<void(void)> callback) {

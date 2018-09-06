@@ -24,28 +24,45 @@
 
 #include <modules/space/spacemodule.h>
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/util/factorymanager.h>
-
-#include <ghoul/misc/assert.h>
-
 #include <modules/space/rendering/renderableconstellationbounds.h>
 #include <modules/space/rendering/renderableplanet.h>
 #include <modules/space/rendering/renderablerings.h>
 #include <modules/space/rendering/renderablestars.h>
 #include <modules/space/rendering/simplespheregeometry.h>
-
 #include <modules/space/translation/keplertranslation.h>
 #include <modules/space/translation/spicetranslation.h>
 #include <modules/space/translation/tletranslation.h>
-
 #include <modules/space/rotation/spicerotation.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/util/factorymanager.h>
+#include <openspace/util/spicemanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/templatefactory.h>
+
+namespace {
+    constexpr openspace::properties::Property::PropertyInfo SpiceExceptionInfo = {
+        "ShowExceptions",
+        "Show Exceptions",
+        "If enabled, errors from SPICE will be thrown and show up in the log. If "
+        "disabled, the errors will be ignored silently."
+    };
+} // namespace
 
 namespace openspace {
 
-SpaceModule::SpaceModule() : OpenSpaceModule(Name) {}
+ghoul::opengl::ProgramObjectManager SpaceModule::ProgramObjectManager;
+
+SpaceModule::SpaceModule()
+    : OpenSpaceModule(Name)
+    , _showSpiceExceptions(SpiceExceptionInfo, true)
+{
+    _showSpiceExceptions.onChange([&t = _showSpiceExceptions](){
+        SpiceManager::ref().setExceptionHandling(SpiceManager::UseException(t));
+    });
+    addProperty(_showSpiceExceptions);
+}
 
 void SpaceModule::internalInitialize(const ghoul::Dictionary&) {
     FactoryManager::ref().addFactory(
@@ -78,6 +95,10 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary&) {
     auto fGeometry = FactoryManager::ref().factory<planetgeometry::PlanetGeometry>();
     ghoul_assert(fGeometry, "Planet geometry factory was not created");
     fGeometry->registerClass<planetgeometry::SimpleSphereGeometry>("SimpleSphere");
+}
+
+void SpaceModule::internalDeinitializeGL() {
+    ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
 }
 
 std::vector<documentation::Documentation> SpaceModule::documentations() const {

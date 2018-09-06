@@ -1,0 +1,77 @@
+--messenger.scene
+
+local assetHelper = asset.require('util/asset_helper')
+local sceneHelper = asset.require('util/scene_helper')
+local propertyHelper = asset.require('util/property_helper')
+
+asset.require('spice/base')
+assetHelper.requestAll(asset, 'scene/solarsystem/sun')
+asset.require('scene/solarsystem/planets')
+asset.request('scene/digitaluniverse/stars')
+asset.request('scene/digitaluniverse/milkyway')
+
+asset.require('util/default_keybindings')
+asset.require('util/default_dashboard')
+
+local MessengerAsset = asset.require('scene/solarsystem/missions/messenger/messengerSC')
+
+if not openspace.modules.isLoaded("Volume") then
+    openspace.printError("Volume module is not loaded, skipping asset: mercurymagnetosphere")
+else
+    asset.require('scene/solarsystem/missions/messenger/mercurymagnetosphere')
+end
+
+asset.request('customization/globebrowsing')
+
+assetHelper.registerDashboardItems(asset, {
+    {
+        Type = "DashboardItemDistance",
+        Identifier = "MessengerDistance",
+        GuiName = "Messenger - Mercury Distance",
+        SourceType = "Node",
+        SourceNodeName = "Messenger",
+        DestinationType = "Node",
+        DestinationNodeName = "Mercury"
+    }
+})
+
+
+asset.onInitialize(function ()
+
+    openspace.time.setTime("2011 MAY 13 00:05:18")
+
+    openspace.setDefaultGuiSorting()
+
+    sceneHelper.setDeltaTimeKeys({
+        1, 5, 10, 20, 40, 90, 360, 720, 2880, 14400,
+        28800, 57600, 115200, 230400, 460800, 921600, 1843200, 3686400, 7372800, 14745600
+    })
+
+    openspace.markInterestingNodes({
+        "Mercury", "Messenger", "Earth", "Sun"
+    })
+
+     openspace.addVirtualProperty(
+        "BoolProperty",
+        "Show Trails",
+        "Scene.*Trail.renderable.Enabled",
+        "Disable or enable all trails of the scene at the same time",
+        true,
+        nil,
+        nil
+    )
+
+
+    openspace.navigation.setCameraState({
+        Focus = "Mercury",
+        Position = { 526781518487.171326, 257168309890.072144, -1381125204152.817383 },
+        Rotation = {0.180662, 0.021334, 0.979084, 0.091111},
+    })
+end)
+
+asset.onDeinitialize(function ()
+    openspace.removeInterestingNodes({
+        "Mercury", "Messenger", "Earth", "Sun"
+    })
+end)
+

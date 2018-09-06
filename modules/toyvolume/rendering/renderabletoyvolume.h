@@ -31,8 +31,6 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <openspace/util/boxgeometry.h>
-#include <openspace/util/blockplaneintersectiongeometry.h>
 
 namespace openspace {
 
@@ -51,7 +49,7 @@ public:
     void update(const UpdateData& data) override;
 
 private:
-    properties::Vec3Property _scaling;
+    properties::Vec3Property _size;
     properties::IntProperty _scalingExponent;
     properties::FloatProperty _stepSize;
     properties::Vec3Property _translation;

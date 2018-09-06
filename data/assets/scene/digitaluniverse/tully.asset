@@ -6,7 +6,7 @@ local textures = asset.syncedResource({
     Name = "Tully Textures",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_tully_textures",
-    Version = 1
+    Version = 2
 })
 
 local speck = asset.syncedResource({
@@ -45,6 +45,8 @@ local tullyPoints = {
         -- Max size in pixels
         BillboardMaxSize = 50.0,
         BillboardMinSize = 0.0,
+        CorrectionSizeEndDistance = 20.55,
+        CorrectionSizeFactor = 10.45,
     },
     GUI = {
         Name = "Tully Galaxies",

@@ -33,7 +33,7 @@
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
 
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/rendering/renderable.h>
 
@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
     );
 
     std::stringstream defaultPassword;
-    defaultPassword << std::hex << std::setfill('0') << std::setw(6) << 
+    defaultPassword << std::hex << std::setfill('0') << std::setw(6) <<
         (std::hash<size_t>{}(
             std::chrono::system_clock::now().time_since_epoch().count()
         ) % 0xffffff);

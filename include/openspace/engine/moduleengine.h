@@ -25,18 +25,18 @@
 #ifndef __OPENSPACE_CORE___MODULEENGINE___H__
 #define __OPENSPACE_CORE___MODULEENGINE___H__
 
+#include <openspace/properties/propertyowner.h>
+
+#include <map>
 #include <memory>
 #include <vector>
 
-#include <openspace/properties/propertyowner.h>
-#include <openspace/util/openspacemodule.h>
-
-#include <ghoul/misc/assert.h>
-#include <algorithm>
-
+namespace ghoul { class Dictionary; }
 namespace ghoul::systemcapabilities { struct Version; }
 
 namespace openspace {
+
+class OpenSpaceModule;
 
 namespace scripting { struct LuaLibrary; }
 
@@ -56,10 +56,16 @@ public:
      * Registers all of the OpenSpaceModule%s which are created by the CMake configuration
      * and stored in the <code>moduleregistration.h</code> file. For all of those modules
      * the OpenSpaceModule::initialize method with will called.
+     *
      * \throw ghoul::RuntimeError If two modules in the default modules have the same
-     * name
+     *        name
     */
-    void initialize(const ghoul::Dictionary& moduleConfigurations);
+    void initialize(const std::map<std::string, ghoul::Dictionary>& moduleConfigurations);
+
+    /**
+     * Calls the initializeGL functions of all registered OpenSpaceModule%s.
+     */
+    void initializeGL();
 
     /**
      * Deinitializes all of the contained OpenSpaceModule%s by calling the
@@ -68,19 +74,27 @@ public:
     void deinitialize();
 
     /**
+     * Calls the deinitializeGL functions of all registered OpenSpaceModule%s.
+     */
+    void deinitializeGL();
+
+    /**
      * Registers the passed \p module with this ModuleEngine. The OpenSpaceModule::create
      * method will be called on the \p module in the process.
+     *
      * \param module The OpenSpaceModule that is to be registered
+     *
      * \throw ghoul::RuntimeError If the name of the \p module was already registered
-     * previously
+     *        previously
      * \pre \p module must not be nullptr
      */
     void registerModule(std::unique_ptr<OpenSpaceModule> module,
-                        const ghoul::Dictionary& configuration);
+        const ghoul::Dictionary& configuration);
 
     /**
      * Returns a list of all registered OpenSpaceModule%s that have been registered with
      * this ModuleEngine. All returned OpenSpaceModule%s are guaranteed to be initialized.
+     *
      * \return A list of all registered OpenSpaceModule%s
      */
     std::vector<OpenSpaceModule*> modules() const;
@@ -89,24 +103,16 @@ public:
      * Get the module subclass with given template argument. Requires the module subclass
      * to have the public static member variable <code>name</code> which must be equal to
      * the name of the module used in its constructor.
+     *
      * \return a pointer to the module of the given subclass
      */
     template <class ModuleSubClass>
-    ModuleSubClass* module() const {
-        auto it = std::find_if(_modules.begin(), _modules.end(),
-            [](const std::unique_ptr<OpenSpaceModule>& m) {
-                return m->identifier() == ModuleSubClass::Name;
-            });
-        if (it != _modules.end()) {
-            return dynamic_cast<ModuleSubClass*>(it->get());
-        } else {
-            return nullptr;
-        }
-    }
+    ModuleSubClass* module() const;
 
     /**
      * Returns the combined minimum OpenGL version. The return value is the maximum
      * version of all registered modules' OpenGL versions.
+     *
      * \return The combined minimum OpenGL version
      */
     ghoul::systemcapabilities::Version requiredOpenGLVersion() const;
@@ -123,5 +129,7 @@ private:
 };
 
 } // namespace openspace
+
+#include "moduleengine.inl"
 
 #endif // __OPENSPACE_CORE___MODULEENGINE___H__

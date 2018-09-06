@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,40 +23,49 @@
  ****************************************************************************************/
 
 #include <modules/server/include/connection.h>
-#include <modules/server/include/authorizationtopic.h>
-#include <modules/server/include/getpropertytopic.h>
-#include <modules/server/include/luascripttopic.h>
-#include <modules/server/include/setpropertytopic.h>
-#include <modules/server/include/subscriptiontopic.h>
-#include <modules/server/include/timetopic.h>
-#include <modules/server/include/triggerpropertytopic.h>
+
+#include <modules/server/include/topics/authorizationtopic.h>
+#include <modules/server/include/topics/bouncetopic.h>
+#include <modules/server/include/topics/getpropertytopic.h>
+#include <modules/server/include/topics/luascripttopic.h>
+#include <modules/server/include/topics/setpropertytopic.h>
+#include <modules/server/include/topics/subscriptiontopic.h>
+#include <modules/server/include/topics/timetopic.h>
+#include <modules/server/include/topics/topic.h>
+#include <modules/server/include/topics/triggerpropertytopic.h>
+#include <openspace/engine/configuration.h>
+#include <openspace/engine/globals.h>
+#include <ghoul/io/socket/socket.h>
+#include <ghoul/io/socket/tcpsocketserver.h>
+#include <ghoul/io/socket/websocketserver.h>
+#include <ghoul/logging/logmanager.h>
+#include <fmt/format.h>
 
 namespace {
-const char* _loggerCat = "ServerModule: Connection";
+    constexpr const char* _loggerCat = "ServerModule: Connection";
 
-const char* MessageKeyType = "type";
-const char* MessageKeyPayload = "payload";
-const char* MessageKeyTopic = "topic";
+    constexpr const char* MessageKeyType = "type";
+    constexpr const char* MessageKeyPayload = "payload";
+    constexpr const char* MessageKeyTopic = "topic";
 
-const char* AuthenticationTopicKey = "authorize";
-const char* GetPropertyTopicKey = "get";
-const char* LuaScriptTopicKey = "luascript";
-const char* SetPropertyTopicKey = "set";
-const char* SubscriptionTopicKey = "subscribe";
-const char* TimeTopicKey = "time";
-const char* TriggerPropertyTopicKey = "trigger";
-const char* BounceTopicKey = "bounce";
-
-const int ThrottleMessageWaitInMs = 100;
-}
+    constexpr const char* AuthenticationTopicKey = "authorize";
+    constexpr const char* GetPropertyTopicKey = "get";
+    constexpr const char* LuaScriptTopicKey = "luascript";
+    constexpr const char* SetPropertyTopicKey = "set";
+    constexpr const char* SubscriptionTopicKey = "subscribe";
+    constexpr const char* TimeTopicKey = "time";
+    constexpr const char* TriggerPropertyTopicKey = "trigger";
+    constexpr const char* BounceTopicKey = "bounce";
+} // namespace
 
 namespace openspace {
 
-Connection::Connection(std::shared_ptr<ghoul::io::Socket> s, const std::string &address)
-    : _socket(s)
-    , _isAuthorized(false)
-    , _address(address)
+Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address)
+    : _socket(std::move(s))
+    , _address(std::move(address))
 {
+    ghoul_assert(_socket, "Socket must not be nullptr");
+
     _topicFactory.registerClass<AuthorizationTopic>(AuthenticationTopicKey);
     _topicFactory.registerClass<GetPropertyTopic>(GetPropertyTopicKey);
     _topicFactory.registerClass<LuaScriptTopic>(LuaScriptTopicKey);
@@ -67,17 +76,10 @@ Connection::Connection(std::shared_ptr<ghoul::io::Socket> s, const std::string &
     _topicFactory.registerClass<BounceTopic>(BounceTopicKey);
 
     // see if the default config for requiring auth (on) is overwritten
-    const bool hasAuthenticationConfiguration = OsEng.configurationManager().hasKeyAndValue<bool>(
-            ConfigurationManager::KeyRequireSocketAuthentication);
-    if (hasAuthenticationConfiguration) {
-        _requireAuthorization = OsEng.configurationManager().value<bool>(
-                ConfigurationManager::KeyRequireSocketAuthentication);
-    } else {
-        _requireAuthorization = true;
-    }
+    _requireAuthorization = global::configuration.doesRequireSocketAuthentication;
 }
 
-void Connection::handleMessage(std::string message) {
+void Connection::handleMessage(const std::string& message) {
     try {
         nlohmann::json j = nlohmann::json::parse(message.c_str());
         try {
@@ -88,7 +90,6 @@ void Connection::handleMessage(std::string message) {
         }
     } catch (...) {
         if (!isAuthorized()) {
-            LERROR("");
             _socket->disconnect();
             LERROR(fmt::format(
                 "Could not parse JSON: '{}'. Connection is unauthorized. Disconnecting.",
@@ -101,16 +102,16 @@ void Connection::handleMessage(std::string message) {
     }
 }
 
-void Connection::handleJson(nlohmann::json j) {
-    auto topicJson = j.find(MessageKeyTopic);
-    auto payloadJson = j.find(MessageKeyPayload);
+void Connection::handleJson(const nlohmann::json& json) {
+    auto topicJson = json.find(MessageKeyTopic);
+    auto payloadJson = json.find(MessageKeyPayload);
 
-    if (topicJson == j.end() || !topicJson->is_number_integer()) {
+    if (topicJson == json.end() || !topicJson->is_number_integer()) {
         LERROR("Topic must be an integer");
         return;
     }
 
-    if (payloadJson == j.end() || !payloadJson->is_object()) {
+    if (payloadJson == json.end() || !payloadJson->is_object()) {
         LERROR("Payload must be an object");
         return;
     }
@@ -121,10 +122,12 @@ void Connection::handleJson(nlohmann::json j) {
 
     if (topicIt == _topics.end()) {
         // The topic id is not registered: Initialize a new topic.
-        auto typeJson = j.find(MessageKeyType);
-        if (typeJson == j.end() || !typeJson->is_string()) {
-            LERROR(fmt::format("A type must be specified (`{}`) as a string when "
-                               "a new topic is initialized", MessageKeyType));
+        auto typeJson = json.find(MessageKeyType);
+        if (typeJson == json.end() || !typeJson->is_string()) {
+            LERROR(fmt::format(
+                "A type must be specified (`{}`) as a string when "
+                "a new topic is initialized", MessageKeyType
+            ));
             return;
         }
         std::string type = *typeJson;
@@ -147,23 +150,23 @@ void Connection::handleJson(nlohmann::json j) {
         }
 
         // Dispatch the message to the existing topic.
-        std::unique_ptr<Topic> &topic = topicIt->second;
-        topic->handleJson(*payloadJson);
-        if (topic->isDone()) {
+        Topic& topic = *topicIt->second;
+        topic.handleJson(*payloadJson);
+        if (topic.isDone()) {
             _topics.erase(topicIt);
         }
     }
 }
 
-void Connection::sendMessage(const std::string &message) {
+void Connection::sendMessage(const std::string& message) {
     _socket->putMessage(message);
 }
 
-void Connection::sendJson(const nlohmann::json &j) {
-    sendMessage(j.dump());
+void Connection::sendJson(const nlohmann::json& json) {
+    sendMessage(json.dump());
 }
 
-bool Connection::isAuthorized() {
+bool Connection::isAuthorized() const {
     // require either auth to be disabled or client to be authenticated
     return !_requireAuthorization || isWhitelisted() || _isAuthorized;
 }
@@ -176,25 +179,17 @@ std::thread& Connection::thread() {
     return _thread;
 }
 
-std::shared_ptr<ghoul::io::Socket> Connection::socket() {
-    return _socket;
+ghoul::io::Socket* Connection::socket() {
+    return _socket.get();
 }
 
-void Connection::setAuthorized(const bool status) {
+void Connection::setAuthorized(bool status) {
     _isAuthorized = status;
 }
 
-bool Connection::isWhitelisted() {
-    const bool hasWhitelist = OsEng.configurationManager().hasKeyAndValue<std::string>(
-        ConfigurationManager::KeyServerClientAddressWhitelist);
-
-    if (!hasWhitelist) {
-        return false;
-    }
-
-    const auto whitelist = OsEng.configurationManager().value<std::string>(
-        ConfigurationManager::KeyServerClientAddressWhitelist);
-    return whitelist.find(_address) != std::string::npos;
+bool Connection::isWhitelisted() const {
+    const std::vector<std::string>& wl = global::configuration.clientAddressWhitelist;
+    return std::find(wl.begin(), wl.end(), _address) != wl.end();
 }
 
 } // namespace openspace

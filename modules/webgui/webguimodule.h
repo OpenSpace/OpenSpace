@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,11 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef OPENSPACE_WEBGUIMODULE_H
-#define OPENSPACE_WEBGUIMODULE_H
+#ifndef __OPENSPACE_MODULE_WEBGUI___WEBGUIMODULE___H__
+#define __OPENSPACE_MODULE_WEBGUI___WEBGUIMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-#include <include/openspace/engine/configurationmanager.h>
 
 namespace openspace {
 
@@ -36,6 +35,6 @@ public:
     WebGuiModule();
 };
 
-}
+} // namespace openspace
 
-#endif //OPENSPACE_WEBGUIMODULE_H
+#endif // __OPENSPACE_MODULE_WEBGUI___WEBGUIMODULE___H__

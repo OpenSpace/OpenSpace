@@ -1,7 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local proceduralGlobes = asset.require('util/procedural_globe')
 local transforms = asset.require('./transforms')
-local kernels112 = asset.require('./ura112').Kernels
+local kernel = asset.require('./kernels').ura112
 
 
 
@@ -25,7 +25,7 @@ local irregularMoons = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 266.56,
-        Kernels = kernels112
+        Kernels = kernel
     },
     {
         Identifier = "Caliban",
@@ -41,7 +41,7 @@ local irregularMoons = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 579.50,
-        Kernels = kernels112
+        Kernels = kernel
     },
     {
         Identifier = "Stephano",
@@ -57,7 +57,7 @@ local irregularMoons = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 676.50,
-        Kernels = kernels112
+        Kernels = kernel
     },
     {
         Identifier = "Trinculo",
@@ -73,7 +73,7 @@ local irregularMoons = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 758.10,
-        Kernels = kernels112
+        Kernels = kernel
     },
     {
         Identifier = "Sycorax",
@@ -89,7 +89,7 @@ local irregularMoons = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 1283.4,
-        Kernels = kernels112
+        Kernels = kernel
     },
     {
         Identifier = "Prospero",
@@ -105,7 +105,7 @@ local irregularMoons = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 1992.8,
-        Kernels = kernels112
+        Kernels = kernel
     },
     {
         Identifier = "Setebos",
@@ -121,7 +121,7 @@ local irregularMoons = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 2202.3,
-        Kernels = kernels112
+        Kernels = kernel
     },
     {
         Identifier = "Ferdinand",
@@ -137,7 +137,7 @@ local irregularMoons = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 2823.4,
-        Kernels = kernels112
+        Kernels = kernel
     }
 }
 

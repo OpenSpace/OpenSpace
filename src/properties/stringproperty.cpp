@@ -38,7 +38,7 @@ std::string fromLuaConversion(lua_State* state, bool& success) {
     }
 }
 
-bool toLuaConversion(lua_State* state, std::string val) {
+bool toLuaConversion(lua_State* state, const std::string& val) {
     lua_pushstring(state, val.c_str());
     return true;
 }
@@ -57,7 +57,7 @@ std::string fromStringConversion(std::string val, bool& success) {
 }
 
 bool toStringConversion(std::string& outValue, std::string inValue) {
-    outValue = "\"" + inValue + "\"";
+    outValue = "\"" + std::move(inValue ) + "\"";
     return true;
 }
 

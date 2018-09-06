@@ -24,47 +24,44 @@
 
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbyindex.h>
 
+#include <modules/globebrowsing/tile/tiledepthtransform.h>
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    const char* KeyDefaultProvider = "DefaultProvider";
-    const char* KeyProviders = "IndexTileProviders";
-    const char* KeyTileIndex = "TileIndex";
-    const char* KeyTileProvider = "TileProvider";
+    constexpr const char* KeyDefaultProvider = "DefaultProvider";
+    constexpr const char* KeyProviders = "IndexTileProviders";
+    constexpr const char* KeyTileIndex = "TileIndex";
+    constexpr const char* KeyTileProvider = "TileProvider";
 } // namespace
 
 namespace openspace::globebrowsing::tileprovider {
 
 TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
-    ghoul::Dictionary defaultProviderDict = dictionary.value<ghoul::Dictionary>(
+    const ghoul::Dictionary& defaultProviderDict = dictionary.value<ghoul::Dictionary>(
         KeyDefaultProvider
-        );
-
-    std::string typeString;
-    defaultProviderDict.getValue("Type", typeString);
-    layergroupid::TypeID typeID = layergroupid::TypeID::Unknown;
-    if (typeString.empty()) {
-        typeID = layergroupid::TypeID::DefaultTileLayer;
-    }
-    else {
-        typeID = layergroupid::getTypeIDFromTypeString(typeString);
-    }
-
-    if (typeID == layergroupid::TypeID::Unknown) {
-        throw ghoul::RuntimeError("Unknown layer type: " + typeString);
-    }
-
-    _defaultTileProvider = TileProvider::createFromDictionary(
-        typeID, defaultProviderDict
     );
 
-    ghoul::Dictionary indexProvidersDict = dictionary.value<ghoul::Dictionary>(
+    layergroupid::TypeID type;
+    if (defaultProviderDict.hasKeyAndValue<std::string>("Type")) {
+        const std::string& t = defaultProviderDict.value<std::string>("Type");
+        type = layergroupid::getTypeIDFromTypeString(t);
+
+        if (type == layergroupid::TypeID::Unknown) {
+            throw ghoul::RuntimeError("Unknown layer type: " + t);
+        }
+    }
+    else {
+        type = layergroupid::TypeID::DefaultTileLayer;
+    }
+
+    _defaultTileProvider = TileProvider::createFromDictionary(type, defaultProviderDict);
+
+    const ghoul::Dictionary& indexProvidersDict = dictionary.value<ghoul::Dictionary>(
         KeyProviders
     );
     for (size_t i = 0; i < indexProvidersDict.size(); i++) {
-        std::string dictKey = std::to_string(i + 1);
         ghoul::Dictionary indexProviderDict = indexProvidersDict.value<ghoul::Dictionary>(
-            dictKey
+            std::to_string(i + 1)
         );
         ghoul::Dictionary tileIndexDict = indexProviderDict.value<ghoul::Dictionary>(
             KeyTileIndex
@@ -73,20 +70,19 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
             KeyTileProvider
         );
 
-        TileIndex tileIndex(tileIndexDict);
+        const TileIndex tileIndex(tileIndexDict);
 
-        std::string providerTypeString;
-        defaultProviderDict.getValue("Type", providerTypeString);
-        layergroupid::TypeID providerTypeID = layergroupid::TypeID::Unknown;
-        if (providerTypeString.empty()) {
-            providerTypeID = layergroupid::TypeID::DefaultTileLayer;
+        layergroupid::TypeID providerTypeID;
+        if (defaultProviderDict.hasKeyAndValue<std::string>("Type")) {
+            const std::string& t = defaultProviderDict.value<std::string>("Type");
+            providerTypeID = layergroupid::getTypeIDFromTypeString(t);
+
+            if (providerTypeID == layergroupid::TypeID::Unknown) {
+                throw ghoul::RuntimeError("Unknown layer type: " + t);
+            }
         }
         else {
-            providerTypeID = layergroupid::getTypeIDFromTypeString(providerTypeString);
-        }
-
-        if (providerTypeID == layergroupid::TypeID::Unknown) {
-            throw ghoul::RuntimeError("Unknown layer type: " + providerTypeString);
+            providerTypeID = layergroupid::TypeID::DefaultTileLayer;
         }
 
         std::shared_ptr<TileProvider> stp = TileProvider::createFromDictionary(
@@ -98,16 +94,16 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
     }
 }
 
-Tile TileProviderByIndex::getTile(const TileIndex& tileIndex) {
-    auto it = _tileProviderMap.find(tileIndex.hashKey());
-    bool hasProvider = it != _tileProviderMap.end();
-    return hasProvider ? it->second->getTile(tileIndex) : Tile::TileUnavailable;
+Tile TileProviderByIndex::tile(const TileIndex& tileIndex) {
+    const auto it = _tileProviderMap.find(tileIndex.hashKey());
+    const bool hasProvider = it != _tileProviderMap.end();
+    return hasProvider ? it->second->tile(tileIndex) : Tile::TileUnavailable;
 }
 
-Tile::Status TileProviderByIndex::getTileStatus(const TileIndex& tileIndex) {
-    auto it = _tileProviderMap.find(tileIndex.hashKey());
-    bool hasProvider = it != _tileProviderMap.end();
-    return hasProvider ? it->second->getTileStatus(tileIndex) : Tile::Status::Unavailable;
+Tile::Status TileProviderByIndex::tileStatus(const TileIndex& tileIndex) {
+    const auto it = _tileProviderMap.find(tileIndex.hashKey());
+    const bool hasProvider = it != _tileProviderMap.end();
+    return hasProvider ? it->second->tileStatus(tileIndex) : Tile::Status::Unavailable;
 }
 
 TileDepthTransform TileProviderByIndex::depthTransform() {
@@ -115,14 +111,18 @@ TileDepthTransform TileProviderByIndex::depthTransform() {
 }
 
 void TileProviderByIndex::update() {
-    for (auto& it : _tileProviderMap){
+    using K = TileIndex::TileHashKey;
+    using V = std::shared_ptr<TileProvider>;
+    for (std::pair<const K, V>& it : _tileProviderMap) {
         it.second->update();
     }
     _defaultTileProvider->update();
 }
 
 void TileProviderByIndex::reset() {
-    for (auto& it : _tileProviderMap) {
+    using K = TileIndex::TileHashKey;
+    using V = std::shared_ptr<TileProvider>;
+    for (std::pair<const K, V>& it : _tileProviderMap) {
         it.second->reset();
     }
     _defaultTileProvider->reset();
@@ -133,7 +133,7 @@ int TileProviderByIndex::maxLevel() {
 }
 
 TileProvider* TileProviderByIndex::indexProvider(const TileIndex& tileIndex) const {
-    auto it = _tileProviderMap.find(tileIndex.hashKey());
+    const auto it = _tileProviderMap.find(tileIndex.hashKey());
     return (it != _tileProviderMap.end()) ? it->second.get() : nullptr;
 }
 

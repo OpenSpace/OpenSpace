@@ -23,16 +23,16 @@
  ****************************************************************************************/
 
 #include <modules/atmosphere/atmospheremodule.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-
-#include <openspace/rendering/renderable.h>
 
 #include <modules/atmosphere/rendering/renderableatmosphere.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/util/factorymanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 
-AtmosphereModule::AtmosphereModule() : OpenSpaceModule("Atmosphere") {}
+AtmosphereModule::AtmosphereModule() : OpenSpaceModule(Name) {}
 
 void AtmosphereModule::internalInitialize(const ghoul::Dictionary&) {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();

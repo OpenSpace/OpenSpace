@@ -27,12 +27,12 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/properties/property.h>
-
 #include <memory>
 #include <vector>
 
 namespace openspace {
+
+class Property;
 
 class VirtualPropertyManager : public properties::PropertyOwner {
 public:

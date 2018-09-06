@@ -25,22 +25,24 @@
 #include <modules/sync/syncs/urlsynchronization.h>
 
 #include <modules/sync/syncmodule.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/util/httprequest.h>
+#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <sstream>
+#include <ghoul/misc/dictionary.h>
 #include <fstream>
 #include <numeric>
 #include <memory>
-#include <cstdio>
 
 namespace {
     constexpr const char* KeyUrl = "Url";
     constexpr const char* KeyIdentifier = "Identifier";
     constexpr const char* KeyOverride = "Override";
+    constexpr const char* KeyUseHash = "UseHash";
 
     constexpr const char* TempSuffix = ".tmp";
 } // namespace
@@ -55,7 +57,7 @@ documentation::Documentation UrlSynchronization::Documentation() {
         {
             {
                 KeyUrl,
-                new OrVerifier(new StringVerifier, new StringListVerifier),
+                new OrVerifier({ new StringVerifier, new StringListVerifier }),
                 Optional::No,
                 "The URL or urls from where the files are downloaded. If multiple URLs "
                 "are provided, all files will be downloaded to the same directory."
@@ -66,7 +68,8 @@ documentation::Documentation UrlSynchronization::Documentation() {
                 Optional::Yes,
                 "This optional identifier will be part of the used folder structure and, "
                 "if provided, can be used to manually find the downloaded folder in the "
-                "synchronization folder."
+                "synchronization folder. If this value is not specified, 'UseHash' has "
+                "to be set to 'true'."
             },
             {
                 KeyOverride,
@@ -77,6 +80,16 @@ documentation::Documentation UrlSynchronization::Documentation() {
                 "be downloaded, thus overwriting the local files. This is useful for "
                 "files that are updated regularly remotely and should be fetch at every "
                 "startup."
+            },
+            {
+                KeyUseHash,
+                new BoolVerifier,
+                Optional::Yes,
+                "If this value is set to 'true' (the default), the hash of the URL is "
+                "appended to the directory name to produce a unique directory under all "
+                "circumstances. If this is not desired, the URLSynchronization use the "
+                "bare directory name alone if this value is 'false'. If this value is "
+                "'false', the identifier has to be specified."
             }
         }
     };
@@ -84,7 +97,7 @@ documentation::Documentation UrlSynchronization::Documentation() {
 
 UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
                                        const std::string& synchronizationRoot)
-    : openspace::ResourceSynchronization(dict)
+    : ResourceSynchronization(dict)
     , _synchronizationRoot(synchronizationRoot)
 {
     documentation::testSpecificationAndThrow(
@@ -104,19 +117,40 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
         }
     }
 
+    bool useHash = true;
+    if (dict.hasValue<bool>(KeyUseHash)) {
+        useHash = dict.value<bool>(KeyUseHash);
+    }
+
     // We just merge all of the URLs together to generate a hash, it's not as stable to
     // reordering URLs, but every other solution would be more error prone
     std::string urlConcat = std::accumulate(_urls.begin(), _urls.end(), std::string());
     size_t hash = std::hash<std::string>{}(urlConcat);
     if (dict.hasValue<std::string>(KeyIdentifier)) {
         std::string ident = dict.value<std::string>(KeyIdentifier);
-        _identifier = ident + "(" + std::to_string(hash) + ")";
+        if (useHash) {
+            _identifier = std::move(ident) + "(" + std::to_string(hash) + ")";
+        }
+        else {
+            _identifier = std::move(ident);
+        }
     }
     else {
-        _identifier = std::to_string(hash);
+        if (useHash) {
+            _identifier = std::to_string(hash);
+        }
+        else {
+            documentation::TestResult res;
+            res.success = false;
+            res.offenses.push_back({
+                std::string(KeyIdentifier) + "|" + KeyUseHash,
+                documentation::TestResult::Offense::Reason::MissingKey
+            });
+            throw documentation::SpecificationError(std::move(res), "UrlSynchronization");
+        }
     }
 
-    if (dict.hasValue<bool>(KeyOverride)) {
+    if (dict.hasKeyAndValue<bool>(KeyOverride)) {
         _forceOverride = dict.value<bool>(KeyOverride);
     }
 }
@@ -147,17 +181,19 @@ void UrlSynchronization::start() {
         std::vector<std::unique_ptr<AsyncHttpFileDownload>> downloads;
 
         for (const std::string& url : _urls) {
-            size_t lastSlash = url.find_last_of('/');
-            std::string filename = url.substr(lastSlash + 1);
+            const size_t lastSlash = url.find_last_of('/');
+            const std::string filename = url.substr(lastSlash + 1);
 
             std::string fileDestination = directory() +
-                ghoul::filesystem::FileSystem::PathSeparator +
-                filename += TempSuffix;
+                ghoul::filesystem::FileSystem::PathSeparator + filename + TempSuffix;
 
             std::unique_ptr<AsyncHttpFileDownload> download =
                 std::make_unique<AsyncHttpFileDownload>(
-                    url, fileDestination, HttpFileDownload::Overwrite::Yes
-            );
+                    url,
+                    fileDestination,
+                    HttpFileDownload::Overwrite::Yes
+                );
+
             downloads.push_back(std::move(download));
 
             std::unique_ptr<AsyncHttpFileDownload>& fileDownload = downloads.back();
@@ -180,7 +216,7 @@ void UrlSynchronization::start() {
                             fileSizes.begin(),
                             fileSizes.end(),
                             size_t(0),
-                            [](size_t a, auto b) {
+                            [](size_t a, const std::pair<const std::string, size_t> b) {
                                 return a + b.second;
                             }
                         );
@@ -203,7 +239,7 @@ void UrlSynchronization::start() {
                 // If we are forcing the override, we download to a temporary file first,
                 // so when we are done here, we need to rename the file to the original
                 // name
-                
+
                 const std::string& tempName = d->destination();
                 std::string originalName = tempName.substr(
                     0,
@@ -272,7 +308,7 @@ void UrlSynchronization::createSyncFile() {
 }
 
 bool UrlSynchronization::hasSyncFile() {
-    std::string path = directory() + ".ossync";
+    const std::string& path = directory() + ".ossync";
     return FileSys.fileExists(path);
 }
 
@@ -288,4 +324,3 @@ std::string UrlSynchronization::directory() {
 }
 
 } // namespace openspace
-

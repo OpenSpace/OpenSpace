@@ -26,8 +26,6 @@
 #define __OPENSPACE_MODULE_IMGUI___GUISPACETIMECOMPONENT___H__
 
 #include <modules/imgui/include/guicomponent.h>
-
-#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/timeconversion.h>
 
 namespace openspace::gui {
@@ -35,18 +33,22 @@ namespace openspace::gui {
 class GuiSpaceTimeComponent : public GuiComponent {
 public:
     GuiSpaceTimeComponent();
+
     void render() override;
 
 private:
-    float _deltaTime;
-    int _deltaTimeUnit; // aka static_cast<int>(TimeUnit)
+    float _deltaTime = 0.f;
 
-    float _accelerationDelta;
+    TimeUnit _deltaTimeUnit = TimeUnit::Second;
 
-    double _oldDeltaTime;
-    float _slidingDelta;
+    bool _resetTimeAfterShuttle = true;
 
-    bool _firstFrame;
+    float _accelerationDelta = 0.f;
+
+    double _oldDeltaTime = 0.0;
+    float _slidingDelta = 0.f;
+
+    bool _firstFrame = true;
 
     std::string _timeUnits;
 };

@@ -27,23 +27,24 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/interaction/orbitalnavigator.h>
-#include <openspace/interaction/keyframenavigator.h>
+#include <openspace/interaction/joystickcamerastates.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
-
-#include <ghoul/misc/boolean.h>
-#include <ghoul/misc/assert.h>
 
 namespace openspace {
     class Camera;
     class SceneGraphNode;
 } // namespace openspace
 
+namespace openspace::scripting { struct LuaLibrary; }
+
 namespace openspace::interaction {
+
+struct JoystickInputStates;
+class KeyframeNavigator;
+class OrbitalNavigator;
 
 class NavigationHandler : public properties::PropertyOwner {
 public:
@@ -57,6 +58,8 @@ public:
     void setFocusNode(SceneGraphNode* node);
     void setCamera(Camera* camera);
     void resetCameraDirection();
+    void setInterpolationTime(float durationInSeconds);
+
     void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
     void updateCamera(double deltaTime);
     void setEnableKeyFrameInteraction();
@@ -64,7 +67,7 @@ public:
     void triggerPlaybackStart(std::function<void()> callback);
 
     // Accessors
-    ghoul::Dictionary getCameraStateDictionary();
+    ghoul::Dictionary cameraStateDictionary();
     SceneGraphNode* focusNode() const;
     glm::dvec3 focusNodeToCameraVector() const;
     glm::quat focusNodeToCameraRotation() const;
@@ -73,12 +76,34 @@ public:
     const OrbitalNavigator& orbitalNavigator() const;
     KeyframeNavigator& keyframeNavigator() const;
     bool isKeyFrameInteractionEnabled() const;
+    float interpolationTime() const;
 
     // Callback functions
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
+
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
+
+    void setJoystickAxisMapping(int axis, JoystickCameraStates::AxisType mapping,
+        JoystickCameraStates::AxisInvert shouldInvert =
+            JoystickCameraStates::AxisInvert::No,
+        JoystickCameraStates::AxisNormalize shouldNormalize =
+            JoystickCameraStates::AxisNormalize::No
+    );
+
+    JoystickCameraStates::AxisInformation joystickAxisMapping(int axis) const;
+
+    void setJoystickAxisDeadzone(int axis, float deadzone);
+    float joystickAxisDeadzone(int axis) const;
+
+    void bindJoystickButtonCommand(int button, std::string command, JoystickAction action,
+        JoystickCameraStates::ButtonCommandRemote remote, std::string documentation);
+
+    void clearJoystickButtonCommand(int button);
+    std::vector<std::string> joystickButtonCommand(int button) const;
+
+
 
     void saveCameraStateToFile(const std::string& filepath);
     void restoreCameraStateFromFile(const std::string& filepath);
@@ -95,13 +120,12 @@ private:
     bool _playbackModeEnabled = false;
 
     std::unique_ptr<InputState> _inputState;
-    Camera* _camera;
+    Camera* _camera = nullptr;
     std::function<void()> _playbackEndCallback;
 
     std::unique_ptr<OrbitalNavigator> _orbitalNavigator;
     std::unique_ptr<KeyframeNavigator> _keyframeNavigator;
 
-    // Properties
     properties::StringProperty _origin;
     properties::BoolProperty _useKeyFrameInteraction;
 };

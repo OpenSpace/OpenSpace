@@ -25,15 +25,16 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___VOLUMESAMPLER___H__
 #define __OPENSPACE_MODULE_VOLUME___VOLUMESAMPLER___H__
 
-namespace openspace {
-namespace volume {
+#include <ghoul/glm.h>
+
+namespace openspace::volume {
 
 template <typename VolumeType>
 class VolumeSampler {
 public:
     using VoxelType = VolumeType;
 
-    VolumeSampler(const VolumeType& volume, const glm::vec3& filterSize);
+    VolumeSampler(const VolumeType* volume, const glm::vec3& filterSize);
     typename VolumeType::VoxelType sample(const glm::vec3& position) const;
 
 private:
@@ -41,8 +42,7 @@ private:
     const VolumeType* _volume;
 };
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume
 
 #include "volumesampler.inl"
 

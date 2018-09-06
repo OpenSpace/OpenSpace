@@ -25,16 +25,18 @@
 #include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
 
 #include <modules/globebrowsing/tile/pixelregion.h>
+#include <ghoul/misc/assert.h>
 
 namespace openspace::globebrowsing {
 
 IODescription IODescription::cut(PixelRegion::Side side, int pos) {
-    PixelRegion readPreCut = read.region;
-    PixelRegion writePreCut = write.region;
+    const PixelRegion readPreCut = read.region;
+    const PixelRegion writePreCut = write.region;
 
-    glm::dvec2 ratio;
-    ratio.x = write.region.numPixels.x / static_cast<double>(read.region.numPixels.x);
-    ratio.y = write.region.numPixels.y / static_cast<double>(read.region.numPixels.y);
+    glm::dvec2 ratio = {
+        write.region.numPixels.x / static_cast<double>(read.region.numPixels.x),
+        write.region.numPixels.y / static_cast<double>(read.region.numPixels.y)
+    };
 
     IODescription whatCameOff = *this;
     whatCameOff.read.region = read.region.globalCut(side, pos);
@@ -54,8 +56,10 @@ IODescription IODescription::cut(PixelRegion::Side side, int pos) {
     }
 
     int localWriteCutPos =
-        (side == PixelRegion::Side::LEFT || side == PixelRegion::Side::RIGHT)
-        ? localWriteCutSize.x : localWriteCutSize.y;
+        (side == PixelRegion::Side::LEFT || side == PixelRegion::Side::RIGHT) ?
+        localWriteCutSize.x :
+        localWriteCutSize.y;
+
     whatCameOff.write.region = write.region.localCut(side, localWriteCutPos);
 
     return whatCameOff;

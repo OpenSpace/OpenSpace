@@ -24,33 +24,28 @@
 
 #include <modules/atmosphere/rendering/renderableatmosphere.h>
 
+#include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
+#include <modules/space/rendering/planetgeometry.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-
-#include <modules/space/rendering/planetgeometry.h>
+#include <openspace/engine/globals.h>
+#include <openspace/rendering/deferredcastermanager.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/renderer.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
-#include <openspace/scene/scenegraphnode.h>
-
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/invariants.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/misc/invariants.h>
-
-#include <openspace/rendering/deferredcastermanager.h>
-#include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
-#include <openspace/engine/configurationmanager.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/renderer.h>
-
 #include <glm/gtx/string_cast.hpp>
-
-#include <memory>
 #include <fstream>
+#include <memory>
 
 #ifdef WIN32
 #define _USE_MATH_DEFINES
@@ -81,115 +76,111 @@ namespace {
     const char* keyTextureScale             = "PreCalculatedTextureScale";
     const char* keySaveTextures             = "SaveCalculatedTextures";
 
-    static const openspace::properties::Property::PropertyInfo AtmosphereHeightInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AtmosphereHeightInfo = {
         "atmmosphereHeight",
         "Atmosphere Height (KM)",
         "The thickness of the atmosphere in Km"
     };
 
-    static const openspace::properties::Property::PropertyInfo
-    AverageGroundReflectanceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AverageGroundReflectanceInfo =
+    {
         "AverageGroundReflectance",
         "Average Ground Reflectance (%)",
         "Average percentage of light reflected by the ground during the pre-calculation "
         "phase"
     };
 
-    static const openspace::properties::Property::PropertyInfo
-    GroundRadianceEmittioninfo = {
+    constexpr openspace::properties::Property::PropertyInfo GroundRadianceEmittioninfo = {
         "GroundRadianceEmittion",
         "Percentage of initial radiance emitted from ground",
         "Multiplier of the ground radiance color during the rendering phase"
     };
 
-    static const openspace::properties::Property::PropertyInfo RayleighHeightScaleInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RayleighHeightScaleInfo = {
         "RayleighHeightScale",
         "Rayleigh Scale Height (KM)",
         "It is the vertical distance over which the density and pressure fall by a "
         "constant factor"
     };
 
-    static const openspace::properties::Property::PropertyInfo
-    RayleighScatteringCoeffXInfo =
+    constexpr openspace::properties::Property::PropertyInfo RayleighScatteringCoeffXInfo =
     {
         "RayleighScatteringCoeffX",
         "Rayleigh Scattering Coeff X (x10e-3)",
         "Rayleigh sea-level scattering coefficients in meters"
     };
 
-    static const openspace::properties::Property::PropertyInfo
-    RayleighScatteringCoeffYInfo =
+    constexpr openspace::properties::Property::PropertyInfo RayleighScatteringCoeffYInfo =
     {
         "RayleighScatteringCoeffY",
         "Rayleigh Scattering Coeff Y (x10e-3)",
         "Rayleigh sea-level scattering coefficients in meters"
     };
 
-    static const openspace::properties::Property::PropertyInfo
-    RayleighScatteringCoeffZInfo =
+    constexpr openspace::properties::Property::PropertyInfo RayleighScatteringCoeffZInfo =
     {
         "RayleighScatteringCoeffZ",
         "Rayleigh Scattering Coeff Z (x10e-3)",
         "Rayleigh sea-level scattering coefficients in meters"
     };
 
-    static const openspace::properties::Property::PropertyInfo OzoneLayerInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OzoneLayerInfo = {
         "Ozone",
         "Ozone Layer Enabled",
         "Enables/Disable Ozone Layer during pre-calculation phase"
     };
 
-    static const openspace::properties::Property::PropertyInfo OzoneHeightScaleInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OzoneHeightScaleInfo = {
         "OzoneLayerHeightScale",
         "Ozone Scale Height (KM)",
         "It is the vertical distance over which the density and pressure fall by a "
         "constant factor"
     };
 
-    static const openspace::properties::Property::PropertyInfo OzoneLayerCoeffXInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OzoneLayerCoeffXInfo = {
         "OzoneLayerCoeffX",
         "Ozone Layer Extinction Coeff X (x10e-5)",
         "Ozone scattering coefficients in meters"
     };
 
-    static const openspace::properties::Property::PropertyInfo OzoneLayerCoeffYInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OzoneLayerCoeffYInfo = {
         "OzoneLayerCoeffY",
         "Ozone Layer Extinction Coeff Y (x10e-5)",
         "Ozone scattering coefficients in meters"
     };
 
-    static const openspace::properties::Property::PropertyInfo OzoneLayerCoeffZInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OzoneLayerCoeffZInfo = {
         "OzoneLayerCoeffZ",
         "Ozone Layer Extinction Coeff Z (x10e-5)",
         "Ozone scattering coefficients in meters"
     };
 
-    static const openspace::properties::Property::PropertyInfo MieHeightScaleInfo = {
+    constexpr openspace::properties::Property::PropertyInfo MieHeightScaleInfo = {
         "MieHeightScale",
         "Mie Scale Height (KM)",
         "It is the vertical distance over which the density and pressure fall by a "
         "constant factor"
     };
 
-    static const openspace::properties::Property::PropertyInfo MieScatteringCoeffXInfo = {
+    constexpr openspace::properties::Property::PropertyInfo MieScatteringCoeffXInfo = {
         "MieScatteringCoeffX",
         "Mie Scattering Coeff X (x10e-3)",
         "Mie sea-level scattering coefficients in meters"
     };
 
-    static const openspace::properties::Property::PropertyInfo MieScatteringCoeffYInfo = {
+    constexpr openspace::properties::Property::PropertyInfo MieScatteringCoeffYInfo = {
         "MieScatteringCoeffY",
         "Mie Scattering Coeff Y (x10e-3)",
         "Mie sea-level scattering coefficients in meters"
     };
 
-    static const openspace::properties::Property::PropertyInfo MieScatteringCoeffZInfo = {
+    constexpr openspace::properties::Property::PropertyInfo MieScatteringCoeffZInfo = {
         "MieScatteringCoeffZ",
         "Mie Scattering Coeff Z (x10e-3)",
         "Mie sea-level scattering coefficients in meters"
     };
 
-    static const openspace::properties::Property::PropertyInfo
+    constexpr openspace::properties::Property::PropertyInfo
     MieScatteringExtinctionPropCoeffInfo =
     {
         "MieScatteringExtinctionPropCoefficient",
@@ -197,41 +188,27 @@ namespace {
         "Mie Scattering/Extinction Proportion Coefficient (%)"
     };
 
-    static const openspace::properties::Property::PropertyInfo
-    MieAsymmetricFactorGInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo MieAsymmetricFactorGInfo = {
         "MieAsymmetricFactorG",
         "Mie Asymmetric Factor G",
         "Averaging of the scattering angle over a high number of scattering events"
     };
 
-    static const openspace::properties::Property::PropertyInfo SunIntensityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SunIntensityInfo = {
         "SunIntensity",
         "Sun Intensity",
         "Unitless for now"
     };
 
-    static const openspace::properties::Property::PropertyInfo AtmosphereExposureInfo = {
-        "HdrExposure",
-        "Atmosphere Exposure",
-        "Constant to controls the exposure of the radiance range"
-    };
-
-    static const openspace::properties::Property::PropertyInfo AtmosphereGammaInfo = {
-        "Gamma",
-        "Gamma Correction",
-        "Gamma Correction"
-    };
-
-    static const openspace::properties::Property::PropertyInfo
-    EnableSunOnCameraPositionInfo =
+    constexpr openspace::properties::Property::PropertyInfo
+        EnableSunOnCameraPositionInfo =
     {
         "SunFollowingCamera",
         "Enable Sun On Camera Position",
         "When selected the Sun is artificially positioned behind the observer all times"
     };
 
-    static const openspace::properties::Property::PropertyInfo EclipseHardShadowsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EclipseHardShadowsInfo = {
         "EclipseHardShadowsInfo",
         "Enable Hard Shadows for Eclipses",
         "Enable/Disables hard shadows through the atmosphere"
@@ -445,7 +422,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         if (success) {
             // Not using right now.
             glm::vec3 rayleighWavelengths;
-            success = rayleighDictionary.getValue(
+            rayleighDictionary.getValue(
                 "Coefficients.Wavelengths",
                 rayleighWavelengths
             );
@@ -677,11 +654,9 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     }
 }
 
-void RenderableAtmosphere::deinitialize() {
+void RenderableAtmosphere::deinitializeGL() {
     if (_deferredcaster) {
-        OsEng.renderEngine().deferredcasterManager().detachDeferredcaster(
-            *_deferredcaster
-        );
+        global::deferredcasterManager.detachDeferredcaster(*_deferredcaster);
         _deferredcaster = nullptr;
     }
 }
@@ -724,15 +699,10 @@ void RenderableAtmosphere::initializeGL() {
             _deferredcaster->initialize();
         }
 
-        OsEng.renderEngine().deferredcasterManager().attachDeferredcaster(
-            *_deferredcaster
-        );
+        global::deferredcasterManager.attachDeferredcaster(*_deferredcaster);
     }
 
     return;
-}
-
-void RenderableAtmosphere::deinitializeGL() {
 }
 
 bool RenderableAtmosphere::isReady() const {

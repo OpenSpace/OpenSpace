@@ -27,8 +27,8 @@
 
 #include <openspace/util/resourcesynchronization.h>
 
-#include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
+#include <thread>
+#include <vector>
 
 namespace openspace {
 
@@ -36,8 +36,7 @@ class HttpSynchronization : public ResourceSynchronization {
 public:
     HttpSynchronization(const ghoul::Dictionary& dict,
         const std::string& synchronizationRoot,
-        const std::vector<std::string>& synchronizationRepositories
-    );
+        const std::vector<std::string>& synchronizationRepositories);
 
     virtual ~HttpSynchronization();
 
@@ -64,7 +63,7 @@ private:
     std::atomic_bool _shouldCancel = false;
 
     std::string _identifier;
-    int _version;
+    int _version = -1;
     std::string _synchronizationRoot;
     std::vector<std::string> _synchronizationRepositories;
 

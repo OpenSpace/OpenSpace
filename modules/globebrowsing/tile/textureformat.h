@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TEXTUREFORMAT___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TEXTUREFORMAT___H__
 
-#include <ghoul/glm.h>
 #include <ghoul/opengl/texture.h>
 
 namespace openspace::globebrowsing {

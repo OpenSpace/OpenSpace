@@ -63,15 +63,14 @@ public:
     /**
      * The constructor of PropertyOwner.
      *
-     * \param info the PropertyOwnerInfo struct that contains the
-     * #PropertyOwnerInfo::identifier, #PropertyOwnerInfo::guiName, and
-     * #PropertyOwnerInfo::description of this PropertyOwner.
+     * \param info The PropertyOwnerInfo struct that contains the
+     *             #PropertyOwnerInfo::identifier, #PropertyOwnerInfo::guiName, and
+     *             #PropertyOwnerInfo::description of this PropertyOwner.
      *
      * \pre The \p info 's #PropertyOwnerInfo::identifier must not contain any whitespaces
      * \pre The \p info 's #PropertyOwnerInfo::identifier must not contain any
      *      <code>.</code>
      */
-
     PropertyOwner(PropertyOwnerInfo info);
 
     /**
@@ -83,8 +82,8 @@ public:
     /**
      * Sets the identifier for this PropertyOwner. If the PropertyOwner does not have an
      * owner itself, the identifier must be globally unique. If the PropertyOwner has an
-     * owner, the identifier must be unique to the owner (including the owner's 
-     * properties). No uniqueness check will be preformed here, but rather in the 
+     * owner, the identifier must be unique to the owner (including the owner's
+     * properties). No uniqueness check will be preformed here, but rather in the
      * PropertyOwner::addProperty and PropertyOwner::addPropertySubOwner methods).
      *
      * \param identifier The identifier of this PropertyOwner. It must not contain any
@@ -97,12 +96,13 @@ public:
 
     /**
      * Returns the identifier of this PropertyOwner.
+     *
      * \return The identifier of this PropertyOwner
      */
-    std::string identifier() const;
+    const std::string& identifier() const;
 
     /**
-     * Sets the user-facing name of this PropertyOwner. This name does not have to be 
+     * Sets the user-facing name of this PropertyOwner. This name does not have to be
      * unique, but it is recommended to be.
      *
      * \param guiName The new user-facing name for this PropertyOwner
@@ -118,7 +118,7 @@ public:
 
     void setDescription(std::string description);
 
-    std::string description() const;
+    const std::string& description() const;
 
     /**
      * Returns a list of all Propertys directly owned by this PropertyOwner. This list not
@@ -126,7 +126,7 @@ public:
      *
      * \return A list of all Propertys directly owned by this PropertyOwner
      */
-    std::vector<Property*> properties() const;
+    const std::vector<Property*>& properties() const;
 
     /**
      * Returns a list of all Propertys directly or indirectly owned by this PropertyOwner.
@@ -136,28 +136,29 @@ public:
     std::vector<Property*> propertiesRecursive() const;
 
     /**
-     * Retrieves a Property identified by <code>URI</code> from this PropertyOwner. If
-     * <code>id</code> does not contain a <code>.</code> the identifier must refer to a
-     * Property directly owned by this PropertyOwner. If the identifier contains one or
-     * more <code>.</code>, the first part of the name will be recursively extracted and
-     * used as a name for a sub-owner and only the last part of the identifier is
-     * referring to a Property owned by PropertyOwner named by the second-but-last name.
-     * \param URI The identifier of the Property that should be extracted
-     * \return If the Property cannot be found, <code>nullptr</code> is returned,
-     * otherwise the pointer to the Property is returned
+     * Retrieves a Property identified by \p uri from this PropertyOwner. If \p uri does
+     * not contain a <code>.</code> the identifier must refer to a Property directly owned
+     * by this PropertyOwner. If the identifier contains one or more <code>.</code>, the
+     * first part of the name will be recursively extracted and used as a name for a
+     * sub-owner and only the last part of the identifier is referring to a Property owned
+     * by PropertyOwner named by the second-but-last name.
+     *
+     * \param uri The identifier of the Property that should be extracted
+     * \return If the Property cannot be found, \c nullptr is returned, otherwise the
+     *         pointer to the Property is returned
      */
-    Property* property(const std::string& URI) const;
+    Property* property(const std::string& uri) const;
 
     /**
-     * This method checks if a Property with the provided <code>URI</code> exists in this
+     * This method checks if a Property with the provided \p uri exists in this
      * PropertyOwner (or any sub-owner). If the identifier contains one or more
      * <code>.</code>, the first part of the name will be recursively extracted and is
      * used as a name for a sub-owner and only the last part of the identifier is
      * referring to a Property owned by PropertyOwner named by the second-but-last name.
-     * \return <code>true</code> if the <code>URI</code> refers to a Property;
-     * <code>false</code> otherwise.
+     *
+     * \return \c true if the \p uri refers to a Property; \c false otherwise.
      */
-    bool hasProperty(const std::string& URI) const;
+    bool hasProperty(const std::string& uri) const;
 
     void setPropertyOwner(PropertyOwner* owner) { _owner = owner; }
     PropertyOwner* owner() const { return _owner; }
@@ -166,52 +167,57 @@ public:
      * Returns a list of all sub-owners this PropertyOwner has. Each name of a sub-owner
      * has to be unique with respect to other sub-owners as well as Property's owned by
      * this PropertyOwner.
+     *
      * \return A list of all sub-owners this PropertyOwner has
      */
-    std::vector<PropertyOwner*> propertySubOwners() const;
+    const std::vector<PropertyOwner*>& propertySubOwners() const;
 
     /**
      * This method returns the direct sub-owner of this PropertyOwner with the provided
-     * <code>name</code>. This means that <code>name</code> cannot contain any
+     * \p identifier. This means that <code>identifier</code> cannot contain any
      * <code>.</code> as this character is not allowed in PropertyOwner names. If the
-     * <code>name</code> does not name a valid sub-owner of this PropertyOwner, a
-     * <code>nullptr</code> will be returned.
-     * \param name The name of the sub-owner that should be returned
-     * \return The PropertyOwner with the given <code>name</code>, or <code>nullptr</code>
+     * \p name does not name a valid sub-owner of this PropertyOwner, a \c nullptr will be
+     * returned.
+     *
+     * \param identifier The identifier of the sub-owner that should be returned
+     * \return The PropertyOwner with the given \p name, or \c nullptr
      */
-    PropertyOwner* propertySubOwner(const std::string& name) const;
+    PropertyOwner* propertySubOwner(const std::string& identifier) const;
 
     /**
-     * Returns <code>true</code> if this PropertyOwner owns a sub-owner with the provided
-     * <code>name</code>; returns <code>false</code> otherwise.
-     * \param name The name of the sub-owner that should be looked up
-     * \return <code>true</code> if this PropertyOwner owns a sub-owner with the provided
-     * <code>name</code>; returns <code>false</code> otherwise
+     * Returns \c true if this PropertyOwner owns a sub-owner with the provided
+     * \p identifier; returns \c false otherwise.
+     *
+     * \param identifier The identifier of the sub-owner that should be looked up
+     * \return \c true if this PropertyOwner owns a sub-owner with the provided
+     *         \p identifier; returns \c false otherwise
      */
-    bool hasPropertySubOwner(const std::string& name) const;
+    bool hasPropertySubOwner(const std::string& identifier) const;
 
     /**
-     * This method converts a provided <code>groupID</code>, used by the Propertys, into a
-     * human-readable <code>name</code> which can be used by some external application.
-     * \param groupID The group identifier whose human-readable name should be set
-     * \param name The human-readable name for the group identifier
+     * This method converts a provided \p groupID, used by the Propertys, into a
+     * human-readable \p identifier which can be used by some external application.
+     *
+     * \param groupID The group identifier whose human-readable identifier should be set
+     * \param identifier The human-readable name for the group identifier
      */
-    void setPropertyGroupName(std::string groupID, std::string name);
+    void setPropertyGroupName(std::string groupID, std::string identifier);
 
     /**
-     * Returns the human-readable name for the <code>groupID</code> for the Propertys of
-     * this PropertyOwner.
+     * Returns the human-readable name for the \p groupID for the Propertys of this
+     * PropertyOwner.
+     *
      * \param groupID The group identifier whose human-readable name should be returned
-     * \return The human readable name for the Propertys identified by
-     * <code>groupID</code>
+     * \return The human readable name for the Propertys identified by \p groupID
      */
     std::string propertyGroupName(const std::string& groupID) const;
 
     /**
-     * Assigns the Property <code>prop</code> to this PropertyOwner. This method will
-     * check if the name of the Property is unique amongst Propertys and sub-owners in
-     * this PropertyOwner. This method will also inform the Property about the change in
+     * Assigns the Property \p prop to this PropertyOwner. This method will check if the
+     * name of the Property is unique amongst Propertys and sub-owners in this
+     * PropertyOwner. This method will also inform the Property about the change in
      * ownership by calling the Property::setPropertyOwner method.
+     *
      * \param prop The Property whose ownership is changed.
      */
     void addProperty(Property* prop);
@@ -221,9 +227,10 @@ public:
 
     /**
      * Adds the provided PropertyOwner to the list of sub-owners for this PropertyOwner.
-     * This means that the name of the <code>owner</code> has to be unique amonst the
-     * direct Property's as well as other PropertyOwner's that this PropertyOwner owns.
-     * This uniqueness will be tested in this method.
+     * This means that the name of the \p owner has to be unique amonst the direct
+     * Property's as well as other PropertyOwner's that this PropertyOwner owns. This
+     * uniqueness will be tested in this method.
+     *
      * \param owner The owner that should be assigned to this PropertyOwner
      */
     void addPropertySubOwner(PropertyOwner* owner);
@@ -233,8 +240,9 @@ public:
 
     /**
      * Removes the Property from this PropertyOwner. Notifies the Property about this
-     * change by calling the Property::setPropertyOwner method with a <code>nullptr</code>
-     * as parameter.
+     * change by calling the Property::setPropertyOwner method with a \c nullptr as
+     * parameter.
+     *
      * \param prop The Property that should be removed from this PropertyOwner
      */
     void removeProperty(Property* prop);
@@ -244,6 +252,7 @@ public:
 
     /**
      * Removes the sub-owner from this PropertyOwner.
+     *
      * \param owner The PropertyOwner that should be removed
      */
     void removePropertySubOwner(PropertyOwner* owner);
@@ -254,22 +263,25 @@ public:
     /**
      * Returns a list of all tags that have been assigned to the Property. Useful for
      * trying to find a match for a desired batch operation on Properties.
+     *
      * \return Pointer to vector of string tags that were assigned to the Property
      */
-    std::vector<std::string> tags() const;
+    const std::vector<std::string>& tags() const;
 
     /**
      * Adds a tag to the PropertyOwner's list of assigned tags. Tags are useful for
      * creating oups of Properties that can be used in batch operations or to mark up
      * PropertyOwners for other usages (such signalling to GUI applications).
+     *
      * \param tag The string that is to be assigned to the Property
      */
     void addTag(std::string tag);
 
     /**
      * Removes a tag from this PropertyOwner. No error is reported if the tag does not
-     * exist
-     * @param tag The tag is that is to be removed from this PropertyOwner
+     * exist.
+     *
+     * \param tag The tag is that is to be removed from this PropertyOwner
      */
     void removeTag(const std::string& tag);
 
@@ -286,7 +298,7 @@ private:
     std::string generateJson() const override;
 
     /// The owner of this PropertyOwner
-    PropertyOwner* _owner;
+    PropertyOwner* _owner = nullptr;
     /// A list of all registered Property's
     std::vector<Property*> _properties;
     /// A list of all sub-owners

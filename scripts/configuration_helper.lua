@@ -39,7 +39,8 @@ function sgct.makeConfig(config) end
 --      [example: scene = {offset = {x = 1.0, y = 1.0, z = 2.0}, orientation = { yaw = 120, pitch = 15, roll = 0.0 }, scale = 10.0}]
 -- capture: Settings to configure the image capture [example: capture = { path = "./images"]
 -- sgctDebug: Determines whether a higher debug level in SGCT is enabled [example: sgctDebug=true] {default: false}
--- fov: The field of view settings [example: fov={ left=20, right=30, up=10, down=50}] {default: { left=30.0, right=30.0, up=16.875, down=16.875}}
+-- fov: The field of view settings [example: fov={ left=20, right=30, up=10, down=50}] {default: { left=40.0, right=40.0, up=22.5, down=22.5}}
+-- tracked: Determines whether the aspect ratio of the camera defined at application startup should persist when the window is resized [example: tracked=false] {default: true}
 
 -- Thus this function can be called the following ways:
 -- sgct.config.single() -> Leading to a 1280x720 resolution window
@@ -655,34 +656,52 @@ function sgct.config.single(arg)
         assert(type(arg["fov"]["up"]) == "number",    "fov['up'] must be a number")
         assert(type(arg["fov"]["down"]) == "number",  "fov['down'] must be a number")
     else
+        local defaultFov = 40
+        local defaultRatio = 16/9 -- comes from default res 1280 x 720
+        local tanDefaultFov = math.tan(math.pi * defaultFov / 180)
+
         if (type(arg["windowSize"]) == "table") then
             assert(type(arg["windowSize"][1]) == "number", "windowPos[1] must be a number")
             assert(type(arg["windowSize"][2]) == "number", "windowPos[2] must be a number")
+            local tanHorizontalFov = tanDefaultFov
+            local tanVerticalFov = tanDefaultFov
 
             local ratio = arg["windowSize"][1] / arg["windowSize"][2]
-            local horizontalFov = 30
-            local verticalFov = 30
+
+            -- ratio between w and h should be
+            -- same as tan(horizontalFov) and tan(verticalFov)
 
             if (ratio > 1) then
-                verticalFov = horizontalFov / ratio
+                tanVerticalFov = tanHorizontalFov / ratio
             else
-                horizontalFov = verticalFov * ratio
+                tanHorizontalFov = tanVerticalFov * ratio
             end
 
+            -- sgct expects fov in degrees
             arg["fov"] = {
-                down = verticalFov,
-                up = verticalFov,
-                left = horizontalFov,
-                right = horizontalFov
+                down = 180 * math.atan(tanVerticalFov) / math.pi,
+                up = 180 * math.atan(tanVerticalFov) / math.pi,
+                left = 180 * math.atan(tanHorizontalFov) / math.pi,
+                right = 180 * math.atan(tanHorizontalFov) / math.pi
             }
         else
-            arg["fov"] = { down = 16.875, up = 16.875, left = 30.0, right = 30.0 }
+            -- sgct expects fov in degrees
+            arg["fov"] = {
+                down = 180 * math.atan(tanDefaultFov / defaultRatio) / math.pi,
+                up = 180 * math.atan(tanDefaultFov / defaultRatio) / math.pi,
+                left = 180 * math.atan(tanDefaultFov) / math.pi,
+                right = 180 * math.atan(tanDefaultFov) / math.pi
+            }
         end
     end
 
-    if (arg["tracked"] ~= nil and arg["tracked"] == true) then
-        trackedSpecifier = "tracked=\"true\""
-    else
+    assert(
+        type(arg["tracked"]) == "boolean" or type(arg["tracked"]) == "nil",
+        "tracked must be a boolean or nil"
+    )
+    trackedSpecifier = "tracked=\"true\""
+
+    if (arg["tracked"] ~= nil and arg["tracked"] == false) then
         trackedSpecifier = "tracked=\"false\""
     end
 
@@ -765,11 +784,11 @@ function sgct.config.fisheye(arg)
     end
 
     if arg["tilt"] == nil then
-        arg["tilt"] = 0
+        arg["tilt"] = 90
     end
 
     if arg["background"] == nil then
-        arg["background"] = { r = 0.1, g = 0.1, b = 0.1, a = 1.0 }
+        arg["background"] = { r = 0.0, g = 0.0, b = 0.0, a = 1.0 }
     end
 
     if (arg["tracked"] ~= nil and arg["tracked"] == true) then
@@ -852,7 +871,7 @@ function sgct.config.cube(arg)
 
 
     res = 1024
-    size = {640, 360}
+    size = { 640, 360 }
     
     arg["scene"] = generateScene(arg)
     arg["settings"] = generateSettings(arg)

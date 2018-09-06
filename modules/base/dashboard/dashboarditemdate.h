@@ -30,9 +30,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
-namespace ghoul::fontrendering {
-    class Font;
-} // namespace ghoul::fontrendering
+namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
 
@@ -40,7 +38,7 @@ namespace documentation { struct Documentation; }
 
 class DashboardItemDate : public DashboardItem {
 public:
-    DashboardItemDate(ghoul::Dictionary dictionary);
+    DashboardItemDate(const ghoul::Dictionary& dictionary);
     ~DashboardItemDate() = default;
 
     void render(glm::vec2& penPosition) override;

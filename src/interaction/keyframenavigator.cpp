@@ -24,26 +24,22 @@
 
 #include <openspace/interaction/keyframenavigator.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/time.h>
-
 #include <ghoul/logging/logmanager.h>
 
 #include <glm/gtx/quaternion.hpp>
-
-namespace {
-    const char* _loggerCat = "keyframenavigator";
-}
 
 namespace openspace::interaction {
 
 bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes) {
     double now = currentTime();
     bool foundPrevKeyframe = false;
+
 
     if (_cameraPoseTimeline.nKeyframes() == 0) {
         return false;
@@ -53,10 +49,8 @@ bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes)
                                               _cameraPoseTimeline.firstKeyframeAfter(now);
     const Keyframe<CameraPose>* prevKeyframe =
                                               _cameraPoseTimeline.lastKeyframeBefore(now);
-    double nextTime = 0;
-    double prevTime = 0;
-    double t = 0;
 
+    double nextTime = 0.0;
     if (nextKeyframe) {
         nextTime = nextKeyframe->timestamp;
     } else {
@@ -66,6 +60,8 @@ bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes)
         return false;
     }
 
+    double prevTime = 0.0;
+    double t = 0.0;
     if (prevKeyframe) {
         prevTime = prevKeyframe->timestamp;
         t = (now - prevTime) / (nextTime - prevTime);
@@ -128,16 +124,27 @@ bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes)
     camera.setRotation(
         glm::slerp(prevKeyframeCameraRotation, nextKeyframeCameraRotation, t)
     );
+
+    // We want to affect view scaling, such that we achieve
+    // logarithmic interpolation of distance to an imagined focus node.
+    // To do this, we interpolate the scale reciprocal logarithmically.
+    const float prevInvScaleExp = glm::log(1.f / prevPose.scale);
+    const float nextInvScaleExp = glm::log(1.f / nextPose.scale);
+    const float interpolatedInvScaleExp = static_cast<float>(
+        prevInvScaleExp * (1 - t) + nextInvScaleExp * t
+    );
+    camera.setScaling(1.f / glm::exp(interpolatedInvScaleExp));
+
     return true;
 }
 
 double KeyframeNavigator::currentTime() const {
     if( _timeframeMode == KeyframeTimeRef::relative_recordedStart )
-        return (OsEng.windowWrapper().applicationTime() - _referenceTimestamp);
+        return (global::windowDelegate.applicationTime() - _referenceTimestamp);
     else if( _timeframeMode == KeyframeTimeRef::absolute_simTimeJ2000 )
         return OsEng.timeManager().time().j2000Seconds();
     else
-        return OsEng.windowWrapper().applicationTime();
+        return global::windowDelegate.applicationTime();
 }
 
 void KeyframeNavigator::setTimeReferenceMode(KeyframeTimeRef refType, double referenceTimestamp) {
@@ -151,11 +158,11 @@ Timeline<KeyframeNavigator::CameraPose>& KeyframeNavigator::timeline() {
 
 void KeyframeNavigator::addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose)
 {
-    timeline().addKeyframe(timestamp, pose);
+    timeline().addKeyframe(timestamp, std::move(pose));
 }
 
-void KeyframeNavigator::removeKeyframesAfter(double timestamp) {
-    timeline().removeKeyframesAfter(timestamp);
+void KeyframeNavigator::removeKeyframesAfter(double timestamp, Inclusive inclusive) {
+    timeline().removeKeyframesAfter(timestamp, inclusive);
 }
 
 void KeyframeNavigator::clearKeyframes() {

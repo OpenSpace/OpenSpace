@@ -28,7 +28,7 @@
 #include <openspace/documentation/verifier.h>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo ScaleInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
         "Scale",
         "Scale",
         "This value is used as a scaling factor for the scene graph node that this "
@@ -54,13 +54,11 @@ documentation::Documentation StaticScale::Documentation() {
     };
 }
 
-double StaticScale::scaleValue(const Time&) const {
+double StaticScale::scaleValue(const UpdateData&) const {
     return _scaleValue;
 }
 
-StaticScale::StaticScale()
-    : _scaleValue(ScaleInfo, 1.0, 1.0, 1e6)
-{
+StaticScale::StaticScale() : _scaleValue(ScaleInfo, 1.0, 1.0, 1e6) {
     addProperty(_scaleValue);
 
     _scaleValue.onChange([this]() {
@@ -68,9 +66,7 @@ StaticScale::StaticScale()
     });
 }
 
-StaticScale::StaticScale(const ghoul::Dictionary& dictionary)
-    : StaticScale()
-{
+StaticScale::StaticScale(const ghoul::Dictionary& dictionary) : StaticScale() {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "StaticScale");
 
     _scaleValue = static_cast<float>(dictionary.value<double>(ScaleInfo.identifier));

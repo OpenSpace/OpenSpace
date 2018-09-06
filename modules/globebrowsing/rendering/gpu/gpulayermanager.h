@@ -25,45 +25,46 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERMANAGER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERMANAGER___H__
 
-#include <modules/globebrowsing/rendering/gpu/gpulayergroup.h>
-#include <openspace/util/gpudata.h>
-
+#include <memory>
 #include <string>
+#include <vector>
 
 namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace::globebrowsing {
 
+class GPULayerGroup;
 class LayerManager;
+struct TileIndex;
 
 /**
  * Manages a GPU representation of a <code>LayerGroup</code>
  */
 class GPULayerManager {
 public:
-    virtual ~GPULayerManager() = default;
+    ~GPULayerManager();
 
     /**
      * Sets the value of <code>LayerGroup</code> to its corresponding
      * GPU struct. OBS! Users must ensure bind has been
      * called before setting using this method.
      */
-    virtual void setValue(ghoul::opengl::ProgramObject* programObject,
-        const LayerManager& layerManager, const TileIndex& tileIndex);
+    void setValue(ghoul::opengl::ProgramObject* programObject,
+        const LayerManager& manager, const TileIndex& tileIndex);
 
     /**
      * Binds this object with GLSL variables with identifiers starting
      * with nameBase within the provided shader program.
      * After this method has been called, users may invoke setValue.
      */
-    virtual void bind(ghoul::opengl::ProgramObject* programObject,
-        const LayerManager& layerManager);
+    void bind(ghoul::opengl::ProgramObject* programObject,
+        const LayerManager& manager);
 
     /**
     * Deactivates any <code>TextureUnit</code>s assigned by this object.
     * This method should be called after the OpenGL draw call.
     */
-    virtual void deactivate();
+    void deactivate();
 
 private:
     std::vector<std::unique_ptr<GPULayerGroup>> _gpuLayerGroups;

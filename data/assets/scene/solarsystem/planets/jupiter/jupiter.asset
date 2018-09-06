@@ -20,6 +20,10 @@ local Jupiter = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_JUPITER",
             DestinationFrame = "GALACTIC"
+        },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1.0
         }
     },
     Renderable = {

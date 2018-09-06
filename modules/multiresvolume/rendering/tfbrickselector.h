@@ -25,10 +25,9 @@
 #ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___TFBRICKSELECTOR___H__
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___TFBRICKSELECTOR___H__
 
-#include <modules/multiresvolume/rendering/brickselection.h>
 #include <modules/multiresvolume/rendering/brickselector.h>
-#include <modules/multiresvolume/rendering/brickcover.h>
 
+#include <modules/multiresvolume/rendering/brickselection.h>
 #include <vector>
 
 namespace openspace {
@@ -41,12 +40,11 @@ class TfBrickSelector : public BrickSelector {
 public:
     TfBrickSelector(TSP* tsp, ErrorHistogramManager* hm, TransferFunction* tf,
         int memoryBudget, int streamingBudget);
+    ~TfBrickSelector() = default;
 
-    ~TfBrickSelector();
+    bool initialize() override;
 
-    virtual bool initialize();
-
-    void selectBricks(int timestep, std::vector<int>& bricks);
+    void selectBricks(int timestep, std::vector<int>& bricks) override;
     void setMemoryBudget(int memoryBudget);
     void setStreamingBudget(int streamingBudget);
     bool calculateBrickErrors();
@@ -56,12 +54,13 @@ private:
     ErrorHistogramManager* _histogramManager;
     TransferFunction* _transferFunction;
     std::vector<float> _brickErrors;
+
     float spatialSplitPoints(unsigned int brickIndex);
     float temporalSplitPoints(unsigned int brickIndex);
     float splitPoints(unsigned int brickIndex, BrickSelection::SplitType& splitType);
 
-    int linearCoords(int x, int y, int z);
-    void writeSelection(BrickSelection coveredBricks, std::vector<int>& bricks);
+    int linearCoords(int x, int y, int z) const;
+    void writeSelection(BrickSelection coveredBricks, std::vector<int>& bricks) const;
 
     int _memoryBudget;
     int _streamingBudget;

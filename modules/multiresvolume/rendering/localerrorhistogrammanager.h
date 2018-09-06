@@ -25,37 +25,36 @@
 #ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___LOCALERRORHISTOGRAMMANAGER___H__
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___LOCALERRORHISTOGRAMMANAGER___H__
 
-#include <fstream>
-#include <modules/multiresvolume/rendering/tsp.h>
 #include <openspace/util/histogram.h>
+#include <ghoul/glm.h>
+#include <iosfwd>
 #include <map>
 
-#include <ghoul/glm.h>
-
 namespace openspace {
+
+class TSP;
 
 class LocalErrorHistogramManager {
 public:
     LocalErrorHistogramManager(TSP* tsp);
-    ~LocalErrorHistogramManager();
 
     bool buildHistograms(int numBins);
-    const Histogram* getSpatialHistogram(unsigned int brickIndex) const;
-    const Histogram* getTemporalHistogram(unsigned int brickIndex) const;
+    const Histogram* spatialHistogram(unsigned int brickIndex) const;
+    const Histogram* temporalHistogram(unsigned int brickIndex) const;
 
     bool loadFromFile(const std::string& filename);
     bool saveToFile(const std::string& filename);
 
 private:
-    TSP* _tsp;
+    TSP* _tsp = nullptr;
     std::ifstream* _file;
 
     std::vector<Histogram> _spatialHistograms;
     std::vector<Histogram> _temporalHistograms;
-    unsigned int _numInnerNodes;
-    float _minBin;
-    float _maxBin;
-    int _numBins;
+    unsigned int _numInnerNodes = 0;
+    float _minBin = 0.f;
+    float _maxBin = 0.f;
+    int _numBins = 0;
 
     std::map<unsigned int, std::vector<float>> _voxelCache;
 

@@ -22,24 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#pragma optimize ("", off)
+
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
 
 #include <modules/spacecraftinstruments/util/hongkangparser.h>
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <modules/spacecraftinstruments/util/instrumenttimesparser.h>
 #include <modules/spacecraftinstruments/util/labelparser.h>
-
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/scene/scenegraphnode.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/textureconversion.h>
 #include <ghoul/opengl/textureunit.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
 namespace {
@@ -67,25 +69,25 @@ namespace {
     constexpr const char* sequenceTypeHybrid = "hybrid";
     constexpr const char* sequenceTypeInstrumentTimes = "instrument-times";
 
-    const char* placeholderFile = "${DATA}/placeholder.png";
+    constexpr const char* placeholderFile = "${DATA}/placeholder.png";
 
     constexpr const char* _loggerCat = "ProjectionComponent";
 
-    static const openspace::properties::Property::PropertyInfo ProjectionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ProjectionInfo = {
         "PerformProjection",
         "Perform Projections",
         "If this value is enabled, this ProjectionComponent will perform projections. If "
         "it is disabled, projections will be ignored."
     };
 
-    static const openspace::properties::Property::PropertyInfo ClearProjectionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ClearProjectionInfo = {
         "ClearAllProjections",
         "Clear Projections",
         "If this property is triggered, it will remove all the projections that have "
         "already been applied."
     };
 
-    static const openspace::properties::Property::PropertyInfo FadingInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FadingInfo = {
         "ProjectionFading",
         "Projection Fading",
         "This value fades the previously performed projections in or out. If this value "
@@ -93,7 +95,7 @@ namespace {
         "'0', the performed projections are completely invisible."
     };
 
-    static const openspace::properties::Property::PropertyInfo TextureSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TextureSizeInfo = {
         "TextureSize",
         "Texture Size",
         "This value determines the size of the texture into which the images are "
@@ -102,7 +104,7 @@ namespace {
         "updated, but triggering the 'ApplyTextureSize' property is required."
     };
 
-    static const openspace::properties::Property::PropertyInfo ApplyTextureSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ApplyTextureSizeInfo = {
         "ApplyTextureSize",
         "Apply Texture Size",
         "Triggering this property applies a new size to the underlying projection "
@@ -112,9 +114,6 @@ namespace {
 
 namespace openspace {
 
-using ghoul::Dictionary;
-using glm::ivec2;
-
 documentation::Documentation ProjectionComponent::Documentation() {
     using namespace documentation;
     return {
@@ -123,10 +122,7 @@ documentation::Documentation ProjectionComponent::Documentation() {
         {
             {
                 keySequenceDir,
-                new OrVerifier(
-                    new StringVerifier,
-                    new StringListVerifier
-                ),
+                new OrVerifier({ new StringVerifier, new StringListVerifier }),
                 Optional::Yes,
                 "This value specifies one or more directories from which images are "
                 "being used for image projections. If the sequence type is set to "
@@ -230,14 +226,9 @@ ProjectionComponent::ProjectionComponent()
     , _performProjection(ProjectionInfo, true)
     , _clearAllProjections(ClearProjectionInfo, false)
     , _projectionFading(FadingInfo, 1.f, 0.f, 1.f)
-    , _textureSize(TextureSizeInfo, ivec2(16), ivec2(16), ivec2(32768))
+    , _textureSize(TextureSizeInfo, glm::ivec2(16), glm::ivec2(16), glm::ivec2(32768))
     , _applyTextureSize(ApplyTextureSizeInfo)
-    , _textureSizeDirty(false)
-    , _projectionTexture(nullptr)
 {
-    _shadowing.isEnabled = false;
-    _dilation.isEnabled = false;
-
     addProperty(_performProjection);
     addProperty(_clearAllProjections);
     addProperty(_projectionFading);
@@ -266,9 +257,9 @@ void ProjectionComponent::initialize(const std::string& identifier,
     );
 
     if (dictionary.hasKeyAndValue<ghoul::Dictionary>(keyPotentialTargets)) {
-        ghoul::Dictionary potentialTargets = dictionary.value<ghoul::Dictionary>(
+        const ghoul::Dictionary& potentialTargets = dictionary.value<ghoul::Dictionary>(
             keyPotentialTargets
-            );
+        );
 
         _potentialTargets.reserve(potentialTargets.size());
         for (size_t i = 1; i <= potentialTargets.size(); ++i) {
@@ -286,105 +277,117 @@ void ProjectionComponent::initialize(const std::string& identifier,
         _shadowing.isEnabled = dictionary.value<bool>(keyNeedsShadowing);
     }
 
-    _projectionTextureAspectRatio = 1.f;
     if (dictionary.hasKeyAndValue<double>(keyTextureMapAspectRatio)) {
         _projectionTextureAspectRatio =
             static_cast<float>(dictionary.value<double>(keyTextureMapAspectRatio));
     }
 
-    std::vector<SequenceParser*> parsers;
 
-    if (dictionary.hasKey(keySequenceDir)) {
-        std::vector<std::string> sequenceSources;
-        // Due to the documentation check above it must either be one or the other
-        if (dictionary.hasValue<std::string>(keySequenceDir)) {
+    if (!dictionary.hasKey(keySequenceDir)) {
+        return;
+    }
+
+    std::vector<std::string> sequenceSources;
+    // Due to the documentation check above it must either be one or the other
+    if (dictionary.hasValue<std::string>(keySequenceDir)) {
+        sequenceSources.push_back(absPath(dictionary.value<std::string>(keySequenceDir)));
+    }
+    else {
+        ghoul::Dictionary sourcesDict = dictionary.value<ghoul::Dictionary>(
+            keySequenceDir
+        );
+        for (int i = 1; i <= static_cast<int>(sourcesDict.size()); ++i) {
             sequenceSources.push_back(
-                absPath(dictionary.value<std::string>(keySequenceDir))
-            );
-        }
-        else {
-            ghoul::Dictionary sourcesDict = dictionary.value<ghoul::Dictionary>(
-                keySequenceDir
-            );
-            for (int i = 1; i <= static_cast<int>(sourcesDict.size()); ++i) {
-                sequenceSources.push_back(
-                    absPath(sourcesDict.value<std::string>(std::to_string(i)))
-                );
-            }
-        }
-
-        std::string sequenceType = dictionary.value<std::string>(keySequenceType);
-        //Important: client must define translation-list in mod file IFF playbook
-        if (dictionary.hasKey(keyTranslation)) {
-            ghoul::Dictionary translationDictionary;
-            //get translation dictionary
-            dictionary.getValue(keyTranslation, translationDictionary);
-
-            for (std::string& sequenceSource : sequenceSources) {
-                if (sequenceType == sequenceTypePlaybook) {
-                    parsers.push_back(new HongKangParser(
-                        identifier,
-                        std::move(sequenceSource),
-                        _projectorID,
-                        translationDictionary,
-                        _potentialTargets));
-                }
-                else if (sequenceType == sequenceTypeImage) {
-                    parsers.push_back(new LabelParser(
-                        identifier,
-                        std::move(sequenceSource),
-                        translationDictionary));
-                }
-                else if (sequenceType == sequenceTypeHybrid) {
-                    //first read labels
-                    parsers.push_back(new LabelParser(
-                        identifier,
-                        std::move(sequenceSource),
-                        translationDictionary));
-
-                    std::string _eventFile;
-                    bool foundEventFile = dictionary.getValue("EventFile", _eventFile);
-                    if (foundEventFile) {
-                        //then read playbook
-                        _eventFile = absPath(_eventFile);
-                        parsers.push_back(new HongKangParser(
-                            identifier,
-                            _eventFile,
-                            _projectorID,
-                            translationDictionary,
-                            _potentialTargets));
-                    }
-                    else {
-                        LWARNING("No eventfile has been provided, please check modfiles");
-                    }
-                }
-                else if (sequenceType == sequenceTypeInstrumentTimes) {
-                    parsers.push_back(new InstrumentTimesParser(
-                        identifier,
-                        std::move(sequenceSource),
-                        translationDictionary)
-                    );
-                }
-            }
-
-            for (SequenceParser* parser : parsers) {
-                openspace::ImageSequencer::ref().runSequenceParser(parser);
-                delete parser;
-            }
-        }
-        else {
-            LWARNING(
-                "No playbook translation provided, please make sure \
-                all spice calls match playbook!"
+                absPath(sourcesDict.value<std::string>(std::to_string(i)))
             );
         }
     }
+
+    const std::string& sequenceType = dictionary.value<std::string>(keySequenceType);
+    //Important: client must define translation-list in mod file IFF playbook
+    if (!dictionary.hasKey(keyTranslation)) {
+        LWARNING("No playbook translation provided, spice calls must match playbook!");
+        return;
+    }
+
+    ghoul::Dictionary translationDictionary;
+    dictionary.getValue(keyTranslation, translationDictionary);
+
+    std::vector<std::unique_ptr<SequenceParser>> parsers;
+    for (std::string& sequenceSource : sequenceSources) {
+        if (sequenceType == sequenceTypePlaybook) {
+            parsers.push_back(
+                std::make_unique<HongKangParser>(
+                    identifier,
+                    std::move(sequenceSource),
+                    _projectorID,
+                    translationDictionary,
+                    _potentialTargets
+                )
+            );
+        }
+        else if (sequenceType == sequenceTypeImage) {
+            parsers.push_back(
+                std::make_unique<LabelParser>(
+                    identifier,
+                    std::move(sequenceSource),
+                    translationDictionary
+                )
+            );
+        }
+        else if (sequenceType == sequenceTypeHybrid) {
+            //first read labels
+            parsers.push_back(
+                std::make_unique<LabelParser>(
+                    identifier,
+                    std::move(sequenceSource),
+                    translationDictionary
+                )
+            );
+
+            if (dictionary.hasKey("EventFile")) {
+                std::string eventFile = dictionary.value<std::string>("EventFile");
+                parsers.push_back(
+                    std::make_unique<HongKangParser>(
+                        identifier,
+                        absPath(eventFile),
+                        _projectorID,
+                        translationDictionary,
+                        _potentialTargets
+                    )
+                );
+            }
+            else {
+                LWARNING("No eventfile has been provided, please check modfiles");
+            }
+        }
+        else if (sequenceType == sequenceTypeInstrumentTimes) {
+            parsers.push_back(
+                std::make_unique<InstrumentTimesParser>(
+                    identifier,
+                    std::move(sequenceSource),
+                    translationDictionary
+                )
+            );
+        }
+    }
+
+    for (std::unique_ptr<SequenceParser>& parser : parsers) {
+        bool success = parser->create();
+        if (!success) {
+            LERROR("One or more sequence loads failed; please check mod files");
+        }
+        else {
+            ImageSequencer::ref().runSequenceParser(*parser);
+        }
+    }
+    parsers.clear();
 }
 
 bool ProjectionComponent::initializeGL() {
     int maxSize = OpenGLCap.max2DTextureSize();
-    glm::ivec2 size;
 
+    glm::ivec2 size;
     if (_projectionTextureAspectRatio > 1.f) {
         size.x = maxSize;
         size.y = static_cast<int>(maxSize / _projectionTextureAspectRatio);
@@ -413,8 +416,9 @@ bool ProjectionComponent::initializeGL() {
         absPath(placeholderFile)
     );
     if (texture) {
+        texture->uploadTexture();
         texture->setFilter(Texture::FilterMode::LinearMipMap);
-        texture->setWrapping(Texture::WrappingMode::ClampToEdge);
+        texture->setWrapping(Texture::WrappingMode::ClampToBorder);
     }
     _placeholderTexture = std::move(texture);
 
@@ -769,8 +773,9 @@ bool ProjectionComponent::depthRendertarget() {
     glDrawBuffer(GL_NONE);
 
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE)
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
         return false;
+    }
 
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
     return true;
@@ -977,8 +982,9 @@ std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
 
     unique_ptr<Texture> texture = TextureReader::ref().loadTexture(absPath(texturePath));
     if (texture) {
-        if (texture->format() == Texture::Format::Red)
+        if (texture->format() == Texture::Format::Red) {
             ghoul::opengl::convertTextureFormat(*texture, Texture::Format::RGB);
+        }
         texture->uploadTexture();
         texture->setWrapping(
             { Texture::WrappingMode::Repeat, Texture::WrappingMode::MirroredRepeat }
@@ -988,7 +994,7 @@ std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
     return std::move(texture);
 }
 
-bool ProjectionComponent::generateProjectionLayerTexture(const ivec2& size) {
+bool ProjectionComponent::generateProjectionLayerTexture(const glm::ivec2& size) {
     LINFO(fmt::format("Creating projection texture of size '{}, {}'", size.x, size.y));
 
     using namespace ghoul::opengl;
@@ -998,10 +1004,6 @@ bool ProjectionComponent::generateProjectionLayerTexture(const ivec2& size) {
     );
     if (_projectionTexture) {
         _projectionTexture->uploadTexture();
-        _projectionTexture->setWrapping(
-            { Texture::WrappingMode::Repeat, Texture::WrappingMode::MirroredRepeat }
-        );
-        _projectionTexture->setFilter(Texture::FilterMode::LinearMipMap);
     }
 
     if (_dilation.isEnabled) {
@@ -1035,7 +1037,7 @@ bool ProjectionComponent::generateProjectionLayerTexture(const ivec2& size) {
     return _projectionTexture != nullptr;
 }
 
-bool ProjectionComponent::generateDepthTexture(const ivec2& size) {
+bool ProjectionComponent::generateDepthTexture(const glm::ivec2& size) {
     LINFO(fmt::format("Creating depth texture of size '{}, {}'", size.x, size.y));
 
     _shadowing.texture = std::make_unique<ghoul::opengl::Texture>(

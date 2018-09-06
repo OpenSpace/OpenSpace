@@ -24,21 +24,14 @@
 
 #include <openspace/scene/scenelicense.h>
 
-#include <openspace/openspace.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-
-#include <fstream>
-#include <sstream>
-
 namespace {
-    const char* LicenseKeyName = "Name";
-    const char* LicenseKeyAttribution = "Attribution";
-    const char* LicenseKeyUrl = "URL";
-    const char* LicenseKeyLicenseText = "License";
+    constexpr const char* LicenseKeyName = "Name";
+    constexpr const char* LicenseKeyAttribution = "Attribution";
+    constexpr const char* LicenseKeyUrl = "URL";
+    constexpr const char* LicenseKeyLicenseText = "License";
 } // namespace
 
 namespace openspace {

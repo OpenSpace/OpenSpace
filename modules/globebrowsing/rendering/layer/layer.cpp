@@ -26,8 +26,10 @@
 
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace openspace::globebrowsing {
 
@@ -44,21 +46,21 @@ namespace {
     constexpr const char* KeyBlendMode = "BlendMode";
     constexpr const char* KeyPadTiles = "PadTiles";
 
-    static const openspace::properties::Property::PropertyInfo TypeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
         "Type",
         "The type of this Layer. This value is a read-only property and thus cannot be "
         "changed."
     };
 
-    static const openspace::properties::Property::PropertyInfo BlendModeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blend Mode",
         "This value specifies the blend mode that is applied to this layer. The blend "
         "mode determines how this layer is added to the underlying layers beneath."
     };
 
-    static const openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "If this value is enabled, the layer will be used for the final composition of "
@@ -66,21 +68,21 @@ namespace {
         "composition."
     };
 
-    static const openspace::properties::Property::PropertyInfo ResetInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ResetInfo = {
         "Reset",
         "Reset",
         "If this value is triggered, this layer will be reset. This will delete the "
         "local cache for this layer and will trigger a fresh load of all tiles."
     };
 
-    static const openspace::properties::Property::PropertyInfo RemoveInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RemoveInfo = {
         "Remove",
         "Remove",
         "If this value is triggered, a script will be executed that will remove this "
         "layer before the next frame."
     };
 
-    static const openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "If the 'Type' of this layer is a solid color, this value determines what this "
@@ -103,7 +105,6 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     , _enabled(EnabledInfo, false)
     , _reset(ResetInfo)
     , _remove(RemoveInfo)
-    , _tileProvider(nullptr)
     , _otherTypesProperties({
         { ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f) }
     })
@@ -123,8 +124,10 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     bool padTiles = true;
     layerDict.getValue<bool>(KeyPadTiles, padTiles);
 
-    TileTextureInitData initData = LayerManager::getTileTextureInitData(_layerGroupId,
-                                                                        padTiles);
+    TileTextureInitData initData = LayerManager::getTileTextureInitData(
+        _layerGroupId,
+        LayerManager::PadTiles(padTiles)
+    );
     _padTilePixelStartOffset = initData.tilePixelStartOffset();
     _padTilePixelSizeDifference = initData.tilePixelSizeDifference();
 
@@ -156,20 +159,20 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     if (layerDict.getValue(KeyBlendMode, blendModeName)) {
         layergroupid::BlendModeID blendModeID =
             layergroupid::getBlendModeIDFromName(blendModeName);
-        _blendModeOption.setValue(static_cast<int>(blendModeID));
+        _blendModeOption = static_cast<int>(blendModeID);
     }
     else {
-        _blendModeOption.setValue(static_cast<int>(layergroupid::BlendModeID::Normal));
+        _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Normal);
     }
 
     // On change callbacks definitions
-    _enabled.onChange([&](){
+    _enabled.onChange([&]() {
         if (_onChangeCallback) {
             _onChangeCallback();
         }
     });
 
-    _reset.onChange([&](){
+    _reset.onChange([&]() {
         if (_tileProvider) {
             _tileProvider->reset();
         }
@@ -187,7 +190,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
         }
     });
 
-    _typeOption.onChange([&](){
+    _typeOption.onChange([&]() {
         removeVisibleProperties();
         _type = static_cast<layergroupid::TypeID>(_typeOption.value());
         ghoul::Dictionary dict;
@@ -198,13 +201,13 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
         }
     });
 
-    _blendModeOption.onChange([&](){
+    _blendModeOption.onChange([&]() {
         if (_onChangeCallback) {
             _onChangeCallback();
         }
     });
 
-    _layerAdjustment.onChange([&](){
+    _layerAdjustment.onChange([&]() {
         if (_onChangeCallback) {
             _onChangeCallback();
         }
@@ -239,9 +242,9 @@ void Layer::deinitialize() {
     }
 }
 
-ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const {
+ChunkTilePile Layer::chunkTilePile(const TileIndex& tileIndex, int pileSize) const {
     if (_tileProvider) {
-        return _tileProvider->getChunkTilePile(tileIndex, pileSize);
+        return _tileProvider->chunkTilePile(tileIndex, pileSize);
     }
     else {
         ChunkTilePile chunkTilePile;
@@ -255,9 +258,9 @@ ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) 
     }
 }
 
-Tile::Status Layer::getTileStatus(const TileIndex& index) const {
+Tile::Status Layer::tileStatus(const TileIndex& index) const {
     if (_tileProvider) {
-        return _tileProvider->getTileStatus(index);
+        return _tileProvider->tileStatus(index);
     }
     else {
         return Tile::Status::Unavailable;
@@ -277,12 +280,12 @@ TileDepthTransform Layer::depthTransform() const {
         return _tileProvider->depthTransform();
     }
     else {
-        return {1.0f, 0.0f};
+        return { 1.f, 0.f };
     }
 }
 
 bool Layer::enabled() const {
-    return _enabled.value();
+    return _enabled;
 }
 
 tileprovider::TileProvider* Layer::tileProvider() const {
@@ -302,7 +305,7 @@ const LayerAdjustment& Layer::layerAdjustment() const {
 }
 
 void Layer::onChange(std::function<void(void)> callback) {
-    _onChangeCallback = callback;
+    _onChangeCallback = std::move(callback);
 }
 
 void Layer::update() {
@@ -323,9 +326,9 @@ glm::vec2 Layer::compensateSourceTextureSampling(glm::vec2 startOffset,
                                                  glm::vec2 sizeDiff,
                                                  glm::uvec2 resolution, glm::vec2 tileUV)
 {
-    glm::vec2 sourceSize = glm::vec2(resolution) + sizeDiff;
-    glm::vec2 currentSize = glm::vec2(resolution);
-    glm::vec2 sourceToCurrentSize = currentSize / sourceSize;
+    const glm::vec2 sourceSize = glm::vec2(resolution) + sizeDiff;
+    const glm::vec2 currentSize = glm::vec2(resolution);
+    const glm::vec2 sourceToCurrentSize = currentSize / sourceSize;
     tileUV = sourceToCurrentSize * (tileUV - startOffset / sourceSize);
     return tileUV;
 }
@@ -343,10 +346,10 @@ glm::vec2 Layer::TileUvToTextureSamplePosition(const TileUvTransform& uvTransfor
 }
 
 layergroupid::TypeID Layer::parseTypeIdFromDictionary(
-    const ghoul::Dictionary& initDict) const
+                                                  const ghoul::Dictionary& initDict) const
 {
     if (initDict.hasKeyAndValue<std::string>("Type")) {
-        const std::string typeString = initDict.value<std::string>("Type");
+        const std::string& typeString = initDict.value<std::string>("Type");
         return layergroupid::getTypeIDFromTypeString(typeString);
     }
     else {
@@ -367,17 +370,16 @@ void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary
         case layergroupid::TypeID::ByLevelTileLayer: {
             // We add the id to the dictionary since it needs to be known by
             // the tile provider
-            ghoul::Dictionary tileProviderInitDict = initDict;
-            tileProviderInitDict.setValue(keyLayerGroupID, _layerGroupId);
-            if (tileProviderInitDict.hasKeyAndValue<std::string>(keyName)) {
+            initDict.setValue(keyLayerGroupID, _layerGroupId);
+            if (initDict.hasKeyAndValue<std::string>(keyName)) {
                 std::string name;
-                tileProviderInitDict.getValue(keyName, name);
+                initDict.getValue(keyName, name);
                 LDEBUG("Initializing tile provider for layer: '" + name + "'");
             }
             _tileProvider = std::shared_ptr<tileprovider::TileProvider>(
                 tileprovider::TileProvider::createFromDictionary(
                     typeId,
-                    tileProviderInitDict
+                    std::move(initDict)
                 )
             );
             break;

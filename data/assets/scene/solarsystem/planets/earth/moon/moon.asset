@@ -30,38 +30,85 @@ local Moon = {
         SegmentsPerPatch = 64,
         Layers = {
             ColorLayers = {
-                -- Utah based servers
-                {
-                    Identifier = "ClemUvvis",
-                    Name = "Clem Uvvis",
-                    FilePath = mapServiceConfigs .. "/Utah/ClemUvvis.wms"
-                },
-                {
-                    Identifier = "Kaguya",
-                    FilePath = mapServiceConfigs .. "/Utah/Kaguya.wms"
-                },
                 {
                     Identifier = "WAC_Utah",
-                    Name = "WAC Utah",
+                    Name = "WAC [Utah]",
                     FilePath = mapServiceConfigs .. "/Utah/Wac.wms",
                     Enabled = true
                 },
-                -- LMMP based servers
                 {
-                    Identifier = "OnMoon",
-                    FilePath = mapServiceConfigs .. "/OnMoonColor.wms"
-                }
+                    Identifier = "WAC_Sweden",
+                    Name = "WAC [Sweden]",
+                    FilePath = mapServiceConfigs .. "/LiU/WAC.wms"
+                },
+                {
+                    Identifier = "ClemUvvis_Utah",
+                    Name = "Clem Uvvis [Utah]",
+                    FilePath = mapServiceConfigs .. "/Utah/ClemUvvis.wms"
+                },
+                {
+                    Identifier = "ClemUvvis_Sweden",
+                    Name = "Clem Uvvis [Sweden]",
+                    FilePath = mapServiceConfigs .. "/LiU/Clem_Uvvis.wms"
+                },
+                {
+                    Identifier = "UvvisHybrid_Utah",
+                    Name = "Uvvis Hybrid [Utah]",
+                    FilePath = mapServiceConfigs .. "/Utah/UvvisHybrid.wms"
+                },
+                {
+                    Identifier = "UvvisHybrid_Sweden",
+                    Name = "Uvvis Hybrid [Sweden]",
+                    FilePath = mapServiceConfigs .. "/LiU/Uvvis_Hybrid.wms"
+                },
+                {
+                    Identifier = "Kaguya_Utah",
+                    Name = "Kaguya [Utah]",
+                    FilePath = mapServiceConfigs .. "/Utah/Kaguya.wms"
+                },
+                {
+                    Identifier = "Kaguya_Sweden",
+                    Name = "Kaguya [Sweden]",
+                    FilePath = mapServiceConfigs .. "/LiU/Kaguya.wms"
+                },
+                {
+                    Identifier = "Lola_Clr_Shade_Utah",
+                    Name = "Lola Clear Shade [Utah]",
+                    FilePath = mapServiceConfigs .. "/Utah/LolaClrShade.wms"
+                },
+                {
+                    Identifier = "Lola_Clr_Shade_Sweden",
+                    Name = "Lola Clear Shade [Sweden]",
+                    FilePath = mapServiceConfigs .. "/LiU/Lola_Clr_Shade.wms"
+                },
+                {
+                    Identifier = "Lola_Shade_Utah",
+                    Name = "Lola Shade [Utah]",
+                    FilePath = mapServiceConfigs .. "/Utah/LolaShade.wms"
+                },
+                {
+                    Identifier = "Lola_Shade_Sweden",
+                    Name = "Lola Shade [Sweden]",
+                    FilePath = mapServiceConfigs .. "/LiU/Lola_Shade.wms"
+                },
             },
             HeightLayers = {
-                -- Utah based servers
                 {
-                    Identifier = "LolaDem",
-                    Name = "WAC [Utah]",
+                    Identifier = "LolaDem_Utah",
+                    Name = "Lola DEM [Utah]",
                     FilePath = mapServiceConfigs .. "/Utah/LolaDem.wms",
                     Enabled = true,
                     TilePixelSize = 64,
                     Settings = { Multiplier = 0.5 }
+                },
+                {
+                    Identifier = "LolaDem_Sweden",
+                    Name = "Lola DEM [Sweden]",
+                    FilePath = mapServiceConfigs .. "/LiU/Lola_DEM.wms",
+                    TilePixelSize = 64,
+                    Settings = { Multiplier = 0.5 }
                 }
+
             }
         },
         ShadowGroup = {

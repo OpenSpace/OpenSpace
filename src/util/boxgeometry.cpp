@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/util/boxgeometry.h>
+
 #include <ghoul/logging/logmanager.h>
 #include <string>
 
@@ -32,23 +33,18 @@ namespace {
 
 namespace openspace {
 
-BoxGeometry::BoxGeometry(glm::vec3 size)
-    : _vaoId(0)
-    , _vBufferId(0)
-    , _size(size)
-{}
+BoxGeometry::BoxGeometry(glm::vec3 size) : _size(std::move(size)) {}
 
 BoxGeometry::~BoxGeometry() {
     glDeleteBuffers(1, &_vBufferId);
     glDeleteVertexArrays(1, &_vaoId);
 }
 
-
 bool BoxGeometry::initialize() {
     // Initialize and upload to GPU
-    float x = _size.x * 0.5f;
-    float y = _size.y * 0.5f;
-    float z = _size.z * 0.5f;
+    const float x = _size.x * 0.5f;
+    const float y = _size.y * 0.5f;
+    const float z = _size.z * 0.5f;
 
     const GLfloat vertices[] = {
         -x, -y,  z, // blue corner
@@ -94,8 +90,9 @@ bool BoxGeometry::initialize() {
         x, -y,  z // magenta
     };
 
-    if (_vaoId == 0)
+    if (_vaoId == 0) {
         glGenVertexArrays(1, &_vaoId);
+    }
 
     if (_vBufferId == 0) {
         glGenBuffers(1, &_vBufferId);
@@ -125,4 +122,4 @@ void BoxGeometry::render() {
     glBindVertexArray(0);
 }
 
-}
+} // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,15 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBBROWSER__CEF_HOST_H
-#define __OPENSPACE_MODULE_WEBBROWSER__CEF_HOST_H
+#ifndef __OPENSPACE_MODULE_WEBBROWSER___CEF_HOST___H__
+#define __OPENSPACE_MODULE_WEBBROWSER___CEF_HOST___H__
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable : 4100)
+#endif // _MSC_VER
 
 #include <include/wrapper/cef_helpers.h>
-#include <include/cef_app.h>
-#include <fmt/format.h>
-#include <include/openspace/engine/openspaceengine.h>
-#include <ghoul/logging/logmanager.h>
-#include <modules/webbrowser/include/webbrowserapp.h>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif // _MSC_VER
+
+#include <string>
 
 namespace openspace {
 
@@ -46,4 +52,4 @@ private:
 
 } // namespace openspace
 
-#endif //__OPENSPACE_MODULE_WEBBROWSER__CEF_HOST_H
+#endif // __OPENSPACE_MODULE_WEBBROWSER___CEF_HOST___H__

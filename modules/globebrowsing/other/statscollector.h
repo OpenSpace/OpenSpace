@@ -25,73 +25,27 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___STATS_COLLECTOR___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___STATS_COLLECTOR___H__
 
-#include <ghoul/misc/boolean.h>
+#include <modules/globebrowsing/other/templatedstatscollector.h>
 
-#include <set>
+#include <ghoul/misc/boolean.h>
 #include <string>
-#include <unordered_map>
-#include <vector>
 
 namespace openspace::globebrowsing {
 
-template <typename T>
-class TemplatedStatsCollector {
-public:
-    TemplatedStatsCollector(bool& enabled, const std::string& delimiter);
-
-    ~TemplatedStatsCollector() = default;
-
-    void startNewRecord();
-
-    T& operator[](const std::string& name);
-
-    T previous(const std::string& name);
-
-    bool hasHeaders();
-
-    bool hasRecordsToWrite();
-
-    void reset();
-
-    void writeHeader(std::ostream& os);
-
-    void writeNextRecord(std::ostream& os);
-
-private:
-    template <typename U>
-    using StatsRecord = std::unordered_map<std::string, U>;
-
-    template <typename U>
-    struct StatsCollection : public std::vector<StatsRecord<U>> {
-        std::set<std::string> keys;
-    };
-
-    StatsCollection<T> _data;
-    T _dummy; // used when disabled
-    bool& _enabled;
-
-    size_t _writePos;
-    std::string _delimiter;
-};
-
 class StatsCollector {
 public:
-    StatsCollector() = delete;
-
     BooleanType(Enabled);
 
-    StatsCollector(const std::string& filename, int dumpEveryXRecord,
-        Enabled enabled = Enabled::Yes, const std::string& delimiter = ",");
+    StatsCollector() = delete;
+
+    StatsCollector(std::string filename, int dumpEveryXRecord,
+        Enabled enabled = Enabled::Yes, std::string delimiter = ",");
 
     ~StatsCollector();
 
     void startNewRecord();
 
     void setEnabled(bool enabled);
-
-    void disable();
-
-    void enable();
 
     int hasHeaders();
 
@@ -109,14 +63,11 @@ private:
     std::string _delimiter;
 
     int _dumpEveryXRecord;
-    int _recordsSinceLastDump;
+    int _recordsSinceLastDump = 0;
 
-    bool _enabled;
-    bool _hasWrittenHeader;
+    bool _hasWrittenHeader = false;
 };
 
 } // namespace openspace::globebrowsing
-
-#include "statscollector.inl"
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___STATS_COLLECTOR___H__

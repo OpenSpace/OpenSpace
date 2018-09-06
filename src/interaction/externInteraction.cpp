@@ -80,7 +80,7 @@ void ExternInteraction::cameraInteraction(datamessagestructures::CameraKeyframe 
     pose.rotation = kf._rotation;
     pose.followFocusNodeRotation = kf._followNodeRotation;
 
-    OsEng.navigationHandler().keyframeNavigator().addKeyframe(kf._timestamp, pose);
+    global::navigationHandler.keyframeNavigator().addKeyframe(kf._timestamp, pose);
 }
 
 void ExternInteraction::timeInteraction(datamessagestructures::TimeKeyframe kf) {
@@ -93,7 +93,7 @@ void ExternInteraction::timeInteraction(datamessagestructures::TimeKeyframe kf) 
 }
 
 void ExternInteraction::scriptInteraction(datamessagestructures::ScriptMessage sm) {
-    OsEng.scriptEngine().queueScript(
+    global::scriptEngine.queueScript(
         sm._script,
         scripting::ScriptEngine::RemoteScripting::No
     );

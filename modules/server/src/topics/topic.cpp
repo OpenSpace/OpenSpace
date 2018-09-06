@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,24 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <modules/server/include/topics/topic.h>
+
 #include <modules/server/servermodule.h>
-#include <modules/server/include/topic.h>
+#include <openspace/json.h>
 
 namespace openspace {
 
 void Topic::initialize(Connection* connection, size_t topicId) {
     _connection = connection;
     _topicId = topicId;
-};
+}
 
-nlohmann::json Topic::wrappedPayload(const nlohmann::json &payload) const {
+nlohmann::json Topic::wrappedPayload(const nlohmann::json& payload) const {
     // TODO: add message time
     nlohmann::json j = {
         { "topic", _topicId },
         { "payload", payload }
     };
     return j;
-};
+}
 
 nlohmann::json Topic::wrappedError(std::string message, int code) {
     nlohmann::json j = {
@@ -49,10 +51,6 @@ nlohmann::json Topic::wrappedError(std::string message, int code) {
         { "code", code }
     };
     return j;
-};
-
-void BounceTopic::handleJson(nlohmann::json json) {
-    _connection->sendJson(json);
-};
-
 }
+
+} // namespace openspace

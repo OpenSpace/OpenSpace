@@ -30,9 +30,9 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
-#include <openspace/util/updatestructures.h>
 
 #include <ghoul/opengl/uniformcache.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
@@ -74,10 +74,10 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
 
-    bool _textureIsDirty;
-    GLuint _quad;
-    GLuint _vertexPositionBuffer;
-    bool _planeIsDirty;
+    bool _textureIsDirty = false;
+    GLuint _quad = 0;
+    GLuint _vertexPositionBuffer = 0;
+    bool _planeIsDirty = false;
 
     glm::vec3 _sunPosition;
 };

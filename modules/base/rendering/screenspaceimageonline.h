@@ -30,7 +30,7 @@
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/properties/stringproperty.h>
 
-#include <ghoul/opengl/texture.h>
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
@@ -39,13 +39,16 @@ namespace documentation { struct Documentation; }
 class ScreenSpaceImageOnline : public ScreenSpaceRenderable {
 public:
     ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary);
+    ~ScreenSpaceImageOnline();
+
+    bool deinitializeGL() override;
 
     void update() override;
 
     static documentation::Documentation Documentation();
 
 protected:
-    bool _downloadImage;
+    bool _downloadImage = false;
     bool _textureIsDirty;
     std::future<DownloadManager::MemoryFile> _imageFuture;
     properties::StringProperty _texturePath;
@@ -53,7 +56,8 @@ protected:
 private:
     void bindTexture() override;
 
-    std::future<DownloadManager::MemoryFile> downloadImageToMemory(std::string url);
+    std::future<DownloadManager::MemoryFile> downloadImageToMemory(
+        const std::string& url);
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 };

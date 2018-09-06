@@ -28,13 +28,11 @@
 #ifdef GLOBEBROWSING_USE_GDAL
 
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/scalarproperty.h>
-#include <openspace/properties/triggerproperty.h>
 
-#include <gdal.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 
-#include <mutex>
-#include <memory>
+#include <cpl_error.h>
 
 namespace openspace::globebrowsing {
 
@@ -84,7 +82,6 @@ private:
     properties::IntProperty _gdalMaximumCacheSize;
 
     static GdalWrapper* _singleton;
-    static std::mutex _mutexLock;
 };
 
 } // namespace openspace::globebrowsing

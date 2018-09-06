@@ -26,36 +26,28 @@
 
 #include <modules/globebrowsing/tile/rawtiledatareader/gdalwrapper.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/configurationmanager.h>
+#include <openspace/engine/configuration.h>
+#include <openspace/engine/globals.h>
 
-#include <ghoul/filesystem/filesystem.h> // abspath
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/ghoul.h>
 #include <ghoul/logging/consolelog.h>
+#include <ghoul/logging/logmanager.h>
+#include <gdal.h>
 
-
-#ifdef WIN32
-#pragma warning (push)
-#pragma warning (disable : 4251) // needs to have dll-interface to be used by clients
-#endif // WIN32
-
-#include <gdal_priv.h>
-
-#ifdef WIN32
-#pragma warning (pop)
-#endif // WIN32
+#include <cpl_conv.h>
 
 namespace {
     constexpr const char* _loggerCat = "GdalWrapper";
 
-    static const openspace::properties::Property::PropertyInfo LogGdalErrorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LogGdalErrorInfo = {
         "LogGdalErrors",
         "Log GDAL errors",
         "If this value is enabled, any error that is raised by GDAL will be logged using "
         "the logmanager. If this value is disabled, any error will be ignored."
     };
 
-    static const openspace::properties::Property::PropertyInfo GdalMaximumCacheInfo = {
+    constexpr openspace::properties::Property::PropertyInfo GdalMaximumCacheInfo = {
         "GdalMaximumCacheSize",
         "GDAL maximum cache size",
         "This function sets the maximum amount of RAM memory in MB that GDAL is "
@@ -78,15 +70,12 @@ void gdalErrorHandler(CPLErr eErrClass, int, const char* msg) {
 }
 
 GdalWrapper* GdalWrapper::_singleton = nullptr;
-std::mutex GdalWrapper::_mutexLock;
 
 void GdalWrapper::create(size_t maximumCacheSize, size_t maximumMaximumCacheSize) {
-    std::lock_guard<std::mutex> guard(_mutexLock);
     _singleton = new GdalWrapper(maximumCacheSize, maximumMaximumCacheSize);
 }
 
 void GdalWrapper::destroy() {
-    std::lock_guard<std::mutex> guard(_mutexLock);
     ghoul_assert(_singleton, "Cannot delete null");
     delete _singleton;
 }
@@ -142,64 +131,29 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
 }
 
 void GdalWrapper::setGdalProxyConfiguration() {
-    ghoul::Dictionary proxySettings;
-    bool proxyEnabled = OsEng.configurationManager().getValue(
-        ConfigurationManager::KeyHttpProxy, proxySettings
-    );
-    if (proxyEnabled) {
-        std::string proxyAddress, proxyPort, proxyUser, proxyPassword,
-            proxyAuth;
-
-        bool success = proxySettings.getValue(
-            ConfigurationManager::PartHttpProxyAddress,
-            proxyAddress
-        );
-        success &= proxySettings.getValue(
-            ConfigurationManager::PartHttpProxyPort,
-            proxyPort
-        );
-        proxySettings.getValue(
-            ConfigurationManager::PartHttpProxyAuthentication,
-            proxyAuth
+    if (global::configuration.httpProxy.usingHttpProxy) {
+        const std::string address = global::configuration.httpProxy.address;
+        const unsigned int port = global::configuration.httpProxy.port;
+        const std::string user = global::configuration.httpProxy.user;
+        const std::string password = global::configuration.httpProxy.password;
+        std::string auth = global::configuration.httpProxy.authentication;
+        std::transform(
+            auth.begin(),
+            auth.end(),
+            auth.begin(),
+            [](char c) { return static_cast<char>(::toupper(c)); }
         );
 
-        std::string proxyAuthString = "BASIC";
-        if (proxyAuth == "basic" || proxyAuth == "") {
-            proxyAuthString = "BASIC";
-        } else if (proxyAuth == "ntlm") {
-            proxyAuthString = "NTLM";
-        } else if (proxyAuth == "digest") {
-            proxyAuthString = "DIGEST";
-        } else if (proxyAuth == "any") {
-            proxyAuthString = "ANY";
-        } else {
-            success = false;
+        const std::string proxy = address + ":" + std::to_string(port);
+        CPLSetConfigOption("GDAL_HTTP_PROXY", proxy.c_str());
+        LDEBUG(fmt::format("Using proxy server {}", proxy));
+
+        if (!user.empty() && !password.empty()) {
+            std::string userPwd = user + ":" + password;
+            CPLSetConfigOption("GDAL_HTTP_PROXYUSERPWD", userPwd.c_str());
+            CPLSetConfigOption("GDAL_HTTP_PROXYAUTH", auth.c_str());
+            LDEBUG(fmt::format("Using authentication method: {}", auth));
         }
-
-        bool userAndPassword = proxySettings.getValue(
-            ConfigurationManager::PartHttpProxyUser,
-            proxyUser
-        );
-        userAndPassword &= proxySettings.getValue(
-            ConfigurationManager::PartHttpProxyPassword,
-            proxyPassword
-        );
-
-        if (success) {
-            std::string proxy = proxyAddress + ":" + proxyPort;
-            CPLSetConfigOption("GDAL_HTTP_PROXY", proxy.c_str());
-            LDEBUG(fmt::format("Using proxy server {}", proxy));
-            if (userAndPassword) {
-                std::string proxyUserPwd = proxyUser + ":" + proxyPassword;
-                CPLSetConfigOption("GDAL_HTTP_PROXYUSERPWD", proxyUserPwd.c_str());
-                CPLSetConfigOption("GDAL_HTTP_PROXYAUTH", proxyAuthString.c_str());
-                LDEBUG(fmt::format("Using authentication method: {}", proxyAuthString));
-            }
-        } else {
-            LERROR("Invalid proxy settings for GDAL");
-        }
-    } else {
-        LDEBUG("Setting up GDAL without proxy server");
     }
 }
 

@@ -26,12 +26,9 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GPUCHUNKTILEPILE___H__
 
 #include <modules/globebrowsing/rendering/gpu/gpuchunktile.h>
-
 #include <modules/globebrowsing/tile/chunktile.h>
-
-#include <openspace/util/gpudata.h>
-
 #include <string>
+#include <vector>
 
 namespace ghoul::opengl { class ProgramObject; }
 
@@ -42,7 +39,6 @@ namespace openspace::globebrowsing {
  */
 class GPUChunkTilePile {
 public:
-
     /**
      * Sets the value of <code>ChunkTilePile</code> to its corresponding
      * GPU struct. OBS! Users must ensure bind has been

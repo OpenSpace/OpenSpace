@@ -28,8 +28,8 @@
 #include <ghoul/logging/log.h>
 
 #include <chrono>
-#include <vector>
 #include <mutex>
+#include <vector>
 
 namespace openspace {
 
@@ -70,21 +70,23 @@ public:
      * Constructor that creates a ScreenLog with the provided \p timeToLive, and the
      * minimum \p logLevel that is stored. Log message with a lower
      * ghoul::logging::LogLevel are automatically discarded.
+     *
      * \param timeToLive The time-to-live for the messages in this ScreenLog. Expired
-     * messages are removed whenever the #removeExpiredEntries method is called
+     *        messages are removed whenever the #removeExpiredEntries method is called
      * \param logLevel The minimum ghoul::logging::LogLevel that messages must
-     * have in order to be stored in the ScreenLog
+     *        have in order to be stored in the ScreenLog
      */
     ScreenLog(std::chrono::seconds timeToLive, LogLevel logLevel = LogLevel::Info);
 
     /**
      * Destructor
      */
-    ~ScreenLog();
+    ~ScreenLog() = default;
 
     /**
      * Overwritten ghoul::loggling::Log method that is called whenever a new log message
      * shall be stored.
+     *
      * \param level The ghoul::logging::LogLevel of the incoming log message
      * \param category The category of the log message
      * \param message The actual log message that was transmitted
@@ -95,17 +97,19 @@ public:
     /**
      * This method removes all the stored LogEntry%s that have expired, calculated by
      * their <code>timeStamp</code> and the #_timeToLive value.
+     *
      * \post All entries retrieved by the #entries function have a <code>timeStamp</code>
-     * that is lower than the current time + #_timeToLive. The current time used is the
-     * time when this method was last called
+     *       that is lower than the current time + #_timeToLive. The current time used is
+     *       the time when this method was last called
      */
     void removeExpiredEntries();
 
     /**
      * Returns the list of all stored LogEntry%s.
+     *
      * \return The list of all stored LogEntry%s
      */
-    std::vector<LogEntry> entries() const;
+    const std::vector<LogEntry>& entries() const;
 
 private:
     /// The list of all LogEntry%s stored by this ScreenLog
@@ -118,7 +122,8 @@ private:
     /// The minimum LogLevel of messages
     LogLevel _logLevel;
 
-    /// A mutex to ensure thread-safety
+    /// A mutex to ensure thread-safety since the logging and the removal of expired
+    /// entires can occur on different threads
     mutable std::mutex _mutex;
 };
 

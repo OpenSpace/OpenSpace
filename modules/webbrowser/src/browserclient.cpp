@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,15 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <modules/webbrowser/include/browserclient.h>
 
-#include "include/browserclient.h"
 #include <modules/webbrowser/include/defaultbrowserlauncher.h>
+#include <modules/webbrowser/include/webrenderhandler.h>
 
 namespace openspace {
 
-BrowserClient::BrowserClient(WebRenderHandler* handler) {
-    _renderHandler = handler;
-    auto *browserLauncher = new DefaultBrowserLauncher;
+BrowserClient::BrowserClient(WebRenderHandler* handler)
+    : _renderHandler(handler)
+{
+    DefaultBrowserLauncher* browserLauncher = new DefaultBrowserLauncher;
     _lifeSpanHandler = browserLauncher;
     _requestHandler = browserLauncher;
 };

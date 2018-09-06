@@ -24,10 +24,12 @@
 
 #include <modules/volume/volumegridtype.h>
 
-#include <string>
+namespace openspace::volume {
 
-namespace openspace {
-namespace volume {
+InvalidGridTypeError::InvalidGridTypeError(std::string gt)
+    : RuntimeError("Invalid grid type: '" + gt + "'")
+    , gridType(std::move(gt))
+{}
 
 VolumeGridType parseGridType(const std::string& gridType) {
     if (gridType == "Cartesian") {
@@ -39,10 +41,12 @@ VolumeGridType parseGridType(const std::string& gridType) {
     throw InvalidGridTypeError(gridType);
 }
 
-InvalidGridTypeError::InvalidGridTypeError(std::string gt)
-    : RuntimeError("Invalid grid type: '" + gt + "'")
-    , gridType(std::move(gt))
-{}
+std::string gridTypeToString(VolumeGridType gridType) {
+    switch (gridType) {
+        case VolumeGridType::Cartesian: return "Cartesian";
+        case VolumeGridType::Spherical: return "Spherical";
+    }
+    return "Unknown";
+}
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume

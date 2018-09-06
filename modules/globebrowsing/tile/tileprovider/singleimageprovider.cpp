@@ -24,6 +24,7 @@
 
 #include <modules/globebrowsing/tile/tileprovider/singleimageprovider.h>
 
+#include <modules/globebrowsing/tile/tiledepthtransform.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
@@ -31,7 +32,7 @@
 namespace {
     constexpr const char* KeyFilePath = "FilePath";
 
-    static const openspace::properties::Property::PropertyInfo FilePathInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
         "FilePath",
         "File Path",
         "The file path that is used for this image provider. The file must point to an "
@@ -58,19 +59,16 @@ SingleImageProvider::SingleImageProvider(const std::string& imagePath)
     reset();
 }
 
-Tile SingleImageProvider::getTile(const TileIndex&) {
+Tile SingleImageProvider::tile(const TileIndex&) {
     return _tile;
 }
 
-Tile::Status SingleImageProvider::getTileStatus(const TileIndex&) {
+Tile::Status SingleImageProvider::tileStatus(const TileIndex&) {
     return _tile.status();
 }
 
 TileDepthTransform SingleImageProvider::depthTransform() {
-    TileDepthTransform transform;
-    transform.depthOffset = 0.0f;
-    transform.depthScale = 1.0f;
-    return transform;
+    return { 0.f, 1.f };
 }
 
 void SingleImageProvider::update() {

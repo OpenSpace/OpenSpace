@@ -25,11 +25,12 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_SHADER_MANAGER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_SHADER_MANAGER___H__
 
-#include <modules/globebrowsing/rendering/layer/layermanager.h>
-#include <modules/globebrowsing/rendering/layer/layer.h>
-
+#include <modules/globebrowsing/rendering/layershadermanager.h>
+#include <modules/globebrowsing/rendering/layer/layergroupid.h>
 #include <array>
+#include <memory>
 #include <string>
+#include <vector>
 
 namespace ghoul::opengl { class ProgramObject; }
 
@@ -57,26 +58,24 @@ public:
          * Settings per texture group that contains shader preprocessing information.
          */
         struct LayerGroupPreprocessingData {
+            bool operator==(const LayerGroupPreprocessingData& other) const;
+
             int lastLayerIdx;
             bool layerBlendingEnabled;
             std::vector<layergroupid::TypeID> layerType;
             std::vector<layergroupid::BlendModeID> blendMode;
             std::vector<layergroupid::AdjustmentTypeID> layerAdjustmentType;
-            bool operator==(const LayerGroupPreprocessingData& other) const;
         };
+
+        bool operator==(const LayerShaderPreprocessingData& other) const;
+        static LayerShaderPreprocessingData get(const RenderableGlobe&);
 
         std::array<LayerGroupPreprocessingData, layergroupid::NUM_LAYER_GROUPS>
         layeredTextureInfo;
-        std::vector<std::pair<std::string, std::string> > keyValuePairs;
-        bool operator==(const LayerShaderPreprocessingData& other) const;
-
-        static LayerShaderPreprocessingData get(const RenderableGlobe&);
+        std::vector<std::pair<std::string, std::string>> keyValuePairs;
     };
 
-    LayerShaderManager(
-        const std::string& shaderName,
-        const std::string& vsPath,
-        const std::string& fsPath);
+    LayerShaderManager(std::string shaderName, std::string vsPath, std::string fsPath);
     ~LayerShaderManager();
 
     /**
@@ -96,7 +95,7 @@ private:
     const std::string _vsPath;
     const std::string _fsPath;
 
-    bool _updatedSinceLastCall;
+    bool _updatedSinceLastCall = false;
 };
 
 } // namespace openspace::globebrowsing

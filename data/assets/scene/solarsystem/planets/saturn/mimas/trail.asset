@@ -1,6 +1,6 @@
 local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
-local kernels375 = asset.require('../sat375').Kernels
+local kernel = asset.require('../kernels').sat375
 
 
 
@@ -13,7 +13,7 @@ local MimasTrail = {
             Type = "SpiceTranslation",
             Target = "MIMAS",
             Observer = "SATURN BARYCENTER",
-            Kernels = kernels
+            Kernels = kernel
         },
         Color = { 0.5, 0.3, 0.3 },
         Period = 23.0 / 24.0,

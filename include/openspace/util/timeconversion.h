@@ -31,7 +31,6 @@
 #include <array>
 #include <chrono>
 #include <string>
-#include <utility>
 
 namespace openspace {
 
@@ -225,7 +224,6 @@ constexpr double convertTime(double t, TimeUnit sourceUnit, TimeUnit destination
             throw ghoul::MissingCaseException();
     }
 }
-
 
 } // namespace openspace
 

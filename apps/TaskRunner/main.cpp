@@ -38,13 +38,14 @@
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
 
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/configuration.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/util/progressbar.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/util/taskloader.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/resourcesynchronization.h>
@@ -62,12 +63,12 @@ namespace {
 void initTextureReaders() {
     #ifdef GHOUL_USE_DEVIL
         ghoul::io::TextureReader::ref().addReader(
-            std::make_shared<ghoul::io::TextureReaderDevIL>()
+            std::make_unique<ghoul::io::TextureReaderDevIL>()
         );
     #endif // GHOUL_USE_DEVIL
     #ifdef GHOUL_USE_FREEIMAGE
         ghoul::io::TextureReader::ref().addReader(
-            std::make_shared<ghoul::io::TextureReaderFreeImage>()
+            std::make_unique<ghoul::io::TextureReaderFreeImage>()
         );
     #endif // GHOUL_USE_FREEIMAGE
 }
@@ -103,9 +104,12 @@ void performTasks(const std::string& path) {
 int main(int argc, char** argv) {
     using namespace openspace;
 
-    std::vector<std::string> remainingArguments;
-    bool unusedBool;
-    OpenSpaceEngine::create(argc, argv, nullptr, remainingArguments, unusedBool);
+    ghoul::initialize();
+
+    std::string configFile = configuration::findConfiguration();
+    global::configuration = configuration::loadConfigurationFromFile(configFile);
+    global::openSpaceEngine.initialize();
+
 
     ghoul::cmdparser::CommandlineParser commandlineParser(
         "OpenSpace TaskRunner",
@@ -119,10 +123,10 @@ int main(int argc, char** argv) {
             "--task",
             "-t",
             "Provides the path to a task file to execute"
-            )
+        )
     );
 
-    commandlineParser.setCommandLine(remainingArguments);
+    commandlineParser.setCommandLine({ argv, argv + argc });
     commandlineParser.execute();
 
     //FileSys.setCurrentDirectory(launchDirectory);

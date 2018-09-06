@@ -32,9 +32,7 @@ in float ta;
 uniform float alphaValue;
 uniform vec3 color;
 uniform sampler2D spriteTexture;
-uniform sampler2D polygonTexture;
 uniform bool hasColorMap;
-uniform bool hasPolygon;
 uniform float fadeInValue;
 
 Fragment getFragment() {      
@@ -44,24 +42,27 @@ Fragment getFragment() {
     vec4 fullColor = vec4(1.0);
     
     if (hasColorMap) {
-        fullColor = vec4(gs_colorMap.rgb * textureColor.rgb, gs_colorMap.a * textureColor.a * alphaValue);
-    } else if (hasPolygon) {
-        vec4 polygon = texture(polygonTexture, texCoord);
-        fullColor = vec4(color.rgb * textureColor.rgb + polygon.rgb, textureColor.a * alphaValue);
+        fullColor = vec4(
+            gs_colorMap.rgb * textureColor.rgb, 
+            gs_colorMap.a * textureColor.a * alphaValue
+            );
     } else {
         fullColor = vec4(color.rgb * textureColor.rgb, textureColor.a * alphaValue);
     }
 
     fullColor.a *= fadeInValue * ta;
-
-    if (fullColor.a == 0.f) {
+    
+    if (fullColor.a == 0.f || 
+        fullColor.rgb == vec3(0.0)) {
         discard;
     }
 
     Fragment frag;
     frag.color      = fullColor;
     frag.depth      = vs_screenSpaceDepth;
-    frag.gPosition  = vec4(1e32, 1e32, 1e32, 1.0);
+    // Setting the position of the billboards to not interact 
+    // with the ATM.
+    frag.gPosition  = vec4(-1e32, -1e32, -1e32, 1.0);
     frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
 
 

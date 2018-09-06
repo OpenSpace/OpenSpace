@@ -29,8 +29,7 @@
 #include <functional>
 #include <vector>
 
-namespace openspace {
-namespace volume {
+namespace openspace::volume {
 
 template <typename Type>
 class RawVolume {
@@ -38,6 +37,7 @@ class RawVolume {
 
 public:
     RawVolume(const glm::uvec3& dimensions);
+
     glm::uvec3 dimensions() const;
     void setDimensions(const glm::uvec3& dimensions);
     size_t nCells() const;
@@ -50,13 +50,13 @@ public:
     size_t coordsToIndex(const glm::uvec3& cartesian) const;
     glm::uvec3 indexToCoords(size_t linear) const;
     VoxelType* data();
+
 private:
     glm::uvec3 _dimensions;
     std::vector<VoxelType> _data;
 };
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume
 
 #include "rawvolume.inl"
 

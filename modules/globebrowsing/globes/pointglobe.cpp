@@ -25,23 +25,24 @@
 #include <modules/globebrowsing/globes/pointglobe.h>
 
 #include <modules/globebrowsing/globes/renderableglobe.h>
-
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo IntensityClampInfo = {
+    constexpr const std::array<const char*, 3> UniformNames = {
+        "lightIntensityClamped", "modelViewTransform", "projectionTransform"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo IntensityClampInfo = {
         "IntensityClamp",
         "Intensity clamp",
         ""
     };
 
-    static const openspace::properties::Property::PropertyInfo LightIntensityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LightIntensityInfo = {
         "LightIntensity",
         "Light intensity",
         "" // @TODO Missing documentation
@@ -66,48 +67,40 @@ PointGlobe::~PointGlobe() {
 }
 
 void PointGlobe::initialize() {
-    _programObject = OsEng.renderEngine().buildRenderProgram(
+    _programObject = global::renderEngine.buildRenderProgram(
         "PointGlobe",
         absPath("${MODULE_GLOBEBROWSING}/shaders/pointglobe_vs.glsl"),
         absPath("${MODULE_GLOBEBROWSING}/shaders/pointglobe_fs.glsl")
     );
 
-    _uniformCache.lightIntensityClamped = _programObject->uniformLocation(
-        "lightIntensityClamped"
-    );
-    _uniformCache.modelView = _programObject->uniformLocation(
-        "modelViewTransform"
-    );
-    _uniformCache.projection = _programObject->uniformLocation(
-        "projectionTransform"
-    );
+    ghoul::opengl::updateUniformLocations(*_programObject, _uniformCache, UniformNames);
 
     glGenVertexArrays(1, &_vaoID);
     glGenBuffers(1, &_vertexBufferID);
 
     glBindVertexArray(_vaoID);
 
-    std::array<glm::vec2, 6> quadVertexData = {{
-      glm::vec2(-1.0f, -1.0f),
-      glm::vec2(1.0f, -1.0f),
-      glm::vec2(-1.0f, 1.0f),
-      glm::vec2(-1.0f, 1.0f),
-      glm::vec2(1.0f, -1.0f),
-      glm::vec2(1.0f, 1.0f)
-    }};
+    std::array<float, 2 * 6> quadVertexData = {
+        -1.f, -1.f,
+         1.f, -1.f,
+        -1.f,  1.f,
+        -1.f,  1.f,
+         1.f, -1.f,
+         1.f,  1.f
+    };
 
     // Vertex buffer
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
     glBufferData(
         GL_ARRAY_BUFFER,
-        sizeof(glm::vec2) * quadVertexData.size(),
+        sizeof(float) * quadVertexData.size(),
         quadVertexData.data(),
         GL_STATIC_DRAW
     );
 
     // Position at location 0
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), nullptr);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
 
     glBindVertexArray(0);
 }
@@ -125,42 +118,45 @@ void PointGlobe::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
 
     // Calculate variables to be used as uniform variables in shader
-    glm::dvec3 bodyPosition = data.modelTransform.translation;
+    const glm::dvec3 bodyPosition = data.modelTransform.translation;
 
-    glm::dmat4 rotationTransform = glm::lookAt(
+    const glm::dmat4 rotationTransform = glm::lookAt(
         glm::dvec3(0.0f),
         data.camera.positionVec3() - bodyPosition,
-        glm::normalize(glm::dvec3(1000000.0f) - bodyPosition));
+        glm::normalize(glm::dvec3(1000000.0f) - bodyPosition)
+    );
 
-    glm::dvec3 camToBody = bodyPosition - data.camera.positionVec3();
-    float distanceToBody = static_cast<float>(glm::length(camToBody));
+    const glm::dvec3 camToBody = bodyPosition - data.camera.positionVec3();
+    const float distanceToBody = static_cast<float>(glm::length(camToBody));
 
-    float avgRadius = static_cast<float>(_owner.ellipsoid().averageRadius());
-    float lightIntensity = static_cast<float>(
+    const float avgRadius = static_cast<float>(_owner.ellipsoid().averageRadius());
+    const float lightIntensity = static_cast<float>(
         _lightIntensity.value() * data.modelTransform.scale * avgRadius / distanceToBody
     );
-    float lightIntensityClamped = glm::min(lightIntensity, _intensityClamp.value());
+    const float lightIntensityClamped = glm::min(lightIntensity, _intensityClamp.value());
     //float lightOverflow = glm::max(lightIntensity - lightIntensityClamped, 0.0f);
 
-    float billboardRadius = lightIntensityClamped * distanceToBody;
-    glm::dmat4 scaleTransform = glm::scale(glm::dmat4(1.0), glm::dvec3(billboardRadius));
+    const float billboardRadius = lightIntensityClamped * distanceToBody;
+    const glm::dmat4 scaleTransform = glm::scale(
+        glm::dmat4(1.0), glm::dvec3(billboardRadius)
+    );
 
     setBoundingSphere(billboardRadius);
 
     // Model transform and view transform needs to be in double precision
-    glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), bodyPosition) * // Translation
-        glm::inverse(rotationTransform) *
-        scaleTransform; // Scale
-    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+    const glm::dmat4 modelTransform = glm::translate(glm::dmat4(1.0), bodyPosition) *
+                                      glm::inverse(rotationTransform) *
+                                      scaleTransform; // Scale
+    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
+                                          modelTransform;
 
 
     _programObject->setUniform(
         _uniformCache.lightIntensityClamped,
         lightIntensityClamped
     );
-    //_programObject->setUniform("lightOverflow", lightOverflow);
-    //_programObject->setUniform("directionToSunViewSpace", directionToSunViewSpace);
+    //_program->setUniform("lightOverflow", lightOverflow);
+    //_program->setUniform("directionToSunViewSpace", directionToSunViewSpace);
     _programObject->setUniform(
         _uniformCache.modelView,
         glm::mat4(modelViewTransform)

@@ -24,19 +24,17 @@
 
 #include <openspace/performance/performancemanager.h>
 
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/performance/performancelayout.h>
-
+#include <openspace/scene/scenegraphnode.h>
+#include <ghoul/fmt.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/misc/sharedmemory.h>
-#include <ghoul/filesystem/filesystem.h>
-
 #include <algorithm>
 #include <cstring>
 #include <iostream>
 #include <fstream>
-#include <ghoul/fmt.h>
 
 namespace {
     constexpr const char* _loggerCat = "PerformanceManager";
@@ -66,16 +64,14 @@ namespace openspace::performance {
 // blocks alongside a list of names of these blocks
 //
 
-void PerformanceManager::createGlobalSharedMemory() {
+void PerformanceManager::CreateGlobalSharedMemory() {
     static_assert(
         sizeof(GlobalMemory) == GlobalSharedMemorySize,
         "The global memory struct does not fit the allocated global memory space"
     );
 
-    using ghoul::SharedMemory;
-
-    if (SharedMemory::exists(GlobalSharedMemoryName)) {
-        SharedMemory sharedMemory(GlobalSharedMemoryName);
+    if (ghoul::SharedMemory::exists(GlobalSharedMemoryName)) {
+        ghoul::SharedMemory sharedMemory(GlobalSharedMemoryName);
         sharedMemory.acquireLock();
         GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
         ++(m->referenceCount);
@@ -88,10 +84,10 @@ void PerformanceManager::createGlobalSharedMemory() {
     }
     else {
         LINFO("Creating global shared memory block for performance measurements");
-        SharedMemory::create(GlobalSharedMemoryName, GlobalSharedMemorySize);
+        ghoul::SharedMemory::create(GlobalSharedMemoryName, GlobalSharedMemorySize);
 
         // Initialize the data
-        SharedMemory sharedMemory(GlobalSharedMemoryName);
+        ghoul::SharedMemory sharedMemory(GlobalSharedMemoryName);
         sharedMemory.acquireLock();
         new (sharedMemory.memory()) GlobalMemory;
         GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
@@ -101,20 +97,19 @@ void PerformanceManager::createGlobalSharedMemory() {
     }
 }
 
-void PerformanceManager::destroyGlobalSharedMemory() {
-    using ghoul::SharedMemory;
-    if (!SharedMemory::exists(GlobalSharedMemoryName)) {
+void PerformanceManager::DestroyGlobalSharedMemory() {
+    if (!ghoul::SharedMemory::exists(GlobalSharedMemoryName)) {
         LWARNING("Global shared memory for Performance measurements did not exist");
         return;
     }
 
-    SharedMemory sharedMemory(GlobalSharedMemoryName);
+    ghoul::SharedMemory sharedMemory(GlobalSharedMemoryName);
     sharedMemory.acquireLock();
     GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
     --(m->referenceCount);
     LINFO(fmt::format(
         "Global shared performance memory reference count: {}",
-        int(m->referenceCount)
+        static_cast<int>(m->referenceCount)
     ));
     if (m->referenceCount == 0) {
         LINFO("Removing global shared performance memory");
@@ -124,115 +119,112 @@ void PerformanceManager::destroyGlobalSharedMemory() {
         // some of the memory orphaned
         for (int i = 0; i < std::numeric_limits<uint8_t>::max(); ++i) {
             std::string localName = LocalSharedMemoryNameBase + std::to_string(i);
-            if (SharedMemory::exists(localName)) {
+            if (ghoul::SharedMemory::exists(localName)) {
                 LINFO(fmt::format("Removing shared memory: {}", localName));
-                SharedMemory::remove(localName);
+                ghoul::SharedMemory::remove(localName);
             }
         }
 
-        SharedMemory::remove(GlobalSharedMemoryName);
+        ghoul::SharedMemory::remove(GlobalSharedMemoryName);
     }
     sharedMemory.releaseLock();
 }
 
-PerformanceManager::PerformanceManager(std::string loggingDirectory, std::string prefix)
-    : _loggingEnabled(false)
-    , _logDir(absPath(std::move(loggingDirectory)))
-    , _prefix(std::move(prefix))
-    , _ext("log")
-    , _performanceMemory(nullptr)
-    , _tick(0)
-{
-    PerformanceManager::createGlobalSharedMemory();
+PerformanceManager::~PerformanceManager() {}
 
-    ghoul::SharedMemory sharedMemory(GlobalSharedMemoryName);
-    sharedMemory.acquireLock();
-    defer {
-        sharedMemory.releaseLock();
-    };
+void PerformanceManager::setEnabled(bool enabled) {
+    _logDir = absPath("${BASE}");
+    _prefix = "PM-";
 
-    GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
+    _performanceMeasurementEnabled = enabled;
 
-    // The the first free block (which also coincides with the number of blocks
-    uint8_t blockIndex = m->number;
-    ++(m->number);
+    if (enabled) {
+        PerformanceManager::CreateGlobalSharedMemory();
 
-    std::string localName = LocalSharedMemoryNameBase + std::to_string(blockIndex);
-
-    // Compute the total size
-    const int totalSize = sizeof(PerformanceLayout);
-    LINFO(fmt::format(
-        "Create shared memory '{}' of {} bytes",
-        localName,
-        totalSize
-    ));
-
-    if (ghoul::SharedMemory::exists(localName)) {
-        throw ghoul::RuntimeError(
-            "Shared Memory '" + localName + "' block already existed"
-        );
-    }
-
-    ghoul::SharedMemory::create(localName, totalSize);
-
-    _performanceMemory = std::make_unique<ghoul::SharedMemory>(localName);
-    // Using the placement-new to create a PerformanceLayout in the shared memory
-    new (_performanceMemory->memory()) PerformanceLayout;
-}
-
-PerformanceManager::~PerformanceManager() {
-    if (loggingEnabled()) {
-        outputLogs();
-    }
-
-    if (_performanceMemory) {
         ghoul::SharedMemory sharedMemory(GlobalSharedMemoryName);
         sharedMemory.acquireLock();
+        defer {
+            sharedMemory.releaseLock();
+        };
+
         GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
-        --(m->number);
-        sharedMemory.releaseLock();
 
-        LINFO(fmt::format("Remove shared memory '{}'", _performanceMemory->name()));
-        ghoul::SharedMemory::remove(_performanceMemory->name());
+        // The the first free block (which also coincides with the number of blocks
+        uint8_t blockIndex = m->number;
+        ++(m->number);
 
-        _performanceMemory = nullptr;
+        const std::string& localName = LocalSharedMemoryNameBase +
+                                       std::to_string(blockIndex);
 
+        // Compute the total size
+        const int totalSize = sizeof(PerformanceLayout);
+        LINFO(fmt::format("Create shared memory '{}' of {} bytes", localName, totalSize));
+
+        if (ghoul::SharedMemory::exists(localName)) {
+            throw ghoul::RuntimeError(
+                "Shared Memory '" + localName + "' block already existed"
+            );
+        }
+
+        ghoul::SharedMemory::create(localName, totalSize);
+
+        _performanceMemory = std::make_unique<ghoul::SharedMemory>(localName);
+        // Using the placement-new to create a PerformanceLayout in the shared memory
+        new (_performanceMemory->memory()) PerformanceLayout;
     }
+    else {
+        if (loggingEnabled()) {
+            outputLogs();
+        }
 
-    PerformanceManager::destroyGlobalSharedMemory();
+        if (_performanceMemory) {
+            ghoul::SharedMemory sharedMemory(GlobalSharedMemoryName);
+            sharedMemory.acquireLock();
+            GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
+            --(m->number);
+            sharedMemory.releaseLock();
+
+            LINFO(fmt::format("Remove shared memory '{}'", _performanceMemory->name()));
+            ghoul::SharedMemory::remove(_performanceMemory->name());
+
+            _performanceMemory = nullptr;
+        }
+
+        PerformanceManager::DestroyGlobalSharedMemory();
+    }
+}
+
+bool PerformanceManager::isEnabled() const {
+    return _performanceMeasurementEnabled;
 }
 
 void PerformanceManager::resetPerformanceMeasurements() {
     // Using the placement-new to create a PerformanceLayout in the shared memory
     _performanceMemory->acquireLock();
-    void* ptr = _performanceMemory->memory();
-    new (ptr) PerformanceLayout;
+    new (_performanceMemory->memory()) PerformanceLayout;
     _performanceMemory->releaseLock();
 
     individualPerformanceLocations.clear();
 }
 
-bool PerformanceManager::isMeasuringPerformance() const {
-    return _doPerformanceMeasurements;
-}
-
 void PerformanceManager::outputLogs() {
     // Log Layout values
     PerformanceLayout* layout = performanceData();
-    const size_t writeStart = (PerformanceLayout::NumberValues - 1) - _tick;
+    const size_t writeStart = (PerformanceLayout::NumberValues - 1) - _currentTick;
 
     // Log function performance
     for (int16_t n = 0; n < layout->nFunctionEntries; n++) {
-        const auto function = layout->functionEntries[n];
-        const std::string filename = formatLogName(function.name);
+        const PerformanceLayout::FunctionPerformanceLayout& function =
+            layout->functionEntries[n];
+        std::string filename = formatLogName(function.name);
         std::ofstream out = std::ofstream(
-            absPath(filename),
+            absPath(std::move(filename)),
             std::ofstream::out | std::ofstream::app
         );
 
         // Comma separate data
         for (size_t i = writeStart; i < PerformanceLayout::NumberValues; i++) {
-            const std::vector<float> data = { function.time[i] };
+            const std::vector<float>& data = { function.time[i] };
             writeData(out, data);
         }
         out.close();
@@ -240,12 +232,13 @@ void PerformanceManager::outputLogs() {
 
     // Log scene object performance
     for (int16_t n = 0; n < layout->nScaleGraphEntries; n++) {
-        const auto node = layout->sceneGraphEntries[n];
+        const PerformanceLayout::SceneGraphPerformanceLayout node =
+            layout->sceneGraphEntries[n];
 
         // Open file
-        const std::string filename = formatLogName(node.name);
+        std::string filename = formatLogName(node.name);
         std::ofstream out = std::ofstream(
-            absPath(filename),
+            absPath(std::move(filename)),
             std::ofstream::out | std::ofstream::app
         );
 
@@ -276,22 +269,22 @@ void PerformanceManager::writeData(std::ofstream& out, const std::vector<float>&
     std::replace(nodeName.begin(), nodeName.end(), ':', '-');
     // Replace spaces with underscore
     std::replace(nodeName.begin(), nodeName.end(), ' ', '_');
-    return  _logDir + "/" + _prefix + nodeName + _suffix + "." + _ext;
+    return  _logDir + "/" + _prefix + nodeName + "." + _ext;
 }
 
 void PerformanceManager::logDir(std::string dir) {
-    _logDir = absPath(dir);
+    _logDir = absPath(std::move(dir));
 }
 
-std::string PerformanceManager::logDir() const {
+const std::string& PerformanceManager::logDir() const {
     return _logDir;
 }
 
 void PerformanceManager::prefix(std::string prefix) {
-    _prefix = prefix;
+    _prefix = std::move(prefix);
 }
 
-std::string PerformanceManager::prefix() const {
+const std::string& PerformanceManager::prefix() const {
     return _prefix;
 }
 
@@ -346,11 +339,12 @@ PerformanceLayout* PerformanceManager::performanceData() {
 }
 
 void PerformanceManager::tick() {
-    _tick = (_tick + 1) % PerformanceLayout::NumberValues;
+    _currentTick = (_currentTick + 1) % PerformanceLayout::NumberValues;
 }
 
-void PerformanceManager::storeIndividualPerformanceMeasurement
-                                          (std::string identifier, long long microseconds)
+void PerformanceManager::storeIndividualPerformanceMeasurement(
+                                                            const std::string& identifier,
+                                                                   long long microseconds)
 {
     PerformanceLayout* layout = performanceData();
     _performanceMemory->acquireLock();
@@ -376,8 +370,7 @@ void PerformanceManager::storeIndividualPerformanceMeasurement
         std::next(std::begin(p->time)),
         std::end(p->time)
     );
-    p->time[PerformanceLayout::NumberValues - 1] =
-        static_cast<float>(microseconds);
+    p->time[PerformanceLayout::NumberValues - 1] = static_cast<float>(microseconds);
 
     _performanceMemory->releaseLock();
 }
@@ -385,40 +378,38 @@ void PerformanceManager::storeIndividualPerformanceMeasurement
 void PerformanceManager::storeScenePerformanceMeasurements(
                                            const std::vector<SceneGraphNode*>& sceneNodes)
 {
-    using namespace performance;
-
     PerformanceLayout* layout = performanceData();
     _performanceMemory->acquireLock();
 
-    int nNodes = static_cast<int>(sceneNodes.size());
+    const int nNodes = static_cast<int>(sceneNodes.size());
     layout->nScaleGraphEntries = static_cast<int16_t>(nNodes);
     for (int i = 0; i < nNodes; ++i) {
-        SceneGraphNode* node = sceneNodes[i];
+        const SceneGraphNode& node = *sceneNodes[i];
 
         memset(layout->sceneGraphEntries[i].name, 0, PerformanceLayout::LengthName);
 #ifdef _MSC_VER
         strcpy_s(
             layout->sceneGraphEntries[i].name,
-            node->identifier().length() + 1,
-            node->identifier().c_str()
+            node.identifier().length() + 1,
+            node.identifier().c_str()
         );
 #else
-        strcpy(layout->sceneGraphEntries[i].name, node->identifier().c_str());
+        strcpy(layout->sceneGraphEntries[i].name, node.identifier().c_str());
 #endif
 
-        SceneGraphNode::PerformanceRecord r = node->performanceRecord();
+        const SceneGraphNode::PerformanceRecord& r = node.performanceRecord();
         PerformanceLayout::SceneGraphPerformanceLayout& entry =
                                                              layout->sceneGraphEntries[i];
 
         // Covert nano to microseconds
-        const float micro = 1000.f;
+        constexpr const float Micro = 1000.f;
 
         std::rotate(
             std::begin(entry.renderTime),
             std::next(std::begin(entry.renderTime)),
             std::end(entry.renderTime)
         );
-        entry.renderTime[PerformanceLayout::NumberValues - 1] = r.renderTime / micro;
+        entry.renderTime[PerformanceLayout::NumberValues - 1] = r.renderTime / Micro;
 
         std::rotate(
             std::begin(entry.updateTranslation),
@@ -426,7 +417,7 @@ void PerformanceManager::storeScenePerformanceMeasurements(
             std::end(entry.updateTranslation)
         );
         entry.updateTranslation[PerformanceLayout::NumberValues - 1] =
-                                                          r.updateTimeTranslation / micro;
+            r.updateTimeTranslation / Micro;
 
         std::rotate(
             std::begin(entry.updateRotation),
@@ -434,7 +425,7 @@ void PerformanceManager::storeScenePerformanceMeasurements(
             std::end(entry.updateRotation)
         );
         entry.updateRotation[PerformanceLayout::NumberValues - 1] =
-                                                             r.updateTimeRotation / micro;
+            r.updateTimeRotation / Micro;
 
         std::rotate(
             std::begin(entry.updateScaling),
@@ -442,7 +433,7 @@ void PerformanceManager::storeScenePerformanceMeasurements(
             std::end(entry.updateScaling)
         );
         entry.updateScaling[PerformanceLayout::NumberValues - 1] =
-                                                              r.updateTimeScaling / micro;
+            r.updateTimeScaling / Micro;
 
         std::rotate(
             std::begin(entry.updateRenderable),
@@ -450,11 +441,11 @@ void PerformanceManager::storeScenePerformanceMeasurements(
             std::end(entry.updateRenderable)
         );
         entry.updateRenderable[PerformanceLayout::NumberValues - 1] =
-                                                           r.updateTimeRenderable / micro;
+            r.updateTimeRenderable / Micro;
     }
     _performanceMemory->releaseLock();
 
-    if (_loggingEnabled && _tick == PerformanceLayout::NumberValues - 1) {
+    if (_loggingEnabled && _currentTick == PerformanceLayout::NumberValues - 1) {
         outputLogs();
     }
 

@@ -24,11 +24,9 @@
 
 #include <openspace/mission/missionmanager.h>
 
+#include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/scripting/scriptengine.h>
-
 #include <ghoul/misc/assert.h>
 
 #include "missionmanager_lua.inl"
@@ -39,12 +37,11 @@ MissionManager::MissionManagerException::MissionManagerException(std::string err
     : ghoul::RuntimeError(std::move(error), "MissionManager")
 {}
 
-MissionManager::MissionManager()
-    : _currentMission(_missionMap.end())
-{}
+MissionManager::MissionManager() : _currentMission(_missionMap.end()) {}
 
 void MissionManager::setCurrentMission(const std::string& missionName) {
     ghoul_assert(!missionName.empty(), "missionName must not be empty");
+
     auto it = _missionMap.find(missionName);
     if (it == _missionMap.end()) {
         throw MissionManagerException("Mission has not been loaded");
@@ -83,10 +80,7 @@ std::string MissionManager::loadMission(const std::string& filename) {
 void MissionManager::unloadMission(const std::string& missionName) {
     ghoul_assert(!missionName.empty(), "missionName must not be empty");
     auto it = _missionMap.find(missionName);
-    ghoul_assert(
-        it != _missionMap.end(),
-        "missionName must name a previously loaded mission"
-    );
+    ghoul_assert(it != _missionMap.end(), "missionName must be a loaded mission");
 
     if (it == _currentMission) {
         _currentMission = _missionMap.end();

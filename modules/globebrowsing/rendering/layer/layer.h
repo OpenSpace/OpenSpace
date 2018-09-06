@@ -25,21 +25,21 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___LAYER___H__
 
-#include <modules/globebrowsing/tile/chunktile.h>
+#include <openspace/properties/propertyowner.h>
 
+#include <modules/globebrowsing/tile/chunktile.h>
+#include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/rendering/layer/layeradjustment.h>
-#include <modules/globebrowsing/rendering/layer/layergroupid.h>
 #include <modules/globebrowsing/rendering/layer/layerrendersettings.h>
 
 #include <openspace/properties/optionproperty.h>
-#include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/triggerproperty.h>
-#include <openspace/properties/vectorproperty.h>
 
 namespace openspace::globebrowsing {
 
 struct LayerGroup;
+struct TileIndex;
+struct TileDepthTransform;
 
 namespace tileprovider { class TileProvider; }
 
@@ -59,8 +59,8 @@ public:
     void initialize();
     void deinitialize();
 
-    ChunkTilePile getChunkTilePile(const TileIndex& tileIndex, int pileSize) const;
-    Tile::Status getTileStatus(const TileIndex& index) const;
+    ChunkTilePile chunkTilePile(const TileIndex& tileIndex, int pileSize) const;
+    Tile::Status tileStatus(const TileIndex& index) const;
 
     layergroupid::TypeID type() const;
     layergroupid::BlendModeID blendMode() const;

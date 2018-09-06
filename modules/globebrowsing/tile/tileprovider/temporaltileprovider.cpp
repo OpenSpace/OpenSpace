@@ -26,15 +26,17 @@
 
 #include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
 
+#include <modules/globebrowsing/tile/tiledepthtransform.h>
 #include <modules/globebrowsing/tile/tileprovider/defaulttileprovider.h>
-
+#include <openspace/engine/globals.h>
+#include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-
-#include "cpl_minixml.h"
-#include <ghoul/fmt.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/stringconversion.h>
 #include <fstream>
+#include "cpl_minixml.h"
 
 namespace {
     constexpr const char* _loggerCat = "TemporalTileProvider";
@@ -44,7 +46,7 @@ namespace {
     constexpr const char* KeyPreCacheStartTime = "PreCacheStartTime";
     constexpr const char* KeyPreCacheEndTime = "PreCacheEndTime";
 
-    static const openspace::properties::Property::PropertyInfo FilePathInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
         "FilePath",
         "File Path",
         "This is the path to the XML configuration file that describes the temporal tile "
@@ -52,15 +54,72 @@ namespace {
     };
 } // namespace
 
+namespace ghoul {
+
+template <>
+openspace::globebrowsing::tileprovider::TemporalTileProvider::TimeFormatType
+from_string(const std::string& string)
+{
+    using namespace openspace::globebrowsing::tileprovider;
+    if (string == "YYYY-MM-DD") {
+        return TemporalTileProvider::TimeFormatType::YYYY_MM_DD;
+    }
+    else if (string == "YYYY-MM-DDThh:mm:ssZ") {
+        return TemporalTileProvider::TimeFormatType::YYYY_MM_DDThhColonmmColonssZ;
+    }
+    else if (string == "YYYY-MM-DDThh_mm_ssZ") {
+        return TemporalTileProvider::TimeFormatType::YYYY_MM_DDThh_mm_ssZ;
+    }
+    else if (string == "YYYYMMDD_hhmmss") {
+        return TemporalTileProvider::TimeFormatType::YYYYMMDD_hhmmss;
+    }
+    else if (string == "YYYYMMDD_hhmm") {
+        return TemporalTileProvider::TimeFormatType::YYYYMMDD_hhmm;
+    }
+    else {
+        throw ghoul::RuntimeError("Unknown timeformat " + string);
+    }
+}
+
+} // namespace ghoul
+
 namespace openspace::globebrowsing::tileprovider {
 
-const char* TemporalTileProvider::URL_TIME_PLACEHOLDER("${OpenSpaceTimeId}");
+namespace {
+    std::string timeStringify(TemporalTileProvider::TimeFormatType type, const Time& t) {
+        switch (type) {
+            case TemporalTileProvider::TimeFormatType::YYYY_MM_DD:
+                return t.ISO8601().substr(0, 10);
+            case TemporalTileProvider::TimeFormatType::YYYYMMDD_hhmmss: {
+                std::string ts = t.ISO8601().substr(0, 19);
 
-const char* TemporalTileProvider::TemporalXMLTags::TIME_START = "OpenSpaceTimeStart";
-const char* TemporalTileProvider::TemporalXMLTags::TIME_END = "OpenSpaceTimeEnd";
-const char* TemporalTileProvider::TemporalXMLTags::TIME_RESOLUTION =
-                                                                "OpenSpaceTimeResolution";
-const char* TemporalTileProvider::TemporalXMLTags::TIME_FORMAT = "OpenSpaceTimeIdFormat";
+                // YYYY_MM_DDThh_mm_ss -> YYYYMMDD_hhmmss
+                ts.erase(std::remove(ts.begin(), ts.end(), '-'), ts.end());
+                ts.erase(std::remove(ts.begin(), ts.end(), ':'), ts.end());
+                replace(ts.begin(), ts.end(), 'T', '_');
+                return ts;
+            }
+            case TemporalTileProvider::TimeFormatType::YYYYMMDD_hhmm: {
+                std::string ts = t.ISO8601().substr(0, 16);
+
+                // YYYY_MM_DDThh_mm -> YYYYMMDD_hhmm
+                ts.erase(std::remove(ts.begin(), ts.end(), '-'), ts.end());
+                ts.erase(std::remove(ts.begin(), ts.end(), ':'), ts.end());
+                replace(ts.begin(), ts.end(), 'T', '_');
+                return ts;
+            }
+            case TemporalTileProvider::TimeFormatType::YYYY_MM_DDThhColonmmColonssZ:
+                return t.ISO8601().substr(0, 19) + "Z";
+            case TemporalTileProvider::TimeFormatType::YYYY_MM_DDThh_mm_ssZ: {
+                std::string timeString = t.ISO8601().substr(0, 19) + "Z";
+                replace(timeString.begin(), timeString.end(), ':', '_');
+                return timeString;
+            }
+            default:
+                throw ghoul::MissingCaseException();
+        }
+    }
+} // namespace
 
 TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     : _initDict(dictionary)
@@ -68,22 +127,12 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     , _successfulInitialization(false)
 {
     _filePath = dictionary.value<std::string>(KeyFilePath);
-    // std::string filePath;
-    // dictionary.getValue<std::string>(KeyFilePath, filePath);
-    // try {
-    //     filePath = absPath(filePath);
-    // }
-    // catch (const std::runtime_error&) {
-    //     // File path was not a path to a file but a GDAL config or empty
-    // }
-
-    // _filePath.setValue(filePath);
     addProperty(_filePath);
 
     if (readFilePath()) {
         const bool hasStart = dictionary.hasKeyAndValue<std::string>(
             KeyPreCacheStartTime
-        );
+            );
         const bool hasEnd = dictionary.hasKeyAndValue<std::string>(KeyPreCacheEndTime);
         if (hasStart && hasEnd) {
             const std::string start = dictionary.value<std::string>(KeyPreCacheStartTime);
@@ -103,7 +152,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
 
 
 bool TemporalTileProvider::initialize() {
-    bool success = TileProvider::initialize();
+    const bool success = TileProvider::initialize();
 
     if (!_preCacheTimes.empty()) {
         LINFO(fmt::format("Preloading: {}", _filePath.value()));
@@ -131,14 +180,12 @@ bool TemporalTileProvider::readFilePath() {
         xml = _filePath.value();
     }
 
-    try {
+    // File path was not a path to a file but a GDAL config or empty
+    if (FileSys.fileExists(_filePath.value())) {
         _initDict.setValue<std::string>(
             KeyBasePath,
             ghoul::filesystem::File(_filePath.value()).directoryName()
         );
-    }
-    catch (const std::runtime_error&) {
-        // File path was not a path to a file but a GDAL config or empty
     }
 
     _gdalXmlTemplate = consumeTemporalMetaData(xml);
@@ -148,51 +195,35 @@ bool TemporalTileProvider::readFilePath() {
 std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml) {
     CPLXMLNode* node = CPLParseXMLString(xml.c_str());
 
-    std::string timeStart = getXMLValue(
-        node,
-        TemporalXMLTags::TIME_START,
-        "2000 Jan 1"
-    );
-    std::string timeResolution = getXMLValue(
-        node,
-        TemporalXMLTags::TIME_RESOLUTION,
-        "2d"
-    );
-    std::string timeEnd = getXMLValue(
-        node,
-        TemporalXMLTags::TIME_END,
-        "Today"
-    );
+    std::string timeStart = getXMLValue(node, TemporalXMLTags::TimeStart, "2000 Jan 1");
+    std::string timeResolution = getXMLValue(node, TemporalXMLTags::TimeResolution, "2d");
+    std::string timeEnd = getXMLValue(node, TemporalXMLTags::TimeEnd, "Today");
     std::string timeIdFormat = getXMLValue(
         node,
-        TemporalXMLTags::TIME_FORMAT,
+        TemporalXMLTags::TimeFormat,
         "YYYY-MM-DDThh:mm:ssZ"
     );
 
     Time start;
-    start.setTime(timeStart);
+    start.setTime(std::move(timeStart));
     Time end(Time::now());
     if (timeEnd == "Yesterday") {
         end.advanceTime(-60.0 * 60.0 * 24.0); // Go back one day
     }
     else if (timeEnd != "Today") {
-        end.setTime(timeEnd);
+        end.setTime(std::move(timeEnd));
     }
 
     try {
         _timeQuantizer = TimeQuantizer(start, end, timeResolution);
     }
     catch (const ghoul::RuntimeError& e) {
-        throw ghoul::RuntimeError(
-            "Could not create time quantizer for Temporal GDAL dataset '" +
-            _filePath.value() + "'. " + e.message);
+        throw ghoul::RuntimeError(fmt::format(
+            "Could not create time quantizer for Temporal GDAL dataset '{}'. {}",
+            _filePath.value(), e.message
+        ));
     }
-    _timeFormat = TimeIdProviderFactory::getProvider(timeIdFormat);
-    if (!_timeFormat) {
-        throw ghoul::RuntimeError(
-            "Invalid Time Format " + timeIdFormat + " in " + _filePath.value()
-        );
-    }
+    _timeFormat = ghoul::from_string<TimeFormatType>(timeIdFormat);
 
     std::string gdalDescription;
     CPLXMLNode* gdalNode = CPLSearchXMLNode(node, "GDAL_WMS");
@@ -207,19 +238,18 @@ std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml
     return gdalDescription;
 }
 
-std::string TemporalTileProvider::getXMLValue(CPLXMLNode* root, const std::string& key,
+std::string TemporalTileProvider::getXMLValue(CPLXMLNode* node, const std::string& key,
                                               const std::string& defaultVal)
 {
-    CPLXMLNode * n = CPLSearchXMLNode(root, key.c_str());
+    CPLXMLNode* n = CPLSearchXMLNode(node, key.c_str());
     if (!n) {
         throw ghoul::RuntimeError(
-            "Unable to parse file " + _filePath.value() + ". " + key + " missing."
+            fmt::format("Unable to parse file {}. {} missing", _filePath.value(), key)
         );
     }
 
-    bool hasValue =
-        (n != nullptr && n->psChild != nullptr && n->psChild->pszValue != nullptr);
-    return hasValue ? std::string(n->psChild->pszValue) : defaultVal;
+    const bool hasValue = n && n->psChild && n->psChild->pszValue;
+    return hasValue ? n->psChild->pszValue : defaultVal;
 }
 
 TileDepthTransform TemporalTileProvider::depthTransform() {
@@ -228,24 +258,24 @@ TileDepthTransform TemporalTileProvider::depthTransform() {
         return _currentTileProvider->depthTransform();
     }
     else {
-        return { 1.0f, 0.0f};
+        return { 1.f, 0.f };
     }
 }
 
-Tile::Status TemporalTileProvider::getTileStatus(const TileIndex& tileIndex) {
+Tile::Status TemporalTileProvider::tileStatus(const TileIndex& tileIndex) {
     if (_successfulInitialization) {
         ensureUpdated();
-        return _currentTileProvider->getTileStatus(tileIndex);
+        return _currentTileProvider->tileStatus(tileIndex);
     }
     else {
         return Tile::Status::Unavailable;
     }
 }
 
-Tile TemporalTileProvider::getTile(const TileIndex& tileIndex) {
+Tile TemporalTileProvider::tile(const TileIndex& tileIndex) {
     if (_successfulInitialization) {
         ensureUpdated();
-        return _currentTileProvider->getTile(tileIndex);
+        return _currentTileProvider->tile(tileIndex);
     }
     else {
         return Tile::TileUnavailable;
@@ -263,7 +293,7 @@ int TemporalTileProvider::maxLevel() {
 }
 
 void TemporalTileProvider::ensureUpdated() {
-    if (_currentTileProvider == nullptr) {
+    if (!_currentTileProvider) {
         LDEBUG("Warning: update was done lazily");
         update();
     }
@@ -271,7 +301,9 @@ void TemporalTileProvider::ensureUpdated() {
 
 void TemporalTileProvider::update() {
     if (_successfulInitialization) {
-        std::shared_ptr<TileProvider> newCurrent = getTileProvider();
+        std::shared_ptr<TileProvider> newCurrent = getTileProvider(
+            global::timeManager.time()
+        );
         if (newCurrent) {
             _currentTileProvider = newCurrent;
         }
@@ -281,8 +313,9 @@ void TemporalTileProvider::update() {
 
 void TemporalTileProvider::reset() {
     if (_successfulInitialization) {
-        using T = std::pair<const TimeKey, std::shared_ptr<TileProvider>>;
-        for (T& it : _tileProviderMap) {
+        using K = TimeKey;
+        using V = std::shared_ptr<TileProvider>;
+        for (std::pair<const K, V>& it : _tileProviderMap) {
             it.second->reset();
         }
     }
@@ -290,9 +323,9 @@ void TemporalTileProvider::reset() {
 std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(const Time& t) {
     Time tCopy(t);
     if (_timeQuantizer.quantize(tCopy, true)) {
-        TimeKey timekey = _timeFormat->stringify(tCopy);
+        TimeKey timeKey = timeStringify(_timeFormat, tCopy);
         try {
-            return getTileProvider(timekey);
+            return getTileProvider(timeKey);
         }
         catch (const ghoul::RuntimeError& e) {
             LERROR(e.message);
@@ -303,9 +336,9 @@ std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(const Time& 
 }
 
 std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(
-    const TimeKey& timekey)
+                                                                   const TimeKey& timekey)
 {
-    auto it = _tileProviderMap.find(timekey);
+    const auto it = _tileProviderMap.find(timekey);
     if (it != _tileProviderMap.end()) {
         return it->second;
     }
@@ -319,7 +352,7 @@ std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(
 }
 
 std::shared_ptr<TileProvider> TemporalTileProvider::initTileProvider(TimeKey timekey) {
-    static const std::vector<std::string> AllowedToken = {
+    static const std::vector<std::string> AllowedTokens = {
         // From: http://www.gdal.org/frmt_wms.html
         // @FRAGILE:  What happens if a user specifies one of these as path tokens?
         // ---abock
@@ -331,186 +364,29 @@ std::shared_ptr<TileProvider> TemporalTileProvider::initTileProvider(TimeKey tim
         "${layer}"
     };
 
-    std::string gdalDatasetXml = getGdalDatasetXML(timekey);
-    FileSys.expandPathTokens(gdalDatasetXml, AllowedToken);
+    std::string gdalDatasetXml = getGdalDatasetXML(std::move(timekey));
+    FileSys.expandPathTokens(gdalDatasetXml, AllowedTokens);
 
     _initDict.setValue<std::string>(KeyFilePath, gdalDatasetXml);
-    auto tileProvider = std::make_shared<DefaultTileProvider>(_initDict);
+    std::shared_ptr<DefaultTileProvider> tileProvider =
+        std::make_shared<DefaultTileProvider>(_initDict);
     return tileProvider;
 }
 
-std::string TemporalTileProvider::getGdalDatasetXML(Time t) {
-    TimeKey timekey = _timeFormat->stringify(t);
-    return getGdalDatasetXML(timekey);
+std::string TemporalTileProvider::getGdalDatasetXML(const Time& t) {
+    TimeKey timeKey = timeStringify(_timeFormat, t);
+    return getGdalDatasetXML(timeKey);
 }
 
-std::string TemporalTileProvider::getGdalDatasetXML(TimeKey timeKey) {
+std::string TemporalTileProvider::getGdalDatasetXML(const TimeKey& timeKey) {
     std::string xmlTemplate(_gdalXmlTemplate);
-    size_t pos = xmlTemplate.find(URL_TIME_PLACEHOLDER);
-    //size_t numChars = std::string(URL_TIME_PLACEHOLDER).length();
-    size_t numChars = strlen(URL_TIME_PLACEHOLDER);
+    const size_t pos = xmlTemplate.find(UrlTimePlaceholder);
+    //size_t numChars = std::string(UrlTimePlaceholder).length();
+    const size_t numChars = strlen(UrlTimePlaceholder);
     // @FRAGILE:  This will only find the first instance. Dangerous if that instance is
     // commented out ---abock
-    std::string timeSpecifiedXml = xmlTemplate.replace(pos, numChars, timeKey);
+    const std::string timeSpecifiedXml = xmlTemplate.replace(pos, numChars, timeKey);
     return timeSpecifiedXml;
-}
-
-std::string YYYY_MM_DD::stringify(const Time& t) const {
-    return t.ISO8601().substr(0, 10);
-}
-
-std::string YYYYMMDD_hhmmss::stringify(const Time& t) const {
-    std::string ts = t.ISO8601().substr(0, 19);
-
-    // YYYY_MM_DDThh_mm_ss -> YYYYMMDD_hhmmss
-    ts.erase(std::remove(ts.begin(), ts.end(), '-'), ts.end());
-    ts.erase(std::remove(ts.begin(), ts.end(), ':'), ts.end());
-    replace(ts.begin(), ts.end(), 'T', '_');
-    return ts;
-}
-
-std::string YYYYMMDD_hhmm::stringify(const Time& t) const {
-    std::string ts = t.ISO8601().substr(0, 16);
-
-    // YYYY_MM_DDThh_mm -> YYYYMMDD_hhmm
-    ts.erase(std::remove(ts.begin(), ts.end(), '-'), ts.end());
-    ts.erase(std::remove(ts.begin(), ts.end(), ':'), ts.end());
-    replace(ts.begin(), ts.end(), 'T', '_');
-    return ts;
-}
-
-std::string YYYY_MM_DDThhColonmmColonssZ::stringify(const Time& t) const {
-    return t.ISO8601().substr(0, 19) + "Z";
-}
-
-std::string YYYY_MM_DDThh_mm_ssZ::stringify(const Time& t) const {
-    std::string timeString = t.ISO8601().substr(0, 19) + "Z";
-    replace( timeString.begin(), timeString.end(), ':', '_' );
-    return timeString;
-}
-
-bool TimeIdProviderFactory::initialized = false;
-
-std::unordered_map<std::string, std::unique_ptr<TimeFormat>>
-    TimeIdProviderFactory::_timeIdProviderMap =
-    std::unordered_map<std::string, std::unique_ptr<TimeFormat>>();
-
-void TimeIdProviderFactory::init() {
-    _timeIdProviderMap.insert(std::pair<std::string, std::unique_ptr<TimeFormat>>(
-        { "YYYY-MM-DD" , std::make_unique<YYYY_MM_DD>() }
-    ));
-    _timeIdProviderMap.insert(std::pair<std::string, std::unique_ptr<TimeFormat>>(
-        { "YYYY-MM-DDThh:mm:ssZ", std::make_unique<YYYY_MM_DDThhColonmmColonssZ>() }
-    ));
-    _timeIdProviderMap.insert(std::pair<std::string, std::unique_ptr<TimeFormat>>(
-        { "YYYY-MM-DDThh_mm_ssZ", std::make_unique<YYYY_MM_DDThh_mm_ssZ>() }
-    ));
-    _timeIdProviderMap.insert(std::pair<std::string, std::unique_ptr<TimeFormat>>(
-        { "YYYYMMDD_hhmmss", std::make_unique<YYYYMMDD_hhmmss>() }
-    ));
-    _timeIdProviderMap.insert(std::pair<std::string, std::unique_ptr<TimeFormat>>(
-        { "YYYYMMDD_hhmm" , std::make_unique<YYYYMMDD_hhmm>() }
-    ));
-    initialized = true;
-}
-
-TimeFormat* TimeIdProviderFactory::getProvider(const std::string& format) {
-    if (!initialized) {
-        init();
-    }
-    ghoul_assert(
-        _timeIdProviderMap.find(format) != _timeIdProviderMap.end(),
-        "Unsupported Time format: " + format
-    );
-    return _timeIdProviderMap[format].get();
-}
-
-TimeQuantizer::TimeQuantizer(const Time& start, const Time& end, double resolution)
-    : _timerange(start.j2000Seconds(), end.j2000Seconds())
-    , _resolution(resolution)
-{}
-
-TimeQuantizer::TimeQuantizer(const Time& start, const Time& end,
-                             const std::string& resolution)
-    : TimeQuantizer(start, end, parseTimeResolutionStr(resolution))
-{}
-
-double TimeQuantizer::parseTimeResolutionStr(const std::string& resoltutionStr) {
-    const char unit = resoltutionStr.back();
-    std::string numberString = resoltutionStr.substr(0, resoltutionStr.length() - 1);
-
-    char* p;
-    double value = strtol(numberString.c_str(), &p, 10);
-    if (*p) { // not a number
-        throw ghoul::RuntimeError("Cannot convert " + numberString + " to number");
-    }
-    else {
-        // convert value to seconds, based on unit.
-        // The switch statment has intentional fall throughs
-        switch (unit) {
-            case 'y':
-                value *= 365;
-                [[fallthrough]];
-            case 'd':
-                value *= 24.0;
-                [[fallthrough]];
-            case 'h': value *= 60.0;
-                [[fallthrough]];
-            case 'm':
-                value *= 60.0;
-                [[fallthrough]];
-            case 's':
-                value *= 1.0;
-                break;
-        default:
-            throw ghoul::RuntimeError("Invalid unit format '" + std::string(1, unit) +
-                "'. Expected 'y', 'd', 'h', 'm' or 's'.");
-        }
-        return value;
-    }
-}
-
-bool TimeQuantizer::quantize(Time& t, bool clamp) const {
-    double unquantized = t.j2000Seconds();
-    if (_timerange.includes(unquantized)) {
-        double quantized = std::floor(
-            (unquantized - _timerange.start) / _resolution) *
-            _resolution + _timerange.start;
-        t.setTime(quantized);
-        return true;
-    }
-    else if (clamp) {
-        double clampedTime = unquantized;
-        clampedTime = std::max(clampedTime, _timerange.start);
-        clampedTime = std::min(clampedTime, _timerange.end);
-        t.setTime(clampedTime);
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-
-std::vector<Time> TimeQuantizer::quantized(const Time& start, const Time& end) const {
-    Time s = start;
-    quantize(s, true);
-
-    Time e = end;
-    quantize(e, true);
-
-    const double startSeconds = s.j2000Seconds();
-    const double endSeconds = e.j2000Seconds();
-    const double delta = endSeconds - startSeconds;
-
-    ghoul_assert(int(delta) % int(_resolution) == 0, "Quantization error");
-    const int nSteps = static_cast<int>(delta / _resolution);
-
-    std::vector<Time> result(nSteps + 1);
-    for (int i = 0; i <= nSteps; ++i) {
-        result[i].setTime(startSeconds + i * _resolution, false);
-    }
-
-    return result;
 }
 
 } // namespace openspace::globebrowsing::tileprovider

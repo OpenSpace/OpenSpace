@@ -29,9 +29,9 @@
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalarproperty.h>
-#include <openspace/properties/vectorproperty.h>
-
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
@@ -77,13 +77,13 @@ private:
     ghoul::Dictionary _fieldlineInfo;
     ghoul::Dictionary _seedPointsInfo;
 
-    bool _seedPointsAreDirty;
-    bool _fieldLinesAreDirty;
+    bool _seedPointsAreDirty = true;
+    bool _fieldLinesAreDirty = true;
 
     std::vector<glm::vec3> _seedPoints;
 
-    GLuint _fieldlineVAO;
-    GLuint _vertexPositionBuffer;
+    GLuint _fieldlineVAO = 0;
+    GLuint _vertexPositionBuffer = 0;
 
     std::vector<GLint> _lineStart;
     std::vector<GLsizei> _lineCount;

@@ -28,25 +28,21 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/defer.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr const char* LoggerCat = "ScreenSpaceSpout";
 
-    const char* KeyName = "Name";
+    constexpr const char* KeyName = "Name";
 
-    static const openspace::properties::Property::PropertyInfo NameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo NameInfo = {
         "SpoutName",
         "Spout Sender Name",
         "This value explicitly sets the Spout receiver to use a specific name. If this "
         "is not a valid name, an empty image is used."
     };
 
-    static const openspace::properties::Property::PropertyInfo SelectionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
         "SpoutSelection",
         "Spout Selection",
         "This property displays all available Spout sender on the system. If one them is "
@@ -54,7 +50,7 @@ namespace {
         "previous value."
     };
 
-    static const openspace::properties::Property::PropertyInfo UpdateInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UpdateInfo = {
         "UpdateSelection",
         "Update Selection",
         "If this property is trigged, the 'SpoutSelection' options will be refreshed."
@@ -118,11 +114,8 @@ RenderablePlaneSpout::RenderablePlaneSpout(const ghoul::Dictionary& dictionary)
         setGuiName("ScreenSpaceSpout " + std::to_string(iIdentifier));
     }
 
-    _isSpoutDirty = true;
-
     if (dictionary.hasKey(NameInfo.identifier)) {
         _spoutName = dictionary.value<std::string>(NameInfo.identifier);
-        _isSpoutDirty = true;
     }
 
     _spoutName.onChange([this]() {
@@ -140,15 +133,14 @@ RenderablePlaneSpout::RenderablePlaneSpout(const ghoul::Dictionary& dictionary)
     addProperty(_spoutSelection);
 
     _updateSelection.onChange([this]() {
-        std::string currentValue = _spoutSelection.options().empty() ?
+        const std::string& currentValue = _spoutSelection.options().empty() ?
             "" :
             _spoutSelection.option().description;
 
         _spoutSelection.clearOptions();
         _spoutSelection.addOption(0, "");
 
-        int nSenders = _receiver->GetSenderCount();
-
+        const int nSenders = _receiver->GetSenderCount();
         int idx = 0;
 
         for (int i = 0; i < nSenders; ++i) {
@@ -178,8 +170,6 @@ void RenderablePlaneSpout::update(const UpdateData& data) {
     RenderablePlane::update(data);
 
     if (_isFirstUpdate) {
-        defer { _isFirstUpdate = false; };
-
         // Trigger an update; the value is a dummy that is ignored
         _updateSelection.set(0);
 
@@ -187,6 +177,8 @@ void RenderablePlaneSpout::update(const UpdateData& data) {
         if (_spoutSelection.options().size() > 1) {
             _spoutSelection = 1;
         }
+
+        _isFirstUpdate = false;
     }
 
     if (_spoutName.value().empty()) {
@@ -204,13 +196,8 @@ void RenderablePlaneSpout::update(const UpdateData& data) {
 
         _receiver->GetActiveSender(_currentSenderName);
 
-        bool createSuccess = _receiver->CreateReceiver(
-            _currentSenderName,
-            width,
-            height
-        );
-
-        if (!createSuccess) {
+        bool hasCreated = _receiver->CreateReceiver(_currentSenderName, width, height);
+        if (!hasCreated) {
             LWARNINGC(
                 LoggerCat,
                 fmt::format("Could not create receiver for {}", _currentSenderName)
@@ -221,14 +208,9 @@ void RenderablePlaneSpout::update(const UpdateData& data) {
 
     unsigned int width;
     unsigned int height;
+    const bool hasReceived = _receiver->ReceiveTexture(_currentSenderName, width, height);
 
-    bool receiveSuccess = _receiver->ReceiveTexture(
-        _currentSenderName,
-        width,
-        height
-    );
-
-    if (!receiveSuccess && !_isErrorMessageDisplayed) {
+    if (!hasReceived && !_isErrorMessageDisplayed) {
         LWARNINGC(
             LoggerCat,
             fmt::format("Could not receive texture for {}", _currentSenderName)
@@ -244,7 +226,6 @@ void RenderablePlaneSpout::bindTexture() {
 void RenderablePlaneSpout::unbindTexture() {
     _receiver->UnBindSharedTexture();
 }
-
 
 } // namespace openspace
 

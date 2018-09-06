@@ -29,6 +29,8 @@ local object = {
         ColorOption = { "redshift", "prox5Mpc" },
         ColorRange = { { 0.0, 0.075 }, { 1.0, 50.0 } },
         Unit = "Mpc",
+        CorrectionSizeEndDistance = 20.6,
+        CorrectionSizeFactor = 15.0,
         ScaleFactor = 508.0
     },
     GUI = {

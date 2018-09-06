@@ -26,31 +26,30 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 
 namespace {
-    const char* KeyFontMono = "Mono";
-    const float DefaultFontSize = 10.f;
+    constexpr const char* KeyFontMono = "Mono";
+    constexpr const float DefaultFontSize = 10.f;
 
-    static const openspace::properties::Property::PropertyInfo FontNameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",
         "Font Name",
         "This value is the name of the font that is used. It can either refer to an "
         "internal name registered previously, or it can refer to a path that is used."
     };
 
-    static const openspace::properties::Property::PropertyInfo FontSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
         "This value determines the size of the font that is used to render the date."
     };
 
-    static const openspace::properties::Property::PropertyInfo FrametimeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FrametimeInfo = {
         "FrametimeType",
         "Type of the frame time display",
         "This value determines the units in which the frame time is displayed."
@@ -61,6 +60,7 @@ namespace openspace {
 
 documentation::Documentation DashboardItemFramerate::Documentation() {
     using namespace documentation;
+
     return {
         "DashboardItem Framerate",
         "base_dashboarditem_framerate",
@@ -95,7 +95,7 @@ documentation::Documentation DashboardItemFramerate::Documentation() {
     };
 }
 
-DashboardItemFramerate::DashboardItemFramerate(ghoul::Dictionary dictionary)
+DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
@@ -104,14 +104,14 @@ DashboardItemFramerate::DashboardItemFramerate(ghoul::Dictionary dictionary)
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
-        "DashboardItemDate"
+        "DashboardItemFramerate"
     );
 
     if (dictionary.hasKey(FontNameInfo.identifier)) {
         _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
     }
-    _fontName.onChange([this](){
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+    _fontName.onChange([this]() {
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
@@ -121,7 +121,7 @@ DashboardItemFramerate::DashboardItemFramerate(ghoul::Dictionary dictionary)
         );
     }
     _fontSize.onChange([this](){
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
@@ -133,14 +133,14 @@ DashboardItemFramerate::DashboardItemFramerate(ghoul::Dictionary dictionary)
     });
 
     if (dictionary.hasKey(FrametimeInfo.identifier)) {
-        std::string value = dictionary.value<std::string>(FrametimeInfo.identifier);
-        if (value == "Average Deltatime") {
+        const std::string& v = dictionary.value<std::string>(FrametimeInfo.identifier);
+        if (v == "Average Deltatime") {
             _frametimeType = static_cast<int>(FrametimeType::DtTimeAvg);
         }
-        else if (value == "Frames per second") {
+        else if (v == "Frames per second") {
             _frametimeType = static_cast<int>(FrametimeType::FPS);
         }
-        else if (value == "Average frames per second") {
+        else if (v == "Average frames per second") {
             _frametimeType = static_cast<int>(FrametimeType::FPSAvg);
         }
         else {
@@ -152,7 +152,7 @@ DashboardItemFramerate::DashboardItemFramerate(ghoul::Dictionary dictionary)
     }
     addProperty(_frametimeType);
 
-    _font = OsEng.fontManager().font(_fontName, _fontSize);
+    _font = global::fontManager.font(_fontName, _fontSize);
 }
 
 void DashboardItemFramerate::render(glm::vec2& penPosition) {
@@ -163,8 +163,9 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                "Avg. Frametime: %.5f",
-                OsEng.windowWrapper().averageDeltaTime()
+                fmt::format(
+                    "Avg. Frametime: {:.5f}", global::windowDelegate.averageDeltaTime()
+                )
             );
             break;
         case FrametimeType::FPS:
@@ -172,8 +173,7 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                "FPS: %3.2f",
-                1.0 / OsEng.windowWrapper().deltaTime()
+                fmt::format("FPS: {:3.2f}", 1.0 / global::windowDelegate.deltaTime())
             );
             break;
         case FrametimeType::FPSAvg:
@@ -181,8 +181,9 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                "Avg. FPS: %3.2f",
-                1.0 / OsEng.windowWrapper().averageDeltaTime()
+                fmt::format(
+                    "Avg. FPS: {:3.2f}", 1.0 / global::windowDelegate.averageDeltaTime()
+                )
             );
             break;
         case FrametimeType::None:
@@ -196,20 +197,23 @@ glm::vec2 DashboardItemFramerate::size() const {
         case FrametimeType::DtTimeAvg:
             return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
                 *_font,
-                "Avg. Frametime: %.5f",
-                OsEng.windowWrapper().averageDeltaTime()
+                fmt::format(
+                    "Avg. Frametime: {:.5f}", global::windowDelegate.averageDeltaTime()
+                )
             ).boundingBox;
         case FrametimeType::FPS:
             return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
                 *_font,
-                "FPS: %3.2f",
-                1.0 / OsEng.windowWrapper().deltaTime()
+                fmt::format(
+                    "FPS: {:3.2f}", 1.0 / global::windowDelegate.deltaTime()
+                )
             ).boundingBox;
         case FrametimeType::FPSAvg:
             return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
                 *_font,
-                "Avg. FPS: %3.2f",
-                1.0 / OsEng.windowWrapper().averageDeltaTime()
+                fmt::format(
+                    "Avg. FPS: %3.2f", 1.0 / global::windowDelegate.averageDeltaTime()
+                )
             ).boundingBox;
         case FrametimeType::None:
             return { 0.f, 0.f };

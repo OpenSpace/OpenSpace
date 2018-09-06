@@ -24,31 +24,37 @@
 
 #include <modules/globebrowsing/other/statscollector.h>
 
+#include <ghoul/misc/assert.h>
 #include <fstream>
 #include <iomanip>
-#include <string>
 
 namespace openspace::globebrowsing {
 
-StatsCollector::StatsCollector(const std::string& filename, int dumpEveryXRecord,
-                               Enabled enabled, const std::string & delimiter)
-    : i(TemplatedStatsCollector<long long>(_enabled, delimiter))
-    , d(TemplatedStatsCollector<double>(_enabled, delimiter))
-    , _filename(filename)
-    , _delimiter(delimiter)
+StatsCollector::StatsCollector(std::string filename, int dumpEveryXRecord,
+                               Enabled enabled, std::string delimiter)
+    : i(TemplatedStatsCollector<long long>(
+        TemplatedStatsCollector<long long>::Enabled(enabled),
+        delimiter
+    ))
+    , d(TemplatedStatsCollector<double>(
+        TemplatedStatsCollector<double>::Enabled(enabled),
+        delimiter
+    ))
+    , _filename(std::move(filename))
+    , _delimiter(std::move(delimiter))
     , _dumpEveryXRecord(dumpEveryXRecord)
-    , _recordsSinceLastDump(0)
-    , _enabled(enabled)
-    , _hasWrittenHeader(false)
-{}
+{
+}
 
 StatsCollector::~StatsCollector() {
     dumpToDisk();
 }
 
 void StatsCollector::startNewRecord() {
-    if (_enabled) {
-        if (_dumpEveryXRecord && ++_recordsSinceLastDump >= _dumpEveryXRecord) {
+    ghoul_assert(i.enabled() == d.enabled(), "Both Statscollector have to be synced");
+
+    if (i.enabled()) {
+        if (_dumpEveryXRecord && (++_recordsSinceLastDump >= _dumpEveryXRecord)) {
             dumpToDisk();
             _recordsSinceLastDump = 0;
         }
@@ -59,15 +65,8 @@ void StatsCollector::startNewRecord() {
 }
 
 void StatsCollector::setEnabled(bool enabled) {
-    _enabled = enabled;
-}
-
-void StatsCollector::disable() {
-    _enabled = false;
-}
-
-void StatsCollector::enable() {
-    _enabled = true;
+    i.setEnabled(enabled);
+    d.setEnabled(enabled);
 }
 
 int StatsCollector::hasHeaders() {
@@ -75,7 +74,9 @@ int StatsCollector::hasHeaders() {
 }
 
 void StatsCollector::dumpToDisk() {
-    if (_enabled && hasHeaders()) {
+    ghoul_assert(i.enabled() == d.enabled(), "Both Statscollector have to be synced");
+
+    if (i.enabled() && hasHeaders()) {
         if (!_hasWrittenHeader) {
             writeHeader();
         }

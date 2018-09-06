@@ -25,14 +25,14 @@
 #ifndef __OPENSPACE_CORE___VOLUMERAYCASTER___H__
 #define __OPENSPACE_CORE___VOLUMERAYCASTER___H__
 
+#include <ghoul/glm.h>
 #include <string>
 #include <vector>
-#include <openspace/util/updatestructures.h>
 
 namespace ghoul::opengl {
     class Texture;
     class ProgramObject;
-}
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -44,7 +44,7 @@ public:
     /**
      * Destructor
      */
-    virtual ~VolumeRaycaster() {};
+    virtual ~VolumeRaycaster() = default;
 
     /**
      * Render the volume's entry points (front face of the bounding geometry)
@@ -63,23 +63,22 @@ public:
      * Make sure textures are up to date, bind them to texture units, set program uniforms
      * etc.
      */
-    virtual void preRaycast(const RaycastData& /*data*/,
-        ghoul::opengl::ProgramObject& /*program*/) {};
+    virtual void preRaycast(const RaycastData& data,
+        ghoul::opengl::ProgramObject& program);
 
     /**
      * Clean up for the volume after the ABuffer's resolve step.
      * Make sure texture units are deinitialized, etc.
      */
-    virtual void postRaycast(const RaycastData& /*data*/,
-        ghoul::opengl::ProgramObject& /*program*/) {};
+    virtual void postRaycast(const RaycastData& data,
+        ghoul::opengl::ProgramObject& program);
 
     /**
     * Return true if the camera is inside the volume.
     * Also set localPosition to the camera position in the volume's local coordinate
     * system.
     */
-    virtual bool cameraIsInside(const RenderData& /*data*/,
-        glm::vec3& /*localPosition*/) { return false; };
+    virtual bool isCameraInside(const RenderData& data, glm::vec3& localPosition);
 
     /**
      * Return a path the file to use as vertex shader
@@ -87,7 +86,7 @@ public:
      * The shader preprocessor will have acceess to
      *   A #{namespace} variable (unique per helper file)
      */
-    virtual std::string getBoundsVsPath() const = 0;
+    virtual std::string boundsVertexShaderPath() const = 0;
 
     /*
      * Return a path to a file with the functions, uniforms and fragment shader in
@@ -99,7 +98,7 @@ public:
      * The shader preprocessor will have acceess to
      *   A #{namespace} variable (unique per helper file)
      */
-    virtual std::string getBoundsFsPath() const = 0 ;
+    virtual std::string boundsFragmentShaderPath() const = 0;
 
     /**
      * Return a path to a file with all the uniforms, functions etc
@@ -116,7 +115,7 @@ public:
      *   An #{id} variable (unique per volume)
      *   A #{namespace} variable (unique per helper file)
      */
-    virtual std::string getRaycastPath() const = 0;
+    virtual std::string raycasterPath() const = 0;
 
     /**
      * Return a path to a glsl file with helper functions required for the
@@ -128,7 +127,7 @@ public:
      * The shader preprocessor will have access to the #{namespace} variable (unique per
      * helper file) which should be a prefix to all symbols defined by the helper
      */
-    virtual std::string getHelperPath() const = 0;
+    virtual std::string helperPath() const = 0;
 };
 
 } // namespace openspace

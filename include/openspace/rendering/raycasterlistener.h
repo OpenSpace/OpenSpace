@@ -25,14 +25,18 @@
 #ifndef __OPENSPACE_CORE___RAYCASTERLISTENER___H__
 #define __OPENSPACE_CORE___RAYCASTERLISTENER___H__
 
+#include <ghoul/misc/boolean.h>
+
 namespace openspace {
 
 class VolumeRaycaster;
 
 class RaycasterListener {
 public:
+    BooleanType(IsAttached);
+
     virtual ~RaycasterListener() = default;
-    virtual void raycastersChanged(VolumeRaycaster& raycaster, bool attached) = 0;
+    virtual void raycastersChanged(VolumeRaycaster& raycaster, IsAttached isAttached) = 0;
 };
 
 } // namespace openspace

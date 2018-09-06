@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,21 +25,28 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER___BROWSER_CLIENT___H__
 #define __OPENSPACE_MODULE_WEBBROWSER___BROWSER_CLIENT___H__
 
-#include <memory>
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable : 4100)
+#endif // _MSC_VER
+
 #include <include/cef_client.h>
-#include <include/cef_life_span_handler.h>
-#include <modules/webbrowser/include/defaultbrowserlauncher.h>
-#include "webrenderhandler.h"
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif // _MSC_VER
 
 namespace openspace {
+
+class WebRenderHandler;
 
 class BrowserClient : public CefClient {
 public:
     BrowserClient(WebRenderHandler*);
 
-    virtual CefRefPtr<CefRenderHandler> GetRenderHandler();
-    CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler();
-    CefRefPtr<CefRequestHandler> GetRequestHandler();
+    CefRefPtr<CefRenderHandler> GetRenderHandler() override;
+    CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() override;
+    CefRefPtr<CefRequestHandler> GetRequestHandler() override;
 
 private:
     CefRefPtr<CefRenderHandler> _renderHandler;
@@ -51,4 +58,4 @@ private:
 
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_WEBBROWSER___BROWSER_CLIENT___H__
+#endif // __OPENSPACE_MODULE_WEBBROWSER___BROWSER_CLIENT___H__

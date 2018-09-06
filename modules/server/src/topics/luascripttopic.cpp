@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,28 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/openspaceengine.h>
+#include <modules/server/include/topics/luascripttopic.h>
+
+#include <openspace/json.h>
+#include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
-#include <modules/server/include/luascripttopic.h>
 
 namespace {
-const std::string ScriptKey = "script";
-const std::string _loggerCat = "LuaScriptTopic";
-}
+    constexpr const char* ScriptKey = "script";
+    constexpr const char* _loggerCat = "LuaScriptTopic";
+} // namespace
 
 namespace openspace {
 
-void LuaScriptTopic::handleJson(nlohmann::json json) {
+void LuaScriptTopic::handleJson(const nlohmann::json& json) {
     try {
-        auto script = json.at(ScriptKey).get<std::string>();
+        std::string script = json.at(ScriptKey).get<std::string>();
         LDEBUG("Queueing Lua script: " + script);
-        OsEng.scriptEngine().queueScript(script, scripting::ScriptEngine::RemoteScripting::No);
+        global::scriptEngine.queueScript(
+            std::move(script),
+            scripting::ScriptEngine::RemoteScripting::No
+        );
     }
-    catch (std::out_of_range& e) {
-        LERROR("Could run script -- key or value is missing in payload");
+    catch (const std::out_of_range& e) {
+        LERROR("Could not run script -- key or value is missing in payload");
         LERROR(e.what());
     }
 }
 
+bool LuaScriptTopic::isDone() const {
+    return true;
 }
+
+} // namespace openspace

@@ -31,13 +31,14 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
-    const char* KeyKernels = "Kernels";
+    constexpr const char* KeyKernels = "Kernels";
 
-    const char* DefaultReferenceFrame = "GALACTIC";
+    constexpr const char* DefaultReferenceFrame = "GALACTIC";
 
-    static const openspace::properties::Property::PropertyInfo TargetInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TargetInfo = {
         "Target",
         "Target",
         "This is the SPICE NAIF name for the body whose translation is to be computed by "
@@ -45,7 +46,7 @@ namespace {
         "or a NAIF integer id code (such as '399')."
     };
 
-    static const openspace::properties::Property::PropertyInfo ObserverInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ObserverInfo = {
         "Observer",
         "Observer",
         "This is the SPICE NAIF name for the parent of the body whose translation is to "
@@ -53,7 +54,7 @@ namespace {
         "(such as 'SOLAR SYSTEM BARYCENTER') or a NAIF integer id code (such as '0')."
     };
 
-    static const openspace::properties::Property::PropertyInfo FrameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FrameInfo = {
         "Frame",
         "Reference Frame",
         "This is the SPICE NAIF name for the reference frame in which the position "
@@ -99,10 +100,7 @@ documentation::Documentation SpiceTranslation::Documentation() {
             },
             {
                 KeyKernels,
-                new OrVerifier(
-                    new StringListVerifier,
-                    new StringVerifier
-                ),
+                new OrVerifier({ new StringListVerifier, new StringVerifier }),
                 Optional::Yes,
                 "A single kernel or list of kernels that this SpiceTranslation depends "
                 "on. All provided kernels will be loaded before any other operation is "
@@ -173,14 +171,14 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     addProperty(_frame);
 }
 
-glm::dvec3 SpiceTranslation::position(const Time& time) const {
+glm::dvec3 SpiceTranslation::position(const UpdateData& data) const {
     double lightTime = 0.0;
     return SpiceManager::ref().targetPosition(
         _target,
         _observer,
         _frame,
         {},
-        time.j2000Seconds(),
+        data.time.j2000Seconds(),
         lightTime
     ) * glm::pow(10.0, 3.0);
 }

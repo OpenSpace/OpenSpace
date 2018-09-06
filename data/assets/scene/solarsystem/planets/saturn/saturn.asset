@@ -9,7 +9,7 @@ local textures = asset.syncedResource({
     Type = "HttpSynchronization",
     Name = "Saturn textures",
     Identifier = "saturn_textures",
-    Version = 2
+    Version = 3
 })
 
 local Saturn = {
@@ -20,6 +20,10 @@ local Saturn = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_SATURN",
             DestinationFrame = "GALACTIC"
+        },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1.0
         }
     },
     Renderable = {
@@ -48,14 +52,14 @@ local SaturnRings = {
     Renderable = {
         Type = "RenderableRings",
         Texture = textures .. "/saturn_rings.png",
-        Size = 140220000,
+        Size = 140445000,
         Offset = { 74500 / 140445.100671159, 1.0 } -- min / max extend
     },
     GUI = {
         Name = "Saturn Rings",
         Path = "/Solar System/Planets/Saturn"
     }
-},
+}
 
 
 

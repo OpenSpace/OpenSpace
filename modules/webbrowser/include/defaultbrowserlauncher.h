@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,25 +25,29 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER___DEFAULT_BROWSER_LAUNCHER___H__
 #define __OPENSPACE_MODULE_WEBBROWSER___DEFAULT_BROWSER_LAUNCHER___H__
 
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable : 4100)
+#endif // _MSC_VER
+
 #include <include/cef_life_span_handler.h>
 #include <include/cef_request_handler.h>
-#include <ghoul/logging/logmanager.h>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif // _MSC_VER
 
 namespace openspace {
 
 class DefaultBrowserLauncher : public CefLifeSpanHandler, public CefRequestHandler {
 public:
-    bool OnBeforePopup(CefRefPtr<CefBrowser> parentBrowser, 
-        const CefPopupFeatures& popupFeatures, 
-        CefWindowInfo& windowInfo, 
-        const CefString& url, 
-        CefRefPtr<CefClient>& client, 
-        CefBrowserSettings& settings);
-    bool OnOpenURLFromTab(CefRefPtr<CefBrowser> browser, 
-        CefRefPtr<CefFrame> frame, 
-        const CefString& target_url, 
-        CefRequestHandler::WindowOpenDisposition target_disposition, 
-        bool user_gesture);
+    bool OnBeforePopup(CefRefPtr<CefBrowser> parentBrowser,
+        const CefPopupFeatures& popupFeatures, CefWindowInfo& windowInfo,
+        const CefString& url, CefRefPtr<CefClient>& client, CefBrowserSettings& settings);
+
+    bool OnOpenURLFromTab(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
+        const CefString& target_url,
+        CefRequestHandler::WindowOpenDisposition target_disposition, bool userGesture);
 
 private:
     void launchBrowser(const std::string &url) const;
@@ -52,4 +56,4 @@ private:
 
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_WEBBROWSER___DEFAULT_BROWSER_LAUNCHER___H__
+#endif // __OPENSPACE_MODULE_WEBBROWSER___DEFAULT_BROWSER_LAUNCHER___H__

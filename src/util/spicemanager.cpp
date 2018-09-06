@@ -24,17 +24,13 @@
 
 #include <openspace/util/spicemanager.h>
 
+#include <openspace/scripting/lualibrary.h>
+#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
-#include <ghoul/misc/exception.h>
-
-#include <glm/gtc/type_ptr.hpp>
-
 #include <algorithm>
-#include <ghoul/fmt.h>
-
 #include "SpiceUsr.h"
 #include "SpiceZpr.h"
 
@@ -49,7 +45,7 @@ namespace {
     // This method checks if one of the previous SPICE methods has failed. If it has, an
     // exception with the SPICE error message is thrown
     // If an error occurred, true is returned, otherwise, false
-    bool throwOnSpiceError(std::string errorMessage) {
+    bool throwOnSpiceError(const std::string& errorMessage) {
         SpiceBoolean failed = failed_c();
         if (openspace::SpiceManager::ref().exceptionHandling()) {
             if (failed) {
@@ -70,36 +66,29 @@ namespace {
     }
 
     const char* toString(openspace::SpiceManager::FieldOfViewMethod m) {
+        using SM = openspace::SpiceManager;
         switch (m) {
-            case openspace::SpiceManager::FieldOfViewMethod::Ellipsoid:
-                return "ELLIPSOID";
-            case openspace::SpiceManager::FieldOfViewMethod::Point:
-                return "POINT";
-            default:
-                throw ghoul::MissingCaseException();
+            case SM::FieldOfViewMethod::Ellipsoid: return "ELLIPSOID";
+            case SM::FieldOfViewMethod::Point:     return "POINT";
+            default:                               throw ghoul::MissingCaseException();
         }
     }
 
     const char* toString(openspace::SpiceManager::TerminatorType t) {
+        using SM = openspace::SpiceManager;
         switch (t) {
-            case openspace::SpiceManager::TerminatorType::Umbral:
-                return "UMBRAL";
-            case openspace::SpiceManager::TerminatorType::Penumbral:
-                return "PENUMBRAL";
-            default:
-                throw ghoul::MissingCaseException();
+            case SM::TerminatorType::Umbral:    return "UMBRAL";
+            case SM::TerminatorType::Penumbral: return "PENUMBRAL";
+            default:                            throw ghoul::MissingCaseException();
         }
     }
 }
-
-using fmt::format;
-using std::string;
 
 #include "spicemanager_lua.inl"
 
 namespace openspace {
 
-SpiceManager::SpiceException::SpiceException(const string& msg)
+SpiceManager::SpiceException::SpiceException(const std::string& msg)
     : ghoul::RuntimeError(msg, "Spice")
 {
     ghoul_assert(
@@ -129,7 +118,7 @@ SpiceManager::AberrationCorrection::AberrationCorrection(const std::string& iden
     auto it = Mapping.find(identifier);
 
     ghoul_assert(!identifier.empty(), "Identifier may not be empty");
-    ghoul_assert(it != Mapping.end(), format("Invalid identifer '{}'", identifier));
+    ghoul_assert(it != Mapping.end(), fmt::format("Invalid identifer '{}'", identifier));
 
     type = it->second.first;
     direction = it->second.second;
@@ -153,9 +142,9 @@ SpiceManager::AberrationCorrection::operator const char*() const {
 }
 
 SpiceManager::FieldOfViewMethod SpiceManager::fieldOfViewMethodFromString(
-    const string& method)
+                                                                const std::string& method)
 {
-    const static std::map<string, FieldOfViewMethod> Mapping = {
+    const static std::map<std::string, FieldOfViewMethod> Mapping = {
         { "ELLIPSOID", FieldOfViewMethod::Ellipsoid },
         { "POINT", FieldOfViewMethod::Point }
     };
@@ -165,8 +154,10 @@ SpiceManager::FieldOfViewMethod SpiceManager::fieldOfViewMethodFromString(
     return Mapping.at(method);
 }
 
-SpiceManager::TerminatorType SpiceManager::terminatorTypeFromString( const string& type) {
-    const static std::map<string, TerminatorType> Mapping = {
+SpiceManager::TerminatorType SpiceManager::terminatorTypeFromString(
+                                                                  const std::string& type)
+{
+    const static std::map<std::string, TerminatorType> Mapping = {
         { "UMBRAL", TerminatorType::Umbral },
         { "PENUMBRAL", TerminatorType::Penumbral }
     };
@@ -176,13 +167,11 @@ SpiceManager::TerminatorType SpiceManager::terminatorTypeFromString( const strin
     return Mapping.at(type);
 }
 
-SpiceManager::SpiceManager()
-    : _useExceptions(UseException::Yes)
-{
+SpiceManager::SpiceManager() {
     // Set the SPICE library to not exit the program if an error occurs
-    erract_c("SET", 0, const_cast<char*>("REPORT"));
+    erract_c("SET", 0, const_cast<char*>("REPORT")); // NOLINT
     // But we do not want SPICE to print the errors, we will fetch them ourselves
-    errprt_c("SET", 0, const_cast<char*>("NONE"));
+    errprt_c("SET", 0, const_cast<char*>("NONE")); // NOLINT
 }
 
 SpiceManager::~SpiceManager() {
@@ -191,44 +180,33 @@ SpiceManager::~SpiceManager() {
     }
 
     // Set values back to default
-    erract_c("SET", 0, const_cast<char*>("DEFAULT"));
-    errprt_c("SET", 0, const_cast<char*>("DEFAULT"));
+    erract_c("SET", 0, const_cast<char*>("DEFAULT")); // NOLINT
+    errprt_c("SET", 0, const_cast<char*>("DEFAULT")); // NOLINT
 }
 
-SpiceManager::KernelHandle SpiceManager::loadKernel(string filePath) {
+SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
     ghoul_assert(!filePath.empty(), "Empty file path");
     ghoul_assert(
         FileSys.fileExists(filePath),
-        format(
-            "File '{}' ('{}') does not exist",
-            filePath,
-            absPath(filePath)
-        )
+        fmt::format("File '{}' ('{}') does not exist", filePath, absPath(filePath))
     );
     ghoul_assert(
         FileSys.directoryExists(ghoul::filesystem::File(filePath).directoryName()),
-        format(
+        fmt::format(
             "File '{}' exists, but directory '{}' doesn't",
-            absPath(filePath),
-            ghoul::filesystem::File(filePath).directoryName()
+            absPath(filePath), ghoul::filesystem::File(filePath).directoryName()
         )
     );
 
-    string path = absPath(filePath);
-    auto it = std::find_if(
+    std::string path = absPath(std::move(filePath));
+    const auto it = std::find_if(
         _loadedKernels.begin(),
         _loadedKernels.end(),
-        [path](const KernelInformation& info) { return info.path == path; });
+        [path](const KernelInformation& info) { return info.path == path; }
+    );
 
     if (it != _loadedKernels.end()) {
         it->refCount++;
-        LDEBUG(
-            format(
-                "Kernel '{}' was already loaded. New reference count: {}",
-                path,
-                it->refCount
-            )
-        );
         return it->id;
     }
 
@@ -237,7 +215,10 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(string filePath) {
     // kernels
     ghoul::filesystem::Directory currentDirectory = FileSys.currentDirectory();
     using RawPath = ghoul::filesystem::File::RawPath;
-    string fileDirectory = ghoul::filesystem::File(path, RawPath::Yes).directoryName();
+    std::string fileDirectory = ghoul::filesystem::File(
+        path,
+        RawPath::Yes
+    ).directoryName();
     FileSys.setCurrentDirectory(fileDirectory);
 
     LINFO(fmt::format("Loading SPICE kernel '{}'", path));
@@ -249,7 +230,10 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(string filePath) {
 
     throwOnSpiceError("Kernel loading");
 
-    string fileExtension = ghoul::filesystem::File(path, RawPath::Yes).fileExtension();
+    std::string fileExtension = ghoul::filesystem::File(
+        path,
+        RawPath::Yes
+    ).fileExtension();
     if (fileExtension == "bc" || fileExtension == "BC") {
         findCkCoverage(path); // binary ck kernel
     }
@@ -267,21 +251,24 @@ void SpiceManager::unloadKernel(KernelHandle kernelId) {
     ghoul_assert(kernelId <= _lastAssignedKernel, "Invalid unassigned kernel");
     ghoul_assert(kernelId != KernelHandle(0), "Invalid zero handle");
 
-    auto it = std::find_if(_loadedKernels.begin(), _loadedKernels.end(),
-        [&kernelId](const KernelInformation& info) { return info.id == kernelId; });
+    const auto it = std::find_if(
+        _loadedKernels.begin(),
+        _loadedKernels.end(),
+        [&kernelId](const KernelInformation& info) { return info.id == kernelId; }
+    );
 
     if (it != _loadedKernels.end()) {
         // If there was only one part interested in the kernel, we can unload it
         if (it->refCount == 1) {
             // No need to check for errors as we do not allow empty path names
-            LINFO(format("Unloading SPICE kernel '{}'", it->path));
+            LINFO(fmt::format("Unloading SPICE kernel '{}'", it->path));
             unload_c(it->path.c_str());
             _loadedKernels.erase(it);
         }
         // Otherwise, we hold on to it, but reduce the reference counter by 1
         else {
             it->refCount--;
-            LDEBUG(format("Reducing reference counter to: {}", it->refCount));
+            LDEBUG(fmt::format("Reducing reference counter to: {}", it->refCount));
         }
     }
 }
@@ -289,15 +276,18 @@ void SpiceManager::unloadKernel(KernelHandle kernelId) {
 void SpiceManager::unloadKernel(std::string filePath) {
     ghoul_assert(!filePath.empty(), "Empty filename");
 
-    string path = absPath(filePath);
+    std::string path = absPath(std::move(filePath));
 
-    auto it = std::find_if(_loadedKernels.begin(), _loadedKernels.end(),
-        [&path](const KernelInformation& info) { return info.path == path; });
+    const auto it = std::find_if(
+        _loadedKernels.begin(),
+        _loadedKernels.end(),
+        [&path](const KernelInformation& info) { return info.path == path; }
+    );
 
     if (it == _loadedKernels.end()) {
         if (_useExceptions) {
             throw SpiceException(
-                format("'{}' did not correspond to a loaded kernel", path)
+                fmt::format("'{}' did not correspond to a loaded kernel", path)
             );
         }
         else {
@@ -307,27 +297,27 @@ void SpiceManager::unloadKernel(std::string filePath) {
     else {
         // If there was only one part interested in the kernel, we can unload it
         if (it->refCount == 1) {
-            LINFO(format("Unloading SPICE kernel '{}'", path));
+            LINFO(fmt::format("Unloading SPICE kernel '{}'", path));
             unload_c(path.c_str());
             _loadedKernels.erase(it);
         }
         else {
             // Otherwise, we hold on to it, but reduce the reference counter by 1
             it->refCount--;
-            LDEBUG(format("Reducing reference counter to: {}", it->refCount));
+            LDEBUG(fmt::format("Reducing reference counter to: {}", it->refCount));
         }
     }
 }
 
-bool SpiceManager::hasSpkCoverage(const string& target, double et) const {
+bool SpiceManager::hasSpkCoverage(const std::string& target, double et) const {
     ghoul_assert(!target.empty(), "Empty target");
 
-    int id = naifId(target);
-    auto it = _spkIntervals.find(id);
+    const int id = naifId(target);
+    const auto it = _spkIntervals.find(id);
     if (it != _spkIntervals.end()) {
-        std::vector<std::pair<double, double>> intervalVector = it->second;
-        for (const auto& vecElement : intervalVector) {
-            if (vecElement.first < et && vecElement.second > et) {
+        const std::vector<std::pair<double, double>>& intervalVector = it->second;
+        for (const std::pair<double, double>& vecElement : intervalVector) {
+            if ((vecElement.first < et) && (vecElement.second > et)) {
                 return true;
             }
         }
@@ -335,16 +325,15 @@ bool SpiceManager::hasSpkCoverage(const string& target, double et) const {
     return false;
 }
 
-bool SpiceManager::hasCkCoverage(const string& frame, double et) const {
+bool SpiceManager::hasCkCoverage(const std::string& frame, double et) const {
     ghoul_assert(!frame.empty(), "Empty target");
 
-    int id = frameId(frame);
-
-    auto it = _ckIntervals.find(id);
+    const int id = frameId(frame);
+    const auto it = _ckIntervals.find(id);
     if (it != _ckIntervals.end()) {
-        std::vector<std::pair<double, double>> intervalVector = it->second;
-        for (const auto& i : intervalVector) {
-            if (i.first < et && i.second > et) {
+        const std::vector<std::pair<double, double>>& intervalVector = it->second;
+        for (const std::pair<double, double>& i : intervalVector) {
+            if ((i.first < et) && (i.second > et)) {
                 return true;
             }
         }
@@ -371,7 +360,7 @@ int SpiceManager::naifId(const std::string& body) const {
     SpiceInt id;
     bods2c_c(body.c_str(), &id, &success);
     if (!success && _useExceptions) {
-        throw SpiceException(format("Could not find NAIF ID of body '{}'", body));
+        throw SpiceException(fmt::format("Could not find NAIF ID of body '{}'", body));
     }
     return id;
 }
@@ -392,7 +381,7 @@ int SpiceManager::frameId(const std::string& frame) const {
     SpiceInt id;
     namfrm_c(frame.c_str(), &id);
     if (id == 0 && _useExceptions) {
-        throw SpiceException(format("Could not find NAIF ID of frame '{}'", frame));
+        throw SpiceException(fmt::format("Could not find NAIF ID of frame '{}'", frame));
     }
     return id;
 }
@@ -406,7 +395,7 @@ bool SpiceManager::hasFrameId(const std::string& frame) const {
 }
 
 void getValueInternal(const std::string& body, const std::string& value, int size,
-    double* v)
+                      double* v)
 {
     ghoul_assert(!body.empty(), "Empty body");
     ghoul_assert(!value.empty(), "Empty value");
@@ -415,12 +404,7 @@ void getValueInternal(const std::string& body, const std::string& value, int siz
     SpiceInt n;
     bodvrd_c(body.c_str(), value.c_str(), size, &n, v);
 
-    throwOnSpiceError(
-        format("Error getting value '{}' for body '{}'",
-               value,
-               body
-        )
-    );
+    throwOnSpiceError(fmt::format("Error getting value '{}' for body '{}'", value, body));
 }
 
 void SpiceManager::getValue(const std::string& body, const std::string& value,
@@ -461,10 +445,9 @@ double SpiceManager::spacecraftClockToET(const std::string& craft, double craftT
     int craftId = naifId(craft);
     double et;
     sct2e_c(craftId, craftTicks, &et);
-    throwOnSpiceError(format(
-        "Error transforming spacecraft clock of '{}' at time {}",
-        craft, craftTicks)
-    );
+    throwOnSpiceError(fmt::format(
+        "Error transforming spacecraft clock of '{}' at time {}", craft, craftTicks
+    ));
     return et;
 }
 
@@ -473,33 +456,32 @@ double SpiceManager::ephemerisTimeFromDate(const std::string& timeString) const 
 
     double et;
     str2et_c(timeString.c_str(), &et);
-    throwOnSpiceError(format("Error converting date '{}'", timeString));
+    throwOnSpiceError(fmt::format("Error converting date '{}'", timeString));
     return et;
 }
 
-string SpiceManager::dateFromEphemerisTime(double ephemerisTime,
-    const string& formatString) const
+std::string SpiceManager::dateFromEphemerisTime(double ephemerisTime,
+                                                    const std::string& formatString) const
 {
     ghoul_assert(!formatString.empty(), "Format is empty");
 
-    static const int BufferSize = 256;
+    constexpr const int BufferSize = 256;
     SpiceChar buffer[BufferSize];
     timout_c(ephemerisTime, formatString.c_str(), BufferSize - 1, buffer);
     throwOnSpiceError(
-        format("Error converting ephemeris time '{}' to date with format '{}'",
-               ephemerisTime,
-               formatString
+        fmt::format("Error converting ephemeris time '{}' to date with format '{}'",
+            ephemerisTime, formatString
         )
     );
 
     return std::string(buffer);
-
 }
 
 glm::dvec3 SpiceManager::targetPosition(const std::string& target,
-    const std::string& observer, const std::string& referenceFrame,
-    AberrationCorrection aberrationCorrection, double ephemerisTime,
-    double& lightTime) const
+                                        const std::string& observer,
+                                        const std::string& referenceFrame,
+                                        AberrationCorrection aberrationCorrection,
+                                        double ephemerisTime, double& lightTime) const
 {
     ghoul_assert(!target.empty(), "Target is not empty");
     ghoul_assert(!observer.empty(), "Observer is not empty");
@@ -510,11 +492,9 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
     if (!targetHasCoverage && !observerHasCoverage) {
         if (_useExceptions) {
             throw SpiceException(
-                format(
+                fmt::format(
                     "Neither target '{}' nor observer '{}' has SPK coverage at time {}",
-                    target,
-                    observer,
-                    ephemerisTime
+                    target, observer, ephemerisTime
                 )
             );
         }
@@ -533,12 +513,9 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
             glm::value_ptr(position),
             &lightTime
         );
-        throwOnSpiceError(format(
+        throwOnSpiceError(fmt::format(
             "Error getting position from '{}' to '{}' in reference frame '{}' at time {}",
-            target,
-            observer,
-            referenceFrame,
-            ephemerisTime
+            target, observer, referenceFrame, ephemerisTime
         ));
         return position;
     }
@@ -567,8 +544,10 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
 }
 
 glm::dvec3 SpiceManager::targetPosition(const std::string& target,
-    const std::string& observer, const std::string& referenceFrame,
-    AberrationCorrection aberrationCorrection, double ephemerisTime) const
+                                        const std::string& observer,
+                                        const std::string& referenceFrame,
+                                        AberrationCorrection aberrationCorrection,
+                                        double ephemerisTime) const
 {
     double unused = 0.0;
     return targetPosition(
@@ -598,8 +577,8 @@ glm::dmat3 SpiceManager::frameTransformationMatrix(const std::string& from,
     );
 
     throwOnSpiceError(
-        format("Error converting from frame '{}' to frame '{}' at time '{}'",
-               from, to, ephemerisTime
+        fmt::format("Error converting from frame '{}' to frame '{}' at time '{}'",
+            from, to, ephemerisTime
         )
     );
 
@@ -609,9 +588,13 @@ glm::dmat3 SpiceManager::frameTransformationMatrix(const std::string& from,
 }
 
 SpiceManager::SurfaceInterceptResult SpiceManager::surfaceIntercept(
-    const std::string& target, const std::string& observer, const std::string& fovFrame,
-    const std::string& referenceFrame, AberrationCorrection aberrationCorrection,
-    double ephemerisTime, const glm::dvec3& directionVector) const
+                                                                const std::string& target,
+                                                              const std::string& observer,
+                                                              const std::string& fovFrame,
+                                                        const std::string& referenceFrame,
+                                                AberrationCorrection aberrationCorrection,
+                                                                     double ephemerisTime,
+                                                  const glm::dvec3& directionVector) const
 {
     ghoul_assert(!target.empty(), "Target must not be empty");
     ghoul_assert(!observer.empty(), "Observer must not be empty");
@@ -640,7 +623,7 @@ SpiceManager::SurfaceInterceptResult SpiceManager::surfaceIntercept(
     );
     result.interceptFound = (found == SPICETRUE);
 
-    throwOnSpiceError(format(
+    throwOnSpiceError(fmt::format(
         "Error retrieving surface intercept on target '{}' viewed from observer '{}' in "
         "reference frame '{}' at time '{}'",
         target, observer, referenceFrame, ephemerisTime
@@ -650,9 +633,12 @@ SpiceManager::SurfaceInterceptResult SpiceManager::surfaceIntercept(
 }
 
 bool SpiceManager::isTargetInFieldOfView(const std::string& target,
-    const std::string& observer, const std::string& referenceFrame,
-    const std::string& instrument, FieldOfViewMethod method,
-    AberrationCorrection aberrationCorrection, double& ephemerisTime) const
+                                         const std::string& observer,
+                                         const std::string& referenceFrame,
+                                         const std::string& instrument,
+                                         FieldOfViewMethod method,
+                                         AberrationCorrection aberrationCorrection,
+                                         double& ephemerisTime) const
 {
     ghoul_assert(!target.empty(), "Target must not be empty");
     ghoul_assert(!observer.empty(), "Observer must not be empty");
@@ -671,7 +657,7 @@ bool SpiceManager::isTargetInFieldOfView(const std::string& target,
         &visible
     );
 
-    throwOnSpiceError(format(
+    throwOnSpiceError(fmt::format(
         "Checking if target '{}' is in view of instrument '{}' failed",
         target, instrument
     ));
@@ -680,8 +666,11 @@ bool SpiceManager::isTargetInFieldOfView(const std::string& target,
 }
 
 bool SpiceManager::isTargetInFieldOfView(const std::string& target,
-    const std::string& observer, const std::string& instrument, FieldOfViewMethod method,
-    AberrationCorrection aberrationCorrection, double& ephemerisTime) const
+                                         const std::string& observer,
+                                         const std::string& instrument,
+                                         FieldOfViewMethod method,
+                                         AberrationCorrection aberrationCorrection,
+                                         double& ephemerisTime) const
 {
     return isTargetInFieldOfView(
         target,
@@ -695,8 +684,10 @@ bool SpiceManager::isTargetInFieldOfView(const std::string& target,
 }
 
 SpiceManager::TargetStateResult SpiceManager::targetState(const std::string& target,
-    const std::string& observer, const std::string& referenceFrame,
-    AberrationCorrection aberrationCorrection, double ephemerisTime) const
+                                                          const std::string& observer,
+                                                        const std::string& referenceFrame,
+                                                AberrationCorrection aberrationCorrection,
+                                                               double ephemerisTime) const
 {
     ghoul_assert(!target.empty(), "Target must not be empty");
     ghoul_assert(!observer.empty(), "Observer must not be empty");
@@ -717,7 +708,7 @@ SpiceManager::TargetStateResult SpiceManager::targetState(const std::string& tar
         &result.lightTime
     );
 
-    throwOnSpiceError(format(
+    throwOnSpiceError(fmt::format(
         "Error retrieving state of target '{}' viewed from observer '{}' in reference "
         "frame '{}' at time '{}'",
         target, observer, referenceFrame, ephemerisTime
@@ -728,37 +719,40 @@ SpiceManager::TargetStateResult SpiceManager::targetState(const std::string& tar
     return result;
 }
 
-SpiceManager::TransformMatrix SpiceManager::stateTransformMatrix(const string& fromFrame,
-    const string& toFrame, double ephemerisTime) const
+SpiceManager::TransformMatrix SpiceManager::stateTransformMatrix(
+                                                           const std::string& sourceFrame,
+                                                      const std::string& destinationFrame,
+                                                               double ephemerisTime) const
 {
-    ghoul_assert(!fromFrame.empty(), "fromFrame must not be empty");
-    ghoul_assert(!toFrame.empty(), "toFrame must not be empty");
+    ghoul_assert(!sourceFrame.empty(), "sourceFrame must not be empty");
+    ghoul_assert(!destinationFrame.empty(), "toFrame must not be empty");
 
     TransformMatrix m;
     sxform_c(
-        fromFrame.c_str(),
-        toFrame.c_str(),
+        sourceFrame.c_str(),
+        destinationFrame.c_str(),
         ephemerisTime,
         reinterpret_cast<double(*)[6]>(m.data())
     );
-    throwOnSpiceError(format(
+    throwOnSpiceError(fmt::format(
         "Error retrieved state transform matrix from frame '{}' to frame '{}' at time "
         "'{}'",
-        fromFrame, toFrame, ephemerisTime
+        sourceFrame, destinationFrame, ephemerisTime
     ));
     return m;
 }
 
-glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
-    const std::string& toFrame, double ephemerisTime) const
+glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& sourceFrame,
+                                                 const std::string& destinationFrame,
+                                                 double ephemerisTime) const
 {
-    ghoul_assert(!fromFrame.empty(), "fromFrame must not be empty");
-    ghoul_assert(!toFrame.empty(), "toFrame must not be empty");
+    ghoul_assert(!sourceFrame.empty(), "sourceFrame must not be empty");
+    ghoul_assert(!destinationFrame.empty(), "destinationFrame must not be empty");
 
     glm::dmat3 result;
     pxform_c(
-        fromFrame.c_str(),
-        toFrame.c_str(),
+        sourceFrame.c_str(),
+        destinationFrame.c_str(),
         ephemerisTime,
         reinterpret_cast<double(*)[3]>(glm::value_ptr(result))
     );
@@ -766,31 +760,38 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
     throwOnSpiceError("");
     SpiceBoolean success = !(failed_c());
     reset_c();
-    if (!success)
-        result = getEstimatedTransformMatrix(fromFrame, toFrame, ephemerisTime);
+    if (!success) {
+        result = getEstimatedTransformMatrix(
+            sourceFrame,
+            destinationFrame,
+            ephemerisTime
+        );
+    }
 
     return glm::transpose(result);
 }
 
-glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
-    const std::string& toFrame, double ephemerisTimeFrom, double ephemerisTimeTo) const
+glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& sourceFrame,
+                                                 const std::string& destinationFrame,
+                                                 double ephemerisTimeFrom,
+                                                 double ephemerisTimeTo) const
 {
-    ghoul_assert(!fromFrame.empty(), "fromFrame must not be empty");
-    ghoul_assert(!toFrame.empty(), "toFrame must not be empty");
+    ghoul_assert(!sourceFrame.empty(), "sourceFrame must not be empty");
+    ghoul_assert(!destinationFrame.empty(), "destinationFrame must not be empty");
 
     glm::dmat3 result;
 
     pxfrm2_c(
-        fromFrame.c_str(),
-        toFrame.c_str(),
+        sourceFrame.c_str(),
+        destinationFrame.c_str(),
         ephemerisTimeFrom,
         ephemerisTimeTo,
         reinterpret_cast<double(*)[3]>(glm::value_ptr(result))
     );
-    throwOnSpiceError(format(
+    throwOnSpiceError(fmt::format(
         "Error retrieving position transform matrix from '{}' at time '{}' to frame '{}' "
         "at time '{}'",
-        fromFrame, ephemerisTimeFrom, toFrame, ephemerisTimeTo
+        sourceFrame, ephemerisTimeFrom, destinationFrame, ephemerisTimeTo
     ));
     return glm::transpose(result);
 }
@@ -823,7 +824,7 @@ SpiceManager::FieldOfViewResult SpiceManager::fieldOfView(int instrument) const 
         boundsArr                               // the bounds
     );
 
-    bool failed = throwOnSpiceError(format(
+    bool failed = throwOnSpiceError(fmt::format(
         "Error getting field-of-view parameters for instrument '{}'", instrument
     ));
     if (failed) {
@@ -835,24 +836,28 @@ SpiceManager::FieldOfViewResult SpiceManager::fieldOfView(int instrument) const 
         res.bounds.emplace_back(boundsArr[i][0], boundsArr[i][1], boundsArr[i][2]);
     }
 
-    string shape = string(fovShapeBuffer);
-    static const std::map<string, FieldOfViewResult::Shape> Map = {
+    std::string shape = std::string(fovShapeBuffer);
+    static const std::map<std::string, FieldOfViewResult::Shape> Map = {
         { "POLYGON", FieldOfViewResult::Shape::Polygon },
         { "RECTANGLE" , FieldOfViewResult::Shape::Rectangle },
         { "CIRCLE", FieldOfViewResult::Shape::Circle },
         { "ELLIPSE", FieldOfViewResult::Shape::Ellipse }
     };
     res.shape = Map.at(shape);
-    res.frameName = string(frameNameBuffer);
+    res.frameName = std::string(frameNameBuffer);
 
     return res;
 }
 
 SpiceManager::TerminatorEllipseResult SpiceManager::terminatorEllipse(
-    const std::string& target, const std::string& observer, const std::string& frame,
-    const std::string& lightSource, TerminatorType terminatorType,
-    AberrationCorrection aberrationCorrection, double ephemerisTime,
-    int numberOfTerminatorPoints)
+                                                                const std::string& target,
+                                                              const std::string& observer,
+                                                                 const std::string& frame,
+                                                           const std::string& lightSource,
+                                                            TerminatorType terminatorType,
+                                                AberrationCorrection aberrationCorrection,
+                                                                     double ephemerisTime,
+                                                             int numberOfTerminatorPoints)
 {
     ghoul_assert(!target.empty(), "Target must not be empty");
     ghoul_assert(!observer.empty(), "Observer must not be empty");
@@ -865,19 +870,20 @@ SpiceManager::TerminatorEllipseResult SpiceManager::terminatorEllipse(
     // Warning: This assumes std::vector<glm::dvec3> to have all values memory contiguous
     res.terminatorPoints.resize(numberOfTerminatorPoints);
 
-    edterm_c(toString(terminatorType),
-             lightSource.c_str(),
-             target.c_str(),
-             ephemerisTime,
-             frame.c_str(),
-             aberrationCorrection,
-             observer.c_str(),
-             numberOfTerminatorPoints,
-             &res.targetEphemerisTime,
-             glm::value_ptr(res.observerPosition),
-             reinterpret_cast<double(*)[3]>(res.terminatorPoints.data())
+    edterm_c(
+        toString(terminatorType),
+        lightSource.c_str(),
+        target.c_str(),
+        ephemerisTime,
+        frame.c_str(),
+        aberrationCorrection,
+        observer.c_str(),
+        numberOfTerminatorPoints,
+        &res.targetEphemerisTime,
+        glm::value_ptr(res.observerPosition),
+        reinterpret_cast<double(*)[3]>(res.terminatorPoints.data())
     );
-    throwOnSpiceError(format(
+    throwOnSpiceError(fmt::format(
         "Error getting terminator ellipse for target '{}' from observer '{}' in frame "
         "'{}' with light source '{}' at time '{}'",
         target, observer, frame, lightSource, ephemerisTime
@@ -886,35 +892,35 @@ SpiceManager::TerminatorEllipseResult SpiceManager::terminatorEllipse(
 }
 
 bool SpiceManager::addFrame(std::string body, std::string frame) {
-    if (body == "" || frame == "")
+    if (body.empty() || frame.empty()) {
         return false;
+    }
     else {
-        _frameByBody.push_back(std::make_pair(body, frame));
+        _frameByBody.emplace_back(body, frame);
         return true;
     }
 }
 
 std::string SpiceManager::frameFromBody(const std::string& body) const {
-    for (auto pair : _frameByBody) {
+    for (const std::pair<std::string, std::string>& pair : _frameByBody) {
         if (pair.first == body) {
             return pair.second;
         }
     }
 
-    std::string unionPrefix = "IAU_";
-    std::string frame = "";
+    constexpr const char* unionPrefix = "IAU_";
 
-    if (body.find(unionPrefix) == std::string::npos)
-        frame = unionPrefix + body;
-    else
-        frame = body;
-
-    return frame;
+    if (body.find(unionPrefix) == std::string::npos) {
+        return unionPrefix + body;
+    }
+    else {
+        return body;
+    }
 }
 
 void SpiceManager::findCkCoverage(const std::string& path) {
     ghoul_assert(!path.empty(), "Empty file path");
-    ghoul_assert(FileSys.fileExists(path), format("File '{}' does not exist", path));
+    ghoul_assert(FileSys.fileExists(path), fmt::format("File '{}' does not exist", path));
 
     constexpr unsigned int MaxObj = 256;
     constexpr unsigned int WinSiz = 10000;
@@ -934,7 +940,7 @@ void SpiceManager::findCkCoverage(const std::string& path) {
     throwOnSpiceError("Error finding Ck Coverage");
 
     for (SpiceInt i = 0; i < card_c(&ids); ++i) {
-        SpiceInt frame = SPICE_CELL_ELEM_I(&ids, i);
+        const SpiceInt frame = SPICE_CELL_ELEM_I(&ids, i); // NOLINT
 
 #if defined __clang__
 #pragma clang diagnostic pop
@@ -946,11 +952,11 @@ void SpiceManager::findCkCoverage(const std::string& path) {
         ckcov_c(path.c_str(), frame, SPICEFALSE, "SEGMENT", 0.0, "TDB", &cover);
         throwOnSpiceError("Error finding Ck Coverage");
 
-        //Get the number of intervals in the coverage window.
-        SpiceInt numberOfIntervals = wncard_c(&cover);
+        // Get the number of intervals in the coverage window.
+        const SpiceInt numberOfIntervals = wncard_c(&cover);
 
         for (SpiceInt j = 0; j < numberOfIntervals; ++j) {
-            //Get the endpoints of the jth interval.
+            // Get the endpoints of the jth interval.
             SpiceDouble b, e;
             wnfetd_c(&cover, j, &b, &e);
             throwOnSpiceError("Error finding Ck Coverage");
@@ -964,7 +970,7 @@ void SpiceManager::findCkCoverage(const std::string& path) {
 
 void SpiceManager::findSpkCoverage(const std::string& path) {
     ghoul_assert(!path.empty(), "Empty file path");
-    ghoul_assert(FileSys.fileExists(path), format("File '{}' does not exist", path));
+    ghoul_assert(FileSys.fileExists(path), fmt::format("File '{}' does not exist", path));
 
     constexpr unsigned int MaxObj = 256;
     constexpr unsigned int WinSiz = 10000;
@@ -984,7 +990,7 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
     throwOnSpiceError("Error finding Spk ID for coverage");
 
     for (SpiceInt i = 0; i < card_c(&ids); ++i) {
-        SpiceInt obj = SPICE_CELL_ELEM_I(&ids, i);
+        const SpiceInt obj = SPICE_CELL_ELEM_I(&ids, i); // NOLINT
 
 #if defined __clang__
 #pragma clang diagnostic pop
@@ -996,8 +1002,8 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
         spkcov_c(path.c_str(), obj, &cover);
         throwOnSpiceError("Error finding Spk coverage");
 
-        //Get the number of intervals in the coverage window.
-        SpiceInt numberOfIntervals = wncard_c(&cover);
+        // Get the number of intervals in the coverage window.
+        const SpiceInt numberOfIntervals = wncard_c(&cover);
 
         for (SpiceInt j = 0; j < numberOfIntervals; ++j) {
             //Get the endpoints of the jth interval.
@@ -1005,7 +1011,7 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
             wnfetd_c(&cover, j, &b, &e);
             throwOnSpiceError("Error finding Spk coverage");
 
-            //insert all into coverage time set, the windows could be merged @AA
+            // insert all into coverage time set, the windows could be merged @AA
             _spkCoverageTimes[obj].insert(e);
             _spkCoverageTimes[obj].insert(b);
             _spkIntervals[obj].emplace_back(b, e);
@@ -1035,7 +1041,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
     if (_spkCoverageTimes.find(targetId) == _spkCoverageTimes.end()) {
         if (_useExceptions) {
             // no coverage
-            throw SpiceException(format("No position for '{}' at any time", target));
+            throw SpiceException(fmt::format("No position for '{}' at any time", target));
         }
         else {
             return glm::dvec3();
@@ -1056,7 +1062,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
             glm::value_ptr(pos),
             &lightTime
         );
-        throwOnSpiceError(format(
+        throwOnSpiceError(fmt::format(
             "Error estimating position for target '{}' with observer '{}' in frame '{}'",
             target, observer, referenceFrame
         ));
@@ -1072,7 +1078,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
             glm::value_ptr(pos),
             &lightTime
         );
-        throwOnSpiceError(format(
+        throwOnSpiceError(fmt::format(
             "Error estimating position for target '{}' with observer '{}' in frame '{}'",
             target, observer, referenceFrame
         ));
@@ -1105,13 +1111,13 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
             &ltLater
         );
 
-        throwOnSpiceError(format(
+        throwOnSpiceError(fmt::format(
             "Error estimating position for target '{}' with observer '{}' in frame '{}'",
             target, observer, referenceFrame
         ));
 
         // linear interpolation
-        double t = (ephemerisTime - timeEarlier) / (timeLater - timeEarlier);
+        const double t = (ephemerisTime - timeEarlier) / (timeLater - timeEarlier);
         pos = posEarlier * (1.0 - t) + posLater * t;
         lightTime = ltEarlier * (1.0 - t) + ltLater * t;
     }
@@ -1124,12 +1130,12 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
                                                      double time) const
 {
     glm::dmat3 result;
-    int idFrame = frameId(fromFrame);
+    const int idFrame = frameId(fromFrame);
 
     if (_ckCoverageTimes.find(idFrame) == _ckCoverageTimes.end()) {
         if (_useExceptions) {
             // no coverage
-            throw SpiceException(format(
+            throw SpiceException(fmt::format(
                 "No data available for transform matrix from '{}' to '{}' at any time",
                 fromFrame, toFrame
             ));
@@ -1149,7 +1155,7 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
             *(coveredTimes.begin()),
             reinterpret_cast<double(*)[3]>(glm::value_ptr(result))
         );
-        throwOnSpiceError(format(
+        throwOnSpiceError(fmt::format(
             "Error estimating transform matrix from frame '{}' to from '{}' at time '{}'",
             fromFrame, toFrame, time
         ));
@@ -1162,7 +1168,7 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
             *(coveredTimes.rbegin()),
             reinterpret_cast<double(*)[3]>(glm::value_ptr(result))
         );
-        throwOnSpiceError(format(
+        throwOnSpiceError(fmt::format(
             "Error estimating transform matrix from frame '{}' to from '{}' at time '{}'",
             fromFrame, toFrame, time
         ));
@@ -1179,7 +1185,7 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
             earlier,
             reinterpret_cast<double(*)[3]>(glm::value_ptr(earlierTransform))
         );
-        throwOnSpiceError(format(
+        throwOnSpiceError(fmt::format(
             "Error estimating transform matrix from frame '{}' to from '{}' at time '{}'",
             fromFrame, toFrame, time
         ));
@@ -1191,12 +1197,12 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
             later,
             reinterpret_cast<double(*)[3]>(glm::value_ptr(laterTransform))
         );
-        throwOnSpiceError(format(
+        throwOnSpiceError(fmt::format(
             "Error estimating transform matrix from frame '{}' to from '{}' at time '{}'",
             fromFrame, toFrame, time
         ));
 
-        double t = (time - earlier) / (later - earlier);
+        const double t = (time - earlier) / (later - earlier);
         result = earlierTransform * (1.0 - t) + laterTransform * t;
     }
 

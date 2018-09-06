@@ -26,10 +26,9 @@
 #define __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
 
 #include <openspace/util/timeline.h>
-#include <openspace/util/timemanager.h>
-#include <openspace/network/parallelpeer.h>
-
+#include <openspace/network/messagestructures.h>
 #include <ghoul/glm.h>
+#include <ghoul/misc/boolean.h>
 #include <glm/gtx/quaternion.hpp>
 
 namespace openspace { class Camera; }
@@ -45,15 +44,15 @@ enum class KeyframeTimeRef {
 
 class KeyframeNavigator {
 public:
+    BooleanType(Inclusive);
+
     struct CameraPose {
         glm::dvec3 position;
         glm::quat rotation;
         std::string focusNode;
+        float scale;
         bool followFocusNodeRotation;
     };
-
-    KeyframeNavigator() = default;
-    ~KeyframeNavigator() = default;
 
     /**
     * Update camera position using the next camera pose keyframe from the timeline.
@@ -66,7 +65,7 @@ public:
     Timeline<CameraPose>& timeline();
 
     void addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose);
-    void removeKeyframesAfter(double timestamp);
+    void removeKeyframesAfter(double timestamp, Inclusive inclusive = Inclusive::No);
     void clearKeyframes();
     size_t nKeyframes() const;
     const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;

@@ -1,0 +1,51 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('./transforms')
+local kernels = asset.require('./kernels').PlutoKernels
+
+
+
+local Kerberos = {
+    Identifier = "Kerberos",
+    Parent = transforms.PlutoBarycenter.Identifier,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "KERBEROS",
+            Observer = "PLUTO BARYCENTER",
+            Kernels = PlutoKernels
+        }
+    },
+    Renderable = {
+        Type = "RenderableGlobe",
+        Radii = { 0.1E5, 0.1E5, 0.1E5 },
+        SegmentsPerPatch = 64,
+        Layers = {}
+    },
+    GUI = {
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
+}
+
+local KerberosTrail = {
+    Identifier = "KerberosTrail",
+    Parent = transforms.PlutoBarycenter.Identifier,
+    Renderable = {
+        Type = "RenderableTrailOrbit",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "KERBEROS",
+            Observer = "PLUTO BARYCENTER",
+        },
+        Color = { 0.00, 0.62, 1.00 },
+        Period = 32.16756,
+        Resolution = 1000
+    },
+    GUI = {
+        Name = "Hydra Trail",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Kerberos, KerberosTrail })

@@ -27,11 +27,13 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/globebrowsing/geometry/ellipsoid.h>
-#include <modules/globebrowsing/other/statscollector.h>
-#include <modules/globebrowsing/geometry/geodeticpatch.h>
-
 #include <memory>
+
+//#define DEBUG_GLOBEBROWSING_STATSRECORD
+
+#ifdef DEBUG_GLOBEBROWSING_STATSRECORD
+#include <modules/globebrowsing/other/statscollector.h>
+#endif // DEBUG_GLOBEBROWSING_STATSRECORD
 
 namespace openspace::globebrowsing {
 
@@ -42,6 +44,7 @@ namespace culling { class ChunkCuller; }
 class Chunk;
 class ChunkNode;
 class ChunkRenderer;
+class Ellipsoid;
 struct Geodetic2;
 class LayerManager;
 class RenderableGlobe;
@@ -49,7 +52,7 @@ class RenderableGlobe;
 class ChunkedLodGlobe : public Renderable {
 public:
     ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPerPatch,
-        std::shared_ptr<LayerManager> layerManager);
+        std::shared_ptr<LayerManager> layerManager, Ellipsoid& ellipsoid);
     ~ChunkedLodGlobe();
 
     bool isReady() const override;
@@ -85,7 +88,7 @@ public:
      * <code>Chunk</code>, it wants to split. If it is lower, it wants to merge with
      * its siblings.
      */
-    int getDesiredLevel(const Chunk& chunk, const RenderData& renderData) const;
+    int desiredLevel(const Chunk& chunk, const RenderData& renderData) const;
 
     /**
      * Calculates the height from the surface of the reference ellipsoid to the
@@ -98,7 +101,7 @@ public:
      * cartesian model space.
      * \returns the height from the reference ellipsoid to the globe surface.
      */
-    float getHeight(glm::dvec3 position) const;
+    float getHeight(const glm::dvec3& position) const;
 
     /**
      * Notifies the renderer to recompile its shaders the next time the render function is
@@ -112,19 +115,17 @@ public:
      */
     void recompileShaders();
 
-    const int minSplitDepth;
-    const int maxSplitDepth;
+    constexpr static const int MinSplitDepth = 2;
+    constexpr static const int MaxSplitDepth = 22;
 
     std::shared_ptr<LayerManager> layerManager() const;
 
+#ifdef DEBUG_GLOBEBROWSING_STATSRECORD
     StatsCollector stats;
+#endif // DEBUG_GLOBEBROWSING_STATSRECORD
 
 private:
-    void debugRenderChunk(const Chunk& chunk, const glm::dmat4& data) const;
-
-    static const GeodeticPatch COVERAGE;
-    static const TileIndex LEFT_HEMISPHERE_INDEX;
-    static const TileIndex RIGHT_HEMISPHERE_INDEX;
+    void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const;
 
     const RenderableGlobe& _owner;
 
@@ -145,7 +146,7 @@ private:
 
     std::shared_ptr<LayerManager> _layerManager;
 
-    bool _shadersNeedRecompilation;
+    bool _shadersNeedRecompilation = true;
 };
 
 } // namespace openspace::globebrowsing

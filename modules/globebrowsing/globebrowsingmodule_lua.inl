@@ -28,48 +28,45 @@
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/rendering/layer/layer.h>
 
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/navigationhandler.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
+#include <openspace/util/camera.h>
+#include <openspace/util/updatestructures.h>
 
 namespace openspace::globebrowsing::luascriptfunctions {
 
 /**
- *Adds a layer to the specified globe.
+ * Adds a layer to the specified globe.
  */
 int addLayer(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::addLayer");
 
-    using ghoul::lua::errorLocation;
-
-    // Argument locations
-    const int GlobeLocation = -3;
-    const int LayerGroupLocation = -2;
-
     // String arguments
-    const std::string GlobeName = luaL_checkstring(L, GlobeLocation);
-    const std::string LayerGroupName = luaL_checkstring(L, LayerGroupLocation);
+    const std::string& globeName = ghoul::lua::value<std::string>(L, 1);
+    const std::string& layerGroupName = ghoul::lua::value<std::string>(L, 2);
 
     // Get the node and make sure it exists
-    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(GlobeName);
-    if (!node) {
-        return luaL_error(L, ("Unknown globe name: " + GlobeName).c_str());
+    SceneGraphNode* n = global::renderEngine.scene()->sceneGraphNode(globeName);
+    if (!n) {
+        return ghoul::lua::luaError(L, "Unknown globe name: " + globeName);
     }
 
     // Get the renderable globe
-    RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(node->renderable());
+    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
     if (!globe) {
-        return luaL_error(L, ("Renderable is not a globe: " + GlobeName).c_str());
+        return ghoul::lua::luaError(L, "Renderable is not a globe: " + globeName);
     }
 
     // Get the layer group
-    layergroupid::GroupID groupID = layergroupid::getGroupIDFromName(LayerGroupName);
+    layergroupid::GroupID groupID = layergroupid::getGroupIDFromName(layerGroupName);
     if (groupID == layergroupid::GroupID::Unknown) {
-        return luaL_error(L, ("Unknown layer group: " + LayerGroupName).c_str());
+        return ghoul::lua::luaError(L, "Unknown layer group: " + layerGroupName);
     }
 
     // Get the dictionary defining the layer
@@ -94,44 +91,35 @@ int addLayer(lua_State* L) {
 }
 
 /**
- Deletes a layer from the specified globe.
+ * Deletes a layer from the specified globe.
  */
 int deleteLayer(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::deleteLayer");
 
-    using ghoul::lua::errorLocation;
-
-    // Argument locations
-    const int GlobeLocation = -3;
-    const int LayerGroupLocation = -2;
-    const int NameLocation = -1;
-
-    // String arguments
-    const std::string GlobeName = luaL_checkstring(L, GlobeLocation);
-    const std::string LayerGroupName = luaL_checkstring(L, LayerGroupLocation);
-    const std::string LayerName = luaL_checkstring(L, NameLocation);
-
-    lua_settop(L, 0);
+    const std::string& globeName = luaL_checkstring(L, 1);
+    const std::string& layerGroupName = luaL_checkstring(L, 2);
+    const std::string& layerName = luaL_checkstring(L, 3);
+    lua_pop(L, 3);
 
     // Get the node and make sure it exists
-    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(GlobeName);
-    if (!node) {
-        return luaL_error(L, ("Unknown globe name: " + GlobeName).c_str());
+    SceneGraphNode* n = global::renderEngine.scene()->sceneGraphNode(globeName);
+    if (!n) {
+        return ghoul::lua::luaError(L, "Unknown globe name: " + globeName);
     }
 
     // Get the renderable globe
-    RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(node->renderable());
+    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
     if (!globe) {
-        return luaL_error(L, ("Renderable is not a globe: " + GlobeName).c_str());
+        return ghoul::lua::luaError(L, "Renderable is not a globe: " + globeName);
     }
 
     // Get the layer group
-    layergroupid::GroupID groupID = layergroupid::getGroupIDFromName(LayerGroupName);
+    layergroupid::GroupID groupID = layergroupid::getGroupIDFromName(layerGroupName);
     if (groupID == layergroupid::GroupID::Unknown) {
-        return luaL_error(L, ("Unknown layer group: " + LayerGroupName).c_str());
+        return ghoul::lua::luaError(L, "Unknown layer group: " + layerGroupName);
     }
 
-    globe->layerManager()->deleteLayer(groupID, LayerName);
+    globe->layerManager()->deleteLayer(groupID, layerName);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -140,37 +128,37 @@ int deleteLayer(lua_State* L) {
 int goToChunk(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::goToChunk");
 
-    using ghoul::lua::luaTypeToString;
+    const int x = ghoul::lua::value<int>(L, 1);
+    const int y = ghoul::lua::value<int>(L, 2);
+    const int level = ghoul::lua::value<int>(L, 3);
+    lua_pop(L, 3);
 
-    int x = static_cast<int>(lua_tonumber(L, 1));
-    int y = static_cast<int>(lua_tonumber(L, 2));
-    int level = static_cast<int>(lua_tonumber(L, 3));
-    lua_settop(L, 0);
-
-    OsEng.moduleEngine().module<GlobeBrowsingModule>()->goToChunk(x, y, level);
+    global::moduleEngine.module<GlobeBrowsingModule>()->goToChunk(x, y, level);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int goToGeo(lua_State* L) {
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, 2, 3, "lua::goToGeo");
+    const int nArguments = ghoul::lua::checkArgumentsAndThrow(L, 2, 3, "lua::goToGeo");
 
-    using ghoul::lua::luaTypeToString;
-
-    double latitude = lua_tonumber(L, 1);
-    double longitude = lua_tonumber(L, 2);
+    const double latitude = ghoul::lua::value<double>(L, 1);
+    const double longitude = ghoul::lua::value<double>(L, 2);
 
     if (nArguments == 2) {
-        OsEng.moduleEngine().module<GlobeBrowsingModule>()->goToGeo(latitude, longitude);
+        global::moduleEngine.module<GlobeBrowsingModule>()->goToGeo(latitude, longitude);
     }
     else if (nArguments == 3) {
-        double altitude = static_cast<int>(lua_tonumber(L, 3));
-        OsEng.moduleEngine().module<GlobeBrowsingModule>()->goToGeo(latitude, longitude,
-            altitude);
+        const double altitude = ghoul::lua::value<double>(L, 3);
+        global::moduleEngine.module<GlobeBrowsingModule>()->goToGeo(
+            latitude,
+            longitude,
+            altitude
+        );
     }
 
     lua_settop(L, 0);
+
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
@@ -178,64 +166,65 @@ int goToGeo(lua_State* L) {
 int getGeoPosition(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::getGeoPosition");
 
-    std::string name = luaL_checkstring(L, 1);
-    double latitude = lua_tonumber(L, 2);
-    double longitude = lua_tonumber(L, 3);
-    double altitude = lua_tonumber(L, 4);
-
-    lua_settop(L, 0);
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    const std::string& name = ghoul::lua::value<std::string>(L, 1);
+    const double latitude = ghoul::lua::value<double>(L, 2);
+    const double longitude = ghoul::lua::value<double>(L, 3);
+    const double altitude = ghoul::lua::value<double>(L, 4);
+    lua_pop(L, 4);
 
     SceneGraphNode* n = sceneGraphNode(name);
-    Renderable* r = n->renderable();
-    RenderableGlobe* g = dynamic_cast<RenderableGlobe*>(r);
-    if (!g) {
-        return luaL_error(L, "Name must be a RenderableGlobe");
+    if (!n) {
+        return ghoul::lua::luaError(L, "Unknown globe name: " + name);
+    }
+    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
+    if (!globe) {
+        return ghoul::lua::luaError(L, "Name must be a RenderableGlobe");
     }
 
-
-    GlobeBrowsingModule& mod = *(OsEng.moduleEngine().module<GlobeBrowsingModule>());
+    GlobeBrowsingModule& mod = *(global::moduleEngine.module<GlobeBrowsingModule>());
     glm::vec3 pos = mod.cartesianCoordinatesFromGeo(
-        *g,
+        *globe,
         latitude,
         longitude,
         altitude
     );
 
-    lua_pushnumber(L, pos.x);
-    lua_pushnumber(L, pos.y);
-    lua_pushnumber(L, pos.z);
+    ghoul::lua::push(L, pos.x, pos.y, pos.z);
+
+    ghoul_assert(lua_gettop(L) == 3, "Incorrect number of items left on stack");
     return 3;
 }
 
 int getGeoPositionForCamera(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getGeoPositionForCamera");
 
-    GlobeBrowsingModule* module = OsEng.moduleEngine().module<GlobeBrowsingModule>();
-    RenderableGlobe* globe = module->castFocusNodeRenderableToGlobe();
+    GlobeBrowsingModule* module = global::moduleEngine.module<GlobeBrowsingModule>();
+    const RenderableGlobe* globe = module->castFocusNodeRenderableToGlobe();
     if (!globe) {
-        return luaL_error(L, "Focus node must be a RenderableGlobe");
+        return ghoul::lua::luaError(L, "Focus node must be a RenderableGlobe");
     }
 
-    glm::dvec3 cameraPosition = OsEng.navigationHandler().camera()->positionVec3();
-    glm::dmat4 inverseModelTransform =
-        OsEng.navigationHandler().focusNode()->inverseModelTransform();
-    glm::dvec3 cameraPositionModelSpace =
+    const glm::dvec3 cameraPosition = global::navigationHandler.camera()->positionVec3();
+    const glm::dmat4 inverseModelTransform =
+        global::navigationHandler.focusNode()->inverseModelTransform();
+    const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
-    SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
-        cameraPositionModelSpace);
+    const SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
+        cameraPositionModelSpace
+    );
 
-    Geodetic2 geo2 = globe->ellipsoid().cartesianToGeodetic2(
+    const Geodetic2 geo2 = globe->ellipsoid().cartesianToGeodetic2(
         posHandle.centerToReferenceSurface
     );
-    double altitude = glm::length(cameraPositionModelSpace -
+    const double altitude = glm::length(cameraPositionModelSpace -
                                   posHandle.centerToReferenceSurface);
 
-    lua_settop(L, 0);
-
-    lua_pushnumber(L, Angle<double>::fromRadians(geo2.lat).asDegrees());
-    lua_pushnumber(L, Angle<double>::fromRadians(geo2.lon).asDegrees());
-    lua_pushnumber(L, altitude);
+    ghoul::lua::push(
+        L,
+        Angle<double>::fromRadians(geo2.lat).asDegrees(),
+        Angle<double>::fromRadians(geo2.lon).asDegrees(),
+        altitude
+    );
 
     ghoul_assert(lua_gettop(L) == 3, "Incorrect number of items left on stack");
     return 3;
@@ -245,15 +234,17 @@ int getGeoPositionForCamera(lua_State* L) {
 int loadWMSCapabilities(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::loadWMSCapabilities");
 
-    std::string url = ghoul::lua::checkStringAndPop(L);
-    std::string globe = ghoul::lua::checkStringAndPop(L);
-    std::string name = ghoul::lua::checkStringAndPop(L);
+    std::string name = ghoul::lua::value<std::string>(L, 1);
+    std::string globe = ghoul::lua::value<std::string>(L, 2);
+    std::string url = ghoul::lua::value<std::string>(L, 3);
 
-    OsEng.moduleEngine().module<GlobeBrowsingModule>()->loadWMSCapabilities(
+    global::moduleEngine.module<GlobeBrowsingModule>()->loadWMSCapabilities(
         std::move(name),
         std::move(globe),
         std::move(url)
     );
+
+    lua_pop(L, 3);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -262,9 +253,13 @@ int loadWMSCapabilities(lua_State* L) {
 int removeWMSServer(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeWMSServer");
 
-    std::string name = ghoul::lua::checkStringAndPop(L);
+    const std::string& name = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
 
-    OsEng.moduleEngine().module<GlobeBrowsingModule>()->removeWMSServer(name);
+    global::moduleEngine.module<GlobeBrowsingModule>()->removeWMSServer(name);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -273,23 +268,24 @@ int removeWMSServer(lua_State* L) {
 int capabilities(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::capabilities");
 
-    std::string name = ghoul::lua::checkStringAndPop(L);
+    const std::string& name = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
     GlobeBrowsingModule::Capabilities cap =
-        OsEng.moduleEngine().module<GlobeBrowsingModule>()->capabilities(name);
+        global::moduleEngine.module<GlobeBrowsingModule>()->capabilities(name);
 
-    lua_settop(L, 0);
     lua_newtable(L);
     for (unsigned long i = 0; i < cap.size(); ++i) {
         const GlobeBrowsingModule::Layer& l = cap[i];
 
         lua_newtable(L);
 
-        lua_pushstring(L, "Name");
-        lua_pushstring(L, l.name.c_str());
+        ghoul::lua::push(L, "Name", l.name);
         lua_settable(L, -3);
 
-        lua_pushstring(L, "URL");
-        lua_pushstring(L, l.url.c_str());
+        ghoul::lua::push(L, "URL", l.url);
         lua_settable(L, -3);
 
         lua_rawseti(L, -2, i + 1);

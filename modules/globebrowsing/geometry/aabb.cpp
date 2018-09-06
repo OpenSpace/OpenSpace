@@ -28,10 +28,6 @@
 
 namespace openspace::globebrowsing {
 
-AABB1::AABB1()
-    : AABB1(std::numeric_limits<float>::max(), -std::numeric_limits<float>::max())
-{}
-
 AABB1::AABB1(float minValue, float maxValue)
     : min(minValue)
     , max(maxValue)
@@ -74,13 +70,6 @@ AABB1::AABBSpatialRelation AABB1::relationTo(const AABB1& o) const {
     }
     return AABB1::AABBSpatialRelation::None;
 }
-
-AABB2::AABB2()
-    : AABB2(
-        glm::vec2(std::numeric_limits<float>::max()),
-        glm::vec2(-std::numeric_limits<float>::max())
-    )
-{}
 
 AABB2::AABB2(glm::vec2 minValue, glm::vec2 maxValue)
     : min(std::move(minValue))
@@ -127,13 +116,6 @@ AABB2::AABBSpatialRelation AABB2::relationTo(const AABB2& o) const {
     }
     return AABB2::AABBSpatialRelation::None;
 }
-
-AABB3::AABB3()
-    : AABB3(
-        glm::vec3(std::numeric_limits<float>::max()),
-        glm::vec3(-std::numeric_limits<float>::max())
-    )
-{}
 
 AABB3::AABB3(glm::vec3 minValue, glm::vec3 maxValue)
     : min(std::move(minValue))

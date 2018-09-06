@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2017                                                                #
+# Copyright (c) 2014-2018                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -152,7 +152,7 @@ if(OS_MACOSX)
     target_link_libraries(${CEF_HELPER_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
     set_target_properties(${CEF_HELPER_TARGET} PROPERTIES
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/mac/helper-Info.plist
-        )
+    )
 
     # Fix the framework rpath in the helper executable.
     FIX_MACOSX_HELPER_FRAMEWORK_RPATH(${CEF_HELPER_TARGET})
@@ -178,7 +178,6 @@ set(OPENSPACE_HEADER_FILES
     webbrowsermodule.h
     include/webrenderhandler.h
     include/browserclient.h
-    include/screenspacerenderhandler.h
     include/screenspacebrowser.h
     include/browserinstance.h
     include/eventhandler.h
@@ -192,7 +191,6 @@ set(OPENSPACE_SOURCE_FILES
     webbrowsermodule.cpp
     src/webrenderhandler.cpp
     src/browserclient.cpp
-    src/screenspacerenderhandler.cpp
     src/screenspacebrowser.cpp
     src/browserinstance.cpp
     src/eventhandler.cpp
@@ -208,7 +206,7 @@ create_new_module(
     ${WEBBROWSER_MODULE_NAME}
     webbrowser_module
     ${OPENSPACE_HEADER_FILES} ${OPENSPACE_SOURCE_FILES}
-    )
+)
 
 # Display CEF configuration settings.
 PRINT_CEF_CONFIG()

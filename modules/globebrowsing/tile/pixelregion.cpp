@@ -34,11 +34,6 @@ PixelRegion::PixelRegion(const PixelCoordinate& pixelStart,
     , numPixels(numberOfPixels)
 {}
 
-PixelRegion::PixelRegion(const PixelRegion& o)
-    : start(o.start)
-    , numPixels(o.numPixels)
-{}
-
 void PixelRegion::setSide(Side side, int pos) {
     switch (side) {
     case Side::LEFT:
@@ -165,24 +160,28 @@ void PixelRegion::clampTo(const PixelRegion& boundingRegion) {
 
 void PixelRegion::forceNumPixelToDifferByNearestMultipleOf(unsigned int multiple) {
     ghoul_assert(multiple > 0, "multiple must be 1 or larger");
-    int sizeDiff = numPixels.x - numPixels.y;
-    if (static_cast<int>(std::abs(static_cast<double>(sizeDiff))) > 0) {
+    const int sizeDiff = numPixels.x - numPixels.y;
+    if (std::abs(sizeDiff) > 0) {
         if (sizeDiff > 0) {
             numPixels.y += sizeDiff % multiple;
         }
         else {
-            numPixels.x += static_cast<int>(
-                std::abs(static_cast<double>(sizeDiff))) % multiple;
+            numPixels.x += std::abs(sizeDiff) % multiple;
         }
     }
 }
 
 void PixelRegion::roundUpNumPixelToNearestMultipleOf(unsigned int multiple) {
     ghoul_assert(multiple > 0, "multiple must be 1 or larger");
-    numPixels.x += (numPixels.x % multiple == 0) ? 0 :
+
+    numPixels.x += (numPixels.x % multiple == 0) ?
+        0 :
         (multiple - (numPixels.x % multiple));
-    numPixels.y += (numPixels.y % multiple == 0) ? 0 :
+
+    numPixels.y += (numPixels.y % multiple == 0) ?
+        0 :
         (multiple - (numPixels.y % multiple));
+
     ghoul_assert((numPixels.x % multiple) == 0, "Round to nearest multiple failed");
     ghoul_assert((numPixels.y % multiple) == 0, "Round to nearest multiple failed");
 }
@@ -196,8 +195,8 @@ void PixelRegion::roundDownToQuadratic() {
     }
 }
 
-PixelRegion PixelRegion::globalCut(Side side, int p) {
-    if (!lineIntersect(side, p)) {
+PixelRegion PixelRegion::globalCut(Side side, int globalPos) {
+    if (!lineIntersect(side, globalPos)) {
         return PixelRegion({ 0, 0 }, { 0, 0 });
     }
 
@@ -205,31 +204,31 @@ PixelRegion PixelRegion::globalCut(Side side, int p) {
     int cutSize = 0;
     switch (side) {
     case Side::LEFT:
-        setLeft(p);
-        cutOff.setRight(p - cutSize);
+        setLeft(globalPos);
+        cutOff.setRight(globalPos - cutSize);
         break;
     case Side::TOP:
-        setTop(p);
-        cutOff.setBottom(p - cutSize);
+        setTop(globalPos);
+        cutOff.setBottom(globalPos - cutSize);
         break;
     case Side::RIGHT:
-        setRight(p);
-        cutOff.setLeft(p + cutSize);
+        setRight(globalPos);
+        cutOff.setLeft(globalPos + cutSize);
         break;
     case Side::BOTTOM:
-        setBottom(p);
-        cutOff.setTop(p + cutSize);
+        setBottom(globalPos);
+        cutOff.setTop(globalPos + cutSize);
         break;
     }
     return cutOff;
 }
 
-PixelRegion PixelRegion::localCut(Side side, int p) {
-    if (p < 1) {
+PixelRegion PixelRegion::localCut(Side side, int localPos) {
+    if (localPos < 1) {
         return PixelRegion({ 0, 0 }, { 0, 0 });
     }
     else {
-        return globalCut(side, edge(side) - edgeDirectionSign(side) * p);
+        return globalCut(side, edge(side) - edgeDirectionSign(side) * localPos);
     }
 }
 
@@ -264,6 +263,7 @@ bool PixelRegion::lineIntersect(Side side, int p) {
         case Side::TOP:
         case Side::BOTTOM:
             return start.y <= p && p <= (start.y + numPixels.y);
+
         default:
             throw ghoul::MissingCaseException();
     }

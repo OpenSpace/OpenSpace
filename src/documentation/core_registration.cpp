@@ -25,24 +25,26 @@
 #include <openspace/documentation/core_registration.h>
 
 #include <openspace/documentation/documentationengine.h>
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionRecording.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
+#include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scene/lightsource.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scale.h>
 #include <openspace/scene/translation.h>
+#include <openspace/scene/timeframe.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/systemcapabilitiesbinding.h>
@@ -53,7 +55,6 @@
 namespace openspace {
 
 void registerCoreClasses(documentation::DocumentationEngine& engine) {
-    engine.addDocumentation(ConfigurationManager::Documentation());
     engine.addDocumentation(LogFactoryDocumentation());
     engine.addDocumentation(Mission::Documentation());
     engine.addDocumentation(Renderable::Documentation());
@@ -63,6 +64,8 @@ void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(ScreenSpaceRenderable::Documentation());
     engine.addDocumentation(TimeRange::Documentation());
     engine.addDocumentation(Translation::Documentation());
+    engine.addDocumentation(TimeFrame::Documentation());
+    engine.addDocumentation(LightSource::Documentation());
 }
 
 void registerCoreClasses(scripting::ScriptEngine& engine) {
@@ -75,8 +78,7 @@ void registerCoreClasses(scripting::ScriptEngine& engine) {
     engine.addLibrary(SpiceManager::luaLibrary());
     engine.addLibrary(Scene::luaLibrary());
     engine.addLibrary(Time::luaLibrary());
-    engine.addLibrary(WindowWrapper::luaLibrary());
-    engine.addLibrary(interaction::KeyBindingManager::luaLibrary());
+    engine.addLibrary(interaction::KeybindingManager::luaLibrary());
     engine.addLibrary(interaction::NavigationHandler::luaLibrary());
     engine.addLibrary(interaction::SessionRecording::luaLibrary());
     engine.addLibrary(scripting::ScriptScheduler::luaLibrary());

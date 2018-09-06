@@ -1,0 +1,225 @@
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local mercuryTransforms = asset.require('scene/solarsystem/planets/mercury/transforms')
+
+
+local models = asset.syncedResource({
+    Name = "Messenger Models",
+    Type = "HttpSynchronization",
+    Identifier = "messenger_model",
+    Version = 1
+})
+
+local kernels = asset.syncedResource({
+    Name = "Messenger Kernels",
+    Type = "HttpSynchronization",
+    Identifier = "messenger_spice",
+    Version = 1
+})
+
+
+local LocalKernels = {
+    kernels .. '/messenger_2548.tsc',
+
+    kernels .. '/de405.bsp',
+    kernels .. '/msgr_040803_150430_150430_od431sc_2.bsp',
+    kernels .. '/msgr_antenna_v000.bsp',
+    kernels .. '/msgr_de405_de423s.bsp',
+
+    kernels .. '/msgr_epps_v100.ti',
+    kernels .. '/msgr_grns_v110.ti',
+    kernels .. '/msgr_mag_v021.ti',
+    kernels .. '/msgr_mascs_v100.ti',
+    kernels .. '/msgr_mdis_v160.ti',
+    kernels .. '/msgr_mla_v010.ti',
+    kernels .. '/msgr_rs_v111.ti',
+    kernels .. '/msgr_xrs_v001.ti',
+    
+    kernels .. '/msgr_1103_v02.bc',
+    kernels .. '/msgr_1104_v02.bc',
+    kernels .. '/msgr_1105_v02.bc',
+    kernels .. '/msgr_1106_v02.bc',
+
+    kernels .. '/pck00008.tpc',
+    kernels .. '/pck00008_msgr.tpc',
+    kernels .. '/pck00009_msgr_v10.tpc',
+    kernels .. '/pck00010_msgr_v10.tpc',
+    kernels .. '/pck00010_msgr_v23.tpc',
+    kernels .. '/pck00010.tpc'
+}
+
+
+local RotationMatrix = {
+    0, 1, 0,
+    0, 0, 1,
+    1, 0, 0
+}
+
+local LightSources = {
+    {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sunTransforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+    },
+    {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+    }
+}
+
+local Messenger = {
+    Identifier = "Messenger",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "MESSENGER",
+            Observer = "SUN",
+            Kernels = LocalKernels
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "MSGR_SPACECRAFT",
+            DestinationFrame = "GALACTIC",
+        },
+    },
+    GUI = {
+        Name = "Messenger",
+        Path = "/Solar System/Missions/Messenger"
+    }
+}
+
+local MessengerProbeBlack = {
+    Identifier = "MessengerProbe_black",
+    Parent = Messenger.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/MessengerProbe_black.obj"
+        },
+        ColorTexture = models .. "/Tex_black.png",
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
+    },
+    GUI = {
+        Name = "MessengerProbe Black",
+        Path = "/Solar System/Missions/Messenger"
+    }
+}
+
+local MessengerProbeFoil = {
+    Identifier = "MessengerProbe_foil",
+    Parent = Messenger.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/MessengerProbe_foil.obj"
+        },
+        ColorTexture = models .. "/foil_n2.png",
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
+    },
+    GUI = {
+        Name = "MessengerProbe foil",
+        Path = "/Solar System/Missions/Messenger"
+    }
+}
+
+local MessengerProbeHeatShield = {
+    Identifier = "MessengerProbe_heatShield",
+    Parent = Messenger.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/MessengerProbe_heatShield.obj"
+        },
+        ColorTexture = models .. "/AO_heatshield4.png",
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
+    },
+    GUI = {
+        Name = "MessengerProbe Heat Sheild",
+        Path = "/Solar System/Missions/Messenger"
+    }
+}
+
+
+local MessengerProbeMetal = {
+    Identifier = "MessengerProbe_Metal",
+    Parent = Messenger.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/MessengerProbe_metal.obj"
+        },
+        ColorTexture = models .. "/Tex_grey.png",
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
+    },
+    GUI = {
+        Name = "MessengerProbe Metal",
+        Path = "/Solar System/Missions/Messenger"
+    }
+}
+
+
+local MessengerProbePanels = {
+    Identifier = "MessengerProbe_panels",
+    Parent = Messenger.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/MessengerProbe_panels.obj"
+        },
+        ColorTexture = models .. "/Messenger_tex.png",
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
+    },
+    GUI = {
+        Name = "MessengerProbe Panels",
+        Path = "/Solar System/Missions/Messenger"
+    }
+}
+
+local MessengerTrail = {
+    Identifier = "MessengerTrail",
+    Parent = mercuryTransforms.MercuryBarycenter.Identifier,
+    Renderable = {
+        Type = "RenderableTrailOrbit",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "MESSENGER",
+            Observer = "MERCURY BARYCENTER",
+            Kernels = Kernels
+        },
+        Color = { 0.288, 0.375, 0.934 },
+        EnableFade = false,
+        StartTime = "2011 MARCH 01 12:00:00",
+        EndTime = "2011 MAY 30 12:00:00",
+        Period = 12,
+        Resolution = 10000
+
+    },
+    GUI = {
+        Name = "Messenger Trail",
+        Path = "/Solar System/Missions/Messenger"
+    }
+}
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    Messenger,
+    MessengerProbeBlack,
+    MessengerProbeFoil,
+    MessengerProbeHeatShield,
+    MessengerProbeMetal,
+    MessengerProbePanels,
+    MessengerTrail
+})
