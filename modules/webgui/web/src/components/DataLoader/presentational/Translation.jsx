@@ -4,6 +4,8 @@ import 'react-select/dist/react-select.css';
 import Label from '../../common/Label/Label';
 import Select from '../../common/Input/Select/Select';
 import styles from './Translation.scss';
+import Description from '../../common/Description/Description';
+import Row from '../../common/Row/Row';
 
 const Translation = (props) => {
   const { onSetTranslationTarget, target } = props;
@@ -11,6 +13,9 @@ const Translation = (props) => {
   return (
     <div className={styles.wrapper}>
       <Label size='medium'>Apply Spice Translation</Label>
+      <Row>
+        <Description>Moves output volume to selected origin</Description>
+      </Row>
       <Select label={target}
         options={spiceOptions}
         onChange={onSetTranslationTarget}

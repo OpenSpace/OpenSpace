@@ -4,14 +4,18 @@ import ReactSelect from 'react-select';
 import 'react-select/dist/react-select.css';
 import Input from '../../common/Input/Input/Input';
 import Label from '../../common/Label/Label';
+import Description from '../../common/Description/Description';
 import Row from '../../common/Row/Row';
 import styles from './MultiInputs.scss';
 
 const MultiInputs = (props) => {
-  const { options, onChange, presentationLabel, inputTypes, disabled } = props;
+  const { options, onChange, presentationLabel, inputTypes, disabled, description } = props;
   return (
     <div className={styles.multiInputs}>
-      <Label size='medium'>{presentationLabel}:</Label>
+      <Label size='medium'>{presentationLabel}</Label>
+      <Row>
+        <Description>{description}</Description>
+      </Row>
       <Row>
         {inputTypes.map((type) => (
           <Input

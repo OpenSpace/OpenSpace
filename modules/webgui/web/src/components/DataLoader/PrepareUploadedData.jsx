@@ -37,7 +37,9 @@ class PrepareUploadedData extends Component {
       activated: false,
       volumeProgress: 0,
       metaData: {
+        modelName: '',
         gridType: '',
+        radiusUnit: '',
         gridSystem: ['x', 'y', 'z'],
         variableMinBounds: {},
         variableMaxBounds: {}
@@ -271,16 +273,16 @@ class PrepareUploadedData extends Component {
           <Row>
             <Column widthPercentage={33} className={styles.spaceFirstChildren}>
               <div>
+                <Label size='large'>Parameters</Label>
+              </div>
+              <div>
                 <Input onChange={(event) => this.changeItemName(event)}
                   label='Item name'
                   placeholder='name'
                   value={this.state.itemName || this.getDefaultItemName()} />
               </div>
-              <div>
-                <Row><Label>Visualization grid type </Label></Row>
-                {(metaData && metaData.gridType) ? metaData.gridType : 'undefined'}
-              </div>
               <MultiInputs presentationLabel='Data Dimensions'
+                description={"The number of cells in each dimension in the output volume"}
                 inputTypes={metaData && metaData.gridSystem}
                 options={dimensions}
                 disabled={isUnEditable}
@@ -289,12 +291,21 @@ class PrepareUploadedData extends Component {
                 options={metaData ? metaData.variableKeys : undefined}
                 disabled={isUnEditable}
                 onChange={this.changeVariable} />
+              {variable == "rho" &&
+                <div>
+                  <Checkbox label={"Multiply with radius^2?"}
+                    onChange={this.changeRSquared}
+                    disabled={isUnEditable} />
+                </div>
+              }
               <MultiInputs presentationLabel='Lower Domain Bounds'
+                description={"Lower visualization boundary limit" + (metaData ? " in " + metaData.radiusUnit : "")}
                 inputTypes={metaData && metaData.gridSystem}
                 options={lowerDomainBounds}
                 disabled={isUnEditable}
                 onChange={(target) => this.onChangeMultiInputs(target, KEY_LOWER_DOMAIN_BOUNDS)} />
               <MultiInputs presentationLabel='Upper Domain Bounds'
+                description={"Upper visualization boundary limit" + (metaData ? " in " + metaData.radiusUnit : "")}
                 inputTypes={metaData && metaData.gridSystem}
                 options={upperDomainBounds}
                 disabled={isUnEditable}
@@ -302,17 +313,30 @@ class PrepareUploadedData extends Component {
               <Translation
                 onSetTranslationTarget={this.handleSetTranslationTarget}
                 target={translationTarget} />
-              <Checkbox label={"Multiply " + variable + " with radius^2?"}
-                onChange={this.changeRSquared}
-                disabled={isUnEditable} />
             </Column>
             <Column className={styles.spaceFirstChildren}
               widthPercentage={33}>
-              <Label>metadata</Label>
+              <div>
+                <Label size='large'>Information</Label>
+              </div>
+              <div>
+                <Row><Label>Model:</Label></Row>
+                {metaData.modelName.toUpperCase()}
+              </div>
+              <div>
+                <Row><Label>Visualization grid type: </Label></Row>
+                {(metaData && metaData.gridType) ? metaData.gridType : 'undefined'}
+              </div>
+              <div>
+                <Row><Label>Unit:</Label></Row>
+                {metaData.radiusUnit}
+              </div>
             </Column>
             <Column className={styles.spaceFirstChildren}
               widthPercentage={33}>
-              <Label>Here be trafnser functions</Label>
+              <div>
+                <Label size='large'>Transfer Function</Label>
+              </div>
               <ImageSelect imageSources={tfImages}
                 onSelect={this.handleSelectedTFImage} />
             </Column>

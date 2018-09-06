@@ -5,6 +5,7 @@ import Label from '../../common/Label/Label';
 import Select from '../../common/Input/Select/Select';
 import Row from '../../common/Row/Row';
 import styles from './Variables.scss';
+import Description from '../../common/Description/Description';
 
 const Variables = (props) => {
   const { variable, onChange, disabled, options } = props;
@@ -22,7 +23,10 @@ const Variables = (props) => {
 
   return (
     <div className={styles.variables}>
-      <Label size={'medium'}>Variable: </Label>
+      <Label size={'medium'}>Variable</Label>
+      <Row>
+        <Description>Select variable to visualize</Description>
+      </Row>
       <Select
         label={variable === '' ? "Select..." : variable}
         options={processedOptions || standardOptions}
