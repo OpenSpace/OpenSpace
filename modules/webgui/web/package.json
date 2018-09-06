@@ -9,7 +9,7 @@
     "lint-nice": "eslint --ext .jsx --ext .js src || exit 0;",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "copyfiles index.html dist && webpack-dev-server --progress --colors",
-    "prebuild": "rimraf dist && npm install",
+    "prebuild": "npm install && rimraf dist",
     "build": "cross-env NODE_ENV=production webpack -p --config webpack.config.production.js",
     "postbuild": "copyfiles index.html dist",
     "flow": "flow"

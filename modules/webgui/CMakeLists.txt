@@ -51,6 +51,9 @@ include(webgui_helpers)
 add_custom_target(openspace-module-webgui-javascript)
 build_webgui_source(openspace-module-webgui-javascript)
 
+add_custom_target(openspace-module-webgui-server)
+build_webserver_source(openspace-module-webgui-server)
+
 create_new_module(
     WebGui
     webgui_module
