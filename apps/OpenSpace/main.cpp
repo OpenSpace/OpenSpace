@@ -822,6 +822,13 @@ int main(int argc, char** argv) {
 
     ghoul::initialize();
 
+    // Register the path of the executable, in order to
+    FileSys.registerPathToken(
+        "${BIN}",
+        ghoul::filesystem::File(absPath(argv[0])).directoryName(),
+        ghoul::filesystem::FileSystem::Override::Yes
+    );
+
     //
     // Parse commandline arguments
     //

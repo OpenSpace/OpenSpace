@@ -26,12 +26,12 @@
 #include "cefwebguimodule.h"
 
 #include <openspace/engine/globals.h>
-#include <openspace/engine/configuration.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <modules/webbrowser/include/browserinstance.h>
 #include <modules/cefwebgui/include/guirenderhandler.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 
@@ -45,9 +45,9 @@ CefWebGuiModule::CefWebGuiModule()
     : OpenSpaceModule(CefWebGuiModule::Name)
 {}
 
-void CefWebGuiModule::internalInitialize(const ghoul::Dictionary&) {
+void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
     _guiInstance = std::make_shared<BrowserInstance>(new GUIRenderHandler);
-    _guiLocation = global::configuration.cefWebGuiUrl;
+    _guiLocation = configuration.value<std::string>("Url");
 
     global::callback::initialize.push_back([this]() {
         LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", _guiLocation));

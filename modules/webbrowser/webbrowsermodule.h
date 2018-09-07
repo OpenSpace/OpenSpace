@@ -33,14 +33,6 @@ namespace openspace {
 
 class CefHost;
 
-constexpr const char* SUBPROCESS_NAME = "openspace_web_helper";
-
-#ifdef WIN32
-constexpr const char* SUBPROCESS_ENDING = ".exe";
-#else
-constexpr const char* SUBPROCESS_ENDING = "";
-#endif
-
 class WebBrowserModule : public OpenSpaceModule {
 public:
     static constexpr const char* Name = "WebBrowser";
@@ -68,6 +60,7 @@ private:
     std::vector<std::shared_ptr<BrowserInstance>> _browsers;
     EventHandler _eventHandler;
     std::unique_ptr<CefHost> _cefHost;
+    std::string _webHelperLocation;
 };
 
 } // namespace openspace
