@@ -591,7 +591,8 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     _program->setUniform(_uniformCache.galaxyTexture, unit);
     int currentTextureIndex = -1;
 
-    for (const std::unordered_map<int, PlaneAggregate>::reference pAMapItem : _planesMap) {
+    for (const std::unordered_map<int, PlaneAggregate>::reference pAMapItem : _planesMap)
+    {
         // For planes with undefined textures references
         if (pAMapItem.first == 30) {
             continue;
@@ -604,7 +605,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
         glBindVertexArray(pAMapItem.second.vao);
         glDrawArrays(GL_TRIANGLES, 0, 6 * pAMapItem.second.numberOfPlanes);
     }
-    
+
     glBindVertexArray(0);
     _program->deactivate();
 
@@ -1294,7 +1295,7 @@ void RenderablePlanesCloud::createPlanes() {
             };
 
             int textureIndex = static_cast<int>(_fullData[p + _textureVariableIndex]);
-            std::unordered_map<int, PlaneAggregate>::iterator found = 
+            std::unordered_map<int, PlaneAggregate>::iterator found =
                 _planesMap.find(textureIndex);
             if (found != _planesMap.end()) {
                 for (int i = 0; i < PLANES_VERTEX_DATA_SIZE; ++i) {
@@ -1312,7 +1313,7 @@ void RenderablePlanesCloud::createPlanes() {
                     pA.planesCoordinates.push_back(vertexData[i]);
                 }
                 _planesMap.insert(std::pair<int, PlaneAggregate>(textureIndex, pA));
-            }            
+            }
         }
 
         // Send data to GPU
@@ -1321,7 +1322,8 @@ void RenderablePlanesCloud::createPlanes() {
             glBindBuffer(GL_ARRAY_BUFFER, pAMapItem.second.vbo);
             glBufferData(
                 GL_ARRAY_BUFFER,
-                sizeof(GLfloat) * PLANES_VERTEX_DATA_SIZE * pAMapItem.second.numberOfPlanes,
+                sizeof(GLfloat) * PLANES_VERTEX_DATA_SIZE *
+                    pAMapItem.second.numberOfPlanes,
                 pAMapItem.second.planesCoordinates.data(),
                 GL_STATIC_DRAW
             );
@@ -1348,7 +1350,7 @@ void RenderablePlanesCloud::createPlanes() {
             );
 
             glBindVertexArray(0);
-        }        
+        }
 
         _dataIsDirty = false;
 

@@ -44,6 +44,7 @@
 #include <openspace/performance/performancemanager.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/dashboarditem.h>
+#include <openspace/rendering/helper.h>
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderable.h>
@@ -77,7 +78,9 @@
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <glbinding/glbinding.h>
+#include <glbinding-aux/types_to_string.h>
 #include <numeric>
+#include <sstream>
 
 // @TODO(abock): Replace this with callback in windowdelegate
 #define GLFW_INCLUDE_NONE
@@ -150,14 +153,11 @@ OpenSpaceEngine::OpenSpaceEngine()
 
 OpenSpaceEngine::~OpenSpaceEngine() {} // NOLINT
 
-void deinitialize() {
-}
-
-void OpenSpaceEngine::initialize() {
+void OpenSpaceEngine::registerPathTokens() {
     LTRACE("OpenSpaceEngine::initialize(begin)");
 
     // Registering Path tokens. If the BASE path is set, it is the only one that will
-    // overwrite the default path of the cfg directory
+// overwrite the default path of the cfg directory
     for (const std::pair<std::string, std::string>& path :
         global::configuration.pathTokens)
     {
@@ -178,6 +178,12 @@ void OpenSpaceEngine::initialize() {
             Override(override)
         );
     }
+
+    LTRACE("OpenSpaceEngine::initialize(end)");
+}
+
+void OpenSpaceEngine::initialize() {
+    LTRACE("OpenSpaceEngine::initialize(begin)");
 
     global::initialize();
 
@@ -211,7 +217,6 @@ void OpenSpaceEngine::initialize() {
         LFATAL("Could not create Cache Manager");
         LFATALC(e.component, e.message);
     }
-
 
 
     // Initialize the requested logs from the configuration file
@@ -336,6 +341,8 @@ void OpenSpaceEngine::initializeGL() {
 
     //glbinding::Binding::useCurrentContext();
     glbinding::Binding::initialize(glfwGetProcAddress);
+
+    rendering::helper::initialize();
 
     // clear the screen so the user doesn't have to see old buffer contents left on the
     // graphics card
@@ -563,7 +570,7 @@ void OpenSpaceEngine::initializeGL() {
                     std::string("("),
                     [](std::string a, const std::unique_ptr<AbstractValue>& v) {
                         std::stringstream s;
-                        s << v;
+                        s << v.get();
                         return a + s.str() + ", ";
                     }
                 );
@@ -573,7 +580,7 @@ void OpenSpaceEngine::initializeGL() {
                 std::string returnValue;
                 std::stringstream s;
                 if (call.returnValue) {
-                    s << call.returnValue;
+                    s << call.returnValue.get();
                     returnValue = " -> " + s.str();
                 }
 
@@ -699,8 +706,12 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
                 progressInfo.progress = (*it)->progress();
 
                 if ((*it)->nTotalBytesIsKnown()) {
-                    progressInfo.currentSize = static_cast<float>((*it)->nSynchronizedBytes());
-                    progressInfo.totalSize = static_cast<float>((*it)->nTotalBytes());
+                    progressInfo.currentSize = static_cast<int>(
+                        (*it)->nSynchronizedBytes()
+                    );
+                    progressInfo.totalSize = static_cast<int>(
+                        (*it)->nTotalBytes()
+                    );
                 }
 
                 loading = true;
@@ -763,20 +774,9 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 void OpenSpaceEngine::deinitialize() {
     LTRACE("OpenSpaceEngine::deinitialize(begin)");
 
-    // We want to render an image informing the user that we are shutting down
-    global::renderEngine.renderEndscreen();
-    global::windowDelegate.swapBuffer();
-
-    for (const std::function<void()>& func : global::callback::deinitializeGL) {
-        func();
-    }
-
     for (const std::function<void()>& func : global::callback::deinitialize) {
         func();
     }
-
-    global::openSpaceEngine.assetManager().deinitialize();
-    global::openSpaceEngine._scene = nullptr;
 
     global::navigationHandler.deinitialize();
 
@@ -790,7 +790,6 @@ void OpenSpaceEngine::deinitialize() {
         );
     }
 
-    global::deinitializeGL();
     global::deinitialize();
 
     FactoryManager::deinitialize();
@@ -806,6 +805,27 @@ void OpenSpaceEngine::deinitialize() {
 
 
     LTRACE("OpenSpaceEngine::deinitialize(end)");
+}
+
+void OpenSpaceEngine::deinitializeGL() {
+    LTRACE("OpenSpaceEngine::deinitializeGL(begin)");
+
+    // We want to render an image informing the user that we are shutting down
+    global::renderEngine.renderEndscreen();
+    global::windowDelegate.swapBuffer();
+
+    global::openSpaceEngine.assetManager().deinitialize();
+    global::openSpaceEngine._scene = nullptr;
+
+    for (const std::function<void()>& func : global::callback::deinitializeGL) {
+        func();
+    }
+
+    global::deinitializeGL();
+
+    rendering::helper::deinitialize();
+
+    LTRACE("OpenSpaceEngine::deinitializeGL(end)");
 }
 
 void OpenSpaceEngine::writeStaticDocumentation() {

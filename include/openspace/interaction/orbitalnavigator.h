@@ -56,6 +56,8 @@ public:
 
     void setFocusNode(SceneGraphNode* focusNode);
     void startInterpolateCameraDirection(const Camera& camera);
+    float rotateToFocusInterpolationTime() const;
+    void setRotateToFocusInterpolationTime(float durationInSeconds);
 
     JoystickCameraStates& joystickStates();
     WebsocketCameraStates& websocketStates();

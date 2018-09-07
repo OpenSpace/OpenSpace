@@ -37,6 +37,7 @@
 #include <openspace/rendering/abufferrenderer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/deferredcastermanager.h>
+#include <openspace/rendering/helper.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/raycastermanager.h>
@@ -90,23 +91,6 @@ namespace {
         "and rendering of the scene graph nodes are collected each frame. These values "
         "provide some information about the impact of individual nodes on the overall "
         "performance."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ShowDateInfo = {
-        "ShowDate",
-        "Show Date Information",
-        "This values determines whether the date will be printed in the top left corner "
-        "of the rendering window if a regular rendering window is used (as opposed to a "
-        "fisheye rendering, for example)."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ShowInfoInfo = {
-        "ShowInfo",
-        "Show Rendering Information",
-        "This value determines whether the rendering info, which is the delta time and "
-        "the frame time, is shown in the top left corner of the rendering window if a "
-        "regular rendering window is used (as opposed to a fisheye rendering, for "
-        "example)."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowOverlaySlavesInfo = {
@@ -313,8 +297,6 @@ void RenderEngine::initialize() {
         global::configuration.isSceneTranslationOnMasterDisabled;
     _disableMasterRendering = global::configuration.isRenderingOnMasterDisabled;
 
-    _nAaSamples = global::windowDelegate.currentNumberOfAaSamples();
-
 #ifdef GHOUL_USE_DEVIL
     ghoul::io::TextureReader::ref().addReader(
         std::make_unique<ghoul::io::TextureReaderDevIL>()
@@ -346,6 +328,8 @@ void RenderEngine::initialize() {
 
 void RenderEngine::initializeGL() {
     LTRACE("RenderEngine::initializeGL(begin)");
+
+    _nAaSamples = global::windowDelegate.currentNumberOfAaSamples();
 
     std::string renderingMethod = global::configuration.renderingMethod;
     if (renderingMethod == "ABuffer") {
@@ -406,7 +390,8 @@ void RenderEngine::updateScene() {
     _scene->update({
         { glm::dvec3(0.0), glm::dmat3(11.), 1.0 },
         currentTime,
-        integrateFromTime
+        integrateFromTime,
+        _doPerformanceMeasurements
     });
 
     LTRACE("RenderEngine::updateSceneGraph(end)");
@@ -612,8 +597,13 @@ void RenderEngine::renderOverlays(const ShutdownInformation& shutdownInfo) {
 }
 
 void RenderEngine::renderEndscreen() {
-    glClearColor(0.f, 0.f, 0.f, 0.25f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glEnable(GL_BLEND);
+
+    rendering::helper::renderBox(
+        glm::vec2(0.f, 0.f),
+        glm::vec2(1.f, 1.f),
+        glm::vec4(0.f, 0.f, 0.f, 0.5f)
+    );
 
     using FR = ghoul::fontrendering::FontRenderer;
     using BBox = FR::BoundingBoxInformation;

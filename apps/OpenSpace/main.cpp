@@ -445,7 +445,7 @@ void mainRenderFunc() {
 
     glm::mat4 projectionMatrix = SgctEngine->getCurrentProjectionMatrix();
 #ifdef OPENVR_SUPPORT
-    const bool currentWindowIsHMD = FirstOpenVRWindow == SgctEngine->getCurrentWindowPtr();
+    bool currentWindowIsHMD = FirstOpenVRWindow == SgctEngine->getCurrentWindowPtr();
     if (sgct::SGCTOpenVR::isHMDActive() && currentWindowIsHMD) {
         projectionMatrix = sgct::SGCTOpenVR::getHMDCurrentViewProjectionMatrix(
             SgctEngine->getCurrentFrustumMode()
@@ -623,8 +623,8 @@ void setSgctDelegateFunctions() {
         for (size_t i = 0; i < n; ++i) {
             glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            GLFWwindow* win = sgct::Engine::instance()->getWindowPtr(i)->getWindowHandle();
-            glfwSwapBuffers(win);
+            GLFWwindow* w = sgct::Engine::instance()->getWindowPtr(i)->getWindowHandle();
+            glfwSwapBuffers(w);
         }
     };
     sgctDelegate.windowHasResized = []() {
@@ -922,6 +922,8 @@ int main(int argc, char** argv) {
         }
         return EXIT_FAILURE;
     }
+
+    openspace::global::openSpaceEngine.registerPathTokens();
 
     // Prepend the outgoing sgctArguments with the program name
     // as well as the configuration file that sgct is supposed to use

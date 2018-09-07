@@ -855,9 +855,9 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
             scaledPos,
             pair.second,
             textColor,
-            pow(10.0, _textSize.value()),
-            _textMinSize,
-            _textMaxSize,
+            pow(10.f, _textSize.value()),
+            static_cast<int>(_textMinSize),
+            static_cast<int>(_textMaxSize),
             modelViewProjectionMatrix,
             orthoRight,
             orthoUp,
@@ -897,7 +897,7 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
 
     float fadeInVariable = 1.f;
     if (!_disableFadeInDistance) {
-        float distCamera = glm::length(data.camera.positionVec3());
+        float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
         const glm::vec2 fadeRange = _fadeInDistance;
         const float a = 1.f / ((fadeRange.y - fadeRange.x) * scale);
         const float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
@@ -1042,7 +1042,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                     ghoul::io::TextureReader::ref().loadTexture(
                         absPath(path)
                     );
-             
+
                 t->uploadTexture();
                 t->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
                 return t;

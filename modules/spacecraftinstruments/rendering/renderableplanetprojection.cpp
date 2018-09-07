@@ -697,7 +697,7 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
 void RenderablePlanetProjection::update(const UpdateData& data) {
     if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
-        
+
         ghoul::opengl::updateUniformLocations(
             *_programObject,
             _mainUniformCache,

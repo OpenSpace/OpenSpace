@@ -60,6 +60,7 @@ public:
     void setFocusNode(SceneGraphNode* node);
     void setCamera(Camera* camera);
     void resetCameraDirection();
+    void setInterpolationTime(float durationInSeconds);
 
     void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
 
@@ -74,6 +75,7 @@ public:
     const InputState& inputState() const;
     const OrbitalNavigator& orbitalNavigator() const;
     KeyframeNavigator& keyframeNavigator() const;
+    float interpolationTime() const;
 
     // Callback functions
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);

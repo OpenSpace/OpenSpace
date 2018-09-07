@@ -189,7 +189,7 @@ void TransferFunction::setTextureFromTxt(std::shared_ptr<ghoul::opengl::Texture>
         const float dist = fpos - prevKey->position;
         const float weight = dist / (currentKey->position - prevKey->position);
 
-        for (size_t channel = 0; channel < 4; ++channel) {
+        for (int channel = 0; channel < 4; ++channel) {
             const size_t position = 4 * i + channel;
             // Interpolate linearly between prev and next mapping key
             float value = (prevKey->color[channel] * (1.f - weight) +
@@ -229,14 +229,11 @@ glm::vec4 TransferFunction::sample(size_t offset) {
     const int nPixels = _texture->width();
 
     // Clamp to range.
-    if (offset >= nPixels) {
+    if (offset >= static_cast<size_t>(nPixels)) {
         offset = nPixels - 1;
     }
-    if (offset < 0) {
-        offset = 0;
-    }
 
-    return _texture->texelAsFloat(offset);
+    return _texture->texelAsFloat(static_cast<unsigned int>(offset));
 }
 
 size_t TransferFunction::width() {
