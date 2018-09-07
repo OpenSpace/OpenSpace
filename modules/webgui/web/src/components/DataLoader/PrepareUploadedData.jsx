@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 import DataManager from '../../api/DataManager';
 import { UploadDataItemScript, ValuePlaceholder } from '../../api/keys';
-import { removeLineBreakCharacters, getDirectoryLeaf, getFileBasename, backSlashesToForward, handleReceivedJSON, stringArrayToArray } from './utils/helpers';
+import { removeLineBreakCharacters, getDirectoryLeaf, getFileBasename, backSlashesToForward, handleReceivedJSON } from './utils/helpers';
 
 import Row from '../common/Row/Row';
 import Input from '../common/Input/Input/Input';
@@ -20,6 +20,7 @@ import provideWindowWidth from './HOC/provideWindowSize';
 import MultiInputs from './presentational/MultiInputs';
 import Variables from './presentational/Variables';
 import Translation from './presentational/Translation';
+import LoadingString from '../common/LoadingString/LoadingString';
 // import NumericInput from '../common/Input/NumericInput/NumericInput';
 
 import {
@@ -56,9 +57,9 @@ class PrepareUploadedData extends Component {
       scale: 1,
 
       data: {
-        dimensions: { x: 100, y: 100, z: 128 },
-        lowerDomainBounds: { r: 1, theta: -90, phi: 0 },
-        upperDomainBounds: { r: 15, theta: 90, phi: 360 },
+        dimensions: {},
+        lowerDomainBounds: {},
+        upperDomainBounds: {},
         variable: 'rho',
         rSquared: false,
       }
@@ -81,7 +82,6 @@ class PrepareUploadedData extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     const { selectedFilePaths } = this.props;
-
     // const hasFilePaths = selectedFilePaths.length > 0 && selectedFilePaths[0] !== '';
     const hasFilePaths = selectedFilePaths.length > 0;
     const filePathsDiffer = JSON.stringify(selectedFilePaths) !== JSON.stringify(prevProps.selectedFilePaths);
@@ -91,6 +91,17 @@ class PrepareUploadedData extends Component {
         activated: true,
         uploadButtonIsClicked: false
       });
+    }
+
+    if (this.props.isReadingNewMetaData && (this.props.isReadingNewMetaData !== prevProps.isReadingNewMetaData)) {
+      this.setState({
+        data: {
+          ...this.state.data,
+          dimensions: { x: undefined, y: undefined, z: undefined },
+          lowerDomainBounds: { x: undefined, y: undefined, z: undefined },
+          upperDomainBounds: { x: undefined, y: undefined, z: undefined },
+        }
+      })
     }
 
     if (prevProps.metaDataStringifiedJSON !== this.props.metaDataStringifiedJSON && this.props.metaDataStringifiedJSON !== '') {
@@ -224,12 +235,12 @@ class PrepareUploadedData extends Component {
   }
 
   render() {
-    const { width, currentVolumesConvertedCount, currentVolumesToConvertCount } = this.props;
+    const { width, currentVolumesConvertedCount, currentVolumesToConvertCount, isReadingNewMetaData } = this.props;
     const { volumeProgress, translationTarget, metaData } = this.state;
     const { variable, dimensions, lowerDomainBounds, upperDomainBounds } = this.state.data;
     // const spiceOptions = 'SUN EARTH'.split(' ').map(v => ({ value: v, label: v }));
 
-    const isUnEditable = (this.state.uploadButtonIsClicked && (currentVolumesConvertedCount !== currentVolumesToConvertCount));
+    const isUnEditable = (this.state.uploadButtonIsClicked && (currentVolumesConvertedCount !== currentVolumesToConvertCount)) || isReadingNewMetaData;
 
     const WINDOW_MAX_WIDTH = 800;
     const w = width / 1.5;
@@ -279,13 +290,15 @@ class PrepareUploadedData extends Component {
                 <Input onChange={(event) => this.changeItemName(event)}
                   label='Item name'
                   placeholder='name'
+                  disabled={isUnEditable}
                   value={this.state.itemName || this.getDefaultItemName()} />
               </div>
               <MultiInputs presentationLabel='Data Dimensions'
                 description={"The number of cells in each dimension in the output volume"}
-                inputTypes={metaData && metaData.gridSystem}
+                inputTypes={metaData.gridSystem}
                 options={dimensions}
                 disabled={isUnEditable}
+                loading={isReadingNewMetaData}
                 onChange={(target) => this.onChangeMultiInputs(target, KEY_DIMENSIONS)} />
               <Variables variable={variable}
                 options={metaData ? metaData.variableKeys : undefined}
@@ -300,15 +313,17 @@ class PrepareUploadedData extends Component {
               }
               <MultiInputs presentationLabel='Lower Domain Bounds'
                 description={"Lower visualization boundary limit" + (metaData ? " in " + metaData.radiusUnit : "")}
-                inputTypes={metaData && metaData.gridSystem}
+                inputTypes={metaData.gridSystem}
                 options={lowerDomainBounds}
                 disabled={isUnEditable}
+                loading={isReadingNewMetaData}
                 onChange={(target) => this.onChangeMultiInputs(target, KEY_LOWER_DOMAIN_BOUNDS)} />
               <MultiInputs presentationLabel='Upper Domain Bounds'
                 description={"Upper visualization boundary limit" + (metaData ? " in " + metaData.radiusUnit : "")}
-                inputTypes={metaData && metaData.gridSystem}
+                inputTypes={metaData.gridSystem}
                 options={upperDomainBounds}
                 disabled={isUnEditable}
+                loading={isReadingNewMetaData}
                 onChange={(target) => this.onChangeMultiInputs(target, KEY_UPPER_DOMAIN_BOUNDS)} />
               <Translation
                 onSetTranslationTarget={this.handleSetTranslationTarget}
@@ -321,15 +336,21 @@ class PrepareUploadedData extends Component {
               </div>
               <div>
                 <Row><Label>Model:</Label></Row>
-                {metaData.modelName.toUpperCase()}
+                <LoadingString loading={isReadingNewMetaData}>
+                  {metaData.modelName.toUpperCase()}
+                </LoadingString>
               </div>
               <div>
                 <Row><Label>Visualization grid type: </Label></Row>
-                {(metaData && metaData.gridType) ? metaData.gridType : 'undefined'}
+                <LoadingString loading={isReadingNewMetaData}>
+                  {(metaData && metaData.gridType) ? metaData.gridType : 'undefined'}
+                </LoadingString>
               </div>
               <div>
                 <Row><Label>Unit:</Label></Row>
-                {metaData.radiusUnit}
+                <LoadingString loading={isReadingNewMetaData}>
+                  {metaData.radiusUnit}
+                </LoadingString>
               </div>
             </Column>
             <Column className={styles.spaceFirstChildren}
@@ -382,6 +403,7 @@ PrepareUploadedData.defaultProps = {
 
 const mapStateToProps = state => ({
   selectedFilePaths: state.dataLoader.selectedFilePaths,
+  isReadingNewMetaData: state.dataLoader.readingNewMetaData,
   metaDataStringifiedJSON: state.dataLoader.selectedDataMetaData,
   currentVolumesConvertedCount: state.dataLoader.currentVolumesConvertedCount,
   currentVolumesToConvertCount: state.dataLoader.currentVolumesToConvertCount,

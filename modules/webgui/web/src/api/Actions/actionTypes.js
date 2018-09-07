@@ -34,5 +34,6 @@ export const actionTypes = {
   setSelectedFilesPathName: 'DATA_LOADER_SET_FILEPATH',
   setSelectedFilesMetaData: 'DATA_LOADER_SET_META_DATA',
   setVolumesConvertedCount: 'SET_VOLUMES_CONVERTED_COUNT',
-  setVolumesToConvertCount: 'SET_VOLUMES_TO_CONVERT_COUNT'
+  setVolumesToConvertCount: 'SET_VOLUMES_TO_CONVERT_COUNT',
+  setReadingNewMetaData: 'SET_READING_NEW_META_DATA'
 };

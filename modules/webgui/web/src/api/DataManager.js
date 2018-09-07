@@ -52,7 +52,7 @@ class DataManager {
       subscription = this.createSubscription(key, type, SUBSCRIPTION_EVENTS.start);
       this.subscriptions[key] = subscription;
     }
-    return subscription.addCallback(callback); 
+    return subscription.addCallback(callback);
   }
 
   /**
@@ -65,12 +65,12 @@ class DataManager {
     if (subscription) {
       subscription.removeCallback(callbackId);
       // TODO: should subscriptions be killed or should we let them be for future snappiness?
-       if (!subscription.hasAnyCallbacks()) {
-          this.deleteSubscription(key, subscription.topic);
-          this.connection.clearTopic(subscription.topic);
-          delete this.subscriptions[subscription.key];
-       }
-       return true;
+      if (!subscription.hasAnyCallbacks()) {
+        this.deleteSubscription(key, subscription.topic);
+        this.connection.clearTopic(subscription.topic);
+        delete this.subscriptions[subscription.key];
+      }
+      return true;
     }
   }
 
@@ -167,7 +167,7 @@ class DataManager {
    * @param message - the message to send
    * @param args - optional args to send Connection.send
    */
-  send(message: Object, ...args: Array<mixed>) {
+  send(message: Object, ...args: Array < mixed > ) {
     this.connection.send(message, ...args);
   }
 
@@ -181,15 +181,25 @@ class DataManager {
    * @returns {{payload: *, type: *, topic: *}}
    * @throws UnknownTypeException - unless provided `type` is in `TOPIC_TYPES`
    */
-  wrapMessage({ payload, type, topic = this.nextTopicId }) {
+  wrapMessage({
+    payload,
+    type,
+    topic = this.nextTopicId
+  }) {
     if (!TOPIC_TYPES[type]) {
       throw new UnknownTypeException('Unknown type provided.', type);
     }
-    return { payload, type, topic };
+    return {
+      payload,
+      type,
+      topic
+    };
   }
 
   get nextTopicId(): number {
-    const { topicId } = this;
+    const {
+      topicId
+    } = this;
     this.topicId += 1;
     return topicId;
   }

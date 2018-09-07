@@ -141,6 +141,11 @@ static const openspace::properties::Property::PropertyInfo VolumeMetaDataJSONInf
     "VolumeMetaDataJSON",
     "JSON formatted string of volume meta data",
     ""};
+
+static const openspace::properties::Property::PropertyInfo ReadingNewMetaDataInfo = {
+    "ReadingNewMetaData",
+    "Boolean discerning if the process of reading volume meta data is finnished or not",
+    ""};
 } // namespace
 
 namespace openspace::dataloader
@@ -153,7 +158,8 @@ Loader::Loader()
       _currentVolumesToConvertCount(CurrentVolumesToConvertCount),
       _uploadDataTrigger(UploadDataTriggerInfo),
       _volumeConversionProgress(VolumeConversionProgressInfo),
-      _volumeMetaDataJSON(VolumeMetaDataJSONInfo)
+      _volumeMetaDataJSON(VolumeMetaDataJSONInfo),
+      _readingNewMetaData(ReadingNewMetaDataInfo)
 {
     _uploadDataTrigger.onChange([this]() {
         selectData();
@@ -165,6 +171,7 @@ Loader::Loader()
     addProperty(_uploadDataTrigger);
     addProperty(_volumeConversionProgress);
     addProperty(_volumeMetaDataJSON);
+    addProperty(_readingNewMetaData);
 
     _volumeConversionThreadCanRun = false;
 }
@@ -192,8 +199,9 @@ void Loader::selectData()
                 _volumeConversionThreadCanRun = false;
                 _currentVolumesToConvertCount = count;
                 _selectedFilePaths = paths;
+                _readingNewMetaData = true;
+                getVolumeMetaData();
                 NFD_PathSet_Free(&outPathSet);
-                getVolumeMetaData(_volumeMetaDataDictionary);
             }
             else if (result == NFD_CANCEL)
             {
@@ -315,7 +323,7 @@ void Loader::goToFirstTimeStep(const std::string &absPathToItem)
     setTime(firstTimeStep);
 }
 
-void Loader::getVolumeMetaData(ghoul::Dictionary &metaDataDictionary)
+void Loader::getVolumeMetaData()
 {
     std::vector<std::string> selectedFileVector = _selectedFilePaths;
     openspace::kameleonvolume::KameleonVolumeReader reader(selectedFileVector[0]);
@@ -442,6 +450,7 @@ void Loader::getVolumeMetaData(ghoul::Dictionary &metaDataDictionary)
     j["variableMaxBounds"] = variableMaxBoundsJson;
     j["variableAttributes"] = json::parse(variableAttributesJsonString);
 
+    _readingNewMetaData = false;
     _volumeMetaDataJSON = j.dump();
 }
 

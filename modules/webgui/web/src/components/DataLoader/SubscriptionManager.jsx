@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import DataManager from '../../api/DataManager';
-import { setSelectedFilePaths, setVolumesConvertedCount, setVolumesToConvertCount, setMetaData } from '../../api/Actions/dataLoaderActions';
+import { setSelectedFilePaths, setVolumesConvertedCount, setVolumesToConvertCount, setMetaData, setReadingNewMetaData } from '../../api/Actions/dataLoaderActions';
 import { stringListToArray } from './utils/helpers';
 
 class SubscriptionManager extends React.Component {
@@ -13,6 +13,7 @@ class SubscriptionManager extends React.Component {
         this.subscribeToFilepaths = this.subscribeToFilepaths.bind(this);
         this.handleVolumesConvertedCount = this.handleVolumesConvertedCount.bind(this);
         this.handleVolumesToConvertCount = this.handleVolumesToConvertCount.bind(this);
+        this.handleReadingNewMetaData = this.handleReadingNewMetaData.bind(this);
     }
 
     componentDidMount() {
@@ -25,6 +26,7 @@ class SubscriptionManager extends React.Component {
 
     subscribeToFilepaths() {
         DataManager.subscribe('Modules.DataLoader.Loader.SelectedFiles', this.handleSelectedFiles);
+        DataManager.subscribe('Modules.DataLoader.Loader.ReadingNewMetaData', this.handleReadingNewMetaData);
         DataManager.subscribe('Modules.DataLoader.Loader.VolumeMetaDataJSON', this.handleMetaData);
         DataManager.subscribe('Modules.DataLoader.Loader.CurrentVolumesConvertedCount', this.handleVolumesConvertedCount);
         DataManager.subscribe('Modules.DataLoader.Loader.CurrentVolumesToConvertCount', this.handleVolumesToConvertCount);
@@ -46,6 +48,11 @@ class SubscriptionManager extends React.Component {
         this.props.setVolumesToConvertCount(Number(data.Value));
     }
 
+    handleReadingNewMetaData(data) {
+        const isReading = data.Value === 'true'
+        this.props.setReadingNewMetaData(isReading);
+    }
+
     render() {
         return null;
     }
@@ -63,6 +70,9 @@ const mapDispatchToProps = dispatch => ({
     },
     setVolumesToConvertCount: (count) => {
         dispatch(setVolumesToConvertCount(count))
+    },
+    setReadingNewMetaData: (readingNewMetaData) => {
+        dispatch(setReadingNewMetaData(readingNewMetaData))
     }
 });
 

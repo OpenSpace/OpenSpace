@@ -7,9 +7,11 @@ import Label from '../../common/Label/Label';
 import Description from '../../common/Description/Description';
 import Row from '../../common/Row/Row';
 import styles from './MultiInputs.scss';
+import LoadingString from '../../common/LoadingString/LoadingString';
 
 const MultiInputs = (props) => {
-  const { options, onChange, presentationLabel, inputTypes, disabled, description } = props;
+  const { options, onChange, presentationLabel, inputTypes, disabled, description, loading } = props;
+
   return (
     <div className={styles.multiInputs}>
       <Label size='medium'>{presentationLabel}</Label>
@@ -18,14 +20,15 @@ const MultiInputs = (props) => {
       </Row>
       <Row>
         {inputTypes.map((type) => (
-          <Input
-            key={type}
-            label={type}
-            placeholder={type}
-            value={options[type] !== undefined ? Math.round(options[type]) : 100}
-            disabled={disabled}
-            onChange={onChange}
-          />
+          <LoadingString key={type} loading={loading}>
+            <Input
+              label={type}
+              placeholder={type}
+              value={options[type] !== undefined ? Math.round(options[type]) : undefined}
+              disabled={disabled}
+              onChange={onChange}
+            />
+          </LoadingString>
         ))}
       </Row>
     </div>

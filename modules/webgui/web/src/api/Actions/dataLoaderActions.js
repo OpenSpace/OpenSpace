@@ -36,3 +36,10 @@ export const setVolumesToConvertCount = (count) => ({
     currentVolumesToConvertCount: count
   }
 });
+
+export const setReadingNewMetaData = (readingNewMetaData) => ({
+  type: actionTypes.setReadingNewMetaData,
+  payload: {
+    readingNewMetaData
+  }
+});

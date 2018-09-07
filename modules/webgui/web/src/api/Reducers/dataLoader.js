@@ -54,6 +54,16 @@ export const dataLoader = (state = {}, action) => {
         currentVolumesToConvertCount
       }
 
+    case actionTypes.setReadingNewMetaData:
+      const {
+        readingNewMetaData
+      } = action.payload;
+
+      return {
+        ...state,
+        readingNewMetaData
+      }
+
     default:
       return state;
   }

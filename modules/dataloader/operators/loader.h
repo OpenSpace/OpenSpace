@@ -28,6 +28,7 @@
 #include <modules/dataloader/operators/operator.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/stringlistproperty.h>
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/vector/dvec3property.h>
@@ -93,8 +94,11 @@ private:
   ghoul::Dictionary _volumeMetaDataDictionary;
   properties::UIntProperty _currentVolumesConvertedCount;
   properties::UIntProperty _currentVolumesToConvertCount;
+  properties::BoolProperty _readingNewMetaData;
+
   bool _volumeConversionThreadCanRun = false;
-  void getVolumeMetaData(ghoul::Dictionary &metaDataDictionary);
+
+  void getVolumeMetaData();
 
   void initializeNode(ghoul::Dictionary dict);
   void goToFirstTimeStep(const std::string &absPathToItem);

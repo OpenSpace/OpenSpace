@@ -6,11 +6,6 @@ export const stringListToArray = (stringList) => {
   return stringList.split(',').map(item => item.trim());
 }
 
-export const stringArrayToArray = (stringArray) => {
-  let arr = stringArray.replace('[', '')
-  arr = arr.replace(']', '')
-  return arr.split(',').map(item => item.trim());
-}
 /**
  * 
  * @param {string} filePath 
