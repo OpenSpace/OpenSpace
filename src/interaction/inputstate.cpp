@@ -24,6 +24,7 @@
 
 #include <openspace/interaction/inputstate.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/websocketinputstate.h>
 #include <ghoul/fmt.h>
@@ -70,23 +71,6 @@ void InputState::mouseScrollWheelCallback(double mouseScrollDelta) {
     _mouseScrollDelta = mouseScrollDelta;
 }
 
-void InputState::setJoystickInputStates(JoystickInputStates& states) {
-    _joystickInputStates = &states;
-}
-
-void InputState::setWebsocketInputStates(WebsocketInputStates& states) {
-    _websocketInputStates = &states;
-}
-
-void InputState::addWebsocketInputState(size_t id, WebsocketInputState& states) {
-    _websocketInputs[id] = &states;
-}
-
-void InputState::removeWebsocketInputState(size_t id) {
-    _websocketInputs.erase(id);
-    _websocketInputs = websocketInputStates();
-}
-
 const std::vector<std::pair<Key, KeyModifier>>& InputState::pressedKeys() const {
     return _keysDown;
 }
@@ -120,40 +104,32 @@ bool InputState::isMouseButtonPressed(MouseButton mouseButton) const {
     return it != _mouseButtonsDown.end();
 }
 
-const JoystickInputStates& InputState::joystickInputStates() const {
-    return *_joystickInputStates;
-}
-
 float InputState::joystickAxis(int i) const {
-    return _joystickInputStates->axis(i);
+    return global::joystickInputStates.axis(i);
 }
 
 bool InputState::joystickButton(int i) const {
-    return _joystickInputStates->button(i, JoystickAction::Press);
-}
-
-WebsocketInputStates& InputState::websocketInputStates() {
-    return _websocketInputs;
+    return global::joystickInputStates.button(i, JoystickAction::Press);
 }
 
 float InputState::websocketAxis(int i) const {
-    return _websocketInputs.axis(i);
+    return global::websocketInputStates.axis(i);
 }
 
 bool InputState::websocketButton(int i) const {
-    return _websocketInputs.button(i, WebsocketAction::Press);
+    return global::websocketInputStates.button(i, WebsocketAction::Press);
 }
 
 void InputState::resetWebsockets() {
     //if(!_websocketInputs) { return; }
     
-    for (auto it = _websocketInputs.begin(); it != _websocketInputs.end(); ++it) {
+    for (auto it = global::websocketInputStates.begin(); it != global::websocketInputStates.end(); ++it) {
         it->second->isConnected = false;
     }
 }
 
 bool InputState::hasWebsocketStates() const {
-    return !_websocketInputs.empty();
+    return !global::websocketInputStates.empty();
 }
 
 } // namespace openspace::interaction

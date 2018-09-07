@@ -28,6 +28,7 @@
 #include <modules/webbrowser/include/cefhost.h>
 #include <modules/webbrowser/include/screenspacebrowser.h>
 #include <openspace/engine/configuration.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -47,10 +48,7 @@ WebBrowserModule::WebBrowserModule() : OpenSpaceModule(WebBrowserModule::Name) {
     _cefHost = std::make_unique<CefHost>(std::move(helperLocation));
     LDEBUG("Starting CEF... done!");
 
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::Deinitialize,
-        [this]() { deinitialize(); }
-    );
+    global::callback::deinitialize.push_back([this]() { deinitialize(); });
 }
 
 WebBrowserModule::~WebBrowserModule() {}

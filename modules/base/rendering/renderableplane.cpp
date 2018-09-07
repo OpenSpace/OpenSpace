@@ -27,11 +27,10 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/defer.h>
@@ -168,7 +167,7 @@ void RenderablePlane::initializeGL() {
     _shader = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return OsEng.renderEngine().buildRenderProgram(
+            return global::renderEngine.buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_BASE}/shaders/plane_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/plane_fs.glsl")
@@ -187,7 +186,7 @@ void RenderablePlane::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
     _shader = nullptr;
@@ -240,10 +239,10 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform("texture1", unit);
 
-    bool usingFramebufferRenderer = OsEng.renderEngine().rendererImplementation() ==
+    bool usingFramebufferRenderer = global::renderEngine.rendererImplementation() ==
                                     RenderEngine::RendererImplementation::Framebuffer;
 
-    bool usingABufferRenderer = OsEng.renderEngine().rendererImplementation() ==
+    bool usingABufferRenderer = global::renderEngine.rendererImplementation() ==
                                 RenderEngine::RendererImplementation::ABuffer;
 
     if (usingABufferRenderer) {

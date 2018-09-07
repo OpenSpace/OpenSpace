@@ -24,8 +24,8 @@
 
 #include <openspace/rendering/luaconsole.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/cachemanager.h>
@@ -269,23 +269,23 @@ void LuaConsole::initialize() {
 
     glBindVertexArray(0);
 
-    _font = OsEng.fontManager().font(
+    _font = global::fontManager.font(
         FontName,
         EntryFontSize,
         ghoul::fontrendering::FontManager::Outline::No
     );
 
-    _historyFont = OsEng.fontManager().font(
+    _historyFont = global::fontManager.font(
         FontName,
         HistoryFontSize,
         ghoul::fontrendering::FontManager::Outline::No
     );
 
-    OsEng.parallelPeer().connectionEvent().subscribe(
+    global::parallelPeer.connectionEvent().subscribe(
         "luaConsole",
         "statusChanged",
         [this]() {
-            ParallelConnection::Status status = OsEng.parallelPeer().status();
+            ParallelConnection::Status status = global::parallelPeer.status();
             parallelConnectionChanged(status);
         }
     );
@@ -325,7 +325,7 @@ void LuaConsole::deinitialize() {
 
     _program = nullptr;
 
-    OsEng.parallelPeer().connectionEvent().unsubscribe("luaConsole");
+    global::parallelPeer.connectionEvent().unsubscribe("luaConsole");
 }
 
 bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
@@ -348,7 +348,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         }
         else {
             _isVisible = true;
-            if (OsEng.parallelPeer().status() == ParallelConnection::Status::Host) {
+            if (global::parallelPeer.status() == ParallelConnection::Status::Host) {
                 _remoteScripting = true;
             }
         }
@@ -488,7 +488,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         std::string cmd = _commands.at(_activeCommand);
         if (!cmd.empty()) {
             using RemoteScripting = scripting::ScriptEngine::RemoteScripting;
-            OsEng.scriptEngine().queueScript(cmd, RemoteScripting(_remoteScripting));
+            global::scriptEngine.queueScript(cmd, RemoteScripting(_remoteScripting));
 
             // Only add the current command to the history if it hasn't been
             // executed before. We don't want two of the same commands in a row
@@ -517,7 +517,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         if (_autoCompleteInfo.lastIndex != NoAutoComplete && modifierShift) {
             _autoCompleteInfo.lastIndex -= 2;
         }
-        std::vector<std::string> allCommands = OsEng.scriptEngine().allLuaFunctions();
+        std::vector<std::string> allCommands = global::scriptEngine.allLuaFunctions();
         std::sort(allCommands.begin(), allCommands.end());
 
         std::string currentCommand = _commands.at(_activeCommand);
@@ -675,13 +675,13 @@ void LuaConsole::update() {
     // The first frame is going to be finished in approx 10 us, which causes a floating
     // point overflow when computing dHeight
     constexpr double Epsilon = 1e-4;
-    const double frametime = std::max(OsEng.windowWrapper().deltaTime(), Epsilon);
+    const double frametime = std::max(global::windowDelegate.deltaTime(), Epsilon);
 
     // Update the current height.
     // The current height is the offset that is used to slide
     // the console in from the top.
-    const glm::ivec2 res = OsEng.windowWrapper().currentWindowResolution();
-    const glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();
+    const glm::ivec2 res = global::windowDelegate.currentWindowResolution();
+    const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
     const double dHeight = (_targetHeight - _currentHeight) *
         std::pow(0.98, 1.0 / (ConsoleOpenSpeed / dpiScaling.y * frametime));
 
@@ -705,9 +705,9 @@ void LuaConsole::render() {
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 
-    const glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();
+    const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
     const glm::ivec2 res =
-        glm::vec2(OsEng.windowWrapper().currentWindowResolution()) / dpiScaling;
+        glm::vec2(global::windowDelegate.currentWindowResolution()) / dpiScaling;
 
 
     // Render background
@@ -888,10 +888,10 @@ void LuaConsole::render() {
     if (_remoteScripting) {
         const glm::vec4 Red(1, 0, 0, 1);
 
-        ParallelConnection::Status status = OsEng.parallelPeer().status();
+        ParallelConnection::Status status = global::parallelPeer.status();
         const int nClients =
             status != ParallelConnection::Status::Disconnected ?
-            OsEng.parallelPeer().nConnections() - 1 :
+            global::parallelPeer.nConnections() - 1 :
             0;
 
         const std::string nClientsText =
@@ -901,7 +901,7 @@ void LuaConsole::render() {
 
         const glm::vec2 loc = locationForRightJustifiedText(nClientsText);
         RenderFont(*_font, loc, nClientsText, Red);
-    } else if (OsEng.parallelPeer().isHost()) {
+    } else if (global::parallelPeer.isHost()) {
         const glm::vec4 LightBlue(0.4, 0.4, 1, 1);
 
         const std::string localExecutionText = "Local script execution";

@@ -24,12 +24,15 @@
 
 #include <openspace/interaction/touchbar.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/timemanager.h>
+
+using namespace openspace;
 
 // Apple uses 'defer' as named arguments in some functions, so unfortunately, we have to
 // undef our defer macro from ghoul/misc/defer.h
@@ -90,7 +93,7 @@ NSArray* focusIdentifiers;
         if ([identifier isEqualToString:pauseResultId]) {
             NSButton* button = [NSButton 
                 buttonWithTitle:NSLocalizedString(
-                    (OsEng.timeManager().isPaused() ? @"Resume" : @"Pause"),
+                    (global::timeManager.isPaused() ? @"Resume" : @"Pause"),
                     @""
                 )
                 target:self action:@selector(pauseResumeButtonAction:)
@@ -170,14 +173,14 @@ NSArray* focusIdentifiers;
     }
 
     - (void)pauseResumeButtonAction:(id)sender {
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             "openspace.time.togglePause();",
-            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::RemoteScripting::Yes
         );
 
         NSButton* button = static_cast<NSButton*>(sender);
         // This check is inverted since the togglePause script has not run yet
-        [button setTitle: OsEng.timeManager().isPaused() ? @"Pause" : @"Resume"];
+        [button setTitle: global::timeManager.isPaused() ? @"Pause" : @"Resume"];
     }
 
     - (void)focusObjectAction:(id)sender {
@@ -185,17 +188,17 @@ NSArray* focusIdentifiers;
 
         NSString* title = [button title];
 
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             "openspace.setPropertyValue('NavigationHandler.Origin', '" +
             std::string([title UTF8String]) + "');",
-            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
 
     - (void)fullGuiButtonAction:(id)sender {
         // Remove unused variable warning
         (void)sender;
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             "local b = openspace.getPropertyValue(\
                 'Modules.ImGUI.Main.Enabled'\
             );\
@@ -207,14 +210,14 @@ NSArray* focusIdentifiers;
                 'Modules.ImGUI.Main.IsHidden',\
                 b\
             );",
-            openspace::scripting::ScriptEngine::RemoteScripting::No
+            scripting::ScriptEngine::RemoteScripting::No
         );
     }
 
     - (void)simpleGuiButtonAction:(id)sender {
         // Remove unused variable warning
         (void)sender;
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
 "local b = openspace.getPropertyValue('Modules.ImGUI.Main.FeaturedProperties.Enabled');\n\
 local c = openspace.getPropertyValue('Modules.ImGUI.Main.IsHidden');\n\
 openspace.setPropertyValue('Modules.ImGUI.*.Enabled', false);\n\
@@ -242,7 +245,7 @@ else\n\
     );\n\
     openspace.setPropertyValueSingle('Modules.ImGUI.Main.IsHidden', b);\n\
 end",
-            openspace::scripting::ScriptEngine::RemoteScripting::No
+            scripting::ScriptEngine::RemoteScripting::No
         );
     }
 @end
@@ -264,7 +267,7 @@ void showTouchbar() {
     }
     
     std::vector<SceneGraphNode*> nodes =
-        OsEng.renderEngine().scene()->allSceneGraphNodes();
+        global::renderEngine.scene()->allSceneGraphNodes();
 
     std::sort(
         nodes.begin(),

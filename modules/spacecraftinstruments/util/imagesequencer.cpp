@@ -24,7 +24,6 @@
 
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>

@@ -24,33 +24,28 @@
 
 #include <modules/atmosphere/rendering/renderableatmosphere.h>
 
+#include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
+#include <modules/space/rendering/planetgeometry.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-
-#include <modules/space/rendering/planetgeometry.h>
+#include <openspace/engine/globals.h>
+#include <openspace/rendering/deferredcastermanager.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/renderer.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
-#include <openspace/scene/scenegraphnode.h>
-
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/invariants.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/misc/invariants.h>
-
-#include <openspace/rendering/deferredcastermanager.h>
-#include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/renderer.h>
-
 #include <glm/gtx/string_cast.hpp>
-
-#include <memory>
 #include <fstream>
+#include <memory>
 
 #ifdef WIN32
 #define _USE_MATH_DEFINES
@@ -673,9 +668,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
 
 void RenderableAtmosphere::deinitialize() {
     if (_deferredcaster) {
-        OsEng.renderEngine().deferredcasterManager().detachDeferredcaster(
-            *_deferredcaster
-        );
+        global::deferredcasterManager.detachDeferredcaster(*_deferredcaster);
         _deferredcaster = nullptr;
     }
 }
@@ -718,9 +711,7 @@ void RenderableAtmosphere::initializeGL() {
             _deferredcaster->initialize();
         }
 
-        OsEng.renderEngine().deferredcasterManager().attachDeferredcaster(
-            *_deferredcaster
-        );
+        global::deferredcasterManager.attachDeferredcaster(*_deferredcaster);
     }
 
     return;

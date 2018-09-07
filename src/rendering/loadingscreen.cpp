@@ -24,8 +24,8 @@
 
 #include <openspace/rendering/loadingscreen.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/font.h>
@@ -116,7 +116,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
         { "logoTexture", "useTexture", "color" }
     );
 
-    _loadingFont = OsEng.fontManager().font(
+    _loadingFont = global::fontManager.font(
         "Loading",
         LoadingFontSize,
         ghoul::fontrendering::FontManager::Outline::No,
@@ -124,7 +124,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     );
 
     if (_showMessage) {
-        _messageFont = OsEng.fontManager().font(
+        _messageFont = global::fontManager.font(
             "Loading",
             MessageFontSize,
             ghoul::fontrendering::FontManager::Outline::No,
@@ -133,7 +133,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     }
 
     if (_showNodeNames) {
-        _itemFont = OsEng.fontManager().font(
+        _itemFont = global::fontManager.font(
             "Loading",
             ItemFontSize,
             ghoul::fontrendering::FontManager::Outline::No,
@@ -212,9 +212,9 @@ void LoadingScreen::render() {
     // We have to recalculate the positions here because we will not be informed about a
     // window size change
 
-    const glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();
+    const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
     const glm::ivec2 res =
-        glm::vec2(OsEng.windowWrapper().currentDrawBufferResolution()) / dpiScaling;
+        glm::vec2(global::windowDelegate.currentDrawBufferResolution()) / dpiScaling;
 
     float screenAspectRatio = static_cast<float>(res.x) / static_cast<float>(res.y);
 
@@ -611,7 +611,7 @@ void LoadingScreen::render() {
     glEnable(GL_DEPTH_TEST);
 
     std::this_thread::sleep_for(RefreshRate);
-    OsEng.windowWrapper().swapBuffer();
+    global::windowDelegate.swapBuffer();
 }
 
 void LoadingScreen::postMessage(std::string message) {

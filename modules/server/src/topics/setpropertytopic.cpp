@@ -25,7 +25,7 @@
 #include <modules/server/include/topics/setpropertytopic.h>
 
 #include <openspace/json.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/properties/property.h>
 #include <openspace/query/query.h>
 #include <openspace/util/timemanager.h>
@@ -49,7 +49,7 @@ void SetPropertyTopic::handleJson(const nlohmann::json& json) {
         if (propertyKey == SpecialKeyTime) {
             Time newTime;
             newTime.setTime(value);
-            OsEng.timeManager().setTimeNextFrame(newTime);
+            global::timeManager.setTimeNextFrame(newTime);
         }
         else {
             properties::Property* prop = property(propertyKey);

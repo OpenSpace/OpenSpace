@@ -27,9 +27,9 @@
 #include <modules/digitaluniverse/digitaluniversemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -432,7 +432,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     _renderOption.addOption(0, "Camera View Direction");
     _renderOption.addOption(1, "Camera Position Normal");
     _renderOption.set(1);
-    if (OsEng.windowWrapper().isFisheyeRendering()) {
+    if (global::windowDelegate.isFisheyeRendering()) {
         _renderOption.set(1);
     }
     else {
@@ -645,7 +645,7 @@ void RenderableBillboardsCloud::initializeGL() {
     _program = DigitalUniverseModule::ProgramObjectManager.request(
         ProgramObjectName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return OsEng.renderEngine().buildRenderProgram(
+            return global::renderEngine.buildRenderProgram(
                 ProgramObjectName,
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_vs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_fs.glsl"),
@@ -675,7 +675,7 @@ void RenderableBillboardsCloud::initializeGL() {
     if (_hasLabel) {
         if (_font == nullptr) {
             size_t _fontSize = 50;
-            _font = OsEng.fontManager().font(
+            _font = global::fontManager.font(
                 "Mono",
                 static_cast<float>(_fontSize),
                 ghoul::fontrendering::FontManager::Outline::Yes,
@@ -694,7 +694,7 @@ void RenderableBillboardsCloud::deinitializeGL() {
     DigitalUniverseModule::ProgramObjectManager.release(
         ProgramObjectName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
     _program = nullptr;
@@ -749,7 +749,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     const glm::dmat4 projMatrix = glm::dmat4(data.camera.projectionMatrix());
     _program->setUniform(
         "screenSize",
-        glm::vec2(OsEng.renderEngine().renderingResolution())
+        glm::vec2(global::renderEngine.renderingResolution())
     );
 
     _program->setUniform(_uniformCache.cameraPos, data.camera.positionVec3());

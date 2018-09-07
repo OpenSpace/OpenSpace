@@ -26,7 +26,7 @@
 
 #include <modules/server/include/connection.h>
 #include <openspace/engine/configuration.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -84,7 +84,7 @@ void AuthorizationTopic::handleJson(const nlohmann::json& json) {
 }
 
 bool AuthorizationTopic::authorize(const std::string& key) {
-    _isAuthenticated = (key == OsEng.configuration().serverPasskey);
+    _isAuthenticated = (key == global::configuration.serverPasskey);
     return _isAuthenticated;
 }
 

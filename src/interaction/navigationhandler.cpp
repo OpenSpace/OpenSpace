@@ -24,7 +24,7 @@
 
 #include <openspace/interaction/navigationhandler.h>
 
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
@@ -99,18 +99,18 @@ NavigationHandler::NavigationHandler()
 NavigationHandler::~NavigationHandler() {} // NOLINT
 
 void NavigationHandler::initialize() {
-    OsEng.parallelPeer().connectionEvent().subscribe(
+    global::parallelPeer.connectionEvent().subscribe(
         "NavigationHandler",
         "statusChanged",
         [this]() {
-            _useKeyFrameInteraction = (OsEng.parallelPeer().status() ==
+            _useKeyFrameInteraction = (global::parallelPeer.status() ==
                 ParallelConnection::Status::ClientWithHost);
         }
     );
 }
 
 void NavigationHandler::deinitialize() {
-    OsEng.parallelPeer().connectionEvent().unsubscribe("NavigationHandler");
+    global::parallelPeer.connectionEvent().unsubscribe("NavigationHandler");
 }
 
 void NavigationHandler::setFocusNode(SceneGraphNode* node) {
@@ -195,10 +195,6 @@ void NavigationHandler::mouseScrollWheelCallback(double pos) {
 void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
 {
     _inputState->keyboardCallback(key, modifier, action);
-}
-
-void NavigationHandler::setJoystickInputStates(JoystickInputStates& states) {
-    _inputState->setJoystickInputStates(states);
 }
 
 void NavigationHandler::setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict)
@@ -355,18 +351,6 @@ void NavigationHandler::clearJoystickButtonCommand(int button) {
 
 std::vector<std::string> NavigationHandler::joystickButtonCommand(int button) const {
     return _orbitalNavigator->joystickStates().buttonCommand(button);
-}
-
-void NavigationHandler::setWebsocketInputStates(WebsocketInputStates& states) {
-    _inputState->setWebsocketInputStates(states);
-}
-
-void NavigationHandler::addWebsocketInputState(size_t id, openspace::interaction::WebsocketInputState &state) {
-    _inputState->addWebsocketInputState(id, state);
-}
-
-void NavigationHandler::removeWebsocketInputState(size_t id) {
-    _inputState->removeWebsocketInputState(id);
 }
 
 scripting::LuaLibrary NavigationHandler::luaLibrary() {

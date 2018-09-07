@@ -27,7 +27,7 @@
 #include <modules/server/include/connection.h>
 #include <modules/server/include/jsonconverters.h>
 
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/websocketcamerastates.h>
 #include <openspace/interaction/websocketinputstate.h>
@@ -141,16 +141,19 @@ FlightControllerTopic::FlightControllerTopic()
 : _isDone(false)
 {
     for (auto it = AxisIndexMap.begin(); it != AxisIndexMap.end(); ++it) {
-        OsEng.navigationHandler().setWebsocketAxisMapping(
+        global::navigationHandler.setWebsocketAxisMapping(
             int(std::distance(AxisIndexMap.begin(), it)),
             it->second);
     }
 
-    OsEng.navigationHandler().addWebsocketInputState(_topicId, _inputState);
+    // Add WebsocketInputState to global states
+    global::websocketInputStates[_topicId] = &_inputState;
 }
 
 FlightControllerTopic::~FlightControllerTopic() {
-    OsEng.navigationHandler().removeWebsocketInputState(_topicId);
+    // Reset global websocketInputStates
+    global::websocketInputStates.erase(_topicId);
+    global::websocketInputStates = interaction::WebsocketInputStates();
 }
 
 bool FlightControllerTopic::isDone() const {
@@ -204,7 +207,7 @@ void FlightControllerTopic::connect() {
 
 void FlightControllerTopic::setFocusNodes() {
     std::vector<SceneGraphNode*> nodes =
-        OsEng.renderEngine().scene()->allSceneGraphNodes();
+        global::renderEngine.scene()->allSceneGraphNodes();
 
     std::sort(
           nodes.begin(),
@@ -227,21 +230,26 @@ void FlightControllerTopic::setFocusNodes() {
 void FlightControllerTopic::changeFocus(const nlohmann::json& json) {
 
     if (json[ChangeFocus].find(FocusKey) == json[ChangeFocus].end()) {
-        LWARNING(fmt::format("Could not find {} key in JSON. JSON was:\n{}", FocusKey, json));
+        const std::string j = json;
+        LWARNING(fmt::format("Could not find {} key in JSON. JSON was:\n{}", FocusKey, j));
         return;
     }
-
-    const auto node = OsEng.renderEngine().scene()->sceneGraphNode(json[ChangeFocus][FocusKey]);
+    
+    const std::string focus = json[ChangeFocus][FocusKey];
+    const auto node = global::renderEngine.scene()->sceneGraphNode(focus);
     if (node) {
-        OsEng.navigationHandler().setFocusNode(node);
-        OsEng.navigationHandler().resetCameraDirection();
+        global::navigationHandler.setFocusNode(node);
+        global::navigationHandler.resetCameraDirection();
     } else {
-        LWARNING(fmt::format("Could not find node named {}", json[ChangeFocus][FocusKey]));
+        LWARNING(fmt::format("Could not find node named {}", focus));
     }
 }
 
 void FlightControllerTopic::disconnect() {
-    OsEng.navigationHandler().removeWebsocketInputState(_topicId);
+    // Reset global websocketInputStates
+    global::websocketInputStates.erase(_topicId);
+    global::websocketInputStates = interaction::WebsocketInputStates();
+
 
     // Update FlightController
     nlohmann::json j;
@@ -259,7 +267,7 @@ void FlightControllerTopic::setFriction(const bool &on) const {
     frictions.push_back(RollFriction);
 
     for (auto &f: frictions) {
-        auto property = OsEng.navigationHandler().orbitalNavigator().property(f);
+        auto property = global::navigationHandler.orbitalNavigator().property(f);
         property->set(on);
     }
 
@@ -287,9 +295,7 @@ void FlightControllerTopic::engageAutopilot(const nlohmann::json &json) {
         if (mapIt == AxisIndexMap.end()) {
             if (it.key() != TypeKey
                 || CommandMap.find(it.value()) == CommandMap.end()) {
-                LWARNING(fmt::format(
-                                     "No axis, button, or command named {} (value: {})", it.key() , it.value()
-                                     ));
+                LWARNING(fmt::format("No axis, button, or command named {} (value: {})", it.key(), static_cast<int>(it.value())));
             }
             continue;
         }
@@ -327,9 +333,10 @@ void FlightControllerTopic::processInputState(const nlohmann::json& json) {
         if (mapIt == AxisIndexMap.end()) {
             if (it.key() != TypeKey
                 || CommandMap.find(it.value()) == CommandMap.end()) {
-                LWARNING(fmt::format(
-                                 "No axis, button, or command named {} (value: {})", it.key() , it.value()
-                                 ));
+                LWARNING(
+                    fmt::format(
+                        "No axis, button, or command named {} (value: {})", it.key() , static_cast<int>(it.value())
+                    ));
             }
             continue;
         }

@@ -33,6 +33,8 @@
 
 #include <openspace/engine/openspaceengine.h>
 
+#include <openspace/engine/globalscallbacks.h>
+
 #include <modules/iswa/rendering/textureplane.h>
 #include <modules/iswa/rendering/dataplane.h>
 #include <modules/iswa/rendering/kameleonplane.h>
@@ -45,12 +47,7 @@
 namespace openspace {
 
 IswaModule::IswaModule() : OpenSpaceModule(Name) {
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::Initialize,
-        [](){
-            IswaManager::initialize();
-        }
-    );
+    global::callback::initialize.push_back([]() { IswaManager::initialize(); });
 }
 
 void IswaModule::internalInitialize(const ghoul::Dictionary&) {

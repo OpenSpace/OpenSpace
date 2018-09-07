@@ -92,176 +92,183 @@ namespace {
     constexpr const char* KeyShowNodeNames = "ShowNodeNames";
     constexpr const char* KeyShowProgressbar = "ShowProgressbar";
     constexpr const char* KeyModuleConfigurations = "ModuleConfigurations";
+
+    template <typename T>
+    void getValue(ghoul::lua::LuaState& L, const char* name, T& value) {
+        using namespace openspace::configuration;
+
+        auto it = std::find_if(
+            Configuration::Documentation.entries.begin(),
+            Configuration::Documentation.entries.end(),
+            [name](const openspace::documentation::DocumentationEntry& e) {
+            return e.key == name;
+        }
+        );
+
+        bool isOptional =
+            it != Configuration::Documentation.entries.end()
+            ? it->optional :
+            true;
+
+        lua_getglobal(L, name);
+        if (isOptional && lua_isnil(L, -1)) {
+            return;
+        }
+
+        if (!isOptional && lua_isnil(L, -1)) {
+            openspace::documentation::TestResult testResult = {
+                false,
+                { {
+                    name,
+                    openspace::documentation::TestResult::Offense::Reason::MissingKey
+                }},
+                {}
+            };
+            throw openspace::documentation::SpecificationError(
+                std::move(testResult),
+                "Configuration"
+            );
+        }
+
+        // NOLINTNEXTLINE
+        if constexpr (std::is_same_v<T, std::vector<std::string>>) {
+            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
+
+            std::vector<std::string> res;
+            for (size_t i = 1; i <= d.size(); ++i) {
+                res.push_back(d.value<std::string>(std::to_string(i)));
+            }
+            value = res;
+        }
+        // NOLINTNEXTLINE
+        else if constexpr (std::is_same_v<T, std::map<std::string, std::string>>) {
+            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
+
+            std::map<std::string, std::string> res;
+            for (size_t i = 0; i < d.size(); ++i) {
+                std::string key = d.keys()[i];
+                std::string v = d.value<std::string>(key);
+                res[std::move(key)] = std::move(v);
+            }
+            value = res;
+        }
+        // NOLINTNEXTLINE
+        else if constexpr (std::is_same_v<T, std::map<std::string, ghoul::Dictionary>>) {
+            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
+
+            std::map<std::string, ghoul::Dictionary> res;
+            for (size_t i = 0; i < d.size(); ++i) {
+                std::string key = d.keys()[i];
+                ghoul::Dictionary v = d.value<ghoul::Dictionary>(key);
+                res[std::move(key)] = std::move(v);
+            }
+            value = res;
+        }
+        // NOLINTNEXTLINE
+        else if constexpr (std::is_same_v<T, Configuration::Logging>) {
+            Configuration::Logging& v = static_cast<Configuration::Logging&>(value);
+            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
+
+            d.getValue(KeyLogLevel, v.level);
+            d.getValue(KeyImmediateFlush, v.forceImmediateFlush);
+            d.getValue(KeyCapabilitiesVerbosity, v.capabilitiesVerbosity);
+
+            if (d.hasKeyAndValue<ghoul::Dictionary>(KeyLogs)) {
+                ghoul::Dictionary l = d.value<ghoul::Dictionary>(KeyLogs);
+                std::vector<ghoul::Dictionary> res;
+                for (size_t i = 1; i <= l.size(); ++i) {
+                    res.push_back(l.value<ghoul::Dictionary>(std::to_string(i)));
+                }
+                v.logs = res;
+            }
+        }
+        // NOLINTNEXTLINE
+        else if constexpr (std::is_same_v<T, Configuration::DocumentationInfo>) {
+            Configuration::DocumentationInfo& v =
+                static_cast<Configuration::DocumentationInfo&>(value);
+            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
+
+            d.getValue(KeyLuaDocumentation, v.lua);
+            d.getValue(KeyPropertyDocumentation, v.property);
+            d.getValue("ScenePropertyDocumentation", v.sceneProperty);
+            d.getValue(KeyKeyboardShortcuts, v.keyboard);
+            d.getValue(KeyDocumentation, v.documentation);
+            d.getValue(KeyFactoryDocumentation, v.factory);
+            d.getValue(KeyLicenseDocumentation, v.license);
+        }
+        // NOLINTNEXTLINE
+        else if constexpr (std::is_same_v<T, Configuration::LoadingScreen>) {
+            Configuration::LoadingScreen& v =
+                static_cast<Configuration::LoadingScreen&>(value);
+            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
+
+            d.getValue(KeyShowMessage, v.isShowingMessages);
+            d.getValue(KeyShowNodeNames, v.isShowingNodeNames);
+            d.getValue(KeyShowProgressbar, v.isShowingProgressbar);
+        }
+        // NOLINTNEXTLINE
+        else if constexpr (std::is_same_v<T, Configuration::OpenGLDebugContext>) {
+            Configuration::OpenGLDebugContext& v =
+                static_cast<Configuration::OpenGLDebugContext&>(value);
+            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
+
+            d.getValue(KeyActivate, v.isActive);
+            d.getValue(KeySynchronous, v.isSynchronous);
+
+            if (d.hasKeyAndValue<ghoul::Dictionary>(KeyFilterIdentifier)) {
+                ghoul::Dictionary f = d.value<ghoul::Dictionary>(KeyFilterIdentifier);
+
+                std::vector<Configuration::OpenGLDebugContext::IdentifierFilter> res;
+                for (size_t i = 1; i <= f.size(); ++i) {
+                    Configuration::OpenGLDebugContext::IdentifierFilter filter;
+                    ghoul::Dictionary fi = f.value<ghoul::Dictionary>(std::to_string(i));
+
+                    double id = static_cast<double>(filter.identifier);
+                    fi.getValue(KeyIdentifier, id);
+                    filter.identifier = static_cast<unsigned int>(id);
+                    fi.getValue(KeySource, filter.source);
+                    fi.getValue(KeyType, filter.type);
+
+                    res.push_back(filter);
+                }
+
+                v.identifierFilters = res;
+            }
+
+            if (d.hasKeyAndValue<ghoul::Dictionary>(KeyFilterSeverity)) {
+                ghoul::Dictionary f = d.value<ghoul::Dictionary>(KeyFilterSeverity);
+
+                std::vector<std::string> res;
+                for (size_t i = 1; i <= f.size(); ++i) {
+                    res.push_back(f.value<std::string>(std::to_string(i)));
+                }
+                v.severityFilters = res;
+            }
+        }
+        // NOLINTNEXTLINE
+        else if constexpr (std::is_same_v<T, Configuration::HTTPProxy>) {
+            Configuration::HTTPProxy& v = static_cast<Configuration::HTTPProxy&>(value);
+            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
+
+            d.getValue(KeyActivate, v.usingHttpProxy);
+            d.getValue(KeyAddress, v.address);
+            double p = static_cast<double>(v.port);
+            d.getValue(KeyPort, p);
+            v.port = static_cast<unsigned int>(p);
+            d.getValue(KeyAuthentication, v.authentication);
+            d.getValue(KeyUser, v.user);
+            d.getValue(KeyPassword, v.password);
+        }
+        else {
+            value = ghoul::lua::value<T>(L);
+        }
+    }
+
 } // namespace
 
 #include "configuration_doc.inl"
 
-namespace openspace {
-
-template <typename T>
-void getValue(ghoul::lua::LuaState& L, const char* name, T& value) {
-    auto it = std::find_if(
-        Configuration::Documentation.entries.begin(),
-        Configuration::Documentation.entries.end(),
-        [name](const documentation::DocumentationEntry& e) {
-            return e.key == name;
-        }
-    );
-
-    bool isOptional =
-        it != Configuration::Documentation.entries.end()
-        ? it->optional :
-        true;
-
-    lua_getglobal(L, name);
-    if (isOptional && lua_isnil(L, -1)) {
-        return;
-    }
-
-    if (!isOptional && lua_isnil(L, -1)) {
-        documentation::TestResult testResult = {
-            false,
-            { { name, documentation::TestResult::Offense::Reason::MissingKey} },
-            {}
-        };
-        throw documentation::SpecificationError(std::move(testResult), "Configuration");
-    }
-
-    // NOLINTNEXTLINE
-    if constexpr (std::is_same_v<T, std::vector<std::string>>) {
-        ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-
-        std::vector<std::string> res;
-        for (size_t i = 1; i <= d.size(); ++i) {
-            res.push_back(d.value<std::string>(std::to_string(i)));
-        }
-        value = res;
-    }
-    // NOLINTNEXTLINE
-    else if constexpr (std::is_same_v<T, std::map<std::string, std::string>>) {
-        ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-
-        std::map<std::string, std::string> res;
-        for (size_t i = 0; i < d.size(); ++i) {
-            std::string key = d.keys()[i];
-            std::string v = d.value<std::string>(key);
-            res[std::move(key)] = std::move(v);
-        }
-        value = res;
-    }
-    // NOLINTNEXTLINE
-    else if constexpr (std::is_same_v<T, std::map<std::string, ghoul::Dictionary>>) {
-        ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-
-        std::map<std::string, ghoul::Dictionary> res;
-        for (size_t i = 0; i < d.size(); ++i) {
-            std::string key = d.keys()[i];
-            ghoul::Dictionary v = d.value<ghoul::Dictionary>(key);
-            res[std::move(key)] = std::move(v);
-        }
-        value = res;
-    }
-    // NOLINTNEXTLINE
-    else if constexpr (std::is_same_v<T, Configuration::Logging>) {
-        Configuration::Logging& v = static_cast<Configuration::Logging&>(value);
-        ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-
-        d.getValue(KeyLogLevel, v.level);
-        d.getValue(KeyLogDir, v.directory);
-        d.getValue(KeyPerformancePrefix, v.performancePrefix);
-        d.getValue(KeyImmediateFlush, v.forceImmediateFlush);
-        d.getValue(KeyCapabilitiesVerbosity, v.capabilitiesVerbosity);
-
-        if (d.hasKeyAndValue<ghoul::Dictionary>(KeyLogs)) {
-            ghoul::Dictionary l = d.value<ghoul::Dictionary>(KeyLogs);
-            std::vector<ghoul::Dictionary> res;
-            for (size_t i = 1; i <= l.size(); ++i) {
-                res.push_back(l.value<ghoul::Dictionary>(std::to_string(i)));
-            }
-            v.logs = res;
-        }
-    }
-    // NOLINTNEXTLINE
-    else if constexpr (std::is_same_v<T, Configuration::DocumentationInfo>) {
-        Configuration::DocumentationInfo& v =
-            static_cast<Configuration::DocumentationInfo&>(value);
-        ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-
-        d.getValue(KeyLuaDocumentation, v.lua);
-        d.getValue(KeyPropertyDocumentation, v.property);
-        d.getValue("ScenePropertyDocumentation", v.sceneProperty);
-        d.getValue(KeyKeyboardShortcuts, v.keyboard);
-        d.getValue(KeyDocumentation, v.documentation);
-        d.getValue(KeyFactoryDocumentation, v.factory);
-        d.getValue(KeyLicenseDocumentation, v.license);
-    }
-    // NOLINTNEXTLINE
-    else if constexpr (std::is_same_v<T, Configuration::LoadingScreen>) {
-        Configuration::LoadingScreen& v =
-            static_cast<Configuration::LoadingScreen&>(value);
-        ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-
-        d.getValue(KeyShowMessage, v.isShowingMessages);
-        d.getValue(KeyShowNodeNames, v.isShowingNodeNames);
-        d.getValue(KeyShowProgressbar, v.isShowingProgressbar);
-    }
-    // NOLINTNEXTLINE
-    else if constexpr (std::is_same_v<T, Configuration::OpenGLDebugContext>) {
-        Configuration::OpenGLDebugContext& v =
-            static_cast<Configuration::OpenGLDebugContext&>(value);
-        ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-
-        d.getValue(KeyActivate, v.isActive);
-        d.getValue(KeySynchronous, v.isSynchronous);
-
-        if (d.hasKeyAndValue<ghoul::Dictionary>(KeyFilterIdentifier)) {
-            ghoul::Dictionary f = d.value<ghoul::Dictionary>(KeyFilterIdentifier);
-
-            std::vector<Configuration::OpenGLDebugContext::IdentifierFilter> res;
-            for (size_t i = 1; i <= f.size(); ++i) {
-                Configuration::OpenGLDebugContext::IdentifierFilter filter;
-                ghoul::Dictionary fi = f.value<ghoul::Dictionary>(std::to_string(i));
-
-                double id = static_cast<double>(filter.identifier);
-                fi.getValue(KeyIdentifier, id);
-                filter.identifier = static_cast<unsigned int>(id);
-                fi.getValue(KeySource, filter.source);
-                fi.getValue(KeyType, filter.type);
-
-                res.push_back(filter);
-            }
-
-            v.identifierFilters = res;
-        }
-
-        if (d.hasKeyAndValue<ghoul::Dictionary>(KeyFilterSeverity)) {
-            ghoul::Dictionary f = d.value<ghoul::Dictionary>(KeyFilterSeverity);
-
-            std::vector<std::string> res;
-            for (size_t i = 1; i <= f.size(); ++i) {
-                res.push_back(f.value<std::string>(std::to_string(i)));
-            }
-            v.severityFilters = res;
-        }
-    }
-    // NOLINTNEXTLINE
-    else if constexpr (std::is_same_v<T, Configuration::HTTPProxy>) {
-        Configuration::HTTPProxy& v = static_cast<Configuration::HTTPProxy&>(value);
-        ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-
-        d.getValue(KeyActivate, v.usingHttpProxy);
-        d.getValue(KeyAddress, v.address);
-        double p = static_cast<double>(v.port);
-        d.getValue(KeyPort, p);
-        v.port = static_cast<unsigned int>(p);
-        d.getValue(KeyAuthentication, v.authentication);
-        d.getValue(KeyUser, v.user);
-        d.getValue(KeyPassword, v.password);
-    }
-    else {
-        value = ghoul::lua::value<T>(L);
-    }
-}
+namespace openspace::configuration {
 
 void parseLuaState(Configuration& configuration) {
     using namespace ghoul::lua;
@@ -356,4 +363,4 @@ Configuration loadConfigurationFromFile(const std::string& filename) {
     return result;
 }
 
-} // namespace openspace
+} // namespace openspace::configuration

@@ -82,8 +82,6 @@ public:
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
 
-    void setJoystickInputStates(JoystickInputStates& states);
-
     void setJoystickAxisMapping(int axis, JoystickCameraStates::AxisType mapping,
         JoystickCameraStates::AxisInvert shouldInvert =
             JoystickCameraStates::AxisInvert::No,
@@ -104,9 +102,6 @@ public:
 
 
     // Websockets
-    void setWebsocketInputStates(WebsocketInputStates& states);
-    void addWebsocketInputState(size_t id, WebsocketInputState& state);
-    void removeWebsocketInputState(size_t id);
     void setWebsocketAxisMapping(int axis, WebsocketCameraStates::AxisType mapping,
                                 WebsocketCameraStates::AxisInvert shouldInvert =
                                 WebsocketCameraStates::AxisInvert::No,

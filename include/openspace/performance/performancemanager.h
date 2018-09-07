@@ -42,10 +42,10 @@ public:
     static void CreateGlobalSharedMemory();
     static void DestroyGlobalSharedMemory();
 
-    PerformanceManager(std::string loggingDirectory = "${BASE}",
-        std::string prefix = "PM-");
-
     ~PerformanceManager();
+
+    void setEnabled(bool enabled);
+    bool isEnabled() const;
 
     void resetPerformanceMeasurements();
 
@@ -74,6 +74,7 @@ public:
     PerformanceLayout* performanceData();
 
 private:
+    bool _performanceMeasurementEnabled = false;
     bool _loggingEnabled = false;
 
     std::string _logDir;

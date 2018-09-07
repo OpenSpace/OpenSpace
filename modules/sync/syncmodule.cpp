@@ -29,7 +29,7 @@
 #include <modules/sync/syncs/urlsynchronization.h>
 #include <modules/sync/tasks/syncassettask.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/util/factorymanager.h>
@@ -114,11 +114,7 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
 
     _torrentClient.initialize();
 
-    // Deinitialize
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::Deinitialize,
-        [&]() { _torrentClient.deinitialize(); }
-    );
+    global::callback::deinitialize.push_back([&]() { _torrentClient.deinitialize(); });
 }
 
 void SyncModule::internalDeinitialize() {
