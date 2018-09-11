@@ -26,7 +26,7 @@
 
 #include <modules/iswa/rendering/iswabasegroup.h>
 #include <modules/iswa/util/iswamanager.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
@@ -114,7 +114,7 @@ void IswaCygnet::initializeGL() {
     } else {
         _delete.onChange([this]() {
             deinitialize();
-            OsEng.scriptEngine().queueScript(
+            global::scriptEngine.queueScript(
                 "openspace.removeSceneGraphNode('" + identifier() + "')",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
@@ -123,7 +123,7 @@ void IswaCygnet::initializeGL() {
 
     initializeTime();
     createGeometry();
-    downloadTextureResource(OsEng.timeManager().time().j2000Seconds());
+    downloadTextureResource(global::timeManager.time().j2000Seconds());
 }
 
 void IswaCygnet::deinitializeGL() {
@@ -135,7 +135,7 @@ void IswaCygnet::deinitializeGL() {
     destroyGeometry();
 
     if (_shader) {
-        OsEng.renderEngine().removeRenderProgram(_shader.get());
+        global::renderEngine.removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
 }
@@ -186,7 +186,7 @@ void IswaCygnet::update(const UpdateData&) {
 
     // the texture resource is downloaded ahead of time, so we need to
     // now if we are going backwards or forwards
-    _openSpaceTime = OsEng.timeManager().time().j2000Seconds();
+    _openSpaceTime = global::timeManager.time().j2000Seconds();
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()
     );
@@ -211,7 +211,7 @@ void IswaCygnet::update(const UpdateData&) {
         updateTexture();
         _textureDirty = false;
 
-        double clockwiseSign = (OsEng.timeManager().deltaTime() > 0) ? 1.0 : -1.0;
+        double clockwiseSign = (global::timeManager.deltaTime() > 0) ? 1.0 : -1.0;
         downloadTextureResource(_openSpaceTime + clockwiseSign * _data.updateTime);
         _lastUpdateRealTime = _realTime;
         _lastUpdateOpenSpaceTime = _openSpaceTime;
@@ -233,7 +233,7 @@ void IswaCygnet::registerProperties() {}
 void IswaCygnet::unregisterProperties() {}
 
 void IswaCygnet::initializeTime() {
-    _openSpaceTime = OsEng.timeManager().time().j2000Seconds();
+    _openSpaceTime = global::timeManager.time().j2000Seconds();
     _lastUpdateOpenSpaceTime = 0.0;
 
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -270,7 +270,7 @@ void IswaCygnet::initializeGroup() {
 
     groupEvent.subscribe(identifier(), "clearGroup", [&](ghoul::Dictionary) {
         LDEBUG(identifier() + " Event clearGroup");
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             "openspace.removeSceneGraphNode('" + identifier() + "')",
             scripting::ScriptEngine::RemoteScripting::Yes
         );

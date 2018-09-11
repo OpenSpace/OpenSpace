@@ -37,6 +37,8 @@ set(SOURCE_FILES
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
+set(SGCT_SPOUT_SUPPORT ON CACHE BOOL "" FORCE)
+
 create_new_module(
     "Spout"
     spout_module

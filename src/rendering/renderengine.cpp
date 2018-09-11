@@ -26,7 +26,9 @@
 
 #include <openspace/openspace.h>
 #include <openspace/engine/configuration.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/mission/missionmanager.h>
@@ -35,6 +37,7 @@
 #include <openspace/rendering/abufferrenderer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/deferredcastermanager.h>
+#include <openspace/rendering/helper.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/raycastermanager.h>
@@ -88,23 +91,6 @@ namespace {
         "and rendering of the scene graph nodes are collected each frame. These values "
         "provide some information about the impact of individual nodes on the overall "
         "performance."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ShowDateInfo = {
-        "ShowDate",
-        "Show Date Information",
-        "This values determines whether the date will be printed in the top left corner "
-        "of the rendering window if a regular rendering window is used (as opposed to a "
-        "fisheye rendering, for example)."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ShowInfoInfo = {
-        "ShowInfo",
-        "Show Rendering Information",
-        "This value determines whether the rendering info, which is the delta time and "
-        "the frame time, is shown in the top left corner of the rendering window if a "
-        "regular rendering window is used (as opposed to a fisheye rendering, for "
-        "example)."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowOverlaySlavesInfo = {
@@ -229,21 +215,9 @@ RenderEngine::RenderEngine()
     , _hdrExposure(HDRExposureInfo, 0.4f, 0.01f, 10.0f)
     , _hdrBackground(BackgroundExposureInfo, 2.8f, 0.01f, 10.0f)
     , _gamma(GammaInfo, 2.2f, 0.01f, 10.0f)
-    , _screenSpaceOwner({ "ScreenSpace" })
 {
     _doPerformanceMeasurements.onChange([this](){
-        if (_doPerformanceMeasurements) {
-            if (!_performanceManager) {
-                _performanceManager = std::make_shared<performance::PerformanceManager>(
-                    OsEng.configuration().logging.directory,
-                    OsEng.configuration().logging.performancePrefix
-                );
-            }
-        }
-        else {
-            _performanceManager = nullptr;
-        }
-
+        global::performanceManager.setEnabled(_doPerformanceMeasurements);
     });
     addProperty(_doPerformanceMeasurements);
 
@@ -317,30 +291,11 @@ void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
 }
 
 void RenderEngine::initialize() {
-    std::string renderingMethod = OsEng.configuration().renderingMethod;
-    if (renderingMethod == "ABuffer") {
-        using Version = ghoul::systemcapabilities::Version;
-
-        // The default rendering method has a requirement of OpenGL 4.3, so if we are
-        // below that, we will fall back to frame buffer operation
-        if (OpenGLCap.openGLVersion() < Version{ 4,3,0 }) {
-            LINFO("Falling back to framebuffer implementation due to OpenGL limitations");
-            renderingMethod = "Framebuffer";
-        }
-    }
-
     // We have to perform these initializations here as the OsEng has not been initialized
     // in our constructor
     _disableSceneTranslationOnMaster =
-        OsEng.configuration().isSceneTranslationOnMasterDisabled;
-    _disableMasterRendering = OsEng.configuration().isRenderingOnMasterDisabled;
-
-    _raycasterManager = std::make_unique<RaycasterManager>();
-    _deferredcasterManager = std::make_unique<DeferredcasterManager>();
-    _nAaSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
-
-    LINFO(fmt::format("Setting renderer from string: {}", renderingMethod));
-    setRendererFromString(renderingMethod);
+        global::configuration.isSceneTranslationOnMasterDisabled;
+    _disableMasterRendering = global::configuration.isRenderingOnMasterDisabled;
 
 #ifdef GHOUL_USE_DEVIL
     ghoul::io::TextureReader::ref().addReader(
@@ -369,53 +324,57 @@ void RenderEngine::initialize() {
     ghoul::io::TextureReader::ref().addReader(
         std::make_unique<ghoul::io::TextureReaderCMAP>()
     );
-
-    MissionManager::initialize();
 }
 
 void RenderEngine::initializeGL() {
     LTRACE("RenderEngine::initializeGL(begin)");
+
+    _nAaSamples = global::windowDelegate.currentNumberOfAaSamples();
+
+    std::string renderingMethod = global::configuration.renderingMethod;
+    if (renderingMethod == "ABuffer") {
+        using Version = ghoul::systemcapabilities::Version;
+
+        // The default rendering method has a requirement of OpenGL 4.3, so if we are
+        // below that, we will fall back to frame buffer operation
+        if (OpenGLCap.openGLVersion() < Version{ 4,3,0 }) {
+            LINFO("Falling back to framebuffer implementation due to OpenGL limitations");
+            renderingMethod = "Framebuffer";
+        }
+    }
+
+    LINFO(fmt::format("Setting renderer from string: {}", renderingMethod));
+    setRendererFromString(renderingMethod);
+
+
+
     // TODO:    Fix the power scaled coordinates in such a way that these
     //            values can be set to more realistic values
 
     // set the close clip plane and the far clip plane to extreme values while in
     // development
-    OsEng.windowWrapper().setNearFarClippingPlane(0.001f, 1000.f);
+    global::windowDelegate.setNearFarClippingPlane(0.001f, 1000.f);
 
     constexpr const float FontSizeBig = 50.f;
-    _fontBig = OsEng.fontManager().font(KeyFontMono, FontSizeBig);
+    _fontBig = global::fontManager.font(KeyFontMono, FontSizeBig);
     constexpr const float FontSizeTime = 15.f;
-    _fontDate = OsEng.fontManager().font(KeyFontMono, FontSizeTime);
+    _fontDate = global::fontManager.font(KeyFontMono, FontSizeTime);
     constexpr const float FontSizeMono = 10.f;
-    _fontInfo = OsEng.fontManager().font(KeyFontMono, FontSizeMono);
+    _fontInfo = global::fontManager.font(KeyFontMono, FontSizeMono);
     constexpr const float FontSizeLight = 8.f;
-    _fontLog = OsEng.fontManager().font(KeyFontLight, FontSizeLight);
+    _fontLog = global::fontManager.font(KeyFontLight, FontSizeLight);
 
     LINFO("Initializing Log");
     std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
     _log = log.get();
     ghoul::logging::LogManager::ref().addLog(std::move(log));
 
-    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
-        ssr->initializeGL();
-    }
-
     LINFO("Finished initializing GL");
     LTRACE("RenderEngine::initializeGL(end)");
 }
 
-void RenderEngine::deinitialize() {
-    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
-        ssr->deinitialize();
-    }
-
-    MissionManager::deinitialize();
-}
-
 void RenderEngine::deinitializeGL() {
-    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
-        ssr->deinitializeGL();
-    }
+    _renderer = nullptr;
 }
 
 void RenderEngine::updateScene() {
@@ -425,14 +384,14 @@ void RenderEngine::updateScene() {
 
     _scene->updateInterpolations();
 
-    const Time& currentTime = OsEng.timeManager().time();
-    const Time& integrateFromTime = OsEng.timeManager().integrateFromTime();
+    const Time& currentTime = global::timeManager.time();
+    const Time& integrateFromTime = global::timeManager.integrateFromTime();
 
     _scene->update({
         { glm::dvec3(0.0), glm::dmat3(11.), 1.0 },
         currentTime,
         integrateFromTime,
-        _performanceManager != nullptr
+        _doPerformanceMeasurements
     });
 
     LTRACE("RenderEngine::updateSceneGraph(end)");
@@ -452,7 +411,7 @@ void RenderEngine::updateShaderPrograms() {
 }
 
 void RenderEngine::updateRenderer() {
-    const bool windowResized = OsEng.windowWrapper().windowHasResized();
+    const bool windowResized = global::windowDelegate.windowHasResized();
 
     if (windowResized) {
         _renderer->setResolution(renderingResolution());
@@ -466,28 +425,27 @@ void RenderEngine::updateRenderer() {
 }
 
 void RenderEngine::updateScreenSpaceRenderables() {
-    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
+    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : global::screenSpaceRenderables) {
         ssr->update();
     }
 }
 
 glm::ivec2 RenderEngine::renderingResolution() const {
-    if (OsEng.windowWrapper().isRegularRendering()) {
-        return OsEng.windowWrapper().currentWindowResolution();
+    if (global::windowDelegate.isRegularRendering()) {
+        return global::windowDelegate.currentWindowResolution();
     }
     else {
-        return OsEng.windowWrapper().currentDrawBufferResolution();
+        return global::windowDelegate.currentDrawBufferResolution();
     }
 }
 
 glm::ivec2 RenderEngine::fontResolution() const {
-    const std::string& value = OsEng.configuration().onScreenTextScaling;
+    const std::string& value = global::configuration.onScreenTextScaling;
     if (value == "framebuffer") {
-        return OsEng.windowWrapper().getCurrentViewportSize();
-        //return OsEng.windowWrapper().currentWindowResolution();
+        return global::windowDelegate.currentViewportSize();
     }
     else {
-        return OsEng.windowWrapper().currentWindowSize();
+        return global::windowDelegate.currentWindowSize();
     }
 }
 
@@ -523,7 +481,7 @@ void RenderEngine::updateFade() {
                 );
             }
             _currentFadeTime += static_cast<float>(
-                OsEng.windowWrapper().averageDeltaTime()
+                global::windowDelegate.averageDeltaTime()
             );
         }
     }
@@ -533,9 +491,9 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
                           const glm::mat4& projectionMatrix)
 {
     LTRACE("RenderEngine::render(begin)");
-    const WindowWrapper& wrapper = OsEng.windowWrapper();
+    const WindowDelegate& delegate = global::windowDelegate;
     if (_camera) {
-        if (_disableSceneTranslationOnMaster && wrapper.isMaster()) {
+        if (_disableSceneTranslationOnMaster && delegate.isMaster()) {
             _camera->sgctInternal.setViewMatrix(viewMatrix);
         }
         else {
@@ -545,13 +503,12 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         _camera->sgctInternal.setProjectionMatrix(projectionMatrix);
     }
 
-    const bool masterEnabled = wrapper.isMaster() ? !_disableMasterRendering : true;
-    if (masterEnabled && !wrapper.isGuiWindow() && _globalBlackOutFactor > 0.f) {
+    const bool masterEnabled = delegate.isMaster() ? !_disableMasterRendering : true;
+    if (masterEnabled && !delegate.isGuiWindow() && _globalBlackOutFactor > 0.f) {
         _renderer->render(
             _scene,
             _camera,
-            _globalBlackOutFactor,
-            _performanceManager != nullptr
+            _globalBlackOutFactor
         );
     }
 
@@ -566,7 +523,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 
     ++_frameNumber;
 
-    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
+    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : global::screenSpaceRenderables) {
         if (ssr->isEnabled() && ssr->isReady()) {
             ssr->render();
         }
@@ -586,7 +543,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RotationalFriction';
             openspace.setPropertyValue(f, not openspace.getPropertyValue(f));)";
 
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             ToggleRotationFrictionScript,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -598,7 +555,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
             local f = 'NavigationHandler.OrbitalNavigator.Friction.ZoomFriction';
             openspace.setPropertyValue(f, not openspace.getPropertyValue(f));)";
 
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             ToggleZoomFrictionScript,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -610,7 +567,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RollFriction';
             openspace.setPropertyValue(f, not openspace.getPropertyValue(f));)";
 
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             ToggleRollFrictionScript,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -621,7 +578,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
 }
 
 void RenderEngine::renderOverlays(const ShutdownInformation& shutdownInfo) {
-    const bool isMaster = OsEng.windowWrapper().isMaster();
+    const bool isMaster = global::windowDelegate.isMaster();
     if (isMaster || _showOverlayOnSlaves) {
         renderScreenLog();
         renderVersionInformation();
@@ -637,6 +594,28 @@ void RenderEngine::renderOverlays(const ShutdownInformation& shutdownInfo) {
             renderShutdownInformation(shutdownInfo.timer, shutdownInfo.waitTime);
         }
     }
+}
+
+void RenderEngine::renderEndscreen() {
+    glEnable(GL_BLEND);
+
+    rendering::helper::renderBox(
+        glm::vec2(0.f, 0.f),
+        glm::vec2(1.f, 1.f),
+        glm::vec4(0.f, 0.f, 0.f, 0.5f)
+    );
+
+    using FR = ghoul::fontrendering::FontRenderer;
+    using BBox = FR::BoundingBoxInformation;
+    BBox size = FR::defaultRenderer().boundingBox(
+        *_fontDate,
+        "Shutting down"
+    );
+    glm::vec2 penPosition = glm::vec2(
+        fontResolution().x / 2 - size.boundingBox.x / 2,
+        fontResolution().y / 2- size.boundingBox.y / 2
+    );
+    RenderFont(*_fontDate, penPosition, "Shutting down");
 }
 
 void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
@@ -672,40 +651,37 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 
 void RenderEngine::renderDashboard() {
     std::unique_ptr<performance::PerformanceMeasurement> perf;
-    if (_performanceManager) {
+    if (global::performanceManager.isEnabled()) {
         perf = std::make_unique<performance::PerformanceMeasurement>(
-            "Main Dashboard::render",
-            OsEng.renderEngine().performanceManager()
+            "Main Dashboard::render"
         );
     }
     glm::vec2 penPosition = glm::vec2(
         10.f,
-        fontResolution().y - OsEng.console().currentHeight()
+        fontResolution().y - global::luaConsole.currentHeight()
     );
 
-    OsEng.dashboard().render(penPosition);
+    global::dashboard.render(penPosition);
 }
 
 void RenderEngine::postDraw() {
-    const Time& currentTime = OsEng.timeManager().time();
-
     if (_shouldTakeScreenshot) {
         // We only create the directory here, as we don't want to spam the users
         // screenshot folder everytime we start OpenSpace even when we are not taking any
         // screenshots. So the first time we actually take one, we create the folder:
-        if (!FileSys.directoryExists(absPath("${THIS_SCREENSHOT_PATH}"))) {
+        if (!FileSys.directoryExists(absPath("${SCREENSHOTS}"))) {
             FileSys.createDirectory(
-                absPath("${THIS_SCREENSHOT_PATH}"),
+                absPath("${SCREENSHOTS}"),
                 ghoul::filesystem::FileSystem::Recursive::Yes
             );
         }
 
-        OsEng.windowWrapper().takeScreenshot(_applyWarping);
+        global::windowDelegate.takeScreenshot(_applyWarping);
         _shouldTakeScreenshot = false;
     }
 
-    if (_performanceManager) {
-        _performanceManager->storeScenePerformanceMeasurements(
+    if (global::performanceManager.isEnabled()) {
+        global::performanceManager.storeScenePerformanceMeasurements(
             scene()->allSceneGraphNodes()
         );
     }
@@ -713,14 +689,6 @@ void RenderEngine::postDraw() {
 
 Scene* RenderEngine::scene() {
     return _scene;
-}
-
-RaycasterManager& RenderEngine::raycasterManager() {
-    return *_raycasterManager;
-}
-
-DeferredcasterManager& RenderEngine::deferredcasterManager() {
-    return *_deferredcasterManager;
 }
 
 void RenderEngine::setScene(Scene* scene) {
@@ -943,35 +911,27 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
     };
 }
 
-bool RenderEngine::doesPerformanceMeasurements() const {
-    return _performanceManager != nullptr;
-}
-
-std::shared_ptr<performance::PerformanceManager> RenderEngine::performanceManager() {
-    return _performanceManager;
-}
-
 void RenderEngine::addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderable> s) {
     s->initialize();
     s->initializeGL();
 
-    _screenSpaceOwner.addPropertySubOwner(s.get());
+    global::screenSpaceRootPropertyOwner.addPropertySubOwner(s.get());
 
-    _screenSpaceRenderables.push_back(std::move(s));
+    global::screenSpaceRenderables.push_back(std::move(s));
 }
 
 void RenderEngine::removeScreenSpaceRenderable(ScreenSpaceRenderable* s) {
     const auto it = std::find_if(
-        _screenSpaceRenderables.begin(),
-        _screenSpaceRenderables.end(),
+        global::screenSpaceRenderables.begin(),
+        global::screenSpaceRenderables.end(),
         [s](const std::unique_ptr<ScreenSpaceRenderable>& r) { return r.get() == s; }
     );
 
-    if (it != _screenSpaceRenderables.end()) {
+    if (it != global::screenSpaceRenderables.end()) {
         s->deinitialize();
-        _screenSpaceOwner.removePropertySubOwner(s);
+        global::screenSpaceRootPropertyOwner.removePropertySubOwner(s);
 
-        _screenSpaceRenderables.erase(it);
+        global::screenSpaceRenderables.erase(it);
     }
 }
 
@@ -986,14 +946,14 @@ ScreenSpaceRenderable* RenderEngine::screenSpaceRenderable(
                                                             const std::string& identifier)
 {
     const auto it = std::find_if(
-        _screenSpaceRenderables.begin(),
-        _screenSpaceRenderables.end(),
+        global::screenSpaceRenderables.begin(),
+        global::screenSpaceRenderables.end(),
         [&identifier](const std::unique_ptr<ScreenSpaceRenderable>& s) {
             return s->identifier() == identifier;
         }
     );
 
-    if (it != _screenSpaceRenderables.end()) {
+    if (it != global::screenSpaceRenderables.end()) {
         return it->get();
     }
     else {
@@ -1002,10 +962,10 @@ ScreenSpaceRenderable* RenderEngine::screenSpaceRenderable(
 }
 
 std::vector<ScreenSpaceRenderable*> RenderEngine::screenSpaceRenderables() const {
-    std::vector<ScreenSpaceRenderable*> res(_screenSpaceRenderables.size());
+    std::vector<ScreenSpaceRenderable*> res(global::screenSpaceRenderables.size());
     std::transform(
-        _screenSpaceRenderables.begin(),
-        _screenSpaceRenderables.end(),
+        global::screenSpaceRenderables.begin(),
+        global::screenSpaceRenderables.end(),
         res.begin(),
         [](const std::unique_ptr<ScreenSpaceRenderable>& p) { return p.get(); }
     );
@@ -1049,7 +1009,7 @@ void RenderEngine::renderCameraInformation() {
     constexpr const float YSeparation = 5.f;
     constexpr const float XSeparation = 5.f;
 
-    interaction::OrbitalNavigator nav = OsEng.navigationHandler().orbitalNavigator();
+    interaction::OrbitalNavigator nav = global::navigationHandler.orbitalNavigator();
 
     _cameraButtonLocations.rotation = {
         fontResolution().x - rotationBox.boundingBox.x - XSeparation,
@@ -1238,10 +1198,6 @@ void RenderEngine::renderScreenLog() {
         );
         ++nr;
     }
-}
-
-properties::PropertyOwner& RenderEngine::screenSpaceOwner() {
-    return _screenSpaceOwner;
 }
 
 } // namespace openspace

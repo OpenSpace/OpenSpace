@@ -1,26 +1,26 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014-2018                                                               *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2018                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #include <modules/digitaluniverse/rendering/renderabledumeshes.h>
 
@@ -28,8 +28,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -145,7 +145,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
-        "RenderOptionInfo",
+        "RenderOption",
         "Render Option",
         "Debug option for rendering of billboards and texts."
     };
@@ -158,36 +158,36 @@ namespace openspace {
         return {
             "RenderableDUMeshes",
             "digitaluniverse_renderabledumeshes",
-        {
             {
-                "Type",
-                new StringEqualVerifier("RenderableDUMeshes"),
-                Optional::No
-            },
-            {
-                KeyFile,
-                new StringVerifier,
-                Optional::No,
-                "The path to the SPECK file that contains information about the "
-                "astronomical object being rendered."
-            },
-            {
-                keyColor,
-                new Vector3Verifier<float>,
-                Optional::No,
-                "Astronomical Object Color (r,g,b)."
-            },
-            {
-                TransparencyInfo.identifier,
+                {
+                    "Type",
+                    new StringEqualVerifier("RenderableDUMeshes"),
+                    Optional::No
+                },
+                {
+                    KeyFile,
+                    new StringVerifier,
+                    Optional::No,
+                    "The path to the SPECK file that contains information about the "
+                    "astronomical object being rendered."
+                },
+                {
+                    keyColor,
+                    new Vector3Verifier<float>,
+                    Optional::No,
+                    "Astronomical Object Color (r,g,b)."
+                },
+                {
+                    TransparencyInfo.identifier,
+                    new DoubleVerifier,
+                    Optional::Yes,
+                    TransparencyInfo.description
+                },
+            /*{
+                ScaleFactorInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
-                TransparencyInfo.description
-            },
-            /*{
-            ScaleFactorInfo.identifier,
-            new DoubleVerifier,
-            Optional::Yes,
-            ScaleFactorInfo.description
+                ScaleFactorInfo.description
             },*/
             {
                 DrawLabelInfo.identifier,
@@ -275,7 +275,7 @@ namespace openspace {
 
         _renderOption.addOption(0, "Camera View Direction");
         _renderOption.addOption(1, "Camera Position Normal");
-        if (OsEng.windowWrapper().isFisheyeRendering()) {
+        if (global::windowDelegate.isFisheyeRendering()) {
             _renderOption.set(1);
         }
         else {
@@ -313,7 +313,7 @@ namespace openspace {
         }
 
         /*if (dictionary.hasKey(keyColor)) {
-        _pointColor = dictionary.value<glm::vec3>(keyColor);
+            _pointColor = dictionary.value<glm::vec3>(keyColor);
         }
         addProperty(_pointColor);*/
 
@@ -325,9 +325,9 @@ namespace openspace {
         addProperty(_alphaValue);
 
         /*if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
-        _scaleFactor = static_cast<float>(
-        dictionary.value<double>(ScaleFactorInfo.identifier)
-        );
+            _scaleFactor = static_cast<float>(
+                dictionary.value<double>(ScaleFactorInfo.identifier)
+            );
         }
         addProperty(_scaleFactor);*/
 
@@ -399,7 +399,7 @@ namespace openspace {
         _program = DigitalUniverseModule::ProgramObjectManager.request(
             ProgramObjectName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return OsEng.renderEngine().buildRenderProgram(
+            return global::renderEngine.buildRenderProgram(
                 "RenderableDUMeshes",
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_vs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_fs.glsl")
@@ -419,7 +419,7 @@ namespace openspace {
         if (_hasLabel) {
             if (!_font) {
                 constexpr const int FontSize = 50;
-                _font = OsEng.fontManager().font(
+                _font = global::fontManager.font(
                     "Mono",
                     static_cast<float>(FontSize),
                     ghoul::fontrendering::FontManager::Outline::Yes,
@@ -440,7 +440,7 @@ namespace openspace {
         DigitalUniverseModule::ProgramObjectManager.release(
             ProgramObjectName,
             [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
         );
     }
@@ -655,7 +655,7 @@ namespace openspace {
 
             // LINFO("Saving cache");
             //success &= saveCachedFile(cachedFile);
-            // }
+        // }
         }
 
         std::string labelFile = _labelFile;
@@ -782,7 +782,7 @@ namespace openspace {
                 dim >> mesh.numU; // numU
                 dim >> mesh.numV; // numV
 
-                                  // We can now read the vertices data:
+                // We can now read the vertices data:
                 for (int l = 0; l < mesh.numU * mesh.numV; ++l) {
                     std::getline(file, line);
                     if (line.substr(0, 1) != "}") {

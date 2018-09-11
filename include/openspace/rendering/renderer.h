@@ -71,8 +71,7 @@ public:
 
     virtual void update() = 0;
 
-    virtual void render(Scene* scene, Camera* camera, float blackoutFactor,
-        bool doPerformanceMeasurements) = 0;
+    virtual void render(Scene* scene, Camera* camera, float blackoutFactor) = 0;
     /**
      * Update render data
      * Responsible for calling renderEngine::setRenderData

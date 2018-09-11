@@ -29,8 +29,8 @@
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
 
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -499,8 +499,7 @@ namespace openspace {
     }
 
     void RenderableStars::initializeGL() {
-        RenderEngine& renderEngine = OsEng.renderEngine();
-        _program = renderEngine.buildRenderProgram("Star",
+        _program = global::renderEngine.buildRenderProgram("Star",
             absPath("${MODULE_SPACE}/shaders/star_vs.glsl"),
             absPath("${MODULE_SPACE}/shaders/star_fs.glsl"),
             absPath("${MODULE_SPACE}/shaders/star_ge.glsl")
@@ -566,9 +565,8 @@ namespace openspace {
 
         _colorTexture = nullptr;
 
-        RenderEngine& renderEngine = OsEng.renderEngine();
         if (_program) {
-            renderEngine.removeRenderProgram(_program.get());
+            global::renderEngine.removeRenderProgram(_program.get());
             _program = nullptr;
         }
     }

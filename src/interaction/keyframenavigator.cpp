@@ -24,8 +24,8 @@
 
 #include <openspace/interaction/keyframenavigator.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
@@ -35,7 +35,7 @@
 namespace openspace::interaction {
 
 void KeyframeNavigator::updateCamera(Camera& camera) {
-    double now = OsEng.windowWrapper().applicationTime();
+    double now = global::windowDelegate.applicationTime();
 
     if (_cameraPoseTimeline.nKeyframes() == 0) {
         return;
@@ -117,10 +117,12 @@ void KeyframeNavigator::updateCamera(Camera& camera) {
     // We want to affect view scaling, such that we achieve
     // logarithmic interpolation of distance to an imagined focus node.
     // To do this, we interpolate the scale reciprocal logarithmically.
-    const float prevInvScaleExp = glm::log(1.0 / prevPose.scale);
-    const float nextInvScaleExp = glm::log(1.0 / nextPose.scale);
-    const float interpolatedInvScaleExp = prevInvScaleExp * (1 - t) + nextInvScaleExp * t;
-    camera.setScaling(1.0 / glm::exp(interpolatedInvScaleExp));
+    const float prevInvScaleExp = glm::log(1.f / prevPose.scale);
+    const float nextInvScaleExp = glm::log(1.f / nextPose.scale);
+    const float interpolatedInvScaleExp = static_cast<float>(
+        prevInvScaleExp * (1 - t) + nextInvScaleExp * t
+    );
+    camera.setScaling(1.f / glm::exp(interpolatedInvScaleExp));
 }
 
 Timeline<KeyframeNavigator::CameraPose>& KeyframeNavigator::timeline() {

@@ -26,15 +26,14 @@
 
 #include <modules/imgui/imguimodule.h>
 #include <modules/imgui/include/imgui_include.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/mission/missionmanager.h>
-#include <openspace/rendering/renderengine.h>
+#include <openspace/performance/performancemanager.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
@@ -47,7 +46,6 @@ namespace {
     constexpr const char* configurationFile = "imgui.ini";
     constexpr const char* GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
     constexpr const float FontSize = 14.f;
-    const ImVec2 Size = ImVec2(500, 500);
 
     char* iniFileBuffer = nullptr;
 
@@ -61,7 +59,7 @@ namespace {
             return;
         }
 
-        OsEng.scriptEngine().queueScript(
+        openspace::global::scriptEngine.queueScript(
             fmt::format(
                 "openspace.addScreenSpaceRenderable({{\
                     Type = 'ScreenSpaceImageLocal',\
@@ -74,7 +72,7 @@ namespace {
     }
 
     void addScreenSpaceRenderableOnline(std::string texturePath) {
-        OsEng.scriptEngine().queueScript(
+        openspace::global::scriptEngine.queueScript(
             fmt::format(
                 "openspace.addScreenSpaceRenderable({{\
                     Type = 'ScreenSpaceImageOnline', URL = '{}'\
@@ -168,6 +166,25 @@ GUI::GUI()
 GUI::~GUI() {} // NOLINT
 
 void GUI::initialize() {
+
+}
+
+void GUI::deinitialize() {
+    ImGui::Shutdown();
+
+    int nWindows = global::windowDelegate.nWindows();
+    for (int i = 0; i < nWindows; ++i) {
+        ImGui::DestroyContext(_contexts[i]);
+    }
+
+    for (GuiComponent* comp : _components) {
+        comp->deinitialize();
+    }
+
+    delete iniFileBuffer;
+}
+
+void GUI::initializeGL() {
     std::string cachedFile = FileSys.cacheManager()->cachedFilename(
         configurationFile,
         "",
@@ -184,7 +201,7 @@ void GUI::initialize() {
     strcpy(iniFileBuffer, cachedFile.c_str());
 #endif
 
-    int nWindows = OsEng.windowWrapper().nWindows();
+    int nWindows = global::windowDelegate.nWindows();
     _contexts.resize(nWindows);
 
     for (int i = 0; i < nWindows; ++i) {
@@ -192,7 +209,7 @@ void GUI::initialize() {
         ImGui::SetCurrentContext(_contexts[i]);
 
         ImGuiIO& io = ImGui::GetIO();
-        io.IniFilename = cachedFile.c_str();
+        io.IniFilename = iniFileBuffer;
         io.DeltaTime = 1.f / 60.f;
         io.KeyMap[ImGuiKey_Tab] = static_cast<int>(Key::Tab);
         io.KeyMap[ImGuiKey_LeftArrow] = static_cast<int>(Key::Left);
@@ -232,48 +249,48 @@ void GUI::initialize() {
         style.GrabMinSize = 10.f;
         style.GrabRounding = 16.f;
 
-        style.Colors[ImGuiCol_Text] =                 ImVec4(0.90f, 0.90f, 0.90f, 1.00f);
-        style.Colors[ImGuiCol_TextDisabled] =         ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
-        style.Colors[ImGuiCol_WindowBg] =             ImVec4(0.13f, 0.13f, 0.13f, 0.96f);
-        style.Colors[ImGuiCol_ChildWindowBg] =        ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-        style.Colors[ImGuiCol_PopupBg] =              ImVec4(0.05f, 0.05f, 0.10f, 0.90f);
-        style.Colors[ImGuiCol_Border] =               ImVec4(0.65f, 0.65f, 0.65f, 0.59f);
-        style.Colors[ImGuiCol_BorderShadow] =         ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-        style.Colors[ImGuiCol_FrameBg] =              ImVec4(0.80f, 0.80f, 0.80f, 0.30f);
-        style.Colors[ImGuiCol_FrameBgHovered] =       ImVec4(0.91f, 0.94f, 0.99f, 0.40f);
-        style.Colors[ImGuiCol_FrameBgActive] =        ImVec4(0.90f, 0.90f, 0.90f, 0.45f);
-        style.Colors[ImGuiCol_TitleBg] =              ImVec4(0.71f, 0.81f, 1.00f, 0.45f);
-        style.Colors[ImGuiCol_TitleBgCollapsed] =     ImVec4(0.71f, 0.81f, 1.00f, 0.45f);
-        style.Colors[ImGuiCol_TitleBgActive] =        ImVec4(0.51f, 0.69f, 1.00f, 0.63f);
-        style.Colors[ImGuiCol_MenuBarBg] =            ImVec4(0.26f, 0.27f, 0.33f, 0.80f);
-        style.Colors[ImGuiCol_ScrollbarBg] =          ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-        style.Colors[ImGuiCol_ScrollbarGrab] =        ImVec4(0.40f, 0.75f, 0.80f, 0.43f);
+        style.Colors[ImGuiCol_Text] = ImVec4(0.90f, 0.90f, 0.90f, 1.00f);
+        style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
+        style.Colors[ImGuiCol_WindowBg] = ImVec4(0.13f, 0.13f, 0.13f, 0.96f);
+        style.Colors[ImGuiCol_ChildWindowBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+        style.Colors[ImGuiCol_PopupBg] = ImVec4(0.05f, 0.05f, 0.10f, 0.90f);
+        style.Colors[ImGuiCol_Border] = ImVec4(0.65f, 0.65f, 0.65f, 0.59f);
+        style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+        style.Colors[ImGuiCol_FrameBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.30f);
+        style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.91f, 0.94f, 0.99f, 0.40f);
+        style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.90f, 0.90f, 0.90f, 0.45f);
+        style.Colors[ImGuiCol_TitleBg] = ImVec4(0.71f, 0.81f, 1.00f, 0.45f);
+        style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.71f, 0.81f, 1.00f, 0.45f);
+        style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.51f, 0.69f, 1.00f, 0.63f);
+        style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.26f, 0.27f, 0.33f, 0.80f);
+        style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+        style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.40f, 0.75f, 0.80f, 0.43f);
         style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.40f, 0.75f, 0.80f, 0.65f);
-        style.Colors[ImGuiCol_ScrollbarGrabActive] =  ImVec4(0.40f, 0.75f, 0.80f, 0.65f);
-        style.Colors[ImGuiCol_ComboBg] =              ImVec4(0.36f, 0.46f, 0.56f, 1.00f);
-        style.Colors[ImGuiCol_CheckMark] =            ImVec4(1.00f, 1.00f, 1.00f, 0.50f);
-        style.Colors[ImGuiCol_SliderGrab] =           ImVec4(1.00f, 1.00f, 1.00f, 0.30f);
-        style.Colors[ImGuiCol_SliderGrabActive] =     ImVec4(0.50f, 0.80f, 0.76f, 1.00f);
-        style.Colors[ImGuiCol_Button] =               ImVec4(0.36f, 0.54f, 0.68f, 0.62f);
-        style.Colors[ImGuiCol_ButtonHovered] =        ImVec4(0.36f, 0.54f, 0.68f, 1.00f);
-        style.Colors[ImGuiCol_ButtonActive] =         ImVec4(0.36f, 0.61f, 0.81f, 1.00f);
-        style.Colors[ImGuiCol_Header] =               ImVec4(0.69f, 0.69f, 0.69f, 0.45f);
-        style.Colors[ImGuiCol_HeaderHovered] =        ImVec4(0.36f, 0.54f, 0.68f, 0.62f);
-        style.Colors[ImGuiCol_HeaderActive] =         ImVec4(0.53f, 0.63f, 0.87f, 0.80f);
-        style.Colors[ImGuiCol_Column] =               ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
-        style.Colors[ImGuiCol_ColumnHovered] =        ImVec4(0.70f, 0.60f, 0.60f, 1.00f);
-        style.Colors[ImGuiCol_ColumnActive] =         ImVec4(0.90f, 0.70f, 0.70f, 1.00f);
-        style.Colors[ImGuiCol_ResizeGrip] =           ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-        style.Colors[ImGuiCol_ResizeGripHovered] =    ImVec4(1.00f, 1.00f, 1.00f, 0.60f);
-        style.Colors[ImGuiCol_ResizeGripActive] =     ImVec4(1.00f, 1.00f, 1.00f, 0.90f);
-        style.Colors[ImGuiCol_CloseButton] =          ImVec4(0.75f, 0.75f, 0.75f, 1.00f);
-        style.Colors[ImGuiCol_CloseButtonHovered] =   ImVec4(0.52f, 0.52f, 0.52f, 0.60f);
-        style.Colors[ImGuiCol_CloseButtonActive] =    ImVec4(0.52f, 0.52f, 0.52f, 1.00f);
-        style.Colors[ImGuiCol_PlotLines] =            ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-        style.Colors[ImGuiCol_PlotLinesHovered] =     ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
-        style.Colors[ImGuiCol_PlotHistogram] =        ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+        style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.40f, 0.75f, 0.80f, 0.65f);
+        style.Colors[ImGuiCol_ComboBg] = ImVec4(0.36f, 0.46f, 0.56f, 1.00f);
+        style.Colors[ImGuiCol_CheckMark] = ImVec4(1.00f, 1.00f, 1.00f, 0.50f);
+        style.Colors[ImGuiCol_SliderGrab] = ImVec4(1.00f, 1.00f, 1.00f, 0.30f);
+        style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.50f, 0.80f, 0.76f, 1.00f);
+        style.Colors[ImGuiCol_Button] = ImVec4(0.36f, 0.54f, 0.68f, 0.62f);
+        style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.36f, 0.54f, 0.68f, 1.00f);
+        style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.36f, 0.61f, 0.81f, 1.00f);
+        style.Colors[ImGuiCol_Header] = ImVec4(0.69f, 0.69f, 0.69f, 0.45f);
+        style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.36f, 0.54f, 0.68f, 0.62f);
+        style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.53f, 0.63f, 0.87f, 0.80f);
+        style.Colors[ImGuiCol_Column] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+        style.Colors[ImGuiCol_ColumnHovered] = ImVec4(0.70f, 0.60f, 0.60f, 1.00f);
+        style.Colors[ImGuiCol_ColumnActive] = ImVec4(0.90f, 0.70f, 0.70f, 1.00f);
+        style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+        style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(1.00f, 1.00f, 1.00f, 0.60f);
+        style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(1.00f, 1.00f, 1.00f, 0.90f);
+        style.Colors[ImGuiCol_CloseButton] = ImVec4(0.75f, 0.75f, 0.75f, 1.00f);
+        style.Colors[ImGuiCol_CloseButtonHovered] = ImVec4(0.52f, 0.52f, 0.52f, 0.60f);
+        style.Colors[ImGuiCol_CloseButtonActive] = ImVec4(0.52f, 0.52f, 0.52f, 1.00f);
+        style.Colors[ImGuiCol_PlotLines] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+        style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+        style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
         style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
-        style.Colors[ImGuiCol_TextSelectedBg] =       ImVec4(0.44f, 0.63f, 1.00f, 0.35f);
+        style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.44f, 0.63f, 1.00f, 0.35f);
         style.Colors[ImGuiCol_ModalWindowDarkening] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
     }
 
@@ -285,33 +302,15 @@ void GUI::initialize() {
     _globalProperty.setHasRegularProperties(true);
     _moduleProperty.setHasRegularProperties(true);
     _featuredProperties.setHasRegularProperties(true);
-}
 
-void GUI::deinitialize() {
-    ImGui::Shutdown();
-
-    int nWindows = OsEng.windowWrapper().nWindows();
-    for (int i = 0; i < nWindows; ++i) {
-        ImGui::DestroyContext(_contexts[i]);
-    }
-
-    for (GuiComponent* comp : _components) {
-        comp->deinitialize();
-    }
-
-    delete iniFileBuffer;
-}
-
-void GUI::initializeGL() {
     _program = ghoul::opengl::ProgramObject::Build(
         "GUI",
         absPath("${MODULE_IMGUI}/shaders/gui_vs.glsl"),
         absPath("${MODULE_IMGUI}/shaders/gui_fs.glsl")
     );
-    
+
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
-    int nWindows = OsEng.windowWrapper().nWindows();
     {
         unsigned char* texData;
         glm::ivec2 texSize;
@@ -400,7 +399,7 @@ void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
                      const glm::vec2& dpiScaling, const glm::vec2& mousePos,
                      uint32_t mouseButtonsPressed)
 {
-    const int iWindow = OsEng.windowWrapper().currentWindowId();
+    const int iWindow = global::windowDelegate.currentWindowId();
     ImGui::SetCurrentContext(_contexts[iWindow]);
 
     ImGuiIO& io = ImGui::GetIO();
@@ -422,7 +421,7 @@ void GUI::endFrame() {
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 
-    _performance.setEnabled(OsEng.renderEngine().doesPerformanceMeasurements());
+    _performance.setEnabled(global::performanceManager.isEnabled());
 
     if (_performance.isEnabled()) {
         _performance.render();
@@ -653,7 +652,7 @@ void GUI::render() {
 
     bool addDashboard = ImGui::Button("Add New Dashboard");
     if (addDashboard) {
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             "openspace.addScreenSpaceRenderable({ Type = 'ScreenSpaceDashboard' });",
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -661,7 +660,7 @@ void GUI::render() {
 
     bool addDashboardCopy = ImGui::Button("Add Copy of Main Dashboard");
     if (addDashboardCopy) {
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             "openspace.addScreenSpaceRenderable({ "
                 "Type = 'ScreenSpaceDashboard', UseMainDashboard = true "
             "});",

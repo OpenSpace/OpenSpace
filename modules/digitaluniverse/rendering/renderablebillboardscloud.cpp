@@ -1,35 +1,35 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014-2018                                                               *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2018                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #include <modules/digitaluniverse/rendering/renderablebillboardscloud.h>
 
 #include <modules/digitaluniverse/digitaluniversemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -82,13 +82,6 @@ namespace {
         "Texture",
         "Point Sprite Texture",
         "The path to the texture that should be used as the point sprite."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
-        "Transparency",
-        "Transparency",
-        "This value is a multiplicative factor that is applied to the transparency of "
-        "all points."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
@@ -182,7 +175,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
-        "RenderOptionInfo",
+        "RenderOption",
         "Render Option",
         "Debug option for rendering of billboards and texts."
     };
@@ -217,9 +210,9 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo
         CorrectionSizeEndDistanceInfo = {
-        "CorrectionSizeEndDistance",
-        "Distance in 10^X meters where correction size stops acting.",
-        "Distance in 10^X meters where correction size stops acting."
+            "CorrectionSizeEndDistance",
+            "Distance in 10^X meters where correction size stops acting.",
+            "Distance in 10^X meters where correction size stops acting."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CorrectionSizeFactorInfo = {
@@ -242,158 +235,151 @@ namespace openspace {
         return {
             "RenderableBillboardsCloud",
             "digitaluniverse_RenderableBillboardsCloud",
-        {
             {
-                "Type",
-                new StringEqualVerifier("RenderableBillboardsCloud"),
-                Optional::No
-            },
-            {
-                KeyFile,
-                new StringVerifier,
-                Optional::Yes,
-                "The path to the SPECK file that contains information about the "
-                "astronomical object being rendered."
-            },
-            {
-                keyColor,
-                new Vector3Verifier<float>,
-                Optional::No,
-                "Astronomical Object Color (r,g,b)."
-            },
-            {
-                SpriteTextureInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                SpriteTextureInfo.description
-            },
-            {
-                TransparencyInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                TransparencyInfo.description
-            },
-            {
-                ScaleFactorInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                ScaleFactorInfo.description
-            },
-            {
-                ColorMapInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                ColorMapInfo.description
-            },
-            {
-                PolygonSidesInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                PolygonSidesInfo.description
-            },
-            {
-                DrawLabelInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                DrawLabelInfo.description
-            },
-            {
-                TextColorInfo.identifier,
-                new DoubleVector4Verifier,
-                Optional::Yes,
-                TextColorInfo.description
-            },
-            {
-                TextSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                TextSizeInfo.description
-            },
-            {
-                LabelFileInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                LabelFileInfo.description
-            },
-            {
-                LabelMinSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LabelMinSizeInfo.description
-            },
-            {
-                LabelMaxSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LabelMaxSizeInfo.description
-            },
-            {
-                ColorOptionInfo.identifier,
-                new StringListVerifier,
-                Optional::Yes,
-                ColorOptionInfo.description
-            },
-            {
-                ColorRangeInfo.identifier,
-                new Vector2ListVerifier<float>,
-                Optional::Yes,
-                ColorRangeInfo.description
-            },
-            {
-                TransformationMatrixInfo.identifier,
-                new Matrix4x4Verifier<double>,
-                Optional::Yes,
-                TransformationMatrixInfo.description
-            },
-            {
-                FadeInDistancesInfo.identifier,
-                new Vector2Verifier<double>,
-                Optional::Yes,
-                FadeInDistancesInfo.description
-            },
-            {
-                DisableFadeInInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                DisableFadeInInfo.description
-            },
-            {
-                BillboardMaxSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                BillboardMaxSizeInfo.description
-            },
-            {
-                BillboardMinSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                BillboardMinSizeInfo.description
-            },
-            {
-                CorrectionSizeEndDistanceInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                CorrectionSizeEndDistanceInfo.description
-            },
-            {
-                CorrectionSizeFactorInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                CorrectionSizeFactorInfo.description
-            },
-            {
-                PixelSizeControlInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                PixelSizeControlInfo.description
+                {
+                    "Type",
+                    new StringEqualVerifier("RenderableBillboardsCloud"),
+                    Optional::No
+                },
+                {
+                    KeyFile,
+                    new StringVerifier,
+                    Optional::Yes,
+                    "The path to the SPECK file that contains information about the "
+                    "astronomical object being rendered."
+                },
+                {
+                    keyColor,
+                    new Vector3Verifier<float>,
+                    Optional::No,
+                    "Astronomical Object Color (r,g,b)."
+                },
+                {
+                    SpriteTextureInfo.identifier,
+                    new StringVerifier,
+                    Optional::Yes,
+                    SpriteTextureInfo.description
+                },
+                {
+                    ScaleFactorInfo.identifier,
+                    new DoubleVerifier,
+                    Optional::Yes,
+                    ScaleFactorInfo.description
+                },
+                {
+                    ColorMapInfo.identifier,
+                    new StringVerifier,
+                    Optional::Yes,
+                    ColorMapInfo.description
+                },
+                {
+                    PolygonSidesInfo.identifier,
+                    new IntVerifier,
+                    Optional::Yes,
+                    PolygonSidesInfo.description
+                },
+                {
+                    DrawLabelInfo.identifier,
+                    new BoolVerifier,
+                    Optional::Yes,
+                    DrawLabelInfo.description
+                },
+                {
+                    TextColorInfo.identifier,
+                    new DoubleVector4Verifier,
+                    Optional::Yes,
+                    TextColorInfo.description
+                },
+                {
+                    TextSizeInfo.identifier,
+                    new DoubleVerifier,
+                    Optional::Yes,
+                    TextSizeInfo.description
+                },
+                {
+                    LabelFileInfo.identifier,
+                    new StringVerifier,
+                    Optional::Yes,
+                    LabelFileInfo.description
+                },
+                {
+                    LabelMinSizeInfo.identifier,
+                    new DoubleVerifier,
+                    Optional::Yes,
+                    LabelMinSizeInfo.description
+                },
+                {
+                    LabelMaxSizeInfo.identifier,
+                    new DoubleVerifier,
+                    Optional::Yes,
+                    LabelMaxSizeInfo.description
+                },
+                {
+                    ColorOptionInfo.identifier,
+                    new StringListVerifier,
+                    Optional::Yes,
+                    ColorOptionInfo.description
+                },
+                {
+                    ColorRangeInfo.identifier,
+                    new Vector2ListVerifier<float>,
+                    Optional::Yes,
+                    ColorRangeInfo.description
+                },
+                {
+                    TransformationMatrixInfo.identifier,
+                    new Matrix4x4Verifier<double>,
+                    Optional::Yes,
+                    TransformationMatrixInfo.description
+                },
+                {
+                    FadeInDistancesInfo.identifier,
+                    new Vector2Verifier<double>,
+                    Optional::Yes,
+                    FadeInDistancesInfo.description
+                },
+                {
+                    DisableFadeInInfo.identifier,
+                    new BoolVerifier,
+                    Optional::Yes,
+                    DisableFadeInInfo.description
+                },
+                {
+                    BillboardMaxSizeInfo.identifier,
+                    new DoubleVerifier,
+                    Optional::Yes,
+                    BillboardMaxSizeInfo.description
+                },
+                {
+                    BillboardMinSizeInfo.identifier,
+                    new DoubleVerifier,
+                    Optional::Yes,
+                    BillboardMinSizeInfo.description
+                },
+                {
+                    CorrectionSizeEndDistanceInfo.identifier,
+                    new DoubleVerifier,
+                    Optional::Yes,
+                    CorrectionSizeEndDistanceInfo.description
+                },
+                {
+                    CorrectionSizeFactorInfo.identifier,
+                    new DoubleVerifier,
+                    Optional::Yes,
+                    CorrectionSizeFactorInfo.description
+                },
+                {
+                    PixelSizeControlInfo.identifier,
+                    new BoolVerifier,
+                    Optional::Yes,
+                    PixelSizeControlInfo.description
+                }
             }
-        }
         };
     }
 
     RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary)
-        , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
         , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
         , _pointColor(
             ColorInfo,
@@ -446,7 +432,7 @@ namespace openspace {
         _renderOption.addOption(0, "Camera View Direction");
         _renderOption.addOption(1, "Camera Position Normal");
         _renderOption.set(1);
-        if (OsEng.windowWrapper().isFisheyeRendering()) {
+        if (global::windowDelegate.isFisheyeRendering()) {
             _renderOption.set(1);
         }
         else {
@@ -536,12 +522,7 @@ namespace openspace {
             addProperty(_pointColor);
         }
 
-        if (dictionary.hasKey(TransparencyInfo.identifier)) {
-            _alphaValue = static_cast<float>(
-                dictionary.value<double>(TransparencyInfo.identifier)
-                );
-        }
-        addProperty(_alphaValue);
+        addProperty(_opacity);
 
         if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
             _scaleFactor = static_cast<float>(
@@ -664,7 +645,7 @@ namespace openspace {
         _program = DigitalUniverseModule::ProgramObjectManager.request(
             ProgramObjectName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return OsEng.renderEngine().buildRenderProgram(
+            return global::renderEngine.buildRenderProgram(
                 ProgramObjectName,
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_vs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_fs.glsl"),
@@ -694,7 +675,7 @@ namespace openspace {
         if (_hasLabel) {
             if (_font == nullptr) {
                 size_t _fontSize = 50;
-                _font = OsEng.fontManager().font(
+                _font = global::fontManager.font(
                     "Mono",
                     static_cast<float>(_fontSize),
                     ghoul::fontrendering::FontManager::Outline::Yes,
@@ -713,7 +694,7 @@ namespace openspace {
         DigitalUniverseModule::ProgramObjectManager.release(
             ProgramObjectName,
             [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
         );
         _program = nullptr;
@@ -768,7 +749,7 @@ namespace openspace {
         const glm::dmat4 projMatrix = glm::dmat4(data.camera.projectionMatrix());
         _program->setUniform(
             "screenSize",
-            glm::vec2(OsEng.renderEngine().renderingResolution())
+            glm::vec2(global::renderEngine.renderingResolution())
         );
 
         _program->setUniform(_uniformCache.cameraPos, data.camera.positionVec3());
@@ -783,7 +764,7 @@ namespace openspace {
         _program->setUniform(_uniformCache.minBillboardSize, _billboardMinSize); // in pixels
         _program->setUniform(_uniformCache.maxBillboardSize, _billboardMaxSize); // in pixels
         _program->setUniform(_uniformCache.color, _pointColor);
-        _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+        _program->setUniform(_uniformCache.alphaValue, _opacity);
         _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
         _program->setUniform(_uniformCache.up, orthoUp);
         _program->setUniform(_uniformCache.right, orthoRight);
@@ -865,6 +846,7 @@ namespace openspace {
 
         glm::vec4 textColor = _textColor;
         textColor.a *= fadeInVariable;
+        textColor.a *= _opacity;
         for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
             //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
             glm::vec3 scaledPos(pair.first);
@@ -874,9 +856,9 @@ namespace openspace {
                 scaledPos,
                 pair.second,
                 textColor,
-                pow(10.0, _textSize.value()),
-                _textMinSize,
-                _textMaxSize,
+                pow(10.f, _textSize.value()),
+                static_cast<int>(_textMinSize),
+                static_cast<int>(_textMaxSize),
                 modelViewProjectionMatrix,
                 orthoRight,
                 orthoUp,
@@ -916,7 +898,7 @@ namespace openspace {
 
         float fadeInVariable = 1.f;
         if (!_disableFadeInDistance) {
-            float distCamera = glm::length(data.camera.positionVec3());
+            float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
             const glm::vec2 fadeRange = _fadeInDistance;
             const float a = 1.f / ((fadeRange.y - fadeRange.x) * scale);
             const float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
