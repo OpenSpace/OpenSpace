@@ -18,7 +18,7 @@ local vrt_folders = {
         --
         -- tl;dr:  Specify CTX folders first, then HiRISE 
         -- example:   'C:/OpenSpace/GlobeBrowsingData/Mars/CTX'
-        '',
+        'L:/MSLDATA/MapDatasets/HiRISE',
         '',
     },
     Moon = {
