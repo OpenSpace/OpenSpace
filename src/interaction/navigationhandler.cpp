@@ -161,7 +161,6 @@ void NavigationHandler::updateCamera(double deltaTime) {
             }
             _camera->setFocusPositionVec3(focusNode()->worldPosition());
         }
-        _inputState->resetWebsockets();
     }
 }
 
