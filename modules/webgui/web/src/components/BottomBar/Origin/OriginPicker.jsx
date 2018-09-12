@@ -51,7 +51,7 @@ class OriginPicker extends Component {
         <img src={icon} className={styles.iconImage} alt={this.state.origin} />
       );
     }
-    return (<Icon icon="language" className={styles.Icon} />);
+    return (<Icon icon="gps_fixed" className={styles.Icon} />);
   }
 
   get origin() {
