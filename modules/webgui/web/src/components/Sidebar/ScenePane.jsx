@@ -14,7 +14,7 @@ class ScenePane extends Component {
   render() {
     const { nodes } = this.props;
     return (
-      <Pane title="View" closeCallback={this.props.closeCallback}>
+      <Pane title="Scene" closeCallback={this.props.closeCallback}>
         { (nodes.length === 0) && (
           <LoadingBlocks className={Pane.styles.loading} />
         )}

@@ -4,19 +4,23 @@ import Icon from '../Icon/Icon';
 
 import styles from './ToggleHeader.scss';
 
-const ToggleHeader = ({ title, toggled, onClick, onIcon, offIcon }) => (
+const ToggleHeader = ({ title, toggled, onClick, onIcon, offIcon, children}) => (
   <header className={styles.toggle} onClick={onClick} role="button" tabIndex={0}>
     <span className="title">
       { title }
     </span>
-    <Icon
-      icon={toggled ? onIcon : offIcon}
-      className={styles.icon}
-    />
+    <div>
+      <div style={{display: 'inline', overflow: 'hidden'}}>{children}</div>
+      <Icon
+        icon={toggled ? onIcon : offIcon}
+        className={styles.icon}
+      />
+    </div>
   </header>
 );
 
 ToggleHeader.propTypes = {
+  children: PropTypes.node,
   offIcon: PropTypes.string,
   onClick: PropTypes.func.isRequired,
   onIcon: PropTypes.string,
@@ -25,7 +29,7 @@ ToggleHeader.propTypes = {
 };
 
 ToggleHeader.defaultProps = {
-  offIcon: 'chevron_left',
+  offIcon: 'chevron_right',
   onIcon: 'expand_more',
 };
 

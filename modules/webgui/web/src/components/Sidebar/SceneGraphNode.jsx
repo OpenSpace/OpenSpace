@@ -6,6 +6,7 @@ import Button from '../common/Input/Button/Button';
 import Icon from '../common/Icon/Icon';
 import DataManager from '../../api/DataManager';
 import { OriginKey } from '../../api/keys';
+import styles from './SceneGraphNode.scss';
 
 class SceneGraphNode extends Component {
   constructor(props) {
@@ -14,7 +15,8 @@ class SceneGraphNode extends Component {
     this.focusOnThis = this.focusOnThis.bind(this);
   }
 
-  focusOnThis() {
+  focusOnThis(e) {
+    e.stopPropagation();
     const { identifier } = this.props;
     DataManager.setValue(OriginKey, '"' + identifier + '"');
   }
@@ -22,11 +24,14 @@ class SceneGraphNode extends Component {
   render() {
     const { identifier, subowners } = this.props;
 
+    const focusButton = <div className={styles.shycontainer}>
+      <Button className={styles.shybutton} onClick={this.focusOnThis} >
+        <Icon icon="gps_fixed" />
+      </Button>
+    </div>;
+
     return (
-      <ToggleContent title={identifier}>
-        <Button onClick={this.focusOnThis}>
-          <Icon icon="gps_fixed" /> Focus
-        </Button>
+      <ToggleContent title={identifier} headerChildren={focusButton} shyHeaderChildren>
         { subowners.map(sub => (
           <PropertyOwner
             key={sub.identifier}

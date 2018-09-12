@@ -22,10 +22,10 @@ class FilterList extends Component {
   }
 
   get filtered() {
-    const { data, matcher } = this.props;
+    const { favorites, data, matcher } = this.props;
     let { search } = this.state;
     if (search === '') {
-      return data;
+      return favorites || data;
     }
 
     // most matcher functions are case sensitive
@@ -90,6 +90,11 @@ FilterList.propTypes = {
    */
   // eslint-disable-next-line react/forbid-prop-types
   data: PropTypes.array.isRequired,
+  /**
+   * Optional: data to display when there is no search term
+   * Defaults to the same as `data`
+   */
+  favorites: PropTypes.array,
   /**
    * the function used to filter the list
    */

@@ -9,6 +9,7 @@ $base-padding: 14px;
 $vertical-padding: $base-padding / 2;
 $button-padding: $vertical-padding $base-padding;
 $sidebar-padding: ($base-padding / 2);
+$sidebar-indent: ($base-padding * 1.5);
 
 // popover
 $popover-horizontal-padding: $base-padding / 2;

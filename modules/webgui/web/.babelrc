@@ -5,7 +5,6 @@
     "@babel/preset-flow"
   ],
   "plugins": [
-    "react-hot-loader/babel",
-    ["transform-object-rest-spread"]
+    "react-hot-loader/babel"
   ]
 }

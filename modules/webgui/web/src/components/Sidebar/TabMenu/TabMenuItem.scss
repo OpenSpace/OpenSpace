@@ -12,9 +12,12 @@
   &.active {
     background: $ui-background-active;
     border-bottom: 3px solid $ui-highlight-secondary;
-  }
-  &:hover, &:focus {
     background: $ui-background-hover;
+  }
+  &:hover {
+    background: $ui-background-hover;
+  }
+  &:focus {
     outline: 0;
   }
 }
