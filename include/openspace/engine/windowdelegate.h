@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE__WINDOWDELEGATE___H__
 
 #include <ghoul/glm.h>
+#include <glbinding/glbinding.h>
 #include <vector>
 
 namespace openspace {
@@ -105,6 +106,8 @@ struct WindowDelegate {
     int (*nWindows)() = []() { return 0; };
 
     int (*currentWindowId)() = []() { return 0; };
+
+    glbinding::GetProcAddress openGLProcedureFunction = [](const char*) -> glbinding::ProcAddress { return nullptr; };
 };
 
 } // namespace openspace

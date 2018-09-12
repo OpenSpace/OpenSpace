@@ -121,57 +121,6 @@ set_property(TARGET Lua PROPERTY FOLDER "External")
 set_property(TARGET lz4 PROPERTY FOLDER "External")
 link_directories("${GHOUL_LIBRARY_DIRS}")
 
-# SGCT
-set(SGCT_TEXT OFF CACHE BOOL "" FORCE)
-set(SGCT_BUILD_CSHARP_PROJECTS OFF CACHE BOOL "" FORCE)
-set(SGCT_LIGHT_ONLY ON CACHE BOOL "" FORCE)
-set(SGCT_CUSTOMOUTPUTDIRS OFF CACHE BOOL "" FORCE)
-set(JPEG_TURBO_WITH_SIMD OFF CACHE BOOL "" FORCE)
-
-add_subdirectory(${OPENSPACE_EXT_DIR}/sgct)
-target_include_directories(libOpenSpace SYSTEM PUBLIC ${OPENSPACE_EXT_DIR}/sgct/include)
-target_link_libraries(
-    libOpenSpace
-    sgct_light glew glfw png16_static quat tinyxml2static turbojpeg-static
-    vrpn
-    ${GLFW_LIBRARIES}
-)
-
-if (TARGET sgct_light)
-    set_property(TARGET sgct_light PROPERTY FOLDER "External")
-endif ()
-if (TARGET glew)
-    set_property(TARGET glew PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET glfw)
-    set_property(TARGET glfw PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET png16_static)
-    set_property(TARGET png16_static PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET quat)
-    set_property(TARGET quat PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET simd)
-    set_property(TARGET simd PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET tinyxml2static)
-    set_property(TARGET tinyxml2static PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET turbojpeg-static)
-    set_property(TARGET turbojpeg-static PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET vrpn)
-    set_property(TARGET vrpn PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET zlibstatic)
-    set_property(TARGET zlibstatic PROPERTY FOLDER "External/SGCT")
-endif ()
-
-if (UNIX AND (NOT APPLE))
-    target_link_libraries(libOpenSpace Xcursor Xinerama X11)
-endif ()
-
 # Spice
 add_subdirectory(${OPENSPACE_EXT_DIR}/spice)
 target_link_libraries(libOpenSpace Spice)

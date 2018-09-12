@@ -26,62 +26,12 @@ include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake)
 include(${OPENSPACE_CMAKE_EXT_DIR}/application_definition.cmake)
 include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
 
-#####
-# OpenVR
-#####
-option(OPENSPACE_OPENVR_SUPPORT "Build OpenSpace application with OpenVR support" OFF)
-
-if (OPENSPACE_OPENVR_SUPPORT)
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${OPENSPACE_EXT_DIR}/sgct/cmake/modules/")
-
-    find_package(OpenVR REQUIRED)
-
-    set(SGCT_OPENVR_DEFINITIONS OPENVR_SUPPORT)
-
-    if (NOT SGCT_OPENVR_INCLUDE_DIRECTORY)
-        if (WIN32)
-            find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
-                NAMES SGCTOpenVR.h
-                PATHS
-                    $ENV{SGCT_ROOT_DIR}/additional_includes/openvr
-                    ${OPENSPACE_EXT_DIR}/sgct/additional_includes/openvr
-                    NO_DEFAULT_PATH
-                REQUIRED
-            )
-        else ()
-            find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
-                NAMES SGCTOpenVR.h
-                PATH_SUFFIXES SGCTOpenVR
-                PATHS
-                    $ENV{SGCT_ROOT_DIR}/additional_includes/openvr
-                    ${OPENSPACE_EXT_DIR}/sgct/additional_includes/openvr
-                REQUIRED
-            )
-        endif ()
-    else()
-        set(
-            SGCT_OPENVR_FILES
-            ${SGCT_OPENVR_INCLUDE_DIRECTORY}/SGCTOpenVR.h
-            ${SGCT_OPENVR_INCLUDE_DIRECTORY}/SGCTOpenVR.cpp
-        )
-    endif()
-endif()
-
-#####
-# Spout 
-#####
-if (SGCT_SPOUT_SUPPORT AND NOT OPENSPACE_MODULE_SPOUT)
-    set(SPOUT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout)
-    set(SPOUT_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.lib)
-    set(SPOUT_DEFINITIONS "OPENSPACE_HAS_SPOUT")
-
-    add_external_library_dependencies(${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.dll)
-endif ()
-
 set(MACOSX_BUNDLE_ICON_FILE openspace.icns)
 
-create_new_application(OpenSpace
-    ${SGCT_OPENVR_FILES}
+set(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT ON CACHE BOOL "" FORCE)
+add_subdirectory(ext/minvr)
+
+create_new_application(OpenSpace-MinVR
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/openspace.rc
     ${CMAKE_CURRENT_SOURCE_DIR}/openspace.icns
@@ -92,74 +42,12 @@ set_source_files_properties(
     PROPERTIES MACOSX_PACKAGE_LOCATION "Resources"
 )
 
-target_include_directories(
-    OpenSpace PRIVATE
-    ${OPENVR_INCLUDE_DIRS}
-    ${SGCT_OPENVR_INCLUDE_DIRECTORY}
-    ${SPOUT_INCLUDE_DIRS}
-)
+target_include_directories(OpenSpace-MinVR PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ext/minvr/src)
 
-target_link_libraries(OpenSpace
+target_link_libraries(OpenSpace-MinVR
     libOpenSpace
-    ${OPENVR_LIBRARY}
-    ${SPOUT_LIBRARY}
+    MinVR
 )
-
-target_compile_definitions(OpenSpace PRIVATE
-    ${SGCT_OPENVR_DEFINITIONS}
-    ${SPOUT_DEFINITIONS}
-)
-
-set(SGCT_TEXT OFF CACHE BOOL "" FORCE)
-set(SGCT_BUILD_CSHARP_PROJECTS OFF CACHE BOOL "" FORCE)
-set(SGCT_LIGHT_ONLY ON CACHE BOOL "" FORCE)
-set(SGCT_CUSTOMOUTPUTDIRS OFF CACHE BOOL "" FORCE)
-set(JPEG_TURBO_WITH_SIMD OFF CACHE BOOL "" FORCE)
-
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct)
-target_include_directories(OpenSpace SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct/include)
-target_link_libraries(
-    OpenSpace
-    sgct_light glew glfw png16_static quat tinyxml2static turbojpeg-static
-    vrpn
-    ${GLFW_LIBRARIES}
-)
-
-if (TARGET sgct_light)
-    set_property(TARGET sgct_light PROPERTY FOLDER "External")
-endif ()
-if (TARGET glew)
-    set_property(TARGET glew PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET glfw)
-    set_property(TARGET glfw PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET png16_static)
-    set_property(TARGET png16_static PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET quat)
-    set_property(TARGET quat PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET simd)
-    set_property(TARGET simd PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET tinyxml2static)
-    set_property(TARGET tinyxml2static PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET turbojpeg-static)
-    set_property(TARGET turbojpeg-static PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET vrpn)
-    set_property(TARGET vrpn PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET zlibstatic)
-    set_property(TARGET zlibstatic PROPERTY FOLDER "External/SGCT")
-endif ()
-
-if (UNIX AND (NOT APPLE))
-    target_link_libraries(libOpenSpace Xcursor Xinerama X11)
-endif ()
-
 
 # Web Browser and Web gui
 # Why not put these in the module's path? Because they do not have access to the
@@ -169,7 +57,7 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
     set(CMAKE_BUILD_TYPE Debug CACHE INTERNAL "CMAKE_BUILD_TYPE")
     
     if (WIN32)
-        set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/OpenSpace/openspace.rc)
+        set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/OpenSpace-MinVR/openspace.rc)
     endif ()
 
     # Add the CEF binary distribution's cmake/ directory to the module path and
@@ -177,7 +65,7 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
     include(webbrowser_helpers)
 
-    set_cef_targets("${CEF_ROOT}" OpenSpace)
+    set_cef_targets("${CEF_ROOT}" OpenSpace-MinVR)
     run_cef_platform_config("${CEF_ROOT}" "${CEF_TARGET}" "${WEBBROWSER_MODULE_PATH}")
 elseif (OPENSPACE_MODULE_WEBBROWSER)
     message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
@@ -186,7 +74,7 @@ endif ()
 if (OPENSPACE_MODULE_WEBGUI AND WEBGUI_MODULE_PATH)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBGUI_MODULE_PATH}/cmake")
     include(webgui_helpers)
-    build_webgui_source(OpenSpace)
+    build_webgui_source(OpenSpace-MinVR)
 elseif(OPENSPACE_MODULE_WEBGUI)
     message(WARNING "WebGui is configured to be included, but the web source could not be found. Try configuring CMake again.")
 endif()
@@ -194,5 +82,5 @@ endif()
 
 if (MSVC)
     # This library is used for being able to output the callstack if an exception escapes
-    target_link_libraries(OpenSpace Dbghelp.lib)
+    target_link_libraries(OpenSpace-MinVR Dbghelp.lib)
 endif()

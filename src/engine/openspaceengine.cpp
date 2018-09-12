@@ -82,10 +82,6 @@
 #include <numeric>
 #include <sstream>
 
-// @TODO(abock): Replace this with callback in windowdelegate
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
-
 #if defined(_MSC_VER) && defined(OPENSPACE_ENABLE_VLD)
 #include <vld.h>
 #endif
@@ -340,7 +336,7 @@ void OpenSpaceEngine::initializeGL() {
     LTRACE("OpenSpaceEngine::initializeGL(begin)");
 
     //glbinding::Binding::useCurrentContext();
-    glbinding::Binding::initialize(glfwGetProcAddress);
+    glbinding::Binding::initialize(global::windowDelegate.openGLProcedureFunction);
 
     rendering::helper::initialize();
 
