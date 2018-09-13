@@ -26,8 +26,9 @@
 #include <openspace/interaction/externInteraction.h>
 
 #include <openspace/openspace.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/interaction/keyframenavigator.h>
@@ -51,6 +52,8 @@ SessionRecording::SessionRecording()
     : properties::PropertyOwner({ "SessionRecording" }) {
 }
 
+SessionRecording::~SessionRecording() {} // NOLINT
+
 bool SessionRecording::startRecording(std::string filename) {
     if( _state == sessionState::playback ) {
         _playbackFile.close();
@@ -67,7 +70,8 @@ bool SessionRecording::startRecording(std::string filename) {
         return false;
     }
     LINFO("Session recording started");
-    _timestampRecordStarted = OsEng.windowWrapper().applicationTime();
+    _timestampRecordStarted = global::windowDelegate.applicationTime();
+    return true;
 }
 
 void SessionRecording::stopRecording() {
@@ -102,9 +106,9 @@ bool SessionRecording::startPlayback(std::string filename, KeyframeTimeRef timeM
         return false;
     }
     //Set time reference mode
-    double now = OsEng.windowWrapper().applicationTime();
+    double now = global::windowDelegate.applicationTime();
     _timestampPlaybackStarted_application = now;
-    _timestampPlaybackStarted_simulation = OsEng.timeManager().time().j2000Seconds();
+    _timestampPlaybackStarted_simulation = global::timeManager.time().j2000Seconds();
     _timestampApplicationStarted_simulation = _timestampPlaybackStarted_simulation - now;
     _playbackTimeReferenceMode = timeMode;
 
@@ -117,21 +121,22 @@ bool SessionRecording::startPlayback(std::string filename, KeyframeTimeRef timeM
 #endif
     _playbackActive_script = true;
 
-    OsEng.navigationHandler().keyframeNavigator().setTimeReferenceMode(timeMode, now);
-    OsEng.scriptScheduler().setTimeReferenceMode(timeMode);
+    global::navigationHandler.keyframeNavigator().setTimeReferenceMode(timeMode, now);
+    global::scriptScheduler.setTimeReferenceMode(timeMode);
     playbackAddEntriesToTimeline();
 
-    OsEng.navigationHandler().triggerPlaybackStart([&]() {
+    global::navigationHandler.triggerPlaybackStart([&]() {
         signalPlaybackFinishedForComponent(recordedType::camera);
     });
-    OsEng.scriptScheduler().triggerPlaybackStart([&]() {
+    global::scriptScheduler.triggerPlaybackStart([&]() {
         signalPlaybackFinishedForComponent(recordedType::script);
     });
 #ifdef SESSION_RECORDING_TIME
-    OsEng.timeManager().triggerPlaybackStart([&]() {
+    global::timeManager.triggerPlaybackStart([&]() {
         signalPlaybackFinishedForComponent(recordedType::time);
     });
 #endif
+    return true;
 }
 
 void SessionRecording::signalPlaybackFinishedForComponent(recordedType type) {
@@ -159,24 +164,24 @@ void SessionRecording::signalPlaybackFinishedForComponent(recordedType type) {
         _playbackFile.close();
         //Reset the script scheduler's time reference to simulation time, which is the
         // default mode for non-playback uses of the scheduler
-        OsEng.scriptScheduler().setTimeReferenceMode(
+        global::scriptScheduler.setTimeReferenceMode(
             KeyframeTimeRef::absolute_simTimeJ2000);
         LINFO("Playback session finished");
     }
 }
 
 void SessionRecording::stopPlayback() {
-    OsEng.navigationHandler().setDisableKeyFrameInteraction();
+    global::navigationHandler.setDisableKeyFrameInteraction();
     //Clear the timelines of all keyframes
-    OsEng.scriptScheduler().clearSchedule();
-    OsEng.navigationHandler().keyframeNavigator().clearKeyframes();
+    global::scriptScheduler.clearSchedule();
+    global::navigationHandler.keyframeNavigator().clearKeyframes();
     //Close the playback file
     _playbackFile.close();
     LINFO("Playback session was stopped");
 }
 
 void SessionRecording::saveCameraKeyframe() {
-    SceneGraphNode* focusNode = OsEng.navigationHandler().focusNode();
+    SceneGraphNode* focusNode = global::navigationHandler.focusNode();
     if (!focusNode) {
         return;
     }
@@ -191,7 +196,7 @@ void SessionRecording::saveCameraKeyframe() {
     keyframeLine << "camera ";
     keyframeLine << kf._timestamp << " ";
     keyframeLine << (kf._timestamp - _timestampRecordStarted) << " ";
-    keyframeLine << std::fixed << std::setprecision(3) << OsEng.timeManager().time().j2000Seconds();
+    keyframeLine << std::fixed << std::setprecision(3) << global::timeManager.time().j2000Seconds();
     keyframeLine << " ";
     //Add camera position
     keyframeLine << std::fixed << std::setprecision(7) << kf._position.x << " "
@@ -223,7 +228,7 @@ void SessionRecording::saveTimeKeyframe() {
     keyframeLine << kf._timestamp << " ";
     keyframeLine << (kf._timestamp - _timestampRecordStarted) << " ";
 
-    //keyframeLine << std::fixed << std::setprecision(3) << OsEng.timeManager().time().j2000Seconds();
+    //keyframeLine << std::fixed << std::setprecision(3) << global::timeManager.time().j2000Seconds();
     keyframeLine << std::fixed << std::setprecision(3) << kf._time;
 
     keyframeLine << " " << kf._dt;
@@ -250,7 +255,7 @@ void SessionRecording::saveScript(std::string scriptToSave) {
     keyframeLine << "script ";
     keyframeLine << sm._timestamp << " ";
     keyframeLine << (sm._timestamp - _timestampRecordStarted) << " ";
-    keyframeLine << std::fixed << std::setprecision(3) << OsEng.timeManager().time().j2000Seconds();
+    keyframeLine << std::fixed << std::setprecision(3) << global::timeManager.time().j2000Seconds();
     keyframeLine << " ";
 
     keyframeLine << scriptToSave;
@@ -323,7 +328,7 @@ double SessionRecording::getEquivalentSimulationTime(std::istringstream& inputLi
 double SessionRecording::getEquivalentApplicationTime(std::istringstream& inputLine) {
     double timeOs, timeRec, timeSim;
     inputLine >> timeOs >> timeRec >> timeSim;
-    double offset = 0;
+    //double offset = 0;
 
     if (_playbackTimeReferenceMode == KeyframeTimeRef::relative_recordedStart)
         return _timestampPlaybackStarted_application + timeRec;
@@ -362,7 +367,7 @@ void SessionRecording::playbackCamera(std::string& entry) {
     else
         pbFrame.followFocusNodeRotation = false;
     
-    OsEng.navigationHandler().keyframeNavigator().addKeyframe(timeRef, pbFrame);
+    global::navigationHandler.keyframeNavigator().addKeyframe(timeRef, pbFrame);
 }
 
 #ifdef SESSION_RECORDING_TIME
@@ -393,7 +398,7 @@ void SessionRecording::playbackTimeChange(std::string& entry) {
         pbFrame._requiresTimeJump = false;
 
     pbFrame._time = pbFrame._timestamp + _timestampApplicationStarted_simulation;
-    //OsEng.timeManager().addKeyframe(timeRef, pbFrame._timestamp);
+    //global::timeManager.addKeyframe(timeRef, pbFrame._timestamp);
     _externInteract.timeInteraction(pbFrame);
 }
 #endif
@@ -424,7 +429,7 @@ void SessionRecording::playbackScript(std::string& entry) {
     ghoul::Dictionary scriptDict(ghoul::Dictionary{ {KeyTime, timeDescription },
                                                     {KeyForwardScript, pbFrame._script} }
                                 );
-    OsEng.scriptScheduler().loadScripts({ { "1", scriptDict } });
+    global::scriptScheduler.loadScripts({ { "1", scriptDict } });
 }
 
 void SessionRecording::saveKeyframeToFile(std::string entry) {

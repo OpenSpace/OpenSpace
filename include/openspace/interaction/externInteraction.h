@@ -27,6 +27,8 @@
 
 #include <openspace/interaction/externInteraction.h>
 #include <openspace/network/messagestructures.h>
+#include <openspace/properties/propertyowner.h>
+
 
 #include <ghoul/io/socket/tcpsocket.h>
 

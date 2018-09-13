@@ -26,18 +26,20 @@ namespace openspace::luascriptfunctions {
 
 using openspace::interaction::KeyframeTimeRef;
 
+
+
 int startRecording(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::startRecording");
 
     using ghoul::lua::luaTypeToString;
 
-    const std::string recordFilePath = ghoul::lua::checkStringAndPop(L);
+    const std::string recordFilePath = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
 
     if (recordFilePath.empty()) {
         return luaL_error(L, "filepath string is empty");
     }
 
-    OsEng.sessionRecording().startRecording(recordFilePath);
+    global::sessionRecording.startRecording(recordFilePath);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -46,7 +48,7 @@ int startRecording(lua_State* L) {
 int stopRecording(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::stopRecording");
 
-    OsEng.sessionRecording().stopRecording();
+    global::sessionRecording.stopRecording();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -55,13 +57,13 @@ int stopRecording(lua_State* L) {
 int startPlayback(lua_State* L, KeyframeTimeRef timeMode) {
     using ghoul::lua::luaTypeToString;
 
-    const std::string playbackFilePath = ghoul::lua::checkStringAndPop(L);
+    const std::string playbackFilePath = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
 
     if (playbackFilePath.empty()) {
         return luaL_error(L, "filepath string is empty");
     }
 
-    OsEng.sessionRecording().startPlayback(playbackFilePath, timeMode);
+    global::sessionRecording.startPlayback(playbackFilePath, timeMode);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -88,7 +90,7 @@ int startPlaybackSimulationTime(lua_State* L) {
 int stopPlayback(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::stopPlayback");
 
-    OsEng.sessionRecording().stopPlayback();
+    global::sessionRecording.stopPlayback();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

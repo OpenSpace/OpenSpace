@@ -32,6 +32,7 @@
 #include <queue>
 #include <string>
 #include <vector>
+#include <functional>
 
 namespace {
     const char* KeyTime = "Time";

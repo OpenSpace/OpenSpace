@@ -30,6 +30,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/time.h>
+#include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
 
 #include <glm/gtx/quaternion.hpp>
@@ -39,7 +40,6 @@ namespace openspace::interaction {
 bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes) {
     double now = currentTime();
     bool foundPrevKeyframe = false;
-
 
     if (_cameraPoseTimeline.nKeyframes() == 0) {
         return false;
@@ -124,17 +124,18 @@ bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes)
     camera.setRotation(
         glm::slerp(prevKeyframeCameraRotation, nextKeyframeCameraRotation, t)
     );
-
+    
     // We want to affect view scaling, such that we achieve
     // logarithmic interpolation of distance to an imagined focus node.
     // To do this, we interpolate the scale reciprocal logarithmically.
-    const float prevInvScaleExp = glm::log(1.f / prevPose.scale);
-    const float nextInvScaleExp = glm::log(1.f / nextPose.scale);
-    const float interpolatedInvScaleExp = static_cast<float>(
-        prevInvScaleExp * (1 - t) + nextInvScaleExp * t
-    );
-    camera.setScaling(1.f / glm::exp(interpolatedInvScaleExp));
-
+    if (!ignoreFutureKeyframes) {
+        const float prevInvScaleExp = glm::log(1.f / prevPose.scale);
+        const float nextInvScaleExp = glm::log(1.f / nextPose.scale);
+        const float interpolatedInvScaleExp = static_cast<float>(
+            prevInvScaleExp * (1 - t) + nextInvScaleExp * t
+            );
+        camera.setScaling(1.f / glm::exp(interpolatedInvScaleExp));
+    }
     return true;
 }
 
@@ -142,7 +143,7 @@ double KeyframeNavigator::currentTime() const {
     if( _timeframeMode == KeyframeTimeRef::relative_recordedStart )
         return (global::windowDelegate.applicationTime() - _referenceTimestamp);
     else if( _timeframeMode == KeyframeTimeRef::absolute_simTimeJ2000 )
-        return OsEng.timeManager().time().j2000Seconds();
+        return global::timeManager.time().j2000Seconds();
     else
         return global::windowDelegate.applicationTime();
 }

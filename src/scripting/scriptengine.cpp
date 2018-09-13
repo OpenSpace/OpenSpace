@@ -26,6 +26,7 @@
 
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
+#include <openspace/interaction/sessionRecording.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/syncbuffer.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -636,8 +637,8 @@ void ScriptEngine::preSync(bool isMaster) {
         if (global::parallelPeer.isHost() && remoteScripting) {
             global::parallelPeer.sendScript(_currentSyncedScript);
         }
-        if (OsEng.sessionRecording().isRecording()) {
-            OsEng.sessionRecording().saveScript(_currentSyncedScript);
+        if (global::sessionRecording.isRecording()) {
+            global::sessionRecording.saveScript(_currentSyncedScript);
         }
     }
     _mutex.unlock();

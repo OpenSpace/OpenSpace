@@ -106,7 +106,7 @@ int loadScheduledScript(lua_State* L) {
 int setModeApplicationTime(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::setModeApplicationTime");
 
-    OsEng.scriptScheduler().setModeApplicationTime();
+    global::scriptScheduler.setModeApplicationTime();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -115,7 +115,7 @@ int setModeApplicationTime(lua_State* L) {
 int setModeRecordedTime(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::setModeRecordedTime");
 
-    OsEng.scriptScheduler().setModeRecordedTime();
+    global::scriptScheduler.setModeRecordedTime();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -124,7 +124,7 @@ int setModeRecordedTime(lua_State* L) {
 int setModeSimulationTime(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::setModeSimulationTime");
 
-    OsEng.scriptScheduler().setModeSimulationTime();
+    global::scriptScheduler.setModeSimulationTime();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

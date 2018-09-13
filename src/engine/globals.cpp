@@ -34,6 +34,7 @@
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/sessionRecording.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelpeer.h>
@@ -162,6 +163,12 @@ interaction::NavigationHandler& gNavigationHandler() {
     return g;
 }
 
+interaction::SessionRecording& gSessionRecording() {
+    static interaction::SessionRecording g;
+    return g;
+}
+
+
 performance::PerformanceManager& gPerformanceManager() {
     static performance::PerformanceManager g;
     return g;
@@ -195,6 +202,7 @@ void initialize() {
     global::navigationHandler.setPropertyOwner(&global::rootPropertyOwner);
     // New property subowners also have to be added to the ImGuiModule callback!
     global::rootPropertyOwner.addPropertySubOwner(global::navigationHandler);
+    global::rootPropertyOwner.addPropertySubOwner(global::sessionRecording);
     global::rootPropertyOwner.addPropertySubOwner(global::timeManager);
 
     global::rootPropertyOwner.addPropertySubOwner(global::renderEngine);

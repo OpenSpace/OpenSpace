@@ -28,7 +28,7 @@
 #include <openspace/interaction/externInteraction.h>
 #include <openspace/interaction/keyframenavigator.h>
 #include <openspace/network/messagestructures.h>
-
+#include <openspace/scripting/lualibrary.h>
 #include <ghoul/io/socket/tcpsocket.h>
 
 #include <vector>
@@ -53,6 +53,8 @@ public:
     };
 
     SessionRecording();
+    ~SessionRecording();
+
     bool startRecording(std::string filename);
     void stopRecording();
     void saveScript(std::string scriptToSave);
@@ -74,7 +76,7 @@ public:
     * \return The Lua library that contains all Lua functions available to affect the
     * interaction
     */
-    static scripting::LuaLibrary luaLibrary();
+    static openspace::scripting::LuaLibrary luaLibrary();
     
 private:
     ExternInteraction _externInteract;

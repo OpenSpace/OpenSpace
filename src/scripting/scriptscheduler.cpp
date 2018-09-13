@@ -30,13 +30,6 @@
 #include <openspace/util/time.h>
 #include <ghoul/logging/logmanager.h>
 
-namespace {
-    constexpr const char* KeyTime = "Time";
-    constexpr const char* KeyForwardScript = "ForwardScript";
-    constexpr const char* KeyBackwardScript = "BackwardScript";
-    constexpr const char* KeyUniversalScript = "Script";
-} // namespace
-
 #include "scriptscheduler_lua.inl"
 
 namespace openspace::scripting {

@@ -146,8 +146,6 @@ private:
 #ifdef SESSION_RECORDING_TIME
     std::function<void()> _playbackEndCallback;
 #endif
-    double _lastTime = 0;
-    double _lastDeltaTime = 0;
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeJumpCallbacks;
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timelineChangeCallbacks;
 };

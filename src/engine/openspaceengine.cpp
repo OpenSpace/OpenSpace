@@ -569,7 +569,7 @@ void OpenSpaceEngine::initializeGL() {
                     std::string("("),
                     [](std::string a, const std::unique_ptr<AbstractValue>& v) {
                         std::stringstream s;
-                        s << v;
+                        s << v.get();
                         return a + s.str() + ", ";
                     }
                 );
@@ -579,7 +579,7 @@ void OpenSpaceEngine::initializeGL() {
                 std::string returnValue;
                 std::stringstream s;
                 if (call.returnValue) {
-                    s << call.returnValue;
+                    s << call.returnValue.get();
                     returnValue = " -> " + s.str();
                 }
 
@@ -983,7 +983,7 @@ void OpenSpaceEngine::preSynchronization() {
         }
         global::parallelPeer.preSynchronization();
     }
-    _sessionRecording->preSynchronization();
+    global::sessionRecording.preSynchronization();
 
     for (const std::function<void()>& func : global::callback::preSync) {
         func();

@@ -25,11 +25,15 @@
 #include <openspace/interaction/externInteraction.h>
 
 #include <openspace/openspace.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/keyframenavigator.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scripting/scriptengine.h>
+#include <openspace/util/camera.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 
@@ -84,12 +88,12 @@ void ExternInteraction::cameraInteraction(datamessagestructures::CameraKeyframe 
 }
 
 void ExternInteraction::timeInteraction(datamessagestructures::TimeKeyframe kf) {
-    Time time(kf._time);
-    time.setDeltaTime(kf._dt);
-    time.setPause(kf._paused);
-    time.setTimeJumped(kf._requiresTimeJump);
+    TimeKeyframeData timeKfData;
+    timeKfData.delta = kf._dt;
+    timeKfData.pause = kf._paused;
+    timeKfData.jump = kf._requiresTimeJump;
 
-    OsEng.timeManager().addKeyframe(kf._timestamp, time);
+    global::timeManager.addKeyframe(kf._timestamp, timeKfData);
 }
 
 void ExternInteraction::scriptInteraction(datamessagestructures::ScriptMessage sm) {
@@ -100,45 +104,45 @@ void ExternInteraction::scriptInteraction(datamessagestructures::ScriptMessage s
 }
     
 void ExternInteraction::generateCameraKeyframe(datamessagestructures::CameraKeyframe& kf) {
-    SceneGraphNode* focusNode = OsEng.navigationHandler().focusNode();
+    SceneGraphNode* focusNode = global::navigationHandler.focusNode();
     if (!focusNode) {
         return;
     }
     
-    kf._position = OsEng.navigationHandler().focusNodeToCameraVector();
+    kf._position = global::navigationHandler.focusNodeToCameraVector();
     
     kf._followNodeRotation =
-    OsEng.navigationHandler().orbitalNavigator().followingNodeRotation();
+        global::navigationHandler.orbitalNavigator().followingNodeRotation();
     if (kf._followNodeRotation) {
         kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
-        kf._rotation = OsEng.navigationHandler().focusNodeToCameraRotation();
+        kf._rotation = global::navigationHandler.focusNodeToCameraRotation();
     }
     else {
-        kf._rotation = OsEng.navigationHandler().camera()->rotationQuaternion();
+        kf._rotation = global::navigationHandler.camera()->rotationQuaternion();
     }
     
     kf._focusNode = focusNode->identifier();
     
     // Timestamp as current runtime of OpenSpace instance
-    kf._timestamp = OsEng.windowWrapper().applicationTime();
+    kf._timestamp = global::windowDelegate.applicationTime();
 }
     
 void ExternInteraction::generateTimeKeyframe(datamessagestructures::TimeKeyframe& kf) {
-    Time& time = OsEng.timeManager().time();
+    const Time& time = global::timeManager.time();
     
-    kf._dt = time.deltaTime();
-    kf._paused = time.paused();
+    kf._dt = global::timeManager.deltaTime();
+    kf._paused = global::timeManager.isPaused();
     kf._time = time.j2000Seconds();
     
     // Timestamp as current runtime of OpenSpace instance
-    kf._timestamp = OsEng.windowWrapper().applicationTime();
+    kf._timestamp = global::windowDelegate.applicationTime();
 }
     
 void ExternInteraction::generateScriptMessage(datamessagestructures::ScriptMessage& sm,
                                               std::string script) {
     sm._script = std::move(script);
     // Timestamp as current runtime of OpenSpace instance
-    sm._timestamp = OsEng.windowWrapper().applicationTime();
+    sm._timestamp = global::windowDelegate.applicationTime();
 }
 
 
