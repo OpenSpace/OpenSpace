@@ -44,10 +44,13 @@ set_source_files_properties(
 
 target_include_directories(OpenSpace-MinVR PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ext/minvr/src)
 
-target_link_libraries(OpenSpace-MinVR
-    libOpenSpace
-    MinVR
-)
+# @FRAGILE:  This will break if we ever compile MinVR without GLFW support.
+#            Maybe there is a better way to access glfwGetProcAddress, which is probably
+#            The only thing that we need from this include
+target_include_directories(OpenSpace-MinVR PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ext/minvr/external/GLFW/src/include)
+
+
+target_link_libraries(OpenSpace-MinVR libOpenSpace MinVR)
 
 # Web Browser and Web gui
 # Why not put these in the module's path? Because they do not have access to the
