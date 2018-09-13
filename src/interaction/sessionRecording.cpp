@@ -190,30 +190,48 @@ void SessionRecording::saveCameraKeyframe() {
     // & orientation of camera
     datamessagestructures::CameraKeyframe kf;
     _externInteract.generateCameraKeyframe(kf);
-    
-    std::stringstream keyframeLine = std::stringstream();
-    //Add simulation timestamp, timestamp relative, simulation time to recording start
-    keyframeLine << "camera ";
-    keyframeLine << kf._timestamp << " ";
-    keyframeLine << (kf._timestamp - _timestampRecordStarted) << " ";
-    keyframeLine << std::fixed << std::setprecision(3) << global::timeManager.time().j2000Seconds();
-    keyframeLine << " ";
-    //Add camera position
-    keyframeLine << std::fixed << std::setprecision(7) << kf._position.x << " "
-                 << std::fixed << std::setprecision(7) << kf._position.y << " "
-                 << std::fixed << std::setprecision(7) << kf._position.z << " ";
-    //Add camera rotation
-    keyframeLine << std::fixed << std::setprecision(7) << kf._rotation.x << " "
-                 << std::fixed << std::setprecision(7) << kf._rotation.y << " "
-                 << std::fixed << std::setprecision(7) << kf._rotation.z << " "
-                 << std::fixed << std::setprecision(7) << kf._rotation.w << " ";
-    if( kf._followNodeRotation )
-        keyframeLine << "F ";
-    else
-        keyframeLine << "- ";
-    keyframeLine << kf._focusNode;
-    
-    saveKeyframeToFile(keyframeLine.str());
+
+    if (hasCameraChangedFromPrev(kf)) {
+        std::stringstream keyframeLine = std::stringstream();
+        //Add simulation timestamp, timestamp relative, simulation time to recording start
+        keyframeLine << "camera ";
+        keyframeLine << kf._timestamp << " ";
+        keyframeLine << (kf._timestamp - _timestampRecordStarted) << " ";
+        keyframeLine << std::fixed << std::setprecision(3) << global::timeManager.time().j2000Seconds();
+        keyframeLine << " ";
+        //Add camera position
+        keyframeLine << std::fixed << std::setprecision(7) << kf._position.x << " "
+            << std::fixed << std::setprecision(7) << kf._position.y << " "
+            << std::fixed << std::setprecision(7) << kf._position.z << " ";
+        //Add camera rotation
+        keyframeLine << std::fixed << std::setprecision(7) << kf._rotation.x << " "
+            << std::fixed << std::setprecision(7) << kf._rotation.y << " "
+            << std::fixed << std::setprecision(7) << kf._rotation.z << " "
+            << std::fixed << std::setprecision(7) << kf._rotation.w << " ";
+        if (kf._followNodeRotation)
+            keyframeLine << "F ";
+        else
+            keyframeLine << "- ";
+        keyframeLine << kf._focusNode;
+
+        saveKeyframeToFile(keyframeLine.str());
+    }
+}
+
+bool SessionRecording::hasCameraChangedFromPrev(datamessagestructures::CameraKeyframe kfNew) {
+    const double threshold = 1e-2;
+    bool hasChanged = false;
+
+    glm::dvec3 positionDiff = kfNew._position - _prevRecordedCameraKeyframe._position;
+    if (glm::length(positionDiff) > threshold)
+        hasChanged = true;
+
+    float rotationDiff = dot(kfNew._rotation, _prevRecordedCameraKeyframe._rotation);
+    if (std::abs(rotationDiff - 1.0) > threshold)
+        hasChanged = true;
+
+    _prevRecordedCameraKeyframe = kfNew;
+    return hasChanged;
 }
 
 #ifdef SESSION_RECORDING_TIME

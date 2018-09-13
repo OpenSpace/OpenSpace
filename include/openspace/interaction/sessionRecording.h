@@ -86,6 +86,7 @@ private:
     double _timestampPlaybackStarted_simulation;
     double _timestampApplicationStarted_simulation;
     void saveKeyframeToFile(std::string entry);
+    bool hasCameraChangedFromPrev(datamessagestructures::CameraKeyframe kfNew);
     double getAppropriateTimestamp(std::istringstream& inputLine);
     double getEquivalentSimulationTime(std::istringstream& inputLine);
     double getEquivalentApplicationTime(std::istringstream& inputLine);
@@ -96,6 +97,7 @@ private:
     std::ofstream _recordFile;
     int _playbackLineNum = 1;
     KeyframeTimeRef _playbackTimeReferenceMode;
+    datamessagestructures::CameraKeyframe _prevRecordedCameraKeyframe;
     bool _playbackActive_camera = false;
 #ifdef SESSION_RECORDING_TIME
     bool _playbackActive_time = false;
