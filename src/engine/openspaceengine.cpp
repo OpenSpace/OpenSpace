@@ -1225,14 +1225,16 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
     global::navigationHandler.mouseScrollWheelCallback(posY);
 }
 
-void OpenSpaceEngine::encode() {
-    global::syncEngine.encodeSyncables();
+std::vector<char> OpenSpaceEngine::encode() {
+    std::vector<char> buffer = global::syncEngine.encodeSyncables();
     global::networkEngine.publishStatusMessage();
     global::networkEngine.sendMessages();
+
+    return buffer;
 }
 
-void OpenSpaceEngine::decode() {
-    global::syncEngine.decodeSyncables();
+void OpenSpaceEngine::decode(std::vector<char> data) {
+    global::syncEngine.decodeSyncables(std::move(data));
 }
 
 void OpenSpaceEngine::externalControlCallback(const char* receivedChars, int size,

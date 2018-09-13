@@ -70,6 +70,7 @@ constexpr const char* SpoutTag = "Spout";
 constexpr const char* OpenVRTag = "OpenVR";
 
 sgct::Engine* SgctEngine;
+sgct::SharedVector<char> _synchronizationBuffer;
 
 #ifdef OPENVR_SUPPORT
 sgct::SGCTWindow* FirstOpenVRWindow = nullptr;
@@ -581,7 +582,9 @@ void mainCharCallback(unsigned int codepoint, int mods) {
 
 void mainEncodeFun() {
     LTRACE("main::mainEncodeFun(begin)");
-    openspace::global::openSpaceEngine.encode();
+    std::vector<char> data = openspace::global::openSpaceEngine.encode();
+    _synchronizationBuffer.setVal(std::move(data));
+    sgct::SharedData::instance()->writeVector(&_synchronizationBuffer);
     LTRACE("main::mainEncodeFun(end)");
 }
 
@@ -589,7 +592,9 @@ void mainEncodeFun() {
 
 void mainDecodeFun() {
     LTRACE("main::mainDecodeFun(begin)");
-    openspace::global::openSpaceEngine.decode();
+    sgct::SharedData::instance()->readVector(&_synchronizationBuffer);
+    std::vector<char> data = _synchronizationBuffer.getVal();
+    openspace::global::openSpaceEngine.decode(std::move(data));
     LTRACE("main::mainDecodeFun(end)");
 }
 
@@ -850,13 +855,18 @@ int main(int argc, char** argv) {
         "evaluated before it is passed to OpenSpace."
     ));
 
-    std::vector<std::string> sgctArguments = parser.setCommandLine({ argv, argv + argc });
+    // setCommandLine returns a referece to the vector that will be filled later
+    const std::vector<std::string>& sgctArguments = parser.setCommandLine(
+        { argv, argv + argc }
+    );
 
     bool showHelp = parser.execute();
     if (showHelp) {
         parser.displayHelp(std::cout);
         exit(EXIT_SUCCESS);
     }
+    // Take an actual copy of the arguments
+    std::vector<std::string> arguments = sgctArguments;
 
     //
     // Set up SGCT functions for window delegate
@@ -928,9 +938,9 @@ int main(int argc, char** argv) {
 
     // Prepend the outgoing sgctArguments with the program name
     // as well as the configuration file that sgct is supposed to use
-    sgctArguments.insert(sgctArguments.begin(), argv[0]);
-    sgctArguments.insert(sgctArguments.begin() + 1, "-config");
-    sgctArguments.insert(sgctArguments.begin() + 2, absPath(windowConfiguration));
+    arguments.insert(arguments.begin(), argv[0]);
+    arguments.insert(arguments.begin() + 1, "-config");
+    arguments.insert(arguments.begin() + 2, absPath(windowConfiguration));
 
     // Need to set this before the creation of the sgct::Engine
     sgct::MessageHandler::instance()->setLogToConsole(false);
@@ -943,7 +953,7 @@ int main(int argc, char** argv) {
 #endif
 
     LDEBUG("Creating SGCT Engine");
-    SgctEngine = new sgct::Engine(sgctArguments);
+    SgctEngine = new sgct::Engine(arguments);
 
     // Bind functions
     SgctEngine->setInitOGLFunction(mainInitFunc);
