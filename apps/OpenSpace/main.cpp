@@ -801,7 +801,9 @@ void setSgctDelegateFunctions() {
     sgctDelegate.currentWindowId = []() {
         return sgct::Engine::instance()->getCurrentWindowPtr()->getId();
     };
-    sgctDelegate.openGLProcedureFunction = glfwGetProcAddress;
+    sgctDelegate.openGLProcedureFunction = [](const char* func) {
+        return glfwGetProcAddress(func);
+    };
 }
 
 int main(int argc, char** argv) {

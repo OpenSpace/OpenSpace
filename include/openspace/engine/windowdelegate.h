@@ -107,7 +107,10 @@ struct WindowDelegate {
 
     int (*currentWindowId)() = []() { return 0; };
 
-    glbinding::GetProcAddress openGLProcedureFunction = [](const char*) -> glbinding::ProcAddress { return nullptr; };
+    using GLProcAddress = void(*)(void);
+
+    GLProcAddress (*openGLProcedureAddress)(const char*) =
+        [](const char*) -> GLProcAddress { return []() {}; };
 };
 
 } // namespace openspace

@@ -335,8 +335,8 @@ void OpenSpaceEngine::initialize() {
 void OpenSpaceEngine::initializeGL() {
     LTRACE("OpenSpaceEngine::initializeGL(begin)");
 
+    glbinding::Binding::initialize(global::windowDelegate.openGLProcedureAddress);
     //glbinding::Binding::useCurrentContext();
-    glbinding::Binding::initialize(global::windowDelegate.openGLProcedureFunction);
 
     rendering::helper::initialize();
 
