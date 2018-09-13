@@ -15,6 +15,7 @@ asset.request('scene/digitaluniverse/stars')
 asset.request('scene/digitaluniverse/milkyway')
 asset.require('scene/solarsystem/missions/voyager/voyager1')
 asset.require('scene/solarsystem/missions/voyager/voyager2')
+asset.require('scene/solarsystem/missions/voyager/voyager1trails')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')

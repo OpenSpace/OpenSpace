@@ -14,6 +14,12 @@ asset.require('util/default_joystick')
 
 asset.request('customization/globebrowsing')
 -- Keybindings that are specific for this scene
+
+asset.require('scene/solarsystem/spacecrafts/voyager/voyager1')
+asset.require('scene/solarsystem/spacecrafts/voyager/voyager2')
+asset.require('scene/solarsystem/spacecrafts/osirisrex/osirisrex')
+
+
 local Keybindings = {
     {
         Key = "s",
