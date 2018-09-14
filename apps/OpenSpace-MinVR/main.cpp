@@ -40,8 +40,18 @@
 #include <GLFW/glfw3.h>
 #include <numeric>
 
-// @TODO(abock):  Add Spout support
-// @TODO(abock):  Reintroduce commandline-parsing
+// @TODO:  Add Spout support
+// @TODO:  Reintroduce commandline-parsing
+// @TODO:  Prevent a third window to open that immediately crashes
+
+// @TODO:  Proper check if the current instance is the master:
+
+        // Print whether a the vrsetup is a host or a client
+//std::cout << vrMain->getConfig()->getAttributeValue(vrMain->getName(), "hostType") << std::endl;
+//if (vrMain->getConfig()->exists("NumClients", vrMain->getName())) {
+    // How to read configuration settings for the specific vrsetup
+    //std::cout << "Number of Clients: " << (std::string)vrMain->getConfig()->getValue("NumClients", vrMain->getName()) << std::endl;
+//}
 
 using namespace MinVR;
 using namespace openspace;
