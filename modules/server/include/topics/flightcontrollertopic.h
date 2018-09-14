@@ -64,6 +64,7 @@ private:
     void processInputState(const nlohmann::json& json);
     void setFocusNodes();
     void changeFocus(const nlohmann::json& json);
+    void processLua(const nlohmann::json& json);
 
     void setFriction(const bool &on) const;
 };

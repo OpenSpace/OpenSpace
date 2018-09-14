@@ -36,6 +36,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -50,12 +51,13 @@ namespace {
     constexpr const char* BasePathToken = "${BASE}";
 
     enum class Command {
-        Connect = 0,
-        Disconnect,
-        InputState,
-        ChangeFocus,
-        Autopilot,
-        Friction
+          Connect = 0
+        , Disconnect
+        , InputState
+        , ChangeFocus
+        , Autopilot
+        , Friction
+        , Lua
     };
 
     using AxisType = openspace::interaction::WebsocketCameraStates::AxisType;
@@ -82,12 +84,14 @@ namespace {
 
     // Friction JSON Keys
     constexpr const char* FrictionEngagedKey = "engaged";
-
     constexpr const char* FrictionPropertyUri = "NavigationHandler.OrbitalNavigator.Friction";
-
     constexpr const char* RotationalFriction = "Friction.RotationalFriction";
     constexpr const char* ZoomFriction = "Friction.ZoomFriction";
     constexpr const char* RollFriction = "Friction.RollFriction";
+
+    // Friction Lua Keys
+    constexpr const char* LuaKey = "lua";
+    constexpr const char* LuaScript = "script";
 
     const std::string OrbitX = "orbitX";
     const std::string OrbitY = "orbitY";
@@ -106,6 +110,7 @@ namespace {
     const std::string ChangeFocus = "changeFocus";
     const std::string Autopilot = "autopilot";
     const std::string Friction = "friction";
+    const std::string Lua = "lua";
 
     const static std::unordered_map<std::string, AxisType> AxisIndexMap ({
         {OrbitX, AxisType::OrbitX},
@@ -121,12 +126,13 @@ namespace {
     });
 
     const static std::unordered_map<std::string, Command> CommandMap ({
-        {Connect, Command::Connect},
-        {Disconnect, Command::Disconnect},
-        {InputState, Command::InputState},
-        {ChangeFocus, Command::ChangeFocus},
-        {Autopilot, Command::Autopilot},
-        {Friction, Command::Friction}
+          {Connect, Command::Connect}
+        , {Disconnect, Command::Disconnect}
+        , {InputState, Command::InputState}
+        , {ChangeFocus, Command::ChangeFocus}
+        , {Autopilot, Command::Autopilot}
+        , {Friction, Command::Friction}
+        , {Lua, Command::Lua}
     });
 
     const int Axes = 10;
@@ -188,6 +194,9 @@ void FlightControllerTopic::handleJson(const nlohmann::json& json) {
             break;
         case Command::Friction:
             setFriction(json[Friction][FrictionEngagedKey]);
+            break;
+        case Command::Lua:
+            processLua(json[Lua]);
             break;
         default:
             LWARNING(fmt::format("Unrecognized action: {}", it->first));
@@ -343,4 +352,10 @@ void FlightControllerTopic::processInputState(const nlohmann::json& json) {
         _inputState.axes[std::distance(AxisIndexMap.begin(), mapIt)] = float(it.value());
     }
 }
+    
+void FlightControllerTopic::processLua(const nlohmann::json &json) {
+    const std::string script = json[LuaScript];
+    global::scriptEngine.queueScript(script, openspace::scripting::ScriptEngine::RemoteScripting::Yes);
+}
+    
 } // namespace openspace

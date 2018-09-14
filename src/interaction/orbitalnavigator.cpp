@@ -225,6 +225,10 @@ OrbitalNavigator::OrbitalNavigator()
     _joystickSensitivity.onChange([&]() {
         _joystickStates.setSensitivity(_joystickSensitivity * pow(10.0, -4));
     });
+    _websocketSensitivity.onChange([&]() {
+        _websocketStates.setSensitivity(_websocketSensitivity);
+    });
+
 
     addPropertySubOwner(_friction);
 
@@ -239,6 +243,7 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_stereoInterpolationTime);
     addProperty(_mouseSensitivity);
     addProperty(_joystickSensitivity);
+    addProperty(_websocketSensitivity);
 }
 
 void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
