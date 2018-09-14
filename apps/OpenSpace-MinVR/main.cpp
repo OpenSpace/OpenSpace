@@ -38,24 +38,29 @@
 #include <ghoul/logging/visualstudiooutputlog.h>
 #include <api/MinVR.h>
 #include <GLFW/glfw3.h>
+#include <numeric>
 
 // @TODO(abock):  Add Spout support
 // @TODO(abock):  Reintroduce commandline-parsing
-// @TODO(abock):  Pull OpenSpace branch and remove explicit linking against GLFW from application
 
 using namespace MinVR;
 using namespace openspace;
 
 namespace {
 
-class Handler : public VREventHandler, public VRRenderHandler {
+class Handler : public VREventHandler, public VRRenderHandler, public VRInputDevice {
 public:
     void onVREvent(const VRDataIndex& eventData) override;
     void onVRRenderContext(const VRDataIndex& stateData) override;
     void onVRRenderScene(const VRDataIndex& stateData) override;
+
+    void appendNewInputEventsSinceLastCall(VRDataQueue* queue) override;
 };
 
 constexpr const char* _loggerCat = "main_minvr";
+
+constexpr const char* MasterNode = "/MinVR/Desktop1";
+bool IsMasterNode = false;
 
 VRMain engine;
 Handler handler;
@@ -67,6 +72,9 @@ struct {
 
     glm::vec2 mousePosition;
     uint32_t mouseButtons = 0;
+
+    float averageDeltatime = -1.f;
+    float deltaTime = -1.f;
 } windowingGlobals;
 
 struct {
@@ -77,6 +85,7 @@ struct {
 
 std::vector<char> SynchronizationBuffer;
 bool HasInitializedGL = false;
+std::array<float, 30> LastFrametimes = { 1.f / 60.f }; // we can be optimistic here
 
 } // namespace
 
@@ -94,14 +103,32 @@ void Handler::onVREvent(const VRDataIndex& eventData) {
         );
     }
 
-    const bool isMaster = global::windowDelegate.isMaster();
     const bool isButtonEvent = type == "ButtonDown" || type == "ButtonUp" ||
                                type == "ButtonRepeat";
 
     if (type == "AnalogUpdate") {
-        //_app->onAnalogChange(VRAnalogEvent(eventData));
+        const VRAnalogEvent& event = static_cast<const VRAnalogEvent&>(eventData);
+        if (event.getName() == "FrameStart") {
+            float currentTime = event.getValue();
+            windowingGlobals.deltaTime = currentTime - LastFrametimes.back();
+            std::rotate(
+                LastFrametimes.begin(),
+                LastFrametimes.begin() + 1,
+                LastFrametimes.end()
+            );
+            LastFrametimes.back() = currentTime;
+        }
+
+        windowingGlobals.averageDeltatime = std::accumulate(
+            LastFrametimes.begin(),
+            LastFrametimes.end(),
+            0.f
+        ) / LastFrametimes.size();
     }
-    else if (isMaster && isButtonEvent) {
+    else if (isButtonEvent) {
+        if (!global::windowDelegate.isMaster()) {
+            return;
+        }
         const VRButtonEvent& event = static_cast<const VRButtonEvent&>(eventData);
 
         const std::string& buttonName = event.getName();
@@ -189,7 +216,10 @@ void Handler::onVREvent(const VRDataIndex& eventData) {
         }
 
     }
-    else if (isMaster && type == "CursorMove") {
+    else if (type == "CursorMove") {
+        if (!global::windowDelegate.isMaster()) {
+            return;
+        }
         const VRCursorEvent& event = static_cast<const VRCursorEvent&>(eventData);
 
         const float* pos = event.getPos();
@@ -201,6 +231,20 @@ void Handler::onVREvent(const VRDataIndex& eventData) {
     }
     else if (type == "TrackerMove") {
         const VRTrackerEvent& event = static_cast<const VRTrackerEvent&>(eventData);
+    }
+    else if (type == "OpenSpaceMessage") {
+        if (global::windowDelegate.isMaster()) {
+            // We don't want the message if we are the master as we already have the state
+            return;
+        }
+        const int nBytes = eventData.getValue("NBytes");
+        std::vector<int> intData = eventData.getValue("SynchronizationData");
+        char* data = reinterpret_cast<char*>(intData.data());
+
+        SynchronizationBuffer.resize(nBytes);
+        std::copy(data, data + nBytes, SynchronizationBuffer.begin());
+
+        global::openSpaceEngine.decode(std::move(SynchronizationBuffer));
     }
     else {
         LERRORC("onVREvent()", fmt::format("Received an event of unknown type {}", type));
@@ -226,8 +270,6 @@ void Handler::onVRRenderContext(const VRDataIndex& stateData) {
 
             HasInitializedGL = true;
         }
-
-        //_app->onRenderGraphicsContext(VRGraphicsState(renderData));
     }
 }
 
@@ -246,7 +288,6 @@ void Handler::onVRRenderScene(const VRDataIndex& stateData) {
                 projectionMatrix
             );
             openspace::global::openSpaceEngine.drawOverlays();
-
             openspace::global::openSpaceEngine.postDraw();
         }
         catch (const ghoul::RuntimeError& e) {
@@ -254,6 +295,27 @@ void Handler::onVRRenderScene(const VRDataIndex& stateData) {
         }
     }
 }
+
+void Handler::appendNewInputEventsSinceLastCall(VRDataQueue* queue) {
+    VRDataIndex e("OpenSpace_Sync");
+
+    e.addData("EventType", "OpenSpaceMessage");
+
+    // Pad the buffer to a multiple of 4
+    const int nBytes = SynchronizationBuffer.size();
+    const int nInts = nBytes % 4 != 0 ? (nBytes / 4 + 1) : nBytes;
+    SynchronizationBuffer.resize((nInts) * 4);
+
+    // Just look away for a bit!
+    int* data = reinterpret_cast<int*>(SynchronizationBuffer.data());
+    std::vector<int> intData(nInts);
+    std::copy(data, data + nInts, intData.begin());
+
+    e.addData("NBytes", static_cast<int>(nBytes));
+    e.addData("SynchronizationData", intData);
+    queue->push(e);
+}
+
 
 void setupMinVrDelegateFunctions(VRMain& main) {
     // Sets up the OpenSpace WindowDelegate callback functions
@@ -267,8 +329,8 @@ void setupMinVrDelegateFunctions(VRMain& main) {
     delegate.currentDrawBufferResolution = delegate.currentWindowResolution;
     delegate.currentViewportSize = delegate.currentWindowResolution;
 
-    delegate.averageDeltaTime = []() { return 1.0 / 60.0; };
-    delegate.deltaTime = []() { return 1.0 / 60.0; };
+    delegate.averageDeltaTime = []() -> double { return windowingGlobals.deltaTime; };
+    delegate.deltaTime = []() -> double { return windowingGlobals.deltaTime; };
 
     delegate.mousePosition = []() {
         return windowingGlobals.mousePosition;
@@ -277,11 +339,7 @@ void setupMinVrDelegateFunctions(VRMain& main) {
         return windowingGlobals.mouseButtons;
     };
 
-    delegate.isMaster = []() {
-        //const std::string& name = engine.getName();
-        //return name == "foobar"; // make the server with the name foobar the master
-        return true;
-    };
+    delegate.isMaster = []() { return IsMasterNode; };
 
     delegate.openGLProcedureAddress = [](const char* func) {
         VRWindowToolkit* wtk = engine.getWindowToolkit("VRGLFWWindowToolkit");
@@ -373,6 +431,9 @@ int main(int argc, char** argv) {
 
     engine.addEventHandler(&handler);
     engine.addRenderHandler(&handler);
+    if (global::windowDelegate.isMaster()) {
+        engine.addInputDevice(&handler);
+    }
     engine.loadConfig(global::configuration.windowConfiguration);
     // Yes, this still contains the OpenSpace-specific commandline arguments, but no one
     // will ever know if we use the remaining arguments or not; both commandline parsers
@@ -381,17 +442,21 @@ int main(int argc, char** argv) {
 
     setupMinVrDelegateFunctions(engine);
 
+    const std::string& name = engine.getName();
+    IsMasterNode = (name == MasterNode);
 
     // run loop-di-loop
     do {
         if (HasInitializedGL) {
-            openspace::global::openSpaceEngine.preSynchronization();
+            global::openSpaceEngine.preSynchronization();
+
+            SynchronizationBuffer = global::openSpaceEngine.encode();
             engine.synchronizeAndProcessEvents();
 
             engine.updateAllModels();
 
             // @TODO(abock): Not sure if this should be before updateAllModels or here
-            openspace::global::openSpaceEngine.postSynchronizationPreDraw();
+            global::openSpaceEngine.postSynchronizationPreDraw();
         }
 
         engine.renderOnAllDisplays();
