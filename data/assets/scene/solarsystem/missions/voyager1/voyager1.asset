@@ -1,6 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local kernels = asset.require('./voyager1kernels')
+local kernels = asset.require('./kernels')
 
 local models = asset.syncedResource({
     Name = "Voyager 1 Models",
@@ -72,7 +72,7 @@ local Voyager1Main = {
 }
 
 local Voyager1Antenna = {
-    Identifier = "Voyager_1_Antanna",
+    Identifier = "Voyager_1_Antenna",
     Parent = Voyager1.Identifier,
     Renderable = {
         Type = "RenderableModel",
@@ -85,7 +85,7 @@ local Voyager1Antenna = {
         LightSources = LightSources
     },
     GUI = {
-        Name = "Voyager 1 Antanna",
+        Name = "Voyager 1 Antenna",
         Path = "/Solar System/Missions/Voyager 1"
     }
 }

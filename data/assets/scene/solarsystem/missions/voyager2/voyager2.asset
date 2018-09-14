@@ -1,0 +1,101 @@
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local kernels = asset.require('./kernels')
+
+
+local models = asset.syncedResource({
+    Name = "Voyager 2 Models",
+    Type = "HttpSynchronization",
+    Identifier = "voyager2_model",
+    Version = 1
+})
+
+
+local RotationMatrix = {
+    -1, 0, 0,
+    0, 0, -1,
+    0, -1, 0
+}
+
+
+local LightSources = {
+    {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sunTransforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+    },
+    {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+    }
+}
+
+local Voyager2 = {
+    Identifier = "Voyager_2",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "VOYAGER 2",
+            Observer = "SUN",
+            Kernels = kernels.Voyager2Kernels
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "VG2_SC_BUS",
+            DestinationFrame = "GALACTIC"
+        }
+    },
+    GUI = {
+        Name = "Voyager 2",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
+}
+
+local Voyager2Main = {
+    Identifier = "Voyager_2_Main",
+    Parent = Voyager2.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/voyager-main.obj"
+        },
+        ColorTexture = models .. "/voyager-main.jpg",
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
+    },
+    GUI = {
+        Name = "Voyager 2 Main",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
+}
+
+local Voyager2Antenna = {
+    Identifier = "Voyager_2_Antenna",
+    Parent = Voyager2.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/voyager-antenna.obj"
+        },
+        ColorTexture = models .. "/voyager-antenna.png",
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
+    },
+    GUI = {
+        Name = "Voyager 2 Antenna",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    Voyager2,
+    Voyager2Main,
+    Voyager2Antenna
+})

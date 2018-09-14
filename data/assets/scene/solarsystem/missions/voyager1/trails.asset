@@ -1,6 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local kernels = asset.require('./voyager1kernels')
+local kernels = asset.require('./kernels')
 
     -- The trails are organized as follows.  The cruise phases can be resolved in relatively
     -- low resolution since they are just straight lines
