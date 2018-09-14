@@ -157,7 +157,7 @@ if (TARGET zlibstatic)
 endif ()
 
 if (UNIX AND (NOT APPLE))
-    target_link_libraries(libOpenSpace Xcursor Xinerama X11)
+    target_link_libraries(OpenSpace Xcursor Xinerama X11)
 endif ()
 
 
