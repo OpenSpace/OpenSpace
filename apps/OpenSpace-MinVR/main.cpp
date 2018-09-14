@@ -59,11 +59,9 @@ public:
 
 constexpr const char* _loggerCat = "main_minvr";
 
-constexpr const char* MasterNode = "/MinVR/Desktop1";
-bool IsMasterNode = false;
-
 VRMain engine;
 Handler handler;
+VRDataQueue eventQueue;
 
 struct {
     int nWindows = 0;
@@ -83,9 +81,12 @@ struct {
     bool modifierAlt = false;
 } keyboardState;
 
-std::vector<char> SynchronizationBuffer;
 bool HasInitializedGL = false;
 std::array<float, 30> LastFrametimes = { 1.f / 60.f }; // we can be optimistic here
+constexpr const char* MasterNode = "/MinVR/Desktop1";
+bool IsMasterNode = false;
+uint64_t FrameNumber = 0;
+std::chrono::time_point<std::chrono::high_resolution_clock> lastFrameTime;
 
 } // namespace
 
@@ -108,22 +109,6 @@ void Handler::onVREvent(const VRDataIndex& eventData) {
 
     if (type == "AnalogUpdate") {
         const VRAnalogEvent& event = static_cast<const VRAnalogEvent&>(eventData);
-        if (event.getName() == "FrameStart") {
-            float currentTime = event.getValue();
-            windowingGlobals.deltaTime = currentTime - LastFrametimes.back();
-            std::rotate(
-                LastFrametimes.begin(),
-                LastFrametimes.begin() + 1,
-                LastFrametimes.end()
-            );
-            LastFrametimes.back() = currentTime;
-        }
-
-        windowingGlobals.averageDeltatime = std::accumulate(
-            LastFrametimes.begin(),
-            LastFrametimes.end(),
-            0.f
-        ) / LastFrametimes.size();
     }
     else if (isButtonEvent) {
         if (!global::windowDelegate.isMaster()) {
@@ -237,14 +222,15 @@ void Handler::onVREvent(const VRDataIndex& eventData) {
             // We don't want the message if we are the master as we already have the state
             return;
         }
+        const int frameNumber = eventData.getValue("FrameNumber");
         const int nBytes = eventData.getValue("NBytes");
         std::vector<int> intData = eventData.getValue("SynchronizationData");
         char* data = reinterpret_cast<char*>(intData.data());
 
-        SynchronizationBuffer.resize(nBytes);
-        std::copy(data, data + nBytes, SynchronizationBuffer.begin());
+        std::vector<char> synchronizationBuffer(nBytes);
+        std::copy(data, data + nBytes, synchronizationBuffer.begin());
 
-        global::openSpaceEngine.decode(std::move(SynchronizationBuffer));
+        global::openSpaceEngine.decode(std::move(synchronizationBuffer));
     }
     else {
         LERRORC("onVREvent()", fmt::format("Received an event of unknown type {}", type));
@@ -297,23 +283,8 @@ void Handler::onVRRenderScene(const VRDataIndex& stateData) {
 }
 
 void Handler::appendNewInputEventsSinceLastCall(VRDataQueue* queue) {
-    VRDataIndex e("OpenSpace_Sync");
-
-    e.addData("EventType", "OpenSpaceMessage");
-
-    // Pad the buffer to a multiple of 4
-    const int nBytes = SynchronizationBuffer.size();
-    const int nInts = nBytes % 4 != 0 ? (nBytes / 4 + 1) : nBytes;
-    SynchronizationBuffer.resize((nInts) * 4);
-
-    // Just look away for a bit!
-    int* data = reinterpret_cast<int*>(SynchronizationBuffer.data());
-    std::vector<int> intData(nInts);
-    std::copy(data, data + nInts, intData.begin());
-
-    e.addData("NBytes", static_cast<int>(nBytes));
-    e.addData("SynchronizationData", intData);
-    queue->push(e);
+    queue->addQueue(eventQueue);
+    eventQueue.clear();
 }
 
 
@@ -329,7 +300,9 @@ void setupMinVrDelegateFunctions(VRMain& main) {
     delegate.currentDrawBufferResolution = delegate.currentWindowResolution;
     delegate.currentViewportSize = delegate.currentWindowResolution;
 
-    delegate.averageDeltaTime = []() -> double { return windowingGlobals.deltaTime; };
+    delegate.averageDeltaTime = []() -> double {
+        return windowingGlobals.averageDeltatime;
+    };
     delegate.deltaTime = []() -> double { return windowingGlobals.deltaTime; };
 
     delegate.mousePosition = []() {
@@ -431,9 +404,6 @@ int main(int argc, char** argv) {
 
     engine.addEventHandler(&handler);
     engine.addRenderHandler(&handler);
-    if (global::windowDelegate.isMaster()) {
-        engine.addInputDevice(&handler);
-    }
     engine.loadConfig(global::configuration.windowConfiguration);
     // Yes, this still contains the OpenSpace-specific commandline arguments, but no one
     // will ever know if we use the remaining arguments or not; both commandline parsers
@@ -445,18 +415,66 @@ int main(int argc, char** argv) {
     const std::string& name = engine.getName();
     IsMasterNode = (name == MasterNode);
 
+    if (global::windowDelegate.isMaster()) {
+        engine.addInputDevice(&handler);
+    }
+
+    lastFrameTime = std::chrono::high_resolution_clock::now();
     // run loop-di-loop
     do {
         if (HasInitializedGL) {
+            auto now = std::chrono::high_resolution_clock::now();
+            std::chrono::nanoseconds dt = now - lastFrameTime;
+            double dtSec = dt.count() / (1000.0 * 1000.0 * 1000.0);
+            windowingGlobals.deltaTime = static_cast<float>(dtSec);
+            std::rotate(
+                LastFrametimes.begin(),
+                LastFrametimes.begin() + 1,
+                LastFrametimes.end()
+            );
+            LastFrametimes.back() = windowingGlobals.deltaTime;
+            lastFrameTime = now;
+
+            windowingGlobals.averageDeltatime = std::accumulate(
+                LastFrametimes.begin(),
+                LastFrametimes.end(),
+                0.f
+            ) / LastFrametimes.size();
+
+
+
             global::openSpaceEngine.preSynchronization();
 
-            SynchronizationBuffer = global::openSpaceEngine.encode();
+            if (global::windowDelegate.isMaster()) {
+                std::vector<char> syncBuffer = global::openSpaceEngine.encode();
+                VRDataIndex e("OpenSpace_Sync");
+
+                e.addData("EventType", "OpenSpaceMessage");
+
+                // Pad the buffer to a multiple of 4
+                const int nBytes = syncBuffer.size();
+                const int nInts = nBytes % 4 != 0 ? (nBytes / 4 + 1) : nBytes;
+                syncBuffer.resize((nInts) * 4);
+
+                // Just look away for a bit!
+                int* data = reinterpret_cast<int*>(syncBuffer.data());
+                std::vector<int> intData(nInts);
+                std::copy(data, data + nInts, intData.begin());
+
+                e.addData("NBytes", static_cast<int>(nBytes));
+                e.addData("FrameNumber", static_cast<int>(FrameNumber));
+                e.addData("SynchronizationData", intData);
+                eventQueue.push(e);
+            }
+
             engine.synchronizeAndProcessEvents();
 
             engine.updateAllModels();
 
             // @TODO(abock): Not sure if this should be before updateAllModels or here
             global::openSpaceEngine.postSynchronizationPreDraw();
+
+            ++FrameNumber;
         }
 
         engine.renderOnAllDisplays();

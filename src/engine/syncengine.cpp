@@ -61,6 +61,8 @@ void SyncEngine::decodeSyncables(std::vector<char> data) {
     for (Syncable* syncable : _syncables) {
         syncable->decode(&_syncBuffer);
     }
+
+    _syncBuffer.reset();
 }
 
 void SyncEngine::preSynchronization(IsMaster isMaster) {
