@@ -16,6 +16,7 @@
 [submodule "apps/OpenSpace-MinVR/ext/minvr"]
 	path = apps/OpenSpace-MinVR/ext/minvr
 	url = https://github.com/OpenSpace/minvr
+	branch = OpenSpace
 [submodule "apps/OpenSpace/ext/sgct"]
 	path = apps/OpenSpace/ext/sgct
 	url = https://github.com/opensgct/sgct
