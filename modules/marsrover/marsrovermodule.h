@@ -29,6 +29,10 @@
 #include <modules/globebrowsing/globebrowsingmodule.h>
 
 #include <ghoul/opengl/programobjectmanager.h>
+#include <openspace/util/timeline.h>
+#include <modules/marsrover/surfaceprojection/wheeldataprovider.h>
+
+
 
 namespace openspace {
 
@@ -41,8 +45,18 @@ public:
 
     static ghoul::opengl::ProgramObjectManager ProgramObjectManager; //nej
 
+    std::unique_ptr<WheelDataProvider> WheelData;
+
+    Timeline<WheelDataProvider::Node> &getFrameData(const std::string f);
+    //void getFrameData(const std::string f);
+    //void getFrameData(const std::string f);
+
+
 protected:
     void internalInitialize(const ghoul::Dictionary&) override; //used always typ
+
+    //static const auto WheelData = 0;
+    
 };
 
 } // namespace openspace

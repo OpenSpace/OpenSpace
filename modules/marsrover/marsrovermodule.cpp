@@ -34,6 +34,13 @@
 #include <modules/marsrover/surfaceprojection/spacecraftprojection.h>
 #include <modules/marsrover/surfaceprojection/projectionprovider.h>
 #include <modules/marsrover/surfaceprojection/wheeldataprovider.h>
+#include <openspace/util/timeline.h>
+
+#include <ghoul/logging/logmanager.h>
+
+namespace {
+ const std::string _loggerCat = "MarsroverModule";
+}
 
 namespace openspace {
 
@@ -60,9 +67,18 @@ void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {
     fTranslation->registerClass<SpacecraftProjection>("SpacecraftProjection");
    
 
-    auto fProjectionProvider = std::make_unique<ghoul::TemplateFactory<ProjectionProvider>>();
-        fProjectionProvider->registerClass<WheelDataProvider>("WheelDataProvider");
-    FactoryManager::ref().addFactory(std::move(fProjectionProvider));
+    WheelData = std::make_unique<WheelDataProvider>();
+    //fwheelDataProvider->registerClass<WheelDataProvider>("WheelDataProvider");
+    //FactoryManager::ref().addFactory(std::move(fProjectionProvider));
+
+    WheelData->initialize();
+    //WheelData2 = WheelData;
+    //fProjectionProvider->WheelDataProvider::loadData("./OpenSpace/");
+
+    //slutade här!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    //std::string filepath = ".\sync\http\marscuriosity_wheeldata\1\rksml";
+    //fProjectionProvider->loadData(filepath);
+
 
     //Read heightmap once
     //MslTerrain terrainMap;
@@ -70,6 +86,15 @@ void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {
 
     //auto fTranslation = FactoryManager::ref().factory<Translation>();
     //fTranslation->registerClass<MarsProjection>("MarsProjection");
+}
+
+//Timeline<WheelDataProvider::Node> &MarsroverModule::getFrameData(const std::string f, Timeline<WheelDataProvider::Node> obj)
+
+//void MarsroverModule::getFrameData(const std::string f)
+Timeline<WheelDataProvider::Node> &MarsroverModule::getFrameData(const std::string f)
+{
+    LERROR(fmt::format("(getFrameData marsrovermodule) f: '{}'", f));
+    return WheelData->getNode(f);
 }
 
 } // namespace openspace

@@ -31,6 +31,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include <modules/globebrowsing/globes/renderableglobe.h>
 
@@ -41,40 +42,44 @@ namespace {
 }
 
 namespace openspace {
-WheelDataProvider::WheelDataProvider(const ghoul::Dictionary& dictionary)
- : ProjectionProvider(dictionary) {
-}
+WheelDataProvider::WheelDataProvider() {}
 
-void WheelDataProvider::loadData(std::string path) {
-	std::string fileName;
+void WheelDataProvider::loadData(const std::string path) {
+    //LERROR(fmt::format("load data"));
+    //LERROR(fmt::format("filepath1 '{}'", path));
+
+    std::string fileName;
 
     const int start = 28;
     const int end = 2072;
 
-    LERROR(fmt::format("hej"));
-
     for (int i = 0; i < (end - start); i++) {
         if (i < (100 - start)) 
-            fileName = path + "000" + std::to_string(i + start); 
+            fileName = path + "/000" + std::to_string(i + start); 
         
         else if (i < (1000 - start)) 
-            fileName = path + "00" + std::to_string(i + start); 
+            fileName = path + "/00" + std::to_string(i + start); 
         
         else  
-            fileName = path + "0" + std::to_string(i + start); 
+            fileName = path + "/0" + std::to_string(i + start); 
 
         fileName = fileName + "/rksml_playback_filt_eha.rksml";
         std::replace(fileName.begin(), fileName.end(), '\\', '/');
     
         //parse file
-        //parseFile(fileName);
+        parseFile(fileName);
     }
-    std::string testFile = path + "/00048/rksml_playback_filt_eha.rksml";
-    parseFile(testFile);
+    //testfile
+    //std::string testFile = path + "/00048/rksml_playback_filt_eha.rksml";
+    //parseFile(testFile);
+
+    //for (auto x : Timeline_Objects)
+        //LERROR(fmt::format(x.first));
 }
 
-void WheelDataProvider::parseFile(std::string path) 
+void WheelDataProvider::parseFile(const std::string path) 
 {
+
 	double val;
     double e;
     std::ifstream myfile (path);
@@ -89,7 +94,7 @@ void WheelDataProvider::parseFile(std::string path)
                 tag,
                 raised,
                 line;
-    /*
+
     if (myfile.is_open())
     {
         while (getline (myfile, line) )
@@ -116,15 +121,9 @@ void WheelDataProvider::parseFile(std::string path)
                 std::getline(iss, trash, '>');
                 std::getline(iss, value, '<');
 
-                //Send to new object with time to 
-                //If moved to another file, if statement is not neccessary
-                //if (name == std::to_string(_objectPart)) {     
-                
                 Node nodeObject;
                 nodeObject.frameName = name;
-                //double te = 399958865.0;
                 nodeObject.frameTime = atof(time.c_str());
-                //nodeObject.frameTime = te;
 
                 //if *10^x is found
                 if (value.find('E') != std::string::npos)
@@ -136,83 +135,79 @@ void WheelDataProvider::parseFile(std::string path)
 
                     nodeObject.rotValue = val * pow(10.0, e); 
                 }
-                else {
+                
+                else 
                     nodeObject.rotValue = atof(value.c_str());
-                	//If not empty, fix: make correct
-                	if (getNode(std::to_string(nodeObject.name + "_Timeline")->data.name =! "")
-                    	getNode(std::to_string(nodeObject.name + "_Timeline").addKeyframe(nodeObject.frameTime, nodeObject)));
-                }
+                    
+                if (nodeObject.frameName != "")
+                    addKeyframe(nodeObject);    
+
             } 
             iss.clear();
             //trash = "";
         }
         myfile.close();
     }
-    else LERROR(fmt::format("never opened file")); */
+    else LERROR(fmt::format("never opened file")); 
+
 }
 
-Timeline<WheelDataProvider::Node>& WheelDataProvider::getNode(std::string s)
+void WheelDataProvider::addKeyframe(const Node &node)
 {
-    if ( "LF_DRIVE_Timeline" == s) 
-        return LF_DRIVE_Timeline;
+    bool found = false;
 
-    else if ("LF_STEER_Timeline" == s) 
-        return LF_STEER_Timeline;
+    // If Frame timeline object already exist, add new time
+    if (Timeline_Objects.size() > 0)
+    {
     
-    else if ("LM_DRIVE_Timeline" == s)     
-        return LM_DRIVE_Timeline;
-    
-    else if ("LR_DRIVE_Timeline" == s) 
-        return LR_DRIVE_Timeline;
-    
-    else if ("LR_STEER_Timeline" == s) 
-        return LR_STEER_Timeline;
-    
-    else if ("RF_DRIVE_Timeline" == s) 
-        return RF_DRIVE_Timeline;
-    
-    else if ("RF_STEER_Timeline" == s) 
-        return RF_STEER_Timeline;
-    
-    else if ("RM_DRIVE_Timeline" == s) 
-        return RM_DRIVE_Timeline;
-    
-    else if ("RR_DRIVE_Timeline" == s) 
-        return RR_DRIVE_Timeline;
-    
-    else if ("RR_STEER_Timeline" == s) 
-        return RR_STEER_Timeline;
-    
-    else if ("LEFT_BOGIE_Timeline" == s) 
-        return LEFT_BOGIE_Timeline;
-    
-    else if ("LEFT_DIFFERENTIAL_Timeline" == s) 
-        return LEFT_DIFFERENTIAL_Timeline;
-    
-    else if ("RIGHT_BOGIE_Timeline" == s) 
-        return RIGHT_BOGIE_Timeline;
-    
-    else if ("RIGHT_DIFFERENTIAL_Timeline" == s) 
-        return RIGHT_DIFFERENTIAL_Timeline;
-    
-    else if ("QUAT_C_Timeline" == s) 
-        return QUAT_C_Timeline;
-    
-    else if ("QUAT_X_Timeline" == s) 
-        return QUAT_X_Timeline;
-    
-    else if ("QUAT_Y_Timeline" == s) 
-        return QUAT_Y_Timeline;
-    
-    else if("QUAT_Z_Timeline" == s) 
-        return QUAT_Z_Timeline; 
+        for (auto obj : Timeline_Objects)
+        {
+            if (node.frameName == obj.first) // if already in vector -> add time 
+            {
+                obj.second.addKeyframe(node.frameTime, node);
+                found = true;
+                break;
+            }
+        }
+    }
 
-    //fix
-    //return empty object
-    return QUAT_Z_Timeline;
+    // Add new timeline object to vector
+    if (!found)
+    {
+        Timeline<WheelDataProvider::Node> timeline_obj;
+        timeline_obj.addKeyframe(node.frameTime, node);
+        Timeline_Objects.push_back(std::make_pair(node.frameName, timeline_obj));
+    }
+}
+
+
+Timeline<WheelDataProvider::Node> &WheelDataProvider::getNode(const std::string s) const
+{    
+    LERROR(fmt::format("(getNode) s: '{}'", s));
+
+    for (auto obj : Timeline_Objects)
+    {
+        LERROR(fmt::format("(getNode) obj.first '{}'", obj.first));
+
+        if (s == obj.first)
+        {
+            //LERROR(fmt::format("init projection provider1: '{}'", obj.second.firstKeyframeAfter(100000.0)->data.rotValue));
+            
+            return obj.second;
+        }
+    }
+
+
+
+    // No data for object
+    LERROR(fmt::format("No data for frame"));
+    Timeline<WheelDataProvider::Node> empty;
+    return empty;
 }
 
 void WheelDataProvider::initialize() {
+    std::string path = "../../../sync/http/marscuriosity_wheeldata/1/rksml";
+    loadData(path);
     return;
 }
 

@@ -28,9 +28,8 @@
 
 #include <openspace/scene/rotation.h>
 #include <openspace/properties/stringproperty.h>
-//#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-//#include <openspace/properties/scalar/boolproperty.h>
+#include <modules/marsrover/surfaceprojection/projectionprovider.h>
 #include <openspace/util/timeline.h>
 
 #include <string>
@@ -45,7 +44,7 @@ namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class RksmlRotation : public Rotation { //change to : public ProjectionProvider 
+class RksmlRotation : public Rotation { //change to : public ProjectionProvider , public Rotation
 public:
 
     struct Node {
@@ -59,42 +58,15 @@ public:
 
     ~RksmlRotation();
     
-    //Timeline<Node>& timeline();
     //void addKeyframe(double timestamp, RksmlRotation::Node data);     
     
     glm::dmat3 matrix(const UpdateData& data) const override;
     
 private:
-    //void addTimelineObject(std::string s, Node n);
-    void openFile();
-    void parseFile(std::string path);
-    Timeline<RksmlRotation::Node>& getNode(std::string s);
 
     Timeline<Node> Object_Timeline;    //creates a Timeline object of the structure type Node 
-	//Not a good way
-	/*
 
-    Timeline<Node> LF_DRIVE_Timeline;    //creates a Timeline object of the structure type Node 
-    Timeline<Node> LF_STEER_Timeline;
-    Timeline<Node> LM_DRIVE_Timeline;
-    Timeline<Node> LR_DRIVE_Timeline;
-    Timeline<Node> LR_STEER_Timeline;
-    Timeline<Node> RF_DRIVE_Timeline;
-    Timeline<Node> RF_STEER_Timeline;
-    Timeline<Node> RM_DRIVE_Timeline;
-    Timeline<Node> RR_DRIVE_Timeline;
-    Timeline<Node> RR_STEER_Timeline;
-    Timeline<Node> LEFT_BOGIE_Timeline;
-    Timeline<Node> LEFT_DIFFERENTIAL_Timeline;
-    Timeline<Node> RIGHT_BOGIE_Timeline;
-    Timeline<Node> RIGHT_DIFFERENTIAL_Timeline;
-    Timeline<Node> QUAT_C_Timeline;
-    Timeline<Node> QUAT_X_Timeline;
-    Timeline<Node> QUAT_Y_Timeline;
-    Timeline<Node> QUAT_Z_Timeline;
-	*/
-    properties::StringProperty _dataPath;
-    properties::StringProperty _objectPart;
+    properties::StringProperty _frame;
     properties::IntProperty _rotationAxis;
 };
 

@@ -28,30 +28,46 @@
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/templatefactory.h>
+
 namespace {
  const std::string _loggerCat = "ProjectionProvider";
  const std::string Type = "Type";
 }
 
 namespace openspace {
+/*
 std::unique_ptr<ProjectionProvider> ProjectionProvider::createFromDictionary(const ghoul::Dictionary& dictionary) {
+	LERROR(fmt::format("init projection provider1"));
 	std::string type = "ProjectionProvider";
 	dictionary.getValue(Type, type);
-	auto factory = FactoryManager::ref().factory<ProjectionProvider>();
-	std::unique_ptr<ProjectionProvider> projProvider = factory->create(type, dictionary);
-	if (!projProvider) {
+	 ghoul::TemplateFactory<ProjectionProvider>* factory
+          = FactoryManager::ref().factory<ProjectionProvider>();
+	//auto factory = FactoryManager::ref().factory<ProjectionProvider>();
+	std::unique_ptr<ProjectionProvider> result = factory->create(type, dictionary);
+	result->setIdentifier("ProjectionProvider");
+	if (!result) {
         throw ghoul::RuntimeError("Unable to create projection provider");
     }
- 	return projProvider;
+ 	return result;
 }
 
+/*
 ProjectionProvider::ProjectionProvider(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner(openspace::properties::PropertyOwner::PropertyOwnerInfo{ "projectionProvider", "projectionProvider" })
+     //,_wheelData() 
 {
-}
+	LERROR(fmt::format("init projection provider3"));
+}*/
+/*
+ProjectionProvider::ProjectionProvider() : properties::PropertyOwner({ "ProjectionProvider" }) {}
+
 
 void ProjectionProvider::initialize() {
+	// _wheelData->loadData();
+	LERROR(fmt::format("init projection provider2"));
 	return;
 }
-
+*/
 } // namespace openspace

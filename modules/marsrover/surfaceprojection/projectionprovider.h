@@ -27,19 +27,31 @@
 
 //#include <modules/roverterrainrenderer/filehandler/subsite.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <modules/marsrover/surfaceprojection/wheeldataprovider.h>
+#include <openspace/properties/propertyowner.h>
+
+#include <ghoul/glm.h>
+#include <functional>
+#include <memory>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
-class ProjectionProvider : public properties::PropertyOwner {
+class ProjectionProvider {
 public:
- static std::unique_ptr<ProjectionProvider> createFromDictionary(const ghoul::Dictionary& dictionary);
 
- ProjectionProvider(const ghoul::Dictionary& dictionary);
+	ProjectionProvider();
+	//virtual ~Translation() = default;
+	//ProjectionProvider(const ghoul::Dictionary& dictionary);
 
- //virtual std::vector<std::shared_ptr<Subsite>> calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites,
- // const RenderData& data, const SceneGraphNode* parent) = 0;
+	// virtual std::vector<std::shared_ptr<Subsite>> calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites,
+	// const RenderData& data, const SceneGraphNode* parent) = 0;
 
+	void initialize();
 
- virtual void initialize() = 0;
+private:
+	WheelDataProvider _wheelData;
+
 };
 } // namespace openspace
 

@@ -25,54 +25,35 @@
 #ifndef __OPENSPACE_MODULE_MARSROVER___WHEEL_DATA_PROVIDER___H__
 #define __OPENSPACE_MODULE_MARSROVER___WHEEL_DATA_PROVIDER___H__
 
-#include <modules/marsrover/surfaceprojection/projectionprovider.h>
+//#include <modules/marsrover/surfaceprojection/projectionprovider.h>
 #include <openspace/util/timeline.h>
 #include <string>
+#include <vector>
 
 namespace openspace {
-class WheelDataProvider : public ProjectionProvider {
+class WheelDataProvider  { // : public ProjectionProvider
 public:
 
 	struct Node {
-        std::string frameName;
-        double frameTime;
-        double rotValue; //radians
-        int axis; 
+        std::string frameName = "";
+        double frameTime = 0;
+        double rotValue = 0; //radians
+        int axis = -1; 
     };
 
-
-	WheelDataProvider(const ghoul::Dictionary& dictionary);
+	WheelDataProvider(); //const ghoul::Dictionary& dictionary
 
 	//virtual std::vector<std::shared_ptr<Subsite>> calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites,
 	// const RenderData& data, const SceneGraphNode* parent);
-	static void loadData(std::string path);
-	static void parseFile(std::string path); 
-	Timeline<WheelDataProvider::Node>& getNode(std::string s);
-	virtual void initialize();
+	void loadData(const std::string path);
+	void parseFile(const std::string path); 
+    void addKeyframe(const WheelDataProvider::Node &node);
+	Timeline<WheelDataProvider::Node> &getNode(const std::string s) const;
+	void initialize();
 
 private:
-	Timeline<WheelDataProvider::Node> Object_Timeline;
+    std::vector<std::pair<std::string, Timeline<WheelDataProvider::Node>>> Timeline_Objects;
 
-	Timeline<WheelDataProvider::Node> LF_DRIVE_Timeline;    
-    Timeline<WheelDataProvider::Node> LF_STEER_Timeline;
-    Timeline<WheelDataProvider::Node> LM_DRIVE_Timeline;
-    Timeline<WheelDataProvider::Node> LR_DRIVE_Timeline;
-    Timeline<WheelDataProvider::Node> LR_STEER_Timeline;
-    Timeline<WheelDataProvider::Node> RF_DRIVE_Timeline;
-    Timeline<WheelDataProvider::Node> RF_STEER_Timeline;
-    Timeline<WheelDataProvider::Node> RM_DRIVE_Timeline;
-    Timeline<WheelDataProvider::Node> RR_DRIVE_Timeline;
-    Timeline<WheelDataProvider::Node> RR_STEER_Timeline;
-    Timeline<WheelDataProvider::Node> LEFT_BOGIE_Timeline;
-    Timeline<WheelDataProvider::Node> LEFT_DIFFERENTIAL_Timeline;
-    Timeline<WheelDataProvider::Node> RIGHT_BOGIE_Timeline;
-    Timeline<WheelDataProvider::Node> RIGHT_DIFFERENTIAL_Timeline;
-    Timeline<WheelDataProvider::Node> QUAT_C_Timeline;
-    Timeline<WheelDataProvider::Node> QUAT_X_Timeline;
-    Timeline<WheelDataProvider::Node> QUAT_Y_Timeline;
-    Timeline<WheelDataProvider::Node> QUAT_Z_Timeline;
-
-    //const int timelinesNr = 18;
 };
 
 

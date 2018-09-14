@@ -78,7 +78,7 @@ asset.onInitialize(function ()
     )
 
     openspace.markInterestingNodes({
-        "Earth", "Mars", "Curiosity", "HeightMap", "Body_staticParts_2"
+        "Earth", "Mars", "Curiosity", "HeightMap"
     })
 
     openspace.addVirtualProperty(
@@ -105,6 +105,6 @@ asset.onDeinitialize(function ()
     openspace.removeVirtualProperty("*Trail.renderable.Enabled")
 
     openspace.removeInterestingNodes({
-        "Earth", "Mars", "Curiosity", "HeightMap", "Body_staticParts_2"
+        "Earth", "Mars", "Curiosity", "HeightMap"
     })
 end)

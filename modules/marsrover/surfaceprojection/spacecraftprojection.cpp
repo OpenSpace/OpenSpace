@@ -51,6 +51,9 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/templatefactory.h>
+
 #include <iostream>
 #include <fstream>
 #include <cassert>

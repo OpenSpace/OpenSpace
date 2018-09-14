@@ -22,10 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-//FIX: 
-//Everything should be saved once in another file
-//No need to declare all tags for all objects, for every object!!
-
 #include <modules/marsrover/rotation/rksmlrotation.h>
 #include <modules/marsrover/surfaceprojection/projectionprovider.h>
 #include <modules/marsrover/surfaceprojection/wheeldataprovider.h>
@@ -36,11 +32,13 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
-
+#include <openspace/engine/moduleengine.h>
+#include <modules/marsrover/marsrovermodule.h>
 
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/util/timeline.h>
 
 #include <functional>
 
@@ -50,13 +48,6 @@
 
 namespace {
     const char* DefaultReferenceFrame = "GALACTIC";
-
-    static const openspace::properties::Property::PropertyInfo DataPathInfo = {
-        "DataPath",
-        "Path",
-        "This value specifies the angle of correction around staticAxisRotation2."
-        "Valid strings are expressed in radians"
-    };
     
     static const openspace::properties::Property::PropertyInfo ObjectPartInfo = {
         "Object",
@@ -81,15 +72,13 @@ namespace openspace {
 constexpr const char* _loggerCat = "RksmlRotation";
 
 RksmlRotation::RksmlRotation(const ghoul::Dictionary& dictionary)
-    : _dataPath(DataPathInfo)
-    , _objectPart(ObjectPartInfo, DefaultReferenceFrame)
+    : _frame(ObjectPartInfo, DefaultReferenceFrame)
     , _rotationAxis(AxisInfo, 1)
 {
     //Fix: move down to matrix?
     double now = OsEng.windowWrapper().applicationTime();
 
-    _dataPath = dictionary.value<std::string>(DataPathInfo.identifier);
-    _objectPart = dictionary.value<std::string>(ObjectPartInfo.identifier);
+    _frame = dictionary.value<std::string>(ObjectPartInfo.identifier);
     _rotationAxis = static_cast<int>(dictionary.value<double>(AxisInfo.identifier));
 
     ghoul::Dictionary modelDic;
@@ -97,20 +86,17 @@ RksmlRotation::RksmlRotation(const ghoul::Dictionary& dictionary)
     //calls the projectionprovider
     std::unique_ptr<ProjectionProvider> _projectionProvider;
 
-
-    addProperty(_dataPath);
-    addProperty(_objectPart);
+    addProperty(_frame);
     addProperty(_rotationAxis);
     
-    openFile();
+    //openFile();
 
     auto update = [this]() {
         requireUpdate();
     };
 
     //Fix: needed?
-    _dataPath.onChange(update);
-    _objectPart.onChange(update);
+    _frame.onChange(update);
     _rotationAxis.onChange(update);
 
 }
@@ -121,9 +107,12 @@ glm::dmat3 RksmlRotation::matrix(const UpdateData& data) const {
     
     double currentTime = data.time.j2000Seconds();// * pow(10.0, 8.0);
 
-    //double tt = 402555992.017; //00057 (middle of two frames)
-    const Keyframe<RksmlRotation::Node>* nextKeyframe = Object_Timeline.firstKeyframeAfter(currentTime);
-    const Keyframe<RksmlRotation::Node>* prevKeyframe = Object_Timeline.lastKeyframeBefore(currentTime);
+    // Get timeline object
+    LERROR(fmt::format("_Frame: '{}'", _frame));
+    Timeline<WheelDataProvider::Node> Object_Timeline = OsEng.moduleEngine().module<MarsroverModule>()->getFrameData(_frame);
+
+    const Keyframe<WheelDataProvider::Node>* nextKeyframe = Object_Timeline.firstKeyframeAfter(currentTime);
+    const Keyframe<WheelDataProvider::Node>* prevKeyframe = Object_Timeline.lastKeyframeBefore(currentTime);
 
     double radiansResult = 0.0;
     double radians1 = 0.0;
@@ -131,7 +120,6 @@ glm::dmat3 RksmlRotation::matrix(const UpdateData& data) const {
 
     double time1 = 0.0;
     double time2 = 0.0;
-
 
     if (prevKeyframe != nullptr) 
     {
@@ -157,11 +145,14 @@ glm::dmat3 RksmlRotation::matrix(const UpdateData& data) const {
     else if (nextKeyframe != nullptr)
         radiansResult = nextKeyframe->data.rotValue; 
 
-
     double sin = glm::sin(radiansResult);
     double cos = glm::cos(radiansResult);
 
+    LERROR(fmt::format("sin: '{}'", sin));
+    LERROR(fmt::format("cos: '{}'", cos));
+
     glm::dmat3 rotMatrix = glm::dmat3(1.0);
+
     
     switch(_rotationAxis)
     {   //currently opposite direction for all matrises
@@ -181,114 +172,9 @@ glm::dmat3 RksmlRotation::matrix(const UpdateData& data) const {
                                    -sin, cos, 0.0, 
                                     0.0, 0.0, 1.0 );  
             break;
-
     }
 
     return rotMatrix;
-
-}
-
-
-void RksmlRotation::openFile() {
-
-    std::string path = _dataPath;// + "/*/rksml_playback_filt_eha.rksml";
-    std::string fileName;
-
-    const int start = 28;
-    const int end = 2072;
-
-    for (int i = 0; i < (end - start); i++) {
-        if (i < (100 - start)) 
-            fileName = path + "000" + std::to_string(i + start); 
-        
-        else if (i < (1000 - start)) 
-            fileName = path + "00" + std::to_string(i + start); 
-        
-        else  
-            fileName = path + "0" + std::to_string(i + start); 
-
-        fileName = fileName + "/rksml_playback_filt_eha.rksml";
-        std::replace(fileName.begin(), fileName.end(), '\\', '/');
-    
-        //parse file
-        parseFile(fileName);
-    }
-
-}
-
-void RksmlRotation::parseFile(std::string path) {
-	//call file that will parse the data
-    double val;
-    double e;
-    std::ifstream myfile (path);
-    std::istringstream iss;
-    
-    std::string theline,
-                trash,
-                time,
-                unit,
-                name,
-                value,
-                tag,
-                raised,
-                line;
-
-    if (myfile.is_open())
-    {
-        while (getline (myfile, line) )
-        {
-            iss.clear();
-            iss = std::istringstream(line);
-
-            //get first node tag
-            std::getline(iss, trash, '<');
-            std::getline(iss, tag, ' ');
-
-            if (tag == "Node")
-            {
-                std::getline(iss, trash, '"');
-                std::getline(iss, time,  '"');
-            }
-
-            else if (tag == "Knot")
-            {
-                std::getline(iss, trash, '"');
-                std::getline(iss, name,  '"');
-                std::getline(iss, trash, '"');
-                std::getline(iss, unit,  '"');
-                std::getline(iss, trash, '>');
-                std::getline(iss, value, '<');
-                //If moved to another file, if statement is not neccessary
-                if (name == _objectPart.value()) {
-                    Node nodeObject;
-                    nodeObject.frameName = name;
-                    //double te = 399958865.0;
-                    nodeObject.frameTime = atof(time.c_str());
-                    //nodeObject.frameTime = te;
-
-                    //if *10^x is found
-                    if (value.find('E') != std::string::npos)
-                    {
-                        raised = value.substr(value.find('E') + 1, value.find('E') + 3 );
-                        value.erase(value.find('E'), value.length());
-                        val = atof(value.c_str());
-                        e = atof(raised.c_str());
-
-                        nodeObject.rotValue = val * pow(10.0, e); 
-                    }
-                    else 
-                        nodeObject.rotValue = atof(value.c_str());
-
-                    Object_Timeline.addKeyframe(nodeObject.frameTime, nodeObject);
-                }
-            }
-            iss.clear();
-            //trash = "";
-        }
-        myfile.close();
-    } else {
-        throw ghoul::RuntimeError("Never opened file");
-    }
 }
 
 } // namespace openspace

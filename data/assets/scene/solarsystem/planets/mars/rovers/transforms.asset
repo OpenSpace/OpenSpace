@@ -439,10 +439,9 @@ local Wheel_base_Location = {
     Parent = MSL_Body.Identifier,
     --Transform = {
     --    Rotation = {
-    --        Type = "RksmlRotation",
-    --        DataPath = wheeldata .. "/rksml/", 
+    --        Type = "RksmlRotation", 
     --        Object = "LEFT_BOGIE",
-    --        RotationAxis = 1;
+    --        RotationAxis = 1
     --    }
     --},
     GUI = {
@@ -686,12 +685,11 @@ local Wheel_F_R_Location = {
     Identifier = "Wheel_F_R_Location",
     Parent = Wrist_F_R_Location.Identifier,
     Transform = {   
-        --Rotation = {
-        --    Type = "RksmlRotation",
-        --    DataPath = wheeldata .. "/rksml/", 
-        --    Object = "RF_DRIVE",
-        --    RotationAxis = 2;
-        --},
+        Rotation = {
+            Type = "RksmlRotation",
+            Object = "RF_DRIVE",
+            RotationAxis = 2
+        },
         Translation = {
             Type = "StaticTranslation",
             Position = {0.0, 0.0, 0.426}
