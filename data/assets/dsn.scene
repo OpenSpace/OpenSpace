@@ -18,7 +18,8 @@ asset.request('customization/globebrowsing')
 asset.require('scene/solarsystem/missions/voyager1/voyager1')
 asset.require('scene/solarsystem/missions/voyager2/voyager2')
 asset.require('scene/solarsystem/missions/voyager2/voyager2')
-asset.require('scene/solarsystem/missions/osirisrex/model')
+--asset.require('scene/solarsystem/missions/osirisrex/model')
+
 
 local Keybindings = {
     {
