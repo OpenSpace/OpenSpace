@@ -958,7 +958,7 @@ void OpenSpaceEngine::preSynchronization() {
 
     global::syncEngine.preSynchronization(SyncEngine::IsMaster(master));
     if (master) {
-        double dt = global::windowDelegate.averageDeltaTime();
+        double dt = global::windowDelegate.deltaTime();
         global::timeManager.preSynchronization(dt);
 
         using Iter = std::vector<std::string>::const_iterator;
