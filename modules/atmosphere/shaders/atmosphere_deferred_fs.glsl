@@ -292,7 +292,8 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
                        const vec3 v, const vec3 s, out float r, out float mu,
                        out vec3 attenuation, const vec3 fragPosObj,
                        const double maxLength, const double pixelDepth,
-                       const vec4 spaceColor, const float sunIntensity) {
+                       const vec4 spaceColor, const float sunIntensity,
+                       out bool groundHit) {
 
     const float INTERPOLATION_EPS = 0.004f; // precision const from Brunetton
 
@@ -326,7 +327,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     //vec3  x0     = x + float(pixelDepth) * v;      
     float mu0    = dot(x0, v) * invr0;
 
-    bool groundHit = false;
+    //bool groundHit = false;
     if ((pixelDepth > INTERPOLATION_EPS) && (pixelDepth < maxLength)) {
         t = float(pixelDepth);  
         groundHit = true;
@@ -538,12 +539,13 @@ void main() {
     if (cullAtmosphere == 0) {
         vec4 atmosphereFinalColor = vec4(0.0f);
         int nSamples = 1;
+        
         // First we determine if the pixel is complex (different fragments on it)
         bool complex = false;
         vec4 oldColor, currentColor;
-        //vec4 colorArray[16];
+        vec4 colorArray[16];
         //int colorIndexArray[16];
-
+        /*
         oldColor = texelFetch(mainColorTexture, fragCoords, 0);        
         //colorArray[0] = oldColor;
         //colorIndexArray[0] = 0;
@@ -573,10 +575,22 @@ void main() {
             // }            
             oldColor = currentColor;
         }
+        */
         
+        colorArray[0] = texelFetch(mainColorTexture, fragCoords, 0);        
+        for (int i = 1; i < nAaSamples; i++) {
+            colorArray[i]  = texelFetch(mainColorTexture, fragCoords, i);
+            if (colorArray[i] != colorArray[i-1]) {
+                complex = true;           
+            } 
+        }
+        nSamples = complex ? nAaSamples / 2 : 1;
+        
+        //nSamples = nAaSamples;
         for (int i = 0; i < nSamples; i++) {
             // Color from G-Buffer
-            vec4 color = texelFetch(mainColorTexture, fragCoords, i);
+            //vec4 color = texelFetch(mainColorTexture, fragCoords, i);
+            vec4 color = colorArray[i];
             
             // Ray in object space
             dRay ray;
@@ -642,7 +656,7 @@ void main() {
                 positionObjectsCoords.xyz *= 0.001;
                 
                 if (position.xyz != vec3(0.0) && (pixelDepth < offset)) {
-                    atmosphereFinalColor += vec4(HDR(color.xyz * backgroundConstant, atmExposure), color.a);                      
+                    atmosphereFinalColor += vec4(HDR(color.xyz * backgroundConstant, atmExposure), color.a);                  
                     //discard;
                 } else {
                     // Following paper nomenclature      
@@ -673,29 +687,46 @@ void main() {
 
                     float irradianceFactor = 0.0;
 
+                    bool groundHit = false;
                     vec3 inscatterColor = inscatterRadiance(x, tF, irradianceFactor, v,
                                                             s, r, mu, attenuation, 
                                                             vec3(positionObjectsCoords.xyz),
                                                             maxLength, pixelDepth,
-                                                            color, sunIntensityInscatter); 
-                    vec3 groundColor    = groundColor(x, tF, v, s, r, mu, attenuation,
-                                                      color, normal.xyz, irradianceFactor, 
-                                                      normal.a, sunIntensityGround);
-                    vec3 sunColor       = sunColor(x, tF, v, s, r, mu, irradianceFactor); 
+                                                            color, sunIntensityInscatter,
+                                                            groundHit); 
+                    vec3 fGroundColor = vec3(0.0);
+                    if (groundHit) {
+                        fGroundColor = groundColor(x, tF, v, s, r, mu, attenuation, 
+                                                  color, normal.xyz, irradianceFactor, 
+                                                  normal.a, sunIntensityGround);
+                    } else {
+                        nSamples = 1;
+                        complex = false;
+                        fGroundColor = vec3(1.0, 1.0, 0.0);
+                        discard;
+                    }                                                            
+                    
+                    // vec3 fGroundColor = groundColor(x, tF, v, s, r, mu, attenuation, 
+                    //                               color, normal.xyz, irradianceFactor, 
+                    //                               normal.a, sunIntensityGround);
+
+                    vec3 sunColor = sunColor(x, tF, v, s, r, mu, irradianceFactor);
                     
                     // Final Color of ATM plus terrain:
-                    vec4 finalRadiance  = vec4(HDR(inscatterColor + groundColor + sunColor, atmExposure), 1.0);
+                    vec4 finalRadiance  = vec4(HDR(inscatterColor + fGroundColor + sunColor, atmExposure), 1.0);
                     
                     atmosphereFinalColor += finalRadiance;
                 }
             } 
             else { // no intersection
-                //discard;
                 atmosphereFinalColor += vec4(HDR(color.xyz * backgroundConstant, atmExposure), color.a);
             }           
         }  
 
         renderTarget = atmosphereFinalColor / float(nSamples);        
+
+        // if (complex)
+        //     renderTarget = vec4(1.0, 0.0, 0.0, 1.0);
     } 
     else { // culling
         if (firstPaint) {
