@@ -35,7 +35,7 @@ FrustumCuller::FrustumCuller(AABB3 viewFrustum)
     : _viewFrustum(std::move(viewFrustum))
 {}
 
-bool FrustumCuller::isCullable(const Chunk& chunk, const RenderData& renderData) {
+bool FrustumCuller::isCullable(const Chunk& chunk, const RenderData& renderData) const {
     // Calculate the MVP matrix
     const glm::dmat4 modelTransform = chunk.owner().modelTransform();
     const glm::dmat4 viewTransform = glm::dmat4(renderData.camera.combinedViewMatrix());

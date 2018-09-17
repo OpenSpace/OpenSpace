@@ -28,14 +28,7 @@
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <ghoul/logging/logmanager.h>
 #include <modules/globebrowsing/chunk/chunk.h>
-#include <modules/globebrowsing/chunk/chunklevelevaluator/chunklevelevaluator.h>
-#include <modules/globebrowsing/chunk/chunklevelevaluator/availabletiledataevaluator.h>
-#include <modules/globebrowsing/chunk/chunklevelevaluator/distanceevaluator.h>
-#include <modules/globebrowsing/chunk/chunklevelevaluator/projectedareaevaluator.h>
 #include <modules/globebrowsing/chunk/chunknode.h>
-#include <modules/globebrowsing/chunk/culling/chunkculler.h>
-#include <modules/globebrowsing/chunk/culling/frustumculler.h>
-#include <modules/globebrowsing/chunk/culling/horizonculler.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/meshes/skirtedgrid.h>
 #include <modules/globebrowsing/tile/tileindex.h>
@@ -53,10 +46,8 @@
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/meshes/grid.h>
 #include <modules/globebrowsing/meshes/trianglesoup.h>
-#include <modules/globebrowsing/rendering/layershadermanager.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/rendering/gpu/gpulayergroup.h>
-#include <modules/globebrowsing/rendering/gpu/gpulayermanager.h>
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/spicemanager.h>
@@ -242,6 +233,18 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _debugPropertyOwner({ "Debug" })
     , _leftRoot(std::make_unique<ChunkNode>(Chunk(*this, LeftHemisphereIndex)))
     , _rightRoot(std::make_unique<ChunkNode>(Chunk(*this, RightHemisphereIndex)))
+    , _frustumCuller(AABB3(glm::vec3(-1, -1, 0), glm::vec3(1, 1, 1e35)))
+    , _globalLayerShaderManager(
+        "GlobalChunkedLodPatch",
+        "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_vs.glsl",
+        "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_fs.glsl"
+    )
+    , _localLayerShaderManager(
+        "LocalChunkedLodPatch",
+        "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl",
+        "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl"
+    )
+
 {
     setIdentifier("RenderableGlobe");
 
@@ -285,36 +288,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         TriangleSoup::Normals::No
         );
 
-    _chunkCullers.push_back(std::make_unique<culling::HorizonCuller>());
-    _chunkCullers.push_back(std::make_unique<culling::FrustumCuller>(
-        AABB3(
-            glm::vec3(-1, -1, 0),
-            glm::vec3(1, 1, 1e35)
-        )
-        ));
-
-    _chunkEvaluatorByAvailableTiles =
-        std::make_unique<chunklevelevaluator::AvailableTileData>();
-    _chunkEvaluatorByProjectedArea =
-        std::make_unique<chunklevelevaluator::ProjectedArea>();
-    _chunkEvaluatorByDistance = std::make_unique<chunklevelevaluator::Distance>();
-
-
-
-    _globalLayerShaderManager = std::make_shared<LayerShaderManager>(
-        "GlobalChunkedLodPatch",
-        "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_vs.glsl",
-        "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_fs.glsl"
-        );
-
-    _localLayerShaderManager = std::make_shared<LayerShaderManager>(
-        "LocalChunkedLodPatch",
-        "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl",
-        "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl"
-        );
-
-    _globalGpuLayerManager = std::make_shared<GPULayerManager>();
-    _localGpuLayerManager = std::make_shared<GPULayerManager>();
 
 
 
@@ -607,11 +580,11 @@ bool RenderableGlobe::testIfCullable(const Chunk& chunk,
     const RenderData& renderData) const
 {
     if (debugProperties().performHorizonCulling &&
-        _chunkCullers[0]->isCullable(chunk, renderData)) {
+        _horizonCuller.isCullable(chunk, renderData)) {
         return true;
     }
     if (debugProperties().performFrustumCulling &&
-        _chunkCullers[1]->isCullable(chunk, renderData)) {
+        _frustumCuller.isCullable(chunk, renderData)) {
         return true;
     }
     return false;
@@ -633,13 +606,13 @@ int RenderableGlobe::desiredLevel(const Chunk& chunk,
 {
     int desiredLevel = 0;
     if (debugProperties().levelByProjectedAreaElseDistance) {
-        desiredLevel = _chunkEvaluatorByProjectedArea->desiredLevel(chunk, renderData);
+        desiredLevel = _chunkEvaluatorByProjectedArea.desiredLevel(chunk, renderData);
     }
     else {
-        desiredLevel = _chunkEvaluatorByDistance->desiredLevel(chunk, renderData);
+        desiredLevel = _chunkEvaluatorByDistance.desiredLevel(chunk, renderData);
     }
 
-    int levelByAvailableData = _chunkEvaluatorByAvailableTiles->desiredLevel(
+    int levelByAvailableData = _chunkEvaluatorByAvailableTiles.desiredLevel(
         chunk,
         renderData
     );
@@ -784,8 +757,8 @@ void RenderableGlobe::notifyShaderRecompilation() {
 void RenderableGlobe::recompileShaders() {
     LayerShaderManager::LayerShaderPreprocessingData preprocessingData =
         LayerShaderManager::LayerShaderPreprocessingData::get(*this);
-    _globalLayerShaderManager->recompileShaderProgram(preprocessingData);
-    _localLayerShaderManager->recompileShaderProgram(preprocessingData);
+    _globalLayerShaderManager.recompileShaderProgram(preprocessingData);
+    _localLayerShaderManager.recompileShaderProgram(preprocessingData);
 
     _shadersNeedRecompilation = false;
 }
@@ -798,8 +771,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
 
         LayerShaderManager::LayerShaderPreprocessingData preprocessingData =
             LayerShaderManager::LayerShaderPreprocessingData::get(*this);
-        _globalLayerShaderManager->recompileShaderProgram(preprocessingData);
-        _localLayerShaderManager->recompileShaderProgram(preprocessingData);
+        _globalLayerShaderManager.recompileShaderProgram(preprocessingData);
+        _localLayerShaderManager.recompileShaderProgram(preprocessingData);
 
         _shadersNeedRecompilation = false;
     }
@@ -1180,8 +1153,8 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
 
 void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& data) {
     ghoul::opengl::ProgramObject* programObject = getActivatedProgramWithTileData(
-        *_globalLayerShaderManager,
-        *_globalGpuLayerManager,
+        _globalLayerShaderManager,
+        _globalGpuLayerManager,
         chunk
     );
     if (!programObject) {
@@ -1266,7 +1239,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     // render
     _grid->geometry().drawUsingActiveProgram();
 
-    _globalGpuLayerManager->deactivate();
+    _globalGpuLayerManager.deactivate();
 
     // disable shader
     programObject->deactivate();
@@ -1274,8 +1247,8 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 
 void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& data) {
     ghoul::opengl::ProgramObject* programObject = getActivatedProgramWithTileData(
-        *_localLayerShaderManager,
-        *_localGpuLayerManager,
+        _localLayerShaderManager,
+        _localGpuLayerManager,
         chunk
     );
     if (!programObject) {
@@ -1367,7 +1340,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     // render
     _grid->geometry().drawUsingActiveProgram();
 
-    _localGpuLayerManager->deactivate();
+    _localGpuLayerManager.deactivate();
 
     // disable shader
     programObject->deactivate();

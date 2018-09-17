@@ -31,7 +31,7 @@
 
 namespace openspace::globebrowsing::culling {
 
-bool HorizonCuller::isCullable(const Chunk& chunk, const RenderData& renderData) {
+bool HorizonCuller::isCullable(const Chunk& chunk, const RenderData& renderData) const {
     // Calculations are done in the reference frame of the globe. Hence, the camera
     // position needs to be transformed with the inverse model matrix
     const glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
@@ -76,7 +76,7 @@ bool HorizonCuller::isCullable(const glm::dvec3& cameraPosition,
                                const glm::dvec3& globePosition,
                                const glm::dvec3& objectPosition,
                                double objectBoundingSphereRadius,
-                               double minimumGlobeRadius)
+                               double minimumGlobeRadius) const
 {
     const double objectP = pow(length(objectPosition - globePosition), 2);
     const double horizonP = pow(minimumGlobeRadius - objectBoundingSphereRadius, 2);

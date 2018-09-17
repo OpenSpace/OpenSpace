@@ -31,6 +31,13 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <modules/globebrowsing/chunk/culling/frustumculler.h>
+#include <modules/globebrowsing/chunk/culling/horizonculler.h>
+#include <modules/globebrowsing/chunk/chunklevelevaluator/availabletiledataevaluator.h>
+#include <modules/globebrowsing/chunk/chunklevelevaluator/distanceevaluator.h>
+#include <modules/globebrowsing/chunk/chunklevelevaluator/projectedareaevaluator.h>
+#include <modules/globebrowsing/rendering/layershadermanager.h>
+#include <modules/globebrowsing/rendering/gpu/gpulayermanager.h>
 
 namespace openspace::globebrowsing {
 
@@ -223,11 +230,12 @@ private:
     // Covers all positive longitudes
     std::unique_ptr<ChunkNode> _rightRoot;
 
-    std::vector<std::unique_ptr<culling::ChunkCuller>> _chunkCullers;
+    culling::HorizonCuller _horizonCuller;
+    culling::FrustumCuller _frustumCuller;
 
-    std::unique_ptr<chunklevelevaluator::Evaluator> _chunkEvaluatorByAvailableTiles;
-    std::unique_ptr<chunklevelevaluator::Evaluator> _chunkEvaluatorByProjectedArea;
-    std::unique_ptr<chunklevelevaluator::Evaluator> _chunkEvaluatorByDistance;
+    chunklevelevaluator::AvailableTileData _chunkEvaluatorByAvailableTiles;
+    chunklevelevaluator::ProjectedArea _chunkEvaluatorByProjectedArea;
+    chunklevelevaluator::Distance _chunkEvaluatorByDistance;
 
     bool _shadersNeedRecompilation = true;
 
@@ -273,12 +281,12 @@ private:
 
 
     // Two different shader programs. One for global and one for local rendering.
-    std::shared_ptr<LayerShaderManager> _globalLayerShaderManager;
-    std::shared_ptr<LayerShaderManager> _localLayerShaderManager;
+    LayerShaderManager _globalLayerShaderManager;
+    LayerShaderManager _localLayerShaderManager;
 
     // Layered texture uniforms are chached in the uniform ID handles.
-    std::shared_ptr<GPULayerManager> _globalGpuLayerManager;
-    std::shared_ptr<GPULayerManager> _localGpuLayerManager;
+    GPULayerManager _globalGpuLayerManager;
+    GPULayerManager _localGpuLayerManager;
 };
 
 } // namespace openspace::globebrowsing

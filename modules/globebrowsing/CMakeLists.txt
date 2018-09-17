@@ -38,7 +38,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/availabletiledataevaluator.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/distanceevaluator.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/projectedareaevaluator.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling/chunkculler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling/frustumculler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling/horizonculler.h
 

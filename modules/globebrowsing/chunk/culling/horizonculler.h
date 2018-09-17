@@ -25,9 +25,10 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___HORIZONCULLER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___HORIZONCULLER___H__
 
-#include <modules/globebrowsing/chunk/culling/chunkculler.h>
-
 #include <ghoul/glm.h>
+
+namespace openspace { struct RenderData; }
+namespace openspace::globebrowsing { class Chunk; }
 
 namespace openspace::globebrowsing::culling {
 
@@ -37,15 +38,14 @@ namespace openspace::globebrowsing::culling {
  * be safe. This means that if the ellipsoid has high difference between radii,
  * splitting might accur even though it may not be needed.
  */
-class HorizonCuller : public ChunkCuller {
+class HorizonCuller {
 public:
-    virtual ~HorizonCuller() override = default;
-    bool isCullable(const Chunk& chunk, const RenderData& renderData) override;
+    bool isCullable(const Chunk& chunk, const RenderData& renderData) const;
 
 private:
     bool isCullable(const glm::dvec3& cameraPosition, const glm::dvec3& globePosition,
         const glm::dvec3& objectPosition, double objectBoundingSphereRadius,
-        double minimumGlobeRadius);
+        double minimumGlobeRadius) const;
 };
 
 } // namespace openspace::globebrowsing::culling

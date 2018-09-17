@@ -25,9 +25,10 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___FRUSTUMCULLER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___FRUSTUMCULLER___H__
 
-#include <modules/globebrowsing/chunk/culling/chunkculler.h>
-
 #include <modules/globebrowsing/geometry/aabb.h>
+
+namespace openspace { struct RenderData; }
+namespace openspace::globebrowsing { class Chunk; }
 
 namespace openspace::globebrowsing::culling {
 
@@ -39,16 +40,15 @@ namespace openspace::globebrowsing::culling {
  * Chunk. Hence the culling will not be 'perfect' but fast and good enough for
  * culling chunks outside the frustum with some margin.
  */
-class FrustumCuller : public ChunkCuller {
+class FrustumCuller {
 public:
-    virtual ~FrustumCuller() override = default;
     /**
      * \param viewFrustum is the view space in normalized device coordinates space.
      *        Hence it is an axis aligned bounding box and not a real frustum.
      */
     FrustumCuller(AABB3 viewFrustum);
 
-    bool isCullable(const Chunk& chunk, const RenderData& renderData) override;
+    bool isCullable(const Chunk& chunk, const RenderData& renderData) const;
 
 private:
     const AABB3 _viewFrustum;
