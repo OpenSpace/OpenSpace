@@ -147,9 +147,6 @@ private:
     std::shared_ptr<LayerManager> _layerManager;
     std::shared_ptr<Camera> _savedCamera;
 
-    std::string _frame;
-    double _time = 0.0;
-
     glm::dmat4 _cachedModelTransform;
     glm::dmat4 _cachedInverseModelTransform;
 
@@ -220,7 +217,7 @@ public:
     void recompileShaders();
 
     constexpr static const int MinSplitDepth = 2;
-    constexpr static const int MaxSplitDepth = 22;
+    constexpr static const int MaxSplitDepth = 22;  // increase? (abock)
 
 private:
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const;
@@ -244,7 +241,6 @@ private:
 
 
     // ChunkRenderer
-    void renderChunk(const Chunk& chunk, const RenderData& data);
     /**
  * Chunks can be rendered either globally or locally. Global rendering is performed
  * in the model space of the globe. With global rendering, the vertex positions

@@ -253,8 +253,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 {
     setIdentifier("RenderableGlobe");
 
-    dictionary.getValue(keyFrame, _frame);
-
     // Read the radii in to its own dictionary
     if (dictionary.hasKeyAndValue<glm::dvec3>(keyRadii)) {
         const glm::dvec3 radii = dictionary.value<glm::vec3>(keyRadii);
@@ -463,8 +461,6 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 }
 
 void RenderableGlobe::update(const UpdateData& data) {
-    _time = data.time.j2000Seconds();
-
     setBoundingSphere(static_cast<float>(
         ellipsoid().maximumRadius() * data.modelTransform.scale
         ));
@@ -796,7 +792,13 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
                 stats.i["rendered chunks"]++;
 #endif // DEBUG_GLOBEBROWSING_STATSRECORD
 
-                renderChunk(chunkNode.chunk(), data);
+                if (chunk.tileIndex().level < debugProperties().modelSpaceRenderingCutoffLevel) {
+                    renderChunkGlobally(chunk, data);
+                }
+                else {
+                    renderChunkLocally(chunk, data);
+                }
+
                 debugRenderChunk(chunk, mvp);
             }
         }
@@ -804,9 +806,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
 
     _leftRoot->breadthFirst(renderJob);
     _rightRoot->breadthFirst(renderJob);
-
-    //_leftRoot->reverseBreadthFirst(renderJob);
-    //_rightRoot->reverseBreadthFirst(renderJob);
 
 #ifdef DEBUG_GLOBEBROWSING_STATSRECORD
     auto duration2 = std::chrono::system_clock::now().time_since_epoch();
@@ -816,9 +815,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const {
-    if (debugProperties().showChunkBounds ||
-        debugProperties().showChunkAABB)
-    {
+    if (debugProperties().showChunkBounds || debugProperties().showChunkAABB) {
         const std::vector<glm::dvec4>& modelSpaceCorners =
             chunk.boundingPolyhedronCorners();
 
@@ -868,19 +865,6 @@ void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
 
 
 
-
-// Chunkrenderer
-void RenderableGlobe::renderChunk(const Chunk& chunk, const RenderData& data) {
-    // A little arbitrary with 10 but it works
-    if (chunk.tileIndex().level <
-        chunk.owner().debugProperties().modelSpaceRenderingCutoffLevel)
-    {
-        renderChunkGlobally(chunk, data);
-    }
-    else {
-        renderChunkLocally(chunk, data);
-    }
-}
 
 ghoul::opengl::ProgramObject* RenderableGlobe::getActivatedProgramWithTileData(
     LayerShaderManager& layeredShaderManager,
@@ -933,10 +917,10 @@ void RenderableGlobe::calculateEclipseShadows(const Chunk& chunk,
     const RenderData& data)
 {
     // Shadow calculations..
-    if (chunk.owner().ellipsoid().hasEclipseShadows()) {
+    if (ellipsoid().hasEclipseShadows()) {
         std::vector<RenderableGlobe::ShadowRenderingStruct> shadowDataArray;
         std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray =
-            chunk.owner().ellipsoid().shadowConfigurationArray();
+            ellipsoid().shadowConfigurationArray();
         shadowDataArray.reserve(shadowConfArray.size());
         double lt;
         for (const auto & shadowConf : shadowConfArray) {
@@ -997,7 +981,7 @@ void RenderableGlobe::calculateEclipseShadows(const Chunk& chunk,
             shadowData.isShadowing = false;
 
             // Eclipse shadows considers planets and moons as spheres
-            if (((d_test - rp_test) < (chunk.owner().ellipsoid().radii().x * KM_TO_M)) &&
+            if (((d_test - rp_test) < (ellipsoid().radii().x * KM_TO_M)) &&
                 (casterDistSun < planetDistSun))
             {
                 // The current caster is shadowing the current planet
@@ -1044,10 +1028,10 @@ void RenderableGlobe::calculateEclipseShadows(const Chunk& chunk,
             "inverseViewTransform",
             glm::inverse(data.camera.combinedViewMatrix())
         );
-        programObject->setUniform("modelTransform", chunk.owner().modelTransform());
+        programObject->setUniform("modelTransform", modelTransform());
         programObject->setUniform(
             "hardShadows",
-            chunk.owner().generalProperties().eclipseHardShadows
+            generalProperties().eclipseHardShadows
         );
         programObject->setUniform("calculateEclipseShadows", true);
     }
@@ -1056,9 +1040,8 @@ void RenderableGlobe::calculateEclipseShadows(const Chunk& chunk,
 void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObject,
     const Chunk& chunk, const RenderData& data)
 {
-    const glm::dmat4 modelTransform = chunk.owner().modelTransform();
     const glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
-    const glm::dmat4 modelViewTransform = viewTransform * modelTransform;
+    const glm::dmat4 modelViewTransform = viewTransform * modelTransform();
 
     const bool nightLayersActive =
         !_layerManager->layerGroup(layergroupid::NightLayers).activeLayers().empty();
@@ -1066,8 +1049,8 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
         !_layerManager->layerGroup(layergroupid::WaterMasks).activeLayers().empty();
 
     if (nightLayersActive || waterLayersActive ||
-        chunk.owner().generalProperties().atmosphereEnabled ||
-        chunk.owner().generalProperties().performShading)
+        generalProperties().atmosphereEnabled ||
+        generalProperties().performShading)
     {
         const glm::dvec3 directionToSunWorldSpace =
             length(data.modelTransform.translation) > 0.0 ?
@@ -1082,25 +1065,25 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
         );
     }
 
-    if (chunk.owner().generalProperties().performShading) {
+    if (generalProperties().performShading) {
         programObject.setUniform(
             "orenNayarRoughness",
-            chunk.owner().generalProperties().orenNayarRoughness);
+            generalProperties().orenNayarRoughness);
     }
 
-    if (chunk.owner().generalProperties().useAccurateNormals &&
+    if (generalProperties().useAccurateNormals &&
         !_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().empty())
     {
-        const glm::dvec3 corner00 = chunk.owner().ellipsoid().cartesianSurfacePosition(
+        const glm::dvec3 corner00 = ellipsoid().cartesianSurfacePosition(
             chunk.surfacePatch().corner(Quad::SOUTH_WEST)
         );
-        const glm::dvec3 corner10 = chunk.owner().ellipsoid().cartesianSurfacePosition(
+        const glm::dvec3 corner10 = ellipsoid().cartesianSurfacePosition(
             chunk.surfacePatch().corner(Quad::SOUTH_EAST)
         );
-        const glm::dvec3 corner01 = chunk.owner().ellipsoid().cartesianSurfacePosition(
+        const glm::dvec3 corner01 = ellipsoid().cartesianSurfacePosition(
             chunk.surfacePatch().corner(Quad::NORTH_WEST)
         );
-        const glm::dvec3 corner11 = chunk.owner().ellipsoid().cartesianSurfacePosition(
+        const glm::dvec3 corner11 = ellipsoid().cartesianSurfacePosition(
             chunk.surfacePatch().corner(Quad::NORTH_EAST)
         );
 
@@ -1149,8 +1132,6 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
         return;
     }
 
-    const Ellipsoid& ellipsoid = chunk.owner().ellipsoid();
-
     if (_layerManager->hasAnyBlendingLayersEnabled()) {
         // Calculations are done in the reference frame of the globe. Hence, the
         // camera position needs to be transformed with the inverse model matrix
@@ -1159,7 +1140,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
             inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1.0)
         );
         const float distanceScaleFactor = static_cast<float>(
-            chunk.owner().generalProperties().lodScaleFactor * ellipsoid.minimumRadius()
+            generalProperties().lodScaleFactor * ellipsoid().minimumRadius()
             );
         programObject->setUniform("cameraPosition", glm::vec3(cameraPosition));
         programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
@@ -1170,9 +1151,8 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     const Geodetic2 swCorner = chunk.surfacePatch().corner(Quad::SOUTH_WEST);
     const Geodetic2& patchSize = chunk.surfacePatch().size();
 
-    const glm::dmat4 modelTransform = chunk.owner().modelTransform();
     const glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
-    const glm::mat4 modelViewTransform = glm::mat4(viewTransform * modelTransform);
+    const glm::mat4 modelViewTransform = glm::mat4(viewTransform * modelTransform());
     const glm::mat4 modelViewProjectionTransform =
         data.camera.sgctInternal.projectionMatrix() * modelViewTransform;
 
@@ -1184,7 +1164,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     programObject->setUniform("minLatLon", glm::vec2(swCorner.toLonLatVec2()));
     programObject->setUniform("lonLatScalingFactor", glm::vec2(patchSize.toLonLatVec2()));
     // Ellipsoid Radius (Model Space)
-    programObject->setUniform("radiiSquared", glm::vec3(ellipsoid.radiiSquared()));
+    programObject->setUniform("radiiSquared", glm::vec3(ellipsoid().radiiSquared()));
 
     const bool hasNightLayers = !_layerManager->layerGroup(
         layergroupid::GroupID::NightLayers
@@ -1199,13 +1179,13 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     ).activeLayers().empty();
 
     if (hasNightLayers || hasWaterLayer ||
-        chunk.owner().generalProperties().atmosphereEnabled ||
-        chunk.owner().generalProperties().performShading)
+        generalProperties().atmosphereEnabled ||
+        generalProperties().performShading)
     {
         programObject->setUniform("modelViewTransform", modelViewTransform);
     }
 
-    if (chunk.owner().generalProperties().useAccurateNormals && hasHeightLayer) {
+    if (generalProperties().useAccurateNormals && hasHeightLayer) {
         // Apply an extra scaling to the height if the object is scaled
         programObject->setUniform(
             "heightScale",
@@ -1215,7 +1195,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 
     setCommonUniforms(*programObject, chunk, data);
 
-    if (chunk.owner().ellipsoid().hasEclipseShadows()) {
+    if (ellipsoid().hasEclipseShadows()) {
         calculateEclipseShadows(chunk, programObject, data);
     }
 
@@ -1243,12 +1223,9 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         return;
     }
 
-    const Ellipsoid& ellipsoid = chunk.owner().ellipsoid();
-
     if (_layerManager->hasAnyBlendingLayersEnabled()) {
         float distanceScaleFactor = static_cast<float>(
-            chunk.owner().generalProperties().lodScaleFactor *
-            chunk.owner().ellipsoid().minimumRadius()
+            generalProperties().lodScaleFactor * ellipsoid().minimumRadius()
             );
 
         programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
@@ -1257,9 +1234,8 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
     // Calculate other uniform variables needed for rendering
     // Send the matrix inverse to the fragment for the global and local shader (JCC)
-    const glm::dmat4 modelTransform = chunk.owner().modelTransform();
     const glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
-    const glm::dmat4 modelViewTransform = viewTransform * modelTransform;
+    const glm::dmat4 modelViewTransform = viewTransform * modelTransform();
 
 
     std::array<glm::dvec3, 4> cornersCameraSpace;
@@ -1271,7 +1247,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
         const Quad q = static_cast<Quad>(i);
         const Geodetic2 corner = chunk.surfacePatch().corner(q);
-        const glm::dvec3 cornerModelSpace = ellipsoid.cartesianSurfacePosition(corner);
+        const glm::dvec3 cornerModelSpace = ellipsoid().cartesianSurfacePosition(corner);
         cornersModelSpace[i] = cornerModelSpace;
         const glm::dvec3 cornerCameraSpace = glm::dvec3(
             modelViewTransform * glm::dvec4(cornerModelSpace, 1)
@@ -1316,7 +1292,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
     setCommonUniforms(*programObject, chunk, data);
 
-    if (chunk.owner().ellipsoid().hasEclipseShadows()) {
+    if (ellipsoid().hasEclipseShadows()) {
         calculateEclipseShadows(chunk, programObject, data);
     }
 
