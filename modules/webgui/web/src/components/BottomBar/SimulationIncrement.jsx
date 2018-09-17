@@ -90,7 +90,9 @@ class SimulationIncrement extends Component {
   setDeltaTime(event) {
     const { value } = event.currentTarget;
     const deltaTime = parseFloat(value) * this.stepSize;
-
+    if (isNaN(deltaTime)) {
+      return;
+    }
     // optimistic ui change
     this.setState({ deltaTime });
     UpdateDeltaTime(deltaTime);

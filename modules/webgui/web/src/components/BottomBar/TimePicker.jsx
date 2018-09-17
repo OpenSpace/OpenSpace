@@ -7,7 +7,16 @@ import Button from '../common/Input/Button/Button';
 import Calendar from '../common/Calendar/Calendar';
 import Picker from './Picker';
 import Time from '../common/Input/Time/Time';
-import { TogglePauseScript, CurrenTimeKey, ValuePlaceholder, SetDeltaTimeScript } from '../../api/keys';
+
+import {
+  TogglePauseScript,
+  InterpolateTogglePauseScript,
+  CurrenTimeKey,
+  ValuePlaceholder,
+  SetDeltaTimeScript,
+  InterpolateDeltaTime
+} from '../../api/keys';
+
 import SimulationIncrement from './SimulationIncrement';
 import styles from './TimePicker.scss';
 
@@ -21,12 +30,23 @@ const DateStringWithTimeZone = (date, zone = 'Z') =>
   (!date.includes('Z') ? `${date}${zone}` : date);
 
 class TimePicker extends Component {
-  static togglePause() {
-    DataManager.runScript(TogglePauseScript);
+  static togglePause(e) {
+    const shift = e.getModifierState("Shift");
+    if (shift) {
+      DataManager.runScript(TogglePauseScript);
+    } else {
+      DataManager.runScript(InterpolateTogglePauseScript);
+    }
   }
 
-  static realtime() {
-    const script = SetDeltaTimeScript.replace(ValuePlaceholder, 1);
+  static realtime(e) {
+    const shift = e.getModifierState("Shift");
+    let script = '';
+    if (shift) {
+      script = SetDeltaTimeScript.replace(ValuePlaceholder, 1);
+    } else {
+      script = InterpolateDeltaTimeScript.replace(ValuePlaceholder, 1);
+    }
     DataManager.runScript(script);
   }
 

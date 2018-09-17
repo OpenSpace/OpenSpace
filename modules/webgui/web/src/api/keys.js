@@ -12,6 +12,7 @@ export const VersionInfoKey = 'VersionInfo';
 export const SCMInfoKey = 'SCMInfo';
 // script to toggle pause
 export const TogglePauseScript = 'openspace.time.togglePause()';
+export const InterpolateTogglePauseScript = 'openspace.time.interpolateTogglePause()';
 // key for getting current time subscription
 export const TimeKey = 'special:currentTime';
 // script to toggle shutdown
@@ -31,3 +32,4 @@ export const DeltaTime = 'deltaTime';
 export const ValuePlaceholder = '___value___';
 // script for setting deltatime
 export const SetDeltaTimeScript = `openspace.time.setDeltaTime(${ValuePlaceholder})`;
+export const InterpolateDeltaTimeScript = `openspace.time.interpolateDeltaTime(${ValuePlaceholder})`;
