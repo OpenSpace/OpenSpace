@@ -72,7 +72,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lruthreadpool.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lruthreadpool.inl
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunkrenderer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layershadermanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuchunktile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuchunktilepile.h
@@ -156,7 +155,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/timequantizer.cpp
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunkrenderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layershadermanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuchunktile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuchunktilepile.cpp
