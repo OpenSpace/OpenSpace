@@ -52,7 +52,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodetic3.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodeticpatch.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunkedlodglobe.h
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/pointglobe.h
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.h
 
@@ -145,7 +144,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodetic2.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodeticpatch.cpp
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunkedlodglobe.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/pointglobe.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.cpp
     

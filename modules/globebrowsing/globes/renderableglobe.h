@@ -28,21 +28,24 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/globebrowsing/geometry/ellipsoid.h>
-//#include <modules/globebrowsing/other/distanceswitch.h>
-
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 
-#ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
-namespace openspace {
-    class AtmosphereDeferredcaster;
-}
-#endif
-
 namespace openspace::globebrowsing {
 
-class ChunkedLodGlobe;
+    namespace chunklevelevaluator { class Evaluator; }
+
+    namespace culling { class ChunkCuller; }
+
+    class Chunk;
+    class ChunkNode;
+    class ChunkRenderer;
+    class Ellipsoid;
+    struct Geodetic2;
+    class LayerManager;
+    class RenderableGlobe;
+
 class PointGlobe;
 class LayerManager;
 
@@ -106,10 +109,9 @@ public:
 
     // Getters that perform calculations
     glm::dvec3 projectOnEllipsoid(glm::dvec3 position);
-    float getHeight(glm::dvec3 position) const;
+    //float getHeight(glm::dvec3 position) const;
 
     // Getters
-    ChunkedLodGlobe* chunkedLodGlobe() const;
     LayerManager* layerManager() const;
     const Ellipsoid& ellipsoid() const;
     const glm::dmat4& modelTransform() const;
@@ -126,8 +128,6 @@ public:
                                        const glm::dvec3& targetModelSpace) const override;
 
 private:
-    std::unique_ptr<ChunkedLodGlobe> _chunkedLodGlobe;
-
     Ellipsoid _ellipsoid;
     std::shared_ptr<LayerManager> _layerManager;
     std::shared_ptr<Camera> _savedCamera;
@@ -142,6 +142,90 @@ private:
     DebugProperties _debugProperties;
     GeneralProperties _generalProperties;
     properties::PropertyOwner _debugPropertyOwner;
+
+
+    // Chunked Lod Globe
+public:
+    void renderChunks(const RenderData& data, RendererTasks& rendererTask);
+
+    
+    /**
+ * Traverse the chunk tree and find the highest level chunk node.
+ *
+ * \param location is given in geodetic coordinates and must be in the range
+ * latitude [-90, 90] and longitude [-180, 180]. In other words, it must be a
+ * position defined on the globe in georeferenced coordinates.
+ */
+    const ChunkNode& findChunkNode(const Geodetic2& location) const;
+
+    /**
+     * Test if a specific chunk can saf;ely be culled without affecting the rendered
+     * image.
+     *
+     * Goes through all available <code>ChunkCuller</code>s and check if any of them
+     * allows culling of the <code>Chunk</code>s in question.
+     */
+    bool testIfCullable(const Chunk& chunk, const RenderData& renderData) const;
+
+    /**
+     * Gets the desired level which can be used to determine if a chunk should split
+     * or merge.
+     *
+     * Using <code>ChunkLevelEvaluator</code>s, the desired level can be higher or
+     * lower than the current level of the <code>Chunks</code>s
+     * <code>TileIndex</code>. If the desired level is higher than that of the
+     * <code>Chunk</code>, it wants to split. If it is lower, it wants to merge with
+     * its siblings.
+     */
+    int desiredLevel(const Chunk& chunk, const RenderData& renderData) const;
+
+    /**
+     * Calculates the height from the surface of the reference ellipsoid to the
+     * heigh mapped surface.
+     *
+     * The height can be negative if the height map contains negative values.
+     *
+     * \param <code>position</code> is the position of a point that gets geodetically
+     * projected on the reference ellipsoid. <code>position</code> must be in
+     * cartesian model space.
+     * \returns the height from the reference ellipsoid to the globe surface.
+     */
+    float getHeight(const glm::dvec3& position) const;
+
+    /**
+     * Notifies the renderer to recompile its shaders the next time the render function is
+     * called. The actual shader recompilation takes place in the render function because
+     * properties that the shader depends on need to be properly synced.
+     */
+    void notifyShaderRecompilation();
+
+    /**
+     * Directly recompile the shaders of the renderer.
+     */
+    void recompileShaders();
+
+    constexpr static const int MinSplitDepth = 2;
+    constexpr static const int MaxSplitDepth = 22;
+
+private:
+    void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const;
+
+    // Covers all negative longitudes
+    std::unique_ptr<ChunkNode> _leftRoot;
+
+    // Covers all positive longitudes
+    std::unique_ptr<ChunkNode> _rightRoot;
+
+    // the patch used for actual rendering
+    std::unique_ptr<ChunkRenderer> _renderer;
+
+    std::vector<std::unique_ptr<culling::ChunkCuller>> _chunkCullers;
+
+    std::unique_ptr<chunklevelevaluator::Evaluator> _chunkEvaluatorByAvailableTiles;
+    std::unique_ptr<chunklevelevaluator::Evaluator> _chunkEvaluatorByProjectedArea;
+    std::unique_ptr<chunklevelevaluator::Evaluator> _chunkEvaluatorByDistance;
+
+    bool _shadersNeedRecompilation = true;
 };
 
 } // namespace openspace::globebrowsing

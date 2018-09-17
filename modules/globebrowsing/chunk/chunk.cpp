@@ -26,7 +26,6 @@
 
 #include <modules/globebrowsing/geometry/geodetic3.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/tile/chunktile.h>
@@ -74,12 +73,12 @@ Chunk::Status Chunk::update(const RenderData& data) {
     };
 
     _isVisible = true;
-    if (_owner.chunkedLodGlobe()->testIfCullable(*this, myRenderData)) {
+    if (_owner.testIfCullable(*this, myRenderData)) {
         _isVisible = false;
         return Status::WantMerge;
     }
 
-    const int desiredLevel = _owner.chunkedLodGlobe()->desiredLevel(
+    const int desiredLevel = _owner.desiredLevel(
         *this,
         myRenderData
     );
@@ -102,7 +101,7 @@ Chunk::BoundingHeights Chunk::boundingHeights() const {
 
     // In the future, this should be abstracted away and more easily queryable.
     // One must also handle how to sample pick one out of multiplte heightmaps
-    std::shared_ptr<LayerManager> lm = owner().chunkedLodGlobe()->layerManager();
+    LayerManager* lm = owner().layerManager();
 
     // The raster of a height map is the first one. We assume that the height map is
     // a single raster image. If it is not we will just use the first raster

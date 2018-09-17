@@ -25,7 +25,6 @@
 #include <modules/globebrowsing/rendering/layershadermanager.h>
 
 #include <modules/globebrowsing/chunk/chunk.h>
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/rendering/layer/layer.h>
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
@@ -72,7 +71,7 @@ LayerShaderManager::LayerShaderPreprocessingData::get(const RenderableGlobe& glo
 {
     LayerShaderManager::LayerShaderPreprocessingData preprocessingData;
 
-    std::shared_ptr<LayerManager> layerManager = globe.chunkedLodGlobe()->layerManager();
+    LayerManager* layerManager = globe.layerManager();
     for (size_t i = 0; i < layergroupid::NUM_LAYER_GROUPS; i++) {
         LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData
             layeredTextureInfo;

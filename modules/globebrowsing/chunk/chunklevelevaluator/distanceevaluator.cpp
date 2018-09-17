@@ -25,7 +25,6 @@
 #include <modules/globebrowsing/chunk/chunklevelevaluator/distanceevaluator.h>
 
 #include <modules/globebrowsing/chunk/chunk.h>
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <openspace/util/updatestructures.h>
 

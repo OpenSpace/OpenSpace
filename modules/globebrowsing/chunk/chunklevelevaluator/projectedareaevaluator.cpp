@@ -26,7 +26,6 @@
 
 #include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/geometry/geodetic3.h>
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
