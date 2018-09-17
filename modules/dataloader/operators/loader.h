@@ -41,6 +41,11 @@
 namespace ghoul
 {
 class Dictionary;
+
+namespace filesystem
+{
+class Directory;
+}
 }
 
 namespace openspace
@@ -55,6 +60,7 @@ namespace dataloader
 {
 
 using properties::PropertyOwner;
+using Directory = ghoul::filesystem::Directory;
 
 class Loader : public PropertyOwner, public Operator
 {
@@ -75,8 +81,7 @@ public:
   // Remove the trigger properties
   //void removeDataItemProperties();
 
-  // Load a data item with an abs path to the item under its data type subfolder in data/.internal
-  void loadDataItem(const std::string &absPathToItem);
+  ghoul::Dictionary createAssetDictionary();
 
   // void createVolumeDataItem(std::string absPath);
 
@@ -102,6 +107,9 @@ private:
 
   void initializeNode(ghoul::Dictionary dict);
   void goToFirstTimeStep(const std::string &absPathToItem);
+  void copyTfFileToItemDir();
+  void runConversionTask();
+  Directory getAssetFolderDirectory();
 };
 
 } // namespace dataloader

@@ -11,19 +11,25 @@ using Directory = ghoul::filesystem::Directory;
 using Recursive = ghoul::filesystem::Directory::Recursive;
 using Sort = ghoul::filesystem::Directory::Sort;
 
-namespace openspace::dataloader::helpers {
+namespace openspace::dataloader::helpers
+{
 
-namespace {
-    constexpr const char* _loggerCat = "Helper";
-} 
+namespace
+{
+constexpr const char *_loggerCat = "Helper";
+}
 
-std::string getDirLeaf(std::string dir) {
-    std::regex dirLeafRegex("([^/]+)/?$");
+std::string getDirLeaf(std::string dir)
+{
+    std::regex dirLeafRegex("([^/\\]+)$");
     std::smatch dirLeafMatch;
 
-    if (std::regex_search(dir, dirLeafMatch, dirLeafRegex)) {
+    if (std::regex_search(dir, dirLeafMatch, dirLeafRegex))
+    {
         return dirLeafMatch[0].str();
-    } else {
+    }
+    else
+    {
         LWARNING("Found no match in " + dir + ".");
         return "";
     }
@@ -32,18 +38,21 @@ std::string getDirLeaf(std::string dir) {
 /**
  * Get first file with the supplied extension in item folder
  */
-std::string getFileWithExtensionFromItemFolder(std::string absPathToItem, std::string extension) {
+std::string getFileWithExtensionFromItemFolder(std::string absPathToItem, std::string extension)
+{
     Directory itemDirectory(absPathToItem);
 
     std::vector<std::string> itemFiles = itemDirectory.readFiles(Recursive::No, Sort::Yes);
     std::string filePath = "";
 
     // Find (first) file with the extension
-    // TODO verity regexp below. \ or 
+    // TODO verity regexp below. \ or
     std::regex extRegex("^.*\\.(" + extension + ")$");
     std::smatch match;
-    for (auto file : itemFiles) {
-        if (std::regex_search(file, match, extRegex)) {
+    for (auto file : itemFiles)
+    {
+        if (std::regex_search(file, match, extRegex))
+        {
             filePath = file;
             break;
         }
@@ -54,15 +63,19 @@ std::string getFileWithExtensionFromItemFolder(std::string absPathToItem, std::s
     return filePath;
 }
 
-std::string getFileBaseName(std::string file) {
+std::string getFileBaseName(std::string file)
+{
     std::regex fileRegex("(.*)\.[^.]+$");
-    std::smatch fileMatch; 
+    std::smatch fileMatch;
 
-    if (std::regex_search(file, fileMatch, fileRegex)) {
+    if (std::regex_search(file, fileMatch, fileRegex))
+    {
         return fileMatch[0].str();
-    } else {
+    }
+    else
+    {
         LWARNING("Found no base name for file " + file + ".");
         return "";
     }
 }
-}
+} // namespace openspace::dataloader::helpers

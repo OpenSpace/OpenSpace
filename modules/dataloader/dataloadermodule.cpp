@@ -124,7 +124,8 @@ std::vector<std::string> DataLoaderModule::volumeDataItems() {
 }
 
 void DataLoaderModule::loadDataItem(const std::string& absPathToItem) {
-    _loader->loadDataItem(absPathToItem);
+    //_loader->loadDataItem(absPathToItem);
+    LERROR("Change to load asset file");
 }
 
 void DataLoaderModule::uploadDataItem(const std::string& dictionaryString) {

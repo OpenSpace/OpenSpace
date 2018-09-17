@@ -75,6 +75,7 @@ const std::string translationTypeKey = "SpiceTranslation";
 const std::string volumesGuiPathKey = "/Solar System/Volumes";
 const std::string KeyVolumeToRawTask = "KameleonVolumeToRawTask";
 constexpr const char *KeyVariable = "Variable";
+const std::string KeyTfDestinationFileName = "transferfunction.txt";
 
 const std::string KeyStepSize = "StepSize";
 const std::string KeyGridType = "GridType";
@@ -250,62 +251,73 @@ void Loader::selectData()
 
 // void Loader::createVolumeDataItem(std::string absPath) {}
 
-void Loader::loadDataItem(const std::string &absPathToItem)
+ghoul::Dictionary Loader::createAssetDictionary()
 {
-    std::string sourceDir = absPathToItem;
-    const std::string dirLeaf = openspace::dataloader::helpers::getDirLeaf(absPathToItem);
-
-    if (scene()->sceneGraphNode(dirLeaf))
-    {
-        LINFO(fmt::format("The sceneGraphNode {} has already been created!", std::string(dirLeaf)));
-        goToFirstTimeStep(absPathToItem);
-        return;
-    }
-
     // TODO: Variables to let user initialize in GUI
     std::string sunKey = "SUN";
     const float sunRadiusScale = 695508000;
     const float auScale = 149600000000;
     const std::string parent = "SolarSystemBarycenter"; // valid for all volume data?
 
-    std::string stateFile = openspace::dataloader::helpers::getFileWithExtensionFromItemFolder(absPathToItem, "state");
-    ghoul::Dictionary renderableDictionary = ghoul::lua::loadDictionaryFromFile(stateFile);
-
-    if (!renderableDictionary.hasKey(KeyTransform))
+    ghoul::Dictionary translationDictionary;
+    if (!_currentVolumeConversionDictionary.getValue<ghoul::Dictionary>(KeyTranslation, translationDictionary))
     {
-        LERROR("Transform was not declared in the .state file!");
+        throw ghoul::RuntimeError("Must provide Translation table for volume conversion.");
     }
 
+    // Read and create Scale Dictionary
+    float scale = _currentVolumeConversionDictionary.value<float>(KeyScale) * sunRadiusScale;
+    ghoul::Dictionary scaleDictionary;
+    scaleDictionary.setValue<std::string>(KeyType, KeyStaticScale);
+    scaleDictionary.setValue<float>(KeyScale, scale);
+
+    // Create Transform Dictionary
     ghoul::Dictionary transformDictionary;
-    renderableDictionary.getValue<ghoul::Dictionary>(KeyTransform, transformDictionary);
+    transformDictionary.setValue<ghoul::Dictionary>(KeyTranslation, translationDictionary);
+    transformDictionary.setValue<ghoul::Dictionary>(KeyScale, scaleDictionary);
 
-    std::string tfFilePath = absPathToItem +
-                             ghoul::filesystem::FileSystem::PathSeparator +
-                             "transferfunction.txt";
+    /*if (!renderableDictionary.hasKey(KeyTransform))
+    {
+        LERROR("Transform is not in renderable dictionary");
+    }*/
 
-    renderableDictionary.setValue("Type", KeyRenderableType);
+    const std::string gridType = _currentVolumeConversionDictionary.value<std::string>(KeyGridType);
+    const std::string itemName = _currentVolumeConversionDictionary.value<std::string>(KeyItemName);
+    Directory d = getAssetFolderDirectory();
+    const std::string sourceDir = d.path();
+    // const std::string sourceDirLeaf = openspace::dataloader::helpers::getDirLeaf(sourceDir);
+
+    const std::string tfFilePath = sourceDir +
+                                   ghoul::filesystem::FileSystem::PathSeparator +
+                                   KeyTfDestinationFileName;
+
+    ghoul::Dictionary renderableDictionary;
+    renderableDictionary.setValue<std::string>("Type", KeyRenderableType);
     renderableDictionary.setValue<ghoul::Dictionary>(KeyTransform, transformDictionary);
-    renderableDictionary.setValue("SourceDirectory", sourceDir);
-    renderableDictionary.setValue("TransferFunction", tfFilePath);
+    renderableDictionary.setValue<std::string>("SourceDirectory", sourceDir);
+    renderableDictionary.setValue<std::string>("TransferFunction", tfFilePath);
+    renderableDictionary.setValue<float>(KeyStepSize, DefaultStepSize);
+    renderableDictionary.setValue<std::string>(KeyGridType, gridType);
+    renderableDictionary.setValue<float>(KeySecondsAfter, DefaultSecondsAfter);
+    renderableDictionary.setValue<float>(KeySecondsBefore, DefaultSecondsBefore);
 
-    std::initializer_list<std::pair<std::string, ghoul::any>> gui = {
-        std::make_pair("Path", volumesGuiPathKey)};
-    ghoul::Dictionary guiDictionary(gui);
+    ghoul::Dictionary guiDictionary;
+    guiDictionary.setValue<std::string>("Path", volumesGuiPathKey);
 
-    std::initializer_list<std::pair<std::string, ghoul::any>> completeList = {
-        std::make_pair("Identifier", dirLeaf),
-        std::make_pair("Parent", parent),
-        std::make_pair("Renderable", renderableDictionary),
-        std::make_pair("GUI", guiDictionary)};
+    ghoul::Dictionary completeDictionary;
+    completeDictionary.setValue<std::string>("Identifier", itemName);
+    completeDictionary.setValue<std::string>("Parent", parent);
+    completeDictionary.setValue<ghoul::Dictionary>("Renderable", renderableDictionary);
+    completeDictionary.setValue<ghoul::Dictionary>("GUI", guiDictionary);
 
-    ghoul::Dictionary completeDictionary(completeList);
     ghoul::DictionaryLuaFormatter formatter;
     std::string completeDictString = formatter.format(completeDictionary);
+    LINFO("Formatted asset dictinoary");
     LINFO(completeDictString);
 
     // completeDictionary.setValue<ghoul::Dictionary>(KeyTransform, transformDictionary);
     // initializeNode(completeDictionary);
-    goToFirstTimeStep(absPathToItem);
+    // goToFirstTimeStep(absPathToItem);
 }
 
 void Loader::initializeNode(ghoul::Dictionary dict)
@@ -485,114 +497,91 @@ void Loader::processCurrentlySelectedUploadData(const std::string &dictionaryStr
             {
             }
 
-            std::string itemName = _currentVolumeConversionDictionary.value<std::string>(KeyItemName);
-            std::string itemPathBase = "${DATA}/.internal/volumes_from_cdf/" + itemName;
-            Directory d(itemPathBase, RawPath::No);
+            Directory d = getAssetFolderDirectory();
             FileSys.createDirectory(d);
 
-            ghoul::Dictionary translationDictionary;
-            if (!_currentVolumeConversionDictionary.getValue<ghoul::Dictionary>(KeyTranslation, translationDictionary))
-            {
-                throw ghoul::RuntimeError("Must provide Translation table for volume conversion.");
-            }
+            runConversionTask();
+            copyTfFileToItemDir();
+            ghoul::Dictionary assetDictionary = createAssetDictionary();
 
-            // Read and create Scale Dictionary
-            float scale = _currentVolumeConversionDictionary.value<float>(KeyScale) * sunRadiusScale;
-            ghoul::Dictionary scaleDictionary;
-            scaleDictionary.setValue<std::string>(KeyType, KeyStaticScale);
-            scaleDictionary.setValue<float>(KeyScale, scale);
-
-            // Create Transform Dictionary
-            ghoul::Dictionary transformDictionary;
-            transformDictionary.setValue<ghoul::Dictionary>(KeyTranslation, translationDictionary);
-            transformDictionary.setValue<ghoul::Dictionary>(KeyScale, scaleDictionary);
-
-            /*** create state file ***/
-            // Check if file exists
-            // If it exists, clear contents? delete and create new?
-            // Create file, write dictionary to string contents
-            const std::string gridType = _currentVolumeConversionDictionary.value<std::string>(KeyGridType);
-            std::initializer_list<std::pair<std::string, ghoul::any>> stateList = {
-                std::make_pair(KeyStepSize, DefaultStepSize),
-                std::make_pair(KeyGridType, gridType),
-                std::make_pair(KeySecondsAfter, DefaultSecondsAfter),
-                std::make_pair(KeySecondsBefore, DefaultSecondsBefore),
-                std::make_pair(KeyTransform, transformDictionary)};
-            ghoul::Dictionary stateDict(stateList);
-            ghoul::DictionaryLuaFormatter formatter;
-            std::string stateString = formatter.format(stateDict);
-            std::fstream stateStream(absPath(itemPathBase + "/" + itemName + ".state"), std::ios::out);
-            if (!stateStream)
-            {
-                LERROR("Could not create state file");
-            }
-            stateStream << "return " << stateString;
-            stateStream.close();
-
-            /*** copy over tf file ***/
-            const std::string tfFileToCopyPath = _currentVolumeConversionDictionary.value<std::string>(KeyTransferFunctionPath);
-            LDEBUG("tf path as it is: " + tfFileToCopyPath);
-            LDEBUG("tf path abs path: " + absPath(tfFileToCopyPath));
-            std::ifstream tfSource(absPath(tfFileToCopyPath));
-            std::ofstream tfDest(absPath(itemPathBase + "/transferfunction.txt"));
-            if (!tfSource)
-            {
-                LERROR("Could not open source transferfunction file.");
-            }
-            if (!tfDest)
-            {
-                LERROR("Could not open destination transferfunction file.");
-            }
-
-            tfDest << tfSource.rdbuf();
-            tfSource.close();
-            tfDest.close();
-
-            ghoul::Dictionary taskDictionary;
-            if (!_currentVolumeConversionDictionary.getValue<ghoul::Dictionary>(KeyTask, taskDictionary))
-            {
-                throw ghoul::RuntimeError("Must provide Task dictionary for volume conversion.");
-            }
-
-            std::mutex m;
-            std::function<void(float)> cb = [&](float progress) {
-                std::lock_guard<std::mutex> g(m);
-                _volumeConversionProgress = progress;
-            };
-
-            std::vector<std::string> selectedFiles = _selectedFilePaths;
-            unsigned int counter = 0;
-            for (const std::string &file : selectedFiles)
-            {
-                _volumeConversionProgress = FLT_MIN;
-                auto selectedFile = File(file);
-                const std::string outputBasePath = d.path() + "/" + selectedFile.filename();
-
-                const std::string rawVolumeOutput = outputBasePath + ".rawvolume";
-                const std::string dictionaryOutput = outputBasePath + ".dictionary";
-
-                taskDictionary.setValue("Type", KeyVolumeToRawTask);
-                taskDictionary.setValue("Input", file);
-                taskDictionary.setValue("RawVolumeOutput", rawVolumeOutput);
-                taskDictionary.setValue("DictionaryOutput", dictionaryOutput);
-
-                auto volumeToRawTask = Task::createFromDictionary(taskDictionary);
-
-                volumeToRawTask->perform(cb);
-                counter++;
-                _currentVolumesConvertedCount = counter;
-            }
-
-            LINFO("Created files in " + d.path());
+            LINFO("Created files");
 
             _volumeConversionThreadCanRun = false;
-            loadDataItem(absPath(itemPathBase));
         });
 
         t.detach();
     }
 
     // Create state file, transferfunction file in volume item directory
+}
+
+void Loader::copyTfFileToItemDir()
+{
+    const std::string tfFileToCopyPath = _currentVolumeConversionDictionary.value<std::string>(KeyTransferFunctionPath);
+    LDEBUG("tf path as it is: " + tfFileToCopyPath);
+    LDEBUG("tf path abs path: " + absPath(tfFileToCopyPath));
+    std::ifstream tfSource(absPath(tfFileToCopyPath));
+    std::ofstream tfDest(absPath(getAssetFolderDirectory().path() + "/" + KeyTfDestinationFileName));
+    if (!tfSource)
+    {
+        LERROR("Could not open source transferfunction file.");
+    }
+    if (!tfDest)
+    {
+        LERROR("Could not open destination transferfunction file.");
+    }
+
+    tfDest << tfSource.rdbuf();
+    tfSource.close();
+    tfDest.close();
+}
+
+void Loader::runConversionTask()
+{
+
+    ghoul::Dictionary taskDictionary;
+    if (!_currentVolumeConversionDictionary.getValue<ghoul::Dictionary>(KeyTask, taskDictionary))
+    {
+        throw ghoul::RuntimeError("Must provide Task dictionary for volume conversion.");
+    }
+
+    std::mutex m;
+    std::function<void(float)> cb = [&](float progress) {
+        std::lock_guard<std::mutex> g(m);
+        _volumeConversionProgress = progress;
+    };
+
+    std::vector<std::string> selectedFiles = _selectedFilePaths;
+    unsigned int counter = 0;
+    for (const std::string &file : selectedFiles)
+    {
+        _volumeConversionProgress = FLT_MIN;
+        auto selectedFile = File(file);
+        // Directory d = getAssetFolderDirectory();
+        const std::string outputBasePath = getAssetFolderDirectory().path() + "/" + selectedFile.filename();
+
+        const std::string rawVolumeOutput = outputBasePath + ".rawvolume";
+        const std::string dictionaryOutput = outputBasePath + ".dictionary";
+
+        taskDictionary.setValue("Type", KeyVolumeToRawTask);
+        taskDictionary.setValue("Input", file);
+        taskDictionary.setValue("RawVolumeOutput", rawVolumeOutput);
+        taskDictionary.setValue("DictionaryOutput", dictionaryOutput);
+
+        auto volumeToRawTask = Task::createFromDictionary(taskDictionary);
+
+        volumeToRawTask->perform(cb);
+        counter++;
+        _currentVolumesConvertedCount = counter;
+    }
+}
+
+Directory Loader::getAssetFolderDirectory()
+{
+    std::string itemName = _currentVolumeConversionDictionary.value<std::string>(KeyItemName);
+    std::string itemPathBase = "${DATA}/.internal/volumes_from_cdf/" + itemName;
+    Directory d(itemPathBase, RawPath::No);
+    return d;
 }
 
 // void Loader::createVolumeDataItem(std::string absPath) {}
