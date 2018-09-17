@@ -38,6 +38,7 @@
 #include <modules/globebrowsing/chunk/chunklevelevaluator/projectedareaevaluator.h>
 #include <modules/globebrowsing/rendering/layershadermanager.h>
 #include <modules/globebrowsing/rendering/gpu/gpulayermanager.h>
+#include <modules/globebrowsing/meshes/skirtedgrid.h>
 
 namespace openspace::globebrowsing {
 
@@ -277,7 +278,7 @@ private:
     void setCommonUniforms(ghoul::opengl::ProgramObject& programObject,
         const Chunk& chunk, const RenderData& data);
 
-    std::shared_ptr<Grid> _grid;
+    SkirtedGrid _grid;
 
 
     // Two different shader programs. One for global and one for local rendering.

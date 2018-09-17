@@ -30,7 +30,6 @@
 #include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/chunk/chunknode.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/meshes/skirtedgrid.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/rendering/layer/layer.h>
@@ -62,6 +61,8 @@ namespace {
     constexpr const char* keyShadowSource = "Source";
     constexpr const char* keyShadowCaster = "Caster";
     constexpr const double KM_TO_M = 1000.0;
+
+    constexpr const int DefaultSkirtedGridSegments = 64;
 
     const openspace::globebrowsing::GeodeticPatch Coverage =
         openspace::globebrowsing::GeodeticPatch(0, 0, 90, 180);
@@ -244,7 +245,11 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl",
         "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl"
     )
-
+    , _grid(DefaultSkirtedGridSegments,
+        DefaultSkirtedGridSegments,
+        TriangleSoup::Positions::No,
+        TriangleSoup::TextureCoordinates::Yes,
+        TriangleSoup::Normals::No)
 {
     setIdentifier("RenderableGlobe");
 
@@ -262,11 +267,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
     }
 
-    // Ghoul can't read ints from lua dictionaries...
-    double patchSegmentsd;
-    dictionary.getValue(keySegmentsPerPatch, patchSegmentsd);
-    int patchSegments = static_cast<int>(patchSegmentsd);
-
     if (dictionary.hasValue<bool>("PerformShading")) {
         _generalProperties.performShading = dictionary.value<bool>("PerformShading");
     }
@@ -278,18 +278,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     }
 
     _layerManager = std::make_shared<LayerManager>(layersDictionary);
-
-
-    _grid = std::make_shared<SkirtedGrid>(
-        static_cast<unsigned int>(patchSegments),
-        static_cast<unsigned int>(patchSegments),
-        TriangleSoup::Positions::No,
-        TriangleSoup::TextureCoordinates::Yes,
-        TriangleSoup::Normals::No
-        );
-
-
-
 
     addProperty(_generalProperties.atmosphereEnabled);
     addProperty(_generalProperties.performShading);
@@ -928,12 +916,12 @@ ghoul::opengl::ProgramObject* RenderableGlobe::getActivatedProgramWithTileData(
     //    glm::min(static_cast<float>(chunk.surfacePatch().halfSize().lat * 1000000),
     //        8700.0f));
 
-    programObject->setUniform("xSegments", _grid->xSegments());
+    programObject->setUniform("xSegments", _grid.xSegments());
 
     if (chunk.owner().debugProperties().showHeightResolution) {
         programObject->setUniform(
             "vertexResolution",
-            glm::vec2(_grid->xSegments(), _grid->ySegments())
+            glm::vec2(_grid.xSegments(), _grid.ySegments())
         );
     }
 
@@ -1237,7 +1225,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     glCullFace(GL_BACK);
 
     // render
-    _grid->geometry().drawUsingActiveProgram();
+    _grid.geometry().drawUsingActiveProgram();
 
     _globalGpuLayerManager.deactivate();
 
@@ -1338,7 +1326,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     glCullFace(GL_BACK);
 
     // render
-    _grid->geometry().drawUsingActiveProgram();
+    _grid.geometry().drawUsingActiveProgram();
 
     _localGpuLayerManager.deactivate();
 
