@@ -27,6 +27,7 @@ class SettingsPane extends Component {
             data={properties}
             className={styles.list}
             viewComponent={PropertyOwner}
+            searchAutoFocus
           />
         )}
       </Pane>

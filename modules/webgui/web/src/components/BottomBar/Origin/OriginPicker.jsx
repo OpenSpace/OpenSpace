@@ -92,6 +92,7 @@ class OriginPicker extends Component {
               searchText="Search the universe..."
               viewComponent={FocusEntry}
               active={this.origin}
+              searchAutoFocus
             />
           </Popover>
         )}

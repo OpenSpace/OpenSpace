@@ -52,6 +52,7 @@ class FilterList extends Component {
           placeholder={this.props.searchText}
           onChange={this.changeSearch}
           clearable
+          autoFocus={this.props.searchAutoFocus}
         />
 
         <ScrollOverlay>
@@ -108,6 +109,10 @@ FilterList.propTypes = {
    */
   searchText: PropTypes.string,
   /**
+   * Whether the search input field should gain focus automatically
+   */
+   searchAutoFocus: PropTypes.bool,
+  /**
    * the component used to display entries
    */
   viewComponent: PropTypes.func,
@@ -119,6 +124,7 @@ FilterList.defaultProps = {
   matcher: SimpleSubstring,
   onSelect: null,
   searchText: 'Search...',
+  searchAutoFocus: false,
   viewComponent: props => (<li>{ JSON.stringify(props) }</li>),
 };
 

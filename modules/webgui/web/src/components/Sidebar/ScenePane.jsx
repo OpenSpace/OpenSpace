@@ -20,7 +20,7 @@ class ScenePane extends Component {
         )}
 
         { nodes.length > 0 && (
-          <FilterList data={nodes} viewComponent={SceneGraphNode} />
+          <FilterList data={nodes} viewComponent={SceneGraphNode} searchAutoFocus />
         )}
       </Pane>
     );
@@ -41,10 +41,12 @@ const mapStateToProps = (state) => {
   const subowners = state.propertyTree.subowners || [];
 
   const rootNodes = subowners.filter(element => element.identifier === sceneType);
+
   let nodes = [];
   rootNodes.forEach((node) => {
     nodes = [...nodes, ...node.subowners];
   });
+
   return {
     nodes,
   };
