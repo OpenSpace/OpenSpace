@@ -54,6 +54,21 @@ namespace {
         }
     }
 
+    uint32_t mapToCefModifiers(openspace::KeyModifier modifiers) {
+        uint32_t cefModifiers = 0;
+        // Based on cef_event_flags_t in cef_types.h
+        if (hasKeyModifier(modifiers, openspace::KeyModifier::Shift)) {
+            cefModifiers |= 1 << 1;
+        }
+        if (hasKeyModifier(modifiers, openspace::KeyModifier::Control)) {
+            cefModifiers |= 1 << 2;
+        }
+        if (hasKeyModifier(modifiers, openspace::KeyModifier::Alt)) {
+            cefModifiers |= 1 << 3;
+        }
+        return cefModifiers;
+    }
+
 } // namespace
 
 namespace openspace {
@@ -184,7 +199,7 @@ bool EventHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction act
     CefKeyEvent keyEvent;
     // TODO(klas): Use something less platform specific?
     keyEvent.windows_key_code = mapFromGlfwToNative(key);
-    keyEvent.modifiers        = static_cast<uint32>(modifier);
+    keyEvent.modifiers        = mapToCefModifiers(modifier);
     keyEvent.type             = keyEventType(action);
     // TODO(klas): figure out when to block
     return _browserInstance->sendKeyEvent(keyEvent);
