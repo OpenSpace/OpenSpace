@@ -93,16 +93,6 @@ class PrepareUploadedData extends Component {
       });
     }
 
-    if (this.props.isReadingNewMetaData && (this.props.isReadingNewMetaData !== prevProps.isReadingNewMetaData)) {
-      this.setState({
-        data: {
-          ...this.state.data,
-          dimensions: { x: undefined, y: undefined, z: undefined },
-          lowerDomainBounds: { x: undefined, y: undefined, z: undefined },
-          upperDomainBounds: { x: undefined, y: undefined, z: undefined },
-        }
-      })
-    }
 
     if (prevProps.metaDataStringifiedJSON !== this.props.metaDataStringifiedJSON && this.props.metaDataStringifiedJSON !== '') {
       const metaData = this.props.metaDataStringifiedJSON ? handleReceivedJSON(this.props.metaDataStringifiedJSON) : undefined
@@ -202,25 +192,24 @@ class PrepareUploadedData extends Component {
 
   upload() {
     this.setState({ uploadButtonIsClicked: true });
-
+    const { gridSystem } = this.state.metaData;
     const { translationTarget, translationObserver, activeTfFilePath } = this.state;
     const { dimensions, variable, lowerDomainBounds, upperDomainBounds, rSquared } = this.state.data;
 
     let payload = `\'
       return {
         ItemName="${this.state.itemName || this.getDefaultItemName()}",
-        GridType="${this.state.gridType}",
+        GridType="${this.state.metaData.gridType}",
         Translation={
           Type="${KEY_SPICE_TRANSLATION}",
           Target="${translationTarget}",
-          Observer="${translationObserver}",
-          }
+          Observer="${translationObserver}"
         },
         Task={
-          Dimensions={${dimensions.x}, ${dimensions.y}, ${dimensions.z}}, 
+          Dimensions={${dimensions[gridSystem[0]]}, ${dimensions[gridSystem[1]]}, ${dimensions[gridSystem[2]]}}, 
           Variable="${variable.toLowerCase()}",
-          LowerDomainBound={${lowerDomainBounds.r}, ${lowerDomainBounds.theta}, ${lowerDomainBounds.phi}}, 
-          UpperDomainBound={${upperDomainBounds.r}, ${upperDomainBounds.theta}, ${upperDomainBounds.phi}}, 
+          LowerDomainBound={${lowerDomainBounds[gridSystem[0]]}, ${lowerDomainBounds[gridSystem[1]]}, ${lowerDomainBounds[gridSystem[2]]}}, 
+          UpperDomainBound={${upperDomainBounds[gridSystem[0]]}, ${upperDomainBounds[gridSystem[1]]}, ${upperDomainBounds[gridSystem[2]]}}, 
           FactorRSquared="${rSquared.toString()}",          
         },
         Scale=${this.state.scale},
@@ -231,6 +220,8 @@ class PrepareUploadedData extends Component {
     payload = removeLineBreakCharacters(payload);
 
     const payloadScript = UploadDataItemScript.replace(ValuePlaceholder, payload);
+    console.log(payloadScript);
+
     DataManager.runScript(payloadScript);
   }
 

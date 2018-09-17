@@ -101,7 +101,6 @@ const double DefaultSecondsAfter = 24 * 60;
 const double DefaultSecondsBefore = 24 * 60;
 const float sunRadiusScale = 695508000;
 
-const bool guiHidden = false;
 } // namespace
 
 namespace
@@ -285,13 +284,12 @@ void Loader::loadDataItem(const std::string &absPathToItem)
                              "transferfunction.txt";
 
     renderableDictionary.setValue("Type", KeyRenderableType);
+    renderableDictionary.setValue<ghoul::Dictionary>(KeyTransform, transformDictionary);
     renderableDictionary.setValue("SourceDirectory", sourceDir);
     renderableDictionary.setValue("TransferFunction", tfFilePath);
 
     std::initializer_list<std::pair<std::string, ghoul::any>> gui = {
-        std::make_pair("Path", volumesGuiPathKey),
-        std::make_pair("Hidden", guiHidden),
-    };
+        std::make_pair("Path", volumesGuiPathKey)};
     ghoul::Dictionary guiDictionary(gui);
 
     std::initializer_list<std::pair<std::string, ghoul::any>> completeList = {
@@ -300,12 +298,13 @@ void Loader::loadDataItem(const std::string &absPathToItem)
         std::make_pair("Renderable", renderableDictionary),
         std::make_pair("GUI", guiDictionary)};
 
-    LINFO("Before setting transformDictionary to completeDictionary");
     ghoul::Dictionary completeDictionary(completeList);
-    completeDictionary.setValue<ghoul::Dictionary>(KeyTransform, transformDictionary);
-    LINFO("Before setting transformDictionary to completeDictionary");
-    initializeNode(completeDictionary);
+    ghoul::DictionaryLuaFormatter formatter;
+    std::string completeDictString = formatter.format(completeDictionary);
+    LINFO(completeDictString);
 
+    // completeDictionary.setValue<ghoul::Dictionary>(KeyTransform, transformDictionary);
+    // initializeNode(completeDictionary);
     goToFirstTimeStep(absPathToItem);
 }
 
@@ -456,7 +455,6 @@ void Loader::getVolumeMetaData()
 
 void Loader::processCurrentlySelectedUploadData(const std::string &dictionaryString)
 {
-    LINFO(dictionaryString);
     _currentVolumeConversionDictionary = ghoul::lua::loadDictionaryFromString(dictionaryString);
 
     TestResult result;
@@ -498,10 +496,6 @@ void Loader::processCurrentlySelectedUploadData(const std::string &dictionaryStr
                 throw ghoul::RuntimeError("Must provide Translation table for volume conversion.");
             }
 
-            // Quick fix to make formatter handle nestled dvec3 type correctly
-            glm::dvec3 position = translationDictionary.value<glm::dvec3>(KeyPosition);
-            translationDictionary.setValue<glm::dvec3>(KeyPosition, position);
-
             // Read and create Scale Dictionary
             float scale = _currentVolumeConversionDictionary.value<float>(KeyScale) * sunRadiusScale;
             ghoul::Dictionary scaleDictionary;
@@ -527,7 +521,6 @@ void Loader::processCurrentlySelectedUploadData(const std::string &dictionaryStr
             ghoul::Dictionary stateDict(stateList);
             ghoul::DictionaryLuaFormatter formatter;
             std::string stateString = formatter.format(stateDict);
-            LINFO(stateString);
             std::fstream stateStream(absPath(itemPathBase + "/" + itemName + ".state"), std::ios::out);
             if (!stateStream)
             {
@@ -573,9 +566,6 @@ void Loader::processCurrentlySelectedUploadData(const std::string &dictionaryStr
             {
                 _volumeConversionProgress = FLT_MIN;
                 auto selectedFile = File(file);
-                LDEBUG("raw path = " + file);
-                LDEBUG("abs path = " + absPath(file));
-                LDEBUG("file handle path = " + selectedFile.path());
                 const std::string outputBasePath = d.path() + "/" + selectedFile.filename();
 
                 const std::string rawVolumeOutput = outputBasePath + ".rawvolume";
