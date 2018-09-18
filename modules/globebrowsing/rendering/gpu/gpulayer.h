@@ -25,9 +25,6 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER___H__
 
-#include <modules/globebrowsing/rendering/gpu/gpuchunktilepile.h>
-#include <modules/globebrowsing/rendering/gpu/gpulayeradjustment.h>
-#include <modules/globebrowsing/rendering/gpu/gpulayerrendersettings.h>
 #include <openspace/util/gpudata.h>
 #include <string>
 
@@ -43,14 +40,12 @@ struct TileIndex;
  */
 class GPULayer {
 public:
-    virtual ~GPULayer() = default;
-
     /**
      * Sets the value of <code>Layer</code> to its corresponding
      * GPU struct. OBS! Users must ensure bind has been
      * called before setting using this method.
      */
-    virtual void setValue(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
+    void setValue(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
         const TileIndex& tileIndex, int pileSize);
 
     /**
@@ -58,24 +53,51 @@ public:
      * with nameBase within the provided shader program.
      * After this method has been called, users may invoke setValue.
      */
-    virtual void bind(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
+    void bind(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
         const std::string& nameBase, int pileSize);
 
     /**
     * Deactivates any <code>TextureUnit</code>s assigned by this object.
     * This method should be called after the OpenGL draw call.
     */
-    virtual void deactivate();
+    void deactivate();
+
+    bool isHeightLayer = false;
 
 private:
-    GPUChunkTilePile gpuChunkTilePile;
-    GPULayerRenderSettings gpuRenderSettings;
-    GPULayerAdjustment gpuLayerAdjustment;
+    //GPUChunkTilePile gpuChunkTilePile;
+    struct GPUChunkTile {
+        GPUTexture gpuTexture;
+        //GPUTileUvTransform gpuTileUvTransform;
+        GPUData<glm::vec2> gpuUvOffset;
+        GPUData<glm::vec2> gpuUvScale;
+
+    };
+    std::vector<GPUChunkTile> gpuChunkTiles;
+
+    //GPULayerRenderSettings gpuRenderSettings;
+    GPUData<float> gpuOpacity;
+    GPUData<float> gpuGamma;
+    GPUData<float> gpuMultiplier;
+    GPUData<float> gpuOffset;
+
+    // Optional
+    GPUData<float> gpuValueBlending;
+
+    //GPULayerAdjustment gpuLayerAdjustment;
+    GPUData<glm::vec3> gpuChromaKeyColor;
+    GPUData<float> gpuChromaKeyTolerance;
+
 
     GPUData<glm::ivec2> paddingStartOffset;
     GPUData<glm::ivec2> paddingSizeDifference;
+
     // Adjustment layer stuff
     GPUData<glm::vec3> gpuColor;
+
+    //GPUTileDepthTransform _gpuDepthTransform;
+    GPUData<float> _gpuDepthOffset;
+    GPUData<float> _gpuDepthScale;
 };
 
 } // namespace openspace::globebrowsing

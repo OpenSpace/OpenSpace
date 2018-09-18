@@ -26,23 +26,20 @@
 
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
-#include <modules/globebrowsing/rendering/gpu/gpuheightlayer.h>
 #include <modules/globebrowsing/rendering/gpu/gpulayer.h>
 
 namespace openspace::globebrowsing {
 
-GPULayerGroup::~GPULayerGroup() {} // NOLINT
-
 void GPULayerGroup::setValue(ghoul::opengl::ProgramObject* programObject,
                              const LayerGroup& layerGroup, const TileIndex& tileIndex)
 {
-    auto& activeLayers = layerGroup.activeLayers();
+    const std::vector<std::shared_ptr<Layer>>& activeLayers = layerGroup.activeLayers();
     ghoul_assert(
         activeLayers.size() == _gpuActiveLayers.size(),
         "GPU and CPU active layers must have same size!"
     );
     for (unsigned int i = 0; i < activeLayers.size(); ++i) {
-        _gpuActiveLayers[i]->setValue(
+        _gpuActiveLayers[i].setValue(
             programObject,
             *activeLayers[i],
             tileIndex,
@@ -59,11 +56,11 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject* programObject,
     _gpuActiveLayers.resize(activeLayers.size());
     const int pileSize = layerGroup.pileSize();
     for (size_t i = 0; i < _gpuActiveLayers.size(); ++i) {
-        // should maybe a proper GPULayer factory
-        _gpuActiveLayers[i] = (category == layergroupid::GroupID::HeightLayers) ?
-            std::make_unique<GPUHeightLayer>() :
-            std::make_unique<GPULayer>();
-        _gpuActiveLayers[i]->bind(
+        if (category == layergroupid::GroupID::HeightLayers) {
+            _gpuActiveLayers[i].isHeightLayer = true;
+        }
+
+        _gpuActiveLayers[i].bind(
             programObject,
             *activeLayers[i],
             nameBase + "[" + std::to_string(i) + "].",
@@ -73,8 +70,8 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject* programObject,
 }
 
 void GPULayerGroup::deactivate() {
-    for (std::unique_ptr<GPULayer>& l : _gpuActiveLayers) {
-        l->deactivate();
+    for (GPULayer& l : _gpuActiveLayers) {
+        l.deactivate();
     }
 }
 

@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERGROUP___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERGROUP___H__
 
+#include <modules/globebrowsing/rendering/gpu/gpulayer.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -48,14 +49,12 @@ struct TileIndex;
  */
 class GPULayerGroup {
 public:
-    virtual ~GPULayerGroup();
-
     /**
      * Sets the value of <code>LayerGroup</code> to its corresponding
      * GPU struct. OBS! Users must ensure bind has been
      * called before setting using this method.
      */
-    virtual void setValue(ghoul::opengl::ProgramObject* programObject,
+    void setValue(ghoul::opengl::ProgramObject* programObject,
         const LayerGroup& layerGroup, const TileIndex& tileIndex);
 
     /**
@@ -63,17 +62,17 @@ public:
      * with nameBase within the provided shader program.
      * After this method has been called, users may invoke setValue.
      */
-    virtual void bind(ghoul::opengl::ProgramObject* programObject,
+    void bind(ghoul::opengl::ProgramObject* programObject,
         const LayerGroup& layerGroup, const std::string& nameBase, int category);
 
     /**
     * Deactivates any <code>TextureUnit</code>s assigned by this object.
     * This method should be called after the OpenGL draw call.
     */
-    virtual void deactivate();
+    void deactivate();
 
 private:
-    std::vector<std::unique_ptr<GPULayer>> _gpuActiveLayers;
+    std::vector<GPULayer> _gpuActiveLayers;
 };
 
 } // namespace openspace::globebrowsing

@@ -65,16 +65,8 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lruthreadpool.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lruthreadpool.inl
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuchunktile.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuchunktilepile.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuheightlayer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayeradjustment.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayergroup.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayermanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayerrendersettings.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gputiledepthtransform.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gputileuvtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layeradjustment.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layergroup.h
@@ -142,16 +134,8 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/timequantizer.cpp
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuchunktile.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuchunktilepile.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuheightlayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayeradjustment.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayergroup.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayermanager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayerrendersettings.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gputiledepthtransform.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gputileuvtransform.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layeradjustment.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layergroup.cpp

@@ -31,10 +31,10 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <modules/globebrowsing/rendering/gpu/gpulayermanager.h>
 #include <modules/globebrowsing/meshes/skirtedgrid.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <modules/globebrowsing/rendering/gpu/gpulayer.h>
 
 namespace openspace::globebrowsing {
 
@@ -56,6 +56,7 @@ namespace openspace::globebrowsing {
     class LayerManager;
     class LayerShaderManager;
     class RenderableGlobe;
+    class GPULayerGroup;
 
 class PointGlobe;
 class LayerManager;
@@ -251,21 +252,25 @@ private:
         std::unique_ptr<ghoul::opengl::ProgramObject> program;
         bool updatedSinceLastCall = false;
         UniformCache(skirtLength, minLatLon, lonLatScalingFactor) uniformCache;
-    } _globalProgram;
+
+        std::vector<std::unique_ptr<GPULayerGroup>> gpuLayerGroups;
+    } _globalRenderer;
 
     struct {
         std::unique_ptr<ghoul::opengl::ProgramObject> program;
         bool updatedSinceLastCall = false;
         UniformCache(skirtLength, p01, p11, p00, p10, patchNormalModelSpace, 
             patchNormalCameraSpace) uniformCache;
-    } _localProgram;
+
+        std::vector<std::unique_ptr<GPULayerGroup>> gpuLayerGroups;
+    } _localRenderer;
 
 
 
 
     // Layered texture uniforms are chached in the uniform ID handles.
-    GPULayerManager _globalGpuLayerManager;
-    GPULayerManager _localGpuLayerManager;
+    //GPULayerManager _globalGpuLayerManager;
+    //GPULayerManager _localGpuLayerManager;
 
     bool _shadersNeedRecompilation = true;
     bool _lodScaleFactorDirty = true;
