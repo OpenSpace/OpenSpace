@@ -140,12 +140,6 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CollectStatsInfo = {
-        "CollectStats",
-        "Collect stats",
-        "" // @TODO Missing documentation
-    };
-
     constexpr openspace::properties::Property::PropertyInfo LimitLevelInfo = {
         "LimitLevelByAvailableData",
         "Limit level by available data",
@@ -224,7 +218,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty(HorizonCullingInfo, true),
         BoolProperty(LevelProjectedAreaInfo, false),
         BoolProperty(ResetTileProviderInfo, false),
-        BoolProperty(CollectStatsInfo, false),
         BoolProperty(LimitLevelInfo, true),
         IntProperty(ModelSpaceRenderingInfo, 10, 1, 22)
     })
@@ -261,8 +254,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 
     // Read the radii in to its own dictionary
     if (dictionary.hasKeyAndValue<glm::dvec3>(keyRadii)) {
-        const glm::dvec3 radii = dictionary.value<glm::vec3>(keyRadii);
-        _ellipsoid = Ellipsoid(radii);
+        _ellipsoid = Ellipsoid(dictionary.value<glm::vec3>(keyRadii));
         setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
     }
     else if (dictionary.hasKeyAndValue<double>(keyRadii)) {
@@ -281,7 +273,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         throw ghoul::RuntimeError(std::string(keyLayers) + " must be specified");
     }
 
-    //_layerManager = std::make_shared<LayerManager>(layersDictionary);
     _layerManager.initialize(layersDictionary);
 
     addProperty(_generalProperties.atmosphereEnabled);
@@ -305,7 +296,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         _debugProperties.levelByProjectedAreaElseDistance
     );
     _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
-    _debugPropertyOwner.addProperty(_debugProperties.collectStats);
     _debugPropertyOwner.addProperty(_debugProperties.limitLevelByAvailableData);
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
 
@@ -325,7 +315,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 
     addPropertySubOwner(_debugPropertyOwner);
     addPropertySubOwner(_layerManager);
-    //addPropertySubOwner(_pointGlobe.get());
 
     //================================================================
     //======== Reads Shadow (Eclipses) Entries in mod file ===========
@@ -409,7 +398,7 @@ void RenderableGlobe::initializeGL() {
     recompileShaders();
 }
 
-void RenderableGlobe::deinitializeGL() {
+void RenderableGlobe::deinitialize() {
     _layerManager.deinitialize();
 }
 
@@ -418,23 +407,8 @@ bool RenderableGlobe::isReady() const {
 }
 
 void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask) {
-    bool statsEnabled = _debugProperties.collectStats;
-#ifdef DEBUG_GLOBEBROWSING_STATSRECORD
-    _chunkedLodGlobe->stats.setEnabled(statsEnabled);
-#else // DEBUG_GLOBEBROWSING_STATSRECORD
-    if (statsEnabled) {
-        LWARNINGC(
-            "RenderableGlobe",
-            "Stats collection was enabled, but ChunkedLodGlobe compiled without support"
-        );
-        _debugProperties.collectStats = false;
-    }
-#endif // DEBUG_GLOBEBROWSING_STATSRECORD
-
     if (_enabled) {
         if (_debugProperties.saveOrThrowCamera) {
-            _debugProperties.saveOrThrowCamera = false;
-
             if (!_savedCamera) {
                 // save camera
                 _savedCamera = std::make_unique<Camera>(data.camera);
@@ -442,6 +416,8 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
             else { // throw camera
                 _savedCamera = nullptr;
             }
+         
+            _debugProperties.saveOrThrowCamera = false;
         }
 
         const double distanceToCamera = distance(
@@ -451,10 +427,11 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 
         // This distance will be enough to render the globe as one pixel if the field of
         // view is 'fov' radians and the screen resolution is 'res' pixels.
-        const double fov = 2 * glm::pi<double>() / 6; // 60 degrees
-        const int res = 2880;
-
-        const double distance = res * boundingSphere() / tan(fov / 2);
+        //constexpr double fov = 2 * glm::pi<double>() / 6; // 60 degrees
+        //constexpr double tfov = tan(fov / 2.0); // doesn't work unfortunately
+        const double tfov = 0.5773502691896257;
+        constexpr int res = 2880;
+        const double distance = res * boundingSphere() / tfov;
 
         if (distanceToCamera < distance) {
             renderChunks(data, rendererTask);
@@ -466,10 +443,19 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 }
 
 void RenderableGlobe::update(const UpdateData& data) {
+    if (_shadersNeedRecompilation) {
+        LayerShaderManager::LayerShaderPreprocessingData preprocessingData =
+            LayerShaderManager::LayerShaderPreprocessingData::get(*this);
+        _globalLayerShaderManager.recompileShaderProgram(preprocessingData);
+        _localLayerShaderManager.recompileShaderProgram(preprocessingData);
+
+        _shadersNeedRecompilation = false;
+    }
+
+
     setBoundingSphere(static_cast<float>(
         _ellipsoid.maximumRadius() * data.modelTransform.scale
-        ));
-
+    ));
 
     glm::dmat4 translation =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation);
@@ -486,13 +472,49 @@ void RenderableGlobe::update(const UpdateData& data) {
         _debugProperties.resetTileProviders = false;
     }
     _layerManager.update();
-    setBoundingSphere(static_cast<float>(
-        _ellipsoid.maximumRadius() * data.modelTransform.scale
-        ));
 }
 
-glm::dvec3 RenderableGlobe::projectOnEllipsoid(glm::dvec3 position) {
-    return _ellipsoid.geodeticSurfaceProjection(position);
+void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
+    _leftRoot->updateChunkTree(data);
+    _rightRoot->updateChunkTree(data);
+
+    // Calculate the MVP matrix
+    const glm::dmat4 viewTransform = glm::dmat4(data.camera.combinedViewMatrix());
+    const glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
+        viewTransform;
+    const glm::dmat4 mvp = vp * _cachedModelTransform;
+
+    int count = 0;
+
+    auto renderJob = [this, &data, &mvp, &count](const ChunkNode& chunkNode) {
+        const Chunk& chunk = chunkNode.chunk();
+        if (chunkNode.isLeaf() && chunk.isVisible()) {
+            if (chunk.tileIndex().level < _debugProperties.modelSpaceRenderingCutoffLevel) {
+                renderChunkGlobally(chunk, data);
+            }
+            else {
+                renderChunkLocally(chunk, data);
+            }
+
+            ++count;
+
+            debugRenderChunk(chunk, mvp);
+        }
+    };
+
+    _leftRoot->breadthFirst(renderJob);
+    _rightRoot->breadthFirst(renderJob);
+
+    LINFOC(identifier(), std::to_string(count));
+}
+
+void RenderableGlobe::recompileShaders() {
+    LayerShaderManager::LayerShaderPreprocessingData preprocessingData =
+        LayerShaderManager::LayerShaderPreprocessingData::get(*this);
+    _globalLayerShaderManager.recompileShaderProgram(preprocessingData);
+    _localLayerShaderManager.recompileShaderProgram(preprocessingData);
+
+    _shadersNeedRecompilation = false;
 }
 
 SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
@@ -526,18 +548,14 @@ SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
 
 
 
-bool RenderableGlobe::testIfCullable(const Chunk& chunk,
-    const RenderData& renderData) const
+bool RenderableGlobe::testIfCullable(const Chunk& chunk, 
+                                     const RenderData& renderData) const
 {
-    if (_debugProperties.performHorizonCulling &&
-        isCullableByHorizon(chunk, renderData)) {
-        return true;
-    }
-    if (_debugProperties.performFrustumCulling &&
-        isCullableByFrustum(chunk, renderData)) {
-        return true;
-    }
-    return false;
+    const bool phc = _debugProperties.performHorizonCulling;
+    const bool pfc = _debugProperties.performFrustumCulling;
+
+    return (phc && isCullableByHorizon(chunk, renderData)) ||
+           (pfc && isCullableByFrustum(chunk, renderData));
 }
 
 const ChunkNode& RenderableGlobe::findChunkNode(const Geodetic2& location) const {
@@ -551,29 +569,24 @@ const ChunkNode& RenderableGlobe::findChunkNode(const Geodetic2& location) const
         _rightRoot->find(location);
 }
 
-int RenderableGlobe::desiredLevel(const Chunk& chunk,
-    const RenderData& renderData) const
+int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderData) const
 {
-    int desiredLevel = 0;
-    if (_debugProperties.levelByProjectedAreaElseDistance) {
-        desiredLevel = desiredLevelByProjectedArea(chunk, renderData);
-    }
-    else {
-        desiredLevel = desiredLevelByDistance(chunk, renderData);
-    }
-
-    int levelByAvailableData = desiredLevelByAvailableTileData(
+    const int desiredLevel = _debugProperties.levelByProjectedAreaElseDistance ?
+        desiredLevelByProjectedArea(chunk, renderData) :
+        desiredLevelByDistance(chunk, renderData);
+    const int levelByAvailableData = desiredLevelByAvailableTileData(
         chunk,
         renderData
     );
-    if (levelByAvailableData != UnknownDesiredLevel &&
-        _debugProperties.limitLevelByAvailableData)
-    {
-        desiredLevel = glm::min(desiredLevel, levelByAvailableData);
-    }
 
-    desiredLevel = glm::clamp(desiredLevel, MinSplitDepth, MaxSplitDepth);
-    return desiredLevel;
+    const bool llbad = _debugProperties.limitLevelByAvailableData;
+    if (levelByAvailableData != UnknownDesiredLevel && llbad) {
+        const int l = glm::min(desiredLevel, levelByAvailableData);
+        return glm::clamp(l, MinSplitDepth, MaxSplitDepth);
+    }
+    else {
+        return glm::clamp(desiredLevel, MinSplitDepth, MaxSplitDepth);
+    }
 }
 
 float RenderableGlobe::getHeight(const glm::dvec3& position) const {
@@ -704,88 +717,6 @@ void RenderableGlobe::notifyShaderRecompilation() {
     _shadersNeedRecompilation = true;
 }
 
-void RenderableGlobe::recompileShaders() {
-    LayerShaderManager::LayerShaderPreprocessingData preprocessingData =
-        LayerShaderManager::LayerShaderPreprocessingData::get(*this);
-    _globalLayerShaderManager.recompileShaderProgram(preprocessingData);
-    _localLayerShaderManager.recompileShaderProgram(preprocessingData);
-
-    _shadersNeedRecompilation = false;
-}
-
-void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
-#ifdef DEBUG_GLOBEBROWSING_STATSRECORD
-    stats.startNewRecord();
-#endif // DEBUG_GLOBEBROWSING_STATSRECORD
-    if (_shadersNeedRecompilation) {
-
-        LayerShaderManager::LayerShaderPreprocessingData preprocessingData =
-            LayerShaderManager::LayerShaderPreprocessingData::get(*this);
-        _globalLayerShaderManager.recompileShaderProgram(preprocessingData);
-        _localLayerShaderManager.recompileShaderProgram(preprocessingData);
-
-        _shadersNeedRecompilation = false;
-    }
-
-#ifdef DEBUG_GLOBEBROWSING_STATSRECORD
-    auto duration = std::chrono::system_clock::now().time_since_epoch();
-    auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-    stats.i["time"] = millis;
-#endif // DEBUG_GLOBEBROWSING_STATSRECORD
-
-    _leftRoot->updateChunkTree(data);
-    _rightRoot->updateChunkTree(data);
-
-    // Calculate the MVP matrix
-    const glm::dmat4 viewTransform = glm::dmat4(data.camera.combinedViewMatrix());
-    const glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
-        viewTransform;
-    const glm::dmat4 mvp = vp * _cachedModelTransform;
-
-    int count = 0;
-
-    // Render function
-    auto renderJob = [this, &data, &mvp, &count](const ChunkNode& chunkNode) {
-#ifdef DEBUG_GLOBEBROWSING_STATSRECORD
-        stats.i["chunks nodes"]++;
-#endif // DEBUG_GLOBEBROWSING_STATSRECORD
-        const Chunk& chunk = chunkNode.chunk();
-        if (chunkNode.isLeaf()) {
-#ifdef DEBUG_GLOBEBROWSING_STATSRECORD
-            stats.i["leafs chunk nodes"]++;
-#endif // DEBUG_GLOBEBROWSING_STATSRECORD
-
-            if (chunk.isVisible()) {
-#ifdef DEBUG_GLOBEBROWSING_STATSRECORD
-                stats.i["rendered chunks"]++;
-#endif // DEBUG_GLOBEBROWSING_STATSRECORD
-
-                if (chunk.tileIndex().level < _debugProperties.modelSpaceRenderingCutoffLevel) {
-                    renderChunkGlobally(chunk, data);
-                }
-                else {
-                    renderChunkLocally(chunk, data);
-                }
-
-                ++count;
-
-                debugRenderChunk(chunk, mvp);
-            }
-        }
-    };
-
-    _leftRoot->breadthFirst(renderJob);
-    _rightRoot->breadthFirst(renderJob);
-
-    LINFOC(identifier(), std::to_string(count));
-
-#ifdef DEBUG_GLOBEBROWSING_STATSRECORD
-    auto duration2 = std::chrono::system_clock::now().time_since_epoch();
-    auto ms2 = std::chrono::duration_cast<std::chrono::milliseconds>(duration2).count();
-    stats.i["chunk globe render time"] = ms2 - millis;
-#endif // DEBUG_GLOBEBROWSING_STATSRECORD
-}
-
 void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const {
     if (_debugProperties.showChunkBounds || _debugProperties.showChunkAABB) {
         const std::vector<glm::dvec4>& modelSpaceCorners =
@@ -867,10 +798,6 @@ ghoul::opengl::ProgramObject* RenderableGlobe::getActivatedProgramWithTileData(
             )
             )
     );
-
-    //programObject->setUniform("skirtLength",
-    //    glm::min(static_cast<float>(chunk.surfacePatch().halfSize().lat * 1000000),
-    //        8700.0f));
 
     programObject->setUniform("xSegments", _grid.xSegments());
 

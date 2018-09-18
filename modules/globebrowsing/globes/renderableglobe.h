@@ -66,42 +66,22 @@ class LayerManager;
  */
 class RenderableGlobe : public Renderable {
 public:
-    // Shadow structure
-    struct ShadowRenderingStruct {
-        double xu;
-        double xp;
-        double rs;
-        double rc;
-        glm::dvec3 sourceCasterVec;
-        glm::dvec3 casterPositionVec;
-        bool isShadowing;
-    };
+
 
     RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe() = default;
 
     void initializeGL() override;
-    void deinitializeGL() override;
+    void deinitialize() override;
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    // Getters that perform calculations
-    glm::dvec3 projectOnEllipsoid(glm::dvec3 position);
-
-
     virtual SurfacePositionHandle calculateSurfacePositionHandle(
                                        const glm::dvec3& targetModelSpace) const override;
 
 //private:
-    Ellipsoid _ellipsoid;
-    LayerManager _layerManager;
-    std::unique_ptr<Camera> _savedCamera;
-
-    glm::dmat4 _cachedModelTransform;
-    glm::dmat4 _cachedInverseModelTransform;
-
     // Properties
     struct {
         properties::BoolProperty saveOrThrowCamera;
@@ -114,7 +94,6 @@ public:
         properties::BoolProperty performHorizonCulling;
         properties::BoolProperty levelByProjectedAreaElseDistance;
         properties::BoolProperty resetTileProviders;
-        properties::BoolProperty collectStats;
         properties::BoolProperty limitLevelByAvailableData;
         properties::IntProperty modelSpaceRenderingCutoffLevel;
     } _debugProperties;
@@ -133,19 +112,18 @@ public:
     properties::PropertyOwner _debugPropertyOwner;
 
 
-    void renderChunks(const RenderData& data, RendererTasks& rendererTask);
 
     /**
- * Traverse the chunk tree and find the highest level chunk node.
- *
- * \param location is given in geodetic coordinates and must be in the range
- * latitude [-90, 90] and longitude [-180, 180]. In other words, it must be a
- * position defined on the globe in georeferenced coordinates.
- */
+     * Traverse the chunk tree and find the highest level chunk node.
+     *
+     * \param location is given in geodetic coordinates and must be in the range
+     * latitude [-90, 90] and longitude [-180, 180]. In other words, it must be a
+     * position defined on the globe in georeferenced coordinates.
+     */
     const ChunkNode& findChunkNode(const Geodetic2& location) const;
 
     /**
-     * Test if a specific chunk can saf;ely be culled without affecting the rendered
+     * Test if a specific chunk can safely be culled without affecting the rendered
      * image.
      *
      * Goes through all available <code>ChunkCuller</code>s and check if any of them
@@ -184,32 +162,12 @@ public:
      * properties that the shader depends on need to be properly synced.
      */
     void notifyShaderRecompilation();
+
     /**
      * Directly recompile the shaders of the renderer.
      */
     void recompileShaders();
 
-    constexpr static const int MinSplitDepth = 2;
-    constexpr static const int MaxSplitDepth = 22;  // increase? (abock)
-
-    void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const;
-
-    // Covers all negative longitudes
-    std::unique_ptr<ChunkNode> _leftRoot;
-
-    // Covers all positive longitudes
-    std::unique_ptr<ChunkNode> _rightRoot;
-
-    bool isCullableByFrustum(const Chunk& chunk, const RenderData& renderData) const;
-    bool isCullableByHorizon(const Chunk& chunk, const RenderData& renderData) const;
-
-
-    int desiredLevelByDistance(const Chunk& chunk, const RenderData& data) const;
-    int desiredLevelByProjectedArea(const Chunk& chunk, const RenderData& data) const;
-    int desiredLevelByAvailableTileData(const Chunk& chunk, const RenderData& data) const;
-
-
-    bool _shadersNeedRecompilation = true;
 
 
     const LayerManager& layerManager() const;
@@ -217,19 +175,42 @@ public:
     const Ellipsoid& ellipsoid() const;
     const glm::dmat4& modelTransform() const;
     Camera* savedCamera() const;
-    double interactionDepthBelowEllipsoid();
 
 
 
-    // ChunkRenderer
+private:
+    constexpr static const int MinSplitDepth = 2;
+    constexpr static const int MaxSplitDepth = 22;  // increase? (abock)
+
+    // Shadow structure
+    struct ShadowRenderingStruct {
+        double xu;
+        double xp;
+        double rs;
+        double rc;
+        glm::dvec3 sourceCasterVec;
+        glm::dvec3 casterPositionVec;
+        bool isShadowing;
+    };
+
+    void renderChunks(const RenderData& data, RendererTasks& rendererTask);
+    void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const;
+
+    bool isCullableByFrustum(const Chunk& chunk, const RenderData& renderData) const;
+    bool isCullableByHorizon(const Chunk& chunk, const RenderData& renderData) const;
+
+    int desiredLevelByDistance(const Chunk& chunk, const RenderData& data) const;
+    int desiredLevelByProjectedArea(const Chunk& chunk, const RenderData& data) const;
+    int desiredLevelByAvailableTileData(const Chunk& chunk, const RenderData& data) const;
+
     /**
- * Chunks can be rendered either globally or locally. Global rendering is performed
- * in the model space of the globe. With global rendering, the vertex positions
- * of a chunk are calculated in the vertex shader by transforming the geodetic
- * coordinates of the chunk to model space coordinates. We can only achieve floating
- * point precision by doing this which means that the camera too close to a global
- * tile will lead to jagging. We only render global chunks for lower chunk levels.
- */
+     * Chunks can be rendered either globally or locally. Global rendering is performed
+     * in the model space of the globe. With global rendering, the vertex positions
+     * of a chunk are calculated in the vertex shader by transforming the geodetic
+     * coordinates of the chunk to model space coordinates. We can only achieve floating
+     * point precision by doing this which means that the camera too close to a global
+     * tile will lead to jagging. We only render global chunks for lower chunk levels.
+     */
     void renderChunkGlobally(const Chunk& chunk, const RenderData& data);
 
     /**
@@ -255,7 +236,25 @@ public:
     void setCommonUniforms(ghoul::opengl::ProgramObject& programObject,
         const Chunk& chunk, const RenderData& data);
 
+
+
+
+
     SkirtedGrid _grid;
+
+    Ellipsoid _ellipsoid;
+    LayerManager _layerManager;
+    std::unique_ptr<Camera> _savedCamera;
+
+    glm::dmat4 _cachedModelTransform;
+    glm::dmat4 _cachedInverseModelTransform;
+
+    // Covers all negative longitudes
+    std::unique_ptr<ChunkNode> _leftRoot;
+
+    // Covers all positive longitudes
+    std::unique_ptr<ChunkNode> _rightRoot;
+
 
 
     // Two different shader programs. One for global and one for local rendering.
@@ -265,6 +264,8 @@ public:
     // Layered texture uniforms are chached in the uniform ID handles.
     GPULayerManager _globalGpuLayerManager;
     GPULayerManager _localGpuLayerManager;
+
+    bool _shadersNeedRecompilation = true;
 };
 
 } // namespace openspace::globebrowsing
