@@ -309,11 +309,10 @@ void mainInitFunc() {
         std::tm* nowTime = std::localtime(&now);
         char mbstr[128];
         strftime(mbstr, sizeof(mbstr), "%Y-%m-%d-%H-%M", nowTime);
-        screenshotPath += "/" + std::string(mbstr);
 
         FileSys.registerPathToken(
             "${SCREENSHOTS}",
-            absPath(screenshotPath),
+            absPath(screenshotPath + '/' + std::string(mbstr)),
             ghoul::filesystem::FileSystem::Override::Yes
         );
     }
