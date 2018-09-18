@@ -490,7 +490,7 @@ void RenderableGlobe::update(const UpdateData& data) {
         for (size_t i = 0; i < layerGroups.size(); ++i) {
             const std::string& nameBase = layergroupid::LAYER_GROUP_IDENTIFIERS[i];
             _globalRenderer.gpuLayerGroups[i]->bind(
-                _globalRenderer.program.get(),
+                *_globalRenderer.program,
                 *layerGroups[i],
                 nameBase,
                 static_cast<int>(i)
@@ -514,7 +514,7 @@ void RenderableGlobe::update(const UpdateData& data) {
         for (size_t i = 0; i < layerGroups.size(); ++i) {
             const std::string& nameBase = layergroupid::LAYER_GROUP_IDENTIFIERS[i];
             _localRenderer.gpuLayerGroups[i]->bind(
-                _localRenderer.program.get(),
+                *_localRenderer.program,
                 *layerGroups[i],
                 nameBase,
                 static_cast<int>(i)
@@ -661,19 +661,15 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     }
 
     int count = 0;
-    int countGlobal = 0;
-    int countLocal = 0;
 
     // Render chunks
-    auto renderJob = [this, &data, &mvp, &count, &countGlobal, &countLocal](const ChunkNode& chunkNode) {
+    auto renderJob = [this, &data, &mvp, &count](const ChunkNode& chunkNode) {
         const Chunk& chunk = chunkNode.chunk();
         if (chunkNode.isLeaf() && chunk.isVisible()) {
             if (chunk.tileIndex().level < _debugProperties.modelSpaceRenderingCutoffLevel) {
-                ++countGlobal;
                 renderChunkGlobally(chunk, data);
             }
             else {
-                ++countLocal;
                 renderChunkLocally(chunk, data);
             }
 
@@ -686,9 +682,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     _rightRoot->breadthFirst(renderJob);
 
     LINFOC(identifier(), "Count: " + std::to_string(count));
-    LINFOC(identifier(), "Local: " + std::to_string(countLocal));
-    LINFOC(identifier(), "Global: " + std::to_string(countGlobal));
-    LINFOC(identifier(), "=========");
 }
 
 void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& data) {
@@ -700,7 +693,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 
     const std::vector<std::shared_ptr<LayerGroup>>& layerGroups = _layerManager.layerGroups();
     for (size_t i = 0; i < layerGroups.size(); ++i) {
-        _globalRenderer.gpuLayerGroups[i]->setValue(&program, *layerGroups[i], tileIndex);
+        _globalRenderer.gpuLayerGroups[i]->setValue(program, *layerGroups[i], tileIndex);
     }
     //_globalGpuLayerManager.setValue(&program, _layerManager, tileIndex);
 
@@ -753,7 +746,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
     const std::vector<std::shared_ptr<LayerGroup>>& layerGroups = _layerManager.layerGroups();
     for (size_t i = 0; i < layerGroups.size(); ++i) {
-        _localRenderer.gpuLayerGroups[i]->setValue(&program, *layerGroups[i], tileIndex);
+        _localRenderer.gpuLayerGroups[i]->setValue(program, *layerGroups[i], tileIndex);
     }
 
     //_localGpuLayerManager.setValue(&program, _layerManager, tileIndex);

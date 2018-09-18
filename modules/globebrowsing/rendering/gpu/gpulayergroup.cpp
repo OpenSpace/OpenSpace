@@ -27,10 +27,12 @@
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/rendering/gpu/gpulayer.h>
+#include <modules/globebrowsing/rendering/layer/layer.h>
+#include <ghoul/opengl/texture.h>
 
 namespace openspace::globebrowsing {
 
-void GPULayerGroup::setValue(ghoul::opengl::ProgramObject* programObject,
+void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
                              const LayerGroup& layerGroup, const TileIndex& tileIndex)
 {
     const std::vector<std::shared_ptr<Layer>>& activeLayers = layerGroup.activeLayers();
@@ -39,16 +41,76 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject* programObject,
         "GPU and CPU active layers must have same size!"
     );
     for (unsigned int i = 0; i < activeLayers.size(); ++i) {
-        _gpuActiveLayers[i].setValue(
-            programObject,
-            *activeLayers[i],
-            tileIndex,
-            layerGroup.pileSize()
-        );
+        const GPULayer& gal = _gpuActiveLayers[i];
+        auto& galuc = gal.uniformCache;
+        const Layer& al = *activeLayers[i];
+
+        program.setUniform(galuc.opacity, al.renderSettings().opacity);
+        program.setUniform(galuc.gamma, al.renderSettings().gamma);
+        program.setUniform(galuc.multiplier, al.renderSettings().multiplier);
+        program.setUniform(galuc.offset, al.renderSettings().offset);
+
+        if (al.layerAdjustment().type() == layergroupid::AdjustmentTypeID::ChromaKey) {
+            program.setUniform(
+                galuc.chromaKeyColor,
+                al.layerAdjustment().chromaKeyColor()
+            );
+            program.setUniform(
+                galuc.chromaKeyTolerance,
+                al.layerAdjustment().chromaKeyTolerance()
+            );
+        }
+
+        switch (al.type()) {
+            // Intentional fall through. Same for all tile layers
+            case layergroupid::TypeID::DefaultTileLayer:
+            case layergroupid::TypeID::SingleImageTileLayer:
+            case layergroupid::TypeID::SizeReferenceTileLayer:
+            case layergroupid::TypeID::TemporalTileLayer:
+            case layergroupid::TypeID::TileIndexTileLayer:
+            case layergroupid::TypeID::ByIndexTileLayer:
+            case layergroupid::TypeID::ByLevelTileLayer: {
+                ChunkTilePile ctp = al.chunkTilePile(tileIndex, layerGroup.pileSize());
+                for (size_t j = 0; j < _gpuActiveLayers[i].gpuChunkTiles.size(); ++j) {
+                    GPULayer::GPUChunkTile& t = _gpuActiveLayers[i].gpuChunkTiles[j];
+                    const ChunkTile& ct = ctp[j];
+
+                    t.texUnit = std::make_unique<ghoul::opengl::TextureUnit>();
+                    t.texUnit->activate();
+                    if (ct.tile.texture()) {
+                        ct.tile.texture()->bind();
+                    }
+                    program.setUniform(t.uniformCache.texture, *t.texUnit);
+
+                    program.setUniform(t.uniformCache.uvOffset, ct.uvTransform.uvOffset);
+                    program.setUniform(t.uniformCache.uvScale, ct.uvTransform.uvScale);
+                }
+
+                program.setUniform(
+                    galuc.paddingStartOffset,
+                    al.tilePixelStartOffset()
+                );
+                program.setUniform(
+                    galuc.paddingSizeDifference,
+                    al.tilePixelSizeDifference()
+                );
+                break;
+            }
+            case layergroupid::TypeID::SolidColor:
+                program.setUniform(galuc.color, al.otherTypesProperties().color);
+                break;
+            default:
+                break;
+        }
+
+        if (gal.isHeightLayer) {
+            program.setUniform(galuc.depthOffset, al.depthTransform().depthOffset);
+            program.setUniform(galuc.depthScale, al.depthTransform().depthScale);
+        }
     }
 }
 
-void GPULayerGroup::bind(ghoul::opengl::ProgramObject* programObject,
+void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p,
                          const LayerGroup& layerGroup, const std::string& nameBase,
                          int category)
 {
@@ -56,22 +118,77 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject* programObject,
     _gpuActiveLayers.resize(activeLayers.size());
     const int pileSize = layerGroup.pileSize();
     for (size_t i = 0; i < _gpuActiveLayers.size(); ++i) {
+        GPULayer& gal = _gpuActiveLayers[i];
+        auto& galuc = gal.uniformCache;
+        const Layer& al = *activeLayers[i];
+        std::string name = nameBase + "[" + std::to_string(i) + "].";
+
         if (category == layergroupid::GroupID::HeightLayers) {
-            _gpuActiveLayers[i].isHeightLayer = true;
+            gal.isHeightLayer = true;
         }
 
-        _gpuActiveLayers[i].bind(
-            programObject,
-            *activeLayers[i],
-            nameBase + "[" + std::to_string(i) + "].",
-            pileSize
-        );
+        galuc.opacity = p.uniformLocation(name + "settings.opacity");
+        galuc.gamma = p.uniformLocation(name + "settings.gamma");
+        galuc.multiplier = p.uniformLocation(name + "settings.multiplier");
+        galuc.offset = p.uniformLocation(name + "settings.offset");
+
+        if (al.layerAdjustment().type() == layergroupid::AdjustmentTypeID::ChromaKey) {
+            galuc.chromaKeyColor = p.uniformLocation(
+                name + "adjustment.chromaKeyColor"
+            );
+            galuc.chromaKeyTolerance = p.uniformLocation(
+                name + "adjustment.chromaKeyTolerance"
+            );
+        }
+
+        switch (al.type()) {
+            // Intentional fall through. Same for all tile layers
+            case layergroupid::TypeID::DefaultTileLayer:
+            case layergroupid::TypeID::SingleImageTileLayer:
+            case layergroupid::TypeID::SizeReferenceTileLayer:
+            case layergroupid::TypeID::TemporalTileLayer:
+            case layergroupid::TypeID::TileIndexTileLayer:
+            case layergroupid::TypeID::ByIndexTileLayer:
+            case layergroupid::TypeID::ByLevelTileLayer: {
+                gal.gpuChunkTiles.resize(pileSize);
+                for (size_t j = 0; j < gal.gpuChunkTiles.size(); ++j) {
+                    GPULayer::GPUChunkTile& t = gal.gpuChunkTiles[j];
+                    auto& tuc = t.uniformCache;
+                    std::string n = name + "pile.chunkTile" + std::to_string(j) + ".";
+
+                    tuc.texture = p.uniformLocation(n + "textureSampler");
+                    tuc.uvOffset = p.uniformLocation(n + "uvTransform.uvOffset");
+                    tuc.uvScale = p.uniformLocation(n + "uvTransform.uvScale");
+                }
+
+                galuc.paddingStartOffset = p.uniformLocation(
+                    name + "padding.startOffset"
+                );
+                galuc.paddingSizeDifference = p.uniformLocation(
+                    name + "padding.sizeDifference"
+                );
+
+                break;
+            }
+            case layergroupid::TypeID::SolidColor:
+                galuc.color = p.uniformLocation(name + "color");
+                break;
+            default:
+                break;
+        }
+
+        if (gal.isHeightLayer) {
+            galuc.depthOffset = p.uniformLocation(name + "depthTransform.depthOffset");
+            galuc.depthScale = p.uniformLocation(name + "depthTransform.depthScale");
+        }
     }
 }
 
 void GPULayerGroup::deactivate() {
-    for (GPULayer& l : _gpuActiveLayers) {
-        l.deactivate();
+    for (GPULayer& gal : _gpuActiveLayers) {
+        for (GPULayer::GPUChunkTile& t : gal.gpuChunkTiles) {
+            t.texUnit = nullptr;
+        }
     }
 }
 

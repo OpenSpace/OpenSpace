@@ -34,7 +34,6 @@
 #include <modules/globebrowsing/meshes/skirtedgrid.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <modules/globebrowsing/rendering/gpu/gpulayer.h>
 
 namespace openspace::globebrowsing {
 

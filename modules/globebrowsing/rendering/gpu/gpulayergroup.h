@@ -25,7 +25,8 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERGROUP___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERGROUP___H__
 
-#include <modules/globebrowsing/rendering/gpu/gpulayer.h>
+#include <ghoul/opengl/textureunit.h>
+#include <ghoul/opengl/uniformcache.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -54,7 +55,7 @@ public:
      * GPU struct. OBS! Users must ensure bind has been
      * called before setting using this method.
      */
-    void setValue(ghoul::opengl::ProgramObject* programObject,
+    void setValue(ghoul::opengl::ProgramObject& programObject,
         const LayerGroup& layerGroup, const TileIndex& tileIndex);
 
     /**
@@ -62,7 +63,7 @@ public:
      * with nameBase within the provided shader program.
      * After this method has been called, users may invoke setValue.
      */
-    void bind(ghoul::opengl::ProgramObject* programObject,
+    void bind(ghoul::opengl::ProgramObject& programObject,
         const LayerGroup& layerGroup, const std::string& nameBase, int category);
 
     /**
@@ -72,6 +73,20 @@ public:
     void deactivate();
 
 private:
+    struct GPULayer {
+        struct GPUChunkTile {
+            std::unique_ptr<ghoul::opengl::TextureUnit> texUnit;
+            UniformCache(texture, uvOffset, uvScale) uniformCache;
+        };
+        std::vector<GPUChunkTile> gpuChunkTiles;
+
+        UniformCache(opacity, gamma, multiplier, offset, valueBlending, chromaKeyColor,
+            chromaKeyTolerance, paddingStartOffset, paddingSizeDifference, color,
+            depthOffset, depthScale) uniformCache;
+    
+        bool isHeightLayer = false;
+    };
+
     std::vector<GPULayer> _gpuActiveLayers;
 };
 
