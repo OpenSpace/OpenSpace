@@ -51,6 +51,12 @@
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/opengl/programobject.h>
+#include <modules/globebrowsing/chunk/chunk.h>
+#include <modules/globebrowsing/geometry/geodetic3.h>
+#include <modules/globebrowsing/globes/renderableglobe.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <openspace/util/updatestructures.h>
 
 namespace {
     constexpr const char* keyFrame = "Frame";
@@ -61,8 +67,10 @@ namespace {
     constexpr const char* keyShadowSource = "Source";
     constexpr const char* keyShadowCaster = "Caster";
     constexpr const double KM_TO_M = 1000.0;
+    const openspace::globebrowsing::AABB3 CullingFrustum(glm::vec3(-1, -1, 0), glm::vec3(1, 1, 1e35));
 
     constexpr const int DefaultSkirtedGridSegments = 64;
+    constexpr static const int UnknownDesiredLevel = -1;
 
     const openspace::globebrowsing::GeodeticPatch Coverage =
         openspace::globebrowsing::GeodeticPatch(0, 0, 90, 180);
@@ -234,7 +242,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _debugPropertyOwner({ "Debug" })
     , _leftRoot(std::make_unique<ChunkNode>(Chunk(*this, LeftHemisphereIndex)))
     , _rightRoot(std::make_unique<ChunkNode>(Chunk(*this, RightHemisphereIndex)))
-    , _frustumCuller(AABB3(glm::vec3(-1, -1, 0), glm::vec3(1, 1, 1e35)))
     , _globalLayerShaderManager(
         "GlobalChunkedLodPatch",
         "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_vs.glsl",
@@ -430,12 +437,12 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
         if (_debugProperties.saveOrThrowCamera) {
             _debugProperties.saveOrThrowCamera = false;
 
-            if (!savedCamera()) {
+            if (!_savedCamera) {
                 // save camera
-                setSaveCamera(std::make_shared<Camera>(data.camera));
+                _savedCamera = std::make_unique<Camera>(data.camera);
             }
             else { // throw camera
-                setSaveCamera(nullptr);
+                _savedCamera = nullptr;
             }
         }
 
@@ -462,7 +469,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 
 void RenderableGlobe::update(const UpdateData& data) {
     setBoundingSphere(static_cast<float>(
-        ellipsoid().maximumRadius() * data.modelTransform.scale
+        _ellipsoid.maximumRadius() * data.modelTransform.scale
         ));
 
 
@@ -482,42 +489,12 @@ void RenderableGlobe::update(const UpdateData& data) {
     }
     _layerManager->update();
     setBoundingSphere(static_cast<float>(
-        ellipsoid().maximumRadius() * data.modelTransform.scale
+        _ellipsoid.maximumRadius() * data.modelTransform.scale
         ));
 }
 
 glm::dvec3 RenderableGlobe::projectOnEllipsoid(glm::dvec3 position) {
     return _ellipsoid.geodeticSurfaceProjection(position);
-}
-
-LayerManager* RenderableGlobe::layerManager() const {
-    return _layerManager.get();
-}
-
-const Ellipsoid& RenderableGlobe::ellipsoid() const{
-    return _ellipsoid;
-}
-
-const glm::dmat4& RenderableGlobe::modelTransform() const{
-    return _cachedModelTransform;
-}
-
-const glm::dmat4& RenderableGlobe::inverseModelTransform() const{
-    return _cachedInverseModelTransform;
-}
-
-const RenderableGlobe::DebugProperties&
-    RenderableGlobe::debugProperties() const{
-    return _debugProperties;
-}
-
-const RenderableGlobe::GeneralProperties&
-    RenderableGlobe::generalProperties() const{
-    return _generalProperties;
-}
-
-const std::shared_ptr<const Camera> RenderableGlobe::savedCamera() const {
-    return _savedCamera;
 }
 
 SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
@@ -549,26 +526,17 @@ SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
     };
 }
 
-void RenderableGlobe::setSaveCamera(std::shared_ptr<Camera> camera) {
-    _savedCamera = std::move(camera);
-}
-
-
-
-
-
-
 
 
 bool RenderableGlobe::testIfCullable(const Chunk& chunk,
     const RenderData& renderData) const
 {
-    if (debugProperties().performHorizonCulling &&
-        _horizonCuller.isCullable(chunk, renderData)) {
+    if (_debugProperties.performHorizonCulling &&
+        isCullableByHorizon(chunk, renderData)) {
         return true;
     }
-    if (debugProperties().performFrustumCulling &&
-        _frustumCuller.isCullable(chunk, renderData)) {
+    if (_debugProperties.performFrustumCulling &&
+        isCullableByFrustum(chunk, renderData)) {
         return true;
     }
     return false;
@@ -589,19 +557,19 @@ int RenderableGlobe::desiredLevel(const Chunk& chunk,
     const RenderData& renderData) const
 {
     int desiredLevel = 0;
-    if (debugProperties().levelByProjectedAreaElseDistance) {
-        desiredLevel = _chunkEvaluatorByProjectedArea.desiredLevel(chunk, renderData);
+    if (_debugProperties.levelByProjectedAreaElseDistance) {
+        desiredLevel = desiredLevelByProjectedArea(chunk, renderData);
     }
     else {
-        desiredLevel = _chunkEvaluatorByDistance.desiredLevel(chunk, renderData);
+        desiredLevel = desiredLevelByDistance(chunk, renderData);
     }
 
-    int levelByAvailableData = _chunkEvaluatorByAvailableTiles.desiredLevel(
+    int levelByAvailableData = desiredLevelByAvailableTileData(
         chunk,
         renderData
     );
-    if (levelByAvailableData != chunklevelevaluator::Evaluator::UnknownDesiredLevel &&
-        debugProperties().limitLevelByAvailableData)
+    if (levelByAvailableData != UnknownDesiredLevel &&
+        _debugProperties.limitLevelByAvailableData)
     {
         desiredLevel = glm::min(desiredLevel, levelByAvailableData);
     }
@@ -614,7 +582,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
     float height = 0;
 
     // Get the uv coordinates to sample from
-    const Geodetic2 geodeticPosition = ellipsoid().cartesianToGeodetic2(position);
+    const Geodetic2 geodeticPosition = _ellipsoid.cartesianToGeodetic2(position);
     const int chunkLevel = findChunkNode(geodeticPosition).chunk().tileIndex().level;
 
     const TileIndex tileIndex = TileIndex(geodeticPosition, chunkLevel);
@@ -774,10 +742,12 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     const glm::dmat4 viewTransform = glm::dmat4(data.camera.combinedViewMatrix());
     const glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
         viewTransform;
-    const glm::dmat4 mvp = vp * modelTransform();
+    const glm::dmat4 mvp = vp * _cachedModelTransform;
+
+    int count = 0;
 
     // Render function
-    auto renderJob = [this, &data, &mvp](const ChunkNode& chunkNode) {
+    auto renderJob = [this, &data, &mvp, &count](const ChunkNode& chunkNode) {
 #ifdef DEBUG_GLOBEBROWSING_STATSRECORD
         stats.i["chunks nodes"]++;
 #endif // DEBUG_GLOBEBROWSING_STATSRECORD
@@ -792,12 +762,14 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
                 stats.i["rendered chunks"]++;
 #endif // DEBUG_GLOBEBROWSING_STATSRECORD
 
-                if (chunk.tileIndex().level < debugProperties().modelSpaceRenderingCutoffLevel) {
+                if (chunk.tileIndex().level < _debugProperties.modelSpaceRenderingCutoffLevel) {
                     renderChunkGlobally(chunk, data);
                 }
                 else {
                     renderChunkLocally(chunk, data);
                 }
+
+                ++count;
 
                 debugRenderChunk(chunk, mvp);
             }
@@ -807,6 +779,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     _leftRoot->breadthFirst(renderJob);
     _rightRoot->breadthFirst(renderJob);
 
+    LINFOC(identifier(), std::to_string(count));
+
 #ifdef DEBUG_GLOBEBROWSING_STATSRECORD
     auto duration2 = std::chrono::system_clock::now().time_since_epoch();
     auto ms2 = std::chrono::duration_cast<std::chrono::milliseconds>(duration2).count();
@@ -815,7 +789,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const {
-    if (debugProperties().showChunkBounds || debugProperties().showChunkAABB) {
+    if (_debugProperties.showChunkBounds || _debugProperties.showChunkAABB) {
         const std::vector<glm::dvec4>& modelSpaceCorners =
             chunk.boundingPolyhedronCorners();
 
@@ -839,11 +813,11 @@ void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
             0.3f
         );
 
-        if (debugProperties().showChunkBounds) {
+        if (_debugProperties.showChunkBounds) {
             DebugRenderer::ref().renderNiceBox(clippingSpaceCorners, color);
         }
 
-        if (debugProperties().showChunkAABB) {
+        if (_debugProperties.showChunkAABB) {
             const std::vector<glm::vec4>& screenSpacePoints =
                 DebugRenderer::ref().verticesFor(screenSpaceBounds);
             DebugRenderer::ref().renderNiceBox(screenSpacePoints, color);
@@ -902,7 +876,7 @@ ghoul::opengl::ProgramObject* RenderableGlobe::getActivatedProgramWithTileData(
 
     programObject->setUniform("xSegments", _grid.xSegments());
 
-    if (chunk.owner().debugProperties().showHeightResolution) {
+    if (chunk.owner()._debugProperties.showHeightResolution) {
         programObject->setUniform(
             "vertexResolution",
             glm::vec2(_grid.xSegments(), _grid.ySegments())
@@ -917,10 +891,10 @@ void RenderableGlobe::calculateEclipseShadows(const Chunk& chunk,
     const RenderData& data)
 {
     // Shadow calculations..
-    if (ellipsoid().hasEclipseShadows()) {
+    if (_ellipsoid.hasEclipseShadows()) {
         std::vector<RenderableGlobe::ShadowRenderingStruct> shadowDataArray;
         std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray =
-            ellipsoid().shadowConfigurationArray();
+            _ellipsoid.shadowConfigurationArray();
         shadowDataArray.reserve(shadowConfArray.size());
         double lt;
         for (const auto & shadowConf : shadowConfArray) {
@@ -981,7 +955,7 @@ void RenderableGlobe::calculateEclipseShadows(const Chunk& chunk,
             shadowData.isShadowing = false;
 
             // Eclipse shadows considers planets and moons as spheres
-            if (((d_test - rp_test) < (ellipsoid().radii().x * KM_TO_M)) &&
+            if (((d_test - rp_test) < (_ellipsoid.radii().x * KM_TO_M)) &&
                 (casterDistSun < planetDistSun))
             {
                 // The current caster is shadowing the current planet
@@ -1028,10 +1002,10 @@ void RenderableGlobe::calculateEclipseShadows(const Chunk& chunk,
             "inverseViewTransform",
             glm::inverse(data.camera.combinedViewMatrix())
         );
-        programObject->setUniform("modelTransform", modelTransform());
+        programObject->setUniform("modelTransform", _cachedModelTransform);
         programObject->setUniform(
             "hardShadows",
-            generalProperties().eclipseHardShadows
+            _generalProperties.eclipseHardShadows
         );
         programObject->setUniform("calculateEclipseShadows", true);
     }
@@ -1041,7 +1015,7 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
     const Chunk& chunk, const RenderData& data)
 {
     const glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
-    const glm::dmat4 modelViewTransform = viewTransform * modelTransform();
+    const glm::dmat4 modelViewTransform = viewTransform * _cachedModelTransform;
 
     const bool nightLayersActive =
         !_layerManager->layerGroup(layergroupid::NightLayers).activeLayers().empty();
@@ -1049,8 +1023,8 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
         !_layerManager->layerGroup(layergroupid::WaterMasks).activeLayers().empty();
 
     if (nightLayersActive || waterLayersActive ||
-        generalProperties().atmosphereEnabled ||
-        generalProperties().performShading)
+        _generalProperties.atmosphereEnabled ||
+        _generalProperties.performShading)
     {
         const glm::dvec3 directionToSunWorldSpace =
             length(data.modelTransform.translation) > 0.0 ?
@@ -1065,25 +1039,25 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
         );
     }
 
-    if (generalProperties().performShading) {
+    if (_generalProperties.performShading) {
         programObject.setUniform(
             "orenNayarRoughness",
-            generalProperties().orenNayarRoughness);
+            _generalProperties.orenNayarRoughness);
     }
 
-    if (generalProperties().useAccurateNormals &&
+    if (_generalProperties.useAccurateNormals &&
         !_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().empty())
     {
-        const glm::dvec3 corner00 = ellipsoid().cartesianSurfacePosition(
+        const glm::dvec3 corner00 = _ellipsoid.cartesianSurfacePosition(
             chunk.surfacePatch().corner(Quad::SOUTH_WEST)
         );
-        const glm::dvec3 corner10 = ellipsoid().cartesianSurfacePosition(
+        const glm::dvec3 corner10 = _ellipsoid.cartesianSurfacePosition(
             chunk.surfacePatch().corner(Quad::SOUTH_EAST)
         );
-        const glm::dvec3 corner01 = ellipsoid().cartesianSurfacePosition(
+        const glm::dvec3 corner01 = _ellipsoid.cartesianSurfacePosition(
             chunk.surfacePatch().corner(Quad::NORTH_WEST)
         );
-        const glm::dvec3 corner11 = ellipsoid().cartesianSurfacePosition(
+        const glm::dvec3 corner11 = _ellipsoid.cartesianSurfacePosition(
             chunk.surfacePatch().corner(Quad::NORTH_EAST)
         );
 
@@ -1116,7 +1090,7 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
             "invViewModelTransform",
             glm::inverse(
                 glm::mat4(data.camera.combinedViewMatrix()) *
-                glm::mat4(chunk.owner().modelTransform())
+                glm::mat4(_cachedModelTransform)
             )
         );
     }
@@ -1135,12 +1109,11 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     if (_layerManager->hasAnyBlendingLayersEnabled()) {
         // Calculations are done in the reference frame of the globe. Hence, the
         // camera position needs to be transformed with the inverse model matrix
-        const glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
         const glm::dvec3 cameraPosition = glm::dvec3(
-            inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1.0)
+            _cachedInverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1.0)
         );
         const float distanceScaleFactor = static_cast<float>(
-            generalProperties().lodScaleFactor * ellipsoid().minimumRadius()
+            _generalProperties.lodScaleFactor * _ellipsoid.minimumRadius()
             );
         programObject->setUniform("cameraPosition", glm::vec3(cameraPosition));
         programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
@@ -1152,7 +1125,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     const Geodetic2& patchSize = chunk.surfacePatch().size();
 
     const glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
-    const glm::mat4 modelViewTransform = glm::mat4(viewTransform * modelTransform());
+    const glm::mat4 modelViewTransform = glm::mat4(viewTransform * _cachedModelTransform);
     const glm::mat4 modelViewProjectionTransform =
         data.camera.sgctInternal.projectionMatrix() * modelViewTransform;
 
@@ -1164,7 +1137,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     programObject->setUniform("minLatLon", glm::vec2(swCorner.toLonLatVec2()));
     programObject->setUniform("lonLatScalingFactor", glm::vec2(patchSize.toLonLatVec2()));
     // Ellipsoid Radius (Model Space)
-    programObject->setUniform("radiiSquared", glm::vec3(ellipsoid().radiiSquared()));
+    programObject->setUniform("radiiSquared", glm::vec3(_ellipsoid.radiiSquared()));
 
     const bool hasNightLayers = !_layerManager->layerGroup(
         layergroupid::GroupID::NightLayers
@@ -1179,13 +1152,13 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     ).activeLayers().empty();
 
     if (hasNightLayers || hasWaterLayer ||
-        generalProperties().atmosphereEnabled ||
-        generalProperties().performShading)
+        _generalProperties.atmosphereEnabled ||
+        _generalProperties.performShading)
     {
         programObject->setUniform("modelViewTransform", modelViewTransform);
     }
 
-    if (generalProperties().useAccurateNormals && hasHeightLayer) {
+    if (_generalProperties.useAccurateNormals && hasHeightLayer) {
         // Apply an extra scaling to the height if the object is scaled
         programObject->setUniform(
             "heightScale",
@@ -1195,7 +1168,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 
     setCommonUniforms(*programObject, chunk, data);
 
-    if (ellipsoid().hasEclipseShadows()) {
+    if (_ellipsoid.hasEclipseShadows()) {
         calculateEclipseShadows(chunk, programObject, data);
     }
 
@@ -1225,7 +1198,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
     if (_layerManager->hasAnyBlendingLayersEnabled()) {
         float distanceScaleFactor = static_cast<float>(
-            generalProperties().lodScaleFactor * ellipsoid().minimumRadius()
+            _generalProperties.lodScaleFactor * _ellipsoid.minimumRadius()
             );
 
         programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
@@ -1235,7 +1208,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     // Calculate other uniform variables needed for rendering
     // Send the matrix inverse to the fragment for the global and local shader (JCC)
     const glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
-    const glm::dmat4 modelViewTransform = viewTransform * modelTransform();
+    const glm::dmat4 modelViewTransform = viewTransform * _cachedModelTransform;
 
 
     std::array<glm::dvec3, 4> cornersCameraSpace;
@@ -1247,7 +1220,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
         const Quad q = static_cast<Quad>(i);
         const Geodetic2 corner = chunk.surfacePatch().corner(q);
-        const glm::dvec3 cornerModelSpace = ellipsoid().cartesianSurfacePosition(corner);
+        const glm::dvec3 cornerModelSpace = _ellipsoid.cartesianSurfacePosition(corner);
         cornersModelSpace[i] = cornerModelSpace;
         const glm::dvec3 cornerCameraSpace = glm::dvec3(
             modelViewTransform * glm::dvec4(cornerModelSpace, 1)
@@ -1292,7 +1265,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
     setCommonUniforms(*programObject, chunk, data);
 
-    if (ellipsoid().hasEclipseShadows()) {
+    if (_ellipsoid.hasEclipseShadows()) {
         calculateEclipseShadows(chunk, programObject, data);
     }
 
@@ -1310,6 +1283,248 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     programObject->deactivate();
 }
 
+int RenderableGlobe::desiredLevelByDistance(const Chunk& chunk, const RenderData& data) const {
+    // Calculations are done in the reference frame of the globe
+    // (model space). Hence, the camera position needs to be transformed
+    // with the inverse model matrix
+    const glm::dvec3 cameraPosition = glm::dvec3(_cachedInverseModelTransform *
+        glm::dvec4(data.camera.positionVec3(), 1.0));
 
+    const Geodetic2 pointOnPatch = chunk.surfacePatch().closestPoint(
+        _ellipsoid.cartesianToGeodetic2(cameraPosition)
+    );
+    const glm::dvec3 patchNormal = _ellipsoid.geodeticSurfaceNormal(pointOnPatch);
+    glm::dvec3 patchPosition = _ellipsoid.cartesianSurfacePosition(pointOnPatch);
+
+    const Chunk::BoundingHeights heights = chunk.boundingHeights();
+    const double heightToChunk = heights.min;
+
+    // Offset position according to height
+    patchPosition += patchNormal * heightToChunk;
+
+    const glm::dvec3 cameraToChunk = patchPosition - cameraPosition;
+
+    // Calculate desired level based on distance
+    const double distanceToPatch = glm::length(cameraToChunk);
+    const double distance = distanceToPatch;
+
+    const double scaleFactor = _generalProperties.lodScaleFactor *
+        _ellipsoid.minimumRadius();
+    const double projectedScaleFactor = scaleFactor / distance;
+    const int desiredLevel = static_cast<int>(ceil(log2(projectedScaleFactor)));
+    return desiredLevel;
+}
+
+int RenderableGlobe::desiredLevelByProjectedArea(const Chunk& chunk, const RenderData& data) const {
+    // Calculations are done in the reference frame of the globe
+    // (model space). Hence, the camera position needs to be transformed
+    // with the inverse model matrix
+    const glm::dvec4 cameraPositionModelSpace = glm::dvec4(data.camera.positionVec3(), 1);
+    const glm::dvec3 cameraPosition = glm::dvec3(
+        _cachedInverseModelTransform * cameraPositionModelSpace
+    );
+    const glm::dvec3 cameraToEllipsoidCenter = -cameraPosition;
+
+    const Geodetic2 cameraGeodeticPos = _ellipsoid.cartesianToGeodetic2(cameraPosition);
+
+    // Approach:
+    // The projected area of the chunk will be calculated based on a small area that
+    // is close to the camera, and the scaled up to represent the full area.
+    // The advantage of doing this is that it will better handle the cases where the
+    // full patch is very curved (e.g. stretches from latitude 0 to 90 deg).
+
+    const Geodetic2 center = chunk.surfacePatch().center();
+    const Geodetic2 closestCorner = chunk.surfacePatch().closestCorner(cameraGeodeticPos);
+
+    //  Camera
+    //  |
+    //  V
+    //
+    //  oo
+    // [  ]<
+    //                     *geodetic space*
+    //
+    //   closestCorner
+    //    +-----------------+  <-- north east corner
+    //    |                 |
+    //    |      center     |
+    //    |                 |
+    //    +-----------------+  <-- south east corner
+
+    const Chunk::BoundingHeights heights = chunk.boundingHeights();
+    const Geodetic3 c = { center, heights.min };
+    const Geodetic3 c1 = { Geodetic2(center.lat, closestCorner.lon), heights.min };
+    const Geodetic3 c2 = { Geodetic2(closestCorner.lat, center.lon), heights.min };
+
+    //  Camera
+    //  |
+    //  V
+    //
+    //  oo
+    // [  ]<
+    //                     *geodetic space*
+    //
+    //    +--------c2-------+  <-- north east corner
+    //    |                 |
+    //    c1       c        |
+    //    |                 |
+    //    +-----------------+  <-- south east corner
+
+
+    // Go from geodetic to cartesian space and project onto unit sphere
+    const glm::dvec3 A = glm::normalize(
+        cameraToEllipsoidCenter + _ellipsoid.cartesianPosition(c)
+    );
+    const glm::dvec3 B = glm::normalize(
+        cameraToEllipsoidCenter + _ellipsoid.cartesianPosition(c1)
+    );
+    const glm::dvec3 C = glm::normalize(
+        cameraToEllipsoidCenter + _ellipsoid.cartesianPosition(c2)
+    );
+
+    // Camera                      *cartesian space*
+    // |                    +--------+---+
+    // V             __--''   __--''    /
+    //              C-------A--------- +
+    // oo          /       /          /
+    //[  ]<       +-------B----------+
+    //
+
+    // If the geodetic patch is small (i.e. has small width), that means the patch in
+    // cartesian space will be almost flat, and in turn, the triangle ABC will roughly
+    // correspond to 1/8 of the full area
+    const glm::dvec3 AB = B - A;
+    const glm::dvec3 AC = C - A;
+    const double areaABC = 0.5 * glm::length(glm::cross(AC, AB));
+    const double projectedChunkAreaApprox = 8 * areaABC;
+
+    const double scaledArea = _generalProperties.lodScaleFactor *
+        projectedChunkAreaApprox;
+    return chunk.tileIndex().level + static_cast<int>(round(scaledArea - 1));
+}
+
+int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk, const RenderData&) const {
+    const int currLevel = chunk.tileIndex().level;
+
+    for (size_t i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
+        for (const std::shared_ptr<Layer>& layer :
+            _layerManager->layerGroup(i).activeLayers())
+        {
+            Tile::Status status = layer->tileStatus(chunk.tileIndex());
+            if (status == Tile::Status::OK) {
+                return UnknownDesiredLevel;
+            }
+        }
+    }
+
+    return currLevel - 1;
+}
+
+bool RenderableGlobe::isCullableByFrustum(const Chunk& chunk, const RenderData& renderData) const {
+    // Calculate the MVP matrix
+    const glm::dmat4 viewTransform = glm::dmat4(renderData.camera.combinedViewMatrix());
+    const glm::dmat4 modelViewProjectionTransform = glm::dmat4(
+        renderData.camera.sgctInternal.projectionMatrix()
+    ) * viewTransform * _cachedModelTransform;
+
+    const std::vector<glm::dvec4>& corners = chunk.boundingPolyhedronCorners();
+
+    // Create a bounding box that fits the patch corners
+    AABB3 bounds; // in screen space
+    for (size_t i = 0; i < 8; ++i) {
+        const glm::dvec4 cornerClippingSpace = modelViewProjectionTransform * corners[i];
+        const glm::dvec3 ndc = glm::dvec3(
+            (1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace
+        );
+        bounds.expand(ndc);
+    }
+
+    return !(CullingFrustum.intersects(bounds));
+}
+
+LayerManager* RenderableGlobe::layerManager() const {
+    return _layerManager.get();
+}
+
+const Ellipsoid& RenderableGlobe::ellipsoid() const {
+    return _ellipsoid;
+}
+
+const glm::dmat4& RenderableGlobe::modelTransform() const {
+    return _cachedModelTransform;
+}
+
+const glm::dmat4& RenderableGlobe::inverseModelTransform() const {
+    return _cachedInverseModelTransform;
+}
+
+Camera* RenderableGlobe::savedCamera() const {
+    return _savedCamera.get();
+}
+
+
+
+bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk, const RenderData& renderData) const {
+    // Calculations are done in the reference frame of the globe. Hence, the camera
+    // position needs to be transformed with the inverse model matrix
+    const GeodeticPatch& patch = chunk.surfacePatch();
+    const float maxHeight = chunk.boundingHeights().max;
+    const glm::dvec3 globePos = glm::dvec3(0, 0, 0); // In model space it is 0
+    const double minimumGlobeRadius = _ellipsoid.minimumRadius();
+
+    const glm::dvec3 cameraPos = glm::dvec3(
+        _cachedInverseModelTransform * glm::dvec4(renderData.camera.positionVec3(), 1)
+    );
+
+    const glm::dvec3 globeToCamera = cameraPos;
+
+    const Geodetic2 cameraPositionOnGlobe = _ellipsoid.cartesianToGeodetic2(globeToCamera);
+    const Geodetic2 closestPatchPoint = patch.closestPoint(cameraPositionOnGlobe);
+    glm::dvec3 objectPos = _ellipsoid.cartesianSurfacePosition(closestPatchPoint);
+
+    // objectPosition is closest in latlon space but not guaranteed to be closest in
+    // castesian coordinates. Therefore we compare it to the corners and pick the
+    // real closest point,
+    std::array<glm::dvec3, 4> corners = {
+        _ellipsoid.cartesianSurfacePosition(chunk.surfacePatch().corner(NORTH_WEST)),
+        _ellipsoid.cartesianSurfacePosition(chunk.surfacePatch().corner(NORTH_EAST)),
+        _ellipsoid.cartesianSurfacePosition(chunk.surfacePatch().corner(SOUTH_WEST)),
+        _ellipsoid.cartesianSurfacePosition(chunk.surfacePatch().corner(SOUTH_EAST))
+    };
+
+    for (int i = 0; i < 4; ++i) {
+        const double distance = glm::length(cameraPos - corners[i]);
+        if (distance < glm::length(cameraPos - objectPos)) {
+            objectPos = corners[i];
+        }
+    }
+
+
+    const double objectP = pow(length(objectPos - globePos), 2);
+    const double horizonP = pow(minimumGlobeRadius - maxHeight, 2);
+    if (objectP < horizonP) {
+        return false;
+    }
+
+    const double cameraP = pow(length(cameraPos - globePos), 2);
+    const double minR = pow(minimumGlobeRadius, 2);
+    if (cameraP < minR) {
+        return false;
+    }
+
+    const double minimumAllowedDistanceToObjectFromHorizon = sqrt(objectP - horizonP);
+    const double distanceToHorizon = sqrt(cameraP - minR);
+
+    // Minimum allowed for the object to be occluded
+    const double minimumAllowedDistanceToObjectSquared =
+        pow(distanceToHorizon + minimumAllowedDistanceToObjectFromHorizon, 2) +
+        pow(maxHeight, 2);
+
+    const double distanceToObjectSquared = pow(
+        length(objectPos - cameraPos),
+        2
+    );
+    return distanceToObjectSquared > minimumAllowedDistanceToObjectSquared;
+}
 
 } // namespace openspace::globebrowsing

@@ -31,11 +31,6 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <modules/globebrowsing/chunk/culling/frustumculler.h>
-#include <modules/globebrowsing/chunk/culling/horizonculler.h>
-#include <modules/globebrowsing/chunk/chunklevelevaluator/availabletiledataevaluator.h>
-#include <modules/globebrowsing/chunk/chunklevelevaluator/distanceevaluator.h>
-#include <modules/globebrowsing/chunk/chunklevelevaluator/projectedareaevaluator.h>
 #include <modules/globebrowsing/rendering/layershadermanager.h>
 #include <modules/globebrowsing/rendering/gpu/gpulayermanager.h>
 #include <modules/globebrowsing/meshes/skirtedgrid.h>
@@ -70,37 +65,6 @@ class LayerManager;
  */
 class RenderableGlobe : public Renderable {
 public:
-    /**
-     * These properties are specific for <code>ChunkedLodGlobe</code> and separated from
-     * the general properties of <code>RenderableGlobe</code>.
-     */
-    struct DebugProperties {
-        properties::BoolProperty saveOrThrowCamera;
-        properties::BoolProperty showChunkEdges;
-        properties::BoolProperty showChunkBounds;
-        properties::BoolProperty showChunkAABB;
-        properties::BoolProperty showHeightResolution;
-        properties::BoolProperty showHeightIntensities;
-        properties::BoolProperty performFrustumCulling;
-        properties::BoolProperty performHorizonCulling;
-        properties::BoolProperty levelByProjectedAreaElseDistance;
-        properties::BoolProperty resetTileProviders;
-        properties::BoolProperty collectStats;
-        properties::BoolProperty limitLevelByAvailableData;
-        properties::IntProperty modelSpaceRenderingCutoffLevel;
-    };
-
-    struct GeneralProperties {
-        properties::BoolProperty performShading;
-        properties::BoolProperty atmosphereEnabled;
-        properties::BoolProperty useAccurateNormals;
-        properties::BoolProperty eclipseShadowsEnabled;
-        properties::BoolProperty eclipseHardShadows;
-        properties::FloatProperty lodScaleFactor;
-        properties::FloatProperty cameraMinHeight;
-        properties::FloatProperty orenNayarRoughness;
-    };
-
     // Shadow structure
     struct ShadowRenderingStruct {
         double xu;
@@ -124,43 +88,52 @@ public:
 
     // Getters that perform calculations
     glm::dvec3 projectOnEllipsoid(glm::dvec3 position);
-    //float getHeight(glm::dvec3 position) const;
 
-    // Getters
-    LayerManager* layerManager() const;
-    const Ellipsoid& ellipsoid() const;
-    const glm::dmat4& modelTransform() const;
-    const glm::dmat4& inverseModelTransform() const;
-    const DebugProperties& debugProperties() const;
-    const GeneralProperties& generalProperties() const;
-    const std::shared_ptr<const Camera> savedCamera() const;
-    double interactionDepthBelowEllipsoid();
-
-    // Setters
-    void setSaveCamera(std::shared_ptr<Camera> camera);
 
     virtual SurfacePositionHandle calculateSurfacePositionHandle(
                                        const glm::dvec3& targetModelSpace) const override;
 
-private:
+//private:
     Ellipsoid _ellipsoid;
     std::shared_ptr<LayerManager> _layerManager;
-    std::shared_ptr<Camera> _savedCamera;
+    std::unique_ptr<Camera> _savedCamera;
 
     glm::dmat4 _cachedModelTransform;
     glm::dmat4 _cachedInverseModelTransform;
 
     // Properties
-    DebugProperties _debugProperties;
-    GeneralProperties _generalProperties;
+    struct {
+        properties::BoolProperty saveOrThrowCamera;
+        properties::BoolProperty showChunkEdges;
+        properties::BoolProperty showChunkBounds;
+        properties::BoolProperty showChunkAABB;
+        properties::BoolProperty showHeightResolution;
+        properties::BoolProperty showHeightIntensities;
+        properties::BoolProperty performFrustumCulling;
+        properties::BoolProperty performHorizonCulling;
+        properties::BoolProperty levelByProjectedAreaElseDistance;
+        properties::BoolProperty resetTileProviders;
+        properties::BoolProperty collectStats;
+        properties::BoolProperty limitLevelByAvailableData;
+        properties::IntProperty modelSpaceRenderingCutoffLevel;
+    } _debugProperties;
+
+    struct {
+        properties::BoolProperty performShading;
+        properties::BoolProperty atmosphereEnabled;
+        properties::BoolProperty useAccurateNormals;
+        properties::BoolProperty eclipseShadowsEnabled;
+        properties::BoolProperty eclipseHardShadows;
+        properties::FloatProperty lodScaleFactor;
+        properties::FloatProperty cameraMinHeight;
+        properties::FloatProperty orenNayarRoughness;
+    } _generalProperties;
+
     properties::PropertyOwner _debugPropertyOwner;
 
 
-    // Chunked Lod Globe
-public:
     void renderChunks(const RenderData& data, RendererTasks& rendererTask);
 
-    
     /**
  * Traverse the chunk tree and find the highest level chunk node.
  *
@@ -210,7 +183,6 @@ public:
      * properties that the shader depends on need to be properly synced.
      */
     void notifyShaderRecompilation();
-
     /**
      * Directly recompile the shaders of the renderer.
      */
@@ -219,7 +191,6 @@ public:
     constexpr static const int MinSplitDepth = 2;
     constexpr static const int MaxSplitDepth = 22;  // increase? (abock)
 
-private:
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const;
 
     // Covers all negative longitudes
@@ -228,15 +199,24 @@ private:
     // Covers all positive longitudes
     std::unique_ptr<ChunkNode> _rightRoot;
 
-    culling::HorizonCuller _horizonCuller;
-    culling::FrustumCuller _frustumCuller;
+    bool isCullableByFrustum(const Chunk& chunk, const RenderData& renderData) const;
+    bool isCullableByHorizon(const Chunk& chunk, const RenderData& renderData) const;
 
-    chunklevelevaluator::AvailableTileData _chunkEvaluatorByAvailableTiles;
-    chunklevelevaluator::ProjectedArea _chunkEvaluatorByProjectedArea;
-    chunklevelevaluator::Distance _chunkEvaluatorByDistance;
+
+    int desiredLevelByDistance(const Chunk& chunk, const RenderData& data) const;
+    int desiredLevelByProjectedArea(const Chunk& chunk, const RenderData& data) const;
+    int desiredLevelByAvailableTileData(const Chunk& chunk, const RenderData& data) const;
+
 
     bool _shadersNeedRecompilation = true;
 
+
+    LayerManager* layerManager() const;
+    const Ellipsoid& ellipsoid() const;
+    const glm::dmat4& modelTransform() const;
+    const glm::dmat4& inverseModelTransform() const;
+    Camera* savedCamera() const;
+    double interactionDepthBelowEllipsoid();
 
 
 

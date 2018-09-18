@@ -34,12 +34,6 @@ set(HEADER_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunknode.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/chunklevelevaluator.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/availabletiledataevaluator.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/distanceevaluator.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/projectedareaevaluator.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling/frustumculler.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling/horizonculler.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemglobelocation.h
 
@@ -129,11 +123,6 @@ set(SOURCE_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunknode.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/availabletiledataevaluator.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/distanceevaluator.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/projectedareaevaluator.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling/frustumculler.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling/horizonculler.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemglobelocation.cpp
 

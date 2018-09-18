@@ -60,7 +60,7 @@ bool Chunk::isVisible() const {
 }
 
 Chunk::Status Chunk::update(const RenderData& data) {
-    const std::shared_ptr<const Camera>& savedCamera = _owner.savedCamera();
+    Camera* savedCamera = _owner.savedCamera();
     const Camera& camRef = savedCamera ? *savedCamera : data.camera;
 
     RenderData myRenderData = {
