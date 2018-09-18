@@ -32,9 +32,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "WebGuiModule";
-    constexpr const char* ModeKey = "Mode";
-    constexpr const char* ModeDevelopment = "Development";
-    constexpr const char* ModeProduction = "Production";
 
     constexpr openspace::properties::Property::PropertyInfo ServerProcessEnabledInfo = {
         "ServerProcessEnabled",
@@ -94,7 +91,11 @@ void WebGuiModule::internalInitialize(const ghoul::Dictionary&) {
 }
 
 void WebGuiModule::startProcess() {
+#ifdef WIN32
     const std::string nodePath = absPath("${MODULE_WEBGUI}/ext/nodejs/node.exe");
+#else
+    const std::string nodePath = absPath("${MODULE_WEBGUI}/ext/nodejs/node");
+#endif
 
     _process = std::make_unique<ghoul::Process>(
         "\"" + nodePath + "\" \"" + _serverProcessEntryPoint.value() + "\"",
