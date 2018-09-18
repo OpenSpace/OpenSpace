@@ -447,11 +447,6 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 }
 
 void RenderableGlobe::update(const UpdateData& data) {
-    if (_shadersNeedRecompilation) {
-        recompileShaders();
-    }
-
-
     setBoundingSphere(static_cast<float>(
         _ellipsoid.maximumRadius() * data.modelTransform.scale
     ));
@@ -475,6 +470,29 @@ void RenderableGlobe::update(const UpdateData& data) {
     //
     // Setting frame-const uniforms that are not view dependent
     //
+
+    if (_layerManager.hasAnyBlendingLayersEnabled()) {
+        if (_lodScaleFactorDirty) {
+            const float distanceScaleFactor = static_cast<float>(
+                _generalProperties.lodScaleFactor * _ellipsoid.minimumRadius()
+            );
+            _globalRenderer.program->setUniform("distanceScaleFactor", distanceScaleFactor);
+            _localRenderer.program->setUniform("distanceScaleFactor", distanceScaleFactor);
+            _lodScaleFactorDirty = false;
+        }
+    }
+
+    if (_generalProperties.performShading) {
+        const bool onr = _generalProperties.orenNayarRoughness;
+        _localRenderer.program->setUniform("orenNayarRoughness", onr);
+        _globalRenderer.program->setUniform("orenNayarRoughness", onr);
+    }
+}
+
+void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
+    if (_shadersNeedRecompilation) {
+        recompileShaders();
+    }
 
     if (_globalRenderer.updatedSinceLastCall) {
         //_globalGpuLayerManager.bind(_globalRenderer.program.get(), _layerManager);
@@ -524,25 +542,6 @@ void RenderableGlobe::update(const UpdateData& data) {
         _localRenderer.updatedSinceLastCall = false;
     }
 
-    if (_layerManager.hasAnyBlendingLayersEnabled()) {
-        if (_lodScaleFactorDirty) {
-            const float distanceScaleFactor = static_cast<float>(
-                _generalProperties.lodScaleFactor * _ellipsoid.minimumRadius()
-            );
-            _globalRenderer.program->setUniform("distanceScaleFactor", distanceScaleFactor);
-            _localRenderer.program->setUniform("distanceScaleFactor", distanceScaleFactor);
-            _lodScaleFactorDirty = false;
-        }
-    }
-
-    if (_generalProperties.performShading) {
-        const bool onr = _generalProperties.orenNayarRoughness;
-        _localRenderer.program->setUniform("orenNayarRoughness", onr);
-        _globalRenderer.program->setUniform("orenNayarRoughness", onr);
-    }
-}
-
-void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     _leftRoot->updateChunkTree(data);
     _rightRoot->updateChunkTree(data);
 

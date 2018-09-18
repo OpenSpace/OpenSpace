@@ -26,7 +26,6 @@
 
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
-#include <modules/globebrowsing/rendering/gpu/gpulayer.h>
 #include <modules/globebrowsing/rendering/layer/layer.h>
 #include <ghoul/opengl/texture.h>
 
