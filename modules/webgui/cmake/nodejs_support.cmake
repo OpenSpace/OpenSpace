@@ -28,15 +28,18 @@
 
 function(DownloadNodeJs version download_dir)
   if(MSVC)
-    set(filename "node.exe")
+    set(basename "node")
+    set(filename "${basename}.exe")
     set(path "v${version}/win-x64/${filename}")
   endif(MSVC)
   if(APPLE)
-    set(filename "node-v${version}-darwin-x64.tar.gz")
+    set(basename "node-v${version}-darwin-x64")
+    set(filename "${basename}.tar.gz")
     set(path "v${version}/${filename}")
   endif(APPLE)
   if (UNIX AND NOT APPLE)
-    set(path "v${version}/node-v${version}-linux-x64.tar.xz")
+    set(basename "node-v${version}-linux-x64")
+    set(filename "${basename}.tar.xz")
     set(path "v${version}/${filename}")
   endif(UNIX AND NOT APPLE)
 
@@ -65,11 +68,15 @@ function(DownloadNodeJs version download_dir)
 
     if (UNIX)
       # Extract the binary distribution.
-      message(STATUS "Extracting NodeJs: ${NODEJS_DOWNLOAD_PATH}...")
+      message(STATUS "Extracting NodeJs: ${NODEJS_DOWNLOAD_PATH} in ${NODEJS_DOWNLOAD_DIR}")
       execute_process(
-        COMMAND ${CMAKE_COMMAND} -E "tar xzf ${NODEJS_DOWNLOAD_DIR}/${filename}"
+        COMMAND tar xzf ${NODEJS_DOWNLOAD_PATH}
         WORKING_DIRECTORY ${NODEJS_DOWNLOAD_DIR}
-        )
+      )
+      FILE(COPY ${NODEJS_DOWNLOAD_DIR}/${basename}/bin/node
+           DESTINATION ${NODEJS_DOWNLOAD_DIR})
+      FILE(REMOVE_RECURSE ${NODEJS_DOWNLOAD_DIR}/${basename})
+      FILE(REMOVE ${NODEJS_DOWNLOAD_PATH})
     endif()
   endif()
 endfunction()
