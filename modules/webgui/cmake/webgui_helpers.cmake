@@ -22,26 +22,24 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-function(build_webgui_source target_name)
+function(build_webgui_frontend_source target_name)
     set(NPM_COMMAND "npm" CACHE STRING "Location of NPM executable unless in PATH.")
     # copy webgui source
     add_custom_command(
         TARGET ${target_name} POST_BUILD
         COMMAND ${NPM_COMMAND} run build
-        WORKING_DIRECTORY ${WEBGUI_MODULE_PATH}/web
+        WORKING_DIRECTORY ${WEBGUI_MODULE_PATH}/ext/frontend
         VERBATIM
     )
-
 endfunction()
 
-function(build_webserver_source target_name)
+function(build_webgui_backend_source target_name)
     set(NPM_COMMAND "npm" CACHE STRING "Location of NPM executable unless in PATH.")
     # copy webgui source
     add_custom_command(
         TARGET ${target_name} POST_BUILD
         COMMAND ${NPM_COMMAND} run build
-        WORKING_DIRECTORY ${WEBGUI_MODULE_PATH}/server
+        WORKING_DIRECTORY ${WEBGUI_MODULE_PATH}/ext/backend
         VERBATIM
     )
-
 endfunction()

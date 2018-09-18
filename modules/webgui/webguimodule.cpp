@@ -82,8 +82,8 @@ void WebGuiModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 
 void WebGuiModule::startProcess() {
     const std::string nodePath = absPath("${MODULE_WEBGUI}/ext/nodejs/node.exe");
-    const std::string scriptPath = absPath("${MODULE_WEBGUI}/server/dist/server.js");
-    const std::string workingDirectory = absPath("${MODULE_WEBGUI}/server");
+    const std::string scriptPath = absPath("${MODULE_WEBGUI}/ext/backend/dist/server.js");
+    const std::string workingDirectory = absPath("${MODULE_WEBGUI}/ext/backend");
 
     _process = std::make_unique<ghoul::Process>(
         "\"" + nodePath + "\" \"" + scriptPath + "\"",

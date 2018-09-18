@@ -66,12 +66,3 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
 elseif (OPENSPACE_MODULE_WEBBROWSER)
     message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
 endif ()
-
-if (OPENSPACE_MODULE_WEBGUI AND WEBGUI_MODULE_PATH)
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBGUI_MODULE_PATH}/cmake")
-    include(webgui_helpers)
-    build_webgui_source(Sync)
-elseif(OPENSPACE_MODULE_WEBGUI)
-    message(WARNING "WebGui is configured to be included, but the web source could not be found. Try configuring CMake again.")
-endif()
-# End Web Browser and Web gui

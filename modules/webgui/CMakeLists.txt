@@ -24,7 +24,7 @@
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(WEBGUI_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "WEBGUI_MODULE_PATH")
-set(WEBGUI_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/web CACHE INTERNAL "WEBGUI_MODULE_PATH")
+set(WEBGUI_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/frontend CACHE INTERNAL "WEBGUI_MODULE_PATH")
 
 set(OPENSPACE_HEADER_FILES
     webguimodule.h
@@ -48,11 +48,11 @@ DownloadNodeJs("${NODEJS_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/ext/nodejs")
 
 include(webgui_helpers)
 
-add_custom_target(openspace-module-webgui-javascript)
-build_webgui_source(openspace-module-webgui-javascript)
+add_custom_target(openspace-module-webgui-frontend)
+build_webgui_frontend_source(openspace-module-webgui-frontend)
 
-add_custom_target(openspace-module-webgui-server)
-build_webserver_source(openspace-module-webgui-server)
+add_custom_target(openspace-module-webgui-backend)
+build_webgui_backend_source(openspace-module-webgui-backend)
 
 create_new_module(
     WebGui
