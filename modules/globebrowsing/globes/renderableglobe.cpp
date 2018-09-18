@@ -25,7 +25,6 @@
 #include <modules/globebrowsing/globes/renderableglobe.h>
 
 #include <modules/debugging/rendering/debugrenderer.h>
-#include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <ghoul/logging/logmanager.h>
 #include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/chunk/chunknode.h>
@@ -282,7 +281,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         throw ghoul::RuntimeError(std::string(keyLayers) + " must be specified");
     }
 
-    _layerManager = std::make_shared<LayerManager>(layersDictionary);
+    //_layerManager = std::make_shared<LayerManager>(layersDictionary);
+    _layerManager.initialize(layersDictionary);
 
     addProperty(_generalProperties.atmosphereEnabled);
     addProperty(_generalProperties.performShading);
@@ -321,10 +321,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _debugProperties.showHeightResolution.onChange(notifyShaderRecompilation);
     _debugProperties.showHeightIntensities.onChange(notifyShaderRecompilation);
 
-    _layerManager->onChange(notifyShaderRecompilation);
+    _layerManager.onChange(notifyShaderRecompilation);
 
     addPropertySubOwner(_debugPropertyOwner);
-    addPropertySubOwner(_layerManager.get());
+    addPropertySubOwner(_layerManager);
     //addPropertySubOwner(_pointGlobe.get());
 
     //================================================================
@@ -402,9 +402,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableGlobe::initializeGL() {
-    _layerManager->initialize();
-
-    _layerManager->update();
+    _layerManager.update();
 
     // Recompile the shaders directly so that it is not done the first time the render
     // function is called.
@@ -412,7 +410,7 @@ void RenderableGlobe::initializeGL() {
 }
 
 void RenderableGlobe::deinitializeGL() {
-    _layerManager->deinitialize();
+    _layerManager.deinitialize();
 }
 
 bool RenderableGlobe::isReady() const {
@@ -484,10 +482,10 @@ void RenderableGlobe::update(const UpdateData& data) {
     _cachedInverseModelTransform = glm::inverse(_cachedModelTransform);
 
     if (_debugProperties.resetTileProviders) {
-        _layerManager->reset();
+        _layerManager.reset();
         _debugProperties.resetTileProviders = false;
     }
-    _layerManager->update();
+    _layerManager.update();
     setBoundingSphere(static_cast<float>(
         _ellipsoid.maximumRadius() * data.modelTransform.scale
         ));
@@ -599,7 +597,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
 
     // Get the tile providers for the height maps
     const std::vector<std::shared_ptr<Layer>>& heightMapLayers =
-        _layerManager->layerGroup(layergroupid::GroupID::HeightLayers).activeLayers();
+        _layerManager.layerGroup(layergroupid::GroupID::HeightLayers).activeLayers();
 
     for (const std::shared_ptr<Layer>& layer : heightMapLayers) {
         tileprovider::TileProvider* tileProvider = layer->tileProvider();
@@ -851,13 +849,13 @@ ghoul::opengl::ProgramObject* RenderableGlobe::getActivatedProgramWithTileData(
     ghoul::opengl::ProgramObject* programObject = layeredShaderManager.programObject();
 
     if (layeredShaderManager.updatedSinceLastCall()) {
-        gpuLayerManager.bind(programObject, *_layerManager);
+        gpuLayerManager.bind(programObject, _layerManager);
     }
 
     // Activate the shader program
     programObject->activate();
 
-    gpuLayerManager.setValue(programObject, *_layerManager, tileIndex);
+    gpuLayerManager.setValue(programObject, _layerManager, tileIndex);
 
     // The length of the skirts is proportional to its size
     programObject->setUniform(
@@ -1018,9 +1016,9 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
     const glm::dmat4 modelViewTransform = viewTransform * _cachedModelTransform;
 
     const bool nightLayersActive =
-        !_layerManager->layerGroup(layergroupid::NightLayers).activeLayers().empty();
+        !_layerManager.layerGroup(layergroupid::NightLayers).activeLayers().empty();
     const bool waterLayersActive =
-        !_layerManager->layerGroup(layergroupid::WaterMasks).activeLayers().empty();
+        !_layerManager.layerGroup(layergroupid::WaterMasks).activeLayers().empty();
 
     if (nightLayersActive || waterLayersActive ||
         _generalProperties.atmosphereEnabled ||
@@ -1046,7 +1044,7 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
     }
 
     if (_generalProperties.useAccurateNormals &&
-        !_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().empty())
+        !_layerManager.layerGroup(layergroupid::HeightLayers).activeLayers().empty())
     {
         const glm::dvec3 corner00 = _ellipsoid.cartesianSurfacePosition(
             chunk.surfacePatch().corner(Quad::SOUTH_WEST)
@@ -1106,7 +1104,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
         return;
     }
 
-    if (_layerManager->hasAnyBlendingLayersEnabled()) {
+    if (_layerManager.hasAnyBlendingLayersEnabled()) {
         // Calculations are done in the reference frame of the globe. Hence, the
         // camera position needs to be transformed with the inverse model matrix
         const glm::dvec3 cameraPosition = glm::dvec3(
@@ -1139,15 +1137,15 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     // Ellipsoid Radius (Model Space)
     programObject->setUniform("radiiSquared", glm::vec3(_ellipsoid.radiiSquared()));
 
-    const bool hasNightLayers = !_layerManager->layerGroup(
+    const bool hasNightLayers = !_layerManager.layerGroup(
         layergroupid::GroupID::NightLayers
     ).activeLayers().empty();
 
-    const bool hasWaterLayer = !_layerManager->layerGroup(
+    const bool hasWaterLayer = !_layerManager.layerGroup(
         layergroupid::GroupID::WaterMasks
     ).activeLayers().empty();
 
-    const bool hasHeightLayer = !_layerManager->layerGroup(
+    const bool hasHeightLayer = !_layerManager.layerGroup(
         layergroupid::HeightLayers
     ).activeLayers().empty();
 
@@ -1196,7 +1194,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         return;
     }
 
-    if (_layerManager->hasAnyBlendingLayersEnabled()) {
+    if (_layerManager.hasAnyBlendingLayersEnabled()) {
         float distanceScaleFactor = static_cast<float>(
             _generalProperties.lodScaleFactor * _ellipsoid.minimumRadius()
             );
@@ -1255,7 +1253,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         data.camera.sgctInternal.projectionMatrix()
     );
 
-    if (!_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().empty()) {
+    if (!_layerManager.layerGroup(layergroupid::HeightLayers).activeLayers().empty()) {
         // Apply an extra scaling to the height if the object is scaled
         programObject->setUniform(
             "heightScale",
@@ -1408,7 +1406,7 @@ int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk, const R
 
     for (size_t i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
         for (const std::shared_ptr<Layer>& layer :
-            _layerManager->layerGroup(i).activeLayers())
+            _layerManager.layerGroup(i).activeLayers())
         {
             Tile::Status status = layer->tileStatus(chunk.tileIndex());
             if (status == Tile::Status::OK) {
@@ -1442,8 +1440,12 @@ bool RenderableGlobe::isCullableByFrustum(const Chunk& chunk, const RenderData& 
     return !(CullingFrustum.intersects(bounds));
 }
 
-LayerManager* RenderableGlobe::layerManager() const {
-    return _layerManager.get();
+const LayerManager& RenderableGlobe::layerManager() const {
+    return _layerManager;
+}
+
+LayerManager& RenderableGlobe::layerManager() {
+    return _layerManager;
 }
 
 const Ellipsoid& RenderableGlobe::ellipsoid() const {
@@ -1452,10 +1454,6 @@ const Ellipsoid& RenderableGlobe::ellipsoid() const {
 
 const glm::dmat4& RenderableGlobe::modelTransform() const {
     return _cachedModelTransform;
-}
-
-const glm::dmat4& RenderableGlobe::inverseModelTransform() const {
-    return _cachedInverseModelTransform;
 }
 
 Camera* RenderableGlobe::savedCamera() const {

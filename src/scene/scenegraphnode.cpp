@@ -721,9 +721,9 @@ const Renderable* SceneGraphNode::renderable() const {
     return _renderable.get();
 }
 
-//Renderable* SceneGraphNode::renderable() {
-//    return _renderable.get();
-//}
+Renderable* SceneGraphNode::renderable() {
+    return _renderable.get();
+}
 
 /*
 bool SceneGraphNode::sphereInsideFrustum(const psc& s_pos, const PowerScaledScalar& s_rad,

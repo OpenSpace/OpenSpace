@@ -379,7 +379,7 @@ void GlobeBrowsingModule::goToChunk(Camera& camera, const globebrowsing::TileInd
 
     // Camera position in model space
     const glm::dvec3 camPos = camera.positionVec3();
-    const glm::dmat4 inverseModelTransform = globe->inverseModelTransform();
+    const glm::dmat4 inverseModelTransform = glm::inverse(globe->modelTransform());
     const glm::dvec3 cameraPositionModelSpace = glm::dvec3(
         inverseModelTransform * glm::dvec4(camPos, 1)
     );

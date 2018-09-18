@@ -36,16 +36,16 @@ namespace {
 
 namespace openspace::globebrowsing {
 
-LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict)
-    : properties::PropertyOwner({ "Layers" })
-{
+LayerManager::LayerManager() : properties::PropertyOwner({ "Layers" }) {}
+
+void LayerManager::initialize(const ghoul::Dictionary& layerGroupsDict) {
     // First create empty layer groups in case not all are specified
     _layerGroups.resize(layergroupid::NUM_LAYER_GROUPS);
     for (size_t i = 0; i < _layerGroups.size(); ++i) {
         ghoul::Dictionary emptyDict;
         _layerGroups[i] = std::make_shared<LayerGroup>(
             static_cast<layergroupid::GroupID>(i), emptyDict
-        );
+            );
     }
 
     const std::vector<std::string>& layerGroupNamesInDict = layerGroupsDict.keys();
@@ -61,7 +61,7 @@ LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict)
             _layerGroups[static_cast<int>(groupId)] = std::make_shared<LayerGroup>(
                 groupId,
                 layerGroupDict
-            );
+                );
         }
         else {
             LWARNING("Unknown layer group: " + groupName);
@@ -71,9 +71,7 @@ LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict)
     for (const std::shared_ptr<LayerGroup>& layerGroup : _layerGroups) {
         addPropertySubOwner(layerGroup.get());
     }
-}
 
-void LayerManager::initialize() {
     for (const std::shared_ptr<LayerGroup>& lg : _layerGroups) {
         lg->initialize();
     }
@@ -101,11 +99,11 @@ void LayerManager::deleteLayer(layergroupid::GroupID groupId,
     _layerGroups[groupId]->deleteLayer(layerName);
 }
 
-const LayerGroup& LayerManager::layerGroup(size_t groupId) {
+const LayerGroup& LayerManager::layerGroup(size_t groupId) const {
     return *_layerGroups[groupId];
 }
 
-const LayerGroup& LayerManager::layerGroup(layergroupid::GroupID groupId) {
+const LayerGroup& LayerManager::layerGroup(layergroupid::GroupID groupId) const {
     return *_layerGroups[groupId];
 }
 

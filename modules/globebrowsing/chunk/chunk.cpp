@@ -101,13 +101,13 @@ Chunk::BoundingHeights Chunk::boundingHeights() const {
 
     // In the future, this should be abstracted away and more easily queryable.
     // One must also handle how to sample pick one out of multiplte heightmaps
-    LayerManager* lm = owner().layerManager();
+    const LayerManager& lm = owner().layerManager();
 
     // The raster of a height map is the first one. We assume that the height map is
     // a single raster image. If it is not we will just use the first raster
     // (that is channel 0).
     const size_t HeightChannel = 0;
-    const LayerGroup& heightmaps = lm->layerGroup(layergroupid::GroupID::HeightLayers);
+    const LayerGroup& heightmaps = lm.layerGroup(layergroupid::GroupID::HeightLayers);
     std::vector<ChunkTileSettingsPair> chunkTileSettingPairs =
         tileselector::getTilesAndSettingsUnsorted(heightmaps, _tileIndex);
 

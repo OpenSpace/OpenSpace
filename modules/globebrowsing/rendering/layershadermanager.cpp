@@ -71,12 +71,12 @@ LayerShaderManager::LayerShaderPreprocessingData::get(const RenderableGlobe& glo
 {
     LayerShaderManager::LayerShaderPreprocessingData preprocessingData;
 
-    LayerManager* layerManager = globe.layerManager();
+    const LayerManager& layerManager = globe.layerManager();
     for (size_t i = 0; i < layergroupid::NUM_LAYER_GROUPS; i++) {
         LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData
             layeredTextureInfo;
 
-        const LayerGroup& layerGroup = layerManager->layerGroup(i);
+        const LayerGroup& layerGroup = layerManager.layerGroup(i);
         const std::vector<std::shared_ptr<Layer>>& layers = layerGroup.activeLayers();
 
         // This check was implicit before;  not sure if it will fire or will be handled

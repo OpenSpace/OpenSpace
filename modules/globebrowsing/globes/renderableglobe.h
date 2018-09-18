@@ -34,6 +34,7 @@
 #include <modules/globebrowsing/rendering/layershadermanager.h>
 #include <modules/globebrowsing/rendering/gpu/gpulayermanager.h>
 #include <modules/globebrowsing/meshes/skirtedgrid.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
 
 namespace openspace::globebrowsing {
 
@@ -95,7 +96,7 @@ public:
 
 //private:
     Ellipsoid _ellipsoid;
-    std::shared_ptr<LayerManager> _layerManager;
+    LayerManager _layerManager;
     std::unique_ptr<Camera> _savedCamera;
 
     glm::dmat4 _cachedModelTransform;
@@ -211,10 +212,10 @@ public:
     bool _shadersNeedRecompilation = true;
 
 
-    LayerManager* layerManager() const;
+    const LayerManager& layerManager() const;
+    LayerManager& layerManager() ;
     const Ellipsoid& ellipsoid() const;
     const glm::dmat4& modelTransform() const;
-    const glm::dmat4& inverseModelTransform() const;
     Camera* savedCamera() const;
     double interactionDepthBelowEllipsoid();
 

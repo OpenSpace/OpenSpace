@@ -58,7 +58,7 @@ int addLayer(lua_State* L) {
     }
 
     // Get the renderable globe
-    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
+    RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
     if (!globe) {
         return ghoul::lua::luaError(L, "Renderable is not a globe: " + globeName);
     }
@@ -81,7 +81,7 @@ int addLayer(lua_State* L) {
     }
     lua_settop(L, 0);
 
-    std::shared_ptr<Layer> layer = globe->layerManager()->addLayer(groupID, d);
+    std::shared_ptr<Layer> layer = globe->layerManager().addLayer(groupID, d);
     if (layer) {
         layer->initialize();
     }
@@ -108,7 +108,7 @@ int deleteLayer(lua_State* L) {
     }
 
     // Get the renderable globe
-    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
+    RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
     if (!globe) {
         return ghoul::lua::luaError(L, "Renderable is not a globe: " + globeName);
     }
@@ -119,7 +119,7 @@ int deleteLayer(lua_State* L) {
         return ghoul::lua::luaError(L, "Unknown layer group: " + layerGroupName);
     }
 
-    globe->layerManager()->deleteLayer(groupID, layerName);
+    globe->layerManager().deleteLayer(groupID, layerName);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

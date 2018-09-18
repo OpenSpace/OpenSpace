@@ -47,17 +47,17 @@ class LayerManager : public properties::PropertyOwner  {
 public:
     BooleanType(PadTiles);
 
-    LayerManager(const ghoul::Dictionary& layerGroupsDict);
+    LayerManager();
 
-    void initialize();
+    void initialize(const ghoul::Dictionary& layerGroupsDict);
     void deinitialize();
 
     std::shared_ptr<Layer> addLayer(layergroupid::GroupID groupId,
         const ghoul::Dictionary& layerDict);
     void deleteLayer(layergroupid::GroupID groupId, const std::string& layerName);
 
-    const LayerGroup& layerGroup(size_t groupId);
-    const LayerGroup& layerGroup(layergroupid::GroupID);
+    const LayerGroup& layerGroup(size_t groupId) const;
+    const LayerGroup& layerGroup(layergroupid::GroupID) const;
 
     bool hasAnyBlendingLayersEnabled() const;
 
