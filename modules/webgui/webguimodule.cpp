@@ -41,6 +41,21 @@ namespace {
         "Enable Server Process",
         "Enable the node js based process used to serve the Web GUI."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo ServerProcessEntryPointInfo =
+    {
+        "ServerProcessEntryPoint",
+        "Server Process Entry Point",
+        "The node js command to invoke"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo
+        ServerProcessWorkingDirectoryInfo =
+    {
+        "ServerProcessWorkingDirectory",
+        "Server Process Working Directory",
+        "The working directory of the process"
+    };
 }
 
 namespace openspace {
@@ -48,26 +63,15 @@ namespace openspace {
 WebGuiModule::WebGuiModule()
     : OpenSpaceModule(WebGuiModule::Name)
     , _serverProcessEnabled(ServerProcessEnabledInfo, false)
+    , _serverProcessEntryPoint(ServerProcessEntryPointInfo)
+    , _serverProcessWorkingDirectory(ServerProcessWorkingDirectoryInfo)
 {
     addProperty(_serverProcessEnabled);
+    addProperty(_serverProcessEntryPoint);
+    addProperty(_serverProcessWorkingDirectory);
 }
 
-void WebGuiModule::internalInitialize(const ghoul::Dictionary& dictionary) {
-
-    // Node js is only launched by OpenSpace when the GUI is in `Production` mode.
-    // In `Development`, the developer is expected to run the GUI manually,
-    // using `npm start`.
-    _serverProcessEnabled =
-        !dictionary.hasValue<std::string>(ModeKey) ||
-        dictionary.value<std::string>(ModeKey) == ModeProduction;
-
-    if (!_serverProcessEnabled) {
-        LINFO(
-            "Web GUI running in development mode. "
-            "Use `npm start` in WebGui module to launch Web GUI."
-        );
-        return;
-    }
+void WebGuiModule::internalInitialize(const ghoul::Dictionary&) {
     const std::function<void()> startOrStop = [this]() {
         if (_serverProcessEnabled) {
             startProcess();
@@ -76,18 +80,25 @@ void WebGuiModule::internalInitialize(const ghoul::Dictionary& dictionary) {
         }
     };
 
+    const std::function<void()> restartIfEnabled = [this]() {
+        stopProcess();
+        if (_serverProcessEnabled) {
+            startProcess();
+        }
+    };
+
     _serverProcessEnabled.onChange(startOrStop);
+    _serverProcessEntryPoint.onChange(restartIfEnabled);
+    _serverProcessWorkingDirectory.onChange(restartIfEnabled);
     startOrStop();
 }
 
 void WebGuiModule::startProcess() {
     const std::string nodePath = absPath("${MODULE_WEBGUI}/ext/nodejs/node.exe");
-    const std::string scriptPath = absPath("${MODULE_WEBGUI}/ext/backend/dist/server.js");
-    const std::string workingDirectory = absPath("${MODULE_WEBGUI}/ext/backend");
 
     _process = std::make_unique<ghoul::Process>(
-        "\"" + nodePath + "\" \"" + scriptPath + "\"",
-        workingDirectory,
+        "\"" + nodePath + "\" \"" + _serverProcessEntryPoint.value() + "\"",
+        _serverProcessWorkingDirectory.value(),
         [](const char* data, size_t n) {
             const std::string str(data, n);
             LDEBUG(fmt::format("Web GUI server output: {}", str));

@@ -1,0 +1,36 @@
+local frontendHash = "2d0b69e4d08436514a4867fbaa8f93a55de6d612"
+local backendHash = "3e862a67ff2869d83187ad8bda05746b583d13d4"
+
+local backend = asset.syncedResource({
+    Identifier = "WebGuiBackend",
+    Name = "Web Gui Backend",
+    Type = "UrlSynchronization",
+    Url = "data.openspaceproject.com/files/webgui/backend/" ..  backendHash .. "/backend.js"
+})
+
+local frontend = asset.syncedResource({
+    Identifier = "WebGuiFrontend",
+    Name = "Web Gui Frontend",
+    Type = "UrlSynchronization",
+    Url = "data.openspaceproject.com/files/webgui/frontend/" ..  frontendHash .. "/frontend.zip"
+})
+
+local guiCustomization = asset.require('customization/gui')
+
+asset.onInitialize(function ()
+    if not guiCustomization.webguiDevemopmentMode then
+        openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEntryPoint", backend .. "/backend.js")
+        openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessWorkingDirectory", frontend .. "/frontend")
+        openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", true)
+    end
+
+    local dest = frontend .. "/frontend"
+    if not openspace.directoryExists(dest) then
+        openspace.unzipFile(frontend .. "/frontend.zip", dest, true)
+    end 
+
+end)
+
+asset.onDeinitialize(function ()
+    openspace.setPropertyValueSingle("Modules.WebGui.EnableServerProcess", false)
+end)

@@ -27,6 +27,7 @@
 
 #include <openspace/util/openspacemodule.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/stringproperty.h>
 
 #include <ghoul/misc/process.h>
 
@@ -44,6 +45,8 @@ protected:
 private:
     std::unique_ptr<ghoul::Process> _process;
     properties::BoolProperty _serverProcessEnabled;
+    properties::StringProperty _serverProcessEntryPoint;
+    properties::StringProperty _serverProcessWorkingDirectory;
 
     void startProcess();
     void stopProcess();
