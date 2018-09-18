@@ -34,6 +34,7 @@
 #include <modules/globebrowsing/rendering/gpu/gpulayermanager.h>
 #include <modules/globebrowsing/meshes/skirtedgrid.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <ghoul/opengl/uniformcache.h>
 
 namespace openspace::globebrowsing {
 
@@ -246,14 +247,18 @@ private:
 
 
     // Two different shader programs. One for global and one for local rendering.
-    //LayerShaderManager _globalLayerShaderManager;
-    //LayerShaderManager _localLayerShaderManager;
+    struct {
+        std::unique_ptr<ghoul::opengl::ProgramObject> program;
+        bool updatedSinceLastCall = false;
+        UniformCache(skirtLength, minLatLon, lonLatScalingFactor) uniformCache;
+    } _globalProgram;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _globalProgramObject;
-    bool _globalProgramObjectUpdatedSinceLastCall = false;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _localProgramObject;
-    bool _localProgramObjectUpdatedSinceLastCall = false;
-
+    struct {
+        std::unique_ptr<ghoul::opengl::ProgramObject> program;
+        bool updatedSinceLastCall = false;
+        UniformCache(skirtLength, p01, p11, p00, p10, patchNormalModelSpace, 
+            patchNormalCameraSpace) uniformCache;
+    } _localProgram;
 
 
 

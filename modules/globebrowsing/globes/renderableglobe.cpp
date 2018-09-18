@@ -395,14 +395,14 @@ void RenderableGlobe::deinitialize() {
 }
 
 void RenderableGlobe::deinitializeGL() {
-    if (_localProgramObject) {
-        global::renderEngine.removeRenderProgram(_localProgramObject.get());
-        _localProgramObject  = nullptr;
+    if (_localProgram.program) {
+        global::renderEngine.removeRenderProgram(_localProgram.program.get());
+        _localProgram.program = nullptr;
     }
 
-    if (_globalProgramObject) {
-        global::renderEngine.removeRenderProgram(_globalProgramObject.get());
-        _globalProgramObject = nullptr;
+    if (_globalProgram.program) {
+        global::renderEngine.removeRenderProgram(_globalProgram.program.get());
+        _globalProgram.program = nullptr;
     }
 }
 
@@ -476,14 +476,14 @@ void RenderableGlobe::update(const UpdateData& data) {
     // Setting frame-const uniforms that are not view dependent
     //
 
-    if (_globalProgramObjectUpdatedSinceLastCall) {
-        _globalGpuLayerManager.bind(_globalProgramObject.get(), _layerManager);
-        _globalProgramObjectUpdatedSinceLastCall = false;
+    if (_globalProgram.updatedSinceLastCall) {
+        _globalGpuLayerManager.bind(_globalProgram.program.get(), _layerManager);
+        _globalProgram.updatedSinceLastCall = false;
     }
 
-    if (_localProgramObjectUpdatedSinceLastCall) {
-        _localGpuLayerManager.bind(_localProgramObject.get(), _layerManager);
-        _localProgramObjectUpdatedSinceLastCall = false;
+    if (_localProgram.updatedSinceLastCall) {
+        _localGpuLayerManager.bind(_localProgram.program.get(), _layerManager);
+        _localProgram.updatedSinceLastCall = false;
     }
 
     if (_layerManager.hasAnyBlendingLayersEnabled()) {
@@ -491,16 +491,16 @@ void RenderableGlobe::update(const UpdateData& data) {
             const float distanceScaleFactor = static_cast<float>(
                 _generalProperties.lodScaleFactor * _ellipsoid.minimumRadius()
             );
-            _globalProgramObject->setUniform("distanceScaleFactor", distanceScaleFactor);
-            _localProgramObject->setUniform("distanceScaleFactor", distanceScaleFactor);
+            _globalProgram.program->setUniform("distanceScaleFactor", distanceScaleFactor);
+            _localProgram.program->setUniform("distanceScaleFactor", distanceScaleFactor);
             _lodScaleFactorDirty = false;
         }
     }
 
     if (_generalProperties.performShading) {
         const bool onr = _generalProperties.orenNayarRoughness;
-        _localProgramObject->setUniform("orenNayarRoughness", onr);
-        _globalProgramObject->setUniform("orenNayarRoughness", onr);
+        _localProgram.program->setUniform("orenNayarRoughness", onr);
+        _globalProgram.program->setUniform("orenNayarRoughness", onr);
     }
 }
 
@@ -526,7 +526,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
             _cachedInverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1.0)
         );
 
-        _globalProgramObject->setUniform("cameraPosition", glm::vec3(cameraPosition));
+        _globalProgram.program->setUniform("cameraPosition", glm::vec3(cameraPosition));
     }
 
     const glm::mat4 modelViewTransform = glm::mat4(viewTransform * _cachedModelTransform);
@@ -534,7 +534,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
         data.camera.sgctInternal.projectionMatrix() * modelViewTransform;
 
     // Upload the uniform variables
-    _globalProgramObject->setUniform(
+    _globalProgram.program->setUniform(
         "modelViewProjectionTransform",
         modelViewProjectionTransform
     );
@@ -547,7 +547,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
         layergroupid::GroupID::WaterMasks
     ).activeLayers().empty();
     if (hasNightLayers || hasWaterLayer || _generalProperties.performShading) {
-        _globalProgramObject->setUniform("modelViewTransform", modelViewTransform);
+        _globalProgram.program->setUniform("modelViewTransform", modelViewTransform);
     }
 
     const bool hasHeightLayer = !_layerManager.layerGroup(
@@ -555,7 +555,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     ).activeLayers().empty();
     if (_generalProperties.useAccurateNormals && hasHeightLayer) {
         // Apply an extra scaling to the height if the object is scaled
-        _globalProgramObject->setUniform(
+        _globalProgram.program->setUniform(
             "heightScale",
             static_cast<float>(data.modelTransform.scale * data.camera.scaling())
         );
@@ -574,7 +574,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
 
         const glm::vec3 directionToSunCameraSpace = glm::vec3(viewTransform *
             glm::dvec4(directionToSunWorldSpace, 0));
-        _globalProgramObject->setUniform(
+        _globalProgram.program->setUniform(
             "lightDirectionCameraSpace",
             -glm::normalize(directionToSunCameraSpace)
         );
@@ -582,7 +582,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
 
 
     // Local shader
-    _localProgramObject->setUniform(
+    _localProgram.program->setUniform(
         "projectionTransform",
         data.camera.sgctInternal.projectionMatrix()
     );
@@ -595,7 +595,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
 
         const glm::vec3 directionToSunCameraSpace = glm::vec3(viewTransform *
             glm::dvec4(directionToSunWorldSpace, 0));
-        _localProgramObject->setUniform(
+        _localProgram.program->setUniform(
             "lightDirectionCameraSpace",
             -glm::normalize(directionToSunCameraSpace)
         );
@@ -606,21 +606,20 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     {
         // This should not be needed once the light calculations for the atmosphere
         // is performed in view space..
-        _localProgramObject->setUniform(
+        _localProgram.program->setUniform(
             "invViewModelTransform",
             glm::inverse(
                 glm::mat4(data.camera.combinedViewMatrix()) *
                 glm::mat4(_cachedModelTransform)
             )
         );
-        _globalProgramObject->setUniform(
+        _globalProgram.program->setUniform(
             "invViewModelTransform",
             glm::inverse(
                 glm::mat4(data.camera.combinedViewMatrix()) *
                 glm::mat4(_cachedModelTransform)
             )
         );
-
     }
 
     int count = 0;
@@ -656,7 +655,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
 
 void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& data) {
     const TileIndex& tileIndex = chunk.tileIndex();
-    ghoul::opengl::ProgramObject& program = *_globalProgramObject;
+    ghoul::opengl::ProgramObject& program = *_globalProgram.program;
 
     // Activate the shader program
     program.activate();
@@ -665,7 +664,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 
     // The length of the skirts is proportional to its size
     program.setUniform(
-        "skirtLength",
+        _globalProgram.uniformCache.skirtLength,
         static_cast<float>(
             glm::min(
                 chunk.surfacePatch().halfSize().lat * 1000000,
@@ -682,8 +681,8 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     const Geodetic2 swCorner = chunk.surfacePatch().corner(Quad::SOUTH_WEST);
     const Geodetic2& patchSize = chunk.surfacePatch().size();
 
-    program.setUniform("minLatLon", glm::vec2(swCorner.toLonLatVec2()));
-    program.setUniform("lonLatScalingFactor", glm::vec2(patchSize.toLonLatVec2()));
+    program.setUniform(_globalProgram.uniformCache.minLatLon, glm::vec2(swCorner.toLonLatVec2()));
+    program.setUniform(_globalProgram.uniformCache.lonLatScalingFactor, glm::vec2(patchSize.toLonLatVec2()));
 
     setCommonUniforms(program, chunk, data);
 
@@ -702,7 +701,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 
 void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& data) {
     const TileIndex& tileIndex = chunk.tileIndex();
-    ghoul::opengl::ProgramObject& program = *_localProgramObject;
+    ghoul::opengl::ProgramObject& program = *_localProgram.program;
 
     // Activate the shader program
     program.activate();
@@ -711,7 +710,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
     // The length of the skirts is proportional to its size
     program.setUniform(
-        "skirtLength",
+        _localProgram.uniformCache.skirtLength,
         static_cast<float>(
             glm::min(
                 chunk.surfacePatch().halfSize().lat * 1000000,
@@ -733,10 +732,6 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     std::array<glm::dvec3, 4> cornersCameraSpace;
     std::array<glm::dvec3, 4> cornersModelSpace;
     for (int i = 0; i < 4; ++i) {
-        constexpr const std::array<const char*, 4> CornerNames = {
-            "p01", "p11", "p00", "p10"
-        };
-
         const Quad q = static_cast<Quad>(i);
         const Geodetic2 corner = chunk.surfacePatch().corner(q);
         const glm::dvec3 cornerModelSpace = _ellipsoid.cartesianSurfacePosition(corner);
@@ -745,9 +740,11 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
             modelViewTransform * glm::dvec4(cornerModelSpace, 1)
         );
         cornersCameraSpace[i] = cornerCameraSpace;
-        program.setUniform(CornerNames[i], glm::vec3(cornerCameraSpace));
-
     }
+    _localProgram.program->setUniform(_localProgram.uniformCache.p01, glm::vec3(cornersCameraSpace[0]));
+    _localProgram.program->setUniform(_localProgram.uniformCache.p11, glm::vec3(cornersCameraSpace[1]));
+    _localProgram.program->setUniform(_localProgram.uniformCache.p00, glm::vec3(cornersCameraSpace[2]));
+    _localProgram.program->setUniform(_localProgram.uniformCache.p10, glm::vec3(cornersCameraSpace[3]));
 
     // TODO: Patch normal can be calculated for all corners and then linearly
     // interpolated on the GPU to avoid cracks for high altitudes.
@@ -767,8 +764,8 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         )
     );
 
-    program.setUniform("patchNormalModelSpace", patchNormalModelSpace);
-    program.setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
+    program.setUniform(_localProgram.uniformCache.patchNormalModelSpace, patchNormalModelSpace);
+    program.setUniform(_localProgram.uniformCache.patchNormalCameraSpace, patchNormalCameraSpace);
 
     if (!_layerManager.layerGroup(layergroupid::HeightLayers).activeLayers().empty()) {
         // Apply an extra scaling to the height if the object is scaled
@@ -946,52 +943,63 @@ void RenderableGlobe::recompileShaders() {
     //
     // Create local shader
     //
-    global::renderEngine.removeRenderProgram(_localProgramObject.get());
-    _localProgramObject = global::renderEngine.buildRenderProgram(
+    global::renderEngine.removeRenderProgram(_localProgram.program.get());
+    _localProgram.program = global::renderEngine.buildRenderProgram(
         "LocalChunkedLodPatch",
         "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl",
         "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl",
         shaderDictionary
     );
     ghoul_assert(_localProgramObject != nullptr, "Failed to initialize programObject!");
-    _localProgramObjectUpdatedSinceLastCall = true;
+    _localProgram.updatedSinceLastCall = true;
 
-    _localProgramObject->setUniform("xSegments", _grid.xSegments());
+    _localProgram.program->setUniform("xSegments", _grid.xSegments());
 
     if (_debugProperties.showHeightResolution) {
-        _localProgramObject->setUniform(
+        _localProgram.program->setUniform(
             "vertexResolution",
             glm::vec2(_grid.xSegments(), _grid.ySegments())
         );
     }
 
+    ghoul::opengl::updateUniformLocations(
+        *_localProgram.program,
+        _localProgram.uniformCache,
+        { "skirtLength", "p01", "p11", "p00", "p10", "patchNormalModelSpace",
+          "patchNormalCameraSpace" }
+    );
 
 
     //
     // Create global shader
     //
-    global::renderEngine.removeRenderProgram(_globalProgramObject.get());
-    _globalProgramObject = global::renderEngine.buildRenderProgram(
+    global::renderEngine.removeRenderProgram(_globalProgram.program.get());
+    _globalProgram.program = global::renderEngine.buildRenderProgram(
         "GlobalChunkedLodPatch",
         "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_vs.glsl",
         "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_fs.glsl",
         shaderDictionary
     );
-    ghoul_assert(_globalProgramObject != nullptr, "Failed to initialize programObject!");
+    ghoul_assert(_globalProgram.program != nullptr, "Failed to initialize programObject!");
 
-    _globalProgramObject->setUniform("xSegments", _grid.xSegments());
+    _globalProgram.program->setUniform("xSegments", _grid.xSegments());
 
     if (_debugProperties.showHeightResolution) {
-        _globalProgramObject->setUniform(
+        _globalProgram.program->setUniform(
             "vertexResolution",
             glm::vec2(_grid.xSegments(), _grid.ySegments())
         );
     }
     // Ellipsoid Radius (Model Space)
-    _globalProgramObject->setUniform("radiiSquared", glm::vec3(_ellipsoid.radiiSquared()));
+    _globalProgram.program->setUniform("radiiSquared", glm::vec3(_ellipsoid.radiiSquared()));
 
+    ghoul::opengl::updateUniformLocations(
+        *_globalProgram.program,
+        _globalProgram.uniformCache,
+        { "skirtLength", "minLatLon", "lonLatScalingFactor" }
+    );
 
-    _globalProgramObjectUpdatedSinceLastCall = true;
+    _globalProgram.updatedSinceLastCall = true;
 
     _shadersNeedRecompilation = false;
 }
