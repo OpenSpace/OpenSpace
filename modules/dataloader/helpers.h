@@ -6,4 +6,6 @@ namespace openspace::dataloader::helpers {
     std::string getFileWithExtensionFromItemFolder(std::string absPathToItem, std::string extension);
 
     std::string getFileBaseName(std::string absPathToFile);
+
+    void replaceDoubleBackslashesWithForward(std::string &path);
 }

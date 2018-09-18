@@ -46,7 +46,7 @@ namespace filesystem
 {
 class Directory;
 }
-}
+} // namespace ghoul
 
 namespace openspace
 {
@@ -66,6 +66,7 @@ class Loader : public PropertyOwner, public Operator
 {
 public:
   Loader();
+  ~Loader();
 
   // Select file data path
   void selectData();
@@ -110,6 +111,7 @@ private:
   void copyTfFileToItemDir();
   void runConversionTask();
   Directory getAssetFolderDirectory();
+  void createAssetFile(ghoul::Dictionary assetDictionary);
 };
 
 } // namespace dataloader

@@ -78,4 +78,9 @@ std::string getFileBaseName(std::string file)
         return "";
     }
 }
+
+void replaceDoubleBackslashesWithForward(std::string& path)
+{
+    std::replace(path.begin(), path.end(), '\\', '/');
+}
 } // namespace openspace::dataloader::helpers
