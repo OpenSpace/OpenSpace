@@ -250,7 +250,8 @@ private:
     struct {
         std::unique_ptr<ghoul::opengl::ProgramObject> program;
         bool updatedSinceLastCall = false;
-        UniformCache(skirtLength, minLatLon, lonLatScalingFactor) uniformCache;
+        UniformCache(skirtLength, minLatLon, lonLatScalingFactor,
+            orenNayarRoughness) uniformCache;
 
         std::vector<std::unique_ptr<GPULayerGroup>> gpuLayerGroups;
     } _globalRenderer;
@@ -259,7 +260,7 @@ private:
         std::unique_ptr<ghoul::opengl::ProgramObject> program;
         bool updatedSinceLastCall = false;
         UniformCache(skirtLength, p01, p11, p00, p10, patchNormalModelSpace, 
-            patchNormalCameraSpace) uniformCache;
+            patchNormalCameraSpace, orenNayarRoughness) uniformCache;
 
         std::vector<std::unique_ptr<GPULayerGroup>> gpuLayerGroups;
     } _localRenderer;

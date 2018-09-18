@@ -65,7 +65,8 @@
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
-
+#include <openspace/performance/performancemanager.h>
+#include <openspace/performance/performancemeasurement.h>
 
 namespace {
     constexpr const char* keyFrame = "Frame";
@@ -433,7 +434,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
         // view is 'fov' radians and the screen resolution is 'res' pixels.
         //constexpr double fov = 2 * glm::pi<double>() / 6; // 60 degrees
         //constexpr double tfov = tan(fov / 2.0); // doesn't work unfortunately
-        const double tfov = 0.5773502691896257;
+        constexpr double tfov = 0.5773502691896257;
         constexpr int res = 2880;
         const double distance = res * boundingSphere() / tfov;
 
@@ -484,8 +485,14 @@ void RenderableGlobe::update(const UpdateData& data) {
 
     if (_generalProperties.performShading) {
         const bool onr = _generalProperties.orenNayarRoughness;
-        _localRenderer.program->setUniform("orenNayarRoughness", onr);
-        _globalRenderer.program->setUniform("orenNayarRoughness", onr);
+        _localRenderer.program->setUniform(
+            _localRenderer.uniformCache.orenNayarRoughness,
+            onr
+        );
+        _globalRenderer.program->setUniform(
+            _globalRenderer.uniformCache.orenNayarRoughness,
+            onr
+        );
     }
 }
 
@@ -495,8 +502,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     }
 
     if (_globalRenderer.updatedSinceLastCall) {
-        //_globalGpuLayerManager.bind(_globalRenderer.program.get(), _layerManager);
-
         const std::vector<std::shared_ptr<LayerGroup>>& layerGroups = _layerManager.layerGroups();
         if (_globalRenderer.gpuLayerGroups.size() != layerGroups.size()) {
             _globalRenderer.gpuLayerGroups.resize(layerGroups.size());
@@ -519,8 +524,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     }
 
     if (_localRenderer.updatedSinceLastCall) {
-        //_localGpuLayerManager.bind(_localRenderer.program.get(), _layerManager);
-
         const std::vector<std::shared_ptr<LayerGroup>>& layerGroups = _layerManager.layerGroups();
         if (_localRenderer.gpuLayerGroups.size() != layerGroups.size()) {
             _localRenderer.gpuLayerGroups.resize(layerGroups.size());
@@ -1012,7 +1015,7 @@ void RenderableGlobe::recompileShaders() {
         *_localRenderer.program,
         _localRenderer.uniformCache,
         { "skirtLength", "p01", "p11", "p00", "p10", "patchNormalModelSpace",
-          "patchNormalCameraSpace" }
+          "patchNormalCameraSpace", "orenNayarRoughness" }
     );
 
 
@@ -1042,7 +1045,7 @@ void RenderableGlobe::recompileShaders() {
     ghoul::opengl::updateUniformLocations(
         *_globalRenderer.program,
         _globalRenderer.uniformCache,
-        { "skirtLength", "minLatLon", "lonLatScalingFactor" }
+        { "skirtLength", "minLatLon", "lonLatScalingFactor", "orenNayarRoughness" }
     );
 
     _globalRenderer.updatedSinceLastCall = true;
