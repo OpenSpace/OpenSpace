@@ -290,10 +290,10 @@ void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray,
  */
 vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor,
                        const vec3 v, const vec3 s, out float r, out float mu,
-                       out vec3 attenuation, const vec3 fragPosObj,
+                       out vec3 attenuation, const vec3 fragPosObj, out bool groundHit,
                        const double maxLength, const double pixelDepth,
                        const vec4 spaceColor, const float sunIntensity,
-                       out bool groundHit) {
+                       const float Rt2, const float Rg2) {
 
     const float INTERPOLATION_EPS = 0.004f; // precision const from Brunetton
 
@@ -304,8 +304,6 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
 
     float mu2           = mu * mu;
     float r2            = r * r;
-    float Rt2           = Rt * Rt;
-    float Rg2           = Rg * Rg;
     float nu            = dot(v, s);
     float muSun         = dot(x, s) / r;
     float rayleighPhase = rayleighPhaseFunction(nu);
@@ -327,7 +325,6 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     //vec3  x0     = x + float(pixelDepth) * v;      
     float mu0    = dot(x0, v) * invr0;
 
-    //bool groundHit = false;
     if ((pixelDepth > INTERPOLATION_EPS) && (pixelDepth < maxLength)) {
         t = float(pixelDepth);  
         groundHit = true;
@@ -352,6 +349,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     } else {
         attenuation = analyticTransmittance(r, mu, t);
         //attenuation = transmittance(r, mu, t); 
+        groundHit = false;
     }
 
     // cos(PI-thetaH) = dist/r
@@ -446,7 +444,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
 vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const float r,
                  const float mu, const vec3 attenuationXtoX0, const vec4 groundColor, 
                  const vec3 normal, const float irradianceFactor,
-                 const float waterReflectance, const float sunIntensity)
+                 const float waterReflectance, const float sunIntensity, const float Rg2)
 {
     vec3 reflectedRadiance = vec3(0.0f);
 
@@ -467,7 +465,7 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
     float muSun = max(dotNS, 0.0f);
 
     // Is direct Sun light arriving at x0? If not, there is no direct light from Sun (shadowed)
-    vec3  transmittanceL0     = muSun < -sqrt(1.0f - ((Rg * Rg) / (r0 * r0))) ? 
+    vec3  transmittanceL0     = muSun < -sqrt(1.0f - (Rg2 / (r0 * r0))) ? 
                                 vec3(0.0f) : transmittanceLUT(r0, muSun);
     // E[L*] at x0
     vec3  irradianceReflected = irradiance(irradianceTexture, r0, muSun) * irradianceFactor;
@@ -484,10 +482,8 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
         groundRadiance = groundReflectance.rgb * RLStar;
     }
 
-    //groundRadiance = groundReflectance.rgb * RLStar;
-
     // Specular reflection from sun on oceans and rivers  
-    if ((waterReflectance > 0.1) && /*(dotNS > -0.2f)*/(muSun > 0.0)) {
+    if ((waterReflectance > 0.1f) && /*(dotNS > -0.2f)*/(muSun > 0.0f)) {
         vec3  h         = normalize(s - v);
         // Fresnell Schlick's approximation
         float fresnel   = 0.02f + 0.98f * pow(1.0f - dot(-v, h), 5.0f);
@@ -495,7 +491,7 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
         float waterBrdf = fresnel * pow(max(dot(h, n), 0.0f), 150.0f);
         // Adding Fresnell and Water BRDFs approximation to the final surface color
         // (After adding the sunRadiance and the attenuation of the Sun through atmosphere)
-        groundRadiance += waterReflectance * max(waterBrdf, 0.0) * transmittanceL0 * sunIntensity;
+        groundRadiance += waterReflectance * max(waterBrdf, 0.0f) * transmittanceL0 * sunIntensity;
     }
     //return groundRadiance;  
     // Finally, we attenuate the surface Radiance from the the point x0 to the camera location.
@@ -523,12 +519,12 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
  * attenuation := transmittance T(x,x0)
  */
 vec3 sunColor(const vec3 x, const float t, const vec3 v, const vec3 s, const float r,
-              const float mu, const float irradianceFactor) {
-    vec3 transmittance  = (r <= Rt) ? ( mu < -sqrt(1.0f - (Rg*Rg)/(r*r)) ? 
+              const float mu, const float irradianceFactor, const float Rg2 ) {
+    vec3 transmittance  = (r <= Rt) ? ( mu < -sqrt(1.0f - Rg2/(r*r)) ? 
                           vec3(0.0f) : transmittanceLUT(r, mu)) : vec3(1.0f);  
     // JCC: Change this function to a impostor texture with gaussian decay color weighted
     // by tge sunRadiance, transmittance and irradianceColor (11/03/2017)                          
-    float sunFinalColor = step(cos(M_PI / 650.0), dot(v, s)) * sunRadiance * (1.0 - irradianceFactor); 
+    float sunFinalColor = step(cos(M_PI / 650.0f), dot(v, s)) * sunRadiance * (1.0f- irradianceFactor); 
 
     return transmittance * sunFinalColor;      
 }
@@ -544,38 +540,6 @@ void main() {
         bool complex = false;
         vec4 oldColor, currentColor;
         vec4 colorArray[16];
-        //int colorIndexArray[16];
-        /*
-        oldColor = texelFetch(mainColorTexture, fragCoords, 0);        
-        //colorArray[0] = oldColor;
-        //colorIndexArray[0] = 0;
-        for (int i = 1; i < nAaSamples; i++) {
-            //vec4 normal = texelFetch(mainNormalTexture, fragCoords, i);
-            vec4 currentColor  = texelFetch(mainColorTexture, fragCoords, i);
-            //colorArray[i] = currentColor;
-            if (currentColor != oldColor) {
-                complex = true;
-                //nSamples = nAaSamples;
-                nSamples = nAaSamples > 1 ? nAaSamples / 2 : nAaSamples;
-                break;
-                // for (int c = 0; c < nAaSamples; c++) {
-                //     if (currentColor == colorArray[c]) {
-                //         colorIndexArray[i] = c;
-                //         break;
-                //     }
-                // }                
-            } 
-            //else {
-            //     for (int c = 0; c < nAaSamples; c++) {
-            //         if (currentColor == colorArray[c]) {
-            //             colorIndexArray[i] = c;
-            //             break;
-            //         }
-            //     }
-            // }            
-            oldColor = currentColor;
-        }
-        */
         
         colorArray[0] = texelFetch(mainColorTexture, fragCoords, 0);        
         for (int i = 1; i < nAaSamples; i++) {
@@ -586,7 +550,11 @@ void main() {
         }
         nSamples = complex ? nAaSamples / 2 : 1;
         
-        //nSamples = nAaSamples;
+        // Performance variables:
+        float Rt2 = Rt * Rt; // in Km
+        float Rg2 = Rg * Rg; // in Km
+
+
         for (int i = 0; i < nSamples; i++) {
             // Color from G-Buffer
             //vec4 color = texelFetch(mainColorTexture, fragCoords, i);
@@ -608,11 +576,11 @@ void main() {
             bool  intersectATM = false;
 
             intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, ray,  
-                                                  Rt - (ATM_EPSILON * 0.001), insideATM, offset, maxLength );
+                                                  Rt - (ATM_EPSILON * 0.001), insideATM, offset, maxLength);
                
             if ( intersectATM ) {
                 // Now we check is if the atmosphere is occluded, i.e., if the distance to the pixel 
-                // in the depth buffer is less than the distance to the atmosphere then the atmosphere
+                // in the G-Buffer positions is less than the distance to the atmosphere then the atmosphere
                 // is occluded
                 // Fragments positions into G-Buffer are written in SGCT Eye Space (View plus Camera Rig Coords)
                 // when using their positions later, one must convert them to the planet's coords
@@ -656,8 +624,8 @@ void main() {
                 positionObjectsCoords.xyz *= 0.001;
                 
                 if (position.xyz != vec3(0.0) && (pixelDepth < offset)) {
+                    // ATM Occluded - Something in fron of ATM.
                     atmosphereFinalColor += vec4(HDR(color.xyz * backgroundConstant, atmExposure), color.a);                  
-                    //discard;
                 } else {
                     // Following paper nomenclature      
                     double t = offset;                  
@@ -674,7 +642,7 @@ void main() {
                     float tF = float(maxLength - t);
 
                     // Because we may move the camera origin to the top of atmosphere 
-                    // we also need to adjust the pixelDepth for tdCalculateRayRenderableGlobehis offset so the
+                    // we also need to adjust the pixelDepth for tdCalculateRayRenderableGlobe' offset so the
                     // next comparison with the planet's ground make sense:
                     pixelDepth -= offset;
                     
@@ -691,29 +659,26 @@ void main() {
                     vec3 inscatterColor = inscatterRadiance(x, tF, irradianceFactor, v,
                                                             s, r, mu, attenuation, 
                                                             vec3(positionObjectsCoords.xyz),
-                                                            maxLength, pixelDepth,
+                                                            groundHit, maxLength, pixelDepth,
                                                             color, sunIntensityInscatter,
-                                                            groundHit); 
-                    vec3 fGroundColor = vec3(0.0);
+                                                            Rt2, Rg2); 
+                    vec3 groundColorV = vec3(0.0);
+                    vec3 sunColorV = vec3(0.0);                                                
                     if (groundHit) {
-                        fGroundColor = groundColor(x, tF, v, s, r, mu, attenuation, 
-                                                  color, normal.xyz, irradianceFactor, 
-                                                  normal.a, sunIntensityGround);
+                        groundColorV = groundColor(x, tF, v, s, r, mu, attenuation,
+                                                   color, normal.xyz, irradianceFactor, 
+                                                   normal.a, sunIntensityGround, Rg2);
                     } else {
+                        // In order to get better performance, we are not tracing
+                        // multiple rays per pixel when the ray doesn't intersect
+                        // the ground.
+                        sunColorV = sunColor(x, tF, v, s, r, mu, irradianceFactor, Rg2); 
                         nSamples = 1;
                         complex = false;
-                        fGroundColor = vec3(1.0, 1.0, 0.0);
-                        discard;
-                    }                                                            
-                    
-                    // vec3 fGroundColor = groundColor(x, tF, v, s, r, mu, attenuation, 
-                    //                               color, normal.xyz, irradianceFactor, 
-                    //                               normal.a, sunIntensityGround);
-
-                    vec3 sunColor = sunColor(x, tF, v, s, r, mu, irradianceFactor);
+                    } 
                     
                     // Final Color of ATM plus terrain:
-                    vec4 finalRadiance  = vec4(HDR(inscatterColor + fGroundColor + sunColor, atmExposure), 1.0);
+                    vec4 finalRadiance = vec4(HDR(inscatterColor + groundColorV + sunColorV, atmExposure), 1.0);
                     
                     atmosphereFinalColor += finalRadiance;
                 }
