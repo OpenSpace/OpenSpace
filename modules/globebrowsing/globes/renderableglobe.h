@@ -31,7 +31,6 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <modules/globebrowsing/rendering/layershadermanager.h>
 #include <modules/globebrowsing/rendering/gpu/gpulayermanager.h>
 #include <modules/globebrowsing/meshes/skirtedgrid.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
@@ -73,6 +72,7 @@ public:
 
     void initializeGL() override;
     void deinitialize() override;
+    void deinitializeGL() override;
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
@@ -100,7 +100,6 @@ public:
 
     struct {
         properties::BoolProperty performShading;
-        properties::BoolProperty atmosphereEnabled;
         properties::BoolProperty useAccurateNormals;
         properties::BoolProperty eclipseShadowsEnabled;
         properties::BoolProperty eclipseHardShadows;
@@ -161,13 +160,7 @@ public:
      * called. The actual shader recompilation takes place in the render function because
      * properties that the shader depends on need to be properly synced.
      */
-    void notifyShaderRecompilation();
-
-    /**
-     * Directly recompile the shaders of the renderer.
-     */
-    void recompileShaders();
-
+    //void notifyShaderRecompilation();
 
 
     const LayerManager& layerManager() const;
@@ -226,15 +219,21 @@ private:
      */
     void renderChunkLocally(const Chunk& chunk, const RenderData& data);
 
-    ghoul::opengl::ProgramObject* getActivatedProgramWithTileData(
-        LayerShaderManager& layeredShaderManager, GPULayerManager& gpuLayerManager,
-        const Chunk& chunk);
+    //ghoul::opengl::ProgramObject* getActivatedProgramWithTileData(
+    //    ghoul::opengl::ProgramObject& programObject, bool& updatedSinceLastCall, GPULayerManager& gpuLayerManager,
+    //    const Chunk& chunk);
 
     void calculateEclipseShadows(const Chunk& chunk,
         ghoul::opengl::ProgramObject* programObject, const RenderData& data);
 
     void setCommonUniforms(ghoul::opengl::ProgramObject& programObject,
         const Chunk& chunk, const RenderData& data);
+
+
+    /**
+     * Directly recompile the shaders of the renderer.
+     */
+    void recompileShaders();
 
 
 
@@ -258,8 +257,17 @@ private:
 
 
     // Two different shader programs. One for global and one for local rendering.
-    LayerShaderManager _globalLayerShaderManager;
-    LayerShaderManager _localLayerShaderManager;
+    //LayerShaderManager _globalLayerShaderManager;
+    //LayerShaderManager _localLayerShaderManager;
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _globalProgramObject;
+    bool _globalProgramObjectUpdatedSinceLastCall = false;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _localProgramObject;
+    bool _localProgramObjectUpdatedSinceLastCall = false;
+
+
+
+
 
     // Layered texture uniforms are chached in the uniform ID handles.
     GPULayerManager _globalGpuLayerManager;

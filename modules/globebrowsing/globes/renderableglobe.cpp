@@ -56,6 +56,16 @@
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <openspace/util/updatestructures.h>
+#include <modules/globebrowsing/chunk/chunk.h>
+#include <modules/globebrowsing/globes/renderableglobe.h>
+#include <modules/globebrowsing/rendering/layer/layer.h>
+#include <modules/globebrowsing/rendering/layer/layergroup.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <openspace/engine/globals.h>
+#include <openspace/rendering/renderengine.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/programobject.h>
+
 
 namespace {
     constexpr const char* keyFrame = "Frame";
@@ -158,12 +168,6 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AtmosphereInfo = {
-        "Atmosphere",
-        "Atmosphere",
-        "" // @TODO Missing documentation
-    };
-
     constexpr openspace::properties::Property::PropertyInfo AccurateNormalsInfo = {
         "UseAccurateNormals",
         "Use Accurate Normals",
@@ -223,7 +227,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     })
     , _generalProperties({
         BoolProperty(PerformShadingInfo, true),
-        BoolProperty(AtmosphereInfo, false),
         BoolProperty(AccurateNormalsInfo, false),
         BoolProperty(EclipseInfo, false),
         BoolProperty(EclipseHardShadowsInfo, false),
@@ -234,16 +237,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _debugPropertyOwner({ "Debug" })
     , _leftRoot(std::make_unique<ChunkNode>(Chunk(*this, LeftHemisphereIndex)))
     , _rightRoot(std::make_unique<ChunkNode>(Chunk(*this, RightHemisphereIndex)))
-    , _globalLayerShaderManager(
-        "GlobalChunkedLodPatch",
-        "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_vs.glsl",
-        "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_fs.glsl"
-    )
-    , _localLayerShaderManager(
-        "LocalChunkedLodPatch",
-        "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl",
-        "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl"
-    )
     , _grid(DefaultSkirtedGridSegments,
         DefaultSkirtedGridSegments,
         TriangleSoup::Positions::No,
@@ -275,7 +268,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 
     _layerManager.initialize(layersDictionary);
 
-    addProperty(_generalProperties.atmosphereEnabled);
     addProperty(_generalProperties.performShading);
     addProperty(_generalProperties.useAccurateNormals);
     addProperty(_generalProperties.eclipseShadowsEnabled);
@@ -300,9 +292,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
 
     auto notifyShaderRecompilation = [&](){
-        this->notifyShaderRecompilation();
+        _shadersNeedRecompilation = true;
     };
-    _generalProperties.atmosphereEnabled.onChange(notifyShaderRecompilation);
     _generalProperties.useAccurateNormals.onChange(notifyShaderRecompilation);
     _generalProperties.eclipseShadowsEnabled.onChange(notifyShaderRecompilation);
     _generalProperties.eclipseHardShadows.onChange(notifyShaderRecompilation);
@@ -402,6 +393,18 @@ void RenderableGlobe::deinitialize() {
     _layerManager.deinitialize();
 }
 
+void RenderableGlobe::deinitializeGL() {
+    if (_localProgramObject) {
+        global::renderEngine.removeRenderProgram(_localProgramObject.get());
+        _localProgramObject  = nullptr;
+    }
+
+    if (_globalProgramObject) {
+        global::renderEngine.removeRenderProgram(_globalProgramObject.get());
+        _globalProgramObject = nullptr;
+    }
+}
+
 bool RenderableGlobe::isReady() const {
     return true;
 }
@@ -444,12 +447,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 
 void RenderableGlobe::update(const UpdateData& data) {
     if (_shadersNeedRecompilation) {
-        LayerShaderManager::LayerShaderPreprocessingData preprocessingData =
-            LayerShaderManager::LayerShaderPreprocessingData::get(*this);
-        _globalLayerShaderManager.recompileShaderProgram(preprocessingData);
-        _localLayerShaderManager.recompileShaderProgram(preprocessingData);
-
-        _shadersNeedRecompilation = false;
+        recompileShaders();
     }
 
 
@@ -508,11 +506,436 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     LINFOC(identifier(), std::to_string(count));
 }
 
+void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& data) {
+    const TileIndex& tileIndex = chunk.tileIndex();
+    ghoul::opengl::ProgramObject& program = *_globalProgramObject;
+
+    if (_globalProgramObjectUpdatedSinceLastCall) {
+        _globalGpuLayerManager.bind(&program, _layerManager);
+        _globalProgramObjectUpdatedSinceLastCall = false;
+    }
+
+    // Activate the shader program
+    program.activate();
+
+    _globalGpuLayerManager.setValue(&program, _layerManager, tileIndex);
+
+    // The length of the skirts is proportional to its size
+    program.setUniform(
+        "skirtLength",
+        static_cast<float>(
+            glm::min(
+                chunk.surfacePatch().halfSize().lat * 1000000,
+                _ellipsoid.minimumRadius()
+            )
+            )
+    );
+
+    program.setUniform("xSegments", _grid.xSegments());
+
+    if (_debugProperties.showHeightResolution) {
+        program.setUniform(
+            "vertexResolution",
+            glm::vec2(_grid.xSegments(), _grid.ySegments())
+        );
+    }
+
+
+    if (_layerManager.hasAnyBlendingLayersEnabled()) {
+        // Calculations are done in the reference frame of the globe. Hence, the
+        // camera position needs to be transformed with the inverse model matrix
+        const glm::dvec3 cameraPosition = glm::dvec3(
+            _cachedInverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1.0)
+        );
+        const float distanceScaleFactor = static_cast<float>(
+            _generalProperties.lodScaleFactor * _ellipsoid.minimumRadius()
+        );
+        program.setUniform("cameraPosition", glm::vec3(cameraPosition));
+        program.setUniform("distanceScaleFactor", distanceScaleFactor);
+        program.setUniform("chunkLevel", chunk.tileIndex().level);
+    }
+
+    // Calculate other uniform variables needed for rendering
+    const Geodetic2 swCorner = chunk.surfacePatch().corner(Quad::SOUTH_WEST);
+    const Geodetic2& patchSize = chunk.surfacePatch().size();
+
+    const glm::dmat4& viewTransform = data.camera.combinedViewMatrix();
+    const glm::mat4 modelViewTransform = glm::mat4(viewTransform * _cachedModelTransform);
+    const glm::mat4 modelViewProjectionTransform =
+        data.camera.sgctInternal.projectionMatrix() * modelViewTransform;
+
+    // Upload the uniform variables
+    program.setUniform(
+        "modelViewProjectionTransform",
+        modelViewProjectionTransform
+    );
+    program.setUniform("minLatLon", glm::vec2(swCorner.toLonLatVec2()));
+    program.setUniform("lonLatScalingFactor", glm::vec2(patchSize.toLonLatVec2()));
+    // Ellipsoid Radius (Model Space)
+    program.setUniform("radiiSquared", glm::vec3(_ellipsoid.radiiSquared()));
+
+    const bool hasNightLayers = !_layerManager.layerGroup(
+        layergroupid::GroupID::NightLayers
+    ).activeLayers().empty();
+
+    const bool hasWaterLayer = !_layerManager.layerGroup(
+        layergroupid::GroupID::WaterMasks
+    ).activeLayers().empty();
+
+    if (hasNightLayers || hasWaterLayer || _generalProperties.performShading) {
+        program.setUniform("modelViewTransform", modelViewTransform);
+    }
+
+    const bool hasHeightLayer = !_layerManager.layerGroup(
+        layergroupid::HeightLayers
+    ).activeLayers().empty();
+    if (_generalProperties.useAccurateNormals && hasHeightLayer) {
+        // Apply an extra scaling to the height if the object is scaled
+        program.setUniform(
+            "heightScale",
+            static_cast<float>(data.modelTransform.scale * data.camera.scaling())
+        );
+    }
+
+    setCommonUniforms(program, chunk, data);
+
+    if (_generalProperties.eclipseShadowsEnabled && _ellipsoid.hasEclipseShadows()) {
+        calculateEclipseShadows(chunk, &program, data);
+    }
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
+    _grid.geometry().drawUsingActiveProgram();
+    _globalGpuLayerManager.deactivate();
+    program.deactivate();
+}
+
+void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& data) {
+    const TileIndex& tileIndex = chunk.tileIndex();
+    ghoul::opengl::ProgramObject& program = *_localProgramObject;
+
+    if (_localProgramObjectUpdatedSinceLastCall) {
+        _localGpuLayerManager.bind(&program, _layerManager);
+        _localProgramObjectUpdatedSinceLastCall = false;
+    }
+
+    // Activate the shader program
+    program.activate();
+
+    _localGpuLayerManager.setValue(&program, _layerManager, tileIndex);
+
+    // The length of the skirts is proportional to its size
+    program.setUniform(
+        "skirtLength",
+        static_cast<float>(
+            glm::min(
+                chunk.surfacePatch().halfSize().lat * 1000000,
+                _ellipsoid.minimumRadius()
+            )
+        )
+    );
+
+    program.setUniform("xSegments", _grid.xSegments());
+
+    if (_debugProperties.showHeightResolution) {
+        program.setUniform(
+            "vertexResolution",
+            glm::vec2(_grid.xSegments(), _grid.ySegments())
+        );
+    }
+
+    if (_layerManager.hasAnyBlendingLayersEnabled()) {
+        float distanceScaleFactor = static_cast<float>(
+            _generalProperties.lodScaleFactor * _ellipsoid.minimumRadius()
+        );
+
+        program.setUniform("distanceScaleFactor", distanceScaleFactor);
+        program.setUniform("chunkLevel", chunk.tileIndex().level);
+    }
+
+    // Calculate other uniform variables needed for rendering
+    // Send the matrix inverse to the fragment for the global and local shader (JCC)
+    const glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
+    const glm::dmat4 modelViewTransform = viewTransform * _cachedModelTransform;
+
+
+    std::array<glm::dvec3, 4> cornersCameraSpace;
+    std::array<glm::dvec3, 4> cornersModelSpace;
+    for (int i = 0; i < 4; ++i) {
+        constexpr const std::array<const char*, 4> CornerNames = {
+            "p01", "p11", "p00", "p10"
+        };
+
+        const Quad q = static_cast<Quad>(i);
+        const Geodetic2 corner = chunk.surfacePatch().corner(q);
+        const glm::dvec3 cornerModelSpace = _ellipsoid.cartesianSurfacePosition(corner);
+        cornersModelSpace[i] = cornerModelSpace;
+        const glm::dvec3 cornerCameraSpace = glm::dvec3(
+            modelViewTransform * glm::dvec4(cornerModelSpace, 1)
+        );
+        cornersCameraSpace[i] = cornerCameraSpace;
+        program.setUniform(CornerNames[i], glm::vec3(cornerCameraSpace));
+
+    }
+
+    // TODO: Patch normal can be calculated for all corners and then linearly
+    // interpolated on the GPU to avoid cracks for high altitudes.
+    const glm::vec3 patchNormalCameraSpace = normalize(
+        cross(
+            cornersCameraSpace[Quad::SOUTH_EAST] - cornersCameraSpace[Quad::SOUTH_WEST],
+            cornersCameraSpace[Quad::NORTH_EAST] - cornersCameraSpace[Quad::SOUTH_WEST]
+        )
+    );
+
+    // In order to improve performance, lets use the normal in object space (model space)
+    // for deferred rendering.
+    const glm::vec3 patchNormalModelSpace = normalize(
+        cross(
+            cornersModelSpace[Quad::SOUTH_EAST] - cornersModelSpace[Quad::SOUTH_WEST],
+            cornersModelSpace[Quad::NORTH_EAST] - cornersModelSpace[Quad::SOUTH_WEST]
+        )
+    );
+
+    program.setUniform("patchNormalModelSpace", patchNormalModelSpace);
+    program.setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
+    program.setUniform(
+        "projectionTransform",
+        data.camera.sgctInternal.projectionMatrix()
+    );
+
+    if (!_layerManager.layerGroup(layergroupid::HeightLayers).activeLayers().empty()) {
+        // Apply an extra scaling to the height if the object is scaled
+        program.setUniform(
+            "heightScale",
+            static_cast<float>(data.modelTransform.scale * data.camera.scaling())
+        );
+    }
+
+    setCommonUniforms(program, chunk, data);
+
+    if (_generalProperties.eclipseShadowsEnabled && _ellipsoid.hasEclipseShadows()) {
+        calculateEclipseShadows(chunk, &program, data);
+    }
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
+    _grid.geometry().drawUsingActiveProgram();
+
+    _localGpuLayerManager.deactivate();
+    program.deactivate();
+}
+//
+//ghoul::opengl::ProgramObject* RenderableGlobe::getActivatedProgramWithTileData(
+//                                              ghoul::opengl::ProgramObject& programObject,
+//                                                               bool& updatedSinceLastCall,
+//                                                         GPULayerManager& gpuLayerManager,
+//                                                                       const Chunk& chunk)
+//{
+//
+// }
+
+
+
+
+
+
+
 void RenderableGlobe::recompileShaders() {
-    LayerShaderManager::LayerShaderPreprocessingData preprocessingData =
-        LayerShaderManager::LayerShaderPreprocessingData::get(*this);
-    _globalLayerShaderManager.recompileShaderProgram(preprocessingData);
-    _localLayerShaderManager.recompileShaderProgram(preprocessingData);
+    struct LayerShaderPreprocessingData {
+        struct LayerGroupPreprocessingData {
+            int lastLayerIdx;
+            bool layerBlendingEnabled;
+            std::vector<layergroupid::TypeID> layerType;
+            std::vector<layergroupid::BlendModeID> blendMode;
+            std::vector<layergroupid::AdjustmentTypeID> layerAdjustmentType;
+        };
+
+        std::array<LayerGroupPreprocessingData, layergroupid::NUM_LAYER_GROUPS>
+            layeredTextureInfo;
+        std::vector<std::pair<std::string, std::string>> keyValuePairs;
+    };
+
+    //LayerShaderManager::LayerShaderPreprocessingData preprocessingData =
+//    LayerShaderManager::LayerShaderPreprocessingData::get(*this);
+//_globalLayerShaderManager.recompileShaderProgram(preprocessingData);
+//_localLayerShaderManager.recompileShaderProgram(preprocessingData);
+/*
+        , _globalLayerShaderManager(
+            "GlobalChunkedLodPatch",
+            "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_vs.glsl",
+            "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_fs.glsl"
+        )
+            , _localLayerShaderManager(
+                "LocalChunkedLodPatch",
+                "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl",
+                "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl"
+            )*/
+
+
+    //
+    // Create LayerShaderPreprocessingData
+    //
+
+    LayerShaderPreprocessingData preprocessingData;
+
+    for (size_t i = 0; i < layergroupid::NUM_LAYER_GROUPS; i++) {
+        LayerShaderPreprocessingData::LayerGroupPreprocessingData layeredTextureInfo;
+
+        const LayerGroup& layerGroup = _layerManager.layerGroup(i);
+        const std::vector<std::shared_ptr<Layer>>& layers = layerGroup.activeLayers();
+
+        // This check was implicit before;  not sure if it will fire or will be handled
+        // elsewhere
+        //ghoul_assert(
+        //    !layerGroup.activeLayers().empty(),
+        //    "If activeLayers is empty the following line will lead to an overflow"
+        //);
+        layeredTextureInfo.lastLayerIdx = static_cast<int>(
+            layerGroup.activeLayers().size() - 1
+            );
+        layeredTextureInfo.layerBlendingEnabled = layerGroup.layerBlendingEnabled();
+
+        for (const std::shared_ptr<Layer>& layer : layers) {
+            layeredTextureInfo.layerType.push_back(layer->type());
+            layeredTextureInfo.blendMode.push_back(layer->blendMode());
+            layeredTextureInfo.layerAdjustmentType.push_back(
+                layer->layerAdjustment().type()
+            );
+        }
+
+        preprocessingData.layeredTextureInfo[i] = layeredTextureInfo;
+    }
+
+    std::vector<std::pair<std::string, std::string>>& pairs =
+        preprocessingData.keyValuePairs;
+
+    pairs.emplace_back("useAccurateNormals",
+        std::to_string(_generalProperties.useAccurateNormals)
+    );
+    pairs.emplace_back("useAtmosphere", std::to_string(false));
+    pairs.emplace_back("performShading", std::to_string(_generalProperties.performShading));
+    pairs.emplace_back(
+        "useEclipseShadows",
+        std::to_string(_generalProperties.eclipseShadowsEnabled)
+    );
+    pairs.emplace_back(
+        "useEclipseHardShadows",
+        std::to_string(_generalProperties.eclipseHardShadows)
+    );
+    pairs.emplace_back("showChunkEdges", std::to_string(_debugProperties.showChunkEdges));
+    pairs.emplace_back("showHeightResolution",
+        std::to_string(_debugProperties.showHeightResolution)
+    );
+    pairs.emplace_back("showHeightIntensities",
+        std::to_string(_debugProperties.showHeightIntensities)
+    );
+    pairs.emplace_back("defaultHeight", std::to_string(Chunk::DefaultHeight));
+
+
+    //
+    // Create dictionary from layerpreprocessing data
+    //
+
+    ghoul::Dictionary shaderDictionary;
+
+    // Different layer types can be height layers or color layers for example.
+    // These are used differently within the shaders.
+    preprocessingData.layeredTextureInfo;
+
+    for (size_t i = 0; i < preprocessingData.layeredTextureInfo.size(); i++) {
+        // lastLayerIndex must be at least 0 for the shader to compile,
+        // the layer type is inactivated by setting use to false
+        const std::string& groupName = layergroupid::LAYER_GROUP_IDENTIFIERS[i];
+        shaderDictionary.setValue(
+            "lastLayerIndex" + groupName,
+            glm::max(preprocessingData.layeredTextureInfo[i].lastLayerIdx, 0)
+        );
+        shaderDictionary.setValue(
+            "use" + groupName,
+            preprocessingData.layeredTextureInfo[i].lastLayerIdx >= 0
+        );
+        shaderDictionary.setValue(
+            "blend" + groupName,
+            preprocessingData.layeredTextureInfo[i].layerBlendingEnabled
+        );
+
+        // This is to avoid errors from shader preprocessor
+        shaderDictionary.setValue(groupName + "0" + "LayerType", 0);
+
+        for (int j = 0; j < preprocessingData.layeredTextureInfo[i].lastLayerIdx + 1; ++j) {
+            shaderDictionary.setValue(
+                groupName + std::to_string(j) + "LayerType",
+                static_cast<int>(preprocessingData.layeredTextureInfo[i].layerType[j])
+            );
+        }
+
+        // This is to avoid errors from shader preprocessor
+        shaderDictionary.setValue(groupName + "0" + "BlendMode", 0);
+
+        for (int j = 0; j < preprocessingData.layeredTextureInfo[i].lastLayerIdx + 1; ++j) {
+            shaderDictionary.setValue(
+                groupName + std::to_string(j) + "BlendMode",
+                static_cast<int>(preprocessingData.layeredTextureInfo[i].blendMode[j])
+            );
+        }
+
+        // This is to avoid errors from shader preprocessor
+        std::string keyLayerAdjustmentType = groupName + "0" + "LayerAdjustmentType";
+        shaderDictionary.setValue(keyLayerAdjustmentType, 0);
+
+        for (int j = 0; j < preprocessingData.layeredTextureInfo[i].lastLayerIdx + 1; ++j) {
+            shaderDictionary.setValue(
+                groupName + std::to_string(j) + "LayerAdjustmentType",
+                static_cast<int>(preprocessingData.layeredTextureInfo[i].layerAdjustmentType[j])
+            );
+        }
+    }
+
+    ghoul::Dictionary layerGroupNames;
+    for (int i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
+        layerGroupNames.setValue(
+            std::to_string(i),
+            layergroupid::LAYER_GROUP_IDENTIFIERS[i]
+        );
+    }
+    shaderDictionary.setValue("layerGroups", layerGroupNames);
+
+    // Other settings such as "useAtmosphere"
+    for (const std::pair<std::string, std::string>& p : preprocessingData.keyValuePairs)
+    {
+        shaderDictionary.setValue(p.first, p.second);
+    }
+
+    //
+    // Create local shader
+    //
+    global::renderEngine.removeRenderProgram(_localProgramObject.get());
+    _localProgramObject = global::renderEngine.buildRenderProgram(
+        "LocalChunkedLodPatch",
+        "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl",
+        "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl",
+        shaderDictionary
+    );
+    ghoul_assert(_localProgramObject != nullptr, "Failed to initialize programObject!");
+    _localProgramObjectUpdatedSinceLastCall = true;
+
+
+    //
+    // Create global shader
+    //
+    global::renderEngine.removeRenderProgram(_globalProgramObject.get());
+    _globalProgramObject = global::renderEngine.buildRenderProgram(
+        "GlobalChunkedLodPatch",
+        "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_vs.glsl",
+        "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_fs.glsl",
+        shaderDictionary
+    );
+    ghoul_assert(_globalProgramObject != nullptr, "Failed to initialize programObject!");
+    _globalProgramObjectUpdatedSinceLastCall = true;
 
     _shadersNeedRecompilation = false;
 }
@@ -713,10 +1136,6 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
     return height;
 }
 
-void RenderableGlobe::notifyShaderRecompilation() {
-    _shadersNeedRecompilation = true;
-}
-
 void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const {
     if (_debugProperties.showChunkBounds || _debugProperties.showChunkAABB) {
         const std::vector<glm::dvec4>& modelSpaceCorners =
@@ -769,47 +1188,6 @@ void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
 
 
 
-ghoul::opengl::ProgramObject* RenderableGlobe::getActivatedProgramWithTileData(
-    LayerShaderManager& layeredShaderManager,
-    GPULayerManager& gpuLayerManager,
-    const Chunk& chunk)
-{
-    const TileIndex& tileIndex = chunk.tileIndex();
-
-    // Now the shader program can be accessed
-    ghoul::opengl::ProgramObject* programObject = layeredShaderManager.programObject();
-
-    if (layeredShaderManager.updatedSinceLastCall()) {
-        gpuLayerManager.bind(programObject, _layerManager);
-    }
-
-    // Activate the shader program
-    programObject->activate();
-
-    gpuLayerManager.setValue(programObject, _layerManager, tileIndex);
-
-    // The length of the skirts is proportional to its size
-    programObject->setUniform(
-        "skirtLength",
-        static_cast<float>(
-            glm::min(
-                chunk.surfacePatch().halfSize().lat * 1000000,
-                _ellipsoid.minimumRadius()
-            )
-            )
-    );
-
-    programObject->setUniform("xSegments", _grid.xSegments());
-
-    if (chunk.owner()._debugProperties.showHeightResolution) {
-        programObject->setUniform(
-            "vertexResolution",
-            glm::vec2(_grid.xSegments(), _grid.ySegments())
-        );
-    }
-
-    return programObject;
-}
 
 void RenderableGlobe::calculateEclipseShadows(const Chunk& chunk,
     ghoul::opengl::ProgramObject* programObject,
@@ -947,10 +1325,7 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
     const bool waterLayersActive =
         !_layerManager.layerGroup(layergroupid::WaterMasks).activeLayers().empty();
 
-    if (nightLayersActive || waterLayersActive ||
-        _generalProperties.atmosphereEnabled ||
-        _generalProperties.performShading)
-    {
+    if (nightLayersActive || waterLayersActive || _generalProperties.performShading) {
         const glm::dvec3 directionToSunWorldSpace =
             length(data.modelTransform.translation) > 0.0 ?
             glm::normalize(-data.modelTransform.translation) :
@@ -1019,193 +1394,6 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
             )
         );
     }
-}
-
-void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& data) {
-    ghoul::opengl::ProgramObject* programObject = getActivatedProgramWithTileData(
-        _globalLayerShaderManager,
-        _globalGpuLayerManager,
-        chunk
-    );
-    if (!programObject) {
-        return;
-    }
-
-    if (_layerManager.hasAnyBlendingLayersEnabled()) {
-        // Calculations are done in the reference frame of the globe. Hence, the
-        // camera position needs to be transformed with the inverse model matrix
-        const glm::dvec3 cameraPosition = glm::dvec3(
-            _cachedInverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1.0)
-        );
-        const float distanceScaleFactor = static_cast<float>(
-            _generalProperties.lodScaleFactor * _ellipsoid.minimumRadius()
-            );
-        programObject->setUniform("cameraPosition", glm::vec3(cameraPosition));
-        programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
-        programObject->setUniform("chunkLevel", chunk.tileIndex().level);
-    }
-
-    // Calculate other uniform variables needed for rendering
-    const Geodetic2 swCorner = chunk.surfacePatch().corner(Quad::SOUTH_WEST);
-    const Geodetic2& patchSize = chunk.surfacePatch().size();
-
-    const glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
-    const glm::mat4 modelViewTransform = glm::mat4(viewTransform * _cachedModelTransform);
-    const glm::mat4 modelViewProjectionTransform =
-        data.camera.sgctInternal.projectionMatrix() * modelViewTransform;
-
-    // Upload the uniform variables
-    programObject->setUniform(
-        "modelViewProjectionTransform",
-        modelViewProjectionTransform
-    );
-    programObject->setUniform("minLatLon", glm::vec2(swCorner.toLonLatVec2()));
-    programObject->setUniform("lonLatScalingFactor", glm::vec2(patchSize.toLonLatVec2()));
-    // Ellipsoid Radius (Model Space)
-    programObject->setUniform("radiiSquared", glm::vec3(_ellipsoid.radiiSquared()));
-
-    const bool hasNightLayers = !_layerManager.layerGroup(
-        layergroupid::GroupID::NightLayers
-    ).activeLayers().empty();
-
-    const bool hasWaterLayer = !_layerManager.layerGroup(
-        layergroupid::GroupID::WaterMasks
-    ).activeLayers().empty();
-
-    const bool hasHeightLayer = !_layerManager.layerGroup(
-        layergroupid::HeightLayers
-    ).activeLayers().empty();
-
-    if (hasNightLayers || hasWaterLayer ||
-        _generalProperties.atmosphereEnabled ||
-        _generalProperties.performShading)
-    {
-        programObject->setUniform("modelViewTransform", modelViewTransform);
-    }
-
-    if (_generalProperties.useAccurateNormals && hasHeightLayer) {
-        // Apply an extra scaling to the height if the object is scaled
-        programObject->setUniform(
-            "heightScale",
-            static_cast<float>(data.modelTransform.scale * data.camera.scaling())
-        );
-    }
-
-    setCommonUniforms(*programObject, chunk, data);
-
-    if (_ellipsoid.hasEclipseShadows()) {
-        calculateEclipseShadows(chunk, programObject, data);
-    }
-
-    // OpenGL rendering settings
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-
-    // render
-    _grid.geometry().drawUsingActiveProgram();
-
-    _globalGpuLayerManager.deactivate();
-
-    // disable shader
-    programObject->deactivate();
-}
-
-void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& data) {
-    ghoul::opengl::ProgramObject* programObject = getActivatedProgramWithTileData(
-        _localLayerShaderManager,
-        _localGpuLayerManager,
-        chunk
-    );
-    if (!programObject) {
-        return;
-    }
-
-    if (_layerManager.hasAnyBlendingLayersEnabled()) {
-        float distanceScaleFactor = static_cast<float>(
-            _generalProperties.lodScaleFactor * _ellipsoid.minimumRadius()
-            );
-
-        programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
-        programObject->setUniform("chunkLevel", chunk.tileIndex().level);
-    }
-
-    // Calculate other uniform variables needed for rendering
-    // Send the matrix inverse to the fragment for the global and local shader (JCC)
-    const glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
-    const glm::dmat4 modelViewTransform = viewTransform * _cachedModelTransform;
-
-
-    std::array<glm::dvec3, 4> cornersCameraSpace;
-    std::array<glm::dvec3, 4> cornersModelSpace;
-    for (int i = 0; i < 4; ++i) {
-        constexpr const std::array<const char*, 4> CornerNames = {
-            "p01", "p11", "p00", "p10"
-        };
-
-        const Quad q = static_cast<Quad>(i);
-        const Geodetic2 corner = chunk.surfacePatch().corner(q);
-        const glm::dvec3 cornerModelSpace = _ellipsoid.cartesianSurfacePosition(corner);
-        cornersModelSpace[i] = cornerModelSpace;
-        const glm::dvec3 cornerCameraSpace = glm::dvec3(
-            modelViewTransform * glm::dvec4(cornerModelSpace, 1)
-        );
-        cornersCameraSpace[i] = cornerCameraSpace;
-        programObject->setUniform(CornerNames[i], glm::vec3(cornerCameraSpace));
-
-    }
-
-    // TODO: Patch normal can be calculated for all corners and then linearly
-    // interpolated on the GPU to avoid cracks for high altitudes.
-    const glm::vec3 patchNormalCameraSpace = normalize(
-        cross(
-            cornersCameraSpace[Quad::SOUTH_EAST] - cornersCameraSpace[Quad::SOUTH_WEST],
-            cornersCameraSpace[Quad::NORTH_EAST] - cornersCameraSpace[Quad::SOUTH_WEST]
-        )
-    );
-
-    // In order to improve performance, lets use the normal in object space (model space)
-    // for deferred rendering.
-    const glm::vec3 patchNormalModelSpace = normalize(
-        cross(
-            cornersModelSpace[Quad::SOUTH_EAST] - cornersModelSpace[Quad::SOUTH_WEST],
-            cornersModelSpace[Quad::NORTH_EAST] - cornersModelSpace[Quad::SOUTH_WEST]
-        )
-    );
-
-    programObject->setUniform("patchNormalModelSpace", patchNormalModelSpace);
-    programObject->setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
-    programObject->setUniform(
-        "projectionTransform",
-        data.camera.sgctInternal.projectionMatrix()
-    );
-
-    if (!_layerManager.layerGroup(layergroupid::HeightLayers).activeLayers().empty()) {
-        // Apply an extra scaling to the height if the object is scaled
-        programObject->setUniform(
-            "heightScale",
-            static_cast<float>(data.modelTransform.scale * data.camera.scaling())
-        );
-    }
-
-    setCommonUniforms(*programObject, chunk, data);
-
-    if (_ellipsoid.hasEclipseShadows()) {
-        calculateEclipseShadows(chunk, programObject, data);
-    }
-
-    // OpenGL rendering settings
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-
-    // render
-    _grid.geometry().drawUsingActiveProgram();
-
-    _localGpuLayerManager.deactivate();
-
-    // disable shader
-    programObject->deactivate();
 }
 
 int RenderableGlobe::desiredLevelByDistance(const Chunk& chunk, const RenderData& data) const {
