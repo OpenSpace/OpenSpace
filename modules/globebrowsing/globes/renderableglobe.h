@@ -155,13 +155,6 @@ public:
      */
     float getHeight(const glm::dvec3& position) const;
 
-    /**
-     * Notifies the renderer to recompile its shaders the next time the render function is
-     * called. The actual shader recompilation takes place in the render function because
-     * properties that the shader depends on need to be properly synced.
-     */
-    //void notifyShaderRecompilation();
-
 
     const LayerManager& layerManager() const;
     LayerManager& layerManager() ;
@@ -219,10 +212,6 @@ private:
      */
     void renderChunkLocally(const Chunk& chunk, const RenderData& data);
 
-    //ghoul::opengl::ProgramObject* getActivatedProgramWithTileData(
-    //    ghoul::opengl::ProgramObject& programObject, bool& updatedSinceLastCall, GPULayerManager& gpuLayerManager,
-    //    const Chunk& chunk);
-
     void calculateEclipseShadows(const Chunk& chunk,
         ghoul::opengl::ProgramObject* programObject, const RenderData& data);
 
@@ -274,6 +263,7 @@ private:
     GPULayerManager _localGpuLayerManager;
 
     bool _shadersNeedRecompilation = true;
+    bool _lodScaleFactorDirty = true;
 };
 
 } // namespace openspace::globebrowsing
