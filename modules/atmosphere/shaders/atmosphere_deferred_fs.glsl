@@ -387,6 +387,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
         // Below Horizon
         mu  = muHorizon + INTERPOLATION_EPS;
         r0  = sqrt(r2 + t2 + 2.0f * r * t * mu);
+        invr0 = 1.0/r0;
         mu0 = (r * mu + t) * invr0;
         vec4 inScatterBelowX  = texture4D(inscatterTexture, r, mu, muSun, nu);
         vec4 inScatterBelowXs = texture4D(inscatterTexture, r0, mu0, muSun0, nu);
@@ -648,10 +649,7 @@ void main() {
                     
                     dvec4 onATMPos           = dModelTransformMatrix * dvec4(x * 1000.0, 1.0);
                     vec4 eclipseShadowATM    = calcShadow(shadowDataArray, onATMPos.xyz, false);            
-                    vec4 eclipseShadowPlanet = calcShadow(shadowDataArray, positionWorldCoords.xyz, true);
-                  
                     float sunIntensityInscatter = sunRadiance * eclipseShadowATM.x;
-                    float sunIntensityGround    = sunRadiance * eclipseShadowPlanet.x;
 
                     float irradianceFactor = 0.0;
 
@@ -665,6 +663,8 @@ void main() {
                     vec3 groundColorV = vec3(0.0);
                     vec3 sunColorV = vec3(0.0);                                                
                     if (groundHit) {
+                        vec4 eclipseShadowPlanet = calcShadow(shadowDataArray, positionWorldCoords.xyz, true);
+                        float sunIntensityGround = sunRadiance * eclipseShadowPlanet.x;
                         groundColorV = groundColor(x, tF, v, s, r, mu, attenuation,
                                                    color, normal.xyz, irradianceFactor, 
                                                    normal.a, sunIntensityGround, Rg2);
@@ -673,8 +673,6 @@ void main() {
                         // multiple rays per pixel when the ray doesn't intersect
                         // the ground.
                         sunColorV = sunColor(x, tF, v, s, r, mu, irradianceFactor, Rg2); 
-                        nSamples = 1;
-                        complex = false;
                     } 
                     
                     // Final Color of ATM plus terrain:
