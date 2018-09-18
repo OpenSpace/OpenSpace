@@ -1,34 +1,42 @@
+local guiCustomization = asset.require('customization/gui')
+
+-- Select which commit hashes to use for the frontend and backend
 local frontendHash = "2d0b69e4d08436514a4867fbaa8f93a55de6d612"
 local backendHash = "3e862a67ff2869d83187ad8bda05746b583d13d4"
+
+local dataProvider = "data.openspaceproject.com/files/webgui"
 
 local backend = asset.syncedResource({
     Identifier = "WebGuiBackend",
     Name = "Web Gui Backend",
     Type = "UrlSynchronization",
-    Url = "data.openspaceproject.com/files/webgui/backend/" ..  backendHash .. "/backend.js"
+    Url = dataProvider .. "/backend/" ..  backendHash .. "/backend.js"
 })
 
 local frontend = asset.syncedResource({
     Identifier = "WebGuiFrontend",
     Name = "Web Gui Frontend",
     Type = "UrlSynchronization",
-    Url = "data.openspaceproject.com/files/webgui/frontend/" ..  frontendHash .. "/frontend.zip"
+    Url = dataProvider .. "/frontend/" ..  frontendHash .. "/frontend.zip"
 })
 
-local guiCustomization = asset.require('customization/gui')
-
 asset.onInitialize(function ()
-    if not guiCustomization.webguiDevemopmentMode then
-        openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEntryPoint", backend .. "/backend.js")
-        openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessWorkingDirectory", frontend .. "/frontend")
-        openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", true)
-    end
-
+    -- Unzip the frontend bundle
     local dest = frontend .. "/frontend"
     if not openspace.directoryExists(dest) then
         openspace.unzipFile(frontend .. "/frontend.zip", dest, true)
-    end 
-
+    end
+    -- Do not serve the files if we are in webgui development mode.
+    -- In that case, you have to serve the webgui manually, using `npm start`.
+    if not guiCustomization.webguiDevemopmentMode then
+        openspace.setPropertyValueSingle(
+            "Modules.WebGui.ServerProcessEntryPoint", backend .. "/backend.js"
+        )
+        openspace.setPropertyValueSingle(
+            "Modules.WebGui.ServerProcessWorkingDirectory", frontend .. "/frontend"
+        )
+        openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", true)
+    end
 end)
 
 asset.onDeinitialize(function ()
