@@ -788,6 +788,7 @@ void OpenSpaceEngine::deinitialize() {
             global::renderEngine.scene()->camera()->getSyncables()
         );
     }
+    global::sessionRecording.deinitialize();
 
     global::deinitialize();
 
