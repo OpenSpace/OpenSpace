@@ -6,7 +6,9 @@ local propertyHelper = asset.require('util/property_helper')
 asset.require('spice/base')
 assetHelper.requestAll(asset, 'scene/solarsystem/sun')
 asset.require('scene/solarsystem/planets')
-
+-- Spacecrafts
+asset.require('scene/solarsystem/missions/voyager/voyager1')
+asset.require('scene/solarsystem/missions/voyager/voyager2')
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
@@ -14,11 +16,6 @@ asset.require('util/default_joystick')
 
 asset.request('customization/globebrowsing')
 -- Keybindings that are specific for this scene
-
-asset.require('scene/solarsystem/spacecrafts/voyager/voyager1')
-asset.require('scene/solarsystem/spacecrafts/voyager/voyager2')
-asset.require('scene/solarsystem/spacecrafts/osirisrex/osirisrex')
-
 
 local Keybindings = {
     {
