@@ -36,22 +36,19 @@ MasScene = {
         -- asset.require('../mas/bastille_day_sun_textures').TexturesPath .. "/br_photo_bas05_trans_1000G_offset.png",
     asset.require('./scene/solarsystem/sun/sun_textures').TexturesPath .. "/sun.jpg",        
     asset.require('../mas/bastille_day_sun_textures').TexturesPath .. "/black.png",
-    '../../data/mas/br_bas05_20G_inv_redblue.png',           
-    '../../data/mas/br_bas05_100G_inv_redblue.png', 
-    '../../data/mas/br_bas05_1000G_inv_redblue.png',
-        
-          
-        
+    'C:/Users/openspace/Downloads/NASA/br_bas05_20G_inv_redblue.png',           
+    'C:/Users/openspace/Downloads/NASA/br_bas05_100G_inv_redblue.png',           
+    'C:/Users/openspace/Downloads/NASA/br_bas05_1000G_inv_redblue.png'
     }
 }
 
 -- This causes crash because the renderable is not removed properly before the next frame
-local toggleMas = function ()
-    return 
-        -- "openspace.removeSceneGraphNode('Mas_MHD');" ..
-        "openspace.assset.remove('Mas_MHD');" ..
-        "openspace.asset.add('Mas_MHD');"
-end
+-- local toggleMas = function ()
+--     return 
+--         -- "openspace.removeSceneGraphNode('Mas_MHD');" ..
+--         "openspace.assset.remove('Mas_MHD');" ..
+--         "openspace.asset.add('Mas_MHD');"
+-- end
 
 local setup = function ()
     return
@@ -61,16 +58,16 @@ local setup = function ()
         "openspace.setPropertyValueSingle('Scene.Sun.renderable.ColorTexture', MasScene.SunTextures[1]);" ..
         "openspace.setPropertyValueSingle('Scene.Sun.renderable.Enabled', true);" ..
 
-        -- DISABLES MAS FIELDLIENS && FLOW, SETS COLOR AND ALPHA
+        -- DISABLES MAS FIELDLINES && FLOW, SETS COLOR AND ALPHA
         "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.Enabled', false);" ..
         "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.flowEnabled', false);" ..
-        "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.Color.uniform', {0, 0.725, 0.75, 0.6});" ..
+        "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.Color.uniform', {0, 0.725, 0.75, 0.6});"
 
-        -- DISABLES ENLIL FIELDLIES FLOW
-        "openspace.setPropertyValue('Scene.FL_ENLIL_slice_eqPlane_011AU_1.renderable.flowEnabled', false)" ..
-        "openspace.setPropertyValue('Scene.FL_ENLIL_slice_eqPlane_011AU_2.renderable.flowEnabled', false)" ..
-        "openspace.setPropertyValue('Scene.FL_ENLIL_slice_lat4_011AU_1.renderable.flowEnabled', false)" ..
-        "openspace.setPropertyValue('Scene.FL_ENLIL_slice_lat4_011AU_2.renderable.flowEnabled', false)"
+        -- DISABLES ENLIL FIELDLINES FLOW
+        -- "openspace.setPropertyValue('Scene.FL_ENLIL_slice_eqPlane_011AU_1.renderable.flowEnabled', false)" ..
+        -- "openspace.setPropertyValue('Scene.FL_ENLIL_slice_eqPlane_011AU_2.renderable.flowEnabled', false)" ..
+        -- "openspace.setPropertyValue('Scene.FL_ENLIL_slice_lat4_011AU_1.renderable.flowEnabled', false)" ..
+        -- "openspace.setPropertyValue('Scene.FL_ENLIL_slice_lat4_011AU_2.renderable.flowEnabled', false)"
 
 end
 
@@ -318,16 +315,16 @@ local Keybindings = {
 
 -- We need to specify paths to the prepared fieldline files before requesting the BATSRUS, ENLIL, and PFSS fieldline assets:
 -- local FieldLineBasePath = "E:/FieldlineBinaries/"
-local FieldLineBasePath = asset.localResource('../../../FieldlineBinaries/')
-ENLILPaths = {
-    EqPlane011AU1 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_eq_plane_1/",
-    EqPlane011AU2 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_eq_plane_2/",
-    Lat4011AU1 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_lat4_1/",
-    Lat4011AU2 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_lat4_2/",
-    -- Earth = FieldLineBasePath .. "enlil/july2012/downsampled40/earth/",
-    -- StereoA = FieldLineBasePath .. "enlil/july2012/downsampled40/stereoa/"
-}
-asset.require('./fieldlines/enlil')
+-- local FieldLineBasePath = asset.localResource('../../../FieldlineBinaries/')
+-- ENLILPaths = {
+--     EqPlane011AU1 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_eq_plane_1/",
+--     EqPlane011AU2 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_eq_plane_2/",
+--     Lat4011AU1 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_lat4_1/",
+--     Lat4011AU2 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_lat4_2/",
+--     -- Earth = FieldLineBasePath .. "enlil/july2012/downsampled40/earth/",
+--     -- StereoA = FieldLineBasePath .. "enlil/july2012/downsampled40/stereoa/"
+-- }
+-- asset.require('./fieldlines/enlil')
 asset.require('./fieldlines/mas')
 
 asset.onInitialize(function ()

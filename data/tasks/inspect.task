@@ -2,7 +2,7 @@
 return {
     {
         Type = "KameleonDocumentationTask",
-        Input = "${DATA}/mas-data/mas_merged_step_101.cdf",
-        Output = "${DATA}/mas-data/output.html"
+        Input = "${DATA}/mhd.cdf",
+        Output = "${DATA}/mhdoutput.html"
     }
 }
