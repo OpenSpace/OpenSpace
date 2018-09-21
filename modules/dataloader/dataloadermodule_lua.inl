@@ -23,6 +23,8 @@
  ****************************************************************************************/
 
 #include <iostream>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 
 namespace openspace::luascriptfunctions {
 
@@ -40,7 +42,7 @@ int loadItem(lua_State* L) {
 
     /** handle path to check item type or handle it in different function **/
 
-    OsEng.moduleEngine().module<DataLoaderModule>()->loadDataItem(path);
+    global::moduleEngine.module<DataLoaderModule>()->loadDataItem(path);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -57,7 +59,7 @@ int uploadItem(lua_State* L) {
     using ghoul::lua::errorLocation;
 
     const std::string& dictionaryString = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
-    OsEng.moduleEngine().module<DataLoaderModule>()->uploadDataItem(dictionaryString);
+    global::moduleEngine.module<DataLoaderModule>()->uploadDataItem(dictionaryString);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

@@ -28,6 +28,8 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/globalscallbacks.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
@@ -98,7 +100,7 @@ DataLoaderModule::DataLoaderModule()
 DataLoaderModule::~DataLoaderModule() {}
 
 void DataLoaderModule::internalInitialize(const ghoul::Dictionary&) {
-    OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Initialize, [&] {
+    global::callback::initialize.push_back([&]() {
         _reader = std::make_unique<openspace::dataloader::Reader>();
         _loader = std::make_unique<openspace::dataloader::Loader>();
         addPropertySubOwner(*_reader);

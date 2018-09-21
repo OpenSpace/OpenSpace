@@ -5,21 +5,23 @@
 #include <openspace/util/timemanager.h>
 #include <openspace/scene/scene.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 
 namespace openspace::dataloader {
 
 DataLoaderModule* Operator::module() {
-    return OsEng.moduleEngine().module<DataLoaderModule>();
+    return global::moduleEngine.module<DataLoaderModule>();
 }
 
 Scene* Operator::scene() {
-    return OsEng.renderEngine().scene();
+    return global::renderEngine.scene();
 }
 
 void Operator::setTime(std::string value) {
     Time newTime;
     newTime.setTime(value);
-    OsEng.timeManager().setTimeNextFrame(newTime);
+    global::timeManager.setTimeNextFrame(newTime);
 }
 
 } // namespace openspace::dataloader

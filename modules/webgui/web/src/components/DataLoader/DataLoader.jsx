@@ -66,7 +66,7 @@ class DataLoader extends Component {
         className={Picker.Popover}
         title="DATA"
         closeCallback={() => this.togglePopover()}
-        detachable={true}
+        detachable
       >
           <div className={styles.container}>
             <div className={styles.upload}>
