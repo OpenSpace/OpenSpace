@@ -521,14 +521,14 @@ void Loader::processCurrentlySelectedUploadData(const std::string &dictionaryStr
     copyTfFileToItemDir();
     ghoul::Dictionary assetDictionary = createAssetDictionary();
 
-    createAssetFile(assetDictionary);
+    const std::string assetFilePath = createAssetFile(assetDictionary);
 
     LINFO("Created files");
 
 
     _volumeConversionThreadCanRun = false;
 
-    // loadCreatedAsset()
+    loadCreatedAsset(assetFilePath);
 
     //});
 
@@ -610,7 +610,7 @@ Directory Loader::getAssetFolderDirectory()
     return d;
 }
 
-void Loader::createAssetFile(ghoul::Dictionary assetDictionary)
+const std::string Loader::createAssetFile(ghoul::Dictionary assetDictionary)
 {
     Directory d = getAssetFolderDirectory();
     const std::string path = d.path();
@@ -619,7 +619,8 @@ void Loader::createAssetFile(ghoul::Dictionary assetDictionary)
     const std::string dictionaryString = formatter.format(assetDictionary);
 
     std::string identifier = assetDictionary.value<std::string>(KeyIdentifier);
-    std::fstream fileStream(absPath(path + "/" + identifier + ".asset"), std::ios::out);
+    const std::string assetFilePath = absPath(path + "/" + identifier + ".asset");
+    std::fstream fileStream(assetFilePath, std::ios::out);
     if (!fileStream)
     {
         LERROR("Could not create file");
@@ -635,6 +636,13 @@ void Loader::createAssetFile(ghoul::Dictionary assetDictionary)
                << exportStatement << "\n";
 
     fileStream.close();
+
+    return assetFilePath;
+}
+
+void Loader::loadCreatedAsset(const std::string& path) 
+{
+    
 }
 
 // void Loader::createVolumeDataItem(std::string absPath) {}

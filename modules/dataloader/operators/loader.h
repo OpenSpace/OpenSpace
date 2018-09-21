@@ -111,7 +111,8 @@ private:
   void copyTfFileToItemDir();
   void runConversionTask();
   Directory getAssetFolderDirectory();
-  void createAssetFile(ghoul::Dictionary assetDictionary);
+  const std::string createAssetFile(ghoul::Dictionary assetDictionary);
+  void loadCreatedAsset(const std::string& path);
 };
 
 } // namespace dataloader
