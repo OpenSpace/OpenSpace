@@ -24,6 +24,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/engine/globals.h>
 
 namespace openspace::luascriptfunctions::asset {
 
@@ -39,13 +40,13 @@ int add(lua_State* state) {
         ghoul::lua::PopValue::Yes
     );
 
-    if (OsEng.renderEngine().scene()) {
+    if (global::renderEngine.scene()) {
         assetManager->add(assetName);
     }
     else {
         // The scene might not exist yet if OpenSpace was started without specifying an
         // initial asset
-        OsEng.scheduleLoadSingleAsset(assetName);
+        global::openSpaceEngine.scheduleLoadSingleAsset(assetName);
     }
 
 

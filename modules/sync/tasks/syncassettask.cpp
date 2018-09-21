@@ -28,7 +28,7 @@
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/scene/assetlistener.h>
 #include <openspace/scene/assetloader.h>
 #include <openspace/scripting/scriptengine.h>
@@ -104,7 +104,7 @@ void SyncAssetTask::perform(const Task::ProgressCallback& progressCallback) {
 
     registerCoreClasses(scriptEngine);
 
-    for (OpenSpaceModule* m : OsEng.moduleEngine().modules()) {
+    for (OpenSpaceModule* m : global::moduleEngine.modules()) {
         scriptEngine.addLibrary(m->luaLibrary());
 
         for (scripting::LuaLibrary& l : m->luaLibraries()) {

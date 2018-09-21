@@ -25,32 +25,24 @@
 #include <modules/galaxy/rendering/renderablegalaxy.h>
 
 #include <modules/galaxy/rendering/galaxyraycaster.h>
-
-#include <ghoul/io/texture/texturereader.h>
-
-#include <modules/galaxy/rendering/galaxyraycaster.h>
-#include <openspace/util/boxgeometry.h>
 #include <modules/volume/rawvolume.h>
-#include <openspace/util/updatestructures.h>
-
-#include <openspace/rendering/renderable.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/raycastermanager.h>
-#include <ghoul/glm.h>
-#include <glm/gtc/matrix_transform.hpp>
-#include <ghoul/opengl/ghoul_gl.h>
-
 #include <modules/volume/rawvolumereader.h>
+#include <openspace/engine/globals.h>
+#include <openspace/rendering/raycastermanager.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/util/boxgeometry.h>
+#include <openspace/util/updatestructures.h>
+#include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-
-#include <ghoul/opengl/programobject.h>
-
+#include <glm/gtc/matrix_transform.hpp>
 #include <fstream>
-
 
 namespace {
     constexpr const char* GlslRayCastPath  = "${MODULES}/toyvolume/shaders/rayCast.glsl";
@@ -175,14 +167,14 @@ void RenderableGalaxy::initializeGL() {
     _raycaster = std::make_unique<GalaxyRaycaster>(*_texture);
     _raycaster->initialize();
 
-    OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
+    global::raycasterManager.attachRaycaster(*_raycaster.get());
 
     auto onChange = [&](bool enabled) {
         if (enabled) {
-            OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
+            global::raycasterManager.attachRaycaster(*_raycaster.get());
         }
         else {
-            OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
+            global::raycasterManager.detachRaycaster(*_raycaster.get());
         }
     };
 
@@ -250,8 +242,7 @@ void RenderableGalaxy::initializeGL() {
         GL_STATIC_DRAW
     );
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    _pointsProgram = renderEngine.buildRenderProgram(
+    _pointsProgram = global::renderEngine.buildRenderProgram(
         "Galaxy points",
         absPath("${MODULE_GALAXY}/shaders/points.vs"),
         absPath("${MODULE_GALAXY}/shaders/points.fs")
@@ -278,7 +269,7 @@ void RenderableGalaxy::initializeGL() {
 
 void RenderableGalaxy::deinitializeGL() {
     if (_raycaster) {
-        OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
+        global::raycasterManager.detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
 }

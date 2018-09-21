@@ -58,6 +58,7 @@ public:
     void setFocusNode(SceneGraphNode* node);
     void setCamera(Camera* camera);
     void resetCameraDirection();
+    void setInterpolationTime(float durationInSeconds);
 
     void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
 
@@ -72,6 +73,7 @@ public:
     const InputState& inputState() const;
     const OrbitalNavigator& orbitalNavigator() const;
     KeyframeNavigator& keyframeNavigator() const;
+    float interpolationTime() const;
 
     // Callback functions
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
@@ -79,8 +81,6 @@ public:
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
-
-    void setJoystickInputStates(JoystickInputStates& states);
 
     void setJoystickAxisMapping(int axis, JoystickCameraStates::AxisType mapping,
         JoystickCameraStates::AxisInvert shouldInvert =

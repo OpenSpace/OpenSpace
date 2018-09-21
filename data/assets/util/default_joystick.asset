@@ -118,7 +118,7 @@ asset.onInitialize(function()
     openspace.navigation.bindJoystickAxis(controller.LeftThumbStick[1], "Orbit X");
     openspace.navigation.bindJoystickAxis(controller.LeftThumbStick[2], "Orbit Y", true);
     openspace.navigation.bindJoystickAxis(controller.RightThumbStick[1], "Pan X", true);
-    openspace.navigation.bindJoystickAxis(controller.RightThumbStick[2], "Pan Y");
+    openspace.navigation.bindJoystickAxis(controller.RightThumbStick[2], "Pan Y", true);
     openspace.navigation.bindJoystickAxis(controller.LeftTrigger, "Zoom Out", false, true);
     openspace.navigation.bindJoystickAxis(controller.RightTrigger, "Zoom In", false, true);
 

@@ -23,41 +23,36 @@
  ****************************************************************************************/
 
 #include <openspace/engine/configuration.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/sgctwindowwrapper.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/util/keys.h>
-
-
+#include <ghoul/ghoul.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/cmdparser/commandlineparser.h>
+#include <ghoul/cmdparser/singlecommand.h>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/logging/visualstudiooutputlog.h>
+#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/boolean.h>
-
 #include <sgct.h>
 #include <chrono>
 #include <ctime>
 
 #ifdef WIN32
-
 #include <openspace/openspace.h>
-
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/stacktrace.h>
-
 #include <ghoul/fmt.h>
-
-#include <Windows.h>
+#include <dbghelp.h>
 #include <shellapi.h>
 #include <shlobj.h>
-
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable : 4091)
-#include <dbghelp.h>
-#pragma warning (pop)
-#endif // _MSC_VER
-
+#include <Windows.h>
 #endif // WIN32
 
 #ifdef OPENVR_SUPPORT
@@ -68,21 +63,54 @@
 #include "SpoutLibrary.h"
 #endif // OPENSPACE_HAS_SPOUT
 
-
-#define DEVELOPER_MODE
-
 namespace {
 
 constexpr const char* _loggerCat = "main";
+constexpr const char* SpoutTag = "Spout";
+constexpr const char* OpenVRTag = "OpenVR";
+
 sgct::Engine* SgctEngine;
 
-openspace::interaction::JoystickInputStates joystickInputStates;
+#ifdef OPENVR_SUPPORT
+sgct::SGCTWindow* FirstOpenVRWindow = nullptr;
+#endif
 
-constexpr const char* OpenVRTag = "OpenVR";
-constexpr const char* SpoutTag = "Spout";
+//
+//  SPOUT-support
+//
 
+#ifdef OPENSPACE_HAS_SPOUT
+/**
+ * This struct stores all information about a single render window. Depending on the
+ * frame setup, each window can be mono or stereo, the information of which is stored in
+ * the \c leftOrMain and \c right members respectively.
+ */
+struct SpoutWindow {
+    struct SpoutData {
+        SPOUTHANDLE handle = nullptr;
+        bool initialized = false;
+    };
+
+    /// The left framebuffer (or main, if there is no stereo rendering)
+    SpoutData leftOrMain;
+
+    /// The right framebuffer
+    SpoutData right;
+
+    /// The window ID of this windows
+    size_t windowId = size_t(-1);
+};
+
+/// The list of all windows with spout senders
+std::vector<SpoutWindow> SpoutWindows;
+
+#endif // OPENSPACE_HAS_SPOUT
+
+
+//
+//  MiniDump generation
+//
 #ifdef WIN32
-
 LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
     SYSTEMTIME stLocalTime;
     GetLocalTime(&stLocalTime);
@@ -135,6 +163,8 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
         nullptr
     );
 
+    CloseHandle(hDumpFile);
+
     if (success) {
         LINFO("Created successfully");
     }
@@ -144,41 +174,11 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
 
     return EXCEPTION_EXECUTE_HANDLER;
 }
-
 #endif // WIN32
 
-#ifdef OPENVR_SUPPORT
-sgct::SGCTWindow* FirstOpenVRWindow = nullptr;
-#endif
-
-#ifdef OPENSPACE_HAS_SPOUT
-/**
- * This struct stores all information about a single render window. Depending on the
- * frame setup, each window can be mono or stereo, the information of which is stored in
- * the \c leftOrMain and \c right members respectively.
- */
-struct SpoutWindow {
-    struct SpoutData {
-        SPOUTHANDLE handle = nullptr;
-        bool initialized = false;
-    };
-
-    /// The left framebuffer (or main, if there is no stereo rendering)
-    SpoutData leftOrMain;
-
-    /// The right framebuffer
-    SpoutData right;
-
-    /// The window ID of this windows
-    size_t windowId = size_t(-1);
-};
-
-/// The list of all windows with spout senders
-std::vector<SpoutWindow> SpoutWindows;
-
-#endif // OPENSPACE_HAS_SPOUT
-
-
+//
+//  Detect OpenGL version
+//
 std::pair<int, int> supportedOpenGLVersion() {
     // Just create a window in order to retrieve the available OpenGL version before we
     // create the real window
@@ -213,15 +213,20 @@ std::pair<int, int> supportedOpenGLVersion() {
     return { major, minor };
 }
 
+
+//
+//  Init function
+//
 void mainInitFunc() {
     LTRACE("main::mainInitFunc(begin)");
 
     LDEBUG("Initializing OpenSpace Engine started");
-    OsEng.initialize();
+    openspace::global::openSpaceEngine.initialize();
     LDEBUG("Initializing OpenSpace Engine finished");
 
+
     LDEBUG("Initializing OpenGL in OpenSpace Engine started");
-    OsEng.initializeGL();
+    openspace::global::openSpaceEngine.initializeGL();
     LDEBUG("Initializing OpenGL in OpenSpace Engine finished");
 
     // Find if we have at least one OpenVR window
@@ -236,32 +241,14 @@ void mainInitFunc() {
                 SgctEngine->getNearClippingPlane(), SgctEngine->getFarClippingPlane()
             );
 #else
-            LWARNING(
-                "OpenVR was requested, but OpenSpace was compiled without VR support."
-            );
+            LWARNING("OpenVR was requested, but program was compiled without VR support");
 #endif
 
             break;
         }
     }
 
-    // Set the clear color for all non-linear projection viewports
-    // @CLEANUP:  Why is this necessary?  We can set the clear color in the configuration
-    // files --- abock
     const size_t nWindows = SgctEngine->getNumberOfWindows();
-    for (size_t i = 0; i < nWindows; ++i) {
-        sgct::SGCTWindow* w = SgctEngine->getWindowPtr(i);
-        const size_t nViewports = w->getNumberOfViewports();
-        for (size_t j = 0; j < nViewports; ++j) {
-            sgct_core::Viewport* v = w->getViewport(j);
-            ghoul_assert(v != nullptr, "Number of reported viewports was incorrect");
-            sgct_core::NonLinearProjection* p = v->getNonLinearProjectionPtr();
-            if (p) {
-                p->setClearColor(glm::vec4(0.f, 0.f, 0.f, 1.f));
-            }
-        }
-    }
-
     for (size_t i = 0; i < nWindows; ++i) {
         const sgct::SGCTWindow* windowPtr = SgctEngine->getWindowPtr(i);
 
@@ -275,9 +262,8 @@ void mainInitFunc() {
         w.windowId = i;
 
         const sgct::SGCTWindow::StereoMode sm = windowPtr->getStereoMode();
-        const bool hasStereo =
-            (sm != sgct::SGCTWindow::No_Stereo) &&
-            (sm < sgct::SGCTWindow::Side_By_Side_Stereo);
+        const bool hasStereo = (sm != sgct::SGCTWindow::No_Stereo) &&
+                               (sm < sgct::SGCTWindow::Side_By_Side_Stereo);
 
         if (hasStereo) {
             SpoutWindow::SpoutData& left = w.leftOrMain;
@@ -308,146 +294,135 @@ void mainInitFunc() {
 
         SpoutWindows.push_back(std::move(w));
 #else
-        LWARNING(
-            "Spout was requested, but OpenSpace was compiled without Spout support."
-        );
-
+        LWARNING("Spout was requested, but program was compiled without Spout support");
 #endif // OPENSPACE_HAS_SPOUT
     }
 
-    std::string screenshotPath = "${SCREENSHOTS}";
-    std::string screenshotNames = "OpenSpace";
 
-    if (OsEng.configuration().shouldUseScreenshotDate) {
+    //
+    //  Screenshots
+    //
+
+    std::string screenshotPath = "${SCREENSHOTS}";
+    if (openspace::global::configuration.shouldUseScreenshotDate) {
         std::time_t now = std::time(nullptr);
         std::tm* nowTime = std::localtime(&now);
-        char mbstr[100];
+        char mbstr[128];
         strftime(mbstr, sizeof(mbstr), "%Y-%m-%d-%H-%M", nowTime);
-        screenshotPath += "/" + std::string(mbstr);
+
+        FileSys.registerPathToken(
+            "${SCREENSHOTS}",
+            absPath(screenshotPath + '/' + std::string(mbstr)),
+            ghoul::filesystem::FileSystem::Override::Yes
+        );
     }
 
-    FileSys.registerPathToken("${THIS_SCREENSHOT_PATH}", screenshotPath);
 
     for (size_t i = 0; i < nWindows; ++i) {
-        sgct_core::ScreenCapture* cpt0 =
-            SgctEngine->getWindowPtr(i)->getScreenCapturePointer(0);
-        sgct_core::ScreenCapture* cpt1 =
-            SgctEngine->getWindowPtr(i)->getScreenCapturePointer(1);
+        sgct::SGCTWindow* w = SgctEngine->getWindowPtr(i);
+        constexpr const char* screenshotNames = "OpenSpace";
+        sgct_core::ScreenCapture* cpt0 = w->getScreenCapturePointer(0);
+        sgct_core::ScreenCapture* cpt1 = w->getScreenCapturePointer(1);
 
         if (cpt0) {
-            cpt0->setPathAndFileName(
-                absPath(screenshotPath),
-                screenshotNames
-            );
+            cpt0->setPathAndFileName(absPath(screenshotPath), screenshotNames);
         }
 
         if (cpt1) {
-            cpt1->setPathAndFileName(
-                screenshotPath,
-                screenshotNames
-            );
+            cpt1->setPathAndFileName(absPath(screenshotPath), screenshotNames);
         }
     }
-
-    OsEng.setJoystickInputStates(joystickInputStates);
 
     LTRACE("main::mainInitFunc(end)");
 }
 
+
+
 void mainPreSyncFunc() {
     LTRACE("main::mainPreSyncFunc(begin)");
-    OsEng.preSynchronization();
+    openspace::global::openSpaceEngine.preSynchronization();
 
     // Query joystick status
     using namespace openspace::interaction;
 
     for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; ++i) {
-        JoystickInputState& state = joystickInputStates[i];
+        JoystickInputState& state = openspace::global::joystickInputStates[i];
 
         int present = glfwJoystickPresent(i);
-        if (present == GLFW_TRUE) {
-            if (!state.isConnected) {
-                // Joystick was added
-                state.isConnected = true;
-                state.name = SgctEngine->getJoystickName(i);
-
-                std::fill(state.axes.begin(), state.axes.end(), 0.f);
-                std::fill(
-                    state.buttons.begin(),
-                    state.buttons.end(),
-                    JoystickAction::Idle
-                );
-            }
-
-            const float* axes = SgctEngine->getJoystickAxes(i, &state.nAxes);
-            if (state.nAxes > JoystickInputState::MaxAxes) {
-                LWARNING(fmt::format(
-                    "Joystick/Gamepad {} has {} axes, but only {} axes are supported. "
-                    "All excess axes are ignored",
-                    state.name,
-                    state.nAxes,
-                    JoystickInputState::MaxAxes
-                ));
-                state.nAxes = JoystickInputState::MaxAxes;
-            }
-            std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
-
-            const unsigned char* buttons = SgctEngine->getJoystickButtons(
-                i,
-                &state.nButtons
-            );
-
-            if (state.nButtons > JoystickInputState::MaxButtons) {
-                LWARNING(fmt::format(
-                    "Joystick/Gamepad {} has {} buttons, but only {} buttons are "
-                    "supported. All excess buttons are ignored",
-                    state.name,
-                    state.nButtons,
-                    JoystickInputState::MaxButtons
-                ));
-                state.nButtons = JoystickInputState::MaxButtons;
-            }
-
-            for (int j = 0; j < state.nButtons; ++j) {
-                bool currentlyPressed = buttons[j] == GLFW_PRESS;
-
-                if (currentlyPressed) {
-                    switch (state.buttons[j]) {
-                        case JoystickAction::Idle:
-                        case JoystickAction::Release:
-                            state.buttons[j] = JoystickAction::Press;
-                            break;
-                        case JoystickAction::Press:
-                        case JoystickAction::Repeat:
-                            state.buttons[j] = JoystickAction::Repeat;
-                            break;
-                    }
-                }
-                else {
-                    switch (state.buttons[j]) {
-                        case JoystickAction::Idle:
-                        case JoystickAction::Release:
-                            state.buttons[j] = JoystickAction::Idle;
-                            break;
-                        case JoystickAction::Press:
-                        case JoystickAction::Repeat:
-                            state.buttons[j] = JoystickAction::Release;
-                            break;
-                    }
-                }
-            }
-        }
-        else {
+        if (present == GLFW_FALSE) {
             state.isConnected = false;
+            continue;
+        }
+
+        if (!state.isConnected) {
+            // Joystick was added
+            state.isConnected = true;
+            state.name = SgctEngine->getJoystickName(i);
+
+            std::fill(state.axes.begin(), state.axes.end(), 0.f);
+            std::fill(state.buttons.begin(), state.buttons.end(), JoystickAction::Idle);
+        }
+
+        const float* axes = SgctEngine->getJoystickAxes(i, &state.nAxes);
+        if (state.nAxes > JoystickInputState::MaxAxes) {
+            LWARNING(fmt::format(
+                "Joystick/Gamepad {} has {} axes, but only {} axes are supported. "
+                "All excess axes are ignored",
+                state.name, state.nAxes, JoystickInputState::MaxAxes
+            ));
+            state.nAxes = JoystickInputState::MaxAxes;
+        }
+        std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
+
+        const unsigned char* buttons = SgctEngine->getJoystickButtons(i, &state.nButtons);
+
+        if (state.nButtons > JoystickInputState::MaxButtons) {
+            LWARNING(fmt::format(
+                "Joystick/Gamepad {} has {} buttons, but only {} buttons are "
+                "supported. All excess buttons are ignored",
+                state.name, state.nButtons, JoystickInputState::MaxButtons
+            ));
+            state.nButtons = JoystickInputState::MaxButtons;
+        }
+
+        for (int j = 0; j < state.nButtons; ++j) {
+            const bool currentlyPressed = buttons[j] == GLFW_PRESS;
+
+            if (currentlyPressed) {
+                switch (state.buttons[j]) {
+                    case JoystickAction::Idle:
+                    case JoystickAction::Release:
+                        state.buttons[j] = JoystickAction::Press;
+                        break;
+                    case JoystickAction::Press:
+                    case JoystickAction::Repeat:
+                        state.buttons[j] = JoystickAction::Repeat;
+                        break;
+                }
+            }
+            else {
+                switch (state.buttons[j]) {
+                    case JoystickAction::Idle:
+                    case JoystickAction::Release:
+                        state.buttons[j] = JoystickAction::Idle;
+                        break;
+                    case JoystickAction::Press:
+                    case JoystickAction::Repeat:
+                        state.buttons[j] = JoystickAction::Release;
+                        break;
+                }
+            }
         }
     }
 
     LTRACE("main::mainPreSyncFunc(end)");
 }
 
+
+
 void mainPostSyncPreDrawFunc() {
     LTRACE("main::postSynchronizationPreDraw(begin)");
-    OsEng.postSynchronizationPreDraw();
+    openspace::global::openSpaceEngine.postSynchronizationPreDraw();
 
 #ifdef OPENVR_SUPPORT
     if (FirstOpenVRWindow) {
@@ -459,17 +434,13 @@ void mainPostSyncPreDrawFunc() {
     LTRACE("main::postSynchronizationPreDraw(end)");
 }
 
+
+
 void mainRenderFunc() {
     LTRACE("main::mainRenderFunc(begin)");
 
-    glm::mat4 viewMatrix =
-        SgctEngine->getCurrentViewMatrix() *
-        // User matrix
-        glm::translate(
-           glm::mat4(1.f),
-           SgctEngine->getDefaultUserPtr()->getPos()
-       )
-    ;
+    glm::mat4 viewMatrix = SgctEngine->getCurrentViewMatrix() *
+                glm::translate(glm::mat4(1.f), SgctEngine->getDefaultUserPtr()->getPos());
 
     glm::mat4 projectionMatrix = SgctEngine->getCurrentProjectionMatrix();
 #ifdef OPENVR_SUPPORT
@@ -482,7 +453,7 @@ void mainRenderFunc() {
 #endif
 
     try {
-        OsEng.render(
+        openspace::global::openSpaceEngine.render(
             SgctEngine->getModelMatrix(),
             viewMatrix,
             projectionMatrix
@@ -494,11 +465,13 @@ void mainRenderFunc() {
     LTRACE("main::mainRenderFunc(end)");
 }
 
+
+
 void mainDraw2DFunc() {
     LTRACE("main::mainDraw2DFunc(begin)");
 
     try {
-        OsEng.drawOverlays();
+        openspace::global::openSpaceEngine.drawOverlays();
     }
     catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
@@ -512,6 +485,8 @@ void mainDraw2DFunc() {
     LTRACE("main::mainDraw2DFunc(end)");
 }
 
+
+
 void mainPostDrawFunc() {
     LTRACE("main::mainPostDrawFunc(begin)");
 
@@ -522,13 +497,13 @@ void mainPostDrawFunc() {
     }
 #endif // OPENVR_SUPPORT
 
-    OsEng.postDraw();
+    openspace::global::openSpaceEngine.postDraw();
 
 #ifdef OPENSPACE_HAS_SPOUT
     for (const SpoutWindow& w : SpoutWindows) {
         sgct::SGCTWindow* window = SgctEngine->getWindowPtr(w.windowId);
         if (w.leftOrMain.initialized) {
-            GLuint texId = window->getFrameBufferTexture(sgct::Engine::LeftEye);
+            const GLuint texId = window->getFrameBufferTexture(sgct::Engine::LeftEye);
             glBindTexture(GL_TEXTURE_2D, texId);
             w.leftOrMain.handle->SendTexture(
                 texId,
@@ -539,7 +514,7 @@ void mainPostDrawFunc() {
         }
 
         if (w.right.initialized) {
-            GLuint texId = window->getFrameBufferTexture(sgct::Engine::RightEye);
+            const GLuint texId = window->getFrameBufferTexture(sgct::Engine::RightEye);
             glBindTexture(GL_TEXTURE_2D, texId);
             w.right.handle->SendTexture(
                 texId,
@@ -555,68 +530,69 @@ void mainPostDrawFunc() {
     LTRACE("main::mainPostDrawFunc(end)");
 }
 
-void mainExternalControlCallback(const char* receivedChars, int size) {
-    LTRACE("main::mainExternalControlCallback(begin)");
-    if (SgctEngine->isMaster()) {
-        OsEng.externalControlCallback(receivedChars, size, 0);
-    }
-    LTRACE("main::mainExternalControlCallback(end)");
-}
+
 
 void mainKeyboardCallback(int key, int, int action, int mods) {
     LTRACE("main::mainKeyboardCallback(begin)");
-    if (SgctEngine->isMaster()) {
-        OsEng.keyboardCallback(
-            openspace::Key(key),
-            openspace::KeyModifier(mods),
-            openspace::KeyAction(action)
-        );
-    }
+    openspace::global::openSpaceEngine.keyboardCallback(
+        openspace::Key(key),
+        openspace::KeyModifier(mods),
+        openspace::KeyAction(action)
+    );
     LTRACE("main::mainKeyboardCallback(begin)");
 }
 
+
+
 void mainMouseButtonCallback(int key, int action) {
     LTRACE("main::mainMouseButtonCallback(begin)");
-    if (SgctEngine->isMaster()) {
-        OsEng.mouseButtonCallback(
-            openspace::MouseButton(key),
-            openspace::MouseAction(action)
-        );
-    }
+    openspace::global::openSpaceEngine.mouseButtonCallback(
+        openspace::MouseButton(key),
+        openspace::MouseAction(action)
+    );
     LTRACE("main::mainMouseButtonCallback(end)");
 }
 
+
+
 void mainMousePosCallback(double x, double y) {
-    if (SgctEngine->isMaster()) {
-        OsEng.mousePositionCallback(x, y);
-    }
+    openspace::global::openSpaceEngine.mousePositionCallback(x, y);
 }
+
+
 
 void mainMouseScrollCallback(double posX, double posY) {
     LTRACE("main::mainMouseScrollCallback(begin");
-    if (SgctEngine->isMaster()) {
-        OsEng.mouseScrollWheelCallback(posX, posY);
-    }
+    openspace::global::openSpaceEngine.mouseScrollWheelCallback(posX, posY);
     LTRACE("main::mainMouseScrollCallback(end)");
 }
 
+
+
 void mainCharCallback(unsigned int codepoint, int mods) {
-    if (SgctEngine->isMaster()) {
-        OsEng.charCallback(codepoint, openspace::KeyModifier(mods));
-    }
+    openspace::global::openSpaceEngine.charCallback(
+        codepoint,
+        openspace::KeyModifier(mods)
+    );
 }
+
+
 
 void mainEncodeFun() {
     LTRACE("main::mainEncodeFun(begin)");
-    OsEng.encode();
+    openspace::global::openSpaceEngine.encode();
     LTRACE("main::mainEncodeFun(end)");
 }
 
+
+
 void mainDecodeFun() {
     LTRACE("main::mainDecodeFun(begin)");
-    OsEng.decode();
+    openspace::global::openSpaceEngine.decode();
     LTRACE("main::mainDecodeFun(end)");
 }
+
+
 
 void mainLogCallback(const char* msg) {
     std::string message = msg;
@@ -629,19 +605,313 @@ void mainLogCallback(const char* msg) {
     LINFOC("SGCT", message.substr(0, message.size() - 1));
 }
 
-int main_main(int argc, char** argv) {
-    std::pair<int, int> glVersion = supportedOpenGLVersion();
+} // namespace
+
+
+void setSgctDelegateFunctions() {
+    openspace::WindowDelegate& sgctDelegate = openspace::global::windowDelegate;
+    sgctDelegate.terminate = []() { sgct::Engine::instance()->terminate(); };
+    sgctDelegate.setBarrier = [](bool enabled) {
+        sgct::SGCTWindow::setBarrier(enabled);
+    };
+    sgctDelegate.setSynchronization = [](bool enabled) {
+        sgct_core::ClusterManager::instance()->setUseIgnoreSync(enabled);
+    };
+    sgctDelegate.clearAllWindows = [](const glm::vec4& clearColor) {
+        size_t n = sgct::Engine::instance()->getNumberOfWindows();
+        for (size_t i = 0; i < n; ++i) {
+            glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            GLFWwindow* w = sgct::Engine::instance()->getWindowPtr(i)->getWindowHandle();
+            glfwSwapBuffers(w);
+        }
+    };
+    sgctDelegate.windowHasResized = []() {
+        return sgct::Engine::instance()->getCurrentWindowPtr()->isWindowResized();
+    };
+    sgctDelegate.averageDeltaTime = []() { return sgct::Engine::instance()->getAvgDt(); };
+    sgctDelegate.deltaTime = []() { return sgct::Engine::instance()->getDt(); };
+    sgctDelegate.applicationTime = []() { return sgct::Engine::getTime(); };
+    sgctDelegate.mousePosition = []() {
+        int id = sgct::Engine::instance()->getCurrentWindowPtr()->getId();
+        double posX, posY;
+        sgct::Engine::instance()->getMousePos(id, &posX, &posY);
+        return glm::vec2(posX, posY);
+    };
+    sgctDelegate.mouseButtons = [](int maxNumber) {
+        int id = sgct::Engine::instance()->getCurrentWindowPtr()->getId();
+        uint32_t result = 0;
+        for (int i = 0; i < maxNumber; ++i) {
+            bool button = (sgct::Engine::instance()->getMouseButton(id, i) != 0);
+            if (button) {
+                result |= (1 << i);
+            }
+        }
+        return result;
+    };
+    sgctDelegate.currentWindowSize = []() {
+        return glm::ivec2(
+            sgct::Engine::instance()->getCurrentWindowPtr()->getXResolution(),
+            sgct::Engine::instance()->getCurrentWindowPtr()->getYResolution());
+    };
+    sgctDelegate.currentSubwindowSize = []() {
+        auto window = sgct::Engine::instance()->getCurrentWindowPtr();
+        switch (window->getStereoMode()) {
+            case sgct::SGCTWindow::Side_By_Side_Stereo:
+            case sgct::SGCTWindow::Side_By_Side_Inverted_Stereo:
+                return glm::ivec2(window->getXResolution() / 2, window->getYResolution());
+            case sgct::SGCTWindow::Top_Bottom_Stereo:
+            case sgct::SGCTWindow::Top_Bottom_Inverted_Stereo:
+                return glm::ivec2(window->getXResolution(), window->getYResolution() / 2);
+            default:
+                return glm::ivec2(window->getXResolution(), window->getYResolution());
+        }
+    };
+    sgctDelegate.currentWindowResolution = []() {
+        int x, y;
+        auto window = sgct::Engine::instance()->getCurrentWindowPtr();
+        window->getFinalFBODimensions(x, y);
+        return glm::ivec2(x, y);
+    };
+    sgctDelegate.currentDrawBufferResolution = []() {
+        sgct_core::Viewport* viewport =
+            sgct::Engine::instance()->getCurrentWindowPtr()->getViewport(0);
+        if (viewport != nullptr) {
+            if (viewport->hasSubViewports() && viewport->getNonLinearProjectionPtr()) {
+                int res = viewport->getNonLinearProjectionPtr()->getCubemapResolution();
+                return glm::ivec2(res, res);
+            }
+            else {
+                int x, y;
+                auto window = sgct::Engine::instance()->getCurrentWindowPtr();
+                window->getFinalFBODimensions(x, y);
+                return glm::ivec2(x, y);
+            }
+        }
+        return glm::ivec2(-1, -1);
+    };
+    sgctDelegate.currentViewportSize = []() {
+        sgct_core::Viewport* viewport =
+            sgct::Engine::instance()->getCurrentWindowPtr()->getViewport(0);
+        if (viewport != nullptr) {
+            int x = 0;
+            int y = 0;
+            sgct::Engine::instance()->getCurrentViewportSize(x, y);
+            return glm::ivec2(x, y);
+        }
+        return glm::ivec2(-1, -1);
+    };
+    sgctDelegate.dpiScaling = []() {
+        return glm::vec2(
+            sgct::Engine::instance()->getCurrentWindowPtr()->getXScale(),
+            sgct::Engine::instance()->getCurrentWindowPtr()->getYScale()
+        );
+    };
+    sgctDelegate.currentNumberOfAaSamples = []() {
+        return sgct::Engine::instance()->getCurrentWindowPtr()->getNumberOfAASamples();
+    };
+    sgctDelegate.isRegularRendering = []() {
+        sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
+        ghoul_assert(
+            w->getNumberOfViewports() > 0,
+            "At least one viewport must exist at this time"
+        );
+        sgct_core::Viewport* vp = w->getViewport(0);
+        sgct_core::NonLinearProjection* nlp = vp->getNonLinearProjectionPtr();
+        return nlp == nullptr;
+    };
+    sgctDelegate.hasGuiWindow = []() {
+        auto engine = sgct::Engine::instance();
+        for (size_t i = 0; i < engine->getNumberOfWindows(); ++i) {
+            if (engine->getWindowPtr(i)->checkIfTagExists("GUI")) {
+                return true;
+            }
+        }
+        return false;
+    };
+    sgctDelegate.isGuiWindow = []() {
+        return sgct::Engine::instance()->getCurrentWindowPtr()->checkIfTagExists("GUI");
+    };
+    sgctDelegate.isMaster = []() { return sgct::Engine::instance()->isMaster(); };
+    sgctDelegate.isUsingSwapGroups = []() {
+        return sgct::Engine::instance()->getCurrentWindowPtr()->isUsingSwapGroups();
+    };
+    sgctDelegate.isSwapGroupMaster = []() {
+        return sgct::Engine::instance()->getCurrentWindowPtr()->isSwapGroupMaster();
+    };
+    sgctDelegate.viewProjectionMatrix = []() {
+        return sgct::Engine::instance()->getCurrentModelViewProjectionMatrix();
+    };
+    sgctDelegate.modelMatrix = []() {
+        return sgct::Engine::instance()->getModelMatrix();
+    };
+    sgctDelegate.setNearFarClippingPlane = [](float nearPlane, float farPlane) {
+        sgct::Engine::instance()->setNearAndFarClippingPlanes(nearPlane, farPlane);
+    };
+    sgctDelegate.setEyeSeparationDistance = [](float distance) {
+        sgct::Engine::instance()->setEyeSeparation(distance);
+    };
+    sgctDelegate.viewportPixelCoordinates = []() {
+        sgct::SGCTWindow* window = sgct::Engine::instance()->getCurrentWindowPtr();
+        if (!window || !window->getCurrentViewport()) {
+            return glm::ivec4(0, 0, 0, 0);
+        }
+        else {
+            const int* data = sgct::Engine::instance()->getCurrentViewportPixelCoords();
+            return glm::ivec4(data[0], data[2], data[1], data[3]);
+        }
+    };
+    sgctDelegate.isExternalControlConnected = []() {
+        return sgct::Engine::instance()->isExternalControlConnected();
+    };
+    sgctDelegate.sendMessageToExternalControl = [](const std::vector<char>& message) {
+        sgct::Engine::instance()->sendMessageToExternalControl(
+            message.data(),
+            static_cast<int>(message.size())
+        );
+    };
+    sgctDelegate.isSimpleRendering = []() {
+        return (sgct::Engine::instance()->getCurrentRenderTarget() !=
+                sgct::Engine::NonLinearBuffer);
+    };
+    sgctDelegate.isFisheyeRendering = []() {
+        sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
+        return dynamic_cast<sgct_core::FisheyeProjection*>(
+            w->getViewport(0)->getNonLinearProjectionPtr()
+        ) != nullptr;
+    };
+    sgctDelegate.takeScreenshot = [](bool applyWarping) {
+        sgct::SGCTSettings::instance()->setCaptureFromBackBuffer(applyWarping);
+        sgct::Engine::instance()->takeScreenshot();
+    };
+    sgctDelegate.swapBuffer = []() {
+        GLFWwindow* w = glfwGetCurrentContext();
+        glfwSwapBuffers(w);
+        glfwPollEvents();
+    };
+    sgctDelegate.nWindows = []() {
+        return static_cast<int>(sgct::Engine::instance()->getNumberOfWindows());
+    };
+    sgctDelegate.currentWindowId = []() {
+        return sgct::Engine::instance()->getCurrentWindowPtr()->getId();
+    };
+}
+
+int main(int argc, char** argv) {
+#ifdef WIN32
+    SetUnhandledExceptionFilter(generateMiniDump);
+#endif // WIN32
+
+    // Initialize the LogManager and add the console log as this will be used every time
+    // and we need a fall back if something goes wrong between here and when we add the
+    // logs from the configuration file. If the user requested as specific loglevel in the
+    // configuration file, we will deinitialize this LogManager and reinitialize it later
+    // with the correct LogLevel
+    {
+        using namespace ghoul::logging;
+        LogManager::initialize(LogLevel::Debug, LogManager::ImmediateFlush::Yes);
+        LogMgr.addLog(std::make_unique<ConsoleLog>());
+#ifdef WIN32
+        if (IsDebuggerPresent()) {
+            LogMgr.addLog(std::make_unique<ghoul::logging::VisualStudioOutputLog>());
+        }
+#endif // WIN32
+
+    }
+
+    ghoul::initialize();
+
+    //
+    // Parse commandline arguments
+    //
+    ghoul::cmdparser::CommandlineParser parser(
+        std::string(argv[0]),
+        ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
+    );
+
+    openspace::CommandlineArguments commandlineArguments;
+    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+        commandlineArguments.configurationName, "--file", "-f",
+        "Provides the path to the OpenSpace configuration file. Only the '${TEMPORARY}' "
+        "path token is available and any other path has to be specified relative to the "
+        "current working directory."
+    ));
+
+    parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+        commandlineArguments.configurationOverride, "--config", "-c",
+        "Provides the ability to pass arbitrary Lua code to the application that will be "
+        "evaluated after the configuration file has been loaded but before the other "
+        "commandline arguments are triggered. This can be used to manipulate the "
+        "configuration file without editing the file on disk, for example in a "
+        "planetarium environment. Please not that the Lua script must not contain any - "
+        "or they will be interpreted as a new command. Similar, in Bash, ${...} will be "
+        "evaluated before it is passed to OpenSpace."
+    ));
+
+    std::vector<std::string> sgctArguments = parser.setCommandLine({ argv, argv + argc });
+
+    bool showHelp = parser.execute();
+    if (showHelp) {
+        parser.displayHelp(std::cout);
+        exit(EXIT_SUCCESS);
+    }
+
+    //
+    // Set up SGCT functions for window delegate
+    //
+    setSgctDelegateFunctions();
 
     // Create the OpenSpace engine and get arguments for the SGCT engine
-    std::vector<std::string> sgctArguments;
-    bool requestQuit = false;
+    std::string windowConfiguration;
     try {
-        openspace::OpenSpaceEngine::create(
-            argc, argv,
-            std::make_unique<openspace::SGCTWindowWrapper>(),
-            sgctArguments,
-            requestQuit
+        using namespace openspace;
+
+        // Find configuration
+        std::string configurationFilePath = commandlineArguments.configurationName;
+        if (commandlineArguments.configurationName.empty()) {
+            LDEBUG("Finding configuration");
+            configurationFilePath = configuration::findConfiguration();
+        }
+        configurationFilePath = absPath(configurationFilePath);
+
+        if (!FileSys.fileExists(configurationFilePath)) {
+            LFATALC("main", "Could not find configuration: " + configurationFilePath);
+            exit(EXIT_FAILURE);
+        }
+        LINFO(fmt::format("Configuration Path: '{}'", configurationFilePath));
+
+        // Loading configuration from disk
+        LDEBUG("Loading configuration from disk");
+        global::configuration = configuration::loadConfigurationFromFile(
+            configurationFilePath
         );
+
+        // If the user requested a commandline-based configuation script that should
+        // overwrite some of the values, this is the time to do it
+        if (!commandlineArguments.configurationOverride.empty()) {
+            LDEBUG("Executing Lua script passed through the commandline:");
+            LDEBUG(commandlineArguments.configurationOverride);
+            ghoul::lua::runScript(
+                global::configuration.state,
+                commandlineArguments.configurationOverride
+            );
+            parseLuaState(global::configuration);
+        }
+
+        // Determining SGCT configuration file
+        LDEBUG("SGCT Configuration file: " + global::configuration.windowConfiguration);
+
+        windowConfiguration = openspace::global::configuration.windowConfiguration;
+    }
+    catch (const openspace::documentation::SpecificationError& e) {
+        LFATALC("main", "Loading of configuration file failed");
+        for (const openspace::documentation::TestResult::Offense& o : e.result.offenses) {
+            LERRORC(o.offender, ghoul::to_string(o.reason));
+        }
+        for (const openspace::documentation::TestResult::Warning& w : e.result.warnings) {
+            LWARNINGC(w.offender, ghoul::to_string(w.reason));
+        }
+        exit(EXIT_FAILURE);
     }
     catch (const ghoul::RuntimeError& e) {
         // Write out all of the information about the exception and flush the logs
@@ -651,42 +921,14 @@ int main_main(int argc, char** argv) {
         }
         return EXIT_FAILURE;
     }
-    catch (const ghoul::AssertionException& e) {
-        // We don't want to catch the assertion exception as we won't be able to add a
-        // breakpoint for debugging
-        LFATALC("Assertion failed", e.what());
-        throw;
-    }
-    catch (const std::exception& e) {
-        LFATALC("Exception", e.what());
-        if (ghoul::logging::LogManager::isInitialized()) {
-            LogMgr.flushLogs();
-        }
-        return EXIT_FAILURE;
-    }
-    catch (...) {
-        LFATALC("Exception", "Unknown exception");
-        if (ghoul::logging::LogManager::isInitialized()) {
-            LogMgr.flushLogs();
-        }
-        return EXIT_FAILURE;
-    }
 
-    if (requestQuit) {
-        return EXIT_SUCCESS;
-    }
+    openspace::global::openSpaceEngine.registerPathTokens();
 
-    LINFO(fmt::format(
-        "Detected OpenGL version: {}.{}", glVersion.first, glVersion.second
-    ));
-
-    // Create sgct engine c arguments
-    int newArgc = static_cast<int>(sgctArguments.size());
-
-    char** newArgv = new char*[newArgc];
-    for (int i = 0; i < newArgc; ++i) {
-        newArgv[i] = const_cast<char*>(sgctArguments.at(i).c_str());
-    }
+    // Prepend the outgoing sgctArguments with the program name
+    // as well as the configuration file that sgct is supposed to use
+    sgctArguments.insert(sgctArguments.begin(), argv[0]);
+    sgctArguments.insert(sgctArguments.begin() + 1, "-config");
+    sgctArguments.insert(sgctArguments.begin() + 2, absPath(windowConfiguration));
 
     // Need to set this before the creation of the sgct::Engine
     sgct::MessageHandler::instance()->setLogToConsole(false);
@@ -699,10 +941,7 @@ int main_main(int argc, char** argv) {
 #endif
 
     LDEBUG("Creating SGCT Engine");
-    SgctEngine = new sgct::Engine(newArgc, newArgv);
-
-    // Deallocate sgct c arguments
-    delete[] newArgv;
+    SgctEngine = new sgct::Engine(sgctArguments);
 
     // Bind functions
     SgctEngine->setInitOGLFunction(mainInitFunc);
@@ -715,7 +954,6 @@ int main_main(int argc, char** argv) {
     SgctEngine->setMouseButtonCallbackFunction(mainMouseButtonCallback);
     SgctEngine->setMousePosCallbackFunction(mainMousePosCallback);
     SgctEngine->setMouseScrollCallbackFunction(mainMouseScrollCallback);
-    SgctEngine->setExternalControlCallback(mainExternalControlCallback);
     SgctEngine->setCharCallbackFunction(mainCharCallback);
 
     // Disable the immediate exit of the application when the ESC key is pressed
@@ -740,27 +978,28 @@ int main_main(int argc, char** argv) {
         { { 4, 5 }, sgct::Engine::RunMode::OpenGL_4_5_Core_Profile },
         { { 4, 6 }, sgct::Engine::RunMode::OpenGL_4_6_Core_Profile }
     };
-    ghoul_assert(
-        versionMapping.find(glVersion) != versionMapping.end(),
-        "Unknown OpenGL version. Missing statement in version mapping map"
-    );
 
-    BooleanType(IsInitialized);
-    auto cleanup = [&](IsInitialized isInitialized){
+
+    std::pair<int, int> version = supportedOpenGLVersion();
+    LINFO(fmt::format("Detected OpenGL version: {}.{}", version.first, version.second));
+    bool initSuccess = SgctEngine->init(versionMapping[version]);
+
+    // Do not print message if slaves are waiting for the master
+    // Only timeout after 15 minutes
+    SgctEngine->setSyncParameters(false, 15.f * 60.f);
+
+    auto cleanup = [&](bool isInitialized) {
         if (isInitialized) {
-            OsEng.deinitialize();
+            openspace::global::openSpaceEngine.deinitializeGL();
+            openspace::global::openSpaceEngine.deinitialize();
         }
 
         // Clear function bindings to avoid crash after destroying the OpenSpace Engine
         sgct::MessageHandler::instance()->setLogToCallback(false);
         sgct::MessageHandler::instance()->setLogCallback(nullptr);
 
-        LDEBUG("Destroying OpenSpaceEngine");
-        openspace::OpenSpaceEngine::destroy();
-
         LDEBUG("Destroying SGCT Engine");
         delete SgctEngine;
-
 
 #ifdef OPENVR_SUPPORT
         // Clean up OpenVR
@@ -781,68 +1020,17 @@ int main_main(int argc, char** argv) {
 #endif // OPENSPACE_HAS_SPOUT
     };
 
-    bool initSuccess = SgctEngine->init(versionMapping[glVersion]);
-
-    // Do not print message if slaves are waiting for the master
-    // Only timeout after 15 minutes
-    SgctEngine->setSyncParameters(false, 15.f * 60.f);
-
     if (!initSuccess) {
         LFATAL("Initializing failed");
-        cleanup(IsInitialized::No);
+        cleanup(false);
         return EXIT_FAILURE;
     }
 
-    // Main loop
     LINFO("Starting rendering loop");
     SgctEngine->render();
     LINFO("Ending rendering loop");
 
-    cleanup(IsInitialized::Yes);
+    cleanup(true);
 
-    // Exit program
     exit(EXIT_SUCCESS);
-}
-
-} // namespace
-
-int main(int argc, char** argv) {
-#ifdef WIN32
-    SetUnhandledExceptionFilter(generateMiniDump);
-#endif // WIN32
-
-    // If we are working as a developer, we don't want to catch the exceptions in order to
-    // find the locations where the exceptions are raised.
-    // If we are not in developer mode, we want to catch and at least log the error before
-    // dying
-#ifdef DEVELOPER_MODE
-    return main_main(argc, argv);
-#else
-    // We wrap the actual main function in a try catch block so that we can get and print
-    // some additional information in case an exception is raised
-    try {
-        return main_main(argc, argv);
-    }
-    catch (const ghoul::RuntimeError& e) {
-        // Write out all of the information about the exception and flush the logs
-        LFATALC(e.component, e.message);
-        LogMgr.flushLogs();
-        return EXIT_FAILURE;
-    }
-    catch (const ghoul::AssertionException& e) {
-        // We don't want to catch the assertion exception as we won't be able to add a
-        // breakpoint for debugging
-        LFATALC("Assertion failed", e.what());
-        throw;
-    } catch (const std::exception& e) {
-        LFATALC("Exception", e.what());
-        LogMgr.flushLogs();
-        return EXIT_FAILURE;
-    }
-    catch (...) {
-        LFATALC("Exception", "Unknown exception");
-        LogMgr.flushLogs();
-        return EXIT_FAILURE;
-    }
-#endif // DEVELOPER_MODE
 }

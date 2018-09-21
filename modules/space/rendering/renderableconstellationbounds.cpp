@@ -26,7 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -185,7 +185,7 @@ RenderableConstellationBounds::RenderableConstellationBounds(
 }
 
 void RenderableConstellationBounds::initializeGL() {
-    _program = OsEng.renderEngine().buildRenderProgram(
+    _program = global::renderEngine.buildRenderProgram(
         "ConstellationBounds",
         absPath("${MODULE_SPACE}/shaders/constellationbounds_vs.glsl"),
         absPath("${MODULE_SPACE}/shaders/constellationbounds_fs.glsl")
@@ -217,7 +217,7 @@ void RenderableConstellationBounds::deinitializeGL() {
     _vao = 0;
 
     if (_program) {
-        OsEng.renderEngine().removeRenderProgram(_program.get());
+        global::renderEngine.removeRenderProgram(_program.get());
         _program = nullptr;
     }
 }

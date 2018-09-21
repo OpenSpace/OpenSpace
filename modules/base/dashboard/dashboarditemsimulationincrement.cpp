@@ -26,7 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/font/font.h>
@@ -136,7 +136,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
         _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
     }
     _fontName.onChange([this](){
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
@@ -144,7 +144,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
         _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
     }
     _fontSize.onChange([this](){
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
@@ -173,12 +173,12 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
     addProperty(_requestedUnit);
 
-    _font = OsEng.fontManager().font(_fontName, _fontSize);
+    _font = global::fontManager.font(_fontName, _fontSize);
 }
 
 void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
-    const double targetDt = OsEng.timeManager().targetDeltaTime();
-    const double currentDt = OsEng.timeManager().deltaTime();
+    const double targetDt = global::timeManager.targetDeltaTime();
+    const double currentDt = global::timeManager.deltaTime();
     std::pair<double, std::string> targetDeltaTime;
     std::pair<double, std::string> currentDeltaTime;
     if (_doSimplification) {
@@ -199,10 +199,10 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
         }
     }
 
-    std::string pauseText = OsEng.timeManager().isPaused() ? " (Paused)" : "";
+    std::string pauseText = global::timeManager.isPaused() ? " (Paused)" : "";
 
     penPosition.y -= _font->height();
-    if (targetDt != currentDt && !OsEng.timeManager().isPaused()) {
+    if (targetDt != currentDt && !global::timeManager.isPaused()) {
         // We are in the middle of a transition
         RenderFont(
             *_font,
@@ -229,7 +229,7 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemSimulationIncrement::size() const {
-    double t = OsEng.timeManager().targetDeltaTime();
+    double t = global::timeManager.targetDeltaTime();
     std::pair<double, std::string> deltaTime;
     if (_doSimplification) {
         deltaTime = simplifyTime(t);

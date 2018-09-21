@@ -27,7 +27,7 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/powerscaledscalar.h>
 #include <openspace/util/powerscaledsphere.h>
@@ -244,7 +244,7 @@ void RenderableSphere::initializeGL() {
     _shader = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return OsEng.renderEngine().buildRenderProgram(
+            return global::renderEngine.buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_BASE}/shaders/sphere_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/sphere_fs.glsl")
@@ -263,7 +263,7 @@ void RenderableSphere::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
     _shader = nullptr;
@@ -322,10 +322,10 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
-    bool usingFramebufferRenderer = OsEng.renderEngine().rendererImplementation() ==
+    bool usingFramebufferRenderer = global::renderEngine.rendererImplementation() ==
                                     RenderEngine::RendererImplementation::Framebuffer;
 
-    bool usingABufferRenderer = OsEng.renderEngine().rendererImplementation() ==
+    bool usingABufferRenderer = global::renderEngine.rendererImplementation() ==
                                 RenderEngine::RendererImplementation::ABuffer;
 
     if (usingABufferRenderer) {

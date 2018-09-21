@@ -31,9 +31,9 @@
 #include <string>
 #include <vector>
 
-namespace openspace {
+namespace openspace::documentation { struct Documentation; }
 
-namespace documentation { struct Documentation; }
+namespace openspace::configuration {
 
 struct Configuration {
     std::string windowConfiguration = "${CONFIG}/single.xml";
@@ -46,8 +46,6 @@ struct Configuration {
 
     struct Logging {
         std::string level = "Info";
-        std::string directory = "${BASE}";
-        std::string performancePrefix = "PM-";
         bool forceImmediateFlush = false;
         std::string capabilitiesVerbosity = "Default";
         std::vector<ghoul::Dictionary> logs;
@@ -134,6 +132,6 @@ Configuration loadConfigurationFromFile(const std::string& filename);
 
 void parseLuaState(Configuration& configuration);
 
-} // namespace openspace
+} // namespace openspace::configuration
 
 #endif // __OPENSPACE_CORE___CONFIGURATION___H__

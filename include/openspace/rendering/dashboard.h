@@ -41,6 +41,7 @@ class DashboardItem;
 class Dashboard : public properties::PropertyOwner {
 public:
     Dashboard();
+    ~Dashboard();
 
     void render(glm::vec2& penPosition);
 
