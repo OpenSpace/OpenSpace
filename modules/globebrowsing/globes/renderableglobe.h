@@ -265,13 +265,6 @@ private:
         std::vector<std::unique_ptr<GPULayerGroup>> gpuLayerGroups;
     } _localRenderer;
 
-
-
-
-    // Layered texture uniforms are chached in the uniform ID handles.
-    //GPULayerManager _globalGpuLayerManager;
-    //GPULayerManager _localGpuLayerManager;
-
     bool _shadersNeedRecompilation = true;
     bool _lodScaleFactorDirty = true;
 };

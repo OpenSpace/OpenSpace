@@ -55,8 +55,13 @@ public:
     bool isRoot() const;
     bool isLeaf() const;
 
+    using RenderFunction = std::function<
+        void(const ChunkNode&, int, const RenderData&, const glm::dmat4&)>;
+
     void depthFirst(const std::function<void(const ChunkNode&)>& f) const;
-    void breadthFirst(const std::function<void(const ChunkNode&)>& f) const;
+    void breadthFirst(const RenderFunction& f,
+        int modelSpaceCutoffLevel, const RenderData& data,
+        const glm::dmat4& modelViewProjection) const;
     void reverseBreadthFirst(const std::function<void(const ChunkNode&)>& f) const;
 
     const ChunkNode& find(const Geodetic2& location) const;

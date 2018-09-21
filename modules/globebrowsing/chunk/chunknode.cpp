@@ -80,7 +80,10 @@ void ChunkNode::depthFirst(const std::function<void(const ChunkNode&)>& f) const
     }
 }
 
-void ChunkNode::breadthFirst(const std::function<void(const ChunkNode&)>& f) const {
+void ChunkNode::breadthFirst(const RenderFunction& f, int modelSpaceCutoffLevel,
+                             const RenderData& data,
+                             const glm::dmat4& modelViewProjection) const
+{
     std::queue<const ChunkNode*> Q;
 
     // Loop through nodes in breadths first order
@@ -89,7 +92,7 @@ void ChunkNode::breadthFirst(const std::function<void(const ChunkNode&)>& f) con
         const ChunkNode* node = Q.front();
         Q.pop();
 
-        f(*node);
+        f(*node, modelSpaceCutoffLevel, data, modelViewProjection);
 
         // Add children to queue, if any
         if (!node->isLeaf()) {

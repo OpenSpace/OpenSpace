@@ -665,10 +665,12 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     int count = 0;
 
     // Render chunks
-    auto renderJob = [this, &data, &mvp, &count](const ChunkNode& chunkNode) {
+    auto renderJob = [this, &count](const ChunkNode& chunkNode, int modelSpaceCutoffLevel,
+                            const RenderData& data, const glm::dmat4& modelViewProjection)
+    {
         const Chunk& chunk = chunkNode.chunk();
         if (chunkNode.isLeaf() && chunk.isVisible()) {
-            if (chunk.tileIndex().level < _debugProperties.modelSpaceRenderingCutoffLevel) {
+            if (chunk.tileIndex().level < modelSpaceCutoffLevel) {
                 renderChunkGlobally(chunk, data);
             }
             else {
@@ -677,11 +679,23 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
 
             ++count;
 
-            debugRenderChunk(chunk, mvp);
+            if (_debugProperties.showChunkBounds || _debugProperties.showChunkAABB) {
+                debugRenderChunk(chunk, modelViewProjection);
+            }
         }
     };
-    _leftRoot->breadthFirst(renderJob);
-    _rightRoot->breadthFirst(renderJob);
+    _leftRoot->breadthFirst(
+        renderJob,
+        _debugProperties.modelSpaceRenderingCutoffLevel,
+        data,
+        mvp
+    );
+    _rightRoot->breadthFirst(
+        renderJob,
+        _debugProperties.modelSpaceRenderingCutoffLevel,
+        data,
+        mvp
+    );
 
     LINFOC(identifier(), "Count: " + std::to_string(count));
 }
@@ -1250,39 +1264,37 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
 }
 
 void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const {
-    if (_debugProperties.showChunkBounds || _debugProperties.showChunkAABB) {
-        const std::vector<glm::dvec4>& modelSpaceCorners =
-            chunk.boundingPolyhedronCorners();
+    const std::vector<glm::dvec4>& modelSpaceCorners =
+        chunk.boundingPolyhedronCorners();
 
-        std::vector<glm::vec4> clippingSpaceCorners(8);
-        AABB3 screenSpaceBounds;
+    std::vector<glm::vec4> clippingSpaceCorners(8);
+    AABB3 screenSpaceBounds;
 
-        for (size_t i = 0; i < 8; ++i) {
-            const glm::vec4& clippingSpaceCorner = mvp * modelSpaceCorners[i];
-            clippingSpaceCorners[i] = clippingSpaceCorner;
+    for (size_t i = 0; i < 8; ++i) {
+        const glm::vec4& clippingSpaceCorner = mvp * modelSpaceCorners[i];
+        clippingSpaceCorners[i] = clippingSpaceCorner;
 
-            glm::vec3 screenSpaceCorner =
-                glm::vec3((1.f / clippingSpaceCorner.w) * clippingSpaceCorner);
-            screenSpaceBounds.expand(std::move(screenSpaceCorner));
-        }
+        glm::vec3 screenSpaceCorner =
+            glm::vec3((1.f / clippingSpaceCorner.w) * clippingSpaceCorner);
+        screenSpaceBounds.expand(std::move(screenSpaceCorner));
+    }
 
-        const unsigned int colorBits = 1 + chunk.tileIndex().level % 6;
-        const glm::vec4 color = glm::vec4(
-            colorBits & 1,
-            colorBits & 2,
-            colorBits & 4,
-            0.3f
-        );
+    const unsigned int colorBits = 1 + chunk.tileIndex().level % 6;
+    const glm::vec4 color = glm::vec4(
+        colorBits & 1,
+        colorBits & 2,
+        colorBits & 4,
+        0.3f
+    );
 
-        if (_debugProperties.showChunkBounds) {
-            DebugRenderer::ref().renderNiceBox(clippingSpaceCorners, color);
-        }
+    if (_debugProperties.showChunkBounds) {
+        DebugRenderer::ref().renderNiceBox(clippingSpaceCorners, color);
+    }
 
-        if (_debugProperties.showChunkAABB) {
-            const std::vector<glm::vec4>& screenSpacePoints =
-                DebugRenderer::ref().verticesFor(screenSpaceBounds);
-            DebugRenderer::ref().renderNiceBox(screenSpacePoints, color);
-        }
+    if (_debugProperties.showChunkAABB) {
+        const std::vector<glm::vec4>& screenSpacePoints =
+            DebugRenderer::ref().verticesFor(screenSpaceBounds);
+        DebugRenderer::ref().renderNiceBox(screenSpacePoints, color);
     }
 }
 
