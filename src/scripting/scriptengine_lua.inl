@@ -372,6 +372,7 @@ int unzipFile(lua_State* L) {
     }
 
     lua_settop(L, 0);
+    return 0;
 }
 
 } // namespace openspace::luascriptfunctions
