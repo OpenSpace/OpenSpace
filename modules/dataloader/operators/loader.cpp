@@ -54,12 +54,16 @@
 #include <ghoul/misc/dictionary.h>
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 #include <ext/json/json.hpp>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
+#include <openspace/scene/assetmanager.h>
 
 #include <ghoul/glm.h>
 
 using Directory = ghoul::filesystem::Directory;
 using File = ghoul::filesystem::File;
 using RawPath = ghoul::filesystem::Directory::RawPath;
+using PrettyPrint = ghoul::DictionaryLuaFormatter::PrettyPrint;
 using Recursive = ghoul::filesystem::Directory::Recursive;
 using TestResult = openspace::documentation::TestResult;
 using json = nlohmann::json;
@@ -615,7 +619,7 @@ const std::string Loader::createAssetFile(ghoul::Dictionary assetDictionary)
     Directory d = getAssetFolderDirectory();
     const std::string path = d.path();
 
-    ghoul::DictionaryLuaFormatter formatter;
+    ghoul::DictionaryLuaFormatter formatter(PrettyPrint::Yes, "  ");
     const std::string dictionaryString = formatter.format(assetDictionary);
 
     std::string identifier = assetDictionary.value<std::string>(KeyIdentifier);
@@ -642,7 +646,7 @@ const std::string Loader::createAssetFile(ghoul::Dictionary assetDictionary)
 
 void Loader::loadCreatedAsset(const std::string& path) 
 {
-    
+    global::openSpaceEngine.assetManager().add(path);
 }
 
 // void Loader::createVolumeDataItem(std::string absPath) {}
