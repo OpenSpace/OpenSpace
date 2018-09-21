@@ -58,8 +58,8 @@ option(OPENSPACE_MODULE_SYNC_USE_LIBTORRENT "Use libtorrent" OFF)
 if (OPENSPACE_MODULE_SYNC_USE_LIBTORRENT)
     set(Boost_USE_STATIC_LIBS ON)
     set(Boost_USE_MULTITHREADED ON)
-    SET(LIBTORRENT_encryption OFF CACHE BOOL "Use OpenSSL Encryption" FORCE)
-    SET(LIBTORRENT_shared OFF CACHE BOOL "Use Libtorrent as shared library" FORCE)
+    set(LIBTORRENT_encryption OFF CACHE BOOL "Use OpenSSL Encryption" FORCE)
+    set(LIBTORRENT_shared OFF CACHE BOOL "Use Libtorrent as shared library" FORCE)
 
     include_external_library(
         ${sync_module}
@@ -73,4 +73,9 @@ if (OPENSPACE_MODULE_SYNC_USE_LIBTORRENT)
     )
 
     target_compile_definitions(openspace-module-sync PUBLIC SYNC_USE_LIBTORRENT)
+
+    mark_as_advanced(LIBTORRENT_build_examples LIBTORRENT_build_tests
+        LIBTORRENT_deprecated-functions LIBTORRENT_dht LIBTORRENT_encryption
+        LIBTORRENT_exceptions LIBTORRENT_exceptions LIBTORRENT_libiconv
+        LIBTORRENT_logging LIBTORRENT_shared LIBTORRENT_static_runtime)
 endif () # OPENSPACE_MODULE_SYNC_USE_LIBTORRENT
