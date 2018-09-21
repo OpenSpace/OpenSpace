@@ -61,7 +61,7 @@ function (handle_modules internal_module_path external_modules_paths)
 
         get_module_attribute_supported(${path} is_module_supported)
         if (NOT ${is_module_supported})
-            message(STATUS "Skipping module ${path} as it is not supported on this machine")
+            message(STATUS "Skipping module ${name} (${path}) as it is not supported on this machine")
             continue()
         endif ()
 
