@@ -1009,11 +1009,11 @@ void RenderableGlobe::recompileShaders() {
     global::renderEngine.removeRenderProgram(_localRenderer.program.get());
     _localRenderer.program = global::renderEngine.buildRenderProgram(
         "LocalChunkedLodPatch",
-        "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl",
-        "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl",
+        absPath("${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl"),
+        absPath("${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl"),
         shaderDictionary
     );
-    ghoul_assert(_localProgramObject != nullptr, "Failed to initialize programObject!");
+    ghoul_assert(_localRenderer.program, "Failed to initialize programObject!");
     _localRenderer.updatedSinceLastCall = true;
 
     _localRenderer.program->setUniform("xSegments", _grid.xSegments());
@@ -1039,11 +1039,11 @@ void RenderableGlobe::recompileShaders() {
     global::renderEngine.removeRenderProgram(_globalRenderer.program.get());
     _globalRenderer.program = global::renderEngine.buildRenderProgram(
         "GlobalChunkedLodPatch",
-        "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_vs.glsl",
-        "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_fs.glsl",
+        absPath("${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_vs.glsl"),
+        absPath("${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_fs.glsl"),
         shaderDictionary
     );
-    ghoul_assert(_globalRenderer.program != nullptr, "Failed to initialize programObject!");
+    ghoul_assert(_globalRenderer.program, "Failed to initialize programObject!");
 
     _globalRenderer.program->setUniform("xSegments", _grid.xSegments());
 
