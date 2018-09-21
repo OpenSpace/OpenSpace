@@ -38,7 +38,7 @@ public:
     SpiceRotation(const ghoul::Dictionary& dictionary);
 
     const glm::dmat3& matrix() const;
-    glm::dmat3 matrix(const Time& time) const override;
+    glm::dmat3 matrix(const UpdateData& data) const override;
 
     static documentation::Documentation Documentation();
 

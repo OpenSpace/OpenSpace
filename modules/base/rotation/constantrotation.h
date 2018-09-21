@@ -22,33 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___HISTOGRAMMANAGER___H__
-#define __OPENSPACE_MODULE_MULTIRESVOLUME___HISTOGRAMMANAGER___H__
+#ifndef __OPENSPACE_MODULE_BASE___CONSTANTROTATION___H__
+#define __OPENSPACE_MODULE_BASE___CONSTANTROTATION___H__
 
-#include <openspace/util/histogram.h>
-#include <string>
+#include <openspace/scene/rotation.h>
+
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/dvec3property.h>
 
 namespace openspace {
 
-class TSP;
+namespace documentation { struct Documentation; }
 
-class HistogramManager {
+class ConstantRotation : public Rotation {
 public:
-    bool buildHistograms(TSP* tsp, int numBins);
-    Histogram* histogram(unsigned int brickIndex);
-    bool loadFromFile(const std::string& filename);
-    bool saveToFile(const std::string& filename);
+    ConstantRotation(const ghoul::Dictionary& dictionary);
+
+    glm::dmat3 matrix(const UpdateData& data) const override;
+
+    static documentation::Documentation Documentation();
 
 private:
-    bool buildHistogram(TSP* tsp, unsigned int brickIndex);
-    std::vector<float> readValues(TSP* tsp, unsigned int brickIndex);
+    properties::DVec3Property _rotationAxis;
+    properties::FloatProperty _rotationRate;
 
-    std::vector<Histogram> _histograms;
-    float _minBin = 0.f;
-    float _maxBin = 0.f;
-    int _numBins = 0;
+    mutable double _accumulatedRotation = 0.0;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_MULTIRESVOLUME___HISTOGRAMMANAGER___H__
+#endif // __OPENSPACE_MODULE_BASE___CONSTANTROTATION___H__

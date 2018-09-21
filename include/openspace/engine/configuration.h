@@ -37,7 +37,7 @@ namespace documentation { struct Documentation; }
 
 struct Configuration {
     std::string windowConfiguration = "${CONFIG}/single.xml";
-    std::string asset = "default";
+    std::string asset;
     std::vector<std::string> globalCustomizationScripts;
     std::map<std::string, std::string> pathTokens = {
         { "CACHE" , "CACHE = \"${BASE}/cache\"" }
@@ -88,6 +88,7 @@ struct Configuration {
 
     bool isRenderingOnMasterDisabled = false;
     bool isSceneTranslationOnMasterDisabled = false;
+    bool isConsoleDisabled = false;
 
     std::map<std::string, ghoul::Dictionary> moduleConfigurations;
 

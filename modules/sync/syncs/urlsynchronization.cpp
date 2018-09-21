@@ -58,7 +58,7 @@ documentation::Documentation UrlSynchronization::Documentation() {
         {
             {
                 KeyUrl,
-                new OrVerifier(new StringVerifier, new StringListVerifier),
+                new OrVerifier({ new StringVerifier, new StringListVerifier }),
                 Optional::No,
                 "The URL or urls from where the files are downloaded. If multiple URLs "
                 "are provided, all files will be downloaded to the same directory."

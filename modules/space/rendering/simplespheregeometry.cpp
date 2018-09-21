@@ -53,10 +53,7 @@ documentation::Documentation SimpleSphereGeometry::Documentation() {
         {
             {
                 RadiusInfo.identifier,
-                new OrVerifier(
-                    new DoubleVerifier,
-                    new DoubleVector3Verifier
-                ),
+                new OrVerifier({ new DoubleVerifier, new DoubleVector3Verifier }),
                 Optional::No,
                 RadiusInfo.description
             },

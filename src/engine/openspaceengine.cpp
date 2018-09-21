@@ -333,10 +333,10 @@ void OpenSpaceEngine::create(int argc, char** argv,
             "Loading of configuration file '{}' failed", configurationFilePath
         ));
         for (const documentation::TestResult::Offense& o : e.result.offenses) {
-            LERRORC(o.offender, std::to_string(o.reason));
+            LERRORC(o.offender, ghoul::to_string(o.reason));
         }
         for (const documentation::TestResult::Warning& w : e.result.warnings) {
-            LWARNINGC(w.offender, std::to_string(w.reason));
+            LWARNINGC(w.offender, ghoul::to_string(w.reason));
         }
         throw;
     }
@@ -537,7 +537,7 @@ void OpenSpaceEngine::initialize() {
     // Check the required OpenGL versions of the registered modules
     ghoul::systemcapabilities::Version version =
         _engine->_moduleEngine->requiredOpenGLVersion();
-    LINFO(fmt::format("Required OpenGL version: {}", std::to_string(version)));
+    LINFO(fmt::format("Required OpenGL version: {}", ghoul::to_string(version)));
 
     if (OpenGLCap.openGLVersion() < version) {
         throw ghoul::RuntimeError(
@@ -760,6 +760,11 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 void OpenSpaceEngine::deinitialize() {
     LTRACE("OpenSpaceEngine::deinitialize(begin)");
 
+    // We want to render an image informing the user that we are shutting down
+    _renderEngine->renderEndscreen();
+
+    _engine->_windowWrapper->swapBuffer();
+
     for (const std::function<void()>& func : _engine->_moduleCallbacks.deinitializeGL) {
         func();
     }
@@ -913,10 +918,10 @@ void OpenSpaceEngine::configureLogging(bool consoleLog) {
         catch (const documentation::SpecificationError& e) {
             LERROR("Failed loading of log");
             for (const documentation::TestResult::Offense& o : e.result.offenses) {
-                LERRORC(o.offender, std::to_string(o.reason));
+                LERRORC(o.offender, ghoul::to_string(o.reason));
             }
             for (const documentation::TestResult::Warning& w : e.result.warnings) {
-                LWARNINGC(w.offender, std::to_string(w.reason));
+                LWARNINGC(w.offender, ghoul::to_string(w.reason));
             }
             throw;
         }
@@ -1017,8 +1022,8 @@ void OpenSpaceEngine::initializeGL() {
         auto callback = [](Source source, Type type, Severity severity,
             unsigned int id, std::string message) -> void
         {
-            const std::string s = std::to_string(source);
-            const std::string t = std::to_string(type);
+            const std::string s = ghoul::to_string(source);
+            const std::string t = ghoul::to_string(type);
 
             const std::string category =
                 "OpenGL (" + s + ") [" + t + "] {" + std::to_string(id) + "}";
@@ -1193,10 +1198,12 @@ void OpenSpaceEngine::preSynchronization() {
         _renderEngine->updateScene();
         //_navigationHandler->updateCamera(dt);
 
-        Camera* camera = _scene->camera();
-        if (camera) {
-            _navigationHandler->updateCamera(dt);
-            camera->invalidateCache();
+        if (_scene) {
+            Camera* camera = _scene->camera();
+            if (camera) {
+                _navigationHandler->updateCamera(dt);
+                camera->invalidateCache();
+            }
         }
         _parallelPeer->preSynchronization();
     }
@@ -1233,6 +1240,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     if (_shutdown.inShutdown) {
         if (_shutdown.timer <= 0.f) {
             _windowWrapper->terminate();
+            return;
         }
         _shutdown.timer -= static_cast<float>(_windowWrapper->averageDeltaTime());
     }
@@ -1367,9 +1375,11 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
         }
     }
 
-    const bool isConsoleConsumed = _console->keyboardCallback(key, mod, action);
-    if (isConsoleConsumed) {
-        return;
+    if (!_configuration->isConsoleDisabled) {
+        const bool isConsoleConsumed = _console->keyboardCallback(key, mod, action);
+        if (isConsoleConsumed) {
+            return;
+        }
     }
 
     _navigationHandler->keyboardCallback(key, mod, action);

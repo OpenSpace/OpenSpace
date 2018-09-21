@@ -53,6 +53,8 @@ namespace {
 
     ImFont* captionFont = nullptr;
 
+    constexpr const std::array<const char*, 2> UniformNames = { "tex", "ortho" };
+
     void addScreenSpaceRenderableLocal(std::string texturePath) {
         if (!FileSys.fileExists(absPath(texturePath))) {
             LWARNING(fmt::format("Could not find image '{}'", texturePath));
@@ -171,6 +173,8 @@ void GUI::initialize() {
         "",
         ghoul::filesystem::CacheManager::Persistent::Yes
     );
+
+    LDEBUG(fmt::format("Using {} as ImGUI cache location", cachedFile));
 
     iniFileBuffer = new char[cachedFile.size() + 1];
 
@@ -304,9 +308,8 @@ void GUI::initializeGL() {
         absPath("${MODULE_IMGUI}/shaders/gui_vs.glsl"),
         absPath("${MODULE_IMGUI}/shaders/gui_fs.glsl")
     );
-
-    _uniformCache.tex = _program->uniformLocation("tex");
-    _uniformCache.ortho = _program->uniformLocation("ortho");
+    
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
     int nWindows = OsEng.windowWrapper().nWindows();
     {
@@ -416,9 +419,7 @@ void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
 void GUI::endFrame() {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
-
-        _uniformCache.tex = _program->uniformLocation("tex");
-        _uniformCache.ortho = _program->uniformLocation("ortho");
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 
     _performance.setEnabled(OsEng.renderEngine().doesPerformanceMeasurements());

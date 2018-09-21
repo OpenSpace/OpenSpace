@@ -33,6 +33,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/crc32.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
@@ -51,19 +52,27 @@
 #include <string>
 
 namespace {
-    constexpr const char* _loggerCat             = "RenderableBillboardsCloud";
-    constexpr const char* ProgramObjectName      = "RenderableBillboardsCloud";
+    constexpr const char* _loggerCat = "RenderableBillboardsCloud";
+    constexpr const char* ProgramObjectName = "RenderableBillboardsCloud";
     constexpr const char* RenderToPolygonProgram = "RenderableBillboardsCloud_Polygon";
 
-    constexpr const char* KeyFile           = "File";
-    constexpr const char* keyColor          = "Color";
-    constexpr const char* keyUnit           = "Unit";
-    constexpr const char* MeterUnit         = "m";
-    constexpr const char* KilometerUnit     = "Km";
-    constexpr const char* ParsecUnit        = "pc";
-    constexpr const char* KiloparsecUnit    = "Kpc";
-    constexpr const char* MegaparsecUnit    = "Mpc";
-    constexpr const char* GigaparsecUnit    = "Gpc";
+    constexpr const std::array<const char*, 19> UniformNames = {
+        "cameraViewProjectionMatrix", "modelMatrix", "cameraPosition", "cameraLookUp",
+        "renderOption", "minBillboardSize", "maxBillboardSize",
+        "correctionSizeEndDistance", "correctionSizeFactor", "color", "alphaValue",
+        "scaleFactor", "up", "right", "fadeInValue", "screenSize", "spriteTexture",
+        "hasColorMap", "enabledRectSizeControl"
+    };
+
+    constexpr const char* KeyFile = "File";
+    constexpr const char* keyColor = "Color";
+    constexpr const char* keyUnit = "Unit";
+    constexpr const char* MeterUnit = "m";
+    constexpr const char* KilometerUnit = "Km";
+    constexpr const char* ParsecUnit = "pc";
+    constexpr const char* KiloparsecUnit = "Kpc";
+    constexpr const char* MegaparsecUnit = "Mpc";
+    constexpr const char* GigaparsecUnit = "Gpc";
     constexpr const char* GigalightyearUnit = "Gly";
 
     constexpr int8_t CurrentCacheVersion = 1;
@@ -73,13 +82,6 @@ namespace {
         "Texture",
         "Point Sprite Texture",
         "The path to the texture that should be used as the point sprite."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
-        "Transparency",
-        "Transparency",
-        "This value is a multiplicative factor that is applied to the transparency of "
-        "all points."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
@@ -259,12 +261,6 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
                 SpriteTextureInfo.description
             },
             {
-                TransparencyInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                TransparencyInfo.description
-            },
-            {
                 ScaleFactorInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
@@ -384,7 +380,6 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
 
 RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
     , _pointColor(
         ColorInfo,
@@ -480,14 +475,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _spriteTexturePath = absPath(dictionary.value<std::string>(
             SpriteTextureInfo.identifier
         ));
-        _spriteTextureFile = std::make_unique<ghoul::filesystem::File>(
-            _spriteTexturePath
-        );
 
-        _spriteTexturePath.onChange([&] { _spriteTextureIsDirty = true; });
-        _spriteTextureFile->setCallback(
-            [&](const ghoul::filesystem::File&) { _spriteTextureIsDirty = true; }
-        );
+        _spriteTexturePath.onChange([&]() { _spriteTextureIsDirty = true; });
         addProperty(_spriteTexturePath);
 
         _hasSpriteTexture = true;
@@ -533,12 +522,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         addProperty(_pointColor);
     }
 
-    if (dictionary.hasKey(TransparencyInfo.identifier)) {
-        _alphaValue = static_cast<float>(
-            dictionary.value<double>(TransparencyInfo.identifier)
-        );
-    }
-    addProperty(_alphaValue);
+    addProperty(_opacity);
 
     if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
         _scaleFactor = static_cast<float>(
@@ -658,62 +642,31 @@ void RenderableBillboardsCloud::initialize() {
 }
 
 void RenderableBillboardsCloud::initializeGL() {
-    _program = DigitalUniverseModule::ProgramObjectManager.requestProgramObject(
+    _program = DigitalUniverseModule::ProgramObjectManager.request(
         ProgramObjectName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-        return OsEng.renderEngine().buildRenderProgram(
-            ProgramObjectName,
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_vs.glsl"),
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_fs.glsl"),
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_gs.glsl")
-        );
-    }
+            return OsEng.renderEngine().buildRenderProgram(
+                ProgramObjectName,
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_vs.glsl"),
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_fs.glsl"),
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_gs.glsl")
+            );
+        }
     );
 
-    _renderToPolygonProgram =
-        DigitalUniverseModule::ProgramObjectManager.requestProgramObject(
-            RenderToPolygonProgram,
-            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-        return ghoul::opengl::ProgramObject::Build(
-            RenderToPolygonProgram,
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl"),
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl"),
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_gs.glsl")
-        );
-    }
+    _renderToPolygonProgram = DigitalUniverseModule::ProgramObjectManager.request(
+        RenderToPolygonProgram,
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return ghoul::opengl::ProgramObject::Build(
+                RenderToPolygonProgram,
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl"),
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl"),
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_gs.glsl")
+            );
+        }
     );
 
-    _uniformCache.cameraViewProjectionMatrix = _program->uniformLocation(
-        "cameraViewProjectionMatrix"
-    );
-
-    _uniformCache.modelMatrix = _program->uniformLocation(
-        "modelMatrix"
-    );
-
-    _uniformCache.cameraPos = _program->uniformLocation("cameraPosition");
-    _uniformCache.cameraLookup = _program->uniformLocation("cameraLookUp");
-    _uniformCache.renderOption = _program->uniformLocation("renderOption");
-    _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
-    _uniformCache.maxBillboardSize = _program->uniformLocation("maxBillboardSize");
-    _uniformCache.correctionSizeEndDistance = _program->uniformLocation(
-        "correctionSizeEndDistance"
-    );
-    _uniformCache.correctionSizeFactor = _program->uniformLocation(
-        "correctionSizeFactor"
-    );
-    _uniformCache.color = _program->uniformLocation("color");
-    _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-    _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
-    _uniformCache.up = _program->uniformLocation("up");
-    _uniformCache.right = _program->uniformLocation("right");
-    _uniformCache.fadeInValue = _program->uniformLocation("fadeInValue");
-    _uniformCache.screenSize = _program->uniformLocation("screenSize");
-    _uniformCache.spriteTexture = _program->uniformLocation("spriteTexture");
-    _uniformCache.hasColormap = _program->uniformLocation("hasColorMap");
-    _uniformCache.enabledRectSizeControl = _program->uniformLocation(
-        "enabledRectSizeControl"
-    );
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
     if (_hasPolygon) {
         createPolygonTexture();
@@ -738,22 +691,19 @@ void RenderableBillboardsCloud::deinitializeGL() {
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
 
-    DigitalUniverseModule::ProgramObjectManager.releaseProgramObject(
+    DigitalUniverseModule::ProgramObjectManager.release(
         ProgramObjectName,
         [](ghoul::opengl::ProgramObject* p) {
-        OsEng.renderEngine().removeRenderProgram(p);
-    }
+            OsEng.renderEngine().removeRenderProgram(p);
+        }
     );
     _program = nullptr;
 
-    DigitalUniverseModule::ProgramObjectManager.releaseProgramObject(
-        RenderToPolygonProgram
-    );
+    DigitalUniverseModule::ProgramObjectManager.release(RenderToPolygonProgram);
     _renderToPolygonProgram = nullptr;
 
-    if (_hasSpriteTexture) {
-        _spriteTexture = nullptr;
-    }
+    DigitalUniverseModule::TextureManager.release(_spriteTexture);
+    _spriteTexture = nullptr;
 
     if (_hasPolygon) {
         _polygonTexture = nullptr;
@@ -814,7 +764,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.minBillboardSize, _billboardMinSize); // in pixels
     _program->setUniform(_uniformCache.maxBillboardSize, _billboardMaxSize); // in pixels
     _program->setUniform(_uniformCache.color, _pointColor);
-    _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+    _program->setUniform(_uniformCache.alphaValue, _opacity);
     _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
     _program->setUniform(_uniformCache.up, orthoUp);
     _program->setUniform(_uniformCache.right, orthoRight);
@@ -895,6 +845,7 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
 
     glm::vec4 textColor = _textColor;
     textColor.a *= fadeInVariable;
+    textColor.a *= _opacity;
     for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
         //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
         glm::vec3 scaledPos(pair.first);
@@ -1077,36 +1028,29 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
         _dataIsDirty = false;
     }
 
-    if (_hasSpriteTexture && _spriteTextureIsDirty) {
-        LDEBUG("Reloading Sprite Texture");
-        _spriteTexture = nullptr;
-        if (_spriteTexturePath.value() != "") {
-            _spriteTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_spriteTexturePath)
-            );
-            if (_spriteTexture) {
-                LINFO(fmt::format(
-                    "Loaded texture from '{}'",
-                    absPath(_spriteTexturePath)
-                ));
-                _spriteTexture->uploadTexture();
+    if (_hasSpriteTexture && _spriteTextureIsDirty && !_spriteTexturePath.value().empty())
+    {
+        ghoul::opengl::Texture* t = _spriteTexture;
+
+        unsigned int hash = ghoul::hashCRC32File(_spriteTexturePath);
+
+        _spriteTexture = DigitalUniverseModule::TextureManager.request(
+            std::to_string(hash),
+            [path = _spriteTexturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
+                LINFO(fmt::format("Loaded texture from '{}'", absPath(path)));
+                std::unique_ptr<ghoul::opengl::Texture> t =
+                    ghoul::io::TextureReader::ref().loadTexture(
+                        absPath(path)
+                    );
+             
+                t->uploadTexture();
+                t->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+                return t;
             }
-            _spriteTexture->setFilter(
-                ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
-            );
+        );
 
-            _spriteTextureFile = std::make_unique<ghoul::filesystem::File>(
-                _spriteTexturePath);
-            _spriteTextureFile->setCallback(
-                [&](const ghoul::filesystem::File&) { _spriteTextureIsDirty = true; }
-            );
-        }
+        DigitalUniverseModule::TextureManager.release(t);
         _spriteTextureIsDirty = false;
-    }
-
-    if (_hasLabel && _labelDataIsDirty) {
-
-        _labelDataIsDirty = false;
     }
 }
 

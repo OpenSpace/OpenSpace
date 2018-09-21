@@ -27,10 +27,6 @@
 #include <iterator>
 #include <sstream>
 
-namespace std {
-    std::string to_string(std::string value);
-} // namespace std
-
 namespace openspace::documentation {
 
 template <typename T>
@@ -140,32 +136,32 @@ TestResult OperatorVerifier<T, Operator>::operator()(const ghoul::Dictionary& di
 
 template <typename T>
 std::string LessVerifier<T>::documentation() const {
-    return "Less than: " + std::to_string(value);
+    return "Less than: " + ghoul::to_string(value);
 }
 
 template <typename T>
 std::string LessEqualVerifier<T>::documentation() const {
-    return "Less or equal to: " + std::to_string(value);
+    return "Less or equal to: " + ghoul::to_string(value);
 }
 
 template <typename T>
 std::string GreaterVerifier<T>::documentation() const {
-    return "Greater than: " + std::to_string(value);
+    return "Greater than: " + ghoul::to_string(value);
 }
 
 template <typename T>
 std::string GreaterEqualVerifier<T>::documentation() const {
-    return "Greater or equal to: " + std::to_string(value);
+    return "Greater or equal to: " + ghoul::to_string(value);
 }
 
 template <typename T>
 std::string EqualVerifier<T>::documentation() const {
-    return "Equal to: " + std::to_string(value);
+    return "Equal to: " + ghoul::to_string(value);
 }
 
 template <typename T>
 std::string UnequalVerifier<T>::documentation() const {
-    return "Unequal to: " + std::to_string(value);
+    return "Unequal to: " + ghoul::to_string(value);
 }
 
 template <typename T>
@@ -290,8 +286,8 @@ TestResult InRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
 
 template <typename T>
 std::string InRangeVerifier<T>::documentation() const {
-    return "In range: ( " + std::to_string(lower) + "," +
-        std::to_string(upper) + " )";
+    return "In range: ( " + ghoul::to_string(lower) + "," +
+           ghoul::to_string(upper) + " )";
 }
 
 template <typename T>
@@ -323,8 +319,8 @@ TestResult NotInRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
 
 template <typename T>
 std::string NotInRangeVerifier<T>::documentation() const {
-    return "Not in range: ( " + std::to_string(lower) + "," +
-        std::to_string(upper) + " )";
+    return "Not in range: ( " + ghoul::to_string(lower) + "," +
+           ghoul::to_string(upper) + " )";
 }
 
 

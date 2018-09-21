@@ -233,13 +233,11 @@ bool ImageSequencer::imagePaths(std::vector<Image>& captures,
     // check if this instance is either in range or
     // a valid candidate to recieve data
 
-    if (!isInstrumentActive(time, instrumentRequest)) {
-        return false;
-    }
-
-    if (!_subsetMap[projectee]._range.includes(time) &&
-        !_subsetMap[projectee]._range.includes(sinceTime))
-    {
+    const bool instrumentActive = isInstrumentActive(time, instrumentRequest);
+    const bool hasCurrentTime = _subsetMap[projectee]._range.includes(time);
+    const bool hasSinceTime = _subsetMap[projectee]._range.includes(sinceTime);
+    
+    if (!instrumentActive || (!hasCurrentTime && !hasSinceTime)) {
         return false;
     }
 

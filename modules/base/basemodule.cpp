@@ -48,6 +48,7 @@
 #include <modules/base/rendering/screenspaceimagelocal.h>
 #include <modules/base/rendering/screenspaceimageonline.h>
 #include <modules/base/rendering/screenspaceframebuffer.h>
+#include <modules/base/rotation/constantrotation.h>
 #include <modules/base/rotation/fixedrotation.h>
 #include <modules/base/rotation/luarotation.h>
 #include <modules/base/rotation/staticrotation.h>
@@ -68,6 +69,7 @@
 namespace openspace {
 
 ghoul::opengl::ProgramObjectManager BaseModule::ProgramObjectManager;
+ghoul::opengl::TextureManager BaseModule::TextureManager;
 
 BaseModule::BaseModule() : OpenSpaceModule(BaseModule::Name) {}
 
@@ -128,6 +130,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     auto fRotation = FactoryManager::ref().factory<Rotation>();
     ghoul_assert(fRotation, "Rotation factory was not created");
 
+    fRotation->registerClass<ConstantRotation>("ConstantRotation");
     fRotation->registerClass<FixedRotation>("FixedRotation");
     fRotation->registerClass<LuaRotation>("LuaRotation");
     fRotation->registerClass<StaticRotation>("StaticRotation");
@@ -157,6 +160,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
 
 void BaseModule::internalDeinitializeGL() {
     ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
+    TextureManager.releaseAll(ghoul::opengl::TextureManager::Warnings::Yes);
 }
 
 std::vector<documentation::Documentation> BaseModule::documentations() const {

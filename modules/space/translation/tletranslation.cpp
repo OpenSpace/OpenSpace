@@ -251,9 +251,9 @@ documentation::Documentation TLETranslation::Documentation() {
             {
                 KeyLineNumber,
                 new DoubleGreaterVerifier(0),
-                Optional::No,
+                Optional::Yes,
                 "Specifies the line number within the file where the group of 3 TLE "
-                "lines begins (1-based)."
+                "lines begins (1-based). Defaults to 1."
             }
         }
     };
@@ -267,7 +267,10 @@ TLETranslation::TLETranslation(const ghoul::Dictionary& dictionary) {
     );
 
     const std::string& file = dictionary.value<std::string>(KeyFile);
-    int lineNum = static_cast<int>(dictionary.value<double>(KeyLineNumber));
+    int lineNum = 1;
+    if (dictionary.hasKeyAndValue<double>(KeyLineNumber)) {
+        lineNum = static_cast<int>(dictionary.value<double>(KeyLineNumber));
+    }
     readTLEFile(file, lineNum);
 }
 

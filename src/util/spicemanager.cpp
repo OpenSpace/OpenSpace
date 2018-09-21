@@ -207,12 +207,6 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
 
     if (it != _loadedKernels.end()) {
         it->refCount++;
-        LDEBUG(
-            fmt::format(
-                "Kernel '{}' was already loaded. New reference count: {}",
-                path, it->refCount
-            )
-        );
         return it->id;
     }
 

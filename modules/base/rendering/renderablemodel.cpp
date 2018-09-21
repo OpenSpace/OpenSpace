@@ -47,6 +47,12 @@ namespace {
     constexpr const char* ProgramName = "ModelProgram";
     constexpr const char* KeyGeometry = "Geometry";
 
+    constexpr const std::array<const char*, 11> UniformNames = {
+        "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
+        "modelViewTransform", "projectionTransform", "performShading", "texture1",
+        "ambientIntensity", "diffuseIntensity", "specularIntensity"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "ColorTexture",
         "Color Texture",
@@ -237,7 +243,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 RenderableModel::~RenderableModel() {}
 
 bool RenderableModel::isReady() const {
-    return _programObject && _texture;
+    return _program && _texture;
 }
 
 void RenderableModel::initialize() {
@@ -247,7 +253,7 @@ void RenderableModel::initialize() {
 }
 
 void RenderableModel::initializeGL() {
-    _programObject = BaseModule::ProgramObjectManager.requestProgramObject(
+    _program = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return OsEng.renderEngine().buildRenderProgram(
@@ -257,7 +263,8 @@ void RenderableModel::initializeGL() {
             );
         }
     );
-    updateUniformCache();
+
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
     loadTexture();
 
@@ -271,19 +278,19 @@ void RenderableModel::deinitializeGL() {
     }
     _texture = nullptr;
 
-    BaseModule::ProgramObjectManager.releaseProgramObject(
+    BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
             OsEng.renderEngine().removeRenderProgram(p);
         }
     );
-    _programObject = nullptr;
+    _program = nullptr;
 }
 
 void RenderableModel::render(const RenderData& data, RendererTasks&) {
-    _programObject->activate();
+    _program->activate();
 
-    _programObject->setUniform(_uniformCache.opacity, _opacity);
+    _program->setUniform(_uniformCache.opacity, _opacity);
 
     // Model transform and view transform needs to be in double precision
     const glm::dmat4 modelTransform =
@@ -309,96 +316,63 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         ++nLightSources;
     }
 
-    _programObject->setUniform(
+    _program->setUniform(
         _uniformCache.nLightSources,
         nLightSources
     );
-    _programObject->setUniform(
+    _program->setUniform(
         _uniformCache.lightIntensities,
         _lightIntensitiesBuffer.data(),
         nLightSources
     );
-    _programObject->setUniform(
+    _program->setUniform(
         _uniformCache.lightDirectionsViewSpace,
         _lightDirectionsViewSpaceBuffer.data(),
         nLightSources
     );
-    _programObject->setUniform(
+    _program->setUniform(
         _uniformCache.modelViewTransform,
         glm::mat4(modelViewTransform)
     );
-    _programObject->setUniform(
+    _program->setUniform(
         _uniformCache.projectionTransform,
         data.camera.projectionMatrix()
     );
-    _programObject->setUniform(
+    _program->setUniform(
         _uniformCache.ambientIntensity,
         _ambientIntensity
     );
-    _programObject->setUniform(
+    _program->setUniform(
         _uniformCache.diffuseIntensity,
         _diffuseIntensity
     );
-    _programObject->setUniform(
+    _program->setUniform(
         _uniformCache.specularIntensity,
         _specularIntensity
     );
-    _programObject->setUniform(
+    _program->setUniform(
         _uniformCache.performShading,
         _performShading
     );
 
-    _geometry->setUniforms(*_programObject);
+    _geometry->setUniforms(*_program);
 
     // Bind texture
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
-    _programObject->setUniform(_uniformCache.texture, unit);
+    _program->setUniform(_uniformCache.texture, unit);
 
     _geometry->render();
 
-    _programObject->deactivate();
+    _program->deactivate();
 }
 
 void RenderableModel::update(const UpdateData&) {
-    if (_programObject->isDirty()) {
-        _programObject->rebuildFromFile();
-        updateUniformCache();
+    if (_program->isDirty()) {
+        _program->rebuildFromFile();
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
-}
-
-
-void RenderableModel::updateUniformCache() {
-    _uniformCache.opacity = _programObject->uniformLocation("opacity");
-    _uniformCache.nLightSources = _programObject->uniformLocation(
-        "nLightSources"
-    );
-    _uniformCache.lightDirectionsViewSpace = _programObject->uniformLocation(
-        "lightDirectionsViewSpace"
-    );
-    _uniformCache.lightIntensities = _programObject->uniformLocation(
-        "lightIntensities"
-    );
-    _uniformCache.modelViewTransform = _programObject->uniformLocation(
-        "modelViewTransform"
-    );
-    _uniformCache.projectionTransform = _programObject->uniformLocation(
-        "projectionTransform"
-    );
-    _uniformCache.performShading = _programObject->uniformLocation(
-        "performShading"
-    );
-    _uniformCache.ambientIntensity = _programObject->uniformLocation(
-        "ambientIntensity"
-    );
-    _uniformCache.diffuseIntensity = _programObject->uniformLocation(
-        "diffuseIntensity"
-    );
-    _uniformCache.specularIntensity = _programObject->uniformLocation(
-        "specularIntensity"
-    );
-    _uniformCache.texture = _programObject->uniformLocation("texture1");
 }
 
 void RenderableModel::loadTexture() {

@@ -48,7 +48,7 @@ public:
 
     static documentation::Documentation Documentation();
 
-    glm::dmat3 matrix(const Time& time) const override;
+    glm::dmat3 matrix(const UpdateData& data) const override;
 
 private:
     glm::vec3 xAxis() const;
@@ -57,7 +57,7 @@ private:
 
     struct Axis {
         enum Type {
-            Unspecified = 0,
+            Unspecified = -1,
             Object,
             Vector,
             OrthogonalVector,

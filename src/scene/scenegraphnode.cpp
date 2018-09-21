@@ -290,14 +290,14 @@ void SceneGraphNode::update(const UpdateData& data) {
             glFinish();
             const auto start = std::chrono::high_resolution_clock::now();
 
-            _transform.translation->update(data.time);
+            _transform.translation->update(data);
 
             glFinish();
             const auto end = std::chrono::high_resolution_clock::now();
             _performanceRecord.updateTimeTranslation = (end - start).count();
         }
         else {
-            _transform.translation->update(data.time);
+            _transform.translation->update(data);
         }
     }
 
@@ -306,14 +306,14 @@ void SceneGraphNode::update(const UpdateData& data) {
             glFinish();
             const auto start = std::chrono::high_resolution_clock::now();
 
-            _transform.rotation->update(data.time);
+            _transform.rotation->update(data);
 
             glFinish();
             const auto end = std::chrono::high_resolution_clock::now();
             _performanceRecord.updateTimeRotation = (end - start).count();
         }
         else {
-            _transform.rotation->update(data.time);
+            _transform.rotation->update(data);
         }
     }
 
@@ -322,14 +322,14 @@ void SceneGraphNode::update(const UpdateData& data) {
             glFinish();
             const auto start = std::chrono::high_resolution_clock::now();
 
-            _transform.scale->update(data.time);
+            _transform.scale->update(data);
 
             glFinish();
             const auto end = std::chrono::high_resolution_clock::now();
             _performanceRecord.updateTimeScaling = (end - start).count();
         }
         else {
-            _transform.scale->update(data.time);
+            _transform.scale->update(data);
         }
     }
     UpdateData newUpdateData = data;

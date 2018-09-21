@@ -25,6 +25,7 @@
 #include <openspace/documentation/verifier.h>
 
 #include <openspace/documentation/documentationengine.h>
+#include <ghoul/misc/misc.h>
 #include <algorithm>
 
 namespace openspace::documentation {
@@ -291,21 +292,33 @@ std::string ReferencingVerifier::documentation() const {
     return "Referencing Documentation: '" + identifier + "'";
 }
 
-AndVerifier::AndVerifier(Verifier* l, Verifier* r)
-    : lhs(l)
-    , rhs(r)
-{
-    ghoul_assert(lhs, "lhs must not be nullptr");
-    ghoul_assert(rhs, "rhs must not be nullptr");
+AndVerifier::AndVerifier(const std::vector<Verifier*> vs) {
+    ghoul_assert(!vs.empty(), "values must not be empty");
+    for (Verifier* v : vs) {
+        values.push_back(std::shared_ptr<Verifier>(v));
+    }
 }
 
 TestResult AndVerifier::operator()(const ghoul::Dictionary& dictionary,
                                    const std::string& key) const
 {
-    TestResult resLhs = lhs->operator()(dictionary, key);
-    TestResult resRhs = rhs->operator()(dictionary, key);
+    std::vector<TestResult> res(values.size());
+    std::transform(
+        values.begin(),
+        values.end(),
+        res.begin(),
+        [dictionary, key](const std::shared_ptr<Verifier>& v) {
+            return v->operator()(dictionary, key);
+        }
+    );
 
-    if (resLhs.success && resRhs.success) {
+    const bool success = std::all_of(
+        res.begin(),
+        res.end(),
+        [](const TestResult& res) { return res.success; }
+    );
+
+    if (success) {
         return { true, {}, {} };
     }
     else {
@@ -314,33 +327,60 @@ TestResult AndVerifier::operator()(const ghoul::Dictionary& dictionary,
 }
 
 std::string AndVerifier::type() const {
-    if (lhs->type() != rhs->type()) {
-        return lhs->type() + " and " + rhs->type();
-    }
-    else {
-        return lhs->type();
-    }
+    // Dirty hack to get an "and " inserted before the last element
+    std::vector<std::string> types(values.size() - 1);
+    std::transform(
+        values.begin(),
+        values.end() - 1,
+        types.begin(),
+        [](const std::shared_ptr<Verifier>& v) { return v->type(); }
+    );
+    types.push_back(std::string("and ") + values.back()->type());
+
+    return ghoul::join(types, ", ");
 }
 
 std::string AndVerifier::documentation() const {
-    return lhs->documentation() + " and " + rhs->documentation();
+    // Dirty hack to get an "and " inserted before the last element
+    std::vector<std::string> documentations(values.size() - 1);
+    std::transform(
+        values.begin(),
+        values.end() - 1,
+        documentations.begin(),
+        [](const std::shared_ptr<Verifier>& v) { return v->documentation(); }
+    );
+    documentations.push_back(std::string("and ") + values.back()->documentation());
+
+    return ghoul::join(documentations, ", ");
 }
 
-OrVerifier::OrVerifier(Verifier* l, Verifier* r)
-    : lhs(l)
-    , rhs(r)
-{
-    ghoul_assert(lhs, "lhs must not be nullptr");
-    ghoul_assert(rhs, "rhs must not be nullptr");
+OrVerifier::OrVerifier(const std::vector<Verifier*> vs) {
+    ghoul_assert(!vs.empty(), "values must not be empty");
+    for (Verifier* v : vs) {
+        values.push_back(std::shared_ptr<Verifier>(v));
+    }
 }
 
 TestResult OrVerifier::operator()(const ghoul::Dictionary& dictionary,
-                                   const std::string& key) const
+                                  const std::string& key) const
 {
-    TestResult resA = lhs->operator()(dictionary, key);
-    TestResult resB = rhs->operator()(dictionary, key);
+    std::vector<TestResult> res(values.size());
+    std::transform(
+        values.begin(),
+        values.end(),
+        res.begin(),
+        [dictionary, key](const std::shared_ptr<Verifier>& v) {
+            return v->operator()(dictionary, key);
+        }
+    );
 
-    if (resA.success || resB.success) {
+    const bool success = std::any_of(
+        res.begin(),
+        res.end(),
+        [](const TestResult& res) { return res.success; }
+    );
+
+    if (success) {
         return { true, {}, {} };
     }
     else {
@@ -349,17 +389,31 @@ TestResult OrVerifier::operator()(const ghoul::Dictionary& dictionary,
 }
 
 std::string OrVerifier::type() const {
-    if (lhs->type() != rhs->type()) {
-        return lhs->type() + " or " + rhs->type();
-    }
-    else {
-        return lhs->type();
-    }
+    // Dirty hack to get an "or " inserted before the last element
+    std::vector<std::string> types(values.size() - 1);
+    std::transform(
+        values.begin(),
+        values.end() - 1,
+        types.begin(),
+        [](const std::shared_ptr<Verifier>& v) { return v->type(); }
+    );
+    types.push_back(std::string("or ") + values.back()->type());
+
+    return ghoul::join(types, ", ");
 }
 
 std::string OrVerifier::documentation() const {
-    return lhs->documentation() + " or " + rhs->documentation();
-}
+    // Dirty hack to get an "or " inserted before the last element
+    std::vector<std::string> documentations(values.size() - 1);
+    std::transform(
+        values.begin(),
+        values.end() - 1,
+        documentations.begin(),
+        [](const std::shared_ptr<Verifier>& v) { return v->documentation(); }
+    );
+    documentations.push_back(std::string("or ") + values.back()->documentation());
 
+    return ghoul::join(documentations, ", ");
+}
 
 } // namespace openspace::documentation

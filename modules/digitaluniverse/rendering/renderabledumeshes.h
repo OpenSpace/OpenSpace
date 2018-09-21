@@ -135,7 +135,7 @@ private:
 
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(modelViewTransform, projectionTransform, alphaValue,
-        /*scaleFactor,*/ color) _uniformCache;
+        color) _uniformCache;
     std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
 
     std::string _speckFile;

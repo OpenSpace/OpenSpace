@@ -34,7 +34,7 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-class Time;
+struct UpdateData;
 
 namespace documentation { struct Documentation; }
 
@@ -49,8 +49,8 @@ public:
     virtual bool initialize();
 
     double scaleValue() const;
-    virtual double scaleValue(const Time& time) const = 0;
-    virtual void update(const Time& time);
+    virtual double scaleValue(const UpdateData& data) const = 0;
+    virtual void update(const UpdateData& data);
 
     static documentation::Documentation Documentation();
 
