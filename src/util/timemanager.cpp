@@ -130,7 +130,7 @@ void TimeManager::preSynchronization(double dt) {
             it.second();
         }
     }
-    if (newDeltaTime != _lastDeltaTime) {
+    if (newDeltaTime != _lastDeltaTime || _timePaused != _lastTimePaused) {
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
         for (const std::pair<K, V>& it : _deltaTimeChangeCallbacks) {
@@ -147,6 +147,7 @@ void TimeManager::preSynchronization(double dt) {
 
     _lastTime = newTime;
     _lastDeltaTime = newDeltaTime;
+    _lastTimePaused = _timePaused;
     _timelineChanged = false;
 }
 

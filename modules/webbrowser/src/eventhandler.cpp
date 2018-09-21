@@ -119,48 +119,53 @@ void EventHandler::initialize() {
 }
 
 bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
-    if (button != MouseButton::Left) {
+    if (button != MouseButton::Left && button != MouseButton::Right) {
         return false;
     }
+
+    MouseButtonState& state =
+        (button == MouseButton::Left) ? _leftButton : _rightButton;
 
     int clickCount = BrowserInstance::SingleClick;
 
     // click or release?
     if (action == MouseAction::Release) {
-        _leftMouseDown = false;
+        state.down = false;
     } else {
-        if (isDoubleClick() ) {
+        if (isDoubleClick(state)) {
             ++clickCount;
         } else {
-            _lastClickTime = std::chrono::high_resolution_clock::now();
+            state.lastClickTime = std::chrono::high_resolution_clock::now();
         }
 
-        _leftMouseDown = true;
-        _lastClickPosition = _mousePosition;
+        state.down = true;
+        state.lastClickPosition = _mousePosition;
     }
+
+    std::cout << state.down;
 
     return _browserInstance->sendMouseClickEvent(
         mouseEvent(),
-        MBT_LEFT,
-        !_leftMouseDown,
+        button == MouseButton::Left ? MBT_LEFT : MBT_RIGHT,
+        !state.down,
         clickCount
     );
 }
 
-bool EventHandler::isDoubleClick() const {
+bool EventHandler::isDoubleClick(const MouseButtonState& button) const {
     // check time
     using namespace std::chrono;
     auto now = high_resolution_clock::now();
     milliseconds maxTimeDifference(EventHandler::doubleClickTime());
-    auto requiredTime = _lastClickTime + maxTimeDifference;
+    auto requiredTime = button.lastClickTime + maxTimeDifference;
     if (requiredTime < now) {
         return false;
     }
 
     // check position
     const float maxDist = static_cast<float>(EventHandler::maxDoubleClickDistance() / 2);
-    const bool x = abs(_mousePosition.x - _lastClickPosition.x) < maxDist;
-    const bool y = abs(_mousePosition.y - _lastClickPosition.y) < maxDist;
+    const bool x = abs(_mousePosition.x - button.lastClickPosition.x) < maxDist;
+    const bool y = abs(_mousePosition.y - button.lastClickPosition.y) < maxDist;
 
     return x && y;
 }
@@ -228,8 +233,12 @@ CefMouseEvent EventHandler::mouseEvent() {
     event.x = static_cast<int>(_mousePosition.x);
     event.y = static_cast<int>(_mousePosition.y);
 
-    if (_leftMouseDown) {
+    if (_leftButton.down) {
         event.modifiers = EVENTFLAG_LEFT_MOUSE_BUTTON;
+    }
+
+    if (_rightButton.down) {
+        event.modifiers = EVENTFLAG_RIGHT_MOUSE_BUTTON;
     }
 
     return event;
