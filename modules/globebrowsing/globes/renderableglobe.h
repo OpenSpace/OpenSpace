@@ -33,6 +33,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <modules/globebrowsing/meshes/skirtedgrid.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <modules/globebrowsing/chunk/chunk.h>
 #include <ghoul/opengl/uniformcache.h>
 
 namespace openspace::globebrowsing {
@@ -42,7 +43,6 @@ namespace openspace::globebrowsing {
     namespace culling { class ChunkCuller; }
 
     class Chunk;
-    struct ChunkNode;
     class ChunkRenderer;
     class Ellipsoid;
     struct Geodetic2;
@@ -59,6 +59,14 @@ namespace openspace::globebrowsing {
 
 class PointGlobe;
 class LayerManager;
+
+struct ChunkNode {
+    ChunkNode(Chunk chunk);
+
+    std::array<std::unique_ptr<ChunkNode>, 4> children;
+    Chunk chunk;
+    //bool isLeaf;
+};
 
 /**
  * A RenderableGlobe is a globe modeled as an ellipsoid using a chunked LOD algorithm for
@@ -111,16 +119,6 @@ public:
 
     properties::PropertyOwner _debugPropertyOwner;
 
-
-
-    /**
-     * Traverse the chunk tree and find the highest level chunk node.
-     *
-     * \param location is given in geodetic coordinates and must be in the range
-     * latitude [-90, 90] and longitude [-180, 180]. In other words, it must be a
-     * position defined on the globe in georeferenced coordinates.
-     */
-    //const ChunkNode& findChunkNode(const Geodetic2& location) const;
 
     /**
      * Test if a specific chunk can safely be culled without affecting the rendered

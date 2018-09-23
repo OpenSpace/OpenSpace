@@ -27,7 +27,6 @@
 #include <modules/debugging/rendering/debugrenderer.h>
 #include <ghoul/logging/logmanager.h>
 #include <modules/globebrowsing/chunk/chunk.h>
-#include <modules/globebrowsing/chunk/chunknode.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
@@ -67,6 +66,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <openspace/performance/performancemanager.h>
 #include <openspace/performance/performancemeasurement.h>
+#include <queue>
 
 namespace {
     constexpr const char* keyFrame = "Frame";
@@ -209,6 +209,117 @@ namespace {
 using namespace openspace::properties;
 
 namespace openspace::globebrowsing {
+
+ChunkNode::ChunkNode(Chunk chunk)
+    : children({ {nullptr, nullptr, nullptr, nullptr} })
+    , chunk(std::move(chunk))
+{}
+
+
+namespace {
+
+bool isLeaf(const ChunkNode& cn) {
+    return cn.children[0] == nullptr;
+}
+
+void splitChunkNode(ChunkNode& cn, int depth) {
+    if (depth > 0 && isLeaf(cn)) {
+        for (size_t i = 0; i < cn.children.size(); ++i) {
+            Chunk chunk(cn.chunk.owner(), cn.chunk.tileIndex().child(static_cast<Quad>(i)));
+            cn.children[i] = std::make_unique<ChunkNode>(chunk);
+        }
+    }
+
+    if (depth - 1 > 0) {
+        for (const std::unique_ptr<ChunkNode>& child : cn.children) {
+            splitChunkNode(*child, depth - 1);
+        }
+    }
+}
+
+void mergeChunkNode(ChunkNode& cn) {
+    for (std::unique_ptr<ChunkNode>& child : cn.children) {
+        if (child) {
+            mergeChunkNode(*child);
+        }
+        child = nullptr;
+    }
+
+    ghoul_assert(isLeaf(cn), "ChunkNode must be leaf after merge");
+}
+
+    using RenderFunction = std::function<
+        void(const ChunkNode&, int, const RenderData&, const glm::dmat4&)>;
+
+bool updateChunkTree(ChunkNode& cn, const RenderData& data) {
+    if (isLeaf(cn)) {
+        Chunk::Status status = cn.chunk.update(data);
+        if (status == Chunk::Status::WantSplit) {
+            splitChunkNode(cn, 1);
+        }
+        return status == Chunk::Status::WantMerge;
+    }
+    else {
+        char requestedMergeMask = 0;
+        for (int i = 0; i < 4; ++i) {
+            if (updateChunkTree(*cn.children[i], data)) {
+                requestedMergeMask |= (1 << i);
+            }
+        }
+
+        const bool allChildrenWantsMerge = requestedMergeMask == 0xf;
+        const bool thisChunkWantsSplit = cn.chunk.update(data) == Chunk::Status::WantSplit;
+
+        if (allChildrenWantsMerge && !thisChunkWantsSplit) {
+            mergeChunkNode(cn);
+        }
+
+        return false;
+    }
+}
+
+void breadthFirstTraversal(const ChunkNode& node, const RenderFunction& f, int modelSpaceCutoffLevel,
+    const RenderData& data,
+    const glm::dmat4& modelViewProjection)
+{
+    std::queue<const ChunkNode*> Q;
+
+    // Loop through nodes in breadths first order
+    Q.push(&node);
+    while (!Q.empty()) {
+        const ChunkNode* node = Q.front();
+        Q.pop();
+
+        f(*node, modelSpaceCutoffLevel, data, modelViewProjection);
+
+        // Add children to queue, if any
+        if (!isLeaf(*node)) {
+            for (int i = 0; i < 4; ++i) {
+                Q.push(node->children[i].get());
+            }
+        }
+    }
+}
+
+const ChunkNode& findChunkNode(const ChunkNode& node, const Geodetic2& location) {
+    const ChunkNode* n = &node;
+
+    while (!isLeaf(*n)) {
+        const Geodetic2 center = n->chunk.surfacePatch().center();
+        int index = 0;
+        if (center.lon < location.lon) {
+            ++index;
+        }
+        if (location.lat < center.lat) {
+            ++index;
+            ++index;
+        }
+        n = n->children[static_cast<Quad>(index)].get();
+    }
+    return *n;
+}
+
+} // namespace
 
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
@@ -1109,17 +1220,6 @@ bool RenderableGlobe::testIfCullable(const Chunk& chunk,
     return (phc && isCullableByHorizon(chunk, renderData)) ||
            (pfc && isCullableByFrustum(chunk, renderData));
 }
-
-//const ChunkNode& RenderableGlobe::findChunkNode(const Geodetic2& location) const {
-//    ghoul_assert(
-//        Coverage.contains(location),
-//        "Point must be in lat [-90, 90] and lon [-180, 180]"
-//    );
-//
-//    return location.lon < Coverage.center().lon ?
-//        _leftRoot->find(location) :
-//        _rightRoot->find(location);
-//}
 
 int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderData) const
 {

@@ -33,7 +33,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/texturecontainer.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunknode.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemglobelocation.h
 
@@ -112,7 +111,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/texturecontainer.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunknode.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemglobelocation.cpp
 
