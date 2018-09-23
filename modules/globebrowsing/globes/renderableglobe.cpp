@@ -545,8 +545,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
         _localRenderer.updatedSinceLastCall = false;
     }
 
-    _leftRoot->updateChunkTree(data);
-    _rightRoot->updateChunkTree(data);
+    updateChunkTree(*_leftRoot, data);
+    updateChunkTree(*_rightRoot, data);
 
     // Calculate the MVP matrix
     const glm::dmat4& viewTransform = data.camera.combinedViewMatrix();
@@ -668,8 +668,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     auto renderJob = [this, &count](const ChunkNode& chunkNode, int modelSpaceCutoffLevel,
                             const RenderData& data, const glm::dmat4& modelViewProjection)
     {
-        const Chunk& chunk = chunkNode.chunk();
-        if (chunkNode.isLeaf() && chunk.isVisible()) {
+        const Chunk& chunk = chunkNode.chunk;
+        if (isLeaf(chunkNode) && chunk.isVisible()) {
             if (chunk.tileIndex().level < modelSpaceCutoffLevel) {
                 renderChunkGlobally(chunk, data);
             }
@@ -684,13 +684,15 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
             }
         }
     };
-    _leftRoot->breadthFirst(
+    breadthFirstTraversal(
+        *_leftRoot,
         renderJob,
         _debugProperties.modelSpaceRenderingCutoffLevel,
         data,
         mvp
     );
-    _rightRoot->breadthFirst(
+    breadthFirstTraversal(
+        *_rightRoot,
         renderJob,
         _debugProperties.modelSpaceRenderingCutoffLevel,
         data,
@@ -1108,16 +1110,16 @@ bool RenderableGlobe::testIfCullable(const Chunk& chunk,
            (pfc && isCullableByFrustum(chunk, renderData));
 }
 
-const ChunkNode& RenderableGlobe::findChunkNode(const Geodetic2& location) const {
-    ghoul_assert(
-        Coverage.contains(location),
-        "Point must be in lat [-90, 90] and lon [-180, 180]"
-    );
-
-    return location.lon < Coverage.center().lon ?
-        _leftRoot->find(location) :
-        _rightRoot->find(location);
-}
+//const ChunkNode& RenderableGlobe::findChunkNode(const Geodetic2& location) const {
+//    ghoul_assert(
+//        Coverage.contains(location),
+//        "Point must be in lat [-90, 90] and lon [-180, 180]"
+//    );
+//
+//    return location.lon < Coverage.center().lon ?
+//        _leftRoot->find(location) :
+//        _rightRoot->find(location);
+//}
 
 int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderData) const
 {
@@ -1144,7 +1146,10 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
 
     // Get the uv coordinates to sample from
     const Geodetic2 geodeticPosition = _ellipsoid.cartesianToGeodetic2(position);
-    const int chunkLevel = findChunkNode(geodeticPosition).chunk().tileIndex().level;
+    const ChunkNode& node = geodeticPosition.lon < Coverage.center().lon ?
+        findChunkNode(*_leftRoot, geodeticPosition) :
+        findChunkNode(*_rightRoot, geodeticPosition);
+    const int chunkLevel = node.chunk.tileIndex().level;
 
     const TileIndex tileIndex = TileIndex(geodeticPosition, chunkLevel);
     const GeodeticPatch patch = GeodeticPatch(tileIndex);

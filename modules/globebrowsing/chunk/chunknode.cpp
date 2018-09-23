@@ -30,64 +30,55 @@
 
 namespace openspace::globebrowsing {
 
+bool isRoot(const ChunkNode& cn) {
+    return cn.parent == nullptr;
+}
+
+bool isLeaf(const ChunkNode& cn) {
+    return cn.children[0] == nullptr;
+}
+
 ChunkNode::ChunkNode(Chunk chunk, ChunkNode* parent)
-    : _parent(parent)
-    , _children({ {nullptr, nullptr, nullptr, nullptr} })
-    , _chunk(std::move(chunk))
+    : parent(parent)
+    , children({ {nullptr, nullptr, nullptr, nullptr} })
+    , chunk(std::move(chunk))
 {}
 
-bool ChunkNode::isRoot() const {
-    return _parent == nullptr;
-}
-
-bool ChunkNode::isLeaf() const {
-    return _children[0] == nullptr;
-}
-
-bool ChunkNode::updateChunkTree(const RenderData& data) {
-    if (isLeaf()) {
-        Chunk::Status status = _chunk.update(data);
+bool updateChunkTree(ChunkNode& cn, const RenderData& data) {
+    if (isLeaf(cn)) {
+        Chunk::Status status = cn.chunk.update(data);
         if (status == Chunk::Status::WantSplit) {
-            split();
+            splitChunkNode(cn);
         }
         return status == Chunk::Status::WantMerge;
     }
     else {
         char requestedMergeMask = 0;
         for (int i = 0; i < 4; ++i) {
-            if (_children[i]->updateChunkTree(data)) {
+            if (updateChunkTree(*cn.children[i], data)) {
                 requestedMergeMask |= (1 << i);
             }
         }
 
         const bool allChildrenWantsMerge = requestedMergeMask == 0xf;
-        const bool thisChunkWantsSplit = _chunk.update(data) == Chunk::Status::WantSplit;
+        const bool thisChunkWantsSplit = cn.chunk.update(data) == Chunk::Status::WantSplit;
 
         if (allChildrenWantsMerge && !thisChunkWantsSplit) {
-            merge();
+            mergeChunkNode(cn);
         }
 
         return false;
     }
 }
 
-void ChunkNode::depthFirst(const std::function<void(const ChunkNode&)>& f) const {
-    f(*this);
-    if (!isLeaf()) {
-        for (int i = 0; i < 4; ++i) {
-            _children[i]->depthFirst(f);
-        }
-    }
-}
-
-void ChunkNode::breadthFirst(const RenderFunction& f, int modelSpaceCutoffLevel,
+void breadthFirstTraversal(const ChunkNode& node, const RenderFunction& f, int modelSpaceCutoffLevel,
                              const RenderData& data,
-                             const glm::dmat4& modelViewProjection) const
+                             const glm::dmat4& modelViewProjection)
 {
     std::queue<const ChunkNode*> Q;
 
     // Loop through nodes in breadths first order
-    Q.push(this);
+    Q.push(&node);
     while (!Q.empty()) {
         const ChunkNode* node = Q.front();
         Q.pop();
@@ -95,51 +86,19 @@ void ChunkNode::breadthFirst(const RenderFunction& f, int modelSpaceCutoffLevel,
         f(*node, modelSpaceCutoffLevel, data, modelViewProjection);
 
         // Add children to queue, if any
-        if (!node->isLeaf()) {
+        if (!isLeaf(*node)) {
             for (int i = 0; i < 4; ++i) {
-                Q.push(node->_children[i].get());
+                Q.push(node->children[i].get());
             }
         }
     }
 }
 
-void ChunkNode::reverseBreadthFirst(const std::function<void(const ChunkNode&)>& f) const
-{
-    std::stack<const ChunkNode*> S;
-    std::queue<const ChunkNode*> Q;
+const ChunkNode& findChunkNode(const ChunkNode& node, const Geodetic2& location) {
+    const ChunkNode* n = &node;
 
-    // Loop through nodes in breadths first order
-    Q.push(this);
-    while (!Q.empty()) {
-        const ChunkNode* node = Q.front();
-        Q.pop();
-
-        // Add node to future stack
-        S.push(node);
-
-        // Add children to queue, if any
-        if (!node->isLeaf()) {
-            for (const auto& c : node->_children) {
-                Q.push(c.get());
-            }
-            //for (int i = 0; i < 4; ++i) {
-            //    Q.push(node->_children[i].get());
-            //}
-        }
-    }
-
-    // Loop through all nodes in stack, this will be reversed breadth first
-    while (!S.empty()) {
-        f(*S.top());
-        S.pop();
-    }
-}
-
-const ChunkNode& ChunkNode::find(const Geodetic2& location) const {
-    const ChunkNode* node = this;
-
-    while (!node->isLeaf()) {
-        const Geodetic2 center = node->_chunk.surfacePatch().center();
+    while (!isLeaf(*n)) {
+        const Geodetic2 center = n->chunk.surfacePatch().center();
         int index = 0;
         if (center.lon < location.lon) {
             ++index;
@@ -148,43 +107,189 @@ const ChunkNode& ChunkNode::find(const Geodetic2& location) const {
             ++index;
             ++index;
         }
-        node = &(node->child(static_cast<Quad>(index)));
+        n = n->children[static_cast<Quad>(index)].get();
     }
-    return *node;
+    return *n;
 }
 
-const ChunkNode& ChunkNode::child(const Quad& quad) const {
-    return *_children[quad];
-}
-
-void ChunkNode::split(int depth) {
-    if (depth > 0 && isLeaf()) {
-        for (size_t i = 0; i < _children.size(); ++i) {
-            Chunk chunk(_chunk.owner(), _chunk.tileIndex().child(static_cast<Quad>(i)));
-            _children[i] = std::make_unique<ChunkNode>(chunk, this);
+void splitChunkNode(ChunkNode& cn, int depth) {
+    if (depth > 0 && isLeaf(cn)) {
+        for (size_t i = 0; i < cn.children.size(); ++i) {
+            Chunk chunk(cn.chunk.owner(), cn.chunk.tileIndex().child(static_cast<Quad>(i)));
+            cn.children[i] = std::make_unique<ChunkNode>(chunk, &cn);
         }
     }
 
     if (depth - 1 > 0) {
-        for (const std::unique_ptr<ChunkNode>& child : _children) {
-            child->split(depth - 1);
+        for (const std::unique_ptr<ChunkNode>& child : cn.children) {
+            splitChunkNode(*child, depth - 1);
         }
     }
 }
 
-void ChunkNode::merge() {
-    for (std::unique_ptr<ChunkNode>& child : _children) {
+void mergeChunkNode(ChunkNode& cn) {
+    for (std::unique_ptr<ChunkNode>& child : cn.children) {
         if (child) {
-            child->merge();
+            mergeChunkNode(*child);
         }
         child = nullptr;
     }
 
-    ghoul_assert(isLeaf(), "ChunkNode must be leaf after merge");
+    ghoul_assert(isLeaf(cn), "ChunkNode must be leaf after merge");
 }
 
-const Chunk& ChunkNode::chunk() const {
-    return _chunk;
 }
 
-} // namespace openspace::globebrowsing
+//
+//bool ChunkNode::isRoot() const {
+//    return _parent == nullptr;
+//}
+//
+//bool ChunkNode::isLeaf() const {
+//    return _children[0] == nullptr;
+//}
+//
+//bool ChunkNode::updateChunkTree(const RenderData& data) {
+//    if (isLeaf()) {
+//        Chunk::Status status = _chunk.update(data);
+//        if (status == Chunk::Status::WantSplit) {
+//            split();
+//        }
+//        return status == Chunk::Status::WantMerge;
+//    }
+//    else {
+//        char requestedMergeMask = 0;
+//        for (int i = 0; i < 4; ++i) {
+//            if (_children[i]->updateChunkTree(data)) {
+//                requestedMergeMask |= (1 << i);
+//            }
+//        }
+//
+//        const bool allChildrenWantsMerge = requestedMergeMask == 0xf;
+//        const bool thisChunkWantsSplit = _chunk.update(data) == Chunk::Status::WantSplit;
+//
+//        if (allChildrenWantsMerge && !thisChunkWantsSplit) {
+//            merge();
+//        }
+//
+//        return false;
+//    }
+//}
+//
+//void ChunkNode::depthFirst(const std::function<void(const ChunkNode&)>& f) const {
+//    f(*this);
+//    if (!isLeaf()) {
+//        for (int i = 0; i < 4; ++i) {
+//            _children[i]->depthFirst(f);
+//        }
+//    }
+//}
+//
+//void ChunkNode::breadthFirst(const RenderFunction& f, int modelSpaceCutoffLevel,
+//                             const RenderData& data,
+//                             const glm::dmat4& modelViewProjection) const
+//{
+//    std::queue<const ChunkNode*> Q;
+//
+//    // Loop through nodes in breadths first order
+//    Q.push(this);
+//    while (!Q.empty()) {
+//        const ChunkNode* node = Q.front();
+//        Q.pop();
+//
+//        f(*node, modelSpaceCutoffLevel, data, modelViewProjection);
+//
+//        // Add children to queue, if any
+//        if (!node->isLeaf()) {
+//            for (int i = 0; i < 4; ++i) {
+//                Q.push(node->_children[i].get());
+//            }
+//        }
+//    }
+//}
+//
+//void ChunkNode::reverseBreadthFirst(const std::function<void(const ChunkNode&)>& f) const
+//{
+//    std::stack<const ChunkNode*> S;
+//    std::queue<const ChunkNode*> Q;
+//
+//    // Loop through nodes in breadths first order
+//    Q.push(this);
+//    while (!Q.empty()) {
+//        const ChunkNode* node = Q.front();
+//        Q.pop();
+//
+//        // Add node to future stack
+//        S.push(node);
+//
+//        // Add children to queue, if any
+//        if (!node->isLeaf()) {
+//            for (const auto& c : node->_children) {
+//                Q.push(c.get());
+//            }
+//            //for (int i = 0; i < 4; ++i) {
+//            //    Q.push(node->_children[i].get());
+//            //}
+//        }
+//    }
+//
+//    // Loop through all nodes in stack, this will be reversed breadth first
+//    while (!S.empty()) {
+//        f(*S.top());
+//        S.pop();
+//    }
+//}
+//
+//const ChunkNode& ChunkNode::find(const Geodetic2& location) const {
+//    const ChunkNode* node = this;
+//
+//    while (!node->isLeaf()) {
+//        const Geodetic2 center = node->_chunk.surfacePatch().center();
+//        int index = 0;
+//        if (center.lon < location.lon) {
+//            ++index;
+//        }
+//        if (location.lat < center.lat) {
+//            ++index;
+//            ++index;
+//        }
+//        node = &(node->child(static_cast<Quad>(index)));
+//    }
+//    return *node;
+//}
+//
+//const ChunkNode& ChunkNode::child(const Quad& quad) const {
+//    return *_children[quad];
+//}
+//
+//void ChunkNode::split(int depth) {
+//    if (depth > 0 && isLeaf()) {
+//        for (size_t i = 0; i < _children.size(); ++i) {
+//            Chunk chunk(_chunk.owner(), _chunk.tileIndex().child(static_cast<Quad>(i)));
+//            _children[i] = std::make_unique<ChunkNode>(chunk, this);
+//        }
+//    }
+//
+//    if (depth - 1 > 0) {
+//        for (const std::unique_ptr<ChunkNode>& child : _children) {
+//            child->split(depth - 1);
+//        }
+//    }
+//}
+//
+//void ChunkNode::merge() {
+//    for (std::unique_ptr<ChunkNode>& child : _children) {
+//        if (child) {
+//            child->merge();
+//        }
+//        child = nullptr;
+//    }
+//
+//    ghoul_assert(isLeaf(), "ChunkNode must be leaf after merge");
+//}
+//
+//const Chunk& ChunkNode::chunk() const {
+//    return _chunk;
+//}
+//
+//} // namespace openspace::globebrowsing

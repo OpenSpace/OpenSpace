@@ -42,7 +42,7 @@ namespace openspace::globebrowsing {
     namespace culling { class ChunkCuller; }
 
     class Chunk;
-    class ChunkNode;
+    struct ChunkNode;
     class ChunkRenderer;
     class Ellipsoid;
     struct Geodetic2;
@@ -120,7 +120,7 @@ public:
      * latitude [-90, 90] and longitude [-180, 180]. In other words, it must be a
      * position defined on the globe in georeferenced coordinates.
      */
-    const ChunkNode& findChunkNode(const Geodetic2& location) const;
+    //const ChunkNode& findChunkNode(const Geodetic2& location) const;
 
     /**
      * Test if a specific chunk can safely be culled without affecting the rendered

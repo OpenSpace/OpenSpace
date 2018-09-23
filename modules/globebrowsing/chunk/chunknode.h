@@ -35,54 +35,81 @@ namespace openspace::globebrowsing {
 
 class ChunkedLodGlobe;
 
-class ChunkNode {
-public:
+struct ChunkNode {
     ChunkNode(Chunk chunk, ChunkNode* parent = nullptr);
 
-    /**
-     * Recursively split the ChunkNode.
-     *
-     * \param depth defines how deep the recursion should go. If depth == 1 (default),
-     * the ChunkNode will only split once.
-     */
-    void split(int depth = 1);
+    ChunkNode* parent;  // bool isRoot
+    std::array<std::unique_ptr<ChunkNode>, 4> children;
 
-    /**
-     * Deletes all children of the ChunkNode recursively.
-     */
-    void merge();
+    Chunk chunk;
 
-    bool isRoot() const;
-    bool isLeaf() const;
+    //bool isRoot;
+    //bool isLeaf;
+};
 
+bool isLeaf(const ChunkNode& cn);
     using RenderFunction = std::function<
         void(const ChunkNode&, int, const RenderData&, const glm::dmat4&)>;
 
-    void depthFirst(const std::function<void(const ChunkNode&)>& f) const;
-    void breadthFirst(const RenderFunction& f,
+        void breadthFirstTraversal(const ChunkNode& cn, const RenderFunction& f,
         int modelSpaceCutoffLevel, const RenderData& data,
-        const glm::dmat4& modelViewProjection) const;
-    void reverseBreadthFirst(const std::function<void(const ChunkNode&)>& f) const;
+        const glm::dmat4& modelViewProjection);
 
-    const ChunkNode& find(const Geodetic2& location) const;
-    const ChunkNode& child(const Quad& quad) const;
-    const Chunk& chunk() const;
+        const ChunkNode& findChunkNode(const ChunkNode& cn, const Geodetic2& location);
 
-    /**
-     * Updates all children recursively. If this ChunkNode wants to split it will,
-     * otherwise check if the children wants to merge. If all children wants to merge
-     * and the Status of this Chunk is not Status::WANT_SPLIT it will merge.
-     *
-     * \returns true if the ChunkNode can merge and false if it can not merge.
-    */
-    bool updateChunkTree(const RenderData& data);
+        bool updateChunkTree(ChunkNode& cn, const RenderData& data);
 
-private:
-    ChunkNode* _parent;
-    std::array<std::unique_ptr<ChunkNode>, 4> _children;
+        void splitChunkNode(ChunkNode& cn, int depth = 1);
+        void mergeChunkNode(ChunkNode& cn);
 
-    Chunk _chunk;
-};
+//class ChunkNode {
+//public:
+//    ChunkNode(Chunk chunk, ChunkNode* parent = nullptr);
+//
+//    /**
+//     * Recursively split the ChunkNode.
+//     *
+//     * \param depth defines how deep the recursion should go. If depth == 1 (default),
+//     * the ChunkNode will only split once.
+//     */
+//    void split(int depth = 1);
+//
+//    /**
+//     * Deletes all children of the ChunkNode recursively.
+//     */
+//    void merge();
+//
+//    bool isRoot() const;
+//    bool isLeaf() const;
+//
+//    using RenderFunction = std::function<
+//        void(const ChunkNode&, int, const RenderData&, const glm::dmat4&)>;
+//
+//    void depthFirst(const std::function<void(const ChunkNode&)>& f) const;
+//    void breadthFirst(const RenderFunction& f,
+//        int modelSpaceCutoffLevel, const RenderData& data,
+//        const glm::dmat4& modelViewProjection) const;
+//    void reverseBreadthFirst(const std::function<void(const ChunkNode&)>& f) const;
+//
+//    const ChunkNode& find(const Geodetic2& location) const;
+//    const ChunkNode& child(const Quad& quad) const;
+//    const Chunk& chunk() const;
+//
+//    /**
+//     * Updates all children recursively. If this ChunkNode wants to split it will,
+//     * otherwise check if the children wants to merge. If all children wants to merge
+//     * and the Status of this Chunk is not Status::WANT_SPLIT it will merge.
+//     *
+//     * \returns true if the ChunkNode can merge and false if it can not merge.
+//    */
+//    bool updateChunkTree(const RenderData& data);
+//
+//private:
+//    ChunkNode* _parent;
+//    std::array<std::unique_ptr<ChunkNode>, 4> _children;
+//
+//    Chunk _chunk;
+//};
 
 } // namespace openspace::globebrowsing
 
