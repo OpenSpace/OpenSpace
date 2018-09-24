@@ -27,7 +27,7 @@
 
 Fragment getFragment() {
     Fragment frag;
-    frag = getTileFragment();    
+    frag = getTileFragment();
 
 #if SHOW_CHUNK_EDGES
     frag.color += patchBorderOverlay(fs_uv, vec3(1,0,0), 0.005);
