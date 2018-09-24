@@ -158,7 +158,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     std::string blendModeName;
     if (layerDict.getValue(KeyBlendMode, blendModeName)) {
         layergroupid::BlendModeID blendModeID =
-            layergroupid::getBlendModeIDFromName(blendModeName);
+            ghoul::from_string<layergroupid::BlendModeID>(blendModeName);
         _blendModeOption = static_cast<int>(blendModeID);
     }
     else {
@@ -350,7 +350,7 @@ layergroupid::TypeID Layer::parseTypeIdFromDictionary(
 {
     if (initDict.hasKeyAndValue<std::string>("Type")) {
         const std::string& typeString = initDict.value<std::string>("Type");
-        return layergroupid::getTypeIDFromTypeString(typeString);
+        return ghoul::from_string<layergroupid::TypeID>(typeString);
     }
     else {
         return layergroupid::TypeID::DefaultTileLayer;

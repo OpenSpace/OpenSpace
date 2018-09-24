@@ -64,7 +64,9 @@ int addLayer(lua_State* L) {
     }
 
     // Get the layer group
-    layergroupid::GroupID groupID = layergroupid::getGroupIDFromName(layerGroupName);
+    layergroupid::GroupID groupID = ghoul::from_string<layergroupid::GroupID>(
+        layerGroupName
+    );
     if (groupID == layergroupid::GroupID::Unknown) {
         return ghoul::lua::luaError(L, "Unknown layer group: " + layerGroupName);
     }
@@ -114,7 +116,9 @@ int deleteLayer(lua_State* L) {
     }
 
     // Get the layer group
-    layergroupid::GroupID groupID = layergroupid::getGroupIDFromName(layerGroupName);
+    layergroupid::GroupID groupID = ghoul::from_string<layergroupid::GroupID>(
+        layerGroupName
+    );
     if (groupID == layergroupid::GroupID::Unknown) {
         return ghoul::lua::luaError(L, "Unknown layer group: " + layerGroupName);
     }

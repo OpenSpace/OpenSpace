@@ -26,8 +26,8 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_TILE_CACHE___H__
 
 #include <modules/globebrowsing/cache/lrucache.h>
-#include <modules/globebrowsing/cache/texturecontainer.h>
 #include <modules/globebrowsing/tile/tileindex.h>
+#include <modules/globebrowsing/tile/tiletextureinitdata.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
@@ -55,17 +55,17 @@ struct ProviderTileKey {
 
 struct ProviderTileHasher {
     /**
-    Creates a hash which can be used as key in hash maps.
-    First set the bits to be unique for all tiles.
-    +-------+------------+-------+------------+
-    | USAGE | BIT RANGE  | #BITS | MAX VALUE  |
-    +-------+------------+-------+------------+
-    | level |   0 -  5   |   5   |         31 |
-    |     x |   5 - 35   |  30   | 1073741824 |
-    |     y |  35 - 64   |  29   |  536870912 |
-    +-------+------------+-------+------------+
-
-    Bits are then shifted depending on the tile provider used.
+     * Creates a hash which can be used as key in hash maps.
+     * First set the bits to be unique for all tiles.
+     * +-------+------------+-------+------------+
+     * | USAGE | BIT RANGE  | #BITS | MAX VALUE  |
+     * +-------+------------+-------+------------+
+     * | level |   0 -  5   |   5   |         31 |
+     * |     x |   5 - 35   |  30   | 1073741824 |
+     * |     y |  35 - 64   |  29   |  536870912 |
+     * +-------+------------+-------+------------+
+     *
+     * Bits are then shifted depending on the tile provider used.
     */
     unsigned long long operator()(const ProviderTileKey& t) const {
         unsigned long long key = 0;
@@ -102,6 +102,46 @@ public:
     bool shouldUsePbo() const;
 
 private:
+    /**
+     * Owner of texture data used for tiles. Instead of dynamically allocating textures
+     * one by one, they are created once and reused.
+     */
+    class TextureContainer {
+    public:
+        /**
+         * \param initData is the description of the texture type.
+         * \param numTextures is the number of textures to allocate.
+         */
+        TextureContainer(TileTextureInitData initData, size_t numTextures);
+
+        ~TextureContainer() = default;
+
+        void reset();
+        void reset(size_t numTextures);
+
+        /**
+         * \return A pointer to a texture if there is one texture never used before. If
+         *         there are no textures left, nullptr is returned. TextureContainer still
+         *         owns the texture so no delete should be called on the raw pointer.
+         */
+        ghoul::opengl::Texture* getTextureIfFree();
+
+        const TileTextureInitData& tileTextureInitData() const;
+
+        /**
+         * \returns the number of textures in this TextureContainer
+         */
+        size_t size() const;
+
+    private:
+        std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
+
+        const TileTextureInitData _initData;
+        size_t _freeTexture = 0;
+        size_t _numTextures;
+    };
+
+
     void createDefaultTextureContainers();
     void assureTextureContainerExists(const TileTextureInitData& initData);
     void resetTextureContainerSize(size_t numTexturesPerTextureType);

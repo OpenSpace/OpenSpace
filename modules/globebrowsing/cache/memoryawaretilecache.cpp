@@ -77,6 +77,70 @@ namespace {
 
 namespace openspace::globebrowsing::cache {
 
+//
+// TextureContainer
+//
+MemoryAwareTileCache::TextureContainer::TextureContainer(TileTextureInitData initData,
+                                                         size_t numTextures)
+    : _initData(std::move(initData))
+    , _numTextures(numTextures)
+{
+    reset();
+}
+
+void MemoryAwareTileCache::TextureContainer::reset() {
+    _textures.clear();
+    _freeTexture = 0;
+    for (size_t i = 0; i < _numTextures; ++i) {
+        using namespace ghoul::opengl;
+        std::unique_ptr<Texture> tex = std::make_unique<Texture>(
+            _initData.dimensions(),
+            _initData.ghoulTextureFormat(),
+            _initData.glTextureFormat(),
+            _initData.glType(),
+            Texture::FilterMode::Linear,
+            Texture::WrappingMode::ClampToEdge,
+            Texture::AllocateData(_initData.shouldAllocateDataOnCPU())
+        );
+
+        tex->setDataOwnership(Texture::TakeOwnership::Yes);
+        tex->uploadTexture();
+        tex->setFilter(Texture::FilterMode::AnisotropicMipMap);
+
+        _textures.push_back(std::move(tex));
+    }
+}
+
+void MemoryAwareTileCache::TextureContainer::reset(size_t numTextures) {
+    _numTextures = numTextures;
+    reset();
+}
+
+ghoul::opengl::Texture* MemoryAwareTileCache::TextureContainer::getTextureIfFree() {
+    if (_freeTexture < _textures.size()) {
+        ghoul::opengl::Texture* texture = _textures[_freeTexture].get();
+        _freeTexture++;
+        return texture;
+    }
+    else {
+        return nullptr;
+    }
+}
+
+const TileTextureInitData&
+MemoryAwareTileCache::TextureContainer::tileTextureInitData() const
+{
+    return _initData;
+}
+
+size_t MemoryAwareTileCache::TextureContainer::size() const {
+    return _textures.size();
+}
+
+//
+// MemoryAwareTileCache
+//
+
 MemoryAwareTileCache::MemoryAwareTileCache()
     : PropertyOwner({ "TileCache" })
     , _numTextureBytesAllocatedOnCPU(0)

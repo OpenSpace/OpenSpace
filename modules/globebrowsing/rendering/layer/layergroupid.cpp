@@ -24,44 +24,51 @@
 
 #include <modules/globebrowsing/rendering/layer/layergroupid.h>
 
-namespace openspace::globebrowsing::layergroupid {
+using namespace openspace::globebrowsing::layergroupid;
 
-TypeID getTypeIDFromTypeString(const std::string& typeString) {
+namespace ghoul {
+
+template <>
+TypeID from_string(const std::string& string) {
     for (int i = 0; i < NUM_LAYER_TYPES; ++i) {
-        if (typeString == LAYER_TYPE_NAMES[i]) {
+        if (string == LAYER_TYPE_NAMES[i]) {
             return static_cast<TypeID>(i);
         }
     }
     return TypeID::Unknown;
 }
 
-layergroupid::GroupID getGroupIDFromName(const std::string& layerGroupName) {
-    for (int i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
-        if (layerGroupName == layergroupid::LAYER_GROUP_IDENTIFIERS[i]) {
-            return static_cast<layergroupid::GroupID>(i);
+template <>
+openspace::globebrowsing::layergroupid::GroupID from_string(const std::string& string) {
+    for (int i = 0; i < NUM_LAYER_GROUPS; ++i) {
+        if (string == LAYER_GROUP_IDENTIFIERS[i]) {
+            return static_cast<GroupID>(i);
         }
     }
     return GroupID::Unknown;
 }
 
-layergroupid::AdjustmentTypeID getAdjustmentTypeIDFromName(
-                                                    const std::string& adjustmentTypeName)
+template <>
+openspace::globebrowsing::layergroupid::AdjustmentTypeID from_string(
+                                                                const std::string& string)
 {
-    for (int i = 0; i < layergroupid::NUM_ADJUSTMENT_TYPES; ++i) {
-        if (adjustmentTypeName == layergroupid::ADJUSTMENT_TYPE_NAMES[i]) {
-            return static_cast<layergroupid::AdjustmentTypeID>(i);
+    for (int i = 0; i < NUM_ADJUSTMENT_TYPES; ++i) {
+        if (string == ADJUSTMENT_TYPE_NAMES[i]) {
+            return static_cast<AdjustmentTypeID>(i);
         }
     }
     return AdjustmentTypeID::None;
 }
 
-layergroupid::BlendModeID getBlendModeIDFromName(const std::string& blendModeName) {
-    for (int i = 0; i < layergroupid::NUM_BLEND_MODES; ++i) {
-        if (blendModeName == layergroupid::BLEND_MODE_NAMES[i]) {
-            return static_cast<layergroupid::BlendModeID>(i);
+template <>
+openspace::globebrowsing::layergroupid::BlendModeID from_string(const std::string& string)
+{
+    for (int i = 0; i < NUM_BLEND_MODES; ++i) {
+        if (string == BLEND_MODE_NAMES[i]) {
+            return static_cast<BlendModeID>(i);
         }
     }
     return BlendModeID::Normal;
 }
 
-} // namespace openspace::globebrowsing::layergroupid
+} // namespace ghoul

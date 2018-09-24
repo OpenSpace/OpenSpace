@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__
 
+#include <ghoul/misc/stringconversion.h>
 #include <string>
 
 namespace openspace::globebrowsing::layergroupid {
@@ -118,16 +119,25 @@ enum class BlendModeID {
     Color = 4,
 };
 
-TypeID getTypeIDFromTypeString(const std::string& typeString);
-
-layergroupid::GroupID getGroupIDFromName(const std::string& layerGroupName);
-
-layergroupid::AdjustmentTypeID getAdjustmentTypeIDFromName(
-    const std::string& adjustmentTypeName);
-
-layergroupid::BlendModeID getBlendModeIDFromName(
-    const std::string& blendModeName);
-
 } // namespace openspace::globebrowsing::layergroupid
+
+namespace ghoul {
+    
+template <>
+openspace::globebrowsing::layergroupid::TypeID from_string(const std::string& string);
+
+template <>
+openspace::globebrowsing::layergroupid::GroupID from_string(const std::string& string);
+
+template <>
+openspace::globebrowsing::layergroupid::AdjustmentTypeID from_string(
+    const std::string& string);
+
+template <>
+openspace::globebrowsing::layergroupid::BlendModeID from_string(
+    const std::string& string);
+
+} // ghoul
+
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__

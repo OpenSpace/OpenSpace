@@ -60,7 +60,7 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
         layergroupid::TypeID typeID;
         if (providerDict.hasKeyAndValue<std::string>("Type")) {
             const std::string& typeString = providerDict.value<std::string>("Type");
-            typeID = layergroupid::getTypeIDFromTypeString(typeString);
+            typeID = ghoul::from_string<layergroupid::TypeID>(typeString);
 
             if (typeID == layergroupid::TypeID::Unknown) {
                 throw ghoul::RuntimeError("Unknown layer type: " + typeString);

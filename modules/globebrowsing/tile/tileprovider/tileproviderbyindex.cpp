@@ -44,7 +44,7 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
     layergroupid::TypeID type;
     if (defaultProviderDict.hasKeyAndValue<std::string>("Type")) {
         const std::string& t = defaultProviderDict.value<std::string>("Type");
-        type = layergroupid::getTypeIDFromTypeString(t);
+        type = ghoul::from_string<layergroupid::TypeID>(t);
 
         if (type == layergroupid::TypeID::Unknown) {
             throw ghoul::RuntimeError("Unknown layer type: " + t);
@@ -75,7 +75,7 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
         layergroupid::TypeID providerTypeID;
         if (defaultProviderDict.hasKeyAndValue<std::string>("Type")) {
             const std::string& t = defaultProviderDict.value<std::string>("Type");
-            providerTypeID = layergroupid::getTypeIDFromTypeString(t);
+            providerTypeID = ghoul::from_string<layergroupid::TypeID>(t);
 
             if (providerTypeID == layergroupid::TypeID::Unknown) {
                 throw ghoul::RuntimeError("Unknown layer type: " + t);

@@ -30,7 +30,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/lrucache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/lrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawaretilecache.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/cache/texturecontainer.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.h
 
@@ -47,8 +46,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/pointglobe.h
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/meshes/basicgrid.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.h
 
@@ -108,7 +105,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/globebrowsingmodule_lua.inl
 
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawaretilecache.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/cache/texturecontainer.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.cpp
 
@@ -122,8 +118,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/pointglobe.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.cpp
     
-    ${CMAKE_CURRENT_SOURCE_DIR}/meshes/basicgrid.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.cpp
 

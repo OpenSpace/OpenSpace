@@ -52,7 +52,9 @@ void LayerManager::initialize(const ghoul::Dictionary& layerGroupsDict) {
 
     // Create all the layer groups
     for (const std::string& groupName : layerGroupNamesInDict) {
-        layergroupid::GroupID groupId = layergroupid::getGroupIDFromName(groupName);
+        layergroupid::GroupID groupId = ghoul::from_string<layergroupid::GroupID>(
+            groupName
+        );
 
         if (groupId != layergroupid::GroupID::Unknown) {
             ghoul::Dictionary layerGroupDict = layerGroupsDict.value<ghoul::Dictionary>(

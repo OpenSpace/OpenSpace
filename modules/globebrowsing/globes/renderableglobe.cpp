@@ -41,7 +41,6 @@
 #include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/geometry/ellipsoid.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/meshes/grid.h>
 #include <modules/globebrowsing/meshes/trianglesoup.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/rendering/gpu/gpulayergroup.h>

@@ -82,7 +82,7 @@ void LayerAdjustment::setValuesFromDictionary(const ghoul::Dictionary& adjustmen
     if (adjustmentDict.hasKeyAndValue<std::string>(keyType)) {
         const std::string& dictType = adjustmentDict.value<std::string>(keyType);
         _typeOption = static_cast<int>(
-            layergroupid::getAdjustmentTypeIDFromName(dictType)
+            ghoul::from_string<layergroupid::AdjustmentTypeID>(dictType)
         );
 
     }

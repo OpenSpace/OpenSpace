@@ -25,8 +25,6 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___SKIRTEDGRID___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___SKIRTEDGRID___H__
 
-#include <modules/globebrowsing/meshes/grid.h>
-
 #include <modules/globebrowsing/meshes/trianglesoup.h>
 #include <ghoul/glm.h>
 #include <vector>
@@ -34,12 +32,11 @@
 namespace openspace::globebrowsing {
 
 /**
- * This grid is the same as <code>BasicGrid</code> except it has skirts around its edges.
- * The areas covered by the skirts have position coordinates and texture coordinates
- * that are outside of the range [0, 1]. The width of the skirts is half the size of one
- * segment width or a cell.
+ * This grid is a regular grid with skirts around its edges. The areas covered by the
+ * skirts have position coordinates and texture coordinates that are outside of the range
+ * [0, 1]. The width of the skirts is half the size of one segment width or a cell.
  */
-class SkirtedGrid : public Grid {
+class SkirtedGrid {
 public:
     /**
      * \param xSegments is the number of grid cells in the x direction.
@@ -57,15 +54,22 @@ public:
         TriangleSoup::Normals useNormals);
     ~SkirtedGrid() = default;
 
-    virtual int xSegments() const override;
-    virtual int ySegments() const override;
+    int xSegments() const;
+    int ySegments() const;
+
+    TriangleSoup& geometry();
 
 private:
-    std::vector<GLuint> createElements(int xSegments, int ySegments) override;
-    std::vector<glm::vec4> createPositions(int xSegments, int ySegments) override;
+    std::vector<GLuint> createElements(int xSegments, int ySegments);
+    std::vector<glm::vec4> createPositions(int xSegments, int ySegments);
     std::vector<glm::vec2> createTextureCoordinates(int xSegments,
-        int ySegments) override;
-    std::vector<glm::vec3> createNormals(int xSegments, int ySegments) override;
+        int ySegments);
+    std::vector<glm::vec3> createNormals(int xSegments, int ySegments);
+
+    std::unique_ptr<TriangleSoup> _geometry;
+
+    const int _xSegments;
+    const int _ySegments;
 };
 
 } // namespace openspace::globebrowsing
