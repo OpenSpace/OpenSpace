@@ -206,6 +206,7 @@ namespace {
     };
 } // namespace
 
+
 using namespace openspace::properties;
 
 namespace openspace::globebrowsing {
@@ -222,61 +223,10 @@ bool isLeaf(const ChunkNode& cn) {
     return cn.children[0] == nullptr;
 }
 
-void splitChunkNode(ChunkNode& cn, int depth) {
-    if (depth > 0 && isLeaf(cn)) {
-        for (size_t i = 0; i < cn.children.size(); ++i) {
-            Chunk chunk(cn.chunk.owner(), cn.chunk.tileIndex().child(static_cast<Quad>(i)));
-            cn.children[i] = std::make_unique<ChunkNode>(chunk);
-        }
-    }
-
-    if (depth - 1 > 0) {
-        for (const std::unique_ptr<ChunkNode>& child : cn.children) {
-            splitChunkNode(*child, depth - 1);
-        }
-    }
-}
-
-void mergeChunkNode(ChunkNode& cn) {
-    for (std::unique_ptr<ChunkNode>& child : cn.children) {
-        if (child) {
-            mergeChunkNode(*child);
-        }
-        child = nullptr;
-    }
-
-    ghoul_assert(isLeaf(cn), "ChunkNode must be leaf after merge");
-}
 
     using RenderFunction = std::function<
         void(const ChunkNode&, int, const RenderData&, const glm::dmat4&)>;
 
-bool updateChunkTree(ChunkNode& cn, const RenderData& data) {
-    if (isLeaf(cn)) {
-        Chunk::Status status = cn.chunk.update(data);
-        if (status == Chunk::Status::WantSplit) {
-            splitChunkNode(cn, 1);
-        }
-        return status == Chunk::Status::WantMerge;
-    }
-    else {
-        char requestedMergeMask = 0;
-        for (int i = 0; i < 4; ++i) {
-            if (updateChunkTree(*cn.children[i], data)) {
-                requestedMergeMask |= (1 << i);
-            }
-        }
-
-        const bool allChildrenWantsMerge = requestedMergeMask == 0xf;
-        const bool thisChunkWantsSplit = cn.chunk.update(data) == Chunk::Status::WantSplit;
-
-        if (allChildrenWantsMerge && !thisChunkWantsSplit) {
-            mergeChunkNode(cn);
-        }
-
-        return false;
-    }
-}
 
 void breadthFirstTraversal(const ChunkNode& node, const RenderFunction& f, int modelSpaceCutoffLevel,
     const RenderData& data,
@@ -287,15 +237,15 @@ void breadthFirstTraversal(const ChunkNode& node, const RenderFunction& f, int m
     // Loop through nodes in breadths first order
     Q.push(&node);
     while (!Q.empty()) {
-        const ChunkNode* node = Q.front();
+        const ChunkNode* n = Q.front();
         Q.pop();
 
-        f(*node, modelSpaceCutoffLevel, data, modelViewProjection);
+        f(*n, modelSpaceCutoffLevel, data, modelViewProjection);
 
         // Add children to queue, if any
-        if (!isLeaf(*node)) {
+        if (!isLeaf(*n)) {
             for (int i = 0; i < 4; ++i) {
-                Q.push(node->children[i].get());
+                Q.push(n->children[i]);
             }
         }
     }
@@ -314,7 +264,7 @@ const ChunkNode& findChunkNode(const ChunkNode& node, const Geodetic2& location)
             ++index;
             ++index;
         }
-        n = n->children[static_cast<Quad>(index)].get();
+        n = n->children[static_cast<Quad>(index)];
     }
     return *n;
 }
@@ -347,8 +297,9 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f)
     })
     , _debugPropertyOwner({ "Debug" })
-    , _leftRoot(std::make_unique<ChunkNode>(Chunk(*this, LeftHemisphereIndex)))
-    , _rightRoot(std::make_unique<ChunkNode>(Chunk(*this, RightHemisphereIndex)))
+    //, _chunkPool(1)
+    , _leftRoot(Chunk(*this, LeftHemisphereIndex))
+    , _rightRoot(Chunk(*this, RightHemisphereIndex))
     , _grid(DefaultSkirtedGridSegments,
         DefaultSkirtedGridSegments,
         TriangleSoup::Positions::No,
@@ -656,8 +607,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
         _localRenderer.updatedSinceLastCall = false;
     }
 
-    updateChunkTree(*_leftRoot, data);
-    updateChunkTree(*_rightRoot, data);
+    updateChunkTree(_leftRoot, data);
+    updateChunkTree(_rightRoot, data);
 
     // Calculate the MVP matrix
     const glm::dmat4& viewTransform = data.camera.combinedViewMatrix();
@@ -796,14 +747,14 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
         }
     };
     breadthFirstTraversal(
-        *_leftRoot,
+        _leftRoot,
         renderJob,
         _debugProperties.modelSpaceRenderingCutoffLevel,
         data,
         mvp
     );
     breadthFirstTraversal(
-        *_rightRoot,
+        _rightRoot,
         renderJob,
         _debugProperties.modelSpaceRenderingCutoffLevel,
         data,
@@ -1247,8 +1198,8 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
     // Get the uv coordinates to sample from
     const Geodetic2 geodeticPosition = _ellipsoid.cartesianToGeodetic2(position);
     const ChunkNode& node = geodeticPosition.lon < Coverage.center().lon ?
-        findChunkNode(*_leftRoot, geodeticPosition) :
-        findChunkNode(*_rightRoot, geodeticPosition);
+        findChunkNode(_leftRoot, geodeticPosition) :
+        findChunkNode(_rightRoot, geodeticPosition);
     const int chunkLevel = node.chunk.tileIndex().level;
 
     const TileIndex tileIndex = TileIndex(geodeticPosition, chunkLevel);
@@ -1419,7 +1370,7 @@ void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
 
 
 
-void RenderableGlobe::calculateEclipseShadows(const Chunk& chunk,
+void RenderableGlobe::calculateEclipseShadows(const Chunk&,
     ghoul::opengl::ProgramObject* programObject,
     const RenderData& data)
 {
@@ -1834,6 +1785,73 @@ bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk, const RenderData& 
         2
     );
     return distanceToObjectSquared > minimumAllowedDistanceToObjectSquared;
+}
+
+
+void RenderableGlobe::splitChunkNode(ChunkNode& cn, int depth) {
+    if (depth > 0 && isLeaf(cn)) {
+        std::vector<void*> memory = _chunkPool.allocate(
+            static_cast<int>(cn.children.size())
+        );
+        for (size_t i = 0; i < cn.children.size(); ++i) {
+            Chunk chunk(cn.chunk.owner(), cn.chunk.tileIndex().child(static_cast<Quad>(i)));
+            cn.children[i] = new (memory[i]) ChunkNode(chunk);
+        }
+    }
+
+    if (depth - 1 > 0) {
+        for (ChunkNode* child : cn.children) {
+            splitChunkNode(*child, depth - 1);
+        }
+    }
+}
+
+void RenderableGlobe::freeChunkNode(ChunkNode* n) {
+    _chunkPool.free(n);
+    for (ChunkNode*& c : n->children) {
+        if (c) {
+            freeChunkNode(c);
+        }
+        c = nullptr;
+    }
+}
+
+void RenderableGlobe::mergeChunkNode(ChunkNode& cn) {
+    for (ChunkNode*& child : cn.children) {
+        if (child) {
+            mergeChunkNode(*child);
+            freeChunkNode(child);
+            child = nullptr;
+        }
+    }
+}
+
+bool RenderableGlobe::updateChunkTree(ChunkNode& cn, const RenderData& data) {
+    if (isLeaf(cn)) {
+        Chunk::Status status = cn.chunk.update(data);
+        if (status == Chunk::Status::WantSplit) {
+            splitChunkNode(cn, 1);
+        }
+        return status == Chunk::Status::WantMerge;
+    }
+    else {
+        char requestedMergeMask = 0;
+        for (int i = 0; i < 4; ++i) {
+            if (updateChunkTree(*cn.children[i], data)) {
+                requestedMergeMask |= (1 << i);
+            }
+            i = i;
+        }
+
+        const bool allChildrenWantsMerge = requestedMergeMask == 0xf;
+        const bool thisChunkWantsSplit = cn.chunk.update(data) == Chunk::Status::WantSplit;
+
+        if (allChildrenWantsMerge && !thisChunkWantsSplit) {
+            mergeChunkNode(cn);
+        }
+
+        return false;
+    }
 }
 
 } // namespace openspace::globebrowsing

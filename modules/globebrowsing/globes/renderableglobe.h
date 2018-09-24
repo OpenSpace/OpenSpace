@@ -34,7 +34,9 @@
 #include <modules/globebrowsing/meshes/skirtedgrid.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/chunk/chunk.h>
+#include <ghoul/misc/memorypool.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <cstddef>
 
 namespace openspace::globebrowsing {
 
@@ -63,9 +65,8 @@ class LayerManager;
 struct ChunkNode {
     ChunkNode(Chunk chunk);
 
-    std::array<std::unique_ptr<ChunkNode>, 4> children;
+    std::array<ChunkNode*, 4> children;
     Chunk chunk;
-    //bool isLeaf;
 };
 
 /**
@@ -224,8 +225,11 @@ private:
     void recompileShaders();
 
 
+    void splitChunkNode(ChunkNode& cn, int depth);
+    void mergeChunkNode(ChunkNode& cn);
+    bool updateChunkTree(ChunkNode& cn, const RenderData& data);
 
-
+    void freeChunkNode(ChunkNode* n);
 
     SkirtedGrid _grid;
 
@@ -236,11 +240,10 @@ private:
     glm::dmat4 _cachedModelTransform;
     glm::dmat4 _cachedInverseModelTransform;
 
-    // Covers all negative longitudes
-    std::unique_ptr<ChunkNode> _leftRoot;
+    ghoul::ReusableTypedMemoryPool<ChunkNode, 256> _chunkPool;
 
-    // Covers all positive longitudes
-    std::unique_ptr<ChunkNode> _rightRoot;
+    ChunkNode _leftRoot;  // Covers all negative longitudes
+    ChunkNode _rightRoot; // Covers all positive longitudes
 
 
 
