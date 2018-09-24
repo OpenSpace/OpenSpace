@@ -292,8 +292,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
                        const vec3 v, const vec3 s, out float r, out float mu,
                        out vec3 attenuation, const vec3 fragPosObj, out bool groundHit,
                        const double maxLength, const double pixelDepth,
-                       const vec4 spaceColor, const float sunIntensity,
-                       const float Rt2, const float Rg2) {
+                       const vec4 spaceColor, const float sunIntensity) {
 
     const float INTERPOLATION_EPS = 0.004f; // precision const from Brunetton
 
@@ -365,20 +364,25 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
         // or it has a havey weight if from above or below horizon
         float interpolationValue = ((mu - muHorizon) + INTERPOLATION_EPS) / (2.0f * INTERPOLATION_EPS);
 
-        float t2 = t * t;
+        //float t2 = t * t;
               
         // Above Horizon
         mu  = muHorizon - INTERPOLATION_EPS;
         //r0  = sqrt(r * r + t * t + 2.0f * r * t * mu);
         // From cosine law where t = distance between x and x0
         // r0^2 = r^2 + t^2 - 2 * r * t * cos(PI-theta)
-        r0  = sqrt(r2 + t2 + 2.0f * r * t * mu);
+        //r0  = sqrt(r2 + t2 + 2.0f * r * t * mu);
+        float halfCossineLaw1 = r2 + (t * t);
+        float halfCossineLaw2 = 2.0f * r * t;
+        r0  = sqrt(halfCossineLaw1 + halfCossineLaw2 * mu);
+        
         float invr0 = 1.0/r0;
         // From the dot product: cos(theta0) = (x0 dot v)/(||ro||*||v||)
         // mu0 = ((x + t) dot v) / r0
         // mu0 = (x dot v + t dot v) / r0
         // mu0 = (r*mu + t) / r0
         mu0 = (r * mu + t) * invr0;
+        
         vec4 inScatterAboveX  = texture4D(inscatterTexture, r, mu, muSun, nu);
         vec4 inScatterAboveXs = texture4D(inscatterTexture, r0, mu0, muSun0, nu);
         // Attention for the attenuation.r value applied to the S_Mie
@@ -386,9 +390,12 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
 
         // Below Horizon
         mu  = muHorizon + INTERPOLATION_EPS;
-        r0  = sqrt(r2 + t2 + 2.0f * r * t * mu);
+        //r0  = sqrt(r2 + t2 + 2.0f * r * t * mu);
+        r0  = sqrt(halfCossineLaw1 + halfCossineLaw2 * mu);
         invr0 = 1.0/r0;
+        
         mu0 = (r * mu + t) * invr0;
+        
         vec4 inScatterBelowX  = texture4D(inscatterTexture, r, mu, muSun, nu);
         vec4 inScatterBelowXs = texture4D(inscatterTexture, r0, mu0, muSun0, nu);
         // Attention for the attenuation.r value applied to the S_Mie
@@ -404,7 +411,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
       
     // Hermite interpolation between two values
     // This step is done because imprecision problems happen when the Sun is slightly below
-    // the horizon. When this happen, we avoid the Mie scattering contribution.
+    // the horizon. When this happens, we avoid the Mie scattering contribution.
     inscatterRadiance.w *= smoothstep(0.0f, 0.02f, muSun);
     vec3 inscatterMie    = inscatterRadiance.rgb * inscatterRadiance.a / max(inscatterRadiance.r, 1e-4) *
       (betaRayleigh.r / betaRayleigh);
@@ -418,7 +425,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     if (groundHit) {
         return finalScatteringRadiance;
     } else {
-        return ((r-Rg)/(Rt-Rg))*spaceColor.rgb * backgroundConstant + finalScatteringRadiance;
+        return ((r-Rg) * invRtMinusRg)*spaceColor.rgb * backgroundConstant + finalScatteringRadiance;
     }
     
 }
@@ -445,7 +452,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
 vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const float r,
                  const float mu, const vec3 attenuationXtoX0, const vec4 groundColor, 
                  const vec3 normal, const float irradianceFactor,
-                 const float waterReflectance, const float sunIntensity, const float Rg2)
+                 const float waterReflectance, const float sunIntensity)
 {
     vec3 reflectedRadiance = vec3(0.0f);
 
@@ -520,7 +527,7 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
  * attenuation := transmittance T(x,x0)
  */
 vec3 sunColor(const vec3 x, const float t, const vec3 v, const vec3 s, const float r,
-              const float mu, const float irradianceFactor, const float Rg2 ) {
+              const float mu, const float irradianceFactor) {
     vec3 transmittance  = (r <= Rt) ? ( mu < -sqrt(1.0f - Rg2/(r*r)) ? 
                           vec3(0.0f) : transmittanceLUT(r, mu)) : vec3(1.0f);  
     // JCC: Change this function to a impostor texture with gaussian decay color weighted
@@ -552,8 +559,8 @@ void main() {
         nSamples = complex ? nAaSamples / 2 : 1;
         
         // Performance variables:
-        float Rt2 = Rt * Rt; // in Km
-        float Rg2 = Rg * Rg; // in Km
+        //float Rt2 = Rt * Rt; // in Km
+        //float Rg2 = Rg * Rg; // in Km
 
 
         for (int i = 0; i < nSamples; i++) {
@@ -658,8 +665,7 @@ void main() {
                                                             s, r, mu, attenuation, 
                                                             vec3(positionObjectsCoords.xyz),
                                                             groundHit, maxLength, pixelDepth,
-                                                            color, sunIntensityInscatter,
-                                                            Rt2, Rg2); 
+                                                            color, sunIntensityInscatter); 
                     vec3 groundColorV = vec3(0.0);
                     vec3 sunColorV = vec3(0.0);                                                
                     if (groundHit) {
@@ -667,12 +673,12 @@ void main() {
                         float sunIntensityGround = sunRadiance * eclipseShadowPlanet.x;
                         groundColorV = groundColor(x, tF, v, s, r, mu, attenuation,
                                                    color, normal.xyz, irradianceFactor, 
-                                                   normal.a, sunIntensityGround, Rg2);
+                                                   normal.a, sunIntensityGround);
                     } else {
                         // In order to get better performance, we are not tracing
                         // multiple rays per pixel when the ray doesn't intersect
                         // the ground.
-                        sunColorV = sunColor(x, tF, v, s, r, mu, irradianceFactor, Rg2); 
+                        sunColorV = sunColor(x, tF, v, s, r, mu, irradianceFactor); 
                     } 
                     
                     // Final Color of ATM plus terrain:
