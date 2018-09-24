@@ -66,7 +66,7 @@ private:
         int ySegments);
     std::vector<glm::vec3> createNormals(int xSegments, int ySegments);
 
-    std::unique_ptr<TriangleSoup> _geometry;
+    TriangleSoup _geometry;
 
     const int _xSegments;
     const int _ySegments;

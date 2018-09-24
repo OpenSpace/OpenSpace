@@ -76,7 +76,6 @@ public:
     std::vector<glm::dvec4> boundingPolyhedronCorners() const;
 
     const GeodeticPatch& surfacePatch() const;
-    const RenderableGlobe& owner() const;
     const TileIndex tileIndex() const;
     bool isVisible() const;
 

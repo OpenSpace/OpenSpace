@@ -47,9 +47,9 @@ const GeodeticPatch& Chunk::surfacePatch() const {
     return _surfacePatch;
 }
 
-const RenderableGlobe& Chunk::owner() const {
-    return _owner;
-}
+//const RenderableGlobe& Chunk::owner() const {
+//    return _owner;
+//}
 
 const TileIndex Chunk::tileIndex() const {
     return _tileIndex;
@@ -78,10 +78,7 @@ Chunk::Status Chunk::update(const RenderData& data) {
         return Status::WantMerge;
     }
 
-    const int desiredLevel = _owner.desiredLevel(
-        *this,
-        myRenderData
-    );
+    const int desiredLevel = _owner.desiredLevel(*this, myRenderData);
 
     if (desiredLevel < _tileIndex.level) {
         return Status::WantMerge;
@@ -101,7 +98,7 @@ Chunk::BoundingHeights Chunk::boundingHeights() const {
 
     // In the future, this should be abstracted away and more easily queryable.
     // One must also handle how to sample pick one out of multiplte heightmaps
-    const LayerManager& lm = owner().layerManager();
+    const LayerManager& lm = _owner.layerManager();
 
     // The raster of a height map is the first one. We assume that the height map is
     // a single raster image. If it is not we will just use the first raster
@@ -156,7 +153,7 @@ Chunk::BoundingHeights Chunk::boundingHeights() const {
 }
 
 std::vector<glm::dvec4> Chunk::boundingPolyhedronCorners() const {
-    const Ellipsoid& ellipsoid = owner().ellipsoid();
+    const Ellipsoid& ellipsoid = _owner.ellipsoid();
     const GeodeticPatch& patch = surfacePatch();
 
     const BoundingHeights& boundingHeight = boundingHeights();

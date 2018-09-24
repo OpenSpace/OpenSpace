@@ -1795,7 +1795,7 @@ void RenderableGlobe::splitChunkNode(ChunkNode& cn, int depth) {
             static_cast<int>(cn.children.size())
         );
         for (size_t i = 0; i < cn.children.size(); ++i) {
-            Chunk chunk(cn.chunk.owner(), cn.chunk.tileIndex().child(static_cast<Quad>(i)));
+            Chunk chunk(*this, cn.chunk.tileIndex().child(static_cast<Quad>(i)));
             cn.children[i] = new (memory[i]) ChunkNode(chunk);
         }
     }

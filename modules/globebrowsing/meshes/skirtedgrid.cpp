@@ -50,27 +50,26 @@ SkirtedGrid::SkirtedGrid(unsigned int xSegments, unsigned int ySegments,
                          TriangleSoup::Positions usePositions,
                          TriangleSoup::TextureCoordinates useTextureCoordinates,
                          TriangleSoup::Normals useNormals)
-    : _xSegments(xSegments)
-    , _ySegments(ySegments)
-
-{
-    _geometry = std::make_unique<TriangleSoup>(
+    : _geometry(
         createElements(xSegments, ySegments),
         usePositions,
         useTextureCoordinates,
         useNormals
-    );
+    )
+    , _xSegments(xSegments)
+    , _ySegments(ySegments)
 
+{
     if (usePositions) {
-        _geometry->setVertexPositions(createPositions(_xSegments, _ySegments));
+        _geometry.setVertexPositions(createPositions(_xSegments, _ySegments));
     }
     if (useTextureCoordinates) {
-        _geometry->setVertexTextureCoordinates(
+        _geometry.setVertexTextureCoordinates(
             createTextureCoordinates(_xSegments, _ySegments)
         );
     }
     if (useNormals) {
-        _geometry->setVertexNormals(createNormals(_xSegments, _ySegments));
+        _geometry.setVertexNormals(createNormals(_xSegments, _ySegments));
     }
 }
 
@@ -83,7 +82,7 @@ int SkirtedGrid::ySegments() const {
 }
 
 TriangleSoup& SkirtedGrid::geometry() {
-    return *_geometry;
+    return _geometry;
 }
 
 std::vector<GLuint> SkirtedGrid::createElements(int xSegments, int ySegments) {
