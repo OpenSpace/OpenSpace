@@ -74,7 +74,7 @@ namespace {
 namespace openspace::kameleonvolume {
 
 KameleonVolumeReader::KameleonVolumeReader(std::string path) : _path(std::move(path)) {
-    if (!FileSys.fileExists(path)) {
+    if (!FileSys.fileExists(_path)) {
         throw ghoul::FileNotFoundError(_path);
     }
 
