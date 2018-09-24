@@ -23,6 +23,7 @@
 ##########################################################################################
 
 include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake)
+include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
 include(${OPENSPACE_CMAKE_EXT_DIR}/application_definition.cmake)
 include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
 
@@ -32,50 +33,43 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
 option(OPENSPACE_OPENVR_SUPPORT "Build OpenSpace application with OpenVR support" OFF)
 
 if (OPENSPACE_OPENVR_SUPPORT)
+    begin_header("Dependency: OpenVR")
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${OPENSPACE_EXT_DIR}/sgct/cmake/modules/")
 
     find_package(OpenVR REQUIRED)
 
     set(SGCT_OPENVR_DEFINITIONS OPENVR_SUPPORT)
-
     if (NOT SGCT_OPENVR_INCLUDE_DIRECTORY)
         if (WIN32)
             find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
                 NAMES SGCTOpenVR.h
-                PATHS
-                    $ENV{SGCT_ROOT_DIR}/additional_includes/openvr
-                    ${OPENSPACE_EXT_DIR}/sgct/additional_includes/openvr
-                    NO_DEFAULT_PATH
+                PATHS ${OPENSPACE_EXT_DIR}/sgct/additional_includes/openvr NO_DEFAULT_PATH
                 REQUIRED
             )
         else ()
             find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
                 NAMES SGCTOpenVR.h
                 PATH_SUFFIXES SGCTOpenVR
-                PATHS
-                    $ENV{SGCT_ROOT_DIR}/additional_includes/openvr
-                    ${OPENSPACE_EXT_DIR}/sgct/additional_includes/openvr
+                PATHS ${OPENSPACE_EXT_DIR}/sgct/additional_includes/openvr
                 REQUIRED
             )
         endif ()
-    else()
-        set(
-            SGCT_OPENVR_FILES
+    else ()
+        set(SGCT_OPENVR_FILES
             ${SGCT_OPENVR_INCLUDE_DIRECTORY}/SGCTOpenVR.h
             ${SGCT_OPENVR_INCLUDE_DIRECTORY}/SGCTOpenVR.cpp
         )
-    endif()
+    endif ()
+    end_header("Dependency: OpenVR")
 endif()
 
 #####
-# Spout 
+# Spout
 #####
 if (SGCT_SPOUT_SUPPORT AND NOT OPENSPACE_MODULE_SPOUT)
-    set(SPOUT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout)
-    set(SPOUT_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.lib)
-    set(SPOUT_DEFINITIONS "OPENSPACE_HAS_SPOUT")
-
-    add_external_library_dependencies(${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.dll)
+    message(WARNING "Spout support from SGCT was requested, but OpenSpace Spout module was disabled")
+    message(STATUS "Enabling module as dependency")
+    set(OPENSPACE_MODULE_SPOUT ON CACHE BOOL "Build OPENSPACE_MODULE_SPOUTModule" FORCE)
 endif ()
 
 set(MACOSX_BUNDLE_ICON_FILE openspace.icns)
@@ -99,11 +93,7 @@ target_include_directories(
     ${SPOUT_INCLUDE_DIRS}
 )
 
-target_link_libraries(OpenSpace
-    libOpenSpace
-    ${OPENVR_LIBRARY}
-    ${SPOUT_LIBRARY}
-)
+target_link_libraries(OpenSpace openspace-core ${OPENVR_LIBRARY} ${SPOUT_LIBRARY})
 
 target_compile_definitions(OpenSpace PRIVATE
     ${SGCT_OPENVR_DEFINITIONS}
@@ -134,15 +124,19 @@ elseif (OPENSPACE_MODULE_WEBBROWSER)
 endif ()
 
 if (OPENSPACE_MODULE_WEBGUI AND WEBGUI_MODULE_PATH)
+    begin_header("Building WebGUI source")
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBGUI_MODULE_PATH}/cmake")
     include(webgui_helpers)
     build_webgui_source(OpenSpace)
-elseif(OPENSPACE_MODULE_WEBGUI)
+    end_header("End: Building WebGUI source")
+elseif (OPENSPACE_MODULE_WEBGUI)
     message(WARNING "WebGui is configured to be included, but the web source could not be found. Try configuring CMake again.")
 endif()
 # End Web Browser and Web gui
 
 if (MSVC)
+    begin_header("Dependency: Dbghelp")
     # This library is used for being able to output the callstack if an exception escapes
     target_link_libraries(OpenSpace Dbghelp.lib)
-endif()
+    end_header()
+endif ()
