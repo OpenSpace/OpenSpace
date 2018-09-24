@@ -726,24 +726,28 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
 
     int count = 0;
 
+    constexpr const int ChunkBufferSize = 2048;
+    std::array<const Chunk*, ChunkBufferSize> global;
+    int globalCount = 0;
+    std::array<const Chunk*, ChunkBufferSize> local;
+    int localCount = 0;
+
     // Render chunks
-    auto renderJob = [this, &count](const ChunkNode& chunkNode, int modelSpaceCutoffLevel,
+    auto renderJob = [this, &count, &global, &local, &globalCount, &localCount](const ChunkNode& chunkNode, int modelSpaceCutoffLevel,
                             const RenderData& data, const glm::dmat4& modelViewProjection)
     {
         const Chunk& chunk = chunkNode.chunk;
         if (isLeaf(chunkNode) && chunk.isVisible()) {
             if (chunk.tileIndex().level < modelSpaceCutoffLevel) {
-                renderChunkGlobally(chunk, data);
+                global[globalCount] = &chunkNode.chunk;
+                ++globalCount;
             }
             else {
-                renderChunkLocally(chunk, data);
+                local[localCount] = &chunkNode.chunk;
+                ++localCount;
             }
 
             ++count;
-
-            if (_debugProperties.showChunkBounds || _debugProperties.showChunkAABB) {
-                debugRenderChunk(chunk, modelViewProjection);
-            }
         }
     };
     breadthFirstTraversal(
@@ -761,6 +765,29 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
         mvp
     );
 
+    _globalRenderer.program->activate();
+    for (int i = 0; i < std::min(globalCount, 2048); ++i) {
+        renderChunkGlobally(*global[i], data);
+    }
+    _globalRenderer.program->deactivate();
+
+
+    _localRenderer.program->activate();
+    for (int i = 0; i < std::min(localCount, 2048); ++i) {
+        renderChunkLocally(*local[i], data);
+    }
+    _localRenderer.program->deactivate();
+
+    if (_debugProperties.showChunkBounds || _debugProperties.showChunkAABB) {
+        for (int i = 0; i < std::min(globalCount, 2048); ++i) {
+            debugRenderChunk(*global[i], mvp);
+        }
+
+        for (int i = 0; i < std::min(localCount, 2048); ++i) {
+            debugRenderChunk(*local[i], mvp);
+        }
+    }
+
     LINFOC(identifier(), "Count: " + std::to_string(count));
 }
 
@@ -768,14 +795,10 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     const TileIndex& tileIndex = chunk.tileIndex();
     ghoul::opengl::ProgramObject& program = *_globalRenderer.program;
 
-    // Activate the shader program
-    program.activate();
-
     const std::vector<std::shared_ptr<LayerGroup>>& layerGroups = _layerManager.layerGroups();
     for (size_t i = 0; i < layerGroups.size(); ++i) {
         _globalRenderer.gpuLayerGroups[i]->setValue(program, *layerGroups[i], tileIndex);
     }
-    //_globalGpuLayerManager.setValue(&program, _layerManager, tileIndex);
 
     // The length of the skirts is proportional to its size
     program.setUniform(
@@ -810,11 +833,9 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     glCullFace(GL_BACK);
 
     _grid.geometry().drawUsingActiveProgram();
-    //_globalGpuLayerManager.deactivate();
     for (std::unique_ptr<GPULayerGroup>& l : _globalRenderer.gpuLayerGroups) {
         l->deactivate();
     }
-    program.deactivate();
 }
 
 void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& data) {
@@ -822,7 +843,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     ghoul::opengl::ProgramObject& program = *_localRenderer.program;
 
     // Activate the shader program
-    program.activate();
+    //program.activate();
 
     const std::vector<std::shared_ptr<LayerGroup>>& layerGroups = _layerManager.layerGroups();
     for (size_t i = 0; i < layerGroups.size(); ++i) {
@@ -915,7 +936,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         l->deactivate();
     }
 
-    program.deactivate();
+    //program.deactivate();
 }
 
 void RenderableGlobe::recompileShaders() {
