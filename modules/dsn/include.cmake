@@ -1,0 +1,1 @@
+set(DSN_MODULE ON)
