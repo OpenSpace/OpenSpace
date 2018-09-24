@@ -228,29 +228,6 @@ bool isLeaf(const ChunkNode& cn) {
         void(const ChunkNode&, int, const RenderData&, const glm::dmat4&)>;
 
 
-void breadthFirstTraversal(const ChunkNode& node, const RenderFunction& f, int modelSpaceCutoffLevel,
-    const RenderData& data,
-    const glm::dmat4& modelViewProjection)
-{
-    std::queue<const ChunkNode*> Q;
-
-    // Loop through nodes in breadths first order
-    Q.push(&node);
-    while (!Q.empty()) {
-        const ChunkNode* n = Q.front();
-        Q.pop();
-
-        f(*n, modelSpaceCutoffLevel, data, modelViewProjection);
-
-        // Add children to queue, if any
-        if (!isLeaf(*n)) {
-            for (int i = 0; i < 4; ++i) {
-                Q.push(n->children[i]);
-            }
-        }
-    }
-}
-
 const ChunkNode& findChunkNode(const ChunkNode& node, const Geodetic2& location) {
     const ChunkNode* n = &node;
 
@@ -732,39 +709,47 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     std::array<const Chunk*, ChunkBufferSize> local;
     int localCount = 0;
 
-    // Render chunks
-    auto renderJob = [this, &count, &global, &local, &globalCount, &localCount](const ChunkNode& chunkNode, int modelSpaceCutoffLevel,
-                            const RenderData& data, const glm::dmat4& modelViewProjection)
+    auto traversal = [&global, &globalCount, &local, &localCount, &count,
+          cutoff = _debugProperties.modelSpaceRenderingCutoffLevel](const ChunkNode& node)
     {
-        const Chunk& chunk = chunkNode.chunk;
-        if (isLeaf(chunkNode) && chunk.isVisible()) {
-            if (chunk.tileIndex().level < modelSpaceCutoffLevel) {
-                global[globalCount] = &chunkNode.chunk;
-                ++globalCount;
-            }
-            else {
-                local[localCount] = &chunkNode.chunk;
-                ++localCount;
+        //std::queue<const ChunkNode*> Q;
+        std::vector<const ChunkNode*> Q;
+        Q.reserve(256);
+
+        // Loop through nodes in breadths first order
+        Q.push_back(&node);
+        while (!Q.empty()) {
+            const ChunkNode* n = Q.front();
+            Q.erase(Q.begin());
+            //Q.pop();
+
+            const Chunk& chunk = n->chunk;
+            if (isLeaf(*n) && chunk.isVisible()) {
+                if (chunk.tileIndex().level < cutoff) {
+                    global[globalCount] = &n->chunk;
+                    ++globalCount;
+                }
+                else {
+                    local[localCount] = &n->chunk;
+                    ++localCount;
+                }
+
+                ++count;
             }
 
-            ++count;
+            // Add children to queue, if any
+            if (!isLeaf(*n)) {
+                for (int i = 0; i < 4; ++i) {
+                    Q.push_back(n->children[i]);
+                }
+            }
         }
     };
-    breadthFirstTraversal(
-        _leftRoot,
-        renderJob,
-        _debugProperties.modelSpaceRenderingCutoffLevel,
-        data,
-        mvp
-    );
-    breadthFirstTraversal(
-        _rightRoot,
-        renderJob,
-        _debugProperties.modelSpaceRenderingCutoffLevel,
-        data,
-        mvp
-    );
 
+    traversal(_leftRoot);
+    traversal(_rightRoot);
+
+    // Render all chunks that want to be rendered globally
     _globalRenderer.program->activate();
     for (int i = 0; i < std::min(globalCount, 2048); ++i) {
         renderChunkGlobally(*global[i], data);
@@ -772,11 +757,13 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     _globalRenderer.program->deactivate();
 
 
+    // Render all chunks that need to be rendered locally
     _localRenderer.program->activate();
     for (int i = 0; i < std::min(localCount, 2048); ++i) {
         renderChunkLocally(*local[i], data);
     }
     _localRenderer.program->deactivate();
+
 
     if (_debugProperties.showChunkBounds || _debugProperties.showChunkAABB) {
         for (int i = 0; i < std::min(globalCount, 2048); ++i) {
