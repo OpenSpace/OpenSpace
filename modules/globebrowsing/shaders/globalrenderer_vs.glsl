@@ -43,7 +43,7 @@ out vec3 positionCameraSpace;
 #if USE_ACCURATE_NORMALS
 out vec3 ellipsoidTangentThetaCameraSpace;
 out vec3 ellipsoidTangentPhiCameraSpace;
-#endif //USE_ACCURATE_NORMALS
+#endif // USE_ACCURATE_NORMALS
 
 #if USE_ECLIPSE_SHADOWS
 out vec3 positionWorldSpace;

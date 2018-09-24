@@ -295,6 +295,16 @@ Fragment getTileFragment() {
 }
 
 
+vec4 patchBorderOverlay(vec2 uv, vec3 borderColor, float borderSize) {
+    vec2 uvOffset = uv - vec2(0.5);
+    float thres = 0.5 - borderSize/2;
+    bool isBorder = abs(uvOffset.x) > thres || abs(uvOffset.y) > thres;
+    vec3 color = isBorder ? borderColor : vec3(0);
+    return vec4(color, 0);
+}
+
+
+
 Fragment getFragment() {
     Fragment frag;
     frag = getTileFragment();

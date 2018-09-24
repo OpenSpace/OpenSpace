@@ -75,19 +75,7 @@ struct Layer {
     vec3 color;
 };
 
-vec4 patchBorderOverlay(vec2 uv, vec3 borderColor, float borderSize) {
-    vec2 uvOffset = uv - vec2(0.5);
-    float thres = 0.5 - borderSize/2;
-    bool isBorder = abs(uvOffset.x) > thres || abs(uvOffset.y) > thres;
-    vec3 color = isBorder ? borderColor : vec3(0);
-    return vec4(color, 0);
-}
-
 float getTransformedTexVal(TileDepthTransform transform, float val) {
-    return transform.depthOffset + transform.depthScale * val;
-}
-
-vec4 getTransformedTexVal(TileDepthTransform transform, vec4 val) {
     return transform.depthOffset + transform.depthScale * val;
 }
 
