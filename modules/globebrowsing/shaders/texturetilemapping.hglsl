@@ -114,7 +114,7 @@ vec4 performLayerSettings(vec4 currentValue, LayerSettings settings) {
 #for id, layerGroup in layerGroups
 #for i in 0..#{lastLayerIndex#{layerGroup}}
 
-vec4 getSample#{layerGroup}#{i}(vec2 uv, LevelWeights levelWeights,
+vec4 getSample#{layerGroup}#{i}(vec2 uv, vec3 levelWeights,
                             Layer #{layerGroup}[#{lastLayerIndex#{layerGroup}} + 1])
 {
     vec4 color = vec4(0,0,0,1);
@@ -203,7 +203,7 @@ vec4 performAdjustment#{layerGroup}#{i}(vec4 currentColor,
 #endfor
 #endfor
 
-float calculateUntransformedHeight(vec2 uv, LevelWeights levelWeights,
+float calculateUntransformedHeight(vec2 uv, vec3 levelWeights,
                                    Layer HeightLayers[NUMLAYERS_HEIGHTMAP])
 {
 
@@ -229,7 +229,7 @@ float calculateUntransformedHeight(vec2 uv, LevelWeights levelWeights,
 
 float calculateHeight(
     vec2 uv,
-    LevelWeights levelWeights,
+    vec3 levelWeights,
     Layer HeightLayers[NUMLAYERS_HEIGHTMAP]) {
 
     float height = 0;
@@ -257,7 +257,7 @@ float calculateHeight(
     return height;
 }
 
-vec4 calculateColor(vec4 currentColor, vec2 uv, LevelWeights levelWeights,
+vec4 calculateColor(vec4 currentColor, vec2 uv, vec3 levelWeights,
                     Layer ColorLayers[NUMLAYERS_COLORTEXTURE])
 {
     vec4 color = currentColor;
@@ -307,8 +307,8 @@ float tileResolution(vec2 tileUV, ChunkTile chunkTile) {
     return gridDots(uv, heightResolution);
 }
 
-vec4 calculateNight(vec4 currentColor, vec2 uv, LevelWeights levelWeights,
-                    Layer NightLayers[NUMLAYERS_NIGHTTEXTURE], 
+vec4 calculateNight(vec4 currentColor, vec2 uv, vec3 levelWeights,
+                    Layer NightLayers[NUMLAYERS_NIGHTTEXTURE],
                     vec3 ellipsoidNormalCameraSpace,
                     vec3 lightDirectionCameraSpace)
 {
@@ -363,7 +363,7 @@ vec4 calculateShadedColor(vec4 currentColor, vec3 ellipsoidNormalCameraSpace,
     return color;
 }
 
-vec4 calculateOverlay(vec4 currentColor, vec2 uv, LevelWeights levelWeights,
+vec4 calculateOverlay(vec4 currentColor, vec2 uv, vec3 levelWeights,
                       Layer Overlays[NUMLAYERS_OVERLAY])
 {
     vec4 color = currentColor;
@@ -389,7 +389,7 @@ vec4 calculateOverlay(vec4 currentColor, vec2 uv, LevelWeights levelWeights,
     return color;
 }
 
-vec4 calculateWater(vec4 currentColor, vec2 uv, LevelWeights levelWeights, 
+vec4 calculateWater(vec4 currentColor, vec2 uv, vec3 levelWeights, 
                     Layer WaterMasks[NUMLAYERS_WATERMASK],
                     vec3 ellipsoidNormalCameraSpace,
                     vec3 lightDirectionCameraSpace, vec3 positionCameraSpace,

@@ -79,7 +79,7 @@ namespace {
     constexpr const double KM_TO_M = 1000.0;
     const openspace::globebrowsing::AABB3 CullingFrustum(glm::vec3(-1, -1, 0), glm::vec3(1, 1, 1e35));
 
-    constexpr const int DefaultSkirtedGridSegments = 64;
+    constexpr const int DefaultSkirtedGridSegments = 64;  // 16
     constexpr static const int UnknownDesiredLevel = -1;
 
     const openspace::globebrowsing::GeodeticPatch Coverage =
@@ -792,6 +792,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& data) {
+    //PerfMeasure("globally");
     const TileIndex& tileIndex = chunk.tileIndex();
     ghoul::opengl::ProgramObject& program = *_globalRenderer.program;
 
@@ -839,18 +840,14 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 }
 
 void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& data) {
+    //PerfMeasure("locally");
     const TileIndex& tileIndex = chunk.tileIndex();
     ghoul::opengl::ProgramObject& program = *_localRenderer.program;
-
-    // Activate the shader program
-    //program.activate();
 
     const std::vector<std::shared_ptr<LayerGroup>>& layerGroups = _layerManager.layerGroups();
     for (size_t i = 0; i < layerGroups.size(); ++i) {
         _localRenderer.gpuLayerGroups[i]->setValue(program, *layerGroups[i], tileIndex);
     }
-
-    //_localGpuLayerManager.setValue(&program, _layerManager, tileIndex);
 
     // The length of the skirts is proportional to its size
     program.setUniform(
@@ -931,12 +928,9 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
     _grid.geometry().drawUsingActiveProgram();
 
-    //_localGpuLayerManager.deactivate();
     for (std::unique_ptr<GPULayerGroup>& l : _globalRenderer.gpuLayerGroups) {
         l->deactivate();
     }
-
-    //program.deactivate();
 }
 
 void RenderableGlobe::recompileShaders() {
@@ -1094,8 +1088,8 @@ void RenderableGlobe::recompileShaders() {
     global::renderEngine.removeRenderProgram(_localRenderer.program.get());
     _localRenderer.program = global::renderEngine.buildRenderProgram(
         "LocalChunkedLodPatch",
-        absPath("${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl"),
-        absPath("${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl"),
+        absPath("${MODULE_GLOBEBROWSING}/shaders/localrenderer_vs.glsl"),
+        absPath("${MODULE_GLOBEBROWSING}/shaders/renderer_fs.glsl"),
         shaderDictionary
     );
     ghoul_assert(_localRenderer.program, "Failed to initialize programObject!");
@@ -1124,8 +1118,8 @@ void RenderableGlobe::recompileShaders() {
     global::renderEngine.removeRenderProgram(_globalRenderer.program.get());
     _globalRenderer.program = global::renderEngine.buildRenderProgram(
         "GlobalChunkedLodPatch",
-        absPath("${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_vs.glsl"),
-        absPath("${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_fs.glsl"),
+        absPath("${MODULE_GLOBEBROWSING}/shaders/globalrenderer_vs.glsl"),
+        absPath("${MODULE_GLOBEBROWSING}/shaders/renderer_fs.glsl"),
         shaderDictionary
     );
     ghoul_assert(_globalRenderer.program, "Failed to initialize programObject!");

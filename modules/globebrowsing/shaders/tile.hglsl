@@ -75,12 +75,6 @@ struct Layer {
     vec3 color;
 };
 
-struct LevelWeights {
-    float w1;
-    float w2;
-    float w3;
-};
-
 vec4 patchBorderOverlay(vec2 uv, vec3 borderColor, float borderSize) {
     vec2 uvOffset = uv - vec2(0.5);
     float thres = 0.5 - borderSize/2;
@@ -135,31 +129,27 @@ float getLevelInterpolationParameter(int chunkLevel, float distanceScaleFactor,
     return chunkLevel - desiredLevel;
 }
 
-LevelWeights getLevelWeights(float levelInterpolationParameter) {
-    LevelWeights levelWeights;
-    levelWeights.w1 = clamp(1.0 - levelInterpolationParameter, 0.0, 1.0);
-    levelWeights.w2 = (
+vec3 getLevelWeights(float levelInterpolationParameter) {
+    vec3 levelWeights;
+    levelWeights[0] = clamp(1.0 - levelInterpolationParameter, 0.0, 1.0);
+    levelWeights[1] = (
         clamp(levelInterpolationParameter, 0.0, 1.0) -
         clamp(levelInterpolationParameter - 1.0, 0.0, 1.0)
     );
-    levelWeights.w3 = clamp(levelInterpolationParameter - 1.0, 0.0, 1.0);
+    levelWeights[2] = clamp(levelInterpolationParameter - 1.0, 0.0, 1.0);
     return levelWeights;
 }
 
-LevelWeights getDefaultLevelWeights() {
-    LevelWeights levelWeights;
-    levelWeights.w1 = 1;
-    levelWeights.w2 = 0;
-    levelWeights.w3 = 0;
-    return levelWeights;
+vec3 getDefaultLevelWeights() {
+    return vec3(1.0, 0.0, 0.0);
 }
 
-vec4 getTexVal(ChunkTilePile chunkTilePile, LevelWeights w, vec2 uv,
+vec4 getTexVal(ChunkTilePile chunkTilePile, vec3 w, vec2 uv,
                PixelPadding padding)
 {
-    return w.w1 * getTexVal(chunkTilePile.chunkTile0, uv, padding) + 
-        w.w2 * getTexVal(chunkTilePile.chunkTile1, uv, padding) + 
-        w.w3 * getTexVal(chunkTilePile.chunkTile2, uv, padding);
+    return w[0] * getTexVal(chunkTilePile.chunkTile0, uv, padding) + 
+        w[1] * getTexVal(chunkTilePile.chunkTile1, uv, padding) + 
+        w[2] * getTexVal(chunkTilePile.chunkTile2, uv, padding);
 }
 
 #endif // TEXTURETILE_HGLSL

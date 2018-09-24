@@ -37,7 +37,7 @@ out vec2 fs_uv;
 out vec4 fs_position;
 out vec3 fs_normal;
 out vec3 ellipsoidNormalCameraSpace;
-out LevelWeights levelWeights;
+out vec3 levelWeights;
 out vec3 positionCameraSpace;
 
 #if USE_ACCURATE_NORMALS

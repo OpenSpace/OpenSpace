@@ -51,7 +51,7 @@ uniform float deltaPhi1;
 uniform float tileDelta;
 #endif //USE_ACCURATE_NORMALS && USE_HEIGHTMAP
 
-float getUntransformedTileHeight(vec2 uv, LevelWeights levelWeights) {
+float getUntransformedTileHeight(vec2 uv, vec3 levelWeights) {
     float height = CHUNK_DEFAULT_HEIGHT;
 
 #if USE_HEIGHTMAP
@@ -67,7 +67,7 @@ float getUntransformedTileHeight(vec2 uv, LevelWeights levelWeights) {
     return height;
 }
 
-float getTileHeight(vec2 uv, LevelWeights levelWeights) {
+float getTileHeight(vec2 uv, vec3 levelWeights) {
     float height = CHUNK_DEFAULT_HEIGHT;
 
 #if USE_HEIGHTMAP
@@ -83,7 +83,7 @@ float getTileHeight(vec2 uv, LevelWeights levelWeights) {
     return height;
 }
 
-float getTileHeightScaled(vec2 uv, LevelWeights levelWeights) {
+float getTileHeightScaled(vec2 uv, vec3 levelWeights) {
     float height = getTileHeight(uv, levelWeights);
     
 #if USE_HEIGHTMAP
@@ -93,7 +93,7 @@ float getTileHeightScaled(vec2 uv, LevelWeights levelWeights) {
     return height;
 }
 
-vec3 getTileNormal(vec2 uv, LevelWeights levelWeights, vec3 ellipsoidNormalCameraSpace,
+vec3 getTileNormal(vec2 uv, vec3 levelWeights, vec3 ellipsoidNormalCameraSpace,
                    vec3 ellipsoidTangentThetaCameraSpace,
                    vec3 ellipsoidTangentPhiCameraSpace)
 {
