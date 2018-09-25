@@ -25,20 +25,24 @@
 #ifndef __OPENSPACE_MODULE_DSN___DSNMODULE___H__
 #define __OPENSPACE_MODULE_DSN___DSNMODULE___H__
 
+#include <modules/dsn/rendering/communicationlines.h>
+
 #include <openspace/util/openspacemodule.h>
+#include <openspace/util/factorymanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/templatefactory.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace openspace {
 
 class DsnModule : public OpenSpaceModule {
-	public:
-	    constexpr static const char* Name = "Dsn";
+public:
+	constexpr static const char* Name = "Dsn";
 
-	    DsnModule();
+	DsnModule();
 
-	    //static std::string DefaultTransferFunctionFile;
-	    void PrintSomething();
-
-	private:
+private:
+	void internalInitialize(const ghoul::Dictionary&) override;
 
 };
 

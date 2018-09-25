@@ -23,26 +23,19 @@
  ****************************************************************************************/
 
 #include <modules/dsn/dsnmodule.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
-#include <iostream>
-#include <fstream>
-
 
 namespace openspace {
+    constexpr const char* _loggerCat = "CommunicationLine";
 
 DsnModule::DsnModule() : OpenSpaceModule(Name) {
-    PrintSomething();
+	LDEBUG("Hello from DSN module");
 }
 
+void DsnModule::internalInitialize(const ghoul::Dictionary&) {
+	auto factory = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(factory, "No renderable factory existed");
 
-void DsnModule::PrintSomething(){
-    
-    std::ofstream file{ "dsnmodule.txt" };
-    file << "my module works!" << std::endl;
-    file.close();
+	factory->registerClass<CommunicationLines>("CommunicationLines"); 
 }
 
 } // namespace openspace

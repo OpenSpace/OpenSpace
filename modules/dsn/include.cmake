@@ -1,1 +1,1 @@
-set(DSN_MODULE ON)
+set(DEFAULT_MODULE ON)
