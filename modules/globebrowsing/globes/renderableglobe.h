@@ -33,10 +33,11 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <modules/globebrowsing/meshes/skirtedgrid.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
-#include <modules/globebrowsing/chunk/chunk.h>
 #include <ghoul/misc/memorypool.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <cstddef>
+#include <modules/globebrowsing/geometry/geodeticpatch.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 
 namespace openspace::globebrowsing {
 
@@ -48,7 +49,6 @@ class Ellipsoid;
 struct Geodetic2;
 class LayerManager;
 class RenderableGlobe;
-class Chunk;
 class Ellipsoid;
 class Grid;
 class GPULayerManager;
@@ -62,8 +62,28 @@ class LayerManager;
 
 
 struct Chunk {
+    constexpr static float DefaultHeight = 0.f;
 
+    struct BoundingHeights {
+        float min;
+        float max;
+        bool available;
+    };
 
+    enum class Status {
+        DoNothing,
+        WantMerge,
+        WantSplit
+    };
+
+    Chunk(const RenderableGlobe& owner, const TileIndex& tileIndex);
+
+    const RenderableGlobe& owner;
+    const TileIndex tileIndex;
+    bool isVisible = true;
+    const GeodeticPatch surfacePatch;
+
+    std::array<Chunk*, 4> children = { { nullptr, nullptr, nullptr, nullptr } };
 };
 
 
@@ -73,8 +93,6 @@ struct Chunk {
  */
 class RenderableGlobe : public Renderable {
 public:
-
-
     RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe() = default;
 
@@ -86,8 +104,8 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    virtual SurfacePositionHandle calculateSurfacePositionHandle(
-                                       const glm::dvec3& targetModelSpace) const override;
+    SurfacePositionHandle calculateSurfacePositionHandle(
+        const glm::dvec3& targetModelSpace) const;
 
 //private:
     // Properties

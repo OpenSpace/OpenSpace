@@ -31,8 +31,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/lrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawaretilecache.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.h
-
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemglobelocation.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/aabb.h
@@ -102,8 +100,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/globebrowsingmodule_lua.inl
 
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawaretilecache.cpp
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemglobelocation.cpp
 

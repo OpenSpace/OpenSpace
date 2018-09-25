@@ -26,7 +26,6 @@
 
 #include <modules/debugging/rendering/debugrenderer.h>
 #include <ghoul/logging/logmanager.h>
-#include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
@@ -38,7 +37,6 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/texture.h>
 
-#include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/geometry/ellipsoid.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/meshes/trianglesoup.h>
@@ -48,13 +46,11 @@
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/opengl/programobject.h>
-#include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/geometry/geodetic3.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <openspace/util/updatestructures.h>
-#include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/rendering/layer/layer.h>
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
@@ -65,6 +61,8 @@
 #include <ghoul/opengl/programobject.h>
 #include <openspace/performance/performancemanager.h>
 #include <openspace/performance/performancemeasurement.h>
+#include <modules/globebrowsing/geometry/geodeticpatch.h>
+#include <modules/globebrowsing/tile/tileselector.h>
 #include <queue>
 
 namespace {
@@ -213,15 +211,14 @@ namespace openspace::globebrowsing {
 namespace {
 
 bool isLeaf(const Chunk& cn) {
-    return cn.children()[0] == nullptr;
+    return cn.children[0] == nullptr;
 }
-
 
 const Chunk& findChunkNode(const Chunk& node, const Geodetic2& location) {
     const Chunk* n = &node;
 
     while (!isLeaf(*n)) {
-        const Geodetic2 center = n->surfacePatch().center();
+        const Geodetic2 center = n->surfacePatch.center();
         int index = 0;
         if (center.lon < location.lon) {
             ++index;
@@ -230,12 +227,180 @@ const Chunk& findChunkNode(const Chunk& node, const Geodetic2& location) {
             ++index;
             ++index;
         }
-        n = n->children()[static_cast<Quad>(index)];
+        n = n->children[static_cast<Quad>(index)];
     }
     return *n;
 }
 
+Chunk::Status updateChunk(Chunk& chunk, const RenderData& data) {
+    Camera* savedCamera = chunk.owner.savedCamera();
+    const Camera& camRef = savedCamera ? *savedCamera : data.camera;
+
+    RenderData myRenderData = {
+        camRef,
+        data.position,
+        data.time,
+        data.doPerformanceMeasurement,
+        data.renderBinMask,
+        data.modelTransform
+    };
+
+    chunk.isVisible = true;
+    if (chunk.owner.testIfCullable(chunk, myRenderData)) {
+        chunk.isVisible = false;
+        return Chunk::Status::WantMerge;
+    }
+
+    const int desiredLevel = chunk.owner.desiredLevel(chunk, myRenderData);
+
+    if (desiredLevel < chunk.tileIndex.level) {
+        return Chunk::Status::WantMerge;
+    }
+    else if (chunk.tileIndex.level < desiredLevel) {
+        return Chunk::Status::WantSplit;
+    }
+    else {
+        return Chunk::Status::DoNothing;
+    }
+}
+
+Chunk::BoundingHeights boundingHeightsForChunk(const Chunk& chunk) {
+    using ChunkTileSettingsPair = std::pair<ChunkTile, const LayerRenderSettings*>;
+
+    Chunk::BoundingHeights boundingHeights { 0.f, 0.f, false };
+
+    // In the future, this should be abstracted away and more easily queryable.
+    // One must also handle how to sample pick one out of multiplte heightmaps
+    const LayerManager& lm = chunk.owner.layerManager();
+
+    // The raster of a height map is the first one. We assume that the height map is
+    // a single raster image. If it is not we will just use the first raster
+    // (that is channel 0).
+    const size_t HeightChannel = 0;
+    const LayerGroup& heightmaps = lm.layerGroup(layergroupid::GroupID::HeightLayers);
+    std::vector<ChunkTileSettingsPair> chunkTileSettingPairs =
+        tileselector::getTilesAndSettingsUnsorted(heightmaps, chunk.tileIndex);
+
+    bool lastHadMissingData = true;
+    for (const ChunkTileSettingsPair& chunkTileSettingsPair : chunkTileSettingPairs) {
+        const ChunkTile& chunkTile = chunkTileSettingsPair.first;
+        const LayerRenderSettings* settings = chunkTileSettingsPair.second;
+        const bool goodTile = (chunkTile.tile.status() == Tile::Status::OK);
+        const bool hasTileMetaData = (chunkTile.tile.metaData() != nullptr);
+
+        if (goodTile && hasTileMetaData) {
+            TileMetaData* tileMetaData = chunkTile.tile.metaData();
+
+            const float minValue = settings->performLayerSettings(
+                tileMetaData->minValues[HeightChannel]
+            );
+            const float maxValue = settings->performLayerSettings(
+                tileMetaData->maxValues[HeightChannel]
+            );
+
+            if (!boundingHeights.available) {
+                if (tileMetaData->hasMissingData[HeightChannel]) {
+                    boundingHeights.min = std::min(Chunk::DefaultHeight, minValue);
+                    boundingHeights.max = std::max(Chunk::DefaultHeight, maxValue);
+                }
+                else {
+                    boundingHeights.min = minValue;
+                    boundingHeights.max = maxValue;
+                }
+                boundingHeights.available = true;
+            }
+            else {
+                boundingHeights.min = std::min(boundingHeights.min, minValue);
+                boundingHeights.max = std::max(boundingHeights.max, maxValue);
+            }
+            lastHadMissingData = tileMetaData->hasMissingData[HeightChannel];
+        }
+
+        // Allow for early termination
+        if (!lastHadMissingData) {
+            break;
+        }
+    }
+
+    return boundingHeights;
+}
+
+
+std::vector<glm::dvec4> boundingPolyhedronCornersForChunk(const Chunk& chunk) {
+    const Ellipsoid& ellipsoid = chunk.owner.ellipsoid();
+
+    const Chunk::BoundingHeights& boundingHeight = boundingHeightsForChunk(chunk);
+
+    // assume worst case
+    const double patchCenterRadius = ellipsoid.maximumRadius();
+
+    const double maxCenterRadius = patchCenterRadius + boundingHeight.max;
+    Geodetic2 halfSize = chunk.surfacePatch.halfSize();
+
+    // As the patch is curved, the maximum height offsets at the corners must be long
+    // enough to cover large enough to cover a boundingHeight.max at the center of the
+    // patch.
+    // Approximating scaleToCoverCenter by assuming the latitude and longitude angles
+    // of "halfSize" are equal to the angles they create from the center of the
+    // globe to the patch corners. This is true for the longitude direction when
+    // the ellipsoid can be approximated as a sphere and for the latitude for patches
+    // close to the equator. Close to the pole this will lead to a bigger than needed
+    // value for scaleToCoverCenter. However, this is a simple calculation and a good
+    // Approximation.
+    const double y1 = tan(halfSize.lat);
+    const double y2 = tan(halfSize.lon);
+    const double scaleToCoverCenter = sqrt(1 + pow(y1, 2) + pow(y2, 2));
+
+    const double maxCornerHeight = maxCenterRadius * scaleToCoverCenter -
+        patchCenterRadius;
+
+    const bool chunkIsNorthOfEquator = chunk.surfacePatch.isNorthern();
+
+    // The minimum height offset, however, we can simply
+    const double minCornerHeight = boundingHeight.min;
+    std::vector<glm::dvec4> corners(8);
+
+    const double latCloseToEquator = chunk.surfacePatch.edgeLatitudeNearestEquator();
+    const Geodetic3 p1Geodetic = {
+        { latCloseToEquator, chunk.surfacePatch.minLon() },
+        maxCornerHeight
+    };
+    const Geodetic3 p2Geodetic = {
+        { latCloseToEquator, chunk.surfacePatch.maxLon() },
+        maxCornerHeight
+    };
+
+    const glm::vec3 p1 = ellipsoid.cartesianPosition(p1Geodetic);
+    const glm::vec3 p2 = ellipsoid.cartesianPosition(p2Geodetic);
+    const glm::vec3 p = 0.5f * (p1 + p2);
+    const Geodetic2 pGeodetic = ellipsoid.cartesianToGeodetic2(p);
+    const double latDiff = latCloseToEquator - pGeodetic.lat;
+
+    for (size_t i = 0; i < 8; ++i) {
+        const Quad q = static_cast<Quad>(i % 4);
+        const double cornerHeight = i < 4 ? minCornerHeight : maxCornerHeight;
+        Geodetic3 cornerGeodetic = { chunk.surfacePatch.corner(q), cornerHeight };
+
+        const bool cornerIsNorthern = !((i / 2) % 2);
+        const bool cornerCloseToEquator = chunkIsNorthOfEquator ^ cornerIsNorthern;
+        if (cornerCloseToEquator) {
+            cornerGeodetic.geodetic2.lat += latDiff;
+        }
+
+        corners[i] = glm::dvec4(ellipsoid.cartesianPosition(cornerGeodetic), 1);
+    }
+
+    return corners;
+}
+
 } // namespace
+
+Chunk::Chunk(const RenderableGlobe& o, const TileIndex& ti)
+    : owner(o)
+    , tileIndex(ti)
+    , surfacePatch(ti)
+{}
+
 
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
@@ -712,8 +877,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
             Q.erase(Q.begin());
             //Q.pop();
 
-            if (isLeaf(*n) && n->isVisible()) {
-                if (n->tileIndex().level < cutoff) {
+            if (isLeaf(*n) && n->isVisible) {
+                if (n->tileIndex.level < cutoff) {
                     global[globalCount] = n;
                     ++globalCount;
                 }
@@ -727,9 +892,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
 
             // Add children to queue, if any
             if (!isLeaf(*n)) {
-                const std::array<Chunk*, 4>& children = n->children();
                 for (int i = 0; i < 4; ++i) {
-                    Q.push_back(children[i]);
+                    Q.push_back(n->children[i]);
                 }
             }
         }
@@ -769,7 +933,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
 
 void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& data) {
     //PerfMeasure("globally");
-    const TileIndex& tileIndex = chunk.tileIndex();
+    const TileIndex& tileIndex = chunk.tileIndex;
     ghoul::opengl::ProgramObject& program = *_globalRenderer.program;
 
     const std::vector<std::shared_ptr<LayerGroup>>& layerGroups = _layerManager.layerGroups();
@@ -782,19 +946,19 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
         _globalRenderer.uniformCache.skirtLength,
         static_cast<float>(
             glm::min(
-                chunk.surfacePatch().halfSize().lat * 1000000,
+                chunk.surfacePatch.halfSize().lat * 1000000,
                 _ellipsoid.minimumRadius()
             )
         )
     );
 
     if (_layerManager.hasAnyBlendingLayersEnabled()) {
-        program.setUniform("chunkLevel", chunk.tileIndex().level);
+        program.setUniform("chunkLevel", chunk.tileIndex.level);
     }
 
     // Calculate other uniform variables needed for rendering
-    const Geodetic2 swCorner = chunk.surfacePatch().corner(Quad::SOUTH_WEST);
-    const Geodetic2& patchSize = chunk.surfacePatch().size();
+    const Geodetic2 swCorner = chunk.surfacePatch.corner(Quad::SOUTH_WEST);
+    const Geodetic2& patchSize = chunk.surfacePatch.size();
 
     program.setUniform(_globalRenderer.uniformCache.minLatLon, glm::vec2(swCorner.toLonLatVec2()));
     program.setUniform(_globalRenderer.uniformCache.lonLatScalingFactor, glm::vec2(patchSize.toLonLatVec2()));
@@ -817,7 +981,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 
 void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& data) {
     //PerfMeasure("locally");
-    const TileIndex& tileIndex = chunk.tileIndex();
+    const TileIndex& tileIndex = chunk.tileIndex;
     ghoul::opengl::ProgramObject& program = *_localRenderer.program;
 
     const std::vector<std::shared_ptr<LayerGroup>>& layerGroups = _layerManager.layerGroups();
@@ -830,14 +994,14 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         _localRenderer.uniformCache.skirtLength,
         static_cast<float>(
             glm::min(
-                chunk.surfacePatch().halfSize().lat * 1000000,
+                chunk.surfacePatch.halfSize().lat * 1000000,
                 _ellipsoid.minimumRadius()
             )
         )
     );
 
     if (_layerManager.hasAnyBlendingLayersEnabled()) {
-        program.setUniform("chunkLevel", chunk.tileIndex().level);
+        program.setUniform("chunkLevel", chunk.tileIndex.level);
     }
 
     // Calculate other uniform variables needed for rendering
@@ -850,7 +1014,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     std::array<glm::dvec3, 4> cornersModelSpace;
     for (int i = 0; i < 4; ++i) {
         const Quad q = static_cast<Quad>(i);
-        const Geodetic2 corner = chunk.surfacePatch().corner(q);
+        const Geodetic2 corner = chunk.surfacePatch.corner(q);
         const glm::dvec3 cornerModelSpace = _ellipsoid.cartesianSurfacePosition(corner);
         cornersModelSpace[i] = cornerModelSpace;
         const glm::dvec3 cornerCameraSpace = glm::dvec3(
@@ -1191,7 +1355,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
     const Chunk& node = geodeticPosition.lon < Coverage.center().lon ?
         findChunkNode(_leftRoot, geodeticPosition) :
         findChunkNode(_rightRoot, geodeticPosition);
-    const int chunkLevel = node.tileIndex().level;
+    const int chunkLevel = node.tileIndex.level;
 
     const TileIndex tileIndex = TileIndex(geodeticPosition, chunkLevel);
     const GeodeticPatch patch = GeodeticPatch(tileIndex);
@@ -1312,7 +1476,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
 
 void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const {
     const std::vector<glm::dvec4>& modelSpaceCorners =
-        chunk.boundingPolyhedronCorners();
+        boundingPolyhedronCornersForChunk(chunk);
 
     std::vector<glm::vec4> clippingSpaceCorners(8);
     AABB3 screenSpaceBounds;
@@ -1326,7 +1490,7 @@ void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
         screenSpaceBounds.expand(std::move(screenSpaceCorner));
     }
 
-    const unsigned int colorBits = 1 + chunk.tileIndex().level % 6;
+    const unsigned int colorBits = 1 + chunk.tileIndex.level % 6;
     const glm::vec4 color = glm::vec4(
         colorBits & 1,
         colorBits & 2,
@@ -1493,16 +1657,16 @@ void RenderableGlobe::setCommonUniforms(ghoul::opengl::ProgramObject& programObj
         !_layerManager.layerGroup(layergroupid::HeightLayers).activeLayers().empty())
     {
         const glm::dvec3 corner00 = _ellipsoid.cartesianSurfacePosition(
-            chunk.surfacePatch().corner(Quad::SOUTH_WEST)
+            chunk.surfacePatch.corner(Quad::SOUTH_WEST)
         );
         const glm::dvec3 corner10 = _ellipsoid.cartesianSurfacePosition(
-            chunk.surfacePatch().corner(Quad::SOUTH_EAST)
+            chunk.surfacePatch.corner(Quad::SOUTH_EAST)
         );
         const glm::dvec3 corner01 = _ellipsoid.cartesianSurfacePosition(
-            chunk.surfacePatch().corner(Quad::NORTH_WEST)
+            chunk.surfacePatch.corner(Quad::NORTH_WEST)
         );
         const glm::dvec3 corner11 = _ellipsoid.cartesianSurfacePosition(
-            chunk.surfacePatch().corner(Quad::NORTH_EAST)
+            chunk.surfacePatch.corner(Quad::NORTH_EAST)
         );
 
         // This is an assumption that the height tile has a resolution of 64 * 64
@@ -1541,13 +1705,13 @@ int RenderableGlobe::desiredLevelByDistance(const Chunk& chunk, const RenderData
     const glm::dvec3 cameraPosition = glm::dvec3(_cachedInverseModelTransform *
         glm::dvec4(data.camera.positionVec3(), 1.0));
 
-    const Geodetic2 pointOnPatch = chunk.surfacePatch().closestPoint(
+    const Geodetic2 pointOnPatch = chunk.surfacePatch.closestPoint(
         _ellipsoid.cartesianToGeodetic2(cameraPosition)
     );
     const glm::dvec3 patchNormal = _ellipsoid.geodeticSurfaceNormal(pointOnPatch);
     glm::dvec3 patchPosition = _ellipsoid.cartesianSurfacePosition(pointOnPatch);
 
-    const Chunk::BoundingHeights heights = chunk.boundingHeights();
+    const Chunk::BoundingHeights heights = boundingHeightsForChunk(chunk);
     const double heightToChunk = heights.min;
 
     // Offset position according to height
@@ -1584,8 +1748,8 @@ int RenderableGlobe::desiredLevelByProjectedArea(const Chunk& chunk, const Rende
     // The advantage of doing this is that it will better handle the cases where the
     // full patch is very curved (e.g. stretches from latitude 0 to 90 deg).
 
-    const Geodetic2 center = chunk.surfacePatch().center();
-    const Geodetic2 closestCorner = chunk.surfacePatch().closestCorner(cameraGeodeticPos);
+    const Geodetic2 center = chunk.surfacePatch.center();
+    const Geodetic2 closestCorner = chunk.surfacePatch.closestCorner(cameraGeodeticPos);
 
     //  Camera
     //  |
@@ -1602,7 +1766,7 @@ int RenderableGlobe::desiredLevelByProjectedArea(const Chunk& chunk, const Rende
     //    |                 |
     //    +-----------------+  <-- south east corner
 
-    const Chunk::BoundingHeights heights = chunk.boundingHeights();
+    const Chunk::BoundingHeights heights = boundingHeightsForChunk(chunk);
     const Geodetic3 c = { center, heights.min };
     const Geodetic3 c1 = { Geodetic2(center.lat, closestCorner.lon), heights.min };
     const Geodetic3 c2 = { Geodetic2(closestCorner.lat, center.lon), heights.min };
@@ -1651,17 +1815,17 @@ int RenderableGlobe::desiredLevelByProjectedArea(const Chunk& chunk, const Rende
 
     const double scaledArea = _generalProperties.lodScaleFactor *
         projectedChunkAreaApprox;
-    return chunk.tileIndex().level + static_cast<int>(round(scaledArea - 1));
+    return chunk.tileIndex.level + static_cast<int>(round(scaledArea - 1));
 }
 
 int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk, const RenderData&) const {
-    const int currLevel = chunk.tileIndex().level;
+    const int currLevel = chunk.tileIndex.level;
 
     for (size_t i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
         for (const std::shared_ptr<Layer>& layer :
             _layerManager.layerGroup(i).activeLayers())
         {
-            Tile::Status status = layer->tileStatus(chunk.tileIndex());
+            Tile::Status status = layer->tileStatus(chunk.tileIndex);
             if (status == Tile::Status::OK) {
                 return UnknownDesiredLevel;
             }
@@ -1678,7 +1842,7 @@ bool RenderableGlobe::isCullableByFrustum(const Chunk& chunk, const RenderData& 
         renderData.camera.sgctInternal.projectionMatrix()
     ) * viewTransform * _cachedModelTransform;
 
-    const std::vector<glm::dvec4>& corners = chunk.boundingPolyhedronCorners();
+    const std::vector<glm::dvec4>& corners = boundingPolyhedronCornersForChunk(chunk);
 
     // Create a bounding box that fits the patch corners
     AABB3 bounds; // in screen space
@@ -1718,8 +1882,8 @@ Camera* RenderableGlobe::savedCamera() const {
 bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk, const RenderData& renderData) const {
     // Calculations are done in the reference frame of the globe. Hence, the camera
     // position needs to be transformed with the inverse model matrix
-    const GeodeticPatch& patch = chunk.surfacePatch();
-    const float maxHeight = chunk.boundingHeights().max;
+    const GeodeticPatch& patch = chunk.surfacePatch;
+    const float maxHeight = boundingHeightsForChunk(chunk).max;
     const glm::dvec3 globePos = glm::dvec3(0, 0, 0); // In model space it is 0
     const double minimumGlobeRadius = _ellipsoid.minimumRadius();
 
@@ -1737,10 +1901,10 @@ bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk, const RenderData& 
     // castesian coordinates. Therefore we compare it to the corners and pick the
     // real closest point,
     std::array<glm::dvec3, 4> corners = {
-        _ellipsoid.cartesianSurfacePosition(chunk.surfacePatch().corner(NORTH_WEST)),
-        _ellipsoid.cartesianSurfacePosition(chunk.surfacePatch().corner(NORTH_EAST)),
-        _ellipsoid.cartesianSurfacePosition(chunk.surfacePatch().corner(SOUTH_WEST)),
-        _ellipsoid.cartesianSurfacePosition(chunk.surfacePatch().corner(SOUTH_EAST))
+        _ellipsoid.cartesianSurfacePosition(chunk.surfacePatch.corner(NORTH_WEST)),
+        _ellipsoid.cartesianSurfacePosition(chunk.surfacePatch.corner(NORTH_EAST)),
+        _ellipsoid.cartesianSurfacePosition(chunk.surfacePatch.corner(SOUTH_WEST)),
+        _ellipsoid.cartesianSurfacePosition(chunk.surfacePatch.corner(SOUTH_EAST))
     };
 
     for (int i = 0; i < 4; ++i) {
@@ -1782,18 +1946,18 @@ bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk, const RenderData& 
 void RenderableGlobe::splitChunkNode(Chunk& cn, int depth) {
     if (depth > 0 && isLeaf(cn)) {
         std::vector<void*> memory = _chunkPool.allocate(
-            static_cast<int>(cn.children().size())
+            static_cast<int>(cn.children.size())
         );
-        for (size_t i = 0; i < cn.children().size(); ++i) {
-            cn.children()[i] = new (memory[i]) Chunk(
+        for (size_t i = 0; i < cn.children.size(); ++i) {
+            cn.children[i] = new (memory[i]) Chunk(
                 *this,
-                cn.tileIndex().child(static_cast<Quad>(i))
+                cn.tileIndex.child(static_cast<Quad>(i))
             );
         }
     }
 
     if (depth - 1 > 0) {
-        for (Chunk* child : cn.children()) {
+        for (Chunk* child : cn.children) {
             splitChunkNode(*child, depth - 1);
         }
     }
@@ -1801,7 +1965,7 @@ void RenderableGlobe::splitChunkNode(Chunk& cn, int depth) {
 
 void RenderableGlobe::freeChunkNode(Chunk* n) {
     _chunkPool.free(n);
-    for (Chunk*& c : n->children()) {
+    for (Chunk*& c : n->children) {
         if (c) {
             freeChunkNode(c);
         }
@@ -1810,7 +1974,7 @@ void RenderableGlobe::freeChunkNode(Chunk* n) {
 }
 
 void RenderableGlobe::mergeChunkNode(Chunk& cn) {
-    for (Chunk*& child : cn.children()) {
+    for (Chunk*& child : cn.children) {
         if (child) {
             mergeChunkNode(*child);
             freeChunkNode(child);
@@ -1821,7 +1985,7 @@ void RenderableGlobe::mergeChunkNode(Chunk& cn) {
 
 bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
     if (isLeaf(cn)) {
-        Chunk::Status status = cn.update(data);
+        Chunk::Status status = updateChunk(cn, data);
         if (status == Chunk::Status::WantSplit) {
             splitChunkNode(cn, 1);
         }
@@ -1830,14 +1994,14 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
     else {
         char requestedMergeMask = 0;
         for (int i = 0; i < 4; ++i) {
-            if (updateChunkTree(*cn.children()[i], data)) {
+            if (updateChunkTree(*cn.children[i], data)) {
                 requestedMergeMask |= (1 << i);
             }
             i = i;
         }
 
         const bool allChildrenWantsMerge = requestedMergeMask == 0xf;
-        const bool thisChunkWantsSplit = cn.update(data) == Chunk::Status::WantSplit;
+        const bool thisChunkWantsSplit = updateChunk(cn, data) == Chunk::Status::WantSplit;
 
         if (allChildrenWantsMerge && !thisChunkWantsSplit) {
             mergeChunkNode(cn);
