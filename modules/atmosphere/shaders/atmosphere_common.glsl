@@ -98,16 +98,16 @@ const float M_PI = 3.141592657;
 
 uniform sampler2D transmittanceTexture;
 
-const float Rg2    = Rg * Rg;
-const float Rt2    = Rt * Rt;
-const float H      = sqrt(Rt2 - Rg2);
-const float H2     = Rt2 - Rg2;
-const float invSamplesMu = 1.0f / float(SAMPLES_MU);
-const float invSamplesR = 1.0f / float(SAMPLES_R);
-const float invSamplesMuS = 1.0f / float(SAMPLES_MU_S);
-const float invSamplesNu = 1.0f / float(SAMPLES_NU);
-const float RtMinusRg = float(Rt - Rg);
-const float invRtMinusRg = 1.0f / RtMinusRg;
+float Rg2    = Rg * Rg;
+float Rt2    = Rt * Rt;
+float H      = sqrt(Rt2 - Rg2);
+float H2     = Rt2 - Rg2;
+float invSamplesMu = 1.0f / float(SAMPLES_MU);
+float invSamplesR = 1.0f / float(SAMPLES_R);
+float invSamplesMuS = 1.0f / float(SAMPLES_MU_S);
+float invSamplesNu = 1.0f / float(SAMPLES_NU);
+float RtMinusRg = float(Rt - Rg);
+float invRtMinusRg = 1.0f / RtMinusRg;
 
 float opticalDepth(const float localH, const float r, const float mu, const float d) {
   float invH = 1.0/localH;
