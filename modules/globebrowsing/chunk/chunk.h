@@ -28,6 +28,7 @@
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <ghoul/glm.h>
+#include <array>
 #include <vector>
 
 namespace openspace { struct RenderData; }
@@ -78,6 +79,8 @@ public:
     const GeodeticPatch& surfacePatch() const;
     const TileIndex tileIndex() const;
     bool isVisible() const;
+    std::array<Chunk*, 4>& children();
+    const std::array<Chunk*, 4>& children() const;
 
     /**
      * Returns BoundingHeights that fits the Chunk as tightly as possible.
@@ -95,6 +98,8 @@ private:
     const TileIndex _tileIndex;
     bool _isVisible;
     const GeodeticPatch _surfacePatch;
+
+    std::array<Chunk*, 4> _children;
 };
 
 } // namespace openspace::globebrowsing

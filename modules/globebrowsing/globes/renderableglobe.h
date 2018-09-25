@@ -40,34 +40,32 @@
 
 namespace openspace::globebrowsing {
 
-    namespace chunklevelevaluator { class Evaluator; }
+namespace chunklevelevaluator { class Evaluator; }
+namespace culling { class ChunkCuller; }
 
-    namespace culling { class ChunkCuller; }
-
-    class Chunk;
-    class ChunkRenderer;
-    class Ellipsoid;
-    struct Geodetic2;
-    class LayerManager;
-    class RenderableGlobe;
-    class Chunk;
-    class Ellipsoid;
-    class Grid;
-    class GPULayerManager;
-    class LayerManager;
-    class LayerShaderManager;
-    class RenderableGlobe;
-    class GPULayerGroup;
+class ChunkRenderer;
+class Ellipsoid;
+struct Geodetic2;
+class LayerManager;
+class RenderableGlobe;
+class Chunk;
+class Ellipsoid;
+class Grid;
+class GPULayerManager;
+class LayerManager;
+class LayerShaderManager;
+class RenderableGlobe;
+class GPULayerGroup;
 
 class PointGlobe;
 class LayerManager;
 
-struct ChunkNode {
-    ChunkNode(Chunk chunk);
 
-    std::array<ChunkNode*, 4> children;
-    Chunk chunk;
+struct Chunk {
+
+
 };
+
 
 /**
  * A RenderableGlobe is a globe modeled as an ellipsoid using a chunked LOD algorithm for
@@ -225,11 +223,11 @@ private:
     void recompileShaders();
 
 
-    void splitChunkNode(ChunkNode& cn, int depth);
-    void mergeChunkNode(ChunkNode& cn);
-    bool updateChunkTree(ChunkNode& cn, const RenderData& data);
+    void splitChunkNode(Chunk& cn, int depth);
+    void mergeChunkNode(Chunk& cn);
+    bool updateChunkTree(Chunk& cn, const RenderData& data);
 
-    void freeChunkNode(ChunkNode* n);
+    void freeChunkNode(Chunk* n);
 
     SkirtedGrid _grid;
 
@@ -240,10 +238,10 @@ private:
     glm::dmat4 _cachedModelTransform;
     glm::dmat4 _cachedInverseModelTransform;
 
-    ghoul::ReusableTypedMemoryPool<ChunkNode, 256> _chunkPool;
+    ghoul::ReusableTypedMemoryPool<Chunk, 256> _chunkPool;
 
-    ChunkNode _leftRoot;  // Covers all negative longitudes
-    ChunkNode _rightRoot; // Covers all positive longitudes
+    Chunk _leftRoot;  // Covers all negative longitudes
+    Chunk _rightRoot; // Covers all positive longitudes
 
 
 

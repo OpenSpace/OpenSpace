@@ -41,15 +41,12 @@ Chunk::Chunk(const RenderableGlobe& owner, const TileIndex& tileIndex, bool init
     , _tileIndex(tileIndex)
     , _isVisible(initVisible)
     , _surfacePatch(tileIndex)
+    , _children({ {nullptr, nullptr, nullptr, nullptr} })
 {}
 
 const GeodeticPatch& Chunk::surfacePatch() const {
     return _surfacePatch;
 }
-
-//const RenderableGlobe& Chunk::owner() const {
-//    return _owner;
-//}
 
 const TileIndex Chunk::tileIndex() const {
     return _tileIndex;
@@ -57,6 +54,14 @@ const TileIndex Chunk::tileIndex() const {
 
 bool Chunk::isVisible() const {
     return _isVisible;
+}
+
+const std::array<Chunk*, 4>& Chunk::children() const {
+    return _children;
+}
+
+std::array<Chunk*, 4>& Chunk::children() {
+    return _children;
 }
 
 Chunk::Status Chunk::update(const RenderData& data) {

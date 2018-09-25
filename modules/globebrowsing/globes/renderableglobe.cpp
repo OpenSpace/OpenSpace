@@ -210,28 +210,18 @@ using namespace openspace::properties;
 
 namespace openspace::globebrowsing {
 
-ChunkNode::ChunkNode(Chunk chunk)
-    : children({ {nullptr, nullptr, nullptr, nullptr} })
-    , chunk(std::move(chunk))
-{}
-
-
 namespace {
 
-bool isLeaf(const ChunkNode& cn) {
-    return cn.children[0] == nullptr;
+bool isLeaf(const Chunk& cn) {
+    return cn.children()[0] == nullptr;
 }
 
 
-    using RenderFunction = std::function<
-        void(const ChunkNode&, int, const RenderData&, const glm::dmat4&)>;
-
-
-const ChunkNode& findChunkNode(const ChunkNode& node, const Geodetic2& location) {
-    const ChunkNode* n = &node;
+const Chunk& findChunkNode(const Chunk& node, const Geodetic2& location) {
+    const Chunk* n = &node;
 
     while (!isLeaf(*n)) {
-        const Geodetic2 center = n->chunk.surfacePatch().center();
+        const Geodetic2 center = n->surfacePatch().center();
         int index = 0;
         if (center.lon < location.lon) {
             ++index;
@@ -240,7 +230,7 @@ const ChunkNode& findChunkNode(const ChunkNode& node, const Geodetic2& location)
             ++index;
             ++index;
         }
-        n = n->children[static_cast<Quad>(index)];
+        n = n->children()[static_cast<Quad>(index)];
     }
     return *n;
 }
@@ -709,27 +699,26 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     int localCount = 0;
 
     auto traversal = [&global, &globalCount, &local, &localCount, &count,
-          cutoff = _debugProperties.modelSpaceRenderingCutoffLevel](const ChunkNode& node)
+          cutoff = _debugProperties.modelSpaceRenderingCutoffLevel](const Chunk& node)
     {
         //std::queue<const ChunkNode*> Q;
-        std::vector<const ChunkNode*> Q;
+        std::vector<const Chunk*> Q;
         Q.reserve(256);
 
         // Loop through nodes in breadths first order
         Q.push_back(&node);
         while (!Q.empty()) {
-            const ChunkNode* n = Q.front();
+            const Chunk* n = Q.front();
             Q.erase(Q.begin());
             //Q.pop();
 
-            const Chunk& chunk = n->chunk;
-            if (isLeaf(*n) && chunk.isVisible()) {
-                if (chunk.tileIndex().level < cutoff) {
-                    global[globalCount] = &n->chunk;
+            if (isLeaf(*n) && n->isVisible()) {
+                if (n->tileIndex().level < cutoff) {
+                    global[globalCount] = n;
                     ++globalCount;
                 }
                 else {
-                    local[localCount] = &n->chunk;
+                    local[localCount] = n;
                     ++localCount;
                 }
 
@@ -738,8 +727,9 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
 
             // Add children to queue, if any
             if (!isLeaf(*n)) {
+                const std::array<Chunk*, 4>& children = n->children();
                 for (int i = 0; i < 4; ++i) {
-                    Q.push_back(n->children[i]);
+                    Q.push_back(children[i]);
                 }
             }
         }
@@ -1198,10 +1188,10 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
 
     // Get the uv coordinates to sample from
     const Geodetic2 geodeticPosition = _ellipsoid.cartesianToGeodetic2(position);
-    const ChunkNode& node = geodeticPosition.lon < Coverage.center().lon ?
+    const Chunk& node = geodeticPosition.lon < Coverage.center().lon ?
         findChunkNode(_leftRoot, geodeticPosition) :
         findChunkNode(_rightRoot, geodeticPosition);
-    const int chunkLevel = node.chunk.tileIndex().level;
+    const int chunkLevel = node.tileIndex().level;
 
     const TileIndex tileIndex = TileIndex(geodeticPosition, chunkLevel);
     const GeodeticPatch patch = GeodeticPatch(tileIndex);
@@ -1789,27 +1779,29 @@ bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk, const RenderData& 
 }
 
 
-void RenderableGlobe::splitChunkNode(ChunkNode& cn, int depth) {
+void RenderableGlobe::splitChunkNode(Chunk& cn, int depth) {
     if (depth > 0 && isLeaf(cn)) {
         std::vector<void*> memory = _chunkPool.allocate(
-            static_cast<int>(cn.children.size())
+            static_cast<int>(cn.children().size())
         );
-        for (size_t i = 0; i < cn.children.size(); ++i) {
-            Chunk chunk(*this, cn.chunk.tileIndex().child(static_cast<Quad>(i)));
-            cn.children[i] = new (memory[i]) ChunkNode(chunk);
+        for (size_t i = 0; i < cn.children().size(); ++i) {
+            cn.children()[i] = new (memory[i]) Chunk(
+                *this,
+                cn.tileIndex().child(static_cast<Quad>(i))
+            );
         }
     }
 
     if (depth - 1 > 0) {
-        for (ChunkNode* child : cn.children) {
+        for (Chunk* child : cn.children()) {
             splitChunkNode(*child, depth - 1);
         }
     }
 }
 
-void RenderableGlobe::freeChunkNode(ChunkNode* n) {
+void RenderableGlobe::freeChunkNode(Chunk* n) {
     _chunkPool.free(n);
-    for (ChunkNode*& c : n->children) {
+    for (Chunk*& c : n->children()) {
         if (c) {
             freeChunkNode(c);
         }
@@ -1817,8 +1809,8 @@ void RenderableGlobe::freeChunkNode(ChunkNode* n) {
     }
 }
 
-void RenderableGlobe::mergeChunkNode(ChunkNode& cn) {
-    for (ChunkNode*& child : cn.children) {
+void RenderableGlobe::mergeChunkNode(Chunk& cn) {
+    for (Chunk*& child : cn.children()) {
         if (child) {
             mergeChunkNode(*child);
             freeChunkNode(child);
@@ -1827,9 +1819,9 @@ void RenderableGlobe::mergeChunkNode(ChunkNode& cn) {
     }
 }
 
-bool RenderableGlobe::updateChunkTree(ChunkNode& cn, const RenderData& data) {
+bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
     if (isLeaf(cn)) {
-        Chunk::Status status = cn.chunk.update(data);
+        Chunk::Status status = cn.update(data);
         if (status == Chunk::Status::WantSplit) {
             splitChunkNode(cn, 1);
         }
@@ -1838,14 +1830,14 @@ bool RenderableGlobe::updateChunkTree(ChunkNode& cn, const RenderData& data) {
     else {
         char requestedMergeMask = 0;
         for (int i = 0; i < 4; ++i) {
-            if (updateChunkTree(*cn.children[i], data)) {
+            if (updateChunkTree(*cn.children()[i], data)) {
                 requestedMergeMask |= (1 << i);
             }
             i = i;
         }
 
         const bool allChildrenWantsMerge = requestedMergeMask == 0xf;
-        const bool thisChunkWantsSplit = cn.chunk.update(data) == Chunk::Status::WantSplit;
+        const bool thisChunkWantsSplit = cn.update(data) == Chunk::Status::WantSplit;
 
         if (allChildrenWantsMerge && !thisChunkWantsSplit) {
             mergeChunkNode(cn);
