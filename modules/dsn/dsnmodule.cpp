@@ -25,10 +25,9 @@
 #include <modules/dsn/dsnmodule.h>
 
 namespace openspace {
-    constexpr const char* _loggerCat = "CommunicationLine";
+    constexpr const char* _loggerCat = "DSN Module";
 
 DsnModule::DsnModule() : OpenSpaceModule(Name) {
-	LDEBUG("Hello from DSN module");
 }
 
 void DsnModule::internalInitialize(const ghoul::Dictionary&) {

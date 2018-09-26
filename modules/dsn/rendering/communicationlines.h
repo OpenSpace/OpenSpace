@@ -36,10 +36,10 @@ namespace openspace {
 class CommunicationLines : public Renderable {
 public:
    
-
+    std::string _myMessage;
 
 	CommunicationLines(const ghoul::Dictionary& dictionary);
-	void PrintSomething();
+	void PrintSomething(const ghoul::Dictionary& dictionary);
 
 	void initializeGL() override;
 	void deinitializeGL() override;
@@ -50,7 +50,7 @@ public:
 	void update(const UpdateData& data) override;
 private:
 	std::unique_ptr<ghoul::Dictionary> _dictionary;
-    std::string _myMessage = "base";
+
 };
 
 }

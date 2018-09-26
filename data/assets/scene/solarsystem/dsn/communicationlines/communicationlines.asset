@@ -8,7 +8,7 @@ local CommunicationLine = {
     Parent = earthTransforms.EarthBarycenter.Identifier,
     Renderable = {
         Type = "CommunicationLines",
-        --_myMessage = "My Asset works!"
+        Message = "My Asset works!"
         -- SourceFolder = ENLILPaths.Earth,
         -- InputFileType = "osfls",
     },
