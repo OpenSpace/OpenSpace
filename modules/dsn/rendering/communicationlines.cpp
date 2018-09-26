@@ -38,7 +38,7 @@ namespace openspace {
     //Filetypes
     const std::string dataFileTypeStringXml = "xml";
 
-    enum class SourceFileType : int {
+    enum class DataFileType : int {
         Xml = 0,
         Invalid
     };
@@ -60,7 +60,7 @@ namespace openspace {
     */
     bool CommunicationLines::ExtractMandatoryInfoFromDictionary()
     {
-        SourceFileType sourceFileType = SourceFileType::Invalid;
+        DataFileType sourceFileType = DataFileType::Invalid;
 
         _dictionary->getValue(SceneGraphNode::KeyIdentifier, _identifier);
 
@@ -78,7 +78,7 @@ namespace openspace {
             );
             // Verify that the input type is correct
             if (dataFileTypeString == dataFileTypeStringXml) {
-                sourceFileType = SourceFileType::Xml;
+                sourceFileType = DataFileType::Xml;
             }
             else {
                 LERROR(fmt::format(
