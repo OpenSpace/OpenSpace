@@ -11,6 +11,9 @@ asset.request('customization/globebrowsing')
 -- Spacecrafts
 asset.require('scene/solarsystem/missions/voyager1/voyager1')
 asset.require('scene/solarsystem/missions/voyager2/voyager2')
+
+--Communication
+asset.require('scene/solarsystem/dsn/communicationlines/communicationlines')
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')

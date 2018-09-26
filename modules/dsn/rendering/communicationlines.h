@@ -27,12 +27,17 @@
 
 #include <openspace/rendering/renderable.h>
 #include <modules/dsn/dsnmodule.h>
+#include <ghoul/logging/logmanager.h>
+
 #include <fstream>
 
 namespace openspace {
 
 class CommunicationLines : public Renderable {
 public:
+   
+
+
 	CommunicationLines(const ghoul::Dictionary& dictionary);
 	void PrintSomething();
 
@@ -45,8 +50,7 @@ public:
 	void update(const UpdateData& data) override;
 private:
 	std::unique_ptr<ghoul::Dictionary> _dictionary;
-
-
+    std::string _myMessage = "base";
 };
 
 }

@@ -26,11 +26,11 @@
 
 
 namespace openspace {
+    constexpr const char* _loggerCat = "CommunicationLine";
 
 	CommunicationLines::CommunicationLines(const ghoul::Dictionary& dictionary) 
 		: Renderable(dictionary) {
 	//lines between space and earth
-
 		_dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
 		CommunicationLines::PrintSomething();
 		
@@ -39,8 +39,9 @@ namespace openspace {
 	void CommunicationLines::PrintSomething() {
 
 		std::ofstream file{ "dsnmodule.txt" };
-		file << "my module works!" << std::endl;
+		file << _myMessage << std::endl;
 		file.close();
+        LDEBUG(_myMessage);
 
 	}
 

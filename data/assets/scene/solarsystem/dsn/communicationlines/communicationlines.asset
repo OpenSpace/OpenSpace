@@ -1,0 +1,21 @@
+local assetHelper = asset.require('util/asset_helper')
+local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+
+--Communicationline data 
+
+local CommunicationLine = {
+    Identifier = "Communication_line",
+    Parent = earthTransforms.EarthBarycenter.Identifier,
+    Renderable = {
+        Type = "CommunicationLines",
+        --_myMessage = "My Asset works!"
+        -- SourceFolder = ENLILPaths.Earth,
+        -- InputFileType = "osfls",
+    },
+    GUI = {
+        Name = "CommunicationLine",
+        Path = "/Solar System"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {CommunicationLine})
