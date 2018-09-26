@@ -37,6 +37,7 @@
 
 namespace openspace::interaction {
 #define RECORD_BINARY
+//#define SESSION_RECORDING_TIME
 class KeyframeNavigator;
 
 class SessionRecording : public properties::PropertyOwner {

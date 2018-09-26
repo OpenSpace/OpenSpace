@@ -41,6 +41,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 
 namespace openspace {
+//#define SESSION_RECORDING_TIME
 
 struct TimeKeyframeData {
     Time time;

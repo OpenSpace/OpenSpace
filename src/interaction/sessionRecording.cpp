@@ -355,12 +355,12 @@ void SessionRecording::saveTimeKeyframe() {
 #ifdef RECORD_BINARY
     _bufferIndex = 0;
     _keyframeBuffer[_bufferIndex++] = 't';
-    writeDoubleToFileBuffer(kf._timestamp);
-    writeDoubleToFileBuffer(kf._timestamp - _timestampRecordStarted);
-    writeDoubleToFileBuffer(kf._time);
-    writeDoubleToFileBuffer(kf._dt);
-    writeBooleanToFileBuffer(kf._paused);
-    writeBooleanToFileBuffer(kf._requiresTimeJump);
+    writeToFileBuffer(kf._timestamp);
+    writeToFileBuffer(kf._timestamp - _timestampRecordStarted);
+    writeToFileBuffer(kf._time);
+    writeToFileBuffer(kf._dt);
+    writeToFileBuffer(kf._paused);
+    writeToFileBuffer(kf._requiresTimeJump);
 
     saveKeyframeToFileBinary();
 #else
@@ -592,6 +592,7 @@ void SessionRecording::playbackCamera() {
 #ifdef SESSION_RECORDING_TIME
 void SessionRecording::playbackTimeChange() {
     double timeOs, timeRec, timeSim;
+    datamessagestructures::TimeKeyframe pbFrame;
 #ifdef RECORD_BINARY
     readFromPlayback(timeOs);
     readFromPlayback(timeRec);
@@ -601,7 +602,7 @@ void SessionRecording::playbackTimeChange() {
     readFromPlayback(pbFrame._requiresTimeJump);
     if (!_playbackFile) {
         LERROR(fmt::format("Error reading time playback from keyframe entry {}",
-            _playbackLineNum - 1, ));
+            _playbackLineNum - 1));
         return;
     }
 #else
@@ -609,7 +610,6 @@ void SessionRecording::playbackTimeChange() {
     std::string entryType;
     //double timeRef;
     std::string paused, jump;
-    datamessagestructures::TimeKeyframe pbFrame;
     iss >> entryType;
     iss >> timeOs >> timeRec >> timeSim;
     iss >> pbFrame._dt
