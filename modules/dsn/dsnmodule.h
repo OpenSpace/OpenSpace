@@ -35,16 +35,16 @@
 
 namespace openspace {
 
-class DsnModule : public OpenSpaceModule {
-public:
-	constexpr static const char* Name = "Dsn";
+    class DsnModule : public OpenSpaceModule {
+    public:
+        constexpr static const char* Name = "Dsn";
 
-	DsnModule();
+        DsnModule();
 
-private:
-	void internalInitialize(const ghoul::Dictionary&) override;
+    private:
+        void internalInitialize(const ghoul::Dictionary&) override;
 
-};
+    };
 
 } // namespace openspace
 

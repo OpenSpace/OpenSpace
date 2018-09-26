@@ -28,30 +28,33 @@
 #include <openspace/rendering/renderable.h>
 #include <modules/dsn/dsnmodule.h>
 #include <ghoul/logging/logmanager.h>
-
+#include <ghoul/filesystem/filesystem.h>
 #include <fstream>
 
 namespace openspace {
 
-class CommunicationLines : public Renderable {
-public:
-   
-    std::string _myMessage;
+    class CommunicationLines : public Renderable {
+    public:
 
-	CommunicationLines(const ghoul::Dictionary& dictionary);
-	void PrintSomething(const ghoul::Dictionary& dictionary);
+        CommunicationLines(const ghoul::Dictionary& dictionary);
+        void LogSomething();
+        bool ExtractMandatoryInfoFromDictionary();
 
-	void initializeGL() override;
-	void deinitializeGL() override;
 
-	bool isReady() const override;
+        void initializeGL() override;
+        void deinitializeGL() override;
 
-	void render(const RenderData& data, RendererTasks& rendererTask) override;
-	void update(const UpdateData& data) override;
-private:
-	std::unique_ptr<ghoul::Dictionary> _dictionary;
+        bool isReady() const override;
 
-};
+        void render(const RenderData& data, RendererTasks& rendererTask) override;
+        void update(const UpdateData& data) override;
+    private:
+        std::unique_ptr<ghoul::Dictionary> _dictionary;
+        std::string _dataFolder;
+        std::string _identifier;
+        std::vector<std::string> _dataFiles;
+
+    };
 
 }
 #endif 

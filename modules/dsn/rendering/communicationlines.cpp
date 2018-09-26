@@ -23,50 +23,158 @@
 ****************************************************************************************/
 
 #include <modules/dsn/rendering/communicationlines.h>
+#include <openspace/scene/scene.h>
 
 
 namespace openspace {
     constexpr const char* _loggerCat = "CommunicationLine";
-    constexpr const char* _messageKey = "Message";
+
+    // Keys to get values from dictionary
+    constexpr const char* KeyMessage = "Message";
+    constexpr const char* KeyDataFolder = "DataFolder";
+    constexpr const char* KeyDataFileType = "DataFileType";
+    constexpr const char* KeyIdentifier = "Identifier";
+
+    //Filetypes
+    const std::string dataFileTypeStringXml = "xml";
+
+    enum class SourceFileType : int {
+        Xml = 0,
+        Invalid
+    };
+
+    //Member functions
+    CommunicationLines::CommunicationLines(const ghoul::Dictionary& dictionary)
+        : Renderable(dictionary) {
+        //lines between space and earth
+        _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
+        CommunicationLines::initializeGL();
+        CommunicationLines::LogSomething();
+    }
 
 
-	CommunicationLines::CommunicationLines(const ghoul::Dictionary& dictionary) 
-		: Renderable(dictionary) {
-	//lines between space and earth
-		_dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
-		CommunicationLines::PrintSomething(dictionary);
-		
-	}
-    
-	void CommunicationLines::PrintSomething(const ghoul::Dictionary& aDictionary) {
+    /**
+    * Extracts the general information (from the lua modfile) that is mandatory for the class
+    * to function; such as the file type and the location of the data files.
+    * Returns false if it fails to extract mandatory information!
+    */
+    bool CommunicationLines::ExtractMandatoryInfoFromDictionary()
+    {
+        SourceFileType sourceFileType = SourceFileType::Invalid;
 
-        bool success = aDictionary.getValue(_messageKey, _myMessage);
-        if (!success) {
-            LERROR("ERROR DICTIONARY");
+        _dictionary->getValue(SceneGraphNode::KeyIdentifier, _identifier);
+
+        // ------------------- EXTRACT MANDATORY VALUES FROM DICTIONARY ------------------- //
+        std::string dataFileTypeString;
+        if (!_dictionary->getValue(KeyDataFileType, dataFileTypeString)) {
+            LERROR(fmt::format("{}: The field {} is missing", _identifier, KeyDataFileType));
         }
-        std::ofstream file{ "dsnmodule.txt" };
-        file << _myMessage << std::endl;
-        file.close();
-        LDEBUG(_myMessage);
-	}
+        else {
+            std::transform(
+                dataFileTypeString.begin(),
+                dataFileTypeString.end(),
+                dataFileTypeString.begin(),
+                [](char c) { return static_cast<char>(tolower(c)); }
+            );
+            // Verify that the input type is correct
+            if (dataFileTypeString == dataFileTypeStringXml) {
+                sourceFileType = SourceFileType::Xml;
+            }
+            else {
+                LERROR(fmt::format(
+                    "{}: {} is not a recognized {}",
+                    _identifier, dataFileTypeString, KeyDataFileType
+                ));
+                return false;
+            }
+        }
 
-	void CommunicationLines::render(const RenderData& data, RendererTasks&) {
+        std::string dataFolderPath;
+        if (!_dictionary->getValue(KeyDataFolder, dataFolderPath)) {
+            LERROR(fmt::format("{}: The field {} is missing", _identifier, KeyDataFolder));
+            return false;
+        }
 
-	}
-	void CommunicationLines::initializeGL() {
+        // Ensure that the source folder exists and then extract
+        // the files with the same extension as <inputFileTypeString>
+        ghoul::filesystem::Directory dataFolder(dataFolderPath);
+        if (FileSys.directoryExists(dataFolder)) {
+            // Extract all file paths from the provided folder
+            _dataFiles = dataFolder.readFiles(
+                ghoul::filesystem::Directory::Recursive::No,
+                ghoul::filesystem::Directory::Sort::Yes
+            );
 
-	}
-	void CommunicationLines::deinitializeGL() {
+            // Remove all files that don't have <dataFileTypeString> as extension
+            _dataFiles.erase(
+                std::remove_if(
+                    _dataFiles.begin(),
+                    _dataFiles.end(),
+                    [dataFileTypeString](const std::string& str) {
+                const size_t extLength = dataFileTypeString.length();
+                std::string sub = str.substr(str.length() - extLength, extLength);
+                std::transform(
+                    sub.begin(),
+                    sub.end(),
+                    sub.begin(),
+                    [](char c) { return static_cast<char>(::tolower(c)); }
+                );
+                return sub != dataFileTypeString;
+            }),
+                _dataFiles.end()
+                );
+            // Ensure that there are available and valid source files left
+            if (_dataFiles.empty()) {
+                LERROR(fmt::format(
+                    "{}: {} contains no {} files",
+                    _identifier, dataFolderPath, dataFileTypeString
+                ));
+                return false;
+            }
+        }
+        else {
+            LERROR(fmt::format(
+                "{}: FieldlinesSequence {} is not a valid directory",
+                _identifier,
+                dataFolderPath
+            ));
+            return false;
+        }
+        return true;
+    }
 
-	}
 
-	bool CommunicationLines::isReady() const {
-		return true;
-	}
+    void CommunicationLines::LogSomething() {
 
-	void CommunicationLines::update(const UpdateData& data) {
+        std::ofstream logfile{ "dsnmodulelog.txt" };
 
-	}
+        for (std::vector<std::string>::iterator it = _dataFiles.begin(); it != _dataFiles.end(); ++it) {
+            logfile << *it << std::endl;
+        }
+        logfile.close();
+    }
+
+    void CommunicationLines::render(const RenderData& data, RendererTasks&) {
+
+    }
+    void CommunicationLines::initializeGL() {
+        // EXTRACT MANDATORY INFORMATION FROM DICTIONARY
+        if (!ExtractMandatoryInfoFromDictionary()) {
+            return;
+        }
+
+    }
+    void CommunicationLines::deinitializeGL() {
+
+    }
+
+    bool CommunicationLines::isReady() const {
+        return true;
+    }
+
+    void CommunicationLines::update(const UpdateData& data) {
+
+    }
 } // namespace openspace
 
 

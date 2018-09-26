@@ -1,16 +1,16 @@
 local assetHelper = asset.require('util/asset_helper')
 local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
-
 --Communicationline data 
+local dataFolder = "C:/OpenSpace/OpenSpace/sync/http/dsn_data/1"
 
 local CommunicationLine = {
     Identifier = "Communication_line",
     Parent = earthTransforms.EarthBarycenter.Identifier,
     Renderable = {
         Type = "CommunicationLines",
-        Message = "My Asset works!"
-        -- SourceFolder = ENLILPaths.Earth,
-        -- InputFileType = "osfls",
+        Message = "My Asset works!",
+        DataFolder = dataFolder,
+        DataFileType = "xml"
     },
     GUI = {
         Name = "CommunicationLine",

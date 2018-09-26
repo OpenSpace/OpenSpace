@@ -27,14 +27,14 @@
 namespace openspace {
     constexpr const char* _loggerCat = "DSN Module";
 
-DsnModule::DsnModule() : OpenSpaceModule(Name) {
-}
+    DsnModule::DsnModule() : OpenSpaceModule(Name) {
+    }
 
-void DsnModule::internalInitialize(const ghoul::Dictionary&) {
-	auto factory = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(factory, "No renderable factory existed");
+    void DsnModule::internalInitialize(const ghoul::Dictionary&) {
+        auto factory = FactoryManager::ref().factory<Renderable>();
+        ghoul_assert(factory, "No renderable factory existed");
 
-	factory->registerClass<CommunicationLines>("CommunicationLines"); 
-}
+        factory->registerClass<CommunicationLines>("CommunicationLines");
+    }
 
 } // namespace openspace
