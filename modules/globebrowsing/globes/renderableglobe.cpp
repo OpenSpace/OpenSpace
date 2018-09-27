@@ -24,45 +24,26 @@
 
 #include <modules/globebrowsing/globes/renderableglobe.h>
 
-#include <modules/debugging/rendering/debugrenderer.h>
-#include <ghoul/logging/logmanager.h>
-#include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/tile/tileindex.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/rendering/layer/layer.h>
-#include <modules/globebrowsing/rendering/layer/layergroup.h>
-#include <modules/globebrowsing/rendering/layer/layermanager.h>
-#include <modules/debugging/rendering/debugrenderer.h>
-#include <openspace/util/time.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/opengl/texture.h>
-
-#include <modules/globebrowsing/geometry/ellipsoid.h>
-#include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/meshes/trianglesoup.h>
-#include <modules/globebrowsing/rendering/layer/layermanager.h>
-#include <modules/globebrowsing/rendering/gpu/gpulayergroup.h>
-#include <modules/globebrowsing/rendering/layer/layergroup.h>
-#include <openspace/util/updatestructures.h>
-#include <openspace/util/spicemanager.h>
-#include <ghoul/opengl/programobject.h>
 #include <modules/globebrowsing/geometry/geodetic3.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/rendering/layer/layermanager.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-#include <openspace/util/updatestructures.h>
-#include <modules/globebrowsing/globes/renderableglobe.h>
+#include <modules/globebrowsing/meshes/trianglesoup.h>
 #include <modules/globebrowsing/rendering/layer/layer.h>
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
-#include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <modules/globebrowsing/rendering/gpu/gpulayergroup.h>
+#include <modules/globebrowsing/tile/tileselector.h>
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/debugging/rendering/debugrenderer.h>
 #include <openspace/engine/globals.h>
-#include <openspace/rendering/renderengine.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/opengl/programobject.h>
 #include <openspace/performance/performancemanager.h>
 #include <openspace/performance/performancemeasurement.h>
-#include <modules/globebrowsing/geometry/geodeticpatch.h>
-#include <modules/globebrowsing/tile/tileselector.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
+#include <openspace/util/updatestructures.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/programobject.h>
 #include <queue>
 
 namespace {
@@ -74,7 +55,11 @@ namespace {
     constexpr const char* keyShadowSource = "Source";
     constexpr const char* keyShadowCaster = "Caster";
     constexpr const double KM_TO_M = 1000.0;
-    const openspace::globebrowsing::AABB3 CullingFrustum(glm::vec3(-1, -1, 0), glm::vec3(1, 1, 1e35));
+    const openspace::globebrowsing::AABB3 CullingFrustum(
+        glm::vec3(-1.f, -1.f, 0.f),
+        glm::vec3( 1.f,  1.f, 1e35)
+    );
+    constexpr const float DefaultHeight = 0.f;
 
     constexpr const int DefaultSkirtedGridSegments = 64;  // 16
     constexpr static const int UnknownDesiredLevel = -1;
@@ -87,12 +72,6 @@ namespace {
 
     const openspace::globebrowsing::TileIndex RightHemisphereIndex =
         openspace::globebrowsing::TileIndex(1, 0, 1);
-
-    constexpr openspace::properties::Property::PropertyInfo SaveOrThrowInfo = {
-        "SaveOrThrowCamera",
-        "Save or throw camera",
-        "" // @TODO Missing documentation
-    };
 
     constexpr openspace::properties::Property::PropertyInfo ShowChunkEdgeInfo = {
         "ShowChunkEdges",
@@ -208,6 +187,19 @@ using namespace openspace::properties;
 
 namespace openspace::globebrowsing {
 
+struct BoundingHeights {
+    float min;
+    float max;
+    bool available;
+};
+
+enum class ChunkStatus {
+    DoNothing,
+    WantMerge,
+    WantSplit
+};
+
+
 namespace {
 
 bool isLeaf(const Chunk& cn) {
@@ -232,10 +224,10 @@ const Chunk& findChunkNode(const Chunk& node, const Geodetic2& location) {
     return *n;
 }
 
-Chunk::BoundingHeights boundingHeightsForChunk(const Chunk& chunk) {
+BoundingHeights boundingHeightsForChunk(const Chunk& chunk) {
     using ChunkTileSettingsPair = std::pair<ChunkTile, const LayerRenderSettings*>;
 
-    Chunk::BoundingHeights boundingHeights{ 0.f, 0.f, false };
+    BoundingHeights boundingHeights { 0.f, 0.f, false };
 
     // In the future, this should be abstracted away and more easily queryable.
     // One must also handle how to sample pick one out of multiplte heightmaps
@@ -268,8 +260,8 @@ Chunk::BoundingHeights boundingHeightsForChunk(const Chunk& chunk) {
 
             if (!boundingHeights.available) {
                 if (tileMetaData->hasMissingData[HeightChannel]) {
-                    boundingHeights.min = std::min(Chunk::DefaultHeight, minValue);
-                    boundingHeights.max = std::max(Chunk::DefaultHeight, maxValue);
+                    boundingHeights.min = std::min(DefaultHeight, minValue);
+                    boundingHeights.max = std::max(DefaultHeight, maxValue);
                 }
                 else {
                     boundingHeights.min = minValue;
@@ -296,7 +288,7 @@ Chunk::BoundingHeights boundingHeightsForChunk(const Chunk& chunk) {
 std::array<glm::dvec4, 8> boundingPolyhedronCornersForChunk(const Chunk& chunk) {
     const Ellipsoid& ellipsoid = chunk.owner.ellipsoid();
 
-    const Chunk::BoundingHeights& boundingHeight = boundingHeightsForChunk(chunk);
+    const BoundingHeights& boundingHeight = boundingHeightsForChunk(chunk);
 
     // assume worst case
     const double patchCenterRadius = ellipsoid.maximumRadius();
@@ -360,39 +352,27 @@ std::array<glm::dvec4, 8> boundingPolyhedronCornersForChunk(const Chunk& chunk) 
     return corners;
 }
 
-Chunk::Status updateChunk(Chunk& chunk, const RenderData& data, bool updateCorners) {
-    Camera* savedCamera = chunk.owner.savedCamera();
-    const Camera& camRef = savedCamera ? *savedCamera : data.camera;
-
-    RenderData myRenderData = {
-        camRef,
-        data.position,
-        data.time,
-        data.doPerformanceMeasurement,
-        data.renderBinMask,
-        data.modelTransform
-    };
-
+ChunkStatus updateChunk(Chunk& chunk, const RenderData& data, bool updateCorners) {
     if (updateCorners) {
         chunk.corners = boundingPolyhedronCornersForChunk(chunk);
     }
 
     chunk.isVisible = true;
-    if (chunk.owner.testIfCullable(chunk, myRenderData)) {
+    if (chunk.owner.testIfCullable(chunk, data)) {
         chunk.isVisible = false;
-        return Chunk::Status::WantMerge;
+        return ChunkStatus::WantMerge;
     }
 
-    const int desiredLevel = chunk.owner.desiredLevel(chunk, myRenderData);
+    const int desiredLevel = chunk.owner.desiredLevel(chunk, data);
 
     if (desiredLevel < chunk.tileIndex.level) {
-        return Chunk::Status::WantMerge;
+        return ChunkStatus::WantMerge;
     }
     else if (chunk.tileIndex.level < desiredLevel) {
-        return Chunk::Status::WantSplit;
+        return ChunkStatus::WantSplit;
     }
     else {
-        return Chunk::Status::DoNothing;
+        return ChunkStatus::DoNothing;
     }
 }
 
@@ -408,7 +388,6 @@ Chunk::Chunk(const RenderableGlobe& o, const TileIndex& ti)
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _debugProperties({
-        BoolProperty(SaveOrThrowInfo, false),
         BoolProperty(ShowChunkEdgeInfo, false),
         BoolProperty(ShowChunkBoundsInfo, false),
         BoolProperty(ShowChunkAABBInfo, false),
@@ -474,7 +453,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.cameraMinHeight);
     addProperty(_generalProperties.orenNayarRoughness);
 
-    _debugPropertyOwner.addProperty(_debugProperties.saveOrThrowCamera);
     _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);
     _debugPropertyOwner.addProperty(_debugProperties.showChunkBounds);
     _debugPropertyOwner.addProperty(_debugProperties.showChunkAABB);
@@ -612,18 +590,6 @@ bool RenderableGlobe::isReady() const {
 
 void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask) {
     if (_enabled) {
-        if (_debugProperties.saveOrThrowCamera) {
-            if (!_savedCamera) {
-                // save camera
-                _savedCamera = std::make_unique<Camera>(data.camera);
-            }
-            else { // throw camera
-                _savedCamera = nullptr;
-            }
-         
-            _debugProperties.saveOrThrowCamera = false;
-        }
-
         const double distanceToCamera = distance(
             data.camera.positionVec3(),
             data.modelTransform.translation
@@ -640,9 +606,6 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
         if (distanceToCamera < distance) {
             renderChunks(data, rendererTask);
         }
-    }
-    if (_savedCamera != nullptr) {
-        DebugRenderer::ref().renderCameraFrustum(data, *_savedCamera);
     }
 }
 
@@ -1151,7 +1114,7 @@ void RenderableGlobe::recompileShaders() {
     pairs.emplace_back("showHeightIntensities",
         std::to_string(_debugProperties.showHeightIntensities)
     );
-    pairs.emplace_back("defaultHeight", std::to_string(Chunk::DefaultHeight));
+    pairs.emplace_back("defaultHeight", std::to_string(DefaultHeight));
 
 
     //
@@ -1716,7 +1679,7 @@ int RenderableGlobe::desiredLevelByDistance(const Chunk& chunk, const RenderData
     const glm::dvec3 patchNormal = _ellipsoid.geodeticSurfaceNormal(pointOnPatch);
     glm::dvec3 patchPosition = _ellipsoid.cartesianSurfacePosition(pointOnPatch);
 
-    const Chunk::BoundingHeights heights = boundingHeightsForChunk(chunk);
+    const BoundingHeights heights = boundingHeightsForChunk(chunk);
     const double heightToChunk = heights.min;
 
     // Offset position according to height
@@ -1771,7 +1734,7 @@ int RenderableGlobe::desiredLevelByProjectedArea(const Chunk& chunk, const Rende
     //    |                 |
     //    +-----------------+  <-- south east corner
 
-    const Chunk::BoundingHeights heights = boundingHeightsForChunk(chunk);
+    const BoundingHeights heights = boundingHeightsForChunk(chunk);
     const Geodetic3 c = { center, heights.min };
     const Geodetic3 c1 = { Geodetic2(center.lat, closestCorner.lon), heights.min };
     const Geodetic3 c2 = { Geodetic2(closestCorner.lat, center.lon), heights.min };
@@ -1878,11 +1841,6 @@ const glm::dmat4& RenderableGlobe::modelTransform() const {
     return _cachedModelTransform;
 }
 
-Camera* RenderableGlobe::savedCamera() const {
-    return _savedCamera.get();
-}
-
-
 
 bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk, const RenderData& renderData) const {
     // Calculations are done in the reference frame of the globe. Hence, the camera
@@ -1972,12 +1930,12 @@ void RenderableGlobe::splitChunkNode(Chunk& cn, int depth) {
 
 void RenderableGlobe::freeChunkNode(Chunk* n) {
     _chunkPool.free(n);
-    for (Chunk*& c : n->children) {
+    for (Chunk* c : n->children) {
         if (c) {
             freeChunkNode(c);
         }
-        c = nullptr;
     }
+    n->children.fill(nullptr);
 }
 
 void RenderableGlobe::mergeChunkNode(Chunk& cn) {
@@ -1992,11 +1950,11 @@ void RenderableGlobe::mergeChunkNode(Chunk& cn) {
 
 bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
     if (isLeaf(cn)) {
-        Chunk::Status status = updateChunk(cn, data, _chunkCornersDirty);
-        if (status == Chunk::Status::WantSplit) {
+        ChunkStatus status = updateChunk(cn, data, _chunkCornersDirty);
+        if (status == ChunkStatus::WantSplit) {
             splitChunkNode(cn, 1);
         }
-        return status == Chunk::Status::WantMerge;
+        return status == ChunkStatus::WantMerge;
     }
     else {
         char requestedMergeMask = 0;
@@ -2007,8 +1965,8 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
         }
 
         const bool allChildrenWantsMerge = requestedMergeMask == 0xf;
-        Chunk::Status status = updateChunk(cn, data, _chunkCornersDirty);
-        const bool thisChunkWantsSplit = status == Chunk::Status::WantSplit;
+        ChunkStatus status = updateChunk(cn, data, _chunkCornersDirty);
+        const bool thisChunkWantsSplit = (status == ChunkStatus::WantSplit);
 
         if (allChildrenWantsMerge && !thisChunkWantsSplit) {
             mergeChunkNode(cn);

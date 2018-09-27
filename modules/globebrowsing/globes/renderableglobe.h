@@ -28,54 +28,27 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/globebrowsing/geometry/ellipsoid.h>
+#include <modules/globebrowsing/geometry/geodeticpatch.h>
+#include <modules/globebrowsing/meshes/skirtedgrid.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <modules/globebrowsing/meshes/skirtedgrid.h>
-#include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <ghoul/misc/memorypool.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <cstddef>
-#include <modules/globebrowsing/geometry/geodeticpatch.h>
-#include <modules/globebrowsing/tile/tileindex.h>
 
 namespace openspace::globebrowsing {
+
+class GPULayerGroup;
+class RenderableGlobe;
+struct TileIndex;
 
 namespace chunklevelevaluator { class Evaluator; }
 namespace culling { class ChunkCuller; }
 
-class ChunkRenderer;
-class Ellipsoid;
-struct Geodetic2;
-class LayerManager;
-class RenderableGlobe;
-class Ellipsoid;
-class Grid;
-class GPULayerManager;
-class LayerManager;
-class LayerShaderManager;
-class RenderableGlobe;
-class GPULayerGroup;
-
-class PointGlobe;
-class LayerManager;
-
-
 struct Chunk {
-    constexpr static float DefaultHeight = 0.f;
-
-    struct BoundingHeights {
-        float min;
-        float max;
-        bool available;
-    };
-
-    enum class Status {
-        DoNothing,
-        WantMerge,
-        WantSplit
-    };
-
     Chunk(const RenderableGlobe& owner, const TileIndex& tileIndex);
 
     const RenderableGlobe& owner;
@@ -83,12 +56,9 @@ struct Chunk {
     const GeodeticPatch surfacePatch;
 
     bool isVisible = true;
-
     std::array<glm::dvec4, 8> corners;
-
     std::array<Chunk*, 4> children = { { nullptr, nullptr, nullptr, nullptr } };
 };
-
 
 /**
  * A RenderableGlobe is a globe modeled as an ellipsoid using a chunked LOD algorithm for
@@ -113,7 +83,6 @@ public:
 //private:
     // Properties
     struct {
-        properties::BoolProperty saveOrThrowCamera;
         properties::BoolProperty showChunkEdges;
         properties::BoolProperty showChunkBounds;
         properties::BoolProperty showChunkAABB;
@@ -179,9 +148,6 @@ public:
     LayerManager& layerManager() ;
     const Ellipsoid& ellipsoid() const;
     const glm::dmat4& modelTransform() const;
-    Camera* savedCamera() const;
-
-
 
 private:
     constexpr static const int MinSplitDepth = 2;
@@ -254,7 +220,6 @@ private:
 
     Ellipsoid _ellipsoid;
     LayerManager _layerManager;
-    std::unique_ptr<Camera> _savedCamera;
 
     glm::dmat4 _cachedModelTransform;
     glm::dmat4 _cachedInverseModelTransform;
