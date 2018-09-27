@@ -31,9 +31,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ext/xml/rapidxml.hpp>
 #include <ext/xml/rapidxml_utils.hpp>
-#include <ext/xml/rapidxml_iterators.hpp>
-#include <ext/xml/rapidxml_print.hpp>
-
+#include <openspace/rendering/renderengine.h>
 #include <fstream>
 
 namespace openspace {
@@ -55,7 +53,7 @@ namespace openspace {
         void update(const UpdateData& data) override;
     private:
         std::unique_ptr<ghoul::Dictionary> _dictionary;
-       // std::string _identifier;
+        std::string _identifier = "CommunicationLines";
         std::vector<std::string> _dataFiles;
     };
 

@@ -80,10 +80,6 @@ namespace openspace {
     {
         DataFileType sourceFileType = DataFileType::Invalid;
 
-        //_dictionary->getValue(SceneGraphNode::KeyIdentifier, _identifier);
-
-
-
         // ------------------- EXTRACT MANDATORY VALUES FROM DICTIONARY ------------------- //
         std::string dataFileTypeString;
         if (!_dictionary->getValue(KeyDataFileType, dataFileTypeString)) {
@@ -154,7 +150,7 @@ namespace openspace {
         }
         else {
             LERROR(fmt::format(
-                "{}: FieldlinesSequence {} is not a valid directory",
+                "{}: {} is not a valid directory",
                 _identifier,
                 dataFolderPath
             ));
