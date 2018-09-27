@@ -29,6 +29,7 @@
 
 #include <modules/globebrowsing/rendering/layer/layergroupid.h>
 #include <ghoul/misc/boolean.h>
+#include <array>
 #include <memory>
 #include <functional>
 
@@ -40,12 +41,16 @@ class Layer;
 struct LayerGroup;
 class TileTextureInitData;
 
+bool shouldPerformPreProcessingOnLayerGroup(layergroupid::GroupID id);
+TileTextureInitData getTileTextureInitData(layergroupid::GroupID id,
+    bool shouldPadTiles, size_t preferredTileSize = 0);
+
 /**
  * Manages multiple LayerGroups.
  */
-class LayerManager : public properties::PropertyOwner  {
+class LayerManager : public properties::PropertyOwner {
 public:
-    BooleanType(PadTiles);
+    constexpr static const int NumLayerGroups = layergroupid::NUM_LAYER_GROUPS;
 
     LayerManager();
 
@@ -61,19 +66,15 @@ public:
 
     bool hasAnyBlendingLayersEnabled() const;
 
-    std::vector<LayerGroup*> layerGroups() const;
+    std::array<LayerGroup*, NumLayerGroups> layerGroups() const;
 
     void update();
     void reset(bool includeDisabled = false);
 
-    static TileTextureInitData getTileTextureInitData(layergroupid::GroupID id,
-        PadTiles padTiles, size_t preferredTileSize = 0);
-
-    static bool shouldPerformPreProcessingOnLayergroup(layergroupid::GroupID id);
     void onChange(std::function<void(void)> callback);
 
 private:
-    std::vector<std::unique_ptr<LayerGroup>> _layerGroups;
+    std::array<std::unique_ptr<LayerGroup>, NumLayerGroups> _layerGroups;
 };
 
 } // namespace openspace::globebrowsing

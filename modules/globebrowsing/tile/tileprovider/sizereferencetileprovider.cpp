@@ -40,12 +40,7 @@ namespace {
 namespace openspace::globebrowsing::tileprovider {
 
 SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
-    : TextTileProvider(
-        LayerManager::getTileTextureInitData(
-            layergroupid::GroupID::ColorLayers,
-            LayerManager::PadTiles::No
-        )
-    )
+    : TextTileProvider(getTileTextureInitData(layergroupid::GroupID::ColorLayers, false))
 {
     _fontSize = 50;
     _font = global::fontManager.font("Mono", static_cast<float>(_fontSize));

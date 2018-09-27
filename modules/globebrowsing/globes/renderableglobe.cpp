@@ -638,7 +638,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     }
 
     if (_globalRenderer.updatedSinceLastCall) {
-        const std::vector<LayerGroup*>& layerGroups = _layerManager.layerGroups();
+        const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
+            _layerManager.layerGroups();
         if (_globalRenderer.gpuLayerGroups.size() != layerGroups.size()) {
             _globalRenderer.gpuLayerGroups.resize(layerGroups.size());
             for (std::unique_ptr<GPULayerGroup>& gpuLayerGroup : _globalRenderer.gpuLayerGroups) {
@@ -660,7 +661,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     }
 
     if (_localRenderer.updatedSinceLastCall) {
-        const std::vector<LayerGroup*>& layerGroups = _layerManager.layerGroups();
+        const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
+            _layerManager.layerGroups();
         if (_localRenderer.gpuLayerGroups.size() != layerGroups.size()) {
             _localRenderer.gpuLayerGroups.resize(layerGroups.size());
             for (std::unique_ptr<GPULayerGroup>& gpuLayerGroup : _localRenderer.gpuLayerGroups) {
@@ -879,7 +881,8 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     const TileIndex& tileIndex = chunk.tileIndex;
     ghoul::opengl::ProgramObject& program = *_globalRenderer.program;
 
-    const std::vector<LayerGroup*>& layerGroups = _layerManager.layerGroups();
+    const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
+        _layerManager.layerGroups();
     for (size_t i = 0; i < layerGroups.size(); ++i) {
         _globalRenderer.gpuLayerGroups[i]->setValue(program, *layerGroups[i], tileIndex);
     }
@@ -933,7 +936,8 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     const TileIndex& tileIndex = chunk.tileIndex;
     ghoul::opengl::ProgramObject& program = *_localRenderer.program;
 
-    const std::vector<LayerGroup*>& layerGroups = _layerManager.layerGroups();
+    const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
+        _layerManager.layerGroups();
     for (size_t i = 0; i < layerGroups.size(); ++i) {
         _localRenderer.gpuLayerGroups[i]->setValue(program, *layerGroups[i], tileIndex);
     }

@@ -87,16 +87,14 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
 
     dictionary.getValue<bool>(KeyPadTiles, _padTiles);
 
-    TileTextureInitData initData(LayerManager::getTileTextureInitData(
+    TileTextureInitData initData(getTileTextureInitData(
         _layerGroupID,
-        LayerManager::PadTiles(_padTiles),
+        _padTiles,
         tilePixelSize
     ));
     _tilePixelSize = initData.dimensions().x;
 
-    _performPreProcessing = LayerManager::shouldPerformPreProcessingOnLayergroup(
-        _layerGroupID
-    );
+    _performPreProcessing = shouldPerformPreProcessingOnLayerGroup(_layerGroupID);
     if (dictionary.getValue<bool>(KeyPerformPreProcessing, _performPreProcessing)) {
         LDEBUG(fmt::format(
             "Default PerformPreProcessing overridden: {}", _performPreProcessing
@@ -128,11 +126,9 @@ void DefaultTileProvider::update() {
         initTexturesFromLoadedData();
         if (_asyncTextureDataProvider->shouldBeDeleted()) {
             _asyncTextureDataProvider = nullptr;
-            TileTextureInitData initData(LayerManager::getTileTextureInitData(
-                _layerGroupID,
-                LayerManager::PadTiles(_padTiles),
-                _tilePixelSize
-            ));
+            TileTextureInitData initData(
+                getTileTextureInitData(_layerGroupID, _padTiles, _tilePixelSize)
+            );
             initAsyncTileDataReader(initData);
         }
     }
@@ -144,11 +140,9 @@ void DefaultTileProvider::reset() {
         _asyncTextureDataProvider->prepairToBeDeleted();
     }
     else {
-        TileTextureInitData initData(LayerManager::getTileTextureInitData(
-            _layerGroupID,
-            LayerManager::PadTiles(_padTiles),
-            _tilePixelSize
-        ));
+        TileTextureInitData initData(
+            getTileTextureInitData(_layerGroupID, _padTiles, _tilePixelSize)
+        );
         initAsyncTileDataReader(initData);
     }
 }

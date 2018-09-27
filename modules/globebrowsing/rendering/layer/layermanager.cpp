@@ -36,11 +36,79 @@ namespace {
 
 namespace openspace::globebrowsing {
 
+bool shouldPerformPreProcessingOnLayerGroup(layergroupid::GroupID id) {
+    // Only preprocess height layers by default
+    switch (id) {
+        case layergroupid::GroupID::HeightLayers: return true;
+        default:                                  return false;
+    }
+}
+
+TileTextureInitData getTileTextureInitData(layergroupid::GroupID id, bool shouldPadTiles,
+                                           size_t preferredTileSize)
+{
+    switch (id) {
+        case layergroupid::GroupID::HeightLayers: {
+            const size_t tileSize = preferredTileSize ? preferredTileSize : 64;
+            return TileTextureInitData(
+                tileSize,
+                tileSize,
+                GL_FLOAT,
+                ghoul::opengl::Texture::Format::Red,
+                TileTextureInitData::PadTiles(shouldPadTiles),
+                TileTextureInitData::ShouldAllocateDataOnCPU::Yes
+            );
+        }
+        case layergroupid::GroupID::ColorLayers: {
+            const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
+            return TileTextureInitData(
+                tileSize,
+                tileSize,
+                GL_UNSIGNED_BYTE,
+                ghoul::opengl::Texture::Format::BGRA,
+                TileTextureInitData::PadTiles(shouldPadTiles)
+            );
+        }
+        case layergroupid::GroupID::Overlays: {
+            const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
+            return TileTextureInitData(
+                tileSize,
+                tileSize,
+                GL_UNSIGNED_BYTE,
+                ghoul::opengl::Texture::Format::BGRA,
+                TileTextureInitData::PadTiles(shouldPadTiles)
+            );
+        }
+        case layergroupid::GroupID::NightLayers: {
+            const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
+            return TileTextureInitData(
+                tileSize,
+                tileSize,
+                GL_UNSIGNED_BYTE,
+                ghoul::opengl::Texture::Format::BGRA,
+                TileTextureInitData::PadTiles(shouldPadTiles)
+            );
+        }
+        case layergroupid::GroupID::WaterMasks: {
+            const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
+            return TileTextureInitData(
+                tileSize,
+                tileSize,
+                GL_UNSIGNED_BYTE,
+                ghoul::opengl::Texture::Format::BGRA,
+                TileTextureInitData::PadTiles(shouldPadTiles)
+            );
+        }
+        default: {
+            throw ghoul::MissingCaseException();
+        }
+    }
+}
+
 LayerManager::LayerManager() : properties::PropertyOwner({ "Layers" }) {}
 
 void LayerManager::initialize(const ghoul::Dictionary& layerGroupsDict) {
     // First create empty layer groups in case not all are specified
-    _layerGroups.resize(layergroupid::NUM_LAYER_GROUPS);
     for (size_t i = 0; i < _layerGroups.size(); ++i) {
         ghoul::Dictionary emptyDict;
         _layerGroups[i] = std::make_unique<LayerGroup>(
@@ -83,7 +151,7 @@ void LayerManager::deinitialize() {
 }
 
 Layer* LayerManager::addLayer(layergroupid::GroupID groupId,
-                                              const ghoul::Dictionary& layerDict)
+                              const ghoul::Dictionary& layerDict)
 {
     ghoul_assert(groupId != layergroupid::Unknown, "Layer group ID must be known");
 
@@ -117,11 +185,11 @@ bool LayerManager::hasAnyBlendingLayersEnabled() const {
     );
 }
 
-std::vector<LayerGroup*> LayerManager::layerGroups() const {
-    std::vector<LayerGroup*> res;
-    res.reserve(_layerGroups.size());
-    for (const std::unique_ptr<LayerGroup>& ptr : _layerGroups) {
-        res.push_back(ptr.get());
+std::array<LayerGroup*, LayerManager::NumLayerGroups> LayerManager::layerGroups() const
+{
+    std::array<LayerGroup*, NumLayerGroups> res;
+    for (int i = 0; i < NumLayerGroups; ++i) {
+        res[i] = _layerGroups[i].get();
     }
     return res;
 }
@@ -139,85 +207,6 @@ void LayerManager::reset(bool includeDisabled) {
                 layer->tileProvider()->reset();
             }
         }
-    }
-}
-
-TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::GroupID id,
-                                                         PadTiles padTiles,
-                                                         size_t preferredTileSize)
-{
-    switch (id) {
-        case layergroupid::GroupID::HeightLayers: {
-            const size_t tileSize = preferredTileSize ? preferredTileSize : 64;
-            return TileTextureInitData(
-                tileSize,
-                tileSize,
-                GL_FLOAT,
-                ghoul::opengl::Texture::Format::Red,
-                TileTextureInitData::PadTiles(padTiles),
-                TileTextureInitData::ShouldAllocateDataOnCPU::Yes
-            );
-        }
-        case layergroupid::GroupID::ColorLayers: {
-            const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
-            return TileTextureInitData(
-                tileSize,
-                tileSize,
-                GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA,
-                TileTextureInitData::PadTiles(padTiles)
-            );
-        }
-        case layergroupid::GroupID::Overlays: {
-            const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
-            return TileTextureInitData(
-                tileSize,
-                tileSize,
-                GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA,
-                TileTextureInitData::PadTiles(padTiles)
-            );
-        }
-        case layergroupid::GroupID::NightLayers: {
-            const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
-            return TileTextureInitData(
-                tileSize,
-                tileSize,
-                GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA,
-                TileTextureInitData::PadTiles(padTiles)
-            );
-        }
-        case layergroupid::GroupID::WaterMasks: {
-            const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
-            return TileTextureInitData(
-                tileSize,
-                tileSize,
-                GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA,
-                TileTextureInitData::PadTiles(padTiles)
-            );
-        }
-        default: {
-            ghoul_assert(false, "Unknown layer group ID");
-
-            const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
-            return TileTextureInitData(
-                tileSize,
-                tileSize,
-                GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA,
-                TileTextureInitData::PadTiles(padTiles)
-            );
-        }
-    }
-}
-
-bool LayerManager::shouldPerformPreProcessingOnLayergroup(layergroupid::GroupID id) {
-    // Only preprocess height layers by default
-    switch (id) {
-        case layergroupid::GroupID::HeightLayers: return true;
-        default:                                  return false;
     }
 }
 

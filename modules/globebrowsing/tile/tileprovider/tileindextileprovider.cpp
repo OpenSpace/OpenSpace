@@ -32,10 +32,7 @@
 namespace openspace::globebrowsing::tileprovider {
 
 TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary&)
-    : TextTileProvider(LayerManager::getTileTextureInitData(
-        layergroupid::GroupID::ColorLayers,
-        LayerManager::PadTiles::No
-    ))
+    : TextTileProvider(getTileTextureInitData(layergroupid::GroupID::ColorLayers, false))
 {}
 
 void TileIndexTileProvider::renderText(const ghoul::fontrendering::FontRenderer&
@@ -48,9 +45,12 @@ void TileIndexTileProvider::renderText(const ghoul::fontrendering::FontRenderer&
                 (_initData.dimensions().x / 32) * log10(1 << tileIndex.level),
             _initData.dimensions().y / 2 + _fontSize
         ),
-        fmt::format("level: {}\nx: {}\ny: {}", tileIndex.level, tileIndex.x, tileIndex.y),
-        glm::vec4(1.0),
-        glm::vec4(1.0)
+        fmt::format(
+            "level: {}\nx: {}\ny: {}",
+            tileIndex.level, tileIndex.x, tileIndex.y
+        ),
+        glm::vec4(1.f),
+        glm::vec4(1.f)
     );
 }
 
