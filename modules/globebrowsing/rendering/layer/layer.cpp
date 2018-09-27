@@ -317,27 +317,17 @@ glm::ivec2 Layer::tilePixelSizeDifference() const {
     return _padTilePixelSizeDifference;
 }
 
-glm::vec2 Layer::compensateSourceTextureSampling(glm::vec2 startOffset,
-                                                 glm::vec2 sizeDiff,
-                                                 glm::uvec2 resolution, glm::vec2 tileUV)
-{
-    const glm::vec2 sourceSize = glm::vec2(resolution) + sizeDiff;
-    const glm::vec2 currentSize = glm::vec2(resolution);
-    const glm::vec2 sourceToCurrentSize = currentSize / sourceSize;
-    tileUV = sourceToCurrentSize * (tileUV - startOffset / sourceSize);
-    return tileUV;
-}
-
-glm::vec2 Layer::TileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
-                                               glm::vec2 tileUV, glm::uvec2 resolution)
+glm::vec2 Layer::tileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
+                                               const glm::vec2& tileUV,
+                                               const glm::uvec2& resolution)
 {
     glm::vec2 uv = uvTransform.uvOffset + uvTransform.uvScale * tileUV;
-    uv = compensateSourceTextureSampling(
-        tilePixelStartOffset(),
-        tilePixelSizeDifference(),
-        resolution,
-        uv);
-    return uv;
+
+    const glm::vec2 sourceSize = glm::vec2(resolution) +
+                                 glm::vec2(_padTilePixelSizeDifference);
+    const glm::vec2 currentSize = glm::vec2(resolution);
+    const glm::vec2 sourceToCurrentSize = currentSize / sourceSize;
+    return sourceToCurrentSize * (uv - glm::vec2(_padTilePixelStartOffset) / sourceSize);
 }
 
 layergroupid::TypeID Layer::parseTypeIdFromDictionary(

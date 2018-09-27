@@ -1449,7 +1449,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
             return 0;
         }
 
-        glm::vec2 transformedUv = layer->TileUvToTextureSamplePosition(
+        glm::vec2 transformedUv = layer->tileUvToTextureSamplePosition(
             uvTransform,
             patchUV,
             glm::uvec2(tileTexture->dimensions())

@@ -77,10 +77,8 @@ public:
 
     glm::ivec2 tilePixelStartOffset() const;
     glm::ivec2 tilePixelSizeDifference() const;
-    glm::vec2 compensateSourceTextureSampling(glm::vec2 startOffset, glm::vec2 sizeDiff,
-        glm::uvec2 resolution, glm::vec2 tileUV);
-    glm::vec2 TileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
-        glm::vec2 tileUV, glm::uvec2 resolution);
+    glm::vec2 tileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
+        const glm::vec2& tileUV, const glm::uvec2& resolution);
 
 private:
     layergroupid::TypeID parseTypeIdFromDictionary(
