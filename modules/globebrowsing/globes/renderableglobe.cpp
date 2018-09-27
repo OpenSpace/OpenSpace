@@ -232,42 +232,10 @@ const Chunk& findChunkNode(const Chunk& node, const Geodetic2& location) {
     return *n;
 }
 
-Chunk::Status updateChunk(Chunk& chunk, const RenderData& data) {
-    Camera* savedCamera = chunk.owner.savedCamera();
-    const Camera& camRef = savedCamera ? *savedCamera : data.camera;
-
-    RenderData myRenderData = {
-        camRef,
-        data.position,
-        data.time,
-        data.doPerformanceMeasurement,
-        data.renderBinMask,
-        data.modelTransform
-    };
-
-    chunk.isVisible = true;
-    if (chunk.owner.testIfCullable(chunk, myRenderData)) {
-        chunk.isVisible = false;
-        return Chunk::Status::WantMerge;
-    }
-
-    const int desiredLevel = chunk.owner.desiredLevel(chunk, myRenderData);
-
-    if (desiredLevel < chunk.tileIndex.level) {
-        return Chunk::Status::WantMerge;
-    }
-    else if (chunk.tileIndex.level < desiredLevel) {
-        return Chunk::Status::WantSplit;
-    }
-    else {
-        return Chunk::Status::DoNothing;
-    }
-}
-
 Chunk::BoundingHeights boundingHeightsForChunk(const Chunk& chunk) {
     using ChunkTileSettingsPair = std::pair<ChunkTile, const LayerRenderSettings*>;
 
-    Chunk::BoundingHeights boundingHeights { 0.f, 0.f, false };
+    Chunk::BoundingHeights boundingHeights{ 0.f, 0.f, false };
 
     // In the future, this should be abstracted away and more easily queryable.
     // One must also handle how to sample pick one out of multiplte heightmaps
@@ -325,8 +293,7 @@ Chunk::BoundingHeights boundingHeightsForChunk(const Chunk& chunk) {
     return boundingHeights;
 }
 
-
-std::vector<glm::dvec4> boundingPolyhedronCornersForChunk(const Chunk& chunk) {
+std::array<glm::dvec4, 8> boundingPolyhedronCornersForChunk(const Chunk& chunk) {
     const Ellipsoid& ellipsoid = chunk.owner.ellipsoid();
 
     const Chunk::BoundingHeights& boundingHeight = boundingHeightsForChunk(chunk);
@@ -358,7 +325,7 @@ std::vector<glm::dvec4> boundingPolyhedronCornersForChunk(const Chunk& chunk) {
 
     // The minimum height offset, however, we can simply
     const double minCornerHeight = boundingHeight.min;
-    std::vector<glm::dvec4> corners(8);
+    std::array<glm::dvec4, 8> corners;
 
     const double latCloseToEquator = chunk.surfacePatch.edgeLatitudeNearestEquator();
     const Geodetic3 p1Geodetic = {
@@ -391,6 +358,42 @@ std::vector<glm::dvec4> boundingPolyhedronCornersForChunk(const Chunk& chunk) {
     }
 
     return corners;
+}
+
+Chunk::Status updateChunk(Chunk& chunk, const RenderData& data, bool updateCorners) {
+    Camera* savedCamera = chunk.owner.savedCamera();
+    const Camera& camRef = savedCamera ? *savedCamera : data.camera;
+
+    RenderData myRenderData = {
+        camRef,
+        data.position,
+        data.time,
+        data.doPerformanceMeasurement,
+        data.renderBinMask,
+        data.modelTransform
+    };
+
+    if (updateCorners) {
+        chunk.corners = boundingPolyhedronCornersForChunk(chunk);
+    }
+
+    chunk.isVisible = true;
+    if (chunk.owner.testIfCullable(chunk, myRenderData)) {
+        chunk.isVisible = false;
+        return Chunk::Status::WantMerge;
+    }
+
+    const int desiredLevel = chunk.owner.desiredLevel(chunk, myRenderData);
+
+    if (desiredLevel < chunk.tileIndex.level) {
+        return Chunk::Status::WantMerge;
+    }
+    else if (chunk.tileIndex.level < desiredLevel) {
+        return Chunk::Status::WantSplit;
+    }
+    else {
+        return Chunk::Status::DoNothing;
+    }
 }
 
 } // namespace
@@ -497,7 +500,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _debugProperties.showHeightResolution.onChange(notifyShaderRecompilation);
     _debugProperties.showHeightIntensities.onChange(notifyShaderRecompilation);
 
-    _layerManager.onChange(notifyShaderRecompilation);
+    _layerManager.onChange([&]() {
+        _shadersNeedRecompilation = true;
+        _chunkCornersDirty = true;
+    });
 
     addPropertySubOwner(_debugPropertyOwner);
     addPropertySubOwner(_layerManager);
@@ -740,6 +746,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
 
     updateChunkTree(_leftRoot, data);
     updateChunkTree(_rightRoot, data);
+    _chunkCornersDirty = false;
 
     // Calculate the MVP matrix
     const glm::dmat4& viewTransform = data.camera.combinedViewMatrix();
@@ -866,7 +873,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     auto traversal = [&global, &globalCount, &local, &localCount, &count,
           cutoff = _debugProperties.modelSpaceRenderingCutoffLevel](const Chunk& node)
     {
-        //std::queue<const ChunkNode*> Q;
         std::vector<const Chunk*> Q;
         Q.reserve(256);
 
@@ -1475,8 +1481,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
 }
 
 void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const {
-    const std::vector<glm::dvec4>& modelSpaceCorners =
-        boundingPolyhedronCornersForChunk(chunk);
+    const std::array<glm::dvec4, 8>& modelSpaceCorners = chunk.corners;
 
     std::vector<glm::vec4> clippingSpaceCorners(8);
     AABB3 screenSpaceBounds;
@@ -1842,7 +1847,7 @@ bool RenderableGlobe::isCullableByFrustum(const Chunk& chunk, const RenderData& 
         renderData.camera.sgctInternal.projectionMatrix()
     ) * viewTransform * _cachedModelTransform;
 
-    const std::vector<glm::dvec4>& corners = boundingPolyhedronCornersForChunk(chunk);
+    const std::array<glm::dvec4, 8>& corners = chunk.corners;
 
     // Create a bounding box that fits the patch corners
     AABB3 bounds; // in screen space
@@ -1953,6 +1958,8 @@ void RenderableGlobe::splitChunkNode(Chunk& cn, int depth) {
                 *this,
                 cn.tileIndex.child(static_cast<Quad>(i))
             );
+            cn.children[i]->corners = boundingPolyhedronCornersForChunk(*cn.children[i]);
+
         }
     }
 
@@ -1985,7 +1992,7 @@ void RenderableGlobe::mergeChunkNode(Chunk& cn) {
 
 bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
     if (isLeaf(cn)) {
-        Chunk::Status status = updateChunk(cn, data);
+        Chunk::Status status = updateChunk(cn, data, _chunkCornersDirty);
         if (status == Chunk::Status::WantSplit) {
             splitChunkNode(cn, 1);
         }
@@ -1997,11 +2004,11 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
             if (updateChunkTree(*cn.children[i], data)) {
                 requestedMergeMask |= (1 << i);
             }
-            i = i;
         }
 
         const bool allChildrenWantsMerge = requestedMergeMask == 0xf;
-        const bool thisChunkWantsSplit = updateChunk(cn, data) == Chunk::Status::WantSplit;
+        Chunk::Status status = updateChunk(cn, data, _chunkCornersDirty);
+        const bool thisChunkWantsSplit = status == Chunk::Status::WantSplit;
 
         if (allChildrenWantsMerge && !thisChunkWantsSplit) {
             mergeChunkNode(cn);

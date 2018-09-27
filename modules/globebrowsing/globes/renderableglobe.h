@@ -80,8 +80,11 @@ struct Chunk {
 
     const RenderableGlobe& owner;
     const TileIndex tileIndex;
-    bool isVisible = true;
     const GeodeticPatch surfacePatch;
+
+    bool isVisible = true;
+
+    std::array<glm::dvec4, 8> corners;
 
     std::array<Chunk*, 4> children = { { nullptr, nullptr, nullptr, nullptr } };
 };
@@ -284,6 +287,7 @@ private:
 
     bool _shadersNeedRecompilation = true;
     bool _lodScaleFactorDirty = true;
+    bool _chunkCornersDirty = true;
 };
 
 } // namespace openspace::globebrowsing
