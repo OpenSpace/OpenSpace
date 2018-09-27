@@ -54,9 +54,7 @@ LayerGroup::LayerGroup(layergroupid::GroupID id)
     addProperty(_levelBlendingEnabled);
 }
 
-LayerGroup::LayerGroup(layergroupid::GroupID id, const ghoul::Dictionary& dict)
-    : LayerGroup(id)
-{
+void LayerGroup::setLayersFromDict(const ghoul::Dictionary& dict) {
     for (size_t i = 1; i <= dict.size(); i++) {
         ghoul::Dictionary layerDict = dict.value<ghoul::Dictionary>(std::to_string(i));
 

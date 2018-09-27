@@ -52,7 +52,7 @@ public:
     void initialize(const ghoul::Dictionary& layerGroupsDict);
     void deinitialize();
 
-    std::shared_ptr<Layer> addLayer(layergroupid::GroupID groupId,
+    Layer* addLayer(layergroupid::GroupID groupId,
         const ghoul::Dictionary& layerDict);
     void deleteLayer(layergroupid::GroupID groupId, const std::string& layerName);
 
@@ -61,7 +61,7 @@ public:
 
     bool hasAnyBlendingLayersEnabled() const;
 
-    const std::vector<std::shared_ptr<LayerGroup>>& layerGroups() const;
+    std::vector<LayerGroup*> layerGroups() const;
 
     void update();
     void reset(bool includeDisabled = false);
@@ -73,7 +73,7 @@ public:
     void onChange(std::function<void(void)> callback);
 
 private:
-    std::vector<std::shared_ptr<LayerGroup>> _layerGroups;
+    std::vector<std::unique_ptr<LayerGroup>> _layerGroups;
 };
 
 } // namespace openspace::globebrowsing

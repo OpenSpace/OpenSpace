@@ -43,9 +43,9 @@ void LayerManager::initialize(const ghoul::Dictionary& layerGroupsDict) {
     _layerGroups.resize(layergroupid::NUM_LAYER_GROUPS);
     for (size_t i = 0; i < _layerGroups.size(); ++i) {
         ghoul::Dictionary emptyDict;
-        _layerGroups[i] = std::make_shared<LayerGroup>(
-            static_cast<layergroupid::GroupID>(i), emptyDict
-            );
+        _layerGroups[i] = std::make_unique<LayerGroup>(
+            static_cast<layergroupid::GroupID>(i)
+        );
     }
 
     const std::vector<std::string>& layerGroupNamesInDict = layerGroupsDict.keys();
@@ -60,37 +60,34 @@ void LayerManager::initialize(const ghoul::Dictionary& layerGroupsDict) {
             ghoul::Dictionary layerGroupDict = layerGroupsDict.value<ghoul::Dictionary>(
                 groupName
                 );
-            _layerGroups[static_cast<int>(groupId)] = std::make_shared<LayerGroup>(
-                groupId,
-                layerGroupDict
-                );
+            _layerGroups[static_cast<int>(groupId)]->setLayersFromDict(layerGroupDict);
         }
         else {
             LWARNING("Unknown layer group: " + groupName);
         }
     }
 
-    for (const std::shared_ptr<LayerGroup>& layerGroup : _layerGroups) {
+    for (const std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
         addPropertySubOwner(layerGroup.get());
     }
 
-    for (const std::shared_ptr<LayerGroup>& lg : _layerGroups) {
+    for (const std::unique_ptr<LayerGroup>& lg : _layerGroups) {
         lg->initialize();
     }
 }
 
 void LayerManager::deinitialize() {
-    for (const std::shared_ptr<LayerGroup>& lg : _layerGroups) {
+    for (const std::unique_ptr<LayerGroup>& lg : _layerGroups) {
         lg->deinitialize();
     }
 }
 
-std::shared_ptr<Layer> LayerManager::addLayer(layergroupid::GroupID groupId,
+Layer* LayerManager::addLayer(layergroupid::GroupID groupId,
                                               const ghoul::Dictionary& layerDict)
 {
     ghoul_assert(groupId != layergroupid::Unknown, "Layer group ID must be known");
 
-    return _layerGroups[groupId]->addLayer(layerDict);
+    return _layerGroups[groupId]->addLayer(layerDict).get();
 }
 
 void LayerManager::deleteLayer(layergroupid::GroupID groupId,
@@ -113,25 +110,30 @@ bool LayerManager::hasAnyBlendingLayersEnabled() const {
     return std::any_of(
         _layerGroups.begin(),
         _layerGroups.end(),
-        [](const std::shared_ptr<LayerGroup>& layerGroup) {
+        [](const std::unique_ptr<LayerGroup>& layerGroup) {
             return layerGroup->layerBlendingEnabled() &&
                    !layerGroup->activeLayers().empty();
         }
     );
 }
 
-const std::vector<std::shared_ptr<LayerGroup>>& LayerManager::layerGroups() const {
-    return _layerGroups;
+std::vector<LayerGroup*> LayerManager::layerGroups() const {
+    std::vector<LayerGroup*> res;
+    res.reserve(_layerGroups.size());
+    for (const std::unique_ptr<LayerGroup>& ptr : _layerGroups) {
+        res.push_back(ptr.get());
+    }
+    return res;
 }
 
 void LayerManager::update() {
-    for (std::shared_ptr<LayerGroup>& layerGroup : _layerGroups) {
+    for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
         layerGroup->update();
     }
 }
 
 void LayerManager::reset(bool includeDisabled) {
-    for (std::shared_ptr<LayerGroup>& layerGroup : _layerGroups) {
+    for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
         for (const std::shared_ptr<Layer>& layer : layerGroup->layers()) {
             if (layer->enabled() || includeDisabled) {
                 layer->tileProvider()->reset();
@@ -220,7 +222,7 @@ bool LayerManager::shouldPerformPreProcessingOnLayergroup(layergroupid::GroupID 
 }
 
 void LayerManager::onChange(std::function<void(void)> callback) {
-    for (std::shared_ptr<LayerGroup>& layerGroup : _layerGroups) {
+    for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
         layerGroup->onChange(callback);
     }
 }
