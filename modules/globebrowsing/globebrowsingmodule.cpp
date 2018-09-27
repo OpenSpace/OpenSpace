@@ -29,15 +29,7 @@
 #include <modules/globebrowsing/geometry/geodetic3.h>
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/gdalwrapper.h>
-#include <modules/globebrowsing/tile/tileprovider/defaulttileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/singleimageprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/sizereferencetileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/texttileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/tileindextileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/tileproviderbylevel.h>
-#include <modules/globebrowsing/tile/tileprovider/tileproviderbyindex.h>
+#include <modules/globebrowsing/tile/tileprovider.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>

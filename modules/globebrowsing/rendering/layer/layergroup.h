@@ -34,7 +34,7 @@ namespace openspace::globebrowsing {
 
 class Layer;
 
-namespace tileprovider { class TileProvider; }
+namespace tileprovider { struct TileProvider; }
 
 /**
  * Convenience class for dealing with multiple <code>Layer</code>s.

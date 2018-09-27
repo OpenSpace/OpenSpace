@@ -76,15 +76,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileuvtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileloadjob.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/defaulttileprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/sizereferencetileprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/texttileprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileindextileprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileproviderbyindex.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileproviderbylevel.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiletextureinitdata.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/rawtiledatareader.h
@@ -134,15 +126,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilemetadata.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileloadjob.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/defaulttileprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/sizereferencetileprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/texttileprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileindextileprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileproviderbyindex.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileproviderbylevel.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiletextureinitdata.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/rawtiledatareader.cpp

@@ -31,7 +31,7 @@
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/rendering/gpu/gpulayergroup.h>
 #include <modules/globebrowsing/tile/tileselector.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider.h>
 #include <modules/debugging/rendering/debugrenderer.h>
 #include <openspace/engine/globals.h>
 #include <openspace/performance/performancemanager.h>
@@ -859,7 +859,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
         }
     }
 
-    LINFOC(identifier(), "Count: " + std::to_string(count));
+    //LINFOC(identifier(), "Count: " + std::to_string(count));
 }
 
 void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& data) {
@@ -1436,10 +1436,11 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
             continue;
         }
         // Transform the uv coordinates to the current tile texture
-        const ChunkTile chunkTile = tileProvider->chunkTile(tileIndex);
+        const ChunkTile chunkTile = tileprovider::chunkTile(*tileProvider, tileIndex);
         const Tile& tile = chunkTile.tile;
         const TileUvTransform& uvTransform = chunkTile.uvTransform;
-        const TileDepthTransform& depthTransform = tileProvider->depthTransform();
+        const TileDepthTransform& depthTransform =
+            tileprovider::depthTransform(*tileProvider);
         if (tile.status() != Tile::Status::OK) {
             return 0;
         }
@@ -1497,10 +1498,10 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
             std::isnan(sample11);
 
         const bool anySampleIsNoData =
-            sample00 == tileProvider->noDataValueAsFloat() ||
-            sample01 == tileProvider->noDataValueAsFloat() ||
-            sample10 == tileProvider->noDataValueAsFloat() ||
-            sample11 == tileProvider->noDataValueAsFloat();
+            sample00 == tileprovider::noDataValueAsFloat(*tileProvider) ||
+            sample01 == tileprovider::noDataValueAsFloat(*tileProvider) ||
+            sample10 == tileprovider::noDataValueAsFloat(*tileProvider) ||
+            sample11 == tileprovider::noDataValueAsFloat(*tileProvider);
 
         if (anySampleIsNaN || anySampleIsNoData) {
             continue;

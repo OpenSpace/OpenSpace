@@ -27,7 +27,7 @@
 #include <modules/globebrowsing/rendering/layer/layer.h>
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/tile/tileindex.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider.h>
 
 namespace openspace::globebrowsing::tileselector {
 
@@ -40,7 +40,10 @@ ChunkTile getHighestResolutionTile(const LayerGroup& layerGroup,
     mostHighResolution.tile = Tile::TileUnavailable;
 
     for (const Layer* layer : layerGroup.activeLayers()) {
-        const ChunkTile chunkTile = layer->tileProvider()->chunkTile(tileIndex);
+        const ChunkTile chunkTile = tileprovider::chunkTile(
+            *layer->tileProvider(),
+            tileIndex
+        );
         const bool tileIsOk = chunkTile.tile.status() == Tile::Status::OK;
         const bool tileHasMetaData = chunkTile.tile.metaData() != nullptr;
         const bool tileIsHigherResolution =
@@ -59,7 +62,7 @@ std::vector<ChunkTile> getTilesSortedByHighestResolution(const LayerGroup& layer
 {
     std::vector<ChunkTile> tiles;
     for (Layer* layer : layerGroup.activeLayers()) {
-        tiles.push_back(layer->tileProvider()->chunkTile(tileIndex));
+        tiles.push_back(tileprovider::chunkTile(*layer->tileProvider(), tileIndex));
     }
 
     std::sort(
@@ -80,7 +83,7 @@ getTilesAndSettingsSortedByHighestResolution(const LayerGroup& layerGroup,
     std::vector<std::pair<ChunkTile, const LayerRenderSettings*>> tilesAndSettings;
     for (Layer* layer : layerGroup.activeLayers()) {
         tilesAndSettings.emplace_back(
-            layer->tileProvider()->chunkTile(tileIndex),
+            tileprovider::chunkTile(*layer->tileProvider(), tileIndex),
             &layer->renderSettings()
         );
     }
@@ -103,7 +106,7 @@ getTilesAndSettingsUnsorted(const LayerGroup& layerGroup, const TileIndex& tileI
     for (Layer* layer : layerGroup.activeLayers()) {
         if (layer->tileProvider()) {
             tilesAndSettings.emplace_back(
-                layer->tileProvider()->chunkTile(tileIndex),
+                tileprovider::chunkTile(*layer->tileProvider(), tileIndex),
                 &layer->renderSettings()
             );
         }

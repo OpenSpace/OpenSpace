@@ -34,7 +34,7 @@
 
 namespace openspace::globebrowsing {
 
-namespace tileprovider { class TileProvider; }
+namespace tileprovider { struct TileProvider; }
 
 class LayerAdjustment : public properties::PropertyOwner {
 public:

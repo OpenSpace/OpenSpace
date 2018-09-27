@@ -41,7 +41,7 @@ struct LayerGroup;
 struct TileIndex;
 struct TileDepthTransform;
 
-namespace tileprovider { class TileProvider; }
+namespace tileprovider { struct TileProvider; }
 
 class Layer : public properties::PropertyOwner {
 public:

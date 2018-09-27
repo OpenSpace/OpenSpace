@@ -28,7 +28,7 @@
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace openspace::globebrowsing {
@@ -170,14 +170,14 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
 
     _reset.onChange([&]() {
         if (_tileProvider) {
-            _tileProvider->reset();
+            tileprovider::reset(*_tileProvider);
         }
     });
 
     _remove.onChange([&]() {
         try {
             if (_tileProvider) {
-                _tileProvider->reset();
+                tileprovider::reset(*_tileProvider);
             }
         }
         catch (...) {
@@ -227,19 +227,19 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
 
 void Layer::initialize() {
     if (_tileProvider) {
-        _tileProvider->initialize();
+        tileprovider::initialize(*_tileProvider);
     }
 }
 
 void Layer::deinitialize() {
     if (_tileProvider) {
-        _tileProvider->deinitialize();
+        tileprovider::deinitialize(*_tileProvider);
     }
 }
 
 ChunkTilePile Layer::chunkTilePile(const TileIndex& tileIndex, int pileSize) const {
     if (_tileProvider) {
-        return _tileProvider->chunkTilePile(tileIndex, pileSize);
+        return tileprovider::chunkTilePile(*_tileProvider, tileIndex, pileSize);
     }
     else {
         ChunkTilePile chunkTilePile;
@@ -255,7 +255,7 @@ ChunkTilePile Layer::chunkTilePile(const TileIndex& tileIndex, int pileSize) con
 
 Tile::Status Layer::tileStatus(const TileIndex& index) const {
     if (_tileProvider) {
-        return _tileProvider->tileStatus(index);
+        return tileprovider::tileStatus(*_tileProvider, index);
     }
     else {
         return Tile::Status::Unavailable;
@@ -272,7 +272,7 @@ layergroupid::BlendModeID Layer::blendMode() const {
 
 TileDepthTransform Layer::depthTransform() const {
     if (_tileProvider) {
-        return _tileProvider->depthTransform();
+        return tileprovider::depthTransform(*_tileProvider);
     }
     else {
         return { 1.f, 0.f };
@@ -305,7 +305,7 @@ void Layer::onChange(std::function<void(void)> callback) {
 
 void Layer::update() {
     if (_tileProvider) {
-        _tileProvider->update();
+        tileprovider::update(*_tileProvider);
     }
 }
 
@@ -362,7 +362,7 @@ void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary
                 LDEBUG("Initializing tile provider for layer: '" + name + "'");
             }
             _tileProvider = std::unique_ptr<tileprovider::TileProvider>(
-                tileprovider::TileProvider::createFromDictionary(
+                tileprovider::createFromDictionary(
                     typeId,
                     std::move(initDict)
                 )
