@@ -82,13 +82,13 @@ void LayerGroup::setLayersFromDict(const ghoul::Dictionary& dict) {
 }
 
 void LayerGroup::initialize() {
-    for (const std::shared_ptr<Layer>& l : _layers) {
+    for (const std::unique_ptr<Layer>& l : _layers) {
         l->initialize();
     }
 }
 
 void LayerGroup::deinitialize() {
-    for (const std::shared_ptr<Layer>& l : _layers) {
+    for (const std::unique_ptr<Layer>& l : _layers) {
         l->deinitialize();
     }
 }
@@ -96,40 +96,40 @@ void LayerGroup::deinitialize() {
 void LayerGroup::update() {
     _activeLayers.clear();
 
-    for (const std::shared_ptr<Layer>& layer : _layers) {
+    for (const std::unique_ptr<Layer>& layer : _layers) {
         if (layer->enabled()) {
             layer->update();
-            _activeLayers.push_back(layer);
+            _activeLayers.push_back(layer.get());
         }
     }
 }
 
-std::shared_ptr<Layer> LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
+Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     if (!layerDict.hasKeyAndValue<std::string>("Identifier")) {
         LERROR("'Identifier' must be specified for layer.");
         return nullptr;
     }
-    std::shared_ptr<Layer> layer = std::make_shared<Layer>(_groupId, layerDict, *this);
+    std::unique_ptr<Layer> layer = std::make_unique<Layer>(_groupId, layerDict, *this);
     layer->onChange(_onChangeCallback);
     if (hasPropertySubOwner(layer->identifier())) {
         LINFO("Layer with identifier " + layer->identifier() + " already exists.");
         _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
         return nullptr;
     }
-    else {
-        _layers.push_back(layer);
-        //update();
-        if (_onChangeCallback) {
-            _onChangeCallback();
-        }
-        addPropertySubOwner(layer.get());
-        _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
-        return layer;
+
+    Layer* ptr = layer.get();
+    _layers.push_back(std::move(layer));
+    update();
+    if (_onChangeCallback) {
+        _onChangeCallback();
     }
+    addPropertySubOwner(ptr);
+    _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
+    return ptr;
 }
 
 void LayerGroup::deleteLayer(const std::string& layerName) {
-    for (std::vector<std::shared_ptr<Layer>>::iterator it = _layers.begin();
+    for (std::vector<std::unique_ptr<Layer>>::iterator it = _layers.begin();
          it != _layers.end();
          ++it)
     {
@@ -154,11 +154,16 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
     LERROR("Could not find layer " + layerName);
 }
 
-const std::vector<std::shared_ptr<Layer>>& LayerGroup::layers() const {
-    return _layers;
+std::vector<Layer*> LayerGroup::layers() const {
+    std::vector<Layer*> res;
+    res.reserve(_layers.size());
+    for (const std::unique_ptr<Layer>& layer : _layers) {
+        res.push_back(layer.get());
+    }
+    return res;
 }
 
-const std::vector<std::shared_ptr<Layer>>& LayerGroup::activeLayers() const {
+const std::vector<Layer*>& LayerGroup::activeLayers() const {
     return _activeLayers;
 }
 
@@ -173,7 +178,7 @@ bool LayerGroup::layerBlendingEnabled() const {
 void LayerGroup::onChange(std::function<void(void)> callback) {
     _onChangeCallback = std::move(callback);
     _levelBlendingEnabled.onChange(_onChangeCallback);
-    for (const std::shared_ptr<Layer>& layer : _layers) {
+    for (const std::unique_ptr<Layer>& layer : _layers) {
         layer->onChange(_onChangeCallback);
     }
 }

@@ -61,7 +61,6 @@ public:
         const ghoul::Dictionary& layerDict);
     void deleteLayer(layergroupid::GroupID groupId, const std::string& layerName);
 
-    const LayerGroup& layerGroup(size_t groupId) const;
     const LayerGroup& layerGroup(layergroupid::GroupID) const;
 
     bool hasAnyBlendingLayersEnabled() const;

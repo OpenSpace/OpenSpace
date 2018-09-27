@@ -50,14 +50,14 @@ struct LayerGroup : public properties::PropertyOwner {
     /// Updates all layers tile providers within this group
     void update();
 
-    std::shared_ptr<Layer> addLayer(const ghoul::Dictionary& layerDict);
+    Layer* addLayer(const ghoul::Dictionary& layerDict);
     void deleteLayer(const std::string& layerName);
 
     /// @returns const vector of all layers
-    const std::vector<std::shared_ptr<Layer>>& layers() const;
+    std::vector<Layer*> layers() const;
 
     /// @returns const vector of all active layers
-    const std::vector<std::shared_ptr<Layer>>& activeLayers() const;
+    const std::vector<Layer*>& activeLayers() const;
 
     /// @returns the size of the pile to be used in rendering of this layer
     int pileSize() const;
@@ -68,8 +68,8 @@ struct LayerGroup : public properties::PropertyOwner {
 
 private:
     const layergroupid::GroupID _groupId;
-    std::vector<std::shared_ptr<Layer>> _layers;
-    std::vector<std::shared_ptr<Layer>> _activeLayers;
+    std::vector<std::unique_ptr<Layer>> _layers;
+    std::vector<Layer*> _activeLayers;
 
     properties::BoolProperty _levelBlendingEnabled;
     std::function<void(void)> _onChangeCallback;

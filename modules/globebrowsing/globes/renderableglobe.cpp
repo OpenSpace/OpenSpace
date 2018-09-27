@@ -1141,8 +1141,8 @@ void RenderableGlobe::recompileShaders() {
     for (size_t i = 0; i < layergroupid::NUM_LAYER_GROUPS; i++) {
         LayerShaderPreprocessingData::LayerGroupPreprocessingData layeredTextureInfo;
 
-        const LayerGroup& layerGroup = _layerManager.layerGroup(i);
-        const std::vector<std::shared_ptr<Layer>>& layers = layerGroup.activeLayers();
+        const LayerGroup& layerGroup = _layerManager.layerGroup(layergroupid::GroupID(i));
+        const std::vector<Layer*>& layers = layerGroup.activeLayers();
 
         // This check was implicit before;  not sure if it will fire or will be handled
         // elsewhere
@@ -1155,7 +1155,7 @@ void RenderableGlobe::recompileShaders() {
             );
         layeredTextureInfo.layerBlendingEnabled = layerGroup.layerBlendingEnabled();
 
-        for (const std::shared_ptr<Layer>& layer : layers) {
+        for (Layer* layer : layers) {
             layeredTextureInfo.layerType.push_back(layer->type());
             layeredTextureInfo.blendMode.push_back(layer->blendMode());
             layeredTextureInfo.layerAdjustmentType.push_back(
@@ -1427,10 +1427,10 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
     );
 
     // Get the tile providers for the height maps
-    const std::vector<std::shared_ptr<Layer>>& heightMapLayers =
+    const std::vector<Layer*>& heightMapLayers =
         _layerManager.layerGroup(layergroupid::GroupID::HeightLayers).activeLayers();
 
-    for (const std::shared_ptr<Layer>& layer : heightMapLayers) {
+    for (Layer* layer : heightMapLayers) {
         tileprovider::TileProvider* tileProvider = layer->tileProvider();
         if (!tileProvider) {
             continue;
@@ -1786,8 +1786,8 @@ int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk) const {
     const int currLevel = chunk.tileIndex.level;
 
     for (size_t i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
-        for (const std::shared_ptr<Layer>& layer :
-            _layerManager.layerGroup(i).activeLayers())
+        for (Layer* layer :
+             _layerManager.layerGroup(layergroupid::GroupID(i)).activeLayers())
         {
             Tile::Status status = layer->tileStatus(chunk.tileIndex);
             if (status == Tile::Status::OK) {

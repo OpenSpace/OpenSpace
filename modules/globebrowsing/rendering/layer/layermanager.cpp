@@ -154,7 +154,7 @@ Layer* LayerManager::addLayer(layergroupid::GroupID groupId,
                               const ghoul::Dictionary& layerDict)
 {
     ghoul_assert(groupId != layergroupid::Unknown, "Layer group ID must be known");
-    return _layerGroups[groupId]->addLayer(layerDict).get();
+    return _layerGroups[groupId]->addLayer(layerDict);
 }
 
 void LayerManager::deleteLayer(layergroupid::GroupID groupId,
@@ -162,10 +162,6 @@ void LayerManager::deleteLayer(layergroupid::GroupID groupId,
 {
     ghoul_assert(groupId != layergroupid::Unknown, "Layer group ID must be known");
     _layerGroups[groupId]->deleteLayer(layerName);
-}
-
-const LayerGroup& LayerManager::layerGroup(size_t groupId) const {
-    return *_layerGroups[groupId];
 }
 
 const LayerGroup& LayerManager::layerGroup(layergroupid::GroupID groupId) const {
@@ -200,7 +196,7 @@ void LayerManager::update() {
 
 void LayerManager::reset(bool includeDisabled) {
     for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
-        for (const std::shared_ptr<Layer>& layer : layerGroup->layers()) {
+        for (Layer* layer : layerGroup->layers()) {
             if (layer->enabled() || includeDisabled) {
                 layer->tileProvider()->reset();
             }

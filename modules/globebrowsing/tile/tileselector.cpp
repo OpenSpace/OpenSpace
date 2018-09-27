@@ -39,7 +39,7 @@ ChunkTile getHighestResolutionTile(const LayerGroup& layerGroup,
     ChunkTile mostHighResolution{ Tile::TileUnavailable, uvTrans, TileDepthTransform() };
     mostHighResolution.tile = Tile::TileUnavailable;
 
-    for (const std::shared_ptr<Layer>& layer : layerGroup.activeLayers()) {
+    for (const Layer* layer : layerGroup.activeLayers()) {
         const ChunkTile chunkTile = layer->tileProvider()->chunkTile(tileIndex);
         const bool tileIsOk = chunkTile.tile.status() == Tile::Status::OK;
         const bool tileHasMetaData = chunkTile.tile.metaData() != nullptr;
@@ -58,7 +58,7 @@ std::vector<ChunkTile> getTilesSortedByHighestResolution(const LayerGroup& layer
                                                          const TileIndex& tileIndex)
 {
     std::vector<ChunkTile> tiles;
-    for (const std::shared_ptr<Layer>& layer : layerGroup.activeLayers()) {
+    for (Layer* layer : layerGroup.activeLayers()) {
         tiles.push_back(layer->tileProvider()->chunkTile(tileIndex));
     }
 
@@ -78,7 +78,7 @@ getTilesAndSettingsSortedByHighestResolution(const LayerGroup& layerGroup,
                                              const TileIndex& tileIndex)
 {
     std::vector<std::pair<ChunkTile, const LayerRenderSettings*>> tilesAndSettings;
-    for (const std::shared_ptr<Layer>& layer : layerGroup.activeLayers()) {
+    for (Layer* layer : layerGroup.activeLayers()) {
         tilesAndSettings.emplace_back(
             layer->tileProvider()->chunkTile(tileIndex),
             &layer->renderSettings()
@@ -100,7 +100,7 @@ std::vector<std::pair<ChunkTile, const LayerRenderSettings*>>
 getTilesAndSettingsUnsorted(const LayerGroup& layerGroup, const TileIndex& tileIndex)
 {
     std::vector<std::pair<ChunkTile, const LayerRenderSettings*> > tilesAndSettings;
-    for (const std::shared_ptr<Layer>& layer : layerGroup.activeLayers()) {
+    for (Layer* layer : layerGroup.activeLayers()) {
         if (layer->tileProvider()) {
             tilesAndSettings.emplace_back(
                 layer->tileProvider()->chunkTile(tileIndex),

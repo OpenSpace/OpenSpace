@@ -34,7 +34,7 @@ namespace openspace::globebrowsing {
 void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
                              const LayerGroup& layerGroup, const TileIndex& tileIndex)
 {
-    const std::vector<std::shared_ptr<Layer>>& activeLayers = layerGroup.activeLayers();
+    const std::vector<Layer*>& activeLayers = layerGroup.activeLayers();
     ghoul_assert(
         activeLayers.size() == _gpuActiveLayers.size(),
         "GPU and CPU active layers must have same size!"
@@ -113,7 +113,7 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p,
                          const LayerGroup& layerGroup, const std::string& nameBase,
                          int category)
 {
-    const std::vector<std::shared_ptr<Layer>>& activeLayers = layerGroup.activeLayers();
+    const std::vector<Layer*>& activeLayers = layerGroup.activeLayers();
     _gpuActiveLayers.resize(activeLayers.size());
     const int pileSize = layerGroup.pileSize();
     for (size_t i = 0; i < _gpuActiveLayers.size(); ++i) {
