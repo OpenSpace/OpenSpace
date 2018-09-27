@@ -59,14 +59,29 @@ namespace openspace {
         rapidxml::xml_node<> *rootNode = doc.first_node(); //find root, dsn
         rapidxml::xml_node<> *node = rootNode->first_node();
 
-        rapidxml::xml_attribute<> *attribute = node->first_attribute();
-
         //loop through all nodes
-        while (node != 0) {
+        while (node != nullptr) {
             logfile << node->name() << "\n";
             //loop through all attributes of a node
-            for (rapidxml::xml_attribute<> *attribute = node->first_attribute(); attribute; attribute = attribute->next_attribute()) {
-                logfile << attribute->name() << ": " << attribute->value() << "\n";
+            for (rapidxml::xml_attribute<> *attribute = node->first_attribute();
+                attribute; attribute = attribute->next_attribute()) {
+
+                if (attribute->value())
+                    logfile << "   " << attribute->name() << ": " << attribute->value() << "\n";
+            }
+
+            rapidxml::xml_node<> *childNode = node->first_node();
+            while (childNode != nullptr) {
+                logfile << "   " << childNode->name() << "\n";
+
+                for (rapidxml::xml_attribute<> *childAttribute = childNode->first_attribute();
+                    childAttribute; childAttribute = childAttribute->next_attribute()) {
+
+                    if(childAttribute->value())
+                    logfile <<"        "<< childAttribute->name() << ": " << childAttribute->value() << "\n";
+                }
+
+                childNode = childNode->next_sibling();
             }
             node = node->next_sibling();
         }
@@ -156,7 +171,6 @@ namespace openspace {
             ));
             return false;
         }
-
         return true;
     }
 
