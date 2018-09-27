@@ -30,10 +30,8 @@ namespace openspace {
     constexpr const char* _loggerCat = "CommunicationLine";
 
     // Keys to get values from dictionary
-    constexpr const char* KeyMessage = "Message";
     constexpr const char* KeyDataFolder = "DataFolder";
     constexpr const char* KeyDataFileType = "DataFileType";
-    constexpr const char* KeyIdentifier = "Identifier";
 
     //Filetypes
     const std::string dataFileTypeStringXml = "xml";
@@ -46,7 +44,6 @@ namespace openspace {
     //Member functions
     CommunicationLines::CommunicationLines(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary) {
-        //lines between space and earth
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
         CommunicationLines::initializeGL();
         CommunicationLines::LogSomething();
@@ -61,8 +58,6 @@ namespace openspace {
     bool CommunicationLines::ExtractMandatoryInfoFromDictionary()
     {
         DataFileType sourceFileType = DataFileType::Invalid;
-
-        _dictionary->getValue(SceneGraphNode::KeyIdentifier, _identifier);
 
         // ------------------- EXTRACT MANDATORY VALUES FROM DICTIONARY ------------------- //
         std::string dataFileTypeString;
@@ -134,7 +129,7 @@ namespace openspace {
         }
         else {
             LERROR(fmt::format(
-                "{}: FieldlinesSequence {} is not a valid directory",
+                "{}: {} is not a valid directory",
                 _identifier,
                 dataFolderPath
             ));

@@ -29,6 +29,7 @@
 #include <modules/dsn/dsnmodule.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <openspace/rendering/renderengine.h>
 #include <fstream>
 
 namespace openspace {
@@ -50,8 +51,7 @@ namespace openspace {
         void update(const UpdateData& data) override;
     private:
         std::unique_ptr<ghoul::Dictionary> _dictionary;
-        std::string _dataFolder;
-        std::string _identifier;
+        std::string _identifier = "CommunicationLines";
         std::vector<std::string> _dataFiles;
 
     };

@@ -8,7 +8,6 @@ local CommunicationLine = {
     Parent = earthTransforms.EarthBarycenter.Identifier,
     Renderable = {
         Type = "CommunicationLines",
-        Message = "My Asset works!",
         DataFolder = dataFolder,
         DataFileType = "xml"
     },
