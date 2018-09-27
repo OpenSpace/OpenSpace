@@ -640,16 +640,9 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     if (_globalRenderer.updatedSinceLastCall) {
         const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
             _layerManager.layerGroups();
-        if (_globalRenderer.gpuLayerGroups.size() != layerGroups.size()) {
-            _globalRenderer.gpuLayerGroups.resize(layerGroups.size());
-            for (std::unique_ptr<GPULayerGroup>& gpuLayerGroup : _globalRenderer.gpuLayerGroups) {
-                gpuLayerGroup = std::make_unique<GPULayerGroup>();
-            }
-        }
-
         for (size_t i = 0; i < layerGroups.size(); ++i) {
             const std::string& nameBase = layergroupid::LAYER_GROUP_IDENTIFIERS[i];
-            _globalRenderer.gpuLayerGroups[i]->bind(
+            _globalRenderer.gpuLayerGroups[i].bind(
                 *_globalRenderer.program,
                 *layerGroups[i],
                 nameBase,
@@ -663,16 +656,9 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     if (_localRenderer.updatedSinceLastCall) {
         const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
             _layerManager.layerGroups();
-        if (_localRenderer.gpuLayerGroups.size() != layerGroups.size()) {
-            _localRenderer.gpuLayerGroups.resize(layerGroups.size());
-            for (std::unique_ptr<GPULayerGroup>& gpuLayerGroup : _localRenderer.gpuLayerGroups) {
-                gpuLayerGroup = std::make_unique<GPULayerGroup>();
-            }
-        }
-
         for (size_t i = 0; i < layerGroups.size(); ++i) {
             const std::string& nameBase = layergroupid::LAYER_GROUP_IDENTIFIERS[i];
-            _localRenderer.gpuLayerGroups[i]->bind(
+            _localRenderer.gpuLayerGroups[i].bind(
                 *_localRenderer.program,
                 *layerGroups[i],
                 nameBase,
@@ -884,7 +870,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
         _layerManager.layerGroups();
     for (size_t i = 0; i < layerGroups.size(); ++i) {
-        _globalRenderer.gpuLayerGroups[i]->setValue(program, *layerGroups[i], tileIndex);
+        _globalRenderer.gpuLayerGroups[i].setValue(program, *layerGroups[i], tileIndex);
     }
 
     // The length of the skirts is proportional to its size
@@ -926,8 +912,8 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     glCullFace(GL_BACK);
 
     _grid.geometry().drawUsingActiveProgram();
-    for (std::unique_ptr<GPULayerGroup>& l : _globalRenderer.gpuLayerGroups) {
-        l->deactivate();
+    for (GPULayerGroup& l : _globalRenderer.gpuLayerGroups) {
+        l.deactivate();
     }
 }
 
@@ -939,7 +925,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
         _layerManager.layerGroups();
     for (size_t i = 0; i < layerGroups.size(); ++i) {
-        _localRenderer.gpuLayerGroups[i]->setValue(program, *layerGroups[i], tileIndex);
+        _localRenderer.gpuLayerGroups[i].setValue(program, *layerGroups[i], tileIndex);
     }
 
     // The length of the skirts is proportional to its size
@@ -1039,8 +1025,8 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
     _grid.geometry().drawUsingActiveProgram();
 
-    for (std::unique_ptr<GPULayerGroup>& l : _globalRenderer.gpuLayerGroups) {
-        l->deactivate();
+    for (GPULayerGroup& l : _globalRenderer.gpuLayerGroups) {
+        l.deactivate();
     }
 }
 

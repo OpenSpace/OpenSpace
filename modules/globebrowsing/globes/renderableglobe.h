@@ -30,6 +30,7 @@
 #include <modules/globebrowsing/geometry/ellipsoid.h>
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 #include <modules/globebrowsing/meshes/skirtedgrid.h>
+#include <modules/globebrowsing/rendering/gpu/gpulayergroup.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -236,7 +237,7 @@ private:
         UniformCache(skirtLength, minLatLon, lonLatScalingFactor,
             orenNayarRoughness) uniformCache;
 
-        std::vector<std::unique_ptr<GPULayerGroup>> gpuLayerGroups;
+        std::array<GPULayerGroup, LayerManager::NumLayerGroups> gpuLayerGroups;
     } _globalRenderer;
 
     struct {
@@ -245,7 +246,7 @@ private:
         UniformCache(skirtLength, p01, p11, p00, p10, patchNormalModelSpace, 
             patchNormalCameraSpace, orenNayarRoughness) uniformCache;
 
-        std::vector<std::unique_ptr<GPULayerGroup>> gpuLayerGroups;
+        std::array<GPULayerGroup, LayerManager::NumLayerGroups> gpuLayerGroups;
     } _localRenderer;
 
     bool _shadersNeedRecompilation = true;

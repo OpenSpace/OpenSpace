@@ -154,7 +154,6 @@ Layer* LayerManager::addLayer(layergroupid::GroupID groupId,
                               const ghoul::Dictionary& layerDict)
 {
     ghoul_assert(groupId != layergroupid::Unknown, "Layer group ID must be known");
-
     return _layerGroups[groupId]->addLayer(layerDict).get();
 }
 
@@ -162,7 +161,6 @@ void LayerManager::deleteLayer(layergroupid::GroupID groupId,
                                const std::string& layerName)
 {
     ghoul_assert(groupId != layergroupid::Unknown, "Layer group ID must be known");
-
     _layerGroups[groupId]->deleteLayer(layerName);
 }
 
