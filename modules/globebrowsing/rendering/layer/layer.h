@@ -99,7 +99,7 @@ private:
     properties::TriggerProperty _remove;
 
     layergroupid::TypeID _type;
-    std::shared_ptr<tileprovider::TileProvider> _tileProvider;
+    std::unique_ptr<tileprovider::TileProvider> _tileProvider;
     OtherTypesProperties _otherTypesProperties;
     LayerRenderSettings _renderSettings;
     LayerAdjustment _layerAdjustment;

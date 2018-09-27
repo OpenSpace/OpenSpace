@@ -167,8 +167,8 @@ const std::vector<Layer*>& LayerGroup::activeLayers() const {
     return _activeLayers;
 }
 
-int LayerGroup::pileSize() const{
-    return _levelBlendingEnabled.value() ? 3 : 1;
+int LayerGroup::pileSize() const {
+    return _levelBlendingEnabled ? 3 : 1;
 }
 
 bool LayerGroup::layerBlendingEnabled() const {

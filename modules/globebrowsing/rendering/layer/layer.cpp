@@ -36,14 +36,12 @@ namespace openspace::globebrowsing {
 namespace {
     constexpr const char* _loggerCat = "Layer";
 
-    constexpr const char* keyIdentifier = "Identifier";
-    constexpr const char* keyName = "Name";
-    constexpr const char* keyDescription = "Description";
-    constexpr const char* keyEnabled = "Enabled";
-    constexpr const char* keyLayerGroupID = "LayerGroupID";
-    constexpr const char* keySettings = "Settings";
-    constexpr const char* keyAdjustment = "Adjustment";
-    constexpr const char* KeyBlendMode = "BlendMode";
+    constexpr const char* KeyIdentifier = "Identifier";
+    constexpr const char* KeyName = "Name";
+    constexpr const char* KeyDescription = "Description";
+    constexpr const char* KeyLayerGroupID = "LayerGroupID";
+    constexpr const char* KeySettings = "Settings";
+    constexpr const char* KeyAdjustment = "Adjustment";
     constexpr const char* KeyPadTiles = "PadTiles";
 
     constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
@@ -93,10 +91,10 @@ namespace {
 Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
              LayerGroup& parent)
     : properties::PropertyOwner({
-        layerDict.value<std::string>(keyIdentifier),
-        layerDict.hasKey(keyName) ? layerDict.value<std::string>(keyName) : "",
-        layerDict.hasKey(keyDescription) ?
-            layerDict.value<std::string>(keyDescription) :
+        layerDict.value<std::string>(KeyIdentifier),
+        layerDict.hasKey(KeyName) ? layerDict.value<std::string>(KeyName) : "",
+        layerDict.hasKey(KeyDescription) ?
+            layerDict.value<std::string>(KeyDescription) :
             ""
     })
     , _parent(parent)
@@ -117,27 +115,28 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
 
     initializeBasedOnType(typeID, layerDict);
 
-    bool enabled = false; // defaults to false if unspecified
-    layerDict.getValue(keyEnabled, enabled);
-    _enabled.setValue(enabled);
+    if (layerDict.hasKeyAndValue<bool>(EnabledInfo.identifier)) {
+        _enabled = layerDict.value<bool>(EnabledInfo.identifier);
+    }
 
     bool padTiles = true;
-    layerDict.getValue<bool>(KeyPadTiles, padTiles);
+    if (layerDict.hasKeyAndValue<bool>(KeyPadTiles)) {
+        padTiles = layerDict.value<bool>(KeyPadTiles);
+    }
 
     TileTextureInitData initData = getTileTextureInitData(_layerGroupId, padTiles);
     _padTilePixelStartOffset = initData.tilePixelStartOffset();
     _padTilePixelSizeDifference = initData.tilePixelSizeDifference();
 
-    // Initialize settings
-    ghoul::Dictionary settingsDict;
-    if (layerDict.getValue(keySettings, settingsDict)) {
-        _renderSettings.setValuesFromDictionary(settingsDict);
+    if (layerDict.hasKeyAndValue<ghoul::Dictionary>(KeySettings)) {
+        _renderSettings.setValuesFromDictionary(
+            layerDict.value<ghoul::Dictionary>(KeySettings)
+        );
     }
-
-    // Initiallize layer adjustment
-    ghoul::Dictionary adjustmentDict;
-    if (layerDict.getValue(keyAdjustment, adjustmentDict)) {
-        _layerAdjustment.setValuesFromDictionary(adjustmentDict);
+    if (layerDict.hasKeyAndValue<ghoul::Dictionary>(KeyAdjustment)) {
+        _layerAdjustment.setValuesFromDictionary(
+            layerDict.value<ghoul::Dictionary>(KeyAdjustment)
+        );
     }
 
     // Add options to option properties
@@ -152,10 +151,10 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     }
 
     // Initialize blend mode
-    std::string blendModeName;
-    if (layerDict.getValue(KeyBlendMode, blendModeName)) {
+    if (layerDict.hasKeyAndValue<std::string>(BlendModeInfo.identifier)) {
+        std::string blendMode = layerDict.value<std::string>(BlendModeInfo.identifier);
         layergroupid::BlendModeID blendModeID =
-            ghoul::from_string<layergroupid::BlendModeID>(blendModeName);
+            ghoul::from_string<layergroupid::BlendModeID>(blendMode);
         _blendModeOption = static_cast<int>(blendModeID);
     }
     else {
@@ -190,8 +189,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     _typeOption.onChange([&]() {
         removeVisibleProperties();
         _type = static_cast<layergroupid::TypeID>(_typeOption.value());
-        ghoul::Dictionary dict;
-        initializeBasedOnType(type(), dict);
+        initializeBasedOnType(type(), {});
         addVisibleProperties();
         if (_onChangeCallback) {
             _onChangeCallback();
@@ -367,13 +365,13 @@ void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary
         case layergroupid::TypeID::ByLevelTileLayer: {
             // We add the id to the dictionary since it needs to be known by
             // the tile provider
-            initDict.setValue(keyLayerGroupID, _layerGroupId);
-            if (initDict.hasKeyAndValue<std::string>(keyName)) {
+            initDict.setValue(KeyLayerGroupID, _layerGroupId);
+            if (initDict.hasKeyAndValue<std::string>(KeyName)) {
                 std::string name;
-                initDict.getValue(keyName, name);
+                initDict.getValue(KeyName, name);
                 LDEBUG("Initializing tile provider for layer: '" + name + "'");
             }
-            _tileProvider = std::shared_ptr<tileprovider::TileProvider>(
+            _tileProvider = std::unique_ptr<tileprovider::TileProvider>(
                 tileprovider::TileProvider::createFromDictionary(
                     typeId,
                     std::move(initDict)
