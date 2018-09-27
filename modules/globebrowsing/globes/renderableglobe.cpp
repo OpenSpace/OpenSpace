@@ -47,6 +47,8 @@
 #include <queue>
 
 namespace {
+    constexpr const bool LimitLevelByAvailableData = false;
+
     constexpr const char* keyFrame = "Frame";
     constexpr const char* keyRadii = "Radii";
     constexpr const char* keySegmentsPerPatch = "SegmentsPerPatch";
@@ -127,12 +129,6 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LimitLevelInfo = {
-        "LimitLevelByAvailableData",
-        "Limit level by available data",
-        "" // @TODO Missing documentation
-    };
-
     constexpr openspace::properties::Property::PropertyInfo ModelSpaceRenderingInfo = {
         "ModelSpaceRenderingCutoffLevel",
         "Model Space Rendering Cutoff Level",
@@ -182,7 +178,6 @@ namespace {
     };
 } // namespace
 
-
 using namespace openspace::properties;
 
 namespace openspace::globebrowsing {
@@ -192,13 +187,6 @@ struct BoundingHeights {
     float max;
     bool available;
 };
-
-enum class ChunkStatus {
-    DoNothing,
-    WantMerge,
-    WantSplit
-};
-
 
 namespace {
 
@@ -224,14 +212,10 @@ const Chunk& findChunkNode(const Chunk& node, const Geodetic2& location) {
     return *n;
 }
 
-BoundingHeights boundingHeightsForChunk(const Chunk& chunk) {
+BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& lm) {
     using ChunkTileSettingsPair = std::pair<ChunkTile, const LayerRenderSettings*>;
 
     BoundingHeights boundingHeights { 0.f, 0.f, false };
-
-    // In the future, this should be abstracted away and more easily queryable.
-    // One must also handle how to sample pick one out of multiplte heightmaps
-    const LayerManager& lm = chunk.owner.layerManager();
 
     // The raster of a height map is the first one. We assume that the height map is
     // a single raster image. If it is not we will just use the first raster
@@ -285,10 +269,11 @@ BoundingHeights boundingHeightsForChunk(const Chunk& chunk) {
     return boundingHeights;
 }
 
-std::array<glm::dvec4, 8> boundingPolyhedronCornersForChunk(const Chunk& chunk) {
-    const Ellipsoid& ellipsoid = chunk.owner.ellipsoid();
-
-    const BoundingHeights& boundingHeight = boundingHeightsForChunk(chunk);
+std::array<glm::dvec4, 8> boundingPolyhedronCornersForChunk(const Chunk& chunk,
+                                                            const LayerManager& lm,
+                                                            const Ellipsoid& ellipsoid)
+{
+    const BoundingHeights& boundingHeight = boundingHeightsForChunk(chunk, lm);
 
     // assume worst case
     const double patchCenterRadius = ellipsoid.maximumRadius();
@@ -352,38 +337,12 @@ std::array<glm::dvec4, 8> boundingPolyhedronCornersForChunk(const Chunk& chunk) 
     return corners;
 }
 
-ChunkStatus updateChunk(Chunk& chunk, const RenderData& data, bool updateCorners) {
-    if (updateCorners) {
-        chunk.corners = boundingPolyhedronCornersForChunk(chunk);
-    }
-
-    chunk.isVisible = true;
-    if (chunk.owner.testIfCullable(chunk, data)) {
-        chunk.isVisible = false;
-        return ChunkStatus::WantMerge;
-    }
-
-    const int desiredLevel = chunk.owner.desiredLevel(chunk, data);
-
-    if (desiredLevel < chunk.tileIndex.level) {
-        return ChunkStatus::WantMerge;
-    }
-    else if (chunk.tileIndex.level < desiredLevel) {
-        return ChunkStatus::WantSplit;
-    }
-    else {
-        return ChunkStatus::DoNothing;
-    }
-}
-
 } // namespace
 
-Chunk::Chunk(const RenderableGlobe& o, const TileIndex& ti)
-    : owner(o)
-    , tileIndex(ti)
+Chunk::Chunk(const TileIndex& ti)
+    : tileIndex(ti)
     , surfacePatch(ti)
 {}
-
 
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
@@ -397,7 +356,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty(HorizonCullingInfo, true),
         BoolProperty(LevelProjectedAreaInfo, false),
         BoolProperty(ResetTileProviderInfo, false),
-        BoolProperty(LimitLevelInfo, true),
         IntProperty(ModelSpaceRenderingInfo, 10, 1, 22)
     })
     , _generalProperties({
@@ -410,14 +368,14 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f)
     })
     , _debugPropertyOwner({ "Debug" })
-    //, _chunkPool(1)
-    , _leftRoot(Chunk(*this, LeftHemisphereIndex))
-    , _rightRoot(Chunk(*this, RightHemisphereIndex))
+    , _leftRoot(Chunk(LeftHemisphereIndex))
+    , _rightRoot(Chunk(RightHemisphereIndex))
     , _grid(DefaultSkirtedGridSegments,
         DefaultSkirtedGridSegments,
         TriangleSoup::Positions::No,
         TriangleSoup::TextureCoordinates::Yes,
-        TriangleSoup::Normals::No)
+        TriangleSoup::Normals::No
+    )
 {
     setIdentifier("RenderableGlobe");
 
@@ -464,10 +422,9 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         _debugProperties.levelByProjectedAreaElseDistance
     );
     _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
-    _debugPropertyOwner.addProperty(_debugProperties.limitLevelByAvailableData);
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
 
-    auto notifyShaderRecompilation = [&](){
+    auto notifyShaderRecompilation = [&]() {
         _shadersNeedRecompilation = true;
     };
     _generalProperties.useAccurateNormals.onChange(notifyShaderRecompilation);
@@ -656,6 +613,22 @@ void RenderableGlobe::update(const UpdateData& data) {
             onr
         );
     }
+}
+
+const LayerManager& RenderableGlobe::layerManager() const {
+    return _layerManager;
+}
+
+LayerManager& RenderableGlobe::layerManager() {
+    return _layerManager;
+}
+
+const Ellipsoid& RenderableGlobe::ellipsoid() const {
+    return _ellipsoid;
+}
+
+const glm::dmat4& RenderableGlobe::modelTransform() const {
+    return _cachedModelTransform;
 }
 
 void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
@@ -1301,13 +1274,9 @@ int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderDa
     const int desiredLevel = _debugProperties.levelByProjectedAreaElseDistance ?
         desiredLevelByProjectedArea(chunk, renderData) :
         desiredLevelByDistance(chunk, renderData);
-    const int levelByAvailableData = desiredLevelByAvailableTileData(
-        chunk,
-        renderData
-    );
+    const int levelByAvailableData = desiredLevelByAvailableTileData(chunk);
 
-    const bool llbad = _debugProperties.limitLevelByAvailableData;
-    if (levelByAvailableData != UnknownDesiredLevel && llbad) {
+    if (LimitLevelByAvailableData && (levelByAvailableData != UnknownDesiredLevel)) {
         const int l = glm::min(desiredLevel, levelByAvailableData);
         return glm::clamp(l, MinSplitDepth, MaxSplitDepth);
     }
@@ -1679,7 +1648,7 @@ int RenderableGlobe::desiredLevelByDistance(const Chunk& chunk, const RenderData
     const glm::dvec3 patchNormal = _ellipsoid.geodeticSurfaceNormal(pointOnPatch);
     glm::dvec3 patchPosition = _ellipsoid.cartesianSurfacePosition(pointOnPatch);
 
-    const BoundingHeights heights = boundingHeightsForChunk(chunk);
+    const BoundingHeights heights = boundingHeightsForChunk(chunk, _layerManager);
     const double heightToChunk = heights.min;
 
     // Offset position according to height
@@ -1734,7 +1703,7 @@ int RenderableGlobe::desiredLevelByProjectedArea(const Chunk& chunk, const Rende
     //    |                 |
     //    +-----------------+  <-- south east corner
 
-    const BoundingHeights heights = boundingHeightsForChunk(chunk);
+    const BoundingHeights heights = boundingHeightsForChunk(chunk, _layerManager);
     const Geodetic3 c = { center, heights.min };
     const Geodetic3 c1 = { Geodetic2(center.lat, closestCorner.lon), heights.min };
     const Geodetic3 c2 = { Geodetic2(closestCorner.lat, center.lon), heights.min };
@@ -1786,7 +1755,7 @@ int RenderableGlobe::desiredLevelByProjectedArea(const Chunk& chunk, const Rende
     return chunk.tileIndex.level + static_cast<int>(round(scaledArea - 1));
 }
 
-int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk, const RenderData&) const {
+int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk) const {
     const int currLevel = chunk.tileIndex.level;
 
     for (size_t i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
@@ -1825,28 +1794,11 @@ bool RenderableGlobe::isCullableByFrustum(const Chunk& chunk, const RenderData& 
     return !(CullingFrustum.intersects(bounds));
 }
 
-const LayerManager& RenderableGlobe::layerManager() const {
-    return _layerManager;
-}
-
-LayerManager& RenderableGlobe::layerManager() {
-    return _layerManager;
-}
-
-const Ellipsoid& RenderableGlobe::ellipsoid() const {
-    return _ellipsoid;
-}
-
-const glm::dmat4& RenderableGlobe::modelTransform() const {
-    return _cachedModelTransform;
-}
-
-
 bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk, const RenderData& renderData) const {
     // Calculations are done in the reference frame of the globe. Hence, the camera
     // position needs to be transformed with the inverse model matrix
     const GeodeticPatch& patch = chunk.surfacePatch;
-    const float maxHeight = boundingHeightsForChunk(chunk).max;
+    const float maxHeight = boundingHeightsForChunk(chunk, _layerManager).max;
     const glm::dvec3 globePos = glm::dvec3(0, 0, 0); // In model space it is 0
     const double minimumGlobeRadius = _ellipsoid.minimumRadius();
 
@@ -1913,11 +1865,13 @@ void RenderableGlobe::splitChunkNode(Chunk& cn, int depth) {
         );
         for (size_t i = 0; i < cn.children.size(); ++i) {
             cn.children[i] = new (memory[i]) Chunk(
-                *this,
                 cn.tileIndex.child(static_cast<Quad>(i))
             );
-            cn.children[i]->corners = boundingPolyhedronCornersForChunk(*cn.children[i]);
-
+            cn.children[i]->corners = boundingPolyhedronCornersForChunk(
+                *cn.children[i],
+                _layerManager,
+                _ellipsoid
+            );
         }
     }
 
@@ -1939,18 +1893,18 @@ void RenderableGlobe::freeChunkNode(Chunk* n) {
 }
 
 void RenderableGlobe::mergeChunkNode(Chunk& cn) {
-    for (Chunk*& child : cn.children) {
+    for (Chunk* child : cn.children) {
         if (child) {
             mergeChunkNode(*child);
             freeChunkNode(child);
-            child = nullptr;
         }
     }
+    cn.children.fill(nullptr);
 }
 
 bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
     if (isLeaf(cn)) {
-        ChunkStatus status = updateChunk(cn, data, _chunkCornersDirty);
+        ChunkStatus status = updateChunk(cn, data);
         if (status == ChunkStatus::WantSplit) {
             splitChunkNode(cn, 1);
         }
@@ -1965,7 +1919,7 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
         }
 
         const bool allChildrenWantsMerge = requestedMergeMask == 0xf;
-        ChunkStatus status = updateChunk(cn, data, _chunkCornersDirty);
+        ChunkStatus status = updateChunk(cn, data);
         const bool thisChunkWantsSplit = (status == ChunkStatus::WantSplit);
 
         if (allChildrenWantsMerge && !thisChunkWantsSplit) {
@@ -1975,5 +1929,36 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
         return false;
     }
 }
+
+RenderableGlobe::ChunkStatus RenderableGlobe::updateChunk(Chunk& chunk,
+                                                          const RenderData& data)
+{
+    if (_chunkCornersDirty) {
+        chunk.corners = boundingPolyhedronCornersForChunk(
+            chunk,
+            _layerManager,
+            _ellipsoid
+        );
+    }
+
+    chunk.isVisible = true;
+    if (testIfCullable(chunk, data)) {
+        chunk.isVisible = false;
+        return ChunkStatus::WantMerge;
+    }
+
+    const int dl = desiredLevel(chunk, data);
+
+    if (dl < chunk.tileIndex.level) {
+        return ChunkStatus::WantMerge;
+    }
+    else if (chunk.tileIndex.level < dl) {
+        return ChunkStatus::WantSplit;
+    }
+    else {
+        return ChunkStatus::DoNothing;
+    }
+}
+
 
 } // namespace openspace::globebrowsing

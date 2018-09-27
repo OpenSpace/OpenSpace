@@ -49,9 +49,8 @@ namespace chunklevelevaluator { class Evaluator; }
 namespace culling { class ChunkCuller; }
 
 struct Chunk {
-    Chunk(const RenderableGlobe& owner, const TileIndex& tileIndex);
+    Chunk(const TileIndex& tileIndex);
 
-    const RenderableGlobe& owner;
     const TileIndex tileIndex;
     const GeodeticPatch surfacePatch;
 
@@ -80,8 +79,12 @@ public:
     SurfacePositionHandle calculateSurfacePositionHandle(
         const glm::dvec3& targetModelSpace) const;
 
-//private:
-    // Properties
+    const Ellipsoid& ellipsoid() const;
+    const LayerManager& layerManager() const;
+    LayerManager& layerManager();
+    const glm::dmat4& modelTransform() const;
+
+private:
     struct {
         properties::BoolProperty showChunkEdges;
         properties::BoolProperty showChunkBounds;
@@ -92,7 +95,6 @@ public:
         properties::BoolProperty performHorizonCulling;
         properties::BoolProperty levelByProjectedAreaElseDistance;
         properties::BoolProperty resetTileProviders;
-        properties::BoolProperty limitLevelByAvailableData;
         properties::IntProperty modelSpaceRenderingCutoffLevel;
     } _debugProperties;
 
@@ -143,15 +145,15 @@ public:
      */
     float getHeight(const glm::dvec3& position) const;
 
-
-    const LayerManager& layerManager() const;
-    LayerManager& layerManager() ;
-    const Ellipsoid& ellipsoid() const;
-    const glm::dmat4& modelTransform() const;
-
 private:
     constexpr static const int MinSplitDepth = 2;
     constexpr static const int MaxSplitDepth = 22;  // increase? (abock)
+
+    enum class ChunkStatus {
+        DoNothing,
+        WantMerge,
+        WantSplit
+    };
 
     // Shadow structure
     struct ShadowRenderingStruct {
@@ -165,14 +167,6 @@ private:
     };
 
     void renderChunks(const RenderData& data, RendererTasks& rendererTask);
-    void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const;
-
-    bool isCullableByFrustum(const Chunk& chunk, const RenderData& renderData) const;
-    bool isCullableByHorizon(const Chunk& chunk, const RenderData& renderData) const;
-
-    int desiredLevelByDistance(const Chunk& chunk, const RenderData& data) const;
-    int desiredLevelByProjectedArea(const Chunk& chunk, const RenderData& data) const;
-    int desiredLevelByAvailableTileData(const Chunk& chunk, const RenderData& data) const;
 
     /**
      * Chunks can be rendered either globally or locally. Global rendering is performed
@@ -197,6 +191,16 @@ private:
      */
     void renderChunkLocally(const Chunk& chunk, const RenderData& data);
 
+    void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const;
+
+    bool isCullableByFrustum(const Chunk& chunk, const RenderData& renderData) const;
+    bool isCullableByHorizon(const Chunk& chunk, const RenderData& renderData) const;
+
+    int desiredLevelByDistance(const Chunk& chunk, const RenderData& data) const;
+    int desiredLevelByProjectedArea(const Chunk& chunk, const RenderData& data) const;
+    int desiredLevelByAvailableTileData(const Chunk& chunk) const;
+
+
     void calculateEclipseShadows(const Chunk& chunk,
         ghoul::opengl::ProgramObject* programObject, const RenderData& data);
 
@@ -204,21 +208,17 @@ private:
         const Chunk& chunk, const RenderData& data);
 
 
-    /**
-     * Directly recompile the shaders of the renderer.
-     */
     void recompileShaders();
 
 
     void splitChunkNode(Chunk& cn, int depth);
     void mergeChunkNode(Chunk& cn);
     bool updateChunkTree(Chunk& cn, const RenderData& data);
-
+    ChunkStatus updateChunk(Chunk& chunk, const RenderData& data);
     void freeChunkNode(Chunk* n);
 
-    SkirtedGrid _grid;
-
     Ellipsoid _ellipsoid;
+    SkirtedGrid _grid;
     LayerManager _layerManager;
 
     glm::dmat4 _cachedModelTransform;
@@ -228,8 +228,6 @@ private:
 
     Chunk _leftRoot;  // Covers all negative longitudes
     Chunk _rightRoot; // Covers all positive longitudes
-
-
 
     // Two different shader programs. One for global and one for local rendering.
     struct {
