@@ -29,6 +29,11 @@
 #include <modules/dsn/dsnmodule.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ext/xml/rapidxml.hpp>
+#include <ext/xml/rapidxml_utils.hpp>
+#include <ext/xml/rapidxml_iterators.hpp>
+#include <ext/xml/rapidxml_print.hpp>
+
 #include <fstream>
 
 namespace openspace {
@@ -37,9 +42,9 @@ namespace openspace {
     public:
 
         CommunicationLines(const ghoul::Dictionary& dictionary);
-        void LogSomething();
-        bool ExtractMandatoryInfoFromDictionary();
-
+        void logSomething();
+        bool extractMandatoryInfoFromDictionary();
+        void xmlParser(std::string filename, std::ofstream &logfile);
 
         void initializeGL() override;
         void deinitializeGL() override;
@@ -50,10 +55,8 @@ namespace openspace {
         void update(const UpdateData& data) override;
     private:
         std::unique_ptr<ghoul::Dictionary> _dictionary;
-        std::string _dataFolder;
-        std::string _identifier;
+       // std::string _identifier;
         std::vector<std::string> _dataFiles;
-
     };
 
 }

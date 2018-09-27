@@ -30,10 +30,8 @@ namespace openspace {
     constexpr const char* _loggerCat = "CommunicationLine";
 
     // Keys to get values from dictionary
-    constexpr const char* KeyMessage = "Message";
     constexpr const char* KeyDataFolder = "DataFolder";
     constexpr const char* KeyDataFileType = "DataFileType";
-    constexpr const char* KeyIdentifier = "Identifier";
 
     //Filetypes
     const std::string dataFileTypeStringXml = "xml";
@@ -46,23 +44,45 @@ namespace openspace {
     //Member functions
     CommunicationLines::CommunicationLines(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary) {
-        //lines between space and earth
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
         CommunicationLines::initializeGL();
-        CommunicationLines::LogSomething();
     }
+    /**
+    * Using rapidxml lib to parse the data from xml files
+    */
+    void CommunicationLines::xmlParser(std::string filename, std::ofstream &logfile)
+    {
+        rapidxml::file<> xmlfile((char*)filename.c_str());
+        rapidxml::xml_document<> doc;
+        doc.parse<0>(xmlfile.data());
 
+        rapidxml::xml_node<> *rootNode = doc.first_node(); //find root, dsn
+        rapidxml::xml_node<> *node = rootNode->first_node();
 
+        rapidxml::xml_attribute<> *attribute = node->first_attribute();
+
+        //loop through all nodes
+        while (node != 0) {
+            logfile << node->name() << "\n";
+            //loop through all attributes of a node
+            for (rapidxml::xml_attribute<> *attribute = node->first_attribute(); attribute; attribute = attribute->next_attribute()) {
+                logfile << attribute->name() << ": " << attribute->value() << "\n";
+            }
+            node = node->next_sibling();
+        }
+    }
     /**
     * Extracts the general information (from the lua modfile) that is mandatory for the class
     * to function; such as the file type and the location of the data files.
     * Returns false if it fails to extract mandatory information!
     */
-    bool CommunicationLines::ExtractMandatoryInfoFromDictionary()
+    bool CommunicationLines::extractMandatoryInfoFromDictionary()
     {
         DataFileType sourceFileType = DataFileType::Invalid;
 
-        _dictionary->getValue(SceneGraphNode::KeyIdentifier, _identifier);
+        //_dictionary->getValue(SceneGraphNode::KeyIdentifier, _identifier);
+
+
 
         // ------------------- EXTRACT MANDATORY VALUES FROM DICTIONARY ------------------- //
         std::string dataFileTypeString;
@@ -140,11 +160,11 @@ namespace openspace {
             ));
             return false;
         }
+
         return true;
     }
 
-
-    void CommunicationLines::LogSomething() {
+    void CommunicationLines::logSomething() {
 
         std::ofstream logfile{ "dsnmodulelog.txt" };
 
@@ -157,12 +177,19 @@ namespace openspace {
     void CommunicationLines::render(const RenderData& data, RendererTasks&) {
 
     }
+
     void CommunicationLines::initializeGL() {
         // EXTRACT MANDATORY INFORMATION FROM DICTIONARY
-        if (!ExtractMandatoryInfoFromDictionary()) {
+        if (!extractMandatoryInfoFromDictionary()) {
             return;
         }
+        //logfile for checking so that the data parsing works
+        std::ofstream logfile{ "dsndatalogger.txt" };
 
+        for (std::vector<std::string>::iterator it = _dataFiles.begin(); it != _dataFiles.end(); ++it) {
+            CommunicationLines::xmlParser(*it, logfile);
+        }
+        logfile.close();
     }
     void CommunicationLines::deinitializeGL() {
 
