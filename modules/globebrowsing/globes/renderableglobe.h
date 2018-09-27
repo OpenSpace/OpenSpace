@@ -201,8 +201,8 @@ private:
     int desiredLevelByAvailableTileData(const Chunk& chunk) const;
 
 
-    void calculateEclipseShadows(const Chunk& chunk,
-        ghoul::opengl::ProgramObject* programObject, const RenderData& data);
+    void calculateEclipseShadows(ghoul::opengl::ProgramObject& programObject,
+        const RenderData& data);
 
     void setCommonUniforms(ghoul::opengl::ProgramObject& programObject,
         const Chunk& chunk, const RenderData& data);
