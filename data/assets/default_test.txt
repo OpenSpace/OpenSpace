@@ -1,0 +1,117 @@
+local assetHelper = asset.require('util/asset_helper')
+local sceneHelper = asset.require('util/scene_helper')
+local propertyHelper = asset.require('util/property_helper')
+
+-- Specifying which other assets should be loaded in this scene
+asset.require('spice/base')
+assetHelper.requestAll(asset, 'scene/solarsystem/sun')
+asset.require('scene/solarsystem/planets/earth/earth')
+-- asset.require('scene/solarsystem/planets/mars/mars')
+-- asset.require('scene/solarsystem/planets/mars/moons/phobos')
+-- asset.require('scene/solarsystem/planets/mars/moons/deimos')
+-- asset.require('scene/solarsystem/dwarf_planets/pluto/system')
+-- assetHelper.requestAll(asset, 'scene/digitaluniverse')
+-- Load default key bindings applicable to most scenes
+asset.require('util/default_keybindings')
+asset.require('util/default_dashboard')
+asset.require('util/default_joystick')
+
+asset.request('customization/globebrowsing')
+
+-- Keybindings that are specific for this scene
+local Keybindings = {
+    {
+        Key = "s",
+        Command = propertyHelper.invert('Scene.Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.Enabled') ..
+                  propertyHelper.invert('Scene.Earth.RenderableGlobe.PerformShading') ..
+                  propertyHelper.invert('Scene.Earth.RenderableGlobe.Atmosphere') ..
+                  propertyHelper.invert('Scene.Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled'),
+        Documentation = "Toggle night texture, shading, atmosphere, and water for Earth.",
+        Local = false
+    },
+    {
+        Key = "b",
+        Command = propertyHelper.invert('Scene.MilkyWay.renderable.Enabled') ..
+                  propertyHelper.invert('Scene.Stars.renderable.Enabled'),
+        Documentation = "Toggle background (Stars and Milkyway).",
+        Local = false
+    },
+    {
+        Key = "g",
+        Command = propertyHelper.invert('Scene.MilkyWay.renderable.Enabled') ..
+                  propertyHelper.invert('Scene.Stars.renderable.Enabled') ..
+                  propertyHelper.invert('Scene.Earth.RenderableGlobe.Layers.NightLayers.Earth_at_Night_2012.Enabled') ..
+                  propertyHelper.invert('Scene.EarthAtmosphere.renderable.Enabled') ..
+                  propertyHelper.invert('Scene.MarsAtmosphere.renderable.Enabled') ..
+                  propertyHelper.invert('Scene.Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled') ..
+                  propertyHelper.invert('Scene.Moon.RenderableGlobe.Enabled') ..
+                  propertyHelper.invert('Scene.Sun.renderable.Enabled'),
+        Documentation = "Toogles background and shading mode on the Earth and Mars alongside visibility of the Moon and the Sun",
+        Local = false
+    },
+    {
+        Key = "h",
+        Command = "openspace.setPropertyValue('Scene.*Trail.renderable.Enabled', false)",
+        Documentation = "Disables visibility of the trails",
+        Local = false
+    },
+}
+
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+
+asset.onInitialize(function ()
+    local now = openspace.time.currentWallTime()
+    -- Jump back one day to show a complete planet
+    openspace.time.setTime(openspace.time.advancedTime(now, "-1d"))
+
+    sceneHelper.bindKeys(Keybindings)
+
+    openspace.setDefaultGuiSorting()
+
+    openspace.globebrowsing.loadWMSServersFromFile(
+        openspace.absPath("${DATA}/globebrowsing_servers.lua")
+    )
+
+    openspace.markInterestingNodes({
+        "Earth", "Mars", "Moon"
+    })
+
+    openspace.addVirtualProperty(
+        "BoolProperty",
+        "Show Trails",
+        "Scene.*Trail.renderable.Enabled",
+        "Disable or enable all trails of the scene at the same time",
+        true,
+        nil,
+        nil
+    )
+
+    openspace.setPropertyValueSingle('Scene.EarthAtmosphere.renderable.Enabled', false);
+    openspace.setPropertyValueSingle('Dashboard.Framerate.FrametimeType', 0);
+    openspace.setPropertyValueSingle('Scene.Earth.RenderableGlobe.LodScaleFactor', 50.000000);
+openspace.setPropertyValueSingle('Scene.Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled', false);
+openspace.setPropertyValueSingle('Scene.Earth.RenderableGlobe.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled', false);
+-- openspace.setPropertyValue('RenderEngine.PerformanceMeasurements', not openspace.getPropertyValue('RenderEngine.PerformanceMeasurements'));
+openspace.setPropertyValueSingle('Scene.Earth.RenderableGlobe.Layers.NightLayers.Earth_at_Night_2012.Enabled', false);
+
+openspace.setPropertyValue('Scene.Earth.RenderableGlobe.Layers.*.Enabled', false);
+openspace.setPropertyValueSingle('Modules.GlobeBrowsing.TileCache.TileCacheSize', 2000);
+
+    openspace.navigation.setCameraState({
+        Focus = earthAsset.Earth.Identifier,
+        Position = { 0, 0, 0 },
+        Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 },
+    })
+    openspace.setPropertyValueSingle('Scene.Earth.RenderableGlobe.LodScaleFactor', 50.000000);
+    openspace.globebrowsing.goToGeo(34.54, 94.23, 3316940)
+end)
+
+asset.onDeinitialize(function ()
+    sceneHelper.unbindKeys(Keybindings)
+
+    openspace.removeVirtualProperty("*Trail.renderable.Enabled")
+
+    openspace.removeInterestingNodes({
+        "Earth", "Mars", "Moon"
+    })
+end)
