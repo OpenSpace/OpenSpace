@@ -150,7 +150,7 @@ protected:
     RawTile::ReadError postProcessErrorCheck(
         std::shared_ptr<const RawTile> rawTile) const;
 
-    struct Cached {
+    struct {
         int _maxLevel = -1;
         double _tileLevelDifference;
     } _cached;

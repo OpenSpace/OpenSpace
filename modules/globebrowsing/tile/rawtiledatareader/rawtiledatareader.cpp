@@ -48,16 +48,13 @@ std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
 {
     ghoul_assert(dataDestination, "Need to specify a data destination");
 
+    memset(dataDestination, 255, _initData.totalNumBytes());
+
     IODescription io = ioDescription(tileIndex);
     RawTile::ReadError worstError = RawTile::ReadError::None;
-
-    // Build the RawTile from the data we querred
-    std::shared_ptr<RawTile> rawTile = std::make_shared<RawTile>();
-
-    // Write only to cpu data destination
-    memset(dataDestination, 255, _initData.totalNumBytes());
     readImageData(io, worstError, dataDestination);
 
+    std::shared_ptr<RawTile> rawTile = std::make_shared<RawTile>();
     rawTile->imageData = dataDestination;
     rawTile->error = worstError;
     rawTile->tileIndex = std::move(tileIndex);
@@ -191,12 +188,10 @@ IODescription RawTileDataReader::ioDescription(const TileIndex& tileIndex) const
     io.read.fullRegion = fullPixelRegion();
     // For correct sampling in dataset, we need to pad the texture tile
 
-    const PixelRegion padding = PixelRegion(
+    PixelRegion scaledPadding = PixelRegion(
         _initData.tilePixelStartOffset(),
         _initData.tilePixelSizeDifference()
     );
-
-    PixelRegion scaledPadding = padding;
     const double scale = static_cast<double>(io.read.region.numPixels.x) /
                          static_cast<double>(io.write.region.numPixels.x);
     scaledPadding.numPixels *= scale;
@@ -239,7 +234,7 @@ PixelRegion RawTileDataReader::fullPixelRegion() const {
 
 std::array<double, 6> RawTileDataReader::geoTransform() const {
     GeodeticPatch cov(
-        Geodetic2(0,0),
+        Geodetic2(0.0, 0.0),
         Geodetic2(glm::half_pi<double>(), glm::pi<double>())
     );
     return {
@@ -475,10 +470,9 @@ float RawTileDataReader::depthScale() const {
 }
 
 TileDepthTransform RawTileDataReader::calculateTileDepthTransform() {
-    const bool isFloat =
-        (_initData.glType() == GL_HALF_FLOAT ||
-         _initData.glType() == GL_FLOAT ||
-         _initData.glType() == GL_DOUBLE);
+    const bool isFloat = _initData.glType() == GL_HALF_FLOAT ||
+                         _initData.glType() == GL_FLOAT ||
+                         _initData.glType() == GL_DOUBLE;
 
     const double maximumValue = isFloat ?
         1.f :
@@ -497,7 +491,7 @@ RawTile::ReadError RawTileDataReader::postProcessErrorCheck(
 
     bool hasMissingData = false;
     for (size_t c = 0; c < _initData.nRasters(); c++) {
-        hasMissingData |= rawTile->tileMetaData->maxValues[c] == missingDataValue;
+        hasMissingData |= (rawTile->tileMetaData->maxValues[c] == missingDataValue);
     }
 
     const bool onHighLevel = rawTile->tileIndex.level > 6;
