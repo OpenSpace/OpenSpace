@@ -680,12 +680,12 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
             }
         }
 
-        std::shared_ptr<TileProvider> stp = createFromDictionary(
+        std::unique_ptr<TileProvider> stp = createFromDictionary(
             providerTypeID,
             providerDict
         );
         TileIndex::TileHashKey key = tileIndex.hashKey();
-        tileProviderMap.insert(std::make_pair(key, stp));
+        tileProviderMap.insert(std::make_pair(key, std::move(stp)));
     }
 }
 
@@ -732,16 +732,17 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
                 typeID = layergroupid::TypeID::DefaultTileLayer;
             }
 
-            std::shared_ptr<TileProvider> tp = std::shared_ptr<TileProvider>(
+            std::unique_ptr<TileProvider> tp = std::unique_ptr<TileProvider>(
                 createFromDictionary(typeID, providerDict)
             );
-            levelTileProviders.push_back(tp);
 
             std::string provId = providerDict.value<std::string>("Identifier");
             tp->setIdentifier(provId);
             std::string providerName = providerDict.value<std::string>("Name");
             tp->setGuiName(providerName);
             addPropertySubOwner(tp.get());
+
+            levelTileProviders.push_back(std::move(tp));
 
             // Ensure we can represent the max level
             if (static_cast<int>(providerIndices.size()) < maxLevel) {
@@ -817,7 +818,7 @@ bool initialize(TileProvider& tp) {
         case Type::ByLevelTileProvider: {
             TileProviderByLevel& t = static_cast<TileProviderByLevel&>(tp);
             bool success = true;
-            for (const std::shared_ptr<TileProvider>& prov : t.levelTileProviders) {
+            for (const std::unique_ptr<TileProvider>& prov : t.levelTileProviders) {
                 success &= initialize(*prov);
             }
             return success;
@@ -857,7 +858,7 @@ bool deinitialize(TileProvider& tp) {
         case Type::ByLevelTileProvider: {
             TileProviderByLevel& t = static_cast<TileProviderByLevel&>(tp);
             bool success = true;
-            for (const std::shared_ptr<TileProvider>& prov : t.levelTileProviders) {
+            for (const std::unique_ptr<TileProvider>& prov : t.levelTileProviders) {
                 success &= deinitialize(*prov);
             }
             return success;
@@ -1120,7 +1121,7 @@ void update(TileProvider& tp) {
         case Type::ByIndexTileProvider: {
             TileProviderByIndex& t = static_cast<TileProviderByIndex&>(tp);
             using K = TileIndex::TileHashKey;
-            using V = std::shared_ptr<TileProvider>;
+            using V = std::unique_ptr<TileProvider>;
             for (std::pair<const K, V>& it : t.tileProviderMap) {
                 update(*it.second);
             }
@@ -1129,7 +1130,7 @@ void update(TileProvider& tp) {
         }
         case Type::ByLevelTileProvider: {
             TileProviderByLevel& t = static_cast<TileProviderByLevel&>(tp);
-            for (const std::shared_ptr<TileProvider>& provider : t.levelTileProviders) {
+            for (const std::unique_ptr<TileProvider>& provider : t.levelTileProviders) {
                 update(*provider);
             }
             break;
@@ -1206,7 +1207,7 @@ void reset(TileProvider& tp) {
         case Type::ByIndexTileProvider: {
             TileProviderByIndex& t = static_cast<TileProviderByIndex&>(tp);
             using K = TileIndex::TileHashKey;
-            using V = std::shared_ptr<TileProvider>;
+            using V = std::unique_ptr<TileProvider>;
             for (std::pair<const K, V>& it : t.tileProviderMap) {
                 reset(*it.second);
             }
@@ -1215,7 +1216,7 @@ void reset(TileProvider& tp) {
         }
         case Type::ByLevelTileProvider: {
             TileProviderByLevel& t = static_cast<TileProviderByLevel&>(tp);
-            for (const std::shared_ptr<TileProvider>& provider : t.levelTileProviders) {
+            for (const std::unique_ptr<TileProvider>& provider : t.levelTileProviders) {
                 reset(*provider);
             }
             break;

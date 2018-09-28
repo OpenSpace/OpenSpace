@@ -114,10 +114,10 @@ struct TextTileProvider : public TileProvider {
     TextTileProvider(const TileTextureInitData& initData, size_t fontSize = 48);
 
     const TileTextureInitData initData;
-    std::shared_ptr<ghoul::fontrendering::Font> font;
-    size_t fontSize;
 
     std::unique_ptr<ghoul::fontrendering::FontRenderer> fontRenderer;
+    std::shared_ptr<ghoul::fontrendering::Font> font;
+    size_t fontSize;
 
     std::string text;
     glm::vec2 textPosition;
@@ -132,7 +132,6 @@ struct SizeReferenceTileProvider : public TextTileProvider {
     SizeReferenceTileProvider(const ghoul::Dictionary& dictionary);
 
     Ellipsoid ellipsoid;
-    Tile backgroundTile = Tile::TileUnavailable;
 };
 
 struct TileIndexTileProvider : public TextTileProvider {
@@ -143,16 +142,16 @@ struct TileProviderByIndex : public TileProvider {
     TileProviderByIndex(const ghoul::Dictionary& dictionary);
 
     std::unordered_map<
-        TileIndex::TileHashKey, std::shared_ptr<TileProvider>
+        TileIndex::TileHashKey, std::unique_ptr<TileProvider>
     > tileProviderMap;
-    std::shared_ptr<TileProvider> defaultTileProvider;
+    std::unique_ptr<TileProvider> defaultTileProvider;
 };
 
 struct TileProviderByLevel : public TileProvider {
     TileProviderByLevel(const ghoul::Dictionary& dictionary);
 
     std::vector<int> providerIndices;
-    std::vector<std::shared_ptr<TileProvider>> levelTileProviders;
+    std::vector<std::unique_ptr<TileProvider>> levelTileProviders;
 };
 
 
