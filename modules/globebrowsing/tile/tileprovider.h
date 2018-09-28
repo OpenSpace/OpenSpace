@@ -82,7 +82,7 @@ struct TileProvider : public properties::PropertyOwner {
 
     Type type;
 
-    TileProvider(const ghoul::Dictionary& dictionary);
+    TileProvider();
     virtual ~TileProvider() = default;
 
     std::string name;
@@ -97,14 +97,13 @@ struct TileProvider : public properties::PropertyOwner {
 struct DefaultTileProvider : public TileProvider {
     DefaultTileProvider(const ghoul::Dictionary& dictionary);
 
-    std::shared_ptr<AsyncTileDataProvider> asyncTextureDataProvider;
+    std::unique_ptr<AsyncTileDataProvider> asyncTextureDataProvider;
 
     cache::MemoryAwareTileCache* tileCache = nullptr;
 
     properties::StringProperty filePath;
     properties::IntProperty tilePixelSize;
     layergroupid::GroupID layerGroupID = layergroupid::GroupID::Unknown;
-    int preCacheLevel = 0;
     bool performPreProcessing = false;
     bool padTiles = true;
 };
@@ -131,7 +130,6 @@ struct TextTileProvider : public TileProvider {
     std::string text;
     glm::vec2 textPosition;
     glm::vec4 textColor;
-    bool textIsDirty = true;
 
     GLuint fbo = 0;
 
@@ -188,54 +186,10 @@ struct TemporalTileProvider : public TileProvider {
         YYYY_MM_DDThh_mm_ssZ
     };
 
-    TemporalTileProvider(const ghoul::Dictionary& dictionary);
-
     using TimeKey = std::string;
 
-    /**
-     * A placeholder string that must be provided in the WMS template url. This
-     * placeholder will be replaced by quantized date-time strings during run time
-     * in order to access the datasets for different instances of time.
-     */
-    constexpr static const char* UrlTimePlaceholder = "${OpenSpaceTimeId}";
+    TemporalTileProvider(const ghoul::Dictionary& dictionary);
 
-    /**
-     * These are tags that TemporalTileProviders must be able to read from the XML
-     * file provided in the ghoul::Dictionary used to create this provider. These
-     * tags describe the temporal properties of the dataset.
-     */
-    struct TemporalXMLTags {
-        /**
-         * Tag should contain a ISO8601 time specifying the datasets start time
-         */
-        constexpr static const char* TimeStart = "OpenSpaceTimeStart";
-
-        /**
-         * Tag should contain a ISO8601 time specifying the datasets end time
-         * Example 1: "2016 SEP 08".
-         * Example 2: "now" - sets the dataset's end time to the current time.
-         */
-        constexpr static const char* TimeEnd = "OpenSpaceTimeEnd";
-
-        /**
-         * Tag should contain the time resolution of the dataset.
-         * The resolution is defined by a number along with a unit specifying how
-         * often the dataset is updated temporally. Supported units are:
-         * (s)econds, (m)inutes, (h)ours, (d)ays, (y)ears.
-         *
-         * Example 1: "2d" - dataset updated every other day.
-         * Example 2: "1h" - dataset is updated every hour.
-         */
-        constexpr static const char* TimeResolution = "OpenSpaceTimeResolution";
-
-        /**
-         * Tag should contain a string specifying the date-time format expected by the
-         * WMS.
-         */
-        constexpr static const char* TimeFormat = "OpenSpaceTimeIdFormat";
-    };
-
-    // Used for creation of time specific instances of CachingTileProvider
     ghoul::Dictionary initDict;
     properties::StringProperty filePath;
     std::string gdalXmlTemplate;
@@ -247,9 +201,7 @@ struct TemporalTileProvider : public TileProvider {
     TimeFormatType timeFormat;
     TimeQuantizer timeQuantizer;
 
-    std::vector<Time> preCacheTimes;
-
-    bool successfulInitialization;
+    bool successfulInitialization = false;
 };
 
 #endif // GLOBEBROWSING_USE_GDAL
