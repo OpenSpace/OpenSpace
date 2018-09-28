@@ -22,59 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_ADJUSTMENT___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_ADJUSTMENT___H__
 
 #include <openspace/properties/propertyowner.h>
 
-#include <modules/globebrowsing/rendering/layer/layergroupid.h>
-#include <openspace/properties/scalar/boolproperty.h>
+#include <modules/globebrowsing/rendering/layergroupid.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec3property.h>
 
 namespace openspace::globebrowsing {
 
-class Layer;
-
 namespace tileprovider { struct TileProvider; }
 
-/**
- * Convenience class for dealing with multiple <code>Layer</code>s.
- */
-struct LayerGroup : public properties::PropertyOwner {
-    LayerGroup(layergroupid::GroupID id);
+class LayerAdjustment : public properties::PropertyOwner {
+public:
+    LayerAdjustment();
+    ~LayerAdjustment() = default;
 
-    void setLayersFromDict(const ghoul::Dictionary& dict);
+    void setValuesFromDictionary(const ghoul::Dictionary& adjustmentDict);
 
-    void initialize();
-    void deinitialize();
+    layergroupid::AdjustmentTypeID type() const;
 
-    /// Updates all layers tile providers within this group
-    void update();
-
-    Layer* addLayer(const ghoul::Dictionary& layerDict);
-    void deleteLayer(const std::string& layerName);
-
-    /// @returns const vector of all layers
-    std::vector<Layer*> layers() const;
-
-    /// @returns const vector of all active layers
-    const std::vector<Layer*>& activeLayers() const;
-
-    /// @returns the size of the pile to be used in rendering of this layer
-    int pileSize() const;
-
-    bool layerBlendingEnabled() const;
+    glm::vec3 chromaKeyColor() const;
+    float chromaKeyTolerance() const;
 
     void onChange(std::function<void(void)> callback);
 
 private:
-    const layergroupid::GroupID _groupId;
-    std::vector<std::unique_ptr<Layer>> _layers;
-    std::vector<Layer*> _activeLayers;
+    void addVisibleProperties();
+    void removeVisibleProperties();
 
-    properties::BoolProperty _levelBlendingEnabled;
+    properties::Vec3Property _chromaKeyColor;
+    properties::FloatProperty _chromaKeyTolerance;
+
+    properties::OptionProperty _typeOption;
+    layergroupid::AdjustmentTypeID _type;
+
     std::function<void(void)> _onChangeCallback;
 };
 
 } // namespace openspace::globebrowsing
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_ADJUSTMENT___H__

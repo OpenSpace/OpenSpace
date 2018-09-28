@@ -53,13 +53,13 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lruthreadpool.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lruthreadpool.inl
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayergroup.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layeradjustment.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layergroup.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layergroupid.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layermanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layerrendersettings.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpulayergroup.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layeradjustment.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layergroup.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layergroupid.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layermanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layerrendersettings.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctiledataprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/chunktile.h
@@ -105,13 +105,13 @@ set(SOURCE_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/timequantizer.cpp
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayergroup.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layeradjustment.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layergroup.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layergroupid.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layermanager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layerrendersettings.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpulayergroup.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layeradjustment.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layergroup.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layergroupid.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layermanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layerrendersettings.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctiledataprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.cpp

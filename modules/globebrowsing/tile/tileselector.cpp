@@ -24,8 +24,8 @@
 
 #include <modules/globebrowsing/tile/tileselector.h>
 
-#include <modules/globebrowsing/rendering/layer/layer.h>
-#include <modules/globebrowsing/rendering/layer/layergroup.h>
+#include <modules/globebrowsing/rendering/layer.h>
+#include <modules/globebrowsing/rendering/layergroup.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/tileprovider.h>
 

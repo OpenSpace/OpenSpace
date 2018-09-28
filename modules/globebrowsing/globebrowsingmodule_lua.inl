@@ -25,8 +25,8 @@
 #include <modules/globebrowsing/globes/renderableglobe.h>
 
 #include <modules/globebrowsing/geometry/angle.h>
-#include <modules/globebrowsing/rendering/layer/layermanager.h>
-#include <modules/globebrowsing/rendering/layer/layer.h>
+#include <modules/globebrowsing/rendering/layermanager.h>
+#include <modules/globebrowsing/rendering/layer.h>
 
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/engine/globals.h>

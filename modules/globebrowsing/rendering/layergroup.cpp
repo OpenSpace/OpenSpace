@@ -22,9 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/rendering/layer/layergroup.h>
+#include <modules/globebrowsing/rendering/layergroup.h>
 
-#include <modules/globebrowsing/rendering/layer/layer.h>
+#include <modules/globebrowsing/rendering/layer.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {

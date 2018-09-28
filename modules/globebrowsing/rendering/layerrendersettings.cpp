@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/rendering/layer/layerrendersettings.h>
+#include <modules/globebrowsing/rendering/layerrendersettings.h>
 
 namespace {
     constexpr const char* keyOpacity = "Opacity";

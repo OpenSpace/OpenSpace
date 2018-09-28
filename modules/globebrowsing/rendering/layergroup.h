@@ -22,60 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYERMANAGER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERMANAGER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__
 
 #include <openspace/properties/propertyowner.h>
 
-#include <modules/globebrowsing/rendering/layer/layergroupid.h>
-#include <ghoul/misc/boolean.h>
-#include <array>
-#include <memory>
-#include <functional>
-
-namespace ghoul { class Dictionary; }
+#include <modules/globebrowsing/rendering/layergroupid.h>
+#include <openspace/properties/scalar/boolproperty.h>
 
 namespace openspace::globebrowsing {
 
 class Layer;
-struct LayerGroup;
-class TileTextureInitData;
 
-bool shouldPerformPreProcessingOnLayerGroup(layergroupid::GroupID id);
-TileTextureInitData getTileTextureInitData(layergroupid::GroupID id,
-    bool shouldPadTiles, size_t preferredTileSize = 0);
+namespace tileprovider { struct TileProvider; }
 
 /**
- * Manages multiple LayerGroups.
+ * Convenience class for dealing with multiple <code>Layer</code>s.
  */
-class LayerManager : public properties::PropertyOwner {
-public:
-    constexpr static const int NumLayerGroups = layergroupid::NUM_LAYER_GROUPS;
+struct LayerGroup : public properties::PropertyOwner {
+    LayerGroup(layergroupid::GroupID id);
 
-    LayerManager();
+    void setLayersFromDict(const ghoul::Dictionary& dict);
 
-    void initialize(const ghoul::Dictionary& layerGroupsDict);
+    void initialize();
     void deinitialize();
 
-    Layer* addLayer(layergroupid::GroupID groupId,
-        const ghoul::Dictionary& layerDict);
-    void deleteLayer(layergroupid::GroupID groupId, const std::string& layerName);
-
-    const LayerGroup& layerGroup(layergroupid::GroupID) const;
-
-    bool hasAnyBlendingLayersEnabled() const;
-
-    std::array<LayerGroup*, NumLayerGroups> layerGroups() const;
-
+    /// Updates all layers tile providers within this group
     void update();
-    void reset(bool includeDisabled = false);
+
+    Layer* addLayer(const ghoul::Dictionary& layerDict);
+    void deleteLayer(const std::string& layerName);
+
+    /// @returns const vector of all layers
+    std::vector<Layer*> layers() const;
+
+    /// @returns const vector of all active layers
+    const std::vector<Layer*>& activeLayers() const;
+
+    /// @returns the size of the pile to be used in rendering of this layer
+    int pileSize() const;
+
+    bool layerBlendingEnabled() const;
 
     void onChange(std::function<void(void)> callback);
 
 private:
-    std::array<std::unique_ptr<LayerGroup>, NumLayerGroups> _layerGroups;
+    const layergroupid::GroupID _groupId;
+    std::vector<std::unique_ptr<Layer>> _layers;
+    std::vector<Layer*> _activeLayers;
+
+    properties::BoolProperty _levelBlendingEnabled;
+    std::function<void(void)> _onChangeCallback;
 };
 
 } // namespace openspace::globebrowsing
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERMANAGER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__

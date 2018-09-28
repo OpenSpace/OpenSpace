@@ -30,8 +30,8 @@
 #include <modules/globebrowsing/geometry/ellipsoid.h>
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 #include <modules/globebrowsing/meshes/skirtedgrid.h>
-#include <modules/globebrowsing/rendering/gpu/gpulayergroup.h>
-#include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <modules/globebrowsing/rendering/gpulayergroup.h>
+#include <modules/globebrowsing/rendering/layermanager.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>

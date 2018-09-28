@@ -22,47 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_ADJUSTMENT___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_ADJUSTMENT___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYERMANAGER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERMANAGER___H__
 
 #include <openspace/properties/propertyowner.h>
 
-#include <modules/globebrowsing/rendering/layer/layergroupid.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec3property.h>
+#include <modules/globebrowsing/rendering/layergroupid.h>
+#include <ghoul/misc/boolean.h>
+#include <array>
+#include <memory>
+#include <functional>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace::globebrowsing {
 
-namespace tileprovider { struct TileProvider; }
+class Layer;
+struct LayerGroup;
+class TileTextureInitData;
 
-class LayerAdjustment : public properties::PropertyOwner {
+bool shouldPerformPreProcessingOnLayerGroup(layergroupid::GroupID id);
+TileTextureInitData getTileTextureInitData(layergroupid::GroupID id,
+    bool shouldPadTiles, size_t preferredTileSize = 0);
+
+/**
+ * Manages multiple LayerGroups.
+ */
+class LayerManager : public properties::PropertyOwner {
 public:
-    LayerAdjustment();
-    ~LayerAdjustment() = default;
+    constexpr static const int NumLayerGroups = layergroupid::NUM_LAYER_GROUPS;
 
-    void setValuesFromDictionary(const ghoul::Dictionary& adjustmentDict);
+    LayerManager();
 
-    layergroupid::AdjustmentTypeID type() const;
+    void initialize(const ghoul::Dictionary& layerGroupsDict);
+    void deinitialize();
 
-    glm::vec3 chromaKeyColor() const;
-    float chromaKeyTolerance() const;
+    Layer* addLayer(layergroupid::GroupID groupId,
+        const ghoul::Dictionary& layerDict);
+    void deleteLayer(layergroupid::GroupID groupId, const std::string& layerName);
+
+    const LayerGroup& layerGroup(layergroupid::GroupID) const;
+
+    bool hasAnyBlendingLayersEnabled() const;
+
+    std::array<LayerGroup*, NumLayerGroups> layerGroups() const;
+
+    void update();
+    void reset(bool includeDisabled = false);
 
     void onChange(std::function<void(void)> callback);
 
 private:
-    void addVisibleProperties();
-    void removeVisibleProperties();
-
-    properties::Vec3Property _chromaKeyColor;
-    properties::FloatProperty _chromaKeyTolerance;
-
-    properties::OptionProperty _typeOption;
-    layergroupid::AdjustmentTypeID _type;
-
-    std::function<void(void)> _onChangeCallback;
+    std::array<std::unique_ptr<LayerGroup>, NumLayerGroups> _layerGroups;
 };
 
 } // namespace openspace::globebrowsing
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_ADJUSTMENT___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERMANAGER___H__

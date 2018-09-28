@@ -29,8 +29,8 @@
 
 #include <modules/globebrowsing/tile/chunktile.h>
 #include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/rendering/layer/layeradjustment.h>
-#include <modules/globebrowsing/rendering/layer/layerrendersettings.h>
+#include <modules/globebrowsing/rendering/layeradjustment.h>
+#include <modules/globebrowsing/rendering/layerrendersettings.h>
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>

@@ -27,9 +27,9 @@
 #include <modules/globebrowsing/geometry/geodetic3.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/meshes/trianglesoup.h>
-#include <modules/globebrowsing/rendering/layer/layer.h>
-#include <modules/globebrowsing/rendering/layer/layergroup.h>
-#include <modules/globebrowsing/rendering/gpu/gpulayergroup.h>
+#include <modules/globebrowsing/rendering/layer.h>
+#include <modules/globebrowsing/rendering/layergroup.h>
+#include <modules/globebrowsing/rendering/gpulayergroup.h>
 #include <modules/globebrowsing/tile/tileselector.h>
 #include <modules/globebrowsing/tile/tileprovider.h>
 #include <modules/debugging/rendering/debugrenderer.h>
