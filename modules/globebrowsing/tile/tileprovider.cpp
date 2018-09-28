@@ -24,58 +24,26 @@
 
 #include <modules/globebrowsing/tile/tileprovider.h>
 
-#include <modules/globebrowsing/tile/chunktile.h>
-#include <modules/globebrowsing/tile/tileselector.h>
-#include <modules/globebrowsing/tile/tiletextureinitdata.h>
-#include <modules/globebrowsing/tile/tileindex.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/templatefactory.h>
-#include <ghoul/logging/logmanager.h>
-#include <modules/globebrowsing/cache/memoryawaretilecache.h>
 #include <modules/globebrowsing/globebrowsingmodule.h>
+#include <modules/globebrowsing/cache/memoryawaretilecache.h>
+#include <modules/globebrowsing/geometry/geodeticpatch.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <modules/globebrowsing/tile/chunktile.h>
 #include <modules/globebrowsing/tile/asynctiledataprovider.h>
+#include <modules/globebrowsing/tile/tileselector.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/gdalrawtiledatareader.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <ghoul/logging/logmanager.h>
-#include <modules/globebrowsing/tile/tiledepthtransform.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/texture.h>
-#include <modules/globebrowsing/geometry/geodeticpatch.h>
-#include <modules/globebrowsing/rendering/layer/layermanager.h>
-#include <openspace/engine/globals.h>
-#include <ghoul/fmt.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <modules/globebrowsing/globebrowsingmodule.h>
-#include <modules/globebrowsing/geometry/geodeticpatch.h>
-#include <modules/globebrowsing/cache/memoryawaretilecache.h>
-#include <modules/globebrowsing/tile/tiledepthtransform.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
-
+#include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/stringconversion.h>
+#include <ghoul/logging/logmanager.h>
 
 #ifdef GLOBEBROWSING_USE_GDAL
-#include <modules/globebrowsing/tile/tiledepthtransform.h>
-//#include <modules/globebrowsing/tile/tileprovider/defaulttileprovider.h>
-#include <openspace/engine/globals.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/stringconversion.h>
 #include <fstream>
 #include "cpl_minixml.h"
 #endif // GLOBEBROWSING_USE_GDAL
@@ -278,12 +246,13 @@ namespace {
         );
 
         glViewport(
-            0, 0,
+            0,
+            0,
             static_cast<GLsizei>(texture->width()),
             static_cast<GLsizei>(texture->height())
         );
 
-        glClearColor(0, 0, 0, 0);
+        glClearColor(0.f, 0.f, 0.f, 0.f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         ghoul_assert(t._fontRenderer != nullptr, "_fontRenderer must not be null");
@@ -293,11 +262,7 @@ namespace {
             t.textPosition,
             t.text,
             t.textColor
-            //fmt::format(" {:.0f} {:s}", tileLongitudalLength, unit),
-            //{ 1.f, 1.f, 1.f, 1.f }
         );
-
-
 
         // Reset state: bind default FBO and set viewport to what it was
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
@@ -334,7 +299,6 @@ namespace {
 
     void reset(TextTileProvider& t) {
         t._tileCache->clear();
-
     }
 
     int providerIndex(TileProviderByLevel& t, int level) {

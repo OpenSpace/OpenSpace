@@ -27,23 +27,13 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <modules/globebrowsing/geometry/ellipsoid.h>
 #include <modules/globebrowsing/rendering/layer/layergroupid.h>
 #include <modules/globebrowsing/tile/tile.h>
-#include <ghoul/misc/dictionary.h>
-#include <vector>
-
+#include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <modules/globebrowsing/globebrowsingmodule.h>
-#include <modules/globebrowsing/cache/lrucache.h>
-#include <modules/globebrowsing/tile/tileindex.h>
-#include <modules/globebrowsing/tile/tiletextureinitdata.h>
-
-#include <ghoul/opengl/ghoul_gl.h>
-
-#include <modules/globebrowsing/geometry/ellipsoid.h>
 
 #ifdef GLOBEBROWSING_USE_GDAL
 #include <modules/globebrowsing/other/timequantizer.h>
