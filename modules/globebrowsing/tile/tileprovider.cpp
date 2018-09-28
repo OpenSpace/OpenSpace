@@ -48,8 +48,6 @@
 #include "cpl_minixml.h"
 #endif // GLOBEBROWSING_USE_GDAL
 
-#pragma optimize ("", off)
-
 #ifdef GLOBEBROWSING_USE_GDAL
 namespace ghoul {
     template <>
