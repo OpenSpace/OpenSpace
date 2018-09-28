@@ -130,6 +130,8 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
         _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>();
         addPropertySubOwner(*_tileCache);
 
+        tileprovider::initializeDefaultTile();
+
 #ifdef GLOBEBROWSING_USE_GDAL
         // Convert from MB to Bytes
         GdalWrapper::create(
@@ -138,6 +140,10 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
         );
         addPropertySubOwner(GdalWrapper::ref());
 #endif // GLOBEBROWSING_USE_GDAL
+    });
+
+    global::callback::deinitializeGL.push_back([]() {
+        tileprovider::deinitializeDefaultTile();
     });
 
 

@@ -84,6 +84,10 @@ namespace openspace::globebrowsing::tileprovider {
 
 namespace {
 
+std::unique_ptr<ghoul::opengl::Texture> DefaultTileTexture;
+Tile DefaultTile = Tile(nullptr, nullptr, Tile::Status::Unavailable);
+
+
 namespace defaultprovider {
     constexpr const char* KeyPerformPreProcessing = "PerformPreProcessing";
     constexpr const char* KeyTilePixelSize = "TilePixelSize";
@@ -213,46 +217,6 @@ void initTexturesFromLoadedData(DefaultTileProvider& t) {
     }
 }
 
-Tile createChunkIndexTile(TextTileProvider& t, const TileIndex& tileIndex) {
-    ghoul::opengl::Texture* texture = t.tileCache->texture(t.initData);
-
-    // Keep track of defaultFBO and viewport to be able to reset state when done
-    GLint defaultFBO;
-    GLint viewport[4];
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
-    glGetIntegerv(GL_VIEWPORT, viewport);
-
-    // Render to texture
-    glBindFramebuffer(GL_FRAMEBUFFER, t.fbo);
-    glFramebufferTexture2D(
-        GL_FRAMEBUFFER,
-        GL_COLOR_ATTACHMENT0,
-        GL_TEXTURE_2D,
-        *texture,
-        0
-    );
-
-    glViewport(
-        0,
-        0,
-        static_cast<GLsizei>(texture->width()),
-        static_cast<GLsizei>(texture->height())
-    );
-
-    glClearColor(0.f, 0.f, 0.f, 0.f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    ghoul_assert(t.fontRenderer != nullptr, "_fontRenderer must not be null");
-
-    t.fontRenderer->render(*t.font, t.textPosition, t.text, t.textColor);
-
-    // Reset state: bind default FBO and set viewport to what it was
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-
-    return Tile(texture, nullptr, Tile::Status::OK);
-}
-
 void initialize(TextTileProvider& t) {
     t.font = global::fontManager.font("Mono", static_cast<float>(t.fontSize));
     t.fontRenderer = ghoul::fontrendering::FontRenderer::createDefault();
@@ -268,7 +232,36 @@ Tile tile(TextTileProvider& t, const TileIndex& tileIndex) {
     cache::ProviderTileKey key = { tileIndex, t.uniqueIdentifier };
     Tile tile = t.tileCache->get(key);
     if (!tile.texture()) {
-        tile = createChunkIndexTile(t, tileIndex);
+        ghoul::opengl::Texture* texture = t.tileCache->texture(t.initData);
+
+        // Keep track of defaultFBO and viewport to be able to reset state when done
+        GLint defaultFBO;
+        GLint viewport[4];
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
+        glGetIntegerv(GL_VIEWPORT, viewport);
+
+        // Render to texture
+        glBindFramebuffer(GL_FRAMEBUFFER, t.fbo);
+        glFramebufferTexture2D(
+            GL_FRAMEBUFFER,
+            GL_COLOR_ATTACHMENT0,
+            GL_TEXTURE_2D,
+            *texture,
+            0
+        );
+
+        GLsizei w = static_cast<GLsizei>(texture->width());
+        GLsizei h = static_cast<GLsizei>(texture->height());
+        glViewport(0, 0, w, h);
+        glClearColor(0.f, 0.f, 0.f, 0.f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        t.fontRenderer->render(*t.font, t.textPosition, t.text, t.textColor);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+        glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+
+        tile = Tile(texture, nullptr, Tile::Status::OK);
         t.tileCache->put(key, t.initData.hashKey(), tile);
     }
     return tile;
@@ -398,7 +391,7 @@ void ensureUpdated(TemporalTileProvider& t) {
     }
 }
 
-std::string getXMLValue(TemporalTileProvider& t, CPLXMLNode* node, const std::string& key,
+std::string xmlValue(TemporalTileProvider& t, CPLXMLNode* node, const std::string& key,
                         const std::string& defaultVal)
 {
     CPLXMLNode* n = CPLSearchXMLNode(node, key.c_str());
@@ -415,10 +408,10 @@ std::string getXMLValue(TemporalTileProvider& t, CPLXMLNode* node, const std::st
 std::string consumeTemporalMetaData(TemporalTileProvider& t, const std::string& xml) {
     CPLXMLNode* node = CPLParseXMLString(xml.c_str());
 
-    std::string timeStart = getXMLValue(t, node, temporal::TimeStart, "2000 Jan 1");
-    std::string timeResolution = getXMLValue(t, node, temporal::TimeResolution, "2d");
-    std::string timeEnd = getXMLValue(t, node, temporal::TimeEnd, "Today");
-    std::string timeIdFormat = getXMLValue(
+    std::string timeStart = xmlValue(t, node, temporal::TimeStart, "2000 Jan 1");
+    std::string timeResolution = xmlValue(t, node, temporal::TimeResolution, "2d");
+    std::string timeEnd = xmlValue(t, node, temporal::TimeEnd, "Today");
+    std::string timeIdFormat = xmlValue(
         t,
         node,
         temporal::TimeFormat,
@@ -446,17 +439,16 @@ std::string consumeTemporalMetaData(TemporalTileProvider& t, const std::string& 
     }
     t.timeFormat = ghoul::from_string<TemporalTileProvider::TimeFormatType>(timeIdFormat);
 
-    std::string gdalDescription;
     CPLXMLNode* gdalNode = CPLSearchXMLNode(node, "GDAL_WMS");
     if (gdalNode) {
-        gdalDescription = CPLSerializeXMLTree(gdalNode);
+        std::string gdalDescription = CPLSerializeXMLTree(gdalNode);
+        return gdalDescription;
     }
     else {
         gdalNode = CPLSearchXMLNode(node, "FilePath");
-        gdalDescription = std::string(gdalNode->psChild->pszValue);
+        std::string gdalDescription = std::string(gdalNode->psChild->pszValue);
+        return gdalDescription;
     }
-
-    return gdalDescription;
 }
 
 bool readFilePath(TemporalTileProvider& t) {
@@ -487,6 +479,38 @@ bool readFilePath(TemporalTileProvider& t) {
 } // namespace
 
 unsigned int TileProvider::NumTileProviders = 0;
+
+void initializeDefaultTile() {
+    ghoul_assert(!DefaultTile.texture(), "Default tile should not have been created");
+    using namespace ghoul::opengl;
+
+    // Create pixel data
+    TileTextureInitData initData(
+        8,
+        8,
+        GL_UNSIGNED_BYTE,
+        Texture::Format::RGBA,
+        TileTextureInitData::PadTiles::No,
+        TileTextureInitData::ShouldAllocateDataOnCPU::Yes
+    );
+    const size_t numBytes = initData.totalNumBytes();
+    char* pixels = new char[numBytes];
+    memset(pixels, 0, numBytes * sizeof(char));
+
+    // Create ghoul texture
+    DefaultTileTexture = std::make_unique<Texture>(initData.dimensions());
+    DefaultTileTexture->setDataOwnership(Texture::TakeOwnership::Yes);
+    DefaultTileTexture->setPixelData(pixels);
+    DefaultTileTexture->uploadTexture();
+    DefaultTileTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+
+    // Create tile
+    DefaultTile = Tile(DefaultTileTexture.get(), nullptr, Tile::Status::OK);
+}
+
+void deinitializeDefaultTile() {
+    DefaultTileTexture = nullptr;
+}
 
 std::unique_ptr<TileProvider> createFromDictionary(layergroupid::TypeID layerTypeID,
                                                    const ghoul::Dictionary& dictionary)
@@ -571,8 +595,7 @@ SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
 
 
 
-TextTileProvider::TextTileProvider(const ghoul::Dictionary& dictionary,
-                                   const TileTextureInitData& initData, size_t fontSize)
+TextTileProvider::TextTileProvider(const TileTextureInitData& initData, size_t fontSize)
     : initData(initData)
     , fontSize(fontSize)
 {
@@ -584,10 +607,7 @@ TextTileProvider::TextTileProvider(const ghoul::Dictionary& dictionary,
 
 
 SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
-    : TextTileProvider(
-        dictionary,
-        getTileTextureInitData(layergroupid::GroupID::ColorLayers, false)
-    )
+    : TextTileProvider(getTileTextureInitData(layergroupid::GroupID::ColorLayers, false))
 {
     type = Type::SizeReferenceTileProvider;
 
@@ -602,11 +622,8 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
 
 
 
-TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary& dictionary)
-    : TextTileProvider(
-        dictionary,
-        getTileTextureInitData(layergroupid::GroupID::ColorLayers, false)
-    )
+TileIndexTileProvider::TileIndexTileProvider()
+    : TextTileProvider(getTileTextureInitData(layergroupid::GroupID::ColorLayers, false))
 {
     type = Type::TileIndexTileProvider;
 }
@@ -622,20 +639,20 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
         byindexprovider::KeyDefaultProvider
     );
 
-    layergroupid::TypeID type;
+    layergroupid::TypeID typeID;
     if (defaultProviderDict.hasKeyAndValue<std::string>("Type")) {
         const std::string& t = defaultProviderDict.value<std::string>("Type");
-        type = ghoul::from_string<layergroupid::TypeID>(t);
+        typeID = ghoul::from_string<layergroupid::TypeID>(t);
 
-        if (type == layergroupid::TypeID::Unknown) {
+        if (typeID == layergroupid::TypeID::Unknown) {
             throw ghoul::RuntimeError("Unknown layer type: " + t);
         }
     }
     else {
-        type = layergroupid::TypeID::DefaultTileLayer;
+        typeID = layergroupid::TypeID::DefaultTileLayer;
     }
 
-    defaultTileProvider = createFromDictionary(type, defaultProviderDict);
+    defaultTileProvider = createFromDictionary(typeID, defaultProviderDict);
 
     const ghoul::Dictionary& indexProvidersDict = dictionary.value<ghoul::Dictionary>(
         byindexprovider::KeyProviders
@@ -772,9 +789,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
 bool initialize(TileProvider& tp) {
     ghoul_assert(!tp.isInitialized, "TileProvider can only be initialized once.");
 
-    initializeDefaultTile(tp);
-    tp.uniqueIdentifier = tp.NumTileProviders;
-    ++tp.NumTileProviders;
+    tp.uniqueIdentifier = tp.NumTileProviders++;
     if (tp.NumTileProviders == std::numeric_limits<unsigned int>::max()) {
         --tp.NumTileProviders;
         return false;
@@ -969,87 +984,6 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
             throw ghoul::MissingCaseException();
     }
 }
-
-
-
-
-
-
-ChunkTile chunkTile(TileProvider& tp, TileIndex tileIndex, int parents, int maxParents) {
-    ghoul_assert(tp.isInitialized, "TileProvider was not initialized.");
-    TileUvTransform uvTransform = { glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f) };
-
-    // Step 1. Traverse 0 or more parents up the chunkTree as requested by the caller
-    for (int i = 0; i < parents && tileIndex.level > 1; i++) {
-        tileselector::ascendToParent(tileIndex, uvTransform);
-    }
-    maxParents -= parents;
-
-    // Step 2. Traverse 0 or more parents up the chunkTree to make sure we're inside
-    //         the range of defined data.
-    int maximumLevel = maxLevel(tp);
-    while (tileIndex.level > maximumLevel) {
-        tileselector::ascendToParent(tileIndex, uvTransform);
-        maxParents--;
-    }
-    if (maxParents < 0) {
-        return ChunkTile { Tile::TileUnavailable, uvTransform, TileDepthTransform() };
-    }
-
-    // Step 3. Traverse 0 or more parents up the chunkTree until we find a chunk that
-    //         has a loaded tile ready to use.
-    while (tileIndex.level > 1) {
-        Tile t = tile(tp, tileIndex);
-        if (t.status() != Tile::Status::OK) {
-            if (--maxParents < 0) {
-                return ChunkTile {
-                    Tile::TileUnavailable,
-                    uvTransform,
-                    TileDepthTransform()
-                };
-            }
-            tileselector::ascendToParent(tileIndex, uvTransform);
-        }
-        else {
-            return ChunkTile { std::move(t), uvTransform, TileDepthTransform() };
-        }
-    }
-
-    return ChunkTile { Tile::TileUnavailable, uvTransform, TileDepthTransform() };
-}
-
-
-
-
-
-
-ChunkTilePile chunkTilePile(TileProvider& tp, TileIndex tileIndex, int pileSize) {
-    ghoul_assert(tp.isInitialized, "TileProvider was not initialized.");
-    ghoul_assert(pileSize >= 0, "pileSize must be positive");
-
-    ChunkTilePile chunkTilePile(pileSize);
-    for (int i = 0; i < pileSize; ++i) {
-        chunkTilePile[i] = chunkTile(tp, tileIndex, i);
-        if (chunkTilePile[i].tile.status() == Tile::Status::Unavailable) {
-            if (i > 0) {
-                // First iteration
-                chunkTilePile[i].tile = chunkTilePile[i - 1].tile;
-                chunkTilePile[i].uvTransform.uvOffset =
-                    chunkTilePile[i - 1].uvTransform.uvOffset;
-                chunkTilePile[i].uvTransform.uvScale =
-                    chunkTilePile[i - 1].uvTransform.uvScale;
-            }
-            else {
-                chunkTilePile[i].tile = tp.defaultTile;
-                chunkTilePile[i].uvTransform.uvOffset = { 0.f, 0.f };
-                chunkTilePile[i].uvTransform.uvScale = { 1.f, 1.f };
-            }
-        }
-    }
-    return chunkTilePile;
-}
-
-
 
 
 
@@ -1383,33 +1317,78 @@ float noDataValueAsFloat(TileProvider& tp) {
 
 
 
+ChunkTile chunkTile(TileProvider& tp, TileIndex tileIndex, int parents, int maxParents) {
+    ghoul_assert(tp.isInitialized, "TileProvider was not initialized.");
+    TileUvTransform uvTransform = { glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f) };
 
-void initializeDefaultTile(TileProvider& tp) {
-    ghoul_assert(!tp.defaultTile.texture(), "Default tile should not have been created");
-    using namespace ghoul::opengl;
+    // Step 1. Traverse 0 or more parents up the chunkTree as requested by the caller
+    for (int i = 0; i < parents && tileIndex.level > 1; i++) {
+        tileselector::ascendToParent(tileIndex, uvTransform);
+    }
+    maxParents -= parents;
 
-    // Create pixel data
-    TileTextureInitData initData(
-        8,
-        8,
-        GL_UNSIGNED_BYTE,
-        Texture::Format::RGBA,
-        TileTextureInitData::PadTiles::No,
-        TileTextureInitData::ShouldAllocateDataOnCPU::Yes
-    );
-    const size_t numBytes = initData.totalNumBytes();
-    char* pixels = new char[numBytes];
-    memset(pixels, 0, numBytes * sizeof(char));
+    // Step 2. Traverse 0 or more parents up the chunkTree to make sure we're inside
+    //         the range of defined data.
+    int maximumLevel = maxLevel(tp);
+    while (tileIndex.level > maximumLevel) {
+        tileselector::ascendToParent(tileIndex, uvTransform);
+        maxParents--;
+    }
+    if (maxParents < 0) {
+        return ChunkTile{ Tile::TileUnavailable, uvTransform, TileDepthTransform() };
+    }
 
-    // Create ghoul texture
-    tp.defaultTileTexture = std::make_unique<Texture>(initData.dimensions());
-    tp.defaultTileTexture->setDataOwnership(Texture::TakeOwnership::Yes);
-    tp.defaultTileTexture->setPixelData(pixels);
-    tp.defaultTileTexture->uploadTexture();
-    tp.defaultTileTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+    // Step 3. Traverse 0 or more parents up the chunkTree until we find a chunk that
+    //         has a loaded tile ready to use.
+    while (tileIndex.level > 1) {
+        Tile t = tile(tp, tileIndex);
+        if (t.status() != Tile::Status::OK) {
+            if (--maxParents < 0) {
+                return ChunkTile{
+                    Tile::TileUnavailable,
+                    uvTransform,
+                    TileDepthTransform()
+                };
+            }
+            tileselector::ascendToParent(tileIndex, uvTransform);
+        }
+        else {
+            return ChunkTile{ std::move(t), uvTransform, TileDepthTransform() };
+        }
+    }
 
-    // Create tile
-    tp.defaultTile = Tile(tp.defaultTileTexture.get(), nullptr, Tile::Status::OK);
+    return ChunkTile{ Tile::TileUnavailable, uvTransform, TileDepthTransform() };
+}
+
+
+
+
+
+
+ChunkTilePile chunkTilePile(TileProvider& tp, TileIndex tileIndex, int pileSize) {
+    ghoul_assert(tp.isInitialized, "TileProvider was not initialized.");
+    ghoul_assert(pileSize >= 0, "pileSize must be positive");
+
+    ChunkTilePile chunkTilePile(pileSize);
+    for (int i = 0; i < pileSize; ++i) {
+        chunkTilePile[i] = chunkTile(tp, tileIndex, i);
+        if (chunkTilePile[i].tile.status() == Tile::Status::Unavailable) {
+            if (i > 0) {
+                // First iteration
+                chunkTilePile[i].tile = chunkTilePile[i - 1].tile;
+                chunkTilePile[i].uvTransform.uvOffset =
+                    chunkTilePile[i - 1].uvTransform.uvOffset;
+                chunkTilePile[i].uvTransform.uvScale =
+                    chunkTilePile[i - 1].uvTransform.uvScale;
+            }
+            else {
+                chunkTilePile[i].tile = DefaultTile;
+                chunkTilePile[i].uvTransform.uvOffset = { 0.f, 0.f };
+                chunkTilePile[i].uvTransform.uvScale = { 1.f, 1.f };
+            }
+        }
+    }
+    return chunkTilePile;
 }
 
 } // namespace openspace::globebrowsing::tileprovider

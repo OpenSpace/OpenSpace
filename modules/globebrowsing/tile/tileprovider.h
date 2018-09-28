@@ -73,10 +73,6 @@ enum class Type {
 };
 
 
-
-
-
-
 struct TileProvider : public properties::PropertyOwner {
     static unsigned int NumTileProviders;
 
@@ -89,9 +85,6 @@ struct TileProvider : public properties::PropertyOwner {
 
     unsigned int uniqueIdentifier = 0;
     bool isInitialized = false;
-
-    std::unique_ptr<ghoul::opengl::Texture> defaultTileTexture;
-    Tile defaultTile = Tile(nullptr, nullptr, Tile::Status::Unavailable);
 };
 
 struct DefaultTileProvider : public TileProvider {
@@ -118,8 +111,7 @@ struct SingleImageProvider : public TileProvider {
 };
 
 struct TextTileProvider : public TileProvider {
-    TextTileProvider(const ghoul::Dictionary& dictionary,
-        const TileTextureInitData& initData, size_t fontSize = 48);
+    TextTileProvider(const TileTextureInitData& initData, size_t fontSize = 48);
 
     const TileTextureInitData initData;
     std::shared_ptr<ghoul::fontrendering::Font> font;
@@ -144,7 +136,7 @@ struct SizeReferenceTileProvider : public TextTileProvider {
 };
 
 struct TileIndexTileProvider : public TextTileProvider {
-    TileIndexTileProvider(const ghoul::Dictionary& dict);
+    TileIndexTileProvider();
 };
 
 struct TileProviderByIndex : public TileProvider {
@@ -206,6 +198,9 @@ struct TemporalTileProvider : public TileProvider {
 
 #endif // GLOBEBROWSING_USE_GDAL
 
+void initializeDefaultTile();
+void deinitializeDefaultTile();
+
 std::unique_ptr<TileProvider> createFromDictionary(layergroupid::TypeID layerTypeID,
     const ghoul::Dictionary& dictionary);
 
@@ -257,8 +252,6 @@ int maxLevel(TileProvider& tp);
  * \returns the no data value for the dataset. Default is the minimum float avalue.
  */
 float noDataValueAsFloat(TileProvider& tp);
-
-void initializeDefaultTile(TileProvider& tp);
 
 } // namespace openspace::globebrowsing::tileprovider
 
