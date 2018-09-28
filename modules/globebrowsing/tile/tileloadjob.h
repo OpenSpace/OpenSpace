@@ -31,8 +31,8 @@
 
 namespace openspace::globebrowsing {
 
-class RawTileDataReader;
 struct RawTile;
+class RawTileDataReader;
 
 struct TileLoadJob : public Job<RawTile> {
     /**
@@ -42,14 +42,6 @@ struct TileLoadJob : public Job<RawTile> {
      * been exposed outside of this object.
      */
     TileLoadJob(RawTileDataReader* rawTileDataReader, const TileIndex& tileIndex);
-
-    /**
-     * No data is allocated unless specified so by the TileTextureInitData of
-     * rawTileDataReader but it is assumed that pboDataPtr is a mapped pointer to a pixel
-     * buffer object.
-     */
-    TileLoadJob(RawTileDataReader* rawTileDataReader, const TileIndex& tileIndex,
-        char* pboDataPtr);
 
     /**
      * Destroys the allocated data pointer if it has been allocated and the TileLoadJob
@@ -83,7 +75,6 @@ protected:
     RawTileDataReader* _rawTileDataReader;
     std::shared_ptr<RawTile> _rawTile;
     TileIndex _chunkIndex;
-    char* _pboMappedDataDestination = nullptr;
     bool _hasOwnershipOfData = false;
 };
 

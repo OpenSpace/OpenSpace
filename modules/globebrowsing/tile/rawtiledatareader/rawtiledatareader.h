@@ -49,7 +49,7 @@ public:
      * which gets returned.
      */
     std::shared_ptr<RawTile> readTileData(TileIndex tileIndex,
-        char* dataDestination, char* pboMappedDataDestination) const;
+        char* dataDestination) const;
     const TileDepthTransform& depthTransform() const;
     const TileTextureInitData& tileTextureInitData() const;
     const PixelRegion::PixelRange fullPixelSize() const;

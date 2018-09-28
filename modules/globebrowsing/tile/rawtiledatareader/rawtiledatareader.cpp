@@ -44,35 +44,19 @@ std::shared_ptr<RawTile> RawTileDataReader::defaultTileData() const {
 }
 
 std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
-                                                         char* dataDestination,
-                                                     char* pboMappedDataDestination) const
+                                                         char* dataDestination) const
 {
+    ghoul_assert(dataDestination, "Need to specify a data destination");
+
     IODescription io = ioDescription(tileIndex);
     RawTile::ReadError worstError = RawTile::ReadError::None;
 
     // Build the RawTile from the data we querred
     std::shared_ptr<RawTile> rawTile = std::make_shared<RawTile>();
 
-    if (dataDestination && !pboMappedDataDestination) {
-        // Write only to cpu data destination
-        memset(dataDestination, 255, _initData.totalNumBytes());
-        readImageData(io, worstError, dataDestination);
-    }
-    else if (!dataDestination && pboMappedDataDestination) {
-        // Write only to pbo mapped data destination
-        memset(pboMappedDataDestination, 255, _initData.totalNumBytes());
-        readImageData(io, worstError, pboMappedDataDestination);
-    }
-    else if (dataDestination && pboMappedDataDestination) {
-        // Write to both data destinations
-        memset(dataDestination, 255, _initData.totalNumBytes());
-        readImageData(io, worstError, dataDestination);
-        size_t numBytes = _initData.totalNumBytes();
-        memcpy(pboMappedDataDestination, dataDestination, numBytes);
-    }
-    else {
-        ghoul_assert(false, "Need to specify a data destination");
-    }
+    // Write only to cpu data destination
+    memset(dataDestination, 255, _initData.totalNumBytes());
+    readImageData(io, worstError, dataDestination);
 
     rawTile->imageData = dataDestination;
     rawTile->error = worstError;

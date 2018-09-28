@@ -31,38 +31,21 @@ namespace openspace::globebrowsing {
 TileLoadJob::TileLoadJob(RawTileDataReader* rawTileDataReader, const TileIndex& tileIndex)
     : _rawTileDataReader(rawTileDataReader)
     , _chunkIndex(tileIndex)
-{}
-
-
-TileLoadJob::TileLoadJob(RawTileDataReader* rawTileDataReader, const TileIndex& tileIndex,
-                         char* pboDataPtr)
-    : _rawTileDataReader(rawTileDataReader)
-    , _chunkIndex(tileIndex)
-    , _pboMappedDataDestination(pboDataPtr)
-{}
+{
+    ghoul_assert(rawTileDataReader, "data reader must not be nullptr");
+}
 
 TileLoadJob::~TileLoadJob() {
     if (_hasOwnershipOfData) {
-        ghoul_assert(_rawTile->imageData, "Image data must exist");
-
         delete[] _rawTile->imageData;
     }
 }
 
 void TileLoadJob::execute() {
     size_t numBytes = _rawTileDataReader->tileTextureInitData().totalNumBytes();
-    char* dataPtr = nullptr;
-    if (_rawTileDataReader->tileTextureInitData().shouldAllocateDataOnCPU() ||
-        !_pboMappedDataDestination)
-    {
-        dataPtr = new char[numBytes];
-        _hasOwnershipOfData = true;
-    }
-    _rawTile = _rawTileDataReader->readTileData(
-        _chunkIndex,
-        dataPtr,
-        _pboMappedDataDestination
-    );
+    char* dataPtr = new char[numBytes];
+    _hasOwnershipOfData = true;
+    _rawTile = _rawTileDataReader->readTileData(_chunkIndex, dataPtr);
 }
 
 std::shared_ptr<RawTile> TileLoadJob::product() {
