@@ -6,6 +6,7 @@ local propertyHelper = asset.require('util/property_helper')
 asset.require('spice/base')
 assetHelper.requestAll(asset, 'scene/solarsystem/sun')
 asset.require('scene/solarsystem/planets/earth/earth')
+-- asset.require('scene/solarsystem/planets/mars/mars')
 -- asset.require('scene/solarsystem/planets/mars/moons/phobos')
 -- asset.require('scene/solarsystem/planets/mars/moons/deimos')
 -- asset.require('scene/solarsystem/dwarf_planets/pluto/system')
@@ -89,12 +90,12 @@ asset.onInitialize(function ()
     openspace.setPropertyValueSingle('Dashboard.Framerate.FrametimeType', 0);
     openspace.setPropertyValueSingle('Scene.Earth.RenderableGlobe.LodScaleFactor', 50.000000);
 openspace.setPropertyValueSingle('Scene.Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled', false);
-openspace.setPropertyValueSingle('Scene.Earth.RenderableGlobe.Debug.LimitLevelByAvailableData', false);
 openspace.setPropertyValueSingle('Scene.Earth.RenderableGlobe.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled', false);
 -- openspace.setPropertyValue('RenderEngine.PerformanceMeasurements', not openspace.getPropertyValue('RenderEngine.PerformanceMeasurements'));
 openspace.setPropertyValueSingle('Scene.Earth.RenderableGlobe.Layers.NightLayers.Earth_at_Night_2012.Enabled', false);
 
 openspace.setPropertyValue('Scene.Earth.RenderableGlobe.Layers.*.Enabled', false);
+openspace.setPropertyValueSingle('Modules.GlobeBrowsing.TileCache.TileCacheSize', 2000);
 
     openspace.navigation.setCameraState({
         Focus = earthAsset.Earth.Identifier,
