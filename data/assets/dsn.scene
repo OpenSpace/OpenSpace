@@ -54,8 +54,9 @@ local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 
 asset.onInitialize(function ()
     local now = openspace.time.currentWallTime()
+
     -- Jump back one day to show a complete planet
-    openspace.time.setTime(openspace.time.advancedTime(now, "-1d"))
+    openspace.time.setTime("2018 SEP 12 19:07:54")
 
     sceneHelper.bindKeys(Keybindings)
 

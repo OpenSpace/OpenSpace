@@ -1,7 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
 --Communicationline data 
-local dataFolder = "C:/Openspace/OpenSpace/sync/http/dsn_data/1"
+local dataFolder = "C:/Agnes/OpenSpace/sync/http/dsn_data/1"
 
 local CommunicationLine = {
     Identifier = "Communication_Line",
