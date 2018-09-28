@@ -80,6 +80,8 @@
 #include "cpl_minixml.h"
 #endif // GLOBEBROWSING_USE_GDAL
 
+#pragma optimize ("", off)
+
 #ifdef GLOBEBROWSING_USE_GDAL
 namespace ghoul {
     template <>
@@ -554,10 +556,8 @@ std::unique_ptr<TileProvider> createFromDictionary(layergroupid::TypeID layerTyp
                                                    const ghoul::Dictionary& dictionary)
 {
     const char* type = layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layerTypeID)];
-    ghoul::Dictionary d = dictionary;
-    d.setValue("type", static_cast<int>(layerTypeID));
     auto factory = FactoryManager::ref().factory<TileProvider>();
-    std::unique_ptr<TileProvider> result = factory->create(type, d);
+    std::unique_ptr<TileProvider> result = factory->create(type, dictionary);
 
 
     return result;
@@ -566,8 +566,8 @@ std::unique_ptr<TileProvider> createFromDictionary(layergroupid::TypeID layerTyp
 TileProvider::TileProvider(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "tileProvider" })
 {
-    ghoul_assert(dictionary.hasKeyAndValue<int>("type"), "No type found");
-    type = toType(layergroupid::TypeID(dictionary.value<int>("type")));
+    //ghoul_assert(dictionary.hasKeyAndValue<int>("type"), "No type found");
+    //type = toType(layergroupid::TypeID(dictionary.value<int>("type")));
 }
 
 DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
@@ -575,6 +575,8 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     , _filePath(defaultprovider::FilePathInfo, "")
     , _tilePixelSize(defaultprovider::TilePixelSizeInfo, 32, 32, 2048)
 {
+    type = Type::Default;
+
     _tileCache = global::moduleEngine.module<GlobeBrowsingModule>()->tileCache();
     name = "Name unspecified";
     dictionary.getValue("Name", name);
@@ -623,12 +625,12 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     addProperty(_tilePixelSize);
 }
 
-DefaultTileProvider::DefaultTileProvider(std::shared_ptr<AsyncTileDataProvider> reader)
-    : TileProvider({})
-    , _asyncTextureDataProvider(std::move(reader))
-    , _filePath(defaultprovider::FilePathInfo, "")
-    , _tilePixelSize(defaultprovider::TilePixelSizeInfo, 32, 32, 2048)
-{}
+//DefaultTileProvider::DefaultTileProvider(std::shared_ptr<AsyncTileDataProvider> reader)
+//    : TileProvider({})
+//    , _asyncTextureDataProvider(std::move(reader))
+//    , _filePath(defaultprovider::FilePathInfo, "")
+//    , _tilePixelSize(defaultprovider::TilePixelSizeInfo, 32, 32, 2048)
+//{}
 
 
 
@@ -639,19 +641,21 @@ SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
     , _tile(nullptr, nullptr, Tile::Status::Unavailable)
     , _filePath(singleimageprovider::FilePathInfo)
 {
+    type = Type::SingleImage;
+
     _filePath = dictionary.value<std::string>(singleimageprovider::KeyFilePath);
     addProperty(_filePath);
 
     reset(*this);
 }
 
-SingleImageProvider::SingleImageProvider(const std::string& imagePath)
-    : TileProvider({})
-    , _tile(nullptr, nullptr, Tile::Status::Unavailable)
-    , _filePath(singleimageprovider::FilePathInfo, imagePath)
-{
-    reset(*this);
-}
+//SingleImageProvider::SingleImageProvider(const std::string& imagePath)
+//    : TileProvider({})
+//    , _tile(nullptr, nullptr, Tile::Status::Unavailable)
+//    , _filePath(singleimageprovider::FilePathInfo, imagePath)
+//{
+//    reset(*this);
+//}
 
 
 
@@ -673,6 +677,8 @@ TextTileProvider::TextTileProvider(const ghoul::Dictionary& dictionary,
 SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
     : TextTileProvider(dictionary, getTileTextureInitData(layergroupid::GroupID::ColorLayers, false))
 {
+    type = Type::SizeReference;
+
     _fontSize = 50;
     _font = global::fontManager.font("Mono", static_cast<float>(_fontSize));
 
@@ -691,7 +697,9 @@ TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary& dictionary
         dictionary,
         getTileTextureInitData(layergroupid::GroupID::ColorLayers, false)
     )
-{}
+{
+    type = Type::TileIndex;
+}
 
 
 
@@ -700,6 +708,8 @@ TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary& dictionary
 TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary)
     : TileProvider(dictionary)
 {
+    type = Type::ByIndex;
+
     const ghoul::Dictionary& defaultProviderDict = dictionary.value<ghoul::Dictionary>(
         byindexprovider::KeyDefaultProvider
         );
@@ -764,6 +774,8 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary)
 TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary)
     : TileProvider(dictionary)
 {
+    type = Type::ByLevel;
+
     layergroupid::GroupID layerGroupID;
     dictionary.getValue(bylevelprovider::KeyLayerGroupID, layerGroupID);
 
@@ -840,6 +852,8 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     , _filePath(temporal::FilePathInfo)
     , _successfulInitialization(false)
 {
+    type = Type::Temporal;
+
     _filePath = dictionary.value<std::string>(temporal::KeyFilePath);
     addProperty(_filePath);
 
@@ -1486,6 +1500,9 @@ float noDataValueAsFloat(TileProvider& tp) {
         case Type::SingleImage:
         case Type::SizeReference:
         case Type::TileIndex:
+        case Type::ByIndex:
+        case Type::ByLevel:
+        case Type::Temporal:
             return std::numeric_limits<float>::min();
         default:
             throw ghoul::MissingCaseException();

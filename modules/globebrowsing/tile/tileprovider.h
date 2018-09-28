@@ -115,7 +115,7 @@ struct TileProvider : public properties::PropertyOwner {
 struct DefaultTileProvider : public TileProvider {
     DefaultTileProvider(const ghoul::Dictionary& dictionary);
     // This one still used?
-    DefaultTileProvider(std::shared_ptr<AsyncTileDataProvider> reader);
+    //DefaultTileProvider(std::shared_ptr<AsyncTileDataProvider> reader);
 
     std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
 
@@ -131,7 +131,7 @@ struct DefaultTileProvider : public TileProvider {
 
 struct SingleImageProvider : public TileProvider {
     SingleImageProvider(const ghoul::Dictionary& dictionary);
-    SingleImageProvider(const std::string& imagePath);
+    //SingleImageProvider(const std::string& imagePath);
 
     std::unique_ptr<ghoul::opengl::Texture> _tileTexture;
     Tile _tile;
