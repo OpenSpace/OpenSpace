@@ -89,21 +89,19 @@ namespace {
             case T::Unknown:
                 throw ghoul::MissingCaseException();
             case T::DefaultTileLayer:
-                return Type::Default;
+                return Type::DefaultTileProvider;
             case T::SingleImageTileLayer:
-                return Type::SingleImage;
+                return Type::SingleImageTileProvider;
             case T::SizeReferenceTileLayer:
-                return Type::SizeReference;
+                return Type::SizeReferenceTileProvider;
             case T::TemporalTileLayer:
-                return Type::Temporal;
+                return Type::TemporalTileProvider;
             case T::TileIndexTileLayer:
-                return Type::TileIndex;
+                return Type::TileIndexTileProvider;
             case T::ByIndexTileLayer:
-                return Type::ByIndex;
+                return Type::ByIndexTileProvider;
             case T::ByLevelTileLayer:
-                return Type::ByLevel;
-            case T::SolidColor:
-                return Type::SolidColor;
+                return Type::ByLevelTileProvider;
             default:
                 throw ghoul::MissingCaseException();
         }
@@ -183,32 +181,31 @@ namespace {
         const std::string _loggerCat = "DefaultTileProvider : " + t.name;
 
         RawTileDataReader::PerformPreprocessing preprocess =
-            t._performPreProcessing ? RawTileDataReader::PerformPreprocessing::Yes :
-            RawTileDataReader::PerformPreprocessing::No;
+            RawTileDataReader::PerformPreprocessing(t.performPreProcessing);
 
         // Initialize instance variables
 #ifdef GLOBEBROWSING_USE_GDAL
         std::shared_ptr<GdalRawTileDataReader> tileDataset =
-            std::make_shared<GdalRawTileDataReader>(t._filePath, initData, preprocess);
+            std::make_shared<GdalRawTileDataReader>(t.filePath, initData, preprocess);
 #else // GLOBEBROWSING_USE_GDAL
         std::shared_ptr<SimpleRawTileDataReader> tileDataset =
             std::make_shared<SimpleRawTileDataReader>(t._filePath, initData, preprocess);
 #endif // GLOBEBROWSING_USE_GDAL
 
-        t._asyncTextureDataProvider = std::make_shared<AsyncTileDataProvider>(
+        t.asyncTextureDataProvider = std::make_shared<AsyncTileDataProvider>(
             t.name,
             tileDataset
             );
 
         // Tiles are only available for levels 2 and higher.
-        if (t._preCacheLevel >= 2) {
+        if (t.preCacheLevel >= 2) {
             LDEBUG(fmt::format(
-                "Precaching '{}' with level '{}'", t._filePath.value(), t._preCacheLevel
+                "Precaching '{}' with level '{}'", t.filePath.value(), t.preCacheLevel
             ));
-            for (int level = 0; level <= t._preCacheLevel; ++level) {
+            for (int level = 0; level <= t.preCacheLevel; ++level) {
                 for (int x = 0; x <= level * 2; ++x) {
                     for (int y = 0; y <= level; ++y) {
-                        t._asyncTextureDataProvider->enqueueTileIO({ x, y, level });
+                        t.asyncTextureDataProvider->enqueueTileIO({ x, y, level });
                     }
                 }
             }
@@ -216,18 +213,18 @@ namespace {
     }
 
     void initTexturesFromLoadedData(DefaultTileProvider& t) {
-        if (t._asyncTextureDataProvider) {
-            std::shared_ptr<RawTile> tile = t._asyncTextureDataProvider->popFinishedRawTile();
+        if (t.asyncTextureDataProvider) {
+            std::shared_ptr<RawTile> tile = t.asyncTextureDataProvider->popFinishedRawTile();
             if (tile) {
                 const cache::ProviderTileKey key = { tile->tileIndex, t.uniqueIdentifier };
-                ghoul_assert(!t._tileCache->exist(key), "Tile must not be existing in cache");
-                t._tileCache->createTileAndPut(key, *tile);
+                ghoul_assert(!t.tileCache->exist(key), "Tile must not be existing in cache");
+                t.tileCache->createTileAndPut(key, *tile);
             }
         }
     }
 
     Tile createChunkIndexTile(TextTileProvider& t, const TileIndex& tileIndex) {
-        ghoul::opengl::Texture* texture = t._tileCache->texture(t._initData);
+        ghoul::opengl::Texture* texture = t.tileCache->texture(t.initData);
 
         // Keep track of defaultFBO and viewport to be able to reset state when done
         GLint defaultFBO;
@@ -236,7 +233,7 @@ namespace {
         glGetIntegerv(GL_VIEWPORT, viewport);
 
         // Render to texture
-        glBindFramebuffer(GL_FRAMEBUFFER, t._fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, t.fbo);
         glFramebufferTexture2D(
             GL_FRAMEBUFFER,
             GL_COLOR_ATTACHMENT0,
@@ -255,10 +252,10 @@ namespace {
         glClearColor(0.f, 0.f, 0.f, 0.f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        ghoul_assert(t._fontRenderer != nullptr, "_fontRenderer must not be null");
+        ghoul_assert(t.fontRenderer != nullptr, "_fontRenderer must not be null");
 
-        t._fontRenderer->render(
-            *t._font,
+        t.fontRenderer->render(
+            *t.font,
             t.textPosition,
             t.text,
             t.textColor
@@ -272,46 +269,46 @@ namespace {
     }
 
     void initialize(TextTileProvider& t) {
-        t._font = global::fontManager.font("Mono", static_cast<float>(t._fontSize));
+        t.font = global::fontManager.font("Mono", static_cast<float>(t.fontSize));
 
-        t._fontRenderer = ghoul::fontrendering::FontRenderer::createDefault();
-        t._fontRenderer->setFramebufferSize(glm::vec2(t._initData.dimensions()));
+        t.fontRenderer = ghoul::fontrendering::FontRenderer::createDefault();
+        t.fontRenderer->setFramebufferSize(glm::vec2(t.initData.dimensions()));
 
-        glGenFramebuffers(1, &t._fbo);
+        glGenFramebuffers(1, &t.fbo);
     }
 
     void deinitialize(TextTileProvider& t) {
-        glDeleteFramebuffers(1, &t._fbo);
+        glDeleteFramebuffers(1, &t.fbo);
     }
 
     Tile tile(TextTileProvider& t, const TileIndex& tileIndex) {
         cache::ProviderTileKey key = { tileIndex, t.uniqueIdentifier };
 
-        Tile tile = t._tileCache->get(key);
+        Tile tile = t.tileCache->get(key);
 
         if (tile.texture() == nullptr || t.textIsDirty) {
             tile = createChunkIndexTile(t, tileIndex);
-            t._tileCache->put(key, t._initData.hashKey(), tile);
+            t.tileCache->put(key, t.initData.hashKey(), tile);
             t.textIsDirty = false;
         }
         return tile;
     }
 
     void reset(TextTileProvider& t) {
-        t._tileCache->clear();
+        t.tileCache->clear();
     }
 
     int providerIndex(TileProviderByLevel& t, int level) {
         int clampedLevel = std::max(
             0,
-            std::min(level, static_cast<int>(t._providerIndices.size() - 1))
+            std::min(level, static_cast<int>(t.providerIndices.size() - 1))
         );
-        return t._providerIndices[clampedLevel];
+        return t.providerIndices[clampedLevel];
     }
 
     TileProvider* levelProvider(TileProviderByLevel& t, int level) {
-        if (!t._levelTileProviders.empty()) {
-            return t._levelTileProviders[providerIndex(t, level)].get();
+        if (!t.levelTileProviders.empty()) {
+            return t.levelTileProviders[providerIndex(t, level)].get();
         }
         else {
             return nullptr;
@@ -353,7 +350,7 @@ namespace {
     }
 
     std::string getGdalDatasetXML(TemporalTileProvider& t, const TemporalTileProvider::TimeKey& timeKey) {
-        std::string xmlTemplate(t._gdalXmlTemplate);
+        std::string xmlTemplate(t.gdalXmlTemplate);
         const size_t pos = xmlTemplate.find(TemporalTileProvider::UrlTimePlaceholder);
         //size_t numChars = std::string(UrlTimePlaceholder).length();
         const size_t numChars = strlen(TemporalTileProvider::UrlTimePlaceholder);
@@ -380,31 +377,31 @@ namespace {
         std::string gdalDatasetXml = getGdalDatasetXML(t, std::move(timekey));
         FileSys.expandPathTokens(gdalDatasetXml, AllowedTokens);
 
-        t._initDict.setValue<std::string>(temporal::KeyFilePath, gdalDatasetXml);
+        t.initDict.setValue<std::string>(temporal::KeyFilePath, gdalDatasetXml);
         std::shared_ptr<DefaultTileProvider> tileProvider =
-            std::make_shared<DefaultTileProvider>(t._initDict);
+            std::make_shared<DefaultTileProvider>(t.initDict);
         return tileProvider;
     }
 
     std::shared_ptr<TileProvider> getTileProvider(TemporalTileProvider& t, const TemporalTileProvider::TimeKey& timekey)
     {
-        const auto it = t._tileProviderMap.find(timekey);
-        if (it != t._tileProviderMap.end()) {
+        const auto it = t.tileProviderMap.find(timekey);
+        if (it != t.tileProviderMap.end()) {
             return it->second;
         }
         else {
             std::shared_ptr<TileProvider> tileProvider = initTileProvider(t, timekey);
             initialize(*tileProvider);
 
-            t._tileProviderMap[timekey] = tileProvider;
+            t.tileProviderMap[timekey] = tileProvider;
             return tileProvider;
         }
     }
 
     std::shared_ptr<TileProvider> getTileProvider(TemporalTileProvider& t, const Time& time) {
         Time tCopy(time);
-        if (t._timeQuantizer.quantize(tCopy, true)) {
-            TemporalTileProvider::TimeKey timeKey = timeStringify(t._timeFormat, tCopy);
+        if (t.timeQuantizer.quantize(tCopy, true)) {
+            TemporalTileProvider::TimeKey timeKey = timeStringify(t.timeFormat, tCopy);
             try {
                 return getTileProvider(t, timeKey);
             }
@@ -417,7 +414,7 @@ namespace {
     }
 
     void ensureUpdated(TemporalTileProvider& t) {
-        if (!t._currentTileProvider) {
+        if (!t.currentTileProvider) {
             LDEBUGC("TemporalTileProvider", "Warning: update was done lazily");
             update(t);
         }
@@ -429,7 +426,7 @@ namespace {
         CPLXMLNode* n = CPLSearchXMLNode(node, key.c_str());
         if (!n) {
             throw ghoul::RuntimeError(
-                fmt::format("Unable to parse file {}. {} missing", t._filePath.value(), key)
+                fmt::format("Unable to parse file {}. {} missing", t.filePath.value(), key)
             );
         }
 
@@ -461,15 +458,15 @@ namespace {
         }
 
         try {
-            t._timeQuantizer = TimeQuantizer(start, end, timeResolution);
+            t.timeQuantizer = TimeQuantizer(start, end, timeResolution);
         }
         catch (const ghoul::RuntimeError& e) {
             throw ghoul::RuntimeError(fmt::format(
                 "Could not create time quantizer for Temporal GDAL dataset '{}'. {}",
-                t._filePath.value(), e.message
+                t.filePath.value(), e.message
             ));
         }
-        t._timeFormat = ghoul::from_string<TemporalTileProvider::TimeFormatType>(timeIdFormat);
+        t.timeFormat = ghoul::from_string<TemporalTileProvider::TimeFormatType>(timeIdFormat);
 
         std::string gdalDescription;
         CPLXMLNode* gdalNode = CPLSearchXMLNode(node, "GDAL_WMS");
@@ -485,7 +482,7 @@ namespace {
     }
 
     bool readFilePath(TemporalTileProvider& t) {
-        std::ifstream in(t._filePath.value().c_str());
+        std::ifstream in(t.filePath.value().c_str());
         std::string xml;
         if (in.is_open()) {
             // read file
@@ -496,18 +493,18 @@ namespace {
         }
         else {
             // Assume that it is already an xml
-            xml = t._filePath.value();
+            xml = t.filePath.value();
         }
 
         // File path was not a path to a file but a GDAL config or empty
-        if (FileSys.fileExists(t._filePath.value())) {
-            t._initDict.setValue<std::string>(
+        if (FileSys.fileExists(t.filePath.value())) {
+            t.initDict.setValue<std::string>(
                 temporal::KeyBasePath,
-                ghoul::filesystem::File(t._filePath.value()).directoryName()
+                ghoul::filesystem::File(t.filePath.value()).directoryName()
             );
         }
 
-        t._gdalXmlTemplate = consumeTemporalMetaData(t, xml);
+        t.gdalXmlTemplate = consumeTemporalMetaData(t, xml);
         return true;
     }
 
@@ -536,57 +533,57 @@ TileProvider::TileProvider(const ghoul::Dictionary& dictionary)
 
 DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     : TileProvider(dictionary)
-    , _filePath(defaultprovider::FilePathInfo, "")
-    , _tilePixelSize(defaultprovider::TilePixelSizeInfo, 32, 32, 2048)
+    , filePath(defaultprovider::FilePathInfo, "")
+    , tilePixelSize(defaultprovider::TilePixelSizeInfo, 32, 32, 2048)
 {
-    type = Type::Default;
+    type = Type::DefaultTileProvider;
 
-    _tileCache = global::moduleEngine.module<GlobeBrowsingModule>()->tileCache();
+    tileCache = global::moduleEngine.module<GlobeBrowsingModule>()->tileCache();
     name = "Name unspecified";
     dictionary.getValue("Name", name);
     std::string _loggerCat = "DefaultTileProvider : " + name;
 
     // 1. Get required Keys
-    _filePath = dictionary.value<std::string>(defaultprovider::KeyFilePath);
+    filePath = dictionary.value<std::string>(defaultprovider::KeyFilePath);
 
-    if (!dictionary.getValue<layergroupid::GroupID>("LayerGroupID", _layerGroupID)) {
+    if (!dictionary.getValue<layergroupid::GroupID>("LayerGroupID", layerGroupID)) {
         ghoul_assert(false, "Unknown layer group id");
     }
 
     // 2. Initialize default values for any optional Keys
     // getValue does not work for integers
     double pixelSize = 0.0;
-    int tilePixelSize = 0;
+    int tps = 0;
     if (dictionary.getValue<double>(defaultprovider::KeyTilePixelSize, pixelSize)) {
         LDEBUG(fmt::format("Default pixel size overridden: {}", pixelSize));
         tilePixelSize = static_cast<int>(pixelSize);
     }
 
-    dictionary.getValue<bool>(defaultprovider::KeyPadTiles, _padTiles);
+    dictionary.getValue<bool>(defaultprovider::KeyPadTiles, padTiles);
 
     TileTextureInitData initData(getTileTextureInitData(
-        _layerGroupID,
-        _padTiles,
-        tilePixelSize
+        layerGroupID,
+        padTiles,
+        tps
     ));
-    _tilePixelSize = initData.dimensions().x;
+    tilePixelSize = initData.dimensions().x;
 
-    _performPreProcessing = shouldPerformPreProcessingOnLayerGroup(_layerGroupID);
-    if (dictionary.getValue<bool>(defaultprovider::KeyPerformPreProcessing, _performPreProcessing)) {
+    performPreProcessing = shouldPerformPreProcessingOnLayerGroup(layerGroupID);
+    if (dictionary.getValue<bool>(defaultprovider::KeyPerformPreProcessing, performPreProcessing)) {
         LDEBUG(fmt::format(
-            "Default PerformPreProcessing overridden: {}", _performPreProcessing
+            "Default PerformPreProcessing overridden: {}", performPreProcessing
         ));
     }
 
     if (dictionary.hasKeyAndValue<double>(defaultprovider::KeyPreCacheLevel)) {
-        _preCacheLevel = static_cast<int>(dictionary.value<double>(defaultprovider::KeyPreCacheLevel));
+        preCacheLevel = static_cast<int>(dictionary.value<double>(defaultprovider::KeyPreCacheLevel));
     }
 
     initAsyncTileDataReader(*this, initData);
 
     // Properties
-    addProperty(_filePath);
-    addProperty(_tilePixelSize);
+    addProperty(filePath);
+    addProperty(tilePixelSize);
 }
 
 //DefaultTileProvider::DefaultTileProvider(std::shared_ptr<AsyncTileDataProvider> reader)
@@ -602,13 +599,13 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
 
 SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
     : TileProvider(dictionary)
-    , _tile(nullptr, nullptr, Tile::Status::Unavailable)
-    , _filePath(singleimageprovider::FilePathInfo)
+    , tile(nullptr, nullptr, Tile::Status::Unavailable)
+    , filePath(singleimageprovider::FilePathInfo)
 {
-    type = Type::SingleImage;
+    type = Type::SingleImageTileProvider;
 
-    _filePath = dictionary.value<std::string>(singleimageprovider::KeyFilePath);
-    addProperty(_filePath);
+    filePath = dictionary.value<std::string>(singleimageprovider::KeyFilePath);
+    addProperty(filePath);
 
     reset(*this);
 }
@@ -628,10 +625,10 @@ SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
 TextTileProvider::TextTileProvider(const ghoul::Dictionary& dictionary,
                                    const TileTextureInitData& initData, size_t fontSize)
     : TileProvider(dictionary)
-    , _initData(initData)
-    , _fontSize(fontSize)
+    , initData(initData)
+    , fontSize(fontSize)
 {
-    _tileCache = global::moduleEngine.module<GlobeBrowsingModule>()->tileCache();
+    tileCache = global::moduleEngine.module<GlobeBrowsingModule>()->tileCache();
 }
 
 
@@ -641,13 +638,13 @@ TextTileProvider::TextTileProvider(const ghoul::Dictionary& dictionary,
 SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
     : TextTileProvider(dictionary, getTileTextureInitData(layergroupid::GroupID::ColorLayers, false))
 {
-    type = Type::SizeReference;
+    type = Type::SizeReferenceTileProvider;
 
-    _fontSize = 50;
-    _font = global::fontManager.font("Mono", static_cast<float>(_fontSize));
+    fontSize = 50;
+    font = global::fontManager.font("Mono", static_cast<float>(fontSize));
 
     if (dictionary.hasKeyAndValue<glm::dvec3>(sizereferenceprovider::KeyRadii)) {
-        _ellipsoid = dictionary.value<glm::dvec3>(sizereferenceprovider::KeyRadii);
+        ellipsoid = dictionary.value<glm::dvec3>(sizereferenceprovider::KeyRadii);
     }
 
 }
@@ -662,7 +659,7 @@ TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary& dictionary
         getTileTextureInitData(layergroupid::GroupID::ColorLayers, false)
     )
 {
-    type = Type::TileIndex;
+    type = Type::TileIndexTileProvider;
 }
 
 
@@ -672,7 +669,7 @@ TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary& dictionary
 TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary)
     : TileProvider(dictionary)
 {
-    type = Type::ByIndex;
+    type = Type::ByIndexTileProvider;
 
     const ghoul::Dictionary& defaultProviderDict = dictionary.value<ghoul::Dictionary>(
         byindexprovider::KeyDefaultProvider
@@ -691,7 +688,7 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary)
         type = layergroupid::TypeID::DefaultTileLayer;
     }
 
-    _defaultTileProvider = createFromDictionary(type, defaultProviderDict);
+    defaultTileProvider = createFromDictionary(type, defaultProviderDict);
 
     const ghoul::Dictionary& indexProvidersDict = dictionary.value<ghoul::Dictionary>(
         byindexprovider::KeyProviders
@@ -727,7 +724,7 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary)
             providerDict
         );
         TileIndex::TileHashKey key = tileIndex.hashKey();
-        _tileProviderMap.insert(std::make_pair(key, stp));
+        tileProviderMap.insert(std::make_pair(key, stp));
     }
 }
 
@@ -738,7 +735,7 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary)
 TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary)
     : TileProvider(dictionary)
 {
-    type = Type::ByLevel;
+    type = Type::ByLevelTileProvider;
 
     layergroupid::GroupID layerGroupID;
     dictionary.getValue(bylevelprovider::KeyLayerGroupID, layerGroupID);
@@ -773,7 +770,7 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary)
             typeID = layergroupid::TypeID::DefaultTileLayer;
         }
 
-        _levelTileProviders.push_back(
+        levelTileProviders.push_back(
             std::shared_ptr<TileProvider>(
                 createFromDictionary(typeID, providerDict)
                 )
@@ -781,27 +778,27 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary)
 
         std::string providerIdentifier;
         providerDict.getValue("Identifier", providerIdentifier);
-        _levelTileProviders.back()->setIdentifier(providerIdentifier);
+        levelTileProviders.back()->setIdentifier(providerIdentifier);
 
         std::string providerName;
         providerDict.getValue("Name", providerName);
-        _levelTileProviders.back()->setGuiName(providerName);
+        levelTileProviders.back()->setGuiName(providerName);
 
-        addPropertySubOwner(_levelTileProviders.back().get());
+        addPropertySubOwner(levelTileProviders.back().get());
 
         // Ensure we can represent the max level
-        if (static_cast<int>(_providerIndices.size()) < maxLevel) {
-            _providerIndices.resize(maxLevel + 1, -1);
+        if (static_cast<int>(providerIndices.size()) < maxLevel) {
+            providerIndices.resize(maxLevel + 1, -1);
         }
 
         // map this level to the tile provider index
-        _providerIndices[maxLevel] = static_cast<int>(_levelTileProviders.size()) - 1;
+        providerIndices[maxLevel] = static_cast<int>(levelTileProviders.size()) - 1;
     }
 
     // Fill in the gaps (value -1) in provider indices, from back to end
-    for (int i = static_cast<int>(_providerIndices.size()) - 2; i >= 0; --i) {
-        if (_providerIndices[i] == -1) {
-            _providerIndices[i] = _providerIndices[i + 1];
+    for (int i = static_cast<int>(providerIndices.size()) - 2; i >= 0; --i) {
+        if (providerIndices[i] == -1) {
+            providerIndices[i] = providerIndices[i + 1];
         }
     }
 }
@@ -812,14 +809,14 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary)
 
 TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary) 
     : TileProvider(dictionary)
-    , _initDict(dictionary)
-    , _filePath(temporal::FilePathInfo)
-    , _successfulInitialization(false)
+    , initDict(dictionary)
+    , filePath(temporal::FilePathInfo)
+    , successfulInitialization(false)
 {
-    type = Type::Temporal;
+    type = Type::TemporalTileProvider;
 
-    _filePath = dictionary.value<std::string>(temporal::KeyFilePath);
-    addProperty(_filePath);
+    filePath = dictionary.value<std::string>(temporal::KeyFilePath);
+    addProperty(filePath);
 
     if (readFilePath(*this)) {
         const bool hasStart = dictionary.hasKeyAndValue<std::string>(
@@ -829,16 +826,16 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
         if (hasStart && hasEnd) {
             const std::string start = dictionary.value<std::string>(temporal::KeyPreCacheStartTime);
             const std::string end = dictionary.value<std::string>(temporal::KeyPreCacheEndTime);
-            _preCacheTimes = _timeQuantizer.quantized(
+            preCacheTimes = timeQuantizer.quantized(
                 Time(Time::convertTime(start)),
                 Time(Time::convertTime(end))
             );
         }
-        _successfulInitialization = true;
+        successfulInitialization = true;
     }
     else {
-        LERRORC("TemporalTileProvider", "Unable to read file " + _filePath.value());
-        _successfulInitialization = false;
+        LERRORC("TemporalTileProvider", "Unable to read file " + filePath.value());
+        successfulInitialization = false;
     }
 }
 
@@ -861,38 +858,38 @@ bool initialize(TileProvider& tp) {
     tp.isInitialized = true;
 
     switch (tp.type) {
-        case Type::Default:
+        case Type::DefaultTileProvider:
             break;
-        case Type::SingleImage:
+        case Type::SingleImageTileProvider:
             break;
-        case Type::SizeReference: {
+        case Type::SizeReferenceTileProvider: {
             SizeReferenceTileProvider& t = static_cast<SizeReferenceTileProvider&>(tp);
             initialize(t);
             break;
         }
-        case Type::TileIndex: {
+        case Type::TileIndexTileProvider: {
             TileIndexTileProvider& t = static_cast<TileIndexTileProvider&>(tp);
             initialize(t);
             break;
         }
-        case Type::ByIndex:
+        case Type::ByIndexTileProvider:
             break;
-        case Type::ByLevel: {
+        case Type::ByLevelTileProvider: {
             TileProviderByLevel& t = static_cast<TileProviderByLevel&>(tp);
             bool success = true;
-            for (const std::shared_ptr<TileProvider>& prov : t._levelTileProviders) {
+            for (const std::shared_ptr<TileProvider>& prov : t.levelTileProviders) {
                 success &= initialize(*prov);
             }
             return success;
         }
-        case Type::Temporal: {
+        case Type::TemporalTileProvider: {
             TemporalTileProvider& t = static_cast<TemporalTileProvider&>(tp);
-            if (!t._preCacheTimes.empty()) {
-                LINFOC("TemporalTileProvider", fmt::format("Preloading: {}", t._filePath.value()));
-                for (const Time& time : t._preCacheTimes) {
+            if (!t.preCacheTimes.empty()) {
+                LINFOC("TemporalTileProvider", fmt::format("Preloading: {}", t.filePath.value()));
+                for (const Time& time : t.preCacheTimes) {
                     getTileProvider(t, time);
                 }
-                t._preCacheTimes.clear();
+                t.preCacheTimes.clear();
             }
             break;
         }
@@ -911,31 +908,31 @@ bool initialize(TileProvider& tp) {
 
 bool deinitialize(TileProvider& tp) {
     switch (tp.type) {
-        case Type::Default:
+        case Type::DefaultTileProvider:
             break;
-        case Type::SingleImage:
+        case Type::SingleImageTileProvider:
             break;
-        case Type::SizeReference: {
+        case Type::SizeReferenceTileProvider: {
             SizeReferenceTileProvider& t = static_cast<SizeReferenceTileProvider&>(tp);
             deinitialize(t);
             break;
         }
-        case Type::TileIndex: {
+        case Type::TileIndexTileProvider: {
             TileIndexTileProvider& t = static_cast<TileIndexTileProvider&>(tp);
             deinitialize(t);
             break;
         }
-        case Type::ByIndex:
+        case Type::ByIndexTileProvider:
             break;
-        case Type::ByLevel: {
+        case Type::ByLevelTileProvider: {
             TileProviderByLevel& t = static_cast<TileProviderByLevel&>(tp);
             bool success = true;
-            for (const std::shared_ptr<TileProvider>& prov : t._levelTileProviders) {
+            for (const std::shared_ptr<TileProvider>& prov : t.levelTileProviders) {
                 success &= deinitialize(*prov);
             }
             return success;
         }
-        case Type::Temporal:
+        case Type::TemporalTileProvider:
             break;
         default:
             throw ghoul::MissingCaseException();
@@ -950,17 +947,17 @@ bool deinitialize(TileProvider& tp) {
 
 Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
     switch (tp.type) {
-        case Type::Default: {
+        case Type::DefaultTileProvider: {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
-            if (t._asyncTextureDataProvider) {
+            if (t.asyncTextureDataProvider) {
                 if (tileIndex.level > maxLevel(t)) {
                     return Tile(nullptr, nullptr, Tile::Status::OutOfRange);
                 }
                 const cache::ProviderTileKey key = { tileIndex, t.uniqueIdentifier };
-                const Tile tile = t._tileCache->get(key);
+                const Tile tile = t.tileCache->get(key);
 
                 if (!tile.texture()) {
-                    t._asyncTextureDataProvider->enqueueTileIO(tileIndex);
+                    t.asyncTextureDataProvider->enqueueTileIO(tileIndex);
                 }
 
                 return tile;
@@ -969,11 +966,11 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
                 return Tile(nullptr, nullptr, Tile::Status::Unavailable);
             }
         }
-        case Type::SingleImage: {
+        case Type::SingleImageTileProvider: {
             SingleImageProvider& t = static_cast<SingleImageProvider&>(tp);
-            return t._tile;
+            return t.tile;
         }
-        case Type::SizeReference: {
+        case Type::SizeReferenceTileProvider: {
             SizeReferenceTileProvider& t = static_cast<SizeReferenceTileProvider&>(tp);
 
             const GeodeticPatch patch(tileIndex);
@@ -981,7 +978,7 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
             const double lat = aboveEquator ? patch.minLat() : patch.maxLat();
             const double lon1 = patch.minLon();
             const double lon2 = patch.maxLon();
-            int l = static_cast<int>(t._ellipsoid.longitudalDistance(lat, lon1, lon2));
+            int l = static_cast<int>(t.ellipsoid.longitudalDistance(lat, lon1, lon2));
 
             const bool useKm = l > 9999;
             if (useKm) {
@@ -1005,34 +1002,34 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
             t.text = fmt::format(" {:.0f} {:s}", tileLongitudalLength, unit);
             t.textPosition = {
                 0.f,
-                aboveEquator ? t._fontSize / 2.f : t._initData.dimensions().y - 3.f * t._fontSize / 2.f
+                aboveEquator ? t.fontSize / 2.f : t.initData.dimensions().y - 3.f * t.fontSize / 2.f
             };
             t.textColor = glm::vec4(1.f);
 
             return tile(t, tileIndex);
         }
-        case Type::TileIndex: {
+        case Type::TileIndexTileProvider: {
             TileIndexTileProvider& t = static_cast<TileIndexTileProvider&>(tp);
             t.text = fmt::format(
                 "level: {}\nx: {}\ny: {}",
                 tileIndex.level, tileIndex.x, tileIndex.y
             );
             t.textPosition = glm::vec2(
-                t._initData.dimensions().x / 4 -
-                (t._initData.dimensions().x / 32) * log10(1 << tileIndex.level),
-                t._initData.dimensions().y / 2 + t._fontSize
+                t.initData.dimensions().x / 4 -
+                (t.initData.dimensions().x / 32) * log10(1 << tileIndex.level),
+                t.initData.dimensions().y / 2 + t.fontSize
             );
             t.textColor = glm::vec4(1.f);
 
             return tile(t, tileIndex);
         }
-        case Type::ByIndex: {
+        case Type::ByIndexTileProvider: {
             TileProviderByIndex& t = static_cast<TileProviderByIndex&>(tp);
-            const auto it = t._tileProviderMap.find(tileIndex.hashKey());
-            const bool hasProvider = it != t._tileProviderMap.end();
+            const auto it = t.tileProviderMap.find(tileIndex.hashKey());
+            const bool hasProvider = it != t.tileProviderMap.end();
             return hasProvider ? tile(*it->second, tileIndex) : Tile::TileUnavailable;
         }
-        case Type::ByLevel: {
+        case Type::ByLevelTileProvider: {
             TileProviderByLevel& t = static_cast<TileProviderByLevel&>(tp);
             TileProvider* provider = levelProvider(t, tileIndex.level);
             if (provider) {
@@ -1042,11 +1039,11 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
                 return Tile::TileUnavailable;
             }
         }
-        case Type::Temporal: {
+        case Type::TemporalTileProvider: {
             TemporalTileProvider& t = static_cast<TemporalTileProvider&>(tp);
-            if (t._successfulInitialization) {
+            if (t.successfulInitialization) {
                 ensureUpdated(t);
-                return tile(*t._currentTileProvider, tileIndex);
+                return tile(*t.currentTileProvider, tileIndex);
             }
             else {
                 return Tile::TileUnavailable;
@@ -1146,11 +1143,11 @@ ChunkTilePile chunkTilePile(TileProvider& tp, TileIndex tileIndex, int pileSize)
 
 Tile::Status tileStatus(TileProvider& tp, const TileIndex& index) {
     switch (tp.type) {
-        case Type::Default: {
+        case Type::DefaultTileProvider: {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
-            if (t._asyncTextureDataProvider) {
+            if (t.asyncTextureDataProvider) {
                 const std::shared_ptr<RawTileDataReader>& rawTileDataReader =
-                    t._asyncTextureDataProvider->rawTileDataReader();
+                    t.asyncTextureDataProvider->rawTileDataReader();
 
                 if (index.level > rawTileDataReader->maxChunkLevel()) {
                     return Tile::Status::OutOfRange;
@@ -1158,27 +1155,27 @@ Tile::Status tileStatus(TileProvider& tp, const TileIndex& index) {
 
                 const cache::ProviderTileKey key = { index, t.uniqueIdentifier };
 
-                return t._tileCache->get(key).status();
+                return t.tileCache->get(key).status();
             }
             else {
                 return Tile::Status::Unavailable;
             }
         }
-        case Type::SingleImage: {
+        case Type::SingleImageTileProvider: {
             SingleImageProvider& t = static_cast<SingleImageProvider&>(tp);
-            return t._tile.status();
+            return t.tile.status();
         }
-        case Type::SizeReference:
+        case Type::SizeReferenceTileProvider:
             return Tile::Status::OK;
-        case Type::TileIndex:
+        case Type::TileIndexTileProvider:
             return Tile::Status::OK;
-        case Type::ByIndex: {
+        case Type::ByIndexTileProvider: {
             TileProviderByIndex& t = static_cast<TileProviderByIndex&>(tp);
-            const auto it = t._tileProviderMap.find(index.hashKey());
-            const bool hasProvider = it != t._tileProviderMap.end();
+            const auto it = t.tileProviderMap.find(index.hashKey());
+            const bool hasProvider = it != t.tileProviderMap.end();
             return hasProvider ? tileStatus(*it->second, index) : Tile::Status::Unavailable;
         }
-        case Type::ByLevel: {
+        case Type::ByLevelTileProvider: {
             TileProviderByLevel& t = static_cast<TileProviderByLevel&>(tp);
             TileProvider* provider = levelProvider(t, index.level);
             if (provider) {
@@ -1188,11 +1185,11 @@ Tile::Status tileStatus(TileProvider& tp, const TileIndex& index) {
                 return Tile::Status::Unavailable;
             }
         }
-        case Type::Temporal: {
+        case Type::TemporalTileProvider: {
             TemporalTileProvider& t = static_cast<TemporalTileProvider&>(tp);
-            if (t._successfulInitialization) {
+            if (t.successfulInitialization) {
                 ensureUpdated(t);
-                return tileStatus(*t._currentTileProvider, index);
+                return tileStatus(*t.currentTileProvider, index);
             }
             else {
                 return Tile::Status::Unavailable;
@@ -1213,32 +1210,32 @@ Tile::Status tileStatus(TileProvider& tp, const TileIndex& index) {
 
 TileDepthTransform depthTransform(TileProvider& tp) {
     switch (tp.type) {
-        case Type::Default: {
+        case Type::DefaultTileProvider: {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
-            if (t._asyncTextureDataProvider) {
-                return t._asyncTextureDataProvider->rawTileDataReader()->depthTransform();
+            if (t.asyncTextureDataProvider) {
+                return t.asyncTextureDataProvider->rawTileDataReader()->depthTransform();
             }
             else {
                 return { 1.f, 0.f };
             }
         }
-        case Type::SingleImage:
+        case Type::SingleImageTileProvider:
             return { 0.f, 1.f };
-        case Type::SizeReference:
+        case Type::SizeReferenceTileProvider:
             return { 0.f, 1.f };
-        case Type::TileIndex:
+        case Type::TileIndexTileProvider:
             return { 0.f, 1.f };
-        case Type::ByIndex: {
+        case Type::ByIndexTileProvider: {
             TileProviderByIndex& t = static_cast<TileProviderByIndex&>(tp);
-            return depthTransform(*t._defaultTileProvider);
+            return depthTransform(*t.defaultTileProvider);
         }
-        case Type::ByLevel:
+        case Type::ByLevelTileProvider:
             return { 0.f, 1.f };
-        case Type::Temporal: {
+        case Type::TemporalTileProvider: {
             TemporalTileProvider& t = static_cast<TemporalTileProvider&>(tp);
-            if (t._successfulInitialization) {
+            if (t.successfulInitialization) {
                 ensureUpdated(t);
-                return depthTransform(*t._currentTileProvider);
+                return depthTransform(*t.currentTileProvider);
             }
             else {
                 return { 1.f, 0.f };
@@ -1258,53 +1255,53 @@ TileDepthTransform depthTransform(TileProvider& tp) {
 
 void update(TileProvider& tp) {
     switch (tp.type) {
-        case Type::Default: {
+        case Type::DefaultTileProvider: {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
-            if (t._asyncTextureDataProvider) {
-                t._asyncTextureDataProvider->update();
+            if (t.asyncTextureDataProvider) {
+                t.asyncTextureDataProvider->update();
                 initTexturesFromLoadedData(t);
-                if (t._asyncTextureDataProvider->shouldBeDeleted()) {
-                    t._asyncTextureDataProvider = nullptr;
+                if (t.asyncTextureDataProvider->shouldBeDeleted()) {
+                    t.asyncTextureDataProvider = nullptr;
                     TileTextureInitData initData(
-                        getTileTextureInitData(t._layerGroupID, t._padTiles, t._tilePixelSize)
+                        getTileTextureInitData(t.layerGroupID, t.padTiles, t.tilePixelSize)
                     );
                     initAsyncTileDataReader(t, initData);
                 }
             }
         }
-        case Type::SingleImage:
+        case Type::SingleImageTileProvider:
             break;
-        case Type::SizeReference:
+        case Type::SizeReferenceTileProvider:
             break;
-        case Type::TileIndex:
+        case Type::TileIndexTileProvider:
             break;
-        case Type::ByIndex: {
+        case Type::ByIndexTileProvider: {
             TileProviderByIndex& t = static_cast<TileProviderByIndex&>(tp);
             using K = TileIndex::TileHashKey;
             using V = std::shared_ptr<TileProvider>;
-            for (std::pair<const K, V>& it : t._tileProviderMap) {
+            for (std::pair<const K, V>& it : t.tileProviderMap) {
                 update(*it.second);
             }
-            update(*t._defaultTileProvider);
+            update(*t.defaultTileProvider);
             break;
         }
-        case Type::ByLevel: {
+        case Type::ByLevelTileProvider: {
             TileProviderByLevel& t = static_cast<TileProviderByLevel&>(tp);
-            for (const std::shared_ptr<TileProvider>& provider : t._levelTileProviders) {
+            for (const std::shared_ptr<TileProvider>& provider : t.levelTileProviders) {
                 update(*provider);
             }
             break;
         }
-        case Type::Temporal: {
+        case Type::TemporalTileProvider: {
             TemporalTileProvider& t = static_cast<TemporalTileProvider&>(tp);
-            if (t._successfulInitialization) {
+            if (t.successfulInitialization) {
                 std::shared_ptr<TileProvider> newCurrent = getTileProvider(t,
                     global::timeManager.time()
                 );
                 if (newCurrent) {
-                    t._currentTileProvider = newCurrent;
+                    t.currentTileProvider = newCurrent;
                 }
-                update(*t._currentTileProvider);
+                update(*t.currentTileProvider);
             }
             break;
         }
@@ -1320,70 +1317,70 @@ void update(TileProvider& tp) {
 
 void reset(TileProvider& tp) {
     switch (tp.type) {
-        case Type::Default: {
+        case Type::DefaultTileProvider: {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
-            t._tileCache->clear();
-            if (t._asyncTextureDataProvider) {
-                t._asyncTextureDataProvider->prepairToBeDeleted();
+            t.tileCache->clear();
+            if (t.asyncTextureDataProvider) {
+                t.asyncTextureDataProvider->prepairToBeDeleted();
             }
             else {
                 TileTextureInitData initData(
-                    getTileTextureInitData(t._layerGroupID, t._padTiles, t._tilePixelSize)
+                    getTileTextureInitData(t.layerGroupID, t.padTiles, t.tilePixelSize)
                 );
                 initAsyncTileDataReader(t, initData);
             }
         }
-        case Type::SingleImage: {
+        case Type::SingleImageTileProvider: {
             SingleImageProvider& t = static_cast<SingleImageProvider&>(tp);
-            if (t._filePath.value().empty()) {
+            if (t.filePath.value().empty()) {
                 return;
             }
-            t._tileTexture = ghoul::io::TextureReader::ref().loadTexture(t._filePath);
-            Tile::Status tileStatus = t._tileTexture ? Tile::Status::OK : Tile::Status::IOError;
+            t.tileTexture = ghoul::io::TextureReader::ref().loadTexture(t.filePath);
+            Tile::Status tileStatus = t.tileTexture ? Tile::Status::OK : Tile::Status::IOError;
 
-            if (!t._tileTexture) {
+            if (!t.tileTexture) {
                 throw std::runtime_error(std::string("Unable to load texture '")
-                    + t._filePath.value() + "'");
+                    + t.filePath.value() + "'");
             }
 
-            t._tileTexture->uploadTexture();
-            t._tileTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            t.tileTexture->uploadTexture();
+            t.tileTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 
-            t._tile = Tile(t._tileTexture.get(), nullptr, tileStatus);
+            t.tile = Tile(t.tileTexture.get(), nullptr, tileStatus);
         }
-        case Type::SizeReference: {
+        case Type::SizeReferenceTileProvider: {
             SizeReferenceTileProvider& t = static_cast<SizeReferenceTileProvider&>(tp);
             reset(t);
             break;
         }
-        case Type::TileIndex: {
+        case Type::TileIndexTileProvider: {
             TileIndexTileProvider& t = static_cast<TileIndexTileProvider&>(tp);
             reset(t);
             break;
         }
-        case Type::ByIndex: {
+        case Type::ByIndexTileProvider: {
             TileProviderByIndex& t = static_cast<TileProviderByIndex&>(tp);
             using K = TileIndex::TileHashKey;
             using V = std::shared_ptr<TileProvider>;
-            for (std::pair<const K, V>& it : t._tileProviderMap) {
+            for (std::pair<const K, V>& it : t.tileProviderMap) {
                 reset(*it.second);
             }
-            reset(*t._defaultTileProvider);
+            reset(*t.defaultTileProvider);
             break;
         }
-        case Type::ByLevel: {
+        case Type::ByLevelTileProvider: {
             TileProviderByLevel& t = static_cast<TileProviderByLevel&>(tp);
-            for (const std::shared_ptr<TileProvider>& provider : t._levelTileProviders) {
+            for (const std::shared_ptr<TileProvider>& provider : t.levelTileProviders) {
                 reset(*provider);
             }
             break;
         }
-        case Type::Temporal: {
+        case Type::TemporalTileProvider: {
             TemporalTileProvider& t = static_cast<TemporalTileProvider&>(tp);
-            if (t._successfulInitialization) {
+            if (t.successfulInitialization) {
                 using K = TemporalTileProvider::TimeKey;
                 using V = std::shared_ptr<TileProvider>;
-                for (std::pair<const K, V>& it : t._tileProviderMap) {
+                for (std::pair<const K, V>& it : t.tileProviderMap) {
                     reset(*it.second);
                 }
             }
@@ -1401,10 +1398,10 @@ void reset(TileProvider& tp) {
 
 int maxLevel(TileProvider& tp) {
     switch (tp.type) {
-        case Type::Default: {
+        case Type::DefaultTileProvider: {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
-            if (t._asyncTextureDataProvider) {
-                return t._asyncTextureDataProvider->rawTileDataReader()->maxChunkLevel();
+            if (t.asyncTextureDataProvider) {
+                return t.asyncTextureDataProvider->rawTileDataReader()->maxChunkLevel();
             }
             else {
                 // Current theoretical maximum based on the number of hashes that are possible
@@ -1412,25 +1409,25 @@ int maxLevel(TileProvider& tp) {
                 return 22;
             }
         }
-        case Type::SingleImage:
+        case Type::SingleImageTileProvider:
             return 1337; // unlimited
-        case Type::SizeReference:
+        case Type::SizeReferenceTileProvider:
             return 1337; // unlimited
-        case Type::TileIndex:
+        case Type::TileIndexTileProvider:
             return 1337; // unlimited
-        case Type::ByIndex: {
+        case Type::ByIndexTileProvider: {
             TileProviderByIndex& t = static_cast<TileProviderByIndex&>(tp);
-            return maxLevel(*t._defaultTileProvider);
+            return maxLevel(*t.defaultTileProvider);
         }
-        case Type::ByLevel: {
+        case Type::ByLevelTileProvider: {
             TileProviderByLevel& t = static_cast<TileProviderByLevel&>(tp);
-            return static_cast<int>(t._providerIndices.size() - 1);
+            return static_cast<int>(t.providerIndices.size() - 1);
         }
-        case Type::Temporal: {
+        case Type::TemporalTileProvider: {
             TemporalTileProvider& t = static_cast<TemporalTileProvider&>(tp);
-            if (t._successfulInitialization) {
+            if (t.successfulInitialization) {
                 ensureUpdated(t);
-                return maxLevel(*t._currentTileProvider);
+                return maxLevel(*t.currentTileProvider);
             }
             else {
                 return 0;
@@ -1452,21 +1449,21 @@ int maxLevel(TileProvider& tp) {
 float noDataValueAsFloat(TileProvider& tp) {
     ghoul_assert(tp.isInitialized, "TileProvider was not initialized.");
     switch (tp.type) {
-        case Type::Default: {
+        case Type::DefaultTileProvider: {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
-            if (t._asyncTextureDataProvider) {
-                return t._asyncTextureDataProvider->noDataValueAsFloat();
+            if (t.asyncTextureDataProvider) {
+                return t.asyncTextureDataProvider->noDataValueAsFloat();
             }
             else {
                 return std::numeric_limits<float>::min();
             }
         }
-        case Type::SingleImage:
-        case Type::SizeReference:
-        case Type::TileIndex:
-        case Type::ByIndex:
-        case Type::ByLevel:
-        case Type::Temporal:
+        case Type::SingleImageTileProvider:
+        case Type::SizeReferenceTileProvider:
+        case Type::TileIndexTileProvider:
+        case Type::ByIndexTileProvider:
+        case Type::ByLevelTileProvider:
+        case Type::TemporalTileProvider:
             return std::numeric_limits<float>::min();
         default:
             throw ghoul::MissingCaseException();

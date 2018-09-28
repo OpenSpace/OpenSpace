@@ -41,7 +41,6 @@
 #include <unordered_map>
 
 struct CPLXMLNode;
-
 #endif // GLOBEBROWSING_USE_GDAL
 
 namespace ghoul::fontrendering {
@@ -53,31 +52,24 @@ namespace openspace { class PixelBuffer; }
 
 namespace openspace::globebrowsing {
     class AsyncTileDataProvider;
-    struct RawTile;
-
-    namespace cache { class MemoryAwareTileCache; }
-} // namespace openspace::globebrowsing
-
-
-namespace openspace::globebrowsing {
     struct ChunkTile;
     using ChunkTilePile = std::vector<ChunkTile>;
+    struct RawTile;
     struct TileDepthTransform;
     struct TileIndex;
+    namespace cache { class MemoryAwareTileCache; }
 } // namespace openspace::globebrowsing
 
 namespace openspace::globebrowsing::tileprovider {
 
 enum class Type {
-    Default = 0,
-    //Projection,
-    SingleImage,
-    SizeReference,
-    Temporal,
-    TileIndex,
-    ByIndex,
-    ByLevel,
-    SolidColor
+    DefaultTileProvider = 0,
+    SingleImageTileProvider,
+    SizeReferenceTileProvider,
+    TemporalTileProvider,
+    TileIndexTileProvider,
+    ByIndexTileProvider,
+    ByLevelTileProvider
 };
 
 
@@ -104,57 +96,53 @@ struct TileProvider : public properties::PropertyOwner {
 
 struct DefaultTileProvider : public TileProvider {
     DefaultTileProvider(const ghoul::Dictionary& dictionary);
-    // This one still used?
-    //DefaultTileProvider(std::shared_ptr<AsyncTileDataProvider> reader);
 
-    std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
+    std::shared_ptr<AsyncTileDataProvider> asyncTextureDataProvider;
 
-    cache::MemoryAwareTileCache* _tileCache = nullptr;
+    cache::MemoryAwareTileCache* tileCache = nullptr;
 
-    properties::StringProperty _filePath;
-    properties::IntProperty _tilePixelSize;
-    layergroupid::GroupID _layerGroupID = layergroupid::GroupID::Unknown;
-    int _preCacheLevel = 0;
-    bool _performPreProcessing = false;
-    bool _padTiles = true;
+    properties::StringProperty filePath;
+    properties::IntProperty tilePixelSize;
+    layergroupid::GroupID layerGroupID = layergroupid::GroupID::Unknown;
+    int preCacheLevel = 0;
+    bool performPreProcessing = false;
+    bool padTiles = true;
 };
 
 struct SingleImageProvider : public TileProvider {
     SingleImageProvider(const ghoul::Dictionary& dictionary);
-    //SingleImageProvider(const std::string& imagePath);
 
-    std::unique_ptr<ghoul::opengl::Texture> _tileTexture;
-    Tile _tile;
+    std::unique_ptr<ghoul::opengl::Texture> tileTexture;
+    Tile tile;
 
-    properties::StringProperty _filePath;
+    properties::StringProperty filePath;
 };
 
 struct TextTileProvider : public TileProvider {
     TextTileProvider(const ghoul::Dictionary& dictionary,
         const TileTextureInitData& initData, size_t fontSize = 48);
 
-    const TileTextureInitData _initData;
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
-    size_t _fontSize;
+    const TileTextureInitData initData;
+    std::shared_ptr<ghoul::fontrendering::Font> font;
+    size_t fontSize;
 
-    std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
+    std::unique_ptr<ghoul::fontrendering::FontRenderer> fontRenderer;
 
     std::string text;
     glm::vec2 textPosition;
     glm::vec4 textColor;
     bool textIsDirty = true;
 
-    GLuint _fbo = 0;
+    GLuint fbo = 0;
 
-    cache::MemoryAwareTileCache* _tileCache;
-
+    cache::MemoryAwareTileCache* tileCache;
 };
 
 struct SizeReferenceTileProvider : public TextTileProvider {
     SizeReferenceTileProvider(const ghoul::Dictionary& dictionary);
 
-    Ellipsoid _ellipsoid;
-    Tile _backgroundTile = Tile::TileUnavailable;
+    Ellipsoid ellipsoid;
+    Tile backgroundTile = Tile::TileUnavailable;
 };
 
 struct TileIndexTileProvider : public TextTileProvider {
@@ -166,16 +154,15 @@ struct TileProviderByIndex : public TileProvider {
 
     std::unordered_map<
         TileIndex::TileHashKey, std::shared_ptr<TileProvider>
-    > _tileProviderMap;
-    std::shared_ptr<TileProvider> _defaultTileProvider;
+    > tileProviderMap;
+    std::shared_ptr<TileProvider> defaultTileProvider;
 };
 
 struct TileProviderByLevel : public TileProvider {
     TileProviderByLevel(const ghoul::Dictionary& dictionary);
 
-    std::vector<int> _providerIndices;
-    std::vector<std::shared_ptr<TileProvider>> _levelTileProviders;
-
+    std::vector<int> providerIndices;
+    std::vector<std::shared_ptr<TileProvider>> levelTileProviders;
 };
 
 
@@ -248,86 +235,24 @@ struct TemporalTileProvider : public TileProvider {
         constexpr static const char* TimeFormat = "OpenSpaceTimeIdFormat";
     };
 
-    /**
-     * Create a GDAL dataset description based on the time t,
-     *
-     * \param t Time to generate a GDAL dataset description for
-     * \return a GDAL dataset description
-     */
-    //std::string getGdalDatasetXML(const Time& t);
-
-    /**
-     * Create a GDAL dataset description associated with the provided TimeKey
-     *
-     * \param timeKey The TimeKey specifying time
-     * \return a GDAL dataset description
-     */
-    //std::string getGdalDatasetXML(const TimeKey& timeKey);
-
-    /**
-     * Instantiates a new TileProvder for the temporal dataset at the time
-     * specified.
-     *
-     * This method replaced the <code>UrlTimePlaceholder</code> in the template URL
-     * with the provided timekey, the opens a new GDAL dataset with that URL.
-     *
-     * \param timekey time specifying dataset's temporality
-     * \return newly instantiated TileProvider
-     */
-    //std::shared_ptr<TileProvider> initTileProvider(TimeKey timekey);
-
-    /**
-     * Takes as input a Openspace Temporal dataset description, extracts the temporal
-     * metadata provided by reading the <code>TemporalXMLTags</code>, removes the
-     * read tags from the description, and returns a GDAL template GDAL dataset
-     * description. The template GDAL dataset description has the a
-     * <code>UrlTimePlaceholder</code> still in it, which needs to be replaced before
-     * GDAL can open it as a GDALDataset.
-     *
-     * \param xml Openspace Temporal dataset description
-     * \returns a GDAL template data description.
-     */
-    //std::string consumeTemporalMetaData(const std::string &xml);
-
-    /**
-     * Helper method to read a XML value from a XML tree.
-     *
-     * \param node XML tree to search in
-     * \param key XML tag to find the value for
-     * \param defaultVal value to return if key was not found
-     * \return the value of the Key, or defaultVal if key was undefined.
-     */
-    //std::string getXMLValue(CPLXMLNode* node, const std::string& key,
-    //    const std::string& defaultVal);
-
-    /**
-     * Ensures that the TemporalTileProvider is up to date.
-     */
-    //void ensureUpdated();
-
-    //bool readFilePath();
-
     // Used for creation of time specific instances of CachingTileProvider
-    ghoul::Dictionary _initDict;
-    properties::StringProperty _filePath;
-    std::string _gdalXmlTemplate;
+    ghoul::Dictionary initDict;
+    properties::StringProperty filePath;
+    std::string gdalXmlTemplate;
 
-    std::unordered_map<TimeKey, std::shared_ptr<TileProvider>> _tileProviderMap;
+    std::unordered_map<TimeKey, std::shared_ptr<TileProvider>> tileProviderMap;
 
+    std::shared_ptr<TileProvider> currentTileProvider;
 
-    std::shared_ptr<TileProvider> _currentTileProvider;
+    TimeFormatType timeFormat;
+    TimeQuantizer timeQuantizer;
 
-    TimeFormatType _timeFormat;
-    TimeQuantizer _timeQuantizer;
+    std::vector<Time> preCacheTimes;
 
-    std::vector<Time> _preCacheTimes;
-
-    bool _successfulInitialization;
+    bool successfulInitialization;
 };
 
 #endif // GLOBEBROWSING_USE_GDAL
-
-
 
 std::unique_ptr<TileProvider> createFromDictionary(layergroupid::TypeID layerTypeID,
     const ghoul::Dictionary& dictionary);
@@ -382,125 +307,6 @@ int maxLevel(TileProvider& tp);
 float noDataValueAsFloat(TileProvider& tp);
 
 void initializeDefaultTile(TileProvider& tp);
-
-///**
-// * Interface for providing <code>Tile</code>s given a
-// * <code>TileIndex</code>.
-// */
-//class TileProvider : public properties::PropertyOwner {
-//public:
-//    /**
-//     * Factory method for instantiating different implementations of
-//     * <code>TileProviders</code>. The provided dictionary must
-//     * define a key specifying what implementation of TileProvider
-//     * to be instantiated.
-//     */
-//    static std::unique_ptr<TileProvider> createFromDictionary(
-//        layergroupid::TypeID layerTypeID, const ghoul::Dictionary& dictionary);
-//
-//    /**
-//     * Implementations of the TileProvider interface must implement
-//     * a constructor taking a dictionary as input. The provided
-//     * dictionary must define a key specifying what implementation
-//     * of TileProvider to be instantiated.
-//     */
-//    TileProvider(const ghoul::Dictionary& dictionary = ghoul::Dictionary());
-//
-//    /**
-//     * Virtual destructor that subclasses should override to do
-//     * clean up.
-//     */
-//    virtual ~TileProvider();
-//
-//    virtual bool initialize();
-//    virtual bool deinitialize();
-//
-//    /**
-//     * Method for querying tiles, given a specified <code>TileIndex</code>.
-//     *
-//     * This method is expected to be invoked multiple times per frame,
-//     *  and should therefore return quickly, e.g. not perform heavy I/O
-//     * operations. However, invoking this method may spawn separate threads
-//     * to perform such operations. Therefore, programmers shoud
-//     *  note that there is no guarantee that the <code>Tile</code>
-//     * status and texture will be consistent over different invocations
-//     * of this method.
-//     *
-//     * \param tileIndex specifying a region of a map for which
-//     * we want tile data.
-//     *
-//     * \returns The tile corresponding to the TileIndex by the time
-//     * the method was invoked.
-//     */
-//    virtual Tile tile(const TileIndex& tileIndex) = 0;
-//
-//
-//    virtual ChunkTile chunkTile(TileIndex tileIndex, int parents = 0,
-//        int maxParents = 1337);
-//
-//    virtual ChunkTilePile chunkTilePile(TileIndex tileIndex, int pileSize);
-//
-//    Tile defaultTile() const;
-//
-//    /**
-//     * Returns the status of a <code>Tile</code>. The <code>Tile::Status</code>
-//     * corresponds the <code>Tile</code> that would be returned
-//     * if the function <code>tile</code> would be invoked with the same
-//     * <code>TileIndex</code> argument at this point in time.
-//     */
-//    virtual Tile::Status tileStatus(const TileIndex& index) = 0;
-//
-//    /**
-//     * Get the associated depth transform for this TileProvider.
-//     * This is necessary for TileProviders serving height map
-//     * data, in order to correcly map pixel values to meters.
-//     */
-//    virtual TileDepthTransform depthTransform() = 0;
-//
-//    /**
-//     * This method should be called once per frame. Here, TileProviders
-//     * are given the opportunity to update their internal state.
-//     */
-//    virtual void update() = 0;
-//
-//    /**
-//     * Provides a uniform way of all TileProviders to reload or
-//     * restore all of its internal state. This is mainly useful
-//     * for debugging purposes.
-//     */
-//    virtual void reset() = 0;
-//
-//    /**
-//     * \returns The maximum level as defined by <code>TileIndex</code>
-//     * that this TileProvider is able provide.
-//     */
-//    virtual int maxLevel() = 0;
-//
-//    /**
-//     * \returns the no data value for the dataset. Default is the minimum float avalue.
-//     */
-//    virtual float noDataValueAsFloat();
-//
-//    /**
-//     * \returns a unique identifier for the <code>TileProvider<\code>. All
-//     * <code>TileProviders<\code> have an ID starting at 0 from the first created.
-//     * The maximum number of unique identifiers is UINT_MAX
-//     */
-//    unsigned int uniqueIdentifier() const;
-//
-//protected:
-//    std::string _name;
-//
-//private:
-//    void initializeDefaultTile();
-//
-//    static unsigned int _numTileProviders;
-//    unsigned int _uniqueIdentifier = 0;
-//    bool _isInitialized = false;
-//
-//    std::unique_ptr<ghoul::opengl::Texture> _defaultTileTexture;
-//    Tile _defaultTile = Tile(nullptr, nullptr, Tile::Status::Unavailable);
-//};
 
 } // namespace openspace::globebrowsing::tileprovider
 
