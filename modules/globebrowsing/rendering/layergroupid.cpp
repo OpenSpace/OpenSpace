@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/rendering/layer/layergroupid.h>
+#include <modules/globebrowsing/rendering/layergroupid.h>
 
 using namespace openspace::globebrowsing::layergroupid;
 

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/rendering/layer/layeradjustment.h>
+#include <modules/globebrowsing/rendering/layeradjustment.h>
 
 namespace {
     constexpr const char* keyType = "Type";
