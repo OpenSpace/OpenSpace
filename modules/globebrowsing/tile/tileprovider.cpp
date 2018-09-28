@@ -193,16 +193,16 @@ void initAsyncTileDataReader(DefaultTileProvider& t, TileTextureInitData initDat
 
     // Initialize instance variables
 #ifdef GLOBEBROWSING_USE_GDAL
-    std::shared_ptr<GdalRawTileDataReader> tileDataset =
-        std::make_shared<GdalRawTileDataReader>(t.filePath, initData, preprocess);
+    std::unique_ptr<GdalRawTileDataReader> tileDataset =
+        std::make_unique<GdalRawTileDataReader>(t.filePath, initData, preprocess);
 #else // GLOBEBROWSING_USE_GDAL
-    std::shared_ptr<SimpleRawTileDataReader> tileDataset =
-        std::make_shared<SimpleRawTileDataReader>(t._filePath, initData, preprocess);
+    std::unique_ptr<SimpleRawTileDataReader> tileDataset =
+        std::make_unique<SimpleRawTileDataReader>(t._filePath, initData, preprocess);
 #endif // GLOBEBROWSING_USE_GDAL
 
     t.asyncTextureDataProvider = std::make_unique<AsyncTileDataProvider>(
         t.name,
-        tileDataset
+        std::move(tileDataset)
     );
 }
 
@@ -994,10 +994,10 @@ Tile::Status tileStatus(TileProvider& tp, const TileIndex& index) {
         case Type::DefaultTileProvider: {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
             if (t.asyncTextureDataProvider) {
-                const std::shared_ptr<RawTileDataReader>& rawTileDataReader =
+                const RawTileDataReader& rawTileDataReader =
                     t.asyncTextureDataProvider->rawTileDataReader();
 
-                if (index.level > rawTileDataReader->maxChunkLevel()) {
+                if (index.level > rawTileDataReader.maxChunkLevel()) {
                     return Tile::Status::OutOfRange;
                 }
 
@@ -1054,7 +1054,7 @@ TileDepthTransform depthTransform(TileProvider& tp) {
         case Type::DefaultTileProvider: {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
             if (t.asyncTextureDataProvider) {
-                return t.asyncTextureDataProvider->rawTileDataReader()->depthTransform();
+                return t.asyncTextureDataProvider->rawTileDataReader().depthTransform();
             }
             else {
                 return { 1.f, 0.f };
@@ -1172,6 +1172,7 @@ void reset(TileProvider& tp) {
                 );
                 initAsyncTileDataReader(t, initData);
             }
+            break;
         }
         case Type::SingleImageTileProvider: {
             SingleImageProvider& t = static_cast<SingleImageProvider&>(tp);
@@ -1193,6 +1194,7 @@ void reset(TileProvider& tp) {
             );
 
             t.tile = Tile(t.tileTexture.get(), nullptr, tileStatus);
+            break;
         }
         case Type::SizeReferenceTileProvider: {
             SizeReferenceTileProvider& t = static_cast<SizeReferenceTileProvider&>(tp);
@@ -1250,7 +1252,7 @@ int maxLevel(TileProvider& tp) {
             // are possible to uniquely identify a tile. See ProviderTileHasher in
             // memoryawaretilecache.h
             return t.asyncTextureDataProvider ?
-                t.asyncTextureDataProvider->rawTileDataReader()->maxChunkLevel() :
+                t.asyncTextureDataProvider->rawTileDataReader().maxChunkLevel() :
                 22;
                 return 22;
         }

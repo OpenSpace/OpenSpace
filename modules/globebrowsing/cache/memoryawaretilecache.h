@@ -99,7 +99,6 @@ public:
 
     size_t gpuAllocatedDataSize() const;
     size_t cpuAllocatedDataSize() const;
-    bool shouldUsePbo() const;
 
 private:
     /**
@@ -165,9 +164,6 @@ private:
     properties::IntProperty _tileCacheSize;
     properties::TriggerProperty _applyTileCacheSize;
     properties::TriggerProperty _clearTileCache;
-
-    /// Whether or not pixel buffer objects should be used when uploading tile data
-    properties::BoolProperty _usePbo;
 };
 
 } // namespace openspace::globebrowsing::cache

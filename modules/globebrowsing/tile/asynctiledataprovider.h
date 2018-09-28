@@ -35,8 +35,6 @@ namespace openspace { class GlobeBrowsingModule; }
 
 namespace openspace::globebrowsing {
 
-template <typename T> class PixelBufferContainer;
-
 struct RawTile;
 class RawTileDataReader;
 
@@ -51,7 +49,7 @@ public:
      * tile loading.
      */
     AsyncTileDataProvider(std::string name,
-        std::shared_ptr<RawTileDataReader> rawTileDataReader);
+        std::unique_ptr<RawTileDataReader> rawTileDataReader);
 
     ~AsyncTileDataProvider();
 
@@ -76,7 +74,7 @@ public:
 
     bool shouldBeDeleted();
 
-    std::shared_ptr<RawTileDataReader> rawTileDataReader() const;
+    const RawTileDataReader& rawTileDataReader() const;
     float noDataValueAsFloat() const;
 
 protected:
@@ -103,21 +101,17 @@ protected:
 
     void endEnqueuedJobs();
 
-    void updatePboUsage();
-
     void performReset(ResetRawTileDataReader resetRawTileDataReader);
 
 private:
     const std::string _name;
     GlobeBrowsingModule* _globeBrowsingModule;
     /// The reader used for asynchronous reading
-    std::shared_ptr<RawTileDataReader> _rawTileDataReader;
+    std::unique_ptr<RawTileDataReader> _rawTileDataReader;
 
     PrioritizingConcurrentJobManager<RawTile, TileIndex::TileHashKey>
         _concurrentJobManager;
 
-    /// nullptr if pbo is not used for texture uploading. Otherwise initialized.
-    std::unique_ptr<PixelBufferContainer<TileIndex::TileHashKey>> _pboContainer;
     std::set<TileIndex::TileHashKey> _enqueuedTileRequests;
 
     ResetMode _resetMode = ResetMode::ShouldResetAllButRawTileDataReader;

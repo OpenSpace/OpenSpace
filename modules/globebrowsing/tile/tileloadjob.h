@@ -41,16 +41,15 @@ struct TileLoadJob : public Job<RawTile> {
      * called before the TileLoadJob is finished, the data will be deleted as it has not
      * been exposed outside of this object.
      */
-    TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
-        const TileIndex& tileIndex);
+    TileLoadJob(RawTileDataReader* rawTileDataReader, const TileIndex& tileIndex);
 
     /**
      * No data is allocated unless specified so by the TileTextureInitData of
      * rawTileDataReader but it is assumed that pboDataPtr is a mapped pointer to a pixel
      * buffer object.
      */
-    TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
-        const TileIndex& tileIndex, char* pboDataPtr);
+    TileLoadJob(RawTileDataReader* rawTileDataReader, const TileIndex& tileIndex,
+        char* pboDataPtr);
 
     /**
      * Destroys the allocated data pointer if it has been allocated and the TileLoadJob
@@ -81,7 +80,7 @@ struct TileLoadJob : public Job<RawTile> {
     bool hasOwnershipOfData() const;
 
 protected:
-    std::shared_ptr<RawTileDataReader> _rawTileDataReader;
+    RawTileDataReader* _rawTileDataReader;
     std::shared_ptr<RawTile> _rawTile;
     TileIndex _chunkIndex;
     char* _pboMappedDataDestination = nullptr;

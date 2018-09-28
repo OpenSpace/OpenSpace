@@ -66,13 +66,6 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UsePboInfo = {
-        "UsePbo",
-        "Use PBO",
-        "If this value is enabled, pixel buffer objects are used to upload the texture "
-        "data asynchronously. If this value is disabled, the upload is synchronously."
-    };
-
 } // namespace
 
 namespace openspace::globebrowsing::cache {
@@ -149,7 +142,6 @@ MemoryAwareTileCache::MemoryAwareTileCache()
     , _tileCacheSize(TileCacheSizeInfo, 1024, 128, 16384, 1)
     , _applyTileCacheSize(ApplyTileCacheInfo)
     , _clearTileCache(ClearTileCacheInfo)
-    , _usePbo(UsePboInfo, false)
 {
     createDefaultTextureContainers();
 
@@ -177,8 +169,6 @@ MemoryAwareTileCache::MemoryAwareTileCache()
         static_cast<int>(CpuCap.installedMainMemory() * 0.95)
     );
     addProperty(_tileCacheSize);
-
-    addProperty(_usePbo);
 
     setSizeEstimated(_tileCacheSize * 1024 * 1024);
 }
@@ -396,10 +386,6 @@ size_t MemoryAwareTileCache::cpuAllocatedDataSize() const {
         }
     );
     return dataSize + _numTextureBytesAllocatedOnCPU;
-}
-
-bool MemoryAwareTileCache::shouldUsePbo() const {
-    return _usePbo;
 }
 
 } // namespace openspace::globebrowsing::cache

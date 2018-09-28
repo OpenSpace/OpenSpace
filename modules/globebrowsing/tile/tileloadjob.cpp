@@ -28,16 +28,15 @@
 
 namespace openspace::globebrowsing {
 
-TileLoadJob::TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
-                         const TileIndex& tileIndex)
-    : _rawTileDataReader(std::move(rawTileDataReader))
+TileLoadJob::TileLoadJob(RawTileDataReader* rawTileDataReader, const TileIndex& tileIndex)
+    : _rawTileDataReader(rawTileDataReader)
     , _chunkIndex(tileIndex)
 {}
 
 
-TileLoadJob::TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
-                         const TileIndex& tileIndex, char* pboDataPtr)
-    : _rawTileDataReader(std::move(rawTileDataReader))
+TileLoadJob::TileLoadJob(RawTileDataReader* rawTileDataReader, const TileIndex& tileIndex,
+                         char* pboDataPtr)
+    : _rawTileDataReader(rawTileDataReader)
     , _chunkIndex(tileIndex)
     , _pboMappedDataDestination(pboDataPtr)
 {}
