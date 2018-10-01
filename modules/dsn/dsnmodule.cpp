@@ -35,6 +35,11 @@ namespace openspace {
         ghoul_assert(factory, "No renderable factory existed");
 
         factory->registerClass<CommunicationLines>("CommunicationLines");
+
+		auto fTranslation = FactoryManager::ref().factory<Translation>();
+		ghoul_assert(fTranslation, "Ephemeris factory was not created");
+
+		fTranslation->registerClass<DsnTranslation>("DsnTranslation");
     }
 
 } // namespace openspace

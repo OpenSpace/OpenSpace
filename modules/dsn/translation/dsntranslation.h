@@ -22,31 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_DSN___DSNMODULE___H__
-#define __OPENSPACE_MODULE_DSN___DSNMODULE___H__
+#ifndef __OPENSPACE_MODULE_DSN___DSNTRANSLATION___H__
+#define __OPENSPACE_MODULE_DSN___DSNTRANSLATION___H__
 
-#include <modules/dsn/rendering/communicationlines.h>
+#include <openspace/scene/translation.h>
 
-#include <openspace/util/openspacemodule.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
-#include <ghoul/logging/logmanager.h>
-#include <modules/dsn/translation/dsntranslation.h>
+#include <openspace/properties/vector/dvec3property.h>
 
 namespace openspace {
 
-    class DsnModule : public OpenSpaceModule {
-    public:
-        constexpr static const char* Name = "Dsn";
+struct UpdateData;
 
-        DsnModule();
+namespace documentation { struct Documentation; }
 
-    private:
-        void internalInitialize(const ghoul::Dictionary&) override;
+class DsnTranslation : public Translation {
+public:
+	DsnTranslation();
+	DsnTranslation(const ghoul::Dictionary& dictionary);
 
-    };
+    glm::dvec3 position(const UpdateData& data) const override;
+    static documentation::Documentation Documentation();
+
+private:
+    properties::DVec3Property _position;
+};
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_DSN___DSNMODULE___H__
+#endif // __OPENSPACE_MODULE_DSN___DSNTRANSLATION___H__
