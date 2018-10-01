@@ -64,7 +64,8 @@ public:
     void updateCamera(double deltaTime);
     void setEnableKeyFrameInteraction();
     void setDisableKeyFrameInteraction();
-    void triggerPlaybackStart(std::function<void()> callback);
+    void triggerPlaybackStart();
+    void stopPlayback();
 
     // Accessors
     ghoul::Dictionary cameraStateDictionary();
@@ -115,7 +116,6 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    void updateCameraWithNextKeyframe();
     bool _cameraUpdatedFromScript = false;
     bool _playbackModeEnabled = false;
 

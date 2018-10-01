@@ -50,7 +50,14 @@ public:
     enum class recordedType {
         camera = 0,
         time,
-        script
+        script,
+        invalid
+    };
+
+    struct timelineEntry {
+        recordedType keyframeType;
+        unsigned int idxIntoKeyframeTypeArray;
+        double timestamp;
     };
 
     SessionRecording();
@@ -67,7 +74,7 @@ public:
 #ifdef SESSION_RECORDING_TIME
     void saveTimeKeyframe();
 #endif
-    void preSynchronization();
+    void preSynchronization(double deltaTime);
     void playbackAddEntriesToTimeline();
     void playbackCamera();
 #ifdef SESSION_RECORDING_TIME
@@ -75,6 +82,7 @@ public:
 #endif
     void playbackScript();
     void stopPlayback();
+    double currentTime() const;
     /**
     * \return The Lua library that contains all Lua functions available to affect the
     * interaction
@@ -97,8 +105,9 @@ private:
     void writeToFileBuffer(const double& src);
     void writeToFileBuffer(const unsigned char c);
     void writeToFileBuffer(bool b);
-    void writeToFileBuffer(const std::string s);
-    void saveKeyframeToFileBinary();
+    void writeStringToFileBuffer(const std::string s, unsigned char* buffer,
+        unsigned int& bufferIdx);
+    void saveKeyframeToFileBinary(unsigned char* bufferSource, unsigned int size);
     void readFromPlayback(unsigned char& result);
     void readFromPlayback(double& result);
     void readFromPlayback(float& result);
@@ -108,6 +117,22 @@ private:
 #else
     void saveKeyframeToFile(std::string entry);
 #endif //#ifdef RECORD_BINARY
+    void addKeyframe(double timestamp, interaction::KeyframeNavigator::CameraPose keyframe);
+#ifdef SESSION_RECORDING_TIME
+    void addKeyframe(double timestamp, datamessagestructures::TimeKeyframe keyframe);
+#endif
+    void addKeyframe(double timestamp, std::string scriptToQueue);
+    void moveAheadInTime(double deltaTime);
+    bool isTimeToHandleNextKeyframe(double currTime, double deltaTime);
+    bool processNextKeyframeAheadInTime(double currTime, double deltaTime);
+    bool processCameraKeyframe(double now, double deltaTime);
+    bool processScriptKeyframe(double now, double deltaTime);
+   
+    recordedType getNextKeyframeType();
+    recordedType getPrevKeyframeType();
+    double getNextTimestamp();
+    double getPrevTimestamp();
+    void cleanUpPlayback();
 
     sessionState _state = sessionState::idle;
     std::string _playbackFilename;
@@ -123,14 +148,33 @@ private:
 #endif
     bool _playbackActive_script = false;
 #ifdef RECORD_BINARY
+    static const size_t keyframeHeaderSize_bytes = 33;
     static const size_t saveBufferCameraSize_min = 82;
     static const size_t saveBufferStringSize_max = 500;
-    unsigned char _keyframeBuffer[(saveBufferCameraSize_min + saveBufferStringSize_max)];
+    static const size_t _saveBufferMaxSize_bytes = keyframeHeaderSize_bytes + 
+        + saveBufferCameraSize_min
+        + saveBufferStringSize_max;
+    unsigned char _keyframeBuffer[_saveBufferMaxSize_bytes];
     unsigned int _bufferIndex = 0;
     unsigned int _playbackIndex = 0;
 #endif
+    bool _cleanupNeeded = false;
+
+    std::vector < interaction::KeyframeNavigator::CameraPose> _keyframesCamera;
+    unsigned int _idxCamera = 0;
+
+    std::vector<datamessagestructures::TimeKeyframe> _keyframesTime;
+    unsigned int _idxTime;
+
+    std::vector<std::string> _keyframesScript;
+    unsigned int _idxScript;
+
+    std::vector<timelineEntry> _timeline;
+    unsigned int _idxTimeline;
 };
 
 } // namespace openspace
+
+#include "sessionRecording.inl"
 
 #endif // __OPENSPACE_CORE___SESSIONRECORDING___H__

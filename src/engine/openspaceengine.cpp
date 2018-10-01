@@ -983,8 +983,8 @@ void OpenSpaceEngine::preSynchronization() {
             }
         }
         global::parallelPeer.preSynchronization();
+        global::sessionRecording.preSynchronization(dt);
     }
-    global::sessionRecording.preSynchronization();
 
     for (const std::function<void()>& func : global::callback::preSync) {
         func();

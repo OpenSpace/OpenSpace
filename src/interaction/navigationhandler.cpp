@@ -154,32 +154,16 @@ void NavigationHandler::updateCamera(double deltaTime) {
     if (_cameraUpdatedFromScript) {
         _cameraUpdatedFromScript = false;
     }
-    else {
+    else if( ! _playbackModeEnabled ) {
         if (_camera && focusNode()) {
             if (_useKeyFrameInteraction) {
-                updateCameraWithNextKeyframe();
+                _keyframeNavigator->updateCamera(*_camera, _playbackModeEnabled);
             }
             else {
                 _orbitalNavigator->updateStatesFromInput(*_inputState, deltaTime);
                 _orbitalNavigator->updateCameraStateFromStates(*_camera, deltaTime);
                 _camera->setFocusPositionVec3(focusNode()->worldPosition());
             }
-        }
-    }
-}
-
-void NavigationHandler::updateCameraWithNextKeyframe() {
-    bool didUpdateToNextKeyframe
-        = _keyframeNavigator->updateCamera(*_camera, _playbackModeEnabled);
-
-    if (_playbackModeEnabled && !didUpdateToNextKeyframe) {
-        if (_keyframeNavigator->nKeyframes() == 0) {
-            //If in playback mode, didn't update to a new keyframe, and there are no
-            // keyframes left, then execute callback to end camera playback
-            _playbackModeEnabled = false;
-            _useKeyFrameInteraction = false;
-            if (_playbackEndCallback)
-                _playbackEndCallback();
         }
     }
 }
@@ -192,10 +176,12 @@ void NavigationHandler::setDisableKeyFrameInteraction() {
     _useKeyFrameInteraction = false;
 }
 
-void NavigationHandler::triggerPlaybackStart(std::function<void()> callback) {
+void NavigationHandler::triggerPlaybackStart() {
     _playbackModeEnabled = true;
-    _useKeyFrameInteraction = true;
-    _playbackEndCallback = std::move(callback);
+}
+
+void NavigationHandler::stopPlayback() {
+    _playbackModeEnabled = false;
 }
 
 SceneGraphNode* NavigationHandler::focusNode() const {
