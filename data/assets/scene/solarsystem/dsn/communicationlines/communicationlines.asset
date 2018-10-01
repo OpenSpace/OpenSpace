@@ -1,15 +1,22 @@
 local assetHelper = asset.require('util/asset_helper')
 local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local kernels = asset.require('scene/solarsystem/missions/voyager1/kernels')
 --Communicationline data 
 local dataFolder = "C:/Agnes/OpenSpace/sync/http/dsn_data/1"
 
 local CommunicationLine = {
     Identifier = "Communication_Line",
     Parent = earthTransforms.EarthBarycenter.Identifier,
+
     Renderable = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0, -2000000.0, 0} --random pos
+        },
         Type = "CommunicationLines",
         DataFolder = dataFolder,
-        DataFileType = "xml"
+        DataFileType = "xml",
+        Color = { 0.70, 0.50, 0.20 }
     },
     GUI = {
         Name = "CommunicationLine",

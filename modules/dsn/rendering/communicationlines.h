@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_DSN___COMMUNICATIONLINES___H__
 #define __OPENSPACE_MODULE_DSN___COMMUNICATIONLINES___H__
 
-#include <openspace/rendering/renderable.h>
+#include <modules/base/rendering/renderabletrail.h>
 #include <modules/dsn/dsnmodule.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -34,9 +34,10 @@
 #include <openspace/rendering/renderengine.h>
 #include <fstream>
 
+
 namespace openspace {
 
-    class CommunicationLines : public Renderable {
+    class CommunicationLines : public RenderableTrail {
     public:
 
         CommunicationLines(const ghoul::Dictionary& dictionary);
@@ -46,15 +47,15 @@ namespace openspace {
 
         void initializeGL() override;
         void deinitializeGL() override;
-
-        bool isReady() const override;
-
-        void render(const RenderData& data, RendererTasks& rendererTask) override;
         void update(const UpdateData& data) override;
+
+        void readDataFromXml();
     private:
         std::unique_ptr<ghoul::Dictionary> _dictionary;
-        std::string _identifier = "CommunicationLines";
+        const char* _identifier = "CommunicationLines";
         std::vector<std::string> _dataFiles;
+        bool _needsFullSweep = true;
+       
     };
 
 }

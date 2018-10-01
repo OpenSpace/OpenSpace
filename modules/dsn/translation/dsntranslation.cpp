@@ -22,31 +22,73 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_DSN___DSNMODULE___H__
-#define __OPENSPACE_MODULE_DSN___DSNMODULE___H__
-
-#include <modules/dsn/rendering/communicationlines.h>
-
-#include <openspace/util/openspacemodule.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
-#include <ghoul/logging/logmanager.h>
 #include <modules/dsn/translation/dsntranslation.h>
+
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
+
+namespace {
+    constexpr openspace::properties::Property::PropertyInfo PositionInfo = {
+        "Position",
+        "Position",
+        "Write some documentaion here!"
+    };
+} // namespace
 
 namespace openspace {
 
-    class DsnModule : public OpenSpaceModule {
-    public:
-        constexpr static const char* Name = "Dsn";
-
-        DsnModule();
-
-    private:
-        void internalInitialize(const ghoul::Dictionary&) override;
-
+documentation::Documentation DsnTranslation::Documentation() {
+    using namespace documentation;
+    return {
+        "Dsn Translation",
+        "transform_translation_dsn",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("DsnTranslation"),
+                Optional::No
+            },
+            {
+                PositionInfo.identifier,
+                new DoubleVector3Verifier,
+                Optional::No,
+                PositionInfo.description
+            }
+        }
     };
+}
+
+
+DsnTranslation::DsnTranslation()
+    : _position(
+        PositionInfo,
+        glm::dvec3(0.0),
+        glm::dvec3(-std::numeric_limits<double>::max()),
+        glm::dvec3(std::numeric_limits<double>::max())
+    )
+{
+    addProperty(_position);
+
+    _position.onChange([this]() {
+        requireUpdate();
+        notifyObservers();
+    });
+}
+
+DsnTranslation::DsnTranslation(const ghoul::Dictionary& dictionary)
+    : DsnTranslation()
+{
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "DsnTranslation"
+    );
+
+    _position = dictionary.value<glm::dvec3>(PositionInfo.identifier);
+}
+
+glm::dvec3 DsnTranslation::position(const UpdateData&) const {
+    return _position;
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_DSN___DSNMODULE___H__

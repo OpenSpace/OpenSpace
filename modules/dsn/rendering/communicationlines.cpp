@@ -43,9 +43,9 @@ namespace openspace {
 
     //Member functions
     CommunicationLines::CommunicationLines(const ghoul::Dictionary& dictionary)
-        : Renderable(dictionary) {
+        : RenderableTrail(dictionary){
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
-        CommunicationLines::initializeGL();
+        CommunicationLines::readDataFromXml();
     }
     /**
     * Using rapidxml lib to parse the data from xml files
@@ -184,11 +184,8 @@ namespace openspace {
         logfile.close();
     }
 
-    void CommunicationLines::render(const RenderData& data, RendererTasks&) {
-
-    }
-
-    void CommunicationLines::initializeGL() {
+ 
+    void CommunicationLines::readDataFromXml() {
         // EXTRACT MANDATORY INFORMATION FROM DICTIONARY
         if (!extractMandatoryInfoFromDictionary()) {
             return;
@@ -201,17 +198,65 @@ namespace openspace {
         }
         logfile.close();
     }
-    void CommunicationLines::deinitializeGL() {
 
+
+    void CommunicationLines::initializeGL() {
+        RenderableTrail::initializeGL();
+
+        // We don't need an index buffer, so we keep it at the default value of 0
+        glGenVertexArrays(1, &_primaryRenderInformation._vaoID);
+        glGenBuffers(1, &_primaryRenderInformation._vBufferID);
+    }
+    void CommunicationLines::deinitializeGL(){
+        glDeleteVertexArrays(1, &_primaryRenderInformation._vaoID);
+        glDeleteBuffers(1, &_primaryRenderInformation._vBufferID);
+
+
+        RenderableTrail::deinitializeGL();
+    }
+    void CommunicationLines::update(const UpdateData& data){
+
+        if (_needsFullSweep) {
+
+            const int nValues = 2;
+
+            // Make space for the vertices
+            _vertexArray.clear();
+            _vertexArray.resize(nValues);
+
+            // ... fill all of the values, dummy values for now, should load from  _translation->position()
+            //    const glm::vec3 p = _translation->position()
+            _vertexArray[0] = { 0, 0, 0 };
+            _vertexArray[1] = { static_cast<float>(58.5877), static_cast<float>(16.1924), static_cast<float>(20000000) }; // go to geo?
+
+            // ... and upload them to the GPU
+            glBindVertexArray(_primaryRenderInformation._vaoID);
+            glBindBuffer(GL_ARRAY_BUFFER, _primaryRenderInformation._vBufferID);
+            glBufferData(
+                GL_ARRAY_BUFFER,
+                _vertexArray.size() * sizeof(TrailVBOLayout),
+                _vertexArray.data(),
+                GL_STATIC_DRAW
+            );
+
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+            // We clear the indexArray just in case. The base class will take care not to use
+            // it if it is empty
+            _indexArray.clear();
+
+            _needsFullSweep = false;
+        }
+
+        // If the full trail should be rendered at all times, we can directly render the
+        // entire set
+        _primaryRenderInformation.first = 0;
+        _primaryRenderInformation.count = static_cast<GLsizei>(_vertexArray.size());
+     
+        glBindVertexArray(0);
     }
 
-    bool CommunicationLines::isReady() const {
-        return true;
-    }
-
-    void CommunicationLines::update(const UpdateData& data) {
-
-    }
 } // namespace openspace
 
 
