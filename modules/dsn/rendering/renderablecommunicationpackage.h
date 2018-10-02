@@ -72,8 +72,8 @@ public:
 
     /**
      * The render method will set up the shader information and then render first the
-     * information contained in the the \c _primaryRenderInformation, then the optional
-     * \c _floatingRenderInformation using the provided \p data
+     * information contained in the the \c _mainRenderInformation, 
+	 * using the provided \p data
      * \param data The data that is necessary to render this Renderable
      */
     void render(const RenderData& data, RendererTasks& rendererTask) override;
@@ -81,7 +81,7 @@ public:
 protected:
     explicit RenderableCommunicationPackage(const ghoul::Dictionary& dictionary);
 
-    /// Returns the documentation entries that the con
+    /// Returns the documentation entries
     static documentation::Documentation Documentation();
 
     /// The layout of the VBOs
@@ -89,8 +89,8 @@ protected:
         float x, y, z;
     };
 
-    /// The backend storage for the vertex buffer object containing all points for this
-    /// trail.
+    /// The backend storage for the vertex buffer object containing all points for the
+    /// packages to be rendered
     std::vector<PackageVBOLayout> _vertexArray;
 
     /// The index array that is potentially used in the draw call. If this is empty, no
@@ -103,23 +103,12 @@ protected:
     /// The RenderInformation contains information filled in by the concrete subclasses to
     /// be used by this class.
     struct RenderInformation {
-        enum class VertexSorting {
-            NewestFirst = 0,    ///< Newer vertices have a lower index than older ones
-            OldestFirst,        ///< Older vertices have a lower index than newer ones
-            NoSorting           ///< No ordering in the vertices; no fading applied
-        };
         /// The first element in the vertex buffer to be rendered
         GLint first = 0;
         /// The number of values to be rendered
         GLsizei count = 0;
-        /// The stride between 'major' points in the array
-        int stride = 1;
-        /// Sorting of the vertices; required for correct fading
-        VertexSorting sorting = VertexSorting::NoSorting;
-
         /// Local model matrix transformation, used for rendering in camera space
         glm::dmat4 _localTransform = glm::dmat4(1.0);
-
         /// The vertex array object for this RenderInformation
         GLuint _vaoID = 0;
         /// The main vertex buffer object
@@ -128,31 +117,20 @@ protected:
         GLuint _iBufferID = 0;
     };
 
-    /// Primary set of information about the main rendering parts
-    RenderInformation _primaryRenderInformation;
-    /// Optional render information that contains information about the last, floating
-    /// part of the trail
-    RenderInformation _floatingRenderInformation;
+    /// Set of information about the main rendering parts
+    RenderInformation _mainRenderInformation;
+
 
 private:
-    /// Specifies the base color of the line before fading
+    /// Specifies the base color of the line
     properties::Vec3Property _lineColor;
-    /// Settings that enables or disables the line fading
-    properties::BoolProperty _useLineFade;
-    /// Specifies a multiplicative factor that fades out the line
-    properties::FloatProperty _lineFade;
     /// Line width for the line rendering part
     properties::FloatProperty _lineWidth;
-    /// Point size for the point rendering part
-    properties::IntProperty _pointSize;
-    /// The option determining which rendering method to use
-    properties::OptionProperty _renderingModes;
 
     /// Program object used to render the data stored in RenderInformation
     ghoul::opengl::ProgramObject* _programObject = nullptr;
 
-    UniformCache(opacity, modelView, projection, color, useLineFade, lineFade,
-        vertexSorting, idOffset, nVertices, stride, pointSize, renderPhase) _uniformCache;
+    UniformCache(modelView, projection, color) _uniformCache;
 };
 
 } // namespace openspace
