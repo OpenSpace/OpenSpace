@@ -35,7 +35,7 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    constexpr const char* ProgramName = "EphemerisProgram";
+    constexpr const char* ProgramName = "CommunicationPackageProgram";
     constexpr const char* KeyTranslation = "Translation";
 
     constexpr const std::array<const char*, 12> UniformNames = {
@@ -236,8 +236,8 @@ void RenderableCommunicationPackage::initializeGL() {
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine.buildRenderProgram(
                 ProgramName,
-                absPath("${MODULE_BASE}/shaders/renderabletrail_vs.glsl"),
-                absPath("${MODULE_BASE}/shaders/renderabletrail_fs.glsl")
+                absPath("${MODULE_DSN}/shaders/renderablecommunicationpackage_vs.glsl"),
+                absPath("${MODULE_DSN}/shaders/renderablecommunicationpackage_fs.glsl")
             );
         }
     );

@@ -91,7 +91,7 @@ end)
 asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
 
-    openspace.removeVirtualProperty("*Trail.renderable.Enabled")
+    openspace.removeVirtualProperty("Scene.*Trail.renderable.Enabled")
 
     openspace.removeInterestingNodes({
         "Communication_Line", "Earth", "Moon"
