@@ -7,11 +7,10 @@ local dataFolder = "C:/Openspace/OpenSpace/sync/http/dsn_data/1"
 local CommunicationLine = {
     Identifier = "Communication_Line",
     Parent = earthTransforms.EarthBarycenter.Identifier,
-
     Renderable = {
         Translation = {
-            Type = "StaticTranslation",
-            Position = {0, -2000000.0, 0} --random pos
+            Type = "DsnTranslation",
+            Position = {58.5877, 16.1924, 20000000} --random pos
         },
         Type = "CommunicationLines",
         DataFolder = dataFolder,
