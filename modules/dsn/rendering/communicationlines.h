@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_DSN___COMMUNICATIONLINES___H__
 #define __OPENSPACE_MODULE_DSN___COMMUNICATIONLINES___H__
 
-#include <modules/base/rendering/renderabletrail.h>
+#include <modules/dsn/rendering/renderablecommunicationpackage.h>
 #include <modules/dsn/dsnmodule.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -37,7 +37,7 @@
 
 namespace openspace {
 
-    class CommunicationLines : public RenderableTrail {
+    class CommunicationLines : public RenderableCommunicationPackage {
     public:
 
         CommunicationLines(const ghoul::Dictionary& dictionary);

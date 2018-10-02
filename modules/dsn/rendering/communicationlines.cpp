@@ -43,7 +43,7 @@ namespace openspace {
 
     //Member functions
     CommunicationLines::CommunicationLines(const ghoul::Dictionary& dictionary)
-        : RenderableTrail(dictionary){
+        : RenderableCommunicationPackage(dictionary){
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
         CommunicationLines::readDataFromXml();
     }
@@ -201,7 +201,7 @@ namespace openspace {
 
 
     void CommunicationLines::initializeGL() {
-        RenderableTrail::initializeGL();
+        RenderableCommunicationPackage::initializeGL();
 
         // We don't need an index buffer, so we keep it at the default value of 0
         glGenVertexArrays(1, &_primaryRenderInformation._vaoID);
@@ -212,7 +212,7 @@ namespace openspace {
         glDeleteBuffers(1, &_primaryRenderInformation._vBufferID);
 
 
-        RenderableTrail::deinitializeGL();
+        RenderableCommunicationPackage::deinitializeGL();
     }
     void CommunicationLines::update(const UpdateData& data){
 
@@ -234,7 +234,7 @@ namespace openspace {
             glBindBuffer(GL_ARRAY_BUFFER, _primaryRenderInformation._vBufferID);
             glBufferData(
                 GL_ARRAY_BUFFER,
-                _vertexArray.size() * sizeof(TrailVBOLayout),
+                _vertexArray.size() * sizeof(PackageVBOLayout),
                 _vertexArray.data(),
                 GL_STATIC_DRAW
             );
