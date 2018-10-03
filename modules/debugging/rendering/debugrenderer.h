@@ -134,15 +134,6 @@ public:
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
     /**
-     *  Renders a screen space AABB2 to the screen with the provided color
-     */
-    void renderAABB2(const globebrowsing::AABB2& screenSpaceAABB,
-        const glm::vec4& rgba = { 1.f, 1.f, 1.f, 0.3f }) const;
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-    /**
       * Takes a AABB3 in screen space and returns vertices representing the corner points
       * of the AABB. The ordering of the corner points is compatible with the box
       * rendering methods in this class.

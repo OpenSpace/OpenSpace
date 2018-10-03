@@ -30,69 +30,6 @@
 
 class AABBTest : public testing::Test {};
 
-TEST_F(AABBTest, Contains2) {
-    using namespace openspace::globebrowsing;
-    AABB2 a1;
-    AABB2 a2;
-    /*
-        a1
-        +-----+
-        |+---+|
-        ||a2 ||
-        |+---+|
-        +-----+
-    */
-
-    a1.expand(glm::vec2(0, 0));
-    a1.expand(glm::vec2(1, 1));
-
-    a2.expand(glm::vec2(0.1, 0.1));
-    a2.expand(glm::vec2(0.9, 0.9));
-
-    EXPECT_TRUE(a1.contains(a2)) << "a1 should contain a2";
-    EXPECT_FALSE(a2.contains(a1)) << "a2 should not contain a1";
-    EXPECT_TRUE(a1.intersects(a2)) << "a1 should intersect a2";
-    EXPECT_TRUE(a2.intersects(a1)) << "a2 should intersect a1";
-
-    EXPECT_EQ(AABB2::AABBSpatialRelation::Containing, a1.relationTo(a2)) << "a1 contains a2";
-    EXPECT_EQ(AABB2::AABBSpatialRelation::Contained, a2.relationTo(a1)) << "a2 contained by a1";
-
-}
-
-
-TEST_F(AABBTest, Intersects2) {
-    using namespace openspace::globebrowsing;
-    AABB2 a1;
-    AABB2 a2;
-
-    /*
-    a1
-    +-----+
-    |     |
-    |     |   a2
-    |    ++----+
-    +----++    |
-         |     |
-         |     |
-         +-----+
-    */
-
-    a1.expand(glm::vec2(0, 0));
-    a1.expand(glm::vec2(1, 1));
-
-    a2.expand(glm::vec2(0.9, 0.9));
-    a2.expand(glm::vec2(1.9, 1.9));
-
-    EXPECT_FALSE(a1.contains(a2)) << "a1 should not contain a2";
-    EXPECT_FALSE(a2.contains(a1)) << "a2 should not contain a1";
-    EXPECT_TRUE(a1.intersects(a2)) << "a1 should intersect a2";
-    EXPECT_TRUE(a2.intersects(a1)) << "a2 should intersect a1";
-
-    EXPECT_EQ(AABB2::AABBSpatialRelation::Intersecting, a1.relationTo(a2)) << "They should intersect";
-    EXPECT_EQ(AABB2::AABBSpatialRelation::Intersecting, a2.relationTo(a1)) << "They should intersect";
-
-}
-
 TEST_F(AABBTest, Contains3) {
     using namespace openspace::globebrowsing;
     AABB3 a1;
@@ -108,10 +45,6 @@ TEST_F(AABBTest, Contains3) {
     EXPECT_FALSE(a2.contains(a1)) << "a2 should not contain a1";
     EXPECT_TRUE(a1.intersects(a2)) << "a1 should intersect a2";
     EXPECT_TRUE(a2.intersects(a1)) << "a2 should intersect a1";
-
-    EXPECT_EQ(AABB3::AABBSpatialRelation::Containing, a1.relationTo(a2)) << "a1 contains a2";
-    EXPECT_EQ(AABB3::AABBSpatialRelation::Contained, a2.relationTo(a1)) << "a2 contained by a1";
-
 }
 
 
@@ -130,8 +63,5 @@ TEST_F(AABBTest, Intersects3) {
     EXPECT_TRUE(a2.intersects(a1)) << "a2 should intersect a1";
     EXPECT_FALSE(a1.contains(a2)) << "a1 should not contain a2";
     EXPECT_FALSE(a2.contains(a1)) << "a2 should not contain a1";
-
-    EXPECT_EQ(AABB3::AABBSpatialRelation::Intersecting, a1.relationTo(a2)) << "They should intersect";
-    EXPECT_EQ(AABB3::AABBSpatialRelation::Intersecting, a2.relationTo(a1)) << "They should intersect";
 }
 

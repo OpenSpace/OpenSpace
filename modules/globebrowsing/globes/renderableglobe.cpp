@@ -903,7 +903,9 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 
     setCommonUniforms(program, chunk, data);
 
-    if (_generalProperties.eclipseShadowsEnabled && _ellipsoid.hasEclipseShadows()) {
+    if (_generalProperties.eclipseShadowsEnabled &&
+        !_ellipsoid.shadowConfigurationArray().empty())
+    {
         calculateEclipseShadows(program, data);
     }
 
@@ -1015,7 +1017,9 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
     setCommonUniforms(program, chunk, data);
 
-    if (_generalProperties.eclipseShadowsEnabled && _ellipsoid.hasEclipseShadows()) {
+    if (_generalProperties.eclipseShadowsEnabled &&
+        !_ellipsoid.shadowConfigurationArray().empty())
+    {
         calculateEclipseShadows(program, data);
     }
 
@@ -1333,7 +1337,7 @@ void RenderableGlobe::recompileShaders() {
     // Ellipsoid Radius (Model Space)
     _globalRenderer.program->setUniform(
         "radiiSquared",
-        glm::vec3(_ellipsoid.radiiSquared())
+        glm::vec3(_ellipsoid.radii() * _ellipsoid.radii())
     );
 
     ghoul::opengl::updateUniformLocations(

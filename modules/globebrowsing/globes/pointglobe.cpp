@@ -129,7 +129,8 @@ void PointGlobe::render(const RenderData& data, RendererTasks&) {
     const glm::dvec3 camToBody = bodyPosition - data.camera.positionVec3();
     const float distanceToBody = static_cast<float>(glm::length(camToBody));
 
-    const float avgRadius = static_cast<float>(_owner.ellipsoid().averageRadius());
+    const glm::dvec3 radii = _owner.ellipsoid().radii();
+    const float avgRadius = static_cast<float>((radii.x + radii.y + radii.z) / 3.0);
     const float lightIntensity = static_cast<float>(
         _lightIntensity.value() * data.modelTransform.scale * avgRadius / distanceToBody
     );

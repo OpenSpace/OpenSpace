@@ -32,7 +32,7 @@
 
 namespace {
     constexpr const size_t MaxIterations = 8;
-}
+} // namespace
 
 namespace openspace::globebrowsing {
 
@@ -41,30 +41,25 @@ Ellipsoid::Ellipsoid(glm::dvec3 radii) : _radii(radii) {
 }
 
 void Ellipsoid::updateInternalCache() {
-    _cached._radiiSquared = glm::dvec3(
-        _radii.x * _radii.x,
-        _radii.y * _radii.y,
-        _radii.z * _radii.z
-    );
+    _cached.radiiSquared = _radii * _radii;
 
-    _cached._oneOverRadiiSquared = glm::dvec3(1.0) / _cached._radiiSquared;
-    _cached._radiiToTheFourth = _cached._radiiSquared * _cached._radiiSquared;
+    _cached.oneOverRadiiSquared = glm::dvec3(1.0) / _cached.radiiSquared;
+    _cached.radiiToTheFourth = _cached.radiiSquared * _cached.radiiSquared;
 
     std::array<double, 3> radii = { _radii.x, _radii.y, _radii.z };
     std::sort(radii.begin(), radii.end());
-    _cached._minimumRadius = radii[0];
-    _cached._medianRadius = radii[1];
-    _cached._maximumRadius = radii[2];
+    _cached.minimumRadius = radii[0];
+    _cached.maximumRadius = radii[2];
 }
 
 glm::dvec3 Ellipsoid::geocentricSurfaceProjection(const glm::dvec3& p) const {
-    const double beta = 1.0 / sqrt(dot(p * p, _cached._oneOverRadiiSquared));
+    const double beta = 1.0 / sqrt(dot(p * p, _cached.oneOverRadiiSquared));
     return beta * p;
 }
 
 glm::dvec3 Ellipsoid::geodeticSurfaceProjection(const glm::dvec3& p) const {
-    const double beta = 1.0 / sqrt(dot(p * p, _cached._oneOverRadiiSquared));
-    const double n = glm::length(beta * p * _cached._oneOverRadiiSquared);
+    const double beta = 1.0 / sqrt(dot(p * p, _cached.oneOverRadiiSquared));
+    const double n = glm::length(beta * p * _cached.oneOverRadiiSquared);
     double alpha = (1.0 - beta) * (glm::length(p) / n);
 
     const glm::dvec3 p2 = p * p;
@@ -78,13 +73,13 @@ glm::dvec3 Ellipsoid::geodeticSurfaceProjection(const glm::dvec3& p) const {
     do {
         alpha -= (s / dSdA);
 
-        d = glm::dvec3(1.0) + alpha * _cached._oneOverRadiiSquared;
+        d = glm::dvec3(1.0) + alpha * _cached.oneOverRadiiSquared;
         const glm::dvec3 d2 = d * d;
         const glm::dvec3 d3 = d * d2;
 
-        s = glm::dot(p2 / (_cached._radiiSquared * d2), glm::dvec3(1.0)) - 1.0;
+        s = glm::dot(p2 / (_cached.radiiSquared * d2), glm::dvec3(1.0)) - 1.0;
 
-        dSdA = -2.0 * glm::dot(p2 / (_cached._radiiToTheFourth * d3), glm::dvec3(1.0));
+        dSdA = -2.0 * glm::dot(p2 / (_cached.radiiToTheFourth * d3), glm::dvec3(1.0));
         ++nIterations;
     }
     while (std::abs(s) > epsilon && nIterations < MaxIterations);
@@ -95,7 +90,7 @@ glm::dvec3 Ellipsoid::geodeticSurfaceProjection(const glm::dvec3& p) const {
 glm::dvec3 Ellipsoid::geodeticSurfaceNormalForGeocentricallyProjectedPoint(
                                                                 const glm::dvec3& p) const
 {
-    const glm::dvec3 normal = p * _cached._oneOverRadiiSquared;
+    const glm::dvec3 normal = p * _cached.oneOverRadiiSquared;
     return glm::normalize(normal);
 }
 
@@ -113,28 +108,12 @@ const glm::dvec3& Ellipsoid::radii() const {
     return _radii;
 }
 
-const glm::dvec3& Ellipsoid::radiiSquared() const {
-    return _cached._radiiSquared;
-}
-
-const glm::dvec3& Ellipsoid::oneOverRadiiSquared() const {
-    return _cached._oneOverRadiiSquared;
-}
-
-const glm::dvec3& Ellipsoid::radiiToTheFourth() const {
-    return _cached._radiiToTheFourth;
-}
-
 double Ellipsoid::minimumRadius() const {
-    return _cached._minimumRadius;
+    return _cached.minimumRadius;
 }
 
 double Ellipsoid::maximumRadius() const {
-    return _cached._maximumRadius;
-}
-
-double Ellipsoid::averageRadius() const {
-    return (_radii.x + _radii.y + _radii.z) / 3.0;
+    return _cached.maximumRadius;
 }
 
 double Ellipsoid::longitudalDistance(double lat, double lon1, double lon2) const {
@@ -175,24 +154,22 @@ glm::dvec3 Ellipsoid::cartesianSurfacePosition(const Geodetic2& geodetic2) const
 
 glm::dvec3 Ellipsoid::cartesianPosition(const Geodetic3& geodetic3) const {
     const glm::dvec3 normal = geodeticSurfaceNormal(geodetic3.geodetic2);
-    const glm::dvec3 k = _cached._radiiSquared * normal;
+    const glm::dvec3 k = _cached.radiiSquared * normal;
     const double gamma = sqrt(dot(k, normal));
     const glm::dvec3 rSurface = k / gamma;
     return rSurface + geodetic3.height * normal;
 }
 
 void Ellipsoid::setShadowConfigurationArray(
-                       const std::vector<Ellipsoid::ShadowConfiguration>& shadowConfArray)
+                              std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray)
 {
-    _shadowConfArray = shadowConfArray;
+    _shadowConfArray = std::move(shadowConfArray);
 }
 
-std::vector<Ellipsoid::ShadowConfiguration> Ellipsoid::shadowConfigurationArray() const {
+const std::vector<Ellipsoid::ShadowConfiguration>&
+Ellipsoid::shadowConfigurationArray() const
+{
     return _shadowConfArray;
-}
-
-bool Ellipsoid::hasEclipseShadows() const {
-    return !_shadowConfArray.empty();
 }
 
 } // namespace openspace::globebrowsing
