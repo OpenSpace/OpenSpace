@@ -33,8 +33,8 @@ namespace openspace::globebrowsing {
 
 GeodeticPatch::GeodeticPatch(double centerLat, double centerLon, double halfSizeLat,
                              double halfSizeLon)
-    : _center(Geodetic2(centerLat, centerLon))
-    , _halfSize(Geodetic2(halfSizeLat, halfSizeLon))
+    : _center{ centerLat, centerLon }
+    , _halfSize{ halfSizeLat, halfSizeLon }
 {}
 
 GeodeticPatch::GeodeticPatch(const Geodetic2& center, const Geodetic2& halfSize)
@@ -48,10 +48,10 @@ GeodeticPatch::GeodeticPatch(const TileIndex& tileIndex) {
     const double deltaLon = (2 * glm::pi<double>()) /
                             (static_cast<double>(1 << tileIndex.level));
     const Geodetic2 nwCorner(
-        glm::pi<double>() / 2 - deltaLat * tileIndex.y,
-        -glm::pi<double>() + deltaLon * tileIndex.x
+        glm::pi<double>() / 2.0 - deltaLat * tileIndex.y,
+        -glm::pi<double>()      + deltaLon * tileIndex.x
     );
-    _halfSize = Geodetic2(deltaLat / 2, deltaLon / 2);
+    _halfSize = Geodetic2(deltaLat / 2.0, deltaLon / 2.0);
     _center = Geodetic2(nwCorner.lat - _halfSize.lat, nwCorner.lon + _halfSize.lon);
 }
 
@@ -117,7 +117,7 @@ bool GeodeticPatch::contains(const Geodetic2& p) const {
 }
 
 double GeodeticPatch::edgeLatitudeNearestEquator() const {
-    return _center.lat + _halfSize.lat * (isNorthern() ? -1 : 1);
+    return _center.lat + _halfSize.lat * (isNorthern() ? -1.0 : 1.0);
 }
 
 double GeodeticPatch::isNorthern() const {
