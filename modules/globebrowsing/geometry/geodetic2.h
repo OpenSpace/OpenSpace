@@ -31,15 +31,6 @@ namespace openspace::globebrowsing {
 
 struct Geodetic2 {
     Geodetic2(double latitude = 0.0, double longitude = 0.0);
-    Geodetic2(const Geodetic2& src) = default;
-
-    //static Geodetic2 fromCartesian(const Vec3& v);
-    //Vec3 asUnitCartesian() const;
-
-    glm::dvec2 toLonLatVec2() const;
-
-    bool operator==(const Geodetic2& other) const;
-    bool operator!=(const Geodetic2& other) const { return !(*this == (other)); }
 
     Geodetic2 operator+(const Geodetic2& other) const;
     Geodetic2 operator-(const Geodetic2& other) const;

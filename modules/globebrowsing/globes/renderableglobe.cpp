@@ -894,11 +894,11 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 
     program.setUniform(
         _globalRenderer.uniformCache.minLatLon,
-        glm::vec2(swCorner.toLonLatVec2())
+        glm::vec2(swCorner.lon, swCorner.lat)
     );
     program.setUniform(
         _globalRenderer.uniformCache.lonLatScalingFactor,
-        glm::vec2(patchSize.toLonLatVec2())
+        glm::vec2(patchSize.lon, patchSize.lat)
     );
 
     setCommonUniforms(program, chunk, data);

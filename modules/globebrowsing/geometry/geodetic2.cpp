@@ -31,14 +31,6 @@ Geodetic2::Geodetic2(double latitude, double longitude)
     , lon(longitude)
 {}
 
-glm::dvec2 Geodetic2::toLonLatVec2() const {
-    return glm::dvec2(lon, lat);
-}
-
-bool Geodetic2::operator==(const Geodetic2& other) const {
-    return lat == other.lat && lon == other.lon;
-}
-
 Geodetic2 Geodetic2::operator+(const Geodetic2& other) const {
     return Geodetic2(lat + other.lat, lon + other.lon);
 }

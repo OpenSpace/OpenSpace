@@ -148,14 +148,13 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
     using namespace globebrowsing;
 
     SceneGraphNode* n = global::navigationHandler.focusNode();
-    const RenderableGlobe* globe = dynamic_cast<const  RenderableGlobe*>(n->renderable());
+    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
     if (!globe) {
         return;
     }
 
     const glm::dvec3 cameraPosition = global::navigationHandler.camera()->positionVec3();
-    const glm::dmat4 inverseModelTransform =
-        global::navigationHandler.focusNode()->inverseModelTransform();
+    const glm::dmat4 inverseModelTransform = n->inverseModelTransform();
     const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
     const SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
@@ -175,8 +174,9 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
     bool isEast = lon > 0.0;
     lon = std::abs(lon);
 
-    const double altitude = glm::length(cameraPositionModelSpace -
-        posHandle.centerToReferenceSurface);
+    const double altitude = glm::length(
+        cameraPositionModelSpace - posHandle.centerToReferenceSurface
+    );
     std::pair<double, std::string> dist = simplifyDistance(altitude);
 
     penPosition.y -= _font->height();
@@ -187,7 +187,8 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
             "Position: {:03.2f}{}, {:03.2f}{}  Altitude: {} {}",
             lat, isNorth ? "N" : "S",
             lon, isEast ? "E" : "W",
-            dist.first, dist.second)
+            dist.first, dist.second
+        )
     );
 }
 glm::vec2 DashboardItemGlobeLocation::size() const {
