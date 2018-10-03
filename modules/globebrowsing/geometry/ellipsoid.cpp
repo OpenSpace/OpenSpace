@@ -24,8 +24,7 @@
 
 #include <modules/globebrowsing/geometry/ellipsoid.h>
 
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/geometry/geodetic3.h>
+#include <modules/globebrowsing/geometry/geodetic.h>
 
 #include <algorithm>
 #include <array>

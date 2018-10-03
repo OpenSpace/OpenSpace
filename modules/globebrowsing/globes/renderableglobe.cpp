@@ -24,7 +24,7 @@
 
 #include <modules/globebrowsing/globes/renderableglobe.h>
 
-#include <modules/globebrowsing/geometry/geodetic3.h>
+#include <modules/globebrowsing/geometry/geodetic.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/meshes/trianglesoup.h>
 #include <modules/globebrowsing/rendering/layer.h>

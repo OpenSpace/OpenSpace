@@ -41,8 +41,8 @@
 #include <glm/gtx/quaternion.hpp>
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+#include <modules/globebrowsing/geometry/geodetic.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/geometry/geodetic2.h>
 #endif
 
 #include <cmath>

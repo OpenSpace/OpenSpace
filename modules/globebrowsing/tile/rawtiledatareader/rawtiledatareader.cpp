@@ -25,7 +25,7 @@
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 
 #include <modules/globebrowsing/geometry/angle.h>
-#include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/geometry/geodetic.h>
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/tiledatatype.h>

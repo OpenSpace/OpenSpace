@@ -26,7 +26,7 @@
 
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
 #include <modules/globebrowsing/dashboard/dashboarditemglobelocation.h>
-#include <modules/globebrowsing/geometry/geodetic3.h>
+#include <modules/globebrowsing/geometry/geodetic.h>
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/gdalwrapper.h>
 #include <modules/globebrowsing/tile/tileprovider.h>

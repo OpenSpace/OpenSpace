@@ -25,9 +25,33 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GEODETIC3___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GEODETIC3___H__
 
-#include <modules/globebrowsing/geometry/geodetic2.h>
-
 namespace openspace::globebrowsing {
+
+struct Geodetic2 {
+    Geodetic2(double latitude = 0.0, double longitude = 0.0)
+        : lat(latitude)
+        , lon(longitude)
+    {}
+
+    Geodetic2 operator+(const Geodetic2& other) const {
+        return Geodetic2(lat + other.lat, lon + other.lon);
+    }
+
+    Geodetic2 operator-(const Geodetic2& other) const {
+        return Geodetic2(lat - other.lat, lon - other.lon);
+    }
+
+    Geodetic2 operator*(double scalar) const {
+        return Geodetic2(lat * scalar, lon * scalar);
+    }
+
+    Geodetic2 operator/(double scalar) const {
+        return Geodetic2(lat / scalar, lon / scalar);
+    }
+
+    double lat;
+    double lon;
+};
 
 struct Geodetic3 {
     Geodetic2 geodetic2;
