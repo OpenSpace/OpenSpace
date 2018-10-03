@@ -24,7 +24,6 @@
 
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 
-#include <modules/globebrowsing/geometry/angle.h>
 #include <modules/globebrowsing/geometry/geodetic.h>
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
@@ -237,14 +236,14 @@ std::array<double, 6> RawTileDataReader::geoTransform() const {
         Geodetic2(0.0, 0.0),
         Geodetic2(glm::half_pi<double>(), glm::pi<double>())
     );
-    return {
-        Angle<double>::fromRadians(cov.corner(Quad::NORTH_WEST).lon).asDegrees(),
-        Angle<double>::fromRadians(cov.size().lon).asDegrees() / rasterXSize(),
-        0.0,
-        Angle<double>::fromRadians(cov.corner(Quad::NORTH_WEST).lat).asDegrees(),
-        0.0,
-        -Angle<double>::fromRadians(cov.size().lat).asDegrees() / rasterYSize()
-    };
+    std::array<double, 6> res;
+    res[0] = glm::degrees(cov.corner(Quad::NORTH_WEST).lon);
+    res[1] = glm::degrees(cov.size().lon) / rasterXSize();
+    res[2] = 0.0;
+    res[3] = glm::degrees(cov.corner(Quad::NORTH_WEST).lat);
+    res[4] = 0.0;
+    res[5] = glm::degrees(-cov.size().lat) / rasterYSize();
+    return res;
 }
 
 PixelRegion::PixelCoordinate RawTileDataReader::geodeticToPixel(
@@ -252,8 +251,8 @@ PixelRegion::PixelCoordinate RawTileDataReader::geodeticToPixel(
 {
     const std::array<double, 6>& t = geoTransform();
 
-    const double Y = Angle<double>::fromRadians(geo.lat).asDegrees();
-    const double X = Angle<double>::fromRadians(geo.lon).asDegrees();
+    const double Y = glm::degrees(geo.lat);
+    const double X = glm::degrees(geo.lon);
 
     const double divisor = t[2] * t[4] - t[1] * t[5];
     ghoul_assert(divisor != 0.0, "Division by zero!");

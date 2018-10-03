@@ -319,9 +319,7 @@ void GlobeBrowsingModule::goToChunk(int x, int y, int level) {
 void GlobeBrowsingModule::goToGeo(double latitude, double longitude) {
     using namespace globebrowsing;
     Camera* cam = global::navigationHandler.camera();
-    goToGeodetic2(*cam, Geodetic2(
-        Angle<double>::fromDegrees(latitude).asRadians(),
-        Angle<double>::fromDegrees(longitude).asRadians()), true);
+    goToGeodetic2(*cam, Geodetic2(glm::radians(latitude), glm::radians(longitude)), true);
 }
 
 void GlobeBrowsingModule::goToGeo(double latitude, double longitude,
@@ -333,9 +331,7 @@ void GlobeBrowsingModule::goToGeo(double latitude, double longitude,
     goToGeodetic3(
         *cam,
         {
-            Geodetic2(
-                Angle<double>::fromDegrees(latitude).asRadians(),
-                Angle<double>::fromDegrees(longitude).asRadians()),
+            Geodetic2(glm::radians(latitude), glm::radians(longitude)),
             altitude
         },
         true
@@ -349,10 +345,7 @@ glm::vec3 GlobeBrowsingModule::cartesianCoordinatesFromGeo(
     using namespace globebrowsing;
 
     const Geodetic3 pos = {
-        {
-            Angle<double>::fromDegrees(latitude).asRadians(),
-            Angle<double>::fromDegrees(longitude).asRadians()
-        },
+        { glm::radians(latitude), glm::radians(longitude) },
         altitude
     };
 

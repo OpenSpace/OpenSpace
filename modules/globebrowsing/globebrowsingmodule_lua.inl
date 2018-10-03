@@ -24,7 +24,6 @@
 
 #include <modules/globebrowsing/globes/renderableglobe.h>
 
-#include <modules/globebrowsing/geometry/angle.h>
 #include <modules/globebrowsing/rendering/layermanager.h>
 #include <modules/globebrowsing/rendering/layer.h>
 
@@ -223,12 +222,7 @@ int getGeoPositionForCamera(lua_State* L) {
     const double altitude = glm::length(cameraPositionModelSpace -
                                   posHandle.centerToReferenceSurface);
 
-    ghoul::lua::push(
-        L,
-        Angle<double>::fromRadians(geo2.lat).asDegrees(),
-        Angle<double>::fromRadians(geo2.lon).asDegrees(),
-        altitude
-    );
+    ghoul::lua::push(L, glm::degrees(geo2.lat), glm::degrees(geo2.lon), altitude);
 
     ghoul_assert(lua_gettop(L) == 3, "Incorrect number of items left on stack");
     return 3;
