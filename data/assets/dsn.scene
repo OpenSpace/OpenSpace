@@ -67,7 +67,7 @@ asset.onInitialize(function ()
     )
 
     openspace.markInterestingNodes({
-        "Earth", "Moon"
+        "Communication_Line", "Earth", "Moon"
     })
 
     openspace.addVirtualProperty(
@@ -92,9 +92,9 @@ end)
 asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
 
-    openspace.removeVirtualProperty("*Trail.renderable.Enabled")
+    openspace.removeVirtualProperty("Scene.*Trail.renderable.Enabled")
 
     openspace.removeInterestingNodes({
-        "Earth", "Moon"
+        "Communication_Line", "Earth", "Moon"
     })
 end)

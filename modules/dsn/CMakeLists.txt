@@ -25,6 +25,7 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablecommunicationpackage.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/communicationlines.h
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/dsntranslation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dsnmanager/dsnmanager.h
@@ -32,14 +33,23 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablecommunicationpackage.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/communicationlines.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/dsntranslation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dsnmanager/dsnmanager.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
+
+set(SHADER_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablecommunicationpackage_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablecommunicationpackage_vs.glsl
+   
+)
+source_group("Shader Files" FILES ${SHADER_FILES})
+
 create_new_module(
     "Dsn"
     dsn_module
-    ${HEADER_FILES} ${SOURCE_FILES}
+    ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
