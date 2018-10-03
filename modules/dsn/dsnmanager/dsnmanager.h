@@ -21,36 +21,30 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
+#ifndef __OPENSPACE_MODULE_DSN___DSNMANAGER___H__
+#define __OPENSPACE_MODULE_DSN___DSNMANAGER___H__
 
-#ifndef __OPENSPACE_MODULE_DSN___COMMUNICATIONLINES___H__
-#define __OPENSPACE_MODULE_DSN___COMMUNICATIONLINES___H__
-
-#include <modules/base/rendering/renderabletrail.h>
-#include <modules/dsn/dsnmodule.h>
-#include <modules/dsn/dsnmanager/dsnmanager.h>
+#include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <openspace/rendering/renderengine.h>
+#include <ext/xml/rapidxml.hpp>
+#include <ext/xml/rapidxml_utils.hpp>
 #include <fstream>
 
 
 namespace openspace {
 
-    class CommunicationLines : public RenderableTrail {
+    class DsnManager {
+
     public:
+       static bool extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary);
 
-        CommunicationLines(const ghoul::Dictionary& dictionary);
-        void extractData();
-        void initializeGL() override;
-        void deinitializeGL() override;
-        void update(const UpdateData& data) override;
-      
     private:
-
-         const char* _identifier = "CommunicationLines";
-         bool _needsFullSweep = true;
-         std::unique_ptr<ghoul::Dictionary> _dictionary;
+       static void readDataFromXml(std::vector<std::string> _dataFiles);
+       static void xmlParser(std::string filename, std::ofstream &logfile);
     };
-
 }
+
+
 #endif 
