@@ -85,9 +85,6 @@ asset.onInitialize(function ()
         nil
     )
 
-    openspace.setPropertyValueSingle('Scene.EarthAtmosphere.renderable.Enabled', false);
-    openspace.setPropertyValueSingle('Dashboard.Framerate.FrametimeType', 0);
-    
 
     openspace.navigation.setCameraState({
         Focus = earthAsset.Earth.Identifier,
