@@ -29,36 +29,6 @@
 
 namespace openspace::globebrowsing {
 
-//struct AABB1 {
-//    AABB1(float minValue = std::numeric_limits<float>::max(),
-//        float maxValue = -std::numeric_limits<float>::max());
-//
-//    void expand(float p);
-//    float center() const;
-//    float size() const;
-//    bool contains(float p) const;
-//    bool contains(const AABB1& o) const;
-//    bool intersects(const AABB1& o) const;
-//
-//    float min;
-//    float max;
-//};
-//
-//struct AABB2 {
-//    AABB2(glm::vec2 minValue = glm::vec2(std::numeric_limits<float>::max()),
-//        glm::vec2 maxValue = glm::vec2(-std::numeric_limits<float>::max()));
-//
-//    void expand(const glm::vec2& p);
-//    glm::vec2 center() const;
-//    glm::vec2 size() const;
-//    bool contains(const glm::vec2& p) const;
-//    bool contains(const AABB2& o) const;
-//    bool intersects(const AABB2& o) const;
-//
-//    glm::vec2 min;
-//    glm::vec2 max;
-//};
-
 struct AABB3 {
     AABB3(glm::vec3 minValue = glm::vec3(std::numeric_limits<float>::max()),
         glm::vec3 maxValue = glm::vec3(-std::numeric_limits<float>::max()));

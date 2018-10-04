@@ -38,7 +38,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodetic.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodeticpatch.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/globes/pointglobe.h
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.h
@@ -93,7 +92,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/ellipsoid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodeticpatch.cpp
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/globes/pointglobe.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.cpp
     
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.cpp
