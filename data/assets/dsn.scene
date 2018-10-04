@@ -14,10 +14,13 @@ asset.require('scene/solarsystem/missions/voyager2/voyager2')
 
 --Communication
 asset.require('scene/solarsystem/dsn/communicationlines/communicationlines')
+asset.require('scene/solarsystem/dsn/stations')
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
 asset.require('util/default_joystick')
+
+assetHelper.requestAll(asset, 'scene/solarsystem/dsn')
 
 local Keybindings = {
     {
@@ -53,9 +56,10 @@ local Keybindings = {
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 
 asset.onInitialize(function ()
-    local now = openspace.time.currentWallTime()
 
-    -- Jump back one day to show a complete planet
+
+    local now = openspace.time.currentWallTime()
+	 -- Jump back one day to show a complete planet
     openspace.time.setTime("2018 SEP 12 19:07:54")
 
     sceneHelper.bindKeys(Keybindings)
@@ -87,6 +91,10 @@ asset.onInitialize(function ()
     })
 
     openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
+
+    local x, y, z = openspace.globebrowsing.getGeoPosition(earthAsset.Earth.Identifier, 35.0, 243.0, 1002.114)
+	openspace.setPropertyValueSingle("Scene.DSS_14.Translation.Position", { x, y, z })
+
 end)
 
 asset.onDeinitialize(function ()

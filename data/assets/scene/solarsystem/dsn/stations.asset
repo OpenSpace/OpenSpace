@@ -1,0 +1,44 @@
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+
+asset.request('customization/globebrowsing')
+
+
+local sceneHelper = asset.require('util/scene_helper')
+local propertyHelper = asset.require('util/property_helper')
+
+local models = asset.syncedResource({
+    Name = "Voyager 1 Models",
+    Type = "HttpSynchronization",
+    Identifier = "voyager1_model",
+    Version = 1
+})
+
+local DSS14 = {
+    Identifier = "DSS_14",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+      Translation = {
+         Type = "StaticTranslation",
+         Position = { 0, 0, 0 }
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/voyager-main.obj"
+        },
+        ColorTexture = models .. "/voyager-main.jpg",
+    },
+    GUI = {
+        Name = "DSS14",
+        Path = "/Solar System/DSS14"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    DSS14
+})
