@@ -105,8 +105,7 @@ private:
     void writeToFileBuffer(const double& src);
     void writeToFileBuffer(const unsigned char c);
     void writeToFileBuffer(bool b);
-    void writeStringToFileBuffer(const std::string s, unsigned char* buffer,
-        unsigned int& bufferIdx);
+    void saveStringToFile(const std::string s);
     void saveKeyframeToFileBinary(unsigned char* bufferSource, unsigned int size);
     void readFromPlayback(unsigned char& result);
     void readFromPlayback(double& result);
@@ -156,7 +155,6 @@ private:
         + saveBufferStringSize_max;
     unsigned char _keyframeBuffer[_saveBufferMaxSize_bytes];
     unsigned int _bufferIndex = 0;
-    unsigned int _playbackIndex = 0;
 #endif
     bool _cleanupNeeded = false;
 

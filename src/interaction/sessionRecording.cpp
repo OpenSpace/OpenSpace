@@ -43,6 +43,8 @@
 
 #include <ghoul/logging/logmanager.h>
 
+#include <iterator>
+
 namespace {
     const char* _loggerCat = "SessionRecording";
 }
@@ -122,6 +124,7 @@ bool SessionRecording::startPlayback(std::string filename, KeyframeTimeRef timeM
     {
         LERROR(fmt::format("Unable to open file {} for keyframe playback",
                filename.c_str()));
+        stopPlayback();
         return false;
     }
     //Set time reference mode
@@ -146,12 +149,8 @@ bool SessionRecording::startPlayback(std::string filename, KeyframeTimeRef timeM
         now, _timestampPlaybackStarted_simulation, _keyframesCamera.size(),
         _keyframesTime.size(), _keyframesScript.size()));
 
-    global::navigationHandler.triggerPlaybackStart(/*[&]() {
-        signalPlaybackFinishedForComponent(recordedType::camera);
-    }*/);
-    global::scriptScheduler.triggerPlaybackStart(/*[&]() {
-        signalPlaybackFinishedForComponent(recordedType::script);
-    }*/);
+    global::navigationHandler.triggerPlaybackStart();
+    global::scriptScheduler.triggerPlaybackStart();
 #ifdef SESSION_RECORDING_TIME
     global::timeManager.triggerPlaybackStart(/*[&]() {
         signalPlaybackFinishedForComponent(recordedType::time);
@@ -195,14 +194,6 @@ void SessionRecording::stopPlayback() {
 }
 
 void SessionRecording::cleanUpPlayback() {
-    //Reset the script scheduler's time reference to simulation time, which is the
-    // default mode for non-playback uses of the scheduler
-    //global::scriptScheduler.setTimeReferenceMode(KeyframeTimeRef::absolute_simTimeJ2000);
-
-    //Clear the timelines of all keyframes
-    //global::scriptScheduler.clearSchedule();
-    //global::navigationHandler.keyframeNavigator().clearKeyframes();
-
     global::navigationHandler.setDisableKeyFrameInteraction();
     global::navigationHandler.stopPlayback();
     global::scriptScheduler.stopPlayback();
@@ -244,21 +235,17 @@ void SessionRecording::writeToFileBuffer(const bool b) {
     _bufferIndex += writeSize_bytes;
 }
 
-void SessionRecording::writeStringToFileBuffer(const std::string s, unsigned char* buffer,
-                                               unsigned int& bufferIdx)
-{
+void SessionRecording::saveStringToFile(const std::string s) {
     size_t strLen = s.size();
     size_t writeSize_bytes = sizeof(size_t);
 
-    //Write the length of the string in bytes first
+    _bufferIndex = 0;
     unsigned char const *p = reinterpret_cast<unsigned char const*>(&strLen);
-    memcpy((buffer + bufferIdx), p, writeSize_bytes);
-    bufferIdx += (unsigned int)writeSize_bytes;
+    memcpy((_keyframeBuffer + _bufferIndex), p, writeSize_bytes);
+    _bufferIndex += (unsigned int)writeSize_bytes;
+    saveKeyframeToFileBinary(_keyframeBuffer, _bufferIndex);
 
-    //Now write the string contents
-    writeSize_bytes = strLen;
-    strcpy((char*)buffer + bufferIdx, s.c_str());
-    bufferIdx += (unsigned int)writeSize_bytes;
+    _recordFile.write(s.c_str(), s.size());
 }
 
 void SessionRecording::readFromPlayback(unsigned char& result) {
@@ -297,9 +284,12 @@ void SessionRecording::readFromPlayback(std::string& result) {
     size_t strLen;
     //Read string length from file
     _playbackFile.read(reinterpret_cast<char*>(&strLen), sizeof(strLen));
-    //Read the string from file to keyframe buffer, then into string arg
-    _playbackFile.read(reinterpret_cast<char*>(&_keyframeBuffer), strLen);
-    result.append((const char*)_keyframeBuffer, strLen);
+    //Read back full string
+    char* temp = new char[strLen + 1];
+    _playbackFile.read(temp, strLen);
+    temp[strLen] = '\0';
+    result = temp;
+    delete[] temp;
 }
 #endif //#ifdef RECORD_BINARY
 
@@ -345,9 +335,9 @@ void SessionRecording::saveCameraKeyframe() {
         writeToFileBuffer(kf._rotation.z);
         writeToFileBuffer(kf._rotation.w);
         writeToFileBuffer(kf._followNodeRotation);
-        writeStringToFileBuffer(kf._focusNode, _keyframeBuffer, _bufferIndex);
-
         saveKeyframeToFileBinary(_keyframeBuffer, _bufferIndex);
+
+        saveStringToFile(kf._focusNode);
 #else
         std::stringstream keyframeLine = std::stringstream();
         //Add simulation timestamp, timestamp relative, simulation time to recording start
@@ -431,20 +421,7 @@ void SessionRecording::saveScript(std::string scriptToSave) {
     //Write header to file
     saveKeyframeToFileBinary(_keyframeBuffer, _bufferIndex);
 
-    unsigned int spaceRemainingInBuffer = _saveBufferMaxSize_bytes - _bufferIndex;
-    if (scriptToSave.length() > spaceRemainingInBuffer) {
-        size_t biggerSize_bytes = keyframeHeaderSize_bytes + scriptToSave.length()
-            + sizeof(size_t);
-        unsigned int tmpBufferIndex = 0;
-        unsigned char* tmpBuffer = new unsigned char(biggerSize_bytes);
-        //Write script do dynamically-allocated buffer
-        writeStringToFileBuffer(scriptToSave, tmpBuffer, tmpBufferIndex);
-        saveKeyframeToFileBinary(tmpBuffer, tmpBufferIndex);
-    } else {
-        _bufferIndex = 0;
-        writeStringToFileBuffer(scriptToSave, _keyframeBuffer, _bufferIndex);
-        saveKeyframeToFileBinary(_keyframeBuffer, _bufferIndex);
-    }
+    saveStringToFile(scriptToSave);
 #else
     std::stringstream keyframeLine = std::stringstream();
     //Add simulation timestamp, timestamp relative, simulation time to recording start
@@ -504,7 +481,7 @@ void SessionRecording::playbackAddEntriesToTimeline() {
         }
         else {
             LERROR(fmt::format("Unknown frame type {} @ index {} of playback file {}",
-                frameType, _playbackIndex, _playbackFilename.c_str()));
+                frameType, _playbackLineNum - 1, _playbackFilename.c_str()));
             break;
         }
 
@@ -596,7 +573,6 @@ void SessionRecording::playbackCamera() {
     interaction::KeyframeNavigator::CameraPose pbFrame;
 #ifdef RECORD_BINARY
     double tmpRotation;
-    //LINFO(fmt::format("Reading frame #{} for camera", _playbackLineNum - 1));
     readFromPlayback(timeOs);
     readFromPlayback(timeRec);
     readFromPlayback(timeSim);
@@ -782,7 +758,6 @@ void SessionRecording::moveAheadInTime(double deltaTime) {
 bool SessionRecording::isTimeToHandleNextKeyframe(double currTime, double deltaTime) {
     double timeOfNextKeyframe = getNextTimestamp();
     double timeDiff = timeOfNextKeyframe - currTime;
-//    LINFO(fmt::format("isTime? keyframe {} ({}) has diff= {}", _idxTimeline, deltaTime, timeDiff));
 
     return (timeDiff < deltaTime);
 }
@@ -792,7 +767,6 @@ bool SessionRecording::processNextKeyframeAheadInTime(double now, double deltaTi
 
     switch (getNextKeyframeType()) {
     case recordedType::camera:
-        //LINFO(fmt::format("cam @ {}", _idxTimeline));
         _idxCamera = _timeline[_idxTimeline].idxIntoKeyframeTypeArray;
         returnValue = processCameraKeyframe(now, deltaTime);
         break;
@@ -955,7 +929,7 @@ SessionRecording::recordedType SessionRecording::getPrevKeyframeType() {
 void SessionRecording::saveKeyframeToFileBinary(unsigned char* bufferSource,
                                                 unsigned int size)
 {
-    _recordFile.write((char*)_keyframeBuffer, size);
+    _recordFile.write((char*)bufferSource, size);
 }
 #else
 void SessionRecording::saveKeyframeToFile(std::string entry) {
