@@ -1333,7 +1333,6 @@ void RenderableGlobe::recompileShaders() {
     );
 
     _globalRenderer.updatedSinceLastCall = true;
-
     _shadersNeedRecompilation = false;
 }
 

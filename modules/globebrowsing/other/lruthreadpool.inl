@@ -35,7 +35,7 @@ void LRUThreadPoolWorker<KeyType>::operator()() {
     while (true) {
         // acquire lock
         {
-            std::unique_lock<std::mutex> lock(_pool._queueMutex);
+            std::unique_lock lock(_pool._queueMutex);
 
             // look for a work item
             while (!_pool._stop && _pool._queuedTasks.isEmpty()) {
@@ -75,7 +75,7 @@ LRUThreadPool<KeyType>::LRUThreadPool(const LRUThreadPool& toCopy)
 template<typename KeyType>
 LRUThreadPool<KeyType>::~LRUThreadPool() {
     {
-        std::unique_lock<std::mutex> lock(_queueMutex);
+        std::unique_lock lock(_queueMutex);
         _stop = true;
     }
     _condition.notify_all();

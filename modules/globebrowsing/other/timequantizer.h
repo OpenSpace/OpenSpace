@@ -47,12 +47,11 @@ struct TimeQuantizer {
     *
     * Example: parseTimeResolutionStr("1d");
     *
-    * \param resoltutionStr with the format {number}{unit}
-    *        where supported units are:
+    * \param resolutionStr with the format {number}{unit} where supported units are:
     *        (s)econds, (m)inutes, (h)ours, (d)ays, (y)ears
     * \return the time resolution in seconds
     */
-    static double parseTimeResolutionStr(const std::string& resoltutionStr);
+    static double parseTimeResolutionStr(const std::string& resolutionStr);
 
     /**
     * Quantizes a OpenSpace Time into descrete values. If the provided Time \p t is

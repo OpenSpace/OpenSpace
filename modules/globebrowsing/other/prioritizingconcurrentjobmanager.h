@@ -26,10 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___PRIORITIZING_CONCURRENT_JOB_MANAGER___H__
 
 #include <modules/globebrowsing/other/lruthreadpool.h>
-
-//#include <openspace/util/concurrentjobmanager.h>
 #include <openspace/util/concurrentqueue.h>
-
 #include <mutex>
 
 namespace openspace { template <typename T> struct Job; }
@@ -37,10 +34,10 @@ namespace openspace { template <typename T> struct Job; }
 namespace openspace::globebrowsing {
 
 /**
- * Concurrent job manager which prioritizes which jobs to work on depending on which
- * ones were enqueued latest. The class is templated both on the job type and the key
- * type which is used to identify jobs. In case a job need to be explicitly ended
- * It can be identified using its key.
+ * Concurrent job manager which prioritizes which jobs to work on depending on which ones
+ * were enqueued latest. The class is templated both on the job type and the key type
+ * which is used to identify jobs. In case a job need to be explicitly ended. It can be
+ * identified using its key.
  */
 template<typename P, typename KeyType>
 class PrioritizingConcurrentJobManager {
@@ -58,9 +55,9 @@ public:
      * function will also clear the list of unfinished jobs so if the jobs need to be
      * explicitly ended, the user need to make sure to do so after calling this function.
      */
-    std::vector<KeyType> keysToUnfinishedJobs();
+    std::vector<KeyType> keysToUnfinishedJobs() const;
 
-    std::vector<KeyType> keysToEnqueuedJobs();
+    std::vector<KeyType> keysToEnqueuedJobs() const;
 
     /**
      * Bumps the job identified with <code>key</code> to the beginning of the queue.

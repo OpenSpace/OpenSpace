@@ -53,10 +53,10 @@ private:
  * recently enqueued task is the one that will be executed first. This class is templated
  * on a key type which used as an identifier to determine wheter or not a task with the
  * given key has been enqueued or not. This means that a task can be enqueued several
- * times. The user must ensure that an enqueued task with a given key should be
- * equal in outcome to a second enqueued task with the same key. This is because a second
- * enqueued task with the same key will simply be bumped and prioritised before other
- * enqueued tasks. The given task will be ignored.
+ * times. The user must ensure that an enqueued task with a given key should be equal in
+ * outcome to a second enqueued task with the same key. This is because a second enqueued
+ * task with the same key will simply be bumped and prioritised before other enqueued
+ * tasks. The given task will be ignored.
  */
 template<typename KeyType>
 class LRUThreadPool {

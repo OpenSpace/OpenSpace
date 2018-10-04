@@ -42,9 +42,9 @@ TimeQuantizer::TimeQuantizer(const Time& start, const Time& end,
     : TimeQuantizer(start, end, parseTimeResolutionStr(resolution))
 {}
 
-double TimeQuantizer::parseTimeResolutionStr(const std::string& resoltutionStr) {
-    const char unit = resoltutionStr.back();
-    std::string numberString = resoltutionStr.substr(0, resoltutionStr.length() - 1);
+double TimeQuantizer::parseTimeResolutionStr(const std::string& resolutionStr) {
+    const char unit = resolutionStr.back();
+    std::string numberString = resolutionStr.substr(0, resolutionStr.length() - 1);
 
     char* p;
     double value = strtol(numberString.c_str(), &p, 10);
