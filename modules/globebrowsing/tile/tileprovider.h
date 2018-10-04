@@ -135,7 +135,7 @@ struct SizeReferenceTileProvider : public TextTileProvider {
 };
 
 struct TileIndexTileProvider : public TextTileProvider {
-    TileIndexTileProvider();
+    TileIndexTileProvider(const ghoul::Dictionary& dictionary);
 };
 
 struct TileProviderByIndex : public TileProvider {

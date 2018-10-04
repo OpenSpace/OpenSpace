@@ -620,7 +620,7 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
 
 
 
-TileIndexTileProvider::TileIndexTileProvider()
+TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary&)
     : TextTileProvider(getTileTextureInitData(layergroupid::GroupID::ColorLayers, false))
 {
     type = Type::TileIndexTileProvider;

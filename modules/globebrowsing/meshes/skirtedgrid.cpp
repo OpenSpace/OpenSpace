@@ -24,9 +24,12 @@
 
 #include <modules/globebrowsing/meshes/skirtedgrid.h>
 
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 
 namespace {
+    constexpr const char* _loggerCat = "SkirtedGrid";
+
     size_t numElements(int xSegments, int ySegments) {
         return 3 * 2 * xSegments * ySegments;
     }
@@ -46,31 +49,26 @@ namespace {
 
 namespace openspace::globebrowsing {
 
-SkirtedGrid::SkirtedGrid(unsigned int xSegments, unsigned int ySegments,
-                         TriangleSoup::Positions usePositions,
-                         TriangleSoup::TextureCoordinates useTextureCoordinates,
-                         TriangleSoup::Normals useNormals)
-    : _geometry(
-        createElements(xSegments, ySegments),
-        usePositions,
-        useTextureCoordinates,
-        useNormals
-    )
-    , _xSegments(xSegments)
+SkirtedGrid::SkirtedGrid(unsigned int xSegments, unsigned int ySegments)
+    : _xSegments(xSegments)
     , _ySegments(ySegments)
 
 {
-    if (usePositions) {
-        _geometry.setVertexPositions(createPositions(_xSegments, _ySegments));
+    _gpuDataNeedUpdate = true;
+    _elementData = createElements(xSegments, ySegments);
+
+    std::vector<glm::vec2> textures = createTextureCoordinates(_xSegments, _ySegments);
+    _vertexData.resize(textures.size());
+    for (size_t i = 0; i < textures.size(); ++i) {
+        _vertexData[i].texture[0] = textures[i][0];
+        _vertexData[i].texture[1] = textures[i][1];
     }
-    if (useTextureCoordinates) {
-        _geometry.setVertexTextureCoordinates(
-            createTextureCoordinates(_xSegments, _ySegments)
-        );
-    }
-    if (useNormals) {
-        _geometry.setVertexNormals(createNormals(_xSegments, _ySegments));
-    }
+}
+
+SkirtedGrid::~SkirtedGrid() {
+    glDeleteBuffers(1, &_vertexBufferID);
+    glDeleteBuffers(1, &_elementBufferID);
+    glDeleteVertexArrays(1, &_vaoID);
 }
 
 int SkirtedGrid::xSegments() const {
@@ -81,14 +79,10 @@ int SkirtedGrid::ySegments() const {
     return _ySegments;
 }
 
-TriangleSoup& SkirtedGrid::geometry() {
-    return _geometry;
-}
-
-std::vector<GLuint> SkirtedGrid::createElements(int xSegments, int ySegments) {
+std::vector<GLushort> SkirtedGrid::createElements(int xSegments, int ySegments) {
     validate(xSegments, ySegments);
 
-    std::vector<GLuint> elements;
+    std::vector<GLushort> elements;
     elements.reserve(numElements(xSegments + 2, ySegments + 2));
     for (int y = 0; y < ySegments + 2; y++) {
         for (int x = 0; x < xSegments + 2; x++) {
@@ -120,23 +114,6 @@ std::vector<GLuint> SkirtedGrid::createElements(int xSegments, int ySegments) {
     return elements;
 }
 
-std::vector<glm::vec4> SkirtedGrid::createPositions(int xSegments, int ySegments) {
-    validate(xSegments, ySegments);
-
-    // Copy from 2d texture coordinates and use as template to create positions
-    const std::vector<glm::vec2>& templateTextureCoords = createTextureCoordinates(
-        xSegments,
-        ySegments
-    );
-
-    std::vector<glm::vec4> positions;
-    positions.reserve(numVertices(xSegments, ySegments));
-    for (const glm::vec2& c : templateTextureCoords) {
-        positions.emplace_back(c, 0.f, 1.f);
-    }
-    return positions;
-}
-
 std::vector<glm::vec2> SkirtedGrid::createTextureCoordinates(int xSegments, int ySegments)
 {
     validate(xSegments, ySegments);
@@ -148,13 +125,13 @@ std::vector<glm::vec2> SkirtedGrid::createTextureCoordinates(int xSegments, int 
             textureCoordinates.emplace_back(
                 glm::clamp(
                     static_cast<float>(x) / static_cast<float>(xSegments),
-                    0 - 1.f / (2 * xSegments),
-                    1 + 1.f / (2 * xSegments)
+                    0.f - 1.f / (2.f * xSegments),
+                    1.f + 1.f / (2.f * xSegments)
                 ),
                 glm::clamp(
                     static_cast<float>(y) / static_cast<float>(ySegments),
-                    0 - 1.f / (2 * ySegments),
-                    1 + 1.f / (2 * ySegments)
+                    0.f - 1.f / (2.f * ySegments),
+                    1.f + 1.f / (2.f * ySegments)
                 )
             );
         }
@@ -162,18 +139,79 @@ std::vector<glm::vec2> SkirtedGrid::createTextureCoordinates(int xSegments, int 
     return textureCoordinates;
 }
 
-std::vector<glm::vec3> SkirtedGrid::createNormals(int xSegments, int ySegments) {
-    validate(xSegments, ySegments);
+bool SkirtedGrid::updateDataOnGPU() {
+    // Create VAO
+    if (_vaoID == 0) {
+        glGenVertexArrays(1, &_vaoID);
+    }
 
-    std::vector<glm::vec3> normals;
-    normals.reserve(numVertices(xSegments + 2, ySegments + 2));
-    for (int y = -1; y < ySegments + 2; y++) {
-        for (int x = -1; x < xSegments + 2; x++) {
-            normals.emplace_back(0.f, 0.f, 1.f);
+    // Create VBOs
+    if (_vertexBufferID == 0 && !_vertexData.empty()) {
+        glGenBuffers(1, &_vertexBufferID);
+        if (_vertexBufferID == 0) {
+            LERROR("Could not create vertex buffer");
+            return false;
+        }
+    }
+    if (_elementBufferID == 0 && !_elementData.empty()) {
+        glGenBuffers(1, &_elementBufferID);
+        if (_elementBufferID == 0) {
+            LERROR("Could not create vertex element buffer");
+            return false;
         }
     }
 
-    return normals;
+    // First VAO setup
+    glBindVertexArray(_vaoID);
+
+    // Vertex buffer
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        _vertexData.size() * sizeof(Vertex),
+        _vertexData.data(),
+        GL_STATIC_DRAW
+    );
+
+    // Textures at location 1
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(Vertex),
+        reinterpret_cast<const GLvoid*>(offsetof(Vertex, texture)) // NOLINT
+    );
+
+    // Element buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _elementBufferID);
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        _elementData.size() * sizeof(GLushort),
+        _elementData.data(),
+        GL_STATIC_DRAW
+    );
+
+    glBindVertexArray(0);
+
+    _gpuDataNeedUpdate = false;
+    return true;
+}
+
+void SkirtedGrid::drawUsingActiveProgram() {
+    if (_gpuDataNeedUpdate) {
+        updateDataOnGPU();
+    }
+    glBindVertexArray(_vaoID);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _elementBufferID);
+    glDrawElements(
+        GL_TRIANGLES,
+        static_cast<GLsizei>(_elementData.size()),
+        GL_UNSIGNED_SHORT,
+        nullptr
+    );
+    glBindVertexArray(0);
 }
 
 } // namespace openspace::globebrowsing

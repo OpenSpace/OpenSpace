@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___SKIRTEDGRID___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___SKIRTEDGRID___H__
 
-#include <modules/globebrowsing/meshes/trianglesoup.h>
 #include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <vector>
 
 namespace openspace::globebrowsing {
@@ -48,28 +48,50 @@ public:
      * \param useNormals determines whether or not to upload any vertex normal data
      * to the GPU.
      */
-    SkirtedGrid(unsigned int xSegments, unsigned int ySegments,
-        TriangleSoup::Positions usePositions,
-        TriangleSoup::TextureCoordinates useTextureCoordinates,
-        TriangleSoup::Normals useNormals);
-    ~SkirtedGrid() = default;
+    SkirtedGrid(unsigned int xSegments, unsigned int ySegments);
+    ~SkirtedGrid();
 
     int xSegments() const;
     int ySegments() const;
 
-    TriangleSoup& geometry();
+    /**
+     * Calls OpenGL's draw function to draw the triangles defined in the vertex buffers
+     * using the current bound program object.
+     * The vertex buffer attribute input locations to the shader program comes in the
+     * order of positions (0), texture coordinates (1) and normals (2).
+     * The input locations in the shader program should be specified to match these
+     * locations.
+     */
+    void drawUsingActiveProgram();
 
 private:
-    std::vector<GLuint> createElements(int xSegments, int ySegments);
-    std::vector<glm::vec4> createPositions(int xSegments, int ySegments);
+    std::vector<GLushort> createElements(int xSegments, int ySegments);
     std::vector<glm::vec2> createTextureCoordinates(int xSegments,
         int ySegments);
-    std::vector<glm::vec3> createNormals(int xSegments, int ySegments);
 
-    TriangleSoup _geometry;
+    bool updateDataOnGPU();
 
     const int _xSegments;
     const int _ySegments;
+
+    struct Vertex {
+        GLfloat position[3];
+        GLfloat texture[2];
+        GLfloat normal[3];
+    };
+
+    // Vertex data
+    std::vector<Vertex> _vertexData;
+    std::vector<GLushort> _elementData;
+
+
+    // GL handles
+    GLuint _vaoID = 0;
+    GLuint _vertexBufferID = 0;
+    GLuint _elementBufferID = 0;
+
+    bool _gpuDataNeedUpdate = false;
+
 };
 
 } // namespace openspace::globebrowsing

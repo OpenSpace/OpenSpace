@@ -26,7 +26,6 @@
 
 #include <modules/globebrowsing/geometry/geodetic.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/meshes/trianglesoup.h>
 #include <modules/globebrowsing/rendering/layer.h>
 #include <modules/globebrowsing/rendering/layergroup.h>
 #include <modules/globebrowsing/rendering/gpulayergroup.h>
@@ -370,12 +369,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _debugPropertyOwner({ "Debug" })
     , _leftRoot(Chunk(LeftHemisphereIndex))
     , _rightRoot(Chunk(RightHemisphereIndex))
-    , _grid(DefaultSkirtedGridSegments,
-        DefaultSkirtedGridSegments,
-        TriangleSoup::Positions::No,
-        TriangleSoup::TextureCoordinates::Yes,
-        TriangleSoup::Normals::No
-    )
+    , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
 {
     setIdentifier("RenderableGlobe");
 
@@ -859,7 +853,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
         }
     }
 
-    //LINFOC(identifier(), "Count: " + std::to_string(count));
+    LINFOC(identifier(), "Count: " + std::to_string(count));
 }
 
 void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& data) {
@@ -913,7 +907,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
-    _grid.geometry().drawUsingActiveProgram();
+    _grid.drawUsingActiveProgram();
     for (GPULayerGroup& l : _globalRenderer.gpuLayerGroups) {
         l.deactivate();
     }
@@ -1027,7 +1021,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
-    _grid.geometry().drawUsingActiveProgram();
+    _grid.drawUsingActiveProgram();
 
     for (GPULayerGroup& l : _globalRenderer.gpuLayerGroups) {
         l.deactivate();

@@ -41,7 +41,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/prioritizingconcurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/prioritizingconcurrentjobmanager.inl
@@ -95,7 +94,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.cpp
     
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/timequantizer.cpp
 
