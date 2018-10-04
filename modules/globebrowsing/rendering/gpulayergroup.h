@@ -75,7 +75,7 @@ public:
 private:
     struct GPULayer {
         struct GPUChunkTile {
-            std::unique_ptr<ghoul::opengl::TextureUnit> texUnit;
+            ghoul::opengl::TextureUnit texUnit;
             UniformCache(texture, uvOffset, uvScale) uniformCache;
         };
         std::vector<GPUChunkTile> gpuChunkTiles;

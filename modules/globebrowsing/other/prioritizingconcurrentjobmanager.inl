@@ -45,13 +45,13 @@ void PrioritizingConcurrentJobManager<P, KeyType>::enqueueJob(std::shared_ptr<Jo
 
 template <typename P, typename KeyType>
 std::vector<KeyType>
-PrioritizingConcurrentJobManager<P, KeyType>::keysToUnfinishedJobs() const {
+PrioritizingConcurrentJobManager<P, KeyType>::keysToUnfinishedJobs() {
     return _threadPool.getUnqueuedTasksKeys();
 }
 
 template <typename P, typename KeyType>
 std::vector<KeyType>
-PrioritizingConcurrentJobManager<P, KeyType>::keysToEnqueuedJobs() const {
+PrioritizingConcurrentJobManager<P, KeyType>::keysToEnqueuedJobs() {
     return _threadPool.getQueuedTasksKeys();
 }
 

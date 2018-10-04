@@ -74,12 +74,11 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
                     GPULayer::GPUChunkTile& t = _gpuActiveLayers[i].gpuChunkTiles[j];
                     const ChunkTile& ct = ctp[j];
 
-                    t.texUnit = std::make_unique<ghoul::opengl::TextureUnit>();
-                    t.texUnit->activate();
+                    t.texUnit.activate();
                     if (ct.tile.texture()) {
                         ct.tile.texture()->bind();
                     }
-                    program.setUniform(t.uniformCache.texture, *t.texUnit);
+                    program.setUniform(t.uniformCache.texture, t.texUnit);
 
                     program.setUniform(t.uniformCache.uvOffset, ct.uvTransform.uvOffset);
                     program.setUniform(t.uniformCache.uvScale, ct.uvTransform.uvScale);
@@ -186,7 +185,7 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p,
 void GPULayerGroup::deactivate() {
     for (GPULayer& gal : _gpuActiveLayers) {
         for (GPULayer::GPUChunkTile& t : gal.gpuChunkTiles) {
-            t.texUnit = nullptr;
+            t.texUnit.deactivate();
         }
     }
 }

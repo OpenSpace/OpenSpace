@@ -55,9 +55,9 @@ public:
      * function will also clear the list of unfinished jobs so if the jobs need to be
      * explicitly ended, the user need to make sure to do so after calling this function.
      */
-    std::vector<KeyType> keysToUnfinishedJobs() const;
+    std::vector<KeyType> keysToUnfinishedJobs();
 
-    std::vector<KeyType> keysToEnqueuedJobs() const;
+    std::vector<KeyType> keysToEnqueuedJobs();
 
     /**
      * Bumps the job identified with <code>key</code> to the beginning of the queue.
