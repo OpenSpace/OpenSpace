@@ -50,10 +50,18 @@ namespace chunklevelevaluator { class Evaluator; }
 namespace culling { class ChunkCuller; }
 
 struct Chunk {
+    enum class Status : uint8_t {
+        DoNothing,
+        WantMerge,
+        WantSplit
+    };
+
     Chunk(const TileIndex& tileIndex);
 
     const TileIndex tileIndex;
     const GeodeticPatch surfacePatch;
+
+    Status status;
 
     bool isVisible = true;
     std::array<glm::dvec4, 8> corners;
@@ -150,12 +158,6 @@ private:
     constexpr static const int MinSplitDepth = 2;
     constexpr static const int MaxSplitDepth = 22;  // increase? (abock)
 
-    enum class ChunkStatus {
-        DoNothing,
-        WantMerge,
-        WantSplit
-    };
-
     // Shadow structure
     struct ShadowRenderingStruct {
         double xu;
@@ -215,7 +217,7 @@ private:
     void splitChunkNode(Chunk& cn, int depth);
     void mergeChunkNode(Chunk& cn);
     bool updateChunkTree(Chunk& cn, const RenderData& data);
-    ChunkStatus updateChunk(Chunk& chunk, const RenderData& data);
+    void updateChunk(Chunk& chunk, const RenderData& data);
     void freeChunkNode(Chunk* n);
 
     Ellipsoid _ellipsoid;

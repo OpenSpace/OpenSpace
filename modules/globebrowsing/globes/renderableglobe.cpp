@@ -1944,12 +1944,85 @@ void RenderableGlobe::mergeChunkNode(Chunk& cn) {
 }
 
 bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
+    //std::vector<const Chunk*> Q;
+    //Q.reserve(256);
+
+    //Q.push_back(&cn);
+    //while (!Q.empty()) {
+    //    const Chunk* n = Q.front();
+    //    Q.erase(Q.begin());
+
+    //    if (isLeaf(*n)) {
+    //        ChunkStatus status = updateChunk(cn, data);
+    //        if (status == ChunkStatus::WantSplit) {
+    //            splitChunkNode(cn, 1);
+    //        }
+    //        //return status == ChunkStatus::WantMerge;
+    //    }
+    //    else {
+    //        char requestedMergeMask = 0;
+    //        for (int i = 0; i < 4; ++i) {
+    //            if (updateChunkTree(*cn.children[i], data)) {
+    //                requestedMergeMask |= (1 << i);
+    //            }
+    //        }
+
+    //        const bool allChildrenWantsMerge = requestedMergeMask == 0xf;
+    //        ChunkStatus status = updateChunk(cn, data);
+    //        const bool thisChunkWantsSplit = (status == ChunkStatus::WantSplit);
+
+    //        if (allChildrenWantsMerge && !thisChunkWantsSplit) {
+    //            mergeChunkNode(cn);
+    //        }
+
+    //        //return false;
+    //    }
+    //}
+
+
+
+
+
+    //// Loop through nodes in breadths first order
+    //Q.push_back(&node);
+    //while (!Q.empty()) {
+    //    const Chunk* n = Q.front();
+    //    Q.erase(Q.begin());
+    //    //Q.pop();
+
+    //    if (isLeaf(*n) && n->isVisible) {
+    //        if (n->tileIndex.level < cutoff) {
+    //            global[globalCount] = n;
+    //            ++globalCount;
+    //        }
+    //        else {
+    //            local[localCount] = n;
+    //            ++localCount;
+    //        }
+
+    //        ++count;
+    //    }
+
+    //    // Add children to queue, if any
+    //    if (!isLeaf(*n)) {
+    //        for (int i = 0; i < 4; ++i) {
+    //            Q.push_back(n->children[i]);
+    //        }
+    //    }
+    //}
+
+
+
+
+
+
+
     if (isLeaf(cn)) {
-        ChunkStatus status = updateChunk(cn, data);
-        if (status == ChunkStatus::WantSplit) {
+        updateChunk(cn, data);
+        if (cn.status == Chunk::Status::WantSplit) {
             splitChunkNode(cn, 1);
         }
-        return status == ChunkStatus::WantMerge;
+        return cn.status == Chunk::Status::WantMerge;
     }
     else {
         char requestedMergeMask = 0;
@@ -1960,8 +2033,8 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
         }
 
         const bool allChildrenWantsMerge = requestedMergeMask == 0xf;
-        ChunkStatus status = updateChunk(cn, data);
-        const bool thisChunkWantsSplit = (status == ChunkStatus::WantSplit);
+        updateChunk(cn, data);
+        const bool thisChunkWantsSplit = (cn.status == Chunk::Status::WantSplit);
 
         if (allChildrenWantsMerge && !thisChunkWantsSplit) {
             mergeChunkNode(cn);
@@ -1971,9 +2044,7 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
     }
 }
 
-RenderableGlobe::ChunkStatus RenderableGlobe::updateChunk(Chunk& chunk,
-                                                          const RenderData& data)
-{
+void RenderableGlobe::updateChunk(Chunk& chunk, const RenderData& data) {
     if (_chunkCornersDirty) {
         chunk.corners = boundingPolyhedronCornersForChunk(
             chunk,
@@ -1985,19 +2056,20 @@ RenderableGlobe::ChunkStatus RenderableGlobe::updateChunk(Chunk& chunk,
     chunk.isVisible = true;
     if (testIfCullable(chunk, data)) {
         chunk.isVisible = false;
-        return ChunkStatus::WantMerge;
+        chunk.status = Chunk::Status::WantMerge;
+        return;
     }
 
     const int dl = desiredLevel(chunk, data);
 
     if (dl < chunk.tileIndex.level) {
-        return ChunkStatus::WantMerge;
+        chunk.status = Chunk::Status::WantMerge;
     }
     else if (chunk.tileIndex.level < dl) {
-        return ChunkStatus::WantSplit;
+        chunk.status = Chunk::Status::WantSplit;
     }
     else {
-        return ChunkStatus::DoNothing;
+        chunk.status = Chunk::Status::DoNothing;
     }
 }
 
