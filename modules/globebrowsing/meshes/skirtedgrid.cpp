@@ -45,121 +45,96 @@ namespace {
             std::to_string(ySegments) + ")"
         );
     }
+
+    std::vector<GLushort> createElements(int xSegments, int ySegments) {
+        validate(xSegments, ySegments);
+
+        std::vector<GLushort> elements;
+        elements.reserve(numElements(xSegments + 2, ySegments + 2));
+        for (int y = 0; y < ySegments + 2; y++) {
+            for (int x = 0; x < xSegments + 2; x++) {
+
+                // x    v01---v11   x ..
+                //       |  /  |
+                // x    v00---v10   x ..
+                //
+                // x    x     x     x ..
+                // :    :     :     :
+
+                const GLuint v00 = (y + 0) * (xSegments + 2 + 1) + x + 0;
+                const GLuint v10 = (y + 0) * (xSegments + 2 + 1) + x + 1;
+                const GLuint v01 = (y + 1) * (xSegments + 2 + 1) + x + 0;
+                const GLuint v11 = (y + 1) * (xSegments + 2 + 1) + x + 1;
+
+                // add upper triangle
+                elements.push_back(v00);
+                elements.push_back(v10);
+                elements.push_back(v11);
+
+                // add lower triangle
+                elements.push_back(v00);
+                elements.push_back(v11);
+                elements.push_back(v01);
+            }
+        }
+
+        return elements;
+    }
+
+    std::vector<glm::vec2> createTextureCoordinates(int xSegments, int ySegments) {
+        validate(xSegments, ySegments);
+
+        std::vector<glm::vec2> textureCoordinates;
+        textureCoordinates.reserve(numVertices(xSegments + 2, ySegments + 2));
+        for (int y = -1; y < ySegments + 2; y++) {
+            for (int x = -1; x < xSegments + 2; x++) {
+                textureCoordinates.emplace_back(
+                    glm::clamp(
+                        static_cast<float>(x) / static_cast<float>(xSegments),
+                        0.f - 1.f / (2.f * xSegments),
+                        1.f + 1.f / (2.f * xSegments)
+                    ),
+                    glm::clamp(
+                        static_cast<float>(y) / static_cast<float>(ySegments),
+                        0.f - 1.f / (2.f * ySegments),
+                        1.f + 1.f / (2.f * ySegments)
+                    )
+                );
+            }
+        }
+        return textureCoordinates;
+    }
+
 } // namespace
 
 namespace openspace::globebrowsing {
 
-SkirtedGrid::SkirtedGrid(unsigned int xSegments, unsigned int ySegments)
-    : _xSegments(xSegments)
-    , _ySegments(ySegments)
-
+SkirtedGrid::SkirtedGrid(unsigned int xSeg, unsigned int ySeg)
+    : xSegments(xSeg)
+    , ySegments(ySeg)
+    , _elementSize(numElements(xSegments + 2, ySegments + 2))
 {
-    _gpuDataNeedUpdate = true;
-    _elementData = createElements(xSegments, ySegments);
+}
 
-    std::vector<glm::vec2> textures = createTextureCoordinates(_xSegments, _ySegments);
-    _vertexData.resize(textures.size());
+void SkirtedGrid::initializeGL() {
+    std::vector<GLushort> elementData = createElements(xSegments, ySegments);
+
+    struct Vertex {
+        GLfloat texture[2];
+    };
+
+
+    std::vector<glm::vec2> textures = createTextureCoordinates(xSegments, ySegments);
+    std::vector<Vertex> vertexData(textures.size());
     for (size_t i = 0; i < textures.size(); ++i) {
-        _vertexData[i].texture[0] = textures[i][0];
-        _vertexData[i].texture[1] = textures[i][1];
-    }
-}
-
-SkirtedGrid::~SkirtedGrid() {
-    glDeleteBuffers(1, &_vertexBufferID);
-    glDeleteBuffers(1, &_elementBufferID);
-    glDeleteVertexArrays(1, &_vaoID);
-}
-
-int SkirtedGrid::xSegments() const {
-    return _xSegments;
-}
-
-int SkirtedGrid::ySegments() const {
-    return _ySegments;
-}
-
-std::vector<GLushort> SkirtedGrid::createElements(int xSegments, int ySegments) {
-    validate(xSegments, ySegments);
-
-    std::vector<GLushort> elements;
-    elements.reserve(numElements(xSegments + 2, ySegments + 2));
-    for (int y = 0; y < ySegments + 2; y++) {
-        for (int x = 0; x < xSegments + 2; x++) {
-
-            // x    v01---v11   x ..
-            //       |  /  |
-            // x    v00---v10   x ..
-            //
-            // x    x     x     x ..
-            // :    :     :     :
-
-            const GLuint v00 = (y + 0) * (xSegments + 2 + 1) + x + 0;
-            const GLuint v10 = (y + 0) * (xSegments + 2 + 1) + x + 1;
-            const GLuint v01 = (y + 1) * (xSegments + 2 + 1) + x + 0;
-            const GLuint v11 = (y + 1) * (xSegments + 2 + 1) + x + 1;
-
-            // add upper triangle
-            elements.push_back(v00);
-            elements.push_back(v10);
-            elements.push_back(v11);
-
-            // add lower triangle
-            elements.push_back(v00);
-            elements.push_back(v11);
-            elements.push_back(v01);
-        }
+        vertexData[i].texture[0] = textures[i][0];
+        vertexData[i].texture[1] = textures[i][1];
     }
 
-    return elements;
-}
 
-std::vector<glm::vec2> SkirtedGrid::createTextureCoordinates(int xSegments, int ySegments)
-{
-    validate(xSegments, ySegments);
-
-    std::vector<glm::vec2> textureCoordinates;
-    textureCoordinates.reserve(numVertices(xSegments + 2, ySegments + 2));
-    for (int y = -1; y < ySegments + 2; y++) {
-        for (int x = -1; x < xSegments + 2; x++) {
-            textureCoordinates.emplace_back(
-                glm::clamp(
-                    static_cast<float>(x) / static_cast<float>(xSegments),
-                    0.f - 1.f / (2.f * xSegments),
-                    1.f + 1.f / (2.f * xSegments)
-                ),
-                glm::clamp(
-                    static_cast<float>(y) / static_cast<float>(ySegments),
-                    0.f - 1.f / (2.f * ySegments),
-                    1.f + 1.f / (2.f * ySegments)
-                )
-            );
-        }
-    }
-    return textureCoordinates;
-}
-
-bool SkirtedGrid::updateDataOnGPU() {
-    // Create VAO
-    if (_vaoID == 0) {
-        glGenVertexArrays(1, &_vaoID);
-    }
-
-    // Create VBOs
-    if (_vertexBufferID == 0 && !_vertexData.empty()) {
-        glGenBuffers(1, &_vertexBufferID);
-        if (_vertexBufferID == 0) {
-            LERROR("Could not create vertex buffer");
-            return false;
-        }
-    }
-    if (_elementBufferID == 0 && !_elementData.empty()) {
-        glGenBuffers(1, &_elementBufferID);
-        if (_elementBufferID == 0) {
-            LERROR("Could not create vertex element buffer");
-            return false;
-        }
-    }
+    glGenVertexArrays(1, &_vaoID);
+    glGenBuffers(1, &_vertexBufferID);
+    glGenBuffers(1, &_elementBufferID);
 
     // First VAO setup
     glBindVertexArray(_vaoID);
@@ -168,8 +143,8 @@ bool SkirtedGrid::updateDataOnGPU() {
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
     glBufferData(
         GL_ARRAY_BUFFER,
-        _vertexData.size() * sizeof(Vertex),
-        _vertexData.data(),
+        vertexData.size() * sizeof(Vertex),
+        vertexData.data(),
         GL_STATIC_DRAW
     );
 
@@ -188,26 +163,31 @@ bool SkirtedGrid::updateDataOnGPU() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _elementBufferID);
     glBufferData(
         GL_ELEMENT_ARRAY_BUFFER,
-        _elementData.size() * sizeof(GLushort),
-        _elementData.data(),
+        elementData.size() * sizeof(GLushort),
+        elementData.data(),
         GL_STATIC_DRAW
     );
 
     glBindVertexArray(0);
 
-    _gpuDataNeedUpdate = false;
-    return true;
+    ghoul_assert(
+        elementData.size() == _elementSize,
+        "Wrong element size. The correct number is assumed in the render method"
+    );
 }
 
-void SkirtedGrid::drawUsingActiveProgram() {
-    if (_gpuDataNeedUpdate) {
-        updateDataOnGPU();
-    }
+void SkirtedGrid::deinitializeGL() {
+    glDeleteBuffers(1, &_vertexBufferID);
+    glDeleteBuffers(1, &_elementBufferID);
+    glDeleteVertexArrays(1, &_vaoID);
+}
+
+void SkirtedGrid::drawUsingActiveProgram() const {
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _elementBufferID);
     glDrawElements(
         GL_TRIANGLES,
-        static_cast<GLsizei>(_elementData.size()),
+        _elementSize,
         GL_UNSIGNED_SHORT,
         nullptr
     );

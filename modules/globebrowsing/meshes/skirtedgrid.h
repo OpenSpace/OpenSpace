@@ -49,10 +49,10 @@ public:
      * to the GPU.
      */
     SkirtedGrid(unsigned int xSegments, unsigned int ySegments);
-    ~SkirtedGrid();
+    ~SkirtedGrid() = default;
 
-    int xSegments() const;
-    int ySegments() const;
+    void initializeGL();
+    void deinitializeGL();
 
     /**
      * Calls OpenGL's draw function to draw the triangles defined in the vertex buffers
@@ -62,36 +62,17 @@ public:
      * The input locations in the shader program should be specified to match these
      * locations.
      */
-    void drawUsingActiveProgram();
+    void drawUsingActiveProgram() const;
+
+    const int xSegments;
+    const int ySegments;
 
 private:
-    std::vector<GLushort> createElements(int xSegments, int ySegments);
-    std::vector<glm::vec2> createTextureCoordinates(int xSegments,
-        int ySegments);
-
-    bool updateDataOnGPU();
-
-    const int _xSegments;
-    const int _ySegments;
-
-    struct Vertex {
-        GLfloat position[3];
-        GLfloat texture[2];
-        GLfloat normal[3];
-    };
-
-    // Vertex data
-    std::vector<Vertex> _vertexData;
-    std::vector<GLushort> _elementData;
-
-
     // GL handles
     GLuint _vaoID = 0;
     GLuint _vertexBufferID = 0;
     GLuint _elementBufferID = 0;
-
-    bool _gpuDataNeedUpdate = false;
-
+    const GLsizei _elementSize;
 };
 
 } // namespace openspace::globebrowsing

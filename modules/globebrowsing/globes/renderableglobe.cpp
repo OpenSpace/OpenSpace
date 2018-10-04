@@ -514,6 +514,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 void RenderableGlobe::initializeGL() {
     _layerManager.update();
 
+    _grid.initializeGL();
     // Recompile the shaders directly so that it is not done the first time the render
     // function is called.
     recompileShaders();
@@ -533,6 +534,8 @@ void RenderableGlobe::deinitializeGL() {
         global::renderEngine.removeRenderProgram(_globalRenderer.program.get());
         _globalRenderer.program = nullptr;
     }
+
+    _grid.deinitializeGL();
 }
 
 bool RenderableGlobe::isReady() const {
@@ -1291,12 +1294,12 @@ void RenderableGlobe::recompileShaders() {
     ghoul_assert(_localRenderer.program, "Failed to initialize programObject!");
     _localRenderer.updatedSinceLastCall = true;
 
-    _localRenderer.program->setUniform("xSegments", _grid.xSegments());
+    _localRenderer.program->setUniform("xSegments", _grid.xSegments);
 
     if (_debugProperties.showHeightResolution) {
         _localRenderer.program->setUniform(
             "vertexResolution",
-            glm::vec2(_grid.xSegments(), _grid.ySegments())
+            glm::vec2(_grid.xSegments, _grid.ySegments)
         );
     }
 
@@ -1320,12 +1323,12 @@ void RenderableGlobe::recompileShaders() {
     );
     ghoul_assert(_globalRenderer.program, "Failed to initialize programObject!");
 
-    _globalRenderer.program->setUniform("xSegments", _grid.xSegments());
+    _globalRenderer.program->setUniform("xSegments", _grid.xSegments);
 
     if (_debugProperties.showHeightResolution) {
         _globalRenderer.program->setUniform(
             "vertexResolution",
-            glm::vec2(_grid.xSegments(), _grid.ySegments())
+            glm::vec2(_grid.xSegments, _grid.ySegments)
         );
     }
     // Ellipsoid Radius (Model Space)
