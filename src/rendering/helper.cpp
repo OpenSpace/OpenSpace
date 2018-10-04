@@ -262,7 +262,6 @@ void deinitialize() {
 }
 
 glm::mat4 ortho(const glm::vec2& position, const glm::vec2& size, Anchor anchor) {
-    glm::ivec2 res = global::windowDelegate.currentDrawBufferResolution();
     const float xSize = size.x;
     const float ySize = size.y;
     float xPos = (position.x - 0.5f) * 2.f;

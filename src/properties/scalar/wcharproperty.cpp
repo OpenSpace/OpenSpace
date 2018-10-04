@@ -31,6 +31,8 @@
 
 namespace openspace::properties {
 
+int _StubToPreventLinkerWarningAboutMissingExportSymbols;
+
 // #define DEFAULT_FROM_LUA_LAMBDA(wchar_t, DEFAULT_VALUE)
 //     [](lua_State* state, bool& success) -> wchar_t {
 //         success = (lua_isnumber(state, -1) == 1);
