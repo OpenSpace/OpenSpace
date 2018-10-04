@@ -100,8 +100,6 @@ private:
         properties::BoolProperty showChunkAABB;
         properties::BoolProperty showHeightResolution;
         properties::BoolProperty showHeightIntensities;
-        properties::BoolProperty performFrustumCulling;
-        properties::BoolProperty performHorizonCulling;
         properties::BoolProperty levelByProjectedAreaElseDistance;
         properties::BoolProperty resetTileProviders;
         properties::IntProperty modelSpaceRenderingCutoffLevel;
@@ -236,8 +234,7 @@ private:
     struct {
         std::unique_ptr<ghoul::opengl::ProgramObject> program;
         bool updatedSinceLastCall = false;
-        UniformCache(skirtLength, minLatLon, lonLatScalingFactor,
-            orenNayarRoughness) uniformCache;
+        UniformCache(skirtLength, minLatLon, lonLatScalingFactor) uniformCache;
 
         std::array<GPULayerGroup, LayerManager::NumLayerGroups> gpuLayerGroups;
     } _globalRenderer;
@@ -246,7 +243,7 @@ private:
         std::unique_ptr<ghoul::opengl::ProgramObject> program;
         bool updatedSinceLastCall = false;
         UniformCache(skirtLength, p01, p11, p00, p10, patchNormalModelSpace, 
-            patchNormalCameraSpace, orenNayarRoughness) uniformCache;
+            patchNormalCameraSpace) uniformCache;
 
         std::array<GPULayerGroup, LayerManager::NumLayerGroups> gpuLayerGroups;
     } _localRenderer;

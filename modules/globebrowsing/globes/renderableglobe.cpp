@@ -46,7 +46,12 @@
 #include <queue>
 
 namespace {
+    // Global flags to modify the RenderableGlobe
     constexpr const bool LimitLevelByAvailableData = false;
+    constexpr const bool PerformFrustumCulling = true;
+    constexpr const bool PreformHorizonCulling = true;
+
+
 
     constexpr const char* keyFrame = "Frame";
     constexpr const char* keyRadii = "Radii";
@@ -101,18 +106,6 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo HeightIntensityInfo = {
         "ShowHeightIntensities",
         "Show height intensities",
-        "" // @TODO Missing documentation
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FrustumCullingInfo = {
-        "PerformFrustumCulling",
-        "Perform frustum culling",
-        "" // @TODO Missing documentation
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo HorizonCullingInfo = {
-        "PerformHorizonCulling",
-        "Perform horizon culling",
         "" // @TODO Missing documentation
     };
 
@@ -351,8 +344,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty(ShowChunkAABBInfo, false),
         BoolProperty(HeightResolutionInfo, false),
         BoolProperty(HeightIntensityInfo, false),
-        BoolProperty(FrustumCullingInfo, true),
-        BoolProperty(HorizonCullingInfo, true),
         BoolProperty(LevelProjectedAreaInfo, false),
         BoolProperty(ResetTileProviderInfo, false),
         IntProperty(ModelSpaceRenderingInfo, 10, 1, 22)
@@ -410,8 +401,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _debugPropertyOwner.addProperty(_debugProperties.showChunkAABB);
     _debugPropertyOwner.addProperty(_debugProperties.showHeightResolution);
     _debugPropertyOwner.addProperty(_debugProperties.showHeightIntensities);
-    _debugPropertyOwner.addProperty(_debugProperties.performFrustumCulling);
-    _debugPropertyOwner.addProperty(_debugProperties.performHorizonCulling);
     _debugPropertyOwner.addProperty(
         _debugProperties.levelByProjectedAreaElseDistance
     );
@@ -599,11 +588,11 @@ void RenderableGlobe::update(const UpdateData& data) {
     if (_generalProperties.performShading) {
         const bool onr = _generalProperties.orenNayarRoughness;
         _localRenderer.program->setUniform(
-            _localRenderer.uniformCache.orenNayarRoughness,
+            "orenNayarRoughness",
             onr
         );
         _globalRenderer.program->setUniform(
-            _globalRenderer.uniformCache.orenNayarRoughness,
+            "orenNayarRoughness",
             onr
         );
     }
@@ -856,7 +845,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
         }
     }
 
-    LINFOC(identifier(), "Count: " + std::to_string(count));
+    //LINFOC(identifier(), "Count: " + std::to_string(count));
 }
 
 void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& data) {
@@ -1307,7 +1296,7 @@ void RenderableGlobe::recompileShaders() {
         *_localRenderer.program,
         _localRenderer.uniformCache,
         { "skirtLength", "p01", "p11", "p00", "p10", "patchNormalModelSpace",
-          "patchNormalCameraSpace", "orenNayarRoughness" }
+          "patchNormalCameraSpace" }
     );
 
 
@@ -1340,7 +1329,7 @@ void RenderableGlobe::recompileShaders() {
     ghoul::opengl::updateUniformLocations(
         *_globalRenderer.program,
         _globalRenderer.uniformCache,
-        { "skirtLength", "minLatLon", "lonLatScalingFactor", "orenNayarRoughness" }
+        { "skirtLength", "minLatLon", "lonLatScalingFactor" }
     );
 
     _globalRenderer.updatedSinceLastCall = true;
@@ -1382,11 +1371,8 @@ SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
 bool RenderableGlobe::testIfCullable(const Chunk& chunk, 
                                      const RenderData& renderData) const
 {
-    const bool phc = _debugProperties.performHorizonCulling;
-    const bool pfc = _debugProperties.performFrustumCulling;
-
-    return (phc && isCullableByHorizon(chunk, renderData)) ||
-           (pfc && isCullableByFrustum(chunk, renderData));
+    return (PreformHorizonCulling && isCullableByHorizon(chunk, renderData)) ||
+           (PerformFrustumCulling && isCullableByFrustum(chunk, renderData));
 }
 
 int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderData) const
@@ -1945,6 +1931,11 @@ void RenderableGlobe::mergeChunkNode(Chunk& cn) {
 }
 
 bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
+    // abock:  I tried turning this into a queue and use iteration, rather than recursion
+    //         but that made the code harder to understand as the breadth-first traversal
+    //         requires parents to be passed through the pipe twice (first to add the
+    //         children and then again it self to be processed after the children finish).
+    //         In addition, this didn't even improve performance ---  2018-10-04
     if (isLeaf(cn)) {
         updateChunk(cn, data);
         if (cn.status == Chunk::Status::WantSplit) {
