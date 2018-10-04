@@ -27,10 +27,10 @@
 
 vec4 blendNormal(vec4 oldColor, vec4 newColor) {
     vec4 toReturn;
+    toReturn.a = mix(oldColor.a, 1.0, newColor.a);
     toReturn.rgb =
         (newColor.rgb * newColor.a + oldColor.rgb * oldColor.a * (1 - newColor.a)) /
-        (newColor.a + oldColor.a * (1 - newColor.a));
-    toReturn.a = newColor.a + oldColor.a * (1 - newColor.a);
+        toReturn.a;
     return toReturn;
 }
 

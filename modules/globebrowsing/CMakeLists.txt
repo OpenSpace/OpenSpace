@@ -132,8 +132,6 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globalrenderer_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/localrenderer_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderer_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pointglobe_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pointglobe_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/texturetilemapping.hglsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tile.hglsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tileheight.hglsl
