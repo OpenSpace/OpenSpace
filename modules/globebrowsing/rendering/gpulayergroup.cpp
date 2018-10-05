@@ -69,7 +69,10 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
             case layergroupid::TypeID::TileIndexTileLayer:
             case layergroupid::TypeID::ByIndexTileLayer:
             case layergroupid::TypeID::ByLevelTileLayer: {
-                ChunkTilePile ctp = al.chunkTilePile(tileIndex, layerGroup.pileSize());
+                const ChunkTilePile& ctp = al.chunkTilePile(
+                    tileIndex,
+                    layerGroup.pileSize()
+                );
                 for (size_t j = 0; j < _gpuActiveLayers[i].gpuChunkTiles.size(); ++j) {
                     GPULayer::GPUChunkTile& t = _gpuActiveLayers[i].gpuChunkTiles[j];
                     const ChunkTile& ct = ctp[j];
