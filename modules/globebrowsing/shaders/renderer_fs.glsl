@@ -76,26 +76,23 @@ in vec3 positionWorldSpace;
 const uint numberOfShadows = 1;
 
 struct ShadowRenderingStruct {
-        double xu, xp;
-        double rs, rc;
-        dvec3 sourceCasterVec;
-        dvec3 casterPositionVec;
-        bool isShadowing;
+    double xu, xp;
+    double rs, rc;
+    dvec3 sourceCasterVec;
+    dvec3 casterPositionVec;
+    bool isShadowing;
 };
 
 // Eclipse shadow data
-// JCC: Remove and use dictionary to 
+// JCC: Remove and use dictionary to
 // decides the number of shadows
 uniform ShadowRenderingStruct shadowDataArray[numberOfShadows];
 uniform int shadows;
 uniform bool hardShadows;
 
-vec4 butterworthFunc(const float d, const float r, const float n) {
-    return vec4(vec3(sqrt(r/(r + pow(d, 2*n)))), 1.0);    
-}
-
-vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[numberOfShadows], const dvec3 position,
-                const bool ground) {
+vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[numberOfShadows],
+                const dvec3 position, const bool ground)
+{
     if (shadowInfoArray[0].isShadowing) {
         dvec3 pc = shadowInfoArray[0].casterPositionVec - position;
         dvec3 sc_norm = shadowInfoArray[0].sourceCasterVec;
@@ -108,28 +105,32 @@ vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[numberOfShadows], co
         float r_p_pi = float(shadowInfoArray[0].rc * (length_pc_proj + shadowInfoArray[0].xp) / shadowInfoArray[0].xp);
         float r_u_pi = float(shadowInfoArray[0].rc * (shadowInfoArray[0].xu - length_pc_proj) / shadowInfoArray[0].xu);
         
-        if ( length_d < r_u_pi ) { // umbra            
+        if (length_d < r_u_pi) { // umbra
             if (ground) {
-#if USE_ECLIPSE_HARD_SHADOWS                
+#if USE_ECLIPSE_HARD_SHADOWS
                 return vec4(0.2, 0.2, 0.2, 1.0);
+#else
+                // butterworthFunc
+                return vec4(vec3(sqrt(r_u_pi / (r_u_pi + pow(length_d, 8.0)))), 1.0);
 #endif
-                return butterworthFunc(length_d, r_u_pi, 4.0);        
             }
             else {
-#if USE_ECLIPSE_HARD_SHADOWS                 
+#if USE_ECLIPSE_HARD_SHADOWS
                 return vec4(0.5, 0.5, 0.5, 1.0);
-#endif              
-                return vec4(vec3(length_d/r_p_pi), 1.0);       
+#else
+                return vec4(vec3(length_d / r_p_pi), 1.0);
+#endif
             }
         }
         else if ( length_d < r_p_pi ) {// penumbra
-#if USE_ECLIPSE_HARD_SHADOWS         
+#if USE_ECLIPSE_HARD_SHADOWS
                 return vec4(0.5, 0.5, 0.5, 1.0); 
-#endif                
-                return vec4(vec3(length_d/r_p_pi), 1.0);
+#else
+                return vec4(vec3(length_d / r_p_pi), 1.0);
+#endif
         }
     }
-     
+
     return vec4(1.0);
 }
 #endif
@@ -141,12 +142,12 @@ in vec3 ellipsoidNormalCameraSpace;
 in vec3 positionCameraSpace;
 
 #if USE_ACCURATE_NORMALS
-in vec3 ellipsoidTangentThetaCameraSpace;
-in vec3 ellipsoidTangentPhiCameraSpace;
+    in vec3 ellipsoidTangentThetaCameraSpace;
+    in vec3 ellipsoidTangentPhiCameraSpace;
 
-// Once deferred light calculations are done in view space this can be removed
-// so that we only need one normal; in view space.
-uniform mat4 invViewModelTransform;
+    // Once deferred light calculations are done in view space this can be removed
+    // so that we only need one normal; in view space.
+    uniform mat4 invViewModelTransform;
 #endif // USE_ACCURATE_NORMALS
 
 // levelInterpolationParameter is used to interpolate between a tile and its parent tiles
@@ -178,12 +179,7 @@ Fragment getTileFragment() {
 #endif /// USE_ACCURATE_NORMALS
 
 #if USE_COLORTEXTURE
-    frag.color = calculateColor(
-        frag.color,
-        fs_uv,
-        levelWeights,
-        ColorLayers
-    );
+    frag.color = calculateColor(frag.color, fs_uv, levelWeights, ColorLayers);
 #endif // USE_COLORTEXTURE
 
 #if USE_WATERMASK

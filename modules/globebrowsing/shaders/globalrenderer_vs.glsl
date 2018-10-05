@@ -68,46 +68,36 @@ struct PositionNormalPair {
     vec3 normal;
 };
 
-PositionNormalPair geodetic2ToCartesian(vec2 lonlat, vec3 radiiSquared) {
+PositionNormalPair globalInterpolation(vec2 uv) {
+    vec2 lonlat = lonLatScalingFactor * uv + minLatLon;
+
     // geodetic surface normal
     float cosLat = cos(lonlat.y);
     vec3 normal = vec3(cosLat * cos(lonlat.x), cosLat * sin(lonlat.x), sin(lonlat.y));
     vec3 k = radiiSquared * normal;
     float gamma = sqrt(dot(k, normal));
-    PositionNormalPair toReturn;
-    toReturn.position = k / gamma;
-    toReturn.normal = normal;
-    return toReturn;
-}
 
-PositionNormalPair globalInterpolation(vec2 uv) {
-    vec2 lonLatInput = lonLatScalingFactor * uv + minLatLon;
-    PositionNormalPair positionPairModelSpace = geodetic2ToCartesian(
-        lonLatInput,
-        radiiSquared
-    );
-    return positionPairModelSpace;
+    PositionNormalPair result;
+    result.position = k / gamma;
+    result.normal = normal;
+    return result;
 }
 
 void main() {
     PositionNormalPair pair = globalInterpolation(in_uv);
-    float distToVertexOnEllipsoid =
-        length(pair.position + pair.normal * chunkMinHeight - cameraPosition);
+    float distToVertexOnEllipsoid = length((pair.normal * chunkMinHeight + pair.position) - cameraPosition);
 
-    float levelInterpolationParameter =
-        getLevelInterpolationParameter(
-            chunkLevel,
-            distanceScaleFactor,
-            distToVertexOnEllipsoid);
+    float levelInterpolationParameter = getLevelInterpolationParameter(
+        chunkLevel,
+        distanceScaleFactor,
+        distToVertexOnEllipsoid
+    );
 
     // use level weight for height sampling, and output to fragment shader
     levelWeights = getLevelWeights(levelInterpolationParameter);
 
-    // Get the height value
-    float height = getTileHeight(in_uv, levelWeights);
-
-    // Apply skirts
-    height -= getTileVertexSkirtLength();
+    // Get the height value and apply skirts
+    float height = getTileHeight(in_uv, levelWeights)  - getTileVertexSkirtLength();
 
 #if USE_ACCURATE_NORMALS
     // Calculate tangents
@@ -127,9 +117,8 @@ void main() {
 #endif // USE_ACCURATE_NORMALS
 
     // Add the height in the direction of the normal
-    pair.position += pair.normal * height;
-    vec4 positionClippingSpace =
-        modelViewProjectionTransform * vec4(pair.position, 1.0);
+    pair.position = pair.normal * height + pair.position;
+    vec4 positionClippingSpace = modelViewProjectionTransform * vec4(pair.position, 1.0);
 
     // Write output
     fs_uv = in_uv;
