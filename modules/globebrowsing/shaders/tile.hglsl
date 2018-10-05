@@ -75,10 +75,6 @@ struct Layer {
     vec3 color;
 };
 
-float getTransformedTexVal(TileDepthTransform transform, float val) {
-    return transform.depthOffset + transform.depthScale * val;
-}
-
 vec2 compensateSourceTextureSampling(vec2 startOffset, vec2 sizeDiff, ChunkTile chunkTile,
                                      vec2 tileUV)
 {
@@ -90,7 +86,7 @@ vec2 compensateSourceTextureSampling(vec2 startOffset, vec2 sizeDiff, ChunkTile 
     return sourceToCurrentSize * (tileUV - startOffset / sourceSize);
 }
 
-vec2 TileUVToTextureSamplePosition(ChunkTile chunkTile, vec2 tileUV,
+vec2 tileUVToTextureSamplePosition(ChunkTile chunkTile, vec2 tileUV,
                                    PixelPadding padding)
 {
     vec2 uv = chunkTile.uvTransform.uvOffset + chunkTile.uvTransform.uvScale * tileUV;
@@ -102,13 +98,6 @@ vec2 TileUVToTextureSamplePosition(ChunkTile chunkTile, vec2 tileUV,
     );
 }
 
-vec4 getTexVal(ChunkTile chunkTile, vec2 tileUV, PixelPadding padding) {
-    return texture(
-        chunkTile.textureSampler,
-        TileUVToTextureSamplePosition(chunkTile, tileUV, padding)
-    );
-}
-
 float getLevelInterpolationParameter(int chunkLevel, float distanceScaleFactor,
                                      float distToVertexOnEllipsoid)
 {
@@ -117,27 +106,34 @@ float getLevelInterpolationParameter(int chunkLevel, float distanceScaleFactor,
     return chunkLevel - desiredLevel;
 }
 
-vec3 getLevelWeights(float levelInterpolationParameter) {
-    vec3 levelWeights;
-    levelWeights[0] = clamp(1.0 - levelInterpolationParameter, 0.0, 1.0);
-    levelWeights[1] = (
-        clamp(levelInterpolationParameter, 0.0, 1.0) -
-        clamp(levelInterpolationParameter - 1.0, 0.0, 1.0)
+vec3 getLevelWeights(float levelInterp) {
+    return clamp(
+        vec3(
+            1.0 - levelInterp,
+            clamp(levelInterp, 0.0, 1.0) - clamp(levelInterp - 1.0, 0.0, 1.0),
+            levelInterp - 1.0),
+        vec3(0.0),
+        vec3(1.0)
     );
-    levelWeights[2] = clamp(levelInterpolationParameter - 1.0, 0.0, 1.0);
-    return levelWeights;
-}
-
-vec3 getDefaultLevelWeights() {
-    return vec3(1.0, 0.0, 0.0);
 }
 
 vec4 getTexVal(ChunkTilePile chunkTilePile, vec3 w, vec2 uv,
                PixelPadding padding)
 {
-    return w[0] * getTexVal(chunkTilePile.chunkTile0, uv, padding) + 
-        w[1] * getTexVal(chunkTilePile.chunkTile1, uv, padding) + 
-        w[2] * getTexVal(chunkTilePile.chunkTile2, uv, padding);
+    vec4 v1 = texture(
+        chunkTilePile.chunkTile0.textureSampler,
+        tileUVToTextureSamplePosition(chunkTilePile.chunkTile0, uv, padding)
+    );
+    vec4 v2 = texture(
+        chunkTilePile.chunkTile1.textureSampler,
+        tileUVToTextureSamplePosition(chunkTilePile.chunkTile1, uv, padding)
+    );
+    vec4 v3 = texture(
+        chunkTilePile.chunkTile2.textureSampler,
+        tileUVToTextureSamplePosition(chunkTilePile.chunkTile2, uv, padding)
+    );
+
+    return w.x * v1 + w.y * v2 + w.z * v3;
 }
 
 #endif // TEXTURETILE_HGLSL

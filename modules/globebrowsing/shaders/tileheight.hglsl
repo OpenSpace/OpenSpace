@@ -28,7 +28,6 @@
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 #include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
-#include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
 
 #ifndef USE_HEIGHTMAP
 #define USE_HEIGHTMAP #{useAccurateNormals}
