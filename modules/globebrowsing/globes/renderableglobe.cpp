@@ -1162,7 +1162,6 @@ void RenderableGlobe::recompileShaders() {
     pairs.emplace_back("useAccurateNormals",
         std::to_string(_generalProperties.useAccurateNormals)
     );
-    pairs.emplace_back("useAtmosphere", std::to_string(false));
     pairs.emplace_back(
         "performShading",
         std::to_string(_generalProperties.performShading)
@@ -1264,7 +1263,6 @@ void RenderableGlobe::recompileShaders() {
     }
     shaderDictionary.setValue("layerGroups", layerGroupNames);
 
-    // Other settings such as "useAtmosphere"
     for (const std::pair<std::string, std::string>& p : preprocessingData.keyValuePairs)
     {
         shaderDictionary.setValue(p.first, p.second);

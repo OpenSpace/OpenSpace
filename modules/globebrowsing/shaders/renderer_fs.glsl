@@ -53,11 +53,7 @@ float waterReflectance = 0.0;
 uniform vec2 vertexResolution;
 #endif
 
-#if USE_ATMOSPHERE
-// TODO atmosphere uniforms here
-#endif // USE_ATMOSPHERE
-
-#if USE_NIGHTTEXTURE || USE_WATERMASK || USE_ATMOSPHERE || PERFORM_SHADING
+#if USE_NIGHTTEXTURE || USE_WATERMASK || PERFORM_SHADING
 uniform vec3 lightDirectionCameraSpace;
 #endif
 
@@ -217,28 +213,6 @@ Fragment getTileFragment() {
         orenNayarRoughness
     );
 #endif // PERFORM_SHADING
-
-#if USE_ATMOSPHERE
-    // Temporary until the real atmosphere code is here
-    //frag.color = frag.color + vec4(0.5,0.5,1,0) * 0.3; // Just to see something for now
-    const vec3 n = normalize(ellipsoidNormalCameraSpace);
-    const vec3 l = lightDirectionCameraSpace;
-    const vec3 c = normalize(positionCameraSpace);
-    float cosFactor = 1 - clamp(dot(-n * 0.9, c), 0, 1);
-    cosFactor *= 1.1;
-    cosFactor -= 0.1;
-    cosFactor = clamp(cosFactor, 0.0, 1.0);
-    cosFactor = cosFactor + pow(cosFactor, 5);
-    
-    const float shadowLight = 0.15;
-    float cosFactorLight = pow(max(dot(-l, n), -shadowLight) + shadowLight, 0.8);
-    //float cosFactorScatter = pow(max(dot(l, n) + shadowLight, 0), 5);
-    //float cosFactorLight = max(dot(-lightDirectionCameraSpace, normalize(ellipsoidNormalCameraSpace)), 0);
-    //vec3 r = reflect(l, n);
-    //float scatteredLight = pow(clamp(dot(-r,c), 0, 1), 20);
-    const vec3 atmosphereColor = vec3(0.5, 0.5, 1.0) * 2.0;
-    frag.color += vec4(atmosphereColor,0) * cosFactor * cosFactorLight *  0.5;
-#endif // USE_ATMOSPHERE
 
 #if USE_ECLIPSE_SHADOWS
     frag.color *= calcShadow(shadowDataArray, dvec3(positionWorldSpace), true);
