@@ -3,18 +3,30 @@ local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 
-asset.request('customization/globebrowsing')
-
-
 local sceneHelper = asset.require('util/scene_helper')
 local propertyHelper = asset.require('util/property_helper')
 
 local models = asset.syncedResource({
-    Name = "Voyager 1 Models",
+    Name = "Dsn models",
     Type = "HttpSynchronization",
-    Identifier = "voyager1_model",
+    Identifier = "dsn_34_model",
     Version = 1
 })
+
+
+local LightSources = {
+    {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sunTransforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+    },
+    {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+    }
+}
 
 local DSS14 = {
     Identifier = "DSS_14",
@@ -29,9 +41,10 @@ local DSS14 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/voyager-main.obj"
+            GeometryFile = models .. "/dish.obj"
         },
-        ColorTexture = models .. "/voyager-main.jpg",
+        ColorTexture = models .. "/base_AO.png" 
+
     },
     GUI = {
         Name = "DSS14",
