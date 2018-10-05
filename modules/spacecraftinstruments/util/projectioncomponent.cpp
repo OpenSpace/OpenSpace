@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#pragma optimize ("", off)
-
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
 
 #include <modules/spacecraftinstruments/util/hongkangparser.h>
