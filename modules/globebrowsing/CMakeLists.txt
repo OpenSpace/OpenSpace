@@ -128,7 +128,6 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/blending.hglsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ellipsoid.hglsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globalrenderer_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/localrenderer_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderer_fs.glsl
