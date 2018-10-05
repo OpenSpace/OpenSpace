@@ -107,6 +107,37 @@ vec4 performLayerSettings(vec4 currentValue, LayerSettings settings) {
     return vec4(newValue, currentValue.a * settings.opacity);
 }
 
+vec2 tileUVToTextureSamplePosition(ChunkTile chunkTile, vec2 tileUV,
+                                   PixelPadding padding)
+{
+    vec2 uv = chunkTile.uvTransform.uvOffset + chunkTile.uvTransform.uvScale * tileUV;
+
+    // compensateSourceTextureSampling
+    ivec2 resolution = textureSize(chunkTile.textureSampler, 0);
+    vec2 sourceSize = vec2(resolution) + padding.sizeDifference;
+    vec2 currentSize = vec2(resolution);
+    vec2 sourceToCurrentSize = currentSize / sourceSize;
+    return sourceToCurrentSize * (uv - padding.startOffset / sourceSize);
+}
+
+vec4 getTexVal(ChunkTilePile chunkTilePile, vec3 w, vec2 uv,
+               PixelPadding padding)
+{
+    vec4 v1 = texture(
+        chunkTilePile.chunkTile0.textureSampler,
+        tileUVToTextureSamplePosition(chunkTilePile.chunkTile0, uv, padding)
+    );
+    vec4 v2 = texture(
+        chunkTilePile.chunkTile1.textureSampler,
+        tileUVToTextureSamplePosition(chunkTilePile.chunkTile1, uv, padding)
+    );
+    vec4 v3 = texture(
+        chunkTilePile.chunkTile2.textureSampler,
+        tileUVToTextureSamplePosition(chunkTilePile.chunkTile2, uv, padding)
+    );
+
+    return w.x * v1 + w.y * v2 + w.z * v3;
+}
 
 #for id, layerGroup in layerGroups
 #for i in 0..#{lastLayerIndex#{layerGroup}}
@@ -115,7 +146,7 @@ vec4 getSample#{layerGroup}#{i}(vec2 uv, vec3 levelWeights,
                             Layer #{layerGroup}[#{lastLayerIndex#{layerGroup}} + 1])
 {
     vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
-    
+
     // All tile layers are the same. Sample from texture
 #if (#{#{layerGroup}#{i}LayerType} == 0) // DefaultTileLayer
     color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
