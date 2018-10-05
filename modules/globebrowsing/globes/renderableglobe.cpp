@@ -570,32 +570,6 @@ void RenderableGlobe::update(const UpdateData& data) {
         _debugProperties.resetTileProviders = false;
     }
     _layerManager.update();
-
-    //
-    // Setting frame-const uniforms that are not view dependent
-    //
-    if (_layerManager.hasAnyBlendingLayersEnabled()) {
-        if (_lodScaleFactorDirty) {
-            const float dsf = static_cast<float>(
-                _generalProperties.lodScaleFactor * _ellipsoid.minimumRadius()
-            );
-            _globalRenderer.program->setUniform("distanceScaleFactor", dsf);
-            _localRenderer.program->setUniform("distanceScaleFactor", dsf);
-            _lodScaleFactorDirty = false;
-        }
-    }
-
-    if (_generalProperties.performShading) {
-        const bool onr = _generalProperties.orenNayarRoughness;
-        _localRenderer.program->setUniform(
-            "orenNayarRoughness",
-            onr
-        );
-        _globalRenderer.program->setUniform(
-            "orenNayarRoughness",
-            onr
-        );
-    }
 }
 
 const LayerManager& RenderableGlobe::layerManager() const {
@@ -621,6 +595,32 @@ const glm::dmat4& RenderableGlobe::modelTransform() const {
 void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     if (_shadersNeedRecompilation) {
         recompileShaders();
+
+        //
+        // Setting frame-const uniforms that are not view dependent
+        //
+        if (_layerManager.hasAnyBlendingLayersEnabled()) {
+            if (_lodScaleFactorDirty) {
+                const float dsf = static_cast<float>(
+                    _generalProperties.lodScaleFactor * _ellipsoid.minimumRadius()
+                    );
+                _globalRenderer.program->setUniform("distanceScaleFactor", dsf);
+                _localRenderer.program->setUniform("distanceScaleFactor", dsf);
+                _lodScaleFactorDirty = false;
+            }
+        }
+
+        if (_generalProperties.performShading) {
+            const bool onr = _generalProperties.orenNayarRoughness;
+            _localRenderer.program->setUniform(
+                "orenNayarRoughness",
+                onr
+            );
+            _globalRenderer.program->setUniform(
+                "orenNayarRoughness",
+                onr
+            );
+        }
     }
 
     if (_globalRenderer.updatedSinceLastCall) {
@@ -773,15 +773,13 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
         );
     }
 
-    int count = 0;
-
     constexpr const int ChunkBufferSize = 2048;
     std::array<const Chunk*, ChunkBufferSize> global;
     int globalCount = 0;
     std::array<const Chunk*, ChunkBufferSize> local;
     int localCount = 0;
 
-    auto traversal = [&global, &globalCount, &local, &localCount, &count,
+    auto traversal = [&global, &globalCount, &local, &localCount,
           cutoff = _debugProperties.modelSpaceRenderingCutoffLevel](const Chunk& node)
     {
         std::vector<const Chunk*> Q;
@@ -792,7 +790,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
         while (!Q.empty()) {
             const Chunk* n = Q.front();
             Q.erase(Q.begin());
-            //Q.pop();
 
             if (isLeaf(*n) && n->isVisible) {
                 if (n->tileIndex.level < cutoff) {
@@ -803,8 +800,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
                     local[localCount] = n;
                     ++localCount;
                 }
-
-                ++count;
             }
 
             // Add children to queue, if any
@@ -844,8 +839,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
             debugRenderChunk(*local[i], mvp);
         }
     }
-
-    //LINFOC(identifier(), "Count: " + std::to_string(count));
 }
 
 void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& data) {

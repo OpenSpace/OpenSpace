@@ -68,11 +68,10 @@ vec3 bilinearInterpolation(vec2 uv) {
     return mix(p0, p1, uv.y);
 }
 
-vec3 getLevelWeights(int level, float distanceScaleFactor, float distToVertexOnEllipsoid)
-{
+vec3 getLevelWeights(float distToVertexOnEllipsoid) {
     float projectedScaleFactor = distanceScaleFactor / distToVertexOnEllipsoid;
     float desiredLevel = log2(projectedScaleFactor);
-    float levelInterp = level - desiredLevel;
+    float levelInterp = chunkLevel - desiredLevel;
 
     return vec3(
         clamp(1.0 - levelInterp, 0.0, 1.0),
@@ -90,11 +89,7 @@ void main() {
     float distToVertexOnEllipsoid = length(p + patchNormalCameraSpace * chunkMinHeight);
 
     // use level weight for height sampling, and output to fragment shader
-    levelWeights = getLevelWeights(
-        chunkLevel,
-        distanceScaleFactor,
-        distToVertexOnEllipsoid
-    );
+    levelWeights = getLevelWeights(distToVertexOnEllipsoid);
 
     // Get the height value and apply skirts
     float height = getTileHeightScaled(in_uv, levelWeights) - getTileVertexSkirtLength();
