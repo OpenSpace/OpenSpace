@@ -63,13 +63,27 @@ uniform float distanceScaleFactor;
 uniform int chunkLevel;
 
 
+struct PositionNormalPair {
+    vec3 position;
+    vec3 normal;
+};
+
+PositionNormalPair geodetic2ToCartesian(vec2 lonlat, vec3 radiiSquared) {
+    // geodetic surface normal
+    float cosLat = cos(lonlat.y);
+    vec3 normal = vec3(cosLat * cos(lonlat.x), cosLat * sin(lonlat.x), sin(lonlat.y));
+    vec3 k = radiiSquared * normal;
+    float gamma = sqrt(dot(k, normal));
+    PositionNormalPair toReturn;
+    toReturn.position = k / gamma;
+    toReturn.normal = normal;
+    return toReturn;
+}
+
 PositionNormalPair globalInterpolation(vec2 uv) {
-    vec2 lonLatInput;
-    lonLatInput.y = minLatLon.y + lonLatScalingFactor.y * uv.y; // Lat
-    lonLatInput.x = minLatLon.x + lonLatScalingFactor.x * uv.x; // Lon
+    vec2 lonLatInput = lonLatScalingFactor * uv + minLatLon;
     PositionNormalPair positionPairModelSpace = geodetic2ToCartesian(
-        lonLatInput.y,
-        lonLatInput.x,
+        lonLatInput,
         radiiSquared
     );
     return positionPairModelSpace;
