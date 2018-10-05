@@ -219,18 +219,11 @@ Fragment getTileFragment() {
 #endif
 
 #if USE_OVERLAY
-    frag.color = calculateOverlay(
-        frag.color,
-        fs_uv,
-        levelWeights,
-        Overlays
-    );
+    frag.color = calculateOverlay(frag.color, fs_uv, levelWeights, Overlays);
 #endif // USE_OVERLAY
 
 #if SHOW_HEIGHT_INTENSITIES
-    frag.color.r *= 0.1;
-    frag.color.g *= 0.1;
-    frag.color.b *= 0.1;
+    frag.color.rgb *= vec3(0.1);
 
     float untransformedHeight = getUntransformedTileVertexHeight(fs_uv, levelWeights);
     float contourLine = fract(10.0 * untransformedHeight) > 0.98 ? 1.0 : 0.0;
@@ -239,7 +232,7 @@ Fragment getTileFragment() {
 #endif
 
 #if SHOW_HEIGHT_RESOLUTION
-    frag.color += 0.0001*calculateDebugColor(fs_uv, fs_position, vertexResolution);
+    frag.color += 0.0001 * calculateDebugColor(fs_uv, fs_position, vertexResolution);
     #if USE_HEIGHTMAP
         frag.color.r = min(frag.color.r, 0.8);
         frag.color.r += tileResolution(fs_uv, HeightLayers[0].pile.chunkTile0) > 0.9 ? 1 : 0;
@@ -265,12 +258,11 @@ Fragment getTileFragment() {
 }
 
 
-vec4 patchBorderOverlay(vec2 uv, vec3 borderColor, float borderSize) {
+vec3 patchBorderOverlay(vec2 uv, vec3 borderColor, float borderSize) {
     vec2 uvOffset = uv - vec2(0.5);
-    float thres = 0.5 - borderSize/2;
+    float thres = 0.5 - borderSize * 0.5;
     bool isBorder = abs(uvOffset.x) > thres || abs(uvOffset.y) > thres;
-    vec3 color = isBorder ? borderColor : vec3(0);
-    return vec4(color, 0);
+    return isBorder ? borderColor : vec3(0.0);
 }
 
 
@@ -280,7 +272,7 @@ Fragment getFragment() {
     frag = getTileFragment();
 
 #if SHOW_CHUNK_EDGES
-    frag.color += patchBorderOverlay(fs_uv, vec3(1,0,0), 0.005);
+    frag.color.rgb += patchBorderOverlay(fs_uv, vec3(1,0,0), 0.005);
 #endif // SHOW_CHUNK_EDGES
 
     return frag;

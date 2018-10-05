@@ -25,7 +25,6 @@
 #version __CONTEXT__
 
 #include "PowerScaling/powerScaling_vs.hglsl"
-#include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetilemapping.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/tileheight.hglsl>
@@ -41,13 +40,13 @@ out vec3 levelWeights;
 out vec3 positionCameraSpace;
 
 #if USE_ACCURATE_NORMALS
-out vec3 ellipsoidTangentThetaCameraSpace;
-out vec3 ellipsoidTangentPhiCameraSpace;
+    out vec3 ellipsoidTangentThetaCameraSpace;
+    out vec3 ellipsoidTangentPhiCameraSpace;
 #endif // USE_ACCURATE_NORMALS
 
 #if USE_ECLIPSE_SHADOWS
-out vec3 positionWorldSpace;
-uniform dmat4 modelTransform;
+    out vec3 positionWorldSpace;
+    uniform dmat4 modelTransform;
 #endif
 
 uniform mat4 modelViewProjectionTransform;
@@ -104,12 +103,8 @@ void main() {
     // tileDelta is a step length (epsilon). Should be small enough for accuracy but not
     // Too small for precision. 1 / 512 is good.
     const float tileDelta = 1.0 / 512.0;
-    PositionNormalPair pair10 = globalInterpolation(
-        in_uv + vec2(1.0, 0.0) * tileDelta
-    );
-    PositionNormalPair pair01 = globalInterpolation(
-        in_uv + vec2(0.0, 1.0) * tileDelta
-    );
+    PositionNormalPair pair10 = globalInterpolation(vec2(1.0, 0.0) * tileDelta + in_uv);
+    PositionNormalPair pair01 = globalInterpolation(vec2(0.0, 1.0) * tileDelta + in_uv);
     vec3 ellipsoidTangentTheta = normalize(pair10.position - pair.position);
     vec3 ellipsoidTangentPhi = normalize(pair01.position - pair.position);
     ellipsoidTangentThetaCameraSpace = mat3(modelViewTransform) * ellipsoidTangentTheta;

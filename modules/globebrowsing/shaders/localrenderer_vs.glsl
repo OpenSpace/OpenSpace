@@ -25,7 +25,6 @@
 #version __CONTEXT__
 
 #include "PowerScaling/powerScaling_vs.hglsl"
-#include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetilemapping.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/tileheight.hglsl>
@@ -41,8 +40,8 @@ out vec3 levelWeights;
 out vec3 positionCameraSpace;
 
 #if USE_ACCURATE_NORMALS
-out vec3 ellipsoidTangentThetaCameraSpace;
-out vec3 ellipsoidTangentPhiCameraSpace;
+    out vec3 ellipsoidTangentThetaCameraSpace;
+    out vec3 ellipsoidTangentPhiCameraSpace;
 #endif // USE_ACCURATE_NORMALS
 
 #if USE_ECLIPSE_SHADOWS
@@ -64,10 +63,9 @@ uniform float distanceScaleFactor;
 uniform int chunkLevel;
 
 vec3 bilinearInterpolation(vec2 uv) {
-    vec3 p0 = (1 - uv.x) * p00 + uv.x * p10;
-    vec3 p1 = (1 - uv.x) * p01 + uv.x * p11;
-    vec3 p = (1 - uv.y) * p0 + uv.y * p1;
-    return p;
+    vec3 p0 = mix(p00, p10, uv.x);
+    vec3 p1 = mix(p01, p11, uv.x);
+    return mix(p0, p1, uv.y);
 }
 
 void main() {
@@ -76,31 +74,29 @@ void main() {
     
     // Calculate desired level based on distance to the vertex on the ellipsoid
     // Before any heightmapping is done
-    float distToVertexOnEllipsoid =
-        length(p + patchNormalCameraSpace * chunkMinHeight);
-    float levelInterpolationParameter =
-        getLevelInterpolationParameter(
-            chunkLevel,
-            distanceScaleFactor,
-            distToVertexOnEllipsoid);
-    
+    float distToVertexOnEllipsoid = length(p + patchNormalCameraSpace * chunkMinHeight);
+    float levelInterpolationParameter = getLevelInterpolationParameter(
+        chunkLevel,
+        distanceScaleFactor,
+        distToVertexOnEllipsoid
+    );
+
     // use level weight for height sampling, and output to fragment shader
     levelWeights = getLevelWeights(levelInterpolationParameter);
 
     // Get the height value and apply skirts
-    float height =
-        getTileHeightScaled(in_uv, levelWeights) - getTileVertexSkirtLength();
+    float height = getTileHeightScaled(in_uv, levelWeights) - getTileVertexSkirtLength();
     
     // Translate the point along normal
     p += patchNormalCameraSpace * height;
 
     vec4 positionClippingSpace = projectionTransform * vec4(p, 1);
-    
-    #if USE_ACCURATE_NORMALS
+
+#if USE_ACCURATE_NORMALS
     // Calculate tangents
     ellipsoidTangentThetaCameraSpace = normalize(p10 - p00);
     ellipsoidTangentPhiCameraSpace = normalize(p01 - p00);
-    #endif // USE_ACCURATE_NORMALS
+#endif // USE_ACCURATE_NORMALS
 
     // Write output
     fs_uv = in_uv;
@@ -110,7 +106,7 @@ void main() {
     fs_normal = patchNormalModelSpace;
     positionCameraSpace = p;
 
-    #if USE_ECLIPSE_SHADOWS
+#if USE_ECLIPSE_SHADOWS
     positionWorldSpace = vec3(inverseViewTransform * dvec4(p, 1.0));
-    #endif
+#endif
 }
