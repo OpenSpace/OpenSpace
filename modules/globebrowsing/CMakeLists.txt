@@ -135,7 +135,6 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tile.hglsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tileheight.hglsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tilevertexskirt.hglsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globeshading.hglsl
 )
 
 source_group("Shader Files" FILES ${SHADER_FILES})
