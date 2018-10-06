@@ -305,20 +305,20 @@ vec4 calculateColor(vec4 currentColor, vec2 uv, vec3 levelWeights,
     }
     #endfor
 
-    return color;   
+    return color;
 }
 
-float gridDots(vec2 uv, vec2 gridResolution){
+float gridDots(vec2 uv, vec2 gridResolution) {
     vec2 uvVertexSpace = fract((gridResolution) * uv) + 0.5;
 
-    vec2 uvDotSpace = abs(2*(uvVertexSpace-0.5));
-    return 1-length(1-uvDotSpace);
+    vec2 uvDotSpace = abs(2.0 * (uvVertexSpace - 0.5));
+    return 1.0 - length(1.0 - uvDotSpace);
 }
 
 vec4 calculateDebugColor(vec2 uv, vec4 fragPos, vec2 vertexResolution) {
     vec2 uvVertexSpace = fract(vertexResolution * uv);
     vec3 colorUv = vec3(0.3 * uv.x, 0.3 * uv.y, 0);
-    vec3 colorDistance = vec3(0, 0, min( 0.4 * log(fragPos.w) - 3.9, 1));
+    vec3 colorDistance = vec3(0.0, 0.0, min(0.4 * log(fragPos.w) - 3.9, 1));
     vec3 colorVertex = (1.0 - length(uvVertexSpace)) * vec3(0.5);
     vec3 colorSum = colorUv + colorDistance + colorVertex;
     return vec4(0.5 * colorSum, 1);

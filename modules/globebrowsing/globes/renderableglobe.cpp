@@ -604,7 +604,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
         if (_lodScaleFactorDirty) {
             const float dsf = static_cast<float>(
                 _generalProperties.lodScaleFactor * _ellipsoid.minimumRadius()
-                );
+            );
             _globalRenderer.program->setUniform("distanceScaleFactor", dsf);
             _localRenderer.program->setUniform("distanceScaleFactor", dsf);
             _lodScaleFactorDirty = false;
@@ -613,14 +613,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
 
     if (_generalProperties.performShading) {
         const bool onr = _generalProperties.orenNayarRoughness;
-        _localRenderer.program->setUniform(
-            "orenNayarRoughness",
-            onr
-        );
-        _globalRenderer.program->setUniform(
-            "orenNayarRoughness",
-            onr
-        );
+        _localRenderer.program->setUniform("orenNayarRoughness", onr);
+        _globalRenderer.program->setUniform("orenNayarRoughness", onr);
     }
 
 

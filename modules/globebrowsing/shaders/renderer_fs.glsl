@@ -28,7 +28,6 @@
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetilemapping.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/tileheight.hglsl>
 #include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
 
 // Below are all the tiles that are used for contributing the actual fragment color
 
@@ -46,7 +45,6 @@ uniform Layer Overlays[NUMLAYERS_OVERLAY];
 
 #if USE_WATERMASK
 uniform Layer WaterMasks[NUMLAYERS_WATERMASK];
-float waterReflectance = 0.0;
 #endif // USE_WATERMASK
 
 #if SHOW_HEIGHT_RESOLUTION
@@ -62,7 +60,6 @@ uniform float orenNayarRoughness;
 #endif
 
 #if USE_ECLIPSE_SHADOWS
-in vec3 positionWorldSpace;
 
 /*******************************************************************************
  ***** ALL CALCULATIONS FOR ECLIPSE ARE IN METERS AND IN WORLD SPACE SYSTEM ****
@@ -94,13 +91,13 @@ vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[numberOfShadows],
         dvec3 sc_norm = shadowInfoArray[0].sourceCasterVec;
         dvec3 pc_proj = dot(pc, sc_norm) * sc_norm;
         dvec3 d = pc - pc_proj;
-        
+
         float length_d = float(length(d));
         double length_pc_proj = length(pc_proj);
-        
+
         float r_p_pi = float(shadowInfoArray[0].rc * (length_pc_proj + shadowInfoArray[0].xp) / shadowInfoArray[0].xp);
         float r_u_pi = float(shadowInfoArray[0].rc * (shadowInfoArray[0].xu - length_pc_proj) / shadowInfoArray[0].xu);
-        
+
         if (length_d < r_u_pi) { // umbra
             if (ground) {
 #if USE_ECLIPSE_HARD_SHADOWS
@@ -118,11 +115,11 @@ vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[numberOfShadows],
 #endif
             }
         }
-        else if ( length_d < r_p_pi ) {// penumbra
+        else if (length_d < r_p_pi) {// penumbra
 #if USE_ECLIPSE_HARD_SHADOWS
-                return vec4(0.5, 0.5, 0.5, 1.0); 
+            return vec4(0.5, 0.5, 0.5, 1.0); 
 #else
-                return vec4(vec3(length_d / r_p_pi), 1.0);
+            return vec4(vec3(length_d / r_p_pi), 1.0);
 #endif
         }
     }
@@ -135,6 +132,7 @@ in vec4 fs_position;
 in vec3 fs_normal;
 in vec2 fs_uv;
 in vec3 ellipsoidNormalCameraSpace;
+in vec3 levelWeights;
 in vec3 positionCameraSpace;
 
 #if USE_ACCURATE_NORMALS
@@ -146,17 +144,15 @@ in vec3 positionCameraSpace;
     uniform mat4 invViewModelTransform;
 #endif // USE_ACCURATE_NORMALS
 
-// levelInterpolationParameter is used to interpolate between a tile and its parent tiles
-// The value increases with the distance from the vertex (or fragment) to the camera
-in vec3 levelWeights;
+#if USE_ECLIPSE_SHADOWS
+in vec3 positionWorldSpace;
+#endif // USE_ECLIPSE_SHADOWS
 
-/**
- * This method defines the fragment color pipeline which is used in both
- * the local and global chunk rendering. 
- *
- */
-Fragment getTileFragment() {
+
+
+Fragment getFragment() {
     Fragment frag;
+
     frag.color = vec4(0.3, 0.3, 0.3, 1.0);
 
     vec3 normal = normalize(ellipsoidNormalCameraSpace);
@@ -179,6 +175,7 @@ Fragment getTileFragment() {
 #endif // USE_COLORTEXTURE
 
 #if USE_WATERMASK
+    float waterReflectance = 0.0;
     frag.color = calculateWater(
         frag.color,
         fs_uv,
@@ -254,25 +251,17 @@ Fragment getTileFragment() {
     frag.gPosition   = vec4(positionCameraSpace, 1.0); // in Camera Rig Space
 
     frag.depth = fs_position.w;
-    return frag;
-}
-
-
-vec3 patchBorderOverlay(vec2 uv, vec3 borderColor, float borderSize) {
-    vec2 uvOffset = uv - vec2(0.5);
-    float thres = 0.5 - borderSize * 0.5;
-    bool isBorder = abs(uvOffset.x) > thres || abs(uvOffset.y) > thres;
-    return isBorder ? borderColor : vec3(0.0);
-}
-
-
-
-Fragment getFragment() {
-    Fragment frag;
-    frag = getTileFragment();
 
 #if SHOW_CHUNK_EDGES
-    frag.color.rgb += patchBorderOverlay(fs_uv, vec3(1,0,0), 0.005);
+    const float BorderSize = 0.005;
+    const vec3 BorderColor = vec3(1.0, 0.0, 0.0);
+
+    vec2 uvOffset = fs_uv - vec2(0.5);
+    float thres = 0.5 - BorderSize * 0.5;
+    bool isBorder = abs(uvOffset.x) > thres || abs(uvOffset.y) > thres;
+    if (isBorder) {
+        frag.color.rgb += BorderColor;
+    }
 #endif // SHOW_CHUNK_EDGES
 
     return frag;

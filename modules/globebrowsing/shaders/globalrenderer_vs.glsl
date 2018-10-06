@@ -32,9 +32,9 @@
 
 layout(location = 1) in vec2 in_uv;
 
-out vec2 fs_uv;
 out vec4 fs_position;
 out vec3 fs_normal;
+out vec2 fs_uv;
 out vec3 ellipsoidNormalCameraSpace;
 out vec3 levelWeights;
 out vec3 positionCameraSpace;
