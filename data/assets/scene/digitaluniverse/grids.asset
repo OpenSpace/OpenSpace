@@ -9,6 +9,32 @@ local speck = asset.syncedResource({
     Version = 1
 })
 
+local radio = {
+    Identifier = "RadioSphere",
+    Parent = transforms.SolarSystemBarycenter.Name,
+    Transform = {
+        Scale = {
+            Type = "TimeDependentScale",
+            ReferenceDate = "1900 JAN 01", -- TODO: First atlantic transmission
+            Speed = 299792458 -- c
+        }
+    },
+    Renderable = {
+        Type = "RenderableSphericalGrid",
+        Enabled = false,
+        GridColor = { 1.0, 1.0, 0.3, 0.75},
+        LineWidth = 2.0,
+        GridMatrix = { -0.05487554,  0.4941095, -0.8676661   , 0.0,
+                       -0.9938214 , -0.1109906, -0.0003515167, 0.0,
+                       -0.09647644,  0.8622859,  0.4971472   , 0.0,
+                        0.0       ,  0.0      ,  0.0         , 1.0 }
+    },
+    GUI = {
+        Name = "Radio Sphere",
+        Path = "/Other/Grids"
+    }
+}
+
 local ecliptic = {
     Identifier = "EclipticSphere",
     Parent = transforms.SolarSystemBarycenter.Name,
@@ -274,6 +300,6 @@ local plane20Gly = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    ecliptic, eclipticLabels, equatorial, equatorialLabels, galactic, galacticLabels,
-    plane100kly, plane1Mly, plane10Mly, plane100Mly, plane20Gly
+    radio, ecliptic, eclipticLabels, equatorial, equatorialLabels, galactic,
+    galacticLabels, plane100kly, plane1Mly, plane10Mly, plane100Mly, plane20Gly
 })

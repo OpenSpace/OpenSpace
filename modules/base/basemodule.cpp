@@ -54,6 +54,7 @@
 #include <modules/base/rotation/staticrotation.h>
 #include <modules/base/scale/luascale.h>
 #include <modules/base/scale/staticscale.h>
+#include <modules/base/scale/timedependentscale.h>
 #include <modules/base/translation/luatranslation.h>
 #include <modules/base/translation/statictranslation.h>
 #include <modules/base/timeframe/timeframeinterval.h>
@@ -140,6 +141,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
 
     fScale->registerClass<LuaScale>("LuaScale");
     fScale->registerClass<StaticScale>("StaticScale");
+    fScale->registerClass<TimeDependentScale>("TimeDependentScale");
 
     auto fTimeFrame = FactoryManager::ref().factory<TimeFrame>();
     ghoul_assert(fTimeFrame, "Scale factory was not created");
@@ -191,6 +193,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
 
         LuaScale::Documentation(),
         StaticScale::Documentation(),
+        TimeDependentScale::Documentation(),
 
         LuaTranslation::Documentation(),
         StaticTranslation::Documentation(),
