@@ -33,11 +33,11 @@
 #include <modules/imgui/include/guihelpcomponent.h>
 #include <modules/imgui/include/guiiswacomponent.h>
 #include <modules/imgui/include/guijoystickcomponent.h>
-#include <modules/imgui/include/guikeybindingcomponent.h>
 #include <modules/imgui/include/guimissioncomponent.h>
 #include <modules/imgui/include/guiparallelcomponent.h>
 #include <modules/imgui/include/guiperformancecomponent.h>
 #include <modules/imgui/include/guipropertycomponent.h>
+#include <modules/imgui/include/guishortcutscomponent.h>
 #include <modules/imgui/include/guispacetimecomponent.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -119,7 +119,7 @@ public:
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     GuiIswaComponent _iswa;
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
-    GuiKeybindingComponent _keybinds;
+    GuiShortcutsComponent _shortcuts;
     GuiJoystickComponent _joystick;
     GuiParallelComponent _parallel;
     GuiPropertyComponent _featuredProperties;
@@ -151,7 +151,7 @@ private:
 #endif
 
         &_asset,
-        &_keybinds,
+        &_shortcuts,
         &_joystick,
         &_filePath,
 

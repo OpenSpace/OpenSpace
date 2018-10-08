@@ -41,7 +41,6 @@ namespace openspace::interaction {
 
 class KeybindingManager : public DocumentationGenerator {
 public:
-    BooleanType(IsLocalBind);
     BooleanType(IsSynchronized);
 
     struct KeyInformation {

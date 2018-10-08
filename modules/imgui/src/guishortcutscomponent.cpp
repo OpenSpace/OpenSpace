@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/imgui/include/guikeybindingcomponent.h>
+#include <modules/imgui/include/guishortcutscomponent.h>
 
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/keybindingmanager.h>
@@ -33,11 +33,11 @@
 
 namespace openspace::gui {
 
-GuiKeybindingComponent::GuiKeybindingComponent()
-    : GuiComponent("Keybinding", "Key Bindings")
+GuiShortcutsComponent::GuiShortcutsComponent()
+    : GuiComponent("Shortcuts", "Shortcuts")
 {}
 
-void GuiKeybindingComponent::render() {
+void GuiShortcutsComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
 
     bool v = _isEnabled;
