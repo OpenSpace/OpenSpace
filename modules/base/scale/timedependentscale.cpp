@@ -45,6 +45,14 @@ namespace {
         "The speed at which the value grows or shrinks. The units for this are meters "
         "per second. The default value is 1 m/s."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo ClampToPositiveInfo = {
+        "ClampToPositive",
+        "Clamp to Positive",
+        "If this value is true, the velocity computation will never result in any "
+        "negative values. This is useful for instantaneous events that only propagate "
+        "forwards. The default value is 'true'."
+    };
 } // namespace
 
 namespace openspace {
@@ -66,6 +74,12 @@ documentation::Documentation TimeDependentScale::Documentation() {
                 new DoubleVerifier,
                 Optional::Yes,
                 SpeedInfo.description
+            },
+            {
+                ClampToPositiveInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                ClampToPositiveInfo.description
             }
         }
     };
@@ -74,6 +88,7 @@ documentation::Documentation TimeDependentScale::Documentation() {
 TimeDependentScale::TimeDependentScale(const ghoul::Dictionary& dictionary)
     : _referenceDate(ReferenceDateInfo, "")
     , _speed(SpeedInfo, 1.0, 0.0, 1e12)
+    , _clampToPositive(ClampToPositiveInfo, true)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -89,6 +104,8 @@ TimeDependentScale::TimeDependentScale(const ghoul::Dictionary& dictionary)
         _speed = dictionary.value<double>(SpeedInfo.identifier);
     }
     addProperty(_speed);
+
+    addProperty(_clampToPositive);
 }
 
 double TimeDependentScale::scaleValue(const UpdateData& data) const {
@@ -99,7 +116,13 @@ double TimeDependentScale::scaleValue(const UpdateData& data) const {
 
     const double now = data.time.j2000Seconds();
     const double dt = now - _cachedReference;
-    return dt * _speed;
+
+    if (_clampToPositive) {
+        return std::max(0.0, dt) * _speed;
+    }
+    else {
+        return dt * _speed;
+    }
 }
 
 } // namespace openspace

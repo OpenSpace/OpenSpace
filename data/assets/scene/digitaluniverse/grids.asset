@@ -1,5 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/sun/transforms')
+local earth_transforms = asset.require('scene/solarsystem/planets/earth/transforms')
 
 
 local speck = asset.syncedResource({
@@ -11,11 +12,12 @@ local speck = asset.syncedResource({
 
 local radio = {
     Identifier = "RadioSphere",
-    Parent = transforms.SolarSystemBarycenter.Name,
+    Parent = earth_transforms.EarthBarycenter.Identifier,
     Transform = {
         Scale = {
             Type = "TimeDependentScale",
-            ReferenceDate = "1901 DEC 12", -- Marconi's first atlantic transmission
+            -- First TV signals strong enough to leave the ionosphere
+            ReferenceDate = "1936 AUG 01 12:00:00",
             Speed = 299792458 -- c
         }
     },
