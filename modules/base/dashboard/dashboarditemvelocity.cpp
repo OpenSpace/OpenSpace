@@ -186,59 +186,6 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
     _font = global::fontManager.font(_fontName, _fontSize);
 }
 
-//std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
-//                                                                      Component& mainComp,
-//                                                               Component& otherComp) const
-//{
-//    if ((mainComp.type == Type::Node) || (mainComp.type == Type::NodeSurface)) {
-//        if (!mainComp.node) {
-//            mainComp.node = global::renderEngine.scene()->sceneGraphNode(
-//                mainComp.nodeName
-//            );
-//
-//            if (!mainComp.node) {
-//                LERRORC(
-//                    "DashboardItemDistance",
-//                    "Could not find node '" + mainComp.nodeName.value() + "'"
-//                );
-//                return { glm::dvec3(0.0), "Node" };
-//            }
-//        }
-//    }
-//
-//    switch (mainComp.type) {
-//        case Type::Node:
-//            return { mainComp.node->worldPosition(), mainComp.node->guiName() };
-//        case Type::NodeSurface:
-//        {
-//            glm::dvec3 otherPos;
-//            if (otherComp.type == Type::NodeSurface) {
-//                // We are only interested in the direction, and we want to prevent
-//                // infinite recursion
-//                otherPos = otherComp.node->worldPosition();
-//            }
-//            else {
-//                otherPos = positionAndLabel(otherComp, mainComp).first;
-//            }
-//            const glm::dvec3 thisPos = mainComp.node->worldPosition();
-//
-//            const glm::dvec3 dir = glm::normalize(otherPos - thisPos);
-//            glm::dvec3 dirLength = dir * glm::dvec3(mainComp.node->boundingSphere());
-//
-//            return { thisPos + dirLength, "surface of " + mainComp.node->guiName() };
-//        }
-//        case Type::Focus:
-//            return {
-//                global::navigationHandler.focusNode()->worldPosition(),
-//                "focus"
-//            };
-//        case Type::Camera:
-//            return { global::renderEngine.scene()->camera()->positionVec3(), "camera" };
-//        default:
-//            return { glm::dvec3(0.0), "Unknown" };
-//    }
-//}
-
 void DashboardItemVelocity::render(glm::vec2& penPosition) {
     const glm::dvec3 currentPos = global::renderEngine.scene()->camera()->positionVec3();
     const glm::dvec3 dt = currentPos - _prevPosition;
