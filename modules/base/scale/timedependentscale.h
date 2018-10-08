@@ -27,6 +27,7 @@
 
 #include <openspace/scene/scale.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/stringproperty.h>
 
@@ -44,6 +45,7 @@ public:
 private:
     properties::StringProperty _referenceDate;
     properties::DoubleProperty _speed;
+    properties::BoolProperty _clampToPositive;
 
     mutable bool _cachedReferenceDirty = true;
     mutable double _cachedReference = 0.0; // in seconds past the J2000 epoch
