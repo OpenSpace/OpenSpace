@@ -15,7 +15,7 @@ local radio = {
     Transform = {
         Scale = {
             Type = "TimeDependentScale",
-            ReferenceDate = "1900 JAN 01", -- TODO: First atlantic transmission
+            ReferenceDate = "1901 DEC 12", -- Marconi's first atlantic transmission
             Speed = 299792458 -- c
         }
     },
