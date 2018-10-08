@@ -177,6 +177,28 @@ void GuiSpaceTimeComponent::render() {
     CaptionText("Time Controls");
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
 
+    const std::vector<Scene::InterestingTime>& interestingTimes =
+        global::renderEngine.scene()->interestingTimes();
+    if (!interestingTimes.empty()) {
+        ImGui::Text("%s", "Interesting Times");
+
+        for (size_t i = 0; i < interestingTimes.size(); ++i) {
+            const Scene::InterestingTime& t = interestingTimes[i];
+            if (ImGui::Button(t.name.c_str())) {
+                global::scriptEngine.queueScript(
+                    "openspace.time.setTime(\"" + t.time + "\")",
+                    scripting::ScriptEngine::RemoteScripting::No
+                );
+            }
+
+            if (i != interestingTimes.size() - 1) {
+                ImGui::SameLine();
+            }
+        }
+    }
+
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
+
     ImGui::Text("Current Date: %s", global::timeManager.time().UTC().c_str());
 
     constexpr int BufferSize = 256;
