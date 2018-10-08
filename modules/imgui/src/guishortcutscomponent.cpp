@@ -24,8 +24,10 @@
 
 #include <modules/imgui/include/guishortcutscomponent.h>
 
+#include <modules/imgui/include/gui.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/keybindingmanager.h>
+#include <openspace/interaction/shortcutmanager.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/keys.h>
 
@@ -41,10 +43,44 @@ void GuiShortcutsComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
 
     bool v = _isEnabled;
-    ImGui::Begin("File Path", &v);
+    ImGui::Begin("Shortcuts", &v);
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 
+
+
+    // First the actual shortcuts
+    CaptionText("Shortcuts");
+    const std::vector<interaction::ShortcutManager::ShortcutInformation>& shortcuts =
+        global::shortcutManager.shortcuts();
+
+    for (size_t i = 0; i < shortcuts.size(); ++i) {
+        const interaction::ShortcutManager::ShortcutInformation& info = shortcuts[i];
+
+        if (ImGui::Button(info.name.c_str())) {
+            global::scriptEngine.queueScript(
+                info.script,
+                scripting::ScriptEngine::RemoteScripting(info.synchronization)
+            );
+        }
+        ImGui::SameLine();
+
+        // Poor mans table layout
+        ImGui::SetCursorPosX(125.f);
+
+        ImGui::Text("%s", info.documentation.c_str());
+        if (!info.synchronization) {
+            ImGui::SameLine();
+            ImGui::Text("(%s)", "local");
+        }
+    }
+
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 25.f);
+
+
+
+    // Then display all the keybinds as buttons as well, for good measure
+    CaptionText("Keybindings");
     using K = KeyWithModifier;
     using V = interaction::KeybindingManager::KeyInformation;
     const std::multimap<K, V>& binds = global::keybindingManager.keyBindings();
