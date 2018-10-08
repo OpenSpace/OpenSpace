@@ -22,64 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESPHERICALGRID___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLESPHERICALGRID___H__
+#ifndef __OPENSPACE_MODULE_IMGUI___GUISHORTCUTSCOMPONENT___H__
+#define __OPENSPACE_MODULE_IMGUI___GUISHORTCUTSCOMPONENT___H__
 
-#include <openspace/rendering/renderable.h>
+#include <modules/imgui/include/guicomponent.h>
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/matrix/dmat4property.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/vector/vec4property.h>
-#include <ghoul/opengl/ghoul_gl.h>
+namespace openspace::gui {
 
-namespace ghoul::opengl { class ProgramObject; }
-
-namespace openspace::documentation { struct Documentation; }
-
-namespace openspace {
-
-class RenderableSphericalGrid : public Renderable {
+class GuiShortcutsComponent : public GuiComponent {
 public:
-    RenderableSphericalGrid(const ghoul::Dictionary& dictionary);
-    ~RenderableSphericalGrid() = default;
+    GuiShortcutsComponent();
 
-    void initializeGL() override;
-    void deinitializeGL() override;
-
-    bool isReady() const override;
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
-
-    static documentation::Documentation Documentation();
-
-protected:
-    struct Vertex {
-        float location[3];
-    };
-
-    ghoul::opengl::ProgramObject* _gridProgram;
-
-    properties::DMat4Property _gridMatrix;
-    properties::Vec4Property _gridColor;
-    properties::IntProperty _segments;
-    properties::FloatProperty _lineWidth;
-
-    bool _gridIsDirty = true;
-
-    GLuint _vaoID = 0;
-    GLuint _vBufferID = 0;
-    GLuint _iBufferID = 0;
-
-    GLenum _mode = GL_LINES;
-    unsigned int _isize = 0;
-    unsigned int _vsize = 0;
-    std::vector<Vertex> _varray;
-    std::vector<int> _iarray;
+    void render() override;
 };
 
-}// namespace openspace
+} // namespace openspace::gui
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLESPHERICALGRID___H__
+#endif // __OPENSPACE_MODULE_IMGUI___GUISHORTCUTSCOMPONENT___H__
