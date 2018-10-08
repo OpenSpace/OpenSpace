@@ -33,6 +33,7 @@
 #include <modules/imgui/include/guihelpcomponent.h>
 #include <modules/imgui/include/guiiswacomponent.h>
 #include <modules/imgui/include/guijoystickcomponent.h>
+#include <modules/imgui/include/guikeybindingcomponent.h>
 #include <modules/imgui/include/guimissioncomponent.h>
 #include <modules/imgui/include/guiparallelcomponent.h>
 #include <modules/imgui/include/guiperformancecomponent.h>
@@ -61,7 +62,7 @@ namespace openspace::gui {
 
 namespace detail {
     constexpr int nComponents() {
-        const int nRegularComponents = 14;
+        const int nRegularComponents = 15;
         int totalComponents = nRegularComponents;
 #ifdef GLOBEBROWSING_USE_GDAL
         ++totalComponents;
@@ -118,6 +119,7 @@ public:
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     GuiIswaComponent _iswa;
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
+    GuiKeybindingComponent _keybinds;
     GuiJoystickComponent _joystick;
     GuiParallelComponent _parallel;
     GuiPropertyComponent _featuredProperties;
@@ -149,6 +151,7 @@ private:
 #endif
 
         &_asset,
+        &_keybinds,
         &_joystick,
         &_filePath,
 

@@ -22,61 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
-#define __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
+#ifndef __OPENSPACE_MODULE_IMGUI___GUIKEYBINDINGCOMPONENT___H__
+#define __OPENSPACE_MODULE_IMGUI___GUIKEYBINDINGCOMPONENT___H__
 
-#include <openspace/documentation/documentationgenerator.h>
+#include <modules/imgui/include/guicomponent.h>
 
-#include <openspace/util/keys.h>
-#include <ghoul/misc/boolean.h>
+namespace openspace::gui {
 
-namespace openspace {
-    class Camera;
-    class SceneGraphNode;
-} // namespace openspace
-
-namespace openspace::scripting { struct LuaLibrary; }
-
-namespace openspace::interaction {
-
-class KeybindingManager : public DocumentationGenerator {
+class GuiKeybindingComponent : public GuiComponent {
 public:
-    BooleanType(IsLocalBind);
-    BooleanType(IsSynchronized);
+    GuiKeybindingComponent();
 
-    struct KeyInformation {
-        std::string command;
-        IsSynchronized synchronization;
-        std::string documentation;
-    };
-
-    KeybindingManager();
-
-    void resetKeyBindings();
-
-    void bindKeyLocal(Key key, KeyModifier modifier, std::string luaCommand,
-        std::string documentation = "");
-
-    void bindKey(Key key, KeyModifier modifier, std::string luaCommand,
-        std::string documentation = "");
-
-    void removeKeyBinding(const std::string& key);
-
-    std::vector<std::pair<KeyWithModifier, KeyInformation>> keyBinding(
-        const std::string& key) const;
-
-    static scripting::LuaLibrary luaLibrary();
-
-    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
-
-    const std::multimap<KeyWithModifier, KeyInformation>& keyBindings() const;
-
-private:
-    std::string generateJson() const override;
-
-    std::multimap<KeyWithModifier, KeyInformation> _keyLua;
+    void render() override;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace::gui
 
-#endif // __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
+#endif // __OPENSPACE_MODULE_IMGUI___GUIKEYBINDINGCOMPONENT___H__

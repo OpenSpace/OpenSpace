@@ -22,61 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
-#define __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
+#include <modules/imgui/include/guikeybindingcomponent.h>
 
-#include <openspace/documentation/documentationgenerator.h>
-
+#include <openspace/engine/globals.h>
+#include <openspace/interaction/keybindingmanager.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/keys.h>
-#include <ghoul/misc/boolean.h>
 
-namespace openspace {
-    class Camera;
-    class SceneGraphNode;
-} // namespace openspace
+#include <modules/imgui/include/imgui_include.h>
 
-namespace openspace::scripting { struct LuaLibrary; }
+namespace openspace::gui {
 
-namespace openspace::interaction {
+GuiKeybindingComponent::GuiKeybindingComponent()
+    : GuiComponent("Keybinding", "Key Bindings")
+{}
 
-class KeybindingManager : public DocumentationGenerator {
-public:
-    BooleanType(IsLocalBind);
-    BooleanType(IsSynchronized);
+void GuiKeybindingComponent::render() {
+    ImGui::SetNextWindowCollapsed(_isCollapsed);
 
-    struct KeyInformation {
-        std::string command;
-        IsSynchronized synchronization;
-        std::string documentation;
-    };
+    bool v = _isEnabled;
+    ImGui::Begin("File Path", &v);
+    _isEnabled = v;
+    _isCollapsed = ImGui::IsWindowCollapsed();
 
-    KeybindingManager();
+    using K = KeyWithModifier;
+    using V = interaction::KeybindingManager::KeyInformation;
+    const std::multimap<K, V>& binds = global::keybindingManager.keyBindings();
 
-    void resetKeyBindings();
+    for (const std::pair<K, V>& p : binds) {
+        if (ImGui::Button(ghoul::to_string(p.first).c_str())) {
+            global::scriptEngine.queueScript(
+                p.second.command,
+                scripting::ScriptEngine::RemoteScripting(p.second.synchronization)
+            );
+        }
+        ImGui::SameLine();
 
-    void bindKeyLocal(Key key, KeyModifier modifier, std::string luaCommand,
-        std::string documentation = "");
+        // Poor mans table layout
+        ImGui::SetCursorPosX(125.f);
 
-    void bindKey(Key key, KeyModifier modifier, std::string luaCommand,
-        std::string documentation = "");
+        ImGui::Text("%s", p.second.documentation.c_str());
+        if (!p.second.synchronization) {
+            ImGui::SameLine();
+            ImGui::Text("(%s)", "local");
+        }
 
-    void removeKeyBinding(const std::string& key);
+    }
+}
 
-    std::vector<std::pair<KeyWithModifier, KeyInformation>> keyBinding(
-        const std::string& key) const;
-
-    static scripting::LuaLibrary luaLibrary();
-
-    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
-
-    const std::multimap<KeyWithModifier, KeyInformation>& keyBindings() const;
-
-private:
-    std::string generateJson() const override;
-
-    std::multimap<KeyWithModifier, KeyInformation> _keyLua;
-};
-
-} // namespace openspace::interaction
-
-#endif // __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
+} // namespace openspace::gui
