@@ -55,6 +55,8 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/interaction/orbitalnavigator.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/websocketinputstate.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/websocketcamerastates.cpp
+    ${OPENSPACE_BASE_DIR}/src/interaction/shortcutmanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/interaction/shortcutmanager_lua.inl
     ${OPENSPACE_BASE_DIR}/src/mission/mission.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/missionmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/missionmanager_lua.inl
@@ -234,6 +236,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/orbitalnavigator.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/websocketinputstate.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/websocketcamerastates.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/shortcutmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/mission/mission.h
     ${OPENSPACE_BASE_DIR}/include/openspace/mission/missionmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/network/networkengine.h
@@ -422,13 +425,14 @@ endforeach ()
 ##########################################################################################
 # Create OpenSpace target
 ##########################################################################################
-add_library(libOpenSpace STATIC ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
-# In order to be able to include libOpenSpace files
-target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_BASE_DIR}/include)
-# In order to be able to include module files
-target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_BASE_DIR})
-# In order to be able to include the module_registration file
-target_include_directories(libOpenSpace PUBLIC ${CMAKE_BINARY_DIR}/_generated/include)
+add_library(openspace-core STATIC ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
+target_include_directories(openspace-core PUBLIC
+    # In order to be able to include openspace-core files
+    ${OPENSPACE_BASE_DIR}/include
+    # In order to be able to include module files
+    ${OPENSPACE_BASE_DIR}
+    # In order to be able to include the module_registration file
+    ${CMAKE_BINARY_DIR}/_generated/include)
 
 configure_file(
     ${OPENSPACE_CMAKE_EXT_DIR}/openspace_header.template
@@ -442,4 +446,4 @@ configure_file(
     @ONLY IMMEDIATE
 )
 
-set_openspace_compile_settings(libOpenSpace)
+set_openspace_compile_settings(openspace-core)

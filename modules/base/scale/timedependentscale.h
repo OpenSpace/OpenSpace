@@ -22,52 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/scalar/wcharproperty.h>
+#ifndef __OPENSPACE_MODULE_BASE___TIMEDEPENDENTSCALE___H__
+#define __OPENSPACE_MODULE_BASE___TIMEDEPENDENTSCALE___H__
 
-#include <ghoul/lua/ghoul_lua.h>
+#include <openspace/scene/scale.h>
 
-#include <limits>
-#include <sstream>
+#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/stringproperty.h>
 
-namespace openspace::properties {
+namespace openspace {
 
-int _StubToPreventLinkerWarningAboutMissingExportSymbols;
+namespace documentation { struct Documentation; }
 
-// #define DEFAULT_FROM_LUA_LAMBDA(wchar_t, DEFAULT_VALUE)
-//     [](lua_State* state, bool& success) -> wchar_t {
-//         success = (lua_isnumber(state, -1) == 1);
-//         if (success) {
-//             return static_cast<wchar_t>(lua_tonumber(state, -1));
-//         }
-//         else {
-//             return DEFAULT_VALUE;
-//         }
-//     }
+class TimeDependentScale : public Scale {
+public:
+    TimeDependentScale(const ghoul::Dictionary& dictionary);
+    double scaleValue(const UpdateData& data) const override;
 
-// #define DEFAULT_TO_LUA_LAMBDA(wchar_t)
-//     [](lua_State* state, wchar_t value) -> bool {
-//         lua_pushnumber(state, static_cast<lua_Number>(value));
-//         return true;
-//     }
+    static documentation::Documentation Documentation();
 
-// #define DEFAULT_FROM_STRING_LAMBDA(wchar_t, DEFAULT_VALUE)
-//     [](std::string val, bool& success) -> wchar_t {
-//         std::stringstream s(val);
-//         wchar_t v;
-//         s >> v;
-//         success = !s.fail();
-//         if (success) {
-//             return v;
-//         }
-//     }
+private:
+    properties::StringProperty _referenceDate;
+    properties::DoubleProperty _speed;
 
-//REGISTER_NUMERICALPROPERTY_SOURCE(WCharProperty, wchar_t, wchar_t(0),
-//                                  numeric_limits<wchar_t>::lowest(),
-//                                  numeric_limits<wchar_t>::max(), wchar_t(1),
-//                                  DEFAULT_FROM_LUA_LAMBDA(wchar_t, wchar_t(0)),
-//                                  DEFAULT_TO_LUA_LAMBDA(wchar_t),
-//                                  DEFAULT_FROM_STRING_LAMBDA(wchar_t, wchar_t(0)),
-//                                  DEFAULT_TO_STRING_LAMBDA(wchar_t),
-//                                  LUA_TNUMBER);
+    mutable bool _cachedReferenceDirty = true;
+    mutable double _cachedReference = 0.0; // in seconds past the J2000 epoch
+};
 
-} // namespace openspace::properties
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_BASE___TIMEDEPENDENTSCALE___H__

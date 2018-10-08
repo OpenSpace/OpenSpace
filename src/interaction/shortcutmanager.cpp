@@ -22,52 +22,66 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/scalar/wcharproperty.h>
+#include <openspace/interaction/shortcutmanager.h>
 
-#include <ghoul/lua/ghoul_lua.h>
-
-#include <limits>
+#include <openspace/engine/globals.h>
+#include <openspace/scripting/lualibrary.h>
+#include <openspace/scripting/scriptengine.h>
+#include <ghoul/glm.h>
 #include <sstream>
 
-namespace openspace::properties {
+#include "shortcutmanager_lua.inl"
 
-int _StubToPreventLinkerWarningAboutMissingExportSymbols;
+namespace openspace::interaction {
 
-// #define DEFAULT_FROM_LUA_LAMBDA(wchar_t, DEFAULT_VALUE)
-//     [](lua_State* state, bool& success) -> wchar_t {
-//         success = (lua_isnumber(state, -1) == 1);
-//         if (success) {
-//             return static_cast<wchar_t>(lua_tonumber(state, -1));
-//         }
-//         else {
-//             return DEFAULT_VALUE;
-//         }
-//     }
+void ShortcutManager::resetShortcuts() {
+    _shortcuts.clear();
+}
 
-// #define DEFAULT_TO_LUA_LAMBDA(wchar_t)
-//     [](lua_State* state, wchar_t value) -> bool {
-//         lua_pushnumber(state, static_cast<lua_Number>(value));
-//         return true;
-//     }
+void ShortcutManager::addShortcut(ShortcutInformation info) {
+    _shortcuts.push_back(std::move(info));
+}
 
-// #define DEFAULT_FROM_STRING_LAMBDA(wchar_t, DEFAULT_VALUE)
-//     [](std::string val, bool& success) -> wchar_t {
-//         std::stringstream s(val);
-//         wchar_t v;
-//         s >> v;
-//         success = !s.fail();
-//         if (success) {
-//             return v;
-//         }
-//     }
+const std::vector<ShortcutManager::ShortcutInformation>&
+ShortcutManager::shortcuts() const
+{
+    return _shortcuts;
+}
 
-//REGISTER_NUMERICALPROPERTY_SOURCE(WCharProperty, wchar_t, wchar_t(0),
-//                                  numeric_limits<wchar_t>::lowest(),
-//                                  numeric_limits<wchar_t>::max(), wchar_t(1),
-//                                  DEFAULT_FROM_LUA_LAMBDA(wchar_t, wchar_t(0)),
-//                                  DEFAULT_TO_LUA_LAMBDA(wchar_t),
-//                                  DEFAULT_FROM_STRING_LAMBDA(wchar_t, wchar_t(0)),
-//                                  DEFAULT_TO_STRING_LAMBDA(wchar_t),
-//                                  LUA_TNUMBER);
+scripting::LuaLibrary ShortcutManager::luaLibrary() {
+    return {
+        "",
+        {
+            {
+                "clearShortcuts",
+                &luascriptfunctions::clearShortcuts,
+                {},
+                "",
+                "Clear all shortcuts in this scene"
+            },
+            {
+                "bindShortcut",
+                &luascriptfunctions::bindShortcut,
+                {},
+                "string, string [, string]",
+                "Binds a Lua script to a new shortcut that is executed both locally and "
+                "to be broadcast to clients if this is the host of a parallel session. "
+                "The first argument is a human-readable name for this shortcut, the "
+                "second argument is the Lua script that will be executed and the last "
+                "argument is a describtive text for the shortcut for tooltips, etc."
+            },
+            {
+                "bindShortcutLocal",
+                &luascriptfunctions::bindShortcutLocal,
+                {},
+                "string, string [, string]",
+                "Binds a Lua script to a new shortcut that is executed onlylocally. The "
+                "first argument is a human-readable name for this shortcut, the second "
+                "argument is the Lua script that will be executed and the last argument "
+                "is a describtive text for the shortcut for tooltips, etc."
+            }
+        }
+    };
+}
 
-} // namespace openspace::properties
+} // namespace openspace::interaction
