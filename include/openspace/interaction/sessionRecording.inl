@@ -34,11 +34,9 @@ T getNextKeyframeObj(unsigned int& index,
         if( index == (keyframeContainer.size() - 1) )
             finishedCallback();
         return keyframeContainer.back();
-    }
-    else if (index < keyframeContainer.size()) {
+    } else if (index < keyframeContainer.size()) {
         return keyframeContainer[index];
-    }
-    else {
+    } else {
         return keyframeContainer.back();
     }
 }
@@ -49,11 +47,9 @@ T getPrevKeyframeObj(unsigned int& index,
 {
     if (index >= keyframeContainer.size()) {
         return keyframeContainer.back();
-    }
-    else if (index > 0) {
+    } else if (index > 0) {
         return keyframeContainer[index - 1];
-    }
-    else {
+    } else {
         return keyframeContainer.front();
     }
 }

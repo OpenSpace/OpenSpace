@@ -41,7 +41,6 @@
 #include <openspace/properties/scalar/floatproperty.h>
 
 namespace openspace {
-//#define SESSION_RECORDING_TIME
 
 struct TimeKeyframeData {
     Time time;
@@ -104,9 +103,7 @@ public:
 
     void removeTimeChangeCallback(CallbackHandle handle);
     void removeDeltaTimeChangeCallback(CallbackHandle handle);
-#ifdef SESSION_RECORDING_TIME
-    void triggerPlaybackStart(std::function<void()> callback);
-#endif
+    void triggerPlaybackStart();
     void removeTimeJumpCallback(CallbackHandle handle);
     void removeTimelineChangeCallback(CallbackHandle handle);
 
@@ -138,15 +135,11 @@ private:
 
     double _latestConsumedTimestamp = -std::numeric_limits<double>::max();
     int _nextCallbackHandle = 0;
-#ifdef SESSION_RECORDING_TIME
     bool _playbackModeEnabled = false;
-#endif
 
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeChangeCallbacks;
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _deltaTimeChangeCallbacks;
-#ifdef SESSION_RECORDING_TIME
-    std::function<void()> _playbackEndCallback;
-#endif
+
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeJumpCallbacks;
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timelineChangeCallbacks;
 };

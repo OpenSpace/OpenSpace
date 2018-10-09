@@ -934,6 +934,8 @@ void OpenSpaceEngine::writeSceneDocumentation() {
 void OpenSpaceEngine::preSynchronization() {
     LTRACE("OpenSpaceEngine::preSynchronization(begin)");
 
+    //std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
     std::unique_ptr<performance::PerformanceMeasurement> perf;
     if (global::performanceManager.isEnabled()) {
         perf = std::make_unique<performance::PerformanceMeasurement>(
@@ -975,6 +977,7 @@ void OpenSpaceEngine::preSynchronization() {
         global::renderEngine.updateScene();
         //_navigationHandler->updateCamera(dt);
 
+
         if (_scene) {
             Camera* camera = _scene->camera();
             if (camera) {
@@ -983,7 +986,7 @@ void OpenSpaceEngine::preSynchronization() {
             }
         }
         global::parallelPeer.preSynchronization();
-        global::sessionRecording.preSynchronization(dt);
+        global::sessionRecording.preSynchronization(global::windowDelegate.deltaTime());
     }
 
     for (const std::function<void()>& func : global::callback::preSync) {

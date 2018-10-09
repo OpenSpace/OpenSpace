@@ -38,7 +38,24 @@ int startRecording(lua_State* L) {
     if (recordFilePath.empty()) {
         return luaL_error(L, "filepath string is empty");
     }
+    global::sessionRecording.setRecordDataFormat(openspace::interaction::SessionRecording::recordDataMode::binary);
+    global::sessionRecording.startRecording(recordFilePath);
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+int startRecordingAscii(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::startRecordingAscii");
+
+    using ghoul::lua::luaTypeToString;
+
+    const std::string recordFilePath = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
+
+    if (recordFilePath.empty()) {
+        return luaL_error(L, "filepath string is empty");
+    }
+    global::sessionRecording.setRecordDataFormat(openspace::interaction::SessionRecording::recordDataMode::ascii);
     global::sessionRecording.startRecording(recordFilePath);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");

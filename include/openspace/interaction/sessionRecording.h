@@ -37,11 +37,100 @@
 
 namespace openspace::interaction {
 #define RECORD_BINARY
-//#define SESSION_RECORDING_TIME
+
 class KeyframeNavigator;
 
 class SessionRecording : public properties::PropertyOwner {
 public:
+    enum class recordDataMode {
+        ascii,
+        binary
+    };
+    SessionRecording();
+    ~SessionRecording();
+    /**
+    * Used to de-initialize the session recording feature. Any recording or playback
+    * in progress will be stopped, files closed, and keyframes in memory deleted.
+    */
+    void deinitialize();
+    /**
+    * This is called with every rendered frame. If in recording state, the camera
+    * state will be saved to the recording file (if its state has changed since last).
+    * If in playback state, the next keyframe will be used (if it is time to do so).
+    * \param deltaTime The OpenSpace engine will provide the deltaTime (secs) since
+    * the last frame.
+    */
+    void preSynchronization(double deltaTime);
+    /**
+    * Starts a recording session, which will save data to the provided filename
+    * according to the data format specified, and will continue until recording is
+    * stopped using stopRecording() method.
+    * \param filename file saved with recorded keyframes.
+    * \returns true if recording to file starts without errors.
+    */
+    bool startRecording(std::string filename);
+
+    /**
+    * Starts a recording session, which will save data to the provided filename
+    * in ASCII data format until recording is stopped using stopRecording() method.
+    * \param filename file saved with recorded keyframes.
+    * \returns true if recording to file starts without errors.
+    */
+    void setRecordDataFormat(recordDataMode dataMode);
+    /**
+    * Used to stop a recording in progress. If open, the recording file will be closed,
+    * and all keyframes deleted from memory.
+    */
+    void stopRecording();
+    /**
+    * Used to check if a session recording is in progress.
+    * \returns true if recording is in progress.
+    */
+    bool isRecording();
+    /**
+    * Starts a playback session, which can run in one of three different time modes.
+    * \param filename file containing recorded keyframes to play back
+    * \param timeMode which of the 3 time modes to use for time reference during
+    * playback: recorded time, application time, or simulation time. See the LuaLibrary
+    * entry for SessionRecording for details on these time modes.
+    * \returns true if recording to file starts without errors.
+    */
+    bool startPlayback(std::string filename, KeyframeTimeRef timeMode);
+    /**
+    * Used to stop a playback in progress. If open, the playback file will be closed,
+    * and all keyframes deleted from memory.
+    */
+    void stopPlayback();
+    /**
+    * Used to check if a session playback is in progress.
+    * \returns true if playback is in progress.
+    */
+    bool isPlayingBack();
+    /**
+    * Used to trigger a save of the camera states (position, rotation, focus node,
+    * whether it is following the rotation of a node, and timestamp). The data will
+    * be saved to the recording file only if a recording is currently in progress.
+    */
+    void saveCameraKeyframe();
+    /**
+    * Used to trigger a save of the current timing states. The data will be saved
+    * to the recording file only if a recording is currently in progress.
+    */
+    void saveTimeKeyframe();
+    /**
+    * Used to trigger a save of a script to the recording file, but only if a recording
+    * is currently in progress.
+    * \param scriptToSave String of the Lua command to be saved.
+    */
+    void saveScriptKeyframe(std::string scriptToSave);
+    
+    /**
+    * \return The Lua library that contains all Lua functions available to affect the
+    * interaction
+    */
+    static openspace::scripting::LuaLibrary luaLibrary();
+    
+private:
     enum class sessionState {
         idle = 0,
         recording,
@@ -53,43 +142,11 @@ public:
         script,
         invalid
     };
-
     struct timelineEntry {
         recordedType keyframeType;
         unsigned int idxIntoKeyframeTypeArray;
         double timestamp;
     };
-
-    SessionRecording();
-    ~SessionRecording();
-
-    void deinitialize();
-
-    bool startRecording(std::string filename);
-    void stopRecording();
-    void saveScript(std::string scriptToSave);
-    bool isRecording();
-    bool startPlayback(std::string filename, KeyframeTimeRef timeMode);
-    void saveCameraKeyframe();
-#ifdef SESSION_RECORDING_TIME
-    void saveTimeKeyframe();
-#endif
-    void preSynchronization(double deltaTime);
-    void playbackAddEntriesToTimeline();
-    void playbackCamera();
-#ifdef SESSION_RECORDING_TIME
-    void playbackTimeChange();
-#endif
-    void playbackScript();
-    void stopPlayback();
-    double currentTime() const;
-    /**
-    * \return The Lua library that contains all Lua functions available to affect the
-    * interaction
-    */
-    static openspace::scripting::LuaLibrary luaLibrary();
-    
-private:
     ExternInteraction _externInteract;
     bool _isRecording = false;
     double _timestampRecordStarted;
@@ -100,32 +157,37 @@ private:
     double getAppropriateTimestamp(double timeOs, double timeRec, double timeSim);
     double getEquivalentSimulationTime(double timeOs, double timeRec, double timeSim);
     double getEquivalentApplicationTime(double timeOs, double timeRec, double timeSim);
+    double currentTime() const;
+
+    void playbackCamera();
+    void playbackTimeChange();
+    void playbackScript();
+    bool playbackAddEntriesToTimeline();
     void signalPlaybackFinishedForComponent(recordedType type);
-#ifdef RECORD_BINARY
     void writeToFileBuffer(const double& src);
     void writeToFileBuffer(const unsigned char c);
     void writeToFileBuffer(bool b);
     void saveStringToFile(const std::string s);
     void saveKeyframeToFileBinary(unsigned char* bufferSource, unsigned int size);
+    std::string readHeaderElement(size_t readLen_chars);
     void readFromPlayback(unsigned char& result);
     void readFromPlayback(double& result);
     void readFromPlayback(float& result);
     void readFromPlayback(size_t& result);
     void readFromPlayback(bool& result);
     void readFromPlayback(std::string& result);
-#else
     void saveKeyframeToFile(std::string entry);
-#endif //#ifdef RECORD_BINARY
+
     void addKeyframe(double timestamp, interaction::KeyframeNavigator::CameraPose keyframe);
-#ifdef SESSION_RECORDING_TIME
     void addKeyframe(double timestamp, datamessagestructures::TimeKeyframe keyframe);
-#endif
     void addKeyframe(double timestamp, std::string scriptToQueue);
     void moveAheadInTime(double deltaTime);
-    bool isTimeToHandleNextKeyframe(double currTime, double deltaTime);
+    bool isTimeToHandleNextNonCameraKeyframe(double currTime, double deltaTime);
     bool processNextKeyframeAheadInTime(double currTime, double deltaTime);
-    bool processCameraKeyframe(double now, double deltaTime);
+    void findNextFutureCameraIndex(double currTime);
+    bool processCameraKeyframe(double now);
     bool processScriptKeyframe(double now, double deltaTime);
+    bool isDataModeBinary();
    
     recordedType getNextKeyframeType();
     recordedType getPrevKeyframeType();
@@ -133,6 +195,14 @@ private:
     double getPrevTimestamp();
     void cleanUpPlayback();
 
+    const bool _usingTimeKeyframes = false;
+    const std::string _fileHeaderTitle = "OpenSpace_record/playback";
+    static const size_t _fileHeaderVersionLength = 5;
+    const char _fileHeaderVersion[_fileHeaderVersionLength] = { '0', '0', '.', '8', '0' };
+    const char dataFormatAsciiTag = 'A';
+    const char dataFormatBinaryTag = 'B';
+
+    recordDataMode _recordingDataMode = recordDataMode::binary;
     sessionState _state = sessionState::idle;
     std::string _playbackFilename;
     std::ifstream _playbackFile;
@@ -142,11 +212,9 @@ private:
     KeyframeTimeRef _playbackTimeReferenceMode;
     datamessagestructures::CameraKeyframe _prevRecordedCameraKeyframe;
     bool _playbackActive_camera = false;
-#ifdef SESSION_RECORDING_TIME
     bool _playbackActive_time = false;
-#endif
     bool _playbackActive_script = false;
-#ifdef RECORD_BINARY
+
     static const size_t keyframeHeaderSize_bytes = 33;
     static const size_t saveBufferCameraSize_min = 82;
     static const size_t saveBufferStringSize_max = 500;
@@ -155,7 +223,7 @@ private:
         + saveBufferStringSize_max;
     unsigned char _keyframeBuffer[_saveBufferMaxSize_bytes];
     unsigned int _bufferIndex = 0;
-#endif
+
     bool _cleanupNeeded = false;
 
     std::vector < interaction::KeyframeNavigator::CameraPose> _keyframesCamera;
@@ -169,6 +237,11 @@ private:
 
     std::vector<timelineEntry> _timeline;
     unsigned int _idxTimeline;
+    unsigned int _idxTimeline_cameraPtr = 0;
+    unsigned int _idxTimeline_cameraPrevUpperBound = 0;
+    unsigned int _idxTimeline_timePtr = 0;
+    unsigned int _idxTimeline_scriptPtr = 0;
+    double _lastCameraRenderTime = 0;
 };
 
 } // namespace openspace

@@ -638,7 +638,7 @@ void ScriptEngine::preSync(bool isMaster) {
             global::parallelPeer.sendScript(_currentSyncedScript);
         }
         if (global::sessionRecording.isRecording()) {
-            global::sessionRecording.saveScript(_currentSyncedScript);
+            global::sessionRecording.saveScriptKeyframe(_currentSyncedScript);
         }
     }
     _mutex.unlock();

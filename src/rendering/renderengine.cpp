@@ -662,6 +662,20 @@ void RenderEngine::renderDashboard() {
     );
 
     global::dashboard.render(penPosition);
+
+    penPosition += glm::vec2(0.f, -50.f);
+
+    glm::dvec3 p = _camera->positionVec3();
+    glm::dquat rot = _camera->rotationQuaternion();
+    std::string fc = global::navigationHandler.focusNode()->identifier();
+    RenderFont(
+        *_fontInfo,
+        penPosition,
+        fmt::format("Pos: {} {} {}\nOrientation: {} {} {} {}\nFocus: {}",
+            p.x, p.y, p.z, rot[0], rot[1], rot[2], rot[3], fc
+            )
+    );
+
 }
 
 void RenderEngine::postDraw() {

@@ -258,13 +258,10 @@ void TimeManager::progressTime(double dt) {
         // and time is not paused, just advance time.
         _deltaTime = _targetDeltaTime;
         _currentTime.data().advanceTime(dt * _deltaTime);
-#ifdef SESSION_RECORDING_TIME
         //Call the playback callback function if mode is enabled
-        if (_playbackModeEnabled && _playbackEndCallback) {
+        if (_playbackModeEnabled) {
             _playbackModeEnabled = false;
-            _playbackEndCallback();
         }
-#endif
     }
 
     if (hasPastKeyframes) {
@@ -441,12 +438,9 @@ void TimeManager::removeDeltaTimeChangeCallback(CallbackHandle handle) {
     _deltaTimeChangeCallbacks.erase(it);
 }
 
-#ifdef SESSION_RECORDING_TIME
-void TimeManager::triggerPlaybackStart(std::function<void()> callback) {
+void TimeManager::triggerPlaybackStart() {
     _playbackModeEnabled = true;
-    _playbackEndCallback = std::move(callback);
 }
-#endif
 
 void TimeManager::removeTimeJumpCallback(CallbackHandle handle) {
     const auto it = std::find_if(
