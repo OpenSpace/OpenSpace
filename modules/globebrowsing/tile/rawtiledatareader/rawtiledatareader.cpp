@@ -46,13 +46,12 @@ RawTile RawTileDataReader::readTileData(TileIndex tileIndex) const {
     size_t numBytes = tileTextureInitData().totalNumBytes();
 
     RawTile rawTile;
-    rawTile.imageData = new char[numBytes];
-    //std::fill_n(rawTile.imageData, numBytes, std::numeric_limits<char>::max());
-    memset(rawTile.imageData, 0xFF, _initData.totalNumBytes());
+    rawTile.imageData = std::unique_ptr<std::byte[]>(new std::byte[numBytes]);
+    memset(rawTile.imageData.get(), 0xFF, _initData.totalNumBytes());
 
     IODescription io = ioDescription(tileIndex);
     RawTile::ReadError worstError = RawTile::ReadError::None;
-    readImageData(io, worstError, rawTile.imageData);
+    readImageData(io, worstError, reinterpret_cast<char*>(rawTile.imageData.get()));
 
     rawTile.error = worstError;
     rawTile.tileIndex = std::move(tileIndex);
@@ -426,7 +425,7 @@ std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(RawTile& rawTil
                 const float noDataValue = noDataValueAsFloat();
                 const float val = tiledatatype::interpretFloat(
                     _initData.glType(),
-                    &(rawTile.imageData[yi + i])
+                    &(rawTile.imageData.get()[yi + i])
                 );
                 if (val != noDataValue && val == val) {
                     preprocessData->maxValues[raster] = std::max(

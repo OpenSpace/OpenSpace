@@ -53,7 +53,7 @@ namespace openspace::globebrowsing::tiledatatype {
 
 #ifdef GLOBEBROWSING_USE_GDAL
 
-float interpretFloat(GDALDataType gdalType, const char* src) {
+float interpretFloat(GDALDataType gdalType, std::byte* src) {
     switch (gdalType) {
         case GDT_Byte:
             return static_cast<float>(*reinterpret_cast<const GLubyte*>(src));
@@ -475,7 +475,7 @@ size_t getMaximumValue(GLenum glType) {
     }
 }
 
-float interpretFloat(GLenum glType, const char* src) {
+float interpretFloat(GLenum glType, const std::byte* src) {
     switch (glType) {
         case GL_UNSIGNED_BYTE:
             return static_cast<float>(*reinterpret_cast<const GLubyte*>(src));

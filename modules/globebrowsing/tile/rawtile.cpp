@@ -31,8 +31,9 @@ namespace openspace::globebrowsing {
 RawTile RawTile::createDefault(const TileTextureInitData& initData) {
     RawTile defaultRes;
     defaultRes.textureInitData = std::make_shared<TileTextureInitData>(initData);
-    defaultRes.imageData = new char[initData.totalNumBytes()];
-    std::fill_n(defaultRes.imageData, initData.totalNumBytes(), char(0));
+    std::byte* data = new std::byte[initData.totalNumBytes()];
+    defaultRes.imageData = std::unique_ptr<std::byte[]>(data);
+    std::fill_n(defaultRes.imageData.get(), initData.totalNumBytes(), std::byte(0));
     return defaultRes;
 
 }

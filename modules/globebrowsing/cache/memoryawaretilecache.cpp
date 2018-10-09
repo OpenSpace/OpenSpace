@@ -313,7 +313,7 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key, RawTile& rawTil
                 if (!tex->dataOwnership()) {
                     _numTextureBytesAllocatedOnCPU += initData.totalNumBytes();
                 }
-                tex->setPixelData(rawTile.imageData, Texture::TakeOwnership::Yes);
+                tex->setPixelData(rawTile.imageData.release(), Texture::TakeOwnership::Yes);
                 rawTile.imageData = nullptr;
             }
         }
@@ -323,7 +323,7 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key, RawTile& rawTil
                 tex->dataOwnership(),
                 "Texture must have ownership of old data to avoid leaks"
             );
-            tex->setPixelData(rawTile.imageData, Texture::TakeOwnership::Yes);
+            tex->setPixelData(rawTile.imageData.release(), Texture::TakeOwnership::Yes);
             rawTile.imageData = nullptr;
             [[ maybe_unused ]] size_t expectedDataSize = tex->expectedPixelDataSize();
             const size_t numBytes = rawTile.textureInitData->totalNumBytes();

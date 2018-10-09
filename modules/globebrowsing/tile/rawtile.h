@@ -28,6 +28,7 @@
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <cstddef>
 #include <memory>
 
 namespace openspace::globebrowsing {
@@ -44,7 +45,7 @@ struct RawTile {
         Fatal     // = CE_Fatal
     };
 
-    char* imageData = nullptr; // @TODO byte
+    std::unique_ptr<std::byte[]> imageData = nullptr;
     std::shared_ptr<TileMetaData> tileMetaData = nullptr;
     std::shared_ptr<TileTextureInitData> textureInitData = nullptr;
     TileIndex tileIndex = { 0, 0, 0 };

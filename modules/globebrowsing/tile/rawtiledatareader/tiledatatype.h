@@ -50,7 +50,7 @@ size_t getMaximumValue(GDALDataType gdalType);
 
 size_t numberOfBytes(GDALDataType gdalType);
 
-float interpretFloat(GDALDataType gdalType, const char* src);
+float interpretFloat(GDALDataType gdalType, const std::byte* src);
 #endif // GLOBEBROWSING_USE_GDAL
 
 GLenum glTextureFormat(GLenum glType, ghoul::opengl::Texture::Format format);
@@ -61,7 +61,7 @@ size_t numberOfBytes(GLenum glType);
 
 size_t getMaximumValue(GLenum glType);
 
-float interpretFloat(GLenum glType, const char* src);
+float interpretFloat(GLenum glType, const std::byte* src);
 
 } // namespace openspace::globebrowsing::tiledatatype
 
