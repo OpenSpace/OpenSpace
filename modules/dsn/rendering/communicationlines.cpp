@@ -43,6 +43,7 @@ namespace openspace {
         else {
             LDEBUG(fmt::format("{}: Successfully read data.", _identifier));
         }
+   
     }
     
     void CommunicationLines::initializeGL() {
@@ -71,8 +72,12 @@ namespace openspace {
 
             // ... fill all of the values, dummy values for now, should load from  _translation->position()
             //    const glm::vec3 p = _translation->position()
-            _vertexArray[0] = { 0, 0, 0 };
-            _vertexArray[1] = { static_cast<float>(58.5877), static_cast<float>(16.1924), static_cast<float>(20000000) }; // go to geo?
+            const char* dishIdentifier = "DSS_35";
+            double dishPosXYZ[3] = { -4461273.0838, 2682568.9220, -3674152.0885 }; //DSS35
+            glm::vec3 spaceCraftPos = DsnManager::spaceCraftPosition(dishIdentifier); // VGR2
+
+            _vertexArray[0] = { static_cast<float>(dishPosXYZ[0]), static_cast<float>(dishPosXYZ[1]), static_cast<float>(dishPosXYZ[2]) };
+            _vertexArray[1] = { static_cast<float>(spaceCraftPos.x), static_cast<float>(spaceCraftPos.y), static_cast<float>(spaceCraftPos.z) }; // go to geo?
 
             // ... and upload them to the GPU
             glBindVertexArray(_mainRenderInformation._vaoID);

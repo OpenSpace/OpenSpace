@@ -176,4 +176,85 @@ namespace openspace {
         }
     }
 
+    glm::vec3 DsnManager::spaceCraftPosition(const char* dishId) {
+
+        //get data from Id here somehow, maybe use dictionary
+        double dishPosXYZ[] = { -4431247.000000, 2768950.500000, -3658746.000000 };
+        double dishPosLLA[] = { -35.383, 148.966, 692 };
+
+        double azimuthAngle = 205.87; // angle from true north 
+        double elevationAngle = 13.40; // angle from horizontal plane towards zenith
+        double range = 1.7762947155343E10 * 1000; //DSS35 to VGR2
+
+        // spacecraft coordinates in RAE
+        double spacecraftPosRAE[3] = { range, azimuthAngle, elevationAngle};
+        double spacecraftPosXYZ[3] = {};
+
+        // fill up spacecraftPosXYZ
+        convertRaeToEcef(dishPosLLA, dishPosXYZ, spacecraftPosRAE, spacecraftPosXYZ);
+        glm::vec3 position = { spacecraftPosXYZ[0],spacecraftPosXYZ[1],spacecraftPosXYZ[2] };
+
+        //return position
+        return position;
+    }
+
+    void DsnManager::convertRaeToEcef(double observerLla[], double observerXyz[], 
+        double objectRae[], double objectEcef[]) {
+        
+        double tempSez[] = { 0.0, 0.0, 0.0 };
+
+        convertRaeToSez(observerLla, objectRae, tempSez);
+        convertSezToEcef(observerLla, observerXyz, tempSez, objectEcef);
+    }
+
+    void DsnManager::convertRaeToSez(double observerLla[], double objectRae[], double objectSez[]) {
+        double range, azimuth, elevation;
+        range = objectRae[0];
+        azimuth = objectRae[1];
+        elevation = objectRae[2];
+
+        // Compute needed math
+        double slat = sin(deg2rad(observerLla[0]));
+        double slon = sin(deg2rad(observerLla[1]));
+        double clat = cos(deg2rad(observerLla[0]));
+        double clon = cos(deg2rad(observerLla[1]));
+
+        // Convert to radians
+        azimuth = deg2rad(azimuth);
+        elevation = deg2rad(elevation);
+
+        // Convert
+        objectSez[0] = -range * cos(elevation) * cos(azimuth);
+        objectSez[1] = range * cos(elevation) * sin(azimuth);
+        objectSez[2] = range * sin(elevation);
+    }
+
+    void DsnManager::convertSezToEcef(double observerLla[], double observerXyz[], 
+        double objectSez[], double objectEcef[]) {
+
+        double south, east, zenith;
+        south = objectSez[0];
+        east = objectSez[1];
+        zenith = objectSez[2];
+
+        // Compute needed math
+        double slat = sin(deg2rad(observerLla[0]));
+        double slon = sin(deg2rad(observerLla[1]));
+        double clat = cos(deg2rad(observerLla[0]));
+        double clon = cos(deg2rad(observerLla[1]));
+
+        // Convert
+        objectEcef[0] = (slat * clon * south) + (-slon * east) + (clat * clon * zenith) + observerXyz[0];
+        objectEcef[1] = (slat * slon * south) + (clon * east) + (clat * slon * zenith) + observerXyz[1];
+        objectEcef[2] = (-clat * south) + (slat * zenith) + observerXyz[2];
+    }
+
+
+    double DsnManager::deg2rad(double degrees)
+    {
+        const double factor = glm::pi<double>() / 180;
+        return degrees * factor;
+    }
 }
+
+

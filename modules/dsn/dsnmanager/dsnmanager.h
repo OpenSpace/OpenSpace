@@ -35,15 +35,28 @@
 
 namespace openspace {
 
+
+
     class DsnManager {
 
     public:
        static bool extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary);
+	   static glm::vec3 spaceCraftPosition(const char* dishId);
 
     private:
        static void readDataFromXml(std::vector<std::string> _dataFiles);
        static void xmlParser(std::string filename, std::ofstream &logfile);
+	   static double deg2rad(double degrees);
+
+	   /**  Converts a Range, Azimuth, Elevation location to South East Zenith coordinates**/    
+	   static void convertRaeToSez(double siteLLA[], double rae[], double sez[]);
+	   /**  Converts a Range, Azimuth, Elevation location to Earth centered Earth fixed coordinates**/
+	   static void convertRaeToEcef(double observerLLA[], double observerXyz[], double objectRae[], double objectEcef[]);
+	   /**  Converts South East Zenith location to Earth centered Earth fixed coordinates**/
+	   static void convertSezToEcef(double observerLla[], double observerXyz[], double objectSez[], double objectEcef[]);
+
     };
+
 }
 
 
