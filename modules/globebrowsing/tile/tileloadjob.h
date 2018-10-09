@@ -27,11 +27,11 @@
 
 #include <openspace/util/job.h>
 
+#include <modules/globebrowsing/tile/rawtile.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 
 namespace openspace::globebrowsing {
 
-struct RawTile;
 class RawTileDataReader;
 
 struct TileLoadJob : public Job<RawTile> {
@@ -41,7 +41,7 @@ struct TileLoadJob : public Job<RawTile> {
      * called before the TileLoadJob is finished, the data will be deleted as it has not
      * been exposed outside of this object.
      */
-    TileLoadJob(RawTileDataReader* rawTileDataReader, const TileIndex& tileIndex);
+    TileLoadJob(RawTileDataReader& rawTileDataReader, const TileIndex& tileIndex);
 
     /**
      * Destroys the allocated data pointer if it has been allocated and the TileLoadJob
@@ -61,7 +61,7 @@ struct TileLoadJob : public Job<RawTile> {
     * Unless the job is marked as finished, the pixel data will be deallocated
     * when the job is deleted.
     */
-    std::shared_ptr<RawTile> product() override;
+    RawTile product() override;
 
     /**
      * Get the data ownership. if any data has been allocated (ie if the job was created
@@ -72,8 +72,8 @@ struct TileLoadJob : public Job<RawTile> {
     bool hasOwnershipOfData() const;
 
 protected:
-    RawTileDataReader* _rawTileDataReader;
-    std::shared_ptr<RawTile> _rawTile;
+    RawTileDataReader& _rawTileDataReader;
+    RawTile _rawTile;
     TileIndex _chunkIndex;
     bool _hasOwnershipOfData = false;
 };

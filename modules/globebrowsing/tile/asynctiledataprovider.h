@@ -29,6 +29,7 @@
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <ghoul/misc/boolean.h>
 #include <map>
+#include <optional>
 #include <set>
 
 namespace openspace { class GlobeBrowsingModule; }
@@ -61,12 +62,12 @@ public:
     /**
      * Get all finished jobs.
      */
-    std::vector<std::shared_ptr<RawTile>> rawTiles();
+    std::vector<RawTile> rawTiles();
 
     /**
      * Get one finished job.
      */
-    std::shared_ptr<RawTile> popFinishedRawTile();
+    std::optional<RawTile> popFinishedRawTile();
 
     void update();
     void reset();

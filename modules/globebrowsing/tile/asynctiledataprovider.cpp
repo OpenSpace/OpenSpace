@@ -57,7 +57,7 @@ const RawTileDataReader& AsyncTileDataProvider::rawTileDataReader() const {
 
 bool AsyncTileDataProvider::enqueueTileIO(const TileIndex& tileIndex) {
     if (_resetMode == ResetMode::ShouldNotReset && satisfiesEnqueueCriteria(tileIndex)) {
-        auto job = std::make_shared<TileLoadJob>(_rawTileDataReader.get(), tileIndex);
+        auto job = std::make_shared<TileLoadJob>(*_rawTileDataReader, tileIndex);
         _concurrentJobManager.enqueueJob(job, tileIndex.hashKey());
         _enqueuedTileRequests.insert(tileIndex.hashKey());
         return true;
@@ -65,36 +65,35 @@ bool AsyncTileDataProvider::enqueueTileIO(const TileIndex& tileIndex) {
     return false;
 }
 
-std::vector<std::shared_ptr<RawTile>> AsyncTileDataProvider::rawTiles() {
-    std::vector<std::shared_ptr<RawTile>> readyResults;
-    std::shared_ptr<RawTile> finishedJob = popFinishedRawTile();
+std::vector<RawTile> AsyncTileDataProvider::rawTiles() {
+    std::vector<RawTile> readyResults;
+    std::optional<RawTile> finishedJob = popFinishedRawTile();
     while (finishedJob) {
-        readyResults.push_back(finishedJob);
+        readyResults.push_back(finishedJob.value());
         finishedJob = popFinishedRawTile();
     }
     return readyResults;
 }
 
-std::shared_ptr<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
+std::optional<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
     if (_concurrentJobManager.numFinishedJobs() > 0) {
         // Now the tile load job looses ownerwhip of the data pointer
-        std::shared_ptr<RawTile> product =
-            _concurrentJobManager.popFinishedJob()->product();
+        RawTile product = _concurrentJobManager.popFinishedJob()->product();
 
-        const TileIndex::TileHashKey key = product->tileIndex.hashKey();
+        const TileIndex::TileHashKey key = product.tileIndex.hashKey();
         // No longer enqueued. Remove from set of enqueued tiles
         _enqueuedTileRequests.erase(key);
         // Pbo is still mapped. Set the id for the raw tile
-        product->pbo = 0;
-        if (product->error != RawTile::ReadError::None) {
-            delete[] product->imageData;
-            return nullptr;
+        product.pbo = 0;
+        if (product.error != RawTile::ReadError::None) {
+            delete[] product.imageData;
+            return std::nullopt;
         }
 
         return product;
     }
     else {
-        return nullptr;
+        return std::nullopt;
     }
 }
 

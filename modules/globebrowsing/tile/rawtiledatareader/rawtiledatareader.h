@@ -48,8 +48,7 @@ public:
      * Reads data from the current dataset and initializes a <code>RawTile</code>
      * which gets returned.
      */
-    std::shared_ptr<RawTile> readTileData(TileIndex tileIndex,
-        char* dataDestination) const;
+    RawTile readTileData(TileIndex tileIndex, char* dataDestination) const;
     const TileDepthTransform& depthTransform() const;
     const TileTextureInitData& tileTextureInitData() const;
     const PixelRegion::PixelRange fullPixelSize() const;
@@ -96,8 +95,8 @@ protected:
      * \param io describes how to read the data.
      * \param worstError should be set to the error code returned when reading the data.
      */
-    void readImageData(
-        IODescription& io, RawTile::ReadError& worstError, char* imageDataDest) const;
+    void readImageData(IODescription& io, RawTile::ReadError& worstError,
+        char* imageDataDest) const;
 
     /**
      * The default does not affect the IODescription but this function can be used for
@@ -105,8 +104,8 @@ protected:
      */
     virtual IODescription adjustIODescription(const IODescription& io) const;
 
-    virtual RawTile::ReadError rasterRead(
-        int rasterBand, const IODescription& io, char* dst) const = 0;
+    virtual RawTile::ReadError rasterRead(int rasterBand, const IODescription& io,
+        char* dst) const = 0;
 
     IODescription ioDescription(const TileIndex& tileIndex) const;
 
@@ -144,11 +143,10 @@ protected:
     RawTile::ReadError repeatedRasterRead(int rasterBand, const IODescription& fullIO,
         char* dataDestination, int depth = 0) const;
 
-    std::shared_ptr<TileMetaData> getTileMetaData(std::shared_ptr<RawTile> rawTile,
+    std::shared_ptr<TileMetaData> getTileMetaData(RawTile& rawTile,
         const PixelRegion& region) const;
     TileDepthTransform calculateTileDepthTransform();
-    RawTile::ReadError postProcessErrorCheck(
-        std::shared_ptr<const RawTile> rawTile) const;
+    RawTile::ReadError postProcessErrorCheck(const RawTile& rawTile) const;
 
     struct {
         int _maxLevel = -1;

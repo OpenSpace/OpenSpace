@@ -42,7 +42,7 @@ std::shared_ptr<RawTile> RawTileDataReader::defaultTileData() const {
     return std::make_shared<RawTile>(RawTile::createDefault(_initData));
 }
 
-std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
+RawTile RawTileDataReader::readTileData(TileIndex tileIndex,
                                                          char* dataDestination) const
 {
     ghoul_assert(dataDestination, "Need to specify a data destination");
@@ -53,16 +53,16 @@ std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
     RawTile::ReadError worstError = RawTile::ReadError::None;
     readImageData(io, worstError, dataDestination);
 
-    std::shared_ptr<RawTile> rawTile = std::make_shared<RawTile>();
-    rawTile->imageData = dataDestination;
-    rawTile->error = worstError;
-    rawTile->tileIndex = std::move(tileIndex);
+    RawTile rawTile;
+    rawTile.imageData = dataDestination;
+    rawTile.error = worstError;
+    rawTile.tileIndex = std::move(tileIndex);
 
-    rawTile->textureInitData = std::make_shared<TileTextureInitData>(_initData);
+    rawTile.textureInitData = std::make_shared<TileTextureInitData>(_initData);
 
     if (_preprocess) {
-        rawTile->tileMetaData = getTileMetaData(rawTile, io.write.region);
-        rawTile->error = std::max(rawTile->error, postProcessErrorCheck(rawTile));
+        rawTile.tileMetaData = getTileMetaData(rawTile, io.write.region);
+        rawTile.error = std::max(rawTile.error, postProcessErrorCheck(rawTile));
     }
 
     return rawTile;
@@ -400,8 +400,7 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(int rasterBand,
     return err;
 }
 
-std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
-                                                         std::shared_ptr<RawTile> rawTile,
+std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(RawTile& rawTile,
                                                           const PixelRegion& region) const
 {
     const size_t bytesPerLine = _initData.bytesPerPixel() * region.numPixels.x;
@@ -428,7 +427,7 @@ std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
                 const float noDataValue = noDataValueAsFloat();
                 const float val = tiledatatype::interpretFloat(
                     _initData.glType(),
-                    &(rawTile->imageData[yi + i])
+                    &(rawTile.imageData[yi + i])
                 );
                 if (val != noDataValue && val == val) {
                     preprocessData->maxValues[raster] = std::max(
@@ -444,7 +443,7 @@ std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
                 else {
                     preprocessData->hasMissingData[raster] = true;
                     float& floatToRewrite = reinterpret_cast<float&>(
-                        rawTile->imageData[yi + i]
+                        rawTile.imageData[yi + i]
                     );
                     floatToRewrite = -std::numeric_limits<float>::max();
                 }
@@ -454,7 +453,7 @@ std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
     }
 
     if (allIsMissing) {
-        rawTile->error = RawTile::ReadError::Failure;
+        rawTile.error = RawTile::ReadError::Failure;
     }
 
     return preprocessData;
@@ -483,17 +482,16 @@ TileDepthTransform RawTileDataReader::calculateTileDepthTransform() {
     };
 }
 
-RawTile::ReadError RawTileDataReader::postProcessErrorCheck(
-                                             std::shared_ptr<const RawTile> rawTile) const
+RawTile::ReadError RawTileDataReader::postProcessErrorCheck(const RawTile& rawTile) const
 {
     const float missingDataValue = noDataValueAsFloat();
 
     bool hasMissingData = false;
     for (size_t c = 0; c < _initData.nRasters(); c++) {
-        hasMissingData |= (rawTile->tileMetaData->maxValues[c] == missingDataValue);
+        hasMissingData |= (rawTile.tileMetaData->maxValues[c] == missingDataValue);
     }
 
-    const bool onHighLevel = rawTile->tileIndex.level > 6;
+    const bool onHighLevel = rawTile.tileIndex.level > 6;
     if (hasMissingData && onHighLevel) {
         return RawTile::ReadError::Fatal;
     }

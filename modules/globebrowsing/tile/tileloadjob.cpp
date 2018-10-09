@@ -28,7 +28,7 @@
 
 namespace openspace::globebrowsing {
 
-TileLoadJob::TileLoadJob(RawTileDataReader* rawTileDataReader, const TileIndex& tileIndex)
+TileLoadJob::TileLoadJob(RawTileDataReader& rawTileDataReader, const TileIndex& tileIndex)
     : _rawTileDataReader(rawTileDataReader)
     , _chunkIndex(tileIndex)
 {
@@ -37,20 +37,20 @@ TileLoadJob::TileLoadJob(RawTileDataReader* rawTileDataReader, const TileIndex& 
 
 TileLoadJob::~TileLoadJob() {
     if (_hasOwnershipOfData) {
-        delete[] _rawTile->imageData;
+        delete[] _rawTile.imageData;
     }
 }
 
 void TileLoadJob::execute() {
-    size_t numBytes = _rawTileDataReader->tileTextureInitData().totalNumBytes();
+    size_t numBytes = _rawTileDataReader.tileTextureInitData().totalNumBytes();
     char* dataPtr = new char[numBytes];
     _hasOwnershipOfData = true;
-    _rawTile = _rawTileDataReader->readTileData(_chunkIndex, dataPtr);
+    _rawTile = std::move(_rawTileDataReader.readTileData(_chunkIndex, dataPtr));
 }
 
-std::shared_ptr<RawTile> TileLoadJob::product() {
+RawTile TileLoadJob::product() {
     _hasOwnershipOfData = false;
-    return _rawTile;
+    return std::move(_rawTile);
 }
 
 bool TileLoadJob::hasOwnershipOfData() const {

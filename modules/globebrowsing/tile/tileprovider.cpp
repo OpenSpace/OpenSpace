@@ -206,7 +206,7 @@ void initAsyncTileDataReader(DefaultTileProvider& t, TileTextureInitData initDat
 
 void initTexturesFromLoadedData(DefaultTileProvider& t) {
     if (t.asyncTextureDataProvider) {
-        std::shared_ptr<RawTile> tile = t.asyncTextureDataProvider->popFinishedRawTile();
+        std::optional<RawTile> tile = t.asyncTextureDataProvider->popFinishedRawTile();
         if (tile) {
             const cache::ProviderTileKey key = { tile->tileIndex, t.uniqueIdentifier };
             ghoul_assert(!t.tileCache->exist(key), "Tile must not be existing in cache");
