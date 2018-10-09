@@ -22,52 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/scalar/wcharproperty.h>
+#ifndef __OPENSPACE_MODULE_IMGUI___GUISHORTCUTSCOMPONENT___H__
+#define __OPENSPACE_MODULE_IMGUI___GUISHORTCUTSCOMPONENT___H__
 
-#include <ghoul/lua/ghoul_lua.h>
+#include <modules/imgui/include/guicomponent.h>
 
-#include <limits>
-#include <sstream>
+namespace openspace::gui {
 
-namespace openspace::properties {
+class GuiShortcutsComponent : public GuiComponent {
+public:
+    GuiShortcutsComponent();
 
-int _StubToPreventLinkerWarningAboutMissingExportSymbols;
+    void render() override;
+};
 
-// #define DEFAULT_FROM_LUA_LAMBDA(wchar_t, DEFAULT_VALUE)
-//     [](lua_State* state, bool& success) -> wchar_t {
-//         success = (lua_isnumber(state, -1) == 1);
-//         if (success) {
-//             return static_cast<wchar_t>(lua_tonumber(state, -1));
-//         }
-//         else {
-//             return DEFAULT_VALUE;
-//         }
-//     }
+} // namespace openspace::gui
 
-// #define DEFAULT_TO_LUA_LAMBDA(wchar_t)
-//     [](lua_State* state, wchar_t value) -> bool {
-//         lua_pushnumber(state, static_cast<lua_Number>(value));
-//         return true;
-//     }
-
-// #define DEFAULT_FROM_STRING_LAMBDA(wchar_t, DEFAULT_VALUE)
-//     [](std::string val, bool& success) -> wchar_t {
-//         std::stringstream s(val);
-//         wchar_t v;
-//         s >> v;
-//         success = !s.fail();
-//         if (success) {
-//             return v;
-//         }
-//     }
-
-//REGISTER_NUMERICALPROPERTY_SOURCE(WCharProperty, wchar_t, wchar_t(0),
-//                                  numeric_limits<wchar_t>::lowest(),
-//                                  numeric_limits<wchar_t>::max(), wchar_t(1),
-//                                  DEFAULT_FROM_LUA_LAMBDA(wchar_t, wchar_t(0)),
-//                                  DEFAULT_TO_LUA_LAMBDA(wchar_t),
-//                                  DEFAULT_FROM_STRING_LAMBDA(wchar_t, wchar_t(0)),
-//                                  DEFAULT_TO_STRING_LAMBDA(wchar_t),
-//                                  LUA_TNUMBER);
-
-} // namespace openspace::properties
+#endif // __OPENSPACE_MODULE_IMGUI___GUISHORTCUTSCOMPONENT___H__

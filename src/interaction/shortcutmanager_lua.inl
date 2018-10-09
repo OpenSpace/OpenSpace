@@ -22,52 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/scalar/wcharproperty.h>
+#include <openspace/engine/globals.h>
+#include <ghoul/logging/logmanager.h>
 
-#include <ghoul/lua/ghoul_lua.h>
+namespace {
 
-#include <limits>
-#include <sstream>
+openspace::interaction::ShortcutManager::ShortcutInformation extractInfo(lua_State* L,
+                                                                         int nArguments,
+                                                                         bool isSync)
+{
+    openspace::interaction::ShortcutManager::ShortcutInformation i = {
+        ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::No),
+        ghoul::lua::value<std::string>(L, 2, ghoul::lua::PopValue::No),
+        openspace::interaction::ShortcutManager::IsSynchronized(isSync),
+        nArguments == 3 ?
+            ghoul::lua::value<std::string>(L, 3, ghoul::lua::PopValue::No) :
+            ""
+    };
+    lua_pop(L, nArguments);
+    return i;
+}
 
-namespace openspace::properties {
+} // namespace
 
-int _StubToPreventLinkerWarningAboutMissingExportSymbols;
+namespace openspace::luascriptfunctions {
 
-// #define DEFAULT_FROM_LUA_LAMBDA(wchar_t, DEFAULT_VALUE)
-//     [](lua_State* state, bool& success) -> wchar_t {
-//         success = (lua_isnumber(state, -1) == 1);
-//         if (success) {
-//             return static_cast<wchar_t>(lua_tonumber(state, -1));
-//         }
-//         else {
-//             return DEFAULT_VALUE;
-//         }
-//     }
+int clearShortcuts(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clearShortcuts");
+    global::shortcutManager.resetShortcuts();
+    return 0;
+}
 
-// #define DEFAULT_TO_LUA_LAMBDA(wchar_t)
-//     [](lua_State* state, wchar_t value) -> bool {
-//         lua_pushnumber(state, static_cast<lua_Number>(value));
-//         return true;
-//     }
+int bindShortcut(lua_State* L) {
+    int n = ghoul::lua::checkArgumentsAndThrow(L, 2, 3, "lua::bindKeyLocal");
 
-// #define DEFAULT_FROM_STRING_LAMBDA(wchar_t, DEFAULT_VALUE)
-//     [](std::string val, bool& success) -> wchar_t {
-//         std::stringstream s(val);
-//         wchar_t v;
-//         s >> v;
-//         success = !s.fail();
-//         if (success) {
-//             return v;
-//         }
-//     }
+    interaction::ShortcutManager::ShortcutInformation info = extractInfo(L, n, true);
+    global::shortcutManager.addShortcut(std::move(info));
 
-//REGISTER_NUMERICALPROPERTY_SOURCE(WCharProperty, wchar_t, wchar_t(0),
-//                                  numeric_limits<wchar_t>::lowest(),
-//                                  numeric_limits<wchar_t>::max(), wchar_t(1),
-//                                  DEFAULT_FROM_LUA_LAMBDA(wchar_t, wchar_t(0)),
-//                                  DEFAULT_TO_LUA_LAMBDA(wchar_t),
-//                                  DEFAULT_FROM_STRING_LAMBDA(wchar_t, wchar_t(0)),
-//                                  DEFAULT_TO_STRING_LAMBDA(wchar_t),
-//                                  LUA_TNUMBER);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
 
-} // namespace openspace::properties
+int bindShortcutLocal(lua_State* L) {
+    int n = ghoul::lua::checkArgumentsAndThrow(L, 2, 3, "lua::bindKeyLocal");
+
+    interaction::ShortcutManager::ShortcutInformation info = extractInfo(L, n, false);
+    global::shortcutManager.addShortcut(std::move(info));
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+} // namespace openspace::luascriptfunctions

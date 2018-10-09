@@ -22,52 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/scalar/wcharproperty.h>
+#ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMVELOCITY___H__
+#define __OPENSPACE_MODULE_BASE___DASHBOARDITEMVELOCITY___H__
 
-#include <ghoul/lua/ghoul_lua.h>
+#include <openspace/rendering/dashboarditem.h>
 
-#include <limits>
-#include <sstream>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <utility>
 
-namespace openspace::properties {
+namespace ghoul::fontrendering { class Font; }
 
-int _StubToPreventLinkerWarningAboutMissingExportSymbols;
+namespace openspace {
 
-// #define DEFAULT_FROM_LUA_LAMBDA(wchar_t, DEFAULT_VALUE)
-//     [](lua_State* state, bool& success) -> wchar_t {
-//         success = (lua_isnumber(state, -1) == 1);
-//         if (success) {
-//             return static_cast<wchar_t>(lua_tonumber(state, -1));
-//         }
-//         else {
-//             return DEFAULT_VALUE;
-//         }
-//     }
+class SceneGraphNode;
 
-// #define DEFAULT_TO_LUA_LAMBDA(wchar_t)
-//     [](lua_State* state, wchar_t value) -> bool {
-//         lua_pushnumber(state, static_cast<lua_Number>(value));
-//         return true;
-//     }
+namespace documentation { struct Documentation; }
 
-// #define DEFAULT_FROM_STRING_LAMBDA(wchar_t, DEFAULT_VALUE)
-//     [](std::string val, bool& success) -> wchar_t {
-//         std::stringstream s(val);
-//         wchar_t v;
-//         s >> v;
-//         success = !s.fail();
-//         if (success) {
-//             return v;
-//         }
-//     }
+class DashboardItemVelocity : public DashboardItem {
+public:
+    DashboardItemVelocity(const ghoul::Dictionary& dictionary);
+    virtual ~DashboardItemVelocity() = default;
 
-//REGISTER_NUMERICALPROPERTY_SOURCE(WCharProperty, wchar_t, wchar_t(0),
-//                                  numeric_limits<wchar_t>::lowest(),
-//                                  numeric_limits<wchar_t>::max(), wchar_t(1),
-//                                  DEFAULT_FROM_LUA_LAMBDA(wchar_t, wchar_t(0)),
-//                                  DEFAULT_TO_LUA_LAMBDA(wchar_t),
-//                                  DEFAULT_FROM_STRING_LAMBDA(wchar_t, wchar_t(0)),
-//                                  DEFAULT_TO_STRING_LAMBDA(wchar_t),
-//                                  LUA_TNUMBER);
+    void render(glm::vec2& penPosition) override;
 
-} // namespace openspace::properties
+    glm::vec2 size() const override;
+
+    static documentation::Documentation Documentation();
+
+private:
+    properties::StringProperty _fontName;
+    properties::FloatProperty _fontSize;
+    properties::BoolProperty _doSimplification;
+    properties::OptionProperty _requestedUnit;
+
+    glm::dvec3 _prevPosition;
+
+    std::shared_ptr<ghoul::fontrendering::Font> _font;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMVELOCITY___H__

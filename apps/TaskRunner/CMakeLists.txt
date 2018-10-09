@@ -31,19 +31,13 @@ set_source_files_properties(
 
 set(MACOSX_BUNDLE_ICON_FILE openspace.icns)
 
-create_new_application(
-    TaskRunner
-    MACOSX_BUNDLE
+create_new_application(TaskRunner MACOSX_BUNDLE
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/openspace.rc
     ${CMAKE_CURRENT_SOURCE_DIR}/openspace.icns
 )
 
-target_link_libraries(
-    TaskRunner
-    libOpenSpace
-)
-
+target_link_libraries(TaskRunner openspace-core)
 
 # Web Browser and Web gui
 # Why not put these in the module's path? Because they do not have access to the
