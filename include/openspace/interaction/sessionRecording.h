@@ -182,6 +182,8 @@ private:
     void addKeyframe(double timestamp, datamessagestructures::TimeKeyframe keyframe);
     void addKeyframe(double timestamp, std::string scriptToQueue);
     void moveAheadInTime(double deltaTime);
+    void lookForNonCameraKeyframesThatHaveComeDue(double currTime, double deltaTime);
+    void updateCameraWithOrWithoutNewKeyframes(double currTime);
     bool isTimeToHandleNextNonCameraKeyframe(double currTime, double deltaTime);
     bool processNextNonCameraKeyframeAheadInTime(double currTime, double deltaTime);
     void findNextFutureCameraIndex(double currTime);
@@ -233,11 +235,10 @@ private:
 
     unsigned int _idxTimeline_nonCamera = 0;
     unsigned int _idxTime = 0;
-    unsigned int _idxScript;
+    unsigned int _idxScript = 0;
 
     unsigned int _idxTimeline_cameraPtr = 0;
     unsigned int _idxTimeline_cameraPrevUpperBound = 0;
-    double _lastCameraRenderTime = 0;
 };
 
 } // namespace openspace
