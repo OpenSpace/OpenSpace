@@ -22,64 +22,66 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESPHERICALGRID___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLESPHERICALGRID___H__
+#include <openspace/interaction/shortcutmanager.h>
 
-#include <openspace/rendering/renderable.h>
+#include <openspace/engine/globals.h>
+#include <openspace/scripting/lualibrary.h>
+#include <openspace/scripting/scriptengine.h>
+#include <ghoul/glm.h>
+#include <sstream>
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/matrix/dmat4property.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/vector/vec4property.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include "shortcutmanager_lua.inl"
 
-namespace ghoul::opengl { class ProgramObject; }
+namespace openspace::interaction {
 
-namespace openspace::documentation { struct Documentation; }
+void ShortcutManager::resetShortcuts() {
+    _shortcuts.clear();
+}
 
-namespace openspace {
+void ShortcutManager::addShortcut(ShortcutInformation info) {
+    _shortcuts.push_back(std::move(info));
+}
 
-class RenderableSphericalGrid : public Renderable {
-public:
-    RenderableSphericalGrid(const ghoul::Dictionary& dictionary);
-    ~RenderableSphericalGrid() = default;
+const std::vector<ShortcutManager::ShortcutInformation>&
+ShortcutManager::shortcuts() const
+{
+    return _shortcuts;
+}
 
-    void initializeGL() override;
-    void deinitializeGL() override;
-
-    bool isReady() const override;
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
-
-    static documentation::Documentation Documentation();
-
-protected:
-    struct Vertex {
-        float location[3];
+scripting::LuaLibrary ShortcutManager::luaLibrary() {
+    return {
+        "",
+        {
+            {
+                "clearShortcuts",
+                &luascriptfunctions::clearShortcuts,
+                {},
+                "",
+                "Clear all shortcuts in this scene"
+            },
+            {
+                "bindShortcut",
+                &luascriptfunctions::bindShortcut,
+                {},
+                "string, string [, string]",
+                "Binds a Lua script to a new shortcut that is executed both locally and "
+                "to be broadcast to clients if this is the host of a parallel session. "
+                "The first argument is a human-readable name for this shortcut, the "
+                "second argument is the Lua script that will be executed and the last "
+                "argument is a describtive text for the shortcut for tooltips, etc."
+            },
+            {
+                "bindShortcutLocal",
+                &luascriptfunctions::bindShortcutLocal,
+                {},
+                "string, string [, string]",
+                "Binds a Lua script to a new shortcut that is executed onlylocally. The "
+                "first argument is a human-readable name for this shortcut, the second "
+                "argument is the Lua script that will be executed and the last argument "
+                "is a describtive text for the shortcut for tooltips, etc."
+            }
+        }
     };
+}
 
-    ghoul::opengl::ProgramObject* _gridProgram;
-
-    properties::DMat4Property _gridMatrix;
-    properties::Vec4Property _gridColor;
-    properties::IntProperty _segments;
-    properties::FloatProperty _lineWidth;
-
-    bool _gridIsDirty = true;
-
-    GLuint _vaoID = 0;
-    GLuint _vBufferID = 0;
-    GLuint _iBufferID = 0;
-
-    GLenum _mode = GL_LINES;
-    unsigned int _isize = 0;
-    unsigned int _vsize = 0;
-    std::vector<Vertex> _varray;
-    std::vector<int> _iarray;
-};
-
-}// namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLESPHERICALGRID___H__
+} // namespace openspace::interaction

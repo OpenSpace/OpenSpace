@@ -53,7 +53,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
-        "This value determines the size of the font that is used to render the date."
+        "This value determines the size of the font that is used to render the distance."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SourceTypeInfo = {
@@ -87,9 +87,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SimplificationInfo = {
         "Simplification",
         "Simplification",
-        "If this value is enabled, the distace is displayed in nuanced units, such as "
-        "km, AU, light years, parsecs, etc. If this value is disabled, it is always "
-        "displayed in meters."
+        "If this value is enabled, the distance is displayed in nuanced units, such as "
+        "km, AU, light years, parsecs, etc. If this value is disabled, the unit can be "
+        "explicitly requested."
     };
 
     constexpr openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
