@@ -56,95 +56,95 @@ namespace {
 
 namespace openspace::interaction {
 
-    SessionRecording::SessionRecording()
-        : properties::PropertyOwner({ "SessionRecording" }) {
+SessionRecording::SessionRecording()
+    : properties::PropertyOwner({ "SessionRecording" }) {
+}
+
+SessionRecording::~SessionRecording() {} // NOLINT
+
+void SessionRecording::deinitialize() {
+    stopRecording();
+    stopPlayback();
+}
+
+void SessionRecording::setRecordDataFormat(recordDataMode dataMode) {
+    _recordingDataMode = dataMode;
+}
+
+bool SessionRecording::startRecording(std::string filename) {
+    if (_state == sessionState::playback) {
+        _playbackFile.close();
     }
+    _state = sessionState::recording;
+    _playbackActive_camera = false;
+    _playbackActive_time = false;
+    _playbackActive_script = false;
+    if (isDataModeBinary())
+        _recordFile.open(filename, std::ios::binary);
+    else
+        _recordFile.open(filename);
 
-    SessionRecording::~SessionRecording() {} // NOLINT
-
-    void SessionRecording::deinitialize() {
-        stopRecording();
-        stopPlayback();
+    if (!_recordFile.is_open() || !_recordFile.good()) {
+        LERROR(fmt::format("Unable to open file {} for keyframe recording", filename.c_str()));
+        return false;
     }
+    _recordFile << _fileHeaderTitle;
+    _recordFile.write(_fileHeaderVersion, _fileHeaderVersionLength);
+    if (isDataModeBinary())
+        _recordFile << dataFormatBinaryTag;
+    else
+        _recordFile << dataFormatAsciiTag;
+    _recordFile << '\n';
 
-    void SessionRecording::setRecordDataFormat(recordDataMode dataMode) {
-        _recordingDataMode = dataMode;
+    LINFO("Session recording started");
+    _timestampRecordStarted = global::windowDelegate.applicationTime();
+    return true;
+}
+
+void SessionRecording::stopRecording() {
+    if (_state == sessionState::recording) {
+        _state = sessionState::idle;
+        LINFO("Session recording stopped");
     }
+    //Close the recording file
+    _recordFile.close();
+}
 
-    bool SessionRecording::startRecording(std::string filename) {
-        if (_state == sessionState::playback) {
-            _playbackFile.close();
-        }
-        _state = sessionState::recording;
-        _playbackActive_camera = false;
-        _playbackActive_time = false;
-        _playbackActive_script = false;
-        if (isDataModeBinary())
-            _recordFile.open(filename, std::ios::binary);
-        else
-            _recordFile.open(filename);
-
-        if (!_recordFile.is_open() || !_recordFile.good()) {
-            LERROR(fmt::format("Unable to open file {} for keyframe recording", filename.c_str()));
+bool SessionRecording::startPlayback(std::string filename, KeyframeTimeRef timeMode) {
+    if (_state == sessionState::recording) {
+        LERROR("Unable to start playback while in session recording mode");
+        return false;
+    }
+    else if (_state == sessionState::playback) {
+        if (_playbackFilename.compare(filename) == 0) {
+            LERROR(fmt::format(
+                "Unable to start playback on file {} since it is already in playback",
+                filename)
+            );
             return false;
         }
-        _recordFile << _fileHeaderTitle;
-        _recordFile.write(_fileHeaderVersion, _fileHeaderVersionLength);
-        if (isDataModeBinary())
-            _recordFile << dataFormatBinaryTag;
-        else
-            _recordFile << dataFormatAsciiTag;
-        _recordFile << '\n';
-
-        LINFO("Session recording started");
-        _timestampRecordStarted = global::windowDelegate.applicationTime();
-        return true;
     }
 
-    void SessionRecording::stopRecording() {
-        if (_state == sessionState::recording) {
-            _state = sessionState::idle;
-            LINFO("Session recording stopped");
-        }
-        //Close the recording file
-        _recordFile.close();
+    _playbackLineNum = 1;
+    _playbackFilename = filename;
+
+    //Open in ASCII first
+    _playbackFile.open(_playbackFilename, std::ifstream::in);
+    //Read header
+    std::string readBackHeaderString = readHeaderElement(_fileHeaderTitle.length());
+    if (readBackHeaderString.compare(_fileHeaderTitle) != 0) {
+        LERROR("Specified playback file does not contain expected header.");
+        return false;
     }
-
-    bool SessionRecording::startPlayback(std::string filename, KeyframeTimeRef timeMode) {
-        if (_state == sessionState::recording) {
-            LERROR("Unable to start playback while in session recording mode");
-            return false;
-        }
-        else if (_state == sessionState::playback) {
-            if (_playbackFilename.compare(filename) == 0) {
-                LERROR(fmt::format(
-                    "Unable to start playback on file {} since it is already in playback",
-                    filename)
-                );
-                return false;
-            }
-        }
-
-        _playbackLineNum = 1;
-        _playbackFilename = filename;
-
-        //Open in ASCII first
-        _playbackFile.open(_playbackFilename, std::ifstream::in);
-        //Read header
-        std::string readBackHeaderString = readHeaderElement(_fileHeaderTitle.length());
-        if (readBackHeaderString.compare(_fileHeaderTitle) != 0) {
-            LERROR("Specified playback file does not contain expected header.");
-            return false;
-        }
-        readHeaderElement(_fileHeaderVersionLength);
-        std::string readDataMode = readHeaderElement(1);
-        if (readDataMode[0] == dataFormatAsciiTag)
-            _recordingDataMode = recordDataMode::ascii;
-        else if (readDataMode[0] == dataFormatBinaryTag)
-            _recordingDataMode = recordDataMode::binary;
-        else
-            LERROR("Unknown data type in header (should be Ascii or Binary)");
-        std::string throwawayNewlineChar = readHeaderElement(1);
+    readHeaderElement(_fileHeaderVersionLength);
+    std::string readDataMode = readHeaderElement(1);
+    if (readDataMode[0] == dataFormatAsciiTag)
+        _recordingDataMode = recordDataMode::ascii;
+    else if (readDataMode[0] == dataFormatBinaryTag)
+        _recordingDataMode = recordDataMode::binary;
+    else
+        LERROR("Unknown data type in header (should be Ascii or Binary)");
+    std::string throwawayNewlineChar = readHeaderElement(1);
     
     if (isDataModeBinary()) {
         //Close & re-open the file, starting from the beginning, and do dummy read
