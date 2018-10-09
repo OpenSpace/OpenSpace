@@ -17,13 +17,4 @@
   <BlockSizeY>240</BlockSizeY>
   <BandsCount>3</BandsCount>
   <MaxConnections>10</MaxConnections>
-   <Cache>
-        <Path>./gdalwmscache</Path>
-        <Depth>2</Depth>
-        <Extension>.jpg</Extension>
-        <Type>file</Type>
-        <Expires>604800</Expires>
-        <MaxSize>2147483640</MaxSize>
-        <Unique>True</Unique>
-    </Cache>
 </GDAL_WMS>
