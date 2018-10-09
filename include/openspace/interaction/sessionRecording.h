@@ -183,7 +183,7 @@ private:
     void addKeyframe(double timestamp, std::string scriptToQueue);
     void moveAheadInTime(double deltaTime);
     bool isTimeToHandleNextNonCameraKeyframe(double currTime, double deltaTime);
-    bool processNextKeyframeAheadInTime(double currTime, double deltaTime);
+    bool processNextNonCameraKeyframeAheadInTime(double currTime, double deltaTime);
     void findNextFutureCameraIndex(double currTime);
     bool processCameraKeyframe(double now);
     bool processScriptKeyframe(double now, double deltaTime);
@@ -227,20 +227,16 @@ private:
     bool _cleanupNeeded = false;
 
     std::vector < interaction::KeyframeNavigator::CameraPose> _keyframesCamera;
-    unsigned int _idxCamera = 0;
-
     std::vector<datamessagestructures::TimeKeyframe> _keyframesTime;
-    unsigned int _idxTime;
-
     std::vector<std::string> _keyframesScript;
+    std::vector<timelineEntry> _timeline;
+
+    unsigned int _idxTimeline_nonCamera = 0;
+    unsigned int _idxTime = 0;
     unsigned int _idxScript;
 
-    std::vector<timelineEntry> _timeline;
-    unsigned int _idxTimeline;
     unsigned int _idxTimeline_cameraPtr = 0;
     unsigned int _idxTimeline_cameraPrevUpperBound = 0;
-    unsigned int _idxTimeline_timePtr = 0;
-    unsigned int _idxTimeline_scriptPtr = 0;
     double _lastCameraRenderTime = 0;
 };
 

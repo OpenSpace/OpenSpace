@@ -227,6 +227,7 @@ void SessionRecording::signalPlaybackFinishedForComponent(recordedType type) {
 void SessionRecording::stopPlayback() {
     if (_state == sessionState::playback) {
         _state = sessionState::idle;
+        _cleanupNeeded = true;
         LINFO("Session playback stopped");
     }
 }
@@ -240,9 +241,8 @@ void SessionRecording::cleanUpPlayback() {
 
     //Clear all timelines and keyframes
     _timeline.clear();
-    _idxTimeline = 0;
+    _idxTimeline_nonCamera = 0;
     _keyframesCamera.clear();
-    _idxCamera = 0;
     _keyframesTime.clear();
     _idxTime = 0;
     _keyframesScript.clear();
@@ -818,21 +818,23 @@ void SessionRecording::moveAheadInTime(double deltaTime) {
 
     LINFOC("frame", std::to_string(global::renderEngine._frameNumber));
 
+    //Update non-camera keyframes
     while (isTimeToHandleNextNonCameraKeyframe(currTime, deltaTime)
            && _state == sessionState::playback
            && (_playbackActive_time || _playbackActive_script))
     {
-        if (!processNextKeyframeAheadInTime(currTime, deltaTime)) {
+        if (!processNextNonCameraKeyframeAheadInTime(currTime, deltaTime)) {
             break;
         }
 
-        if (_idxTimeline < (_timeline.size() - 1))
-            _idxTimeline++;
+        if (_idxTimeline_nonCamera < (_timeline.size() - 1))
+            _idxTimeline_nonCamera++;
         else
             break;
     }
 
-    //Update camera with interpolation
+    //Update camera with interpolation, regardless of whether or not there is a new
+    // camera keyframe available
     if (_state == sessionState::playback && _playbackActive_camera)
     {
         findNextFutureCameraIndex(currTime);
@@ -841,7 +843,7 @@ void SessionRecording::moveAheadInTime(double deltaTime) {
 }
 
 bool SessionRecording::isTimeToHandleNextNonCameraKeyframe(double currTime, double deltaTime) {
-    if (getNextKeyframeType() != recordedType::camera) {
+    if (currTime > getNextTimestamp()) {
         return true;
     }
 }
@@ -864,19 +866,22 @@ void SessionRecording::findNextFutureCameraIndex(double currTime) {
         signalPlaybackFinishedForComponent(recordedType::camera);
 }
 
-bool SessionRecording::processNextKeyframeAheadInTime(double now, double deltaTime) {
+bool SessionRecording::processNextNonCameraKeyframeAheadInTime(double now, double deltaTime) {
     bool returnValue = false;
 
     //LINFO(fmt::format("Keyframe at {} frame={} timelineIndex={}", now, global::renderEngine._frameNumber, _idxTimeline));
 
     switch (getNextKeyframeType()) {
     case recordedType::camera:
-        _idxCamera = _timeline[_idxTimeline].idxIntoKeyframeTypeArray;
-        returnValue = processCameraKeyframe(now);
+        //_idxCamera = _timeline[_idxTimeline].idxIntoKeyframeTypeArray;
+        //returnValue = processCameraKeyframe(now);
+
+        //Just return true since this function no longer handles camera keyframes
+        returnValue = true;
         break;
 
     case recordedType::time:
-        _idxTime = _timeline[_idxTimeline].idxIntoKeyframeTypeArray;
+        _idxTime = _timeline[_idxTimeline_nonCamera].idxIntoKeyframeTypeArray;
         if (_keyframesTime.size() == 0) {
             return false;
         }
@@ -885,13 +890,13 @@ bool SessionRecording::processNextKeyframeAheadInTime(double now, double deltaTi
         break;
 
     case recordedType::script:
-        _idxScript = _timeline[_idxTimeline].idxIntoKeyframeTypeArray;
+        _idxScript = _timeline[_idxTimeline_nonCamera].idxIntoKeyframeTypeArray;
         returnValue = processScriptKeyframe(now, deltaTime);
         break;
 
     default:
         LERROR(fmt::format("Bad keyframe type encountered during playback at index {}.",
-               _idxTimeline));
+            _idxTimeline_nonCamera));
         break;
     }
     return returnValue;
@@ -950,7 +955,7 @@ bool SessionRecording::processCameraKeyframe(double now) {
     glm::dvec3 nextKeyframeCameraPosition = nextPose.position;
     glm::dquat prevKeyframeCameraRotation = prevPose.rotation;
     glm::dquat nextKeyframeCameraRotation = nextPose.rotation;
-/*
+
     // Transform position and rotation based on focus node rotation
     // (if following rotation)
     if (prevPose.followFocusNodeRotation) {
@@ -973,7 +978,7 @@ bool SessionRecording::processCameraKeyframe(double now) {
     // Transform position based on focus node position
     prevKeyframeCameraPosition += prevFocusNode->worldPosition();
     nextKeyframeCameraPosition += nextFocusNode->worldPosition();
-*/
+
     // Linear interpolation
     camera->setPositionVec3(
         prevKeyframeCameraPosition * (1 - t) + nextKeyframeCameraPosition * t
@@ -1021,8 +1026,8 @@ bool SessionRecording::processScriptKeyframe(double now, double deltaTime) {
 double SessionRecording::getNextTimestamp() {
     if (_timeline.size() == 0) {
         return 0.0;
-    } else if (_idxTimeline < _timeline.size()) {
-        return _timeline[_idxTimeline].timestamp;
+    } else if (_idxTimeline_nonCamera < _timeline.size()) {
+        return _timeline[_idxTimeline_nonCamera].timestamp;
     } else {
         return _timeline.back().timestamp;
     }
@@ -1031,10 +1036,10 @@ double SessionRecording::getNextTimestamp() {
 double SessionRecording::getPrevTimestamp() {
     if (_timeline.size() == 0)
         return 0.0;
-    else if (_idxTimeline == 0 )
+    else if (_idxTimeline_nonCamera == 0 )
         return _timeline.front().timestamp;
-    else if (_idxTimeline < _timeline.size()) 
-        return _timeline[_idxTimeline - 1].timestamp;
+    else if (_idxTimeline_nonCamera < _timeline.size())
+        return _timeline[_idxTimeline_nonCamera - 1].timestamp;
     else
         return _timeline.back().timestamp;
 }
@@ -1042,8 +1047,8 @@ double SessionRecording::getPrevTimestamp() {
 SessionRecording::recordedType SessionRecording::getNextKeyframeType() {
     if (_timeline.size() == 0) {
         return recordedType::invalid;
-    } else if (_idxTimeline < _timeline.size()) {
-        return _timeline[_idxTimeline].keyframeType;
+    } else if (_idxTimeline_nonCamera < _timeline.size()) {
+        return _timeline[_idxTimeline_nonCamera].keyframeType;
     } else {
         return _timeline.back().keyframeType;
     }
@@ -1052,9 +1057,9 @@ SessionRecording::recordedType SessionRecording::getNextKeyframeType() {
 SessionRecording::recordedType SessionRecording::getPrevKeyframeType() {
     if (_timeline.size() == 0) {
         return recordedType::invalid;
-    } else if (_idxTimeline < _timeline.size()) {
-        if (_idxTimeline > 0)
-            return _timeline[_idxTimeline - 1].keyframeType;
+    } else if (_idxTimeline_nonCamera < _timeline.size()) {
+        if (_idxTimeline_nonCamera > 0)
+            return _timeline[_idxTimeline_nonCamera - 1].keyframeType;
         else
             return _timeline.front().keyframeType;
     }

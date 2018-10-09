@@ -962,6 +962,7 @@ void OpenSpaceEngine::preSynchronization() {
     if (master) {
         double dt = global::windowDelegate.averageDeltaTime();
         global::timeManager.preSynchronization(dt);
+        global::sessionRecording.preSynchronization(global::windowDelegate.deltaTime());
 
         using Iter = std::vector<std::string>::const_iterator;
         std::pair<Iter, Iter> scheduledScripts = global::scriptScheduler.progressTo(
@@ -986,7 +987,6 @@ void OpenSpaceEngine::preSynchronization() {
             }
         }
         global::parallelPeer.preSynchronization();
-        global::sessionRecording.preSynchronization(global::windowDelegate.deltaTime());
     }
 
     for (const std::function<void()>& func : global::callback::preSync) {
