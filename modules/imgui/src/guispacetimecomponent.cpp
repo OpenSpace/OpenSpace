@@ -224,7 +224,7 @@ void GuiSpaceTimeComponent::render() {
         _tooltipDelay
     );
 
-    auto incrementTime = [](float days) {
+    auto incrementTime = [shift = ImGui::GetIO().KeyShift](float days) {
         using namespace std::chrono;
 
         const float duration = global::timeManager.defaultTimeInterpolationDuration();
@@ -241,11 +241,20 @@ void GuiSpaceTimeComponent::render() {
             j2000 - seconds :
             j2000 + seconds;
 
-        global::scriptEngine.queueScript(
-            "openspace.time.interpolateTime(" + std::to_string(newTime) + ", " +
-            std::to_string(duration) + ")",
-            scripting::ScriptEngine::RemoteScripting::No
-        );
+        if (shift) {
+            // If any shift key is pressed we want to always jump to the time
+            global::scriptEngine.queueScript(
+                "openspace.time.setTime(" + std::to_string(newTime) + ")",
+                scripting::ScriptEngine::RemoteScripting::No
+            );
+        }
+        else {
+            global::scriptEngine.queueScript(
+                "openspace.time.interpolateTime(" + std::to_string(newTime) + ", " +
+                std::to_string(duration) + ")",
+                scripting::ScriptEngine::RemoteScripting::No
+            );
+        }
     };
 
     const bool minusMonth = ImGui::Button("-Month");
@@ -369,8 +378,7 @@ void GuiSpaceTimeComponent::render() {
             // value to the new unit
 
             _deltaTime = static_cast<float>(
-                convertTime(dt, TimeUnit::Second, static_cast<TimeUnit>(_deltaTimeUnit)
-                )
+                convertTime(dt, TimeUnit::Second, static_cast<TimeUnit>(_deltaTimeUnit))
             );
         }
     }
