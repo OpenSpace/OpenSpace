@@ -63,19 +63,11 @@ struct TileLoadJob : public Job<RawTile> {
     */
     RawTile product() override;
 
-    /**
-     * Get the data ownership. if any data has been allocated (ie if the job was created
-     * using the CPU constructor not taking a PBO data pointer) this function is
-     * equivalent with asking if the job is unfinished. If the job has ownership of data,
-     * the data will be deleted once the job is deleted.
-     */
-    bool hasOwnershipOfData() const;
-
 protected:
     RawTileDataReader& _rawTileDataReader;
     RawTile _rawTile;
     TileIndex _chunkIndex;
-    bool _hasOwnershipOfData = false;
+    bool _hasTile = false;
 };
 
 } // namespace openspace::globebrowsing

@@ -42,19 +42,18 @@ std::shared_ptr<RawTile> RawTileDataReader::defaultTileData() const {
     return std::make_shared<RawTile>(RawTile::createDefault(_initData));
 }
 
-RawTile RawTileDataReader::readTileData(TileIndex tileIndex,
-                                                         char* dataDestination) const
-{
-    ghoul_assert(dataDestination, "Need to specify a data destination");
+RawTile RawTileDataReader::readTileData(TileIndex tileIndex) const {
+    size_t numBytes = tileTextureInitData().totalNumBytes();
 
-    memset(dataDestination, 255, _initData.totalNumBytes());
+    RawTile rawTile;
+    rawTile.imageData = new char[numBytes];
+    //std::fill_n(rawTile.imageData, numBytes, std::numeric_limits<char>::max());
+    memset(rawTile.imageData, 0xFF, _initData.totalNumBytes());
 
     IODescription io = ioDescription(tileIndex);
     RawTile::ReadError worstError = RawTile::ReadError::None;
-    readImageData(io, worstError, dataDestination);
+    readImageData(io, worstError, rawTile.imageData);
 
-    RawTile rawTile;
-    rawTile.imageData = dataDestination;
     rawTile.error = worstError;
     rawTile.tileIndex = std::move(tileIndex);
 

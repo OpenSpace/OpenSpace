@@ -32,11 +32,7 @@ RawTile RawTile::createDefault(const TileTextureInitData& initData) {
     RawTile defaultRes;
     defaultRes.textureInitData = std::make_shared<TileTextureInitData>(initData);
     defaultRes.imageData = new char[initData.totalNumBytes()];
-    std::fill_n(
-        defaultRes.imageData,
-        initData.totalNumBytes(),
-        char(0)
-    );
+    std::fill_n(defaultRes.imageData, initData.totalNumBytes(), char(0));
     return defaultRes;
 
 }

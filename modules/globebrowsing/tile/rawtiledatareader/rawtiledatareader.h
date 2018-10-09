@@ -48,7 +48,7 @@ public:
      * Reads data from the current dataset and initializes a <code>RawTile</code>
      * which gets returned.
      */
-    RawTile readTileData(TileIndex tileIndex, char* dataDestination) const;
+    RawTile readTileData(TileIndex tileIndex) const;
     const TileDepthTransform& depthTransform() const;
     const TileTextureInitData& tileTextureInitData() const;
     const PixelRegion::PixelRange fullPixelSize() const;

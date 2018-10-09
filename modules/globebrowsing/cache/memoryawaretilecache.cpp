@@ -314,6 +314,7 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key, RawTile& rawTil
                     _numTextureBytesAllocatedOnCPU += initData.totalNumBytes();
                 }
                 tex->setPixelData(rawTile.imageData, Texture::TakeOwnership::Yes);
+                rawTile.imageData = nullptr;
             }
         }
         else {
@@ -323,6 +324,7 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key, RawTile& rawTil
                 "Texture must have ownership of old data to avoid leaks"
             );
             tex->setPixelData(rawTile.imageData, Texture::TakeOwnership::Yes);
+            rawTile.imageData = nullptr;
             [[ maybe_unused ]] size_t expectedDataSize = tex->expectedPixelDataSize();
             const size_t numBytes = rawTile.textureInitData->totalNumBytes();
             ghoul_assert(expectedDataSize == numBytes, "Pixel data size is incorrect");

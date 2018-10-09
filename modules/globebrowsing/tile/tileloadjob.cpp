@@ -31,30 +31,22 @@ namespace openspace::globebrowsing {
 TileLoadJob::TileLoadJob(RawTileDataReader& rawTileDataReader, const TileIndex& tileIndex)
     : _rawTileDataReader(rawTileDataReader)
     , _chunkIndex(tileIndex)
-{
-    ghoul_assert(rawTileDataReader, "data reader must not be nullptr");
-}
+{}
 
 TileLoadJob::~TileLoadJob() {
-    if (_hasOwnershipOfData) {
-        delete[] _rawTile.imageData;
+    if (_hasTile) {
+        _rawTile.imageData = nullptr;
     }
 }
 
 void TileLoadJob::execute() {
-    size_t numBytes = _rawTileDataReader.tileTextureInitData().totalNumBytes();
-    char* dataPtr = new char[numBytes];
-    _hasOwnershipOfData = true;
-    _rawTile = std::move(_rawTileDataReader.readTileData(_chunkIndex, dataPtr));
+    _rawTile = std::move(_rawTileDataReader.readTileData(_chunkIndex));
+    _hasTile = true;
 }
 
 RawTile TileLoadJob::product() {
-    _hasOwnershipOfData = false;
+    _hasTile = false;
     return std::move(_rawTile);
-}
-
-bool TileLoadJob::hasOwnershipOfData() const {
-    return _hasOwnershipOfData;
 }
 
 } // namespace openspace::globebrowsing

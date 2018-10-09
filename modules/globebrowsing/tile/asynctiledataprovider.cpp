@@ -69,7 +69,7 @@ std::vector<RawTile> AsyncTileDataProvider::rawTiles() {
     std::vector<RawTile> readyResults;
     std::optional<RawTile> finishedJob = popFinishedRawTile();
     while (finishedJob) {
-        readyResults.push_back(finishedJob.value());
+        readyResults.push_back(std::move(finishedJob.value()));
         finishedJob = popFinishedRawTile();
     }
     return readyResults;
@@ -86,7 +86,7 @@ std::optional<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
         // Pbo is still mapped. Set the id for the raw tile
         product.pbo = 0;
         if (product.error != RawTile::ReadError::None) {
-            delete[] product.imageData;
+            product.imageData = nullptr;
             return std::nullopt;
         }
 

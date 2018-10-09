@@ -44,7 +44,7 @@ struct RawTile {
         Fatal     // = CE_Fatal
     };
 
-    char* imageData = nullptr;
+    char* imageData = nullptr; // @TODO byte
     std::shared_ptr<TileMetaData> tileMetaData = nullptr;
     std::shared_ptr<TileTextureInitData> textureInitData = nullptr;
     TileIndex tileIndex = { 0, 0, 0 };
