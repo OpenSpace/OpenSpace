@@ -222,20 +222,20 @@ BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& 
         const ChunkTile& chunkTile = chunkTileSettingsPair.first;
         const LayerRenderSettings* settings = chunkTileSettingsPair.second;
         const bool goodTile = (chunkTile.tile.status() == Tile::Status::OK);
-        const bool hasTileMetaData = (chunkTile.tile.metaData() != nullptr);
+        const bool hasTileMetaData = chunkTile.tile.metaData().has_value();
 
         if (goodTile && hasTileMetaData) {
-            TileMetaData* tileMetaData = chunkTile.tile.metaData();
+            const TileMetaData& tileMetaData = chunkTile.tile.metaData().value();
 
             const float minValue = settings->performLayerSettings(
-                tileMetaData->minValues[HeightChannel]
+                tileMetaData.minValues[HeightChannel]
             );
             const float maxValue = settings->performLayerSettings(
-                tileMetaData->maxValues[HeightChannel]
+                tileMetaData.maxValues[HeightChannel]
             );
 
             if (!boundingHeights.available) {
-                if (tileMetaData->hasMissingData[HeightChannel]) {
+                if (tileMetaData.hasMissingData[HeightChannel]) {
                     boundingHeights.min = std::min(DefaultHeight, minValue);
                     boundingHeights.max = std::max(DefaultHeight, maxValue);
                 }
@@ -249,7 +249,7 @@ BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& 
                 boundingHeights.min = std::min(boundingHeights.min, minValue);
                 boundingHeights.max = std::max(boundingHeights.max, maxValue);
             }
-            lastHadMissingData = tileMetaData->hasMissingData[HeightChannel];
+            lastHadMissingData = tileMetaData.hasMissingData[HeightChannel];
         }
 
         // Allow for early termination
@@ -1507,7 +1507,10 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
 void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& programObject,
                                               const RenderData& data)
 {
-    ghoul_assert(_ellipsoid.hasEclipseShadows(), "Needs to have eclipse shadows enabled");
+    ghoul_assert(
+        !_ellipsoid.shadowConfigurationArray().empty(),
+        "Needs to have eclipse shadows enabled"
+    );
     // Shadow calculations..
     std::vector<RenderableGlobe::ShadowRenderingStruct> shadowDataArray;
     std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray =

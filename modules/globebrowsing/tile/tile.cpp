@@ -31,17 +31,17 @@
 
 namespace openspace::globebrowsing {
 
-const Tile Tile::TileUnavailable(nullptr, nullptr, Tile::Status::Unavailable);
+const Tile Tile::TileUnavailable(nullptr, std::nullopt, Tile::Status::Unavailable);
 
-Tile::Tile(ghoul::opengl::Texture* texture, std::unique_ptr<TileMetaData> metaData,
+Tile::Tile(ghoul::opengl::Texture* texture, std::optional<TileMetaData> metaData,
            Status status)
     : _texture(texture)
     , _metaData(std::move(metaData))
     , _status(status)
 {}
 
-TileMetaData* Tile::metaData() const {
-    return _metaData.get();
+const std::optional<TileMetaData>& Tile::metaData() const {
+    return _metaData;
 }
 
 Tile::Status Tile::status() const {

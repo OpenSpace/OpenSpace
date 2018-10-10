@@ -27,6 +27,7 @@
 
 #include <modules/globebrowsing/tile/tilemetadata.h>
 #include <memory>
+#include <optional>
 
 namespace ghoul::opengl { class Texture; }
 
@@ -71,11 +72,11 @@ public:
         OK
     };
 
-    Tile(ghoul::opengl::Texture* texture, std::unique_ptr<TileMetaData> metaData,
+    Tile(ghoul::opengl::Texture* texture, std::optional<TileMetaData> metaData,
         Status status);
     ~Tile() = default;
 
-    TileMetaData* metaData() const;
+    const std::optional<TileMetaData>& metaData() const;
     Status status() const;
     ghoul::opengl::Texture* texture() const;
 
@@ -87,7 +88,7 @@ public:
 
 private:
     ghoul::opengl::Texture* _texture;
-    std::shared_ptr<TileMetaData> _metaData;
+    std::optional<TileMetaData> _metaData;
     Status _status;
 };
 

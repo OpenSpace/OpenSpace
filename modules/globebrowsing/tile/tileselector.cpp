@@ -45,11 +45,10 @@ ChunkTile getHighestResolutionTile(const LayerGroup& layerGroup,
             tileIndex
         );
         const bool tileIsOk = chunkTile.tile.status() == Tile::Status::OK;
-        const bool tileHasMetaData = chunkTile.tile.metaData() != nullptr;
         const bool tileIsHigherResolution =
             chunkTile.uvTransform.uvScale.x > mostHighResolution.uvTransform.uvScale.x;
 
-        if (tileIsOk && tileHasMetaData && tileIsHigherResolution) {
+        if (tileIsOk && chunkTile.tile.metaData().has_value() && tileIsHigherResolution) {
             mostHighResolution = chunkTile;
         }
     }

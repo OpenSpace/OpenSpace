@@ -83,7 +83,7 @@ namespace openspace::globebrowsing::tileprovider {
 namespace {
 
 std::unique_ptr<ghoul::opengl::Texture> DefaultTileTexture;
-Tile DefaultTile = Tile(nullptr, nullptr, Tile::Status::Unavailable);
+Tile DefaultTile = Tile(nullptr, std::nullopt, Tile::Status::Unavailable);
 
 
 namespace defaultprovider {
@@ -259,7 +259,7 @@ Tile tile(TextTileProvider& t, const TileIndex& tileIndex) {
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
         glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
-        tile = Tile(texture, nullptr, Tile::Status::OK);
+        tile = Tile(texture, std::nullopt, Tile::Status::OK);
         t.tileCache->put(key, t.initData.hashKey(), tile);
     }
     return tile;
@@ -503,7 +503,7 @@ void initializeDefaultTile() {
     DefaultTileTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
 
     // Create tile
-    DefaultTile = Tile(DefaultTileTexture.get(), nullptr, Tile::Status::OK);
+    DefaultTile = Tile(DefaultTileTexture.get(), std::nullopt, Tile::Status::OK);
 }
 
 void deinitializeDefaultTile() {
@@ -578,7 +578,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
 
 
 SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
-    : tile(nullptr, nullptr, Tile::Status::Unavailable)
+    : tile(nullptr, std::nullopt, Tile::Status::Unavailable)
     , filePath(singleimageprovider::FilePathInfo)
 {
     type = Type::SingleImageTileProvider;
@@ -880,7 +880,7 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
             if (t.asyncTextureDataProvider) {
                 if (tileIndex.level > maxLevel(t)) {
-                    return Tile(nullptr, nullptr, Tile::Status::OutOfRange);
+                    return Tile(nullptr, std::nullopt, Tile::Status::OutOfRange);
                 }
                 const cache::ProviderTileKey key = { tileIndex, t.uniqueIdentifier };
                 const Tile tile = t.tileCache->get(key);
@@ -892,7 +892,7 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
                 return tile;
             }
             else {
-                return Tile(nullptr, nullptr, Tile::Status::Unavailable);
+                return Tile(nullptr, std::nullopt, Tile::Status::Unavailable);
             }
         }
         case Type::SingleImageTileProvider: {
@@ -1191,7 +1191,7 @@ void reset(TileProvider& tp) {
                 ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
             );
 
-            t.tile = Tile(t.tileTexture.get(), nullptr, tileStatus);
+            t.tile = Tile(t.tileTexture.get(), std::nullopt, tileStatus);
             break;
         }
         case Type::SizeReferenceTileProvider: {

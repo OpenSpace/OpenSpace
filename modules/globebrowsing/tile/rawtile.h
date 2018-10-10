@@ -47,7 +47,7 @@ struct RawTile {
     };
 
     std::unique_ptr<std::byte[]> imageData = nullptr;
-    std::unique_ptr<TileMetaData> tileMetaData = nullptr;
+    TileMetaData tileMetaData;
     std::shared_ptr<TileTextureInitData> textureInitData = nullptr;
     TileIndex tileIndex = { 0, 0, 0 };
     ReadError error = ReadError::None;

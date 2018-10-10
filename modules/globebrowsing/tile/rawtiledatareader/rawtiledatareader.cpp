@@ -398,21 +398,21 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(int rasterBand,
     return err;
 }
 
-std::unique_ptr<TileMetaData> RawTileDataReader::getTileMetaData(RawTile& rawTile,
-                                                          const PixelRegion& region) const
+TileMetaData RawTileDataReader::getTileMetaData(RawTile& rawTile,
+                                                const PixelRegion& region) const
 {
     const size_t bytesPerLine = _initData.bytesPerPixel() * region.numPixels.x;
 
-    std::unique_ptr<TileMetaData> preprocessData = std::make_unique<TileMetaData>();
-    preprocessData->maxValues.resize(_initData.nRasters());
-    preprocessData->minValues.resize(_initData.nRasters());
-    preprocessData->hasMissingData.resize(_initData.nRasters());
+    TileMetaData preprocessData;
+    preprocessData.maxValues.resize(_initData.nRasters());
+    preprocessData.minValues.resize(_initData.nRasters());
+    preprocessData.hasMissingData.resize(_initData.nRasters());
 
     std::vector<float> noDataValues(_initData.nRasters());
     for (size_t raster = 0; raster < _initData.nRasters(); ++raster) {
-        preprocessData->maxValues[raster] = -FLT_MAX;
-        preprocessData->minValues[raster] = FLT_MAX;
-        preprocessData->hasMissingData[raster] = false;
+        preprocessData.maxValues[raster] = -FLT_MAX;
+        preprocessData.minValues[raster] = FLT_MAX;
+        preprocessData.hasMissingData[raster] = false;
         noDataValues[raster] = noDataValueAsFloat();
     }
 
@@ -428,18 +428,18 @@ std::unique_ptr<TileMetaData> RawTileDataReader::getTileMetaData(RawTile& rawTil
                     &(rawTile.imageData.get()[yi + i])
                 );
                 if (val != noDataValue && val == val) {
-                    preprocessData->maxValues[raster] = std::max(
+                    preprocessData.maxValues[raster] = std::max(
                         val,
-                        preprocessData->maxValues[raster]
+                        preprocessData.maxValues[raster]
                     );
-                    preprocessData->minValues[raster] = std::min(
+                    preprocessData.minValues[raster] = std::min(
                         val,
-                        preprocessData->minValues[raster]
+                        preprocessData.minValues[raster]
                     );
                     allIsMissing = false;
                 }
                 else {
-                    preprocessData->hasMissingData[raster] = true;
+                    preprocessData.hasMissingData[raster] = true;
                     float& floatToRewrite = reinterpret_cast<float&>(
                         rawTile.imageData[yi + i]
                     );
@@ -486,7 +486,7 @@ RawTile::ReadError RawTileDataReader::postProcessErrorCheck(const RawTile& rawTi
 
     bool hasMissingData = false;
     for (size_t c = 0; c < _initData.nRasters(); c++) {
-        hasMissingData |= (rawTile.tileMetaData->maxValues[c] == missingDataValue);
+        hasMissingData |= (rawTile.tileMetaData.maxValues[c] == missingDataValue);
     }
 
     const bool onHighLevel = rawTile.tileIndex.level > 6;
