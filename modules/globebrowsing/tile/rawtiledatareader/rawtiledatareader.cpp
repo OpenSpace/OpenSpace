@@ -56,7 +56,7 @@ RawTile RawTileDataReader::readTileData(TileIndex tileIndex) const {
     rawTile.error = worstError;
     rawTile.tileIndex = std::move(tileIndex);
 
-    rawTile.textureInitData = std::make_shared<TileTextureInitData>(_initData);
+    rawTile.textureInitData = std::make_unique<TileTextureInitData>(_initData);
 
     if (_preprocess) {
         rawTile.tileMetaData = getTileMetaData(rawTile, io.write.region);

@@ -334,7 +334,7 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key, RawTile rawTile
         tex->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
         Tile tile(tex, std::move(rawTile.tileMetaData), Tile::Status::OK);
         TileTextureInitData::HashKey initDataKey = initData.hashKey();
-        _textureContainerMap[initDataKey].second->put(std::move(key), tile);
+        _textureContainerMap[initDataKey].second->put(std::move(key), std::move(tile));
     }
 }
 
