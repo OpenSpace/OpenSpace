@@ -1,4 +1,4 @@
-asset.export("webguiDevemopmentMode", false)
+asset.export("webguiDevemopmentMode", true)
 
 -- To make changes to the webgui:
 

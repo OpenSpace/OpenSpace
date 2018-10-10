@@ -27,6 +27,10 @@ function(set_cef_targets cef_root main_target)
     # find cef cmake helpers
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${cef_root}/cmake")
     include(cef_support)
+
+    # Use <PackageName>_ROOT variables
+    # https://cmake.org/cmake/help/git-stage/policy/CMP0074.html
+    cmake_policy(SET CMP0074 NEW)
     find_package(CEF REQUIRED)
 
     # ensure out target dir is set
@@ -40,6 +44,10 @@ function(run_cef_platform_config cef_root cef_target module_path)
     # find cef cmake helpers
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${cef_root}/cmake")
     include(cef_support)
+
+    # Use <PackageName>_ROOT variables
+    # https://cmake.org/cmake/help/git-stage/policy/CMP0074.html
+    cmake_policy(SET CMP0074 NEW)
     find_package(CEF REQUIRED)
 
     if (OS_MACOSX)
