@@ -13,7 +13,6 @@ local models = asset.syncedResource({
     Version = 1
 })
 
-
 local LightSources = {
     {
         Type = "SceneGraphLightSource",
@@ -29,12 +28,12 @@ local LightSources = {
 }
 
 local DSS14 = {
-    Identifier = "DSS_14",
+    Identifier = "DSS14",
     Parent = earthAsset.Earth.Identifier,
     Transform = {
       Translation = {
          Type = "StaticTranslation",
-         Position = { 0, 0, 0 }
+         Position = { -2350973.5,-4636119.5, 3697665 }
       }
    },
     Renderable = {
@@ -52,6 +51,269 @@ local DSS14 = {
     }
 }
 
+local DSS24 = {
+    Identifier = "DSS24",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+      Translation = {
+         Type = "StaticTranslation",
+         Position = {-2352268.0,-4641634.5,3689828.75 }
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/dish.obj"
+        },
+        ColorTexture = models .. "/base_AO.png" 
+
+    },
+    GUI = {
+        Name = "DSS24",
+        Path = "/Solar System/DSS24"
+    }
+}
+
+local DSS25 = {
+    Identifier = "DSS25",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+      Translation = {
+         Type = "StaticTranslation",
+         Position = {-2352383.75,-4641748,3689626.25 }
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/dish.obj"
+        },
+        ColorTexture = models .. "/base_AO.png" 
+
+    },
+    GUI = {
+        Name = "DSS25",
+        Path = "/Solar System/DSS25"
+    }
+}
+
+local DSS26 = {
+    Identifier = "DSS26",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+      Translation = {
+         Type = "StaticTranslation",
+         Position = {-2352253.25,-4641961,3689457.25}
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/dish.obj"
+        },
+        ColorTexture = models .. "/base_AO.png" 
+
+    },
+    GUI = {
+        Name = "DSS26",
+        Path = "/Solar System/DSS26"
+    }
+}
+
+local DSS43 = {
+    Identifier = "DSS43",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+      Translation = {
+         Type = "StaticTranslation",
+         Position = {-4455882,2679347,-3695353.25 }
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/dish.obj"
+        },
+        ColorTexture = models .. "/base_AO.png" 
+
+    },
+    GUI = {
+        Name = "DSS43",
+        Path = "/Solar System/DSS43"
+    }
+}
+ 
+local DSS34 = {
+    Identifier = "DSS34",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+      Translation = {
+         Type = "StaticTranslation",
+         Position = {-4456134,2679425.5,-3694997.5}
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/dish.obj"
+        },
+        ColorTexture = models .. "/base_AO.png" 
+
+    },
+    GUI = {
+        Name = "DSS34",
+        Path = "/Solar System/DSS34"
+    }
+}
+
+local DSS35 = {
+    Identifier = "DSS35",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+      Translation = {
+         Type = "StaticTranslation",
+         Position = {-4456261,2679554.75,-3694756 }
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/dish.obj"
+        },
+        ColorTexture = models .. "/base_AO.png" 
+
+    },
+    GUI = {
+        Name = "DSS35",
+        Path = "/Solar System/DSS35"
+    }
+}
+
+local DSS36 = {
+    Identifier = "DSS36",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+      Translation = {
+         Type = "StaticTranslation",
+         Position = {-4456158,2679802,-3694689.75 }
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/dish.obj"
+        },
+        ColorTexture = models .. "/base_AO.png" 
+
+    },
+    GUI = {
+        Name = "DSS36",
+        Path = "/Solar System/DSS36"
+    }
+}
+
+local DSS63 = {
+    Identifier = "DSS63",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+      Translation = {
+         Type = "StaticTranslation",
+         Position = {4842262,-359673.125,4137003.5}
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/dish.obj"
+        },
+        ColorTexture = models .. "/base_AO.png" 
+
+    },
+    GUI = {
+        Name = "DSS63",
+        Path = "/Solar System/DSS63"
+    }
+}
+
+local DSS65 = {
+    Identifier = "DSS65",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+      Translation = {
+         Type = "StaticTranslation",
+         Position = {4842509.5,-359920.125,4136644.5 }
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/dish.obj"
+        },
+        ColorTexture = models .. "/base_AO.png" 
+
+    },
+    GUI = {
+        Name = "DSS65",
+        Path = "/Solar System/DSS65"
+    }
+}
+
+local DSS54 = {
+    Identifier = "DSS54",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+      Translation = {
+         Type = "StaticTranslation",
+         Position = {4842605,-360216.15625,4136511.75 }
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/dish.obj"
+        },
+        ColorTexture = models .. "/base_AO.png" 
+
+    },
+    GUI = {
+        Name = "DSS54",
+        Path = "/Solar System/DSS54"
+    }
+}
+
+local DSS55 = {
+    Identifier = "DSS55",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+      Translation = {
+         Type = "StaticTranslation",
+         Position = {4842696,-360097.96875,4136388.25 }
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/dish.obj"
+        },
+        ColorTexture = models .. "/base_AO.png" 
+
+    },
+    GUI = {
+        Name = "DSS55",
+        Path = "/Solar System/DSS55"
+    }
+}
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    DSS14
+    DSS14, DSS24, DSS25, DSS26, DSS43, DSS34, DSS35, DSS36, DSS63, DSS65, DSS54, DSS55
 })

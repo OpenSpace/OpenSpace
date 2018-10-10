@@ -92,9 +92,6 @@ asset.onInitialize(function ()
 
     openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
 
-    local x, y, z = openspace.globebrowsing.getGeoPosition(earthAsset.Earth.Identifier, 35.0, 243.0, 1002.114)
-	openspace.setPropertyValueSingle("Scene.DSS_14.Translation.Position", { x, y, z })
-
 end)
 
 asset.onDeinitialize(function ()
