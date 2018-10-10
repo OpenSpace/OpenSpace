@@ -69,7 +69,6 @@ public:
     const static glm::ivec2 TilePixelSizeDifference;
 
 private:
-
     void calculateHashKey();
     unsigned int getUniqueIdFromTextureFormat(Format textureFormat) const;
 

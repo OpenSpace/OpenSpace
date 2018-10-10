@@ -296,7 +296,7 @@ ghoul::opengl::Texture* MemoryAwareTileCache::texture(
     return texture;
 }
 
-void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key, RawTile& rawTile) {
+void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key, RawTile rawTile) {
     using ghoul::opengl::Texture;
 
     if (rawTile.error != RawTile::ReadError::None) {
@@ -332,7 +332,7 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key, RawTile& rawTil
             tex->reUploadTexture();
         }
         tex->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-        Tile tile(tex, rawTile.tileMetaData, Tile::Status::OK);
+        Tile tile(tex, std::move(rawTile.tileMetaData), Tile::Status::OK);
         TileTextureInitData::HashKey initDataKey = initData.hashKey();
         _textureContainerMap[initDataKey].second->put(std::move(key), tile);
     }

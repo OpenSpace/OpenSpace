@@ -39,7 +39,7 @@ RawTileDataReader::RawTileDataReader(const TileTextureInitData& initData,
 {}
 
 std::shared_ptr<RawTile> RawTileDataReader::defaultTileData() const {
-    return std::make_shared<RawTile>(RawTile::createDefault(_initData));
+    return std::make_shared<RawTile>(createDefaultTile(_initData));
 }
 
 RawTile RawTileDataReader::readTileData(TileIndex tileIndex) const {
@@ -398,12 +398,12 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(int rasterBand,
     return err;
 }
 
-std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(RawTile& rawTile,
+std::unique_ptr<TileMetaData> RawTileDataReader::getTileMetaData(RawTile& rawTile,
                                                           const PixelRegion& region) const
 {
     const size_t bytesPerLine = _initData.bytesPerPixel() * region.numPixels.x;
 
-    std::shared_ptr<TileMetaData> preprocessData = std::make_shared<TileMetaData>();
+    std::unique_ptr<TileMetaData> preprocessData = std::make_unique<TileMetaData>();
     preprocessData->maxValues.resize(_initData.nRasters());
     preprocessData->minValues.resize(_initData.nRasters());
     preprocessData->hasMissingData.resize(_initData.nRasters());

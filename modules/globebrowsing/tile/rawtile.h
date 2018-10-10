@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___RAWTILE___H__
 
 #include <modules/globebrowsing/tile/tileindex.h>
+#include <modules/globebrowsing/tile/tilemetadata.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <cstddef>
@@ -46,14 +47,14 @@ struct RawTile {
     };
 
     std::unique_ptr<std::byte[]> imageData = nullptr;
-    std::shared_ptr<TileMetaData> tileMetaData = nullptr;
+    std::unique_ptr<TileMetaData> tileMetaData = nullptr;
     std::shared_ptr<TileTextureInitData> textureInitData = nullptr;
     TileIndex tileIndex = { 0, 0, 0 };
     ReadError error = ReadError::None;
     GLuint pbo = 0;
-
-    static RawTile createDefault(const TileTextureInitData& initData);
 };
+
+RawTile createDefaultTile(const TileTextureInitData& initData);
 
 } // namespace openspace::globebrowsing
 

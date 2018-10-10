@@ -71,7 +71,7 @@ public:
         OK
     };
 
-    Tile(ghoul::opengl::Texture* texture, std::shared_ptr<TileMetaData> metaData,
+    Tile(ghoul::opengl::Texture* texture, std::unique_ptr<TileMetaData> metaData,
         Status status);
     ~Tile() = default;
 

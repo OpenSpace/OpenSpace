@@ -33,7 +33,7 @@ namespace openspace::globebrowsing {
 
 const Tile Tile::TileUnavailable(nullptr, nullptr, Tile::Status::Unavailable);
 
-Tile::Tile(ghoul::opengl::Texture* texture, std::shared_ptr<TileMetaData> metaData,
+Tile::Tile(ghoul::opengl::Texture* texture, std::unique_ptr<TileMetaData> metaData,
            Status status)
     : _texture(texture)
     , _metaData(std::move(metaData))

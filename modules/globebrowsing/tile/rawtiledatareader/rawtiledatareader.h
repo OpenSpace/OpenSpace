@@ -143,7 +143,7 @@ protected:
     RawTile::ReadError repeatedRasterRead(int rasterBand, const IODescription& fullIO,
         char* dataDestination, int depth = 0) const;
 
-    std::shared_ptr<TileMetaData> getTileMetaData(RawTile& rawTile,
+    std::unique_ptr<TileMetaData> getTileMetaData(RawTile& rawTile,
         const PixelRegion& region) const;
     TileDepthTransform calculateTileDepthTransform();
     RawTile::ReadError postProcessErrorCheck(const RawTile& rawTile) const;
