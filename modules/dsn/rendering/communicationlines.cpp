@@ -25,6 +25,7 @@
 #include <modules/dsn/rendering/communicationlines.h>
 #include <openspace/scene/scene.h>
 
+
 namespace openspace {
     constexpr const char* _loggerCat = "CommunicationLine";
 
@@ -62,22 +63,53 @@ namespace openspace {
     }
     void CommunicationLines::update(const UpdateData& data){
 
-        if (_needsFullSweep) {
-
-            const int nValues = 2;
+            //get number of lines to be drawn = count signals from data at this time
+            const int nValues = 2; 
 
             // Make space for the vertices
             _vertexArray.clear();
             _vertexArray.resize(nValues);
 
             // ... fill all of the values, dummy values for now, should load from  _translation->position()
-            //    const glm::vec3 p = _translation->position()
-            const char* dishIdentifier = "DSS_35";
-            double dishPosXYZ[3] = { -4461273.0838, 2682568.9220, -3674152.0885 }; //DSS35
-            glm::vec3 spaceCraftPos = DsnManager::spaceCraftPosition(dishIdentifier); // VGR2
+            const char* dishIdentifier = "DSS35";
+            const char* spacecraftIdentifier = "Voyager_1_Antenna";
 
-            _vertexArray[0] = { static_cast<float>(dishPosXYZ[0]), static_cast<float>(dishPosXYZ[1]), static_cast<float>(dishPosXYZ[2]) };
-            _vertexArray[1] = { static_cast<float>(spaceCraftPos.x), static_cast<float>(spaceCraftPos.y), static_cast<float>(spaceCraftPos.z) }; // go to geo?
+            SceneGraphNode* dishNode = global::renderEngine.scene()->sceneGraphNode(dishIdentifier);
+            glm::vec3 dishPos = dishNode->worldPosition();
+
+            //if(global::renderEngine.scene()->sceneGraphNode(spacecraftIdentifier))
+            SceneGraphNode* spaceCraftNode = global::renderEngine.scene()->sceneGraphNode(spacecraftIdentifier);
+            glm::vec3 bPos = spaceCraftNode->worldPosition();
+            glm::vec3 aPos = spaceCraftNode->position();
+            glm::vec3 spaceCraftPos = bPos + aPos;
+            //glm::vec3 spaceCraftPos = spaceCraftNode->GetPosition();
+            //else
+           // glm::vec3 spaceCraftPos = DsnManager::spaceCraftPosition(dishIdentifier); // VGR2
+
+            //glm::mat4 transform = myNode->modelTransform();
+            //glm::vec3 translation = myNode->modelTransform.translation;
+            //UpdateData& adata = data;
+            //properties::PropertyOwner* apos = myNode->propertySubOwner();
+            
+            //// ... fill all of the values
+            //for (int i = 0; i < nValues; ++i) {
+            //    const glm::vec3 p = _translation->position({
+            //        {}, //TransformData modelTransform;
+            //        0.0,//const Time time;
+            //        0.0,//const Time previousFrameTime;
+            //        false//const bool doPerformanceMeasurement;
+            //        });
+            //    _vertexArray[i] = { p.x, p.y, p.z };
+            //}
+
+
+            //Translation translation = node->properties("Translation")
+            //node->_transform.translation->_position->templateProperty
+
+            _vertexArray[0] = { static_cast<float>(dishPos.x), static_cast<float>(dishPos.y), static_cast<float>(dishPos.z) };
+            _vertexArray[1] = { static_cast<float>(spaceCraftPos.x), static_cast<float>(spaceCraftPos.y), static_cast<float>(spaceCraftPos.z) }; 
+            //_vertexArray[2] = { static_cast<float>(dishPosXYZ[0]), static_cast<float>(dishPosXYZ[1]), static_cast<float>(dishPosXYZ[2]) };
+            //_vertexArray[3] = { static_cast<float>(20000000), static_cast<float>(0), static_cast<float>(0) }; // go to geo?
 
             // ... and upload them to the GPU
             glBindVertexArray(_mainRenderInformation._vaoID);
@@ -96,8 +128,7 @@ namespace openspace {
             // it if it is empty
             _indexArray.clear();
 
-            _needsFullSweep = false;
-        }
+        
 
         // If the full trail should be rendered at all times, we can directly render the
         // entire set

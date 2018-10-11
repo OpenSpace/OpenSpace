@@ -31,6 +31,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/engine/globals.h>
 #include <fstream>
 
 
