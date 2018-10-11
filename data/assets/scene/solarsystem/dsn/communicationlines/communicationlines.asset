@@ -14,7 +14,6 @@ local CommunicationLine = {
         Type = "CommunicationLines",
         DataFolder = dataFolder,
         DataFileType = "xml",
-        Color = { 1.0, 0.0, 0.0 }
     },
     GUI = {
         Name = "CommunicationLine",

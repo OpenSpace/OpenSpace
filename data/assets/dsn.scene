@@ -11,6 +11,8 @@ asset.request('customization/globebrowsing')
 -- Spacecrafts
 asset.require('scene/solarsystem/missions/voyager1/voyager1')
 asset.require('scene/solarsystem/missions/voyager2/voyager2')
+asset.require('scene/solarsystem/missions/voyager1/trails')
+
 
 --Communication
 asset.require('scene/solarsystem/dsn/communicationlines/communicationlines')
@@ -47,7 +49,7 @@ local Keybindings = {
     },
     {
         Key = "h",
-        Command = "openspace.setPropertyValue('Scene.*Trail.renderable.Enabled', false)",
+        Command = "openspace.setPropertyValue('Scene.*Trail.renderable.Enabled', true)",
         Documentation = "Disables visibility of the trails",
         Local = false
     },
@@ -73,7 +75,7 @@ asset.onInitialize(function ()
     )
 
     openspace.markInterestingNodes({
-        "Communication_Line", "Earth", "Moon"
+        "Voyager1", "Earth", "Moon"
     })
 
     openspace.addVirtualProperty(
@@ -102,6 +104,6 @@ asset.onDeinitialize(function ()
     openspace.removeVirtualProperty("Scene.*Trail.renderable.Enabled")
 
     openspace.removeInterestingNodes({
-        "Communication_Line", "Earth", "Moon"
+        "Voyager1", "Earth", "Moon"
     })
 end)

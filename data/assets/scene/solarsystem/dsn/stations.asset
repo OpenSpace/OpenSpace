@@ -47,7 +47,7 @@ local DSS14 = {
     },
     GUI = {
         Name = "DSS14",
-        Path = "/Solar System/DSS14"
+        Path = "/Solar System/Stations/Goldstone/DSS14"
     }
 }
 
@@ -71,7 +71,7 @@ local DSS24 = {
     },
     GUI = {
         Name = "DSS24",
-        Path = "/Solar System/DSS24"
+        Path = "/Solar System/Stations/Goldstone/DSS24"
     }
 }
 
@@ -95,7 +95,7 @@ local DSS25 = {
     },
     GUI = {
         Name = "DSS25",
-        Path = "/Solar System/DSS25"
+        Path = "/Solar System/Stations/Goldstone/DSS25"
     }
 }
 
@@ -119,7 +119,7 @@ local DSS26 = {
     },
     GUI = {
         Name = "DSS26",
-        Path = "/Solar System/DSS26"
+        Path = "/Solar System/Stations/Goldstone/DSS26"
     }
 }
 
@@ -143,7 +143,7 @@ local DSS43 = {
     },
     GUI = {
         Name = "DSS43",
-        Path = "/Solar System/DSS43"
+        Path = "/Solar System/Stations/Canberra/DSS43"
     }
 }
  
@@ -167,7 +167,7 @@ local DSS34 = {
     },
     GUI = {
         Name = "DSS34",
-        Path = "/Solar System/DSS34"
+        Path = "/Solar System/Stations/Canberra/DSS34"
     }
 }
 
@@ -176,7 +176,7 @@ local DSS35 = {
     Parent = earthAsset.Earth.Identifier,
     Transform = {
       Translation = {
-         Type = "StaticTranslation",
+         Type = "DsnTranslation",
          Position = {-4456261,2679554.75,-3694756 }
       }
    },
@@ -191,7 +191,7 @@ local DSS35 = {
     },
     GUI = {
         Name = "DSS35",
-        Path = "/Solar System/DSS35"
+        Path = "/Solar System/Stations/Canberra/DSS35"
     }
 }
 
@@ -215,7 +215,7 @@ local DSS36 = {
     },
     GUI = {
         Name = "DSS36",
-        Path = "/Solar System/DSS36"
+        Path = "/Solar System/Stations/Canberra/DSS36"
     }
 }
 
@@ -239,7 +239,7 @@ local DSS63 = {
     },
     GUI = {
         Name = "DSS63",
-        Path = "/Solar System/DSS63"
+        Path = "/Solar System/Stations/Madrid/DSS63"
     }
 }
 
@@ -263,7 +263,7 @@ local DSS65 = {
     },
     GUI = {
         Name = "DSS65",
-        Path = "/Solar System/DSS65"
+        Path = "/Solar System/Stations/Madrid/DSS65"
     }
 }
 
@@ -287,7 +287,7 @@ local DSS54 = {
     },
     GUI = {
         Name = "DSS54",
-        Path = "/Solar System/DSS54"
+        Path = "/Solar System/Stations/Madrid/DSS54"
     }
 }
 
@@ -311,7 +311,7 @@ local DSS55 = {
     },
     GUI = {
         Name = "DSS55",
-        Path = "/Solar System/DSS55"
+        Path = "/Solar System/Stations/Madrid/DSS55"
     }
 }
 assetHelper.registerSceneGraphNodesAndExport(asset, {
