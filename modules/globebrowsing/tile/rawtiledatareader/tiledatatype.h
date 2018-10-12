@@ -25,9 +25,8 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATA_TYPE___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATA_TYPE___H__
 
-#include <modules/globebrowsing/tile/textureformat.h>
-
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/texture.h>
 
 #ifdef GLOBEBROWSING_USE_GDAL
 #include <gdal.h>
@@ -41,10 +40,6 @@ namespace openspace::globebrowsing::tiledatatype {
 GLenum getOpenGLDataType(GDALDataType gdalType);
 
 GDALDataType getGdalDataType(GLenum glType);
-
-TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType);
-
-TextureFormat getTextureFormatOptimized(int rasterCount, GDALDataType gdalType);
 
 size_t getMaximumValue(GDALDataType gdalType);
 

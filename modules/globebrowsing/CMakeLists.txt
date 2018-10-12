@@ -60,7 +60,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/chunktile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtile.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/textureformat.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledepthtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.h
