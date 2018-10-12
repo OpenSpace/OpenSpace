@@ -228,7 +228,6 @@ int getGeoPositionForCamera(lua_State* L) {
     return 3;
 }
 
-#ifdef GLOBEBROWSING_USE_GDAL
 int loadWMSCapabilities(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::loadWMSCapabilities");
 
@@ -292,6 +291,5 @@ int capabilities(lua_State* L) {
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
-#endif // GLOBEBROWSING_USE_GDAL
 
 } // namespace openspace::globebrowsing::luascriptfunctions

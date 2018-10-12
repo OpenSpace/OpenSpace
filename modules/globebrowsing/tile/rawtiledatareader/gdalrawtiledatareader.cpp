@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifdef GLOBEBROWSING_USE_GDAL
-
 #include <modules/globebrowsing/tile/rawtiledatareader/gdalrawtiledatareader.h>
 
 #include <ghoul/fmt.h>
@@ -262,5 +260,3 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(int rasterBand,
 }
 
 } // namespace openspace::globebrowsing
-
-#endif // GLOBEBROWSING_USE_GDAL

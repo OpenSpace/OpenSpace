@@ -25,8 +25,6 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GDAL_RAW_TILE_DATA_READER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GDAL_RAW_TILE_DATA_READER___H__
 
-#ifdef GLOBEBROWSING_USE_GDAL
-
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 
 #include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
@@ -102,7 +100,5 @@ private:
 };
 
 } // namespace openspace::globebrowsing
-
-#endif // GLOBEBROWSING_USE_GDAL
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___GDAL_RAW_TILE_DATA_READER___H__

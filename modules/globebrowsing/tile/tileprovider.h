@@ -35,13 +35,11 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 
-#ifdef GLOBEBROWSING_USE_GDAL
 #include <modules/globebrowsing/other/timequantizer.h>
 #include <openspace/properties/stringproperty.h>
 #include <unordered_map>
 
 struct CPLXMLNode;
-#endif // GLOBEBROWSING_USE_GDAL
 
 namespace ghoul::fontrendering {
     class Font;
@@ -155,8 +153,6 @@ struct TileProviderByLevel : public TileProvider {
 };
 
 
-#ifdef GLOBEBROWSING_USE_GDAL
-
 /**
  * Provide <code>Tile</code>s from web map services that have temporal resolution.
  *
@@ -195,7 +191,7 @@ struct TemporalTileProvider : public TileProvider {
     bool successfulInitialization = false;
 };
 
-#endif // GLOBEBROWSING_USE_GDAL
+
 
 void initializeDefaultTile();
 void deinitializeDefaultTile();

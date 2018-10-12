@@ -40,7 +40,6 @@
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <vector>
 
-#ifdef GLOBEBROWSING_USE_GDAL
 #include <gdal.h>
 
 #ifdef _MSC_VER
@@ -55,14 +54,11 @@
 #pragma warning (pop)
 #endif // _MSC_VER
 
-#endif // GLOBEBROWSING_USE_GDAL
-
 #include "globebrowsingmodule_lua.inl"
 
 namespace {
     constexpr const char* _loggerCat = "GlobeBrowsingModule";
 
-#ifdef GLOBEBROWSING_USE_GDAL
     openspace::GlobeBrowsingModule::Capabilities
     parseSubDatasets(char** subDatasets, int nSubdatasets)
     {
@@ -113,9 +109,6 @@ namespace {
 
         return result;
     }
-
-#endif // GLOBEBROWSING_USE_GDAL
-
 } // namespace
 
 namespace openspace {
@@ -132,14 +125,12 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
 
         tileprovider::initializeDefaultTile();
 
-#ifdef GLOBEBROWSING_USE_GDAL
         // Convert from MB to Bytes
         GdalWrapper::create(
             16ULL * 1024ULL * 1024ULL, // 16 MB
             static_cast<size_t>(CpuCap.installedMainMemory() * 0.25 * 1024 * 1024)
         );
         addPropertySubOwner(GdalWrapper::ref());
-#endif // GLOBEBROWSING_USE_GDAL
     });
 
     global::callback::deinitializeGL.push_back([]() {
@@ -151,9 +142,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
     global::callback::render.push_back([&]() { _tileCache->update(); });
 
     // Deinitialize
-#ifdef GLOBEBROWSING_USE_GDAL
     global::callback::deinitialize.push_back([&]() { GdalWrapper::ref().destroy(); });
-#endif // GLOBEBROWSING_USE_GDAL
 
     // Get factories
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
@@ -175,12 +164,10 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::SingleImageTileLayer
         )]);
-#ifdef GLOBEBROWSING_USE_GDAL
     fTileProvider->registerClass<tileprovider::TemporalTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::TemporalTileLayer
         )]);
-#endif // GLOBEBROWSING_USE_GDAL
     fTileProvider->registerClass<tileprovider::TileIndexTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::TileIndexTileLayer
@@ -271,7 +258,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             "Get geographic coordinates of the camera poosition in latitude, "
             "longitude, and altitude"
         },
-#ifdef GLOBEBROWSING_USE_GDAL
         {
             "loadWMSCapabilities",
             &globebrowsing::luascriptfunctions::loadWMSCapabilities,
@@ -302,7 +288,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             "component of the returned table can be used in the 'FilePath' argument "
             "for a call to the 'addLayer' function to add the value to a globe."
         }
-#endif  // GLOBEBROWSING_USE_GDAL
     };
     res.scripts = {
         absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua")
@@ -525,8 +510,6 @@ std::string GlobeBrowsingModule::layerTypeNamesList() {
     return listLayerTypes;
 }
 
-#ifdef GLOBEBROWSING_USE_GDAL
-
 void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string globe,
                                               std::string url)
 {
@@ -614,7 +597,5 @@ GlobeBrowsingModule::urlInfo(const std::string& globe) const
 bool GlobeBrowsingModule::hasUrlInfo(const std::string& globe) const {
     return _urlList.find(globe) != _urlList.end();
 }
-
-#endif // GLOBEBROWSING_USE_GDAL
 
 } // namespace openspace

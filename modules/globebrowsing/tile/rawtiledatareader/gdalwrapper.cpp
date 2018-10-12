@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifdef GLOBEBROWSING_USE_GDAL
-
 #include <modules/globebrowsing/tile/rawtiledatareader/gdalwrapper.h>
 
 #include <openspace/engine/configuration.h>
@@ -158,5 +156,3 @@ void GdalWrapper::setGdalProxyConfiguration() {
 }
 
 } // namespace openspace::globebrowsing
-
-#endif // GLOBEBROWSING_USE_GDAL

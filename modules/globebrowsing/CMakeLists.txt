@@ -140,36 +140,31 @@ create_new_module(
     ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
-option(OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL "Use GDAL" ON)
-
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/gdal_data DESTINATION modules/globebrowsing)
 
-if (OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL)
-    if (WIN32)
-        target_include_directories(
-            openspace-module-globebrowsing
-            SYSTEM PUBLIC
-            ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/include
-        )
+if (WIN32)
+    target_include_directories(
+        openspace-module-globebrowsing
+        SYSTEM PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/include
+    )
 
-        target_link_libraries(
-            openspace-module-globebrowsing
-            ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib
-        )
-        register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal202.dll")
-    else (WIN32)
-        find_package(GDAL REQUIRED)
+    target_link_libraries(
+        openspace-module-globebrowsing
+        ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib
+    )
+    register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal202.dll")
+else (WIN32)
+    find_package(GDAL REQUIRED)
 
-        target_include_directories(
-            openspace-module-globebrowsing
-            SYSTEM PUBLIC
-            ${GDAL_INCLUDE_DIR}
-        )
+    target_include_directories(
+        openspace-module-globebrowsing
+        SYSTEM PUBLIC
+        ${GDAL_INCLUDE_DIR}
+    )
 
-        target_link_libraries(openspace-module-globebrowsing ${GDAL_LIBRARY})
+    target_link_libraries(openspace-module-globebrowsing ${GDAL_LIBRARY})
 
-        mark_as_advanced(GDAL_CONFIG GDAL_INCLUDE_DIR GDAL_LIBRARY)
+    mark_as_advanced(GDAL_CONFIG GDAL_INCLUDE_DIR GDAL_LIBRARY)
 
-    endif () # WIN32
-    target_compile_definitions(openspace-module-globebrowsing PUBLIC GLOBEBROWSING_USE_GDAL)
-endif () # OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL
+endif () # WIN32

@@ -25,8 +25,6 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GDAL_WRAPPER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GDAL_WRAPPER___H__
 
-#ifdef GLOBEBROWSING_USE_GDAL
-
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
@@ -80,7 +78,5 @@ private:
 };
 
 } // namespace openspace::globebrowsing
-
-#endif // GLOBEBROWSING_USE_GDAL
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___GDAL_WRAPPER___H__

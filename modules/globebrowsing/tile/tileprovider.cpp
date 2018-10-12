@@ -40,14 +40,11 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 
-#ifdef GLOBEBROWSING_USE_GDAL
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <fstream>
 #include "cpl_minixml.h"
-#endif // GLOBEBROWSING_USE_GDAL
 
-#ifdef GLOBEBROWSING_USE_GDAL
 namespace ghoul {
     template <>
     openspace::globebrowsing::tileprovider::TemporalTileProvider::TimeFormatType
@@ -74,7 +71,6 @@ namespace ghoul {
         }
     }
 } // namespace ghoul
-#endif // GLOBEBROWSING_USE_GDAL
 
 
 namespace openspace::globebrowsing::tileprovider {
@@ -137,7 +133,6 @@ namespace bylevelprovider {
     constexpr const char* KeyLayerGroupID = "LayerGroupID";
 } // namespace bylevelprovider
 
-#ifdef  GLOBEBROWSING_USE_GDAL
 namespace temporal {
     constexpr const char* KeyFilePath = "FilePath";
     constexpr const char* KeyBasePath = "BasePath";
@@ -157,7 +152,6 @@ namespace temporal {
         "information."
     };
 } // namespace temporal
-#endif // GLOBEBROWSING_USE_GDAL
 
 Type toType(const layergroupid::TypeID& id) {
     using T = layergroupid::TypeID;
@@ -187,18 +181,9 @@ void initAsyncTileDataReader(DefaultTileProvider& t, TileTextureInitData initDat
     RawTileDataReader::PerformPreprocessing preprocess =
         RawTileDataReader::PerformPreprocessing(t.performPreProcessing);
 
-    // Initialize instance variables
-#ifdef GLOBEBROWSING_USE_GDAL
-    std::unique_ptr<GdalRawTileDataReader> tileDataset =
-        std::make_unique<GdalRawTileDataReader>(t.filePath, initData, preprocess);
-#else // GLOBEBROWSING_USE_GDAL
-    std::unique_ptr<SimpleRawTileDataReader> tileDataset =
-        std::make_unique<SimpleRawTileDataReader>(t._filePath, initData, preprocess);
-#endif // GLOBEBROWSING_USE_GDAL
-
     t.asyncTextureDataProvider = std::make_unique<AsyncTileDataProvider>(
         t.name,
-        std::move(tileDataset)
+        std::make_unique<GdalRawTileDataReader>(t.filePath, initData, preprocess)
     );
 }
 
