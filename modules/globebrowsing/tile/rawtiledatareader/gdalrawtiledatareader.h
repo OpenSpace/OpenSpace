@@ -69,7 +69,6 @@ public:
     virtual float depthScale() const override;
 
 protected:
-
     /**
      * Returns the geo transform from raster space to projection coordinates as defined
      * by GDAL.
@@ -82,21 +81,10 @@ private:
     // Private virtual function overloading
     virtual void initialize() override;
     virtual RawTile::ReadError rasterRead(int rasterBand, const IODescription& io,
-                                          char* dst) const override;
-
-    // GDAL Helper methods
-    GDALDataset* openGdalDataset(const std::string& filePath);
-
-    /**
-     * Use as a helper function when determining the maximum tile level. This function
-     * returns the negated number of overviews requred to downscale the highest overview
-     * dataset so that it fits within minimumPixelSize pixels in the x-dimension.
-     */
-    int calculateTileLevelDifference(int minimumPixelSize) const;
-
-    std::string _datasetFilePath;
+        char* dst) const override;
 
     GDALDataset* _dataset = nullptr;
+    std::string _datasetFilePath;
 
     struct GdalDatasetMetaDataCached {
         int rasterCount;
@@ -108,7 +96,6 @@ private:
         std::array<double, 6> padfTransform;
 
         GDALDataType dataType;
-
     } _gdalDatasetMetaDataCached;
 
     mutable std::mutex _datasetLock;

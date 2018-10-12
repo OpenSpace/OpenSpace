@@ -76,6 +76,28 @@ GDALDataType getGdalDataType(GLenum glType) {
     }
 }
 
+/**
+ * Use as a helper function when determining the maximum tile level. This function
+ * returns the negated number of overviews requred to downscale the highest overview
+ * dataset so that it fits within minimumPixelSize pixels in the x-dimension.
+ */
+int calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize) {
+    GDALRasterBand* firstBand = dataset->GetRasterBand(1);
+    GDALRasterBand* maxOverview;
+    int numOverviews = firstBand->GetOverviewCount();
+    if (numOverviews <= 0) { // No overviews. Use first band.
+        maxOverview = firstBand;
+    }
+    else { // Pick the highest overview.
+        maxOverview = firstBand->GetOverview(numOverviews - 1);
+    }
+    const int sizeLevel0 = maxOverview->GetXSize();
+    const double diff = log2(minimumPixelSize) - log2(sizeLevel0);
+    return static_cast<int>(diff);
+}
+
+
+
 } // namespace
 
 GdalRawTileDataReader::GdalRawTileDataReader(const std::string& filePath,
@@ -86,13 +108,13 @@ GdalRawTileDataReader::GdalRawTileDataReader(const std::string& filePath,
     _datasetFilePath = filePath;
 
     {
-        std::lock_guard<std::mutex> lockGuard(_datasetLock);
+        std::lock_guard lockGuard(_datasetLock);
         initialize();
     }
 }
 
 GdalRawTileDataReader::~GdalRawTileDataReader() {
-    std::lock_guard<std::mutex> lockGuard(_datasetLock);
+    std::lock_guard lockGuard(_datasetLock);
     if (_dataset) {
         GDALClose(_dataset);
         _dataset = nullptr;
@@ -100,7 +122,7 @@ GdalRawTileDataReader::~GdalRawTileDataReader() {
 }
 
 void GdalRawTileDataReader::reset() {
-    std::lock_guard<std::mutex> lockGuard(_datasetLock);
+    std::lock_guard lockGuard(_datasetLock);
     _cached._maxLevel = -1;
     if (_dataset) {
         GDALClose(_dataset);
@@ -145,10 +167,12 @@ void GdalRawTileDataReader::initialize() {
     if (_datasetFilePath.empty()) {
         throw ghoul::RuntimeError("File path must not be empty");
     }
-    _dataset = openGdalDataset(_datasetFilePath);
+    _dataset = static_cast<GDALDataset*>(GDALOpen(_datasetFilePath.c_str(), GA_ReadOnly));
     if (!_dataset) {
         throw ghoul::RuntimeError("Failed to load dataset: " + _datasetFilePath);
     }
+
+    _datasetFilePath.clear();
 
     // Assume all raster bands have the same data type
     _gdalDatasetMetaDataCached.rasterCount = _dataset->GetRasterCount();
@@ -172,7 +196,7 @@ void GdalRawTileDataReader::initialize() {
 
     _depthTransform = calculateTileDepthTransform();
     _cached._tileLevelDifference = calculateTileLevelDifference(
-        _initData.dimensions().x
+        _dataset, _initData.dimensions().x
     );
 
     const int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
@@ -235,25 +259,6 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(int rasterBand,
         case CE_Fatal:   return RawTile::ReadError::Fatal;
         default:         return RawTile::ReadError::Failure;
     }
-}
-
-GDALDataset* GdalRawTileDataReader::openGdalDataset(const std::string& filePath) {
-    return static_cast<GDALDataset*>(GDALOpen(filePath.c_str(), GA_ReadOnly));
-}
-
-int GdalRawTileDataReader::calculateTileLevelDifference(int minimumPixelSize) const {
-    GDALRasterBand* firstBand = _dataset->GetRasterBand(1);
-    GDALRasterBand* maxOverview;
-    int numOverviews = firstBand->GetOverviewCount();
-    if (numOverviews <= 0) { // No overviews. Use first band.
-        maxOverview = firstBand;
-    }
-    else { // Pick the highest overview.
-        maxOverview = firstBand->GetOverview(numOverviews - 1);
-    }
-    const int sizeLevel0 = maxOverview->GetXSize();
-    const double diff = log2(minimumPixelSize) - log2(sizeLevel0);
-    return static_cast<int>(diff);
 }
 
 } // namespace openspace::globebrowsing

@@ -37,11 +37,6 @@
 namespace openspace::globebrowsing {
 
 /**
- * Function for passing GDAL error messages to the GHOUL logging system.
- */
-void gdalErrorHandler(CPLErr eErrClass, int errNo, const char* msg);
-
-/**
  * Singleton class interfacing with global GDAL functions.
  */
 class GdalWrapper : public properties::PropertyOwner {
@@ -62,13 +57,13 @@ public:
      * Get the current size of the GDAL in memory cache.
      * \returns the number of bytes currently in the GDAL memory cache.
      */
-    static size_t GDALCacheUsed();
+    static int64_t GDALCacheUsed();
 
     /**
      * Get the maximum GDAL in memory cache size.
      * \returns the maximum number of bytes allowed for the GDAL cache.
      */
-    static size_t GDALMaximumCacheSize();
+    static int64_t GDALMaximumCacheSize();
 
     bool logGdalErrors() const;
 

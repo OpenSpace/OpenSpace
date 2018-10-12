@@ -28,14 +28,12 @@
 
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
-
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/ghoul.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/logmanager.h>
-#include <gdal.h>
-
 #include <cpl_conv.h>
+#include <gdal.h>
 
 namespace {
     constexpr const char* _loggerCat = "GdalWrapper";
@@ -53,21 +51,24 @@ namespace {
         "This function sets the maximum amount of RAM memory in MB that GDAL is "
         "permitted to use for caching."
     };
+
+    void gdalErrorHandler(CPLErr eErrClass, int, const char* msg) {
+        // No need to try to do this check earlier and only install this method as an error
+        // handler if the logging is desired as the default behavior of GDAL is to log errors
+        // to stderr.
+        if (openspace::globebrowsing::GdalWrapper::ref().logGdalErrors()) {
+            switch (eErrClass) {
+                case CE_None: break;
+                case CE_Debug:    LDEBUGC("GDAL", msg); break;
+                case CE_Warning:  LWARNINGC("GDAL", msg); break;
+                case CE_Failure:  LERRORC("GDAL", msg); break;
+                case CE_Fatal:    LFATALC("GDAL", msg); break;
+            }
+        }
+    }
 } // namespace
 
 namespace openspace::globebrowsing {
-
-void gdalErrorHandler(CPLErr eErrClass, int, const char* msg) {
-    if (GdalWrapper::ref().logGdalErrors()) {
-        switch (eErrClass) {
-            case CE_None: break;
-            case CE_Debug:    LDEBUGC  ("GDAL", msg); break;
-            case CE_Warning:  LWARNINGC("GDAL", msg); break;
-            case CE_Failure:  LERRORC  ("GDAL", msg); break;
-            case CE_Fatal:    LFATALC  ("GDAL", msg); break;
-        }
-    }
-}
 
 GdalWrapper* GdalWrapper::_singleton = nullptr;
 
@@ -85,11 +86,11 @@ GdalWrapper& GdalWrapper::ref() {
     return *_singleton;
 }
 
-size_t GDALCacheUsed() {
+int64_t GDALCacheUsed() {
     return GDALGetCacheUsed64();
 }
 
-size_t GDALMaximumCacheSize() {
+int64_t GDALMaximumCacheSize() {
     return GDALGetCacheMax64();
 }
 
@@ -100,7 +101,7 @@ bool GdalWrapper::logGdalErrors() const {
 GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize)
     : PropertyOwner({ "GdalWrapper" })
     , _logGdalErrors(LogGdalErrorInfo, false)
-    , _gdalMaximumCacheSize (
+    , _gdalMaximumCacheSize(
         GdalMaximumCacheInfo,
         static_cast<int>(maximumCacheSize / (1024ULL * 1024ULL)), // Default
         0,                                          // Minimum: No caching
@@ -124,8 +125,7 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
     _gdalMaximumCacheSize.onChange([&] {
         // MB to Bytes
         GDALSetCacheMax64(
-            static_cast<size_t>(_gdalMaximumCacheSize) *
-            1024ULL * 1024ULL
+            static_cast<int64_t>(_gdalMaximumCacheSize) * 1024ULL * 1024ULL
         );
     });
 }
