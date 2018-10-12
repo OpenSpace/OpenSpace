@@ -5,7 +5,7 @@ local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 local dataFolder = "C:/OpenSpace/OpenSpace/sync/http/dsn_data/1/xml"
 
 local CommunicationLine = {
-    Identifier = "Communication_Line",
+    Identifier = "Communication_Lines",
     Renderable = {
         Translation = {
             Type = "DsnTranslation",
@@ -13,7 +13,7 @@ local CommunicationLine = {
         },
         Type = "CommunicationLines",
         DataFolder = dataFolder,
-        DataFileType = "xml",
+        DataFileType = "xml"
     },
     GUI = {
         Name = "CommunicationLine",

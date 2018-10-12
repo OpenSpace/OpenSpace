@@ -78,6 +78,9 @@ public:
      */
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
+	/// The function deciding what color to use for a signal
+	virtual glm::vec3 GetSiteColor(std::string dishIdentifier);
+
 protected:
     explicit RenderableCommunicationPackage(const ghoul::Dictionary& dictionary);
 
@@ -120,10 +123,16 @@ protected:
     /// Set of information about the main rendering parts
     RenderInformation _mainRenderInformation;
 
+	/// Specifies the base color of the line
+	glm::vec3 _lineColor;
+
+	/// Specifies the base color of the site lines
+	properties::Vec3Property _madridLineColor;
+	properties::Vec3Property _goldstoneLineColor;
+	properties::Vec3Property _canberraLineColor;
 
 private:
-    /// Specifies the base color of the line
-    properties::Vec3Property _lineColor;
+
     /// Line width for the line rendering part
     properties::FloatProperty _lineWidth;
 
@@ -131,6 +140,30 @@ private:
     ghoul::opengl::ProgramObject* _programObject = nullptr;
 
     UniformCache(modelView, projection, color) _uniformCache;
+
+	enum SiteEnum {
+		GoldStone = 0,
+		Madrid,
+		Canberra
+	};
+
+	// Key Value map of stations and their sites
+	const std::map<std::string, SiteEnum> StationToSiteConversion = {
+	{ "DSS14", GoldStone },
+	{ "DSS24", GoldStone },
+	{ "DSS25", GoldStone },
+	{ "DSS26", GoldStone },
+	{ "DSS43", Canberra },
+	{ "DSS34", Canberra },
+	{ "DSS35", Canberra },
+	{ "DSS36", Canberra },
+	{ "DSS63", Madrid },
+	{ "DSS65", Madrid },
+	{ "DSS54", Madrid },
+	{ "DSS55", Madrid }
+	};
+
+
 };
 
 } // namespace openspace

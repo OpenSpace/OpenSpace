@@ -42,11 +42,24 @@ namespace {
         "modelViewTransform", "projectionTransform", "color"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
-        "Color",
-        "Color",
+    constexpr openspace::properties::Property::PropertyInfo MadridColorInfo = {
+        "MadridColor",
+        "MadridColor",
         "This value determines the RGB main color for the lines "
-        "of the communication package."
+        "of communication to and from Madrid."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo GoldstoneColorInfo = {
+        "GoldstoneColor",
+        "GoldstoneColor",
+        "This value determines the RGB main color for the lines "
+        "of communication to and from Goldstone."
+    };
+    constexpr openspace::properties::Property::PropertyInfo CanberraColorInfo = {
+        "CanberraColor",
+        "CanberraColor",
+        "This value determines the RGB main color for the lines "
+        "of communication to and from Canberra."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
@@ -73,10 +86,22 @@ documentation::Documentation RenderableCommunicationPackage::Documentation() {
                 "Translation object can be used here."
             },
             {
-                LineColorInfo.identifier,
+                MadridColorInfo.identifier,
                 new DoubleVector3Verifier,
-                Optional::No,
-                LineColorInfo.description
+                Optional::Yes,
+                MadridColorInfo.description
+            },
+            {
+                GoldstoneColorInfo.identifier,
+                new DoubleVector3Verifier,
+                Optional::Yes,
+                GoldstoneColorInfo.description
+            },
+            {
+                CanberraColorInfo.identifier,
+                new DoubleVector3Verifier,
+                Optional::Yes,
+                GoldstoneColorInfo.description
             },
             {
                 LineWidthInfo.identifier,
@@ -90,19 +115,34 @@ documentation::Documentation RenderableCommunicationPackage::Documentation() {
 
 RenderableCommunicationPackage::RenderableCommunicationPackage(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _madridLineColor(MadridColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(0.f))
+    , _goldstoneLineColor(GoldstoneColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _canberraLineColor(CanberraColorInfo, glm::vec3(0.f), glm::vec3(1.f), glm::vec3(0.f))
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
 {
     //addProperty(_opacity);
     //registerUpdateRenderBinFromOpacity();
+
 
     _translation = Translation::createFromDictionary(
         dictionary.value<ghoul::Dictionary>(KeyTranslation)
     );
     addPropertySubOwner(_translation.get());
 
-    _lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
-    addProperty(_lineColor);
+    if (dictionary.hasKeyAndValue<glm::vec3>(GoldstoneColorInfo.identifier)) {
+        _goldstoneLineColor = dictionary.value<glm::vec3>(GoldstoneColorInfo.identifier);
+    }
+    addProperty(_goldstoneLineColor);
+
+    if (dictionary.hasKeyAndValue<glm::vec3>(MadridColorInfo.identifier)) {
+        _madridLineColor = dictionary.value<glm::vec3>(MadridColorInfo.identifier);
+    }
+    addProperty(_madridLineColor);
+
+    if (dictionary.hasKeyAndValue<glm::vec3>(GoldstoneColorInfo.identifier)) {
+        _canberraLineColor = dictionary.value<glm::vec3>(GoldstoneColorInfo.identifier);
+    }
+    addProperty(_canberraLineColor);
 
     if (dictionary.hasKeyAndValue<double>(LineWidthInfo.identifier)) {
         _lineWidth = static_cast<float>(dictionary.value<double>(
@@ -201,5 +241,26 @@ void RenderableCommunicationPackage::render(const RenderData& data, RendererTask
 
     _programObject->deactivate();
 }
+
+glm::vec3 RenderableCommunicationPackage::GetSiteColor(std::string dishidentifier) {
+    
+    glm::vec3 color(0.0, 0.0, 0.0);
+
+    SiteEnum site = StationToSiteConversion.at(dishidentifier);
+
+    switch (site) {
+        case 0: 
+            color = _goldstoneLineColor; 
+            break;
+        case 1: 
+            color = _madridLineColor; 
+            break;
+        case 2: 
+            color = _canberraLineColor;
+            break;
+    }
+    return color;
+}
+
 
 } // namespace openspace
