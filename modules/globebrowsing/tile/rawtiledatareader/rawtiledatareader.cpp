@@ -72,6 +72,47 @@ size_t getMaximumValue(GLenum glType) {
 
 namespace openspace::globebrowsing {
 
+namespace {
+
+IODescription cutIODescription(IODescription io, PixelRegion::Side side, int pos) {
+    const PixelRegion readPreCut = io.read.region;
+    const PixelRegion writePreCut = io.write.region;
+
+    glm::dvec2 ratio = {
+        io.write.region.numPixels.x / static_cast<double>(io.read.region.numPixels.x),
+        io.write.region.numPixels.y / static_cast<double>(io.read.region.numPixels.y)
+    };
+
+    IODescription whatCameOff = io;
+    whatCameOff.read.region = io.read.region.globalCut(side, pos);
+
+    PixelRegion::PixelRange cutSize = whatCameOff.read.region.numPixels;
+    PixelRegion::PixelRange localWriteCutSize = ratio * glm::dvec2(cutSize);
+
+    if (cutSize.x == 0 || cutSize.y == 0) {
+        ghoul_assert(
+            read.region.equals(readPreCut),
+            "Read region should not have been modified"
+        );
+        ghoul_assert(
+            write.region.equals(writePreCut),
+            "Write region should not have been modified"
+        );
+    }
+
+    int localWriteCutPos =
+        (side == PixelRegion::Side::LEFT || side == PixelRegion::Side::RIGHT) ?
+        localWriteCutSize.x :
+        localWriteCutSize.y;
+
+    whatCameOff.write.region = io.write.region.localCut(side, localWriteCutPos);
+
+    return whatCameOff;
+}
+
+} // namespace 
+    
+
 RawTileDataReader::RawTileDataReader(TileTextureInitData initData,
                                      PerformPreprocessing preprocess)
     : _initData(std::move(initData))
@@ -362,7 +403,11 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(int rasterBand,
             // Example:
             // We are currently considering the left side of the pixel region
             const PixelRegion::Side side = static_cast<PixelRegion::Side>(i);
-            IODescription cutoff = io.cut(side, io.read.fullRegion.edge(side));
+            IODescription cutoff = cutIODescription(
+                io,
+                side,
+                io.read.fullRegion.edge(side)
+            );
 
             // Example:
             // We cut off the left part that was outside the io.read.fullRegion, and we

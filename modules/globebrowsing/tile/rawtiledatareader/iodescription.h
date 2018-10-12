@@ -42,8 +42,6 @@ struct IODescription {
         size_t bytesPerLine;
         size_t totalNumBytes;
     } write;
-
-    IODescription cut(PixelRegion::Side side, int pos);
 };
 
 } // namespace openspace::globebrowsing
