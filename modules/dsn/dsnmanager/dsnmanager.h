@@ -28,20 +28,28 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
+
 #include <ext/xml/rapidxml.hpp>
 #include <ext/xml/rapidxml_utils.hpp>
+
+#include <modules/dsn/rendering/renderablecommunicationpackage.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/engine/globals.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
+
 #include <fstream>
 
 
+
 namespace openspace {
-
-
 
     class DsnManager {
 
     public:
        static bool extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary);
-	   static glm::vec3 spaceCraftPosition(const char* dishId);
+	   static glm::vec3 spaceCraftPosition(const char* dishId, glm::vec3 dishPos);
+      static void fillVertexArray(std::vector<RenderableCommunicationPackage::PackageVBOLayout> &vertexArray); 
 
     private:
        static void readDataFromXml(std::vector<std::string> _dataFiles);

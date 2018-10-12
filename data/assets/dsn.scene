@@ -8,6 +8,7 @@ assetHelper.requestAll(asset, 'scene/solarsystem/sun')
 asset.require('scene/solarsystem/planets')
 asset.request('scene/digitaluniverse/stars')
 asset.request('customization/globebrowsing')
+
 -- Spacecrafts
 asset.require('scene/solarsystem/missions/voyager1/voyager1')
 asset.require('scene/solarsystem/missions/voyager2/voyager2')
@@ -17,6 +18,7 @@ asset.require('scene/solarsystem/missions/voyager1/trails')
 --Communication
 asset.require('scene/solarsystem/dsn/communicationlines/communicationlines')
 asset.require('scene/solarsystem/dsn/stations')
+
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')

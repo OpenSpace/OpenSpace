@@ -24,6 +24,7 @@
 
 #include <modules/dsn/dsnmanager/dsnmanager.h>
 
+
 namespace openspace {
     constexpr const char* _loggerCat = "DsnManager";
     
@@ -176,12 +177,42 @@ namespace openspace {
         }
     }
 
-    glm::vec3 DsnManager::spaceCraftPosition(const char* dishId) {
+    //return vertexarray to commmunicationline
+    void DsnManager::fillVertexArray(std::vector<RenderableCommunicationPackage::PackageVBOLayout> &vertexArray) {
+       
+        //get number of lines to be drawn = count signals from data at this time
+        const int nValues = 2;
 
-        //get data from Id here somehow, maybe use dictionary
-        double dishPosXYZ[] = { -4431247.000000, 2768950.500000, -3658746.000000 };
+        // ... fill all of the values, dummy values for now, should load from  _translation->position()
+        const char* dishIdentifier = "DSS54";
+        const char* spacecraftIdentifier = "Voyager_1";
+
+        SceneGraphNode* dishNode = global::renderEngine.scene()->sceneGraphNode(dishIdentifier);
+        SceneGraphNode* spaceCraftNode = global::renderEngine.scene()->sceneGraphNode(spacecraftIdentifier);
+        
+        glm::vec3 dishPos = dishNode->worldPosition();
+        vertexArray[0] = { static_cast<float>(dishPos.x), static_cast<float>(dishPos.y), static_cast<float>(dishPos.z) };
+
+        //If spacecraft excists in open space, use that position. 
+        if (global::renderEngine.scene()->sceneGraphNode(spacecraftIdentifier)) {
+            glm::vec3 spaceCraftPos = spaceCraftNode->worldPosition();
+            vertexArray[1] = { static_cast<float>(spaceCraftPos.x), static_cast<float>(spaceCraftPos.y), static_cast<float>(spaceCraftPos.z) };
+        }
+        else
+        {
+            //Else estimate the position of the spacecraft from Azimuth and elevation angles. 
+            LDEBUG("No position data for the space craft, estimate position");
+            glm::vec3 spaceCraftPos = DsnManager::spaceCraftPosition(dishIdentifier, dishPos); // VGR2
+            vertexArray[1] = { static_cast<float>(spaceCraftPos.x), static_cast<float>(spaceCraftPos.y), static_cast<float>(spaceCraftPos.z) };
+        }
+
+    }
+
+    glm::vec3 DsnManager::spaceCraftPosition(const char* dishId, glm::vec3 dishPos) {
+
+        double dishPosXYZ[] = { dishPos.x, dishPos.y, dishPos.z };
         double dishPosLLA[] = { -35.383, 148.966, 692 };
-
+        
         double azimuthAngle = 205.87; // angle from true north 
         double elevationAngle = 13.40; // angle from horizontal plane towards zenith
         double range = 1.7762947155343E10 * 1000; //DSS35 to VGR2
