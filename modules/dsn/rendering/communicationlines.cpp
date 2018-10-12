@@ -63,35 +63,12 @@ namespace openspace {
     }
     void CommunicationLines::update(const UpdateData& data){
 
-            //get number of lines to be drawn = count signals from data at this time
-            const int nValues = 2; 
-
             // Make space for the vertices
             _vertexArray.clear();
-            _vertexArray.resize(nValues);
+            _vertexArray.resize(2);
 
-            // ... fill all of the values, dummy values for now, should load from  _translation->position()
-            const char* dishIdentifier = "DSS35";
-            const char* spacecraftIdentifier = "Dawn";
-
-            SceneGraphNode* dishNode = global::renderEngine.scene()->sceneGraphNode(dishIdentifier);
-            SceneGraphNode* spaceCraftNode = global::renderEngine.scene()->sceneGraphNode(spacecraftIdentifier);
-
-            glm::vec3 dishPos = dishNode->worldPosition();
-            _vertexArray[0] = { static_cast<float>(dishPos.x), static_cast<float>(dishPos.y), static_cast<float>(dishPos.z) };
-
-            //If spacecraft excists in open space, use that position. 
-            if (global::renderEngine.scene()->sceneGraphNode(spacecraftIdentifier)) {
-                glm::vec3 spaceCraftPos = spaceCraftNode->worldPosition();
-                _vertexArray[1] = { static_cast<float>(spaceCraftPos.x), static_cast<float>(spaceCraftPos.y), static_cast<float>(spaceCraftPos.z) };
-            }
-            else
-            {
-                //Else estimate the position of the spacecraft from Azimuth and elevation angles. 
-                LDEBUG("No position data for the space craft, estimate position");
-                glm::vec3 spaceCraftPos = DsnManager::spaceCraftPosition(dishIdentifier); // VGR2
-                _vertexArray[1] = { static_cast<float>(spaceCraftPos.x), static_cast<float>(spaceCraftPos.y), static_cast<float>(spaceCraftPos.z) };
-            }
+            //Update vertex array with values from data 
+            DsnManager::fillVertexArray(_vertexArray);
 
             // ... and upload them to the GPU
             glBindVertexArray(_mainRenderInformation._vaoID);

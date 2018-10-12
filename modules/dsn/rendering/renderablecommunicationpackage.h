@@ -69,6 +69,10 @@ public:
     void deinitializeGL() override;
 
     bool isReady() const override;
+    /// The layout of the VBOs
+    struct PackageVBOLayout {
+        float x, y, z;
+    };
 
     /**
      * The render method will set up the shader information and then render first the
@@ -85,9 +89,9 @@ protected:
     static documentation::Documentation Documentation();
 
     /// The layout of the VBOs
-    struct PackageVBOLayout {
-        float x, y, z;
-    };
+   // struct PackageVBOLayout {
+   //     float x, y, z;
+   // };
 
     /// The backend storage for the vertex buffer object containing all points for the
     /// packages to be rendered
