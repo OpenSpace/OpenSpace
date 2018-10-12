@@ -37,6 +37,7 @@
 namespace {
     constexpr const char* ProgramName = "CommunicationPackageProgram";
     constexpr const char* KeyTranslation = "Translation";
+    constexpr const char* _loggerCat = "RenderableCommmunicationPackage";
 
     constexpr const std::array<const char*, 3> UniformNames = {
         "modelViewTransform", "projectionTransform", "color"
@@ -115,34 +116,42 @@ documentation::Documentation RenderableCommunicationPackage::Documentation() {
 
 RenderableCommunicationPackage::RenderableCommunicationPackage(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _madridLineColor(MadridColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(0.f))
-    , _goldstoneLineColor(GoldstoneColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _canberraLineColor(CanberraColorInfo, glm::vec3(0.f), glm::vec3(1.f), glm::vec3(0.f))
+    , _madridLineColor(MadridColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _goldstoneLineColor(GoldstoneColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _canberraLineColor(CanberraColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
 {
     //addProperty(_opacity);
     //registerUpdateRenderBinFromOpacity();
-
 
     _translation = Translation::createFromDictionary(
         dictionary.value<ghoul::Dictionary>(KeyTranslation)
     );
     addPropertySubOwner(_translation.get());
 
-    if (dictionary.hasKeyAndValue<glm::vec3>(GoldstoneColorInfo.identifier)) {
-        _goldstoneLineColor = dictionary.value<glm::vec3>(GoldstoneColorInfo.identifier);
-    }
-    addProperty(_goldstoneLineColor);
-
     if (dictionary.hasKeyAndValue<glm::vec3>(MadridColorInfo.identifier)) {
         _madridLineColor = dictionary.value<glm::vec3>(MadridColorInfo.identifier);
     }
+    else {
+        _madridLineColor = glm::vec3(1.f, 0.f, 0.f);
+    }
     addProperty(_madridLineColor);
 
-    if (dictionary.hasKeyAndValue<glm::vec3>(GoldstoneColorInfo.identifier)) {
-        _canberraLineColor = dictionary.value<glm::vec3>(GoldstoneColorInfo.identifier);
+    if (dictionary.hasKeyAndValue<glm::vec3>(CanberraColorInfo.identifier)) {
+        _canberraLineColor = dictionary.value<glm::vec3>(CanberraColorInfo.identifier);
+    }
+    else {
+        _canberraLineColor = glm::vec3(0.f, 1.f, 0.f);
     }
     addProperty(_canberraLineColor);
+
+    if (dictionary.hasKeyAndValue<glm::vec3>(GoldstoneColorInfo.identifier)) {
+        _goldstoneLineColor = dictionary.value<glm::vec3>(GoldstoneColorInfo.identifier);
+    }
+    else {
+        _goldstoneLineColor = glm::vec3(0.f, 0.f, 1.f);
+    }
+    addProperty(_goldstoneLineColor);
 
     if (dictionary.hasKeyAndValue<double>(LineWidthInfo.identifier)) {
         _lineWidth = static_cast<float>(dictionary.value<double>(
@@ -244,16 +253,27 @@ void RenderableCommunicationPackage::render(const RenderData& data, RendererTask
 
 glm::vec3 RenderableCommunicationPackage::GetSiteColor(std::string dishidentifier) {
     
-    glm::vec3 color(0.0, 0.0, 0.0);
+    glm::vec3 color(0.0f,0.0f,0.0f);
+    SiteEnum site;
 
-    SiteEnum site = StationToSiteConversion.at(dishidentifier);
+    try {
+        site = StationToSiteConversion.at(dishidentifier);
+    }
+    catch (const std::exception& e) {
+        LERROR(fmt::format("Station {} has no site location.", dishidentifier));
+    }
+
+    glm::vec3 color1 = _goldstoneLineColor;
+    glm::vec3 color2 = _madridLineColor;
+    glm::vec3 color3 = _canberraLineColor;
+
 
     switch (site) {
         case 0: 
             color = _goldstoneLineColor; 
             break;
         case 1: 
-            color = _madridLineColor; 
+            color = _madridLineColor;
             break;
         case 2: 
             color = _canberraLineColor;

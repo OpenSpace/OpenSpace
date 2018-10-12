@@ -70,6 +70,9 @@ namespace openspace {
             //Update vertex array with values from data 
             DsnManager::fillVertexArray(_vertexArray);
 
+            _lineColor = GetSiteColor("DSS63");
+
+
             // ... and upload them to the GPU
             glBindVertexArray(_mainRenderInformation._vaoID);
             glBindBuffer(GL_ARRAY_BUFFER, _mainRenderInformation._vBufferID);
