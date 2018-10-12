@@ -74,7 +74,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/simplerawtiledatareader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/gdalwrapper.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/iodescription.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/tiledatatype.h
 )
 
 set(SOURCE_FILES
@@ -119,7 +118,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/simplerawtiledatareader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/gdalwrapper.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/iodescription.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/tiledatatype.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

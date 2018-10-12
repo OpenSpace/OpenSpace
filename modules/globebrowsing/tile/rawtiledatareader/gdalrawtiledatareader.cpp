@@ -26,7 +26,8 @@
 
 #include <modules/globebrowsing/tile/rawtiledatareader/gdalrawtiledatareader.h>
 
-#include <modules/globebrowsing/tile/rawtiledatareader/tiledatatype.h>
+#include <ghoul/fmt.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
 
 #ifdef _MSC_VER
@@ -48,6 +49,34 @@
 #include <algorithm>
 
 namespace openspace::globebrowsing {
+
+namespace {
+    
+GDALDataType getGdalDataType(GLenum glType) {
+    switch (glType) {
+        case GL_UNSIGNED_BYTE:
+            return GDT_Byte;
+        case GL_UNSIGNED_SHORT:
+            return GDT_UInt16;
+        case GL_SHORT:
+            return GDT_Int16;
+        case GL_UNSIGNED_INT:
+            return GDT_UInt32;
+        case GL_INT:
+            return GDT_Int32;
+        case GL_FLOAT:
+            return GDT_Float32;
+        case GL_DOUBLE:
+            return GDT_Float64;
+        default:
+            LERRORC("GDALRawTileDataReader", fmt::format(
+                "OpenGL data type unknown to GDAL: {}", static_cast<int>(glType)
+            ));
+            throw ghoul::MissingCaseException();
+    }
+}
+
+} // namespace
 
 GdalRawTileDataReader::GdalRawTileDataReader(const std::string& filePath,
                                              const TileTextureInitData& initData,
@@ -134,9 +163,7 @@ void GdalRawTileDataReader::initialize() {
     _gdalDatasetMetaDataCached.noDataValue = static_cast<float>(
         _dataset->GetRasterBand(1)->GetNoDataValue()
     );
-    _gdalDatasetMetaDataCached.dataType = tiledatatype::getGdalDataType(
-        _initData.glType()
-    );
+    _gdalDatasetMetaDataCached.dataType = getGdalDataType(_initData.glType());
 
     CPLErr err = _dataset->GetGeoTransform(&_gdalDatasetMetaDataCached.padfTransform[0]);
     if (err == CE_Failure) {

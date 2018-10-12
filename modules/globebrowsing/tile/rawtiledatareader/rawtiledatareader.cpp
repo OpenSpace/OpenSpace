@@ -27,8 +27,48 @@
 #include <modules/globebrowsing/geometry/geodetic.h>
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
-#include <modules/globebrowsing/tile/rawtiledatareader/tiledatatype.h>
 #include <modules/globebrowsing/tile/tilemetadata.h>
+
+namespace {
+
+float interpretFloat(GLenum glType, const std::byte* src) {
+    switch (glType) {
+        case GL_UNSIGNED_BYTE:
+            return static_cast<float>(*reinterpret_cast<const GLubyte*>(src));
+        case GL_UNSIGNED_SHORT:
+            return static_cast<float>(*reinterpret_cast<const GLushort*>(src));
+        case GL_SHORT:
+            return static_cast<float>(*reinterpret_cast<const GLshort*>(src));
+        case GL_UNSIGNED_INT:
+            return static_cast<float>(*reinterpret_cast<const GLuint*>(src));
+        case GL_INT:
+            return static_cast<float>(*reinterpret_cast<const GLint*>(src));
+        case GL_HALF_FLOAT:
+            return static_cast<float>(*reinterpret_cast<const GLhalf*>(src));
+        case GL_FLOAT:
+            return static_cast<float>(*reinterpret_cast<const GLfloat*>(src));
+        case GL_DOUBLE:
+            return static_cast<float>(*reinterpret_cast<const GLdouble*>(src));
+        default:
+            ghoul_assert(false, "Unknown data type");
+            throw ghoul::MissingCaseException();
+    }
+}
+
+size_t getMaximumValue(GLenum glType) {
+    switch (glType) {
+        case GL_UNSIGNED_BYTE:  return 1ULL << 8ULL;
+        case GL_UNSIGNED_SHORT: return 1ULL << 16ULL;
+        case GL_SHORT:          return 1ULL << 15ULL;
+        case GL_UNSIGNED_INT:   return 1ULL << 32ULL;
+        case GL_INT:            return 1ULL << 31ULL;
+        default:
+            ghoul_assert(false, "Unknown data type");
+            throw ghoul::MissingCaseException();
+    }
+}
+
+} // namespace
 
 namespace openspace::globebrowsing {
 
@@ -419,7 +459,7 @@ TileMetaData RawTileDataReader::getTileMetaData(RawTile& rawTile,
         for (int x = 0; x < region.numPixels.x; ++x) {
             for (size_t raster = 0; raster < _initData.nRasters(); ++raster) {
                 const float noDataValue = noDataValueAsFloat();
-                const float val = tiledatatype::interpretFloat(
+                const float val = interpretFloat(
                     _initData.glType(),
                     &(rawTile.imageData.get()[yi + i])
                 );
@@ -466,9 +506,7 @@ TileDepthTransform RawTileDataReader::calculateTileDepthTransform() {
                          _initData.glType() == GL_FLOAT ||
                          _initData.glType() == GL_DOUBLE;
 
-    const double maximumValue = isFloat ?
-        1.f :
-        tiledatatype::getMaximumValue(_initData.glType());
+    const double maximumValue = isFloat ? 1.f : getMaximumValue(_initData.glType());
 
     return {
         static_cast<float>(depthScale() * maximumValue),
