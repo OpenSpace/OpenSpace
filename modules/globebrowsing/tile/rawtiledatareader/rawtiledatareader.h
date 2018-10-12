@@ -40,7 +40,7 @@ class RawTileDataReader {
 public:
     BooleanType(PerformPreprocessing);
 
-    RawTileDataReader(const TileTextureInitData& initData,
+    RawTileDataReader(TileTextureInitData initData,
         PerformPreprocessing preprocess = PerformPreprocessing::No);
     virtual ~RawTileDataReader() = default;
 
@@ -70,11 +70,6 @@ public:
     virtual float depthOffset() const;
     virtual float depthScale() const;
     PixelRegion fullPixelRegion() const;
-
-    /**
-     * Returns a single channeled empty RawTile of size 16 * 16 pixels.
-     */
-    std::shared_ptr<RawTile> defaultTileData() const;
 
 protected:
     /**

@@ -65,7 +65,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledepthtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilemetadata.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileuvtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileloadjob.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider.h
@@ -112,7 +111,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilemetadata.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileloadjob.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiletextureinitdata.cpp

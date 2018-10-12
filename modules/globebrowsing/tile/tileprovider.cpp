@@ -30,7 +30,6 @@
 #include <modules/globebrowsing/rendering/layermanager.h>
 #include <modules/globebrowsing/tile/chunktile.h>
 #include <modules/globebrowsing/tile/asynctiledataprovider.h>
-#include <modules/globebrowsing/tile/tileselector.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/gdalrawtiledatareader.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
@@ -84,7 +83,6 @@ namespace {
 
 std::unique_ptr<ghoul::opengl::Texture> DefaultTileTexture;
 Tile DefaultTile = Tile(nullptr, std::nullopt, Tile::Status::Unavailable);
-
 
 namespace defaultprovider {
     constexpr const char* KeyPerformPreProcessing = "PerformPreProcessing";
@@ -1320,11 +1318,21 @@ float noDataValueAsFloat(TileProvider& tp) {
 
 ChunkTile chunkTile(TileProvider& tp, TileIndex tileIndex, int parents, int maxParents) {
     ghoul_assert(tp.isInitialized, "TileProvider was not initialized.");
+
+    auto ascendToParent = [](TileIndex& tileIndex, TileUvTransform& uv) {
+        uv.uvOffset *= 0.5;
+        uv.uvScale *= 0.5;
+
+        uv.uvOffset += tileIndex.positionRelativeParent();
+
+        --tileIndex;
+    };
+
     TileUvTransform uvTransform = { glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f) };
 
     // Step 1. Traverse 0 or more parents up the chunkTree as requested by the caller
     for (int i = 0; i < parents && tileIndex.level > 1; i++) {
-        tileselector::ascendToParent(tileIndex, uvTransform);
+        ascendToParent(tileIndex, uvTransform);
     }
     maxParents -= parents;
 
@@ -1332,7 +1340,7 @@ ChunkTile chunkTile(TileProvider& tp, TileIndex tileIndex, int parents, int maxP
     //         the range of defined data.
     int maximumLevel = maxLevel(tp);
     while (tileIndex.level > maximumLevel) {
-        tileselector::ascendToParent(tileIndex, uvTransform);
+        ascendToParent(tileIndex, uvTransform);
         maxParents--;
     }
     if (maxParents < 0) {
@@ -1351,7 +1359,7 @@ ChunkTile chunkTile(TileProvider& tp, TileIndex tileIndex, int parents, int maxP
                     TileDepthTransform()
                 };
             }
-            tileselector::ascendToParent(tileIndex, uvTransform);
+            ascendToParent(tileIndex, uvTransform);
         }
         else {
             return ChunkTile{ std::move(t), uvTransform, TileDepthTransform() };

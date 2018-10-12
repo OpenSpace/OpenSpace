@@ -29,7 +29,6 @@
 #include <modules/globebrowsing/rendering/layer.h>
 #include <modules/globebrowsing/rendering/layergroup.h>
 #include <modules/globebrowsing/rendering/gpulayergroup.h>
-#include <modules/globebrowsing/tile/tileselector.h>
 #include <modules/globebrowsing/tile/tileprovider.h>
 #include <modules/debugging/rendering/debugrenderer.h>
 #include <openspace/engine/globals.h>
@@ -204,6 +203,22 @@ const Chunk& findChunkNode(const Chunk& node, const Geodetic2& location) {
     return *n;
 }
 
+std::vector<std::pair<ChunkTile, const LayerRenderSettings*>>
+tilesAndSettingsUnsorted(const LayerGroup& layerGroup, const TileIndex& tileIndex)
+{
+    std::vector<std::pair<ChunkTile, const LayerRenderSettings*>> tilesAndSettings;
+    for (Layer* layer : layerGroup.activeLayers()) {
+        if (layer->tileProvider()) {
+            tilesAndSettings.emplace_back(
+                tileprovider::chunkTile(*layer->tileProvider(), tileIndex),
+                &layer->renderSettings()
+            );
+        }
+    }
+    std::reverse(tilesAndSettings.begin(), tilesAndSettings.end());
+    return tilesAndSettings;
+}
+
 BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& lm) {
     using ChunkTileSettingsPair = std::pair<ChunkTile, const LayerRenderSettings*>;
 
@@ -214,8 +229,10 @@ BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& 
     // (that is channel 0).
     const size_t HeightChannel = 0;
     const LayerGroup& heightmaps = lm.layerGroup(layergroupid::GroupID::HeightLayers);
-    std::vector<ChunkTileSettingsPair> chunkTileSettingPairs =
-        tileselector::getTilesAndSettingsUnsorted(heightmaps, chunk.tileIndex);
+    std::vector<ChunkTileSettingsPair> chunkTileSettingPairs = tilesAndSettingsUnsorted(
+        heightmaps,
+        chunk.tileIndex
+    );
 
     bool lastHadMissingData = true;
     for (const ChunkTileSettingsPair& chunkTileSettingsPair : chunkTileSettingPairs) {

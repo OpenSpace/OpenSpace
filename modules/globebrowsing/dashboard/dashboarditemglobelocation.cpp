@@ -115,7 +115,7 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
                                                       const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
-    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
+    , _fontSize(FontSizeInfo, DefaultFontSize, 10.f, 144.f, 1.f)
     , _font(global::fontManager.font(KeyFontMono, 10))
 {
     documentation::testSpecificationAndThrow(

@@ -27,10 +27,12 @@
 
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/tilemetadata.h>
+#include <modules/globebrowsing/tile/tiletextureinitdata.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <cstddef>
 #include <memory>
+#include <optional>
 
 namespace openspace::globebrowsing {
 
@@ -46,15 +48,15 @@ struct RawTile {
         Fatal     // = CE_Fatal
     };
 
-    std::unique_ptr<std::byte[]> imageData = nullptr;
+    std::unique_ptr<std::byte[]> imageData;
     TileMetaData tileMetaData;
-    std::unique_ptr<TileTextureInitData> textureInitData = nullptr;
+    std::optional<TileTextureInitData> textureInitData;
     TileIndex tileIndex = { 0, 0, 0 };
     ReadError error = ReadError::None;
     GLuint pbo = 0;
 };
 
-RawTile createDefaultTile(const TileTextureInitData& initData);
+RawTile createDefaultTile(TileTextureInitData initData);
 
 } // namespace openspace::globebrowsing
 

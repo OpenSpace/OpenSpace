@@ -38,7 +38,6 @@ namespace openspace::globebrowsing {
 struct ChunkTile;
 class Layer;
 class GPULayer;
-struct LayerRenderSettings;
 struct TileDepthTransform;
 struct TileUvTransform;
 

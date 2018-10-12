@@ -32,15 +32,11 @@
 
 namespace openspace::globebrowsing {
 
-RawTileDataReader::RawTileDataReader(const TileTextureInitData& initData,
+RawTileDataReader::RawTileDataReader(TileTextureInitData initData,
                                      PerformPreprocessing preprocess)
-    : _initData(initData)
+    : _initData(std::move(initData))
     , _preprocess(preprocess)
 {}
-
-std::shared_ptr<RawTile> RawTileDataReader::defaultTileData() const {
-    return std::make_shared<RawTile>(createDefaultTile(_initData));
-}
 
 RawTile RawTileDataReader::readTileData(TileIndex tileIndex) const {
     size_t numBytes = tileTextureInitData().totalNumBytes();
@@ -56,7 +52,7 @@ RawTile RawTileDataReader::readTileData(TileIndex tileIndex) const {
     rawTile.error = worstError;
     rawTile.tileIndex = std::move(tileIndex);
 
-    rawTile.textureInitData = std::make_unique<TileTextureInitData>(_initData);
+    rawTile.textureInitData = _initData;
 
     if (_preprocess) {
         rawTile.tileMetaData = getTileMetaData(rawTile, io.write.region);
