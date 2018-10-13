@@ -24,7 +24,6 @@
 
 #include <modules/globebrowsing/tile/tile.h>
 
-#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <modules/globebrowsing/tile/tilemetadata.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/tileuvtransform.h>

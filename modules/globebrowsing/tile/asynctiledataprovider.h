@@ -37,7 +37,7 @@ namespace openspace { class GlobeBrowsingModule; }
 namespace openspace::globebrowsing {
 
 struct RawTile;
-class RawTileDataReader;
+class GdalRawTileDataReader;
 
 /**
  * The responsibility of this class is to enqueue tile requests and fetching finished
@@ -50,7 +50,7 @@ public:
      * tile loading.
      */
     AsyncTileDataProvider(std::string name,
-        std::unique_ptr<RawTileDataReader> rawTileDataReader);
+        std::unique_ptr<GdalRawTileDataReader> rawTileDataReader);
 
     ~AsyncTileDataProvider();
 
@@ -75,7 +75,7 @@ public:
 
     bool shouldBeDeleted();
 
-    const RawTileDataReader& rawTileDataReader() const;
+    const GdalRawTileDataReader& rawTileDataReader() const;
     float noDataValueAsFloat() const;
 
 protected:
@@ -108,7 +108,7 @@ private:
     const std::string _name;
     GlobeBrowsingModule* _globeBrowsingModule;
     /// The reader used for asynchronous reading
-    std::unique_ptr<RawTileDataReader> _rawTileDataReader;
+    std::unique_ptr<GdalRawTileDataReader> _rawTileDataReader;
 
     PrioritizingConcurrentJobManager<RawTile, TileIndex::TileHashKey>
         _concurrentJobManager;

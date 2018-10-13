@@ -178,8 +178,8 @@ Type toType(const layergroupid::TypeID& id) {
 }
 
 void initAsyncTileDataReader(DefaultTileProvider& t, TileTextureInitData initData) {
-    RawTileDataReader::PerformPreprocessing preprocess =
-        RawTileDataReader::PerformPreprocessing(t.performPreProcessing);
+    GdalRawTileDataReader::PerformPreprocessing preprocess =
+        GdalRawTileDataReader::PerformPreprocessing(t.performPreProcessing);
 
     t.asyncTextureDataProvider = std::make_unique<AsyncTileDataProvider>(
         t.name,
@@ -975,7 +975,7 @@ Tile::Status tileStatus(TileProvider& tp, const TileIndex& index) {
         case Type::DefaultTileProvider: {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
             if (t.asyncTextureDataProvider) {
-                const RawTileDataReader& rawTileDataReader =
+                const GdalRawTileDataReader& rawTileDataReader =
                     t.asyncTextureDataProvider->rawTileDataReader();
 
                 if (index.level > rawTileDataReader.maxChunkLevel()) {
