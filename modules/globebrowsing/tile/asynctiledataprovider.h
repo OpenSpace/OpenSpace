@@ -49,7 +49,8 @@ public:
      * \param rawTileDataReader is the reader that will be used for the asynchronous
      * tile loading.
      */
-    AsyncTileDataProvider(std::string name, std::unique_ptr<RawTileDataReader>  rawTileDataReader);
+    AsyncTileDataProvider(std::string name,
+        std::unique_ptr<RawTileDataReader> rawTileDataReader);
 
     ~AsyncTileDataProvider();
 
