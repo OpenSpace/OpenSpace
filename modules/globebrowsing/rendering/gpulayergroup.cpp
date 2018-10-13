@@ -105,8 +105,8 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
         }
 
         if (gal.isHeightLayer) {
-            program.setUniform(galuc.depthOffset, al.depthTransform().depthOffset);
-            program.setUniform(galuc.depthScale, al.depthTransform().depthScale);
+            program.setUniform(galuc.depthOffset, al.depthTransform().offset);
+            program.setUniform(galuc.depthScale, al.depthTransform().scale);
         }
     }
 }

@@ -28,8 +28,8 @@
 namespace openspace::globebrowsing {
 
 struct TileDepthTransform {
-    float depthScale;
-    float depthOffset;
+    float scale;
+    float offset;
 };
 
 } // namespace openspace::globebrowsing

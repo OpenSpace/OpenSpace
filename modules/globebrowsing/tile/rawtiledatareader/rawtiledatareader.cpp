@@ -311,8 +311,8 @@ void RawTileDataReader::initialize() {
 
     const double maximumValue = isFloat ? 1.f : getMaximumValue(_initData.glType());
 
-    _depthTransform.depthScale = static_cast<float>(depthScale() * maximumValue);
-    _depthTransform.depthOffset = depthOffset();
+    _depthTransform.scale = static_cast<float>(depthScale() * maximumValue);
+    _depthTransform.offset = depthOffset();
 
     _cached._tileLevelDifference = calculateTileLevelDifference(
         _dataset, _initData.dimensions().x

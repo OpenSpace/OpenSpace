@@ -1510,7 +1510,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
         // is smaller than -100000
         if (sample > -100000) {
             // Perform depth transform to get the value in meters
-            height = depthTransform.depthOffset + depthTransform.depthScale * sample;
+            height = depthTransform.offset + depthTransform.scale * sample;
             // Make sure that the height value follows the layer settings.
             // For example if the multiplier is set to a value bigger than one,
             // the sampled height should be modified as well.
