@@ -32,7 +32,7 @@
 
 namespace openspace::globebrowsing {
 
-class GdalRawTileDataReader;
+class RawTileDataReader;
 
 struct TileLoadJob : public Job<RawTile> {
     /**
@@ -41,7 +41,7 @@ struct TileLoadJob : public Job<RawTile> {
      * called before the TileLoadJob is finished, the data will be deleted as it has not
      * been exposed outside of this object.
      */
-    TileLoadJob(GdalRawTileDataReader& rawTileDataReader, const TileIndex& tileIndex);
+    TileLoadJob(RawTileDataReader& rawTileDataReader, const TileIndex& tileIndex);
 
     /**
      * Destroys the allocated data pointer if it has been allocated and the TileLoadJob
@@ -64,7 +64,7 @@ struct TileLoadJob : public Job<RawTile> {
     RawTile product() override;
 
 protected:
-    GdalRawTileDataReader& _rawTileDataReader;
+    RawTileDataReader& _rawTileDataReader;
     RawTile _rawTile;
     TileIndex _chunkIndex;
     bool _hasTile = false;

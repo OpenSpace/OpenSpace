@@ -47,7 +47,6 @@ class RawTileDataReader {
 public:
     BooleanType(PerformPreprocessing);
 
-
     /**
     * Opens a GDALDataset in readonly mode and calculates meta data required for
     * reading tile using a TileIndex.

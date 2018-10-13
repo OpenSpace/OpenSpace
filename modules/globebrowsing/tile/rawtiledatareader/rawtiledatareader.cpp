@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/rawtiledatareader/gdalrawtiledatareader.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 
 
 #include <modules/globebrowsing/geometry/geodetic.h>
@@ -199,8 +199,6 @@ RawTileDataReader::~RawTileDataReader() {
         _dataset = nullptr;
     }
 }
-
-
 
 std::array<double, 6> RawTileDataReader::calculategeoTransform() const {
     GeodeticPatch cov(

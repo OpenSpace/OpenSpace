@@ -30,7 +30,7 @@
 #include <modules/globebrowsing/rendering/layermanager.h>
 #include <modules/globebrowsing/tile/chunktile.h>
 #include <modules/globebrowsing/tile/asynctiledataprovider.h>
-#include <modules/globebrowsing/tile/rawtiledatareader/gdalrawtiledatareader.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/util/factorymanager.h>
@@ -178,12 +178,12 @@ Type toType(const layergroupid::TypeID& id) {
 }
 
 void initAsyncTileDataReader(DefaultTileProvider& t, TileTextureInitData initData) {
-    GdalRawTileDataReader::PerformPreprocessing preprocess =
-        GdalRawTileDataReader::PerformPreprocessing(t.performPreProcessing);
+    RawTileDataReader::PerformPreprocessing preprocess =
+        RawTileDataReader::PerformPreprocessing(t.performPreProcessing);
 
     t.asyncTextureDataProvider = std::make_unique<AsyncTileDataProvider>(
         t.name,
-        std::make_unique<GdalRawTileDataReader>(t.filePath, initData, preprocess)
+        std::make_unique<RawTileDataReader>(t.filePath, initData, preprocess)
     );
 }
 
@@ -975,7 +975,7 @@ Tile::Status tileStatus(TileProvider& tp, const TileIndex& index) {
         case Type::DefaultTileProvider: {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
             if (t.asyncTextureDataProvider) {
-                const GdalRawTileDataReader& rawTileDataReader =
+                const RawTileDataReader& rawTileDataReader =
                     t.asyncTextureDataProvider->rawTileDataReader();
 
                 if (index.level > rawTileDataReader.maxChunkLevel()) {

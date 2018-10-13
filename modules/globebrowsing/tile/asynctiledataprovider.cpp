@@ -27,7 +27,7 @@
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/tile/tileloadjob.h>
-#include <modules/globebrowsing/tile/rawtiledatareader/gdalrawtiledatareader.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/logging/logmanager.h>
@@ -40,7 +40,7 @@ namespace {
 } // namespace
 
 AsyncTileDataProvider::AsyncTileDataProvider(std::string name,
-                                     std::unique_ptr<GdalRawTileDataReader> rawTileDataReader)
+                                    std::unique_ptr<RawTileDataReader>  rawTileDataReader)
     : _name(std::move(name))
     , _rawTileDataReader(std::move(rawTileDataReader))
     , _concurrentJobManager(LRUThreadPool<TileIndex::TileHashKey>(1, 10))
@@ -51,7 +51,7 @@ AsyncTileDataProvider::AsyncTileDataProvider(std::string name,
 
 AsyncTileDataProvider::~AsyncTileDataProvider() {} // NOLINT
 
-const GdalRawTileDataReader& AsyncTileDataProvider::rawTileDataReader() const {
+const RawTileDataReader& AsyncTileDataProvider::rawTileDataReader() const {
     return *_rawTileDataReader;
 }
 

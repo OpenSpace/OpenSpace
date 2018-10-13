@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_DATAPROVIDER___H__
 
 #include <modules/globebrowsing/other/prioritizingconcurrentjobmanager.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <ghoul/misc/boolean.h>
 #include <map>
@@ -37,7 +38,6 @@ namespace openspace { class GlobeBrowsingModule; }
 namespace openspace::globebrowsing {
 
 struct RawTile;
-class GdalRawTileDataReader;
 
 /**
  * The responsibility of this class is to enqueue tile requests and fetching finished
@@ -49,8 +49,7 @@ public:
      * \param rawTileDataReader is the reader that will be used for the asynchronous
      * tile loading.
      */
-    AsyncTileDataProvider(std::string name,
-        std::unique_ptr<GdalRawTileDataReader> rawTileDataReader);
+    AsyncTileDataProvider(std::string name, std::unique_ptr<RawTileDataReader>  rawTileDataReader);
 
     ~AsyncTileDataProvider();
 
@@ -75,7 +74,7 @@ public:
 
     bool shouldBeDeleted();
 
-    const GdalRawTileDataReader& rawTileDataReader() const;
+    const RawTileDataReader& rawTileDataReader() const;
     float noDataValueAsFloat() const;
 
 protected:
@@ -108,7 +107,7 @@ private:
     const std::string _name;
     GlobeBrowsingModule* _globeBrowsingModule;
     /// The reader used for asynchronous reading
-    std::unique_ptr<GdalRawTileDataReader> _rawTileDataReader;
+    std::unique_ptr<RawTileDataReader> _rawTileDataReader;
 
     PrioritizingConcurrentJobManager<RawTile, TileIndex::TileHashKey>
         _concurrentJobManager;
