@@ -57,45 +57,31 @@ namespace openspace::globebrowsing {
 
 namespace {
 
-
-    float interpretFloat(GLenum glType, const std::byte* src) {
-        switch (glType) {
-            case GL_UNSIGNED_BYTE:
-                return static_cast<float>(*reinterpret_cast<const GLubyte*>(src));
-            case GL_UNSIGNED_SHORT:
-                return static_cast<float>(*reinterpret_cast<const GLushort*>(src));
-            case GL_SHORT:
-                return static_cast<float>(*reinterpret_cast<const GLshort*>(src));
-            case GL_UNSIGNED_INT:
-                return static_cast<float>(*reinterpret_cast<const GLuint*>(src));
-            case GL_INT:
-                return static_cast<float>(*reinterpret_cast<const GLint*>(src));
-            case GL_HALF_FLOAT:
-                return static_cast<float>(*reinterpret_cast<const GLhalf*>(src));
-            case GL_FLOAT:
-                return static_cast<float>(*reinterpret_cast<const GLfloat*>(src));
-            case GL_DOUBLE:
-                return static_cast<float>(*reinterpret_cast<const GLdouble*>(src));
-            default:
-                ghoul_assert(false, "Unknown data type");
-                throw ghoul::MissingCaseException();
-        }
+float interpretFloat(GLenum glType, const std::byte* src) {
+    switch (glType) {
+        case GL_UNSIGNED_BYTE:
+            return static_cast<float>(*reinterpret_cast<const GLubyte*>(src));
+        case GL_UNSIGNED_SHORT:
+            return static_cast<float>(*reinterpret_cast<const GLushort*>(src));
+        case GL_SHORT:
+            return static_cast<float>(*reinterpret_cast<const GLshort*>(src));
+        case GL_UNSIGNED_INT:
+            return static_cast<float>(*reinterpret_cast<const GLuint*>(src));
+        case GL_INT:
+            return static_cast<float>(*reinterpret_cast<const GLint*>(src));
+        case GL_HALF_FLOAT:
+            return static_cast<float>(*reinterpret_cast<const GLhalf*>(src));
+        case GL_FLOAT:
+            return static_cast<float>(*reinterpret_cast<const GLfloat*>(src));
+        case GL_DOUBLE:
+            return static_cast<float>(*reinterpret_cast<const GLdouble*>(src));
+        default:
+            ghoul_assert(false, "Unknown data type");
+            throw ghoul::MissingCaseException();
     }
+}
 
-    size_t getMaximumValue(GLenum glType) {
-        switch (glType) {
-            case GL_UNSIGNED_BYTE:  return 1ULL << 8ULL;
-            case GL_UNSIGNED_SHORT: return 1ULL << 16ULL;
-            case GL_SHORT:          return 1ULL << 15ULL;
-            case GL_UNSIGNED_INT:   return 1ULL << 32ULL;
-            case GL_INT:            return 1ULL << 31ULL;
-            default:
-                ghoul_assert(false, "Unknown data type");
-                throw ghoul::MissingCaseException();
-        }
-    }
-
-GDALDataType getGdalDataType(GLenum glType) {
+GDALDataType toGDALDataType(GLenum glType) {
     switch (glType) {
         case GL_UNSIGNED_BYTE:
             return GDT_Byte;
@@ -139,7 +125,6 @@ int calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize) {
     return static_cast<int>(diff);
 }
 
-
 IODescription cutIODescription(IODescription io, PixelRegion::Side side, int pos) {
     const PixelRegion readPreCut = io.read.region;
     const PixelRegion writePreCut = io.write.region;
@@ -179,8 +164,6 @@ IODescription cutIODescription(IODescription io, PixelRegion::Side side, int pos
 /**
  * Returns the geo transform from raster space to projection coordinates as defined
  * by GDAL.
- * If the transform is not available, the function returns a transform to map
- * the pixel coordinates to cover the whole geodetic lat long space.
  */
 std::array<double, 6> geoTransform(const glm::ivec2& rasterSize) {
     GeodeticPatch cov(
@@ -250,17 +233,18 @@ PixelRegion highestResPixelRegion(const GeodeticPatch& geodeticPatch,
 
 } // namespace
 
+
+
+
+
 RawTileDataReader::RawTileDataReader(const std::string& filePath,
-                                             const TileTextureInitData& initData,
-                                             PerformPreprocessing preprocess)
+                                     const TileTextureInitData& initData,
+                                     PerformPreprocessing preprocess)
     : _initData(std::move(initData))
     , _preprocess(preprocess)
     , _datasetFilePath(filePath)
 {
-    {
-        std::lock_guard lockGuard(_datasetLock);
-        initialize();
-    }
+    initialize();
 }
 
 RawTileDataReader::~RawTileDataReader() {
@@ -286,16 +270,16 @@ void RawTileDataReader::initialize() {
     _gdalDatasetMetaDataCached.rasterCount = _dataset->GetRasterCount();
     _gdalDatasetMetaDataCached.scale = static_cast<float>(
         _dataset->GetRasterBand(1)->GetScale()
-    );
+        );
     _gdalDatasetMetaDataCached.offset = static_cast<float>(
         _dataset->GetRasterBand(1)->GetOffset()
-    );
+        );
     _gdalDatasetMetaDataCached.rasterXSize = _dataset->GetRasterXSize();
     _gdalDatasetMetaDataCached.rasterYSize = _dataset->GetRasterYSize();
     _gdalDatasetMetaDataCached.noDataValue = static_cast<float>(
         _dataset->GetRasterBand(1)->GetNoDataValue()
-    );
-    _gdalDatasetMetaDataCached.dataType = getGdalDataType(_initData.glType());
+        );
+    _gdalDatasetMetaDataCached.dataType = toGDALDataType(_initData.glType());
 
     CPLErr e = _dataset->GetGeoTransform(_gdalDatasetMetaDataCached.padfTransform.data());
     if (e == CE_Failure) {
@@ -309,7 +293,22 @@ void RawTileDataReader::initialize() {
         _initData.glType() == GL_FLOAT ||
         _initData.glType() == GL_DOUBLE;
 
-    const double maximumValue = isFloat ? 1.f : getMaximumValue(_initData.glType());
+    unsigned long long maximumValue = [t = _initData.glType()]() {
+        switch (t) {
+            case GL_UNSIGNED_BYTE:  return 1ULL << 8ULL;
+            case GL_UNSIGNED_SHORT: return 1ULL << 16ULL;
+            case GL_SHORT:          return 1ULL << 15ULL;
+            case GL_UNSIGNED_INT:   return 1ULL << 32ULL;
+            case GL_INT:            return 1ULL << 31ULL;
+            case GL_HALF_FLOAT:
+            case GL_FLOAT:
+            case GL_DOUBLE:
+                                    return 1ULL;
+            default:
+                ghoul_assert(false, "Unknown data type");
+                throw ghoul::MissingCaseException();
+        }
+    }();
 
     _depthTransform.scale = static_cast<float>(depthScale() * maximumValue);
     _depthTransform.offset = depthOffset();
@@ -334,34 +333,6 @@ void RawTileDataReader::reset() {
         _dataset = nullptr;
     }
     initialize();
-}
-
-int RawTileDataReader::maxChunkLevel() const {
-    return _cached._maxLevel;
-}
-
-float RawTileDataReader::noDataValueAsFloat() const {
-    return _gdalDatasetMetaDataCached.noDataValue;
-}
-
-int RawTileDataReader::rasterXSize() const {
-    return _gdalDatasetMetaDataCached.rasterXSize;
-}
-
-int RawTileDataReader::rasterYSize() const {
-    return _gdalDatasetMetaDataCached.rasterYSize;
-}
-
-int RawTileDataReader::dataSourceNumRasters() const {
-    return _gdalDatasetMetaDataCached.rasterCount;
-}
-
-float RawTileDataReader::depthOffset() const {
-    return _gdalDatasetMetaDataCached.offset;
-}
-
-float RawTileDataReader::depthScale() const {
-    return _gdalDatasetMetaDataCached.scale;
 }
 
 RawTile::ReadError RawTileDataReader::rasterRead(int rasterBand,
@@ -418,8 +389,6 @@ RawTile::ReadError RawTileDataReader::rasterRead(int rasterBand,
     }
 }
 
-
-
 RawTile RawTileDataReader::readTileData(TileIndex tileIndex) const {
     size_t numBytes = tileTextureInitData().totalNumBytes();
 
@@ -445,7 +414,7 @@ RawTile RawTileDataReader::readTileData(TileIndex tileIndex) const {
 }
 
 void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& worstError,
-    char* imageDataDest) const
+                                      char* imageDataDest) const
 {
     // Only read the minimum number of rasters
     int nRastersToRead = std::min(
@@ -565,7 +534,7 @@ IODescription RawTileDataReader::ioDescription(const TileIndex& tileIndex) const
         _initData.tilePixelSizeDifference()
     );
     const double scale = static_cast<double>(io.read.region.numPixels.x) /
-        static_cast<double>(io.write.region.numPixels.x);
+                         static_cast<double>(io.write.region.numPixels.x);
     scaledPadding.numPixels *= scale;
     scaledPadding.start *= scale;
 
@@ -671,7 +640,7 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(int rasterBand,
                 // Wrap by repeating
                 PixelRegion::Side oppositeSide = static_cast<PixelRegion::Side>(
                     (i + 2) % 4
-                    );
+                );
 
                 cutoff.read.region.align(
                     oppositeSide,
@@ -719,7 +688,7 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(int rasterBand,
 }
 
 TileMetaData RawTileDataReader::tileMetaData(RawTile& rawTile,
-                                                const PixelRegion& region) const
+                                             const PixelRegion& region) const
 {
     const size_t bytesPerLine = _initData.bytesPerPixel() * region.numPixels.x;
 
@@ -762,7 +731,7 @@ TileMetaData RawTileDataReader::tileMetaData(RawTile& rawTile,
                     preprocessData.hasMissingData[raster] = true;
                     float& floatToRewrite = reinterpret_cast<float&>(
                         rawTile.imageData[yi + i]
-                        );
+                    );
                     floatToRewrite = -std::numeric_limits<float>::max();
                 }
                 i += _initData.bytesPerDatum();
@@ -779,12 +748,18 @@ TileMetaData RawTileDataReader::tileMetaData(RawTile& rawTile,
 
 RawTile::ReadError RawTileDataReader::postProcessErrorCheck(const RawTile& rawTile) const
 {
-    const float missingDataValue = noDataValueAsFloat();
+    // This check was implicit before and just made explicit here
+    ghoul_assert(
+        _initData.nRasters() == rawTile.tileMetaData.maxValues.size(),
+        "Wrong numbers of max values"
+    );
 
-    bool hasMissingData = false;
-    for (size_t c = 0; c < _initData.nRasters(); c++) {
-        hasMissingData |= (rawTile.tileMetaData.maxValues[c] == missingDataValue);
-    }
+    const float missingDataValue = noDataValueAsFloat();
+    const bool hasMissingData = std::any_of(
+        rawTile.tileMetaData.maxValues.begin(),
+        rawTile.tileMetaData.maxValues.end(),
+        [missingDataValue](float v) { return v = missingDataValue; }
+    );
 
     const bool onHighLevel = rawTile.tileIndex.level > 6;
     if (hasMissingData && onHighLevel) {
@@ -793,5 +768,32 @@ RawTile::ReadError RawTileDataReader::postProcessErrorCheck(const RawTile& rawTi
     return RawTile::ReadError::None;
 }
 
+int RawTileDataReader::maxChunkLevel() const {
+    return _cached._maxLevel;
+}
+
+float RawTileDataReader::noDataValueAsFloat() const {
+    return _gdalDatasetMetaDataCached.noDataValue;
+}
+
+int RawTileDataReader::rasterXSize() const {
+    return _gdalDatasetMetaDataCached.rasterXSize;
+}
+
+int RawTileDataReader::rasterYSize() const {
+    return _gdalDatasetMetaDataCached.rasterYSize;
+}
+
+int RawTileDataReader::dataSourceNumRasters() const {
+    return _gdalDatasetMetaDataCached.rasterCount;
+}
+
+float RawTileDataReader::depthOffset() const {
+    return _gdalDatasetMetaDataCached.offset;
+}
+
+float RawTileDataReader::depthScale() const {
+    return _gdalDatasetMetaDataCached.scale;
+}
 
 } // namespace openspace::globebrowsing
