@@ -27,7 +27,6 @@
 
 #include <modules/globebrowsing/geometry/geodetic.h>
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
-#include <modules/globebrowsing/tile/tilemetadata.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>

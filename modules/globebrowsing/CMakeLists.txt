@@ -58,11 +58,8 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layerrendersettings.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctiledataprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/chunktile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtile.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilemetadata.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileloadjob.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiletextureinitdata.h
@@ -100,9 +97,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctiledataprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtile.cpp
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilemetadata.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileloadjob.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiletextureinitdata.cpp

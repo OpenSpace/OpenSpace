@@ -27,8 +27,8 @@
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
+#include <modules/globebrowsing/other/basictypes.h>
 #include <modules/globebrowsing/rendering/layermanager.h>
-#include <modules/globebrowsing/tile/chunktile.h>
 #include <modules/globebrowsing/tile/asynctiledataprovider.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <openspace/engine/globals.h>

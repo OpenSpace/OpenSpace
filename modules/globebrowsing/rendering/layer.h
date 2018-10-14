@@ -27,8 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <modules/globebrowsing/tile/chunktile.h>
-#include <modules/globebrowsing/tile/tile.h>
+#include <modules/globebrowsing/other/basictypes.h>
 #include <modules/globebrowsing/rendering/layeradjustment.h>
 #include <modules/globebrowsing/rendering/layerrendersettings.h>
 

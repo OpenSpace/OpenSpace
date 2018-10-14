@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___RAWTILE___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___RAWTILE___H__
 
+#include <modules/globebrowsing/other/basictypes.h>
 #include <modules/globebrowsing/tile/tileindex.h>
-#include <modules/globebrowsing/tile/tilemetadata.h>
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>

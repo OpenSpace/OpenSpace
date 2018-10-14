@@ -24,8 +24,8 @@
 
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
 
+#include <modules/globebrowsing/other/basictypes.h>
 #include <modules/globebrowsing/rendering/layermanager.h>
-#include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/tile/rawtile.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
