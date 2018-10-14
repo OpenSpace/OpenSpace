@@ -28,7 +28,7 @@
 #include <openspace/util/updatestructures.h>
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-#include <modules/globebrowsing/other/basictypes.h>
+#include <modules/globebrowsing/src/basictypes.h>
 #endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 
 #include <ghoul/glm.h>

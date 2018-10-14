@@ -26,82 +26,65 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/globebrowsingmodule.h
-    
-    ${CMAKE_CURRENT_SOURCE_DIR}/cache/lrucache.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/cache/lrucache.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawaretilecache.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemglobelocation.h
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/geometry/ellipsoid.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodetic.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodeticpatch.h
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.h
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.h
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/lruthreadpool.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/lruthreadpool.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/prioritizingconcurrentjobmanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/prioritizingconcurrentjobmanager.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/basictypes.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/timequantizer.h
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpulayergroup.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layeradjustment.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layergroup.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layergroupid.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layermanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layerrendersettings.h
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctiledataprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtile.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileloadjob.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiletextureinitdata.h
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/gdalwrapper.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/asynctiledataprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/basictypes.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/dashboarditemglobelocation.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ellipsoid.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/gdalwrapper.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/geodetic.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/geodeticpatch.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/gpulayergroup.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/layer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/layeradjustment.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/layergroup.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/layergroupid.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/layermanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/layerrendersettings.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/lrucache.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/lrucache.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/lruthreadpool.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/lruthreadpool.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/memoryawaretilecache.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/prioritizingconcurrentjobmanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/prioritizingconcurrentjobmanager.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/rawtile.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/rawtiledatareader.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderableglobe.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/skirtedgrid.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/tileindex.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/tileloadjob.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/tileprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/tiletextureinitdata.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/timequantizer.h
 )
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/globebrowsingmodule.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/globebrowsingmodule_lua.inl
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawaretilecache.cpp
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemglobelocation.cpp
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/geometry/ellipsoid.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodeticpatch.cpp
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.cpp
-    
-    ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.cpp
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/timequantizer.cpp
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpulayergroup.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layeradjustment.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layergroup.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layergroupid.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layermanager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layerrendersettings.cpp
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctiledataprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtile.cpp
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileloadjob.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiletextureinitdata.cpp
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/gdalwrapper.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/asynctiledataprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/dashboarditemglobelocation.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ellipsoid.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/gdalwrapper.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/geodeticpatch.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/gpulayergroup.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/layer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/layeradjustment.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/layergroup.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/layergroupid.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/layermanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/layerrendersettings.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/memoryawaretilecache.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/rawtile.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/rawtiledatareader.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderableglobe.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/skirtedgrid.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/tileindex.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/tileloadjob.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/tileprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/tiletextureinitdata.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/timequantizer.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

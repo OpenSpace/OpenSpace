@@ -24,12 +24,12 @@
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
 
-#include <modules/globebrowsing/cache/memoryawaretilecache.h>
-#include <modules/globebrowsing/dashboard/dashboarditemglobelocation.h>
-#include <modules/globebrowsing/geometry/geodetic.h>
-#include <modules/globebrowsing/geometry/geodeticpatch.h>
-#include <modules/globebrowsing/tile/gdalwrapper.h>
-#include <modules/globebrowsing/tile/tileprovider.h>
+#include <modules/globebrowsing/src/dashboarditemglobelocation.h>
+#include <modules/globebrowsing/src/gdalwrapper.h>
+#include <modules/globebrowsing/src/geodetic.h>
+#include <modules/globebrowsing/src/geodeticpatch.h>
+#include <modules/globebrowsing/src/memoryawaretilecache.h>
+#include <modules/globebrowsing/src/tileprovider.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>

@@ -22,16 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/globes/renderableglobe.h>
+#include <modules/globebrowsing/src/renderableglobe.h>
 
-#include <modules/globebrowsing/rendering/layermanager.h>
-#include <modules/globebrowsing/rendering/layer.h>
-
-#include <openspace/interaction/navigationhandler.h>
+#include <modules/globebrowsing/src/layer.h>
+#include <modules/globebrowsing/src/layermanager.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/rendering/renderengine.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>

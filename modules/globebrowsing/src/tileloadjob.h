@@ -22,76 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/src/lrucache.h>
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILELOADJOB___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TILELOADJOB___H__
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-#include <glm/glm.hpp>
+#include <openspace/util/job.h>
 
-class LRUCacheTest : public testing::Test {};
+#include <modules/globebrowsing/src/rawtile.h>
+#include <modules/globebrowsing/src/tileindex.h>
 
-struct DefaultHasher {
-    unsigned long long operator()(const int& var) const {
-        return static_cast<unsigned long long>(var);
-    }
+namespace openspace::globebrowsing {
+
+class RawTileDataReader;
+
+struct TileLoadJob : public Job<RawTile> {
+    /**
+     * Allocates enough data for one tile. When calling <code>product()</code>, the
+     * ownership of this data will be released. If <code>product()</code> has not been
+     * called before the TileLoadJob is finished, the data will be deleted as it has not
+     * been exposed outside of this object.
+     */
+    TileLoadJob(RawTileDataReader& rawTileDataReader, const TileIndex& tileIndex);
+
+    /**
+     * Destroys the allocated data pointer if it has been allocated and the TileLoadJob
+     * has ownership of it.
+     */
+    ~TileLoadJob();
+
+    /**
+     * If the TileLoadJob has been created using PBO, this is the address that the
+     * RawTileDataReader will read to. In case specified so in the TileTextureInitData
+     * of RawTileDataReader, the data will also be written to CPU memory.
+     */
+    void execute() override;
+
+    /**
+    * Marks the job as finised and releases ownership of the data.
+    * Unless the job is marked as finished, the pixel data will be deallocated
+    * when the job is deleted.
+    */
+    RawTile product() override;
+
+protected:
+    RawTileDataReader& _rawTileDataReader;
+    RawTile _rawTile;
+    TileIndex _chunkIndex;
+    bool _hasTile = false;
 };
 
-TEST_F(LRUCacheTest, Get) {
-    openspace::globebrowsing::cache::LRUCache<int, std::string, DefaultHasher> lru(4);
-    lru.put(1, "hej");
-    lru.put(12, "san");
-    ASSERT_STREQ(lru.get(1).c_str(), "hej") << "testing get";
-}
+} // namespace openspace::globebrowsing
 
-TEST_F(LRUCacheTest, CleaningCache) {
-    openspace::globebrowsing::cache::LRUCache<int, double, DefaultHasher> lru(4);
-    lru.put(1, 1.2);
-    lru.put(12, 2.3);
-    lru.put(123, 33.4);
-    lru.put(1234, 4.5);
-    lru.put(12345, 6.7);
-    ASSERT_FALSE(lru.exist(1)) << "Element should have been cleaned out of cache";
-    ASSERT_TRUE(lru.exist(12)) << "Element should remain in cache";
-}
-
-struct MyKey {
-    int x, y;
-};
-
-bool operator==(const MyKey& a, const MyKey& b) {
-    return a.x == b.x && a.y == b.y;
-}
-
-std::ostream& operator<<(std::ostream& o, const MyKey& key) {
-    return o << key.x << ", " << key.y;
-}
-
-// custom specialization 
-struct DefaultHasherMyKey {
-    unsigned long long operator()(const MyKey& s) const {
-        return s.x ^ (s.y << 1);
-    }
-};
-
-TEST_F(LRUCacheTest, StructKey) {
-    openspace::globebrowsing::cache::LRUCache<MyKey, std::string, DefaultHasherMyKey> lru(4);
-
-    // These two custom keys should be treated as equal
-    MyKey key1 = { 2, 3 };
-    MyKey key2 = { 2, 3 };
-
-    std::string val1 = "value 1";
-    std::string val2 = "value 2";
-
-
-    lru.put(key1, val1);
-    ASSERT_TRUE(lru.exist(key1));
-    ASSERT_EQ(lru.get(key1), val1);
-
-    // Putting key2 should replace key1
-    lru.put(key2, val2);
-    ASSERT_EQ(key1, key2) << "key 1 and key2 should be considered equal";
-    ASSERT_TRUE(lru.exist(key2));
-    ASSERT_EQ(lru.get(key1), val2);
-    ASSERT_EQ(lru.get(key2), val2);
-}
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILELOADJOB___H__

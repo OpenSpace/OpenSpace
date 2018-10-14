@@ -22,76 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/src/lrucache.h>
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-#include <glm/glm.hpp>
+#include <openspace/properties/propertyowner.h>
 
-class LRUCacheTest : public testing::Test {};
+#include <modules/globebrowsing/src/layergroupid.h>
+#include <openspace/properties/scalar/boolproperty.h>
 
-struct DefaultHasher {
-    unsigned long long operator()(const int& var) const {
-        return static_cast<unsigned long long>(var);
-    }
+namespace openspace::globebrowsing {
+
+class Layer;
+
+namespace tileprovider { struct TileProvider; }
+
+/**
+ * Convenience class for dealing with multiple <code>Layer</code>s.
+ */
+struct LayerGroup : public properties::PropertyOwner {
+    LayerGroup(layergroupid::GroupID id);
+
+    void setLayersFromDict(const ghoul::Dictionary& dict);
+
+    void initialize();
+    void deinitialize();
+
+    /// Updates all layers tile providers within this group
+    void update();
+
+    Layer* addLayer(const ghoul::Dictionary& layerDict);
+    void deleteLayer(const std::string& layerName);
+
+    /// @returns const vector of all layers
+    std::vector<Layer*> layers() const;
+
+    /// @returns const vector of all active layers
+    const std::vector<Layer*>& activeLayers() const;
+
+    /// @returns the size of the pile to be used in rendering of this layer
+    int pileSize() const;
+
+    bool layerBlendingEnabled() const;
+
+    void onChange(std::function<void(void)> callback);
+
+private:
+    const layergroupid::GroupID _groupId;
+    std::vector<std::unique_ptr<Layer>> _layers;
+    std::vector<Layer*> _activeLayers;
+
+    properties::BoolProperty _levelBlendingEnabled;
+    std::function<void(void)> _onChangeCallback;
 };
 
-TEST_F(LRUCacheTest, Get) {
-    openspace::globebrowsing::cache::LRUCache<int, std::string, DefaultHasher> lru(4);
-    lru.put(1, "hej");
-    lru.put(12, "san");
-    ASSERT_STREQ(lru.get(1).c_str(), "hej") << "testing get";
-}
+} // namespace openspace::globebrowsing
 
-TEST_F(LRUCacheTest, CleaningCache) {
-    openspace::globebrowsing::cache::LRUCache<int, double, DefaultHasher> lru(4);
-    lru.put(1, 1.2);
-    lru.put(12, 2.3);
-    lru.put(123, 33.4);
-    lru.put(1234, 4.5);
-    lru.put(12345, 6.7);
-    ASSERT_FALSE(lru.exist(1)) << "Element should have been cleaned out of cache";
-    ASSERT_TRUE(lru.exist(12)) << "Element should remain in cache";
-}
-
-struct MyKey {
-    int x, y;
-};
-
-bool operator==(const MyKey& a, const MyKey& b) {
-    return a.x == b.x && a.y == b.y;
-}
-
-std::ostream& operator<<(std::ostream& o, const MyKey& key) {
-    return o << key.x << ", " << key.y;
-}
-
-// custom specialization 
-struct DefaultHasherMyKey {
-    unsigned long long operator()(const MyKey& s) const {
-        return s.x ^ (s.y << 1);
-    }
-};
-
-TEST_F(LRUCacheTest, StructKey) {
-    openspace::globebrowsing::cache::LRUCache<MyKey, std::string, DefaultHasherMyKey> lru(4);
-
-    // These two custom keys should be treated as equal
-    MyKey key1 = { 2, 3 };
-    MyKey key2 = { 2, 3 };
-
-    std::string val1 = "value 1";
-    std::string val2 = "value 2";
-
-
-    lru.put(key1, val1);
-    ASSERT_TRUE(lru.exist(key1));
-    ASSERT_EQ(lru.get(key1), val1);
-
-    // Putting key2 should replace key1
-    lru.put(key2, val2);
-    ASSERT_EQ(key1, key2) << "key 1 and key2 should be considered equal";
-    ASSERT_TRUE(lru.exist(key2));
-    ASSERT_EQ(lru.get(key1), val2);
-    ASSERT_EQ(lru.get(key2), val2);
-}
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__

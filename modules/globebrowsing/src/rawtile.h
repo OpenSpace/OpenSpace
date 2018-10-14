@@ -22,76 +22,42 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/src/lrucache.h>
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___RAWTILE___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___RAWTILE___H__
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-#include <glm/glm.hpp>
+#include <modules/globebrowsing/src/basictypes.h>
+#include <modules/globebrowsing/src/tileindex.h>
+#include <modules/globebrowsing/src/tiletextureinitdata.h>
+#include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <cstddef>
+#include <memory>
+#include <optional>
 
-class LRUCacheTest : public testing::Test {};
+namespace openspace::globebrowsing {
 
-struct DefaultHasher {
-    unsigned long long operator()(const int& var) const {
-        return static_cast<unsigned long long>(var);
-    }
+struct TileMetaData;
+class TileTextureInitData;
+
+struct RawTile {
+    enum class ReadError {
+        None = 0, // = CE_None
+        Debug,    // = CE_Debug
+        Warning,  // = CE_Warning
+        Failure,  // = CE_Failure
+        Fatal     // = CE_Fatal
+    };
+
+    std::unique_ptr<std::byte[]> imageData;
+    TileMetaData tileMetaData;
+    std::optional<TileTextureInitData> textureInitData;
+    TileIndex tileIndex = { 0, 0, 0 };
+    ReadError error = ReadError::None;
+    GLuint pbo = 0;
 };
 
-TEST_F(LRUCacheTest, Get) {
-    openspace::globebrowsing::cache::LRUCache<int, std::string, DefaultHasher> lru(4);
-    lru.put(1, "hej");
-    lru.put(12, "san");
-    ASSERT_STREQ(lru.get(1).c_str(), "hej") << "testing get";
-}
+RawTile createDefaultTile(TileTextureInitData initData);
 
-TEST_F(LRUCacheTest, CleaningCache) {
-    openspace::globebrowsing::cache::LRUCache<int, double, DefaultHasher> lru(4);
-    lru.put(1, 1.2);
-    lru.put(12, 2.3);
-    lru.put(123, 33.4);
-    lru.put(1234, 4.5);
-    lru.put(12345, 6.7);
-    ASSERT_FALSE(lru.exist(1)) << "Element should have been cleaned out of cache";
-    ASSERT_TRUE(lru.exist(12)) << "Element should remain in cache";
-}
+} // namespace openspace::globebrowsing
 
-struct MyKey {
-    int x, y;
-};
-
-bool operator==(const MyKey& a, const MyKey& b) {
-    return a.x == b.x && a.y == b.y;
-}
-
-std::ostream& operator<<(std::ostream& o, const MyKey& key) {
-    return o << key.x << ", " << key.y;
-}
-
-// custom specialization 
-struct DefaultHasherMyKey {
-    unsigned long long operator()(const MyKey& s) const {
-        return s.x ^ (s.y << 1);
-    }
-};
-
-TEST_F(LRUCacheTest, StructKey) {
-    openspace::globebrowsing::cache::LRUCache<MyKey, std::string, DefaultHasherMyKey> lru(4);
-
-    // These two custom keys should be treated as equal
-    MyKey key1 = { 2, 3 };
-    MyKey key2 = { 2, 3 };
-
-    std::string val1 = "value 1";
-    std::string val2 = "value 2";
-
-
-    lru.put(key1, val1);
-    ASSERT_TRUE(lru.exist(key1));
-    ASSERT_EQ(lru.get(key1), val1);
-
-    // Putting key2 should replace key1
-    lru.put(key2, val2);
-    ASSERT_EQ(key1, key2) << "key 1 and key2 should be considered equal";
-    ASSERT_TRUE(lru.exist(key2));
-    ASSERT_EQ(lru.get(key1), val2);
-    ASSERT_EQ(lru.get(key2), val2);
-}
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___RAWTILE___H__

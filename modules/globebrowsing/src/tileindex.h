@@ -22,76 +22,82 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/src/lrucache.h>
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_INDEX___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_INDEX___H__
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-#include <glm/glm.hpp>
+#include <modules/globebrowsing/src/basictypes.h>
+#include <ghoul/glm.h>
+#include <stdint.h>
 
-class LRUCacheTest : public testing::Test {};
+namespace ghoul { class Dictionary; }
 
-struct DefaultHasher {
-    unsigned long long operator()(const int& var) const {
-        return static_cast<unsigned long long>(var);
-    }
+namespace openspace::globebrowsing {
+
+struct Geodetic2;
+
+enum CardinalDirection {
+    WEST = 0,
+    EAST,
+    NORTH,
+    SOUTH,
 };
 
-TEST_F(LRUCacheTest, Get) {
-    openspace::globebrowsing::cache::LRUCache<int, std::string, DefaultHasher> lru(4);
-    lru.put(1, "hej");
-    lru.put(12, "san");
-    ASSERT_STREQ(lru.get(1).c_str(), "hej") << "testing get";
-}
+struct TileIndex {
+    using TileHashKey = uint64_t;
 
-TEST_F(LRUCacheTest, CleaningCache) {
-    openspace::globebrowsing::cache::LRUCache<int, double, DefaultHasher> lru(4);
-    lru.put(1, 1.2);
-    lru.put(12, 2.3);
-    lru.put(123, 33.4);
-    lru.put(1234, 4.5);
-    lru.put(12345, 6.7);
-    ASSERT_FALSE(lru.exist(1)) << "Element should have been cleaned out of cache";
-    ASSERT_TRUE(lru.exist(12)) << "Element should remain in cache";
-}
+    int x, y, level;
 
-struct MyKey {
-    int x, y;
+    TileIndex(int x_ = 0, int y_ = 0, int level_ = 0);
+    TileIndex(const TileIndex& other) = default;
+
+    /**
+     * Creates the geodetic tile index for the Geodetic patch that covers the
+     * point p at the specified level
+     */
+    TileIndex(const Geodetic2& point, int level_);
+
+    /**
+     * Initializes a TileIndex from a Dictionary
+     */
+    TileIndex(const ghoul::Dictionary& dict);
+
+
+    bool hasParent() const;
+
+    TileIndex parent() const;
+
+    bool operator==(const TileIndex& other) const;
+
+    TileIndex& operator--();
+    TileIndex operator--(int);
+
+    TileIndex& operator-=(unsigned int levels);
+
+    bool isWestChild() const;
+    bool isEastChild() const;
+    bool isNorthChild() const;
+    bool isSouthChild() const;
+
+    TileIndex child(Quad q) const;
+
+    glm::vec2 positionRelativeParent() const;
+
+
+    std::string toString() const;
+
+    /**
+     * Gets the tile at a specified offset from this tile.
+     * Accepts delta indices ranging from [-2^level, Infinity[
+     */
+    TileIndex relatedTile(int deltaX, int deltaY) const;
+
+    int manhattan(const TileIndex& other) const;
+
+    TileHashKey hashKey() const;
 };
 
-bool operator==(const MyKey& a, const MyKey& b) {
-    return a.x == b.x && a.y == b.y;
-}
+std::ostream& operator<<(std::ostream& os, const TileIndex& ti);
 
-std::ostream& operator<<(std::ostream& o, const MyKey& key) {
-    return o << key.x << ", " << key.y;
-}
+} // namespace openspace::globebrowsing
 
-// custom specialization 
-struct DefaultHasherMyKey {
-    unsigned long long operator()(const MyKey& s) const {
-        return s.x ^ (s.y << 1);
-    }
-};
-
-TEST_F(LRUCacheTest, StructKey) {
-    openspace::globebrowsing::cache::LRUCache<MyKey, std::string, DefaultHasherMyKey> lru(4);
-
-    // These two custom keys should be treated as equal
-    MyKey key1 = { 2, 3 };
-    MyKey key2 = { 2, 3 };
-
-    std::string val1 = "value 1";
-    std::string val2 = "value 2";
-
-
-    lru.put(key1, val1);
-    ASSERT_TRUE(lru.exist(key1));
-    ASSERT_EQ(lru.get(key1), val1);
-
-    // Putting key2 should replace key1
-    lru.put(key2, val2);
-    ASSERT_EQ(key1, key2) << "key 1 and key2 should be considered equal";
-    ASSERT_TRUE(lru.exist(key2));
-    ASSERT_EQ(lru.get(key1), val2);
-    ASSERT_EQ(lru.get(key2), val2);
-}
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_INDEX___H__
