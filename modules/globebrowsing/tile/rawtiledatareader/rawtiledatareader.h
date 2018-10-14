@@ -25,13 +25,10 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GDAL_RAW_TILE_DATA_READER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GDAL_RAW_TILE_DATA_READER___H__
 
-#include <modules/globebrowsing/tile/pixelregion.h>
+#include <modules/globebrowsing/other/basictypes.h>
 #include <modules/globebrowsing/tile/rawtile.h>
-#include <modules/globebrowsing/tile/tiledepthtransform.h>
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
 #include <ghoul/misc/boolean.h>
-
-#include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
 #include <string>
 #include <mutex>
 #include <gdal.h>

@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_INDEX___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_INDEX___H__
 
-#include <modules/globebrowsing/tile/quad.h>
+#include <modules/globebrowsing/other/basictypes.h>
 
 #include <ghoul/glm.h>
 #include <stdint.h>

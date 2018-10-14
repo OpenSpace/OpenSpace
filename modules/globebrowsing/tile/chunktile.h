@@ -25,9 +25,8 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKTILE___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKTILE___H__
 
+#include <modules/globebrowsing/other/basictypes.h>
 #include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tiledepthtransform.h>
-#include <modules/globebrowsing/tile/tileuvtransform.h>
 #include <vector>
 
 namespace openspace::globebrowsing {

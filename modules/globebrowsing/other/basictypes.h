@@ -22,13 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___IO_DESCRIPTION___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___IO_DESCRIPTION___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING__STRUCTS___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING__STRUCTS___H__
 
-#include <modules/globebrowsing/tile/pixelregion.h>
-#include <string>
+#include <ghoul/glm.h>
 
 namespace openspace::globebrowsing {
+
+struct PixelRegion {
+    glm::ivec2 start = glm::ivec2(0);
+    glm::ivec2 numPixels = glm::ivec2(0);
+};
 
 struct IODescription {
     struct ReadData {
@@ -44,6 +48,23 @@ struct IODescription {
     } write;
 };
 
+enum Quad {
+    NORTH_WEST = 0,
+    NORTH_EAST,
+    SOUTH_WEST,
+    SOUTH_EAST
+};
+
+struct TileDepthTransform {
+    float scale;
+    float offset;
+};
+
+struct TileUvTransform {
+    glm::vec2 uvOffset;
+    glm::vec2 uvScale;
+};
+
 } // namespace openspace::globebrowsing
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___IO_DESCRIPTION___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING__STRUCTS___H__

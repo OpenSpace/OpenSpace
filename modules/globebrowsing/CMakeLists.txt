@@ -42,11 +42,12 @@ set(HEADER_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/prioritizingconcurrentjobmanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/prioritizingconcurrentjobmanager.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/timequantizer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lruthreadpool.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lruthreadpool.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/prioritizingconcurrentjobmanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/prioritizingconcurrentjobmanager.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/basictypes.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/timequantizer.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpulayergroup.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer.h
@@ -58,20 +59,16 @@ set(HEADER_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctiledataprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/chunktile.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledepthtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilemetadata.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileuvtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileloadjob.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiletextureinitdata.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/rawtiledatareader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/gdalwrapper.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/iodescription.h
 )
 
 set(SOURCE_FILES

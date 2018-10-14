@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GEODETICPATCH___H__
 
 #include <modules/globebrowsing/geometry/geodetic.h>
-#include <modules/globebrowsing/tile/quad.h>
+#include <modules/globebrowsing/other/basictypes.h>
 
 namespace openspace::globebrowsing {
 
