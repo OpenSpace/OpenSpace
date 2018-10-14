@@ -24,7 +24,7 @@
 
 #include <modules/globebrowsing/src/renderableglobe.h>
 
-#include <modules/globebrowsing/src/geodetic.h>
+#include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/gpulayergroup.h>
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layergroup.h>
@@ -1417,10 +1417,18 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
     const TileIndex tileIndex = TileIndex(geodeticPosition, chunkLevel);
     const GeodeticPatch patch = GeodeticPatch(tileIndex);
 
-    const Geodetic2 geoDiffPatch = patch.corner(Quad::NORTH_EAST) -
-        patch.corner(Quad::SOUTH_WEST);
+    const Geodetic2 northEast = patch.corner(Quad::NORTH_EAST);
+    const Geodetic2 southWest = patch.corner(Quad::SOUTH_WEST);
 
-    const Geodetic2 geoDiffPoint = geodeticPosition - patch.corner(Quad::SOUTH_WEST);
+    const Geodetic2 geoDiffPatch = {
+        northEast.lat - southWest.lat,
+        northEast.lon - southWest.lon
+    };
+
+    const Geodetic2 geoDiffPoint = {
+        geodeticPosition.lat - southWest.lat,
+        geodeticPosition.lon - southWest.lon
+    };
     const glm::vec2 patchUV = glm::vec2(
         geoDiffPoint.lon / geoDiffPatch.lon,
         geoDiffPoint.lat / geoDiffPatch.lat
@@ -1734,8 +1742,8 @@ int RenderableGlobe::desiredLevelByProjectedArea(const Chunk& chunk,
     const Geodetic2 center = chunk.surfacePatch.center();
     const BoundingHeights heights = boundingHeightsForChunk(chunk, _layerManager);
     const Geodetic3 c = { center, heights.min };
-    const Geodetic3 c1 = { Geodetic2(center.lat, closestCorner.lon), heights.min };
-    const Geodetic3 c2 = { Geodetic2(closestCorner.lat, center.lon), heights.min };
+    const Geodetic3 c1 = { Geodetic2{ center.lat, closestCorner.lon }, heights.min };
+    const Geodetic3 c2 = { Geodetic2{ closestCorner.lat, center.lon }, heights.min };
 
     //  Camera
     //  |

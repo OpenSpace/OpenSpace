@@ -24,7 +24,7 @@
 
 #include <modules/globebrowsing/src/rawtiledatareader.h>
 
-#include <modules/globebrowsing/src/geodetic.h>
+#include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
@@ -283,8 +283,8 @@ IODescription cutIODescription(IODescription io, Side side, int pos) {
  */
 std::array<double, 6> geoTransform(const glm::ivec2& rasterSize) {
     GeodeticPatch cov(
-        Geodetic2(0.0, 0.0),
-        Geodetic2(glm::half_pi<double>(), glm::pi<double>())
+        Geodetic2{ 0.0, 0.0 },
+        Geodetic2{ glm::half_pi<double>(), glm::pi<double>() }
     );
     std::array<double, 6> res;
     res[0] = glm::degrees(cov.corner(Quad::NORTH_WEST).lon);
@@ -685,7 +685,10 @@ const TileTextureInitData& RawTileDataReader::tileTextureInitData() const {
 }
 
 glm::ivec2 RawTileDataReader::fullPixelSize() const {
-    return geodeticToPixel(Geodetic2(90, 180), _gdalDatasetMetaDataCached.padfTransform);
+    return geodeticToPixel(
+        Geodetic2{ 90.0, 180.0 },
+        _gdalDatasetMetaDataCached.padfTransform
+    );
 }
 
 PixelRegion RawTileDataReader::fullPixelRegion() const {

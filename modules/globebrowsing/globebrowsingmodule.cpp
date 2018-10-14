@@ -24,9 +24,9 @@
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
 
+#include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/dashboarditemglobelocation.h>
 #include <modules/globebrowsing/src/gdalwrapper.h>
-#include <modules/globebrowsing/src/geodetic.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <modules/globebrowsing/src/tileprovider.h>
@@ -304,7 +304,11 @@ void GlobeBrowsingModule::goToChunk(int x, int y, int level) {
 void GlobeBrowsingModule::goToGeo(double latitude, double longitude) {
     using namespace globebrowsing;
     Camera* cam = global::navigationHandler.camera();
-    goToGeodetic2(*cam, Geodetic2(glm::radians(latitude), glm::radians(longitude)), true);
+    goToGeodetic2(
+        *cam,
+        Geodetic2{ glm::radians(latitude), glm::radians(longitude) }, 
+        true
+    );
 }
 
 void GlobeBrowsingModule::goToGeo(double latitude, double longitude,
@@ -316,7 +320,7 @@ void GlobeBrowsingModule::goToGeo(double latitude, double longitude,
     goToGeodetic3(
         *cam,
         {
-            Geodetic2(glm::radians(latitude), glm::radians(longitude)),
+            Geodetic2{ glm::radians(latitude), glm::radians(longitude) },
             altitude
         },
         true
@@ -365,7 +369,10 @@ void GlobeBrowsingModule::goToChunk(Camera& camera, const globebrowsing::TileInd
     Geodetic2 positionOnPatch = patch.size();
     positionOnPatch.lat *= uv.y;
     positionOnPatch.lon *= uv.x;
-    const Geodetic2 pointPosition = corner + positionOnPatch;
+    const Geodetic2 pointPosition = {
+        corner.lat + positionOnPatch.lat,
+        corner.lon + positionOnPatch.lon
+    };
 
     const glm::dvec3 positionOnEllipsoid = globe->ellipsoid().geodeticSurfaceProjection(
         cameraPositionModelSpace
@@ -443,7 +450,7 @@ void GlobeBrowsingModule::resetCameraDirection(Camera& camera,
         geo2
     );
     const glm::dvec3 slightlyNorth = globe->ellipsoid().cartesianSurfacePosition(
-        Geodetic2(geo2.lat + 0.001, geo2.lon)
+        Geodetic2{ geo2.lat + 0.001, geo2.lon }
     );
     const glm::dvec3 lookUpModelSpace = glm::normalize(
         slightlyNorth - positionModelSpace

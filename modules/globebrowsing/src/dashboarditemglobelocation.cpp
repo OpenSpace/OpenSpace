@@ -24,7 +24,7 @@
 
 #include <modules/globebrowsing/src/dashboarditemglobelocation.h>
 
-#include <modules/globebrowsing/src/geodetic.h>
+#include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>

@@ -24,7 +24,7 @@
 
 #include <modules/globebrowsing/src/tileindex.h>
 
-#include <modules/globebrowsing/src/geodetic.h>
+#include <modules/globebrowsing/src/basictypes.h>
 #include <ghoul/misc/dictionary.h>
 #include <sstream>
 

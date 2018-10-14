@@ -24,7 +24,7 @@
 
 #include <modules/globebrowsing/src/ellipsoid.h>
 
-#include <modules/globebrowsing/src/geodetic.h>
+#include <modules/globebrowsing/src/basictypes.h>
 #include <algorithm>
 #include <array>
 #include <vector>
@@ -132,7 +132,10 @@ double Ellipsoid::greatCircleDistance(const Geodetic2& p1, const Geodetic2& p2) 
         glm::length(glm::cross(n1, n2)) / glm::dot(n1, n2)
     );
 
-    const Geodetic2 pMid = (p1 + p2) / 2;
+    const Geodetic2 pMid = {
+        (p1.lat + p2.lat) / 2.0,
+        (p1.lon + p2.lon) / 2.0
+    };
     const glm::dvec3 centralNormal = cartesianSurfacePosition(pMid);
 
     return centralAngle * glm::length(centralNormal);
@@ -140,10 +143,10 @@ double Ellipsoid::greatCircleDistance(const Geodetic2& p1, const Geodetic2& p2) 
 
 Geodetic2 Ellipsoid::cartesianToGeodetic2(const glm::dvec3& p) const {
     const glm::dvec3 normal = geodeticSurfaceNormalForGeocentricallyProjectedPoint(p);
-    return Geodetic2(
-        asin(normal.z / length(normal)), // Latitude
-        atan2(normal.y, normal.x)        // Longitude
-    );
+    Geodetic2 res;
+    res.lat = asin(normal.z / length(normal));
+    res.lon = atan2(normal.y, normal.x);
+    return res;
 }
 
 glm::dvec3 Ellipsoid::cartesianSurfacePosition(const Geodetic2& geodetic2) const {

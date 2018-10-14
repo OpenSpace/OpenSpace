@@ -32,7 +32,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/dashboarditemglobelocation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ellipsoid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/gdalwrapper.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/geodetic.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/geodeticpatch.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/gpulayergroup.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/layer.h
