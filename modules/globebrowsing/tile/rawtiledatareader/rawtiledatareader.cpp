@@ -57,6 +57,15 @@ namespace openspace::globebrowsing {
 
 namespace {
 
+
+enum class Side {
+    Left = 0,
+    Top,
+    Right,
+    Bottom
+};
+
+
 float interpretFloat(GLenum glType, const std::byte* src) {
     switch (glType) {
         case GL_UNSIGNED_BYTE:
@@ -125,7 +134,119 @@ int calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize) {
     return static_cast<int>(diff);
 }
 
-IODescription cutIODescription(IODescription io, PixelRegion::Side side, int pos) {
+/**
+ * Aligns one the sides of the pixel regino to the specified position. This does
+ * not change the number of pixels within the region.
+ *
+ * Example: Side = left and pos = 16:
+ *                 start.x = 16 and keep the size the same
+ */
+void alignPixelRegion(PixelRegion& pr, Side side, int pos) {
+    switch (side) {
+        case Side::Left:
+            pr.start.x = pos;
+            break;
+        case Side::Top:
+            pr.start.y = pos;
+            break;
+        case Side::Right:
+            pr.start.x = pos - pr.numPixels.x;
+            break;
+        case Side::Bottom:
+            pr.start.y = pos - pr.numPixels.y;
+            break;
+    }
+}
+
+PixelRegion globalCut(PixelRegion& pr, Side side, int p) {
+    const bool lineIntersect = [pr, side, p]() {
+        switch (side) {
+            case Side::Left:
+            case Side::Right:
+                return pr.start.x <= p && p <= (pr.start.x + pr.numPixels.x);
+            case Side::Top:
+            case Side::Bottom:
+                return pr.start.y <= p && p <= (pr.start.y + pr.numPixels.y);
+            default:
+                throw ghoul::MissingCaseException();
+        }
+    }();
+
+    if (!lineIntersect) {
+        return PixelRegion();
+    }
+
+    auto setSide = [](PixelRegion& pr, Side side, int pos) {
+        switch (side) {
+            case Side::Left:
+                pr.numPixels.x += (pr.start.x - pos);
+                pr.start.x = pos;
+                break;
+            case Side::Top:
+                pr.numPixels.y += (pr.start.y - pos);
+                pr.start.y = pos;
+                break;
+            case Side::Right:
+                pr.numPixels.x = pos - pr.start.x;
+                break;
+            case Side::Bottom:
+                pr.numPixels.y = pos - pr.start.y;
+                break;
+        }
+    };
+
+    PixelRegion cutOff(pr);
+    int cutSize = 0;
+    switch (side) {
+        case Side::Left:
+            setSide(pr, Side::Left, p);
+            setSide(cutOff, Side::Right, p - cutSize);
+            break;
+        case Side::Top:
+            setSide(pr, Side::Top, p);
+            setSide(cutOff, Side::Bottom, p - cutSize);
+            break;
+        case Side::Right:
+            setSide(pr, Side::Right, p);
+            setSide(cutOff, Side::Left, p + cutSize);
+            break;
+        case Side::Bottom:
+            setSide(pr, Side::Bottom, p);
+            setSide(cutOff, Side::Top, p + cutSize);
+            break;
+    }
+    return cutOff;
+}
+
+int edge(const PixelRegion& pr, Side side) {
+    switch (side) {
+        case Side::Left:   return pr.start.x;
+        case Side::Top:    return pr.start.y;
+        case Side::Right:  return pr.start.x + pr.numPixels.x;
+        case Side::Bottom: return pr.start.y + pr.numPixels.y;
+        default:           throw ghoul::MissingCaseException();
+    }
+}
+
+PixelRegion localCut(PixelRegion& pr, Side side, int localPos) {
+    if (localPos < 1) {
+        return PixelRegion();
+    }
+    else {
+        const int edgeDirectionSign = side < Side::Right ? -1 : 1;
+        return globalCut(pr, side, edge(pr, side) - edgeDirectionSign * localPos);
+    }
+}
+
+bool isInside(const PixelRegion& lhs, const PixelRegion& rhs) {
+    glm::ivec2 e = lhs.start + lhs.numPixels;
+    glm::ivec2 re = rhs.start + rhs.numPixels;
+    return rhs.start.x <= lhs.start.x && e.x <= re.x &&
+           rhs.start.y <= lhs.start.y && e.y <= re.y;
+}
+
+
+IODescription cutIODescription(IODescription io, Side side, int pos) {
     const PixelRegion readPreCut = io.read.region;
     const PixelRegion writePreCut = io.write.region;
 
@@ -135,10 +256,10 @@ IODescription cutIODescription(IODescription io, PixelRegion::Side side, int pos
     };
 
     IODescription whatCameOff = io;
-    whatCameOff.read.region = io.read.region.globalCut(side, pos);
+    whatCameOff.read.region = globalCut(io.read.region, side, pos);
 
-    PixelRegion::PixelRange cutSize = whatCameOff.read.region.numPixels;
-    PixelRegion::PixelRange localWriteCutSize = ratio * glm::dvec2(cutSize);
+    glm::ivec2 cutSize = whatCameOff.read.region.numPixels;
+    glm::ivec2 localWriteCutSize = ratio * glm::dvec2(cutSize);
 
     if (cutSize.x == 0 || cutSize.y == 0) {
         ghoul_assert(
@@ -152,11 +273,11 @@ IODescription cutIODescription(IODescription io, PixelRegion::Side side, int pos
     }
 
     int localWriteCutPos =
-        (side == PixelRegion::Side::LEFT || side == PixelRegion::Side::RIGHT) ?
+        (side == Side::Left || side == Side::Right) ?
         localWriteCutSize.x :
         localWriteCutSize.y;
 
-    whatCameOff.write.region = io.write.region.localCut(side, localWriteCutPos);
+    whatCameOff.write.region = localCut(io.write.region, side, localWriteCutPos);
 
     return whatCameOff;
 }
@@ -188,8 +309,8 @@ std::array<double, 6> geoTransform(const glm::ivec2& rasterSize) {
  * \param geo The position on the globe to convert to pixel space.
  * \return a pixel coordinate in the dataset.
  */
-PixelRegion::PixelCoordinate geodeticToPixel(const Geodetic2& geo,
-                                             const std::array<double, 6>& transform)
+glm::ivec2 geodeticToPixel(const Geodetic2& geo,
+                           const std::array<double, 6>& transform)
 {
     const std::array<double, 6>& t = transform;
 
@@ -209,7 +330,7 @@ PixelRegion::PixelCoordinate geodeticToPixel(const Geodetic2& geo,
     ghoul_assert(std::abs(X - Xp) < 1e-10, "inverse should yield X as before");
     ghoul_assert(std::abs(Y - Yp) < 1e-10, "inverse should yield Y as before");
 
-    return PixelRegion::PixelCoordinate(glm::round(P), glm::round(L));
+    return glm::ivec2(glm::round(P), glm::round(L));
 }
 
 /**
@@ -225,9 +346,11 @@ PixelRegion highestResPixelRegion(const GeodeticPatch& geodeticPatch,
 {
     const Geodetic2 nwCorner = geodeticPatch.corner(Quad::NORTH_WEST);
     const Geodetic2 swCorner = geodeticPatch.corner(Quad::SOUTH_EAST);
-    const PixelRegion::PixelCoordinate pixelStart = geodeticToPixel(nwCorner, transform);
-    const PixelRegion::PixelCoordinate pixelEnd = geodeticToPixel(swCorner, transform);
-    PixelRegion region(pixelStart, pixelEnd - pixelStart);
+    const glm::ivec2 pixelStart = geodeticToPixel(nwCorner, transform);
+    const glm::ivec2 pixelEnd = geodeticToPixel(swCorner, transform);
+    PixelRegion region;
+    region.start = pixelStart;
+    region.numPixels = pixelEnd - pixelStart;
     return region;
 }
 
@@ -345,7 +468,7 @@ RawTile::ReadError RawTileDataReader::rasterRead(int rasterBand,
         "Invalid write region"
     );
 
-    const PixelRegion::PixelCoordinate end = io.write.region.end();
+    const glm::ivec2 end = io.write.region.start + io.write.region.numPixels;
     [[maybe_unused]] const size_t largestIndex =
         (end.y - 1) * io.write.bytesPerLine + (end.x - 1) * _initData.bytesPerPixel();
     ghoul_assert(largestIndex <= io.write.totalNumBytes, "Invalid write region");
@@ -521,26 +644,27 @@ IODescription RawTileDataReader::ioDescription(const TileIndex& tileIndex) const
     );
 
     // write region starts in origin
-    io.write.region.start = PixelRegion::PixelCoordinate(0, 0);
-    io.write.region.numPixels = PixelRegion::PixelCoordinate(
-        _initData.dimensions().x, _initData.dimensions().y);
+    io.write.region.start = glm::ivec2(00);
+    io.write.region.numPixels = glm::ivec2(
+        _initData.dimensions().x,
+        _initData.dimensions().y
+    );
 
     io.read.overview = 0;
     io.read.fullRegion = fullPixelRegion();
     // For correct sampling in dataset, we need to pad the texture tile
 
-    PixelRegion scaledPadding = PixelRegion(
-        _initData.tilePixelStartOffset(),
-        _initData.tilePixelSizeDifference()
-    );
+    PixelRegion scaledPadding;
+    scaledPadding.start = _initData.tilePixelStartOffset();
+    scaledPadding.numPixels = _initData.tilePixelSizeDifference();
+
     const double scale = static_cast<double>(io.read.region.numPixels.x) /
                          static_cast<double>(io.write.region.numPixels.x);
     scaledPadding.numPixels *= scale;
     scaledPadding.start *= scale;
 
-    io.read.region.pad(scaledPadding);
-    //io.write.region.pad(padding);
-    //io.write.region.start = PixelRegion::PixelCoordinate(0, 0);
+    io.read.region.start += scaledPadding.start;
+    io.read.region.numPixels += scaledPadding.numPixels;
 
     io.write.bytesPerLine = _initData.bytesPerLine();
     io.write.totalNumBytes = _initData.totalNumBytes();
@@ -565,7 +689,7 @@ const TileTextureInitData& RawTileDataReader::tileTextureInitData() const {
     return _initData;
 }
 
-PixelRegion::PixelRange RawTileDataReader::fullPixelSize() const {
+glm::ivec2 RawTileDataReader::fullPixelSize() const {
     return geodeticToPixel(Geodetic2(90, 180), _gdalDatasetMetaDataCached.padfTransform);
 }
 
@@ -605,16 +729,16 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(int rasterBand,
     //                            +--------------+
 
     RawTile::ReadError worstError = RawTile::ReadError::None;
-    if (!io.read.region.isInside(io.read.fullRegion)) {
+    if (!isInside(io.read.region, io.read.fullRegion)) {
         //  Loop through each side: left, top, right, bottom
         for (int i = 0; i < 4; ++i) {
             // Example:
             // We are currently considering the left side of the pixel region
-            const PixelRegion::Side side = static_cast<PixelRegion::Side>(i);
+            const Side side = static_cast<Side>(i);
             IODescription cutoff = cutIODescription(
                 io,
                 side,
-                io.read.fullRegion.edge(side)
+                edge(io.read.fullRegion, side)
             );
 
             // Example:
@@ -636,15 +760,16 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(int rasterBand,
             //                           |              |
             //                           +--------------+
 
-            if (cutoff.read.region.area() > 0) {
+            const int area = cutoff.read.region.numPixels.x *
+                             cutoff.read.region.numPixels.y;
+            if (area > 0) {
                 // Wrap by repeating
-                PixelRegion::Side oppositeSide = static_cast<PixelRegion::Side>(
-                    (i + 2) % 4
-                );
+                Side oppositeSide = static_cast<Side>((i + 2) % 4);
 
-                cutoff.read.region.align(
+                alignPixelRegion(
+                    cutoff.read.region,
                     oppositeSide,
-                    io.read.fullRegion.edge(oppositeSide)
+                    edge(io.read.fullRegion, oppositeSide)
                 );
 
                 // Example:

@@ -73,7 +73,7 @@ public:
     RawTile readTileData(TileIndex tileIndex) const;
     const TileDepthTransform& depthTransform() const;
     const TileTextureInitData& tileTextureInitData() const;
-    PixelRegion::PixelRange fullPixelSize() const;
+    glm::ivec2 fullPixelSize() const;
 
 private:
     void initialize();
