@@ -60,10 +60,10 @@ namespace {
     constexpr const char* keyShadowSource = "Source";
     constexpr const char* keyShadowCaster = "Caster";
     constexpr const double KM_TO_M = 1000.0;
-    const openspace::globebrowsing::AABB3 CullingFrustum(
+    const openspace::globebrowsing::AABB3 CullingFrustum{
         glm::vec3(-1.f, -1.f, 0.f),
         glm::vec3( 1.f,  1.f, 1e35)
-    );
+    };
     constexpr const float DefaultHeight = 0.f;
 
     constexpr const int DefaultSkirtedGridSegments = 16;  // 64 before
@@ -344,6 +344,17 @@ std::array<glm::dvec4, 8> boundingPolyhedronCornersForChunk(const Chunk& chunk,
     }
 
     return corners;
+}
+
+void expand(AABB3& bb, const glm::vec3& p) {
+    bb.min = glm::min(bb.min, p);
+    bb.max = glm::max(bb.max, p);
+}
+
+bool intersects(const AABB3& bb, const AABB3& o) {
+    return (bb.min.x <= o.max.x) && (o.min.x <= bb.max.x)
+        && (bb.min.y <= o.max.y) && (o.min.y <= bb.max.y)
+        && (bb.min.z <= o.max.z) && (o.min.z <= bb.max.z);
 }
 
 } // namespace
@@ -1037,7 +1048,7 @@ void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
 
         glm::vec3 screenSpaceCorner =
             glm::vec3((1.f / clippingSpaceCorner.w) * clippingSpaceCorner);
-        screenSpaceBounds.expand(std::move(screenSpaceCorner));
+        expand(screenSpaceBounds, std::move(screenSpaceCorner));
     }
 
     const unsigned int colorBits = 1 + chunk.tileIndex.level % 6;
@@ -1806,10 +1817,10 @@ bool RenderableGlobe::isCullableByFrustum(const Chunk& chunk,
         const glm::dvec3 ndc = glm::dvec3(
             (1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace
         );
-        bounds.expand(ndc);
+        expand(bounds, ndc);
     }
 
-    return !(CullingFrustum.intersects(bounds));
+    return !(intersects(CullingFrustum, bounds));
 }
 
 bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk,

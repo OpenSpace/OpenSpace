@@ -34,6 +34,13 @@ namespace ghoul::opengl { class Texture; }
 
 namespace openspace::globebrowsing {
 
+struct AABB3 {
+    glm::vec3 min = glm::vec3(std::numeric_limits<float>::max());
+    glm::vec3 max = glm::vec3(-std::numeric_limits<float>::max());
+};
+
+
+
 struct PixelRegion {
     glm::ivec2 start = glm::ivec2(0);
     glm::ivec2 numPixels = glm::ivec2(0);
