@@ -58,7 +58,6 @@ public:
     const glm::ivec2 tilePixelSizeDifference;
     const GLenum glType;
     const ghoul::opengl::Texture::Format ghoulTextureFormat;
-    const GLenum glTextureFormat;
     const size_t nRasters;
     const size_t bytesPerDatum;
     const size_t bytesPerPixel;

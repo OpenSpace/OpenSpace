@@ -79,122 +79,6 @@ unsigned int uniqueIdForTextureFormat(ghoul::opengl::Texture::Format textureForm
     }
 }
 
-GLenum toGlTextureFormat(GLenum glType, ghoul::opengl::Texture::Format format) {
-    switch (format) {
-        case ghoul::opengl::Texture::Format::Red:
-            switch (glType) {
-                case GL_BYTE:
-                    return GL_R8;
-                case GL_UNSIGNED_BYTE:
-                    return GL_R8;
-                case GL_INT:
-                    return GL_R32I;
-                case GL_UNSIGNED_INT:
-                    return GL_R32UI;
-                case GL_FLOAT:
-                    return GL_R32F;
-                case GL_HALF_FLOAT:
-                    return GL_R16F;
-                default:
-                    ghoul_assert(false, "glType data type unknown");
-                    throw ghoul::MissingCaseException();
-            }
-        case ghoul::opengl::Texture::Format::RG:
-            switch (glType) {
-                case GL_BYTE:
-                    return GL_RG8;
-                case GL_UNSIGNED_BYTE:
-                    return GL_RG8;
-                case GL_INT:
-                    return GL_RG32I;
-                case GL_UNSIGNED_INT:
-                    return GL_RG32UI;
-                case GL_FLOAT:
-                    return GL_RG32F;
-                case GL_HALF_FLOAT:
-                    return GL_RG16F;
-                default:
-                    ghoul_assert(false, "glType data type unknown");
-                    throw ghoul::MissingCaseException();
-            }
-        case ghoul::opengl::Texture::Format::RGB:
-            switch (glType) {
-                case GL_BYTE:
-                    return GL_RGB8;
-                case GL_UNSIGNED_BYTE:
-                    return GL_RGB8;
-                case GL_INT:
-                    return GL_RGB32I;
-                case GL_UNSIGNED_INT:
-                    return GL_RGB32UI;
-                case GL_FLOAT:
-                    return GL_RGB32F;
-                case GL_HALF_FLOAT:
-                    return GL_RGB16F;
-                default:
-                    ghoul_assert(false, "glType data type unknown");
-                    throw ghoul::MissingCaseException();
-            }
-        case ghoul::opengl::Texture::Format::RGBA:
-            switch (glType) {
-                case GL_BYTE:
-                    return GL_RGBA8;
-                case GL_UNSIGNED_BYTE:
-                    return GL_RGBA8;
-                case GL_INT:
-                    return GL_RGBA32I;
-                case GL_UNSIGNED_INT:
-                    return GL_RGBA32UI;
-                case GL_FLOAT:
-                    return GL_RGBA32F;
-                case GL_HALF_FLOAT:
-                    return GL_RGBA16F;
-                default:
-                    ghoul_assert(false, "glType data type unknown");
-                    throw ghoul::MissingCaseException();
-            }
-        case ghoul::opengl::Texture::Format::BGR:
-            switch (glType) {
-                case GL_BYTE:
-                    return GL_RGB8;
-                case GL_UNSIGNED_BYTE:
-                    return GL_RGB8;
-                case GL_INT:
-                    return GL_RGB32I;
-                case GL_UNSIGNED_INT:
-                    return GL_RGB32UI;
-                case GL_FLOAT:
-                    return GL_RGB32F;
-                case GL_HALF_FLOAT:
-                    return GL_RGB16F;
-                default:
-                    ghoul_assert(false, "glType data type unknown");
-                    throw ghoul::MissingCaseException();
-            }
-        case ghoul::opengl::Texture::Format::BGRA:
-            switch (glType) {
-                case GL_BYTE:
-                    return GL_RGBA8;
-                case GL_UNSIGNED_BYTE:
-                    return GL_RGBA8;
-                case GL_INT:
-                    return GL_RGBA32I;
-                case GL_UNSIGNED_INT:
-                    return GL_RGBA32UI;
-                case GL_FLOAT:
-                    return GL_RGBA32F;
-                case GL_HALF_FLOAT:
-                    return GL_RGBA16F;
-                default:
-                    ghoul_assert(false, "glType data type unknown");
-                    throw ghoul::MissingCaseException();
-            }
-        default:
-            ghoul_assert(false, "Unknown format for OpenGL texture");
-            throw ghoul::MissingCaseException();
-    }
-}
-
 openspace::globebrowsing::TileTextureInitData::HashKey calculateHashKey(
                                                              const glm::ivec3& dimensions,
                                              const ghoul::opengl::Texture::Format& format,
@@ -230,7 +114,6 @@ TileTextureInitData::TileTextureInitData(size_t width, size_t height, GLenum typ
     , tilePixelSizeDifference(padTiles ? TilePixelSizeDifference : glm::ivec2(0))
     , glType(type)
     , ghoulTextureFormat(textureFormat)
-    , glTextureFormat(toGlTextureFormat(glType, ghoulTextureFormat))
     , nRasters(numberOfRasters(ghoulTextureFormat))
     , bytesPerDatum(numberOfBytes(glType))
     , bytesPerPixel(nRasters * bytesPerDatum)
