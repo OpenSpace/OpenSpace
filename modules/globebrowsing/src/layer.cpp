@@ -125,8 +125,8 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     }
 
     TileTextureInitData initData = getTileTextureInitData(_layerGroupId, padTiles);
-    _padTilePixelStartOffset = initData.tilePixelStartOffset();
-    _padTilePixelSizeDifference = initData.tilePixelSizeDifference();
+    _padTilePixelStartOffset = initData.tilePixelStartOffset;
+    _padTilePixelSizeDifference = initData.tilePixelSizeDifference;
 
     if (layerDict.hasKeyAndValue<ghoul::Dictionary>(KeySettings)) {
         _renderSettings.setValuesFromDictionary(

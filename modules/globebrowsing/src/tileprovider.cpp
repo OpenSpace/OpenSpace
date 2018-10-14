@@ -200,7 +200,7 @@ void initTexturesFromLoadedData(DefaultTileProvider& t) {
 void initialize(TextTileProvider& t) {
     t.font = global::fontManager.font("Mono", static_cast<float>(t.fontSize));
     t.fontRenderer = ghoul::fontrendering::FontRenderer::createDefault();
-    t.fontRenderer->setFramebufferSize(glm::vec2(t.initData.dimensions()));
+    t.fontRenderer->setFramebufferSize(glm::vec2(t.initData.dimensions));
     glGenFramebuffers(1, &t.fbo);
 }
 
@@ -242,7 +242,7 @@ Tile tile(TextTileProvider& t, const TileIndex& tileIndex) {
         glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
         tile = Tile{ texture, std::nullopt, Tile::Status::OK };
-        t.tileCache->put(key, t.initData.hashKey(), tile);
+        t.tileCache->put(key, t.initData.hashKey, tile);
     }
     return tile;
 }
@@ -473,12 +473,11 @@ void initializeDefaultTile() {
         TileTextureInitData::PadTiles::No,
         TileTextureInitData::ShouldAllocateDataOnCPU::Yes
     );
-    const size_t numBytes = initData.totalNumBytes();
-    char* pixels = new char[numBytes];
-    memset(pixels, 0, numBytes * sizeof(char));
+    char* pixels = new char[initData.totalNumBytes];
+    memset(pixels, 0, initData.totalNumBytes * sizeof(char));
 
     // Create ghoul texture
-    DefaultTileTexture = std::make_unique<Texture>(initData.dimensions());
+    DefaultTileTexture = std::make_unique<Texture>(initData.dimensions);
     DefaultTileTexture->setDataOwnership(Texture::TakeOwnership::Yes);
     DefaultTileTexture->setPixelData(pixels);
     DefaultTileTexture->uploadTexture();
@@ -537,7 +536,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     TileTextureInitData initData(
         getTileTextureInitData(layerGroupID, padTiles, pixelSize)
     );
-    tilePixelSize = initData.dimensions().x;
+    tilePixelSize = initData.dimensions.x;
 
     performPreProcessing = shouldPerformPreProcessingOnLayerGroup(layerGroupID);
     if (dictionary.hasKeyAndValue<bool>(defaultprovider::KeyPerformPreProcessing)) {
@@ -914,7 +913,7 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
                 0.f,
                 aboveEquator ?
                     t.fontSize / 2.f :
-                    t.initData.dimensions().y - 3.f * t.fontSize / 2.f
+                    t.initData.dimensions.y - 3.f * t.fontSize / 2.f
             };
             t.textColor = glm::vec4(1.f);
 
@@ -926,9 +925,9 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
                 "level: {}\nx: {}\ny: {}", tileIndex.level, tileIndex.x, tileIndex.y
             );
             t.textPosition = glm::vec2(
-                t.initData.dimensions().x / 4 -
-                (t.initData.dimensions().x / 32) * log10(1 << tileIndex.level),
-                t.initData.dimensions().y / 2 + t.fontSize
+                t.initData.dimensions.x / 4 -
+                (t.initData.dimensions.x / 32) * log10(1 << tileIndex.level),
+                t.initData.dimensions.y / 2 + t.fontSize
             );
             t.textColor = glm::vec4(1.f);
 

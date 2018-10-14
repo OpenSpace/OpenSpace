@@ -29,7 +29,6 @@
 #include <ghoul/misc/boolean.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
-#include <string>
 
 namespace openspace::globebrowsing {
 
@@ -38,54 +37,36 @@ namespace openspace::globebrowsing {
  */
 class TileTextureInitData {
 public:
-    using HashKey = unsigned long long;
+    using HashKey = uint64_t;
     BooleanType(ShouldAllocateDataOnCPU);
     BooleanType(PadTiles);
-    using Format = ghoul::opengl::Texture::Format;
 
-    TileTextureInitData(size_t width, size_t height, GLenum glType, Format textureFormat,
-        PadTiles padTiles,
-        ShouldAllocateDataOnCPU shouldAllocateDataOnCPU = ShouldAllocateDataOnCPU::No);
+    TileTextureInitData(size_t width, size_t height, GLenum glType,
+        ghoul::opengl::Texture::Format textureFormat, PadTiles padTiles,
+        ShouldAllocateDataOnCPU cpuAlloc = ShouldAllocateDataOnCPU::No);
 
-    TileTextureInitData(const TileTextureInitData& original);
+    TileTextureInitData(const TileTextureInitData& original) = default;
+    TileTextureInitData(TileTextureInitData&& original) = default;
+
+    TileTextureInitData operator=(const TileTextureInitData& rhs);
+    TileTextureInitData operator=(TileTextureInitData&& rhs);
 
     ~TileTextureInitData() = default;
 
-    glm::ivec3 dimensions() const;
-    glm::ivec2 tilePixelStartOffset() const;
-    glm::ivec2 tilePixelSizeDifference() const;
-    size_t nRasters() const;
-    size_t bytesPerDatum() const;
-    size_t bytesPerPixel() const;
-    size_t bytesPerLine() const;
-    size_t totalNumBytes() const;
-    GLenum glType() const;
-    Format ghoulTextureFormat() const;
-    GLenum glTextureFormat() const;
-    bool shouldAllocateDataOnCPU() const;
-    HashKey hashKey() const;
-
-    const static glm::ivec2 TilePixelStartOffset;
-    const static glm::ivec2 TilePixelSizeDifference;
-
-private:
-    void calculateHashKey();
-    unsigned int getUniqueIdFromTextureFormat(Format textureFormat) const;
-
-    HashKey _hashKey = HashKey(0);
-    glm::ivec3 _dimensions;
-    glm::ivec2 _tilePixelStartOffset;
-    glm::ivec2 _tilePixelSizeDifference;
-    GLenum _glType;
-    Format _ghoulTextureFormat;
-    GLenum _glTextureFormat;
-    size_t _nRasters;
-    size_t _bytesPerDatum;
-    size_t _bytesPerPixel;
-    size_t _bytesPerLine;
-    size_t _totalNumBytes;
-    bool _shouldAllocateDataOnCPU;
-    bool _padTiles;
+    const glm::ivec3 dimensions;
+    const glm::ivec2 tilePixelStartOffset;
+    const glm::ivec2 tilePixelSizeDifference;
+    const GLenum glType;
+    const ghoul::opengl::Texture::Format ghoulTextureFormat;
+    const GLenum glTextureFormat;
+    const size_t nRasters;
+    const size_t bytesPerDatum;
+    const size_t bytesPerPixel;
+    const size_t bytesPerLine;
+    const size_t totalNumBytes;
+    const bool shouldAllocateDataOnCPU;
+    const bool padTiles;
+    HashKey hashKey = 0ULL;
 };
 
 } // namespace openspace::globebrowsing
