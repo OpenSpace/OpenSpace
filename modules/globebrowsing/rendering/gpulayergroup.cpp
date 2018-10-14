@@ -78,8 +78,8 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
                     const ChunkTile& ct = ctp[j];
 
                     t.texUnit.activate();
-                    if (ct.tile.texture()) {
-                        ct.tile.texture()->bind();
+                    if (ct.tile.texture) {
+                        ct.tile.texture->bind();
                     }
                     program.setUniform(t.uniformCache.texture, t.texUnit);
 

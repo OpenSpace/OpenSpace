@@ -238,11 +238,11 @@ BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& 
     for (const ChunkTileSettingsPair& chunkTileSettingsPair : chunkTileSettingPairs) {
         const ChunkTile& chunkTile = chunkTileSettingsPair.first;
         const LayerRenderSettings* settings = chunkTileSettingsPair.second;
-        const bool goodTile = (chunkTile.tile.status() == Tile::Status::OK);
-        const bool hasTileMetaData = chunkTile.tile.metaData().has_value();
+        const bool goodTile = (chunkTile.tile.status == Tile::Status::OK);
+        const bool hasTileMetaData = chunkTile.tile.metaData.has_value();
 
         if (goodTile && hasTileMetaData) {
-            const TileMetaData& tileMetaData = chunkTile.tile.metaData().value();
+            const TileMetaData& tileMetaData = chunkTile.tile.metaData.value();
 
             const float minValue = settings->performLayerSettings(
                 tileMetaData.minValues[HeightChannel]
@@ -1430,11 +1430,11 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
         const TileUvTransform& uvTransform = chunkTile.uvTransform;
         const TileDepthTransform& depthTransform =
             tileprovider::depthTransform(*tileProvider);
-        if (tile.status() != Tile::Status::OK) {
+        if (tile.status != Tile::Status::OK) {
             return 0;
         }
 
-        ghoul::opengl::Texture* tileTexture = tile.texture();
+        ghoul::opengl::Texture* tileTexture = tile.texture;
         if (!tileTexture) {
             return 0;
         }

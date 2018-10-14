@@ -245,7 +245,7 @@ ChunkTilePile Layer::chunkTilePile(const TileIndex& tileIndex, int pileSize) con
         ChunkTilePile chunkTilePile;
         chunkTilePile.resize(pileSize);
         for (int i = 0; i < pileSize; ++i) {
-            chunkTilePile[i].tile = Tile::TileUnavailable;
+            chunkTilePile[i].tile = Tile();
             chunkTilePile[i].uvTransform.uvOffset = { 0, 0 };
             chunkTilePile[i].uvTransform.uvScale = { 1, 1 };
         }

@@ -78,7 +78,7 @@ namespace openspace::globebrowsing::tileprovider {
 namespace {
 
 std::unique_ptr<ghoul::opengl::Texture> DefaultTileTexture;
-Tile DefaultTile = Tile(nullptr, std::nullopt, Tile::Status::Unavailable);
+Tile DefaultTile = Tile{ nullptr, std::nullopt, Tile::Status::Unavailable };
 
 namespace defaultprovider {
     constexpr const char* KeyPerformPreProcessing = "PerformPreProcessing";
@@ -212,7 +212,7 @@ void deinitialize(TextTileProvider& t) {
 Tile tile(TextTileProvider& t, const TileIndex& tileIndex) {
     cache::ProviderTileKey key = { tileIndex, t.uniqueIdentifier };
     Tile tile = t.tileCache->get(key);
-    if (!tile.texture()) {
+    if (!tile.texture) {
         ghoul::opengl::Texture* texture = t.tileCache->texture(t.initData);
 
         // Keep track of defaultFBO and viewport to be able to reset state when done
@@ -242,7 +242,7 @@ Tile tile(TextTileProvider& t, const TileIndex& tileIndex) {
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
         glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
-        tile = Tile(texture, std::nullopt, Tile::Status::OK);
+        tile = Tile{ texture, std::nullopt, Tile::Status::OK };
         t.tileCache->put(key, t.initData.hashKey(), tile);
     }
     return tile;
@@ -486,7 +486,7 @@ void initializeDefaultTile() {
     DefaultTileTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
 
     // Create tile
-    DefaultTile = Tile(DefaultTileTexture.get(), std::nullopt, Tile::Status::OK);
+    DefaultTile = Tile{ DefaultTileTexture.get(), std::nullopt, Tile::Status::OK };
 }
 
 void deinitializeDefaultTile() {
@@ -561,8 +561,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
 
 
 SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
-    : tile(nullptr, std::nullopt, Tile::Status::Unavailable)
-    , filePath(singleimageprovider::FilePathInfo)
+    : filePath(singleimageprovider::FilePathInfo)
 {
     type = Type::SingleImageTileProvider;
 
@@ -863,19 +862,19 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
             if (t.asyncTextureDataProvider) {
                 if (tileIndex.level > maxLevel(t)) {
-                    return Tile(nullptr, std::nullopt, Tile::Status::OutOfRange);
+                    return Tile{ nullptr, std::nullopt, Tile::Status::OutOfRange };
                 }
                 const cache::ProviderTileKey key = { tileIndex, t.uniqueIdentifier };
                 const Tile tile = t.tileCache->get(key);
 
-                if (!tile.texture()) {
+                if (!tile.texture) {
                     t.asyncTextureDataProvider->enqueueTileIO(tileIndex);
                 }
 
                 return tile;
             }
             else {
-                return Tile(nullptr, std::nullopt, Tile::Status::Unavailable);
+                return Tile{ nullptr, std::nullopt, Tile::Status::Unavailable };
             }
         }
         case Type::SingleImageTileProvider: {
@@ -940,7 +939,7 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
             TileProviderByIndex& t = static_cast<TileProviderByIndex&>(tp);
             const auto it = t.tileProviderMap.find(tileIndex.hashKey());
             const bool hasProvider = it != t.tileProviderMap.end();
-            return hasProvider ? tile(*it->second, tileIndex) : Tile::TileUnavailable;
+            return hasProvider ? tile(*it->second, tileIndex) : Tile();
         }
         case Type::ByLevelTileProvider: {
             TileProviderByLevel& t = static_cast<TileProviderByLevel&>(tp);
@@ -949,7 +948,7 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
                 return tile(*provider, tileIndex);
             }
             else {
-                return Tile::TileUnavailable;
+                return Tile();
             }
         }
         case Type::TemporalTileProvider: {
@@ -959,7 +958,7 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
                 return tile(*t.currentTileProvider, tileIndex);
             }
             else {
-                return Tile::TileUnavailable;
+                return Tile();
             }
         }
         default:
@@ -983,7 +982,7 @@ Tile::Status tileStatus(TileProvider& tp, const TileIndex& index) {
                 }
 
                 const cache::ProviderTileKey key = { index, t.uniqueIdentifier };
-                return t.tileCache->get(key).status();
+                return t.tileCache->get(key).status;
             }
             else {
                 return Tile::Status::Unavailable;
@@ -991,7 +990,7 @@ Tile::Status tileStatus(TileProvider& tp, const TileIndex& index) {
         }
         case Type::SingleImageTileProvider: {
             SingleImageProvider& t = static_cast<SingleImageProvider&>(tp);
-            return t.tile.status();
+            return t.tile.status;
         }
         case Type::SizeReferenceTileProvider:
             return Tile::Status::OK;
@@ -1174,7 +1173,7 @@ void reset(TileProvider& tp) {
                 ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
             );
 
-            t.tile = Tile(t.tileTexture.get(), std::nullopt, tileStatus);
+            t.tile = Tile{ t.tileTexture.get(), std::nullopt, tileStatus };
             break;
         }
         case Type::SizeReferenceTileProvider: {
@@ -1329,20 +1328,16 @@ ChunkTile chunkTile(TileProvider& tp, TileIndex tileIndex, int parents, int maxP
         maxParents--;
     }
     if (maxParents < 0) {
-        return ChunkTile{ Tile::TileUnavailable, uvTransform, TileDepthTransform() };
+        return ChunkTile{ Tile(), uvTransform, TileDepthTransform() };
     }
 
     // Step 3. Traverse 0 or more parents up the chunkTree until we find a chunk that
     //         has a loaded tile ready to use.
     while (tileIndex.level > 1) {
         Tile t = tile(tp, tileIndex);
-        if (t.status() != Tile::Status::OK) {
+        if (t.status != Tile::Status::OK) {
             if (--maxParents < 0) {
-                return ChunkTile{
-                    Tile::TileUnavailable,
-                    uvTransform,
-                    TileDepthTransform()
-                };
+                return ChunkTile{ Tile(), uvTransform, TileDepthTransform() };
             }
             ascendToParent(tileIndex, uvTransform);
         }
@@ -1351,7 +1346,7 @@ ChunkTile chunkTile(TileProvider& tp, TileIndex tileIndex, int parents, int maxP
         }
     }
 
-    return ChunkTile{ Tile::TileUnavailable, uvTransform, TileDepthTransform() };
+    return ChunkTile{ Tile(), uvTransform, TileDepthTransform() };
 }
 
 
@@ -1366,7 +1361,7 @@ ChunkTilePile chunkTilePile(TileProvider& tp, TileIndex tileIndex, int pileSize)
     ChunkTilePile chunkTilePile(pileSize);
     for (int i = 0; i < pileSize; ++i) {
         chunkTilePile[i] = chunkTile(tp, tileIndex, i);
-        if (chunkTilePile[i].tile.status() == Tile::Status::Unavailable) {
+        if (chunkTilePile[i].tile.status == Tile::Status::Unavailable) {
             if (i > 0) {
                 // First iteration
                 chunkTilePile[i].tile = chunkTilePile[i - 1].tile;

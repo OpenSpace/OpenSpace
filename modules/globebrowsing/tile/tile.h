@@ -72,24 +72,9 @@ public:
         OK
     };
 
-    Tile(ghoul::opengl::Texture* texture, std::optional<TileMetaData> metaData,
-        Status status);
-    ~Tile() = default;
-
-    const std::optional<TileMetaData>& metaData() const;
-    Status status() const;
-    ghoul::opengl::Texture* texture() const;
-
-    /**
-    * A tile with status unavailable that any user can return to
-    * indicate that a tile was unavailable.
-    */
-    static const Tile TileUnavailable;
-
-private:
-    ghoul::opengl::Texture* _texture;
-    std::optional<TileMetaData> _metaData;
-    Status _status;
+    ghoul::opengl::Texture* texture = nullptr;
+    std::optional<TileMetaData> metaData = std::nullopt;
+    Status status = Status::Unavailable;
 };
 
 } // namespace openspace::globebrowsing

@@ -32,7 +32,7 @@
 namespace openspace::globebrowsing {
 
 struct ChunkTile {
-    Tile tile = Tile::TileUnavailable;
+    Tile tile;
     TileUvTransform uvTransform;
     TileDepthTransform depthTransform;
 };

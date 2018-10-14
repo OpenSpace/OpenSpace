@@ -272,7 +272,7 @@ Tile MemoryAwareTileCache::get(const ProviderTileKey& key) {
         return it->second.second->get(key);
     }
     else {
-        return Tile::TileUnavailable;
+        return Tile();
     }
 }
 
@@ -291,7 +291,7 @@ ghoul::opengl::Texture* MemoryAwareTileCache::texture(
     if (!texture) {
         Tile oldTile = _textureContainerMap[initDataKey].second->popLRU().second;
         // Use the old tile's texture
-        texture = oldTile.texture();
+        texture = oldTile.texture;
     }
     return texture;
 }
@@ -332,7 +332,7 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key, RawTile rawTile
             tex->reUploadTexture();
         }
         tex->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-        Tile tile(tex, std::move(rawTile.tileMetaData), Tile::Status::OK);
+        Tile tile{ tex, std::move(rawTile.tileMetaData), Tile::Status::OK };
         TileTextureInitData::HashKey initDataKey = initData.hashKey();
         _textureContainerMap[initDataKey].second->put(std::move(key), std::move(tile));
     }
