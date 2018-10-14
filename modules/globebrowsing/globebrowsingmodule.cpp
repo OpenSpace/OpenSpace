@@ -28,7 +28,7 @@
 #include <modules/globebrowsing/dashboard/dashboarditemglobelocation.h>
 #include <modules/globebrowsing/geometry/geodetic.h>
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
-#include <modules/globebrowsing/tile/rawtiledatareader/gdalwrapper.h>
+#include <modules/globebrowsing/tile/gdalwrapper.h>
 #include <modules/globebrowsing/tile/tileprovider.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/scripting/lualibrary.h>

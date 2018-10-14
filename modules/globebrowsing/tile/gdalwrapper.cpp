@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/rawtiledatareader/gdalwrapper.h>
+#include <modules/globebrowsing/tile/gdalwrapper.h>
 
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>

@@ -30,7 +30,7 @@
 #include <modules/globebrowsing/other/basictypes.h>
 #include <modules/globebrowsing/rendering/layermanager.h>
 #include <modules/globebrowsing/tile/asynctiledataprovider.h>
-#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
+#include <modules/globebrowsing/tile/rawtiledatareader.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/util/factorymanager.h>

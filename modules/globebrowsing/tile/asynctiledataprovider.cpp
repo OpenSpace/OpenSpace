@@ -27,7 +27,7 @@
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/tile/tileloadjob.h>
-#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
+#include <modules/globebrowsing/tile/rawtiledatareader.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/logging/logmanager.h>

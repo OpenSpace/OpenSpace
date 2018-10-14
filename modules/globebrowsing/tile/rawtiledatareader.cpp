@@ -22,8 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
-
+#include <modules/globebrowsing/tile/rawtiledatareader.h>
 
 #include <modules/globebrowsing/geometry/geodetic.h>
 #include <modules/globebrowsing/geometry/geodeticpatch.h>

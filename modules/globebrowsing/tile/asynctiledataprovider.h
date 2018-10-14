@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_DATAPROVIDER___H__
 
 #include <modules/globebrowsing/other/prioritizingconcurrentjobmanager.h>
-#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
+#include <modules/globebrowsing/tile/rawtiledatareader.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <ghoul/misc/boolean.h>
 #include <map>
