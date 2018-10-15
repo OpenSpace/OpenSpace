@@ -461,7 +461,7 @@ bool readFilePath(TemporalTileProvider& t) {
 unsigned int TileProvider::NumTileProviders = 0;
 
 void initializeDefaultTile() {
-    ghoul_assert(!DefaultTile.texture(), "Default tile should not have been created");
+    ghoul_assert(!DefaultTile.texture, "Default tile should not have been created");
     using namespace ghoul::opengl;
 
     // Create pixel data

@@ -256,17 +256,6 @@ IODescription cutIODescription(IODescription io, Side side, int pos) {
     glm::ivec2 cutSize = whatCameOff.read.region.numPixels;
     glm::ivec2 localWriteCutSize = ratio * glm::dvec2(cutSize);
 
-    if (cutSize.x == 0 || cutSize.y == 0) {
-        ghoul_assert(
-            read.region.equals(readPreCut),
-            "Read region should not have been modified"
-        );
-        ghoul_assert(
-            write.region.equals(writePreCut),
-            "Write region should not have been modified"
-        );
-    }
-
     int localWriteCutPos =
         (side == Side::Left || side == Side::Right) ?
         localWriteCutSize.x :
@@ -453,7 +442,7 @@ RawTile::ReadError RawTileDataReader::rasterRead(int rasterBand,
                                                  const IODescription& io,
                                                  char* dataDestination) const
 {
-    ghoul_assert(io.read.region.isInside(io.read.fullRegion), "write region of bounds!");
+    ghoul_assert(isInside(io.read.region, io.read.fullRegion), "write region of bounds!");
     ghoul_assert(
         io.write.region.start.x >= 0 && io.write.region.start.y >= 0,
         "Invalid write region"
