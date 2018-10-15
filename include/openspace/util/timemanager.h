@@ -86,6 +86,7 @@ public:
     float defaultUnpauseInterpolationDuration() const;
 
     void interpolateTime(double targetTime, double durationSeconds);
+    void interpolateTimeRelative(double delta, double durationSeconds);
     void interpolateDeltaTime(double targetDeltaTime, double durationSeconds);
     void interpolatePause(bool pause, double durationSeconds);
 

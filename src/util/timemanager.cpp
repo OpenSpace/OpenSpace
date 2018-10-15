@@ -116,6 +116,18 @@ void TimeManager::interpolateTime(double targetTime, double durationSeconds) {
     addKeyframe(now + durationSeconds, next);
 }
 
+void TimeManager::interpolateTimeRelative(double delta, double durationSeconds) {
+    ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
+
+    const float duration = global::timeManager.defaultTimeInterpolationDuration();
+
+    const TimeKeyframeData predictedTime = interpolate(
+        global::windowDelegate.applicationTime() + duration
+    );
+    const double targetTime = predictedTime.time.j2000Seconds() + delta;
+    interpolateTime(targetTime, durationSeconds);
+}
+
 void TimeManager::preSynchronization(double dt) {
     removeKeyframesBefore(_latestConsumedTimestamp);
     progressTime(dt);
