@@ -663,6 +663,7 @@ void RenderEngine::renderDashboard() {
 
     global::dashboard.render(penPosition);
 
+#ifdef REALTIME_CAMERA_POS_DISPLAY
     penPosition += glm::vec2(0.f, -50.f);
 
     glm::dvec3 p = _camera->positionVec3();
@@ -675,7 +676,7 @@ void RenderEngine::renderDashboard() {
             p.x, p.y, p.z, rot[0], rot[1], rot[2], rot[3], fc
             )
     );
-
+#endif
 }
 
 void RenderEngine::postDraw() {

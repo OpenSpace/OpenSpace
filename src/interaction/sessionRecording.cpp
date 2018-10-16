@@ -184,6 +184,8 @@ bool SessionRecording::startPlayback(std::string filename, KeyframeTimeRef timeM
     if (!playbackAddEntriesToTimeline())
         return false;
 
+    findFirstCameraKeyframeInTimeline();
+
     LINFO(fmt::format("Playback session started @ ({:8.3f},0.0,{:13.3f}) with {}/{}/{} entries",
         now, _timestampPlaybackStarted_simulation, _keyframesCamera.size(),
         _keyframesTime.size(), _keyframesScript.size()));
@@ -194,6 +196,21 @@ bool SessionRecording::startPlayback(std::string filename, KeyframeTimeRef timeM
     _state = sessionState::playback;
 
     return true;
+}
+
+void SessionRecording::findFirstCameraKeyframeInTimeline() {
+    bool foundCameraKeyframe = false;
+    for (unsigned int i = 0; i < _timeline.size(); i++) {
+        if (doesTimelineEntryContainCamera(i)) {
+            _idxTimeline_cameraPtrPrev = i;
+            _idxTimeline_cameraPtrNext = i;
+            foundCameraKeyframe = true;
+            break;
+        }
+    }
+
+    if (!foundCameraKeyframe)
+        signalPlaybackFinishedForComponent(recordedType::camera);
 }
 
 std::string SessionRecording::readHeaderElement(size_t readLen_chars) {
@@ -247,8 +264,8 @@ void SessionRecording::cleanUpPlayback() {
     _idxTimeline_nonCamera = 0;
     _idxTime = 0;
     _idxScript = 0;
-    _idxTimeline_cameraPtr = 0;
-    _idxTimeline_cameraPrevUpperBound = 0;
+    _idxTimeline_cameraPtrNext = 0;
+    _idxTimeline_cameraPtrPrev = 0;
 }
 
 bool SessionRecording::isDataModeBinary() {
@@ -815,13 +832,9 @@ void SessionRecording::addKeyframe(double timestamp, std::string scriptToQueue)
 }
 
 void SessionRecording::moveAheadInTime(double deltaTime) {
-    if (_state == sessionState::playback) {
-        LINFOC("frame", std::to_string(global::renderEngine._frameNumber));
-
-        double currTime = currentTime();
-        lookForNonCameraKeyframesThatHaveComeDue(currTime, deltaTime);
-        updateCameraWithOrWithoutNewKeyframes(currTime);
-    }
+    double currTime = currentTime();
+    lookForNonCameraKeyframesThatHaveComeDue(currTime, deltaTime);
+    updateCameraWithOrWithoutNewKeyframes(currTime);
 }
 
 void SessionRecording::lookForNonCameraKeyframesThatHaveComeDue(double currTime, double deltaTime) {
@@ -831,6 +844,10 @@ void SessionRecording::lookForNonCameraKeyframesThatHaveComeDue(double currTime,
 
         if (++_idxTimeline_nonCamera >= _timeline.size()) {
             _idxTimeline_nonCamera--;
+            if(_playbackActive_time)
+                signalPlaybackFinishedForComponent(recordedType::time);
+            if (_playbackActive_script)
+                signalPlaybackFinishedForComponent(recordedType::script);
             break;
         }
     }
@@ -839,8 +856,10 @@ void SessionRecording::lookForNonCameraKeyframesThatHaveComeDue(double currTime,
 void SessionRecording::updateCameraWithOrWithoutNewKeyframes(double currTime) {
     if (_playbackActive_camera)
     {
-        findNextFutureCameraIndex(currTime);
+        bool didFindFutureCameraKeyframes = findNextFutureCameraIndex(currTime);
         processCameraKeyframe(currTime);
+        if (!didFindFutureCameraKeyframes)
+            signalPlaybackFinishedForComponent(recordedType::camera);
     }
 }
 
@@ -851,22 +870,46 @@ bool SessionRecording::isTimeToHandleNextNonCameraKeyframe(double currTime, doub
         return false;
 }
 
-void SessionRecording::findNextFutureCameraIndex(double currTime) {
-    unsigned int seekAheadIndex = _idxTimeline_cameraPtr;
+bool SessionRecording::findNextFutureCameraIndex(double currTime) {
+    unsigned int seekAheadIndex = _idxTimeline_cameraPtrPrev;
+    while (true) {
+        seekAheadIndex++;
+        if (seekAheadIndex >= _timeline.size())
+            seekAheadIndex = _timeline.size() - 1;
 
-    while  (++seekAheadIndex < _timeline.size()) {
-        recordedType keyframeType = _timeline[seekAheadIndex].keyframeType;
-        double timestamp = _timeline[seekAheadIndex].timestamp;
-        if (keyframeType == recordedType::camera && timestamp > currTime) {
+        if (doesTimelineEntryContainCamera(seekAheadIndex)) {
+            unsigned int indexIntoCameraKeyframes
+                = _timeline[seekAheadIndex].idxIntoKeyframeTypeArray;
+            double seekAheadKeyframeTimestamp = _timeline[seekAheadIndex].timestamp;
+
+            if (indexIntoCameraKeyframes >= (_keyframesCamera.size() - 1))
+                _hasHitEndOfCameraKeyframes = true;
+
+            if (currTime < seekAheadKeyframeTimestamp) {
+                if (seekAheadIndex > _idxTimeline_cameraPtrNext) {
+                    _idxTimeline_cameraPtrPrev = _idxTimeline_cameraPtrNext;
+                    _idxTimeline_cameraPtrNext = seekAheadIndex;
+                }
+                break;
+            }
+        }
+
+        double interpolationUpperBoundTimestamp
+            = _timeline[_idxTimeline_cameraPtrNext].timestamp;
+        if ((currTime > interpolationUpperBoundTimestamp) && _hasHitEndOfCameraKeyframes) {
+            _idxTimeline_cameraPtrPrev = _idxTimeline_cameraPtrNext;
+            return false;
             break;
         }
+
+        if (seekAheadIndex == (_timeline.size() - 1))
+            break;
     }
-    //Set next keyframe in camera timeline to the next keyframe in the timeline that is
-    // one less than the first future camera keyframe found.
-    _idxTimeline_cameraPtr = (seekAheadIndex > 0) ? seekAheadIndex : 0;
-    //Signal finished with camera keyframes if end of timeline reached
-    if (seekAheadIndex >= _timeline.size())
-        signalPlaybackFinishedForComponent(recordedType::camera);
+    return true;
+}
+
+bool SessionRecording::doesTimelineEntryContainCamera(unsigned int index) {
+    return (_timeline[index].keyframeType == recordedType::camera);
 }
 
 bool SessionRecording::processNextNonCameraKeyframeAheadInTime(double now, double deltaTime) {
@@ -904,6 +947,15 @@ bool SessionRecording::processNextNonCameraKeyframeAheadInTime(double now, doubl
 
 //void SessionRecording::moveBackInTime() { } //for future use
 
+unsigned int SessionRecording::findIndexOfLastCameraKeyframeInTimeline() {
+    unsigned int i;
+    for (i = _timeline.size() - 1; i >= 0; i--) {
+        if (_timeline[i].keyframeType == recordedType::camera)
+            break;
+    }
+    return i;
+}
+
 bool SessionRecording::processCameraKeyframe(double now) {
     interaction::KeyframeNavigator::CameraPose nextPose;
     interaction::KeyframeNavigator::CameraPose prevPose;
@@ -916,39 +968,48 @@ bool SessionRecording::processCameraKeyframe(double now) {
     } else if (_keyframesCamera.size() == 0) {
         return false;
     } else {
-        unsigned int nextIdx = _timeline[_idxTimeline_cameraPtr].idxIntoKeyframeTypeArray;
-        nextPose = _keyframesCamera[nextIdx];
-        unsigned int prevIdx = _timeline[_idxTimeline_cameraPrevUpperBound].idxIntoKeyframeTypeArray;
+        unsigned int prevIdx = _timeline[_idxTimeline_cameraPtrPrev].idxIntoKeyframeTypeArray;
         prevPose = _keyframesCamera[prevIdx];
+        unsigned int nextIdx = _timeline[_idxTimeline_cameraPtrNext].idxIntoKeyframeTypeArray;
+        nextPose = _keyframesCamera[nextIdx];
     }
+
+    double prevTime = _timeline[_idxTimeline_cameraPtrPrev].timestamp;  //getPrevTimestamp();
+    double nextTime = _timeline[_idxTimeline_cameraPtrNext].timestamp;  //getNextTimestamp();
+
+    /*if (now >= nextTime) {
+        LINFOC("_idxTimeline_cameraPtr", std::to_string(_idxTimeline_cameraPtrNext));
+        LINFOC("idxLastCamKeyframe", std::to_string(findIndexOfLastCameraKeyframeInTimeline()));
+
+        if (_idxTimeline_cameraPtrNext == findIndexOfLastCameraKeyframeInTimeline()) {
+            prevPose = nextPose;
+            prevTime = nextTime;
+            signalPlaybackFinishedForComponent(recordedType::camera);
+        }
+    }*/
 
     SceneGraphNode* prevFocusNode = scene->sceneGraphNode(prevPose.focusNode);
     SceneGraphNode* nextFocusNode = scene->sceneGraphNode(nextPose.focusNode);
 
-    LINFOC("now", std::to_string(now));
-
-    if (_idxTimeline_cameraPrevUpperBound == 0)
-        _idxTimeline_cameraPrevUpperBound = _idxTimeline_cameraPtr;
-
-    double nextTime = _timeline[_idxTimeline_cameraPtr].timestamp;  //getNextTimestamp();
-    double prevTime = _timeline[_idxTimeline_cameraPrevUpperBound].timestamp;  //getPrevTimestamp();
-
-    LINFOC("next", std::to_string(nextTime));
+#ifdef INTERPOLATION_DEBUG_PRINT
     LINFOC("prev", std::to_string(prevTime));
+    LINFOC("now", std::to_string(now));
+    LINFOC("next", std::to_string(nextTime));
+#endif
     double t;
     if ((nextTime - prevTime) < 1e-7)
         t = 0;
     else
         t = (now - prevTime) / (nextTime - prevTime);
-    t = (t < 0.0) ? 0.0 : t;
+    t = std::max(0.0, std::min(1.0, t));
 
     if (!prevFocusNode || !nextFocusNode) {
         return false;
     }
 
     glm::dvec3 prevKeyframeCameraPosition = prevPose.position;
-    glm::dvec3 nextKeyframeCameraPosition = nextPose.position;
     glm::dquat prevKeyframeCameraRotation = prevPose.rotation;
+    glm::dvec3 nextKeyframeCameraPosition = nextPose.position;
     glm::dquat nextKeyframeCameraRotation = nextPose.rotation;
 
     // Transform position and rotation based on focus node rotation
@@ -975,18 +1036,20 @@ bool SessionRecording::processCameraKeyframe(double now) {
     nextKeyframeCameraPosition += nextFocusNode->worldPosition();
 
     // Linear interpolation
-    camera->setPositionVec3(
-        prevKeyframeCameraPosition * (1 - t) + nextKeyframeCameraPosition * t
-    );
+    glm::dvec3 interpolatedCamera
+        = prevKeyframeCameraPosition * (1 - t) + nextKeyframeCameraPosition * t;
+
+    camera->setPositionVec3(interpolatedCamera);
     if (prevKeyframeCameraRotation == nextKeyframeCameraRotation) {
         camera->setRotation(prevKeyframeCameraRotation);
-        LINFO("Skipped slerp call with equal prev/next frames.");
+        //LINFO("Skipped slerp call with = rotation.");
     }
     else {
         camera->setRotation(
             glm::slerp(prevKeyframeCameraRotation, nextKeyframeCameraRotation, t)
         );
     }
+#ifdef INTERPOLATION_DEBUG_PRINT
 LINFO(fmt::format("Cam pos prev={}, next={}", std::to_string(prevKeyframeCameraPosition),
     std::to_string(nextKeyframeCameraPosition)));
 LINFO(fmt::format("Cam rot prev={} {} {} {}  next={} {} {} {}", prevKeyframeCameraRotation.x,
@@ -994,9 +1057,12 @@ LINFO(fmt::format("Cam rot prev={} {} {} {}  next={} {} {} {}", prevKeyframeCame
     nextKeyframeCameraRotation.x, nextKeyframeCameraRotation.y, nextKeyframeCameraRotation.z,
     nextKeyframeCameraRotation.w));
 LINFO(fmt::format("Cam interp = {}", t));
-
-    _idxTimeline_cameraPrevUpperBound = _idxTimeline_cameraPtr;
-
+#else
+    LINFO(fmt::format("camera {} {} {} {} {} {}", global::windowDelegate.applicationTime(),
+        global::windowDelegate.applicationTime() - _timestampPlaybackStarted_application,
+        global::timeManager.time().j2000Seconds(), interpolatedCamera.x,
+        interpolatedCamera.y, interpolatedCamera.z));
+#endif
     return true;
 }
 
@@ -1013,7 +1079,7 @@ bool SessionRecording::processScriptKeyframe(double now, double deltaTime) {
         global::scriptEngine.queueScript(nextScript,
             scripting::ScriptEngine::RemoteScripting::Yes);
     }
-    LINFO("Script");
+    //LINFO("Script");
 
     return true;
 }

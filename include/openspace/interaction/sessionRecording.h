@@ -169,6 +169,7 @@ private:
     void writeToFileBuffer(bool b);
     void saveStringToFile(const std::string s);
     void saveKeyframeToFileBinary(unsigned char* bufferSource, unsigned int size);
+    void findFirstCameraKeyframeInTimeline();
     std::string readHeaderElement(size_t readLen_chars);
     void readFromPlayback(unsigned char& result);
     void readFromPlayback(double& result);
@@ -186,10 +187,12 @@ private:
     void updateCameraWithOrWithoutNewKeyframes(double currTime);
     bool isTimeToHandleNextNonCameraKeyframe(double currTime, double deltaTime);
     bool processNextNonCameraKeyframeAheadInTime(double currTime, double deltaTime);
-    void findNextFutureCameraIndex(double currTime);
+    bool findNextFutureCameraIndex(double currTime);
     bool processCameraKeyframe(double now);
     bool processScriptKeyframe(double now, double deltaTime);
     bool isDataModeBinary();
+    unsigned int findIndexOfLastCameraKeyframeInTimeline();
+    bool doesTimelineEntryContainCamera(unsigned int index);
    
     recordedType getNextKeyframeType();
     recordedType getPrevKeyframeType();
@@ -216,6 +219,7 @@ private:
     bool _playbackActive_camera = false;
     bool _playbackActive_time = false;
     bool _playbackActive_script = false;
+    bool _hasHitEndOfCameraKeyframes = false;
 
     static const size_t keyframeHeaderSize_bytes = 33;
     static const size_t saveBufferCameraSize_min = 82;
@@ -237,8 +241,8 @@ private:
     unsigned int _idxTime = 0;
     unsigned int _idxScript = 0;
 
-    unsigned int _idxTimeline_cameraPtr = 0;
-    unsigned int _idxTimeline_cameraPrevUpperBound = 0;
+    unsigned int _idxTimeline_cameraPtrNext = 0;
+    unsigned int _idxTimeline_cameraPtrPrev = 0;
 };
 
 } // namespace openspace

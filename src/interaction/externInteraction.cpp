@@ -111,8 +111,9 @@ void ExternInteraction::generateCameraKeyframe(datamessagestructures::CameraKeyf
         return;
     }
     
-    kf._position = global::navigationHandler.camera()->positionVec3();
-   
+    //kf._position = global::navigationHandler.camera()->positionVec3();
+    kf._position = global::navigationHandler.focusNodeToCameraVector();
+
     kf._followNodeRotation =
         global::navigationHandler.orbitalNavigator().followingNodeRotation();
     if (kf._followNodeRotation) {
