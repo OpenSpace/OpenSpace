@@ -215,31 +215,19 @@ void RenderableCommunicationPackage::render(const RenderData& data, RendererTask
     glLineWidth(_lineWidth);
 
     // We pass in the model view transformation matrix as double in order to maintain
-    // high precision for vertices; especially for the packages, a high vertex precision
+    // high precision for vertices; especially for the lines, a high vertex precision
     // is necessary as they are usually far away from their reference
     _programObject->setUniform( _uniformCache.modelView,
         data.camera.combinedViewMatrix() * modelTransform * _mainRenderInformation._localTransform);
 
     glBindVertexArray(_mainRenderInformation._vaoID);
 
-    // Subclasses of this renderer might be using the index array or might now be
-    // so we check if there is data available and if there isn't, we use the
-    // glDrawArrays draw call; otherwise the glDrawElements
-    if (_mainRenderInformation._iBufferID == 0) {
-        glDrawArrays(
-            GL_LINE_STRIP,
-            _mainRenderInformation.first,
-            _mainRenderInformation.count
-        );
-    }
-    else {
-        glDrawElements(
-            GL_LINE_STRIP,
-            _mainRenderInformation.count,
-            GL_UNSIGNED_INT,
-            reinterpret_cast<void*>(_mainRenderInformation.first * sizeof(unsigned int))
-        );
-    }
+    glDrawArrays(
+        GL_LINE_STRIP,
+        _mainRenderInformation.first,
+        _mainRenderInformation.count
+    );
+
     //unbind vertex array
     glBindVertexArray(0);
 

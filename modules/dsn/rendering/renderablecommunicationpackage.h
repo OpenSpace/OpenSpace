@@ -121,8 +121,6 @@ protected:
         GLuint _vaoID = 0;
         /// The main vertex buffer object
         GLuint _vBufferID = 0;
-        /// The optional index buffer object
-        GLuint _iBufferID = 0;
     };
 
     /// Set of information about the main rendering parts

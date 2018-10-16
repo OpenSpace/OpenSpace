@@ -202,13 +202,13 @@ namespace openspace {
         {
             //Else estimate the position of the spacecraft from Azimuth and elevation angles. 
             LDEBUG("No position data for the space craft, estimate position");
-            glm::vec3 spaceCraftPos = DsnManager::spaceCraftPosition(dishIdentifier, dishPos); // VGR2
+            glm::vec3 spaceCraftPos = DsnManager::approximateSpacecraftPosition(dishIdentifier, dishPos); // VGR2
             vertexArray[1] = { static_cast<float>(spaceCraftPos.x), static_cast<float>(spaceCraftPos.y), static_cast<float>(spaceCraftPos.z) };
         }
 
     }
 
-    glm::vec3 DsnManager::spaceCraftPosition(const char* dishId, glm::vec3 dishPos) {
+    glm::vec3 DsnManager::approximateSpacecraftPosition(const char* dishId, glm::vec3 dishPos) {
 
         double dishPosXYZ[] = { dishPos.x, dishPos.y, dishPos.z };
         double dishPosLLA[] = { -35.383, 148.966, 692 };
