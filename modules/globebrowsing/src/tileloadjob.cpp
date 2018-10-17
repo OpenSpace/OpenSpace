@@ -28,9 +28,9 @@
 
 namespace openspace::globebrowsing {
 
-TileLoadJob::TileLoadJob(RawTileDataReader& rawTileDataReader, const TileIndex& tileIndex)
+TileLoadJob::TileLoadJob(RawTileDataReader& rawTileDataReader, TileIndex tileIndex)
     : _rawTileDataReader(rawTileDataReader)
-    , _chunkIndex(tileIndex)
+    , _chunkIndex(std::move(tileIndex))
 {}
 
 TileLoadJob::~TileLoadJob() {

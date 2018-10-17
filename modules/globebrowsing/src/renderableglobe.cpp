@@ -287,9 +287,9 @@ BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& 
     return boundingHeights;
 }
 
-std::array<glm::dvec4, 8> boundingPolyhedronCornersForChunk(const Chunk& chunk,
-                                                            const LayerManager& lm,
-                                                            const Ellipsoid& ellipsoid)
+std::array<glm::dvec4, 8> boundingCornersForChunk(const Chunk& chunk,
+                                                  const LayerManager& lm,
+                                                  const Ellipsoid& ellipsoid)
 {
     const BoundingHeights& boundingHeight = boundingHeightsForChunk(chunk, lm);
 
@@ -1944,7 +1944,7 @@ void RenderableGlobe::splitChunkNode(Chunk& cn, int depth) {
             cn.children[i] = new (memory[i]) Chunk(
                 cn.tileIndex.child(static_cast<Quad>(i))
             );
-            cn.children[i]->corners = boundingPolyhedronCornersForChunk(
+            cn.children[i]->corners = boundingCornersForChunk(
                 *cn.children[i],
                 _layerManager,
                 _ellipsoid
@@ -1952,7 +1952,7 @@ void RenderableGlobe::splitChunkNode(Chunk& cn, int depth) {
         }
     }
 
-    if (depth - 1 > 0) {
+    if (depth > 1) {
         for (Chunk* child : cn.children) {
             splitChunkNode(*child, depth - 1);
         }
@@ -2011,13 +2011,9 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
     }
 }
 
-void RenderableGlobe::updateChunk(Chunk& chunk, const RenderData& data) {
+void RenderableGlobe::updateChunk(Chunk& chunk, const RenderData& data) const {
     if (_chunkCornersDirty) {
-        chunk.corners = boundingPolyhedronCornersForChunk(
-            chunk,
-            _layerManager,
-            _ellipsoid
-        );
+        chunk.corners = boundingCornersForChunk(chunk, _layerManager, _ellipsoid);
 
         // The flag gets set to false globally after the updateChunkTree calls
     }
@@ -2043,6 +2039,5 @@ void RenderableGlobe::updateChunk(Chunk& chunk, const RenderData& data) {
         chunk.status = Chunk::Status::DoNothing;
     }
 }
-
 
 } // namespace openspace::globebrowsing

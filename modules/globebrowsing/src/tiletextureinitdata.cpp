@@ -29,7 +29,6 @@ namespace {
 const glm::ivec2 TilePixelStartOffset = glm::ivec2(-2);
 const glm::ivec2 TilePixelSizeDifference = glm::ivec2(4);
 
-
 size_t numberOfRasters(ghoul::opengl::Texture::Format format) {
     switch (format) {
         case ghoul::opengl::Texture::Format::Red:

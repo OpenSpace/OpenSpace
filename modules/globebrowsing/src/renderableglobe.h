@@ -203,7 +203,7 @@ private:
     void splitChunkNode(Chunk& cn, int depth);
     void mergeChunkNode(Chunk& cn);
     bool updateChunkTree(Chunk& cn, const RenderData& data);
-    void updateChunk(Chunk& chunk, const RenderData& data);
+    void updateChunk(Chunk& chunk, const RenderData& data) const;
     void freeChunkNode(Chunk* n);
 
     Ellipsoid _ellipsoid;
