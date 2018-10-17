@@ -504,7 +504,7 @@ RawTile RawTileDataReader::readTileData(TileIndex tileIndex) const {
 
     RawTile rawTile;
     rawTile.imageData = std::unique_ptr<std::byte[]>(new std::byte[numBytes]);
-    memset(rawTile.imageData.get(), 0xFF, _initData.totalNumBytes);
+    memset(rawTile.imageData.get(), 0xFF, numBytes);
 
     IODescription io = ioDescription(tileIndex);
     RawTile::ReadError worstError = RawTile::ReadError::None;

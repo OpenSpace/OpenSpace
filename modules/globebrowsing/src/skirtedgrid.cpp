@@ -67,14 +67,14 @@ namespace {
                 const GLuint v11 = (y + 1) * (xSegments + 2 + 1) + x + 1;
 
                 // add upper triangle
-                elements.push_back(v00);
-                elements.push_back(v10);
-                elements.push_back(v11);
+                elements.push_back(static_cast<GLushort>(v00));
+                elements.push_back(static_cast<GLushort>(v10));
+                elements.push_back(static_cast<GLushort>(v11));
 
                 // add lower triangle
-                elements.push_back(v00);
-                elements.push_back(v11);
-                elements.push_back(v01);
+                elements.push_back(static_cast<GLushort>(v00));
+                elements.push_back(static_cast<GLushort>(v11));
+                elements.push_back(static_cast<GLushort>(v01));
             }
         }
 
@@ -112,9 +112,8 @@ namespace openspace::globebrowsing {
 SkirtedGrid::SkirtedGrid(unsigned int xSeg, unsigned int ySeg)
     : xSegments(xSeg)
     , ySegments(ySeg)
-    , _elementSize(numElements(xSegments + 2, ySegments + 2))
-{
-}
+    , _elementSize(static_cast<GLsizei>(numElements(xSegments + 2, ySegments + 2)))
+{}
 
 void SkirtedGrid::initializeGL() {
     std::vector<GLushort> elementData = createElements(xSegments, ySegments);
@@ -141,8 +140,7 @@ void SkirtedGrid::initializeGL() {
 
     // Vertex buffer
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glBufferData(GL_ARRAY_BUFFER,
         vertexData.size() * sizeof(Vertex),
         vertexData.data(),
         GL_STATIC_DRAW
@@ -150,14 +148,7 @@ void SkirtedGrid::initializeGL() {
 
     // Textures at location 1
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, texture)) // NOLINT
-    );
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
 
     // Element buffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _elementBufferID);
@@ -185,12 +176,7 @@ void SkirtedGrid::deinitializeGL() {
 void SkirtedGrid::drawUsingActiveProgram() const {
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _elementBufferID);
-    glDrawElements(
-        GL_TRIANGLES,
-        _elementSize,
-        GL_UNSIGNED_SHORT,
-        nullptr
-    );
+    glDrawElements(GL_TRIANGLES, _elementSize, GL_UNSIGNED_SHORT, nullptr);
     glBindVertexArray(0);
 }
 

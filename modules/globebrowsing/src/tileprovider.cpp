@@ -658,7 +658,14 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
             byindexprovider::KeyTileProvider
         );
 
-        const TileIndex tileIndex(tileIndexDict);
+        constexpr const char* KeyLevel = "Level";
+        constexpr const char* KeyX = "X";
+        constexpr const char* KeyY = "Y";
+
+        int level = static_cast<int>(tileIndexDict.value<double>(KeyLevel));
+        int x = static_cast<int>(tileIndexDict.value<double>(KeyX));
+        int y = static_cast<int>(tileIndexDict.value<double>(KeyY));
+        const TileIndex tileIndex(x, y, level);
 
         layergroupid::TypeID providerTypeID = layergroupid::TypeID::DefaultTileLayer;
         if (defaultProviderDict.hasKeyAndValue<std::string>("Type")) {
@@ -1316,7 +1323,9 @@ ChunkTile chunkTile(TileProvider& tp, TileIndex tileIndex, int parents, int maxP
 
         uv.uvOffset += tileIndex.positionRelativeParent();
 
-        --tileIndex;
+        tileIndex.x /= 2;
+        tileIndex.y /= 2;
+        tileIndex.level--;
     };
 
     TileUvTransform uvTransform = { glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f) };

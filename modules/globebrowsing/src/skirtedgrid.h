@@ -68,7 +68,6 @@ public:
     const int ySegments;
 
 private:
-    // GL handles
     GLuint _vaoID = 0;
     GLuint _vertexBufferID = 0;
     GLuint _elementBufferID = 0;
