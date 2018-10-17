@@ -189,13 +189,26 @@ namespace openspace {
 
         SceneGraphNode* dishNode = global::renderEngine.scene()->sceneGraphNode(dishIdentifier);
         SceneGraphNode* spaceCraftNode = global::renderEngine.scene()->sceneGraphNode(spacecraftIdentifier);
+        SceneGraphNode* earthNode = global::renderEngine.scene()->sceneGraphNode("Earth");
         
-        glm::vec3 dishPos = dishNode->worldPosition();
+        //glm::vec3 dishPos = dishNode->worldPosition();
+
+        glm::vec3 dishPos = dishNode->position();
+
         vertexArray[0] = { static_cast<float>(dishPos.x), static_cast<float>(dishPos.y), static_cast<float>(dishPos.z) };
 
         //If spacecraft excists in open space, use that position. 
         if (global::renderEngine.scene()->sceneGraphNode(spacecraftIdentifier)) {
-            glm::vec3 spaceCraftPos = spaceCraftNode->worldPosition();
+            //glm::mat4  earthTrans = earthNode->modelTransform();
+           // glm::mat4  spaceCraftTrans = spaceCraftNode->modelTransform();
+            //glm::mat4  spaceCraftTransInWorld = earthTrans * spaceCraftTrans;
+
+            //glm::vec3 earthWorldPos = earthNode->worldPosition();
+            //glm::vec3 earthPos = earthNode->position();
+
+            glm::vec3 spaceCraftPos = spaceCraftNode->position();
+           // glm::vec3 spaceCraftPos = spaceCraftNode->worldPosition();
+
             vertexArray[1] = { static_cast<float>(spaceCraftPos.x), static_cast<float>(spaceCraftPos.y), static_cast<float>(spaceCraftPos.z) };
         }
         else

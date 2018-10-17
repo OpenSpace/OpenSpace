@@ -40,7 +40,7 @@ Fragment getFragment() {
     // G-Buffer
     // JCC: The depthCorrection here is a temporary tweak
     // to fix precision problems.
-    frag.gPosition = vs_gPosition + depthCorrection;
+    frag.gPosition = vs_gPosition;// + depthCorrection;
 
     // There is no normal here
     frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);

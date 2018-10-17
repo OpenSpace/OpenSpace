@@ -142,7 +142,7 @@ private:
     /// Program object used to render the data stored in RenderInformation
     ghoul::opengl::ProgramObject* _programObject = nullptr;
 
-    UniformCache(modelView, projection, color) _uniformCache;
+    UniformCache(modelViewStation, modelViewSpacecraft, projection, color) _uniformCache;
 
 	enum SiteEnum {
 		GoldStone = 0,

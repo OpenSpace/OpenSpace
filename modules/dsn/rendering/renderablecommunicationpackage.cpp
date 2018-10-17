@@ -34,13 +34,17 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
+
+#include <openspace/scene/scene.h>
+//#include <openspace/scene/scenegraphnode.h>
+
 namespace {
     constexpr const char* ProgramName = "CommunicationPackageProgram";
     constexpr const char* KeyTranslation = "Translation";
     constexpr const char* _loggerCat = "RenderableCommmunicationPackage";
 
-    constexpr const std::array<const char*, 3> UniformNames = {
-        "modelViewTransform", "projectionTransform", "color"
+    constexpr const std::array<const char*, 4> UniformNames = {
+        "modelViewTransformStation","modelViewTransformSpacecraft", "projectionTransform", "color"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MadridColorInfo = {
@@ -195,10 +199,15 @@ bool RenderableCommunicationPackage::isReady() const {
 void RenderableCommunicationPackage::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
 
-    glm::dmat4 modelTransform =
+    SceneGraphNode* earthNode = global::renderEngine.scene()->sceneGraphNode("Earth");
+    SceneGraphNode* spacecraftNode = global::renderEngine.scene()->sceneGraphNode("Voyager_1");
+
+    glm::dmat4 modelTransformSpacecraft =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+
+    glm::dmat4 modelTransformStation = earthNode->modelTransform();
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
 
@@ -217,8 +226,11 @@ void RenderableCommunicationPackage::render(const RenderData& data, RendererTask
     // We pass in the model view transformation matrix as double in order to maintain
     // high precision for vertices; especially for the lines, a high vertex precision
     // is necessary as they are usually far away from their reference
-    _programObject->setUniform( _uniformCache.modelView,
-        data.camera.combinedViewMatrix() * modelTransform * _mainRenderInformation._localTransform);
+    _programObject->setUniform( _uniformCache.modelViewStation,
+        data.camera.combinedViewMatrix() * modelTransformStation * _mainRenderInformation._localTransform);
+    
+    _programObject->setUniform(_uniformCache.modelViewSpacecraft,
+        data.camera.combinedViewMatrix() * modelTransformSpacecraft * _mainRenderInformation._localTransform);
 
     glBindVertexArray(_mainRenderInformation._vaoID);
 
