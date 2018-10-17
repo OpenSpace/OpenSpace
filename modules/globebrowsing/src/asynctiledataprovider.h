@@ -71,7 +71,7 @@ public:
 
     void update();
     void reset();
-    void prepairToBeDeleted();
+    void prepareToBeDeleted();
 
     bool shouldBeDeleted();
 

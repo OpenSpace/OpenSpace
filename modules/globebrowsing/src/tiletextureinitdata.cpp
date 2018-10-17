@@ -106,6 +106,67 @@ openspace::globebrowsing::TileTextureInitData::HashKey calculateHashKey(
 
 namespace openspace::globebrowsing {
 
+TileTextureInitData tileTextureInitData(layergroupid::GroupID id, bool shouldPadTiles,
+    size_t preferredTileSize)
+{
+    switch (id) {
+        case layergroupid::GroupID::HeightLayers: {
+            const size_t tileSize = preferredTileSize ? preferredTileSize : 64;
+            return TileTextureInitData(
+                tileSize,
+                tileSize,
+                GL_FLOAT,
+                ghoul::opengl::Texture::Format::Red,
+                TileTextureInitData::PadTiles(shouldPadTiles),
+                TileTextureInitData::ShouldAllocateDataOnCPU::Yes
+            );
+        }
+        case layergroupid::GroupID::ColorLayers: {
+            const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
+            return TileTextureInitData(
+                tileSize,
+                tileSize,
+                GL_UNSIGNED_BYTE,
+                ghoul::opengl::Texture::Format::BGRA,
+                TileTextureInitData::PadTiles(shouldPadTiles)
+            );
+        }
+        case layergroupid::GroupID::Overlays: {
+            const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
+            return TileTextureInitData(
+                tileSize,
+                tileSize,
+                GL_UNSIGNED_BYTE,
+                ghoul::opengl::Texture::Format::BGRA,
+                TileTextureInitData::PadTiles(shouldPadTiles)
+            );
+        }
+        case layergroupid::GroupID::NightLayers: {
+            const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
+            return TileTextureInitData(
+                tileSize,
+                tileSize,
+                GL_UNSIGNED_BYTE,
+                ghoul::opengl::Texture::Format::BGRA,
+                TileTextureInitData::PadTiles(shouldPadTiles)
+            );
+        }
+        case layergroupid::GroupID::WaterMasks: {
+            const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
+            return TileTextureInitData(
+                tileSize,
+                tileSize,
+                GL_UNSIGNED_BYTE,
+                ghoul::opengl::Texture::Format::BGRA,
+                TileTextureInitData::PadTiles(shouldPadTiles)
+            );
+        }
+        default: {
+            throw ghoul::MissingCaseException();
+        }
+    }
+}
+
 TileTextureInitData::TileTextureInitData(size_t width, size_t height, GLenum type,
                                          ghoul::opengl::Texture::Format textureFormat,
                                          PadTiles pad, ShouldAllocateDataOnCPU allocCpu)

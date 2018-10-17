@@ -41,10 +41,6 @@ class Layer;
 struct LayerGroup;
 class TileTextureInitData;
 
-bool shouldPerformPreProcessingOnLayerGroup(layergroupid::GroupID id);
-TileTextureInitData getTileTextureInitData(layergroupid::GroupID id,
-    bool shouldPadTiles, size_t preferredTileSize = 0);
-
 /**
  * Manages multiple LayerGroups.
  */

@@ -25,11 +25,6 @@
 #include <modules/globebrowsing/src/layerrendersettings.h>
 
 namespace {
-    constexpr const char* keyOpacity = "Opacity";
-    constexpr const char* keyGamma = "Gamma";
-    constexpr const char* keyMultiplier = "Multiplier";
-    constexpr const char* keyOffset = "Offset";
-
     constexpr openspace::properties::Property::PropertyInfo SetDefaultInfo = {
         "SetDefault",
         "Set Default",
@@ -70,11 +65,11 @@ namespace openspace::globebrowsing {
 
 LayerRenderSettings::LayerRenderSettings()
     : properties::PropertyOwner({ "Settings" })
-    , setDefault(SetDefaultInfo)
     , opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , gamma(GammaInfo, 1.f, 0.f, 5.f)
     , multiplier(MultiplierInfo, 1.f, 0.f, 20.f)
     , offset(OffsetInfo, 0.f, -10000.f, 10000.f)
+    , setDefault(SetDefaultInfo)
 {
     addProperty(opacity);
     addProperty(gamma);
@@ -90,33 +85,12 @@ LayerRenderSettings::LayerRenderSettings()
     });
 }
 
-void LayerRenderSettings::setValuesFromDictionary(
-                                              const ghoul::Dictionary& renderSettingsDict)
-{
-    if (renderSettingsDict.hasKeyAndValue<float>(keyOpacity)) {
-        opacity = renderSettingsDict.value<float>(keyOpacity);
-    }
-
-    if (renderSettingsDict.hasKeyAndValue<float>(keyGamma)) {
-        gamma = renderSettingsDict.value<float>(keyGamma);
-    }
-
-    if (renderSettingsDict.hasKeyAndValue<float>(keyMultiplier)) {
-        multiplier = renderSettingsDict.value<float>(keyMultiplier);
-    }
-
-    if (renderSettingsDict.hasKeyAndValue<float>(keyOffset)) {
-        offset = renderSettingsDict.value<float>(keyOffset);
-    }
+float LayerRenderSettings::performLayerSettings(float v) const {
+    return
+        ((glm::sign(v) * glm::pow(glm::abs(v), gamma) * multiplier) + offset) * opacity;
 }
 
-float LayerRenderSettings::performLayerSettings(float value) const {
-    return ((glm::sign(value) * glm::pow(glm::abs(value), gamma) * multiplier) +
-            offset) *
-            opacity;
-}
-
-glm::vec4 LayerRenderSettings::performLayerSettings(glm::vec4 currentValue) const {
+glm::vec4 LayerRenderSettings::performLayerSettings(const glm::vec4& currentValue) const {
     glm::vec4 newValue = glm::vec4(
         performLayerSettings(currentValue.r),
         performLayerSettings(currentValue.g),

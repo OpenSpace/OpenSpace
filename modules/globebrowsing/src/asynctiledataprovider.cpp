@@ -177,7 +177,7 @@ void AsyncTileDataProvider::reset() {
     LINFO(fmt::format("Prepairing for resetting of tile reader '{}'", _name));
 }
 
-void AsyncTileDataProvider::prepairToBeDeleted() {
+void AsyncTileDataProvider::prepareToBeDeleted() {
     _resetMode = ResetMode::ShouldBeDeleted;
     endEnqueuedJobs();
 }

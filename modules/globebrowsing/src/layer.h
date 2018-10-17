@@ -37,20 +37,11 @@ namespace openspace::globebrowsing {
 
 struct LayerGroup;
 struct TileIndex;
-struct TileDepthTransform;
 
 namespace tileprovider { struct TileProvider; }
 
 class Layer : public properties::PropertyOwner {
 public:
-    /**
-     * Properties used when the layer type is not a tile type layer. These properties
-     * can be added or removed depending on the layer type.
-     */
-    struct OtherTypesProperties {
-        properties::Vec3Property color;
-    };
-
     Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
         LayerGroup& parent);
 
@@ -65,7 +56,7 @@ public:
     TileDepthTransform depthTransform() const;
     bool enabled() const;
     tileprovider::TileProvider* tileProvider() const;
-    const OtherTypesProperties& otherTypesProperties() const;
+    glm::vec3 solidColor() const;
     const LayerRenderSettings& renderSettings() const;
     const LayerAdjustment& layerAdjustment() const;
 
@@ -79,12 +70,8 @@ public:
         const glm::vec2& tileUV, const glm::uvec2& resolution);
 
 private:
-    layergroupid::TypeID parseTypeIdFromDictionary(
-        const ghoul::Dictionary& initDict) const;
-
     void initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary initDict);
     void addVisibleProperties();
-    void removeVisibleProperties();
 
     LayerGroup& _parent;
 
@@ -96,7 +83,7 @@ private:
 
     layergroupid::TypeID _type;
     std::unique_ptr<tileprovider::TileProvider> _tileProvider;
-    OtherTypesProperties _otherTypesProperties;
+    properties::Vec3Property _solidColor;
     LayerRenderSettings _renderSettings;
     LayerAdjustment _layerAdjustment;
 

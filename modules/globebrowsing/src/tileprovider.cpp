@@ -163,6 +163,10 @@ Type toType(const layergroupid::TypeID& id) {
     }
 }
 
+//
+// DefaultTileProvider
+//
+
 void initAsyncTileDataReader(DefaultTileProvider& t, TileTextureInitData initData) {
     t.asyncTextureDataProvider = std::make_unique<AsyncTileDataProvider>(
         t.name,
@@ -184,6 +188,11 @@ void initTexturesFromLoadedData(DefaultTileProvider& t) {
         }
     }
 }
+
+
+//
+// TextTileProvider
+//
 
 void initialize(TextTileProvider& t) {
     t.font = global::fontManager.font("Mono", static_cast<float>(t.fontSize));
@@ -239,6 +248,11 @@ void reset(TextTileProvider& t) {
     t.tileCache->clear();
 }
 
+
+//
+// TileProviderByLevel
+//
+
 TileProvider* levelProvider(TileProviderByLevel& t, int level) {
     if (!t.levelTileProviders.empty()) {
         int clampedLevel = glm::clamp(
@@ -253,6 +267,11 @@ TileProvider* levelProvider(TileProviderByLevel& t, int level) {
         return nullptr;
     }
 }
+
+
+//
+// TemporalTileProvider
+//
 
 std::string timeStringify(TemporalTileProvider::TimeFormatType type, const Time& t) {
     switch (type) {
@@ -443,6 +462,10 @@ bool readFilePath(TemporalTileProvider& t) {
 
 unsigned int TileProvider::NumTileProviders = 0;
 
+
+//
+// General functions
+//
 void initializeDefaultTile() {
     ghoul_assert(!DefaultTile.texture, "Default tile should not have been created");
     using namespace ghoul::opengl;
@@ -517,11 +540,17 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     }
 
     TileTextureInitData initData(
-        getTileTextureInitData(layerGroupID, padTiles, pixelSize)
+        tileTextureInitData(layerGroupID, padTiles, pixelSize)
     );
     tilePixelSize = initData.dimensions.x;
 
-    performPreProcessing = shouldPerformPreProcessingOnLayerGroup(layerGroupID);
+
+    // Only preprocess height layers by default
+    switch (layerGroupID) {
+        case layergroupid::GroupID::HeightLayers: performPreProcessing = true; break;
+        default:                                  performPreProcessing = false; break;
+    }
+
     if (dictionary.hasKeyAndValue<bool>(defaultprovider::KeyPerformPreProcessing)) {
         performPreProcessing = dictionary.value<bool>(
             defaultprovider::KeyPerformPreProcessing
@@ -568,7 +597,7 @@ TextTileProvider::TextTileProvider(const TileTextureInitData& initData, size_t f
 
 
 SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
-    : TextTileProvider(getTileTextureInitData(layergroupid::GroupID::ColorLayers, false))
+    : TextTileProvider(tileTextureInitData(layergroupid::GroupID::ColorLayers, false))
 {
     type = Type::SizeReferenceTileProvider;
 
@@ -584,7 +613,7 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
 
 
 TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary&)
-    : TextTileProvider(getTileTextureInitData(layergroupid::GroupID::ColorLayers, false))
+    : TextTileProvider(tileTextureInitData(layergroupid::GroupID::ColorLayers, false))
 {
     type = Type::TileIndexTileProvider;
 }
@@ -1066,10 +1095,10 @@ void update(TileProvider& tp) {
 
             if (t.asyncTextureDataProvider->shouldBeDeleted()) {
                 t.asyncTextureDataProvider = nullptr;
-                TileTextureInitData initData(
-                    getTileTextureInitData(t.layerGroupID, t.padTiles, t.tilePixelSize)
+                initAsyncTileDataReader(
+                    t,
+                    tileTextureInitData(t.layerGroupID, t.padTiles, t.tilePixelSize)
                 );
-                initAsyncTileDataReader(t, initData);
             }
             break;
         }
@@ -1123,13 +1152,13 @@ void reset(TileProvider& tp) {
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
             t.tileCache->clear();
             if (t.asyncTextureDataProvider) {
-                t.asyncTextureDataProvider->prepairToBeDeleted();
+                t.asyncTextureDataProvider->prepareToBeDeleted();
             }
             else {
-                TileTextureInitData initData(
-                    getTileTextureInitData(t.layerGroupID, t.padTiles, t.tilePixelSize)
+                initAsyncTileDataReader(
+                    t,
+                    tileTextureInitData(t.layerGroupID, t.padTiles, t.tilePixelSize)
                 );
-                initAsyncTileDataReader(t, initData);
             }
             break;
         }

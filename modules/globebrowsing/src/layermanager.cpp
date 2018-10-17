@@ -30,80 +30,7 @@
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
 #include <ghoul/logging/logmanager.h>
 
-namespace {
-    constexpr const char* _loggerCat = "LayerManager";
-} // namespace
-
 namespace openspace::globebrowsing {
-
-bool shouldPerformPreProcessingOnLayerGroup(layergroupid::GroupID id) {
-    // Only preprocess height layers by default
-    switch (id) {
-        case layergroupid::GroupID::HeightLayers: return true;
-        default:                                  return false;
-    }
-}
-
-TileTextureInitData getTileTextureInitData(layergroupid::GroupID id, bool shouldPadTiles,
-                                           size_t preferredTileSize)
-{
-    switch (id) {
-        case layergroupid::GroupID::HeightLayers: {
-            const size_t tileSize = preferredTileSize ? preferredTileSize : 64;
-            return TileTextureInitData(
-                tileSize,
-                tileSize,
-                GL_FLOAT,
-                ghoul::opengl::Texture::Format::Red,
-                TileTextureInitData::PadTiles(shouldPadTiles),
-                TileTextureInitData::ShouldAllocateDataOnCPU::Yes
-            );
-        }
-        case layergroupid::GroupID::ColorLayers: {
-            const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
-            return TileTextureInitData(
-                tileSize,
-                tileSize,
-                GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA,
-                TileTextureInitData::PadTiles(shouldPadTiles)
-            );
-        }
-        case layergroupid::GroupID::Overlays: {
-            const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
-            return TileTextureInitData(
-                tileSize,
-                tileSize,
-                GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA,
-                TileTextureInitData::PadTiles(shouldPadTiles)
-            );
-        }
-        case layergroupid::GroupID::NightLayers: {
-            const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
-            return TileTextureInitData(
-                tileSize,
-                tileSize,
-                GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA,
-                TileTextureInitData::PadTiles(shouldPadTiles)
-            );
-        }
-        case layergroupid::GroupID::WaterMasks: {
-            const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
-            return TileTextureInitData(
-                tileSize,
-                tileSize,
-                GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA,
-                TileTextureInitData::PadTiles(shouldPadTiles)
-            );
-        }
-        default: {
-            throw ghoul::MissingCaseException();
-        }
-    }
-}
 
 LayerManager::LayerManager() : properties::PropertyOwner({ "Layers" }) {}
 
@@ -120,18 +47,14 @@ void LayerManager::initialize(const ghoul::Dictionary& layerGroupsDict) {
 
     // Create all the layer groups
     for (const std::string& groupName : layerGroupNamesInDict) {
-        layergroupid::GroupID groupId = ghoul::from_string<layergroupid::GroupID>(
-            groupName
-        );
+        layergroupid::GroupID id = ghoul::from_string<layergroupid::GroupID>(groupName);
 
-        if (groupId != layergroupid::GroupID::Unknown) {
-            ghoul::Dictionary layerGroupDict = layerGroupsDict.value<ghoul::Dictionary>(
-                groupName
-                );
-            _layerGroups[static_cast<int>(groupId)]->setLayersFromDict(layerGroupDict);
+        if (id != layergroupid::GroupID::Unknown) {
+            ghoul::Dictionary d = layerGroupsDict.value<ghoul::Dictionary>(groupName);
+            _layerGroups[static_cast<int>(id)]->setLayersFromDict(d);
         }
         else {
-            LWARNING("Unknown layer group: " + groupName);
+            LWARNINGC("LayerManager", "Unknown layer group: " + groupName);
         }
     }
 
@@ -157,11 +80,9 @@ Layer* LayerManager::addLayer(layergroupid::GroupID groupId,
     return _layerGroups[groupId]->addLayer(layerDict);
 }
 
-void LayerManager::deleteLayer(layergroupid::GroupID groupId,
-                               const std::string& layerName)
-{
-    ghoul_assert(groupId != layergroupid::Unknown, "Layer group ID must be known");
-    _layerGroups[groupId]->deleteLayer(layerName);
+void LayerManager::deleteLayer(layergroupid::GroupID id, const std::string& layerName) {
+    ghoul_assert(id != layergroupid::Unknown, "Layer group ID must be known");
+    _layerGroups[id]->deleteLayer(layerName);
 }
 
 const LayerGroup& LayerManager::layerGroup(layergroupid::GroupID groupId) const {
@@ -172,9 +93,8 @@ bool LayerManager::hasAnyBlendingLayersEnabled() const {
     return std::any_of(
         _layerGroups.begin(),
         _layerGroups.end(),
-        [](const std::unique_ptr<LayerGroup>& layerGroup) {
-            return layerGroup->layerBlendingEnabled() &&
-                   !layerGroup->activeLayers().empty();
+        [](const std::unique_ptr<LayerGroup>& lg) {
+            return lg->layerBlendingEnabled() && !lg->activeLayers().empty();
         }
     );
 }

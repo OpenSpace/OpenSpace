@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_TEXTURE_INIT_DATA___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_TEXTURE_INIT_DATA___H__
 
+#include <modules/globebrowsing/src/layergroupid.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -67,6 +68,9 @@ public:
     const bool padTiles;
     HashKey hashKey = 0ULL;
 };
+
+TileTextureInitData tileTextureInitData(layergroupid::GroupID id,
+    bool shouldPadTiles, size_t preferredTileSize = 0);
 
 } // namespace openspace::globebrowsing
 

@@ -34,11 +34,12 @@ namespace openspace::globebrowsing {
 void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
                              const LayerGroup& layerGroup, const TileIndex& tileIndex)
 {
-    const std::vector<Layer*>& activeLayers = layerGroup.activeLayers();
     ghoul_assert(
-        activeLayers.size() == _gpuActiveLayers.size(),
+        layerGroup.activeLayers().size() == _gpuActiveLayers.size(),
         "GPU and CPU active layers must have same size!"
     );
+
+    const std::vector<Layer*>& activeLayers = layerGroup.activeLayers();
     for (unsigned int i = 0; i < activeLayers.size(); ++i) {
         const GPULayer& gal = _gpuActiveLayers[i];
         auto& galuc = gal.uniformCache;
@@ -87,10 +88,7 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
                     program.setUniform(t.uniformCache.uvScale, ct.uvTransform.uvScale);
                 }
 
-                program.setUniform(
-                    galuc.paddingStartOffset,
-                    al.tilePixelStartOffset()
-                );
+                program.setUniform(galuc.paddingStartOffset, al.tilePixelStartOffset());
                 program.setUniform(
                     galuc.paddingSizeDifference,
                     al.tilePixelSizeDifference()
@@ -98,7 +96,7 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
                 break;
             }
             case layergroupid::TypeID::SolidColor:
-                program.setUniform(galuc.color, al.otherTypesProperties().color);
+                program.setUniform(galuc.color, al.solidColor());
                 break;
             default:
                 break;
