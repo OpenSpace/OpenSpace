@@ -94,6 +94,9 @@ public:
     const glm::dmat4& modelTransform() const;
 
 private:
+    constexpr static const int MinSplitDepth = 2;
+    constexpr static const int MaxSplitDepth = 22;
+
     struct {
         properties::BoolProperty showChunkEdges;
         properties::BoolProperty showChunkBounds;
@@ -116,7 +119,6 @@ private:
     } _generalProperties;
 
     properties::PropertyOwner _debugPropertyOwner;
-
 
     /**
      * Test if a specific chunk can safely be culled without affecting the rendered
@@ -141,7 +143,7 @@ private:
 
     /**
      * Calculates the height from the surface of the reference ellipsoid to the
-     * heigh mapped surface.
+     * height mapped surface.
      *
      * The height can be negative if the height map contains negative values.
      *
@@ -151,21 +153,6 @@ private:
      * \returns the height from the reference ellipsoid to the globe surface.
      */
     float getHeight(const glm::dvec3& position) const;
-
-private:
-    constexpr static const int MinSplitDepth = 2;
-    constexpr static const int MaxSplitDepth = 22;  // increase? (abock)
-
-    // Shadow structure
-    struct ShadowRenderingStruct {
-        double xu;
-        double xp;
-        double rs;
-        double rc;
-        glm::dvec3 sourceCasterVec;
-        glm::dvec3 casterPositionVec;
-        bool isShadowing;
-    };
 
     void renderChunks(const RenderData& data, RendererTasks& rendererTask);
 
@@ -192,7 +179,8 @@ private:
      */
     void renderChunkLocally(const Chunk& chunk, const RenderData& data);
 
-    void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const;
+    void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
+        bool renderBounds, bool renderAABB) const;
 
     bool isCullableByFrustum(const Chunk& chunk, const RenderData& renderData) const;
     bool isCullableByHorizon(const Chunk& chunk, const RenderData& renderData) const;

@@ -48,10 +48,7 @@ namespace openspace { class PixelBuffer; }
 
 namespace openspace::globebrowsing {
     class AsyncTileDataProvider;
-    struct ChunkTile;
-    using ChunkTilePile = std::vector<ChunkTile>;
     struct RawTile;
-    struct TileDepthTransform;
     struct TileIndex;
     namespace cache { class MemoryAwareTileCache; }
 } // namespace openspace::globebrowsing

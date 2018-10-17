@@ -26,7 +26,6 @@
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/asynctiledataprovider.h>
-#include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
 #include <modules/globebrowsing/src/layermanager.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
@@ -79,11 +78,11 @@ namespace {
 std::unique_ptr<ghoul::opengl::Texture> DefaultTileTexture;
 Tile DefaultTile = Tile{ nullptr, std::nullopt, Tile::Status::Unavailable };
 
+constexpr const char* KeyFilePath = "FilePath";
+
 namespace defaultprovider {
     constexpr const char* KeyPerformPreProcessing = "PerformPreProcessing";
     constexpr const char* KeyTilePixelSize = "TilePixelSize";
-    constexpr const char* KeyFilePath = "FilePath";
-    constexpr const char* KeyPreCacheLevel = "PreCacheLevel";
     constexpr const char* KeyPadTiles = "PadTiles";
 
     constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
@@ -104,8 +103,6 @@ namespace defaultprovider {
 } // namespace defaultprovider
 
 namespace singleimageprovider {
-    constexpr const char* KeyFilePath = "FilePath";
-
     constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
         "FilePath",
         "File Path",
@@ -133,7 +130,6 @@ namespace bylevelprovider {
 } // namespace bylevelprovider
 
 namespace temporal {
-    constexpr const char* KeyFilePath = "FilePath";
     constexpr const char* KeyBasePath = "BasePath";
     constexpr const char* KeyPreCacheStartTime = "PreCacheStartTime";
     constexpr const char* KeyPreCacheEndTime = "PreCacheEndTime";
@@ -155,34 +151,26 @@ namespace temporal {
 Type toType(const layergroupid::TypeID& id) {
     using T = layergroupid::TypeID;
     switch (id) {
-        case T::Unknown:
-            throw ghoul::MissingCaseException();
-        case T::DefaultTileLayer:
-            return Type::DefaultTileProvider;
-        case T::SingleImageTileLayer:
-            return Type::SingleImageTileProvider;
-        case T::SizeReferenceTileLayer:
-            return Type::SizeReferenceTileProvider;
-        case T::TemporalTileLayer:
-            return Type::TemporalTileProvider;
-        case T::TileIndexTileLayer:
-            return Type::TileIndexTileProvider;
-        case T::ByIndexTileLayer:
-            return Type::ByIndexTileProvider;
-        case T::ByLevelTileLayer:
-            return Type::ByLevelTileProvider;
-        default:
-            throw ghoul::MissingCaseException();
+        case T::Unknown:                throw ghoul::MissingCaseException();
+        case T::DefaultTileLayer:       return Type::DefaultTileProvider;
+        case T::SingleImageTileLayer:   return Type::SingleImageTileProvider;
+        case T::SizeReferenceTileLayer: return Type::SizeReferenceTileProvider;
+        case T::TemporalTileLayer:      return Type::TemporalTileProvider;
+        case T::TileIndexTileLayer:     return Type::TileIndexTileProvider;
+        case T::ByIndexTileLayer:       return Type::ByIndexTileProvider;
+        case T::ByLevelTileLayer:       return Type::ByLevelTileProvider;
+        default:                        throw ghoul::MissingCaseException();
     }
 }
 
 void initAsyncTileDataReader(DefaultTileProvider& t, TileTextureInitData initData) {
-    RawTileDataReader::PerformPreprocessing preprocess =
-        RawTileDataReader::PerformPreprocessing(t.performPreProcessing);
-
     t.asyncTextureDataProvider = std::make_unique<AsyncTileDataProvider>(
         t.name,
-        std::make_unique<RawTileDataReader>(t.filePath, initData, preprocess)
+        std::make_unique<RawTileDataReader>(
+            t.filePath,
+            initData,
+            RawTileDataReader::PerformPreprocessing(t.performPreProcessing)
+        )
     );
 }
 
@@ -300,25 +288,11 @@ std::string timeStringify(TemporalTileProvider::TimeFormatType type, const Time&
     }
 }
 
-std::string getGdalDatasetXML(TemporalTileProvider& t,
-                              const TemporalTileProvider::TimeKey& timeKey)
-{
-    std::string xmlTemplate(t.gdalXmlTemplate);
-    const size_t pos = xmlTemplate.find(temporal::UrlTimePlaceholder);
-    const size_t numChars = strlen(temporal::UrlTimePlaceholder);
-    // @FRAGILE:  This will only find the first instance. Dangerous if that instance is
-    // commented out ---abock
-    const std::string timeSpecifiedXml = xmlTemplate.replace(pos, numChars, timeKey);
-    return timeSpecifiedXml;
-}
-
 std::shared_ptr<TileProvider> initTileProvider(TemporalTileProvider& t,
                                                TemporalTileProvider::TimeKey timekey)
 {
-    static const std::vector<std::string> AllowedTokens = {
+    static const std::vector<std::string> IgnoredTokens = {
         // From: http://www.gdal.org/frmt_wms.html
-        // @FRAGILE:  What happens if a user specifies one of these as path tokens?
-        // ---abock
         "${x}",
         "${y}",
         "${z}",
@@ -327,10 +301,18 @@ std::shared_ptr<TileProvider> initTileProvider(TemporalTileProvider& t,
         "${layer}"
     };
 
-    std::string gdalDatasetXml = getGdalDatasetXML(t, std::move(timekey));
-    FileSys.expandPathTokens(gdalDatasetXml, AllowedTokens);
 
-    t.initDict.setValue<std::string>(temporal::KeyFilePath, gdalDatasetXml);
+    std::string xmlTemplate(t.gdalXmlTemplate);
+    const size_t pos = xmlTemplate.find(temporal::UrlTimePlaceholder);
+    const size_t numChars = strlen(temporal::UrlTimePlaceholder);
+    // @FRAGILE:  This will only find the first instance. Dangerous if that instance is
+    // commented out ---abock
+    const std::string timeSpecifiedXml = xmlTemplate.replace(pos, numChars, timekey);
+    std::string gdalDatasetXml = timeSpecifiedXml;
+
+    FileSys.expandPathTokens(gdalDatasetXml, IgnoredTokens);
+
+    t.initDict.setValue<std::string>(KeyFilePath, gdalDatasetXml);
     return std::make_shared<DefaultTileProvider>(t.initDict);
 }
 
@@ -516,7 +498,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     std::string _loggerCat = "DefaultTileProvider (" + name + ")";
 
     // 1. Get required Keys
-    filePath = dictionary.value<std::string>(defaultprovider::KeyFilePath);
+    filePath = dictionary.value<std::string>(KeyFilePath);
     layerGroupID = dictionary.value<layergroupid::GroupID>("LayerGroupID");
 
     // 2. Initialize default values for any optional Keys
@@ -563,7 +545,7 @@ SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
 {
     type = Type::SingleImageTileProvider;
 
-    filePath = dictionary.value<std::string>(singleimageprovider::KeyFilePath);
+    filePath = dictionary.value<std::string>(KeyFilePath);
     addProperty(filePath);
 
     reset(*this);
@@ -750,7 +732,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
 {
     type = Type::TemporalTileProvider;
 
-    filePath = dictionary.value<std::string>(temporal::KeyFilePath);
+    filePath = dictionary.value<std::string>(KeyFilePath);
     addProperty(filePath);
 
     successfulInitialization = readFilePath(*this);

@@ -50,7 +50,16 @@ namespace {
     constexpr const bool PerformFrustumCulling = true;
     constexpr const bool PreformHorizonCulling = true;
 
-
+    // Shadow structure
+    struct ShadowRenderingStruct {
+        double xu;
+        double xp;
+        double rs;
+        double rc;
+        glm::dvec3 sourceCasterVec;
+        glm::dvec3 casterPositionVec;
+        bool isShadowing;
+    };
 
     constexpr const char* keyFrame = "Frame";
     constexpr const char* keyRadii = "Radii";
@@ -855,11 +864,21 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
 
     if (_debugProperties.showChunkBounds || _debugProperties.showChunkAABB) {
         for (int i = 0; i < std::min(globalCount, ChunkBufferSize); ++i) {
-            debugRenderChunk(*global[i], mvp);
+            debugRenderChunk(
+                *global[i],
+                mvp,
+                _debugProperties.showChunkBounds,
+                _debugProperties.showChunkAABB
+            );
         }
 
         for (int i = 0; i < std::min(localCount, ChunkBufferSize); ++i) {
-            debugRenderChunk(*local[i], mvp);
+            debugRenderChunk(
+                *local[i],
+                mvp,
+                _debugProperties.showChunkBounds,
+                _debugProperties.showChunkAABB
+            );
         }
     }
 }
@@ -1036,7 +1055,8 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     }
 }
 
-void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const {
+void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
+                                       bool renderBounds, bool renderAABB) const {
     const std::array<glm::dvec4, 8>& modelSpaceCorners = chunk.corners;
 
     std::vector<glm::vec4> clippingSpaceCorners(8);
@@ -1059,11 +1079,11 @@ void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
         0.3f
     );
 
-    if (_debugProperties.showChunkBounds) {
+    if (renderBounds) {
         DebugRenderer::ref().renderNiceBox(clippingSpaceCorners, color);
     }
 
-    if (_debugProperties.showChunkAABB) {
+    if (renderAABB) {
         const std::vector<glm::vec4>& screenSpacePoints =
             DebugRenderer::ref().verticesFor(screenSpaceBounds);
         DebugRenderer::ref().renderNiceBox(screenSpacePoints, color);
@@ -1548,7 +1568,7 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
         "Needs to have eclipse shadows enabled"
     );
     // Shadow calculations..
-    std::vector<RenderableGlobe::ShadowRenderingStruct> shadowDataArray;
+    std::vector<ShadowRenderingStruct> shadowDataArray;
     std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray =
         _ellipsoid.shadowConfigurationArray();
     shadowDataArray.reserve(shadowConfArray.size());
@@ -1607,7 +1627,7 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
         const double casterDistSun = glm::length(casterPos - sunPos);
         const double planetDistSun = glm::length(data.position.dvec3() - sunPos);
 
-        RenderableGlobe::ShadowRenderingStruct shadowData;
+        ShadowRenderingStruct shadowData;
         shadowData.isShadowing = false;
 
         // Eclipse shadows considers planets and moons as spheres
@@ -1629,7 +1649,7 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
 
     const std::string uniformVarName("shadowDataArray[");
     unsigned int counter = 0;
-    for (const RenderableGlobe::ShadowRenderingStruct& sd : shadowDataArray) {
+    for (const ShadowRenderingStruct& sd : shadowDataArray) {
         constexpr const char* NameIsShadowing = "shadowDataArray[{}].isShadowing";
         constexpr const char* NameXp = "shadowDataArray[{}].xp";
         constexpr const char* NameXu = "shadowDataArray[{}].xu";
