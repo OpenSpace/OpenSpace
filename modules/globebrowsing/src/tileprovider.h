@@ -176,9 +176,9 @@ struct TemporalTileProvider : public TileProvider {
     properties::StringProperty filePath;
     std::string gdalXmlTemplate;
 
-    std::unordered_map<TimeKey, std::shared_ptr<TileProvider>> tileProviderMap;
+    std::unordered_map<TimeKey, std::unique_ptr<TileProvider>> tileProviderMap;
 
-    std::shared_ptr<TileProvider> currentTileProvider;
+    TileProvider* currentTileProvider = nullptr;
 
     TimeFormatType timeFormat;
     TimeQuantizer timeQuantizer;

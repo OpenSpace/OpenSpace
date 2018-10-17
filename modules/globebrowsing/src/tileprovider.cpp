@@ -288,7 +288,7 @@ std::string timeStringify(TemporalTileProvider::TimeFormatType type, const Time&
     }
 }
 
-std::shared_ptr<TileProvider> initTileProvider(TemporalTileProvider& t,
+std::unique_ptr<TileProvider> initTileProvider(TemporalTileProvider& t,
                                                TemporalTileProvider::TimeKey timekey)
 {
     static const std::vector<std::string> IgnoredTokens = {
@@ -313,26 +313,27 @@ std::shared_ptr<TileProvider> initTileProvider(TemporalTileProvider& t,
     FileSys.expandPathTokens(gdalDatasetXml, IgnoredTokens);
 
     t.initDict.setValue<std::string>(KeyFilePath, gdalDatasetXml);
-    return std::make_shared<DefaultTileProvider>(t.initDict);
+    return std::make_unique<DefaultTileProvider>(t.initDict);
 }
 
-std::shared_ptr<TileProvider> getTileProvider(TemporalTileProvider& t,
-                                             const TemporalTileProvider::TimeKey& timekey)
+TileProvider* getTileProvider(TemporalTileProvider& t,
+                              const TemporalTileProvider::TimeKey& timekey)
 {
     const auto it = t.tileProviderMap.find(timekey);
     if (it != t.tileProviderMap.end()) {
-        return it->second;
+        return it->second.get();
     }
     else {
-        std::shared_ptr<TileProvider> tileProvider = initTileProvider(t, timekey);
+        std::unique_ptr<TileProvider> tileProvider = initTileProvider(t, timekey);
         initialize(*tileProvider);
 
-        t.tileProviderMap[timekey] = tileProvider;
-        return tileProvider;
+        TileProvider* res = tileProvider.get();
+        t.tileProviderMap[timekey] = std::move(tileProvider);
+        return res;
     }
 }
 
-std::shared_ptr<TileProvider> getTileProvider(TemporalTileProvider& t, const Time& time) {
+TileProvider* getTileProvider(TemporalTileProvider& t, const Time& time) {
     Time tCopy(time);
     if (t.timeQuantizer.quantize(tCopy, true)) {
         TemporalTileProvider::TimeKey timeKey = timeStringify(t.timeFormat, tCopy);
@@ -1098,9 +1099,7 @@ void update(TileProvider& tp) {
         case Type::TemporalTileProvider: {
             TemporalTileProvider& t = static_cast<TemporalTileProvider&>(tp);
             if (t.successfulInitialization) {
-                std::shared_ptr<TileProvider> newCurrent = getTileProvider(t,
-                    global::timeManager.time()
-                );
+                TileProvider* newCurrent = getTileProvider(t, global::timeManager.time());
                 if (newCurrent) {
                     t.currentTileProvider = newCurrent;
                 }
@@ -1187,7 +1186,7 @@ void reset(TileProvider& tp) {
             TemporalTileProvider& t = static_cast<TemporalTileProvider&>(tp);
             if (t.successfulInitialization) {
                 using K = TemporalTileProvider::TimeKey;
-                using V = std::shared_ptr<TileProvider>;
+                using V = std::unique_ptr<TileProvider>;
                 for (std::pair<const K, V>& it : t.tileProviderMap) {
                     reset(*it.second);
                 }
@@ -1214,7 +1213,6 @@ int maxLevel(TileProvider& tp) {
             return t.asyncTextureDataProvider ?
                 t.asyncTextureDataProvider->rawTileDataReader().maxChunkLevel() :
                 22;
-                return 22;
         }
         case Type::SingleImageTileProvider:
             return 1337; // unlimited

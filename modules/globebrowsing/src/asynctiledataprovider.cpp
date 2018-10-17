@@ -40,7 +40,7 @@ namespace {
 } // namespace
 
 AsyncTileDataProvider::AsyncTileDataProvider(std::string name,
-                                    std::unique_ptr<RawTileDataReader>  rawTileDataReader)
+                                    std::unique_ptr<RawTileDataReader> rawTileDataReader)
     : _name(std::move(name))
     , _rawTileDataReader(std::move(rawTileDataReader))
     , _concurrentJobManager(LRUThreadPool<TileIndex::TileHashKey>(1, 10))
