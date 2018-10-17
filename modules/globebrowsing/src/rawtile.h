@@ -36,7 +36,6 @@
 
 namespace openspace::globebrowsing {
 
-struct TileMetaData;
 class TileTextureInitData;
 
 struct RawTile {

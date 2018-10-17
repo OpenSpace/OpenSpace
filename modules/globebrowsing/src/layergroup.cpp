@@ -73,7 +73,6 @@ void LayerGroup::setLayersFromDict(const ghoul::Dictionary& dict) {
                 }
                 catch (const ghoul::RuntimeError& except) {
                     LERRORC(except.component, except.message);
-                    continue;
                 }
             }
             continue;

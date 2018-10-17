@@ -57,8 +57,8 @@ const RawTileDataReader& AsyncTileDataProvider::rawTileDataReader() const {
 
 bool AsyncTileDataProvider::enqueueTileIO(const TileIndex& tileIndex) {
     if (_resetMode == ResetMode::ShouldNotReset && satisfiesEnqueueCriteria(tileIndex)) {
-        auto job = std::make_shared<TileLoadJob>(*_rawTileDataReader, tileIndex);
-        _concurrentJobManager.enqueueJob(job, tileIndex.hashKey());
+        auto job = std::make_unique<TileLoadJob>(*_rawTileDataReader, tileIndex);
+        _concurrentJobManager.enqueueJob(std::move(job), tileIndex.hashKey());
         _enqueuedTileRequests.insert(tileIndex.hashKey());
         return true;
     }

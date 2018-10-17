@@ -37,10 +37,7 @@ LayerManager::LayerManager() : properties::PropertyOwner({ "Layers" }) {}
 void LayerManager::initialize(const ghoul::Dictionary& layerGroupsDict) {
     // First create empty layer groups in case not all are specified
     for (size_t i = 0; i < _layerGroups.size(); ++i) {
-        ghoul::Dictionary emptyDict;
-        _layerGroups[i] = std::make_unique<LayerGroup>(
-            static_cast<layergroupid::GroupID>(i)
-        );
+        _layerGroups[i] = std::make_unique<LayerGroup>(layergroupid::GroupID(i));
     }
 
     const std::vector<std::string>& layerGroupNamesInDict = layerGroupsDict.keys();

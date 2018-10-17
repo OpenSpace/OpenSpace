@@ -24,7 +24,6 @@
 
 #include <modules/globebrowsing/src/rawtiledatareader.h>
 
-#include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
@@ -52,14 +51,12 @@ namespace openspace::globebrowsing {
 
 namespace {
 
-
 enum class Side {
     Left = 0,
     Top,
     Right,
     Bottom
 };
-
 
 float interpretFloat(GLenum glType, const std::byte* src) {
     switch (glType) {
@@ -228,7 +225,7 @@ PixelRegion localCut(PixelRegion& pr, Side side, int localPos) {
         return PixelRegion();
     }
     else {
-        const int edgeDirectionSign = side < Side::Right ? -1 : 1;
+        const int edgeDirectionSign = (side < Side::Right) ? -1 : 1;
         return globalCut(pr, side, edge(pr, side) - edgeDirectionSign * localPos);
     }
 }
@@ -239,7 +236,6 @@ bool isInside(const PixelRegion& lhs, const PixelRegion& rhs) {
     return rhs.start.x <= lhs.start.x && e.x <= re.x &&
            rhs.start.y <= lhs.start.y && e.y <= re.y;
 }
-
 
 IODescription cutIODescription(IODescription io, Side side, int pos) {
     const PixelRegion readPreCut = io.read.region;
@@ -270,18 +266,18 @@ IODescription cutIODescription(IODescription io, Side side, int pos) {
  * Returns the geo transform from raster space to projection coordinates as defined
  * by GDAL.
  */
-std::array<double, 6> geoTransform(const glm::ivec2& rasterSize) {
+std::array<double, 6> geoTransform(int rasterX, int rasterY) {
     GeodeticPatch cov(
         Geodetic2{ 0.0, 0.0 },
         Geodetic2{ glm::half_pi<double>(), glm::pi<double>() }
     );
     std::array<double, 6> res;
     res[0] = glm::degrees(cov.corner(Quad::NORTH_WEST).lon);
-    res[1] = glm::degrees(cov.size().lon) / rasterSize.x;
+    res[1] = glm::degrees(cov.size().lon) / rasterX;
     res[2] = 0.0;
     res[3] = glm::degrees(cov.corner(Quad::NORTH_WEST).lat);
     res[4] = 0.0;
-    res[5] = glm::degrees(-cov.size().lat) / rasterSize.y;
+    res[5] = glm::degrees(-cov.size().lat) / rasterY;
     return res;
 }
 
@@ -341,15 +337,12 @@ PixelRegion highestResPixelRegion(const GeodeticPatch& geodeticPatch,
 } // namespace
 
 
-
-
-
-RawTileDataReader::RawTileDataReader(const std::string& filePath,
-                                     const TileTextureInitData& initData,
+RawTileDataReader::RawTileDataReader(std::string filePath,
+                                     TileTextureInitData initData,
                                      PerformPreprocessing preprocess)
     : _initData(std::move(initData))
     , _preprocess(preprocess)
-    , _datasetFilePath(filePath)
+    , _datasetFilePath(std::move(filePath))
 {
     initialize();
 }
@@ -371,16 +364,14 @@ void RawTileDataReader::initialize() {
         throw ghoul::RuntimeError("Failed to load dataset: " + _datasetFilePath);
     }
 
-    _datasetFilePath.clear();
-
     // Assume all raster bands have the same data type
     _gdalDatasetMetaDataCached.rasterCount = _dataset->GetRasterCount();
     _gdalDatasetMetaDataCached.scale = static_cast<float>(
         _dataset->GetRasterBand(1)->GetScale()
-        );
+    );
     _gdalDatasetMetaDataCached.offset = static_cast<float>(
         _dataset->GetRasterBand(1)->GetOffset()
-        );
+    );
     _gdalDatasetMetaDataCached.rasterXSize = _dataset->GetRasterXSize();
     _gdalDatasetMetaDataCached.rasterYSize = _dataset->GetRasterYSize();
     _gdalDatasetMetaDataCached.noDataValue = static_cast<float>(
@@ -391,7 +382,8 @@ void RawTileDataReader::initialize() {
     CPLErr e = _dataset->GetGeoTransform(_gdalDatasetMetaDataCached.padfTransform.data());
     if (e == CE_Failure) {
         _gdalDatasetMetaDataCached.padfTransform = geoTransform(
-            glm::ivec2(rasterXSize(), rasterYSize())
+            _gdalDatasetMetaDataCached.rasterXSize,
+            _gdalDatasetMetaDataCached.rasterYSize
         );
     }
 
@@ -403,18 +395,19 @@ void RawTileDataReader::initialize() {
             case GL_SHORT:          return 1ULL << 15ULL;
             case GL_UNSIGNED_INT:   return 1ULL << 32ULL;
             case GL_INT:            return 1ULL << 31ULL;
-            case GL_HALF_FLOAT:
-            case GL_FLOAT:
-            case GL_DOUBLE:
-                                    return 1ULL;
+            case GL_HALF_FLOAT:     return 1ULL;
+            case GL_FLOAT:          return 1ULL;
+            case GL_DOUBLE:         return 1ULL;
             default:
                 ghoul_assert(false, "Unknown data type");
                 throw ghoul::MissingCaseException();
         }
     }();
 
-    _depthTransform.scale = static_cast<float>(depthScale() * maximumValue);
-    _depthTransform.offset = depthOffset();
+    _depthTransform.scale = static_cast<float>(
+        _gdalDatasetMetaDataCached.scale * maximumValue
+    );
+    _depthTransform.offset = _gdalDatasetMetaDataCached.offset;
 
     _cached._tileLevelDifference = calculateTileLevelDifference(
         _dataset, _initData.dimensions.x
@@ -493,7 +486,7 @@ RawTile::ReadError RawTileDataReader::rasterRead(int rasterBand,
 }
 
 RawTile RawTileDataReader::readTileData(TileIndex tileIndex) const {
-    size_t numBytes = tileTextureInitData().totalNumBytes;
+    size_t numBytes = _initData.totalNumBytes;
 
     RawTile rawTile;
     rawTile.imageData = std::unique_ptr<std::byte[]>(new std::byte[numBytes]);
@@ -505,7 +498,6 @@ RawTile RawTileDataReader::readTileData(TileIndex tileIndex) const {
 
     rawTile.error = worstError;
     rawTile.tileIndex = std::move(tileIndex);
-
     rawTile.textureInitData = _initData;
 
     if (_preprocess) {
@@ -521,7 +513,7 @@ void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& wor
 {
     // Only read the minimum number of rasters
     int nRastersToRead = std::min(
-        dataSourceNumRasters(),
+        _gdalDatasetMetaDataCached.rasterCount,
         static_cast<int>(_initData.nRasters)
     );
 
@@ -624,14 +616,15 @@ IODescription RawTileDataReader::ioDescription(const TileIndex& tileIndex) const
     );
 
     // write region starts in origin
-    io.write.region.start = glm::ivec2(00);
-    io.write.region.numPixels = glm::ivec2(
-        _initData.dimensions.x,
-        _initData.dimensions.y
-    );
+    io.write.region.start = glm::ivec2(0);
+    io.write.region.numPixels = _initData.dimensions;
 
     io.read.overview = 0;
-    io.read.fullRegion = fullPixelRegion();
+    io.read.fullRegion.start = { 0, 0 };
+    io.read.fullRegion.numPixels = {
+        _gdalDatasetMetaDataCached.rasterXSize,
+        _gdalDatasetMetaDataCached.rasterYSize
+    };
     // For correct sampling in dataset, we need to pad the texture tile
 
     PixelRegion scaledPadding;
@@ -665,19 +658,11 @@ const TileDepthTransform& RawTileDataReader::depthTransform() const {
     return _depthTransform;
 }
 
-const TileTextureInitData& RawTileDataReader::tileTextureInitData() const {
-    return _initData;
-}
-
 glm::ivec2 RawTileDataReader::fullPixelSize() const {
     return geodeticToPixel(
         Geodetic2{ 90.0, 180.0 },
         _gdalDatasetMetaDataCached.padfTransform
     );
-}
-
-PixelRegion RawTileDataReader::fullPixelRegion() const {
-    return { { 0, 0 }, { rasterXSize(), rasterYSize() } };
 }
 
 RawTile::ReadError RawTileDataReader::repeatedRasterRead(int rasterBand,
@@ -882,26 +867,6 @@ int RawTileDataReader::maxChunkLevel() const {
 
 float RawTileDataReader::noDataValueAsFloat() const {
     return _gdalDatasetMetaDataCached.noDataValue;
-}
-
-int RawTileDataReader::rasterXSize() const {
-    return _gdalDatasetMetaDataCached.rasterXSize;
-}
-
-int RawTileDataReader::rasterYSize() const {
-    return _gdalDatasetMetaDataCached.rasterYSize;
-}
-
-int RawTileDataReader::dataSourceNumRasters() const {
-    return _gdalDatasetMetaDataCached.rasterCount;
-}
-
-float RawTileDataReader::depthOffset() const {
-    return _gdalDatasetMetaDataCached.offset;
-}
-
-float RawTileDataReader::depthScale() const {
-    return _gdalDatasetMetaDataCached.scale;
 }
 
 } // namespace openspace::globebrowsing

@@ -25,9 +25,9 @@
 #include <modules/globebrowsing/src/layeradjustment.h>
 
 namespace {
-    constexpr const char* keyType = "Type";
-    constexpr const char* keyChromaKeyColor = "ChromaKeyColor";
-    constexpr const char* keyChromaKeyTolerance = "ChromaKeyTolerance";
+    constexpr const char* KeyType = "Type";
+    constexpr const char* KeyChromaKeyColor = "ChromaKeyColor";
+    constexpr const char* KeyChromaKeyTolerance = "ChromaKeyTolerance";
 
     constexpr openspace::properties::Property::PropertyInfo ChromaKeyColorInfo = {
         "ChromaKeyColor",
@@ -65,7 +65,17 @@ LayerAdjustment::LayerAdjustment()
     _type = static_cast<layergroupid::AdjustmentTypeID>(_typeOption.value());
 
     _typeOption.onChange([&]() {
-        removeVisibleProperties();
+        switch (type()) {
+            case layergroupid::AdjustmentTypeID::None:
+                break;
+            case layergroupid::AdjustmentTypeID::ChromaKey: {
+                removeProperty(_chromaKeyColor);
+                removeProperty(_chromaKeyTolerance);
+                break;
+            }
+            case layergroupid::AdjustmentTypeID::TransferFunction:
+                break;
+        }
         _type = static_cast<layergroupid::AdjustmentTypeID>(_typeOption.value());
         addVisibleProperties();
         if (_onChangeCallback) {
@@ -79,21 +89,20 @@ LayerAdjustment::LayerAdjustment()
 }
 
 void LayerAdjustment::setValuesFromDictionary(const ghoul::Dictionary& adjustmentDict) {
-    if (adjustmentDict.hasKeyAndValue<std::string>(keyType)) {
-        const std::string& dictType = adjustmentDict.value<std::string>(keyType);
+    if (adjustmentDict.hasKeyAndValue<std::string>(KeyType)) {
+        std::string dictType = adjustmentDict.value<std::string>(KeyType);
         _typeOption = static_cast<int>(
             ghoul::from_string<layergroupid::AdjustmentTypeID>(dictType)
         );
-
     }
 
-    if (adjustmentDict.hasKeyAndValue<glm::vec3>(keyChromaKeyColor)) {
-        glm::vec3 dictChromaKeyColor = adjustmentDict.value<glm::vec3>(keyChromaKeyColor);
+    if (adjustmentDict.hasKeyAndValue<glm::vec3>(KeyChromaKeyColor)) {
+        glm::vec3 dictChromaKeyColor = adjustmentDict.value<glm::vec3>(KeyChromaKeyColor);
         _chromaKeyColor = std::move(dictChromaKeyColor);
     }
 
-    if (adjustmentDict.hasKeyAndValue<float>(keyChromaKeyTolerance)) {
-        float dictChromaKeyTolerance = adjustmentDict.value<float>(keyChromaKeyTolerance);
+    if (adjustmentDict.hasKeyAndValue<float>(KeyChromaKeyTolerance)) {
+        float dictChromaKeyTolerance = adjustmentDict.value<float>(KeyChromaKeyTolerance);
         _chromaKeyTolerance = dictChromaKeyTolerance;
     }
 }
@@ -109,20 +118,6 @@ void LayerAdjustment::addVisibleProperties() {
         case layergroupid::AdjustmentTypeID::ChromaKey: {
             addProperty(_chromaKeyColor);
             addProperty(_chromaKeyTolerance);
-            break;
-        }
-        case layergroupid::AdjustmentTypeID::TransferFunction:
-            break;
-    }
-}
-
-void LayerAdjustment::removeVisibleProperties() {
-    switch (type()) {
-        case layergroupid::AdjustmentTypeID::None:
-            break;
-        case layergroupid::AdjustmentTypeID::ChromaKey: {
-            removeProperty(_chromaKeyColor);
-            removeProperty(_chromaKeyTolerance);
             break;
         }
         case layergroupid::AdjustmentTypeID::TransferFunction:

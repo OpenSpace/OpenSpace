@@ -52,7 +52,6 @@ public:
 
 private:
     void addVisibleProperties();
-    void removeVisibleProperties();
 
     properties::Vec3Property _chromaKeyColor;
     properties::FloatProperty _chromaKeyTolerance;

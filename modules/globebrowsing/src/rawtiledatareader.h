@@ -45,31 +45,23 @@ public:
     BooleanType(PerformPreprocessing);
 
     /**
-    * Opens a GDALDataset in readonly mode and calculates meta data required for
-    * reading tile using a TileIndex.
-    *
-    * \param filePath, a path to a specific file GDAL can read
-    * \param config, Configuration used for initialization
-    * \param baseDirectory, the base directory to use in future loading operations
-    */
-    RawTileDataReader(const std::string& filePath, const TileTextureInitData& initData,
+     * Opens a GDALDataset in readonly mode and calculates meta data required for
+     * reading tile using a TileIndex.
+     *
+     * \param filePath, a path to a specific file GDAL can read
+     * \param config, Configuration used for initialization
+     * \param baseDirectory, the base directory to use in future loading operations
+     */
+    RawTileDataReader(std::string filePath, TileTextureInitData initData,
         PerformPreprocessing preprocess = PerformPreprocessing::No);
     ~RawTileDataReader();
 
-    // Public virtual function overloading
     void reset();
     int maxChunkLevel() const;
     float noDataValueAsFloat() const;
-    int rasterXSize() const;
-    int rasterYSize() const;
-    int dataSourceNumRasters() const;
-    float depthOffset() const;
-    float depthScale() const;
-    PixelRegion fullPixelRegion() const;
 
     RawTile readTileData(TileIndex tileIndex) const;
     const TileDepthTransform& depthTransform() const;
-    const TileTextureInitData& tileTextureInitData() const;
     glm::ivec2 fullPixelSize() const;
 
 private:
@@ -94,7 +86,7 @@ private:
     RawTile::ReadError postProcessErrorCheck(const RawTile& rawTile) const;
 
     GDALDataset* _dataset = nullptr;
-    std::string _datasetFilePath;
+    const std::string _datasetFilePath;
 
     struct GdalDatasetMetaDataCached {
         int rasterCount;
@@ -113,7 +105,7 @@ private:
         double _tileLevelDifference;
     } _cached;
     const TileTextureInitData _initData;
-    PerformPreprocessing _preprocess;
+    const PerformPreprocessing _preprocess;
     TileDepthTransform _depthTransform = { 0.f, 0.f };
 
     mutable std::mutex _datasetLock;
