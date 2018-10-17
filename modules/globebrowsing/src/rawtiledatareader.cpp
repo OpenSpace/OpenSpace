@@ -334,6 +334,28 @@ PixelRegion highestResPixelRegion(const GeodeticPatch& geodeticPatch,
     return region;
 }
 
+RawTile::ReadError postProcessErrorCheck(const RawTile& rawTile, size_t nRasters,
+                                         float noDataValue)
+{
+    // This check was implicit before and just made explicit here
+    ghoul_assert(
+        nRasters == rawTile.tileMetaData.maxValues.size(),
+        "Wrong numbers of max values"
+    );
+
+    const bool hasMissingData = std::any_of(
+        rawTile.tileMetaData.maxValues.begin(),
+        rawTile.tileMetaData.maxValues.end(),
+        [noDataValue](float v) { return v == noDataValue; }
+    );
+
+    const bool onHighLevel = rawTile.tileIndex.level > 6;
+    if (hasMissingData && onHighLevel) {
+        return RawTile::ReadError::Fatal;
+    }
+    return RawTile::ReadError::None;
+}
+
 } // namespace
 
 
@@ -365,27 +387,7 @@ void RawTileDataReader::initialize() {
     }
 
     // Assume all raster bands have the same data type
-    _gdalDatasetMetaDataCached.rasterCount = _dataset->GetRasterCount();
-    _gdalDatasetMetaDataCached.scale = static_cast<float>(
-        _dataset->GetRasterBand(1)->GetScale()
-    );
-    _gdalDatasetMetaDataCached.offset = static_cast<float>(
-        _dataset->GetRasterBand(1)->GetOffset()
-    );
-    _gdalDatasetMetaDataCached.rasterXSize = _dataset->GetRasterXSize();
-    _gdalDatasetMetaDataCached.rasterYSize = _dataset->GetRasterYSize();
-    _gdalDatasetMetaDataCached.noDataValue = static_cast<float>(
-        _dataset->GetRasterBand(1)->GetNoDataValue()
-    );
-    _gdalDatasetMetaDataCached.dataType = toGDALDataType(_initData.glType);
-
-    CPLErr e = _dataset->GetGeoTransform(_gdalDatasetMetaDataCached.padfTransform.data());
-    if (e == CE_Failure) {
-        _gdalDatasetMetaDataCached.padfTransform = geoTransform(
-            _gdalDatasetMetaDataCached.rasterXSize,
-            _gdalDatasetMetaDataCached.rasterYSize
-        );
-    }
+    _rasterCount = _dataset->GetRasterCount();
 
     // calculateTileDepthTransform
     unsigned long long maximumValue = [t = _initData.glType]() {
@@ -404,26 +406,38 @@ void RawTileDataReader::initialize() {
         }
     }();
 
-    _depthTransform.scale = static_cast<float>(
-        _gdalDatasetMetaDataCached.scale * maximumValue
-    );
-    _depthTransform.offset = _gdalDatasetMetaDataCached.offset;
 
-    _cached._tileLevelDifference = calculateTileLevelDifference(
+    _depthTransform.scale = static_cast<float>(
+        _dataset->GetRasterBand(1)->GetScale() * maximumValue
+    );
+    _depthTransform.offset = static_cast<float>(
+        _dataset->GetRasterBand(1)->GetOffset()
+    );
+    _rasterXSize = _dataset->GetRasterXSize();
+    _rasterYSize = _dataset->GetRasterYSize();
+    _noDataValue = static_cast<float>(_dataset->GetRasterBand(1)->GetNoDataValue());
+    _dataType = toGDALDataType(_initData.glType);
+
+    CPLErr error = _dataset->GetGeoTransform(_padfTransform.data());
+    if (error == CE_Failure) {
+        _padfTransform = geoTransform(_rasterXSize, _rasterYSize);
+    }
+
+    double tileLevelDifference = calculateTileLevelDifference(
         _dataset, _initData.dimensions.x
     );
 
     const int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
-    _cached._maxLevel = static_cast<int>(-_cached._tileLevelDifference);
+    _maxChunkLevel = static_cast<int>(-tileLevelDifference);
     if (numOverviews > 0) {
-        _cached._maxLevel += numOverviews - 1;
+        _maxChunkLevel += numOverviews - 1;
     }
-    _cached._maxLevel = std::max(_cached._maxLevel, 2);
+    _maxChunkLevel = std::max(_maxChunkLevel, 2);
 }
 
 void RawTileDataReader::reset() {
     std::lock_guard lockGuard(_datasetLock);
-    _cached._maxLevel = -1;
+    _maxChunkLevel = -1;
     if (_dataset) {
         GDALClose(_dataset);
         _dataset = nullptr;
@@ -469,7 +483,7 @@ RawTile::ReadError RawTileDataReader::rasterRead(int rasterBand,
         dataDest,                       // Where to put data
         io.write.region.numPixels.x,    // width to write x in destination
         io.write.region.numPixels.y,    // width to write y in destination
-        _gdalDatasetMetaDataCached.dataType,         // Type
+        _dataType,                      // Type
         static_cast<int>(_initData.bytesPerPixel), // Pixel spacing
         -static_cast<int>(io.write.bytesPerLine)     // Line spacing
     );
@@ -502,7 +516,10 @@ RawTile RawTileDataReader::readTileData(TileIndex tileIndex) const {
 
     if (_preprocess) {
         rawTile.tileMetaData = tileMetaData(rawTile, io.write.region);
-        rawTile.error = std::max(rawTile.error, postProcessErrorCheck(rawTile));
+        rawTile.error = std::max(
+            rawTile.error,
+            postProcessErrorCheck(rawTile, _initData.nRasters, noDataValueAsFloat())
+        );
     }
 
     return rawTile;
@@ -512,10 +529,7 @@ void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& wor
                                       char* imageDataDest) const
 {
     // Only read the minimum number of rasters
-    int nRastersToRead = std::min(
-        _gdalDatasetMetaDataCached.rasterCount,
-        static_cast<int>(_initData.nRasters)
-    );
+    int nRastersToRead = std::min(_rasterCount, static_cast<int>(_initData.nRasters));
 
     switch (_initData.ghoulTextureFormat) {
         case ghoul::opengl::Texture::Format::Red: {
@@ -610,10 +624,7 @@ void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& wor
 
 IODescription RawTileDataReader::ioDescription(const TileIndex& tileIndex) const {
     IODescription io;
-    io.read.region = highestResPixelRegion(
-        tileIndex,
-        _gdalDatasetMetaDataCached.padfTransform
-    );
+    io.read.region = highestResPixelRegion(tileIndex, _padfTransform);
 
     // write region starts in origin
     io.write.region.start = glm::ivec2(0);
@@ -621,10 +632,7 @@ IODescription RawTileDataReader::ioDescription(const TileIndex& tileIndex) const
 
     io.read.overview = 0;
     io.read.fullRegion.start = { 0, 0 };
-    io.read.fullRegion.numPixels = {
-        _gdalDatasetMetaDataCached.rasterXSize,
-        _gdalDatasetMetaDataCached.rasterYSize
-    };
+    io.read.fullRegion.numPixels = { _rasterXSize, _rasterYSize };
     // For correct sampling in dataset, we need to pad the texture tile
 
     PixelRegion scaledPadding;
@@ -659,10 +667,7 @@ const TileDepthTransform& RawTileDataReader::depthTransform() const {
 }
 
 glm::ivec2 RawTileDataReader::fullPixelSize() const {
-    return geodeticToPixel(
-        Geodetic2{ 90.0, 180.0 },
-        _gdalDatasetMetaDataCached.padfTransform
-    );
+    return geodeticToPixel(Geodetic2{ 90.0, 180.0 }, _padfTransform);
 }
 
 RawTile::ReadError RawTileDataReader::repeatedRasterRead(int rasterBand,
@@ -839,34 +844,12 @@ TileMetaData RawTileDataReader::tileMetaData(RawTile& rawTile,
     return preprocessData;
 }
 
-RawTile::ReadError RawTileDataReader::postProcessErrorCheck(const RawTile& rawTile) const
-{
-    // This check was implicit before and just made explicit here
-    ghoul_assert(
-        _initData.nRasters == rawTile.tileMetaData.maxValues.size(),
-        "Wrong numbers of max values"
-    );
-
-    const float missingDataValue = noDataValueAsFloat();
-    const bool hasMissingData = std::any_of(
-        rawTile.tileMetaData.maxValues.begin(),
-        rawTile.tileMetaData.maxValues.end(),
-        [missingDataValue](float v) { return v = missingDataValue; }
-    );
-
-    const bool onHighLevel = rawTile.tileIndex.level > 6;
-    if (hasMissingData && onHighLevel) {
-        return RawTile::ReadError::Fatal;
-    }
-    return RawTile::ReadError::None;
-}
-
 int RawTileDataReader::maxChunkLevel() const {
-    return _cached._maxLevel;
+    return _maxChunkLevel;
 }
 
 float RawTileDataReader::noDataValueAsFloat() const {
-    return _gdalDatasetMetaDataCached.noDataValue;
+    return _noDataValue;
 }
 
 } // namespace openspace::globebrowsing

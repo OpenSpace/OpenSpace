@@ -83,27 +83,19 @@ private:
         char* dataDestination, int depth = 0) const;
 
     TileMetaData tileMetaData(RawTile& rawTile, const PixelRegion& region) const;
-    RawTile::ReadError postProcessErrorCheck(const RawTile& rawTile) const;
 
-    GDALDataset* _dataset = nullptr;
     const std::string _datasetFilePath;
+    GDALDataset* _dataset = nullptr;
 
-    struct GdalDatasetMetaDataCached {
-        int rasterCount;
-        float scale;
-        float offset;
-        int rasterXSize;
-        int rasterYSize;
-        float noDataValue;
-        std::array<double, 6> padfTransform;
+    // Dataset parameters
+    int _rasterCount;
+    int _rasterXSize;
+    int _rasterYSize;
+    float _noDataValue;
+    std::array<double, 6> _padfTransform;
+    GDALDataType _dataType;
+    int _maxChunkLevel = -1;
 
-        GDALDataType dataType;
-    } _gdalDatasetMetaDataCached;
-
-    struct {
-        int _maxLevel = -1;
-        double _tileLevelDifference;
-    } _cached;
     const TileTextureInitData _initData;
     const PerformPreprocessing _preprocess;
     TileDepthTransform _depthTransform = { 0.f, 0.f };
