@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING__STRUCTS___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING__STRUCTS___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING__BASICTYPES___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING__BASICTYPES___H__
 
 #include <ghoul/glm.h>
 #include <memory>
@@ -163,8 +163,6 @@ struct ChunkTile {
 
 using ChunkTilePile = std::vector<ChunkTile>;
 
-
-
 } // namespace openspace::globebrowsing
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING__STRUCTS___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING__BASICTYPES___H__
