@@ -28,7 +28,7 @@ asset.onInitialize(function ()
     end
     -- Do not serve the files if we are in webgui development mode.
     -- In that case, you have to serve the webgui manually, using `npm start`.
-    if not guiCustomization.webguiDevemopmentMode then
+    if not guiCustomization.webguiDevelopmentMode then
         openspace.setPropertyValueSingle(
             "Modules.WebGui.ServerProcessEntryPoint", backend .. "/backend.js"
         )
