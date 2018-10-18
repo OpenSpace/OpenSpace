@@ -97,6 +97,15 @@ void Connection::handleMessage(const std::string& message) {
             ));
             return;
         } else {
+            std::string sanitizedString = message;
+            std::transform(
+                message.begin(),
+                message.end(),
+                sanitizedString.begin(),
+                [](const unsigned char& c) {
+                    return std::isprint(c) ? c : ' ';
+                }
+            );
             LERROR(fmt::format("Could not parse JSON: '{}'", message));
         }
     }
