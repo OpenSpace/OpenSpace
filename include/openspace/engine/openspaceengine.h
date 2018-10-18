@@ -79,7 +79,6 @@ public:
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double posX, double posY);
-    void externalControlCallback(const char* receivedChars, int size, int clientId);
     void encode();
     void decode();
 

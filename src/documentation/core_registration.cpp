@@ -31,6 +31,7 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionRecording.h>
+#include <openspace/interaction/shortcutmanager.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/network/parallelpeer.h>
@@ -81,6 +82,7 @@ void registerCoreClasses(scripting::ScriptEngine& engine) {
     engine.addLibrary(interaction::KeybindingManager::luaLibrary());
     engine.addLibrary(interaction::NavigationHandler::luaLibrary());
     engine.addLibrary(interaction::SessionRecording::luaLibrary());
+    engine.addLibrary(interaction::ShortcutManager::luaLibrary());
     engine.addLibrary(scripting::ScriptScheduler::luaLibrary());
     engine.addLibrary(scripting::generalSystemCapabilities());
     engine.addLibrary(scripting::openglSystemCapabilities());

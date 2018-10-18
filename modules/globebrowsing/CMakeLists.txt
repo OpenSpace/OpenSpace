@@ -258,10 +258,10 @@ if (OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL)
             ${GDAL_INCLUDE_DIR}
         )
 
-        target_link_libraries(
-            openspace-module-globebrowsing
-            ${GDAL_LIBRARY}
-        )
+        target_link_libraries(openspace-module-globebrowsing ${GDAL_LIBRARY})
+
+        mark_as_advanced(GDAL_CONFIG GDAL_INCLUDE_DIR GDAL_LIBRARY)
+
     endif () # WIN32
     target_compile_definitions(openspace-module-globebrowsing PUBLIC GLOBEBROWSING_USE_GDAL)
 endif () # OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL

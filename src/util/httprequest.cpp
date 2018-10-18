@@ -219,7 +219,7 @@ void SyncHttpDownload::download(HttpRequest::RequestOptions opt) {
     });
     _httpRequest.perform(opt);
     deinitDownload();
- 
+
     LTRACE(fmt::format("End sync download '{}'", _httpRequest.url()));
 }
 

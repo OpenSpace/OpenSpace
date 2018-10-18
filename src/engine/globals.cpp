@@ -35,6 +35,7 @@
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/sessionRecording.h>
+#include <openspace/interaction/shortcutmanager.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelpeer.h>
@@ -168,6 +169,11 @@ interaction::SessionRecording& gSessionRecording() {
     return g;
 }
 
+
+interaction::ShortcutManager& gShortcutManager() {
+    static interaction::ShortcutManager g;
+    return g;
+}
 
 performance::PerformanceManager& gPerformanceManager() {
     static performance::PerformanceManager g;
