@@ -184,6 +184,7 @@ bool SessionRecording::startPlayback(std::string filename, KeyframeTimeRef timeM
     if (!playbackAddEntriesToTimeline())
         return false;
 
+    _hasHitEndOfCameraKeyframes = false;
     findFirstCameraKeyframeInTimeline();
 
     LINFO(fmt::format("Playback session started @ ({:8.3f},0.0,{:13.3f}) with {}/{}/{} entries",
@@ -266,6 +267,7 @@ void SessionRecording::cleanUpPlayback() {
     _idxScript = 0;
     _idxTimeline_cameraPtrNext = 0;
     _idxTimeline_cameraPtrPrev = 0;
+    _hasHitEndOfCameraKeyframes = false;
 }
 
 bool SessionRecording::isDataModeBinary() {
@@ -891,6 +893,9 @@ bool SessionRecording::findNextFutureCameraIndex(double currTime) {
                     _idxTimeline_cameraPtrNext = seekAheadIndex;
                 }
                 break;
+            } else {
+                //Force interpolation between consecutive keyframes
+                _idxTimeline_cameraPtrPrev = seekAheadIndex;
             }
         }
 
@@ -1050,18 +1055,23 @@ bool SessionRecording::processCameraKeyframe(double now) {
         );
     }
 #ifdef INTERPOLATION_DEBUG_PRINT
-LINFO(fmt::format("Cam pos prev={}, next={}", std::to_string(prevKeyframeCameraPosition),
-    std::to_string(nextKeyframeCameraPosition)));
-LINFO(fmt::format("Cam rot prev={} {} {} {}  next={} {} {} {}", prevKeyframeCameraRotation.x,
-    prevKeyframeCameraRotation.y, prevKeyframeCameraRotation.z, prevKeyframeCameraRotation.w,
-    nextKeyframeCameraRotation.x, nextKeyframeCameraRotation.y, nextKeyframeCameraRotation.z,
-    nextKeyframeCameraRotation.w));
-LINFO(fmt::format("Cam interp = {}", t));
-#else
+    LINFO(fmt::format("Cam pos prev={}, next={}", std::to_string(prevKeyframeCameraPosition),
+        std::to_string(nextKeyframeCameraPosition)));
+    LINFO(fmt::format("Cam rot prev={} {} {} {}  next={} {} {} {}", prevKeyframeCameraRotation.x,
+        prevKeyframeCameraRotation.y, prevKeyframeCameraRotation.z, prevKeyframeCameraRotation.w,
+        nextKeyframeCameraRotation.x, nextKeyframeCameraRotation.y, nextKeyframeCameraRotation.z,
+        nextKeyframeCameraRotation.w));
+    LINFO(fmt::format("Cam interp = {}", t));
     LINFO(fmt::format("camera {} {} {} {} {} {}", global::windowDelegate.applicationTime(),
         global::windowDelegate.applicationTime() - _timestampPlaybackStarted_application,
         global::timeManager.time().j2000Seconds(), interpolatedCamera.x,
         interpolatedCamera.y, interpolatedCamera.z));
+    //Following is for direct print to save & compare camera positions against recorded file
+    printf("camera %8.4f %8.4f %13.3f %16.7f %16.7f %16.7f\n", global::windowDelegate.applicationTime(),
+        global::windowDelegate.applicationTime() - _timestampPlaybackStarted_application,
+        global::timeManager.time().j2000Seconds(), interpolatedCamera.x,
+        interpolatedCamera.y, interpolatedCamera.z);
+
 #endif
     return true;
 }
