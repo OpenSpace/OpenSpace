@@ -39,11 +39,43 @@ namespace openspace {
 class ExternInteraction : public properties::PropertyOwner {
 public:
     ExternInteraction();
+    /**
+    * Method that generates a keyframeNavigator CameraPose from a CameraKeyframe
+    * object, and then adds this to the navigationHandler's keyframe navigator.
+    * \param kf The camera keyframe to add.
+    */
     void cameraInteraction(datamessagestructures::CameraKeyframe kf);
+    /**
+    * Method that generates a TimeKeyframeData from a TimeKeyframe object, and
+    * then adds this to the timeManager.
+    * \param kf The time keyframe to add.
+    */
     void timeInteraction(datamessagestructures::TimeKeyframe kf);
+    /**
+    * Method that passes a ScriptMessage object to the script engine, calling its
+    * queueScript method to add it for execution.
+    * \param sm The ScriptMessage object to queue in the script engine.
+    */
     void scriptInteraction(datamessagestructures::ScriptMessage sm);
+    /**
+    * Method that accepts a reference to a CameraKeyframe object, and populates
+    * it with the current properties of the camera from the navigation handler.
+    * \param kf The camera keyframe to populate.
+    */
     void generateCameraKeyframe(datamessagestructures::CameraKeyframe& kf);
+    /**
+    * Method that accepts a reference to a TimeKeyframe object, and populates
+    * it with the current time values from the application time manager.
+    * \param kf The time keyframe to populate.
+    */
     void generateTimeKeyframe(datamessagestructures::TimeKeyframe& kf);
+    /**
+    * Method that accepts a reference to a ScriptMessage object and a script
+    * string, and populates the ScriptMessage with the script and timestamp
+    * of the current application time.
+    * \param sm The ScriptMessage data structure to populate.
+    * \param script The script to execute in std::string form
+    */
     void generateScriptMessage(datamessagestructures::ScriptMessage& sm,
                                std::string script);
 private:
