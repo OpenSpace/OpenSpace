@@ -25,7 +25,7 @@
 #include <modules/server/include/topics/luascripttopic.h>
 
 #include <openspace/json.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
 
@@ -40,7 +40,7 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
     try {
         std::string script = json.at(ScriptKey).get<std::string>();
         LDEBUG("Queueing Lua script: " + script);
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             std::move(script),
             scripting::ScriptEngine::RemoteScripting::No
         );

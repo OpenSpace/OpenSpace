@@ -31,6 +31,10 @@
 #include <array>
 #include <vector>
 
+namespace {
+    constexpr const size_t MaxIterations = 8;
+}
+
 namespace openspace::globebrowsing {
 
 Ellipsoid::Ellipsoid(glm::dvec3 radii) : _radii(radii) {
@@ -70,6 +74,8 @@ glm::dvec3 Ellipsoid::geodeticSurfaceProjection(const glm::dvec3& p) const {
     double dSdA = 1.0;
 
     double epsilon = 1e-10;
+
+    size_t nIterations = 0;
     do {
         alpha -= (s / dSdA);
 
@@ -80,8 +86,10 @@ glm::dvec3 Ellipsoid::geodeticSurfaceProjection(const glm::dvec3& p) const {
         s = glm::dot(p2 / (_cached._radiiSquared * d2), glm::dvec3(1.0)) - 1.0;
 
         dSdA = -2.0 * glm::dot(p2 / (_cached._radiiToTheFourth * d3), glm::dvec3(1.0));
+        ++nIterations;
     }
-    while (std::abs(s) > epsilon);
+    while (std::abs(s) > epsilon && nIterations < MaxIterations);
+
     return p / d;
 }
 

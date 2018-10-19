@@ -28,8 +28,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -46,18 +46,22 @@
 #include <stdint.h>
 
 namespace {
-    constexpr const char* _loggerCat        = "RenderableDUMeshes";
+    constexpr const char* _loggerCat = "RenderableDUMeshes";
     constexpr const char* ProgramObjectName = "RenderableDUMeshes";
 
-    constexpr const char* KeyFile           = "File";
-    constexpr const char* keyColor          = "Color";
-    constexpr const char* keyUnit           = "Unit";
-    constexpr const char* MeterUnit         = "m";
-    constexpr const char* KilometerUnit     = "Km";
-    constexpr const char* ParsecUnit        = "pc";
-    constexpr const char* KiloparsecUnit    = "Kpc";
-    constexpr const char* MegaparsecUnit    = "Mpc";
-    constexpr const char* GigaparsecUnit    = "Gpc";
+    constexpr const std::array<const char*, 4> UniformNames = {
+        "modelViewTransform", "projectionTransform", "alphaValue", "color"
+    };
+
+    constexpr const char* KeyFile = "File";
+    constexpr const char* keyColor = "Color";
+    constexpr const char* keyUnit = "Unit";
+    constexpr const char* MeterUnit = "m";
+    constexpr const char* KilometerUnit = "Km";
+    constexpr const char* ParsecUnit = "pc";
+    constexpr const char* KiloparsecUnit = "Kpc";
+    constexpr const char* MegaparsecUnit = "Mpc";
+    constexpr const char* GigaparsecUnit = "Gpc";
     constexpr const char* GigalightyearUnit = "Gly";
 
     constexpr const int8_t CurrentCacheVersion = 1;
@@ -141,7 +145,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
-        "RenderOptionInfo",
+        "RenderOption",
         "Render Option",
         "Debug option for rendering of billboards and texts."
     };
@@ -211,13 +215,13 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
             },
             {
                 LabelMinSizeInfo.identifier,
-                new IntVerifier,
+                new DoubleVerifier,
                 Optional::Yes,
                 LabelMinSizeInfo.description
             },
             {
                 LabelMaxSizeInfo.identifier,
-                new IntVerifier,
+                new DoubleVerifier,
                 Optional::Yes,
                 LabelMaxSizeInfo.description
             },
@@ -271,7 +275,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
 
     _renderOption.addOption(0, "Camera View Direction");
     _renderOption.addOption(1, "Camera Position Normal");
-    if (OsEng.windowWrapper().isFisheyeRendering()) {
+    if (global::windowDelegate.isFisheyeRendering()) {
         _renderOption.set(1);
     }
     else {
@@ -392,10 +396,10 @@ bool RenderableDUMeshes::isReady() const {
 }
 
 void RenderableDUMeshes::initializeGL() {
-    _program = DigitalUniverseModule::ProgramObjectManager.requestProgramObject(
+    _program = DigitalUniverseModule::ProgramObjectManager.request(
         ProgramObjectName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return OsEng.renderEngine().buildRenderProgram(
+            return global::renderEngine.buildRenderProgram(
                 "RenderableDUMeshes",
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_vs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_fs.glsl")
@@ -403,11 +407,7 @@ void RenderableDUMeshes::initializeGL() {
         }
     );
 
-    _uniformCache.modelViewTransform = _program->uniformLocation("modelViewTransform");
-    _uniformCache.projectionTransform = _program->uniformLocation("projectionTransform");
-    _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-    //_uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
-    _uniformCache.color = _program->uniformLocation("color");
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
     bool success = loadData();
     if (!success) {
@@ -419,7 +419,7 @@ void RenderableDUMeshes::initializeGL() {
     if (_hasLabel) {
         if (!_font) {
             constexpr const int FontSize = 50;
-            _font = OsEng.fontManager().font(
+            _font = global::fontManager.font(
                 "Mono",
                 static_cast<float>(FontSize),
                 ghoul::fontrendering::FontManager::Outline::Yes,
@@ -437,10 +437,10 @@ void RenderableDUMeshes::deinitializeGL() {
         }
     }
 
-    DigitalUniverseModule::ProgramObjectManager.releaseProgramObject(
+    DigitalUniverseModule::ProgramObjectManager.release(
         ProgramObjectName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
 }
@@ -616,16 +616,7 @@ void RenderableDUMeshes::render(const RenderData& data, RendererTasks&) {
 void RenderableDUMeshes::update(const UpdateData&) {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
-
-        _uniformCache.modelViewTransform = _program->uniformLocation(
-            "modelViewTransform"
-        );
-        _uniformCache.projectionTransform = _program->uniformLocation(
-            "projectionTransform"
-        );
-        _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-        //_uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
-        _uniformCache.color = _program->uniformLocation("color");
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 }
 

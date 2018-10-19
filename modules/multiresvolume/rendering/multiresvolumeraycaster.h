@@ -25,32 +25,29 @@
 #ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___MULTIRESVOLUMERAYCASTER___H__
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___MULTIRESVOLUMERAYCASTER___H__
 
-#include <ghoul/glm.h>
-#include <string>
-#include <vector>
 #include <openspace/rendering/volumeraycaster.h>
-#include <openspace/util/boxgeometry.h>
-#include <openspace/util/blockplaneintersectiongeometry.h>
-#include <openspace/rendering/transferfunction.h>
-#include <ghoul/opengl/textureunit.h>
-#include <ghoul/opengl/bufferbinding.h>
 
-#include <modules/multiresvolume/rendering/atlasmanager.h>
-#include <modules/multiresvolume/rendering/tsp.h>
+#include <openspace/util/boxgeometry.h>
+#include <ghoul/glm.h>
+#include <ghoul/opengl/bufferbinding.h>
+#include <ghoul/opengl/textureunit.h>
+#include <string>
 
 namespace ghoul::opengl {
     class Texture;
     class ProgramObject;
-}
+} // namespace ghoul::opengl
 
 namespace openspace {
 
+class AtlasManager;
 struct RenderData;
 struct RaycastData;
+class TSP;
+class TransferFunction;
 
 class MultiresVolumeRaycaster : public VolumeRaycaster {
 public:
-
     MultiresVolumeRaycaster(std::shared_ptr<TSP> tsp,
         std::shared_ptr<AtlasManager> atlasManager,
         std::shared_ptr<TransferFunction> transferFunction);

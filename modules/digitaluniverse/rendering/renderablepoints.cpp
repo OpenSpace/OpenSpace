@@ -27,35 +27,40 @@
 #include <modules/digitaluniverse/digitaluniversemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/util/updatestructures.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/templatefactory.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/templatefactory.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <array>
 #include <fstream>
-#include <stdint.h>
 #include <locale>
+#include <stdint.h>
 #include <string>
 
 namespace {
-    constexpr const char* _loggerCat        = "RenderablePoints";
+    constexpr const char* _loggerCat = "RenderablePoints";
 
-    constexpr const char* KeyFile           = "File";
-    constexpr const char* keyColor          = "Color";
-    constexpr const char* keyUnit           = "Unit";
-    constexpr const char* MeterUnit         = "m";
-    constexpr const char* KilometerUnit     = "Km";
-    constexpr const char* ParsecUnit        = "pc";
-    constexpr const char* KiloparsecUnit    = "Kpc";
-    constexpr const char* MegaparsecUnit    = "Mpc";
-    constexpr const char* GigaparsecUnit    = "Gpc";
+    constexpr const std::array<const char*, 7> UniformNames = {
+        "modelViewProjectionTransform", "color", "sides", "alphaValue", "scaleFactor",
+        "spriteTexture", "hasColorMap"
+    };
+
+    constexpr const char* KeyFile = "File";
+    constexpr const char* keyColor = "Color";
+    constexpr const char* keyUnit = "Unit";
+    constexpr const char* MeterUnit = "m";
+    constexpr const char* KilometerUnit = "Km";
+    constexpr const char* ParsecUnit = "pc";
+    constexpr const char* KiloparsecUnit = "Kpc";
+    constexpr const char* MegaparsecUnit = "Mpc";
+    constexpr const char* GigaparsecUnit = "Gpc";
     constexpr const char* GigalightyearUnit = "Gly";
 
     constexpr int8_t CurrentCacheVersion = 1;
@@ -261,48 +266,30 @@ void RenderablePoints::initializeGL() {
     //       end of the program.
 
     if (_hasSpriteTexture) {
-        _program = DigitalUniverseModule::ProgramObjectManager.requestProgramObject(
+        _program = DigitalUniverseModule::ProgramObjectManager.request(
             "RenderablePoints Sprite",
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                return OsEng.renderEngine().buildRenderProgram(
+                return global::renderEngine.buildRenderProgram(
                     "RenderablePoints Sprite",
                     absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl"),
                     absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_sprite_fs.glsl")
                 );
             }
         );
-
-        _uniformCache.modelViewProjectionTransform = _program->uniformLocation(
-            "modelViewProjectionTransform"
-        );
-        _uniformCache.color = _program->uniformLocation("color");
-        _uniformCache.sides = _program->uniformLocation("sides");
-        _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-        _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
-        _uniformCache.spriteTexture = _program->uniformLocation("spriteTexture");
-        _uniformCache.hasColorMap = _program->uniformLocation("hasColorMap");
     }
     else {
-        _program = DigitalUniverseModule::ProgramObjectManager.requestProgramObject(
+        _program = DigitalUniverseModule::ProgramObjectManager.request(
             "RenderablePoints",
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                return OsEng.renderEngine().buildRenderProgram(
+                return global::renderEngine.buildRenderProgram(
                     "RenderablePoints",
                     absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl"),
                     absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_sprite_fs.glsl")
                 );
             }
         );
-
-        _uniformCache.modelViewProjectionTransform = _program->uniformLocation(
-            "modelViewProjectionTransform"
-        );
-        _uniformCache.color = _program->uniformLocation("color");
-        _uniformCache.sides = _program->uniformLocation("sides");
-        _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-        _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
-        _uniformCache.hasColorMap = _program->uniformLocation("hasColorMap");
     }
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 }
 
 void RenderablePoints::deinitializeGL() {
@@ -311,10 +298,10 @@ void RenderablePoints::deinitializeGL() {
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
 
-    DigitalUniverseModule::ProgramObjectManager.releaseProgramObject(
+    DigitalUniverseModule::ProgramObjectManager.release(
         _program->name(),
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
 

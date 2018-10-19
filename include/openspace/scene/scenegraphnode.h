@@ -34,6 +34,8 @@
 #include <memory>
 #include <vector>
 
+ //#define Debugging_Core_SceneGraphNode_Indices
+
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
@@ -48,6 +50,8 @@ class Scale;
 class Scene;
 struct UpdateData;
 struct SurfacePositionHandle;
+class TimeFrame;
+class Time;
 
 namespace documentation { struct Documentation; }
 
@@ -120,6 +124,7 @@ public:
     glm::dmat4 modelTransform() const;
     glm::dmat4 inverseModelTransform() const;
     double worldScale() const;
+    bool isTimeFrameActive(const Time& time) const;
 
     SceneGraphNode* parent() const;
     std::vector<SceneGraphNode*> children() const;
@@ -168,6 +173,8 @@ private:
         std::unique_ptr<Scale> scale;
     } _transform;
 
+    std::unique_ptr<TimeFrame> _timeFrame;
+
     // Cached transform data
     glm::dvec3 _worldPositionCached;
     glm::dmat3 _worldRotationCached;
@@ -175,6 +182,11 @@ private:
 
     glm::dmat4 _modelTransformCached;
     glm::dmat4 _inverseModelTransformCached;
+
+#ifdef Debugging_Core_SceneGraphNode_Indices
+    int index = 0;
+    static int nextIndex;
+#endif // Debugging_Core_SceneGraphNode_Indices
 };
 
 } // namespace openspace

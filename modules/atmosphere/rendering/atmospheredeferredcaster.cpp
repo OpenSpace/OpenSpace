@@ -60,7 +60,6 @@
 #include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
 
 #include <modules/atmosphere/rendering/renderableatmosphere.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/spicemanager.h>
@@ -90,6 +89,20 @@
 
 namespace {
     constexpr const char* _loggerCat = "AtmosphereDeferredcaster";
+
+    constexpr const std::array<const char*, 17> UniformNames1 = {
+        "cullAtmosphere", "Rg", "Rt", "groundRadianceEmittion", "HR", "betaRayleigh",
+        "HM", "betaMieExtinction", "mieG", "sunRadiance", "ozoneLayerEnabled", "HO",
+        "betaOzoneExtinction", "SAMPLES_R", "SAMPLES_MU", "SAMPLES_MU_S", "SAMPLES_NU"
+    };
+
+    constexpr const std::array<const char*, 10> UniformNames2 = {
+        "dInverseModelTransformMatrix", "dModelTransformMatrix",
+        "dSgctProjectionToModelTransformMatrix", "dSGCTViewToWorldMatrix", "dCamPosObj",
+        "sunDirectionObj", "hardShadows", "transmittanceTexture", "irradianceTexture",
+        "inscatterTexture"
+    };
+
     constexpr const char* GlslDeferredcastPath =
         "${MODULES}/atmosphere/shaders/atmosphere_deferred_fs.glsl";
     constexpr const char* GlslDeferredcastFSPath =
@@ -464,48 +477,11 @@ std::string AtmosphereDeferredcaster::helperPath() const {
 void AtmosphereDeferredcaster::initializeCachedVariables(
                                                     ghoul::opengl::ProgramObject& program)
 {
-    _uniformCache.cullAtmosphere = program.uniformLocation("cullAtmosphere");
-    _uniformCache.Rg = program.uniformLocation("Rg");
-    _uniformCache.Rt = program.uniformLocation("Rt");
-    _uniformCache.groundRadianceEmittion = program.uniformLocation(
-        "groundRadianceEmittion"
-    );
-    _uniformCache.HR = program.uniformLocation("HR");
-    _uniformCache.betaRayleigh = program.uniformLocation("betaRayleigh");
-    _uniformCache.HM = program.uniformLocation("HM");
-    _uniformCache.betaMieExtinction = program.uniformLocation("betaMieExtinction");
-    _uniformCache.mieG = program.uniformLocation("mieG");
-    _uniformCache.sunRadiance = program.uniformLocation("sunRadiance");
-    _uniformCache.ozoneLayerEnabled = program.uniformLocation("ozoneLayerEnabled");
-    _uniformCache.HO = program.uniformLocation("HO");
-    _uniformCache.betaOzoneExtinction = program.uniformLocation("betaOzoneExtinction");
-    _uniformCache.SAMPLES_R = program.uniformLocation("SAMPLES_R");
-    _uniformCache.SAMPLES_MU = program.uniformLocation("SAMPLES_MU");
-    _uniformCache.SAMPLES_MU_S = program.uniformLocation("SAMPLES_MU_S");
-    _uniformCache.SAMPLES_NU = program.uniformLocation("SAMPLES_NU");
-    _uniformCache2.dInverseModelTransformMatrix = program.uniformLocation(
-        "dInverseModelTransformMatrix"
-    );
-    _uniformCache2.dModelTransformMatrix = program.uniformLocation(
-        "dModelTransformMatrix"
-    );
-    _uniformCache2.dSgctProjectionToModelTransformMatrix = program.uniformLocation(
-        "dSgctProjectionToModelTransformMatrix"
-    );
-    _uniformCache2.dSGCTViewToWorldMatrix = program.uniformLocation(
-        "dSGCTViewToWorldMatrix"
-    );
-    _uniformCache2.dCamPosObj = program.uniformLocation("dCamPosObj");
-    _uniformCache2.sunDirectionObj = program.uniformLocation("sunDirectionObj");
-    _uniformCache2.hardShadows = program.uniformLocation("hardShadows");
-    _uniformCache2.transmittanceTexture = program.uniformLocation("transmittanceTexture");
-    _uniformCache2.irradianceTexture = program.uniformLocation("irradianceTexture");
-    _uniformCache2.inscatterTexture = program.uniformLocation("inscatterTexture");
+    ghoul::opengl::updateUniformLocations(program, _uniformCache, UniformNames1);
+    ghoul::opengl::updateUniformLocations(program, _uniformCache2, UniformNames2);
 }
 
-void AtmosphereDeferredcaster::update(const UpdateData&) {
-
-}
+void AtmosphereDeferredcaster::update(const UpdateData&) {}
 
 void AtmosphereDeferredcaster::setModelTransform(const glm::dmat4& transform) {
     _modelTransform = transform;

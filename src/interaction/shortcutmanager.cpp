@@ -22,20 +22,66 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include <openspace/interaction/shortcutmanager.h>
 
-in vec2 st;
-out vec4 FragColor;
+#include <openspace/engine/globals.h>
+#include <openspace/scripting/lualibrary.h>
+#include <openspace/scripting/scriptengine.h>
+#include <ghoul/glm.h>
+#include <sstream>
 
-uniform bool useTexture;
-uniform sampler2D logoTexture;
-uniform vec4 color;
+#include "shortcutmanager_lua.inl"
 
-void main() {
-    if (useTexture) {
-        FragColor = texture(logoTexture, st);
-    }
-    else {
-        FragColor = color;
-    }
+namespace openspace::interaction {
+
+void ShortcutManager::resetShortcuts() {
+    _shortcuts.clear();
 }
+
+void ShortcutManager::addShortcut(ShortcutInformation info) {
+    _shortcuts.push_back(std::move(info));
+}
+
+const std::vector<ShortcutManager::ShortcutInformation>&
+ShortcutManager::shortcuts() const
+{
+    return _shortcuts;
+}
+
+scripting::LuaLibrary ShortcutManager::luaLibrary() {
+    return {
+        "",
+        {
+            {
+                "clearShortcuts",
+                &luascriptfunctions::clearShortcuts,
+                {},
+                "",
+                "Clear all shortcuts in this scene"
+            },
+            {
+                "bindShortcut",
+                &luascriptfunctions::bindShortcut,
+                {},
+                "string, string [, string]",
+                "Binds a Lua script to a new shortcut that is executed both locally and "
+                "to be broadcast to clients if this is the host of a parallel session. "
+                "The first argument is a human-readable name for this shortcut, the "
+                "second argument is the Lua script that will be executed and the last "
+                "argument is a describtive text for the shortcut for tooltips, etc."
+            },
+            {
+                "bindShortcutLocal",
+                &luascriptfunctions::bindShortcutLocal,
+                {},
+                "string, string [, string]",
+                "Binds a Lua script to a new shortcut that is executed onlylocally. The "
+                "first argument is a human-readable name for this shortcut, the second "
+                "argument is the Lua script that will be executed and the last argument "
+                "is a describtive text for the shortcut for tooltips, etc."
+            }
+        }
+    };
+}
+
+} // namespace openspace::interaction

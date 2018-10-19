@@ -25,17 +25,15 @@
 #include <modules/spacecraftinstruments/rendering/renderablemodelprojection.h>
 
 #include <modules/base/rendering/modelgeometry.h>
-
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
@@ -52,6 +50,20 @@ namespace {
     constexpr const char* keyBoundingSphereRadius = "BoundingSphereRadius";
 
     constexpr const char* DestinationFrame = "GALACTIC";
+
+    constexpr const std::array<const char*, 7> MainUniformNames = {
+        "_performShading", "directionToSunViewSpace", "modelViewTransform",
+        "projectionTransform", "_projectionFading", "baseTexture", "projectionTexture"
+    };
+
+    constexpr const std::array<const char*, 5> FboUniformNames = {
+        "projectionTexture", "needShadowMap", "ProjectorMatrix", "ModelTransform",
+        "boresight"
+    };
+
+    constexpr const std::array<const char*, 2> DepthFboUniformNames = {
+        "ProjectorMatrix", "ModelTransform"
+    };
 
     constexpr openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorTexture",
@@ -168,31 +180,16 @@ bool RenderableModelProjection::isReady() const {
 }
 
 void RenderableModelProjection::initializeGL() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    _programObject = renderEngine.buildRenderProgram(
+    _programObject = global::renderEngine.buildRenderProgram(
         "ModelShader",
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModel_vs.glsl"),
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModel_fs.glsl")
     );
 
-    _mainUniformCache.performShading = _programObject->uniformLocation("_performShading");
-    _mainUniformCache.directionToSunViewSpace = _programObject->uniformLocation(
-        "directionToSunViewSpace"
-    );
-    _mainUniformCache.modelViewTransform = _programObject->uniformLocation(
-        "modelViewTransform"
-    );
-    _mainUniformCache.projectionTransform = _programObject->uniformLocation(
-        "projectionTransform"
-    );
-    _mainUniformCache.projectionFading = _programObject->uniformLocation(
-        "_projectionFading"
-    );
-    _mainUniformCache.baseTexture = _programObject->uniformLocation(
-        "baseTexture"
-    );
-    _mainUniformCache.projectionTexture = _programObject->uniformLocation(
-        "projectionTexture"
+    ghoul::opengl::updateUniformLocations(
+        *_programObject,
+        _mainUniformCache,
+        MainUniformNames
     );
 
     _fboProgramObject = ghoul::opengl::ProgramObject::Build(
@@ -205,18 +202,11 @@ void RenderableModelProjection::initializeGL() {
         )
     );
 
-    _fboUniformCache.projectionTexture = _fboProgramObject->uniformLocation(
-        "projectionTexture"
+    ghoul::opengl::updateUniformLocations(
+        *_fboProgramObject,
+        _fboUniformCache,
+        FboUniformNames
     );
-    _fboUniformCache.needShadowMap = _fboProgramObject->uniformLocation("needShadowMap");
-    _fboUniformCache.ProjectorMatrix = _fboProgramObject->uniformLocation(
-        "ProjectorMatrix"
-    );
-    _fboUniformCache.ModelTransform = _fboProgramObject->uniformLocation(
-        "ModelTransform"
-    );
-    _fboUniformCache.boresight = _fboProgramObject->uniformLocation("boresight");
-
 
     _depthFboProgramObject = ghoul::opengl::ProgramObject::Build(
         "DepthPass",
@@ -224,13 +214,11 @@ void RenderableModelProjection::initializeGL() {
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModelDepth_fs.glsl")
     );
 
-    _depthFboUniformCache.ProjectorMatrix = _depthFboProgramObject->uniformLocation(
-        "ProjectorMatrix"
+    ghoul::opengl::updateUniformLocations(
+        *_depthFboProgramObject,
+        _depthFboUniformCache,
+        DepthFboUniformNames
     );
-    _depthFboUniformCache.ModelTransform = _depthFboProgramObject->uniformLocation(
-        "ModelTransform"
-    );
-
 
     loadTextures();
     _projectionComponent.initializeGL();
@@ -250,7 +238,7 @@ void RenderableModelProjection::deinitializeGL() {
 
     _projectionComponent.deinitialize();
 
-    OsEng.renderEngine().removeRenderProgram(_programObject.get());
+    global::renderEngine.removeRenderProgram(_programObject.get());
     _programObject = nullptr;
 }
 
@@ -330,45 +318,21 @@ void RenderableModelProjection::update(const UpdateData& data) {
     if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
 
-        _mainUniformCache.performShading = _programObject->uniformLocation(
-            "_performShading"
-        );
-        _mainUniformCache.directionToSunViewSpace = _programObject->uniformLocation(
-            "directionToSunViewSpace"
-        );
-        _mainUniformCache.modelViewTransform = _programObject->uniformLocation(
-            "modelViewTransform"
-        );
-        _mainUniformCache.projectionTransform = _programObject->uniformLocation(
-            "projectionTransform"
-        );
-        _mainUniformCache.projectionFading = _programObject->uniformLocation(
-            "_projectionFading"
-        );
-        _mainUniformCache.baseTexture = _programObject->uniformLocation(
-            "baseTexture"
-        );
-        _mainUniformCache.projectionTexture = _programObject->uniformLocation(
-            "projectionTexture"
+        ghoul::opengl::updateUniformLocations(
+            *_programObject,
+            _mainUniformCache,
+            MainUniformNames
         );
     }
 
     if (_fboProgramObject->isDirty()) {
         _fboProgramObject->rebuildFromFile();
 
-        _fboUniformCache.projectionTexture = _fboProgramObject->uniformLocation(
-            "projectionTexture"
+        ghoul::opengl::updateUniformLocations(
+            *_fboProgramObject,
+            _fboUniformCache,
+            FboUniformNames
         );
-        _fboUniformCache.needShadowMap = _fboProgramObject->uniformLocation(
-            "needShadowMap"
-        );
-        _fboUniformCache.ProjectorMatrix = _fboProgramObject->uniformLocation(
-            "ProjectorMatrix"
-        );
-        _fboUniformCache.ModelTransform = _fboProgramObject->uniformLocation(
-            "ModelTransform"
-        );
-        _fboUniformCache.boresight = _fboProgramObject->uniformLocation("boresight");
     }
 
     _projectionComponent.update();
@@ -376,30 +340,29 @@ void RenderableModelProjection::update(const UpdateData& data) {
     if (_depthFboProgramObject->isDirty()) {
         _depthFboProgramObject->rebuildFromFile();
 
-        _depthFboUniformCache.ProjectorMatrix = _depthFboProgramObject->uniformLocation(
-            "ProjectorMatrix"
-        );
-        _depthFboUniformCache.ModelTransform = _depthFboProgramObject->uniformLocation(
-            "ModelTransform"
+        ghoul::opengl::updateUniformLocations(
+            *_depthFboProgramObject,
+            _depthFboUniformCache,
+            DepthFboUniformNames
         );
     }
 
     const double time = data.time.j2000Seconds();
+    const double integrateFromTime = data.previousFrameTime.j2000Seconds();
 
     // Only project new images if time changed since last update.
-    if (time != _time) {
+    if (time > integrateFromTime) {
         if (ImageSequencer::ref().isReady()) {
-            ImageSequencer::ref().updateSequencer(time);
             if (_projectionComponent.doesPerformProjection()) {
                 _shouldCapture = ImageSequencer::ref().imagePaths(
                     _imageTimes,
                     _projectionComponent.projecteeId(),
                     _projectionComponent.instrumentId(),
-                    _time
+                    time,
+                    integrateFromTime
                 );
             }
         }
-        _time = time;
     }
 
     glm::dmat3 stateMatrix = data.modelTransform.rotation;
@@ -411,7 +374,7 @@ void RenderableModelProjection::update(const UpdateData& data) {
 
     // @TODO:  Change this to remove PSC
     glm::dvec3 p =
-        OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition() -
+        global::renderEngine.scene()->sceneGraphNode("Sun")->worldPosition() -
         data.modelTransform.translation;
 
     _sunPosition =

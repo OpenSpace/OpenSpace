@@ -27,7 +27,7 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/updatestructures.h>
@@ -37,6 +37,12 @@
 namespace {
     constexpr const char* ProgramName = "EphemerisProgram";
     constexpr const char* KeyTranslation = "Translation";
+
+    constexpr const std::array<const char*, 12> UniformNames = {
+        "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
+        "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
+        "renderPhase"
+    };
 
     // The possible values for the _renderingModes property
     enum RenderingMode {
@@ -225,10 +231,10 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableTrail::initializeGL() {
-    _programObject = BaseModule::ProgramObjectManager.requestProgramObject(
+    _programObject = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return OsEng.renderEngine().buildRenderProgram(
+            return global::renderEngine.buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_BASE}/shaders/renderabletrail_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/renderabletrail_fs.glsl")
@@ -236,27 +242,16 @@ void RenderableTrail::initializeGL() {
         }
     );
 
-    _uniformCache.opacity = _programObject->uniformLocation("opacity");
-    _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
-    _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
-    _uniformCache.color = _programObject->uniformLocation("color");
-    _uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
-    _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
-    _uniformCache.vertexSorting = _programObject->uniformLocation("vertexSortingMethod");
-    _uniformCache.idOffset = _programObject->uniformLocation("idOffset");
-    _uniformCache.nVertices = _programObject->uniformLocation("nVertices");
-    _uniformCache.stride = _programObject->uniformLocation("stride");
-    _uniformCache.pointSize = _programObject->uniformLocation("pointSize");
-    _uniformCache.renderPhase = _programObject->uniformLocation("renderPhase");
+    ghoul::opengl::updateUniformLocations(*_programObject, _uniformCache, UniformNames);
 
     setRenderBin(Renderable::RenderBin::Overlay);
 }
 
 void RenderableTrail::deinitializeGL() {
-    BaseModule::ProgramObjectManager.releaseProgramObject(
+    BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
     _programObject = nullptr;
@@ -291,7 +286,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     };
 
     const bool usingFramebufferRenderer =
-        OsEng.renderEngine().rendererImplementation() ==
+        global::renderEngine.rendererImplementation() ==
         RenderEngine::RendererImplementation::Framebuffer;
 
     if (usingFramebufferRenderer) {

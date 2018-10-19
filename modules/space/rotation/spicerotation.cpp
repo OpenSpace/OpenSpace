@@ -75,10 +75,7 @@ documentation::Documentation SpiceRotation::Documentation() {
             },
             {
                 KeyKernels,
-                new OrVerifier(
-                    new StringListVerifier,
-                    new StringVerifier
-                ),
+                new OrVerifier({ new StringListVerifier, new StringVerifier }),
                 Optional::Yes,
                 "A single kernel or list of kernels that this SpiceTranslation depends "
                 "on. All provided kernels will be loaded before any other operation is "
@@ -123,17 +120,12 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     _destinationFrame.onChange([this]() { requireUpdate(); });
 }
 
-glm::dmat3 SpiceRotation::matrix(const Time& time) const {
-    try {
-        return SpiceManager::ref().positionTransformMatrix(
-            _sourceFrame,
-            _destinationFrame,
-            time.j2000Seconds()
-        );
-    }
-    catch (const SpiceManager::SpiceException&) {
-        return glm::dmat3(1.0);
-    }
+glm::dmat3 SpiceRotation::matrix(const UpdateData& data) const {
+    return SpiceManager::ref().positionTransformMatrix(
+        _sourceFrame,
+        _destinationFrame,
+        data.time.j2000Seconds()
+    );
 }
 
 } // namespace openspace

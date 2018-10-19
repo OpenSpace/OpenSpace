@@ -28,7 +28,7 @@
 #include <modules/space/rendering/planetgeometry.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
@@ -349,10 +349,10 @@ void RenderablePlanet::initializeGL() {
     //           correct one.
 
     if (!_programObject && _shadowEnabled && _hasNightTexture) {
-        _programObject = SpaceModule::ProgramObjectManager.requestProgramObject(
+        _programObject = SpaceModule::ProgramObjectManager.request(
             ShadowNightProgramName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                return OsEng.renderEngine().buildRenderProgram(
+                return global::renderEngine.buildRenderProgram(
                     ShadowNightProgramName,
                     absPath("${MODULE_SPACE}/shaders/shadow_nighttexture_vs.glsl"),
                     absPath("${MODULE_SPACE}/shaders/shadow_nighttexture_fs.glsl")
@@ -361,10 +361,10 @@ void RenderablePlanet::initializeGL() {
         );
     }
     else if (!_programObject && _shadowEnabled) {
-        _programObject = SpaceModule::ProgramObjectManager.requestProgramObject(
+        _programObject = SpaceModule::ProgramObjectManager.request(
             ShadowProgramName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                return OsEng.renderEngine().buildRenderProgram(
+                return global::renderEngine.buildRenderProgram(
                         ShadowProgramName,
                         absPath("${MODULE_SPACE}/shaders/shadow_vs.glsl"),
                         absPath("${MODULE_SPACE}/shaders/shadow_fs.glsl")
@@ -373,10 +373,10 @@ void RenderablePlanet::initializeGL() {
         );
     }
     else if (!_programObject && _hasNightTexture) {
-        _programObject = SpaceModule::ProgramObjectManager.requestProgramObject(
+        _programObject = SpaceModule::ProgramObjectManager.request(
             NightProgramName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                return OsEng.renderEngine().buildRenderProgram(
+                return global::renderEngine.buildRenderProgram(
                     NightProgramName,
                     absPath("${MODULE_SPACE}/shaders/nighttexture_vs.glsl"),
                     absPath("${MODULE_SPACE}/shaders/nighttexture_fs.glsl")
@@ -385,10 +385,10 @@ void RenderablePlanet::initializeGL() {
         );
     }
     else if (!_programObject) {
-        _programObject = SpaceModule::ProgramObjectManager.requestProgramObject(
+        _programObject = SpaceModule::ProgramObjectManager.request(
             PlainProgramName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                return OsEng.renderEngine().buildRenderProgram(
+                return global::renderEngine.buildRenderProgram(
                     PlainProgramName,
                     absPath("${MODULE_SPACE}/shaders/renderableplanet_vs.glsl"),
                     absPath("${MODULE_SPACE}/shaders/renderableplanet_fs.glsl")
@@ -416,10 +416,10 @@ void RenderablePlanet::deinitializeGL() {
         _geometry = nullptr;
     }
 
-    SpaceModule::ProgramObjectManager.releaseProgramObject(
+    SpaceModule::ProgramObjectManager.release(
         _programObject->name(),
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
 

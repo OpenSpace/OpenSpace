@@ -51,10 +51,10 @@ documentation::Documentation StaticRotation::Documentation() {
             },
             {
                 RotationInfo.identifier,
-                new OrVerifier(
+                new OrVerifier({
                     new DoubleVector3Verifier(),
                     new DoubleMatrix3Verifier()
-                ),
+                }),
                 Optional::No,
                 "Stores the static rotation as either a vector containing Euler angles "
                 "or by specifiying the 3x3 rotation matrix directly"
@@ -89,7 +89,7 @@ StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary) : StaticRota
     }
 }
 
-glm::dmat3 StaticRotation::matrix(const Time&) const {
+glm::dmat3 StaticRotation::matrix(const UpdateData&) const {
     return _rotationMatrix;
 }
 

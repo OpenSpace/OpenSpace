@@ -28,7 +28,7 @@
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -36,19 +36,21 @@
 #include <glm/gtx/projection.hpp>
 
 namespace {
-    constexpr const char* ProgramName             = "FovProgram";
-    constexpr const char* KeyBody                 = "Body";
-    constexpr const char* KeyFrame                = "Frame";
-//    const char* KeyColor                = "RGB";
-
-    constexpr const char* KeyInstrument           = "Instrument";
-    constexpr const char* KeyInstrumentName       = "Name";
+    constexpr const char* ProgramName = "FovProgram";
+    constexpr const char* KeyBody = "Body";
+    constexpr const char* KeyFrame = "Frame";
+    constexpr const char* KeyInstrument = "Instrument";
+    constexpr const char* KeyInstrumentName = "Name";
     constexpr const char* KeyInstrumentAberration = "Aberration";
-
-    constexpr const char* KeyPotentialTargets     = "PotentialTargets";
-    constexpr const char* KeyFrameConversions     = "FrameConversions";
-
+    constexpr const char* KeyPotentialTargets = "PotentialTargets";
+    constexpr const char* KeyFrameConversions = "FrameConversions";
     constexpr const char* KeyBoundsSimplification = "SimplifyBounds";
+
+    constexpr const std::array<const char*, 9> UniformNames = {
+        "modelViewProjectionTransform", "defaultColorStart", "defaultColorEnd",
+        "activeColor", "targetInFieldOfViewColor", "intersectionStartColor",
+        "intersectionEndColor", "squareColor", "interpolation"
+    };
 
     constexpr const int InterpolationSteps = 5;
 
@@ -326,11 +328,11 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableFov::initializeGL() {
-    _programObject =
-        SpacecraftInstrumentsModule::ProgramObjectManager.requestProgramObject(
+    _program =
+        SpacecraftInstrumentsModule::ProgramObjectManager.request(
             ProgramName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                return OsEng.renderEngine().buildRenderProgram(
+                return global::renderEngine.buildRenderProgram(
                     ProgramName,
                     absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_vs.glsl"),
                     absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_fs.glsl")
@@ -338,25 +340,7 @@ void RenderableFov::initializeGL() {
             }
         );
 
-    _uniformCache.modelViewProjection = _programObject->uniformLocation(
-        "modelViewProjectionTransform"
-    );
-    _uniformCache.defaultColorStart = _programObject->uniformLocation(
-        "defaultColorStart"
-    );
-    _uniformCache.defaultColorEnd = _programObject->uniformLocation("defaultColorEnd");
-    _uniformCache.activeColor = _programObject->uniformLocation("activeColor");
-    _uniformCache.targetInFieldOfViewColor = _programObject->uniformLocation(
-        "targetInFieldOfViewColor"
-    );
-    _uniformCache.intersectionStartColor = _programObject->uniformLocation(
-        "intersectionStartColor"
-    );
-    _uniformCache.intersectionEndColor = _programObject->uniformLocation(
-        "intersectionEndColor"
-    );
-    _uniformCache.squareColor = _programObject->uniformLocation("squareColor");
-    _uniformCache.interpolation = _programObject->uniformLocation("interpolation");
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
     // Fetch information about the specific instrument
     SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(
@@ -493,13 +477,13 @@ void RenderableFov::initializeGL() {
 }
 
 void RenderableFov::deinitializeGL() {
-    SpacecraftInstrumentsModule::ProgramObjectManager.releaseProgramObject(
+    SpacecraftInstrumentsModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
-    _programObject = nullptr;
+    _program = nullptr;
 
     glDeleteBuffers(1, &_orthogonalPlane.vbo);
     glDeleteVertexArrays(1, &_orthogonalPlane.vao);
@@ -509,7 +493,7 @@ void RenderableFov::deinitializeGL() {
 }
 
 bool RenderableFov::isReady() const {
-    return _programObject != nullptr && !_instrument.bounds.empty();
+    return _program != nullptr && !_instrument.bounds.empty();
 }
 
 // Orthogonal projection next to planets surface
@@ -838,7 +822,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
 
 void RenderableFov::render(const RenderData& data, RendererTasks&) {
     if (_drawFOV) {
-        _programObject->activate();
+        _program->activate();
 
         // Model transform and view transform needs to be in double precision
         glm::dmat4 modelTransform =
@@ -850,28 +834,28 @@ void RenderableFov::render(const RenderData& data, RendererTasks&) {
             data.camera.projectionMatrix() *
             glm::mat4(data.camera.combinedViewMatrix() * modelTransform);
 
-        _programObject->setUniform(
+        _program->setUniform(
             _uniformCache.modelViewProjection,
             modelViewProjectionTransform
         );
 
-        _programObject->setUniform(_uniformCache.defaultColorStart, _colors.defaultStart);
-        _programObject->setUniform(_uniformCache.defaultColorEnd, _colors.defaultEnd);
-        _programObject->setUniform(_uniformCache.activeColor, _colors.active);
-        _programObject->setUniform(
+        _program->setUniform(_uniformCache.defaultColorStart, _colors.defaultStart);
+        _program->setUniform(_uniformCache.defaultColorEnd, _colors.defaultEnd);
+        _program->setUniform(_uniformCache.activeColor, _colors.active);
+        _program->setUniform(
             _uniformCache.targetInFieldOfViewColor,
             _colors.targetInFieldOfView
         );
-        _programObject->setUniform(
+        _program->setUniform(
             _uniformCache.intersectionStartColor,
             _colors.intersectionStart
         );
-        _programObject->setUniform(
+        _program->setUniform(
             _uniformCache.intersectionEndColor,
             _colors.intersectionEnd
         );
-        _programObject->setUniform(_uniformCache.squareColor, _colors.square);
-        _programObject->setUniform(_uniformCache.interpolation, _interpolationTime);
+        _program->setUniform(_uniformCache.squareColor, _colors.square);
+        _program->setUniform(_uniformCache.interpolation, _interpolationTime);
 
         GLenum mode = _drawSolid ? GL_TRIANGLE_STRIP : GL_LINES;
 
@@ -885,26 +869,30 @@ void RenderableFov::render(const RenderData& data, RendererTasks&) {
         glBindVertexArray(0);
         glLineWidth(1.f);
 
-        _programObject->deactivate();
+        _program->deactivate();
     }
 }
 
 void RenderableFov::update(const UpdateData& data) {
     _drawFOV = false;
     if (openspace::ImageSequencer::ref().isReady()) {
-        _drawFOV = ImageSequencer::ref().isInstrumentActive(_instrument.name);
+        _drawFOV = ImageSequencer::ref().isInstrumentActive(
+            data.time.j2000Seconds(),
+            _instrument.name
+        );
     }
 
-    if (_drawFOV && !data.time.paused()) {
-        const std::pair<std::string,bool>& t = determineTarget(data.time.j2000Seconds());
+    // TODO: figure out if time has changed
+    if (_drawFOV /* && time changed */) {
+        const std::pair<std::string, bool>& t = determineTarget(data.time.j2000Seconds());
 
         computeIntercepts(data, t.first, t.second);
         updateGPU();
 
-        const double t2 = (ImageSequencer::ref().nextCaptureTime());
+        const double t2 = ImageSequencer::ref().nextCaptureTime(data.time.j2000Seconds());
         const double diff = (t2 - data.time.j2000Seconds());
         _interpolationTime = 0.f;
-        const float interpolationStart = 7.f; //seconds before
+        const float interpolationStart = 7.f; // seconds before
         if (diff <= interpolationStart) {
             _interpolationTime = static_cast<float>(1.f - (diff / interpolationStart));
         }
@@ -914,31 +902,9 @@ void RenderableFov::update(const UpdateData& data) {
         }
     }
 
-    if (_programObject->isDirty()) {
-        _programObject->rebuildFromFile();
-
-
-        _uniformCache.modelViewProjection = _programObject->uniformLocation(
-            "modelViewProjectionTransform"
-        );
-        _uniformCache.defaultColorStart = _programObject->uniformLocation(
-            "defaultColorStart"
-        );
-        _uniformCache.defaultColorEnd = _programObject->uniformLocation(
-            "defaultColorEnd"
-        );
-        _uniformCache.activeColor = _programObject->uniformLocation("activeColor");
-        _uniformCache.targetInFieldOfViewColor = _programObject->uniformLocation(
-            "targetInFieldOfViewColor"
-        );
-        _uniformCache.intersectionStartColor = _programObject->uniformLocation(
-            "intersectionStartColor"
-        );
-        _uniformCache.intersectionEndColor = _programObject->uniformLocation(
-            "intersectionEndColor"
-        );
-        _uniformCache.squareColor = _programObject->uniformLocation("squareColor");
-        _uniformCache.interpolation = _programObject->uniformLocation("interpolation");
+    if (_program->isDirty()) {
+        _program->rebuildFromFile();
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 }
 

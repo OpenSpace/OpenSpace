@@ -55,6 +55,20 @@ local RotationMatrix = {
     1, 0, 0
 }
 
+local LightSources = {
+    {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sunTransforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+    },
+    {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+    }
+}
+
 local Messenger = {
     Identifier = "Messenger",
     Parent = sunTransforms.SolarSystemBarycenter.Identifier,
@@ -87,7 +101,8 @@ local MessengerProbeBlack = {
             GeometryFile = models .. "/MessengerProbe_black.obj"
         },
         ColorTexture = models .. "/Tex_black.png",
-        ModelTransform = RotationMatrix
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
     },
     GUI = {
         Name = "MessengerProbe Black",
@@ -105,7 +120,8 @@ local MessengerProbeFoil = {
             GeometryFile = models .. "/MessengerProbe_foil.obj"
         },
         ColorTexture = models .. "/foil_n2.png",
-        ModelTransform = RotationMatrix
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
     },
     GUI = {
         Name = "MessengerProbe foil",
@@ -123,7 +139,8 @@ local MessengerProbeHeatShield = {
             GeometryFile = models .. "/MessengerProbe_heatShield.obj"
         },
         ColorTexture = models .. "/AO_heatshield4.png",
-        ModelTransform = RotationMatrix
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
     },
     GUI = {
         Name = "MessengerProbe Heat Sheild",
@@ -142,7 +159,8 @@ local MessengerProbeMetal = {
             GeometryFile = models .. "/MessengerProbe_metal.obj"
         },
         ColorTexture = models .. "/Tex_grey.png",
-        ModelTransform = RotationMatrix
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
     },
     GUI = {
         Name = "MessengerProbe Metal",
@@ -161,7 +179,8 @@ local MessengerProbePanels = {
             GeometryFile = models .. "/MessengerProbe_panels.obj"
         },
         ColorTexture = models .. "/Messenger_tex.png",
-        ModelTransform = RotationMatrix
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
     },
     GUI = {
         Name = "MessengerProbe Panels",

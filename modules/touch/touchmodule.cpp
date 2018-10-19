@@ -24,15 +24,13 @@
 
 #include <modules/touch/touchmodule.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
-
 #include <ghoul/logging/logmanager.h>
-//#include <glm/ext.hpp>
-
 #include <sstream>
 #include <string>
 #include <iostream>
@@ -105,39 +103,25 @@ bool TouchModule::hasNewInput() {
     }
 }
 
-TouchModule::TouchModule()
-    : OpenSpaceModule("Touch")
-{
+TouchModule::TouchModule() : OpenSpaceModule("Touch") {
     addPropertySubOwner(touch);
     addPropertySubOwner(markers);
 
-    if (!OpenSpaceEngine::isCreated()) {
-        return;
-    }
-
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::InitializeGL,
-        [&]() {
+    global::callback::initializeGL.push_back([&]() {
         LDEBUGC("TouchModule", "Initializing TouchMarker OpenGL");
         markers.initialize();
-    }
-    );
+    });
 
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::DeinitializeGL,
-        [&]() {
+    global::callback::deinitializeGL.push_back([&]() {
         LDEBUGC("TouchMarker", "Deinitialize TouchMarker OpenGL");
         markers.deinitialize();
-    }
-    );
+    });
 
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::PreSync,
-        [&]() {
-        touch.setCamera(OsEng.navigationHandler().camera());
-        touch.setFocusNode(OsEng.navigationHandler().focusNode());
+    global::callback::preSync.push_back([&]() {
+        touch.setCamera(global::navigationHandler.camera());
+        touch.setFocusNode(global::navigationHandler.focusNode());
 
-        if (hasNewInput() && OsEng.windowWrapper().isMaster()) {
+        if (hasNewInput() && global::windowDelegate.isMaster()) {
             touch.updateStateFromInput(listOfContactPoints, lastProcessed);
         }
         else if (listOfContactPoints.empty()) {
@@ -149,21 +133,15 @@ TouchModule::TouchModule()
         for (const TuioCursor& c : listOfContactPoints) {
             lastProcessed.emplace_back(c.getSessionID(), c.getPath().back());
         }
-         // used to save data from solver, only calculated for one frame when user chooses
-         // in GUI
+        // used to save data from solver, only calculated for one frame when user chooses
+        // in GUI
         touch.unitTest();
-         // calculate the new camera state for this frame
-        touch.step(OsEng.windowWrapper().deltaTime());
-    }
-    );
+        // calculate the new camera state for this frame
+        touch.step(global::windowDelegate.deltaTime());
+    });
 
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::Render,
-        [&]() {
-             // render markers, customizable through the GUI
-            markers.render(listOfContactPoints);
-        }
-    );
+    global::callback::render.push_back([&]() { markers.render(listOfContactPoints); });
+
 }
 
 } // namespace openspace

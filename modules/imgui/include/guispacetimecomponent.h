@@ -41,6 +41,8 @@ private:
 
     TimeUnit _deltaTimeUnit = TimeUnit::Second;
 
+    bool _resetTimeAfterShuttle = true;
+
     float _accelerationDelta = 0.f;
 
     double _oldDeltaTime = 0.0;

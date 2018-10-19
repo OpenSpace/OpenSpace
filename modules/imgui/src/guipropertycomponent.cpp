@@ -30,7 +30,7 @@
 #include <ghoul/misc/misc.h>
 #include <algorithm>
 
-//#define Debugging_ImGui_TreeNode
+//#define Debugging_ImGui_TreeNode_Indices
 
 namespace {
     const ImVec2 Size = ImVec2(350, 500);
@@ -85,26 +85,26 @@ namespace {
     struct TreeNode {
         TreeNode(std::string p)
             : path(std::move(p))
-#ifdef Debugging_ImGui_TreeNode
+#ifdef Debugging_ImGui_TreeNode_Indices
             , index(nextIndex++)
-#endif // Debugging_ImGui_TreeNode
+#endif // Debugging_ImGui_TreeNode_Indices
         {}
 
         std::string path;
         std::vector<std::unique_ptr<TreeNode>> children;
         std::vector<openspace::SceneGraphNode*> nodes;
-#ifdef Debugging_ImGui_TreeNode
+#ifdef Debugging_ImGui_TreeNode_Indices
         int index = 0;
         static int nextIndex;
-#endif // Debugging_ImGui_TreeNode
+#endif // Debugging_ImGui_TreeNode_Indices
 
     };
 
-#ifdef Debugging_ImGui_TreeNode
+#ifdef Debugging_ImGui_TreeNode_Indices
 
     int TreeNode::nextIndex = 0;
 
-#endif // Debugging_ImGui_TreeNode
+#endif // Debugging_ImGui_TreeNode_Indices
 
     void addPathToTree(TreeNode& node, const std::vector<std::string>& path,
                        openspace::SceneGraphNode* owner)

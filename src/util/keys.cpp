@@ -124,9 +124,10 @@ bool operator==(const KeyWithModifier& lhs, const KeyWithModifier& rhs) {
 
 } // namespace openspace
 
-namespace std {
+namespace ghoul {
 
-std::string to_string(openspace::Key key) {
+template <>
+std::string to_string(const openspace::Key& key) {
     for (const std::pair<const std::string, openspace::Key>& p : openspace::KeyMapping) {
         if (p.second == key) {
             return p.first;
@@ -135,7 +136,8 @@ std::string to_string(openspace::Key key) {
     throw ghoul::MissingCaseException();
 }
 
-std::string to_string(openspace::KeyModifier mod) {
+template <>
+std::string to_string(const openspace::KeyModifier& mod) {
     using namespace openspace;
 
     if (mod == KeyModifier::NoModifier) {
@@ -155,7 +157,8 @@ std::string to_string(openspace::KeyModifier mod) {
     return result.substr(0, result.size() - 1);
 }
 
-std::string to_string(openspace::KeyWithModifier key) {
+template <>
+std::string to_string(const openspace::KeyWithModifier& key) {
     if (key.modifier == openspace::KeyModifier::NoModifier) {
         return to_string(key.key);
     }
@@ -164,4 +167,4 @@ std::string to_string(openspace::KeyWithModifier key) {
     }
 }
 
-} // namespace std
+} // namespace ghoul

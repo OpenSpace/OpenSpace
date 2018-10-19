@@ -62,9 +62,10 @@ public:
 
     struct DataMessage {
         DataMessage() = default;
-        DataMessage(datamessagestructures::Type t, std::vector<char> c);
+        DataMessage(datamessagestructures::Type t, double timestamp, std::vector<char> c);
 
         datamessagestructures::Type type;
+        double timestamp;
         std::vector<char> content;
     };
 
@@ -83,6 +84,7 @@ public:
 
     ParallelConnection::Message receiveMessage();
 
+    static const unsigned int ProtocolVersion;
 private:
     std::unique_ptr<ghoul::io::TcpSocket> _socket;
 };

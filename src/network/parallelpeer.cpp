@@ -24,8 +24,8 @@
 
 #include <openspace/network/parallelpeer.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/keyframenavigator.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
@@ -40,7 +40,6 @@
 #include "parallelpeer_lua.inl"
 
 namespace {
-    constexpr const uint32_t ProtocolVersion = 3;
     constexpr const size_t MaxLatencyDiffs = 64;
     constexpr const char* _loggerCat = "ParallelPeer";
 
@@ -95,12 +94,6 @@ namespace {
         "Camera Keyframe interval",
         "" // @TODO Missing documentation
     };
-
-    constexpr openspace::properties::Property::PropertyInfo TimeToleranceInfo = {
-        "TimeTolerance",
-        "Time tolerance",
-        "" // @TODO Missing documentation
-    };
 } // namespace
 
 namespace openspace {
@@ -115,7 +108,6 @@ ParallelPeer::ParallelPeer()
     , _bufferTime(BufferTimeInfo, 0.2f, 0.01f, 5.0f)
     , _timeKeyframeInterval(TimeKeyFrameInfo, 0.1f, 0.f, 1.f)
     , _cameraKeyframeInterval(CameraKeyFrameInfo, 0.1f, 0.f, 1.f)
-    , _timeTolerance(TimeToleranceInfo, 1.f, 0.5f, 5.f)
     , _connectionEvent(std::make_shared<ghoul::Event<>>())
     , _connection(nullptr)
 {
@@ -129,11 +121,17 @@ ParallelPeer::ParallelPeer()
 
     addProperty(_timeKeyframeInterval);
     addProperty(_cameraKeyframeInterval);
-    addProperty(_timeTolerance);
 }
 
 ParallelPeer::~ParallelPeer() {
     disconnect();
+    if (_timeJumpCallback != -1) {
+        global::timeManager.removeTimeJumpCallback(_timeJumpCallback);
+    }
+    if (_timeJumpCallback != -1) {
+        global::timeManager.removeTimeJumpCallback(_timeJumpCallback);
+    }
+
 }
 
 void ParallelPeer::connect() {
@@ -166,8 +164,9 @@ void ParallelPeer::disconnect() {
 }
 
 void ParallelPeer::sendAuthentication() {
+    std::string name = _name;
     // Length of this nodes name
-    const uint32_t nameLength = static_cast<uint32_t>(_name.value().length());
+    const uint32_t nameLength = static_cast<uint32_t>(name.length());
 
     // Total size of the buffer: (passcode + namelength + name)
     const size_t size = sizeof(uint64_t) + sizeof(uint32_t) + nameLength;
@@ -193,7 +192,7 @@ void ParallelPeer::sendAuthentication() {
     );
 
     // Write this node's name to buffer
-    buffer.insert(buffer.end(), _name.value().begin(), _name.value().end());
+    buffer.insert(buffer.end(), name.begin(), name.end());
 
     // Send message
     _connection.sendMessage(ParallelConnection::Message(
@@ -207,7 +206,7 @@ void ParallelPeer::queueInMessage(const ParallelConnection::Message& message) {
     _receiveBuffer.push_back(message);
 }
 
-void ParallelPeer::handleMessage(const  ParallelConnection::Message& message) {
+void ParallelPeer::handleMessage(const ParallelConnection::Message& message) {
     switch (message.type) {
         case ParallelConnection::MessageType::Data:
             dataMessageReceived(message.content);
@@ -224,10 +223,10 @@ void ParallelPeer::handleMessage(const  ParallelConnection::Message& message) {
     }
 }
 
-double ParallelPeer::calculateBufferedKeyframeTime(double originalTime) {
+void ParallelPeer::analyzeTimeDifference(double messageTimestamp) {
     std::lock_guard<std::mutex> latencyLock(_latencyMutex);
 
-    const double timeDiff = OsEng.windowWrapper().applicationTime() - originalTime;
+    const double timeDiff = global::windowDelegate.applicationTime() - messageTimestamp;
     if (_latencyDiffs.empty()) {
         _initialTimeDiff = timeDiff;
     }
@@ -236,8 +235,11 @@ double ParallelPeer::calculateBufferedKeyframeTime(double originalTime) {
         _latencyDiffs.pop_front();
     }
     _latencyDiffs.push_back(latencyDiff);
+}
 
-    return originalTime + timeDiff + latencyDiff + _bufferTime;
+double ParallelPeer::convertTimestamp(double messageTimestamp) {
+    std::lock_guard<std::mutex> latencyLock(_latencyMutex);
+    return messageTimestamp + _initialTimeDiff + _bufferTime;
 }
 
 double ParallelPeer::latencyStandardDeviation() const {
@@ -259,53 +261,91 @@ double ParallelPeer::latencyStandardDeviation() const {
     return std::sqrt(latencyVariance);
 }
 
-double ParallelPeer::timeTolerance() const {
-    return _timeTolerance;
-}
+void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
+{
+    size_t offset = 0;
 
-void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
     // The type of data message received
-    const uint32_t type = *(reinterpret_cast<const uint32_t*>(message.data()));
-    std::vector<char> buffer(message.begin() + sizeof(uint32_t), message.end());
+    const uint32_t type = *(reinterpret_cast<const uint32_t*>(message.data() + offset));
+    offset += sizeof(uint32_t);
+
+    const double timestamp = *(reinterpret_cast<const double*>(message.data() + offset));
+    offset += sizeof(double);
+
+    analyzeTimeDifference(timestamp);
+
+    std::vector<char> buffer(message.begin() + offset, message.end());
 
     switch (static_cast<datamessagestructures::Type>(type)) {
         case datamessagestructures::Type::CameraData: {
             datamessagestructures::CameraKeyframe kf(buffer);
-            kf._timestamp = calculateBufferedKeyframeTime(kf._timestamp);
+            const double convertedTimestamp = convertTimestamp(kf._timestamp);
 
-            OsEng.navigationHandler().keyframeNavigator().removeKeyframesAfter(
-                kf._timestamp
+            global::navigationHandler.keyframeNavigator().removeKeyframesAfter(
+                convertedTimestamp
             );
+
             interaction::KeyframeNavigator::CameraPose pose;
             pose.focusNode = kf._focusNode;
             pose.position = kf._position;
             pose.rotation = kf._rotation;
+            pose.scale = kf._scale;
             pose.followFocusNodeRotation = kf._followNodeRotation;
 
-            OsEng.navigationHandler().keyframeNavigator().addKeyframe(
-                kf._timestamp,
-                pose
-            );
+            global::navigationHandler.keyframeNavigator().addKeyframe(convertedTimestamp,
+                                                                      pose);
             break;
         }
-        case datamessagestructures::Type::TimeData: {
-            datamessagestructures::TimeKeyframe kf(buffer);
-            kf._timestamp = calculateBufferedKeyframeTime(kf._timestamp);
+        case datamessagestructures::Type::TimelineData: {
+            const double now = global::windowDelegate.applicationTime();
+            datamessagestructures::TimeTimeline timelineMessage(buffer);
 
-            OsEng.timeManager().removeKeyframesAfter(kf._timestamp);
-            Time time(kf._time);
-            time.setDeltaTime(kf._dt);
-            time.setPause(kf._paused);
-            time.setTimeJumped(kf._requiresTimeJump);
+            if (timelineMessage._clear) {
+                global::timeManager.removeKeyframesAfter(
+                    convertTimestamp(timestamp),
+                    true
+                );
+            }
 
-            OsEng.timeManager().addKeyframe(kf._timestamp, time);
+            const std::vector<datamessagestructures::TimeKeyframe>& keyframesMessage =
+                timelineMessage._keyframes;
+
+            // If there are new keyframes incoming, make sure to erase all keyframes
+            // that already exist after the first new keyframe.
+            if (keyframesMessage.size() > 0) {
+                const double convertedTimestamp =
+                    convertTimestamp(keyframesMessage[0]._timestamp);
+
+                global::timeManager.removeKeyframesAfter(convertedTimestamp, true);
+            }
+
+            for (const datamessagestructures::TimeKeyframe& kfMessage : keyframesMessage)
+            {
+                TimeKeyframeData timeKeyframeData;
+                timeKeyframeData.delta = kfMessage._dt;
+                timeKeyframeData.pause = kfMessage._paused;
+                timeKeyframeData.time = kfMessage._time;
+                timeKeyframeData.jump = kfMessage._requiresTimeJump;
+
+                const double kfTimestamp = convertTimestamp(kfMessage._timestamp);
+
+                // We only need at least one keyframe before the current timestamp,
+                // so we can remove any other previous ones
+                if (kfTimestamp < now) {
+                    global::timeManager.removeKeyframesBefore(kfTimestamp, true);
+                }
+                global::timeManager.addKeyframe(
+                    kfTimestamp,
+                    timeKeyframeData
+                );
+            }
             break;
         }
         case datamessagestructures::Type::ScriptData: {
             datamessagestructures::ScriptMessage sm;
             sm.deserialize(buffer);
 
-            OsEng.scriptEngine().queueScript(
+            global::scriptEngine.queueScript(
                 sm._script,
                 scripting::ScriptEngine::RemoteScripting::No
             );
@@ -321,7 +361,8 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
     }
 }
 
-void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& message) {
+void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& message)
+ {
     if (message.size() < 2 * sizeof(uint32_t)) {
         LERROR("Malformed connection status message.");
         return;
@@ -364,11 +405,12 @@ void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& mess
 
     setStatus(status);
 
-    OsEng.navigationHandler().keyframeNavigator().clearKeyframes();
-    OsEng.timeManager().clearKeyframes();
+    global::navigationHandler.keyframeNavigator().clearKeyframes();
+    global::timeManager.clearKeyframes();
 }
 
-void ParallelPeer::nConnectionsMessageReceived(const std::vector<char>& message) {
+void ParallelPeer::nConnectionsMessageReceived(const std::vector<char>& message)
+{
     if (message.size() < sizeof(uint32_t)) {
         LERROR("Malformed host info message.");
         return;
@@ -409,6 +451,7 @@ void ParallelPeer::requestHostship() {
         reinterpret_cast<char*>(&passwordHash),
         reinterpret_cast<char*>(&passwordHash) + sizeof(uint64_t)
     );
+
     _connection.sendMessage(ParallelConnection::Message(
         ParallelConnection::MessageType::HostshipRequest,
         buffer
@@ -442,16 +485,18 @@ void ParallelPeer::sendScript(std::string script) {
     std::vector<char> buffer;
     sm.serialize(buffer);
 
+    double timestamp = global::windowDelegate.applicationTime();
     ParallelConnection::DataMessage message(
         datamessagestructures::Type::ScriptData,
+        timestamp,
         buffer
     );
     _connection.sendDataMessage(message);
 }
 
 void ParallelPeer::resetTimeOffset() {
-    OsEng.navigationHandler().keyframeNavigator().clearKeyframes();
-    OsEng.timeManager().clearKeyframes();
+    global::navigationHandler.keyframeNavigator().clearKeyframes();
+    global::timeManager.clearKeyframes();
     std::lock_guard<std::mutex> latencyLock(_latencyMutex);
     _latencyDiffs.clear();
 }
@@ -464,19 +509,20 @@ void ParallelPeer::preSynchronization() {
         _receiveBuffer.pop_front();
     }
 
-    if (status() == ParallelConnection::Status::Host) {
-        if (OsEng.timeManager().time().timeJumped()) {
-            _timeJumped = true;
-        }
-        double now = OsEng.windowWrapper().applicationTime();
+    if (isHost()) {
+        double now = global::windowDelegate.applicationTime();
 
         if (_lastCameraKeyframeTimestamp + _cameraKeyframeInterval < now) {
             sendCameraKeyframe();
             _lastCameraKeyframeTimestamp = now;
         }
-        if (_lastTimeKeyframeTimestamp + _timeKeyframeInterval < now) {
-            sendTimeKeyframe();
+        if (_timeTimelineChanged ||
+            _lastTimeKeyframeTimestamp + _timeKeyframeInterval < now)
+        {
+            sendTimeTimeline();
             _lastTimeKeyframeTimestamp = now;
+            _timeJumped = false;
+            _timeTimelineChanged = false;
         }
     }
     if (_shouldDisconnect) {
@@ -489,6 +535,21 @@ void ParallelPeer::setStatus(ParallelConnection::Status status) {
         _status = status;
         _timeJumped = true;
         _connectionEvent->publish("statusChanged");
+    }
+    if (isHost()) {
+        global::timeManager.addTimeJumpCallback([this]() {
+            _timeJumped = true;
+        });
+        global::timeManager.addTimelineChangeCallback([this]() {
+            _timeTimelineChanged = true;
+        });
+    } else {
+        if (_timeJumpCallback != -1) {
+            global::timeManager.removeTimeJumpCallback(_timeJumpCallback);
+        }
+        if (_timeTimelineChangeCallback != -1) {
+            global::timeManager.removeTimelineChangeCallback(_timeTimelineChangeCallback);
+        }
     }
 }
 
@@ -523,30 +584,30 @@ const std::string& ParallelPeer::hostName() {
 }
 
 void ParallelPeer::sendCameraKeyframe() {
-    SceneGraphNode* focusNode = OsEng.navigationHandler().focusNode();
+    SceneGraphNode* focusNode = global::navigationHandler.focusNode();
     if (!focusNode) {
         return;
     }
 
     // Create a keyframe with current position and orientation of camera
     datamessagestructures::CameraKeyframe kf;
-    kf._position = OsEng.navigationHandler().focusNodeToCameraVector();
+    kf._position = global::navigationHandler.focusNodeToCameraVector();
 
     kf._followNodeRotation =
-        OsEng.navigationHandler().orbitalNavigator().followingNodeRotation();
+        global::navigationHandler.orbitalNavigator().followingNodeRotation();
     if (kf._followNodeRotation) {
         kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
-        kf._rotation = OsEng.navigationHandler().focusNodeToCameraRotation();
+        kf._rotation = global::navigationHandler.focusNodeToCameraRotation();
     }
     else {
-        kf._rotation = OsEng.navigationHandler().camera()->rotationQuaternion();
+        kf._rotation = global::navigationHandler.camera()->rotationQuaternion();
     }
 
     kf._focusNode = focusNode->identifier();
-    kf._scale = OsEng.navigationHandler().camera()->scaling();
+    kf._scale = global::navigationHandler.camera()->scaling();
 
     // Timestamp as current runtime of OpenSpace instance
-    kf._timestamp = OsEng.windowWrapper().applicationTime();
+    kf._timestamp = global::windowDelegate.applicationTime();
 
     // Create a buffer for the keyframe
     std::vector<char> buffer;
@@ -554,39 +615,62 @@ void ParallelPeer::sendCameraKeyframe() {
     // Fill the keyframe buffer
     kf.serialize(buffer);
 
+    const double timestamp = global::windowDelegate.applicationTime();
     // Send message
     _connection.sendDataMessage(ParallelConnection::DataMessage(
         datamessagestructures::Type::CameraData,
+        timestamp,
         buffer
     ));
 }
 
-void ParallelPeer::sendTimeKeyframe() {
+void ParallelPeer::sendTimeTimeline() {
     // Create a keyframe with current position and orientation of camera
-    datamessagestructures::TimeKeyframe kf;
+    const Timeline<TimeKeyframeData> timeline = global::timeManager.timeline();
+    std::deque<Keyframe<TimeKeyframeData>> keyframes = timeline.keyframes();
 
-    const Time& time = OsEng.timeManager().time();
+    datamessagestructures::TimeTimeline timelineMessage;
+    timelineMessage._clear = true;
+    timelineMessage._keyframes.reserve(timeline.nKeyframes());
 
-    kf._dt = time.deltaTime();
-    kf._paused = time.paused();
-    kf._requiresTimeJump = _timeJumped;
-    kf._time = time.j2000Seconds();
+    // Case 1: Copy all keyframes from the native timeline
+    for (size_t i = 0; i < timeline.nKeyframes(); ++i) {
+        const Keyframe<TimeKeyframeData>& kf = keyframes.at(i);
 
-    // Timestamp as current runtime of OpenSpace instance
-    kf._timestamp = OsEng.windowWrapper().applicationTime();
+        datamessagestructures::TimeKeyframe kfMessage;
+        kfMessage._time = kf.data.time.j2000Seconds();
+        kfMessage._dt = kf.data.delta;
+        kfMessage._paused = kf.data.pause;
+        kfMessage._requiresTimeJump = kf.data.jump;
+        kfMessage._timestamp = kf.timestamp;
 
+        timelineMessage._keyframes.push_back(kfMessage);
+    }
+
+    // Case 2: Send one keyframe to represent the curernt time.
+    // If time jumped this frame, this is represented in the keyframe.
+    if (timeline.nKeyframes() == 0) {
+        datamessagestructures::TimeKeyframe kfMessage;
+        kfMessage._time = global::timeManager.time().j2000Seconds();
+        kfMessage._dt = global::timeManager.targetDeltaTime();
+        kfMessage._paused = global::timeManager.isPaused();
+        kfMessage._timestamp = global::windowDelegate.applicationTime();
+        kfMessage._requiresTimeJump = _timeJumped;
+        timelineMessage._keyframes.push_back(kfMessage);
+    }
     // Create a buffer for the keyframe
     std::vector<char> buffer;
 
-    // Fill the keyframe buffer
-    kf.serialize(buffer);
+    // Fill the timeline buffer
+    timelineMessage.serialize(buffer);
 
+    double timestamp = global::windowDelegate.applicationTime();
     // Send message
     _connection.sendDataMessage(ParallelConnection::DataMessage(
-        datamessagestructures::Type::TimeData,
+        datamessagestructures::Type::TimelineData,
+        timestamp,
         buffer
     ));
-    _timeJumped = false;
 }
 
 ghoul::Event<>& ParallelPeer::connectionEvent() {

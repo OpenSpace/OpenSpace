@@ -27,7 +27,6 @@
 #include <modules/sync/syncmodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/util/httprequest.h>
 #include <ghoul/fmt.h>
@@ -58,7 +57,7 @@ documentation::Documentation UrlSynchronization::Documentation() {
         {
             {
                 KeyUrl,
-                new OrVerifier(new StringVerifier, new StringListVerifier),
+                new OrVerifier({ new StringVerifier, new StringListVerifier }),
                 Optional::No,
                 "The URL or urls from where the files are downloaded. If multiple URLs "
                 "are provided, all files will be downloaded to the same directory."

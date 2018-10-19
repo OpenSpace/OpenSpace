@@ -57,6 +57,7 @@
 // All values that are defined here are compatible with (and are based on) the
 // definitions GLFW v3.1
 
+#include <ghoul/misc/stringconversion.h>
 #include <map>
 #include <string>
 
@@ -361,12 +362,17 @@ static const std::map<std::string, Key> KeyMapping = {
 
 } // namespace openspace
 
-namespace std {
+namespace ghoul {
 
-std::string to_string(openspace::Key key);
-std::string to_string(openspace::KeyModifier mod);
-std::string to_string(openspace::KeyWithModifier key);
+template <>
+std::string to_string(const openspace::Key& key);
 
-} // namespace std
+template <>
+std::string to_string(const openspace::KeyModifier& mod);
+
+template <>
+std::string to_string(const openspace::KeyWithModifier& key);
+
+} // namespace ghoul
 
 #endif // __OPENSPACE_CORE___KEYS___H__

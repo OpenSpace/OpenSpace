@@ -24,7 +24,7 @@
 
 #include <openspace/interaction/joystickcamerastates.h>
 
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/interaction/inputstate.h>
 #include <openspace/scripting/scriptengine.h>
 #include <utility>
@@ -152,10 +152,10 @@ void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
     for (int i = 0; i < JoystickInputState::MaxButtons; ++i) {
         auto itRange = _buttonMapping.equal_range(i);
         for (auto it = itRange.first; it != itRange.second; ++it) {
-            bool active = inputState.joystickInputStates().button(i, it->second.action);
+            bool active = global::joystickInputStates.button(i, it->second.action);
 
             if (active) {
-                OsEng.scriptEngine().queueScript(
+                global::scriptEngine.queueScript(
                     it->second.command,
                     scripting::ScriptEngine::RemoteScripting(it->second.synchronization)
                 );
@@ -223,8 +223,9 @@ std::vector<std::string> JoystickCameraStates::buttonCommand(int button) const {
 
 } // namespace openspace::interaction
 
-namespace std {
+namespace ghoul {
 
+template <>
 std::string to_string(const openspace::interaction::JoystickCameraStates::AxisType& type)
 {
     using T = openspace::interaction::JoystickCameraStates::AxisType;
@@ -243,10 +244,6 @@ std::string to_string(const openspace::interaction::JoystickCameraStates::AxisTy
         default:             return "";
     }
 }
-
-} // namespace std
-
-namespace ghoul {
 
 template <>
 openspace::interaction::JoystickCameraStates::AxisType from_string(

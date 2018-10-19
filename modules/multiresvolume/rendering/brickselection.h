@@ -36,6 +36,19 @@ struct BrickSelection {
         Spatial = 2
     };
 
+    BrickSelection();
+    BrickSelection(int numBricks, int numTimeSteps, SplitType splitType,
+        float splitPoints);
+
+    BrickSelection splitSpatially(bool x, bool y, bool z, unsigned int childBrickIndex,
+        SplitType childSplitType, float childSplitPoints);
+
+    BrickSelection splitTemporally(bool t, unsigned int childBrickIndex,
+        SplitType childSplitType, float childSplitPoints);
+
+    int centerT() const;
+    bool timestepInRightChild(int timestep) const;
+
     unsigned int brickIndex;
     float splitPoints;
     BrickSelection::SplitType splitType;
@@ -44,69 +57,6 @@ struct BrickSelection {
     int highT;
     int nSpatialSplits;
     int nTemporalSplits;
-
-    BrickSelection() {}
-
-    BrickSelection(int numBricks, int numTimeSteps, SplitType splitType_,
-                   float splitPoints_)
-    {
-        cover = BrickCover(numBricks);
-        lowT = 0;
-        highT = numTimeSteps;
-        brickIndex = 0;
-        splitType = splitType_;
-        splitPoints = splitPoints_;
-        nSpatialSplits = 0;
-        nTemporalSplits = 0;
-    }
-
-    BrickSelection splitSpatially(bool x, bool y, bool z, unsigned int childBrickIndex,
-                                  SplitType childSplitType, float childSplitPoints)
-    {
-        BrickSelection child;
-        child.cover = cover.split(x, y, z);
-        child.brickIndex = childBrickIndex;
-        child.splitPoints = childSplitPoints;
-        child.splitType = childSplitType;
-        child.nSpatialSplits = nSpatialSplits + 1;
-        child.nTemporalSplits = nTemporalSplits;
-        child.lowT = lowT;
-        child.highT = highT;
-        return child;
-    }
-
-    BrickSelection splitTemporally(bool t, unsigned int childBrickIndex,
-                                   SplitType childSplitType, float childSplitPoints)
-    {
-        BrickSelection child;
-        child.cover = cover;
-        child.brickIndex = childBrickIndex;
-        child.splitPoints = childSplitPoints;
-        child.splitType = childSplitType;
-        if (t) {
-            child.lowT = centerT();
-            child.highT = highT;
-        } else {
-            child.lowT = lowT;
-            child.highT = centerT();
-        }
-        child.nSpatialSplits = nSpatialSplits;
-        child.nTemporalSplits = nTemporalSplits + 1;
-
-        return child;
-    }
-
-    int centerT() {
-        return lowT + (highT - lowT) / 2;
-    }
-
-    bool timestepInRightChild(int timestep) {
-        return timestep >= centerT();
-    }
-
-    static bool compareSplitPoints(const BrickSelection& a, const BrickSelection& b) {
-        return a.splitPoints < b.splitPoints;
-    }
 };
 
 } // namespace openspace

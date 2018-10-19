@@ -26,7 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
@@ -38,6 +38,11 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
+    constexpr const std::array<const char*, 6> UniformNames = {
+        "modelViewProjectionTransform", "textureOffset", "transparency", "_nightFactor",
+        "sunPosition", "texture1"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
@@ -177,20 +182,13 @@ bool RenderableRings::isReady() const {
 }
 
 void RenderableRings::initializeGL() {
-    _shader = OsEng.renderEngine().buildRenderProgram(
+    _shader = global::renderEngine.buildRenderProgram(
         "RingProgram",
         absPath("${MODULE_SPACE}/shaders/rings_vs.glsl"),
         absPath("${MODULE_SPACE}/shaders/rings_fs.glsl")
     );
 
-    _uniformCache.modelViewProjection = _shader->uniformLocation(
-        "modelViewProjectionTransform"
-    );
-    _uniformCache.textureOffset = _shader->uniformLocation("textureOffset");
-    _uniformCache.transparency = _shader->uniformLocation("transparency");
-    _uniformCache.nightFactor = _shader->uniformLocation("_nightFactor");
-    _uniformCache.sunPosition = _shader->uniformLocation("sunPosition");
-    _uniformCache.texture = _shader->uniformLocation("texture1");
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 
     glGenVertexArrays(1, &_quad);
     glGenBuffers(1, &_vertexPositionBuffer);
@@ -209,7 +207,7 @@ void RenderableRings::deinitializeGL() {
     _textureFile = nullptr;
     _texture = nullptr;
 
-    OsEng.renderEngine().removeRenderProgram(_shader.get());
+    global::renderEngine.removeRenderProgram(_shader.get());
     _shader = nullptr;
 }
 
@@ -250,15 +248,7 @@ void RenderableRings::render(const RenderData& data, RendererTasks&) {
 void RenderableRings::update(const UpdateData& data) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
-
-        _uniformCache.modelViewProjection = _shader->uniformLocation(
-            "modelViewProjectionTransform"
-        );
-        _uniformCache.textureOffset = _shader->uniformLocation("textureOffset");
-        _uniformCache.transparency = _shader->uniformLocation("transparency");
-        _uniformCache.nightFactor = _shader->uniformLocation("_nightFactor");
-        _uniformCache.sunPosition = _shader->uniformLocation("sunPosition");
-        _uniformCache.texture = _shader->uniformLocation("texture1");
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
     }
 
     if (_planeIsDirty) {
@@ -271,7 +261,7 @@ void RenderableRings::update(const UpdateData& data) {
         _textureIsDirty = false;
     }
 
-    _sunPosition = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition() -
+    _sunPosition = global::renderEngine.scene()->sceneGraphNode("Sun")->worldPosition() -
                    data.modelTransform.translation;
 }
 

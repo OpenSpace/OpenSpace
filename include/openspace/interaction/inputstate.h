@@ -43,8 +43,6 @@ public:
     void mousePositionCallback(double mouseX, double mouseY);
     void mouseScrollWheelCallback(double mouseScrollDelta);
 
-    void setJoystickInputStates(JoystickInputStates& states);
-
     // Accessors
     const std::vector<std::pair<Key, KeyModifier>>& pressedKeys() const;
     bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const;
@@ -55,7 +53,6 @@ public:
     double mouseScrollDelta() const;
     bool isMouseButtonPressed(MouseButton mouseButton) const;
 
-    const JoystickInputStates& joystickInputStates() const;
     float joystickAxis(int i) const;
     bool joystickButton(int i) const;
 
@@ -67,10 +64,6 @@ private:
     std::vector<MouseButton> _mouseButtonsDown;
     glm::dvec2 _mousePosition;
     double _mouseScrollDelta;
-
-    // Input from joysticks
-    // The memory is owned by the outer most main (apps/OpenSpace/main.cpp right now)
-    JoystickInputStates* _joystickInputStates = nullptr;
 };
 
 } // namespace openspace::interaction

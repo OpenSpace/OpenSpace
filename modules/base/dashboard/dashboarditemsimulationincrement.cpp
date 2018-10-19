@@ -26,7 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/font/font.h>
@@ -136,7 +136,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
         _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
     }
     _fontName.onChange([this](){
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
@@ -144,7 +144,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
         _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
     }
     _fontSize.onChange([this](){
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
@@ -173,34 +173,63 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
     addProperty(_requestedUnit);
 
-    _font = OsEng.fontManager().font(_fontName, _fontSize);
+    _font = global::fontManager.font(_fontName, _fontSize);
 }
 
 void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
-    const double t = OsEng.timeManager().time().deltaTime();
-    std::pair<double, std::string> deltaTime;
+    const double targetDt = global::timeManager.targetDeltaTime();
+    const double currentDt = global::timeManager.deltaTime();
+    std::pair<double, std::string> targetDeltaTime;
+    std::pair<double, std::string> currentDeltaTime;
     if (_doSimplification) {
-        deltaTime = simplifyTime(t);
+        targetDeltaTime = simplifyTime(targetDt);
+        if (targetDt != currentDt) {
+            currentDeltaTime = simplifyTime(currentDt);
+        }
     }
     else {
         const TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
-        const double convertedT = convertTime(t, TimeUnit::Second, unit);
-        deltaTime = { convertedT, nameForTimeUnit(unit, convertedT != 1.0) };
+
+        const double convTarget = convertTime(targetDt, TimeUnit::Second, unit);
+        targetDeltaTime = { convTarget, nameForTimeUnit(unit, convTarget != 1.0) };
+
+        if (targetDt != currentDt) {
+            const double convCurrent = convertTime(currentDt, TimeUnit::Second, unit);
+            currentDeltaTime = { convCurrent, nameForTimeUnit(unit, convCurrent != 1.0) };
+        }
     }
 
+    std::string pauseText = global::timeManager.isPaused() ? " (Paused)" : "";
+
     penPosition.y -= _font->height();
-    RenderFont(
-        *_font,
-        penPosition,
-        fmt::format(
-            "Simulation increment: {:.1f} {:s} / second",
-            deltaTime.first, deltaTime.second
-        )
-    );
+    if (targetDt != currentDt && !global::timeManager.isPaused()) {
+        // We are in the middle of a transition
+        RenderFont(
+            *_font,
+            penPosition,
+            fmt::format(
+                "Simulation increment: {:.1f} {:s} / second{:s} (current: {:.1f} {:s})",
+                targetDeltaTime.first, targetDeltaTime.second,
+                pauseText,
+                currentDeltaTime.first, currentDeltaTime.second
+            )
+        );
+    }
+    else {
+        RenderFont(
+            *_font,
+            penPosition,
+            fmt::format(
+                "Simulation increment: {:.1f} {:s} / second{:s}",
+                targetDeltaTime.first, targetDeltaTime.second,
+                pauseText
+            )
+        );
+    }
 }
 
 glm::vec2 DashboardItemSimulationIncrement::size() const {
-    double t = OsEng.timeManager().time().deltaTime();
+    double t = global::timeManager.targetDeltaTime();
     std::pair<double, std::string> deltaTime;
     if (_doSimplification) {
         deltaTime = simplifyTime(t);

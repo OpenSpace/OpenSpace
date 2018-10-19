@@ -23,6 +23,8 @@
  ****************************************************************************************/
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/misc/easing.h>
 #include <regex>
@@ -107,12 +109,12 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
                 foundMatching = true;
 
                 if (interpolationDuration == 0.0) {
-                    OsEng.renderEngine().scene()->removeInterpolation(prop);
+                    global::renderEngine.scene()->removePropertyInterpolation(prop);
                     prop->setLuaValue(L);
                 }
                 else {
                     prop->setLuaInterpolationTarget(L);
-                    OsEng.renderEngine().scene()->addInterpolation(
+                    global::renderEngine.scene()->addPropertyInterpolation(
                         prop,
                         static_cast<float>(interpolationDuration),
                         easingFunction
@@ -184,12 +186,12 @@ int setPropertyCall_single(properties::Property& prop, const std::string& uri,
     }
     else {
         if (duration == 0.0) {
-            OsEng.renderEngine().scene()->removeInterpolation(&prop);
+            global::renderEngine.scene()->removePropertyInterpolation(&prop);
             prop.setLuaValue(L);
         }
         else {
             prop.setLuaInterpolationTarget(L);
-            OsEng.renderEngine().scene()->addInterpolation(
+            global::renderEngine.scene()->addPropertyInterpolation(
                 &prop,
                 static_cast<float>(duration),
                 eastingFunction
@@ -237,12 +239,12 @@ int property_setValue(lua_State* L) {
                 interpolationDuration = ghoul::lua::value<double>(L, 4);
             }
             else {
-                optimization = ghoul::lua::value<std::string>(L, 4);
+                easingMethodName = ghoul::lua::value<std::string>(L, 4);
             }
         }
 
         if (lua_gettop(L) == 5) {
-            easingMethodName = ghoul::lua::value<std::string>(L, 5);
+            optimization = ghoul::lua::value<std::string>(L, 5);
         }
 
         // Later functions expect the value to be at the last position on the stack
@@ -373,7 +375,7 @@ int property_setValueSingle(lua_State* L) {
 int property_getValue(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::property_getValue");
 
-    const std::string& uri = ghoul::lua::value<std::string>(
+    std::string uri = ghoul::lua::value<std::string>(
         L,
         1,
         ghoul::lua::PopValue::Yes
@@ -409,7 +411,7 @@ int loadScene(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadScene");
 
     const std::string& sceneFile = ghoul::lua::value<std::string>(L, 1);
-    OsEng.scheduleLoadSingleAsset(sceneFile);
+    global::openSpaceEngine.scheduleLoadSingleAsset(sceneFile);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -428,19 +430,19 @@ int addSceneGraphNode(lua_State* L) {
     }
 
     try {
-        SceneGraphNode* node = OsEng.renderEngine().scene()->loadNode(d);
+        SceneGraphNode* node = global::renderEngine.scene()->loadNode(d);
         if (!node) {
             LERRORC("Scene", "Could not load scene graph node");
             return ghoul::lua::luaError(L, "Error loading scene graph node");
         }
 
-        OsEng.renderEngine().scene()->initializeNode(node);
+        global::renderEngine.scene()->initializeNode(node);
     }
     catch (const documentation::SpecificationError& e) {
         return ghoul::lua::luaError(
             L,
             fmt::format("Error loading scene graph node: {}: {}",
-                e.what(), std::to_string(e.result))
+                e.what(), ghoul::to_string(e.result))
         );
     } catch (const ghoul::RuntimeError& e) {
         return ghoul::lua::luaError(
@@ -457,12 +459,12 @@ int addSceneGraphNode(lua_State* L) {
 int removeSceneGraphNode(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeSceneGraphNode");
 
-    const std::string& nodeName = ghoul::lua::value<std::string>(
+    std::string nodeName = ghoul::lua::value<std::string>(
         L,
         1,
         ghoul::lua::PopValue::Yes
     );
-    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(nodeName);
+    SceneGraphNode* node = global::renderEngine.scene()->sceneGraphNode(nodeName);
     if (!node) {
         LERRORC(
             "removeSceneGraphNode",
@@ -507,17 +509,31 @@ int removeSceneGraphNode(lua_State* L) {
 int hasSceneGraphNode(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::hasSceneGraphNode");
 
-    const std::string& nodeName = ghoul::lua::value<std::string>(
+    std::string nodeName = ghoul::lua::value<std::string>(
         L,
         1,
         ghoul::lua::PopValue::Yes
     );
-    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(nodeName);
+    SceneGraphNode* node = global::renderEngine.scene()->sceneGraphNode(nodeName);
 
     ghoul::lua::push(L, node != nullptr);
 
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
+}
+
+#pragma optimize("", off)
+int addInterestingTime(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addInterestingTime");
+
+    std::string name = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::No);
+    std::string time = ghoul::lua::value<std::string>(L, 2, ghoul::lua::PopValue::No);
+    lua_pop(L, 2);
+
+    global::renderEngine.scene()->addInterestingTime({std::move(name), std::move(time)});
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
 }
 
 }  // namespace openspace::luascriptfunctions

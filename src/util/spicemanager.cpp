@@ -207,12 +207,6 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
 
     if (it != _loadedKernels.end()) {
         it->refCount++;
-        LDEBUG(
-            fmt::format(
-                "Kernel '{}' was already loaded. New reference count: {}",
-                path, it->refCount
-            )
-        );
         return it->id;
     }
 
@@ -401,7 +395,7 @@ bool SpiceManager::hasFrameId(const std::string& frame) const {
 }
 
 void getValueInternal(const std::string& body, const std::string& value, int size,
-    double* v)
+                      double* v)
 {
     ghoul_assert(!body.empty(), "Empty body");
     ghoul_assert(!value.empty(), "Empty value");

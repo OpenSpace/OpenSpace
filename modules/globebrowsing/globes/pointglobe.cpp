@@ -25,13 +25,17 @@
 #include <modules/globebrowsing/globes/pointglobe.h>
 
 #include <modules/globebrowsing/globes/renderableglobe.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
+    constexpr const std::array<const char*, 3> UniformNames = {
+        "lightIntensityClamped", "modelViewTransform", "projectionTransform"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo IntensityClampInfo = {
         "IntensityClamp",
         "Intensity clamp",
@@ -63,21 +67,13 @@ PointGlobe::~PointGlobe() {
 }
 
 void PointGlobe::initialize() {
-    _programObject = OsEng.renderEngine().buildRenderProgram(
+    _programObject = global::renderEngine.buildRenderProgram(
         "PointGlobe",
         absPath("${MODULE_GLOBEBROWSING}/shaders/pointglobe_vs.glsl"),
         absPath("${MODULE_GLOBEBROWSING}/shaders/pointglobe_fs.glsl")
     );
 
-    _uniformCache.lightIntensityClamped = _programObject->uniformLocation(
-        "lightIntensityClamped"
-    );
-    _uniformCache.modelView = _programObject->uniformLocation(
-        "modelViewTransform"
-    );
-    _uniformCache.projection = _programObject->uniformLocation(
-        "projectionTransform"
-    );
+    ghoul::opengl::updateUniformLocations(*_programObject, _uniformCache, UniformNames);
 
     glGenVertexArrays(1, &_vaoID);
     glGenBuffers(1, &_vertexBufferID);
@@ -159,8 +155,8 @@ void PointGlobe::render(const RenderData& data, RendererTasks&) {
         _uniformCache.lightIntensityClamped,
         lightIntensityClamped
     );
-    //_programObject->setUniform("lightOverflow", lightOverflow);
-    //_programObject->setUniform("directionToSunViewSpace", directionToSunViewSpace);
+    //_program->setUniform("lightOverflow", lightOverflow);
+    //_program->setUniform("directionToSunViewSpace", directionToSunViewSpace);
     _programObject->setUniform(
         _uniformCache.modelView,
         glm::mat4(modelViewTransform)

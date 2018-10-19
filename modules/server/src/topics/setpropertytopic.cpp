@@ -25,10 +25,11 @@
 #include <modules/server/include/topics/setpropertytopic.h>
 
 #include <openspace/json.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/properties/property.h>
 #include <openspace/query/query.h>
 #include <openspace/util/timemanager.h>
+#include <openspace/util/time.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -46,7 +47,9 @@ void SetPropertyTopic::handleJson(const nlohmann::json& json) {
         std::string value = json.at(ValueKey).get<std::string>();
 
         if (propertyKey == SpecialKeyTime) {
-            OsEng.timeManager().time().setTime(std::move(value));
+            Time newTime;
+            newTime.setTime(value);
+            global::timeManager.setTimeNextFrame(newTime);
         }
         else {
             properties::Property* prop = property(propertyKey);

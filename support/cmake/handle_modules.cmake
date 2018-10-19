@@ -23,6 +23,7 @@
 ##########################################################################################
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
+include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
 
 function (handle_modules internal_module_path external_modules_paths)
     #
@@ -45,16 +46,8 @@ function (handle_modules internal_module_path external_modules_paths)
         set(all_module_paths ${all_module_paths} ${paths})
     endforeach ()
 
-    list(LENGTH all_module_names len1)
-    math(EXPR len2 "${len1} - 1")
-
-    # Debug:  List all modules
-    # message(STATUS "All modules:")
-    # foreach (val RANGE ${len2})
-    #     list(GET all_module_names ${val} name)
-    #     list(GET all_module_paths ${val} path)
-    #     message(STATUS "\t${name}        (${path})")
-    # endforeach ()
+    list(LENGTH all_module_names all_module_names_count)
+    math(EXPR all_module_names_count "${all_module_names_count} - 1")
 
     #
     # Step 2:  Create options for all modules with correct default values
@@ -62,13 +55,19 @@ function (handle_modules internal_module_path external_modules_paths)
 
     set(enabled_module_names "")
     set(enabled_module_paths "")
-    foreach(val RANGE ${len2})
+    foreach(val RANGE ${all_module_names_count})
         list(GET all_module_names ${val} name)
         list(GET all_module_paths ${val} path)
 
+        get_module_attribute_supported(${path} is_module_supported)
+        if (NOT ${is_module_supported})
+            message(STATUS "Skipping module ${name} (${path}) as it is not supported on this machine")
+            continue()
+        endif ()
+
         get_module_attribute_default(${path} is_default_module)
         create_option_name(${name} optionName)
-        option(${optionName} "Build ${dir} Module" ${is_default_module})
+        option(${optionName} "Build ${path} Module" ${is_default_module})
 
         if (${optionName})
             list(APPEND enabled_module_names ${name})
@@ -76,14 +75,13 @@ function (handle_modules internal_module_path external_modules_paths)
         endif ()
     endforeach ()
 
-
     #
     # Step 3:  For each module that is default or enabled by the user, get the dependencies
     #
     set(dependencies "")
-    list(LENGTH enabled_module_names len1)
-    math(EXPR len2 "${len1} - 1")
-    foreach (val RANGE ${len2})
+    list(LENGTH enabled_module_names enabled_module_count)
+    math(EXPR enabled_module_count "${enabled_module_count} - 1")
+    foreach (val RANGE ${enabled_module_count})
         list(GET enabled_module_names ${val} name)
         list(GET enabled_module_paths ${val} path)
 
@@ -118,35 +116,38 @@ function (handle_modules internal_module_path external_modules_paths)
 
     # Print all the enabled modules
     message(STATUS "Enabled modules:")
-    list(LENGTH enabled_module_names len1)
-    math(EXPR len2 "${len1} - 1")
-    foreach (val RANGE ${len2})
+    list(LENGTH enabled_module_names enabled_module_count)
+    math(EXPR enabled_module_count "${enabled_module_count} - 1")
+    foreach (val RANGE ${enabled_module_count})
         list(GET enabled_module_names ${val} name)
         list(GET enabled_module_paths ${val} path)
 
-        message(STATUS "\t${name}    (${path})")
+        message(STATUS "\t${name}  (${path})")
     endforeach ()
 
     #
-    # Step 5:  Add the subdirectories of all the enabled modules
+    # Step 5:  Add the subdirectories of all enabled modules
     #
     set(module_class_names "")
     set(module_external_libraries "")
-    foreach (val RANGE ${len2})
+    foreach (val RANGE ${enabled_module_count})
         list(GET enabled_module_names ${val} name)
         list(GET enabled_module_paths ${val} path)
 
         create_library_name(${name} library_name)
+        begin_header("Module ${name} (${library_name})")
         add_subdirectory(${path})
+        end_header("End: Module ${name}")
+        message(STATUS "")
 
-        # Only link libOpenSpace against the library if it has been set STATIC
+        # Only link openspace-core against the library if it has been set STATIC
         get_target_property(library_type ${library_name} TYPE)
         if (NOT ${library_type} STREQUAL "SHARED_LIBRARY")
-            target_link_libraries(libOpenSpace ${library_name})
+            target_link_libraries(openspace-core ${library_name})
         endif()
 
         create_define_name(${name} define_name)
-        target_compile_definitions(libOpenSpace PUBLIC "${define_name}")
+        target_compile_definitions(openspace-core PUBLIC "${define_name}")
 
         get_property(class_name GLOBAL PROPERTY CurrentModuleClassName)
         list(APPEND module_class_names ${class_name})
@@ -165,7 +166,7 @@ function (handle_modules internal_module_path external_modules_paths)
     set(MODULE_HEADERS "")
     set(MODULE_CLASSES "")
     set(MODULE_PATHS "")
-    foreach (val RANGE ${len2})
+    foreach (val RANGE ${enabled_module_count})
         list(GET enabled_module_names ${val} name)
         list(GET enabled_module_paths ${val} path)
         list(GET module_class_names ${val} class_name)
@@ -190,7 +191,7 @@ function (handle_modules internal_module_path external_modules_paths)
         # The module path should include the 'modules' directory, which is removed for the
         # include path to make all of the includes look the same
         list(APPEND MODULE_PATHS "    \"${path}/modules\",\n")
-        target_include_directories(libOpenSpace PUBLIC ${path})
+        target_include_directories(openspace-core PUBLIC ${path})
     endforeach ()
 
     if (NOT "${MODULE_HEADERS}" STREQUAL "")
@@ -266,6 +267,18 @@ function (get_module_attribute_dependencies path result)
         include(${path}/${dir}/include.cmake)
         if (DEFINED OPENSPACE_DEPENDENCIES)
             set(${result} ${OPENSPACE_DEPENDENCIES} PARENT_SCOPE)
+        endif ()
+    endif ()
+endfunction()
+
+# Returns the state whether the module located at 'path' is supported on this machine
+function (get_module_attribute_supported path result)
+    set(${result} ON PARENT_SCOPE)
+    if (EXISTS "${path}/include.cmake")
+        unset(SUPPORTED)
+        include(${path}/${dir}/include.cmake)
+        if (DEFINED SUPPORTED)
+            set(${result} ${SUPPORTED} PARENT_SCOPE)
         endif ()
     endif ()
 endfunction()

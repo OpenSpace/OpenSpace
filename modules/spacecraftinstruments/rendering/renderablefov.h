@@ -93,7 +93,7 @@ private:
     properties::FloatProperty _lineWidth;
     properties::BoolProperty _drawSolid;
     properties::DoubleProperty _standOffDistance;
-    ghoul::opengl::ProgramObject* _programObject = nullptr;
+    ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(modelViewProjection, defaultColorStart, defaultColorEnd, activeColor,
         targetInFieldOfViewColor, intersectionStartColor, intersectionEndColor,
         squareColor, interpolation) _uniformCache;

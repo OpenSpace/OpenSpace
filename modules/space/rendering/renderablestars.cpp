@@ -27,7 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 
 #include <ghoul/filesystem/cachemanager.h>
@@ -47,6 +47,11 @@ namespace {
     constexpr const char* _loggerCat = "RenderableStars";
 
     constexpr const char* KeyFile = "File";
+
+    constexpr const std::array<const char*, 10> UniformNames = {
+        "view", "projection", "colorOption", "alphaValue", "scaleFactor",
+        "minBillboardSize", "screenSize", "scaling", "psfTexture", "colorTexture"
+    };
 
     constexpr int8_t CurrentCacheVersion = 1;
 
@@ -289,23 +294,13 @@ bool RenderableStars::isReady() const {
 }
 
 void RenderableStars::initializeGL() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    _program = renderEngine.buildRenderProgram("Star",
+    _program = global::renderEngine.buildRenderProgram("Star",
         absPath("${MODULE_SPACE}/shaders/star_vs.glsl"),
         absPath("${MODULE_SPACE}/shaders/star_fs.glsl"),
         absPath("${MODULE_SPACE}/shaders/star_ge.glsl")
     );
 
-    _uniformCache.view = _program->uniformLocation("view");
-    _uniformCache.projection = _program->uniformLocation("projection");
-    _uniformCache.colorOption = _program->uniformLocation("colorOption");
-    _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-    _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
-    _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
-    _uniformCache.screenSize = _program->uniformLocation("screenSize");
-    _uniformCache.scaling = _program->uniformLocation("scaling");
-    _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
-    _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
     bool success = loadData();
     if (!success) {
@@ -322,9 +317,8 @@ void RenderableStars::deinitializeGL() {
     _pointSpreadFunctionTexture = nullptr;
     _colorTexture = nullptr;
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
     if (_program) {
-        renderEngine.removeRenderProgram(_program.get());
+        global::renderEngine.removeRenderProgram(_program.get());
         _program = nullptr;
     }
 }
@@ -346,7 +340,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.minBillboardSize, _minBillboardSize);
     _program->setUniform(
         _uniformCache.screenSize,
-        glm::vec2(OsEng.renderEngine().renderingResolution())
+        glm::vec2(global::renderEngine.renderingResolution())
     );
 
     setPscUniforms(*_program.get(), data.camera, data.position);
@@ -555,17 +549,7 @@ void RenderableStars::update(const UpdateData&) {
 
     if (_program->isDirty()) {
         _program->rebuildFromFile();
-
-        _uniformCache.view = _program->uniformLocation("view");
-        _uniformCache.projection = _program->uniformLocation("projection");
-        _uniformCache.colorOption = _program->uniformLocation("colorOption");
-        _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-        _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
-        _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
-        _uniformCache.screenSize = _program->uniformLocation("screenSize");
-        _uniformCache.scaling = _program->uniformLocation("scaling");
-        _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
-        _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 }
 

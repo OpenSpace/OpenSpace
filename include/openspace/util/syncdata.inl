@@ -27,38 +27,48 @@
 namespace openspace {
 
 template<class T>
-SyncData<T>::SyncData(const T& val) : data(val) {}
+SyncData<T>::SyncData(const T& val) : _data(val) {}
 
 template<class T>
-SyncData<T>::SyncData(const SyncData<T>& o) : data(o.data) {}
+SyncData<T>::SyncData(const SyncData<T>& o) : _data(o._data) {}
 
 template<class T>
 SyncData<T>& SyncData<T>::operator=(const T& rhs) {
-    data = rhs;
+    _data = rhs;
     return *this;
 }
 
 template<class T>
 SyncData<T>::operator T&() {
-    return data;
+    return _data;
 }
 
 template<class T>
 SyncData<T>::operator const T&() const {
-    return data;
+    return _data;
+}
+
+template<class T>
+T& SyncData<T>::data() {
+    return _data;
+}
+
+template<class T>
+const T& SyncData<T>::data() const {
+    return _data;
 }
 
 template<class T>
 void SyncData<T>::encode(SyncBuffer* syncBuffer) {
     _mutex.lock();
-    syncBuffer->encode(data);
+    syncBuffer->encode(_data);
     _mutex.unlock();
 }
 
 template<class T>
 void SyncData<T>::decode(SyncBuffer* syncBuffer) {
     _mutex.lock();
-    syncBuffer->decode(doubleBufferedData);
+    syncBuffer->decode(_doubleBufferedData);
     _mutex.unlock();
 }
 
@@ -67,7 +77,7 @@ void SyncData<T>::postSync(bool isMaster) {
     // apply synced update
     if (!isMaster) {
         _mutex.lock();
-        data = doubleBufferedData;
+        _data = _doubleBufferedData;
         _mutex.unlock();
     }
 }

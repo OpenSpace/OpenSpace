@@ -25,7 +25,7 @@
 #include <modules/imgui/include/guijoystickcomponent.h>
 
 #include <modules/imgui/include/imgui_include.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/joystickinputstate.h>
@@ -50,11 +50,8 @@ void GuiJoystickComponent::render() {
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 
-    const JoystickInputStates& states =
-        OsEng.navigationHandler().inputState().joystickInputStates();
-
-    for (size_t i = 0; i < states.size(); ++i) {
-        const JoystickInputState& state = states[i];
+    for (size_t i = 0; i < global::joystickInputStates.size(); ++i) {
+        const JoystickInputState& state = global::joystickInputStates[i];
         if (!state.isConnected) {
             continue;
         }
@@ -88,7 +85,7 @@ void GuiJoystickComponent::render() {
     ImGui::Text("%s", "Summed contributions");
     ImGui::Text("%s", "Axes");
     for (int i = 0; i < JoystickInputState::MaxAxes; ++i) {
-        float f = states.axis(i);
+        float f = global::joystickInputStates.axis(i);
         ImGui::SliderFloat(
             std::to_string(i).c_str(),
             &f,
@@ -100,8 +97,8 @@ void GuiJoystickComponent::render() {
     for (int i = 0; i < JoystickInputState::MaxButtons; ++i) {
         ImGui::RadioButton(
             std::to_string(i).c_str(),
-            states.button(i, JoystickAction::Press) ||
-                states.button(i, JoystickAction::Repeat)
+            global::joystickInputStates.button(i, JoystickAction::Press) ||
+                global::joystickInputStates.button(i, JoystickAction::Repeat)
         );
     }
 

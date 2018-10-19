@@ -24,7 +24,6 @@
 
 #include <openspace/util/time.h>
 
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
@@ -44,7 +43,6 @@ double Time::convertTime(const std::string& time) {
 
 Time::Time(double secondsJ2000) : _time(secondsJ2000) {}
 
-
 Time Time::now() {
     Time now;
     time_t secondsSince1970;
@@ -58,45 +56,21 @@ Time Time::now() {
     return now;
 }
 
-void Time::setTime(double j2000Seconds, bool requireJump) {
-    _time = j2000Seconds;
-    _timeJumped = requireJump;
+void Time::setTime(double value) {
+    _time = value;
 }
 
 double Time::j2000Seconds() const {
     return _time;
 }
 
-double Time::advanceTime(double tickTime) {
-    if (_timePaused) {
-        return _time;
-    }
-    else {
-        _time += _dt * tickTime;
-    }
+double Time::advanceTime(double delta) {
+    _time += delta;
     return _time;
 }
 
-void Time::setDeltaTime(double deltaT) {
-    _dt = deltaT;
-}
-
-double Time::deltaTime() const {
-    return _dt;
-}
-
-void Time::setPause(bool pause) {
-    _timePaused = pause;
-}
-
-bool Time::togglePause() {
-    _timePaused = !_timePaused;
-    return _timePaused;
-}
-
-void Time::setTime(std::string time, bool requireJump) {
+void Time::setTime(std::string time) {
     _time = SpiceManager::ref().ephemerisTimeFromDate(std::move(time));
-    _timeJumped = requireJump;
 }
 
 std::string Time::UTC() const {
@@ -152,22 +126,22 @@ std::string Time::ISO8601() const {
     return datetime;
 }
 
-bool Time::timeJumped() const {
-    return _timeJumped;
-}
-
-void Time::setTimeJumped(bool jumped) {
-    _timeJumped = jumped;
-}
-
-bool Time::paused() const {
-    return _timePaused;
-}
-
 scripting::LuaLibrary Time::luaLibrary() {
     return {
         "time",
         {
+            {
+                "setTime",
+                &luascriptfunctions::time_setTime,
+                {},
+                "{number, string}",
+                "Sets the current simulation time to the "
+                "specified value. If the parameter is a number, the value is the number "
+                "of seconds past the J2000 epoch. If it is a string, it has to be a "
+                "valid ISO 8601-like date string of the format YYYY-MM-DDTHH:MN:SS. "
+                "Note: providing time zone using the Z format is not supported. UTC is "
+                "assumed."
+            },
             {
                 "setDeltaTime",
                 &luascriptfunctions::time_setDeltaTime,
@@ -200,16 +174,39 @@ scripting::LuaLibrary Time::luaLibrary() {
                 " and restoring it afterwards"
             },
             {
-                "setTime",
-                &luascriptfunctions::time_setTime,
+                "interpolateTime",
+                &luascriptfunctions::time_interpolateTime,
                 {},
-                "{number, string}",
+                "{number, string} [, number]",
                 "Sets the current simulation time to the "
                 "specified value. If the parameter is a number, the value is the number "
                 "of seconds past the J2000 epoch. If it is a string, it has to be a "
                 "valid ISO 8601-like date string of the format YYYY-MM-DDTHH:MN:SS. "
                 "Note: providing time zone using the Z format is not supported. UTC is "
                 "assumed."
+            },
+            {
+                "interpolateDeltaTime",
+                &luascriptfunctions::time_interpolateDeltaTime,
+                {},
+                "number",
+                "Sets the amount of simulation time that happens "
+                "in one second of real time"
+            },
+            {
+                "interpolatePause",
+                &luascriptfunctions::time_interpolatePause,
+                {},
+                "bool",
+                "Pauses the simulation time or restores the delta time"
+            },
+            {
+                "interpolateTogglePause",
+                &luascriptfunctions::time_interpolateTogglePause,
+                {},
+                "",
+                "Toggles the pause function, i.e. temporarily setting the delta time to 0"
+                " and restoring it afterwards"
             },
             {
                 "currentTime",

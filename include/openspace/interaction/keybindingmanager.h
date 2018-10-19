@@ -39,9 +39,8 @@ namespace openspace::scripting { struct LuaLibrary; }
 
 namespace openspace::interaction {
 
-class KeyBindingManager : public DocumentationGenerator {
+class KeybindingManager : public DocumentationGenerator {
 public:
-    BooleanType(IsLocalBind);
     BooleanType(IsSynchronized);
 
     struct KeyInformation {
@@ -50,7 +49,7 @@ public:
         std::string documentation;
     };
 
-    KeyBindingManager();
+    KeybindingManager();
 
     void resetKeyBindings();
 
@@ -68,6 +67,8 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
+
+    const std::multimap<KeyWithModifier, KeyInformation>& keyBindings() const;
 
 private:
     std::string generateJson() const override;

@@ -6,12 +6,17 @@ asset.require("spice/base")
 -- Barycenter of the solar system, expressed in the Galactic frame
 local SolarSystemBarycenter = {
     Identifier = "SolarSystemBarycenter",
+    -- No parent; this node is attached to the scene graph root
+    TimeFrame = { -- Using Spice kernels for 1850-2150
+        Type = "TimeFrameInterval",
+        Start = "1850-JAN-01",
+        End = "2150-JAN-01"
+    },
     GUI = {
         Name = "Solar System Barycenter",
         Path = "/Solar System",
         Hidden = true
     }
-    -- No parent; this node is attached to the scene graph root
 }
 
 -- Spice frame for the Sun

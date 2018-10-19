@@ -27,7 +27,7 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/powerscaledscalar.h>
 #include <openspace/util/powerscaledsphere.h>
@@ -42,6 +42,10 @@
 
 namespace {
     constexpr const char* ProgramName = "Sphere";
+
+    constexpr const std::array<const char*, 4> UniformNames = {
+        "opacity", "ViewProjection", "ModelTransform", "texture1"
+    };
 
     enum Orientation {
         Outside = 1,
@@ -237,10 +241,10 @@ void RenderableSphere::initializeGL() {
     );
     _sphere->initialize();
 
-    _shader = BaseModule::ProgramObjectManager.requestProgramObject(
+    _shader = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return OsEng.renderEngine().buildRenderProgram(
+            return global::renderEngine.buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_BASE}/shaders/sphere_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/sphere_fs.glsl")
@@ -248,10 +252,7 @@ void RenderableSphere::initializeGL() {
         }
     );
 
-    _uniformCache.opacity = _shader->uniformLocation("opacity");
-    _uniformCache.viewProjection = _shader->uniformLocation("ViewProjection");
-    _uniformCache.modelTransform = _shader->uniformLocation("ModelTransform");
-    _uniformCache.texture = _shader->uniformLocation("texture1");
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 
     loadTexture();
 }
@@ -259,10 +260,10 @@ void RenderableSphere::initializeGL() {
 void RenderableSphere::deinitializeGL() {
     _texture = nullptr;
 
-    BaseModule::ProgramObjectManager.releaseProgramObject(
+    BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
     _shader = nullptr;
@@ -321,10 +322,10 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
-    bool usingFramebufferRenderer = OsEng.renderEngine().rendererImplementation() ==
+    bool usingFramebufferRenderer = global::renderEngine.rendererImplementation() ==
                                     RenderEngine::RendererImplementation::Framebuffer;
 
-    bool usingABufferRenderer = OsEng.renderEngine().rendererImplementation() ==
+    bool usingABufferRenderer = global::renderEngine.rendererImplementation() ==
                                 RenderEngine::RendererImplementation::ABuffer;
 
     if (usingABufferRenderer) {
@@ -348,11 +349,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 void RenderableSphere::update(const UpdateData&) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
-
-        _uniformCache.opacity = _shader->uniformLocation("opacity");
-        _uniformCache.viewProjection = _shader->uniformLocation("ViewProjection");
-        _uniformCache.modelTransform = _shader->uniformLocation("ModelTransform");
-        _uniformCache.texture = _shader->uniformLocation("texture1");
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
     }
 
     if (_sphereIsDirty) {

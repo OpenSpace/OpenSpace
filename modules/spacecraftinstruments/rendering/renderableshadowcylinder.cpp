@@ -26,7 +26,7 @@
 
 #include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/spicemanager.h>
@@ -38,6 +38,10 @@
 namespace {
     constexpr const char* ProgramName = "ShadowCylinderProgram";
     constexpr const char* MainFrame = "GALACTIC";
+
+    constexpr const std::array<const char*, 2> UniformNames = {
+        "modelViewProjectionTransform", "shadowColor"
+    };
 
     constexpr openspace::properties::Property::PropertyInfo NumberPointsInfo = {
         "AmountOfPoints",
@@ -277,10 +281,10 @@ void RenderableShadowCylinder::initializeGL() {
     glGenVertexArrays(1, &_vao);
     glGenBuffers(1, &_vbo);
 
-    _shader = SpacecraftInstrumentsModule::ProgramObjectManager.requestProgramObject(
+    _shader = SpacecraftInstrumentsModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return OsEng.renderEngine().buildRenderProgram(
+            return global::renderEngine.buildRenderProgram(
                 ProgramName,
                 absPath(
                     "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/terminatorshadow_vs.glsl"
@@ -292,19 +296,14 @@ void RenderableShadowCylinder::initializeGL() {
         }
     );
 
-    _uniformCache.modelViewProjectionTransform = _shader->uniformLocation(
-        "modelViewProjectionTransform"
-    );
-    _uniformCache.shadowColor = _shader->uniformLocation(
-        "shadowColor"
-    );
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 }
 
 void RenderableShadowCylinder::deinitializeGL() {
-    SpacecraftInstrumentsModule::ProgramObjectManager.releaseProgramObject(
+    SpacecraftInstrumentsModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
     _shader = nullptr;
@@ -352,15 +351,10 @@ void RenderableShadowCylinder::update(const UpdateData& data) {
         MainFrame,
         data.time.j2000Seconds()
     );
+
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
-
-        _uniformCache.modelViewProjectionTransform = _shader->uniformLocation(
-            "modelViewProjectionTransform"
-        );
-        _uniformCache.shadowColor = _shader->uniformLocation(
-            "shadowColor"
-        );
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
     }
     createCylinder(data.time.j2000Seconds());
 }

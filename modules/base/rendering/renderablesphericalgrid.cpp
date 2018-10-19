@@ -25,7 +25,7 @@
 #include <modules/base/rendering/renderablesphericalgrid.h>
 
 #include <modules/base/basemodule.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
@@ -62,12 +62,6 @@ namespace {
         "Line Width",
         "This value specifies the line width of the spherical grid."
     };
-
-    constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
-        "Radius",
-        "Radius",
-        "This value specifies the radius of the grid."
-    };
 } // namespace
 
 namespace openspace {
@@ -101,12 +95,6 @@ documentation::Documentation RenderableSphericalGrid::Documentation() {
                 new DoubleVerifier,
                 Optional::Yes,
                 LineWidthInfo.description
-            },
-            {
-                RadiusInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                RadiusInfo.description
             }
         }
     };
@@ -125,7 +113,6 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     )
     , _segments(SegmentsInfo, 36, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
-    , _radius(RadiusInfo, 1e20f, 1.f, 1e35f)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -159,14 +146,6 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
         );
     }
     addProperty(_lineWidth);
-
-    if (dictionary.hasKey(RadiusInfo.identifier)) {
-        _radius = static_cast<float>(
-            dictionary.value<double>(RadiusInfo.identifier)
-        );
-    }
-    _radius.onChange([&]() { _gridIsDirty = true; });
-    addProperty(_radius);
 }
 
 bool RenderableSphericalGrid::isReady() const {
@@ -176,10 +155,10 @@ bool RenderableSphericalGrid::isReady() const {
 }
 
 void RenderableSphericalGrid::initializeGL() {
-    _gridProgram = BaseModule::ProgramObjectManager.requestProgramObject(
+    _gridProgram = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return OsEng.renderEngine().buildRenderProgram(
+            return global::renderEngine.buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_BASE}/shaders/grid_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/grid_fs.glsl")
@@ -208,10 +187,10 @@ void RenderableSphericalGrid::deinitializeGL() {
     glDeleteBuffers(1, &_iBufferID);
     _iBufferID = 0;
 
-    BaseModule::ProgramObjectManager.releaseProgramObject(
+    BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
     _gridProgram = nullptr;
@@ -257,7 +236,6 @@ void RenderableSphericalGrid::update(const UpdateData&) {
 
         int nr = 0;
         const float fsegments = static_cast<float>(_segments);
-        const float r = _radius;
 
         for (int nSegment = 0; nSegment <= _segments; ++nSegment) {
             // define an extra vertex around the y-axis due to texture mapping
@@ -271,9 +249,9 @@ void RenderableSphericalGrid::update(const UpdateData&) {
                 // azimuth angle (east to west)
                 const float phi = fj * glm::pi<float>() * 2.0f / fsegments;  // 0 -> 2*PI
 
-                const float x = r * sin(phi) * sin(theta);  //
-                const float y = r * cos(theta);             // up
-                const float z = r * cos(phi) * sin(theta);  //
+                const float x = sin(phi) * sin(theta);  //
+                const float y = cos(theta);             // up
+                const float z = cos(phi) * sin(theta);  //
 
                 glm::vec3 normal = glm::vec3(x, y, z);
                 if (!(x == 0.f && y == 0.f && z == 0.f)) {

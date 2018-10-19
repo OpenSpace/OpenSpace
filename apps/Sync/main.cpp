@@ -24,8 +24,10 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/windowdelegate.h>
+#include <openspace/engine/configuration.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/engine/globals.h>
 #include <openspace/util/progressbar.h>
 #include <openspace/util/resourcesynchronization.h>
 #include <openspace/util/task.h>
@@ -37,12 +39,15 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
 
-int main(int argc, char** argv) {
+int main(int, char**) {
     using namespace openspace;
 
-    std::vector<std::string> unusedStringlist;
-    bool unusedBool;
-    OpenSpaceEngine::create(argc, argv, nullptr, unusedStringlist, unusedBool);
+    ghoul::initialize();
+
+    std::string configFile = configuration::findConfiguration();
+    global::configuration = configuration::loadConfigurationFromFile(configFile);
+    global::openSpaceEngine.initialize();
+
 
     TaskLoader taskLoader;
     std::vector<std::unique_ptr<Task>> tasks = taskLoader.tasksFromFile(

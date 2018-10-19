@@ -656,28 +656,42 @@ function sgct.config.single(arg)
         assert(type(arg["fov"]["up"]) == "number",    "fov['up'] must be a number")
         assert(type(arg["fov"]["down"]) == "number",  "fov['down'] must be a number")
     else
+        local defaultFov = 40
+        local defaultRatio = 16/9 -- comes from default res 1280 x 720
+        local tanDefaultFov = math.tan(math.pi * defaultFov / 180)
+
         if (type(arg["windowSize"]) == "table") then
             assert(type(arg["windowSize"][1]) == "number", "windowPos[1] must be a number")
             assert(type(arg["windowSize"][2]) == "number", "windowPos[2] must be a number")
+            local tanHorizontalFov = tanDefaultFov
+            local tanVerticalFov = tanDefaultFov
 
             local ratio = arg["windowSize"][1] / arg["windowSize"][2]
-            local horizontalFov = 40
-            local verticalFov = 40
+
+            -- ratio between w and h should be
+            -- same as tan(horizontalFov) and tan(verticalFov)
 
             if (ratio > 1) then
-                verticalFov = horizontalFov / ratio
+                tanVerticalFov = tanHorizontalFov / ratio
             else
-                horizontalFov = verticalFov * ratio
+                tanHorizontalFov = tanVerticalFov * ratio
             end
 
+            -- sgct expects fov in degrees
             arg["fov"] = {
-                down = verticalFov,
-                up = verticalFov,
-                left = horizontalFov,
-                right = horizontalFov
+                down = 180 * math.atan(tanVerticalFov) / math.pi,
+                up = 180 * math.atan(tanVerticalFov) / math.pi,
+                left = 180 * math.atan(tanHorizontalFov) / math.pi,
+                right = 180 * math.atan(tanHorizontalFov) / math.pi
             }
         else
-            arg["fov"] = { down = 25, up = 25, left = 40.0, right = 40.0 }
+            -- sgct expects fov in degrees
+            arg["fov"] = {
+                down = 180 * math.atan(tanDefaultFov / defaultRatio) / math.pi,
+                up = 180 * math.atan(tanDefaultFov / defaultRatio) / math.pi,
+                left = 180 * math.atan(tanDefaultFov) / math.pi,
+                right = 180 * math.atan(tanDefaultFov) / math.pi
+            }
         end
     end
 
@@ -770,11 +784,11 @@ function sgct.config.fisheye(arg)
     end
 
     if arg["tilt"] == nil then
-        arg["tilt"] = 0
+        arg["tilt"] = 90
     end
 
     if arg["background"] == nil then
-        arg["background"] = { r = 0.1, g = 0.1, b = 0.1, a = 1.0 }
+        arg["background"] = { r = 0.0, g = 0.0, b = 0.0, a = 1.0 }
     end
 
     if (arg["tracked"] ~= nil and arg["tracked"] == true) then
@@ -857,7 +871,7 @@ function sgct.config.cube(arg)
 
 
     res = 1024
-    size = {640, 360}
+    size = { 640, 360 }
     
     arg["scene"] = generateScene(arg)
     arg["settings"] = generateSettings(arg)

@@ -143,7 +143,7 @@ bool LabelParser::create() {
     using Recursive = ghoul::filesystem::Directory::Recursive;
     using Sort = ghoul::filesystem::Directory::Sort;
     std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::No);
-    for (std::string path : sequencePaths) {
+    for (const std::string& path : sequencePaths) {
         size_t position = path.find_last_of('.') + 1;
         if (position == 0 || position == std::string::npos) {
             continue;
@@ -182,22 +182,39 @@ bool LabelParser::create() {
 
             _detectorType = "CAMERA"; //default value
 
+            constexpr const char* ErrorMsg =
+                "Unrecognized '{}' in line {} in file {}. The 'Convert' table must "
+                "contain the identity tranformation for all values encountered in the "
+                "label files, for example: ROSETTA = {{ \"ROSETTA\" }}";
+
             /* Add more  */
             if (read == "TARGET_NAME") {
                 _target = decode(line);
+                if (_target.empty()) {
+                    LWARNING(fmt::format(ErrorMsg, "TARGET_NAME", line, path));
+                }
                 count++;
             }
             if (read == "INSTRUMENT_HOST_NAME") {
                 _instrumentHostID = decode(line);
+                if (_instrumentHostID.empty()) {
+                    LWARNING(fmt::format(ErrorMsg, "INSTRUMENT_HOST_NAME", line, path));
+                }
                 count++;
             }
             if (read == "INSTRUMENT_ID") {
                 _instrumentID = decode(line);
+                if (_instrumentID.empty()) {
+                    LWARNING(fmt::format(ErrorMsg, "INSTRUMENT_ID", line, path));
+                }
                 lblName = encode(line);
                 count++;
             }
             if (read == "DETECTOR_TYPE") {
                 _detectorType = decode(line);
+                if (_detectorType.empty()) {
+                    LWARNING(fmt::format(ErrorMsg, "DETECTOR_TYPE", line, path));
+                }
                 count++;
             }
 
@@ -213,7 +230,7 @@ bool LabelParser::create() {
                 line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
 
                 read = line.substr(0, line.find_first_of('='));
-                if (read == "STOP_TIME"){
+                if (read == "STOP_TIME") {
                     std::string stop = line.substr(line.find('=') + 1);
                     stop.erase(
                         std::remove_if(
@@ -245,14 +262,14 @@ bool LabelParser::create() {
                 using namespace std::literals;
                 std::string p = path.substr(0, path.size() - ("lbl"s).size());
                 for (const std::string& ext : extensions) {
-                    path = p + ext;
-                    if (FileSys.fileExists(path)) {
+                    std::string imagePath = p + ext;
+                    if (FileSys.fileExists(imagePath)) {
                         std::vector<std::string> spiceInstrument;
                         spiceInstrument.push_back(_instrumentID);
 
                         Image image = {
                             TimeRange(startTime, stopTime),
-                            path,
+                            imagePath,
                             spiceInstrument,
                             _target,
                             false,

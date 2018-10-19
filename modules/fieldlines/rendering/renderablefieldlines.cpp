@@ -24,7 +24,7 @@
 
 #include <modules/fieldlines/rendering/renderablefieldlines.h>
 
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -200,7 +200,7 @@ void RenderableFieldlines::initializeGL() {
         throw ghoul::RuntimeError("Error initializing");
     }
 
-    _program = OsEng.renderEngine().buildRenderProgram(
+    _program = global::renderEngine.buildRenderProgram(
         "Fieldline",
         absPath("${MODULE_FIELDLINES}/shaders/fieldline_vs.glsl"),
         absPath("${MODULE_FIELDLINES}/shaders/fieldline_fs.glsl"),
@@ -214,9 +214,8 @@ void RenderableFieldlines::deinitializeGL() {
     glDeleteBuffers(1, &_vertexPositionBuffer);
     _vertexPositionBuffer = 0;
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
     if (_program) {
-        renderEngine.removeRenderProgram(_program.get());
+        global::renderEngine.removeRenderProgram(_program.get());
         _program = nullptr;
     }
 }

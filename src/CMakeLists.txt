@@ -33,17 +33,15 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/documentation/verifier.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/configuration.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/configuration_doc.inl
-    # ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager.cpp
-    # ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager_doc.inl
     ${OPENSPACE_BASE_DIR}/src/engine/downloadmanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/engine/globals.cpp
+    ${OPENSPACE_BASE_DIR}/src/engine/globalscallbacks.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/logfactory.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/moduleengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/moduleengine_lua.inl
     ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/syncengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/virtualpropertymanager.cpp
-    ${OPENSPACE_BASE_DIR}/src/engine/wrapper/sgctwindowwrapper.cpp
-    ${OPENSPACE_BASE_DIR}/src/engine/wrapper/windowwrapper.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/camerainteractionstates.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/inputstate.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/joystickinputstate.cpp
@@ -55,6 +53,8 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/interaction/navigationhandler_lua.inl
     ${OPENSPACE_BASE_DIR}/src/interaction/mousecamerastates.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/orbitalnavigator.cpp
+    ${OPENSPACE_BASE_DIR}/src/interaction/shortcutmanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/interaction/shortcutmanager_lua.inl
     ${OPENSPACE_BASE_DIR}/src/mission/mission.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/missionmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/missionmanager_lua.inl
@@ -130,6 +130,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/rendering/dashboarditem.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/framebufferrenderer.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/deferredcastermanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/rendering/helper.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/loadingscreen.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/luaconsole.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/raycastermanager.cpp
@@ -144,7 +145,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/scene/assetloader_lua.inl
     ${OPENSPACE_BASE_DIR}/src/scene/assetmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/assetmanager_lua.inl
-    ${OPENSPACE_BASE_DIR}/src/scene/translation.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/lightsource.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/rotation.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scale.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scene.cpp
@@ -154,6 +155,8 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/scene/scenelicensewriter.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode_doc.inl
+    ${OPENSPACE_BASE_DIR}/src/scene/timeframe.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/translation.cpp
     ${OPENSPACE_BASE_DIR}/src/scripting/lualibrary.cpp
     ${OPENSPACE_BASE_DIR}/src/scripting/scriptengine.cpp
     ${OPENSPACE_BASE_DIR}/src/scripting/scriptengine_lua.inl
@@ -207,14 +210,15 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/verifier.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/configuration.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/downloadmanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/engine/globals.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/engine/globalscallbacks.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/logfactory.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/moduleengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/moduleengine.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/openspaceengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/syncengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/virtualpropertymanager.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/engine/wrapper/sgctwindowwrapper.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/engine/wrapper/windowwrapper.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/engine/windowdelegate.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/camerainteractionstates.h
@@ -228,6 +232,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/mousecamerastates.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/navigationhandler.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/orbitalnavigator.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/shortcutmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/mission/mission.h
     ${OPENSPACE_BASE_DIR}/include/openspace/mission/missionmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/network/networkengine.h
@@ -310,6 +315,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcastermanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/loadingscreen.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/luaconsole.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/helper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycasterlistener.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycastermanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderable.h
@@ -324,7 +330,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetlistener.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetloader.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetmanager.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/scene/translation.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/lightsource.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/rotation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scale.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scene.h
@@ -332,6 +338,8 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenelicense.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenelicensewriter.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenegraphnode.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/timeframe.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/translation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/lualibrary.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/scriptengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/scriptscheduler.h
@@ -413,13 +421,14 @@ endforeach ()
 ##########################################################################################
 # Create OpenSpace target
 ##########################################################################################
-add_library(libOpenSpace STATIC ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
-# In order to be able to include libOpenSpace files
-target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_BASE_DIR}/include)
-# In order to be able to include module files
-target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_BASE_DIR})
-# In order to be able to include the module_registration file
-target_include_directories(libOpenSpace PUBLIC ${CMAKE_BINARY_DIR}/_generated/include)
+add_library(openspace-core STATIC ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
+target_include_directories(openspace-core PUBLIC
+    # In order to be able to include openspace-core files
+    ${OPENSPACE_BASE_DIR}/include
+    # In order to be able to include module files
+    ${OPENSPACE_BASE_DIR}
+    # In order to be able to include the module_registration file
+    ${CMAKE_BINARY_DIR}/_generated/include)
 
 configure_file(
     ${OPENSPACE_CMAKE_EXT_DIR}/openspace_header.template
@@ -433,4 +442,4 @@ configure_file(
     @ONLY IMMEDIATE
 )
 
-set_openspace_compile_settings(libOpenSpace)
+set_openspace_compile_settings(openspace-core)

@@ -82,14 +82,15 @@ private:
         GigalightYears = 6
     };
 
-    struct RenderingPlane {
-        int planeIndex;
+    struct PlaneAggregate {
+        int textureIndex;
+        int numberOfPlanes;
         GLuint vao;
         GLuint vbo;
-        GLfloat vertexData[PLANES_VERTEX_DATA_SIZE];
+        std::vector<GLfloat> planesCoordinates;
     };
 
-    void deleteDataGPU();
+    void deleteDataGPUAndCPU();
     void createPlanes();
     void renderPlanes(const RenderData& data, const glm::dmat4& modelViewMatrix,
         const glm::dmat4& projectionMatrix, float fadeInVariable);
@@ -129,11 +130,12 @@ private:
     properties::OptionProperty _renderOption;
 
     ghoul::opengl::ProgramObject* _program = nullptr;
-    UniformCache(modelViewProjectionTransform, alphaValue, scaleFactor, fadeInValue,
+    UniformCache(modelViewProjectionTransform, alphaValue, fadeInValue,
         galaxyTexture) _uniformCache;
     std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
     std::unordered_map<int, std::unique_ptr<ghoul::opengl::Texture>> _textureMap;
     std::unordered_map<int, std::string> _textureFileMap;
+    std::unordered_map<int, PlaneAggregate> _planesMap;
 
     std::string _speckFile;
     std::string _labelFile;
@@ -151,8 +153,6 @@ private:
     float _sluminosity = 1.f;
 
     glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
-
-    std::vector<RenderingPlane> _renderingPlanesArray;
 };
 
 

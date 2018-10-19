@@ -25,8 +25,7 @@
 #include <modules/imgui/include/guiparallelcomponent.h>
 
 #include <modules/imgui/include/imgui_include.h>
-
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/interaction/keyframenavigator.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -51,7 +50,7 @@ void GuiParallelComponent::renderDisconnected() {
 
     const bool connect = ImGui::Button("Connect");
     if (connect) {
-        OsEng.parallelPeer().connect();
+        global::parallelPeer.connect();
     }
 }
 
@@ -60,12 +59,12 @@ void GuiParallelComponent::renderConnecting() {
 
     const bool cancel = ImGui::Button("Cancel connection");
     if (cancel) {
-        OsEng.parallelPeer().disconnect();
+        global::parallelPeer.disconnect();
     }
 }
 
 void GuiParallelComponent::renderClientWithHost() {
-    ParallelPeer& parallel = OsEng.parallelPeer();
+    ParallelPeer& parallel = global::parallelPeer;
 
     std::string connectionInfo = "Session hosted by \"" + parallel.hostName() + "\"\n";
     const size_t nConnections = parallel.nConnections();
@@ -86,9 +85,9 @@ void GuiParallelComponent::renderClientWithHost() {
     ImGui::Text("%s", connectionInfo.c_str());
     renderClientCommon();
 
-    const size_t nTimeKeyframes = OsEng.timeManager().nKeyframes();
+    const size_t nTimeKeyframes = global::timeManager.nKeyframes();
     const size_t nCameraKeyframes =
-        OsEng.navigationHandler().keyframeNavigator().nKeyframes();
+        global::navigationHandler.keyframeNavigator().nKeyframes();
 
     std::string timeKeyframeInfo = "TimeKeyframes : " + std::to_string(nTimeKeyframes);
     std::string cameraKeyframeInfo = "CameraKeyframes : " +
@@ -108,10 +107,8 @@ void GuiParallelComponent::renderClientWithHost() {
 }
 
 void GuiParallelComponent::renderClientWithoutHost() {
-    ParallelPeer& parallel = OsEng.parallelPeer();
-
     std::string connectionInfo = "Connected to parallel session with no host\n";
-    const size_t nConnections = parallel.nConnections();
+    const size_t nConnections = global::parallelPeer.nConnections();
 
     if (nConnections > 2) {
         std::string c = std::to_string(nConnections - 1);
@@ -131,23 +128,19 @@ void GuiParallelComponent::renderClientWithoutHost() {
 }
 
 void GuiParallelComponent::renderClientCommon() {
-    ParallelPeer& parallel = OsEng.parallelPeer();
-
-
     const bool requestHostship = ImGui::Button("Request hostship");
     if (requestHostship) {
-        parallel.requestHostship();
+        global::parallelPeer.requestHostship();
     }
 
     const bool disconnect = ImGui::Button("Disconnect");
     if (disconnect) {
-        parallel.disconnect();
+        global::parallelPeer.disconnect();
     }
 }
 
 void GuiParallelComponent::renderHost() {
-    ParallelPeer& parallel = OsEng.parallelPeer();
-    const size_t nConnections = parallel.nConnections();
+    const size_t nConnections = global::parallelPeer.nConnections();
 
     std::string connectionInfo;
     const size_t nClients = nConnections - 1;
@@ -161,7 +154,7 @@ void GuiParallelComponent::renderHost() {
 
     const bool resignHostship = ImGui::Button("Resign hostship");
     if (resignHostship) {
-        parallel.resignHostship();
+        global::parallelPeer.resignHostship();
     }
 }
 
@@ -173,7 +166,7 @@ void GuiParallelComponent::render() {
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 
-    ParallelConnection::Status status = OsEng.parallelPeer().status();
+    ParallelConnection::Status status = global::parallelPeer.status();
 
     switch (status) {
         case ParallelConnection::Status::Disconnected:
@@ -193,7 +186,7 @@ void GuiParallelComponent::render() {
             break;
     }
 
-    GuiPropertyComponent::renderPropertyOwner(&OsEng.parallelPeer());
+    GuiPropertyComponent::renderPropertyOwner(&global::parallelPeer);
     ImGui::End();
 }
 

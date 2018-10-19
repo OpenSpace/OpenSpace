@@ -38,6 +38,7 @@
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbylevel.h>
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbyindex.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -130,49 +131,31 @@ namespace openspace {
 GlobeBrowsingModule::GlobeBrowsingModule() : OpenSpaceModule(Name) {}
 
 void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
-    // TODO: Remove dependency on OsEng.
-    // Instead, make this class implement an interface that OsEng depends on.
-    // Do not try to register module callbacks if OsEng does not exist,
-    // for example in the TaskRunner.
-
-    if (!OpenSpaceEngine::isCreated()) {
-        return;
-    }
-
     using namespace globebrowsing;
 
     // Initialize
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::Initialize,
-        [&]() {
-            _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>();
-            addPropertySubOwner(*_tileCache);
+    global::callback::initializeGL.push_back([&]() {
+        _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>();
+        addPropertySubOwner(*_tileCache);
+
 #ifdef GLOBEBROWSING_USE_GDAL
-            // Convert from MB to Bytes
-            GdalWrapper::create(
-                16ULL * 1024ULL * 1024ULL, // 16 MB
-                static_cast<size_t>(CpuCap.installedMainMemory() * 0.25 * 1024 * 1024)
-            );
-            addPropertySubOwner(GdalWrapper::ref());
+        // Convert from MB to Bytes
+        GdalWrapper::create(
+            16ULL * 1024ULL * 1024ULL, // 16 MB
+            static_cast<size_t>(CpuCap.installedMainMemory() * 0.25 * 1024 * 1024)
+        );
+        addPropertySubOwner(GdalWrapper::ref());
 #endif // GLOBEBROWSING_USE_GDAL
-        }
-    );
+    });
+
 
     // Render
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::Render,
-        [&]() { _tileCache->update(); }
-    );
+    global::callback::render.push_back([&]() { _tileCache->update(); });
 
     // Deinitialize
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::Deinitialize,
-        [&]() {
 #ifdef GLOBEBROWSING_USE_GDAL
-            GdalWrapper::ref().destroy();
+    global::callback::deinitialize.push_back([&]() { GdalWrapper::ref().destroy(); });
 #endif // GLOBEBROWSING_USE_GDAL
-        }
-    );
 
     // Get factories
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
@@ -331,13 +314,13 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
 }
 
 void GlobeBrowsingModule::goToChunk(int x, int y, int level) {
-    Camera* cam = OsEng.navigationHandler().camera();
+    Camera* cam = global::navigationHandler.camera();
     goToChunk(*cam, globebrowsing::TileIndex(x,y,level), glm::vec2(0.5f, 0.5f), true);
 }
 
 void GlobeBrowsingModule::goToGeo(double latitude, double longitude) {
     using namespace globebrowsing;
-    Camera* cam = OsEng.navigationHandler().camera();
+    Camera* cam = global::navigationHandler.camera();
     goToGeodetic2(*cam, Geodetic2(
         Angle<double>::fromDegrees(latitude).asRadians(),
         Angle<double>::fromDegrees(longitude).asRadians()), true);
@@ -348,7 +331,7 @@ void GlobeBrowsingModule::goToGeo(double latitude, double longitude,
 {
     using namespace globebrowsing;
 
-    Camera* cam = OsEng.navigationHandler().camera();
+    Camera* cam = global::navigationHandler.camera();
     goToGeodetic3(
         *cam,
         {
@@ -427,9 +410,9 @@ void GlobeBrowsingModule::goToGeodetic2(Camera& camera, globebrowsing::Geodetic2
         return;
     }
 
-    const glm::dvec3 cameraPosition = OsEng.navigationHandler().camera()->positionVec3();
+    const glm::dvec3 cameraPosition = global::navigationHandler.camera()->positionVec3();
     const glm::dmat4 inverseModelTransform =
-        OsEng.navigationHandler().focusNode()->inverseModelTransform();
+        global::navigationHandler.focusNode()->inverseModelTransform();
     const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
     const SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
@@ -512,7 +495,7 @@ GlobeBrowsingModule::castFocusNodeRenderableToGlobe()
 {
     using namespace globebrowsing;
 
-    const Renderable* renderable = OsEng.navigationHandler().focusNode()->renderable();
+    const Renderable* renderable = global::navigationHandler.focusNode()->renderable();
     if (!renderable) {
         return nullptr;
     }

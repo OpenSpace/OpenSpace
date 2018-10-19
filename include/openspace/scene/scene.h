@@ -62,6 +62,13 @@ public:
             const std::string& comp = "");
     };
 
+    /// This struct describes a time that has some intrinsic interesting-ness to this
+    /// scene.
+    struct InterestingTime {
+        std::string name;
+        std::string time;
+    };
+
     // constructors & destructor
     Scene(std::unique_ptr<SceneInitializer> initializer);
     ~Scene();
@@ -184,7 +191,7 @@ public:
      * \pre \p durationSeconds must be positive and not 0
      * \post A new interpolation record exists for \p that is not expired
      */
-    void addInterpolation(properties::Property* prop, float durationSeconds,
+    void addPropertyInterpolation(properties::Property* prop, float durationSeconds,
         ghoul::EasingFunction easingFunction = ghoul::EasingFunction::Linear);
 
     /**
@@ -196,7 +203,7 @@ public:
      * \pre \prop must not be nullptr
      * \post No interpolation record exists for \p prop
      */
-    void removeInterpolation(properties::Property* prop);
+    void removePropertyInterpolation(properties::Property* prop);
 
     /**
      * Informs all Property%s with active interpolations about applying a new update tick
@@ -208,6 +215,24 @@ public:
      * both calls
      */
     void updateInterpolations();
+
+    /**
+     * Adds the provided \p time as an interesting time to this scene. The same time can
+     * be added multiple times.
+     *
+     * \param The time that should be added
+     *
+     * \pre \p time.time must not be empty
+     * \pre \p time.name must not be empty
+     */
+    void addInterestingTime(InterestingTime time);
+
+    /**
+     * Returns the list of all interesting times that are defined for this scene.
+     *
+     * \return The list of all interesting times that are defined for this scene
+     */
+    const std::vector<InterestingTime>& interestingTimes() const;
 
     /**
      * Returns the Lua library that contains all Lua functions available to change the
@@ -235,20 +260,22 @@ private:
     SceneGraphNode _rootDummy;
     std::unique_ptr<SceneInitializer> _initializer;
 
+    std::vector<InterestingTime> _interestingTimes;
+
     std::vector<SceneLicense> _licenses;
 
     std::mutex _programUpdateLock;
     std::set<ghoul::opengl::ProgramObject*> _programsToUpdate;
     std::vector<std::unique_ptr<ghoul::opengl::ProgramObject>> _programs;
 
-    struct InterpolationInfo {
+    struct PropertyInterpolationInfo {
         properties::Property* prop;
         std::chrono::time_point<std::chrono::steady_clock> beginTime;
         float durationSeconds;
         ghoul::EasingFunc<float> easingFunction;
         bool isExpired = false;
     };
-    std::vector<InterpolationInfo> _interpolationInfos;
+    std::vector<PropertyInterpolationInfo> _propertyInterpolationInfos;
 };
 
 } // namespace openspace

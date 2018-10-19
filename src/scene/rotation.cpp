@@ -28,7 +28,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/time.h>
-
+#include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
@@ -88,12 +88,12 @@ const glm::dmat3& Rotation::matrix() const {
     return _cachedMatrix;
 }
 
-void Rotation::update(const Time& time) {
-    if (!_needsUpdate && (time.j2000Seconds() == _cachedTime)) {
+void Rotation::update(const UpdateData& data) {
+    if (!_needsUpdate && (data.time.j2000Seconds() == _cachedTime)) {
         return;
     }
-    _cachedMatrix = matrix(time);
-    _cachedTime = time.j2000Seconds();
+    _cachedMatrix = matrix(data);
+    _cachedTime = data.time.j2000Seconds();
     _needsUpdate = false;
 }
 
