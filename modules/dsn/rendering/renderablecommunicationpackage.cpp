@@ -125,9 +125,6 @@ RenderableCommunicationPackage::RenderableCommunicationPackage(const ghoul::Dict
     , _canberraLineColor(CanberraColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
 {
-    //addProperty(_opacity);
-    //registerUpdateRenderBinFromOpacity();
-
     _translation = Translation::createFromDictionary(
         dictionary.value<ghoul::Dictionary>(KeyTranslation)
     );
@@ -199,60 +196,6 @@ bool RenderableCommunicationPackage::isReady() const {
 void RenderableCommunicationPackage::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
 
-    //SceneGraphNode* earthNode = global::renderEngine.scene()->sceneGraphNode("Earth");
-    //SceneGraphNode* spacecraftNode = global::renderEngine.scene()->sceneGraphNode("Voyager_1");
-    //SceneGraphNode* focusNode = global::navigationHandler.focusNode();
-
-    //////check camera distance to
-    //glm::vec3 cameraPos = data.camera.positionVec3();
-    //glm::vec3 focusNodePos = focusNode->worldPosition();
-    //std::string focusNodeIdentifier = focusNode->identifier();
-
-    //glm::vec3 diff = glm::vec3(cameraPos.x - focusNodePos.x, cameraPos.y - focusNodePos.y, cameraPos.z - focusNodePos.z);
-    //float distanceCameraToFocus = glm::sqrt(glm::pow(diff.x,2.0) + glm::pow(diff.y, 2.0)+ glm::pow(diff.z, 2.0));
-    //float distanceToSwap = 10000000;
-
-
-    //if (distanceCameraToFocus < distanceToSwap && focusNodeIdentifier == "Voyager_1") {
-    //    LDEBUG(std::to_string(distanceCameraToFocus));
-
-    //    ////Copy the last valid location
-    //    glm::dvec3 v0(earthNode->worldPosition());
-    //    // And get the current location of the object
-    //    const glm::dvec3 p = spacecraftNode->position();
-    //    const glm::dvec3 v1 = { p.x, p.y, p.z };
-
-    //    // Compute the difference between the points in double precision
-    //    const glm::dvec3 p0 = v0 - v1;
-    //    _auxiliaryVBOdata[0] = {
-    //        static_cast<float>(p0.x),
-    //        static_cast<float>(p0.y),
-    //        static_cast<float>(p0.z)
-    //    };
-    //    _auxiliaryVBOdata[1] = { 0.f, 0.f, 0.f };
-
-    //    // Fill the render info with the data
-    //    _mainRenderInformation.first = 0;
-    //    _mainRenderInformation.count = 2;
-
-    //    _mainRenderInformation._localTransform = glm::translate(glm::dmat4(1.0), v1);
-
-
-    //    _programObject->setUniform(_uniformCache.modelViewSpacecraft,
-    //        data.camera.combinedViewMatrix() * modelTransformSpacecraft * _mainRenderInformation._localTransform);
-
-    //}
-    //else {
-    //        //modelTransformSpacecraft =
-    //        //glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-    //        //glm::dmat4(data.modelTransform.rotation) *
-    //        //glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-    //    _programObject->setUniform(_uniformCache.modelViewSpacecraft,
-    //        data.camera.combinedViewMatrix() * modelTransformSpacecraft * _mainRenderInformation._localTransform);
-    //}
-
-
     glm::dmat4 modelTransformStation = global::renderEngine.scene()->sceneGraphNode("Earth")->modelTransform();
 
     glm::dmat4 modelTransformSpacecraft =
@@ -261,11 +204,11 @@ void RenderableCommunicationPackage::render(const RenderData& data, RendererTask
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     _programObject->setUniform(_uniformCache.modelViewStation,
-        data.camera.combinedViewMatrix() * modelTransformStation * _mainRenderInformation._localTransform);
+        data.camera.combinedViewMatrix() * modelTransformStation * _lineRenderInformation._localTransform);
 
 
     _programObject->setUniform(_uniformCache.modelViewSpacecraft,
-        data.camera.combinedViewMatrix() * modelTransformSpacecraft * _mainRenderInformation._localTransformSpacecraft);
+        data.camera.combinedViewMatrix() * modelTransformSpacecraft * _lineRenderInformation._localTransformSpacecraft);
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
 
@@ -281,22 +224,12 @@ void RenderableCommunicationPackage::render(const RenderData& data, RendererTask
     }
     glLineWidth(_lineWidth);
 
-
-    // We pass in the model view transformation matrix as double in order to maintain
-    // high precision for vertices; especially for the lines, a high vertex precision
-    // is necessary as they are usually far away from their reference
-    
-    //_programObject->setUniform( _uniformCache.modelViewStation,
-    //    data.camera.combinedViewMatrix() * modelTransformStation * _mainRenderInformation._localTransform);
-    
-
-
-    glBindVertexArray(_mainRenderInformation._vaoID);
+    glBindVertexArray(_lineRenderInformation._vaoID);
 
     glDrawArrays(
         GL_LINES,
-        _mainRenderInformation.first,
-        _mainRenderInformation.count
+        _lineRenderInformation.first,
+        _lineRenderInformation.count
     );
 
     //unbind vertex array

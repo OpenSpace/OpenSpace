@@ -178,7 +178,7 @@ namespace openspace {
     }
 
     //return vertexarray to commmunicationline
-    void DsnManager::fillVertexArray(std::vector<RenderableCommunicationPackage::PackageVBOLayout> &vertexArray) {
+    void DsnManager::fillVertexArray(std::vector<RenderableCommunicationPackage::LineVBOLayout> &vertexArray) {
        
         //get number of lines to be drawn = count signals from data at this time
         const int nValues = 2;

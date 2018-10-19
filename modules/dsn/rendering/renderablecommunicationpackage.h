@@ -71,7 +71,7 @@ public:
 
     bool isReady() const override;
     /// The layout of the VBOs
-    struct PackageVBOLayout {
+    struct LineVBOLayout {
         float x, y, z;
     };
 
@@ -93,14 +93,9 @@ protected:
     /// Returns the documentation entries
     static documentation::Documentation Documentation();
 
-    /// The layout of the VBOs
-   // struct PackageVBOLayout {
-   //     float x, y, z;
-   // };
-
     /// The backend storage for the vertex buffer object containing all points for the
     /// packages to be rendered
-    std::vector<PackageVBOLayout> _vertexArray;
+    std::vector<LineVBOLayout> _vertexArray;
 
     /// The index array that is potentially used in the draw call. If this is empty, no
     /// element draw call is used.
@@ -127,8 +122,7 @@ protected:
     };
 
     /// Set of information about the main rendering parts
-    RenderInformation _mainRenderInformation;
-    RenderInformation _spacecraftRenderInformation;
+    RenderInformation _lineRenderInformation;
 
 	/// Specifies the base color of the line
 	glm::vec3 _lineColor;
