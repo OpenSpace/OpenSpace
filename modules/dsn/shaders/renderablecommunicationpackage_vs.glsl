@@ -32,17 +32,17 @@ in int gl_VertexID;
 out vec4 vs_positionScreenSpace;
 out vec4 vs_gPosition;
 
-uniform dmat4 modelViewTransformStation;
-uniform dmat4 modelViewTransformSpacecraft;
+uniform dmat4 modelViewStation;
+uniform dmat4 modelViewSpacecraft;
 
 uniform mat4 projectionTransform;
 
 void main() {
     
     if(mod(gl_VertexID,2) == 0 ){
-        vs_gPosition = vec4(modelViewTransformStation * dvec4(in_point_position, 1));
+        vs_gPosition = vec4(modelViewStation * dvec4(in_point_position, 1));
     }else{
-        vs_gPosition = vec4(modelViewTransformSpacecraft * dvec4(in_point_position, 1));
+        vs_gPosition = vec4(modelViewSpacecraft * dvec4(in_point_position, 1));
     }
     vs_positionScreenSpace = z_normalization(projectionTransform * vs_gPosition);
     gl_Position  = vs_positionScreenSpace;

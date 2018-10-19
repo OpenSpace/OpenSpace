@@ -45,12 +45,41 @@ namespace openspace {
         void initializeGL() override;
         void deinitializeGL() override;
         void update(const UpdateData& data) override;
-      
+        
+        struct Signal {
+            const char* station;
+            const char* spacecraft;
+            glm::vec3 color;
+        };
+
+        struct DsnData {
+            std::vector<Signal> signals;
+        };
+
+        glm::vec3 approximateSpacecraftPosition(const char* dishId, glm::vec3 dishPos);
+        RenderableCommunicationPackage::PackageVBOLayout getPositionForSceneGraphNode(const char* id);
+        RenderableCommunicationPackage::PackageVBOLayout getHighPrecisionPositionForSceneGraphNode(std::string id);
+        RenderableCommunicationPackage::PackageVBOLayout getPositionForGeocentricSceneGraphNode(const char* id);
+
+        
     private:
 
          const char* _identifier = "CommunicationLines";
          bool _needsFullSweep = true;
          std::unique_ptr<ghoul::Dictionary> _dictionary;
+
+         double deg2rad(double degrees);
+         /**  Converts a Range, Azimuth, Elevation location to South East Zenith coordinates**/
+         void convertRaeToSez(double siteLLA[], double rae[], double sez[]);
+         /**  Converts a Range, Azimuth, Elevation location to Earth centered Earth fixed coordinates**/
+         void convertRaeToEcef(double observerLLA[], double observerXyz[], double objectRae[], double objectEcef[]);
+         /**  Converts South East Zenith location to Earth centered Earth fixed coordinates**/
+         void convertSezToEcef(double observerLla[], double observerXyz[], double objectSez[], double objectEcef[]);
+
+
+         static void fillVertexArray(std::vector<RenderableCommunicationPackage::PackageVBOLayout> &vertexArray);
+
+
     };
 
 }

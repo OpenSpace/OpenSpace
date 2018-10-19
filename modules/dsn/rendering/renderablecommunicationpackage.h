@@ -75,6 +75,7 @@ public:
         float x, y, z;
     };
 
+
     /**
      * The render method will set up the shader information and then render first the
      * information contained in the the \c _mainRenderInformation, 
@@ -117,6 +118,8 @@ protected:
         GLsizei count = 0;
         /// Local model matrix transformation, used for rendering in camera space
         glm::dmat4 _localTransform = glm::dmat4(1.0);
+        /// Local model matrix, for spacecraft
+        glm::dmat4 _localTransformSpacecraft = glm::dmat4(1.0);
         /// The vertex array object for this RenderInformation
         GLuint _vaoID = 0;
         /// The main vertex buffer object
@@ -125,6 +128,7 @@ protected:
 
     /// Set of information about the main rendering parts
     RenderInformation _mainRenderInformation;
+    RenderInformation _spacecraftRenderInformation;
 
 	/// Specifies the base color of the line
 	glm::vec3 _lineColor;
