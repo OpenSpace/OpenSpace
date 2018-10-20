@@ -106,7 +106,7 @@ void Connection::handleMessage(const std::string& message) {
                     return std::isprint(c) ? c : ' ';
                 }
             );
-            LERROR(fmt::format("Could not parse JSON: '{}'", message));
+            LERROR(fmt::format("Could not parse JSON: '{}'", sanitizedString));
         }
     }
 }
