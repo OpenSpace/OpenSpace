@@ -31,6 +31,7 @@
 
 #include <ext/xml/rapidxml.hpp>
 #include <ext/xml/rapidxml_utils.hpp>
+#include <openspace/json.h>
 
 #include <modules/dsn/rendering/renderablecommunicationpackage.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -40,20 +41,31 @@
 
 #include <fstream>
 
-
-
 namespace openspace {
 
     class DsnManager {
 
     public:
-       static bool extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary);
-	   static glm::vec3 approximateSpacecraftPosition(const char* dishId, glm::vec3 dishPos);
+    static struct Signal {        
+        std::string dishName ;
+        std::string spacecraft;
+        std::string direction; 
+        std::string type;
+        float startTime;
+        std::string dataRate;
+      };
+    static struct DsnData {
+        std::vector<Signal> signals;
+     };
+      static bool extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary);
+	  static glm::vec3 approximateSpacecraftPosition(const char* dishId, glm::vec3 dishPos);
       static void fillVertexArray(std::vector<RenderableCommunicationPackage::PackageVBOLayout> &vertexArray); 
 
     private:
        static void readDataFromXml(std::vector<std::string> _dataFiles);
+       static void readDataFromJson(std::vector<std::string> _dataFiles);
        static void xmlParser(std::string filename, std::ofstream &logfile);
+       static void jsonParser(std::string filename, std::ofstream &logfile);
 	   static double deg2rad(double degrees);
 
 	   /**  Converts a Range, Azimuth, Elevation location to South East Zenith coordinates**/    

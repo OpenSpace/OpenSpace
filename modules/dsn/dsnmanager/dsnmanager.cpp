@@ -33,10 +33,12 @@ namespace openspace {
     constexpr const char* KeyDataFileType = "DataFileType";
 
     //Filetypes
-    const std::string dataFileTypeStringXml = "xml";
+    //const std::string dataFileTypeStringXml = "xml";
+    const std::string dataFileTypeStringJson = "json";
 
     enum class DataFileType : int {
-        Xml = 0,
+       //Xml = 0
+        Json = 0,
         Invalid
     };
  
@@ -62,8 +64,8 @@ namespace openspace {
             [](char c) { return static_cast<char>(tolower(c)); }
         );
         // Verify that the input type is correct
-        if (dataFileTypeString == dataFileTypeStringXml) {
-            sourceFileType = DataFileType::Xml;
+        if (dataFileTypeString == dataFileTypeStringJson) {
+            sourceFileType = DataFileType::Json;
         }
         else {
             LERROR(fmt::format(
@@ -124,7 +126,8 @@ namespace openspace {
             ));
             return false;
         }
-        readDataFromXml(_dataFiles);
+        //readDataFromXml(_dataFiles);
+        readDataFromJson(_dataFiles);
         return true;
     }
 
@@ -135,6 +138,15 @@ namespace openspace {
             DsnManager::xmlParser(*it, logfile);
         }
         logfile.close(); 
+    }
+
+    void DsnManager::readDataFromJson(std::vector<std::string> _dataFiles) {
+        // logfile for checking so that the data parsing works
+        std::ofstream logfile{ "jsonTestLogger.txt" };
+        for (std::vector<std::string>::iterator it = _dataFiles.begin(); it != _dataFiles.end(); ++it) {
+            DsnManager::jsonParser(*it, logfile);
+        }
+        logfile.close();
     }
 
     /****
@@ -175,6 +187,35 @@ namespace openspace {
             }
             node = node->next_sibling();
         }
+    }
+   
+    void DsnManager::jsonParser(std::string filename, std::ofstream &logfile) {
+        std::ifstream ifs(filename);
+        nlohmann::json j = nlohmann::json::parse(ifs);
+
+       // DsnManager::DsnData dsnData;
+       DsnManager::Signal structSignal;
+      
+       DsnManager::DsnData signals;
+       signals.signals.clear();
+       signals.signals.reserve(0);
+
+       //loop through all signals in the data 
+      for (const auto& signalsInJson : j["Signals"]) {
+          
+          structSignal.dishName = signalsInJson["dishName"].get<std::string>();
+          structSignal.spacecraft = signalsInJson["spacecraft"].get<std::string>();
+          structSignal.direction = signalsInJson["direction"].get<std::string>();
+          structSignal.type = signalsInJson["type"].get<std::string>();
+          structSignal.dataRate = signalsInJson["dataRate"].get<std::string>(); //Should not be a string
+          structSignal.startTime = signalsInJson["startTime"].get<float>();
+        
+          //Add signals to vector of signals
+          signals.signals.push_back(structSignal);
+        }
+   
+       // logfile << structSignal.dishName;
+        logfile.close();
     }
 
     //return vertexarray to commmunicationline

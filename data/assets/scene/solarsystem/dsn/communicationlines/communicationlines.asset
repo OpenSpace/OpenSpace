@@ -2,7 +2,8 @@ local assetHelper = asset.require('util/asset_helper')
 local kernels = asset.require('scene/solarsystem/missions/voyager1/kernels')
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 --Communicationline data 
-local dataFolder = "C:/OpenSpace/OpenSpace/sync/http/dsn_data/1/xml"
+--local dataFolder = "C:/Agnes/OpenSpace/sync/http/dsn_data/1/xml"
+local dataFolder = "C:/Agnes/OpenSpace/sync/http/dsn_data/1/json"
 
 local CommunicationLine = {
     Identifier = "Communication_Lines",
@@ -13,7 +14,7 @@ local CommunicationLine = {
         },
         Type = "CommunicationLines",
         DataFolder = dataFolder,
-        DataFileType = "xml",
+        DataFileType = "json",
         MadridColor = {1.0, 0.0, 0.0},
         GoldstoneColor = {0.0, 0.0, 1.0},
         CanberraColor = {0.0, 1.0, 0.0}
