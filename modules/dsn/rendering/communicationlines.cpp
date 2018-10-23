@@ -35,6 +35,7 @@ namespace openspace {
     CommunicationLines::CommunicationLines(const ghoul::Dictionary& dictionary)
         :RenderableCommunicationPackage(dictionary){
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
+        
         extractData();
     }
 
@@ -46,7 +47,6 @@ namespace openspace {
         else {
             LDEBUG(fmt::format("{}: Successfully read data.", _identifier));
         }
-   
     }
     
     void CommunicationLines::initializeGL() {
@@ -59,7 +59,6 @@ namespace openspace {
     void CommunicationLines::deinitializeGL(){
         glDeleteVertexArrays(1, &_lineRenderInformation._vaoID);
         glDeleteBuffers(1, &_lineRenderInformation._vBufferID);
-
 
         RenderableCommunicationPackage::deinitializeGL();
     }
@@ -85,6 +84,11 @@ namespace openspace {
         // Make space for the vertices
         _vertexArray.clear();
 
+        //update focusnode information
+        _focusNode = global::navigationHandler.focusNode();
+        _lineRenderInformation._localTransformSpacecraft = glm::translate(glm::dmat4(1.0), _focusNode->worldPosition());
+
+        //fill vertexarray with signal position data
         for (int i = 0; i < signalDataVector.signals.size(); i++) {
                
             Signal currentSignal = signalDataVector.signals[i];
@@ -92,7 +96,6 @@ namespace openspace {
             _vertexArray.push_back(getPositionForGeocentricSceneGraphNode(currentSignal.station));
             _vertexArray.push_back(getSuitablePrecisionPositionForSceneGraphNode(currentSignal.spacecraft));
         }
-
      
         // ... and upload them to the GPU
         glBindVertexArray(_lineRenderInformation._vaoID);
@@ -105,7 +108,7 @@ namespace openspace {
         );
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr); // the vertex data points for all positions
 
         // Directly render the entire step
         _lineRenderInformation.first = 0;
@@ -114,42 +117,30 @@ namespace openspace {
         glBindVertexArray(0);
     }
 
+    /*Returns a position calculated where the focusNode position is origin(0,0,0) */
+    glm::dvec3 CommunicationLines::GetCoordinatePosFromFocusNode(SceneGraphNode* node) {
 
-    //Our spacecrafts are often very far from Earth (and the sun) which gives precision errors when getting close
-    //To correct this we change the reference coordinate system when rendering these points if we want to zoom in on them
-    RenderableCommunicationPackage::LineVBOLayout CommunicationLines::getSuitablePrecisionPositionForSceneGraphNode(std::string id) {
+        glm::dvec3 nodePos = node->worldPosition();
+        glm::dvec3 focusNodePos = _focusNode->worldPosition();
+
+        glm::dvec3 diff = glm::vec3(nodePos.x - focusNodePos.x, nodePos.y - focusNodePos.y,
+            nodePos.z - focusNodePos.z);
+
+        return diff;
+    }
+
+    /* Our spacecrafts are often very far from Earth (and the sun) which gives precision 
+    * errors when we getting close to the node. To correct this we make a localtransform
+    * to the current focusNode and calculate positions with the focusNode as origin. This
+    * gives us a exact renderposition when we get closer to spacecrafts */
+    RenderableCommunicationPackage::LineVBOLayout 
+        CommunicationLines::getSuitablePrecisionPositionForSceneGraphNode(std::string id) {
         
-        SceneGraphNode* focusNode = global::navigationHandler.focusNode();
         RenderableCommunicationPackage::LineVBOLayout position;
-        glm::vec3 nodePos;
 
-        if (focusNode->identifier() == id) {
-            //make high precision calculations
-            LDEBUG("IdentfierNode");
-            Camera* cam = global::renderEngine.scene()->camera();
+        SceneGraphNode* spacecraftNode = global::renderEngine.scene()->sceneGraphNode(id);
+        glm::dvec3 nodePos = GetCoordinatePosFromFocusNode(spacecraftNode);
 
-            glm::dvec3 cameraPos = cam->positionVec3();
-            glm::dvec3 focusNodePos = focusNode->worldPosition();
-
-            glm::vec3 diff = glm::vec3(cameraPos.x - focusNodePos.x, cameraPos.y - focusNodePos.y, cameraPos.z - focusNodePos.z);
-            float distanceCameraToFocus = glm::sqrt(glm::pow(diff.x,2.0) + glm::pow(diff.y, 2.0)+ glm::pow(diff.z, 2.0));
-            float distanceToSwap = 60000000;
-
-            if (distanceCameraToFocus < distanceToSwap) {
-                LDEBUG(fmt::format("Distance: {}", std::to_string(distanceCameraToFocus)));
-                glm::dvec3 earthPos(global::renderEngine.scene()->sceneGraphNode("Earth")->worldPosition());
-                // And get the current location of the object
-                const glm::dvec3 spacecraftPosWorld = global::renderEngine.scene()->sceneGraphNode(id)->worldPosition();
-                const glm::dvec3 v1 = { spacecraftPosWorld.x, spacecraftPosWorld.y, spacecraftPosWorld.z };
-
-                nodePos = {0.0,0.0,0.0};
-                _lineRenderInformation._localTransformSpacecraft = glm::translate(glm::dmat4(1.0), v1);
-            }else{
-                nodePos = global::renderEngine.scene()->sceneGraphNode(id)->worldPosition();
-            }
-        }else {
-            nodePos = global::renderEngine.scene()->sceneGraphNode(id)->worldPosition();
-        }
         position.x = nodePos.x;
         position.y = nodePos.y;
         position.z = nodePos.z;
@@ -157,8 +148,11 @@ namespace openspace {
         return position;
     }
 
-    //Since our station dishes have a static translation from earth, we can get their local translation
-    RenderableCommunicationPackage::LineVBOLayout CommunicationLines::getPositionForGeocentricSceneGraphNode(const char* id) {
+    /* Since our station dishes have a static translation from Earth, we can get their
+    * local translation the reason to have a separate  modeltransform is to keep an
+    * exact render position even when the focusNode is Earth.*/
+    RenderableCommunicationPackage::LineVBOLayout 
+        CommunicationLines::getPositionForGeocentricSceneGraphNode(const char* id) {
 
         glm::vec3 nodePos = global::renderEngine.scene()->sceneGraphNode(id)->position();
         RenderableCommunicationPackage::LineVBOLayout position;
@@ -168,6 +162,7 @@ namespace openspace {
 
         return position;
     }
+
 
 } // namespace openspace
 

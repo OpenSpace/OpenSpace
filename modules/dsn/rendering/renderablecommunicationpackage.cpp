@@ -196,19 +196,14 @@ bool RenderableCommunicationPackage::isReady() const {
 void RenderableCommunicationPackage::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
 
+    //The stations are statically translated with respect to Earth
     glm::dmat4 modelTransformStation = global::renderEngine.scene()->sceneGraphNode("Earth")->modelTransform();
 
-    glm::dmat4 modelTransformSpacecraft =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
     _programObject->setUniform(_uniformCache.modelViewStation,
-        data.camera.combinedViewMatrix() * modelTransformStation * _lineRenderInformation._localTransform);
-
+        data.camera.combinedViewMatrix() * modelTransformStation);
 
     _programObject->setUniform(_uniformCache.modelViewSpacecraft,
-        data.camera.combinedViewMatrix() * modelTransformSpacecraft * _lineRenderInformation._localTransformSpacecraft);
+        data.camera.combinedViewMatrix()  * _lineRenderInformation._localTransformSpacecraft);
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
 
@@ -273,6 +268,5 @@ glm::vec3 RenderableCommunicationPackage::GetSiteColor(std::string dishidentifie
     }
     return color;
 }
-
 
 } // namespace openspace

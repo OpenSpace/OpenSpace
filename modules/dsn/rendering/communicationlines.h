@@ -58,12 +58,15 @@ namespace openspace {
 
         RenderableCommunicationPackage::LineVBOLayout getSuitablePrecisionPositionForSceneGraphNode(std::string id);
         RenderableCommunicationPackage::LineVBOLayout getPositionForGeocentricSceneGraphNode(const char* id);
-        
+        glm::dvec3 GetCoordinatePosFromFocusNode(SceneGraphNode* node);
+
     private:
 
          const char* _identifier = "CommunicationLines";
-         bool _needsFullSweep = true;
          std::unique_ptr<ghoul::Dictionary> _dictionary;
+    
+         SceneGraphNode* _focusNode;
+
     };
 
 }

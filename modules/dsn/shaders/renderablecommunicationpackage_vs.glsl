@@ -39,11 +39,13 @@ uniform mat4 projectionTransform;
 
 void main() {
     
+    //we use different modelviews depending on if the vertex is a stationposition or a spacecraftposition
     if(mod(gl_VertexID,2) == 0 ){
         vs_gPosition = vec4(modelViewStation * dvec4(in_point_position, 1));
     }else{
         vs_gPosition = vec4(modelViewSpacecraft * dvec4(in_point_position, 1));
     }
+
     vs_positionScreenSpace = z_normalization(projectionTransform * vs_gPosition);
     gl_Position  = vs_positionScreenSpace;
 }

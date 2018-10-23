@@ -49,19 +49,21 @@ namespace documentation { struct Documentation; }
 class Translation;
 
 /**
- * This is the base class for communication packages that are sent out from an emitter
+ * This is the base class for communication lines that are sent out from an emitter
  * (such as a station or spacecraft dish). This can be used by subclasses that either
  * has preloaded data or continuously update position data. This class is responsible
  * for the rendering of the vertex buffer objects which are filled by the subclasses.
- * The buffers contain a list of PackageVBOLayout objects that contains pairs of three
- * dimensional position data that determine start and endpoint of a package segment.
+ * The buffers contain a list of LineVBOLayout objects that contains pairs of three
+ * dimensional position data that determine start and endpoint of a line segment.
  *
- * Communication packages can be rendered as lines of varying colors and line thicknesses.
+ * Communication lines can be rendered with varying colors and line thicknesses.
  *
- * The positions for each point along the trail is provided through a Translation object,
- * the type of which is specified in the dictionary that is passed to the constructor. A
- * typical implementation of Translation used for the trail would be a DsnTranslation.
- */
+ * The positions for each point along the communication is provided by checking for
+ * ScenegraphNode positions in OpenSpace. These positions have different origins
+ * depending on if they are representing a station position or a spacecraft position.
+ * The reason for this is because of precision problems occurring due to using very 
+ * large numbers representing the distances in space.
+ **/
 class RenderableCommunicationPackage : public Renderable {
 public:
     ~RenderableCommunicationPackage() = default;
@@ -74,7 +76,6 @@ public:
     struct LineVBOLayout {
         float x, y, z;
     };
-
 
     /**
      * The render method will set up the shader information and then render first the
@@ -111,9 +112,7 @@ protected:
         GLint first = 0;
         /// The number of values to be rendered
         GLsizei count = 0;
-        /// Local model matrix transformation, used for rendering in camera space
-        glm::dmat4 _localTransform = glm::dmat4(1.0);
-        /// Local model matrix, for spacecraft
+        /// Local model matrix, for spacecraft, dependant on focusnode, used for rendering in camera space
         glm::dmat4 _localTransformSpacecraft = glm::dmat4(1.0);
         /// The vertex array object for this RenderInformation
         GLuint _vaoID = 0;
@@ -136,7 +135,6 @@ private:
 
     /// Line width for the line rendering part
     properties::FloatProperty _lineWidth;
-
     /// Program object used to render the data stored in RenderInformation
     ghoul::opengl::ProgramObject* _programObject = nullptr;
 
