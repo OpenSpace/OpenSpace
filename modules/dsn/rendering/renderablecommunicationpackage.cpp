@@ -34,13 +34,17 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
+
+#include <openspace/scene/scene.h>
+//#include <openspace/scene/scenegraphnode.h>
+
 namespace {
     constexpr const char* ProgramName = "CommunicationPackageProgram";
     constexpr const char* KeyTranslation = "Translation";
     constexpr const char* _loggerCat = "RenderableCommmunicationPackage";
 
-    constexpr const std::array<const char*, 3> UniformNames = {
-        "modelViewTransform", "projectionTransform", "color"
+    constexpr const std::array<const char*, 4> UniformNames = {
+        "modelViewStation","modelViewSpacecraft", "projectionTransform", "color"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MadridColorInfo = {
@@ -121,9 +125,6 @@ RenderableCommunicationPackage::RenderableCommunicationPackage(const ghoul::Dict
     , _canberraLineColor(CanberraColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
 {
-    //addProperty(_opacity);
-    //registerUpdateRenderBinFromOpacity();
-
     _translation = Translation::createFromDictionary(
         dictionary.value<ghoul::Dictionary>(KeyTranslation)
     );
@@ -195,10 +196,19 @@ bool RenderableCommunicationPackage::isReady() const {
 void RenderableCommunicationPackage::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
 
-    glm::dmat4 modelTransform =
+    glm::dmat4 modelTransformStation = global::renderEngine.scene()->sceneGraphNode("Earth")->modelTransform();
+
+    glm::dmat4 modelTransformSpacecraft =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+
+    _programObject->setUniform(_uniformCache.modelViewStation,
+        data.camera.combinedViewMatrix() * modelTransformStation * _lineRenderInformation._localTransform);
+
+
+    _programObject->setUniform(_uniformCache.modelViewSpacecraft,
+        data.camera.combinedViewMatrix() * modelTransformSpacecraft * _lineRenderInformation._localTransformSpacecraft);
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
 
@@ -214,18 +224,12 @@ void RenderableCommunicationPackage::render(const RenderData& data, RendererTask
     }
     glLineWidth(_lineWidth);
 
-    // We pass in the model view transformation matrix as double in order to maintain
-    // high precision for vertices; especially for the lines, a high vertex precision
-    // is necessary as they are usually far away from their reference
-    _programObject->setUniform( _uniformCache.modelView,
-        data.camera.combinedViewMatrix() * modelTransform * _mainRenderInformation._localTransform);
-
-    glBindVertexArray(_mainRenderInformation._vaoID);
+    glBindVertexArray(_lineRenderInformation._vaoID);
 
     glDrawArrays(
-        GL_LINE_STRIP,
-        _mainRenderInformation.first,
-        _mainRenderInformation.count
+        GL_LINES,
+        _lineRenderInformation.first,
+        _lineRenderInformation.count
     );
 
     //unbind vertex array
