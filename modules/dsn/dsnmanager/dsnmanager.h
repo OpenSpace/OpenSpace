@@ -62,6 +62,7 @@ namespace openspace {
     static struct DsnData {
         std::vector<Signal> signals;
      };
+
       static DsnData _dsnData;
 
       static bool extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary);

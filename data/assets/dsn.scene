@@ -28,7 +28,7 @@ assetHelper.requestAll(asset, 'scene/solarsystem/dsn')
 
 local Keybindings = {
     {
-        Key = "s",
+        Key = "s",  
         Command = propertyHelper.invert('Scene.Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.Enabled') ..
                   propertyHelper.invert('Scene.Earth.RenderableGlobe.PerformShading') ..
                   propertyHelper.invert('Scene.Earth.RenderableGlobe.Atmosphere') ..
@@ -63,8 +63,9 @@ asset.onInitialize(function ()
 
 
     local now = openspace.time.currentWallTime()
-	 -- Jump back one day to show a complete planet
-    openspace.time.setTime("2018 SEP 12 19:07:54")
+	openspace.time.setTime("2018 SEP 03 03:11:00")
+
+
 
     sceneHelper.bindKeys(Keybindings)
 

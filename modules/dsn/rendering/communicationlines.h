@@ -33,6 +33,8 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/globals.h>
 #include <fstream>
+#include <openspace/util/updatestructures.h>
+#include <openspace/util/spicemanager.h>
 
 
 namespace openspace {
@@ -45,18 +47,17 @@ namespace openspace {
         void initializeGL() override;
         void deinitializeGL() override;
         void update(const UpdateData& data) override;
-
+     
         RenderableCommunicationPackage::LineVBOLayout getSuitablePrecisionPositionForSceneGraphNode(std::string id);
         RenderableCommunicationPackage::LineVBOLayout getPositionForGeocentricSceneGraphNode(const char* id);
         glm::dvec3 GetCoordinatePosFromFocusNode(SceneGraphNode* node);
 
     private:
-
+         bool checkSignal(double currentTime, std::string signalStartTime, std::string signalEndTime);
+ 
          const char* _identifier = "CommunicationLines";
          std::unique_ptr<ghoul::Dictionary> _dictionary;
-    
          SceneGraphNode* _focusNode;
-
     };
 
 }

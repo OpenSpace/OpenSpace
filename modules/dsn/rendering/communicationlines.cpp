@@ -31,12 +31,23 @@
 namespace openspace {
     constexpr const char* _loggerCat = "CommunicationLine";
 
+
     //Member functions
     CommunicationLines::CommunicationLines(const ghoul::Dictionary& dictionary)
         :RenderableCommunicationPackage(dictionary){
+
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
-        
         extractData();
+    }
+
+    bool CommunicationLines::checkSignal(double currentTime, std::string signalStartTime, std::string signalEndTime) {
+           double startTimeInSeconds = SpiceManager::ref().ephemerisTimeFromDate(signalStartTime);
+           double endTimeInSeconds = SpiceManager::ref().ephemerisTimeFromDate(signalEndTime);
+
+           if (startTimeInSeconds <= currentTime && endTimeInSeconds >= currentTime)
+               return true;
+
+       return false;
     }
 
     void CommunicationLines::extractData() {
@@ -62,12 +73,14 @@ namespace openspace {
 
         RenderableCommunicationPackage::deinitializeGL();
     }
+
     void CommunicationLines::update(const UpdateData& data) {
 
         DsnManager::DsnData signalDataVector = DsnManager::_dsnData;
+        double currentTime = data.time.j2000Seconds();
 
         signalDataVector.signals[1].color = GetSiteColor(signalDataVector.signals[1].dishName);
-        _lineColor = signalDataVector.signals[1].color;
+        _lineColor = signalDataVector.signals[1].color; 
 
         // Make space for the vertices
         _vertexArray.clear();
@@ -77,12 +90,15 @@ namespace openspace {
         _lineRenderInformation._localTransformSpacecraft = glm::translate(glm::dmat4(1.0), _focusNode->worldPosition());
 
         //fill vertexarray with signal position data
-        for (int i = 0; i < signalDataVector.signals.size(); i++) {
-               
+        //Need to change this later, it's to slow.
+        for (int i = 0; i < signalDataVector.signals.size(); i++) { 
             DsnManager::Signal currentSignal = signalDataVector.signals[i];
 
-            _vertexArray.push_back(getPositionForGeocentricSceneGraphNode(currentSignal.dishName.c_str()));
-            _vertexArray.push_back(getSuitablePrecisionPositionForSceneGraphNode(currentSignal.spacecraft.c_str()));
+            if (checkSignal(currentTime, DsnManager::_dsnData.signals[i].startTime, DsnManager::_dsnData.signals[i].endTime))
+            {
+               _vertexArray.push_back(getPositionForGeocentricSceneGraphNode(currentSignal.dishName.c_str()));
+               _vertexArray.push_back(getSuitablePrecisionPositionForSceneGraphNode(currentSignal.spacecraft.c_str()));
+            }
         }
      
         // ... and upload them to the GPU
@@ -103,6 +119,7 @@ namespace openspace {
         _lineRenderInformation.count = static_cast<GLsizei>(_vertexArray.size());
      
         glBindVertexArray(0);
+        
     }
 
     /*Returns a position calculated where the focusNode position is origin(0,0,0) */
