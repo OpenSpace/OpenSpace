@@ -22,64 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESPHERICALGRID___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLESPHERICALGRID___H__
+#ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMVELOCITY___H__
+#define __OPENSPACE_MODULE_BASE___DASHBOARDITEMVELOCITY___H__
 
-#include <openspace/rendering/renderable.h>
+#include <openspace/rendering/dashboarditem.h>
 
+#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/matrix/dmat4property.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/vector/vec4property.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <utility>
 
-namespace ghoul::opengl { class ProgramObject; }
-
-namespace openspace::documentation { struct Documentation; }
+namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
 
-class RenderableSphericalGrid : public Renderable {
+class SceneGraphNode;
+
+namespace documentation { struct Documentation; }
+
+class DashboardItemVelocity : public DashboardItem {
 public:
-    RenderableSphericalGrid(const ghoul::Dictionary& dictionary);
-    ~RenderableSphericalGrid() = default;
+    DashboardItemVelocity(const ghoul::Dictionary& dictionary);
+    virtual ~DashboardItemVelocity() = default;
 
-    void initializeGL() override;
-    void deinitializeGL() override;
+    void render(glm::vec2& penPosition) override;
 
-    bool isReady() const override;
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
+    glm::vec2 size() const override;
 
     static documentation::Documentation Documentation();
 
-protected:
-    struct Vertex {
-        float location[3];
-    };
+private:
+    properties::StringProperty _fontName;
+    properties::FloatProperty _fontSize;
+    properties::BoolProperty _doSimplification;
+    properties::OptionProperty _requestedUnit;
 
-    ghoul::opengl::ProgramObject* _gridProgram;
+    glm::dvec3 _prevPosition;
 
-    properties::DMat4Property _gridMatrix;
-    properties::Vec4Property _gridColor;
-    properties::IntProperty _segments;
-    properties::FloatProperty _lineWidth;
-
-    bool _gridIsDirty = true;
-
-    GLuint _vaoID = 0;
-    GLuint _vBufferID = 0;
-    GLuint _iBufferID = 0;
-
-    GLenum _mode = GL_LINES;
-    unsigned int _isize = 0;
-    unsigned int _vsize = 0;
-    std::vector<Vertex> _varray;
-    std::vector<int> _iarray;
+    std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
 
-}// namespace openspace
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLESPHERICALGRID___H__
+#endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMVELOCITY___H__

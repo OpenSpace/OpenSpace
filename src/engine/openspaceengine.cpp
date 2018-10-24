@@ -816,6 +816,7 @@ void OpenSpaceEngine::deinitializeGL() {
 
     global::openSpaceEngine.assetManager().deinitialize();
     global::openSpaceEngine._scene = nullptr;
+    global::renderEngine.setScene(nullptr);
 
     for (const std::function<void()>& func : global::callback::deinitializeGL) {
         func();
