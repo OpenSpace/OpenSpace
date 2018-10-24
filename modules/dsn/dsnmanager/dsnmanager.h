@@ -60,7 +60,7 @@ namespace openspace {
      };
       static bool extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary);
 	  static glm::vec3 approximateSpacecraftPosition(const char* dishId, glm::vec3 dishPos);
-      static void fillVertexArray(std::vector<RenderableCommunicationPackage::LineVBOLayout> &vertexArray); 
+      static void fillVertexArray(std::vector<RenderableCommunicationPackage::PositionVBOLayout> &vertexArray); 
 
     private:
        static void readDataFromXml(std::vector<std::string> _dataFiles);

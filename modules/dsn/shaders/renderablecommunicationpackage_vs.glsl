@@ -27,14 +27,16 @@
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 layout(location = 0) in vec3 in_point_position;
+layout(location = 1) in vec4 in_color;
+
 in int gl_VertexID;
 
 out vec4 vs_positionScreenSpace;
 out vec4 vs_gPosition;
+out vec4 vs_color;
 
 uniform dmat4 modelViewStation;
 uniform dmat4 modelViewSpacecraft;
-
 uniform mat4 projectionTransform;
 
 void main() {
@@ -48,4 +50,5 @@ void main() {
 
     vs_positionScreenSpace = z_normalization(projectionTransform * vs_gPosition);
     gl_Position  = vs_positionScreenSpace;
+    vs_color = in_color;
 }

@@ -43,8 +43,8 @@ namespace {
     constexpr const char* KeyTranslation = "Translation";
     constexpr const char* _loggerCat = "RenderableCommmunicationPackage";
 
-    constexpr const std::array<const char*, 4> UniformNames = {
-        "modelViewStation","modelViewSpacecraft", "projectionTransform", "color"
+    constexpr const std::array<const char*, 3> UniformNames = {
+        "modelViewStation","modelViewSpacecraft", "projectionTransform"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MadridColorInfo = {
@@ -207,8 +207,6 @@ void RenderableCommunicationPackage::render(const RenderData& data, RendererTask
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
 
-    _programObject->setUniform(_uniformCache.color, _lineColor);
-
     const bool usingFramebufferRenderer =
         global::renderEngine.rendererImplementation() ==
         RenderEngine::RendererImplementation::Framebuffer;
@@ -238,9 +236,10 @@ void RenderableCommunicationPackage::render(const RenderData& data, RendererTask
     _programObject->deactivate();
 }
 
-glm::vec3 RenderableCommunicationPackage::GetSiteColor(std::string dishidentifier) {
+RenderableCommunicationPackage::ColorVBOLayout RenderableCommunicationPackage::GetSiteColor(std::string dishidentifier) {
     
     glm::vec3 color(0.0f,0.0f,0.0f);
+    RenderableCommunicationPackage::ColorVBOLayout colorVbo;
     SiteEnum site;
 
     try {
@@ -249,11 +248,6 @@ glm::vec3 RenderableCommunicationPackage::GetSiteColor(std::string dishidentifie
     catch (const std::exception& e) {
         LERROR(fmt::format("Station {} has no site location.", dishidentifier));
     }
-
-    glm::vec3 color1 = _goldstoneLineColor;
-    glm::vec3 color2 = _madridLineColor;
-    glm::vec3 color3 = _canberraLineColor;
-
 
     switch (site) {
         case 0: 
@@ -266,7 +260,21 @@ glm::vec3 RenderableCommunicationPackage::GetSiteColor(std::string dishidentifie
             color = _canberraLineColor;
             break;
     }
-    return color;
+
+    colorVbo.r = color.r;
+    colorVbo.g = color.g;
+    colorVbo.b = color.b;
+
+    //have different alpha for the 70m antennas
+    if (dishidentifier == "DSS14" || dishidentifier == "DSS63" || dishidentifier == "DSS43")
+    {
+        colorVbo.a = 1.0;
+    }
+    else {
+        colorVbo.a = 0.6f;
+    }
+
+    return colorVbo;
 }
 
 } // namespace openspace

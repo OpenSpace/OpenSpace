@@ -36,7 +36,7 @@ namespace openspace {
         :RenderableCommunicationPackage(dictionary){
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
         
-        extractData();
+        //extractData();
     }
 
     void CommunicationLines::extractData() {
@@ -68,52 +68,88 @@ namespace openspace {
         Signal exampleSignal;
         exampleSignal.spacecraft = "Voyager_1";
         exampleSignal.station = "DSS54";
-        exampleSignal.color = GetSiteColor(exampleSignal.station);
-        _lineColor = exampleSignal.color;
+        //exampleSignal.color = GetSiteColor(exampleSignal.station);
+        //_lineColor = exampleSignal.color;
 
         Signal exampleSignal2;
         exampleSignal2.spacecraft = "Voyager_2";
         exampleSignal2.station = "DSS14";
-        exampleSignal2.color = GetSiteColor(exampleSignal2.station);
-        _lineColor = exampleSignal2.color;
+        //exampleSignal2.color = GetSiteColor(exampleSignal2.station);
+        //_lineColor = exampleSignal2.color;
+
+        Signal exampleSignal3;
+        exampleSignal3.spacecraft = "Voyager_2";
+        exampleSignal3.station = "DSS34";
+        //exampleSignal3.color = GetSiteColor(exampleSignal3.station);
+       // _lineColor = exampleSignal3.color;
 
         DsnData signalDataVector;
         signalDataVector.signals.push_back(exampleSignal);
         signalDataVector.signals.push_back(exampleSignal2);
+        signalDataVector.signals.push_back(exampleSignal3);
 
-        // Make space for the vertices
+        // Make space for the vertex renderinformation
         _vertexArray.clear();
 
         //update focusnode information
         _focusNode = global::navigationHandler.focusNode();
         _lineRenderInformation._localTransformSpacecraft = glm::translate(glm::dmat4(1.0), _focusNode->worldPosition());
 
-        //fill vertexarray with signal position data
+        PositionVBOLayout posStation, posSpacecraft;
+
         for (int i = 0; i < signalDataVector.signals.size(); i++) {
                
             Signal currentSignal = signalDataVector.signals[i];
 
-            _vertexArray.push_back(getPositionForGeocentricSceneGraphNode(currentSignal.station));
-            _vertexArray.push_back(getSuitablePrecisionPositionForSceneGraphNode(currentSignal.spacecraft));
-        }
-     
+            ColorVBOLayout color = GetSiteColor(currentSignal.station);
+            posStation = getPositionForGeocentricSceneGraphNode(currentSignal.station);
+            posSpacecraft = getSuitablePrecisionPositionForSceneGraphNode(currentSignal.spacecraft);
+
+            //fill the render array
+            _vertexArray.push_back(posStation.x);
+            _vertexArray.push_back(posStation.y);
+            _vertexArray.push_back(posStation.z);
+
+            _vertexArray.push_back(color.r);
+            _vertexArray.push_back(color.g);
+            _vertexArray.push_back(color.b);
+            _vertexArray.push_back(color.a);
+
+            _vertexArray.push_back(posSpacecraft.x);
+            _vertexArray.push_back(posSpacecraft.y);
+            _vertexArray.push_back(posSpacecraft.z);
+
+            _vertexArray.push_back(color.r);
+            _vertexArray.push_back(color.g);
+            _vertexArray.push_back(color.b);
+            _vertexArray.push_back(color.a);
+
+        };
+
+        std::vector<float> test = _vertexArray;
+
         // ... and upload them to the GPU
         glBindVertexArray(_lineRenderInformation._vaoID);
         glBindBuffer(GL_ARRAY_BUFFER, _lineRenderInformation._vBufferID);
         glBufferData(
             GL_ARRAY_BUFFER,
-            _vertexArray.size() * sizeof(LineVBOLayout),
+            _vertexArray.size() * sizeof(float),
             _vertexArray.data(),
             GL_STATIC_DRAW
         );
 
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr); // the vertex data points for all positions
+        // position attributes
+        glVertexAttribPointer(_locVer, _sizePosVal, GL_FLOAT, GL_FALSE, sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout), (void*)0);
+        glEnableVertexAttribArray(_locVer);
+        // color attributes
+        glVertexAttribPointer(_locCol, _sizeColorVal, GL_FLOAT, GL_FALSE, sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout), (void*)(sizeof(PositionVBOLayout)));
+        glEnableVertexAttribArray(_locCol);
 
         // Directly render the entire step
         _lineRenderInformation.first = 0;
-        _lineRenderInformation.count = static_cast<GLsizei>(_vertexArray.size());
-     
+        _lineRenderInformation.count = static_cast<GLsizei>(_vertexArray.size()/(_sizePosVal + _sizeColorVal));
+        
+        //unbind vertexArray
         glBindVertexArray(0);
     }
 
@@ -133,10 +169,10 @@ namespace openspace {
     * errors when we getting close to the node. To correct this we make a localtransform
     * to the current focusNode and calculate positions with the focusNode as origin. This
     * gives us a exact renderposition when we get closer to spacecrafts */
-    RenderableCommunicationPackage::LineVBOLayout 
+    RenderableCommunicationPackage::PositionVBOLayout 
         CommunicationLines::getSuitablePrecisionPositionForSceneGraphNode(std::string id) {
         
-        RenderableCommunicationPackage::LineVBOLayout position;
+        RenderableCommunicationPackage::PositionVBOLayout position;
 
         SceneGraphNode* spacecraftNode = global::renderEngine.scene()->sceneGraphNode(id);
         glm::dvec3 nodePos = GetCoordinatePosFromFocusNode(spacecraftNode);
@@ -151,11 +187,11 @@ namespace openspace {
     /* Since our station dishes have a static translation from Earth, we can get their
     * local translation the reason to have a separate  modeltransform is to keep an
     * exact render position even when the focusNode is Earth.*/
-    RenderableCommunicationPackage::LineVBOLayout 
+    RenderableCommunicationPackage::PositionVBOLayout 
         CommunicationLines::getPositionForGeocentricSceneGraphNode(const char* id) {
 
         glm::vec3 nodePos = global::renderEngine.scene()->sceneGraphNode(id)->position();
-        RenderableCommunicationPackage::LineVBOLayout position;
+        RenderableCommunicationPackage::PositionVBOLayout position;
         position.x = nodePos.x;
         position.y = nodePos.y;
         position.z = nodePos.z;

@@ -26,21 +26,15 @@
 
 in vec4 vs_positionScreenSpace;
 in vec4 vs_gPosition;
-
-uniform vec3 color;
+in vec4 vs_color;
 
 Fragment getFragment() {
     Fragment frag;
-    frag.color = vec4(color, 1.0); // opacity 1.0
+    frag.color = vec4(vs_color); // opacity 1.0
     frag.depth = vs_positionScreenSpace.w;
     //frag.blend = BLEND_MODE_ADDITIVE;
 
-    vec4 depthCorrection = vec4(0.0, 0.0, 100.0, 0.0);
-
-    // G-Buffer
-    // JCC: The depthCorrection here is a temporary tweak
-    // to fix precision problems.
-    frag.gPosition = vs_gPosition;// + depthCorrection;
+    frag.gPosition = vs_gPosition;
 
     // There is no normal here
     frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);

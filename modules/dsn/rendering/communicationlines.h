@@ -49,15 +49,14 @@ namespace openspace {
         struct Signal {
             const char* station;
             const char* spacecraft;
-            glm::vec3 color;
         };
 
         struct DsnData {
             std::vector<Signal> signals;
         };
 
-        RenderableCommunicationPackage::LineVBOLayout getSuitablePrecisionPositionForSceneGraphNode(std::string id);
-        RenderableCommunicationPackage::LineVBOLayout getPositionForGeocentricSceneGraphNode(const char* id);
+        RenderableCommunicationPackage::PositionVBOLayout getSuitablePrecisionPositionForSceneGraphNode(std::string id);
+        RenderableCommunicationPackage::PositionVBOLayout getPositionForGeocentricSceneGraphNode(const char* id);
         glm::dvec3 GetCoordinatePosFromFocusNode(SceneGraphNode* node);
 
     private:
