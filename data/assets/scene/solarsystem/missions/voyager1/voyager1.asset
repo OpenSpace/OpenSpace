@@ -31,7 +31,7 @@ local LightSources = {
 }
 
 local Voyager1 = {
-    Identifier = "Voyager_1",
+    Identifier = "VGR1",
     Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Transform = {
         Translation = {

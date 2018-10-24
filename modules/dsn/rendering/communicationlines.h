@@ -45,16 +45,6 @@ namespace openspace {
         void initializeGL() override;
         void deinitializeGL() override;
         void update(const UpdateData& data) override;
-        
-        struct Signal {
-            const char* station;
-            const char* spacecraft;
-            glm::vec3 color;
-        };
-
-        struct DsnData {
-            std::vector<Signal> signals;
-        };
 
         RenderableCommunicationPackage::LineVBOLayout getSuitablePrecisionPositionForSceneGraphNode(std::string id);
         RenderableCommunicationPackage::LineVBOLayout getPositionForGeocentricSceneGraphNode(const char* id);

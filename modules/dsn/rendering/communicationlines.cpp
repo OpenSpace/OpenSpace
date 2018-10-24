@@ -62,24 +62,12 @@ namespace openspace {
 
         RenderableCommunicationPackage::deinitializeGL();
     }
-    void CommunicationLines::update(const UpdateData& data){
+    void CommunicationLines::update(const UpdateData& data) {
 
-        //Update vertex array with values from data 
-        Signal exampleSignal;
-        exampleSignal.spacecraft = "Voyager_1";
-        exampleSignal.station = "DSS54";
-        exampleSignal.color = GetSiteColor(exampleSignal.station);
-        _lineColor = exampleSignal.color;
+        DsnManager::DsnData signalDataVector = DsnManager::_dsnData;
 
-        Signal exampleSignal2;
-        exampleSignal2.spacecraft = "Voyager_2";
-        exampleSignal2.station = "DSS14";
-        exampleSignal2.color = GetSiteColor(exampleSignal2.station);
-        _lineColor = exampleSignal2.color;
-
-        DsnData signalDataVector;
-        signalDataVector.signals.push_back(exampleSignal);
-        signalDataVector.signals.push_back(exampleSignal2);
+        signalDataVector.signals[1].color = GetSiteColor(signalDataVector.signals[1].dishName);
+        _lineColor = signalDataVector.signals[1].color;
 
         // Make space for the vertices
         _vertexArray.clear();
@@ -91,10 +79,10 @@ namespace openspace {
         //fill vertexarray with signal position data
         for (int i = 0; i < signalDataVector.signals.size(); i++) {
                
-            Signal currentSignal = signalDataVector.signals[i];
+            DsnManager::Signal currentSignal = signalDataVector.signals[i];
 
-            _vertexArray.push_back(getPositionForGeocentricSceneGraphNode(currentSignal.station));
-            _vertexArray.push_back(getSuitablePrecisionPositionForSceneGraphNode(currentSignal.spacecraft));
+            _vertexArray.push_back(getPositionForGeocentricSceneGraphNode(currentSignal.dishName.c_str()));
+            _vertexArray.push_back(getSuitablePrecisionPositionForSceneGraphNode(currentSignal.spacecraft.c_str()));
         }
      
         // ... and upload them to the GPU

@@ -32,8 +32,9 @@ namespace openspace {
     constexpr const char* KeyDataFolder = "DataFolder";
     constexpr const char* KeyDataFileType = "DataFileType";
 
+    struct DsnManager::DsnData DsnManager::_dsnData;
+
     //Filetypes
-    //const std::string dataFileTypeStringXml = "xml";
     const std::string dataFileTypeStringJson = "json";
 
     enum class DataFileType : int {
@@ -141,12 +142,9 @@ namespace openspace {
     }
 
     void DsnManager::readDataFromJson(std::vector<std::string> _dataFiles) {
-        // logfile for checking so that the data parsing works
-        std::ofstream logfile{ "jsonTestLogger.txt" };
         for (std::vector<std::string>::iterator it = _dataFiles.begin(); it != _dataFiles.end(); ++it) {
-            DsnManager::jsonParser(*it, logfile);
+          DsnManager::jsonParser(*it);
         }
-        logfile.close();
     }
 
     /****
@@ -189,35 +187,30 @@ namespace openspace {
         }
     }
    
-    void DsnManager::jsonParser(std::string filename, std::ofstream &logfile) {
+    void DsnManager::jsonParser(std::string filename) {
         std::ifstream ifs(filename);
         nlohmann::json j = nlohmann::json::parse(ifs);
 
-       // DsnManager::DsnData dsnData;
        DsnManager::Signal structSignal;
-      
-       DsnManager::DsnData signals;
-       signals.signals.clear();
-       signals.signals.reserve(0);
+
+       _dsnData.signals.clear();
+       _dsnData.signals.reserve(0);
 
        //loop through all signals in the data 
       for (const auto& signalsInJson : j["Signals"]) {
-          
-          structSignal.dishName = signalsInJson["dishName"].get<std::string>();
-          structSignal.spacecraft = signalsInJson["spacecraft"].get<std::string>();
-          structSignal.direction = signalsInJson["direction"].get<std::string>();
-          structSignal.type = signalsInJson["type"].get<std::string>();
-          structSignal.dataRate = signalsInJson["dataRate"].get<std::string>(); //Should not be a string
-          structSignal.startTime = signalsInJson["startTime"].get<float>();
-        
+
+          structSignal.signalId = signalsInJson["activityid"].get<int>();
+          structSignal.dishName = signalsInJson["facility"].get<std::string>();
+          structSignal.year = signalsInJson["year"].get<int>();
+          structSignal.spacecraft = signalsInJson["projuser"].get<std::string>();
+          structSignal.endTime = signalsInJson["eot"].get<std::string>(); 
+          structSignal.startTime = signalsInJson["bot"].get<std::string>();
+       
           //Add signals to vector of signals
-          signals.signals.push_back(structSignal);
+          _dsnData.signals.push_back(structSignal);
         }
    
-       // logfile << structSignal.dishName;
-        logfile.close();
     }
-
     //return vertexarray to commmunicationline
     void DsnManager::fillVertexArray(std::vector<RenderableCommunicationPackage::LineVBOLayout> &vertexArray) {
        

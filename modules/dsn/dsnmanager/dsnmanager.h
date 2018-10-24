@@ -48,16 +48,22 @@ namespace openspace {
     public:
 
     static struct Signal {        
-        std::string dishName ;
+        int signalId;
+        std::string dishName;
+        int year;
         std::string spacecraft;
         std::string direction; 
-        std::string type;
-        float startTime;
-        std::string dataRate;
+        std::string startTime;
+        std::string endTime;
+        glm::vec3 color;
+
       };
+
     static struct DsnData {
         std::vector<Signal> signals;
      };
+      static DsnData _dsnData;
+
       static bool extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary);
 	  static glm::vec3 approximateSpacecraftPosition(const char* dishId, glm::vec3 dishPos);
       static void fillVertexArray(std::vector<RenderableCommunicationPackage::LineVBOLayout> &vertexArray); 
@@ -66,7 +72,7 @@ namespace openspace {
        static void readDataFromXml(std::vector<std::string> _dataFiles);
        static void readDataFromJson(std::vector<std::string> _dataFiles);
        static void xmlParser(std::string filename, std::ofstream &logfile);
-       static void jsonParser(std::string filename, std::ofstream &logfile);
+       static void jsonParser(std::string filename);
 	   static double deg2rad(double degrees);
 
 	   /**  Converts a Range, Azimuth, Elevation location to South East Zenith coordinates**/    
