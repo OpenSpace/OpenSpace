@@ -65,6 +65,8 @@ class Translation;
  * large numbers representing the distances in space.
  **/
 class RenderableCommunicationPackage : public Renderable {
+
+
 public:
     ~RenderableCommunicationPackage() = default;
 
@@ -72,21 +74,26 @@ public:
     void deinitializeGL() override;
 
     bool isReady() const override;
-    /// The layout of the VBOs
-    struct LineVBOLayout {
+
+    /// The VBO layout of the vertex position 
+    struct PositionVBOLayout {
         float x, y, z;
+    };
+    /// The VBO layout of the color
+    struct ColorVBOLayout {
+        float r, g, b, a;
     };
 
     /**
-     * The render method will set up the shader information and then render first the
-     * information contained in the the \c _mainRenderInformation, 
+     * The render method will set up the shader information and then render the
+     * information contained in the the \c _lineRenderInformation, 
 	 * using the provided \p data
      * \param data The data that is necessary to render this Renderable
      */
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
 	/// The function deciding what color to use for a signal
-	virtual glm::vec3 GetSiteColor(std::string dishIdentifier);
+	 ColorVBOLayout GetSiteColor(std::string dishIdentifier);
 
 protected:
     explicit RenderableCommunicationPackage(const ghoul::Dictionary& dictionary);
@@ -95,8 +102,8 @@ protected:
     static documentation::Documentation Documentation();
 
     /// The backend storage for the vertex buffer object containing all points for the
-    /// packages to be rendered
-    std::vector<LineVBOLayout> _vertexArray;
+    /// lines to be rendered; position (3 floats) color (4 floats), 
+    std::vector<float> _vertexArray;
 
     /// The index array that is potentially used in the draw call. If this is empty, no
     /// element draw call is used.
@@ -123,13 +130,18 @@ protected:
     /// Set of information about the main rendering parts
     RenderInformation _lineRenderInformation;
 
-	/// Specifies the base color of the line
-	glm::vec3 _lineColor;
-
 	/// Specifies the base color of the site lines
 	properties::Vec3Property _madridLineColor;
 	properties::Vec3Property _goldstoneLineColor;
 	properties::Vec3Property _canberraLineColor;
+
+    /// The attribute location for vertex position
+    const GLuint _locVer = 0;
+    /// The attribute location for vertex color
+    const GLuint _locCol = 1;
+    /// Specifies the number of components per generic vertex attribute
+    const GLuint _sizeColorVal = 4;
+    const GLuint _sizePosVal = 3;
 
 private:
 
@@ -138,7 +150,7 @@ private:
     /// Program object used to render the data stored in RenderInformation
     ghoul::opengl::ProgramObject* _programObject = nullptr;
 
-    UniformCache(modelViewStation, modelViewSpacecraft, projection, color) _uniformCache;
+    UniformCache(modelViewStation, modelViewSpacecraft, projection) _uniformCache;
 
 	enum SiteEnum {
 		GoldStone = 0,

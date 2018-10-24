@@ -212,7 +212,7 @@ namespace openspace {
    
     }
     //return vertexarray to commmunicationline
-    void DsnManager::fillVertexArray(std::vector<RenderableCommunicationPackage::LineVBOLayout> &vertexArray) {
+    void DsnManager::fillVertexArray(std::vector<RenderableCommunicationPackage::PositionVBOLayout> &vertexArray) {
        
         //get number of lines to be drawn = count signals from data at this time
         const int nValues = 2;

@@ -47,9 +47,10 @@ namespace openspace {
         void initializeGL() override;
         void deinitializeGL() override;
         void update(const UpdateData& data) override;
-     
-        RenderableCommunicationPackage::LineVBOLayout getSuitablePrecisionPositionForSceneGraphNode(std::string id);
-        RenderableCommunicationPackage::LineVBOLayout getPositionForGeocentricSceneGraphNode(const char* id);
+
+        RenderableCommunicationPackage::PositionVBOLayout getSuitablePrecisionPositionForSceneGraphNode(std::string id);
+        RenderableCommunicationPackage::PositionVBOLayout getPositionForGeocentricSceneGraphNode(const char* id);
+
         glm::dvec3 GetCoordinatePosFromFocusNode(SceneGraphNode* node);
 
     private:
