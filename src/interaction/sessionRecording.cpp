@@ -418,6 +418,7 @@ void SessionRecording::saveCameraKeyframe() {
                 << std::fixed << std::setprecision(7) << kf._rotation.y << " "
                 << std::fixed << std::setprecision(7) << kf._rotation.z << " "
                 << std::fixed << std::setprecision(7) << kf._rotation.w << " ";
+            keyframeLine << std::fixed << std::setprecision(7) << kf._scale << " ";
             if (kf._followNodeRotation)
                 keyframeLine << "F ";
             else
@@ -677,7 +678,7 @@ void SessionRecording::playbackCamera() {
         std::istringstream iss(_playbackLineParsing);
         std::string entryType;
         iss >> entryType;
-        iss >> timeRec >> timeSim >> timeOs;
+        iss >> timeOs >> timeRec >> timeSim;
         iss >> pbFrame.position.x
             >> pbFrame.position.y
             >> pbFrame.position.z
@@ -685,6 +686,7 @@ void SessionRecording::playbackCamera() {
             >> pbFrame.rotation.y
             >> pbFrame.rotation.z
             >> pbFrame.rotation.w
+            >> pbFrame.scale
             >> rotationFollowing
             >> pbFrame.focusNode;
         if (iss.fail() || !iss.eof()) {
