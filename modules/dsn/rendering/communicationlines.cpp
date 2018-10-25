@@ -169,9 +169,17 @@ namespace openspace {
         CommunicationLines::getSuitablePrecisionPositionForSceneGraphNode(std::string id) {
         
         RenderableCommunicationPackage::PositionVBOLayout position;
+        glm::dvec3 nodePos;
 
-        SceneGraphNode* spacecraftNode = global::renderEngine.scene()->sceneGraphNode(id);
-        glm::dvec3 nodePos = GetCoordinatePosFromFocusNode(spacecraftNode);
+        if (global::renderEngine.scene()->sceneGraphNode(id)) {
+            SceneGraphNode* spacecraftNode = global::renderEngine.scene()->sceneGraphNode(id);
+            nodePos = GetCoordinatePosFromFocusNode(spacecraftNode);
+        }
+        else {
+            // TODO: Else estimate the position of the spacecraft by RA/DEC/RANGE 
+            LDEBUG(fmt::format("No position data for the spacecraft {}, estimating position",id));
+            nodePos = glm::vec3(0, 0, 0);
+        }
 
         position.x = nodePos.x;
         position.y = nodePos.y;
