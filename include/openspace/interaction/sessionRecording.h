@@ -165,6 +165,7 @@ private:
     bool playbackAddEntriesToTimeline();
     void signalPlaybackFinishedForComponent(recordedType type);
     void writeToFileBuffer(const double& src);
+    void writeToFileBuffer(std::vector<char>& cvec);
     void writeToFileBuffer(const unsigned char c);
     void writeToFileBuffer(bool b);
     void saveStringToFile(const std::string s);

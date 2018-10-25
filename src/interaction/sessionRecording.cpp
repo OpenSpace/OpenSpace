@@ -284,6 +284,12 @@ void SessionRecording::writeToFileBuffer(const double& src) {
     _bufferIndex += writeSize_bytes;
 }
 
+void SessionRecording::writeToFileBuffer(std::vector<char>& cvec) {
+    const size_t writeSize_bytes = cvec.size() * sizeof(char);
+    memcpy((_keyframeBuffer + _bufferIndex), &cvec[0], writeSize_bytes);
+    _bufferIndex += writeSize_bytes;
+}
+
 void SessionRecording::writeToFileBuffer(const unsigned char c) {
     const size_t writeSize_bytes = sizeof(char);
     _keyframeBuffer[_bufferIndex] = c;
@@ -386,20 +392,15 @@ void SessionRecording::saveCameraKeyframe() {
         if (isDataModeBinary()) {
             _bufferIndex = 0;
             _keyframeBuffer[_bufferIndex++] = 'c';
-            writeToFileBuffer(kf._timestamp);
+
+            //Writing to internal buffer, and then to file, for performance reasons
             writeToFileBuffer(kf._timestamp - _timestampRecordStarted);
             writeToFileBuffer(global::timeManager.time().j2000Seconds());
-            writeToFileBuffer(kf._position.x);
-            writeToFileBuffer(kf._position.y);
-            writeToFileBuffer(kf._position.z);
-            writeToFileBuffer(kf._rotation.x);
-            writeToFileBuffer(kf._rotation.y);
-            writeToFileBuffer(kf._rotation.z);
-            writeToFileBuffer(kf._rotation.w);
-            writeToFileBuffer(kf._followNodeRotation);
-            saveKeyframeToFileBinary(_keyframeBuffer, _bufferIndex);
+            std::vector<char> kfBuffer;
+            kf.serialize(kfBuffer);
+            writeToFileBuffer(kfBuffer);
 
-            saveStringToFile(kf._focusNode);
+            saveKeyframeToFileBinary(_keyframeBuffer, _bufferIndex);
         } else {
             std::stringstream keyframeLine = std::stringstream();
             //Add simulation timestamp, timestamp relative, simulation time to recording start
@@ -653,25 +654,20 @@ void SessionRecording::playbackCamera() {
     double timeOs, timeRec, timeSim;
     std::string rotationFollowing;
     interaction::KeyframeNavigator::CameraPose pbFrame;
+    datamessagestructures::CameraKeyframe kf;
     if (isDataModeBinary()) {
-        double tmpRotation;
-        readFromPlayback(timeOs);
         readFromPlayback(timeRec);
         readFromPlayback(timeSim);
-        readFromPlayback(pbFrame.position.x);
-        readFromPlayback(pbFrame.position.y);
-        readFromPlayback(pbFrame.position.z);
-        readFromPlayback(tmpRotation);
-        pbFrame.rotation.x = static_cast<float>(tmpRotation);
-        readFromPlayback(tmpRotation);
-        pbFrame.rotation.y = static_cast<float>(tmpRotation);
-        readFromPlayback(tmpRotation);
-        pbFrame.rotation.z = static_cast<float>(tmpRotation);
-        readFromPlayback(tmpRotation);
-        pbFrame.rotation.w = static_cast<float>(tmpRotation);
+        kf.read(&_playbackFile);
 
-        readFromPlayback(pbFrame.followFocusNodeRotation);
-        readFromPlayback(pbFrame.focusNode);
+        timeOs = kf._timestamp;
+
+        pbFrame.focusNode = kf._focusNode;
+        pbFrame.position = kf._position;
+        pbFrame.rotation = kf._rotation;
+        pbFrame.scale = kf._scale;
+        pbFrame.followFocusNodeRotation = kf._followNodeRotation;
+
         if (!_playbackFile) {
             LINFO(fmt::format("Error reading camera playback from keyframe entry {}",
                 _playbackLineNum - 1));
@@ -681,7 +677,7 @@ void SessionRecording::playbackCamera() {
         std::istringstream iss(_playbackLineParsing);
         std::string entryType;
         iss >> entryType;
-        iss >> timeOs >> timeRec >> timeSim;
+        iss >> timeRec >> timeSim >> timeOs;
         iss >> pbFrame.position.x
             >> pbFrame.position.y
             >> pbFrame.position.z
@@ -1047,13 +1043,23 @@ bool SessionRecording::processCameraKeyframe(double now) {
     camera->setPositionVec3(interpolatedCamera);
     if (prevKeyframeCameraRotation == nextKeyframeCameraRotation) {
         camera->setRotation(prevKeyframeCameraRotation);
+        camera->setScaling(prevPose.scale);
         //LINFO("Skipped slerp call with = rotation.");
     }
     else {
         camera->setRotation(
             glm::slerp(prevKeyframeCameraRotation, nextKeyframeCameraRotation, t)
         );
+        // We want to affect view scaling, such that we achieve
+        // logarithmic interpolation of distance to an imagined focus node.
+        // To do this, we interpolate the scale reciprocal logarithmically.
+        const float prevInvScaleExp = glm::log(1.f / prevPose.scale);
+        const float nextInvScaleExp = glm::log(1.f / nextPose.scale);
+        const float interpolatedInvScaleExp = static_cast<float>(
+            prevInvScaleExp * (1 - t) + nextInvScaleExp * t);
+        camera->setScaling(1.f / glm::exp(interpolatedInvScaleExp));
     }
+
 #ifdef INTERPOLATION_DEBUG_PRINT
     LINFO(fmt::format("Cam pos prev={}, next={}", std::to_string(prevKeyframeCameraPosition),
         std::to_string(nextKeyframeCameraPosition)));

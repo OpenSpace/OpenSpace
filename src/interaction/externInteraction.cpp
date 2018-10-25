@@ -82,6 +82,7 @@ void ExternInteraction::cameraInteraction(datamessagestructures::CameraKeyframe 
     pose.focusNode = kf._focusNode;
     pose.position = kf._position;
     pose.rotation = kf._rotation;
+    pose.scale = kf._scale;
     pose.followFocusNodeRotation = kf._followNodeRotation;
 
     global::navigationHandler.keyframeNavigator().addKeyframe(kf._timestamp, pose);
@@ -125,6 +126,7 @@ void ExternInteraction::generateCameraKeyframe(datamessagestructures::CameraKeyf
     }
     
     kf._focusNode = focusNode->identifier();
+    kf._scale = global::navigationHandler.camera()->scaling();
     
     // Timestamp as current runtime of OpenSpace instance
     kf._timestamp = global::windowDelegate.applicationTime();
