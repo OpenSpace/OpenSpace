@@ -964,7 +964,6 @@ void OpenSpaceEngine::preSynchronization() {
     if (master) {
         double dt = global::windowDelegate.averageDeltaTime();
         global::timeManager.preSynchronization(dt);
-        global::sessionRecording.preSynchronization(global::windowDelegate.deltaTime());
 
         using Iter = std::vector<std::string>::const_iterator;
         std::pair<Iter, Iter> scheduledScripts = global::scriptScheduler.progressTo(
@@ -988,6 +987,7 @@ void OpenSpaceEngine::preSynchronization() {
                 camera->invalidateCache();
             }
         }
+        global::sessionRecording.preSynchronization(global::windowDelegate.deltaTime());
         global::parallelPeer.preSynchronization();
     }
 

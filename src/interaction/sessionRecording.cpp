@@ -255,8 +255,14 @@ void SessionRecording::stopPlayback() {
 }
 
 void SessionRecording::cleanUpPlayback() {
-    global::navigationHandler.setDisableKeyFrameInteraction();
     global::navigationHandler.stopPlayback();
+
+    Camera * camera = global::navigationHandler.camera();
+    ghoul_assert(camera != nullptr, "Camera must not be nullptr");
+    Scene * scene = camera->parent()->scene();
+    unsigned int prevIdx = _timeline[_idxTimeline_cameraPtrPrev].idxIntoKeyframeTypeArray;
+    global::navigationHandler.setFocusNode(scene->sceneGraphNode(_keyframesCamera[prevIdx].focusNode));
+
     global::scriptScheduler.stopPlayback();
 
     _playbackFile.close();
@@ -272,6 +278,8 @@ void SessionRecording::cleanUpPlayback() {
     _idxTimeline_cameraPtrNext = 0;
     _idxTimeline_cameraPtrPrev = 0;
     _hasHitEndOfCameraKeyframes = false;
+
+    _cleanupNeeded = false;
 }
 
 bool SessionRecording::isDataModeBinary() {
@@ -972,9 +980,6 @@ unsigned int SessionRecording::findIndexOfLastCameraKeyframeInTimeline() {
 bool SessionRecording::processCameraKeyframe(double now) {
     interaction::KeyframeNavigator::CameraPose nextPose;
     interaction::KeyframeNavigator::CameraPose prevPose;
-    Camera * camera = global::navigationHandler.camera();
-    ghoul_assert(camera != nullptr, "Camera must not be nullptr");
-    Scene * scene = camera->parent()->scene();
 
     if (!_playbackActive_camera) {
         return false;
@@ -989,6 +994,20 @@ bool SessionRecording::processCameraKeyframe(double now) {
 
     double prevTime = _timeline[_idxTimeline_cameraPtrPrev].timestamp;  //getPrevTimestamp();
     double nextTime = _timeline[_idxTimeline_cameraPtrNext].timestamp;  //getNextTimestamp();
+    
+    double t;
+    if ((nextTime - prevTime) < 1e-7)
+        t = 0;
+    else
+        t = (now - prevTime) / (nextTime - prevTime);
+
+    return interaction::KeyframeNavigator::updateCamera(global::navigationHandler.camera(), prevPose, nextPose, t, prevTime, nextTime, false);
+
+/*#ifdef INTERPOLATION_DEBUG_PRINT
+    LINFOC("prev", std::to_string(prevTime));
+    LINFOC("now", std::to_string(now));
+    LINFOC("next", std::to_string(nextTime));
+#endif*/
 
     /*if (now >= nextTime) {
         LINFOC("_idxTimeline_cameraPtr", std::to_string(_idxTimeline_cameraPtrNext));
@@ -1001,14 +1020,13 @@ bool SessionRecording::processCameraKeyframe(double now) {
         }
     }*/
 
+    /*Camera * camera = global::navigationHandler.camera();
+    ghoul_assert(camera != nullptr, "Camera must not be nullptr");
+    Scene * scene = camera->parent()->scene();
     SceneGraphNode* prevFocusNode = scene->sceneGraphNode(prevPose.focusNode);
     SceneGraphNode* nextFocusNode = scene->sceneGraphNode(nextPose.focusNode);
 
-#ifdef INTERPOLATION_DEBUG_PRINT
-    LINFOC("prev", std::to_string(prevTime));
-    LINFOC("now", std::to_string(now));
-    LINFOC("next", std::to_string(nextTime));
-#endif
+
     double t;
     if ((nextTime - prevTime) < 1e-7)
         t = 0;
@@ -1091,7 +1109,7 @@ bool SessionRecording::processCameraKeyframe(double now) {
         interpolatedCamera.y, interpolatedCamera.z);
 
 #endif
-    return true;
+    return true;*/
 }
 
 bool SessionRecording::processScriptKeyframe(double now, double deltaTime) {

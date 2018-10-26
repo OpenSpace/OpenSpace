@@ -46,14 +46,15 @@ bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes)
     }
 
     const Keyframe<CameraPose>* nextKeyframe =
-                                              _cameraPoseTimeline.firstKeyframeAfter(now);
+        _cameraPoseTimeline.firstKeyframeAfter(now);
     const Keyframe<CameraPose>* prevKeyframe =
-                                              _cameraPoseTimeline.lastKeyframeBefore(now);
+        _cameraPoseTimeline.lastKeyframeBefore(now);
 
     double nextTime = 0.0;
     if (nextKeyframe) {
         nextTime = nextKeyframe->timestamp;
-    } else {
+    }
+    else {
         if (ignoreFutureKeyframes) {
             _cameraPoseTimeline.removeKeyframesBefore(now);
         }
@@ -66,7 +67,8 @@ bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes)
         prevTime = prevKeyframe->timestamp;
         t = (now - prevTime) / (nextTime - prevTime);
         foundPrevKeyframe = true;
-    } else {
+    }
+    else {
         // If there is no keyframe before: Only use the next keyframe.
         prevTime = nextTime;
         prevKeyframe = nextKeyframe;
@@ -81,7 +83,11 @@ bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes)
         return false;
     }
 
-    Scene* scene = camera.parent()->scene();
+    updateCamera(&camera, prevKeyframe->data, nextKeyframe->data, t, prevTime, nextTime, ignoreFutureKeyframes);
+}
+
+bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose prevPose, const CameraPose nextPose, double t, double prevTime, double nextTime, bool ignoreFutureKeyframes) {  
+    Scene* scene = camera->parent()->scene();
     SceneGraphNode* prevFocusNode = scene->sceneGraphNode(prevPose.focusNode);
     SceneGraphNode* nextFocusNode = scene->sceneGraphNode(nextPose.focusNode);
 
@@ -118,10 +124,11 @@ bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes)
     nextKeyframeCameraPosition += nextFocusNode->worldPosition();
 
     // Linear interpolation
-    camera.setPositionVec3(
+    t = std::max(0.0, std::min(1.0, t));
+    camera->setPositionVec3(
         prevKeyframeCameraPosition * (1 - t) + nextKeyframeCameraPosition * t
     );
-    camera.setRotation(
+    camera->setRotation(
         glm::slerp(prevKeyframeCameraRotation, nextKeyframeCameraRotation, t)
     );
     
@@ -134,8 +141,33 @@ bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes)
         const float interpolatedInvScaleExp = static_cast<float>(
             prevInvScaleExp * (1 - t) + nextInvScaleExp * t
             );
-        camera.setScaling(1.f / glm::exp(interpolatedInvScaleExp));
+        camera->setScaling(1.f / glm::exp(interpolatedInvScaleExp));
     }
+
+#ifdef INTERPOLATION_DEBUG_PRINT
+    LINFOC("prev", std::to_string(prevTime));
+    LINFOC("now", std::to_string(prevTime+t));
+    LINFOC("next", std::to_string(nextTime));
+    LINFO(fmt::format("Cam pos prev={}, next={}", std::to_string(prevKeyframeCameraPosition),
+        std::to_string(nextKeyframeCameraPosition)));
+    LINFO(fmt::format("Cam rot prev={} {} {} {}  next={} {} {} {}", prevKeyframeCameraRotation.x,
+        prevKeyframeCameraRotation.y, prevKeyframeCameraRotation.z, prevKeyframeCameraRotation.w,
+        nextKeyframeCameraRotation.x, nextKeyframeCameraRotation.y, nextKeyframeCameraRotation.z,
+        nextKeyframeCameraRotation.w));
+    LINFO(fmt::format("Cam interp = {}", t));
+    LINFO(fmt::format("camera {} {} {} {} {} {}", global::windowDelegate.applicationTime(),
+        global::windowDelegate.applicationTime() - _timestampPlaybackStarted_application,
+        global::timeManager.time().j2000Seconds(), interpolatedCamera.x,
+        interpolatedCamera.y, interpolatedCamera.z));
+    //Following is for direct print to save & compare camera positions against recorded file
+    printf("camera %8.4f %8.4f %13.3f %16.7f %16.7f %16.7f\n", global::windowDelegate.applicationTime(),
+        global::windowDelegate.applicationTime() - _timestampPlaybackStarted_application,
+        global::timeManager.time().j2000Seconds(), interpolatedCamera.x,
+        interpolatedCamera.y, interpolatedCamera.z);
+
+#endif
+
+
     return true;
 }
 
