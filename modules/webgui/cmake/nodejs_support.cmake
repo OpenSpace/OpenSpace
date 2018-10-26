@@ -66,13 +66,25 @@ function(DownloadNodeJs version download_dir)
 
     message(STATUS "URL: ${NODEJS_DOWNLOAD_URL}")
 
-    if (UNIX)
-      # Extract the binary distribution.
+    # Extract the binary distribution for unix
+    if (APPLE)
+      # Apple uses tar.gz
       message(STATUS "Extracting NodeJs: ${NODEJS_DOWNLOAD_PATH} in ${NODEJS_DOWNLOAD_DIR}")
       execute_process(
         COMMAND tar xzf ${NODEJS_DOWNLOAD_PATH}
         WORKING_DIRECTORY ${NODEJS_DOWNLOAD_DIR}
       )
+    endif()
+    if (UNIX AND NOT APPLE)
+      # Linux uses tar.xz
+      message(STATUS "Extracting NodeJs: ${NODEJS_DOWNLOAD_PATH} in ${NODEJS_DOWNLOAD_DIR}")
+      execute_process(
+        COMMAND tar xvf ${NODEJS_DOWNLOAD_PATH}
+        WORKING_DIRECTORY ${NODEJS_DOWNLOAD_DIR}
+      )
+    endif()
+
+    if (UNIX)
       FILE(COPY ${NODEJS_DOWNLOAD_DIR}/${basename}/bin/node
            DESTINATION ${NODEJS_DOWNLOAD_DIR})
       FILE(REMOVE_RECURSE ${NODEJS_DOWNLOAD_DIR}/${basename})
