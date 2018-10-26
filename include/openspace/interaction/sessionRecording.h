@@ -46,6 +46,7 @@ public:
         ascii,
         binary
     };
+
     SessionRecording();
     ~SessionRecording();
     /**
@@ -91,11 +92,13 @@ public:
     * Starts a playback session, which can run in one of three different time modes.
     * \param filename file containing recorded keyframes to play back
     * \param timeMode which of the 3 time modes to use for time reference during
+    * \param forceSimTimeAtStart if true simulation time is forced to that of playback
     * playback: recorded time, application time, or simulation time. See the LuaLibrary
     * entry for SessionRecording for details on these time modes.
     * \returns true if recording to file starts without errors.
     */
-    bool startPlayback(std::string filename, KeyframeTimeRef timeMode);
+    bool startPlayback(std::string filename, KeyframeTimeRef timeMode,
+        bool forceSimTimeAtStart);
     /**
     * Used to stop a playback in progress. If open, the playback file will be closed,
     * and all keyframes deleted from memory.
@@ -204,7 +207,7 @@ private:
     const bool _usingTimeKeyframes = false;
     const std::string _fileHeaderTitle = "OpenSpace_record/playback";
     static const size_t _fileHeaderVersionLength = 5;
-    const char _fileHeaderVersion[_fileHeaderVersionLength] = { '0', '0', '.', '8', '0' };
+    const char _fileHeaderVersion[_fileHeaderVersionLength] = { '0', '0', '.', '8', '5' };
     const char dataFormatAsciiTag = 'A';
     const char dataFormatBinaryTag = 'B';
 
@@ -221,6 +224,7 @@ private:
     bool _playbackActive_time = false;
     bool _playbackActive_script = false;
     bool _hasHitEndOfCameraKeyframes = false;
+    bool _setSimulationTimeWithNextCameraKeyframe = false;
 
     static const size_t keyframeHeaderSize_bytes = 33;
     static const size_t saveBufferCameraSize_min = 82;

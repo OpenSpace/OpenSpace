@@ -110,7 +110,9 @@ void SessionRecording::stopRecording() {
     _recordFile.close();
 }
 
-bool SessionRecording::startPlayback(std::string filename, KeyframeTimeRef timeMode) {
+bool SessionRecording::startPlayback(std::string filename, KeyframeTimeRef timeMode,
+                                     bool forceSimTimeAtStart)
+{
     if (_state == sessionState::recording) {
         LERROR("Unable to start playback while in session recording mode");
         return false;
@@ -181,15 +183,17 @@ bool SessionRecording::startPlayback(std::string filename, KeyframeTimeRef timeM
 
     global::navigationHandler.keyframeNavigator().setTimeReferenceMode(timeMode, now);
     global::scriptScheduler.setTimeReferenceMode(timeMode);
+
+    _setSimulationTimeWithNextCameraKeyframe = forceSimTimeAtStart;
     if (!playbackAddEntriesToTimeline())
         return false;
 
     _hasHitEndOfCameraKeyframes = false;
     findFirstCameraKeyframeInTimeline();
 
-    LINFO(fmt::format("Playback session started @ ({:8.3f},0.0,{:13.3f}) with {}/{}/{} entries",
+    LINFO(fmt::format("Playback session started @ ({:8.3f},0.0,{:13.3f}) with {}/{}/{} entries, forceTime={}",
         now, _timestampPlaybackStarted_simulation, _keyframesCamera.size(),
-        _keyframesTime.size(), _keyframesScript.size()));
+        _keyframesTime.size(), _keyframesScript.size(), (forceSimTimeAtStart ? 1 : 0)));
 
     global::navigationHandler.triggerPlaybackStart();
     global::scriptScheduler.triggerPlaybackStart();
@@ -394,6 +398,7 @@ void SessionRecording::saveCameraKeyframe() {
             _keyframeBuffer[_bufferIndex++] = 'c';
 
             //Writing to internal buffer, and then to file, for performance reasons
+            writeToFileBuffer(kf._timestamp);
             writeToFileBuffer(kf._timestamp - _timestampRecordStarted);
             writeToFileBuffer(global::timeManager.time().j2000Seconds());
             std::vector<char> kfBuffer;
@@ -657,6 +662,7 @@ void SessionRecording::playbackCamera() {
     interaction::KeyframeNavigator::CameraPose pbFrame;
     datamessagestructures::CameraKeyframe kf;
     if (isDataModeBinary()) {
+        readFromPlayback(timeOs);
         readFromPlayback(timeRec);
         readFromPlayback(timeSim);
         kf.read(&_playbackFile);
@@ -697,6 +703,10 @@ void SessionRecording::playbackCamera() {
             pbFrame.followFocusNodeRotation = true;
         else
             pbFrame.followFocusNodeRotation = false;
+    }
+    if (_setSimulationTimeWithNextCameraKeyframe) {
+        global::timeManager.setTimeNextFrame(timeSim);
+        _setSimulationTimeWithNextCameraKeyframe = false;
     }
     timeRef = getAppropriateTimestamp(timeOs, timeRec, timeSim);
 
@@ -1185,6 +1195,17 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
                 {},
                 "void",
                 "Stops a recording session"
+            },
+            {
+                "startPlayback",
+                &luascriptfunctions::startPlaybackDefault,
+                {},
+                "string",
+                "Starts a playback session with keyframe times that are relative to "
+                "the time since the recording was started (the same relative time "
+                "applies to the playback). When playback starts, the simulation time "
+                "is automatically set to what it was at recording time. The string "
+                "argument is the filename to pull playback keyframes from."
             },
             {
                 "startPlaybackApplicationTime",
