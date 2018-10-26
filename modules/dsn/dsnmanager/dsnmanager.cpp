@@ -186,7 +186,6 @@ namespace openspace {
             node = node->next_sibling();
         }
     }
-   
     void DsnManager::jsonParser(std::string filename) {
         std::ifstream ifs(filename);
         nlohmann::json j = nlohmann::json::parse(ifs);
@@ -205,11 +204,11 @@ namespace openspace {
           structSignal.spacecraft = signalsInJson["projuser"].get<std::string>();
           structSignal.endTime = signalsInJson["eot"].get<std::string>(); 
           structSignal.startTime = signalsInJson["bot"].get<std::string>();
-       
+          structSignal.direction = signalsInJson["direction"].get<std::string>();
+
           //Add signals to vector of signals
           _dsnData.signals.push_back(structSignal);
         }
-   
     }
     //return vertexarray to commmunicationline
     void DsnManager::fillVertexArray(std::vector<RenderableCommunicationPackage::PositionVBOLayout> &vertexArray) {
