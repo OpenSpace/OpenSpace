@@ -210,49 +210,7 @@ namespace openspace {
           _dsnData.signals.push_back(structSignal);
         }
     }
-    //return vertexarray to commmunicationline
-    void DsnManager::fillVertexArray(std::vector<RenderableCommunicationPackage::PositionVBOLayout> &vertexArray) {
-       
-        //get number of lines to be drawn = count signals from data at this time
-        const int nValues = 2;
 
-        // ... fill all of the values, dummy values for now, should load from  _translation->position()
-        const char* dishIdentifier = "DSS54";
-        const char* spacecraftIdentifier = "Voyager_1";
-
-        SceneGraphNode* dishNode = global::renderEngine.scene()->sceneGraphNode(dishIdentifier);
-        SceneGraphNode* spaceCraftNode = global::renderEngine.scene()->sceneGraphNode(spacecraftIdentifier);
-        SceneGraphNode* earthNode = global::renderEngine.scene()->sceneGraphNode("Earth");
-        
-        //glm::vec3 dishPos = dishNode->worldPosition();
-
-        glm::vec3 dishPos = dishNode->position();
-
-        vertexArray[0] = { static_cast<float>(dishPos.x), static_cast<float>(dishPos.y), static_cast<float>(dishPos.z) };
-
-        //If spacecraft excists in open space, use that position. 
-        if (global::renderEngine.scene()->sceneGraphNode(spacecraftIdentifier)) {
-            //glm::mat4  earthTrans = earthNode->modelTransform();
-           // glm::mat4  spaceCraftTrans = spaceCraftNode->modelTransform();
-            //glm::mat4  spaceCraftTransInWorld = earthTrans * spaceCraftTrans;
-
-            //glm::vec3 earthWorldPos = earthNode->worldPosition();
-            //glm::vec3 earthPos = earthNode->position();
-
-            glm::vec3 spaceCraftPos = spaceCraftNode->position();
-           // glm::vec3 spaceCraftPos = spaceCraftNode->worldPosition();
-
-            vertexArray[1] = { static_cast<float>(spaceCraftPos.x), static_cast<float>(spaceCraftPos.y), static_cast<float>(spaceCraftPos.z) };
-        }
-        else
-        {
-            //Else estimate the position of the spacecraft from Azimuth and elevation angles. 
-            LDEBUG("No position data for the space craft, estimate position");
-            glm::vec3 spaceCraftPos = DsnManager::approximateSpacecraftPosition(dishIdentifier, dishPos); // VGR2
-            vertexArray[1] = { static_cast<float>(spaceCraftPos.x), static_cast<float>(spaceCraftPos.y), static_cast<float>(spaceCraftPos.z) };
-        }
-
-    }
 
     glm::vec3 DsnManager::approximateSpacecraftPosition(const char* dishId, glm::vec3 dishPos) {
 
