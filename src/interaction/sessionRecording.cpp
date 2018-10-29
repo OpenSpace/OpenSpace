@@ -981,14 +981,15 @@ bool SessionRecording::processCameraKeyframe(double now) {
     interaction::KeyframeNavigator::CameraPose nextPose;
     interaction::KeyframeNavigator::CameraPose prevPose;
 
+    unsigned int prevIdx, nextIdx;
     if (!_playbackActive_camera) {
         return false;
     } else if (_keyframesCamera.size() == 0) {
         return false;
     } else {
-        unsigned int prevIdx = _timeline[_idxTimeline_cameraPtrPrev].idxIntoKeyframeTypeArray;
+        prevIdx = _timeline[_idxTimeline_cameraPtrPrev].idxIntoKeyframeTypeArray;
         prevPose = _keyframesCamera[prevIdx];
-        unsigned int nextIdx = _timeline[_idxTimeline_cameraPtrNext].idxIntoKeyframeTypeArray;
+        nextIdx = _timeline[_idxTimeline_cameraPtrNext].idxIntoKeyframeTypeArray;
         nextPose = _keyframesCamera[nextIdx];
     }
 
@@ -1000,6 +1001,12 @@ bool SessionRecording::processCameraKeyframe(double now) {
         t = 0;
     else
         t = (now - prevTime) / (nextTime - prevTime);
+
+    // Need to activly update the focusNode position of the camera in relation to
+    // the rendered objects will be unstable and actually incorrect
+    Camera* camera = global::navigationHandler.camera();
+    Scene* scene = camera->parent()->scene();
+    global::navigationHandler.setFocusNode(scene->sceneGraphNode(_keyframesCamera[prevIdx].focusNode));
 
     return interaction::KeyframeNavigator::updateCamera(global::navigationHandler.camera(), prevPose, nextPose, t, prevTime, nextTime, false);
 
