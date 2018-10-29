@@ -51,6 +51,32 @@ local DSS14 = {
     }
 }
 
+
+local DSS15 = {
+    Identifier = "DSS15",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+      Translation = {
+         Type = "StaticTranslation",
+         Position = { -2350973.5, -4636120, 3697665.5 }
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/dish.obj"
+        },
+        ColorTexture = models .. "/base_AO.png" 
+
+    },
+    GUI = {
+        Name = "DSS15",
+        Path = "/Solar System/Stations/Goldstone/DSS15"
+    }
+}
+
+
 local DSS24 = {
     Identifier = "DSS24",
     Parent = earthAsset.Earth.Identifier,
@@ -315,5 +341,5 @@ local DSS55 = {
     }
 }
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    DSS14, DSS24, DSS25, DSS26, DSS43, DSS34, DSS35, DSS36, DSS63, DSS65, DSS54, DSS55
+    DSS14, DSS15, DSS24, DSS25, DSS26, DSS43, DSS34, DSS35, DSS36, DSS63, DSS65, DSS54, DSS55
 })

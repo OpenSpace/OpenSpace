@@ -161,6 +161,7 @@ private:
 	// Key Value map of stations and their sites
 	const std::map<std::string, SiteEnum> StationToSiteConversion = {
 	{ "DSS14", GoldStone },
+    { "DSS15", GoldStone },
 	{ "DSS24", GoldStone },
 	{ "DSS25", GoldStone },
 	{ "DSS26", GoldStone },
