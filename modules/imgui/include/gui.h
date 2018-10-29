@@ -97,6 +97,8 @@ public:
         uint32_t mouseButtonsPressed);
     void endFrame();
 
+    void setHidden(bool isHidden);
+
     void render() override;
 
 //protected:
