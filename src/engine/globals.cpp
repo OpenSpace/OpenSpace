@@ -34,7 +34,7 @@
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/sessionRecording.h>
+#include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/shortcutmanager.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/network/networkengine.h>

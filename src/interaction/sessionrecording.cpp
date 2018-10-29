@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/sessionRecording.h>
-#include <openspace/interaction/externInteraction.h>
+#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/externinteraction.h>
 
 #include <openspace/openspace.h>
 #include <openspace/engine/globals.h>
@@ -51,7 +51,7 @@ namespace {
     const char* _loggerCat = "SessionRecording";
 }
 
-#include "sessionRecording_lua.inl"
+#include "sessionrecording_lua.inl"
 
 
 namespace openspace::interaction {
@@ -153,7 +153,7 @@ bool SessionRecording::startPlayback(std::string filename, KeyframeTimeRef timeM
         // past the header, version, and data type
         _playbackFile.close();
         _playbackFile.open(_playbackFilename, std::ifstream::in | std::ios::binary);
-        unsigned int throwAwayHeaderReadSize = _fileHeaderTitle.length() +
+        size_t throwAwayHeaderReadSize = _fileHeaderTitle.length() +
                                                _fileHeaderVersionLength +
                                                sizeof(dataFormatBinaryTag) +
                                                sizeof('\n');
@@ -378,7 +378,7 @@ bool SessionRecording::hasCameraChangedFromPrev(datamessagestructures::CameraKey
     if (glm::length(positionDiff) > threshold)
         hasChanged = true;
 
-    float rotationDiff = dot(kfNew._rotation, _prevRecordedCameraKeyframe._rotation);
+    double rotationDiff = dot(kfNew._rotation, _prevRecordedCameraKeyframe._rotation);
     if (std::abs(rotationDiff - 1.0) > threshold)
         hasChanged = true;
 
@@ -504,8 +504,8 @@ void SessionRecording::saveScriptKeyframe(std::string scriptToSave) {
 
         saveStringToFile(scriptToSave);
     } else {
-        unsigned int numLinesInScript = std::count(scriptToSave.begin(),
-            scriptToSave.end(), '\n');
+        unsigned int numLinesInScript = static_cast<unsigned int>(std::count(scriptToSave.begin(),
+            scriptToSave.end(), '\n'));
         std::stringstream keyframeLine = std::stringstream();
         //Add simulation timestamp, timestamp relative, simulation time to recording start
         keyframeLine << "script ";
@@ -520,14 +520,14 @@ void SessionRecording::saveScriptKeyframe(std::string scriptToSave) {
     }
 }
 
-void SessionRecording::preSynchronization(double deltaTime) {
+void SessionRecording::preSynchronization() {
     if( _state == sessionState::recording ) {
         saveCameraKeyframe();
         if( _usingTimeKeyframes )
             saveTimeKeyframe();
     }
     else if (_state == sessionState::playback) {
-        moveAheadInTime(deltaTime);
+        moveAheadInTime();
     } else if (_cleanupNeeded) {
         cleanUpPlayback();
     }
@@ -824,7 +824,7 @@ void SessionRecording::playbackScript() {
 
 void SessionRecording::addKeyframe(double timestamp, interaction::KeyframeNavigator::CameraPose keyframe)
 {
-    unsigned int indexIntoCameraKeyframesFromMainTimeline = _keyframesCamera.size();
+    unsigned int indexIntoCameraKeyframesFromMainTimeline = static_cast<unsigned int>(_keyframesCamera.size());
     _keyframesCamera.push_back(keyframe);
     _timeline.push_back({ recordedType::camera,
                           indexIntoCameraKeyframesFromMainTimeline,
@@ -833,7 +833,7 @@ void SessionRecording::addKeyframe(double timestamp, interaction::KeyframeNaviga
 
 void SessionRecording::addKeyframe(double timestamp, datamessagestructures::TimeKeyframe keyframe)
 {
-    unsigned int indexIntoTimeKeyframesFromMainTimeline = _keyframesTime.size();
+    unsigned int indexIntoTimeKeyframesFromMainTimeline = static_cast<unsigned int>(_keyframesTime.size());
     _keyframesTime.push_back(keyframe);
     _timeline.push_back({ recordedType::time,
                           indexIntoTimeKeyframesFromMainTimeline,
@@ -842,22 +842,22 @@ void SessionRecording::addKeyframe(double timestamp, datamessagestructures::Time
 
 void SessionRecording::addKeyframe(double timestamp, std::string scriptToQueue)
 {
-    unsigned int indexIntoScriptKeyframesFromMainTimeline = _keyframesScript.size();
+    unsigned int indexIntoScriptKeyframesFromMainTimeline = static_cast<unsigned int>(_keyframesScript.size());
     _keyframesScript.push_back(scriptToQueue);
     _timeline.push_back({ recordedType::script,
                           indexIntoScriptKeyframesFromMainTimeline,
                           timestamp });
 }
 
-void SessionRecording::moveAheadInTime(double deltaTime) {
+void SessionRecording::moveAheadInTime() {
     double currTime = currentTime();
-    lookForNonCameraKeyframesThatHaveComeDue(currTime, deltaTime);
+    lookForNonCameraKeyframesThatHaveComeDue(currTime);
     updateCameraWithOrWithoutNewKeyframes(currTime);
 }
 
-void SessionRecording::lookForNonCameraKeyframesThatHaveComeDue(double currTime, double deltaTime) {
-    while (isTimeToHandleNextNonCameraKeyframe(currTime, deltaTime)) {
-        if (!processNextNonCameraKeyframeAheadInTime(currTime, deltaTime))
+void SessionRecording::lookForNonCameraKeyframesThatHaveComeDue(double currTime) {
+    while (isTimeToHandleNextNonCameraKeyframe(currTime)) {
+        if (!processNextNonCameraKeyframeAheadInTime())
             break;
 
         if (++_idxTimeline_nonCamera >= _timeline.size()) {
@@ -881,7 +881,7 @@ void SessionRecording::updateCameraWithOrWithoutNewKeyframes(double currTime) {
     }
 }
 
-bool SessionRecording::isTimeToHandleNextNonCameraKeyframe(double currTime, double deltaTime) {
+bool SessionRecording::isTimeToHandleNextNonCameraKeyframe(double currTime) {
     if (currTime > getNextTimestamp() && (_playbackActive_time || _playbackActive_script))
         return true;
     else
@@ -892,8 +892,8 @@ bool SessionRecording::findNextFutureCameraIndex(double currTime) {
     unsigned int seekAheadIndex = _idxTimeline_cameraPtrPrev;
     while (true) {
         seekAheadIndex++;
-        if (seekAheadIndex >= _timeline.size())
-            seekAheadIndex = _timeline.size() - 1;
+        if (seekAheadIndex >= static_cast<unsigned int>(_timeline.size()))
+            seekAheadIndex = static_cast<unsigned int>(_timeline.size()) - 1;
 
         if (doesTimelineEntryContainCamera(seekAheadIndex)) {
             unsigned int indexIntoCameraKeyframes
@@ -933,7 +933,7 @@ bool SessionRecording::doesTimelineEntryContainCamera(unsigned int index) {
     return (_timeline[index].keyframeType == recordedType::camera);
 }
 
-bool SessionRecording::processNextNonCameraKeyframeAheadInTime(double now, double deltaTime) {
+bool SessionRecording::processNextNonCameraKeyframeAheadInTime() {
     bool returnValue = false;
 
     //LINFO(fmt::format("Keyframe at {} frame={} timelineIndex={}", now, global::renderEngine._frameNumber, _idxTimeline));
@@ -955,7 +955,7 @@ bool SessionRecording::processNextNonCameraKeyframeAheadInTime(double now, doubl
 
     case recordedType::script:
         _idxScript = _timeline[_idxTimeline_nonCamera].idxIntoKeyframeTypeArray;
-        returnValue = processScriptKeyframe(now, deltaTime);
+        returnValue = processScriptKeyframe();
         break;
 
     default:
@@ -970,7 +970,7 @@ bool SessionRecording::processNextNonCameraKeyframeAheadInTime(double now, doubl
 
 unsigned int SessionRecording::findIndexOfLastCameraKeyframeInTimeline() {
     unsigned int i;
-    for (i = _timeline.size() - 1; i >= 0; i--) {
+    for (i = static_cast<unsigned int>(_timeline.size()) - 1; i > 0; i--) {
         if (_timeline[i].keyframeType == recordedType::camera)
             break;
     }
@@ -1002,124 +1002,22 @@ bool SessionRecording::processCameraKeyframe(double now) {
     else
         t = (now - prevTime) / (nextTime - prevTime);
 
+#ifdef INTERPOLATION_DEBUG_PRINT
+    LINFOC("prev", std::to_string(prevTime));
+    LINFOC("now", std::to_string(prevTime + t));
+    LINFOC("next", std::to_string(nextTime));
+#endif
+
     // Need to activly update the focusNode position of the camera in relation to
     // the rendered objects will be unstable and actually incorrect
     Camera* camera = global::navigationHandler.camera();
     Scene* scene = camera->parent()->scene();
     global::navigationHandler.setFocusNode(scene->sceneGraphNode(_keyframesCamera[prevIdx].focusNode));
 
-    return interaction::KeyframeNavigator::updateCamera(global::navigationHandler.camera(), prevPose, nextPose, t, prevTime, nextTime, false);
-
-/*#ifdef INTERPOLATION_DEBUG_PRINT
-    LINFOC("prev", std::to_string(prevTime));
-    LINFOC("now", std::to_string(now));
-    LINFOC("next", std::to_string(nextTime));
-#endif*/
-
-    /*if (now >= nextTime) {
-        LINFOC("_idxTimeline_cameraPtr", std::to_string(_idxTimeline_cameraPtrNext));
-        LINFOC("idxLastCamKeyframe", std::to_string(findIndexOfLastCameraKeyframeInTimeline()));
-
-        if (_idxTimeline_cameraPtrNext == findIndexOfLastCameraKeyframeInTimeline()) {
-            prevPose = nextPose;
-            prevTime = nextTime;
-            signalPlaybackFinishedForComponent(recordedType::camera);
-        }
-    }*/
-
-    /*Camera * camera = global::navigationHandler.camera();
-    ghoul_assert(camera != nullptr, "Camera must not be nullptr");
-    Scene * scene = camera->parent()->scene();
-    SceneGraphNode* prevFocusNode = scene->sceneGraphNode(prevPose.focusNode);
-    SceneGraphNode* nextFocusNode = scene->sceneGraphNode(nextPose.focusNode);
-
-
-    double t;
-    if ((nextTime - prevTime) < 1e-7)
-        t = 0;
-    else
-        t = (now - prevTime) / (nextTime - prevTime);
-    t = std::max(0.0, std::min(1.0, t));
-
-    if (!prevFocusNode || !nextFocusNode) {
-        return false;
-    }
-
-    glm::dvec3 prevKeyframeCameraPosition = prevPose.position;
-    glm::dquat prevKeyframeCameraRotation = prevPose.rotation;
-    glm::dvec3 nextKeyframeCameraPosition = nextPose.position;
-    glm::dquat nextKeyframeCameraRotation = nextPose.rotation;
-
-    // Transform position and rotation based on focus node rotation
-    // (if following rotation)
-    if (prevPose.followFocusNodeRotation) {
-        prevKeyframeCameraRotation = glm::dquat(
-            prevFocusNode->worldRotationMatrix() *
-            glm::dmat3(glm::dquat(prevPose.rotation))
-        );
-        prevKeyframeCameraPosition = prevFocusNode->worldRotationMatrix() *
-            prevPose.position;
-    }
-    if (nextPose.followFocusNodeRotation) {
-        nextKeyframeCameraRotation = glm::dquat(
-            nextFocusNode->worldRotationMatrix() *
-            glm::dmat3(glm::dquat(nextPose.rotation))
-        );
-        nextKeyframeCameraPosition = nextFocusNode->worldRotationMatrix() *
-            nextPose.position;
-    }
-
-    // Transform position based on focus node position
-    prevKeyframeCameraPosition += prevFocusNode->worldPosition();
-    nextKeyframeCameraPosition += nextFocusNode->worldPosition();
-
-    // Linear interpolation
-    glm::dvec3 interpolatedCamera
-        = prevKeyframeCameraPosition * (1 - t) + nextKeyframeCameraPosition * t;
-
-    camera->setPositionVec3(interpolatedCamera);
-    if (prevKeyframeCameraRotation == nextKeyframeCameraRotation) {
-        camera->setRotation(prevKeyframeCameraRotation);
-        camera->setScaling(prevPose.scale);
-        //LINFO("Skipped slerp call with = rotation.");
-    }
-    else {
-        camera->setRotation(
-            glm::slerp(prevKeyframeCameraRotation, nextKeyframeCameraRotation, t)
-        );
-        // We want to affect view scaling, such that we achieve
-        // logarithmic interpolation of distance to an imagined focus node.
-        // To do this, we interpolate the scale reciprocal logarithmically.
-        const float prevInvScaleExp = glm::log(1.f / prevPose.scale);
-        const float nextInvScaleExp = glm::log(1.f / nextPose.scale);
-        const float interpolatedInvScaleExp = static_cast<float>(
-            prevInvScaleExp * (1 - t) + nextInvScaleExp * t);
-        camera->setScaling(1.f / glm::exp(interpolatedInvScaleExp));
-    }
-
-#ifdef INTERPOLATION_DEBUG_PRINT
-    LINFO(fmt::format("Cam pos prev={}, next={}", std::to_string(prevKeyframeCameraPosition),
-        std::to_string(nextKeyframeCameraPosition)));
-    LINFO(fmt::format("Cam rot prev={} {} {} {}  next={} {} {} {}", prevKeyframeCameraRotation.x,
-        prevKeyframeCameraRotation.y, prevKeyframeCameraRotation.z, prevKeyframeCameraRotation.w,
-        nextKeyframeCameraRotation.x, nextKeyframeCameraRotation.y, nextKeyframeCameraRotation.z,
-        nextKeyframeCameraRotation.w));
-    LINFO(fmt::format("Cam interp = {}", t));
-    LINFO(fmt::format("camera {} {} {} {} {} {}", global::windowDelegate.applicationTime(),
-        global::windowDelegate.applicationTime() - _timestampPlaybackStarted_application,
-        global::timeManager.time().j2000Seconds(), interpolatedCamera.x,
-        interpolatedCamera.y, interpolatedCamera.z));
-    //Following is for direct print to save & compare camera positions against recorded file
-    printf("camera %8.4f %8.4f %13.3f %16.7f %16.7f %16.7f\n", global::windowDelegate.applicationTime(),
-        global::windowDelegate.applicationTime() - _timestampPlaybackStarted_application,
-        global::timeManager.time().j2000Seconds(), interpolatedCamera.x,
-        interpolatedCamera.y, interpolatedCamera.z);
-
-#endif
-    return true;*/
+    return interaction::KeyframeNavigator::updateCamera(global::navigationHandler.camera(), prevPose, nextPose, t, false);
 }
 
-bool SessionRecording::processScriptKeyframe(double now, double deltaTime) {
+bool SessionRecording::processScriptKeyframe() {
     std::string nextScript;
 
     if (!_playbackActive_script) {
@@ -1183,7 +1081,7 @@ SessionRecording::recordedType SessionRecording::getPrevKeyframeType() {
 }
 
 void SessionRecording::saveKeyframeToFileBinary(unsigned char* bufferSource,
-                                                unsigned int size)
+                                                size_t size)
 {
     _recordFile.write((char*)bufferSource, size);
 }

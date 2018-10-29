@@ -37,7 +37,7 @@
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/keybindingmanager.h>
-#include <openspace/interaction/sessionRecording.h>
+#include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelpeer.h>
@@ -987,7 +987,7 @@ void OpenSpaceEngine::preSynchronization() {
                 camera->invalidateCache();
             }
         }
-        global::sessionRecording.preSynchronization(global::windowDelegate.deltaTime());
+        global::sessionRecording.preSynchronization();
         global::parallelPeer.preSynchronization();
     }
 

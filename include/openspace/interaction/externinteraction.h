@@ -25,11 +25,8 @@
 #ifndef __OPENSPACE_CORE___EXTERNINTERACTION___H__
 #define __OPENSPACE_CORE___EXTERNINTERACTION___H__
 
-#include <openspace/interaction/externInteraction.h>
 #include <openspace/network/messagestructures.h>
 #include <openspace/properties/propertyowner.h>
-
-
 #include <ghoul/io/socket/tcpsocket.h>
 
 #include <vector>

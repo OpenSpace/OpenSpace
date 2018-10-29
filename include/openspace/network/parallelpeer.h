@@ -26,7 +26,7 @@
 #define __OPENSPACE_CORE___PARALLELPEER___H__
 
 #include <openspace/network/parallelconnection.h>
-#include <openspace/interaction/externInteraction.h>
+#include <openspace/interaction/externinteraction.h>
 #include <openspace/network/messagestructures.h>
 #include <openspace/util/timemanager.h>
 

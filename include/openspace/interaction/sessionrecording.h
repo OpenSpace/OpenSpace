@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___SESSIONRECORDING___H__
 #define __OPENSPACE_CORE___SESSIONRECORDING___H__
 
-#include <openspace/interaction/externInteraction.h>
+#include <openspace/interaction/externinteraction.h>
 #include <openspace/interaction/keyframenavigator.h>
 #include <openspace/network/messagestructures.h>
 #include <openspace/scripting/lualibrary.h>
@@ -58,10 +58,8 @@ public:
     * This is called with every rendered frame. If in recording state, the camera
     * state will be saved to the recording file (if its state has changed since last).
     * If in playback state, the next keyframe will be used (if it is time to do so).
-    * \param deltaTime The OpenSpace engine will provide the deltaTime (secs) since
-    * the last frame.
     */
-    void preSynchronization(double deltaTime);
+    void preSynchronization();
     /**
     * Starts a recording session, which will save data to the provided filename
     * according to the data format specified, and will continue until recording is
@@ -172,7 +170,7 @@ private:
     void writeToFileBuffer(const unsigned char c);
     void writeToFileBuffer(bool b);
     void saveStringToFile(const std::string s);
-    void saveKeyframeToFileBinary(unsigned char* bufferSource, unsigned int size);
+    void saveKeyframeToFileBinary(unsigned char* bufferSource, size_t size);
     void findFirstCameraKeyframeInTimeline();
     std::string readHeaderElement(size_t readLen_chars);
     void readFromPlayback(unsigned char& result);
@@ -186,14 +184,14 @@ private:
     void addKeyframe(double timestamp, interaction::KeyframeNavigator::CameraPose keyframe);
     void addKeyframe(double timestamp, datamessagestructures::TimeKeyframe keyframe);
     void addKeyframe(double timestamp, std::string scriptToQueue);
-    void moveAheadInTime(double deltaTime);
-    void lookForNonCameraKeyframesThatHaveComeDue(double currTime, double deltaTime);
+    void moveAheadInTime();
+    void lookForNonCameraKeyframesThatHaveComeDue(double currTime);
     void updateCameraWithOrWithoutNewKeyframes(double currTime);
-    bool isTimeToHandleNextNonCameraKeyframe(double currTime, double deltaTime);
-    bool processNextNonCameraKeyframeAheadInTime(double currTime, double deltaTime);
+    bool isTimeToHandleNextNonCameraKeyframe(double currTime);
+    bool processNextNonCameraKeyframeAheadInTime();
     bool findNextFutureCameraIndex(double currTime);
     bool processCameraKeyframe(double now);
-    bool processScriptKeyframe(double now, double deltaTime);
+    bool processScriptKeyframe();
     bool isDataModeBinary();
     unsigned int findIndexOfLastCameraKeyframeInTimeline();
     bool doesTimelineEntryContainCamera(unsigned int index);
@@ -233,7 +231,7 @@ private:
         + saveBufferCameraSize_min
         + saveBufferStringSize_max;
     unsigned char _keyframeBuffer[_saveBufferMaxSize_bytes];
-    unsigned int _bufferIndex = 0;
+    size_t _bufferIndex = 0;
 
     bool _cleanupNeeded = false;
 
@@ -252,6 +250,6 @@ private:
 
 } // namespace openspace
 
-#include "sessionRecording.inl"
+#include "sessionrecording.inl"
 
 #endif // __OPENSPACE_CORE___SESSIONRECORDING___H__

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/externInteraction.h>
+#include <openspace/interaction/externinteraction.h>
 
 #include <openspace/openspace.h>
 #include <openspace/engine/globals.h>

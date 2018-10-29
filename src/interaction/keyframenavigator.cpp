@@ -83,10 +83,10 @@ bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes)
         return false;
     }
 
-    updateCamera(&camera, prevKeyframe->data, nextKeyframe->data, t, prevTime, nextTime, ignoreFutureKeyframes);
+    return updateCamera(&camera, prevKeyframe->data, nextKeyframe->data, t, ignoreFutureKeyframes);
 }
 
-bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose prevPose, const CameraPose nextPose, double t, double prevTime, double nextTime, bool ignoreFutureKeyframes) {  
+bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose prevPose, const CameraPose nextPose, double t, bool ignoreFutureKeyframes) {  
     Scene* scene = camera->parent()->scene();
     SceneGraphNode* prevFocusNode = scene->sceneGraphNode(prevPose.focusNode);
     SceneGraphNode* nextFocusNode = scene->sceneGraphNode(nextPose.focusNode);
@@ -145,9 +145,6 @@ bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose prevPose, 
     }
 
 #ifdef INTERPOLATION_DEBUG_PRINT
-    LINFOC("prev", std::to_string(prevTime));
-    LINFOC("now", std::to_string(prevTime+t));
-    LINFOC("next", std::to_string(nextTime));
     LINFO(fmt::format("Cam pos prev={}, next={}", std::to_string(prevKeyframeCameraPosition),
         std::to_string(nextKeyframeCameraPosition)));
     LINFO(fmt::format("Cam rot prev={} {} {} {}  next={} {} {} {}", prevKeyframeCameraRotation.x,
