@@ -66,7 +66,7 @@ public:
     const size_t totalNumBytes;
     const bool shouldAllocateDataOnCPU;
     const bool padTiles;
-    HashKey hashKey = 0ULL;
+    const HashKey hashKey;
 };
 
 TileTextureInitData tileTextureInitData(layergroupid::GroupID id,
