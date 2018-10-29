@@ -29,8 +29,6 @@
 #include <openspace/util/camera.h>
 
 
-#include <thread>
-
 namespace openspace {
     constexpr const char* _loggerCat = "CommunicationLine";
 
@@ -82,26 +80,18 @@ namespace openspace {
         //Todo: change this magic number. 86400 equals 24hrs in seconds
         double endTime = 86400; 
 
+        //Bool if the current time is within the timeframe for the currently loaded data
         const bool isTimeInFileInterval = (currentTime >= DsnManager::_dsnData.sequenceStartTime) &&
             (currentTime < DsnManager::_dsnData.sequenceStartTime + endTime);
 
-        //Check if the loaded data file is still relevant
+        //Reload data if it is not relevant anymore
         if (!isTimeInFileInterval) {
             DsnManager::_dsnData.isLoaded = false;
-            int activeSequenceIndex = -1;
 
-            //Check the name of the data file to see which file to load. 
-            for (int i = 0; i < DsnManager::_startTimes.size() - 1; i++) {
-                const bool isTimeInCorrectFile = (currentTime >= DsnManager::_startTimes[i]) && (currentTime < DsnManager::_startTimes[i+1]);
-            
-                if (isTimeInCorrectFile) {
-                    activeSequenceIndex = i;
-                    break;
-                }
-            }
+            int activeFileIndex = findFileIndexForCurrentTime(currentTime);
             //parse data for that file
             if (!DsnManager::_dsnData.isLoaded)
-                DsnManager::jsonParser(activeSequenceIndex);
+                DsnManager::jsonParser(activeFileIndex);
             else
                 return;
         }
@@ -116,6 +106,7 @@ namespace openspace {
 
         PositionVBOLayout posStation, posSpacecraft;
 
+        //todo : binary search instead of for loop
         for (int i = 0; i < signalDataVector.signals.size(); i++) {
                
             DsnManager::Signal currentSignal = signalDataVector.signals[i];
@@ -177,8 +168,31 @@ namespace openspace {
         
     }
 
+    int CommunicationLines::findFileIndexForCurrentTime(double time) {
+        // upper_bound has O(log n) for sorted vectors, more efficient than for loop
+        auto iter = std::upper_bound(DsnManager::_startTimes.begin(), DsnManager::_startTimes.end(), time);
+
+        int fileIndex = -1;
+        //check what index we got 
+        if (iter != DsnManager::_startTimes.end()) {
+            if (iter != DsnManager::_startTimes.begin()) {
+                fileIndex = static_cast<int>(
+                    std::distance(DsnManager::_startTimes.begin(), iter)
+                    ) - 1;
+            }
+            else {
+                fileIndex = 0;
+            }
+        }
+        else {
+            fileIndex = static_cast<int>(DsnManager::_startTimes.size()) - 1;
+        }
+
+        return fileIndex;
+    }
+
     /*Returns a position calculated where the focusNode position is origin(0,0,0) */
-    glm::dvec3 CommunicationLines::GetCoordinatePosFromFocusNode(SceneGraphNode* node) {
+    glm::dvec3 CommunicationLines::getCoordinatePosFromFocusNode(SceneGraphNode* node) {
 
         glm::dvec3 nodePos = node->worldPosition();
         glm::dvec3 focusNodePos = _focusNode->worldPosition();
@@ -201,7 +215,7 @@ namespace openspace {
 
         if (global::renderEngine.scene()->sceneGraphNode(id)) {
             SceneGraphNode* spacecraftNode = global::renderEngine.scene()->sceneGraphNode(id);
-            nodePos = GetCoordinatePosFromFocusNode(spacecraftNode);
+            nodePos = getCoordinatePosFromFocusNode(spacecraftNode);
         }
         else {
             // TODO: Else estimate the position of the spacecraft by RA/DEC/RANGE 
@@ -230,6 +244,8 @@ namespace openspace {
 
         return position;
     }
+
+
 
 
 } // namespace openspace

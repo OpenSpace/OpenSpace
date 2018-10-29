@@ -51,7 +51,8 @@ namespace openspace {
         RenderableCommunicationPackage::PositionVBOLayout getSuitablePrecisionPositionForSceneGraphNode(std::string id);
         RenderableCommunicationPackage::PositionVBOLayout getPositionForGeocentricSceneGraphNode(const char* id);
 
-        glm::dvec3 GetCoordinatePosFromFocusNode(SceneGraphNode* node);
+        glm::dvec3 getCoordinatePosFromFocusNode(SceneGraphNode* node);
+        int findFileIndexForCurrentTime(double time);
 
     private:
          bool checkSignal(double currentTime, std::string signalStartTime, std::string signalEndTime);
