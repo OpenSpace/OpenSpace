@@ -141,7 +141,7 @@ public:
     const Renderable* renderable() const;
     //Renderable* renderable();
 
-    const std::string& guiPath() const;
+    std::string guiPath() const;
     bool hasGuiHintHidden() const;
 
     static documentation::Documentation Documentation();

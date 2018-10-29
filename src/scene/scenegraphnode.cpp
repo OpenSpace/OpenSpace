@@ -100,7 +100,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
     if (dictionary.hasKey(KeyGuiName)) {
         result->setGuiName(dictionary.value<std::string>(KeyGuiName));
-        result->_guiDisplayName = std::move(result->guiName());
+        result->_guiDisplayName = result->guiName();
         result->addProperty(result->_guiDisplayName);
     }
 
@@ -642,7 +642,7 @@ double SceneGraphNode::worldScale() const {
     return _worldScaleCached;
 }
 
-const std::string& SceneGraphNode::guiPath() const {
+std::string SceneGraphNode::guiPath() const {
     return _guiPath;
 }
 
