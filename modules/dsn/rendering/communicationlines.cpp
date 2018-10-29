@@ -91,7 +91,10 @@ namespace openspace {
             int activeFileIndex = findFileIndexForCurrentTime(currentTime);
             //parse data for that file
             if (!DsnManager::_dsnData.isLoaded)
+            {
                 DsnManager::jsonParser(activeFileIndex);
+
+            }
             else
                 return;
         }
@@ -237,9 +240,18 @@ namespace openspace {
 
     RenderableCommunicationPackage::PositionVBOLayout 
         CommunicationLines::getPositionForGeocentricSceneGraphNode(const char* id) {
-
-        glm::vec3 nodePos = global::renderEngine.scene()->sceneGraphNode(id)->position();
+        
         RenderableCommunicationPackage::PositionVBOLayout position;
+        glm::dvec3 nodePos;
+
+        if (global::renderEngine.scene()->sceneGraphNode(id)) {
+            nodePos = global::renderEngine.scene()->sceneGraphNode(id)->position();
+        }
+        else {
+            LERROR(fmt::format("No position data for the station dish {}, drawing line from center of Earth", id));
+            nodePos = glm::vec3(0, 0, 0);
+        }
+
         position.x = nodePos.x;
         position.y = nodePos.y;
         position.z = nodePos.z;
