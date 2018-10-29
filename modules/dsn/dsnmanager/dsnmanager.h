@@ -29,8 +29,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 
-#include <ext/xml/rapidxml.hpp>
-#include <ext/xml/rapidxml_utils.hpp>
 #include <openspace/json.h>
 
 #include <modules/dsn/rendering/renderablecommunicationpackage.h>
