@@ -236,7 +236,7 @@ void RenderableCommunicationPackage::render(const RenderData& data, RendererTask
     _programObject->deactivate();
 }
 
-RenderableCommunicationPackage::ColorVBOLayout RenderableCommunicationPackage::GetSiteColor(std::string dishidentifier) {
+RenderableCommunicationPackage::ColorVBOLayout RenderableCommunicationPackage::getSiteColor(std::string dishidentifier) {
     
     glm::vec3 color(0.0f,0.0f,0.0f);
     RenderableCommunicationPackage::ColorVBOLayout colorVbo;

@@ -104,8 +104,6 @@ namespace openspace {
         _focusNode = global::navigationHandler.focusNode();
         _lineRenderInformation._localTransformSpacecraft = glm::translate(glm::dmat4(1.0), _focusNode->worldPosition());
 
-        PositionVBOLayout posStation, posSpacecraft;
-
         //todo : binary search instead of for loop
         for (int i = 0; i < signalDataVector.signals.size(); i++) {
                
@@ -113,34 +111,10 @@ namespace openspace {
 
             if (checkSignal(currentTime, DsnManager::_dsnData.signals[i].startTime, DsnManager::_dsnData.signals[i].endTime))
             {
-                ColorVBOLayout color = GetSiteColor(currentSignal.dishName);
-                posStation = getPositionForGeocentricSceneGraphNode(currentSignal.dishName.c_str());
-                posSpacecraft = getSuitablePrecisionPositionForSceneGraphNode(currentSignal.spacecraft.c_str());
-
-                //fill the render array
-                _vertexArray.push_back(posStation.x);
-                _vertexArray.push_back(posStation.y);
-                _vertexArray.push_back(posStation.z);
-
-                _vertexArray.push_back(color.r);
-                _vertexArray.push_back(color.g);
-                _vertexArray.push_back(color.b);
-                _vertexArray.push_back(color.a);
-
-                _vertexArray.push_back(posSpacecraft.x);
-                _vertexArray.push_back(posSpacecraft.y);
-                _vertexArray.push_back(posSpacecraft.z);
-
-                _vertexArray.push_back(color.r);
-                _vertexArray.push_back(color.g);
-                _vertexArray.push_back(color.b);
-                _vertexArray.push_back(color.a);
+                pushSignalDataToVertexArray(currentSignal);
             }
 
         };
-
-        std::vector<float> test = _vertexArray;
-
 
         // ... and upload them to the GPU
         glBindVertexArray(_lineRenderInformation._vaoID);
@@ -165,8 +139,8 @@ namespace openspace {
         
         //unbind vertexArray
         glBindVertexArray(0);
-        
     }
+
 
     int CommunicationLines::findFileIndexForCurrentTime(double time) {
         // upper_bound has O(log n) for sorted vectors, more efficient than for loop
@@ -191,7 +165,37 @@ namespace openspace {
         return fileIndex;
     }
 
-    /*Returns a position calculated where the focusNode position is origin(0,0,0) */
+    void CommunicationLines::pushSignalDataToVertexArray(DsnManager::Signal signal) {
+
+        ColorVBOLayout color = getSiteColor(signal.dishName);
+        PositionVBOLayout posStation = getPositionForGeocentricSceneGraphNode(signal.dishName.c_str());
+        PositionVBOLayout posSpacecraft = getSuitablePrecisionPositionForSceneGraphNode(signal.spacecraft.c_str());
+
+        //fill the render array
+        _vertexArray.push_back(posStation.x);
+        _vertexArray.push_back(posStation.y);
+        _vertexArray.push_back(posStation.z);
+
+        _vertexArray.push_back(color.r);
+        _vertexArray.push_back(color.g);
+        _vertexArray.push_back(color.b);
+        _vertexArray.push_back(color.a);
+
+        _vertexArray.push_back(posSpacecraft.x);
+        _vertexArray.push_back(posSpacecraft.y);
+        _vertexArray.push_back(posSpacecraft.z);
+
+        _vertexArray.push_back(color.r);
+        _vertexArray.push_back(color.g);
+        _vertexArray.push_back(color.b);
+        _vertexArray.push_back(color.a);
+
+    }
+
+    /* Since our station dishes have a static translation from Earth, we
+    * can get their local translation. The reason to handle it differently
+    * compared to the spacecrafts is to keep an exact render position
+    * for the station line ends even when the focusNode is Earth. */
     glm::dvec3 CommunicationLines::getCoordinatePosFromFocusNode(SceneGraphNode* node) {
 
         glm::dvec3 nodePos = node->worldPosition();
@@ -203,7 +207,7 @@ namespace openspace {
         return diff;
     }
 
-    /* Our spacecrafts are often very far from Earth (and the sun) which gives precision 
+    /* Our spacecrafts are often very far from Earth (and the sun) which gives precision
     * errors when we getting close to the node. To correct this we make a localtransform
     * to the current focusNode and calculate positions with the focusNode as origin. This
     * gives us a exact renderposition when we get closer to spacecrafts */
@@ -230,9 +234,7 @@ namespace openspace {
         return position;
     }
 
-    /* Since our station dishes have a static translation from Earth, we can get their
-    * local translation the reason to have a separate  modeltransform is to keep an
-    * exact render position even when the focusNode is Earth.*/
+
     RenderableCommunicationPackage::PositionVBOLayout 
         CommunicationLines::getPositionForGeocentricSceneGraphNode(const char* id) {
 

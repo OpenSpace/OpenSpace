@@ -93,7 +93,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
 	/// The function deciding what color to use for a signal
-	 ColorVBOLayout GetSiteColor(std::string dishIdentifier);
+	 ColorVBOLayout getSiteColor(std::string dishIdentifier);
 
 protected:
     explicit RenderableCommunicationPackage(const ghoul::Dictionary& dictionary);
