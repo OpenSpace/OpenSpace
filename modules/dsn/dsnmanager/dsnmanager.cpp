@@ -33,12 +33,13 @@ namespace openspace {
     constexpr const char* KeyDataFileType = "DataFileType";
 
     struct DsnManager::DsnData DsnManager::_dsnData;
+    std::vector<double> DsnManager::_startTimes;
+    std::vector<std::string> DsnManager::_dataFiles;
 
     //Filetypes
     const std::string dataFileTypeStringJson = "json";
 
     enum class DataFileType : int {
-       //Xml = 0
         Json = 0,
         Invalid
     };
@@ -50,7 +51,6 @@ namespace openspace {
     */
     bool DsnManager::extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary)
     {
-        std::vector<std::string> _dataFiles;
         DataFileType sourceFileType = DataFileType::Invalid;
         
         // ------------------- EXTRACT MANDATORY VALUES FROM DICTIONARY ------------------- //
@@ -127,71 +127,65 @@ namespace openspace {
             ));
             return false;
         }
-        //readDataFromXml(_dataFiles);
-        readDataFromJson(_dataFiles);
-        return true;
+        extractTriggerTimesFromFileNames(_dataFiles);
+
+        return DsnManager::jsonParser(0);
     }
 
-    void DsnManager::readDataFromXml(std::vector<std::string> _dataFiles) {
-           // logfile for checking so that the data parsing works
-        std::ofstream logfile{ "dsndatalogger.txt" };
-        for (std::vector<std::string>::iterator it = _dataFiles.begin(); it !=_dataFiles.end(); ++it) {
-            DsnManager::xmlParser(*it, logfile);
-        }
-        logfile.close(); 
-    }
+    // Extract J2000 time from file names
+    // Requires files to be named as such: 'YYYY-DDDT.json'
+    void DsnManager::extractTriggerTimesFromFileNames(std::vector<std::string> _dataFiles) {
+        // number of  characters in filename (excluding '.json')
+        constexpr const int FilenameSize = 9;
+        // size(".json")
+        constexpr const int ExtSize = 5;
 
-    void DsnManager::readDataFromJson(std::vector<std::string> _dataFiles) {
-        for (std::vector<std::string>::iterator it = _dataFiles.begin(); it != _dataFiles.end(); ++it) {
-          DsnManager::jsonParser(*it);
-        }
-    }
+        for (const std::string& filePath : _dataFiles) {
+            const size_t strLength = filePath.size();
+            // Extract the filename from the path (without extension)
+            std::string timeString = filePath.substr(
+                strLength - FilenameSize - ExtSize,
+                FilenameSize
+            );
+            // Ensure the separators are correct
+            timeString.replace(4, 1, "-");
+            timeString.replace(FilenameSize-1, 1, "T");
 
-    /****
-    * Using rapidxml lib to parse the data from xml files
-    */
-    void DsnManager::xmlParser(std::string filename, std::ofstream &logfile)
-    {
-        rapidxml::file<> xmlfile((char*)filename.c_str());
-        rapidxml::xml_document<> doc;
-        doc.parse<0>(xmlfile.data());
-
-        rapidxml::xml_node<> *rootNode = doc.first_node(); //find root, dsn
-        rapidxml::xml_node<> *node = rootNode->first_node();
-
-        //loop through all nodes
-        while (node != nullptr) {
-            logfile << node->name() << "\n";
-            //loop through all attributes of a node
-            for (rapidxml::xml_attribute<> *attribute = node->first_attribute();
-                attribute; attribute = attribute->next_attribute()) {
-
-                if (attribute->value())
-                    logfile << "   " << attribute->name() << ": " << attribute->value() << "\n";
-            }
-
-            rapidxml::xml_node<> *childNode = node->first_node();
-            while (childNode != nullptr) {
-                logfile << "   " << childNode->name() << "\n";
-
-                for (rapidxml::xml_attribute<> *childAttribute = childNode->first_attribute();
-                    childAttribute; childAttribute = childAttribute->next_attribute()) {
-
-                    if (childAttribute->value())
-                        logfile << "        " << childAttribute->name() << ": " << childAttribute->value() << "\n";
-                }
-
-                childNode = childNode->next_sibling();
-            }
-            node = node->next_sibling();
+            const double triggerTime = Time::convertTime(timeString);
+            _startTimes.push_back(triggerTime);
         }
     }
-    void DsnManager::jsonParser(std::string filename) {
+
+    bool DsnManager::jsonParser(int index) {
+
+        std::string filename;
+        if (index == -1 || index > _dataFiles.size())
+            return false;
+
+        filename = _dataFiles[index];
         std::ifstream ifs(filename);
         nlohmann::json j = nlohmann::json::parse(ifs);
 
        DsnManager::Signal structSignal;
 
+       // number of  characters in filename (excluding '.json')
+       constexpr const int FilenameSize = 9;
+       // size(".json")
+       constexpr const int ExtSize = 5;
+
+        const size_t strLength = filename.size();
+        // Extract the filename from the path (without extension)
+        std::string startTimeString = filename.substr(
+            strLength - FilenameSize - ExtSize,
+            FilenameSize
+        );
+        // Ensure the separators are correct
+        startTimeString.replace(4, 1, "-");
+        startTimeString.replace(FilenameSize - 1, 1, "T");
+
+        const double triggerTime = Time::convertTime(startTimeString);
+      
+       _dsnData.sequenceStartTime = triggerTime;
        _dsnData.signals.clear();
        _dsnData.signals.reserve(0);
 
@@ -209,8 +203,11 @@ namespace openspace {
           //Add signals to vector of signals
           _dsnData.signals.push_back(structSignal);
         }
-    }
 
+      _dsnData.isLoaded = true;
+      
+      return _dsnData.isLoaded;
+    }
 
     glm::vec3 DsnManager::approximateSpacecraftPosition(const char* dishId, glm::vec3 dishPos) {
 

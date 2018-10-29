@@ -28,6 +28,9 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/util/camera.h>
 
+
+#include <thread>
+
 namespace openspace {
     constexpr const char* _loggerCat = "CommunicationLine";
 
@@ -75,16 +78,41 @@ namespace openspace {
 
     void CommunicationLines::update(const UpdateData& data) {
 
-        DsnManager::DsnData signalDataVector = DsnManager::_dsnData;
         double currentTime = data.time.j2000Seconds();
+        //Todo: change this magic number. 86400 equals 24hrs in seconds
+        double endTime = 86400; 
 
+        const bool isTimeInFileInterval = (currentTime >= DsnManager::_dsnData.sequenceStartTime) &&
+            (currentTime < DsnManager::_dsnData.sequenceStartTime + endTime);
+
+        //Check if the loaded data file is still relevant
+        if (!isTimeInFileInterval) {
+            DsnManager::_dsnData.isLoaded = false;
+            int activeSequenceIndex = -1;
+
+            //Check the name of the data file to see which file to load. 
+            for (int i = 0; i < DsnManager::_startTimes.size() - 1; i++) {
+                const bool isTimeInCorrectFile = (currentTime >= DsnManager::_startTimes[i]) && (currentTime < DsnManager::_startTimes[i+1]);
+            
+                if (isTimeInCorrectFile) {
+                    activeSequenceIndex = i;
+                    break;
+                }
+            }
+            //parse data for that file
+            if (!DsnManager::_dsnData.isLoaded)
+                DsnManager::jsonParser(activeSequenceIndex);
+            else
+                return;
+        }
+
+        DsnManager::DsnData signalDataVector = DsnManager::_dsnData;
         // Make space for the vertex renderinformation
         _vertexArray.clear();
 
         //update focusnode information
         _focusNode = global::navigationHandler.focusNode();
         _lineRenderInformation._localTransformSpacecraft = glm::translate(glm::dmat4(1.0), _focusNode->worldPosition());
-
 
         PositionVBOLayout posStation, posSpacecraft;
 

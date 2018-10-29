@@ -38,7 +38,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
-
+#include <openspace/util/time.h>
 #include <fstream>
 
 namespace openspace {
@@ -60,18 +60,24 @@ namespace openspace {
       };
 
     static struct DsnData {
+        //filename is on the format of YYYY-DDDT (excluding '.json')
+        //std::string filenamestring;
+        bool isLoaded = false;
+        double sequenceStartTime;
+        double sequenceEndTime = sequenceStartTime + 86400.0; // 24 hours from startTime 
         std::vector<Signal> signals;
      };
 
       static DsnData _dsnData;
+      static std::vector<double> _startTimes;
+      static std::vector<std::string> _dataFiles;
+
       static bool extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary);
 	  static glm::vec3 approximateSpacecraftPosition(const char* dishId, glm::vec3 dishPos);
+      static void extractTriggerTimesFromFileNames(std::vector<std::string> _dataFiles);
+      static bool jsonParser(int index);
 
     private:
-       static void readDataFromXml(std::vector<std::string> _dataFiles);
-       static void readDataFromJson(std::vector<std::string> _dataFiles);
-       static void xmlParser(std::string filename, std::ofstream &logfile);
-       static void jsonParser(std::string filename);
 	   static double deg2rad(double degrees);
 
 	   /**  Converts a Range, Azimuth, Elevation location to South East Zenith coordinates**/    
