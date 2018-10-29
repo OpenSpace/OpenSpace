@@ -237,7 +237,7 @@ bool isInside(const PixelRegion& lhs, const PixelRegion& rhs) {
            rhs.start.y <= lhs.start.y && e.y <= re.y;
 }
 
-IODescription cutIODescription(IODescription io, Side side, int pos) {
+IODescription cutIODescription(IODescription& io, Side side, int pos) {
     const PixelRegion readPreCut = io.read.region;
     const PixelRegion writePreCut = io.write.region;
 
