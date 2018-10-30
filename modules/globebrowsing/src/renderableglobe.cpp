@@ -72,7 +72,14 @@ namespace {
     };
     constexpr const float DefaultHeight = 0.f;
 
-    constexpr const int DefaultSkirtedGridSegments = 64;  // 64 before
+    // I tried reducing this to 16, but it left the rendering with artifacts when the
+    // atmosphere was enabled. The best guess to the circular artifacts are due to the
+    // lack of resolution when a height field is enabled, leading the triangles to cut
+    // into the planets surface, causing issues with the ray depth of the atmosphere
+    // raycaster. We tried a simple solution that uses two grids and switches between
+    // them at a cutoff level, and I think this might still be the best solution for the
+    // time being.  --abock  2018-10-30
+    constexpr const int DefaultSkirtedGridSegments = 64;
     constexpr static const int UnknownDesiredLevel = -1;
 
     const openspace::globebrowsing::GeodeticPatch Coverage =
