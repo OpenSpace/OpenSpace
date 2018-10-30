@@ -22,52 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SYNCBUFFER___H__
-#define __OPENSPACE_CORE___SYNCBUFFER___H__
+#ifndef __OPENSPACE_MODULE_SERVER___VERSION_TOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___VERSION_TOPIC___H__
 
-#include <memory>
-#include <vector>
+#include <modules/server/include/topics/topic.h>
 
 namespace openspace {
 
-class SyncBuffer {
+class VersionTopic : public Topic {
 public:
-    SyncBuffer(size_t n);
+    VersionTopic();
+    virtual ~VersionTopic();
 
-    ~SyncBuffer();
-
-    void encode(const std::string& s);
-
-    template <typename T>
-    void encode(const T& v);
-
-    std::string decode();
-
-    template <typename T>
-    T decode();
-
-    void decode(std::string& s);
-
-    template <typename T>
-    void decode(T& value);
-
-    void reset();
-
-    //void write();
-    //void read();
-
-    void setData(std::vector<char> data);
-    std::vector<char> data();
-
-private:
-    size_t _n;
-    size_t _encodeOffset = 0;
-    size_t _decodeOffset = 0;
-    std::vector<char> _dataStream;
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 };
 
 } // namespace openspace
 
-#include "syncbuffer.inl"
-
-#endif // __OPENSPACE_CORE___SYNCBUFFER___H__
+#endif // __OPENSPACE_MODULE_SERVER___VERSION_TOPIC___H__

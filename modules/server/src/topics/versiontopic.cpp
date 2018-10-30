@@ -22,52 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SYNCBUFFER___H__
-#define __OPENSPACE_CORE___SYNCBUFFER___H__
+#include "modules/server/include/topics/versiontopic.h"
 
-#include <memory>
-#include <vector>
+#include <modules/server/include/connection.h>
+#include <modules/server/servermodule.h>
+
+#include <openspace/openspace.h>
+#include <openspace/engine/globals.h>
+
+namespace {
+    constexpr const char* _loggerCat = "VersionTopic";
+} // namespace
+
+using nlohmann::json;
 
 namespace openspace {
 
-class SyncBuffer {
-public:
-    SyncBuffer(size_t n);
+VersionTopic::VersionTopic() {
+}
 
-    ~SyncBuffer();
+VersionTopic::~VersionTopic() {
+}
 
-    void encode(const std::string& s);
+bool VersionTopic::isDone() const {
+    return true;
+}
 
-    template <typename T>
-    void encode(const T& v);
+void VersionTopic::handleJson(const nlohmann::json&) {
+    nlohmann::json versionJson = {
+        {
+            "openSpaceVersion",
+            {
+                {"major", OPENSPACE_VERSION_MAJOR},
+                {"minor", OPENSPACE_VERSION_MINOR},
+                {"patch", OPENSPACE_VERSION_PATCH}
+            }
+        },
+        {
+            "socketApiVersion",
+            {
+                {"major", SOCKET_API_VERSION_MAJOR},
+                {"minor", SOCKET_API_VERSION_MINOR},
+                {"patch", SOCKET_API_VERSION_PATCH}
+            }
+        }
+    };
 
-    std::string decode();
-
-    template <typename T>
-    T decode();
-
-    void decode(std::string& s);
-
-    template <typename T>
-    void decode(T& value);
-
-    void reset();
-
-    //void write();
-    //void read();
-
-    void setData(std::vector<char> data);
-    std::vector<char> data();
-
-private:
-    size_t _n;
-    size_t _encodeOffset = 0;
-    size_t _decodeOffset = 0;
-    std::vector<char> _dataStream;
-};
+    _connection->sendJson(
+        wrappedPayload(versionJson)
+    );
+}
 
 } // namespace openspace
-
-#include "syncbuffer.inl"
-
-#endif // __OPENSPACE_CORE___SYNCBUFFER___H__

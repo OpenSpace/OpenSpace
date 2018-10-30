@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SHORTCUTSMANAGER___H__
-#define __OPENSPACE_CORE___SHORTCUTSMANAGER___H__
+#ifndef __OPENSPACE_CORE___SHORTCUTMANAGER___H__
+#define __OPENSPACE_CORE___SHORTCUTMANAGER___H__
 
 #include <ghoul/misc/boolean.h>
 #include <string>
@@ -56,4 +56,4 @@ private:
 
 } // namespace openspace::interaction
 
-#endif // __OPENSPACE_CORE___SHORTCUTSMANAGER___H__
+#endif // __OPENSPACE_CORE___SHORTCUTMANAGER___H__
