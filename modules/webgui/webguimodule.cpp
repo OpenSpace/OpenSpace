@@ -93,8 +93,6 @@ void WebGuiModule::internalInitialize(const ghoul::Dictionary&) {
 void WebGuiModule::startProcess() {
 #ifdef _MSC_VER
     const std::string nodePath = absPath("${MODULE_WEBGUI}/ext/nodejs/node.exe");
-#elseifdef __APPLE__
-    const std::string nodePath = absPath("/usr/local/bin/node");
 #else
     const std::string nodePath = absPath("/usr/local/bin/node");
 #endif
