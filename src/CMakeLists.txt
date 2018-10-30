@@ -442,4 +442,9 @@ configure_file(
     @ONLY IMMEDIATE
 )
 
+if (APPLE)
+    find_library(APPKIT_LIBRARY AppKit REQUIRED)
+    target_link_libraries(openspace-core ${APPKIT_LIBRARY})
+endif ()
+
 set_openspace_compile_settings(openspace-core)
