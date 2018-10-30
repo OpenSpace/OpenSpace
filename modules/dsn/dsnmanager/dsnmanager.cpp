@@ -33,7 +33,7 @@ namespace openspace {
     constexpr const char* KeyDataFileType = "DataFileType";
 
     struct DsnManager::DsnData DsnManager::_dsnData;
-    std::vector<double> DsnManager::_startTimes;
+    std::vector<double> DsnManager::_fileStartTimes;
     std::vector<std::string> DsnManager::_dataFiles;
 
     //Filetypes
@@ -152,7 +152,7 @@ namespace openspace {
             timeString.replace(FilenameSize-1, 1, "T");
 
             const double triggerTime = Time::convertTime(timeString);
-            _startTimes.push_back(triggerTime);
+            _fileStartTimes.push_back(triggerTime);
         }
     }
 
@@ -202,6 +202,7 @@ namespace openspace {
 
           //Add signals to vector of signals
           _dsnData.signals.push_back(structSignal);
+          //_dsnData.signalStartTimes.push_back(Time::convertTime(structSignal.startTime));
         }
 
       _dsnData.isLoaded = true;

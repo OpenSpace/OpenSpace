@@ -40,15 +40,6 @@ namespace openspace {
         extractData();
     }
 
-    bool CommunicationLines::checkSignal(double currentTime, std::string signalStartTime, std::string signalEndTime) {
-           double startTimeInSeconds = SpiceManager::ref().ephemerisTimeFromDate(signalStartTime);
-           double endTimeInSeconds = SpiceManager::ref().ephemerisTimeFromDate(signalEndTime);
-
-           if (startTimeInSeconds <= currentTime && endTimeInSeconds >= currentTime)
-               return true;
-
-       return false;
-    }
 
     void CommunicationLines::extractData() {
        
@@ -88,7 +79,7 @@ namespace openspace {
         if (!isTimeInFileInterval) {
             DsnManager::_dsnData.isLoaded = false;
 
-            int activeFileIndex = findFileIndexForCurrentTime(currentTime);
+            int activeFileIndex = findFileIndexForCurrentTime(currentTime, DsnManager::_fileStartTimes);
             //parse data for that file
             if (!DsnManager::_dsnData.isLoaded)
             {
@@ -99,24 +90,19 @@ namespace openspace {
                 return;
         }
 
-        DsnManager::DsnData signalDataVector = DsnManager::_dsnData;
         // Make space for the vertex renderinformation
         _vertexArray.clear();
 
-        //update focusnode information
+        //update focusnode information used to calculate spacecraft positions
         _focusNode = global::navigationHandler.focusNode();
         _lineRenderInformation._localTransformSpacecraft = glm::translate(glm::dmat4(1.0), _focusNode->worldPosition());
 
-        //todo : binary search instead of for loop
-        for (int i = 0; i < signalDataVector.signals.size(); i++) {
+        //Todo; keep track of active index for signalvector, or swap for loop for binary search
+        for (int i = 0; i < DsnManager::_dsnData.signals.size(); i++) {
                
-            DsnManager::Signal currentSignal = signalDataVector.signals[i];
-
-            if (checkSignal(currentTime, DsnManager::_dsnData.signals[i].startTime, DsnManager::_dsnData.signals[i].endTime))
-            {
+            DsnManager::Signal currentSignal = DsnManager::_dsnData.signals[i];
+            if(isSignalActive(currentTime, currentSignal.startTime,currentSignal.endTime))
                 pushSignalDataToVertexArray(currentSignal);
-            }
-
         };
 
         // ... and upload them to the GPU
@@ -144,17 +130,16 @@ namespace openspace {
         glBindVertexArray(0);
     }
 
-
-    int CommunicationLines::findFileIndexForCurrentTime(double time) {
+    int CommunicationLines::findFileIndexForCurrentTime(double time, std::vector<double> vec) {
         // upper_bound has O(log n) for sorted vectors, more efficient than for loop
-        auto iter = std::upper_bound(DsnManager::_startTimes.begin(), DsnManager::_startTimes.end(), time);
+        auto iter = std::upper_bound(vec.begin(), vec.end(), time);
 
         int fileIndex = -1;
         //check what index we got 
-        if (iter != DsnManager::_startTimes.end()) {
-            if (iter != DsnManager::_startTimes.begin()) {
+        if (iter != vec.end()) {
+            if (iter != vec.begin()) {
                 fileIndex = static_cast<int>(
-                    std::distance(DsnManager::_startTimes.begin(), iter)
+                    std::distance(vec.begin(), iter)
                     ) - 1;
             }
             else {
@@ -162,7 +147,7 @@ namespace openspace {
             }
         }
         else {
-            fileIndex = static_cast<int>(DsnManager::_startTimes.size()) - 1;
+            fileIndex = static_cast<int>(vec.size()) - 1;
         }
 
         return fileIndex;
@@ -193,6 +178,16 @@ namespace openspace {
         _vertexArray.push_back(color.b);
         _vertexArray.push_back(color.a);
 
+    }
+
+    bool CommunicationLines::isSignalActive(double currentTime, std::string signalStartTime, std::string signalEndTime) {
+        double startTimeInSeconds = SpiceManager::ref().ephemerisTimeFromDate(signalStartTime);
+        double endTimeInSeconds = SpiceManager::ref().ephemerisTimeFromDate(signalEndTime);
+
+        if (startTimeInSeconds <= currentTime && endTimeInSeconds >= currentTime)
+            return true;
+
+        return false;
     }
 
     /* Since our station dishes have a static translation from Earth, we
@@ -237,7 +232,6 @@ namespace openspace {
         return position;
     }
 
-
     RenderableCommunicationPackage::PositionVBOLayout 
         CommunicationLines::getPositionForGeocentricSceneGraphNode(const char* id) {
         
@@ -258,8 +252,6 @@ namespace openspace {
 
         return position;
     }
-
-
 
 
 } // namespace openspace

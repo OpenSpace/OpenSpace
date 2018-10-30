@@ -59,20 +59,27 @@ namespace openspace {
 
     static struct DsnData {
         //filename is on the format of YYYY-DDDT (excluding '.json')
-        //std::string filenamestring;
         bool isLoaded = false;
         double sequenceStartTime;
         double sequenceEndTime = sequenceStartTime + 86400.0; // 24 hours from startTime 
         std::vector<Signal> signals;
+        //std::vector<double> signalStartTimes;
      };
 
+      /* The data that is currently loaded into open space*/
       static DsnData _dsnData;
-      static std::vector<double> _startTimes;
+      /* A vector with all start times for our datafiles*/
+      static std::vector<double> _fileStartTimes;
+      /* A vector with all our datafile paths*/
       static std::vector<std::string> _dataFiles;
 
+      /* Extracts all the mandatory information we need from our asset file */
       static bool extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary);
-	  static glm::vec3 approximateSpacecraftPosition(const char* dishId, glm::vec3 dishPos);
+      /* Approximates a spacecraft position using XXXXX */
+      static glm::vec3 approximateSpacecraftPosition(const char* dishId, glm::vec3 dishPos);
+      /* Saves all filenames in a vector to be compared current time in open space */
       static void extractTriggerTimesFromFileNames(std::vector<std::string> _dataFiles);
+      /* parses data from a file given an index in our preloaded filename vector */
       static bool jsonParser(int index);
 
     private:

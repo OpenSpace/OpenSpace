@@ -55,16 +55,20 @@ namespace openspace {
         /*Returns a position calculated where the focusNode position is origin(0,0,0) */
         glm::dvec3 getCoordinatePosFromFocusNode(SceneGraphNode* node);
         /*Returns an index for our filenames */
-        int findFileIndexForCurrentTime(double time);
+        int findFileIndexForCurrentTime(double time, std::vector<double> vec);
         /*Adds the signaldata to _vertexArray*/
         void pushSignalDataToVertexArray(DsnManager::Signal signal);
 
+
     private:
-         bool checkSignal(double currentTime, std::string signalStartTime, std::string signalEndTime);
+        /*Checks if the current time is within a signal's start and endtime*/
+         bool isSignalActive(double currentTime, std::string signalStartTime, std::string signalEndTime);
         
          const char* _identifier = "CommunicationLines";
          std::unique_ptr<ghoul::Dictionary> _dictionary;
          SceneGraphNode* _focusNode;
+
+         int _signalVectorStartIndex;
     };
 
 }
