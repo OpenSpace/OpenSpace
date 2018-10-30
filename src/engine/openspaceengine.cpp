@@ -812,6 +812,7 @@ void OpenSpaceEngine::deinitializeGL() {
 
     global::openSpaceEngine.assetManager().deinitialize();
     global::openSpaceEngine._scene = nullptr;
+    global::renderEngine.setScene(nullptr);
 
     for (const std::function<void()>& func : global::callback::deinitializeGL) {
         func();
@@ -1237,18 +1238,6 @@ void OpenSpaceEngine::decode(std::vector<char> data) {
     global::syncEngine.decodeSyncables(std::move(data));
 }
 
-void OpenSpaceEngine::externalControlCallback(const char* receivedChars, int size,
-                                              int /*clientId*/)
-{
-    // Not currently used anymore;  should be replaced with a non-SGCT relient socket
-
-    if (size == 0) {
-        return;
-    }
-
-    global::networkEngine.handleMessage(std::string(receivedChars, size));
-}
-
 void OpenSpaceEngine::toggleShutdownMode() {
     if (_shutdown.inShutdown) {
         // If we are already in shutdown mode, we want to disable it
@@ -1336,6 +1325,7 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 "clusterId",
                 &luascriptfunctions::clusterId,
                 {},
+                "",
                 "Returns the zero-based identifier for this OpenSpace instance in a "
                 "cluster configuration. If this instance is not part of a cluster, this "
                 "identifier is always 0."

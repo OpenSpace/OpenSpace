@@ -310,11 +310,10 @@ void mainInitFunc() {
         std::tm* nowTime = std::localtime(&now);
         char mbstr[128];
         strftime(mbstr, sizeof(mbstr), "%Y-%m-%d-%H-%M", nowTime);
-        screenshotPath += "/" + std::string(mbstr);
 
         FileSys.registerPathToken(
             "${SCREENSHOTS}",
-            absPath(screenshotPath),
+            absPath(screenshotPath + '/' + std::string(mbstr)),
             ghoul::filesystem::FileSystem::Override::Yes
         );
     }
@@ -997,6 +996,32 @@ int main(int argc, char** argv) {
     std::pair<int, int> version = supportedOpenGLVersion();
     LINFO(fmt::format("Detected OpenGL version: {}.{}", version.first, version.second));
     bool initSuccess = SgctEngine->init(versionMapping[version]);
+
+#ifdef __APPLE__
+    // Workaround for OpenGL bug that Apple introduced in 10.14 Mojave that prevents an
+    // OpenGL context to display anything until it is first moved or resized in dark
+    // mode. So we are going through all windows here and resize them a bit larger and
+    // then back to the desired resolution. Resizing the window to the same size doesn't
+    // work as GLFW probably has a check for setting the current values.
+    // This can be removed once the OpenGL bug is fixed.
+    // In order to check, comment out the following lines and start OpenSpace on a 10.14
+    // machine. If the loading screen shows up without doing anything to the window, it
+    // is fixed. With the bug, the rendering stays gray even well after the main render
+    // loop has started     -- 2018-10-28   abock
+    size_t n = sgct::Engine::instance()->getNumberOfWindows();
+    for (size_t i = 0; i < n; ++i) {
+        GLFWwindow* w = sgct::Engine::instance()->getWindowPtr(i)->getWindowHandle();
+        int x, y;
+        glfwGetWindowPos(w, &x, &y);
+        glfwSetWindowPos(w, x + 1, y + 1);
+        glfwSwapBuffers(w);
+        glfwPollEvents();
+        glfwSetWindowPos(w, x, y);
+        glfwSwapBuffers(w);
+        glfwPollEvents();
+    }
+#endif // __APPLE__
+
 
     // Do not print message if slaves are waiting for the master
     // Only timeout after 15 minutes

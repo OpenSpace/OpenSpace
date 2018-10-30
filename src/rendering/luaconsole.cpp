@@ -67,10 +67,6 @@ namespace {
     // when horizontal scrolling is required.
     constexpr const int NVisibleCharsAfterCursor = 5;
 
-    constexpr std::array<const char*, 4> UniformNames = {
-        "res", "color", "height", "ortho"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo VisibleInfo = {
         "IsVisible",
         "Is Visible",

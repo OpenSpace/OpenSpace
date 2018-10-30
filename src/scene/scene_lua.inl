@@ -375,7 +375,7 @@ int property_setValueSingle(lua_State* L) {
 int property_getValue(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::property_getValue");
 
-    const std::string& uri = ghoul::lua::value<std::string>(
+    std::string uri = ghoul::lua::value<std::string>(
         L,
         1,
         ghoul::lua::PopValue::Yes
@@ -459,7 +459,7 @@ int addSceneGraphNode(lua_State* L) {
 int removeSceneGraphNode(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeSceneGraphNode");
 
-    const std::string& nodeName = ghoul::lua::value<std::string>(
+    std::string nodeName = ghoul::lua::value<std::string>(
         L,
         1,
         ghoul::lua::PopValue::Yes
@@ -509,7 +509,7 @@ int removeSceneGraphNode(lua_State* L) {
 int hasSceneGraphNode(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::hasSceneGraphNode");
 
-    const std::string& nodeName = ghoul::lua::value<std::string>(
+    std::string nodeName = ghoul::lua::value<std::string>(
         L,
         1,
         ghoul::lua::PopValue::Yes
@@ -520,6 +520,19 @@ int hasSceneGraphNode(lua_State* L) {
 
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
+}
+
+int addInterestingTime(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addInterestingTime");
+
+    std::string name = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::No);
+    std::string time = ghoul::lua::value<std::string>(L, 2, ghoul::lua::PopValue::No);
+    lua_pop(L, 2);
+
+    global::renderEngine.scene()->addInterestingTime({std::move(name), std::move(time)});
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
 }
 
 }  // namespace openspace::luascriptfunctions
