@@ -385,7 +385,6 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/transformationmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/threadpool.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/histogram.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/util/gpudata.h
 )
 
 if (APPLE)
