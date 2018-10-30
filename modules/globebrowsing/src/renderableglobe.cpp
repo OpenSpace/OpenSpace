@@ -394,7 +394,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty(AccurateNormalsInfo, false),
         BoolProperty(EclipseInfo, false),
         BoolProperty(EclipseHardShadowsInfo, false),
-        FloatProperty(LodScaleFactorInfo, 10.f, 1.f, 50.f),
+        FloatProperty(LodScaleFactorInfo, 15.f, 1.f, 50.f),
         FloatProperty(CameraMinHeightInfo, 100.f, 0.f, 1000.f),
         FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f)
     })
