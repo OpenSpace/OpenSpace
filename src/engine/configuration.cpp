@@ -297,8 +297,6 @@ void parseLuaState(Configuration& configuration) {
     getValue(s, KeyServerPasskey, c.serverPasskey);
     getValue(s, KeyRequireSocketAuthentication, c.doesRequireSocketAuthentication);
     getValue(s, KeyClientAddressWhitelist, c.clientAddressWhitelist);
-    getValue(s, "WebHelperLocation", c.webHelperLocation);
-    getValue(s, "CefWebGuiUrl", c.cefWebGuiUrl);
 
     getValue(s, KeyLogging, c.logging);
     getValue(s, KeyDocumentation, c.documentation);

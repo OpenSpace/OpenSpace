@@ -22,47 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
-#define __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
+#ifndef __OPENSPACE_MODULE_SERVER___VERSION_TOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___VERSION_TOPIC___H__
 
-#include <openspace/util/openspacemodule.h>
-
-#include <modules/webbrowser/include/eventhandler.h>
+#include <modules/server/include/topics/topic.h>
 
 namespace openspace {
 
-class CefHost;
-
-class WebBrowserModule : public OpenSpaceModule {
+class VersionTopic : public Topic {
 public:
-    static constexpr const char* Name = "WebBrowser";
-    WebBrowserModule();
-    virtual ~WebBrowserModule();
+    VersionTopic();
+    virtual ~VersionTopic();
 
-    int addBrowser(std::shared_ptr<BrowserInstance>);
-    void removeBrowser(std::shared_ptr<BrowserInstance>);
-
-    void attachEventHandler(std::shared_ptr<BrowserInstance> browserInstance);
-
-protected:
-    void internalInitialize(const ghoul::Dictionary& configuration) override;
-    void internalDeinitialize() override;
-
-private:
-    /**
-     * Try to find the CEF Helper executable. It looks in the bin/openspace folder.
-     * Therefore, if you change that this might cause a crash here.
-     *
-     * \return the absolute path to the file
-     */
-    std::string findHelperExecutable();
-
-    std::vector<std::shared_ptr<BrowserInstance>> _browsers;
-    EventHandler _eventHandler;
-    std::unique_ptr<CefHost> _cefHost;
-    std::string _webHelperLocation;
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
+#endif // __OPENSPACE_MODULE_SERVER___VERSION_TOPIC___H__

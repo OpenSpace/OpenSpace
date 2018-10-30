@@ -780,10 +780,10 @@ void setSgctDelegateFunctions() {
                 sgct::Engine::NonLinearBuffer);
     };
     sgctDelegate.isFisheyeRendering = []() {
-        sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
-        return dynamic_cast<sgct_core::FisheyeProjection*>(
-            w->getViewport(0)->getNonLinearProjectionPtr()
-        ) != nullptr;
+        //sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
+        return false;// dynamic_cast<sgct_core::FisheyeProjection*>(
+            //w->getViewport(0)->getNonLinearProjectionPtr()
+        //) != nullptr;
     };
     sgctDelegate.takeScreenshot = [](bool applyWarping) {
         sgct::SGCTSettings::instance()->setCaptureFromBackBuffer(applyWarping);
@@ -828,6 +828,14 @@ int main(int argc, char** argv) {
     }
 
     ghoul::initialize();
+
+    // Register the path of the executable,
+    // to make it possible to find other files in the same directory.
+    FileSys.registerPathToken(
+        "${BIN}",
+        ghoul::filesystem::File(absPath(argv[0])).directoryName(),
+        ghoul::filesystem::FileSystem::Override::Yes
+    );
 
     //
     // Parse commandline arguments

@@ -24,7 +24,7 @@
 
 #include <modules/cefwebgui/include/guirenderhandler.h>
 
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
@@ -37,8 +37,7 @@ namespace {
 namespace openspace {
 
 GUIRenderHandler::GUIRenderHandler() {
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::InitializeGL,
+    global::callback::initializeGL.push_back(
         [this]() {
             LDEBUG("Initializing WebGUI RenderHandler OpenGL");
             initializeGL();

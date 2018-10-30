@@ -69,6 +69,9 @@ void SetPropertyTopic::handleJson(const nlohmann::json& json) {
         LERROR("Could not set property -- runtime error:");
         LERROR(e.what());
     }
+    catch (...) {
+        LERROR("Could not set property -- unknown error");
+    }
 }
 
 bool SetPropertyTopic::isDone() const {

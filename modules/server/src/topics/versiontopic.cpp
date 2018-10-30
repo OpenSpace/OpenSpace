@@ -22,47 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
-#define __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
+#include "modules/server/include/topics/versiontopic.h"
 
-#include <openspace/util/openspacemodule.h>
+#include <modules/server/include/connection.h>
+#include <modules/server/servermodule.h>
 
-#include <modules/webbrowser/include/eventhandler.h>
+#include <openspace/openspace.h>
+#include <openspace/engine/globals.h>
+
+namespace {
+    constexpr const char* _loggerCat = "VersionTopic";
+} // namespace
+
+using nlohmann::json;
 
 namespace openspace {
 
-class CefHost;
+VersionTopic::VersionTopic() {
+}
 
-class WebBrowserModule : public OpenSpaceModule {
-public:
-    static constexpr const char* Name = "WebBrowser";
-    WebBrowserModule();
-    virtual ~WebBrowserModule();
+VersionTopic::~VersionTopic() {
+}
 
-    int addBrowser(std::shared_ptr<BrowserInstance>);
-    void removeBrowser(std::shared_ptr<BrowserInstance>);
+bool VersionTopic::isDone() const {
+    return true;
+}
 
-    void attachEventHandler(std::shared_ptr<BrowserInstance> browserInstance);
+void VersionTopic::handleJson(const nlohmann::json&) {
+    nlohmann::json versionJson = {
+        {
+            "openSpaceVersion",
+            {
+                {"major", OPENSPACE_VERSION_MAJOR},
+                {"minor", OPENSPACE_VERSION_MINOR},
+                {"patch", OPENSPACE_VERSION_PATCH}
+            }
+        },
+        {
+            "socketApiVersion",
+            {
+                {"major", SOCKET_API_VERSION_MAJOR},
+                {"minor", SOCKET_API_VERSION_MINOR},
+                {"patch", SOCKET_API_VERSION_PATCH}
+            }
+        }
+    };
 
-protected:
-    void internalInitialize(const ghoul::Dictionary& configuration) override;
-    void internalDeinitialize() override;
-
-private:
-    /**
-     * Try to find the CEF Helper executable. It looks in the bin/openspace folder.
-     * Therefore, if you change that this might cause a crash here.
-     *
-     * \return the absolute path to the file
-     */
-    std::string findHelperExecutable();
-
-    std::vector<std::shared_ptr<BrowserInstance>> _browsers;
-    EventHandler _eventHandler;
-    std::unique_ptr<CefHost> _cefHost;
-    std::string _webHelperLocation;
-};
+    _connection->sendJson(
+        wrappedPayload(versionJson)
+    );
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
