@@ -240,11 +240,6 @@ void LoadingScreen::render() {
             color,
             rendering::helper::Anchor::NW
         );
-
-        LINFOC("P", ghoul::to_string(p));
-        LINFOC("P2", ghoul::to_string(p - progressbarSize / 2.f));
-        LINFOC("S", ghoul::to_string(progressbarSize));
-        LINFOC("S2", ghoul::to_string(progressbarSize * glm::vec2(progress, 1.f)));
     }
 
     //
