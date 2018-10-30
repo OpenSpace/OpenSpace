@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___PARALLELPEER___H__
 
 #include <openspace/network/parallelconnection.h>
+#include <openspace/interaction/externinteraction.h>
 #include <openspace/network/messagestructures.h>
 #include <openspace/util/timemanager.h>
 
@@ -131,6 +132,8 @@ private:
 
     std::unique_ptr<std::thread> _receiveThread = nullptr;
     std::shared_ptr<ghoul::Event<>> _connectionEvent;
+
+    ExternInteraction _externInteract;
 
     ParallelConnection _connection;
 

@@ -135,6 +135,10 @@ KeyframeNavigator& NavigationHandler::keyframeNavigator() const {
     return *_keyframeNavigator;
 }
 
+bool NavigationHandler::isKeyFrameInteractionEnabled() const {
+    return _useKeyFrameInteraction;
+}
+
 float NavigationHandler::interpolationTime() const {
     return _orbitalNavigator->rotateToFocusInterpolationTime();
 }
@@ -150,18 +154,34 @@ void NavigationHandler::updateCamera(double deltaTime) {
     if (_cameraUpdatedFromScript) {
         _cameraUpdatedFromScript = false;
     }
-    else {
+    else if( ! _playbackModeEnabled ) {
         if (_camera && focusNode()) {
             if (_useKeyFrameInteraction) {
-                _keyframeNavigator->updateCamera(*_camera);
+                _keyframeNavigator->updateCamera(*_camera, _playbackModeEnabled);
             }
             else {
                 _orbitalNavigator->updateStatesFromInput(*_inputState, deltaTime);
                 _orbitalNavigator->updateCameraStateFromStates(*_camera, deltaTime);
+                _camera->setFocusPositionVec3(focusNode()->worldPosition());
             }
-            _camera->setFocusPositionVec3(focusNode()->worldPosition());
         }
     }
+}
+
+void NavigationHandler::setEnableKeyFrameInteraction() {
+    _useKeyFrameInteraction = true;
+}
+
+void NavigationHandler::setDisableKeyFrameInteraction() {
+    _useKeyFrameInteraction = false;
+}
+
+void NavigationHandler::triggerPlaybackStart() {
+    _playbackModeEnabled = true;
+}
+
+void NavigationHandler::stopPlayback() {
+    _playbackModeEnabled = false;
 }
 
 SceneGraphNode* NavigationHandler::focusNode() const {
