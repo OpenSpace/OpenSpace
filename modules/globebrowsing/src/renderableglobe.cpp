@@ -61,21 +61,18 @@ namespace {
         bool isShadowing;
     };
 
-    constexpr const char* keyFrame = "Frame";
-    constexpr const char* keyRadii = "Radii";
-    constexpr const char* keySegmentsPerPatch = "SegmentsPerPatch";
-    constexpr const char* keyLayers = "Layers";
-    constexpr const char* keyShadowGroup = "ShadowGroup";
-    constexpr const char* keyShadowSource = "Source";
-    constexpr const char* keyShadowCaster = "Caster";
-    constexpr const double KM_TO_M = 1000.0;
+    constexpr const char* KeyRadii = "Radii";
+    constexpr const char* KeyLayers = "Layers";
+    constexpr const char* KeyShadowGroup = "ShadowGroup";
+    constexpr const char* KeyShadowSource = "Source";
+    constexpr const char* KeyShadowCaster = "Caster";
     const openspace::globebrowsing::AABB3 CullingFrustum{
         glm::vec3(-1.f, -1.f, 0.f),
         glm::vec3( 1.f,  1.f, 1e35)
     };
     constexpr const float DefaultHeight = 0.f;
 
-    constexpr const int DefaultSkirtedGridSegments = 16;  // 64 before
+    constexpr const int DefaultSkirtedGridSegments = 64;  // 64 before
     constexpr static const int UnknownDesiredLevel = -1;
 
     const openspace::globebrowsing::GeodeticPatch Coverage =
@@ -402,12 +399,12 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     setIdentifier("RenderableGlobe");
 
     // Read the radii in to its own dictionary
-    if (dictionary.hasKeyAndValue<glm::dvec3>(keyRadii)) {
-        _ellipsoid = Ellipsoid(dictionary.value<glm::vec3>(keyRadii));
+    if (dictionary.hasKeyAndValue<glm::dvec3>(KeyRadii)) {
+        _ellipsoid = Ellipsoid(dictionary.value<glm::vec3>(KeyRadii));
         setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
     }
-    else if (dictionary.hasKeyAndValue<double>(keyRadii)) {
-        const double radius = dictionary.value<double>(keyRadii);
+    else if (dictionary.hasKeyAndValue<double>(KeyRadii)) {
+        const double radius = dictionary.value<double>(KeyRadii);
         _ellipsoid = Ellipsoid({ radius, radius, radius });
         setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
     }
@@ -418,8 +415,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 
     // Init layer manager
     ghoul::Dictionary layersDictionary;
-    if (!dictionary.getValue(keyLayers, layersDictionary)) {
-        throw ghoul::RuntimeError(std::string(keyLayers) + " must be specified");
+    if (!dictionary.getValue(KeyLayers, layersDictionary)) {
+        throw ghoul::RuntimeError(std::string(KeyLayers) + " must be specified");
     }
 
     _layerManager.initialize(layersDictionary);
@@ -467,18 +464,18 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     //======== Reads Shadow (Eclipses) Entries in mod file ===========
     //================================================================
     ghoul::Dictionary shadowDictionary;
-    bool success = dictionary.getValue(keyShadowGroup, shadowDictionary);
+    bool success = dictionary.getValue(KeyShadowGroup, shadowDictionary);
     bool disableShadows = false;
     if (success) {
         std::vector<std::pair<std::string, double>> sourceArray;
         unsigned int sourceCounter = 1;
         while (success) {
             std::string sourceName;
-            success = shadowDictionary.getValue(keyShadowSource +
+            success = shadowDictionary.getValue(KeyShadowSource +
                 std::to_string(sourceCounter) + ".Name", sourceName);
             if (success) {
                 double sourceRadius;
-                success = shadowDictionary.getValue(keyShadowSource +
+                success = shadowDictionary.getValue(KeyShadowSource +
                     std::to_string(sourceCounter) + ".Radius", sourceRadius);
                 if (success) {
                     sourceArray.emplace_back(sourceName, sourceRadius);
@@ -500,11 +497,11 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
             unsigned int casterCounter = 1;
             while (success) {
                 std::string casterName;
-                success = shadowDictionary.getValue(keyShadowCaster +
+                success = shadowDictionary.getValue(KeyShadowCaster +
                     std::to_string(casterCounter) + ".Name", casterName);
                 if (success) {
                     double casterRadius;
-                    success = shadowDictionary.getValue(keyShadowCaster +
+                    success = shadowDictionary.getValue(KeyShadowCaster +
                         std::to_string(casterCounter) + ".Radius", casterRadius);
                     if (success) {
                         casterArray.emplace_back(casterName, casterRadius);
@@ -1576,6 +1573,8 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
 void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& programObject,
                                               const RenderData& data)
 {
+    constexpr const double KM_TO_M = 1000.0;
+
     ghoul_assert(
         !_ellipsoid.shadowConfigurationArray().empty(),
         "Needs to have eclipse shadows enabled"
