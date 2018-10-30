@@ -78,7 +78,7 @@ asset.onInitialize(function ()
     )
 
     openspace.markInterestingNodes({
-        "Voyager1", "Earth", "Moon"
+        "VGR1", "VGR2", "Earth", "DSS63", "DSS14", "DSS43"
     })
 
     openspace.addVirtualProperty(
@@ -107,6 +107,6 @@ asset.onDeinitialize(function ()
     openspace.removeVirtualProperty("Scene.*Trail.renderable.Enabled")
 
     openspace.removeInterestingNodes({
-        "Voyager1", "Earth", "Moon"
+        "VGR1", "VGR2", "Earth", "DSS63", "DSS14", "DSS43"
     })
 end)
