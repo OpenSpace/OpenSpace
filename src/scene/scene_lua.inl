@@ -522,7 +522,6 @@ int hasSceneGraphNode(lua_State* L) {
     return 1;
 }
 
-#pragma optimize("", off)
 int addInterestingTime(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addInterestingTime");
 
