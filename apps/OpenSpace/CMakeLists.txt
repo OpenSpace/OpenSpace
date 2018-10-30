@@ -100,6 +100,8 @@ target_compile_definitions(OpenSpace PRIVATE
     ${SPOUT_DEFINITIONS}
 )
 
+begin_header("Dependency: SGCT")
+
 set(SGCT_TEXT OFF CACHE BOOL "" FORCE)
 set(SGCT_BUILD_CSHARP_PROJECTS OFF CACHE BOOL "" FORCE)
 set(SGCT_LIGHT_ONLY ON CACHE BOOL "" FORCE)
@@ -115,40 +117,33 @@ target_link_libraries(
     ${GLFW_LIBRARIES}
 )
 
-if (TARGET sgct_light)
-    set_property(TARGET sgct_light PROPERTY FOLDER "External")
-endif ()
-if (TARGET glew)
-    set_property(TARGET glew PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET glfw)
-    set_property(TARGET glfw PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET png16_static)
-    set_property(TARGET png16_static PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET quat)
-    set_property(TARGET quat PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET simd)
-    set_property(TARGET simd PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET tinyxml2static)
-    set_property(TARGET tinyxml2static PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET turbojpeg-static)
-    set_property(TARGET turbojpeg-static PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET vrpn)
-    set_property(TARGET vrpn PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET zlibstatic)
-    set_property(TARGET zlibstatic PROPERTY FOLDER "External/SGCT")
-endif ()
+mark_as_advanced(EXECUTABLE_OUTPUT_PATH GLFW_BUILD_DOCS GLFW_BUILD_EXAMPLES
+    GLFW_BUILD_TESTS GLFW_INSTALL GLFW_USE_HYBRID_HPG GLFW_USE_OSMESA GLFW_VULKAN_STATIC
+    INSTALL_BIN_DIR INSTALL_INC_DIR INSTALL_LIB_DIR INSTALL_MAN_DIR INSTALL_PKGCONFIG_DIR
+    IOKIT_LIBRARY JPEG_TURBO_FORCE32bit JPEG_TURBO_WITH_12BIT JPEG_TURBO_WITH_ARITH_DEC
+    JPEG_TURBO_WITH_ARITH_ENC JPEG_TURBO_WITH_JPEG7 JPEG_TURBO_WITH_JPEG8
+    JPEG_TURBO_WITH_MEM_SRCDST JPEG_TURBO_WITH_SIMD JPEG_TURBO_WITH_TURBOJPEG LIB_SUFFIX
+    LIBRARY_OUTPUT_PATH M_LIBRARY SGCT_BUILD_ALUT SGCT_BUILD_CSHARP_PROJECTS
+    SGCT_CUSTOMOUTPUTDIRS SGCT_DOXYGEN SGCT_DOXYGEN_QUIET SGCT_EXAMPLES SGCT_INSTALL
+    SGCT_LIGHT_ONLY SGCT_NO_EXTERNAL_LIBRARIES SGCT_SPOUT_SUPPORT SGCT_TEXT
+    SGCT_USE_MSVC_RUNTIMES USE_MSVC_RUNTIME_LIBRARY_DLL)
+
+set_folder_location(sgct_light "External")
+set_folder_location(glew "External/SGCT")
+set_folder_location(glfw "External/SGCT")
+set_folder_location(png16_static "External/SGCT")
+set_folder_location(quat "External/SGCT")
+set_folder_location(simd "External/SGCT")
+set_folder_location(tinyxml2static "External/SGCT")
+set_folder_location(turbojpeg-static "External/SGCT")
+set_folder_location(vrpn "External/SGCT")
+set_folder_location(zlibstatic "External/SGCT")
 
 if (UNIX AND (NOT APPLE))
     target_link_libraries(OpenSpace Xcursor Xinerama X11)
 endif ()
+
+end_header("Dependency: SGCT")
 
 
 # Web Browser and Web gui
