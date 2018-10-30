@@ -9,7 +9,7 @@ local propertyHelper = asset.require('util/property_helper')
 local models = asset.syncedResource({
     Name = "Dsn models",
     Type = "HttpSynchronization",
-    Identifier = "dsn_34_model",
+    Identifier = "dsn_stations",
     Version = 1
 })
 
@@ -27,6 +27,7 @@ local LightSources = {
     }
 }
 
+--------------------- Goldstone ------------------------
 local DSS14 = {
     Identifier = "DSS14",
     Parent = earthAsset.Earth.Identifier,
@@ -40,9 +41,9 @@ local DSS14 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/dish.obj"
+            GeometryFile = models .. "/70m_dish/70m_dish.obj"
         },
-        ColorTexture = models .. "/base_AO.png" 
+        ColorTexture = models .. "/70m_dish/truss_dish_AO.jpg" 
 
     },
     GUI = {
@@ -65,9 +66,9 @@ local DSS15 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/dish.obj"
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/base_AO.png" 
+        ColorTexture = models .. "/34m_dish/base_AO.png" 
 
     },
     GUI = {
@@ -90,9 +91,9 @@ local DSS24 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/dish.obj"
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/base_AO.png" 
+        ColorTexture = models .. "/34m_dish/base_AO.png" 
 
     },
     GUI = {
@@ -114,9 +115,9 @@ local DSS25 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/dish.obj"
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/base_AO.png" 
+        ColorTexture = models .. "/34m_dish/base_AO.png" 
 
     },
     GUI = {
@@ -138,9 +139,9 @@ local DSS26 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/dish.obj"
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/base_AO.png" 
+        ColorTexture = models .. "/34m_dish/base_AO.png" 
 
     },
     GUI = {
@@ -148,6 +149,9 @@ local DSS26 = {
         Path = "/Solar System/Stations/Goldstone/DSS26"
     }
 }
+
+
+--------------------- Canberra ------------------------
 
 local DSS43 = {
     Identifier = "DSS43",
@@ -162,9 +166,9 @@ local DSS43 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/dish.obj"
+            GeometryFile = models .. "/70m_dish/70m_dish.obj"
         },
-        ColorTexture = models .. "/base_AO.png" 
+        ColorTexture = models .. "/70m_dish/truss_dish_AO.jpg" 
 
     },
     GUI = {
@@ -186,9 +190,9 @@ local DSS34 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/dish.obj"
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/base_AO.png" 
+        ColorTexture = models .. "/34m_dish/base_AO.png" 
 
     },
     GUI = {
@@ -210,9 +214,9 @@ local DSS35 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/dish.obj"
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/base_AO.png" 
+        ColorTexture = models .. "/34m_dish/base_AO.png" 
 
     },
     GUI = {
@@ -234,9 +238,9 @@ local DSS36 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/dish.obj"
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/base_AO.png" 
+        ColorTexture = models .. "/34m_dish/base_AO.png" 
 
     },
     GUI = {
@@ -259,9 +263,9 @@ local DSS45 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/dish.obj"
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/base_AO.png" 
+        ColorTexture = models .. "/34m_dish/base_AO.png" 
 
     },
     GUI = {
@@ -270,6 +274,8 @@ local DSS45 = {
     }
 }
 
+
+--------------------- Madrid ------------------------
 
 local DSS63 = {
     Identifier = "DSS63",
@@ -284,9 +290,9 @@ local DSS63 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/dish.obj"
+            GeometryFile = models .. "/70m_dish/70m_dish.obj"
         },
-        ColorTexture = models .. "/base_AO.png" 
+        ColorTexture = models .. "/70m_dish/truss_dish_AO.jpg" 
 
     },
     GUI = {
@@ -308,9 +314,9 @@ local DSS65 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/dish.obj"
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/base_AO.png" 
+        ColorTexture = models .. "/34m_dish/base_AO.png" 
 
     },
     GUI = {
@@ -332,9 +338,9 @@ local DSS54 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/dish.obj"
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/base_AO.png" 
+        ColorTexture = models .. "/34m_dish/base_AO.png" 
 
     },
     GUI = {
@@ -356,9 +362,9 @@ local DSS55 = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/dish.obj"
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/base_AO.png" 
+        ColorTexture = models .. "/34m_dish/base_AO.png" 
 
     },
     GUI = {
