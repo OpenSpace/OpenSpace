@@ -139,7 +139,7 @@ public:
 
     void setRenderable(std::unique_ptr<Renderable> renderable);
     const Renderable* renderable() const;
-    //Renderable* renderable();
+    Renderable* renderable();
 
     std::string guiPath() const;
     bool hasGuiHintHidden() const;

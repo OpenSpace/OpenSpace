@@ -385,7 +385,6 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/transformationmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/threadpool.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/histogram.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/util/gpudata.h
 )
 
 if (APPLE)
@@ -441,5 +440,10 @@ configure_file(
     ${OPENSPACE_BASE_DIR}/COMMIT.md
     @ONLY IMMEDIATE
 )
+
+if (APPLE)
+    find_library(APPKIT_LIBRARY AppKit REQUIRED)
+    target_link_libraries(openspace-core ${APPKIT_LIBRARY})
+endif ()
 
 set_openspace_compile_settings(openspace-core)

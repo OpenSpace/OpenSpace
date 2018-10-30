@@ -24,20 +24,12 @@
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
 
-#include <modules/globebrowsing/cache/memoryawaretilecache.h>
-#include <modules/globebrowsing/dashboard/dashboarditemglobelocation.h>
-#include <modules/globebrowsing/geometry/geodetic3.h>
-#include <modules/globebrowsing/geometry/geodeticpatch.h>
-#include <modules/globebrowsing/tile/rawtiledatareader/gdalwrapper.h>
-#include <modules/globebrowsing/tile/tileprovider/defaulttileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/singleimageprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/sizereferencetileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/texttileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/tileindextileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/tileproviderbylevel.h>
-#include <modules/globebrowsing/tile/tileprovider/tileproviderbyindex.h>
+#include <modules/globebrowsing/src/basictypes.h>
+#include <modules/globebrowsing/src/dashboarditemglobelocation.h>
+#include <modules/globebrowsing/src/gdalwrapper.h>
+#include <modules/globebrowsing/src/geodeticpatch.h>
+#include <modules/globebrowsing/src/memoryawaretilecache.h>
+#include <modules/globebrowsing/src/tileprovider.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
@@ -48,7 +40,6 @@
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <vector>
 
-#ifdef GLOBEBROWSING_USE_GDAL
 #include <gdal.h>
 
 #ifdef _MSC_VER
@@ -63,14 +54,11 @@
 #pragma warning (pop)
 #endif // _MSC_VER
 
-#endif // GLOBEBROWSING_USE_GDAL
-
 #include "globebrowsingmodule_lua.inl"
 
 namespace {
     constexpr const char* _loggerCat = "GlobeBrowsingModule";
 
-#ifdef GLOBEBROWSING_USE_GDAL
     openspace::GlobeBrowsingModule::Capabilities
     parseSubDatasets(char** subDatasets, int nSubdatasets)
     {
@@ -121,9 +109,6 @@ namespace {
 
         return result;
     }
-
-#endif // GLOBEBROWSING_USE_GDAL
-
 } // namespace
 
 namespace openspace {
@@ -138,14 +123,18 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
         _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>();
         addPropertySubOwner(*_tileCache);
 
-#ifdef GLOBEBROWSING_USE_GDAL
+        tileprovider::initializeDefaultTile();
+
         // Convert from MB to Bytes
         GdalWrapper::create(
             16ULL * 1024ULL * 1024ULL, // 16 MB
             static_cast<size_t>(CpuCap.installedMainMemory() * 0.25 * 1024 * 1024)
         );
         addPropertySubOwner(GdalWrapper::ref());
-#endif // GLOBEBROWSING_USE_GDAL
+    });
+
+    global::callback::deinitializeGL.push_back([]() {
+        tileprovider::deinitializeDefaultTile();
     });
 
 
@@ -153,9 +142,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
     global::callback::render.push_back([&]() { _tileCache->update(); });
 
     // Deinitialize
-#ifdef GLOBEBROWSING_USE_GDAL
     global::callback::deinitialize.push_back([&]() { GdalWrapper::ref().destroy(); });
-#endif // GLOBEBROWSING_USE_GDAL
 
     // Get factories
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
@@ -177,12 +164,10 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::SingleImageTileLayer
         )]);
-#ifdef GLOBEBROWSING_USE_GDAL
     fTileProvider->registerClass<tileprovider::TemporalTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::TemporalTileLayer
         )]);
-#endif // GLOBEBROWSING_USE_GDAL
     fTileProvider->registerClass<tileprovider::TileIndexTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::TileIndexTileLayer
@@ -273,7 +258,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             "Get geographic coordinates of the camera poosition in latitude, "
             "longitude, and altitude"
         },
-#ifdef GLOBEBROWSING_USE_GDAL
         {
             "loadWMSCapabilities",
             &globebrowsing::luascriptfunctions::loadWMSCapabilities,
@@ -304,7 +288,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             "component of the returned table can be used in the 'FilePath' argument "
             "for a call to the 'addLayer' function to add the value to a globe."
         }
-#endif  // GLOBEBROWSING_USE_GDAL
     };
     res.scripts = {
         absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua")
@@ -321,9 +304,11 @@ void GlobeBrowsingModule::goToChunk(int x, int y, int level) {
 void GlobeBrowsingModule::goToGeo(double latitude, double longitude) {
     using namespace globebrowsing;
     Camera* cam = global::navigationHandler.camera();
-    goToGeodetic2(*cam, Geodetic2(
-        Angle<double>::fromDegrees(latitude).asRadians(),
-        Angle<double>::fromDegrees(longitude).asRadians()), true);
+    goToGeodetic2(
+        *cam,
+        Geodetic2{ glm::radians(latitude), glm::radians(longitude) }, 
+        true
+    );
 }
 
 void GlobeBrowsingModule::goToGeo(double latitude, double longitude,
@@ -335,9 +320,7 @@ void GlobeBrowsingModule::goToGeo(double latitude, double longitude,
     goToGeodetic3(
         *cam,
         {
-            Geodetic2(
-                Angle<double>::fromDegrees(latitude).asRadians(),
-                Angle<double>::fromDegrees(longitude).asRadians()),
+            Geodetic2{ glm::radians(latitude), glm::radians(longitude) },
             altitude
         },
         true
@@ -351,10 +334,7 @@ glm::vec3 GlobeBrowsingModule::cartesianCoordinatesFromGeo(
     using namespace globebrowsing;
 
     const Geodetic3 pos = {
-        {
-            Angle<double>::fromDegrees(latitude).asRadians(),
-            Angle<double>::fromDegrees(longitude).asRadians()
-        },
+        { glm::radians(latitude), glm::radians(longitude) },
         altitude
     };
 
@@ -379,7 +359,7 @@ void GlobeBrowsingModule::goToChunk(Camera& camera, const globebrowsing::TileInd
 
     // Camera position in model space
     const glm::dvec3 camPos = camera.positionVec3();
-    const glm::dmat4 inverseModelTransform = globe->inverseModelTransform();
+    const glm::dmat4 inverseModelTransform = glm::inverse(globe->modelTransform());
     const glm::dvec3 cameraPositionModelSpace = glm::dvec3(
         inverseModelTransform * glm::dvec4(camPos, 1)
     );
@@ -389,7 +369,10 @@ void GlobeBrowsingModule::goToChunk(Camera& camera, const globebrowsing::TileInd
     Geodetic2 positionOnPatch = patch.size();
     positionOnPatch.lat *= uv.y;
     positionOnPatch.lon *= uv.x;
-    const Geodetic2 pointPosition = corner + positionOnPatch;
+    const Geodetic2 pointPosition = {
+        corner.lat + positionOnPatch.lat,
+        corner.lon + positionOnPatch.lon
+    };
 
     const glm::dvec3 positionOnEllipsoid = globe->ellipsoid().geodeticSurfaceProjection(
         cameraPositionModelSpace
@@ -467,7 +450,7 @@ void GlobeBrowsingModule::resetCameraDirection(Camera& camera,
         geo2
     );
     const glm::dvec3 slightlyNorth = globe->ellipsoid().cartesianSurfacePosition(
-        Geodetic2(geo2.lat + 0.001, geo2.lon)
+        Geodetic2{ geo2.lat + 0.001, geo2.lon }
     );
     const glm::dvec3 lookUpModelSpace = glm::normalize(
         slightlyNorth - positionModelSpace
@@ -533,8 +516,6 @@ std::string GlobeBrowsingModule::layerTypeNamesList() {
         ];
     return listLayerTypes;
 }
-
-#ifdef GLOBEBROWSING_USE_GDAL
 
 void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string globe,
                                               std::string url)
@@ -623,7 +604,5 @@ GlobeBrowsingModule::urlInfo(const std::string& globe) const
 bool GlobeBrowsingModule::hasUrlInfo(const std::string& globe) const {
     return _urlList.find(globe) != _urlList.end();
 }
-
-#endif // GLOBEBROWSING_USE_GDAL
 
 } // namespace openspace
