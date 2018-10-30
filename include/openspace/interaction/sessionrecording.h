@@ -248,6 +248,8 @@ private:
     unsigned int _idxTimeline_cameraPtrPrev = 0;
 };
 
+bool doesFileExist(const std::string& filename);
+
 } // namespace openspace
 
 #include "sessionrecording.inl"

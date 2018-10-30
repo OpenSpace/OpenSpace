@@ -127,6 +127,12 @@ bool SessionRecording::startPlayback(std::string filename, KeyframeTimeRef timeM
         }
     }
 
+    if (!doesFileExist(filename)) {
+        LERROR("Cannot find the specified playback file.");
+        cleanUpPlayback();
+        return false;
+    }
+
     _playbackLineNum = 1;
     _playbackFilename = filename;
 
@@ -136,16 +142,21 @@ bool SessionRecording::startPlayback(std::string filename, KeyframeTimeRef timeM
     std::string readBackHeaderString = readHeaderElement(_fileHeaderTitle.length());
     if (readBackHeaderString.compare(_fileHeaderTitle) != 0) {
         LERROR("Specified playback file does not contain expected header.");
+        cleanUpPlayback();
         return false;
     }
     readHeaderElement(_fileHeaderVersionLength);
     std::string readDataMode = readHeaderElement(1);
-    if (readDataMode[0] == dataFormatAsciiTag)
+    if (readDataMode[0] == dataFormatAsciiTag) {
         _recordingDataMode = recordDataMode::ascii;
-    else if (readDataMode[0] == dataFormatBinaryTag)
+    }
+    else if (readDataMode[0] == dataFormatBinaryTag) {
         _recordingDataMode = recordDataMode::binary;
-    else
+    }
+    else {
         LERROR("Unknown data type in header (should be Ascii or Binary)");
+        cleanUpPlayback();
+    }
     std::string throwawayNewlineChar = readHeaderElement(1);
     
     if (isDataModeBinary()) {
@@ -166,6 +177,7 @@ bool SessionRecording::startPlayback(std::string filename, KeyframeTimeRef timeM
         LERROR(fmt::format("Unable to open file {} for keyframe playback",
                filename.c_str()));
         stopPlayback();
+        cleanUpPlayback();
         return false;
     }
     //Set time reference mode
@@ -185,8 +197,10 @@ bool SessionRecording::startPlayback(std::string filename, KeyframeTimeRef timeM
     global::scriptScheduler.setTimeReferenceMode(timeMode);
 
     _setSimulationTimeWithNextCameraKeyframe = forceSimTimeAtStart;
-    if (!playbackAddEntriesToTimeline())
+    if (!playbackAddEntriesToTimeline()) {
+        cleanUpPlayback();
         return false;
+    }
 
     _hasHitEndOfCameraKeyframes = false;
     findFirstCameraKeyframeInTimeline();
@@ -260,9 +274,10 @@ void SessionRecording::cleanUpPlayback() {
     Camera * camera = global::navigationHandler.camera();
     ghoul_assert(camera != nullptr, "Camera must not be nullptr");
     Scene * scene = camera->parent()->scene();
-    unsigned int prevIdx = _timeline[_idxTimeline_cameraPtrPrev].idxIntoKeyframeTypeArray;
-    global::navigationHandler.setFocusNode(scene->sceneGraphNode(_keyframesCamera[prevIdx].focusNode));
-
+    if (_timeline.size() != 0) {
+        unsigned int prevIdx = _timeline[_idxTimeline_cameraPtrPrev].idxIntoKeyframeTypeArray;
+        global::navigationHandler.setFocusNode(scene->sceneGraphNode(_keyframesCamera[prevIdx].focusNode));
+    }
     global::scriptScheduler.stopPlayback();
 
     _playbackFile.close();
@@ -673,7 +688,14 @@ void SessionRecording::playbackCamera() {
         readFromPlayback(timeOs);
         readFromPlayback(timeRec);
         readFromPlayback(timeSim);
-        kf.read(&_playbackFile);
+        try {
+            kf.read(&_playbackFile);
+        }
+        catch (std::bad_alloc&) {
+            LERROR(fmt::format("Allocation error with camera playback from keyframe entry {}",
+                _playbackLineNum - 1));
+            return;
+        }
 
         timeOs = kf._timestamp;
 
@@ -778,7 +800,15 @@ void SessionRecording::playbackScript() {
         readFromPlayback(timeOs);
         readFromPlayback(timeRec);
         readFromPlayback(timeSim);
-        readFromPlayback(pbFrame._script);
+        try {
+            readFromPlayback(pbFrame._script);
+        }
+        catch (std::bad_alloc&) {
+            LERROR(fmt::format("Allocation error with script playback from keyframe entry {}",
+                _playbackLineNum - 1));
+            return;
+        }
+
         if (!_playbackFile) {
             LERROR(fmt::format("Error reading script playback from keyframe entry {}",
                 _playbackLineNum - 1));
@@ -1088,6 +1118,11 @@ void SessionRecording::saveKeyframeToFileBinary(unsigned char* bufferSource,
 
 void SessionRecording::saveKeyframeToFile(std::string entry) {
     _recordFile << entry << std::endl;
+}
+
+bool doesFileExist(const std::string& filename) {
+    std::ifstream f(filename.c_str());
+    return f.good();
 }
 
 scripting::LuaLibrary SessionRecording::luaLibrary() {
