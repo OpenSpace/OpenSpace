@@ -38,8 +38,11 @@
 namespace {
     constexpr const char* _loggerCat = "WebBrowser";
 
-    #ifdef WIN32
+    
+    #ifdef _MSC_VER
         constexpr const char* SubprocessSuffix = ".exe";
+    #elif __APPLE__
+        constexpr const char* SubprocessSuffix = ".app/Contents/MacOS/openspace_web_helper";
     #else
         constexpr const char* SubprocessSuffix = "";
     #endif
