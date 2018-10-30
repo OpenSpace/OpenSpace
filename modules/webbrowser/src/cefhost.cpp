@@ -60,11 +60,13 @@ CefHost::~CefHost() {
 
 void CefHost::attachDebugSettings(CefSettings &settings) {
     settings.remote_debugging_port = 8088;
+    
     LDEBUG(fmt::format(
         "Remote WebBrowser debugging available on http://localhost:{}",
         settings.remote_debugging_port
     ));
-//    settings.single_process = true;
+    //TODO we shoulnd't need this
+    settings.single_process = true;
 }
 
 void CefHost::initializeCallbacks() {
