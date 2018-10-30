@@ -51,7 +51,7 @@ local DSS14 = {
     }
 }
 
-
+-- Retired?
 local DSS15 = {
     Identifier = "DSS15",
     Parent = earthAsset.Earth.Identifier,
@@ -245,6 +245,32 @@ local DSS36 = {
     }
 }
 
+-- Retired 2016
+local DSS45 = {
+    Identifier = "DSS45",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+      Translation = {
+         Type = "StaticTranslation",
+         Position = {-4455930.5,2679756.25,-3694974.25}
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/dish.obj"
+        },
+        ColorTexture = models .. "/base_AO.png" 
+
+    },
+    GUI = {
+        Name = "DSS45",
+        Path = "/Solar System/Stations/Canberra/DSS45"
+    }
+}
+
+
 local DSS63 = {
     Identifier = "DSS63",
     Parent = earthAsset.Earth.Identifier,
@@ -340,6 +366,9 @@ local DSS55 = {
         Path = "/Solar System/Stations/Madrid/DSS55"
     }
 }
+
+
+
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    DSS14, DSS15, DSS24, DSS25, DSS26, DSS43, DSS34, DSS35, DSS36, DSS63, DSS65, DSS54, DSS55
+    DSS14, DSS15, DSS24, DSS25, DSS26, DSS43, DSS34, DSS35, DSS36, DSS45, DSS63, DSS65, DSS54, DSS55
 })

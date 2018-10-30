@@ -169,6 +169,7 @@ private:
 	{ "DSS34", Canberra },
 	{ "DSS35", Canberra },
 	{ "DSS36", Canberra },
+    { "DSS45", Canberra },
 	{ "DSS63", Madrid },
 	{ "DSS65", Madrid },
 	{ "DSS54", Madrid },
