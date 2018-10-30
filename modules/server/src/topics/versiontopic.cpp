@@ -22,59 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
-#define __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
+#include "modules/server/include/topics/versiontopic.h"
 
-#include <openspace/util/openspacemodule.h>
+#include <modules/server/include/connection.h>
+#include <modules/server/servermodule.h>
 
-#include <deque>
-#include <memory>
-#include <mutex>
+#include <openspace/openspace.h>
+#include <openspace/engine/globals.h>
 
-namespace ghoul::io { class SocketServer; }
+namespace {
+    constexpr const char* _loggerCat = "VersionTopic";
+} // namespace
+
+using nlohmann::json;
 
 namespace openspace {
 
-constexpr int SOCKET_API_VERSION_MAJOR = 0;
-constexpr int SOCKET_API_VERSION_MINOR = 1;
-constexpr int SOCKET_API_VERSION_PATCH = 0;
+VersionTopic::VersionTopic() {
+}
 
-class Connection;
+VersionTopic::~VersionTopic() {
+}
 
-struct Message {
-    std::weak_ptr<Connection> connection;
-    std::string messageString;
-};
+bool VersionTopic::isDone() const {
+    return true;
+}
 
-class ServerModule : public OpenSpaceModule {
-public:
-    static constexpr const char* Name = "Server";
-
-    ServerModule();
-    virtual ~ServerModule();
-
-protected:
-    void internalInitialize(const ghoul::Dictionary& configuration) override;
-
-private:
-    struct ConnectionData {
-        std::shared_ptr<Connection> connection;
-        bool isMarkedForRemoval = false;
+void VersionTopic::handleJson(const nlohmann::json&) {
+    nlohmann::json versionJson = {
+        {
+            "openSpaceVersion",
+            {
+                {"major", OPENSPACE_VERSION_MAJOR},
+                {"minor", OPENSPACE_VERSION_MINOR},
+                {"patch", OPENSPACE_VERSION_PATCH}
+            }
+        },
+        {
+            "socketApiVersion",
+            {
+                {"major", SOCKET_API_VERSION_MAJOR},
+                {"minor", SOCKET_API_VERSION_MINOR},
+                {"patch", SOCKET_API_VERSION_PATCH}
+            }
+        }
     };
 
-    void handleConnection(std::shared_ptr<Connection> connection);
-    void cleanUpFinishedThreads();
-    void consumeMessages();
-    void disconnectAll();
-    void preSync();
-
-    std::mutex _messageQueueMutex;
-    std::deque<Message> _messageQueue;
-
-    std::vector<ConnectionData> _connections;
-    std::vector<std::unique_ptr<ghoul::io::SocketServer>> _servers;
-};
+    _connection->sendJson(
+        wrappedPayload(versionJson)
+    );
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__

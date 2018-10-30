@@ -22,59 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
-#define __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
+#ifndef __OPENSPACE_MODULE_SERVER___VERSION_TOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___VERSION_TOPIC___H__
 
-#include <openspace/util/openspacemodule.h>
-
-#include <deque>
-#include <memory>
-#include <mutex>
-
-namespace ghoul::io { class SocketServer; }
+#include <modules/server/include/topics/topic.h>
 
 namespace openspace {
 
-constexpr int SOCKET_API_VERSION_MAJOR = 0;
-constexpr int SOCKET_API_VERSION_MINOR = 1;
-constexpr int SOCKET_API_VERSION_PATCH = 0;
-
-class Connection;
-
-struct Message {
-    std::weak_ptr<Connection> connection;
-    std::string messageString;
-};
-
-class ServerModule : public OpenSpaceModule {
+class VersionTopic : public Topic {
 public:
-    static constexpr const char* Name = "Server";
+    VersionTopic();
+    virtual ~VersionTopic();
 
-    ServerModule();
-    virtual ~ServerModule();
-
-protected:
-    void internalInitialize(const ghoul::Dictionary& configuration) override;
-
-private:
-    struct ConnectionData {
-        std::shared_ptr<Connection> connection;
-        bool isMarkedForRemoval = false;
-    };
-
-    void handleConnection(std::shared_ptr<Connection> connection);
-    void cleanUpFinishedThreads();
-    void consumeMessages();
-    void disconnectAll();
-    void preSync();
-
-    std::mutex _messageQueueMutex;
-    std::deque<Message> _messageQueue;
-
-    std::vector<ConnectionData> _connections;
-    std::vector<std::unique_ptr<ghoul::io::SocketServer>> _servers;
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
+#endif // __OPENSPACE_MODULE_SERVER___VERSION_TOPIC___H__

@@ -33,6 +33,7 @@
 #include <modules/server/include/topics/timetopic.h>
 #include <modules/server/include/topics/topic.h>
 #include <modules/server/include/topics/triggerpropertytopic.h>
+#include <modules/server/include/topics/versiontopic.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/io/socket/socket.h>
@@ -48,6 +49,7 @@ namespace {
     constexpr const char* MessageKeyPayload = "payload";
     constexpr const char* MessageKeyTopic = "topic";
 
+    constexpr const char* VersionTopicKey = "version";
     constexpr const char* AuthenticationTopicKey = "authorize";
     constexpr const char* GetPropertyTopicKey = "get";
     constexpr const char* LuaScriptTopicKey = "luascript";
@@ -74,6 +76,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
     _topicFactory.registerClass<TimeTopic>(TimeTopicKey);
     _topicFactory.registerClass<TriggerPropertyTopic>(TriggerPropertyTopicKey);
     _topicFactory.registerClass<BounceTopic>(BounceTopicKey);
+    _topicFactory.registerClass<VersionTopic>(VersionTopicKey);
 
     // see if the default config for requiring auth (on) is overwritten
     _requireAuthorization = global::configuration.doesRequireSocketAuthentication;
