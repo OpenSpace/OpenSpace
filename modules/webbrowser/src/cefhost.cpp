@@ -70,7 +70,7 @@ void CefHost::attachDebugSettings(CefSettings &settings) {
 }
 
 void CefHost::initializeCallbacks() {
-    global::callback::render.push_back(
+    global::callback::preSync.push_back(
         [this](){ CefDoMessageLoopWork(); }
     );
 }
