@@ -142,8 +142,6 @@ bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
         state.lastClickPosition = _mousePosition;
     }
 
-    std::cout << state.down;
-
     return _browserInstance->sendMouseClickEvent(
         mouseEvent(),
         button == MouseButton::Left ? MBT_LEFT : MBT_RIGHT,
