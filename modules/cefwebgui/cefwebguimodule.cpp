@@ -104,7 +104,6 @@ void CefWebGuiModule::updateUrl() {
 void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
     _guiUrl = configuration.value<std::string>("Url");
 
-
     global::callback::initializeGL.push_back([this]() {
         startOrStopGui();
     });
