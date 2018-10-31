@@ -87,6 +87,16 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     _cefHost = std::make_unique<CefHost>(std::move(helperLocation));
     LDEBUG("Starting CEF... done!");
 
+    global::callback::draw2D.push_back([this]() {
+        if (!_cefHost) {
+            return;
+        }
+        if (_browsers.empty()) {
+            return;
+        }
+        _cefHost->doMessageLoopWork();
+    });
+
     _eventHandler.initialize();
 
     // register ScreenSpaceBrowser

@@ -50,7 +50,6 @@ CefHost::CefHost(std::string helperLocation) {
 
     CefMainArgs args;
     CefInitialize(args, settings, app.get(), NULL);
-    initializeCallbacks();
     LDEBUG("Initializing CEF... done!");
 }
 
@@ -69,10 +68,8 @@ void CefHost::attachDebugSettings(CefSettings &settings) {
     settings.single_process = true;
 }
 
-void CefHost::initializeCallbacks() {
-    global::callback::preSync.push_back(
-        [this](){ CefDoMessageLoopWork(); }
-    );
+void CefHost::doMessageLoopWork() {
+    CefDoMessageLoopWork();
 }
 
 } // namespace openspace
