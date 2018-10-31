@@ -87,7 +87,7 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     _cefHost = std::make_unique<CefHost>(std::move(helperLocation));
     LDEBUG("Starting CEF... done!");
 
-    global::callback::draw2D.push_back([this]() {
+    global::callback::preSync.push_back([this]() {
         if (!_cefHost) {
             return;
         }
