@@ -8,23 +8,25 @@ assetHelper.requestAll(asset, 'scene/solarsystem/sun')
 asset.require('scene/solarsystem/planets')
 asset.request('scene/digitaluniverse/stars')
 asset.request('customization/globebrowsing')
+asset.request('scene/digitaluniverse/grids')
 
 -- Spacecrafts
 asset.require('scene/solarsystem/missions/voyager1/voyager1')
 asset.require('scene/solarsystem/missions/voyager2/voyager2')
 asset.require('scene/solarsystem/missions/voyager1/trails')
 
+-- Stations
+asset.require('scene/solarsystem/dsn/stations')
 
 --Communication
+--assetHelper.requestAll(asset, 'scene/solarsystem/dsn')
 asset.require('scene/solarsystem/dsn/communicationlines/communicationlines')
-asset.require('scene/solarsystem/dsn/stations')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
 asset.require('util/default_joystick')
 
-assetHelper.requestAll(asset, 'scene/solarsystem/dsn')
 
 local Keybindings = {
     {
@@ -52,20 +54,30 @@ local Keybindings = {
     {
         Key = "h",
         Command = "openspace.setPropertyValue('Scene.*Trail.renderable.Enabled', true)",
-        Documentation = "Disables visibility of the trails",
+        Documentation = "Enables visibility of the trails",
         Local = false
     },
+    {
+        Key = "j",
+        Command = "openspace.setPropertyValue('Scene.*Trail.renderable.Enabled', false)",
+        Documentation = "Disables visibility of the trails",
+        Local = false
+    },    
+    {
+        Key = "e",
+        Command = propertyHelper.invert('Scene.EquatorialSphere.renderable.Enabled'),
+        Documentation = "Disables visibility of the equatorial sphere",
+        Local = false
+    },    
 }
 
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+local equatorial = asset.require('scene/digitaluniverse/grids')   
 
 asset.onInitialize(function ()
 
-
     local now = openspace.time.currentWallTime()
 	openspace.time.setTime("2018 SEP 03 03:11:00")
-
-
 
     sceneHelper.bindKeys(Keybindings)
 
