@@ -26,6 +26,8 @@
 #define __OPENSPACE_MODULE_CEFWEBGUI___CEFWEBGUIMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
 
@@ -40,8 +42,12 @@ public:
     void internalInitialize(const ghoul::Dictionary& configuration) override;
 
 private:
+    void startOrStopGui();
+    void updateUrl();
+
+    properties::BoolProperty _cefWebGuiEnabled;
+    properties::StringProperty _guiUrl;
     std::shared_ptr<BrowserInstance> _guiInstance;
-    std::string _guiLocation;
 };
 
 } // namespace openspace

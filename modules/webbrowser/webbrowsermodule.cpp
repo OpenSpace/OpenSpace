@@ -119,4 +119,9 @@ void WebBrowserModule::attachEventHandler(
     _eventHandler.setBrowserInstance(browserInstance);
 }
 
+void WebBrowserModule::detachEventHandler()
+{
+    _eventHandler.setBrowserInstance(nullptr);
+}
+
 } // namespace openspace
