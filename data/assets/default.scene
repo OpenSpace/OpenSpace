@@ -75,6 +75,10 @@ asset.onInitialize(function ()
         "Earth", "Mars", "Moon"
     })
 
+    openspace.markInterestingTimes({
+    	{"Happy Birthday!", "1984 05 08"}
+    })
+
     openspace.addVirtualProperty(
         "BoolProperty",
         "Show Trails",

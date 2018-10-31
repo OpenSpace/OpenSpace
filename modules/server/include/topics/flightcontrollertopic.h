@@ -55,6 +55,7 @@ private:
     nlohmann::json _payload;
     nlohmann::json _focusNodes;
     nlohmann::json _allNodes;
+    nlohmann::json _interestingTimes;
 
     openspace::interaction::WebsocketInputStates _inputStates;
     openspace::interaction::WebsocketInputState _inputState;
@@ -63,6 +64,7 @@ private:
     void disconnect();
     void processInputState(const nlohmann::json& json);
     void setFocusNodes();
+    void setInterestingTimes();
     void changeFocus(const nlohmann::json& json);
     void processLua(const nlohmann::json& json);
 

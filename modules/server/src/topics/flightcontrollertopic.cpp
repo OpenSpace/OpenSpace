@@ -72,6 +72,7 @@ namespace {
     // Connect JSON keys
     constexpr const char* FocusNodesKey = "focusNodes";
     constexpr const char* AllNodesKey = "allNodes";
+    constexpr const char* InterestingTimesKey = "interestingTimes";
 
     // Change focus JSON keys
     constexpr const char* FocusKey = "focus";
@@ -209,8 +210,10 @@ void FlightControllerTopic::connect() {
     std::fill(_inputState.axes.begin(), _inputState.axes.end(), 0);
     _payload[TypeKey] = Connect;
     setFocusNodes();
+    setInterestingTimes();
     _payload[Connect][FocusNodesKey] = _focusNodes;
     _payload[Connect][AllNodesKey] = _allNodes;
+    _payload[Connect][InterestingTimesKey] = _interestingTimes;
     _connection->sendJson(wrappedPayload(_payload));
 }
 
@@ -233,6 +236,23 @@ void FlightControllerTopic::setFocusNodes() {
             _focusNodes[n->guiName()] = n->identifier();
         }
         _allNodes[n->guiName()] = n->identifier();
+    }
+}
+
+void FlightControllerTopic::setInterestingTimes() {
+    std::vector<Scene::InterestingTime> times =
+        global::renderEngine.scene()->interestingTimes();
+
+    std::sort(
+          times.begin(),
+          times.end(),
+          [](Scene::InterestingTime lhs, Scene::InterestingTime rhs) {
+              return lhs.name < rhs.name;
+          }
+      );;
+
+    for (Scene::InterestingTime t : times) {
+        _interestingTimes[t.name] = t.time;
     }
 }
 
