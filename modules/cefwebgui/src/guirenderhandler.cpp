@@ -37,12 +37,11 @@ namespace {
 namespace openspace {
 
 GUIRenderHandler::GUIRenderHandler() {
-    global::callback::initializeGL.push_back(
-        [this]() {
-            LDEBUG("Initializing WebGUI RenderHandler OpenGL");
-            initializeGL();
-        }
-    );
+    initializeGL();
+}
+
+GUIRenderHandler::~GUIRenderHandler() {
+    deinitializeGL();
 }
 
 void GUIRenderHandler::initializeGL() {
@@ -79,6 +78,10 @@ void GUIRenderHandler::deinitializeGL() {
 }
 
 void GUIRenderHandler::draw() {
+    if (!_programObject) {
+        return;
+    }
+
     if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
     }

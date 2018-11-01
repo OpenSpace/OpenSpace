@@ -37,50 +37,91 @@
 
 namespace {
     constexpr const char* _loggerCat = "CefWebGui";
+    
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Is Enabled",
+        "This setting determines whether this object will be visible or not."
+    };
+    
+    constexpr openspace::properties::Property::PropertyInfo GuiUrlInfo = {
+        "GuiUrl",
+        "GUI URL",
+        "The URL to load the Web GUI from"
+    };
 } // namespace
 
 namespace openspace {
 
 CefWebGuiModule::CefWebGuiModule()
     : OpenSpaceModule(CefWebGuiModule::Name)
-{}
+    , _cefWebGuiEnabled(EnabledInfo, true)
+    , _guiUrl(GuiUrlInfo, "")
+{
+    addProperty(_cefWebGuiEnabled);
+    addProperty(_guiUrl);
+    
+    _cefWebGuiEnabled.onChange([this]() {
+        startOrStopGui();
+    });
+    
+    _guiUrl.onChange([this]() {
+        updateUrl();
+    });
+}
+    
+void CefWebGuiModule::startOrStopGui() {
+    WebBrowserModule* webBrowserModule =
+        global::moduleEngine.module<WebBrowserModule>();
+    
+    if (!webBrowserModule) {
+        return;
+    }
+    
+    if (_cefWebGuiEnabled) {
+        LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", _guiUrl));
+        
+        if (!_guiInstance) {
+            _guiInstance = std::make_shared<BrowserInstance>(new GUIRenderHandler);
+            _guiInstance->loadUrl(_guiUrl);
+        }
+        webBrowserModule->attachEventHandler(_guiInstance);
+        webBrowserModule->addBrowser(_guiInstance);
+    } else if (_guiInstance) {
+        _guiInstance->close(true);
+        webBrowserModule->removeBrowser(_guiInstance);
+        webBrowserModule->detachEventHandler();
+        _guiInstance.reset();
+    }
+}
+    
+void CefWebGuiModule::updateUrl() {
+    if (_guiInstance) {
+        _guiInstance->loadUrl(_guiUrl);
+    }
+}
 
 void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
-    _guiInstance = std::make_shared<BrowserInstance>(new GUIRenderHandler);
-    _guiLocation = configuration.value<std::string>("Url");
+    _guiUrl = configuration.value<std::string>("Url");
 
-    global::callback::initialize.push_back([this]() {
-        LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", _guiLocation));
-        _guiInstance->loadUrl(_guiLocation);
-        WebBrowserModule* webBrowserModule =
-            global::moduleEngine.module<WebBrowserModule>();
 
-        if (webBrowserModule) {
-            webBrowserModule->attachEventHandler(_guiInstance);
-            webBrowserModule->addBrowser(_guiInstance);
-        }
+    global::callback::initializeGL.push_back([this]() {
+        startOrStopGui();
     });
 
-    global::callback::render.push_back([this](){
+    global::callback::draw2D.push_back([this](){
         WindowDelegate& windowDelegate = global::windowDelegate;
-        if (windowDelegate.isMaster()) {
+        if (windowDelegate.isMaster() && _guiInstance) {
             if (windowDelegate.windowHasResized()) {
                 _guiInstance->reshape(windowDelegate.currentWindowSize());
             }
-
             _guiInstance->draw();
         }
     });
 
-    global::callback::deinitialize.push_back([this]() {
-        _guiInstance->close(true);
-        WebBrowserModule* webBrowserModule =
-            global::moduleEngine.module<WebBrowserModule>();
-
-        if (webBrowserModule) {
-            webBrowserModule->removeBrowser(_guiInstance);
-        }
-        _guiInstance.reset();
+    global::callback::deinitializeGL.push_back([this]() {
+        _cefWebGuiEnabled = false;
+        startOrStopGui();
     });
 }
 

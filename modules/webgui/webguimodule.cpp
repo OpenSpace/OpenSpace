@@ -94,7 +94,7 @@ void WebGuiModule::startProcess() {
 #ifdef _MSC_VER
     const std::string nodePath = absPath("${MODULE_WEBGUI}/ext/nodejs/node.exe");
 #else
-    const std::string nodePath = absPath("/usr/local/bin/node");
+    const std::string nodePath = absPath("${MODULE_WEBGUI}/ext/nodejs/node");
 #endif
     
     _process = std::make_unique<ghoul::Process>(

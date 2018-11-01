@@ -87,6 +87,16 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     _cefHost = std::make_unique<CefHost>(std::move(helperLocation));
     LDEBUG("Starting CEF... done!");
 
+    global::callback::preSync.push_back([this]() {
+        if (!_cefHost) {
+            return;
+        }
+        if (_browsers.empty()) {
+            return;
+        }
+        _cefHost->doMessageLoopWork();
+    });
+
     _eventHandler.initialize();
 
     // register ScreenSpaceBrowser
@@ -117,6 +127,11 @@ void WebBrowserModule::attachEventHandler(
                                          std::shared_ptr<BrowserInstance> browserInstance)
 {
     _eventHandler.setBrowserInstance(browserInstance);
+}
+
+void WebBrowserModule::detachEventHandler()
+{
+    _eventHandler.setBrowserInstance(nullptr);
 }
 
 } // namespace openspace

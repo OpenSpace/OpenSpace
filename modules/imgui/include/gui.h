@@ -62,11 +62,8 @@ namespace openspace::gui {
 
 namespace detail {
     constexpr int nComponents() {
-        const int nRegularComponents = 15;
+        const int nRegularComponents = 16;
         int totalComponents = nRegularComponents;
-#ifdef GLOBEBROWSING_USE_GDAL
-        ++totalComponents;
-#endif
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
         ++totalComponents;
@@ -105,9 +102,7 @@ public:
     GuiHelpComponent _help;
     GuiFilePathComponent _filePath;
     GuiAssetComponent _asset;
-#ifdef GLOBEBROWSING_USE_GDAL
     GuiGlobeBrowsingComponent _globeBrowsing;
-#endif //  GLOBEBROWSING_USE_GDAL
     GuiPerformanceComponent _performance;
 
     GuiPropertyComponent _globalProperty;
@@ -145,9 +140,7 @@ private:
         &_spaceTime,
         &_mission,
         &_parallel,
-#ifdef GLOBEBROWSING_USE_GDAL
         &_globeBrowsing,
-#endif
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
         &_iswa,
 #endif
