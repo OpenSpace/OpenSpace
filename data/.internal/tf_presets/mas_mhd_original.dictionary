@@ -1,0 +1,7 @@
+return {
+FileName = "mas_mhd_original.txt",
+Image = "http://localhost:1337/enlil.png",
+Label = "MAS",
+Min = "0.000001",
+Max = "0.1"
+}

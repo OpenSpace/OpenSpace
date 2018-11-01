@@ -1,0 +1,39 @@
+@import "../../../styles/colors.scss";
+
+$el-size: 30%;
+$border-size: 4px;
+$tf-selected-color: rgba(1.0, 1.0, 1.0, 0.5);
+
+.tf {
+  max-width: $el-size;
+  padding: 2px;
+
+  border: solid $border-size transparent;
+
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    cursor: pointer;
+    background-color: $ui-background-hover;
+  }
+
+  &.selected {
+    border: $border-size solid $tf-selected-color;
+    background-color: $ui-background-selected;
+  }
+}
+
+.image {
+    width: 100%;
+
+    &:hover {
+      opacity: 0.8;
+    }
+}
+
+.meta {
+  color: $text-color-blur;
+  text-align: center;
+}
+

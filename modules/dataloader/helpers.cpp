@@ -65,7 +65,7 @@ std::string getFileWithExtensionFromItemFolder(std::string absPathToItem, std::s
 
 std::string getFileBaseName(std::string file)
 {
-    std::regex fileRegex("(.*)\.[^.]+$");
+    std::regex fileRegex("^(.*)\.[^.]+$");
     std::smatch fileMatch;
 
     if (std::regex_search(file, fileMatch, fileRegex))

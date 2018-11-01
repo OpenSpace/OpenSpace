@@ -24,13 +24,18 @@
 
 #include <modules/dataloader/operators/reader.h>
 #include <modules/dataloader/dataloadermodule.h>
-
-#include <ext/json/json.hpp>
+#include <modules/dataloader/helpers.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/moduleengine.h>
+
+#include <ext/json/json.hpp>
+
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/lua/lua_helper.h>
 
 #include <fstream>
 #include <iterator>
@@ -44,6 +49,7 @@
 #endif
 
 using Directory = ghoul::filesystem::Directory;
+using File = ghoul::filesystem::File;
 using Recursive = ghoul::filesystem::Directory::Recursive;
 using RawPath = ghoul::filesystem::Directory::RawPath;
 using Sort = ghoul::filesystem::Directory::Sort;
@@ -52,6 +58,11 @@ using json = nlohmann::json;
 namespace
 {
 constexpr const char *_loggerCat = "Reader";
+
+constexpr const char *KeyImage = "Image";
+constexpr const char *KeyLabel = "Label";
+constexpr const char *KeyMin = "Min";
+constexpr const char *KeyMax = "Max";
 }
 
 // namespace {
@@ -124,25 +135,63 @@ std::string Reader::readTransferFunctionPresets()
     std::vector<std::pair<std::string, std::string>> tfLinkList;
 
     // Put last line of transferfunction preset files together with file path in tfLinkList
+    // for (auto file : tfFiles)
+    // {
+    //     std::ifstream in;
+    //     in.open(file);
+    //     if (in.is_open())
+    //     {
+    //         std::vector<std::string> lines;
+    //         copy(std::istream_iterator<std::string>(in),
+    //              std::istream_iterator<std::string>(),
+    //              back_inserter(lines));
+    //         tfLinkList.push_back(std::make_pair(file, lines.back()));
+    //     }
+    //     in.close();
+    // }
+
+    // auto j = json::array();
+    // for (auto pair : tfLinkList)
+    // {
+    //     j.push_back(json::object({{"path", pair.first}, {"image", pair.second}}));
+    // }
+
+    json j;
+
+    unsigned int jsonIdx = 0;
     for (auto file : tfFiles)
     {
-        std::ifstream in;
-        in.open(file);
-        if (in.is_open())
-        {
-            std::vector<std::string> lines;
-            copy(std::istream_iterator<std::string>(in),
-                 std::istream_iterator<std::string>(),
-                 back_inserter(lines));
-            tfLinkList.push_back(std::make_pair(file, lines.back()));
-        }
-        in.close();
-    }
+        File fileHandle = File(file);
+        std::string fileExtension = fileHandle.fileExtension();
 
-    auto j = json::array();
-    for (auto pair : tfLinkList)
-    {
-        j.push_back(json::object({{"path", pair.first}, {"image", pair.second}}));
+        if (fileExtension != "txt")
+        {
+          continue;
+        }
+
+        std::string baseName = fileHandle.fullBaseName();
+        std::string dictionaryFile = baseName + ".dictionary";
+        ghoul::Dictionary dict;
+
+        try {
+          dict = ghoul::lua::loadDictionaryFromFile(dictionaryFile);
+        } catch(const std::exception& e) {
+          LWARNING("Couldn't find file " + dictionaryFile);
+          LWARNING(e.what());
+          continue;
+        }
+
+        openspace::dataloader::helpers::replaceDoubleBackslashesWithForward(file);
+
+        json tfJson;
+        tfJson["path"] = file;
+        tfJson["img"] = dict.value<std::string>(KeyImage);
+        tfJson["label"] = dict.value<std::string>(KeyLabel);
+        tfJson["minValue"] = dict.value<std::string>(KeyMin);
+        tfJson["maxValue"] = dict.value<std::string>(KeyMax);
+
+        j[jsonIdx] = tfJson;
+        jsonIdx++;
     }
 
     return j.dump();

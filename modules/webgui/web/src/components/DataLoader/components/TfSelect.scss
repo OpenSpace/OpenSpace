@@ -1,11 +1,11 @@
 $img-size: 30%;
 
 .image {
-        float: left;
-        width: $img-size;
-        height: $img-size;
-        border: solid 2px transparent;
+    // float: left;
+    width: $img-size;
+    height: $img-size;
 
+    border: solid 2px transparent;
     &:hover {
         cursor: pointer;
         opacity: 0.8;
@@ -19,6 +19,13 @@ $img-size: 30%;
 
 .container {
     padding: 0 10px;
+
+    display: flex;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
 }
 
 .label {

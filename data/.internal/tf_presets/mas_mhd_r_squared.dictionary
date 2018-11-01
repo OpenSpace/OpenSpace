@@ -1,0 +1,7 @@
+return {
+FileName = "mas_mhd_r_squared.txt",
+Image = "http://localhost:1337/mas_mhd_r_squared.png",
+Label = "MAS",
+Min = "0.005",
+Max = "0.16"
+}

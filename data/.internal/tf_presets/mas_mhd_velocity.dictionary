@@ -1,0 +1,7 @@
+return {
+FileName = "mas_mhd_velocity.txt",
+Image = "http://localhost:1337/mas_mhd_velocity.png",
+Label = "MAS",
+Min = "0.005",
+Max = "1.0"
+}

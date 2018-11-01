@@ -33,6 +33,7 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 
 #include "dataloadermodule_lua.inl"
 

@@ -13,7 +13,7 @@ import Button from '../common/Input/Button/Button';
 import Label from '../common/Label/Label';
 import Window from '../common/Window/Window';
 import Column from './components/FlexColumn';
-import ImageSelect from './components/ImageSelect';
+import TfSelect from './components/TfSelect';
 import ProgressBar from '../common/ProgressBar/ProgressBar';
 import Checkbox from '../common/Input/Checkbox/Checkbox';
 import provideWindowWidth from './HOC/provideWindowSize';
@@ -43,14 +43,11 @@ class PrepareUploadedData extends Component {
         radiusUnit: '',
         gridSystem: ['x', 'y', 'z'],
         variableMinBounds: {},
-        variableMaxBounds: {}
+        variableMaxBounds: {},
       },
       uploadButtonIsClicked: false,
       itemName: '',
-      tfLinkList: [{
-        image: '',
-        path: ''
-      }],
+      tfPresets: [{}],
       activeTfFilePath: '',
       translationTarget: 'SUN',
       translationObserver: 'SUN',
@@ -62,9 +59,8 @@ class PrepareUploadedData extends Component {
         upperDomainBounds: {},
         variable: 'rho',
         rSquared: false,
-      }
+      },
     };
-
 
     this.onChangeMultiInputs = this.onChangeMultiInputs.bind(this);
     this.changeVariable = this.changeVariable.bind(this);
@@ -80,6 +76,11 @@ class PrepareUploadedData extends Component {
     this.handleSetTranslationTarget = this.handleSetTranslationTarget.bind(this);
   }
 
+  componentDidMount() {
+    DataManager.trigger('Modules.DataLoader.ReadTransferFunctionPresets');
+    DataManager.subscribe('Modules.DataLoader.TransferFunctionPresetsJSON', this.handleTfPresetsJSON);
+  }
+
   componentDidUpdate(prevProps, prevState) {
     const { selectedFilePaths } = this.props;
     // const hasFilePaths = selectedFilePaths.length > 0 && selectedFilePaths[0] !== '';
@@ -89,13 +90,12 @@ class PrepareUploadedData extends Component {
     if (hasFilePaths && filePathsDiffer) {
       this.setState({
         activated: true,
-        uploadButtonIsClicked: false
+        uploadButtonIsClicked: false,
       });
     }
 
-
     if (prevProps.metaDataStringifiedJSON !== this.props.metaDataStringifiedJSON && this.props.metaDataStringifiedJSON !== '') {
-      const metaData = this.props.metaDataStringifiedJSON ? handleReceivedJSON(this.props.metaDataStringifiedJSON) : undefined
+      const metaData = this.props.metaDataStringifiedJSON ? handleReceivedJSON(this.props.metaDataStringifiedJSON) : undefined;
       const { dataDimensions, variableMinBounds, variableMaxBounds } = metaData;
 
       this.setState({
@@ -106,29 +106,11 @@ class PrepareUploadedData extends Component {
           dimensions: { ...dataDimensions },
           lowerDomainBounds: { ...variableMinBounds },
           upperDomainBounds: { ...variableMaxBounds },
-        }
-      }, () => console.log(this.state))
+        },
+      }, () => console.log(this.state));
     }
 
     this.subscribeToVolumeConversionProgress();
-  }
-
-  componentDidMount() {
-    DataManager.trigger('Modules.DataLoader.ReadTransferFunctionPresets');
-    DataManager.subscribe('Modules.DataLoader.TransferFunctionPresetsJSON', this.handleTfPresetsJSON);
-  }
-
-  handleTfPresetsJSON(jsonData) {
-    const parsedJson = handleReceivedJSON(jsonData.Value);
-    this.setState({ tfLinkList: parsedJson });
-  }
-
-  subscribeToVolumeConversionProgress() {
-    DataManager.subscribe('Modules.DataLoader.Loader.VolumeConversionProgress', this.handleProgressValue);
-  }
-
-  handleProgressValue(data) {
-    this.setState({ volumeProgress: data.Value });
   }
 
   onChangeMultiInputs({ currentTarget }, dataToChange) {
@@ -140,10 +122,38 @@ class PrepareUploadedData extends Component {
         ...this.state.data,
         [dataToChange]: {
           ...this.state.data[dataToChange],
-          [keyToChange]: valueToSet
-        }
-      }
+          [keyToChange]: valueToSet,
+        },
+      },
     });
+  }
+
+  getDefaultItemName() {
+    // First render base case
+    if (this.props.selectedFilePaths[0] === '') {
+      const today = new Date();
+      return `Unnamed_volume_${today.getFullYear()}_${today.getMonth()}_${today.getDay()}__${today.getHours()}_${today.getMinutes()}`;
+    }
+
+    return `${getFileBasename(getDirectoryLeaf(this.props.selectedFilePaths[0]))}_${this.state.data.variable}`;
+  }
+
+  handleTfPresetsJSON(jsonData) {
+    if (jsonData === undefined || jsonData === '') {
+      return;
+    }
+
+    const parsedJson = handleReceivedJSON(jsonData.Value);
+    // console.log('state', parsedJson);
+    this.setState({ tfPresets: parsedJson });
+  }
+
+  subscribeToVolumeConversionProgress() {
+    DataManager.subscribe('Modules.DataLoader.Loader.VolumeConversionProgress', this.handleProgressValue);
+  }
+
+  handleProgressValue(data) {
+    this.setState({ volumeProgress: data.Value });
   }
 
   changeVariable(event) {
@@ -162,32 +172,12 @@ class PrepareUploadedData extends Component {
     this.setState({ gridType: option });
   }
 
-  getDefaultItemName() {
-
-    // First render base case
-    if (this.props.selectedFilePaths[0] === '') {
-      const today = new Date();
-      return `Unnamed_volume_${today.getFullYear()}_${today.getMonth()}_${today.getDay()}__${today.getHours()}_${today.getMinutes()}`;
-    }
-
-    return `${getFileBasename(getDirectoryLeaf(this.props.selectedFilePaths[0]))}_${this.state.data.variable}`
-  }
-
   handleSetTranslationTarget(event) {
-    this.setState({ translationTarget: event.value })
+    this.setState({ translationTarget: event.value });
   }
 
-  handleSelectedTFImage(imgSource) {
-    let activeTfFilePath = '';
-    this.state.tfLinkList.map(pair => {
-      if (pair.image === imgSource) {
-        activeTfFilePath = pair.path;
-      }
-    })
-
-    activeTfFilePath = backSlashesToForward(activeTfFilePath)
-
-    this.setState({ activeTfFilePath });
+  handleSelectedTFImage(tfFilePath) {
+    this.setState({ activeTfFilePath: tfFilePath });
   }
 
   upload() {
@@ -215,12 +205,12 @@ class PrepareUploadedData extends Component {
         Scale=${this.state.scale},
         TransferFunctionPath="${activeTfFilePath}"
       }
-    \'`
+    \'`;
 
     payload = removeLineBreakCharacters(payload);
 
     const payloadScript = UploadDataItemScript.replace(ValuePlaceholder, payload);
-    console.log(payloadScript);
+    // console.log(payloadScript);
 
     DataManager.runScript(payloadScript);
   }
@@ -238,8 +228,8 @@ class PrepareUploadedData extends Component {
     const h = 700;
     const windowSize = {
       width: w > WINDOW_MAX_WIDTH ? WINDOW_MAX_WIDTH : w,
-      height: h
-    }
+      height: h,
+    };
 
     const volumeProgressPercent = Math.floor(volumeProgress * 100);
 
@@ -248,82 +238,100 @@ class PrepareUploadedData extends Component {
     }
 
     const IMAGE_URI_BASE = 'http://localhost:1337';
-    const tfImages = [
-      {
-        label: 'MAS',
-        images: [
-          `${IMAGE_URI_BASE}/mas_mhd_r_squared.png`,
-          `${IMAGE_URI_BASE}/mas_mhd_temperature.png`,
-          `${IMAGE_URI_BASE}/mas_mhd_velocity.png`
-        ],
-      },
-      {
-        label: 'ENLIL',
-        images: [
-          `${IMAGE_URI_BASE}/enlil.png`
-        ]
-      }
-    ]
+    // const tfImages = [
+    //   {
+    //     label: 'MAS',
+    //     images: [
+    //       `${IMAGE_URI_BASE}/mas_mhd_r_squared.png`,
+    //       `${IMAGE_URI_BASE}/mas_mhd_temperature.png`,
+    //       `${IMAGE_URI_BASE}/mas_mhd_velocity.png`,
+    //     ],
+    //   },
+    //   {
+    //     label: 'ENLIL',
+    //     images: [
+    //       `${IMAGE_URI_BASE}/enlil.png`,
+    //     ],
+    //   },
+    // ];
+
 
     return (
-      <Window type="small"
+      <Window
+        type="small"
         title="Prepare Data"
         size={windowSize}
         position={{ x: 100, y: 200 }}
-        closeCallback={() => this.setState({ activated: false })}>
+        closeCallback={() => this.setState({ activated: false })}
+      >
         <Column widthPercentage={100} className={styles.content}>
           <Row>
             <Column widthPercentage={33} className={styles.spaceFirstChildren}>
               <div>
-                <Label size='large'>Parameters</Label>
+                <Label size="large">Parameters</Label>
               </div>
               <div>
-                <Input onChange={(event) => this.changeItemName(event)}
-                  label='Item name'
-                  placeholder='name'
+                <Input
+                  onChange={event => this.changeItemName(event)}
+                  label="Item name"
+                  placeholder="name"
                   disabled={isUnEditable}
-                  value={this.state.itemName || this.getDefaultItemName()} />
+                  value={this.state.itemName || this.getDefaultItemName()}
+                />
               </div>
-              <MultiInputs presentationLabel='Data Dimensions'
-                description={"The number of cells in each dimension in the output volume"}
+              <MultiInputs
+                presentationLabel="Data Dimensions"
+                description={'The number of cells in each dimension in the output volume'}
                 inputTypes={metaData.gridSystem}
                 options={dimensions}
                 disabled={isUnEditable}
                 loading={isReadingNewMetaData}
-                onChange={(target) => this.onChangeMultiInputs(target, KEY_DIMENSIONS)} />
-              <Variables variable={variable}
+                onChange={target => this.onChangeMultiInputs(target, KEY_DIMENSIONS)}
+              />
+              <Variables
+                variable={variable}
                 options={metaData ? metaData.variableKeys : undefined}
                 disabled={isUnEditable}
-                onChange={this.changeVariable} />
-              {variable == "rho" &&
+                onChange={this.changeVariable}
+              />
+              {variable === 'rho' &&
                 <div>
-                  <Checkbox label={"Multiply with radius^2?"}
+                  <Checkbox
+                    label={'Multiply with radius^2?'}
                     onChange={this.changeRSquared}
-                    disabled={isUnEditable} />
+                    disabled={isUnEditable}
+                  />
                 </div>
               }
-              <MultiInputs presentationLabel='Lower Domain Bounds'
-                description={"Lower visualization boundary limit" + (metaData ? " in " + metaData.radiusUnit : "")}
+              <MultiInputs
+                presentationLabel="Lower Domain Bounds"
+                description={`Lower visualization boundary limit${metaData ? ` in ${metaData.radiusUnit}` : ''}`}
                 inputTypes={metaData.gridSystem}
                 options={lowerDomainBounds}
                 disabled={isUnEditable}
                 loading={isReadingNewMetaData}
-                onChange={(target) => this.onChangeMultiInputs(target, KEY_LOWER_DOMAIN_BOUNDS)} />
-              <MultiInputs presentationLabel='Upper Domain Bounds'
-                description={"Upper visualization boundary limit" + (metaData ? " in " + metaData.radiusUnit : "")}
+                onChange={target => this.onChangeMultiInputs(target, KEY_LOWER_DOMAIN_BOUNDS)}
+              />
+              <MultiInputs
+                presentationLabel="Upper Domain Bounds"
+                description={`Upper visualization boundary limit${metaData ? ` in ${metaData.radiusUnit}` : ''}`}
                 inputTypes={metaData.gridSystem}
                 options={upperDomainBounds}
                 disabled={isUnEditable}
                 loading={isReadingNewMetaData}
-                onChange={(target) => this.onChangeMultiInputs(target, KEY_UPPER_DOMAIN_BOUNDS)} />
+                onChange={target => this.onChangeMultiInputs(target, KEY_UPPER_DOMAIN_BOUNDS)}
+              />
               <Translation
                 onSetTranslationTarget={this.handleSetTranslationTarget}
-                target={translationTarget} />
+                target={translationTarget}
+              />
             </Column>
-            <Column className={styles.spaceFirstChildren}
-              widthPercentage={33}>
+            <Column
+              className={styles.spaceFirstChildren}
+              widthPercentage={33}
+            >
               <div>
-                <Label size='large'>Information</Label>
+                <Label size="large">Information</Label>
               </div>
               <div>
                 <Row><Label>Model:</Label></Row>
@@ -344,27 +352,35 @@ class PrepareUploadedData extends Component {
                 </LoadingString>
               </div>
             </Column>
-            <Column className={styles.spaceFirstChildren}
-              widthPercentage={33}>
+            <Column
+              className={styles.spaceFirstChildren}
+              widthPercentage={33}
+            >
               <div>
-                <Label size='large'>Transfer Function</Label>
+                <Label size="large">Transfer Function</Label>
               </div>
-              <ImageSelect imageSources={tfImages}
-                onSelect={this.handleSelectedTFImage} />
+              <TfSelect
+                presets={this.state.tfPresets}
+                onSelect={this.handleSelectedTFImage}
+              />
             </Column>
           </Row>
           <Column className={styles.footer}>
-            <Button onClick={() => this.upload()}
+            <Button
+              onClick={() => this.upload()}
               className={styles.convertButton}
-              disabled={isUnEditable}>
+              disabled={isUnEditable}
+            >
               Convert
             </Button>
             {this.state.uploadButtonIsClicked && (
               <div>
                 <Row>
-                  <ProgressBar label='Volume conversion progress'
-                    initializingMsg='Reading'
-                    progressPercent={volumeProgressPercent} />
+                  <ProgressBar
+                    label="Volume conversion progress"
+                    initializingMsg="Reading"
+                    progressPercent={volumeProgressPercent}
+                  />
                 </Row>
                 <Row className={styles.filesConverted}>
                   <Label size="small">{currentVolumesConvertedCount} / {currentVolumesToConvertCount} files complete</Label>
@@ -383,14 +399,14 @@ PrepareUploadedData.propTypes = {
   currentVolumesConvertedCount: PropTypes.number,
   currentVolumesToConvertCount: PropTypes.number,
   width: PropTypes.number,
-  height: PropTypes.number
+  height: PropTypes.number,
 };
 
 PrepareUploadedData.defaultProps = {
   selectedFilePaths: [],
   currentVolumesConvertedCount: 0,
-  currentVolumesToConvertCount: 0
-}
+  currentVolumesToConvertCount: 0,
+};
 
 const mapStateToProps = state => ({
   selectedFilePaths: state.dataLoader.selectedFilePaths,
@@ -402,7 +418,7 @@ const mapStateToProps = state => ({
 
 PrepareUploadedData = connect(
   mapStateToProps,
-  null
+  null,
 )(PrepareUploadedData);
 
 export default provideWindowWidth(PrepareUploadedData);
