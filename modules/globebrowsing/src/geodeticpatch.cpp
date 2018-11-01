@@ -99,8 +99,8 @@ const Geodetic2& GeodeticPatch::halfSize() const {
 
 Geodetic2 GeodeticPatch::size() const {
     return {
-        _halfSize.lon * 2.0,
-        _halfSize.lat * 2.0
+        _halfSize.lat * 2.0,
+        _halfSize.lon * 2.0
     };
 }
 
