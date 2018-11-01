@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifdef GLOBEBROWSING_USE_GDAL
-
 #include "gdal.h"
 #include "gdal_priv.h"
 
@@ -58,5 +56,3 @@ TEST_F(GdalWmsTest, Simple) {
     // This assertion fails
     //ASSERT_NE(poDataset, nullptr) << "Failed to load testFile";
 }
-
-#endif // GLOBEBROWSING_USE_GDAL

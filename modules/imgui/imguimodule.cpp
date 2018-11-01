@@ -62,68 +62,68 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
         gui._screenSpaceProperty.setSource(
             []() {
-            return global::screenSpaceRootPropertyOwner.propertySubOwners();
-        }
+                return global::screenSpaceRootPropertyOwner.propertySubOwners();
+            }
         );
 
         gui._moduleProperty.setSource(
             []() {
-            std::vector<properties::PropertyOwner*> v;
-            v.push_back(&(global::moduleEngine));
-            return v;
-        }
+                std::vector<properties::PropertyOwner*> v;
+                v.push_back(&(global::moduleEngine));
+                return v;
+            }
         );
 
         gui._sceneProperty.setSource(
             []() {
-            const Scene* scene = global::renderEngine.scene();
-            const std::vector<SceneGraphNode*>& nodes = scene ?
-                scene->allSceneGraphNodes() :
-                std::vector<SceneGraphNode*>();
+                const Scene* scene = global::renderEngine.scene();
+                const std::vector<SceneGraphNode*>& nodes = scene ?
+                    scene->allSceneGraphNodes() :
+                    std::vector<SceneGraphNode*>();
 
-            return std::vector<properties::PropertyOwner*>(
-                nodes.begin(),
-                nodes.end()
+                return std::vector<properties::PropertyOwner*>(
+                    nodes.begin(),
+                    nodes.end()
                 );
-        }
+            }
         );
 
         gui._virtualProperty.setSource(
             []() {
-            std::vector<properties::PropertyOwner*> res = {
-                &global::virtualPropertyManager
-            };
+                std::vector<properties::PropertyOwner*> res = {
+                    &global::virtualPropertyManager
+                };
 
-            return res;
-        }
+                return res;
+            }
         );
 
         gui._featuredProperties.setSource(
             []() {
-            std::vector<SceneGraphNode*> nodes =
-                global::renderEngine.scene()->allSceneGraphNodes();
+                std::vector<SceneGraphNode*> nodes =
+                    global::renderEngine.scene()->allSceneGraphNodes();
 
-            nodes.erase(
-                std::remove_if(
+                nodes.erase(
+                    std::remove_if(
+                        nodes.begin(),
+                        nodes.end(),
+                        [](SceneGraphNode* n) {
+                            const std::vector<std::string>& tags = n->tags();
+                            const auto it = std::find(
+                                tags.begin(),
+                                tags.end(),
+                                "GUI.Interesting"
+                            );
+                            return it == tags.end();
+                        }
+                    ),
+                    nodes.end()
+                );
+                return std::vector<properties::PropertyOwner*>(
                     nodes.begin(),
-                    nodes.end(),
-                    [](SceneGraphNode* n) {
-                const std::vector<std::string>& tags = n->tags();
-                const auto it = std::find(
-                    tags.begin(),
-                    tags.end(),
-                    "GUI.Interesting"
+                    nodes.end()
                 );
-                return it == tags.end();
             }
-                ),
-                nodes.end()
-                );
-            return std::vector<properties::PropertyOwner*>(
-                nodes.begin(),
-                nodes.end()
-                );
-        }
         );
     });
 

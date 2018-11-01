@@ -61,7 +61,6 @@ public:
     scripting::LuaLibrary luaLibrary() const override;
     const globebrowsing::RenderableGlobe* castFocusNodeRenderableToGlobe();
 
-#ifdef GLOBEBROWSING_USE_GDAL
     struct Layer {
         std::string name;
         std::string url;
@@ -82,7 +81,6 @@ public:
     bool hasUrlInfo(const std::string& globe) const;
 
     void removeWMSServer(const std::string& name);
-#endif // GLOBEBROWSING_USE_GDAL
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
@@ -108,14 +106,12 @@ private:
 
     std::unique_ptr<globebrowsing::cache::MemoryAwareTileCache> _tileCache;
 
-#ifdef GLOBEBROWSING_USE_GDAL
     // name -> capabilities
     std::map<std::string, std::future<Capabilities>> _inFlightCapabilitiesMap;
     // name -> capabilities
     std::map<std::string, Capabilities> _capabilitiesMap;
 
     std::multimap<std::string, UrlInfo> _urlList;
-#endif // GLOBEBROWSING_USE_GDAL
 };
 
 } // namespace openspace
