@@ -46,7 +46,8 @@ local setDeltaTimeKeys = function(t)
         openspace.bindKeyLocal(
             Keys[i],
             'openspace.time.interpolateDeltaTime(' .. v .. ")",
-            'Setting the simulation speed to ' .. v .. ' seconds per realtime second'
+            'Setting the simulation speed to ' .. v .. ' seconds per realtime second',
+            'Set sim speed ' .. v
         )
         table.insert(result, Keys[i])
     end
