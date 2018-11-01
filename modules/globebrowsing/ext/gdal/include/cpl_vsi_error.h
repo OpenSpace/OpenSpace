@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_vsi_error.h 36769 2016-12-10 01:44:43Z goatbar $
+ * $Id: cpl_vsi_error.h 1515758e53dd91f1c7f21f1e075e0c88e0e17fea 2016-12-10 01:44:43Z Kurt Schwehr $
  *
  * Project:  VSI Virtual File System
  * Purpose:  Implement an error system for reporting file system errors.

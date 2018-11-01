@@ -1,4 +1,4 @@
-/* $Id: cpl_minizip_ioapi.h 36484 2016-11-24 06:35:54Z goatbar $ */
+/* $Id: cpl_minizip_ioapi.h 2f03d19efafeda04a990e03e7fb3cf56dd11b213 2016-11-24 06:35:54Z Kurt Schwehr $ */
 
 /* Modified version by Even Rouault. :
       - change fill_fopen_filefunc to cpl_fill_fopen_filefunc

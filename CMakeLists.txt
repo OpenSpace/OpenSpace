@@ -136,7 +136,7 @@ begin_dependency("CURL")
 if (WIN32)
     set(CURL_ROOT_DIR "${OPENSPACE_EXT_DIR}/curl")
     target_include_directories(openspace-core SYSTEM PUBLIC ${CURL_ROOT_DIR}/include)
-    target_link_libraries(openspace-core ${CURL_ROOT_DIR}/lib/libcurl_imp.lib)
+    target_link_libraries(openspace-core ${CURL_ROOT_DIR}/lib/libcurl.lib)
     target_compile_definitions(openspace-core PUBLIC
         "OPENSPACE_CURL_ENABLED" "CURL_STATICLIB")
 else ()
