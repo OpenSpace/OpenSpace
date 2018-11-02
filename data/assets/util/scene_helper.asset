@@ -9,7 +9,10 @@ local bindKeys = function(t)
         if k.Name == nil then
             k.Name = k.Key
         end
-        bindFunction(k.Key, k.Command, k.Documentation, k.Name)
+        if k.GuiPath == nil then
+            k.GuiPath = ""
+        end
+        bindFunction(k.Key, k.Command, k.Documentation, k.Name, k.GuiPath)
     end
 end
 asset.export("bindKeys", bindKeys)
@@ -47,7 +50,8 @@ local setDeltaTimeKeys = function(t)
             Keys[i],
             'openspace.time.interpolateDeltaTime(' .. v .. ")",
             'Setting the simulation speed to ' .. v .. ' seconds per realtime second',
-            'Set sim speed ' .. v
+            'Set sim speed ' .. v,
+            '/Simulation Speed'
         )
         table.insert(result, Keys[i])
     end

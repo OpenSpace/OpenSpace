@@ -66,8 +66,12 @@ void KeybindingManager::resetKeyBindings() {
     _keyLua.clear();
 }
 
-void KeybindingManager::bindKeyLocal(Key key, KeyModifier modifier,
-                                     std::string luaCommand, std::string documentation, std::string name)
+void KeybindingManager::bindKeyLocal(Key key,
+                                     KeyModifier modifier,
+                                     std::string luaCommand,
+                                     std::string documentation,
+                                     std::string name,
+                                     std::string guiPath)
 {
     _keyLua.insert({
         { key, modifier },
@@ -75,13 +79,18 @@ void KeybindingManager::bindKeyLocal(Key key, KeyModifier modifier,
             std::move(luaCommand),
             IsSynchronized::No,
             std::move(documentation),
-            std::move(name)
+            std::move(name),
+            std::move(guiPath)
         }
     });
 }
 
-void KeybindingManager::bindKey(Key key, KeyModifier modifier,
-                                std::string luaCommand, std::string documentation, std::string name)
+void KeybindingManager::bindKey(Key key,
+                                KeyModifier modifier,
+                                std::string luaCommand,
+                                std::string documentation,
+                                std::string name,
+                                std::string guiPath)
 {
     _keyLua.insert({
         { key, modifier },
@@ -89,8 +98,8 @@ void KeybindingManager::bindKey(Key key, KeyModifier modifier,
             std::move(luaCommand),
             IsSynchronized::Yes,
             std::move(documentation),
-            std::move(name)
-
+            std::move(name),
+            std::move(guiPath)
         }
     });
 }

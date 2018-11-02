@@ -29,6 +29,7 @@ local Keybindings = {
                   propertyHelper.invert('Scene.Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled'),
         Name = "Night for earth",
         Documentation = "Toggle night texture, shading, atmosphere, and water for Earth.",
+        GuiPath = "/Rendering",
         Local = false
     },
     {
@@ -37,6 +38,7 @@ local Keybindings = {
         Command = propertyHelper.invert('Scene.MilkyWay.renderable.Enabled') ..
                   propertyHelper.invert('Scene.Stars.renderable.Enabled'),
         Documentation = "Toggle background (Stars and Milkyway).",
+        GuiPath = "/Rendering",
         Local = false
     },
     {
@@ -51,6 +53,7 @@ local Keybindings = {
                   propertyHelper.invert('Scene.Moon.RenderableGlobe.Enabled') ..
                   propertyHelper.invert('Scene.Sun.renderable.Enabled'),
         Documentation = "Toogles background and shading mode on the Earth and Mars alongside visibility of the Moon and the Sun",
+        GuiPath = "/Rendering",
         Local = false
     },
     {
@@ -58,6 +61,7 @@ local Keybindings = {
         Name="Hide Trails",
         Command = "openspace.setPropertyValue('Scene.*Trail.renderable.Enabled', false)",
         Documentation = "Disables visibility of the trails",
+        GuiPath = "/Rendering",
         Local = false
     },
 }

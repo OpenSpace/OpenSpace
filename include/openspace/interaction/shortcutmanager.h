@@ -42,6 +42,7 @@ public:
         std::string script;
         IsSynchronized synchronization;
         std::string documentation;
+        std::string guiPath;
     };
 
     void resetShortcuts();

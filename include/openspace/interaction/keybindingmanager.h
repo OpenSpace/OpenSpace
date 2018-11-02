@@ -48,6 +48,7 @@ public:
         IsSynchronized synchronization;
         std::string documentation;
         std::string name;
+        std::string guiPath;
     };
 
     KeybindingManager();
@@ -55,10 +56,10 @@ public:
     void resetKeyBindings();
 
     void bindKeyLocal(Key key, KeyModifier modifier, std::string luaCommand,
-        std::string documentation = "", std::string name = "");
+        std::string documentation = "", std::string name = "", std::string guiPath = "");
 
     void bindKey(Key key, KeyModifier modifier, std::string luaCommand,
-        std::string documentation = "", std::string name = "");
+        std::string documentation = "", std::string name = "", std::string guiPath = "");
 
     void removeKeyBinding(const std::string& key);
 
