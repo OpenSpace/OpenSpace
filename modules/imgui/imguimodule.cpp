@@ -30,6 +30,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/sessionrecording.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/luaconsole.h>
@@ -50,6 +51,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             []() {
             std::vector<properties::PropertyOwner*> res = {
                 &global::navigationHandler,
+                &global::sessionRecording,
                 &global::timeManager,
                 &global::renderEngine,
                 &global::parallelPeer,

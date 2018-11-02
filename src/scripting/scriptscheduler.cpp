@@ -30,13 +30,6 @@
 #include <openspace/util/time.h>
 #include <ghoul/logging/logmanager.h>
 
-namespace {
-    constexpr const char* KeyTime = "Time";
-    constexpr const char* KeyForwardScript = "ForwardScript";
-    constexpr const char* KeyBackwardScript = "BackwardScript";
-    constexpr const char* KeyUniversalScript = "Script";
-} // namespace
-
 #include "scriptscheduler_lua.inl"
 
 namespace openspace::scripting {
@@ -92,6 +85,8 @@ documentation::Documentation ScriptScheduler::Documentation() {
         }
     };
 }
+
+using namespace openspace::interaction;
 
 ScriptScheduler::ScheduledScript::ScheduledScript(const ghoul::Dictionary& dictionary) {
     const std::string& timeStr = dictionary.value<std::string>(KeyTime);
@@ -235,6 +230,18 @@ ScriptScheduler::progressTo(double newTime)
     }
 }
 
+void ScriptScheduler::setTimeReferenceMode(KeyframeTimeRef refType) {
+    _timeframeMode = refType;
+}
+
+void ScriptScheduler::triggerPlaybackStart() {
+    _playbackModeEnabled = true;
+}
+
+void ScriptScheduler::stopPlayback() {
+    _playbackModeEnabled = false;
+}
+
 double ScriptScheduler::currentTime() const {
     return _currentTime;
 }
@@ -250,6 +257,18 @@ std::vector<ScriptScheduler::ScheduledScript> ScriptScheduler::allScripts() cons
         result.push_back(std::move(script));
     }
     return result;
+}
+
+void ScriptScheduler::setModeApplicationTime() {
+    _timeframeMode = KeyframeTimeRef::Relative_applicationStart;
+}
+
+void ScriptScheduler::setModeRecordedTime() {
+    _timeframeMode = KeyframeTimeRef::Relative_recordedStart;
+}
+
+void ScriptScheduler::setModeSimulationTime() {
+    _timeframeMode = KeyframeTimeRef::Absolute_simTimeJ2000;
 }
 
 LuaLibrary ScriptScheduler::luaLibrary() {
@@ -275,6 +294,30 @@ LuaLibrary ScriptScheduler::luaLibrary() {
                 "is the script executed in the backwards direction, and the optional "
                 "last argument is the universal script, executed in either direction."
 
+            },
+            {
+                "setModeApplicationTime",
+                &luascriptfunctions::setModeApplicationTime,
+                {},
+                "",
+                "Sets the time reference for scheduled scripts to application time "
+                "(seconds since OpenSpace application started)."
+            },
+            {
+                "setModeRecordedTime",
+                &luascriptfunctions::setModeRecordedTime,
+                {},
+                "",
+                "Sets the time reference for scheduled scripts to the time since the "
+                "recording was started (the same relative time applies to playback)."
+            },
+            {
+                "setModeSimulationTime",
+                &luascriptfunctions::setModeSimulationTime,
+                {},
+                "",
+                "Sets the time reference for scheduled scripts to the simulated "
+                "date & time (J2000 epoch seconds)."
             },
             {
                 "clear",
