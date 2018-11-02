@@ -196,13 +196,7 @@ std::string Property::toJson() const {
 }
 
 std::string Property::jsonValue() const {
-    std::string value = getStringValue();
-    if (value[0] == '"' && value[value.size() - 1] == '"') {
-        return value.substr(1, value.size() - 2);
-    }
-    else {
-        return value;
-    }
+    return getStringValue();
 }
 
 Property::OnChangeHandle Property::onChange(std::function<void()> callback) {

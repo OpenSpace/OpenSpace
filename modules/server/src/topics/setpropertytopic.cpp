@@ -26,7 +26,7 @@
 
 #include <openspace/json.h>
 #include <openspace/engine/globals.h>
-#include <openspace/properties/property.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/query/query.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/time.h>
@@ -37,6 +37,48 @@ namespace {
     constexpr const char* ValueKey = "value";
     constexpr const char* _loggerCat = "SetPropertyTopic";
     constexpr const char* SpecialKeyTime = "__time";
+
+    std::string escapedLuaString(const std::string& str) {
+        std::string luaString;
+        for (const char& c : str) {
+            switch (c) {
+                case '\'':
+                    luaString += "\'";
+                    break;
+                default:
+                    luaString += c;
+            }
+        }
+        return luaString;
+    }
+
+    std::string luaLiteralFromJson(nlohmann::json value) {
+        if (value.is_string()) {
+            return "'" + escapedLuaString(value.get<std::string>()) + "'";
+        } else if (value.is_boolean()) {
+            return value.get<bool>() ? "true" : "false";
+        } else if (value.is_number()) {
+            return std::to_string(value.get<double>());
+        } else if (value.is_array()) {
+            std::string literal = "{";
+            for (nlohmann::json::iterator it = value.begin(); it != value.end(); ++it) {
+                literal += luaLiteralFromJson(it.value()) += ",";
+            }
+            literal.pop_back(); // remove last comma
+            literal += "}";
+            return literal;
+        } else if (value.is_object()) {
+            std::string literal = "{";
+            for (nlohmann::json::iterator it = value.begin(); it != value.end(); ++it) {
+                literal += it.key() + "=" + luaLiteralFromJson(it.value()) += ",";
+            }
+            literal.pop_back(); // remove last comma
+            literal += "}";
+            return literal;
+        }{
+            return "null";
+        }
+    }
 } // namespace
 
 namespace openspace {
@@ -44,21 +86,20 @@ namespace openspace {
 void SetPropertyTopic::handleJson(const nlohmann::json& json) {
     try {
         const std::string& propertyKey = json.at(PropertyKey).get<std::string>();
-        std::string value = json.at(ValueKey).get<std::string>();
 
         if (propertyKey == SpecialKeyTime) {
             Time newTime;
-            newTime.setTime(value);
+            newTime.setTime(json.at(ValueKey).get<std::string>());
             global::timeManager.setTimeNextFrame(newTime);
         }
         else {
-            properties::Property* prop = property(propertyKey);
-            if (prop) {
-                LDEBUG("Setting " + propertyKey + " to " + value + ".");
-                if (!prop->setStringValue(std::move(value))) {
-                    LERROR("Failed!");
-                }
-            }
+            nlohmann::json value = json.at(ValueKey);
+            std::string literal = luaLiteralFromJson(value);
+
+            global::scriptEngine.queueScript(
+                 "openspace.setPropertyValueSingle(\"" + propertyKey + "\", " + literal + ")",
+                 scripting::ScriptEngine::RemoteScripting::Yes
+             );
         }
     }
     catch (const std::out_of_range& e) {

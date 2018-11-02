@@ -37,7 +37,7 @@ namespace openspace::properties {
 void to_json(json& j, const Property& p) {
     j = {
         { "Description", json::parse(p.generateBaseJsonDescription()) },
-        { "Value", p.jsonValue() }
+        { "Value", json::parse(p.jsonValue()) }
     };
     j["Description"]["description"] = p.description();
 }
