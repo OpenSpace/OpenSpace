@@ -22,13 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-
 namespace openspace::interaction {
 
 template <class T>
-T getNextKeyframeObj(unsigned int& index,
-    std::vector<T>& keyframeContainer,
-    std::function<void()> finishedCallback)
+T nextKeyframeObj(unsigned int index,
+                  const std::vector<T>& keyframeContainer,
+                  std::function<void()> finishedCallback)
 {
     if (index >= (keyframeContainer.size() - 1)) {
         if( index == (keyframeContainer.size() - 1) )
@@ -42,8 +41,8 @@ T getNextKeyframeObj(unsigned int& index,
 }
 
 template <class T>
-T getPrevKeyframeObj(unsigned int& index,
-                     std::vector<T>& keyframeContainer)
+T prevKeyframeObj(unsigned int index,
+                  const std::vector<T>& keyframeContainer)
 {
     if (index >= keyframeContainer.size()) {
         return keyframeContainer.back();

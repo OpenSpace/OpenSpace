@@ -73,43 +73,42 @@ static const openspace::properties::Property::PropertyInfo TimeToleranceInfo = {
 namespace openspace {
 
 ExternInteraction::ExternInteraction()
-    : properties::PropertyOwner({ "ExternInteration", "ExternInteraction" })
+    : properties::PropertyOwner({ "ExternInteration", "External Interaction" })
 {
 }
 
 void ExternInteraction::cameraInteraction(datamessagestructures::CameraKeyframe kf) {
     interaction::KeyframeNavigator::CameraPose pose;
-    pose.focusNode = kf._focusNode;
-    pose.position = kf._position;
-    pose.rotation = kf._rotation;
-    pose.scale = kf._scale;
-    pose.followFocusNodeRotation = kf._followNodeRotation;
+    pose.focusNode = std::move(kf._focusNode);
+    pose.position = std::move(kf._position);
+    pose.rotation = std::move(kf._rotation);
+    pose.scale = std::move(kf._scale);
+    pose.followFocusNodeRotation = std::move(kf._followNodeRotation);
 
     global::navigationHandler.keyframeNavigator().addKeyframe(kf._timestamp, pose);
 }
 
 void ExternInteraction::timeInteraction(datamessagestructures::TimeKeyframe kf) {
     TimeKeyframeData timeKfData;
-    timeKfData.delta = kf._dt;
-    timeKfData.pause = kf._paused;
-    timeKfData.jump = kf._requiresTimeJump;
+    timeKfData.delta = std::move(kf._dt);
+    timeKfData.pause = std::move(kf._paused);
+    timeKfData.jump = std::move(kf._requiresTimeJump);
 
     global::timeManager.addKeyframe(kf._timestamp, timeKfData);
 }
 
 void ExternInteraction::scriptInteraction(datamessagestructures::ScriptMessage sm) {
     global::scriptEngine.queueScript(
-        sm._script,
+        std::move(sm._script),
         scripting::ScriptEngine::RemoteScripting::No
     );
 }
-    
-#pragma optimize ("", off)
 
-void ExternInteraction::generateCameraKeyframe(datamessagestructures::CameraKeyframe& kf) {
+datamessagestructures::CameraKeyframe ExternInteraction::generateCameraKeyframe() {
+    datamessagestructures::CameraKeyframe kf;
     SceneGraphNode* focusNode = global::navigationHandler.focusNode();
     if (!focusNode) {
-        return;
+        return kf;
     }
     
     //kf._position = global::navigationHandler.camera()->positionVec3();
@@ -130,9 +129,12 @@ void ExternInteraction::generateCameraKeyframe(datamessagestructures::CameraKeyf
     
     // Timestamp as current runtime of OpenSpace instance
     kf._timestamp = global::windowDelegate.applicationTime();
+
+    return kf;
 }
     
-void ExternInteraction::generateTimeKeyframe(datamessagestructures::TimeKeyframe& kf) {
+datamessagestructures::TimeKeyframe ExternInteraction::generateTimeKeyframe() {
+    datamessagestructures::TimeKeyframe kf;
     const Time& time = global::timeManager.time();
     
     kf._dt = global::timeManager.deltaTime();
@@ -141,13 +143,15 @@ void ExternInteraction::generateTimeKeyframe(datamessagestructures::TimeKeyframe
     
     // Timestamp as current runtime of OpenSpace instance
     kf._timestamp = global::windowDelegate.applicationTime();
+    return kf;
 }
     
-void ExternInteraction::generateScriptMessage(datamessagestructures::ScriptMessage& sm,
-                                              std::string script) {
+datamessagestructures::ScriptMessage ExternInteraction::generateScriptMessage(std::string script) {
+    datamessagestructures::ScriptMessage sm;
     sm._script = std::move(script);
     // Timestamp as current runtime of OpenSpace instance
     sm._timestamp = global::windowDelegate.applicationTime();
+    return sm;
 }
 
 

@@ -144,21 +144,21 @@ struct CameraKeyframe {
         return offset;
     };
 
-    void write(std::ostream* out) const {
+    void write(std::ostream& out) const {
         // Write position
-        out->write(
+        out.write(
             reinterpret_cast<const char*>(&_position),
             sizeof(_position)
         );
 
         // Write orientation
-        out->write(
+        out.write(
             reinterpret_cast<const char*>(&_rotation),
             sizeof(_rotation)
         );
 
         // Write follow focus node rotation?
-        out->write(
+        out.write(
             reinterpret_cast<const char*>(&_followNodeRotation),
             sizeof(_followNodeRotation)
         );
@@ -166,23 +166,23 @@ struct CameraKeyframe {
         int nodeNameLength = static_cast<int>(_focusNode.size());
 
         // Write focus node
-        out->write(
+        out.write(
             reinterpret_cast<const char*>(&nodeNameLength),
             sizeof(nodeNameLength)
         );
-        out->write(
+        out.write(
             _focusNode.c_str(),
             _focusNode.size()
         );
 
         //Write scale
-        out->write(
+        out.write(
             reinterpret_cast<const char*>(&_scale),
             sizeof(_scale)
         );
 
         // Write timestamp
-        out->write(
+        out.write(
             reinterpret_cast<const char*>(&_timestamp),
             sizeof(_timestamp)
         );
@@ -207,10 +207,7 @@ struct CameraKeyframe {
             reinterpret_cast<char*>(&b),
             sizeof(unsigned char)
         );
-        if (b == 1)
-            _followNodeRotation = true;
-        else if (b == 0)
-            _followNodeRotation = false;
+        _followNodeRotation = (b == 1);
 
         // Read focus node
         int nodeNameLength = static_cast<int>(_focusNode.size());
@@ -218,14 +215,11 @@ struct CameraKeyframe {
             reinterpret_cast<char*>(&nodeNameLength),
             sizeof(nodeNameLength)
         );
-        char* temp = new char[nodeNameLength + 1];
-        in->read(
-            temp,
-            nodeNameLength
-        );
+        std::vector<char> temp(nodeNameLength + 1);
+        in->read(temp.data(), nodeNameLength);
+        
         temp[nodeNameLength] = '\0';
-        _focusNode = temp;
-        delete[] temp;
+        _focusNode = temp.data();
 
         // Read scale
         in->read(
@@ -379,10 +373,7 @@ struct ScriptMessage {
     };
 
     void write(std::ostream* out) const {
-        out->write(
-            _script.c_str(),
-            _script.size()
-        );
+        out->write(_script.c_str(), _script.size());
     };
 
     void read(std::istream* in) {
@@ -390,13 +381,12 @@ struct ScriptMessage {
         //Read string length from file
         in->read(reinterpret_cast<char*>(&strLen), sizeof(strLen));
         //Read back full string
-        char* temp = new char[strLen + 1];
-        in->read(temp, strLen);
+        std::vector<char> temp(strLen + 1);
+        in->read(temp.data(), strLen);
         temp[strLen] = '\0';
 
         _script.erase();
-        _script = temp;
-        delete[] temp;
+        _script = temp.data();
     };
 };
 

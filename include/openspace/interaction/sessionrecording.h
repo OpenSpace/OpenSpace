@@ -42,9 +42,9 @@ class KeyframeNavigator;
 
 class SessionRecording : public properties::PropertyOwner {
 public:
-    enum class recordDataMode {
-        ascii,
-        binary
+    enum class RecordedDataMode {
+        Ascii,
+        Binary
     };
 
     SessionRecording();
@@ -54,12 +54,14 @@ public:
     * in progress will be stopped, files closed, and keyframes in memory deleted.
     */
     void deinitialize();
+
     /**
     * This is called with every rendered frame. If in recording state, the camera
     * state will be saved to the recording file (if its state has changed since last).
     * If in playback state, the next keyframe will be used (if it is time to do so).
     */
     void preSynchronization();
+
     /**
     * Starts a recording session, which will save data to the provided filename
     * according to the data format specified, and will continue until recording is
@@ -75,17 +77,20 @@ public:
     * \param filename file saved with recorded keyframes.
     * \returns true if recording to file starts without errors.
     */
-    void setRecordDataFormat(recordDataMode dataMode);
+    void setRecordDataFormat(RecordedDataMode dataMode);
+
     /**
     * Used to stop a recording in progress. If open, the recording file will be closed,
     * and all keyframes deleted from memory.
     */
     void stopRecording();
+
     /**
     * Used to check if a session recording is in progress.
     * \returns true if recording is in progress.
     */
-    bool isRecording();
+    bool isRecording() const;
+
     /**
     * Starts a playback session, which can run in one of three different time modes.
     * \param filename file containing recorded keyframes to play back
@@ -95,29 +100,34 @@ public:
     * entry for SessionRecording for details on these time modes.
     * \returns true if recording to file starts without errors.
     */
-    bool startPlayback(std::string filename, KeyframeTimeRef timeMode,
+    bool startPlayback(const std::string& filename, KeyframeTimeRef timeMode,
         bool forceSimTimeAtStart);
+
     /**
     * Used to stop a playback in progress. If open, the playback file will be closed,
     * and all keyframes deleted from memory.
     */
     void stopPlayback();
+
     /**
     * Used to check if a session playback is in progress.
     * \returns true if playback is in progress.
     */
-    bool isPlayingBack();
+    bool isPlayingBack() const;
+
     /**
     * Used to trigger a save of the camera states (position, rotation, focus node,
     * whether it is following the rotation of a node, and timestamp). The data will
     * be saved to the recording file only if a recording is currently in progress.
     */
     void saveCameraKeyframe();
+
     /**
     * Used to trigger a save of the current timing states. The data will be saved
     * to the recording file only if a recording is currently in progress.
     */
     void saveTimeKeyframe();
+
     /**
     * Used to trigger a save of a script to the recording file, but only if a recording
     * is currently in progress.
@@ -132,19 +142,19 @@ public:
     static openspace::scripting::LuaLibrary luaLibrary();
     
 private:
-    enum class sessionState {
-        idle = 0,
-        recording,
-        playback
+    enum class SessionState {
+        Idle = 0,
+        Recording,
+        Playback
     };
-    enum class recordedType {
-        camera = 0,
-        time,
-        script,
-        invalid
+    enum class RecordedType {
+        Camera = 0,
+        Time,
+        Script,
+        Invalid
     };
     struct timelineEntry {
-        recordedType keyframeType;
+        RecordedType keyframeType;
         unsigned int idxIntoKeyframeTypeArray;
         double timestamp;
     };
@@ -155,17 +165,17 @@ private:
     double _timestampPlaybackStarted_simulation;
     double _timestampApplicationStarted_simulation;
     bool hasCameraChangedFromPrev(datamessagestructures::CameraKeyframe kfNew);
-    double getAppropriateTimestamp(double timeOs, double timeRec, double timeSim);
-    double getEquivalentSimulationTime(double timeOs, double timeRec, double timeSim);
-    double getEquivalentApplicationTime(double timeOs, double timeRec, double timeSim);
+    double appropriateTimestamp(double timeOs, double timeRec, double timeSim);
+    double equivalentSimulationTime(double timeOs, double timeRec, double timeSim);
+    double equivalentApplicationTime(double timeOs, double timeRec, double timeSim);
     double currentTime() const;
 
     void playbackCamera();
     void playbackTimeChange();
     void playbackScript();
     bool playbackAddEntriesToTimeline();
-    void signalPlaybackFinishedForComponent(recordedType type);
-    void writeToFileBuffer(const double& src);
+    void signalPlaybackFinishedForComponent(RecordedType type);
+    void writeToFileBuffer(const double src);
     void writeToFileBuffer(std::vector<char>& cvec);
     void writeToFileBuffer(const unsigned char c);
     void writeToFileBuffer(bool b);
@@ -194,10 +204,10 @@ private:
     bool processScriptKeyframe();
     bool isDataModeBinary();
     unsigned int findIndexOfLastCameraKeyframeInTimeline();
-    bool doesTimelineEntryContainCamera(unsigned int index);
+    bool doesTimelineEntryContainCamera(unsigned int index) const;
    
-    recordedType getNextKeyframeType();
-    recordedType getPrevKeyframeType();
+    RecordedType getNextKeyframeType();
+    RecordedType getPrevKeyframeType();
     double getNextTimestamp();
     double getPrevTimestamp();
     void cleanUpPlayback();
@@ -209,8 +219,8 @@ private:
     const char dataFormatAsciiTag = 'A';
     const char dataFormatBinaryTag = 'B';
 
-    recordDataMode _recordingDataMode = recordDataMode::binary;
-    sessionState _state = sessionState::idle;
+    RecordedDataMode _recordingDataMode = RecordedDataMode::Binary;
+    SessionState _state = SessionState::Idle;
     std::string _playbackFilename;
     std::ifstream _playbackFile;
     std::string _playbackLineParsing;
@@ -246,9 +256,10 @@ private:
 
     unsigned int _idxTimeline_cameraPtrNext = 0;
     unsigned int _idxTimeline_cameraPtrPrev = 0;
-};
 
-bool doesFileExist(const std::string& filename);
+    unsigned int _idxTimeline_cameraFirstInTimeline = 0;
+    double _cameraFirstInTimeline_timestamp = 0;
+};
 
 } // namespace openspace
 

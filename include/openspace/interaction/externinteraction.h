@@ -57,24 +57,23 @@ public:
     /**
     * Method that accepts a reference to a CameraKeyframe object, and populates
     * it with the current properties of the camera from the navigation handler.
-    * \param kf The camera keyframe to populate.
+    * \returns CameraKeyframe with current state from NavigationHandler.
     */
-    void generateCameraKeyframe(datamessagestructures::CameraKeyframe& kf);
+    datamessagestructures::CameraKeyframe generateCameraKeyframe();
     /**
     * Method that accepts a reference to a TimeKeyframe object, and populates
     * it with the current time values from the application time manager.
-    * \param kf The time keyframe to populate.
+    * \returns TimeKeyframe The time keyframe.
     */
-    void generateTimeKeyframe(datamessagestructures::TimeKeyframe& kf);
+    datamessagestructures::TimeKeyframe generateTimeKeyframe();
     /**
     * Method that accepts a reference to a ScriptMessage object and a script
     * string, and populates the ScriptMessage with the script and timestamp
     * of the current application time.
-    * \param sm The ScriptMessage data structure to populate.
-    * \param script The script to execute in std::string form
+    * \param script The script to execute in std::string form.
+    * \returns ScriptMessage The ScriptMessage data structure with script.
     */
-    void generateScriptMessage(datamessagestructures::ScriptMessage& sm,
-                               std::string script);
+    datamessagestructures::ScriptMessage generateScriptMessage(std::string script);
 private:
 };
 
