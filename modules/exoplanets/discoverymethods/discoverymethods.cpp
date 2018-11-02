@@ -179,7 +179,16 @@ namespace openspace::exoplanets{
                 "Identifier = 'Transit1',"
                 "Type = 'ScreenSpaceImageLocal',"
                 "TexturePath = openspace.absPath('${BASE}/modules/exoplanets/graph.png'),"
-                "EuclideanPosition = {0.0, -0.7},"
+                "Scale = 0.485,"
+                "EuclideanPosition = {0.0, -0.65}"
+            "});"
+            "openspace.addScreenSpaceRenderable("
+            "{"
+                "Identifier = 'Transit3',"
+                "Type = 'ScreenSpaceImageLocal',"
+                "TexturePath = openspace.absPath('${BASE}/modules/exoplanets/axes.png'),"
+                "Scale = 0.7,"
+                "EuclideanPosition = {-0.05, -0.65}"
             "});";
 
         OsEng.scriptEngine().queueScript(
@@ -326,7 +335,7 @@ namespace openspace::exoplanets{
         // HELPER MARKERS
         glm::dvec3 northDirectionPos = starPosition + (double(starRadius * scale) * north);
         glm::dvec3 viewDirectionPos = starPosition + (double(starRadius * scale) * starToSunVec);
-        addDirectionsMarkers(viewDirectionPos, northDirectionPos, starRadius);
+        //addDirectionsMarkers(viewDirectionPos, northDirectionPos, starRadius);
         // END MARKERS
 
     }
@@ -359,7 +368,7 @@ namespace openspace::exoplanets{
         );
 
         //REMOVE HELP MARKERS
-        removeDirectionsMarkers();
+        //removeDirectionsMarkers();
     }
 
     void DiscoveryMethods::addTransitMethodVisualization() {
@@ -418,14 +427,14 @@ namespace openspace::exoplanets{
         scaleNode(planetNames[0], 1);
 
         // REMOVE GRAPH
-        std::string script = "openspace.removeScreenSpaceRenderable('Transit2');openspace.removeScreenSpaceRenderable('Transit1');";
+        std::string script = "openspace.removeScreenSpaceRenderable('Transit3');openspace.removeScreenSpaceRenderable('Transit2');openspace.removeScreenSpaceRenderable('Transit1');";
         OsEng.scriptEngine().queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
 
         //REMOVE HELP MARKERS
-        removeDirectionsMarkers();
+        //removeDirectionsMarkers();
     }
 
 
