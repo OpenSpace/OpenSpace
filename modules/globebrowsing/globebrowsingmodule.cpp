@@ -521,6 +521,7 @@ void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string glob
                                               std::string url)
 {
     auto downloadFunction = [](const std::string& downloadUrl) {
+        LDEBUG("Opening WMS capabilities: " + downloadUrl);
         GDALDatasetH dataset = GDALOpen(
             downloadUrl.c_str(),
             GA_ReadOnly
@@ -530,6 +531,7 @@ void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string glob
         const int nSubdatasets = CSLCount(subDatasets);
         Capabilities cap = parseSubDatasets(subDatasets, nSubdatasets);
         GDALClose(dataset);
+        LDEBUG("Finished WMS capabilities: " + downloadUrl);
         return cap;
     };
 
@@ -538,6 +540,8 @@ void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string glob
         downloadFunction,
         url
     );
+
+    //_capabilitiesMap[name] = downloadFunction(url);
 
     _urlList.emplace(std::move(globe), UrlInfo{ std::move(name), std::move(url) });
 }

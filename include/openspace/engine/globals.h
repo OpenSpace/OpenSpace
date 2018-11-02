@@ -55,6 +55,7 @@ namespace interaction {
     struct WebsocketInputStates;
     class KeybindingManager;
     class NavigationHandler;
+    class SessionRecording;
     class ShortcutManager;
 } // namespace interaction
 namespace performance { class PerformanceManager; }
@@ -90,6 +91,7 @@ interaction::JoystickInputStates& gJoystickInputStates();
 interaction::WebsocketInputStates& gWebsocketInputStates();
 interaction::KeybindingManager& gKeybindingManager();
 interaction::NavigationHandler& gNavigationHandler();
+interaction::SessionRecording& gSessionRecording();
 interaction::ShortcutManager& gShortcutManager();
 performance::PerformanceManager& gPerformanceManager();
 properties::PropertyOwner& gRootPropertyOwner();
@@ -124,6 +126,7 @@ static interaction::WebsocketInputStates& websocketInputStates =
     detail::gWebsocketInputStates();
 static interaction::KeybindingManager& keybindingManager = detail::gKeybindingManager();
 static interaction::NavigationHandler& navigationHandler = detail::gNavigationHandler();
+static interaction::SessionRecording& sessionRecording = detail::gSessionRecording();
 static interaction::ShortcutManager& shortcutManager = detail::gShortcutManager();
 static performance::PerformanceManager& performanceManager =
     detail::gPerformanceManager();

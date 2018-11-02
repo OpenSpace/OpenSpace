@@ -1,3 +1,5 @@
+#ifndef CPL_CONFIG_H
+#define CPL_CONFIG_H
 
 /* We define this here in general so that a VC++ build will publicly
    declare STDCALL interfaces even if an application is built against it
@@ -11,14 +13,14 @@
 #undef HAVE_DOPRNT
 
 /* Define if you have the vprintf function.  */
-#define HAVE_VPRINTF 1
-#define HAVE_VSNPRINTF 1
-#define HAVE_SNPRINTF 1
-#if defined(_MSC_VER) && (_MSC_VER < 1500)
-#  define vsnprintf _vsnprintf
+#ifndef HAVE_VPRINTF
+  #define HAVE_VPRINTF 1
 #endif
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
-#  define snprintf _snprintf
+#ifndef HAVE_VSNPRINTF
+  #define HAVE_VSNPRINTF 1
+#endif
+#ifndef HAVE_SNPRINTF
+  #define HAVE_SNPRINTF 1
 #endif
 
 #define HAVE_GETCWD 1
@@ -59,7 +61,9 @@
 #define HAVE_SEARCH_H 1
 
 /* Define to 1 if you have the <direct.h> header file. */
-#define HAVE_DIRECT_H
+#ifndef HAVE_DIRECT_H
+  #define HAVE_DIRECT_H 1
+#endif
 
 /* Define to 1 if you have the `localtime_r' function. */
 #undef HAVE_LOCALTIME_R
@@ -102,20 +106,14 @@
 
 #define lfind _lfind
 
-#if defined(_MSC_VER) && (_MSC_VER < 1310)
-#  define VSI_STAT64 _stat
-#  define VSI_STAT64_T _stat
-#else
-#  define VSI_STAT64 _stat64
-#  define VSI_STAT64_T __stat64
-#endif
-
-/* VC6 doesn't known intptr_t */
-#if defined(_MSC_VER) && (_MSC_VER <= 1200)
-    typedef int intptr_t;
-#endif
+#define VSI_STAT64 _stat64
+#define VSI_STAT64_T __stat64
 
 #pragma warning(disable: 4786)
 
 /* #define CPL_DISABLE_DLL */
 
+/* Define to 1, if your compiler supports long long data type */
+#define HAVE_LONG_LONG 1
+
+#endif /* CPL_CONFIG_H */

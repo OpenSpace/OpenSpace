@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogrpgeogeometry.h 36883 2016-12-15 13:31:12Z rouault $
+ * $Id: ogrpgeogeometry.h b787ba3ce13acc93ac3095d4c8a33314e48abe4c 2018-03-28 02:28:45 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Implements decoder of shapebin geometry for PGeo
@@ -87,11 +87,11 @@ OGRErr CPL_DLL OGRCreateFromShapeBin( GByte *pabyShape,
                               OGRGeometry **ppoGeom,
                               int nBytes );
 
-OGRErr CPL_DLL OGRWriteToShapeBin( OGRGeometry *poGeom,
+OGRErr CPL_DLL OGRWriteToShapeBin( const OGRGeometry *poGeom,
                            GByte **ppabyShape,
                            int *pnBytes );
 
-OGRErr OGRCreateMultiPatch( OGRGeometry *poGeom,
+OGRErr OGRCreateMultiPatch( const OGRGeometry *poGeom,
                             int bAllowSHPTTriangle,
                             int& nParts,
                             int*& panPartStart,
@@ -100,7 +100,7 @@ OGRErr OGRCreateMultiPatch( OGRGeometry *poGeom,
                             OGRRawPoint*& poPoints,
                             double*& padfZ );
 
-OGRErr CPL_DLL OGRWriteMultiPatchToShapeBin( OGRGeometry *poGeom,
+OGRErr CPL_DLL OGRWriteMultiPatchToShapeBin( const OGRGeometry *poGeom,
                            GByte **ppabyShape,
                            int *pnBytes );
 

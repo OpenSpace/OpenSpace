@@ -242,6 +242,7 @@ double ParallelPeer::convertTimestamp(double messageTimestamp) {
     return messageTimestamp + _initialTimeDiff + _bufferTime;
 }
 
+
 double ParallelPeer::latencyStandardDeviation() const {
     double accumulatedLatencyDiffSquared = 0;
     double accumulatedLatencyDiff = 0;

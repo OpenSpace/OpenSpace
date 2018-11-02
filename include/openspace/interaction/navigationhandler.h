@@ -63,8 +63,11 @@ public:
     void setInterpolationTime(float durationInSeconds);
 
     void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
-
     void updateCamera(double deltaTime);
+    void setEnableKeyFrameInteraction();
+    void setDisableKeyFrameInteraction();
+    void triggerPlaybackStart();
+    void stopPlayback();
 
     // Accessors
     ghoul::Dictionary cameraStateDictionary();
@@ -75,6 +78,7 @@ public:
     const InputState& inputState() const;
     const OrbitalNavigator& orbitalNavigator() const;
     KeyframeNavigator& keyframeNavigator() const;
+    bool isKeyFrameInteractionEnabled() const;
     float interpolationTime() const;
 
     // Callback functions
@@ -122,9 +126,11 @@ public:
 
 private:
     bool _cameraUpdatedFromScript = false;
+    bool _playbackModeEnabled = false;
 
     std::unique_ptr<InputState> _inputState;
     Camera* _camera = nullptr;
+    std::function<void()> _playbackEndCallback;
 
     std::unique_ptr<OrbitalNavigator> _orbitalNavigator;
     std::unique_ptr<KeyframeNavigator> _keyframeNavigator;

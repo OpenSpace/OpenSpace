@@ -116,6 +116,7 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
     CPLSetConfigOption("GDAL_HTTP_UNSAFESSL", "YES");
 
     CPLSetConfigOption("GDAL_HTTP_TIMEOUT", "3"); // 3 seconds
+    CPLSetConfigOption("CURLOPT_TIMEOUT", "3"); // 3 seconds
 
     setGdalProxyConfiguration();
     CPLSetErrorHandler(gdalErrorHandler);
