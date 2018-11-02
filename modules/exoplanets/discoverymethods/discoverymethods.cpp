@@ -227,7 +227,7 @@ namespace openspace::exoplanets{
                 std::string script = "";
                 //remove planetglobe
                 if (!isnan(planets[i].R)) {
-                    script += "openspace.setPropertyValueSingle( 'Scene." + planetNames[i] + ".renderable.Enabled', " + visability + "); ";
+                    script += "openspace.setPropertyValueSingle( 'Scene." + planetNames[i] + ".RenderableGlobe.Enabled', " + visability + "); ";
                 }
                 //remove trail
                 script += "openspace.setPropertyValueSingle( 'Scene." + planetNames[i] + "Trail.renderable.Enabled', " + visability + "); ";
@@ -296,6 +296,10 @@ namespace openspace::exoplanets{
         float semiMajorAxis = planets[0].A; // in AU
         float starSemiMajorAxis = 0.1 * semiMajorAxis; // 10% of exoplanets semiMajorAxis
         float eccentricity = planets[0].ECC;
+        if (isnan(planets[0].ECC))
+        {
+            eccentricity = 0.0;
+        }
         float starRadius = planets[0].RSTAR; // in Solar Radii
 
         glm::dvec3 north = OsEng.moduleEngine().module<ExoplanetsModule>()->getNorthVector();
@@ -382,6 +386,10 @@ namespace openspace::exoplanets{
         
         float semiMajorAxis = planets[0].A; // in AU (1AU = 149 597 870 700m)
         float eccentricity = planets[0].ECC;
+        if (isnan(planets[0].ECC))
+        {
+            eccentricity = 0.0;
+        }
         float starRadius = planets[0].RSTAR; // in Solar Radii
 
         // MOVE CAMERA
