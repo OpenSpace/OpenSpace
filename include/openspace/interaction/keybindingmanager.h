@@ -47,6 +47,7 @@ public:
         std::string command;
         IsSynchronized synchronization;
         std::string documentation;
+        std::string name;
     };
 
     KeybindingManager();
@@ -54,10 +55,10 @@ public:
     void resetKeyBindings();
 
     void bindKeyLocal(Key key, KeyModifier modifier, std::string luaCommand,
-        std::string documentation = "");
+        std::string documentation = "", std::string name = "");
 
     void bindKey(Key key, KeyModifier modifier, std::string luaCommand,
-        std::string documentation = "");
+        std::string documentation = "", std::string name = "");
 
     void removeKeyBinding(const std::string& key);
 

@@ -67,27 +67,30 @@ void KeybindingManager::resetKeyBindings() {
 }
 
 void KeybindingManager::bindKeyLocal(Key key, KeyModifier modifier,
-                                     std::string luaCommand, std::string documentation)
+                                     std::string luaCommand, std::string documentation, std::string name)
 {
     _keyLua.insert({
         { key, modifier },
         {
             std::move(luaCommand),
             IsSynchronized::No,
-            std::move(documentation)
+            std::move(documentation),
+            std::move(name)
         }
     });
 }
 
 void KeybindingManager::bindKey(Key key, KeyModifier modifier,
-                                std::string luaCommand, std::string documentation)
+                                std::string luaCommand, std::string documentation, std::string name)
 {
     _keyLua.insert({
         { key, modifier },
         {
             std::move(luaCommand),
             IsSynchronized::Yes,
-            std::move(documentation)
+            std::move(documentation),
+            std::move(name)
+
         }
     });
 }
@@ -143,7 +146,8 @@ std::string KeybindingManager::generateJson() const {
         json << "\"script\": \"" << escapedJson(p.second.command) << "\",";
         json << "\"remoteScripting\": "
              << (p.second.synchronization ? "true," : "false,");
-        json << "\"documentation\": \"" << escapedJson(p.second.documentation) << "\"";
+        json << "\"documentation\": \"" << escapedJson(p.second.documentation) << "\",";
+        json << "\"name\": \"" << escapedJson(p.second.name) << "\"";
         json << "}";
     }
     json << "]";

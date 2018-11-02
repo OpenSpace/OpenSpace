@@ -37,7 +37,7 @@ namespace openspace::luascriptfunctions {
 int bindKey(lua_State* L) {
     using ghoul::lua::luaTypeToString;
 
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, 2, 3, "lua::bindKey");
+    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, 2, 4, "lua::bindKey");
 
     const std::string& key = ghoul::lua::value<std::string>(L, 1);
     const std::string& command = ghoul::lua::value<std::string>(L, 2);
@@ -56,13 +56,15 @@ int bindKey(lua_State* L) {
         return ghoul::lua::luaError(L, error);
     }
 
-    std::string doc = (nArguments == 3) ? ghoul::lua::value<std::string>(L, 3) : "";
+    std::string doc = (nArguments >= 3) ? ghoul::lua::value<std::string>(L, 3) : "";
+    std::string name = (nArguments == 4) ? ghoul::lua::value<std::string>(L, 4) : "";
 
     global::keybindingManager.bindKey(
         iKey.key,
         iKey.modifier,
         std::move(command),
-        std::move(doc)
+        std::move(doc),
+        std::move(name)
     );
 
     lua_settop(L, 0);
@@ -78,7 +80,7 @@ int bindKey(lua_State* L) {
 int bindKeyLocal(lua_State* L) {
     using ghoul::lua::luaTypeToString;
 
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, 2, 3, "lua::bindKeyLocal");
+    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, 2, 4, "lua::bindKeyLocal");
 
     const std::string& key = ghoul::lua::value<std::string>(L, 1);
     const std::string& command = ghoul::lua::value<std::string>(L, 2);
@@ -95,13 +97,15 @@ int bindKeyLocal(lua_State* L) {
         return ghoul::lua::luaError(L, error);
     }
 
-    std::string doc = nArguments == 3 ? ghoul::lua::value<std::string>(L, 3) : "";
+    std::string doc = nArguments >= 3 ? ghoul::lua::value<std::string>(L, 3) : "";
+    std::string name = ((nArguments == 4) && (L, 4)) ? ghoul::lua::value<std::string>(L, 4) : "";
 
     global::keybindingManager.bindKeyLocal(
         iKey.key,
         iKey.modifier,
         std::move(command),
-        std::move(doc)
+        std::move(doc),
+        std::move(name)
     );
 
     lua_settop(L, 0);
