@@ -59,6 +59,38 @@
 namespace {
     constexpr const char* _loggerCat = "GlobeBrowsingModule";
 
+    constexpr const openspace::properties::Property::PropertyInfo CacheEnabledInfo = {
+        "CacheEnabled",
+        "Cache Enabled",
+        "Determines whether automatic caching of WMS servers is enabled. Changing the "
+        "value of this property will not affect already created WMS datasets."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo OfflineModeInfo = {
+        "OfflineMode",
+        "Offline Mode",
+        "Determines whether loaded WMS servers should be used in offline mode, that is "
+        "not even try to retrieve images through an internet connection. Please note "
+        "that this setting is only reasonable, if the caching is enabled and there is "
+        "available cached data. Changing the value of this property will not affect "
+        "already created WMS datasets."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo CacheLocationInfo = {
+        "CacheLocation",
+        "Cache Location",
+        "The location of the cache folder for WMS servers. Changing the value of this "
+        "property will not affect already created WMS datasets."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo CacheSizeInfo = {
+        "CacheSize",
+        "Cache Size",
+        "The maximum size of the cache for each WMS server. Changing the value of this "
+        "property will not affect already created WMS datasets."
+    };
+
+
     openspace::GlobeBrowsingModule::Capabilities
     parseSubDatasets(char** subDatasets, int nSubdatasets)
     {
@@ -113,10 +145,50 @@ namespace {
 
 namespace openspace {
 
-GlobeBrowsingModule::GlobeBrowsingModule() : OpenSpaceModule(Name) {}
+GlobeBrowsingModule::GlobeBrowsingModule()
+    : OpenSpaceModule(Name)
+    , _cacheEnabled(CacheEnabledInfo, false)
+    , _offlineMode(OfflineModeInfo, false)
+    , _cacheLocation(CacheLocationInfo, "${BASE}/cache_gdal")
+    , _cacheSizeMB(CacheSizeInfo, 1024)
+{
+    addProperty(_cacheEnabled);
+    addProperty(_offlineMode);
+    addProperty(_cacheLocation);
+    addProperty(_cacheSizeMB);
+}
 
-void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
+void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     using namespace globebrowsing;
+
+    if (dict.hasKeyAndValue<bool>(CacheEnabledInfo.identifier)) {
+        _cacheEnabled = dict.value<bool>(CacheEnabledInfo.identifier);
+    }
+    if (dict.hasKeyAndValue<bool>(OfflineModeInfo.identifier)) {
+        _offlineMode = dict.value<bool>(OfflineModeInfo.identifier);
+    }
+    if (dict.hasKeyAndValue<std::string>(CacheLocationInfo.identifier)) {
+        _cacheLocation = dict.value<std::string>(CacheLocationInfo.identifier);
+    }
+    if (dict.hasKeyAndValue<double>(CacheSizeInfo.identifier)) {
+        _cacheSizeMB = static_cast<int>(dict.value<double>(CacheSizeInfo.identifier));
+    }
+
+    // Sanity check
+    const bool noWarning = dict.hasKeyAndValue<bool>("NoWarning") ?
+        dict.value<bool>("NoWarning") :
+        false;
+
+    if (!_cacheEnabled && _offlineMode && !noWarning) {
+        LWARNINGC(
+            "GlobeBrowsingModule",
+            "WMS caching is disabled, but offline mode is enabled. Unless you know "
+            "what you are doing, this will probably cause many servers to stop working. "
+            "If you want to silence this warning, set the 'NoWarning' parameter to "
+            "'true'."
+        );
+    }
+
 
     // Initialize
     global::callback::initializeGL.push_back([&]() {
@@ -127,7 +199,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
 
         // Convert from MB to Bytes
         GdalWrapper::create(
-            16ULL * 1024ULL * 1024ULL, // 16 MB
+            512ULL * 1024ULL * 1024ULL, // 512 MB
             static_cast<size_t>(CpuCap.installedMainMemory() * 0.25 * 1024 * 1024)
         );
         addPropertySubOwner(GdalWrapper::ref());
@@ -159,31 +231,38 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
     fTileProvider->registerClass<tileprovider::DefaultTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::DefaultTileLayer
-        )]);
+        )]
+    );
     fTileProvider->registerClass<tileprovider::SingleImageProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::SingleImageTileLayer
-        )]);
+        )]
+    );
     fTileProvider->registerClass<tileprovider::TemporalTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::TemporalTileLayer
-        )]);
+        )]
+    );
     fTileProvider->registerClass<tileprovider::TileIndexTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::TileIndexTileLayer
-        )]);
+        )]
+    );
     fTileProvider->registerClass<tileprovider::SizeReferenceTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::SizeReferenceTileLayer
-        )]);
+        )]
+    );
     fTileProvider->registerClass<tileprovider::TileProviderByLevel>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::ByLevelTileLayer
-        )]);
+        )]
+    );
     fTileProvider->registerClass<tileprovider::TileProviderByIndex>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::ByIndexTileLayer
-        )]);
+        )]
+    );
 
     FactoryManager::ref().addFactory(std::move(fTileProvider));
 
@@ -191,7 +270,6 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fDashboard, "Dashboard factory was not created");
 
     fDashboard->registerClass<DashboardItemGlobeLocation>("DashboardItemGlobeLocation");
-
 }
 
 globebrowsing::cache::MemoryAwareTileCache* GlobeBrowsingModule::tileCache() {
@@ -608,5 +686,23 @@ GlobeBrowsingModule::urlInfo(const std::string& globe) const
 bool GlobeBrowsingModule::hasUrlInfo(const std::string& globe) const {
     return _urlList.find(globe) != _urlList.end();
 }
+
+bool GlobeBrowsingModule::isCachingEnabled() const {
+    return _cacheEnabled;
+}
+
+bool GlobeBrowsingModule::isInOfflineMode() const {
+    return _offlineMode;
+}
+
+std::string GlobeBrowsingModule::cacheLocation() const {
+    return _cacheLocation;
+}
+
+uint64_t GlobeBrowsingModule::cacheSize() const {
+    uint64_t size = _cacheSizeMB;
+    return size * 1024 * 1024;
+}
+
 
 } // namespace openspace
