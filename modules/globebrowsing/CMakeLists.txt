@@ -120,7 +120,7 @@ if (WIN32)
         openspace-module-globebrowsing
         ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib
     )
-    register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal202.dll")
+    register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal203.dll")
 else (WIN32)
     find_package(GDAL REQUIRED)
 

@@ -37,6 +37,7 @@
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/keybindingmanager.h>
+#include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelpeer.h>
@@ -785,6 +786,7 @@ void OpenSpaceEngine::deinitialize() {
             global::renderEngine.scene()->camera()->getSyncables()
         );
     }
+    global::sessionRecording.deinitialize();
 
     global::deinitialize();
 
@@ -931,6 +933,8 @@ void OpenSpaceEngine::writeSceneDocumentation() {
 void OpenSpaceEngine::preSynchronization() {
     LTRACE("OpenSpaceEngine::preSynchronization(begin)");
 
+    //std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
     std::unique_ptr<performance::PerformanceMeasurement> perf;
     if (global::performanceManager.isEnabled()) {
         perf = std::make_unique<performance::PerformanceMeasurement>(
@@ -972,6 +976,7 @@ void OpenSpaceEngine::preSynchronization() {
         global::renderEngine.updateScene();
         //_navigationHandler->updateCamera(dt);
 
+
         if (_scene) {
             Camera* camera = _scene->camera();
             if (camera) {
@@ -979,6 +984,7 @@ void OpenSpaceEngine::preSynchronization() {
                 camera->invalidateCache();
             }
         }
+        global::sessionRecording.preSynchronization();
         global::parallelPeer.preSynchronization();
     }
 

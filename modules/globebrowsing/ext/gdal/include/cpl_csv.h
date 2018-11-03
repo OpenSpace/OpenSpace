@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_csv.h 36376 2016-11-21 06:54:04Z goatbar $
+ * $Id: cpl_csv.h 99aa5b9717f6d18543ca4487ebd4ccd34cb2b29e 2016-11-21 06:54:04Z Kurt Schwehr $
  *
  * Project:  Common Portability Library
  * Purpose:  Functions for reading and scanning CSV (comma separated,

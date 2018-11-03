@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_mdreader.h 35883 2016-10-24 05:49:15Z goatbar $
+ * $Id: gdal_mdreader.h 7cbc4992fe78542e3ade2da352b283218f4a5ffb 2017-12-19 16:39:24Z Even Rouault $
  *
  * Project:  GDAL Core
  * Purpose:  Read metadata (mainly the remote sensing imagery) from files of
@@ -65,6 +65,12 @@
 #define RPC_LINE_DEN_COEFF  "LINE_DEN_COEFF"
 #define RPC_SAMP_NUM_COEFF  "SAMP_NUM_COEFF"
 #define RPC_SAMP_DEN_COEFF  "SAMP_DEN_COEFF"
+
+/* Optional */
+#define RPC_MIN_LONG        "MIN_LONG"
+#define RPC_MIN_LAT         "MIN_LAT"
+#define RPC_MAX_LONG        "MAX_LONG"
+#define RPC_MAX_LAT         "MAX_LAT"
 
 /**
  * Enumerator of metadata readers

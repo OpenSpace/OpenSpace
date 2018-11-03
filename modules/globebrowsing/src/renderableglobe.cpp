@@ -653,7 +653,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     }
 
     if (_generalProperties.performShading) {
-        const bool onr = _generalProperties.orenNayarRoughness;
+        const float onr = _generalProperties.orenNayarRoughness;
         _localRenderer.program->setUniform("orenNayarRoughness", onr);
         _globalRenderer.program->setUniform("orenNayarRoughness", onr);
     }

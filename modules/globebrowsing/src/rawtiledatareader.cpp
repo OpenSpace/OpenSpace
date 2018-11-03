@@ -24,8 +24,13 @@
 
 #include <modules/globebrowsing/src/rawtiledatareader.h>
 
+#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <ghoul/fmt.h>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
 
@@ -46,6 +51,7 @@
 #endif // _MSC_VER
 
 #include <algorithm>
+#include <fstream>
 
 namespace openspace::globebrowsing {
 
@@ -381,7 +387,73 @@ void RawTileDataReader::initialize() {
     if (_datasetFilePath.empty()) {
         throw ghoul::RuntimeError("File path must not be empty");
     }
-    _dataset = static_cast<GDALDataset*>(GDALOpen(_datasetFilePath.c_str(), GA_ReadOnly));
+
+    GlobeBrowsingModule& module = *global::moduleEngine.module<GlobeBrowsingModule>();
+    
+    std::string content = _datasetFilePath;
+    if (module.isCachingEnabled() && FileSys.fileExists(_datasetFilePath)) {
+        // Only replace the 'content' if the dataset is an XML file and we want to do
+        // caching
+        std::ifstream t(_datasetFilePath);
+        std::string c(
+            (std::istreambuf_iterator<char>(t)),
+            std::istreambuf_iterator<char>()
+        );
+
+        if (c.size() > 10 && c.substr(0, 10) == "<GDAL_WMS>") {
+            // We know that _datasetFilePath is an XML file, so now we add a Cache line
+            // into it iff there isn't already one in the XML and if the configuration
+            // says we should
+
+            // 1. Parse XML
+            // 2. Inject Cache tag if it isn't already there
+            // 3. Serialize XML to pass into GDAL
+
+            LDEBUGC(_datasetFilePath, "Inserting caching tag");
+
+            bool shouldSerializeXml = false;
+
+            CPLXMLNode* root = CPLParseXMLString(c.c_str());
+            CPLXMLNode* cache = CPLSearchXMLNode(root, "Cache");
+            if (!cache) {
+                // If there already is a cache, we don't want to modify it
+                cache = CPLCreateXMLNode(root, CXT_Element, "Cache");
+
+                CPLCreateXMLElementAndValue(
+                    cache,
+                    "Path",
+                    absPath(module.cacheLocation()).c_str()
+                );
+                CPLCreateXMLElementAndValue(cache, "Depth", "4");
+                CPLCreateXMLElementAndValue(cache, "Expires", "315576000"); // 10 years
+                CPLCreateXMLElementAndValue(
+                    cache,
+                    "MaxSize",
+                    std::to_string(module.cacheSize()).c_str()
+                );
+
+                // The serialization only needs to be one if the cache didn't exist
+                // already
+                shouldSerializeXml = true;
+            }
+
+            if (module.isInOfflineMode()) {
+                CPLXMLNode* offlineMode = CPLSearchXMLNode(root, "OfflineMode");
+                if (!offlineMode) {
+                    CPLCreateXMLElementAndValue(root, "OfflineMode", "true");
+                    shouldSerializeXml = true;
+                }
+            }
+
+
+            if (shouldSerializeXml) {
+                content = std::string(CPLSerializeXMLTree(root));
+                //CPLSerializeXMLTreeToFile(root, (_datasetFilePath + ".xml").c_str());
+            }
+        }
+    }
+
+    _dataset = static_cast<GDALDataset*>(GDALOpen(content.c_str(), GA_ReadOnly));
     if (!_dataset) {
         throw ghoul::RuntimeError("Failed to load dataset: " + _datasetFilePath);
     }
