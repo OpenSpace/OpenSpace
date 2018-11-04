@@ -42,15 +42,14 @@ GUIKeyboardHandler::GUIKeyboardHandler() {
 
     global::callback::keyboard.push_back(
         [&](Key key, KeyModifier mod, KeyAction action) -> bool {
-        if (_keyConsumed)
-        {
-            _keyConsumed = false;
-            return true;
+            if (_keyConsumed) {
+                _keyConsumed = false;
+                return true;
+            }
+            else {
+                return false;
+            }
         }
-        else {
-            return false;
-        }
-    }
     );
 }
 
