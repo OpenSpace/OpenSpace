@@ -22,43 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBBROWSER___BROWSER_CLIENT___H__
-#define __OPENSPACE_MODULE_WEBBROWSER___BROWSER_CLIENT___H__
+#ifndef __OPENSPACE_MODULE_CEFWEBGUI___GUI_KEYBOARD_HANDLER___H__
+#define __OPENSPACE_MODULE_CEFWEBGUI___GUI_KEYBOARD_HANDLER___H__
 
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable : 4100)
-#endif // _MSC_VER
+#include <modules/webbrowser/include/webkeyboardhandler.h>
 
-#include <include/cef_client.h>
-
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif // _MSC_VER
+#include <ghoul/opengl/ghoul_gl.h>
+#include <memory>
 
 namespace openspace {
 
-class WebRenderHandler;
-class WebKeyboardHandler;
-
-class BrowserClient : public CefClient {
+class GUIKeyboardHandler : public WebKeyboardHandler {
 public:
-    BrowserClient(WebRenderHandler*, WebKeyboardHandler*);
-
-    CefRefPtr<CefRenderHandler> GetRenderHandler() override;
-    CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() override;
-    CefRefPtr<CefRequestHandler> GetRequestHandler() override;
-    CefRefPtr<CefKeyboardHandler> GetKeyboardHandler() override;
+    GUIKeyboardHandler();
+    virtual ~GUIKeyboardHandler();
 
 private:
-    CefRefPtr<CefRenderHandler> _renderHandler;
-    CefRefPtr<CefKeyboardHandler> _keyboardHandler;
-    CefRefPtr<CefLifeSpanHandler> _lifeSpanHandler;
-    CefRefPtr<CefRequestHandler> _requestHandler;
 
-    IMPLEMENT_REFCOUNTING(BrowserClient);
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_WEBBROWSER___BROWSER_CLIENT___H__
+#endif // __OPENSPACE_MODULE_CEFWEBGUI___GUI_KEYBOARD_HANDLER___H__

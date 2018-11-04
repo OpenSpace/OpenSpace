@@ -22,43 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBBROWSER___BROWSER_CLIENT___H__
-#define __OPENSPACE_MODULE_WEBBROWSER___BROWSER_CLIENT___H__
+#include <modules/cefwebgui/include/guikeyboardhandler.h>
 
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable : 4100)
-#endif // _MSC_VER
+#include <openspace/engine/globalscallbacks.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/textureunit.h>
 
-#include <include/cef_client.h>
-
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif // _MSC_VER
+namespace {
+    constexpr const char* _loggerCat = "WebGUI:KeyboardHandler";
+} // namespace
 
 namespace openspace {
 
-class WebRenderHandler;
-class WebKeyboardHandler;
+GUIKeyboardHandler::GUIKeyboardHandler() {
+    
+    _keyConsumed = false;
 
-class BrowserClient : public CefClient {
-public:
-    BrowserClient(WebRenderHandler*, WebKeyboardHandler*);
+    global::callback::keyboard.push_back(
+        [&](Key key, KeyModifier mod, KeyAction action) -> bool {
+        if (_keyConsumed)
+        {
+            _keyConsumed = false;
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    );
+}
 
-    CefRefPtr<CefRenderHandler> GetRenderHandler() override;
-    CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() override;
-    CefRefPtr<CefRequestHandler> GetRequestHandler() override;
-    CefRefPtr<CefKeyboardHandler> GetKeyboardHandler() override;
-
-private:
-    CefRefPtr<CefRenderHandler> _renderHandler;
-    CefRefPtr<CefKeyboardHandler> _keyboardHandler;
-    CefRefPtr<CefLifeSpanHandler> _lifeSpanHandler;
-    CefRefPtr<CefRequestHandler> _requestHandler;
-
-    IMPLEMENT_REFCOUNTING(BrowserClient);
-};
+GUIKeyboardHandler::~GUIKeyboardHandler() {
+    
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_WEBBROWSER___BROWSER_CLIENT___H__

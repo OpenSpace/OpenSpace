@@ -31,6 +31,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <modules/webbrowser/include/browserinstance.h>
 #include <modules/cefwebgui/include/guirenderhandler.h>
+#include <modules/cefwebgui/include/guikeyboardhandler.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
@@ -82,7 +83,7 @@ void CefWebGuiModule::startOrStopGui() {
         LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", _guiUrl));
         
         if (!_guiInstance) {
-            _guiInstance = std::make_shared<BrowserInstance>(new GUIRenderHandler);
+            _guiInstance = std::make_shared<BrowserInstance>(new GUIRenderHandler, new GUIKeyboardHandler);
             _guiInstance->loadUrl(_guiUrl);
         }
         webBrowserModule->attachEventHandler(_guiInstance);

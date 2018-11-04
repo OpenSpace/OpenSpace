@@ -199,6 +199,7 @@ endif (OS_WINDOWS)
 set(HEADER_FILES
     webbrowsermodule.h
     include/webrenderhandler.h
+    include/webkeyboardhandler.h
     include/browserclient.h
     include/screenspacebrowser.h
     include/browserinstance.h
@@ -212,6 +213,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 set(SOURCE_FILES
     webbrowsermodule.cpp
     src/webrenderhandler.cpp
+    src/webkeyboardhandler.cpp
     src/browserclient.cpp
     src/screenspacebrowser.cpp
     src/browserinstance.cpp

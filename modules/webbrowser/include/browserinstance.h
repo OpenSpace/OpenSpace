@@ -43,10 +43,11 @@ namespace openspace {
 
 class BrowserClient;
 class WebRenderHandler;
+class WebKeyboardHandler;
 
 class BrowserInstance {
 public:
-    BrowserInstance(WebRenderHandler* renderer);
+    BrowserInstance(WebRenderHandler* renderer, WebKeyboardHandler *keyboardHandler);
     ~BrowserInstance();
 
     void loadUrl(const std::string& url);
@@ -97,6 +98,7 @@ public:
 
 private:
     CefRefPtr<WebRenderHandler> _renderHandler;
+    CefRefPtr<WebKeyboardHandler> _keyboardHandler;
     CefRefPtr<BrowserClient> _client;
     CefRefPtr<CefBrowser> _browser;
     bool _isInitialized = false;

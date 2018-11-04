@@ -26,11 +26,13 @@
 
 #include <modules/webbrowser/include/defaultbrowserlauncher.h>
 #include <modules/webbrowser/include/webrenderhandler.h>
+#include <modules/webbrowser/include/webkeyboardhandler.h>
 
 namespace openspace {
 
-BrowserClient::BrowserClient(WebRenderHandler* handler)
-    : _renderHandler(handler)
+BrowserClient::BrowserClient(WebRenderHandler* handler, WebKeyboardHandler *keyboardHandler)
+    : _renderHandler(handler),
+    _keyboardHandler(keyboardHandler)
 {
     DefaultBrowserLauncher* browserLauncher = new DefaultBrowserLauncher;
     _lifeSpanHandler = browserLauncher;
@@ -47,6 +49,10 @@ CefRefPtr<CefLifeSpanHandler> BrowserClient::GetLifeSpanHandler() {
 
 CefRefPtr<CefRequestHandler> BrowserClient::GetRequestHandler() {
     return _requestHandler;
+}
+
+CefRefPtr<CefKeyboardHandler> BrowserClient::GetKeyboardHandler() {
+    return _keyboardHandler;
 }
 
 } // namespace openspace
