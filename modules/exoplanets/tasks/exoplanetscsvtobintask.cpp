@@ -221,14 +221,13 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
 	std::ofstream bin_file(_outputBINPath, std::ios::out | std::ios::binary);
     std::ofstream lut_file(_outputLUTPath);
 
-    std::ofstream bmv_file(absPath("${BASE}/modules/exoplanets/bmv.txt"));
-
 	int version = 1;
 	bin_file.write((char *)&version, sizeof(int));
 
 	Exoplanet p;
 
 	std::string planetname;
+    std::string component;
 	std::string planet_row;
 	getline(csv_file, planet_row); // The first line, containing the data names
 
@@ -310,6 +309,7 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
             p.BMV = NAN;
 		getline(lineStream, data_s, ','); // CHI2
 		getline(lineStream, data_s, ','); // COMP
+        component = data_s;
 		getline(lineStream, data_s, ','); // DATE
 		getline(lineStream, data_s, ','); // DEC
 		getline(lineStream, data_s, ','); // DEC_STRING
@@ -472,8 +472,6 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
 		getline(lineStream, data_s, ','); // MSTARURL
 		getline(lineStream, data_s, ','); // MULT
 		getline(lineStream, data_s, ','); // NAME
-		planetname = data_s;
-
 		getline(lineStream, data_s, ','); // NCOMP
 		if (!data_s.empty())
 			p.NCOMP = std::stoi(data_s.c_str(), nullptr);
@@ -678,8 +676,8 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
 		getline(lineStream, data_s, ','); // SPECREF
 		getline(lineStream, data_s, ','); // SPECURL
 		getline(lineStream, data_s, ','); // STAR
-		std::string starname = getExplName(data_s);
-        glm::vec3 pos = getStarPosition(starname);
+		std::string  speckStarname = getExplName(data_s);
+        glm::vec3 pos = getStarPosition(speckStarname);
 		p.POSITIONX = pos[0];
 		p.POSITIONY = pos[1];
 		p.POSITIONZ = pos[2];
@@ -790,7 +788,7 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
                             bv_upper = std::stof(bv_string.c_str(), nullptr);
                             if (bv_lower == 0)
                             {
-                                BV = 1.45;
+                                BV = 2.00;
                             }
                             else
                                 BV = (((bv_upper - bv_lower)*(teff - teff_lower)) / (teff_upper - teff_lower)) + bv_lower;
@@ -808,17 +806,16 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
             }
 
 			long pos = bin_file.tellp();
+            planetname = speckStarname + " " + component;
 			lut_file << planetname << "," << pos << std::endl;
 			bin_file.write((char *)&p, sizeof(struct Exoplanet));
 
-            bmv_file << planetname << "     " << p.ECC << "      " << p.ECCLOWER << "      " << p.ECCUPPER << std::endl;
 		}
 	}
 
 	csv_file.close();
 	bin_file.close();
 	lut_file.close();
-    bmv_file.close();
 
     progressCallback(1.0f);
 }
