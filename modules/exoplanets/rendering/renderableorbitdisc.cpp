@@ -48,7 +48,7 @@ namespace {
     static const openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value specifies the semi-major axis of teh orbit in meter."
+        "This value specifies the semi-major axis of the orbit in meter."
     };
     
     static const openspace::properties::Property::PropertyInfo EccentricityInfo = {
@@ -122,7 +122,7 @@ documentation::Documentation RenderableOrbitdisc::Documentation() {
 RenderableOrbitdisc::RenderableOrbitdisc(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath(TextureInfo)
-    , _size(SizeInfo, 1.f, 0.f, 3.0e11f)
+    , _size(SizeInfo, 1.f, 0.f, 3.0e12f)
     , _eccentricity(EccentricityInfo, 0.f, 0.f, 1.f)
     , _offset(OffsetInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
     , _transparency(TransparencyInfo, 0.15f, 0.f, 1.f)
