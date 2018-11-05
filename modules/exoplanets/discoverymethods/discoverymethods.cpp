@@ -314,7 +314,7 @@ namespace openspace::exoplanets{
         float periapsisDistance = semiMajorAxis * (1.0 - eccentricity); // in AU
         periapsisDistance *= 149597870700.0; // in m
         starRadius *= 6.957E8; // in m
-        float scale = (0.1 * periapsisDistance) / starRadius;
+        float scale = (0.2 * periapsisDistance) / starRadius;
         scaleNode(starName + "Globe", scale);
         scaleNode(planetNames[0], scale); // using planetNames[0] because i know that will be the one visible after removing outer planets
         // END SCALE
