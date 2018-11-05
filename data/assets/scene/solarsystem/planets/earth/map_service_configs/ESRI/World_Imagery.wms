@@ -17,12 +17,5 @@
   <BlockSizeY>256</BlockSizeY>
   <BandsCount>3</BandsCount>
   <MaxConnections>5</MaxConnections>
-  <OfflineMode>false</OfflineMode>
   <Timeout>5</Timeout>
-
-  <Cache>
-    <Path>./gdalwmscache</Path>
-    <Extension>.jpg</Extension>
-    <MaxSize>21474836480</MaxSize>
-  </Cache>
 </GDAL_WMS>
