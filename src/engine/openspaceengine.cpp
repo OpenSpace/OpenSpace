@@ -73,6 +73,7 @@
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
+#include <ghoul/misc/stringconversion.h>
 #include <ghoul/opengl/debugcontext.h>
 #include <ghoul/opengl/shaderpreprocessor.h>
 #include <ghoul/opengl/texture.h>
@@ -223,7 +224,7 @@ void OpenSpaceEngine::initialize() {
         ghoul::logging::LogManager::deinitialize();
     }
 
-    ghoul::logging::LogLevel level = ghoul::logging::levelFromString(
+    ghoul::logging::LogLevel level = ghoul::from_string<ghoul::logging::LogLevel>(
         global::configuration.logging.level
     );
     bool immediateFlush = global::configuration.logging.forceImmediateFlush;
@@ -550,8 +551,8 @@ void OpenSpaceEngine::initializeGL() {
 
     if (global::configuration.isLoggingOpenGLCalls) {
         using namespace ghoul::logging;
-        LogLevel level = levelFromString(global::configuration.logging.level);
-        if (level > LogLevel::Trace) {
+        LogLevel lvl = ghoul::from_string<LogLevel>(global::configuration.logging.level);
+        if (lvl > LogLevel::Trace) {
             LWARNING(
                 "Logging OpenGL calls is enabled, but the selected log level does "
                 "not include TRACE, so no OpenGL logs will be printed");
