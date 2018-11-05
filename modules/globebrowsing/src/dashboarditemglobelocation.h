@@ -29,6 +29,7 @@
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 
 namespace ghoul::fontrendering { class Font; }
 
@@ -50,6 +51,8 @@ public:
 private:
     properties::StringProperty _fontName;
     properties::FloatProperty _fontSize;
+
+    properties::IntProperty _significantDigits;
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
