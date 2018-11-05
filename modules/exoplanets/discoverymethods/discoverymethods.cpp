@@ -460,7 +460,7 @@ namespace openspace::exoplanets{
         	    "Type = 'RenderablePlaneImageLocal',"
         	    "Size = 6.957E8," //RSTAR. in meters. 1 solar radii = 6.95700×10e8 m
         	    "Billboard = true,"
-        	    "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/target-blue-ring.png',"
+        	    "Texture = 'C:/Users/Karin/Documents/LiU/Exjobb/clone_to_branch/OpenSpace/modules/exoplanets/target-blue-ring.png',"
         	    "BlendMode = 'Additive'"
         	"},"
             "Transform = {"
@@ -478,29 +478,33 @@ namespace openspace::exoplanets{
         );
 
         // EARTH
-        const std::string earthRef = "{"
-            "Identifier = 'EarthReference',"
-            "Parent = '" + planetNames[0] + "',"
-            "Renderable = {"
+        for (int i = 0; i < planetNames.size(); i++)
+        {
+            const std::string earthRef = "{"
+                "Identifier = 'EarthReference" + std::to_string(i) + "',"
+                "Parent = '" + planetNames[i] + "',"
+                "Renderable = {"
                 "Type = 'RenderablePlaneImageLocal',"
                 "Size = 6378137," // in meters
                 "Billboard = true,"
-                "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/target-blue-ring.png',"
+                "Texture = 'C:/Users/Karin/Documents/LiU/Exjobb/clone_to_branch/OpenSpace/modules/exoplanets/target-blue-ring.png',"
                 "BlendMode = 'Additive'"
-            "},"
-            "Transform = {"
-                "Translation = {"
-                    "Type = 'StaticTranslation',"
-                    "Position = {0, 0, 0}," //Jupiter radii to m " + std::to_string(planets[0].R) + "* 7.1492E7
                 "},"
-            "},"
-        "}";
-        script = "";
-        script = "openspace.addSceneGraphNode(" + earthRef + ");";
-        OsEng.scriptEngine().queueScript(
-            script,
-            openspace::scripting::ScriptEngine::RemoteScripting::Yes
-        );
+                "Transform = {"
+                "Translation = {"
+                "Type = 'StaticTranslation',"
+                "Position = {0, 0, 0}," //Jupiter radii to m " + std::to_string(planets[0].R) + "* 7.1492E7
+                "},"
+                "},"
+                "}";
+            script = "";
+            script = "openspace.addSceneGraphNode(" + earthRef + ");";
+            OsEng.scriptEngine().queueScript(
+                script,
+                openspace::scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
+        
 
         glm::dmat3 rotation = OsEng.moduleEngine().module<ExoplanetsModule>()->getRotation();
         // ORBIT
@@ -511,7 +515,7 @@ namespace openspace::exoplanets{
                 "Type = 'RenderablePlaneImageLocal',"
                 "Size = 1.496E11," // earths semi-major axis in m
                 "Billboard = false,"
-                "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/target-blue-ring.png',"
+                "Texture = 'C:/Users/Karin/Documents/LiU/Exjobb/clone_to_branch/OpenSpace/modules/exoplanets/target-blue-ring.png',"
                 "BlendMode = 'Additive'"
             "},"
             "Transform = {"
