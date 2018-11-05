@@ -34,7 +34,7 @@ template <typename Func>
 int walkCommon(lua_State* L, Func func) {
     int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 1, 3 }, "lua::walkCommon");
 
-    const std::string& path = ghoul::lua::value<std::string>(L, 1);
+    std::string path = ghoul::lua::value<std::string>(L, 1);
 
     std::vector<std::string> result;
     if (nArguments == 1) {
