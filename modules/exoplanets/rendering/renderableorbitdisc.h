@@ -84,4 +84,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SPACE___RENDERABLERINGS___H__
+#endif // __OPENSPACE_MODULE_EXOPLENETS___RENDERABLEORBITDISC___H__
