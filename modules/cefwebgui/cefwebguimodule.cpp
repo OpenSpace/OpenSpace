@@ -42,9 +42,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
-        "This setting determines whether this object will be visible or not."
+        "This setting determines whether the browser should be enabled or not."
     };
-    
+
+    constexpr openspace::properties::Property::PropertyInfo VisibleInfo = {
+        "Visible",
+        "Is Visible",
+        "This setting determines whether the browser should be visible or not."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo GuiUrlInfo = {
         "GuiUrl",
         "GUI URL",
@@ -57,9 +63,11 @@ namespace openspace {
 CefWebGuiModule::CefWebGuiModule()
     : OpenSpaceModule(CefWebGuiModule::Name)
     , _cefWebGuiEnabled(EnabledInfo, true)
+    , _cefWebGuiVisible(VisibleInfo, true)
     , _guiUrl(GuiUrlInfo, "")
 {
     addProperty(_cefWebGuiEnabled);
+    addProperty(_cefWebGuiVisible);
     addProperty(_guiUrl);
 }
     
@@ -92,7 +100,8 @@ void CefWebGuiModule::updateUrl() {
 
 void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
     WebBrowserModule* webBrowserModule =
-    global::moduleEngine.module<WebBrowserModule>();
+        global::moduleEngine.module<WebBrowserModule>();
+
     _webBrowserIsAvailable = webBrowserModule && webBrowserModule->isEnabled();
 
     if (!_webBrowserIsAvailable) {
@@ -107,7 +116,11 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         updateUrl();
     });
 
-    _guiUrl = configuration.value<std::string>("Url");
+    _guiUrl = configuration.value<std::string>(GuiUrlInfo.identifier);
+
+    _cefWebGuiEnabled = configuration.hasValue<bool>(EnabledInfo.identifier) && configuration.value<bool>(EnabledInfo.identifier);
+
+    _cefWebGuiVisible = configuration.hasValue<bool>(VisibleInfo.identifier) && configuration.value<bool>(VisibleInfo.identifier);
 
     global::callback::initializeGL.push_back([this]() {
         startOrStopGui();
@@ -119,7 +132,9 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
             if (windowDelegate.windowHasResized()) {
                 _guiInstance->reshape(windowDelegate.currentWindowSize());
             }
-            _guiInstance->draw();
+            if (_cefWebGuiVisible) {
+                _guiInstance->draw();
+            }
         }
     });
 

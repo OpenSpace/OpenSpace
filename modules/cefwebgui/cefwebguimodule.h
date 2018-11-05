@@ -46,6 +46,7 @@ private:
     void updateUrl();
 
     properties::BoolProperty _cefWebGuiEnabled;
+    properties::BoolProperty _cefWebGuiVisible;
     properties::StringProperty _guiUrl;
     std::shared_ptr<BrowserInstance> _guiInstance;
     bool _webBrowserIsAvailable = false;

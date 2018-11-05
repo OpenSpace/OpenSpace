@@ -106,6 +106,27 @@ openspace.setPropertyValueSingle('Modules.ImGUI.Main.IsHidden', b);]],
         Documentation = "Toggles the fade to black within 3 seconds or shows the rendering after 3 seconds.",
         GuiPath = "/Rendering",
         Local = false
+    },
+    {
+        Key = "Tab",
+        Name = "Toggle main GUI",
+        Command = propertyHelper.invert('Modules.CefWebGui.Visible'),
+        Documentation = "Toggles the main GUI",
+        GuiPath = "/GUI",
+        Local = false
+    },
+    {
+        Key = "Shift+Tab",
+        Name = "Toggle dashboard and overlays",
+        Command =
+[[local isEnabled = openspace.getPropertyValue('Dashboard.IsEnabled');
+openspace.setPropertyValueSingle('Dashboard.IsEnabled', not isEnabled);
+openspace.setPropertyValueSingle("RenderEngine.ShowLog", not isEnabled);
+openspace.setPropertyValueSingle("RenderEngine.ShowVersion", not isEnabled);
+openspace.setPropertyValueSingle("RenderEngine.ShowCamera", not isEnabled)]],
+        Documentation = "Toggles the dashboard and overlays",
+        GuiPath = "/GUI",
+        Local = false
     }
 }
 
