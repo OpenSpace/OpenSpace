@@ -27,8 +27,9 @@
 #include <modules/webbrowser/include/browserinstance.h>
 #include <modules/webbrowser/include/cefhost.h>
 #include <modules/webbrowser/include/screenspacebrowser.h>
-#include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -57,6 +58,10 @@ WebBrowserModule::WebBrowserModule() : OpenSpaceModule(WebBrowserModule::Name) {
 WebBrowserModule::~WebBrowserModule() {}
 
 void WebBrowserModule::internalDeinitialize() {
+    if (!_enabled) {
+        return;
+    }
+
     _eventHandler.detachBrowser();
 
     bool forceBrowserShutdown = true;
@@ -80,6 +85,19 @@ std::string WebBrowserModule::findHelperExecutable() {
 
 void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     _webHelperLocation = dictionary.value<std::string>("WebHelperLocation");
+    if (dictionary.hasKeyAndValue<bool>("Enabled")) {
+        _enabled = dictionary.value<bool>("Enabled");
+    }
+
+    const bool isGuiWindow =
+        global::windowDelegate.hasGuiWindow() ?
+        global::windowDelegate.isGuiWindow() :
+        true;
+    const bool isMaster = global::windowDelegate.isMaster();
+
+    if (!_enabled || !isGuiWindow || !isMaster) {
+        return;
+    }
 
     LDEBUG("Starting CEF...");
     std::string helperLocation = findHelperExecutable();
@@ -105,14 +123,17 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     fScreenSpaceRenderable->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
 }
 
-int WebBrowserModule::addBrowser(std::shared_ptr<BrowserInstance> browser) {
-    static int browserId = 0;
+void WebBrowserModule::addBrowser(std::shared_ptr<BrowserInstance> browser) {
+    if (!_enabled) {
+        return;
+    }
     _browsers.push_back(browser);
-    const int givenId = browserId++;
-    return givenId;
 }
 
 void WebBrowserModule::removeBrowser(std::shared_ptr<BrowserInstance> browser) {
+    if (!_enabled) {
+        return;
+    }
     const auto p = std::find(_browsers.begin(), _browsers.end(), browser);
     if (p != _browsers.end()) {
         _browsers.erase(p);
@@ -126,12 +147,21 @@ void WebBrowserModule::removeBrowser(std::shared_ptr<BrowserInstance> browser) {
 void WebBrowserModule::attachEventHandler(
                                          std::shared_ptr<BrowserInstance> browserInstance)
 {
+    if (!_enabled) {
+        return;
+    }
     _eventHandler.setBrowserInstance(browserInstance);
 }
 
-void WebBrowserModule::detachEventHandler()
-{
+void WebBrowserModule::detachEventHandler() {
+    if (!_enabled) {
+        return;
+    }
     _eventHandler.setBrowserInstance(nullptr);
+}
+
+bool WebBrowserModule::isEnabled() const {
+    return _enabled;
 }
 
 } // namespace openspace

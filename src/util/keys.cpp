@@ -26,6 +26,7 @@
 
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/misc.h>
 #include <algorithm>
 #include <vector>

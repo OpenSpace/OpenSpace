@@ -211,10 +211,22 @@ openspace.globebrowsing.parseInfoFile = function (file)
 end
 
 openspace.globebrowsing.addBlendingLayersFromDirectory = function (dir, node_name)
+    local function ends_with(str, ending)
+        return ending == '' or str:sub(-#ending) == ending
+    end
+
+    -- Walking the directory with an empty string will cause the current working directory
+    -- to be walked recursively. This is probably not what the users expects (and it is
+    -- also one of the default values in the globebrowsing customization script), so we
+    -- ignore the empty string here
+    if dir == '' then
+        return
+    end
+
     local files = openspace.walkDirectoryFiles(dir, true, true)
 
     for _, file in pairs(files) do
-        if file and file:find('.info') then
+        if file and file:find('.info') and ends_with(file, '.info') then
             local c, h
             _, c, h, _ = openspace.globebrowsing.parseInfoFile(file)
 

@@ -39,11 +39,12 @@ public:
     WebBrowserModule();
     virtual ~WebBrowserModule();
 
-    int addBrowser(std::shared_ptr<BrowserInstance>);
+    void addBrowser(std::shared_ptr<BrowserInstance>);
     void removeBrowser(std::shared_ptr<BrowserInstance>);
 
     void attachEventHandler(std::shared_ptr<BrowserInstance> browserInstance);
     void detachEventHandler();
+    bool isEnabled() const;
 
 protected:
     void internalInitialize(const ghoul::Dictionary& configuration) override;
@@ -62,6 +63,7 @@ private:
     EventHandler _eventHandler;
     std::unique_ptr<CefHost> _cefHost;
     std::string _webHelperLocation;
+    bool _enabled = true;
 };
 
 } // namespace openspace

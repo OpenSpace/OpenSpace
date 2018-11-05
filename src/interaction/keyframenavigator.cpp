@@ -169,12 +169,15 @@ bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose prevPose, 
 }
 
 double KeyframeNavigator::currentTime() const {
-    if( _timeframeMode == KeyframeTimeRef::relative_recordedStart )
+    if (_timeframeMode == KeyframeTimeRef::Relative_recordedStart) {
         return (global::windowDelegate.applicationTime() - _referenceTimestamp);
-    else if( _timeframeMode == KeyframeTimeRef::absolute_simTimeJ2000 )
+    }
+    else if (_timeframeMode == KeyframeTimeRef::Absolute_simTimeJ2000) {
         return global::timeManager.time().j2000Seconds();
-    else
+    }
+    else {
         return global::windowDelegate.applicationTime();
+    }
 }
 
 void KeyframeNavigator::setTimeReferenceMode(KeyframeTimeRef refType, double referenceTimestamp) {

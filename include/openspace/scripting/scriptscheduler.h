@@ -35,10 +35,10 @@
 #include <functional>
 
 namespace {
-    const char* KeyTime = "Time";
-    const char* KeyForwardScript = "ForwardScript";
-    const char* KeyBackwardScript = "BackwardScript";
-    const char* KeyUniversalScript = "Script";
+    constexpr const char* KeyTime = "Time";
+    constexpr const char* KeyForwardScript = "ForwardScript";
+    constexpr const char* KeyBackwardScript = "BackwardScript";
+    constexpr const char* KeyUniversalScript = "Script";
 } // namespace
 
 namespace ghoul { class Dictionary; }
@@ -153,7 +153,7 @@ private:
     bool _playbackModeEnabled = false;
 
     openspace::interaction::KeyframeTimeRef _timeframeMode
-        = openspace::interaction::KeyframeTimeRef::absolute_simTimeJ2000;
+        = openspace::interaction::KeyframeTimeRef::Absolute_simTimeJ2000;
 };
 
 } // namespace openspace::scripting

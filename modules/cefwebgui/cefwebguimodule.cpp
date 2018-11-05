@@ -31,6 +31,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <modules/webbrowser/include/browserinstance.h>
 #include <modules/cefwebgui/include/guirenderhandler.h>
+#include <modules/cefwebgui/include/guikeyboardhandler.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
@@ -41,9 +42,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
-        "This setting determines whether this object will be visible or not."
+        "This setting determines whether the browser should be enabled or not."
     };
-    
+
+    constexpr openspace::properties::Property::PropertyInfo VisibleInfo = {
+        "Visible",
+        "Is Visible",
+        "This setting determines whether the browser should be visible or not."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo GuiUrlInfo = {
         "GuiUrl",
         "GUI URL",
@@ -56,33 +63,32 @@ namespace openspace {
 CefWebGuiModule::CefWebGuiModule()
     : OpenSpaceModule(CefWebGuiModule::Name)
     , _cefWebGuiEnabled(EnabledInfo, true)
+    , _cefWebGuiVisible(VisibleInfo, true)
     , _guiUrl(GuiUrlInfo, "")
 {
     addProperty(_cefWebGuiEnabled);
+    addProperty(_cefWebGuiVisible);
     addProperty(_guiUrl);
-    
-    _cefWebGuiEnabled.onChange([this]() {
-        startOrStopGui();
-    });
-    
-    _guiUrl.onChange([this]() {
-        updateUrl();
-    });
 }
     
 void CefWebGuiModule::startOrStopGui() {
     WebBrowserModule* webBrowserModule =
         global::moduleEngine.module<WebBrowserModule>();
     
-    if (!webBrowserModule) {
-        return;
-    }
-    
-    if (_cefWebGuiEnabled) {
+    const bool isGuiWindow =
+        global::windowDelegate.hasGuiWindow() ?
+        global::windowDelegate.isGuiWindow() :
+        true;
+    const bool isMaster = global::windowDelegate.isMaster();
+
+    if (_cefWebGuiEnabled && isGuiWindow && isMaster) {
         LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", _guiUrl));
         
         if (!_guiInstance) {
-            _guiInstance = std::make_shared<BrowserInstance>(new GUIRenderHandler);
+            _guiInstance = std::make_shared<BrowserInstance>(
+                new GUIRenderHandler,
+                new GUIKeyboardHandler
+            );
             _guiInstance->loadUrl(_guiUrl);
         }
         webBrowserModule->attachEventHandler(_guiInstance);
@@ -102,19 +108,52 @@ void CefWebGuiModule::updateUrl() {
 }
 
 void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
-    _guiUrl = configuration.value<std::string>("Url");
+    WebBrowserModule* webBrowserModule =
+        global::moduleEngine.module<WebBrowserModule>();
+
+    _webBrowserIsAvailable = webBrowserModule && webBrowserModule->isEnabled();
+
+    if (!_webBrowserIsAvailable) {
+        return;
+    }
+
+    _cefWebGuiEnabled.onChange([this]() {
+        startOrStopGui();
+    });
+
+    _guiUrl.onChange([this]() {
+        updateUrl();
+    });
+
+    _guiUrl = configuration.value<std::string>(GuiUrlInfo.identifier);
+
+    _cefWebGuiEnabled = _webBrowserIsAvailable &&
+        configuration.hasValue<bool>(EnabledInfo.identifier) &&
+        configuration.value<bool>(EnabledInfo.identifier);
+
+    _cefWebGuiVisible = _webBrowserIsAvailable &&
+        configuration.hasValue<bool>(VisibleInfo.identifier) &&
+        configuration.value<bool>(VisibleInfo.identifier);
 
     global::callback::initializeGL.push_back([this]() {
         startOrStopGui();
     });
 
     global::callback::draw2D.push_back([this](){
-        WindowDelegate& windowDelegate = global::windowDelegate;
-        if (windowDelegate.isMaster() && _guiInstance) {
-            if (windowDelegate.windowHasResized()) {
-                _guiInstance->reshape(windowDelegate.currentWindowSize());
+        const bool isGuiWindow =
+            global::windowDelegate.hasGuiWindow() ?
+            global::windowDelegate.isGuiWindow() :
+            true;
+        const bool isMaster = global::windowDelegate.isMaster();
+
+
+        if (isGuiWindow && isMaster && _guiInstance) {
+            if (global::windowDelegate.windowHasResized()) {
+                _guiInstance->reshape(global::windowDelegate.currentWindowSize());
             }
-            _guiInstance->draw();
+            if (_cefWebGuiVisible) {
+                _guiInstance->draw();
+            }
         }
     });
 

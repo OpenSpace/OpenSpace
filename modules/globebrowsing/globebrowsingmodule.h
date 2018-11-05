@@ -25,6 +25,9 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
 
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/uintproperty.h>
 #include <openspace/util/openspacemodule.h>
 
 #include <ghoul/glm.h>
@@ -82,6 +85,11 @@ public:
 
     void removeWMSServer(const std::string& name);
 
+    bool isCachingEnabled() const;
+    bool isInOfflineMode() const;
+    std::string cacheLocation() const;
+    uint64_t cacheSize() const; // bytes
+
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
 
@@ -103,6 +111,12 @@ private:
      \return a comma separated list of layer type names.
      */
     static std::string layerTypeNamesList();
+
+
+    properties::BoolProperty _cacheEnabled;
+    properties::BoolProperty _offlineMode;
+    properties::StringProperty _cacheLocation;
+    properties::UIntProperty _cacheSizeMB;
 
     std::unique_ptr<globebrowsing::cache::MemoryAwareTileCache> _tileCache;
 

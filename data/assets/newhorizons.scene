@@ -22,18 +22,24 @@ local Keybindings = {
         Key = "a",
         Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'NewHorizons')",
         Documentation = "Sets the focus of the camera on 'NewHorizons'.",
+        Name = "Focus on New Horizons",
+        GuiPath = "/New Horizons",
         Local = false
     },
     {
         Key = "s",
         Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'Pluto')",
         Documentation = "Sets the focus of the camera on 'Pluto'",
+        Name = "Focus on Pluto",
+        GuiPath = "/New Horizons",
         Local = false
     },
     {
         Key = "d",
         Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'Charon')",
         Documentation = "Sets the focus of the camera on 'Charon'.",
+        Name = "Focus on New Charon",
+        GuiPath = "/New Horizons",
         Local = false
     },
     {
@@ -41,6 +47,8 @@ local Keybindings = {
         Command = "openspace.setPropertyValue('Scene.Pluto.renderable.ProjectionComponent.ClearAllProjections', true);" ..
                   "openspace.setPropertyValue('Scene.Charon.renderable.ProjectionComponent.ClearAllProjections', true);",
         Documentation = "Removes all image projections from Pluto and Charon.",
+        Name = "Clear image projections",
+        GuiPath = "/New Horizons",
         Local = false
     },
     {
@@ -49,48 +57,48 @@ local Keybindings = {
                   "openspace.setPropertyValue('Scene.Pluto.renderable.ClearAllProjections', true);" ..
                   "openspace.setPropertyValue('Scene.Charon.renderable.ClearAllProjections', true);",
         Documentation = "Jumps to the 14th of July 2015 at 0900 UTC and clears all projections.",
+        Name = "Reset time and projections",
+        GuiPath = "/New Horizons",
         Local = false
     },
     {
         Key = "KP_8",
         Command = propertyHelper.increment('Scene.Pluto.renderable.HeightExaggeration', 5000000),
         Documentation = "Increases the height map exaggeration on Pluto.",
+        Name = "Pluto HeightExaggeration +",
+        GuiPath = "/New Horizons",
         Local = false
     },
     {
         Key = "KP_2",
         Command = propertyHelper.decrement('Scene.Pluto.renderable.HeightExaggeration', 5000000),
         Documentation = "Decreases the height map exaggeration on Pluto.",
+        Name = "Pluto HeightExaggeration -",
+        GuiPath = "/New Horizons",
         Local = false
     },
     {
         Key = "KP_9",
         Command = propertyHelper.increment('Scene.Charon.renderable.HeightExaggeration', 5000000),
         Documentation = "Increases the height map exaggeration on Charon.",
+        Name = "Charon HeightExaggeration +",
+        GuiPath = "/New Horizons",
         Local = false
     },
     {
         Key = "KP_3",
         Command = propertyHelper.decrement('Scene.Charon.renderable.HeightExaggeration', 5000000),
         Documentation = "Decreases the height map exaggeration on Charon.",
-        Local = false
-    },
-    {
-        Key = "q",
-        Command = propertyHelper.invert('Scene.SunMarker.renderable.Enabled'),
-        Documentation = "Toggles the visibility of the text marking the location of the Sun.",
-        Local = false
-    },
-    {
-        Key = "e",
-        Command = propertyHelper.invert('Scene.EarthMarker.renderable.Enabled'),
-        Documentation = "Toggles the visibility of the text marking the location of the Earth.",
+        Name = "Charon HeightExaggeration -",
+        GuiPath = "/New Horizons",
         Local = false
     },
     {
         Key = "o",
         Command = propertyHelper.invert('Scene.PlutoTrail.renderable.Enabled'),
         Documentation = "Toggles the visibility of the trail behind Pluto.",
+        Name = "Toggle Pluto Trail",
+        GuiPath = "/New Horizons",
         Local = false
     },
     {
@@ -99,12 +107,16 @@ local Keybindings = {
                   renderableHelper.toggle('Scene.HydraText') .. renderableHelper.toggle('Scene.NixText') ..
                   renderableHelper.toggle('Scene.KerberosText') .. renderableHelper.toggle('Scene.StyxText'),
         Documentation = "Toggles the visibility of the text labels of Pluto, Charon, Hydra, Nix, Kerberos, and Styx.",
+        Name = "Toggle Pluto Labels",
+        GuiPath = "/New Horizons",
         Local = false
     },
     {
         Key = "l",
         Command = propertyHelper.fadeInOut('Scene.Labels.renderable.Opacity', 2.0),
         Documentation = "Toggles the visibility of the labels for the New Horizons instruments.",
+        Name = "Toggle New Horizons Labels",
+        GuiPath = "/New Horizons",
         Local = false
     },
     {
@@ -121,12 +133,16 @@ local Keybindings = {
                   propertyHelper.invert('Scene.NH_ALICE_AIRGLOW.renderable.SolidDraw') ..
                   propertyHelper.invert('Scene.NH_ALICE_SOC.renderable.SolidDraw'),
         Documentation = "Draws the instrument field of views in a solid color or as lines.",
+        Name = "Toggle instrument FOVs",
+        GuiPath = "/New Horizons",
         Local = false
     },
     {
         Key = "t",
         Command = renderableHelper.toggle('Scene.PlutoShadow') .. renderableHelper.toggle('Scene.CharonShadow'),
         Documentation = "Toggles the visibility of the shadow visualization of Pluto and Charon.",
+        Name = "Toggle Shadows",
+        GuiPath = "/New Horizons",
         Local = false
     }
 }

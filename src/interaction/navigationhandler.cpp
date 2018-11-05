@@ -154,7 +154,7 @@ void NavigationHandler::updateCamera(double deltaTime) {
     if (_cameraUpdatedFromScript) {
         _cameraUpdatedFromScript = false;
     }
-    else if( ! _playbackModeEnabled ) {
+    else if ( ! _playbackModeEnabled ) {
         if (_camera && focusNode()) {
             if (_useKeyFrameInteraction) {
                 _keyframeNavigator->updateCamera(*_camera, _playbackModeEnabled);

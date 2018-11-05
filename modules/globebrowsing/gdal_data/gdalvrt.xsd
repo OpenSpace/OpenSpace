@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /******************************************************************************
- * $Id: gdalvrt.xsd 35479 2016-09-16 20:34:58Z rouault $
+ * $Id: gdalvrt.xsd ff896f5762108a473f1f774dbab003d8fa1b0476 2016-09-16 20:34:58Z Even Rouault $
  *
  * Project:  GDAL/OGR
  * Purpose:  XML Schema for GDAL VRT files.

@@ -271,10 +271,7 @@ void TimeManager::progressTime(double dt) {
         // and time is not paused, just advance time.
         _deltaTime = _targetDeltaTime;
         _currentTime.data().advanceTime(dt * _deltaTime);
-        //Call the playback callback function if mode is enabled
-        if (_playbackModeEnabled) {
-            _playbackModeEnabled = false;
-        }
+        _playbackModeEnabled = false;
     }
 
     if (hasPastKeyframes) {

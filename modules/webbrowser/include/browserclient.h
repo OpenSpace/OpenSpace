@@ -39,17 +39,20 @@
 namespace openspace {
 
 class WebRenderHandler;
+class WebKeyboardHandler;
 
 class BrowserClient : public CefClient {
 public:
-    BrowserClient(WebRenderHandler*);
+    BrowserClient(WebRenderHandler*, WebKeyboardHandler*);
 
     CefRefPtr<CefRenderHandler> GetRenderHandler() override;
     CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() override;
     CefRefPtr<CefRequestHandler> GetRequestHandler() override;
+    CefRefPtr<CefKeyboardHandler> GetKeyboardHandler() override;
 
 private:
     CefRefPtr<CefRenderHandler> _renderHandler;
+    CefRefPtr<CefKeyboardHandler> _keyboardHandler;
     CefRefPtr<CefLifeSpanHandler> _lifeSpanHandler;
     CefRefPtr<CefRequestHandler> _requestHandler;
 

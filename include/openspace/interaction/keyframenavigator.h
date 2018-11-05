@@ -31,15 +31,17 @@
 #include <ghoul/misc/boolean.h>
 #include <glm/gtx/quaternion.hpp>
 
-namespace openspace { class Camera; }
-namespace openspace { class TimeManager; }
+namespace openspace {
+    class Camera;
+    class TimeManager;
+} // namespace openspace
 
 namespace openspace::interaction {
 
 enum class KeyframeTimeRef {
-    relative_applicationStart,
-    relative_recordedStart,
-    absolute_simTimeJ2000
+    Relative_applicationStart,
+    Relative_recordedStart,
+    Absolute_simTimeJ2000
 };
 
 class KeyframeNavigator {
@@ -63,7 +65,8 @@ public:
     * \returns true only if a new future keyframe is available to set camera pose.
     */
     bool updateCamera(Camera& camera, bool ignoreFutureKeyframes);
-    static bool updateCamera(Camera* camera, const CameraPose prevPose, const CameraPose nextPose, double t, bool ignoreFutureKeyframes);
+    static bool updateCamera(Camera* camera, const CameraPose prevPose,
+        const CameraPose nextPose, double t, bool ignoreFutureKeyframes);
   
     Timeline<CameraPose>& timeline();
     void addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose);
@@ -76,7 +79,7 @@ public:
 
 private:
     Timeline<CameraPose> _cameraPoseTimeline;
-    KeyframeTimeRef _timeframeMode = KeyframeTimeRef::relative_applicationStart;
+    KeyframeTimeRef _timeframeMode = KeyframeTimeRef::Relative_applicationStart;
     double _referenceTimestamp = 0.0;
 };
 

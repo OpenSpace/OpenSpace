@@ -24,7 +24,6 @@
 
 #include <modules/server/include/jsonconverters.h>
 
-#include <openspace/json.h>
 #include <openspace/properties/property.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -37,7 +36,7 @@ namespace openspace::properties {
 void to_json(json& j, const Property& p) {
     j = {
         { "Description", json::parse(p.generateBaseJsonDescription()) },
-        { "Value", p.jsonValue() }
+        { "Value", json::parse(p.jsonValue()) }
     };
     j["Description"]["description"] = p.description();
 }

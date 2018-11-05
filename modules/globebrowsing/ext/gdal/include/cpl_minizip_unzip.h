@@ -1,4 +1,4 @@
-/* $Id: cpl_minizip_unzip.h 35921 2016-10-25 02:28:29Z goatbar $ */
+/* $Id: cpl_minizip_unzip.h 44e0c0ecc2e12f7885d8572d0f18dd94e7fbda1c 2016-10-25 02:28:29Z Kurt Schwehr $ */
 /* Modified version by Even Rouault. :
      - Addition of cpl_unzGetCurrentFileZStreamPos
      - Decoration of symbol names unz* -> cpl_unz*

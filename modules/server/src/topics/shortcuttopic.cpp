@@ -64,6 +64,7 @@ std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
             { "script", shortcut.script },
             { "synchronization", static_cast<bool>(shortcut.synchronization) },
             { "documentation", shortcut.documentation },
+            { "guiPath", shortcut.guiPath },
         };
         json.push_back(shortcutJson);
     }
@@ -87,10 +88,11 @@ std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
                     {"super" , hasKeyModifier(k.modifier, KeyModifier::Super) }
                 }
             },
-            { "name", "" },
+            { "name", info.name },
             { "script", info.command },
             { "synchronization", static_cast<bool>(info.synchronization) },
             { "documentation", info.documentation },
+            { "guiPath", info.guiPath },
         };
         json.push_back(shortcutJson);
     }

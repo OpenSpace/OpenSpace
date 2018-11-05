@@ -230,8 +230,7 @@ ScriptScheduler::progressTo(double newTime)
     }
 }
 
-void ScriptScheduler::setTimeReferenceMode(KeyframeTimeRef refType)
-{
+void ScriptScheduler::setTimeReferenceMode(KeyframeTimeRef refType) {
     _timeframeMode = refType;
 }
 
@@ -261,15 +260,15 @@ std::vector<ScriptScheduler::ScheduledScript> ScriptScheduler::allScripts() cons
 }
 
 void ScriptScheduler::setModeApplicationTime() {
-    _timeframeMode = KeyframeTimeRef::relative_applicationStart;
+    _timeframeMode = KeyframeTimeRef::Relative_applicationStart;
 }
 
 void ScriptScheduler::setModeRecordedTime() {
-    _timeframeMode = KeyframeTimeRef::relative_recordedStart;
+    _timeframeMode = KeyframeTimeRef::Relative_recordedStart;
 }
 
 void ScriptScheduler::setModeSimulationTime() {
-    _timeframeMode = KeyframeTimeRef::absolute_simTimeJ2000;
+    _timeframeMode = KeyframeTimeRef::Absolute_simTimeJ2000;
 }
 
 LuaLibrary ScriptScheduler::luaLibrary() {

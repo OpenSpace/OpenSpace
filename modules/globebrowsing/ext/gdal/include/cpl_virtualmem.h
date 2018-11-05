@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_virtualmem.h 36485 2016-11-24 07:54:20Z goatbar $
+ * $Id: cpl_virtualmem.h aa47027b5633ab93caafae35f82f5e53c72ed05c 2016-11-24 07:54:20Z Kurt Schwehr $
  *
  * Name:     cpl_virtualmem.h
  * Project:  CPL - Common Portability Library
