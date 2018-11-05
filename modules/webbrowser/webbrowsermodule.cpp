@@ -114,14 +114,11 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     fScreenSpaceRenderable->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
 }
 
-int WebBrowserModule::addBrowser(std::shared_ptr<BrowserInstance> browser) {
+void WebBrowserModule::addBrowser(std::shared_ptr<BrowserInstance> browser) {
     if (!_enabled) {
-        return;
+        return -1;
     }
-    static int browserId = 0;
     _browsers.push_back(browser);
-    const int givenId = browserId++;
-    return givenId;
 }
 
 void WebBrowserModule::removeBrowser(std::shared_ptr<BrowserInstance> browser) {

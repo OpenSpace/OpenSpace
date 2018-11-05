@@ -39,7 +39,7 @@ public:
     WebBrowserModule();
     virtual ~WebBrowserModule();
 
-    int addBrowser(std::shared_ptr<BrowserInstance>);
+    void addBrowser(std::shared_ptr<BrowserInstance>);
     void removeBrowser(std::shared_ptr<BrowserInstance>);
 
     void attachEventHandler(std::shared_ptr<BrowserInstance> browserInstance);
