@@ -118,9 +118,13 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
 
     _guiUrl = configuration.value<std::string>(GuiUrlInfo.identifier);
 
-    _cefWebGuiEnabled = configuration.hasValue<bool>(EnabledInfo.identifier) && configuration.value<bool>(EnabledInfo.identifier);
+    _cefWebGuiEnabled = _webBrowserIsAvailable &&
+        configuration.hasValue<bool>(EnabledInfo.identifier) &&
+        configuration.value<bool>(EnabledInfo.identifier);
 
-    _cefWebGuiVisible = configuration.hasValue<bool>(VisibleInfo.identifier) && configuration.value<bool>(VisibleInfo.identifier);
+    _cefWebGuiVisible = _webBrowserIsAvailable &&
+        configuration.hasValue<bool>(VisibleInfo.identifier) &&
+        configuration.value<bool>(VisibleInfo.identifier);
 
     global::callback::initializeGL.push_back([this]() {
         startOrStopGui();
