@@ -53,6 +53,7 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/io/texture/texturereadercmap.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringconversion.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
@@ -1161,7 +1162,7 @@ void RenderEngine::renderScreenLog() {
             break;
         }
 
-        const std::string lvl = "(" + ghoul::logging::stringFromLevel(e->level) + ")";
+        const std::string lvl = "(" + ghoul::to_string(e->level) + ")";
         const std::string& message = e->message.substr(0, MessageLength);
         nr += std::count(message.begin(), message.end(), '\n');
 

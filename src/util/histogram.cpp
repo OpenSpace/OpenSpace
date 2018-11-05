@@ -25,6 +25,7 @@
 #include <openspace/util/histogram.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 #include <cmath>
 
 namespace {
