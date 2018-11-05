@@ -61,23 +61,11 @@ CefWebGuiModule::CefWebGuiModule()
 {
     addProperty(_cefWebGuiEnabled);
     addProperty(_guiUrl);
-    
-    _cefWebGuiEnabled.onChange([this]() {
-        startOrStopGui();
-    });
-    
-    _guiUrl.onChange([this]() {
-        updateUrl();
-    });
 }
     
 void CefWebGuiModule::startOrStopGui() {
     WebBrowserModule* webBrowserModule =
         global::moduleEngine.module<WebBrowserModule>();
-    
-    if (!webBrowserModule) {
-        return;
-    }
     
     if (_cefWebGuiEnabled) {
         LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", _guiUrl));
@@ -103,8 +91,23 @@ void CefWebGuiModule::updateUrl() {
 }
 
 void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
-    _guiUrl = configuration.value<std::string>("Url");
+    WebBrowserModule* webBrowserModule =
+    global::moduleEngine.module<WebBrowserModule>();
+    _webBrowserIsAvailable = webBrowserModule && webBrowserModule->isEnabled();
 
+    if (!_webBrowserIsAvailable) {
+        return;
+    }
+
+    _cefWebGuiEnabled.onChange([this]() {
+        startOrStopGui();
+    });
+
+    _guiUrl.onChange([this]() {
+        updateUrl();
+    });
+
+    _guiUrl = configuration.value<std::string>("Url");
 
     global::callback::initializeGL.push_back([this]() {
         startOrStopGui();

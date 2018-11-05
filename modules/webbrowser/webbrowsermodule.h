@@ -44,6 +44,7 @@ public:
 
     void attachEventHandler(std::shared_ptr<BrowserInstance> browserInstance);
     void detachEventHandler();
+    bool isEnabled() const;
 
 protected:
     void internalInitialize(const ghoul::Dictionary& configuration) override;
@@ -62,6 +63,7 @@ private:
     EventHandler _eventHandler;
     std::unique_ptr<CefHost> _cefHost;
     std::string _webHelperLocation;
+    bool _enabled = false;
 };
 
 } // namespace openspace

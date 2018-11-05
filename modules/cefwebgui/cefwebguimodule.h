@@ -48,6 +48,7 @@ private:
     properties::BoolProperty _cefWebGuiEnabled;
     properties::StringProperty _guiUrl;
     std::shared_ptr<BrowserInstance> _guiInstance;
+    bool _webBrowserIsAvailable = false;
 };
 
 } // namespace openspace
