@@ -116,7 +116,7 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 
 void WebBrowserModule::addBrowser(std::shared_ptr<BrowserInstance> browser) {
     if (!_enabled) {
-        return -1;
+        return;
     }
     _browsers.push_back(browser);
 }
