@@ -27,8 +27,9 @@
 #include <modules/webbrowser/include/browserinstance.h>
 #include <modules/webbrowser/include/cefhost.h>
 #include <modules/webbrowser/include/screenspacebrowser.h>
-#include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -84,9 +85,17 @@ std::string WebBrowserModule::findHelperExecutable() {
 
 void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     _webHelperLocation = dictionary.value<std::string>("WebHelperLocation");
-    _enabled = dictionary.value<bool>("Enabled");
+    if (dictionary.hasKeyAndValue<bool>("Enabled")) {
+        _enabled = dictionary.value<bool>("Enabled");
+    }
 
-    if (!_enabled) {
+    const bool isGuiWindow =
+        global::windowDelegate.hasGuiWindow() ?
+        global::windowDelegate.isGuiWindow() :
+        true;
+    const bool isMaster = global::windowDelegate.isMaster();
+
+    if (!_enabled || !isGuiWindow || !isMaster) {
         return;
     }
 

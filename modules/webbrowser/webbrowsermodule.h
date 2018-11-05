@@ -63,7 +63,7 @@ private:
     EventHandler _eventHandler;
     std::unique_ptr<CefHost> _cefHost;
     std::string _webHelperLocation;
-    bool _enabled = false;
+    bool _enabled = true;
 };
 
 } // namespace openspace

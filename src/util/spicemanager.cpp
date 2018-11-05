@@ -87,6 +87,9 @@ namespace {
 #include "spicemanager_lua.inl"
 
 namespace openspace {
+    
+SpiceManager* SpiceManager::_instance = nullptr;
+
 
 SpiceManager::SpiceException::SpiceException(const std::string& msg)
     : ghoul::RuntimeError(msg, "Spice")
@@ -183,6 +186,27 @@ SpiceManager::~SpiceManager() {
     erract_c("SET", 0, const_cast<char*>("DEFAULT")); // NOLINT
     errprt_c("SET", 0, const_cast<char*>("DEFAULT")); // NOLINT
 }
+
+void SpiceManager::initialize() {
+    ghoul_assert(!isInitialized(), "SpiceManager is already initialized");
+    _instance = new SpiceManager;
+}
+
+void SpiceManager::deinitialize() {
+    ghoul_assert(isInitialized(), "SpiceManager is not initialized");
+    delete _instance;
+    _instance = nullptr;
+}
+
+bool SpiceManager::isInitialized() {
+    return _instance != nullptr;
+}
+
+SpiceManager& SpiceManager::ref() {
+    ghoul_assert(isInitialized(), "SpiceManager is not initialized");
+    return *_instance;
+}
+
 
 SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
     ghoul_assert(!filePath.empty(), "Empty file path");

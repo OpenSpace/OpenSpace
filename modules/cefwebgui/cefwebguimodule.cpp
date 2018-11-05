@@ -75,11 +75,20 @@ void CefWebGuiModule::startOrStopGui() {
     WebBrowserModule* webBrowserModule =
         global::moduleEngine.module<WebBrowserModule>();
     
-    if (_cefWebGuiEnabled) {
+    const bool isGuiWindow =
+        global::windowDelegate.hasGuiWindow() ?
+        global::windowDelegate.isGuiWindow() :
+        true;
+    const bool isMaster = global::windowDelegate.isMaster();
+
+    if (_cefWebGuiEnabled && isGuiWindow && isMaster) {
         LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", _guiUrl));
         
         if (!_guiInstance) {
-            _guiInstance = std::make_shared<BrowserInstance>(new GUIRenderHandler, new GUIKeyboardHandler);
+            _guiInstance = std::make_shared<BrowserInstance>(
+                new GUIRenderHandler,
+                new GUIKeyboardHandler
+            );
             _guiInstance->loadUrl(_guiUrl);
         }
         webBrowserModule->attachEventHandler(_guiInstance);
@@ -131,10 +140,16 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     });
 
     global::callback::draw2D.push_back([this](){
-        WindowDelegate& windowDelegate = global::windowDelegate;
-        if (windowDelegate.isMaster() && _guiInstance) {
-            if (windowDelegate.windowHasResized()) {
-                _guiInstance->reshape(windowDelegate.currentWindowSize());
+        const bool isGuiWindow =
+            global::windowDelegate.hasGuiWindow() ?
+            global::windowDelegate.isGuiWindow() :
+            true;
+        const bool isMaster = global::windowDelegate.isMaster();
+
+
+        if (isGuiWindow && isMaster && _guiInstance) {
+            if (global::windowDelegate.windowHasResized()) {
+                _guiInstance->reshape(global::windowDelegate.currentWindowSize());
             }
             if (_cefWebGuiVisible) {
                 _guiInstance->draw();
