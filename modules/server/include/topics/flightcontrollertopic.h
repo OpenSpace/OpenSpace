@@ -67,8 +67,9 @@ private:
     void setInterestingTimes();
     void changeFocus(const nlohmann::json& json);
     void processLua(const nlohmann::json& json);
-
-    void setFriction(const bool &on) const;
+    void setFriction(const nlohmann::json& json) const;
+    void setFriction(const bool& roll, const bool& rotation, const bool& zoom) const;
+    void setFriction(const bool& all) const;
 };
 
 } // namespace openspace

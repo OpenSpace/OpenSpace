@@ -86,6 +86,9 @@ namespace {
     // Friction JSON Keys
     constexpr const char* FrictionEngagedKey = "engaged";
     constexpr const char* FrictionPropertyUri = "NavigationHandler.OrbitalNavigator.Friction";
+    constexpr const char* FrictionRotationKey = "rotation";
+    constexpr const char* FrictionZoomKey = "zoom";
+    constexpr const char* FrictionRollKey = "roll";
     constexpr const char* RotationalFriction = "Friction.RotationalFriction";
     constexpr const char* ZoomFriction = "Friction.ZoomFriction";
     constexpr const char* RollFriction = "Friction.RollFriction";
@@ -194,7 +197,7 @@ void FlightControllerTopic::handleJson(const nlohmann::json& json) {
             handleAutopilot(json[Autopilot]);
             break;
         case Command::Friction:
-            setFriction(json[Friction][FrictionEngagedKey]);
+            setFriction(json[Friction]);
             break;
         case Command::Lua:
             processLua(json[Lua]);
@@ -289,22 +292,28 @@ void FlightControllerTopic::disconnect() {
     _isDone = true;
 }
 
-void FlightControllerTopic::setFriction(const bool &on) const {
-    std::vector<std::string> frictions;
-    frictions.push_back(RotationalFriction);
-    frictions.push_back(ZoomFriction);
-    frictions.push_back(RollFriction);
+void FlightControllerTopic::setFriction(const bool& all) const {
+    setFriction(all, all, all);
+}
 
-    for (auto &f: frictions) {
-        auto property = global::navigationHandler.orbitalNavigator().property(f);
-        property->set(on);
-    }
+void FlightControllerTopic::setFriction(const bool& roll, const bool& rotation, const bool& zoom) const {
+    const auto navigator = global::navigationHandler.orbitalNavigator();
+
+    navigator.property(RollFriction)->set(roll);
+    navigator.property(RotationalFriction)->set(rotation);
+    navigator.property(ZoomFriction)->set(zoom);
 
     // Update FlightController
     nlohmann::json j;
     j[TypeKey] = Friction;
-    j[Friction][FrictionEngagedKey] = on;
+    j[Friction][FrictionRollKey] = roll;
+    j[Friction][FrictionRotationKey] = rotation;
+    j[Friction][FrictionZoomKey] = zoom;
     _connection->sendJson(wrappedPayload(j));
+}
+
+void FlightControllerTopic::setFriction(const nlohmann::json& json) const {
+    setFriction(json[FrictionRollKey], json[FrictionRotationKey], json[FrictionZoomKey]);
 }
 
 void FlightControllerTopic::disengageAutopilot() const {
