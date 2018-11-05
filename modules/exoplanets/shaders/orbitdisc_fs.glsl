@@ -47,43 +47,57 @@ Fragment getFragment() {
     
 
     // The length of the texture coordinates vector is our distance from the center
-    float radius;
-    float radius_inner;
+    float outer;
+    float inner;
+    
+    float E = eccentricity;
+    float AU = semiMajorAxis;
+    float BU = AU * sqrt(1.0 - pow(E, 2.0)); // semi-minor axis
+    float CU = sqrt(pow(AU, 2.0) - pow(BU, 2.0));
+    float apo = AU * (1 + E);
 
-    float semiMinorAxis = semiMajorAxis * sqrt(1.0 - pow(eccentricity, 2.0));
-    float focus = sqrt(pow(semiMajorAxis, 2.0) - pow(semiMinorAxis, 2.0));
-    float apoapsisDistance = semiMajorAxis * (1 + eccentricity);
+    float AL = AU - textureOffset.x * 149597870700.0 - textureOffset.y * 149597870700.0;
+    float BL = AL * sqrt(1.0 - pow(E, 2.0));
+    float CL = sqrt(pow(AL, 2.0) - pow(BL, 2.0));
+    float apo_inner = AL * (1 + E);
 
-    float semiMajorAxis_inner = semiMajorAxis - textureOffset.x * 149597870700.0 - textureOffset.y * 149597870700.0;
-    float semiMinorAxis_inner = semiMajorAxis_inner * sqrt(1.0 - pow(eccentricity, 2.0));
-    float focus_inner = sqrt(pow(semiMajorAxis_inner, 2.0) - pow(semiMinorAxis_inner, 2.0));
-
-    if(eccentricity <= 0.0){
-        radius = length(st);
-        radius_inner = pow(st.x , 2.0) / pow(semiMajorAxis_inner/apoapsisDistance, 2.0)   +   ( pow(st.y, 2.0) / (pow(semiMajorAxis_inner/apoapsisDistance, 2.0)) );
+    if(eccentricity <= 0.000000){
+        outer = pow(st.x , 2.0) / pow(AU/apo, 2.0)  +  ( pow(st.y, 2.0) / (pow(BU/apo, 2.0)) );
+        inner = pow(st.x , 2.0) / pow(AL/apo, 2.0)  +  ( pow(st.y, 2.0) / (pow(BL/apo, 2.0)) );
     }  
     else {
-        radius = ( pow((st.x + focus/apoapsisDistance), 2.0) ) / pow(semiMajorAxis/apoapsisDistance, 2.0)   +   ( pow(st.y, 2.0) / (pow(semiMinorAxis/apoapsisDistance, 2.0)) );
-        radius_inner = ( pow((st.x + focus_inner/apoapsisDistance), 2.0) ) / pow(semiMajorAxis_inner/apoapsisDistance, 2.0)   +   ( pow(st.y, 2.0) / (pow(semiMinorAxis_inner/apoapsisDistance, 2.0)) );
+        outer = ( pow((st.x + CU/apo), 2.0) ) / pow(AU/apo, 2.0)  +  ( pow(st.y, 2.0) / (pow(BU/apo, 2.0)) );
+        inner = ( pow((st.x + CL/apo), 2.0) ) / pow(AL/apo, 2.0)  +  ( pow(st.y, 2.0) / (pow(BL/apo, 2.0)) );
     }
     
-    // We only want to consider ring-like objects so we need to discard everything outside the largest radius
-    if (radius > 1.0  )
+    if (outer > 1.0 ) // point is outside outer ellipse
         discard;
-    // We also need to discard ecerthing inside the smallest radius
-    if (radius_inner < 1.0 )
+    if (inner < 1.0 ) // point is inside inner ellipse
         discard;
 
     // Remapping the texture coordinates
-    // Radius \in [0,1],  texCoord \in [textureOffset.x, textureOffset.y]
-    // textureOffset.x -> 0
-    // textureOffset.y -> 1
+    vec2 dir = normalize(st);
 
-    // textureOffset is not the same as it was when the following row was written.
-    // But as long as the texture is one color it doesnt seem to matter.
-    float texCoord = (radius - textureOffset.x) / (textureOffset.y - textureOffset.x);
+    // Find outer ellipse: where along the direction is the equation = 1
+    float scale;
+    if(eccentricity <= 0.000000){
+        scale = sqrt(  (   pow((AU/apo)*(BU/apo),2)   ) / ((pow((BU/apo)*dir.x,2))+(pow((AU/apo)*dir.y,2)))   );
+    }
+    else{
+        float first = -( pow(BU/apo, 2.0)*dir.x*(CU/apo) ) / ( pow((BU/apo)*dir.x, 2.0) + pow((AU/apo)*dir.y, 2.0) );
+        float second = pow( ( pow(BU/apo, 2.0)*dir.x*(CU/apo) )  /  ( pow((BU/apo)*dir.x, 2.0) + pow( (AU/apo)*dir.y, 2.0 ) ) , 2.0);
+        float third = (  pow( (BU/apo)*(CU/apo) , 2.0 ) - pow( (AU/apo)*(BU/apo), 2.0 )   ) / (   pow( (BU/apo)*dir.x, 2.0 ) + pow( (AU/apo)*dir.y, 2.0 )   );
+        scale = first + sqrt( second - third);
+    }
+    
+    vec2 max = dir * scale;
+    vec2 min = max * (apo_inner/apo);
 
-    vec4 diffuse = texture(texture1, texCoord);
+    float distance1 = distance(max, min);
+    float distance2 = distance(max, st);
+    float textureCoord = distance2/distance1;
+
+    vec4 diffuse = texture(texture1, textureCoord);
     float colorValue = length(diffuse.rgb);
     // times 3 as length of vec3(1.0, 1.0, 1.0) will return 3 and we want
     // to normalize the transparency value to [0,1]
