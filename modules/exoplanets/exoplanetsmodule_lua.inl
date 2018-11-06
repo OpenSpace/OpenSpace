@@ -441,7 +441,7 @@ int addExoplanetSystem(lua_State* L) {
             }
             if (isnan(plsy[0].BIGOM))
             {
-                plsy[0].BIGOM = 0;
+                plsy[0].BIGOM = 180;
             }
             if (isnan(plsy[0].OM))
             {
@@ -542,7 +542,7 @@ int addExoplanetSystem(lua_State* L) {
             }
             if (isnan(plsy[i].BIGOM))
             {
-                plsy[i].BIGOM = 0;
+                plsy[i].BIGOM = 180;
             }
             if (isnan(plsy[i].OM))
             {
