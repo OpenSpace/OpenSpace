@@ -90,7 +90,6 @@ namespace openspace {
     
 SpiceManager* SpiceManager::_instance = nullptr;
 
-
 SpiceManager::SpiceException::SpiceException(std::string msg)
     : ghoul::RuntimeError(std::move(msg), "Spice")
 {
@@ -206,7 +205,6 @@ SpiceManager& SpiceManager::ref() {
     ghoul_assert(isInitialized(), "SpiceManager is not initialized");
     return *_instance;
 }
-
 
 SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
     ghoul_assert(!filePath.empty(), "Empty file path");
