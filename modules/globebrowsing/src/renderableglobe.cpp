@@ -403,8 +403,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _rightRoot(Chunk(RightHemisphereIndex))
     , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
 {
-    setIdentifier("RenderableGlobe");
-
     // Read the radii in to its own dictionary
     if (dictionary.hasKeyAndValue<glm::dvec3>(KeyRadii)) {
         _ellipsoid = Ellipsoid(dictionary.value<glm::vec3>(KeyRadii));
