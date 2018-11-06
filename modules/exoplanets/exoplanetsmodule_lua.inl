@@ -643,7 +643,7 @@ int addExoplanetSystem(lua_State* L) {
                         "Epoch = '" + sepoch + "'," //TT. JD to YYYY MM DD hh:mm:ss
                         "Period = " + std::to_string(plsy[i].PER) + "* 86400" //PER. 86 400sec = 1 day.
                     "},"
-                    "Color = { 1, 0, 0 }"
+                    "Color = { 1, 1, 1 }"
                 "},"
 			"}";
 
@@ -669,7 +669,7 @@ int addExoplanetSystem(lua_State* L) {
 					    "Size = " + std::to_string(plsy[i].A) + " * 149597870700," // 149 597 870 700 m = 1 AU. A
 					    "Eccentricity = " + std::to_string(plsy[i].ECC) + ","
 					    "Offset = { " + std::to_string(plsy[i].ALOWER) + ", " + std::to_string(plsy[i].AUPPER) + " }," //min / max extend
-					    "Transparency = 0.99"
+					    "Transparency = 0.5"
 					"},"
 					"Transform = {"
 					    "Rotation = {"
