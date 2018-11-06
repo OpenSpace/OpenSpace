@@ -54,20 +54,12 @@ namespace {
         "This value determines the size of the font that is used to render the date."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ActiveColorInfo = {
-        "ActiveColor",
-        "Active Color",
-        "This value determines the color that the active instrument is rendered in. "
-        "Shortly after activation, the used color is mixture of this and the flash "
-        "color. The default value is (0.6, 1.0, 0.0)."
+    constexpr openspace::properties::Property::PropertyInfo SignificantDigitsInfo = {
+        "SignificantDigits",
+        "Significant Digits",
+        "Determines the number of significant digits that are shown in the location text."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FlashColorInfo = {
-        "FlashColor",
-        "Flash Color",
-        "This value determines the color that is used shortly after an instrument "
-        "activation. The default value is (0.9, 1.0, 0.75)"
-    };
 } // namespace
 
 namespace openspace {
@@ -96,16 +88,10 @@ documentation::Documentation DashboardItemGlobeLocation::Documentation() {
                 FontSizeInfo.description
             },
             {
-                ActiveColorInfo.identifier,
-                new DoubleVector3Verifier,
+                SignificantDigitsInfo.identifier,
+                new IntVerifier,
                 Optional::Yes,
-                ActiveColorInfo.description
-            },
-            {
-                FlashColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                FlashColorInfo.description
+                SignificantDigitsInfo.description
             }
         }
     };
@@ -116,6 +102,7 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
     : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 10.f, 144.f, 1.f)
+    , _significantDigits(SignificantDigitsInfo, 4, 1, 12)
     , _font(global::fontManager.font(KeyFontMono, 10))
 {
     documentation::testSpecificationAndThrow(
@@ -130,6 +117,12 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
     if (dictionary.hasKey(FontSizeInfo.identifier)) {
         _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
     }
+    if (dictionary.hasKey(SignificantDigitsInfo.identifier)) {
+        _significantDigits = static_cast<int>(
+            dictionary.value<double>(SignificantDigitsInfo.identifier)
+        );
+    }
+
 
     _fontName.onChange([this]() {
         _font = global::fontManager.font(_fontName, _fontSize);
@@ -140,6 +133,8 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
         _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
+
+    addProperty(_significantDigits);
 
     _font = global::fontManager.font(_fontName, _fontSize);
 }
@@ -180,11 +175,12 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
     std::pair<double, std::string> dist = simplifyDistance(altitude);
 
     penPosition.y -= _font->height();
+    std::string d = std::to_string(_significantDigits);
+    std::string f = "Position: {:03." + d + "f}{}, {:03." + d + "f}{}  Altitude: {} {}";
     RenderFont(
         *_font,
         penPosition,
-        fmt::format(
-            "Position: {:03.2f}{}, {:03.2f}{}  Altitude: {} {}",
+        fmt::format(f,
             lat, isNorth ? "N" : "S",
             lon, isEast ? "E" : "W",
             dist.first, dist.second
