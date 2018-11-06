@@ -560,12 +560,18 @@ int addExoplanetSystem(lua_State* L) {
             std::string enabled = "";
             if (isnan(plsy[i].R))
             {
-                planetradius = plsy[i].RSTAR;
+                if (isnan(plsy[i].RSTAR)) {
+                    planetradius = plsy[i].A * 149597870700 * 0.001;
+                }
+                else {
+                    planetradius = plsy[i].RSTAR *6.95700E8 *0.1;
+                }
+
                 enabled = "false";
 
             }
             else {
-                planetradius = plsy[i].R;
+                planetradius = plsy[i].R *7.1492E7;
                 enabled = "true";
             }
 
@@ -576,7 +582,7 @@ int addExoplanetSystem(lua_State* L) {
                 "Renderable = {"
                     "Type = 'RenderableGlobe',"
                     "Enabled = " + enabled + ","
-                    "Radii = " + std::to_string(planetradius) + " *7.1492E7," //R. in meters. 1 jupiter radii = 7.1492×10e7 m
+                    "Radii = " + std::to_string(planetradius) + "," //R. in meters. 1 jupiter radii = 7.1492×10e7 m
                     "SegmentsPerPatch = 64,"
                     "PerformShading = false,"
                     "Layers = {"
