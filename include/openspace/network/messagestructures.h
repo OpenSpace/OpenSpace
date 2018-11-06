@@ -217,7 +217,7 @@ struct CameraKeyframe {
         );
         std::vector<char> temp(nodeNameLength + 1);
         in->read(temp.data(), nodeNameLength);
-        
+
         temp[nodeNameLength] = '\0';
         _focusNode = temp.data();
 

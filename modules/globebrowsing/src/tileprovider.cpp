@@ -763,7 +763,7 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
 
 
 
-TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary) 
+TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     : initDict(dictionary)
     , filePath(temporal::FilePathInfo)
 {
@@ -820,7 +820,7 @@ bool initialize(TileProvider& tp) {
             }
             return success;
         }
-        case Type::TemporalTileProvider: 
+        case Type::TemporalTileProvider:
             break;
         default:
             throw ghoul::MissingCaseException();

@@ -1402,9 +1402,7 @@ SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
     };
 }
 
-
-
-bool RenderableGlobe::testIfCullable(const Chunk& chunk, 
+bool RenderableGlobe::testIfCullable(const Chunk& chunk,
                                      const RenderData& renderData) const
 {
     return (PreformHorizonCulling && isCullableByHorizon(chunk, renderData)) ||
@@ -1446,7 +1444,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
     const double v = 0.25 - geodeticPosition.lat / glm::two_pi<double>();
     const double xIndexSpace = u * numIndicesAtLevel;
     const double yIndexSpace = v * numIndicesAtLevel;
- 
+
     const int x = static_cast<int>(floor(xIndexSpace));
     const int y = static_cast<int>(floor(yIndexSpace));
 
@@ -1820,7 +1818,8 @@ int RenderableGlobe::desiredLevelByProjectedArea(const Chunk& chunk,
     const double areaABC = 0.5 * glm::length(glm::cross(AC, AB));
     const double projectedChunkAreaApprox = 8 * areaABC;
 
-    const double scaledArea = _generalProperties.lodScaleFactor * projectedChunkAreaApprox;
+    const double scaledArea = _generalProperties.lodScaleFactor *
+                              projectedChunkAreaApprox;
     return chunk.tileIndex.level + static_cast<int>(round(scaledArea - 1));
 }
 

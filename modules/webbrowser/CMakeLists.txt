@@ -59,23 +59,18 @@ set_current_cef_build_platform()
 # Download and extract the CEF binary distribution (executes DownloadCEF.cmake).
 DownloadCEF("${CEF_PLATFORM}" "${CEF_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/ext/cef")
 
-
 ##########################################################################################
 # Apply cmake patch
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cmake/patch/CMakeLists.txt
-    DESTINATION ${CEF_ROOT})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cmake/patch/CMakeLists.txt DESTINATION ${CEF_ROOT})
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cmake/patch/cmake/cef_variables.cmake
-    DESTINATION ${CEF_ROOT}/cmake)
-
-
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cmake/patch/cmake/cef_variables.cmake DESTINATION ${CEF_ROOT}/cmake)
 
 # CEF does not provide RelWithDebInfo libs, so we use the ones without Debug information
 file(COPY ${CEF_ROOT}/Release/
     DESTINATION ${CEF_ROOT}/RelWithDebInfo
-    FILES_MATCHING PATTERN *)
-
+    FILES_MATCHING PATTERN *
+)
 
 ##########################################################################################
 
@@ -99,61 +94,40 @@ set(WEBBROWSER_SOURCES
     src/eventhandler.cpp
     src/webbrowserapp.cpp
     src/defaultbrowserlauncher.cpp
-    )
-set(WEBBROWSER_SOURCES_LINUX
-    )
-set(WEBBROWSER_SOURCES_MACOSX
-    )
+)
 set(WEBBROWSER_SOURCES_WINDOWS
     OpenSpace.exe.manifest
     cef_webgui.rc
     resource.h
     simple_handler_win.cc
-    )
+)
 APPEND_PLATFORM_SOURCES(WEBBROWSER_SOURCES)
-source_group(WebBrowser FILES ${WEBBROWSER_SOURCES})
-
-set(WEBBROWSER_RESOURCES_SOURCES_WINDOWS
-    )
 APPEND_PLATFORM_SOURCES(WEBBROWSER_RESOURCES_SOURCES)
-source_group(WebBrowser\\\\res FILES ${WEBBROWSER_RESOURCES_SOURCES})
 
-set(WEBBROWSER_SOURCES
-    ${WEBBROWSER_SOURCES}
-    ${WEBBROWSER_RESOURCES_SOURCES}
-    )
+set(WEBBROWSER_SOURCES ${WEBBROWSER_SOURCES} ${WEBBROWSER_RESOURCES_SOURCES})
 
 # CEF helper sources
-set(WEBBROWSER_HELPER_SOURCES
-    src/webbrowserapp.cpp
-	)
-set(WEBBROWSER_HELPER_SOURCES_MACOSX
-    src/processhelpermac.cpp
-	)
-set(WEBBROWSER_HELPER_SOURCES_WINDOWS
-    src/processhelperwindows.cpp
-	)
+set(WEBBROWSER_HELPER_SOURCES src/webbrowserapp.cpp)
+set(WEBBROWSER_HELPER_SOURCES_MACOSX src/processhelpermac.cpp)
+set(WEBBROWSER_HELPER_SOURCES_WINDOWS src/processhelperwindows.cpp)
 APPEND_PLATFORM_SOURCES(WEBBROWSER_HELPER_SOURCES)
-source_group(WebBrowser\\\\helper FILES ${WEBBROWSER_HELPER_SOURCES})
 
 set(WEBBROWSER_RESOURCES_MAC_SOURCES_MACOSX
     mac/Info.plist
     mac/webgui.icns
-    )
+)
 APPEND_PLATFORM_SOURCES(WEBBROWSER_RESOURCES_MAC_SOURCES)
-source_group(WebBrowser\\\\mac FILES ${WEBBROWSER_RESOURCES_MAC_SOURCES})
 
 set(WEBBROWSER_RESOURCES_MAC_ENGLISH_LPROJ_SRCS_MACOSX
     mac/English.lproj/InfoPlist.strings
     mac/English.lproj/MainMenu.xib
-    )
+)
 APPEND_PLATFORM_SOURCES(WEBBROWSER_RESOURCES_MAC_ENGLISH_LPROJ_SRCS)
-source_group(WebBrowser\\\\mac\\\\English.lproj FILES ${WEBBROWSER_RESOURCES_MAC_ENGLISH_LPROJ_SRCS})
 
 set(WEBBROWSER_RESOURCES_SRCS
-  ${WEBBROWSER_RESOURCES_MAC_SOURCES}
-  ${WEBBROWSER_RESOURCES_MAC_ENGLISH_LPROJ_SRCS}
-  )
+    ${WEBBROWSER_RESOURCES_MAC_SOURCES}
+    ${WEBBROWSER_RESOURCES_MAC_ENGLISH_LPROJ_SRCS}
+)
 
 # place helper in separate executable
 set(CEF_HELPER_TARGET "openspace_web_helper" CACHE INTERNAL "CEF_HELPER_TARGET")
@@ -207,7 +181,7 @@ set(HEADER_FILES
     include/webbrowserapp.h
     include/defaultbrowserlauncher.h
     include/cefhost.h
-    )
+)
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
@@ -221,7 +195,7 @@ set(SOURCE_FILES
     src/webbrowserapp.cpp
     src/defaultbrowserlauncher.cpp
     src/cefhost.cpp
-    )
+)
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})

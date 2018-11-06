@@ -34,7 +34,7 @@ namespace {
 
         // this will cause angle to be in value range ]-2pi, 2pi[
         angle = fmod(angle, glm::two_pi<double>());
-    
+
         // ensure _radians are positive, ie in value range [0, 2pi[
         if (angle < 0.0) {
             angle += glm::two_pi<double>();

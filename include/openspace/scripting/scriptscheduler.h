@@ -28,11 +28,10 @@
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/interaction/keyframenavigator.h>
 
-
+#include <functional>
 #include <queue>
 #include <string>
 #include <vector>
-#include <functional>
 
 namespace {
     constexpr const char* KeyTime = "Time";
@@ -125,7 +124,7 @@ public:
     * or according to the absolute simulation time in seconds from J2000 epoch.
     */
     void setTimeReferenceMode(openspace::interaction::KeyframeTimeRef refType);
-    
+
     /**
     * Sets the mode for scripts being run from playback
     */

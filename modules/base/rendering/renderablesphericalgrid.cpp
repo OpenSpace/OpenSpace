@@ -220,7 +220,7 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     GLfloat currentLineWidth;
     glGetFloatv(GL_LINE_WIDTH, &currentLineWidth);
 
-    GLenum blendEquationRGB, blendEquationAlpha, blendDestAlpha, 
+    GLenum blendEquationRGB, blendEquationAlpha, blendDestAlpha,
         blendDestRGB, blendSrcAlpha, blendSrcRGB;
     glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
     glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);

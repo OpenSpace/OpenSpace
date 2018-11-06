@@ -430,7 +430,10 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key, RawTile rawTile
                 if (!tex->dataOwnership()) {
                     _numTextureBytesAllocatedOnCPU += initData.totalNumBytes;
                 }
-                tex->setPixelData(rawTile.imageData.release(), Texture::TakeOwnership::Yes);
+                tex->setPixelData(
+                    rawTile.imageData.release(),
+                    Texture::TakeOwnership::Yes
+                );
                 rawTile.imageData = nullptr;
             }
         }
