@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBBROWSER__BROWSER_INSTANCE_H
-#define __OPENSPACE_MODULE_WEBBROWSER__BROWSER_INSTANCE_H
+#ifndef __OPENSPACE_MODULE_WEBBROWSER__BROWSER_INSTANCE_H__
+#define __OPENSPACE_MODULE_WEBBROWSER__BROWSER_INSTANCE_H__
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -47,7 +47,7 @@ class WebKeyboardHandler;
 
 class BrowserInstance {
 public:
-    BrowserInstance(WebRenderHandler* renderer, WebKeyboardHandler *keyboardHandler);
+    BrowserInstance(WebRenderHandler* renderer, WebKeyboardHandler* keyboardHandler);
     ~BrowserInstance();
 
     void loadUrl(const std::string& url);
@@ -106,4 +106,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_WEBBROWSER__BROWSER_INSTANCE_H
+#endif // __OPENSPACE_MODULE_WEBBROWSER__BROWSER_INSTANCE_H__

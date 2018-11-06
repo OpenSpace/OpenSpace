@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBBROWSER__WEB_KEYBOARD_HANDLER_H
-#define __OPENSPACE_MODULE_WEBBROWSER__WEB_KEYBOARD_HANDLER_H
+#ifndef __OPENSPACE_MODULE_WEBBROWSER__WEB_KEYBOARD_HANDLER_H__
+#define __OPENSPACE_MODULE_WEBBROWSER__WEB_KEYBOARD_HANDLER_H__
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -36,21 +36,20 @@
 #pragma warning (pop)
 #endif // _MSC_VER
 
-#include <ghoul/opengl/ghoul_gl.h>
-
 namespace openspace {
 
-    class WebKeyboardHandler : public CefKeyboardHandler {
-    public:
-
-        bool OnKeyEvent(CefRefPtr< CefBrowser > browser, const CefKeyEvent& event, CefEventHandle os_event) override;
-        bool OnPreKeyEvent(CefRefPtr< CefBrowser > browser, const CefKeyEvent& event, CefEventHandle os_event, bool* is_keyboard_shortcut) override;
+class WebKeyboardHandler : public CefKeyboardHandler {
+public:
+    bool OnKeyEvent(CefRefPtr<CefBrowser> browser, const CefKeyEvent& event,
+        CefEventHandle os_event) override;
+    bool OnPreKeyEvent(CefRefPtr<CefBrowser> browser, const CefKeyEvent& event,
+        CefEventHandle os_event, bool* is_keyboard_shortcut) override;
             
-    protected:
-        bool _keyConsumed;
-        IMPLEMENT_REFCOUNTING(WebKeyboardHandler);
-    };
+protected:
+    bool _keyConsumed = false;
+    IMPLEMENT_REFCOUNTING(WebKeyboardHandler);
+};
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_WEBBROWSER__WEB_KEYBOARD_HANDLER_H
+#endif // __OPENSPACE_MODULE_WEBBROWSER__WEB_KEYBOARD_HANDLER_H__

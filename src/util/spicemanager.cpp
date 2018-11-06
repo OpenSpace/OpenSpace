@@ -91,8 +91,8 @@ namespace openspace {
 SpiceManager* SpiceManager::_instance = nullptr;
 
 
-SpiceManager::SpiceException::SpiceException(const std::string& msg)
-    : ghoul::RuntimeError(msg, "Spice")
+SpiceManager::SpiceException::SpiceException(std::string msg)
+    : ghoul::RuntimeError(std::move(msg), "Spice")
 {
     ghoul_assert(
         SpiceManager::ref().exceptionHandling() == SpiceManager::UseException::Yes,

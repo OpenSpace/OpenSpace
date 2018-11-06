@@ -123,7 +123,6 @@ void NavigationHandler::setCamera(Camera* camera) {
 }
 
 void NavigationHandler::resetCameraDirection() {
-    LINFO("Setting camera direction to point at focus node.");
     _orbitalNavigator->startInterpolateCameraDirection(*_camera);
 }
 

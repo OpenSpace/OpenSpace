@@ -26,11 +26,10 @@
 #define __OPENSPACE_MODULE_WEBGUI___WEBGUIMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-#include <openspace/properties/scalar/boolproperty.h>
+
 #include <openspace/properties/stringproperty.h>
-
+#include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/misc/process.h>
-
 #include <memory>
 
 namespace openspace {
@@ -42,6 +41,7 @@ public:
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
+
 private:
     std::unique_ptr<ghoul::Process> _process;
     properties::BoolProperty _serverProcessEnabled;

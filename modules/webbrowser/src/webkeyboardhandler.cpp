@@ -24,26 +24,24 @@
 
 #include <modules/webbrowser/include/webkeyboardhandler.h>
 
-
-#include <ghoul/fmt.h>
-#include <ghoul/logging/logmanager.h>
-
-namespace {
-    constexpr const char* _loggerCat = "CEF KeyboardHandler";
-} // namespace
-
-
 namespace openspace {
 
-    bool WebKeyboardHandler::OnKeyEvent(CefRefPtr< CefBrowser > browser, const CefKeyEvent& event, CefEventHandle os_event) {
-        return false;
-    }
+bool WebKeyboardHandler::OnKeyEvent(CefRefPtr<CefBrowser> browser,
+                                    const CefKeyEvent& event,
+                                    CefEventHandle os_event)
+{
+    return false;
+}
 
-    bool WebKeyboardHandler::OnPreKeyEvent(CefRefPtr< CefBrowser > browser, const CefKeyEvent& event, CefEventHandle os_event, bool* is_keyboard_shortcut) {
-        if (event.focus_on_editable_field) {
-            _keyConsumed = true;
-        }
-        return false;
+bool WebKeyboardHandler::OnPreKeyEvent(CefRefPtr<CefBrowser> browser,
+                                       const CefKeyEvent& event,
+                                       CefEventHandle os_event,
+                                       bool* is_keyboard_shortcut)
+{
+    if (event.focus_on_editable_field) {
+        _keyConsumed = true;
     }
+    return false;
+}
 
 } // namespace openspace

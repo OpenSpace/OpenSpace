@@ -37,7 +37,6 @@ namespace {
 namespace openspace {
 
 GUIKeyboardHandler::GUIKeyboardHandler() {
-    
     _keyConsumed = false;
 
     global::callback::keyboard.push_back(
@@ -51,10 +50,6 @@ GUIKeyboardHandler::GUIKeyboardHandler() {
             }
         }
     );
-}
-
-GUIKeyboardHandler::~GUIKeyboardHandler() {
-    
 }
 
 } // namespace openspace

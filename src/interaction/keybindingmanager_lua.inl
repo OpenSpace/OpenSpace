@@ -37,7 +37,7 @@ namespace openspace::luascriptfunctions {
 int bindKey(lua_State* L) {
     using ghoul::lua::luaTypeToString;
 
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, {2, 5}, "lua::bindKey");
+    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 2, 5 }, "lua::bindKey");
 
     const std::string& key = ghoul::lua::value<std::string>(L, 1);
     const std::string& command = ghoul::lua::value<std::string>(L, 2);
@@ -82,7 +82,7 @@ int bindKey(lua_State* L) {
 int bindKeyLocal(lua_State* L) {
     using ghoul::lua::luaTypeToString;
 
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, {2, 5}, "lua::bindKeyLocal");
+    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 2, 5 }, "lua::bindKeyLocal");
 
     const std::string& key = ghoul::lua::value<std::string>(L, 1);
     const std::string& command = ghoul::lua::value<std::string>(L, 2);
@@ -100,8 +100,12 @@ int bindKeyLocal(lua_State* L) {
     }
 
     std::string doc = nArguments >= 3 ? ghoul::lua::value<std::string>(L, 3) : "";
-    std::string name = ((nArguments >= 4) && (L, 4)) ? ghoul::lua::value<std::string>(L, 4) : "";
-    std::string guiPath = ((nArguments == 5) && (L, 5)) ? ghoul::lua::value<std::string>(L, 5) : "";
+    std::string name = (nArguments >= 4) ?
+        ghoul::lua::value<std::string>(L, 4) :
+        "";
+    std::string guiPath = (nArguments == 5) ?
+        ghoul::lua::value<std::string>(L, 5) :
+        "";
 
     global::keybindingManager.bindKeyLocal(
         iKey.key,
