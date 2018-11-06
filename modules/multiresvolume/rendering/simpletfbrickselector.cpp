@@ -28,6 +28,7 @@
 #include <modules/multiresvolume/rendering/histogrammanager.h>
 #include <openspace/rendering/transferfunction.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 
 namespace {
     constexpr const char* _loggerCat = "SimpleTfBrickSelector";
