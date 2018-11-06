@@ -100,10 +100,10 @@ int bindKeyLocal(lua_State* L) {
     }
 
     std::string doc = nArguments >= 3 ? ghoul::lua::value<std::string>(L, 3) : "";
-    std::string name = ((nArguments >= 4) && (L, 4)) ?
+    std::string name = (nArguments >= 4) ?
         ghoul::lua::value<std::string>(L, 4) :
         "";
-    std::string guiPath = ((nArguments == 5) && (L, 5)) ?
+    std::string guiPath = (nArguments == 5) ?
         ghoul::lua::value<std::string>(L, 5) :
         "";
 

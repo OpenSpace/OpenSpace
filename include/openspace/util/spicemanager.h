@@ -46,7 +46,7 @@ public:
     using KernelHandle = unsigned int;
 
     struct SpiceException : public ghoul::RuntimeError {
-        explicit SpiceException(const std::string& msg);
+        explicit SpiceException(std::string msg);
     };
 
     /**
