@@ -24,11 +24,10 @@
 
 #include <modules/webgui/webguimodule.h>
 
+#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
-
-#include <fmt/format.h>
 
 namespace {
     constexpr const char* _loggerCat = "WebGuiModule";
@@ -114,6 +113,4 @@ void WebGuiModule::stopProcess() {
     _process = nullptr;
 }
 
-
 } // namespace openspace
-

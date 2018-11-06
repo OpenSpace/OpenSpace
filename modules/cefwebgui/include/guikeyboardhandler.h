@@ -27,18 +27,12 @@
 
 #include <modules/webbrowser/include/webkeyboardhandler.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
-#include <memory>
-
 namespace openspace {
 
 class GUIKeyboardHandler : public WebKeyboardHandler {
 public:
     GUIKeyboardHandler();
-    virtual ~GUIKeyboardHandler();
-
-private:
-
+    virtual ~GUIKeyboardHandler() = default;
 };
 
 } // namespace openspace

@@ -39,13 +39,12 @@
 namespace {
     constexpr const char* _loggerCat = "WebBrowser";
 
-    
     #ifdef _MSC_VER
-        constexpr const char* SubprocessSuffix = ".exe";
+        constexpr const char* SubprocessSuf = ".exe";
     #elif __APPLE__
-        constexpr const char* SubprocessSuffix = ".app/Contents/MacOS/openspace_web_helper";
+        constexpr const char* SubprocessSuf = ".app/Contents/MacOS/openspace_web_helper";
     #else
-        constexpr const char* SubprocessSuffix = "";
+        constexpr const char* SubprocessSuf = "";
     #endif
 } // namespace
 
@@ -71,9 +70,7 @@ void WebBrowserModule::internalDeinitialize() {
 }
 
 std::string WebBrowserModule::findHelperExecutable() {
-    std::string execLocation = absPath(
-        _webHelperLocation + SubprocessSuffix
-    );
+    std::string execLocation = absPath(_webHelperLocation + SubprocessSuf);
     if (!FileSys.fileExists(execLocation)) {
         LERROR(fmt::format(
             "Could not find web helper executable at location: {}" , execLocation
@@ -106,13 +103,9 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     LDEBUG("Starting CEF... done!");
 
     global::callback::preSync.push_back([this]() {
-        if (!_cefHost) {
-            return;
+        if (_cefHost && !_browsers.empty()) {
+            _cefHost->doMessageLoopWork();
         }
-        if (_browsers.empty()) {
-            return;
-        }
-        _cefHost->doMessageLoopWork();
     });
 
     _eventHandler.initialize();
@@ -124,10 +117,9 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 }
 
 void WebBrowserModule::addBrowser(std::shared_ptr<BrowserInstance> browser) {
-    if (!_enabled) {
-        return;
+    if (_enabled) {
+        _browsers.push_back(browser);
     }
-    _browsers.push_back(browser);
 }
 
 void WebBrowserModule::removeBrowser(std::shared_ptr<BrowserInstance> browser) {
@@ -147,17 +139,15 @@ void WebBrowserModule::removeBrowser(std::shared_ptr<BrowserInstance> browser) {
 void WebBrowserModule::attachEventHandler(
                                          std::shared_ptr<BrowserInstance> browserInstance)
 {
-    if (!_enabled) {
-        return;
+    if (_enabled) {
+        _eventHandler.setBrowserInstance(browserInstance);
     }
-    _eventHandler.setBrowserInstance(browserInstance);
 }
 
 void WebBrowserModule::detachEventHandler() {
-    if (!_enabled) {
-        return;
+    if (_enabled) {
+        _eventHandler.setBrowserInstance(nullptr);
     }
-    _eventHandler.setBrowserInstance(nullptr);
 }
 
 bool WebBrowserModule::isEnabled() const {

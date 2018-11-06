@@ -31,7 +31,6 @@ namespace openspace {
 
 class VersionTopic : public Topic {
 public:
-    VersionTopic();
     virtual ~VersionTopic();
 
     void handleJson(const nlohmann::json& json) override;

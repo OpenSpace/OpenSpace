@@ -30,9 +30,10 @@
 
 namespace openspace {
 
-BrowserClient::BrowserClient(WebRenderHandler* handler, WebKeyboardHandler *keyboardHandler)
-    : _renderHandler(handler),
-    _keyboardHandler(keyboardHandler)
+BrowserClient::BrowserClient(WebRenderHandler* handler,
+                             WebKeyboardHandler* keyboardHandler)
+    : _renderHandler(handler)
+    , _keyboardHandler(keyboardHandler)
 {
     DefaultBrowserLauncher* browserLauncher = new DefaultBrowserLauncher;
     _lifeSpanHandler = browserLauncher;

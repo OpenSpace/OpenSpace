@@ -26,23 +26,13 @@
 
 #include <modules/server/include/connection.h>
 #include <modules/server/servermodule.h>
-
 #include <openspace/openspace.h>
-#include <openspace/engine/globals.h>
 
 namespace {
     constexpr const char* _loggerCat = "VersionTopic";
 } // namespace
 
-using nlohmann::json;
-
 namespace openspace {
-
-VersionTopic::VersionTopic() {
-}
-
-VersionTopic::~VersionTopic() {
-}
 
 bool VersionTopic::isDone() const {
     return true;
@@ -53,24 +43,22 @@ void VersionTopic::handleJson(const nlohmann::json&) {
         {
             "openSpaceVersion",
             {
-                {"major", OPENSPACE_VERSION_MAJOR},
-                {"minor", OPENSPACE_VERSION_MINOR},
-                {"patch", OPENSPACE_VERSION_PATCH}
+                { "major", OPENSPACE_VERSION_MAJOR },
+                { "minor", OPENSPACE_VERSION_MINOR },
+                { "patch", OPENSPACE_VERSION_PATCH }
             }
         },
         {
             "socketApiVersion",
             {
-                {"major", SOCKET_API_VERSION_MAJOR},
-                {"minor", SOCKET_API_VERSION_MINOR},
-                {"patch", SOCKET_API_VERSION_PATCH}
+                { "major", SOCKET_API_VERSION_MAJOR },
+                { "minor", SOCKET_API_VERSION_MINOR },
+                { "patch", SOCKET_API_VERSION_PATCH }
             }
         }
     };
 
-    _connection->sendJson(
-        wrappedPayload(versionJson)
-    );
+    _connection->sendJson(wrappedPayload(versionJson));
 }
 
 } // namespace openspace

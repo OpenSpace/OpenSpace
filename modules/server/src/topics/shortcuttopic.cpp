@@ -25,11 +25,7 @@
 #include <modules/server/include/topics/shortcuttopic.h>
 
 #include <modules/server/include/connection.h>
-#include <modules/server/servermodule.h>
-
-#include <openspace/openspace.h>
 #include <openspace/engine/globals.h>
-
 #include <openspace/interaction/shortcutmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
 
@@ -42,10 +38,6 @@ namespace {
 using nlohmann::json;
 
 namespace openspace {
-
-ShortcutTopic::ShortcutTopic() {}
-
-ShortcutTopic::~ShortcutTopic() {}
 
 bool ShortcutTopic::isDone() const {
     return true;
@@ -82,10 +74,10 @@ std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
             { "key", ghoul::to_string(k.key) },
             { "modifiers",
                 {
-                    {"shift" , hasKeyModifier(k.modifier, KeyModifier::Shift) },
-                    {"control" , hasKeyModifier(k.modifier, KeyModifier::Control) },
-                    {"alt" , hasKeyModifier(k.modifier, KeyModifier::Alt) },
-                    {"super" , hasKeyModifier(k.modifier, KeyModifier::Super) }
+                    { "shift" , hasKeyModifier(k.modifier, KeyModifier::Shift) },
+                    { "control" , hasKeyModifier(k.modifier, KeyModifier::Control) },
+                    { "alt" , hasKeyModifier(k.modifier, KeyModifier::Alt) },
+                    { "super" , hasKeyModifier(k.modifier, KeyModifier::Super) }
                 }
             },
             { "name", info.name },
@@ -100,9 +92,7 @@ std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
 }
 
 void ShortcutTopic::sendData() const {
-    nlohmann::json data = {
-        {"shortcuts", shortcutsJson()}
-    };
+    nlohmann::json data = { {"shortcuts", shortcutsJson()} };
     _connection->sendJson(wrappedPayload(data));
 }
 

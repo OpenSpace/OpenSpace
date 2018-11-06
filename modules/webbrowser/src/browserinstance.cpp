@@ -41,9 +41,10 @@ namespace {
 
 namespace openspace {
 
-BrowserInstance::BrowserInstance(WebRenderHandler* renderer, WebKeyboardHandler *keyboardHandler)
-    : _renderHandler(renderer),
-    _keyboardHandler(keyboardHandler)
+BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
+                                 WebKeyboardHandler* keyboardHandler)
+    : _renderHandler(renderer)
+    , _keyboardHandler(keyboardHandler)
 {
     _client = new BrowserClient(_renderHandler, _keyboardHandler);
 
@@ -123,7 +124,8 @@ bool BrowserInstance::sendKeyEvent(const CefKeyEvent& event) {
 
 bool BrowserInstance::sendMouseClickEvent(const CefMouseEvent& event,
                                           CefBrowserHost::MouseButtonType button,
-                                          bool mouseUp, int clickCount)
+                                          bool mouseUp,
+                                          int clickCount)
 {
     _browser->GetHost()->SendMouseClickEvent(event, button, mouseUp, clickCount);
     return hasContent(event.x, event.y);

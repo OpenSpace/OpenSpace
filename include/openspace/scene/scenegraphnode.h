@@ -27,14 +27,14 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 #include <atomic>
 #include <functional>
 #include <memory>
 #include <vector>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
 
  //#define Debugging_Core_SceneGraphNode_Indices
 

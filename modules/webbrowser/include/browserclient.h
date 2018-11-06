@@ -43,7 +43,7 @@ class WebKeyboardHandler;
 
 class BrowserClient : public CefClient {
 public:
-    BrowserClient(WebRenderHandler*, WebKeyboardHandler*);
+    BrowserClient(WebRenderHandler* handler, WebKeyboardHandler* keyboardHandler);
 
     CefRefPtr<CefRenderHandler> GetRenderHandler() override;
     CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() override;
