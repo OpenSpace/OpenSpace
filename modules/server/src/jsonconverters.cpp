@@ -48,6 +48,7 @@ void to_json(json& j, const Property* pP) {
 void to_json(json& j, const PropertyOwner& p) {
     j = {
         { "identifier", p.identifier() },
+        { "guiName", p.guiName() },
         { "description", p.description() },
         { "properties", p.properties() },
         { "subowners", p.propertySubOwners() },
