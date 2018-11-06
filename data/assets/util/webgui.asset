@@ -47,5 +47,5 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-    openspace.setPropertyValueSingle("Modules.WebGui.EnableServerProcess", false)
+    openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", false)
 end)
