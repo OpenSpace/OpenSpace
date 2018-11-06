@@ -138,6 +138,7 @@ set_folder_location(tinyxml2static "External/SGCT")
 set_folder_location(turbojpeg-static "External/SGCT")
 set_folder_location(vrpn "External/SGCT")
 set_folder_location(zlibstatic "External/SGCT")
+set_folder_location(miniziplibstatic "External/SGCT")
 
 if (UNIX AND (NOT APPLE))
     target_link_libraries(OpenSpace Xcursor Xinerama X11)
