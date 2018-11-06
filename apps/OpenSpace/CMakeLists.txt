@@ -168,17 +168,6 @@ elseif (OPENSPACE_MODULE_WEBBROWSER)
     message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
 endif ()
 
-if (OPENSPACE_MODULE_WEBGUI AND WEBGUI_MODULE_PATH)
-    begin_header("Building WebGUI source")
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBGUI_MODULE_PATH}/cmake")
-    include(webgui_helpers)
-    build_webgui_source(OpenSpace)
-    end_header("End: Building WebGUI source")
-elseif (OPENSPACE_MODULE_WEBGUI)
-    message(WARNING "WebGui is configured to be included, but the web source could not be found. Try configuring CMake again.")
-endif()
-# End Web Browser and Web gui
-
 if (MSVC)
     begin_header("Dependency: Dbghelp")
     # This library is used for being able to output the callstack if an exception escapes

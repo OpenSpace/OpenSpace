@@ -26,8 +26,10 @@
 
 #include <modules/webbrowser/include/browserclient.h>
 #include <modules/webbrowser/include/webrenderhandler.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <modules/webbrowser/include/webkeyboardhandler.h>
+#include <openspace/engine/windowdelegate.h>
+
+#include <openspace/engine/globals.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -39,10 +41,11 @@ namespace {
 
 namespace openspace {
 
-BrowserInstance::BrowserInstance(WebRenderHandler* renderer)
-    : _renderHandler(renderer)
+BrowserInstance::BrowserInstance(WebRenderHandler* renderer, WebKeyboardHandler *keyboardHandler)
+    : _renderHandler(renderer),
+    _keyboardHandler(keyboardHandler)
 {
-    _client = new BrowserClient(_renderHandler);
+    _client = new BrowserClient(_renderHandler, _keyboardHandler);
 
     CefWindowInfo windowInfo;
     const bool renderTransparent = true;
@@ -66,7 +69,7 @@ BrowserInstance::~BrowserInstance() {
 }
 
 void BrowserInstance::initialize() {
-    reshape(OsEng.windowWrapper().currentWindowSize());
+    reshape(global::windowDelegate.currentWindowSize());
     _isInitialized = true;
 }
 

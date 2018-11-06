@@ -44,9 +44,8 @@ class CefHost {
 public:
     CefHost(std::string helperLocation);
     ~CefHost();
-
+    void doMessageLoopWork();
 private:
-    void initializeCallbacks();
     void attachDebugSettings(CefSettings&);
 };
 

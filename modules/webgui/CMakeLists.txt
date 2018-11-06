@@ -24,7 +24,6 @@
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(WEBGUI_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "WEBGUI_MODULE_PATH")
-set(WEBGUI_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/web CACHE INTERNAL "WEBGUI_MODULE_PATH")
 
 set(OPENSPACE_HEADER_FILES
     webguimodule.h
@@ -38,8 +37,17 @@ source_group("Source Files" FILES ${OPENSPACE_SOURCE_FILES})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+# Specify the NodeJs distribution version.
+set(NODEJS_VERSION "8.11.4")
+
+include(nodejs_support)
+DownloadNodeJs("${NODEJS_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/ext/nodejs")
+
 create_new_module(
     WebGui
     webgui_module
+    STATIC
     ${OPENSPACE_HEADER_FILES} ${OPENSPACE_SOURCE_FILES}
 )

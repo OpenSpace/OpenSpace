@@ -290,6 +290,20 @@ void OpenSpaceEngine::initialize() {
     LDEBUG("Registering Lua libraries");
     registerCoreClasses(global::scriptEngine);
 
+    // Set up asset loader
+    std::unique_ptr<SynchronizationWatcher> w =
+        std::make_unique<SynchronizationWatcher>();
+    SynchronizationWatcher* rawWatcher = w.get();
+
+    global::openSpaceEngine._assetManager = std::make_unique<AssetManager>(
+        std::make_unique<AssetLoader>(
+            *global::scriptEngine.luaState(),
+            rawWatcher,
+            FileSys.absPath("${ASSETS}")
+        ),
+        std::move(w)
+    );
+
     global::scriptEngine.addLibrary(global::openSpaceEngine._assetManager->luaLibrary());
 
     for (OpenSpaceModule* module : global::moduleEngine.modules()) {
@@ -313,20 +327,6 @@ void OpenSpaceEngine::initialize() {
     for (const std::function<void()>& func : global::callback::initialize) {
         func();
     }
-
-    // Set up asset loader
-    std::unique_ptr<SynchronizationWatcher> w =
-        std::make_unique<SynchronizationWatcher>();
-    SynchronizationWatcher* rawWatcher = w.get();
-
-    global::openSpaceEngine._assetManager = std::make_unique<AssetManager>(
-        std::make_unique<AssetLoader>(
-            *global::scriptEngine.luaState(),
-            rawWatcher,
-            FileSys.absPath("${ASSETS}")
-        ),
-        std::move(w)
-    );
 
     global::openSpaceEngine._assetManager->initialize();
     scheduleLoadSingleAsset(global::configuration.asset);
