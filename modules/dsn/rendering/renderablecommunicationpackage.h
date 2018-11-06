@@ -36,6 +36,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include "SpiceUsr.h"
 
 namespace ghoul::opengl {
     class ProgramObject;

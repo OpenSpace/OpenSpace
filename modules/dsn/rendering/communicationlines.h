@@ -35,7 +35,7 @@
 #include <fstream>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/spicemanager.h>
-
+//#include "SpiceUsr.h"
 
 namespace openspace {
 
@@ -58,8 +58,11 @@ namespace openspace {
         int findFileIndexForCurrentTime(double time, std::vector<double> vec);
         /*Adds the signaldata to _vertexArray*/
         void pushSignalDataToVertexArray(DsnManager::Signal signal);
+        /* Converts the Ra Dec range coordinates into cartesian coordinates*/
+        glm::vec3 convertRaDecRangeToCartesian();
+        glm::dvec3 getEstimatedCoordinatePosFromFocusNode(glm::vec3 pos);
 
-
+        void pushRaDecDataToVertexArray(glm::vec3 posMoon);
     private:
         /*Checks if the current time is within a signal's start and endtime*/
          bool isSignalActive(double currentTime, std::string signalStartTime, std::string signalEndTime);
@@ -69,6 +72,11 @@ namespace openspace {
          SceneGraphNode* _focusNode;
 
          int _signalVectorStartIndex;
+         /* Rotation matrix to transform into equatorial sphere coordinate system*/
+         glm::dmat4 _rotEquatorialSphere = { -0.05487554,  0.4941095, -0.8676661, 0.0,
+             -0.8734371 , -0.4448296, -0.1980764, 0.0,
+             -0.483835  ,  0.7469823,  0.4559838, 0.0,
+             0.0       ,  0.0      ,  0.0      , 1.0 };
     };
 
 }

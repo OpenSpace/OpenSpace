@@ -34,9 +34,8 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
-
 #include <openspace/scene/scene.h>
-//#include <openspace/scene/scenegraphnode.h>
+
 
 namespace {
     constexpr const char* ProgramName = "CommunicationPackageProgram";

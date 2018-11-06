@@ -24,7 +24,6 @@
 
 #include <modules/dsn/rendering/communicationlines.h>
 #include <openspace/scene/scene.h>
-
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/util/camera.h>
 
@@ -64,8 +63,36 @@ namespace openspace {
 
         RenderableCommunicationPackage::deinitializeGL();
     }
+    
+    glm::vec3 CommunicationLines::convertRaDecRangeToCartesian() {
+
+       //Dummy data for voyager 1
+       float ra = 257.777029167736; //2018-246
+       float dec = 12.2537708651048; // 2018-246
+       float range = 2.14044781771236e+13; 
+       
+        // Convert RA and DEC from degrees to radians 
+        ra = glm::radians(ra);
+        dec = glm::radians(dec);
+
+        //Save the cartesian coordinates
+        double cartesianCoordinates[3];
+
+        //Fill array with coordinates 
+        radrec_c(range, ra, dec, cartesianCoordinates);
+
+        //Save array in vector 
+        glm::vec3 raDecPos = { cartesianCoordinates[0],cartesianCoordinates[1], cartesianCoordinates[2] };
+        
+        //Get the RA / DEC values in world coordinates with respect to the current focus node
+        raDecPos = getEstimatedCoordinatePosFromFocusNode(raDecPos);
+
+        return raDecPos;
+    }
+
 
     void CommunicationLines::update(const UpdateData& data) {
+
 
         double currentTime = data.time.j2000Seconds();
         //Todo: change this magic number. 86400 equals 24hrs in seconds
@@ -104,6 +131,7 @@ namespace openspace {
             if(isSignalActive(currentTime, currentSignal.startTime,currentSignal.endTime))
                 pushSignalDataToVertexArray(currentSignal);
         };
+
 
         // ... and upload them to the GPU
         glBindVertexArray(_lineRenderInformation._vaoID);
@@ -151,6 +179,34 @@ namespace openspace {
         }
 
         return fileIndex;
+    }
+
+
+    void CommunicationLines::pushRaDecDataToVertexArray(glm::vec3 raDecPos) {
+
+        ColorVBOLayout color0 = getSiteColor("DSS63"); // red
+        ColorVBOLayout color1 = getSiteColor("DSS43"); //green
+        ColorVBOLayout color2 = getSiteColor("DSS14"); // blue
+
+        glm::vec3 posEarth = { 0.0, 0.0, 0.0 };
+
+        _vertexArray.push_back(raDecPos.x);
+        _vertexArray.push_back(raDecPos.y);
+        _vertexArray.push_back(raDecPos.z);
+
+        _vertexArray.push_back(color0.r);
+        _vertexArray.push_back(color0.g);
+        _vertexArray.push_back(color0.b);
+        _vertexArray.push_back(color0.a);
+
+        _vertexArray.push_back(posEarth.x);
+        _vertexArray.push_back(posEarth.y);
+        _vertexArray.push_back(posEarth.z);
+
+        _vertexArray.push_back(color1.r);
+        _vertexArray.push_back(color1.g);
+        _vertexArray.push_back(color1.b);
+
     }
 
     void CommunicationLines::pushSignalDataToVertexArray(DsnManager::Signal signal) {
@@ -205,6 +261,23 @@ namespace openspace {
         return diff;
     }
 
+    glm::dvec3 CommunicationLines::getEstimatedCoordinatePosFromFocusNode(glm::vec3 pos) {
+        
+        glm::dvec3 earthPos = global::renderEngine.scene()->sceneGraphNode("Earth")->worldPosition();
+        glm::dvec3 focusNodePos = _focusNode->worldPosition();
+
+        glm::dmat4 translationMatrixEarth = glm::translate(glm::dmat4(1.0), glm::dvec3(earthPos));
+       
+        glm::dvec4 newPos = { pos, 1.0 };
+        glm::dvec4 nodePos = _rotEquatorialSphere * translationMatrixEarth  *newPos;
+
+        glm::dvec3 diff = glm::vec3(nodePos.x - focusNodePos.x, nodePos.y - focusNodePos.y,
+            nodePos.z - focusNodePos.z);
+
+
+        return diff;
+    }
+
     /* Our spacecrafts are often very far from Earth (and the sun) which gives precision
     * errors when we getting close to the node. To correct this we make a localtransform
     * to the current focusNode and calculate positions with the focusNode as origin. This
@@ -221,8 +294,8 @@ namespace openspace {
         }
         else {
             // TODO: Else estimate the position of the spacecraft by RA/DEC/RANGE 
-            LDEBUG(fmt::format("No position data for the spacecraft {}, estimating position",id));
-            nodePos = glm::vec3(0, 0, 0);
+           // LDEBUG(fmt::format("No position data for the spacecraft {}, estimating position",id));
+            nodePos = convertRaDecRangeToCartesian();
         }
 
         position.x = nodePos.x;
