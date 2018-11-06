@@ -91,6 +91,100 @@ glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float om , glm:
 	//return std::to_string(orbitPlaneRotation);
 }
 
+std::string getSpeckStarname(std::string csvName) {
+    std::string explName = csvName;
+    if (csvName == "HD 1237")
+        explName = "GJ 3021";
+    else if (csvName == "MOA-2009-BLG-387L")
+        explName = "MOA 2009-BLG-387L";
+    else if (csvName == "HD 126614 A")
+        explName = "HD 126614";
+    else if (csvName == "epsilon Ret")
+        explName = "HD 27442";
+    else if (csvName == "PH-1")
+        explName = "PH1";
+    else if (csvName == "gamma Leo A")
+        explName = "gam 1 Leo";
+    else if (csvName == "OGLE-2007-BLG-368L")
+        explName = "OGLE 2007-BLG-368L";
+    else if (csvName == "alpha Ari")
+        explName = "alf Ari";
+    else if (csvName == "mu Ara")
+        explName = "HD 160691";
+    else if (csvName == "OGLE-05-169L")
+        explName = "OGLE 2005-BLG-169L";
+    else if (csvName == "tau Gru")
+        explName = "HD 216435";
+    else if (csvName == "iota Hor")
+        explName = "HR 810";
+    else if (csvName == "OGLE-05-071L")
+        explName = "OGLE 2005-BLG-71L";
+    else if (csvName == "OGLE235-MOA53")
+        explName = "OGLE 2003-BLG-235L";
+    else if (csvName == "MOA-2008-BLG-310L")
+        explName = "MOA 2008-BLG-310L";
+    else if (csvName == "KIC 11442793")
+        explName = "KOI-351";
+    else if (csvName == "OGLE-2006-BLG-109L")
+        explName = "OGLE 2006-BLG-109L";
+    else if (csvName == "HD 137388")
+        explName = "HD 137388 A";
+    else if (csvName == "kappa CrB")
+        explName = "kap CrB";
+    else if (csvName == "XO-2")
+        explName = "XO-2 N";
+    else if (csvName == "epsilon Tau")
+        explName = "eps Tau";
+    else if (csvName == "epsilon Eri")
+        explName = "eps Eri";
+    else if (csvName == "Kepler-448")
+        explName = "KOI-12";
+    else if (csvName == "omega Ser")
+        explName = "ome Ser";
+    else if (csvName == "MOA-2010-BLG-477L")
+        explName = "MOA 2010-BLG-477L";
+    else if (csvName == "GJ 176")
+        explName = "HD 285968";
+    else if (csvName == "HIP 2247")
+        explName = "BD-17 63";
+    else if (csvName == "MOA-2009-BLG-266L")
+        explName = "MOA 2009-BLG-266L";
+    else if (csvName == "Kepler-89")
+        explName = "KOI-94";
+    else if (csvName == "iota Dra")
+        explName = "HIP 75458";
+    else if (csvName == "MOA-2007-BLG-400L")
+        explName = "MOA 2007-BLG-400L";
+    else if (csvName == "upsilon And")
+        explName = "ups And";
+    else if (csvName == "OGLE-2011-BLG-0251")
+        explName = "OGLE 2011-BLG-251L";
+    else if (csvName == "OGLE-05-390L")
+        explName = "OGLE 2005-BLG-390L";
+    else if (csvName == "Kepler-420")
+        explName = "KOI-1257";
+    else if (csvName == "beta Pic")
+        explName = "bet Pic";
+    else if (csvName == "gamma Cep")
+        explName = "gam Cep";
+    else if (csvName == "MOA-2007-BLG-192L")
+        explName = "MOA 2007-BLG-192L";
+    else if (csvName == "MOA-2009-BLG-319L")
+        explName = "MOA 2009-BLG-319L";
+    else if (csvName == "omicron CrB")
+        explName = "omi CrB";
+    else if (csvName == "beta Gem")
+        explName = "HD 62509";
+    else if (csvName == "epsilon CrB")
+        explName = "eps CrB";
+    else if (csvName == "omicron UMa")
+        explName = "omi UMa";
+    else if (csvName == "HD 142022")
+        explName = "HD 142022 A";
+
+    return explName;
+}
+
 std::string getCsvStarname(std::string explName) {
 	std::string csvName = explName;
 	if (explName == "GJ 3021")
@@ -230,10 +324,12 @@ int addExoplanetSystem(lua_State* L) {
 	const int StringLocation = -1;
 	const std::string starname = luaL_checkstring(L, StringLocation);
 
-    OsEng.moduleEngine().module<ExoplanetsModule>()->setStarName(starname);
+    //change expl-starname to exoplanet.csv-starname
+    std::string starname_csv = getCsvStarname(starname);
+    // If user have given name as in EOD, change it to speck-name
+    std::string starname_speck = getSpeckStarname(starname);
 
-	//change expl-starname to exoplanet.csv-starname
-	std::string starname_csv = getCsvStarname(starname);
+    OsEng.moduleEngine().module<ExoplanetsModule>()->setStarName(starname_speck);
 
 	std::ifstream data(absPath("${BASE}/modules/exoplanets/expl_data.bin"), std::ios::in | std::ios::binary);
 	if (!data.good()) {
@@ -261,7 +357,7 @@ int addExoplanetSystem(lua_State* L) {
 		std::istringstream ss(line);
 		getline(ss, planetname, ',');
 
-		if (planetname.compare(0, planetname.length() - 2, starname_csv) == 0) {
+		if (planetname.compare(0, planetname.length() - 2, starname_speck) == 0) {
 			std::string location_s;
 			getline(ss, location_s);
 			long location = std::stol(location_s.c_str());
@@ -305,13 +401,14 @@ int addExoplanetSystem(lua_State* L) {
         glm::dvec3 northProjected = normalize(celestialNorth - (((dot(celestialNorth, starToSunVec)) / (glm::length(starToSunVec)))*starToSunVec));
         OsEng.moduleEngine().module<ExoplanetsModule>()->setNorthVector(northProjected);
 
-        glm::dvec3 beta = normalize(cross(northProjected, starToSunVec));
-        glm::dmat3 exoplanetSystemRot = glm::dmat3(starToSunVec.x, starToSunVec.y, starToSunVec.z,
-                                                     beta.x, beta.y, beta.z,
-                                                    northProjected.x, northProjected.y, northProjected.z);
+        glm::dvec3 beta = normalize(cross(starToSunVec, northProjected));
+
+        glm::dmat3 exoplanetSystemRot = glm::dmat3(northProjected.x, northProjected.y, northProjected.z,
+                                                            beta.x, beta.y, beta.z,
+                                                    starToSunVec.x, starToSunVec.y, starToSunVec.z);
 
 		const std::string starParent = "{"
-			"Identifier = '" + starname + "',"
+			"Identifier = '" + starname_speck + "',"
 			"Parent = 'SolarSystemBarycenter'," 
 			"Transform = {"
                 "Rotation = {"
@@ -358,8 +455,8 @@ int addExoplanetSystem(lua_State* L) {
             else
                 sepoch_star = "2009-05-19T07:11:34.080";
 			const std::string starGlobe = "{"
-				"Identifier = '" + starname + "Globe',"
-				"Parent = '" + starname + "',"
+				"Identifier = '" + starname_speck + "Globe',"
+				"Parent = '" + starname_speck + "',"
 				"Renderable = {"
 					"Type = 'RenderableGlobe',"
 					"Radii = " + std::to_string(p.RSTAR) + " * 6.957E8,"
@@ -376,7 +473,7 @@ int addExoplanetSystem(lua_State* L) {
 							"},"
 							"{"
 								"Identifier = 'StarTexture',"
-								"FilePath = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/sun.jpg',"
+								"FilePath = 'C:/Users/Karin/Documents/LiU/Exjobb/clone_to_branch/OpenSpace/modules/exoplanets/sun.jpg',"
 								"BlendMode = 'Color',"
 								"Enabled = true"
 							"}"
@@ -410,8 +507,8 @@ int addExoplanetSystem(lua_State* L) {
             //script = "";
 
 			//const std::string starGlare = "{"
-			//	"Identifier = '" + starname + "Glare',"
-			//	"Parent = '" + starname + "',"
+			//	"Identifier = '" + starname_speck + "Glare',"
+			//	"Parent = '" + starname_speck + "',"
 			//	"Renderable = {"
 			//	"Type = 'RenderablePlaneImageLocal',"
 			//	"Size = " + std::to_string(p.RSTAR) + " * 5E9," //RSTAR. in meters. 1 solar radii = 6.95700×10e8 m
@@ -474,7 +571,7 @@ int addExoplanetSystem(lua_State* L) {
 
             const std::string planet = "{"
                 "Identifier = '" + plna[i] + "',"
-                "Parent = '" + starname + "',"
+                "Parent = '" + starname_speck + "',"
                 "Enabled = true,"
                 "Renderable = {"
                     "Type = 'RenderableGlobe',"
@@ -486,7 +583,7 @@ int addExoplanetSystem(lua_State* L) {
                         "ColorLayers = {"
                             "{"
                                 "Identifier = 'ExoplanetTexture',"
-                                "FilePath = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/test3.jpg',"
+                                "FilePath = 'C:/Users/Karin/Documents/LiU/Exjobb/clone_to_branch/OpenSpace/data/test3.jpg',"
                                 "Enabled = true"
                             "}"
                         "}"
@@ -523,7 +620,7 @@ int addExoplanetSystem(lua_State* L) {
 
             const std::string planetTrail = "{"
                 "Identifier = '" + plna[i] + "Trail',"
-                "Parent = '" + starname + "',"
+                "Parent = '" + starname_speck + "',"
                 "Enabled = true,"
                 "Renderable = {"
                     "Type = 'RenderableTrailOrbit',"
@@ -558,11 +655,11 @@ int addExoplanetSystem(lua_State* L) {
                 OsEng.moduleEngine().module<ExoplanetsModule>()->setRotation(rot);
 				const std::string disc = "{"
 					"Identifier = '" + plna[i] + "Disc',"
-					"Parent = '" + starname + "',"
+					"Parent = '" + starname_speck + "',"
                     "Enabled = true,"
 					"Renderable = {"
 					    "Type = 'RenderableOrbitdisc',"
-					    "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/disc.png',"
+					    "Texture = 'C:/Users/Karin/Documents/LiU/Exjobb/clone_to_branch/OpenSpace/modules/exoplanets/disc3.png',"
 					    "Size = " + std::to_string(plsy[i].A) + " * 149597870700," // 149 597 870 700 m = 1 AU. A
 					    "Eccentricity = " + std::to_string(plsy[i].ECC) + ","
 					    "Offset = { " + std::to_string(plsy[i].ALOWER) + ", " + std::to_string(plsy[i].AUPPER) + " }," //min / max extend
@@ -590,10 +687,10 @@ int addExoplanetSystem(lua_State* L) {
 					}
 					const std::string discECCLOWER = "{"
 						"Identifier = '" + plna[i] + "discECCLOWER',"
-						"Parent = '" + starname + "',"
+						"Parent = '" + starname_speck + "',"
 						"Renderable = {"
 						    "Type = 'RenderableOrbitdisc',"
-						    "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/discL.png',"
+						    "Texture = 'C:/Users/Karin/Documents/LiU/Exjobb/clone_to_branch/OpenSpace/modules/exoplanets/discL.png',"
 						    "Size = " + std::to_string(plsy[i].A) + " * 149597870700," // 149 597 870 700 m = 1 AU. A
 						    "Eccentricity = " + std::to_string(lower_ecc) + ","
 						    "Offset = { " + std::to_string(plsy[i].ALOWER) + ", " + std::to_string(plsy[i].AUPPER) + " }," //min / max extend
@@ -621,10 +718,10 @@ int addExoplanetSystem(lua_State* L) {
 					}
 					const std::string discECCUPPER = "{"
 						"Identifier = '" + plna[i] + "discECCUPPER',"
-						"Parent = '" + starname + "',"
+						"Parent = '" + starname_speck + "',"
 						"Renderable = {"
 						    "Type = 'RenderableOrbitdisc',"
-						    "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/discU.png',"
+						    "Texture = 'C:/Users/Karin/Documents/LiU/Exjobb/clone_to_branch/OpenSpace/modules/exoplanets/discU.png',"
 						    "Size = " + std::to_string(plsy[i].A) + " * 149597870700," // 149 597 870 700 m = 1 AU. A
 						    "Eccentricity = " + std::to_string(upper_ecc) + ","
 						    "Offset = { " + std::to_string(plsy[i].ALOWER) + ", " + std::to_string(plsy[i].AUPPER) + " }," //min / max extend
@@ -662,8 +759,8 @@ int addExoplanetSystem(lua_State* L) {
 int removeExoplanetSystem(lua_State* L) {
 	const int StringLocation = -1;
 	const std::string starname = luaL_checkstring(L, StringLocation);
-
-	std::string script = "openspace.removeSceneGraphNode('" + starname + "');";
+    std::string starname_speck = getSpeckStarname(starname);
+	std::string script = "openspace.removeSceneGraphNode('" + starname_speck + "');";
 	OsEng.scriptEngine().queueScript(
 		script,
 		openspace::scripting::ScriptEngine::RemoteScripting::Yes
