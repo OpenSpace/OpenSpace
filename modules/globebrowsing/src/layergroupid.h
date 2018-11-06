@@ -122,7 +122,7 @@ enum class BlendModeID {
 } // namespace openspace::globebrowsing::layergroupid
 
 namespace ghoul {
-    
+
 template <>
 openspace::globebrowsing::layergroupid::TypeID from_string(const std::string& string);
 

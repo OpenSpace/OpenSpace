@@ -67,7 +67,7 @@ public:
     bool updateCamera(Camera& camera, bool ignoreFutureKeyframes);
     static bool updateCamera(Camera* camera, const CameraPose prevPose,
         const CameraPose nextPose, double t, bool ignoreFutureKeyframes);
-  
+
     Timeline<CameraPose>& timeline();
     void addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose);
     void removeKeyframesAfter(double timestamp, Inclusive inclusive = Inclusive::No);

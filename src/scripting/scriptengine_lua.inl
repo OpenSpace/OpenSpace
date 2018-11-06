@@ -347,7 +347,11 @@ int directoryForPath(lua_State* L) {
  * is finished.
  */
 int unzipFile(lua_State* L) {
-    const int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 2, 3 }, "lua::unzipFile");
+    const int nArguments = ghoul::lua::checkArgumentsAndThrow(
+        L,
+        { 2, 3 },
+        "lua::unzipFile"
+    );
 
     std::string source = absPath(
         ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::No)

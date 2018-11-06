@@ -95,7 +95,7 @@ void WebGuiModule::startProcess() {
 #else
     const std::string nodePath = absPath("${MODULE_WEBGUI}/ext/nodejs/node");
 #endif
-    
+
     _process = std::make_unique<ghoul::Process>(
         "\"" + nodePath + "\" \"" + _serverProcessEntryPoint.value() + "\"",
         _serverProcessWorkingDirectory.value(),

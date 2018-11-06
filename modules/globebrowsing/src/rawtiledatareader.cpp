@@ -389,7 +389,7 @@ void RawTileDataReader::initialize() {
     }
 
     GlobeBrowsingModule& module = *global::moduleEngine.module<GlobeBrowsingModule>();
-    
+
     std::string content = _datasetFilePath;
     if (module.isCachingEnabled() && FileSys.fileExists(_datasetFilePath)) {
         // Only replace the 'content' if the dataset is an XML file and we want to do

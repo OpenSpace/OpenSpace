@@ -82,7 +82,7 @@ private:
         UniformCache(opacity, gamma, multiplier, offset, valueBlending, chromaKeyColor,
             chromaKeyTolerance, paddingStartOffset, paddingSizeDifference, color,
             depthOffset, depthScale) uniformCache;
-    
+
         bool isHeightLayer = false;
     };
 

@@ -30,6 +30,7 @@
 #include <openspace/query/query.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/time.h>
+#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -97,7 +98,9 @@ void SetPropertyTopic::handleJson(const nlohmann::json& json) {
             std::string literal = luaLiteralFromJson(value);
 
             global::scriptEngine.queueScript(
-                 "openspace.setPropertyValueSingle(\"" + propertyKey + "\", " + literal + ")",
+                fmt::format(
+                    "openspace.setPropertyValueSingle(\"{}\", {})", propertyKey, literal
+                ),
                  scripting::ScriptEngine::RemoteScripting::Yes
              );
         }

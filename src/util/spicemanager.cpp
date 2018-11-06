@@ -87,7 +87,7 @@ namespace {
 #include "spicemanager_lua.inl"
 
 namespace openspace {
-    
+
 SpiceManager* SpiceManager::_instance = nullptr;
 
 SpiceManager::SpiceException::SpiceException(std::string msg)

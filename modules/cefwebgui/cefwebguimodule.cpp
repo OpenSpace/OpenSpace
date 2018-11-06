@@ -38,7 +38,7 @@
 
 namespace {
     constexpr const char* _loggerCat = "CefWebGui";
-    
+
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
@@ -70,11 +70,10 @@ CefWebGuiModule::CefWebGuiModule()
     addProperty(_cefWebGuiVisible);
     addProperty(_guiUrl);
 }
-    
+
 void CefWebGuiModule::startOrStopGui() {
-    WebBrowserModule* webBrowserModule =
-        global::moduleEngine.module<WebBrowserModule>();
-    
+    WebBrowserModule* webBrowserModule = global::moduleEngine.module<WebBrowserModule>();
+
     const bool isGuiWindow =
         global::windowDelegate.hasGuiWindow() ?
         global::windowDelegate.isGuiWindow() :
@@ -83,7 +82,7 @@ void CefWebGuiModule::startOrStopGui() {
 
     if (_cefWebGuiEnabled && isGuiWindow && isMaster) {
         LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", _guiUrl));
-        
+
         if (!_guiInstance) {
             _guiInstance = std::make_shared<BrowserInstance>(
                 new GUIRenderHandler,
@@ -100,7 +99,7 @@ void CefWebGuiModule::startOrStopGui() {
         _guiInstance.reset();
     }
 }
-    
+
 void CefWebGuiModule::updateUrl() {
     if (_guiInstance) {
         _guiInstance->loadUrl(_guiUrl);
