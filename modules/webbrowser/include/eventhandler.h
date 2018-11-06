@@ -49,14 +49,10 @@ class EventHandler {
 public:
     void initialize();
     void setBrowser(const CefRefPtr<CefBrowser>& browser);
-    void setBrowserInstance(const std::shared_ptr<BrowserInstance>& browserInstance);
+    void setBrowserInstance(BrowserInstance* browserInstance);
     void detachBrowser();
 
 private:
-#if !defined(WIN32)
-    static const int MaxDoubleClickDistance = 4;
-#endif
-
     bool mouseButtonCallback(MouseButton button, MouseAction action);
     bool mousePositionCallback(double x, double y);
     bool mouseWheelCallback(glm::ivec2 delta);
@@ -87,7 +83,7 @@ private:
      */
     cef_key_event_type_t keyEventType(KeyAction action);
 
-    std::shared_ptr<BrowserInstance> _browserInstance = nullptr;
+    BrowserInstance* _browserInstance = nullptr;
     glm::vec2 _mousePosition = { 0.f, 0.f };
 
     struct MouseButtonState {
@@ -104,22 +100,7 @@ private:
      * @return
      */
     bool isDoubleClick(const MouseButtonState& button) const;
-
-    /**
-     * get the number of milliseconds that is allowed between two clicks for it to count
-     * as a double click
-     * @return
-     */
-    static int doubleClickTime();
-
-    /**
-     * get the rectangle width around the first click in a double click that the second
-     * click has to be _within_
-     * @return
-     */
-    static int maxDoubleClickDistance();
 };
-
 
 } // namespace openspace
 

@@ -43,13 +43,13 @@ protected:
     void internalInitialize(const ghoul::Dictionary&) override;
 
 private:
-    std::unique_ptr<ghoul::Process> _process;
-    properties::BoolProperty _serverProcessEnabled;
-    properties::StringProperty _serverProcessEntryPoint;
-    properties::StringProperty _serverProcessWorkingDirectory;
-
     void startProcess();
     void stopProcess();
+
+    std::unique_ptr<ghoul::Process> _process;
+    properties::BoolProperty _enabled;
+    properties::StringProperty _entryPoint;
+    properties::StringProperty _workingDirectory;
 };
 
 } // namespace openspace

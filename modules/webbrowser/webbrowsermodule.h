@@ -37,12 +37,12 @@ class WebBrowserModule : public OpenSpaceModule {
 public:
     static constexpr const char* Name = "WebBrowser";
     WebBrowserModule();
-    virtual ~WebBrowserModule();
+    virtual ~WebBrowserModule() = default;
 
-    void addBrowser(std::shared_ptr<BrowserInstance>);
-    void removeBrowser(std::shared_ptr<BrowserInstance>);
+    void addBrowser(BrowserInstance*);
+    void removeBrowser(BrowserInstance*);
 
-    void attachEventHandler(std::shared_ptr<BrowserInstance> browserInstance);
+    void attachEventHandler(BrowserInstance* browserInstance);
     void detachEventHandler();
     bool isEnabled() const;
 
@@ -59,7 +59,7 @@ private:
      */
     std::string findHelperExecutable();
 
-    std::vector<std::shared_ptr<BrowserInstance>> _browsers;
+    std::vector<BrowserInstance*> _browsers;
     EventHandler _eventHandler;
     std::unique_ptr<CefHost> _cefHost;
     std::string _webHelperLocation;

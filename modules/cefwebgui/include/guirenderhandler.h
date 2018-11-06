@@ -39,9 +39,6 @@ public:
     GUIRenderHandler();
     virtual ~GUIRenderHandler();
 
-    void initializeGL();
-    void deinitializeGL();
-
     void draw();
     void render();
 
