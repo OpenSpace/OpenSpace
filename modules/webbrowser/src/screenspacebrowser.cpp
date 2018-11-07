@@ -138,6 +138,10 @@ bool ScreenSpaceBrowser::deinitialize() {
 }
 
 void ScreenSpaceBrowser::render() {
+    if (!_renderHandler->isTextureReady()) {
+        return;
+    }
+    _renderHandler->updateTexture();
     draw(rotationMatrix() * translationMatrix() * scaleMatrix());
 }
 
