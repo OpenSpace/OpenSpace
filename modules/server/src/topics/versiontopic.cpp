@@ -28,10 +28,6 @@
 #include <modules/server/servermodule.h>
 #include <openspace/openspace.h>
 
-namespace {
-    constexpr const char* _loggerCat = "VersionTopic";
-} // namespace
-
 namespace openspace {
 
 bool VersionTopic::isDone() const {

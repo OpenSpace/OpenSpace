@@ -47,6 +47,8 @@ class WebKeyboardHandler;
 
 class BrowserInstance {
 public:
+    static constexpr int SingleClick = 1;
+
     BrowserInstance(WebRenderHandler* renderer, WebKeyboardHandler* keyboardHandler);
     ~BrowserInstance();
 
@@ -93,8 +95,6 @@ public:
     const CefRefPtr<CefBrowser>& getBrowser() const;
 
     bool hasContent(int x, int y);
-
-    const static int SingleClick = 1;
 
 private:
     CefRefPtr<WebRenderHandler> _renderHandler;

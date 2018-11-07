@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_CEFWEBGUI___CEFWEBGUIMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/stringproperty.h>
 
@@ -43,13 +44,11 @@ public:
 
 private:
     void startOrStopGui();
-    void updateUrl();
 
-    properties::BoolProperty _cefWebGuiEnabled;
-    properties::BoolProperty _cefWebGuiVisible;
-    properties::StringProperty _guiUrl;
-    std::shared_ptr<BrowserInstance> _guiInstance;
-    bool _webBrowserIsAvailable = false;
+    properties::BoolProperty _enabled;
+    properties::BoolProperty _visible;
+    properties::StringProperty _url;
+    std::unique_ptr<BrowserInstance> _instance;
 };
 
 } // namespace openspace

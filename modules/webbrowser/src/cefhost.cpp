@@ -28,6 +28,7 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <ghoul/logging/logmanager.h>
 #include <fmt/format.h>
+#include <include/wrapper/cef_helpers.h>
 
 namespace {
     constexpr const char* _loggerCat = "CefHost";

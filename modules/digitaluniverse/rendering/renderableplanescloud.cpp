@@ -591,7 +591,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     _program->setUniform(_uniformCache.galaxyTexture, unit);
     int currentTextureIndex = -1;
 
-    for (const std::unordered_map<int, PlaneAggregate>::reference pAMapItem : _planesMap)
+    for (std::unordered_map<int, PlaneAggregate>::reference pAMapItem : _planesMap)
     {
         // For planes with undefined textures references
         if (pAMapItem.first == 30) {

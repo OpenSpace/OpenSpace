@@ -23,6 +23,8 @@
 ##########################################################################################
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
+
 set(WEBBROWSER_MODULE_NAME WebBrowser)
 set(WEBBROWSER_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "WEBBROWSER_MODULE_PATH")
 
@@ -206,6 +208,10 @@ create_new_module(
     STATIC
     ${HEADER_FILES} ${SOURCE_FILES}
 )
+
+set_folder_location(libcef_dll_wrapper "Helper")
+set_folder_location(openspace_web_helper "Helper")
+
 
 # Display CEF configuration settings.
 PRINT_CEF_CONFIG()

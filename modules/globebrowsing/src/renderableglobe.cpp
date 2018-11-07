@@ -399,9 +399,9 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f)
     })
     , _debugPropertyOwner({ "Debug" })
+    , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
     , _leftRoot(Chunk(LeftHemisphereIndex))
     , _rightRoot(Chunk(RightHemisphereIndex))
-    , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
 {
     // Read the radii in to its own dictionary
     if (dictionary.hasKeyAndValue<glm::dvec3>(KeyRadii)) {
@@ -1229,7 +1229,6 @@ void RenderableGlobe::recompileShaders() {
 
     // Different layer types can be height layers or color layers for example.
     // These are used differently within the shaders.
-    preprocessingData.layeredTextureInfo;
 
     for (size_t i = 0; i < preprocessingData.layeredTextureInfo.size(); i++) {
         // lastLayerIndex must be at least 0 for the shader to compile,

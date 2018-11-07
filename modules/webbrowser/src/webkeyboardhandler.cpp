@@ -26,17 +26,14 @@
 
 namespace openspace {
 
-bool WebKeyboardHandler::OnKeyEvent(CefRefPtr<CefBrowser> browser,
-                                    const CefKeyEvent& event,
-                                    CefEventHandle os_event)
+bool WebKeyboardHandler::OnKeyEvent(CefRefPtr<CefBrowser>, const CefKeyEvent&,
+                                    CefEventHandle)
 {
     return false;
 }
 
-bool WebKeyboardHandler::OnPreKeyEvent(CefRefPtr<CefBrowser> browser,
-                                       const CefKeyEvent& event,
-                                       CefEventHandle os_event,
-                                       bool* is_keyboard_shortcut)
+bool WebKeyboardHandler::OnPreKeyEvent(CefRefPtr<CefBrowser>, const CefKeyEvent& event,
+                                       CefEventHandle, bool*)
 {
     if (event.focus_on_editable_field) {
         _keyConsumed = true;

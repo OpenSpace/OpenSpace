@@ -86,7 +86,7 @@ public:
     void update(const UpdateData& data) override;
 
     SurfacePositionHandle calculateSurfacePositionHandle(
-        const glm::dvec3& targetModelSpace) const;
+        const glm::dvec3& targetModelSpace) const override;
 
     const Ellipsoid& ellipsoid() const;
     const LayerManager& layerManager() const;

@@ -69,6 +69,32 @@ namespace {
         return cefModifiers;
     }
 
+    /**
+     * get the number of milliseconds that is allowed between two clicks for it to count
+     * as a double click
+     * @return
+     */
+    int doubleClickTime() {
+#ifdef WIN32
+        return GetDoubleClickTime();
+#else
+        return 500;
+#endif
+    }
+
+    /**
+     * get the rectangle width around the first click in a double click that the second
+     * click has to be _within_
+     * @return
+     */
+    int maxDoubleClickDistance() {
+#ifdef WIN32
+        return GetSystemMetrics(SM_CXDOUBLECLK);
+#else
+        return 4;
+#endif
+    }
+
 } // namespace
 
 namespace openspace {
@@ -115,7 +141,6 @@ void EventHandler::initialize() {
             return false;
         }
     );
-
 }
 
 bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
@@ -123,8 +148,7 @@ bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
         return false;
     }
 
-    MouseButtonState& state =
-        (button == MouseButton::Left) ? _leftButton : _rightButton;
+    MouseButtonState& state = (button == MouseButton::Left) ? _leftButton : _rightButton;
 
     int clickCount = BrowserInstance::SingleClick;
 
@@ -144,7 +168,7 @@ bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
 
     return _browserInstance->sendMouseClickEvent(
         mouseEvent(),
-        button == MouseButton::Left ? MBT_LEFT : MBT_RIGHT,
+        (button == MouseButton::Left) ? MBT_LEFT : MBT_RIGHT,
         !state.down,
         clickCount
     );
@@ -154,14 +178,14 @@ bool EventHandler::isDoubleClick(const MouseButtonState& button) const {
     // check time
     using namespace std::chrono;
     auto now = high_resolution_clock::now();
-    milliseconds maxTimeDifference(EventHandler::doubleClickTime());
+    milliseconds maxTimeDifference(doubleClickTime());
     auto requiredTime = button.lastClickTime + maxTimeDifference;
     if (requiredTime < now) {
         return false;
     }
 
     // check position
-    const float maxDist = static_cast<float>(EventHandler::maxDoubleClickDistance() / 2);
+    const float maxDist = maxDoubleClickDistance() / 2.f;
     const bool x = abs(_mousePosition.x - button.lastClickPosition.x) < maxDist;
     const bool y = abs(_mousePosition.y - button.lastClickPosition.y) < maxDist;
 
@@ -188,8 +212,8 @@ bool EventHandler::mouseWheelCallback(glm::ivec2 delta) {
 bool EventHandler::charCallback(unsigned int charCode, KeyModifier modifier) {
     CefKeyEvent keyEvent;
     keyEvent.windows_key_code = charCode;
-    keyEvent.modifiers        = static_cast<uint32>(modifier);
-    keyEvent.type             = KEYEVENT_CHAR;
+    keyEvent.modifiers = static_cast<uint32>(modifier);
+    keyEvent.type = KEYEVENT_CHAR;
     // TODO(klas): figure out when to block
     return _browserInstance->sendKeyEvent(keyEvent);
 }
@@ -242,36 +266,13 @@ CefMouseEvent EventHandler::mouseEvent() {
     return event;
 }
 
-void EventHandler::setBrowserInstance(
-                                  const std::shared_ptr<BrowserInstance>& browserInstance)
-{
+void EventHandler::setBrowserInstance(BrowserInstance* browserInstance) {
     LDEBUG("Setting browser instance.");
     _browserInstance = browserInstance;
 }
 
 void EventHandler::detachBrowser() {
-    if (_browserInstance) {
-        LDEBUG(fmt::format(
-            "Detaching browser instance with use count {}", _browserInstance.use_count()
-        ));
-    }
     _browserInstance = nullptr;
-}
-
-int EventHandler::doubleClickTime() {
-#ifdef WIN32
-    return GetDoubleClickTime();
-#else
-    return 500;
-#endif
-}
-
-int EventHandler::maxDoubleClickDistance() {
-#ifdef WIN32
-    return GetSystemMetrics(SM_CXDOUBLECLK);
-#else
-    return MaxDoubleClickDistance;
-#endif
 }
 
 } // namespace openspace

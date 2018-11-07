@@ -465,7 +465,7 @@ public:
      *
      * \return The metadata information text for the property
      */
-    virtual std::string generateMetaDataJsonDescription() const;
+    std::string generateMetaDataJsonDescription() const;
 
     /**
      * Creates the information that is specific to each subclass of Property%s. If a
@@ -529,6 +529,9 @@ private:
     uint64_t _id;
 #endif
 };
+
+/// This function sanitizes an incoming string for JSON control characters
+std::string sanitizeString(const std::string& str);
 
 } // namespace openspace::properties
 

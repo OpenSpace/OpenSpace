@@ -25,14 +25,6 @@
 #include <modules/cefwebgui/include/guikeyboardhandler.h>
 
 #include <openspace/engine/globalscallbacks.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/textureunit.h>
-
-namespace {
-    constexpr const char* _loggerCat = "WebGUI:KeyboardHandler";
-} // namespace
 
 namespace openspace {
 
@@ -41,13 +33,9 @@ GUIKeyboardHandler::GUIKeyboardHandler() {
 
     global::callback::keyboard.push_back(
         [&](Key key, KeyModifier mod, KeyAction action) -> bool {
-            if (_keyConsumed) {
-                _keyConsumed = false;
-                return true;
-            }
-            else {
-                return false;
-            }
+            const bool previous = _keyConsumed;
+            _keyConsumed = false;
+            return previous;
         }
     );
 }

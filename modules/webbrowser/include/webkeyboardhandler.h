@@ -41,9 +41,9 @@ namespace openspace {
 class WebKeyboardHandler : public CefKeyboardHandler {
 public:
     bool OnKeyEvent(CefRefPtr<CefBrowser> browser, const CefKeyEvent& event,
-        CefEventHandle os_event) override;
+        CefEventHandle osEvent) override;
     bool OnPreKeyEvent(CefRefPtr<CefBrowser> browser, const CefKeyEvent& event,
-        CefEventHandle os_event, bool* is_keyboard_shortcut) override;
+        CefEventHandle osEvent, bool* isKeyboardShortcut) override;
 
 protected:
     bool _keyConsumed = false;
