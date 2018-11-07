@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_expat.h 34523 2016-07-02 21:50:47Z goatbar $
+ * $Id: ogr_expat.h 8f23c07654499bf39ce1d71a760e86ef109e9504 2014-03-16 23:41:27Z Even Rouault $
  *
  * Project:  OGR
  * Purpose:  Convenience function for parsing with Expat library

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_geocoding.h 34931 2016-08-05 17:13:05Z rouault $
+ * $Id: ogr_geocoding.h fcf615cbf6b2e03db17171af0ebba6da4b4a562d 2016-08-05 17:13:05Z Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Client of geocoding service.

@@ -37,7 +37,7 @@ struct Job {
     virtual ~Job() = default;
 
     virtual void execute() = 0;
-    virtual std::shared_ptr<P> product() = 0;
+    virtual P product() = 0;
 };
 
 } // namespace openspace

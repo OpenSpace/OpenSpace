@@ -5,5 +5,4 @@
   </Service>
   <Timeout>2</Timeout>
   <MaxConnections>5</MaxConnections>
-  <OfflineMode>false</OfflineMode>
 </GDAL_WMS>

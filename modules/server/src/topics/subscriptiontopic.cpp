@@ -48,9 +48,11 @@ namespace openspace {
 SubscriptionTopic::~SubscriptionTopic() {
     if (_prop && _onChangeHandle != UnsetCallbackHandle) {
         _prop->removeOnChange(_onChangeHandle);
+        _onChangeHandle = UnsetCallbackHandle;
     }
     if (_prop && !_onDeleteHandle) {
         _prop->removeOnDelete(_onDeleteHandle);
+        _onDeleteHandle = UnsetCallbackHandle;
     }
 }
 
@@ -63,14 +65,11 @@ void SubscriptionTopic::handleJson(const nlohmann::json& json) {
     const std::string& event = json.at(EventKey).get<std::string>();
 
     if (event == StartSubscription) {
-        LDEBUG(fmt::format("Subscribing to property '{}'", key));
-
         _prop = property(key);
         if (_prop) {
             _requestedResourceIsSubscribable = true;
             _isSubscribedTo = true;
             auto onChange = [this, k = std::move(key)]() {
-                LDEBUG("Updating subscription '" + k + "'.");
                 _connection->sendJson(wrappedPayload(_prop));
             };
             _onChangeHandle = _prop->onChange(onChange);
@@ -89,6 +88,14 @@ void SubscriptionTopic::handleJson(const nlohmann::json& json) {
     }
     if (event == StopSubscription) {
         _isSubscribedTo = false;
+        if (_prop && _onChangeHandle != UnsetCallbackHandle) {
+            _prop->removeOnChange(_onChangeHandle);
+            _onChangeHandle = UnsetCallbackHandle;
+        }
+        if (_prop && !_onDeleteHandle) {
+            _prop->removeOnDelete(_onDeleteHandle);
+            _onDeleteHandle = UnsetCallbackHandle;
+        }
     }
 }
 

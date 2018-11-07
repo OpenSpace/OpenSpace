@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdaljp2abstractdataset.h 36501 2016-11-25 14:09:24Z rouault $
+ * $Id: gdaljp2abstractdataset.h d10f99bfacb1d7c3331a539c4667d1c95199313d 2017-12-18 12:00:18Z Kurt Schwehr $
  *
  * Project:  GDAL
  * Purpose:  GDALGeorefPamDataset with helper to read georeferencing and other
@@ -43,20 +43,20 @@ class CPL_DLL GDALJP2AbstractDataset: public GDALGeorefPamDataset
     int                 m_nWORLDFILEIndex;
 
   protected:
-    virtual int         CloseDependentDatasets() CPL_OVERRIDE;
+    int CloseDependentDatasets() override;
 
   public:
-        GDALJP2AbstractDataset();
-        virtual ~GDALJP2AbstractDataset();
+    GDALJP2AbstractDataset();
+    ~GDALJP2AbstractDataset() override;
 
-        void LoadJP2Metadata( GDALOpenInfo* poOpenInfo,
-                              const char* pszOverrideFilename = NULL );
-        void            LoadVectorLayers( int bOpenRemoteResources = FALSE );
+    void LoadJP2Metadata( GDALOpenInfo* poOpenInfo,
+                          const char* pszOverrideFilename = nullptr );
+    void LoadVectorLayers( int bOpenRemoteResources = FALSE );
 
-        virtual char      **GetFileList( void ) CPL_OVERRIDE;
+    char **GetFileList( void ) override;
 
-        virtual int         GetLayerCount() CPL_OVERRIDE;
-        virtual OGRLayer   *GetLayer( int i ) CPL_OVERRIDE;
+    int GetLayerCount() override;
+    OGRLayer *GetLayer( int i ) override;
 };
 //! @endcond
 

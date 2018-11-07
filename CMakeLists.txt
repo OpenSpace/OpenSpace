@@ -27,9 +27,9 @@ cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 project(OpenSpace)
 
 set(OPENSPACE_VERSION_MAJOR 0)
-set(OPENSPACE_VERSION_MINOR 12)
-set(OPENSPACE_VERSION_PATCH 1)
-set(OPENSPACE_VERSION_STRING "Beta-2 (WIP)")
+set(OPENSPACE_VERSION_MINOR 13)
+set(OPENSPACE_VERSION_PATCH 0)
+set(OPENSPACE_VERSION_STRING "Beta-3")
 
 
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
@@ -124,47 +124,6 @@ set_folder_location(lz4 "External")
 set_folder_location(GhoulTest "Unit Tests")
 link_directories("${GHOUL_LIBRARY_DIRS}")
 
-# SGCT
-begin_dependency("SGCT")
-set(SGCT_TEXT OFF CACHE BOOL "" FORCE)
-set(SGCT_BUILD_CSHARP_PROJECTS OFF CACHE BOOL "" FORCE)
-set(SGCT_LIGHT_ONLY ON CACHE BOOL "" FORCE)
-set(SGCT_CUSTOMOUTPUTDIRS OFF CACHE BOOL "" FORCE)
-set(JPEG_TURBO_WITH_SIMD OFF CACHE BOOL "" FORCE)
-
-add_subdirectory(${OPENSPACE_EXT_DIR}/sgct)
-target_include_directories(openspace-core SYSTEM PUBLIC ${OPENSPACE_EXT_DIR}/sgct/include)
-target_link_libraries(openspace-core
-    sgct_light glew glfw png16_static quat tinyxml2static turbojpeg-static vrpn
-    ${GLFW_LIBRARIES})
-if (UNIX AND (NOT APPLE))
-    target_link_libraries(openspace-core Xcursor Xinerama X11)
-endif ()
-
-mark_as_advanced(EXECUTABLE_OUTPUT_PATH GLFW_BUILD_DOCS GLFW_BUILD_EXAMPLES
-    GLFW_BUILD_TESTS GLFW_INSTALL GLFW_USE_HYBRID_HPG GLFW_USE_OSMESA GLFW_VULKAN_STATIC
-    INSTALL_BIN_DIR INSTALL_INC_DIR INSTALL_LIB_DIR INSTALL_MAN_DIR INSTALL_PKGCONFIG_DIR
-    IOKIT_LIBRARY JPEG_TURBO_FORCE32bit JPEG_TURBO_WITH_12BIT JPEG_TURBO_WITH_ARITH_DEC
-    JPEG_TURBO_WITH_ARITH_ENC JPEG_TURBO_WITH_JPEG7 JPEG_TURBO_WITH_JPEG8
-    JPEG_TURBO_WITH_MEM_SRCDST JPEG_TURBO_WITH_SIMD JPEG_TURBO_WITH_TURBOJPEG LIB_SUFFIX
-    LIBRARY_OUTPUT_PATH M_LIBRARY SGCT_BUILD_ALUT SGCT_BUILD_CSHARP_PROJECTS
-    SGCT_CUSTOMOUTPUTDIRS SGCT_DOXYGEN SGCT_DOXYGEN_QUIET SGCT_EXAMPLES SGCT_INSTALL
-    SGCT_LIGHT_ONLY SGCT_NO_EXTERNAL_LIBRARIES SGCT_SPOUT_SUPPORT SGCT_TEXT
-    SGCT_USE_MSVC_RUNTIMES USE_MSVC_RUNTIME_LIBRARY_DLL)
-
-set_folder_location(sgct_light "External")
-set_folder_location(glew "External/SGCT")
-set_folder_location(glfw "External/SGCT")
-set_folder_location(png16_static "External/SGCT")
-set_folder_location(quat "External/SGCT")
-set_folder_location(simd "External/SGCT")
-set_folder_location(tinyxml2static "External/SGCT")
-set_folder_location(turbojpeg-static "External/SGCT")
-set_folder_location(vrpn "External/SGCT")
-set_folder_location(zlibstatic "External/SGCT")
-end_dependency("SGCT")
-
-
 # Spice
 begin_dependency("Spice")
 add_subdirectory(${OPENSPACE_EXT_DIR}/spice)
@@ -177,7 +136,7 @@ begin_dependency("CURL")
 if (WIN32)
     set(CURL_ROOT_DIR "${OPENSPACE_EXT_DIR}/curl")
     target_include_directories(openspace-core SYSTEM PUBLIC ${CURL_ROOT_DIR}/include)
-    target_link_libraries(openspace-core ${CURL_ROOT_DIR}/lib/libcurl_imp.lib)
+    target_link_libraries(openspace-core ${CURL_ROOT_DIR}/lib/libcurl.lib)
     target_compile_definitions(openspace-core PUBLIC
         "OPENSPACE_CURL_ENABLED" "CURL_STATICLIB")
 else ()
@@ -254,6 +213,29 @@ begin_header("Configuring Applications")
 handle_applications()
 end_header("End: Configuring Applications")
 message(STATUS "")
+
+
+# Web Browser and Web gui
+# Why not put these in the module's path? Because they do not have access to the
+# target as of July 2017, which is needed.
+if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
+    # wanted by CEF
+    set(CMAKE_BUILD_TYPE Debug CACHE INTERNAL "CMAKE_BUILD_TYPE")
+
+    if (WIN32)
+        set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/OpenSpace/openspace.rc)
+    endif ()
+
+    # Add the CEF binary distribution's cmake/ directory to the module path and
+    # find CEF to initialize it properly.
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
+    include(webbrowser_helpers)
+
+    set_cef_targets("${CEF_ROOT}" OpenSpaceTest)
+    run_cef_platform_config("${CEF_ROOT}" "${CEF_TARGET}" "${WEBBROWSER_MODULE_PATH}")
+elseif (OPENSPACE_MODULE_WEBBROWSER)
+    message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
+endif ()
 
 ##########################################################################################
 # Misc settings                                                                          #
