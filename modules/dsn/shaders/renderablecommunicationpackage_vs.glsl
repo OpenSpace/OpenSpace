@@ -24,8 +24,6 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
-
 layout(location = 0) in vec3 in_point_position;
 layout(location = 1) in vec4 in_color;
 
@@ -48,7 +46,9 @@ void main() {
         vs_gPosition = vec4(modelViewSpacecraft * dvec4(in_point_position, 1));
     }
 
-    vs_positionScreenSpace = z_normalization(projectionTransform * vs_gPosition);
+    vs_positionScreenSpace = projectionTransform * vs_gPosition;
     gl_Position  = vs_positionScreenSpace;
+    // Set z to 0 to disable near and far plane
+    gl_Position.z = 0.f; 
     vs_color = in_color;
 }

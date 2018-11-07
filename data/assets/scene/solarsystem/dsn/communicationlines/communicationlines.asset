@@ -4,8 +4,6 @@ local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 --Communicationline data 
 local dataFolder = openspace.absPath("../../../sync/http/dsn_data/1/json")
 
- --openspace.absPath("${DATA}/globebrowsing_servers.lua")
-
 local CommunicationLine = {
     Identifier = "Communication_Lines",
     Renderable = {
@@ -19,7 +17,6 @@ local CommunicationLine = {
         MadridColor = {1.0, 0.0, 0.0},
         GoldstoneColor = {0.0, 0.0, 1.0},
         CanberraColor = {0.0, 1.0, 0.0}
-
     },
     GUI = {
         Name = "CommunicationLine",

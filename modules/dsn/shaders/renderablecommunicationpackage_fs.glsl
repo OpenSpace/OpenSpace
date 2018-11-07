@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include "fragment.glsl"
+#include "floatoperations.glsl"
 
 in vec4 vs_positionScreenSpace;
 in vec4 vs_gPosition;
@@ -30,14 +31,14 @@ in vec4 vs_color;
 
 Fragment getFragment() {
     Fragment frag;
-    frag.color = vec4(vs_color); // opacity 1.0
+    frag.color = vec4(vs_color);
     frag.depth = vs_positionScreenSpace.w;
     //frag.blend = BLEND_MODE_ADDITIVE;
 
     frag.gPosition = vs_gPosition;
 
-    // There is no normal here
-    frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
+    // For rendering inside earth atmosphere we need to set a normal for our line
+    frag.gNormal = vec4(0.0, 0.0, 1.0, 0.0);
 
     return frag;
 }

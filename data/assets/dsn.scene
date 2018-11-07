@@ -27,45 +27,47 @@ asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
 asset.require('util/default_joystick')
 
+asset.require('util/webgui')
+
 
 local Keybindings = {
     {
         Key = "s",  
-        Command = propertyHelper.invert('Scene.Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.Enabled') ..
-                  propertyHelper.invert('Scene.Earth.RenderableGlobe.PerformShading') ..
-                  propertyHelper.invert('Scene.Earth.RenderableGlobe.Atmosphere') ..
-                  propertyHelper.invert('Scene.Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled'),
+        Command = propertyHelper.invert('Scene.Earth.Renderable.Layers.NightLayers.Earth at Night 2012.Enabled') ..
+                  propertyHelper.invert('Scene.Earth.Renderable.PerformShading') ..
+                  propertyHelper.invert('Scene.Earth.Renderable.Atmosphere') ..
+                  propertyHelper.invert('Scene.Earth.Renderable.Layers.WaterMasks.MODIS_Water_Mask.Enabled'),
         Documentation = "Toggle night texture, shading, atmosphere, and water for Earth.",
         Local = false
     },
     {
         Key = "g",
-        Command = propertyHelper.invert('Scene.MilkyWay.renderable.Enabled') ..
-                  propertyHelper.invert('Scene.Stars.renderable.Enabled') ..
-                  propertyHelper.invert('Scene.Earth.RenderableGlobe.Layers.NightLayers.Earth_at_Night_2012.Enabled') ..
-                  propertyHelper.invert('Scene.EarthAtmosphere.renderable.Enabled') ..
-                  propertyHelper.invert('Scene.MarsAtmosphere.renderable.Enabled') ..
-                  propertyHelper.invert('Scene.Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled') ..
-                  propertyHelper.invert('Scene.Moon.RenderableGlobe.Enabled') ..
-                  propertyHelper.invert('Scene.Sun.renderable.Enabled'),
+        Command = propertyHelper.invert('Scene.MilkyWay.Renderable.Enabled') ..
+                  propertyHelper.invert('Scene.Stars.Renderable.Enabled') ..
+                  propertyHelper.invert('Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Enabled') ..
+                  propertyHelper.invert('Scene.EarthAtmosphere.Renderable.Enabled') ..
+                  propertyHelper.invert('Scene.MarsAtmosphere.Renderable.Enabled') ..
+                  propertyHelper.invert('Scene.Earth.Renderable.Layers.WaterMasks.MODIS_Water_Mask.Enabled') ..
+                  propertyHelper.invert('Scene.Moon.Renderable.Enabled') ..
+                  propertyHelper.invert('Scene.Sun.Renderable.Enabled'),
         Documentation = "Toogles background and shading mode on the Earth and Mars alongside visibility of the Moon and the Sun",
         Local = false
     },
     {
         Key = "h",
-        Command = "openspace.setPropertyValue('Scene.*Trail.renderable.Enabled', true)",
+        Command = "openspace.setPropertyValue('Scene.*Trail.Renderable.Enabled', true)",
         Documentation = "Enables visibility of the trails",
         Local = false
     },
     {
         Key = "j",
-        Command = "openspace.setPropertyValue('Scene.*Trail.renderable.Enabled', false)",
+        Command = "openspace.setPropertyValue('Scene.*Trail.Renderable.Enabled', false)",
         Documentation = "Disables visibility of the trails",
         Local = false
     },    
     {
         Key = "e",
-        Command = propertyHelper.invert('Scene.EquatorialSphere.renderable.Enabled'),
+        Command = propertyHelper.invert('Scene.EquatorialSphere.Renderable.Enabled'),
         Documentation = "Disables visibility of the equatorial sphere",
         Local = false
     },    
@@ -83,7 +85,7 @@ asset.onInitialize(function ()
 
     openspace.setDefaultGuiSorting()
 
-    openspace.setPropertyValue('Scene.*Trail.renderable.Enabled', false)
+    openspace.setPropertyValue('Scene.*Trail.Renderable.Enabled', false)
 
     openspace.globebrowsing.loadWMSServersFromFile(
         openspace.absPath("${DATA}/globebrowsing_servers.lua")
@@ -96,7 +98,7 @@ asset.onInitialize(function ()
     openspace.addVirtualProperty(
         "BoolProperty",
         "Show Trails",
-        "Scene.*Trail.renderable.Enabled",
+        "Scene.*Trail.Renderable.Enabled",
         "Disable or enable all trails of the scene at the same time",
         true,
         nil,
@@ -113,10 +115,11 @@ asset.onInitialize(function ()
 
 end)
 
+
 asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
 
-    openspace.removeVirtualProperty("Scene.*Trail.renderable.Enabled")
+    openspace.removeVirtualProperty("Scene.*Trail.Renderable.Enabled")
 
     openspace.removeInterestingNodes({
         "VGR1", "VGR2", "Earth", "DSS63", "DSS14", "DSS43"
