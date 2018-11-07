@@ -21,6 +21,8 @@ asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
 asset.require('util/default_joystick')
 
+asset.require('util/webgui')
+
 local VoyagerAsset = asset.require('scene/solarsystem/missions/voyager/voyager1')
 
 assetHelper.registerDashboardItems(asset, {
