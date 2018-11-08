@@ -71,6 +71,13 @@ namespace openspace {
         void initializeGL() override;
         void deinitializeGL() override;
         void update(const UpdateData& data) override;
+        /*
+         * The render method will set up the shader information and then render the
+         * information contained in the the \c _lineRenderInformation,
+         * using the provided \p data
+         * \param data The data that is necessary to render this Renderable
+         */
+        void render(const RenderData& data, RendererTasks& rendererTask) override;
 
         bool isReady() const override;
         /* Returns an index for our filenames */
@@ -83,29 +90,22 @@ namespace openspace {
         glm::dvec3 getEstimatedCoordinatePosFromFocusNode(glm::vec3 pos);
         /* Converts the Ra Dec range coordinates into cartesian coordinates*/
         glm::vec3 convertRaDecRangeToCartesian();
+        /*Returns a position for a spacecraft*/
+        glm::vec3 getSuitablePrecisionPositionForSceneGraphNode(std::string id);
+        /*Returns a position for a station that has Earth as parent*/
+        glm::vec3 getPositionForGeocentricSceneGraphNode(const char* id);
 
         /* The VBO layout of the vertex position */
         struct PositionVBOLayout {
             float x, y, z;
         };
-        /// The VBO layout of the color
+        /* The VBO layout of the color */
         struct ColorVBOLayout {
             float r, g, b, a;
         };
-        /*Returns a position for a spacecraft*/
-        PositionVBOLayout getSuitablePrecisionPositionForSceneGraphNode(std::string id);
-        /*Returns a position for a station that has Earth as parent*/
-        PositionVBOLayout getPositionForGeocentricSceneGraphNode(const char* id);
-        /**
-         * The render method will set up the shader information and then render the
-         * information contained in the the \c _lineRenderInformation,
-         * using the provided \p data
-         * \param data The data that is necessary to render this Renderable
-         */
-        void render(const RenderData& data, RendererTasks& rendererTask) override;
-
 
         /* The function deciding what color to use for a signal */
+        // Todo: move to asset file 
         ColorVBOLayout getSiteColor(std::string dishIdentifier);
 
         const char* _identifier = "Signals";
@@ -172,6 +172,7 @@ namespace openspace {
             Canberra
         };
 
+        // Todo: move to asset file 
         // Key Value map of stations and their sites
         const std::map<std::string, SiteEnum> StationToSiteConversion = {
         { "DSS14", GoldStone },

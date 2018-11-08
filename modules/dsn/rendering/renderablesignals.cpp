@@ -33,10 +33,7 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
-
-
-#include "SpiceUsr.h"
-
+#include "SpiceUsr.h" //Todo: include in spicemanager
 #include <openspace/util/spicemanager.h>
 #include <openspace/interaction/navigationhandler.h>
 
@@ -207,6 +204,12 @@ bool RenderableSignals::isReady() const {
     return _programObject != nullptr;
 }
 
+// Unbind buffers and arrays
+inline void unbindGL() {
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
 void RenderableSignals::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
 
@@ -239,8 +242,8 @@ void RenderableSignals::render(const RenderData& data, RendererTasks&) {
         _lineRenderInformation.count
     );
 
-    //unbind vertex array
-    glBindVertexArray(0);
+    //unbind vertex array and buffers
+    unbindGL();
 
     if (usingFramebufferRenderer) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -315,7 +318,7 @@ void RenderableSignals::update(const UpdateData& data) {
     _lineRenderInformation.count = static_cast<GLsizei>(_vertexArray.size() / (_sizePosVal + _sizeColorVal));
 
     //unbind vertexArray
-    glBindVertexArray(0);
+    unbindGL();
 }
 
 
@@ -366,8 +369,8 @@ void RenderableSignals::extractData(std::unique_ptr<ghoul::Dictionary> &dictiona
 void RenderableSignals::pushSignalDataToVertexArray(DsnManager::Signal signal) {
 
     ColorVBOLayout color = getSiteColor(signal.dishName);
-    PositionVBOLayout posStation = getPositionForGeocentricSceneGraphNode(signal.dishName.c_str());
-    PositionVBOLayout posSpacecraft = getSuitablePrecisionPositionForSceneGraphNode(signal.spacecraft.c_str());
+    glm::vec3 posStation = getPositionForGeocentricSceneGraphNode(signal.dishName.c_str());
+    glm::vec3 posSpacecraft = getSuitablePrecisionPositionForSceneGraphNode(signal.spacecraft.c_str());
 
     //fill the render array
     _vertexArray.push_back(posStation.x);
@@ -419,57 +422,44 @@ glm::dvec3 RenderableSignals::getEstimatedCoordinatePosFromFocusNode(glm::vec3 p
     glm::dvec3 diff = glm::vec3(nodePos.x - focusNodePos.x, nodePos.y - focusNodePos.y,
         nodePos.z - focusNodePos.z);
 
-
     return diff;
 }
 
-RenderableSignals::PositionVBOLayout
-RenderableSignals::getSuitablePrecisionPositionForSceneGraphNode(std::string id) {
+glm::vec3 RenderableSignals::getSuitablePrecisionPositionForSceneGraphNode(std::string id) {
 
-    RenderableSignals::PositionVBOLayout position;
-    glm::dvec3 nodePos;
+    glm::vec3 position;
 
     if (global::renderEngine.scene()->sceneGraphNode(id)) {
         SceneGraphNode* spacecraftNode = global::renderEngine.scene()->sceneGraphNode(id);
-        nodePos = getCoordinatePosFromFocusNode(spacecraftNode);
+        position = getCoordinatePosFromFocusNode(spacecraftNode);
     }
     else {
         //If no scenegraphnode with proper id was found, estimate the position of the spacecraft by RA/DEC/RANGE 
-        nodePos = convertRaDecRangeToCartesian();
+        position = convertRaDecRangeToCartesian();
     }
-
-    position.x = nodePos.x;
-    position.y = nodePos.y;
-    position.z = nodePos.z;
 
     return position;
 }
 
 
-RenderableSignals::PositionVBOLayout 
-RenderableSignals::getPositionForGeocentricSceneGraphNode(const char* id) {
+glm::vec3 RenderableSignals::getPositionForGeocentricSceneGraphNode(const char* id) {
 
-    RenderableSignals::PositionVBOLayout position;
-    glm::dvec3 nodePos;
+    glm::dvec3 position;
 
     if (global::renderEngine.scene()->sceneGraphNode(id)) {
-        nodePos = global::renderEngine.scene()->sceneGraphNode(id)->position();
+        position = global::renderEngine.scene()->sceneGraphNode(id)->position();
     }
     else {
         LERROR(fmt::format("No position data for the station dish {}, drawing line from center of Earth", id));
-        nodePos = glm::vec3(0, 0, 0);
+        position = glm::vec3(0, 0, 0);
     }
-
-    position.x = nodePos.x;
-    position.y = nodePos.y;
-    position.z = nodePos.z;
 
     return position;
 }
 
 
 glm::vec3 RenderableSignals::convertRaDecRangeToCartesian() {
-
+    //Todo: stream data from file
     //Dummy data for voyager 1
     float ra = 257.777029167736; //2018-246
     float dec = 12.2537708651048; // 2018-246
