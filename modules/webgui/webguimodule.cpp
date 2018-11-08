@@ -58,34 +58,34 @@ namespace openspace {
 
 WebGuiModule::WebGuiModule()
     : OpenSpaceModule(WebGuiModule::Name)
-    , _serverProcessEnabled(ServerProcessEnabledInfo, false)
-    , _serverProcessEntryPoint(ServerProcessEntryPointInfo)
-    , _serverProcessWorkingDirectory(ServerProcessWorkingDirectoryInfo)
+    , _enabled(ServerProcessEnabledInfo, false)
+    , _entryPoint(ServerProcessEntryPointInfo)
+    , _workingDirectory(ServerProcessWorkingDirectoryInfo)
 {
-    addProperty(_serverProcessEnabled);
-    addProperty(_serverProcessEntryPoint);
-    addProperty(_serverProcessWorkingDirectory);
+    addProperty(_enabled);
+    addProperty(_entryPoint);
+    addProperty(_workingDirectory);
 }
 
 void WebGuiModule::internalInitialize(const ghoul::Dictionary&) {
-    const std::function<void()> startOrStop = [this]() {
-        if (_serverProcessEnabled) {
+    auto startOrStop = [this]() {
+        if (_enabled) {
             startProcess();
         } else {
             stopProcess();
         }
     };
 
-    const std::function<void()> restartIfEnabled = [this]() {
+    auto restartIfEnabled = [this]() {
         stopProcess();
-        if (_serverProcessEnabled) {
+        if (_enabled) {
             startProcess();
         }
     };
 
-    _serverProcessEnabled.onChange(startOrStop);
-    _serverProcessEntryPoint.onChange(restartIfEnabled);
-    _serverProcessWorkingDirectory.onChange(restartIfEnabled);
+    _enabled.onChange(startOrStop);
+    _entryPoint.onChange(restartIfEnabled);
+    _workingDirectory.onChange(restartIfEnabled);
     startOrStop();
 }
 
@@ -95,10 +95,10 @@ void WebGuiModule::startProcess() {
 #else
     const std::string nodePath = absPath("${MODULE_WEBGUI}/ext/nodejs/node");
 #endif
-    
+
     _process = std::make_unique<ghoul::Process>(
-        "\"" + nodePath + "\" \"" + _serverProcessEntryPoint.value() + "\"",
-        _serverProcessWorkingDirectory.value(),
+        "\"" + nodePath + "\" \"" + _entryPoint.value() + "\"",
+        _workingDirectory.value(),
         [](const char* data, size_t n) {
             const std::string str(data, n);
             LDEBUG(fmt::format("Web GUI server output: {}", str));

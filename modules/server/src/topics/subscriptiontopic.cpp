@@ -48,9 +48,11 @@ namespace openspace {
 SubscriptionTopic::~SubscriptionTopic() {
     if (_prop && _onChangeHandle != UnsetCallbackHandle) {
         _prop->removeOnChange(_onChangeHandle);
+        _onChangeHandle = UnsetCallbackHandle;
     }
     if (_prop && !_onDeleteHandle) {
         _prop->removeOnDelete(_onDeleteHandle);
+        _onDeleteHandle = UnsetCallbackHandle;
     }
 }
 
@@ -86,6 +88,14 @@ void SubscriptionTopic::handleJson(const nlohmann::json& json) {
     }
     if (event == StopSubscription) {
         _isSubscribedTo = false;
+        if (_prop && _onChangeHandle != UnsetCallbackHandle) {
+            _prop->removeOnChange(_onChangeHandle);
+            _onChangeHandle = UnsetCallbackHandle;
+        }
+        if (_prop && !_onDeleteHandle) {
+            _prop->removeOnDelete(_onDeleteHandle);
+            _onDeleteHandle = UnsetCallbackHandle;
+        }
     }
 }
 

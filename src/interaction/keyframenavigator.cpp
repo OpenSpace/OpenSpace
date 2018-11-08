@@ -83,10 +83,19 @@ bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes)
         return false;
     }
 
-    return updateCamera(&camera, prevKeyframe->data, nextKeyframe->data, t, ignoreFutureKeyframes);
+    return updateCamera(
+        &camera,
+        prevKeyframe->data,
+        nextKeyframe->data,
+        t,
+        ignoreFutureKeyframes
+    );
 }
 
-bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose prevPose, const CameraPose nextPose, double t, bool ignoreFutureKeyframes) {  
+bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose prevPose,
+                                     const CameraPose nextPose, double t,
+                                     bool ignoreFutureKeyframes)
+{
     Scene* scene = camera->parent()->scene();
     SceneGraphNode* prevFocusNode = scene->sceneGraphNode(prevPose.focusNode);
     SceneGraphNode* nextFocusNode = scene->sceneGraphNode(nextPose.focusNode);
@@ -131,7 +140,7 @@ bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose prevPose, 
     camera->setRotation(
         glm::slerp(prevKeyframeCameraRotation, nextKeyframeCameraRotation, t)
     );
-    
+
     // We want to affect view scaling, such that we achieve
     // logarithmic interpolation of distance to an imagined focus node.
     // To do this, we interpolate the scale reciprocal logarithmically.
@@ -145,25 +154,44 @@ bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose prevPose, 
     }
 
 #ifdef INTERPOLATION_DEBUG_PRINT
-    LINFO(fmt::format("Cam pos prev={}, next={}", std::to_string(prevKeyframeCameraPosition),
-        std::to_string(nextKeyframeCameraPosition)));
-    LINFO(fmt::format("Cam rot prev={} {} {} {}  next={} {} {} {}", prevKeyframeCameraRotation.x,
-        prevKeyframeCameraRotation.y, prevKeyframeCameraRotation.z, prevKeyframeCameraRotation.w,
-        nextKeyframeCameraRotation.x, nextKeyframeCameraRotation.y, nextKeyframeCameraRotation.z,
-        nextKeyframeCameraRotation.w));
+    LINFO(fmt::format(
+        "Cam pos prev={}, next={}",
+        std::to_string(prevKeyframeCameraPosition),
+        std::to_string(nextKeyframeCameraPosition)
+    ));
+    LINFO(fmt::format(
+        "Cam rot prev={} {} {} {}  next={} {} {} {}",
+        prevKeyframeCameraRotation.x,
+        prevKeyframeCameraRotation.y,
+        prevKeyframeCameraRotation.z,
+        prevKeyframeCameraRotation.w,
+        nextKeyframeCameraRotation.x,
+        nextKeyframeCameraRotation.y,
+        nextKeyframeCameraRotation.z,
+        nextKeyframeCameraRotation.w
+    ));
     LINFO(fmt::format("Cam interp = {}", t));
-    LINFO(fmt::format("camera {} {} {} {} {} {}", global::windowDelegate.applicationTime(),
+    LINFO(fmt::format(
+        "camera {} {} {} {} {} {}",
+        global::windowDelegate.applicationTime(),
         global::windowDelegate.applicationTime() - _timestampPlaybackStarted_application,
-        global::timeManager.time().j2000Seconds(), interpolatedCamera.x,
-        interpolatedCamera.y, interpolatedCamera.z));
-    //Following is for direct print to save & compare camera positions against recorded file
-    printf("camera %8.4f %8.4f %13.3f %16.7f %16.7f %16.7f\n", global::windowDelegate.applicationTime(),
+        global::timeManager.time().j2000Seconds(),
+        interpolatedCamera.x,
+        interpolatedCamera.y,
+        interpolatedCamera.z
+    ));
+    // Following is for direct print to save & compare camera positions against recorded
+    // file
+    printf(
+        "camera %8.4f %8.4f %13.3f %16.7f %16.7f %16.7f\n",
+        global::windowDelegate.applicationTime(),
         global::windowDelegate.applicationTime() - _timestampPlaybackStarted_application,
-        global::timeManager.time().j2000Seconds(), interpolatedCamera.x,
-        interpolatedCamera.y, interpolatedCamera.z);
-
+        global::timeManager.time().j2000Seconds(),
+        interpolatedCamera.x,
+        interpolatedCamera.y,
+        interpolatedCamera.z
+    );
 #endif
-
 
     return true;
 }
@@ -180,7 +208,9 @@ double KeyframeNavigator::currentTime() const {
     }
 }
 
-void KeyframeNavigator::setTimeReferenceMode(KeyframeTimeRef refType, double referenceTimestamp) {
+void KeyframeNavigator::setTimeReferenceMode(KeyframeTimeRef refType,
+                                             double referenceTimestamp)
+{
     _timeframeMode = refType;
     _referenceTimestamp = referenceTimestamp;
 }

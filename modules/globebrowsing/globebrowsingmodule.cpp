@@ -384,7 +384,7 @@ void GlobeBrowsingModule::goToGeo(double latitude, double longitude) {
     Camera* cam = global::navigationHandler.camera();
     goToGeodetic2(
         *cam,
-        Geodetic2{ glm::radians(latitude), glm::radians(longitude) }, 
+        Geodetic2{ glm::radians(latitude), glm::radians(longitude) },
         true
     );
 }

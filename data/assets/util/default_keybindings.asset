@@ -127,6 +127,14 @@ openspace.setPropertyValueSingle("RenderEngine.ShowCamera", not isEnabled)]],
         Documentation = "Toggles the dashboard and overlays",
         GuiPath = "/GUI",
         Local = false
+    },
+    {
+        Key = "Alt+Tab",
+        Name = "Toggle rendering on master",
+        Command = propertyHelper.invert('RenderEngine.DisableMasterRendering'),
+        Documentation = "Toggles the rendering on master",
+        GuiPath = "/Rendering",
+        Local = false
     }
 }
 

@@ -13,6 +13,8 @@ asset.request('scene/digitaluniverse/milkyway')
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
 
+asset.require('util/webgui')
+
 local MessengerAsset = asset.require('scene/solarsystem/missions/messenger/messengerSC')
 
 if not openspace.modules.isLoaded("Volume") then
@@ -54,7 +56,7 @@ asset.onInitialize(function ()
      openspace.addVirtualProperty(
         "BoolProperty",
         "Show Trails",
-        "Scene.*Trail.renderable.Enabled",
+        "Scene.*Trail.Renderable.Enabled",
         "Disable or enable all trails of the scene at the same time",
         true,
         nil,

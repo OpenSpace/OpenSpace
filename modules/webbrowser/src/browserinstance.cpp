@@ -27,13 +27,13 @@
 #include <modules/webbrowser/include/browserclient.h>
 #include <modules/webbrowser/include/webrenderhandler.h>
 #include <modules/webbrowser/include/webkeyboardhandler.h>
-#include <openspace/engine/windowdelegate.h>
-
 #include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 
 namespace {
     constexpr const char* _loggerCat = "CEF BrowserInstance";
@@ -75,10 +75,7 @@ void BrowserInstance::initialize() {
 }
 
 void BrowserInstance::loadUrl(const std::string& url) {
-    // @TODO:  This should be removed
-    if (!_isInitialized) {
-        initialize();
-    }
+    ghoul_assert(_isInitialized, "BrowserInstance should be initialized");
 
     LDEBUG(fmt::format("Loading URL: {}", url));
     _browser->GetMainFrame()->LoadURL(url);

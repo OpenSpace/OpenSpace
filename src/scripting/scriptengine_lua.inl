@@ -347,7 +347,11 @@ int directoryForPath(lua_State* L) {
  * is finished.
  */
 int unzipFile(lua_State* L) {
-    const int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 2, 3 }, "lua::unzipFile");
+    const int nArguments = ghoul::lua::checkArgumentsAndThrow(
+        L,
+        { 2, 3 },
+        "lua::unzipFile"
+    );
 
     std::string source = absPath(
         ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::No)
@@ -361,9 +365,7 @@ int unzipFile(lua_State* L) {
         deleteSource = ghoul::lua::value<bool>(L, 3, ghoul::lua::PopValue::No);
     }
 
-    auto onExtractEntry = [](const char *filename, void *arg) {
-        return 0;
-    };
+    auto onExtractEntry = [](const char*, void*) { return 0; };
     int arg = 2;
     zip_extract(source.c_str(), dest.c_str(), onExtractEntry, &arg);
 

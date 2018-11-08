@@ -134,13 +134,13 @@ public:
     * \param scriptToSave String of the Lua command to be saved.
     */
     void saveScriptKeyframe(std::string scriptToSave);
-    
+
     /**
     * \return The Lua library that contains all Lua functions available to affect the
     * interaction
     */
     static openspace::scripting::LuaLibrary luaLibrary();
-    
+
 private:
     enum class SessionState {
         Idle = 0,
@@ -191,7 +191,8 @@ private:
     void readFromPlayback(std::string& result);
     void saveKeyframeToFile(std::string entry);
 
-    void addKeyframe(double timestamp, interaction::KeyframeNavigator::CameraPose keyframe);
+    void addKeyframe(double timestamp,
+        interaction::KeyframeNavigator::CameraPose keyframe);
     void addKeyframe(double timestamp, datamessagestructures::TimeKeyframe keyframe);
     void addKeyframe(double timestamp, std::string scriptToQueue);
     void moveAheadInTime();
@@ -205,7 +206,7 @@ private:
     bool isDataModeBinary();
     unsigned int findIndexOfLastCameraKeyframeInTimeline();
     bool doesTimelineEntryContainCamera(unsigned int index) const;
-   
+
     RecordedType getNextKeyframeType();
     RecordedType getPrevKeyframeType();
     double getNextTimestamp();
@@ -237,7 +238,7 @@ private:
     static const size_t keyframeHeaderSize_bytes = 33;
     static const size_t saveBufferCameraSize_min = 82;
     static const size_t saveBufferStringSize_max = 500;
-    static const size_t _saveBufferMaxSize_bytes = keyframeHeaderSize_bytes + 
+    static const size_t _saveBufferMaxSize_bytes = keyframeHeaderSize_bytes +
         + saveBufferCameraSize_min
         + saveBufferStringSize_max;
     unsigned char _keyframeBuffer[_saveBufferMaxSize_bytes];

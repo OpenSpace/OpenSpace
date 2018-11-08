@@ -23,22 +23,22 @@
  ****************************************************************************************/
 
 #include <modules/webbrowser/webbrowsermodule.h>
-#include "cefwebguimodule.h"
 
+#include <modules/cefwebgui/cefwebguimodule.h>
+#include <modules/cefwebgui/include/guirenderhandler.h>
+#include <modules/cefwebgui/include/guikeyboardhandler.h>
+#include <modules/webbrowser/include/browserinstance.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
-#include <modules/webbrowser/include/browserinstance.h>
-#include <modules/cefwebgui/include/guirenderhandler.h>
-#include <modules/cefwebgui/include/guikeyboardhandler.h>
-#include <ghoul/misc/dictionary.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
     constexpr const char* _loggerCat = "CefWebGui";
-    
+
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
@@ -54,7 +54,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo GuiUrlInfo = {
         "GuiUrl",
         "GUI URL",
-        "The URL to load the Web GUI from"
+        "The URL of the webpage that is used to load the WebGUI from."
     };
 } // namespace
 
@@ -62,48 +62,42 @@ namespace openspace {
 
 CefWebGuiModule::CefWebGuiModule()
     : OpenSpaceModule(CefWebGuiModule::Name)
-    , _cefWebGuiEnabled(EnabledInfo, true)
-    , _cefWebGuiVisible(VisibleInfo, true)
-    , _guiUrl(GuiUrlInfo, "")
+    , _enabled(EnabledInfo, true)
+    , _visible(VisibleInfo, true)
+    , _url(GuiUrlInfo, "")
 {
-    addProperty(_cefWebGuiEnabled);
-    addProperty(_cefWebGuiVisible);
-    addProperty(_guiUrl);
+    addProperty(_enabled);
+    addProperty(_visible);
+    addProperty(_url);
 }
-    
+
 void CefWebGuiModule::startOrStopGui() {
-    WebBrowserModule* webBrowserModule =
-        global::moduleEngine.module<WebBrowserModule>();
-    
+    WebBrowserModule* webBrowserModule = global::moduleEngine.module<WebBrowserModule>();
+
     const bool isGuiWindow =
         global::windowDelegate.hasGuiWindow() ?
         global::windowDelegate.isGuiWindow() :
         true;
     const bool isMaster = global::windowDelegate.isMaster();
 
-    if (_cefWebGuiEnabled && isGuiWindow && isMaster) {
-        LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", _guiUrl));
-        
-        if (!_guiInstance) {
-            _guiInstance = std::make_shared<BrowserInstance>(
+    if (_enabled && isGuiWindow && isMaster) {
+        LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", _url));
+
+        if (!_instance) {
+            _instance = std::make_unique<BrowserInstance>(
                 new GUIRenderHandler,
                 new GUIKeyboardHandler
             );
-            _guiInstance->loadUrl(_guiUrl);
+            _instance->initialize();
+            _instance->loadUrl(_url);
         }
-        webBrowserModule->attachEventHandler(_guiInstance);
-        webBrowserModule->addBrowser(_guiInstance);
-    } else if (_guiInstance) {
-        _guiInstance->close(true);
-        webBrowserModule->removeBrowser(_guiInstance);
+        webBrowserModule->attachEventHandler(_instance.get());
+        webBrowserModule->addBrowser(_instance.get());
+    } else if (_instance) {
+        _instance->close(true);
+        webBrowserModule->removeBrowser(_instance.get());
         webBrowserModule->detachEventHandler();
-        _guiInstance.reset();
-    }
-}
-    
-void CefWebGuiModule::updateUrl() {
-    if (_guiInstance) {
-        _guiInstance->loadUrl(_guiUrl);
+        _instance.reset();
     }
 }
 
@@ -111,29 +105,29 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     WebBrowserModule* webBrowserModule =
         global::moduleEngine.module<WebBrowserModule>();
 
-    _webBrowserIsAvailable = webBrowserModule && webBrowserModule->isEnabled();
+    bool available = webBrowserModule && webBrowserModule->isEnabled();
 
-    if (!_webBrowserIsAvailable) {
+    if (!available) {
         return;
     }
 
-    _cefWebGuiEnabled.onChange([this]() {
+    _enabled.onChange([this]() {
         startOrStopGui();
     });
 
-    _guiUrl.onChange([this]() {
-        updateUrl();
+    _url.onChange([this]() {
+        if (_instance) {
+            _instance->loadUrl(_url);
+        }
     });
 
-    _guiUrl = configuration.value<std::string>(GuiUrlInfo.identifier);
+    _url = configuration.value<std::string>(GuiUrlInfo.identifier);
 
-    _cefWebGuiEnabled = _webBrowserIsAvailable &&
-        configuration.hasValue<bool>(EnabledInfo.identifier) &&
-        configuration.value<bool>(EnabledInfo.identifier);
+    _enabled = configuration.hasValue<bool>(EnabledInfo.identifier) &&
+               configuration.value<bool>(EnabledInfo.identifier);
 
-    _cefWebGuiVisible = _webBrowserIsAvailable &&
-        configuration.hasValue<bool>(VisibleInfo.identifier) &&
-        configuration.value<bool>(VisibleInfo.identifier);
+    _visible = configuration.hasValue<bool>(VisibleInfo.identifier) &&
+               configuration.value<bool>(VisibleInfo.identifier);
 
     global::callback::initializeGL.push_back([this]() {
         startOrStopGui();
@@ -146,19 +140,18 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
             true;
         const bool isMaster = global::windowDelegate.isMaster();
 
-
-        if (isGuiWindow && isMaster && _guiInstance) {
+        if (isGuiWindow && isMaster && _instance) {
             if (global::windowDelegate.windowHasResized()) {
-                _guiInstance->reshape(global::windowDelegate.currentWindowSize());
+                _instance->reshape(global::windowDelegate.currentWindowSize());
             }
-            if (_cefWebGuiVisible) {
-                _guiInstance->draw();
+            if (_visible) {
+                _instance->draw();
             }
         }
     });
 
     global::callback::deinitializeGL.push_back([this]() {
-        _cefWebGuiEnabled = false;
+        _enabled = false;
         startOrStopGui();
     });
 }

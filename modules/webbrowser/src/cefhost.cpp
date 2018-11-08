@@ -28,6 +28,7 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <ghoul/logging/logmanager.h>
 #include <fmt/format.h>
+#include <include/wrapper/cef_helpers.h>
 
 namespace {
     constexpr const char* _loggerCat = "CefHost";
@@ -59,7 +60,7 @@ CefHost::~CefHost() {
 
 void CefHost::attachDebugSettings(CefSettings &settings) {
     settings.remote_debugging_port = 8088;
-    
+
     LDEBUG(fmt::format(
         "Remote WebBrowser debugging available on http://localhost:{}",
         settings.remote_debugging_port

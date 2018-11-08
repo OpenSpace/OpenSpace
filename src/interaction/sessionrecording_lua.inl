@@ -30,12 +30,18 @@ int startRecording(lua_State* L) {
 
     using ghoul::lua::luaTypeToString;
 
-    const std::string recordFilePath = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
+    const std::string recordFilePath = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
 
     if (recordFilePath.empty()) {
         return luaL_error(L, "filepath string is empty");
     }
-    global::sessionRecording.setRecordDataFormat(openspace::interaction::SessionRecording::RecordedDataMode::Binary);
+    global::sessionRecording.setRecordDataFormat(
+        openspace::interaction::SessionRecording::RecordedDataMode::Binary
+    );
     global::sessionRecording.startRecording(recordFilePath);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -47,12 +53,18 @@ int startRecordingAscii(lua_State* L) {
 
     using ghoul::lua::luaTypeToString;
 
-    const std::string recordFilePath = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
+    const std::string recordFilePath = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
 
     if (recordFilePath.empty()) {
         return luaL_error(L, "filepath string is empty");
     }
-    global::sessionRecording.setRecordDataFormat(openspace::interaction::SessionRecording::RecordedDataMode::Ascii);
+    global::sessionRecording.setRecordDataFormat(
+        openspace::interaction::SessionRecording::RecordedDataMode::Ascii
+    );
     global::sessionRecording.startRecording(recordFilePath);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -73,13 +85,21 @@ int startPlayback(lua_State* L, openspace::interaction::KeyframeTimeRef timeMode
 {
     using ghoul::lua::luaTypeToString;
 
-    const std::string playbackFilePath = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
+    const std::string playbackFilePath = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
 
     if (playbackFilePath.empty()) {
         return luaL_error(L, "filepath string is empty");
     }
 
-    global::sessionRecording.startPlayback(playbackFilePath, timeMode, forceSimTimeAtStart);
+    global::sessionRecording.startPlayback(
+        playbackFilePath,
+        timeMode,
+        forceSimTimeAtStart
+    );
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

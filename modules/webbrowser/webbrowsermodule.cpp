@@ -31,10 +31,10 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
     constexpr const char* _loggerCat = "WebBrowser";
@@ -54,8 +54,6 @@ WebBrowserModule::WebBrowserModule() : OpenSpaceModule(WebBrowserModule::Name) {
     global::callback::deinitialize.push_back([this]() { deinitialize(); });
 }
 
-WebBrowserModule::~WebBrowserModule() {}
-
 void WebBrowserModule::internalDeinitialize() {
     if (!_enabled) {
         return;
@@ -64,7 +62,7 @@ void WebBrowserModule::internalDeinitialize() {
     _eventHandler.detachBrowser();
 
     bool forceBrowserShutdown = true;
-    for (const std::shared_ptr<BrowserInstance>& browser : _browsers) {
+    for (BrowserInstance* browser : _browsers) {
         browser->close(forceBrowserShutdown);
     }
 }
@@ -116,13 +114,13 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     fScreenSpaceRenderable->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
 }
 
-void WebBrowserModule::addBrowser(std::shared_ptr<BrowserInstance> browser) {
+void WebBrowserModule::addBrowser(BrowserInstance* browser) {
     if (_enabled) {
         _browsers.push_back(browser);
     }
 }
 
-void WebBrowserModule::removeBrowser(std::shared_ptr<BrowserInstance> browser) {
+void WebBrowserModule::removeBrowser(BrowserInstance* browser) {
     if (!_enabled) {
         return;
     }
@@ -136,9 +134,7 @@ void WebBrowserModule::removeBrowser(std::shared_ptr<BrowserInstance> browser) {
     LDEBUG(fmt::format("Number of browsers stored: {}", _browsers.size()));
 }
 
-void WebBrowserModule::attachEventHandler(
-                                         std::shared_ptr<BrowserInstance> browserInstance)
-{
+void WebBrowserModule::attachEventHandler(BrowserInstance* browserInstance) {
     if (_enabled) {
         _eventHandler.setBrowserInstance(browserInstance);
     }

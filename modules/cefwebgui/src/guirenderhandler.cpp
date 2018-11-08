@@ -37,14 +37,6 @@ namespace {
 namespace openspace {
 
 GUIRenderHandler::GUIRenderHandler() {
-    initializeGL();
-}
-
-GUIRenderHandler::~GUIRenderHandler() {
-    deinitializeGL();
-}
-
-void GUIRenderHandler::initializeGL() {
     LDEBUG("Initializing CEF GL environment...");
     _programObject = ghoul::opengl::ProgramObject::Build(
         "WebGUICEFProgram",
@@ -70,7 +62,7 @@ void GUIRenderHandler::initializeGL() {
     LDEBUG("Initializing CEF GL environment... done!");
 }
 
-void GUIRenderHandler::deinitializeGL() {
+GUIRenderHandler::~GUIRenderHandler() {
     _programObject = nullptr;
 
     glDeleteVertexArrays(1, &_vao);

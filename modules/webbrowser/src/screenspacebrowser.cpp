@@ -23,12 +23,12 @@
  ****************************************************************************************/
 
 #include <modules/webbrowser/include/screenspacebrowser.h>
-#include <modules/webbrowser/include/webkeyboardhandler.h>
 
 #include <modules/webbrowser/webbrowsermodule.h>
+#include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <modules/webbrowser/include/browserinstance.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
@@ -87,7 +87,10 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
 
     _renderHandler = new ScreenSpaceRenderHandler();
     _keyboardHandler = new WebKeyboardHandler();
-    _browserInstance = std::make_shared<BrowserInstance>(_renderHandler, _keyboardHandler);
+    _browserInstance = std::make_unique<BrowserInstance>(
+        _renderHandler,
+        _keyboardHandler
+    );
 
     _url.onChange([this]() { _isUrlDirty = true; });
     _dimensions.onChange([this]() { _isDimensionsDirty = true; });
@@ -97,7 +100,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
 
     WebBrowserModule* webBrowser = global::moduleEngine.module<WebBrowserModule>();
     if (webBrowser) {
-        webBrowser->addBrowser(_browserInstance);
+        webBrowser->addBrowser(_browserInstance.get());
     }
 }
 
@@ -105,14 +108,9 @@ bool ScreenSpaceBrowser::initialize() {
     _originalViewportSize = global::windowDelegate.currentWindowSize();
     _renderHandler->setTexture(*_texture);
 
-    // Load a special version of the regular ScreenRenderable shaders. This mirrors the
-    // image along the Y axis since the image produced by CEF was flipped.
-    //createShaders("${MODULE_WEBBROWSER}/shaders/");
-
     createShaders();
 
     _browserInstance->loadUrl(_url);
-
     return isReady();
 }
 
@@ -124,8 +122,8 @@ bool ScreenSpaceBrowser::deinitialize() {
     _browserInstance->close(true);
 
     WebBrowserModule* webBrowser = global::moduleEngine.module<WebBrowserModule>();
-    if (webBrowser != nullptr) {
-        webBrowser->removeBrowser(_browserInstance);
+    if (webBrowser) {
+        webBrowser->removeBrowser(_browserInstance.get());
         _browserInstance.reset();
         return true;
     }

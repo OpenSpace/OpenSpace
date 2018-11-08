@@ -131,8 +131,6 @@ namespace bylevelprovider {
 
 namespace temporal {
     constexpr const char* KeyBasePath = "BasePath";
-    constexpr const char* KeyPreCacheStartTime = "PreCacheStartTime";
-    constexpr const char* KeyPreCacheEndTime = "PreCacheEndTime";
 
     constexpr const char* UrlTimePlaceholder = "${OpenSpaceTimeId}";
     constexpr const char* TimeStart = "OpenSpaceTimeStart";
@@ -148,20 +146,6 @@ namespace temporal {
     };
 } // namespace temporal
 
-Type toType(const layergroupid::TypeID& id) {
-    using T = layergroupid::TypeID;
-    switch (id) {
-        case T::Unknown:                throw ghoul::MissingCaseException();
-        case T::DefaultTileLayer:       return Type::DefaultTileProvider;
-        case T::SingleImageTileLayer:   return Type::SingleImageTileProvider;
-        case T::SizeReferenceTileLayer: return Type::SizeReferenceTileProvider;
-        case T::TemporalTileLayer:      return Type::TemporalTileProvider;
-        case T::TileIndexTileLayer:     return Type::TileIndexTileProvider;
-        case T::ByIndexTileLayer:       return Type::ByIndexTileProvider;
-        case T::ByLevelTileLayer:       return Type::ByLevelTileProvider;
-        default:                        throw ghoul::MissingCaseException();
-    }
-}
 
 //
 // DefaultTileProvider
@@ -763,7 +747,7 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
 
 
 
-TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary) 
+TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     : initDict(dictionary)
     , filePath(temporal::FilePathInfo)
 {
@@ -820,7 +804,7 @@ bool initialize(TileProvider& tp) {
             }
             return success;
         }
-        case Type::TemporalTileProvider: 
+        case Type::TemporalTileProvider:
             break;
         default:
             throw ghoul::MissingCaseException();
