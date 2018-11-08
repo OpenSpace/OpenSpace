@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/dsn/rendering/renderablecommunicationpackage.h>
+#include <modules/dsn/rendering/renderablesignals.h>
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
@@ -38,9 +38,9 @@
 
 
 namespace {
-    constexpr const char* ProgramName = "CommunicationPackageProgram";
+    constexpr const char* ProgramName = "SignalsProgram";
     constexpr const char* KeyTranslation = "Translation";
-    constexpr const char* _loggerCat = "RenderableCommmunicationPackage";
+    constexpr const char* _loggerCat = "RenderableSignals";
 
     constexpr const std::array<const char*, 3> UniformNames = {
         "modelViewStation","modelViewSpacecraft", "projectionTransform"
@@ -76,11 +76,11 @@ namespace {
 
 namespace openspace {
 
-documentation::Documentation RenderableCommunicationPackage::Documentation() {
+documentation::Documentation RenderableSignals::Documentation() {
     using namespace documentation;
     return {
-        "Renderable Communication Package",
-        "dsn_renderable_renderablecommunicationpackage",
+        "Renderable Signals",
+        "dsn_renderable_renderablesignals",
         {
             {
                 KeyTranslation,
@@ -117,7 +117,7 @@ documentation::Documentation RenderableCommunicationPackage::Documentation() {
     };
 }
 
-RenderableCommunicationPackage::RenderableCommunicationPackage(const ghoul::Dictionary& dictionary)
+RenderableSignals::RenderableSignals(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _madridLineColor(MadridColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _goldstoneLineColor(GoldstoneColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
@@ -161,14 +161,14 @@ RenderableCommunicationPackage::RenderableCommunicationPackage(const ghoul::Dict
     addProperty(_lineWidth);
 }
 
-void RenderableCommunicationPackage::initializeGL() {
+void RenderableSignals::initializeGL() {
     _programObject = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine.buildRenderProgram(
                 ProgramName,
-                absPath("${MODULE_DSN}/shaders/renderablecommunicationpackage_vs.glsl"),
-                absPath("${MODULE_DSN}/shaders/renderablecommunicationpackage_fs.glsl")
+                absPath("${MODULE_DSN}/shaders/renderablesignals_vs.glsl"),
+                absPath("${MODULE_DSN}/shaders/renderablesignals_fs.glsl")
             );
         }
     );
@@ -178,7 +178,7 @@ void RenderableCommunicationPackage::initializeGL() {
     setRenderBin(Renderable::RenderBin::Overlay);
 }
 
-void RenderableCommunicationPackage::deinitializeGL() {
+void RenderableSignals::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
@@ -188,11 +188,11 @@ void RenderableCommunicationPackage::deinitializeGL() {
     _programObject = nullptr;
 }
 
-bool RenderableCommunicationPackage::isReady() const {
+bool RenderableSignals::isReady() const {
     return _programObject != nullptr;
 }
 
-void RenderableCommunicationPackage::render(const RenderData& data, RendererTasks&) {
+void RenderableSignals::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
 
     //The stations are statically translated with respect to Earth
@@ -235,10 +235,10 @@ void RenderableCommunicationPackage::render(const RenderData& data, RendererTask
     _programObject->deactivate();
 }
 
-RenderableCommunicationPackage::ColorVBOLayout RenderableCommunicationPackage::getSiteColor(std::string dishidentifier) {
+RenderableSignals::ColorVBOLayout RenderableSignals::getSiteColor(std::string dishidentifier) {
     
     glm::vec3 color(0.0f,0.0f,0.0f);
-    RenderableCommunicationPackage::ColorVBOLayout colorVbo;
+    RenderableSignals::ColorVBOLayout colorVbo;
     SiteEnum site;
 
     try {

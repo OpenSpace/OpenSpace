@@ -25,7 +25,8 @@
 #ifndef __OPENSPACE_MODULE_DSN___COMMUNICATIONLINES___H__
 #define __OPENSPACE_MODULE_DSN___COMMUNICATIONLINES___H__
 
-#include <modules/dsn/rendering/renderablecommunicationpackage.h>
+#include <modules/dsn/rendering/renderablesignals.h>
+
 #include <modules/dsn/dsnmodule.h>
 #include <modules/dsn/dsnmanager/dsnmanager.h>
 #include <ghoul/logging/logmanager.h>
@@ -39,7 +40,7 @@
 
 namespace openspace {
 
-    class CommunicationLines : public RenderableCommunicationPackage {
+    class CommunicationLines : public RenderableSignals {
     public:
 
         CommunicationLines(const ghoul::Dictionary& dictionary);
@@ -49,9 +50,9 @@ namespace openspace {
         void update(const UpdateData& data) override;
 
         /*Returns a position for a spacecraft*/
-        RenderableCommunicationPackage::PositionVBOLayout getSuitablePrecisionPositionForSceneGraphNode(std::string id);
+        RenderableSignals::PositionVBOLayout getSuitablePrecisionPositionForSceneGraphNode(std::string id);
         /*Returns a position for a station that has Earth as parent*/
-        RenderableCommunicationPackage::PositionVBOLayout getPositionForGeocentricSceneGraphNode(const char* id);
+        RenderableSignals::PositionVBOLayout getPositionForGeocentricSceneGraphNode(const char* id);
         /*Returns a position calculated where the focusNode position is origin(0,0,0) */
         glm::dvec3 getCoordinatePosFromFocusNode(SceneGraphNode* node);
         /*Returns an index for our filenames */

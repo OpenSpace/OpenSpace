@@ -31,7 +31,7 @@
 
 #include <openspace/json.h>
 
-#include <modules/dsn/rendering/renderablecommunicationpackage.h>
+#include <modules/dsn/rendering/renderablesignals.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>

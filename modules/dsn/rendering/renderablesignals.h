@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_DSN___RENDERABLECOMMUNICATIONPACKAGE___H__
-#define __OPENSPACE_MODULE_DSN___RENDERABLECOMMUNICATIONPACKAGE___H__
+#ifndef __OPENSPACE_MODULE_DSN___RENDERABLESIGNALS___H__
+#define __OPENSPACE_MODULE_DSN___RENDERABLESIGNALS___H__
 
 #include <openspace/rendering/renderable.h>
 
@@ -65,11 +65,11 @@ class Translation;
  * The reason for this is because of precision problems occurring due to using very 
  * large numbers representing the distances in space.
  **/
-class RenderableCommunicationPackage : public Renderable {
+class RenderableSignals : public Renderable {
 
 
 public:
-    ~RenderableCommunicationPackage() = default;
+    ~RenderableSignals() = default;
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -97,7 +97,7 @@ public:
 	 ColorVBOLayout getSiteColor(std::string dishIdentifier);
 
 protected:
-    explicit RenderableCommunicationPackage(const ghoul::Dictionary& dictionary);
+    explicit RenderableSignals(const ghoul::Dictionary& dictionary);
 
     /// Returns the documentation entries
     static documentation::Documentation Documentation();
@@ -181,4 +181,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_DSN___RENDERABLECOMMUNICATIONPACKAGE___H__
+#endif // __OPENSPACE_MODULE_DSN___RENDERABLESIGNALS___H__

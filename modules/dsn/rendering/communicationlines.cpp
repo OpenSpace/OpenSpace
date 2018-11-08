@@ -34,7 +34,7 @@ namespace openspace {
 
     //Member functions
     CommunicationLines::CommunicationLines(const ghoul::Dictionary& dictionary)
-        :RenderableCommunicationPackage(dictionary){
+        :RenderableSignals(dictionary){
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
         extractData();
     }
@@ -51,7 +51,7 @@ namespace openspace {
     }
     
     void CommunicationLines::initializeGL() {
-        RenderableCommunicationPackage::initializeGL();
+        RenderableSignals::initializeGL();
 
         // We don't need an index buffer, so we keep it at the default value of 0
         glGenVertexArrays(1, &_lineRenderInformation._vaoID);
@@ -61,7 +61,7 @@ namespace openspace {
         glDeleteVertexArrays(1, &_lineRenderInformation._vaoID);
         glDeleteBuffers(1, &_lineRenderInformation._vBufferID);
 
-        RenderableCommunicationPackage::deinitializeGL();
+        RenderableSignals::deinitializeGL();
     }
     
     glm::vec3 CommunicationLines::convertRaDecRangeToCartesian() {
@@ -282,10 +282,10 @@ namespace openspace {
     * errors when we getting close to the node. To correct this we make a localtransform
     * to the current focusNode and calculate positions with the focusNode as origin. This
     * gives us a exact renderposition when we get closer to spacecrafts */
-    RenderableCommunicationPackage::PositionVBOLayout 
+    RenderableSignals::PositionVBOLayout
         CommunicationLines::getSuitablePrecisionPositionForSceneGraphNode(std::string id) {
         
-        RenderableCommunicationPackage::PositionVBOLayout position;
+        RenderableSignals::PositionVBOLayout position;
         glm::dvec3 nodePos;
 
         if (global::renderEngine.scene()->sceneGraphNode(id)) {
@@ -305,10 +305,10 @@ namespace openspace {
         return position;
     }
 
-    RenderableCommunicationPackage::PositionVBOLayout 
+    RenderableSignals::PositionVBOLayout
         CommunicationLines::getPositionForGeocentricSceneGraphNode(const char* id) {
         
-        RenderableCommunicationPackage::PositionVBOLayout position;
+        RenderableSignals::PositionVBOLayout position;
         glm::dvec3 nodePos;
 
         if (global::renderEngine.scene()->sceneGraphNode(id)) {
