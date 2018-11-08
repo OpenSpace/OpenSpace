@@ -28,7 +28,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesignals.h
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/dsntranslation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dsnmanager/dsnmanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/communicationlines.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -36,7 +35,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesignals.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/dsntranslation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dsnmanager/dsnmanager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/communicationlines.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

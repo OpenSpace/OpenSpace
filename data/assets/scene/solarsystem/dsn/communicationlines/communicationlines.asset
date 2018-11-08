@@ -4,14 +4,14 @@ local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 --Communicationline data 
 local dataFolder = openspace.absPath("../../../sync/http/dsn_data/1/json")
 
-local CommunicationLine = {
-    Identifier = "Communication_Lines",
+local Signals = {
+    Identifier = "Signals",
     Renderable = {
         Translation = {
             Type = "DsnTranslation",
             Position = {0.0, 0.0, 0.0} --no parent, sun center is 0, 0, 0
         },
-        Type = "CommunicationLines",
+        Type = "RenderableSignals",
         DataFolder = dataFolder,
         DataFileType = "json",
         MadridColor = {1.0, 0.0, 0.0},
@@ -19,9 +19,9 @@ local CommunicationLine = {
         CanberraColor = {0.0, 1.0, 0.0}
     },
     GUI = {
-        Name = "CommunicationLine",
+        Name = "Signals",
         Path = "/Solar System"
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {CommunicationLine})
+assetHelper.registerSceneGraphNodesAndExport(asset, {Signals})

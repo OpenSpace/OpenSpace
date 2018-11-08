@@ -25,14 +25,15 @@
 #ifndef __OPENSPACE_MODULE_DSN___DSNMODULE___H__
 #define __OPENSPACE_MODULE_DSN___DSNMODULE___H__
 
-#include <modules/dsn/rendering/communicationlines.h>
 
 #include <openspace/util/openspacemodule.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/logging/logmanager.h>
+
 #include <modules/dsn/translation/dsntranslation.h>
+#include <modules/dsn/rendering/renderablesignals.h>
 
 namespace openspace {
 

@@ -31,11 +31,11 @@
 
 #include <openspace/json.h>
 
-#include <modules/dsn/rendering/renderablesignals.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/engine/globals.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
+//#include <modules/dsn/rendering/renderablesignals.h>
+//#include <openspace/scene/scenegraphnode.h>
+//#include <openspace/engine/globals.h>
+//#include <openspace/rendering/renderengine.h>
+//#include <openspace/scene/scene.h>
 #include <openspace/util/time.h>
 #include <fstream>
 
@@ -63,7 +63,6 @@ namespace openspace {
         double sequenceStartTime;
         double sequenceEndTime = sequenceStartTime + 86400.0; // 24 hours from startTime 
         std::vector<Signal> signals;
-        //std::vector<double> signalStartTimes;
      };
 
       /* The data that is currently loaded into open space*/
@@ -75,25 +74,12 @@ namespace openspace {
 
       /* Extracts all the mandatory information we need from our asset file */
       static bool extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary);
-      /* Approximates a spacecraft position using XXXXX */
-      static glm::vec3 approximateSpacecraftPosition(const char* dishId, glm::vec3 dishPos);
       /* Saves all filenames in a vector to be compared current time in open space */
       static void extractTriggerTimesFromFileNames(std::vector<std::string> _dataFiles);
       /* parses data from a file given an index in our preloaded filename vector */
       static bool jsonParser(int index);
 
-    private:
-	   static double deg2rad(double degrees);
-
-	   /**  Converts a Range, Azimuth, Elevation location to South East Zenith coordinates**/    
-	   static void convertRaeToSez(double siteLLA[], double rae[], double sez[]);
-	   /**  Converts a Range, Azimuth, Elevation location to Earth centered Earth fixed coordinates**/
-	   static void convertRaeToEcef(double observerLLA[], double observerXyz[], double objectRae[], double objectEcef[]);
-	   /**  Converts South East Zenith location to Earth centered Earth fixed coordinates**/
-	   static void convertSezToEcef(double observerLla[], double observerXyz[], double objectSez[], double objectEcef[]);
-
     };
-
 }
 
 

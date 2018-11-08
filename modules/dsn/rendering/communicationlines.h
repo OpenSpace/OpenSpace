@@ -44,10 +44,10 @@ namespace openspace {
     public:
 
         CommunicationLines(const ghoul::Dictionary& dictionary);
-        void extractData();
-        void initializeGL() override;
-        void deinitializeGL() override;
-        void update(const UpdateData& data) override;
+        //void extractData();
+       // void initializeGL() override;
+        //void deinitializeGL() override;
+        //void update(const UpdateData& data) override;
 
         /*Returns a position for a spacecraft*/
         RenderableSignals::PositionVBOLayout getSuitablePrecisionPositionForSceneGraphNode(std::string id);
@@ -56,21 +56,21 @@ namespace openspace {
         /*Returns a position calculated where the focusNode position is origin(0,0,0) */
         glm::dvec3 getCoordinatePosFromFocusNode(SceneGraphNode* node);
         /*Returns an index for our filenames */
-        int findFileIndexForCurrentTime(double time, std::vector<double> vec);
+       // int findFileIndexForCurrentTime(double time, std::vector<double> vec);
         /*Adds the signaldata to _vertexArray*/
-        void pushSignalDataToVertexArray(DsnManager::Signal signal);
+       // void pushSignalDataToVertexArray(DsnManager::Signal signal);
         /* Converts the Ra Dec range coordinates into cartesian coordinates*/
         glm::vec3 convertRaDecRangeToCartesian();
         glm::dvec3 getEstimatedCoordinatePosFromFocusNode(glm::vec3 pos);
 
         void pushRaDecDataToVertexArray(glm::vec3 posMoon);
     private:
-        /*Checks if the current time is within a signal's start and endtime*/
-         bool isSignalActive(double currentTime, std::string signalStartTime, std::string signalEndTime);
+        ///*Checks if the current time is within a signal's start and endtime*/
+        // bool isSignalActive(double currentTime, std::string signalStartTime, std::string signalEndTime);
         
-         const char* _identifier = "CommunicationLines";
-         std::unique_ptr<ghoul::Dictionary> _dictionary;
-         SceneGraphNode* _focusNode;
+         //const char* _identifier = "CommunicationLines";
+         //std::unique_ptr<ghoul::Dictionary> _dictionary;
+         //SceneGraphNode* _focusNode;
 
          int _signalVectorStartIndex;
          /* Rotation matrix to transform into equatorial sphere coordinate system*/
