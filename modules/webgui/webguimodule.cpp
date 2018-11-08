@@ -24,9 +24,93 @@
 
 #include <modules/webgui/webguimodule.h>
 
+#include <ghoul/fmt.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+
+namespace {
+    constexpr const char* _loggerCat = "WebGuiModule";
+
+    constexpr openspace::properties::Property::PropertyInfo ServerProcessEnabledInfo = {
+        "ServerProcessEnabled",
+        "Enable Server Process",
+        "Enable the node js based process used to serve the Web GUI."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ServerProcessEntryPointInfo =
+    {
+        "ServerProcessEntryPoint",
+        "Server Process Entry Point",
+        "The node js command to invoke"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo
+        ServerProcessWorkingDirectoryInfo =
+    {
+        "ServerProcessWorkingDirectory",
+        "Server Process Working Directory",
+        "The working directory of the process"
+    };
+}
+
 namespace openspace {
 
-WebGuiModule::WebGuiModule() : OpenSpaceModule(WebGuiModule::Name) {}
+WebGuiModule::WebGuiModule()
+    : OpenSpaceModule(WebGuiModule::Name)
+    , _serverProcessEnabled(ServerProcessEnabledInfo, false)
+    , _serverProcessEntryPoint(ServerProcessEntryPointInfo)
+    , _serverProcessWorkingDirectory(ServerProcessWorkingDirectoryInfo)
+{
+    addProperty(_serverProcessEnabled);
+    addProperty(_serverProcessEntryPoint);
+    addProperty(_serverProcessWorkingDirectory);
+}
+
+void WebGuiModule::internalInitialize(const ghoul::Dictionary&) {
+    const std::function<void()> startOrStop = [this]() {
+        if (_serverProcessEnabled) {
+            startProcess();
+        } else {
+            stopProcess();
+        }
+    };
+
+    const std::function<void()> restartIfEnabled = [this]() {
+        stopProcess();
+        if (_serverProcessEnabled) {
+            startProcess();
+        }
+    };
+
+    _serverProcessEnabled.onChange(startOrStop);
+    _serverProcessEntryPoint.onChange(restartIfEnabled);
+    _serverProcessWorkingDirectory.onChange(restartIfEnabled);
+    startOrStop();
+}
+
+void WebGuiModule::startProcess() {
+#ifdef _MSC_VER
+    const std::string nodePath = absPath("${MODULE_WEBGUI}/ext/nodejs/node.exe");
+#else
+    const std::string nodePath = absPath("${MODULE_WEBGUI}/ext/nodejs/node");
+#endif
+    
+    _process = std::make_unique<ghoul::Process>(
+        "\"" + nodePath + "\" \"" + _serverProcessEntryPoint.value() + "\"",
+        _serverProcessWorkingDirectory.value(),
+        [](const char* data, size_t n) {
+            const std::string str(data, n);
+            LDEBUG(fmt::format("Web GUI server output: {}", str));
+        }
+    );
+}
+
+void WebGuiModule::stopProcess() {
+    if (_process) {
+        _process->kill();
+    }
+    _process = nullptr;
+}
 
 } // namespace openspace
-

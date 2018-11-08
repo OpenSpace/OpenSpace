@@ -30,10 +30,12 @@
 #include <modules/server/include/topics/getpropertytopic.h>
 #include <modules/server/include/topics/luascripttopic.h>
 #include <modules/server/include/topics/setpropertytopic.h>
+#include <modules/server/include/topics/shortcuttopic.h>
 #include <modules/server/include/topics/subscriptiontopic.h>
 #include <modules/server/include/topics/timetopic.h>
 #include <modules/server/include/topics/topic.h>
 #include <modules/server/include/topics/triggerpropertytopic.h>
+#include <modules/server/include/topics/versiontopic.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/io/socket/socket.h>
@@ -49,10 +51,12 @@ namespace {
     constexpr const char* MessageKeyPayload = "payload";
     constexpr const char* MessageKeyTopic = "topic";
 
+    constexpr const char* VersionTopicKey = "version";
     constexpr const char* AuthenticationTopicKey = "authorize";
     constexpr const char* GetPropertyTopicKey = "get";
     constexpr const char* LuaScriptTopicKey = "luascript";
     constexpr const char* SetPropertyTopicKey = "set";
+    constexpr const char* ShortcutTopicKey = "shortcuts";
     constexpr const char* SubscriptionTopicKey = "subscribe";
     constexpr const char* TimeTopicKey = "time";
     constexpr const char* TriggerPropertyTopicKey = "trigger";
@@ -72,11 +76,13 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
     _topicFactory.registerClass<GetPropertyTopic>(GetPropertyTopicKey);
     _topicFactory.registerClass<LuaScriptTopic>(LuaScriptTopicKey);
     _topicFactory.registerClass<SetPropertyTopic>(SetPropertyTopicKey);
+    _topicFactory.registerClass<ShortcutTopic>(ShortcutTopicKey);
     _topicFactory.registerClass<SubscriptionTopic>(SubscriptionTopicKey);
     _topicFactory.registerClass<TimeTopic>(TimeTopicKey);
     _topicFactory.registerClass<TriggerPropertyTopic>(TriggerPropertyTopicKey);
     _topicFactory.registerClass<BounceTopic>(BounceTopicKey);
     _topicFactory.registerClass<FlightControllerTopic>(FlightControllerTopicKey);
+    _topicFactory.registerClass<VersionTopic>(VersionTopicKey);
 
     // see if the default config for requiring auth (on) is overwritten
     _requireAuthorization = global::configuration.doesRequireSocketAuthentication;
@@ -87,9 +93,8 @@ void Connection::handleMessage(const std::string& message) {
         nlohmann::json j = nlohmann::json::parse(message.c_str());
         try {
             handleJson(j);
-        }
-        catch (...) {
-            LERROR(fmt::format("JSON handling error from: {}", message));
+        } catch (const std::exception& e) {
+            LERROR(fmt::format("JSON handling error from: {}. {}", message, e.what()));
         }
     } catch (...) {
         if (!isAuthorized()) {
@@ -100,7 +105,16 @@ void Connection::handleMessage(const std::string& message) {
             ));
             return;
         } else {
-            LERROR(fmt::format("Could not parse JSON: '{}'", message));
+            std::string sanitizedString = message;
+            std::transform(
+                message.begin(),
+                message.end(),
+                sanitizedString.begin(),
+                [](const unsigned char& c) {
+                    return std::isprint(c) ? c : ' ';
+                }
+            );
+            LERROR(fmt::format("Could not parse JSON: '{}'", sanitizedString));
         }
     }
 }

@@ -66,28 +66,40 @@ void KeybindingManager::resetKeyBindings() {
     _keyLua.clear();
 }
 
-void KeybindingManager::bindKeyLocal(Key key, KeyModifier modifier,
-                                     std::string luaCommand, std::string documentation)
+void KeybindingManager::bindKeyLocal(Key key,
+                                     KeyModifier modifier,
+                                     std::string luaCommand,
+                                     std::string documentation,
+                                     std::string name,
+                                     std::string guiPath)
 {
     _keyLua.insert({
         { key, modifier },
         {
             std::move(luaCommand),
             IsSynchronized::No,
-            std::move(documentation)
+            std::move(documentation),
+            std::move(name),
+            std::move(guiPath)
         }
     });
 }
 
-void KeybindingManager::bindKey(Key key, KeyModifier modifier,
-                                std::string luaCommand, std::string documentation)
+void KeybindingManager::bindKey(Key key,
+                                KeyModifier modifier,
+                                std::string luaCommand,
+                                std::string documentation,
+                                std::string name,
+                                std::string guiPath)
 {
     _keyLua.insert({
         { key, modifier },
         {
             std::move(luaCommand),
             IsSynchronized::Yes,
-            std::move(documentation)
+            std::move(documentation),
+            std::move(name),
+            std::move(guiPath)
         }
     });
 }
@@ -143,7 +155,8 @@ std::string KeybindingManager::generateJson() const {
         json << "\"script\": \"" << escapedJson(p.second.command) << "\",";
         json << "\"remoteScripting\": "
              << (p.second.synchronization ? "true," : "false,");
-        json << "\"documentation\": \"" << escapedJson(p.second.documentation) << "\"";
+        json << "\"documentation\": \"" << escapedJson(p.second.documentation) << "\",";
+        json << "\"name\": \"" << escapedJson(p.second.name) << "\"";
         json << "}";
     }
     json << "]";

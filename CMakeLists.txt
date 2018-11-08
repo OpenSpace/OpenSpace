@@ -27,9 +27,9 @@ cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 project(OpenSpace)
 
 set(OPENSPACE_VERSION_MAJOR 0)
-set(OPENSPACE_VERSION_MINOR 12)
-set(OPENSPACE_VERSION_PATCH 1)
-set(OPENSPACE_VERSION_STRING "Beta-2 (WIP)")
+set(OPENSPACE_VERSION_MINOR 13)
+set(OPENSPACE_VERSION_PATCH 0)
+set(OPENSPACE_VERSION_STRING "Beta-3")
 
 
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
@@ -213,6 +213,29 @@ begin_header("Configuring Applications")
 handle_applications()
 end_header("End: Configuring Applications")
 message(STATUS "")
+
+
+# Web Browser and Web gui
+# Why not put these in the module's path? Because they do not have access to the
+# target as of July 2017, which is needed.
+if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
+    # wanted by CEF
+    set(CMAKE_BUILD_TYPE Debug CACHE INTERNAL "CMAKE_BUILD_TYPE")
+
+    if (WIN32)
+        set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/OpenSpace/openspace.rc)
+    endif ()
+
+    # Add the CEF binary distribution's cmake/ directory to the module path and
+    # find CEF to initialize it properly.
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
+    include(webbrowser_helpers)
+
+    set_cef_targets("${CEF_ROOT}" OpenSpaceTest)
+    run_cef_platform_config("${CEF_ROOT}" "${CEF_TARGET}" "${WEBBROWSER_MODULE_PATH}")
+elseif (OPENSPACE_MODULE_WEBBROWSER)
+    message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
+endif ()
 
 ##########################################################################################
 # Misc settings                                                                          #

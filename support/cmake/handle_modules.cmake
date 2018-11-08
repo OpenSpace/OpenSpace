@@ -93,11 +93,11 @@ function (handle_modules internal_module_path external_modules_paths)
 
         set(dependencies ${dependencies} ${deps})
     endforeach()
+
     # We can remove the duplicates here.  We constructed the list such that nested 
     # dependencies are order left to right.  REMOVE_DUPLICATES will keep the left most
     # value in the case of duplicates, so that will still work
     list(REMOVE_DUPLICATES dependencies)
-
 
     #
     # Step 4:  Check each dependency and set it, if necessary
@@ -161,13 +161,26 @@ function (handle_modules internal_module_path external_modules_paths)
 
     #
     # Step 6:  Create the moduleregistration.h file with the header file paths, class
-    #          names and the external module paths
+    #          names and the external module paths.
+    #          The class list needs to be topologically sorted, based on
+    #          the dependency graph, in order to guarantee that modules are
+    #          initialized after their dependencies.
     #
+
+    # We generate a list of the names of the enabled modules taking
+    # the topologically sorted dependencies and adding the rest of the modules.
+    # REMOVE_DUPLICATES will keep the left most value in the case of duplicates
+    set(topologically_sorted ${dependencies} ${enabled_module_names})
+    list(REMOVE_DUPLICATES topologically_sorted)
+
     set(MODULE_HEADERS "")
     set(MODULE_CLASSES "")
     set(MODULE_PATHS "")
-    foreach (val RANGE ${enabled_module_count})
-        list(GET enabled_module_names ${val} name)
+
+    foreach (key RANGE ${enabled_module_count})
+        list(GET topologically_sorted ${key} name)
+        list(FIND enabled_module_names ${name} val)
+
         list(GET enabled_module_paths ${val} path)
         list(GET module_class_names ${val} class_name)
 

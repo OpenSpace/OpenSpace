@@ -39,11 +39,12 @@ set(CMAKE_BUILD_TYPE Debug)
 
 cmake_minimum_required(VERSION 2.8.12.1)
 
-# Only generate Debug and Release configuration types.
-set(CMAKE_CONFIGURATION_TYPES Debug Release)
-
 # Use folders in the resulting project files.
 set_property(GLOBAL PROPERTY OS_FOLDERS ON)
+
+# Use <PackageName>_ROOT variables
+# https://cmake.org/cmake/help/git-stage/policy/CMP0074.html
+cmake_policy(SET CMP0074 NEW)
 
 # Specify the CEF distribution version.
 set(CEF_VERSION "3.3029.1617.gaf831b6")
@@ -57,6 +58,26 @@ set_current_cef_build_platform()
 
 # Download and extract the CEF binary distribution (executes DownloadCEF.cmake).
 DownloadCEF("${CEF_PLATFORM}" "${CEF_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/ext/cef")
+
+
+##########################################################################################
+# Apply cmake patch
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cmake/patch/CMakeLists.txt
+    DESTINATION ${CEF_ROOT})
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cmake/patch/cmake/cef_variables.cmake
+    DESTINATION ${CEF_ROOT}/cmake)
+
+
+
+# CEF does not provide RelWithDebInfo libs, so we use the ones without Debug information
+file(COPY ${CEF_ROOT}/Release/
+    DESTINATION ${CEF_ROOT}/RelWithDebInfo
+    FILES_MATCHING PATTERN *)
+
+
+##########################################################################################
 
 # Add the CEF binary distribution's cmake/ directory to the module path.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CEF_ROOT}/cmake")
@@ -175,9 +196,10 @@ endif (OS_WINDOWS)
 
 ##########################################################################################
 # Create OpenSpace module.
-set(OPENSPACE_HEADER_FILES
+set(HEADER_FILES
     webbrowsermodule.h
     include/webrenderhandler.h
+    include/webkeyboardhandler.h
     include/browserclient.h
     include/screenspacebrowser.h
     include/browserinstance.h
@@ -186,11 +208,12 @@ set(OPENSPACE_HEADER_FILES
     include/defaultbrowserlauncher.h
     include/cefhost.h
     )
-source_group("Header Files" FILES ${OPENSPACE_HEADER_FILES})
+source_group("Header Files" FILES ${HEADER_FILES})
 
-set(OPENSPACE_SOURCE_FILES
+set(SOURCE_FILES
     webbrowsermodule.cpp
     src/webrenderhandler.cpp
+    src/webkeyboardhandler.cpp
     src/browserclient.cpp
     src/screenspacebrowser.cpp
     src/browserinstance.cpp
@@ -199,14 +222,15 @@ set(OPENSPACE_SOURCE_FILES
     src/defaultbrowserlauncher.cpp
     src/cefhost.cpp
     )
-source_group("Source Files" FILES ${OPENSPACE_SOURCE_FILES})
+source_group("Source Files" FILES ${SOURCE_FILES})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 create_new_module(
     ${WEBBROWSER_MODULE_NAME}
     webbrowser_module
-    ${OPENSPACE_HEADER_FILES} ${OPENSPACE_SOURCE_FILES}
+    STATIC
+    ${HEADER_FILES} ${SOURCE_FILES}
 )
 
 # Display CEF configuration settings.

@@ -87,18 +87,23 @@ private:
      */
     cef_key_event_type_t keyEventType(KeyAction action);
 
-    bool _leftMouseDown = false;
-
     std::shared_ptr<BrowserInstance> _browserInstance = nullptr;
     glm::vec2 _mousePosition = { 0.f, 0.f };
-    glm::vec2 _lastClickPosition = { 0.f, 0.f };
-    std::chrono::high_resolution_clock::time_point _lastClickTime;
+
+    struct MouseButtonState {
+        bool down = false;
+        glm::vec2 lastClickPosition = { 0.f, 0.f };
+        std::chrono::high_resolution_clock::time_point lastClickTime;
+    };
+
+    MouseButtonState _leftButton;
+    MouseButtonState _rightButton;
 
     /**
      * determines if a click should be sent as a double click or not
      * @return
      */
-    bool isDoubleClick() const;
+    bool isDoubleClick(const MouseButtonState& button) const;
 
     /**
      * get the number of milliseconds that is allowed between two clicks for it to count

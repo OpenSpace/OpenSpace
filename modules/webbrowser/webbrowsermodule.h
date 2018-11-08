@@ -33,24 +33,18 @@ namespace openspace {
 
 class CefHost;
 
-constexpr const char* SUBPROCESS_NAME = "openspace_web_helper";
-
-#ifdef WIN32
-constexpr const char* SUBPROCESS_ENDING = ".exe";
-#else
-constexpr const char* SUBPROCESS_ENDING = "";
-#endif
-
 class WebBrowserModule : public OpenSpaceModule {
 public:
     static constexpr const char* Name = "WebBrowser";
     WebBrowserModule();
     virtual ~WebBrowserModule();
 
-    int addBrowser(std::shared_ptr<BrowserInstance>);
+    void addBrowser(std::shared_ptr<BrowserInstance>);
     void removeBrowser(std::shared_ptr<BrowserInstance>);
 
     void attachEventHandler(std::shared_ptr<BrowserInstance> browserInstance);
+    void detachEventHandler();
+    bool isEnabled() const;
 
 protected:
     void internalInitialize(const ghoul::Dictionary& configuration) override;
@@ -68,6 +62,8 @@ private:
     std::vector<std::shared_ptr<BrowserInstance>> _browsers;
     EventHandler _eventHandler;
     std::unique_ptr<CefHost> _cefHost;
+    std::string _webHelperLocation;
+    bool _enabled = true;
 };
 
 } // namespace openspace

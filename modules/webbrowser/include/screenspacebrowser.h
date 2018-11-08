@@ -28,6 +28,7 @@
 #include <openspace/rendering/screenspacerenderable.h>
 
 #include <modules/webbrowser/include/webrenderhandler.h>
+#include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 
@@ -48,6 +49,7 @@ namespace openspace {
 
 class BrowserInstance;
 class ScreenSpaceRenderHandler;
+class WebKeyboardHandler;
 
 class ScreenSpaceBrowser : public ScreenSpaceRenderable {
 public:
@@ -71,6 +73,7 @@ private:
     properties::StringProperty _url;
     properties::Vec2Property _dimensions;
     CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
+    CefRefPtr<WebKeyboardHandler> _keyboardHandler;
     std::shared_ptr<BrowserInstance> _browserInstance;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
