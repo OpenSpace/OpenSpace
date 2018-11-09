@@ -26,13 +26,13 @@
 
 
 namespace openspace {
-    constexpr const char* _loggerCat = "DsnManager";
+    constexpr const char* _loggerCat = "SignalManager";
     
     // Keys to get values from dictionary
     constexpr const char* KeyDataFolder = "DataFolder";
     constexpr const char* KeyDataFileType = "DataFileType";
 
-    struct SignalManager::DsnData SignalManager::_dsnData;
+    struct SignalManager::SignalData SignalManager::_signalData;
     std::vector<double> SignalManager::_fileStartTimes;
     std::vector<std::string> SignalManager::_dataFiles;
 
@@ -185,9 +185,9 @@ namespace openspace {
 
         const double triggerTime = Time::convertTime(startTimeString);
       
-       _dsnData.sequenceStartTime = triggerTime;
-       _dsnData.signals.clear();
-       _dsnData.signals.reserve(0);
+       _signalData.sequenceStartTime = triggerTime;
+       _signalData.signals.clear();
+       _signalData.signals.reserve(0);
 
        //loop through all signals in the data 
       for (const auto& signalsInJson : j["Signals"]) {
@@ -201,13 +201,13 @@ namespace openspace {
           structSignal.direction = signalsInJson["direction"].get<std::string>();
 
           //Add signals to vector of signals
-          _dsnData.signals.push_back(structSignal);
+          _signalData.signals.push_back(structSignal);
           //_dsnData.signalStartTimes.push_back(Time::convertTime(structSignal.startTime));
         }
 
-      _dsnData.isLoaded = true;
+      _signalData.isLoaded = true;
       
-      return _dsnData.isLoaded;
+      return _signalData.isLoaded;
     }
 
 }

@@ -262,16 +262,16 @@ void RenderableSignals::update(const UpdateData& data) {
     double endTime = 86400;
 
     //Bool if the current time is within the timeframe for the currently loaded data
-    const bool isTimeInFileInterval = (currentTime >= SignalManager::_dsnData.sequenceStartTime) &&
-        (currentTime < SignalManager::_dsnData.sequenceStartTime + endTime);
+    const bool isTimeInFileInterval = (currentTime >= SignalManager::_signalData.sequenceStartTime) &&
+        (currentTime < SignalManager::_signalData.sequenceStartTime + endTime);
 
     //Reload data if it is not relevant anymore
     if (!isTimeInFileInterval) {
-        SignalManager::_dsnData.isLoaded = false;
+        SignalManager::_signalData.isLoaded = false;
 
         int activeFileIndex = findFileIndexForCurrentTime(currentTime, SignalManager::_fileStartTimes);
         //parse data for that file
-        if (!SignalManager::_dsnData.isLoaded)
+        if (!SignalManager::_signalData.isLoaded)
         {
             SignalManager::jsonParser(activeFileIndex);
 
@@ -288,9 +288,9 @@ void RenderableSignals::update(const UpdateData& data) {
     _lineRenderInformation._localTransformSpacecraft = glm::translate(glm::dmat4(1.0), _focusNode->worldPosition());
 
     //Todo; keep track of active index for signalvector, or swap for loop for binary search
-    for (int i = 0; i < SignalManager::_dsnData.signals.size(); i++) {
+    for (int i = 0; i < SignalManager::_signalData.signals.size(); i++) {
 
-        SignalManager::Signal currentSignal = SignalManager::_dsnData.signals[i];
+        SignalManager::Signal currentSignal = SignalManager::_signalData.signals[i];
         if (isSignalActive(currentTime, currentSignal.startTime, currentSignal.endTime))
             pushSignalDataToVertexArray(currentSignal);
     };

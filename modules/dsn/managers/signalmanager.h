@@ -57,7 +57,7 @@ namespace openspace {
 
       };
 
-    static struct DsnData {
+    static struct SignalData {
         //filename is on the format of YYYY-DDDT (excluding '.json')
         bool isLoaded = false;
         double sequenceStartTime;
@@ -66,7 +66,7 @@ namespace openspace {
      };
 
       /* The data that is currently loaded into open space*/
-      static DsnData _dsnData;
+      static SignalData _signalData;
       /* A vector with all start times for our datafiles*/
       static std::vector<double> _fileStartTimes;
       /* A vector with all our datafile paths*/
