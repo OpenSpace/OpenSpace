@@ -21,8 +21,8 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
-#ifndef __OPENSPACE_MODULE_DSN___DSNMANAGER___H__
-#define __OPENSPACE_MODULE_DSN___DSNMANAGER___H__
+#ifndef __OPENSPACE_MODULE_DSN___SIGNALMANAGER___H__
+#define __OPENSPACE_MODULE_DSN___SIGNALMANAGER___H__
 
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionary.h>
@@ -41,7 +41,7 @@
 
 namespace openspace {
 
-    class DsnManager {
+    class SignalManager {
 
     public:
 

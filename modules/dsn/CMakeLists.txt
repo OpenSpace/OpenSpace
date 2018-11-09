@@ -27,14 +27,14 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesignals.h
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/dsntranslation.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/dsnmanager/dsnmanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/managers/signalmanager.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesignals.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/dsntranslation.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/dsnmanager/dsnmanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/managers/signalmanager.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

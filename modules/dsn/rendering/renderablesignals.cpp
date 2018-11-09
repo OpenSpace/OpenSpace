@@ -262,18 +262,18 @@ void RenderableSignals::update(const UpdateData& data) {
     double endTime = 86400;
 
     //Bool if the current time is within the timeframe for the currently loaded data
-    const bool isTimeInFileInterval = (currentTime >= DsnManager::_dsnData.sequenceStartTime) &&
-        (currentTime < DsnManager::_dsnData.sequenceStartTime + endTime);
+    const bool isTimeInFileInterval = (currentTime >= SignalManager::_dsnData.sequenceStartTime) &&
+        (currentTime < SignalManager::_dsnData.sequenceStartTime + endTime);
 
     //Reload data if it is not relevant anymore
     if (!isTimeInFileInterval) {
-        DsnManager::_dsnData.isLoaded = false;
+        SignalManager::_dsnData.isLoaded = false;
 
-        int activeFileIndex = findFileIndexForCurrentTime(currentTime, DsnManager::_fileStartTimes);
+        int activeFileIndex = findFileIndexForCurrentTime(currentTime, SignalManager::_fileStartTimes);
         //parse data for that file
-        if (!DsnManager::_dsnData.isLoaded)
+        if (!SignalManager::_dsnData.isLoaded)
         {
-            DsnManager::jsonParser(activeFileIndex);
+            SignalManager::jsonParser(activeFileIndex);
 
         }
         else
@@ -288,9 +288,9 @@ void RenderableSignals::update(const UpdateData& data) {
     _lineRenderInformation._localTransformSpacecraft = glm::translate(glm::dmat4(1.0), _focusNode->worldPosition());
 
     //Todo; keep track of active index for signalvector, or swap for loop for binary search
-    for (int i = 0; i < DsnManager::_dsnData.signals.size(); i++) {
+    for (int i = 0; i < SignalManager::_dsnData.signals.size(); i++) {
 
-        DsnManager::Signal currentSignal = DsnManager::_dsnData.signals[i];
+        SignalManager::Signal currentSignal = SignalManager::_dsnData.signals[i];
         if (isSignalActive(currentTime, currentSignal.startTime, currentSignal.endTime))
             pushSignalDataToVertexArray(currentSignal);
     };
@@ -357,7 +357,7 @@ bool RenderableSignals::isSignalActive(double currentTime, std::string signalSta
 
 void RenderableSignals::extractData(std::unique_ptr<ghoul::Dictionary> &dictionary) {
 
-    if (!DsnManager::extractMandatoryInfoFromDictionary(_identifier, dictionary)) {
+    if (!SignalManager::extractMandatoryInfoFromDictionary(_identifier, dictionary)) {
         LERROR(fmt::format("{}: Did not manage to extract data.", _identifier));
     }
     else {
@@ -366,7 +366,7 @@ void RenderableSignals::extractData(std::unique_ptr<ghoul::Dictionary> &dictiona
 }
 
 
-void RenderableSignals::pushSignalDataToVertexArray(DsnManager::Signal signal) {
+void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal) {
 
     ColorVBOLayout color = getSiteColor(signal.dishName);
     glm::vec3 posStation = getPositionForGeocentricSceneGraphNode(signal.dishName.c_str());

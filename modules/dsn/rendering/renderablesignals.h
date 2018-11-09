@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_DSN___RENDERABLESIGNALS___H__
 
 #include <openspace/rendering/renderable.h>
-#include <modules/dsn/dsnmanager/dsnmanager.h>
+#include <modules/dsn/managers/signalmanager.h>
 #include <modules/dsn/dsnmodule.h>
 #include <openspace/scene/scene.h>
 #include <ghoul/logging/logmanager.h>
@@ -83,7 +83,7 @@ namespace openspace {
         /* Returns an index for our filenames */
         int findFileIndexForCurrentTime(double time, std::vector<double> vec);
         /* Adds the signaldata to _vertexArray*/
-        void pushSignalDataToVertexArray(DsnManager::Signal signal);
+        void pushSignalDataToVertexArray(SignalManager::Signal signal);
         /* Returns a position relative the current focus node */
         glm::dvec3 getCoordinatePosFromFocusNode(SceneGraphNode* node);
         /* Returns the estimated position expressed relative to the current focusnode */

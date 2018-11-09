@@ -22,7 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/dsn/dsnmanager/dsnmanager.h>
+#include <modules/dsn/managers/signalmanager.h>
 
 
 namespace openspace {
@@ -32,9 +32,9 @@ namespace openspace {
     constexpr const char* KeyDataFolder = "DataFolder";
     constexpr const char* KeyDataFileType = "DataFileType";
 
-    struct DsnManager::DsnData DsnManager::_dsnData;
-    std::vector<double> DsnManager::_fileStartTimes;
-    std::vector<std::string> DsnManager::_dataFiles;
+    struct SignalManager::DsnData SignalManager::_dsnData;
+    std::vector<double> SignalManager::_fileStartTimes;
+    std::vector<std::string> SignalManager::_dataFiles;
 
     //Filetypes
     const std::string dataFileTypeStringJson = "json";
@@ -49,7 +49,7 @@ namespace openspace {
     * to function; such as the file type and the location of the data files.
     * Returns false if it fails to extract mandatory information!
     */
-    bool DsnManager::extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary)
+    bool SignalManager::extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary)
     {
         DataFileType sourceFileType = DataFileType::Invalid;
         
@@ -129,12 +129,12 @@ namespace openspace {
         }
         extractTriggerTimesFromFileNames(_dataFiles);
 
-        return DsnManager::jsonParser(0);
+        return SignalManager::jsonParser(0);
     }
 
     // Extract J2000 time from file names
     // Requires files to be named as such: 'YYYY-DDDT.json'
-    void DsnManager::extractTriggerTimesFromFileNames(std::vector<std::string> _dataFiles) {
+    void SignalManager::extractTriggerTimesFromFileNames(std::vector<std::string> _dataFiles) {
         // number of  characters in filename (excluding '.json')
         constexpr const int FilenameSize = 9;
         // size(".json")
@@ -156,7 +156,7 @@ namespace openspace {
         }
     }
 
-    bool DsnManager::jsonParser(int index) {
+    bool SignalManager::jsonParser(int index) {
 
         std::string filename;
         if (index == -1 || index > _dataFiles.size())
@@ -166,7 +166,7 @@ namespace openspace {
         std::ifstream ifs(filename);
         nlohmann::json j = nlohmann::json::parse(ifs);
 
-       DsnManager::Signal structSignal;
+        SignalManager::Signal structSignal;
 
        // number of  characters in filename (excluding '.json')
        constexpr const int FilenameSize = 9;
