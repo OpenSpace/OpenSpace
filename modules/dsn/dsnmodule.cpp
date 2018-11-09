@@ -39,7 +39,7 @@ namespace openspace {
 		auto fTranslation = FactoryManager::ref().factory<Translation>();
 		ghoul_assert(fTranslation, "Translation factory was not created");
 
-		fTranslation->registerClass<DsnTranslation>("DsnTranslation");
+		fTranslation->registerClass<RadecTranslation>("RadecTranslation");
     }
 
 } // namespace openspace

@@ -206,7 +206,7 @@ local DSS35 = {
     Parent = earthAsset.Earth.Identifier,
     Transform = {
       Translation = {
-         Type = "DsnTranslation",
+         Type = "StaticTranslation",
          Position = {-4456261,2679554.75,-3694756 }
       }
    },
