@@ -27,10 +27,12 @@
 
 #include <modules/globebrowsing/other/lruthreadpool.h>
 
-#include <openspace/util/concurrentjobmanager.h>
+//#include <openspace/util/concurrentjobmanager.h>
 #include <openspace/util/concurrentqueue.h>
 
 #include <mutex>
+
+namespace openspace { template <typename T> struct Job; }
 
 namespace openspace::globebrowsing {
 
@@ -56,9 +58,9 @@ public:
      * function will also clear the list of unfinished jobs so if the jobs need to be
      * explicitly ended, the user need to make sure to do so after calling this function.
      */
-    std::vector<KeyType> getKeysToUnfinishedJobs();
+    std::vector<KeyType> keysToUnfinishedJobs();
 
-    std::vector<KeyType> getKeysToEnqueuedJobs();
+    std::vector<KeyType> keysToEnqueuedJobs();
 
     /**
      * Bumps the job identified with <code>key</code> to the beginning of the queue.
@@ -88,7 +90,6 @@ private:
     std::mutex _finishedJobsMutex;
     /// An LRU thread pool is used since the jobs can be bumped and hence prioritized.
     LRUThreadPool<KeyType> _threadPool;
-
 };
 
 } // namespace openspace::globebrowsing

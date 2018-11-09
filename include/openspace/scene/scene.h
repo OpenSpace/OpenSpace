@@ -27,43 +27,39 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <vector>
-#include <unordered_map>
-#include <set>
-#include <mutex>
-
-#include <openspace/scene/sceneinitializer.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scenelicense.h>
-#include <openspace/scene/scenelicensewriter.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/util/camera.h>
-#include <openspace/util/updatestructures.h>
 #include <ghoul/misc/easing.h>
-#include <ghoul/opengl/programobject.h>
+#include <ghoul/misc/exception.h>
+#include <mutex>
+#include <set>
+#include <unordered_map>
+#include <vector>
 
 namespace ghoul { class Dictionary; }
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
+namespace scripting { struct LuaLibrary; }
+
+class SceneInitializer;
 
 // Notifications:
 // SceneGraphFinishedLoading
-class Scene
-    : public properties::PropertyOwner
-{
+class Scene : public properties::PropertyOwner {
 public:
     BooleanType(UpdateDependencies);
 
     struct InvalidSceneError : ghoul::RuntimeError {
         /**
-        * \param message The reason that caused this exception to be thrown
-        * \param component The optional compoment that caused this exception to be thrown
-        * \pre message may not be empty
+         * \param message The reason that caused this exception to be thrown
+         * \param component The optional compoment that caused this exception to be thrown
+         * \pre message may not be empty
         */
-        explicit InvalidSceneError(const std::string& message,
-            const std::string& component = "");
+        explicit InvalidSceneError(const std::string& msg,
+            const std::string& comp = "");
     };
 
     // constructors & destructor
@@ -112,8 +108,8 @@ public:
     SceneGraphNode* root();
 
     /**
-    * Return the root SceneGraphNode.
-    */
+     * Return the root SceneGraphNode.
+     */
     const SceneGraphNode* root() const;
 
     /**
@@ -188,7 +184,7 @@ public:
      * \pre \p durationSeconds must be positive and not 0
      * \post A new interpolation record exists for \p that is not expired
      */
-    void addInterpolation(properties::Property* prop, float durationSeconds,
+    void addPropertyInterpolation(properties::Property* prop, float durationSeconds,
         ghoul::EasingFunction easingFunction = ghoul::EasingFunction::Linear);
 
     /**
@@ -200,7 +196,7 @@ public:
      * \pre \prop must not be nullptr
      * \post No interpolation record exists for \p prop
      */
-    void removeInterpolation(properties::Property* prop);
+    void removePropertyInterpolation(properties::Property* prop);
 
     /**
      * Informs all Property%s with active interpolations about applying a new update tick
@@ -235,7 +231,7 @@ private:
     std::vector<SceneGraphNode*> _topologicallySortedNodes;
     std::vector<SceneGraphNode*> _circularNodes;
     std::unordered_map<std::string, SceneGraphNode*> _nodesByIdentifier;
-    bool _dirtyNodeRegistry;
+    bool _dirtyNodeRegistry = false;
     SceneGraphNode _rootDummy;
     std::unique_ptr<SceneInitializer> _initializer;
 
@@ -245,14 +241,14 @@ private:
     std::set<ghoul::opengl::ProgramObject*> _programsToUpdate;
     std::vector<std::unique_ptr<ghoul::opengl::ProgramObject>> _programs;
 
-    struct InterpolationInfo {
+    struct PropertyInterpolationInfo {
         properties::Property* prop;
         std::chrono::time_point<std::chrono::steady_clock> beginTime;
         float durationSeconds;
         ghoul::EasingFunc<float> easingFunction;
         bool isExpired = false;
     };
-    std::vector<InterpolationInfo> _interpolationInfos;
+    std::vector<PropertyInterpolationInfo> _propertyInterpolationInfos;
 };
 
 } // namespace openspace

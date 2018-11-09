@@ -27,17 +27,22 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
     constexpr const char* ProgramName = "EphemerisProgram";
     constexpr const char* KeyTranslation = "Translation";
+
+    constexpr const std::array<const char*, 12> UniformNames = {
+        "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
+        "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
+        "renderPhase"
+    };
 
     // The possible values for the _renderingModes property
     enum RenderingMode {
@@ -47,20 +52,20 @@ namespace {
     };
 
     // Fragile! Keep in sync with documentation
-    static const std::map<std::string, RenderingMode> RenderingModeConversion = {
+    const std::map<std::string, RenderingMode> RenderingModeConversion = {
         { "Lines", RenderingModeLines },
         { "Points", RenderingModePoints },
         { "Lines+Points", RenderingModeLinesPoints },
         { "Points+Lines", RenderingModeLinesPoints }
     };
 
-    static const openspace::properties::Property::PropertyInfo LineColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
         "This value determines the RGB main color for the lines and points of the trail."
     };
 
-    static const openspace::properties::Property::PropertyInfo EnableFadeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EnableFadeInfo = {
         "EnableFade",
         "Enable line fading of old points",
         "Toggles whether the trail should fade older points out. If this value is "
@@ -68,7 +73,7 @@ namespace {
         "'false', the entire trail is rendered at full opacity and color."
     };
 
-    static const openspace::properties::Property::PropertyInfo FadeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
         "Fade",
         "Line fade",
         "The fading factor that is applied to the trail if the 'EnableFade' value is "
@@ -76,7 +81,7 @@ namespace {
         "the less fading is applied."
     };
 
-    static const openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
         "This value specifies the line width of the trail if the selected rendering "
@@ -84,7 +89,7 @@ namespace {
         "ignored."
     };
 
-    static const openspace::properties::Property::PropertyInfo PointSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
         "PointSize",
         "Point Size",
         "This value specifies the base size of the points along the line if the selected "
@@ -93,7 +98,7 @@ namespace {
         "values are half this size."
     };
 
-    static const openspace::properties::Property::PropertyInfo RenderingModeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RenderingModeInfo = {
         "Rendering",
         "Rendering Mode",
         "Determines how the trail should be rendered to the screen.If 'Lines' is "
@@ -168,7 +173,9 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     , _lineFade(FadeInfo, 1.f, 0.f, 30.f)
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
     , _pointSize(PointSizeInfo, 1, 1, 64)
-    , _renderingModes(RenderingModeInfo, properties::OptionProperty::DisplayType::Dropdown
+    , _renderingModes(
+        RenderingModeInfo,
+        properties::OptionProperty::DisplayType::Dropdown
     )
 {
     addProperty(_opacity);
@@ -224,10 +231,10 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableTrail::initializeGL() {
-    _programObject = BaseModule::ProgramObjectManager.requestProgramObject(
+    _programObject = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return OsEng.renderEngine().buildRenderProgram(
+            return global::renderEngine.buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_BASE}/shaders/renderabletrail_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/renderabletrail_fs.glsl")
@@ -235,27 +242,16 @@ void RenderableTrail::initializeGL() {
         }
     );
 
-    _uniformCache.opacity = _programObject->uniformLocation("opacity");
-    _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
-    _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
-    _uniformCache.color = _programObject->uniformLocation("color");
-    _uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
-    _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
-    _uniformCache.vertexSorting = _programObject->uniformLocation("vertexSortingMethod");
-    _uniformCache.idOffset = _programObject->uniformLocation("idOffset");
-    _uniformCache.nVertices = _programObject->uniformLocation("nVertices");
-    _uniformCache.stride = _programObject->uniformLocation("stride");
-    _uniformCache.pointSize = _programObject->uniformLocation("pointSize");
-    _uniformCache.renderPhase = _programObject->uniformLocation("renderPhase");
+    ghoul::opengl::updateUniformLocations(*_programObject, _uniformCache, UniformNames);
 
     setRenderBin(Renderable::RenderBin::Overlay);
 }
 
 void RenderableTrail::deinitializeGL() {
-    BaseModule::ProgramObjectManager.releaseProgramObject(
+    BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
     _programObject = nullptr;
@@ -289,8 +285,8 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
         { RenderInformation::VertexSorting::NoSorting, 2}
     };
 
-    bool usingFramebufferRenderer =
-        OsEng.renderEngine().rendererImplementation() ==
+    const bool usingFramebufferRenderer =
+        global::renderEngine.rendererImplementation() ==
         RenderEngine::RendererImplementation::Framebuffer;
 
     if (usingFramebufferRenderer) {
@@ -298,13 +294,11 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
         //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     }
 
-    bool renderLines =
-        (_renderingModes == RenderingModeLines) |
-        (_renderingModes == RenderingModeLinesPoints);
+    const bool renderLines = (_renderingModes == RenderingModeLines) |
+                             (_renderingModes == RenderingModeLinesPoints);
 
-    bool renderPoints =
-        (_renderingModes == RenderingModePoints) |
-        (_renderingModes == RenderingModeLinesPoints);
+    const bool renderPoints = (_renderingModes == RenderingModePoints) |
+                              (_renderingModes == RenderingModeLinesPoints);
 
     if (renderLines) {
         glLineWidth(_lineWidth);
@@ -390,13 +384,14 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     };
 
     // The combined size of vertices; -1 because we duplicate the penultimate point
-    int totalNumber =
-        _primaryRenderInformation.count + _floatingRenderInformation.count - 1;
+    const int totalNumber = _primaryRenderInformation.count +
+                            _floatingRenderInformation.count - 1;
 
     // The primary information might use an index buffer, so we might need to start at an
     // offset
-    int primaryOffset =
-        _primaryRenderInformation._iBufferID == 0 ? 0 : _primaryRenderInformation.first;
+    const int primaryOffset = (_primaryRenderInformation._iBufferID == 0) ?
+        0 :
+        _primaryRenderInformation.first;
 
     // Render the primary batch of vertices
     render(_primaryRenderInformation, totalNumber, primaryOffset);

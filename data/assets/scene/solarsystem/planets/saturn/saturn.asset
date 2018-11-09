@@ -20,6 +20,10 @@ local Saturn = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_SATURN",
             DestinationFrame = "GALACTIC"
+        },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1.0
         }
     },
     Renderable = {

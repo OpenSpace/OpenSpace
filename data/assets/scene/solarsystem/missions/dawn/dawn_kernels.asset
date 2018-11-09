@@ -1,8 +1,8 @@
 local Kernels = asset.syncedResource({
     Name = "Dawn Kernels",
-    Type = "TorrentSynchronization",
+    Type = "HttpSynchronization",
     Identifier = "dawn_kernels",
-    Magnet = "magnet:?xt=urn:btih:31997fff4bffa6959c7144d24a13f5fad4604fa6&dn=DawnKernels"
+    Version = 1
 })
 
 asset.export("Kernels", Kernels)

@@ -108,29 +108,67 @@ asset.onInitialize(function()
     -- Currently:  XBoxController  or  PS4Controller
     local controller = XBoxController;
 
-    openspace.navigation.setAxisDeadZone(controller.LeftThumbStick[1], 0.05)
-    openspace.navigation.setAxisDeadZone(controller.LeftThumbStick[2], 0.05)
-    openspace.navigation.setAxisDeadZone(controller.RightThumbStick[1], 0.05)
-    openspace.navigation.setAxisDeadZone(controller.RightThumbStick[2], 0.05)
-    openspace.navigation.setAxisDeadZone(controller.LeftTrigger, 0.05)
-    openspace.navigation.setAxisDeadZone(controller.RightTrigger, 0.05)
+    openspace.navigation.setAxisDeadZone(controller.LeftThumbStick[1], 0.15)
+    openspace.navigation.setAxisDeadZone(controller.LeftThumbStick[2], 0.15)
+    openspace.navigation.setAxisDeadZone(controller.RightThumbStick[1], 0.15)
+    openspace.navigation.setAxisDeadZone(controller.RightThumbStick[2], 0.15)
+    openspace.navigation.setAxisDeadZone(controller.LeftTrigger, 0.15)
+    openspace.navigation.setAxisDeadZone(controller.RightTrigger, 0.15)
 
     openspace.navigation.bindJoystickAxis(controller.LeftThumbStick[1], "Orbit X");
     openspace.navigation.bindJoystickAxis(controller.LeftThumbStick[2], "Orbit Y", true);
     openspace.navigation.bindJoystickAxis(controller.RightThumbStick[1], "Pan X", true);
-    openspace.navigation.bindJoystickAxis(controller.RightThumbStick[2], "Pan Y");
+    openspace.navigation.bindJoystickAxis(controller.RightThumbStick[2], "Pan Y", true);
     openspace.navigation.bindJoystickAxis(controller.LeftTrigger, "Zoom Out", false, true);
     openspace.navigation.bindJoystickAxis(controller.RightTrigger, "Zoom In", false, true);
 
-    openspace.navigation.bindJoystickButton(controller.LB, bindLocalRoll(controller.RightThumbStick[1]))
-    openspace.navigation.bindJoystickButton(controller.LB, unbindRoll(controller.RightThumbStick[1]), "Release")
-    openspace.navigation.bindJoystickButton(controller.RB, bindGlobalRoll(controller.RightThumbStick[1]))
-    openspace.navigation.bindJoystickButton(controller.RB, unbindRoll(controller.RightThumbStick[1]), "Release")
+    openspace.navigation.bindJoystickButton(
+        controller.LB,
+        bindLocalRoll(controller.RightThumbStick[1]),
+        "Switch to local roll mode"
+    )
+    openspace.navigation.bindJoystickButton(
+        controller.LB,
+        unbindRoll(controller.RightThumbStick[1]),
+        "Switch back to normal mode",
+        "Release"
+    )
+    openspace.navigation.bindJoystickButton(
+        controller.RB,
+        bindGlobalRoll(controller.RightThumbStick[1]),
+        "Switch to global roll mode"
+    )
+    openspace.navigation.bindJoystickButton(
+        controller.RB,
+        unbindRoll(controller.RightThumbStick[1]),
+        "Switch back to normal mode",
+        "Release"
+    )
 
-    openspace.navigation.bindJoystickButton(controller.A, propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.ZoomFriction'))
-    openspace.navigation.bindJoystickButton(controller.B, propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RotationalFriction'))
-    openspace.navigation.bindJoystickButton(controller.DPad.Left, propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RollFriction'))
+    openspace.navigation.bindJoystickButton(
+        controller.A,
+        propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.ZoomFriction'),
+        "Toggle zoom friction"
+    )
+    openspace.navigation.bindJoystickButton(
+        controller.B,
+        propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RotationalFriction'),
+        "Toggle rotational friction"
+    )
+    openspace.navigation.bindJoystickButton(
+        controller.DPad.Left,
+        propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RollFriction'),
+        "Toggle roll friction"
+    )
 
-    openspace.navigation.bindJoystickButton(controller.X, "openspace.setPropertyValue('NavigationHandler.Origin', 'Earth')")
-    openspace.navigation.bindJoystickButton(controller.Y, "openspace.setPropertyValue('NavigationHandler.Origin', 'Mars')")
+    openspace.navigation.bindJoystickButton(
+        controller.X,
+        "openspace.setPropertyValue('NavigationHandler.Origin', 'Earth')",
+        "Switch target to Earth"
+    )
+    openspace.navigation.bindJoystickButton(
+        controller.Y,
+        "openspace.setPropertyValue('NavigationHandler.Origin', 'Mars')",
+        "Switch target to Mars"
+    )
 end)

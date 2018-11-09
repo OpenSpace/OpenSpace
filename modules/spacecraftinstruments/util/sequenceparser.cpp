@@ -24,7 +24,7 @@
 
 #include <modules/spacecraftinstruments/util/sequenceparser.h>
 
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/util/spicemanager.h>
 
 #include <ghoul/logging/logmanager.h>
@@ -39,27 +39,34 @@ namespace {
 
 namespace openspace {
 
-std::map<std::string, ImageSubset> SequenceParser::getSubsetMap(){
+std::map<std::string, ImageSubset>& SequenceParser::getSubsetMap() {
     return _subsetMap;
 }
-std::vector<std::pair<std::string, TimeRange>> SequenceParser::getInstrumentTimes(){
+
+const std::vector<std::pair<std::string, TimeRange>>&
+SequenceParser::getInstrumentTimes() const
+{
     return _instrumentTimes;
 }
-std::vector<std::pair<double, std::string>> SequenceParser::getTargetTimes(){
+const std::vector<std::pair<double, std::string>>&
+SequenceParser::getTargetTimes() const
+{
     return _targetTimes;
 }
-std::vector<double> SequenceParser::getCaptureProgression(){
+
+const std::vector<double>& SequenceParser::getCaptureProgression() const {
     return _captureProgression;
 }
 
-std::map<std::string, std::unique_ptr<Decoder>>& SequenceParser::getTranslation() {
+std::map<std::string, std::unique_ptr<Decoder>>& SequenceParser::translations() {
     return _fileTranslation;
 }
 
 template <typename T>
 void writeToBuffer(std::vector<char>& buffer, size_t& currentWriteLocation, T value) {
-    if ((currentWriteLocation + sizeof(T)) > buffer.size())
+    if ((currentWriteLocation + sizeof(T)) > buffer.size()) {
         buffer.resize(2 * buffer.size());
+    }
 
     std::memmove(
         buffer.data() + currentWriteLocation,
@@ -73,8 +80,9 @@ template <>
 void writeToBuffer<std::string>(std::vector<char>& buffer, size_t& currentWriteLocation,
                                 std::string value)
 {
-    if ((currentWriteLocation + sizeof(uint8_t) + value.size()) > buffer.size())
+    if ((currentWriteLocation + sizeof(uint8_t) + value.size()) > buffer.size()) {
         buffer.resize(2 * buffer.size());
+    }
 
     uint8_t length = static_cast<uint8_t>(value.size());
     std::memcpy(buffer.data() + currentWriteLocation, &length, sizeof(uint8_t));
@@ -86,7 +94,7 @@ void writeToBuffer<std::string>(std::vector<char>& buffer, size_t& currentWriteL
 
 void SequenceParser::sendPlaybookInformation(const std::string& name) {
     std::string fullName = std::string(PlaybookIdentifierName) + "_" + name;
-    _messageIdentifier = OsEng.networkEngine().identifier(fullName);
+    _messageIdentifier = global::networkEngine.identifier(fullName);
 
     std::vector<char> buffer(1024);
     size_t currentWriteLocation = 0;
@@ -104,15 +112,16 @@ void SequenceParser::sendPlaybookInformation(const std::string& name) {
     std::map<std::string, uint8_t> targetMap;
     uint8_t currentTargetId = 0;
     for (auto target : _subsetMap) {
-        if (targetMap.find(target.first) == targetMap.end())
+        if (targetMap.find(target.first) == targetMap.end()) {
             targetMap[target.first] = currentTargetId++;
+        }
     }
 
     std::map<std::string, uint16_t> instrumentMap;
     uint16_t currentInstrumentId = 1;
-    for (auto target : _subsetMap) {
-        for (auto image : target.second._subset) {
-            for (auto instrument : image.activeInstruments) {
+    for (std::pair<const std::string, ImageSubset>& target : _subsetMap) {
+        for (const Image& image : target.second._subset) {
+            for (const std::string& instrument : image.activeInstruments) {
                 if (instrumentMap.find(instrument) == instrumentMap.end()) {
                     instrumentMap[instrument] = currentInstrumentId;
                     currentInstrumentId = currentInstrumentId << 1;
@@ -134,12 +143,13 @@ void SequenceParser::sendPlaybookInformation(const std::string& name) {
     }
 
     uint32_t allImages = 0;
-    for (auto target : _subsetMap)
+    for (const std::pair<const std::string, ImageSubset>& target : _subsetMap) {
         allImages += static_cast<uint32_t>(target.second._subset.size());
+    }
     writeToBuffer(buffer, currentWriteLocation, allImages);
 
-    for (auto target : _subsetMap){
-        for (auto image : target.second._subset){
+    for (const std::pair<const std::string, ImageSubset>& target : _subsetMap) {
+        for (const Image& image : target.second._subset){
             writeToBuffer(buffer, currentWriteLocation, image.timeRange.start);
             writeToBuffer(buffer, currentWriteLocation, image.timeRange.end);
 
@@ -160,7 +170,7 @@ void SequenceParser::sendPlaybookInformation(const std::string& name) {
                 LERROR("Image had no active instruments");
             }
 
-            for (auto instrument : image.activeInstruments) {
+            for (const std::string& instrument : image.activeInstruments) {
                 uint16_t thisInstrumentId = instrumentMap[instrument];
                 totalInstrumentId |= thisInstrumentId;
             }
@@ -179,7 +189,7 @@ void SequenceParser::sendPlaybookInformation(const std::string& name) {
     buffer.resize(currentWriteLocation);
 
     //OsEng.networkEngine()->publishMessage(PlaybookIdentifier, buffer);
-    OsEng.networkEngine().setInitialConnectionMessage(_messageIdentifier, buffer);
+    global::networkEngine.setInitialConnectionMessage(_messageIdentifier, buffer);
 }
 
-}
+} // namespace openspace

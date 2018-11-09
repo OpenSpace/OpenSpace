@@ -28,23 +28,19 @@
 #include <openspace/network/parallelconnection.h>
 
 #include <openspace/util/concurrentqueue.h>
-
 #include <ghoul/io/socket/tcpsocketserver.h>
-#include <ghoul/io/socket/tcpsocket.h>
-
+#include <atomic>
 #include <string>
 #include <unordered_map>
-#include <atomic>
 
 namespace openspace {
 
 class ParallelServer {
 public:
-    void start(int port,
-        const std::string& password,
+    void start(int port, const std::string& password,
         const std::string& changeHostPassword);
 
-    void setDefaultHostAddress(std::string);
+    void setDefaultHostAddress(std::string defaultHostAddress);
 
     std::string defaultHostAddress() const;
 
@@ -54,6 +50,9 @@ public:
 
 private:
     struct Peer {
+        //Peer(size_t id_, std::string name_, ParallelConnection parallelConnection_,
+            //ParallelConnection::Status status_, std::thread )
+
         size_t id;
         std::string name;
         ParallelConnection parallelConnection;
@@ -80,20 +79,20 @@ private:
 
     void disconnect(std::shared_ptr<Peer> peer);
     void setName(std::shared_ptr<Peer> peer, std::string name);
-    void assignHost(std::shared_ptr<Peer> peer);
+    void assignHost(std::shared_ptr<Peer> newHost);
     void setToClient(std::shared_ptr<Peer> peer);
     void setNConnections(size_t nConnections);
     void sendConnectionStatus(std::shared_ptr<Peer> peer);
 
-    void handleAuthentication(std::shared_ptr<Peer> peer, std::vector<char> data);
+    void handleAuthentication(std::shared_ptr<Peer> peer, std::vector<char> message);
     void handleData(std::shared_ptr<Peer> peer, std::vector<char> data);
-    void handleHostshipRequest(std::shared_ptr<Peer> peer, std::vector<char> data);
+    void handleHostshipRequest(std::shared_ptr<Peer> peer, std::vector<char> message);
     void handleHostshipResignation(std::shared_ptr<Peer> peer, std::vector<char> data);
     void handleDisconnection(std::shared_ptr<Peer> peer);
 
     void handleNewPeers();
     void eventLoop();
-    std::shared_ptr<Peer> peer(size_t i);
+    std::shared_ptr<Peer> peer(size_t id);
     void handlePeer(size_t id);
     void handlePeerMessage(PeerMessage peerMessage);
 

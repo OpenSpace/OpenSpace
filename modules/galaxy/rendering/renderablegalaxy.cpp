@@ -23,60 +23,58 @@
  ****************************************************************************************/
 
 #include <modules/galaxy/rendering/renderablegalaxy.h>
+
 #include <modules/galaxy/rendering/galaxyraycaster.h>
-
-#include <ghoul/io/texture/texturereader.h>
-
-
-#include <openspace/rendering/renderable.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/raycastermanager.h>
-#include <ghoul/glm.h>
-#include <glm/gtc/matrix_transform.hpp>
-#include <ghoul/opengl/ghoul_gl.h>
-
+#include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumereader.h>
+#include <openspace/engine/globals.h>
+#include <openspace/rendering/raycastermanager.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/util/boxgeometry.h>
+#include <openspace/util/updatestructures.h>
+#include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-
-#include <ghoul/opengl/programobject.h>
-
+#include <glm/gtc/matrix_transform.hpp>
 #include <fstream>
 
-
 namespace {
-    const std::string GlslRayCastPath  = "${MODULES}/toyvolume/shaders/rayCast.glsl";
-    const std::string GlslBoundsVsPath = "${MODULES}/toyvolume/shaders/boundsVs.glsl";
-    const std::string GlslBoundsFsPath = "${MODULES}/toyvolume/shaders/boundsFs.glsl";
-    const std::string _loggerCat       = "Renderable Galaxy";
+    constexpr const char* GlslRayCastPath  = "${MODULES}/toyvolume/shaders/rayCast.glsl";
+    constexpr const char* GlslBoundsVsPath = "${MODULES}/toyvolume/shaders/boundsVs.glsl";
+    constexpr const char* GlslBoundsFsPath = "${MODULES}/toyvolume/shaders/boundsFs.glsl";
+    constexpr const char* _loggerCat       = "Renderable Galaxy";
 
-    static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step Size",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo PointStepSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PointStepSizeInfo = {
         "PointStepSize",
         "Point Step Size",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo TranslationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TranslationInfo = {
         "Translation",
         "Translation",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo RotationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo EnabledPointsRatioInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EnabledPointsRatioInfo = {
         "NEnabledPointsRatio",
         "Enabled points",
         "" // @TODO Missing documentation
@@ -93,61 +91,48 @@ namespace openspace {
     , _rotation(RotationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(6.28f))
     , _enabledPointsRatio(EnabledPointsRatioInfo, 0.2f, 0.f, 1.f)
 {
-    float stepSize;
-    glm::vec3 scaling, translation, rotation;
-    glm::vec4 color;
-    ghoul::Dictionary volumeDictionary, pointsDictionary;
+    dictionary.getValue("Translation", _translation);
+    dictionary.getValue("Rotation", _rotation);
+    dictionary.getValue("StepSize", _stepSize);
 
-    if (dictionary.getValue("Translation", translation)) {
-        _translation = translation;
-    }
-    if (dictionary.getValue("Rotation", rotation)) {
-        _rotation = rotation;
-    }
-    if (dictionary.getValue("StepSize", stepSize)) {
-        _stepSize = stepSize;
-    }
-    if (dictionary.getValue("Volume", volumeDictionary)) {
-        std::string volumeFilename;
-        if (volumeDictionary.getValue("Filename", volumeFilename)) {
-            _volumeFilename = absPath(volumeFilename);
-        } else {
-            LERROR("No volume filename specified.");
-        }
-        glm::vec3 volumeDimensions;
-        if (volumeDictionary.getValue("Dimensions", volumeDimensions)) {
-            _volumeDimensions = static_cast<glm::ivec3>(volumeDimensions);
-        } else {
-            LERROR("No volume dimensions specified.");
-        }
-        glm::vec3 volumeSize;
-        if (volumeDictionary.getValue("Size", volumeSize)) {
-            _volumeSize = static_cast<glm::vec3>(volumeSize);
-        }
-        else {
-            LERROR("No volume dimensions specified.");
-        }
-
-    } else {
+    if (!dictionary.hasKeyAndValue<ghoul::Dictionary>("Volume")) {
         LERROR("No volume dictionary specified.");
     }
-    if (dictionary.getValue("Points", pointsDictionary)) {
-        std::string pointsFilename;
-        if (pointsDictionary.getValue("Filename", pointsFilename)) {
-            _pointsFilename = absPath(pointsFilename);
-        } else {
-            LERROR("No points filename specified.");
-        }
-        glm::vec3 pointsScaling;
-        if (pointsDictionary.getValue("Scaling", pointsScaling)) {
-            _pointScaling = static_cast<glm::vec3>(pointsScaling);
-        }
-        else {
-            LERROR("No volume dimensions specified.");
-        }
+
+    ghoul::Dictionary volumeDictionary = dictionary.value<ghoul::Dictionary>("Volume");
+
+    std::string volumeFilename;
+    if (volumeDictionary.getValue("Filename", volumeFilename)) {
+        _volumeFilename = absPath(volumeFilename);
     } else {
+        LERROR("No volume filename specified.");
+    }
+    glm::vec3 volumeDimensions;
+    if (volumeDictionary.getValue("Dimensions", volumeDimensions)) {
+        _volumeDimensions = static_cast<glm::ivec3>(volumeDimensions);
+    } else {
+        LERROR("No volume dimensions specified.");
+    }
+    glm::vec3 volumeSize;
+    if (volumeDictionary.getValue("Size", volumeSize)) {
+        _volumeSize = volumeSize;
+    }
+    else {
+        LERROR("No volume dimensions specified.");
+    }
+
+    if (!dictionary.hasKeyAndValue<ghoul::Dictionary>("Points")) {
         LERROR("No points dictionary specified.");
     }
+
+    ghoul::Dictionary pointsDictionary = dictionary.value<ghoul::Dictionary>("Points");
+    std::string pointsFilename;
+    if (pointsDictionary.getValue("Filename", pointsFilename)) {
+        _pointsFilename = absPath(pointsFilename);
+    } else {
+        LERROR("No points filename specified.");
+    }
+    pointsDictionary.getValue("Scaling", _pointScaling);
 }
 
 RenderableGalaxy::~RenderableGalaxy() {}
@@ -155,7 +140,7 @@ RenderableGalaxy::~RenderableGalaxy() {}
 void RenderableGalaxy::initializeGL() {
     // Aspect is currently hardcoded to cubic voxels.
     _aspect = static_cast<glm::vec3>(_volumeDimensions);
-    _aspect = _aspect / std::max(std::max(_aspect.x, _aspect.y), _aspect.z);
+    _aspect /= std::max(std::max(_aspect.x, _aspect.y), _aspect.z);
 
     volume::RawVolumeReader<glm::tvec4<GLfloat>> reader(
         _volumeFilename,
@@ -182,14 +167,14 @@ void RenderableGalaxy::initializeGL() {
     _raycaster = std::make_unique<GalaxyRaycaster>(*_texture);
     _raycaster->initialize();
 
-    OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
+    global::raycasterManager.attachRaycaster(*_raycaster.get());
 
     auto onChange = [&](bool enabled) {
         if (enabled) {
-            OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
+            global::raycasterManager.attachRaycaster(*_raycaster.get());
         }
         else {
-            OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
+            global::raycasterManager.detachRaycaster(*_raycaster.get());
         }
     };
 
@@ -215,9 +200,9 @@ void RenderableGalaxy::initializeGL() {
 
     size_t nFloats = _nPoints * 7;
 
-    float* pointData = new float[nFloats];
+    std::vector<float> pointData(nFloats);
     pointFile.seekg(sizeof(int64_t), std::ios::beg); // read past heder.
-    pointFile.read(reinterpret_cast<char*>(pointData), nFloats * sizeof(float));
+    pointFile.read(reinterpret_cast<char*>(pointData.data()), nFloats * sizeof(float));
     pointFile.close();
 
     float maxdist = 0;
@@ -238,8 +223,6 @@ void RenderableGalaxy::initializeGL() {
 
     std::cout << maxdist << std::endl;
 
-    delete[] pointData;
-
     glGenVertexArrays(1, &_pointsVao);
     glGenBuffers(1, &_positionVbo);
     glGenBuffers(1, &_colorVbo);
@@ -247,24 +230,22 @@ void RenderableGalaxy::initializeGL() {
     glBindVertexArray(_pointsVao);
     glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
     glBufferData(GL_ARRAY_BUFFER,
-        pointPositions.size()*sizeof(glm::vec3),
+        pointPositions.size() * sizeof(glm::vec3),
         pointPositions.data(),
         GL_STATIC_DRAW
     );
 
     glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
     glBufferData(GL_ARRAY_BUFFER,
-        pointColors.size()*sizeof(glm::vec3),
+        pointColors.size() * sizeof(glm::vec3),
         pointColors.data(),
         GL_STATIC_DRAW
     );
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    _pointsProgram = renderEngine.buildRenderProgram(
+    _pointsProgram = global::renderEngine.buildRenderProgram(
         "Galaxy points",
         absPath("${MODULE_GALAXY}/shaders/points.vs"),
-        absPath("${MODULE_GALAXY}/shaders/points.fs"),
-        ghoul::Dictionary()
+        absPath("${MODULE_GALAXY}/shaders/points.fs")
     );
 
     _pointsProgram->setIgnoreUniformLocationError(
@@ -276,11 +257,11 @@ void RenderableGalaxy::initializeGL() {
 
     glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
     glEnableVertexAttribArray(positionAttrib);
-    glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
     glEnableVertexAttribArray(colorAttrib);
-    glVertexAttribPointer(colorAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(colorAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -288,7 +269,7 @@ void RenderableGalaxy::initializeGL() {
 
 void RenderableGalaxy::deinitializeGL() {
     if (_raycaster) {
-        OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
+        global::raycasterManager.detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
 }
@@ -300,7 +281,7 @@ bool RenderableGalaxy::isReady() const {
 void RenderableGalaxy::update(const UpdateData& data) {
     if (_raycaster) {
         //glm::mat4 transform = glm::translate(, static_cast<glm::vec3>(_translation));
-        glm::vec3 eulerRotation = static_cast<glm::vec3>(_rotation);
+        const glm::vec3 eulerRotation = static_cast<glm::vec3>(_rotation);
         glm::mat4 transform = glm::rotate(
             glm::mat4(1.0),
             eulerRotation.x,
@@ -309,13 +290,10 @@ void RenderableGalaxy::update(const UpdateData& data) {
         transform = glm::rotate(transform, eulerRotation.y, glm::vec3(0, 1, 0));
         transform = glm::rotate(transform, eulerRotation.z,  glm::vec3(0, 0, 1));
 
-        glm::mat4 volumeTransform = glm::scale(
-            transform,
-            static_cast<glm::vec3>(_volumeSize)
-        );
-        _pointTransform = glm::scale(transform, static_cast<glm::vec3>(_pointScaling));
+        glm::mat4 volumeTransform = glm::scale(transform, _volumeSize);
+        _pointTransform = glm::scale(transform, _pointScaling);
 
-        glm::vec4 translation = glm::vec4(static_cast<glm::vec3>(_translation), 0.0);
+        const glm::vec4 translation = glm::vec4(_translation.value(), 0.0);
 
         // Todo: handle floating point overflow, to actually support translation.
 
@@ -331,19 +309,19 @@ void RenderableGalaxy::update(const UpdateData& data) {
 }
 
 void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
-    RaycasterTask task{ _raycaster.get(), data };
+    RaycasterTask task { _raycaster.get(), data };
 
-    glm::vec3 position = data.camera.position().vec3();
-    float length = safeLength(position);
-    glm::vec3 galaxySize = static_cast<glm::vec3>(_volumeSize);
+    const glm::vec3 position = data.camera.position().vec3();
+    const float length = safeLength(position);
+    const glm::vec3 galaxySize = _volumeSize;
 
-    float maxDim = std::max(std::max(galaxySize.x, galaxySize.y), galaxySize.z);
+    const float maxDim = std::max(std::max(galaxySize.x, galaxySize.y), galaxySize.z);
 
-    float lowerRampStart = maxDim * 0.02f;
-    float lowerRampEnd = maxDim * 0.5f;
+    const float lowerRampStart = maxDim * 0.02f;
+    const float lowerRampEnd = maxDim * 0.5f;
 
-    float upperRampStart = maxDim * 2.f;
-    float upperRampEnd = maxDim * 10.f;
+    const float upperRampStart = maxDim * 2.f;
+    const float upperRampEnd = maxDim * 10.f;
 
     float opacityCoefficient = 1.f;
 
@@ -371,8 +349,8 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
     }
 }
 
-float RenderableGalaxy::safeLength(const glm::vec3& vector) {
-    float maxComponent = std::max(
+float RenderableGalaxy::safeLength(const glm::vec3& vector) const {
+    const float maxComponent = std::max(
         std::max(std::abs(vector.x), std::abs(vector.y)), std::abs(vector.z)
     );
     return glm::length(vector / maxComponent) * maxComponent;

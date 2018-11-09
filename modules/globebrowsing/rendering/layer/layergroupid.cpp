@@ -45,7 +45,7 @@ layergroupid::GroupID getGroupIDFromName(const std::string& layerGroupName) {
 }
 
 layergroupid::AdjustmentTypeID getAdjustmentTypeIDFromName(
-    const std::string& adjustmentTypeName)
+                                                    const std::string& adjustmentTypeName)
 {
     for (int i = 0; i < layergroupid::NUM_ADJUSTMENT_TYPES; ++i) {
         if (adjustmentTypeName == layergroupid::ADJUSTMENT_TYPE_NAMES[i]) {
@@ -55,9 +55,7 @@ layergroupid::AdjustmentTypeID getAdjustmentTypeIDFromName(
     return AdjustmentTypeID::None;
 }
 
-layergroupid::BlendModeID getBlendModeIDFromName(
-    const std::string& blendModeName)
-{
+layergroupid::BlendModeID getBlendModeIDFromName(const std::string& blendModeName) {
     for (int i = 0; i < layergroupid::NUM_BLEND_MODES; ++i) {
         if (blendModeName == layergroupid::BLEND_MODE_NAMES[i]) {
             return static_cast<layergroupid::BlendModeID>(i);

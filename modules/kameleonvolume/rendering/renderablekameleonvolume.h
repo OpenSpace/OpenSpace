@@ -25,23 +25,28 @@
 #ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___RENDERABLEKAMELEONVOLUME___H__
 #define __OPENSPACE_MODULE_KAMELEONVOLUME___RENDERABLEKAMELEONVOLUME___H__
 
-#include <openspace/properties/vectorproperty.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/util/boxgeometry.h>
 #include <openspace/rendering/renderable.h>
-#include <modules/volume/transferfunctionhandler.h>
+#include <openspace/rendering/transferfunction.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rendering/basicvolumeraycaster.h>
 
-#include <modules/volume/rendering/volumeclipplanes.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vector/uvec3property.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
-namespace openspace {
+namespace openspace { struct RenderData; }
 
-struct RenderData;
+namespace openspace::volume {
+    class BasicVolumeRaycaster;
+    template <typename T> class RawVolume;
+    class TransferFunctionHandler;
+    class VolumeClipPlanes;
+} // openspace::volume
 
-namespace kameleonvolume {
+namespace openspace::kameleonvolume {
 
 class RenderableKameleonVolume : public Renderable {
 public:
@@ -53,7 +58,7 @@ public:
     bool isReady() const override;
     void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;
-    bool cachingEnabled();
+    bool isCachingEnabled() const;
 
 private:
     void load();
@@ -62,7 +67,7 @@ private:
     void loadCdf(const std::string& path);
     void storeRaw(const std::string& path);
 
-    std::string cacheSuffix();
+    std::string cacheSuffix() const;
     void updateTextureFromVolume();
     void updateRaycasterModelTransform();
 
@@ -71,14 +76,14 @@ private:
     properties::Vec3Property _lowerDomainBound;
     properties::Vec3Property _upperDomainBound;
     properties::Vec3Property _domainScale;
-    bool _autoDomainBounds;
+    bool _autoDomainBounds = false;
 
     properties::FloatProperty _lowerValueBound;
     properties::FloatProperty _upperValueBound;
-    bool _autoValueBounds;
+    bool _autoValueBounds = false;
 
     properties::OptionProperty _gridType;
-    bool _autoGridType;
+    bool _autoGridType = false;
 
     std::shared_ptr<volume::VolumeClipPlanes> _clipPlanes;
 
@@ -93,10 +98,9 @@ private:
     std::unique_ptr<volume::BasicVolumeRaycaster> _raycaster;
 
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
-    std::shared_ptr<volume::TransferFunctionHandler> _transferFunctionHandler;
+    std::shared_ptr<openspace::TransferFunction> _transferFunction;
 };
 
-} // namespace kameleonvolume
-} // namespace openspace
+} // namespace openspace::kameleonvolume
 
 #endif // __OPENSPACE_MODULE_KAMELEONVOLUME___RENDERABLEKAMELEONVOLUME___H__

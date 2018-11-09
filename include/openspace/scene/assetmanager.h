@@ -25,19 +25,19 @@
 #ifndef __OPENSPACE_CORE___ASSETMANAGER___H__
 #define __OPENSPACE_CORE___ASSETMANAGER___H__
 
-#include <openspace/scene/asset.h>
-#include <openspace/scene/assetloader.h>
-#include <openspace/scripting/lualibrary.h>
-#include <openspace/util/synchronizationwatcher.h>
+#include <openspace/scene/assetlistener.h>
 
 #include <memory>
-#include <unordered_map>
-#include <unordered_set>
 #include <vector>
+#include <unordered_map>
 
 namespace openspace {
 
+namespace scripting { struct LuaLibrary; }
+
 class Asset;
+class AssetLoader;
+class SynchronizationWatcher;
 
 /**
  * Interface for managing assets.

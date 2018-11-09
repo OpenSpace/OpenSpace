@@ -25,17 +25,18 @@
 #include <modules/sync/syncs/urlsynchronization.h>
 
 #include <modules/sync/syncmodule.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/util/httprequest.h>
+#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <sstream>
+#include <ghoul/misc/dictionary.h>
 #include <fstream>
 #include <numeric>
 #include <memory>
-#include <cstdio>
 
 namespace {
     constexpr const char* KeyUrl = "Url";
@@ -56,7 +57,7 @@ documentation::Documentation UrlSynchronization::Documentation() {
         {
             {
                 KeyUrl,
-                new OrVerifier(new StringVerifier, new StringListVerifier),
+                new OrVerifier({ new StringVerifier, new StringListVerifier }),
                 Optional::No,
                 "The URL or urls from where the files are downloaded. If multiple URLs "
                 "are provided, all files will be downloaded to the same directory."
@@ -96,7 +97,7 @@ documentation::Documentation UrlSynchronization::Documentation() {
 
 UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
                                        const std::string& synchronizationRoot)
-    : openspace::ResourceSynchronization(dict)
+    : ResourceSynchronization(dict)
     , _synchronizationRoot(synchronizationRoot)
 {
     documentation::testSpecificationAndThrow(
@@ -149,7 +150,7 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
         }
     }
 
-    if (dict.hasValue<bool>(KeyOverride)) {
+    if (dict.hasKeyAndValue<bool>(KeyOverride)) {
         _forceOverride = dict.value<bool>(KeyOverride);
     }
 }
@@ -180,17 +181,19 @@ void UrlSynchronization::start() {
         std::vector<std::unique_ptr<AsyncHttpFileDownload>> downloads;
 
         for (const std::string& url : _urls) {
-            size_t lastSlash = url.find_last_of('/');
-            std::string filename = url.substr(lastSlash + 1);
+            const size_t lastSlash = url.find_last_of('/');
+            const std::string filename = url.substr(lastSlash + 1);
 
             std::string fileDestination = directory() +
-                ghoul::filesystem::FileSystem::PathSeparator +
-                filename += TempSuffix;
+                ghoul::filesystem::FileSystem::PathSeparator + filename + TempSuffix;
 
             std::unique_ptr<AsyncHttpFileDownload> download =
                 std::make_unique<AsyncHttpFileDownload>(
-                    url, fileDestination, HttpFileDownload::Overwrite::Yes
-            );
+                    url,
+                    fileDestination,
+                    HttpFileDownload::Overwrite::Yes
+                );
+
             downloads.push_back(std::move(download));
 
             std::unique_ptr<AsyncHttpFileDownload>& fileDownload = downloads.back();
@@ -213,7 +216,7 @@ void UrlSynchronization::start() {
                             fileSizes.begin(),
                             fileSizes.end(),
                             size_t(0),
-                            [](size_t a, auto b) {
+                            [](size_t a, const std::pair<const std::string, size_t> b) {
                                 return a + b.second;
                             }
                         );
@@ -305,7 +308,7 @@ void UrlSynchronization::createSyncFile() {
 }
 
 bool UrlSynchronization::hasSyncFile() {
-    std::string path = directory() + ".ossync";
+    const std::string& path = directory() + ".ossync";
     return FileSys.fileExists(path);
 }
 
@@ -321,4 +324,3 @@ std::string UrlSynchronization::directory() {
 }
 
 } // namespace openspace
-

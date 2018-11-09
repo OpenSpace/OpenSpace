@@ -26,19 +26,20 @@
 #define __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
 
 #include <openspace/documentation/documentationgenerator.h>
-#include <openspace/scripting/lualibrary.h>
-#include <openspace/util/keys.h>
 
+#include <openspace/util/keys.h>
 #include <ghoul/misc/boolean.h>
 
 namespace openspace {
     class Camera;
     class SceneGraphNode;
-} // namespace
+} // namespace openspace
+
+namespace openspace::scripting { struct LuaLibrary; }
 
 namespace openspace::interaction {
 
-class KeyBindingManager : public DocumentationGenerator {
+class KeybindingManager : public DocumentationGenerator {
 public:
     BooleanType(IsLocalBind);
     BooleanType(IsSynchronized);
@@ -49,24 +50,15 @@ public:
         std::string documentation;
     };
 
-    KeyBindingManager();
-    ~KeyBindingManager() = default;
+    KeybindingManager();
 
     void resetKeyBindings();
 
-    void bindKeyLocal(
-        Key key,
-        KeyModifier modifier,
-        std::string luaCommand,
-        std::string documentation = ""
-    );
+    void bindKeyLocal(Key key, KeyModifier modifier, std::string luaCommand,
+        std::string documentation = "");
 
-    void bindKey(
-        Key key,
-        KeyModifier modifier,
-        std::string luaCommand,
-        std::string documentation = ""
-    );
+    void bindKey(Key key, KeyModifier modifier, std::string luaCommand,
+        std::string documentation = "");
 
     void removeKeyBinding(const std::string& key);
 
@@ -75,7 +67,6 @@ public:
 
     static scripting::LuaLibrary luaLibrary();
 
-    // Callback functions
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 
 private:

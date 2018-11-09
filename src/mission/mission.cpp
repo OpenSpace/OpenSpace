@@ -25,18 +25,16 @@
 #include <openspace/mission/mission.h>
 
 #include <openspace/documentation/verifier.h>
-
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/lua/lua_helper.h>
-
 #include <algorithm>
 
 namespace {
-    const char* KeyName = "Name";
-    const char* KeyDescription = "Description";
-    const char* KeyPhases = "Phases";
-    const char* KeyTimeRange = "TimeRange";
+    constexpr const char* KeyName = "Name";
+    constexpr const char* KeyDescription = "Description";
+    constexpr const char* KeyPhases = "Phases";
+    constexpr const char* KeyTimeRange = "TimeRange";
 } // namespace
 
 namespace openspace {
@@ -85,12 +83,12 @@ documentation::Documentation MissionPhase::Documentation() {
     };
 }
 
-MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
-    _name = dict.value<std::string>(KeyName);
-    dict.getValue(KeyDescription, _description);
+MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
+    _name = dictionary.value<std::string>(KeyName);
+    dictionary.getValue(KeyDescription, _description);
 
     ghoul::Dictionary childDicts;
-    if (dict.getValue(KeyPhases, childDicts)) {
+    if (dictionary.getValue(KeyPhases, childDicts)) {
         // This is a nested mission phase
         _subphases.reserve(childDicts.size());
         for (size_t i = 0; i < childDicts.size(); ++i) {
@@ -114,7 +112,7 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
 
         // user may specify an overall time range. In that case expand this timerange.
         ghoul::Dictionary timeRangeDict;
-        if (dict.getValue(KeyTimeRange, timeRangeDict)) {
+        if (dictionary.getValue(KeyTimeRange, timeRangeDict)) {
             TimeRange overallTimeRange(timeRangeDict);
             if (!overallTimeRange.includes(timeRangeSubPhases)) {
                 throw ghoul::RuntimeError(
@@ -133,7 +131,7 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
     }
     else {
         ghoul::Dictionary timeRangeDict;
-        if (dict.getValue(KeyTimeRange, timeRangeDict)) {
+        if (dictionary.getValue(KeyTimeRange, timeRangeDict)) {
             _timeRange = TimeRange(timeRangeDict); // throws exception if unable to parse
         }
         else {
@@ -145,19 +143,19 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
     }
 }
 
-std::string MissionPhase::name() const {
+const std::string& MissionPhase::name() const {
     return _name;
 }
 
-TimeRange MissionPhase::timeRange() const {
+const TimeRange& MissionPhase::timeRange() const {
     return _timeRange;
 }
 
-std::string MissionPhase::description() const {
+const std::string& MissionPhase::description() const {
     return _description;
 }
 
-std::vector<MissionPhase> MissionPhase::phases() const {
+const std::vector<MissionPhase>& MissionPhase::phases() const {
     return _subphases;
 }
 

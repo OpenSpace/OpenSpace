@@ -25,9 +25,7 @@
 #include <openspace/util/histogram.h>
 
 #include <ghoul/logging/logmanager.h>
-
 #include <cmath>
-#include <cassert>
 
 namespace {
     constexpr const char* _loggerCat = "Histogram";
@@ -35,61 +33,23 @@ namespace {
 
 namespace openspace {
 
-Histogram::Histogram()
-    : _numBins(-1)
-    , _minValue(0)
-    , _maxValue(0)
-    , _data(nullptr)
-    , _numValues(0)
-{}
-
-Histogram::Histogram(float minValue, float maxValue, int numBins)
-    : _numBins(numBins)
-    , _minValue(minValue)
-    , _maxValue(maxValue)
-    , _data(nullptr)
-    , _numValues(0)
-{
-    _data = new float[numBins];
-    for (int i = 0; i < numBins; ++i) {
-        _data[i] = 0.0;
-    }
-}
-
 Histogram::Histogram(float minValue, float maxValue, int numBins, float* data)
     : _numBins(numBins)
     , _minValue(minValue)
     , _maxValue(maxValue)
     , _data(data)
-    , _numValues(0)
-{}
-
-Histogram::Histogram(Histogram&& other) {
-    _minValue = other._minValue;
-    _maxValue = other._maxValue;
-    _numBins = other._numBins;
-    _numValues = other._numValues;
-    _data = other._data;
-    other._data = nullptr;
-}
-
-Histogram& Histogram::operator=(Histogram&& other) {
-    _minValue = other._minValue;
-    _maxValue = other._maxValue;
-    _numBins = other._numBins;
-    _numValues = other._numValues;
-    _data = other._data;
-    other._data = nullptr;
-    return *this;
-}
-
-
-Histogram::~Histogram() {
-    if (_data) {
-        delete[] _data;
+{
+    if (!data) {
+        _data = new float[numBins];
+        for (int i = 0; i < numBins; ++i) {
+            _data[i] = 0.0;
+        }
     }
 }
 
+Histogram::~Histogram() {
+    delete[] _data;
+}
 
 int Histogram::numBins() const {
     return _numBins;
@@ -107,27 +67,28 @@ bool Histogram::isValid() const {
     return _numBins != -1;
 }
 
-
 bool Histogram::add(float value, float repeat) {
     if (value < _minValue || value > _maxValue) {
         // Out of range
         return false;
     }
 
-    float normalizedValue = (value - _minValue) / (_maxValue - _minValue);   // [0.0, 1.0]
-    int binIndex = static_cast<int>(std::min(
+    const float normalizedValue = (value - _minValue) / (_maxValue - _minValue);
+    const int binIndex = static_cast<int>(std::min(
         static_cast<float>(floor(normalizedValue * _numBins)),
         _numBins - 1.f
     )); // [0, _numBins - 1]
 
     _data[binIndex] += repeat;
-    _numValues += repeat;
+    _numValues = static_cast<int>(_numValues + repeat);
 
     return true;
 }
 
-void Histogram::changeRange(float minValue, float maxValue){\
-    if(minValue > _minValue && maxValue < _maxValue) return;
+void Histogram::changeRange(float minValue, float maxValue){
+    if (minValue > _minValue && maxValue < _maxValue) {
+        return;
+    }
 
     float* oldData = _data;
     float oldMin = _minValue;
@@ -172,7 +133,10 @@ bool Histogram::add(const Histogram& histogram) {
 }
 
 bool Histogram::addRectangle(float lowBin, float highBin, float value) {
-    if (lowBin == highBin) return true;
+    if (lowBin == highBin) {
+        return true;
+    }
+
     if (lowBin > highBin) {
         std::swap(lowBin, highBin);
     }
@@ -181,37 +145,36 @@ bool Histogram::addRectangle(float lowBin, float highBin, float value) {
         return false;
     }
 
-    float normalizedLowBin = (lowBin - _minValue) / (_maxValue - _minValue);
-    float normalizedHighBin = (highBin - _minValue) / (_maxValue - _minValue);
+    const float normalizedLowBin = (lowBin - _minValue) / (_maxValue - _minValue);
+    const float normalizedHighBin = (highBin - _minValue) / (_maxValue - _minValue);
 
-    float lowBinIndex = normalizedLowBin * _numBins;
-    float highBinIndex = normalizedHighBin * _numBins;
+    const float lowBinIndex = normalizedLowBin * _numBins;
+    const float highBinIndex = normalizedHighBin * _numBins;
 
-    int fillLow = static_cast<int>(floor(lowBinIndex));
-    int fillHigh = static_cast<int>(ceil(highBinIndex));
+    const int fillLow = static_cast<int>(floor(lowBinIndex));
+    const int fillHigh = static_cast<int>(ceil(highBinIndex));
 
     for (int i = fillLow; i < fillHigh; i++) {
         _data[i] += value;
     }
 
     if (lowBinIndex > fillLow) {
-        float diff = lowBinIndex - fillLow;
+        const float diff = lowBinIndex - fillLow;
         _data[fillLow] -= diff * value;
     }
     if (highBinIndex < fillHigh) {
-        float diff = -highBinIndex + fillHigh;
+        const float diff = -highBinIndex + fillHigh;
         _data[fillHigh - 1] -= diff * value;
     }
 
     return true;
 }
 
-
 float Histogram::interpolate(float bin) const {
-    float normalizedBin = (bin - _minValue) / (_maxValue - _minValue);
-    float binIndex = normalizedBin * _numBins - 0.5f; // Center
+    const float normalizedBin = (bin - _minValue) / (_maxValue - _minValue);
+    const float binIndex = normalizedBin * _numBins - 0.5f; // Center
 
-    float interpolator = binIndex - floor(binIndex);
+    const float interpolator = binIndex - floor(binIndex);
     int binLow = static_cast<int>(floor(binIndex));
     int binHigh = static_cast<int>(ceil(binIndex));
 
@@ -228,6 +191,7 @@ float Histogram::interpolate(float bin) const {
 
 float Histogram::sample(int binIndex) const {
     ghoul_assert(binIndex >= 0 && binIndex < _numBins, "binIndex out of range");
+
     return _data[binIndex];
 }
 
@@ -259,10 +223,8 @@ void Histogram::generateEqualizer() {
     float previousCdf = 0.0f;
     _equalizer = std::vector<float>(_numBins, 0.0f);
     for (int i = 0; i < _numBins; i++) {
-
-        float probability = _data[i] / static_cast<float>(_numValues);
-        float cdf  = previousCdf + probability;
-        cdf = std::min(1.0f, cdf);
+        const float probability = _data[i] / static_cast<float>(_numValues);
+        const float cdf = std::min(1.0f, previousCdf + probability);
         _equalizer[i] = cdf * (_numBins-1);
         previousCdf = cdf;
     }
@@ -285,7 +247,7 @@ Histogram Histogram::equalize() {
  * Given a value within the domain of this histogram (_minValue < value < maxValue),
  * this method will use its equalizer to return a histogram equalized result.
  */
-float Histogram::equalize(float value) {
+float Histogram::equalize(float value) const {
     // if (value < _minValue || value > _maxValue) {
     //     LWARNING(
     //         "Equalized value is is not within domain of histogram. min: " +
@@ -297,7 +259,7 @@ float Histogram::equalize(float value) {
     int bin = static_cast<int>(floor(normalizedValue * _numBins));
     // If value == _maxValues then bin == _numBins, which is a invalid index.
     bin = std::min(_numBins-1, bin);
-    bin = std::max(0 , bin);
+    bin = std::max(0, bin);
 
     return _equalizer[bin];
 }

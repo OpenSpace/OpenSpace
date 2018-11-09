@@ -47,6 +47,8 @@ public:
 
     size_t size() const;
 
+    bool empty() const;
+
 private:
     std::queue<T> _queue;
     mutable std::mutex _mutex;

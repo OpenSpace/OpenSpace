@@ -25,21 +25,29 @@
 #include <modules/imgui/include/renderproperties.h>
 
 #include <modules/imgui/include/imgui_include.h>
-
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/properties/scalarproperty.h>
-#include <openspace/properties/matrixproperty.h>
+#include <openspace/engine/globals.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/selectionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/stringlistproperty.h>
-#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/matrix/dmat2property.h>
+#include <openspace/properties/matrix/dmat3property.h>
+#include <openspace/properties/matrix/dmat4property.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/vector/dvec2property.h>
+#include <openspace/properties/vector/dvec3property.h>
+#include <openspace/properties/vector/dvec4property.h>
+#include <openspace/properties/vector/ivec2property.h>
+#include <openspace/properties/vector/ivec3property.h>
+#include <openspace/properties/vector/ivec4property.h>
+#include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <openspace/scripting/scriptengine.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/misc.h>
-
-#include <imgui_internal.h>
 
 namespace openspace {
 
@@ -61,25 +69,21 @@ void renderTooltip(Property* prop, double delay) {
 }
 
 void executeScriptSingle(const std::string& id, const std::string& value) {
-    std::string script =
-        "openspace.setPropertyValueSingle('" + id + "', " + value + ");";
-    OsEng.scriptEngine().queueScript(
-        script,
+    global::scriptEngine.queueScript(
+        "openspace.setPropertyValueSingle('" + id + "', " + value + ");",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 }
 
 void executeScriptGroup(const std::string& id, const std::string& value) {
-    std::string script =
-        "openspace.setPropertyValue('" + id + "', " + value + ");";
-    OsEng.scriptEngine().queueScript(
-        script,
+    global::scriptEngine.queueScript(
+        "openspace.setPropertyValue('" + id + "', " + value + ");",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 }
 
 void executeScript(const std::string& id, const std::string& value,
-    IsRegularProperty isRegular)
+                   IsRegularProperty isRegular)
 {
     if (isRegular) {
         executeScriptSingle(id, value);
@@ -94,8 +98,9 @@ void renderBoolProperty(Property* prop, const std::string& ownerName,
                         double tooltipDelay)
 {
     ghoul_assert(prop, "prop must not be nullptr");
+
     BoolProperty* p = static_cast<BoolProperty*>(prop);
-    std::string name = p->guiName();
+    const std::string& name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
 
     BoolProperty::ValueType value = *p;
@@ -115,14 +120,15 @@ void renderOptionProperty(Property* prop, const std::string& ownerName,
                           double tooltipDelay)
 {
     ghoul_assert(prop, "prop must not be nullptr");
+
     OptionProperty* p = static_cast<OptionProperty*>(prop);
-    std::string name = p->guiName();
+    const std::string& name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
     bool isReadOnly = false;
     p->metaData().getValue("isReadOnly", isReadOnly);
 
     int value = *p;
-    std::vector<OptionProperty::Option> options = p->options();
+    const std::vector<OptionProperty::Option>& options = p->options();
     switch (p->displayType()) {
     case OptionProperty::DisplayType::Radio: {
         ImGui::Text("%s", name.c_str());
@@ -139,7 +145,7 @@ void renderOptionProperty(Property* prop, const std::string& ownerName,
     case OptionProperty::DisplayType::Dropdown: {
         // The order of the options does not have to correspond with the value of the
         // option
-        std::string nodeNames = "";
+        std::string nodeNames;
         for (const OptionProperty::Option& o : options) {
             nodeNames += o.description + '\0';
         }
@@ -153,13 +159,12 @@ void renderOptionProperty(Property* prop, const std::string& ownerName,
                 [value](const OptionProperty::Option& o) { return o.value == value; }
         )));
 
-        int oldIdx = idx;
-        ImGui::Combo(name.c_str(), &idx, nodeNames.c_str());
+        const bool hasChanged = ImGui::Combo(name.c_str(), &idx, nodeNames.c_str());
         if (showTooltip) {
             renderTooltip(prop, tooltipDelay);
         }
 
-        if (idx != oldIdx) {
+        if (hasChanged) {
             value = options[idx].value;
         }
 
@@ -178,7 +183,7 @@ void renderSelectionProperty(Property* prop, const std::string& ownerName,
 {
     ghoul_assert(prop, "prop must not be nullptr");
     SelectionProperty* p = static_cast<SelectionProperty*>(prop);
-    std::string name = p->guiName();
+    const std::string& name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
 
     if (ImGui::TreeNode(name.c_str())) {
@@ -222,7 +227,7 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
 {
     ghoul_assert(prop, "prop must not be nullptr");
     StringProperty* p = static_cast<StringProperty*>(prop);
-    std::string name = p->guiName();
+    const std::string& name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
 
     const std::string value = p->value();
@@ -261,7 +266,7 @@ void renderStringListProperty(Property* prop, const std::string& ownerName,
 {
     ghoul_assert(prop, "prop must not be nullptr");
     StringListProperty* p = static_cast<StringListProperty*>(prop);
-    std::string name = p->guiName();
+    const std::string& name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
 
     std::string value;

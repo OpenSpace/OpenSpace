@@ -26,17 +26,16 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/rendering/renderengine.h>
-
+#include <openspace/engine/globals.h>
+#include <openspace/engine/downloadmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "URL",
         "Image URL",
         "Sets the URL of the texture that is displayed on this screen space plane. If "
@@ -109,6 +108,14 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
     }
 }
 
+ScreenSpaceImageOnline::~ScreenSpaceImageOnline() {} // NOLINT
+
+bool ScreenSpaceImageOnline::deinitializeGL() {
+    _texture = nullptr;
+
+    return ScreenSpaceRenderable::deinitializeGL();
+}
+
 void ScreenSpaceImageOnline::update() {
     if (_textureIsDirty) {
         if (!_imageFuture.valid()) {
@@ -158,9 +165,9 @@ void ScreenSpaceImageOnline::update() {
 }
 
 std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageToMemory(
-    std::string url)
+                                                                   const std::string& url)
 {
-    return OsEng.downloadManager().fetchFile(
+    return global::downloadManager.fetchFile(
         url,
         [url](const DownloadManager::MemoryFile&) {
             LDEBUGC(
@@ -180,9 +187,6 @@ std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageTo
 void ScreenSpaceImageOnline::bindTexture() {
     if (_texture) {
         _texture->bind();
-    }
-    else {
-        glBindTexture(GL_TEXTURE_2D, 0);
     }
 }
 

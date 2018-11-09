@@ -26,7 +26,6 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERRENDERSETTINGS___H__
 
 #include <openspace/util/gpudata.h>
-
 #include <string>
 
 namespace ghoul::opengl { class ProgramObject; }

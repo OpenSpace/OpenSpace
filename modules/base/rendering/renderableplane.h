@@ -31,13 +31,14 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-
 #include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/programobject.h>
 
 namespace ghoul::filesystem { class File; }
 
-namespace ghoul::opengl { class Texture; }
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -73,12 +74,12 @@ private:
     properties::FloatProperty _size;
     properties::OptionProperty _blendMode;
 
-    ghoul::opengl::ProgramObject* _shader;
+    ghoul::opengl::ProgramObject* _shader = nullptr;
 
-    GLuint _quad;
-    GLuint _vertexPositionBuffer;
+    GLuint _quad = 0;
+    GLuint _vertexPositionBuffer = 0;
 
-    bool _planeIsDirty;
+    bool _planeIsDirty = false;
 };
 
 } // namespace openspace

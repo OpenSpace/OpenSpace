@@ -26,7 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
@@ -35,33 +35,34 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr const char* KeyFontMono = "Mono";
 
     constexpr const float DefaultFontSize = 10.f;
 
-    static const openspace::properties::Property::PropertyInfo FontNameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",
         "Font Name",
         "This value is the name of the font that is used. It can either refer to an "
         "internal name registered previously, or it can refer to a path that is used."
     };
 
-    static const openspace::properties::Property::PropertyInfo FontSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
         "This value determines the size of the font that is used to render the date."
     };
 
-    static const openspace::properties::Property::PropertyInfo SourceTypeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SourceTypeInfo = {
         "SourceType",
         "Source Type",
         "The type of position that is used as the triangle apex used to calculate the "
         "angle. The default value is 'Camera'."
     };
 
-    static const openspace::properties::Property::PropertyInfo SourceNodeNameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SourceNodeNameInfo = {
         "SourceNodeName",
         "Source Node Name",
         "If a scene graph node is selected as type, this value specifies the name of the "
@@ -70,7 +71,7 @@ namespace {
         "Source, Reference, Destination)."
     };
 
-    static const openspace::properties::Property::PropertyInfo ReferenceTypeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ReferenceTypeInfo = {
         "ReferenceType",
         "Reference Type",
         "The type of position that is used as the destination of the reference line used "
@@ -78,14 +79,14 @@ namespace {
         "the triangle (Source, Reference, Destination)."
     };
 
-    static const openspace::properties::Property::PropertyInfo ReferenceNodeNameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ReferenceNodeNameInfo = {
         "ReferenceNodeName",
         "Reference Node Name",
         "If a scene graph node is selected as type, this value specifies the name of the "
         "node that is to be used as the reference direction to compute the angle."
     };
 
-    static const openspace::properties::Property::PropertyInfo DestinationTypeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DestinationTypeInfo = {
         "DestinationType",
         "Destination Type",
         "The type of position that is used as the destination to calculate the angle. "
@@ -93,7 +94,7 @@ namespace {
         "Source, Reference, Destination). The default value for this is 'Focus'."
     };
 
-    static const openspace::properties::Property::PropertyInfo DestinationNodeNameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DestinationNodeNameInfo = {
         "DestinationNodeName",
         "Destination Node Name",
         "If a scene graph node is selected as type, this value specifies the name of the "
@@ -173,10 +174,8 @@ documentation::Documentation DashboardItemAngle::Documentation() {
     };
 }
 
-DashboardItemAngle::DashboardItemAngle(ghoul::Dictionary dictionary)
+DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, KeyFontMono)
-    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
     , _source{
         properties::OptionProperty(
             SourceTypeInfo,
@@ -201,6 +200,8 @@ DashboardItemAngle::DashboardItemAngle(ghoul::Dictionary dictionary)
         properties::StringProperty(DestinationNodeNameInfo),
         nullptr
     }
+    , _fontName(FontNameInfo, KeyFontMono)
+    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -218,12 +219,12 @@ DashboardItemAngle::DashboardItemAngle(ghoul::Dictionary dictionary)
     }
 
     _fontName.onChange([this]() {
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
     _fontSize.onChange([this]() {
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
@@ -339,9 +340,7 @@ DashboardItemAngle::DashboardItemAngle(ghoul::Dictionary dictionary)
         _destination.type = Type::Focus;
     }
     addProperty(_destination.type);
-    _destination.nodeName.onChange([this]() {
-        _destination.node = nullptr;
-    });
+    _destination.nodeName.onChange([this]() { _destination.node = nullptr; });
     if (_destination.type == Type::Node) {
         if (dictionary.hasKey(DestinationNodeNameInfo.identifier)) {
             _destination.nodeName = dictionary.value<std::string>(
@@ -357,7 +356,7 @@ DashboardItemAngle::DashboardItemAngle(ghoul::Dictionary dictionary)
     }
     addProperty(_destination.nodeName);
 
-    _font = OsEng.fontManager().font(_fontName, _fontSize);
+    _font = global::fontManager.font(_fontName, _fontSize);
 }
 
 std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
@@ -365,9 +364,7 @@ std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
 {
     if (comp.type == Type::Node) {
         if (!comp.node) {
-            comp.node = OsEng.renderEngine().scene()->sceneGraphNode(
-                comp.nodeName
-            );
+            comp.node = global::renderEngine.scene()->sceneGraphNode(comp.nodeName);
 
             if (!comp.node) {
                 LERRORC(
@@ -383,12 +380,9 @@ std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
         case Type::Node:
             return { comp.node->worldPosition(), comp.node->guiName() };
         case Type::Focus:
-            return {
-                OsEng.navigationHandler().focusNode()->worldPosition(),
-                "focus"
-            };
+            return { global::navigationHandler.focusNode()->worldPosition(), "focus" };
         case Type::Camera:
-            return { OsEng.renderEngine().scene()->camera()->positionVec3(), "camera" };
+            return { global::renderEngine.scene()->camera()->positionVec3(), "camera" };
         default:
             return { glm::dvec3(0.0), "Unknown" };
     }
@@ -399,22 +393,22 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
     std::pair<glm::dvec3, std::string> referenceInfo = positionAndLabel(_reference);
     std::pair<glm::dvec3, std::string> destinationInfo = positionAndLabel(_destination);
 
-    glm::dvec3 a = referenceInfo.first - sourceInfo.first;
-    glm::dvec3 b = destinationInfo.first - sourceInfo.first;
+    const glm::dvec3 a = referenceInfo.first - sourceInfo.first;
+    const glm::dvec3 b = destinationInfo.first - sourceInfo.first;
 
     if (glm::length(a) == 0.0 || glm::length(b) == 0) {
         penPosition.y -= _font->height();
         RenderFont(
             *_font,
             penPosition,
-            "Could not compute angle at %s between %s and %s",
-            sourceInfo.second.c_str(),
-            destinationInfo.second.c_str(),
-            referenceInfo.second.c_str()
+            fmt::format(
+                "Could not compute angle at {} between {} and {}",
+                sourceInfo.second, destinationInfo.second, referenceInfo.second
+            )
         );
     }
     else {
-        double angle = glm::degrees(
+        const double angle = glm::degrees(
             glm::acos(glm::dot(a, b) / (glm::length(a) * glm::length(b)))
         );
 
@@ -422,22 +416,20 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
         RenderFont(
             *_font,
             penPosition,
-            "Angle at %s between %s and %s: %f degrees",
-            sourceInfo.second.c_str(),
-            destinationInfo.second.c_str(),
-            referenceInfo.second.c_str(),
-            angle
+            fmt::format(
+                "Angle at {} between {} and {}: {} degrees",
+                sourceInfo.second, destinationInfo.second, referenceInfo.second, angle
+            )
         );
     }
 }
 
 glm::vec2 DashboardItemAngle::size() const {
-    double angle = 120;
+    constexpr const double Angle = 120;
 
     return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
         *_font,
-        "Angle: %f %s",
-        angle
+        "Angle: " + std::to_string(Angle)
     ).boundingBox;
 }
 

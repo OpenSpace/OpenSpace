@@ -36,7 +36,7 @@ namespace openspace::luascriptfunctions {
 int loadKernel(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadKernel");
 
-    bool isString = (lua_isstring(L, -1) == 1);
+    bool isString = (lua_isstring(L, 1) == 1);
     if (!isString) {
         LERROR(fmt::format(
             "{}: Expected argument of type 'string'", ghoul::lua::errorLocation(L)
@@ -44,9 +44,16 @@ int loadKernel(lua_State* L) {
         return 0;
     }
 
-    std::string argument = ghoul::lua::checkStringAndPop(L);
+    std::string argument = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
     if (!FileSys.fileExists(argument)) {
-        return luaL_error(L, "Kernel file '%s' did not exist", argument.c_str());
+        return ghoul::lua::luaError(
+            L,
+            fmt::format("Kernel file '{}' did not exist", argument)
+        );
     }
     unsigned int result = SpiceManager::ref().loadKernel(argument);
 
@@ -64,8 +71,8 @@ int loadKernel(lua_State* L) {
 int unloadKernel(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadKernel");
 
-    bool isString = (lua_isstring(L, -1) == 1);
-    bool isNumber = (lua_isnumber(L, -1) == 1);
+    bool isString = (lua_isstring(L, 1) == 1);
+    bool isNumber = (lua_isnumber(L, 1) == 1);
 
     if (!isString && !isNumber) {
         LERRORC(
@@ -81,12 +88,12 @@ int unloadKernel(lua_State* L) {
     }
 
     if (isString) {
-        std::string argument = lua_tostring(L, -1);
+        std::string argument = ghoul::lua::value<std::string>(L, 1);
         SpiceManager::ref().unloadKernel(argument);
     }
 
     if (isNumber) {
-        unsigned int argument = static_cast<unsigned int>(lua_tonumber(L, -1));
+        unsigned int argument = ghoul::lua::value<unsigned int>(L, 1);
         SpiceManager::ref().unloadKernel(argument);
     }
 

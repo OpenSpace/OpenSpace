@@ -45,8 +45,6 @@ struct SurfacePositionHandle;
 
 namespace documentation { struct Documentation; }
 
-// Forward declare to minimize dependencies
-
 class Camera;
 class PowerScaledCoordinate;
 
@@ -64,7 +62,7 @@ public:
 
     // constructors & destructor
     Renderable(const ghoul::Dictionary& dictionary);
-    virtual ~Renderable();
+    virtual ~Renderable() = default;
 
     virtual void initialize();
     virtual void initializeGL();
@@ -80,16 +78,13 @@ public:
     virtual void render(const RenderData& data, RendererTasks& rendererTask);
     virtual void update(const UpdateData& data);
     virtual SurfacePositionHandle calculateSurfacePositionHandle(
-                                                      const glm::dvec3& targetModelSpace);
+                                                const glm::dvec3& targetModelSpace) const;
 
     RenderBin renderBin() const;
     void setRenderBin(RenderBin bin);
     bool matchesRenderBinMask(int binMask);
 
     bool isVisible() const;
-
-    bool hasTimeInterval();
-    bool getInterval(double& start, double& end);
 
     void onEnabledChange(std::function<void(bool)> callback);
 
@@ -105,11 +100,8 @@ protected:
     void registerUpdateRenderBinFromOpacity();
 
 private:
-    RenderBin _renderBin;
-    float _boundingSphere;
-    std::string _startTime;
-    std::string _endTime;
-    bool _hasTimeInterval;
+    RenderBin _renderBin = RenderBin::Opaque;
+    float _boundingSphere = 0.f;
 };
 
 } // namespace openspace

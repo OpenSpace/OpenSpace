@@ -23,16 +23,15 @@
  ****************************************************************************************/
 
 #include <modules/globebrowsing/rendering/layershadermanager.h>
-#include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
+
 #include <modules/globebrowsing/chunk/chunk.h>
-#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
-#include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <modules/globebrowsing/globes/chunkedlodglobe.h>
+#include <modules/globebrowsing/globes/renderableglobe.h>
+#include <modules/globebrowsing/rendering/layer/layer.h>
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
-
-#include <openspace/engine/openspaceengine.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
@@ -40,7 +39,7 @@ namespace openspace::globebrowsing {
 
 bool
 LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData::operator==(
-    const LayerGroupPreprocessingData& other) const
+                                           const LayerGroupPreprocessingData& other) const
 {
     return layerType == other.layerType &&
            blendMode == other.blendMode &&
@@ -50,7 +49,8 @@ LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData::o
 }
 
 bool LayerShaderManager::LayerShaderPreprocessingData::operator==(
-    const LayerShaderPreprocessingData& other) const {
+                                          const LayerShaderPreprocessingData& other) const
+{
     if (layeredTextureInfo.size() != other.layeredTextureInfo.size() ||
         keyValuePairs.size() != other.keyValuePairs.size()) {
         return false;
@@ -68,8 +68,7 @@ bool LayerShaderManager::LayerShaderPreprocessingData::operator==(
 }
 
 LayerShaderManager::LayerShaderPreprocessingData
-    LayerShaderManager::LayerShaderPreprocessingData::get(
-    const RenderableGlobe& globe)
+LayerShaderManager::LayerShaderPreprocessingData::get(const RenderableGlobe& globe)
 {
     LayerShaderManager::LayerShaderPreprocessingData preprocessingData;
 
@@ -79,7 +78,7 @@ LayerShaderManager::LayerShaderPreprocessingData
             layeredTextureInfo;
 
         const LayerGroup& layerGroup = layerManager->layerGroup(i);
-        std::vector<std::shared_ptr<Layer>> layers = layerGroup.activeLayers();
+        const std::vector<std::shared_ptr<Layer>>& layers = layerGroup.activeLayers();
 
         // This check was implicit before;  not sure if it will fire or will be handled
         // elsewhere
@@ -105,7 +104,8 @@ LayerShaderManager::LayerShaderPreprocessingData
 
     const RenderableGlobe::GeneralProperties& generalProps = globe.generalProperties();
     const RenderableGlobe::DebugProperties& debugProps = globe.debugProperties();
-    auto& pairs = preprocessingData.keyValuePairs;
+    std::vector<std::pair<std::string, std::string>>& pairs =
+        preprocessingData.keyValuePairs;
 
     pairs.emplace_back("useAccurateNormals",
         std::to_string(generalProps.useAccurateNormals)
@@ -127,46 +127,48 @@ LayerShaderManager::LayerShaderPreprocessingData
     pairs.emplace_back("showHeightIntensities",
         std::to_string(debugProps.showHeightIntensities)
     );
-    pairs.emplace_back("defaultHeight", std::to_string(Chunk::DEFAULT_HEIGHT));
+    pairs.emplace_back("defaultHeight", std::to_string(Chunk::DefaultHeight));
 
     return preprocessingData;
 }
 
-LayerShaderManager::LayerShaderManager(const std::string& shaderName,
-                                       const std::string& vsPath,
-                                       const std::string& fsPath)
-    : _shaderName(shaderName)
-    , _vsPath(vsPath)
-    , _fsPath(fsPath)
-    , _updatedSinceLastCall(false)
+LayerShaderManager::LayerShaderManager(std::string shaderName, std::string vsPath,
+                                       std::string fsPath)
+    : _shaderName(std::move(shaderName))
+    , _vsPath(std::move(vsPath))
+    , _fsPath(std::move(fsPath))
 {}
 
 LayerShaderManager::~LayerShaderManager() {
     if (_programObject) {
-        RenderEngine& renderEngine = OsEng.renderEngine();
-        renderEngine.removeRenderProgram(_programObject.get());
+        global::renderEngine.removeRenderProgram(_programObject.get());
         _programObject = nullptr;
     }
 }
 
 ghoul::opengl::ProgramObject* LayerShaderManager::programObject() const {
     ghoul_assert(_programObject, "Program does not exist. Needs to be compiled!");
+
     return _programObject.get();
 }
 
 void LayerShaderManager::recompileShaderProgram(
                                            LayerShaderPreprocessingData preprocessingData)
 {
-    _preprocessingData = preprocessingData;
+    _preprocessingData = std::move(preprocessingData);
     ghoul::Dictionary shaderDictionary;
 
     // Different layer types can be height layers or color layers for example.
     // These are used differently within the shaders.
-    auto textureTypes = _preprocessingData.layeredTextureInfo;
+    const std::array<
+        LayerShaderPreprocessingData::LayerGroupPreprocessingData,
+        layergroupid::NUM_LAYER_GROUPS
+    >& textureTypes = _preprocessingData.layeredTextureInfo;
+
     for (size_t i = 0; i < textureTypes.size(); i++) {
         // lastLayerIndex must be at least 0 for the shader to compile,
         // the layer type is inactivated by setting use to false
-        std::string groupName = layergroupid::LAYER_GROUP_IDENTIFIERS[i];
+        const std::string& groupName = layergroupid::LAYER_GROUP_IDENTIFIERS[i];
         shaderDictionary.setValue(
             "lastLayerIndex" + groupName,
             glm::max(textureTypes[i].lastLayerIdx, 0)
@@ -181,25 +183,21 @@ void LayerShaderManager::recompileShaderProgram(
         );
 
         // This is to avoid errors from shader preprocessor
-        std::string keyLayerType = groupName + "0" + "LayerType";
-        shaderDictionary.setValue(keyLayerType, 0);
+        shaderDictionary.setValue(groupName + "0" + "LayerType", 0);
 
         for (int j = 0; j < textureTypes[i].lastLayerIdx + 1; ++j) {
-            std::string key = groupName + std::to_string(j) + "LayerType";
             shaderDictionary.setValue(
-                key,
+                groupName + std::to_string(j) + "LayerType",
                 static_cast<int>(textureTypes[i].layerType[j])
             );
         }
 
         // This is to avoid errors from shader preprocessor
-        std::string keyBlendMode = groupName + "0" + "BlendMode";
-        shaderDictionary.setValue(keyBlendMode, 0);
+        shaderDictionary.setValue(groupName + "0" + "BlendMode", 0);
 
         for (int j = 0; j < textureTypes[i].lastLayerIdx + 1; ++j) {
-            std::string key = groupName + std::to_string(j) + "BlendMode";
             shaderDictionary.setValue(
-                key,
+                groupName + std::to_string(j) + "BlendMode",
                 static_cast<int>(textureTypes[i].blendMode[j])
             );
         }
@@ -209,9 +207,8 @@ void LayerShaderManager::recompileShaderProgram(
         shaderDictionary.setValue(keyLayerAdjustmentType, 0);
 
         for (int j = 0; j < textureTypes[i].lastLayerIdx + 1; ++j) {
-            std::string key = groupName + std::to_string(j) + "LayerAdjustmentType";
             shaderDictionary.setValue(
-                key,
+                groupName + std::to_string(j) + "LayerAdjustmentType",
                 static_cast<int>(textureTypes[i].layerAdjustmentType[j])
             );
         }
@@ -227,15 +224,15 @@ void LayerShaderManager::recompileShaderProgram(
     shaderDictionary.setValue("layerGroups", layerGroupNames);
 
     // Other settings such as "useAtmosphere"
-    auto keyValuePairs = _preprocessingData.keyValuePairs;
-    for (size_t i = 0; i < keyValuePairs.size(); i++) {
-        shaderDictionary.setValue(keyValuePairs[i].first, keyValuePairs[i].second);
+    for (const std::pair<std::string, std::string>& p : _preprocessingData.keyValuePairs)
+    {
+        shaderDictionary.setValue(p.first, p.second);
     }
 
     // Remove old program
-    OsEng.renderEngine().removeRenderProgram(_programObject.get());
+    global::renderEngine.removeRenderProgram(_programObject.get());
 
-    _programObject = OsEng.renderEngine().buildRenderProgram(
+    _programObject = global::renderEngine.buildRenderProgram(
         _shaderName,
         absPath(_vsPath),
         absPath(_fsPath),
@@ -243,6 +240,7 @@ void LayerShaderManager::recompileShaderProgram(
     );
 
     ghoul_assert(_programObject != nullptr, "Failed to initialize programObject!");
+
     using IgnoreError = ghoul::opengl::ProgramObject::ProgramObject::IgnoreError;
     _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     _programObject->setIgnoreUniformLocationError(IgnoreError::Yes);

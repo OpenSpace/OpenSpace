@@ -26,11 +26,8 @@
 #define __OPENSPACE_MODULE_GALAXY___MILKYWAYPOINTSCONVERSIONTASK_H__
 
 #include <openspace/util/task.h>
+
 #include <string>
-#include <ghoul/glm.h>
-#include <functional>
-#include <modules/volume/textureslicevolumereader.h>
-#include <modules/volume/rawvolumewriter.h>
 
 namespace openspace {
 
@@ -46,8 +43,10 @@ class MilkywayPointsConversionTask : public Task {
 public:
     MilkywayPointsConversionTask(const ghoul::Dictionary& dictionary);
     virtual ~MilkywayPointsConversionTask();
+
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
+
     static documentation::Documentation documentation();
 
 private:

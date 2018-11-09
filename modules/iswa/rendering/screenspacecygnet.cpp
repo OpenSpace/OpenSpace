@@ -23,11 +23,11 @@
  ****************************************************************************************/
 
 #include <modules/iswa/rendering/screenspacecygnet.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <openspace/util/time.h>
+
 #include <modules/iswa/util/iswamanager.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
+#include <openspace/scripting/scriptengine.h>
+#include <openspace/util/timemanager.h>
 
 namespace openspace {
 
@@ -38,43 +38,45 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     _updateTime = static_cast<int>(dictionary.value<double>("UpdateInterval"));
 
     _downloadImage = true;
-    _texturePath = IswaManager::ref().iswaUrl(_cygnetId);
+    _texturePath = IswaManager::ref().iswaUrl(
+        _cygnetId,
+        global::timeManager.time().j2000Seconds()
+    );
 
-    _openSpaceTime = OsEng.timeManager().time().j2000Seconds();
+    _openSpaceTime = global::timeManager.time().j2000Seconds();
     _lastUpdateOpenSpaceTime = _openSpaceTime;
 
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()
     );
     _lastUpdateRealTime = _realTime;
-     _minRealTimeUpdateInterval = 100;
+    _minRealTimeUpdateInterval = 100;
 
-    _delete.onChange([this](){
-        OsEng.scriptEngine().queueScript(
+    _delete.onChange([this]() {
+        global::scriptEngine.queueScript(
             "openspace.iswa.removeScreenSpaceCygnet("+std::to_string(_cygnetId)+");",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     });
-        // IswaManager::ref().deleteIswaCygnet(name());});
-
 }
 
-ScreenSpaceCygnet::~ScreenSpaceCygnet() {}
-
 void ScreenSpaceCygnet::update() {
-    _openSpaceTime = OsEng.timeManager().time().j2000Seconds();
+    _openSpaceTime = global::timeManager.time().j2000Seconds();
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()
     );
 
-    bool timeToUpdate =
-        (fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _updateTime &&
-        (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
+    bool timeToUpdate = fabs(_openSpaceTime - _lastUpdateOpenSpaceTime) >= _updateTime &&
+           (_realTime.count() - _lastUpdateRealTime.count()) > _minRealTimeUpdateInterval;
 
-    if ((OsEng.timeManager().time().timeJumped() || timeToUpdate )) {
-        _texturePath = IswaManager::ref().iswaUrl(_cygnetId);
+    if (timeToUpdate) {
+        _texturePath = IswaManager::ref().iswaUrl(
+            _cygnetId,
+            global::timeManager.time().j2000Seconds()
+        );
         _lastUpdateRealTime = _realTime;
         _lastUpdateOpenSpaceTime = _openSpaceTime;
     }
 }
-}
+
+} // namespace openspace

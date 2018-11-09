@@ -24,25 +24,17 @@
 
 #include <openspace/interaction/keybindingmanager.h>
 
-#include <openspace/openspace.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/query/query.h>
-#include <openspace/util/keys.h>
-
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-
-#include <glm/gtx/string_cast.hpp>
 #include <ghoul/glm.h>
-
-#include <fstream>
+#include <sstream>
 
 #include "keybindingmanager_lua.inl"
 
 namespace openspace::interaction {
 
-KeyBindingManager::KeyBindingManager()
+KeybindingManager::KeybindingManager()
     : DocumentationGenerator(
         "Documentation",
         "keybindings",
@@ -52,35 +44,30 @@ KeyBindingManager::KeyBindingManager()
         },
         "${WEB}/keybindings/script.js"
     )
-{ }
+{}
 
-void KeyBindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
+void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
 {
     if (action == KeyAction::Press || action == KeyAction::Repeat) {
         // iterate over key bindings
-        std::pair<std::multimap<KeyWithModifier, KeyInformation>::iterator,
-            std::multimap<KeyWithModifier, KeyInformation>::iterator> ret =
-            _keyLua.equal_range({ key, modifier });
-        for (std::multimap<KeyWithModifier, KeyInformation>::iterator it = ret.first;
-            it != ret.second;
-            ++it)
-        {
-            scripting::ScriptEngine::RemoteScripting remote =
-                it->second.synchronization ?
-                scripting::ScriptEngine::RemoteScripting::Yes :
-                scripting::ScriptEngine::RemoteScripting::No;
+        auto ret = _keyLua.equal_range({ key, modifier });
+        for (auto it = ret.first; it != ret.second; ++it) {
+            using RS = scripting::ScriptEngine::RemoteScripting;
 
-            OsEng.scriptEngine().queueScript(it->second.command, remote);
+            global::scriptEngine.queueScript(
+                it->second.command,
+                it->second.synchronization ? RS::Yes : RS::No
+            );
         }
     }
 }
 
-void KeyBindingManager::resetKeyBindings() {
+void KeybindingManager::resetKeyBindings() {
     _keyLua.clear();
 }
 
-void KeyBindingManager::bindKeyLocal(Key key, KeyModifier modifier,
-                                      std::string luaCommand, std::string documentation)
+void KeybindingManager::bindKeyLocal(Key key, KeyModifier modifier,
+                                     std::string luaCommand, std::string documentation)
 {
     _keyLua.insert({
         { key, modifier },
@@ -92,8 +79,8 @@ void KeyBindingManager::bindKeyLocal(Key key, KeyModifier modifier,
     });
 }
 
-void KeyBindingManager::bindKey(Key key, KeyModifier modifier,
-                                 std::string luaCommand, std::string documentation)
+void KeybindingManager::bindKey(Key key, KeyModifier modifier,
+                                std::string luaCommand, std::string documentation)
 {
     _keyLua.insert({
         { key, modifier },
@@ -105,7 +92,7 @@ void KeyBindingManager::bindKey(Key key, KeyModifier modifier,
     });
 }
 
-void KeyBindingManager::removeKeyBinding(const std::string& key) {
+void KeybindingManager::removeKeyBinding(const std::string& key) {
     // Erase-remove idiom does not work for std::multimap so we have to do this on foot
 
     KeyWithModifier k = stringToKey(key);
@@ -121,34 +108,22 @@ void KeyBindingManager::removeKeyBinding(const std::string& key) {
             ++it;
         }
     }
-
-    // _keyLua.erase(
-    //     std::remove_if(
-    //         _keyLua.begin(),
-    //         _keyLua.end(),
-    //         [key](const std::pair<KeyWithModifier, KeyInformation>& val) {
-    //             KeyWithModifier k = stringToKey(key);
-    //             return val.first == k;
-    //         }
-    //     ),
-    //     _keyLua.end()
-    // );
 }
 
-std::vector<std::pair<KeyWithModifier, KeyBindingManager::KeyInformation>>
-KeyBindingManager::keyBinding(const std::string& key) const
+std::vector<std::pair<KeyWithModifier, KeybindingManager::KeyInformation>>
+KeybindingManager::keyBinding(const std::string& key) const
 {
     std::vector<std::pair<KeyWithModifier, KeyInformation>> result;
 
     KeyWithModifier k = stringToKey(key);
     auto itRange = _keyLua.equal_range(k);
     for (auto it = itRange.first; it != itRange.second; ++it) {
-        result.push_back({ it->first, it->second });
+        result.emplace_back(it->first, it->second);
     }
     return result;
 }
 
-std::string KeyBindingManager::generateJson() const {
+std::string KeybindingManager::generateJson() const {
     std::stringstream json;
     json << "[";
     bool first = true;
@@ -158,7 +133,7 @@ std::string KeyBindingManager::generateJson() const {
         }
         first = false;
         json << "{";
-        json << "\"key\": \"" << std::to_string(p.first) << "\",";
+        json << "\"key\": \"" << ghoul::to_string(p.first) << "\",";
         json << "\"script\": \"" << escapedJson(p.second.command) << "\",";
         json << "\"remoteScripting\": "
              << (p.second.synchronization ? "true," : "false,");
@@ -170,7 +145,7 @@ std::string KeyBindingManager::generateJson() const {
     return json.str();
 }
 
-scripting::LuaLibrary KeyBindingManager::luaLibrary() {
+scripting::LuaLibrary KeybindingManager::luaLibrary() {
     return {
         "",
         {

@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_CORE___BOXGEOMETRY___H__
 #define __OPENSPACE_CORE___BOXGEOMETRY___H__
 
-#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
 
@@ -39,8 +39,8 @@ public:
     bool initialize();
     void render();
 
-    GLuint _vaoId;
-    GLuint _vBufferId;
+    GLuint _vaoId = 0;
+    GLuint _vBufferId = 0;
     glm::vec3 _size;
 };
 

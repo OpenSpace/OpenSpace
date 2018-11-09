@@ -29,6 +29,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/sceneinitializer.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/synchronizationwatcher.h>
 #include <openspace/documentation/documentation.h>
 
@@ -43,8 +44,9 @@
 #include <exception>
 #include <memory>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+//#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/windowdelegate.h>
 
 class AssetLoaderTest;
 
@@ -67,8 +69,8 @@ protected:
         _scene = std::make_unique<openspace::Scene>(
             std::make_unique<openspace::SingleThreadedSceneInitializer>()
         );
-        ghoul::lua::LuaState* state = OsEng.scriptEngine().luaState();
-        OsEng.scriptEngine().initialize();
+        ghoul::lua::LuaState* state = openspace::global::scriptEngine.luaState();
+        openspace::global::scriptEngine.initialize();
         _syncWatcher = std::make_unique<openspace::SynchronizationWatcher>();
         _assetLoader = std::make_unique<openspace::AssetLoader>(
             *state,
@@ -83,7 +85,7 @@ protected:
     }
 
     virtual void TearDown() {
-        OsEng.scriptEngine().deinitialize();
+        openspace::global::scriptEngine.deinitialize();
     }
 
     std::unique_ptr<openspace::Scene> _scene;

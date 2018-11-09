@@ -27,19 +27,19 @@
 
 #include <modules/globebrowsing/cache/lrucache.h>
 #include <modules/globebrowsing/cache/texturecontainer.h>
-#include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/tile/tileindex.h>
-#include <modules/globebrowsing/tile/rawtile.h>
-#include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
-
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/triggerproperty.h>
-
 #include <memory>
-#include <vector>
 #include <unordered_map>
+#include <vector>
+
+namespace openspace::globebrowsing {
+    struct RawTile;
+    class Tile;
+} // namespace openspace::globebrowsing
 
 namespace openspace::globebrowsing::cache {
 
@@ -89,29 +89,32 @@ public:
 
     void clear();
     void setSizeEstimated(size_t estimatedSize);
-    bool exist(ProviderTileKey key) const;
-    Tile get(ProviderTileKey key);
-    ghoul::opengl::Texture* getTexture(const TileTextureInitData& initData);
-    void createTileAndPut(ProviderTileKey key, std::shared_ptr<RawTile> rawTile);
+    bool exist(const ProviderTileKey& key) const;
+    Tile get(const ProviderTileKey& key);
+    ghoul::opengl::Texture* texture(const TileTextureInitData& initData);
+    void createTileAndPut(ProviderTileKey key, RawTile& rawTile);
     void put(const ProviderTileKey& key,
         const TileTextureInitData::HashKey& initDataKey, Tile tile);
     void update();
 
-    size_t getGPUAllocatedDataSize() const;
-    size_t getCPUAllocatedDataSize() const;
+    size_t gpuAllocatedDataSize() const;
+    size_t cpuAllocatedDataSize() const;
     bool shouldUsePbo() const;
 
 private:
-
     void createDefaultTextureContainers();
     void assureTextureContainerExists(const TileTextureInitData& initData);
     void resetTextureContainerSize(size_t numTexturesPerTextureType);
 
     using TileCache = LRUCache<ProviderTileKey, Tile, ProviderTileHasher>;
-    using TextureContainerTileCache =
-        std::pair<std::unique_ptr<TextureContainer>, std::unique_ptr<TileCache>>;
-    using TextureContainerMap = std::unordered_map<TileTextureInitData::HashKey,
-        TextureContainerTileCache>;
+    using TextureContainerTileCache = std::pair<
+        std::unique_ptr<TextureContainer>,
+        std::unique_ptr<TileCache>
+    >;
+    using TextureContainerMap = std::unordered_map<
+        TileTextureInitData::HashKey,
+        TextureContainerTileCache
+    >;
 
     TextureContainerMap _textureContainerMap;
     size_t _numTextureBytesAllocatedOnCPU;

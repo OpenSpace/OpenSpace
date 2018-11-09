@@ -22,29 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <include/openspace/util/factorymanager.h>
-#include <include/screenspacebrowser.h>
-#include "webbrowsermodule.h"
+#include <modules/webbrowser/webbrowsermodule.h>
+
+#include <modules/webbrowser/include/browserinstance.h>
+#include <modules/webbrowser/include/cefhost.h>
+#include <modules/webbrowser/include/screenspacebrowser.h>
+#include <openspace/engine/configuration.h>
+#include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/util/factorymanager.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
-const char* _loggerCat = "WebBrowser";
-}
-
-using ghoul::filesystem::Directory;
+    constexpr const char* _loggerCat = "WebBrowser";
+} // namespace
 
 namespace openspace {
 
 WebBrowserModule::WebBrowserModule() : OpenSpaceModule(WebBrowserModule::Name) {
     LDEBUG("Starting CEF...");
-    auto helperLocation = findHelperExecutable();
+    std::string helperLocation = findHelperExecutable();
     LDEBUG("Using web helper executable: " + helperLocation);
-    _cefHost = std::make_unique<CefHost>(helperLocation);
+    _cefHost = std::make_unique<CefHost>(std::move(helperLocation));
     LDEBUG("Starting CEF... done!");
 
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::Deinitialize,
-        [this](){ deinitialize(); }
-    );
+    global::callback::deinitialize.push_back([this]() { deinitialize(); });
 }
 
 WebBrowserModule::~WebBrowserModule() {}
@@ -53,20 +57,16 @@ void WebBrowserModule::internalDeinitialize() {
     _eventHandler.detachBrowser();
 
     bool forceBrowserShutdown = true;
-    for (auto browser : _browsers) {
+    for (const std::shared_ptr<BrowserInstance>& browser : _browsers) {
         browser->close(forceBrowserShutdown);
     }
 }
 
-/**
- * Try to find the CEF Helper executable. It looks in the bin/openspace folder. Therefore,
- * if you change that this might cause a crash here.
- * @return the absolute path to the file
- */
 std::string WebBrowserModule::findHelperExecutable() {
-    if (OsEng.configurationManager().hasKey(ConfigurationManager::KeyWebHelperLocation)) {
-        auto execLocation = absPath(OsEng.configurationManager().value<std::string>(
-            ConfigurationManager::KeyWebHelperLocation) + SUBPROCESS_ENDING);
+    if (!OsEng.configuration().webHelperLocation.empty()) {
+        std::string execLocation = absPath(
+            OsEng.configuration().webHelperLocation + SUBPROCESS_ENDING
+        );
         if (!FileSys.fileExists(execLocation)) {
             LERROR(fmt::format(
                 "Could not find web helper executable at location: {}" , execLocation
@@ -75,11 +75,10 @@ std::string WebBrowserModule::findHelperExecutable() {
         return execLocation;
     }
     else {
-        std::string subprocessName = SUBPROCESS_NAME;
-        subprocessName += SUBPROCESS_ENDING;
+        std::string subprocessName = std::string(SUBPROCESS_NAME) + SUBPROCESS_ENDING;
         LWARNING(fmt::format("Assuming web helper name is {}", subprocessName));
-        auto subLength = (int)subprocessName.length();
 
+        using namespace ghoul::filesystem;
         Directory binDir("${BASE}/bin/openspace", Directory::RawPath::No);
         std::vector<std::string> foundFiles = binDir.readFiles(
             Directory::Recursive::Yes,
@@ -92,7 +91,7 @@ std::string WebBrowserModule::findHelperExecutable() {
             foundFiles.begin(),
             foundFiles.end(),
             std::back_inserter(matchingFiles),
-            [subprocessName, subLength](std::string s) {
+            [subprocessName, subLength = subprocessName.length()](std::string s) {
                 s = s.substr(s.size() - subLength);
                 return s == subprocessName;
             }
@@ -106,11 +105,10 @@ std::string WebBrowserModule::findHelperExecutable() {
         }
 
         return matchingFiles.back();
-
     }
 }
 
-void WebBrowserModule::internalInitialize(const ghoul::Dictionary& configuration) {
+void WebBrowserModule::internalInitialize(const ghoul::Dictionary&) {
     _eventHandler.initialize();
 
     // register ScreenSpaceBrowser
@@ -122,12 +120,12 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& configuration
 int WebBrowserModule::addBrowser(std::shared_ptr<BrowserInstance> browser) {
     static int browserId = 0;
     _browsers.push_back(browser);
-    int givenId = browserId++;
+    const int givenId = browserId++;
     return givenId;
 }
 
 void WebBrowserModule::removeBrowser(std::shared_ptr<BrowserInstance> browser) {
-    auto p = std::find(_browsers.begin(), _browsers.end(), browser);
+    const auto p = std::find(_browsers.begin(), _browsers.end(), browser);
     if (p != _browsers.end()) {
         _browsers.erase(p);
     } else {
@@ -143,4 +141,4 @@ void WebBrowserModule::attachEventHandler(
     _eventHandler.setBrowserInstance(browserInstance);
 }
 
-}
+} // namespace openspace

@@ -24,16 +24,14 @@
 
 #include <modules/debugging/rendering/debugrenderer.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/engine/openspaceengine.h>
-
-#include <ghoul/glm.h>
-#include <memory>
-#include <ostream>
-
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
-#include <iostream>
+#include <ghoul/opengl/programobject.h>
+//#include <ostream>
+//#include <iostream>
 
 namespace {
     constexpr const char* _loggerCat = "DebugRenderer";
@@ -44,7 +42,7 @@ namespace openspace {
 DebugRenderer* DebugRenderer::_reference = nullptr;
 
 DebugRenderer::DebugRenderer()  {
-    _programObject = OsEng.renderEngine().buildRenderProgram(
+    _programObject = global::renderEngine.buildRenderProgram(
         "BasicDebugShader",
         absPath("${MODULE_DEBUGGING}/rendering/debugshader_vs.glsl"),
         absPath("${MODULE_DEBUGGING}/rendering/debugshader_fs.glsl")
@@ -57,15 +55,10 @@ DebugRenderer::DebugRenderer(std::unique_ptr<ghoul::opengl::ProgramObject> progr
     // nothing to do
 }
 
-DebugRenderer::~DebugRenderer()
-{
-    // nothing to do
-}
-
-
+DebugRenderer::~DebugRenderer() { }
 
 const DebugRenderer& DebugRenderer::ref() {
-    if (_reference == nullptr) {
+    if (!_reference) {
         try {
             _reference = new DebugRenderer();
         }
@@ -77,10 +70,9 @@ const DebugRenderer& DebugRenderer::ref() {
 }
 
 void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum mode,
-                                   RGBA rgba) const
+                                   const glm::vec4& rgba) const
 {
-    if (clippingSpacePoints.size() == 0) {
-        // nothing to render
+    if (clippingSpacePoints.empty()) {
         return;
     }
 
@@ -120,14 +112,6 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
     // Draw the vertices
     glDrawArrays(mode, 0, static_cast<GLsizei>(clippingSpacePoints.size()));
 
-    // Check for errors
-    GLenum error = glGetError();
-    if (error != GL_NO_ERROR) {
-        // Commenting this line. It causes errors to be printed. However
-        // the errors are not caused by DebugRenderer!!
-        //LERROR(error);
-    }
-
     // Clean up after the draw call was made
     glBindVertexArray(0);
     glDeleteVertexArrays(1, &_vaoID);
@@ -135,11 +119,11 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
     _programObject->deactivate();
 }
 
-
 void DebugRenderer::renderBoxFaces(const Vertices& clippingSpaceBoxCorners,
-                                   RGBA rgba) const
+                                   const glm::vec4& rgba) const
 {
     ghoul_assert(clippingSpaceBoxCorners.size() == 8, "Box must have 8 vertices");
+
     const Vertices& V = clippingSpaceBoxCorners;
 
     std::vector<glm::vec4> T;
@@ -170,9 +154,10 @@ void DebugRenderer::renderBoxFaces(const Vertices& clippingSpaceBoxCorners,
 }
 
 void DebugRenderer::renderBoxEdges(const Vertices& clippingSpaceBoxCorners,
-                                   RGBA rgba) const
+                                   const glm::vec4& rgba) const
 {
     ghoul_assert(clippingSpaceBoxCorners.size() == 8, "Box must have 8 vertices");
+
     const Vertices& V = clippingSpaceBoxCorners;
 
     std::vector<glm::vec4> lineVertices;
@@ -192,51 +177,50 @@ void DebugRenderer::renderBoxEdges(const Vertices& clippingSpaceBoxCorners,
 }
 
 void DebugRenderer::renderNiceBox(const Vertices& clippingSpaceBoxCorners,
-                                  RGBA rgba) const
+                                  const glm::vec4& rgba) const
 {
     renderBoxFaces(clippingSpaceBoxCorners, rgba);
 
-    glLineWidth(4.0f);
+    glLineWidth(4.f);
     DebugRenderer::ref().renderBoxEdges(clippingSpaceBoxCorners, rgba);
 
-    glPointSize(10.0f);
+    glPointSize(10.f);
     DebugRenderer::ref().renderVertices(clippingSpaceBoxCorners, GL_POINTS, rgba);
 }
 
 void DebugRenderer::renderCameraFrustum(const RenderData& data, const Camera& otherCamera,
-                                        RGBA rgba) const
+                                        const glm::vec4& rgba) const
 {
     using namespace glm;
 //    dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
-    dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
-    dmat4 vp = dmat4(data.camera.projectionMatrix()) * viewTransform;
+    const dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
+    const dmat4 vp = dmat4(data.camera.projectionMatrix()) * viewTransform;
 
-    dmat4 inverseSavedV = glm::inverse(otherCamera.combinedViewMatrix());
-    dmat4 inverseSavedP = glm::inverse(otherCamera.projectionMatrix());
+    const dmat4 inverseSavedV = glm::inverse(otherCamera.combinedViewMatrix());
+    const dmat4 inverseSavedP = glm::inverse(otherCamera.projectionMatrix());
     Vertices clippingSpaceFrustumCorners(8);
     // loop through the corners of the saved camera frustum
     for (size_t i = 0; i < 8; i++) {
-        bool cornerIsRight = i % 2 == 0;
-        bool cornerIsUp = i > 3;
-        bool cornerIsFar = (i / 2) % 2 == 1;
+        const bool cornerIsRight = i % 2 == 0;
+        const bool cornerIsUp = i > 3;
+        const bool cornerIsFar = (i / 2) % 2 == 1;
 
-        double x = cornerIsRight ? 1 : -1;
-        double y = cornerIsUp ? 1 : -1;
-        double z = cornerIsFar ? 1 : 0;
+        const double x = cornerIsRight ? 1 : -1;
+        const double y = cornerIsUp ? 1 : -1;
+        const double z = cornerIsFar ? 1 : 0;
 
         // p represents a corner in the frustum of the saved camera
-        dvec4 pSavedClippingSpace(x, y, z, 1);
+        const dvec4 pSavedClippingSpace(x, y, z, 1);
         dvec4 pSavedCameraSpace = inverseSavedP * pSavedClippingSpace;
         if (cornerIsFar) {
             pSavedCameraSpace.w *= 1e-7;
         }
         pSavedCameraSpace = glm::abs(1.0 / pSavedCameraSpace.w) * pSavedCameraSpace;
 
-        dvec4 pWorldSpace = inverseSavedV * pSavedCameraSpace;
-        dvec4 pCurrentClippingSpace = vp * pWorldSpace;
+        const dvec4 pWorldSpace = inverseSavedV * pSavedCameraSpace;
+        const dvec4 pCurrentClippingSpace = vp * pWorldSpace;
         clippingSpaceFrustumCorners[i] = pCurrentClippingSpace;
     }
-
 
     glDisable(GL_CULL_FACE);
     renderNiceBox(clippingSpaceFrustumCorners, rgba);
@@ -245,13 +229,14 @@ void DebugRenderer::renderCameraFrustum(const RenderData& data, const Camera& ot
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 void DebugRenderer::renderAABB2(const globebrowsing::AABB2& screenSpaceAABB,
-                                RGBA rgba) const
+                                const glm::vec4& rgba) const
 {
-    Vertices vertices(4);
-    vertices[0] = glm::vec4(screenSpaceAABB.min.x, screenSpaceAABB.min.y, 1, 1);
-    vertices[1] = glm::vec4(screenSpaceAABB.min.x, screenSpaceAABB.max.y, 1, 1);
-    vertices[2] = glm::vec4(screenSpaceAABB.max.x, screenSpaceAABB.min.y, 1, 1);
-    vertices[3] = glm::vec4(screenSpaceAABB.max.x, screenSpaceAABB.max.y, 1, 1);
+    Vertices vertices = {
+        glm::vec4(screenSpaceAABB.min.x, screenSpaceAABB.min.y, 1, 1),
+        glm::vec4(screenSpaceAABB.min.x, screenSpaceAABB.max.y, 1, 1),
+        glm::vec4(screenSpaceAABB.max.x, screenSpaceAABB.min.y, 1, 1),
+        glm::vec4(screenSpaceAABB.max.x, screenSpaceAABB.max.y, 1, 1)
+    };
 
     renderVertices(vertices, GL_LINES, rgba);
 }
@@ -263,13 +248,13 @@ const DebugRenderer::Vertices DebugRenderer::verticesFor(
 {
     Vertices vertices(8);
     for (size_t i = 0; i < 8; i++) {
-        bool cornerIsRight = i % 2 == 0;
-        bool cornerIsUp = i > 3;
-        bool cornerIsFar = (i / 2) % 2 == 1;
+        const bool cornerIsRight = i % 2 == 0;
+        const bool cornerIsUp = i > 3;
+        const bool cornerIsFar = (i / 2) % 2 == 1;
 
-        double x = cornerIsRight ? screenSpaceAABB.max.x : screenSpaceAABB.min.x;
-        double y = cornerIsUp ? screenSpaceAABB.max.y : screenSpaceAABB.min.y;
-        double z = cornerIsFar ? screenSpaceAABB.max.z : screenSpaceAABB.min.z;
+        const double x = cornerIsRight ? screenSpaceAABB.max.x : screenSpaceAABB.min.x;
+        const double y = cornerIsUp ? screenSpaceAABB.max.y : screenSpaceAABB.min.y;
+        const double z = cornerIsFar ? screenSpaceAABB.max.z : screenSpaceAABB.min.z;
 
         vertices[i] = glm::vec4(x, y, z, 1);
     }

@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_CORE___TIMERANGE___H__
 #define __OPENSPACE_CORE___TIMERANGE___H__
 
+#include <limits>
+
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
@@ -33,25 +35,25 @@ namespace documentation { struct Documentation; }
 
 struct TimeRange {
     /**
-    * Default constructor initializes an empty time range.
-    */
-    TimeRange();
+     * Default constructor initializes an empty time range.
+     */
+    TimeRange() = default;
 
     /**
-    * Initializes a TimeRange with both start and end time. Initializing empty timeranges
-    * is OK.
-    */
+     * Initializes a TimeRange with both start and end time. Initializing empty timeranges
+     * is OK.
+     */
     TimeRange(double startTime, double endTime);
 
     /**
-    * Throws exception if unable to parse the provided \class ghoul::Dictionary
-    */
+     * Throws exception if unable to parse the provided \class ghoul::Dictionary
+     */
     TimeRange(const ghoul::Dictionary& dict);
 
     /**
-    * \returns true if timeRange could be initialized from the dictionary,
-    *          false otherwise.
-    */
+     * \return \c true if timeRange could be initialized from the dictionary, \c false
+     *         otherwise.
+     */
     static bool initializeFromDictionary(const ghoul::Dictionary& dict,
         TimeRange& timeRange);
 
@@ -65,7 +67,7 @@ struct TimeRange {
 
     bool isEmpty() const;
 
-    bool inRange(double min, double max);
+    bool inRange(double min, double max) const;
 
     bool includes(double val) const;
 
@@ -73,8 +75,8 @@ struct TimeRange {
 
     static documentation::Documentation Documentation();
 
-    double start;
-    double end;
+    double start = std::numeric_limits<double>::max();
+    double end = -std::numeric_limits<double>::max();
 };
 
 } // namespace openspace

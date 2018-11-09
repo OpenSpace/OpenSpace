@@ -25,9 +25,19 @@
 #include <modules/webbrowser/webbrowsermodule.h>
 #include "cefwebguimodule.h"
 
+#include <openspace/engine/configuration.h>
+#include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/moduleengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
+#include <modules/webbrowser/include/browserinstance.h>
+#include <modules/cefwebgui/include/guirenderhandler.h>
+#include <ghoul/fmt.h>
+#include <ghoul/logging/logmanager.h>
+
 namespace {
-const std::string _loggerCat = "CefWebGui";
-}
+    constexpr const char* _loggerCat = "CefWebGui";
+} // namespace
 
 namespace openspace {
 
@@ -36,45 +46,42 @@ CefWebGuiModule::CefWebGuiModule()
 {}
 
 void CefWebGuiModule::internalInitialize(const ghoul::Dictionary&) {
-    _guiInstance = std::make_shared<BrowserInstance>(new GUIRenderHandler());
-    _guiLocation = OsEng.configurationManager().value<std::string>(
-        ConfigurationManager::KeyCefWebGuiUrl);
+    _guiInstance = std::make_shared<BrowserInstance>(new GUIRenderHandler);
+    _guiLocation = OsEng.configuration().cefWebGuiUrl;
 
-    OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::Initialize,
-            [this]() {
-                LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", _guiLocation));
-                _guiInstance->loadUrl(_guiLocation);
-                auto webBrowserModule = OsEng.moduleEngine().module<WebBrowserModule>();
-                if (webBrowserModule != nullptr) {
-                    webBrowserModule->attachEventHandler(_guiInstance);
-                    webBrowserModule->addBrowser(_guiInstance);
-                }
+    global::callback::initialize.push_back([this]() {
+        LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", _guiLocation));
+        _guiInstance->loadUrl(_guiLocation);
+        WebBrowserModule* webBrowserModule =
+            OsEng.moduleEngine().module<WebBrowserModule>();
+
+        if (webBrowserModule) {
+            webBrowserModule->attachEventHandler(_guiInstance);
+            webBrowserModule->addBrowser(_guiInstance);
+        }
+    });
+
+    global::callback::render.push_back([this](){
+        WindowWrapper& wrapper = OsEng.windowWrapper();
+        if (wrapper.isMaster()) {
+            if (wrapper.windowHasResized()) {
+                _guiInstance->reshape(wrapper.currentWindowSize());
             }
-    );
-    OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::Render,
-            [this](){
-                WindowWrapper& wrapper = OsEng.windowWrapper();
-                if (wrapper.isMaster()) {
-                    if (wrapper.windowHasResized()) {
-                        _guiInstance->reshape(wrapper.currentWindowSize());
-                    }
 
-                    _guiInstance->draw();
-                }
-            });
-    OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::Deinitialize,
-            [this](){
-                _guiInstance->close(true);
-                auto webBrowserModule = OsEng.moduleEngine().module<WebBrowserModule>();
-                if (webBrowserModule != nullptr) {
-                    webBrowserModule->removeBrowser(_guiInstance);
-                }
-                _guiInstance.reset();
-            });
+            _guiInstance->draw();
+        }
+    });
+
+    global::callback::deinitialize.push_back()[this]() {
+        _guiInstance->close(true);
+        WebBrowserModule* webBrowserModule =
+            OsEng.moduleEngine().module<WebBrowserModule>();
+
+        if (webBrowserModule) {
+            webBrowserModule->removeBrowser(_guiInstance);
+        }
+        _guiInstance.reset();
+    });
 }
 
-}
-
+} // namespace openspace

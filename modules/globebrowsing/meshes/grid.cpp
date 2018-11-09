@@ -24,12 +24,16 @@
 
 #include <modules/globebrowsing/meshes/grid.h>
 
+#include <modules/globebrowsing/meshes/trianglesoup.h>
+
 namespace openspace::globebrowsing {
 
 Grid::Grid(int xSegments, int ySegments)
     : _xSegments(xSegments)
     , _ySegments(ySegments)
 {}
+
+Grid::~Grid() {} // NOLINT
 
 TriangleSoup& Grid::geometry() {
     return *_geometry;

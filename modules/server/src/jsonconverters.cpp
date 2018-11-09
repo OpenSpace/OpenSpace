@@ -23,17 +23,18 @@
  ****************************************************************************************/
 
 #include <modules/server/include/jsonconverters.h>
+
+#include <openspace/json.h>
 #include <openspace/properties/property.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <ghoul/logging/logmanager.h>
-#include <ext/json/json.hpp>
 
 using json = nlohmann::json;
 
 namespace openspace::properties {
 
-void to_json(json &j, const Property &p) {
+void to_json(json& j, const Property& p) {
     j = {
         { "Description", json::parse(p.generateBaseJsonDescription()) },
         { "Value", p.jsonValue() }
@@ -41,11 +42,11 @@ void to_json(json &j, const Property &p) {
     j["Description"]["description"] = p.description();
 }
 
-void to_json(json &j, const Property* pP) {
+void to_json(json& j, const Property* pP) {
     j = *pP;
 }
 
-void to_json(json &j, const PropertyOwner &p) {
+void to_json(json& j, const PropertyOwner& p) {
     j = {
         { "identifier", p.identifier() },
         { "description", p.description() },
@@ -55,7 +56,7 @@ void to_json(json &j, const PropertyOwner &p) {
     };
 }
 
-void to_json(json &j, const PropertyOwner* p) {
+void to_json(json& j, const PropertyOwner* p) {
     j = *p;
 }
 
@@ -63,7 +64,7 @@ void to_json(json &j, const PropertyOwner* p) {
 
 namespace openspace {
 
-void to_json(json &j, const SceneGraphNode &n) {
+void to_json(json& j, const SceneGraphNode& n) {
     j = {
         { "identifier", n.identifier() },
         { "worldPosition", n.worldPosition() },
@@ -81,41 +82,40 @@ void to_json(json &j, const SceneGraphNode &n) {
         j["renderable"] = renderable;
     }*/
 
-    auto parent = n.parent();
-    if (parent != nullptr) {
+    SceneGraphNode* parent = n.parent();
+    if (parent) {
         j["parent"] = {
             { "identifier", parent->identifier() }
         };
     }
 }
 
-void to_json(json &j, const SceneGraphNode* pN) {
+void to_json(json& j, const SceneGraphNode* pN) {
     // Use reference converter instead of pointer
     j = *pN;
 }
 
-void to_json(json &j, const Renderable &r) {
+void to_json(json& j, const Renderable& r) {
     j = {
         { "properties", r.properties() },
         { "enabled", r.isEnabled() }
     };
 }
 
-void to_json(json &j, const Renderable* pR) {
+void to_json(json& j, const Renderable* pR) {
     // Use reference converter instead of pointer
     j = *pR;
 }
-
 
 } // namespace openspace
 
 namespace glm {
 
-void to_json(json &j, const dvec3 &v) {
+void to_json(json& j, const dvec3& v) {
     j = {
-        { "value", {v.x, v.y, v.z} },
+        { "value", { v.x, v.y, v.z } },
         { "type", "vec3" }
     };
 }
 
-}
+} // namepsace glm

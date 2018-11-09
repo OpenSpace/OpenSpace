@@ -1,0 +1,20 @@
+<GDAL_WMS>
+        <Service name="TMS">
+                <ServerUrl>http://openspace.sci.utah.edu/Mercury/MessengerMP3/tile/${z}/${y}/${x}</ServerUrl>
+        </Service>
+        <DataWindow>
+                <UpperLeftX>-180.0</UpperLeftX>
+                <UpperLeftY>90.0</UpperLeftY>
+                <LowerRightX>180.0</LowerRightX>
+                <LowerRightY>-90.0</LowerRightY>
+                <SizeX>46080</SizeX>
+                <SizeY>17122</SizeY>
+                <TileLevel>6</TileLevel>
+                <YOrigin>top</YOrigin>
+        </DataWindow>
+        <Projection>PROJCS["Equirectangular Mercury",GEOGCS["GCS_Mercury",DATUM["D_Mercury",SPHEROID["Mercury_localRadius",2439400,0]],PRIMEM["Reference_Meridian",0],UNIT["degree",0.0174532925199433]],PROJECTION["Equirectangular"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",0],PARAMETER["standard_parallel_1",0],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]]]</Projection>
+        <BlockSizeX>360</BlockSizeX>
+        <BlockSizeY>360</BlockSizeY>
+        <BandsCount>3</BandsCount>
+        <MaxConnections>10</MaxConnections>
+</GDAL_WMS>

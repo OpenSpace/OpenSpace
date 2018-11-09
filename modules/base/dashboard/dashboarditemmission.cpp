@@ -26,29 +26,27 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/util/timemanager.h>
-
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-
 #include <stack>
 
 namespace {
-    const char* KeyFontMono = "Mono";
-    const float DefaultFontSize = 15.f;
+    constexpr const char* KeyFontMono = "Mono";
+    constexpr const float DefaultFontSize = 15.f;
 
-    static const openspace::properties::Property::PropertyInfo FontNameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",
         "Font Name",
         "This value is the name of the font that is used. It can either refer to an "
         "internal name registered previously, or it can refer to a path that is used."
     };
 
-    static const openspace::properties::Property::PropertyInfo FontSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
         "This value determines the size of the font that is used to render the date."
@@ -100,7 +98,7 @@ documentation::Documentation DashboardItemMission::Documentation() {
     };
 }
 
-DashboardItemMission::DashboardItemMission(ghoul::Dictionary dictionary)
+DashboardItemMission::DashboardItemMission(const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
@@ -108,14 +106,14 @@ DashboardItemMission::DashboardItemMission(ghoul::Dictionary dictionary)
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
-        "DashboardItemDate"
+        "DashboardItemMission"
     );
 
     if (dictionary.hasKey(FontNameInfo.identifier)) {
         _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
     }
     _fontName.onChange([this](){
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
@@ -125,91 +123,97 @@ DashboardItemMission::DashboardItemMission(ghoul::Dictionary dictionary)
         );
     }
     _fontSize.onChange([this](){
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
-    _font = OsEng.fontManager().font(_fontName, _fontSize);
+    _font = global::fontManager.font(_fontName, _fontSize);
 }
 
 void DashboardItemMission::render(glm::vec2& penPosition) {
-    if (MissionManager::ref().hasCurrentMission()) {
-        double currentTime = OsEng.timeManager().time().j2000Seconds();
-        const Mission& mission = MissionManager::ref().currentMission();
+    if (global::missionManager.hasCurrentMission()) {
+        double currentTime = global::timeManager.time().j2000Seconds();
+        const Mission& mission = global::missionManager.currentMission();
 
-        if (mission.phases().size() > 0) {
-            static const glm::vec4 nextMissionColor(0.7, 0.3, 0.3, 1);
-            //static const glm::vec4 missionProgressColor(0.4, 1.0, 1.0, 1);
-            static const glm::vec4 currentMissionColor(0.0, 0.5, 0.5, 1);
+        if (!mission.phases().empty()) {
+            static const glm::vec4 nextMissionColor(0.7f, 0.3f, 0.3f, 1.f);
+            static const glm::vec4 currentMissionColor(0.f, 0.5f, 0.5f, 1.f);
             static const glm::vec4 missionProgressColor = currentMissionColor;
-           // static const glm::vec4 currentLeafMissionColor = missionProgressColor;
-            static const glm::vec4 nonCurrentMissionColor(0.3, 0.3, 0.3, 1);
+            static const glm::vec4 nonCurrentMissionColor(0.3f, 0.3f, 0.3f, 1.f);
 
             // Add spacing
-            RenderFontCr(*_font, penPosition, nonCurrentMissionColor, " ");
+            RenderFont(
+                *_font,
+                penPosition,
+                " ",
+                nonCurrentMissionColor,
+                ghoul::fontrendering::CrDirection::Down
+            );
 
             auto phaseTrace = mission.phaseTrace(currentTime);
 
-            if (phaseTrace.size()) {
+            if (!phaseTrace.empty()) {
                 const MissionPhase& phase = phaseTrace.back().get();
-                std::string title = "Current Mission Phase: " + phase.name();
+                const std::string title = "Current Mission Phase: " + phase.name();
                 penPosition.y -= _font->height();
-                RenderFont(
-                    *_font,
-                    penPosition,
-                    missionProgressColor,
-                    title.c_str()
-                );
+                RenderFont(*_font, penPosition, title, missionProgressColor);
                 double remaining = phase.timeRange().end - currentTime;
                 float t = static_cast<float>(
                     1.0 - remaining / phase.timeRange().duration()
                 );
                 std::string progress = progressToStr(25, t);
                 penPosition.y -= _font->height();
-                RenderFont(*_font, penPosition, missionProgressColor,
-                   "%.0f s %s %.1f %%", remaining, progress.c_str(), t * 100);
+                RenderFont(
+                    *_font,
+                    penPosition,
+                    fmt::format("{:.0f} s {:s} {:.1f} %", remaining, progress, t * 100),
+                    missionProgressColor
+                );
             }
             else {
+                penPosition.y -= _font->height();
+                RenderFont(*_font, penPosition, "Next Mission:", nextMissionColor);
+                const double remaining = mission.timeRange().start - currentTime;
                 penPosition.y -= _font->height();
                 RenderFont(
                     *_font,
                     penPosition,
-                    nextMissionColor,
-                    "Next Mission:"
+                    fmt::format("{:.0f} s", remaining),
+                    nextMissionColor
                 );
-                double remaining = mission.timeRange().start - currentTime;
-                penPosition.y -= _font->height();
-                RenderFont(*_font, penPosition, nextMissionColor,
-                    "%.0f s", remaining);
             }
 
             bool showAllPhases = false;
 
-            typedef std::pair<const MissionPhase*, int> PhaseWithDepth;
+            using PhaseWithDepth = std::pair<const MissionPhase*, int>;
             std::stack<PhaseWithDepth> S;
-            int pixelIndentation = 20;
+
+            constexpr const int PixelIndentation = 20;
             S.push({ &mission, 0 });
             while (!S.empty()) {
                 const MissionPhase* phase = S.top().first;
-                int depth = S.top().second;
+                const int depth = S.top().second;
                 S.pop();
 
-                bool isCurrentPhase = phase->timeRange().includes(currentTime);
+                const bool isCurrentPhase = phase->timeRange().includes(currentTime);
 
-                penPosition.x += depth * pixelIndentation;
+                penPosition.x += depth * PixelIndentation;
                 if (isCurrentPhase) {
-                    double remaining = phase->timeRange().end - currentTime;
-                    float t = static_cast<float>(
+                    const double remaining = phase->timeRange().end - currentTime;
+                    const float t = static_cast<float>(
                         1.0 - remaining / phase->timeRange().duration()
                     );
-                    std::string progress = progressToStr(25, t);
+                    const std::string progress = progressToStr(25, t);
                     penPosition.y -= _font->height();
-                    RenderFont(*_font, penPosition, currentMissionColor,
-                        "%s  %s %.1f %%",
-                        phase->name().c_str(),
-                        progress.c_str(),
-                        t * 100
-                        );
+                    RenderFont(
+                        *_font,
+                        penPosition,
+                        fmt::format(
+                            "{:s}  {:s} {:.1f} %",
+                            phase->name(),progress,t * 100
+                        ),
+                        currentMissionColor
+                    );
                 }
                 else {
                     if (!phase->name().empty()) {
@@ -217,12 +221,12 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
                         RenderFont(
                             *_font,
                             penPosition,
-                            nonCurrentMissionColor,
-                            phase->name().c_str()
+                            phase->name(),
+                            nonCurrentMissionColor
                         );
                     }
                 }
-                penPosition.x -= depth * pixelIndentation;
+                penPosition.x -= depth * PixelIndentation;
 
                 if (isCurrentPhase || showAllPhases) {
                     // phases are sorted increasingly by start time, and will be

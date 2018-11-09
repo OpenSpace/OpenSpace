@@ -4,7 +4,7 @@ local sceneHelper = asset.require('util/scene_helper')
 -- Specifying which other assets should be loaded in this scene
 asset.require('spice/base')
 assetHelper.requestAll(asset, 'scene/solarsystem/sun')
-assetHelper.requestAll(asset, 'scene/solarsystem/planets')
+asset.request('scene/solarsystem/planets')
 asset.request('scene/digitaluniverse/stars')
 asset.request('scene/digitaluniverse/milkyway')
 assetHelper.requireAll(asset, 'scene/solarsystem/missions/juno')
@@ -12,6 +12,7 @@ assetHelper.requireAll(asset, 'scene/solarsystem/missions/juno')
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
+asset.require('util/default_joystick')
 
 local junoAsset = asset.require('scene/solarsystem/missions/juno/juno')
 

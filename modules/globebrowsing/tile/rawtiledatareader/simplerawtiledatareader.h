@@ -25,27 +25,19 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___SIMPLE_RAW_TILE_DATA_READER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___SIMPLE_RAW_TILE_DATA_READER___H__
 
-#include <modules/globebrowsing/tile/textureformat.h>
-#include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tiledepthtransform.h>
-#include <modules/globebrowsing/tile/pixelregion.h>
-#include <modules/globebrowsing/tile/rawtile.h>
-
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
-
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
 
 #include <string>
 
+namespace ghoul::opengl { class Texture; }
+
 namespace openspace::globebrowsing {
 
+struct IODescription;
 class GeodeticPatch;
 
 class SimpleRawTileDataReader : public RawTileDataReader {
 public:
-
     SimpleRawTileDataReader(const std::string& filePath,
         const TileTextureInitData& initData,
         RawTileDataReader::PerformPreprocessing preprocess =
@@ -67,8 +59,8 @@ protected:
 private:
     // Private virtual function overloading
     virtual void initialize() override;
-    virtual RawTile::ReadError rasterRead(
-        int rasterBand, const IODescription& io, char* dst) const override;
+    virtual RawTile::ReadError rasterRead(int rasterBand, const IODescription& io,
+        char* dataDestination) const override;
 
     // Member variables
     std::string _datasetFilePath;

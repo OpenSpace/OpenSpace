@@ -178,6 +178,8 @@ openspace.globebrowsing.parseInfoFile = function (file)
         name = Name
     end
 
+    local identifier = Identifier
+
     local color = nil
     if ColorFile then
         color = {
@@ -205,7 +207,7 @@ openspace.globebrowsing.parseInfoFile = function (file)
         location = Location
     end
 
-    return name, color, height, location
+    return name, color, height, location, identifier
 end
 
 openspace.globebrowsing.addBlendingLayersFromDirectory = function (dir, node_name)
@@ -213,6 +215,7 @@ openspace.globebrowsing.addBlendingLayersFromDirectory = function (dir, node_nam
 
     for _, file in pairs(files) do
         if file and file:find('.info') then
+            local c, h
             _, c, h, _ = openspace.globebrowsing.parseInfoFile(file)
 
             if c then
@@ -232,7 +235,8 @@ openspace.globebrowsing.addFocusNodesFromDirectory = function (dir, node_name)
 
     for _, file in pairs(files) do
         if file and file:find('.info') then
-            n, _, _, l = openspace.globebrowsing.parseInfoFile(file)
+            local n, l
+            n, _, _, l, i = openspace.globebrowsing.parseInfoFile(file)
 
             if n and l then
                 openspace.printInfo("Creating focus node for '" .. n .. "'")
@@ -244,6 +248,7 @@ openspace.globebrowsing.addFocusNodesFromDirectory = function (dir, node_name)
 
                 openspace.addSceneGraphNode({
                     Name = node_name .. " - " .. n,
+                    Identifier = node_name .. "-" .. i,
                     Parent = node_name,
                     Transform = {
                         Translation = {

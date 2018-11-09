@@ -24,10 +24,10 @@
 
 #include <modules/globebrowsing/meshes/basicgrid.h>
 
+#include <ghoul/glm.h>
 #include <ghoul/misc/assert.h>
 
-namespace openspace {
-namespace globebrowsing {
+namespace openspace::globebrowsing {
 
 BasicGrid::BasicGrid(unsigned int xSegments, unsigned int ySegments,
                      TriangleSoup::Positions usePositions,
@@ -45,6 +45,7 @@ BasicGrid::BasicGrid(unsigned int xSegments, unsigned int ySegments,
     if (usePositions) {
         _geometry->setVertexPositions(createPositions(_xSegments, _ySegments));
     }
+
     if (useTextureCoordinates) {
         _geometry->setVertexTextureCoordinates(
             createTextureCoordinates(_xSegments, _ySegments)
@@ -94,10 +95,10 @@ std::vector<GLuint> BasicGrid::createElements(int xSegments, int ySegments) {
             // x    x     x     x ..
             // :    :     :     :
 
-            GLuint v00 = (y + 0) * (xSegments + 1) + x + 0;
-            GLuint v10 = (y + 0) * (xSegments + 1) + x + 1;
-            GLuint v01 = (y + 1) * (xSegments + 1) + x + 0;
-            GLuint v11 = (y + 1) * (xSegments + 1) + x + 1;
+            const GLuint v00 = (y + 0) * (xSegments + 1) + x + 0;
+            const GLuint v10 = (y + 0) * (xSegments + 1) + x + 1;
+            const GLuint v01 = (y + 1) * (xSegments + 1) + x + 0;
+            const GLuint v11 = (y + 1) * (xSegments + 1) + x + 1;
 
             // add upper triangle
             elements.push_back(v00);
@@ -121,10 +122,11 @@ std::vector<glm::vec4> BasicGrid::createPositions(int xSegments, int ySegments) 
 
     // Copy from 2d texture coordinates and use as template to create positions
     std::vector<glm::vec2> templateTextureCoords = createTextureCoordinates(
-        xSegments, ySegments
+        xSegments,
+        ySegments
     );
     for (const glm::vec2& coords : templateTextureCoords) {
-        positions.push_back(glm::vec4(coords, 0.f, 1.f));
+        positions.emplace_back(coords, 0.f, 1.f);
     }
     //for (unsigned int i = 0; i < templateTextureCoords.size(); i++) {
     //    positions.push_back(glm::vec4(
@@ -143,10 +145,10 @@ std::vector<glm::vec2> BasicGrid::createTextureCoordinates(int xSegments, int yS
 
     for (int y = 0; y < ySegments + 1; y++) {
         for (int x = 0; x < xSegments + 1; x++) {
-            textureCoordinates.push_back(glm::vec2(
+            textureCoordinates.emplace_back(
                 static_cast<float>(x) / static_cast<float>(xSegments),
                 static_cast<float>(y) / static_cast<float>(ySegments)
-            ));
+            );
         }
     }
     return textureCoordinates;
@@ -159,12 +161,11 @@ std::vector<glm::vec3> BasicGrid::createNormals(int xSegments, int ySegments) {
 
     for (int y = 0; y < ySegments + 1; y++) {
         for (int x = 0; x < xSegments + 1; x++) {
-            normals.push_back(glm::vec3(0, 0, 1));
+            normals.emplace_back(0.f, 0.f, 1.f);
         }
     }
 
     return normals;
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+} // namespace openspace::globebrowsing

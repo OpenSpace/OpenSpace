@@ -26,7 +26,6 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GPUTILEUVTRANSFORM___H__
 
 #include <openspace/util/gpudata.h>
-
 #include <string>
 
 namespace ghoul::opengl { class ProgramObject; }
@@ -53,8 +52,7 @@ public:
      * nameBase within the provided shader program with this object.
      * After this method has been called, users may invoke setValue.
      */
-    void bind(ghoul::opengl::ProgramObject* programObject,
-        const std::string& nameBase);
+    void bind(ghoul::opengl::ProgramObject* programObject, const std::string& nameBase);
 
 private:
     GPUData<glm::vec2> _gpuUvOffset;

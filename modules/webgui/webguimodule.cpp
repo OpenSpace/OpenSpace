@@ -22,15 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "webguimodule.h"
-
-namespace {
-const std::string _loggerCat = "WebGui";
-}
+#include <modules/webgui/webguimodule.h>
 
 namespace openspace {
 
 WebGuiModule::WebGuiModule() : OpenSpaceModule(WebGuiModule::Name) {}
 
-}
+} // namespace openspace
 

@@ -1,0 +1,35 @@
+local helper = asset.require('util/slide_deck_helper')
+local deck = nil
+
+asset.onInitialize(function ()
+    deck = helper.createDeck("example", {
+        FlatScreen = false,
+        SphericalPosition = {0.0, 3.1415 / 2},
+        Scale = 0.7
+    })
+
+    helper.addSlide(deck, "${DATA}/test2.jpg")
+    helper.addSlide(deck, "${DATA}/test3.jpg")
+
+    local interpolationDuration = 0
+
+    function nextSlide()
+        helper.goToNextSlide(deck, interpolationDuration)
+    end
+
+    function previousSlide()
+        helper.goToPreviousSlide(deck, interpolationDuration)
+    end
+
+    helper.setCurrentSlide(deck, 1)
+    openspace.bindKey("RIGHT", "nextSlide()")
+    openspace.bindKey("LEFT", "previousSlide()")
+
+end)
+
+
+asset.onDeinitialize(function()
+    openspace.clearKey("RIGHT")
+    openspace.clearKey("LEFT")
+    helper.removeDeck(deck)
+end)

@@ -22,9 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace {
+#include <openspace/engine/globals.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/screenspacerenderable.h>
 
-namespace luascriptfunctions {
+namespace openspace::luascriptfunctions {
 
 int iswa_addCygnet(lua_State* L) {
     int nArguments = lua_gettop(L);
@@ -56,7 +58,9 @@ int iswa_addScreenSpaceCygnet(lua_State* L) {
 
     int nArguments = lua_gettop(L);
     if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+        return ghoul::lua::luaError(L, fmt::format(
+            "Expected {} argumemts, got {}", 1, nArguments
+        ));
     }
 
     ghoul::Dictionary d;
@@ -81,7 +85,7 @@ int iswa_addScreenSpaceCygnet(lua_State* L) {
     int updateInterval = info->updateInterval;
     info->selected = true;
 
-    if (OsEng.renderEngine().screenSpaceRenderable(name)) {
+    if (global::renderEngine.screenSpaceRenderable(name)) {
         LERROR("A cygnet with the name \"" + name +"\" already exist");
         return 0;
     } else {
@@ -92,7 +96,7 @@ int iswa_addScreenSpaceCygnet(lua_State* L) {
         std::unique_ptr<ScreenSpaceRenderable> s(
             ScreenSpaceRenderable::createFromDictionary(d)
         );
-        OsEng.renderEngine().addScreenSpaceRenderable(std::move(s));
+        global::renderEngine.addScreenSpaceRenderable(std::move(s));
     }
     return 0;
 }
@@ -119,7 +123,7 @@ int iswa_addScreenSpaceCygnet(lua_State* L) {
 
 int iswa_removeCygnet(lua_State* L) {
     std::string name = luaL_checkstring(L, -1);
-    OsEng.scriptEngine().queueScript(
+    global::scriptEngine.queueScript(
         "openspace.removeSceneGraphNode('" + name + "')",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
@@ -145,7 +149,7 @@ int iswa_removeScrenSpaceCygnet(lua_State* L) {
         "openspace.unregisterScreenSpaceRenderable('" +
         cygnetInformation[id]->name + "');";
 
-    OsEng.scriptEngine().queueScript(
+    global::scriptEngine.queueScript(
         script,
         scripting::ScriptEngine::RemoteScripting::Yes
     );
@@ -185,6 +189,4 @@ int iswa_setBaseUrl(lua_State* L) {
     return 0;
 }
 
-} // namespace luascriptfunctions
-
-} // namespace openspace
+} // namespace openspace::luascriptfunctions

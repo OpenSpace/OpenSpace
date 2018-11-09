@@ -22,52 +22,57 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/query/query.h>
+#include <modules/server/include/topics/setpropertytopic.h>
+
+#include <openspace/json.h>
+#include <openspace/engine/globals.h>
 #include <openspace/properties/property.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/query/query.h>
 #include <openspace/util/timemanager.h>
+#include <openspace/util/time.h>
 #include <ghoul/logging/logmanager.h>
-#include <modules/server/include/setpropertytopic.h>
 
 namespace {
-const std::string PropertyKey = "property";
-const std::string ValueKey = "value";
-const std::string _loggerCat = "SetPropertyTopic";
-const std::string SpecialKeyTime = "__time";
-}
+    constexpr const char* PropertyKey = "property";
+    constexpr const char* ValueKey = "value";
+    constexpr const char* _loggerCat = "SetPropertyTopic";
+    constexpr const char* SpecialKeyTime = "__time";
+} // namespace
 
 namespace openspace {
 
-void SetPropertyTopic::handleJson(nlohmann::json json) {
+void SetPropertyTopic::handleJson(const nlohmann::json& json) {
     try {
-        auto propertyKey = json.at(PropertyKey).get<std::string>();
-        auto value = json.at(ValueKey).get<std::string>();
+        const std::string& propertyKey = json.at(PropertyKey).get<std::string>();
+        std::string value = json.at(ValueKey).get<std::string>();
 
         if (propertyKey == SpecialKeyTime) {
-            setTime(value);
+            Time newTime;
+            newTime.setTime(value);
+            global::timeManager.setTimeNextFrame(newTime);
         }
         else {
-            auto prop = property(propertyKey);
-            if (prop != nullptr) {
+            properties::Property* prop = property(propertyKey);
+            if (prop) {
                 LDEBUG("Setting " + propertyKey + " to " + value + ".");
-                if (!prop->setStringValue(value)) {
+                if (!prop->setStringValue(std::move(value))) {
                     LERROR("Failed!");
                 }
             }
         }
     }
-    catch (std::out_of_range& e) {
+    catch (const std::out_of_range& e) {
         LERROR("Could not set property -- key or value is missing in payload");
         LERROR(e.what());
     }
-    catch (ghoul::RuntimeError e) {
+    catch (const ghoul::RuntimeError& e) {
         LERROR("Could not set property -- runtime error:");
         LERROR(e.what());
     }
 }
 
-void SetPropertyTopic::setTime(const std::string& timeValue) {
-    OsEng.timeManager().time().setTime(timeValue);
+bool SetPropertyTopic::isDone() const {
+    return true;
 }
 
-}
+} // namespace openspace

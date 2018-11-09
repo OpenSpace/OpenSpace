@@ -25,40 +25,38 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___BASICVOLUMERAYCASTER___H__
 #define __OPENSPACE_MODULE_VOLUME___BASICVOLUMERAYCASTER___H__
 
-#include <string>
-#include <vector>
-#include <memory>
-
-#include <ghoul/glm.h>
-#include <ghoul/opengl/texture.h>
-
 #include <openspace/rendering/volumeraycaster.h>
+#include <openspace/rendering/transferfunction.h>
 #include <openspace/util/boxgeometry.h>
-#include <modules/volume/transferfunctionhandler.h>
 #include <modules/volume/rendering/volumeclipplanes.h>
 
 #include <modules/volume/volumegridtype.h>
+#include <openspace/util/boxgeometry.h>
 
 namespace ghoul::opengl {
     class Texture;
     class ProgramObject;
     class TextureUnit;
-}
+} // namespace ghoul::opengl
 
 namespace openspace {
+    struct RenderData;
+    struct RaycastData;
+} // namespace openspace
 
-struct RenderData;
-struct RaycastData;
+namespace openspace::volume {
 
-namespace volume {
+class TransferFunctionHandler;
+class VolumeClipPlanes;
 
 class BasicVolumeRaycaster : public VolumeRaycaster {
 public:
     BasicVolumeRaycaster(
         std::shared_ptr<ghoul::opengl::Texture> texture,
-        std::shared_ptr<TransferFunctionHandler> transferFunctionHandler,
+        std::shared_ptr<openspace::TransferFunction> transferFunction,
         std::shared_ptr<VolumeClipPlanes> clipPlanes);
     virtual ~BasicVolumeRaycaster();
+
     void initialize();
     void deinitialize();
 
@@ -70,18 +68,18 @@ public:
         ghoul::opengl::ProgramObject& program) override;
     void postRaycast(const RaycastData& data,
         ghoul::opengl::ProgramObject& program) override;
-    bool cameraIsInside(const RenderData& data, glm::vec3& localPosition) override;
+    bool isCameraInside(const RenderData& data, glm::vec3& localPosition) override;
 
-    std::string getBoundsVsPath() const override;
-    std::string getBoundsFsPath() const override;
-    std::string getRaycastPath() const override;
-    std::string getHelperPath() const override;
+    std::string boundsVertexShaderPath() const override;
+    std::string boundsFragmentShaderPath() const override;
+    std::string raycasterPath() const override;
+    std::string helperPath() const override;
 
 
     void setVolumeTexture(std::shared_ptr<ghoul::opengl::Texture> texture);
     std::shared_ptr<ghoul::opengl::Texture> volumeTexture() const;
-    void setTransferFunctionHandler(
-        std::shared_ptr<TransferFunctionHandler> transferFunctionHandler);
+    void setTransferFunction(
+        std::shared_ptr<openspace::TransferFunction> transferFunction);
 
     void setStepSize(float stepSize);
     float opacity() const;
@@ -92,26 +90,26 @@ public:
     void setRUpperBound(float rNormalization);
     VolumeGridType gridType() const;
     void setGridType(VolumeGridType gridType);
-    void setModelTransform(const glm::mat4& transform);
+    void setModelTransform(glm::mat4 transform);
 
 private:
     glm::dmat4 modelViewTransform(const RenderData& data);
 
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
-    std::shared_ptr<TransferFunctionHandler> _transferFunctionHandler;
+    std::shared_ptr<openspace::TransferFunction> _transferFunction;
     BoxGeometry _boundingBox;
     VolumeGridType _gridType;
     glm::mat4 _modelTransform;
-    float _opacity;
-    float _rNormalization;
-    float _rUpperBound;
+    float _opacity = 20.f;
+    float _rNormalization = 0.f;
+    float _rUpperBound = 1.f;
 
     std::unique_ptr<ghoul::opengl::TextureUnit> _tfUnit;
     std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;
     float _stepSize;
 };
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume
+
 #endif // __OPENSPACE_MODULE_VOLUME___BASICVOLUMERAYCASTER___H__

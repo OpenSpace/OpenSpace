@@ -25,7 +25,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
-namespace openspace {
+namespace openspace::configuration {
 
 using namespace documentation;
 documentation::Documentation Configuration::Documentation = {
@@ -44,7 +44,7 @@ documentation::Documentation Configuration::Documentation = {
             new StringAnnotationVerifier(
                 "A valid scene file as described in the Scene documentation"
             ),
-            Optional::No,
+            Optional::Yes,
             "The scene description that is used to populate the application after "
             "startup. The scene determines which objects are loaded, the startup "
             "time and other scene-specific settings. More information is provided in "
@@ -482,4 +482,4 @@ documentation::Documentation Configuration::Documentation = {
     }
 };
 
-} // namespace openspace
+} // namespace openspace::configuration

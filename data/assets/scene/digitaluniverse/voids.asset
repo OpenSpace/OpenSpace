@@ -14,11 +14,12 @@ local object = {
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
+        DrawLabels = true,
         Color = { 1.0, 1.0, 1.0 },
         Transparency = 0.65,
         LabelFile = speck .. "/voids.label",
         TextColor = { 0.0, 0.4, 0.7, 1.0 },
-        TextSize = 21.9,
+        TextSize = 20.9,
         TextMinSize = 8.0,
         Unit = "Mpc"
     },

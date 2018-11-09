@@ -48,9 +48,9 @@ bool toLuaConversion(lua_State* state, char value) {
     return true;
 }
 
-char fromStringConversion(std::string val, bool& success) {
+char fromStringConversion(const std::string& val, bool& success) {
     std::stringstream s(val);
-    char v;
+    char v = 0;
     s >> v;
     success = !s.fail();
     if (success) {

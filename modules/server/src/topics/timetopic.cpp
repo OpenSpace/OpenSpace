@@ -22,54 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/query/query.h>
+#include "modules/server/include/topics/timetopic.h"
+
+#include <modules/server/include/connection.h>
+#include <openspace/engine/globals.h>
 #include <openspace/properties/property.h>
-#include "modules/server/include/connection.h"
-#include "modules/server/include/timetopic.h"
-#include <chrono>
+#include <openspace/query/query.h>
+#include <openspace/util/timemanager.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
-const char* _loggerCat = "TimeTopic";
-const char* PropertyKey = "property";
-const char* CurrentTimeKey = "currentTime";
-const char* DeltaTimeKey = "deltaTime";
-const int UNSET_ONCHANGE_HANDLE = -1;
-const std::chrono::milliseconds TimeUpdateInterval(100);
-}
+    constexpr const char* _loggerCat = "TimeTopic";
+    constexpr const char* PropertyKey = "property";
+    constexpr const char* EventKey = "event";
+    constexpr const char* UnsubscribeEvent = "stop_subscription";
+    constexpr const char* CurrentTimeKey = "currentTime";
+    constexpr const char* DeltaTimeKey = "deltaTime";
+    constexpr const std::chrono::milliseconds TimeUpdateInterval(100);
+} // namespace
 
 using nlohmann::json;
 
 namespace openspace {
 
 TimeTopic::TimeTopic()
-    : Topic()
-    , _timeCallbackHandle(UNSET_ONCHANGE_HANDLE)
-    , _deltaTimeCallbackHandle(UNSET_ONCHANGE_HANDLE)
-    , _lastUpdateTime(std::chrono::system_clock::now())
+    : _lastUpdateTime(std::chrono::system_clock::now())
 {
     LDEBUG("Starting new time subscription");
 }
 
 TimeTopic::~TimeTopic() {
-    if (_timeCallbackHandle != UNSET_ONCHANGE_HANDLE) {
-        OsEng.timeManager().removeTimeChangeCallback(_timeCallbackHandle);
+    if (_timeCallbackHandle != UnsetOnChangeHandle) {
+        global::timeManager.removeTimeChangeCallback(_timeCallbackHandle);
     }
-    if (_deltaTimeCallbackHandle != UNSET_ONCHANGE_HANDLE) {
-        OsEng.timeManager().removeDeltaTimeChangeCallback(_deltaTimeCallbackHandle);
+    if (_deltaTimeCallbackHandle != UnsetOnChangeHandle) {
+        global::timeManager.removeDeltaTimeChangeCallback(_deltaTimeCallbackHandle);
     }
 }
 
-bool TimeTopic::isDone() {
-    return false;
+bool TimeTopic::isDone() const {
+    return _isDone;
 }
 
-void TimeTopic::handleJson(json j) {
+void TimeTopic::handleJson(const nlohmann::json& json) {
+    std::string event = json.at(EventKey).get<std::string>();
+    if (event == UnsubscribeEvent) {
+        _isDone = true;
+        return;
+    }
 
-    std::string requestedKey = j.at(PropertyKey).get<std::string>();
+    std::string requestedKey = json.at(PropertyKey).get<std::string>();
     LDEBUG("Subscribing to " + requestedKey);
 
     if (requestedKey == CurrentTimeKey) {
-        _timeCallbackHandle = OsEng.timeManager().addTimeChangeCallback([this]() {
+        _timeCallbackHandle = global::timeManager.addTimeChangeCallback([this]() {
             std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
             if (now - _lastUpdateTime > TimeUpdateInterval) {
                 _connection->sendJson(currentTime());
@@ -79,10 +85,10 @@ void TimeTopic::handleJson(json j) {
         _connection->sendJson(currentTime());
     }
     else if (requestedKey == DeltaTimeKey) {
-        _deltaTimeCallbackHandle = OsEng.timeManager().addDeltaTimeChangeCallback(
+        _deltaTimeCallbackHandle = global::timeManager.addDeltaTimeChangeCallback(
             [this]() {
                 _connection->sendJson(deltaTime());
-                if (_timeCallbackHandle != UNSET_ONCHANGE_HANDLE) {
+                if (_timeCallbackHandle != UnsetOnChangeHandle) {
                     _connection->sendJson(currentTime());
                     _lastUpdateTime = std::chrono::system_clock::now();;
                 }
@@ -92,16 +98,17 @@ void TimeTopic::handleJson(json j) {
     }
     else {
         LWARNING("Cannot get " + requestedKey);
+        _isDone = true;
     }
 }
 
 json TimeTopic::currentTime() {
-    json timeJson = { { "time", OsEng.timeManager().time().ISO8601() } };
+    json timeJson = { { "time", global::timeManager.time().ISO8601() } };
     return wrappedPayload(timeJson);
 }
 
 json TimeTopic::deltaTime() {
-    json timeJson = { { "deltaTime", OsEng.timeManager().time().deltaTime() } };
+    json timeJson = { { "deltaTime", global::timeManager.deltaTime() } };
     return wrappedPayload(timeJson);
 }
 

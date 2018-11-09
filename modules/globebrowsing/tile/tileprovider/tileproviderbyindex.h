@@ -27,6 +27,9 @@
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
+#include <modules/globebrowsing/tile/tileindex.h>
+#include <unordered_map>
+
 namespace openspace::globebrowsing::tileprovider {
 
 class TileProviderByIndex : public TileProvider {
@@ -35,8 +38,8 @@ public:
     TileProviderByIndex(const std::string& imagePath);
     virtual ~TileProviderByIndex() = default;
 
-    virtual Tile getTile(const TileIndex& tileIndex) override;
-    virtual Tile::Status getTileStatus(const TileIndex& index) override;
+    virtual Tile tile(const TileIndex& tileIndex) override;
+    virtual Tile::Status tileStatus(const TileIndex& tileIndex) override;
     virtual TileDepthTransform depthTransform() override;
     virtual void update() override;
     virtual void reset() override;

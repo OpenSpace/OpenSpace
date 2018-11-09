@@ -25,21 +25,16 @@
 #include <modules/imgui/include/guiperformancecomponent.h>
 
 #include <modules/imgui/include/imgui_include.h>
-
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/performance/performancelayout.h>
 #include <openspace/performance/performancemanager.h>
 #include <openspace/rendering/renderengine.h>
-
 #include <ghoul/misc/sharedmemory.h>
-
-#include <ghoul/fmt.h>
-
-#include <algorithm>
+#include <array>
 #include <numeric>
 
 namespace {
-    enum class Sorting {
+    enum Sorting {
         NoSorting = -1,
         UpdateTranslation = 0,
         UpdateRotation = 1,
@@ -49,27 +44,27 @@ namespace {
         Total = 5
     };
 
-    static const openspace::properties::Property::PropertyInfo SortingSelectionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SortingSelectionInfo = {
         "SortingSelection",
         "Sorting",
         "This value determines the sorting order of the performance measurements."
     };
 
-    static const openspace::properties::Property::PropertyInfo SceneGraphEnabledInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SceneGraphEnabledInfo = {
         "ShowSceneGraph",
         "Show Scene Graph Measurements",
         "If this value is enabled, the window showing the measurements for the scene "
         "graph values is visible."
     };
 
-    static const openspace::properties::Property::PropertyInfo FunctionsEnabledInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FunctionsEnabledInfo = {
         "ShowFunctions",
         "Show Function Measurements",
         "If this value is enabled, the window showing the measurements for the "
         "individual functions is visible."
     };
 
-    static const openspace::properties::Property::PropertyInfo OutputLogsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OutputLogsInfo = {
         "OutputLogs",
         "Output Logs",
         "" // @TODO Missing documentation
@@ -93,7 +88,13 @@ GuiPerformanceComponent::GuiPerformanceComponent()
     addProperty(_outputLogs);
 }
 
+GuiPerformanceComponent::~GuiPerformanceComponent() {} // NOLINT
+
 void GuiPerformanceComponent::render() {
+    if (!global::performanceManager.isEnabled()) {
+        return;
+    }
+
     using ghoul::SharedMemory;
     using namespace performance;
 
@@ -103,8 +104,7 @@ void GuiPerformanceComponent::render() {
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 
-    RenderEngine& re = OsEng.renderEngine();
-    PerformanceLayout* layout = re.performanceManager()->performanceData();
+    PerformanceLayout* layout = global::performanceManager.performanceData();
 
     v = _sceneGraphIsEnabled;
     ImGui::Checkbox("SceneGraph", &v);
@@ -114,15 +114,15 @@ void GuiPerformanceComponent::render() {
     _functionsIsEnabled = v;
     v = _outputLogs;
     ImGui::Checkbox("Output Logs", &v);
-    OsEng.renderEngine().performanceManager()->setLogging(v);
+    global::performanceManager.setLogging(v);
     // Need to catch if it's unsuccessful
-    v = OsEng.renderEngine().performanceManager()->loggingEnabled();
+    v = global::performanceManager.loggingEnabled();
     _outputLogs = v;
 
     ImGui::Spacing();
 
     if (ImGui::Button("Reset measurements")) {
-        OsEng.renderEngine().performanceManager()->resetPerformanceMeasurements();
+        global::performanceManager.resetPerformanceMeasurements();
     }
 
     if (_sceneGraphIsEnabled) {
@@ -133,41 +133,13 @@ void GuiPerformanceComponent::render() {
         // The indices correspond to the index into the average array further below
         ImGui::Text("Sorting");
         int sorting = _sortingSelection;
-        ImGui::RadioButton(
-            "No Sorting",
-            &sorting,
-            static_cast<int>(Sorting::NoSorting)
-        );
-        ImGui::RadioButton(
-            "UpdateTranslation",
-            &sorting,
-            static_cast<int>(Sorting::UpdateTranslation)
-        );
-        ImGui::RadioButton(
-            "UpdateRotation",
-            &sorting,
-            static_cast<int>(Sorting::UpdateRotation)
-        );
-        ImGui::RadioButton(
-            "UpdateScaling",
-            &sorting,
-            static_cast<int>(Sorting::UpdateScaling)
-        );
-        ImGui::RadioButton(
-            "UpdateRender",
-            &sorting,
-            static_cast<int>(Sorting::UpdateRender)
-        );
-        ImGui::RadioButton(
-            "RenderTime",
-            &sorting,
-            static_cast<int>(Sorting::Render)
-        );
-        ImGui::RadioButton(
-            "TotalTime",
-            &sorting,
-            static_cast<int>(Sorting::Total)
-        );
+        ImGui::RadioButton("No Sorting",        &sorting, Sorting::NoSorting);
+        ImGui::RadioButton("UpdateTranslation", &sorting, Sorting::UpdateTranslation);
+        ImGui::RadioButton("UpdateRotation",    &sorting, Sorting::UpdateRotation);
+        ImGui::RadioButton("UpdateScaling",     &sorting, Sorting::UpdateScaling);
+        ImGui::RadioButton("UpdateRender",      &sorting, Sorting::UpdateRender);
+        ImGui::RadioButton("RenderTime",        &sorting, Sorting::Render);
+        ImGui::RadioButton("TotalTime",         &sorting, Sorting::Total);
         _sortingSelection = sorting;
 
         // Later, we will sort this indices list instead of the real values for
@@ -200,20 +172,25 @@ void GuiPerformanceComponent::render() {
             // by 0 later
             for (int j = 0; j < PerformanceLayout::NumberValues; ++j) {
                 averages[i][0] += entry.updateTranslation[j];
-                if (entry.updateTranslation[j] != 0.f)
+                if (entry.updateTranslation[j] != 0.f) {
                     ++(nValues[0]);
+                }
                 averages[i][1] += entry.updateRotation[j];
-                if (entry.updateRotation[j] != 0.f)
+                if (entry.updateRotation[j] != 0.f) {
                     ++(nValues[1]);
+                }
                 averages[i][2] += entry.updateScaling[j];
-                if (entry.updateScaling[j] != 0.f)
+                if (entry.updateScaling[j] != 0.f) {
                     ++(nValues[2]);
+                }
                 averages[i][3] += entry.updateRenderable[j];
-                if (entry.updateRenderable[j] != 0.f)
+                if (entry.updateRenderable[j] != 0.f) {
                     ++(nValues[3]);
+                }
                 averages[i][4] += entry.renderTime[j];
-                if (entry.renderTime[j] != 0.f)
+                if (entry.renderTime[j] != 0.f) {
                     ++(nValues[4]);
+                }
             }
 
             if (nValues[0] != 0) {
@@ -290,13 +267,13 @@ void GuiPerformanceComponent::render() {
                 // If we do want to sort totally, we need to sum all the averages and
                 // use that as the criterion
                 sortFunc = [&averages](size_t a, size_t b) {
-                    float sumA = std::accumulate(
+                    const float sumA = std::accumulate(
                         std::begin(averages[a]),
                         std::end(averages[a]),
                         0.f
                     );
 
-                    float sumB = std::accumulate(
+                    const float sumB = std::accumulate(
                         std::begin(averages[b]),
                         std::end(averages[b]),
                         0.f
@@ -307,17 +284,12 @@ void GuiPerformanceComponent::render() {
             }
             else {
                 // otherwise we use the sorting index
-                int sel = _sortingSelection;
-                sortFunc = [sel, &averages](size_t a, size_t b) {
+                sortFunc = [sel = _sortingSelection, &averages](size_t a, size_t b) {
                     return averages[a][sel] > averages[b][sel];
                 };
             }
 
-            std::sort(
-                indices.begin(),
-                indices.end(),
-                sortFunc
-            );
+            std::sort(indices.begin(), indices.end(), sortFunc);
         }
         else {
             // NoSorting -> So we sort by names instead
@@ -340,7 +312,7 @@ void GuiPerformanceComponent::render() {
                 layout->sceneGraphEntries[indices[i]];
 
             if (ImGui::CollapsingHeader(entry.name)) {
-                std::string updateTranslationTime = std::to_string(
+                const std::string& updateTranslationTime = std::to_string(
                     entry.updateTranslation[PerformanceLayout::NumberValues - 1]
                 ) + "us";
 
@@ -358,7 +330,7 @@ void GuiPerformanceComponent::render() {
                     ImVec2(0, 40)
                 );
 
-                std::string updateRotationTime = std::to_string(
+                const std::string& updateRotationTime = std::to_string(
                     entry.updateRotation[PerformanceLayout::NumberValues - 1]
                 ) + "us";
 
@@ -376,7 +348,7 @@ void GuiPerformanceComponent::render() {
                     ImVec2(0, 40)
                 );
 
-                std::string updateScalingTime = std::to_string(
+                const std::string& updateScalingTime = std::to_string(
                     entry.updateScaling[PerformanceLayout::NumberValues - 1]
                 ) + "us";
 
@@ -394,7 +366,7 @@ void GuiPerformanceComponent::render() {
                     ImVec2(0, 40)
                 );
 
-                std::string updateRenderableTime = std::to_string(
+                const std::string& updateRenderableTime = std::to_string(
                     entry.updateRenderable[PerformanceLayout::NumberValues - 1]
                 ) + "us";
 
@@ -412,7 +384,7 @@ void GuiPerformanceComponent::render() {
                     ImVec2(0, 40)
                 );
 
-                std::string renderTime = std::to_string(
+                const std::string& renderTime = std::to_string(
                     entry.renderTime[PerformanceLayout::NumberValues - 1]
                 ) + "us";
 
@@ -438,9 +410,10 @@ void GuiPerformanceComponent::render() {
         bool fe = _functionsIsEnabled;
         ImGui::Begin("Functions", &fe);
         _functionsIsEnabled = fe;
-        using namespace performance;
 
         for (int i = 0; i < layout->nFunctionEntries; ++i) {
+            using namespace performance;
+
             const PerformanceLayout::FunctionPerformanceLayout& entry =
                 layout->functionEntries[i];
 
@@ -448,17 +421,20 @@ void GuiPerformanceComponent::render() {
             int count = 0;
             for (int j = 0; j < PerformanceLayout::NumberValues; ++j) {
                 avg += layout->functionEntries[i].time[j];
-                if (layout->functionEntries[i].time[j] != 0.f)
+                if (layout->functionEntries[i].time[j] != 0.f) {
                     ++count;
+                }
             }
-            avg /= count;
+            if (count > 0) {
+                avg /= count;
+            }
 
             auto minmax = std::minmax_element(
                 std::begin(layout->functionEntries[i].time),
                 std::end(layout->functionEntries[i].time)
             );
 
-            std::string renderTime = std::to_string(
+            const std::string& renderTime = std::to_string(
                 entry.time[PerformanceLayout::NumberValues - 1]
             ) + "us";
             ImGui::PlotLines(

@@ -26,11 +26,9 @@
 #define __OPENSPACE_MODULE_GALAXY___MILKYWAYCONVERSIONTASK___H__
 
 #include <openspace/util/task.h>
-#include <string>
+
 #include <ghoul/glm.h>
-#include <functional>
-#include <modules/volume/textureslicevolumereader.h>
-#include <modules/volume/rawvolumewriter.h>
+#include <string>
 
 namespace openspace {
 
@@ -46,6 +44,7 @@ public:
     virtual ~MilkywayConversionTask();
     std::string description() override;
     void perform(const Task::ProgressCallback& onProgress) override;
+
     static documentation::Documentation documentation();
 
 private:

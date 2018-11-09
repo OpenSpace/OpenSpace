@@ -1,18 +1,25 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
+
 asset.require("spice/base")
 asset.request('./trail')
 
-
+local textures = asset.syncedResource({
+    Name = "Mercury Textures",
+    Type = "HttpSynchronization",
+    Identifier = "mercury_abundance_textures",
+    Version = 1
+})
 
 local mapServiceConfigs = asset.localResource("map_service_configs")
 
 local color_layers = {
+    --mdis
     {
         Identifier = "Messenger_MDIS_Utah",
         Name = "Messenger MDIS [Utah]",
         FilePath = mapServiceConfigs .. "/Utah/MessengerMDIS.wms",
-        Enabled = true
+        Enabled = false
     },
     {
         Identifier = "Messenger_MDIS_Sweden",
@@ -24,6 +31,7 @@ local color_layers = {
         Name = "Messenger MDIS [AWS]",
         FilePath = mapServiceConfigs .. "/AWS/MessengerMdis.wms"
     },
+    --mossaic
     {
         Identifier = "Messenger_Mosaic_Utah",
         Name = "Messenger Mosaic [Utah]",
@@ -38,6 +46,146 @@ local color_layers = {
         Identifier = "Messenger_Mosaic_AWS",
         Name = "Messenger Mosaic [AWS]",
         FilePath = mapServiceConfigs .. "/AWS/MessengerMosaic.wms"
+    },
+    --bdr
+    {
+        Identifier = "Messenger_BDR_Utah",
+        Name = "Messenger BDR [Utah]",
+        FilePath = mapServiceConfigs .. "/Utah/MessengerBDR.wms",
+        TilePixelSize = 360,
+        Enabled = true
+    },
+    {
+        Identifier = "Messenger_BDR_Sweden",
+        Name = "Messenger BDR [Sweden]",
+        FilePath = mapServiceConfigs .. "/LiU/Messenger_BDR.wms",
+        TilePixelSize = 360,
+        Enabled = false
+    },
+    --mdr
+    {
+        Identifier = "Messenger_MDR_Utah",
+        Name = "Messenger MDR [Utah]",
+        FilePath = mapServiceConfigs .. "/Utah/MessengerMDR.wms",
+        Enabled = false
+    },
+    --mp3
+    {
+        Identifier = "Messenger_MP3_Utah",
+        Name = "Messenger MP3 [Utah]",
+        FilePath = mapServiceConfigs .. "/Utah/MessengerMP3.wms",
+        Enabled = false
+    },
+    --hie
+    {
+        Identifier = "Messenger_HIE_Utah",
+        Name = "Messenger HIE [Utah]",
+        FilePath = mapServiceConfigs .. "/Utah/MessengerHIE.wms",
+        Enabled = false
+    },
+    {
+        Identifier = "Messenger_HIE_Sweden",
+        Name = "Messenger HIE [Sweden]",
+        FilePath = mapServiceConfigs .. "/LiU/Messenger_HIE.wms",
+        Enabled = false
+    },
+    --hiw
+    {
+        Identifier = "Messenger_HIW_Utah",
+        Name = "Messenger HIW [Utah]",
+        FilePath = mapServiceConfigs .. "/Utah/MessengerHIW.wms",
+        Enabled = false
+    },
+    {
+        Identifier = "Messenger_HIW_Sweden",
+        Name = "Messenger HIW [Sweden]",
+        FilePath = mapServiceConfigs .. "/LiU/Messenger_HIW.wms",
+        Enabled = false
+    },
+    --loi
+    {
+        Identifier = "Messenger_LOI_Utah",
+        Name = "Messenger LOI [Utah]",
+        FilePath = mapServiceConfigs .. "/Utah/MessengerLOI.wms",
+        Enabled = false
+    },
+    {
+        Identifier = "Messenger_LOI_Sweden",
+        Name = "Messenger LOI [Sweden]",
+        FilePath = mapServiceConfigs .. "/LiU/Messenger_LOI.wms",
+        Enabled = false
+    },
+    --shade
+    {
+        Identifier = "Messenger_SHADE_Utah",
+        Name = "Messenger SHADE [Utah]",
+        FilePath = mapServiceConfigs .. "/Utah/MessengerSHADE.wms",
+        Settings = { 
+            Gamma = 1.33,
+            Multiplier = 1.15
+        },
+        BlendMode = "Multiply",
+        Enabled = false
+    },
+    {
+        Identifier = "Messenger_SHADE_Sweden",
+        Name = "Messenger SHADE [Sweden]",
+        FilePath = mapServiceConfigs .. "/LiU/Messenger_SHADE.wms",
+        Settings = { 
+            Gamma = 1.33,
+            Multiplier = 1.15
+        },
+        BlendMode = "Multiply",
+        Enabled = false
+    },
+    --mosaic2 aka 8 color
+    {
+        Identifier = "Messenger_Mosaic2_Utah",
+        Name = "Messenger Mosaic2 [Utah]",
+        FilePath = mapServiceConfigs .. "/Utah/MessengerMosaic2.wms",
+        Enabled = false
+    },
+    {
+        Identifier = "Messenger_Mosaic2_Sweden",
+        Name = "Messenger Mosaic2 [Sweden]",
+        FilePath = mapServiceConfigs .. "/LiU/Messenger_Mosaic_2.wms",
+        Enabled = false
+    },
+    --local textures, these are mineral abundance maps
+    {
+        Identifier = "alsimap_02122015",
+        FilePath = textures .. "/alsimap_02122015.png",
+        Enabled = false,
+        BlendMode = "Multiply",
+    },
+    {
+        Identifier = "casimap_02122015",
+        FilePath = textures .. "/casimap_02122015.png",
+        Enabled = false,
+        BlendMode = "Multiply",
+    },
+    {
+        Identifier = "fesimap_02122015",
+        FilePath = textures .. "/fesimap_02122015.png",
+        Enabled = false,
+        BlendMode = "Multiply",
+    },
+    {
+        Identifier = "mgsimap_02122015",
+        FilePath = textures .. "/mgsimap_02122015.png",
+        Enabled = false,
+        Settings = { 
+            Gamma = 1.33,
+            Multiplier = 1.15
+        },
+        BlendMode = "Multiply",
+        
+    },
+    {
+        Identifier = "ssimap_02122015",
+        FilePath = textures .. "/ssimap_02122015.png",
+        Enabled = false,
+        BlendMode = "Multiply",
     }
 }
 
@@ -49,6 +197,10 @@ local Mercury = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_MERCURY",
             DestinationFrame = "GALACTIC"
+        },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1.0
         }
     },
     Renderable = {
@@ -67,7 +219,6 @@ local Mercury = {
         Path = "/Solar System/Planets/Mercury"
     }
 }
-
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Mercury })

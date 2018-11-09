@@ -25,26 +25,30 @@
 #include <modules/globebrowsing/rendering/gpu/gpulayermanager.h>
 
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <modules/globebrowsing/rendering/gpu/gpulayer.h>
+#include <modules/globebrowsing/rendering/gpu/gpulayergroup.h>
 
 namespace openspace::globebrowsing {
 
+GPULayerManager::~GPULayerManager() {} // NOLINT
+
 void GPULayerManager::setValue(ghoul::opengl::ProgramObject* programObject,
-                               const LayerManager& layerManager,
-                               const TileIndex& tileIndex)
+                               const LayerManager& manager, const TileIndex& tileIndex)
 {
-    auto layerGroups = layerManager.layerGroups();
+    const std::vector<std::shared_ptr<LayerGroup>>& layerGroups = manager.layerGroups();
+
     for (size_t i = 0; i < layerGroups.size(); ++i) {
         _gpuLayerGroups[i]->setValue(programObject, *layerGroups[i], tileIndex);
     }
 }
 
 void GPULayerManager::bind(ghoul::opengl::ProgramObject* programObject,
-                           const LayerManager& layerManager)
+                           const LayerManager& manager)
 {
-    auto layerGroups = layerManager.layerGroups();
+    const std::vector<std::shared_ptr<LayerGroup>>& layerGroups = manager.layerGroups();
     if (_gpuLayerGroups.size() != layerGroups.size()) {
         _gpuLayerGroups.resize(layerGroups.size());
-        for (auto& gpuLayerGroup : _gpuLayerGroups){
+        for (std::unique_ptr<GPULayerGroup>& gpuLayerGroup : _gpuLayerGroups) {
             gpuLayerGroup = std::make_unique<GPULayerGroup>();
         }
     }

@@ -29,36 +29,31 @@
 #include <modules/volume/envelope.h>
 
 namespace ghoul { class Dictionary; }
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace::volume {
+
 class TransferFunction {
 public:
-    TransferFunction();
-    TransferFunction(int s);
-    TransferFunction(std::string);
-    TransferFunction(const TransferFunction& tf);
-    TransferFunction(TransferFunction&& tf);
+    TransferFunction() = default;
+    TransferFunction(const std::string& string);
 
-    bool getEnvelopesToLua(lua_State* state);
+    bool envelopesToLua(lua_State* state);
 
-    bool setEnvelopesFromString(std::string s);
+    bool setEnvelopesFromString(const std::string& s);
     bool setEnvelopesFromLua(lua_State* lua);
 
     void loadEnvelopesFromFile(const std::string& path);
     void saveEnvelopesToFile(const std::string& path);
 
-    TransferFunction& operator=(const TransferFunction& tf);
-    TransferFunction& operator=(TransferFunction&& tf);
     bool operator!=(const TransferFunction& tf);
     bool hasEnvelopes() const;
 
-    bool createTexture(std::shared_ptr<ghoul::opengl::Texture> ptr);
-    std::string getSerializedToString() const;
+    bool createTexture(ghoul::opengl::Texture& ptr);
+    std::string serializedToString() const;
 
 private:
     int _width = 1024;
-    double lower = 0.0;
-    double upper = 1.0;
     std::string _loadableFilePath;
     std::vector<Envelope> _envelopes;
 };

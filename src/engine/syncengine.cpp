@@ -25,9 +25,7 @@
 #include <openspace/engine/syncengine.h>
 
 #include <openspace/util/syncdata.h>
-
 #include <ghoul/misc/assert.h>
-
 #include <algorithm>
 
 namespace openspace {
@@ -56,13 +54,13 @@ void SyncEngine::decodeSyncables() {
 
 void SyncEngine::preSynchronization(IsMaster isMaster) {
     for (Syncable* syncable : _syncables) {
-        syncable->presync(isMaster);
+        syncable->preSync(isMaster);
     }
 }
 
 void SyncEngine::postSynchronization(IsMaster isMaster) {
     for (Syncable* syncable : _syncables) {
-        syncable->postsync(isMaster);
+        syncable->postSync(isMaster);
     }
 }
 

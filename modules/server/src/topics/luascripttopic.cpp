@@ -22,24 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/openspaceengine.h>
+#include <modules/server/include/topics/luascripttopic.h>
+
+#include <openspace/json.h>
+#include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
-#include <modules/server/include/luascripttopic.h>
 
 namespace {
-const std::string ScriptKey = "script";
-const std::string _loggerCat = "LuaScriptTopic";
-}
+    constexpr const char* ScriptKey = "script";
+    constexpr const char* _loggerCat = "LuaScriptTopic";
+} // namespace
 
 namespace openspace {
 
-void LuaScriptTopic::handleJson(nlohmann::json json) {
+void LuaScriptTopic::handleJson(const nlohmann::json& json) {
     try {
-        auto script = json.at(ScriptKey).get<std::string>();
+        std::string script = json.at(ScriptKey).get<std::string>();
         LDEBUG("Queueing Lua script: " + script);
-        OsEng.scriptEngine().queueScript(
-            script,
+        global::scriptEngine.queueScript(
+            std::move(script),
             scripting::ScriptEngine::RemoteScripting::No
         );
     }
@@ -49,4 +51,8 @@ void LuaScriptTopic::handleJson(nlohmann::json json) {
     }
 }
 
+bool LuaScriptTopic::isDone() const {
+    return true;
 }
+
+} // namespace openspace

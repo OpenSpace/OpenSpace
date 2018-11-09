@@ -32,7 +32,6 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/util/spicemanager.h>
-
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -82,8 +81,10 @@ private:
         return _colors.active.value() * t + _colors.targetInFieldOfView.value() * (1 - t);
     }
 
-    void computeIntercepts(const UpdateData& data, const std::string& target, bool inFOV);
-    glm::dvec3 orthogonalProjection(const glm::dvec3& camvec, double time,
+    void computeIntercepts(const UpdateData& data, const std::string& target,
+        bool isInFov);
+
+    glm::dvec3 orthogonalProjection(const glm::dvec3& vecFov, double time,
         const std::string& target) const;
     glm::dvec3 checkForIntercept(const glm::dvec3& ray, double time,
         const std::string& target) const;
@@ -92,7 +93,7 @@ private:
     properties::FloatProperty _lineWidth;
     properties::BoolProperty _drawSolid;
     properties::DoubleProperty _standOffDistance;
-    ghoul::opengl::ProgramObject* _programObject;
+    ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(modelViewProjection, defaultColorStart, defaultColorEnd, activeColor,
         targetInFieldOfViewColor, intersectionStartColor, intersectionEndColor,
         squareColor, interpolation) _uniformCache;
@@ -106,7 +107,7 @@ private:
     //std::vector<float> _fovPlane;
 
     std::string _previousTarget;
-    bool _drawFOV;
+    bool _drawFOV = false;
 
     struct {
         std::string spacecraft;
@@ -119,7 +120,7 @@ private:
         std::vector<std::string> potentialTargets;
     } _instrument;
 
-    float _interpolationTime;
+    float _interpolationTime = 0.f;
 
     struct RenderInformation {
         // Differentiating different vertex types

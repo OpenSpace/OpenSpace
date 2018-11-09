@@ -31,9 +31,7 @@
 #include <openspace/properties/matrix/mat3property.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-
 #include <ghoul/opengl/uniformcache.h>
-
 #include <memory>
 
 namespace ghoul::opengl {
@@ -45,6 +43,7 @@ namespace openspace {
 
 struct RenderData;
 struct UpdateData;
+class LightSource;
 
 namespace documentation { struct Documentation; }
 namespace modelgeometry { class ModelGeometry; }
@@ -52,7 +51,9 @@ namespace modelgeometry { class ModelGeometry; }
 class RenderableModel : public Renderable {
 public:
     RenderableModel(const ghoul::Dictionary& dictionary);
+    ~RenderableModel();
 
+    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
 
@@ -70,16 +71,27 @@ private:
     std::unique_ptr<modelgeometry::ModelGeometry> _geometry;
 
     properties::StringProperty _colorTexturePath;
+
+    properties::FloatProperty _ambientIntensity;
+    properties::FloatProperty _diffuseIntensity;
+    properties::FloatProperty _specularIntensity;
+
     properties::BoolProperty _performShading;
     properties::Mat3Property _modelTransform;
 
-    ghoul::opengl::ProgramObject* _programObject;
-    UniformCache(opacity, directionToSunViewSpace, modelViewTransform,
-        projectionTransform, performShading, texture) _uniformCache;
+    ghoul::opengl::ProgramObject* _program = nullptr;
+    UniformCache(opacity, nLightSources, lightDirectionsViewSpace, lightIntensities,
+        modelViewTransform, projectionTransform, performShading, texture,
+        ambientIntensity, diffuseIntensity, specularIntensity) _uniformCache;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::vector<std::unique_ptr<LightSource>> _lightSources;
 
-    glm::dvec3 _sunPos;
+    // Buffers for uniform uploading
+    std::vector<float> _lightIntensitiesBuffer;
+    std::vector<glm::vec3> _lightDirectionsViewSpaceBuffer;
+
+    properties::PropertyOwner _lightSourcePropertyOwner;
 };
 
 }  // namespace openspace

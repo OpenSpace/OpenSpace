@@ -26,24 +26,17 @@
 
 #include <modules/imgui/include/guiglobebrowsingcomponent.h>
 
-#include <modules/imgui/include/imgui_include.h>
-
 #include <modules/globebrowsing/globebrowsingmodule.h>
-
-#include <openspace/engine/openspaceengine.h>
+#include <modules/imgui/include/imgui_include.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/interaction/navigationhandler.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
-
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/misc/defer.h>
-
 #include <ghoul/fmt.h>
-
+#include <ghoul/logging/logmanager.h>
 #include <numeric>
 
 namespace {
@@ -57,7 +50,7 @@ GuiGlobeBrowsingComponent::GuiGlobeBrowsingComponent()
 {}
 
 void GuiGlobeBrowsingComponent::render() {
-    GlobeBrowsingModule* module = OsEng.moduleEngine().module<GlobeBrowsingModule>();
+    GlobeBrowsingModule* module = global::moduleEngine.module<GlobeBrowsingModule>();
     using UrlInfo = GlobeBrowsingModule::UrlInfo;
     using Capabilities = GlobeBrowsingModule::Capabilities;
     using Layer = GlobeBrowsingModule::Layer;
@@ -73,14 +66,14 @@ void GuiGlobeBrowsingComponent::render() {
 
     // Render the list of planets
     std::vector<SceneGraphNode*> nodes =
-        OsEng.renderEngine().scene()->allSceneGraphNodes();
+        global::renderEngine.scene()->allSceneGraphNodes();
 
     nodes.erase(
         std::remove_if(
             nodes.begin(),
             nodes.end(),
             [](SceneGraphNode* n) {
-                Renderable* r = n->renderable();
+                const Renderable* r = n->renderable();
                 return !r || r->identifier() != "RenderableGlobe";
             }
         ),
@@ -90,8 +83,8 @@ void GuiGlobeBrowsingComponent::render() {
         nodes.begin(),
         nodes.end(),
         [module](SceneGraphNode* lhs, SceneGraphNode* rhs) {
-            bool lhsHasUrl = module->hasUrlInfo(lhs->identifier());
-            bool rhsHasUrl = module->hasUrlInfo(rhs->identifier());
+            const bool lhsHasUrl = module->hasUrlInfo(lhs->identifier());
+            const bool rhsHasUrl = module->hasUrlInfo(rhs->identifier());
 
             if (lhsHasUrl && !rhsHasUrl) {
                 return true;
@@ -131,15 +124,15 @@ void GuiGlobeBrowsingComponent::render() {
         // node
 
         // Check if the focus node is a RenderableGlobe
-        const SceneGraphNode* const focus = OsEng.navigationHandler().focusNode();
-        auto it = std::find(nodes.cbegin(), nodes.cend(), focus);
+        const SceneGraphNode* const focus = global::navigationHandler.focusNode();
+        const auto it = std::find(nodes.cbegin(), nodes.cend(), focus);
         if (it != nodes.end()) {
             _currentNode = focus->identifier();
             iNode = static_cast<int>(std::distance(nodes.cbegin(), it));
         }
     }
     else {
-        auto it = std::find_if(
+        const auto it = std::find_if(
             nodes.cbegin(),
             nodes.cend(),
             [this](SceneGraphNode* lhs) {
@@ -149,17 +142,17 @@ void GuiGlobeBrowsingComponent::render() {
         iNode = static_cast<int>(std::distance(nodes.cbegin(), it));
     }
 
-    bool nodeChanged = ImGui::Combo("Globe", &iNode, nodeNames.c_str());
+    bool isNodeChanged = ImGui::Combo("Globe", &iNode, nodeNames.c_str());
 
     ImGui::SameLine();
     bool selectFocusNode = ImGui::Button("From Focus");
     if (selectFocusNode) {
-        const SceneGraphNode* const focus = OsEng.navigationHandler().focusNode();
-        auto it = std::find(nodes.cbegin(), nodes.cend(), focus);
+        const SceneGraphNode* const focus = global::navigationHandler.focusNode();
+        const auto it = std::find(nodes.cbegin(), nodes.cend(), focus);
         if (it != nodes.end()) {
             _currentNode = focus->identifier();
             iNode = static_cast<int>(std::distance(nodes.cbegin(), it));
-            nodeChanged = true;
+            isNodeChanged = true;
         }
     }
 
@@ -176,7 +169,7 @@ void GuiGlobeBrowsingComponent::render() {
 
     _currentNode = nodes[iNode]->identifier();
 
-    if (nodeChanged) {
+    if (isNodeChanged) {
         _currentServer = "";
     }
 
@@ -203,7 +196,7 @@ void GuiGlobeBrowsingComponent::render() {
         }
     }
     else {
-        auto it = std::find_if(
+        const auto it = std::find_if(
             urlInfo.cbegin(),
             urlInfo.cend(),
             [this](const UrlInfo& i) {
@@ -224,14 +217,14 @@ void GuiGlobeBrowsingComponent::render() {
     }
 
     if (ImGui::BeginPopup("globebrowsing_add_server")) {
-        constexpr int InputBufferSize = 512;
+        constexpr const int InputBufferSize = 512;
         static char NameInputBuffer[InputBufferSize];
-        static char UrlInputBuffer[InputBufferSize];
         ImGui::InputText("Server Name", NameInputBuffer, InputBufferSize);
 
+        static char UrlInputBuffer[InputBufferSize];
         ImGui::InputText("Server URL", UrlInputBuffer, InputBufferSize);
 
-        bool addServer = ImGui::Button("Add Server");
+        const bool addServer = ImGui::Button("Add Server");
         if (addServer && (!_currentNode.empty())) {
             module->loadWMSCapabilities(
                 std::string(NameInputBuffer),
@@ -250,7 +243,7 @@ void GuiGlobeBrowsingComponent::render() {
     }
     ImGui::SameLine(0.f, 20.f);
 
-    bool deleteServer = ImGui::Button("Delete Server");
+    const bool deleteServer = ImGui::Button("Delete Server");
     if (deleteServer) {
         module->removeWMSServer(_currentServer);
         _currentServer = "";
@@ -264,7 +257,6 @@ void GuiGlobeBrowsingComponent::render() {
     _currentServer = urlInfo[iServer].name;
 
 
-
     // Can't use urlIt here since it might have been invalidated before
     if (urlInfo.empty()) {
         // There are no server so we have to bail
@@ -276,16 +268,13 @@ void GuiGlobeBrowsingComponent::render() {
     Capabilities cap = module->capabilities(_currentServer);
 
     if (cap.empty()) {
-        LWARNINGC(
-            "GlobeBrowsingGUI",
-            fmt::format("Unknown server: '{}'", _currentServer)
-        );
+        LWARNINGC("GlobeBrowsing", fmt::format("Unknown server: '{}'", _currentServer));
     }
 
     ImGui::Columns(6, nullptr, false);
 
-    float width = ImGui::GetWindowWidth();
-    constexpr float ButtonWidth = 60.f;
+    const float width = ImGui::GetWindowWidth();
+    constexpr const float ButtonWidth = 60.f;
     ImGui::SetColumnOffset(5, width - 1.5f * ButtonWidth);
     ImGui::SetColumnOffset(4, width - 2.5f * ButtonWidth);
     ImGui::SetColumnOffset(3, width - 3.5f * ButtonWidth);
@@ -293,7 +282,6 @@ void GuiGlobeBrowsingComponent::render() {
     ImGui::SetColumnOffset(1, width - 5.5f * ButtonWidth);
     ImGui::SetColumnOffset(0, 0);
 
-    //ImGui::PushItemWidth(500.f);
     ImGui::Text("%s", "Layer name");
     ImGui::NextColumn();
     ImGui::Text("%s", "Add as ...");
@@ -314,29 +302,29 @@ void GuiGlobeBrowsingComponent::render() {
         ImGui::Text("%s", l.name.c_str());
         ImGui::NextColumn();
 
-        bool addColor = ImGui::Button("Color", { ButtonWidth, 25.f });
+        const bool addColor = ImGui::Button("Color", { ButtonWidth, 25.f });
         ImGui::NextColumn();
 
-        bool addNight = ImGui::Button("Night", { ButtonWidth, 25.f });
+        const bool addNight = ImGui::Button("Night", { ButtonWidth, 25.f });
         ImGui::NextColumn();
 
-        bool addOverlay = ImGui::Button("Overlay", { ButtonWidth, 25.f });
+        const bool addOverlay = ImGui::Button("Overlay", { ButtonWidth, 25.f });
         ImGui::NextColumn();
 
-        bool addHeight = ImGui::Button("Height", { ButtonWidth, 25.f });
+        const bool addHeight = ImGui::Button("Height", { ButtonWidth, 25.f });
         ImGui::NextColumn();
 
-        bool addWaterMask = ImGui::Button("Water", { ButtonWidth, 25.f });
+        const bool addWaterMask = ImGui::Button("Water", { ButtonWidth, 25.f });
         ImGui::NextColumn();
 
-        auto addFunc = [this, &l](const std::string& type) {
+        auto addFunc = [n = _currentNode, &l](const std::string& type) {
             std::string layerName = l.name;
             std::replace(layerName.begin(), layerName.end(), '.', '-');
             layerName.erase(
                 std::remove(layerName.begin(), layerName.end(), ' '),
                 layerName.end()
             );
-            OsEng.scriptEngine().queueScript(
+            global::scriptEngine.queueScript(
                 fmt::format(
                     "openspace.globebrowsing.addLayer(\
                         '{}', \
@@ -348,7 +336,7 @@ void GuiGlobeBrowsingComponent::render() {
                             Enabled = true\
                         }}\
                     );",
-                    _currentNode,
+                    n,
                     type,
                     layerName,
                     l.name,

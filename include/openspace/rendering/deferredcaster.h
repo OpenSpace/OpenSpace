@@ -25,10 +25,7 @@
 #ifndef __OPENSPACE_CORE___DEFERREDCASTER___H
 #define __OPENSPACE_CORE___DEFERREDCASTER___H
 
-#include <openspace/util/updatestructures.h>
-
 #include <string>
-#include <vector>
 
 namespace ghoul::opengl {
     class Texture;

@@ -25,33 +25,29 @@
 #ifndef __OPENSPACE_MODULE_ISWA___ISWABASEGROUP___H__
 #define __OPENSPACE_MODULE_ISWA___ISWABASEGROUP___H__
 
-#include <ghoul/designpattern/event.h>
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/selectionproperty.h>
-#include <openspace/properties/vectorproperty.h>
+
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/engine/openspaceengine.h>
-// #include <modules/iswa/rendering/iswacygnet.h>
 #include <openspace/properties/triggerproperty.h>
-#include <modules/iswa/util/iswamanager.h>
-#include <modules/iswa/util/dataprocessor.h>
+#include <ghoul/designpattern/event.h>
 
 namespace openspace {
 
+class DataProcessor;
 class IswaCygnet;
 
-class IswaBaseGroup : public properties::PropertyOwner{
+class IswaBaseGroup : public properties::PropertyOwner {
 public:
     IswaBaseGroup(std::string name, std::string type);
     ~IswaBaseGroup();
-    bool isType(std::string type);
+    bool isType(const std::string& type) const;
 
     void updateGroup();
     virtual void clearGroup();
 
     std::shared_ptr<DataProcessor> dataProcessor();
-    std::shared_ptr<ghoul::Event<ghoul::Dictionary> > groupEvent();
+    ghoul::Event<ghoul::Dictionary>& groupEvent();
 
 protected:
     void registerProperties();
@@ -61,10 +57,10 @@ protected:
     properties::FloatProperty _alpha;
     properties::TriggerProperty _delete;
 
-    std::shared_ptr<ghoul::Event<ghoul::Dictionary> > _groupEvent;
+    ghoul::Event<ghoul::Dictionary> _groupEvent;
     std::shared_ptr<DataProcessor> _dataProcessor;
 
-    bool _registered;
+    bool _registered = false;
     std::string _type;
 };
 

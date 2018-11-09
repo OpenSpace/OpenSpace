@@ -22,10 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifdef OPENSPACE_WITH_ABUFFER_RENDERER
+
 #include <openspace/rendering/abufferrenderer.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/performance/performancemeasurement.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderengine.h>
@@ -36,14 +38,10 @@
 #include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/timemanager.h>
-
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-
-#include <string>
-#include <iterator>
 
 namespace {
     constexpr const char* _loggerCat = "ABufferRenderer";
@@ -51,6 +49,7 @@ namespace {
         "${SHADERS}/abuffer/boundsabuffer.frag";
     constexpr const char* RenderFragmentShaderPath =
         "${SHADERS}/abuffer/renderabuffer.frag";
+
     constexpr int MaxRaycasters = 32;
     constexpr int MaxLayers = 32;
     constexpr int MaxAverageLayers = 8;
@@ -58,33 +57,17 @@ namespace {
 
 namespace openspace {
 
-ABufferRenderer::ABufferRenderer()
-    : _resolution(glm::ivec2(0))
-    , _dirtyResolution(true)
-    , _dirtyRendererData(true)
-    , _dirtyRaycastData(true)
-    , _dirtyResolveDictionary(true)
-    , _resolveProgram(nullptr)
-    , _hdrExposure(0.4f)
-    , _hdrBackground(2.8f)
-    , _gamma(2.2f)
-{}
-
-ABufferRenderer::~ABufferRenderer() {}
-
 void ABufferRenderer::initialize() {
     LINFO("Initializing ABufferRenderer");
-    const GLfloat size = 1.f;
-    const GLfloat vertex_data[] = {
-        //      x      y     s     t
-        -size, -size, 0.f, 1.f,
-        size,   size, 0.f, 1.f,
-        -size,  size, 0.f, 1.f,
-        -size, -size, 0.f, 1.f,
-        size,  -size, 0.f, 1.f,
-        size,   size, 0.f, 1.f,
+    const GLfloat vertexData[] = {
+        // x     y
+        -1.f, -1.f,
+         1.f,  1.f,
+        -1.f,  1.f,
+        -1.f, -1.f,
+         1.f, -1.f,
+         1.f,  1.f,
     };
-
 
     glGenVertexArrays(1, &_screenQuad);
     glBindVertexArray(_screenQuad);
@@ -92,8 +75,8 @@ void ABufferRenderer::initialize() {
     glGenBuffers(1, &_vertexPositionBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, nullptr);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, nullptr);
     glEnableVertexAttribArray(0);
 
     glGenTextures(1, &_anchorPointerTexture);
@@ -147,15 +130,15 @@ void ABufferRenderer::initialize() {
 
         _resolveProgram = ghoul::opengl::ProgramObject::Build(
             "ABuffer Resolve",
-            "${SHADERS}/abuffer/resolveabuffer.vert",
-            "${SHADERS}/abuffer/resolveabuffer.frag",
+            absPath("${SHADERS}/abuffer/resolveabuffer.vert"),
+            absPath("${SHADERS}/abuffer/resolveabuffer.frag"),
             dict
         );
     } catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
     }
 
-    OsEng.renderEngine().raycasterManager().addListener(*this);
+    global::raycasterManager.addListener(*this);
 }
 
 void ABufferRenderer::deinitialize() {
@@ -170,10 +153,10 @@ void ABufferRenderer::deinitialize() {
     glDeleteBuffers(1, &_vertexPositionBuffer);
     glDeleteVertexArrays(1, &_screenQuad);
 
-    OsEng.renderEngine().raycasterManager().removeListener(*this);
+    global::raycasterManager.removeListener(*this);
 }
 
-void ABufferRenderer::raycastersChanged(VolumeRaycaster&, bool) {
+void ABufferRenderer::raycastersChanged(VolumeRaycaster&, IsAttached) {
     _dirtyRaycastData = true;
 }
 
@@ -227,7 +210,7 @@ void ABufferRenderer::update() {
         if (program.second->isDirty()) {
             try {
                 program.second->rebuildFromFile();
-            } catch (const ghoul::RuntimeError e) {
+            } catch (const ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);
             }
         }
@@ -241,8 +224,8 @@ void ABufferRenderer::updateMSAASamplingPattern() {
 
     constexpr const int GridSize = 32;
     GLfloat step = 2.f / static_cast<GLfloat>(GridSize);
-    GLfloat sizeX = -1.0f;
-    GLfloat sizeY = 1.0f;
+    GLfloat sizeX = -1.f;
+    GLfloat sizeY = 1.f;
 
     constexpr const int NVertex = 4 * 6;
     // openPixelSizeVertexData
@@ -287,11 +270,10 @@ void ABufferRenderer::updateMSAASamplingPattern() {
     }
 
     GLuint pixelSizeQuadVAO = 0;
-    GLuint pixelSizeQuadVBO = 0;
-
     glGenVertexArrays(1, &pixelSizeQuadVAO);
     glBindVertexArray(pixelSizeQuadVAO);
 
+    GLuint pixelSizeQuadVBO = 0;
     glGenBuffers(1, &pixelSizeQuadVBO);
     glBindBuffer(GL_ARRAY_BUFFER, pixelSizeQuadVBO);
 
@@ -313,24 +295,24 @@ void ABufferRenderer::updateMSAASamplingPattern() {
     glGetIntegerv(GL_VIEWPORT, viewport);
 
     // Main framebuffer
-    GLuint pixelSizeTexture = 0;
-    GLuint pixelSizeFramebuffer = 0;
 
+    GLuint pixelSizeTexture = 0;
     glGenTextures(1, &pixelSizeTexture);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, pixelSizeTexture);
 
-    const GLsizei ONEPIXEL = 1;
+    constexpr const GLsizei OnePixel = 1;
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
         GL_RGBA32F,
-        ONEPIXEL,
-        ONEPIXEL,
+        OnePixel,
+        OnePixel,
         true
     );
 
-    glViewport(0, 0, ONEPIXEL, ONEPIXEL);
+    glViewport(0, 0, OnePixel, OnePixel);
 
+    GLuint pixelSizeFramebuffer = 0;
     glGenFramebuffers(1, &pixelSizeFramebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, pixelSizeFramebuffer);
     glFramebufferTexture2D(
@@ -344,7 +326,7 @@ void ABufferRenderer::updateMSAASamplingPattern() {
     GLenum textureBuffers[1] = { GL_COLOR_ATTACHMENT0 };
     glDrawBuffers(1, textureBuffers);
 
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -356,8 +338,8 @@ void ABufferRenderer::updateMSAASamplingPattern() {
     std::unique_ptr<ghoul::opengl::ProgramObject> pixelSizeProgram =
         ghoul::opengl::ProgramObject::Build(
             "OnePixel MSAA",
-            "${SHADERS}/framebuffer/pixelSizeMSAA.vert",
-            "${SHADERS}/framebuffer/pixelSizeMSAA.frag"
+            absPath("${SHADERS}/framebuffer/pixelSizeMSAA.vert"),
+            absPath("${SHADERS}/framebuffer/pixelSizeMSAA.frag")
         );
 
     pixelSizeProgram->activate();
@@ -388,46 +370,46 @@ void ABufferRenderer::updateMSAASamplingPattern() {
 
     for (int x = 0; x < _nAaSamples; ++x) {
         nOneStripVertexData[x * (NVertex + 12)] = sizeX;
-        nOneStripVertexData[x * (NVertex + 12) + 1] = -1.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 2] = 0.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 3] = 1.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 4] = 0.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 5] = 0.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 1] = -1.f;
+        nOneStripVertexData[x * (NVertex + 12) + 2] = 0.f;
+        nOneStripVertexData[x * (NVertex + 12) + 3] = 1.f;
+        nOneStripVertexData[x * (NVertex + 12) + 4] = 0.f;
+        nOneStripVertexData[x * (NVertex + 12) + 5] = 0.f;
 
         nOneStripVertexData[x * (NVertex + 12) + 6] = sizeX + step;
-        nOneStripVertexData[x * (NVertex + 12) + 7] = 1.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 8] = 0.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 9] = 1.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 10] = 1.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 11] = 1.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 7] = 1.f;
+        nOneStripVertexData[x * (NVertex + 12) + 8] = 0.f;
+        nOneStripVertexData[x * (NVertex + 12) + 9] = 1.f;
+        nOneStripVertexData[x * (NVertex + 12) + 10] = 1.f;
+        nOneStripVertexData[x * (NVertex + 12) + 11] = 1.f;
 
         nOneStripVertexData[x * (NVertex + 12) + 12] = sizeX;
-        nOneStripVertexData[x * (NVertex + 12) + 13] = 1.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 14] = 0.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 15] = 1.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 16] = 1.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 17] = 0.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 13] = 1.f;
+        nOneStripVertexData[x * (NVertex + 12) + 14] = 0.f;
+        nOneStripVertexData[x * (NVertex + 12) + 15] = 1.f;
+        nOneStripVertexData[x * (NVertex + 12) + 16] = 1.f;
+        nOneStripVertexData[x * (NVertex + 12) + 17] = 0.f;
 
         nOneStripVertexData[x * (NVertex + 12) + 18] = sizeX;
-        nOneStripVertexData[x * (NVertex + 12) + 19] = -1.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 20] = 0.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 21] = 1.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 22] = 0.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 23] = 0.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 19] = -1.f;
+        nOneStripVertexData[x * (NVertex + 12) + 20] = 0.f;
+        nOneStripVertexData[x * (NVertex + 12) + 21] = 1.f;
+        nOneStripVertexData[x * (NVertex + 12) + 22] = 0.f;
+        nOneStripVertexData[x * (NVertex + 12) + 23] = 0.f;
 
         nOneStripVertexData[x * (NVertex + 12) + 24] = sizeX + step;
-        nOneStripVertexData[x * (NVertex + 12) + 25] = -1.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 26] = 0.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 27] = 1.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 28] = 0.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 29] = 1.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 25] = -1.f;
+        nOneStripVertexData[x * (NVertex + 12) + 26] = 0.f;
+        nOneStripVertexData[x * (NVertex + 12) + 27] = 1.f;
+        nOneStripVertexData[x * (NVertex + 12) + 28] = 0.f;
+        nOneStripVertexData[x * (NVertex + 12) + 29] = 1.f;
 
         nOneStripVertexData[x * (NVertex + 12) + 30] = sizeX + step;
-        nOneStripVertexData[x * (NVertex + 12) + 31] = 1.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 32] = 0.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 33] = 1.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 34] = 1.0f;
-        nOneStripVertexData[x * (NVertex + 12) + 35] = 1.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 31] = 1.f;
+        nOneStripVertexData[x * (NVertex + 12) + 32] = 0.f;
+        nOneStripVertexData[x * (NVertex + 12) + 33] = 1.f;
+        nOneStripVertexData[x * (NVertex + 12) + 34] = 1.f;
+        nOneStripVertexData[x * (NVertex + 12) + 35] = 1.f;
 
         sizeX += step;
     }
@@ -473,7 +455,7 @@ void ABufferRenderer::updateMSAASamplingPattern() {
         0,
         GL_RGBA32F,
         _nAaSamples,
-        ONEPIXEL,
+        OnePixel,
         0,
         GL_RGBA,
         GL_FLOAT,
@@ -498,13 +480,13 @@ void ABufferRenderer::updateMSAASamplingPattern() {
         LERROR("nOneStrip framebuffer is not complete");
     }
 
-    glViewport(0, 0, _nAaSamples, ONEPIXEL);
+    glViewport(0, 0, _nAaSamples, OnePixel);
 
     std::unique_ptr<ghoul::opengl::ProgramObject> nOneStripProgram =
         ghoul::opengl::ProgramObject::Build(
             "OneStrip MSAA",
-            "${SHADERS}/framebuffer/nOneStripMSAA.vert",
-            "${SHADERS}/framebuffer/nOneStripMSAA.frag"
+            absPath("${SHADERS}/framebuffer/nOneStripMSAA.vert"),
+            absPath("${SHADERS}/framebuffer/nOneStripMSAA.frag")
         );
 
     nOneStripProgram->activate();
@@ -560,21 +542,19 @@ void ABufferRenderer::updateMSAASamplingPattern() {
     glDeleteVertexArrays(1, &nOneStripVAO);
 }
 
-void ABufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor,
-                             bool doPerformanceMeasurements)
-{
+void ABufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor) {
     PerfMeasure("ABufferRenderer::render");
 
     if (!scene || !camera) {
         return;
     }
 
-    _mainColorTextureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
-    _mainColorTextureUnit->activate();
+    ghoul::opengl::TextureUnit mainColorTextureUnit;
+    mainColorTextureUnit.activate();
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
 
-    _mainDepthTextureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
-    _mainDepthTextureUnit->activate();
+    ghoul::opengl::TextureUnit mainDepthTextureUnit;
+    mainDepthTextureUnit.activate();
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -602,15 +582,8 @@ void ABufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor,
         static_cast<int>(Renderable::RenderBin::Transparent) |
         static_cast<int>(Renderable::RenderBin::Overlay);
 
-    Time time = OsEng.timeManager().time();
-    RenderData data {
-        *camera,
-        psc(),
-        time,
-        doPerformanceMeasurements,
-        renderBinMask,
-        {}
-    };
+    Time time = global::timeManager.time();
+    RenderData data{ *camera, psc(), time, doPerformanceMeasurements, renderBinMask, {} };
     RendererTasks tasks;
     scene->render(data, tasks);
     _blackoutFactor = blackoutFactor;
@@ -659,8 +632,8 @@ void ABufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor,
 
     // END TEMPORARY GAMMA CORRECTION.
 
-    _resolveProgram->setUniform("mainColorTexture", _mainColorTextureUnit->unitNumber());
-    _resolveProgram->setUniform("mainDepthTexture", _mainDepthTextureUnit->unitNumber());
+    _resolveProgram->setUniform("mainColorTexture", mainColorTextureUnit.unitNumber());
+    _resolveProgram->setUniform("mainDepthTexture", mainDepthTextureUnit.unitNumber());
     _resolveProgram->setUniform("blackoutFactor", _blackoutFactor);
     _resolveProgram->setUniform("nAaSamples", _nAaSamples);
 
@@ -676,9 +649,6 @@ void ABufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor,
     }
 
     _resolveProgram->deactivate();
-
-    _mainColorTextureUnit = nullptr;
-    _mainDepthTextureUnit = nullptr;
 }
 
 void ABufferRenderer::preRaycast(const RaycasterTask& raycasterTask) {
@@ -689,13 +659,13 @@ void ABufferRenderer::preRaycast(const RaycasterTask& raycasterTask) {
     raycaster.preRaycast(raycastData, *_resolveProgram);
 
     glm::vec3 localCameraPosition;
-    bool cameraIsInside = raycaster.cameraIsInside(renderData, localCameraPosition);
+    bool isCameraInside = raycaster.isCameraInside(renderData, localCameraPosition);
     int uniformIndex = raycastData.id + 1; // uniforms are indexed from 1 (not from 0)
     _resolveProgram->setUniform(
         "insideRaycaster" + std::to_string(uniformIndex),
-        cameraIsInside
+        isCameraInside
     );
-    if (cameraIsInside) {
+    if (isCameraInside) {
         _resolveProgram->setUniform(
             "cameraPosInRaycaster" + std::to_string(uniformIndex),
             localCameraPosition
@@ -731,7 +701,7 @@ void ABufferRenderer::setNAaSamples(int nAaSamples) {
 
 void ABufferRenderer::setHDRExposure(float hdrExposure) {
     _hdrExposure = hdrExposure;
-    if (_hdrExposure < 0.0) {
+    if (_hdrExposure < 0.f) {
         LERROR("HDR Exposure constant must be greater than zero.");
         _hdrExposure = 1.0;
     }
@@ -739,7 +709,7 @@ void ABufferRenderer::setHDRExposure(float hdrExposure) {
 
 void ABufferRenderer::setHDRBackground(float hdrBackground) {
     _hdrBackground = hdrBackground;
-    if (_hdrBackground < 0.0) {
+    if (_hdrBackground < 0.f) {
         LERROR("HDR Background constant must be greater than zero.");
         _hdrBackground = 1.0;
     }
@@ -748,7 +718,7 @@ void ABufferRenderer::setHDRBackground(float hdrBackground) {
 
 void ABufferRenderer::setGamma(float gamma) {
     _gamma = gamma;
-    if (_gamma < 0.0f) {
+    if (_gamma < 0.f) {
         LERROR("Gamma value must be greater than zero.");
         _gamma = 2.2f;
     }
@@ -762,7 +732,7 @@ int ABufferRenderer::nAaSamples() const {
     return _nAaSamples;
 }
 
-std::vector<double> ABufferRenderer::mSSAPattern() const {
+const std::vector<double>& ABufferRenderer::mSSAPattern() const {
     return _mSAAPattern;
 }
 
@@ -866,11 +836,11 @@ void ABufferRenderer::updateResolveDictionary() {
     ghoul::Dictionary dict;
     ghoul::Dictionary raycastersDict;
 
-    for (const auto& raycastPair : _raycastData) {
+    for (const std::pair<VolumeRaycaster*, RaycastData>& raycastPair : _raycastData) {
         ghoul::Dictionary innerDict;
         int id = raycastPair.second.id;
         std::string namespaceName = raycastPair.second.namespaceName;
-        std::string raycastPath = raycastPair.first->getRaycastPath();
+        std::string raycastPath = raycastPair.first->raycasterPath();
 
         innerDict.setValue("id", id);
         innerDict.setValue("namespace", namespaceName);
@@ -888,13 +858,13 @@ void ABufferRenderer::updateResolveDictionary() {
     }
 
     dict.setValue("helperPaths", helperPathsDict);
-    dict.setValue("raycastingEnabled", _raycastData.size() > 0);
+    dict.setValue("raycastingEnabled", !_raycastData.empty());
     dict.setValue("storeSorted", true);
     dict.setValue("nRaycasters", static_cast<unsigned long long>(_raycastData.size()));
 
     _resolveDictionary = dict;
 
-    OsEng.renderEngine().setResolveData(dict);
+    global::renderEngine.setResolveData(dict);
 
     _dirtyResolveDictionary = false;
 }
@@ -907,7 +877,7 @@ void ABufferRenderer::updateRaycastData() {
     _helperPaths.clear();
 
     const std::vector<VolumeRaycaster*>& raycasters =
-        OsEng.renderEngine().raycasterManager().raycasters();
+        global::renderEngine.raycasterManager().raycasters();
 
     std::map<std::string, int> namespaceIndices;
     // raycaster ids are positive integers starting at 0. (for raycasters,
@@ -915,7 +885,7 @@ void ABufferRenderer::updateRaycastData() {
     int nextId = 0;
     int nextNamespaceIndex = 0;
 
-    for (auto &raycaster : raycasters) {
+    for (VolumeRaycaster* raycaster : raycasters) {
         if (nextId > MaxRaycasters) {
             int nIgnored = MaxRaycasters - static_cast<int>(raycasters.size());
             LWARNING(fmt::format(
@@ -929,12 +899,12 @@ void ABufferRenderer::updateRaycastData() {
         RaycastData data;
         data.id = nextId++;
 
-        std::string helperPath = raycaster->getHelperPath();
+        std::string helperPath = raycaster->helperPath();
         // Each new helper path generates a new namespace,
         // to avoid glsl name collisions between raycaster implementaitons.
         // Assign a new namespace or find an already created index.
 
-        if (helperPath == "") {
+        if (helperPath.empty()) {
             data.namespaceName = "NAMESPACE_" + std::to_string(nextNamespaceIndex++);
         } else {
             auto iter = namespaceIndices.find(helperPath);
@@ -950,8 +920,8 @@ void ABufferRenderer::updateRaycastData() {
         }
 
         _raycastData[raycaster] = data;
-        std::string vsPath = raycaster->getBoundsVsPath();
-        std::string fsPath = raycaster->getBoundsFsPath();
+        std::string vsPath = raycaster->boundsVertexShaderPath();
+        std::string fsPath = raycaster->boundsFragmentShaderPath();
         ghoul::Dictionary dict;
 
         // set path to the current renderer's main fragment shader
@@ -988,16 +958,14 @@ void ABufferRenderer::updateRendererData() {
 
     _rendererData = dict;
 
-    OsEng.renderEngine().setRendererData(dict);
+    global::renderEngine.setRendererData(dict);
     _dirtyRendererData = false;
 }
 
-void ABufferRenderer::saveTextureToMemory(const GLenum color_buffer_attachment,
-    const int width, const int height, std::vector<double>& memory) const {
-
-    if (!memory.empty()) {
-        memory.clear();
-    }
+void ABufferRenderer::saveTextureToMemory(GLenum color_buffer_attachment, int width,
+                                          int height, std::vector<double>& memory) const
+{
+    memory.clear();
 
     memory.reserve(width * height * 3);
     std::vector<float> tmpMemory(width * height * 3);
@@ -1011,9 +979,11 @@ void ABufferRenderer::saveTextureToMemory(const GLenum color_buffer_attachment,
         glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, tmpMemory.data());
     }
 
-    for (auto i = 0; i < width*height * 3; ++i) {
+    for (int i = 0; i < width * height * 3; ++i) {
         memory[i] = static_cast<double>(tmpMemory[i]);
     }
 }
 
 } // namespace openspace
+
+#endif // OPENSPACE_WITH_ABUFFER_RENDERER

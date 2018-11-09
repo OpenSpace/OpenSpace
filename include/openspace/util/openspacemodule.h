@@ -27,17 +27,16 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/scripting/lualibrary.h>
-
 #include <ghoul/systemcapabilities/version.h>
-
 #include <string>
 #include <vector>
 
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
+
 namespace documentation {  struct Documentation; }
+namespace scripting { struct LuaLibrary; }
 
 class ModuleEngine;
 
@@ -51,7 +50,9 @@ public:
     /**
      * Constructs the OpenSpaceModule with a specific \p name. The uniqueness of the
      * \p name will be checked at a later stage.
+     *
      * \param name The name of this OpenSpace module
+     *
      * \pre \p name must not be empty
      */
     OpenSpaceModule(std::string name);
@@ -87,6 +88,7 @@ public:
 
     /**
      * Returns a list of Documentation classes that are valid for this OpenSpaceModule.
+     *
      * \return A list of Documentation classes that are valid for this OpenSapceModule
      */
     virtual std::vector<documentation::Documentation> documentations() const;
@@ -94,6 +96,7 @@ public:
     /**
      * Returns the Lua library with functions defined by this OpenSpaceModule. The default
      * implementation returns an empty library.
+     *
      * \return The Lua library with functions defined by this OpenSpaceModule
      */
     virtual scripting::LuaLibrary luaLibrary() const;
@@ -103,6 +106,7 @@ public:
      * OpenSpaceModule. Note that the #luaLibrary library is *not* contained in this list
      * as this is solely the list of libraries as defined by, for example Renderables,
      * defined in the OpenSpaceModule.
+     *
      * \return A list of libraries defined by items contained in this OpenSpaceModule
      */
     virtual std::vector<scripting::LuaLibrary> luaLibraries() const;
@@ -110,16 +114,27 @@ public:
     /**
      * Returns the minimum required OpenGL version of this OpenSpaceModule. Unless
      * overwritten, it returns an OpenGL version of <code>3.3</code>.
+     *
      * \return The minimum required OpenGL version of this OpenSpaceModule
      */
     virtual ghoul::systemcapabilities::Version requiredOpenGLVersion() const;
+
+    /**
+     * Returns the list of required OpenGL extensions for this OpenSpaceModule. Unless
+     * overwritten, this function returns an empty list.
+     *
+     * \return The list of required OpenGL extensions necessary to use this
+     *         OpenSpaceModule
+     */
+    virtual std::vector<std::string> requiredOpenGLExtensions() const;
 
 protected:
     /**
      * Customization point for each derived class. The internalInitialize method is called
      * by the initialize method.
+     *
      * \param configuration The configuration options that were read from the
-     * configuration file
+     *        configuration file
      */
     virtual void internalInitialize(const ghoul::Dictionary& configuration);
 
@@ -155,7 +170,7 @@ protected:
     const ModuleEngine* moduleEngine() const;
 
 private:
-    const ModuleEngine* _moduleEngine;
+    const ModuleEngine* _moduleEngine = nullptr;
 };
 
 } // namespace openspace

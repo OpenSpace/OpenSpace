@@ -78,10 +78,9 @@ protected:
     bool _useVertexNormals;
 
     struct Vertex {
-        GLfloat position[4];
+        GLfloat position[3];
         GLfloat texture[2];
         GLfloat normal[3];
-        GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
     };
 
     // Vertex data
@@ -92,11 +91,11 @@ private:
     bool updateDataOnGPU();
 
     // GL handles
-    GLuint _vaoID;
-    GLuint _vertexBufferID;
-    GLuint _elementBufferID;
+    GLuint _vaoID = 0;
+    GLuint _vertexBufferID = 0;
+    GLuint _elementBufferID = 0;
 
-    bool _gpuDataNeedUpdate;
+    bool _gpuDataNeedUpdate = false;
 };
 
 } // namespace openspace::globebrowsing

@@ -36,6 +36,21 @@ local RotationMatrix = {
     0, -1, 0
 }
 
+
+local LightSources = {
+    {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sunTransforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+    },
+    {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+    }
+}
+
 local Voyager2 = {
     Identifier = "Voyager_2",
     Parent = sunTransforms.SolarSystemBarycenter.Identifier,
@@ -68,7 +83,8 @@ local Voyager2Main = {
             GeometryFile = models .. "/voyager-main.obj"
         },
         ColorTexture = models .. "/voyager-main.jpg",
-        ModelTransform = RotationMatrix
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
     },
     GUI = {
         Name = "Voyager 2 Main",
@@ -86,7 +102,8 @@ local Voyager2Antenna = {
             GeometryFile = models .. "/voyager-antenna.obj"
         },
         ColorTexture = models .. "/voyager-antenna.png",
-        ModelTransform = RotationMatrix
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
     },
     GUI = {
         Name = "Voyager 2 Antanna",

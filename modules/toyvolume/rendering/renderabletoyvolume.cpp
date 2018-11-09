@@ -23,48 +23,45 @@
  ****************************************************************************************/
 
 #include <modules/toyvolume/rendering/renderabletoyvolume.h>
-#include <modules/toyvolume/rendering/toyvolumeraycaster.h>
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/engine/openspaceengine.h>
+#include <modules/toyvolume/rendering/toyvolumeraycaster.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycastermanager.h>
-#include <ghoul/glm.h>
-#include <glm/gtc/matrix_transform.hpp>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <openspace/util/updatestructures.h>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
         "ScalingExponent",
         "Scaling Exponent",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step Size",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo TranslationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TranslationInfo = {
         "Translation",
         "Translation",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo RotationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "" // @TODO Missing documentation
@@ -82,26 +79,30 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     , _rotation(RotationInfo, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0), glm::vec3(6.28f))
     , _color(ColorInfo, glm::vec4(1.f, 0.f, 0.f, 0.1f), glm::vec4(0.f), glm::vec4(1.f))
 {
-    float stepSize, scalingExponent;
-    glm::vec3 size, translation, rotation;
-    glm::vec4 color;
-    if (dictionary.getValue(ScalingExponentInfo.identifier, scalingExponent)) {
-        _scalingExponent = static_cast<int>(scalingExponent);
+    if (dictionary.hasKeyAndValue<double>(ScalingExponentInfo.identifier)) {
+        _scalingExponent = static_cast<int>(
+            dictionary.value<double>(ScalingExponentInfo.identifier)
+        );
     }
-    if (dictionary.getValue(SizeInfo.identifier, size)) {
-        _size = size;
+
+    if (dictionary.hasKeyAndValue<glm::vec3>(SizeInfo.identifier)) {
+        _size = dictionary.value<glm::vec3>(SizeInfo.identifier);
     }
-    if (dictionary.getValue(TranslationInfo.identifier, translation)) {
-        _translation = translation;
+
+    if (dictionary.hasKeyAndValue<glm::vec3>(TranslationInfo.identifier)) {
+        _translation = dictionary.value<glm::vec3>(TranslationInfo.identifier);
     }
-    if (dictionary.getValue(RotationInfo.identifier, rotation)) {
-        _rotation = rotation;
+
+    if (dictionary.hasKeyAndValue<glm::vec3>(RotationInfo.identifier)) {
+        _rotation = dictionary.value<glm::vec3>(RotationInfo.identifier);
     }
-    if (dictionary.getValue(ColorInfo.identifier, color)) {
-        _color = color;
+
+    if (dictionary.hasKeyAndValue<glm::vec4>(ColorInfo.identifier)) {
+        _color = dictionary.value<glm::vec4>(ColorInfo.identifier);
     }
-    if (dictionary.getValue(StepSizeInfo.identifier, stepSize)) {
-        _stepSize = stepSize;
+
+    if (dictionary.hasKeyAndValue<double>(StepSizeInfo.identifier)) {
+        _stepSize = static_cast<float>(dictionary.value<double>(StepSizeInfo.identifier));
     }
 }
 
@@ -111,14 +112,14 @@ void RenderableToyVolume::initializeGL() {
     _raycaster = std::make_unique<ToyVolumeRaycaster>(_color);
     _raycaster->initialize();
 
-    OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
+    global::raycasterManager.attachRaycaster(*_raycaster.get());
 
     std::function<void(bool)> onChange = [&](bool enabled) {
         if (enabled) {
-            OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
+            global::raycasterManager.attachRaycaster(*_raycaster.get());
         }
         else {
-            OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
+            global::raycasterManager.detachRaycaster(*_raycaster.get());
         }
     };
 
@@ -134,7 +135,7 @@ void RenderableToyVolume::initializeGL() {
 
 void RenderableToyVolume::deinitializeGL() {
     if (_raycaster) {
-        OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
+        global::raycasterManager.detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
 }
@@ -170,7 +171,7 @@ void RenderableToyVolume::update(const UpdateData& data) {
 }
 
 void RenderableToyVolume::render(const RenderData& data, RendererTasks& tasks) {
-    RaycasterTask task{ _raycaster.get(), data };
+    RaycasterTask task { _raycaster.get(), data };
     tasks.raycasterTasks.push_back(task);
 }
 

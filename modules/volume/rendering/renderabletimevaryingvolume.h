@@ -27,23 +27,32 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/volume/rawvolume.h>
-#include <modules/volume/rendering/basicvolumeraycaster.h>
-#include <modules/volume/rendering/volumeclipplanes.h>
-#include <modules/volume/transferfunctionhandler.h>
-
-
-#include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/util/boxgeometry.h>
-#include <openspace/util/histogram.h>
+#include <openspace/properties/triggerproperty.h>
+// #include <modules/volume/rawvolume.h>
+ #include <modules/volume/rawvolumemetadata.h>
+// #include <modules/volume/rendering/basicvolumeraycaster.h>
+// #include <modules/volume/rendering/volumeclipplanes.h>
+
+// #include <openspace/properties/vectorproperty.h>
+// #include <openspace/properties/optionproperty.h>
+// #include <openspace/properties/stringproperty.h>
+// #include <openspace/util/boxgeometry.h>
+// #include <openspace/util/histogram.h>
+// #include <openspace/rendering/transferfunction.h>
 
 namespace openspace {
+    class Histogram;
+    struct RenderData;
+    class TransferFunction;
+} // namespace openspace
 
-struct RenderData;
+namespace openspace::volume {
 
-namespace volume {
+class BasicVolumeRaycaster;
+template <typename T> class RawVolume;
+class VolumeClipPlanes;
 
 class RenderableTimeVaryingVolume : public Renderable {
 public:
@@ -57,23 +66,16 @@ public:
     void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
-    static documentation::Documentation TimestepDocumentation();
 
 private:
     struct Timestep {
         std::string baseName;
-        double time;
-        float minValue;
-        float maxValue;
-        glm::uvec3 dimensions;
-        glm::vec3 lowerDomainBound;
-        glm::vec3 upperDomainBound;
-        std::string unit;
         bool inRam;
         bool onGpu;
-        std::unique_ptr<RawVolume<float>> rawVolume;
+        RawVolumeMetadata metadata;
+        std::shared_ptr<RawVolume<float>> rawVolume;
         std::shared_ptr<ghoul::opengl::Texture> texture;
-        std::shared_ptr<openspace::Histogram> histogram;
+        std::shared_ptr<Histogram> histogram;
     };
 
     Timestep* currentTimestep();
@@ -102,11 +104,9 @@ private:
     std::map<double, Timestep> _volumeTimesteps;
     std::unique_ptr<BasicVolumeRaycaster> _raycaster;
 
-    std::shared_ptr<TransferFunctionHandler> _transferFunctionHandler;
-
+    std::shared_ptr<openspace::TransferFunction> _transferFunction;
 };
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume
 
 #endif // __OPENSPACE_MODULE_VOLUME___RENDERABLETIMEVARYINGVOLUME___H__

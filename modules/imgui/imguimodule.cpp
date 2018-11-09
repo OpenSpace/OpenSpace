@@ -24,23 +24,17 @@
 
 #include <modules/imgui/imguimodule.h>
 
-#include <modules/imgui/include/gui.h>
-
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/virtualpropertymanager.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/interaction/navigationhandler.h>
-#include <openspace/network/parallelconnection.h>
+#include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/asset.h>
-#include <openspace/scene/assetloader.h>
-
 #include <ghoul/logging/logmanager.h>
 
 namespace openspace {
@@ -48,157 +42,139 @@ namespace openspace {
 ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
     addPropertySubOwner(gui);
 
-    // TODO: Remove dependency on OsEng.
-    // Instead, make this class implement an interface that OsEng depends on.
-    // Do not try to register module callbacks if OsEng does not exist,
-    // for example in the TaskRunner.
+    global::callback::initialize.push_back([&]() {
+        LDEBUGC("ImGUIModule", "Initializing GUI");
+        gui.initialize();
 
-    if (!OpenSpaceEngine::isCreated()) {
-        return;
-    }
-
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::Initialize,
-        [&](){
-            LDEBUGC("ImGUIModule", "Initializing GUI");
-            gui.initialize();
-
-            gui._globalProperty.setSource(
-                []() {
-                    std::vector<properties::PropertyOwner*> res = {
-                        &(OsEng.windowWrapper()),
-                        &(OsEng.navigationHandler()),
-                        &(OsEng.renderEngine()),
-                        &(OsEng.parallelPeer()),
-                        &(OsEng.console()),
-                        &(OsEng.dashboard())
-                    };
-                    return res;
-                }
-            );
-
-            gui._screenSpaceProperty.setSource(
-                []() {
-                    return OsEng.renderEngine().screenSpaceOwner().propertySubOwners();
-                }
-            );
-
-            gui._moduleProperty.setSource(
-                []() {
-                    std::vector<properties::PropertyOwner*> v;
-                    v.push_back(&(OsEng.moduleEngine()));
-                    return v;
-                }
-            );
-
-            gui._sceneProperty.setSource(
-                []() {
-                    const Scene* scene = OsEng.renderEngine().scene();
-                    const std::vector<SceneGraphNode*>& nodes = scene ?
-                        scene->allSceneGraphNodes() :
-                        std::vector<SceneGraphNode*>();
-                    return std::vector<properties::PropertyOwner*>(
-                        nodes.begin(),
-                        nodes.end()
-                    );
-                }
-            );
-
-            gui._virtualProperty.setSource(
-                []() {
-                    std::vector<properties::PropertyOwner*> res = {
-                        &(OsEng.virtualPropertyManager())
-                    };
-
-                    return res;
-                }
-            );
-
-            gui._featuredProperties.setSource(
-                [](){
-                    std::vector<SceneGraphNode*> nodes =
-                        OsEng.renderEngine().scene()->allSceneGraphNodes();
-
-                    nodes.erase(
-                        std::remove_if(
-                            nodes.begin(),
-                            nodes.end(),
-                            [](SceneGraphNode* n) {
-                                const std::vector<std::string>& tags = n->tags();
-                                auto it = std::find(
-                                    tags.begin(),
-                                    tags.end(),
-                                    "GUI.Interesting"
-                                );
-                                return it == tags.end();
-                            }
-                        ),
-                        nodes.end()
-                    );
-                    return std::vector<properties::PropertyOwner*>(
-                        nodes.begin(),
-                        nodes.end()
-                    );
-                }
-            );
+        gui._globalProperty.setSource(
+            []() {
+            std::vector<properties::PropertyOwner*> res = {
+                &global::navigationHandler,
+                &global::timeManager,
+                &global::renderEngine,
+                &global::parallelPeer,
+                &global::luaConsole,
+                &global::dashboard
+            };
+            return res;
         }
-    );
+        );
 
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::Deinitialize,
-        [&](){
-            LDEBUGC("ImGui", "Deinitialize GUI");
-            gui.deinitialize();
+        gui._screenSpaceProperty.setSource(
+            []() {
+            return global::screenSpaceRootPropertyOwner.propertySubOwners();
         }
-    );
+        );
 
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::InitializeGL,
-        [&](){
-            LDEBUGC("ImGui", "Initializing GUI OpenGL");
-            gui.initializeGL();
+        gui._moduleProperty.setSource(
+            []() {
+            std::vector<properties::PropertyOwner*> v;
+            v.push_back(&(global::moduleEngine));
+            return v;
         }
-    );
+        );
 
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::DeinitializeGL,
-        [&](){
-            LDEBUGC("ImGui", "Deinitialize GUI OpenGL");
-            gui.deinitializeGL();
-        }
-    );
+        gui._sceneProperty.setSource(
+            []() {
+            const Scene* scene = global::renderEngine.scene();
+            const std::vector<SceneGraphNode*>& nodes = scene ?
+                scene->allSceneGraphNodes() :
+                std::vector<SceneGraphNode*>();
 
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::Draw2D,
-        [&]() {
-            WindowWrapper& wrapper = OsEng.windowWrapper();
-            bool showGui = wrapper.hasGuiWindow() ? wrapper.isGuiWindow() : true;
-            if (wrapper.isMaster() && showGui) {
-                glm::vec2 mousePosition = wrapper.mousePosition();
-                glm::ivec2 windowSize = wrapper.currentWindowSize();
-                uint32_t mouseButtons = wrapper.mouseButtons(2);
-
-                double dt = std::max(wrapper.averageDeltaTime(), 0.0);
-                if (touchInput.active && mouseButtons == 0) {
-                    mouseButtons = touchInput.action;
-                    mousePosition = touchInput.pos;
-                }
-                // We don't do any collection of immediate mode user interface, so it
-                // is fine to open and close a frame immediately
-                gui.startFrame(
-                    static_cast<float>(dt),
-                    glm::vec2(windowSize),
-                    wrapper.dpiScaling(),
-                    mousePosition,
-                    mouseButtons
+            return std::vector<properties::PropertyOwner*>(
+                nodes.begin(),
+                nodes.end()
                 );
-
-                gui.endFrame();
-            }
         }
-    );
+        );
 
-    OsEng.registerModuleKeyboardCallback(
+        gui._virtualProperty.setSource(
+            []() {
+            std::vector<properties::PropertyOwner*> res = {
+                &global::virtualPropertyManager
+            };
+
+            return res;
+        }
+        );
+
+        gui._featuredProperties.setSource(
+            []() {
+            std::vector<SceneGraphNode*> nodes =
+                global::renderEngine.scene()->allSceneGraphNodes();
+
+            nodes.erase(
+                std::remove_if(
+                    nodes.begin(),
+                    nodes.end(),
+                    [](SceneGraphNode* n) {
+                const std::vector<std::string>& tags = n->tags();
+                const auto it = std::find(
+                    tags.begin(),
+                    tags.end(),
+                    "GUI.Interesting"
+                );
+                return it == tags.end();
+            }
+                ),
+                nodes.end()
+                );
+            return std::vector<properties::PropertyOwner*>(
+                nodes.begin(),
+                nodes.end()
+                );
+        }
+        );
+    });
+
+    global::callback::deinitialize.push_back([&]() {
+        LDEBUGC("ImGui", "Deinitialize GUI");
+        gui.deinitialize();
+    });
+
+    global::callback::initializeGL.push_back([&]() {
+        LDEBUGC("ImGui", "Initializing GUI OpenGL");
+        gui.initializeGL();
+    });
+
+    global::callback::deinitializeGL.push_back([&]() {
+        LDEBUGC("ImGui", "Deinitialize GUI OpenGL");
+        gui.deinitializeGL();
+    });
+
+    global::callback::draw2D.push_back([&]() {
+        // TODO emiax: Make sure this is only called for one of the eyes, in the case
+        // of side-by-side / top-bottom stereo.
+
+        WindowDelegate& delegate = global::windowDelegate;
+        const bool showGui = delegate.hasGuiWindow() ? delegate.isGuiWindow() : true;
+        if (delegate.isMaster() && showGui) {
+            const glm::ivec2 windowSize = delegate.currentWindowSize();
+            const glm::ivec2 resolution = delegate.currentWindowResolution();
+
+            glm::vec2 mousePosition = delegate.mousePosition();
+            uint32_t mouseButtons = delegate.mouseButtons(2);
+
+            const double dt = std::max(delegate.averageDeltaTime(), 0.0);
+            if (touchInput.active && mouseButtons == 0) {
+                mouseButtons = touchInput.action;
+                mousePosition = touchInput.pos;
+            }
+            // We don't do any collection of immediate mode user interface, so it
+            // is fine to open and close a frame immediately
+            gui.startFrame(
+                static_cast<float>(dt),
+                glm::vec2(windowSize),
+                resolution / windowSize,
+                mousePosition,
+                mouseButtons
+            );
+
+            gui.endFrame();
+        }
+    });
+
+    global::callback::keyboard.push_back(
         [&](Key key, KeyModifier mod, KeyAction action) -> bool {
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||
@@ -212,7 +188,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         }
     );
 
-    OsEng.registerModuleCharCallback(
+    global::callback::character.push_back(
         [&](unsigned int codepoint, KeyModifier modifier) -> bool {
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||
@@ -226,7 +202,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         }
     );
 
-    OsEng.registerModuleMouseButtonCallback(
+    global::callback::mouseButton.push_back(
         [&](MouseButton button, MouseAction action) -> bool {
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||
@@ -240,7 +216,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         }
     );
 
-    OsEng.registerModuleMouseScrollWheelCallback(
+    global::callback::mouseScrollWheel.push_back(
         [&](double, double posY) -> bool {
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||

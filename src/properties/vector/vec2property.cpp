@@ -24,11 +24,11 @@
 
 #include <openspace/properties/vector/vec2property.h>
 
-#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/glm.h>
+#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/misc.h>
-
 #include <limits>
+#include <sstream>
 
 namespace {
 
@@ -67,7 +67,7 @@ bool toLuaConversion(lua_State* state, glm::vec2 value) {
     return true;
 }
 
-glm::vec2 fromStringConversion(std::string val, bool& success) {
+glm::vec2 fromStringConversion(const std::string& val, bool& success) {
     glm::vec2 result;
     std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
     if (tokens.size() != static_cast<size_t>(result.length())) {
