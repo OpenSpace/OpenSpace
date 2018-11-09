@@ -237,25 +237,6 @@ class PrepareUploadedData extends Component {
       return null;
     }
 
-    const IMAGE_URI_BASE = 'http://localhost:1337';
-    // const tfImages = [
-    //   {
-    //     label: 'MAS',
-    //     images: [
-    //       `${IMAGE_URI_BASE}/mas_mhd_r_squared.png`,
-    //       `${IMAGE_URI_BASE}/mas_mhd_temperature.png`,
-    //       `${IMAGE_URI_BASE}/mas_mhd_velocity.png`,
-    //     ],
-    //   },
-    //   {
-    //     label: 'ENLIL',
-    //     images: [
-    //       `${IMAGE_URI_BASE}/enlil.png`,
-    //     ],
-    //   },
-    // ];
-
-
     return (
       <Window
         type="small"
@@ -268,7 +249,7 @@ class PrepareUploadedData extends Component {
           <Row>
             <Column widthPercentage={33} className={styles.spaceFirstChildren}>
               <div>
-                <Label size="large">Parameters</Label>
+                <Label size="large">Visualization data</Label>
               </div>
               <div>
                 <Input
@@ -278,60 +259,6 @@ class PrepareUploadedData extends Component {
                   disabled={isUnEditable}
                   value={this.state.itemName || this.getDefaultItemName()}
                 />
-              </div>
-              <MultiInputs
-                presentationLabel="Data Dimensions"
-                description={'The number of cells in each dimension in the output volume'}
-                inputTypes={metaData.gridSystem}
-                options={dimensions}
-                disabled={isUnEditable}
-                loading={isReadingNewMetaData}
-                onChange={target => this.onChangeMultiInputs(target, KEY_DIMENSIONS)}
-              />
-              <Variables
-                variable={variable}
-                options={metaData ? metaData.variableKeys : undefined}
-                disabled={isUnEditable}
-                onChange={this.changeVariable}
-              />
-              {variable === 'rho' &&
-                <div>
-                  <Checkbox
-                    label={'Multiply with radius^2?'}
-                    onChange={this.changeRSquared}
-                    disabled={isUnEditable}
-                  />
-                </div>
-              }
-              <MultiInputs
-                presentationLabel="Lower Domain Bounds"
-                description={`Lower visualization boundary limit${metaData ? ` in ${metaData.radiusUnit}` : ''}`}
-                inputTypes={metaData.gridSystem}
-                options={lowerDomainBounds}
-                disabled={isUnEditable}
-                loading={isReadingNewMetaData}
-                onChange={target => this.onChangeMultiInputs(target, KEY_LOWER_DOMAIN_BOUNDS)}
-              />
-              <MultiInputs
-                presentationLabel="Upper Domain Bounds"
-                description={`Upper visualization boundary limit${metaData ? ` in ${metaData.radiusUnit}` : ''}`}
-                inputTypes={metaData.gridSystem}
-                options={upperDomainBounds}
-                disabled={isUnEditable}
-                loading={isReadingNewMetaData}
-                onChange={target => this.onChangeMultiInputs(target, KEY_UPPER_DOMAIN_BOUNDS)}
-              />
-              <Translation
-                onSetTranslationTarget={this.handleSetTranslationTarget}
-                target={translationTarget}
-              />
-            </Column>
-            <Column
-              className={styles.spaceFirstChildren}
-              widthPercentage={33}
-            >
-              <div>
-                <Label size="large">Information</Label>
               </div>
               <div>
                 <Row><Label>Model:</Label></Row>
@@ -351,6 +278,60 @@ class PrepareUploadedData extends Component {
                   {metaData.radiusUnit}
                 </LoadingString>
               </div>
+              <Variables
+                variable={variable}
+                options={metaData ? metaData.variableKeys : undefined}
+                disabled={isUnEditable}
+                onChange={this.changeVariable}
+              />
+              {variable === 'rho' &&
+                <div>
+                  <Checkbox
+                    label={'Multiply with radius^2?'}
+                    onChange={this.changeRSquared}
+                    disabled={isUnEditable}
+                  />
+                </div>
+              }
+              <Translation
+                onSetTranslationTarget={this.handleSetTranslationTarget}
+                target={translationTarget}
+              />
+            </Column>
+            <Column
+              className={styles.spaceFirstChildren}
+              widthPercentage={33}
+            >
+              <div>
+                <Label size="large">Visualization bounds</Label>
+              </div>
+              <MultiInputs
+                presentationLabel="Data Dimensions"
+                description={'The number of cells in each dimension in the output volume data'}
+                inputTypes={metaData.gridSystem}
+                options={dimensions}
+                disabled={isUnEditable}
+                loading={isReadingNewMetaData}
+                onChange={target => this.onChangeMultiInputs(target, KEY_DIMENSIONS)}
+              />
+              <MultiInputs
+                presentationLabel="Lower Domain Bounds"
+                description={`Lower visualization boundary limit${metaData.radiusUnit ? ` in ${metaData.radiusUnit}` : ''}`}
+                inputTypes={metaData.gridSystem}
+                options={lowerDomainBounds}
+                disabled={isUnEditable}
+                loading={isReadingNewMetaData}
+                onChange={target => this.onChangeMultiInputs(target, KEY_LOWER_DOMAIN_BOUNDS)}
+              />
+              <MultiInputs
+                presentationLabel="Upper Domain Bounds"
+                description={`Upper visualization boundary limit${metaData.radiusUnit ? ` in ${metaData.radiusUnit}` : ''}`}
+                inputTypes={metaData.gridSystem}
+                options={upperDomainBounds}
+                disabled={isUnEditable}
+                loading={isReadingNewMetaData}
+                onChange={target => this.onChangeMultiInputs(target, KEY_UPPER_DOMAIN_BOUNDS)}
+              />
             </Column>
             <Column
               className={styles.spaceFirstChildren}
@@ -366,14 +347,7 @@ class PrepareUploadedData extends Component {
             </Column>
           </Row>
           <Column className={styles.footer}>
-            <Button
-              onClick={() => this.upload()}
-              className={styles.convertButton}
-              disabled={isUnEditable}
-            >
-              Convert
-            </Button>
-            {this.state.uploadButtonIsClicked && (
+            {/* this.state.uploadButtonIsClicked && ( */
               <div>
                 <Row>
                   <ProgressBar
@@ -386,7 +360,14 @@ class PrepareUploadedData extends Component {
                   <Label size="small">{currentVolumesConvertedCount} / {currentVolumesToConvertCount} files complete</Label>
                 </Row>
               </div>
-            )}
+            /* ) */}
+            <Button
+              onClick={() => this.upload()}
+              className={styles.convertButton}
+              disabled={isUnEditable}
+            >
+              Convert
+            </Button>
           </Column>
         </Column>
       </Window>
@@ -398,8 +379,8 @@ PrepareUploadedData.propTypes = {
   selectedFilePaths: PropTypes.arrayOf(PropTypes.string),
   currentVolumesConvertedCount: PropTypes.number,
   currentVolumesToConvertCount: PropTypes.number,
-  width: PropTypes.number,
-  height: PropTypes.number,
+  width: PropTypes.number.isRequired,
+  height: PropTypes.number.isRequired,
 };
 
 PrepareUploadedData.defaultProps = {
