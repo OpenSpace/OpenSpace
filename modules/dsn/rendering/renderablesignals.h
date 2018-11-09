@@ -89,7 +89,7 @@ namespace openspace {
         /* Returns the estimated position expressed relative to the current focusnode */
         glm::dvec3 getEstimatedCoordinatePosFromFocusNode(glm::vec3 pos);
         /* Converts the Ra Dec range coordinates into cartesian coordinates*/
-        glm::vec3 convertRaDecRangeToCartesian();
+        glm::dvec3 convertRaDecRangeToCartesian();
         /*Returns a position for a spacecraft*/
         glm::vec3 getSuitablePrecisionPositionForSceneGraphNode(std::string id);
         /*Returns a position for a station that has Earth as parent*/
