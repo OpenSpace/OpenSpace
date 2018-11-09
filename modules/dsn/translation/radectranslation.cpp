@@ -22,31 +22,73 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_DSN___DSNTRANSLATION___H__
-#define __OPENSPACE_MODULE_DSN___DSNTRANSLATION___H__
+#include <modules/dsn/translation/radectranslation.h>
 
-#include <openspace/scene/translation.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 
-#include <openspace/properties/vector/dvec3property.h>
+namespace {
+    constexpr openspace::properties::Property::PropertyInfo PositionInfo = {
+        "Position",
+        "Position",
+        "Write some documentaion here!"
+    };
+} // namespace
 
 namespace openspace {
 
-struct UpdateData;
+documentation::Documentation RadecTranslation::Documentation() {
+    using namespace documentation;
+    return {
+        "Radec Translation",
+        "transform_translation_radec",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("RadecTranslation"),
+                Optional::No
+            },
+            {
+                PositionInfo.identifier,
+                new DoubleVector3Verifier,
+                Optional::No,
+                PositionInfo.description
+            }
+        }
+    };
+}
 
-namespace documentation { struct Documentation; }
 
-class DsnTranslation : public Translation {
-public:
-	DsnTranslation();
-	DsnTranslation(const ghoul::Dictionary& dictionary);
+RadecTranslation::RadecTranslation()
+    : _position(
+        PositionInfo,
+        glm::dvec3(0.0),
+        glm::dvec3(-std::numeric_limits<double>::max()),
+        glm::dvec3(std::numeric_limits<double>::max())
+    )
+{
+    addProperty(_position);
 
-    glm::dvec3 position(const UpdateData& data) const override;
-    static documentation::Documentation Documentation();
+    _position.onChange([this]() {
+        requireUpdate();
+        notifyObservers();
+    });
+}
 
-private:
-    properties::DVec3Property _position;
-};
+RadecTranslation::RadecTranslation(const ghoul::Dictionary& dictionary)
+    : RadecTranslation()
+{
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "RadecTranslation"
+    );
+
+    _position = dictionary.value<glm::dvec3>(PositionInfo.identifier);
+}
+
+glm::dvec3 RadecTranslation::position(const UpdateData&) const {
+    return _position;
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_DSN___DSNTRANSLATION___H__

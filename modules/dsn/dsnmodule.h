@@ -32,7 +32,7 @@
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/logging/logmanager.h>
 
-#include <modules/dsn/translation/dsntranslation.h>
+#include <modules/dsn/translation/radectranslation.h>
 #include <modules/dsn/rendering/renderablesignals.h>
 
 namespace openspace {
