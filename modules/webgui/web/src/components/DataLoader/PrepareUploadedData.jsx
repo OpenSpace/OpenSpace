@@ -81,10 +81,9 @@ class PrepareUploadedData extends Component {
     DataManager.subscribe('Modules.DataLoader.TransferFunctionPresetsJSON', this.handleTfPresetsJSON);
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     const { selectedFilePaths } = this.props;
-    // const hasFilePaths = selectedFilePaths.length > 0 && selectedFilePaths[0] !== '';
-    const hasFilePaths = selectedFilePaths.length > 0;
+    const hasFilePaths = selectedFilePaths.length > 0 && selectedFilePaths[0] !== '';
     const filePathsDiffer = JSON.stringify(selectedFilePaths) !== JSON.stringify(prevProps.selectedFilePaths);
 
     if (hasFilePaths && filePathsDiffer) {
