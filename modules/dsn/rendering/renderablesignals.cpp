@@ -33,7 +33,6 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
-#include "SpiceUsr.h" //Todo: include in spicemanager
 #include <openspace/util/spicemanager.h>
 #include <openspace/interaction/navigationhandler.h>
 
@@ -458,25 +457,19 @@ glm::vec3 RenderableSignals::getPositionForGeocentricSceneGraphNode(const char* 
 }
 
 
-glm::vec3 RenderableSignals::convertRaDecRangeToCartesian() {
+glm::dvec3 RenderableSignals::convertRaDecRangeToCartesian() {
     //Todo: stream data from file
     //Dummy data for voyager 1
-    float ra = 257.777029167736; //2018-246
-    float dec = 12.2537708651048; // 2018-246
-    float range = 2.14044781771236e+13;
+    double ra = 257.777029167736; //2018-246
+    double dec = 12.2537708651048; // 2018-246
+    double range = 2.14044781771236e+13;
 
     // Convert RA and DEC from degrees to radians 
     ra = glm::radians(ra);
     dec = glm::radians(dec);
 
-    //Save the cartesian coordinates
-    double cartesianCoordinates[3];
-
-    //Fill array with coordinates 
-    radrec_c(range, ra, dec, cartesianCoordinates);
-
     //Save array in vector 
-    glm::vec3 raDecPos = { cartesianCoordinates[0],cartesianCoordinates[1], cartesianCoordinates[2] };
+    glm::dvec3 raDecPos = SpiceManager::getPositionFromRaDecRange(ra,dec,range);
 
     //Get the RA / DEC values in world coordinates with respect to the current focus node
     raDecPos = getEstimatedCoordinatePosFromFocusNode(raDecPos);
