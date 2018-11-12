@@ -74,9 +74,15 @@ void GUIRenderHandler::draw() {
         return;
     }
 
+    if (!isTextureReady()) {
+        return;
+    }
+
     if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
     }
+
+    updateTexture();
 
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
