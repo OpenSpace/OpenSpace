@@ -46,15 +46,11 @@ namespace openspace {
     public:
 
     static struct Signal {        
-        int signalId;
         std::string dishName;
-        int year;
         std::string spacecraft;
         std::string direction; 
         std::string startTime;
         std::string endTime;
-        glm::vec3 color;
-
       };
 
     static struct SignalData {
