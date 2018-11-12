@@ -1,0 +1,36 @@
+local assetHelper = asset.require('util/asset_helper')
+
+local models = asset.syncedResource({
+    Name = "Dsn models",
+    Type = "HttpSynchronization",
+    Identifier = "dsn_stations",
+    Version = 1
+})
+
+local testSpaceCraft = {
+    Identifier = "testSpaceCraft",
+    Transform = {
+      Translation = {
+         Type = "RadecTranslation"
+      },
+      Scale = {
+            Type = "StaticScale",
+            Scale = 1000.0
+        }
+
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
+        },
+        ColorTexture = models .. "/34m_dish/base_AO.png",
+    },
+    GUI = {
+        Name = "testSpaceCraft",
+        Path = "/Solar System/testSpaceCraft"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {testSpaceCraft})

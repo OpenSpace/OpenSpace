@@ -390,8 +390,29 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
     _vertexArray.push_back(color.b);
     _vertexArray.push_back(color.a);
 
-}
 
+    //For testing 
+    glm::vec3 worldTestPos = getSuitablePrecisionPositionForSceneGraphNode("testSpaceCraft");
+   
+    _vertexArray.push_back(posStation.x);
+    _vertexArray.push_back(posStation.y);
+    _vertexArray.push_back(posStation.z);
+
+    _vertexArray.push_back(color.r);
+    _vertexArray.push_back(color.g);
+    _vertexArray.push_back(color.b);
+    _vertexArray.push_back(color.a);
+
+    _vertexArray.push_back(worldTestPos.x);
+    _vertexArray.push_back(worldTestPos.y);
+    _vertexArray.push_back(worldTestPos.z);
+
+    _vertexArray.push_back(color.r);
+    _vertexArray.push_back(color.g);
+    _vertexArray.push_back(color.b);
+    _vertexArray.push_back(color.a);
+
+}
 
 /* Since our station dishes have a static translation from Earth, we
 * can get their local translation. The reason to handle it differently
@@ -408,21 +429,6 @@ glm::dvec3 RenderableSignals::getCoordinatePosFromFocusNode(SceneGraphNode* node
     return diff;
 }
 
-glm::dvec3 RenderableSignals::getEstimatedCoordinatePosFromFocusNode(glm::vec3 pos) {
-
-    glm::dvec3 earthPos = global::renderEngine.scene()->sceneGraphNode("Earth")->worldPosition();
-    glm::dvec3 focusNodePos = _focusNode->worldPosition();
-
-    glm::dmat4 translationMatrixEarth = glm::translate(glm::dmat4(1.0), glm::dvec3(earthPos));
-
-    glm::dvec4 newPos = { pos, 1.0 };
-    glm::dvec4 nodePos = _rotEquatorialSphere * translationMatrixEarth  *newPos;
-
-    glm::dvec3 diff = glm::vec3(nodePos.x - focusNodePos.x, nodePos.y - focusNodePos.y,
-        nodePos.z - focusNodePos.z);
-
-    return diff;
-}
 
 glm::vec3 RenderableSignals::getSuitablePrecisionPositionForSceneGraphNode(std::string id) {
 
@@ -434,7 +440,7 @@ glm::vec3 RenderableSignals::getSuitablePrecisionPositionForSceneGraphNode(std::
     }
     else {
         //If no scenegraphnode with proper id was found, estimate the position of the spacecraft by RA/DEC/RANGE 
-        position = convertRaDecRangeToCartesian();
+        //position = convertRaDecRangeToCartesian();
     }
 
     return position;
@@ -454,27 +460,6 @@ glm::vec3 RenderableSignals::getPositionForGeocentricSceneGraphNode(const char* 
     }
 
     return position;
-}
-
-
-glm::dvec3 RenderableSignals::convertRaDecRangeToCartesian() {
-    //Todo: stream data from file
-    //Dummy data for voyager 1
-    double ra = 257.777029167736; //2018-246
-    double dec = 12.2537708651048; // 2018-246
-    double range = 2.14044781771236e+13;
-
-    // Convert RA and DEC from degrees to radians 
-    ra = glm::radians(ra);
-    dec = glm::radians(dec);
-
-    //Save array in vector 
-    glm::dvec3 raDecPos = SpiceManager::getPositionFromRaDecRange(ra,dec,range);
-
-    //Get the RA / DEC values in world coordinates with respect to the current focus node
-    raDecPos = getEstimatedCoordinatePosFromFocusNode(raDecPos);
-
-    return raDecPos;
 }
 
 
