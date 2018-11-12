@@ -3,9 +3,7 @@
 /bin/
 /build/
 /cache/
-/data/.internal/*
-!/data/.internal/readme.md
-!/data/.internal/tf_presets
+/data/generated
 /doc
 /documentation
 /ext/SGCT

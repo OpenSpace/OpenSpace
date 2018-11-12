@@ -231,34 +231,6 @@ void Loader::selectData()
     }
 }
 
-//void Loader::createInternalDataItemProperties() {
-//    module()->validateDataDirectory();
-//    std::vector<std::string> volumeItems = module()->volumeDataItems();
-//
-//    // LDEBUG("volume items vec size " + std::to_string(volumeItems.size()));
-//
-//    for (auto item : volumeItems) {
-//        const char* dirLeaf = openspace::dataloader::helpers::getDirLeaf(item).c_str();
-//        const char* ItemTrigger = "ItemTrigger_";
-//        const openspace::properties::Property::PropertyInfo info = {
-//            ItemTrigger + dirLeaf,
-//            dirLeaf,
-//            ""
-//        };
-//
-//        // Initialize trigger property with data item name (are they unique?)
-//        auto volumeItemTrigger = properties::TriggerProperty(info);
-//
-//        // Set onChange method to call loadDataItem with the path as argument
-//        volumeItemTrigger.onChange([this](){
-//            // loadDataItem(item);
-//        });
-//
-//        // addProperty(volumeItemTrigger);
-//        // LDEBUG("Added property " + dirLeaf);
-//    }
-//}
-
 // addDataItemProperty();
 // removeDataItemProperties();
 
@@ -532,7 +504,7 @@ void Loader::processCurrentlySelectedUploadData(const std::string &dictionaryStr
 
     _volumeConversionThreadCanRun = false;
 
-    loadCreatedAsset(assetFilePath);
+    // loadCreatedAsset(assetFilePath);
 
     //});
 
@@ -609,7 +581,7 @@ void Loader::runConversionTask()
 Directory Loader::getAssetFolderDirectory()
 {
     std::string itemName = _currentVolumeConversionDictionary.value<std::string>(KeyItemName);
-    std::string itemPathBase = "${DATA}/.internal/volumes_from_cdf/" + itemName;
+    std::string itemPathBase = "${DATA}/generated/volumes_from_cdf/" + itemName;
     Directory d(itemPathBase, RawPath::No);
     return d;
 }

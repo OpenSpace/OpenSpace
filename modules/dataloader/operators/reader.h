@@ -46,8 +46,7 @@ class Reader : public PropertyOwner, public Operator {
 
   private:
     ghoul::filesystem::Directory _topDir;
-
-    // properties::TriggerProperty _readVolumesTrigger;
+    ghoul::filesystem::Directory _generatedDir;
 };
 
 }
