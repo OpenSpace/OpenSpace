@@ -391,27 +391,6 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
     _vertexArray.push_back(color.a);
 
 
-    //For testing 
-    glm::vec3 worldTestPos = getSuitablePrecisionPositionForSceneGraphNode("testSpaceCraft");
-   
-    _vertexArray.push_back(posStation.x);
-    _vertexArray.push_back(posStation.y);
-    _vertexArray.push_back(posStation.z);
-
-    _vertexArray.push_back(color.r);
-    _vertexArray.push_back(color.g);
-    _vertexArray.push_back(color.b);
-    _vertexArray.push_back(color.a);
-
-    _vertexArray.push_back(worldTestPos.x);
-    _vertexArray.push_back(worldTestPos.y);
-    _vertexArray.push_back(worldTestPos.z);
-
-    _vertexArray.push_back(color.r);
-    _vertexArray.push_back(color.g);
-    _vertexArray.push_back(color.b);
-    _vertexArray.push_back(color.a);
-
 }
 
 /* Since our station dishes have a static translation from Earth, we
@@ -439,8 +418,8 @@ glm::vec3 RenderableSignals::getSuitablePrecisionPositionForSceneGraphNode(std::
         position = getCoordinatePosFromFocusNode(spacecraftNode);
     }
     else {
-        //If no scenegraphnode with proper id was found, estimate the position of the spacecraft by RA/DEC/RANGE 
-        //position = convertRaDecRangeToCartesian();
+        LERROR(fmt::format("No scengraphnode found for the spacecraft {}", id));
+
     }
 
     return position;
@@ -455,7 +434,7 @@ glm::vec3 RenderableSignals::getPositionForGeocentricSceneGraphNode(const char* 
         position = global::renderEngine.scene()->sceneGraphNode(id)->position();
     }
     else {
-        LERROR(fmt::format("No position data for the station dish {}, drawing line from center of Earth", id));
+        LERROR(fmt::format("No scengraphnode found for the station dish {}, drawing line from center of Earth", id));
         position = glm::vec3(0, 0, 0);
     }
 
