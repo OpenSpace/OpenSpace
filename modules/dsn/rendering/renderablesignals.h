@@ -90,10 +90,12 @@ namespace openspace {
         glm::dvec3 getEstimatedCoordinatePosFromFocusNode(glm::vec3 pos);
         /* Converts the Ra Dec range coordinates into cartesian coordinates*/
         glm::dvec3 convertRaDecRangeToCartesian();
-        /*Returns a position for a spacecraft*/
+        /* Returns a position for a spacecraft*/
         glm::vec3 getSuitablePrecisionPositionForSceneGraphNode(std::string id);
-        /*Returns a position for a station that has Earth as parent*/
+        /* Returns a position for a station that has Earth as parent*/
         glm::vec3 getPositionForGeocentricSceneGraphNode(const char* id);
+        /* Returns a color based on what site the station is located to */
+        glm::vec3 getStationColor(std::string dishidentifier);
 
         /* The VBO layout of the vertex position */
         struct PositionVBOLayout {
@@ -104,9 +106,6 @@ namespace openspace {
             float r, g, b, a;
         };
 
-        /* The function deciding what color to use for a signal */
-        // Todo: move to asset file 
-        ColorVBOLayout getSiteColor(std::string dishIdentifier);
 
         const char* _identifier = "Signals";
     protected:
@@ -142,10 +141,14 @@ namespace openspace {
         /// Set of information about the main rendering parts
         RenderInformation _lineRenderInformation;
 
-        /// Specifies the base color of the site lines
-        properties::Vec3Property _madridLineColor;
-        properties::Vec3Property _goldstoneLineColor;
-        properties::Vec3Property _canberraLineColor;
+        /// Specifies the base color for the different sites
+        std::vector<std::unique_ptr<properties::Vec3Property>> _siteColors;
+        
+        /// Maps a station identifier to a site location
+        std::map<std::string, std::string> _stationToSite;
+
+        /// Maps a site location to an index in the _siteColors property vector
+        std::map<std::string, int> _siteToIndex;
 
         /// The attribute location for vertex position
         const GLuint _locVer = 0;
@@ -166,30 +169,6 @@ namespace openspace {
 
         UniformCache(modelViewStation, modelViewSpacecraft, projection) _uniformCache;
 
-        enum SiteEnum {
-            GoldStone = 0,
-            Madrid,
-            Canberra
-        };
-
-        // Todo: move to asset file 
-        // Key Value map of stations and their sites
-        const std::map<std::string, SiteEnum> StationToSiteConversion = {
-        { "DSS14", GoldStone },
-        { "DSS15", GoldStone },
-        { "DSS24", GoldStone },
-        { "DSS25", GoldStone },
-        { "DSS26", GoldStone },
-        { "DSS43", Canberra },
-        { "DSS34", Canberra },
-        { "DSS35", Canberra },
-        { "DSS36", Canberra },
-        { "DSS45", Canberra },
-        { "DSS63", Madrid },
-        { "DSS65", Madrid },
-        { "DSS54", Madrid },
-        { "DSS55", Madrid }
-        };
 
         /*Checks if the current time is within a signal's start and endtime*/
         bool isSignalActive(double currentTime, std::string signalStartTime, std::string signalEndTime);

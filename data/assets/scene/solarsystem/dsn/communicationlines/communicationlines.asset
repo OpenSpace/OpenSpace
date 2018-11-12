@@ -1,6 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
-local kernels = asset.require('scene/solarsystem/missions/voyager1/kernels')
-local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+local stationsAsset = asset.require('scene/solarsystem/dsn/stations')
+
 --Communicationline data 
 local dataFolder = openspace.absPath("../../../sync/http/dsn_data/1/json")
 
@@ -14,9 +14,8 @@ local Signals = {
         Type = "RenderableSignals",
         DataFolder = dataFolder,
         DataFileType = "json",
-        MadridColor = {1.0, 0.0, 0.0},
-        GoldstoneColor = {0.0, 0.0, 1.0},
-        CanberraColor = {0.0, 1.0, 0.0}
+        SiteColors = stationsAsset.siteColorMap, 
+        StationSites = stationsAsset.stationSiteMap
     },
     GUI = {
         Name = "Signals",

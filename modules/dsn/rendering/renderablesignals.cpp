@@ -41,35 +41,24 @@ namespace {
     constexpr const char* ProgramName = "SignalsProgram";
     constexpr const char* KeyTranslation = "Translation";
     constexpr const char* _loggerCat = "RenderableSignals";
+    constexpr const char* KeyStationSites = "StationSites";
+
 
     constexpr const std::array<const char*, 3> UniformNames = {
         "modelViewStation","modelViewSpacecraft", "projectionTransform"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MadridColorInfo = {
-        "MadridColor",
-        "MadridColor",
+    constexpr openspace::properties::Property::PropertyInfo SiteColorsInfo = {
+        "SiteColors",
+        "SiteColors",
         "This value determines the RGB main color for the lines "
-        "of communication to and from Madrid."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo GoldstoneColorInfo = {
-        "GoldstoneColor",
-        "GoldstoneColor",
-        "This value determines the RGB main color for the lines "
-        "of communication to and from Goldstone."
-    };
-    constexpr openspace::properties::Property::PropertyInfo CanberraColorInfo = {
-        "CanberraColor",
-        "CanberraColor",
-        "This value determines the RGB main color for the lines "
-        "of communication to and from Canberra."
+        "of communication to and from different sites on Earth."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the communication package. "
+        "This value specifies the line width of the signals. "
     };
 
 } // namespace
@@ -90,22 +79,17 @@ documentation::Documentation RenderableSignals::Documentation() {
                 "Translation object can be used here."
             },
             {
-                MadridColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                MadridColorInfo.description
+                SiteColorsInfo.identifier,
+                new TableVerifier,
+                Optional::No,
+                SiteColorsInfo.description
             },
             {
-                GoldstoneColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                GoldstoneColorInfo.description
-            },
-            {
-                CanberraColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                GoldstoneColorInfo.description
+                KeyStationSites,
+                new TableVerifier,
+                Optional::No,
+                "This is a map of the individual stations to their "
+                "respective site location on Earth."
             },
             {
                 LineWidthInfo.identifier,
@@ -119,9 +103,6 @@ documentation::Documentation RenderableSignals::Documentation() {
 
 RenderableSignals::RenderableSignals(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _madridLineColor(MadridColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _goldstoneLineColor(GoldstoneColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _canberraLineColor(CanberraColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
 {
     _translation = Translation::createFromDictionary(
@@ -129,30 +110,40 @@ RenderableSignals::RenderableSignals(const ghoul::Dictionary& dictionary)
     );
     addPropertySubOwner(_translation.get());
 
-    if (dictionary.hasKeyAndValue<glm::vec3>(MadridColorInfo.identifier)) {
-        _madridLineColor = dictionary.value<glm::vec3>(MadridColorInfo.identifier);
-    }
-    else {
-        _madridLineColor = glm::vec3(1.f, 0.f, 0.f);
-    }
-    addProperty(_madridLineColor);
+    if (dictionary.hasKeyAndValue<ghoul::Dictionary>(SiteColorsInfo.identifier)) {
+        ghoul::Dictionary colorDictionary = dictionary.value<ghoul::Dictionary>(SiteColorsInfo.identifier);
+        std::vector<std::string> siteNames = colorDictionary.keys();
 
-    if (dictionary.hasKeyAndValue<glm::vec3>(CanberraColorInfo.identifier)) {
-        _canberraLineColor = dictionary.value<glm::vec3>(CanberraColorInfo.identifier);
+        // Create 
+        for (int siteIndex = 0; siteIndex < siteNames.size(); siteIndex++)
+        {
+            const char* str = siteNames.at(siteIndex).c_str();
+            openspace::properties::Property::PropertyInfo SiteColorsInfo = {
+                str,
+                str,
+                "This value determines the RGB main color for signals "
+                "of communication to and from different sites on Earth."
+            };
+            std::string site = siteNames[siteIndex];
+            glm::vec3 siteColor = colorDictionary.value<glm::vec3>(siteNames.at(siteIndex));
+            _siteColors.push_back(std::make_unique<properties::Vec3Property>(SiteColorsInfo, siteColor, glm::vec3(0.f), glm::vec3(1.f)));
+            _siteToIndex[siteNames.at(siteIndex)] = siteIndex;
+            addProperty(_siteColors.back().get());
+        }
     }
-    else {
-        _canberraLineColor = glm::vec3(0.f, 1.f, 0.f);
-    }
-    addProperty(_canberraLineColor);
 
-    if (dictionary.hasKeyAndValue<glm::vec3>(GoldstoneColorInfo.identifier)) {
-        _goldstoneLineColor = dictionary.value<glm::vec3>(GoldstoneColorInfo.identifier);
-    }
-    else {
-        _goldstoneLineColor = glm::vec3(0.f, 0.f, 1.f);
-    }
-    addProperty(_goldstoneLineColor);
+    if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyStationSites)) {
+        ghoul::Dictionary stationDictionary = dictionary.value<ghoul::Dictionary>(KeyStationSites);
+        std::vector<std::string> keys = stationDictionary.keys();
 
+        for (int i = 0; i < keys.size(); i++)
+        {   
+            std::string station = keys.at(i);
+            std::string site = stationDictionary.value<std::string>(keys.at(i));
+            _stationToSite[station] = site;
+        }
+    }
+ 
     if (dictionary.hasKeyAndValue<double>(LineWidthInfo.identifier)) {
         _lineWidth = static_cast<float>(dictionary.value<double>(
             LineWidthInfo.identifier
@@ -367,7 +358,8 @@ void RenderableSignals::extractData(std::unique_ptr<ghoul::Dictionary> &dictiona
 
 void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal) {
 
-    ColorVBOLayout color = getSiteColor(signal.dishName);
+    glm::dvec4 color = { getStationColor(signal.dishName), 1.0 };
+    //glm::vec4 color = { signal.color, 1.0 };
     glm::vec3 posStation = getPositionForGeocentricSceneGraphNode(signal.dishName.c_str());
     glm::vec3 posSpacecraft = getSuitablePrecisionPositionForSceneGraphNode(signal.spacecraft.c_str());
 
@@ -477,46 +469,23 @@ glm::dvec3 RenderableSignals::convertRaDecRangeToCartesian() {
     return raDecPos;
 }
 
+glm::vec3 RenderableSignals::getStationColor(std::string dishidentifier) {
 
-RenderableSignals::ColorVBOLayout RenderableSignals::getSiteColor(std::string dishidentifier) {
-    
-    glm::vec3 color(0.0f,0.0f,0.0f);
-    RenderableSignals::ColorVBOLayout colorVbo;
-    SiteEnum site;
+    glm::dvec3 color(0.0f, 0.0f, 1.0f);
+    std::string site;
 
     try {
-        site = StationToSiteConversion.at(dishidentifier);
+        site = _stationToSite.at(dishidentifier);
     }
     catch (const std::exception& e) {
         LERROR(fmt::format("Station {} has no site location.", dishidentifier));
     }
 
-    switch (site) {
-        case 0: 
-            color = _goldstoneLineColor; 
-            break;
-        case 1: 
-            color = _madridLineColor;
-            break;
-        case 2: 
-            color = _canberraLineColor;
-            break;
-    }
+    int siteIndex = _siteToIndex.at(site);
+    color = _siteColors[siteIndex]->value();
 
-    colorVbo.r = color.r;
-    colorVbo.g = color.g;
-    colorVbo.b = color.b;
-
-    //have different alpha for the 70m antennas
-    if (dishidentifier == "DSS14" || dishidentifier == "DSS63" || dishidentifier == "DSS43")
-    {
-        colorVbo.a = 1.0;
-    }
-    else {
-        colorVbo.a = 0.6f;
-    }
-
-    return colorVbo;
+    return color;
 }
+
 
 } // namespace openspace
