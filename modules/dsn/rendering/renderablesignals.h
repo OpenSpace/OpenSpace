@@ -86,11 +86,7 @@ namespace openspace {
         void pushSignalDataToVertexArray(SignalManager::Signal signal);
         /* Returns a position relative the current focus node */
         glm::dvec3 getCoordinatePosFromFocusNode(SceneGraphNode* node);
-        /* Returns the estimated position expressed relative to the current focusnode */
-        glm::dvec3 getEstimatedCoordinatePosFromFocusNode(glm::vec3 pos);
-        /* Converts the Ra Dec range coordinates into cartesian coordinates*/
-        glm::dvec3 convertRaDecRangeToCartesian();
-        /* Returns a position for a spacecraft*/
+        /*Returns a position for a spacecraft*/
         glm::vec3 getSuitablePrecisionPositionForSceneGraphNode(std::string id);
         /* Returns a position for a station that has Earth as parent*/
         glm::vec3 getPositionForGeocentricSceneGraphNode(const char* id);
@@ -172,11 +168,8 @@ namespace openspace {
 
         /*Checks if the current time is within a signal's start and endtime*/
         bool isSignalActive(double currentTime, std::string signalStartTime, std::string signalEndTime);
-        /* Rotation matrix to transform into equatorial sphere coordinate system*/
-        glm::dmat4 _rotEquatorialSphere = { -0.05487554,  0.4941095, -0.8676661, 0.0,
-            -0.8734371 , -0.4448296, -0.1980764, 0.0,
-            -0.483835  ,  0.7469823,  0.4559838, 0.0,
-            0.0       ,  0.0      ,  0.0      , 1.0 };
+
+
     };
 
 } // namespace openspace

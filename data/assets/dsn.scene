@@ -21,6 +21,7 @@ asset.require('scene/solarsystem/dsn/stations')
 --Communication
 --assetHelper.requestAll(asset, 'scene/solarsystem/dsn')
 asset.require('scene/solarsystem/dsn/communicationlines/communicationlines')
+asset.require('scene/solarsystem/dsn/spacecrafts')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')

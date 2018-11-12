@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <modules/dsn/translation/radectranslation.h>
-
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
@@ -51,7 +50,7 @@ documentation::Documentation RadecTranslation::Documentation() {
             {
                 PositionInfo.identifier,
                 new DoubleVector3Verifier,
-                Optional::No,
+                Optional::Yes,
                 PositionInfo.description
             }
         }
@@ -66,7 +65,9 @@ RadecTranslation::RadecTranslation()
         glm::dvec3(-std::numeric_limits<double>::max()),
         glm::dvec3(std::numeric_limits<double>::max())
     )
-{
+{   
+
+  
     addProperty(_position);
 
     _position.onChange([this]() {
@@ -83,11 +84,42 @@ RadecTranslation::RadecTranslation(const ghoul::Dictionary& dictionary)
         dictionary,
         "RadecTranslation"
     );
-
-    _position = dictionary.value<glm::dvec3>(PositionInfo.identifier);
 }
 
-glm::dvec3 RadecTranslation::position(const UpdateData&) const {
+glm::dvec3 RadecTranslation::convertRaDecRangeToCartesian() const{
+    //Todo: stream data from file
+    //Static data for voyager 1
+    double ra = 257.777029167736; //2018-246
+    double dec = 12.2537708651048; // 2018-246
+    double range = 2.14044781771236e+13;
+
+    //Convert RA and DEC from degrees to radians 
+    ra = glm::radians(ra);
+    dec = glm::radians(dec);
+
+    //Save array in vector 
+    glm::dvec3 raDecPos = SpiceManager::getPositionFromRaDecRange(ra, dec, range);
+   
+    return raDecPos;
+}
+
+glm::dvec3 RadecTranslation::transformCartesianCoordinates() const {
+
+    glm::vec3 pos = convertRaDecRangeToCartesian();
+
+    glm::dvec3 earthPos = global::renderEngine.scene()->sceneGraphNode("Earth")->worldPosition();
+    glm::dmat4 translationMatrixEarth = glm::translate( glm::dmat4(1.0), glm::dvec3(earthPos) );
+
+    glm::dvec4 newPos = { pos, 1.0 };
+    glm::dvec4 nodePos =  translationMatrixEarth * _rotEquatorialSphere * newPos;
+    glm::dvec3 worldposition = { nodePos.x, nodePos.y, nodePos.z };
+
+    return worldposition;
+}
+
+glm::dvec3 RadecTranslation::position(const UpdateData&) const{
+
+    glm::dvec3 _position = transformCartesianCoordinates();
     return _position;
 }
 

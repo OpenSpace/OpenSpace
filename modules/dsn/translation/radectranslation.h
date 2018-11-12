@@ -26,8 +26,11 @@
 #define __OPENSPACE_MODULE_DSN___RADECTRANSLATION___H__
 
 #include <openspace/scene/translation.h>
-
+#include <openspace/util/spicemanager.h>
+#include <openspace/engine/globals.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/properties/vector/dvec3property.h>
+#include <modules/dsn/rendering/renderablesignals.h>
 
 namespace openspace {
 
@@ -39,14 +42,23 @@ class RadecTranslation : public Translation {
 public:
     RadecTranslation();
     RadecTranslation(const ghoul::Dictionary& dictionary);
-
+    /* Converts the Ra Dec range coordinates into cartesian coordinates*/
+    glm::dvec3 convertRaDecRangeToCartesian() const;
+    /*Transforms the cartesian coordinates with a rotation and a translation*/
+    glm::dvec3 transformCartesianCoordinates() const;
     glm::dvec3 position(const UpdateData& data) const override;
     static documentation::Documentation Documentation();
 
 private:
     properties::DVec3Property _position;
-};
 
+    glm::dmat4 _rotEquatorialSphere = { -0.05487554,  0.4941095, -0.8676661, 0.0,
+            -0.8734371 , -0.4448296, -0.1980764, 0.0,
+            -0.483835  ,  0.7469823,  0.4559838, 0.0,
+             0.0       ,  0.0      ,  0.0      , 1.0
+    };
+
+};
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_DSN___RADECTRANSLATION___H__

@@ -191,10 +191,7 @@ namespace openspace {
 
        //loop through all signals in the data 
       for (const auto& signalsInJson : j["Signals"]) {
-
-          structSignal.signalId = signalsInJson["activityid"].get<int>();
           structSignal.dishName = signalsInJson["facility"].get<std::string>();
-          structSignal.year = signalsInJson["year"].get<int>();
           structSignal.spacecraft = signalsInJson["projuser"].get<std::string>();
           structSignal.endTime = signalsInJson["eot"].get<std::string>(); 
           structSignal.startTime = signalsInJson["bot"].get<std::string>();
@@ -202,7 +199,6 @@ namespace openspace {
 
           //Add signals to vector of signals
           _signalData.signals.push_back(structSignal);
-          //_dsnData.signalStartTimes.push_back(Time::convertTime(structSignal.startTime));
         }
 
       _signalData.isLoaded = true;
