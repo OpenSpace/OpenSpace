@@ -21,58 +21,29 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
-#ifndef __OPENSPACE_MODULE_DSN___SIGNALMANAGER___H__
-#define __OPENSPACE_MODULE_DSN___SIGNALMANAGER___H__
 
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <modules/dsn/managers/jsonhelper.h>
-
-#include <openspace/json.h>
-
-#include <openspace/util/time.h>
-#include <fstream>
+#include <modules/dsn/managers/radecmanager.h>
 
 namespace openspace {
+    constexpr const char* _loggerCat = "RadecManager";
+    std::vector<std::string> RadecManager::_dataFiles;
 
-    class SignalManager {
+    RadecManager::RadecManager()
+    {       
+    }
 
-    public:
+   bool RadecManager::extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary){
 
-    static struct Signal {        
-        std::string dishName;
-        std::string spacecraft;
-        std::string direction; 
-        std::string startTime;
-        std::string endTime;
-     };
+     JsonHelper::checkFileNames(identifier,  dictionary, RadecManager::_dataFiles);
 
-    static struct SignalData {
-        //filename is on the format of YYYY-DDDT (excluding '.json')
-        bool isLoaded = false;
-        double sequenceStartTime;
-        double sequenceEndTime = sequenceStartTime + 86400.0; // 24 hours from startTime 
-        std::vector<Signal> signals;
-     };
+      
+      return true;
+    }
 
-      /* The data that is currently loaded into open space*/
-      static SignalData _signalData;
-      /* A vector with all start times for our datafiles*/
-      static std::vector<double> _fileStartTimes;
-      /* A vector with all our datafile paths*/
-      static std::vector<std::string> _dataFiles;
+   static void jsonParser(int index) {
 
-      /* Extracts all the mandatory information we need from our asset file */
-      static bool extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary);
-      /* Saves all filenames in a vector to be compared current time in open space */
-      static void extractTriggerTimesFromFileNames(std::vector<std::string> _dataFiles);
-      /* parses data from a file given an index in our preloaded filename vector */
-      static bool jsonParser(int index);
+   }
 
-    };
 }
 
 
-#endif 

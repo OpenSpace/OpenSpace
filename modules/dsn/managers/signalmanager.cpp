@@ -27,23 +27,11 @@
 
 namespace openspace {
     constexpr const char* _loggerCat = "SignalManager";
-    
-    // Keys to get values from dictionary
-    constexpr const char* KeyDataFolder = "DataFolder";
-    constexpr const char* KeyDataFileType = "DataFileType";
 
     struct SignalManager::SignalData SignalManager::_signalData;
     std::vector<double> SignalManager::_fileStartTimes;
     std::vector<std::string> SignalManager::_dataFiles;
 
-    //Filetypes
-    const std::string dataFileTypeStringJson = "json";
-
-    enum class DataFileType : int {
-        Json = 0,
-        Invalid
-    };
- 
     /**
     * Extracts the general information (from the lua modfile) that is mandatory for the class
     * to function; such as the file type and the location of the data files.
@@ -51,90 +39,18 @@ namespace openspace {
     */
     bool SignalManager::extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary)
     {
-        DataFileType sourceFileType = DataFileType::Invalid;
-        
-        // ------------------- EXTRACT MANDATORY VALUES FROM DICTIONARY ------------------- //
-        std::string dataFileTypeString;
-       if (!dictionary->getValue(KeyDataFileType, dataFileTypeString)) {
-          LERROR(fmt::format("{}: The field {} is missing", identifier, KeyDataFileType));
-        }
-        std::transform(
-            dataFileTypeString.begin(),
-            dataFileTypeString.end(),
-            dataFileTypeString.begin(),
-            [](char c) { return static_cast<char>(tolower(c)); }
-        );
-        // Verify that the input type is correct
-        if (dataFileTypeString == dataFileTypeStringJson) {
-            sourceFileType = DataFileType::Json;
-        }
-        else {
-            LERROR(fmt::format(
-                "{}: {} is not a recognized {}",
-                identifier, dataFileTypeString, KeyDataFileType
-            ));
-            return false;
-        }
-        
-        std::string dataFolderPath;
-  if (!dictionary->getValue(KeyDataFolder, dataFolderPath)) {
-       LERROR(fmt::format("{}: The field {} is missing", identifier, KeyDataFolder));
-        return false;
-      }
+        bool dataFilesSuccess = JsonHelper::checkFileNames(identifier, dictionary, _dataFiles);
 
-        // Ensure that the source folder exists and then extract
-        // the files with the same extension as <inputFileTypeString>
-        ghoul::filesystem::Directory dataFolder(dataFolderPath);
-        if (FileSys.directoryExists(dataFolder)) {
-            // Extract all file paths from the provided folder
-            _dataFiles = dataFolder.readFiles(
-                ghoul::filesystem::Directory::Recursive::No,
-                ghoul::filesystem::Directory::Sort::Yes
-            );
-
-            // Remove all files that don't have <dataFileTypeString> as extension
-            _dataFiles.erase(
-                std::remove_if(
-                    _dataFiles.begin(),
-                    _dataFiles.end(),
-                    [dataFileTypeString](const std::string& str) {
-                const size_t extLength = dataFileTypeString.length();
-                std::string sub = str.substr(str.length() - extLength, extLength);
-                std::transform(
-                    sub.begin(),
-                    sub.end(),
-                    sub.begin(),
-                    [](char c) { return static_cast<char>(::tolower(c)); }
-                );
-                return sub != dataFileTypeString;
-            }),
-                _dataFiles.end()
-                );
-            // Ensure that there are available and valid source files left
-            if (_dataFiles.empty()) {
-                LERROR(fmt::format(
-                    "{}: {} contains no {} files",
-                    identifier, dataFolderPath, dataFileTypeString
-                ));
-                return false;
-            }
-        }
-        else {
-            LERROR(fmt::format(
-                "{}: {} is not a valid directory",
-                identifier,
-                dataFolderPath
-            ));
-            return false;
-        }
         extractTriggerTimesFromFileNames(_dataFiles);
+        SignalManager::jsonParser(0);
 
-        return SignalManager::jsonParser(0);
+        return dataFilesSuccess;
     }
 
     // Extract J2000 time from file names
     // Requires files to be named as such: 'YYYY-DDDT.json'
     void SignalManager::extractTriggerTimesFromFileNames(std::vector<std::string> _dataFiles) {
+
         // number of  characters in filename (excluding '.json')
         constexpr const int FilenameSize = 9;
         // size(".json")

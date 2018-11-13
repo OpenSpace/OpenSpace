@@ -8,7 +8,7 @@ local Signals = {
     Identifier = "Signals",
     Renderable = {
         Translation = {
-            Type = "RadecTranslation",
+            Type = "StaticTranslation",
             Position = {0.0, 0.0, 0.0} --no parent, sun center is 0, 0, 0
         },
         Type = "RenderableSignals",

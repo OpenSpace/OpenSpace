@@ -36,6 +36,8 @@ namespace {
 
 namespace openspace {
 
+constexpr const char* _loggerCat = "RadecTranslation";
+
 documentation::Documentation RadecTranslation::Documentation() {
     using namespace documentation;
     return {
@@ -74,11 +76,16 @@ RadecTranslation::RadecTranslation()
         requireUpdate();
         notifyObservers();
     });
+
+
 }
 
 RadecTranslation::RadecTranslation(const ghoul::Dictionary& dictionary)
     : RadecTranslation()
 {
+    std::unique_ptr<ghoul::Dictionary> dictionaryPtr = std::make_unique<ghoul::Dictionary>(dictionary);
+    extractData(dictionaryPtr);
+
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
@@ -86,7 +93,19 @@ RadecTranslation::RadecTranslation(const ghoul::Dictionary& dictionary)
     );
 }
 
+void RadecTranslation::extractData(std::unique_ptr<ghoul::Dictionary> &dictionary){
+    const char* _identifier = "testRADEC";
+
+    if (!RadecManager::extractMandatoryInfoFromDictionary(_identifier, dictionary)) {
+        LERROR(fmt::format("{}: Did not manage to extract data. (from RadecTranslation and RadecManager)", _identifier));
+    }
+    else {
+        LDEBUG(fmt::format("{}: Successfully read data. (from RadecTranslation and RadecManager)", _identifier));
+    }
+}
+
 glm::dvec3 RadecTranslation::convertRaDecRangeToCartesian() const{
+
     //Todo: stream data from file
     //Static data for voyager 1
     double ra = 257.777029167736; //2018-246
