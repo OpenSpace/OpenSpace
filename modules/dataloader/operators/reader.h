@@ -45,7 +45,7 @@ class Reader : public PropertyOwner, public Operator {
     std::string readTransferFunctionPresets();
 
   private:
-    ghoul::filesystem::Directory _topDir;
+    ghoul::filesystem::Directory _internalDir;
     ghoul::filesystem::Directory _generatedDir;
 };
 
