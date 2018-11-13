@@ -28,9 +28,8 @@
 #include <openspace/util/syncbuffer.h>
 
 #include <ghoul/misc/boolean.h>
-
-#include <vector>
 #include <memory>
+#include <vector>
 
 namespace openspace {
 
@@ -54,13 +53,13 @@ public:
      * Encodes all added Syncables in the injected <code>SyncBuffer</code>.
      * This method is only called on the SGCT master node
      */
-    void encodeSyncables();
+    std::vector<char> encodeSyncables();
 
     /**
      * Decodes the <code>SyncBuffer</code> into the added Syncables.
      * This method is only called on the SGCT slave nodes
      */
-    void decodeSyncables();
+    void decodeSyncables(std::vector<char> data);
 
     /**
      * Invokes the presync method of all added Syncables

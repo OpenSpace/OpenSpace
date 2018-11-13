@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_worker_thread_pool.h 37003 2016-12-23 14:54:07Z goatbar $
+ * $Id: cpl_worker_thread_pool.h 9ff327806cd64df6d73a6c91f92d12ca0c5e07df 2018-04-07 20:25:06 +0200 Even Rouault $
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  CPL worker thread pool
@@ -101,7 +101,7 @@ class CPL_DLL CPLWorkerThreadPool
         void WaitCompletion(int nMaxRemainingJobs = 0);
 
         /** Return the number of threads setup */
-        int GetThreadCount() const { return (int)aWT.size(); }
+        int GetThreadCount() const { return static_cast<int>(aWT.size()); }
 };
 
 #endif // CPL_WORKER_THREAD_POOL_H_INCLUDED_

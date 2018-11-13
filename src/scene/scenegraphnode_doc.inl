@@ -99,6 +99,12 @@ documentation::Documentation SceneGraphNode::Documentation() {
             "corresponding to a 'Translation', a 'Rotation', and a 'Scale'."
         },
         {
+            "TimeFrame",
+            new ReferencingVerifier("core_time_frame"),
+            Optional::Yes,
+            "Specifies the time frame for when this node should be active."
+        },
+        {
             "GUI",
             new TableVerifier({
                 {

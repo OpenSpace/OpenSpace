@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_odbc.h 36675 2016-12-04 11:10:10Z rouault $
+ * $Id: cpl_odbc.h 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $
  *
  * Project:  OGR ODBC Driver
  * Purpose:  Declarations for ODBC Access Cover API.
@@ -187,7 +187,7 @@ class CPL_DLL CPLODBCSession {
 
     int         CloseSession();
 
-    int         Failed( int, HSTMT = NULL );
+    int         Failed( int, HSTMT = nullptr );
     /** Return connection handle */
     HDBC        GetConnection() { return m_hDBC; }
     /** Return GetEnvironment handle */
@@ -243,7 +243,7 @@ class CPL_DLL CPLODBCStatement {
     /** Return statement string */
     const char    *GetCommand() { return m_pszStatement; }
 
-    int            ExecuteSQL( const char * = NULL );
+    int            ExecuteSQL( const char * = nullptr );
 
     // Results fetching
     int            Fetch( int nOrientation = SQL_FETCH_NEXT,
@@ -260,21 +260,21 @@ class CPL_DLL CPLODBCStatement {
     const char    *GetColColumnDef( int );
 
     int            GetColId( const char * );
-    const char    *GetColData( int, const char * = NULL );
-    const char    *GetColData( const char *, const char * = NULL );
+    const char    *GetColData( int, const char * = nullptr );
+    const char    *GetColData( const char *, const char * = nullptr );
     int            GetColDataLength( int );
     int            GetRowCountAffected();
 
     // Fetch special metadata.
     int            GetColumns( const char *pszTable,
-                               const char *pszCatalog = NULL,
-                               const char *pszSchema = NULL );
+                               const char *pszCatalog = nullptr,
+                               const char *pszSchema = nullptr );
     int            GetPrimaryKeys( const char *pszTable,
-                                   const char *pszCatalog = NULL,
-                                   const char *pszSchema = NULL );
+                                   const char *pszCatalog = nullptr,
+                                   const char *pszSchema = nullptr );
 
-    int            GetTables( const char *pszCatalog = NULL,
-                              const char *pszSchema = NULL );
+    int            GetTables( const char *pszCatalog = nullptr,
+                              const char *pszSchema = nullptr );
 
     void           DumpResult( FILE *fp, int bShowSchema = FALSE );
 

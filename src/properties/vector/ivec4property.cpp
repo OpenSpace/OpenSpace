@@ -24,11 +24,11 @@
 
 #include <openspace/properties/vector/ivec4property.h>
 
-#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/glm.h>
+#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/misc.h>
-
 #include <limits>
+#include <sstream>
 
 namespace {
 
@@ -67,7 +67,7 @@ bool toLuaConversion(lua_State* state, glm::ivec4 value) {
     return true;
 }
 
-glm::ivec4 fromStringConversion(std::string val, bool& success) {
+glm::ivec4 fromStringConversion(const std::string& val, bool& success) {
     glm::ivec4 result;
     std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
     if (tokens.size() != static_cast<size_t>(result.length())) {

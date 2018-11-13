@@ -45,6 +45,7 @@ public:
     static std::unique_ptr<Task> createFromDictionary(
         const ghoul::Dictionary& dictionary
     );
+
     static documentation::Documentation documentation();
 };
 

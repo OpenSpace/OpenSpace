@@ -31,7 +31,6 @@
 #include <queue>
 #include <thread>
 #include <vector>
-#include <atomic>
 
 // Implementation based on http://progsch.net/wordpress/?p=81
 
@@ -41,8 +40,9 @@ class ThreadPool;
 
 class Worker {
 public:
-    Worker(ThreadPool& pool);
+    Worker(ThreadPool& p);
     void operator()();
+
 private:
     ThreadPool& pool;
 };

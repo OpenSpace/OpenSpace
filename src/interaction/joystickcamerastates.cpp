@@ -24,7 +24,7 @@
 
 #include <openspace/interaction/joystickcamerastates.h>
 
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/interaction/inputstate.h>
 #include <openspace/scripting/scriptengine.h>
 #include <utility>
@@ -66,7 +66,7 @@ void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
             value *= -1.f;
         }
 
-        value *= _sensitivity;
+        value = static_cast<float>(value * _sensitivity);
 
         switch (t.type) {
             case AxisType::None:
@@ -152,10 +152,10 @@ void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
     for (int i = 0; i < JoystickInputState::MaxButtons; ++i) {
         auto itRange = _buttonMapping.equal_range(i);
         for (auto it = itRange.first; it != itRange.second; ++it) {
-            bool active = inputState.joystickInputStates().button(i, it->second.action);
+            bool active = global::joystickInputStates.button(i, it->second.action);
 
             if (active) {
-                OsEng.scriptEngine().queueScript(
+                global::scriptEngine.queueScript(
                     it->second.command,
                     scripting::ScriptEngine::RemoteScripting(it->second.synchronization)
                 );
@@ -170,7 +170,9 @@ void JoystickCameraStates::setAxisMapping(int axis, AxisType mapping,
 {
     ghoul_assert(axis < JoystickInputState::MaxAxes, "axis must be < MaxAxes");
 
-    _axisMapping[axis] = { mapping, shouldInvert, shouldNormalize };
+    _axisMapping[axis].type = mapping;
+    _axisMapping[axis].invert = shouldInvert;
+    _axisMapping[axis].normalize = shouldNormalize;
 }
 
 JoystickCameraStates::AxisInformation JoystickCameraStates::axisMapping(int axis) const {
@@ -187,11 +189,12 @@ float JoystickCameraStates::deadzone(int axis) const {
 
 void JoystickCameraStates::bindButtonCommand(int button, std::string command,
                                              JoystickAction action,
-                                             ButtonCommandRemote remote)
+                                             ButtonCommandRemote remote,
+                                             std::string documentation)
 {
     _buttonMapping.insert({
         button,
-        { std::move(command), action, remote }
+        { std::move(command), action, remote, std::move(documentation) }
     });
 }
 
@@ -220,8 +223,9 @@ std::vector<std::string> JoystickCameraStates::buttonCommand(int button) const {
 
 } // namespace openspace::interaction
 
-namespace std {
+namespace ghoul {
 
+template <>
 std::string to_string(const openspace::interaction::JoystickCameraStates::AxisType& type)
 {
     using T = openspace::interaction::JoystickCameraStates::AxisType;
@@ -240,10 +244,6 @@ std::string to_string(const openspace::interaction::JoystickCameraStates::AxisTy
         default:             return "";
     }
 }
-
-} // namespace std
-
-namespace ghoul {
 
 template <>
 openspace::interaction::JoystickCameraStates::AxisType from_string(

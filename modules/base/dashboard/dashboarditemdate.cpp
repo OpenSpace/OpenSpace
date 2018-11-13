@@ -26,25 +26,24 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/util/timemanager.h>
-
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 
 namespace {
-    const char* KeyFontMono = "Mono";
-    const float DefaultFontSize = 15.f;
+    constexpr const char* KeyFontMono = "Mono";
+    constexpr const float DefaultFontSize = 15.f;
 
-    static const openspace::properties::Property::PropertyInfo FontNameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",
         "Font Name",
         "This value is the name of the font that is used. It can either refer to an "
         "internal name registered previously, or it can refer to a path that is used."
     };
 
-    static const openspace::properties::Property::PropertyInfo FontSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
         "This value determines the size of the font that is used to render the date."
@@ -80,7 +79,7 @@ documentation::Documentation DashboardItemDate::Documentation() {
     };
 }
 
-DashboardItemDate::DashboardItemDate(ghoul::Dictionary dictionary)
+DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
@@ -95,7 +94,7 @@ DashboardItemDate::DashboardItemDate(ghoul::Dictionary dictionary)
         _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
     }
     _fontName.onChange([this](){
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
@@ -105,11 +104,11 @@ DashboardItemDate::DashboardItemDate(ghoul::Dictionary dictionary)
         );
     }
     _fontSize.onChange([this](){
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
-    _font = OsEng.fontManager().font(_fontName, _fontSize);
+    _font = global::fontManager.font(_fontName, _fontSize);
 }
 
 void DashboardItemDate::render(glm::vec2& penPosition) {
@@ -117,16 +116,14 @@ void DashboardItemDate::render(glm::vec2& penPosition) {
     RenderFont(
         *_font,
         penPosition,
-        "Date: %s",
-        OsEng.timeManager().time().UTC().c_str()
+        fmt::format("Date: {} UTC", global::timeManager.time().UTC())
     );
 }
 
 glm::vec2 DashboardItemDate::size() const {
     return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
         *_font,
-        "Date: %s",
-        OsEng.timeManager().time().UTC().c_str()
+        fmt::format("Date: {} UTC", global::timeManager.time().UTC())
     ).boundingBox;
 }
 

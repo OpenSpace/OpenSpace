@@ -25,9 +25,9 @@
 #version __CONTEXT__
 
 layout (location = 0) out vec4 finalColor;
+
 uniform float blackoutFactor;
 uniform int nAaSamples;
-
 uniform sampler2DMS mainColorTexture;
 
 void main() {

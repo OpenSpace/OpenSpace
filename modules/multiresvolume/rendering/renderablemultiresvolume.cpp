@@ -24,43 +24,38 @@
 
 #include <modules/multiresvolume/rendering/renderablemultiresvolume.h>
 
-#include <openspace/engine/openspaceengine.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
+#include <modules/multiresvolume/rendering/atlasmanager.h>
+#include <modules/multiresvolume/rendering/errorhistogrammanager.h>
+#include <modules/multiresvolume/rendering/histogrammanager.h>
+#include <modules/multiresvolume/rendering/localerrorhistogrammanager.h>
+#include <modules/multiresvolume/rendering/localtfbrickselector.h>
+#include <modules/multiresvolume/rendering/multiresvolumeraycaster.h>
+#include <modules/multiresvolume/rendering/shenbrickselector.h>
+#include <modules/multiresvolume/rendering/simpletfbrickselector.h>
+#include <modules/multiresvolume/rendering/tfbrickselector.h>
+#include <modules/multiresvolume/rendering/tsp.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycastermanager.h>
-
+#include <openspace/rendering/transferfunction.h>
+#include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
+#include <openspace/util/updatestructures.h>
+#include <ghoul/fmt.h>
 #include <ghoul/glm.h>
-
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/cachemanager.h>
-
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/texture.h>
-
-#include <modules/multiresvolume/rendering/tsp.h>
-#include <modules/multiresvolume/rendering/atlasmanager.h>
-#include <modules/multiresvolume/rendering/shenbrickselector.h>
-#include <modules/multiresvolume/rendering/tfbrickselector.h>
-#include <modules/multiresvolume/rendering/simpletfbrickselector.h>
-#include <modules/multiresvolume/rendering/localtfbrickselector.h>
-
-#include <modules/multiresvolume/rendering/histogrammanager.h>
-#include <modules/multiresvolume/rendering/errorhistogrammanager.h>
-#include <modules/multiresvolume/rendering/localerrorhistogrammanager.h>
-#include <openspace/properties/scalarproperty.h>
-#include <openspace/properties/vectorproperty.h>
-
-#include <openspace/util/time.h>
-#include <openspace/util/spicemanager.h>
-
-#include <algorithm>
-#include <iterator>
-#include <fstream>
 #include <algorithm>
 #include <chrono>
+#include <fstream>
+#include <iterator>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableMultiresVolume";
@@ -79,81 +74,80 @@ namespace {
         "${MODULES}/multiresvolume/shaders/helper.glsl";
     constexpr const char* GlslHeaderPath =
         "${MODULES}/multiresvolume/shaders/header.glsl";
-    bool registeredGlslHelpers = false;
 
-    static const openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {
         "StepSizeCoefficient",
         "Stepsize Coefficient",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo CurrentTimeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo CurrentTimeInfo = {
         "CurrentTime",
         "Current Time",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo MemoryBudgetInfo = {
+    constexpr openspace::properties::Property::PropertyInfo MemoryBudgetInfo = {
         "MemoryBudget",
         "Memory Budget",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo StreamingBudgetInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StreamingBudgetInfo = {
         "StreamingBudget",
         "Streaming Budget",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo UseGlobalTimeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UseGlobalTimeInfo = {
         "UseGlobalTime",
         "Global Time",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo LoopInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LoopInfo = {
         "Loop",
         "Loop",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo SelectorNameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SelectorNameInfo = {
         "Selector",
         "Brick Selector",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo StatsToFileInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StatsToFileInfo = {
         "PrintStats",
         "Print Stats",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo StatsToFileNameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StatsToFileNameInfo = {
         "PrintStatsFileName",
         "Stats Filename",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
         "ScalingExponent",
         "Scaling Exponent",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo ScalingInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ScalingInfo = {
         "Scaling",
         "Scaling",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo TranslationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TranslationInfo = {
         "Translation",
         "Translation",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo RotationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
         "" // @TODO Missing documentation
@@ -162,109 +156,81 @@ namespace {
 
 namespace openspace {
 
-RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dictionary)
+RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dictionary)
     :  Renderable(dictionary)
-    , _transferFunction(nullptr)
-    , _timestep(0)
-    , _atlasMapSize(0)
-    , _tfBrickSelector(nullptr)
-    , _simpleTfBrickSelector(nullptr)
-    , _localTfBrickSelector(nullptr)
-    , _errorHistogramManager(nullptr)
-    , _histogramManager(nullptr)
-    , _localErrorHistogramManager(nullptr)
-    , _stepSizeCoefficient(StepSizeCoefficientInfo, 1.f, 0.01f, 10.f)
+    , _useGlobalTime(UseGlobalTimeInfo, false)
+    , _loop(LoopInfo, false)
     , _currentTime(CurrentTimeInfo, 0, 0, 0)
     , _memoryBudget(MemoryBudgetInfo, 0, 0, 0)
     , _streamingBudget(StreamingBudgetInfo, 0, 0, 0)
-    , _useGlobalTime(UseGlobalTimeInfo, false)
-    , _loop(LoopInfo, false)
-    , _selectorName(SelectorNameInfo)
-    , _gatheringStats(false)
+    , _stepSizeCoefficient(StepSizeCoefficientInfo, 1.f, 0.01f, 10.f)
+    , _selectorName(SelectorNameInfo, "tf")
     , _statsToFile(StatsToFileInfo, false)
     , _statsToFileName(StatsToFileNameInfo)
     , _scalingExponent(ScalingExponentInfo, 1, -10, 20)
-    , _scaling(ScalingInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f))
     , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
     , _rotation(RotationInfo, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(6.28f))
+    , _scaling(ScalingInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f))
 {
-    std::string name;
-
-    _filename = "";
-    bool success = dictionary.getValue(KeyDataSource, _filename);
-    if (!success) {
-        LERROR(fmt::format(
-            "Node '{}' did not contain a valid '{}'",
-            name,
-            KeyDataSource
-        ));
-        return;
+    if (dictionary.hasKeyAndValue<std::string>(KeyDataSource)) {
+        _filename = absPath(dictionary.value<std::string>(KeyDataSource));
     }
-    _filename = absPath(_filename);
-    if (_filename == "") {
+    else {
+        LERROR(fmt::format("Node did not contain a valid '{}'", KeyDataSource));
         return;
     }
 
-    _errorHistogramsPath = "";
-    if (dictionary.getValue(KeyErrorHistogramsSource, _errorHistogramsPath)) {
-        _errorHistogramsPath = absPath(_errorHistogramsPath);
+    if (dictionary.hasKeyAndValue<std::string>(KeyErrorHistogramsSource)) {
+        _errorHistogramsPath = absPath(
+            dictionary.value<std::string>(KeyErrorHistogramsSource)
+        );
     }
 
-
-
-    float scalingExponent, stepSizeCoefficient;
-    glm::vec3 scaling, translation, rotation;
-
-    if (dictionary.getValue("ScalingExponent", scalingExponent)) {
-        _scalingExponent = static_cast<int>(scalingExponent);
-    }
-    if (dictionary.getValue("Scaling", scaling)) {
-        _scaling = scaling;
-    }
-    if (dictionary.getValue("Translation", translation)) {
-        _translation = translation;
-    }
-    if (dictionary.getValue("Rotation", rotation)) {
-        _rotation = rotation;
-    }
-    if (dictionary.getValue("StepSizeCoefficient", stepSizeCoefficient)) {
-        _stepSizeCoefficient = stepSizeCoefficient;
+    if (dictionary.hasKeyAndValue<double>("ScalingExponent")) {
+        _scalingExponent = static_cast<int>(dictionary.value<double>("ScalingExponent"));
     }
 
+    if (dictionary.hasKeyAndValue<double>("StepSizeCoefficient")) {
+        _stepSizeCoefficient = static_cast<float>(
+            dictionary.value<double>("StepSizeCoefficient")
+        );
+    }
+
+    if (dictionary.hasKeyAndValue<glm::vec3>("Scaling")) {
+        _scaling = dictionary.value<glm::vec3>("Scaling");
+    }
+
+    if (dictionary.hasKeyAndValue<glm::vec3>("Translation")) {
+        _translation = dictionary.value<glm::vec3>("Translation");
+    }
+
+    if (dictionary.hasKeyAndValue<glm::vec3>("Rotation")) {
+        _rotation = dictionary.value<glm::vec3>("Rotation");
+    }
 
     std::string startTimeString, endTimeString;
-    bool hasTimeData = true;
-    hasTimeData &= dictionary.getValue(KeyStartTime, startTimeString);
-    hasTimeData &= dictionary.getValue(KeyEndTime, endTimeString);
+
+    bool hasTimeData = dictionary.getValue(KeyStartTime, startTimeString) &&
+                       dictionary.getValue(KeyEndTime, endTimeString);
     if (hasTimeData) {
         _startTime = SpiceManager::ref().ephemerisTimeFromDate(startTimeString);
         _endTime = SpiceManager::ref().ephemerisTimeFromDate(endTimeString);
-    }
-    if (hasTimeData) {
         _loop = false;
     } else {
-    _loop = true;
-        LWARNING(fmt::format(
-            "Node '{}' does not provide valid time information. Viewing one image per "
-            "frame.",
-            name
-        ));
+        _loop = true;
+        LWARNING("Node does not provide time information. Viewing one image / frame");
     }
 
-
-    _transferFunction = nullptr;
-    _transferFunctionPath = "";
-    success = dictionary.getValue(KeyTransferFunction, _transferFunctionPath);
-    if (!success) {
-        LERROR(fmt::format(
-            "Node '{}' did not contain a valid '{}'",
-            name,
-            KeyTransferFunction
-        ));
+    if (dictionary.hasKeyAndValue<std::string>(KeyTransferFunction)) {
+        _transferFunctionPath = absPath(
+            dictionary.value<std::string>(KeyTransferFunction)
+        );
+        _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
+    }
+    else {
+        LERROR(fmt::format("Node did not contain a valid '{}'", KeyTransferFunction));
         return;
     }
-    _transferFunctionPath = absPath(_transferFunctionPath);
-    _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
 
     //_pscOffset = psc(glm::vec4(0.0));
     //_boxScaling = glm::vec3(1.0);
@@ -287,18 +253,11 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
         }
     }*/
 
-    //setBoundingSphere(PowerScaledScalar::CreatePSS(glm::length(_boxScaling)*pow(10,_w)));
-
     _tsp = std::make_shared<TSP>(_filename);
     _atlasManager = std::make_shared<AtlasManager>(_tsp.get());
 
-    _selectorName = "tf";
-    std::string brickSelectorType;
-    if (dictionary.hasKey(KeyBrickSelector)) {
-        success = dictionary.getValue(KeyBrickSelector, brickSelectorType);
-        if (success) {
-            _selectorName = brickSelectorType;
-        }
+    if (dictionary.hasKeyAndValue<std::string>(KeyBrickSelector)) {
+        _selectorName = dictionary.value<std::string>(KeyBrickSelector);
     }
 
     std::string selectorName = _selectorName;
@@ -335,110 +294,94 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     addProperty(_scalingExponent);
     addProperty(_translation);
     addProperty(_rotation);
-
-    //_brickSelector = new ShenBrickSelector(_tsp, -1, -1);
 }
 
-RenderableMultiresVolume::~RenderableMultiresVolume() {
-    //OsEng.renderEngine()->aBuffer()->removeVolume(this);
+RenderableMultiresVolume::~RenderableMultiresVolume() {}
 
-    if (_tfBrickSelector)
-        delete _tfBrickSelector;
-    if (_simpleTfBrickSelector)
-        delete _simpleTfBrickSelector;
-    if (_localTfBrickSelector)
-        delete _localTfBrickSelector;
-
-    if (_errorHistogramManager)
-        delete _errorHistogramManager;
-    if (_histogramManager)
-        delete _histogramManager;
-    if (_localErrorHistogramManager)
-        delete _localErrorHistogramManager;
-}
-
-bool RenderableMultiresVolume::setSelectorType(Selector selector) {
+void RenderableMultiresVolume::setSelectorType(Selector selector) {
+    // @TODO(abock): Can these if statements be simplified by checking if
+    //               selector == _selector before and bailing out early?
     _selector = selector;
     switch (_selector) {
         case Selector::TF:
             if (!_tfBrickSelector) {
-                TfBrickSelector* tbs;
-                _errorHistogramManager = new ErrorHistogramManager(_tsp.get());
-                _tfBrickSelector = tbs = new TfBrickSelector(
+                _errorHistogramManager = std::make_unique<ErrorHistogramManager>(
+                    _tsp.get()
+                );
+                _tfBrickSelector = std::make_unique<TfBrickSelector>(
                     _tsp.get(),
-                    _errorHistogramManager,
+                    _errorHistogramManager.get(),
                     _transferFunction.get(),
                     _memoryBudget,
                     _streamingBudget
                 );
-                _transferFunction->setCallback([tbs](const TransferFunction& /*tf*/) {
-                    tbs->calculateBrickErrors();
+                _transferFunction->setCallback([this](const TransferFunction&) {
+                    _tfBrickSelector->calculateBrickErrors();
                 });
                 if (initializeSelector()) {
-                    tbs->calculateBrickErrors();
-                    return true;
+                    _tfBrickSelector->calculateBrickErrors();
+                    return;
                 }
             }
             break;
 
         case Selector::SIMPLE:
             if (!_simpleTfBrickSelector) {
-                SimpleTfBrickSelector *stbs;
-                _histogramManager = new HistogramManager();
-                _simpleTfBrickSelector = stbs = new SimpleTfBrickSelector(
+                _histogramManager = std::make_unique<HistogramManager>();
+                _simpleTfBrickSelector = std::make_unique<SimpleTfBrickSelector>(
                     _tsp.get(),
-                    _histogramManager,
+                    _histogramManager.get(),
                     _transferFunction.get(),
                     _memoryBudget,
                     _streamingBudget
                 );
-                _transferFunction->setCallback([stbs](const TransferFunction& /*tf*/) {
-                    stbs->calculateBrickImportances();
+                _transferFunction->setCallback([this](const TransferFunction&) {
+                    _simpleTfBrickSelector->calculateBrickImportances();
                 });
                 if (initializeSelector()) {
-                    stbs->calculateBrickImportances();
-                    return true;
+                    _simpleTfBrickSelector->calculateBrickImportances();
+                    return;
                 }
             }
             break;
 
         case Selector::LOCAL:
             if (!_localTfBrickSelector) {
-                LocalTfBrickSelector* ltbs;
-                _localErrorHistogramManager = new LocalErrorHistogramManager(_tsp.get());
-                _localTfBrickSelector = ltbs = new LocalTfBrickSelector(
+                _localErrorHistogramManager =
+                    std::make_unique<LocalErrorHistogramManager>(_tsp.get());
+                _localTfBrickSelector = std::make_unique<LocalTfBrickSelector>(
                     _tsp.get(),
-                    _localErrorHistogramManager,
+                    _localErrorHistogramManager.get(),
                     _transferFunction.get(),
                     _memoryBudget,
                     _streamingBudget
                 );
-                _transferFunction->setCallback([ltbs](const TransferFunction& /*tf*/) {
-                    ltbs->calculateBrickErrors();
+                _transferFunction->setCallback([this](const TransferFunction&) {
+                    _localTfBrickSelector->calculateBrickErrors();
                 });
                 if (initializeSelector()) {
-                    ltbs->calculateBrickErrors();
-                    return true;
+                    _localTfBrickSelector->calculateBrickErrors();
+                    return;
                 }
             }
             break;
     }
-    return false;
 }
 
 void RenderableMultiresVolume::initializeGL() {
     bool success = _tsp && _tsp->load();
 
-    unsigned int maxNumBricks = _tsp->header().xNumBricks_ * _tsp->header().yNumBricks_ * _tsp->header().zNumBricks_;
+    unsigned int maxNumBricks = _tsp->header().xNumBricks * _tsp->header().yNumBricks *
+                                _tsp->header().zNumBricks;
 
-    unsigned int maxInitialBudget = 2048;
-    int initialBudget = std::min(maxInitialBudget, maxNumBricks);
+    constexpr unsigned int MaxInitialBudget = 2048;
+    int initialBudget = std::min(MaxInitialBudget, maxNumBricks);
 
     _currentTime = properties::IntProperty(
         CurrentTimeInfo,
         0,
         0,
-        _tsp->header().numTimesteps_ - 1
+        _tsp->header().numTimesteps - 1
     );
     _memoryBudget = properties::IntProperty(
         MemoryBudgetInfo,
@@ -458,7 +401,7 @@ void RenderableMultiresVolume::initializeGL() {
 
     if (success) {
         _brickIndices.resize(maxNumBricks, 0);
-        success &= setSelectorType(_selector);
+        setSelectorType(_selector);
     }
 
     success &= _atlasManager && _atlasManager->initialize();
@@ -467,17 +410,21 @@ void RenderableMultiresVolume::initializeGL() {
 
     success &= isReady();
 
-    _raycaster = std::make_unique<MultiresVolumeRaycaster>(_tsp, _atlasManager, _transferFunction);
+    _raycaster = std::make_unique<MultiresVolumeRaycaster>(
+        _tsp,
+        _atlasManager,
+        _transferFunction
+    );
     _raycaster->initialize();
 
-    OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
+    global::raycasterManager.attachRaycaster(*_raycaster);
 
-    std::function<void(bool)> onChange = [&](bool enabled) {
+    auto onChange = [&](bool enabled) {
         if (enabled) {
-            OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
+            global::raycasterManager.attachRaycaster(*_raycaster);
         }
         else {
-            OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
+            global::raycasterManager.detachRaycaster(*_raycaster);
         }
     };
 
@@ -509,22 +456,23 @@ bool RenderableMultiresVolume::initializeSelector() {
                 cacheName << f.baseName() << "_" << nHistograms << "_errorHistograms";
                 std::string cacheFilename;
                 cacheFilename = FileSys.cacheManager()->cachedFilename(
-                    cacheName.str(), "", ghoul::filesystem::CacheManager::Persistent::Yes);
+                    cacheName.str(),
+                    "",
+                    ghoul::filesystem::CacheManager::Persistent::Yes
+                );
                 std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
                 std::string errorHistogramsPath = _errorHistogramsPath;
                 if (cacheFile.is_open()) {
                     // Read histograms from cache.
                     cacheFile.close();
-                    LINFO(fmt::format(
-                        "Loading histograms from cache: {}",
-                        cacheFilename
-                    ));
+                    LINFO(
+                        fmt::format("Loading histograms from cache: {}", cacheFilename)
+                    );
                     success &= _errorHistogramManager->loadFromFile(cacheFilename);
                 } else if (_errorHistogramsPath != "") {
                     // Read histograms from scene data.
                     LINFO(fmt::format(
-                        "Loading histograms from scene data: {}",
-                        _errorHistogramsPath
+                        "Loading histograms from scene data: {}", _errorHistogramsPath
                     ));
                     success &= _errorHistogramManager->loadFromFile(_errorHistogramsPath);
                 } else {
@@ -547,7 +495,10 @@ bool RenderableMultiresVolume::initializeSelector() {
                 cacheName << f.baseName() << "_" << nHistograms << "_histograms";
                 std::string cacheFilename;
                 cacheFilename = FileSys.cacheManager()->cachedFilename(
-                    cacheName.str(), "", ghoul::filesystem::CacheManager::Persistent::Yes);
+                    cacheName.str(),
+                    "",
+                    ghoul::filesystem::CacheManager::Persistent::Yes
+                );
                 std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
                 if (cacheFile.is_open()) {
                     // Read histograms from cache.
@@ -572,12 +523,13 @@ bool RenderableMultiresVolume::initializeSelector() {
 
         case Selector::LOCAL:
             if (_localErrorHistogramManager) {
-                std::stringstream cacheName;
                 ghoul::filesystem::File f = _filename;
-                cacheName << f.baseName() << "_" << nHistograms << "_localErrorHistograms";
                 std::string cacheFilename;
                 cacheFilename = FileSys.cacheManager()->cachedFilename(
-                    cacheName.str(), "", ghoul::filesystem::CacheManager::Persistent::Yes);
+                    fmt::format("{}_{}_localErrorHistograms", f.baseName(), nHistograms),
+                    "",
+                    ghoul::filesystem::CacheManager::Persistent::Yes
+                );
                 std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
                 if (cacheFile.is_open()) {
                     // Read histograms from cache.
@@ -615,7 +567,7 @@ void RenderableMultiresVolume::preResolve(ghoul::opengl::ProgramObject* program)
 
     ss.str(std::string());
     ss << "transferFunction_" << getId();
-    program->setUniform(ss.str(), getTextureUnit(_transferFunction->getTexture()));
+    program->setUniform(ss.str(), getTextureUnit(_transferFunction->texture()));
 
     ss.str(std::string());
     ss << "textureAtlas_" << getId();
@@ -626,12 +578,12 @@ void RenderableMultiresVolume::preResolve(ghoul::opengl::ProgramObject* program)
     program->setSsboBinding(ss.str(), getSsboBinding(_atlasManager->atlasMapBuffer()));
 
     ss.str(std::string());
-    ss << "gridType_" << getId();
-    program->setUniform(ss.str(), static_cast<int>(_tsp->header().gridType_));
+    ss << "gridType" << getId();
+    program->setUniform(ss.str(), static_cast<int>(_tsp->header().gridType));
 
     ss.str(std::string());
     ss << "maxNumBricksPerAxis_" << getId();
-    program->setUniform(ss.str(), static_cast<unsigned int>(_tsp->header().xNumBricks_));
+    program->setUniform(ss.str(), static_cast<unsigned int>(_tsp->header().xNumBricks));
 
     ss.str(std::string());
     ss << "paddedBrickDim_" << getId();
@@ -648,7 +600,10 @@ void RenderableMultiresVolume::preResolve(ghoul::opengl::ProgramObject* program)
 */
 /*
 std::vector<ghoul::opengl::Texture*> RenderableMultiresVolume::getTextures() {
-    std::vector<ghoul::opengl::Texture*> textures{_transferFunction->getTexture(), _atlasManager->textureAtlas()};
+    std::vector<ghoul::opengl::Texture*> textures{
+        _transferFunction->texture(),
+        _atlasManager->textureAtlas()
+    };
     return textures;
 }
 
@@ -692,8 +647,7 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
         _statsToFile = false;
     }
 
-
-    int numTimesteps = _tsp->header().numTimesteps_;
+    int numTimesteps = _tsp->header().numTimesteps;
     int currentTimestep;
     bool visible = true;
     if (_loop) {
@@ -709,39 +663,39 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
     }
 
     if (visible) {
-
         std::chrono::system_clock::time_point selectionStart;
         if (_gatheringStats) {
             selectionStart = std::chrono::system_clock::now();
         }
 
         switch (_selector) {
-        case Selector::TF:
-            if (_tfBrickSelector) {
-                _tfBrickSelector->setMemoryBudget(_memoryBudget);
-                _tfBrickSelector->setStreamingBudget(_streamingBudget);
-                _tfBrickSelector->selectBricks(currentTimestep, _brickIndices);
-            }
-            break;
-        case Selector::SIMPLE:
-            if (_simpleTfBrickSelector) {
-                _simpleTfBrickSelector->setMemoryBudget(_memoryBudget);
-                _simpleTfBrickSelector->setStreamingBudget(_streamingBudget);
-                _simpleTfBrickSelector->selectBricks(currentTimestep, _brickIndices);
-            }
-            break;
-        case Selector::LOCAL:
-            if (_localTfBrickSelector) {
-                _localTfBrickSelector->setMemoryBudget(_memoryBudget);
-                _localTfBrickSelector->setStreamingBudget(_streamingBudget);
-                _localTfBrickSelector->selectBricks(currentTimestep, _brickIndices);
-            }
-            break;
+            case Selector::TF:
+                if (_tfBrickSelector) {
+                    _tfBrickSelector->setMemoryBudget(_memoryBudget);
+                    _tfBrickSelector->setStreamingBudget(_streamingBudget);
+                    _tfBrickSelector->selectBricks(currentTimestep, _brickIndices);
+                }
+                break;
+            case Selector::SIMPLE:
+                if (_simpleTfBrickSelector) {
+                    _simpleTfBrickSelector->setMemoryBudget(_memoryBudget);
+                    _simpleTfBrickSelector->setStreamingBudget(_streamingBudget);
+                    _simpleTfBrickSelector->selectBricks(currentTimestep, _brickIndices);
+                }
+                break;
+            case Selector::LOCAL:
+                if (_localTfBrickSelector) {
+                    _localTfBrickSelector->setMemoryBudget(_memoryBudget);
+                    _localTfBrickSelector->setStreamingBudget(_streamingBudget);
+                    _localTfBrickSelector->selectBricks(currentTimestep, _brickIndices);
+                }
+                break;
         }
 
         std::chrono::system_clock::time_point uploadStart;
         if (_gatheringStats) {
-            std::chrono::system_clock::time_point selectionEnd = std::chrono::system_clock::now();
+            std::chrono::system_clock::time_point selectionEnd =
+                std::chrono::system_clock::now();
             _selectionDuration = selectionEnd - selectionStart;
             uploadStart = selectionEnd;
         }
@@ -749,32 +703,39 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
         _atlasManager->updateAtlas(AtlasManager::EVEN, _brickIndices);
 
         if (_gatheringStats) {
-            std::chrono::system_clock::time_point uploadEnd = std::chrono::system_clock::now();
+            std::chrono::system_clock::time_point uploadEnd =
+                std::chrono::system_clock::now();
             _uploadDuration = uploadEnd - uploadStart;
-            _nDiskReads = _atlasManager->getNumDiskReads();
-            _nUsedBricks = _atlasManager->getNumUsedBricks();
-            _nStreamedBricks = _atlasManager->getNumStreamedBricks();
+            _nDiskReads = _atlasManager->numDiskReads();
+            _nUsedBricks = _atlasManager->numUsedBricks();
+            _nStreamedBricks = _atlasManager->numStreamedBricks();
         }
     }
 
     if (_raycaster) {
-
-        glm::mat4 transform = glm::translate(glm::mat4(1.0), static_cast<glm::vec3>(_translation) * std::pow(10.0f, static_cast<float>(_scalingExponent)));
+        glm::mat4 transform = glm::translate(
+            glm::mat4(1.0),
+            static_cast<glm::vec3>(_translation) *
+                std::pow(10.f, static_cast<float>(_scalingExponent))
+        );
         glm::vec3 eulerRotation = static_cast<glm::vec3>(_rotation);
-        transform = glm::rotate(transform, eulerRotation.x, glm::vec3(1, 0, 0));
-        transform = glm::rotate(transform, eulerRotation.y, glm::vec3(0, 1, 0));
-        transform = glm::rotate(transform, eulerRotation.z, glm::vec3(0, 0, 1));
-        transform = glm::scale(transform, static_cast<glm::vec3>(_scaling) * std::pow(10.0f, static_cast<float>(_scalingExponent)));
+        transform = glm::rotate(transform, eulerRotation.x, glm::vec3(1.f, 0.f, 0.f));
+        transform = glm::rotate(transform, eulerRotation.y, glm::vec3(0.f, 1.f, 0.f));
+        transform = glm::rotate(transform, eulerRotation.z, glm::vec3(0.f, 0.f, 1.f));
+        transform = glm::scale(
+            transform,
+            static_cast<glm::vec3>(_scaling) *
+                std::pow(10.f, static_cast<float>(_scalingExponent))
+        );
 
         _raycaster->setStepSizeCoefficient(_stepSizeCoefficient);
         _raycaster->setModelTransform(transform);
         //_raycaster->setTime(data.time);
     }
-
 }
 
 void RenderableMultiresVolume::render(const RenderData& data, RendererTasks& tasks) {
-    RaycasterTask task{ _raycaster.get(), data };
+    RaycasterTask task { _raycaster.get(), data };
     tasks.raycasterTasks.push_back(task);
 }
 

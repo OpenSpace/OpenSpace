@@ -24,61 +24,84 @@
 
 #include <openspace/interaction/keyframenavigator.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/time.h>
-
+#include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
 
 #include <glm/gtx/quaternion.hpp>
 
 namespace openspace::interaction {
 
-void KeyframeNavigator::updateCamera(Camera& camera) {
-    double now = OsEng.windowWrapper().applicationTime();
+bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes) {
+    double now = currentTime();
+    bool foundPrevKeyframe = false;
 
     if (_cameraPoseTimeline.nKeyframes() == 0) {
-        return;
+        return false;
     }
 
     const Keyframe<CameraPose>* nextKeyframe =
-                                              _cameraPoseTimeline.firstKeyframeAfter(now);
+        _cameraPoseTimeline.firstKeyframeAfter(now);
     const Keyframe<CameraPose>* prevKeyframe =
-                                              _cameraPoseTimeline.lastKeyframeBefore(now);
-    double nextTime = 0;
-    double prevTime = 0;
-    double t = 0;
+        _cameraPoseTimeline.lastKeyframeBefore(now);
 
+    double nextTime = 0.0;
     if (nextKeyframe) {
         nextTime = nextKeyframe->timestamp;
-    } else {
-        return;
+    }
+    else {
+        if (ignoreFutureKeyframes) {
+            _cameraPoseTimeline.removeKeyframesBefore(now);
+        }
+        return false;
     }
 
+    double prevTime = 0.0;
+    double t = 0.0;
     if (prevKeyframe) {
         prevTime = prevKeyframe->timestamp;
         t = (now - prevTime) / (nextTime - prevTime);
-    } else {
+        foundPrevKeyframe = true;
+    }
+    else {
         // If there is no keyframe before: Only use the next keyframe.
         prevTime = nextTime;
         prevKeyframe = nextKeyframe;
         t = 1;
     }
 
+    const CameraPose prevPose = prevKeyframe->data;
+    const CameraPose nextPose = nextKeyframe->data;
     _cameraPoseTimeline.removeKeyframesBefore(prevTime);
 
-    const CameraPose& prevPose = prevKeyframe->data;
-    const CameraPose& nextPose = nextKeyframe->data;
+    if (!foundPrevKeyframe && ignoreFutureKeyframes) {
+        return false;
+    }
 
-    Scene* scene = camera.parent()->scene();
+    return updateCamera(
+        &camera,
+        prevKeyframe->data,
+        nextKeyframe->data,
+        t,
+        ignoreFutureKeyframes
+    );
+}
+
+bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose prevPose,
+                                     const CameraPose nextPose, double t,
+                                     bool ignoreFutureKeyframes)
+{
+    Scene* scene = camera->parent()->scene();
     SceneGraphNode* prevFocusNode = scene->sceneGraphNode(prevPose.focusNode);
     SceneGraphNode* nextFocusNode = scene->sceneGraphNode(nextPose.focusNode);
 
     if (!prevFocusNode || !nextFocusNode) {
-        return;
+        return false;
     }
 
     glm::dvec3 prevKeyframeCameraPosition = prevPose.position;
@@ -110,20 +133,86 @@ void KeyframeNavigator::updateCamera(Camera& camera) {
     nextKeyframeCameraPosition += nextFocusNode->worldPosition();
 
     // Linear interpolation
-    camera.setPositionVec3(
+    t = std::max(0.0, std::min(1.0, t));
+    camera->setPositionVec3(
         prevKeyframeCameraPosition * (1 - t) + nextKeyframeCameraPosition * t
     );
-    camera.setRotation(
+    camera->setRotation(
         glm::slerp(prevKeyframeCameraRotation, nextKeyframeCameraRotation, t)
     );
 
     // We want to affect view scaling, such that we achieve
     // logarithmic interpolation of distance to an imagined focus node.
     // To do this, we interpolate the scale reciprocal logarithmically.
-    const float prevInvScaleExp = glm::log(1.0 / prevPose.scale);
-    const float nextInvScaleExp = glm::log(1.0 / nextPose.scale);
-    const float interpolatedInvScaleExp = prevInvScaleExp * (1 - t) + nextInvScaleExp * t;
-    camera.setScaling(1.0 / glm::exp(interpolatedInvScaleExp));
+    if (!ignoreFutureKeyframes) {
+        const float prevInvScaleExp = glm::log(1.f / prevPose.scale);
+        const float nextInvScaleExp = glm::log(1.f / nextPose.scale);
+        const float interpolatedInvScaleExp = static_cast<float>(
+            prevInvScaleExp * (1 - t) + nextInvScaleExp * t
+            );
+        camera->setScaling(1.f / glm::exp(interpolatedInvScaleExp));
+    }
+
+#ifdef INTERPOLATION_DEBUG_PRINT
+    LINFO(fmt::format(
+        "Cam pos prev={}, next={}",
+        std::to_string(prevKeyframeCameraPosition),
+        std::to_string(nextKeyframeCameraPosition)
+    ));
+    LINFO(fmt::format(
+        "Cam rot prev={} {} {} {}  next={} {} {} {}",
+        prevKeyframeCameraRotation.x,
+        prevKeyframeCameraRotation.y,
+        prevKeyframeCameraRotation.z,
+        prevKeyframeCameraRotation.w,
+        nextKeyframeCameraRotation.x,
+        nextKeyframeCameraRotation.y,
+        nextKeyframeCameraRotation.z,
+        nextKeyframeCameraRotation.w
+    ));
+    LINFO(fmt::format("Cam interp = {}", t));
+    LINFO(fmt::format(
+        "camera {} {} {} {} {} {}",
+        global::windowDelegate.applicationTime(),
+        global::windowDelegate.applicationTime() - _timestampPlaybackStarted_application,
+        global::timeManager.time().j2000Seconds(),
+        interpolatedCamera.x,
+        interpolatedCamera.y,
+        interpolatedCamera.z
+    ));
+    // Following is for direct print to save & compare camera positions against recorded
+    // file
+    printf(
+        "camera %8.4f %8.4f %13.3f %16.7f %16.7f %16.7f\n",
+        global::windowDelegate.applicationTime(),
+        global::windowDelegate.applicationTime() - _timestampPlaybackStarted_application,
+        global::timeManager.time().j2000Seconds(),
+        interpolatedCamera.x,
+        interpolatedCamera.y,
+        interpolatedCamera.z
+    );
+#endif
+
+    return true;
+}
+
+double KeyframeNavigator::currentTime() const {
+    if (_timeframeMode == KeyframeTimeRef::Relative_recordedStart) {
+        return (global::windowDelegate.applicationTime() - _referenceTimestamp);
+    }
+    else if (_timeframeMode == KeyframeTimeRef::Absolute_simTimeJ2000) {
+        return global::timeManager.time().j2000Seconds();
+    }
+    else {
+        return global::windowDelegate.applicationTime();
+    }
+}
+
+void KeyframeNavigator::setTimeReferenceMode(KeyframeTimeRef refType,
+                                             double referenceTimestamp)
+{
+    _timeframeMode = refType;
+    _referenceTimestamp = referenceTimestamp;
 }
 
 Timeline<KeyframeNavigator::CameraPose>& KeyframeNavigator::timeline() {
@@ -132,11 +221,11 @@ Timeline<KeyframeNavigator::CameraPose>& KeyframeNavigator::timeline() {
 
 void KeyframeNavigator::addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose)
 {
-    timeline().addKeyframe(timestamp, pose);
+    timeline().addKeyframe(timestamp, std::move(pose));
 }
 
-void KeyframeNavigator::removeKeyframesAfter(double timestamp) {
-    timeline().removeKeyframesAfter(timestamp);
+void KeyframeNavigator::removeKeyframesAfter(double timestamp, Inclusive inclusive) {
+    timeline().removeKeyframesAfter(timestamp, inclusive);
 }
 
 void KeyframeNavigator::clearKeyframes() {

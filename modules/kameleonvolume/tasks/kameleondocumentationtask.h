@@ -29,14 +29,15 @@
 
 #include <string>
 
-namespace openspace {
-namespace kameleonvolume {
+namespace openspace::kameleonvolume {
 
 class KameleonDocumentationTask : public Task {
 public:
     KameleonDocumentationTask(const ghoul::Dictionary& dictionary);
+
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
+
     static documentation::Documentation documentation();
 
 private:
@@ -44,7 +45,6 @@ private:
     std::string _outputPath;
 };
 
-} // namespace kameleonvolume
-} // namespace openspace
+} // namespace openspace::kameleonvolume
 
 #endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONDOCUMENTATIONTASK___H__

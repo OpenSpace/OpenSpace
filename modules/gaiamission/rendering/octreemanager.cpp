@@ -72,8 +72,10 @@ void OctreeManager::initOctree(const long long& cpuRamBudget, int maxDist,
     _root->octreePositionIndex = 8;
 
     // Initialize the culler. The NDC.z of the comparing corners are always -1 or 1.
-    _culler = std::make_unique<OctreeCuller>(
-          globebrowsing::AABB3(glm::vec3(-1, -1, 0), glm::vec3(1, 1, 1e2)));
+    globebrowsing::AABB3 box;
+    box.min = glm::vec3(-1.f, -1.f, 0.f);
+    box.max = glm::vec3(1.f, 1.f, 1e2);
+    _culler = std::make_unique<OctreeCuller>(box);
     _removedKeysInPrevCall = std::set<int>();
     _leastRecentlyFetchedNodes = std::queue<unsigned long long>();
 

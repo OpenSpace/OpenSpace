@@ -27,15 +27,15 @@
 
 #include <openspace/documentation/documentationgenerator.h>
 
-#include <openspace/scene/scenelicense.h>
-
 #include <vector>
 
 namespace openspace {
 
+struct SceneLicense;
+
 class SceneLicenseWriter : public DocumentationGenerator {
 public:
-    SceneLicenseWriter(const std::vector<SceneLicense>& licenses);
+    SceneLicenseWriter(std::vector<SceneLicense> licenses);
 
 private:
     std::string generateJson() const override;

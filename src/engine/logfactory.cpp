@@ -115,8 +115,6 @@ documentation::Documentation LogFactoryDocumentation() {
 }
 
 std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictionary) {
-    using namespace std::string_literals;
-
     documentation::testSpecificationAndThrow(
         LogFactoryDocumentation(),
         dictionary,
@@ -124,8 +122,8 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
     );
 
     // 'type' and 'filename' are required keys
-    std::string type = dictionary.value<std::string>(KeyType);
-    std::string filename = absPath(dictionary.value<std::string>(KeyFilename));
+    const std::string& type = dictionary.value<std::string>(KeyType);
+    const std::string& filename = absPath(dictionary.value<std::string>(KeyFilename));
 
     // the rest are optional
     bool append = true;
@@ -185,7 +183,7 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
                 LogLevelStamping(logLevelStamp),
                 cssFiles,
                 jsFiles,
-                ghoul::logging::levelFromString(logLevel)
+                ghoul::from_string<ghoul::logging::LogLevel>(logLevel)
             );
         }
     }
@@ -208,7 +206,7 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
                 DateStamping(dateStamp),
                 CategoryStamping(categoryStamp),
                 LogLevelStamping(logLevelStamp),
-                ghoul::logging::levelFromString(logLevel)
+                ghoul::from_string<ghoul::logging::LogLevel>(logLevel)
             );
         }
     }

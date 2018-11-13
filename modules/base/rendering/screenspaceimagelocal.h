@@ -29,7 +29,7 @@
 
 #include <openspace/properties/stringproperty.h>
 
-#include <ghoul/opengl/texture.h>
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
@@ -38,6 +38,8 @@ namespace documentation { struct Documentation; }
 class ScreenSpaceImageLocal : public ScreenSpaceRenderable {
 public:
     ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary);
+
+    bool deinitializeGL() override;
 
     void update() override;
 
@@ -49,7 +51,7 @@ private:
     properties::StringProperty _texturePath;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
-    bool _textureIsDirty;
+    bool _textureIsDirty = false;
 };
 
 } // namespace openspace

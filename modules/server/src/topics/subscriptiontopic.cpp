@@ -22,58 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/query/query.h>
-#include <openspace/properties/property.h>
+#include <modules/server/include/topics/subscriptiontopic.h>
+
+#include <modules/server/include/connection.h>
 #include <modules/server/include/jsonconverters.h>
-#include "include/subscriptiontopic.h"
+#include <openspace/properties/property.h>
+#include <openspace/query/query.h>
+#include <openspace/util/timemanager.h>
+#include <ghoul/fmt.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
-const char* _loggerCat = "SubscriptionTopic";
-const char* PropertyKey = "property";
-const char* EventKey = "event";
+    constexpr const char* _loggerCat = "SubscriptionTopic";
+    constexpr const char* PropertyKey = "property";
+    constexpr const char* EventKey = "event";
 
-const char* StartSubscription = "start_subscription";
-const char* StopSubscription = "stop_subscription";
-
-const int UnsetCallbackHandle = -1;
-}
+    constexpr const char* StartSubscription = "start_subscription";
+    constexpr const char* StopSubscription = "stop_subscription";
+} // namespace
 
 using nlohmann::json;
 
 namespace openspace {
 
-    SubscriptionTopic::SubscriptionTopic()
-        : Topic()
-        , _requestedResourceIsSubscribable(false)
-        , _onChangeHandle(UnsetCallbackHandle)
-        , _onDeleteHandle(UnsetCallbackHandle) {}
-
 SubscriptionTopic::~SubscriptionTopic() {
-    if (_onChangeHandle != UnsetCallbackHandle) {
+    if (_prop && _onChangeHandle != UnsetCallbackHandle) {
         _prop->removeOnChange(_onChangeHandle);
+        _onChangeHandle = UnsetCallbackHandle;
     }
-    if (!_onDeleteHandle) {
+    if (_prop && !_onDeleteHandle) {
         _prop->removeOnDelete(_onDeleteHandle);
+        _onDeleteHandle = UnsetCallbackHandle;
     }
 }
 
-bool SubscriptionTopic::isDone() {
+bool SubscriptionTopic::isDone() const {
     return !_requestedResourceIsSubscribable || !_isSubscribedTo;
 }
 
-void SubscriptionTopic::handleJson(json j) {
-    std::string key = j.at(PropertyKey).get<std::string>();
-    std::string event = j.at(EventKey).get<std::string>();
+void SubscriptionTopic::handleJson(const nlohmann::json& json) {
+    std::string key = json.at(PropertyKey).get<std::string>();
+    const std::string& event = json.at(EventKey).get<std::string>();
 
     if (event == StartSubscription) {
-        LDEBUG("Subscribing to property '" + key + "'...");
-
         _prop = property(key);
-        if (_prop != nullptr) {
+        if (_prop) {
             _requestedResourceIsSubscribable = true;
             _isSubscribedTo = true;
-            auto onChange = [this, key]() {
-                LDEBUG("Updating subscription '" + key + "'.");
+            auto onChange = [this, k = std::move(key)]() {
                 _connection->sendJson(wrappedPayload(_prop));
             };
             _onChangeHandle = _prop->onChange(onChange);
@@ -87,11 +83,19 @@ void SubscriptionTopic::handleJson(json j) {
             onChange();
         }
         else {
-            LWARNING("Could not subscribe. Property '" + key + "' not found.");
+            LWARNING(fmt::format("Could not subscribe. Property '{}' not found", key));
         }
     }
     if (event == StopSubscription) {
         _isSubscribedTo = false;
+        if (_prop && _onChangeHandle != UnsetCallbackHandle) {
+            _prop->removeOnChange(_onChangeHandle);
+            _onChangeHandle = UnsetCallbackHandle;
+        }
+        if (_prop && !_onDeleteHandle) {
+            _prop->removeOnDelete(_onDeleteHandle);
+            _onDeleteHandle = UnsetCallbackHandle;
+        }
     }
 }
 

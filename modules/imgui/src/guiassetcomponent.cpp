@@ -26,6 +26,7 @@
 
 #include <modules/imgui/include/imgui_include.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/asset.h>
@@ -74,60 +75,57 @@ void GuiAssetComponent::render() {
     ImGui::Begin("Assets", &e);
     _isEnabled = e;
 
-    AssetManager& assetManager = OsEng.assetManager();
+    AssetManager& assetManager = global::openSpaceEngine.assetManager();
 
-    std::string rootPath = "";
+    std::string rootPath;
 
     for (const std::shared_ptr<Asset>& a : assetManager.rootAsset()->childAssets()) {
-        renderTree(a, rootPath);
+        renderTree(*a, rootPath);
     }
 
     ImGui::End();
 }
 
-void GuiAssetComponent::renderTree(const std::shared_ptr<openspace::Asset> asset,
-                                   const std::string& relativeToPath)
+void GuiAssetComponent::renderTree(const Asset& asset, const std::string& relativeToPath)
 {
-    std::string assetPath = asset->assetFilePath();
-    const std::string assetDirectory =
-        ghoul::filesystem::File(assetPath).directoryName();
+    using namespace ghoul::filesystem;
 
-    if (relativeToPath != "") {
+    std::string assetPath = asset.assetFilePath();
+    const std::string& assetDirectory = File(assetPath).directoryName();
+
+    if (!relativeToPath.empty()) {
         assetPath = FileSys.relativePath(assetPath, relativeToPath);
     }
 
-    std::string assetText = assetPath + " " + assetStateToString(asset->state());
+    std::string assetText = assetPath + " " + assetStateToString(asset.state());
 
-    if (asset->state() == Asset::State::Synchronizing) {
-        assetText += " (" + std::to_string(
-            static_cast<int>(asset->requiredSynchronizationProgress() * 100)
-            ) + "%)";
+    if (asset.state() == Asset::State::Synchronizing) {
+        int prog = static_cast<int>(asset.requiredSynchronizationProgress() * 100);
+        assetText += " (" + std::to_string(prog) + "%)";
     }
 
-    std::vector<std::shared_ptr<Asset>> requested = asset->requestedAssets();
-    std::vector<std::shared_ptr<Asset>> required = asset->requiredAssets();
+    const std::vector<std::shared_ptr<Asset>>& requested = asset.requestedAssets();
+    const std::vector<std::shared_ptr<Asset>>& required = asset.requiredAssets();
 
-    std::vector<std::shared_ptr<ResourceSynchronization>> resourceSyncs =
-        asset->ownSynchronizations();
+    const std::vector<std::shared_ptr<ResourceSynchronization>>& resourceSyncs =
+        asset.ownSynchronizations();
 
     if (requested.empty() && required.empty() && resourceSyncs.empty()) {
         ImGui::Text("%s", assetText.c_str());
     } else if (ImGui::TreeNode(assetPath.c_str(), "%s", assetText.c_str())) {
-
-        for (const auto& child : required) {
-            renderTree(child, assetDirectory);
+        for (const std::shared_ptr<Asset>& child : required) {
+            renderTree(*child, assetDirectory);
         }
 
         if (!requested.empty() && ImGui::TreeNode("Requested assets")) {
-            for (const auto& child : requested) {
-                renderTree(child, assetDirectory);
+            for (const std::shared_ptr<Asset>& child : requested) {
+                renderTree(*child, assetDirectory);
             }
             ImGui::TreePop();
         }
 
         if (!resourceSyncs.empty() && ImGui::TreeNode("Resource Synchronizations")) {
-            for (const auto& sync : resourceSyncs) {
-
+            for (const std::shared_ptr<ResourceSynchronization>& sync : resourceSyncs) {
                 std::string resourceText = sync->directory() +
                     " " + syncStateToString(sync->state());
                 if (sync->state() == ResourceSynchronization::State::Syncing) {
@@ -143,6 +141,5 @@ void GuiAssetComponent::renderTree(const std::shared_ptr<openspace::Asset> asset
         ImGui::TreePop();
     }
 }
-
 
 } // namespace openspace::gui

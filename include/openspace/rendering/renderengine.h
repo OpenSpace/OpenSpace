@@ -42,7 +42,6 @@ namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
-namespace performance { class PerformanceManager; }
 namespace scripting { struct LuaLibrary; }
 
 class Camera;
@@ -70,7 +69,6 @@ public:
 
     void initialize();
     void initializeGL();
-    void deinitialize();
     void deinitializeGL();
 
     void setScene(Scene* scene);
@@ -79,9 +77,6 @@ public:
 
     const Renderer& renderer() const;
     RendererImplementation rendererImplementation() const;
-    RaycasterManager& raycasterManager();
-    DeferredcasterManager& deferredcasterManager();
-
 
     void updateShaderPrograms();
     void updateFade();
@@ -93,28 +88,25 @@ public:
     bool mouseActivationCallback(const glm::dvec2& mousePosition) const;
 
     void renderOverlays(const ShutdownInformation& shutdownInfo);
+    void renderEndscreen();
     void postDraw();
 
-    // Performance measurements
-    bool doesPerformanceMeasurements() const;
-    std::shared_ptr<performance::PerformanceManager> performanceManager();
-
     float globalBlackOutFactor();
-    void setGlobalBlackOutFactor(float factor);
+    void setGlobalBlackOutFactor(float opacity);
 
     void addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderable> s);
     void removeScreenSpaceRenderable(ScreenSpaceRenderable* s);
-    void removeScreenSpaceRenderable(const std::string& name);
-    ScreenSpaceRenderable* screenSpaceRenderable(const std::string& name);
+    void removeScreenSpaceRenderable(const std::string& identifier);
+    ScreenSpaceRenderable* screenSpaceRenderable(const std::string& identifier);
     std::vector<ScreenSpaceRenderable*> screenSpaceRenderables() const;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
         const std::string& name, const std::string& vsPath, std::string fsPath,
-        ghoul::Dictionary dictionary = ghoul::Dictionary());
+        ghoul::Dictionary data = ghoul::Dictionary());
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
         const std::string& name, const std::string& vsPath, std::string fsPath,
-        const std::string& csPath, ghoul::Dictionary dictionary = ghoul::Dictionary());
+        const std::string& csPath, ghoul::Dictionary data = ghoul::Dictionary());
 
     void removeRenderProgram(ghoul::opengl::ProgramObject* program);
 
@@ -134,7 +126,7 @@ public:
     void setCamera(Camera* camera);
 
 
-    void setRendererFromString(const std::string& method);
+    void setRendererFromString(const std::string& renderingMethod);
 
     /**
      * Lets the renderer update the data to be brought into the rendererer programs
@@ -160,11 +152,9 @@ public:
     glm::ivec2 renderingResolution() const;
     glm::ivec2 fontResolution() const;
 
-    properties::PropertyOwner& screenSpaceOwner();
-
 private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
-    RendererImplementation rendererFromString(const std::string& method) const;
+    RendererImplementation rendererFromString(const std::string& renderingMethod) const;
 
     void renderScreenLog();
     void renderVersionInformation();
@@ -172,20 +162,16 @@ private:
     void renderShutdownInformation(float timer, float fullTime);
     void renderDashboard();
 
-
-    Camera* _camera;
-    Scene* _scene;
-    std::unique_ptr<RaycasterManager> _raycasterManager;
-    std::unique_ptr<DeferredcasterManager> _deferredcasterManager;
+    Camera* _camera = nullptr;
+    Scene* _scene = nullptr;
 
     properties::BoolProperty _doPerformanceMeasurements;
-    std::shared_ptr<performance::PerformanceManager> _performanceManager;
 
     std::unique_ptr<Renderer> _renderer;
-    RendererImplementation _rendererImplementation;
+    RendererImplementation _rendererImplementation = RendererImplementation::Invalid;
     ghoul::Dictionary _rendererData;
     ghoul::Dictionary _resolveData;
-    ScreenLog* _log;
+    ScreenLog* _log = nullptr;
 
     properties::BoolProperty _showOverlayOnSlaves;
     properties::BoolProperty _showLog;
@@ -211,13 +197,11 @@ private:
     uint64_t _frameNumber = 0;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
-    properties::PropertyOwner _screenSpaceOwner;
-    std::vector<std::unique_ptr<ScreenSpaceRenderable>> _screenSpaceRenderables;
 
-    std::shared_ptr<ghoul::fontrendering::Font> _fontBig = nullptr;
-    std::shared_ptr<ghoul::fontrendering::Font> _fontInfo = nullptr;
-    std::shared_ptr<ghoul::fontrendering::Font> _fontDate = nullptr;
-    std::shared_ptr<ghoul::fontrendering::Font> _fontLog = nullptr;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontBig;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontLog;
 
     struct {
         glm::ivec4 rotation;

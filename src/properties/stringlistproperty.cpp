@@ -26,8 +26,9 @@
 
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/misc.h>
-
 #include <numeric>
+
+#include <openspace/json.h>
 
 namespace {
 
@@ -41,7 +42,7 @@ std::vector<std::string> fromLuaConversion(lua_State* state, bool& success) {
     lua_pushnil(state);
     while (lua_next(state, -2) != 0) {
         if (lua_isstring(state, -1)) {
-            result.push_back(lua_tostring(state, -1));
+            result.emplace_back(lua_tostring(state, -1));
         }
         else {
             success = false;
@@ -67,7 +68,7 @@ bool toLuaConversion(lua_State* state, std::vector<std::string> val) {
     return true;
 }
 
-std::vector<std::string> fromStringConversion(std::string val, bool& success) {
+std::vector<std::string> fromStringConversion(const std::string& val, bool& success) {
     std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
     for (std::string& token : tokens) {
         // Each incoming string is of the form "value"
@@ -81,16 +82,19 @@ std::vector<std::string> fromStringConversion(std::string val, bool& success) {
     return tokens;
 }
 
-bool toStringConversion(std::string& outValue, std::vector<std::string> inValue) {
-    outValue = "";
+bool toStringConversion(std::string& outValue, const std::vector<std::string>& inValue) {
+    outValue = "[";
     for (const std::string& v : inValue) {
+        std::string str;
+        nlohmann::json json;
+        nlohmann::to_json(json, v);
+        str = json.dump();
         if (&v != &*inValue.cbegin()) {
-            outValue += ", " + v;
+            outValue += ", ";
         }
-        else {
-            outValue += v;
-        }
+        outValue += str;
     }
+    outValue += "]";
 
     // outValue = std::accumulate(
     //     inValue.begin(),

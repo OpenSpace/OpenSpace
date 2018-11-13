@@ -24,6 +24,7 @@
 
 #include <openspace/engine/virtualpropertymanager.h>
 
+#include <openspace/properties/property.h>
 #include <algorithm>
 
 namespace openspace {

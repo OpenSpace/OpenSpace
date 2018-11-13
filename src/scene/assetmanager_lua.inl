@@ -22,6 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/engine/globals.h>
+
 namespace openspace::luascriptfunctions::asset {
 
 int add(lua_State* state) {
@@ -30,28 +34,45 @@ int add(lua_State* state) {
     AssetManager* assetManager =
         reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));
 
-    std::string assetName = ghoul::lua::checkStringAndPop(state);
-    assetManager->add(assetName);
+    const std::string& assetName = ghoul::lua::value<std::string>(
+        state,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
 
+    if (global::renderEngine.scene()) {
+        assetManager->add(assetName);
+    }
+    else {
+        // The scene might not exist yet if OpenSpace was started without specifying an
+        // initial asset
+        global::openSpaceEngine.scheduleLoadSingleAsset(assetName);
+    }
+
+
+    ghoul_assert(lua_gettop(state) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int remove(lua_State* state) {
     ghoul::lua::checkArgumentsAndThrow(state, 1, "lua::remove");
 
-
     AssetManager* assetManager =
         reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));
 
-    std::string assetName = ghoul::lua::checkStringAndPop(state);
+    const std::string& assetName = ghoul::lua::value<std::string>(
+        state,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
     assetManager->remove(assetName);
 
+    ghoul_assert(lua_gettop(state) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int removeAll(lua_State* state) {
     ghoul::lua::checkArgumentsAndThrow(state, 0, "lua::removeAll");
-
 
     AssetManager* assetManager =
         reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));

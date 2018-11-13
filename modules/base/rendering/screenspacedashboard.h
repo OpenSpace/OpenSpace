@@ -33,7 +33,7 @@
 namespace ghoul::fontrendering {
     class Font;
     class FontRenderer;
-}
+} // namespace ghoul::fontrendering
 
 namespace openspace {
 
@@ -43,7 +43,7 @@ namespace scripting { struct LuaLibrary; }
 class ScreenSpaceDashboard: public ScreenSpaceFramebuffer {
 public:
     ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
-    ~ScreenSpaceDashboard();
+    ~ScreenSpaceDashboard() = default;
 
     bool initializeGL() override;
     bool deinitializeGL() override;

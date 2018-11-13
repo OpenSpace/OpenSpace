@@ -51,7 +51,7 @@ struct ReadFileJob : public Job<std::vector<std::vector<float>>> {
 
     void execute() override;
 
-    std::shared_ptr<std::vector<std::vector<float>>> product() override;
+    std::vector<std::vector<float>> product() override;
 
 private:
     std::string _inFilePath;
@@ -62,7 +62,7 @@ private:
     std::vector<std::string> _allColumns;
 
     std::shared_ptr<FitsFileReader> _fitsFileReader;
-    std::shared_ptr<std::vector<std::vector<float>>> _octants;
+    std::vector<std::vector<float>> _octants;
 };
 
 } // namespace openspace::gaiamission

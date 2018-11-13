@@ -20,59 +20,73 @@ local models = asset.syncedResource({
 
 local kernels = asset.syncedResource({
     Name = "Rosetta Kernels",
-    Type = "TorrentSynchronization",
+    Type = "HttpSynchronization",
     Identifier = "rosetta_kernels",
-    Magnet = "magnet:?xt=urn:btih:5DE346AE06D62FC53BEBBBBF591D1CA7715F6F64&dn=Rosetta&tr=udp%3a%2f%2ftracker.openbittorrent.com%3a80%2fannounce&tr=udp%3a%2f%2ftracker.opentrackr.org%3a1337%2fannounce"
+    Version = 1
 })
 
 local RosettaKernels = {
-    kernels .. "/Rosetta/SCLK/ROS_160718_STEP.TSC",
-    kernels .. "/Rosetta/SCLK/ros_triv.tsc",
+    kernels .. "/ROS_160718_STEP.TSC",
+    kernels .. "/ros_triv.tsc",
 
-    kernels .. "/Rosetta/SPK/CORB_DV_243_01___T19_00325.BSP",
-    kernels .. "/Rosetta/SPK/CORB_DV_223_01___T19_00302.BSP",
-    kernels .. "/Rosetta/SPK/CORB_DV_145_01___T19_00216.BSP",
+    kernels .. "/CORB_DV_243_01___T19_00325.BSP",
+    kernels .. "/CORB_DV_223_01___T19_00302.BSP",
+    kernels .. "/CORB_DV_145_01___T19_00216.BSP",
 
-    kernels .. "/Rosetta/SPK/LORB_DV_236_01___T19_00318.BSP",
-    kernels .. "/Rosetta/SPK/LORB_DV_223_01___T19_00302.BSP",
-    kernels .. "/Rosetta/SPK/LORB_DV_145_01___T19_00216.BSP",
+    kernels .. "/LORB_DV_236_01___T19_00318.BSP",
+    kernels .. "/LORB_DV_223_01___T19_00302.BSP",
+    kernels .. "/LORB_DV_145_01___T19_00216.BSP",
     
-    kernels .. "/Rosetta/SPK/RORB_DV_243_01___T19_00325.BSP",
-    kernels .. "/Rosetta/SPK/RORB_DV_223_01___T19_00302.BSP",
-    kernels .. "/Rosetta/SPK/RORB_DV_145_01___T19_00216.BSP",
+    kernels .. "/RORB_DV_243_01___T19_00325.BSP",
+    kernels .. "/RORB_DV_223_01___T19_00302.BSP",
+    kernels .. "/RORB_DV_145_01___T19_00216.BSP",
 
-    kernels .. "/Rosetta/CK/ATNR_P040302093352_00127.BC",
+    kernels .. "/ATNR_P040302093352_00127.BC",
 
-    kernels .. "/Rosetta/SPK/ROS_STRUCT_V5.BSP",
+    kernels .. "/ROS_STRUCT_V5.BSP",
 
-    kernels .. "/Rosetta/IK/ROS_NAVCAM_V01.TI",
+    kernels .. "/ROS_NAVCAM_V01.TI",
     
-    kernels .. "/Rosetta/FK/ROS_CHURYUMOV_V01.TF",
-    kernels .. "/Rosetta/FK/ROS_V26.TF",
+    kernels .. "/ROS_CHURYUMOV_V01.TF",
+    kernels .. "/ROS_V26.TF",
 
     -- CK
     -- Rosetta attitude
-    kernels .. "/Rosetta/CK/RATT_DV_243_01_01____00325.BC",
-    kernels .. "/Rosetta/CK/RATT_DV_223_01_01____00302.BC",
-    kernels .. "/Rosetta/CK/RATT_DV_145_01_01____00216.BC",
+    kernels .. "/RATT_DV_243_01_01____00325.BC",
+    kernels .. "/RATT_DV_223_01_01____00302.BC",
+    kernels .. "/RATT_DV_145_01_01____00216.BC",
 
     -- Comet attitude
-    kernels .. "/Rosetta/CK/CATT_DV_243_01_______00325.BC",
-    kernels .. "/Rosetta/CK/CATT_DV_223_01_______00302.BC",
-    kernels .. "/Rosetta/CK/CATT_DV_145_01_______00216.BC",
+    kernels .. "/CATT_DV_243_01_______00325.BC",
+    kernels .. "/CATT_DV_223_01_______00302.BC",
+    kernels .. "/CATT_DV_145_01_______00216.BC",
 
     -- High gain antenna
-    kernels .. "/Rosetta/CK/ROS_HGA_2016_V0035.BC",
-    kernels .. "/Rosetta/CK/ROS_HGA_2015_V0053.BC",
-    kernels .. "/Rosetta/CK/ROS_HGA_2014_V0044.BC",
+    kernels .. "/ROS_HGA_2016_V0035.BC",
+    kernels .. "/ROS_HGA_2015_V0053.BC",
+    kernels .. "/ROS_HGA_2014_V0044.BC",
 
     -- Solar arrays
-    kernels .. "/Rosetta/CK/ROS_SA_2016_V0034.BC",
-    kernels .. "/Rosetta/CK/ROS_SA_2015_V0042.BC",
-    kernels .. "/Rosetta/CK/ROS_SA_2014_V0047.BC",
+    kernels .. "/ROS_SA_2016_V0034.BC",
+    kernels .. "/ROS_SA_2015_V0042.BC",
+    kernels .. "/ROS_SA_2014_V0047.BC",
 
 
-    kernels .. "/Rosetta/PCK/ROS_CGS_RSOC_V03.TPC"
+    kernels .. "/ROS_CGS_RSOC_V03.TPC"
+}
+
+local LightSources = {
+    {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sunTransforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+    },
+    {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+    }
 }
 
 local RotationMatrix = {
@@ -129,7 +143,8 @@ local RosettaBlackFoil = {
             GeometryFile = models .. "/black_foil.obj"
         },
         ColorTexture = textures .. "/foil_silver_ramp.png",
-        ModelTransform = RotationMatrix
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
     },
     GUI = {
         Name = "Rosetta Model Part Black Foil",
@@ -148,7 +163,8 @@ local RosettaBlackParts = {
             GeometryFile = models .. "/black_parts.obj"
         },
         ColorTexture = textures .. "/foil_silver_ramp.png",
-        ModelTransform = RotationMatrix
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
     },
     GUI = {
         Name = "Rosetta Model Part Black Parts",
@@ -167,7 +183,8 @@ local RosettaDish = {
             GeometryFile = models .. "/dish.obj"
         },
         ColorTexture = textures .. "/dish_AO.png",
-        ModelTransform = RotationMatrix
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
     },
     GUI = {
         Name = "Rosetta Model Part Dish",
@@ -186,7 +203,8 @@ local RosettaParts = {
             GeometryFile = models .. "/parts.obj"
         },
         ColorTexture = textures .. "/parts2_AO.png",
-        ModelTransform = RotationMatrix
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
     },
     GUI = {
         Name = "Rosetta Model Part Parts",
@@ -205,7 +223,8 @@ local RosettaSilverFoil = {
             GeometryFile = models .. "/silver_foil.obj"
         },
         ColorTexture = textures .. "/foil_silver_ramp.png",
-        ModelTransform = RotationMatrix
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
     },
     GUI = {
         Name = "Rosetta Model Part Silver Foil",
@@ -224,7 +243,8 @@ local RosettaVents = {
             GeometryFile = models .. "/vents.obj"
         },
         ColorTexture = textures .. "/tex_01.png",
-        ModelTransform = RotationMatrix
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
     },
     GUI = {
         Name = "Rosetta Model Part Vents",
@@ -243,7 +263,8 @@ local RosettaWingA = {
             GeometryFile = models .."/wingA.obj"
         },
         ColorTexture = textures .. "/tex_01.png",
-        ModelTransform = RotationMatrix
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
     },
     GUI = {
         Name = "Rosetta Model Part Wing A",
@@ -262,7 +283,8 @@ local RosettaWingB = {
             GeometryFile = models .. "/wingB.obj"
         },
         ColorTexture = textures .. "/tex_01.png",
-        ModelTransform = RotationMatrix
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
     },
     GUI = {
         Name = "Rosetta Model Part Wing B",
@@ -281,7 +303,8 @@ local RosettaYellowFoil = {
             GeometryFile = models .. "/yellow_foil.obj"
         },
         ColorTexture = textures .. "/foil_gold_ramp.png",
-        ModelTransform = RotationMatrix
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
     },
     GUI = {
         Name = "Rosetta Model Part Yellow Foil",
@@ -329,7 +352,8 @@ local PhilaeFoil = {
             GeometryFile = models .. "/lander_foil.obj"
         },
         ColorTexture = textures .. "/foil_silver_ramp.png",
-        ModelTransform = RotationMatrix
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
     },
     GUI = {
         Name = "Philae Model Part Foil",
@@ -348,7 +372,8 @@ local PhilaeLids = {
             GeometryFile = models .. "/lander_lids.obj"
         },
         ColorTexture = textures .. "/parts2_AO.png",
-        ModelTransform = RotationMatrix
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
     },
     GUI = {
         Name = "Philae Model Part Lids",
@@ -367,7 +392,8 @@ local PhilaeParts = {
             GeometryFile = models .. "/lander_parts.obj"
         },
         ColorTexture = textures .. "/foil_silver_ramp.png",
-        ModelTransform = RotationMatrix
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
     },
     GUI = {
         Name = "Philae Model Part Parts",
@@ -386,7 +412,8 @@ local PhilaeSolarPanels = {
             GeometryFile = models .. "/lander_solarp.obj"
         },
         ColorTexture = textures .. "/tex_01.png",
-        ModelTransform = RotationMatrix
+        ModelTransform = RotationMatrix,
+        LightSources = LightSources
     },
     GUI = {
         Name = "Philae Model Parts Solar Panels",

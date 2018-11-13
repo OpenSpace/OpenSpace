@@ -28,7 +28,7 @@
 #include <openspace/documentation/verifier.h>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo RotationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
         "Rotation",
         "Rotation",
         "This value is the used as a 3x3 rotation matrix that is applied to the scene "
@@ -51,10 +51,10 @@ documentation::Documentation StaticRotation::Documentation() {
             },
             {
                 RotationInfo.identifier,
-                new OrVerifier(
+                new OrVerifier({
                     new DoubleVector3Verifier(),
                     new DoubleMatrix3Verifier()
-                ),
+                }),
                 Optional::No,
                 "Stores the static rotation as either a vector containing Euler angles "
                 "or by specifiying the 3x3 rotation matrix directly"
@@ -67,14 +67,10 @@ StaticRotation::StaticRotation()
     : _rotationMatrix(RotationInfo, glm::dmat3(1.0), glm::dmat3(-1.0), glm::dmat3(1.0))
 {
     addProperty(_rotationMatrix);
-    _rotationMatrix.onChange([this]() {
-        requireUpdate();
-    });
+    _rotationMatrix.onChange([this]() { requireUpdate(); });
 }
 
-StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary)
-    : StaticRotation()
-{
+StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary) : StaticRotation() {
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
@@ -91,10 +87,9 @@ StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary)
         // Must be glm::dmat3 due to specification restriction
         _rotationMatrix = dictionary.value<glm::dmat3>(RotationInfo.identifier);
     }
-
 }
 
-glm::dmat3 StaticRotation::matrix(const Time&) const {
+glm::dmat3 StaticRotation::matrix(const UpdateData&) const {
     return _rotationMatrix;
 }
 

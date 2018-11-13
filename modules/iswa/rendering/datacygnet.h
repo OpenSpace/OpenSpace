@@ -26,18 +26,20 @@
 #define __OPENSPACE_MODULE_ISWA___DATACYGNET___H__
 
 #include <modules/iswa/rendering/iswacygnet.h>
-#include <modules/iswa/util/dataprocessor.h>
 
-namespace {
-    const int MAX_TEXTURES = 6;
-}
+#include <openspace/properties/selectionproperty.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vector/vec2property.h>
+#include <glm/gtx/std_based_type.hpp>
 
 namespace openspace {
 
+class DataProcessor;
+
 /**
- * This class abstracts away the the loading of data and creation of
- * textures for all data cygnets. It specifies the interface that needs to
- * be implemented for all concrete subclasses
+ * This class abstracts away the the loading of data and creation of textures for all data
+ * cygnets. It specifies the interface that needs to be implemented for all concrete
+ * subclasses
  */
 class DataCygnet : public IswaCygnet {
 public:
@@ -46,19 +48,18 @@ public:
 
 protected:
     bool updateTexture() override;
-    void fillOptions(std::string& source);
+    void fillOptions(const std::string& source);
 
     /**
-     * loads the transferfunctions specified in tfPath into
-     * _transferFunctions list.
+     * Loads the transferfunctions specified in tfPath into _transferFunctions list.
      *
-     * @param tfPath Path to transfer function file
+     * \param tfPath Path to transfer function file
      */
     void readTransferFunctions(std::string tfPath);
 
     /**
-     * This function binds and sets all textures that should go to the
-     * shader program, this includes both the data and transferfunctions.
+     * This function binds and sets all textures that should go to the shader program,
+     * this includes both the data and transferfunctions.
      */
     void setTextureUniforms();
 
@@ -73,8 +74,8 @@ protected:
     void subscribeToGroup();
 
     /**
-     * Optional interface method. this has an implementation
-     * in datacygnet.cpp, but needs to be overriden for kameleonplane
+     * Optional interface method. this has an implementation in datacygnet.cpp, but needs
+     * to be overriden for kameleonplane
      */
     virtual bool updateTextureResource() override;
 
@@ -92,14 +93,9 @@ protected:
     std::string _dataBuffer;
     glm::size3_t _textureDimensions;
 
-    //FOR TESTING
-    int _numOfBenchmarks;
-    double _avgBenchmarkTime;
-
 private:
     bool readyToRender() const override;
-    bool downloadTextureResource(
-        double timestamp = OsEng.timeManager().time().j2000Seconds()) override;
+    bool downloadTextureResource(double timestamp) override;
 };
 
 } //namespace openspace

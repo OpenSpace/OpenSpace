@@ -26,21 +26,17 @@
 
 #include <modules/debugging/rendering/renderabledebugplane.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/util/powerscaledcoordinate.h>
-
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/rendering/renderengine.h>
 #include <modules/spacecraftinstruments/rendering/renderableplanetprojection.h>
-
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-
-#include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 
 namespace {
     enum Origin {
@@ -51,13 +47,13 @@ namespace {
         Center
     };
 
-    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "The OpenGL name of the texture that is displayed on this plane."
     };
 
-    static const openspace::properties::Property::PropertyInfo BillboardInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BillboardInfo = {
         "Billboard",
         "Billboard mode",
         "This value specifies whether the plane is a billboard, which means that it is "
@@ -65,13 +61,13 @@ namespace {
         "transformations."
     };
 
-    static const openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
         "This value specifies the size of the plane in meters."
     };
 
-    static const openspace::properties::Property::PropertyInfo OriginInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OriginInfo = {
         "Origin",
         "Texture Coordinate Origin",
         "The origin of the texture coorinate system."
@@ -123,9 +119,6 @@ RenderableDebugPlane::RenderableDebugPlane(const ghoul::Dictionary& dictionary)
     , _billboard(BillboardInfo, false)
     , _size(SizeInfo, 10.f, 0.f, 1e25f)
     , _origin(OriginInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _shader(nullptr)
-    , _quad(0)
-    , _vertexPositionBuffer(0)
 {
     if (dictionary.hasKey(TextureInfo.identifier)) {
         _texture = static_cast<int>(dictionary.value<double>(TextureInfo.identifier));
@@ -196,8 +189,7 @@ void RenderableDebugPlane::initializeGL() {
     createPlane();
 
     if (!_shader) {
-        RenderEngine& renderEngine = OsEng.renderEngine();
-        _shader = renderEngine.buildRenderProgram("PlaneProgram",
+        _shader = global::renderEngine.buildRenderProgram("PlaneProgram",
             absPath("${MODULE_BASE}/shaders/plane_vs.glsl"),
             absPath("${MODULE_BASE}/shaders/plane_fs.glsl")
         );
@@ -211,9 +203,8 @@ void RenderableDebugPlane::deinitializeGL() {
     glDeleteBuffers(1, &_vertexPositionBuffer);
     _vertexPositionBuffer = 0;
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
-        renderEngine.removeRenderProgram(_shader.get());
+        global::renderEngine.removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
 }
@@ -258,7 +249,7 @@ void RenderableDebugPlane::createPlane() {
     // ============================
     const GLfloat size = _size;
 
-    const GLfloat vertex_data[] = {
+    const GLfloat vertexData[] = {
         //  x      y    z    w    s    t
         -size, -size, 0.f, 0.f, 0.f, 0.f,
          size,  size, 0.f, 0.f, 1.f, 1.f,
@@ -270,7 +261,7 @@ void RenderableDebugPlane::createPlane() {
 
     glBindVertexArray(_quad); // bind array
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
     glEnableVertexAttribArray(1);

@@ -38,10 +38,10 @@ public:
     static std::unique_ptr<Decoder> createFromDictionary(
         const ghoul::Dictionary& dictionary, const std::string& type);
 
-    virtual ~Decoder();
+    virtual ~Decoder() = default;
 
-    virtual std::string getDecoderType() = 0;
-    virtual std::vector<std::string> getTranslation() = 0;
+    virtual const std::string& decoderType() const = 0;
+    virtual const std::vector<std::string>& translations() const = 0;
 
 protected:
     Decoder() = default;

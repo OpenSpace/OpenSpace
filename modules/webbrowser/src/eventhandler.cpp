@@ -22,110 +22,179 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <modules/webbrowser/include/eventhandler.h>
 
-#include <ext/ghoul/include/ghoul/logging/logmanager.h>
-#include <ext/ghoul/ext/cppformat/fmt/format.h>
-#include "include/eventhandler.h"
+#include <modules/webbrowser/include/browserinstance.h>
+#include <openspace/engine/globalscallbacks.h>
+
+#include <ghoul/logging/logmanager.h>
+#include <fmt/format.h>
 
 namespace {
-    const std::string _loggerCat = "WebBrowser:EventHandler";
+    constexpr const char* _loggerCat = "WebBrowser:EventHandler";
+
+    /**
+    * Map from GLFW key codes to "regular" key codes, supported by JS and CEF.
+    * See http://keycode.info/ for lookup
+    *
+    * \param key
+    * \return the key code, if mapped or the GLFW key code
+    */
+    int mapFromGlfwToNative(openspace::Key key) {
+        switch (key) {
+            case openspace::Key::BackSpace:   return 8;
+            case openspace::Key::Tab:         return 9;
+            case openspace::Key::Enter:       return 13;
+            case openspace::Key::Left:        return 37;
+            case openspace::Key::Up:          return 38;
+            case openspace::Key::Right:       return 39;
+            case openspace::Key::Down:        return 40;
+            case openspace::Key::Delete:      return 46;
+            default:                          return static_cast<int>(key);
+        }
+    }
+
+    uint32_t mapToCefModifiers(openspace::KeyModifier modifiers) {
+        uint32_t cefModifiers = 0;
+        // Based on cef_event_flags_t in cef_types.h
+        if (hasKeyModifier(modifiers, openspace::KeyModifier::Shift)) {
+            cefModifiers |= 1 << 1;
+        }
+        if (hasKeyModifier(modifiers, openspace::KeyModifier::Control)) {
+            cefModifiers |= 1 << 2;
+        }
+        if (hasKeyModifier(modifiers, openspace::KeyModifier::Alt)) {
+            cefModifiers |= 1 << 3;
+        }
+        return cefModifiers;
+    }
+
+    /**
+     * get the number of milliseconds that is allowed between two clicks for it to count
+     * as a double click
+     * @return
+     */
+    int doubleClickTime() {
+#ifdef WIN32
+        return GetDoubleClickTime();
+#else
+        return 500;
+#endif
+    }
+
+    /**
+     * get the rectangle width around the first click in a double click that the second
+     * click has to be _within_
+     * @return
+     */
+    int maxDoubleClickDistance() {
+#ifdef WIN32
+        return GetSystemMetrics(SM_CXDOUBLECLK);
+#else
+        return 4;
+#endif
+    }
+
 } // namespace
 
 namespace openspace {
 
 void EventHandler::initialize() {
-    OsEng.registerModuleCharCallback(
-            [this](unsigned int charCode, KeyModifier mod) -> bool {
-                if (_browserInstance) {
-                    return charCallback(charCode, mod);
-                }
-                return false;
+    global::callback::character.push_back(
+        [this](unsigned int charCode, KeyModifier mod) -> bool {
+            if (_browserInstance) {
+                return charCallback(charCode, mod);
             }
+            return false;
+        }
     );
-    OsEng.registerModuleKeyboardCallback(
-            [this](Key key, KeyModifier mod, KeyAction action) -> bool {
-                if (_browserInstance) {
-                    return keyboardCallback(key, mod, action);
-                }
-                return false;
+    global::callback::keyboard.push_back(
+        [this](Key key, KeyModifier mod, KeyAction action) -> bool {
+            if (_browserInstance) {
+                return keyboardCallback(key, mod, action);
             }
+            return false;
+        }
     );
-    OsEng.registerModuleMousePositionCallback(
-            [this](double x, double y) -> bool {
-                if (_browserInstance) {
-                    return mousePositionCallback(x, y);
-                }
-                return false;
+    global::callback::mousePosition.push_back(
+        [this](double x, double y) -> bool {
+            if (_browserInstance) {
+                return mousePositionCallback(x, y);
             }
+            return false;
+        }
     );
-    OsEng.registerModuleMouseButtonCallback(
-            [this](MouseButton button, MouseAction action) -> bool {
-                if (_browserInstance) {
-                    return mouseButtonCallback(button, action);
-                }
-                return false;
+    global::callback::mouseButton.push_back(
+        [this](MouseButton button, MouseAction action) -> bool {
+            if (_browserInstance) {
+                return mouseButtonCallback(button, action);
             }
+            return false;
+        }
     );
-    OsEng.registerModuleMouseScrollWheelCallback(
-            [this](double x, double y) -> bool {
-                if (_browserInstance) {
-                    const glm::ivec2 delta(x, y);
-                    return mouseWheelCallback(delta);
-                }
-                return false;
+    global::callback::mouseScrollWheel.push_back(
+        [this](double x, double y) -> bool {
+            if (_browserInstance) {
+                const glm::ivec2 delta(x, y);
+                return mouseWheelCallback(delta);
             }
+            return false;
+        }
     );
-
 }
 
 bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
-    if (button != MouseButton::Left) return false;
+    if (button != MouseButton::Left && button != MouseButton::Right) {
+        return false;
+    }
 
-    int clickCount = BrowserInstance::SINGLE_CLICK;
+    MouseButtonState& state = (button == MouseButton::Left) ? _leftButton : _rightButton;
+
+    int clickCount = BrowserInstance::SingleClick;
 
     // click or release?
     if (action == MouseAction::Release) {
-        _leftMouseDown = false;
+        state.down = false;
     } else {
-        if (isDoubleClick() ) {
+        if (isDoubleClick(state)) {
             ++clickCount;
         } else {
-            _lastClickTime = std::chrono::high_resolution_clock::now();
+            state.lastClickTime = std::chrono::high_resolution_clock::now();
         }
 
-        _leftMouseDown = true;
-        _lastClickPosition = _mousePosition;
+        state.down = true;
+        state.lastClickPosition = _mousePosition;
     }
 
     return _browserInstance->sendMouseClickEvent(
         mouseEvent(),
-        MBT_LEFT,
-        !_leftMouseDown,
+        (button == MouseButton::Left) ? MBT_LEFT : MBT_RIGHT,
+        !state.down,
         clickCount
     );
 }
 
-bool EventHandler::isDoubleClick() const {
+bool EventHandler::isDoubleClick(const MouseButtonState& button) const {
     // check time
     using namespace std::chrono;
     auto now = high_resolution_clock::now();
-    milliseconds maxTimeDifference(EventHandler::doubleClickTime());
-    auto requiredTime = _lastClickTime + maxTimeDifference;
+    milliseconds maxTimeDifference(doubleClickTime());
+    auto requiredTime = button.lastClickTime + maxTimeDifference;
     if (requiredTime < now) {
         return false;
     }
 
     // check position
-    float maxDist = EventHandler::maxDoubleClickDistance() / 2;
-    bool x = abs(_mousePosition.x - _lastClickPosition.x) < maxDist;
-    bool y = abs(_mousePosition.y - _lastClickPosition.y) < maxDist;
+    const float maxDist = maxDoubleClickDistance() / 2.f;
+    const bool x = abs(_mousePosition.x - button.lastClickPosition.x) < maxDist;
+    const bool y = abs(_mousePosition.y - button.lastClickPosition.y) < maxDist;
 
     return x && y;
 }
 
 bool EventHandler::mousePositionCallback(double x, double y) {
-    _mousePosition.x = (int) x;
-    _mousePosition.y = (int) y;
+    _mousePosition.x = floor(static_cast<float>(x));
+    _mousePosition.y = floor(static_cast<float>(y));
     _browserInstance->sendMouseMoveEvent(mouseEvent());
     // Let the mouse event trickle on
     return false;
@@ -143,8 +212,8 @@ bool EventHandler::mouseWheelCallback(glm::ivec2 delta) {
 bool EventHandler::charCallback(unsigned int charCode, KeyModifier modifier) {
     CefKeyEvent keyEvent;
     keyEvent.windows_key_code = charCode;
-    keyEvent.modifiers        = static_cast<uint32>(modifier);
-    keyEvent.type             = KEYEVENT_CHAR;
+    keyEvent.modifiers = static_cast<uint32>(modifier);
+    keyEvent.type = KEYEVENT_CHAR;
     // TODO(klas): figure out when to block
     return _browserInstance->sendKeyEvent(keyEvent);
 }
@@ -155,110 +224,55 @@ bool EventHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction act
     }
 
     CefKeyEvent keyEvent;
-//        keyEvent.native_key_code  = mapFromGlfwToNative(key);
     // TODO(klas): Use something less platform specific?
     keyEvent.windows_key_code = mapFromGlfwToNative(key);
-    keyEvent.modifiers        = static_cast<uint32>(modifier);
+    keyEvent.modifiers        = mapToCefModifiers(modifier);
     keyEvent.type             = keyEventType(action);
     // TODO(klas): figure out when to block
     return _browserInstance->sendKeyEvent(keyEvent);
 }
 
-/**
- * Detect if there is a special event that should be caught by the GUI before it is sent
- * to CEF.
- * @param key the pressed key
- * @return true if event found, false otherwise
- */
 bool EventHandler::specialKeyEvent(Key key) {
-    switch(key) {
+    switch (key) {
         case Key::F5:
             _browserInstance->reloadBrowser();
             return true;
-    }
-    return false;
-}
-
-/**
- * Map from GLFW key codes to "regular" key codes, supported by JS and CEF.
- * See http://keycode.info/ for lookup
- * @param key
- * @return the key code, if mapped or the GLFW key code
- */
-int EventHandler::mapFromGlfwToNative(Key key) {
-    switch (key) {
-        case Key::BackSpace:      return 8;
-        case Key::Tab:            return 9;
-        case Key::Enter:          return 13;
-        case Key::Left:           return 37;
-        case Key::Up:             return 38;
-        case Key::Right:          return 39;
-        case Key::Down:           return 40;
-        case Key::Delete:         return 46;
-        default:                  return static_cast<int>(key);
+        default:
+            return false;
     }
 }
 
-/**
- * Find the CEF key event to use for a given action
- * @param action
- * @return
- */
 cef_key_event_type_t EventHandler::keyEventType(KeyAction action) {
     if (action == KeyAction::Release) {
         return KEYEVENT_KEYUP;
     } else {
-//            return KEYEVENT_RAWKEYDOWN;
         return KEYEVENT_KEYDOWN;
     }
 }
 
-/**
- * Create a mouse event on the current cursor position
- * @return
- */
 CefMouseEvent EventHandler::mouseEvent() {
     CefMouseEvent event;
-    event.x = (int) _mousePosition.x;
-    event.y = (int) _mousePosition.y;
+    event.x = static_cast<int>(_mousePosition.x);
+    event.y = static_cast<int>(_mousePosition.y);
 
-    if (_leftMouseDown) {
+    if (_leftButton.down) {
         event.modifiers = EVENTFLAG_LEFT_MOUSE_BUTTON;
+    }
+
+    if (_rightButton.down) {
+        event.modifiers = EVENTFLAG_RIGHT_MOUSE_BUTTON;
     }
 
     return event;
 }
 
-void EventHandler::setBrowserInstance(
-                                  const std::shared_ptr<BrowserInstance>& browserInstance)
-{
+void EventHandler::setBrowserInstance(BrowserInstance* browserInstance) {
     LDEBUG("Setting browser instance.");
     _browserInstance = browserInstance;
 }
 
 void EventHandler::detachBrowser() {
-    if (_browserInstance) {
-        LDEBUG(fmt::format(
-            "Detaching browser instance with use count {}", _browserInstance.use_count()
-        ));
-    }
     _browserInstance = nullptr;
-}
-
-int EventHandler::doubleClickTime() {
-#ifdef WIN32
-    return GetDoubleClickTime();
-#else
-    return 500;
-#endif
-}
-
-int EventHandler::maxDoubleClickDistance() {
-#ifdef WIN32
-    return GetSystemMetrics(SM_CXDOUBLECLK);
-#else
-    return MAX_DOUBLE_CLICK_DISTANCE;
-#endif
 }
 
 } // namespace openspace

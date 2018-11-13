@@ -29,7 +29,7 @@ local object = {
         LabelFile = speck .. "/localdwarfs.label",
         TextColor = { 0.3, 0.3, 1.0, 1.0 },
         ScaleFactor = 478,
-        TextSize = 19.2,
+        TextSize = 18.3,
         TextMinSize = 7.3,
         Unit = "Mpc"
     },

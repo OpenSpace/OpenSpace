@@ -20,9 +20,9 @@ local Ceres = {
             SourceFrame = "IAU_CERES",
             DestinationFrame = "GALACTIC",
             Kernels = {
-                kernels .. "/pck/dawn_ceres_v01.tpc",
-                kernels .. "/spk/sb_ceres_140724.bsp",
-                kernels .. "/spk/sb_ceres_110211.bsp"
+                kernels .. "/dawn_ceres_v01.tpc",
+                kernels .. "/sb_ceres_140724.bsp",
+                kernels .. "/sb_ceres_110211.bsp"
             }
         },
         Translation = {
@@ -30,9 +30,9 @@ local Ceres = {
             Target = "CERES",
             Observer = "SSB",
             Kernels = {
-                kernels .. "/pck/dawn_ceres_v01.tpc",
-                kernels .. "/spk/sb_ceres_140724.bsp",
-                kernels .. "/spk/sb_ceres_110211.bsp"
+                kernels .. "/dawn_ceres_v01.tpc",
+                kernels .. "/sb_ceres_140724.bsp",
+                kernels .. "/sb_ceres_110211.bsp"
             }
         }
     },

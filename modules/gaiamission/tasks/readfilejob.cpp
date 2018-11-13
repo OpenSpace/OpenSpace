@@ -45,9 +45,8 @@ ReadFileJob::ReadFileJob(const std::string& filePath,
     , _nDefaultCols(nDefaultCols)
     , _nValuesPerStar(nValuesPerStar)
     , _fitsFileReader(fitsReader)
-{ 
-    _octants = std::make_shared<std::vector<std::vector<float>>>(8);
-}
+    , _octants(8)
+{ }
 
 ReadFileJob::~ReadFileJob() { }
 
@@ -234,14 +233,14 @@ void ReadFileJob::execute() {
         if (values[1] < 0.0) index += 2;
         if (values[2] < 0.0) index += 4;
 
-        (*_octants)[index].insert((*_octants)[index].end(), values.begin(), values.end());
+        _octants[index].insert(_octants[index].end(), values.begin(), values.end());
     }
 
     /*LINFO(std::to_string(nNullArr) + " out of " +
         std::to_string(nStars) + " read stars were nullArrays.");*/
 }
 
-std::shared_ptr<std::vector<std::vector<float>>> ReadFileJob::product() {
+std::vector<std::vector<float>> ReadFileJob::product() {
     return _octants;
 }
 

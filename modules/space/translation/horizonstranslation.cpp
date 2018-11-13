@@ -75,7 +75,6 @@ documentation::Documentation HorizonsTranslation::Documentation() {
 
 HorizonsTranslation::HorizonsTranslation()
     : _horizonsTextFile(HorizonsTextFileInfo)
-    , _state(false)
 {
     _timeline = Timeline<glm::dvec3>();
 
@@ -108,15 +107,15 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
     readHorizonsTextFile(_horizonsTextFile);
 }
 
-glm::dvec3 HorizonsTranslation::position(const Time& time) const {
+glm::dvec3 HorizonsTranslation::position(const UpdateData& data) const {
     glm::dvec3 interpolatedPos = glm::dvec3(0.0);
 
-    auto lastBefore = _timeline.lastKeyframeBefore(time.j2000Seconds(), true);
-    auto firstAfter = _timeline.firstKeyframeAfter(time.j2000Seconds(), false);
+    auto lastBefore = _timeline.lastKeyframeBefore(data.time.j2000Seconds(), true);
+    auto firstAfter = _timeline.firstKeyframeAfter(data.time.j2000Seconds(), false);
     if (lastBefore && firstAfter) {
         // We're inbetween first and last value.
         double timelineDiff = firstAfter->timestamp - lastBefore->timestamp;
-        double timeDiff = time.j2000Seconds() - lastBefore->timestamp;
+        double timeDiff = data.time.j2000Seconds() - lastBefore->timestamp;
         double diff = (timelineDiff > DBL_EPSILON) ? timeDiff / timelineDiff : 0.0;
 
         glm::dvec3 dir = firstAfter->data - lastBefore->data;

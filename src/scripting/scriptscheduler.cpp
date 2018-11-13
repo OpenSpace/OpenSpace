@@ -24,22 +24,11 @@
 
 #include <openspace/scripting/scriptscheduler.h>
 
-#include <openspace/engine/openspaceengine.h>
-
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
 #include <ghoul/logging/logmanager.h>
-//#include <ghoul/filesystem/filesystem>
-
-#include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-
-namespace {
-    const char* KeyTime = "Time";
-    const char* KeyForwardScript = "ForwardScript";
-    const char* KeyBackwardScript = "BackwardScript";
-    const char* KeyUniversalScript = "Script";
-} // namespace
 
 #include "scriptscheduler_lua.inl"
 
@@ -97,10 +86,10 @@ documentation::Documentation ScriptScheduler::Documentation() {
     };
 }
 
-ScriptScheduler::ScheduledScript::ScheduledScript(const ghoul::Dictionary& dictionary)
-    : time(-std::numeric_limits<double>::max())
-{
-    std::string timeStr = dictionary.value<std::string>(KeyTime);
+using namespace openspace::interaction;
+
+ScriptScheduler::ScheduledScript::ScheduledScript(const ghoul::Dictionary& dictionary) {
+    const std::string& timeStr = dictionary.value<std::string>(KeyTime);
     time = Time::convertTime(timeStr);
 
     // If a universal script is specified, retrieve it and add a ; as a separator so that
@@ -165,7 +154,7 @@ void ScriptScheduler::loadScripts(const ghoul::Dictionary& dictionary) {
     }
 
     // Ensure _currentIndex and _currentTime is accurate after new scripts was added
-    double lastTime = _currentTime;
+    const double lastTime = _currentTime;
     rewind();
     progressTo(lastTime);
 
@@ -178,7 +167,7 @@ void ScriptScheduler::loadScripts(const ghoul::Dictionary& dictionary) {
 
 void ScriptScheduler::rewind() {
     _currentIndex = 0;
-    _currentTime = -DBL_MAX;
+    _currentTime = -std::numeric_limits<double>::max();
 }
 
 void ScriptScheduler::clearSchedule() {
@@ -188,9 +177,7 @@ void ScriptScheduler::clearSchedule() {
     _backwardScripts.clear();
 }
 
-std::pair<
-    std::vector<std::string>::const_iterator, std::vector<std::string>::const_iterator
->
+std::pair<ScriptScheduler::ScriptIt, ScriptScheduler::ScriptIt>
 ScriptScheduler::progressTo(double newTime)
 {
     if (newTime == _currentTime) {
@@ -201,14 +188,14 @@ ScriptScheduler::progressTo(double newTime)
         // Moving forward in time; we need to find the highest entry in the timings
         // vector that is still smaller than the newTime
         size_t prevIndex = _currentIndex;
-        auto it = std::upper_bound(
+        const auto it = std::upper_bound(
             _timings.begin() + prevIndex, // We only need to start at the previous time
             _timings.end(),
             newTime
          );
 
         // How many values did we pass over?
-        ptrdiff_t n = std::distance(_timings.begin() + prevIndex, it);
+        const ptrdiff_t n = std::distance(_timings.begin() + prevIndex, it);
         _currentIndex = static_cast<int>(prevIndex + n);
 
         // Update the new time
@@ -222,15 +209,15 @@ ScriptScheduler::progressTo(double newTime)
     else {
         // Moving backward in time; the need to find the lowest entry that is still bigger
         // than the newTime
-        size_t prevIndex = _currentIndex;
-        auto it = std::lower_bound(
+        const size_t prevIndex = _currentIndex;
+        const auto it = std::lower_bound(
             _timings.begin(),
             _timings.begin() + prevIndex, // We can stop at the previous time
             newTime
         );
 
         // How many values did we pass over?
-        ptrdiff_t n = std::distance(it, _timings.begin() + prevIndex);
+        const ptrdiff_t n = std::distance(it, _timings.begin() + prevIndex);
         _currentIndex = static_cast<int>(prevIndex - n);
 
         // Update the new time
@@ -241,6 +228,18 @@ ScriptScheduler::progressTo(double newTime)
             _backwardScripts.begin() + (_timings.size() - _currentIndex)
         };
     }
+}
+
+void ScriptScheduler::setTimeReferenceMode(KeyframeTimeRef refType) {
+    _timeframeMode = refType;
+}
+
+void ScriptScheduler::triggerPlaybackStart() {
+    _playbackModeEnabled = true;
+}
+
+void ScriptScheduler::stopPlayback() {
+    _playbackModeEnabled = false;
 }
 
 double ScriptScheduler::currentTime() const {
@@ -258,6 +257,18 @@ std::vector<ScriptScheduler::ScheduledScript> ScriptScheduler::allScripts() cons
         result.push_back(std::move(script));
     }
     return result;
+}
+
+void ScriptScheduler::setModeApplicationTime() {
+    _timeframeMode = KeyframeTimeRef::Relative_applicationStart;
+}
+
+void ScriptScheduler::setModeRecordedTime() {
+    _timeframeMode = KeyframeTimeRef::Relative_recordedStart;
+}
+
+void ScriptScheduler::setModeSimulationTime() {
+    _timeframeMode = KeyframeTimeRef::Absolute_simTimeJ2000;
 }
 
 LuaLibrary ScriptScheduler::luaLibrary() {
@@ -283,6 +294,30 @@ LuaLibrary ScriptScheduler::luaLibrary() {
                 "is the script executed in the backwards direction, and the optional "
                 "last argument is the universal script, executed in either direction."
 
+            },
+            {
+                "setModeApplicationTime",
+                &luascriptfunctions::setModeApplicationTime,
+                {},
+                "",
+                "Sets the time reference for scheduled scripts to application time "
+                "(seconds since OpenSpace application started)."
+            },
+            {
+                "setModeRecordedTime",
+                &luascriptfunctions::setModeRecordedTime,
+                {},
+                "",
+                "Sets the time reference for scheduled scripts to the time since the "
+                "recording was started (the same relative time applies to playback)."
+            },
+            {
+                "setModeSimulationTime",
+                &luascriptfunctions::setModeSimulationTime,
+                {},
+                "",
+                "Sets the time reference for scheduled scripts to the simulated "
+                "date & time (J2000 epoch seconds)."
             },
             {
                 "clear",

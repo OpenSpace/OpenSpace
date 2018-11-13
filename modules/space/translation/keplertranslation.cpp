@@ -26,32 +26,29 @@
 
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/spicemanager.h>
-
 #include <openspace/util/updatestructures.h>
-
+#include <ghoul/logging/logmanager.h>
 #include <glm/gtx/transform.hpp>
-
-#include <math.h>
 
 namespace {
 
-template <typename T, typename Func>
-T solveIteration(Func function, T x0, const T& err = 0.0, int maxIterations = 100) {
-    T x = 0;
-    T x2 = x0;
+    template <typename T, typename Func>
+    T solveIteration(const Func& function, T x0, const T& err = 0.0, int maxIter = 100) {
+        T x = 0;
+        T x2 = x0;
 
-    for (int i = 0; i < maxIterations; ++i) {
-        x = x2;
-        x2 = function(x);
-        if (std::abs(x2 - x) < err) {
-            return x2;
+        for (int i = 0; i < maxIter; ++i) {
+            x = x2;
+            x2 = function(x);
+            if (std::abs(x2 - x) < err) {
+                return x2;
+            }
         }
+
+        return x2;
     }
 
-    return x2;
-}
-
-    static const openspace::properties::Property::PropertyInfo EccentricityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EccentricityInfo = {
         "Eccentricity",
         "Eccentricity",
         "This value determines the eccentricity, that is the deviation from a perfect "
@@ -59,7 +56,7 @@ T solveIteration(Func function, T x0, const T& err = 0.0, int maxIterations = 10
         "are not supported."
     };
 
-    static const openspace::properties::Property::PropertyInfo SemiMajorAxisInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SemiMajorAxisInfo = {
         "SemiMajorAxis",
         "Semi-major axis",
         "This value determines the semi-major axis, that is the distance of the object "
@@ -67,7 +64,7 @@ T solveIteration(Func function, T x0, const T& err = 0.0, int maxIterations = 10
         "apoapsis)."
     };
 
-    static const openspace::properties::Property::PropertyInfo InclinationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo InclinationInfo = {
         "Inclination",
         "Inclination",
         "This value determines the degrees of inclination, or the angle of the orbital "
@@ -75,7 +72,7 @@ T solveIteration(Func function, T x0, const T& err = 0.0, int maxIterations = 10
         "central body."
     };
 
-    static const openspace::properties::Property::PropertyInfo AscendingNodeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AscendingNodeInfo = {
         "AscendingNode",
         "Right ascension of ascending Node",
         "This value determines the right ascension of the ascending node in degrees, "
@@ -83,28 +80,28 @@ T solveIteration(Func function, T x0, const T& err = 0.0, int maxIterations = 10
         "the horizonal reference plane intersect."
     };
 
-    static const openspace::properties::Property::PropertyInfo ArgumentOfPeriapsisInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ArgumentOfPeriapsisInfo = {
         "ArgumentOfPeriapsis",
         "Argument of Periapsis",
         "This value determines the argument of periapsis in degrees, that is the "
         "position on the orbit that is closest to the orbiting body."
     };
 
-    static const openspace::properties::Property::PropertyInfo MeanAnomalyAtEpochInfo = {
+    constexpr openspace::properties::Property::PropertyInfo MeanAnomalyAtEpochInfo = {
         "MeanAnomaly",
         "Mean anomaly at epoch",
         "This value determines the mean anomaly at the epoch in degrees, which "
         "determines the initial location of the object along the orbit at epoch."
     };
 
-    static const openspace::properties::Property::PropertyInfo EpochInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EpochInfo = {
         "Epoch",
         "Epoch",
         "This value determines the epoch for which the initial location is defined in "
         "the form of YYYY MM DD HH:mm:ss."
     };
 
-    static const openspace::properties::Property::PropertyInfo PeriodInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PeriodInfo = {
         "Period",
         "Orbit period",
         "Specifies the orbital period (in seconds)."
@@ -182,8 +179,7 @@ documentation::Documentation KeplerTranslation::Documentation() {
 }
 
 KeplerTranslation::KeplerTranslation()
-    : Translation()
-    , _eccentricity(EccentricityInfo, 0.0, 0.0, 1.0)
+    : _eccentricity(EccentricityInfo, 0.0, 0.0, 1.0)
     , _semiMajorAxis(SemiMajorAxisInfo, 0.0, 0.0, 1e6)
     , _inclination(InclinationInfo, 0.0, 0.0, 360.0)
     , _ascendingNode(AscendingNodeInfo, 0.0, 0.0, 360.0)
@@ -191,7 +187,6 @@ KeplerTranslation::KeplerTranslation()
     , _meanAnomalyAtEpoch(MeanAnomalyAtEpochInfo, 0.0, 0.0, 360.0)
     , _epoch(EpochInfo, 0.0, 0.0, 1e9)
     , _period(PeriodInfo, 0.0, 0.0, 1e6)
-    , _orbitPlaneDirty(true)
 {
     auto update = [this]() {
         _orbitPlaneDirty = true;
@@ -260,7 +255,7 @@ double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
     }
     else if (_eccentricity < 0.9) {
         auto solver = [this, &meanAnomaly](double x) -> double {
-            double e = _eccentricity;
+            const double e = _eccentricity;
             return x + (meanAnomaly + e * sin(x) - x) / (1.0 - e * cos(x));
         };
         return solveIteration(solver, meanAnomaly, 0.0, 6);
@@ -272,11 +267,11 @@ double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
         double e = meanAnomaly + 0.85 * _eccentricity * sign(sin(meanAnomaly));
 
         auto solver = [this, &meanAnomaly, &sign](double x) -> double {
-            double s = _eccentricity * sin(x);
-            double c = _eccentricity * cos(x);
-            double f = x - s - meanAnomaly;
-            double f1 = 1 - c;
-            double f2 = s;
+            const double s = _eccentricity * sin(x);
+            const double c = _eccentricity * cos(x);
+            const double f = x - s - meanAnomaly;
+            const double f1 = 1 - c;
+            const double f2 = s;
             return x + (-5 * f / (f1 + sign(f1) *
                 sqrt(std::abs(16 * f1 * f1 - 20 * f * f2))));
         };
@@ -289,22 +284,21 @@ double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
     }
 }
 
-glm::dvec3 KeplerTranslation::position(const Time& time) const {
+glm::dvec3 KeplerTranslation::position(const UpdateData& data) const {
     if (_orbitPlaneDirty) {
         computeOrbitPlane();
         _orbitPlaneDirty = false;
     }
 
-    double t = time.j2000Seconds() - _epoch;
-    double meanMotion = 2.0 * glm::pi<double>() / _period;
-    double meanAnomaly = glm::radians(_meanAnomalyAtEpoch.value()) + t * meanMotion;
-    double e = eccentricAnomaly(meanAnomaly);
+    const double t = data.time.j2000Seconds() - _epoch;
+    const double meanMotion = glm::two_pi<double>() / _period;
+    const double meanAnomaly = glm::radians(_meanAnomalyAtEpoch.value()) + t * meanMotion;
+    const double e = eccentricAnomaly(meanAnomaly);
 
     // Use the eccentric anomaly to compute the actual location
-    double a = _semiMajorAxis / (1.0 - _eccentricity) * 1000.0;
-    glm::dvec3 p = {
-        a * (cos(e) - _eccentricity),
-        a * sqrt(1.0 - _eccentricity * _eccentricity) * sin(e),
+    const glm::dvec3 p = {
+        _semiMajorAxis * 1000.0 * (cos(e) - _eccentricity),
+        _semiMajorAxis * 1000.0 * sin(e) * sqrt(1.0 - _eccentricity * _eccentricity),
         0.0
     };
     return _orbitPlaneRotation * p;
@@ -330,10 +324,9 @@ void KeplerTranslation::computeOrbitPlane() const {
     const double inc = glm::radians(_inclination.value());
     const double per = glm::radians(_argumentOfPeriapsis.value());
 
-    _orbitPlaneRotation =
-        glm::rotate(asc, glm::dvec3(ascendingNodeAxisRot)) *
-        glm::rotate(inc, glm::dvec3(inclinationAxisRot)) *
-        glm::rotate(per, glm::dvec3(argPeriapsisAxisRot));
+    _orbitPlaneRotation = glm::rotate(asc, glm::dvec3(ascendingNodeAxisRot)) *
+                          glm::rotate(inc, glm::dvec3(inclinationAxisRot)) *
+                          glm::rotate(per, glm::dvec3(argPeriapsisAxisRot));
 
     notifyObservers();
     _orbitPlaneDirty = false;
@@ -342,8 +335,8 @@ void KeplerTranslation::computeOrbitPlane() const {
 void KeplerTranslation::setKeplerElements(double eccentricity, double semiMajorAxis,
                                           double inclination, double ascendingNode,
                                           double argumentOfPeriapsis,
-                                          double meanAnomalyAtEpoch,
-                                          double orbitalPeriod, const std::string& epoch)
+                                          double meanAnomalyAtEpoch, double orbitalPeriod,
+                                          const std::string& epoch)
 {
     setKeplerElements(
         eccentricity,
@@ -360,8 +353,8 @@ void KeplerTranslation::setKeplerElements(double eccentricity, double semiMajorA
 void KeplerTranslation::setKeplerElements(double eccentricity, double semiMajorAxis,
                                           double inclination, double ascendingNode,
                                           double argumentOfPeriapsis,
-                                          double meanAnomalyAtEpoch,
-                                          double orbitalPeriod, double epoch)
+                                          double meanAnomalyAtEpoch, double orbitalPeriod,
+                                          double epoch)
 {
     auto isInRange = [](double val, double min, double max) -> bool {
         return val >= min && val <= max;

@@ -24,13 +24,13 @@
 
 #include <modules/space/rendering/planetgeometry.h>
 
-#include <openspace/util/factorymanager.h>
-
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/util/factorymanager.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace {
-    const char* KeyType = "Type";
+    constexpr const char* KeyType = "Type";
 } // namespace
 
 namespace openspace::planetgeometry {
@@ -64,25 +64,12 @@ std::unique_ptr<PlanetGeometry> PlanetGeometry::createFromDictionary(
     auto factory = FactoryManager::ref().factory<PlanetGeometry>();
 
     std::unique_ptr<PlanetGeometry> result = factory->create(geometryType, dictionary);
-    if (result == nullptr) {
-        throw ghoul::RuntimeError(
-            "Failed to create a PlanetGeometry object of type '" + geometryType + "'"
-        );
-    }
     return result;
 }
 
-PlanetGeometry::PlanetGeometry()
-    : properties::PropertyOwner({ "PlanetGeometry" })
-    , _parent(nullptr)
-{}
+PlanetGeometry::PlanetGeometry() : properties::PropertyOwner({ "PlanetGeometry" }) {}
 
-PlanetGeometry::~PlanetGeometry() {}
-
-bool PlanetGeometry::initialize(Renderable* parent) {
-    _parent = parent;
-    return true;
-}
+void PlanetGeometry::initialize() {}
 
 void PlanetGeometry::deinitialize() {}
 

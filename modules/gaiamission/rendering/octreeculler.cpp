@@ -32,6 +32,18 @@ namespace {
 
 namespace openspace {
 
+namespace {
+    bool intersects(const globebrowsing::AABB3& bb, const globebrowsing::AABB3& o) {
+        return (bb.min.x <= o.max.x) && (o.min.x <= bb.max.x)
+            && (bb.min.y <= o.max.y) && (o.min.y <= bb.max.y)
+            && (bb.min.z <= o.max.z) && (o.min.z <= bb.max.z);
+    }
+
+    void expand(globebrowsing::AABB3& bb, const glm::vec3& p) {
+        bb.min = glm::min(bb.min, p);
+        bb.max = glm::max(bb.max, p);
+    }
+} // namespace
 
 OctreeCuller::OctreeCuller(globebrowsing::AABB3 viewFrustum)
     : _viewFrustum(std::move(viewFrustum))
@@ -44,7 +56,7 @@ bool OctreeCuller::isVisible(const std::vector<glm::dvec4>& corners,
     
     createNodeBounds(corners, mvp);
 
-    return _viewFrustum.intersects(_nodeBounds);
+    return intersects(_viewFrustum, _nodeBounds);
 }
 
 glm::vec2 OctreeCuller::getNodeSizeInPixels(const std::vector<glm::dvec4>& corners, 
@@ -53,7 +65,7 @@ glm::vec2 OctreeCuller::getNodeSizeInPixels(const std::vector<glm::dvec4>& corne
     createNodeBounds(corners, mvp);
 
     // Screen space is mapped to [-1, 1] so divide by 2 and multiply with screen size.
-    glm::vec3 size = _nodeBounds.size() / 2.f;
+    glm::vec3 size = (_nodeBounds.max - _nodeBounds.min) / 2.f;
     size = glm::abs(size); 
     return glm::vec2(size.x * screenSize.x, size.y * screenSize.y);
 }
@@ -69,7 +81,7 @@ void OctreeCuller::createNodeBounds(const std::vector<glm::dvec4>& corners,
 
         glm::dvec3 ndc
               = glm::dvec3((1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace);
-        _nodeBounds.expand(ndc);
+        expand(_nodeBounds, ndc);
     }
 }
 

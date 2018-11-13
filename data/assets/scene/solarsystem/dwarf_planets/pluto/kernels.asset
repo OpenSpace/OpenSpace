@@ -1,0 +1,13 @@
+local Kernels = asset.syncedResource({
+    Name = "Pluto Kernels",
+    Type = "HttpSynchronization",
+    Identifier = "pluto_kernels",
+    Version =  1
+})
+
+local PlutoKernels = {
+    Kernels .. "/NavPE_de433_od122.bsp",
+    Kernels .. "/NavSE_plu047_od122.bsp"
+}
+
+asset.export("PlutoKernels", PlutoKernels)

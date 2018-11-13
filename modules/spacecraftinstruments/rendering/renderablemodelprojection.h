@@ -27,13 +27,10 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/spacecraftinstruments/util/imagesequencer.h>
+#include <modules/spacecraftinstruments/util/image.h>
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
-
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <openspace/util/powerscaledcoordinate.h>
-
 #include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::opengl {
@@ -82,6 +79,7 @@ private:
     UniformCache(performShading, directionToSunViewSpace, modelViewTransform,
         projectionTransform, projectionFading, baseTexture,
         projectionTexture) _mainUniformCache;
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
     UniformCache(projectionTexture, needShadowMap, ProjectorMatrix, ModelTransform,
         boresight) _fboUniformCache;
@@ -92,22 +90,20 @@ private:
 
     std::unique_ptr<modelgeometry::ModelGeometry> _geometry;
 
-    glm::dmat3 _stateMatrix;
     glm::dmat3 _instrumentMatrix;
 
     // uniforms
-    glm::vec2  _camScaling;
-    glm::vec3  _up;
-    glm::mat4  _transform;
-    glm::mat4  _projectorMatrix;
-    glm::vec3  _boresight;
+    glm::vec3 _up;
+    glm::mat4 _transform;
+    glm::mat4 _projectorMatrix;
+    glm::vec3 _boresight;
 
     std::vector<Image> _imageTimes;
-    double _time;
+    double _time = -std::numeric_limits<double>::max();
 
-    bool _capture;
+    bool _shouldCapture = false;
 
-    psc _sunPosition;
+    glm::vec3 _sunPosition;
     properties::BoolProperty _performShading;
 };
 

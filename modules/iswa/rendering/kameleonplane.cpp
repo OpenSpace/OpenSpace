@@ -22,45 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <fstream>
 #include <modules/iswa/rendering/kameleonplane.h>
+
+#include <modules/iswa/rendering/iswabasegroup.h>
+#include <modules/iswa/rendering/iswakameleongroup.h>
 #include <modules/iswa/util/dataprocessorkameleon.h>
-#include <ghoul/filesystem/filesystem.h>
-
-#ifdef __clang__
-#elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#endif // __GNUC__
-
-#include <modules/iswa/ext/json.h>
-
-#ifdef __clang__
-
-#elif defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif // __GNUC__
-
-#include <openspace/engine/openspaceengine.h>
+#include <modules/iswa/util/iswamanager.h>
+#include <openspace/json.h>
+#include <openspace/engine/globals.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scripting/scriptengine.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
+#include <fstream>
 
 namespace {
     using json = nlohmann::json;
     constexpr const char* _loggerCat = "KameleonPlane";
 
-    static const openspace::properties::Property::PropertyInfo FieldLineSeedsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FieldLineSeedsInfo = {
         "FieldlineSeedsIndexFile",
         "Fieldline Seedpoints",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo ResolutionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {
         "Resolution",
         "Resolution%",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo SliceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SliceInfo = {
         "Slice",
         "Slice",
         "" // @TODO Missing documentation
@@ -88,45 +83,48 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     dictionary.getValue("axisCut", axis);
 
     if (axis == "x") {
-        _cut = 0;
+        _cut = Cut::X;
     }
     else if (axis == "y") {
-        _cut = 1;
+        _cut = Cut::Y;
     }
     else {
-        _cut = 2;
+        _cut = Cut::Z;
     }
 
-    _origOffset = _data->offset;
+    _origOffset = _data.offset;
 
-    _scale = _data->scale[_cut];
-    _data->scale[_cut] = 0;
-    _data->offset[_cut] = 0;
+    _scale = _data.scale[_cut];
+    _data.scale[_cut] = 0;
+    _data.offset[_cut] = 0;
 
-    _slice.setValue((_data->offset[_cut] -_data->gridMin[_cut])/_scale);
+    _slice = (_data.offset[_cut] -_data.gridMin[_cut]) / _scale;
 
     setDimensions();
-
-    _programName = "DataPlaneProgram";
-    _vsPath = "${MODULE_ISWA}/shaders/dataplane_vs.glsl";
-    _fsPath = "${MODULE_ISWA}/shaders/dataplane_fs.glsl";
 }
 
 KameleonPlane::~KameleonPlane() {}
 
-void KameleonPlane::deinitialize() {
+void KameleonPlane::deinitializeGL() {
     IswaCygnet::deinitialize();
-    _fieldlines.set(std::vector<int>());
+    _fieldlines = std::vector<int>();
 }
 
-void KameleonPlane::initialize() {
-    if (!_data->groupName.empty()) {
+void KameleonPlane::initializeGL() {
+    if (!_shader) {
+        _shader = global::renderEngine.buildRenderProgram(
+            "DataPlaneProgram",
+            absPath("${MODULE_ISWA}/shaders/dataplane_vs.glsl"),
+            absPath("${MODULE_ISWA}/shaders/dataplane_fs.glsl")
+        );
+    }
+
+    if (!_data.groupName.empty()) {
         initializeGroup();
     }
 
     initializeTime();
     createGeometry();
-    createShader();
 
     readFieldlinePaths(absPath(_fieldlineIndexFile));
 
@@ -137,11 +135,11 @@ void KameleonPlane::initialize() {
         _dataProcessor = std::make_shared<DataProcessorKameleon>();
 
         //If autofiler is on, background values property should be hidden
-        _autoFilter.onChange([this](){
+        _autoFilter.onChange([this]() {
             // If autofiler is selected, use _dataProcessor to set backgroundValues
             // and unregister backgroundvalues property.
             if (_autoFilter) {
-                _backgroundValues.setValue(_dataProcessor->filterValues());
+                _backgroundValues = _dataProcessor->filterValues();
                 _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
                 //_backgroundValues.setVisible(false);
             // else if autofilter is turned off, register backgroundValues
@@ -154,15 +152,15 @@ void KameleonPlane::initialize() {
 
     fillOptions(_kwPath);
 
-    readTransferFunctions(_transferFunctionsFile.value());
+    readTransferFunctions(_transferFunctionsFile);
 
     // Set Property Callbacks of DataCygnet (must be called after fillOptions)
     setPropertyCallbacks();
 
     // Set Property callback specific to KameleonPlane
-    _resolution.onChange([this](){
+    _resolution.onChange([this]() {
         for (size_t i = 0; i < _textures.size(); i++) {
-            _textures[i] = std::move(nullptr);
+            _textures[i] = nullptr;
         }
 
         updateTextureResource();
@@ -170,21 +168,17 @@ void KameleonPlane::initialize() {
 
     });
 
-    _slice.onChange([this](){
-        updateTextureResource();
-    });
+    _slice.onChange([this]() { updateTextureResource(); });
 
-    _fieldlines.onChange([this](){
-        updateFieldlineSeeds();
-    });
+    _fieldlines.onChange([this]() { updateFieldlineSeeds(); });
 
-    std::dynamic_pointer_cast<DataProcessorKameleon>(_dataProcessor)->dimensions(
+    std::dynamic_pointer_cast<DataProcessorKameleon>(_dataProcessor)->setDimensions(
         _dimensions
     );
     _dataProcessor->addDataValues(_kwPath, _dataOptions);
     // if this datacygnet has added new values then reload texture
     // for the whole group, including this datacygnet, and return after.
-    if(_group){
+    if (_group) {
         _group->updateGroup();
     }
     updateTextureResource();
@@ -198,11 +192,11 @@ bool KameleonPlane::createGeometry() {
     //         GEOMETRY (quad)
     // ============================
     // GLfloat x,y, z;
-    float s = _data->spatialScale.x;
-    const GLfloat x = s*_data->scale.x / 2.f;
-    const GLfloat y = s*_data->scale.y / 2.f;
-    const GLfloat z = s*_data->scale.z / 2.f;
-    const GLfloat w = _data->spatialScale.w;
+    float s = _data.spatialScale.x;
+    const GLfloat x = s * _data.scale.x / 2.f;
+    const GLfloat y = s * _data.scale.y / 2.f;
+    const GLfloat z = s * _data.scale.z / 2.f;
+    const GLfloat w = _data.spatialScale.w;
 
     const GLfloat vertex_data[] = { // square of two triangles (sigh)
         //      x      y     z     w     s     t
@@ -218,14 +212,7 @@ bool KameleonPlane::createGeometry() {
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
-        0,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 6,
-        nullptr
-    );
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(
         1,
@@ -255,16 +242,13 @@ void KameleonPlane::renderGeometry() const {
 }
 
 std::vector<float*> KameleonPlane::textureData() {
-    return std::dynamic_pointer_cast<DataProcessorKameleon>(_dataProcessor)->processData(
-        _kwPath,
-        _dataOptions,
-        _dimensions,
-        _slice
-    );
+    DataProcessorKameleon* p = dynamic_cast<DataProcessorKameleon*>(_dataProcessor.get());
+    p->setSlice(_slice);
+    return p->processData(_kwPath, _dataOptions, _dimensions);
 }
 
 bool KameleonPlane::updateTextureResource() {
-    _data->offset[_cut] = _data->gridMin[_cut]+_slice.value()*_scale;
+    _data.offset[_cut] = _slice * _scale + _data.gridMin[_cut];
     // _textureDirty = true;
     updateTexture();
     return true;
@@ -279,16 +263,16 @@ void KameleonPlane::setUniforms() {
 void KameleonPlane::updateFieldlineSeeds() {
     std::vector<int> selectedOptions = _fieldlines.value();
 
-    // SeedPath == map<int selectionValue, tuple<string name, string path, bool active>>
+    // seedPath == map<int selectionValue, tuple<string name, string path, bool active>>
     for (auto& seedPath : _fieldlineState) {
         // if this option was turned off
-        auto it = std::find(
+        const auto it = std::find(
             selectedOptions.begin(),
             selectedOptions.end(),
             seedPath.first
         );
         if (it == selectedOptions.end() && std::get<2>(seedPath.second)) {
-            SceneGraphNode* n = OsEng.renderEngine().scene()->sceneGraphNode(
+            SceneGraphNode* n = global::renderEngine.scene()->sceneGraphNode(
                 std::get<0>(seedPath.second)
             );
             if (!n) {
@@ -296,20 +280,20 @@ void KameleonPlane::updateFieldlineSeeds() {
             }
 
             LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
-            OsEng.scriptEngine().queueScript(
+            global::scriptEngine.queueScript(
                 "openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
             std::get<2>(seedPath.second) = false;
         // if this option was turned on
         } else if (it != selectedOptions.end() && !std::get<2>(seedPath.second)) {
-            SceneGraphNode* n = OsEng.renderEngine().scene()->sceneGraphNode(
+            SceneGraphNode* n = global::renderEngine.scene()->sceneGraphNode(
                 std::get<0>(seedPath.second)
             );
-
             if (n) {
                 return;
             }
+
             LDEBUG("Created fieldlines: " + std::get<0>(seedPath.second));
             IswaManager::ref().createFieldline(
                 std::get<0>(seedPath.second),
@@ -321,10 +305,10 @@ void KameleonPlane::updateFieldlineSeeds() {
     }
 }
 
-void KameleonPlane::readFieldlinePaths(std::string indexFile) {
+void KameleonPlane::readFieldlinePaths(const std::string& indexFile) {
     LINFO(fmt::format("Reading seed points paths from file '{}'", indexFile));
     if (_group) {
-        std::dynamic_pointer_cast<IswaKameleonGroup>(_group)->setFieldlineInfo(
+        dynamic_cast<IswaKameleonGroup*>(_group)->setFieldlineInfo(
             indexFile,
             _kwPath
         );
@@ -341,7 +325,7 @@ void KameleonPlane::readFieldlinePaths(std::string indexFile) {
             //Parse and add each fieldline as an selection
             json fieldlines = json::parse(seedFile);
             int i = 0;
-            std::string fullName = identifier();
+            const std::string& fullName = identifier();
             std::string partName = fullName.substr(0,fullName.find_last_of("-"));
             for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
                 _fieldlines.addOption({i, it.key()});
@@ -366,21 +350,18 @@ void KameleonPlane::subscribeToGroup() {
     DataCygnet::subscribeToGroup();
 
     //Add additional Events specific to KameleonPlane
-    auto groupEvent = _group->groupEvent();
-    groupEvent->subscribe(identifier(), "resolutionChanged", [&](ghoul::Dictionary dict) {
+    ghoul::Event<ghoul::Dictionary>& groupEvent = _group->groupEvent();
+    groupEvent.subscribe(identifier(), "resolutionChanged", [&](ghoul::Dictionary dict) {
         LDEBUG(identifier() + " Event resolutionChanged");
-        float resolution;
-        bool success = dict.getValue("resolution", resolution);
-        if (success) {
-            _resolution.setValue(resolution);
+        if (dict.hasKeyAndValue<float>("resolution")) {
+            _resolution = dict.value<float>("resolution");
         }
     });
 
-    groupEvent->subscribe(identifier(), "cdfChanged", [&](ghoul::Dictionary dict) {
+    groupEvent.subscribe(identifier(), "cdfChanged", [&](ghoul::Dictionary dict) {
         LDEBUG(identifier() + " Event cdfChanged");
-        std::string path;
-        bool success = dict.getValue("path", path);
-        if (success) {
+        if (dict.hasKeyAndValue<std::string>("path")) {
+            const std::string& path = dict.value<std::string>("path");
             changeKwPath(path);
         }
         updateTexture();
@@ -390,21 +371,21 @@ void KameleonPlane::subscribeToGroup() {
 void KameleonPlane::setDimensions() {
     // the cdf files has an offset of 0.5 in normali resolution.
     // with lower resolution the offset increases.
-    _data->offset = _origOffset - 0.5f*  (100.f / _resolution.value());
-    _dimensions = glm::size3_t(_data->scale * (_resolution.value() / 100.f));
+    _data.offset = _origOffset - 0.5f * (100.f / _resolution);
+    _dimensions = glm::size3_t(_data.scale * (_resolution / 100.f));
     _dimensions[_cut] = 1;
 
-    if (_cut == 0) {
+    if (_cut == Cut::X) {
         _textureDimensions = glm::size3_t(_dimensions.y, _dimensions.z, 1);
-    } else if(_cut == 1) {
+    } else if (_cut == Cut::Y) {
         _textureDimensions = glm::size3_t(_dimensions.x, _dimensions.z, 1);
     } else {
         _textureDimensions = glm::size3_t(_dimensions.x, _dimensions.y, 1);
     }
 }
 
-void KameleonPlane::changeKwPath(std::string kwPath){
-    _kwPath = kwPath;
+void KameleonPlane::changeKwPath(std::string kwPath) {
+    _kwPath = std::move(kwPath);
 }
 
 }// namespace openspace

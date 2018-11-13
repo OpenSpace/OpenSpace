@@ -32,9 +32,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
-namespace ghoul::fontrendering {
-    class Font;
-} // namespace ghoul::fontrendering
+namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
 
@@ -42,7 +40,7 @@ namespace documentation { struct Documentation; }
 
 class DashboardItemSimulationIncrement : public DashboardItem {
 public:
-    DashboardItemSimulationIncrement(ghoul::Dictionary dictionary);
+    DashboardItemSimulationIncrement(const ghoul::Dictionary& dictionary);
     virtual ~DashboardItemSimulationIncrement() = default;
 
     void render(glm::vec2& penPosition) override;

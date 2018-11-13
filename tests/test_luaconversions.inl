@@ -24,9 +24,60 @@
 
 #include <ghoul/lua/ghoul_lua.h>
 #include <openspace/properties/propertydelegate.h>
-#include <openspace/properties/scalarproperty.h>
-#include <openspace/properties/vectorproperty.h>
-#include <openspace/properties/matrixproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/charproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/scalar/longdoubleproperty.h>
+#include <openspace/properties/scalar/longlongproperty.h>
+#include <openspace/properties/scalar/longproperty.h>
+#include <openspace/properties/scalar/shortproperty.h>
+#include <openspace/properties/scalar/signedcharproperty.h>
+#include <openspace/properties/scalar/ucharproperty.h>
+#include <openspace/properties/scalar/uintproperty.h>
+#include <openspace/properties/scalar/ulonglongproperty.h>
+#include <openspace/properties/scalar/ulongproperty.h>
+#include <openspace/properties/scalar/ushortproperty.h>
+#include <openspace/properties/scalar/wcharproperty.h>
+#include <openspace/properties/vector/bvec2property.h>
+#include <openspace/properties/vector/bvec3property.h>
+#include <openspace/properties/vector/bvec4property.h>
+
+#include <openspace/properties/vector/dvec2property.h>
+#include <openspace/properties/vector/dvec3property.h>
+#include <openspace/properties/vector/dvec4property.h>
+
+#include <openspace/properties/vector/ivec2property.h>
+#include <openspace/properties/vector/ivec3property.h>
+#include <openspace/properties/vector/ivec4property.h>
+
+#include <openspace/properties/vector/uvec2property.h>
+#include <openspace/properties/vector/uvec3property.h>
+#include <openspace/properties/vector/uvec4property.h>
+
+#include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
+#include <openspace/properties/matrix/mat2property.h>
+#include <openspace/properties/matrix/mat2x3property.h>
+#include <openspace/properties/matrix/mat2x4property.h>
+#include <openspace/properties/matrix/mat3x2property.h>
+#include <openspace/properties/matrix/mat3property.h>
+#include <openspace/properties/matrix/mat3x4property.h>
+#include <openspace/properties/matrix/mat4x2property.h>
+#include <openspace/properties/matrix/mat4x3property.h>
+#include <openspace/properties/matrix/mat4property.h>
+
+#include <openspace/properties/matrix/dmat2property.h>
+#include <openspace/properties/matrix/dmat2x3property.h>
+#include <openspace/properties/matrix/dmat2x4property.h>
+#include <openspace/properties/matrix/dmat3x2property.h>
+#include <openspace/properties/matrix/dmat3property.h>
+#include <openspace/properties/matrix/dmat3x4property.h>
+#include <openspace/properties/matrix/dmat4x2property.h>
+#include <openspace/properties/matrix/dmat4x3property.h>
+#include <openspace/properties/matrix/dmat4property.h>
 #include <openspace/properties/stringproperty.h>
 
 #include <random>

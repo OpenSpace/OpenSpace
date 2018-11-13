@@ -28,7 +28,7 @@
 #include <openspace/documentation/verifier.h>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo PositionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PositionInfo = {
         "Position",
         "Position",
         "This value is used as a static offset (in meters) that is applied to the scene "
@@ -76,10 +76,6 @@ StaticTranslation::StaticTranslation()
     });
 }
 
-glm::dvec3 StaticTranslation::position(const Time&) const {
-    return _position;
-}
-
 StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
     : StaticTranslation()
 {
@@ -90,6 +86,10 @@ StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
     );
 
     _position = dictionary.value<glm::dvec3>(PositionInfo.identifier);
+}
+
+glm::dvec3 StaticTranslation::position(const UpdateData&) const {
+    return _position;
 }
 
 } // namespace openspace

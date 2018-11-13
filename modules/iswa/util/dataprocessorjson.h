@@ -34,11 +34,13 @@ public:
     DataProcessorJson();
     virtual ~DataProcessorJson();
 
-    virtual std::vector<std::string> readMetadata(std::string data,
+    virtual std::vector<std::string> readMetadata(const std::string& data,
         glm::size3_t& dimensions) override;
-    virtual void addDataValues(std::string data,
+
+    virtual void addDataValues(const std::string& data,
         properties::SelectionProperty& dataOptions) override;
-    virtual std::vector<float*> processData(std::string data,
+
+    virtual std::vector<float*> processData(const std::string& data,
         properties::SelectionProperty& dataOptions, glm::size3_t& dimensions) override;
 };
 

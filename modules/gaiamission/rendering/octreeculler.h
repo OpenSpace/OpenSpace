@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_GAIAMISSION___OCTREECULLER___H__
 #define __OPENSPACE_MODULE_GAIAMISSION___OCTREECULLER___H__
 
-#include <modules/globebrowsing/geometry/aabb.h>
+#include <modules/globebrowsing/src/basictypes.h>
 #include <vector>
 
 // TODO: Move /geometry/* to libOpenSpace so as not to depend on globebrowsing.

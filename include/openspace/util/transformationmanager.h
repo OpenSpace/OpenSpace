@@ -25,39 +25,25 @@
 #ifndef __OPENSPACE_CORE___TRANSFORMATIONMANAGER___H__
 #define __OPENSPACE_CORE___TRANSFORMATIONMANAGER___H__
 
-#include <ghoul/designpattern/singleton.h>
 #include <ghoul/glm.h>
-
-#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
-
-#ifdef WIN32
-#pragma warning (push)
-#pragma warning (disable : 4619) // #pragma warning: there is no warning number '4675'
-#endif // WIN32
-
-#include <ccmc/Kameleon.h>
-
-#ifdef WIN32
-#pragma warning (pop)
-#endif // WIN32
-#endif
-
-
+#include <memory>
 #include <set>
+#include <string>
 
-namespace ccmc {
-    class Kameleon;
-} // namespace ccmc
+namespace ccmc { class Kameleon; }
 
 namespace openspace {
-#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
-#endif
-class TransformationManager : public ghoul::Singleton<TransformationManager> {
-    friend class ghoul::Singleton<TransformationManager>;
 
+class TransformationManager {
 public:
     TransformationManager();
     ~TransformationManager();
+
+    static void initialize();
+    static void deinitialize();
+    static bool isInitialized();
+    static TransformationManager& ref();
+
 
     glm::dmat3 frameTransformationMatrix(const std::string& from, const std::string& to,
         double ephemerisTime) const;
@@ -66,11 +52,13 @@ private:
     glm::dmat3 kameleonTransformationMatrix(const std::string& from,
         const std::string& to, double ephemerisTime) const;
 
-#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+//#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     std::shared_ptr<ccmc::Kameleon> _kameleon;
-#endif
+//#endif
     std::set<std::string> _kameleonFrames;
     std::set<std::string> _dipoleFrames;
+
+    static TransformationManager* _instance;
 };
 
 } // namespace openspace

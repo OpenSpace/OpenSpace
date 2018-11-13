@@ -26,18 +26,14 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/rendering/renderengine.h>
-
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureconversion.h>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo TexturePathInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TexturePathInfo = {
         "TexturePath",
         "Texture path",
         "Sets the path of the texture that is displayed on this screen space plane. If "
@@ -74,7 +70,6 @@ documentation::Documentation ScreenSpaceImageLocal::Documentation() {
 ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _texturePath(TexturePathInfo)
-    , _textureIsDirty(false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -107,6 +102,12 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
     if (dictionary.hasKey(TexturePathInfo.identifier)) {
         _texturePath = dictionary.value<std::string>(TexturePathInfo.identifier);
     }
+}
+
+bool ScreenSpaceImageLocal::deinitializeGL() {
+    _texture = nullptr;
+
+    return ScreenSpaceRenderable::deinitializeGL();
 }
 
 void ScreenSpaceImageLocal::update() {

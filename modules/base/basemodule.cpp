@@ -24,23 +24,20 @@
 
 #include <modules/base/basemodule.h>
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/util/factorymanager.h>
-
-#include <ghoul/misc/assert.h>
-
 #include <modules/base/dashboard/dashboarditemangle.h>
 #include <modules/base/dashboard/dashboarditemdate.h>
 #include <modules/base/dashboard/dashboarditemdistance.h>
 #include <modules/base/dashboard/dashboarditemframerate.h>
 #include <modules/base/dashboard/dashboarditemmission.h>
 #include <modules/base/dashboard/dashboarditemparallelconnection.h>
+#include <modules/base/dashboard/dashboarditempropertyvalue.h>
 #include <modules/base/dashboard/dashboarditemsimulationincrement.h>
 #include <modules/base/dashboard/dashboarditemspacing.h>
-
 #include <modules/base/rendering/renderableboxgrid.h>
+#include <modules/base/dashboard/dashboarditemvelocity.h>
+#include <modules/base/lightsource/cameralightsource.h>
+#include <modules/base/lightsource/scenegraphlightsource.h>
+#include <modules/base/rendering/renderablecartesianaxes.h>
 #include <modules/base/rendering/renderablemodel.h>
 #include <modules/base/rendering/renderablesphere.h>
 #include <modules/base/rendering/renderablesphericalgrid.h>
@@ -54,20 +51,29 @@
 #include <modules/base/rendering/screenspaceimagelocal.h>
 #include <modules/base/rendering/screenspaceimageonline.h>
 #include <modules/base/rendering/screenspaceframebuffer.h>
-
-#include <modules/base/translation/luatranslation.h>
-#include <modules/base/translation/statictranslation.h>
-
+#include <modules/base/rotation/constantrotation.h>
 #include <modules/base/rotation/fixedrotation.h>
 #include <modules/base/rotation/luarotation.h>
 #include <modules/base/rotation/staticrotation.h>
-
 #include <modules/base/scale/luascale.h>
 #include <modules/base/scale/staticscale.h>
+#include <modules/base/scale/timedependentscale.h>
+#include <modules/base/translation/luatranslation.h>
+#include <modules/base/translation/statictranslation.h>
+#include <modules/base/timeframe/timeframeinterval.h>
+#include <modules/base/timeframe/timeframeunion.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scripting/lualibrary.h>
+#include <openspace/util/factorymanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 
 ghoul::opengl::ProgramObjectManager BaseModule::ProgramObjectManager;
+ghoul::opengl::TextureManager BaseModule::TextureManager;
 
 BaseModule::BaseModule() : OpenSpaceModule(BaseModule::Name) {}
 
@@ -100,15 +106,20 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fDashboard->registerClass<DashboardItemParallelConnection>(
         "DashboardItemParallelConnection"
     );
+    fDashboard->registerClass<DashboardItemPropertyValue>(
+        "DashboardItemPropertyValue"
+    );
     fDashboard->registerClass<DashboardItemSimulationIncrement>(
         "DashboardItemSimulationIncrement"
     );
     fDashboard->registerClass<DashboardItemSpacing>("DashboardItemSpacing");
+    fDashboard->registerClass<DashboardItemVelocity>("DashboardItemVelocity");
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
 
     fRenderable->registerClass<RenderableBoxGrid>("RenderableBoxGrid");
+    fRenderable->registerClass<RenderableCartesianAxes>("RenderableCartesianAxes");
     fRenderable->registerClass<RenderableModel>("RenderableModel");
     fRenderable->registerClass<RenderablePlaneImageLocal>("RenderablePlaneImageLocal");
     fRenderable->registerClass<RenderablePlaneImageOnline>("RenderablePlaneImageOnline");
@@ -126,6 +137,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     auto fRotation = FactoryManager::ref().factory<Rotation>();
     ghoul_assert(fRotation, "Rotation factory was not created");
 
+    fRotation->registerClass<ConstantRotation>("ConstantRotation");
     fRotation->registerClass<FixedRotation>("FixedRotation");
     fRotation->registerClass<LuaRotation>("LuaRotation");
     fRotation->registerClass<StaticRotation>("StaticRotation");
@@ -135,6 +147,19 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
 
     fScale->registerClass<LuaScale>("LuaScale");
     fScale->registerClass<StaticScale>("StaticScale");
+    fScale->registerClass<TimeDependentScale>("TimeDependentScale");
+
+    auto fTimeFrame = FactoryManager::ref().factory<TimeFrame>();
+    ghoul_assert(fTimeFrame, "Scale factory was not created");
+
+    fTimeFrame->registerClass<TimeFrameInterval>("TimeFrameInterval");
+    fTimeFrame->registerClass<TimeFrameUnion>("TimeFrameUnion");
+
+    auto fLightSource = FactoryManager::ref().factory<LightSource>();
+    ghoul_assert(fLightSource, "Light Source factory was not created");
+
+    fLightSource->registerClass<CameraLightSource>("CameraLightSource");
+    fLightSource->registerClass<SceneGraphLightSource>("SceneGraphLightSource");
 
     auto fGeometry = FactoryManager::ref().factory<modelgeometry::ModelGeometry>();
     ghoul_assert(fGeometry, "Model geometry factory was not created");
@@ -143,10 +168,12 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
 
 void BaseModule::internalDeinitializeGL() {
     ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
+    TextureManager.releaseAll(ghoul::opengl::TextureManager::Warnings::Yes);
 }
 
 std::vector<documentation::Documentation> BaseModule::documentations() const {
     return {
+        DashboardItemAngle::Documentation(),
         DashboardItemDate::Documentation(),
         DashboardItemDistance::Documentation(),
         DashboardItemFramerate::Documentation(),
@@ -154,6 +181,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         DashboardItemParallelConnection::Documentation(),
         DashboardItemSimulationIncrement::Documentation(),
         DashboardItemSpacing::Documentation(),
+        DashboardItemVelocity::Documentation(),
 
         RenderableBoxGrid::Documentation(),
         RenderableModel::Documentation(),
@@ -173,9 +201,16 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
 
         LuaScale::Documentation(),
         StaticScale::Documentation(),
+        TimeDependentScale::Documentation(),
 
         LuaTranslation::Documentation(),
         StaticTranslation::Documentation(),
+
+        TimeFrameInterval::Documentation(),
+        TimeFrameUnion::Documentation(),
+
+        SceneGraphLightSource::Documentation(),
+        CameraLightSource::Documentation(),
 
         modelgeometry::ModelGeometry::Documentation(),
     };

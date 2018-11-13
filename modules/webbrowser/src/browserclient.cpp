@@ -22,15 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <modules/webbrowser/include/browserclient.h>
 
-#include "include/browserclient.h"
 #include <modules/webbrowser/include/defaultbrowserlauncher.h>
+#include <modules/webbrowser/include/webrenderhandler.h>
+#include <modules/webbrowser/include/webkeyboardhandler.h>
+#include <ghoul/misc/assert.h>
 
 namespace openspace {
 
-BrowserClient::BrowserClient(WebRenderHandler* handler) {
-    _renderHandler = handler;
-    auto *browserLauncher = new DefaultBrowserLauncher;
+BrowserClient::BrowserClient(WebRenderHandler* handler,
+                             WebKeyboardHandler* keyboardHandler)
+    : _renderHandler(handler)
+    , _keyboardHandler(keyboardHandler)
+{
+    ghoul_assert(handler, "No WebRenderHandler provided");
+    ghoul_assert(keyboardHandler, "No WebKeyboardHandler provided");
+
+    DefaultBrowserLauncher* browserLauncher = new DefaultBrowserLauncher;
     _lifeSpanHandler = browserLauncher;
     _requestHandler = browserLauncher;
 };
@@ -45,6 +54,10 @@ CefRefPtr<CefLifeSpanHandler> BrowserClient::GetLifeSpanHandler() {
 
 CefRefPtr<CefRequestHandler> BrowserClient::GetRequestHandler() {
     return _requestHandler;
+}
+
+CefRefPtr<CefKeyboardHandler> BrowserClient::GetKeyboardHandler() {
+    return _keyboardHandler;
 }
 
 } // namespace openspace

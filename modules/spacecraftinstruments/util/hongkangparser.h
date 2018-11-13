@@ -33,19 +33,13 @@ class HongKangParser : public SequenceParser {
 public:
     HongKangParser();
     HongKangParser(std::string name, std::string fileName, std::string spacecraft,
-        ghoul::Dictionary dictionary, std::vector<std::string> potentialTargets);
+        const ghoul::Dictionary& translationDictionary,
+        std::vector<std::string> potentialTargets);
 
     bool create() override;
-    void findPlaybookSpecifiedTarget(std::string line, std::string& target);
+    std::string findPlaybookSpecifiedTarget(std::string line);
 
 private:
-    double getMetFromET(double et);
-    double getETfromMet(std::string timestr);
-    double getETfromMet(double met);
-
-    bool augmentWithSpice(Image& image,  std::string spacecraft,
-        std::vector<std::string> payload, std::vector<std::string> potentialTargets);
-
     std::string _defaultCaptureImage;
     double _metRef = 299180517;
 

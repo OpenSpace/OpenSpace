@@ -31,6 +31,7 @@ local object = {
         ScaleFactor = 440.0,
         TextSize = 17.5,
         TextMinSize = 10.0,
+        TextMaxSize = 30.0,
         Unit = "pc"
     },
     GUI = {

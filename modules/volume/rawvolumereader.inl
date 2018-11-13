@@ -24,8 +24,7 @@
 
 #include <fstream>
 
-namespace openspace {
-namespace volume {
+namespace openspace::volume {
 
 template <typename VoxelType>
 RawVolumeReader<VoxelType>::RawVolumeReader(const std::string& path,
@@ -82,19 +81,29 @@ glm::uvec3 RawVolumeReader<VoxelType>::indexToCoords(size_t linear) const {
 template <typename VoxelType>
 std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read() {
     glm::uvec3 dims = dimensions();
-    std::unique_ptr<RawVolume<VoxelType>> volume =
-        std::make_unique<RawVolume<VoxelType>>(dims);
+    std::unique_ptr<RawVolume<VoxelType>> volume = std::make_unique<RawVolume<VoxelType>>(
+        dims
+    );
 
     std::ifstream file(_path, std::ios::binary);
-    char *buffer = reinterpret_cast<char*>(volume->data());
+    char* buffer = reinterpret_cast<char*>(volume->data());
+
+    if (file.fail()) {
+        throw ghoul::FileNotFoundError("Volume file not found");
+    }
+
     size_t length = static_cast<size_t>(dims.x) *
-        static_cast<size_t>(dims.y) *
-        static_cast<size_t>(dims.z) *
-        sizeof(VoxelType);
+                    static_cast<size_t>(dims.y) *
+                    static_cast<size_t>(dims.z) *
+                    sizeof(VoxelType);
 
     file.read(buffer, length);
+
+    if (file.fail()) {
+        throw ghoul::RuntimeError("Error reading volume file");
+    }
+
     return volume;
 }
 
-} // namepsace volume
-} // namespace openspace
+} // namespace openspace::volume

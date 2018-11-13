@@ -27,18 +27,19 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/envelope.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolume.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rawvolume.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumemetadata.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumereader.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumereader.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumewriter.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumewriter.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/textureslicevolumereader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/textureslicevolumereader.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/transferfunction.h
     ${CMAKE_CURRENT_SOURCE_DIR}/transferfunctionhandler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/transferfunctionproperty.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumemetadata.h
     ${CMAKE_CURRENT_SOURCE_DIR}/lrucache.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/lrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/linearlrucache.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/linearlrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/volumegridtype.h
     ${CMAKE_CURRENT_SOURCE_DIR}/volumesampler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/volumesampler.inl
@@ -47,12 +48,14 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/basicvolumeraycaster.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/volumeclipplane.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/volumeclipplanes.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/generaterawvolumetask.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/envelope.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolume.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumemetadata.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumereader.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumewriter.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/textureslicevolumereader.inl
@@ -66,7 +69,9 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/basicvolumeraycaster.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/volumeclipplane.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/volumeclipplanes.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/generaterawvolumetask.cpp
 )
+
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 create_new_module(

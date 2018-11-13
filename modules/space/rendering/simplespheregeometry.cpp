@@ -30,13 +30,13 @@
 #include <openspace/util/powerscaledsphere.h>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo RadiusInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
         "Radius",
         "Radius",
         "This value specifies the radius of this sphere in meters."
     };
 
-    static const openspace::properties::Property::PropertyInfo SegmentsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Segments",
         "This value specifies the number of segments that this sphere is split into."
@@ -53,10 +53,7 @@ documentation::Documentation SimpleSphereGeometry::Documentation() {
         {
             {
                 RadiusInfo.identifier,
-                new OrVerifier(
-                    new DoubleVerifier,
-                    new DoubleVector3Verifier
-                ),
+                new OrVerifier({ new DoubleVerifier, new DoubleVector3Verifier }),
                 Optional::No,
                 RadiusInfo.description
             },
@@ -71,8 +68,7 @@ documentation::Documentation SimpleSphereGeometry::Documentation() {
 }
 
 SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
-    : PlanetGeometry()
-    , _radius(RadiusInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(std::pow(10.f, 20.f)))
+    : _radius(RadiusInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(std::pow(10.f, 20.f)))
     , _segments(SegmentsInfo, 20, 1, 5000)
     , _sphere(nullptr)
 {
@@ -82,11 +78,10 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
         "SimpleSphereGeometry"
     );
 
-    glm::vec3 ellipsoidRadius;
     if (dictionary.hasKeyAndValue<double>(RadiusInfo.identifier)) {
         const float r = static_cast<float>(
             dictionary.value<double>(RadiusInfo.identifier)
-            );
+        );
         _radius = { r, r, r };
     }
     else {
@@ -105,12 +100,10 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
     addProperty(_segments);
 }
 
-SimpleSphereGeometry::~SimpleSphereGeometry() {}
+SimpleSphereGeometry::~SimpleSphereGeometry() {} // NOLINT
 
-bool SimpleSphereGeometry::initialize(Renderable* parent) {
-    bool success = PlanetGeometry::initialize(parent);
+void SimpleSphereGeometry::initialize() {
     createSphere();
-    return success;
 }
 
 void SimpleSphereGeometry::deinitialize() {
@@ -122,9 +115,13 @@ void SimpleSphereGeometry::render() {
     _sphere->render();
 }
 
+float SimpleSphereGeometry::boundingSphere() const {
+    const glm::vec3 radius = _radius;
+    return std::max(std::max(radius[0], radius[1]), radius[2]);
+}
+
 void SimpleSphereGeometry::createSphere() {
     const glm::vec3 radius = _radius.value();
-    _parent->setBoundingSphere(std::max(std::max(radius[0], radius[1]), radius[2]));
 
     delete _sphere;
     _sphere = new PowerScaledSphere(glm::vec4(radius, 0.0), _segments);

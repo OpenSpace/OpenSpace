@@ -1,0 +1,8 @@
+asset.export("webguiDevelopmentMode", false)
+
+-- To make changes to the webgui:
+
+-- 1) Set the above `webguiDevelopmentMode` to true
+-- 2) Clone the repository: https://github.com/OpenSpace/OpenSpace-WebGuiFrontend
+-- 3) Install nodejs (including npm)
+-- 4) Within the repository, run `npm install` and `npm start`

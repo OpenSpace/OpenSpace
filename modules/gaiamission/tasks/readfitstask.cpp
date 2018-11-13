@@ -249,8 +249,8 @@ void ReadFitsTask::readAllFitsFilesFromFolder(
             
             for (int i = 0; i < 8; ++i) {
                 // Add read values to global octant and check if it's time to write!
-                octants[i].insert(octants[i].end(), (*newOctant)[i].begin(), 
-                    (*newOctant)[i].end());
+                octants[i].insert(octants[i].end(), newOctant[i].begin(), 
+                    newOctant[i].end());
                 if (octants[i].size() > MAX_SIZE_BEFORE_WRITE || finishedJobs == nInputFiles) {
 
                     // Write to file!

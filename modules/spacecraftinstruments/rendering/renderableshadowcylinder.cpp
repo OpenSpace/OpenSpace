@@ -26,19 +26,24 @@
 
 #include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
+#include <openspace/util/spicemanager.h>
 
 namespace {
     constexpr const char* ProgramName = "ShadowCylinderProgram";
     constexpr const char* MainFrame = "GALACTIC";
 
-    static const openspace::properties::Property::PropertyInfo NumberPointsInfo = {
+    constexpr const std::array<const char*, 2> UniformNames = {
+        "modelViewProjectionTransform", "shadowColor"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo NumberPointsInfo = {
         "AmountOfPoints",
         "Points",
         "This value determines the number of control points that is used to construct "
@@ -46,7 +51,7 @@ namespace {
         "but it will have a negative impact on the performance."
     };
 
-    static const openspace::properties::Property::PropertyInfo ShadowLengthInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ShadowLengthInfo = {
         "ShadowLength",
         "Shadow Length",
         "This value determines the length of the shadow that is cast by the target "
@@ -54,53 +59,66 @@ namespace {
         "target to the Sun multiplied with this value."
     };
 
-    static const openspace::properties::Property::PropertyInfo ShadowColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ShadowColorInfo = {
         "ShadowColor",
         "Shadow Color",
         "This value determines the color that is used for the shadow cylinder."
     };
 
-    static const openspace::properties::Property::PropertyInfo TerminatorTypeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TerminatorTypeInfo = {
         "TerminatorType",
         "Terminator Type",
         "This value determines the type of the terminator that is used to calculate the "
         "shadow eclipse."
     };
 
-    static const openspace::properties::Property::PropertyInfo LightSourceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LightSourceInfo = {
         "LightSource",
         "Light Source",
         "This value determines the SPICE name of the object that is used as the "
         "illuminator for computing the shadow cylinder."
     };
 
-    static const openspace::properties::Property::PropertyInfo ObserverInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ObserverInfo = {
         "Observer",
         "Observer",
         "This value specifies the SPICE name of the object that is the observer of the "
         "shadow cylinder."
     };
 
-    static const openspace::properties::Property::PropertyInfo BodyInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BodyInfo = {
         "Body",
         "Target Body",
         "This value is the SPICE name of target body that is used as the shadow caster "
         "for the shadow cylinder."
     };
 
-    static const openspace::properties::Property::PropertyInfo BodyFrameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BodyFrameInfo = {
         "BodyFrame",
         "Body Frame",
         "This value is the SPICE name of the reference frame in which the shadow "
         "cylinder is expressed."
     };
 
-    static const openspace::properties::Property::PropertyInfo AberrationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AberrationInfo = {
         "Aberration",
         "Aberration",
         "This value determines the aberration method that is used to compute the shadow "
         "cylinder."
     };
+
+    glm::vec4 psc_addition(glm::vec4 v1, glm::vec4 v2) {
+        const float k = 10.f;
+        const float ds = v2.w - v1.w;
+        if (ds >= 0) {
+            float p = pow(k, -ds);
+            return glm::vec4(v1.x*p + v2.x, v1.y*p + v2.y, v1.z*p + v2.z, v2.w);
+        }
+        else {
+            float p = pow(k, ds);
+            return glm::vec4(v1.x + v2.x*p, v1.y + v2.y*p, v1.z + v2.z*p, v1.w);
+        }
+    }
 } // namespace
 
 namespace openspace {
@@ -199,9 +217,6 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
     , _body(BodyInfo)
     , _bodyFrame(BodyFrameInfo)
     , _aberration(AberrationInfo)
-    , _shader(nullptr)
-    , _vao(0)
-    , _vbo(0)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -266,10 +281,10 @@ void RenderableShadowCylinder::initializeGL() {
     glGenVertexArrays(1, &_vao);
     glGenBuffers(1, &_vbo);
 
-    _shader = SpacecraftInstrumentsModule::ProgramObjectManager.requestProgramObject(
+    _shader = SpacecraftInstrumentsModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return OsEng.renderEngine().buildRenderProgram(
+            return global::renderEngine.buildRenderProgram(
                 ProgramName,
                 absPath(
                     "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/terminatorshadow_vs.glsl"
@@ -281,19 +296,14 @@ void RenderableShadowCylinder::initializeGL() {
         }
     );
 
-    _uniformCache.modelViewProjectionTransform = _shader->uniformLocation(
-        "modelViewProjectionTransform"
-    );
-    _uniformCache.shadowColor = _shader->uniformLocation(
-        "shadowColor"
-    );
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 }
 
 void RenderableShadowCylinder::deinitializeGL() {
-    SpacecraftInstrumentsModule::ProgramObjectManager.releaseProgramObject(
+    SpacecraftInstrumentsModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
     _shader = nullptr;
@@ -313,9 +323,9 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
     _shader->activate();
 
     // Model transform and view transform needs to be in double precision
-    glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+    const glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
@@ -341,34 +351,16 @@ void RenderableShadowCylinder::update(const UpdateData& data) {
         MainFrame,
         data.time.j2000Seconds()
     );
+
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
-
-        _uniformCache.modelViewProjectionTransform = _shader->uniformLocation(
-            "modelViewProjectionTransform"
-        );
-        _uniformCache.shadowColor = _shader->uniformLocation(
-            "shadowColor"
-        );
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
     }
     createCylinder(data.time.j2000Seconds());
 }
 
-glm::vec4 psc_addition(glm::vec4 v1, glm::vec4 v2) {
-    float k = 10.f;
-    float ds = v2.w - v1.w;
-    if (ds >= 0) {
-        float p = pow(k, -ds);
-        return glm::vec4(v1.x*p + v2.x, v1.y*p + v2.y, v1.z*p + v2.z, v2.w);
-    }
-    else {
-        float p = pow(k, ds);
-        return glm::vec4(v1.x + v2.x*p, v1.y + v2.y*p, v1.z + v2.z*p, v1.w);
-    }
-}
-
 void RenderableShadowCylinder::createCylinder(double time) {
-    auto res = SpiceManager::ref().terminatorEllipse(
+    SpiceManager::TerminatorEllipseResult res = SpiceManager::ref().terminatorEllipse(
         _body,
         _observer,
         _bodyFrame,
@@ -388,8 +380,7 @@ void RenderableShadowCylinder::createCylinder(double time) {
         res.terminatorPoints.end(),
         std::back_inserter(terminatorPoints),
         [](const glm::dvec3& p) {
-            PowerScaledCoordinate coord =
-                PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
+            psc coord = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
             coord[3] += 3;
             return coord;
         }
@@ -413,12 +404,12 @@ void RenderableShadowCylinder::createCylinder(double time) {
     vecLightSource *= _shadowLength;
     _vertices.clear();
 
-    psc endpoint = psc::CreatePowerScaledCoordinate(
-            vecLightSource.x,
-            vecLightSource.y,
-            vecLightSource.z
-        );
-    for (const auto& v : terminatorPoints) {
+    const psc endpoint = psc::CreatePowerScaledCoordinate(
+        vecLightSource.x,
+        vecLightSource.y,
+        vecLightSource.z
+    );
+    for (const psc& v : terminatorPoints) {
         _vertices.push_back({ v[0], v[1], v[2], v[3] });
         glm::vec4 f = psc_addition(v.vec4(), endpoint.vec4());
         _vertices.push_back({ f[0], f[1], f[2], f[3] });

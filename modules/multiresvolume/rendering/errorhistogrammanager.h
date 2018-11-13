@@ -25,22 +25,22 @@
 #ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___ERRORHISTOGRAMMANAGER___H__
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___ERRORHISTOGRAMMANAGER___H__
 
-#include <fstream>
-#include <modules/multiresvolume/rendering/tsp.h>
 #include <openspace/util/histogram.h>
+#include <ghoul/glm.h>
+#include <iosfwd>
 #include <map>
 
-#include <ghoul/glm.h>
-
 namespace openspace {
+
+class TSP;
 
 class ErrorHistogramManager {
 public:
     ErrorHistogramManager(TSP* tsp);
-    ~ErrorHistogramManager();
+    ~ErrorHistogramManager() = default;
 
     bool buildHistograms(int numBins);
-    const Histogram* getHistogram(unsigned int brickIndex) const;
+    const Histogram* histogram(unsigned int brickIndex) const;
 
     bool loadFromFile(const std::string& filename);
     bool saveToFile(const std::string& filename);
@@ -64,11 +64,12 @@ private:
 
     unsigned int brickToInnerNodeIndex(unsigned int brickIndex) const;
     unsigned int innerNodeToBrickIndex(unsigned int innerNodeIndex) const;
-    unsigned int linearCoords(glm::vec3 coords) const;
+    unsigned int linearCoords(const glm::vec3& coords) const;
     unsigned int linearCoords(int x, int y, int z) const;
-    unsigned int linearCoords(glm::ivec3 coords) const;
+    unsigned int linearCoords(const glm::ivec3& coords) const;
 
-    float interpolate(glm::vec3 samplePoint, const std::vector<float>& voxels) const;
+    float interpolate(const glm::vec3& samplePoint,
+        const std::vector<float>& voxels) const;
 };
 
 } // namespace openspace

@@ -23,7 +23,10 @@
  ****************************************************************************************/
 
 #include <modules/iswa/rendering/textureplane.h>
-#include <openspace/engine/openspaceengine.h>
+
+#include <openspace/engine/globals.h>
+#include <openspace/rendering/renderengine.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/programobject.h>
@@ -32,17 +35,19 @@ namespace openspace {
 
 TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
     : TextureCygnet(dictionary)
-    , _quad(0)
-    , _vertexPositionBuffer(0)
-{
-    _programName = "PlaneProgram";
-    _vsPath = "${MODULE_ISWA}/shaders/textureplane_vs.glsl";
-    _fsPath = "${MODULE_ISWA}/shaders/textureplane_fs.glsl";
+{}
+
+void TexturePlane::initializeGL() {
+    if (!_shader) {
+        _shader = global::renderEngine.buildRenderProgram(
+            "PlaneProgram",
+            absPath("${MODULE_ISWA}/shaders/textureplane_vs.glsl"),
+            absPath("${MODULE_ISWA}/shaders/textureplane_fs.glsl")
+        );
+    }
 }
 
-TexturePlane::~TexturePlane(){}
-
-void TexturePlane::setUniforms(){
+void TexturePlane::setUniforms() {
     ghoul::opengl::TextureUnit unit;
 
     unit.activate();
@@ -59,11 +64,11 @@ bool TexturePlane::createGeometry() {
     //         GEOMETRY (quad)
     // ============================
 
-    float s = _data->spatialScale.x;
-    const GLfloat x = s*_data->scale.x/2.f;
-    const GLfloat y = s*_data->scale.y/2.f;
-    const GLfloat z = s*_data->scale.z/2.f;
-    const GLfloat w = _data->spatialScale.w;
+    float s = _data.spatialScale.x;
+    const GLfloat x = s * _data.scale.x / 2.f;
+    const GLfloat y = s * _data.scale.y / 2.f;
+    const GLfloat z = s * _data.scale.z / 2.f;
+    const GLfloat w = _data.spatialScale.w;
 
     const GLfloat vertex_data[] = { // square of two triangles (sigh)
         //      x      y     z     w     s     t
@@ -79,14 +84,7 @@ bool TexturePlane::createGeometry() {
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
-        0,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 6,
-        reinterpret_cast<void*>(0)
-    );
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(
         1,
@@ -100,7 +98,7 @@ bool TexturePlane::createGeometry() {
     return true;
 }
 
-bool TexturePlane::destroyGeometry(){
+bool TexturePlane::destroyGeometry() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 

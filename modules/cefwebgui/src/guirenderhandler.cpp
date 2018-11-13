@@ -22,37 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <glm/gtc/matrix_transform.hpp>
+#include <modules/cefwebgui/include/guirenderhandler.h>
+
+#include <openspace/engine/globalscallbacks.h>
 #include <ghoul/filesystem/filesystem.h>
-#include "modules/cefwebgui/include/guirenderhandler.h"
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/textureunit.h>
 
 namespace {
-    std::string _loggerCat = "WebGUI:RenderHandler";
-}
+    constexpr const char* _loggerCat = "WebGUI:RenderHandler";
+} // namespace
 
 namespace openspace {
 
 GUIRenderHandler::GUIRenderHandler() {
-    OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::InitializeGL,
-            [this](){
-                LDEBUG("Initializing WebGUI RenderHandler OpenGL");
-                initializeGL();
-            }
-    );
-}
-
-void GUIRenderHandler::initializeGL() {
     LDEBUG("Initializing CEF GL environment...");
     _programObject = ghoul::opengl::ProgramObject::Build(
-            "WebGUICEFProgram",
-            absPath("${MODULE_CEFWEBGUI}/shaders/gui_vs.glsl"),
-            absPath("${MODULE_CEFWEBGUI}/shaders/gui_fs.glsl")
+        "WebGUICEFProgram",
+        absPath("${MODULE_CEFWEBGUI}/shaders/gui_vs.glsl"),
+        absPath("${MODULE_CEFWEBGUI}/shaders/gui_fs.glsl")
     );
-    float data[] = {-1.0f, -1.0f, -1.0f,
-                     1.0f,  1.0f, -1.0f,
-                     1.0f, -1.0f, -1.0f,
-                     1.0f,  1.0f,  1.0f};
+    float data[] = {
+        -1.0f, -1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f,  1.0f,  1.0f
+    };
+
     glGenVertexArrays(1, &_vao);
     glBindVertexArray(_vao);
     glGenBuffers(1, &_vbo);
@@ -65,10 +62,27 @@ void GUIRenderHandler::initializeGL() {
     LDEBUG("Initializing CEF GL environment... done!");
 }
 
-void GUIRenderHandler::draw(void) {
+GUIRenderHandler::~GUIRenderHandler() {
+    _programObject = nullptr;
+
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
+}
+
+void GUIRenderHandler::draw() {
+    if (!_programObject) {
+        return;
+    }
+
+    if (!isTextureReady()) {
+        return;
+    }
+
     if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
     }
+
+    updateTexture();
 
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
@@ -91,5 +105,7 @@ void GUIRenderHandler::draw(void) {
 
     glEnable(GL_CULL_FACE);
 }
+
+void GUIRenderHandler::render() {}
 
 } // namespace openspace

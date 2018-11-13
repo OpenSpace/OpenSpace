@@ -25,24 +25,34 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER___DEFAULT_BROWSER_LAUNCHER___H__
 #define __OPENSPACE_MODULE_WEBBROWSER___DEFAULT_BROWSER_LAUNCHER___H__
 
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable : 4100)
+#endif // _MSC_VER
+
 #include <include/cef_life_span_handler.h>
 #include <include/cef_request_handler.h>
-#include <ghoul/logging/logmanager.h>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif // _MSC_VER
 
 namespace openspace {
 
 class DefaultBrowserLauncher : public CefLifeSpanHandler, public CefRequestHandler {
 public:
-    bool OnBeforePopup(CefRefPtr<CefBrowser> parentBrowser,
+    bool OnBeforePopup(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
+        const CefString& targetUrl, const CefString& targetFrameName,
+        CefLifeSpanHandler::WindowOpenDisposition targetDisposition, bool userGesture,
         const CefPopupFeatures& popupFeatures, CefWindowInfo& windowInfo,
-        const CefString& url, CefRefPtr<CefClient>& client, CefBrowserSettings& settings);
+        CefRefPtr<CefClient>& client, CefBrowserSettings& settings,
+        bool* noJavascriptAccess) override;
 
-    bool OnOpenURLFromTab(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
-        const CefString& target_url,
-        CefRequestHandler::WindowOpenDisposition target_disposition, bool userGesture);
+    //bool OnOpenURLFromTab(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
+    //    const CefString& target_url,
+    //    CefRequestHandler::WindowOpenDisposition target_disposition, bool userGesture);
 
 private:
-    void launchBrowser(const std::string &url) const;
     IMPLEMENT_REFCOUNTING(DefaultBrowserLauncher);
 };
 

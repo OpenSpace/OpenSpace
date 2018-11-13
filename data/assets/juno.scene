@@ -4,7 +4,7 @@ local sceneHelper = asset.require('util/scene_helper')
 -- Specifying which other assets should be loaded in this scene
 asset.require('spice/base')
 assetHelper.requestAll(asset, 'scene/solarsystem/sun')
-assetHelper.requestAll(asset, 'scene/solarsystem/planets')
+asset.request('scene/solarsystem/planets')
 asset.request('scene/digitaluniverse/stars')
 asset.request('scene/digitaluniverse/milkyway')
 assetHelper.requireAll(asset, 'scene/solarsystem/missions/juno')
@@ -12,6 +12,9 @@ assetHelper.requireAll(asset, 'scene/solarsystem/missions/juno')
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
+asset.require('util/default_joystick')
+
+asset.require('util/webgui')
 
 local junoAsset = asset.require('scene/solarsystem/missions/juno/juno')
 
@@ -32,7 +35,7 @@ asset.onInitialize(function ()
     openspace.addVirtualProperty(
         "BoolProperty",
         "Show Trails",
-        "*Trail.renderable.Enabled",
+        "*Trail.Renderable.Enabled",
         "Disable or enable all trails of the scene at the same time",
         true,
         nil,
@@ -47,7 +50,7 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-    openspace.removeVirtualProperty("*Trail.renderable.Enabled")
+    openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
 
     openspace.removeInterestingNodes({
         "Jupiter", "Juno"

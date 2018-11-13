@@ -24,22 +24,20 @@
 
 #include <modules/galaxy/rendering/galaxyraycaster.h>
 
-#include <ghoul/glm.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/ghoul_gl.h>
-
-#include <sstream>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/texture.h>
-#include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/updatestructures.h>
-#include <openspace/rendering/renderable.h>
-
 
 namespace {
-    const std::string GlslRaycastPath = "${MODULES}/galaxy/shaders/galaxyraycast.glsl";
-    const std::string GlslBoundsVsPath = "${MODULES}/galaxy/shaders/raycasterbounds.vs";
-    const std::string GlslBoundsFsPath = "${MODULES}/galaxy/shaders/raycasterbounds.fs";
+    constexpr const char* GlslRaycastPath =
+        "${MODULES}/galaxy/shaders/galaxyraycast.glsl";
+    constexpr const char* GlslBoundsVsPath =
+        "${MODULES}/galaxy/shaders/raycasterbounds.vs";
+    constexpr const char* GlslBoundsFsPath =
+        "${MODULES}/galaxy/shaders/raycasterbounds.fs";
 } // namespace
 
 namespace openspace {
@@ -47,15 +45,13 @@ namespace openspace {
 GalaxyRaycaster::GalaxyRaycaster(ghoul::opengl::Texture& texture)
     : _boundingBox(glm::vec3(1.0))
     , _texture(texture)
-    , _textureUnit(nullptr) {}
+    , _textureUnit(nullptr)
+{}
 
 GalaxyRaycaster::~GalaxyRaycaster() {}
 
 void GalaxyRaycaster::initialize() {
     _boundingBox.initialize();
-}
-
-void GalaxyRaycaster::deinitialize() {
 }
 
 void GalaxyRaycaster::renderEntryPoints(const RenderData& data,
@@ -98,12 +94,13 @@ void GalaxyRaycaster::renderExitPoints(const RenderData& data,
 void GalaxyRaycaster::preRaycast(const RaycastData& data,
                                  ghoul::opengl::ProgramObject& program)
 {
-    std::string colorUniformName = "color" + std::to_string(data.id);
-    std::string stepSizeUniformName = "maxStepSize" + std::to_string(data.id);
-    std::string galaxyTextureUniformName = "galaxyTexture" + std::to_string(data.id);
-    std::string volumeAspectUniformName = "aspect" + std::to_string(data.id);
-    std::string opacityCoefficientUniformName =
-        "opacityCoefficient" + std::to_string(data.id);
+    const std::string colorUniformName = "color" + std::to_string(data.id);
+    const std::string stepSizeUniformName = "maxStepSize" + std::to_string(data.id);
+    const std::string galaxyTextureUniformName = "galaxyTexture" +
+                                                 std::to_string(data.id);
+    const std::string volumeAspectUniformName = "aspect" + std::to_string(data.id);
+    const std::string opacityCoefficientUniformName = "opacityCoefficient" +
+                                                      std::to_string(data.id);
 
     program.setUniform(volumeAspectUniformName, _aspect);
     program.setUniform(stepSizeUniformName, _stepSize);
@@ -119,26 +116,31 @@ void GalaxyRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObje
     _textureUnit = nullptr; // release texture unit.
 }
 
-bool GalaxyRaycaster::cameraIsInside(const RenderData& data, glm::vec3& localPosition) {
+bool GalaxyRaycaster::isCameraInside(const RenderData& data, glm::vec3& localPosition) {
     // Camera rig position in world coordinates.
-    glm::vec4 rigWorldPos = glm::vec4(data.camera.position().vec3(), 1.0);
+    const glm::vec4 rigWorldPos = glm::vec4(data.camera.position().vec3(), 1.0);
     //rigWorldPos /= data.camera.scaling().x * pow(10.0, data.camera.scaling().y);
     //glm::mat4 invSgctMatrix = glm::inverse(data.camera.viewMatrix());
 
     // Camera position in world coordinates.
-    glm::vec4 camWorldPos = rigWorldPos;
-    glm::vec3 objPos = data.position.vec3();
+    const glm::vec4 camWorldPos = rigWorldPos;
+    const glm::vec3 objPos = data.position.vec3();
 
-    glm::mat4 modelTransform = glm::translate(_modelTransform, objPos);
+    const glm::mat4 modelTransform = glm::translate(_modelTransform, objPos);
 
-    float divisor = 1.0;
-    for (int i = 0; i < 4; i++) for (int j = 0; j < 4; j++) {
-        if (abs(modelTransform[i][j] > divisor)) divisor = modelTransform[i][j];
+    float divisor = 1.f;
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (abs(modelTransform[i][j] > divisor)) {
+                divisor = modelTransform[i][j];
+            }
+        }
     }
 
-    glm::mat4 scaledModelTransform = modelTransform / divisor;
+    const glm::mat4 scaledModelTransform = modelTransform / divisor;
 
-    glm::vec4 modelPos = (glm::inverse(scaledModelTransform) / divisor) * camWorldPos;
+    const glm::vec4 modelPos = (glm::inverse(scaledModelTransform) / divisor) *
+                               camWorldPos;
 
     localPosition = (glm::vec3(modelPos) + glm::vec3(0.5));
     return (localPosition.x > 0 && localPosition.y > 0 &&
@@ -146,19 +148,19 @@ bool GalaxyRaycaster::cameraIsInside(const RenderData& data, glm::vec3& localPos
             localPosition.y < 1 && localPosition.z < 1);
 }
 
-std::string GalaxyRaycaster::getBoundsVsPath() const {
+std::string GalaxyRaycaster::boundsVertexShaderPath() const {
     return GlslBoundsVsPath;
 }
 
-std::string GalaxyRaycaster::getBoundsFsPath() const {
+std::string GalaxyRaycaster::boundsFragmentShaderPath() const {
     return GlslBoundsFsPath;
 }
 
-std::string GalaxyRaycaster::getRaycastPath() const {
+std::string GalaxyRaycaster::raycasterPath() const {
     return GlslRaycastPath;
 }
 
-std::string GalaxyRaycaster::getHelperPath() const {
+std::string GalaxyRaycaster::helperPath() const {
     return ""; // no helper file
 }
 
