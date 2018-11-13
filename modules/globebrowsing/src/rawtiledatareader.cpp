@@ -244,9 +244,6 @@ bool isInside(const PixelRegion& lhs, const PixelRegion& rhs) {
 }
 
 IODescription cutIODescription(IODescription& io, Side side, int pos) {
-    const PixelRegion readPreCut = io.read.region;
-    const PixelRegion writePreCut = io.write.region;
-
     glm::dvec2 ratio = {
         io.write.region.numPixels.x / static_cast<double>(io.read.region.numPixels.x),
         io.write.region.numPixels.y / static_cast<double>(io.read.region.numPixels.y)
@@ -368,9 +365,9 @@ RawTile::ReadError postProcessErrorCheck(const RawTile& rawTile, size_t nRasters
 RawTileDataReader::RawTileDataReader(std::string filePath,
                                      TileTextureInitData initData,
                                      PerformPreprocessing preprocess)
-    : _initData(std::move(initData))
+    : _datasetFilePath(std::move(filePath))
+    , _initData(std::move(initData))
     , _preprocess(preprocess)
-    , _datasetFilePath(std::move(filePath))
 {
     initialize();
 }

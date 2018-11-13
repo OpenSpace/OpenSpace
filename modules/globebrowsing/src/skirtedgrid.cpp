@@ -28,8 +28,6 @@
 #include <ghoul/misc/assert.h>
 
 namespace {
-    constexpr const char* _loggerCat = "SkirtedGrid";
-
     size_t numElements(int xSegments, int ySegments) {
         return 3 * 2 * xSegments * ySegments;
     }
@@ -162,7 +160,7 @@ void SkirtedGrid::initializeGL() {
     glBindVertexArray(0);
 
     ghoul_assert(
-        elementData.size() == _elementSize,
+        static_cast<int>(elementData.size()) == _elementSize,
         "Wrong element size. The correct number is assumed in the render method"
     );
 }

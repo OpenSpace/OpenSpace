@@ -360,7 +360,7 @@ void SessionRecording::saveStringToFile(const std::string s) {
     _bufferIndex = 0;
     unsigned char const *p = reinterpret_cast<unsigned char const*>(&strLen);
     memcpy((_keyframeBuffer + _bufferIndex), p, writeSize_bytes);
-    _bufferIndex += (unsigned int)writeSize_bytes;
+    _bufferIndex += static_cast<unsigned int>(writeSize_bytes);
     saveKeyframeToFileBinary(_keyframeBuffer, _bufferIndex);
 
     _recordFile.write(s.c_str(), s.size());
@@ -1065,7 +1065,6 @@ bool SessionRecording::findNextFutureCameraIndex(double currTime) {
         {
             _idxTimeline_cameraPtrPrev = _idxTimeline_cameraPtrNext;
             return false;
-            break;
         }
 
         if (seekAheadIndex == (_timeline.size() - 1)) {
