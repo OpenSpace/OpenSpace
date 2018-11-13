@@ -365,9 +365,7 @@ int unzipFile(lua_State* L) {
         deleteSource = ghoul::lua::value<bool>(L, 3, ghoul::lua::PopValue::No);
     }
 
-    auto onExtractEntry = [](const char *filename, void *arg) {
-        return 0;
-    };
+    auto onExtractEntry = [](const char*, void*) { return 0; };
     int arg = 2;
     zip_extract(source.c_str(), dest.c_str(), onExtractEntry, &arg);
 

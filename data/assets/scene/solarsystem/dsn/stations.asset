@@ -27,6 +27,31 @@ local LightSources = {
     }
 }
 
+-- Colormap for the different sites
+local siteColorMap = {  
+                        Goldstone = {0.0, 0.0, 1.0}, 
+                        Canberra = {0.0, 1.0, 0.0}, 
+                        Madrid = {1.0, 0.0, 0.0} 
+                      }
+
+-- Map to the site locations above, this will determine the signal colors
+local stationSiteMap = {
+                 DSS14 = "Goldstone",
+                 DSS15 = "Goldstone",
+                 DSS24 = "Goldstone",
+                 DSS25 = "Goldstone",
+                 DSS26 = "Goldstone",
+                 DSS43 = "Canberra",
+                 DSS34 = "Canberra",
+                 DSS35 = "Canberra",
+                 DSS36 = "Canberra",
+                 DSS45 = "Canberra",
+                 DSS63 = "Madrid",
+                 DSS65 = "Madrid",
+                 DSS54 = "Madrid",
+                 DSS55 = "Madrid"
+        }
+
 --------------------- Goldstone ------------------------
 local DSS14 = {
     Identifier = "DSS14",
@@ -375,6 +400,10 @@ local DSS55 = {
 
 
 
+
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     DSS14, DSS15, DSS24, DSS25, DSS26, DSS43, DSS34, DSS35, DSS36, DSS45, DSS63, DSS65, DSS54, DSS55
 })
+
+asset.export("siteColorMap", siteColorMap)
+asset.export("stationSiteMap", stationSiteMap)

@@ -40,7 +40,7 @@ TileLoadJob::~TileLoadJob() {
 }
 
 void TileLoadJob::execute() {
-    _rawTile = std::move(_rawTileDataReader.readTileData(_chunkIndex));
+    _rawTile = _rawTileDataReader.readTileData(_chunkIndex);
     _hasTile = true;
 }
 

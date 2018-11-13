@@ -17,6 +17,8 @@ asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
 asset.require('util/default_joystick')
 
+asset.require('util/webgui')
+
 -- Custom Keybindings
 local Keybindings = {
     {

@@ -226,9 +226,9 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
 SceneGraphNode::SceneGraphNode()
     : properties::PropertyOwner({ "" })
+    , _guiHidden(GuiHiddenInfo)
     , _guiPath(GuiPathInfo)
     , _guiDisplayName(GuiNameInfo)
-    , _guiHidden(GuiHiddenInfo)
     , _transform {
         std::make_unique<StaticTranslation>(),
         std::make_unique<StaticRotation>(),

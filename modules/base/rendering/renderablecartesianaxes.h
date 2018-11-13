@@ -22,64 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H
-#define __OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLECARTESIANAXES___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLECARTESIANAXES___H__
 
-#include <vector>
-#include <ghoul/glm.h>
+#include <openspace/rendering/renderable.h>
 
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable : 4100)
-#endif // _MSC_VER
-
-#include <include/cef_render_handler.h>
-
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif // _MSC_VER
-
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/matrix/dmat4property.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <ghoul/opengl/ghoul_gl.h>
+
+namespace ghoul::opengl { class ProgramObject; }
+
+namespace openspace::documentation { struct Documentation; }
 
 namespace openspace {
 
-class WebRenderHandler : public CefRenderHandler {
+class RenderableCartesianAxes : public Renderable {
 public:
-    using Pixel = glm::tvec4<char>;
+    RenderableCartesianAxes(const ghoul::Dictionary& dictionary);
+    ~RenderableCartesianAxes() = default;
 
-    virtual void draw(void) = 0;
-    virtual void render() = 0;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
-    void reshape(int, int);
+    bool isReady() const override;
 
-    bool GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) override;
-    void OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type,
-        const RectList &dirtyRects, const void* buffer, int width, int height) override;
-    bool hasContent(int x, int y);
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
 
-    bool isTextureReady() const;
-    void updateTexture();
+    static documentation::Documentation Documentation();
 
 protected:
-    GLuint _texture;
+    struct Vertex {
+        float location[3];
+    };
 
-private:
-    glm::ivec2 _windowSize;
-    glm::ivec2 _browserBufferSize;
+    ghoul::opengl::ProgramObject* _program;
 
-    /**
-     * RGBA buffer from browser
-     */
-    std::vector<Pixel> _browserBuffer;
-    bool _needsRepaint = true;
-    bool _textureSizeIsDirty = true;
-    bool _textureIsDirty = true;
-    glm::ivec2 _lowerDirtyRectBound;
-    glm::ivec2 _upperDirtyRectBound;
+    properties::Vec4Property _xColor;
+    properties::Vec4Property _yColor;
+    properties::Vec4Property _zColor;
 
-    IMPLEMENT_REFCOUNTING(WebRenderHandler);
+    GLuint _vaoId = 0;
+    GLuint _vBufferId = 0;
+    GLuint _iBufferId = 0;
 };
 
-} // namespace openspace
+}// namespace openspace
 
-#endif // __OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLECARTESIANAXES___H__

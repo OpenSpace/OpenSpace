@@ -14,14 +14,15 @@ asset.request('scene/digitaluniverse/grids')
 asset.require('scene/solarsystem/missions/voyager1/voyager1')
 asset.require('scene/solarsystem/missions/voyager2/voyager2')
 asset.require('scene/solarsystem/missions/voyager1/trails')
+asset.require('scene/solarsystem/dsn/testRADEC')
 
 -- Stations
 asset.require('scene/solarsystem/dsn/stations')
 
---Communication
+--Signals
 --assetHelper.requestAll(asset, 'scene/solarsystem/dsn')
-asset.require('scene/solarsystem/dsn/communicationlines/communicationlines')
-asset.require('scene/solarsystem/dsn/testRADEC')
+asset.require('scene/solarsystem/dsn/communicationlines/signals')
+
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')

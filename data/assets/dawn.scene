@@ -15,6 +15,7 @@ asset.require('scene/solarsystem/missions/dawn/vesta')
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
 
+asset.require('util/webgui')
 
 local DawnAsset = asset.require('scene/solarsystem/missions/dawn/dawn')
 

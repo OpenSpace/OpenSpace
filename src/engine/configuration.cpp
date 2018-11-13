@@ -309,7 +309,7 @@ void parseLuaState(Configuration& configuration) {
 std::string findConfiguration(const std::string& filename) {
     using ghoul::filesystem::Directory;
 
-    Directory directory = FileSys.currentDirectory();
+    Directory directory = FileSys.absolutePath("${BIN}");
 
     while (true) {
         std::string fullPath = FileSys.pathByAppendingComponent(

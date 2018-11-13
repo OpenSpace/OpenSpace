@@ -22,64 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H
-#define __OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H
+#include "fragment.glsl"
+#include "PowerScaling/powerScaling_fs.hglsl"
 
-#include <vector>
-#include <ghoul/glm.h>
+in float vs_screenSpaceDepth;
+in vec4 vs_positionViewSpace;
+in vec3 vs_positionModelSpace;
 
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable : 4100)
-#endif // _MSC_VER
+uniform vec4 xColor;
+uniform vec4 yColor;
+uniform vec4 zColor;
 
-#include <include/cef_render_handler.h>
+Fragment getFragment() {
+    Fragment frag;
 
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif // _MSC_VER
+    vec3 colorComponents = step(0.01f, vs_positionModelSpace);
 
-#include <ghoul/opengl/ghoul_gl.h>
+    frag.color = colorComponents.x * xColor +
+        colorComponents.y * yColor +
+        colorComponents.z * zColor;
 
-namespace openspace {
-
-class WebRenderHandler : public CefRenderHandler {
-public:
-    using Pixel = glm::tvec4<char>;
-
-    virtual void draw(void) = 0;
-    virtual void render() = 0;
-
-    void reshape(int, int);
-
-    bool GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) override;
-    void OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type,
-        const RectList &dirtyRects, const void* buffer, int width, int height) override;
-    bool hasContent(int x, int y);
-
-    bool isTextureReady() const;
-    void updateTexture();
-
-protected:
-    GLuint _texture;
-
-private:
-    glm::ivec2 _windowSize;
-    glm::ivec2 _browserBufferSize;
-
-    /**
-     * RGBA buffer from browser
-     */
-    std::vector<Pixel> _browserBuffer;
-    bool _needsRepaint = true;
-    bool _textureSizeIsDirty = true;
-    bool _textureIsDirty = true;
-    glm::ivec2 _lowerDirtyRectBound;
-    glm::ivec2 _upperDirtyRectBound;
-
-    IMPLEMENT_REFCOUNTING(WebRenderHandler);
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H
+    frag.depth = vs_screenSpaceDepth;
+    frag.gPosition = vs_positionViewSpace;
+    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+    return frag;
+}

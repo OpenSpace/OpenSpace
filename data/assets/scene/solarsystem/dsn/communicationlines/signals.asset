@@ -1,0 +1,22 @@
+local assetHelper = asset.require('util/asset_helper')
+local stationsAsset = asset.require('scene/solarsystem/dsn/stations')
+
+--Signals data 
+local dataFolder = openspace.absPath("../../../sync/http/dsn_data/1/json")
+
+local Signals = {
+    Identifier = "Signals",
+    Renderable = {
+        Type = "RenderableSignals",
+        DataFolder = dataFolder,
+        DataFileType = "json",
+        SiteColors = stationsAsset.siteColorMap, 
+        StationSites = stationsAsset.stationSiteMap
+    },
+    GUI = {
+        Name = "Signals",
+        Path = "/Solar System"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {Signals})
