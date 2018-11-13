@@ -43,7 +43,6 @@ namespace {
     constexpr const char* _loggerCat = "RenderableSignals";
     constexpr const char* KeyStationSites = "StationSites";
 
-
     constexpr const std::array<const char*, 3> UniformNames = {
         "modelViewStation","modelViewSpacecraft", "projectionTransform"
     };
@@ -51,8 +50,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SiteColorsInfo = {
         "SiteColors",
         "SiteColors",
-        "This value determines the RGB main color for the lines "
-        "of communication to and from different sites on Earth."
+        "This value determines the RGB main color for the communication "
+        "signals to and from different sites on Earth."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
@@ -71,13 +70,6 @@ documentation::Documentation RenderableSignals::Documentation() {
         "Renderable Signals",
         "dsn_renderable_renderablesignals",
         {
-            {
-                KeyTranslation,
-                new ReferencingVerifier("core_transform_translation"),
-                Optional::No,
-                "This object is used to compute locations along the path. Any "
-                "Translation object can be used here."
-            },
             {
                 SiteColorsInfo.identifier,
                 new TableVerifier,
@@ -105,27 +97,21 @@ RenderableSignals::RenderableSignals(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
 {
-    _translation = Translation::createFromDictionary(
-        dictionary.value<ghoul::Dictionary>(KeyTranslation)
-    );
-    addPropertySubOwner(_translation.get());
-
     if (dictionary.hasKeyAndValue<ghoul::Dictionary>(SiteColorsInfo.identifier)) {
-        ghoul::Dictionary colorDictionary = dictionary.value<ghoul::Dictionary>(SiteColorsInfo.identifier);
-        std::vector<std::string> siteNames = colorDictionary.keys();
+        ghoul::Dictionary siteColorDictionary = dictionary.value<ghoul::Dictionary>(SiteColorsInfo.identifier);
+        std::vector<std::string> siteNames = siteColorDictionary.keys();
 
-        // Create 
         for (int siteIndex = 0; siteIndex < siteNames.size(); siteIndex++)
         {
-            const char* str = siteNames.at(siteIndex).c_str();
+            const char* siteColorIdentifier = siteNames.at(siteIndex).c_str();
             openspace::properties::Property::PropertyInfo SiteColorsInfo = {
-                str,
-                str,
+                siteColorIdentifier,
+                siteColorIdentifier,
                 "This value determines the RGB main color for signals "
                 "of communication to and from different sites on Earth."
             };
             std::string site = siteNames[siteIndex];
-            glm::vec3 siteColor = colorDictionary.value<glm::vec3>(siteNames.at(siteIndex));
+            glm::vec3 siteColor = siteColorDictionary.value<glm::vec3>(siteNames.at(siteIndex));
             _siteColors.push_back(std::make_unique<properties::Vec3Property>(SiteColorsInfo, siteColor, glm::vec3(0.f), glm::vec3(1.f)));
             _siteToIndex[siteNames.at(siteIndex)] = siteIndex;
             addProperty(_siteColors.back().get());
@@ -243,8 +229,6 @@ void RenderableSignals::render(const RenderData& data, RendererTasks&) {
     _programObject->deactivate();
 }
 
-
-
 void RenderableSignals::update(const UpdateData& data) {
 
     double currentTime = data.time.j2000Seconds();
@@ -311,7 +295,6 @@ void RenderableSignals::update(const UpdateData& data) {
     unbindGL();
 }
 
-
 int RenderableSignals::findFileIndexForCurrentTime(double time, std::vector<double> vec) {
     // upper_bound has O(log n) for sorted vectors, more efficient than for loop
     auto iter = std::upper_bound(vec.begin(), vec.end(), time);
@@ -355,11 +338,9 @@ void RenderableSignals::extractData(std::unique_ptr<ghoul::Dictionary> &dictiona
     }
 }
 
-
 void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal) {
 
     glm::dvec4 color = { getStationColor(signal.dishName), 1.0 };
-    //glm::vec4 color = { signal.color, 1.0 };
     glm::vec3 posStation = getPositionForGeocentricSceneGraphNode(signal.dishName.c_str());
     glm::vec3 posSpacecraft = getSuitablePrecisionPositionForSceneGraphNode(signal.spacecraft.c_str());
 
@@ -400,7 +381,6 @@ glm::dvec3 RenderableSignals::getCoordinatePosFromFocusNode(SceneGraphNode* node
     return diff;
 }
 
-
 glm::vec3 RenderableSignals::getSuitablePrecisionPositionForSceneGraphNode(std::string id) {
 
     glm::vec3 position;
@@ -411,12 +391,10 @@ glm::vec3 RenderableSignals::getSuitablePrecisionPositionForSceneGraphNode(std::
     }
     else {
         LERROR(fmt::format("No scengraphnode found for the spacecraft {}", id));
-
     }
 
     return position;
 }
-
 
 glm::vec3 RenderableSignals::getPositionForGeocentricSceneGraphNode(const char* id) {
 
@@ -432,8 +410,6 @@ glm::vec3 RenderableSignals::getPositionForGeocentricSceneGraphNode(const char* 
 
     return position;
 }
-
-
 
 glm::vec3 RenderableSignals::getStationColor(std::string dishidentifier) {
 
@@ -452,6 +428,5 @@ glm::vec3 RenderableSignals::getStationColor(std::string dishidentifier) {
 
     return color;
 }
-
 
 } // namespace openspace

@@ -30,12 +30,6 @@
 #include <ghoul/filesystem/filesystem.h>
 
 #include <openspace/json.h>
-
-//#include <modules/dsn/rendering/renderablesignals.h>
-//#include <openspace/scene/scenegraphnode.h>
-//#include <openspace/engine/globals.h>
-//#include <openspace/rendering/renderengine.h>
-//#include <openspace/scene/scene.h>
 #include <openspace/util/time.h>
 #include <fstream>
 
