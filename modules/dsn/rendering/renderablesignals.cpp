@@ -39,7 +39,6 @@
 
 namespace {
     constexpr const char* ProgramName = "SignalsProgram";
-    constexpr const char* KeyTranslation = "Translation";
     constexpr const char* _loggerCat = "RenderableSignals";
     constexpr const char* KeyStationSites = "StationSites";
 
