@@ -248,7 +248,13 @@ Fragment getFragment() {
     // because all calculation for light interactions are done in Object
     // Space, we avoid a new computation saving the normals in Object Space.
     frag.gNormal.xyz = normalModelSpace;
-    frag.gPosition   = vec4(positionCameraSpace, 1.0); // in Camera Rig Space
+
+    if (dot(positionCameraSpace, vec3(1.0)) != 0.0) {
+        frag.gPosition   = vec4(positionCameraSpace, 1.0); // in Camera Rig Space
+    }
+    else {
+        frag.gPosition   = vec4(1.0); // in Camera Rig Space
+    }
 
     frag.depth = fs_position.w;
 
