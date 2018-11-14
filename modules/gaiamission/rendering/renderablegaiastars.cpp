@@ -297,6 +297,12 @@ namespace {
         "will be rendered (if min is set to 0.0 it is read as -Inf, "
         "if max is set to 0.0 it is read as +Inf). Measured in kParsec."
     };
+
+    static const openspace::properties::Property::PropertyInfo ReportGlErrorsInfo = {
+        "ReportGlErrors",
+        "Report GL Errors",
+        "If set to true, any OpenGL errors will be reported if encountered"
+    };
 }  // namespace
 
 namespace openspace {
@@ -486,6 +492,12 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
                 new Vector2Verifier<double>,
                 Optional::Yes,
                 FilterDistInfo.description
+            },
+            {
+                ReportGlErrorsInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                ReportGlErrorsInfo.description
             }
         }
     };
@@ -533,6 +545,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _nRenderedStars(NumRenderedStarsInfo, 0, 0, 2000000000) // 2 Billion stars
     , _cpuRamBudgetProperty(CpuRamBudgetInfo, 0, 0, 1)
     , _gpuStreamBudgetProperty(GpuStreamBudgetInfo, 0, 0, 1)
+    , _reportGlErrors(ReportGlErrorsInfo, false)
     , _nStarsToRender(0)
     , _program(nullptr)
     , _programTM(nullptr)
@@ -860,6 +873,12 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         }
     }
 
+    if (dictionary.hasKey(ReportGlErrorsInfo.identifier)) {
+        const bool value = dictionary.value<bool>(ReportGlErrorsInfo.identifier);
+        _reportGlErrors.set(value);
+    }
+    addProperty(_reportGlErrors);
+
     // Add a read-only property for the number of rendered stars per frame.
     _nRenderedStars.setReadOnly(true);
     addProperty(_nRenderedStars);
@@ -1129,7 +1148,9 @@ void RenderableGaiaStars::deinitializeGL() {
 }
 
 void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
-    
+
+    checkGlErrors("Before render");
+
     // Save current FBO.
     GLint defaultFbo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
@@ -1355,30 +1376,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         glBindVertexArray(0);
     }
 
-    GLenum error = glGetError();
-    if (error != GL_NO_ERROR) {
-        switch (error) {
-        case GL_INVALID_ENUM:
-            LINFO("1 - GL_INVALID_ENUM");
-            break;
-        case GL_INVALID_VALUE:
-            LINFO("1 - GL_INVALID_VALUE");
-            break;
-        case GL_INVALID_OPERATION:
-            LINFO("1 - GL_INVALID_OPERATION");
-            break;
-        case GL_INVALID_FRAMEBUFFER_OPERATION:
-            LINFO("1 - GL_INVALID_FRAMEBUFFER_OPERATION");
-            break;
-        case GL_OUT_OF_MEMORY:
-            LINFO("1 - GL_OUT_OF_MEMORY");
-            break;
-        default:
-            LINFO("1 - Unknown error");
-            break;
-        }
-    }
-    
+    checkGlErrors("After buffer updates");
+
     // Activate shader program and send uniforms.
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(false);
@@ -1518,27 +1517,33 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     glDepthMask(true);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    error = glGetError();
-    if (error != GL_NO_ERROR) {
-        switch (error) {
-        case GL_INVALID_ENUM:
-            LINFO("4 - GL_INVALID_ENUM");
-            break;
-        case GL_INVALID_VALUE:
-            LINFO("4 - GL_INVALID_VALUE");
-            break;
-        case GL_INVALID_OPERATION:
-            LINFO("4 - GL_INVALID_OPERATION");
-            break;
-        case GL_INVALID_FRAMEBUFFER_OPERATION:
-            LINFO("4 - GL_INVALID_FRAMEBUFFER_OPERATION");
-            break;
-        case GL_OUT_OF_MEMORY:
-            LINFO("4 - GL_OUT_OF_MEMORY");
-            break;
-        default:
-            LINFO("4 - Unknown error");
-            break;
+    checkGlErrors("After render");
+}
+
+void RenderableGaiaStars::checkGlErrors(const std::string& identifier) const {
+    if (_reportGlErrors) {
+        GLenum error = glGetError();
+        if (error != GL_NO_ERROR) {
+            switch (error) {
+            case GL_INVALID_ENUM:
+                LINFO(identifier + " - GL_INVALID_ENUM");
+                break;
+            case GL_INVALID_VALUE:
+                LINFO(identifier + " - GL_INVALID_VALUE");
+                break;
+            case GL_INVALID_OPERATION:
+                LINFO(identifier + " - GL_INVALID_OPERATION");
+                break;
+            case GL_INVALID_FRAMEBUFFER_OPERATION:
+                LINFO(identifier + " - GL_INVALID_FRAMEBUFFER_OPERATION");
+                break;
+            case GL_OUT_OF_MEMORY:
+                LINFO(identifier + " - GL_OUT_OF_MEMORY");
+                break;
+            default:
+                LINFO(identifier + " - Unknown error");
+                break;
+            }
         }
     }
 }
