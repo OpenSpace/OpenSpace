@@ -1,5 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
 
 local textures = asset.syncedResource({
@@ -42,7 +43,20 @@ local GaiaModel = {
             Type = "MultiModelGeometry",
             GeometryFile = model .. "/gaia.obj"
         }, 
-        ColorTexture = textures .. "/gaia-baked.png"
+        ColorTexture = textures .. "/gaia-baked.png",
+        LightSources = {
+            {
+                Type = "SceneGraphLightSource",
+                Identifier = "Sun",
+                Node = sunTransforms.SolarSystemBarycenter.Identifier,
+                Intensity = 0.3
+            },
+            {
+                Identifier = "Camera",
+                Type = "CameraLightSource",
+                Intensity = 0.4
+            }
+        }
     },
     GUI = {
         Name = "Model",
