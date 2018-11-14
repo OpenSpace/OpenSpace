@@ -129,7 +129,7 @@ openspace.setPropertyValueSingle("RenderEngine.ShowCamera", not isEnabled)]],
         Local = false
     },
     {
-        Key = "Alt+Tab",
+        Key = "Alt+R",
         Name = "Toggle rendering on master",
         Command = propertyHelper.invert('RenderEngine.DisableMasterRendering'),
         Documentation = "Toggles the rendering on master",
