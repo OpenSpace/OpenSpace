@@ -22,64 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H
-#define __OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H
+#version __CONTEXT__
 
-#include <vector>
-#include <ghoul/glm.h>
+layout(location = 0) in vec3 in_position;
 
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable : 4100)
-#endif // _MSC_VER
+out float vs_screenSpaceDepth;
+out vec4 vs_positionViewSpace;
+out vec3 vs_positionModelSpace;
 
-#include <include/cef_render_handler.h>
+uniform mat4 modelViewTransform;
+uniform mat4 projectionTransform;
 
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif // _MSC_VER
+void main() {
+    vec4 positionViewSpace = modelViewTransform * vec4(in_position, 1.0);
+    vec4 positionClipSpace = projectionTransform * positionViewSpace;
+    vec4 positionScreenSpace = positionClipSpace;
+    positionScreenSpace.z = 0.f;
+    vs_positionModelSpace = in_position;
+    vs_screenSpaceDepth  = positionScreenSpace.w;
+    vs_positionViewSpace = positionViewSpace;
 
-#include <ghoul/opengl/ghoul_gl.h>
-
-namespace openspace {
-
-class WebRenderHandler : public CefRenderHandler {
-public:
-    using Pixel = glm::tvec4<char>;
-
-    virtual void draw(void) = 0;
-    virtual void render() = 0;
-
-    void reshape(int, int);
-
-    bool GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) override;
-    void OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type,
-        const RectList &dirtyRects, const void* buffer, int width, int height) override;
-    bool hasContent(int x, int y);
-
-    bool isTextureReady() const;
-    void updateTexture();
-
-protected:
-    GLuint _texture;
-
-private:
-    glm::ivec2 _windowSize;
-    glm::ivec2 _browserBufferSize;
-
-    /**
-     * RGBA buffer from browser
-     */
-    std::vector<Pixel> _browserBuffer;
-    bool _needsRepaint = true;
-    bool _textureSizeIsDirty = true;
-    bool _textureIsDirty = true;
-    glm::ivec2 _lowerDirtyRectBound;
-    glm::ivec2 _upperDirtyRectBound;
-
-    IMPLEMENT_REFCOUNTING(WebRenderHandler);
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H
+    gl_Position = positionScreenSpace;
+}
