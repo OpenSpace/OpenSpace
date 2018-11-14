@@ -76,6 +76,14 @@ public:
      * identifier, a GUI name and descriptive text that are both user facing.
      */
     struct PropertyInfo {
+        /// GCC requires an explicit constructor here, as it does not handle the default
+        /// argument for the struct initialization
+        constexpr PropertyInfo(const char* ident, const char* gui, const char* desc)
+            : identifier(ident)
+            , guiName(gui)
+            , description(desc)
+        {}
+
         /// The unique identifier that is part of the fully qualified URI of this Property
         const char* identifier;
         /// The name that is displayed in the user interface
