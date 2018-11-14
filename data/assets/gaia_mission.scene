@@ -47,22 +47,7 @@ asset.require('scene/milkyway/gaia/gaia_full')
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
 
--- Custom Keybindings
-local Keybindings = {
-    {
-        Key = "g",
-        Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'GaiaModel')",
-        Documentation = "Sets the focus of the camera to the 'GaiaModel'.",
-        Local = false
-    },
-    {
-        Key = "e",
-        Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'Earth')",
-        Documentation = "Sets the focus of the camera to 'Earth'.",
-        Local = false
-    }
-}
-
+asset.require('util/webgui')
 
 assetHelper.registerDashboardItems(asset, {
     {
@@ -78,7 +63,6 @@ assetHelper.registerDashboardItems(asset, {
 
 asset.onInitialize(function ()
     openspace.time.setTime(openspace.time.currentWallTime())
-    sceneHelper.bindKeys(Keybindings)
 
     openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.MouseSensitivity', 40.0);
     openspace.setPropertyValueSingle('Scene.Stars.renderable.Enabled', false);
