@@ -64,9 +64,8 @@ assetHelper.registerDashboardItems(asset, {
 asset.onInitialize(function ()
     openspace.time.setTime(openspace.time.currentWallTime())
 
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.MouseSensitivity', 40.0);
-    openspace.setPropertyValueSingle('Scene.Stars.renderable.Enabled', false);
-    
+    openspace.setPropertyValueSingle('Scene.Stars.Renderable.Enabled', false);
+
     openspace.setDefaultGuiSorting()
 
     openspace.markInterestingNodes({
