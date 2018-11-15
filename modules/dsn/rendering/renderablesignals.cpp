@@ -246,7 +246,7 @@ void RenderableSignals::update(const UpdateData& data) {
         //parse data for that file
         if (!SignalManager::_signalData.isLoaded)
         {
-            SignalManager::jsonParser(activeFileIndex);
+            SignalManager::signalParser(activeFileIndex);
 
         }
         else
@@ -268,7 +268,7 @@ void RenderableSignals::update(const UpdateData& data) {
             pushSignalDataToVertexArray(currentSignal);
     };
 
-
+ 
     // ... and upload them to the GPU
     glBindVertexArray(_lineRenderInformation._vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _lineRenderInformation._vBufferID);
@@ -343,6 +343,7 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
     glm::vec3 posStation = getPositionForGeocentricSceneGraphNode(signal.dishName.c_str());
     glm::vec3 posSpacecraft = getSuitablePrecisionPositionForSceneGraphNode(signal.spacecraft.c_str());
 
+
     //fill the render array
     _vertexArray.push_back(posStation.x);
     _vertexArray.push_back(posStation.y);
@@ -361,8 +362,6 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
     _vertexArray.push_back(color.g);
     _vertexArray.push_back(color.b);
     _vertexArray.push_back(color.a);
-
-
 }
 
 /* Since our station dishes have a static translation from Earth, we

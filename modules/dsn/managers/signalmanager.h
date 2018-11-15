@@ -61,13 +61,10 @@ namespace openspace {
       static std::vector<double> _fileStartTimes;
       /* A vector with all our datafile paths*/
       static std::vector<std::string> _dataFiles;
-
       /* Extracts all the mandatory information we need from our asset file */
       static bool extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary);
-      /* Saves all filenames in a vector to be compared current time in open space */
-      static void extractTriggerTimesFromFileNames(std::vector<std::string> _dataFiles);
-      /* parses data from a file given an index in our preloaded filename vector */
-      static bool jsonParser(int index);
+      /* parses signaldata from a file given an index in our preloaded filename vector */
+      static bool signalParser(int index);
 
     };
 }

@@ -27,6 +27,7 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/logging/logmanager.h>
 #include <modules/dsn/managers/jsonhelper.h>
+#include <modules/dsn/rendering/renderablesignals.h>
 
 
 namespace openspace {
@@ -34,12 +35,18 @@ namespace openspace {
     class RadecManager {
 
     public:
-       RadecManager();
-       static void jsonParser(int index);
+       static double _ra;
+       static double _dec;
+       static double _range;
+
+       /* A vector with all our datafile paths*/
        static std::vector<std::string> _dataFiles;
+       /* Extracts all the mandatory information we need from our asset file */
        static bool extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary);
-
-
+       /*gets the correct datafile, that matches the current time in open space*/
+       static glm::vec3 GetPosForTime(double time);
+       /* parses positioningdata from a file given an index in our preloaded filename vector */
+       static bool radecParser(int index);
     };
 }
 

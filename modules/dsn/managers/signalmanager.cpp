@@ -32,47 +32,16 @@ namespace openspace {
     std::vector<double> SignalManager::_fileStartTimes;
     std::vector<std::string> SignalManager::_dataFiles;
 
-    /**
-    * Extracts the general information (from the lua modfile) that is mandatory for the class
-    * to function; such as the file type and the location of the data files.
-    * Returns false if it fails to extract mandatory information!
-    */
     bool SignalManager::extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary)
     {
         bool dataFilesSuccess = JsonHelper::checkFileNames(identifier, dictionary, _dataFiles);
-
-        extractTriggerTimesFromFileNames(_dataFiles);
-        SignalManager::jsonParser(0);
+        _fileStartTimes = JsonHelper::getDaysFromFileNames(_dataFiles);
+        SignalManager::signalParser(0);
 
         return dataFilesSuccess;
     }
 
-    // Extract J2000 time from file names
-    // Requires files to be named as such: 'YYYY-DDDT.json'
-    void SignalManager::extractTriggerTimesFromFileNames(std::vector<std::string> _dataFiles) {
-
-        // number of  characters in filename (excluding '.json')
-        constexpr const int FilenameSize = 9;
-        // size(".json")
-        constexpr const int ExtSize = 5;
-
-        for (const std::string& filePath : _dataFiles) {
-            const size_t strLength = filePath.size();
-            // Extract the filename from the path (without extension)
-            std::string timeString = filePath.substr(
-                strLength - FilenameSize - ExtSize,
-                FilenameSize
-            );
-            // Ensure the separators are correct
-            timeString.replace(4, 1, "-");
-            timeString.replace(FilenameSize-1, 1, "T");
-
-            const double triggerTime = Time::convertTime(timeString);
-            _fileStartTimes.push_back(triggerTime);
-        }
-    }
-
-    bool SignalManager::jsonParser(int index) {
+    bool SignalManager::signalParser(int index) {
 
         std::string filename;
         if (index == -1 || index > _dataFiles.size())
@@ -83,29 +52,14 @@ namespace openspace {
         nlohmann::json j = nlohmann::json::parse(ifs);
 
         SignalManager::Signal structSignal;
-
-       // number of  characters in filename (excluding '.json')
-       constexpr const int FilenameSize = 9;
-       // size(".json")
-       constexpr const int ExtSize = 5;
-
-        const size_t strLength = filename.size();
-        // Extract the filename from the path (without extension)
-        std::string startTimeString = filename.substr(
-            strLength - FilenameSize - ExtSize,
-            FilenameSize
-        );
-        // Ensure the separators are correct
-        startTimeString.replace(4, 1, "-");
-        startTimeString.replace(FilenameSize - 1, 1, "T");
-
+        
+        std::string startTimeString = JsonHelper::getDayFromFileName(filename);
         const double triggerTime = Time::convertTime(startTimeString);
-      
+
        _signalData.sequenceStartTime = triggerTime;
        _signalData.signals.clear();
        _signalData.signals.reserve(0);
 
-       //loop through all signals in the data 
       for (const auto& signalsInJson : j["Signals"]) {
           structSignal.dishName = signalsInJson["facility"].get<std::string>();
           structSignal.spacecraft = signalsInJson["projuser"].get<std::string>();
@@ -118,7 +72,6 @@ namespace openspace {
         }
 
       _signalData.isLoaded = true;
-      
       return _signalData.isLoaded;
     }
 

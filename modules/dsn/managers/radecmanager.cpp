@@ -27,21 +27,40 @@
 namespace openspace {
     constexpr const char* _loggerCat = "RadecManager";
     std::vector<std::string> RadecManager::_dataFiles;
-
-    RadecManager::RadecManager()
-    {       
-    }
+    double RadecManager::_ra;
+    double RadecManager::_dec;
+    double RadecManager::_range;
 
    bool RadecManager::extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary){
-
-     JsonHelper::checkFileNames(identifier,  dictionary, RadecManager::_dataFiles);
-
-      
-      return true;
+     bool dataFilesSuccess = JsonHelper::checkFileNames(identifier, dictionary, RadecManager::_dataFiles);
+     radecParser(0);
+     return dataFilesSuccess;
     }
 
-   static void jsonParser(int index) {
+   glm::vec3 RadecManager::GetPosForTime(double time) {
+       std::vector<double> timeDoubles = JsonHelper::getHoursFromFileNames(_dataFiles);
+       int idx = RenderableSignals::findFileIndexForCurrentTime(time, timeDoubles);
+       
+       if (radecParser(idx)) {
+           return glm::vec3(_ra,_dec,_range);
+       }
+       return glm::vec3(-1,-1,-1);
+   }
 
+   bool RadecManager::radecParser(int index) {
+       std::string filename;
+
+       if (index == -1 || index > _dataFiles.size())
+           return false;
+       filename = _dataFiles[index];
+
+       std::ifstream ifs(filename);
+       nlohmann::json j = nlohmann::json::parse(ifs);
+        _ra = j["ra"].get<double>();
+        _dec = j["dec"].get<double>();
+        _range = j["range"].get<double>();
+
+       return true;
    }
 
 }

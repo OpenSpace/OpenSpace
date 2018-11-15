@@ -35,10 +35,15 @@ namespace openspace {
     class JsonHelper {
 
     public:
-        JsonHelper();
         /* Extracts all the mandatory information we need from our asset files */
         static bool checkFileNames(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary, std::vector<std::string> &dataFiles);
-
+        static std::string getDayFromFileName(std::string filename);
+        static std::vector<double> getDaysFromFileNames(std::vector<std::string> _dataFiles);
+        static std::vector<double> getHoursFromFileNames(std::vector<std::string> _dataFiles);
+        /* Extracts the timestamp from the filename */
+        static std::string getFileNameTime(std::string filename, const int FilenameSize);
+        /* Extracts the timestamp from a vector of filenames */
+        static std::vector<double> extractTriggerTimesFromFileNames(std::vector<std::string> _dataFiles, const int FilenameSize);
     };
 }
 
