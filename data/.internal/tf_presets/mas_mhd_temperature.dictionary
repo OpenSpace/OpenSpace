@@ -1,7 +1,0 @@
-return {
-FileName = "mas_mhd_temperature.txt",
-Image = "http://localhost:1337/mas_mhd_temperature.png",
-Label = "MAS",
-Min = "0.005",
-Max = "1.0"
-}

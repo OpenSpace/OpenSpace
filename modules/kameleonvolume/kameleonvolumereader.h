@@ -30,7 +30,6 @@
 #include <string>
 #include <vector>
 #include <modules/volume/rawvolume.h>
-// #include <ghoul/misc/dictionary.h>
 #include <functional>
 
 #ifdef WIN32

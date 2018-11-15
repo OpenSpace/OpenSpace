@@ -81,10 +81,6 @@ void RawVolume<VoxelType>::forEachVoxel(
 {
     for (size_t i = 0; i < nCells(); i++) {
         const glm::ivec3& coords = indexToCoords(i);
-
-        // Note: these are not volume coords like if we do:
-        // glm::vec3 coordsZeroToOne = coords / dims;
-        // glm::vec3 volumeCoords = lowerBound + diff * coordsZeroToOne;
         fn(coords, _data[i]);
     }
 }

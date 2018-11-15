@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <math.h>
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 
 #include <modules/kameleon/include/kameleonwrapper.h>
@@ -144,7 +143,7 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
         float x = interpolate(variableVector[0], volumeCoords);
         float y = interpolate(variableVector[1], volumeCoords);
         float z = interpolate(variableVector[2], volumeCoords);
-        return sqrt(x*x + y*y + z*z);
+        return glm::sqrt(x*x + y*y + z*z);
     };
 
     float* data = volume->data();
@@ -158,7 +157,6 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
 
         // Radius is within custom limit of exclusion, skip value
         if (volumeCoords.x < innerRadialLimit) {
-            // std::cout << "Skipping radius " << volumeCoords.x << std::endl;
             continue;
         }
 
@@ -322,9 +320,7 @@ std::string KameleonVolumeReader::getVisUnit(const std::string& variable) const 
 }
 
 std::string KameleonVolumeReader::time() const {
-    double start =
-        ccmc::Time(simulationStart()).getEpoch();
-    // std::cout << "time = " + std::to_string(start) << std::endl;
+    double start = ccmc::Time(simulationStart()).getEpoch();
 
     // Get elapsed time in seconds and convert to milliseconds.
     double elapsed = elapsedTime() * 1000;

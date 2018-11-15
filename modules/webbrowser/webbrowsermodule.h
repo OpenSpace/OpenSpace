@@ -26,13 +26,7 @@
 #define __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-#include <ghoul/filesystem/directory.h>
-#include <include/openspace/engine/configuration.h>
-#include <include/wrapper/cef_helpers.h>
-#include <include/cef_browser.h>
-#include "include/eventhandler.h"
-#include "include/browserinstance.h"
-#include "include/cefhost.h"
+#include <modules/webbrowser/include/eventhandler.h>
 
 namespace openspace {
 

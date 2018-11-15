@@ -128,7 +128,7 @@ void Connection::handleJson(const nlohmann::json& json) {
         LERROR("Payload must be an object");
         return;
     }
-    
+
     // The topic id may be an already discussed topic, or a new one.
     TopicId topicId = *topicJson;
     auto topicIt = _topics.find(topicId);

@@ -26,9 +26,6 @@
 #define __OPENSPACE_MODULE_CEFWEBGUI___CEFWEBGUIMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-#include <include/openspace/engine/configuration.h>
-#include "modules/webbrowser/include/browserinstance.h"
-#include "modules/cefwebgui/include/guirenderhandler.h"
 
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/stringproperty.h>

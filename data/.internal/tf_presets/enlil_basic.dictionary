@@ -1,7 +1,0 @@
-return {
-FileName = "enlil_basic.txt",
-Image = "http://localhost:1337/enlil.png",
-Label = "ENLIL",
-Min = "0.15",
-Max = "0.80"
-}

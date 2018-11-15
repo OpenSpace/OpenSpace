@@ -26,16 +26,16 @@
 #define __OPENSPACE_CORE___TIMEMANAGER___H__
 
 #include <openspace/util/syncdata.h>
-#include <utility>
-#include <vector>
-
-#include <deque>
-#include <functional>
 #include <openspace/util/timeline.h>
 #include <openspace/util/time.h>
 #include <openspace/util/syncdata.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/floatproperty.h>
+
+#include <utility>
+#include <vector>
+#include <deque>
+#include <functional>
 
 namespace openspace {
 
