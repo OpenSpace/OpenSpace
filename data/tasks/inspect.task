@@ -1,8 +1,0 @@
-
-return {
-    {
-        Type = "KameleonDocumentationTask",
-        Input = "${DATA}/mhd.cdf",
-        Output = "${DATA}/mhdoutput.html"
-    }
-}
