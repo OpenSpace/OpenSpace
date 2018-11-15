@@ -29,6 +29,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/fmt.h>
 #include <ghoul/glm.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/misc.h>
 
 #ifdef WIN32

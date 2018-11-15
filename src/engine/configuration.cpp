@@ -297,8 +297,6 @@ void parseLuaState(Configuration& configuration) {
     getValue(s, KeyServerPasskey, c.serverPasskey);
     getValue(s, KeyRequireSocketAuthentication, c.doesRequireSocketAuthentication);
     getValue(s, KeyClientAddressWhitelist, c.clientAddressWhitelist);
-    getValue(s, "WebHelperLocation", c.webHelperLocation);
-    getValue(s, "CefWebGuiUrl", c.cefWebGuiUrl);
 
     getValue(s, KeyLogging, c.logging);
     getValue(s, KeyDocumentation, c.documentation);
@@ -311,7 +309,7 @@ void parseLuaState(Configuration& configuration) {
 std::string findConfiguration(const std::string& filename) {
     using ghoul::filesystem::Directory;
 
-    Directory directory = FileSys.currentDirectory();
+    Directory directory = FileSys.absolutePath("${BIN}");
 
     while (true) {
         std::string fullPath = FileSys.pathByAppendingComponent(

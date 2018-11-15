@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_vsil_curl_priv.h 36772 2016-12-10 06:29:22Z goatbar $
+ * $Id: cpl_vsil_curl_priv.h 9a2bcee25a010c5fe6c5e8fc258ed46578d043fb 2016-12-10 06:29:22Z Kurt Schwehr $
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Private API for VSICurl

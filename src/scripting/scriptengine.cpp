@@ -26,6 +26,7 @@
 
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
+#include <openspace/interaction/sessionrecording.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/syncbuffer.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -449,7 +450,18 @@ void ScriptEngine::addBaseLibrary() {
                 "This function extracts the directory part of the passed path. For "
                 "example, if the parameter is 'C:/OpenSpace/foobar/foo.txt', this "
                 "function returns 'C:/OpenSpace/foobar'."
-            }
+            },
+            {
+                "unzipFile",
+                &luascriptfunctions::unzipFile,
+                {},
+                "string, string [bool]",
+                "This function extracts the contents of a zip file. The first "
+                "argument is the path to the zip file. The second argument is the "
+                "directory where to put the extracted files. If the third argument is "
+                "true, then the compressed file will be deleted after the decompression "
+                 "is finished."
+            },
         }
     };
     addLibrary(lib);
@@ -635,6 +647,9 @@ void ScriptEngine::preSync(bool isMaster) {
 
         if (global::parallelPeer.isHost() && remoteScripting) {
             global::parallelPeer.sendScript(_currentSyncedScript);
+        }
+        if (global::sessionRecording.isRecording()) {
+            global::sessionRecording.saveScriptKeyframe(_currentSyncedScript);
         }
     }
     _mutex.unlock();

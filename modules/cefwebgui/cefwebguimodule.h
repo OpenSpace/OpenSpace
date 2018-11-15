@@ -30,6 +30,9 @@
 #include "modules/webbrowser/include/browserinstance.h"
 #include "modules/cefwebgui/include/guirenderhandler.h"
 
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/stringproperty.h>
+
 namespace openspace {
 
 class BrowserInstance;
@@ -43,8 +46,12 @@ public:
     void internalInitialize(const ghoul::Dictionary& configuration) override;
 
 private:
-    std::shared_ptr<BrowserInstance> _guiInstance;
-    std::string _guiLocation;
+    void startOrStopGui();
+
+    properties::BoolProperty _enabled;
+    properties::BoolProperty _visible;
+    properties::StringProperty _url;
+    std::unique_ptr<BrowserInstance> _instance;
 };
 
 } // namespace openspace

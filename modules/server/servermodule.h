@@ -35,6 +35,10 @@ namespace ghoul::io { class SocketServer; }
 
 namespace openspace {
 
+constexpr int SOCKET_API_VERSION_MAJOR = 0;
+constexpr int SOCKET_API_VERSION_MINOR = 1;
+constexpr int SOCKET_API_VERSION_PATCH = 0;
+
 class Connection;
 
 struct Message {

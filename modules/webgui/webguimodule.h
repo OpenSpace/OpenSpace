@@ -27,12 +27,29 @@
 
 #include <openspace/util/openspacemodule.h>
 
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <ghoul/misc/process.h>
+#include <memory>
+
 namespace openspace {
 
 class WebGuiModule : public OpenSpaceModule {
 public:
     static constexpr const char* Name = "WebGui";
     WebGuiModule();
+
+protected:
+    void internalInitialize(const ghoul::Dictionary&) override;
+
+private:
+    void startProcess();
+    void stopProcess();
+
+    std::unique_ptr<ghoul::Process> _process;
+    properties::BoolProperty _enabled;
+    properties::StringProperty _entryPoint;
+    properties::StringProperty _workingDirectory;
 };
 
 } // namespace openspace

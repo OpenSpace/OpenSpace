@@ -29,7 +29,26 @@ function (handle_applications)
     # Remove the .DS_Store present on Mac
     list(REMOVE_ITEM appDirs ".DS_Store")
 
-    message(STATUS "Configuration application")
+    # Print all the enabled modules
+    # message(STATUS "Enabled modules:")
+    # list(LENGTH enabled_module_names enabled_module_count)
+    # math(EXPR enabled_module_count "${enabled_module_count} - 1")
+    # foreach (val RANGE ${enabled_module_count})
+    #     list(GET enabled_module_names ${val} name)
+    #     list(GET enabled_module_paths ${val} path)
+
+    #     message(STATUS "\t${name}    (${path})")
+    # endforeach ()
+
+    message(STATUS "Enabled applications:")
+    foreach (app ${appDirs})
+        string(TOUPPER ${app} upper_app)
+        if (OPENSPACE_APPLICATION_${upper_app})
+            message(STATUS "\t${app}  (${OPENSPACE_APPS_DIR}/${app})")
+        endif ()
+    endforeach ()
+
+
     # First create all of the options for the applications. In case that one of the
     # applications fail to include later, we still want all of them listed
     foreach (app ${appDirs})
@@ -44,8 +63,9 @@ function (handle_applications)
         set(app_dir "${OPENSPACE_APPS_DIR}/${app}")
         string(TOUPPER ${app} upper_app)
         if (OPENSPACE_APPLICATION_${upper_app})
-            message(STATUS "Adding application ${app}")
+            begin_header("Application: ${app}")
             add_subdirectory(${app_dir})
+            end_header("End: Application: ${app}")
         endif ()
     endforeach ()
 endfunction()

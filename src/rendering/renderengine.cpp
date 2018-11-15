@@ -53,6 +53,7 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/io/texture/texturereadercmap.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringconversion.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
@@ -667,6 +668,21 @@ void RenderEngine::renderDashboard() {
     );
 
     global::dashboard.render(penPosition);
+
+#ifdef REALTIME_CAMERA_POS_DISPLAY
+    penPosition += glm::vec2(0.f, -50.f);
+
+    glm::dvec3 p = _camera->positionVec3();
+    glm::dquat rot = _camera->rotationQuaternion();
+    std::string fc = global::navigationHandler.focusNode()->identifier();
+    RenderFont(
+        *_fontInfo,
+        penPosition,
+        fmt::format("Pos: {} {} {}\nOrientation: {} {} {} {}\nFocus: {}",
+            p.x, p.y, p.z, rot[0], rot[1], rot[2], rot[3], fc
+            )
+    );
+#endif
 }
 
 void RenderEngine::postDraw() {
@@ -1151,7 +1167,7 @@ void RenderEngine::renderScreenLog() {
             break;
         }
 
-        const std::string lvl = "(" + ghoul::logging::stringFromLevel(e->level) + ")";
+        const std::string lvl = "(" + ghoul::to_string(e->level) + ")";
         const std::string& message = e->message.substr(0, MessageLength);
         nr += std::count(message.begin(), message.end(), '\n');
 

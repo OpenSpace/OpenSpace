@@ -25,8 +25,6 @@
 #ifndef __OPENSPACE_CORE___SPICEMANAGER___H__
 #define __OPENSPACE_CORE___SPICEMANAGER___H__
 
-#include <ghoul/designpattern/singleton.h>
-
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 #include <ghoul/misc/exception.h>
@@ -40,9 +38,7 @@ namespace openspace {
 
 namespace scripting { struct LuaLibrary; }
 
-class SpiceManager : public ghoul::Singleton<SpiceManager> {
-    friend class ghoul::Singleton<SpiceManager>;
-
+class SpiceManager {
 public:
     BooleanType(UseException);
 
@@ -50,7 +46,7 @@ public:
     using KernelHandle = unsigned int;
 
     struct SpiceException : public ghoul::RuntimeError {
-        explicit SpiceException(const std::string& msg);
+        explicit SpiceException(std::string msg);
     };
 
     /**
@@ -149,6 +145,11 @@ public:
      * \pre \p type must not be empty
      */
     static TerminatorType terminatorTypeFromString(const std::string& type);
+
+    static void initialize();
+    static void deinitialize();
+    static bool isInitialized();
+    static SpiceManager& ref();
 
     /**
      * Loads one or more SPICE kernels into a program. The provided path can either be a
@@ -1055,6 +1056,8 @@ private:
 
     /// The last assigned kernel-id, used to determine the next free kernel id
     KernelHandle _lastAssignedKernel = KernelHandle(0);
+
+    static SpiceManager* _instance;
 };
 
 } // namespace openspace

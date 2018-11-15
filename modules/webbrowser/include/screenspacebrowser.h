@@ -48,6 +48,7 @@ namespace openspace {
 
 class BrowserInstance;
 class ScreenSpaceRenderHandler;
+class WebKeyboardHandler;
 
 class ScreenSpaceBrowser : public ScreenSpaceRenderable {
 public:
@@ -71,7 +72,8 @@ private:
     properties::StringProperty _url;
     properties::Vec2Property _dimensions;
     CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
-    std::shared_ptr<BrowserInstance> _browserInstance;
+    CefRefPtr<WebKeyboardHandler> _keyboardHandler;
+    std::unique_ptr<BrowserInstance> _browserInstance;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     bool _isUrlDirty = false;
