@@ -91,7 +91,9 @@ void CefWebGuiModule::startOrStopGui() {
             _instance->initialize();
             _instance->loadUrl(_url);
         }
-        webBrowserModule->attachEventHandler(_instance.get());
+        if (_visible) {
+            webBrowserModule->attachEventHandler(_instance.get());
+        }
         webBrowserModule->addBrowser(_instance.get());
     } else if (_instance) {
         _instance->close(true);
@@ -118,6 +120,14 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     _url.onChange([this]() {
         if (_instance) {
             _instance->loadUrl(_url);
+        }
+    });
+
+    _visible.onChange([this, webBrowserModule]() {
+        if (_visible && _instance) {
+            webBrowserModule->attachEventHandler(_instance.get());
+        } else {
+            webBrowserModule->detachEventHandler();
         }
     });
 

@@ -46,18 +46,25 @@ using nlohmann::json;
 namespace openspace {
 
 SubscriptionTopic::~SubscriptionTopic() {
-    if (_prop && _onChangeHandle != UnsetCallbackHandle) {
-        _prop->removeOnChange(_onChangeHandle);
-        _onChangeHandle = UnsetCallbackHandle;
-    }
-    if (_prop && !_onDeleteHandle) {
-        _prop->removeOnDelete(_onDeleteHandle);
-        _onDeleteHandle = UnsetCallbackHandle;
-    }
+    resetCallbacks();
 }
 
 bool SubscriptionTopic::isDone() const {
     return !_requestedResourceIsSubscribable || !_isSubscribedTo;
+}
+
+void SubscriptionTopic::resetCallbacks() {
+    if (!_prop) {
+        return;
+    }
+    if (_onChangeHandle != UnsetCallbackHandle) {
+        _prop->removeOnChange(_onChangeHandle);
+        _onChangeHandle = UnsetCallbackHandle;
+    }
+    if (_onDeleteHandle != UnsetCallbackHandle) {
+        _prop->removeOnDelete(_onDeleteHandle);
+        _onDeleteHandle = UnsetCallbackHandle;
+    }
 }
 
 void SubscriptionTopic::handleJson(const nlohmann::json& json) {
@@ -66,14 +73,17 @@ void SubscriptionTopic::handleJson(const nlohmann::json& json) {
 
     if (event == StartSubscription) {
         _prop = property(key);
+        resetCallbacks();
+
         if (_prop) {
             _requestedResourceIsSubscribable = true;
             _isSubscribedTo = true;
             auto onChange = [this, k = std::move(key)]() {
                 _connection->sendJson(wrappedPayload(_prop));
             };
+
             _onChangeHandle = _prop->onChange(onChange);
-            _prop->onDelete([this]() {
+            _onDeleteHandle = _prop->onDelete([this]() {
                 _onChangeHandle = UnsetCallbackHandle;
                 _onDeleteHandle = UnsetCallbackHandle;
                 _isSubscribedTo = false;
