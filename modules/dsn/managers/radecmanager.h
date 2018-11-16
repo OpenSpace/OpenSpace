@@ -21,53 +21,32 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
-#ifndef __OPENSPACE_MODULE_DSN___SIGNALMANAGER___H__
-#define __OPENSPACE_MODULE_DSN___SIGNALMANAGER___H__
+#ifndef __OPENSPACE_MODULE_DSN___RADECMANAGER___H__
+#define __OPENSPACE_MODULE_DSN___RADECMANAGER___H__
 
-#include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <modules/dsn/managers/jsonhelper.h>
-#include <openspace/json.h>
-#include <openspace/util/time.h>
-#include <fstream>
+#include <modules/dsn/rendering/renderablesignals.h>
+
 
 namespace openspace {
 
-    class SignalManager {
+    class RadecManager {
 
     public:
+       static double _ra;
+       static double _dec;
+       static double _range;
 
-    static struct Signal {        
-        std::string dishName;
-        std::string spacecraft;
-        std::string direction; 
-        std::string startTime;
-        std::string endTime;
-        double timeSinceStart = 0.0;
-        double lightTravelTime;
-     };
-
-    static struct SignalData {
-        //filename is on the format of YYYY-DDDT (excluding '.json')
-        bool isLoaded = false;
-        double sequenceStartTime;
-        double sequenceEndTime = sequenceStartTime + 86400.0; // 24 hours from startTime 
-        std::vector<Signal> signals;
-     };
-
-      /* The data that is currently loaded into open space*/
-      static SignalData _signalData;
-      /* A vector with all start times for our datafiles*/
-      static std::vector<double> _fileStartTimes;
-      /* A vector with all our datafile paths*/
-      static std::vector<std::string> _dataFiles;
-      /* Extracts all the mandatory information we need from our asset file */
-      static bool extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary);
-      /* parses signaldata from a file given an index in our preloaded filename vector */
-      static bool signalParser(int index);
-
+       /* A vector with all our datafile paths*/
+       static std::vector<std::string> _dataFiles;
+       /* Extracts all the mandatory information we need from our asset file */
+       static bool extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary);
+       /*gets the correct datafile, that matches the current time in open space*/
+       static glm::vec3 GetPosForTime(double time);
+       /* parses positioningdata from a file given an index in our preloaded filename vector */
+       static bool radecParser(int index);
     };
 }
 

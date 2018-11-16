@@ -41,8 +41,9 @@ Fragment getFragment() {
     //frag.blend = BLEND_MODE_ADDITIVE;
     frag.gPosition = vs_gPosition;
 
-    if( distanceFromStart < (lightSpeed * timeSinceStart) && distanceFromStart > (lightSpeed * timeSinceStart - signalSegmentSize*lightSpeed) ){
-        frag.color = vs_color;
+    if( distanceFromStart < (lightSpeed * timeSinceStart) && 
+    distanceFromStart > (lightSpeed * timeSinceStart - signalSegmentSize*lightSpeed) ){
+            frag.color = vs_color;
     }else{
         frag.color = vec4(0.0,0.0,0.0,0.0);
     }

@@ -245,7 +245,7 @@ void RenderableSignals::update(const UpdateData& data) {
         //parse data for that file
         if (!SignalManager::_signalData.isLoaded)
         {
-            SignalManager::jsonParser(activeFileIndex);
+            SignalManager::signalParser(activeFileIndex);
 
         }
         else
@@ -269,7 +269,7 @@ void RenderableSignals::update(const UpdateData& data) {
         }
     };
 
-
+ 
     // ... and upload them to the GPU
     glBindVertexArray(_lineRenderInformation._vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _lineRenderInformation._vBufferID);
@@ -353,6 +353,7 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
     double distance = getDistance(signal.dishName, signal.spacecraft);
     double timeSinceStart = signal.timeSinceStart;
 
+
     //fill the render array
     _vertexArray.push_back(posStation.x);
     _vertexArray.push_back(posStation.y);
@@ -374,10 +375,10 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
     _vertexArray.push_back(color.g);
     _vertexArray.push_back(color.b);
     _vertexArray.push_back(color.a);
+
     // Todo: handle uplink and downlink differently
     _vertexArray.push_back(distance);
     _vertexArray.push_back(timeSinceStart);
-
 }
 
 /* Since our station dishes have a static translation from Earth, we

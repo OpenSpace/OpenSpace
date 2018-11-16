@@ -36,6 +36,8 @@ namespace {
 
 namespace openspace {
 
+constexpr const char* _loggerCat = "RadecTranslation";
+
 documentation::Documentation RadecTranslation::Documentation() {
     using namespace documentation;
     return {
@@ -57,7 +59,6 @@ documentation::Documentation RadecTranslation::Documentation() {
     };
 }
 
-
 RadecTranslation::RadecTranslation()
     : _position(
         PositionInfo,
@@ -66,8 +67,6 @@ RadecTranslation::RadecTranslation()
         glm::dvec3(std::numeric_limits<double>::max())
     )
 {   
-
-  
     addProperty(_position);
 
     _position.onChange([this]() {
@@ -79,6 +78,9 @@ RadecTranslation::RadecTranslation()
 RadecTranslation::RadecTranslation(const ghoul::Dictionary& dictionary)
     : RadecTranslation()
 {
+    std::unique_ptr<ghoul::Dictionary> dictionaryPtr = std::make_unique<ghoul::Dictionary>(dictionary);
+    extractData(dictionaryPtr);
+
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
@@ -86,40 +88,44 @@ RadecTranslation::RadecTranslation(const ghoul::Dictionary& dictionary)
     );
 }
 
-glm::dvec3 RadecTranslation::convertRaDecRangeToCartesian() const{
-    //Todo: stream data from file
-    //Static data for voyager 1
-    double ra = 257.777029167736; //2018-246
-    double dec = 12.2537708651048; // 2018-246
-    double range = 2.14044781771236e+13;
+void RadecTranslation::extractData(std::unique_ptr<ghoul::Dictionary> &dictionary){
+    const char* _identifier = "spacecraft";
 
-    //Convert RA and DEC from degrees to radians 
+    if (!RadecManager::extractMandatoryInfoFromDictionary(_identifier, dictionary)) {
+        LERROR(fmt::format("{}: Did not manage to extract data. (from RadecTranslation and RadecManager)", _identifier));
+    }
+    else {
+        LDEBUG(fmt::format("{}: Successfully read data. (from RadecTranslation and RadecManager)", _identifier));
+    }
+}
+
+glm::dvec3 RadecTranslation::convertRaDecRangeToCartesian(double ra, double dec, double range) const{
     ra = glm::radians(ra);
     dec = glm::radians(dec);
+    range *= 1000; //convert to meters
 
-    //Save array in vector 
     glm::dvec3 raDecPos = SpiceManager::getPositionFromRaDecRange(ra, dec, range);
    
     return raDecPos;
 }
 
-glm::dvec3 RadecTranslation::transformCartesianCoordinates() const {
+glm::dvec3 RadecTranslation::transformCartesianCoordinates(glm::vec3 pos) const {
 
-    glm::vec3 pos = convertRaDecRangeToCartesian();
+    glm::vec3 cartesianPos = convertRaDecRangeToCartesian(pos.x, pos.y, pos.z);
 
     glm::dvec3 earthPos = global::renderEngine.scene()->sceneGraphNode("Earth")->worldPosition();
     glm::dmat4 translationMatrixEarth = glm::translate( glm::dmat4(1.0), glm::dvec3(earthPos) );
 
-    glm::dvec4 newPos = { pos, 1.0 };
+    glm::dvec4 newPos = { cartesianPos, 1.0 };
     glm::dvec4 nodePos =  translationMatrixEarth * _rotEquatorialSphere * newPos;
     glm::dvec3 worldposition = { nodePos.x, nodePos.y, nodePos.z };
 
     return worldposition;
 }
 
-glm::dvec3 RadecTranslation::position(const UpdateData&) const{
-
-    glm::dvec3 _position = transformCartesianCoordinates();
+glm::dvec3 RadecTranslation::position(const UpdateData& data) const{
+    glm::vec3 pos = RadecManager::GetPosForTime(data.time.j2000Seconds());
+    glm::dvec3 _position = transformCartesianCoordinates(pos);
     return _position;
 }
 

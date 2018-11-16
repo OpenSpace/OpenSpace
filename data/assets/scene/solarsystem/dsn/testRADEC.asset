@@ -1,4 +1,5 @@
 local assetHelper = asset.require('util/asset_helper')
+local dataFolder = openspace.absPath("../../../sync/http/dsn_data/1/positioning/VGR1")
 
 local models = asset.syncedResource({
     Name = "Dsn models",
@@ -7,11 +8,13 @@ local models = asset.syncedResource({
     Version = 1
 })
 
-local testSpaceCraft = {
-    Identifier = "testSpaceCraft",
+local testRADEC = {
+    Identifier = "testRADEC",
     Transform = {
       Translation = {
-         Type = "RadecTranslation"
+          Type = "RadecTranslation", 
+          DataFolder = dataFolder,
+          DataFileType = "json"
       },
       Scale = {
             Type = "StaticScale",
@@ -28,9 +31,9 @@ local testSpaceCraft = {
         ColorTexture = models .. "/34m_dish/base_AO.png",
     },
     GUI = {
-        Name = "testSpaceCraft",
-        Path = "/Solar System/testSpaceCraft"
+        Name = "testRADEC",
+        Path = "/Solar System/testRADEC"
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {testSpaceCraft})
+assetHelper.registerSceneGraphNodesAndExport(asset, {testRADEC})

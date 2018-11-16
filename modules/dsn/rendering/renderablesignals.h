@@ -81,7 +81,7 @@ namespace openspace {
 
         bool isReady() const override;
         /* Returns an index for our filenames */
-        int findFileIndexForCurrentTime(double time, std::vector<double> vec);
+        static int findFileIndexForCurrentTime(double time, std::vector<double> vec);
         /* Adds the signaldata to _vertexArray*/
         void pushSignalDataToVertexArray(SignalManager::Signal signal);
         /* Returns a position relative the current focus node */

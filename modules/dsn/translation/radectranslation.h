@@ -31,6 +31,8 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/properties/vector/dvec3property.h>
 #include <modules/dsn/rendering/renderablesignals.h>
+#include <modules/dsn/managers/radecmanager.h>
+#include <openspace/util/updatestructures.h>
 
 namespace openspace {
 
@@ -41,11 +43,12 @@ namespace documentation { struct Documentation; }
 class RadecTranslation : public Translation {
 public:
     RadecTranslation();
+    void extractData(std::unique_ptr<ghoul::Dictionary> &dictionary);
     RadecTranslation(const ghoul::Dictionary& dictionary);
     /* Converts the Ra Dec range coordinates into cartesian coordinates*/
-    glm::dvec3 convertRaDecRangeToCartesian() const;
+    glm::dvec3 convertRaDecRangeToCartesian(double ra, double dec, double range) const;
     /*Transforms the cartesian coordinates with a rotation and a translation*/
-    glm::dvec3 transformCartesianCoordinates() const;
+    glm::dvec3 transformCartesianCoordinates(glm::vec3 pos) const;
     glm::dvec3 position(const UpdateData& data) const override;
     static documentation::Documentation Documentation();
 
@@ -61,4 +64,4 @@ private:
 };
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_DSN___RADECTRANSLATION___H__
+#endif 
