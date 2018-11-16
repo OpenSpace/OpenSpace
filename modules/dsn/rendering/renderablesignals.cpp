@@ -263,7 +263,7 @@ void RenderableSignals::update(const UpdateData& data) {
     for (int i = 0; i < SignalManager::_signalData.signals.size(); i++) {
 
         SignalManager::Signal currentSignal = SignalManager::_signalData.signals[i];
-        if (isSignalActive(currentTime, currentSignal.startTime, currentSignal.endTime)) {
+        if (isSignalActive(currentTime, currentSignal.startTime, currentSignal.endTime, currentSignal.lightTravelTime)) {
             currentSignal.timeSinceStart = currentTime - Time::convertTime(currentSignal.startTime);
             pushSignalDataToVertexArray(currentSignal);
         }
@@ -324,10 +324,10 @@ int RenderableSignals::findFileIndexForCurrentTime(double time, std::vector<doub
     return fileIndex;
 }
 
-// Todo: handle the signal activity with light time travel in consideration
-bool RenderableSignals::isSignalActive(double currentTime, std::string signalStartTime, std::string signalEndTime) {
+// Todo: handle signalIsSending, not only signalIsActive for the signal segments
+bool RenderableSignals::isSignalActive(double currentTime, std::string signalStartTime, std::string signalEndTime, double lightTravelTime) {
     double startTimeInSeconds = SpiceManager::ref().ephemerisTimeFromDate(signalStartTime);
-    double endTimeInSeconds = SpiceManager::ref().ephemerisTimeFromDate(signalEndTime);
+    double endTimeInSeconds = SpiceManager::ref().ephemerisTimeFromDate(signalEndTime) + lightTravelTime;
 
     if (startTimeInSeconds <= currentTime && endTimeInSeconds >= currentTime)
         return true;

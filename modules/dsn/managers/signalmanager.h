@@ -46,6 +46,7 @@ namespace openspace {
         std::string startTime;
         std::string endTime;
         double timeSinceStart = 0.0;
+        double lightTravelTime;
       };
 
     static struct SignalData {

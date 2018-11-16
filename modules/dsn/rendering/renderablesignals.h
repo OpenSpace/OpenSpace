@@ -182,7 +182,7 @@ namespace openspace {
 
 
         /*Checks if the current time is within a signal's start and endtime*/
-        bool isSignalActive(double currentTime, std::string signalStartTime, std::string signalEndTime);
+        bool isSignalActive(double currentTime, std::string signalStartTime, std::string signalEndTime, double lightTravelTime);
 
 
     };

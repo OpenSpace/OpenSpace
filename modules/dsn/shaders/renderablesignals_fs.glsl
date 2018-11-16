@@ -32,6 +32,7 @@ in float distanceFromStart;
 in float timeSinceStart;
 
 float lightSpeed = 299792458.0; // expressed in m/s
+float signalSegmentSize = 2000;
 
 Fragment getFragment() {
 
@@ -40,10 +41,10 @@ Fragment getFragment() {
     //frag.blend = BLEND_MODE_ADDITIVE;
     frag.gPosition = vs_gPosition;
 
-    if( distanceFromStart < (lightSpeed * timeSinceStart) ){
+    if( distanceFromStart < (lightSpeed * timeSinceStart) && distanceFromStart > (lightSpeed * timeSinceStart - signalSegmentSize*lightSpeed) ){
         frag.color = vs_color;
     }else{
-        frag.color.a = 0.0;
+        frag.color = vec4(0.0,0.0,0.0,0.0);
     }
 
     // For rendering inside earth atmosphere we need to set a normal for our line

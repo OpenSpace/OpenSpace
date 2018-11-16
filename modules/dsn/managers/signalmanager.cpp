@@ -196,6 +196,7 @@ namespace openspace {
           structSignal.endTime = signalsInJson["eot"].get<std::string>(); 
           structSignal.startTime = signalsInJson["bot"].get<std::string>();
           structSignal.direction = signalsInJson["direction"].get<std::string>();
+          structSignal.lightTravelTime = 71397.6659308273;
 
           //Add signals to vector of signals
           _signalData.signals.push_back(structSignal);
