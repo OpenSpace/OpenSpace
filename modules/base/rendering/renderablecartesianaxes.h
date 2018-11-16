@@ -22,35 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___SUBSCRIPTION_TOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___SUBSCRIPTION_TOPIC___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLECARTESIANAXES___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLECARTESIANAXES___H__
 
-#include <modules/server/include/topics/topic.h>
+#include <openspace/rendering/renderable.h>
 
-namespace openspace::properties { class Property; }
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/matrix/dmat4property.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/vector/vec4property.h>
+#include <ghoul/opengl/ghoul_gl.h>
+
+namespace ghoul::opengl { class ProgramObject; }
+
+namespace openspace::documentation { struct Documentation; }
 
 namespace openspace {
 
-class SubscriptionTopic : public Topic {
+class RenderableCartesianAxes : public Renderable {
 public:
-    SubscriptionTopic() = default;
-    ~SubscriptionTopic();
+    RenderableCartesianAxes(const ghoul::Dictionary& dictionary);
+    ~RenderableCartesianAxes() = default;
 
-    void handleJson(const nlohmann::json& json) override;
-    bool isDone() const override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
-private:
-    void resetCallbacks();
+    bool isReady() const override;
 
-    const int UnsetCallbackHandle = -1;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
 
-    bool _requestedResourceIsSubscribable = false;
-    bool _isSubscribedTo = false;
-    int _onChangeHandle = UnsetCallbackHandle;
-    int _onDeleteHandle = UnsetCallbackHandle;
-    properties::Property* _prop = nullptr;
+    static documentation::Documentation Documentation();
+
+protected:
+    struct Vertex {
+        float location[3];
+    };
+
+    ghoul::opengl::ProgramObject* _program;
+
+    properties::Vec4Property _xColor;
+    properties::Vec4Property _yColor;
+    properties::Vec4Property _zColor;
+
+    GLuint _vaoId = 0;
+    GLuint _vBufferId = 0;
+    GLuint _iBufferId = 0;
 };
 
-} // namespace openspace
+}// namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___SUBSCRIPTION_TOPIC___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLECARTESIANAXES___H__

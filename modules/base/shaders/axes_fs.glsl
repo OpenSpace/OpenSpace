@@ -22,35 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___SUBSCRIPTION_TOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___SUBSCRIPTION_TOPIC___H__
+#include "fragment.glsl"
+#include "PowerScaling/powerScaling_fs.hglsl"
 
-#include <modules/server/include/topics/topic.h>
+in float vs_screenSpaceDepth;
+in vec4 vs_positionViewSpace;
+in vec3 vs_positionModelSpace;
 
-namespace openspace::properties { class Property; }
+uniform vec4 xColor;
+uniform vec4 yColor;
+uniform vec4 zColor;
 
-namespace openspace {
+Fragment getFragment() {
+    Fragment frag;
 
-class SubscriptionTopic : public Topic {
-public:
-    SubscriptionTopic() = default;
-    ~SubscriptionTopic();
+    vec3 colorComponents = step(0.01f, vs_positionModelSpace);
 
-    void handleJson(const nlohmann::json& json) override;
-    bool isDone() const override;
+    frag.color = colorComponents.x * xColor +
+        colorComponents.y * yColor +
+        colorComponents.z * zColor;
 
-private:
-    void resetCallbacks();
-
-    const int UnsetCallbackHandle = -1;
-
-    bool _requestedResourceIsSubscribable = false;
-    bool _isSubscribedTo = false;
-    int _onChangeHandle = UnsetCallbackHandle;
-    int _onDeleteHandle = UnsetCallbackHandle;
-    properties::Property* _prop = nullptr;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SERVER___SUBSCRIPTION_TOPIC___H__
+    frag.depth = vs_screenSpaceDepth;
+    frag.gPosition = vs_positionViewSpace;
+    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+    return frag;
+}

@@ -22,35 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___SUBSCRIPTION_TOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___SUBSCRIPTION_TOPIC___H__
+#version __CONTEXT__
 
-#include <modules/server/include/topics/topic.h>
+layout(location = 0) in vec3 in_position;
 
-namespace openspace::properties { class Property; }
+out float vs_screenSpaceDepth;
+out vec4 vs_positionViewSpace;
+out vec3 vs_positionModelSpace;
 
-namespace openspace {
+uniform mat4 modelViewTransform;
+uniform mat4 projectionTransform;
 
-class SubscriptionTopic : public Topic {
-public:
-    SubscriptionTopic() = default;
-    ~SubscriptionTopic();
+void main() {
+    vec4 positionViewSpace = modelViewTransform * vec4(in_position, 1.0);
+    vec4 positionClipSpace = projectionTransform * positionViewSpace;
+    vec4 positionScreenSpace = positionClipSpace;
+    positionScreenSpace.z = 0.f;
+    vs_positionModelSpace = in_position;
+    vs_screenSpaceDepth  = positionScreenSpace.w;
+    vs_positionViewSpace = positionViewSpace;
 
-    void handleJson(const nlohmann::json& json) override;
-    bool isDone() const override;
-
-private:
-    void resetCallbacks();
-
-    const int UnsetCallbackHandle = -1;
-
-    bool _requestedResourceIsSubscribable = false;
-    bool _isSubscribedTo = false;
-    int _onChangeHandle = UnsetCallbackHandle;
-    int _onDeleteHandle = UnsetCallbackHandle;
-    properties::Property* _prop = nullptr;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SERVER___SUBSCRIPTION_TOPIC___H__
+    gl_Position = positionScreenSpace;
+}
