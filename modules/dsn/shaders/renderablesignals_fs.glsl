@@ -28,14 +28,23 @@
 in vec4 vs_positionScreenSpace;
 in vec4 vs_gPosition;
 in vec4 vs_color;
+in float distanceFromStart;
+in float timeSinceStart;
+
+float lightSpeed = 299792458.0; // expressed in m/s
 
 Fragment getFragment() {
+
     Fragment frag;
-    frag.color = vec4(vs_color);
     frag.depth = vs_positionScreenSpace.w;
     //frag.blend = BLEND_MODE_ADDITIVE;
-
     frag.gPosition = vs_gPosition;
+
+    if( distanceFromStart < (lightSpeed * timeSinceStart) ){
+        frag.color = vs_color;
+    }else{
+        frag.color.a = 0.0;
+    }
 
     // For rendering inside earth atmosphere we need to set a normal for our line
     frag.gNormal = vec4(0.0, 0.0, 1.0, 0.0);

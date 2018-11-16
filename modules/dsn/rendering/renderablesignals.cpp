@@ -36,7 +36,6 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/interaction/navigationhandler.h>
 
-
 namespace {
     constexpr const char* ProgramName = "SignalsProgram";
     constexpr const char* _loggerCat = "RenderableSignals";
@@ -264,8 +263,10 @@ void RenderableSignals::update(const UpdateData& data) {
     for (int i = 0; i < SignalManager::_signalData.signals.size(); i++) {
 
         SignalManager::Signal currentSignal = SignalManager::_signalData.signals[i];
-        if (isSignalActive(currentTime, currentSignal.startTime, currentSignal.endTime))
+        if (isSignalActive(currentTime, currentSignal.startTime, currentSignal.endTime)) {
+            currentSignal.timeSinceStart = currentTime - Time::convertTime(currentSignal.startTime);
             pushSignalDataToVertexArray(currentSignal);
+        }
     };
 
 
@@ -280,15 +281,21 @@ void RenderableSignals::update(const UpdateData& data) {
     );
 
     // position attributes
-    glVertexAttribPointer(_locVer, _sizePosVal, GL_FLOAT, GL_FALSE, sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout), (void*)0);
-    glEnableVertexAttribArray(_locVer);
+    glVertexAttribPointer(_vaLocVer, _sizeThreeVal, GL_FLOAT, GL_FALSE, sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) + sizeof(DistanceVBOLayout) + sizeof(float), (void*)0);
+    glEnableVertexAttribArray(_vaLocVer);
     // color attributes
-    glVertexAttribPointer(_locCol, _sizeColorVal, GL_FLOAT, GL_FALSE, sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout), (void*)(sizeof(PositionVBOLayout)));
-    glEnableVertexAttribArray(_locCol);
+    glVertexAttribPointer(_vaLocCol, _sizeFourVal, GL_FLOAT, GL_FALSE, sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) + sizeof(DistanceVBOLayout) + sizeof(float), (void*)(sizeof(PositionVBOLayout)));
+    glEnableVertexAttribArray(_vaLocCol);
+    // distance attributes
+    glVertexAttribPointer(_vaLocDist, _sizeOneVal, GL_FLOAT, GL_FALSE, sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) + sizeof(DistanceVBOLayout) + sizeof(float), (void*)(sizeof(PositionVBOLayout) + sizeof(ColorVBOLayout)));
+    glEnableVertexAttribArray(_vaLocDist);
+    // time attribute
+    glVertexAttribPointer(_vaLocTimeSinceStart, _sizeOneVal, GL_FLOAT, GL_FALSE, sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) + sizeof(DistanceVBOLayout) + sizeof(float), (void*)(sizeof(PositionVBOLayout) + sizeof(ColorVBOLayout)+ sizeof(float)));
+    glEnableVertexAttribArray(_vaLocTimeSinceStart);
 
     // Directly render the entire step
     _lineRenderInformation.first = 0;
-    _lineRenderInformation.count = static_cast<GLsizei>(_vertexArray.size() / (_sizePosVal + _sizeColorVal));
+    _lineRenderInformation.count = static_cast<GLsizei>(_vertexArray.size() / (_sizeThreeVal + _sizeFourVal + 2 *_sizeOneVal));
 
     //unbind vertexArray
     unbindGL();
@@ -317,6 +324,7 @@ int RenderableSignals::findFileIndexForCurrentTime(double time, std::vector<doub
     return fileIndex;
 }
 
+// Todo: handle the signal activity with light time travel in consideration
 bool RenderableSignals::isSignalActive(double currentTime, std::string signalStartTime, std::string signalEndTime) {
     double startTimeInSeconds = SpiceManager::ref().ephemerisTimeFromDate(signalStartTime);
     double endTimeInSeconds = SpiceManager::ref().ephemerisTimeFromDate(signalEndTime);
@@ -339,9 +347,11 @@ void RenderableSignals::extractData(std::unique_ptr<ghoul::Dictionary> &dictiona
 
 void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal) {
 
-    glm::dvec4 color = { getStationColor(signal.dishName), 1.0 };
+    glm::vec4 color = { getStationColor(signal.dishName), 1.0 };
     glm::vec3 posStation = getPositionForGeocentricSceneGraphNode(signal.dishName.c_str());
     glm::vec3 posSpacecraft = getSuitablePrecisionPositionForSceneGraphNode(signal.spacecraft.c_str());
+    double distance = getDistance(signal.dishName, signal.spacecraft);
+    double timeSinceStart = signal.timeSinceStart;
 
     //fill the render array
     _vertexArray.push_back(posStation.x);
@@ -352,6 +362,9 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
     _vertexArray.push_back(color.g);
     _vertexArray.push_back(color.b);
     _vertexArray.push_back(color.a);
+    // Todo: handle uplink and downlink differently
+    _vertexArray.push_back(0.0);
+    _vertexArray.push_back(timeSinceStart);
 
     _vertexArray.push_back(posSpacecraft.x);
     _vertexArray.push_back(posSpacecraft.y);
@@ -361,7 +374,9 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
     _vertexArray.push_back(color.g);
     _vertexArray.push_back(color.b);
     _vertexArray.push_back(color.a);
-
+    // Todo: handle uplink and downlink differently
+    _vertexArray.push_back(distance);
+    _vertexArray.push_back(timeSinceStart);
 
 }
 
@@ -412,7 +427,7 @@ glm::vec3 RenderableSignals::getPositionForGeocentricSceneGraphNode(const char* 
 
 glm::vec3 RenderableSignals::getStationColor(std::string dishidentifier) {
 
-    glm::dvec3 color(0.0f, 0.0f, 1.0f);
+    glm::vec3 color(0.0f, 0.0f, 1.0f);
     std::string site;
 
     try {
@@ -426,6 +441,14 @@ glm::vec3 RenderableSignals::getStationColor(std::string dishidentifier) {
     color = _siteColors[siteIndex]->value();
 
     return color;
+}
+
+float RenderableSignals::getDistance(std::string nodeIdA, std::string nodeIdB) {
+
+    glm::vec3 posA = global::renderEngine.scene()->sceneGraphNode(nodeIdA)->worldPosition();
+    glm::vec3 posB = global::renderEngine.scene()->sceneGraphNode(nodeIdB)->worldPosition();
+
+    return glm::distance(posA, posB);
 }
 
 } // namespace openspace

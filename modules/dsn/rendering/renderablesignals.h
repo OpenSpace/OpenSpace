@@ -92,6 +92,7 @@ namespace openspace {
         glm::vec3 getPositionForGeocentricSceneGraphNode(const char* id);
         /* Returns a color based on what site the station is located to */
         glm::vec3 getStationColor(std::string dishidentifier);
+        float getDistance(std::string nodeIdA, std::string nodeIdB);
 
         /* The VBO layout of the vertex position */
         struct PositionVBOLayout {
@@ -100,6 +101,10 @@ namespace openspace {
         /* The VBO layout of the color */
         struct ColorVBOLayout {
             float r, g, b, a;
+        };
+        /* The VBO layout of the distance */
+        struct DistanceVBOLayout {
+            float d;
         };
 
 
@@ -146,13 +151,23 @@ namespace openspace {
         /// Maps a site location to an index in the _siteColors property vector
         std::map<std::string, int> _siteToIndex;
 
-        /// The attribute location for vertex position
-        const GLuint _locVer = 0;
-        /// The attribute location for vertex color
-        const GLuint _locCol = 1;
+        /// The vertex attribute location for position
+        /// must correlate to layout location in vertex shader
+        const GLuint _vaLocVer = 0;
+        /// The vertex attribute location for color
+        /// must correlate to layout location in vertex shader
+        const GLuint _vaLocCol = 1;
+        /// The vertex attribute location for distance from signal start position
+        /// must correlate to layout location in vertex shader
+        const GLuint _vaLocDist = 2;
+        /// The vertex attribute location time since signal started sending
+        /// must correlate to layout location in vertex shader
+        const GLuint _vaLocTimeSinceStart = 3;
+
         /// Specifies the number of components per generic vertex attribute
-        const GLuint _sizeColorVal = 4;
-        const GLuint _sizePosVal = 3;
+        const GLuint _sizeFourVal = 4;
+        const GLuint _sizeThreeVal = 3;
+        const GLuint _sizeOneVal = 1;
 
         SceneGraphNode* _focusNode;
 

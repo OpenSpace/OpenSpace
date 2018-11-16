@@ -45,6 +45,7 @@ namespace openspace {
         std::string direction; 
         std::string startTime;
         std::string endTime;
+        double timeSinceStart = 0.0;
       };
 
     static struct SignalData {
