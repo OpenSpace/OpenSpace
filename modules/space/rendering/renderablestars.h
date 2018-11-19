@@ -100,13 +100,15 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(view, projection, colorOption, alphaValue, scaleFactor,
-        minBillboardSize, screenSize, scaling, psfTexture, colorTexture) _uniformCache;
+        minBillboardSize, screenSize, scaling, psfTexture, colorTexture,
+        otherDataTexture, otherDataRange) _uniformCache;
 
     std::string _speckFile;
 
     std::vector<float> _slicedData;
     std::vector<float> _fullData;
     int _nValuesPerStar = 0;
+    std::vector<std::string> _dataNames;
 
     GLuint _vao = 0;
     GLuint _vbo = 0;

@@ -66,6 +66,6 @@ local gaia_abundance_galah = {
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     stars,
-    -- gaia_abundance_apogee,
-    -- gaia_abundance_galah
+    gaia_abundance_apogee,
+    gaia_abundance_galah
 })

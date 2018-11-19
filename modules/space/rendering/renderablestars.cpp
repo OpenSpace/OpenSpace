@@ -50,12 +50,13 @@ namespace {
 
     constexpr const char* KeyFile = "File";
 
-    constexpr const std::array<const char*, 10> UniformNames = {
+    constexpr const std::array<const char*, 12> UniformNames = {
         "view", "projection", "colorOption", "alphaValue", "scaleFactor",
-        "minBillboardSize", "screenSize", "scaling", "psfTexture", "colorTexture"
+        "minBillboardSize", "screenSize", "scaling", "psfTexture", "colorTexture",
+        "otherDataTexture", "otherDataRange"
     };
 
-    constexpr int8_t CurrentCacheVersion = 1;
+    constexpr int8_t CurrentCacheVersion = 2;
 
     struct ColorVBOLayout {
         std::array<float, 4> position; // (x,y,z,e)
@@ -191,9 +192,7 @@ documentation::Documentation RenderableStars::Documentation() {
             },
             {
                 ColorOptionInfo.identifier,
-                new StringInListVerifier({
-                    "Color", "Velocity", "Speed"
-                }),
+                new StringInListVerifier({ "Color", "Velocity", "Speed", "Other Data" }),
                 Optional::Yes,
                 ColorOptionInfo.description
             },
@@ -280,7 +279,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKey(ColorOptionInfo.identifier)) {
         const std::string colorOption = dictionary.value<std::string>(
             ColorOptionInfo.identifier
-            );
+        );
         if (colorOption == "Color") {
             _colorOption = ColorOption::Color;
         }
@@ -403,17 +402,25 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.psfTexture, psfUnit);
 
     ghoul::opengl::TextureUnit colorUnit;
-    colorUnit.activate();
     if (_colorTexture) {
+        colorUnit.activate();
         _colorTexture->bind();
         _program->setUniform(_uniformCache.colorTexture, colorUnit);
     }
 
+    ghoul::opengl::TextureUnit otherDataUnit;
     if (_colorOption == ColorOption::OtherData && _otherDataColorMapTexture) {
+        otherDataUnit.activate();
         _otherDataColorMapTexture->bind();
-        _program->setUniform("otherDataTexture", colorUnit);
-        _program->setUniform("otherDataRange", _otherDataRange);
+        _program->setUniform(_uniformCache.otherDataTexture, otherDataUnit);
     }
+    else {
+        // We need to set the uniform to something, or the shader doesn't work
+        _program->setUniform(_uniformCache.otherDataTexture, colorUnit);
+    }
+    // Same here, if we don't set this value, the rendering disappears even if we don't
+    // use this color mode --- abock 2018-11-19
+    _program->setUniform(_uniformCache.otherDataRange, _otherDataRange);
 
     glBindVertexArray(_vao);
     const GLsizei nStars = static_cast<GLsizei>(_fullData.size() / _nValuesPerStar);
@@ -617,7 +624,7 @@ void RenderableStars::update(const UpdateData&) {
 
             _colorTextureFile = std::make_unique<ghoul::filesystem::File>(
                 _colorTexturePath
-                );
+            );
             _colorTextureFile->setCallback(
                 [&](const ghoul::filesystem::File&) { _colorTextureIsDirty = true; }
             );
@@ -661,8 +668,7 @@ void RenderableStars::loadData() {
     if (hasCachedFile) {
         LINFO(fmt::format(
             "Cached file '{}' used for Speck file '{}'",
-            cachedFile,
-            _file
+            cachedFile, _file
         ));
 
         bool success = loadCachedFile(cachedFile);
@@ -693,7 +699,6 @@ void RenderableStars::readSpeckFile() {
         throw ghoul::RuntimeError(fmt::format("Failed to open Speck file '{}'", _file));
     }
 
-    _otherDataOption.clearOptions();
     _nValuesPerStar = 0;
 
     // The beginning of the speck file has a header that either contains comments
@@ -733,10 +738,13 @@ void RenderableStars::readSpeckFile() {
             std::string name;
             str >> name;
 
-            _otherDataOption.addOption(_nValuesPerStar, name);
+            _dataNames.push_back(name);
             _nValuesPerStar += 1; // We want the number, but the index is 0 based
         }
     }
+
+    _otherDataOption.clearOptions();
+    _otherDataOption.addOptions(_dataNames);
 
     _nValuesPerStar += 3; // X Y Z are not counted in the Speck file indices
 
@@ -778,6 +786,16 @@ bool RenderableStars::loadCachedFile(const std::string& file) {
         fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
         fileStream.read(reinterpret_cast<char*>(&_nValuesPerStar), sizeof(int32_t));
 
+        for (int i = 0; i < _nValuesPerStar - 3; ++i) {
+            uint16_t len;
+            fileStream.read(reinterpret_cast<char*>(&len), sizeof(uint16_t));
+            std::vector<char> buffer(len);
+            fileStream.read(buffer.data(), len);
+            std::string value(buffer.begin(), buffer.end());
+            _dataNames.push_back(value);
+        }
+        _otherDataOption.addOptions(_dataNames);
+
         _fullData.resize(nValues);
         fileStream.read(reinterpret_cast<char*>(&_fullData[0]),
             nValues * sizeof(_fullData[0]));
@@ -810,8 +828,15 @@ void RenderableStars::saveCachedFile(const std::string& file) const {
     int32_t nValuesPerStar = static_cast<int32_t>(_nValuesPerStar);
     fileStream.write(reinterpret_cast<const char*>(&nValuesPerStar), sizeof(int32_t));
 
+    // -3 as we don't want to save the xyz values that are in the beginning of the file
+    for (int i = 0; i < _nValuesPerStar - 3; ++i) {
+        uint16_t len = _dataNames[i].size();
+        fileStream.write(reinterpret_cast<const char*>(&len), sizeof(uint16_t));
+        fileStream.write(_dataNames[i].c_str(), len);
+    }
+
     size_t nBytes = nValues * sizeof(_fullData[0]);
-    fileStream.write(reinterpret_cast<const char*>(&_fullData[0]), nBytes);
+    fileStream.write(reinterpret_cast<const char*>(_fullData.data()), nBytes);
 }
 
 void RenderableStars::createDataSlice(ColorOption option) {

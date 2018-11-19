@@ -35,7 +35,6 @@ uniform sampler2D psfTexture;
 uniform sampler1D colorTexture;
 uniform float minBillboardSize;
 
-uniform bool usePsfTexture;
 uniform float alphaValue;
 uniform int colorOption;
 
@@ -74,11 +73,11 @@ Fragment getFragment() {
         
     vec4 color = vec4(0.0);
     switch (colorOption) {
-        case COLOROPTION_COLOR: 
+        case COLOROPTION_COLOR:
             color = bv2rgb(ge_brightness.x);
             break;
         case COLOROPTION_VELOCITY:
-            color = vec4(abs(ge_velocity), 0.5); 
+            color = vec4(abs(ge_velocity), 0.5);
             break;
         case COLOROPTION_SPEED:
             // @TODO Include a transfer function here ---abock
