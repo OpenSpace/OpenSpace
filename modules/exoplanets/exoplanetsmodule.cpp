@@ -26,7 +26,8 @@
 #include <modules/exoplanets/tasks/exoplanetscsvtobintask.h>
 #include <modules/exoplanets/rendering/renderableorbitdisc.h>
 
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/globalscallbacks.h>
 
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -121,20 +122,20 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary&) {
     fTask->registerClass<ExoplanetsCsvToBinTask>("ExoplanetsCsvToBinTask");
     fRenderable->registerClass<RenderableOrbitdisc>("RenderableOrbitdisc");
 
-    OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Initialize, [&] {
+    global::callback::initializeGL.push_back([&]() {
         _discoveryMethods = std::make_unique<openspace::exoplanets::DiscoveryMethods>();
         addPropertySubOwner(*_discoveryMethods);
     });
 
     // Render
-    OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Render, [&] {
+    global::callback::render.push_back([&]() {
 
         if (_discoveryMethods->isDoppler())
         {
-            std::string starName = OsEng.moduleEngine().module<ExoplanetsModule>()->getStarName();
-            std::vector<std::string> planetNames = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlna();
-            SceneGraphNode* planetNode = OsEng.renderEngine().scene()->sceneGraphNode(planetNames[0]);
-            SceneGraphNode* starNode = OsEng.renderEngine().scene()->sceneGraphNode(starName);
+            std::string starName = global::moduleEngine.module<ExoplanetsModule>()->getStarName();
+            std::vector<std::string> planetNames = global::moduleEngine.module<ExoplanetsModule>()->getPlna();
+            SceneGraphNode* planetNode = global::renderEngine.scene()->sceneGraphNode(planetNames[0]);
+            SceneGraphNode* starNode = global::renderEngine.scene()->sceneGraphNode(starName);
             glm::dvec3 planetPos = planetNode->worldPosition();
             glm::dvec3 starPos = starNode->worldPosition();
             glm::dvec3 starToPosVec = normalize(planetPos - starPos);
@@ -168,17 +169,17 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary&) {
         }
         if (_discoveryMethods->isTransit()) {
 
-            std::string starName = OsEng.moduleEngine().module<ExoplanetsModule>()->getStarName();
-            std::vector<std::string> planetNames = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlna();
-            SceneGraphNode* planetNode = OsEng.renderEngine().scene()->sceneGraphNode(planetNames[0]);
-            SceneGraphNode* starNode = OsEng.renderEngine().scene()->sceneGraphNode(starName);
+            std::string starName = global::moduleEngine.module<ExoplanetsModule>()->getStarName();
+            std::vector<std::string> planetNames = global::moduleEngine.module<ExoplanetsModule>()->getPlna();
+            SceneGraphNode* planetNode = global::renderEngine.scene()->sceneGraphNode(planetNames[0]);
+            SceneGraphNode* starNode = global::renderEngine.scene()->sceneGraphNode(starName);
             glm::dvec3 planetPos = planetNode->worldPosition();
             glm::dvec3 starPos = starNode->worldPosition();
 
             glm::dvec3 starToPosVec = planetPos - starPos;
             glm::dvec3 starToSunVec = normalize(glm::dvec3(0.0, 0.0, 0.0) - starPos);
             
-            std::vector<Exoplanet> planets = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlsy();
+            std::vector<Exoplanet> planets = global::moduleEngine.module<ExoplanetsModule>()->getPlsy();
             float starRadius = planets[0].RSTAR * 6.957E8 * _discoveryMethods->getTransitScaleFactor(); // in m
 
             glm::dvec3 north = _north;

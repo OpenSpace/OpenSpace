@@ -22,17 +22,21 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/engine/globals.h>
+#include <openspace/scripting/scriptengine.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
+#include <ghoul/misc/assert.h>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 
 #include <fstream>
+#include <iostream>
+#include <sstream>
 
 namespace openspace{
 
@@ -329,7 +333,7 @@ int addExoplanetSystem(lua_State* L) {
     // If user have given name as in EOD, change it to speck-name
     std::string starname_speck = getSpeckStarname(starname);
 
-    OsEng.moduleEngine().module<ExoplanetsModule>()->setStarName(starname_speck);
+    global::moduleEngine.module<ExoplanetsModule>()->setStarName(starname_speck);
 
 	std::ifstream data(absPath("${BASE}/modules/exoplanets/expl_data.bin"), std::ios::in | std::ios::binary);
 	if (!data.good()) {
@@ -374,9 +378,9 @@ int addExoplanetSystem(lua_State* L) {
     
 	data.close();
 	lut.close();
-    OsEng.moduleEngine().module<ExoplanetsModule>()->setPlna(plna);
-    OsEng.moduleEngine().module<ExoplanetsModule>()->setPlsy(plsy);
-    OsEng.moduleEngine().module<ExoplanetsModule>()->setClosestExoplanet(p);
+    global::moduleEngine.module<ExoplanetsModule>()->setPlna(plna);
+    global::moduleEngine.module<ExoplanetsModule>()->setPlsy(plsy);
+    global::moduleEngine.module<ExoplanetsModule>()->setClosestExoplanet(p);
 
 	if (found && !isnan(p.POSITIONX) && !isnan(p.A) && !isnan(p.PER)) //&& !p.BINARY
 	{
@@ -397,9 +401,9 @@ int addExoplanetSystem(lua_State* L) {
         glm::dvec3 celestialNorth = normalize(galaxticToCelectialMatrix * galacticNorth);
 
 
-        // Earths north vector (0,0,1) projected onto the skyplane, the plane perpendicular to the viewing vector (starTosunVec)
+        // Earths north vector projected onto the skyplane, the plane perpendicular to the viewing vector (starTosunVec)
         glm::dvec3 northProjected = normalize(celestialNorth - (((dot(celestialNorth, starToSunVec)) / (glm::length(starToSunVec)))*starToSunVec));
-        OsEng.moduleEngine().module<ExoplanetsModule>()->setNorthVector(northProjected);
+        global::moduleEngine.module<ExoplanetsModule>()->setNorthVector(northProjected);
 
         glm::dvec3 beta = normalize(cross(starToSunVec, northProjected));
 
@@ -423,7 +427,7 @@ int addExoplanetSystem(lua_State* L) {
 		"}";
 
 		script = "openspace.addSceneGraphNode(" + starParent + ");";
-        OsEng.scriptEngine().queueScript(
+        openspace::global::scriptEngine.queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -500,7 +504,7 @@ int addExoplanetSystem(lua_State* L) {
 			"}";
             script = "";
             script = " openspace.addSceneGraphNode(" + starGlobe + ");";
-            OsEng.scriptEngine().queueScript(
+            openspace::global::scriptEngine.queueScript(
                 script,
                 openspace::scripting::ScriptEngine::RemoteScripting::Yes
             );
@@ -519,9 +523,9 @@ int addExoplanetSystem(lua_State* L) {
 			//	"}";
             //
 			//script = "openspace.addSceneGraphNode(" + starGlare + ");";
-            //OsEng.scriptEngine().queueScript(
+            //global::scriptEngine.queueScript(
             //    script,
-            //    openspace::scripting::ScriptEngine::RemoteScripting::Yes
+            //    scripting::ScriptEngine::RemoteScripting::Yes
             //);
 		}
 
@@ -615,7 +619,7 @@ int addExoplanetSystem(lua_State* L) {
             "}";
 
             script = "openspace.addSceneGraphNode(" + planet + ");";
-            OsEng.scriptEngine().queueScript(
+            openspace::global::scriptEngine.queueScript(
                 script,
                 openspace::scripting::ScriptEngine::RemoteScripting::Yes
             );
@@ -647,7 +651,7 @@ int addExoplanetSystem(lua_State* L) {
                 "},"
 			"}";
 
-			OsEng.scriptEngine().queueScript(
+			openspace::global::scriptEngine.queueScript(
 				"openspace.addSceneGraphNode(" + planetTrail + ");",
 				openspace::scripting::ScriptEngine::RemoteScripting::Yes
 			);
@@ -658,7 +662,7 @@ int addExoplanetSystem(lua_State* L) {
                 glm::dmat4 orbitPlaneRotationMatrix = computeOrbitPlaneRotationMatrix(plsy[i].I, plsy[i].BIGOM, plsy[i].OM, exoplanetSystemRot);
                 //glm::dmat4 orbitPlaneRotationMatrix = computeOrbitPlaneRotationMatrix(plsy[i].I, plsy[i].BIGOM, plsy[i].OM); // , exoplanetSystemRot);
                 glm::dmat3 rot = orbitPlaneRotationMatrix;
-                OsEng.moduleEngine().module<ExoplanetsModule>()->setRotation(rot);
+                global::moduleEngine.module<ExoplanetsModule>()->setRotation(rot);
 				const std::string disc = "{"
 					"Identifier = '" + plna[i] + "Disc',"
 					"Parent = '" + starname_speck + "',"
@@ -678,7 +682,7 @@ int addExoplanetSystem(lua_State* L) {
 					    "}"
 					"},"
 				"}";
-				OsEng.scriptEngine().queueScript(
+				openspace::global::scriptEngine.queueScript(
 					"openspace.addSceneGraphNode(" + disc + ");",
 					openspace::scripting::ScriptEngine::RemoteScripting::Yes
 				);
@@ -712,7 +716,7 @@ int addExoplanetSystem(lua_State* L) {
 					"}";
 
 
-					OsEng.scriptEngine().queueScript(
+					openspace::global::scriptEngine.queueScript(
 						"openspace.addSceneGraphNode(" + discECCLOWER + ");",
 						openspace::scripting::ScriptEngine::RemoteScripting::Yes
 					);
@@ -743,7 +747,7 @@ int addExoplanetSystem(lua_State* L) {
 					"}";
 
 
-					OsEng.scriptEngine().queueScript(
+					openspace::global::scriptEngine.queueScript(
 						"openspace.addSceneGraphNode(" + discECCUPPER + ");",
 						openspace::scripting::ScriptEngine::RemoteScripting::Yes
 					);
@@ -759,6 +763,7 @@ int addExoplanetSystem(lua_State* L) {
 		printf("No star with that name or not enough data about it.");
 	}
 
+
 	return 0;
 }
 
@@ -767,9 +772,9 @@ int removeExoplanetSystem(lua_State* L) {
 	const std::string starname = luaL_checkstring(L, StringLocation);
     std::string starname_speck = getSpeckStarname(starname);
 	std::string script = "openspace.removeSceneGraphNode('" + starname_speck + "');";
-	OsEng.scriptEngine().queueScript(
+	openspace::global::scriptEngine.queueScript(
 		script,
-		openspace::scripting::ScriptEngine::RemoteScripting::Yes
+		scripting::ScriptEngine::RemoteScripting::Yes
 	);
 
 	return 0;

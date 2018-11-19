@@ -25,8 +25,8 @@
 #include <modules/exoplanets/discoverymethods/discoverymethods.h>
 #include <modules/exoplanets/exoplanetsmodule.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
@@ -34,6 +34,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
+#include <openspace/util/camera.h>
 #include <openspace/scene/scene.h>
 
 namespace {
@@ -91,7 +92,7 @@ namespace openspace::exoplanets{
             "},"
         "}";
         std::string script = "openspace.addSceneGraphNode(" + markerView + ");";
-        OsEng.scriptEngine().queueScript(
+        openspace::global::scriptEngine.queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -125,14 +126,14 @@ namespace openspace::exoplanets{
         "}";
         script = "";
         script = "openspace.addSceneGraphNode(" + markerNorth + ");";
-        OsEng.scriptEngine().queueScript(
+        openspace::global::scriptEngine.queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
     void DiscoveryMethods::removeDirectionsMarkers() {
         std::string script = "openspace.removeSceneGraphNode('markerView'); openspace.removeSceneGraphNode('markerNorth');";
-        OsEng.scriptEngine().queueScript(
+        openspace::global::scriptEngine.queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -160,7 +161,7 @@ namespace openspace::exoplanets{
                 "}"
             ");";
 
-        OsEng.scriptEngine().queueScript(
+        openspace::global::scriptEngine.queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -191,7 +192,7 @@ namespace openspace::exoplanets{
                 "EuclideanPosition = {-0.05, -0.65}"
             "});";
 
-        OsEng.scriptEngine().queueScript(
+        openspace::global::scriptEngine.queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -201,7 +202,7 @@ namespace openspace::exoplanets{
 
     void DiscoveryMethods::scaleNode(std::string nodeName, float scalefactor) {
         std::string script = "openspace.setPropertyValueSingle( 'Scene."+ nodeName +".Scale.Scale', " + std::to_string(scalefactor) + ", 1);"; //get name of current star from em
-        OsEng.scriptEngine().queueScript(
+        openspace::global::scriptEngine.queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -209,15 +210,14 @@ namespace openspace::exoplanets{
 
     void DiscoveryMethods::moveStar(std::string starName, float semiMajorAxis) {
         std::string script = "openspace.setPropertyValueSingle( 'Scene."+starName+"Globe.Translation.SemiMajorAxis', " + std::to_string(semiMajorAxis) + ", 1); ";
-        OsEng.scriptEngine().queueScript(
+        openspace::global::scriptEngine.queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
 
     void DiscoveryMethods::toggleVisabilityOuterPlanets(std::vector<std::string> planetNames, std::string visability) {
-        std::vector<Exoplanet> planets = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlsy();
-        //std::vector<std::string> planetNames = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlna();
+        std::vector<Exoplanet> planets = global::moduleEngine.module<ExoplanetsModule>()->getPlsy();
 
         if (planetNames.size()>1)
         {
@@ -236,7 +236,7 @@ namespace openspace::exoplanets{
                     script += "openspace.setPropertyValueSingle( 'Scene." + planetNames[i] + "Disc.renderable.Enabled', " + visability + "); ";
                 }
 
-                OsEng.scriptEngine().queueScript(
+                openspace::global::scriptEngine.queueScript(
                     script,
                     openspace::scripting::ScriptEngine::RemoteScripting::Yes
                 );
@@ -246,7 +246,7 @@ namespace openspace::exoplanets{
 
     void DiscoveryMethods::toggleVisabilityPlanet(std::string nodeName, std::string visability) {
         std::string script = "openspace.setPropertyValueSingle( 'Scene." +nodeName  + ".RenderableGlobe.Enabled', " + visability + "); ";
-        OsEng.scriptEngine().queueScript(
+        openspace::global::scriptEngine.queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -254,9 +254,9 @@ namespace openspace::exoplanets{
 
     void DiscoveryMethods::moveCamera(glm::dvec3 pos) {
 
-        Camera* cam = OsEng.navigationHandler().camera();
+        Camera* cam = global::navigationHandler.camera();
         cam->setPositionVec3(pos);
-        OsEng.navigationHandler().resetCameraDirection();
+        global::navigationHandler.resetCameraDirection();
     }
 
     bool DiscoveryMethods::isDoppler() {
@@ -271,7 +271,7 @@ namespace openspace::exoplanets{
 
     void DiscoveryMethods::setDopplerImagePos(float value) {
         std::string script = "openspace.setPropertyValueSingle( 'ScreenSpace.DopplerShift2.EuclideanPosition', {"+std::to_string(value)+", -0.7}); ";
-        OsEng.scriptEngine().queueScript(
+        openspace::global::scriptEngine.queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -279,19 +279,19 @@ namespace openspace::exoplanets{
 
     void DiscoveryMethods::setTransitImagePos(float valueX,float valueY) {
         std::string script = "openspace.setPropertyValueSingle( 'ScreenSpace.Transit2.EuclideanPosition', {" + std::to_string(valueX) + "," + std::to_string(valueY) + "}); ";
-        OsEng.scriptEngine().queueScript(
+        openspace::global::scriptEngine.queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
 
     void DiscoveryMethods::addDopplerMethodVisualization() {
-        SceneGraphNode* focusNode = OsEng.navigationHandler().focusNode();
-        std::string starName = OsEng.moduleEngine().module<ExoplanetsModule>()->getStarName(); // getStarName 
+        SceneGraphNode* focusNode = global::navigationHandler.focusNode();
+        std::string starName = global::moduleEngine.module<ExoplanetsModule>()->getStarName(); // getStarName 
         glm::dvec3 starPosition = focusNode->worldPosition(); // can get from Exoplanet.POSITIONX/.POSITIONY/.POSITIONZ (in parsecs)
         glm::dvec3 starToSunVec = normalize(glm::dvec3(0.0, 0.0, 0.0) - starPosition);
-        std::vector<Exoplanet> planets = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlsy();
-        std::vector<std::string> planetNames = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlna();
+        std::vector<Exoplanet> planets = global::moduleEngine.module<ExoplanetsModule>()->getPlsy();
+        std::vector<std::string> planetNames = global::moduleEngine.module<ExoplanetsModule>()->getPlna();
 
         float semiMajorAxis = planets[0].A; // in AU
         float starSemiMajorAxis = 0.1 * semiMajorAxis; // 10% of exoplanets semiMajorAxis
@@ -302,7 +302,7 @@ namespace openspace::exoplanets{
         }
         float starRadius = planets[0].RSTAR; // in Solar Radii
 
-        glm::dvec3 north = OsEng.moduleEngine().module<ExoplanetsModule>()->getNorthVector();
+        glm::dvec3 north = global::moduleEngine.module<ExoplanetsModule>()->getNorthVector();
 
         // MOVE CAMERA
         glm::dvec3 faceOnVector = glm::normalize(glm::cross(starToSunVec, north));
@@ -345,9 +345,9 @@ namespace openspace::exoplanets{
     }
 
     void DiscoveryMethods::removeDopplerMethodVisualization() {
-        std::string starName = OsEng.moduleEngine().module<ExoplanetsModule>()->getStarName();
-        std::vector<std::string> planetNames = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlna();
-        std::vector<Exoplanet> planets = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlsy();
+        std::string starName = global::moduleEngine.module<ExoplanetsModule>()->getStarName();
+        std::vector<std::string> planetNames = global::moduleEngine.module<ExoplanetsModule>()->getPlna();
+        std::vector<Exoplanet> planets = global::moduleEngine.module<ExoplanetsModule>()->getPlsy();
 
         //SCALE STAR AND PLANET
         scaleNode(starName + "Globe", 1.0);
@@ -366,7 +366,7 @@ namespace openspace::exoplanets{
 
         // HIDE GRAPHS
         std::string script = "openspace.removeScreenSpaceRenderable('DopplerShift1'); openspace.removeScreenSpaceRenderable('DopplerShift2');";
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -377,12 +377,12 @@ namespace openspace::exoplanets{
 
     void DiscoveryMethods::addTransitMethodVisualization() {
 
-        SceneGraphNode* focusNode = OsEng.navigationHandler().focusNode();
-        std::string starName = OsEng.moduleEngine().module<ExoplanetsModule>()->getStarName(); // getStarName 
+        SceneGraphNode* focusNode = global::navigationHandler.focusNode();
+        std::string starName = global::moduleEngine.module<ExoplanetsModule>()->getStarName(); // getStarName 
         glm::dvec3 starPosition = focusNode->worldPosition(); // can get from Exoplanet.POSITIONX/.POSITIONY/.POSITIONZ (in parsecs)
         glm::dvec3 starToSunVec = normalize(glm::dvec3(0.0, 0.0, 0.0) - starPosition);
-        std::vector<Exoplanet> planets = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlsy();
-        std::vector<std::string> planetNames = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlna();
+        std::vector<Exoplanet> planets = global::moduleEngine.module<ExoplanetsModule>()->getPlsy();
+        std::vector<std::string> planetNames = global::moduleEngine.module<ExoplanetsModule>()->getPlna();
         
         float semiMajorAxis = planets[0].A; // in AU (1AU = 149 597 870 700m)
         float eccentricity = planets[0].ECC;
@@ -394,7 +394,7 @@ namespace openspace::exoplanets{
 
         // MOVE CAMERA
         //borde kanske va periapsis distance, men det går bra ändå
-        glm::dvec3 north = OsEng.moduleEngine().module<ExoplanetsModule>()->getNorthVector();
+        glm::dvec3 north = global::moduleEngine.module<ExoplanetsModule>()->getNorthVector();
         //glm::dvec3 faceOnVector = glm::normalize(glm::cross(starToSunVec, north));
         glm::dvec3 cameraPosition = starPosition + ((4.0 * semiMajorAxis * 149597870700.0) * starToSunVec);
         //glm::dvec3 cameraPosition = starPosition + ((3.0 * semiMajorAxis * 149597870700.0) * faceOnVector);
@@ -428,15 +428,15 @@ namespace openspace::exoplanets{
         // END MARKERS
     }
     void DiscoveryMethods::removeTransitMethodVisualization() {
-        std::vector<std::string> planetNames = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlna();
+        std::vector<std::string> planetNames = global::moduleEngine.module<ExoplanetsModule>()->getPlna();
         //SCALE STAR AND PLANET
-        std::string starName = OsEng.moduleEngine().module<ExoplanetsModule>()->getStarName();
+        std::string starName = global::moduleEngine.module<ExoplanetsModule>()->getStarName();
         scaleNode(starName + "Globe", 1);
         scaleNode(planetNames[0], 1);
 
         // REMOVE GRAPH
         std::string script = "openspace.removeScreenSpaceRenderable('Transit3');openspace.removeScreenSpaceRenderable('Transit2');openspace.removeScreenSpaceRenderable('Transit1');";
-        OsEng.scriptEngine().queueScript(
+        openspace::global::scriptEngine.queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -448,9 +448,9 @@ namespace openspace::exoplanets{
 
     void DiscoveryMethods::addSolarSystemReferenceVisualization() {
 
-        std::string starName = OsEng.moduleEngine().module<ExoplanetsModule>()->getStarName();
-        std::vector<Exoplanet> planets = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlsy();
-        std::vector<std::string> planetNames = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlna();
+        std::string starName = global::moduleEngine.module<ExoplanetsModule>()->getStarName();
+        std::vector<Exoplanet> planets = global::moduleEngine.module<ExoplanetsModule>()->getPlsy();
+        std::vector<std::string> planetNames = global::moduleEngine.module<ExoplanetsModule>()->getPlna();
         
         // SUN
         const std::string sunRef = "{"
@@ -472,7 +472,7 @@ namespace openspace::exoplanets{
         "}";
         
         std::string script = "openspace.addSceneGraphNode(" + sunRef + ");";
-        OsEng.scriptEngine().queueScript(
+        openspace::global::scriptEngine.queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -499,14 +499,14 @@ namespace openspace::exoplanets{
                 "}";
             script = "";
             script = "openspace.addSceneGraphNode(" + earthRef + ");";
-            OsEng.scriptEngine().queueScript(
+            openspace::global::scriptEngine.queueScript(
                 script,
                 openspace::scripting::ScriptEngine::RemoteScripting::Yes
             );
         }
         
 
-        glm::dmat3 rotation = OsEng.moduleEngine().module<ExoplanetsModule>()->getRotation();
+        glm::dmat3 rotation = global::moduleEngine.module<ExoplanetsModule>()->getRotation();
         // ORBIT
         const std::string orbitRef = "{"
             "Identifier = 'OrbitReference',"
@@ -527,7 +527,7 @@ namespace openspace::exoplanets{
         "}";
         script = "";
         script = "openspace.addSceneGraphNode(" + orbitRef + ");";
-        OsEng.scriptEngine().queueScript(
+        openspace::global::scriptEngine.queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -537,7 +537,7 @@ namespace openspace::exoplanets{
         std::string script = "openspace.removeSceneGraphNode('SunReference');"
             "openspace.removeSceneGraphNode('EarthReference');"
             "openspace.removeSceneGraphNode('OrbitReference');";
-        OsEng.scriptEngine().queueScript(
+        openspace::global::scriptEngine.queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );

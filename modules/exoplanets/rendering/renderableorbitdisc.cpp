@@ -26,11 +26,12 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
@@ -178,7 +179,7 @@ bool RenderableOrbitdisc::isReady() const {
 }
 
 void RenderableOrbitdisc::initializeGL() {
-    _shader = OsEng.renderEngine().buildRenderProgram(
+    _shader = global::renderEngine.buildRenderProgram(
         "OrbitdiscProgram",
         absPath("${BASE}/modules/exoplanets/shaders/orbitdisc_vs.glsl"),
         absPath("${BASE}/modules/exoplanets/shaders/orbitdisc_fs.glsl")
@@ -211,7 +212,7 @@ void RenderableOrbitdisc::deinitializeGL() {
     _textureFile = nullptr;
     _texture = nullptr;
 
-    OsEng.renderEngine().removeRenderProgram(_shader.get());
+    global::renderEngine.removeRenderProgram(_shader.get());
     _shader = nullptr;
 }
 
