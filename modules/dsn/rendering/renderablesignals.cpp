@@ -158,6 +158,8 @@ void RenderableSignals::initializeGL() {
     // We don't need an index buffer, so we keep it at the default value of 0
     glGenVertexArrays(1, &_lineRenderInformation._vaoID);
     glGenBuffers(1, &_lineRenderInformation._vBufferID);
+
+    updateVertexAttributes();
 }
 
 void RenderableSignals::deinitializeGL() {
@@ -183,6 +185,23 @@ inline void unbindGL() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
+
+void RenderableSignals::updateVertexAttributes() {
+
+    // position attributes
+    glVertexAttribPointer(_vaLocVer, _sizeThreeVal, GL_FLOAT, GL_FALSE, sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) + sizeof(DistanceVBOLayout) + sizeof(float), (void*)0);
+    glEnableVertexAttribArray(_vaLocVer);
+    // color attributes
+    glVertexAttribPointer(_vaLocCol, _sizeFourVal, GL_FLOAT, GL_FALSE, sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) + sizeof(DistanceVBOLayout) + sizeof(float), (void*)(sizeof(PositionVBOLayout)));
+    glEnableVertexAttribArray(_vaLocCol);
+    // distance attributes
+    glVertexAttribPointer(_vaLocDist, _sizeOneVal, GL_FLOAT, GL_FALSE, sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) + sizeof(DistanceVBOLayout) + sizeof(float), (void*)(sizeof(PositionVBOLayout) + sizeof(ColorVBOLayout)));
+    glEnableVertexAttribArray(_vaLocDist);
+    // time attribute
+    glVertexAttribPointer(_vaLocTimeSinceStart, _sizeOneVal, GL_FLOAT, GL_FALSE, sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) + sizeof(DistanceVBOLayout) + sizeof(float), (void*)(sizeof(PositionVBOLayout) + sizeof(ColorVBOLayout) + sizeof(float)));
+    glEnableVertexAttribArray(_vaLocTimeSinceStart);
+
+};
 
 void RenderableSignals::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
@@ -280,18 +299,7 @@ void RenderableSignals::update(const UpdateData& data) {
         GL_STATIC_DRAW
     );
 
-    // position attributes
-    glVertexAttribPointer(_vaLocVer, _sizeThreeVal, GL_FLOAT, GL_FALSE, sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) + sizeof(DistanceVBOLayout) + sizeof(float), (void*)0);
-    glEnableVertexAttribArray(_vaLocVer);
-    // color attributes
-    glVertexAttribPointer(_vaLocCol, _sizeFourVal, GL_FLOAT, GL_FALSE, sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) + sizeof(DistanceVBOLayout) + sizeof(float), (void*)(sizeof(PositionVBOLayout)));
-    glEnableVertexAttribArray(_vaLocCol);
-    // distance attributes
-    glVertexAttribPointer(_vaLocDist, _sizeOneVal, GL_FLOAT, GL_FALSE, sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) + sizeof(DistanceVBOLayout) + sizeof(float), (void*)(sizeof(PositionVBOLayout) + sizeof(ColorVBOLayout)));
-    glEnableVertexAttribArray(_vaLocDist);
-    // time attribute
-    glVertexAttribPointer(_vaLocTimeSinceStart, _sizeOneVal, GL_FLOAT, GL_FALSE, sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) + sizeof(DistanceVBOLayout) + sizeof(float), (void*)(sizeof(PositionVBOLayout) + sizeof(ColorVBOLayout)+ sizeof(float)));
-    glEnableVertexAttribArray(_vaLocTimeSinceStart);
+    updateVertexAttributes();
 
     // Directly render the entire step
     _lineRenderInformation.first = 0;
@@ -300,6 +308,7 @@ void RenderableSignals::update(const UpdateData& data) {
     //unbind vertexArray
     unbindGL();
 }
+
 
 int RenderableSignals::findFileIndexForCurrentTime(double time, std::vector<double> vec) {
     // upper_bound has O(log n) for sorted vectors, more efficient than for loop

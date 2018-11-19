@@ -79,6 +79,7 @@ namespace openspace {
          */
         void render(const RenderData& data, RendererTasks& rendererTask) override;
 
+        void updateVertexAttributes();
         bool isReady() const override;
         /* Returns an index for our filenames */
         static int findFileIndexForCurrentTime(double time, std::vector<double> vec);
@@ -92,6 +93,7 @@ namespace openspace {
         glm::vec3 getPositionForGeocentricSceneGraphNode(const char* id);
         /* Returns a color based on what site the station is located to */
         glm::vec3 getStationColor(std::string dishidentifier);
+        /* Returns a distance between two scenegraphnodes */
         float getDistance(std::string nodeIdA, std::string nodeIdB);
 
         /* The VBO layout of the vertex position */
