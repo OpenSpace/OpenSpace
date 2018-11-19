@@ -15,29 +15,21 @@ local colorLUT = asset.syncedResource({
 })
 
 -- Download a preprocessed binary octree of Radial Velocity subset values per star (preprocessed into 8 binary files).
-local onlineStars = asset.syncedResource({
+local starsFolder = asset.syncedResource({
     Name = "Gaia Stars RV",
     Type = "HttpSynchronization",
     Identifier = "gaia_stars_rv_octree",
     Version = 1
 })
 
-local localStars = "E:/gaia_sync_data"
-
 local GaiaMission = {
     Identifier = "GaiaMission",
     Renderable = {
         Type = "RenderableGaiaStars",
-        File = onlineStars .. "/",
-        -- File = localStars .. "/DR2_rv_Octree[10kSPN,20dist]/",
-        -- File = localStars .. "/DR2_rv_Octree[10kSPN,20dist]_5p/",
-        -- File = localStars .. "/DR2_full_Octree[20kSPN,200dist]_90,0/",
-        -- File = localStars .. "/DR2_full_Octree[50kSPN,250dist]_50,125/",
-        -- File = localStars .. "/DR2_full_Octree[150kSPN,250dist]/",
-        -- File = localStars .. "/DR2_full_Octree[50kSPN,500dist]_50,50/",
+        File = starsFolder .. "/",
         FileReaderOption = "StreamOctree",
-        RenderOption = "Color",
-        ShaderOption = "Billboard_SSBO",
+        RenderOption = "Motion",
+        ShaderOption = "Point_SSBO",
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
         LuminosityMultiplier = 35,
@@ -61,29 +53,6 @@ local GaiaMission = {
     },
     GUI = {
         Name = "Gaia Mission",
-        Path = "/GaiaMission"
-    }
-}
-
-local GaiaMissionTGAS = {
-    Identifier = "GaiaMissionTGAS",
-    Renderable = {
-        Type = "RenderableGaiaStars",
-        Enabled = false,
-        File = localStars .. "/AMNH_DR1_Octree_10kSPN.bin",
-        --File = localStars .. "/TGAS_Octree_10kSPN.bin",
-        FileReaderOption = "BinaryOctree",
-        RenderOption = "Color",
-        ShaderOption = "Point_SSBO",
-        Texture = textures .. "/halo.png",
-        ColorMap = colorLUT .. "/colorbv.cmap",
-        LuminosityMultiplier = 200,
-        LodPixelThreshold = 0,
-        FilterSize = 3,
-        Sigma = 0.2,
-    },
-    GUI = {
-        Name = "Gaia Mission TGAS",
         Path = "/GaiaMission"
     }
 }
