@@ -93,7 +93,7 @@ documentation::Documentation RenderableSignals::Documentation() {
 
 RenderableSignals::RenderableSignals(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
+    , _lineWidth(LineWidthInfo, 2.5f, 1.f, 10.f)
 {
     if (dictionary.hasKeyAndValue<ghoul::Dictionary>(SiteColorsInfo.identifier)) {
         ghoul::Dictionary siteColorDictionary = dictionary.value<ghoul::Dictionary>(SiteColorsInfo.identifier);
