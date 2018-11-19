@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#pragma optimize ("", off)
-
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
 
 #include <modules/spacecraftinstruments/util/hongkangparser.h>
@@ -33,6 +31,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/dictionary.h>
@@ -486,7 +485,11 @@ void ProjectionComponent::imageProjectBegin() {
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 
     if (_textureSizeDirty) {
-        LDEBUG(fmt::format("Changing texture size to {}", std::to_string(_textureSize)));
+        LDEBUG(
+            fmt::format(
+                "Changing texture size to {}", ghoul::to_string(_textureSize.value())
+            )
+        );
 
         // If the texture size has changed, we have to allocate new memory and copy
         // the image texture to the new target

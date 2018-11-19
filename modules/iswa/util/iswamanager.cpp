@@ -94,6 +94,8 @@ namespace {
 
 namespace openspace {
 
+IswaManager* IswaManager::_instance = nullptr;
+
 IswaManager::IswaManager()
     : properties::PropertyOwner({ "IswaManager" })
     , _baseUrl("https://iswa-demo-server.herokuapp.com/")
@@ -116,6 +118,27 @@ IswaManager::IswaManager()
 IswaManager::~IswaManager() {
     _groups.clear();
     _cygnetInformation.clear();
+}
+
+
+void IswaManager::initialize() {
+    ghoul_assert(!isInitialized(), "IswaManager is already initialized");
+    _instance = new IswaManager;
+}
+
+void IswaManager::deinitialize() {
+    ghoul_assert(isInitialized(), "IswaManager is not initialized");
+    delete _instance;
+    _instance = nullptr;
+}
+
+bool IswaManager::isInitialized() {
+    return _instance != nullptr;
+}
+
+IswaManager& IswaManager::ref() {
+    ghoul_assert(isInitialized(), "IswaManager is not initialized");
+    return *_instance;
 }
 
 void IswaManager::addIswaCygnet(int id, const std::string& type, std::string group) {
@@ -357,15 +380,15 @@ std::string IswaManager::jsonPlaneToLuaTable(MetadataFuture& data) {
     "Parent = '" + parent + "', "
     "Renderable = {"
         "Type = '" + _type[data.type] + _geom[data.geom] + "', "
-        "Id = " + std::to_string(data.id) + ", "
+        "Id = " + ghoul::to_string(data.id) + ", "
         "Frame = '" + frame + "' , "
-        "GridMin = " + std::to_string(min) + ", "
-        "GridMax = " + std::to_string(max) + ", "
-        "SpatialScale = " + std::to_string(spatialScale) + ", "
-        "UpdateTime = " + std::to_string(updateTime) + ", "
+        "GridMin = " + ghoul::to_string(min) + ", "
+        "GridMax = " + ghoul::to_string(max) + ", "
+        "SpatialScale = " + ghoul::to_string(spatialScale) + ", "
+        "UpdateTime = " + ghoul::to_string(updateTime) + ", "
         "CoordinateType = '" + coordinateType + "', "
         "Group = '"+ data.group + "',"
-        "XOffset = "+ std::to_string(xOffset) + ","
+        "XOffset = "+ ghoul::to_string(xOffset) + ","
         "}"
     "}";
 
@@ -412,9 +435,9 @@ std::string IswaManager::parseKWToLuaTable(const CdfInfo& info, const std::strin
                 "Type = 'KameleonPlane', "
                 "Id = 0 ,"
                 "Frame = '" + frame + "' , "
-                "GridMin = " + std::to_string(min) + ", "
-                "GridMax = " + std::to_string(max) + ", "
-                "SpatialScale = " + std::to_string(spatialScale) + ", "
+                "GridMin = " + ghoul::to_string(min) + ", "
+                "GridMax = " + ghoul::to_string(max) + ", "
+                "SpatialScale = " + ghoul::to_string(spatialScale) + ", "
                 "UpdateTime = 0, "
                 "kwPath = '" + info.path + "' ,"
                 "axisCut = '" + cut + "',"
@@ -468,10 +491,10 @@ std::string IswaManager::jsonSphereToLuaTable(MetadataFuture& data) {
         "Type = '" + _type[data.type] + _geom[data.geom] + "', "
         "Id = " + std::to_string(data.id) + ", "
         "Frame = '" + frame + "' , "
-        "GridMin = " + std::to_string(min) + ", "
-        "GridMax = " + std::to_string(max) + ", "
-        "UpdateTime = " + std::to_string(updateTime) + ", "
-        "Radius = " + std::to_string(radius) + ", "
+        "GridMin = " + ghoul::to_string(min) + ", "
+        "GridMax = " + ghoul::to_string(max) + ", "
+        "UpdateTime = " + ghoul::to_string(updateTime) + ", "
+        "Radius = " + ghoul::to_string(radius) + ", "
         "CoordinateType = '" + coordinateType + "', "
         "Group = '"+ data.group + "',"
         "}"

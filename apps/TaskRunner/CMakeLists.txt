@@ -31,15 +31,32 @@ set_source_files_properties(
 
 set(MACOSX_BUNDLE_ICON_FILE openspace.icns)
 
-create_new_application(
-    TaskRunner
-    MACOSX_BUNDLE
+create_new_application(TaskRunner MACOSX_BUNDLE
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/openspace.rc
     ${CMAKE_CURRENT_SOURCE_DIR}/openspace.icns
 )
 
-target_link_libraries(
-    TaskRunner
-    libOpenSpace
-)
+target_link_libraries(TaskRunner openspace-core)
+
+# Web Browser and Web gui
+# Why not put these in the module's path? Because they do not have access to the
+# target as of July 2017, which is needed.
+if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
+    # wanted by CEF
+    set(CMAKE_BUILD_TYPE Debug CACHE INTERNAL "CMAKE_BUILD_TYPE")
+
+    if (WIN32)
+        set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/OpenSpace/openspace.rc)
+    endif ()
+
+    # Add the CEF binary distribution's cmake/ directory to the module path and
+    # find CEF to initialize it properly.
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
+    include(webbrowser_helpers)
+
+    set_cef_targets("${CEF_ROOT}" TaskRunner)
+    run_cef_platform_config("${CEF_ROOT}" "${CEF_TARGET}" "${WEBBROWSER_MODULE_PATH}")
+elseif (OPENSPACE_MODULE_WEBBROWSER)
+    message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
+endif ()

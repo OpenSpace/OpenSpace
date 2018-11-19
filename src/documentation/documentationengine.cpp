@@ -62,6 +62,21 @@ DocumentationEngine::DocumentationEngine()
     )
 {}
 
+void DocumentationEngine::initialize() {
+    ghoul_assert(!isInitialized(), "DocumentationEngine is already initialized");
+    _instance = new DocumentationEngine;
+}
+
+void DocumentationEngine::deinitialize() {
+    ghoul_assert(isInitialized(), "DocumentationEngine is not initialized");
+    delete _instance;
+    _instance = nullptr;
+}
+
+bool DocumentationEngine::isInitialized() {
+    return _instance != nullptr;
+}
+
 DocumentationEngine& DocumentationEngine::ref() {
     if (_instance == nullptr) {
         _instance = new DocumentationEngine;

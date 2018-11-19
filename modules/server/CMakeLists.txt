@@ -35,10 +35,12 @@ set(HEADER_FILES
     include/topics/getpropertytopic.h
     include/topics/luascripttopic.h
     include/topics/setpropertytopic.h
+    include/topics/shortcuttopic.h
     include/topics/subscriptiontopic.h
     include/topics/timetopic.h
     include/topics/topic.h
     include/topics/triggerpropertytopic.h
+    include/topics/versiontopic.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -52,10 +54,12 @@ set(SOURCE_FILES
     src/topics/getpropertytopic.cpp
     src/topics/luascripttopic.cpp
     src/topics/setpropertytopic.cpp
+    src/topics/shortcuttopic.cpp
     src/topics/subscriptiontopic.cpp
     src/topics/timetopic.cpp
     src/topics/topic.cpp
     src/topics/triggerpropertytopic.cpp
+    src/topics/versiontopic.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

@@ -41,13 +41,14 @@ namespace openspace::interaction {
 
 class KeybindingManager : public DocumentationGenerator {
 public:
-    BooleanType(IsLocalBind);
     BooleanType(IsSynchronized);
 
     struct KeyInformation {
         std::string command;
         IsSynchronized synchronization;
         std::string documentation;
+        std::string name;
+        std::string guiPath;
     };
 
     KeybindingManager();
@@ -55,10 +56,10 @@ public:
     void resetKeyBindings();
 
     void bindKeyLocal(Key key, KeyModifier modifier, std::string luaCommand,
-        std::string documentation = "");
+        std::string documentation = "", std::string name = "", std::string guiPath = "");
 
     void bindKey(Key key, KeyModifier modifier, std::string luaCommand,
-        std::string documentation = "");
+        std::string documentation = "", std::string name = "", std::string guiPath = "");
 
     void removeKeyBinding(const std::string& key);
 
@@ -68,6 +69,8 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
+
+    const std::multimap<KeyWithModifier, KeyInformation>& keyBindings() const;
 
 private:
     std::string generateJson() const override;

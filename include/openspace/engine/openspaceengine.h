@@ -80,15 +80,15 @@ public:
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double posX, double posY);
     void externalControlCallback(const char* receivedChars, int size, int clientId);
-    void encode();
-    void decode();
+    std::vector<char> encode();
+    void decode(std::vector<char> data);
 
     void scheduleLoadSingleAsset(std::string assetPath);
     void toggleShutdownMode();
 
     // Guaranteed to return a valid pointer
     AssetManager& assetManager();
-    LoadingScreen& loadingScreen();
+    LoadingScreen* loadingScreen();
 
     void writeSceneDocumentation();
     void writeStaticDocumentation();

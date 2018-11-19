@@ -38,6 +38,7 @@
 #include <openspace/properties/vector/vec4property.h>
 
 //#define TOUCH_DEBUG_PROPERTIES
+//#define TOUCH_DEBUG_NODE_PICK_MESSAGES
 
 namespace openspace {
 
@@ -242,6 +243,7 @@ private:
     int _numOfTests;
     TUIO::TuioTime _time;
     bool _directTouchMode;
+    bool _wasPrevModeDirectTouch;
     bool _tap;
     bool _doubleTap;
     bool _zoomOutTap;

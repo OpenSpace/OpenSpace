@@ -25,10 +25,11 @@
 #include <modules/webbrowser/include/screenspacebrowser.h>
 
 #include <modules/webbrowser/webbrowsermodule.h>
+#include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <modules/webbrowser/include/browserinstance.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/windowdelegate.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 
@@ -77,7 +78,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
         _url = dictionary.value<std::string>(KeyUrl);
     }
 
-    glm::vec2 windowDimensions = OsEng.windowWrapper().currentSubwindowSize();
+    glm::vec2 windowDimensions = global::windowDelegate.currentSubwindowSize();
     _dimensions = windowDimensions;
 
     _texture = std::make_unique<ghoul::opengl::Texture>(
@@ -85,7 +86,11 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
     );
 
     _renderHandler = new ScreenSpaceRenderHandler();
-    _browserInstance = std::make_shared<BrowserInstance>(_renderHandler);
+    _keyboardHandler = new WebKeyboardHandler();
+    _browserInstance = std::make_unique<BrowserInstance>(
+        _renderHandler,
+        _keyboardHandler
+    );
 
     _url.onChange([this]() { _isUrlDirty = true; });
     _dimensions.onChange([this]() { _isDimensionsDirty = true; });
@@ -93,25 +98,19 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
     addProperty(_url);
     addProperty(_dimensions);
 
-    WebBrowserModule* webBrowser = OsEng.moduleEngine().module<WebBrowserModule>();
+    WebBrowserModule* webBrowser = global::moduleEngine.module<WebBrowserModule>();
     if (webBrowser) {
-        webBrowser->addBrowser(_browserInstance);
+        webBrowser->addBrowser(_browserInstance.get());
     }
 }
 
 bool ScreenSpaceBrowser::initialize() {
-    _originalViewportSize = OsEng.windowWrapper().currentWindowSize();
+    _originalViewportSize = global::windowDelegate.currentWindowSize();
     _renderHandler->setTexture(*_texture);
-
-    createPlane();
-    // Load a special version of the regular ScreenRenderable shaders. This mirrors the
-    // image along the Y axis since the image produced by CEF was flipped.
-    //createShaders("${MODULE_WEBBROWSER}/shaders/");
 
     createShaders();
 
     _browserInstance->loadUrl(_url);
-
     return isReady();
 }
 
@@ -122,9 +121,9 @@ bool ScreenSpaceBrowser::deinitialize() {
 
     _browserInstance->close(true);
 
-    WebBrowserModule* webBrowser = OsEng.moduleEngine().module<WebBrowserModule>();
-    if (webBrowser != nullptr) {
-        webBrowser->removeBrowser(_browserInstance);
+    WebBrowserModule* webBrowser = global::moduleEngine.module<WebBrowserModule>();
+    if (webBrowser) {
+        webBrowser->removeBrowser(_browserInstance.get());
         _browserInstance.reset();
         return true;
     }
@@ -134,6 +133,10 @@ bool ScreenSpaceBrowser::deinitialize() {
 }
 
 void ScreenSpaceBrowser::render() {
+    if (!_renderHandler->isTextureReady()) {
+        return;
+    }
+    _renderHandler->updateTexture();
     draw(rotationMatrix() * translationMatrix() * scaleMatrix());
 }
 
