@@ -18,13 +18,13 @@ local model = asset.syncedResource({
 })
 
 
-local GaiaModel = {
-    Identifier = "GaiaModel",
+local Gaia = {
+    Identifier = "Gaia",
     Parent = transforms.GaiaPosition.Identifier,
     Transform = {
         Rotation = {
             Type = "FixedRotation",
-            Attached = "GaiaModel",
+            Attached = "Gaia",
             XAxis = { 1.0, 0.0, 0.0 },
             XAxisOrthogonal = true,
             YAxis = "Sun",
@@ -59,9 +59,9 @@ local GaiaModel = {
         }
     },
     GUI = {
-        Name = "Model",
-        Path = "/GaiaMission/Gaia Model"
+        Name = "Gaia",
+        Path = "/Solar System/Missions/Gaia"
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { GaiaModel })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Gaia })

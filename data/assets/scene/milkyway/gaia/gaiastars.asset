@@ -22,8 +22,8 @@ local starsFolder = asset.syncedResource({
     Version = 1
 })
 
-local GaiaMission = {
-    Identifier = "GaiaMission",
+local GaiaStars = {
+    Identifier = "GaiaStars",
     Renderable = {
         Type = "RenderableGaiaStars",
         File = starsFolder .. "/",
@@ -52,9 +52,9 @@ local GaiaMission = {
         FilterDist = {9.0, 9.0},
     },
     GUI = {
-        Name = "Gaia Mission",
-        Path = "/GaiaMission"
+        Name = "Gaia Stars",
+        Path = "/Milky Way"
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { GaiaMission })
+assetHelper.registerSceneGraphNodesAndExport(asset, { GaiaStars })

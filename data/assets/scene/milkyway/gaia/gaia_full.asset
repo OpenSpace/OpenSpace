@@ -1,3 +1,0 @@
-asset.request('scene/milkyway/gaia/gaiamission')
-asset.require('scene/milkyway/gaia/gaiamodel')
-asset.require('scene/milkyway/gaia/trail')
