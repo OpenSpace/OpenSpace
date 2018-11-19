@@ -189,18 +189,29 @@ inline void unbindGL() {
 void RenderableSignals::updateVertexAttributes() {
 
     // position attributes
-    glVertexAttribPointer(_vaLocVer, _sizeThreeVal, GL_FLOAT, GL_FALSE, sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) + sizeof(DistanceVBOLayout) + sizeof(float), (void*)0);
+    glVertexAttribPointer(_vaLocVer, _sizeThreeVal, GL_FLOAT, GL_FALSE, 
+                          sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) +
+                          sizeof(DistanceVBOLayout) + sizeof(float),
+                          (void*)0);
     glEnableVertexAttribArray(_vaLocVer);
     // color attributes
-    glVertexAttribPointer(_vaLocCol, _sizeFourVal, GL_FLOAT, GL_FALSE, sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) + sizeof(DistanceVBOLayout) + sizeof(float), (void*)(sizeof(PositionVBOLayout)));
+    glVertexAttribPointer(_vaLocCol, _sizeFourVal, GL_FLOAT, GL_FALSE,
+                          sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) +
+                          sizeof(DistanceVBOLayout) + sizeof(float),
+                          (void*)(sizeof(PositionVBOLayout)));
     glEnableVertexAttribArray(_vaLocCol);
     // distance attributes
-    glVertexAttribPointer(_vaLocDist, _sizeOneVal, GL_FLOAT, GL_FALSE, sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) + sizeof(DistanceVBOLayout) + sizeof(float), (void*)(sizeof(PositionVBOLayout) + sizeof(ColorVBOLayout)));
+    glVertexAttribPointer(_vaLocDist, _sizeOneVal, GL_FLOAT, GL_FALSE,
+                          sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) +
+                          sizeof(DistanceVBOLayout) + sizeof(float),
+                          (void*)(sizeof(PositionVBOLayout) + sizeof(ColorVBOLayout)));
     glEnableVertexAttribArray(_vaLocDist);
     // time attribute
-    glVertexAttribPointer(_vaLocTimeSinceStart, _sizeOneVal, GL_FLOAT, GL_FALSE, sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) + sizeof(DistanceVBOLayout) + sizeof(float), (void*)(sizeof(PositionVBOLayout) + sizeof(ColorVBOLayout) + sizeof(float)));
+    glVertexAttribPointer(_vaLocTimeSinceStart, _sizeOneVal, GL_FLOAT, GL_FALSE,
+                          sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) +
+                          sizeof(DistanceVBOLayout) + sizeof(float),
+                          (void*)(sizeof(PositionVBOLayout) + sizeof(ColorVBOLayout) + sizeof(float)));
     glEnableVertexAttribArray(_vaLocTimeSinceStart);
-
 };
 
 void RenderableSignals::render(const RenderData& data, RendererTasks&) {
@@ -232,7 +243,7 @@ void RenderableSignals::render(const RenderData& data, RendererTasks&) {
     glDrawArrays(
         GL_LINES,
         _lineRenderInformation.first,
-        _lineRenderInformation.count
+        _lineRenderInformation.countLines
     );
 
     //unbind vertex array and buffers
@@ -301,9 +312,9 @@ void RenderableSignals::update(const UpdateData& data) {
 
     updateVertexAttributes();
 
-    // Directly render the entire step
-    _lineRenderInformation.first = 0;
-    _lineRenderInformation.count = static_cast<GLsizei>(_vertexArray.size() / (_sizeThreeVal + _sizeFourVal + 2 *_sizeOneVal));
+    // Update the number of lines to render
+    _lineRenderInformation.countLines = static_cast<GLsizei>(_vertexArray.size() / 
+                                (_sizeThreeVal + _sizeFourVal + 2 *_sizeOneVal));
 
     //unbind vertexArray
     unbindGL();
@@ -334,7 +345,8 @@ int RenderableSignals::findFileIndexForCurrentTime(double time, std::vector<doub
 }
 
 // Todo: handle signalIsSending, not only signalIsActive for the signal segments
-bool RenderableSignals::isSignalActive(double currentTime, std::string signalStartTime, std::string signalEndTime, double lightTravelTime) {
+bool RenderableSignals::isSignalActive(double currentTime, std::string signalStartTime,
+                                        std::string signalEndTime, double lightTravelTime) {
     double startTimeInSeconds = SpiceManager::ref().ephemerisTimeFromDate(signalStartTime);
     double endTimeInSeconds = SpiceManager::ref().ephemerisTimeFromDate(signalEndTime) + lightTravelTime;
 
@@ -438,7 +450,8 @@ glm::vec3 RenderableSignals::getPositionForGeocentricSceneGraphNode(const char* 
         position = global::renderEngine.scene()->sceneGraphNode(id)->position();
     }
     else {
-        LERROR(fmt::format("No scengraphnode found for the station dish {}, drawing line from center of Earth", id));
+        LERROR(fmt::format("No scengraphnode found for the station dish {}, "
+                            "drawing line from center of Earth", id));
         position = glm::vec3(0, 0, 0);
     }
 

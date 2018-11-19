@@ -132,7 +132,7 @@ namespace openspace {
             /// The first element in the vertex buffer to be rendered
             GLint first = 0;
             /// The number of values to be rendered
-            GLsizei count = 0;
+            GLsizei countLines = 0;
             /// Local model matrix, for spacecraft, dependant on focusnode, used for rendering in camera space
             glm::dmat4 _localTransformSpacecraft = glm::dmat4(1.0);
             /// The vertex array object for this RenderInformation
