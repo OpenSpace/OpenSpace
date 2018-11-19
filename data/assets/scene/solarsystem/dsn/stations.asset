@@ -29,27 +29,27 @@ local LightSources = {
 
 -- Colormap for the different sites
 local siteColorMap = {  
-                        Goldstone = {0.0, 0.0, 1.0}, 
-                        Canberra = {0.0, 1.0, 0.0}, 
-                        Madrid = {1.0, 0.0, 0.0} 
+                        GoldstoneColor = {0.0, 0.0, 1.0}, 
+                        CanberraColor = {0.0, 1.0, 0.0}, 
+                        MadridColor = {1.0, 0.0, 0.0} 
                       }
 
 -- Map to the site locations above, this will determine the signal colors
 local stationSiteMap = {
-                 DSS14 = "Goldstone",
-                 DSS15 = "Goldstone",
-                 DSS24 = "Goldstone",
-                 DSS25 = "Goldstone",
-                 DSS26 = "Goldstone",
-                 DSS43 = "Canberra",
-                 DSS34 = "Canberra",
-                 DSS35 = "Canberra",
-                 DSS36 = "Canberra",
-                 DSS45 = "Canberra",
-                 DSS63 = "Madrid",
-                 DSS65 = "Madrid",
-                 DSS54 = "Madrid",
-                 DSS55 = "Madrid"
+                 DSS14 = "GoldstoneColor",
+                 DSS15 = "GoldstoneColor",
+                 DSS24 = "GoldstoneColor",
+                 DSS25 = "GoldstoneColor",
+                 DSS26 = "GoldstoneColor",
+                 DSS43 = "CanberraColor",
+                 DSS34 = "CanberraColor",
+                 DSS35 = "CanberraColor",
+                 DSS36 = "CanberraColor",
+                 DSS45 = "CanberraColor",
+                 DSS63 = "MadridColor",
+                 DSS65 = "MadridColor",
+                 DSS54 = "MadridColor",
+                 DSS55 = "MadridColor"
         }
 
 --------------------- Goldstone ------------------------
@@ -73,7 +73,7 @@ local DSS14 = {
     },
     GUI = {
         Name = "DSS14",
-        Path = "/Solar System/Stations/Goldstone/DSS14"
+        Path = "/Solar System/Stations/Goldstone"
     }
 }
 
@@ -98,7 +98,7 @@ local DSS15 = {
     },
     GUI = {
         Name = "DSS15",
-        Path = "/Solar System/Stations/Goldstone/DSS15"
+        Path = "/Solar System/Stations/Goldstone"
     }
 }
 
@@ -123,7 +123,7 @@ local DSS24 = {
     },
     GUI = {
         Name = "DSS24",
-        Path = "/Solar System/Stations/Goldstone/DSS24"
+        Path = "/Solar System/Stations/Goldstone"
     }
 }
 
@@ -147,7 +147,7 @@ local DSS25 = {
     },
     GUI = {
         Name = "DSS25",
-        Path = "/Solar System/Stations/Goldstone/DSS25"
+        Path = "/Solar System/Stations/Goldstone"
     }
 }
 
@@ -171,7 +171,7 @@ local DSS26 = {
     },
     GUI = {
         Name = "DSS26",
-        Path = "/Solar System/Stations/Goldstone/DSS26"
+        Path = "/Solar System/Stations/Goldstone"
     }
 }
 
@@ -198,7 +198,7 @@ local DSS43 = {
     },
     GUI = {
         Name = "DSS43",
-        Path = "/Solar System/Stations/Canberra/DSS43"
+        Path = "/Solar System/Stations/Canberra"
     }
 }
  
@@ -222,7 +222,7 @@ local DSS34 = {
     },
     GUI = {
         Name = "DSS34",
-        Path = "/Solar System/Stations/Canberra/DSS34"
+        Path = "/Solar System/Stations/Canberra"
     }
 }
 
@@ -246,7 +246,7 @@ local DSS35 = {
     },
     GUI = {
         Name = "DSS35",
-        Path = "/Solar System/Stations/Canberra/DSS35"
+        Path = "/Solar System/Stations/Canberra"
     }
 }
 
@@ -270,7 +270,7 @@ local DSS36 = {
     },
     GUI = {
         Name = "DSS36",
-        Path = "/Solar System/Stations/Canberra/DSS36"
+        Path = "/Solar System/Stations/Canberra"
     }
 }
 
@@ -295,7 +295,7 @@ local DSS45 = {
     },
     GUI = {
         Name = "DSS45",
-        Path = "/Solar System/Stations/Canberra/DSS45"
+        Path = "/Solar System/Stations/Canberra"
     }
 }
 
@@ -322,7 +322,7 @@ local DSS63 = {
     },
     GUI = {
         Name = "DSS63",
-        Path = "/Solar System/Stations/Madrid/DSS63"
+        Path = "/Solar System/Stations/Madrid"
     }
 }
 
@@ -346,7 +346,7 @@ local DSS65 = {
     },
     GUI = {
         Name = "DSS65",
-        Path = "/Solar System/Stations/Madrid/DSS65"
+        Path = "/Solar System/Stations/Madrid"
     }
 }
 
@@ -370,7 +370,7 @@ local DSS54 = {
     },
     GUI = {
         Name = "DSS54",
-        Path = "/Solar System/Stations/Madrid/DSS54"
+        Path = "/Solar System/Stations/Madrid"
     }
 }
 
@@ -394,7 +394,7 @@ local DSS55 = {
     },
     GUI = {
         Name = "DSS55",
-        Path = "/Solar System/Stations/Madrid/DSS55"
+        Path = "/Solar System/Stations/Madrid"
     }
 }
 
