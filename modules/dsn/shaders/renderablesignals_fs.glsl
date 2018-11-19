@@ -47,7 +47,7 @@ Fragment getFragment() {
 
     // signal segment size
     float signalSize = signalSizeFactor * lightSpeed;
-    float edgeLength = signalSize/(signalSizeFactor*0.001);
+    float edgeLength = signalSize*0.5;
 
     // Make smooth transitions for both ends of the segment
     float smoothFront = smoothstep(distLightTravel+edgeLength,

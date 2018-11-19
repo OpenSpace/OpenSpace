@@ -363,8 +363,13 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
     _vertexArray.push_back(color.g);
     _vertexArray.push_back(color.b);
     _vertexArray.push_back(color.a);
-    // Todo: handle uplink and downlink differently
-    _vertexArray.push_back(0.0);
+    // Todo: handle case "both"
+    if (signal.direction == "uplink") {
+        _vertexArray.push_back(0.0);
+    }
+    else {
+        _vertexArray.push_back(distance);
+    }
     _vertexArray.push_back(timeSinceStart);
 
     _vertexArray.push_back(posSpacecraft.x);
@@ -376,8 +381,13 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
     _vertexArray.push_back(color.b);
     _vertexArray.push_back(color.a);
 
-    // Todo: handle uplink and downlink differently
-    _vertexArray.push_back(distance);
+    // Todo: handle case "both"
+    if (signal.direction == "downlink") {
+        _vertexArray.push_back(0.0);
+    }
+    else {
+        _vertexArray.push_back(distance);
+    }
     _vertexArray.push_back(timeSinceStart);
 }
 
