@@ -30,6 +30,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -63,28 +64,35 @@ private:
     enum ColorOption {
         Color = 0,
         Velocity = 1,
-        Speed = 2
+        Speed = 2,
+        OtherData = 3
     };
 
     void createDataSlice(ColorOption option);
 
-    bool loadData();
-    bool readSpeckFile();
+    void loadData();
+    void readSpeckFile();
     bool loadCachedFile(const std::string& file);
-    bool saveCachedFile(const std::string& file) const;
+    void saveCachedFile(const std::string& file) const;
 
     properties::StringProperty _pointSpreadFunctionTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
     std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
-    bool _pointSpreadFunctionTextureIsDirty;
+    bool _pointSpreadFunctionTextureIsDirty = true;
 
     properties::StringProperty _colorTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
     std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
-    bool _colorTextureIsDirty;
+    bool _colorTextureIsDirty = true;
 
     properties::OptionProperty _colorOption;
-    bool _dataIsDirty;
+    bool _dataIsDirty = true;
+
+    properties::OptionProperty _otherDataOption;
+    properties::StringProperty _otherDataColorMapPath;
+    properties::Vec2Property _otherDataRange;
+    std::unique_ptr<ghoul::opengl::Texture> _otherDataColorMapTexture;
+    bool _otherDataColorMapIsDirty = true;
 
     properties::FloatProperty _alphaValue;
     properties::FloatProperty _scaleFactor;
@@ -98,10 +106,10 @@ private:
 
     std::vector<float> _slicedData;
     std::vector<float> _fullData;
-    int _nValuesPerStar;
+    int _nValuesPerStar = 0;
 
-    GLuint _vao;
-    GLuint _vbo;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 };
 
 } // namespace openspace

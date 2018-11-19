@@ -27,15 +27,20 @@
 
 // keep in sync with renderablestars.h:ColorOption enum
 const int COLOROPTION_COLOR = 0;
-const int COLOROPTION_VELOCITY = 1; 
+const int COLOROPTION_VELOCITY = 1;
 const int COLOROPTION_SPEED = 2;
- 
+const int COLOROPTION_OTHERDATA = 3;
+
 uniform sampler2D psfTexture;
 uniform sampler1D colorTexture;
 uniform float minBillboardSize;
 
+uniform bool usePsfTexture;
 uniform float alphaValue;
 uniform int colorOption;
+
+uniform sampler1D otherDataTexture;
+uniform vec2 otherDataRange;
 
 in vec4 vs_position;
 in vec4 ge_gPosition;
@@ -57,6 +62,12 @@ vec4 bv2rgb(float bv) {
     return texture(colorTexture, t);
 }
 
+vec4 otherDataValue() {
+    float t = (ge_brightness.x - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
+    t = clamp(t, 0.0, 1.0);
+    return texture(otherDataTexture, t);
+}
+
 Fragment getFragment() {
     // Something in the color calculations need to be changed because before it was dependent
     // on the gl blend functions since the abuffer was not involved
@@ -72,6 +83,9 @@ Fragment getFragment() {
         case COLOROPTION_SPEED:
             // @TODO Include a transfer function here ---abock
             color = vec4(vec3(ge_speed), 0.5);
+            break;
+        case COLOROPTION_OTHERDATA:
+            color = otherDataValue();
             break;
     }
 
