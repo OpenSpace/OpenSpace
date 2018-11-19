@@ -32,7 +32,8 @@ in float distanceFromStart;
 in float timeSinceStart;
 
 float lightSpeed = 299792458.0; // expressed in m/s
-float signalSegmentSize = 2000;
+float signalSizeFactor = 2000;
+float baseOpacity = 0.3;
 
 Fragment getFragment() {
 
@@ -40,15 +41,26 @@ Fragment getFragment() {
     frag.depth = vs_positionScreenSpace.w;
     //frag.blend = BLEND_MODE_ADDITIVE;
     frag.gPosition = vs_gPosition;
+    // the distance the light has travelled since 
+    // start of signal transmission
+    float distLightTravel = lightSpeed * timeSinceStart;
 
-    if( distanceFromStart < (lightSpeed * timeSinceStart) && 
-    distanceFromStart > (lightSpeed * timeSinceStart - signalSegmentSize*lightSpeed) ){
-            frag.color = vs_color;
-    }else{
-        frag.color = vec4(0.0,0.0,0.0,0.0);
-    }
+    // signal segment size
+    float signalSize = signalSizeFactor * lightSpeed;
+    float edgeLength = signalSize/(signalSizeFactor*0.001);
+
+    // Make smooth transitions for both ends of the segment
+    float smoothFront = smoothstep(distLightTravel+edgeLength,
+                                   distLightTravel-edgeLength,
+                                   distanceFromStart);
+    float smoothBack = smoothstep(distLightTravel-signalSize-edgeLength, 
+                                  distLightTravel-signalSize+edgeLength,
+                                  distanceFromStart);
+
+    frag.color = vec4(vs_color.xyz, min(smoothFront,smoothBack)+baseOpacity);
 
     // For rendering inside earth atmosphere we need to set a normal for our line
+    // Todo: calculate normal correctly
     frag.gNormal = vec4(0.0, 0.0, 1.0, 0.0);
 
     return frag;
