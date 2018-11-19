@@ -57,4 +57,23 @@ local testGrid = {
 }
 assetHelper.registerSceneGraphNodesAndExport(asset, { object, testGrid })
 ]]
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+local newTestGrid = {
+    Identifier = "StarsNewTestGrid",
+    Renderable = {
+        Type = "RenderableStars",
+        EnableTestGrid = true,
+        File = speck .. "/starTestGrid.speck",
+        Texture = textures .. "/halo.png",
+        ColorMap = colorLUT .. "/colorbv.cmap",
+        MagnitudeExponent = 5.03,
+        SizeComposition = 5,
+        RenderMethod = 1
+    },
+    GUI = {
+        Path = "/Milky Way/Stars New Test Grid"
+    }
+}
+assetHelper.registerSceneGraphNodesAndExport(asset, { object, newTestGrid })
+
+--assetHelper.registerSceneGraphNodesAndExport(asset, { object })

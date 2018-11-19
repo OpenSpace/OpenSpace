@@ -89,6 +89,14 @@ namespace openspace {
         // Test Grid Enabled
         bool _enableTestGrid;
 
+        std::size_t _lumArrayPos;
+        std::size_t _absMagArrayPos;
+        std::size_t _appMagArrayPos;
+        std::size_t _bvColorArrayPos;
+        std::size_t _velocityArrayPos;
+        std::size_t _speedArrayPos;
+
+
         properties::StringProperty _pointSpreadFunctionTexturePath;
         std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
         std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;

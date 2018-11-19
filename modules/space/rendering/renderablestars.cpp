@@ -59,7 +59,7 @@ namespace {
         "alphaValue", "psfTexture"
     };
 
-    constexpr int8_t CurrentCacheVersion = 1;
+    constexpr int8_t CurrentCacheVersion = 2;
 
     struct ColorVBOLayout {
         std::array<float, 4> position; // (x,y,z,e)
@@ -308,6 +308,12 @@ namespace openspace {
         , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _dataIsDirty(true)
         , _enableTestGrid(false)
+        , _lumArrayPos(0)
+        , _absMagArrayPos(0)
+        , _appMagArrayPos(0)
+        , _bvColorArrayPos(0)
+        , _velocityArrayPos(0)
+        , _speedArrayPos(0)
         , _pointSpreadFunctionTexturePath(PsfTextureInfo)
         , _pointSpreadFunctionTexture(nullptr)
         , _pointSpreadFunctionTextureIsDirty(true)
@@ -948,7 +954,12 @@ namespace openspace {
             {
                 // we read a line that doesn't belong to the header, so we have to jump back
                 // before the beginning of the current line
-                file.seekg(position);
+                if (_enableTestGrid) {
+                    file.seekg(position - static_cast<long long>(8));
+                }
+                else {
+                    file.seekg(position);
+                }
                 break;
             }
 
@@ -962,7 +973,27 @@ namespace openspace {
 
                 std::string dummy;
                 str >> dummy;
-                str >> _nValuesPerStar;
+                str >> _nValuesPerStar;                
+
+                if (line.find("lum") != std::string::npos) {
+                    _lumArrayPos = _nValuesPerStar + 3; // +3 because the position x, y, z
+                }
+                else if (line.find("absmag") != std::string::npos) {
+                    _absMagArrayPos = _nValuesPerStar + 3; // +3 because the position x, y, z
+                }
+                else if (line.find("appmag") != std::string::npos) {
+                    _appMagArrayPos = _nValuesPerStar + 3; // +3 because the position x, y, z
+                } 
+                else if (line.find("colorb_v") != std::string::npos) {
+                    _bvColorArrayPos = _nValuesPerStar + 3; // +3 because the position x, y, z
+                }
+                else if (line.find("vx") != std::string::npos) {
+                    _velocityArrayPos = _nValuesPerStar + 3; // +3 because the position x, y, z
+                }
+                else if (line.find("speed") != std::string::npos) {
+                    _speedArrayPos = _nValuesPerStar + 3; // +3 because the position x, y, z
+                }
+
                 _nValuesPerStar += 1; // We want the number, but the index is 0 based
             }
         }
@@ -988,8 +1019,10 @@ namespace openspace {
                     break;
                 }
             }
-            minLumValue = values[4] < minLumValue ? values[4] : minLumValue;
-            maxLumValue = values[4] > maxLumValue ? values[4] : maxLumValue;
+            minLumValue = values[_lumArrayPos] < minLumValue ? 
+                values[_lumArrayPos] : minLumValue;
+            maxLumValue = values[_lumArrayPos] > maxLumValue ? 
+                values[_lumArrayPos] : maxLumValue;
             if (!nullArray) {
                 _fullData.insert(_fullData.end(), values.begin(), values.end());
             }
@@ -997,7 +1030,8 @@ namespace openspace {
 
         // Normalize Luminosity:
         for (size_t i = 0; i < _fullData.size(); i += _nValuesPerStar) {
-            _fullData[i + 4] = (_fullData[i + 4] - minLumValue) / (maxLumValue - minLumValue);
+            _fullData[i + _lumArrayPos] = 
+                (_fullData[i + _lumArrayPos] - minLumValue) / (maxLumValue - minLumValue);
         }
 
         return true;
@@ -1014,6 +1048,13 @@ namespace openspace {
                 FileSys.deleteFile(file);
                 return false;
             }
+
+            fileStream.read(reinterpret_cast<char*>(&_lumArrayPos), sizeof(int32_t));
+            fileStream.read(reinterpret_cast<char*>(&_absMagArrayPos), sizeof(int32_t));
+            fileStream.read(reinterpret_cast<char*>(&_appMagArrayPos), sizeof(int32_t));
+            fileStream.read(reinterpret_cast<char*>(&_bvColorArrayPos), sizeof(int32_t));
+            fileStream.read(reinterpret_cast<char*>(&_velocityArrayPos), sizeof(int32_t));
+            fileStream.read(reinterpret_cast<char*>(&_speedArrayPos), sizeof(int32_t));
 
             int32_t nValues = 0;
             fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
@@ -1037,6 +1078,24 @@ namespace openspace {
         if (fileStream.good()) {
             fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion),
                 sizeof(int8_t));
+
+            fileStream.write(reinterpret_cast<const char*>(&_lumArrayPos),
+                sizeof(int32_t));
+
+            fileStream.write(reinterpret_cast<const char*>(&_absMagArrayPos),
+                sizeof(int32_t));
+
+            fileStream.write(reinterpret_cast<const char*>(&_appMagArrayPos),
+                sizeof(int32_t));
+
+            fileStream.write(reinterpret_cast<const char*>(&_bvColorArrayPos),
+                sizeof(int32_t));
+
+            fileStream.write(reinterpret_cast<const char*>(&_velocityArrayPos),
+                sizeof(int32_t));
+
+            fileStream.write(reinterpret_cast<const char*>(&_speedArrayPos),
+                sizeof(int32_t));
 
             int32_t nValues = static_cast<int32_t>(_fullData.size());
             if (nValues == 0) {
@@ -1082,13 +1141,13 @@ namespace openspace {
                 if (_enableTestGrid) {
                     float sunColor = 0.650f;
                     layout.value.bvColor = sunColor;// _fullData[i + 3];
-                    layout.value.luminance = _fullData[i + 4];
-                    layout.value.absoluteMagnitude = _fullData[i + 3];
+                    layout.value.luminance = _fullData[i + _lumArrayPos];
+                    layout.value.absoluteMagnitude = _fullData[i + _absMagArrayPos];
                 }
                 else {
-                    layout.value.bvColor = _fullData[i + 3];
-                    layout.value.luminance = _fullData[i + 4];
-                    layout.value.absoluteMagnitude = _fullData[i + 5];
+                    layout.value.bvColor = _fullData[i + _bvColorArrayPos];
+                    layout.value.luminance = _fullData[i + _lumArrayPos];
+                    layout.value.absoluteMagnitude = _fullData[i + _absMagArrayPos];
                 }
 
                 _slicedData.insert(_slicedData.end(),
@@ -1108,13 +1167,13 @@ namespace openspace {
                         p[0], p[1], p[2], 1.0
                     } };
 
-                layout.value.bvColor = _fullData[i + 3];
-                layout.value.luminance = _fullData[i + 4];
-                layout.value.absoluteMagnitude = _fullData[i + 5];
+                layout.value.bvColor = _fullData[i + _bvColorArrayPos];
+                layout.value.luminance = _fullData[i + _lumArrayPos];
+                layout.value.absoluteMagnitude = _fullData[i + _absMagArrayPos];
 
-                layout.value.vx = _fullData[i + 12];
-                layout.value.vy = _fullData[i + 13];
-                layout.value.vz = _fullData[i + 14];
+                layout.value.vx = _fullData[i + _velocityArrayPos];
+                layout.value.vy = _fullData[i + _velocityArrayPos + 1];
+                layout.value.vz = _fullData[i + _velocityArrayPos + 2];
 
                 _slicedData.insert(_slicedData.end(),
                     layout.data.begin(),
@@ -1132,11 +1191,11 @@ namespace openspace {
                         p[0], p[1], p[2], 1.0
                     } };
 
-                layout.value.bvColor = _fullData[i + 3];
-                layout.value.luminance = _fullData[i + 4];
-                layout.value.absoluteMagnitude = _fullData[i + 5];
+                layout.value.bvColor = _fullData[i + _bvColorArrayPos];
+                layout.value.luminance = _fullData[i + _lumArrayPos];
+                layout.value.absoluteMagnitude = _fullData[i + _absMagArrayPos];
 
-                layout.value.speed = _fullData[i + 15];
+                layout.value.speed = _fullData[i + _speedArrayPos];
 
                 _slicedData.insert(_slicedData.end(),
                     layout.data.begin(),
