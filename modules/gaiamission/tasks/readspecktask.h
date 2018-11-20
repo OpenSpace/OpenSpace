@@ -26,7 +26,6 @@
 #define __OPENSPACE_MODULE_GAIAMISSION___READSPECKTASK___H__
 
 #include <openspace/util/task.h>
-#include <modules/fitsfilereader/include/fitsfilereader.h>
 
 namespace openspace {
 
@@ -35,7 +34,7 @@ namespace documentation { struct Documentation; }
 class ReadSpeckTask : public Task {
 public:
     ReadSpeckTask(const ghoul::Dictionary& dictionary);
-    virtual ~ReadSpeckTask();
+    virtual ~ReadSpeckTask() = default;
     
     std::string description() override;
     void perform(const Task::ProgressCallback& onProgress) override;

@@ -27,18 +27,18 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/stringproperty.h>
+#include <modules/gaiamission/rendering/octreemanager.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringlistproperty.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/ivec2property.h>
-
+#include <ghoul/opengl/bufferbinding.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <ghoul/opengl/bufferbinding.h>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
@@ -48,14 +48,12 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
-class OctreeManager;
-
 namespace documentation { struct Documentation; }
 
 class RenderableGaiaStars : public Renderable {
 public:
     explicit RenderableGaiaStars(const ghoul::Dictionary& dictionary);
-    ~RenderableGaiaStars();
+    virtual ~RenderableGaiaStars();
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -68,10 +66,6 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    const size_t POS_SIZE = 3;
-    const size_t COL_SIZE = 2;
-    const size_t VEL_SIZE = 3;
-    
     /**
      * Reads data file in format defined by FileReaderOption.
       \returns true if data was successfully read.
@@ -116,19 +110,19 @@ private:
 
     properties::StringProperty _filePath;
     std::unique_ptr<ghoul::filesystem::File> _dataFile;
-    bool _dataIsDirty;
-    bool _buffersAreDirty;
-    bool _shadersAreDirty;
+    bool _dataIsDirty = true;
+    bool _buffersAreDirty = true;
+    bool _shadersAreDirty = false;
 
     properties::StringProperty _pointSpreadFunctionTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
     std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
-    bool _pointSpreadFunctionTextureIsDirty;
+    bool _pointSpreadFunctionTextureIsDirty = true;
 
     properties::StringProperty _colorTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
     std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
-    bool _colorTextureIsDirty;
+    bool _colorTextureIsDirty = true;
 
     properties::FloatProperty _luminosityMultiplier;
     properties::FloatProperty _magnitudeBoost;
@@ -180,34 +174,34 @@ private:
         projection) _uniformCacheTM;
     std::unique_ptr<ghoul::opengl::Texture> _fboTexture;
 
-    std::shared_ptr<OctreeManager> _octreeManager;
+    OctreeManager _octreeManager;
     std::unique_ptr<ghoul::opengl::BufferBinding<
         ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboIdxBinding;
     std::unique_ptr<ghoul::opengl::BufferBinding<
         ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboDataBinding;
 
     std::vector<int> _accumulatedIndices;
-    size_t _nRenderValuesPerStar;
-    int _nStarsToRender;
-    bool _firstDrawCalls;
+    size_t _nRenderValuesPerStar = 0;
+    int _nStarsToRender = 0;
+    bool _firstDrawCalls = true;
     glm::dquat _previousCameraRotation;
-    bool _useVBO;
-    long long _cpuRamBudgetInBytes;
-    long long _totalDatasetSizeInBytes;
-    long long _gpuMemoryBudgetInBytes;
-    long long _maxStreamingBudgetInBytes;
-    size_t _chunkSize;
+    bool _useVBO = false;
+    long long _cpuRamBudgetInBytes = 0;
+    long long _totalDatasetSizeInBytes = 0;
+    long long _gpuMemoryBudgetInBytes = 0;
+    long long _maxStreamingBudgetInBytes = 0;
+    size_t _chunkSize = 0;
 
-    GLuint _vao;
-    GLuint _vaoEmpty;
-    GLuint _vboPos;
-    GLuint _vboCol;
-    GLuint _vboVel;
-    GLuint _ssboIdx;
-    GLuint _ssboData;
-    GLuint _vaoQuad;
-    GLuint _vboQuad;
-    GLuint _fbo;
+    GLuint _vao = 0;
+    GLuint _vaoEmpty = 0;
+    GLuint _vboPos = 0;
+    GLuint _vboCol = 0;
+    GLuint _vboVel = 0;
+    GLuint _ssboIdx = 0;
+    GLuint _ssboData = 0;
+    GLuint _vaoQuad = 0;
+    GLuint _vboQuad = 0;
+    GLuint _fbo = 0;
 };
 
 } // namespace openspace

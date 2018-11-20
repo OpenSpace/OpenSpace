@@ -97,14 +97,12 @@ std::pair<double, std::string> simplifyDistance(double meters, bool forceSingula
 }
 
 float convertMasPerYearToMeterPerSecond(float masPerYear, float parallax) {
-
-    float degreeFromMas = 1.0 / 3600000.0;
-    float radiusInMeter = (static_cast<float>(distanceconstants::Parsec) * 1000.0)
-        / parallax;
-    float perYearToPerSecond = 1.0 / SecondsPerYear;
-
-    float meterPerSecond = masPerYear * degreeFromMas * radiusInMeter * perYearToPerSecond;
-    return meterPerSecond;
+    double degreeFromMas = 1.0 / 3600000.0;
+    double radiusInMeter = (distanceconstants::Parsec * 1000.0) / parallax;
+    double perYearToPerSecond = 1.0 / SecondsPerYear;
+    double meterPerSecond = masPerYear * degreeFromMas * radiusInMeter *
+                            perYearToPerSecond;
+    return static_cast<float>(meterPerSecond);
 }
 
 } // namespace openspace

@@ -4,6 +4,8 @@ asset.require('default')
 
 -- Augment default scene with gaia data, 3D model and trail
 asset.require('scene/milkyway/gaia/gaiastars')
+asset.require('scene/milkyway/gaia/apogee')
+asset.require('scene/milkyway/gaia/galah')
 asset.require('scene/solarsystem/missions/gaia/gaia')
 asset.require('scene/solarsystem/missions/gaia/trail')
 
@@ -22,9 +24,7 @@ assetHelper.registerDashboardItems(asset, {
 asset.onInitialize(function ()
     openspace.setPropertyValueSingle('Scene.Stars.Renderable.Enabled', false);
 
-    openspace.markInterestingNodes({
-       "Gaia"
-    })
+    openspace.markInterestingNodes({ "Gaia" })
 
     openspace.navigation.setCameraState({
         Focus = "Gaia",
@@ -35,7 +35,5 @@ end)
 
 -- Remove interesting nodes and added virtual properties
 asset.onDeinitialize(function ()
-    openspace.removeInterestingNodes({
-        "Gaia"
-    })
+    openspace.removeInterestingNodes({ "Gaia" })
 end)

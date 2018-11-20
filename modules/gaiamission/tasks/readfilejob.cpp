@@ -36,8 +36,9 @@ constexpr const char* _loggerCat = "ReadFileJob";
 namespace openspace::gaiamission {
 
 ReadFileJob::ReadFileJob(const std::string& filePath, 
-    const std::vector<std::string>& allColumns, int firstRow, int lastRow, 
-    size_t nDefaultCols, int nValuesPerStar, std::shared_ptr<FitsFileReader> fitsReader)
+                         const std::vector<std::string>& allColumns, int firstRow,
+                         int lastRow, size_t nDefaultCols, int nValuesPerStar,
+                         std::shared_ptr<FitsFileReader> fitsReader)
     : _inFilePath(filePath)
     , _allColumns(allColumns)
     , _firstRow(firstRow)
@@ -46,18 +47,21 @@ ReadFileJob::ReadFileJob(const std::string& filePath,
     , _nValuesPerStar(nValuesPerStar)
     , _fitsFileReader(fitsReader)
     , _octants(8)
-{ }
-
-ReadFileJob::~ReadFileJob() { }
+{}
 
 void ReadFileJob::execute() {
-
     // Read columns from FITS file. If rows aren't specified then full table will be read.
-    std::shared_ptr<TableData<float>> table = _fitsFileReader->readTable<float>(_inFilePath,
-        _allColumns, _firstRow, _lastRow);
+    std::shared_ptr<TableData<float>> table = _fitsFileReader->readTable<float>(
+        _inFilePath,
+        _allColumns,
+        _firstRow,
+        _lastRow
+    );
 
     if (!table) {
-        throw ghoul::RuntimeError(fmt::format("Failed to open Fits file '{}'", _inFilePath));
+        throw ghoul::RuntimeError(
+            fmt::format("Failed to open Fits file '{}'", _inFilePath
+        ));
     }
 
     int nStars = table->readRows - _firstRow + 1;
@@ -71,7 +75,6 @@ void ReadFileJob::execute() {
 
     // Copy columns to local variables.
     std::unordered_map<std::string, std::vector<float>>& tableContent = table->contents;
-
 
     // Default columns parameters.
     //std::vector<float> l_longitude = std::move(tableContent[_allColumns[0]]);
@@ -121,12 +124,14 @@ void ReadFileJob::execute() {
         float radiusInKiloParsec = 9.0;
         if (!std::isnan(parallax[i])) {
             // Parallax is in milliArcseconds -> distance in kiloParsecs
-            // https://gea.esac.esa.int/archive/documentation/GDR2/Gaia_archive/chap_datamodel/sec_dm_main_tables/ssec_dm_gaia_source.html
+            // https://gea.esac.esa.int/archive/documentation/GDR2/Gaia_archive/
+            // chap_datamodel/sec_dm_main_tables/ssec_dm_gaia_source.html
             //LINFO("Parallax: " + std::to_string(parallax[i]));
             radiusInKiloParsec = 1.0 / parallax[i];
         }
         /*// Convert to Galactic Coordinates from Galactic Lon & Lat.
-        // https://gea.esac.esa.int/archive/documentation/GDR2/Data_processing/chap_cu3ast/sec_cu3ast_intro/ssec_cu3ast_intro_tansforms.html#SSS1
+        // https://gea.esac.esa.int/archive/documentation/GDR2/Data_processing/
+        // chap_cu3ast/sec_cu3ast_intro/ssec_cu3ast_intro_tansforms.html#SSS1
         values[idx++] = radiusInKiloParsec * cos(glm::radians(b_latitude[i])) * 
             cos(glm::radians(l_longitude[i])); // Pos X
         values[idx++] = radiusInKiloParsec * cos(glm::radians(b_latitude[i])) * 
@@ -136,9 +141,12 @@ void ReadFileJob::execute() {
 
         // Convert ICRS Equatorial Ra and Dec to Galactic latitude and longitude.
         glm::mat3 aPrimG = glm::mat3(
-            glm::vec3(-0.0548755604162154, 0.4941094278755837, -0.8676661490190047), // Col 0
-            glm::vec3(-0.8734370902348850, -0.4448296299600112, -0.1980763734312015), // Col 1
-            glm::vec3(-0.4838350155487132, 0.7469822444972189, 0.4559837761750669) // Col 2
+            // Col 0
+            glm::vec3(-0.0548755604162154, 0.4941094278755837, -0.8676661490190047),
+            // Col 1
+            glm::vec3(-0.8734370902348850, -0.4448296299600112, -0.1980763734312015),
+            // Col 2
+            glm::vec3(-0.4838350155487132, 0.7469822444972189, 0.4559837761750669)
         );
         glm::vec3 rICRS = glm::vec3(
             cos(glm::radians(ra[i])) * cos(glm::radians(dec[i])),
@@ -165,8 +173,12 @@ void ReadFileJob::execute() {
 
 
         // Store velocity. 
-        if (std::isnan(pmra[i])) pmra[i] = 0.f;
-        if (std::isnan(pmdec[i])) pmdec[i] = 0.f;
+        if (std::isnan(pmra[i])) {
+            pmra[i] = 0.f;
+        }
+        if (std::isnan(pmdec[i])) {
+            pmdec[i] = 0.f;
+        }
 
         // Convert Proper Motion from ICRS [Ra,Dec] to Galactic Tanget Vector [l,b].
         glm::vec3 uICRS = glm::vec3(
@@ -205,10 +217,10 @@ void ReadFileJob::execute() {
         }
 
         // Store additional parameters to filter by.
-        values[idx++] = std::isnan(meanMagBp[i]) ? 20.f : meanMagBp[i]; // Mean Bp-band Mag
-        values[idx++] = std::isnan(meanMagRp[i]) ? 20.f : meanMagRp[i]; // Mean Rp-band Mag
-        values[idx++] = std::isnan(bp_g[i]) ? 0.f : bp_g[i]; // Bp-G Color 
-        values[idx++] = std::isnan(g_rp[i]) ? 0.f : g_rp[i]; // G-Rp Color
+        values[idx++] = std::isnan(meanMagBp[i]) ? 20.f : meanMagBp[i];
+        values[idx++] = std::isnan(meanMagRp[i]) ? 20.f : meanMagRp[i];
+        values[idx++] = std::isnan(bp_g[i]) ? 0.f : bp_g[i];
+        values[idx++] = std::isnan(g_rp[i]) ? 0.f : g_rp[i];
         values[idx++] = ra[i];
         values[idx++] = std::isnan(ra_err[i]) ? 0.f : ra_err[i];
         values[idx++] = dec[i];
@@ -229,9 +241,15 @@ void ReadFileJob::execute() {
         }
 
         size_t index = 0;
-        if (values[0] < 0.0) index += 1;
-        if (values[1] < 0.0) index += 2;
-        if (values[2] < 0.0) index += 4;
+        if (values[0] < 0.0) {
+            index += 1;
+        }
+        if (values[1] < 0.0) {
+            index += 2;
+        }
+        if (values[2] < 0.0) {
+            index += 4;
+        }
 
         _octants[index].insert(_octants[index].end(), values.begin(), values.end());
     }

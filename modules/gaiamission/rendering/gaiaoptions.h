@@ -25,30 +25,29 @@
 #ifndef __OPENSPACE_MODULE_GAIAMISSION___GAIAOPTIONS___H__
 #define __OPENSPACE_MODULE_GAIAMISSION___GAIAOPTIONS___H__
 
-
 namespace openspace::gaiamission {
 
-    enum RenderOption {
-        Static = 0,
-        Color = 1,
-        Motion = 2
-    };
+enum RenderOption {
+    Static = 0,
+    Color = 1,
+    Motion = 2
+};
 
-    enum FileReaderOption {
-        Fits = 0,
-        Speck = 1,
-        BinaryRaw = 2,
-        BinaryOctree = 3,
-        StreamOctree = 4
-    };
+enum FileReaderOption {
+    Fits = 0,
+    Speck = 1,
+    BinaryRaw = 2,
+    BinaryOctree = 3,
+    StreamOctree = 4
+};
 
-    enum ShaderOption {
-        Point_SSBO = 0,
-        Point_VBO = 1,
-        Billboard_SSBO = 2,
-        Billboard_VBO = 3,
-        Billboard_SSBO_noFBO = 4
-    };
+enum ShaderOption {
+    Point_SSBO = 0,
+    Point_VBO = 1,
+    Billboard_SSBO = 2,
+    Billboard_VBO = 3,
+    Billboard_SSBO_noFBO = 4
+};
 
 } // namespace openspace::gaiamission
 

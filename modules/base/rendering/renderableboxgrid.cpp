@@ -31,7 +31,6 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/documentation/verifier.h>
-
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
@@ -39,38 +38,37 @@
 namespace {
     constexpr const char* ProgramName = "GridProgram";
 
-    const openspace::properties::Property::PropertyInfo GridColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo GridColorInfo = {
         "GridColor",
         "Grid Color",
         "This value determines the color of the grid lines that are rendered."
     };
 
-    const openspace::properties::Property::PropertyInfo GridMatrixInfo = {
+    constexpr openspace::properties::Property::PropertyInfo GridMatrixInfo = {
         "GridMatrix",
         "Grid Matrix",
         "This value specifies the local transformation matrix that defines the "
         "orientation of this grid relative to the parent's rotation."
     };
 
-    const openspace::properties::Property::PropertyInfo SegmentsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
         "This value specifies the number of segments that are used to render the "
         "surrounding sphere."
     };
 
-    const openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
         "This value specifies the line width of the spherical grid."
     };
 
-    const openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Grid Size",
         "This value species the size of each dimensions of the box"
     };
-
 } // namespace
 
 namespace openspace {
@@ -118,7 +116,6 @@ documentation::Documentation RenderableBoxGrid::Documentation() {
 
 RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _gridProgram(nullptr)
     , _gridMatrix(GridMatrixInfo, glm::mat4(1.f))
     , _gridColor(
         GridColorInfo,
@@ -129,10 +126,6 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     , _segments(SegmentsInfo, 36, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
     , _size(SizeInfo, glm::vec3(1e20f), glm::vec3(1.f), glm::vec3(1e35f))
-    , _gridIsDirty(true)
-    , _vaoID(0)
-    , _vBufferID(0)
-    , _mode(GL_LINE_STRIP)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -174,12 +167,8 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     addProperty(_size);
 }
 
-RenderableBoxGrid::~RenderableBoxGrid() {}
-
 bool RenderableBoxGrid::isReady() const {
-    bool ready = true;
-    ready &= (_gridProgram != nullptr);
-    return ready;
+    return _gridProgram != nullptr;
 }
 
 void RenderableBoxGrid::initializeGL() {

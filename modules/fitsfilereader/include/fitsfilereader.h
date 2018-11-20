@@ -27,13 +27,18 @@
 
 #include <string>
 #include <memory>
-#include <vector>
 #include <mutex>
 #include <unordered_map>
-#include <CCfits>
+#include <valarray>
+#include <vector>
 
-namespace CCfits { class FITS; class PHDU; class ExtHDU; }
-namespace ghoul { namespace opengl{ class Texture; }}
+namespace CCfits {
+    class FITS;
+    class PHDU;
+    class ExtHDU;
+} // namespace CCfits
+
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
@@ -46,10 +51,10 @@ struct ImageData {
 
 template<typename T>
 struct TableData {
-    std::unordered_map<string, std::vector<T>> contents;
+    std::unordered_map<std::string, std::vector<T>> contents;
     int readRows;
     long int optimalRowsize;
-    string name;
+    std::string name;
 };
 
 class FitsFileReader {
@@ -59,6 +64,7 @@ public:
     
     template<typename T>
     std::shared_ptr<ImageData<T>> readImage(const std::string& path);
+
     template<typename T>
     std::shared_ptr<std::unordered_map<std::string, T>> readHeader(
         std::vector<std::string>& keywords);

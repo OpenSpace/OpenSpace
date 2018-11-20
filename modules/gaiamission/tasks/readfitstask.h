@@ -37,7 +37,7 @@ namespace documentation { struct Documentation; }
 class ReadFitsTask : public Task {
 public:
     ReadFitsTask(const ghoul::Dictionary& dictionary);
-    virtual ~ReadFitsTask();
+    virtual ~ReadFitsTask() = default;
 
     std::string description() override;
     void perform(const Task::ProgressCallback& onProgress) override;
@@ -69,10 +69,10 @@ private:
 
     std::string _inFileOrFolderPath;
     std::string _outFileOrFolderPath;
-    bool _singleFileProcess;
-    size_t _threadsToUse;
-    int _firstRow;
-    int _lastRow;
+    bool _singleFileProcess = false;
+    size_t _threadsToUse = 1;
+    int _firstRow = 0;
+    int _lastRow = 0;
     std::vector<std::string> _allColumnNames;
     std::vector<std::string> _filterColumnNames;
 };

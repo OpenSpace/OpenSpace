@@ -25,14 +25,14 @@
 #ifndef __OPENSPACE_MODULE_GAIAMISSION___OCTREEMANAGER___H__
 #define __OPENSPACE_MODULE_GAIAMISSION___OCTREEMANAGER___H__
 
-#include <vector>
-#include <stack>
-#include <map>
-#include <queue>
-#include <mutex>
+#include <modules/gaiamission/rendering/gaiaoptions.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
-#include <modules/gaiamission/rendering/gaiaoptions.h>
+#include <map>
+#include <mutex>
+#include <queue>
+#include <stack>
+#include <vector>
 
 namespace openspace {
 
@@ -59,25 +59,25 @@ public:
         unsigned long long octreePositionIndex;
     };
 
-    OctreeManager();
+    OctreeManager() = default;
     ~OctreeManager();
 
     /**
      * Initializes a one layer Octree with root and 8 children that covers all stars.
+     *
      * \param maxDist together with \param maxstarsPerNode (if defined) determines the 
      * depth of the tree as well as how many nodes will be created.
      */
-    void initOctree(const long long& cpuRamBudget = 0, int maxDist = 0, 
-        int maxStarsPerNode = 0);
+    void initOctree(long long cpuRamBudget = 0, int maxDist = 0, int maxStarsPerNode = 0);
 
     /**
      * Initializes a stack of size \param maxNodes that keeps track of all free spot in 
      * buffer stream. Can be used to trigger a rebuild of buffer(s).
-     * \param useVBO defines if VBO or SSBO is used as buffer(s).
-     * \param datasetFitInMemory defines if streaming of nodes during runtime will be used.
+     *
+     * \param useVBO defines if VBO or SSBO is used as buffer(s)
+     * \param datasetFitInMemory defines if streaming of nodes during runtime is used
      */
-    void initBufferIndexStack(const long long& maxNodes, bool useVBO, 
-        bool datasetFitInMemory);
+    void initBufferIndexStack(long long maxNodes, bool useVBO, bool datasetFitInMemory);
 
     /**
      * Inserts star values in correct position in Octree. Makes use of a recursive 
@@ -87,7 +87,7 @@ public:
 
     /**
      * Slices LOD data so only the MAX_STARS_PER_NODE brightest stars are stored in inner
-     * nodes. If \param branchIndex is defined then only that branch will be sliced.
+     * nodes. If \p branchIndex is defined then only that branch will be sliced.
      * Calls <code>sliceNodeLodCache()</code> internally.
      */
     void sliceLodData(size_t branchIndex = 8);
@@ -112,14 +112,15 @@ public:
 
     /**
      * Builds render data structure by traversing the Octree and checking for intersection
-     * with view frustum. Every vector in map contains data for one node. The corresponding
-     * integer key is the index where chunk should be inserted into streaming buffer.
-     * Calls <code>checkNodeIntersection()</code> for every branch. \param deltaStars 
-     * keeps track of how many stars that were added/removed this render call.
+     * with view frustum. Every vector in map contains data for one node.
+     * The corresponding integer key is the index where chunk should be inserted into
+     * streaming buffer. Calls <code>checkNodeIntersection()</code> for every branch.
+     * \pdeltaStars keeps track of how many stars that were added/removed this render
+     * call.
      */
     std::map<int, std::vector<float>> traverseData(const glm::dmat4& mvp, 
         const glm::vec2& screenSize, int& deltaStars, gaiamission::RenderOption option, 
-        const float& lodPixelThreshold);
+        float lodPixelThreshold);
 
     /** 
      * Builds full render data structure by traversing all leaves in the Octree.
@@ -166,7 +167,7 @@ public:
     size_t maxStarsPerNode() const;
     size_t biggestChunkIndexInUse() const;
     size_t numFreeSpotsInBuffer() const;
-    bool rebuildOngoing() const;
+    bool isRebuildOngoing() const;
 
     /**
      * \returns current CPU RAM budget in bytes.
@@ -199,8 +200,8 @@ private:
     /**
      * \returns the correct index of child node. Maps [1,1,1] to 0 and [-1,-1,-1] to 7.
      */
-    size_t getChildIndex(const float& posX, const float& posY, const float& posZ,
-        const float& origX = 0.0, const float& origY = 0.0, const float& origZ = 0.0);
+    size_t getChildIndex(float posX, float posY, float posZ, float origX = 0.f,
+        float origY = 0.f, float origZ = 0.f);
 
     /**
      * Private help function for <code>insert()</code>. Inserts star into node if leaf and
@@ -240,9 +241,9 @@ private:
      * loaded (if streaming). \param deltaStars keeps track of how many stars that were 
      * added/removed this render call.
      */
-    std::map<int, std::vector<float>> checkNodeIntersection(std::shared_ptr<OctreeNode> node, 
-        const glm::dmat4& mvp, const glm::vec2& screenSize, int& deltaStars, 
-        gaiamission::RenderOption option);
+    std::map<int, std::vector<float>> checkNodeIntersection(
+        std::shared_ptr<OctreeNode> node, const glm::dmat4& mvp,
+        const glm::vec2& screenSize, int& deltaStars, gaiamission::RenderOption option);
 
     /**
      * Checks if specified node existed in cache, and removes it if that's the case.
@@ -250,8 +251,8 @@ private:
      * long as \param recursive is not set to false. \param deltaStars keeps track of how 
      * many stars that were removed.
      */
-    std::map<int, std::vector<float>> removeNodeFromCache(std::shared_ptr<OctreeNode> node, 
-        int& deltaStars, bool recursive = true);
+    std::map<int, std::vector<float>> removeNodeFromCache(
+        std::shared_ptr<OctreeNode> node, int& deltaStars, bool recursive = true);
 
     /**
      * Get data in node and its descendants regardless if they are visible or not.
@@ -289,23 +290,23 @@ private:
      * Write a node to outFileStream. \param writeData defines if data should be included 
      * or if only structure should be written.
      */
-    void writeNodeToFile(std::ofstream& outFileStream, 
-        std::shared_ptr<OctreeNode> node, bool writeData);
+    void writeNodeToFile(std::ofstream& outFileStream, std::shared_ptr<OctreeNode> node,
+        bool writeData);
 
     /**
      * Read a node from file and its potential children. \param readData defines if full 
      * data or only structure should be read.
      * \returns accumulated sum of all read stars in node and its descendants.
      */
-    int readNodeFromFile(std::ifstream& inFileStream, 
-        std::shared_ptr<OctreeNode> node, bool readData);
+    int readNodeFromFile(std::ifstream& inFileStream, std::shared_ptr<OctreeNode> node,
+        bool readData);
 
     /**
      * Write node data to a file. \param outFilePrefix specifies the accumulated path
      * and name of the file. If \param threadWrites is set to true then one new thread 
      * will be created for each child to write its descendents.
      */
-    void writeNodeToMultipleFiles(const std::string& outFilePrefix, 
+    void writeNodeToMultipleFiles(const std::string& outFilePrefix,
         std::shared_ptr<OctreeNode> node, bool threadWrites);
 
     /**
@@ -314,8 +315,8 @@ private:
      * if it's not already loaded. \param additionalLevelsToFetch determines if any 
      * descendants of the found node should be fetched as well (if they exists). 
      */
-    void findAndFetchNeighborNode(const unsigned long long& firstParentId, int x, int y, 
-        int z, int additionalLevelsToFetch);
+    void findAndFetchNeighborNode(unsigned long long firstParentId, int x, int y, int z,
+        int additionalLevelsToFetch);
     
     /** 
      * Fetches data from all children of \param parentNode, as long as it's not already 
@@ -362,23 +363,23 @@ private:
     std::queue<unsigned long long> _leastRecentlyFetchedNodes;
     std::mutex _leastRecentlyFetchedNodesMutex;
 
-    size_t _totalDepth;
-    size_t _numLeafNodes;
-    size_t _numInnerNodes;
-    size_t _biggestChunkIndexInUse;
-    size_t _valuesPerStar;
-    float _minTotalPixelsLod;
+    size_t _totalDepth = 0;
+    size_t _numLeafNodes = 0;
+    size_t _numInnerNodes = 0;
+    size_t _biggestChunkIndexInUse = 0;
+    size_t _valuesPerStar = 0;
+    float _minTotalPixelsLod = 0.f;
     
-    size_t _maxStackSize;
-    bool _rebuildBuffer;
-    bool _useVBO;
-    bool _streamOctree;
-    bool _datasetFitInMemory;
-    long long _cpuRamBudget;
-    long long _maxCpuRamBudget;
-    unsigned long long _parentNodeOfCamera;
+    size_t _maxStackSize = 0;
+    bool _rebuildBuffer = false;
+    bool _useVBO = false;
+    bool _streamOctree = false;
+    bool _datasetFitInMemory = false;
+    long long _cpuRamBudget = 0;
+    long long _maxCpuRamBudget = 0;
+    unsigned long long _parentNodeOfCamera = 8;
     std::string _streamFolderPath;
-    size_t _traversedBranchesInRenderCall;
+    size_t _traversedBranchesInRenderCall = 0;
 
 }; // class OctreeManager
 

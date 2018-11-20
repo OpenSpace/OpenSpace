@@ -580,7 +580,6 @@ glm::dmat3 FixedRotation::matrix(const UpdateData&) const {
 }
 
 glm::vec3 FixedRotation::xAxis() const {
-    // @TODO: Change this (and the others) back to _xAxis.type once that class is fixed
     switch (_xAxis.type) {
         case Axis::Type::Unspecified:
             LWARNINGC("FixedRotation", "Unspecified axis type for X axis");

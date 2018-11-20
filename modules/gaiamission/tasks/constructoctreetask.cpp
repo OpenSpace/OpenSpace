@@ -26,109 +26,52 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-
-#include <ghoul/misc/dictionary.h>
+#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/directory.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/fmt.h>
-
+#include <ghoul/misc/dictionary.h>
 #include <fstream>
 #include <thread>
 
 namespace {
-    const char* KeyInFileOrFolderPath = "InFileOrFolderPath";
-    const char* KeyOutFileOrFolderPath = "OutFileOrFolderPath";
-    const char* KeyMaxDist = "MaxDist";
-    const char* KeyMaxStarsPerNode = "MaxStarsPerNode";
-    const char* KeySingleFileInput = "SingleFileInput";
+    constexpr const char* KeyInFileOrFolderPath = "InFileOrFolderPath";
+    constexpr const char* KeyOutFileOrFolderPath = "OutFileOrFolderPath";
+    constexpr const char* KeyMaxDist = "MaxDist";
+    constexpr const char* KeyMaxStarsPerNode = "MaxStarsPerNode";
+    constexpr const char* KeySingleFileInput = "SingleFileInput";
 
-    const char* KeyFilterPosX = "FilterPosX";
-    const char* KeyFilterPosY = "FilterPosY";
-    const char* KeyFilterPosZ = "FilterPosZ";
-    const char* KeyFilterGMag = "FilterGMag";
-    const char* KeyFilterBpRp = "FilterBpRp";
-    const char* KeyFilterVelX = "FilterVelX";
-    const char* KeyFilterVelY = "FilterVelY";
-    const char* KeyFilterVelZ = "FilterVelZ";
-    const char* KeyFilterBpMag = "FilterBpMag";
-    const char* KeyFilterRpMag = "FilterRpMag";
-    const char* KeyFilterBpG = "FilterBpG";
-    const char* KeyFilterGRp = "FilterGRp";
-    const char* KeyFilterRa = "FilterRa";
-    const char* KeyFilterRaError = "FilterRaError";
-    const char* KeyFilterDec = "FilterDec";
-    const char* KeyFilterDecError = "FilterDecError";
-    const char* KeyFilterParallax = "FilterParallax";
-    const char* KeyFilterParallaxError = "FilterParallaxError";
-    const char* KeyFilterPmra = "FilterPmra";
-    const char* KeyFilterPmraError = "FilterPmraError";
-    const char* KeyFilterPmdec = "FilterPmdec";
-    const char* KeyFilterPmdecError = "FilterPmdecError";
-    const char* KeyFilterRv = "FilterRv";
-    const char* KeyFilterRvError = "FilterRvError";
+    constexpr const char* KeyFilterPosX = "FilterPosX";
+    constexpr const char* KeyFilterPosY = "FilterPosY";
+    constexpr const char* KeyFilterPosZ = "FilterPosZ";
+    constexpr const char* KeyFilterGMag = "FilterGMag";
+    constexpr const char* KeyFilterBpRp = "FilterBpRp";
+    constexpr const char* KeyFilterVelX = "FilterVelX";
+    constexpr const char* KeyFilterVelY = "FilterVelY";
+    constexpr const char* KeyFilterVelZ = "FilterVelZ";
+    constexpr const char* KeyFilterBpMag = "FilterBpMag";
+    constexpr const char* KeyFilterRpMag = "FilterRpMag";
+    constexpr const char* KeyFilterBpG = "FilterBpG";
+    constexpr const char* KeyFilterGRp = "FilterGRp";
+    constexpr const char* KeyFilterRa = "FilterRa";
+    constexpr const char* KeyFilterRaError = "FilterRaError";
+    constexpr const char* KeyFilterDec = "FilterDec";
+    constexpr const char* KeyFilterDecError = "FilterDecError";
+    constexpr const char* KeyFilterParallax = "FilterParallax";
+    constexpr const char* KeyFilterParallaxError = "FilterParallaxError";
+    constexpr const char* KeyFilterPmra = "FilterPmra";
+    constexpr const char* KeyFilterPmraError = "FilterPmraError";
+    constexpr const char* KeyFilterPmdec = "FilterPmdec";
+    constexpr const char* KeyFilterPmdecError = "FilterPmdecError";
+    constexpr const char* KeyFilterRv = "FilterRv";
+    constexpr const char* KeyFilterRvError = "FilterRvError";
 
     constexpr const char* _loggerCat = "ConstructOctreeTask";
 } // namespace
 
 namespace openspace {
 
-ConstructOctreeTask::ConstructOctreeTask(const ghoul::Dictionary& dictionary)
-    : _inFileOrFolderPath("")
-    , _outFileOrFolderPath("")
-    , _singleFileInput(false)
-    , _maxDist(0)
-    , _maxStarsPerNode(0)
-    , _posX(0.0)
-    , _filterPosX(false)
-    , _posY(0.0)
-    , _filterPosY(false)
-    , _posZ(0.0)
-    , _filterPosZ(false)
-    , _gMag(0.0)
-    , _filterGMag(false)
-    , _bpRp(0.0)
-    , _filterBpRp(false)
-    , _velX(0.0)
-    , _filterVelX(false)
-    , _velY(0.0)
-    , _filterVelY(false)
-    , _velZ(0.0)
-    , _filterVelZ(false)
-    , _bpMag(0.0)
-    , _filterBpMag(false)
-    , _rpMag(0.0)
-    , _filterRpMag(false)
-    , _bpG(0.0)
-    , _filterBpG(false)
-    , _gRp(0.0)
-    , _filterGRp(false)
-    , _ra(0.0)
-    , _filterRa(false)
-    , _raError(0.0)
-    , _filterRaError(false)
-    , _dec(0.0)
-    , _filterDec(false)
-    , _decError(0.0)
-    , _filterDecError(false)
-    , _parallax(0.0)
-    , _filterParallax(false)
-    , _parallaxError(0.0)
-    , _filterParallaxError(false)
-    , _pmra(0.0)
-    , _filterPmra(false)
-    , _pmraError(0.0)
-    , _filterPmraError(false)
-    , _pmdec(0.0)
-    , _filterPmdec(false)
-    , _pmdecError(0.0)
-    , _filterPmdecError(false)
-    , _rv(0.0)
-    , _filterRv(false)
-    , _rvError(0.0)
-    , _filterRvError(false)
-{
-    
+ConstructOctreeTask::ConstructOctreeTask(const ghoul::Dictionary& dictionary) {
     openspace::documentation::testSpecificationAndThrow(
         documentation(),
         dictionary,
@@ -260,7 +203,6 @@ std::string ConstructOctreeTask::description() {
 }
 
 void ConstructOctreeTask::perform(const Task::ProgressCallback& progressCallback) {
-
     progressCallback(0.0f);
 
     if (_singleFileInput) {
@@ -285,8 +227,10 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
 
     LINFO("Reading data file: " + _inFileOrFolderPath);
 
-    LINFO("MAX_DIST: " + std::to_string(_octreeManager->maxDist()) +
-        " - MAX_STARS_PER_NODE: " + std::to_string(_octreeManager->maxStarsPerNode()));
+    LINFO(fmt::format(
+        "MAX DIST: {} - MAX STARS PER NODE: {}",
+        _octreeManager->maxDist(), _octreeManager->maxStarsPerNode()
+    ));
 
     // Use to generate a synthetic dataset 
     /*for (float z = -1.0; z < 1.0; z += 0.05) {
@@ -329,13 +273,14 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
 
     std::ifstream inFileStream(_inFileOrFolderPath, std::ifstream::binary);
     if (inFileStream.good()) {
-
         inFileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
         inFileStream.read(reinterpret_cast<char*>(&nValuesPerStar), sizeof(int32_t));
 
         fullData.resize(nValues);
-        inFileStream.read(reinterpret_cast<char*>(&fullData[0]), 
-                nValues * sizeof(fullData[0]));
+        inFileStream.read(
+            reinterpret_cast<char*>(fullData.data()), 
+            nValues * sizeof(fullData[0])
+        );
         nTotalStars = nValues / nValuesPerStar;
 
         progressCallback(0.3f);
@@ -360,11 +305,12 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
         inFileStream.close();
     }
     else {
-        LERROR(fmt::format("Error opening file '{}' for loading preprocessed file!"
-            , _inFileOrFolderPath));
+        LERROR(fmt::format(
+            "Error opening file '{}' for loading preprocessed file!",
+            _inFileOrFolderPath
+        ));
     }
-    LINFO(std::to_string(nFilteredStars) + " out of " + std::to_string(nTotalStars) + 
-        " read stars were filtered away.");
+    LINFO(fmt::format("{} of {} read stars were filtered", nFilteredStars, nTotalStars));
 
     // Slice LOD data before writing to files.
     _octreeManager->sliceLodData();
@@ -372,7 +318,6 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
     LINFO("Writing octree to: " + _outFileOrFolderPath);
     std::ofstream outFileStream(_outFileOrFolderPath, std::ofstream::binary);
     if (outFileStream.good()) {
-
         if (nValues == 0) {
             LERROR("Error writing file - No values were read from file.");
         }
@@ -381,14 +326,15 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
         outFileStream.close();
     }
     else {
-        LERROR(fmt::format("Error opening file: {} as output data file.",
-            _outFileOrFolderPath));
+        LERROR(fmt::format(
+            "Error opening file: {} as output data file.", _outFileOrFolderPath
+        ));
     }
 }
 
 void ConstructOctreeTask::constructOctreeFromFolder(
-    const Task::ProgressCallback& progressCallback) {
-    
+                                           const Task::ProgressCallback& progressCallback)
+{
     int32_t nStars = 0;
     int32_t nValuesPerStar = 0;
     size_t nFilteredStars = 0;
@@ -417,11 +363,12 @@ void ConstructOctreeTask::constructOctreeFromFolder(
 
     float processOneFile = 1.f / allInputFiles.size();
 
-    LINFO("MAX_DIST: " + std::to_string(_indexOctreeManager->maxDist()) +
-        " - MAX_STARS_PER_NODE: " + std::to_string(_indexOctreeManager->maxStarsPerNode()));
+    LINFO(fmt::format(
+        "MAX DIST: {} - MAX STARS PER NODE: {}",
+        _indexOctreeManager->maxDist(), _indexOctreeManager->maxStarsPerNode()
+    ));
 
     for (size_t idx = 0; idx < allInputFiles.size(); ++idx) {
-
         std::string inFilePath = allInputFiles[idx];
         int nStarsInfile = 0;
 
@@ -429,13 +376,14 @@ void ConstructOctreeTask::constructOctreeFromFolder(
 
         std::ifstream inFileStream(inFilePath, std::ifstream::binary);
         if (inFileStream.good()) {
-
             inFileStream.read(reinterpret_cast<char*>(&nValuesPerStar), sizeof(int32_t));
             filterValues.resize(nValuesPerStar, 0.f);
 
-            while (inFileStream.read(reinterpret_cast<char*>(&filterValues[0]),
-                nValuesPerStar * sizeof(filterValues[0]))) {
-
+            while (inFileStream.read(
+                reinterpret_cast<char*>(filterValues.data()),
+                nValuesPerStar * sizeof(filterValues[0])
+            ))
+            {
                 // Filter data by parameters.
                 if (checkAllFilters(filterValues)) {
                     nFilteredStars++;
@@ -451,8 +399,10 @@ void ConstructOctreeTask::constructOctreeFromFolder(
                 //}
 
                 // If all filters passed then insert render values into Octree.
-                std::vector<float> renderValues(filterValues.begin(),
-                    filterValues.begin() + RENDER_VALUES);
+                std::vector<float> renderValues(
+                    filterValues.begin(),
+                    filterValues.begin() + RENDER_VALUES
+                );
 
                 _indexOctreeManager->insert(renderValues);
                 nStarsInfile++;
@@ -479,8 +429,9 @@ void ConstructOctreeTask::constructOctreeFromFolder(
             inFileStream.close();
         }
         else {
-            LERROR(fmt::format("Error opening file '{}' for loading preprocessed file!"
-                , inFilePath));
+            LERROR(fmt::format(
+                "Error opening file '{}' for loading preprocessed file!", inFilePath
+            ));
         }
 
         // Slice LOD data.
@@ -491,21 +442,29 @@ void ConstructOctreeTask::constructOctreeFromFolder(
         nStars += nStarsInfile;
 
         LINFO(fmt::format("Writing {} stars to octree files!", nStarsInfile));
-        LINFO("Number of leaf nodes: " + std::to_string(_indexOctreeManager->numLeafNodes()) +
-            "\n Number of inner nodes: " + std::to_string(_indexOctreeManager->numInnerNodes()) +
-            "\n Total depth of tree: " + std::to_string(_indexOctreeManager->totalDepth()));
+        LINFO(fmt::format(
+            "Number leaf nodes: {}\n Number inner nodes: {}\n Total depth of tree: {}",
+            _indexOctreeManager->numLeafNodes(),
+            _indexOctreeManager->numInnerNodes(),
+            _indexOctreeManager->totalDepth()
+        ));
 
         // Write to 8 separate files in a separate thread. Data will be cleared after it 
         // has been written. Store joinable thread for later sync.
-        std::thread t(&OctreeManager::writeToMultipleFiles, _indexOctreeManager,
-            _outFileOrFolderPath, idx);
+        std::thread t(
+            &OctreeManager::writeToMultipleFiles,
+            _indexOctreeManager,
+            _outFileOrFolderPath,
+            idx
+        );
         writeThreads[idx] = std::move(t);
     }
 
-    LINFO("A total of " + std::to_string(nStars) + " stars were read from files and "
-        "distributed into " + std::to_string(_indexOctreeManager->totalNodes()) + 
-        " total nodes!");
-    LINFO(std::to_string(nFilteredStars) + " stars were filtered away.");
+    LINFO(fmt::format(
+        "A total of {} stars were read from files and distributed into {} total nodes",
+        nStars, _indexOctreeManager->totalNodes()
+    ));
+    LINFO(std::to_string(nFilteredStars) + " stars were filtered");
 
     //LINFO("Max radius of dataset is: " + std::to_string(maxRadius) + 
     //    "\n Number of stars outside of:" +  
@@ -528,14 +487,15 @@ void ConstructOctreeTask::constructOctreeFromFolder(
     std::string indexFileOutPath = _outFileOrFolderPath + "index.bin";
     std::ofstream outFileStream(indexFileOutPath, std::ofstream::binary);
     if (outFileStream.good()) {
-
         LINFO("Writing index file!");
         _indexOctreeManager->writeToFile(outFileStream, false);
 
         outFileStream.close();
     }
     else {
-        LERROR(fmt::format("Error opening file: {} as index output file.", indexFileOutPath));
+        LERROR(fmt::format(
+            "Error opening file: {} as index output file.", indexFileOutPath
+        ));
     }
 
     // Make sure all threads are done.
@@ -572,9 +532,9 @@ bool ConstructOctreeTask::checkAllFilters(const std::vector<float>& filterValues
         (_filterRvError && filterStar(_rvError, filterValues[23]));
 }
 
-bool ConstructOctreeTask::filterStar(const glm::vec2& range, const float& filterValue, 
-    const float& normValue) {
-    
+bool ConstructOctreeTask::filterStar(const glm::vec2& range, float filterValue, 
+                                     float normValue)
+{
     // Return true if star should be filtered away, i.e. if min = max = filterValue or
     // if filterValue < min (when min != 0.0) or filterValue > max (when max != 0.0).
     return (fabs(range.x - range.y) < FLT_EPSILON &&
@@ -598,9 +558,10 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 KeyInFileOrFolderPath,
                 new StringVerifier,
                 Optional::No,
-                "If SingleFileInput is set to true then this specifies the path to a single "
-                "BIN file containing a full dataset. Otherwise this specifies the path to "
-                "a folder with multiple BIN files containing subsets of sorted star data.",
+                "If SingleFileInput is set to true then this specifies the path to a "
+                "single BIN file containing a full dataset. Otherwise this specifies the "
+                "path to a folder with multiple BIN files containing subsets of sorted "
+                "star data.",
             },
             {
                 KeyOutFileOrFolderPath,
@@ -626,9 +587,9 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 KeySingleFileInput,
                 new BoolVerifier,
                 Optional::Yes,
-                "If true then task will read from a single file and output a single binary "
-                "file with the full Octree. If false then task will read all files in "
-                "specified folder and output multiple files for the Octree."
+                "If true then task will read from a single file and output a single "
+                "binary file with the full Octree. If false then task will read all "
+                "files in specified folder and output multiple files for the Octree."
             },
             {
                 KeyFilterPosX,
@@ -661,10 +622,11 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 KeyFilterGMag,
                 new Vector2Verifier<double>,
                 Optional::Yes,
-                "If defined then only stars with G mean magnitude values between [min, max] "
-                "will be inserted into Octree (if min is set to 20.0 it is read as -Inf, " 
-                "if max is set to 20.0 it is read as +Inf). If min = max then all values "
-                "equal min|max will be filtered away. Default GMag = 20.0 if no value existed."
+                "If defined then only stars with G mean magnitude values between "
+                "[min, max] will be inserted into Octree (if min is set to 20.0 it is "
+                "read as -Inf, if max is set to 20.0 it is read as +Inf). If min = max "
+                "then all values equal min|max will be filtered away. Default "
+                "GMag = 20.0 if no value existed."
             },
             {
                 KeyFilterBpRp,
@@ -706,19 +668,21 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 KeyFilterBpMag,
                 new Vector2Verifier<double>,
                 Optional::Yes,
-                "If defined then only stars with Bp mean magnitude values between [min, max] "
-                "will be inserted into Octree (if min is set to 20.0 it is read as -Inf, " 
-                "if max is set to 20.0 it is read as +Inf). If min = max then all values "
-                "equal min|max will be filtered away. Default BpMag = 20.0 if no value existed."
+                "If defined then only stars with Bp mean magnitude values between "
+                "[min, max] will be inserted into Octree (if min is set to 20.0 it is "
+                "read as -Inf, if max is set to 20.0 it is read as +Inf). If min = max "
+                "then all values equal min|max will be filtered away. Default "
+                "BpMag = 20.0 if no value existed."
             },
             {
                 KeyFilterRpMag,
                 new Vector2Verifier<double>,
                 Optional::Yes,
-                "If defined then only stars with Rp mean magnitude values between [min, max] "
-                "will be inserted into Octree (if min is set to 20.0 it is read as -Inf, " 
-                "if max is set to 20.0 it is read as +Inf). If min = max then all values "
-                "equal min|max will be filtered away. Default RpMag = 20.0 if no value existed."
+                "If defined then only stars with Rp mean magnitude values between "
+                "[min, max] will be inserted into Octree (if min is set to 20.0 it is "
+                "read as -Inf, if max is set to 20.0 it is read as +Inf). If min = max "
+                "then all values equal min|max will be filtered away. Default RpMag = "
+                "20.0 if no value existed."
             },
             {
                 KeyFilterBpG,
@@ -787,19 +751,19 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 KeyFilterParallaxError,
                 new Vector2Verifier<double>,
                 Optional::Yes,
-                "If defined then only stars with Parallax Error values between [min, max] "
-                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
-                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
-                "equal min|max will be filtered away."
+                "If defined then only stars with Parallax Error values between "
+                "[min, max] will be inserted into Octree (if min is set to 0.0 it is "
+                "read as -Inf, if max is set to 0.0 it is read as +Inf). If min = max "
+                "then all values equal min|max will be filtered away."
             },
             {
                 KeyFilterPmra,
                 new Vector2Verifier<double>,
                 Optional::Yes,
-                "If defined then only stars with Proper Motion RA values between [min, max] "
-                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
-                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
-                "equal min|max will be filtered away."
+                "If defined then only stars with Proper Motion RA values between "
+                "[min, max] will be inserted into Octree (if min is set to 0.0 it is "
+                "read as -Inf, if max is set to 0.0 it is read as +Inf). If min = max "
+                "then all values equal min|max will be filtered away."
             },
             {
                 KeyFilterPmraError,
@@ -807,46 +771,47 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 Optional::Yes,
                 "If defined then only stars with Proper Motion RA Error values between "
                 "[min, max] will be inserted into Octree (if min is set to 0.0 it is read "
-                "as -Inf, if max is set to 0.0 it is read as +Inf). If min = max then all "
-                "values equal min|max will be filtered away."
+                "as -Inf, if max is set to 0.0 it is read as +Inf). If min = max then "
+                "all values equal min|max will be filtered away."
             },
             {
                 KeyFilterPmdec,
                 new Vector2Verifier<double>,
                 Optional::Yes,
-                "If defined then only stars with Proper Motion DEC values between [min, max] "
-                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
-                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
-                "equal min|max will be filtered away."
+                "If defined then only stars with Proper Motion DEC values between "
+                "[min, max] will be inserted into Octree (if min is set to 0.0 it is "
+                "read as -Inf, if max is set to 0.0 it is read as +Inf). If min = max "
+                "then all values equal min|max will be filtered away."
             },
             {
                 KeyFilterPmdecError,
                 new Vector2Verifier<double>,
                 Optional::Yes,
                 "If defined then only stars with Proper Motion DEC Error values between "
-                "[min, max] will be inserted into Octree (if min is set to 0.0 it is read "
-                "as -Inf, if max is set to 0.0 it is read as +Inf). If min = max then all "
-                "values equal min|max will be filtered away."
+                "[min, max] will be inserted into Octree (if min is set to 0.0 it is "
+                "read as -Inf, if max is set to 0.0 it is read as +Inf). If min = max "
+                "then all values equal min|max will be filtered away."
             },
             {
                 KeyFilterRv,
                 new Vector2Verifier<double>,
                 Optional::Yes,
-                "If defined then only stars with Radial Velocity values between [min, max] "
-                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
-                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
-                "equal min|max will be filtered away."
+                "If defined then only stars with Radial Velocity values between "
+                "[min, max] will be inserted into Octree (if min is set to 0.0 it is "
+                "read as -Inf, if max is set to 0.0 it is read as +Inf). If min = max "
+                "then all values equal min|max will be filtered away."
             },
             {
                 KeyFilterRvError,
                 new Vector2Verifier<double>,
                 Optional::Yes,
                 "If defined then only stars with Radial Velocity Error values between "
-                "[min, max] will be inserted into Octree (if min is set to 0.0 it is read "
-                "as -Inf, if max is set to 0.0 it is read as +Inf). If min = max then all "
-                "values equal min|max will be filtered away."
+                "[min, max] will be inserted into Octree (if min is set to 0.0 it is "
+                "read as -Inf, if max is set to 0.0 it is read as +Inf). If min = max "
+                "then all values equal min|max will be filtered away."
             },
         }
     };
 }
+
 } // namespace openspace

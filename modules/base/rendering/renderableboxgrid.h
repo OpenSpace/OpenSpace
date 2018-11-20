@@ -32,7 +32,6 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
-
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace ghoul::opengl {
@@ -46,7 +45,6 @@ namespace openspace {
 class RenderableBoxGrid : public Renderable {
 public:
     RenderableBoxGrid(const ghoul::Dictionary& dictionary);
-    ~RenderableBoxGrid();
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -63,7 +61,7 @@ protected:
         float location[3];
     };
 
-    ghoul::opengl::ProgramObject* _gridProgram;
+    ghoul::opengl::ProgramObject* _gridProgram = nullptr;
 
     properties::DMat4Property _gridMatrix;
     properties::Vec4Property _gridColor;
@@ -71,12 +69,12 @@ protected:
     properties::FloatProperty _lineWidth;
     properties::Vec3Property _size;
 
-    bool _gridIsDirty;
+    bool _gridIsDirty = true;
 
-    GLuint _vaoID;
-    GLuint _vBufferID;
+    GLuint _vaoID = 0;
+    GLuint _vBufferID = 0;
 
-    GLenum _mode;
+    GLenum _mode = GL_LINE_STRIP;
     std::vector<Vertex> _varray;
 };
 

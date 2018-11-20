@@ -23,8 +23,9 @@
  ****************************************************************************************/
 
 #include <modules/gaiamission/rendering/octreeculler.h>
-#include <ghoul/logging/logmanager.h>
+
 #include <ghoul/glm.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr const char* _loggerCat = "OctreeCuller";
@@ -47,20 +48,19 @@ namespace {
 
 OctreeCuller::OctreeCuller(globebrowsing::AABB3 viewFrustum)
     : _viewFrustum(std::move(viewFrustum))
-{   }
-
-OctreeCuller::~OctreeCuller() {   }
+{}
 
 bool OctreeCuller::isVisible(const std::vector<glm::dvec4>& corners, 
-    const glm::dmat4& mvp) {
-    
+                             const glm::dmat4& mvp)
+{
     createNodeBounds(corners, mvp);
-
     return intersects(_viewFrustum, _nodeBounds);
 }
 
 glm::vec2 OctreeCuller::getNodeSizeInPixels(const std::vector<glm::dvec4>& corners, 
-    const glm::dmat4& mvp, const glm::vec2& screenSize) {
+                                            const glm::dmat4& mvp,
+                                            const glm::vec2& screenSize)
+{
 
     createNodeBounds(corners, mvp);
 
@@ -71,17 +71,15 @@ glm::vec2 OctreeCuller::getNodeSizeInPixels(const std::vector<glm::dvec4>& corne
 }
 
 void OctreeCuller::createNodeBounds(const std::vector<glm::dvec4>& corners, 
-    const glm::dmat4& mvp) {
-
+                                    const glm::dmat4& mvp)
+{
     // Create a bounding box in clipping space from node boundaries.
     _nodeBounds = globebrowsing::AABB3();
 
     for (size_t i = 0; i < 8; ++i) {
         glm::dvec4 cornerClippingSpace = mvp * corners[i];
-
-        glm::dvec3 ndc
-              = glm::dvec3((1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace);
-        expand(_nodeBounds, ndc);
+        glm::dvec4 ndc = (1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace;
+        expand(_nodeBounds, glm::dvec3(ndc));
     }
 }
 

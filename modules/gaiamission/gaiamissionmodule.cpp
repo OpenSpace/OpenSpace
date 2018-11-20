@@ -24,17 +24,16 @@
 
 #include <modules/gaiamission/gaiamissionmodule.h>
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-
-#include <ghoul/misc/assert.h>
+#include <modules/gaiamission/tasks/constructoctreetask.h>
 #include <modules/gaiamission/rendering/renderablegaiastars.h>
 #include <modules/gaiamission/tasks/readfitstask.h>
 #include <modules/gaiamission/tasks/readspecktask.h>
-#include <modules/gaiamission/tasks/constructoctreetask.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/util/factorymanager.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/assert.h>
 
 namespace openspace {
 

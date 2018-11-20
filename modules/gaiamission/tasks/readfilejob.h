@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GAIAMISSION___READFILEJOB___H__
 
 #include <openspace/util/concurrentjobmanager.h>
+
 #include <modules/fitsfilereader/include/fitsfilereader.h>
 
 namespace openspace::gaiamission {
@@ -44,10 +45,10 @@ struct ReadFileJob : public Job<std::vector<std::vector<float>>> {
      * \param nValuesPerStar defines how many values that will be stored per star.
      */
     ReadFileJob(const std::string& filePath, const std::vector<std::string>& allColumns,
-                int firstRow, int lastRow, size_t nDefaultCols, int nValuesPerStar,
-                std::shared_ptr<FitsFileReader> fitsReader);
+        int firstRow, int lastRow, size_t nDefaultCols, int nValuesPerStar,
+        std::shared_ptr<FitsFileReader> fitsReader);
 
-    ~ReadFileJob();
+    ~ReadFileJob() = default;
 
     void execute() override;
 

@@ -24,19 +24,18 @@
 
 #include <modules/gaiamission/tasks/readspecktask.h>
 
+#include <modules/fitsfilereader/include/fitsfilereader.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-
-#include <ghoul/misc/dictionary.h>
+#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/fmt.h>
-
+#include <ghoul/misc/dictionary.h>
 #include <fstream>
 
 namespace {
-    const char* KeyInFilePath = "InFilePath";
-    const char* KeyOutFilePath = "OutFilePath";
+    constexpr const char* KeyInFilePath = "InFilePath";
+    constexpr const char* KeyOutFilePath = "OutFilePath";
 
     constexpr const char* _loggerCat = "ReadSpeckTask";
 } // namespace
@@ -44,7 +43,6 @@ namespace {
 namespace openspace {
 
 ReadSpeckTask::ReadSpeckTask(const ghoul::Dictionary& dictionary) {
-    
     openspace::documentation::testSpecificationAndThrow(
         documentation(),
         dictionary,
@@ -55,15 +53,14 @@ ReadSpeckTask::ReadSpeckTask(const ghoul::Dictionary& dictionary) {
     _outFilePath = absPath(dictionary.value<std::string>(KeyOutFilePath));
 }
 
-ReadSpeckTask::~ReadSpeckTask() {}
-
 std::string ReadSpeckTask::description() {
-    return "Read speck file: " + _inFilePath + "\n and write raw star data into: "
-        + _outFilePath + "\n.";
+    return fmt::format(
+        "Read speck file {} and write raw star data into {}", _inFilePath, _outFilePath
+    );
 }
 
 void ReadSpeckTask::perform(const Task::ProgressCallback& progressCallback) {
-    progressCallback(0.0f);
+    progressCallback(0.f);
 
     int32_t nRenderValues = 0;
 
@@ -74,7 +71,6 @@ void ReadSpeckTask::perform(const Task::ProgressCallback& progressCallback) {
 
     std::ofstream fileStream(_outFilePath, std::ofstream::binary);
     if (fileStream.good()) {
-
         int32_t nValues = static_cast<int32_t>(fullData.size());
         LINFO("nValues: " + std::to_string(nValues));
 
@@ -93,7 +89,7 @@ void ReadSpeckTask::perform(const Task::ProgressCallback& progressCallback) {
         LERROR(fmt::format("Error opening file: {} as output data file.", _outFilePath));
     }
 
-    progressCallback(1.0f);
+    progressCallback(1.f);
 }
 
 documentation::Documentation ReadSpeckTask::Documentation() {

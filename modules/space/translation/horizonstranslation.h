@@ -29,10 +29,8 @@
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/timeline.h>
-
 #include <ghoul/filesystem/file.h>
 #include <ghoul/lua/luastate.h>
-
 #include <memory>
 
 namespace openspace {
