@@ -80,6 +80,12 @@ void OptionProperty::addOptions(std::vector<std::pair<int, std::string>> options
     }
 }
 
+void OptionProperty::addOptions(std::vector<std::string> options) {
+    for (int i = 0; i < static_cast<int>(options.size()); ++i) {
+        addOption(i, std::move(options[i]));
+    }
+}
+
 void OptionProperty::clearOptions() {
     _options.clear();
     _value = 0;
