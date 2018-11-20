@@ -450,7 +450,7 @@ glm::vec3 RenderableSignals::getPositionForGeocentricSceneGraphNode(const char* 
         position = global::renderEngine.scene()->sceneGraphNode(id)->position();
     }
     else {
-        LERROR(fmt::format("No scengraphnode found for the station dish {}, "
+        LERROR(fmt::format("No scenegraphnode found for the station dish {}, "
                             "drawing line from center of Earth", id));
         position = glm::vec3(0, 0, 0);
     }
@@ -467,7 +467,7 @@ glm::vec3 RenderableSignals::getStationColor(std::string dishidentifier) {
         site = _stationToSite.at(dishidentifier);
     }
     catch (const std::exception& e) {
-        LERROR(fmt::format("Station {} has no site location.", dishidentifier));
+        LERROR(fmt::format("Station {} has no site location color, add it to your stationSiteMap.", dishidentifier));
     }
 
     int siteIndex = _siteToIndex.at(site);

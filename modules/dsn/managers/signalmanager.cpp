@@ -59,7 +59,9 @@ namespace openspace {
        _signalData.sequenceStartTime = triggerTime;
        _signalData.signals.clear();
        _signalData.signals.reserve(0);
-
+       // TODO handle the start time/ end time with regard to light time travel
+       // ie. This has to be different for uplink and downlink
+       // light time travel should extend endtime for uplink, and start time for downlink
       for (const auto& signalsInJson : j["Signals"]) {
           structSignal.dishName = signalsInJson["facility"].get<std::string>();
           structSignal.spacecraft = signalsInJson["projuser"].get<std::string>();
