@@ -75,24 +75,20 @@ private:
     bool loadCachedFile(const std::string& file);
     void saveCachedFile(const std::string& file) const;
 
+    properties::StringProperty _speckFile;
+
     properties::StringProperty _pointSpreadFunctionTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
     std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
-    bool _pointSpreadFunctionTextureIsDirty = true;
 
     properties::StringProperty _colorTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
     std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
-    bool _colorTextureIsDirty = true;
-
     properties::OptionProperty _colorOption;
-    bool _dataIsDirty = true;
-
     properties::OptionProperty _otherDataOption;
     properties::StringProperty _otherDataColorMapPath;
     properties::Vec2Property _otherDataRange;
     std::unique_ptr<ghoul::opengl::Texture> _otherDataColorMapTexture;
-    bool _otherDataColorMapIsDirty = true;
 
     properties::FloatProperty _alphaValue;
     properties::FloatProperty _scaleFactor;
@@ -103,7 +99,11 @@ private:
         minBillboardSize, screenSize, scaling, psfTexture, colorTexture,
         otherDataTexture, otherDataRange) _uniformCache;
 
-    std::string _speckFile;
+    bool _speckFileIsDirty = true;
+    bool _pointSpreadFunctionTextureIsDirty = true;
+    bool _colorTextureIsDirty = true;
+    bool _dataIsDirty = true;
+    bool _otherDataColorMapIsDirty = true;
 
     std::vector<float> _slicedData;
     std::vector<float> _fullData;

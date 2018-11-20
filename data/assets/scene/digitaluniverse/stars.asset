@@ -40,9 +40,10 @@ local gaia_abundance_apogee = {
     Identifier = "Gaia Abundance Apogee",
     Renderable = {
         Type = "RenderableStars",
-        File = "D:/Dropbox/GaiaAbundApogee.speck",
+        File = "E:/Dropbox/GaiaAbundApogee.speck",
         Texture = textures .. "/halo.png",
-        ColorMap = colorLUT .. "/colorbv.cmap"
+        ColorMap = colorLUT .. "/colorbv.cmap",
+        OtherDataColorMap = colorLUT .. "/viridis.cmap"
     },
     GUI = {
         Path = "/Milky Way/Stars"
@@ -53,9 +54,10 @@ local gaia_abundance_galah = {
     Identifier = "Gaia Abundance Galah",
     Renderable = {
         Type = "RenderableStars",
-        File = "D:/Dropbox/GaiaAbundGalah.speck",
+        File = "E:/Dropbox/GaiaAbundGalah.speck",
         Texture = textures .. "/halo.png",
-        ColorMap = colorLUT .. "/colorbv.cmap"
+        ColorMap = colorLUT .. "/colorbv.cmap",
+        OtherDataColorMap = colorLUT .. "/viridis.cmap"
     },
     GUI = {
         Path = "/Milky Way/Stars"

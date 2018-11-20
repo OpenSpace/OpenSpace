@@ -96,6 +96,12 @@ namespace {
         float absoluteMagnitude;
     };
 
+    constexpr openspace::properties::Property::PropertyInfo SpeckFileInfo = {
+        "SpeckFile",
+        "Speck File",
+        "The speck file that is loaded to get the data for rendering these stars."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo PsfTextureInfo = {
         "Texture",
         "Point Spread Function Texture",
@@ -226,6 +232,7 @@ documentation::Documentation RenderableStars::Documentation() {
 
 RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
+    , _speckFile(SpeckFileInfo)
     , _pointSpreadFunctionTexturePath(PsfTextureInfo)
     , _colorTexturePath(ColorTextureInfo)
     , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
@@ -251,6 +258,9 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         dictionary,
         "RenderableStars"
     );
+
+    addProperty(_speckFile);
+    _speckFile.onChange([&]() { _speckFileIsDirty = true; });
 
     _pointSpreadFunctionTexturePath = absPath(dictionary.value<std::string>(
         PsfTextureInfo.identifier
@@ -356,6 +366,7 @@ void RenderableStars::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
     loadData();
+    _speckFileIsDirty = false;
 }
 
 void RenderableStars::deinitializeGL() {
@@ -433,6 +444,12 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableStars::update(const UpdateData&) {
+    if (_speckFileIsDirty) {
+        loadData();
+        _speckFileIsDirty = false;
+        _dataIsDirty = true;
+    }
+
     if (_dataIsDirty) {
         const int value = _colorOption;
         LDEBUG("Regenerating data");
@@ -664,6 +681,11 @@ void RenderableStars::loadData() {
         ghoul::filesystem::CacheManager::Persistent::Yes
     );
 
+    _nValuesPerStar = 0;
+    _slicedData.clear();
+    _fullData.clear();
+    _dataNames.clear();
+
     bool hasCachedFile = FileSys.fileExists(cachedFile);
     if (hasCachedFile) {
         LINFO(fmt::format(
@@ -698,8 +720,6 @@ void RenderableStars::readSpeckFile() {
     if (!file.good()) {
         throw ghoul::RuntimeError(fmt::format("Failed to open Speck file '{}'", _file));
     }
-
-    _nValuesPerStar = 0;
 
     // The beginning of the speck file has a header that either contains comments
     // (signaled by a preceding '#') or information about the structure of the file
@@ -854,28 +874,16 @@ void RenderableStars::createDataSlice(ColorOption option) {
         //}
     }
 
+    _otherDataRange = glm::vec2(
+        std::numeric_limits<float>::max(),
+        -std::numeric_limits<float>::max()
+    );
+
     for (size_t i = 0; i < _fullData.size(); i += _nValuesPerStar) {
         glm::vec3 p = glm::vec3(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2]);
 
-        // This is only temporary until the scalegraph is in place. It places all stars
-        // on a sphere with a small variation in the distance to account for blending
-        // issues ---abock
-        //if (p != glm::vec3(0.f))
-        //    p = glm::normalize(p);
-
-        //float distLy = _fullData[i + 6];
-        //float normalizedDist = (distLy - minDistance) / (maxDistance - minDistance);
-        //float distance = 18.f - normalizedDist / 1.f ;
-
-
-        //psc position = psc(glm::vec4(p, distance));
-
         // Convert parsecs -> meter
         psc position = psc(glm::vec4(p * 0.308567756f, 17));
-
-        //position[1] *= parsecsToMetersFactor[0];
-        //position[2] *= parsecsToMetersFactor[0];
-        //position[3] += parsecsToMetersFactor[1];
 
         switch (option) {
             case ColorOption::Color:
