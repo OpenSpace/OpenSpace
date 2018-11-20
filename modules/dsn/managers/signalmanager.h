@@ -28,7 +28,7 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <modules/dsn/managers/jsonhelper.h>
+#include <modules/dsn/managers/datafilehelper.h>
 #include <openspace/json.h>
 #include <openspace/util/time.h>
 #include <fstream>

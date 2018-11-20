@@ -22,10 +22,10 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/dsn/managers/jsonhelper.h>
+#include <modules/dsn/managers/datafilehelper.h>
 
 namespace openspace {
-    constexpr const char* _loggerCat = "JsonHelper";
+    constexpr const char* _loggerCat = "DataFileHelper";
 
     // Keys to get values from dictionary
     constexpr const char* KeyDataFolder = "DataFolder";
@@ -43,7 +43,7 @@ namespace openspace {
   * to function; such as the file type and the location of the data files.
   * Returns false if it fails to extract mandatory information!
   */
-    bool JsonHelper::checkFileNames(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary, std::vector<std::string> &dataFiles)
+    bool DataFileHelper::checkFileNames(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary, std::vector<std::string> &dataFiles)
     {
         DataFileType sourceFileType = DataFileType::Invalid;
 
@@ -125,25 +125,25 @@ namespace openspace {
     }
 
     /*Get the day, must have format YYYY-DDDT*/
-    std::string JsonHelper::getDayFromFileName(std::string filename) {
+    std::string DataFileHelper::getDayFromFileName(std::string filename) {
         // number of  characters in filename (excluding '.json')
         constexpr const int FilenameSize = 9;
-        return JsonHelper::getFileNameTime(filename, FilenameSize);
+        return DataFileHelper::getFileNameTime(filename, FilenameSize);
     }
-    std::vector<double> JsonHelper::getDaysFromFileNames(std::vector<std::string> _dataFiles) {
+    std::vector<double> DataFileHelper::getDaysFromFileNames(std::vector<std::string> _dataFiles) {
         // number of  characters in filename (excluding '.json')
         constexpr const int FilenameSize = 9;
-        return JsonHelper::extractTriggerTimesFromFileNames(_dataFiles, FilenameSize);
+        return DataFileHelper::extractTriggerTimesFromFileNames(_dataFiles, FilenameSize);
     }
 
     /*Get the hour, must have format YYYY-DDDTHH*/
-    std::vector<double> JsonHelper::getHoursFromFileNames(std::vector<std::string> _dataFiles) {
+    std::vector<double> DataFileHelper::getHoursFromFileNames(std::vector<std::string> _dataFiles) {
         // number of  characters in filename (excluding '.json')
         constexpr const int FilenameSize = 11;
-        return JsonHelper::extractTriggerTimesFromFileNames(_dataFiles, FilenameSize);
+        return DataFileHelper::extractTriggerTimesFromFileNames(_dataFiles, FilenameSize);
     }
 
-    std::string JsonHelper::getFileNameTime(std::string filename, const int FilenameSize) {
+    std::string DataFileHelper::getFileNameTime(std::string filename, const int FilenameSize) {
         // size(".json")
         constexpr const int ExtSize = 5;
         const size_t strLength = filename.size();
@@ -155,7 +155,7 @@ namespace openspace {
         return startTimeString;
     }
     // Extract J2000 time from file names
-    std::vector<double> JsonHelper::extractTriggerTimesFromFileNames(std::vector<std::string> dataFiles, const int FilenameSize) {
+    std::vector<double> DataFileHelper::extractTriggerTimesFromFileNames(std::vector<std::string> dataFiles, const int FilenameSize) {
         std::vector<double> fileStartTimes;
         for (const std::string& filePath : dataFiles) {
             std::string timeString = getFileNameTime(filePath, FilenameSize);

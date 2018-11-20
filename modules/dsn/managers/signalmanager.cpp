@@ -34,8 +34,8 @@ namespace openspace {
 
     bool SignalManager::extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary)
     {
-        bool dataFilesSuccess = JsonHelper::checkFileNames(identifier, dictionary, _dataFiles);
-        _fileStartTimes = JsonHelper::getDaysFromFileNames(_dataFiles);
+        bool dataFilesSuccess = DataFileHelper::checkFileNames(identifier, dictionary, _dataFiles);
+        _fileStartTimes = DataFileHelper::getDaysFromFileNames(_dataFiles);
         SignalManager::signalParser(0);
 
         return dataFilesSuccess;
@@ -53,7 +53,7 @@ namespace openspace {
 
         SignalManager::Signal structSignal;
         
-        std::string startTimeString = JsonHelper::getDayFromFileName(filename);
+        std::string startTimeString = DataFileHelper::getDayFromFileName(filename);
         const double triggerTime = Time::convertTime(startTimeString);
 
        _signalData.sequenceStartTime = triggerTime;

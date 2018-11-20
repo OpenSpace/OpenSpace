@@ -32,7 +32,7 @@
 
 namespace openspace {
 
-    class JsonHelper {
+    class DataFileHelper {
 
     public:
         /* Extracts all the mandatory information we need from our asset files */

@@ -26,7 +26,7 @@
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/logging/logmanager.h>
-#include <modules/dsn/managers/jsonhelper.h>
+#include <modules/dsn/managers/datafilehelper.h>
 #include <modules/dsn/rendering/renderablesignals.h>
 
 

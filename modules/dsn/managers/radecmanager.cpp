@@ -32,13 +32,13 @@ namespace openspace {
     double RadecManager::_range;
 
    bool RadecManager::extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary){
-     bool dataFilesSuccess = JsonHelper::checkFileNames(identifier, dictionary, RadecManager::_dataFiles);
+     bool dataFilesSuccess = DataFileHelper::checkFileNames(identifier, dictionary, RadecManager::_dataFiles);
      radecParser(0);
      return dataFilesSuccess;
     }
 
    glm::vec3 RadecManager::GetPosForTime(double time) {
-       std::vector<double> timeDoubles = JsonHelper::getHoursFromFileNames(_dataFiles);
+       std::vector<double> timeDoubles = DataFileHelper::getHoursFromFileNames(_dataFiles);
        int idx = RenderableSignals::findFileIndexForCurrentTime(time, timeDoubles);
        
        if (radecParser(idx)) {
