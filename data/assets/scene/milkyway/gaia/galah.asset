@@ -34,7 +34,9 @@ local gaia_abundance_galah = {
         OtherData = "FeH",
         ScaleFactor = 100,
         ColorMap = colorLUT .. "/colorbv.cmap",
-        OtherDataColorMap = colorLUT .. "/viridis.cmap"
+        OtherDataColorMap = colorLUT .. "/viridis.cmap",
+        StaticFilter = -9999,
+        StaticFilterReplacement = 0.0
     },
     GUI = {
         Path = "/Milky Way/Gaia"

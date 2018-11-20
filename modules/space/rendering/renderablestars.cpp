@@ -45,6 +45,8 @@ namespace {
     constexpr const char* _loggerCat = "RenderableStars";
 
     constexpr const char* KeyFile = "File";
+    constexpr const char* KeyStaticFilterValue = "StaticFilter";
+    constexpr const char* KeyStaticFilterReplacement = "StaticFilterReplacement";
 
     constexpr const std::array<const char*, 13> UniformNames = {
         "view", "projection", "colorOption", "alphaValue", "scaleFactor",
@@ -54,43 +56,27 @@ namespace {
 
     constexpr int8_t CurrentCacheVersion = 2;
 
-    struct ColorVBOLayout {
+    struct CommonDataLayout {
         std::array<float, 4> position; // (x,y,z,e)
-
-        float bvColor; // B-V color value
+        float value;
         float luminance;
         float absoluteMagnitude;
+
     };
 
-    struct VelocityVBOLayout {
-        std::array<float, 4> position; // (x,y,z,e)
+    struct ColorVBOLayout : public CommonDataLayout {};
 
-        float bvColor; // B-V color value
-        float luminance;
-        float absoluteMagnitude;
-
+    struct VelocityVBOLayout : public CommonDataLayout {
         float vx; // v_x
         float vy; // v_y
         float vz; // v_z
     };
 
-    struct SpeedVBOLayout {
-        std::array<float, 4> position; // (x,y,z,e)
-
-        float bvColor; // B-V color value
-        float luminance;
-        float absoluteMagnitude;
-
+    struct SpeedVBOLayout : public CommonDataLayout {
         float speed;
     };
 
-    struct OtherDataLayout {
-        std::array<float, 4> position; // (x,y,z,e)
-
-        float bvColor; // B-V color value
-        float luminance;
-        float absoluteMagnitude;
-    };
+    struct OtherDataLayout : public CommonDataLayout {};
 
     constexpr openspace::properties::Property::PropertyInfo SpeckFileInfo = {
         "SpeckFile",
@@ -222,6 +208,22 @@ documentation::Documentation RenderableStars::Documentation() {
                 new BoolVerifier,
                 Optional::Yes,
                 FilterOutOfRangeInfo.description
+            },
+            {
+                KeyStaticFilterValue,
+                new DoubleVerifier,
+                Optional::Yes,
+                "This value specifies a value that is always filtered out of the value "
+                "ranges on loading. This can be used to trim the dataset's automatic "
+                "value range."
+            },
+            {
+                KeyStaticFilterReplacement,
+                new DoubleVerifier,
+                Optional::Yes,
+                "This is the value that is used to replace statically filtered values. "
+                "Setting this value only makes sense if 'StaticFilter' is 'true', as "
+                "well."
             },
             {
                 TransparencyInfo.identifier,
@@ -368,6 +370,17 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addProperty(_otherDataColorMapPath);
     _otherDataColorMapPath.onChange([&]() { _otherDataColorMapIsDirty = true; });
 
+    if (dictionary.hasKey(KeyStaticFilterValue)) {
+        _staticFilterValue = static_cast<float>(
+            dictionary.value<double>(KeyStaticFilterValue)
+        );
+    }
+    if (dictionary.hasKey(KeyStaticFilterReplacement)) {
+        _staticFilterReplacementValue = static_cast<float>(
+            dictionary.value<double>(KeyStaticFilterReplacement)
+        );
+    }
+
     addProperty(_filterOutOfRange);
 }
 
@@ -510,7 +523,7 @@ void RenderableStars::update(const UpdateData&) {
         glBufferData(
             GL_ARRAY_BUFFER,
             size * sizeof(GLfloat),
-            &_slicedData[0],
+            _slicedData.data(),
             GL_STATIC_DRAW
         );
 
@@ -541,7 +554,7 @@ void RenderableStars::update(const UpdateData&) {
                     GL_FLOAT,
                     GL_FALSE,
                     stride,
-                    reinterpret_cast<void*>(offsetof(ColorVBOLayout, bvColor))
+                    reinterpret_cast<void*>(offsetof(ColorVBOLayout, value))
                 );
 
                 break;
@@ -561,7 +574,7 @@ void RenderableStars::update(const UpdateData&) {
                     GL_FLOAT,
                     GL_FALSE,
                     stride,
-                    reinterpret_cast<void*>(offsetof(VelocityVBOLayout, bvColor)) //NOLINT
+                    reinterpret_cast<void*>(offsetof(VelocityVBOLayout, value)) //NOLINT
                 );
 
                 GLint velocityAttrib = _program->attributeLocation("in_velocity");
@@ -593,7 +606,7 @@ void RenderableStars::update(const UpdateData&) {
                     GL_FLOAT,
                     GL_FALSE,
                     stride,
-                    reinterpret_cast<void*>(offsetof(SpeedVBOLayout, bvColor)) // NOLINT
+                    reinterpret_cast<void*>(offsetof(SpeedVBOLayout, value)) // NOLINT
                 );
 
                 GLint speedAttrib = _program->attributeLocation("in_speed");
@@ -623,7 +636,7 @@ void RenderableStars::update(const UpdateData&) {
                     GL_FLOAT,
                     GL_FALSE,
                     stride,
-                    reinterpret_cast<void*>(offsetof(OtherDataLayout, bvColor)) // NOLINT
+                    reinterpret_cast<void*>(offsetof(OtherDataLayout, value)) // NOLINT
                 );
                 break;
         }
@@ -943,11 +956,11 @@ void RenderableStars::createDataSlice(ColorOption option) {
                     } };
 
 #ifdef USING_STELLAR_TEST_GRID
-                layout.value.bvColor = _fullData[i + 3];
+                layout.value.value = _fullData[i + 3];
                 layout.value.luminance = _fullData[i + 3];
                 layout.value.absoluteMagnitude = _fullData[i + 3];
 #else
-                layout.value.bvColor = _fullData[i + 3];
+                layout.value.value = _fullData[i + 3];
                 layout.value.luminance = _fullData[i + 4];
                 layout.value.absoluteMagnitude = _fullData[i + 5];
 #endif
@@ -969,7 +982,7 @@ void RenderableStars::createDataSlice(ColorOption option) {
                         position[0], position[1], position[2], position[3]
                     } };
 
-                layout.value.bvColor = _fullData[i + 3];
+                layout.value.value = _fullData[i + 3];
                 layout.value.luminance = _fullData[i + 4];
                 layout.value.absoluteMagnitude = _fullData[i + 5];
 
@@ -993,7 +1006,7 @@ void RenderableStars::createDataSlice(ColorOption option) {
                         position[0], position[1], position[2], position[3]
                     } };
 
-                layout.value.bvColor = _fullData[i + 3];
+                layout.value.value = _fullData[i + 3];
                 layout.value.luminance = _fullData[i + 4];
                 layout.value.absoluteMagnitude = _fullData[i + 5];
 
@@ -1016,16 +1029,17 @@ void RenderableStars::createDataSlice(ColorOption option) {
                 };
 
                 int index = _otherDataOption.value();
-                layout.value.bvColor = _fullData[i + index + 3];
+                layout.value.value = _fullData[i + index + 3];
 
-                // @TODO(abock): Change this to user-changable value rather than constant
-                if (layout.value.bvColor == -9999) {
-                    layout.value.bvColor = 0;
+                if (_staticFilterValue.has_value() &&
+                    layout.value.value == _staticFilterValue)
+                {
+                    layout.value.value = _staticFilterReplacementValue;
                 }
 
                 glm::vec2 range = _otherDataRange.value();
-                range.x = std::min(range.x, layout.value.bvColor);
-                range.y = std::max(range.y, layout.value.bvColor);
+                range.x = std::min(range.x, layout.value.value);
+                range.y = std::max(range.y, layout.value.value);
                 _otherDataRange = range;
                 _otherDataRange.setMinValue(glm::vec2(range.x));
                 _otherDataRange.setMaxValue(glm::vec2(range.y));

@@ -31,9 +31,9 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
-
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <optional>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
@@ -111,6 +111,10 @@ private:
     int _nValuesPerStar = 0;
     std::string _queuedOtherData;
     std::vector<std::string> _dataNames;
+
+    std::optional<float> _staticFilterValue;
+    float _staticFilterReplacementValue = 0.f;
+
 
     GLuint _vao = 0;
     GLuint _vbo = 0;

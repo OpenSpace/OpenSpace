@@ -34,7 +34,9 @@ local gaia_abundance_apogee = {
         ScaleFactor = 100,
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
-        OtherDataColorMap = colorLUT .. "/viridis.cmap"
+        OtherDataColorMap = colorLUT .. "/viridis.cmap",
+        StaticFilter = -9999,
+        StaticFilterReplacement = 0.0
     },
     GUI = {
         Path = "/Milky Way/Gaia"
