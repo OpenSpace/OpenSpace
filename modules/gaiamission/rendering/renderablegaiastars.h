@@ -68,37 +68,44 @@ public:
 private:
     /**
      * Reads data file in format defined by FileReaderOption.
-      \returns true if data was successfully read.
+     *
+     * \return true if data was successfully read.
      */
     bool readDataFile();
 
     /**
      * Reads a FITS file by using FitsFileReader.readFitsFile() and constructs an octree.
-     * \returns the number of stars read.
+     *
+     * \return the number of stars read.
      */
     int readFitsFile(const std::string& filePath);
 
     /**
      * Read a SPECK file by using FitsFileReader.readSpeckFile() and constructs an octree.
-     * \returns the number of stars read.
+     *
+     * \return the number of stars read.
      */
     int readSpeckFile(const std::string& filePath);
 
     /**
      * Reads a preprocessed binary file and constructs an octree.
-     * \returns the number of stars read.
+     *
+     * \return the number of stars read.
      */
     int readBinaryRawFile(const std::string& filePath);
 
     /**
      * Reads a pre-constructed octree, with all data, from a binary file.
-     * \returns the number of stars read.
+     *
+     * \return the number of stars read.
      */
     int readBinaryOctreeFile(const std::string& filePath);
 
     /**
-     * Reads the structure of a pre-constructed octree from a binary file, without any data.
-     * \returns the number of stars read.
+     * Reads the structure of a pre-constructed octree from a binary file, without any
+     * data.
+     *
+     * \return the number of stars read.
      */
     int readBinaryOctreeStructureFile(const std::string& folderPath);
 
@@ -160,13 +167,13 @@ private:
     properties::BoolProperty _reportGlErrors;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-    UniformCache(model, view, cameraPos, cameraLookUp, viewScaling, projection, 
-        renderOption, luminosityMultiplier, magnitudeBoost, cutOffThreshold, 
-        sharpness, billboardSize, closeUpBoostDist, screenSize, psfTexture, 
-        time, colorTexture, nChunksToRender, valuesPerStar, maxStarsPerNode) 
+    UniformCache(model, view, cameraPos, cameraLookUp, viewScaling, projection,
+        renderOption, luminosityMultiplier, magnitudeBoost, cutOffThreshold,
+        sharpness, billboardSize, closeUpBoostDist, screenSize, psfTexture,
+        time, colorTexture, nChunksToRender, valuesPerStar, maxStarsPerNode)
         _uniformCache;
 
-    UniformCache(posXThreshold, posYThreshold, posZThreshold, gMagThreshold, 
+    UniformCache(posXThreshold, posYThreshold, posZThreshold, gMagThreshold,
         bpRpThreshold, distThreshold) _uniformFilterCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programTM;

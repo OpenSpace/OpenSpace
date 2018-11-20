@@ -48,16 +48,16 @@ private:
 
     /**
      * Reads a single binary file with preprocessed star data and insert the render values
-     * into an octree structure (if star data passed all defined filters). 
+     * into an octree structure (if star data passed all defined filters).
      * Stores the entire octree in one binary file.
      */
     void constructOctreeFromSingleFile(const Task::ProgressCallback& progressCallback);
 
     /**
      *  Reads binary star data from 8 preprocessed files (one per branch) in specified
-     * folder, prepared by ReadFitsTask, and inserts star render data into an octree 
+     * folder, prepared by ReadFitsTask, and inserts star render data into an octree
      * (if star data passed all defined filters).
-     * Stores octree structure in a binary index file and stores all render data 
+     * Stores octree structure in a binary index file and stores all render data
      * separate files, one file per node in the octree.
      */
     void constructOctreeFromFolder(const Task::ProgressCallback& progressCallback);
@@ -72,9 +72,9 @@ private:
 
     /**
      * \returns true if star should be filtered away and false if all filters passed.
-     * \param range contains ]min, max[ and \param filterValue corresponding value in star.
-     * Star is filtered either if min = max = filterValue or
-     * if filterValue < min (when min != 0.0) or filterValue > max (when max != 0.0).
+     * \param range contains ]min, max[ and \param filterValue corresponding value in
+     * star. Star is filtered either if min = max = filterValue or if filterValue < min
+     * (when min != 0.0) or filterValue > max (when max != 0.0).
      */
     bool filterStar(const glm::vec2& range, float filterValue, float normValue = 0.f);
 

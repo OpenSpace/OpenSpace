@@ -35,7 +35,7 @@ constexpr const char* _loggerCat = "ReadFileJob";
 
 namespace openspace::gaiamission {
 
-ReadFileJob::ReadFileJob(const std::string& filePath, 
+ReadFileJob::ReadFileJob(const std::string& filePath,
                          const std::vector<std::string>& allColumns, int firstRow,
                          int lastRow, size_t nDefaultCols, int nValuesPerStar,
                          std::shared_ptr<FitsFileReader> fitsReader)
@@ -132,9 +132,9 @@ void ReadFileJob::execute() {
         /*// Convert to Galactic Coordinates from Galactic Lon & Lat.
         // https://gea.esac.esa.int/archive/documentation/GDR2/Data_processing/
         // chap_cu3ast/sec_cu3ast_intro/ssec_cu3ast_intro_tansforms.html#SSS1
-        values[idx++] = radiusInKiloParsec * cos(glm::radians(b_latitude[i])) * 
+        values[idx++] = radiusInKiloParsec * cos(glm::radians(b_latitude[i])) *
             cos(glm::radians(l_longitude[i])); // Pos X
-        values[idx++] = radiusInKiloParsec * cos(glm::radians(b_latitude[i])) * 
+        values[idx++] = radiusInKiloParsec * cos(glm::radians(b_latitude[i])) *
             sin(glm::radians(l_longitude[i])); // Pos Y
         values[idx++] = radiusInKiloParsec * sin(glm::radians(b_latitude[i])); // Pos Z
         */
@@ -172,7 +172,7 @@ void ReadFileJob::execute() {
         values[idx++] = std::isnan(bp_rp[i]) ? 0.f : bp_rp[i]; // Bp-Rp Color
 
 
-        // Store velocity. 
+        // Store velocity.
         if (std::isnan(pmra[i])) {
             pmra[i] = 0.f;
         }
@@ -182,7 +182,7 @@ void ReadFileJob::execute() {
 
         // Convert Proper Motion from ICRS [Ra,Dec] to Galactic Tanget Vector [l,b].
         glm::vec3 uICRS = glm::vec3(
-            -sin(glm::radians(ra[i])) * pmra[i] - 
+            -sin(glm::radians(ra[i])) * pmra[i] -
                 cos(glm::radians(ra[i])) * sin(glm::radians(dec[i])) * pmdec[i],
             cos(glm::radians(ra[i])) * pmra[i] -
                 sin(glm::radians(ra[i])) * sin(glm::radians(dec[i])) * pmdec[i],
@@ -203,12 +203,12 @@ void ReadFileJob::execute() {
             float radVelY = 1000.0 * radial_vel[i] * rGal.y;
             float radVelZ = 1000.0 * radial_vel[i] * rGal.z;
 
-            // Use Pythagoras theorem for the final Space Velocity [m/s]. 
+            // Use Pythagoras theorem for the final Space Velocity [m/s].
             values[idx++] = sqrt(pow(radVelX, 2) + pow(tanVelX, 2)); // Vel X [U]
             values[idx++] = sqrt(pow(radVelY, 2) + pow(tanVelY, 2)); // Vel Y [V]
             values[idx++] = sqrt(pow(radVelZ, 2) + pow(tanVelZ, 2)); // Vel Z [W]
         }
-        // Otherwise use the vector [m/s] we got from proper motion. 
+        // Otherwise use the vector [m/s] we got from proper motion.
         else {
             radial_vel[i] = 0.f;
             values[idx++] = tanVelX; // Vel X [U]

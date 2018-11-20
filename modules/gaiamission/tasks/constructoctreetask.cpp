@@ -207,7 +207,7 @@ void ConstructOctreeTask::perform(const Task::ProgressCallback& progressCallback
 
     if (_singleFileInput) {
         constructOctreeFromSingleFile(progressCallback);
-    } 
+    }
     else {
         constructOctreeFromFolder(progressCallback);
     }
@@ -232,7 +232,7 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
         _octreeManager->maxDist(), _octreeManager->maxStarsPerNode()
     ));
 
-    // Use to generate a synthetic dataset 
+    // Use to generate a synthetic dataset
     /*for (float z = -1.0; z < 1.0; z += 0.05) {
         for (float y = -1.0; y < 1.0; y += 0.05) {
             for (float x = -1.0; x < 1.0; x += 0.05) {
@@ -278,7 +278,7 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
 
         fullData.resize(nValues);
         inFileStream.read(
-            reinterpret_cast<char*>(fullData.data()), 
+            reinterpret_cast<char*>(fullData.data()),
             nValues * sizeof(fullData[0])
         );
         nTotalStars = nValues / nValuesPerStar;
@@ -298,7 +298,7 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
                 nFilteredStars++;
                 continue;
             }
-            
+
             // If all filters passed then insert render values into Octree.
             _octreeManager->insert(renderValues);
         }
@@ -407,7 +407,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
                 _indexOctreeManager->insert(renderValues);
                 nStarsInfile++;
 
-                //float maxVal = fmax(fmax(fabs(renderValues[0]), fabs(renderValues[1])), 
+                //float maxVal = fmax(fmax(fabs(renderValues[0]), fabs(renderValues[1])),
                 //    fabs(renderValues[2]));
                 //if (maxVal > maxRadius) maxRadius = maxVal;
                 //// Calculate how many stars are outside of different thresholds.
@@ -449,7 +449,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
             _indexOctreeManager->totalDepth()
         ));
 
-        // Write to 8 separate files in a separate thread. Data will be cleared after it 
+        // Write to 8 separate files in a separate thread. Data will be cleared after it
         // has been written. Store joinable thread for later sync.
         std::thread t(
             &OctreeManager::writeToMultipleFiles,
@@ -466,13 +466,13 @@ void ConstructOctreeTask::constructOctreeFromFolder(
     ));
     LINFO(std::to_string(nFilteredStars) + " stars were filtered");
 
-    //LINFO("Max radius of dataset is: " + std::to_string(maxRadius) + 
-    //    "\n Number of stars outside of:" +  
-    //    " - 10kPc is " + std::to_string(starsOutside10) + "\n" + 
+    //LINFO("Max radius of dataset is: " + std::to_string(maxRadius) +
+    //    "\n Number of stars outside of:" +
+    //    " - 10kPc is " + std::to_string(starsOutside10) + "\n" +
     //    " - 25kPc is " + std::to_string(starsOutside25) + "\n" +
-    //    " - 50kPc is " + std::to_string(starsOutside50) + "\n" + 
+    //    " - 50kPc is " + std::to_string(starsOutside50) + "\n" +
     //    " - 75kPc is " + std::to_string(starsOutside75) + "\n" +
-    //    " - 100kPc is " + std::to_string(starsOutside100) + "\n" + 
+    //    " - 100kPc is " + std::to_string(starsOutside100) + "\n" +
     //    " - 200kPc is " + std::to_string(starsOutside200) + "\n" +
     //    " - 300kPc is " + std::to_string(starsOutside300) + "\n" +
     //    " - 400kPc is " + std::to_string(starsOutside400) + "\n" +
@@ -532,7 +532,7 @@ bool ConstructOctreeTask::checkAllFilters(const std::vector<float>& filterValues
         (_filterRvError && filterStar(_rvError, filterValues[23]));
 }
 
-bool ConstructOctreeTask::filterStar(const glm::vec2& range, float filterValue, 
+bool ConstructOctreeTask::filterStar(const glm::vec2& range, float filterValue,
                                      float normValue)
 {
     // Return true if star should be filtered away, i.e. if min = max = filterValue or
@@ -596,7 +596,7 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 new Vector2Verifier<double>,
                 Optional::Yes,
                 "If defined then only stars with Position X values between [min, max] "
-                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, "
                 "if max is set to 0.0 it is read as +Inf). If min = max then all values "
                 "equal min|max will be filtered away."
             },
@@ -605,7 +605,7 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 new Vector2Verifier<double>,
                 Optional::Yes,
                 "If defined then only stars with Position Y values between [min, max] "
-                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, "
                 "if max is set to 0.0 it is read as +Inf). If min = max then all values "
                 "equal min|max will be filtered away."
             },
@@ -614,7 +614,7 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 new Vector2Verifier<double>,
                 Optional::Yes,
                 "If defined then only stars with Position Z values between [min, max] "
-                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, "
                 "if max is set to 0.0 it is read as +Inf). If min = max then all values "
                 "equal min|max will be filtered away."
             },
@@ -633,7 +633,7 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 new Vector2Verifier<double>,
                 Optional::Yes,
                 "If defined then only stars with Bp-Rp color values between [min, max] "
-                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, "
                 "if max is set to 0.0 it is read as +Inf). If min = max then all values "
                 "equal min|max will be filtered away."
             },
@@ -642,7 +642,7 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 new Vector2Verifier<double>,
                 Optional::Yes,
                 "If defined then only stars with Velocity X values between [min, max] "
-                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, "
                 "if max is set to 0.0 it is read as +Inf). If min = max then all values "
                 "equal min|max will be filtered away."
             },
@@ -651,7 +651,7 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 new Vector2Verifier<double>,
                 Optional::Yes,
                 "If defined then only stars with Velocity Y values between [min, max] "
-                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, "
                 "if max is set to 0.0 it is read as +Inf). If min = max then all values "
                 "equal min|max will be filtered away."
             },
@@ -660,7 +660,7 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 new Vector2Verifier<double>,
                 Optional::Yes,
                 "If defined then only stars with Velocity Z values between [min, max] "
-                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, "
                 "if max is set to 0.0 it is read as +Inf). If min = max then all values "
                 "equal min|max will be filtered away."
             },
@@ -689,7 +689,7 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 new Vector2Verifier<double>,
                 Optional::Yes,
                 "If defined then only stars with Bp-G color values between [min, max] "
-                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, "
                 "if max is set to 0.0 it is read as +Inf). If min = max then all values "
                 "equal min|max will be filtered away."
             },
@@ -698,7 +698,7 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 new Vector2Verifier<double>,
                 Optional::Yes,
                 "If defined then only stars with G-Rp color values between [min, max] "
-                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, "
                 "if max is set to 0.0 it is read as +Inf). If min = max then all values "
                 "equal min|max will be filtered away."
             },
@@ -707,7 +707,7 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 new Vector2Verifier<double>,
                 Optional::Yes,
                 "If defined then only stars with RA values between [min, max] "
-                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, "
                 "if max is set to 0.0 it is read as +Inf). If min = max then all values "
                 "equal min|max will be filtered away."
             },
@@ -716,7 +716,7 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 new Vector2Verifier<double>,
                 Optional::Yes,
                 "If defined then only stars with RA Error values between [min, max] "
-                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, "
                 "if max is set to 0.0 it is read as +Inf). If min = max then all values "
                 "equal min|max will be filtered away."
             },
@@ -725,7 +725,7 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 new Vector2Verifier<double>,
                 Optional::Yes,
                 "If defined then only stars with DEC values between [min, max] "
-                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, "
                 "if max is set to 0.0 it is read as +Inf). If min = max then all values "
                 "equal min|max will be filtered away."
             },
@@ -734,7 +734,7 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 new Vector2Verifier<double>,
                 Optional::Yes,
                 "If defined then only stars with DEC Error values between [min, max] "
-                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, "
                 "if max is set to 0.0 it is read as +Inf). If min = max then all values "
                 "equal min|max will be filtered away."
             },
@@ -743,7 +743,7 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 new Vector2Verifier<double>,
                 Optional::Yes,
                 "If defined then only stars with Parallax values between [min, max] "
-                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, "
                 "if max is set to 0.0 it is read as +Inf). If min = max then all values "
                 "equal min|max will be filtered away."
             },
@@ -770,9 +770,9 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 new Vector2Verifier<double>,
                 Optional::Yes,
                 "If defined then only stars with Proper Motion RA Error values between "
-                "[min, max] will be inserted into Octree (if min is set to 0.0 it is read "
-                "as -Inf, if max is set to 0.0 it is read as +Inf). If min = max then "
-                "all values equal min|max will be filtered away."
+                "[min, max] will be inserted into Octree (if min is set to 0.0 it is "
+                "read as -Inf, if max is set to 0.0 it is read as +Inf). If min = max "
+                "then all values equal min|max will be filtered away."
             },
             {
                 KeyFilterPmdec,

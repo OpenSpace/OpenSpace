@@ -53,7 +53,7 @@ private:
     void readSingleFitsFile(const Task::ProgressCallback& progressCallback);
 
     /**
-     * Reads all FITS files in a folder with multiple threads and stores ordered star 
+     * Reads all FITS files in a folder with multiple threads and stores ordered star
      * data into 8 binary files.
      */
     void readAllFitsFilesFromFolder(const Task::ProgressCallback& progressCallback);
@@ -61,8 +61,8 @@ private:
     /**
      * Writes \param data to octant [\param index] file.
      * \param isFirstWrite defines if this is the first write to specified octant, if so
-     * the file is created, otherwise the accumulated data is appended to the end of the 
-     * file. 
+     * the file is created, otherwise the accumulated data is appended to the end of the
+     * file.
      */
     int writeOctantToFile(const std::vector<float>& data, int index,
         std::vector<bool>& isFirstWrite, int nValuesPerStar);

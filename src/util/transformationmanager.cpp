@@ -42,7 +42,7 @@
 #endif
 
 namespace {
-	constexpr const char* _loggerCat = "TransformationManager";
+    constexpr const char* _loggerCat = "TransformationManager";
 }
 
 namespace openspace {

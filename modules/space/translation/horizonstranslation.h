@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___HORIZONSTRANSLATION___H__
-#define __OPENSPACE_MODULE_BASE___HORIZONSTRANSLATION___H__
+#ifndef __OPENSPACE_MODULE_SPACE___HORIZONSTRANSLATION___H__
+#define __OPENSPACE_MODULE_SPACE___HORIZONSTRANSLATION___H__
 
 #include <openspace/scene/translation.h>
 
@@ -39,15 +39,16 @@ namespace documentation { struct Documentation; }
 
 
 /**
-* The HorizonsTranslation is based on text files generated from NASA JPL HORIZONS Website
-* (https://ssd.jpl.nasa.gov/horizons.cgi). The implementation expects a file with format:
-* TIME(YYYY-MM-DD HH:MM:SS) Range(km) GalLon(degrees) GalLat(degrees)
-* Range - The distance from target to observer. Chosen as "Observer range & range-rate" 
-* in "Table Setting". This also generates a delta that can be suppressed under "Optional 
-* observer-table settings" to limit file size. User must set output settings to kilometers.
-* GalLon - Galactic Longitude. User must set output to Degrees in "Table Settings".
-* GalLat - Galactic Latitude. User must set output to Degrees in "Table Settings".
-*/
+ * The HorizonsTranslation is based on text files generated from NASA JPL HORIZONS Website
+ * (https://ssd.jpl.nasa.gov/horizons.cgi). The implementation expects a file with format:
+ * TIME(YYYY-MM-DD HH:MM:SS) Range(km) GalLon(degrees) GalLat(degrees)
+ * Range - The distance from target to observer. Chosen as "Observer range & range-rate"
+ * in "Table Setting". This also generates a delta that can be suppressed under "Optional
+ * observer-table settings" to limit file size. User must set output settings to
+ * kilometers.
+ * GalLon - Galactic Longitude. User must set output to Degrees in "Table Settings".
+ * GalLat - Galactic Latitude. User must set output to Degrees in "Table Settings".
+ */
 class HorizonsTranslation : public Translation {
 public:
     HorizonsTranslation();
@@ -59,7 +60,7 @@ public:
 
 private:
     void readHorizonsTextFile(const std::string& _horizonsTextFilePath);
-    
+
     properties::StringProperty _horizonsTextFile;
     std::unique_ptr<ghoul::filesystem::File> _fileHandle;
     ghoul::lua::LuaState _state;
@@ -68,4 +69,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___HORIZONSTRANSLATION___H__
+#endif // __OPENSPACE_MODULE_SPACE___HORIZONSTRANSLATION___H__

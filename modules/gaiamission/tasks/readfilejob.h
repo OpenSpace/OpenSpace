@@ -38,8 +38,8 @@ struct ReadFileJob : public Job<std::vector<std::vector<float>>> {
      * \param allColumns define which columns that will be read, it should correspond
      * to the pre-defined order in the job. If additional columns are defined they will
      * be read but slow down the process.
-     * Proper conversions of positions and velocities will take place and all values 
-     * will be checked for NaNs. 
+     * Proper conversions of positions and velocities will take place and all values
+     * will be checked for NaNs.
      * If \param firstRow is < 1 then reading will begin at first row in table.
      * If \param lastRow < firstRow then entire table will be read.
      * \param nValuesPerStar defines how many values that will be stored per star.

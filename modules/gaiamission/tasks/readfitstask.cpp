@@ -82,7 +82,7 @@ ReadFitsTask::ReadFitsTask(const ghoul::Dictionary& dictionary) {
     if (dictionary.hasKey(KeyLastRow)) {
         _lastRow = static_cast<int>(dictionary.value<double>(KeyLastRow));
     }
-    
+
 
     if (dictionary.hasKey(KeyFilterColumnNames)) {
         ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(KeyFilterColumnNames);
@@ -126,7 +126,7 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
 
     FitsFileReader fileReader(false);
     std::vector<float> fullData = fileReader.readFitsFile(
-        _inFileOrFolderPath, 
+        _inFileOrFolderPath,
         nValuesPerStar,
         _firstRow,
         _lastRow,
@@ -209,13 +209,13 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
     };
     _allColumnNames.insert(
         _allColumnNames.end(),
-        defaultColumnNames.begin(), 
+        defaultColumnNames.begin(),
         defaultColumnNames.end()
     );
     // Append additional filter parameters to default rendering parameters.
     _allColumnNames.insert(
         _allColumnNames.end(),
-        _filterColumnNames.begin(), 
+        _filterColumnNames.begin(),
         _filterColumnNames.end()
     );
 
@@ -237,12 +237,12 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
 
         // Add reading of file to jobmanager, which will distribute it to our threadpool.
         auto readFileJob = std::make_shared<gaiamission::ReadFileJob>(
-            fileToRead, 
+            fileToRead,
             _allColumnNames,
             _firstRow,
             _lastRow,
             nDefaultColumns,
-            nValuesPerStar, 
+            nValuesPerStar,
             fitsFileReader
         );
         jobManager.enqueueJob(readFileJob);
@@ -253,17 +253,16 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
     // Check for finished jobs.
     while (finishedJobs < nInputFiles) {
         if (jobManager.numFinishedJobs() > 0) {
-            //LINFO("FinishedJobs: " + std::to_string(concurrentjobManager.numFinishedJobs()));
             std::vector<std::vector<float>> newOctant =
                 jobManager.popFinishedJob()->product();
 
             finishedJobs++;
-            
+
             for (int i = 0; i < 8; ++i) {
                 // Add read values to global octant and check if it's time to write!
                 octants[i].insert(
                     octants[i].end(),
-                    newOctant[i].begin(), 
+                    newOctant[i].begin(),
                     newOctant[i].end()
                 );
                 if ((octants[i].size() > MAX_SIZE_BEFORE_WRITE) ||
@@ -286,7 +285,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
     LINFO(fmt::format("A total of {} stars were written to binary files.", totalStars));
 }
 
-int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int index, 
+int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int index,
                                     std::vector<bool>& isFirstWrite, int nValuesPerStar)
 {
     std::string outPath = fmt::format("{}octant_{}.bin", _outFileOrFolderPath, index);
@@ -302,7 +301,7 @@ int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int in
         if (isFirstWrite[index]) {
             LINFO("First write for Octant_" + std::to_string(index));
             fileStream.write(
-                reinterpret_cast<const char*>(&nValuesPerStar), 
+                reinterpret_cast<const char*>(&nValuesPerStar),
                 sizeof(int32_t)
             );
             isFirstWrite[index] = false;
@@ -338,8 +337,8 @@ documentation::Documentation ReadFitsTask::Documentation() {
                 new StringVerifier,
                 Optional::No,
                 "If SingleFileProcess is set to true then this specifies the path to a "
-                "single FITS file that will be read. Otherwise it specifies the path to a "
-                "folder with multiple FITS files that are to be read.",
+                "single FITS file that will be read. Otherwise it specifies the path to "
+                "a folder with multiple FITS files that are to be read.",
             },
             {
                 KeyOutFileOrFolderPath,
@@ -363,12 +362,12 @@ documentation::Documentation ReadFitsTask::Documentation() {
                 Optional::Yes,
                 "Defines how many threads to use when reading from multiple files."
             },
-            { 
+            {
                 KeyFirstRow,
                 new IntVerifier,
                 Optional::Yes,
-                "Defines the first row that will be read from the specified FITS file(s). "
-                "If not defined then reading will start at first row.",
+                "Defines the first row that will be read from the specified FITS "
+                "file(s). If not defined then reading will start at first row.",
             },
             {
                 KeyLastRow,
