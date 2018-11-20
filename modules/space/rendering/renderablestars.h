@@ -89,6 +89,7 @@ private:
     properties::StringProperty _otherDataColorMapPath;
     properties::Vec2Property _otherDataRange;
     std::unique_ptr<ghoul::opengl::Texture> _otherDataColorMapTexture;
+    properties::BoolProperty _filterOutOfRange;
 
     properties::FloatProperty _alphaValue;
     properties::FloatProperty _scaleFactor;
@@ -97,7 +98,7 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(view, projection, colorOption, alphaValue, scaleFactor,
         minBillboardSize, screenSize, scaling, psfTexture, colorTexture,
-        otherDataTexture, otherDataRange) _uniformCache;
+        otherDataTexture, otherDataRange, filterOutOfRange) _uniformCache;
 
     bool _speckFileIsDirty = true;
     bool _pointSpreadFunctionTextureIsDirty = true;

@@ -50,10 +50,10 @@ namespace {
 
     constexpr const char* KeyFile = "File";
 
-    constexpr const std::array<const char*, 12> UniformNames = {
+    constexpr const std::array<const char*, 13> UniformNames = {
         "view", "projection", "colorOption", "alphaValue", "scaleFactor",
         "minBillboardSize", "screenSize", "scaling", "psfTexture", "colorTexture",
-        "otherDataTexture", "otherDataRange"
+        "otherDataTexture", "otherDataRange", "filterOutOfRange"
     };
 
     constexpr int8_t CurrentCacheVersion = 2;
@@ -162,6 +162,13 @@ namespace {
         "Other Data Color Map",
         "The color map that is used if the 'Other Data' rendering method is selected"
     };
+
+    constexpr openspace::properties::Property::PropertyInfo FilterOutOfRangeInfo = {
+        "FilterOutOfRange",
+        "Filter Out of Range",
+        "Determines whether other data values outside the value range should be visible "
+        "or filtered away"
+    };
 }  // namespace
 
 namespace openspace {
@@ -215,6 +222,12 @@ documentation::Documentation RenderableStars::Documentation() {
                 OtherDataColorMapInfo.description
             },
             {
+                FilterOutOfRangeInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                FilterOutOfRangeInfo.description
+            },
+            {
                 TransparencyInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
@@ -253,6 +266,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         glm::vec2(-10.f, -10.f),
         glm::vec2(10.f, 10.f)
     )
+    , _filterOutOfRange(FilterOutOfRangeInfo, false)
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 10.f)
     , _minBillboardSize(MinBillboardSizeInfo, 1.f, 1.f, 100.f)
@@ -357,6 +371,8 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
     addProperty(_otherDataColorMapPath);
     _otherDataColorMapPath.onChange([&]() { _otherDataColorMapIsDirty = true; });
+
+    addProperty(_filterOutOfRange);
 }
 
 RenderableStars::~RenderableStars() {} // NOLINT
@@ -456,6 +472,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     // Same here, if we don't set this value, the rendering disappears even if we don't
     // use this color mode --- abock 2018-11-19
     _program->setUniform(_uniformCache.otherDataRange, _otherDataRange);
+    _program->setUniform(_uniformCache.filterOutOfRange, _filterOutOfRange);
 
     glBindVertexArray(_vao);
     const GLsizei nStars = static_cast<GLsizei>(_fullData.size() / _nValuesPerStar);

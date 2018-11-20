@@ -40,6 +40,7 @@ uniform int colorOption;
 
 uniform sampler1D otherDataTexture;
 uniform vec2 otherDataRange;
+uniform bool filterOutOfRange;
 
 in vec4 vs_position;
 in vec4 ge_gPosition;
@@ -61,6 +62,10 @@ vec4 bv2rgb(float bv) {
     return texture(colorTexture, t);
 }
 
+bool isOtherDataValueInRange() {
+    float t = (ge_brightness.x - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
+    return t >= 0.0 && t <= 1.0;
+}
 vec4 otherDataValue() {
     float t = (ge_brightness.x - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
     t = clamp(t, 0.0, 1.0);
@@ -84,7 +89,12 @@ Fragment getFragment() {
             color = vec4(vec3(ge_speed), 0.5);
             break;
         case COLOROPTION_OTHERDATA:
-            color = otherDataValue();
+            if (filterOutOfRange && !isOtherDataValueInRange()) {
+                discard;
+            }
+            else {
+                color = otherDataValue();
+            }
             break;
     }
 
