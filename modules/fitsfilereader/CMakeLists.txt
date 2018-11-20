@@ -23,24 +23,26 @@
 ##########################################################################################
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 
-set(HEADER_FILES 
-	${CMAKE_CURRENT_SOURCE_DIR}/fitsfilereadermodule.h
-	${CMAKE_CURRENT_SOURCE_DIR}/include/fitsfilereader.h
+set(HEADER_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/fitsfilereadermodule.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/fitsfilereader.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES 
-	${CMAKE_CURRENT_SOURCE_DIR}/fitsfilereadermodule.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/fitsfilereader.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/fitsfilereadermodule.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/fitsfilereader.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 create_new_module(
-	"FitsFileReader" 
-	fitsfilereader 
-	${HEADER_FILES} 
-	${SOURCE_FILES})
+    "FitsFileReader"
+    fitsfilereader
+    ${HEADER_FILES}
+    ${SOURCE_FILES}
+)
 
 # Set root directories for external libraries.
 set(CFITSIO_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/cfitsio/")
@@ -50,7 +52,11 @@ set(MODULE_NAME openspace-module-fitsfilereader)
 
 # CCfits is dependent on cfitsio, let it handle the internal linking
 add_subdirectory(${CFITSIO_ROOT_DIR})
+set_folder_location(cfitsio "External")
+
 add_subdirectory(${CCFITS_ROOT_DIR})
+set_folder_location(CCfits "External")
+
 
 TARGET_INCLUDE_DIRECTORIES(${MODULE_NAME} SYSTEM PUBLIC ${INCLUDES_FOR_TARGET})
 TARGET_LINK_LIBRARIES(${MODULE_NAME} CCfits)

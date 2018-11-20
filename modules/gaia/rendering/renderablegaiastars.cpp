@@ -879,9 +879,9 @@ void RenderableGaiaStars::initializeGL() {
         case gaia::ShaderOption::Point_SSBO: {
             _program = ghoul::opengl::ProgramObject::Build(
                 "GaiaStar",
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_fs.glsl"),
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_ge.glsl")
+                absPath("${MODULE_GAIA}/shaders/gaia_ssbo_vs.glsl"),
+                absPath("${MODULE_GAIA}/shaders/gaia_point_fs.glsl"),
+                absPath("${MODULE_GAIA}/shaders/gaia_point_ge.glsl")
             );
             _uniformCache.maxStarsPerNode = _program->uniformLocation("maxStarsPerNode");
             _uniformCache.valuesPerStar = _program->uniformLocation("valuesPerStar");
@@ -889,8 +889,8 @@ void RenderableGaiaStars::initializeGL() {
 
             _programTM = global::renderEngine.buildRenderProgram(
                 "ToneMapping",
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"),
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_point_fs.glsl")
+                absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl"),
+                absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_point_fs.glsl")
             );
             _uniformCacheTM.screenSize = _programTM->uniformLocation("screenSize");
             _uniformCacheTM.filterSize = _programTM->uniformLocation("filterSize");
@@ -907,14 +907,14 @@ void RenderableGaiaStars::initializeGL() {
         case gaia::ShaderOption::Point_VBO: {
             _program = ghoul::opengl::ProgramObject::Build(
                 "GaiaStar",
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_vbo_vs.glsl"),
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_fs.glsl"),
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_ge.glsl")
+                absPath("${MODULE_GAIA}/shaders/gaia_vbo_vs.glsl"),
+                absPath("${MODULE_GAIA}/shaders/gaia_point_fs.glsl"),
+                absPath("${MODULE_GAIA}/shaders/gaia_point_ge.glsl")
             );
 
             _programTM = global::renderEngine.buildRenderProgram("ToneMapping",
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"),
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_point_fs.glsl")
+                absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl"),
+                absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_point_fs.glsl")
             );
             _uniformCacheTM.screenSize = _programTM->uniformLocation("screenSize");
             _uniformCacheTM.filterSize = _programTM->uniformLocation("filterSize");
@@ -931,9 +931,9 @@ void RenderableGaiaStars::initializeGL() {
         case gaia::ShaderOption::Billboard_SSBO: {
             _program = ghoul::opengl::ProgramObject::Build(
                 "GaiaStar",
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_fs.glsl"),
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_ge.glsl")
+                absPath("${MODULE_GAIA}/shaders/gaia_ssbo_vs.glsl"),
+                absPath("${MODULE_GAIA}/shaders/gaia_billboard_fs.glsl"),
+                absPath("${MODULE_GAIA}/shaders/gaia_billboard_ge.glsl")
             );
             _uniformCache.cameraPos = _program->uniformLocation("cameraPos");
             _uniformCache.cameraLookUp = _program->uniformLocation("cameraLookUp");
@@ -951,10 +951,8 @@ void RenderableGaiaStars::initializeGL() {
 
             _programTM = global::renderEngine.buildRenderProgram(
                 "ToneMapping",
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"),
-                absPath(
-                    "${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_billboard_fs.glsl"
-                )
+                absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl"),
+                absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_billboard_fs.glsl")
             );
 
             addProperty(_magnitudeBoost);
@@ -966,9 +964,9 @@ void RenderableGaiaStars::initializeGL() {
         }
         case gaia::ShaderOption::Billboard_SSBO_noFBO: {
             _program = global::renderEngine.buildRenderProgram("GaiaStar",
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_nofbo_fs.glsl"),
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_ge.glsl")
+                absPath("${MODULE_GAIA}/shaders/gaia_ssbo_vs.glsl"),
+                absPath("${MODULE_GAIA}/shaders/gaia_billboard_nofbo_fs.glsl"),
+                absPath("${MODULE_GAIA}/shaders/gaia_billboard_ge.glsl")
             );
             _uniformCache.cameraPos = _program->uniformLocation("cameraPos");
             _uniformCache.cameraLookUp = _program->uniformLocation("cameraLookUp");
@@ -993,9 +991,9 @@ void RenderableGaiaStars::initializeGL() {
         case gaia::ShaderOption::Billboard_VBO: {
             _program = ghoul::opengl::ProgramObject::Build(
                 "GaiaStar",
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_vbo_vs.glsl"),
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_fs.glsl"),
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_ge.glsl")
+                absPath("${MODULE_GAIA}/shaders/gaia_vbo_vs.glsl"),
+                absPath("${MODULE_GAIA}/shaders/gaia_billboard_fs.glsl"),
+                absPath("${MODULE_GAIA}/shaders/gaia_billboard_ge.glsl")
             );
             _uniformCache.cameraPos = _program->uniformLocation("cameraPos");
             _uniformCache.cameraLookUp = _program->uniformLocation("cameraLookUp");
@@ -1008,10 +1006,8 @@ void RenderableGaiaStars::initializeGL() {
             _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
 
             _programTM = global::renderEngine.buildRenderProgram("ToneMapping",
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"),
-                absPath(
-                    "${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_billboard_fs.glsl"
-                )
+                absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl"),
+                absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_billboard_fs.glsl")
             );
 
             addProperty(_magnitudeBoost);
@@ -1589,9 +1585,9 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 std::unique_ptr<ghoul::opengl::ProgramObject> program =
                     ghoul::opengl::ProgramObject::Build(
                         "GaiaStar",
-                        absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
-                        absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_fs.glsl"),
-                        absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_ge.glsl")
+                        absPath("${MODULE_GAIA}/shaders/gaia_ssbo_vs.glsl"),
+                        absPath("${MODULE_GAIA}/shaders/gaia_point_fs.glsl"),
+                        absPath("${MODULE_GAIA}/shaders/gaia_point_ge.glsl")
                     );
                 if (_program) {
                     global::renderEngine.removeRenderProgram(_program.get());
@@ -1652,9 +1648,9 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 std::unique_ptr<ghoul::opengl::ProgramObject> program =
                     ghoul::opengl::ProgramObject::Build(
                         "GaiaStar",
-                        absPath("${MODULE_GAIAMISSION}/shaders/gaia_vbo_vs.glsl"),
-                        absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_fs.glsl"),
-                        absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_ge.glsl")
+                        absPath("${MODULE_GAIA}/shaders/gaia_vbo_vs.glsl"),
+                        absPath("${MODULE_GAIA}/shaders/gaia_point_fs.glsl"),
+                        absPath("${MODULE_GAIA}/shaders/gaia_point_ge.glsl")
                     );
                 if (_program) {
                     global::renderEngine.removeRenderProgram(_program.get());
@@ -1694,18 +1690,16 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 if (shaderOption == gaia::ShaderOption::Billboard_SSBO) {
                     program = ghoul::opengl::ProgramObject::Build(
                         "GaiaStar",
-                        absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
-                        absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_fs.glsl"),
-                        absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_ge.glsl")
+                        absPath("${MODULE_GAIA}/shaders/gaia_ssbo_vs.glsl"),
+                        absPath("${MODULE_GAIA}/shaders/gaia_billboard_fs.glsl"),
+                        absPath("${MODULE_GAIA}/shaders/gaia_billboard_ge.glsl")
                     );
                 }
                 else {
                     program = global::renderEngine.buildRenderProgram("GaiaStar",
-                        absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
-                        absPath(
-                            "${MODULE_GAIAMISSION}/shaders/gaia_billboard_nofbo_fs.glsl"
-                        ),
-                        absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_ge.glsl")
+                        absPath("${MODULE_GAIA}/shaders/gaia_ssbo_vs.glsl"),
+                        absPath("${MODULE_GAIA}/shaders/gaia_billboard_nofbo_fs.glsl"),
+                        absPath("${MODULE_GAIA}/shaders/gaia_billboard_ge.glsl")
                     );
                 }
 
@@ -1779,9 +1773,9 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 std::unique_ptr<ghoul::opengl::ProgramObject> program =
                     ghoul::opengl::ProgramObject::Build(
                         "GaiaStar",
-                        absPath("${MODULE_GAIAMISSION}/shaders/gaia_vbo_vs.glsl"),
-                        absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_fs.glsl"),
-                        absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_ge.glsl")
+                        absPath("${MODULE_GAIA}/shaders/gaia_vbo_vs.glsl"),
+                        absPath("${MODULE_GAIA}/shaders/gaia_billboard_fs.glsl"),
+                        absPath("${MODULE_GAIA}/shaders/gaia_billboard_ge.glsl")
                     );
                 if (_program) {
                     global::renderEngine.removeRenderProgram(_program.get());
@@ -1856,12 +1850,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 std::unique_ptr<ghoul::opengl::ProgramObject> programTM =
                     global::renderEngine.buildRenderProgram(
                         "ToneMapping",
-                        absPath(
-                            "${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"
-                        ),
-                        absPath(
-                            "${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_point_fs.glsl"
-                        )
+                        absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl"),
+                        absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_point_fs.glsl")
                     );
                 if (_programTM) {
                     global::renderEngine.removeRenderProgram(_programTM.get());
@@ -1880,10 +1870,10 @@ void RenderableGaiaStars::update(const UpdateData&) {
             case gaia::ShaderOption::Billboard_SSBO:
             case gaia::ShaderOption::Billboard_VBO: {
                 std::string vs = absPath(
-                    "${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"
+                    "${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl"
                 );
                 std::string fs = absPath(
-                    "${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_billboard_fs.glsl"
+                    "${MODULE_GAIA}/shaders/gaia_tonemapping_billboard_fs.glsl"
                 );
                 std::unique_ptr<ghoul::opengl::ProgramObject> programTM =
                     global::renderEngine.buildRenderProgram("ToneMapping", vs, fs);

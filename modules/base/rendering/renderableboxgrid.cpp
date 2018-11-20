@@ -231,7 +231,7 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
     glEnable(GL_LINE_SMOOTH);
 
     glBindVertexArray(_vaoID);
-    glDrawArrays(_mode, 0, _varray.size());
+    glDrawArrays(_mode, 0, static_cast<GLsizei>(_varray.size()));
     glBindVertexArray(0);
 
     _gridProgram->deactivate();

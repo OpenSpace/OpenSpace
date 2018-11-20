@@ -127,7 +127,7 @@ void ReadFileJob::execute() {
             // https://gea.esac.esa.int/archive/documentation/GDR2/Gaia_archive/
             // chap_datamodel/sec_dm_main_tables/ssec_dm_gaia_source.html
             //LINFO("Parallax: " + std::to_string(parallax[i]));
-            radiusInKiloParsec = 1.0 / parallax[i];
+            radiusInKiloParsec = 1.f / parallax[i];
         }
         /*// Convert to Galactic Coordinates from Galactic Lon & Lat.
         // https://gea.esac.esa.int/archive/documentation/GDR2/Data_processing/
@@ -191,17 +191,17 @@ void ReadFileJob::execute() {
         glm::vec3 pmVecGal = aPrimG * uICRS;
 
         // Convert to Tangential vector [m/s] from Proper Motion vector [mas/yr]
-        float tanVelX = 1000.0 * 4.74 * radiusInKiloParsec * pmVecGal.x;
-        float tanVelY = 1000.0 * 4.74 * radiusInKiloParsec * pmVecGal.y;
-        float tanVelZ = 1000.0 * 4.74 * radiusInKiloParsec * pmVecGal.z;
+        float tanVelX = 1000.f * 4.74f * radiusInKiloParsec * pmVecGal.x;
+        float tanVelY = 1000.f * 4.74f * radiusInKiloParsec * pmVecGal.y;
+        float tanVelZ = 1000.f * 4.74f * radiusInKiloParsec * pmVecGal.z;
 
         // Calculate True Space Velocity [m/s] if we have the radial velocity
         if (!std::isnan(radial_vel[i])) {
             // Calculate Radial Velocity in the direction of the star.
             // radial_vel is given in [km/s] -> convert to [m/s].
-            float radVelX = 1000.0 * radial_vel[i] * rGal.x;
-            float radVelY = 1000.0 * radial_vel[i] * rGal.y;
-            float radVelZ = 1000.0 * radial_vel[i] * rGal.z;
+            float radVelX = 1000.f * radial_vel[i] * rGal.x;
+            float radVelY = 1000.f * radial_vel[i] * rGal.y;
+            float radVelZ = 1000.f * radial_vel[i] * rGal.z;
 
             // Use Pythagoras theorem for the final Space Velocity [m/s].
             values[idx++] = sqrt(pow(radVelX, 2) + pow(tanVelX, 2)); // Vel X [U]

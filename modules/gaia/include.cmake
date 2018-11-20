@@ -1,4 +1,6 @@
-set (OPENSPACE_DEPENDENCIES
+set(DEFAULT_MODULE ON)
+
+set(OPENSPACE_DEPENDENCIES
     fitsfilereader
     globebrowsing
 )

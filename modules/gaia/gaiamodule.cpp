@@ -64,7 +64,7 @@ scripting::LuaLibrary GaiaModule::luaLibrary() const {
     scripting::LuaLibrary res;
     res.name = "gaia";
     res.scripts = {
-        absPath("${MODULE_GAIAMISSION}/scripts/filtering.lua")
+        absPath("${MODULE_GAIA}/scripts/filtering.lua")
     };
     return res;
 }

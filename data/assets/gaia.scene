@@ -1,3 +1,9 @@
+local has_gaia = openspace.modules.isLoaded('gaia2')
+if not has_gaia then
+    openspace.printFatal('Could not load scene "' .. asset.filePath .. '" due to missing module "gaia"')
+    do return end
+end
+
 local assetHelper = asset.require('util/asset_helper')
 
 asset.require('default')
