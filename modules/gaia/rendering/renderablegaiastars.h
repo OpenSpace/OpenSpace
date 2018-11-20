@@ -22,12 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GAIAMISSION___RENDERABLEGAIASTARS___H__
-#define __OPENSPACE_MODULE_GAIAMISSION___RENDERABLEGAIASTARS___H__
+#ifndef __OPENSPACE_MODULE_GAIA___RENDERABLEGAIASTARS___H__
+#define __OPENSPACE_MODULE_GAIA___RENDERABLEGAIASTARS___H__
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/gaiamission/rendering/octreemanager.h>
+#include <modules/gaia/rendering/octreemanager.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringlistproperty.h>
 #include <openspace/properties/stringproperty.h>
@@ -213,4 +213,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GAIAMISSION___RENDERABLEGAIASTARS___H__
+#endif // __OPENSPACE_MODULE_GAIA___RENDERABLEGAIASTARS___H__

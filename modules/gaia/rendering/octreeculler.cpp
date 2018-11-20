@@ -22,61 +22,65 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GAIAMISSION___READFITSTASK___H__
-#define __OPENSPACE_MODULE_GAIAMISSION___READFITSTASK___H__
+#include <modules/gaia/rendering/octreeculler.h>
 
-#include <openspace/util/task.h>
-#include <openspace/util/threadpool.h>
-#include <openspace/util/concurrentjobmanager.h>
-#include <modules/fitsfilereader/include/fitsfilereader.h>
+#include <ghoul/glm.h>
+#include <ghoul/logging/logmanager.h>
+
+namespace {
+    constexpr const char* _loggerCat = "OctreeCuller";
+} // namespace
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+namespace {
+    bool intersects(const globebrowsing::AABB3& bb, const globebrowsing::AABB3& o) {
+        return (bb.min.x <= o.max.x) && (o.min.x <= bb.max.x)
+            && (bb.min.y <= o.max.y) && (o.min.y <= bb.max.y)
+            && (bb.min.z <= o.max.z) && (o.min.z <= bb.max.z);
+    }
 
-class ReadFitsTask : public Task {
-public:
-    ReadFitsTask(const ghoul::Dictionary& dictionary);
-    virtual ~ReadFitsTask() = default;
+    void expand(globebrowsing::AABB3& bb, const glm::vec3& p) {
+        bb.min = glm::min(bb.min, p);
+        bb.max = glm::max(bb.max, p);
+    }
+} // namespace
 
-    std::string description() override;
-    void perform(const Task::ProgressCallback& onProgress) override;
-    static documentation::Documentation Documentation();
+OctreeCuller::OctreeCuller(globebrowsing::AABB3 viewFrustum)
+    : _viewFrustum(std::move(viewFrustum))
+{}
 
-private:
-    const size_t MAX_SIZE_BEFORE_WRITE = 48000000; // ~183MB -> 2M stars with 24 values
-    //const size_t MAX_SIZE_BEFORE_WRITE = 9000000; // ~34MB -> 0,5 stars with 18 values
+bool OctreeCuller::isVisible(const std::vector<glm::dvec4>& corners,
+                             const glm::dmat4& mvp)
+{
+    createNodeBounds(corners, mvp);
+    return intersects(_viewFrustum, _nodeBounds);
+}
 
-    /**
-     *  Reads a single FITS file and stores ordered star data in one binary file.
-     */
-    void readSingleFitsFile(const Task::ProgressCallback& progressCallback);
+glm::vec2 OctreeCuller::getNodeSizeInPixels(const std::vector<glm::dvec4>& corners,
+                                            const glm::dmat4& mvp,
+                                            const glm::vec2& screenSize)
+{
 
-    /**
-     * Reads all FITS files in a folder with multiple threads and stores ordered star
-     * data into 8 binary files.
-     */
-    void readAllFitsFilesFromFolder(const Task::ProgressCallback& progressCallback);
+    createNodeBounds(corners, mvp);
 
-    /**
-     * Writes \param data to octant [\param index] file.
-     * \param isFirstWrite defines if this is the first write to specified octant, if so
-     * the file is created, otherwise the accumulated data is appended to the end of the
-     * file.
-     */
-    int writeOctantToFile(const std::vector<float>& data, int index,
-        std::vector<bool>& isFirstWrite, int nValuesPerStar);
+    // Screen space is mapped to [-1, 1] so divide by 2 and multiply with screen size.
+    glm::vec3 size = (_nodeBounds.max - _nodeBounds.min) / 2.f;
+    size = glm::abs(size);
+    return glm::vec2(size.x * screenSize.x, size.y * screenSize.y);
+}
 
-    std::string _inFileOrFolderPath;
-    std::string _outFileOrFolderPath;
-    bool _singleFileProcess = false;
-    size_t _threadsToUse = 1;
-    int _firstRow = 0;
-    int _lastRow = 0;
-    std::vector<std::string> _allColumnNames;
-    std::vector<std::string> _filterColumnNames;
-};
+void OctreeCuller::createNodeBounds(const std::vector<glm::dvec4>& corners,
+                                    const glm::dmat4& mvp)
+{
+    // Create a bounding box in clipping space from node boundaries.
+    _nodeBounds = globebrowsing::AABB3();
+
+    for (size_t i = 0; i < 8; ++i) {
+        glm::dvec4 cornerClippingSpace = mvp * corners[i];
+        glm::dvec4 ndc = (1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace;
+        expand(_nodeBounds, glm::dvec3(ndc));
+    }
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GAIAMISSION___READFITSTASK___H__

@@ -22,29 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GAIAMISSION___READSPECKTASK___H__
-#define __OPENSPACE_MODULE_GAIAMISSION___READSPECKTASK___H__
+#ifndef __OPENSPACE_MODULE_GAIA___GAIAOPTIONS___H__
+#define __OPENSPACE_MODULE_GAIA___GAIAOPTIONS___H__
 
-#include <openspace/util/task.h>
+namespace openspace::gaia {
 
-namespace openspace {
-
-namespace documentation { struct Documentation; }
-
-class ReadSpeckTask : public Task {
-public:
-    ReadSpeckTask(const ghoul::Dictionary& dictionary);
-    virtual ~ReadSpeckTask() = default;
-
-    std::string description() override;
-    void perform(const Task::ProgressCallback& onProgress) override;
-    static documentation::Documentation Documentation();
-
-private:
-    std::string _inFilePath;
-    std::string _outFilePath;
+enum RenderOption {
+    Static = 0,
+    Color = 1,
+    Motion = 2
 };
 
-} // namespace openspace
+enum FileReaderOption {
+    Fits = 0,
+    Speck = 1,
+    BinaryRaw = 2,
+    BinaryOctree = 3,
+    StreamOctree = 4
+};
 
-#endif // __OPENSPACE_MODULE_GAIAMISSION___READSPECKTASK___H__
+enum ShaderOption {
+    Point_SSBO = 0,
+    Point_VBO = 1,
+    Billboard_SSBO = 2,
+    Billboard_VBO = 3,
+    Billboard_SSBO_noFBO = 4
+};
+
+} // namespace openspace::gaiamission
+
+#endif // __OPENSPACE_MODULE_GAIA___GAIAOPTIONS___H__

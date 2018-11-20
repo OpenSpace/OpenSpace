@@ -22,33 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GAIAMISSION___GAIAOPTIONS___H__
-#define __OPENSPACE_MODULE_GAIAMISSION___GAIAOPTIONS___H__
+#ifndef __OPENSPACE_MODULE_GAIA___OCTREECULLER___H__
+#define __OPENSPACE_MODULE_GAIA___OCTREECULLER___H__
 
-namespace openspace::gaiamission {
+#include <modules/globebrowsing/src/basictypes.h>
+#include <vector>
 
-enum RenderOption {
-    Static = 0,
-    Color = 1,
-    Motion = 2
+// TODO: Move /geometry/* to libOpenSpace so as not to depend on globebrowsing.
+
+namespace openspace {
+
+/**
+ * Culls all octree nodes that are completely outside the view frustum.
+ *
+ * The frustum culling uses a 2D axis aligned bounding box for the OctreeNode in
+ * screen space.
+ */
+
+class OctreeCuller {
+public:
+
+    /**
+     * \param viewFrustum is the view space in normalized device coordinates space.
+     *                    Hence it is an axis aligned bounding box and not a real frustum.
+     */
+    OctreeCuller(globebrowsing::AABB3 viewFrustum);
+
+    ~OctreeCuller() = default;
+
+    /**
+     * \return true if any part of the node is visible in the current view.
+     */
+    bool isVisible(const std::vector<glm::dvec4>& corners, const glm::dmat4& mvp);
+
+    /**
+     * \return the size [in pixels] of the node in clipping space.
+     */
+    glm::vec2 getNodeSizeInPixels(const std::vector<glm::dvec4>& corners,
+        const glm::dmat4& mvp, const glm::vec2& screenSize);
+
+private:
+    /**
+     * Creates an axis-aligned bounding box containing all \p corners in clipping space.
+     */
+    void createNodeBounds(const std::vector<glm::dvec4>& corners, const glm::dmat4& mvp);
+
+    const globebrowsing::AABB3 _viewFrustum;
+    globebrowsing::AABB3 _nodeBounds;
 };
 
-enum FileReaderOption {
-    Fits = 0,
-    Speck = 1,
-    BinaryRaw = 2,
-    BinaryOctree = 3,
-    StreamOctree = 4
-};
+} // namespace openspace
 
-enum ShaderOption {
-    Point_SSBO = 0,
-    Point_VBO = 1,
-    Billboard_SSBO = 2,
-    Billboard_VBO = 3,
-    Billboard_SSBO_noFBO = 4
-};
-
-} // namespace openspace::gaiamission
-
-#endif // __OPENSPACE_MODULE_GAIAMISSION___GAIAOPTIONS___H__
+#endif // __OPENSPACE_MODULE_GAIA___OCTREECULLER___H__

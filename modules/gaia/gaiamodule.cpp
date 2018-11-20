@@ -22,55 +22,51 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GAIAMISSION___OCTREECULLER___H__
-#define __OPENSPACE_MODULE_GAIAMISSION___OCTREECULLER___H__
+#include <modules/gaia/gaiamodule.h>
 
-#include <modules/globebrowsing/src/basictypes.h>
-#include <vector>
-
-// TODO: Move /geometry/* to libOpenSpace so as not to depend on globebrowsing.
+#include <modules/gaia/tasks/constructoctreetask.h>
+#include <modules/gaia/rendering/renderablegaiastars.h>
+#include <modules/gaia/tasks/readfitstask.h>
+#include <modules/gaia/tasks/readspecktask.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/scripting/lualibrary.h>
+#include <openspace/util/factorymanager.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/assert.h>
 
 namespace openspace {
 
-/**
- * Culls all octree nodes that are completely outside the view frustum.
- *
- * The frustum culling uses a 2D axis aligned bounding box for the OctreeNode in
- * screen space.
- */
+GaiaModule::GaiaModule() : OpenSpaceModule(Name) {}
 
-class OctreeCuller {
-public:
+void GaiaModule::internalInitialize(const ghoul::Dictionary&) {
+    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "No renderable factory existed");
+    fRenderable->registerClass<RenderableGaiaStars>("RenderableGaiaStars");
 
-    /**
-     * \param viewFrustum is the view space in normalized device coordinates space.
-     *                    Hence it is an axis aligned bounding box and not a real frustum.
-     */
-    OctreeCuller(globebrowsing::AABB3 viewFrustum);
+    auto fTask = FactoryManager::ref().factory<Task>();
+    ghoul_assert(fRenderable, "No task factory existed");
+    fTask->registerClass<ReadFitsTask>("ReadFitsTask");
+    fTask->registerClass<ReadSpeckTask>("ReadSpeckTask");
+    fTask->registerClass<ConstructOctreeTask>("ConstructOctreeTask");
+}
 
-    ~OctreeCuller() = default;
+std::vector<documentation::Documentation> GaiaModule::documentations() const {
+    return {
+        RenderableGaiaStars::Documentation(),
+        ReadFitsTask::Documentation(),
+        ReadSpeckTask::Documentation(),
+        ConstructOctreeTask::Documentation(),
+    };
+}
 
-    /**
-     * \return true if any part of the node is visible in the current view.
-     */
-    bool isVisible(const std::vector<glm::dvec4>& corners, const glm::dmat4& mvp);
-
-    /**
-     * \return the size [in pixels] of the node in clipping space.
-     */
-    glm::vec2 getNodeSizeInPixels(const std::vector<glm::dvec4>& corners,
-        const glm::dmat4& mvp, const glm::vec2& screenSize);
-
-private:
-    /**
-     * Creates an axis-aligned bounding box containing all \p corners in clipping space.
-     */
-    void createNodeBounds(const std::vector<glm::dvec4>& corners, const glm::dmat4& mvp);
-
-    const globebrowsing::AABB3 _viewFrustum;
-    globebrowsing::AABB3 _nodeBounds;
-};
+scripting::LuaLibrary GaiaModule::luaLibrary() const {
+    scripting::LuaLibrary res;
+    res.name = "gaia";
+    res.scripts = {
+        absPath("${MODULE_GAIAMISSION}/scripts/filtering.lua")
+    };
+    return res;
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GAIAMISSION___OCTREECULLER___H__

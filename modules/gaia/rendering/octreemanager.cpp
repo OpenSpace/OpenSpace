@@ -22,9 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/gaiamission/rendering/octreemanager.h>
+#include <modules/gaia/rendering/octreemanager.h>
 
-#include <modules/gaiamission/rendering/octreeculler.h>
+#include <modules/gaia/rendering/octreeculler.h>
 #include <openspace/util/distanceconstants.h>
 #include <ghoul/fmt.h>
 #include <ghoul/glm.h>
@@ -403,8 +403,8 @@ void OctreeManager::findAndFetchNeighborNode(unsigned long long firstParentId, i
 std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& mvp,
                                                               const glm::vec2& screenSize,
                                                               int& deltaStars,
-                                                         gaiamission::RenderOption option,
-                                                                  float lodPixelThreshold)
+                                                              gaia::RenderOption option,
+                                                              float lodPixelThreshold)
 {
     auto renderData = std::map<int, std::vector<float>>();
     bool innerRebuild = false;
@@ -527,7 +527,7 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& 
     return renderData;
 }
 
-std::vector<float> OctreeManager::getAllData(gaiamission::RenderOption option) {
+std::vector<float> OctreeManager::getAllData(gaia::RenderOption option) {
     std::vector<float> fullData;
 
     for (size_t i = 0; i < 8; ++i) {
@@ -1114,7 +1114,7 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(
                                                                     const glm::dmat4& mvp,
                                                               const glm::vec2& screenSize,
                                                                           int& deltaStars,
-                                                         gaiamission::RenderOption option)
+                                                                gaia::RenderOption option)
 {
     std::map<int, std::vector<float>> fetchedData;
     //int depth  = static_cast<int>(log2( MAX_DIST / node->halfDimension ));
@@ -1268,7 +1268,7 @@ std::map<int, std::vector<float>> OctreeManager::removeNodeFromCache(
 }
 
 std::vector<float> OctreeManager::getNodeData(std::shared_ptr<OctreeNode> node,
-                                              gaiamission::RenderOption option)
+                                              gaia::RenderOption option)
 {
     // Return node data if node is a leaf.
     if (node->isLeaf) {
@@ -1374,7 +1374,7 @@ bool OctreeManager::updateBufferIndex(std::shared_ptr<OctreeNode> node) {
 }
 
 std::vector<float> OctreeManager::constructInsertData(std::shared_ptr<OctreeNode> node,
-                                                      gaiamission::RenderOption option,
+                                                      gaia::RenderOption option,
                                                       int& deltaStars)
 {
     // Return early if node doesn't contain any stars!
@@ -1388,12 +1388,12 @@ std::vector<float> OctreeManager::constructInsertData(std::shared_ptr<OctreeNode
     if (_useVBO) {
         insertData.resize(POS_SIZE * MAX_STARS_PER_NODE, 0.f);
     }
-    if (option != gaiamission::RenderOption::Static) {
+    if (option != gaia::RenderOption::Static) {
         insertData.insert(insertData.end(), node->colData.begin(), node->colData.end());
         if (_useVBO) {
             insertData.resize((POS_SIZE + COL_SIZE) * MAX_STARS_PER_NODE, 0.f);
         }
-        if (option == gaiamission::RenderOption::Motion) {
+        if (option == gaia::RenderOption::Motion) {
             insertData.insert(
                 insertData.end(),
                 node->velData.begin(),

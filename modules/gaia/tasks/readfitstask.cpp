@@ -22,9 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/gaiamission/tasks/readfitstask.h>
+#include <modules/gaia/tasks/readfitstask.h>
 
-#include <modules/gaiamission/tasks/readfilejob.h>
+#include <modules/gaia/tasks/readfilejob.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
@@ -236,7 +236,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
         allInputFiles.erase(allInputFiles.end() - 1);
 
         // Add reading of file to jobmanager, which will distribute it to our threadpool.
-        auto readFileJob = std::make_shared<gaiamission::ReadFileJob>(
+        auto readFileJob = std::make_shared<gaia::ReadFileJob>(
             fileToRead,
             _allColumnNames,
             _firstRow,

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/gaiamission/tasks/constructoctreetask.h>
+#include <modules/gaia/tasks/constructoctreetask.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>

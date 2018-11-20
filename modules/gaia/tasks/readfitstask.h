@@ -22,50 +22,61 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GAIAMISSION___READFILEJOB___H__
-#define __OPENSPACE_MODULE_GAIAMISSION___READFILEJOB___H__
+#ifndef __OPENSPACE_MODULE_GAIA___READFITSTASK___H__
+#define __OPENSPACE_MODULE_GAIA___READFITSTASK___H__
 
+#include <openspace/util/task.h>
+#include <openspace/util/threadpool.h>
 #include <openspace/util/concurrentjobmanager.h>
-
 #include <modules/fitsfilereader/include/fitsfilereader.h>
 
-namespace openspace::gaiamission {
+namespace openspace {
 
-struct ReadFileJob : public Job<std::vector<std::vector<float>>> {
-    /**
-     * Constructs a Job that will read a single FITS file in a concurrent thread and
-     * divide the star data into 8 octants depending on position.
-     * \param allColumns define which columns that will be read, it should correspond
-     * to the pre-defined order in the job. If additional columns are defined they will
-     * be read but slow down the process.
-     * Proper conversions of positions and velocities will take place and all values
-     * will be checked for NaNs.
-     * If \param firstRow is < 1 then reading will begin at first row in table.
-     * If \param lastRow < firstRow then entire table will be read.
-     * \param nValuesPerStar defines how many values that will be stored per star.
-     */
-    ReadFileJob(const std::string& filePath, const std::vector<std::string>& allColumns,
-        int firstRow, int lastRow, size_t nDefaultCols, int nValuesPerStar,
-        std::shared_ptr<FitsFileReader> fitsReader);
+namespace documentation { struct Documentation; }
 
-    ~ReadFileJob() = default;
+class ReadFitsTask : public Task {
+public:
+    ReadFitsTask(const ghoul::Dictionary& dictionary);
+    virtual ~ReadFitsTask() = default;
 
-    void execute() override;
-
-    std::vector<std::vector<float>> product() override;
+    std::string description() override;
+    void perform(const Task::ProgressCallback& onProgress) override;
+    static documentation::Documentation Documentation();
 
 private:
-    std::string _inFilePath;
-    int _firstRow;
-    int _lastRow;
-    size_t _nDefaultCols;
-    int _nValuesPerStar;
-    std::vector<std::string> _allColumns;
+    const size_t MAX_SIZE_BEFORE_WRITE = 48000000; // ~183MB -> 2M stars with 24 values
+    //const size_t MAX_SIZE_BEFORE_WRITE = 9000000; // ~34MB -> 0,5 stars with 18 values
 
-    std::shared_ptr<FitsFileReader> _fitsFileReader;
-    std::vector<std::vector<float>> _octants;
+    /**
+     *  Reads a single FITS file and stores ordered star data in one binary file.
+     */
+    void readSingleFitsFile(const Task::ProgressCallback& progressCallback);
+
+    /**
+     * Reads all FITS files in a folder with multiple threads and stores ordered star
+     * data into 8 binary files.
+     */
+    void readAllFitsFilesFromFolder(const Task::ProgressCallback& progressCallback);
+
+    /**
+     * Writes \param data to octant [\param index] file.
+     * \param isFirstWrite defines if this is the first write to specified octant, if so
+     * the file is created, otherwise the accumulated data is appended to the end of the
+     * file.
+     */
+    int writeOctantToFile(const std::vector<float>& data, int index,
+        std::vector<bool>& isFirstWrite, int nValuesPerStar);
+
+    std::string _inFileOrFolderPath;
+    std::string _outFileOrFolderPath;
+    bool _singleFileProcess = false;
+    size_t _threadsToUse = 1;
+    int _firstRow = 0;
+    int _lastRow = 0;
+    std::vector<std::string> _allColumnNames;
+    std::vector<std::string> _filterColumnNames;
 };
 
-} // namespace openspace::gaiamission
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GAIAMISSION___READFILEJOB___H__
+#endif // __OPENSPACE_MODULE_GAIA___READFITSTASK___H__

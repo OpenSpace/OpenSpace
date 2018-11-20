@@ -22,13 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GAIAMISSION___CONSTRUCTOCTREETASK___H__
-#define __OPENSPACE_MODULE_GAIAMISSION___CONSTRUCTOCTREETASK___H__
+#ifndef __OPENSPACE_MODULE_GAIA___CONSTRUCTOCTREETASK___H__
+#define __OPENSPACE_MODULE_GAIA___CONSTRUCTOCTREETASK___H__
 
 #include <openspace/util/task.h>
 
-#include <modules/gaiamission/rendering/octreeculler.h>
-#include <modules/gaiamission/rendering/octreemanager.h>
+#include <modules/gaia/rendering/octreeculler.h>
+#include <modules/gaia/rendering/octreemanager.h>
 
 namespace openspace {
 
@@ -140,4 +140,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GAIAMISSION___CONSTRUCTOCTREETASK___H__
+#endif // __OPENSPACE_MODULE_GAIA___CONSTRUCTOCTREETASK___H__

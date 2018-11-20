@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/gaiamission/tasks/readspecktask.h>
+#include <modules/gaia/tasks/readspecktask.h>
 
 #include <modules/fitsfilereader/include/fitsfilereader.h>
 #include <openspace/documentation/documentation.h>

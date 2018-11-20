@@ -22,65 +22,50 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/gaiamission/rendering/octreeculler.h>
+#ifndef __OPENSPACE_MODULE_GAIA___READFILEJOB___H__
+#define __OPENSPACE_MODULE_GAIA___READFILEJOB___H__
 
-#include <ghoul/glm.h>
-#include <ghoul/logging/logmanager.h>
+#include <openspace/util/concurrentjobmanager.h>
 
-namespace {
-    constexpr const char* _loggerCat = "OctreeCuller";
-} // namespace
+#include <modules/fitsfilereader/include/fitsfilereader.h>
 
-namespace openspace {
+namespace openspace::gaia {
 
-namespace {
-    bool intersects(const globebrowsing::AABB3& bb, const globebrowsing::AABB3& o) {
-        return (bb.min.x <= o.max.x) && (o.min.x <= bb.max.x)
-            && (bb.min.y <= o.max.y) && (o.min.y <= bb.max.y)
-            && (bb.min.z <= o.max.z) && (o.min.z <= bb.max.z);
-    }
+struct ReadFileJob : public Job<std::vector<std::vector<float>>> {
+    /**
+     * Constructs a Job that will read a single FITS file in a concurrent thread and
+     * divide the star data into 8 octants depending on position.
+     * \param allColumns define which columns that will be read, it should correspond
+     * to the pre-defined order in the job. If additional columns are defined they will
+     * be read but slow down the process.
+     * Proper conversions of positions and velocities will take place and all values
+     * will be checked for NaNs.
+     * If \param firstRow is < 1 then reading will begin at first row in table.
+     * If \param lastRow < firstRow then entire table will be read.
+     * \param nValuesPerStar defines how many values that will be stored per star.
+     */
+    ReadFileJob(const std::string& filePath, const std::vector<std::string>& allColumns,
+        int firstRow, int lastRow, size_t nDefaultCols, int nValuesPerStar,
+        std::shared_ptr<FitsFileReader> fitsReader);
 
-    void expand(globebrowsing::AABB3& bb, const glm::vec3& p) {
-        bb.min = glm::min(bb.min, p);
-        bb.max = glm::max(bb.max, p);
-    }
-} // namespace
+    ~ReadFileJob() = default;
 
-OctreeCuller::OctreeCuller(globebrowsing::AABB3 viewFrustum)
-    : _viewFrustum(std::move(viewFrustum))
-{}
+    void execute() override;
 
-bool OctreeCuller::isVisible(const std::vector<glm::dvec4>& corners,
-                             const glm::dmat4& mvp)
-{
-    createNodeBounds(corners, mvp);
-    return intersects(_viewFrustum, _nodeBounds);
-}
+    std::vector<std::vector<float>> product() override;
 
-glm::vec2 OctreeCuller::getNodeSizeInPixels(const std::vector<glm::dvec4>& corners,
-                                            const glm::dmat4& mvp,
-                                            const glm::vec2& screenSize)
-{
+private:
+    std::string _inFilePath;
+    int _firstRow;
+    int _lastRow;
+    size_t _nDefaultCols;
+    int _nValuesPerStar;
+    std::vector<std::string> _allColumns;
 
-    createNodeBounds(corners, mvp);
+    std::shared_ptr<FitsFileReader> _fitsFileReader;
+    std::vector<std::vector<float>> _octants;
+};
 
-    // Screen space is mapped to [-1, 1] so divide by 2 and multiply with screen size.
-    glm::vec3 size = (_nodeBounds.max - _nodeBounds.min) / 2.f;
-    size = glm::abs(size);
-    return glm::vec2(size.x * screenSize.x, size.y * screenSize.y);
-}
+} // namespace openspace::gaiamission
 
-void OctreeCuller::createNodeBounds(const std::vector<glm::dvec4>& corners,
-                                    const glm::dmat4& mvp)
-{
-    // Create a bounding box in clipping space from node boundaries.
-    _nodeBounds = globebrowsing::AABB3();
-
-    for (size_t i = 0; i < 8; ++i) {
-        glm::dvec4 cornerClippingSpace = mvp * corners[i];
-        glm::dvec4 ndc = (1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace;
-        expand(_nodeBounds, glm::dvec3(ndc));
-    }
-}
-
-} // namespace openspace
+#endif // __OPENSPACE_MODULE_GAIA___READFILEJOB___H__

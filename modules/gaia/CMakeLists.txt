@@ -25,7 +25,7 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/gaiamissionmodule.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/gaiamodule.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablegaiastars.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/octreemanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/octreeculler.h
@@ -38,7 +38,7 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/gaiamissionmodule.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/gaiamodule.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablegaiastars.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/octreemanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/octreeculler.cpp
@@ -64,8 +64,8 @@ set(SHADER_FILES
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
-    "GaiaMission"
-    gaia_mission
+    "Gaia"
+    gaia
     STATIC
     ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )

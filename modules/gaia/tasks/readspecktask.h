@@ -22,51 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/gaiamission/gaiamissionmodule.h>
+#ifndef __OPENSPACE_MODULE_GAIA___READSPECKTASK___H__
+#define __OPENSPACE_MODULE_GAIA___READSPECKTASK___H__
 
-#include <modules/gaiamission/tasks/constructoctreetask.h>
-#include <modules/gaiamission/rendering/renderablegaiastars.h>
-#include <modules/gaiamission/tasks/readfitstask.h>
-#include <modules/gaiamission/tasks/readspecktask.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/scripting/lualibrary.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
+#include <openspace/util/task.h>
 
 namespace openspace {
 
-GaiaMissionModule::GaiaMissionModule() : OpenSpaceModule(Name) {}
+namespace documentation { struct Documentation; }
 
-void GaiaMissionModule::internalInitialize(const ghoul::Dictionary&) {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderableGaiaStars>("RenderableGaiaStars");
+class ReadSpeckTask : public Task {
+public:
+    ReadSpeckTask(const ghoul::Dictionary& dictionary);
+    virtual ~ReadSpeckTask() = default;
 
-    auto fTask = FactoryManager::ref().factory<Task>();
-    ghoul_assert(fRenderable, "No task factory existed");
-    fTask->registerClass<ReadFitsTask>("ReadFitsTask");
-    fTask->registerClass<ReadSpeckTask>("ReadSpeckTask");
-    fTask->registerClass<ConstructOctreeTask>("ConstructOctreeTask");
-}
+    std::string description() override;
+    void perform(const Task::ProgressCallback& onProgress) override;
+    static documentation::Documentation Documentation();
 
-std::vector<documentation::Documentation> GaiaMissionModule::documentations() const {
-    return {
-        RenderableGaiaStars::Documentation(),
-        ReadFitsTask::Documentation(),
-        ReadSpeckTask::Documentation(),
-        ConstructOctreeTask::Documentation(),
-    };
-}
-
-scripting::LuaLibrary GaiaMissionModule::luaLibrary() const {
-    scripting::LuaLibrary res;
-    res.name = "gaia";
-    res.scripts = {
-        absPath("${MODULE_GAIAMISSION}/scripts/filtering.lua")
-    };
-    return res;
-}
+private:
+    std::string _inFilePath;
+    std::string _outFilePath;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_GAIA___READSPECKTASK___H__

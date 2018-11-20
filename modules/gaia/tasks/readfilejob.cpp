@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/gaiamission/tasks/readfilejob.h>
+#include <modules/gaia/tasks/readfilejob.h>
 
 #include <openspace/util/distanceconversion.h>
 #include <ghoul/misc/dictionary.h>
@@ -30,10 +30,10 @@
 #include <ghoul/fmt.h>
 
 namespace {
-constexpr const char* _loggerCat = "ReadFileJob";
+    constexpr const char* _loggerCat = "ReadFileJob";
 }
 
-namespace openspace::gaiamission {
+namespace openspace::gaia {
 
 ReadFileJob::ReadFileJob(const std::string& filePath,
                          const std::vector<std::string>& allColumns, int firstRow,
