@@ -29,7 +29,6 @@
 #include <openspace/util/updatestructures.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -38,12 +37,9 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-
 #include <array>
 #include <cstdint>
 #include <fstream>
-
-#pragma optimize ("", off)
 
 namespace {
     constexpr const char* _loggerCat = "RenderableStars";
