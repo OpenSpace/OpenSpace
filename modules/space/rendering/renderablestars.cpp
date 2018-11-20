@@ -203,6 +203,12 @@ documentation::Documentation RenderableStars::Documentation() {
                 ColorOptionInfo.description
             },
             {
+                OtherDataOptionInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                OtherDataOptionInfo.description
+            },
+            {
                 OtherDataColorMapInfo.identifier,
                 new StringVerifier,
                 Optional::Yes,
@@ -259,8 +265,9 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         "RenderableStars"
     );
 
-    addProperty(_speckFile);
+    _speckFile = absPath(dictionary.value<std::string>(KeyFile));
     _speckFile.onChange([&]() { _speckFileIsDirty = true; });
+    addProperty(_speckFile);
 
     _pointSpreadFunctionTexturePath = absPath(dictionary.value<std::string>(
         PsfTextureInfo.identifier
@@ -278,7 +285,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     }
     _colorTextureFile = std::make_unique<File>(_colorTexturePath);
 
-    _speckFile = absPath(dictionary.value<std::string>(KeyFile));
 
     _colorOption.addOptions({
         { ColorOption::Color, "Color" },
@@ -306,17 +312,16 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _colorOption.onChange([&] { _dataIsDirty = true; });
     addProperty(_colorOption);
 
-    _pointSpreadFunctionTexturePath.onChange(
-        [&] { _pointSpreadFunctionTextureIsDirty = true; }
-    );
-    _pointSpreadFunctionFile->setCallback(
-        [&](const File&) { _pointSpreadFunctionTextureIsDirty = true; }
-    );
+    _pointSpreadFunctionTexturePath.onChange([&] {
+        _pointSpreadFunctionTextureIsDirty = true;
+    });
+    _pointSpreadFunctionFile->setCallback([&](const File&) {
+        _pointSpreadFunctionTextureIsDirty = true;
+    });
     addProperty(_pointSpreadFunctionTexturePath);
 
     _colorTexturePath.onChange([&] { _colorTextureIsDirty = true; });
-    _colorTextureFile->setCallback(
-        [&](const File&) { _colorTextureIsDirty = true; }
+    _colorTextureFile->setCallback([&](const File&) { _colorTextureIsDirty = true; }
     );
     addProperty(_colorTexturePath);
 
@@ -341,8 +346,12 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     }
     addProperty(_minBillboardSize);
 
-    addProperty(_otherDataOption);
+    if (dictionary.hasKey(OtherDataOptionInfo.identifier)) {
+        _queuedOtherData = dictionary.value<std::string>(OtherDataOptionInfo.identifier);
+    }
+
     _otherDataOption.onChange([&]() { _dataIsDirty = true; });
+    addProperty(_otherDataOption);
 
     addProperty(_otherDataRange);
 
@@ -353,7 +362,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 RenderableStars::~RenderableStars() {} // NOLINT
 
 bool RenderableStars::isReady() const {
-    return (_program != nullptr) && (!_fullData.empty());
+    return _program != nullptr;
 }
 
 void RenderableStars::initializeGL() {
@@ -366,6 +375,17 @@ void RenderableStars::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
     loadData();
+
+    if (!_queuedOtherData.empty()) {
+        auto it = std::find(_dataNames.begin(), _dataNames.end(), _queuedOtherData);
+        if (it == _dataNames.end()) {
+            LERROR(fmt::format("Could not find other data column {}", _queuedOtherData));
+        }
+        else {
+            _otherDataOption = std::distance(_dataNames.begin(), it);
+            _queuedOtherData.clear();
+        }
+    }
     _speckFileIsDirty = false;
 }
 
@@ -385,6 +405,10 @@ void RenderableStars::deinitializeGL() {
 }
 
 void RenderableStars::render(const RenderData& data, RendererTasks&) {
+    if (_fullData.empty()) {
+        return;
+    }
+
     glDepthMask(false);
     _program->activate();
 
@@ -448,6 +472,10 @@ void RenderableStars::update(const UpdateData&) {
         loadData();
         _speckFileIsDirty = false;
         _dataIsDirty = true;
+    }
+
+    if (_fullData.empty()) {
+        return;
     }
 
     if (_dataIsDirty) {
@@ -676,6 +704,10 @@ void RenderableStars::update(const UpdateData&) {
 
 void RenderableStars::loadData() {
     std::string _file = _speckFile;
+    if (!FileSys.fileExists(absPath(_file))) {
+        return;
+    }
+
     std::string cachedFile = FileSys.cacheManager()->cachedFilename(
         _file,
         ghoul::filesystem::CacheManager::Persistent::Yes
@@ -718,7 +750,8 @@ void RenderableStars::readSpeckFile() {
     std::string _file = _speckFile;
     std::ifstream file(_file);
     if (!file.good()) {
-        throw ghoul::RuntimeError(fmt::format("Failed to open Speck file '{}'", _file));
+        LERROR(fmt::format("Failed to open Speck file '{}'", _file));
+        return;
     }
 
     // The beginning of the speck file has a header that either contains comments
@@ -832,9 +865,8 @@ bool RenderableStars::loadCachedFile(const std::string& file) {
 void RenderableStars::saveCachedFile(const std::string& file) const {
     std::ofstream fileStream(file, std::ofstream::binary);
     if (!fileStream.good()) {
-        throw ghoul::RuntimeError(fmt::format(
-            "Error opening file '{}' for save cache file", file
-        ));
+        LERROR(fmt::format("Error opening file '{}' for save cache file", file));
+        return;
     }
 
     fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion), sizeof(int8_t));

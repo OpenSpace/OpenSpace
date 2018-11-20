@@ -10,9 +10,9 @@ local textures = asset.syncedResource({
 })
 
 local speck = asset.syncedResource({
-    Name = "Stars Speck Files",
+    Name = "Galah Speck Files",
     Type = "HttpSynchronization",
-    Identifier = "stars_du",
+    Identifier = "gaia_galah",
     Version = 1
 })
 
@@ -23,17 +23,22 @@ local colorLUT = asset.syncedResource({
     Version = 2
 })
 
-local stars = {
-    Identifier = "Stars",
+local gaia_abundance_galah = {
+    Identifier = "Gaia Abundance Galah",
     Renderable = {
         Type = "RenderableStars",
-        File = speck .. "/stars.speck",
+        Enabled = false,
+        File = speck .. "/GaiaAbundGalah.speck",
         Texture = textures .. "/halo.png",
-        ColorMap = colorLUT .. "/colorbv.cmap"
+        ColorOption = "Other Data",
+        OtherData = "FeH",
+        ScaleFactor = 100,
+        ColorMap = colorLUT .. "/colorbv.cmap",
+        OtherDataColorMap = colorLUT .. "/viridis.cmap"
     },
     GUI = {
-        Path = "/Milky Way/Stars"
+        Path = "/Milky Way/Gaia"
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { stars })
+assetHelper.registerSceneGraphNodesAndExport(asset, { gaia_abundance_galah })

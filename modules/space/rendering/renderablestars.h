@@ -108,6 +108,7 @@ private:
     std::vector<float> _slicedData;
     std::vector<float> _fullData;
     int _nValuesPerStar = 0;
+    std::string _queuedOtherData;
     std::vector<std::string> _dataNames;
 
     GLuint _vao = 0;
