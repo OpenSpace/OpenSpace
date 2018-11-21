@@ -185,7 +185,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     // On change callbacks definitions
     _enabled.onChange([&]() {
         if (_onChangeCallback) {
-            _onChangeCallback();
+            _onChangeCallback(this);
         }
     });
 
@@ -232,19 +232,19 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
         initializeBasedOnType(type(), {});
         addVisibleProperties();
         if (_onChangeCallback) {
-            _onChangeCallback();
+            _onChangeCallback(this);
         }
     });
 
     _blendModeOption.onChange([&]() {
         if (_onChangeCallback) {
-            _onChangeCallback();
+            _onChangeCallback(this);
         }
     });
 
     _layerAdjustment.onChange([&]() {
         if (_onChangeCallback) {
-            _onChangeCallback();
+            _onChangeCallback(this);
         }
     });
 
@@ -313,6 +313,10 @@ TileDepthTransform Layer::depthTransform() const {
         TileDepthTransform{ 1.f, 0.f };
 }
 
+void Layer::setEnabled(bool enabled) {
+    _enabled = enabled;
+}
+
 bool Layer::enabled() const {
     return _enabled;
 }
@@ -333,7 +337,7 @@ const LayerAdjustment& Layer::layerAdjustment() const {
     return _layerAdjustment;
 }
 
-void Layer::onChange(std::function<void(void)> callback) {
+void Layer::onChange(std::function<void(Layer*)> callback) {
     _onChangeCallback = std::move(callback);
 }
 

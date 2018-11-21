@@ -55,13 +55,14 @@ public:
     layergroupid::TypeID type() const;
     layergroupid::BlendModeID blendMode() const;
     TileDepthTransform depthTransform() const;
+    void setEnabled(bool enabled);
     bool enabled() const;
     tileprovider::TileProvider* tileProvider() const;
     glm::vec3 solidColor() const;
     const LayerRenderSettings& renderSettings() const;
     const LayerAdjustment& layerAdjustment() const;
 
-    void onChange(std::function<void(void)> callback);
+    void onChange(std::function<void(Layer*)> callback);
 
     void update();
 
@@ -93,7 +94,7 @@ private:
 
     const layergroupid::GroupID _layerGroupId;
 
-    std::function<void(void)> _onChangeCallback;
+    std::function<void(Layer*)> _onChangeCallback;
   };
 
 } // namespace openspace::globebrowsing

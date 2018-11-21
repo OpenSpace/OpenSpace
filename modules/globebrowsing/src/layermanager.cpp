@@ -127,7 +127,7 @@ void LayerManager::reset(bool includeDisabled) {
     }
 }
 
-void LayerManager::onChange(std::function<void(void)> callback) {
+void LayerManager::onChange(std::function<void(Layer*)> callback) {
     for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
         layerGroup->onChange(callback);
     }
