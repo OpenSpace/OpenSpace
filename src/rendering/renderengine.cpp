@@ -524,11 +524,31 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 
     ++_frameNumber;
 
-    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : global::screenSpaceRenderables) {
-        if (ssr->isEnabled() && ssr->isReady()) {
-            ssr->render();
+    std::vector<ScreenSpaceRenderable*> ssrs;
+    ssrs.reserve(global::screenSpaceRenderables.size());
+    for (size_t i = 0; i < global::screenSpaceRenderables.size(); ++i) {
+        const bool isEnabled = global::screenSpaceRenderables[i]->isEnabled();
+        const bool isReady = global::screenSpaceRenderables[i]->isReady();
+        if (isEnabled && isReady) {
+            ssrs.push_back(global::screenSpaceRenderables[i].get());
         }
     }
+
+    std::sort(
+        ssrs.begin(),
+        ssrs.end(),
+        [](ScreenSpaceRenderable* lhs, ScreenSpaceRenderable* rhs) {
+            return lhs->depth() < rhs->depth();
+        }
+    );
+
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    for (ScreenSpaceRenderable* ssr : ssrs) {
+        ssr->render();
+    }
+    glDisable(GL_BLEND);
     LTRACE("RenderEngine::render(end)");
 }
 

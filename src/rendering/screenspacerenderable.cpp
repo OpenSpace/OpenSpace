@@ -484,7 +484,7 @@ glm::mat4 ScreenSpaceRenderable::translationMatrix() {
 }
 
 void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
-    glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
     _shader->activate();
