@@ -638,7 +638,7 @@ RawTile RawTileDataReader::readTileData(TileIndex tileIndex) const {
 
     for (const MemoryLocation& ml : NoDataAvailableData) {
         std::byte* ptr = rawTile.imageData.get();
-        if (ptr[ml.offset] != ml.value) {
+        if (ml.offset >= numBytes || ptr[ml.offset] != ml.value) {
             // Bail out as early as possible
             break;
         }
