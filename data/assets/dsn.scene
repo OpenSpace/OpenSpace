@@ -14,7 +14,7 @@ asset.request('scene/digitaluniverse/grids')
 asset.require('scene/solarsystem/missions/voyager1/voyager1')
 asset.require('scene/solarsystem/missions/voyager2/voyager2')
 asset.require('scene/solarsystem/missions/voyager1/trails')
---asset.require('scene/solarsystem/dsn/spacecrafts')
+asset.require('scene/solarsystem/dsn/testRADEC')
 
 -- Stations
 asset.require('scene/solarsystem/dsn/stations')
@@ -82,7 +82,7 @@ local equatorial = asset.require('scene/digitaluniverse/grids')
 asset.onInitialize(function ()
 
     local now = openspace.time.currentWallTime()
-	openspace.time.setTime("2018 SEP 03 03:11:00")
+	openspace.time.setTime("2018 SEP 03 11:11:00")
 
     sceneHelper.bindKeys(Keybindings)
 

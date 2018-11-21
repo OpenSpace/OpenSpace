@@ -42,6 +42,9 @@ namespace documentation { struct Documentation; }
 
 class RadecTranslation : public Translation {
 public:
+
+    static glm::vec3 _pos;
+
     RadecTranslation();
     void extractData(std::unique_ptr<ghoul::Dictionary> &dictionary);
     RadecTranslation(const ghoul::Dictionary& dictionary);
@@ -51,10 +54,9 @@ public:
     glm::dvec3 transformCartesianCoordinates(glm::vec3 pos) const;
     glm::dvec3 position(const UpdateData& data) const override;
     static documentation::Documentation Documentation();
-
+ 
 private:
     properties::DVec3Property _position;
-
     glm::dmat4 _rotEquatorialSphere = { -0.05487554,  0.4941095, -0.8676661, 0.0,
             -0.8734371 , -0.4448296, -0.1980764, 0.0,
             -0.483835  ,  0.7469823,  0.4559838, 0.0,

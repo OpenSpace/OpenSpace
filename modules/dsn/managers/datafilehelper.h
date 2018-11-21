@@ -21,8 +21,8 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
-#ifndef __OPENSPACE_MODULE_DSN___JSONHELPER___H__
-#define __OPENSPACE_MODULE_DSN___JSONHELPER___H__
+#ifndef __OPENSPACE_MODULE_DSN___DATAFILEHELPER___H__
+#define __OPENSPACE_MODULE_DSN___DATAFILEHELPER___H__
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
@@ -38,6 +38,7 @@ namespace openspace {
         /* Extracts all the mandatory information we need from our asset files */
         static bool checkFileNames(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary, std::vector<std::string> &dataFiles);
         static std::string getDayFromFileName(std::string filename);
+        static std::string getHourFromFileName(std::string filename);
         static std::vector<double> getDaysFromFileNames(std::vector<std::string> _dataFiles);
         static std::vector<double> getHoursFromFileNames(std::vector<std::string> _dataFiles);
         /* Extracts the timestamp from the filename */

@@ -124,19 +124,25 @@ namespace openspace {
         return true;
     }
 
-    /*Get the day, must have format YYYY-DDDT*/
+    /*Get one day, must have format YYYY-DDDT*/
     std::string DataFileHelper::getDayFromFileName(std::string filename) {
         // number of  characters in filename (excluding '.json')
         constexpr const int FilenameSize = 9;
         return DataFileHelper::getFileNameTime(filename, FilenameSize);
     }
+    /*get a vector of all filenames, must have format YYY-DDDT*/
     std::vector<double> DataFileHelper::getDaysFromFileNames(std::vector<std::string> _dataFiles) {
         // number of  characters in filename (excluding '.json')
         constexpr const int FilenameSize = 9;
         return DataFileHelper::extractTriggerTimesFromFileNames(_dataFiles, FilenameSize);
     }
-
-    /*Get the hour, must have format YYYY-DDDTHH*/
+    /*Get one hour, must have format YYYY-DDDTHH*/
+    std::string DataFileHelper::getHourFromFileName(std::string filename) {
+        // number of  characters in filename (excluding '.json')
+        constexpr const int FilenameSize = 11;
+        return DataFileHelper::getFileNameTime(filename, FilenameSize);
+    }
+    /*Get a vector of all hour, must have format YYYY-DDDTHH*/
     std::vector<double> DataFileHelper::getHoursFromFileNames(std::vector<std::string> _dataFiles) {
         // number of  characters in filename (excluding '.json')
         constexpr const int FilenameSize = 11;
