@@ -57,6 +57,63 @@ namespace openspace::globebrowsing {
 
 namespace {
 
+// These are some locations in memory taken from ESRI's No Data Available tile so that we
+// can spotcheck these tiles and not present them
+// The pair is <byte index, expected value>
+struct MemoryLocation {
+    int offset;
+    std::byte value;
+};
+
+// The memory locations are grouped to be mostly cache-aligned
+constexpr std::array<MemoryLocation, 42> NoDataAvailableData = {
+    MemoryLocation{ 296380, std::byte(205) },
+    MemoryLocation{ 296381, std::byte(205) },
+    MemoryLocation{ 296382, std::byte(205) },
+    MemoryLocation{ 296383, std::byte(255) },
+    MemoryLocation{ 296384, std::byte(224) },
+    MemoryLocation{ 296385, std::byte(224) },
+    MemoryLocation{ 296386, std::byte(224) },
+    MemoryLocation{ 296387, std::byte(255) },
+    MemoryLocation{ 296388, std::byte(244) },
+    MemoryLocation{ 296389, std::byte(244) },
+    MemoryLocation{ 296390, std::byte(244) },
+    MemoryLocation{ 296391, std::byte(255) },
+
+    MemoryLocation{ 269840, std::byte(209) },
+    MemoryLocation{ 269841, std::byte(209) },
+    MemoryLocation{ 269842, std::byte(209) },
+    MemoryLocation{ 269844, std::byte(203) },
+    MemoryLocation{ 269845, std::byte(203) },
+    MemoryLocation{ 269846, std::byte(203) },
+    MemoryLocation{ 269852, std::byte(221) },
+    MemoryLocation{ 269853, std::byte(221) },
+    MemoryLocation{ 269854, std::byte(221) },
+    MemoryLocation{ 269856, std::byte(225) },
+    MemoryLocation{ 269857, std::byte(225) },
+    MemoryLocation{ 269858, std::byte(225) },
+    MemoryLocation{ 269860, std::byte(218) },
+    MemoryLocation{ 269861, std::byte(218) },
+
+    MemoryLocation{ 240349, std::byte(203) },
+    MemoryLocation{ 240350, std::byte(203) },
+    MemoryLocation{ 240352, std::byte(205) },
+    MemoryLocation{ 240353, std::byte(204) },
+    MemoryLocation{ 240354, std::byte(205) },
+
+    MemoryLocation{ 0, std::byte(204) },
+    MemoryLocation{ 7, std::byte(255) },
+    MemoryLocation{ 520, std::byte(204) },
+    MemoryLocation{ 880, std::byte(204) },
+    MemoryLocation{ 883, std::byte(255) },
+    MemoryLocation{ 91686, std::byte(204) },
+    MemoryLocation{ 372486, std::byte(204) },
+    MemoryLocation{ 670483, std::byte(255) },
+    MemoryLocation{ 231684, std::byte(202) },
+    MemoryLocation{ 232092, std::byte(202) },
+    MemoryLocation{ 235921, std::byte(203) },
+};
+
 enum class Side {
     Left = 0,
     Top,
@@ -578,6 +635,17 @@ RawTile RawTileDataReader::readTileData(TileIndex tileIndex) const {
     IODescription io = ioDescription(tileIndex);
     RawTile::ReadError worstError = RawTile::ReadError::None;
     readImageData(io, worstError, reinterpret_cast<char*>(rawTile.imageData.get()));
+
+    for (const MemoryLocation& ml : NoDataAvailableData) {
+        std::byte* ptr = rawTile.imageData.get();
+        if (ptr[ml.offset] != ml.value) {
+            // Bail out as early as possible
+            break;
+        }
+
+        // If we got here, we have (most likely) a No data yet available tile
+        worstError = RawTile::ReadError::Failure;
+    }
 
     rawTile.error = worstError;
     rawTile.tileIndex = std::move(tileIndex);
