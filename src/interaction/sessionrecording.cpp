@@ -32,6 +32,8 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/interaction/keyframenavigator.h>
+#include <openspace/interaction/keybindingmanager.h>
+#include <openspace/rendering/luaconsole.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -225,6 +227,9 @@ bool SessionRecording::startPlayback(const std::string& filename,
     global::timeManager.triggerPlaybackStart();
     _state = SessionState::Playback;
 
+    //Hide the lua console
+    global::luaConsole.keyboardCallback(Key::GraveAccent, KeyModifier::NoModifier, KeyAction::Press);
+
     return true;
 }
 
@@ -275,6 +280,15 @@ void SessionRecording::signalPlaybackFinishedForComponent(RecordedType type) {
     }
 }
 
+void SessionRecording::enableTakeScreenShotDuringPlayback(int fps) {
+    _saveRenderingDuringPlayback = true;
+    _saveRenderingDeltaTime = 1.0 / fps;
+}
+
+void SessionRecording::disableTakeScreenShotDuringPlayback() {
+    _saveRenderingDuringPlayback = false;
+}
+
 void SessionRecording::stopPlayback() {
     if (_state == SessionState::Playback) {
         _state = SessionState::Idle;
@@ -310,6 +324,7 @@ void SessionRecording::cleanUpPlayback() {
     _idxTimeline_cameraPtrNext = 0;
     _idxTimeline_cameraPtrPrev = 0;
     _hasHitEndOfCameraKeyframes = false;
+    _saveRenderingDuringPlayback = false;
 
     _cleanupNeeded = false;
 }
@@ -594,6 +609,10 @@ bool SessionRecording::isPlayingBack() const {
     return (_state == SessionState::Playback);
 }
 
+bool SessionRecording::isSavingFramesDuringPlayback() const {
+    return (_state == SessionState::Playback && _saveRenderingDuringPlayback);
+}
+
 bool SessionRecording::playbackAddEntriesToTimeline() {
     bool parsingErrorsFound = false;
 
@@ -716,7 +735,10 @@ double SessionRecording::equivalentApplicationTime(double timeOs, double timeRec
 }
 
 double SessionRecording::currentTime() const {
-    if (_playbackTimeReferenceMode == KeyframeTimeRef::Relative_recordedStart) {
+    if (isSavingFramesDuringPlayback()) {
+        return _saveRenderingCurrentRecordedTime;
+    }
+    else if (_playbackTimeReferenceMode == KeyframeTimeRef::Relative_recordedStart) {
         return (global::windowDelegate.applicationTime() -
                 _timestampPlaybackStarted_application);
     }
@@ -726,6 +748,10 @@ double SessionRecording::currentTime() const {
     else {
         return global::windowDelegate.applicationTime();
     }
+}
+
+double SessionRecording::fixedDeltaTimeDuringFrameOutput() const {
+    return _saveRenderingDeltaTime;
 }
 
 void SessionRecording::playbackCamera() {
@@ -801,6 +827,7 @@ void SessionRecording::playbackCamera() {
     if (_setSimulationTimeWithNextCameraKeyframe) {
         global::timeManager.setTimeNextFrame(timeSim);
         _setSimulationTimeWithNextCameraKeyframe = false;
+        _saveRenderingCurrentRecordedTime = timeRec;
     }
     double timeRef = appropriateTimestamp(timeOs, timeRec, timeSim);
 
@@ -981,6 +1008,10 @@ void SessionRecording::moveAheadInTime() {
     double currTime = currentTime();
     lookForNonCameraKeyframesThatHaveComeDue(currTime);
     updateCameraWithOrWithoutNewKeyframes(currTime);
+    if (isSavingFramesDuringPlayback()) {
+        _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
+        global::renderEngine.takeScreenShot();
+    }
 }
 
 void SessionRecording::lookForNonCameraKeyframesThatHaveComeDue(double currTime) {
@@ -1328,6 +1359,20 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
                 {},
                 "void",
                 "Stops a playback session before playback of all keyframes is complete"
+            },
+            {
+                "enableTakeScreenShotDuringPlayback",
+                &luascriptfunctions::enableTakeScreenShotDuringPlayback,
+                {},
+                "int",
+                "Enables that rendered frames should be saved during playback."
+            },
+            {
+                "disableTakeScreenShotDuringPlayback",
+                &luascriptfunctions::disableTakeScreenShotDuringPlayback,
+                {},
+                "void",
+                "Used to disable that renderings are saved during playback"
             }
         }
     };

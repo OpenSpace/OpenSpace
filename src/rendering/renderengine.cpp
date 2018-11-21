@@ -847,6 +847,13 @@ void RenderEngine::setResolveData(ghoul::Dictionary resolveData) {
 }
 
 /**
+  * Mark that one screenshot should be taken
+*/
+void RenderEngine::takeScreenShot() {
+    _shouldTakeScreenshot = true;
+}
+
+/**
  * Set raycasting uniforms on the program object, and setup raycasting.
  */
 void RenderEngine::preRaycast(ghoul::opengl::ProgramObject& programObject) {
