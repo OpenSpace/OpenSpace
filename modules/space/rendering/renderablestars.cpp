@@ -67,6 +67,7 @@ namespace {
         float bvColor; // B-V color value
         float luminance;
         float absoluteMagnitude;
+        float apparentMagnitude;
     };
 
     struct VelocityVBOLayout {
@@ -75,6 +76,7 @@ namespace {
         float bvColor; // B-V color value
         float luminance;
         float absoluteMagnitude;
+        float apparentMagnitude;
 
         float vx; // v_x
         float vy; // v_y
@@ -87,6 +89,7 @@ namespace {
         float bvColor; // B-V color value
         float luminance;
         float absoluteMagnitude;
+        float apparentMagnitude;
 
         float speed;
     };
@@ -606,9 +609,6 @@ namespace openspace {
         static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f };
         glClearBufferfv(GL_COLOR, 0, black);
 
-       /* program->setUniform("sides", _polygonSides);
-        program->setUniform("polygonColor", _pointColor);*/
-
         program->setUniform("psfMethod", _psfMethodOption.value());
         program->setUniform("p0Param", _p0Param);
         program->setUniform("p1Param", _p1Param);
@@ -635,6 +635,24 @@ namespace openspace {
     }
 
     void RenderableStars::render(const RenderData& data, RendererTasks&) {
+        // Saving current OpenGL state
+        GLenum blendEquationRGB;
+        GLenum blendEquationAlpha;
+        GLenum blendDestAlpha;
+        GLenum blendDestRGB;
+        GLenum blendSrcAlpha;
+        GLenum blendSrcRGB;
+        GLboolean depthMask;
+
+        glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
+        glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
+        glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
+        glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
+        glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
+        glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
+
+        glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
+
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         glDepthMask(false);
 
@@ -696,6 +714,11 @@ namespace openspace {
 
         glDepthMask(true);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // Restores OpenGL blending state
+        glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
+        glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
+        glDepthMask(depthMask);
     }
 
     void RenderableStars::update(const UpdateData&) {
@@ -723,7 +746,7 @@ namespace openspace {
             );
 
             GLint positionAttrib = _program->attributeLocation("in_position");
-            GLint brightnessDataAttrib = _program->attributeLocation("in_bvLumAbsMag");
+            GLint brightnessDataAttrib = _program->attributeLocation("in_bvLumAbsMagAppMag");
 
             const size_t nStars = _fullData.size() / _nValuesPerStar;
             const size_t nValues = _slicedData.size() / nStars;
@@ -745,7 +768,7 @@ namespace openspace {
                 );
                 glVertexAttribPointer(
                     brightnessDataAttrib,
-                    3,
+                    4,
                     GL_FLOAT,
                     GL_FALSE,
                     stride,
@@ -765,7 +788,7 @@ namespace openspace {
                 );
                 glVertexAttribPointer(
                     brightnessDataAttrib,
-                    3,
+                    4,
                     GL_FLOAT,
                     GL_FALSE,
                     stride,
@@ -797,7 +820,7 @@ namespace openspace {
                 );
                 glVertexAttribPointer(
                     brightnessDataAttrib,
-                    3,
+                    4,
                     GL_FLOAT,
                     GL_FALSE,
                     stride,
@@ -1029,10 +1052,10 @@ namespace openspace {
         } while (!file.eof());
 
         // Normalize Luminosity:
-        for (size_t i = 0; i < _fullData.size(); i += _nValuesPerStar) {
+        /*for (size_t i = 0; i < _fullData.size(); i += _nValuesPerStar) {
             _fullData[i + _lumArrayPos] = 
                 (_fullData[i + _lumArrayPos] - minLumValue) / (maxLumValue - minLumValue);
-        }
+        }*/
 
         return true;
     }
@@ -1141,14 +1164,14 @@ namespace openspace {
                 if (_enableTestGrid) {
                     float sunColor = 0.650f;
                     layout.value.bvColor = sunColor;// _fullData[i + 3];
-                    layout.value.luminance = _fullData[i + _lumArrayPos];
-                    layout.value.absoluteMagnitude = _fullData[i + _absMagArrayPos];
                 }
                 else {
                     layout.value.bvColor = _fullData[i + _bvColorArrayPos];
-                    layout.value.luminance = _fullData[i + _lumArrayPos];
-                    layout.value.absoluteMagnitude = _fullData[i + _absMagArrayPos];
                 }
+
+                layout.value.luminance = _fullData[i + _lumArrayPos];
+                layout.value.absoluteMagnitude = _fullData[i + _absMagArrayPos];
+                layout.value.apparentMagnitude = _fullData[i + _appMagArrayPos];
 
                 _slicedData.insert(_slicedData.end(),
                     layout.data.begin(),
@@ -1170,6 +1193,7 @@ namespace openspace {
                 layout.value.bvColor = _fullData[i + _bvColorArrayPos];
                 layout.value.luminance = _fullData[i + _lumArrayPos];
                 layout.value.absoluteMagnitude = _fullData[i + _absMagArrayPos];
+                layout.value.apparentMagnitude = _fullData[i + _appMagArrayPos];
 
                 layout.value.vx = _fullData[i + _velocityArrayPos];
                 layout.value.vy = _fullData[i + _velocityArrayPos + 1];
@@ -1194,6 +1218,7 @@ namespace openspace {
                 layout.value.bvColor = _fullData[i + _bvColorArrayPos];
                 layout.value.luminance = _fullData[i + _lumArrayPos];
                 layout.value.absoluteMagnitude = _fullData[i + _absMagArrayPos];
+                layout.value.apparentMagnitude = _fullData[i + _appMagArrayPos];
 
                 layout.value.speed = _fullData[i + _speedArrayPos];
 

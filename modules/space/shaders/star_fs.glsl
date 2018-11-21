@@ -38,7 +38,7 @@ uniform int colorOption;
 
 in vec4 vs_position;
 in vec2 psfCoords;
-flat in vec3 ge_bvLumAbsMag;
+flat in vec4 ge_bvLumAbsMagAppMag;
 flat in vec3 ge_velocity;
 flat in float ge_speed;
 flat in float ge_observationDistance;
@@ -57,7 +57,7 @@ Fragment getFragment() {
     vec4 color = vec4(0.0);
     switch (colorOption) {
         case COLOROPTION_COLOR: 
-            color = bv2rgb(ge_bvLumAbsMag.x);
+            color = bv2rgb(ge_bvLumAbsMagAppMag.x);
             break;
         case COLOROPTION_VELOCITY:
             color = vec4(abs(ge_velocity), 0.5); 

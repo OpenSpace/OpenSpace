@@ -27,11 +27,11 @@
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 in vec4 in_position;
-in vec3 in_bvLumAbsMag;
+in vec4 in_bvLumAbsMagAppMag;
 in vec3 in_velocity;
 in float in_speed;
 
-out vec3 vs_bvLumAbsMag;
+out vec4 vs_bvLumAbsMagAppMag;
 out vec3 vs_velocity;
 out float vs_speed;
 out vec4 vs_correctedPositionViewSpace;
@@ -49,9 +49,9 @@ uniform float betaConstant;
 */
 
 void main() {
-    vs_bvLumAbsMag = in_bvLumAbsMag;
-    vs_velocity    = in_velocity;
-    vs_speed       = in_speed;
+    vs_bvLumAbsMagAppMag = in_bvLumAbsMagAppMag;
+    vs_velocity          = in_velocity;
+    vs_speed             = in_speed;
 
     gl_Position = vec4(in_position);
 }
