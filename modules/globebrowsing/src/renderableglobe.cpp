@@ -41,7 +41,10 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+#include <numeric>
 #include <queue>
 
 namespace {
@@ -179,6 +182,13 @@ namespace {
         "OrenNayarRoughness",
         "orenNayarRoughness",
         "" // @TODO Missing documentation
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo NActiveLayersInfo = {
+        "NActiveLayers",
+        "Number of active layers",
+        "This is the number of currently active layers, if this value reaches the "
+        "maximum, bad things will happen."
     };
 } // namespace
 
@@ -396,7 +406,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty(EclipseHardShadowsInfo, false),
         FloatProperty(LodScaleFactorInfo, 15.f, 1.f, 50.f),
         FloatProperty(CameraMinHeightInfo, 100.f, 0.f, 1000.f),
-        FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f)
+        FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f),
+        IntProperty(NActiveLayersInfo, 0, 0, OpenGLCap.maxTextureUnits() / 3)
     })
     , _debugPropertyOwner({ "Debug" })
     , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
@@ -434,6 +445,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.lodScaleFactor);
     addProperty(_generalProperties.cameraMinHeight);
     addProperty(_generalProperties.orenNayarRoughness);
+    _generalProperties.nActiveLayers.setReadOnly(true);
+    addProperty(_generalProperties.nActiveLayers);
 
     _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);
     _debugPropertyOwner.addProperty(_debugProperties.showChunkBounds);
@@ -457,9 +470,11 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _debugProperties.showHeightResolution.onChange(notifyShaderRecompilation);
     _debugProperties.showHeightIntensities.onChange(notifyShaderRecompilation);
 
-    _layerManager.onChange([&]() {
+    _layerManager.onChange([&](Layer* l) {
         _shadersNeedRecompilation = true;
         _chunkCornersDirty = true;
+        _nLayersIsDirty = true;
+        _lastChangedLayer = l;
     });
 
     addPropertySubOwner(_debugPropertyOwner);
@@ -585,8 +600,38 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
     const double distance = res * boundingSphere() / tfov;
 
     if (distanceToCamera < distance) {
-        renderChunks(data, rendererTask);
+        try {
+            renderChunks(data, rendererTask);
+        }
+        catch (const ghoul::opengl::TextureUnit::TextureUnitError&) {
+            std::string layer = _lastChangedLayer ?
+                _lastChangedLayer->guiName() :
+                "";
+
+            LWARNINGC(
+                guiName(),
+                layer.empty() ?
+                "Too many layers enabled" :
+                "Too many layers enabled, disabling layer: " + layer
+            );
+
+            // We bailed out in the middle of the rendering, so some TextureUnits are
+            // still bound and we would fail in some next render function for sure
+            for (GPULayerGroup& l : _globalRenderer.gpuLayerGroups) {
+                l.deactivate();
+            }
+
+            for (GPULayerGroup& l : _localRenderer.gpuLayerGroups) {
+                l.deactivate();
+            }
+
+            if (_lastChangedLayer) {
+                _lastChangedLayer->setEnabled(false);
+            }
+        }
     }
+
+    _lastChangedLayer = nullptr;
 }
 
 void RenderableGlobe::update(const UpdateData& data) {
@@ -609,6 +654,20 @@ void RenderableGlobe::update(const UpdateData& data) {
         _debugProperties.resetTileProviders = false;
     }
     _layerManager.update();
+
+    if (_nLayersIsDirty) {
+        std::array<LayerGroup*, LayerManager::NumLayerGroups> lgs =
+            _layerManager.layerGroups();
+        _generalProperties.nActiveLayers = std::accumulate(
+            lgs.begin(),
+            lgs.end(),
+            0,
+            [](int lhs, LayerGroup* lg) {
+                return lhs + static_cast<int>(lg->activeLayers().size());
+            }
+        );
+        _nLayersIsDirty = false;
+    }
 }
 
 const LayerManager& RenderableGlobe::layerManager() const {

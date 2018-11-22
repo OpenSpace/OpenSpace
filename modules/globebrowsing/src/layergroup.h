@@ -64,7 +64,7 @@ struct LayerGroup : public properties::PropertyOwner {
 
     bool layerBlendingEnabled() const;
 
-    void onChange(std::function<void(void)> callback);
+    void onChange(std::function<void(Layer*)> callback);
 
 private:
     const layergroupid::GroupID _groupId;
@@ -72,7 +72,7 @@ private:
     std::vector<Layer*> _activeLayers;
 
     properties::BoolProperty _levelBlendingEnabled;
-    std::function<void(void)> _onChangeCallback;
+    std::function<void(Layer*)> _onChangeCallback;
 };
 
 } // namespace openspace::globebrowsing
