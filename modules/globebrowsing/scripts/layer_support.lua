@@ -81,6 +81,13 @@ openspace.globebrowsing.documentation = {
             "Usage: openspace.globebrowsing.addFocusNodesFromDirectory(directory, \"Mars\")"
     },
     {
+        Name = "addFocusNodeFromLatLong",
+        Arguments = "string, number, number, string",
+        Documentation =
+            "Creates a new SceneGraphNode that can be used as focus node. " ..
+            "Usage: openspace.globebrowsing.addFocusNodeFromLatLong(\"Olympus Mons\", -18.65, 226.2, \"Mars\")"
+    },
+    {
         Name = "loadWMSServersFromFile",
         Arguments = "string",
         Documentation =
@@ -260,21 +267,53 @@ openspace.globebrowsing.addFocusNodesFromDirectory = function (dir, node_name)
                 local a, b, c = openspace.globebrowsing.getGeoPosition(node_name, lat, long, 0.0)
                 local p = { a, b, c }
 
+                local identifier = node_name .. " - " .. i
+                local name = node_name .. " - " .. n
+
                 openspace.addSceneGraphNode({
-                    Name = node_name .. " - " .. n,
-                    Identifier = node_name .. "-" .. i,
+                    Identifier = identifier,
                     Parent = node_name,
                     Transform = {
                         Translation = {
                             Type = "StaticTranslation",
                             Position = { p[1], p[2], p[3] }
                         }
+                    },
+                    GUI = {
+                        Path = "/Other/Bookmarks",
+                        Name = name
                     }
                 })
             end
         end
     end
 end
+
+openspace.globebrowsing.addFocusNodeFromLatLong = function (name, lat, long, globe_identifier)  
+    openspace.printInfo("Creating focus node for '" .. name .. "'")
+
+    local a, b, c = openspace.globebrowsing.getGeoPosition(globe_identifier, lat, long, 0.0)
+    local p = { a, b, c }
+    local identifier = globe_identifier .. "-" .. name
+
+    openspace.addSceneGraphNode({
+        Identifier = identifier,
+        Parent = globe_identifier,
+        Transform = {
+            Translation = {
+                Type = "StaticTranslation",
+                Position = { p[1], p[2], p[3] }
+            }
+        },
+        GUI = {
+            Path = "/Other/Bookmarks",
+            Name = identifier
+        }
+    })
+
+    return identifier
+end
+
 
 openspace.globebrowsing.loadWMSServersFromFile = function (file_path)
     local servers = dofile(file_path)

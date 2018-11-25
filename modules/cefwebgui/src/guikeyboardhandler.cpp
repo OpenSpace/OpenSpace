@@ -32,7 +32,7 @@ GUIKeyboardHandler::GUIKeyboardHandler() {
     _keyConsumed = false;
 
     global::callback::keyboard.push_back(
-        [&](Key key, KeyModifier mod, KeyAction action) -> bool {
+        [&](Key, KeyModifier, KeyAction) -> bool {
             const bool previous = _keyConsumed;
             _keyConsumed = false;
             return previous;

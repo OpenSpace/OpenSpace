@@ -3,36 +3,10 @@ local propertyHelper = asset.require('./property_helper')
 
 local Keybindings = {
     {
-        Key = "F2",
-        Name = "Show Scene Menu",
-        Command =
-[[local b = openspace.getPropertyValue('Modules.ImGUI.Main.SceneProperties.Enabled');
-local c = openspace.getPropertyValue('Modules.ImGUI.Main.IsHidden');
-openspace.setPropertyValue('Modules.ImGUI.*.Enabled', false);
-if b and c then
-    -- This can happen if the main properties window is enabled, the main gui is enabled
-    -- and then closed again. So the main properties window is enabled, but also all
-    -- windows are hidden
-    openspace.setPropertyValueSingle('Modules.ImGUI.Main.IsHidden', false);
-    openspace.setPropertyValueSingle('Modules.ImGUI.Main.SceneProperties.Enabled', true);
-    openspace.setPropertyValueSingle('Modules.ImGUI.Main.SpaceTime.Enabled', true);
-else
-    openspace.setPropertyValueSingle('Modules.ImGUI.Main.SceneProperties.Enabled', not b);
-    openspace.setPropertyValueSingle('Modules.ImGUI.Main.SpaceTime.Enabled', not b);
-    openspace.setPropertyValueSingle('Modules.ImGUI.Main.IsHidden', b);
-end]],
-        Documentation = "Shows or hides the properties window",
-        GuiPath = "/Native GUI",
-        Local = true
-    },
-    {
-        Key = "F3",
-        Name = "Show Global Menu",
-        Command = 
-[[local b = openspace.getPropertyValue('Modules.ImGUI.Main.Enabled');
-openspace.setPropertyValueSingle('Modules.ImGUI.Main.Enabled', not b);
-openspace.setPropertyValueSingle('Modules.ImGUI.Main.IsHidden', b);]],
-        Documentation = "Shows or hides the entire user interface",
+        Key = "F1",
+        Name = "Show Native GUI",
+        Command = propertyHelper.invert('Modules.ImGUI.Main.Enabled'),
+        Documentation = "Shows or hides the native UI",
         GuiPath = "/Native GUI",
         Local = true
     },

@@ -82,7 +82,7 @@ asset.onInitialize(function ()
     )
 
     openspace.markInterestingNodes({
-        "Earth", "Mars", "Moon"
+        "Earth", "Mars", "Moon", "Sun"
     })
 
     openspace.markInterestingTimes({
@@ -114,6 +114,6 @@ asset.onDeinitialize(function ()
     openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
 
     openspace.removeInterestingNodes({
-        "Earth", "Mars", "Moon"
+        "Earth", "Mars", "Moon", "Sun"
     })
 end)

@@ -80,6 +80,12 @@ void OptionProperty::addOptions(std::vector<std::pair<int, std::string>> options
     }
 }
 
+void OptionProperty::addOptions(std::vector<std::string> options) {
+    for (int i = 0; i < static_cast<int>(options.size()); ++i) {
+        addOption(i, std::move(options[i]));
+    }
+}
+
 void OptionProperty::clearOptions() {
     _options.clear();
     _value = 0;
@@ -91,6 +97,9 @@ void OptionProperty::setValue(int value) {
         const Option& o = _options[i];
         if (o.value == value) {
             // If it does, set it by calling the superclasses setValue method
+            // @TODO(abock): This should be setValue(value) instead or otherwise the
+            //               stored indices and option values start to drift if the
+            //               operator T of the OptionProperty is used
             NumericalProperty::setValue(static_cast<int>(i));
             return;
         }

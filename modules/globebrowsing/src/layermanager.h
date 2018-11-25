@@ -66,7 +66,7 @@ public:
     void update();
     void reset(bool includeDisabled = false);
 
-    void onChange(std::function<void(void)> callback);
+    void onChange(std::function<void(Layer* l)> callback);
 
 private:
     std::array<std::unique_ptr<LayerGroup>, NumLayerGroups> _layerGroups;
