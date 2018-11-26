@@ -276,7 +276,6 @@ void RenderableSignals::update(const UpdateData& data) {
         if (!SignalManager::_signalData.isLoaded)
         {
             SignalManager::signalParser(activeFileIndex);
-
         }
         else
             return;
@@ -436,7 +435,7 @@ glm::vec3 RenderableSignals::getSuitablePrecisionPositionForSceneGraphNode(std::
         position = getCoordinatePosFromFocusNode(spacecraftNode);
     }
     else {
-        LERROR(fmt::format("No scengraphnode found for the spacecraft {}", id));
+        LERROR(fmt::format("No scenegraphnode found for the spacecraft {}", id));
     }
 
     return position;
@@ -467,7 +466,8 @@ glm::vec3 RenderableSignals::getStationColor(std::string dishidentifier) {
         site = _stationToSite.at(dishidentifier);
     }
     catch (const std::exception& e) {
-        LERROR(fmt::format("Station {} has no site location color, add it to your stationSiteMap.", dishidentifier));
+        LERROR(fmt::format("Station {} has no site location color, "
+               "add it to your stationSiteMap in your asset file.", dishidentifier));
     }
 
     int siteIndex = _siteToIndex.at(site);
