@@ -35,6 +35,7 @@ namespace {
 } // namespace
 
 namespace openspace {
+ glm::vec3 RadecTranslation:: _pos;
 
 constexpr const char* _loggerCat = "RadecTranslation";
 
@@ -111,7 +112,7 @@ glm::dvec3 RadecTranslation::convertRaDecRangeToCartesian(double ra, double dec,
 
 glm::dvec3 RadecTranslation::transformCartesianCoordinates(glm::vec3 pos) const {
 
-    glm::vec3 cartesianPos = convertRaDecRangeToCartesian(pos.x, pos.y, pos.z);
+    glm::dvec3 cartesianPos = convertRaDecRangeToCartesian(pos.x, pos.y, pos.z);
 
     glm::dvec3 earthPos = global::renderEngine.scene()->sceneGraphNode("Earth")->worldPosition();
     glm::dmat4 translationMatrixEarth = glm::translate( glm::dmat4(1.0), glm::dvec3(earthPos) );
@@ -124,9 +125,20 @@ glm::dvec3 RadecTranslation::transformCartesianCoordinates(glm::vec3 pos) const 
 }
 
 glm::dvec3 RadecTranslation::position(const UpdateData& data) const{
-    glm::vec3 pos = RadecManager::GetPosForTime(data.time.j2000Seconds());
-    glm::dvec3 _position = transformCartesianCoordinates(pos);
-    return _position;
+    double endTime = 3600;
+
+    const bool isTimeInFileInterval = (data.time.j2000Seconds() >= RadecManager::_checkFileTime) &&
+        (data.time.j2000Seconds() < RadecManager::_checkFileTime + endTime); //if true -> time is within file interval
+   
+   if (!isTimeInFileInterval) {
+       // The time in open space is is not in the file interval, we need to update the positions
+       glm::vec3 pos = RadecManager::GetPosForTime(data.time.j2000Seconds());
+       _pos = transformCartesianCoordinates(pos);
+       LDEBUG(fmt::format("Openspace time is NOT in interval, update coordinates. FileTime {}; OpenSpaceTime {}; FileEndTime{}", 
+       std::to_string(RadecManager::_checkFileTime), std::to_string(data.time.j2000Seconds()), std::to_string(RadecManager::_checkFileTime + endTime)));
+
+    }
+   return _pos;
 }
 
 } // namespace openspace

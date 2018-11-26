@@ -30,29 +30,36 @@ namespace openspace {
     double RadecManager::_ra;
     double RadecManager::_dec;
     double RadecManager::_range;
+    double RadecManager::_checkFileTime;
 
    bool RadecManager::extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary){
-     bool dataFilesSuccess = JsonHelper::checkFileNames(identifier, dictionary, RadecManager::_dataFiles);
+     bool dataFilesSuccess = DataFileHelper::checkFileNames(identifier, dictionary, RadecManager::_dataFiles);
      radecParser(0);
      return dataFilesSuccess;
     }
 
    glm::vec3 RadecManager::GetPosForTime(double time) {
-       std::vector<double> timeDoubles = JsonHelper::getHoursFromFileNames(_dataFiles);
+       std::vector<double> timeDoubles = DataFileHelper::getHoursFromFileNames(_dataFiles); //save as member 
        int idx = RenderableSignals::findFileIndexForCurrentTime(time, timeDoubles);
-       
-       if (radecParser(idx)) {
-           return glm::vec3(_ra,_dec,_range);
-       }
-       return glm::vec3(-1,-1,-1);
-   }
+
+       //If the current hour in open space found in filesystem, parse the data and return the ra dec values from that file. 
+           if (radecParser(idx)) {
+                   return glm::vec3(_ra,_dec,_range);
+               }
+               return glm::vec3(-1,-1,-1);
+         }
 
    bool RadecManager::radecParser(int index) {
        std::string filename;
 
        if (index == -1 || index > _dataFiles.size())
            return false;
+
        filename = _dataFiles[index];
+
+       std::string startTimeString = DataFileHelper::getHourFromFileName(filename);
+       const double triggerTime = Time::convertTime(startTimeString);
+       _checkFileTime = triggerTime;
 
        std::ifstream ifs(filename);
        nlohmann::json j = nlohmann::json::parse(ifs);

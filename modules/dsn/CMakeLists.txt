@@ -29,7 +29,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/radectranslation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/managers/signalmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/managers/radecmanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/managers/jsonhelper.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/managers/datafilehelper.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -38,7 +38,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/radectranslation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/managers/signalmanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/managers/radecmanager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/managers/jsonhelper.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/managers/datafilehelper.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

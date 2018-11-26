@@ -26,7 +26,7 @@
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/logging/logmanager.h>
-#include <modules/dsn/managers/jsonhelper.h>
+#include <modules/dsn/managers/datafilehelper.h>
 #include <modules/dsn/rendering/renderablesignals.h>
 
 
@@ -38,7 +38,9 @@ namespace openspace {
        static double _ra;
        static double _dec;
        static double _range;
-
+       /*Used to check if the loaded file is still relevant or if we should look for another one. */
+       static double _checkFileTime;
+     
        /* A vector with all our datafile paths*/
        static std::vector<std::string> _dataFiles;
        /* Extracts all the mandatory information we need from our asset file */
