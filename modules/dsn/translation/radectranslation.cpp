@@ -134,8 +134,6 @@ glm::dvec3 RadecTranslation::position(const UpdateData& data) const{
        // The time in open space is is not in the file interval, we need to update the positions
        glm::vec3 pos = RadecManager::GetPosForTime(data.time.j2000Seconds());
        _pos = transformCartesianCoordinates(pos);
-       LDEBUG(fmt::format("Openspace time is NOT in interval, update coordinates. FileTime {}; OpenSpaceTime {}; FileEndTime{}", 
-       std::to_string(RadecManager::_checkFileTime), std::to_string(data.time.j2000Seconds()), std::to_string(RadecManager::_checkFileTime + endTime)));
 
     }
    return _pos;
