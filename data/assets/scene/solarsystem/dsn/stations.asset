@@ -30,8 +30,8 @@ local LightSources = {
 -- Colormap for the different sites
 local siteColorMap = {  
                         GoldstoneColor = {0.0, 0.0, 1.0}, 
-                        CanberraColor = {0.0, 1.0, 0.0}, 
-                        MadridColor = {1.0, 0.0, 0.0} 
+                        CanberraColor = {1.0, 0.0, 0.0}, 
+                        MadridColor = {0.0, 1.0, 0.0} 
                       }
 
 -- Map to the site locations above, this will determine the signal colors
