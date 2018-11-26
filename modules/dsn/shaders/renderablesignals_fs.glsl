@@ -40,7 +40,7 @@ Fragment getFragment() {
     Fragment frag;
     frag.depth = vs_positionScreenSpace.w;
     //frag.blend = BLEND_MODE_ADDITIVE;
-    frag.gPosition = vs_gPosition;
+
     // the distance the light has travelled since 
     // start of signal transmission
     float distLightTravel = lightSpeed * timeSinceStart;
@@ -59,9 +59,21 @@ Fragment getFragment() {
 
     frag.color = vec4(vs_color.xyz, min(smoothFront,smoothBack)+baseOpacity);
 
+    // G-Buffer
+    // JCC: The depthCorrection here is a temporary tweak
+    // to fix precision problems.
+    // LOVISA: We get issues with the coloring of our signals
+    // within the atmosphere, the depth correction moves and 
+    // smoothens this transition to black. 
+    // This is a temporary fix until normals are handled in
+    // view space in the atmosphere shader.
+    vec4 depthCorrection = vec4(0.0,0.0,9000,0.0);
+    frag.gPosition = vs_gPosition + depthCorrection;
+
     // For rendering inside earth atmosphere we need to set a normal for our line
-    // Todo: calculate normal correctly
-    frag.gNormal = vec4(0.0, 0.0, 1.0, 0.0);
+    // Todo: calculate normal correctly 
+    // currently normal is in object space
+    frag.gNormal= vec4(0.0, 0.0, -1.0, 1.0); 
 
     return frag;
 }
