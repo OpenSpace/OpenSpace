@@ -48,6 +48,10 @@
 #include <string>
 #include <vector>
 
+#ifdef OPENSPACE_MODULE_POSTPROCESSING_ENABLED
+#include <modules/postprocessing/postprocessingmodule.h>
+#endif
+
 namespace {
     constexpr const char* _loggerCat = "FramebufferRenderer";
 
@@ -294,6 +298,10 @@ void FramebufferRenderer::update() {
     if (_hdrBackGroundProgram && _hdrBackGroundProgram->isDirty()) {
         _hdrBackGroundProgram->rebuildFromFile();
     }
+    
+    #ifdef OPENSPACE_MODULE_POSTPROCESSING_ENABLED
+    PostprocessingModule::renderer().update();
+    #endif
 
     if (_resolveProgram->isDirty()) {
         _resolveProgram->rebuildFromFile();
@@ -977,9 +985,19 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         performRaycasterTasks(tasks.raycasterTasks);
     }
 
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
-    GLenum dBuffer[1] = { GL_COLOR_ATTACHMENT0 };
-    glDrawBuffers(1, dBuffer);
+    #ifdef OPENSPACE_MODULE_POSTPROCESSING_ENABLED
+    if (PostprocessingModule::renderer().isEnabled()){
+        PostprocessingModule::renderer().bindFramebuffer();
+    }else{
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+        GLenum dBuffer[1] = { GL_COLOR_ATTACHMENT0 };
+        glDrawBuffers(1, dBuffer);
+    }
+    #else
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+        GLenum dBuffer[1] = { GL_COLOR_ATTACHMENT0 };
+        glDrawBuffers(1, dBuffer);
+    #endif
 
     {
         std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
@@ -1008,6 +1026,11 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
         _resolveProgram->deactivate();
     }
+    
+    #ifdef OPENSPACE_MODULE_POSTPROCESSING_ENABLED
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+    PostprocessingModule::renderer().render(camera);
+    #endif
 }
 
 void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>& tasks) {
