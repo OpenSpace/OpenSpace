@@ -182,10 +182,11 @@ namespace openspace {
 
         UniformCache(modelViewStation, modelViewSpacecraft, projection) _uniformCache;
 
-
         /*Checks if the current time is within a signal's start and endtime*/
         bool isSignalActive(double currentTime, std::string signalStartTime, std::string signalEndTime, double lightTravelTime);
 
+        /// Size buffer for signal vector
+        int _signalSizeBuffer = 10;
 
     };
 
