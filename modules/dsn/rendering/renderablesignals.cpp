@@ -226,7 +226,7 @@ void RenderableSignals::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform(_uniformCache.modelViewSpacecraft,
         data.camera.combinedViewMatrix()  * _lineRenderInformation._localTransformSpacecraft);
 
-    _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
+    _programObject->setUniform(_uniformCache.projection, data.camera.sgctInternal.projectionMatrix());
 
     const bool usingFramebufferRenderer =
         global::renderEngine.rendererImplementation() ==
