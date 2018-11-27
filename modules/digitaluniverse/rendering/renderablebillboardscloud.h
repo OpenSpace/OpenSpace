@@ -124,7 +124,7 @@ private:
     properties::Vec2Property _fadeInDistance;
     properties::BoolProperty _disableFadeInDistance;
     properties::FloatProperty _billboardMaxSize;
-    properties::FloatProperty _billboardMinSize;
+    properties::FloatProperty _billboardMinSize;    
     properties::FloatProperty _correctionSizeEndDistance;
     properties::FloatProperty _correctionSizeFactor;
 

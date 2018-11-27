@@ -373,6 +373,7 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
     double distance = getDistance(signal.dishName, signal.spacecraft);
     double timeSinceStart = signal.timeSinceStart;
 
+    glm::vec3 testPOS = getSuitablePrecisionPositionForSceneGraphNode("testRADEC");
 
     //fill the render array
     _vertexArray.push_back(posStation.x);
@@ -392,9 +393,9 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
     }
     _vertexArray.push_back(timeSinceStart);
 
-    _vertexArray.push_back(posSpacecraft.x);
-    _vertexArray.push_back(posSpacecraft.y);
-    _vertexArray.push_back(posSpacecraft.z);
+    _vertexArray.push_back(testPOS.x);
+    _vertexArray.push_back(testPOS.y);
+    _vertexArray.push_back(testPOS.z);
 
     _vertexArray.push_back(color.r);
     _vertexArray.push_back(color.g);

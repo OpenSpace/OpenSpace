@@ -125,7 +125,8 @@ glm::dvec3 RadecTranslation::transformCartesianCoordinates(glm::vec3 pos) const 
 }
 
 glm::dvec3 RadecTranslation::position(const UpdateData& data) const{
-    double endTime = 3600;
+    //double endTime = 3600;
+    double endTime = 60;
 
     const bool isTimeInFileInterval = (data.time.j2000Seconds() >= RadecManager::_checkFileTime) &&
         (data.time.j2000Seconds() < RadecManager::_checkFileTime + endTime); //if true -> time is within file interval
