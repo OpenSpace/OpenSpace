@@ -33,7 +33,7 @@ in float timeSinceStart;
 
 float lightSpeed = 299792458.0; // expressed in m/s
 float signalSizeFactor = 2000;
-float baseOpacity = 0.3;
+uniform float baseOpacity;
 
 Fragment getFragment() {
 

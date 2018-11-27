@@ -41,8 +41,8 @@ namespace {
     constexpr const char* _loggerCat = "RenderableSignals";
     constexpr const char* KeyStationSites = "StationSites";
 
-    constexpr const std::array<const char*, 3> UniformNames = {
-        "modelViewStation","modelViewSpacecraft", "projectionTransform"
+    constexpr const std::array < const char*, openspace::RenderableSignals::_uniformCacheSize > UniformNames = {
+        "modelViewStation","modelViewSpacecraft", "projectionTransform", "baseOpacity"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SiteColorsInfo = {
@@ -58,6 +58,11 @@ namespace {
         "This value specifies the line width of the signals. "
     };
 
+    constexpr openspace::properties::Property::PropertyInfo BaseOpacityInfo = {
+         "BaseOpacity",
+         "Base Opacity",
+         "This value specifies the opacity of the base line. "
+    };
 } // namespace
 
 namespace openspace {
@@ -86,6 +91,12 @@ documentation::Documentation RenderableSignals::Documentation() {
                 new DoubleVerifier,
                 Optional::Yes,
                 LineWidthInfo.description
+            }, 
+            {
+               BaseOpacityInfo.identifier,
+               new DoubleVerifier,
+               Optional::Yes,
+               BaseOpacityInfo.description
             }
         }
     };
@@ -94,6 +105,7 @@ documentation::Documentation RenderableSignals::Documentation() {
 RenderableSignals::RenderableSignals(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _lineWidth(LineWidthInfo, 2.5f, 1.f, 10.f)
+    , _baseOpacity(BaseOpacityInfo, 0.3f, 0.0f, 1.0f)
 {
     if (dictionary.hasKeyAndValue<ghoul::Dictionary>(SiteColorsInfo.identifier)) {
         ghoul::Dictionary siteColorDictionary = dictionary.value<ghoul::Dictionary>(SiteColorsInfo.identifier);
@@ -134,6 +146,13 @@ RenderableSignals::RenderableSignals(const ghoul::Dictionary& dictionary)
         ));
     }
     addProperty(_lineWidth);
+
+    if (dictionary.hasKeyAndValue<double>(BaseOpacityInfo.identifier)) {
+        _baseOpacity = static_cast<float>(dictionary.value<double>(
+            BaseOpacityInfo.identifier
+            ));
+    }
+    addProperty(_baseOpacity);
 
     std::unique_ptr<ghoul::Dictionary> dictionaryPtr = std::make_unique<ghoul::Dictionary>(dictionary);
     extractData(dictionaryPtr);
@@ -227,6 +246,8 @@ void RenderableSignals::render(const RenderData& data, RendererTasks&) {
         data.camera.combinedViewMatrix()  * _lineRenderInformation._localTransformSpacecraft);
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
+
+    _programObject->setUniform(_uniformCache.baseOpacity, _baseOpacity);
 
     const bool usingFramebufferRenderer =
         global::renderEngine.rendererImplementation() ==
