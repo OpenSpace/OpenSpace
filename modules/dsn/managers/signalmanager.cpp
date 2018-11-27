@@ -36,29 +36,19 @@ namespace openspace {
     {
         bool dataFilesSuccess = DataFileHelper::checkFileNames(identifier, dictionary, _dataFiles);
         _fileStartTimes = DataFileHelper::getDaysFromFileNames(_dataFiles);
-        SignalManager::signalParser(0);
+        SignalManager::updateSignalData(0, 0);
 
         return dataFilesSuccess;
     }
 
     bool SignalManager::signalParser(int index) {
 
-        std::string filename;
-        if (index == -1 || index > _dataFiles.size())
-            return false;
-
-        filename = _dataFiles[index];
+        std::string filename = _dataFiles[index];
         std::ifstream ifs(filename);
         nlohmann::json j = nlohmann::json::parse(ifs);
 
-        SignalManager::Signal structSignal;
-        
-        std::string startTimeString = DataFileHelper::getDayFromFileName(filename);
-        const double triggerTime = Time::convertTime(startTimeString);
+        SignalManager::Signal structSignal;       
 
-       _signalData.sequenceStartTime = triggerTime;
-       _signalData.signals.clear();
-       _signalData.signals.reserve(0);
        // TODO handle the start time/ end time with regard to light time travel
        // ie. This has to be different for uplink and downlink
        // light time travel should extend endtime for uplink, and start time for downlink
@@ -74,8 +64,55 @@ namespace openspace {
           _signalData.signals.push_back(structSignal);
         }
 
-      _signalData.isLoaded = true;
-      return _signalData.isLoaded;
+      return true;
+    }
+
+    /* We load the signals for the current day, as well as a 
+    * buffer for the previous day and the next day. This allows 
+    * us to keep signal data in memory that transmit over midnight,
+    * as well as signals that have a long light travel time. */
+    void SignalManager::updateSignalData(int index, int sizeBuffer) {
+        
+        // This will all
+        int lightTimeTravelBuffer = 1;
+
+        if (index == -1 || index > _dataFiles.size())
+            return;
+
+        _signalData.signals.clear();
+        _signalData.signals.reserve(sizeBuffer);
+
+        std::string activeTimeFilename = _dataFiles[index];
+        std::string startTimeString = DataFileHelper::getDayFromFileName(activeTimeFilename);
+        const double triggerTime = Time::convertTime(startTimeString);
+
+        _signalData.sequenceStartTime = triggerTime;
+        //86400 equals 24hrs in seconds
+        _signalData.sequenceEndTime = triggerTime + 86400; 
+
+        if (index < lightTimeTravelBuffer)
+        {
+            signalParser(index);
+            signalParser(index + lightTimeTravelBuffer);
+            _signalData.isLoaded = true;
+            _signalData.signals.shrink_to_fit();
+            return;
+        }
+        else if (index == _dataFiles.size()) {
+
+            signalParser(index- lightTimeTravelBuffer);
+            signalParser(index);
+            _signalData.isLoaded = true;
+            _signalData.signals.shrink_to_fit();
+            return;  
+        }
+        else {
+            signalParser(index - lightTimeTravelBuffer);
+            signalParser(index);
+            signalParser(index + lightTimeTravelBuffer);
+            _signalData.isLoaded = true;
+            _signalData.signals.shrink_to_fit();
+        }
     }
 
 }

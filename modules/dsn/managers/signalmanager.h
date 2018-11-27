@@ -53,7 +53,9 @@ namespace openspace {
         //filename is on the format of YYYY-DDDT (excluding '.json')
         bool isLoaded = false;
         double sequenceStartTime;
-        double sequenceEndTime = sequenceStartTime + 86400.0; // 24 hours from startTime 
+        // 24 hours from startTime 
+        double sequenceEndTime;
+        //The currently loaded signals
         std::vector<Signal> signals;
      };
 
@@ -67,6 +69,8 @@ namespace openspace {
       static bool extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary);
       /* parses signaldata from a file given an index in our preloaded filename vector */
       static bool signalParser(int index);
+      /* updates the loaded signal data from disk */
+      static void updateSignalData(int index, int sizeBuffer);
 
     };
 }

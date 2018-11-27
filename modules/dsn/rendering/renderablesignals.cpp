@@ -245,7 +245,7 @@ void RenderableSignals::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform(_uniformCache.modelViewSpacecraft,
         data.camera.combinedViewMatrix()  * _lineRenderInformation._localTransformSpacecraft);
 
-    _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
+    _programObject->setUniform(_uniformCache.projection, data.camera.sgctInternal.projectionMatrix());
 
     _programObject->setUniform(_uniformCache.baseOpacity, _baseOpacity);
 
@@ -281,12 +281,10 @@ void RenderableSignals::render(const RenderData& data, RendererTasks&) {
 void RenderableSignals::update(const UpdateData& data) {
 
     double currentTime = data.time.j2000Seconds();
-    //Todo: change this magic number. 86400 equals 24hrs in seconds
-    double endTime = 86400;
 
     //Bool if the current time is within the timeframe for the currently loaded data
     const bool isTimeInFileInterval = (currentTime >= SignalManager::_signalData.sequenceStartTime) &&
-        (currentTime < SignalManager::_signalData.sequenceStartTime + endTime);
+        (currentTime < SignalManager::_signalData.sequenceEndTime);
 
     //Reload data if it is not relevant anymore
     if (!isTimeInFileInterval) {
@@ -296,7 +294,8 @@ void RenderableSignals::update(const UpdateData& data) {
         //parse data for that file
         if (!SignalManager::_signalData.isLoaded)
         {
-            SignalManager::signalParser(activeFileIndex);
+            LDEBUG(fmt::format("{}: Reloading SignalData.", _identifier));
+            SignalManager::updateSignalData(activeFileIndex, _signalSizeBuffer);
         }
         else
             return;
