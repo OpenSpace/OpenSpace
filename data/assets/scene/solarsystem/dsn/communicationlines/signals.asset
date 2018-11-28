@@ -10,6 +10,7 @@ local Signals = {
         Type = "RenderableSignals",
         DataFolder = dataFolder,
         DataFileType = "json",
+        BaseOpacity = 0.3,
         SiteColors = stationsAsset.siteColorMap, 
         StationSites = stationsAsset.stationSiteMap
     },
