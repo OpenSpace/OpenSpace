@@ -12,6 +12,8 @@ local textures = asset.syncedResource({
     Version = 1
 })
 
+local mapServiceConfigsPath = asset.localResource("map_service_configs")
+
 local Enceladus = {
     Identifier = "Enceladus",
     Parent = transforms.SaturnBarycenter.Identifier,
@@ -37,8 +39,13 @@ local Enceladus = {
                 {
                     Identifier = "Texture",
                     FilePath = textures .. "/enceladus.jpg",
-                    Enabled = true
-                }
+                },
+                {
+                    Identifier = "Global_Mosaic_100m_HPF",
+                    Name = "Cassini Global Mosaic 100m HPF",
+                    FilePath = mapServiceConfigsPath .. "/Cassini_ISS_Global_Mosaic_100m_HPF.wms",
+                    Enabled = true,
+                },
             }
         }
     },

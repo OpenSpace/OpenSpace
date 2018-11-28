@@ -26,9 +26,9 @@
 #include "floatoperations.glsl"
 
 // keep in sync with renderablestars.h:ColorOption enum
-const int COLOROPTION_COLOR    = 0;
-const int COLOROPTION_VELOCITY = 1; 
-const int COLOROPTION_SPEED    = 2;
+const int COLOROPTION_COLOR     = 0;
+const int COLOROPTION_VELOCITY  = 1; 
+const int COLOROPTION_SPEED     = 2;
 const int COLOROPTION_OTHERDATA = 3;
 
 uniform sampler1D colorTexture;
@@ -75,7 +75,7 @@ Fragment getFragment() {
             color = bv2rgb(ge_bvLumAbsMagAppMag.x);
             break;
         case COLOROPTION_VELOCITY:
-            color = vec4(abs(ge_velocity), 0.5); 
+            color = vec4(abs(ge_velocity), 0.5);
             break;
         case COLOROPTION_SPEED:
             // @TODO Include a transfer function here ---abock
