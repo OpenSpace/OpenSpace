@@ -1428,11 +1428,11 @@ namespace openspace {
                     } layout;
 
                     layout.value.position = {
-                        { position[0], position[1], position[2], position[3] }
+                        { position[0], position[1], position[2], 1.0 }
                     };
 
                     int index = _otherDataOption.value();
-                    layout.value.value = _fullData[i + index + 3];
+                    layout.value.value = _fullData[i + index + 3]; // plus 3 because of the position 
 
                     if (_staticFilterValue.has_value() &&
                         layout.value.value == _staticFilterValue)
