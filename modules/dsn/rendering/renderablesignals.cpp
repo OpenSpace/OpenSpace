@@ -29,9 +29,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/translation.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -290,7 +288,7 @@ void RenderableSignals::update(const UpdateData& data) {
     if (!isTimeInFileInterval) {
         SignalManager::_signalData.isLoaded = false;
 
-        int activeFileIndex = findFileIndexForCurrentTime(currentTime, SignalManager::_fileStartTimes);
+        int activeFileIndex = DataFileHelper::findFileIndexForCurrentTime(currentTime, SignalManager::_fileStartTimes);
         //parse data for that file
         if (!SignalManager::_signalData.isLoaded)
         {
@@ -337,30 +335,6 @@ void RenderableSignals::update(const UpdateData& data) {
 
     //unbind vertexArray
     unbindGL();
-}
-
-
-int RenderableSignals::findFileIndexForCurrentTime(double time, std::vector<double> vec) {
-    // upper_bound has O(log n) for sorted vectors, more efficient than for loop
-    auto iter = std::upper_bound(vec.begin(), vec.end(), time);
-
-    int fileIndex = -1;
-    //check what index we got 
-    if (iter != vec.end()) {
-        if (iter != vec.begin()) {
-            fileIndex = static_cast<int>(
-                std::distance(vec.begin(), iter)
-                ) - 1;
-        }
-        else {
-            fileIndex = 0;
-        }
-    }
-    else {
-        fileIndex = static_cast<int>(vec.size()) - 1;
-    }
-
-    return fileIndex;
 }
 
 // Todo: handle signalIsSending, not only signalIsActive for the signal segments

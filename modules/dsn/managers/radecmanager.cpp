@@ -26,30 +26,26 @@
 
 namespace openspace {
     constexpr const char* _loggerCat = "RadecManager";
-    std::vector<std::string> RadecManager::_dataFiles;
-    double RadecManager::_ra;
-    double RadecManager::_dec;
-    double RadecManager::_range;
-    double RadecManager::_checkFileTime;
 
+    RadecManager::RadecManager() = default;
    bool RadecManager::extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary){
-     bool dataFilesSuccess = DataFileHelper::checkFileNames(identifier, dictionary, RadecManager::_dataFiles);
+     bool dataFilesSuccess = DataFileHelper::checkFileNames(identifier, dictionary, _dataFiles);
      radecParser(0);
      return dataFilesSuccess;
     }
 
-   glm::vec3 RadecManager::GetPosForTime(double time) {
+   glm::vec3 RadecManager::getPosForTime(double time) const{
        std::vector<double> timeDoubles = DataFileHelper::getHoursFromFileNames(_dataFiles); //save as member 
-       int idx = RenderableSignals::findFileIndexForCurrentTime(time, timeDoubles);
+       int idx = DataFileHelper::findFileIndexForCurrentTime(time, timeDoubles);
 
        //If the current hour in open space found in filesystem, parse the data and return the ra dec values from that file. 
-           if (radecParser(idx)) {
-                   return glm::vec3(_ra,_dec,_range);
-               }
-               return glm::vec3(-1,-1,-1);
-         }
+       if (radecParser(idx)) {
+           return glm::vec3(_ra,_dec,_range);
+       }
+       return glm::vec3(-1,-1,-1);
+   }
 
-   bool RadecManager::radecParser(int index) {
+   bool RadecManager::radecParser(int index) const{
        std::string filename;
 
        if (index == -1 || index > _dataFiles.size())
@@ -58,7 +54,7 @@ namespace openspace {
        filename = _dataFiles[index];
 
        std::string startTimeString = DataFileHelper::getHourFromFileName(filename);
-       const double triggerTime = Time::convertTime(startTimeString);
+       double triggerTime = Time::convertTime(startTimeString);
        _checkFileTime = triggerTime;
 
        std::ifstream ifs(filename);
