@@ -16,6 +16,12 @@ asset.require('scene/solarsystem/missions/voyager2/voyager2')
 asset.require('scene/solarsystem/missions/voyager1/trails')
 asset.require('scene/solarsystem/dsn/testRADEC')
 
+--labels 
+ asset.require('scene/digitaluniverse/starlabels')
+-- asset.require('scene/digitaluniverse/dwarfs')
+
+
+
 -- Stations
 asset.require('scene/solarsystem/dsn/stations')
 

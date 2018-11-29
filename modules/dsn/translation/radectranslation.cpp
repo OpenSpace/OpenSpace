@@ -124,8 +124,9 @@ glm::dvec3 RadecTranslation::transformCartesianCoordinates(glm::vec3 pos) const 
     return worldposition;
 }
 
-glm::dvec3 RadecTranslation::position(const UpdateData& data) const {
-    double endTime = 3600;
+glm::dvec3 RadecTranslation::position(const UpdateData& data) const{
+    //double endTime = 3600;
+    double endTime = 60;
 
     const bool isTimeInFileInterval = (data.time.j2000Seconds() >= radecManager._checkFileTime) &&
         (data.time.j2000Seconds() < radecManager._checkFileTime + endTime); //if true -> time is within file interval

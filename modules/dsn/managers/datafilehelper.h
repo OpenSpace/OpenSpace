@@ -39,8 +39,11 @@ namespace openspace {
         static bool checkFileNames(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary, std::vector<std::string> &dataFiles);
         static std::string getDayFromFileName(std::string filename);
         static std::string getHourFromFileName(std::string filename);
-        static std::vector<double> getDaysFromFileNames(std::vector<std::string> _dataFiles);
-        static std::vector<double> getHoursFromFileNames(std::vector<std::string> _dataFiles);
+        static std::string getMinuteFromFileName(std::string filename);
+
+        static std::vector<double> getDaysFromFileNames(std::vector<std::string> dataFiles);
+        static std::vector<double> getHoursFromFileNames(std::vector<std::string> dataFiles);
+        static std::vector <double> geMinutesFromFileNames(std::vector<std::string> dataFiles);
         /* Extracts the timestamp from the filename */
         static std::string getFileNameTime(std::string filename, const int FilenameSize);
         /* Extracts the timestamp from a vector of filenames */

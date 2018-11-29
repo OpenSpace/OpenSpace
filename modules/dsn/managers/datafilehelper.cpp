@@ -131,10 +131,10 @@ namespace openspace {
         return DataFileHelper::getFileNameTime(filename, FilenameSize);
     }
     /*get a vector of all filenames, must have format YYY-DDDT*/
-    std::vector<double> DataFileHelper::getDaysFromFileNames(std::vector<std::string> _dataFiles) {
+    std::vector<double> DataFileHelper::getDaysFromFileNames(std::vector<std::string> dataFiles) {
         // number of  characters in filename (excluding '.json')
         constexpr const int FilenameSize = 9;
-        return DataFileHelper::extractTriggerTimesFromFileNames(_dataFiles, FilenameSize);
+        return DataFileHelper::extractTriggerTimesFromFileNames(dataFiles, FilenameSize);
     }
     /*Get one hour, must have format YYYY-DDDTHH*/
     std::string DataFileHelper::getHourFromFileName(std::string filename) {
@@ -143,10 +143,23 @@ namespace openspace {
         return DataFileHelper::getFileNameTime(filename, FilenameSize);
     }
     /*Get a vector of all hour, must have format YYYY-DDDTHH*/
-    std::vector<double> DataFileHelper::getHoursFromFileNames(std::vector<std::string> _dataFiles) {
+    std::vector<double> DataFileHelper::getHoursFromFileNames(std::vector<std::string> dataFiles) {
         // number of  characters in filename (excluding '.json')
         constexpr const int FilenameSize = 11;
-        return DataFileHelper::extractTriggerTimesFromFileNames(_dataFiles, FilenameSize);
+        return DataFileHelper::extractTriggerTimesFromFileNames(dataFiles, FilenameSize);
+    }
+    /*Get a vector of all hour, must have format YYYY-DDDTHHMM*/
+
+    std::string DataFileHelper::getMinuteFromFileName(std::string filename) {
+        // number of  characters in filename (excluding '.json')
+        constexpr const int FilenameSize = 14;
+        std::string newName = filename.replace(70, 1, ":");
+        return DataFileHelper::getFileNameTime(newName, FilenameSize);
+    }
+    std::vector<double> DataFileHelper::geMinutesFromFileNames(std::vector<std::string> dataFiles) {
+        // number of  characters in filename (excluding '.json')
+        constexpr const int FilenameSize = 14;
+        return DataFileHelper::extractTriggerTimesFromFileNames(dataFiles, FilenameSize);
     }
 
     std::string DataFileHelper::getFileNameTime(std::string filename, const int FilenameSize) {
@@ -164,7 +177,11 @@ namespace openspace {
     std::vector<double> DataFileHelper::extractTriggerTimesFromFileNames(std::vector<std::string> dataFiles, const int FilenameSize) {
         std::vector<double> fileStartTimes;
         for (const std::string& filePath : dataFiles) {
+
             std::string timeString = getFileNameTime(filePath, FilenameSize);
+            if(FilenameSize == 14)
+                timeString.replace(11, 1, ":");
+
             const double triggerTime = Time::convertTime(timeString);
             fileStartTimes.push_back(triggerTime);
         }

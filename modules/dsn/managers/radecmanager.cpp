@@ -34,8 +34,9 @@ namespace openspace {
      return dataFilesSuccess;
     }
 
-   glm::vec3 RadecManager::getPosForTime(double time) const{
-       std::vector<double> timeDoubles = DataFileHelper::getHoursFromFileNames(_dataFiles); //save as member 
+   glm::vec3 RadecManager::getPosForTime(double time) const {
+     //  std::vector<double> timeDoubles = DataFileHelper::getHoursFromFileNames(_dataFiles); //save as member 
+       std::vector<double> timeDoubles = DataFileHelper::geMinutesFromFileNames(_dataFiles); //save as member 
        int idx = DataFileHelper::findFileIndexForCurrentTime(time, timeDoubles);
 
        //If the current hour in open space found in filesystem, parse the data and return the ra dec values from that file. 
@@ -53,15 +54,16 @@ namespace openspace {
 
        filename = _dataFiles[index];
 
-       std::string startTimeString = DataFileHelper::getHourFromFileName(filename);
-       double triggerTime = Time::convertTime(startTimeString);
+       std::string startTimeString = DataFileHelper::getMinuteFromFileName(filename);
+       const double triggerTime = Time::convertTime(startTimeString);
+
        _checkFileTime = triggerTime;
 
        std::ifstream ifs(filename);
        nlohmann::json j = nlohmann::json::parse(ifs);
-        _ra = j["RADn"].get<double>();
-        _dec = j["DecDn"].get<double>();
-        _range = j["GeoRngDn"].get<double>();
+        _ra = j["RAUp"].get<double>();
+        _dec = j["DecUp"].get<double>();
+        _range = j["GeoRngUp"].get<double>();
 
        return true;
    }
