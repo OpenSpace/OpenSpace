@@ -56,6 +56,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/tileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/tiletextureinitdata.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timequantizer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/globelabelscomponent.h
 )
 
 set(SOURCE_FILES
@@ -84,6 +85,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/tileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/tiletextureinitdata.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timequantizer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/globelabelscomponent.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

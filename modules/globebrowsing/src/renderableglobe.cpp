@@ -69,6 +69,8 @@ namespace {
     constexpr const char* KeyShadowGroup = "ShadowGroup";
     constexpr const char* KeyShadowSource = "Source";
     constexpr const char* KeyShadowCaster = "Caster";
+    constexpr const char* keyLabels = "Labels";
+
     const openspace::globebrowsing::AABB3 CullingFrustum{
         glm::vec3(-1.f, -1.f, 0.f),
         glm::vec3( 1.f,  1.f, 1e35)
@@ -552,9 +554,15 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
             }
         }
     }
+
+    // Labels Dictionary
+    dictionary.getValue(keyLabels, _labelsDictionary);
 }
 
 void RenderableGlobe::initializeGL() {
+    _globeLabelsComponent.initialize(_labelsDictionary, this);
+    addPropertySubOwner(_globeLabelsComponent);
+
     _layerManager.update();
 
     _grid.initializeGL();
@@ -602,6 +610,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
     if (distanceToCamera < distance) {
         try {
             renderChunks(data, rendererTask);
+            _globeLabelsComponent.draw(data);
         }
         catch (const ghoul::opengl::TextureUnit::TextureUnitError&) {
             std::string layer = _lastChangedLayer ?
