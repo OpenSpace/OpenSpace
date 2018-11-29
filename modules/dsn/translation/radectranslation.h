@@ -54,7 +54,7 @@ private:
     /* Converts the Ra Dec range coordinates into cartesian coordinates*/
     glm::dvec3 convertRaDecRangeToCartesian(double ra, double dec, double range) const;
     /*Transforms the cartesian coordinates with a rotation and a translation*/
-    glm::dvec3 transformCartesianCoordinates(glm::vec3 pos) const;
+    glm::dvec3 radecToCartesianCoordinates(glm::vec3 pos) const;
 
     RadecManager radecManager;
     mutable glm::vec3 _pos;

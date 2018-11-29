@@ -110,15 +110,16 @@ glm::dvec3 RadecTranslation::convertRaDecRangeToCartesian(double ra, double dec,
     return raDecPos;
 }
 
-glm::dvec3 RadecTranslation::transformCartesianCoordinates(glm::vec3 pos) const {
+glm::dvec3 RadecTranslation::radecToCartesianCoordinates(glm::vec3 pos) const {
 
+    // get the Earth relative cartesian coordinates
+    // expressed in the equatorial sphere coordinate system
     glm::dvec3 cartesianPos = convertRaDecRangeToCartesian(pos.x, pos.y, pos.z);
-
+    // get Earth and make sure it has been placed in OpenSpace 
     glm::dvec3 earthPos = global::renderEngine.scene()->sceneGraphNode("Earth")->worldPosition();
     glm::dmat4 translationMatrixEarth = glm::translate( glm::dmat4(1.0), glm::dvec3(earthPos) );
-
-    glm::dvec4 newPos = { cartesianPos, 1.0 };
-    glm::dvec4 nodePos =  translationMatrixEarth * _rotEquatorialSphere * newPos;
+    // calculate the cartesian world coordinates
+    glm::dvec4 nodePos =  translationMatrixEarth * _rotEquatorialSphere * glm::vec4{ cartesianPos, 1.0 };
     glm::dvec3 worldposition = { nodePos.x, nodePos.y, nodePos.z };
 
     return worldposition;
@@ -126,15 +127,14 @@ glm::dvec3 RadecTranslation::transformCartesianCoordinates(glm::vec3 pos) const 
 
 glm::dvec3 RadecTranslation::position(const UpdateData& data) const {
     double endTime = 3600;
-
+    //if true -> time is within file interval
     const bool isTimeInFileInterval = (data.time.j2000Seconds() >= radecManager._checkFileTime) &&
-        (data.time.j2000Seconds() < radecManager._checkFileTime + endTime); //if true -> time is within file interval
+        (data.time.j2000Seconds() < radecManager._checkFileTime + endTime);
 
     if (!isTimeInFileInterval) {
         // The time in open space is is not in the file interval, we need to update the positions
         glm::vec3 pos = radecManager.getPosForTime(data.time.j2000Seconds());
-        _pos = transformCartesianCoordinates(pos);
-
+        _pos = radecToCartesianCoordinates(pos);
     }
    return _pos;
 }
