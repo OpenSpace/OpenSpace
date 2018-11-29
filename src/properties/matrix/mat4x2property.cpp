@@ -110,7 +110,7 @@ bool toStringConversion(std::string& outValue, glm::mat4x2 inValue) {
         }
     }
     outValue.pop_back();
-    outValue + "]";
+    outValue += "]";
     return true;
 }
 

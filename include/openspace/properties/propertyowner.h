@@ -160,6 +160,12 @@ public:
      */
     bool hasProperty(const std::string& uri) const;
 
+    /**
+    * This method checks if a Property exists in this PropertyOwner.
+    * \return <code>true</code> if the Property existed, <code>false</code> otherwise.
+    */
+    bool hasProperty(const Property* prop) const;
+
     void setPropertyOwner(PropertyOwner* owner) { _owner = owner; }
     PropertyOwner* owner() const { return _owner; }
 

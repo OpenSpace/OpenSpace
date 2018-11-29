@@ -92,7 +92,7 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser> browser,
     // Add the dirty rect bounds to the GPU texture dirty rect.
     _lowerDirtyRectBound = glm::min(lowerUpdatingRectBound, _lowerDirtyRectBound);
     _upperDirtyRectBound = glm::max(upperUpdatingRectBound, _upperDirtyRectBound);
-    _needsRepaint = false;    
+    _needsRepaint = false;
 }
 
 void WebRenderHandler::updateTexture() {

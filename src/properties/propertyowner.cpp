@@ -130,6 +130,16 @@ bool PropertyOwner::hasProperty(const std::string& uri) const {
     return property(uri) != nullptr;
 }
 
+bool PropertyOwner::hasProperty(const Property* prop) const {
+    ghoul_precondition(prop != nullptr, "prop must not be nullptr");
+
+    std::vector<Property*>::const_iterator it = std::find(
+        _properties.begin(), _properties.end(), prop
+    );
+
+    return it != _properties.end();
+}
+
 const std::vector<PropertyOwner*>& PropertyOwner::propertySubOwners() const {
     return _subOwners;
 }

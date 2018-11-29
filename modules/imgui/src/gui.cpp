@@ -130,12 +130,10 @@ GUI::GUI()
     )
     , _showHelpText(ShowHelpInfo, true)
     , _helpTextDelay(HelpTextDelayInfo, 1.0, 0.0, 10.0)
-    , _allHidden(HiddenInfo, true)
 {
     for (GuiComponent* comp : _components) {
         addPropertySubOwner(comp);
     }
-    _featuredProperties.setEnabled(true);
     _spaceTime.setEnabled(true);
 
     {
@@ -159,8 +157,6 @@ GUI::GUI()
         _helpTextDelay.onChange(std::move(helpTextDelayFunc));
         addProperty(_helpTextDelay);
     }
-
-    addProperty(_allHidden);
 }
 
 GUI::~GUI() {} // NOLINT
@@ -427,10 +423,8 @@ void GUI::endFrame() {
         _performance.render();
     }
 
-    if (!_allHidden) {
-        if (_isEnabled) {
-            render();
-        }
+    if (_isEnabled) {
+        render();
 
         for (GuiComponent* comp : _components) {
             if (comp->isEnabled()) {
@@ -441,6 +435,10 @@ void GUI::endFrame() {
 
     ImGui::Render();
 
+    const bool shouldRender = _performance.isEnabled() || _isEnabled;
+    if (!shouldRender) {
+        return;
+    }
 
     // Drawing
     ImDrawData* drawData = ImGui::GetDrawData();
@@ -705,10 +703,5 @@ void GUI::renderAndUpdatePropertyVisibility() {
     _virtualProperty.setVisibility(_currentVisibility);
     _featuredProperties.setVisibility(_currentVisibility);
 }
-
-void GUI::setHidden(bool isHidden) {
-    _allHidden = isHidden;
-}
-
 
 } // namespace openspace::gui

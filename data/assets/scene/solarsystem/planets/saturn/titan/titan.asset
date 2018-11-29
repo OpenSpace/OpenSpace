@@ -4,6 +4,7 @@ local kernel = asset.require('../kernels').sat375
 asset.request('./trail')
 
 
+local map_service_configs = asset.localResource("map_service_configs")
 
 local textures = asset.syncedResource({
     Type = "HttpSynchronization",
@@ -37,6 +38,12 @@ local Titan = {
                 {
                     Identifier = "Texture",
                     FilePath = textures .. "/titan.jpg",
+                    -- Enabled = true
+                },
+                {
+                    Identifier = "Cassini_ISS_Global_Mosaic_4km_LiU",
+                    Name = "Cassini ISS Global Mosaic [Sweden]",
+                    FilePath = map_service_configs .. "/LiU/ISS_P19658_Mosaic_Global_4km.wms",
                     Enabled = true
                 }
             }

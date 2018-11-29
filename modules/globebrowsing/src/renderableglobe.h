@@ -116,6 +116,7 @@ private:
         properties::FloatProperty lodScaleFactor;
         properties::FloatProperty cameraMinHeight;
         properties::FloatProperty orenNayarRoughness;
+        properties::IntProperty nActiveLayers;
     } _generalProperties;
 
     properties::PropertyOwner _debugPropertyOwner;
@@ -239,6 +240,8 @@ private:
     bool _shadersNeedRecompilation = true;
     bool _lodScaleFactorDirty = true;
     bool _chunkCornersDirty = true;
+    bool _nLayersIsDirty = true;
+    Layer* _lastChangedLayer = nullptr;
 };
 
 } // namespace openspace::globebrowsing
