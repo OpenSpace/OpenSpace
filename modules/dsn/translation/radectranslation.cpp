@@ -35,7 +35,6 @@ namespace {
 } // namespace
 
 namespace openspace {
- glm::vec3 RadecTranslation:: _pos;
 
 constexpr const char* _loggerCat = "RadecTranslation";
 
@@ -68,12 +67,13 @@ RadecTranslation::RadecTranslation()
         glm::dvec3(std::numeric_limits<double>::max())
     )
 {   
+    //todo, exchange this property to ra dec range probably
     addProperty(_position);
 
     _position.onChange([this]() {
         requireUpdate();
         notifyObservers();
-    });
+    }); 
 }
 
 RadecTranslation::RadecTranslation(const ghoul::Dictionary& dictionary)
@@ -92,7 +92,7 @@ RadecTranslation::RadecTranslation(const ghoul::Dictionary& dictionary)
 void RadecTranslation::extractData(std::unique_ptr<ghoul::Dictionary> &dictionary){
     const char* _identifier = "spacecraft";
 
-    if (!RadecManager::extractMandatoryInfoFromDictionary(_identifier, dictionary)) {
+    if (!radecManager.extractMandatoryInfoFromDictionary(_identifier, dictionary)) {
         LERROR(fmt::format("{}: Did not manage to extract data. (from RadecTranslation and RadecManager)", _identifier));
     }
     else {
@@ -124,16 +124,16 @@ glm::dvec3 RadecTranslation::transformCartesianCoordinates(glm::vec3 pos) const 
     return worldposition;
 }
 
-glm::dvec3 RadecTranslation::position(const UpdateData& data) const{
+glm::dvec3 RadecTranslation::position(const UpdateData& data) const {
     double endTime = 3600;
 
-    const bool isTimeInFileInterval = (data.time.j2000Seconds() >= RadecManager::_checkFileTime) &&
-        (data.time.j2000Seconds() < RadecManager::_checkFileTime + endTime); //if true -> time is within file interval
-   
-   if (!isTimeInFileInterval) {
-       // The time in open space is is not in the file interval, we need to update the positions
-       glm::vec3 pos = RadecManager::GetPosForTime(data.time.j2000Seconds());
-       _pos = transformCartesianCoordinates(pos);
+    const bool isTimeInFileInterval = (data.time.j2000Seconds() >= radecManager._checkFileTime) &&
+        (data.time.j2000Seconds() < radecManager._checkFileTime + endTime); //if true -> time is within file interval
+
+    if (!isTimeInFileInterval) {
+        // The time in open space is is not in the file interval, we need to update the positions
+        glm::vec3 pos = radecManager.getPosForTime(data.time.j2000Seconds());
+        _pos = transformCartesianCoordinates(pos);
 
     }
    return _pos;

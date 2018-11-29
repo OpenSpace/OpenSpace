@@ -27,7 +27,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <modules/dsn/managers/signalmanager.h>
+#include <openspace/util/time.h>
 
 
 namespace openspace {
@@ -45,6 +45,8 @@ namespace openspace {
         static std::string getFileNameTime(std::string filename, const int FilenameSize);
         /* Extracts the timestamp from a vector of filenames */
         static std::vector<double> extractTriggerTimesFromFileNames(std::vector<std::string> _dataFiles, const int FilenameSize);
+        /* Returns an index for our filenames */
+        static int findFileIndexForCurrentTime(double time, std::vector<double> vec);
     };
 }
 

@@ -27,28 +27,29 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/logging/logmanager.h>
 #include <modules/dsn/managers/datafilehelper.h>
-#include <modules/dsn/rendering/renderablesignals.h>
-
+#include <openspace/json.h>
+#include <fstream>
 
 namespace openspace {
 
     class RadecManager {
 
     public:
-       static double _ra;
-       static double _dec;
-       static double _range;
+       RadecManager();
+       mutable double _ra;
+       mutable double _dec;
+       mutable double _range;
        /*Used to check if the loaded file is still relevant or if we should look for another one. */
-       static double _checkFileTime;
-     
+       mutable double _checkFileTime;
        /* A vector with all our datafile paths*/
-       static std::vector<std::string> _dataFiles;
+       std::vector<std::string> _dataFiles;
+
        /* Extracts all the mandatory information we need from our asset file */
-       static bool extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary);
+       bool extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary);
        /*gets the correct datafile, that matches the current time in open space*/
-       static glm::vec3 GetPosForTime(double time);
+       glm::vec3 getPosForTime(double time) const;
        /* parses positioningdata from a file given an index in our preloaded filename vector */
-       static bool radecParser(int index);
+       bool radecParser(int index) const;
     };
 }
 
