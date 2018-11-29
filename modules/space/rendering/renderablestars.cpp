@@ -1198,6 +1198,7 @@ namespace openspace {
         }
 
         _nValuesPerStar += 3; // X Y Z are not counted in the Speck file indices
+        _otherDataOption.addOptions(_dataNames);
 
         float minLumValue = std::numeric_limits<float>::max();
         float maxLumValue = std::numeric_limits<float>::min();
