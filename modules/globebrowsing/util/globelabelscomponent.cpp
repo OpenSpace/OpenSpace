@@ -131,12 +131,6 @@ namespace {
         "Labels culling disabled"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LabelsForceDomeRenderingInfo = {
-        "LabelsForceDomeRendering",
-        "Force dome rendering style for labels",
-        "Force dome rendering style for labels"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo LabelsDistanceEPSInfo = {
         "LabelsDistanceEPS",
         "Labels culling distance from globe's center",
@@ -231,12 +225,6 @@ documentation::Documentation GlobeLabelsComponent::Documentation() {
             LabelsDisableCullingEnabledInfo.description
         },
         {
-            LabelsForceDomeRenderingInfo.identifier,
-            new BoolVerifier,
-            Optional::Yes,
-            LabelsForceDomeRenderingInfo.description
-        },
-        {
             LabelsDistanceEPSInfo.identifier,
             new DoubleVerifier,
             Optional::Yes,
@@ -244,7 +232,7 @@ documentation::Documentation GlobeLabelsComponent::Documentation() {
         },
         {
             LabelAlignmentOptionInfo.identifier,
-            new IntVerifier,
+            new StringVerifier,
             Optional::Yes,
             LabelAlignmentOptionInfo.description
         },
@@ -284,13 +272,10 @@ GlobeLabelsComponent::GlobeLabelsComponent()
     addProperty(_labelsDisableCullingEnabled);
     addProperty(_labelsDistaneEPS);
 
-    _labelAlignmentOption.addOption(0, "0 - Horizontally");
-    _labelAlignmentOption.addOption(1, "1 - Circularly");
+    _labelAlignmentOption.addOption(0, "Horizontally");
+    _labelAlignmentOption.addOption(1, "Circularly");
     _labelAlignmentOption = 0;
-    //_labelAlignmentOption.onChange([&] {  });
     addProperty(_labelAlignmentOption);
-
-    //_applyTextureSize.onChange([this]() { ; });
 }
 
 void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary, 
@@ -389,13 +374,6 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
                     _labelsDisableCullingEnabled.set(disabled);
                 }
 
-                if (dictionary.hasKey(LabelsForceDomeRenderingInfo.identifier)) {
-                    bool force = dictionary.value<bool>(
-                        LabelsForceDomeRenderingInfo.identifier
-                    );
-                    _forceDomeLabelsRendering = force;
-                }
-
                 if (dictionary.hasKey(LabelsDistanceEPSInfo.identifier)) {
                     float dist = static_cast<float>(
                         dictionary.value<double>(LabelsDistanceEPSInfo.identifier)
@@ -404,9 +382,14 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
                 }
 
                 if (dictionary.hasKey(LabelAlignmentOptionInfo.identifier)) {
-                    _labelAlignmentOption = static_cast<float>(
-                        dictionary.value<double>(LabelAlignmentOptionInfo.identifier)
-                    );
+                    std::string labelAlignment = 
+                        dictionary.value<std::string>(LabelAlignmentOptionInfo.identifier);
+                    if (labelAlignment == "Horizontally") {
+                        _labelAlignmentOption = 0;
+                    }
+                    else {
+                        _labelAlignmentOption = 1;
+                    }
                 }
 
                 _font = font;
@@ -613,44 +596,24 @@ bool GlobeLabelsComponent::saveCachedFile(const std::string& file) const {
 }
 
 void GlobeLabelsComponent::draw(const RenderData& data) {
-    // Calculate the MVP matrix
-    glm::dmat4 viewTransform = glm::dmat4(data.camera.combinedViewMatrix());
-    glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
-        viewTransform;
-    glm::dmat4 mvp = vp * _globe->modelTransform();
-    // Render labels
     if (_labelsEnabled) {
-        glm::dmat4 invModelMatrix = glm::inverse(_globe->modelTransform());
+        // Calculate the MVP matrix
+        glm::dmat4 viewTransform = glm::dmat4(data.camera.combinedViewMatrix());
+        glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
+            viewTransform;
+        glm::dmat4 mvp = vp * _globe->modelTransform();
 
-        glm::dvec3 cameraViewDirectionObj = glm::dvec3(
-            invModelMatrix * glm::dvec4(data.camera.viewDirectionWorldSpace(), 0.0)
-        );
-        glm::dvec3 cameraUpDirectionObj = glm::dvec3(
-            invModelMatrix * glm::dvec4(data.camera.lookUpVectorWorldSpace(), 0.0)
-        );
-        glm::dvec3 orthoRight = glm::normalize(
-            glm::cross(cameraViewDirectionObj, cameraUpDirectionObj)
-        );
-        if (orthoRight == glm::dvec3(0.0)) {
-            glm::dvec3 otherVector(
-                cameraUpDirectionObj.y,
-                cameraUpDirectionObj.x,
-                cameraUpDirectionObj.z
-            );
-            orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionObj));
-        }
-        glm::dvec3 orthoUp = glm::normalize(
-            glm::cross(orthoRight, cameraViewDirectionObj)
-        );
-
-        glm::dvec3 globePositionWorld = glm::dvec3(_globe->modelTransform() * glm::vec4(0.0, 0.0, 0.0, 1.0));
-        glm::dvec3 cameraToGlobeDistanceWorld = globePositionWorld - data.camera.positionVec3();
+        glm::dvec3 globePositionWorld = glm::dvec3(_globe->modelTransform() * 
+            glm::vec4(0.0, 0.0, 0.0, 1.0));
+        glm::dvec3 cameraToGlobeDistanceWorld = globePositionWorld - 
+            data.camera.positionVec3();
         double distanceCameraGlobeWorld = glm::length(cameraToGlobeDistanceWorld);
 
         float fadeInVariable = 1.f;
         if (_labelsFadeInEnabled) {
             double averageRadius = (
-                _globe->ellipsoid().radii().x + _globe->ellipsoid().radii().y + _globe->ellipsoid().radii().z
+                _globe->ellipsoid().radii().x + _globe->ellipsoid().radii().y + 
+                _globe->ellipsoid().radii().z
                 ) / 3.0;
             glm::dvec2 fadeRange = glm::dvec2(
                 averageRadius + _labelsMinHeight
@@ -668,7 +631,8 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
 
         if (_labelsFadeOutEnabled) {
             double averageRadius = (
-                _globe->ellipsoid().radii().x + _globe->ellipsoid().radii().y + _globe->ellipsoid().radii().z
+                _globe->ellipsoid().radii().x + _globe->ellipsoid().radii().y +
+                _globe->ellipsoid().radii().z
                 ) / 3.0;
             glm::dvec2 fadeRange = glm::dvec2(
                 averageRadius + _labelsMinHeight + 1500.0
@@ -684,35 +648,61 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
             }
         }
 
-        renderLabels(data, mvp, orthoRight, orthoUp, distanceCameraGlobeWorld, fadeInVariable);
+        renderLabels(
+            data, 
+            mvp, 
+            static_cast<float>(distanceCameraGlobeWorld), 
+            fadeInVariable
+        );
     }
 }
 
 void GlobeLabelsComponent::renderLabels(const RenderData& data,
-    const glm::dmat4& modelViewProjectionMatrix, const glm::dvec3& orthoRight,
-    const glm::dvec3& orthoUp, const float distToCamera, const float fadeInVariable) {
+                                        const glm::dmat4& modelViewProjectionMatrix, 
+                                        float distToCamera,
+                                        float fadeInVariable
+) {
 
     glm::vec4 textColor = _labelsColor;
     textColor.a *= fadeInVariable;
     constexpr double DIST_EPS = 6000.0;
     constexpr double SIN_EPS = 0.001;
 
-    int textRenderingTechnique = 0;
-    if (openspace::global::windowDelegate.isFisheyeRendering() || _forceDomeLabelsRendering) {
-        textRenderingTechnique = 1;
-    }
-
     glm::dmat4 invMP = glm::inverse(_globe->modelTransform());
     glm::dmat4 invCombinedView = glm::inverse(data.camera.combinedViewMatrix());
 
     glm::dvec4 cameraPosWorld = invCombinedView * glm::dvec4(0.0, 0.0, 0.0, 1.0);
     glm::dvec3 cameraPosObj = glm::dvec3(invMP * cameraPosWorld);
-    glm::dvec4 cameraUpVecWorld = glm::dvec4(data.camera.lookUpVectorWorldSpace(), 0.0); //invCombinedView * glm::dvec4(0.0, 1.0, 0.0, 0.0);
+    glm::dvec4 cameraUpVecWorld = glm::dvec4(data.camera.lookUpVectorWorldSpace(), 0.0); 
     glm::dvec3 cameraLookUpObj = glm::dvec3(invMP * cameraUpVecWorld);
 
     glm::dmat4 VP = glm::dmat4(
         data.camera.sgctInternal.projectionMatrix()
     ) * data.camera.combinedViewMatrix();
+
+
+    glm::dmat4 invModelMatrix = glm::inverse(_globe->modelTransform());
+
+    glm::dvec3 cameraViewDirectionObj = glm::dvec3(
+        invModelMatrix * glm::dvec4(data.camera.viewDirectionWorldSpace(), 0.0)
+    );
+    glm::dvec3 cameraUpDirectionObj = glm::dvec3(
+        invModelMatrix * glm::dvec4(data.camera.lookUpVectorWorldSpace(), 0.0)
+    );
+    glm::dvec3 orthoRight = glm::normalize(
+        glm::cross(cameraViewDirectionObj, cameraUpDirectionObj)
+    );
+    if (orthoRight == glm::dvec3(0.0)) {
+        glm::dvec3 otherVector(
+            cameraUpDirectionObj.y,
+            cameraUpDirectionObj.x,
+            cameraUpDirectionObj.z
+        );
+        orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionObj));
+    }
+    glm::dvec3 orthoUp = glm::normalize(
+        glm::cross(orthoRight, cameraViewDirectionObj)
+    );
 
     for (const LabelEntry lEntry : _labels.labelsArray) {
         glm::vec3 position = lEntry.geoPosition;
@@ -730,74 +720,46 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
             draw = true;
         }
 
-
-        glm::dvec3 labelOrthoRight;
-        glm::dvec3 labelOrthoUp;
-        if (_labelAlignmentOption == 0) {
-
-        }
-        else {
-            glm::dmat4 invModelMatrix = glm::inverse(_globe->modelTransform());
-
+        if (_labelAlignmentOption == 1) {
             glm::dvec3 labelNormalObj = glm::dvec3(
                 invModelMatrix * glm::dvec4(data.camera.positionVec3(), 1.0)
             ) - glm::dvec3(position);
 
             glm::dvec3 labelUpDirectionObj = glm::dvec3(position);
             
-            labelOrthoRight = glm::normalize(
+            orthoRight = glm::normalize(
                 glm::cross(labelUpDirectionObj, labelNormalObj)
             );
-            if (labelOrthoRight == glm::dvec3(0.0)) {
+            if (orthoRight == glm::dvec3(0.0)) {
                 glm::dvec3 otherVector(
                     labelUpDirectionObj.y,
                     labelUpDirectionObj.x,
                     labelUpDirectionObj.z
                 );
-                labelOrthoRight = glm::normalize(glm::cross(otherVector, labelNormalObj));
+                orthoRight = glm::normalize(glm::cross(otherVector, labelNormalObj));
             }
-            labelOrthoUp = glm::normalize(
-                glm::cross(labelNormalObj, labelOrthoRight)
+            orthoUp = glm::normalize(
+                glm::cross(labelNormalObj, orthoRight)
             );
         }
 
         if (draw) {
             position += _labelsMinHeight;
-            if (_labelAlignmentOption == 0) {
-                ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
-                    *_font,
-                    position,
-                    lEntry.feature,
-                    textColor,
-                    powf(2.f, _labelsSize),
-                    _labelsMinSize,
-                    _labelsMaxSize,
-                    modelViewProjectionMatrix,
-                    orthoRight,
-                    orthoUp,
-                    cameraPosObj,
-                    cameraLookUpObj,
-                    textRenderingTechnique
-                );
-            }
-            else {
-                ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
-                    *_font,
-                    position,
-                    lEntry.feature,
-                    textColor,
-                    powf(2.f, _labelsSize),
-                    _labelsMinSize,
-                    _labelsMaxSize,
-                    modelViewProjectionMatrix,
-                    labelOrthoRight,
-                    labelOrthoUp,
-                    cameraPosObj,
-                    cameraLookUpObj,
-                    0
-                );
-            }
-            
+            ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
+                *_font,
+                position,
+                lEntry.feature,
+                textColor,
+                powf(2.f, _labelsSize),
+                _labelsMinSize,
+                _labelsMaxSize,
+                modelViewProjectionMatrix,
+                orthoRight,
+                orthoUp,
+                cameraPosObj,
+                cameraLookUpObj,
+                0
+            );
         }
     }
 }

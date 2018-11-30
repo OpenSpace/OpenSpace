@@ -86,8 +86,8 @@ namespace openspace {
         bool loadCachedFile(const std::string& file);
         bool saveCachedFile(const std::string& file) const;
         void renderLabels(const RenderData& data, 
-            const glm::dmat4& modelViewProjectionMatrix, const glm::dvec3& orthoRight,
-            const glm::dvec3& orthoUp, const float distToCamera, const float fadeInVariable);
+            const glm::dmat4& modelViewProjectionMatrix, float distToCamera, 
+            float fadeInVariable);
         bool isLabelInFrustum(const glm::dmat4& MVMatrix, const glm::dvec3& position) const;
 
         
@@ -110,7 +110,6 @@ namespace openspace {
     private:
         // Labels
         bool _labelsDataPresent = false;
-        bool _forceDomeLabelsRendering = false;
         Labels _labels;
 
         // Font
