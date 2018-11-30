@@ -31,6 +31,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec4property.h>
+#include <openspace/properties/optionproperty.h>
 
 #include <ghoul/glm.h>
 #include <ghoul/font/fontrenderer.h>
@@ -104,6 +105,7 @@ namespace openspace {
         properties::BoolProperty _labelsFadeOutEnabled;
         properties::BoolProperty _labelsDisableCullingEnabled;
         properties::FloatProperty _labelsDistaneEPS;
+        properties::OptionProperty _labelAlignmentOption;
 
     private:
         // Labels
