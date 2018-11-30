@@ -27,16 +27,17 @@
 #include <openspace/documentation/verifier.h>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo PositionInfo = {
-        "Position",
-        "Position",
-        "Write some documentaion here!"
+    constexpr openspace::properties::Property::PropertyInfo ObjectIdentifierInfo = {
+    "ObjectIdentifier",
+    "Object Identifier",
+    "Identifier of the object that this translation is applied to."
     };
 } // namespace
 
 namespace openspace {
 
 constexpr const char* _loggerCat = "RadecTranslation";
+constexpr const char* KeyIdentifier = "ObjectIdentifier";
 
 documentation::Documentation RadecTranslation::Documentation() {
     using namespace documentation;
@@ -48,6 +49,12 @@ documentation::Documentation RadecTranslation::Documentation() {
                 "Type",
                 new StringEqualVerifier("RadecTranslation"),
                 Optional::No
+            },
+            {
+                ObjectIdentifierInfo.identifier,
+                new StringVerifier,
+                Optional::No,
+                ObjectIdentifierInfo.description
             }
         }
     };
@@ -59,6 +66,11 @@ RadecTranslation::RadecTranslation(const ghoul::Dictionary& dictionary)
     : RadecTranslation()
 {
     std::unique_ptr<ghoul::Dictionary> dictionaryPtr = std::make_unique<ghoul::Dictionary>(dictionary);
+    
+    if (dictionary.hasKeyAndValue<std::string>(KeyIdentifier)) {
+        _objectIdentifier = dictionary.value<std::string>(KeyIdentifier);
+    }
+
     extractData(dictionaryPtr);
 
     documentation::testSpecificationAndThrow(
@@ -66,16 +78,17 @@ RadecTranslation::RadecTranslation(const ghoul::Dictionary& dictionary)
         dictionary,
         "RadecTranslation"
     );
+
 }
 
 void RadecTranslation::extractData(std::unique_ptr<ghoul::Dictionary> &dictionary){
-    const char* _identifier = "spacecraft";
+    constexpr const char* _identifier = "RadecTranslation";
 
     if (!radecManager.extractMandatoryInfoFromDictionary(_identifier, dictionary)) {
-        LERROR(fmt::format("{}: Did not manage to extract data. (from RadecTranslation and RadecManager)", _identifier));
+        LERROR(fmt::format("{}: Did not manage to extract data for {}.", _identifier, _objectIdentifier.c_str()));
     }
     else {
-        LDEBUG(fmt::format("{}: Successfully read data. (from RadecTranslation and RadecManager)", _identifier));
+        LDEBUG(fmt::format("{}: Successfully read data for {}.", _identifier, _objectIdentifier.c_str()));
     }
 }
 
