@@ -45,6 +45,9 @@ namespace openspace {
        };
        mutable std::vector<Position> positions;
        mutable std::vector<double> minuteTimes;
+       mutable Position position; 
+       mutable glm::vec3 currentMinute;
+       mutable double activeMinute = 0;
 
        /*Used to check if the loaded file is still relevant or if we should look for another one. */
        mutable double _checkFileTime;
@@ -57,8 +60,12 @@ namespace openspace {
        glm::vec3 getPosForTime(double time) const;
        /* parses positioningdata from a file given an index in our preloaded filename vector */
        bool radecParser(int index) const;
-
-       glm::vec3 findPositionInVector(double time) const;
+       /*Find the correct minute in the vector of loaded positions*/
+       RadecManager::Position getPositionInVector(double time) const;
+       /*Check if current hour in open space is already loaded*/
+       bool correctHour(double time) const;
+       /*Check if current minute in open space is already loaded*/
+       bool correctMinute(double time) const;
     };
 }
 

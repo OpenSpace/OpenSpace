@@ -34,16 +34,28 @@ namespace openspace {
      return dataFilesSuccess;
     }
 
-   glm::vec3 RadecManager::getPosForTime(double time) const {
-       std::vector<double> timeDoubles = DataFileHelper::getHoursFromFileNames(_dataFiles); //save as member 
+   bool RadecManager::correctHour(double time) const{
+       const bool isTimeInFileInterval = (time >= _checkFileTime) &&
+           (time < _checkFileTime + 3600);
 
-       int idx = DataFileHelper::findFileIndexForCurrentTime(time, timeDoubles);
-       if (radecParser(idx)) {
-           //If we have the correct file, check for the correct position in that file.
-           glm::vec3 pos = findPositionInVector(time);
-           return glm::vec3(pos.x,pos.y,pos.z);
+       return isTimeInFileInterval;
+   }
+
+   bool RadecManager::correctMinute(double time) const {
+       const bool isTimeInActiveMinute = (time >= activeMinute && time < activeMinute + 60);
+       return isTimeInActiveMinute;
+   }
+
+   glm::vec3 RadecManager::getPosForTime(double time) const {
+       if (!correctHour(time)) {
+           std::vector<double> timeDoubles = DataFileHelper::getHoursFromFileNames(_dataFiles); 
+           int idx = DataFileHelper::findFileIndexForCurrentTime(time, timeDoubles); 
+           radecParser(idx);
        }
-       return glm::vec3(-1,-1,-1);
+       if(!correctMinute(time)) {
+          getPositionInVector(time);
+       }
+       return glm::vec3(position.ra, position.dec, position.range);
    }
 
    bool RadecManager::radecParser(int index) const{
@@ -77,19 +89,23 @@ namespace openspace {
        return true;
    }
 
-   glm::vec3 RadecManager::findPositionInVector(double time) const{
+  RadecManager::Position RadecManager::getPositionInVector(double time) const{
        minuteTimes.clear();
        minuteTimes.reserve(0);
-
+      
        for (int i = 0; i < RadecManager::positions.size(); i++) {
-           //Convert each timestamp in vector of positions to j2000
            minuteTimes.push_back(Time::convertTime(positions[i].timeStamp));
        }
        int idx = DataFileHelper::findFileIndexForCurrentTime(time, minuteTimes);
-       glm::vec3 pos = { positions[idx].ra, positions[idx].dec, positions[idx].range };
-       return pos;
-   }
+       activeMinute = minuteTimes[idx];
 
+       position.timeStamp = positions[idx].timeStamp;
+       position.ra = positions[idx].ra;
+       position.dec = positions[idx].dec;
+       position.range = positions[idx].range;
+
+       return position;
+   }
 }
 
 

@@ -125,18 +125,8 @@ glm::dvec3 RadecTranslation::transformCartesianCoordinates(glm::vec3 pos) const 
 }
 
 glm::dvec3 RadecTranslation::position(const UpdateData& data) const{
-    //double endTime = 3600;
-    double endTime = 60;
-
-    const bool isTimeInFileInterval = (data.time.j2000Seconds() >= radecManager._checkFileTime) &&
-        (data.time.j2000Seconds() < radecManager._checkFileTime + endTime); //if true -> time is within file interval
-
-    if (!isTimeInFileInterval) {
-        // The time in open space is is not in the file interval, we need to update the positions
-        glm::vec3 pos = radecManager.getPosForTime(data.time.j2000Seconds());
-        _pos = transformCartesianCoordinates(pos);
-
-    }
+   glm::vec3 pos = radecManager.getPosForTime(data.time.j2000Seconds());
+   _pos = transformCartesianCoordinates(pos);
    return _pos;
 }
 
