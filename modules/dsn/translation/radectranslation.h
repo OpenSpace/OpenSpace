@@ -57,8 +57,7 @@ private:
     glm::dvec3 radecToCartesianCoordinates(glm::vec3 pos) const;
 
     RadecManager radecManager;
-    mutable glm::vec3 _pos;
-    properties::DVec3Property _position;
+    mutable glm::vec3 _position;
 
     glm::dmat4 _rotEquatorialSphere = { -0.05487554,  0.4941095, -0.8676661, 0.0,
             -0.8734371 , -0.4448296, -0.1980764, 0.0,

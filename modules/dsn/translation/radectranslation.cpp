@@ -48,33 +48,12 @@ documentation::Documentation RadecTranslation::Documentation() {
                 "Type",
                 new StringEqualVerifier("RadecTranslation"),
                 Optional::No
-            },
-            {
-                PositionInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                PositionInfo.description
             }
         }
     };
 }
 
-RadecTranslation::RadecTranslation()
-    : _position(
-        PositionInfo,
-        glm::dvec3(0.0),
-        glm::dvec3(-std::numeric_limits<double>::max()),
-        glm::dvec3(std::numeric_limits<double>::max())
-    )
-{   
-    //todo, exchange this property to ra dec range probably
-    addProperty(_position);
-
-    _position.onChange([this]() {
-        requireUpdate();
-        notifyObservers();
-    }); 
-}
+RadecTranslation::RadecTranslation() = default;
 
 RadecTranslation::RadecTranslation(const ghoul::Dictionary& dictionary)
     : RadecTranslation()
@@ -134,9 +113,9 @@ glm::dvec3 RadecTranslation::position(const UpdateData& data) const {
     if (!isTimeInFileInterval) {
         // The time in open space is is not in the file interval, we need to update the positions
         glm::vec3 pos = radecManager.getPosForTime(data.time.j2000Seconds());
-        _pos = radecToCartesianCoordinates(pos);
+        _position = radecToCartesianCoordinates(pos);
     }
-   return _pos;
+   return _position;
 }
 
 } // namespace openspace
