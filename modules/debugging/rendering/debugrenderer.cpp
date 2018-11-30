@@ -55,8 +55,6 @@ DebugRenderer::DebugRenderer(std::unique_ptr<ghoul::opengl::ProgramObject> progr
     // nothing to do
 }
 
-DebugRenderer::~DebugRenderer() { }
-
 const DebugRenderer& DebugRenderer::ref() {
     if (!_reference) {
         try {
@@ -70,7 +68,7 @@ const DebugRenderer& DebugRenderer::ref() {
 }
 
 void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum mode,
-                                   const glm::vec4& rgba) const
+                                   const glm::vec4& color) const
 {
     if (clippingSpacePoints.empty()) {
         return;
@@ -88,7 +86,7 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
 
     // Activate the shader program and set the uniform color within the shader
     _programObject->activate();
-    _programObject->setUniform("color", rgba);
+    _programObject->setUniform("color", color);
 
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);

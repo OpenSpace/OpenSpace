@@ -226,10 +226,10 @@ std::vector<std::string> JoystickCameraStates::buttonCommand(int button) const {
 namespace ghoul {
 
 template <>
-std::string to_string(const openspace::interaction::JoystickCameraStates::AxisType& type)
+std::string to_string(const openspace::interaction::JoystickCameraStates::AxisType& value)
 {
     using T = openspace::interaction::JoystickCameraStates::AxisType;
-    switch (type) {
+    switch (value) {
         case T::None:        return "None";
         case T::OrbitX:      return "Orbit X";
         case T::OrbitY:      return "Orbit Y";

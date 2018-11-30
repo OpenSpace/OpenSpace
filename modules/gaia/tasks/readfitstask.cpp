@@ -108,17 +108,17 @@ std::string ReadFitsTask::description() {
     );
 }
 
-void ReadFitsTask::perform(const Task::ProgressCallback& progressCallback) {
-    progressCallback(0.f);
+void ReadFitsTask::perform(const Task::ProgressCallback& onProgress) {
+    onProgress(0.f);
 
     if (_singleFileProcess) {
-        readSingleFitsFile(progressCallback);
+        readSingleFitsFile(onProgress);
     }
     else {
-        readAllFitsFilesFromFolder(progressCallback);
+        readAllFitsFilesFromFolder(onProgress);
     }
 
-    progressCallback(1.f);
+    onProgress(1.f);
 }
 
 void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCallback) {

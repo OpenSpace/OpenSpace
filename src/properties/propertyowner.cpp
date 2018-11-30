@@ -364,19 +364,23 @@ std::string PropertyOwner::generateJson() const {
     std::function<std::string(properties::PropertyOwner*)> createJson =
         [&createJson](properties::PropertyOwner* owner) -> std::string
     {
+        constexpr const char* replStr = R"("{}": "{}",)";
+
         std::stringstream json;
         json << "{";
-        json << "\"name\": \"" << owner->identifier() << "\",";
+        json << fmt::format(replStr, "name", owner->identifier());
 
         json << "\"properties\": [";
-        auto properties = owner->properties();
+        const std::vector<properties::Property*>& properties = owner->properties();
         for (properties::Property* p : properties) {
             json << "{";
-            json << "\"id\": \"" << p->identifier() << "\",";
-            json << "\"type\": \"" << p->className() << "\",";
-            json << "\"fullyQualifiedId\": \"" << p->fullyQualifiedIdentifier() << "\",";
-            json << "\"guiName\": \"" << p->guiName() << "\",";
-            json << "\"description\": \"" << escapedJson(p->description()) << "\"";
+            json << fmt::format(replStr, "id", p->identifier());
+            json << fmt::format(replStr, "type", p->className());
+            json << fmt::format(
+                replStr, "fullyQualifiedId", p->fullyQualifiedIdentifier()
+            );
+            json << fmt::format(replStr, "guiName", p->guiName());
+            json << fmt::format(replStr, "description", escapedJson(p->description()));
             json << "}";
             if (p != properties.back()) {
                 json << ",";

@@ -344,13 +344,13 @@ documentation::Documentation RenderableStars::Documentation() {
         },
         {
             RenderMethodOptionInfo.identifier,
-            new IntVerifier,
+            new StringVerifier,
             Optional::No,
             RenderMethodOptionInfo.description
         },
         {
             SizeCompositionOptionInfo.identifier,
-            new IntVerifier,
+            new StringVerifier,
             Optional::No,
             SizeCompositionOptionInfo.description
         },
@@ -480,13 +480,20 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
     addProperty(_filterOutOfRange);
 
-    _renderingMethodOption.addOption(0, "0 - Point Spread Function Based");
-    _renderingMethodOption.addOption(1, "1 - Textured Based");
+    _renderingMethodOption.addOption(0, "Point Spread Function Based");
+    _renderingMethodOption.addOption(1, "Textured Based");
     addProperty(_renderingMethodOption);     
 
     if (dictionary.hasKey(RenderMethodOptionInfo.identifier)) {
-        _renderingMethodOption =
-            static_cast<int>(dictionary.value<double>(RenderMethodOptionInfo.identifier));
+        std::string renderingMethod = 
+            dictionary.value<std::string>(RenderMethodOptionInfo.identifier);
+        if (renderingMethod == "PSF") {
+            _renderingMethodOption = 0;
+        }
+        else if (renderingMethod == "Texture Based") {
+            _renderingMethodOption = 1;
+        }
+            
     }
     else {
         _renderingMethodOption = 1;
@@ -511,24 +518,41 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     }
     _parametersOwner.addProperty(_alphaValue);
 
-    _psfMethodOption.addOption(0, "0 - Spencer's Function");
-    _psfMethodOption.addOption(1, "1 - Moffat's Function");
+    _psfMethodOption.addOption(0, "Spencer's Function");
+    _psfMethodOption.addOption(1, "Moffat's Function");
     _psfMethodOption = 0;
     _psfMethodOption.onChange([&] { renderPSFToTexture(); });
     _parametersOwner.addProperty(_psfMethodOption);
 
-    _psfMultiplyOption.addOption(0, "0 - Use Star's Apparent Brightness");
-    _psfMultiplyOption.addOption(1, "1 - Use Star's Luminosity and Size");
-    _psfMultiplyOption.addOption(2, "2 - Luminosity, Size, App Brightness");
-    _psfMultiplyOption.addOption(3, "3 - Absolute Magnitude");
-    _psfMultiplyOption.addOption(4, "4 - Apparent Magnitude");
-    _psfMultiplyOption.addOption(5, "5 - Distance Modulus");
+    _psfMultiplyOption.addOption(0, "Use Star's Apparent Brightness");
+    _psfMultiplyOption.addOption(1, "Use Star's Luminosity and Size");
+    _psfMultiplyOption.addOption(2, "Luminosity, Size, App Brightness");
+    _psfMultiplyOption.addOption(3, "Absolute Magnitude");
+    _psfMultiplyOption.addOption(4, "Apparent Magnitude");
+    _psfMultiplyOption.addOption(5, "Distance Modulus");
 
     if (dictionary.hasKey(MagnitudeExponentInfo.identifier)) {
-        _psfMultiplyOption =
-            static_cast<int>(
-                dictionary.value<double>(SizeCompositionOptionInfo.identifier)
-            );
+        std::string sizeCompositionOption = 
+            dictionary.value<std::string>(SizeCompositionOptionInfo.identifier);
+        
+        if (sizeCompositionOption == "App Brightness") {
+            _psfMultiplyOption = 0;
+        } else if (sizeCompositionOption == "Lum and Size") {
+            _psfMultiplyOption = 1;
+        }
+        else if (sizeCompositionOption == "Lum, Size and App Brightness") {
+            _psfMultiplyOption = 2;
+        }
+        else if (sizeCompositionOption == "Abs Magnitude") {
+            _psfMultiplyOption = 3;
+        }
+        else if (sizeCompositionOption == "App Maginitude") {
+            _psfMultiplyOption = 4;
+        }
+        else if (sizeCompositionOption == "Distance Modulus") {
+            _psfMultiplyOption = 5;
+        }
+        
     }
     else {
         _psfMultiplyOption = 5;
@@ -999,7 +1023,7 @@ void RenderableStars::update(const UpdateData&) {
     if (_pointSpreadFunctionTextureIsDirty) {
         LDEBUG("Reloading Point Spread Function texture");
         _pointSpreadFunctionTexture = nullptr;
-        if (_pointSpreadFunctionTexturePath.value() != "") {
+        if (!_pointSpreadFunctionTexturePath.value().empty()) {
             _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
                 absPath(_pointSpreadFunctionTexturePath)
             );
@@ -1055,7 +1079,7 @@ void RenderableStars::update(const UpdateData&) {
     if (_otherDataColorMapIsDirty) {
         LDEBUG("Reloading Color Texture");
         _otherDataColorMapTexture = nullptr;
-        if (_otherDataColorMapPath.value() != "") {
+        if (!_otherDataColorMapPath.value().empty()) {
             _otherDataColorMapTexture = ghoul::io::TextureReader::ref().loadTexture(
                 absPath(_otherDataColorMapPath)
             );
@@ -1211,8 +1235,8 @@ void RenderableStars::readSpeckFile() {
             str >> values[i];
         }
         bool nullArray = true;
-        for (size_t i = 0; i < values.size(); ++i) {
-            if (values[i] != 0.0) {
+        for (float v : values) {
+            if (v != 0.0) {
                 nullArray = false;
                 break;
             }
@@ -1423,7 +1447,7 @@ void RenderableStars::createDataSlice(ColorOption option) {
                 union {
                     OtherDataLayout value;
                     std::array<float, sizeof(OtherDataLayout)> data;
-                } layout;
+                } layout = {};
 
                 layout.value.position = {
                     { position[0], position[1], position[2] }

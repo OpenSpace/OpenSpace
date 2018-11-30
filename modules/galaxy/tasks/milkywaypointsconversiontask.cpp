@@ -40,8 +40,6 @@ namespace openspace {
 
 MilkywayPointsConversionTask::MilkywayPointsConversionTask(const ghoul::Dictionary&) {}
 
-MilkywayPointsConversionTask::~MilkywayPointsConversionTask() {}
-
 std::string MilkywayPointsConversionTask::description() {
     return std::string();
 }

@@ -180,7 +180,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         ghoul::Dictionary renderableDictionary;
         dictionary.getValue(KeyRenderable, renderableDictionary);
 
-        renderableDictionary.setValue(KeyIdentifier, identifier);
+        renderableDictionary.setValue(KeyIdentifier, result->_identifier);
 
         result->_renderable = Renderable::createFromDictionary(renderableDictionary);
         if (result->_renderable == nullptr) {

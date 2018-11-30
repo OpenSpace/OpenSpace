@@ -195,28 +195,27 @@ ConstructOctreeTask::ConstructOctreeTask(const ghoul::Dictionary& dictionary) {
     }
 }
 
-ConstructOctreeTask::~ConstructOctreeTask() {}
-
 std::string ConstructOctreeTask::description() {
     return "Read bin file (or files in folder): " + _inFileOrFolderPath + "\n "
         "and write octree data file (or files) into: " + _outFileOrFolderPath + "\n";
 }
 
-void ConstructOctreeTask::perform(const Task::ProgressCallback& progressCallback) {
-    progressCallback(0.0f);
+void ConstructOctreeTask::perform(const Task::ProgressCallback& onProgress) {
+    onProgress(0.0f);
 
     if (_singleFileInput) {
-        constructOctreeFromSingleFile(progressCallback);
+        constructOctreeFromSingleFile(onProgress);
     }
     else {
-        constructOctreeFromFolder(progressCallback);
+        constructOctreeFromFolder(onProgress);
     }
 
-    progressCallback(1.0f);
+    onProgress(1.0f);
 }
 
 void ConstructOctreeTask::constructOctreeFromSingleFile(
-    const Task::ProgressCallback& progressCallback) {
+                                           const Task::ProgressCallback& progressCallback)
+{
     std::vector<float> fullData;
     int32_t nValues = 0;
     int32_t nValuesPerStar = 0;

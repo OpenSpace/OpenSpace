@@ -31,8 +31,8 @@ local stars = {
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
         MagnitudeExponent = 6.2,
-        SizeComposition = 5,
-        RenderMethod = 1
+        SizeComposition = "Distance Modulus",
+        RenderMethod = "Texture Based" -- or PSF
     },
     GUI = {
         Path = "/Milky Way/Stars"
@@ -48,8 +48,8 @@ local testGrid = {
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
         MagnitudeExponent = 5.03,
-        SizeComposition = 5,
-        RenderMethod = 1
+        SizeComposition = "Distance Modulus",
+        RenderMethod = "Texture Based" -- or PSF
     },
     GUI = {
         Path = "/Milky Way/Stars Test Grid"
@@ -67,8 +67,8 @@ local newTestGrid = {
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
         MagnitudeExponent = 5.03,
-        SizeComposition = 5,
-        RenderMethod = 1
+        SizeComposition = "Distance Modulus",
+        RenderMethod = "Texture Based" -- or PSF
     },
     GUI = {
         Path = "/Milky Way/Stars New Test Grid"

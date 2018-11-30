@@ -96,7 +96,7 @@ public:
      * Reads a single SPECK file and returns a vector with <code>nRenderValues</code>
      * per star. Reads data in pre-defined order based on AMNH's star data files.
      */
-    std::vector<float> readSpeckFile(std::string filePath, int& nRenderValues);
+    std::vector<float> readSpeckFile(const std::string& filePath, int& nRenderValues);
 
 private:
     std::unique_ptr<CCfits::FITS> _infile;

@@ -37,7 +37,7 @@ namespace documentation { struct Documentation; }
 class ConstructOctreeTask : public Task {
 public:
     ConstructOctreeTask(const ghoul::Dictionary& dictionary);
-    virtual ~ConstructOctreeTask();
+    virtual ~ConstructOctreeTask() = default;
 
     std::string description() override;
     void perform(const Task::ProgressCallback& onProgress) override;

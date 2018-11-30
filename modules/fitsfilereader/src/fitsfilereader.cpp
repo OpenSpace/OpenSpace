@@ -52,7 +52,7 @@ FitsFileReader::~FitsFileReader() {
 }
 
 bool FitsFileReader::isPrimaryHDU() {
-    return _infile->extension().size() == 0;
+    return _infile->extension().empty();
 }
 
 template <typename T>
@@ -507,9 +507,10 @@ std::vector<float> FitsFileReader::readFitsFile(std::string filePath, int& nValu
     return fullData;
 }
 
-std::vector<float> FitsFileReader::readSpeckFile(std::string filePath, int& nRenderValues)
+std::vector<float> FitsFileReader::readSpeckFile(const std::string& filePath,
+                                                 int& nRenderValues)
 {
-    auto fullData = std::vector<float>();
+    std::vector<float> fullData;
 
     std::ifstream fileStream(filePath);
 
@@ -525,7 +526,7 @@ std::vector<float> FitsFileReader::readSpeckFile(std::string filePath, int& nRen
     // The beginning of the speck file has a header that either contains comments
     // (signaled by a preceding '#') or information about the structure of the file
     // (signaled by the keywords 'datavar', 'texturevar', 'texture' and 'maxcomment')
-    std::string line = "";
+    std::string line;
     while (true) {
         std::streampos position = fileStream.tellg();
         std::getline(fileStream, line);
@@ -591,8 +592,8 @@ std::vector<float> FitsFileReader::readSpeckFile(std::string filePath, int& nRen
 
         // Check if star is a nullArray.
         bool nullArray = true;
-        for (size_t i = 0; i < readValues.size(); ++i) {
-            if (readValues[i] != 0.0) {
+        for (float f : readValues) {
+            if (f != 0.0) {
                 nullArray = false;
                 break;
             }

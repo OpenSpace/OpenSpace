@@ -45,7 +45,10 @@ namespace {
 
 namespace openspace {
 
-MilkywayConversionTask::MilkywayConversionTask(const ghoul::Dictionary& dictionary) {
+MilkywayConversionTask::MilkywayConversionTask(const ghoul::Dictionary& dictionary) 
+    : _inFirstIndex(0)
+    , _inNSlices(0)
+{
     dictionary.getValue(KeyInFilenamePrefix, _inFilenamePrefix);
     dictionary.getValue(KeyInFilenameSuffix, _inFilenameSuffix);
     dictionary.getValue(KeyInFirstIndex, _inFirstIndex);
@@ -54,13 +57,11 @@ MilkywayConversionTask::MilkywayConversionTask(const ghoul::Dictionary& dictiona
     dictionary.getValue(KeyOutDimensions, _outDimensions);
 }
 
-MilkywayConversionTask::~MilkywayConversionTask() {}
-
 std::string MilkywayConversionTask::description() {
     return std::string();
 }
 
-void MilkywayConversionTask::perform(const Task::ProgressCallback& progressCallback) {
+void MilkywayConversionTask::perform(const Task::ProgressCallback& onProgress) {
     using namespace openspace::volume;
 
     std::vector<std::string> filenames;
@@ -91,7 +92,7 @@ void MilkywayConversionTask::perform(const Task::ProgressCallback& progressCallb
             return value;
         };
 
-    rawWriter.write(sampleFunction, progressCallback);
+    rawWriter.write(sampleFunction, onProgress);
 }
 
 documentation::Documentation MilkywayConversionTask::documentation() {

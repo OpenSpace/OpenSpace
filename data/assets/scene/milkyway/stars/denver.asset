@@ -29,7 +29,10 @@ local object = {
         Type = "RenderableStars",
         File = speck .. "/denver_stars.speck",
         Texture = textures .. "/halo.png",
-        ColorMap = colorLUT .. "/denver_colorbv.cmap"
+        ColorMap = colorLUT .. "/denver_colorbv.cmap",
+        MagnitudeExponent = 6.2,
+        SizeComposition = "Distance Modulus",
+        RenderMethod = "Texture Based" -- or PSF
     },
     GUI = {
         Name = "Stars (Denver)",
