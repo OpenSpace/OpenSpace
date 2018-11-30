@@ -61,8 +61,7 @@ documentation::Documentation CameraLightSource::Documentation() {
 }
 
 CameraLightSource::CameraLightSource()
-    : LightSource()
-    , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
+    : _intensity(IntensityInfo, 1.f, 0.f, 1.f)
 {
     addProperty(_intensity);
 }

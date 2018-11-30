@@ -31,7 +31,7 @@ namespace openspace {
 GUIKeyboardHandler::GUIKeyboardHandler() {
     _keyConsumed = false;
 
-    global::callback::keyboard.push_back(
+    global::callback::keyboard.emplace_back(
         [&](Key, KeyModifier, KeyAction) -> bool {
             const bool previous = _keyConsumed;
             _keyConsumed = false;

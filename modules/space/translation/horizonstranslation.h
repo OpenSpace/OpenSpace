@@ -54,7 +54,7 @@ public:
     HorizonsTranslation();
     HorizonsTranslation(const ghoul::Dictionary& dictionary);
 
-    glm::dvec3 position(const UpdateData& time) const override;
+    glm::dvec3 position(const UpdateData& data) const override;
 
     static documentation::Documentation Documentation();
 

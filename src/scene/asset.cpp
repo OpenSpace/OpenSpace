@@ -112,7 +112,7 @@ void Asset::setState(Asset::State state) {
 
     for (const std::weak_ptr<Asset>& requiringAsset : _requiringAssets) {
         if (std::shared_ptr<Asset> a = requiringAsset.lock()) {
-            a->requiredAssetChangedState(thisAsset, state);
+            a->requiredAssetChangedState(state);
         }
     }
 
@@ -123,7 +123,7 @@ void Asset::setState(Asset::State state) {
     }
 }
 
-void Asset::requiredAssetChangedState(std::shared_ptr<Asset>, Asset::State childState) {
+void Asset::requiredAssetChangedState(Asset::State childState) {
     if (!isLoaded()) {
         // Prohibit state change to SyncResolved if additional requirements
         // may still be added.

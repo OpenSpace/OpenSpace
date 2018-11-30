@@ -111,7 +111,7 @@ void SequenceParser::sendPlaybookInformation(const std::string& name) {
 
     std::map<std::string, uint8_t> targetMap;
     uint8_t currentTargetId = 0;
-    for (auto target : _subsetMap) {
+    for (const std::pair<const std::string, ImageSubset>& target : _subsetMap) {
         if (targetMap.find(target.first) == targetMap.end()) {
             targetMap[target.first] = currentTargetId++;
         }
@@ -181,7 +181,7 @@ void SequenceParser::sendPlaybookInformation(const std::string& name) {
     union {
         uint32_t value;
         std::array<char, sizeof(uint32_t)> data;
-    } sizeBuffer;
+    } sizeBuffer = {};
     sizeBuffer.value = static_cast<uint32_t>(currentWriteLocation);
     buffer.insert(buffer.begin(), sizeBuffer.data.begin(), sizeBuffer.data.end());
     currentWriteLocation += sizeof(uint32_t);
