@@ -43,7 +43,7 @@ namespace openspace {
 ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
     addPropertySubOwner(gui);
 
-    global::callback::initialize.push_back([&]() {
+    global::callback::initialize.emplace_back([&]() {
         LDEBUGC("ImGUIModule", "Initializing GUI");
         gui.initialize();
 
@@ -129,22 +129,22 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         );
     });
 
-    global::callback::deinitialize.push_back([&]() {
+    global::callback::deinitialize.emplace_back([&]() {
         LDEBUGC("ImGui", "Deinitialize GUI");
         gui.deinitialize();
     });
 
-    global::callback::initializeGL.push_back([&]() {
+    global::callback::initializeGL.emplace_back([&]() {
         LDEBUGC("ImGui", "Initializing GUI OpenGL");
         gui.initializeGL();
     });
 
-    global::callback::deinitializeGL.push_back([&]() {
+    global::callback::deinitializeGL.emplace_back([&]() {
         LDEBUGC("ImGui", "Deinitialize GUI OpenGL");
         gui.deinitializeGL();
     });
 
-    global::callback::draw2D.push_back([&]() {
+    global::callback::draw2D.emplace_back([&]() {
         // TODO emiax: Make sure this is only called for one of the eyes, in the case
         // of side-by-side / top-bottom stereo.
 
@@ -176,7 +176,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         }
     });
 
-    global::callback::keyboard.push_back(
+    global::callback::keyboard.emplace_back(
         [&](Key key, KeyModifier mod, KeyAction action) -> bool {
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||
@@ -190,7 +190,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         }
     );
 
-    global::callback::character.push_back(
+    global::callback::character.emplace_back(
         [&](unsigned int codepoint, KeyModifier modifier) -> bool {
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||
@@ -204,7 +204,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         }
     );
 
-    global::callback::mouseButton.push_back(
+    global::callback::mouseButton.emplace_back(
         [&](MouseButton button, MouseAction action) -> bool {
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||
@@ -218,7 +218,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         }
     );
 
-    global::callback::mouseScrollWheel.push_back(
+    global::callback::mouseScrollWheel.emplace_back(
         [&](double, double posY) -> bool {
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||

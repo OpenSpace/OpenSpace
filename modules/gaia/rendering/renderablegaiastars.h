@@ -53,7 +53,7 @@ namespace documentation { struct Documentation; }
 class RenderableGaiaStars : public Renderable {
 public:
     explicit RenderableGaiaStars(const ghoul::Dictionary& dictionary);
-    virtual ~RenderableGaiaStars();
+    virtual ~RenderableGaiaStars() = default;
 
     void initializeGL() override;
     void deinitializeGL() override;

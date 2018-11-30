@@ -526,11 +526,11 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 
     std::vector<ScreenSpaceRenderable*> ssrs;
     ssrs.reserve(global::screenSpaceRenderables.size());
-    for (size_t i = 0; i < global::screenSpaceRenderables.size(); ++i) {
-        const bool isEnabled = global::screenSpaceRenderables[i]->isEnabled();
-        const bool isReady = global::screenSpaceRenderables[i]->isReady();
-        if (isEnabled && isReady) {
-            ssrs.push_back(global::screenSpaceRenderables[i].get());
+    for (const std::unique_ptr<ScreenSpaceRenderable>& ssr :
+         global::screenSpaceRenderables)
+    {
+        if (ssr->isEnabled() && ssr->isReady()) {
+            ssrs.push_back(ssr.get());
         }
     }
 
@@ -1045,7 +1045,8 @@ void RenderEngine::renderCameraInformation() {
     constexpr const float YSeparation = 5.f;
     constexpr const float XSeparation = 5.f;
 
-    interaction::OrbitalNavigator nav = global::navigationHandler.orbitalNavigator();
+    const interaction::OrbitalNavigator& nav =
+        global::navigationHandler.orbitalNavigator();
 
     _cameraButtonLocations.rotation = {
         fontResolution().x - rotationBox.boundingBox.x - XSeparation,

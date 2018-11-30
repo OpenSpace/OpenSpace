@@ -61,7 +61,7 @@ public:
      *  Instantiate a new DebugRenderer with a custom shader program
      */
     DebugRenderer(std::unique_ptr<ghoul::opengl::ProgramObject> programObject);
-    ~DebugRenderer();
+    ~DebugRenderer() = default;
 
     /**
      *  Access the static reference

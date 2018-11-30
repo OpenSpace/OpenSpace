@@ -131,8 +131,8 @@ private:
     // DEBUG:
     properties::OptionProperty _renderOption;
 
-    ghoul::opengl::Texture* _polygonTexture;
-    ghoul::opengl::Texture* _spriteTexture;
+    ghoul::opengl::Texture* _polygonTexture = nullptr;
+    ghoul::opengl::Texture* _spriteTexture = nullptr;
     ghoul::opengl::ProgramObject* _program = nullptr;
     ghoul::opengl::ProgramObject* _renderToPolygonProgram = nullptr;
 

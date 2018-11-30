@@ -186,7 +186,7 @@ private:
     int _nu_samples;
 
     glm::dmat4 _modelTransform;
-    double _time;
+    double _time = 0.0;
 
     // Eclipse Shadows
     std::vector<ShadowConfiguration> _shadowConfArray;

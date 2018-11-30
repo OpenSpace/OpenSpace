@@ -51,7 +51,7 @@ namespace {
 namespace openspace {
 
 WebBrowserModule::WebBrowserModule() : OpenSpaceModule(WebBrowserModule::Name) {
-    global::callback::deinitialize.push_back([this]() { deinitialize(); });
+    global::callback::deinitialize.emplace_back([this]() { deinitialize(); });
 }
 
 void WebBrowserModule::internalDeinitialize() {
@@ -100,7 +100,7 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     _cefHost = std::make_unique<CefHost>(std::move(helperLocation));
     LDEBUG("Starting CEF... done!");
 
-    global::callback::preSync.push_back([this]() {
+    global::callback::preSync.emplace_back([this]() {
         if (_cefHost && !_browsers.empty()) {
             _cefHost->doMessageLoopWork();
         }

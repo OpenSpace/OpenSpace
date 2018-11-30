@@ -151,12 +151,12 @@ std::string KeybindingManager::generateJson() const {
         }
         first = false;
         json << "{";
-        json << "\"key\": \"" << ghoul::to_string(p.first) << "\",";
-        json << "\"script\": \"" << escapedJson(p.second.command) << "\",";
-        json << "\"remoteScripting\": "
+        json << R"("key": ")" << ghoul::to_string(p.first) << "\",";
+        json << R"("script": ")" << escapedJson(p.second.command) << "\",";
+        json << R"("remoteScripting: ")"
              << (p.second.synchronization ? "true," : "false,");
-        json << "\"documentation\": \"" << escapedJson(p.second.documentation) << "\",";
-        json << "\"name\": \"" << escapedJson(p.second.name) << "\"";
+        json << R"("documentation": ")" << escapedJson(p.second.documentation) << "\",";
+        json << R"("name: ")" << escapedJson(p.second.name) << "\"";
         json << "}";
     }
     json << "]";

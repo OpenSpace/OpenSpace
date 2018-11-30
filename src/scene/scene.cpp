@@ -50,9 +50,8 @@ namespace {
 
 namespace openspace {
 
-Scene::InvalidSceneError::InvalidSceneError(const std::string& msg,
-                                            const std::string& comp)
-    : ghoul::RuntimeError(msg, comp)
+Scene::InvalidSceneError::InvalidSceneError(std::string msg, std::string comp)
+    : ghoul::RuntimeError(std::move(msg), std::move(comp))
 {}
 
 Scene::Scene(std::unique_ptr<SceneInitializer> initializer)

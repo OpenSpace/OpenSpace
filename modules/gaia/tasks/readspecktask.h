@@ -27,6 +27,8 @@
 
 #include <openspace/util/task.h>
 
+#include <string>
+
 namespace openspace {
 
 namespace documentation { struct Documentation; }

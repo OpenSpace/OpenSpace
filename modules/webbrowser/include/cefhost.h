@@ -35,7 +35,7 @@ namespace openspace {
 
 class CefHost {
 public:
-    CefHost(std::string helperLocation);
+    CefHost(const std::string& helperLocation);
     ~CefHost();
     void doMessageLoopWork();
 

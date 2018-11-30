@@ -85,7 +85,7 @@ namespace {
     // them at a cutoff level, and I think this might still be the best solution for the
     // time being.  --abock  2018-10-30
     constexpr const int DefaultSkirtedGridSegments = 64;
-    constexpr static const int UnknownDesiredLevel = -1;
+    constexpr const int UnknownDesiredLevel = -1;
 
     const openspace::globebrowsing::GeodeticPatch Coverage =
         openspace::globebrowsing::GeodeticPatch(0, 0, 90, 180);
@@ -387,6 +387,7 @@ bool intersects(const AABB3& bb, const AABB3& o) {
 Chunk::Chunk(const TileIndex& ti)
     : tileIndex(ti)
     , surfacePatch(ti)
+    , status(Status::DoNothing)
 {}
 
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
