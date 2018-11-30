@@ -27,16 +27,17 @@
 #include <openspace/documentation/verifier.h>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo PositionInfo = {
-        "Position",
-        "Position",
-        "Write some documentaion here!"
+    constexpr openspace::properties::Property::PropertyInfo ObjectIdentifierInfo = {
+    "ObjectIdentifier",
+    "Object Identifier",
+    "Identifier of the object that this translation is applied to."
     };
 } // namespace
 
 namespace openspace {
 
 constexpr const char* _loggerCat = "RadecTranslation";
+constexpr const char* KeyIdentifier = "ObjectIdentifier";
 
 documentation::Documentation RadecTranslation::Documentation() {
     using namespace documentation;
@@ -50,36 +51,26 @@ documentation::Documentation RadecTranslation::Documentation() {
                 Optional::No
             },
             {
-                PositionInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                PositionInfo.description
+                ObjectIdentifierInfo.identifier,
+                new StringVerifier,
+                Optional::No,
+                ObjectIdentifierInfo.description
             }
         }
     };
 }
 
-RadecTranslation::RadecTranslation()
-    : _position(
-        PositionInfo,
-        glm::dvec3(0.0),
-        glm::dvec3(-std::numeric_limits<double>::max()),
-        glm::dvec3(std::numeric_limits<double>::max())
-    )
-{   
-    //todo, exchange this property to ra dec range probably
-    addProperty(_position);
-
-    _position.onChange([this]() {
-        requireUpdate();
-        notifyObservers();
-    }); 
-}
+RadecTranslation::RadecTranslation() = default;
 
 RadecTranslation::RadecTranslation(const ghoul::Dictionary& dictionary)
     : RadecTranslation()
 {
     std::unique_ptr<ghoul::Dictionary> dictionaryPtr = std::make_unique<ghoul::Dictionary>(dictionary);
+    
+    if (dictionary.hasKeyAndValue<std::string>(KeyIdentifier)) {
+        _objectIdentifier = dictionary.value<std::string>(KeyIdentifier);
+    }
+
     extractData(dictionaryPtr);
 
     documentation::testSpecificationAndThrow(
@@ -87,16 +78,17 @@ RadecTranslation::RadecTranslation(const ghoul::Dictionary& dictionary)
         dictionary,
         "RadecTranslation"
     );
+
 }
 
 void RadecTranslation::extractData(std::unique_ptr<ghoul::Dictionary> &dictionary){
-    const char* _identifier = "spacecraft";
+    constexpr const char* _identifier = "RadecTranslation";
 
     if (!radecManager.extractMandatoryInfoFromDictionary(_identifier, dictionary)) {
-        LERROR(fmt::format("{}: Did not manage to extract data. (from RadecTranslation and RadecManager)", _identifier));
+        LERROR(fmt::format("{}: Did not manage to extract data for {}.", _identifier, _objectIdentifier.c_str()));
     }
     else {
-        LDEBUG(fmt::format("{}: Successfully read data. (from RadecTranslation and RadecManager)", _identifier));
+        LDEBUG(fmt::format("{}: Successfully read data for {}.", _identifier, _objectIdentifier.c_str()));
     }
 }
 
@@ -110,15 +102,16 @@ glm::dvec3 RadecTranslation::convertRaDecRangeToCartesian(double ra, double dec,
     return raDecPos;
 }
 
-glm::dvec3 RadecTranslation::transformCartesianCoordinates(glm::vec3 pos) const {
+glm::dvec3 RadecTranslation::radecToCartesianCoordinates(glm::vec3 pos) const {
 
+    // get the Earth relative cartesian coordinates
+    // expressed in the equatorial sphere coordinate system
     glm::dvec3 cartesianPos = convertRaDecRangeToCartesian(pos.x, pos.y, pos.z);
-
+    // get Earth and make sure it has been placed in OpenSpace 
     glm::dvec3 earthPos = global::renderEngine.scene()->sceneGraphNode("Earth")->worldPosition();
     glm::dmat4 translationMatrixEarth = glm::translate( glm::dmat4(1.0), glm::dvec3(earthPos) );
-
-    glm::dvec4 newPos = { cartesianPos, 1.0 };
-    glm::dvec4 nodePos =  translationMatrixEarth * _rotEquatorialSphere * newPos;
+    // calculate the cartesian world coordinates
+    glm::dvec4 nodePos =  translationMatrixEarth * _rotEquatorialSphere * glm::vec4{ cartesianPos, 1.0 };
     glm::dvec3 worldposition = { nodePos.x, nodePos.y, nodePos.z };
 
     return worldposition;
@@ -126,8 +119,8 @@ glm::dvec3 RadecTranslation::transformCartesianCoordinates(glm::vec3 pos) const 
 
 glm::dvec3 RadecTranslation::position(const UpdateData& data) const{
    glm::vec3 pos = radecManager.getPosForTime(data.time.j2000Seconds());
-   _pos = transformCartesianCoordinates(pos);
-   return _pos;
+   _position = radecToCartesianCoordinates(pos);
+   return _position;
 }
 
 } // namespace openspace

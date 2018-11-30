@@ -7,14 +7,16 @@ local models = asset.syncedResource({
     Identifier = "dsn_stations",
     Version = 1
 })
+local spacecraftIdentifier = "testRADEC";
 
 local testRADEC = {
-    Identifier = "testRADEC",
+    Identifier = spacecraftIdentifier,
     Transform = {
       Translation = {
           Type = "RadecTranslation", 
           DataFolder = dataFolder,
-          DataFileType = "json"
+          DataFileType = "json",
+          ObjectIdentifier = spacecraftIdentifier
       },
       Scale = {
             Type = "StaticScale",
