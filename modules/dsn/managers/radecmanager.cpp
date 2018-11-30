@@ -35,13 +35,13 @@ namespace openspace {
     }
 
    glm::vec3 RadecManager::getPosForTime(double time) const {
-     //  std::vector<double> timeDoubles = DataFileHelper::getHoursFromFileNames(_dataFiles); //save as member 
-       std::vector<double> timeDoubles = DataFileHelper::geMinutesFromFileNames(_dataFiles); //save as member 
-       int idx = DataFileHelper::findFileIndexForCurrentTime(time, timeDoubles);
+       std::vector<double> timeDoubles = DataFileHelper::getHoursFromFileNames(_dataFiles); //save as member 
 
-       //If the current hour in open space found in filesystem, parse the data and return the ra dec values from that file. 
+       int idx = DataFileHelper::findFileIndexForCurrentTime(time, timeDoubles);
        if (radecParser(idx)) {
-           return glm::vec3(_ra,_dec,_range);
+           //If we have the correct file, check for the correct position in that file.
+           glm::vec3 pos = findPositionInVector(time);
+           return glm::vec3(pos.x,pos.y,pos.z);
        }
        return glm::vec3(-1,-1,-1);
    }
@@ -54,18 +54,40 @@ namespace openspace {
 
        filename = _dataFiles[index];
 
-       std::string startTimeString = DataFileHelper::getMinuteFromFileName(filename);
+       std::string startTimeString = DataFileHelper::getHourFromFileName(filename);
        const double triggerTime = Time::convertTime(startTimeString);
 
        _checkFileTime = triggerTime;
 
        std::ifstream ifs(filename);
        nlohmann::json j = nlohmann::json::parse(ifs);
-        _ra = j["RAUp"].get<double>();
-        _dec = j["DecUp"].get<double>();
-        _range = j["GeoRngUp"].get<double>();
 
+       RadecManager::Position position;
+       positions.clear();
+       positions.reserve(0);
+
+       for (const auto& pos : j["Positions"]) {
+           position.timeStamp = pos["TimeStamp"].get<std::string>();
+           position.ra = pos["RAUp"].get<double>();
+           position.dec = pos["DecUp"].get<double>();
+           position.range = pos["GeoRngUp"].get<double>();
+          
+           RadecManager::positions.push_back(position);
+       }
        return true;
+   }
+
+   glm::vec3 RadecManager::findPositionInVector(double time) const{
+       minuteTimes.clear();
+       minuteTimes.reserve(0);
+
+       for (int i = 0; i < RadecManager::positions.size(); i++) {
+           //Convert each timestamp in vector of positions to j2000
+           minuteTimes.push_back(Time::convertTime(positions[i].timeStamp));
+       }
+       int idx = DataFileHelper::findFileIndexForCurrentTime(time, minuteTimes);
+       glm::vec3 pos = { positions[idx].ra, positions[idx].dec, positions[idx].range };
+       return pos;
    }
 
 }

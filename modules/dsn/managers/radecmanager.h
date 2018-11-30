@@ -36,9 +36,16 @@ namespace openspace {
 
     public:
        RadecManager();
-       mutable double _ra;
-       mutable double _dec;
-       mutable double _range;
+
+       struct Position {
+           mutable std::string timeStamp;
+           mutable double ra;
+           mutable double dec;
+           mutable double range;
+       };
+       mutable std::vector<Position> positions;
+       mutable std::vector<double> minuteTimes;
+
        /*Used to check if the loaded file is still relevant or if we should look for another one. */
        mutable double _checkFileTime;
        /* A vector with all our datafile paths*/
@@ -50,8 +57,9 @@ namespace openspace {
        glm::vec3 getPosForTime(double time) const;
        /* parses positioningdata from a file given an index in our preloaded filename vector */
        bool radecParser(int index) const;
+
+       glm::vec3 findPositionInVector(double time) const;
     };
 }
-
 
 #endif 

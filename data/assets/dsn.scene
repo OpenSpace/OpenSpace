@@ -88,7 +88,7 @@ local equatorial = asset.require('scene/digitaluniverse/grids')
 asset.onInitialize(function ()
 
     local now = openspace.time.currentWallTime()
-	openspace.time.setTime("2018 SEP 03 11:11:00")
+	openspace.time.setTime("2018 SEP 01 11:11:00")
 
     sceneHelper.bindKeys(Keybindings)
 
