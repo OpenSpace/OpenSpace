@@ -48,6 +48,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 
+#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 
 #include <iterator>
@@ -746,7 +747,17 @@ double SessionRecording::currentTime() const {
 }
 
 double SessionRecording::fixedDeltaTimeDuringFrameOutput() const {
-    return _saveRenderingDeltaTime;
+    // Check if renderable in focus is still resolving tile loading
+    // do not adjust time while we are doing this
+    SceneGraphNode* focusNode = global::navigationHandler.focusNode();
+    const Renderable* focusRenderable = focusNode->renderable();
+    if (focusRenderable->renderedWithDesiredData())
+    {
+        return _saveRenderingDeltaTime;
+    }
+    else {
+        return 0;
+    }   
 }
 
 void SessionRecording::playbackCamera() {
@@ -1004,8 +1015,15 @@ void SessionRecording::moveAheadInTime() {
     lookForNonCameraKeyframesThatHaveComeDue(currTime);
     updateCameraWithOrWithoutNewKeyframes(currTime);
     if (isSavingFramesDuringPlayback()) {
-        _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
-        global::renderEngine.takeScreenShot();
+        // Check if renderable in focus is still resolving tile loading
+        // do not adjust time while we are doing this, or take screenshot
+        SceneGraphNode* focusNode = global::navigationHandler.focusNode();
+        const Renderable* focusRenderable = focusNode->renderable();
+        if (focusRenderable->renderedWithDesiredData())
+        {
+            _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
+            //global::renderEngine.takeScreenShot();
+        }       
     }
 }
 

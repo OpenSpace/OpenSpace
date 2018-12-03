@@ -88,6 +88,8 @@ public:
     SurfacePositionHandle calculateSurfacePositionHandle(
         const glm::dvec3& targetModelSpace) const override;
 
+    bool renderedWithDesiredData() const override;
+
     const Ellipsoid& ellipsoid() const;
     const LayerManager& layerManager() const;
     LayerManager& layerManager();
@@ -128,7 +130,7 @@ private:
      * Goes through all available <code>ChunkCuller</code>s and check if any of them
      * allows culling of the <code>Chunk</code>s in question.
      */
-    bool testIfCullable(const Chunk& chunk, const RenderData& renderData) const;
+    bool testIfCullable(const Chunk& chunk, const RenderData& renderData, bool& allChunksAvailable) const;
 
     /**
      * Gets the desired level which can be used to determine if a chunk should split
@@ -140,7 +142,7 @@ private:
      * <code>Chunk</code>, it wants to split. If it is lower, it wants to merge with
      * its siblings.
      */
-    int desiredLevel(const Chunk& chunk, const RenderData& renderData) const;
+    int desiredLevel(const Chunk& chunk, const RenderData& renderData, bool& allChunkTilesOK) const;
 
     /**
      * Calculates the height from the surface of the reference ellipsoid to the
@@ -184,10 +186,10 @@ private:
         bool renderBounds, bool renderAABB) const;
 
     bool isCullableByFrustum(const Chunk& chunk, const RenderData& renderData) const;
-    bool isCullableByHorizon(const Chunk& chunk, const RenderData& renderData) const;
+    bool isCullableByHorizon(const Chunk& chunk, const RenderData& renderData, bool& allChunkTilesOK) const;
 
-    int desiredLevelByDistance(const Chunk& chunk, const RenderData& data) const;
-    int desiredLevelByProjectedArea(const Chunk& chunk, const RenderData& data) const;
+    int desiredLevelByDistance(const Chunk& chunk, const RenderData& data, bool& allChunkTilesOK) const;
+    int desiredLevelByProjectedArea(const Chunk& chunk, const RenderData& data, bool& allChunkTilesOK) const;
     int desiredLevelByAvailableTileData(const Chunk& chunk) const;
 
 
@@ -204,7 +206,7 @@ private:
     void splitChunkNode(Chunk& cn, int depth);
     void mergeChunkNode(Chunk& cn);
     bool updateChunkTree(Chunk& cn, const RenderData& data);
-    void updateChunk(Chunk& chunk, const RenderData& data) const;
+    bool updateChunk(Chunk& chunk, const RenderData& data) const;
     void freeChunkNode(Chunk* n);
 
     Ellipsoid _ellipsoid;
@@ -241,6 +243,7 @@ private:
     bool _lodScaleFactorDirty = true;
     bool _chunkCornersDirty = true;
     bool _nLayersIsDirty = true;
+    bool _allChunksAvailable = true;
     Layer* _lastChangedLayer = nullptr;
 };
 

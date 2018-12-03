@@ -242,7 +242,7 @@ tilesAndSettingsUnsorted(const LayerGroup& layerGroup, const TileIndex& tileInde
     return tilesAndSettings;
 }
 
-BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& lm) {
+BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& lm, bool& allChunkTilesOK) {
     using ChunkTileSettingsPair = std::pair<ChunkTile, const LayerRenderSettings*>;
 
     BoundingHeights boundingHeights { 0.f, 0.f, false };
@@ -291,6 +291,9 @@ BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& 
             }
             lastHadMissingData = tileMetaData.hasMissingData[HeightChannel];
         }
+        else if(chunkTile.tile.status == Tile::Status::Unavailable) {
+            allChunkTilesOK = false;
+        }
 
         // Allow for early termination
         if (!lastHadMissingData) {
@@ -303,9 +306,10 @@ BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& 
 
 std::array<glm::dvec4, 8> boundingCornersForChunk(const Chunk& chunk,
                                                   const LayerManager& lm,
-                                                  const Ellipsoid& ellipsoid)
+                                                  const Ellipsoid& ellipsoid,
+                                                  bool& allChunkTilesOK)
 {
-    const BoundingHeights& boundingHeight = boundingHeightsForChunk(chunk, lm);
+    const BoundingHeights& boundingHeight = boundingHeightsForChunk(chunk, lm, allChunkTilesOK);
 
     // assume worst case
     const double patchCenterRadius = ellipsoid.maximumRadius();
@@ -671,6 +675,10 @@ void RenderableGlobe::update(const UpdateData& data) {
     }
 }
 
+bool RenderableGlobe::renderedWithDesiredData() const {
+    return _allChunksAvailable;
+}
+
 const LayerManager& RenderableGlobe::layerManager() const {
     return _layerManager;
 }
@@ -749,6 +757,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
         _localRenderer.updatedSinceLastCall = false;
     }
 
+    _allChunksAvailable = true;
     updateChunkTree(_leftRoot, data);
     updateChunkTree(_rightRoot, data);
     _chunkCornersDirty = false;
@@ -1460,17 +1469,18 @@ SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
 }
 
 bool RenderableGlobe::testIfCullable(const Chunk& chunk,
-                                     const RenderData& renderData) const
+                                     const RenderData& renderData,
+                                     bool& allChunkTilesOK) const
 {
-    return (PreformHorizonCulling && isCullableByHorizon(chunk, renderData)) ||
+    return (PreformHorizonCulling && isCullableByHorizon(chunk, renderData, allChunkTilesOK)) ||
            (PerformFrustumCulling && isCullableByFrustum(chunk, renderData));
 }
 
-int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderData) const
+int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderData, bool& allChunkTilesOK) const
 {
     const int desiredLevel = _debugProperties.levelByProjectedAreaElseDistance ?
-        desiredLevelByProjectedArea(chunk, renderData) :
-        desiredLevelByDistance(chunk, renderData);
+        desiredLevelByProjectedArea(chunk, renderData, allChunkTilesOK) :
+        desiredLevelByDistance(chunk, renderData, allChunkTilesOK);
     const int levelByAvailableData = desiredLevelByAvailableTileData(chunk);
 
     if (LimitLevelByAvailableData && (levelByAvailableData != UnknownDesiredLevel)) {
@@ -1764,7 +1774,8 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
 //////////////////////////////////////////////////////////////////////////////////////////
 
 int RenderableGlobe::desiredLevelByDistance(const Chunk& chunk,
-                                            const RenderData& data) const
+                                            const RenderData& data,
+                                            bool& allChunkTilesOK) const
 {
     // Calculations are done in the reference frame of the globe
     // (model space). Hence, the camera position needs to be transformed
@@ -1778,7 +1789,7 @@ int RenderableGlobe::desiredLevelByDistance(const Chunk& chunk,
     const glm::dvec3 patchNormal = _ellipsoid.geodeticSurfaceNormal(pointOnPatch);
     glm::dvec3 patchPosition = _ellipsoid.cartesianSurfacePosition(pointOnPatch);
 
-    const BoundingHeights heights = boundingHeightsForChunk(chunk, _layerManager);
+    const BoundingHeights heights = boundingHeightsForChunk(chunk, _layerManager, allChunkTilesOK);
     const double heightToChunk = heights.min;
 
     // Offset position according to height
@@ -1798,7 +1809,8 @@ int RenderableGlobe::desiredLevelByDistance(const Chunk& chunk,
 }
 
 int RenderableGlobe::desiredLevelByProjectedArea(const Chunk& chunk,
-                                                 const RenderData& data) const
+                                                 const RenderData& data,
+                                                 bool& allChunkTilesOK) const
 {
     // Calculations are done in the reference frame of the globe
     // (model space). Hence, the camera position needs to be transformed
@@ -1833,7 +1845,7 @@ int RenderableGlobe::desiredLevelByProjectedArea(const Chunk& chunk,
     //    +-----------------+  <-- south east corner
 
     const Geodetic2 center = chunk.surfacePatch.center();
-    const BoundingHeights heights = boundingHeightsForChunk(chunk, _layerManager);
+    const BoundingHeights heights = boundingHeightsForChunk(chunk, _layerManager, allChunkTilesOK);
     const Geodetic3 c = { center, heights.min };
     const Geodetic3 c1 = { Geodetic2{ center.lat, closestCorner.lon }, heights.min };
     const Geodetic3 c2 = { Geodetic2{ closestCorner.lat, center.lon }, heights.min };
@@ -1926,12 +1938,13 @@ bool RenderableGlobe::isCullableByFrustum(const Chunk& chunk,
 }
 
 bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk,
-                                          const RenderData& renderData) const
+                                          const RenderData& renderData,
+                                          bool& allChunkTilesOK) const
 {
     // Calculations are done in the reference frame of the globe. Hence, the camera
     // position needs to be transformed with the inverse model matrix
     const GeodeticPatch& patch = chunk.surfacePatch;
-    const float maxHeight = boundingHeightsForChunk(chunk, _layerManager).max;
+    const float maxHeight = boundingHeightsForChunk(chunk, _layerManager, allChunkTilesOK).max;
     const glm::dvec3 globePos = glm::dvec3(0, 0, 0); // In model space it is 0
     const double minimumGlobeRadius = _ellipsoid.minimumRadius();
 
@@ -2005,10 +2018,12 @@ void RenderableGlobe::splitChunkNode(Chunk& cn, int depth) {
             cn.children[i] = new (memory[i]) Chunk(
                 cn.tileIndex.child(static_cast<Quad>(i))
             );
+            bool allChunkTilesOK;
             cn.children[i]->corners = boundingCornersForChunk(
                 *cn.children[i],
                 _layerManager,
-                _ellipsoid
+                _ellipsoid,
+                allChunkTilesOK
             );
         }
     }
@@ -2047,7 +2062,9 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
     //         children and then again it self to be processed after the children finish).
     //         In addition, this didn't even improve performance ---  2018-10-04
     if (isLeaf(cn)) {
-        updateChunk(cn, data);
+        if(!updateChunk(cn, data))
+            _allChunksAvailable = false;
+
         if (cn.status == Chunk::Status::WantSplit) {
             splitChunkNode(cn, 1);
         }
@@ -2062,43 +2079,51 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
         }
 
         const bool allChildrenWantsMerge = requestedMergeMask == 0xf;
-        updateChunk(cn, data);
+        if (!updateChunk(cn, data))
+            _allChunksAvailable = false;
 
         if (allChildrenWantsMerge && (cn.status != Chunk::Status::WantSplit)) {
             mergeChunkNode(cn);
+        }
+        else if (cn.status == Chunk::Status::WantSplit) {
+            splitChunkNode(cn, 1);
         }
 
         return false;
     }
 }
 
-void RenderableGlobe::updateChunk(Chunk& chunk, const RenderData& data) const {
+bool RenderableGlobe::updateChunk(Chunk& chunk, const RenderData& data) const {
+    bool allChunkTilesAvailable = true;
     if (_chunkCornersDirty) {
-        chunk.corners = boundingCornersForChunk(chunk, _layerManager, _ellipsoid);
+        chunk.corners = boundingCornersForChunk(chunk, _layerManager, _ellipsoid, allChunkTilesAvailable);
 
         // The flag gets set to false globally after the updateChunkTree calls
     }
 
-    if (testIfCullable(chunk, data)) {
+    if (testIfCullable(chunk, data, allChunkTilesAvailable)) {
         chunk.isVisible = false;
         chunk.status = Chunk::Status::WantMerge;
-        return;
+        return true;
     }
     else {
         chunk.isVisible = true;
     }
 
-    const int dl = desiredLevel(chunk, data);
+    const int dl = desiredLevel(chunk, data, allChunkTilesAvailable);
 
     if (dl < chunk.tileIndex.level) {
         chunk.status = Chunk::Status::WantMerge;
     }
     else if (chunk.tileIndex.level < dl) {
         chunk.status = Chunk::Status::WantSplit;
+        allChunkTilesAvailable = true;
     }
     else {
         chunk.status = Chunk::Status::DoNothing;
     }
+
+    return allChunkTilesAvailable;
 }
 
 } // namespace openspace::globebrowsing

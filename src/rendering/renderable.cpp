@@ -161,6 +161,10 @@ SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
     };
 }
 
+bool Renderable::renderedWithDesiredData() const {
+    return true;
+}
+
 void Renderable::setPscUniforms(ghoul::opengl::ProgramObject& program,
                                 const Camera& camera,
                                 const PowerScaledCoordinate& position)
