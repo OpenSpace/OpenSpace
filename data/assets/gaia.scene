@@ -1,4 +1,4 @@
-local has_gaia = openspace.modules.isLoaded('gaia2')
+local has_gaia = openspace.modules.isLoaded('gaia')
 if not has_gaia then
     openspace.printFatal('Could not load scene "' .. asset.filePath .. '" due to missing module "gaia"')
     do return end
