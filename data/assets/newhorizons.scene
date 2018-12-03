@@ -18,6 +18,8 @@ asset.require('util/default_joystick')
 
 asset.require('util/webgui')
 
+asset.request('customization/globebrowsing')
+
 -- Custom Keybindings
 local Keybindings = {
     {
@@ -45,6 +47,18 @@ local Keybindings = {
         Local = false
     },
     {
+        Key = "F7",
+        Command = 
+[[local enabled = openspace.getPropertyValue('Scene.Pluto.Renderable.ProjectionComponent.PerformProjection')
+openspace.setPropertyValue('Scene.Pluto.Renderable.ProjectionComponent.PerformProjection', not enabled)
+openspace.setPropertyValue('Scene.Charon.Renderable.ProjectionComponent.PerformProjection', not enabled)
+openspace.setPropertyValueSingle("Dashboard.NewHorizonsInstruments.Enabled", not enabled)]],
+        Documentation = "Toggles New Horizons image projection.",
+        Name = "Toggle NH Image Projection",
+        GuiPath = "/New Horizons",
+        Local = false
+    },
+    {
         Key = "F8",
         Command = "openspace.setPropertyValue('Scene.Pluto.Renderable.ProjectionComponent.ClearAllProjections', true);" ..
                   "openspace.setPropertyValue('Scene.Charon.Renderable.ProjectionComponent.ClearAllProjections', true);",
@@ -65,7 +79,7 @@ local Keybindings = {
     },
     {
         Key = "KP_8",
-        Command = propertyHelper.increment('Scene.Pluto.Renderable.HeightExaggeration', 5000000),
+        Command = propertyHelper.increment('Scene.Pluto.Renderable.HeightExaggeration', 5000),
         Documentation = "Increases the height map exaggeration on Pluto.",
         Name = "Pluto HeightExaggeration +",
         GuiPath = "/New Horizons",
@@ -73,7 +87,7 @@ local Keybindings = {
     },
     {
         Key = "KP_2",
-        Command = propertyHelper.decrement('Scene.Pluto.Renderable.HeightExaggeration', 5000000),
+        Command = propertyHelper.decrement('Scene.Pluto.Renderable.HeightExaggeration', 5000),
         Documentation = "Decreases the height map exaggeration on Pluto.",
         Name = "Pluto HeightExaggeration -",
         GuiPath = "/New Horizons",
@@ -81,7 +95,7 @@ local Keybindings = {
     },
     {
         Key = "KP_9",
-        Command = propertyHelper.increment('Scene.Charon.Renderable.HeightExaggeration', 5000000),
+        Command = propertyHelper.increment('Scene.Charon.Renderable.HeightExaggeration', 5000),
         Documentation = "Increases the height map exaggeration on Charon.",
         Name = "Charon HeightExaggeration +",
         GuiPath = "/New Horizons",
@@ -89,7 +103,7 @@ local Keybindings = {
     },
     {
         Key = "KP_3",
-        Command = propertyHelper.decrement('Scene.Charon.Renderable.HeightExaggeration', 5000000),
+        Command = propertyHelper.decrement('Scene.Charon.Renderable.HeightExaggeration', 5000),
         Documentation = "Decreases the height map exaggeration on Charon.",
         Name = "Charon HeightExaggeration -",
         GuiPath = "/New Horizons",
@@ -140,13 +154,22 @@ local Keybindings = {
         Local = false
     },
     {
-        Key = "t",
+        Key = "Shift+t",
         Command = renderableHelper.toggle('Scene.PlutoShadow') .. renderableHelper.toggle('Scene.CharonShadow'),
         Documentation = "Toggles the visibility of the shadow visualization of Pluto and Charon.",
         Name = "Toggle Shadows",
         GuiPath = "/New Horizons",
         Local = false
+    },
+    {
+        Key = "t",
+        Command = renderableHelper.toggle('Scene.NewHorizonsTrailPluto'),
+        Documentation = "Toggles the trail of New Horizons.",
+        Name = "Toggle NH Trail",
+        GuiPath = "/New Horizons",
+        Local = false
     }
+
 }
 
 local NewHorizonsAsset = asset.require('scene/solarsystem/missions/newhorizons/model')
@@ -174,6 +197,10 @@ assetHelper.registerDashboardItems(asset, {
     }
 })
 
+assetHelper.registerInterestingNodes(asset, {
+    "Pluto", "NewHorizons", "Charon"
+})
+
 asset.onInitialize(function ()
     openspace.time.setTime("2015-07-14T08:00:00.00")
     sceneHelper.bindKeys(Keybindings)
@@ -183,10 +210,6 @@ asset.onInitialize(function ()
     sceneHelper.setDeltaTimeKeys({
         1, 5, 10, 20, 40, 60, 120, 360, 540, 1080,
         2160, 4320, 8640
-    })
-
-    openspace.markInterestingNodes({
-        "Pluto", "NewHorizons", "Charon"
     })
 
     openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.FollowFocusNodeRotationDistance', 20.000000);
@@ -212,7 +235,4 @@ asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
 
     openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
-    openspace.removeInterestingNodes({
-        "Pluto", "NewHorizons", "Charon"
-    })
 end)

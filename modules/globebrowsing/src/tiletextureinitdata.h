@@ -42,9 +42,9 @@ public:
     BooleanType(ShouldAllocateDataOnCPU);
     BooleanType(PadTiles);
 
-    TileTextureInitData(size_t width, size_t height, GLenum glType,
-        ghoul::opengl::Texture::Format textureFormat, PadTiles padTiles,
-        ShouldAllocateDataOnCPU cpuAlloc = ShouldAllocateDataOnCPU::No);
+    TileTextureInitData(size_t width, size_t height, GLenum type,
+        ghoul::opengl::Texture::Format textureFormat, PadTiles pad,
+        ShouldAllocateDataOnCPU allocCpu = ShouldAllocateDataOnCPU::No);
 
     TileTextureInitData(const TileTextureInitData& original) = default;
     TileTextureInitData(TileTextureInitData&& original) = default;

@@ -157,10 +157,10 @@ Geodetic2 GeodeticPatch::clamp(const Geodetic2& p) const {
     double pointLat = normalizedAngleAround(p.lat, _center.lat);
     double pointLon = normalizedAngleAround(p.lon, _center.lon);
 
-    Geodetic2 res;
-    res.lat = glm::clamp(pointLat, minLat(), maxLat());
-    res.lon = glm::clamp(pointLon, minLon(), maxLon());
-    return res;
+    return {
+        glm::clamp(pointLat, minLat(), maxLat()),
+        glm::clamp(pointLon, minLon(), maxLon())
+    };
 }
 
 Geodetic2 GeodeticPatch::closestCorner(const Geodetic2& p) const {

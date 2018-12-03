@@ -171,7 +171,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _stepSize(StepSizeInfo, 0.02f, 0.001f, 1.f)
+    , _stepSize(StepSizeInfo, 0.02f, 0.001f, 0.1f)
     , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
     , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
     , _secondsBefore(SecondsBeforeInfo, 0.f, 0.01f, SecondsInOneDay)
@@ -222,6 +222,8 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
         );
         _gridType = static_cast<std::underlying_type_t<VolumeGridType>>(gridType);
     }
+
+    addProperty(_opacity);
 }
 
 RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}

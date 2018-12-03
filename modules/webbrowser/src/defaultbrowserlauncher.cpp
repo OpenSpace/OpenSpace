@@ -35,7 +35,7 @@ namespace {
 void launchBrowser(const std::string& url) {
     LDEBUGC("DefaultBrowserLauncher", "Launching default browser: " + url);
 #ifdef WIN32
-    ShellExecute(0, 0, url.c_str(), 0, 0, SW_SHOW);
+    ShellExecuteA(nullptr, nullptr, url.c_str(), nullptr, nullptr, SW_SHOW);
 #endif
 }
 

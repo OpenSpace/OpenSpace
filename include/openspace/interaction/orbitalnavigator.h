@@ -104,7 +104,7 @@ private:
     SceneGraphNode* _focusNode = nullptr;
     glm::dvec3 _previousFocusNodePosition;
     glm::dquat _previousFocusNodeRotation;
-    double _currentCameraToSurfaceDistance;
+    double _currentCameraToSurfaceDistance = 0.0;
     bool _directlySetStereoDistance = false;
 
     Interpolator<double> _rotateToFocusNodeInterpolator;

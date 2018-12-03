@@ -69,7 +69,7 @@ public:
     * \param filename file saved with recorded keyframes.
     * \returns true if recording to file starts without errors.
     */
-    bool startRecording(std::string filename);
+    bool startRecording(const std::string& filename);
 
     /**
     * Starts a recording session, which will save data to the provided filename
@@ -160,10 +160,10 @@ private:
     };
     ExternInteraction _externInteract;
     bool _isRecording = false;
-    double _timestampRecordStarted;
-    double _timestampPlaybackStarted_application;
-    double _timestampPlaybackStarted_simulation;
-    double _timestampApplicationStarted_simulation;
+    double _timestampRecordStarted = 0.0;
+    double _timestampPlaybackStarted_application = 0.0;
+    double _timestampPlaybackStarted_simulation = 0.0;
+    double _timestampApplicationStarted_simulation = 0.0;
     bool hasCameraChangedFromPrev(datamessagestructures::CameraKeyframe kfNew);
     double appropriateTimestamp(double timeOs, double timeRec, double timeSim);
     double equivalentSimulationTime(double timeOs, double timeRec, double timeSim);
@@ -179,7 +179,7 @@ private:
     void writeToFileBuffer(std::vector<char>& cvec);
     void writeToFileBuffer(const unsigned char c);
     void writeToFileBuffer(bool b);
-    void saveStringToFile(const std::string s);
+    void saveStringToFile(const std::string& s);
     void saveKeyframeToFileBinary(unsigned char* bufferSource, size_t size);
     void findFirstCameraKeyframeInTimeline();
     std::string readHeaderElement(size_t readLen_chars);

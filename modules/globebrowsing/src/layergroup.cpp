@@ -75,7 +75,6 @@ void LayerGroup::setLayersFromDict(const ghoul::Dictionary& dict) {
                     LERRORC(except.component, except.message);
                 }
             }
-            continue;
         }
     }
 }
@@ -120,7 +119,7 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     _layers.push_back(std::move(layer));
     update();
     if (_onChangeCallback) {
-        _onChangeCallback();
+        _onChangeCallback(ptr);
     }
     addPropertySubOwner(ptr);
     _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
@@ -138,7 +137,7 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
             _layers.erase(it);
             update();
             if (_onChangeCallback) {
-                _onChangeCallback();
+                _onChangeCallback(nullptr);
             }
             LINFO("Deleted layer " + layerName);
 
@@ -174,9 +173,9 @@ bool LayerGroup::layerBlendingEnabled() const {
     return _levelBlendingEnabled;
 }
 
-void LayerGroup::onChange(std::function<void(void)> callback) {
+void LayerGroup::onChange(std::function<void(Layer*)> callback) {
     _onChangeCallback = std::move(callback);
-    _levelBlendingEnabled.onChange(_onChangeCallback);
+    _levelBlendingEnabled.onChange([this]() {_onChangeCallback(nullptr); });
     for (const std::unique_ptr<Layer>& layer : _layers) {
         layer->onChange(_onChangeCallback);
     }

@@ -141,7 +141,7 @@ public:
 private:
     void setState(State state);
 
-    void requiredAssetChangedState(std::shared_ptr<Asset> asset, Asset::State childState);
+    void requiredAssetChangedState(Asset::State childState);
     void requestedAssetChangedState(Asset* child, Asset::State childState);
 
     bool isSyncResolveReady();

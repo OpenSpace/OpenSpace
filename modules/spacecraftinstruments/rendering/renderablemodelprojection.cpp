@@ -382,7 +382,7 @@ void RenderableModelProjection::update(const UpdateData& data) {
 }
 
 void RenderableModelProjection::imageProjectGPU(
-                                std::shared_ptr<ghoul::opengl::Texture> projectionTexture)
+                                          const ghoul::opengl::Texture& projectionTexture)
 {
     if (_projectionComponent.needsShadowMap()) {
         _projectionComponent.depthMapRenderBegin();
@@ -408,7 +408,7 @@ void RenderableModelProjection::imageProjectGPU(
 
     ghoul::opengl::TextureUnit unitFbo;
     unitFbo.activate();
-    projectionTexture->bind();
+    projectionTexture.bind();
     _fboProgramObject->setUniform(_fboUniformCache.projectionTexture, unitFbo);
 
     _fboProgramObject->setUniform(
@@ -489,7 +489,7 @@ void RenderableModelProjection::project() {
         attitudeParameters(img.timeRange.start);
         std::shared_ptr<ghoul::opengl::Texture> projTexture =
             _projectionComponent.loadProjectionTexture(img.path, img.isPlaceholder);
-        imageProjectGPU(projTexture);
+        imageProjectGPU(*projTexture);
     }
     _shouldCapture = false;
 }

@@ -181,7 +181,7 @@ void NetworkEngine::sendMessages() {
         union {
             MessageIdentifier value;
             std::array<char, 2> data;
-        } identifier;
+        } identifier = {};
         identifier.value = m.identifer;
 
         // Prepending the message identifier to the front
@@ -199,7 +199,7 @@ void NetworkEngine::sendInitialInformation() {
         union {
             MessageIdentifier value;
             std::array<char, 2> data;
-        } identifier;
+        } identifier = {};
         identifier.value = m.identifer;
 
         std::vector<char> payload = m.body;
@@ -218,7 +218,7 @@ void NetworkEngine::sendInitialInformation() {
     union {
         MessageIdentifier value;
         std::array<char, 2> data;
-    } identifier;
+    } identifier = {};
     identifier.value = _initialMessageFinishedIdentifier;
 
     std::vector<char> d;

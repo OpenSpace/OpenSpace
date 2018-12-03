@@ -90,9 +90,14 @@ void Connection::handleMessage(const std::string& message) {
         nlohmann::json j = nlohmann::json::parse(message.c_str());
         try {
             handleJson(j);
-        } catch (const std::exception& e) {
+        } catch (const std::domain_error& e) {
             LERROR(fmt::format("JSON handling error from: {}. {}", message, e.what()));
         }
+        } catch (const std::out_of_range& e) {
+            LERROR(fmt::format("JSON handling error from: {}. {}", message, e.what()));
+        }
+        catch (const std::exception& e) {
+            LERROR(e.what());
     } catch (...) {
         if (!isAuthorized()) {
             _socket->disconnect();

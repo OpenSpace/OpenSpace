@@ -94,8 +94,6 @@ public:
         uint32_t mouseButtonsPressed);
     void endFrame();
 
-    void setHidden(bool isHidden);
-
     void render() override;
 
 //protected:
@@ -169,7 +167,6 @@ private:
 
     properties::Property::Visibility _currentVisibility =
         properties::Property::Visibility::Developer;
-    properties::BoolProperty _allHidden;
 
     std::vector<ImGuiContext*> _contexts;
 };

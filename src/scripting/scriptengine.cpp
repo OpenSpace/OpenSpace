@@ -551,20 +551,23 @@ std::string ScriptEngine::generateJson() const {
 
     bool first = true;
     for (const LuaLibrary& l : _registeredLibraries) {
+        constexpr const char* replStr = R"("{}": "{}", )";
+        constexpr const char* replStr2 = R"("{}": "{}")";
+
         if (!first) {
             json << ",";
         }
         first = false;
 
         json << "{";
-        json << "\"library\": \"" << l.name << "\",";
+        json << fmt::format(replStr, "library", l.name);
         json << "\"functions\": [";
 
         for (const LuaLibrary::Function& f : l.functions) {
             json << "{";
-            json << "\"name\": \"" << f.name << "\", ";
-            json << "\"arguments\": \"" << escapedJson(f.argumentText) << "\", ";
-            json << "\"help\": \"" << escapedJson(f.helpText) << "\"";
+            json << fmt::format(replStr, "library", f.name);
+            json << fmt::format(replStr, "arguments", escapedJson(f.argumentText));
+            json << fmt::format(replStr2, "help", escapedJson(f.helpText));
             json << "}";
             if (&f != &l.functions.back() || !l.documentations.empty()) {
                 json << ",";
@@ -573,9 +576,9 @@ std::string ScriptEngine::generateJson() const {
 
         for (const LuaLibrary::Documentation& doc : l.documentations) {
             json << "{";
-            json << "\"name\": \"" << doc.name << "\", ";
-            json << "\"arguments\": \"" << escapedJson(doc.parameter) << "\", ";
-            json << "\"help\": \"" << escapedJson(doc.description) << "\"";
+            json << fmt::format(replStr, "name", doc.name);
+            json << fmt::format(replStr, "arguments", escapedJson(doc.parameter));
+            json << fmt::format(replStr2, "help", escapedJson(doc.description));
             json << "}";
             if (&doc != &l.documentations.back()) {
                 json << ",";

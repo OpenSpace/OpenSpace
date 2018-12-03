@@ -139,11 +139,11 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     _visible = configuration.hasValue<bool>(VisibleInfo.identifier) &&
                configuration.value<bool>(VisibleInfo.identifier);
 
-    global::callback::initializeGL.push_back([this]() {
+    global::callback::initializeGL.emplace_back([this]() {
         startOrStopGui();
     });
 
-    global::callback::draw2D.push_back([this](){
+    global::callback::draw2D.emplace_back([this](){
         const bool isGuiWindow =
             global::windowDelegate.hasGuiWindow() ?
             global::windowDelegate.isGuiWindow() :
@@ -160,7 +160,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         }
     });
 
-    global::callback::deinitializeGL.push_back([this]() {
+    global::callback::deinitializeGL.emplace_back([this]() {
         _enabled = false;
         startOrStopGui();
     });

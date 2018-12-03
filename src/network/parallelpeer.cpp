@@ -313,7 +313,7 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
 
             // If there are new keyframes incoming, make sure to erase all keyframes
             // that already exist after the first new keyframe.
-            if (keyframesMessage.size() > 0) {
+            if (!keyframesMessage.empty()) {
                 const double convertedTimestamp =
                     convertTimestamp(keyframesMessage[0]._timestamp);
 
@@ -627,7 +627,7 @@ void ParallelPeer::sendCameraKeyframe() {
 
 void ParallelPeer::sendTimeTimeline() {
     // Create a keyframe with current position and orientation of camera
-    const Timeline<TimeKeyframeData> timeline = global::timeManager.timeline();
+    const Timeline<TimeKeyframeData>& timeline = global::timeManager.timeline();
     std::deque<Keyframe<TimeKeyframeData>> keyframes = timeline.keyframes();
 
     datamessagestructures::TimeTimeline timelineMessage;

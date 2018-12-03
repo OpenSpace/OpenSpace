@@ -1,0 +1,60 @@
+local assetHelper = asset.require("util/asset_helper")
+
+local textures = asset.syncedResource({
+    Name = "Stars Textures",
+    Type = "HttpSynchronization",
+    Identifier = "stars_textures",
+    Version = 1
+})
+
+local colorLUT = asset.syncedResource({
+    Name = "Stars Color Table",
+    Type = "HttpSynchronization",
+    Identifier = "stars_colormap",
+    Version = 1
+})
+
+-- Download a preprocessed binary octree of Radial Velocity subset values per star (preprocessed into 8 binary files).
+local starsFolder = asset.syncedResource({
+    Name = "Gaia Stars RV",
+    Type = "HttpSynchronization",
+    Identifier = "gaia_stars_rv_octree",
+    Version = 1
+})
+
+local GaiaStars = {
+    Identifier = "GaiaStars",
+    Renderable = {
+        Type = "RenderableGaiaStars",
+        File = starsFolder .. "/",
+        FileReaderOption = "StreamOctree",
+        RenderOption = "Motion",
+        ShaderOption = "Point_SSBO",
+        Texture = textures .. "/halo.png",
+        ColorMap = colorLUT .. "/colorbv.cmap",
+        LuminosityMultiplier = 35,
+        MagnitudeBoost = 25,
+        CutOffThreshold = 38,
+        BillboardSize = 1,
+        CloseUpBoostDist = 250,
+        Sharpness = 1.45,
+        LodPixelThreshold = 0,
+        MaxGpuMemoryPercent = 0.24,
+        MaxCpuMemoryPercent = 0.4,
+        FilterSize = 5,
+        Sigma = 0.5,
+        AdditionalNodes = {3.0, 2.0},
+        FilterPosX = {0.0, 0.0},
+        FilterPosY = {0.0, 0.0},
+        FilterPosZ = {0.0, 0.0},
+        FilterGMag = {20.0, 20.0},
+        FilterBpRp = {0.0, 0.0},
+        FilterDist = {9.0, 9.0},
+    },
+    GUI = {
+        Name = "Gaia Stars",
+        Path = "/Milky Way"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { GaiaStars })

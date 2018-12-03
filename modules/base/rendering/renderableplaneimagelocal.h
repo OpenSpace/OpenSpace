@@ -57,7 +57,7 @@ private:
     void loadTexture();
 
     properties::StringProperty _texturePath;
-    ghoul::opengl::Texture* _texture;
+    ghoul::opengl::Texture* _texture = nullptr;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
 
     bool _textureIsDirty = false;

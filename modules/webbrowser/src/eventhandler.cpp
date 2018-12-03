@@ -100,7 +100,7 @@ namespace {
 namespace openspace {
 
 void EventHandler::initialize() {
-    global::callback::character.push_back(
+    global::callback::character.emplace_back(
         [this](unsigned int charCode, KeyModifier mod) -> bool {
             if (_browserInstance) {
                 return charCallback(charCode, mod);
@@ -108,7 +108,7 @@ void EventHandler::initialize() {
             return false;
         }
     );
-    global::callback::keyboard.push_back(
+    global::callback::keyboard.emplace_back(
         [this](Key key, KeyModifier mod, KeyAction action) -> bool {
             if (_browserInstance) {
                 return keyboardCallback(key, mod, action);
@@ -116,7 +116,7 @@ void EventHandler::initialize() {
             return false;
         }
     );
-    global::callback::mousePosition.push_back(
+    global::callback::mousePosition.emplace_back(
         [this](double x, double y) -> bool {
             if (_browserInstance) {
                 return mousePositionCallback(x, y);
@@ -124,7 +124,7 @@ void EventHandler::initialize() {
             return false;
         }
     );
-    global::callback::mouseButton.push_back(
+    global::callback::mouseButton.emplace_back(
         [this](MouseButton button, MouseAction action) -> bool {
             if (_browserInstance) {
                 return mouseButtonCallback(button, action);
@@ -132,7 +132,7 @@ void EventHandler::initialize() {
             return false;
         }
     );
-    global::callback::mouseScrollWheel.push_back(
+    global::callback::mouseScrollWheel.emplace_back(
         [this](double x, double y) -> bool {
             if (_browserInstance) {
                 const glm::ivec2 delta(x, y);

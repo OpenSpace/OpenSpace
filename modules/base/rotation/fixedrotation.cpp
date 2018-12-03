@@ -218,6 +218,12 @@ documentation::Documentation FixedRotation::Documentation() {
                 XAxisOrthogonalVectorInfo.description
             },
             {
+                XAxisInvertObjectInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                XAxisInvertObjectInfo.description
+            },
+            {
                 KeyYAxis,
                 new OrVerifier({ new StringVerifier, new DoubleVector3Verifier, }),
                 Optional::Yes,
@@ -235,6 +241,12 @@ documentation::Documentation FixedRotation::Documentation() {
                 YAxisOrthogonalVectorInfo.description
             },
             {
+                YAxisInvertObjectInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                YAxisInvertObjectInfo.description
+            },
+            {
                 KeyZAxis,
                 new OrVerifier({ new StringVerifier, new DoubleVector3Verifier, }),
                 Optional::Yes,
@@ -250,6 +262,12 @@ documentation::Documentation FixedRotation::Documentation() {
                 new BoolVerifier,
                 Optional::Yes,
                 ZAxisOrthogonalVectorInfo.description
+            },
+            {
+                ZAxisInvertObjectInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                ZAxisInvertObjectInfo.description
             },
             {
                 AttachedInfo.identifier,
@@ -454,6 +472,11 @@ bool FixedRotation::initialize() {
     if (_constructorDictionary.hasKey(KeyXAxisOrthogonal)) {
         _xAxis.isOrthogonal = _constructorDictionary.value<bool>(KeyXAxisOrthogonal);
     }
+    if (_constructorDictionary.hasKey(XAxisInvertObjectInfo.identifier)) {
+        _xAxis.invertObject = _constructorDictionary.value<bool>(
+            XAxisInvertObjectInfo.identifier
+        );
+    }
     if (_xAxis.isOrthogonal) {
         _xAxis.type = Axis::Type::OrthogonalVector;
     }
@@ -473,6 +496,11 @@ bool FixedRotation::initialize() {
 
     if (_constructorDictionary.hasKey(KeyYAxisOrthogonal)) {
         _yAxis.isOrthogonal = _constructorDictionary.value<bool>(KeyYAxisOrthogonal);
+    }
+    if (_constructorDictionary.hasKey(YAxisInvertObjectInfo.identifier)) {
+        _yAxis.invertObject = _constructorDictionary.value<bool>(
+            YAxisInvertObjectInfo.identifier
+        );
     }
     if (_yAxis.isOrthogonal) {
         _yAxis.type = Axis::Type::OrthogonalVector;
@@ -494,10 +522,14 @@ bool FixedRotation::initialize() {
     if (_constructorDictionary.hasKey(KeyZAxisOrthogonal)) {
         _zAxis.isOrthogonal = _constructorDictionary.value<bool>(KeyZAxisOrthogonal);
     }
+    if (_constructorDictionary.hasKey(ZAxisInvertObjectInfo.identifier)) {
+        _yAxis.invertObject = _constructorDictionary.value<bool>(
+            ZAxisInvertObjectInfo.identifier
+        );
+    }
     if (_zAxis.isOrthogonal) {
         _zAxis.type = Axis::Type::OrthogonalVector;
     }
-
 
 
     if (!hasXAxis && hasYAxis && hasZAxis) {
@@ -554,11 +586,14 @@ glm::vec3 FixedRotation::xAxis() const {
             return glm::vec3(1.f, 0.f, 0.f);
         case Axis::Type::Object:
             if (_xAxis.node && _attachedNode) {
-                glm::vec3 dir = glm::vec3(glm::normalize(
-                    _xAxis.node->worldPosition() -
-                    _attachedNode->worldPosition()
-                ));
-                return _xAxis.invertObject ? -dir : dir;
+                glm::dvec3 dir = _xAxis.node->worldPosition() -
+                    _attachedNode->worldPosition();
+
+                if (dir == glm::dvec3(0.0)) {
+                    dir = glm::dvec3(1.0, 0.0, 0.0);
+                }
+                glm::vec3 dirNorm = glm::vec3(glm::normalize(dir));
+                return _xAxis.invertObject ? -dirNorm : dirNorm;
             }
             else {
                 if (_xAxis.node) {

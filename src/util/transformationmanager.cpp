@@ -41,6 +41,10 @@
 #endif // WIN32
 #endif
 
+namespace {
+    constexpr const char* _loggerCat = "TransformationManager";
+}
+
 namespace openspace {
 
 TransformationManager* TransformationManager::_instance = nullptr;

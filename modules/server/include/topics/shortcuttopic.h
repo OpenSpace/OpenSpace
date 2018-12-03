@@ -33,7 +33,7 @@ class ShortcutTopic : public Topic {
 public:
     virtual ~ShortcutTopic() = default;
 
-    void handleJson(const nlohmann::json& json) override;
+    void handleJson(const nlohmann::json& input) override;
     bool isDone() const override;
 
 private:
