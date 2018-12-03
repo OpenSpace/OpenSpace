@@ -143,7 +143,7 @@ void HorizonsTranslation::readHorizonsTextFile(const std::string& horizonsTextFi
     // The beginning of a Horizons file has a header with a lot of information about the
     // query that we do not care about. Ignore everything until data starts, including
     // the row marked by $$SOE (i.e. Start Of Ephemerides).
-    std::string line = "";
+    std::string line;
     while (line[0] != '$') {
         std::getline(fileStream, line);
     }

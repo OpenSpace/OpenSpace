@@ -191,7 +191,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
 
 
     // Initialize
-    global::callback::initializeGL.push_back([&]() {
+    global::callback::initializeGL.emplace_back([&]() {
         _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>();
         addPropertySubOwner(*_tileCache);
 
@@ -205,16 +205,16 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
         addPropertySubOwner(GdalWrapper::ref());
     });
 
-    global::callback::deinitializeGL.push_back([]() {
+    global::callback::deinitializeGL.emplace_back([]() {
         tileprovider::deinitializeDefaultTile();
     });
 
 
     // Render
-    global::callback::render.push_back([&]() { _tileCache->update(); });
+    global::callback::render.emplace_back([&]() { _tileCache->update(); });
 
     // Deinitialize
-    global::callback::deinitialize.push_back([&]() { GdalWrapper::ref().destroy(); });
+    global::callback::deinitialize.emplace_back([&]() { GdalWrapper::destroy(); });
 
     // Get factories
     auto fRenderable = FactoryManager::ref().factory<Renderable>();

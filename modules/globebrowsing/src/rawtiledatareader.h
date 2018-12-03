@@ -68,7 +68,7 @@ private:
     void initialize();
 
     RawTile::ReadError rasterRead(int rasterBand, const IODescription& io,
-        char* dst) const;
+        char* dataDestination) const;
 
     void readImageData(IODescription& io, RawTile::ReadError& worstError,
         char* imageDataDest) const;

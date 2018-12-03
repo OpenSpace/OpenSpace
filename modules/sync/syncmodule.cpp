@@ -114,7 +114,7 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
 
     _torrentClient.initialize();
 
-    global::callback::deinitialize.push_back([&]() { _torrentClient.deinitialize(); });
+    global::callback::deinitialize.emplace_back([&]() { _torrentClient.deinitialize(); });
 }
 
 void SyncModule::internalDeinitialize() {

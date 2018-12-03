@@ -143,10 +143,10 @@ double Ellipsoid::greatCircleDistance(const Geodetic2& p1, const Geodetic2& p2) 
 
 Geodetic2 Ellipsoid::cartesianToGeodetic2(const glm::dvec3& p) const {
     const glm::dvec3 normal = geodeticSurfaceNormalForGeocentricallyProjectedPoint(p);
-    Geodetic2 res;
-    res.lat = asin(normal.z / length(normal));
-    res.lon = atan2(normal.y, normal.x);
-    return res;
+    return {
+        asin(normal.z / length(normal)),
+        atan2(normal.y, normal.x)
+    };
 }
 
 glm::dvec3 Ellipsoid::cartesianSurfacePosition(const Geodetic2& geodetic2) const {

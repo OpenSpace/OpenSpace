@@ -47,7 +47,7 @@ public:
     bool isEnabled() const;
 
 protected:
-    void internalInitialize(const ghoul::Dictionary& configuration) override;
+    void internalInitialize(const ghoul::Dictionary& dictionary) override;
     void internalDeinitialize() override;
 
 private:

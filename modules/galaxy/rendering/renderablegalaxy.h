@@ -41,7 +41,7 @@ struct RenderData;
 class RenderableGalaxy : public Renderable {
 public:
     RenderableGalaxy(const ghoul::Dictionary& dictionary);
-    ~RenderableGalaxy();
+    virtual ~RenderableGalaxy() = default;
 
     void initializeGL() override;
     void deinitializeGL() override;

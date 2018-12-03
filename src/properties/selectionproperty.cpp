@@ -165,7 +165,7 @@ std::string SelectionProperty::generateAdditionalJsonDescription() const {
         std::string dSan = sanitizeString(d);
 
         result += "{";
-        result +=  "\"" + vSan + "\": \"" + dSan + "\"";
+        result += fmt::format(R"("{}": "{}")", vSan, dSan);
         result += "}";
         if (i != _options.size() - 1) {
             result += ",";

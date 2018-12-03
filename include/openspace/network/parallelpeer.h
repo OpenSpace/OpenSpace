@@ -95,7 +95,7 @@ private:
     void setHostName(const std::string& hostName);
     void setNConnections(size_t nConnections);
 
-    double convertTimestamp(double originalTime);
+    double convertTimestamp(double messageTimestamp);
     void analyzeTimeDifference(double messageTimestamp);
 
     properties::StringProperty _password;

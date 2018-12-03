@@ -42,15 +42,15 @@ struct AABB3 {
 
 
 struct Geodetic2 {
-    double lat;
-    double lon;
+    double lat = 0.0;
+    double lon = 0.0;
 };
 
 
 
 struct Geodetic3 {
     Geodetic2 geodetic2;
-    double height;
+    double height = 0.0;
 };
 
 

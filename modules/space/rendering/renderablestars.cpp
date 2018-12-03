@@ -453,7 +453,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         glm::vec2(global::renderEngine.renderingResolution())
     );
 
-    setPscUniforms(*_program.get(), data.camera, data.position);
+    setPscUniforms(*_program, data.camera, data.position);
     _program->setUniform(_uniformCache.scaling, scaling);
 
     ghoul::opengl::TextureUnit psfUnit;
@@ -650,7 +650,7 @@ void RenderableStars::update(const UpdateData&) {
     if (_pointSpreadFunctionTextureIsDirty) {
         LDEBUG("Reloading Point Spread Function texture");
         _pointSpreadFunctionTexture = nullptr;
-        if (_pointSpreadFunctionTexturePath.value() != "") {
+        if (!_pointSpreadFunctionTexturePath.value().empty()) {
             _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
                 absPath(_pointSpreadFunctionTexturePath)
             );
@@ -706,7 +706,7 @@ void RenderableStars::update(const UpdateData&) {
     if (_otherDataColorMapIsDirty) {
         LDEBUG("Reloading Color Texture");
         _otherDataColorMapTexture = nullptr;
-        if (_otherDataColorMapPath.value() != "") {
+        if (!_otherDataColorMapPath.value().empty()) {
             _otherDataColorMapTexture = ghoul::io::TextureReader::ref().loadTexture(
                 absPath(_otherDataColorMapPath)
             );
@@ -837,8 +837,8 @@ void RenderableStars::readSpeckFile() {
             str >> values[i];
         }
         bool nullArray = true;
-        for (size_t i = 0; i < values.size(); ++i) {
-            if (values[i] != 0.0) {
+        for (float v : values) {
+            if (v != 0.0) {
                 nullArray = false;
                 break;
             }
@@ -949,7 +949,7 @@ void RenderableStars::createDataSlice(ColorOption option) {
                 union {
                     ColorVBOLayout value;
                     std::array<float, sizeof(ColorVBOLayout)> data;
-                } layout;
+                } layout = {};
 
                 layout.value.position = { {
                         position[0], position[1], position[2], position[3]
@@ -976,7 +976,7 @@ void RenderableStars::createDataSlice(ColorOption option) {
                 union {
                     VelocityVBOLayout value;
                     std::array<float, sizeof(VelocityVBOLayout)> data;
-                } layout;
+                } layout = {};
 
                 layout.value.position = { {
                         position[0], position[1], position[2], position[3]
@@ -1000,7 +1000,7 @@ void RenderableStars::createDataSlice(ColorOption option) {
                 union {
                     SpeedVBOLayout value;
                     std::array<float, sizeof(SpeedVBOLayout)> data;
-                } layout;
+                } layout = {};
 
                 layout.value.position = { {
                         position[0], position[1], position[2], position[3]
@@ -1022,7 +1022,7 @@ void RenderableStars::createDataSlice(ColorOption option) {
                 union {
                     OtherDataLayout value;
                     std::array<float, sizeof(OtherDataLayout)> data;
-                } layout;
+                } layout = {};
 
                 layout.value.position = {
                     { position[0], position[1], position[2], position[3] }

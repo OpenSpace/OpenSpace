@@ -240,8 +240,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_performShading);
 }
 
-RenderableModel::~RenderableModel() {}
-
 bool RenderableModel::isReady() const {
     return _program && _texture;
 }

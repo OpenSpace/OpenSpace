@@ -104,7 +104,7 @@ struct SingleImageProvider : public TileProvider {
 };
 
 struct TextTileProvider : public TileProvider {
-    TextTileProvider(const TileTextureInitData& initData, size_t fontSize = 48);
+    TextTileProvider(TileTextureInitData initData, size_t fontSize = 48);
 
     const TileTextureInitData initData;
 

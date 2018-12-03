@@ -45,7 +45,7 @@
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <array>
 #include <fstream>
-#include <stdint.h>
+#include <cstdint>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableGaiaStars";
@@ -856,8 +856,6 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     addProperty(_gpuStreamBudgetProperty);
 }
 
-RenderableGaiaStars::~RenderableGaiaStars() {}
-
 bool RenderableGaiaStars::isReady() const {
     return _program && _programTM;
 }
@@ -1157,7 +1155,9 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         _previousCameraRotation = data.camera.rotationQuaternion();
         return;
     }
-    else _firstDrawCalls = false;
+    else {
+        _firstDrawCalls = false;
+    }
 
     // Update which nodes that are stored in memory as the camera moves around
     // (if streaming)

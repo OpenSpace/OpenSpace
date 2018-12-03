@@ -173,8 +173,6 @@ RenderableDebugPlane::RenderableDebugPlane(const ghoul::Dictionary& dictionary)
     setBoundingSphere(_size);
 }
 
-RenderableDebugPlane::~RenderableDebugPlane() {}
-
 bool RenderableDebugPlane::isReady() const {
     bool ready = true;
     if (!_shader) {
@@ -220,7 +218,7 @@ void RenderableDebugPlane::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _shader->setUniform("ModelTransform", transform);
-    setPscUniforms(*_shader.get(), data.camera, data.position);
+    setPscUniforms(*_shader, data.camera, data.position);
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();

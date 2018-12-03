@@ -60,7 +60,7 @@ public:
     };
 
     OctreeManager() = default;
-    ~OctreeManager();
+    ~OctreeManager() = default;
 
     /**
      * Initializes a one layer Octree with root and 8 children that covers all stars.
@@ -212,28 +212,27 @@ private:
      * If node is an inner node, then star is stores in LOD cache if it is among the
      * brightest stars in all children.
      */
-    bool insertInNode(std::shared_ptr<OctreeNode> node,
-        const std::vector<float>& starValues, int depth = 1);
+    bool insertInNode(OctreeNode& node, const std::vector<float>& starValues,
+        int depth = 1);
 
     /**
      * Slices LOD cache data in node to the MAX_STARS_PER_NODE brightest stars. This needs
      * to be called after the last star has been inserted into Octree but before it is
      * saved to file(s). Slices all descendants recursively.
      */
-    void sliceNodeLodCache(std::shared_ptr<OctreeNode> node);
+    void sliceNodeLodCache(OctreeNode& node);
 
     /**
      * Private help function for <code>insertInNode()</code>. Stores star data in node and
      * keeps track of the brightest stars all children.
      */
-    void storeStarData(std::shared_ptr<OctreeNode> node,
-        const std::vector<float>& starValues);
+    void storeStarData(OctreeNode& node, const std::vector<float>& starValues);
 
     /**
      * Private help function for <code>printStarsPerNode()</code>. \returns an accumulated
      * string containing all descendant nodes.
      */
-    std::string printStarsPerNode(std::shared_ptr<OctreeNode> node,
+    std::string printStarsPerNode(const OctreeNode& node, 
         const std::string& prefix) const;
 
     /**
@@ -243,9 +242,9 @@ private:
      * loaded (if streaming). \param deltaStars keeps track of how many stars that were
      * added/removed this render call.
      */
-    std::map<int, std::vector<float>> checkNodeIntersection(
-        std::shared_ptr<OctreeNode> node, const glm::dmat4& mvp,
-        const glm::vec2& screenSize, int& deltaStars, gaia::RenderOption option);
+    std::map<int, std::vector<float>> checkNodeIntersection(OctreeNode& node,
+        const glm::dmat4& mvp, const glm::vec2& screenSize, int& deltaStars,
+        gaia::RenderOption option);
 
     /**
      * Checks if specified node existed in cache, and removes it if that's the case.
@@ -253,31 +252,30 @@ private:
      * long as \param recursive is not set to false. \param deltaStars keeps track of how
      * many stars that were removed.
      */
-    std::map<int, std::vector<float>> removeNodeFromCache(
-        std::shared_ptr<OctreeNode> node, int& deltaStars, bool recursive = true);
+    std::map<int, std::vector<float>> removeNodeFromCache(OctreeNode& node,
+        int& deltaStars, bool recursive = true);
 
     /**
      * Get data in node and its descendants regardless if they are visible or not.
      */
-    std::vector<float> getNodeData(std::shared_ptr<OctreeNode> node,
-        gaia::RenderOption option);
+    std::vector<float> getNodeData(const OctreeNode& node, gaia::RenderOption option);
 
     /**
      * Clear data from node and its descendants and shrink vectors to deallocate memory.
      */
-    void clearNodeData(std::shared_ptr<OctreeNode> node);
+    void clearNodeData(OctreeNode& node);
 
     /**
      * Contruct default children nodes for specified node.
      */
-    void createNodeChildren(std::shared_ptr<OctreeNode> node);
+    void createNodeChildren(OctreeNode& node);
 
     /**
      * Checks if node should be inserted into stream or not. \returns true if it should,
      * (i.e. it doesn't already exists, there is room for it in the buffer and node data
      * is loaded if streaming). \returns false otherwise.
      */
-    bool updateBufferIndex(std::shared_ptr<OctreeNode> node);
+    bool updateBufferIndex(OctreeNode& node);
 
     /**
      * Node should be inserted into stream. This function \returns the data to be
@@ -286,14 +284,14 @@ private:
      *
      * \param deltaStars keeps track of how many stars that were added.
      */
-    std::vector<float> constructInsertData(std::shared_ptr<OctreeNode> node,
+    std::vector<float> constructInsertData(const OctreeNode& node,
         gaia::RenderOption option, int& deltaStars);
 
     /**
      * Write a node to outFileStream. \param writeData defines if data should be included
      * or if only structure should be written.
      */
-    void writeNodeToFile(std::ofstream& outFileStream, std::shared_ptr<OctreeNode> node,
+    void writeNodeToFile(std::ofstream& outFileStream, const OctreeNode& node,
         bool writeData);
 
     /**
@@ -301,16 +299,15 @@ private:
      * data or only structure should be read.
      * \returns accumulated sum of all read stars in node and its descendants.
      */
-    int readNodeFromFile(std::ifstream& inFileStream, std::shared_ptr<OctreeNode> node,
-        bool readData);
+    int readNodeFromFile(std::ifstream& inFileStream, OctreeNode& node, bool readData);
 
     /**
      * Write node data to a file. \param outFilePrefix specifies the accumulated path
      * and name of the file. If \param threadWrites is set to true then one new thread
      * will be created for each child to write its descendents.
      */
-    void writeNodeToMultipleFiles(const std::string& outFilePrefix,
-        std::shared_ptr<OctreeNode> node, bool threadWrites);
+    void writeNodeToMultipleFiles(const std::string& outFilePrefix, OctreeNode& node,
+        bool threadWrites);
 
     /**
      * Finds the neighboring node on the same level (or a higher level if there is no
@@ -329,15 +326,14 @@ private:
      * If it is set to a negative value then all descendants will be fetched recursively.
      * Calls <code>fetchNodeDataFromFile()</code> for every child that passes the tests.
      */
-    void fetchChildrenNodes(std::shared_ptr<OctreeManager::OctreeNode> parentNode,
-        int additionalLevelsToFetch);
+    void fetchChildrenNodes(OctreeNode& parentNode, int additionalLevelsToFetch);
 
     /**
      * Fetches data for specified node from file.
      * OBS! Only call if node file exists (i.e. node has any data, node->numStars > 0)
      * and is not already loaded.
      */
-    void fetchNodeDataFromFile(std::shared_ptr<OctreeNode> node);
+    void fetchNodeDataFromFile(OctreeNode& node);
 
     /**
     * Loops though all nodes in \param nodesToRemove and clears them from RAM.
@@ -350,7 +346,7 @@ private:
      * Removes data in specified node from main memory and updates RAM budget and flags
      * accordingly.
      */
-    void removeNode(std::shared_ptr<OctreeManager::OctreeNode> node);
+    void removeNode(OctreeNode& node);
 
     /**
      * Loops through \param ancestorNodes backwards and checks if parent node has any

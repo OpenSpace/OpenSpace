@@ -59,15 +59,15 @@ std::string ReadSpeckTask::description() {
     );
 }
 
-void ReadSpeckTask::perform(const Task::ProgressCallback& progressCallback) {
-    progressCallback(0.f);
+void ReadSpeckTask::perform(const Task::ProgressCallback& onProgress) {
+    onProgress(0.f);
 
     int32_t nRenderValues = 0;
 
     FitsFileReader fileReader(false);
     std::vector<float> fullData = fileReader.readSpeckFile(_inFilePath, nRenderValues);
 
-    progressCallback(0.9f);
+    onProgress(0.9f);
 
     std::ofstream fileStream(_outFilePath, std::ofstream::binary);
     if (fileStream.good()) {
@@ -89,7 +89,7 @@ void ReadSpeckTask::perform(const Task::ProgressCallback& progressCallback) {
         LERROR(fmt::format("Error opening file: {} as output data file.", _outFilePath));
     }
 
-    progressCallback(1.f);
+    onProgress(1.f);
 }
 
 documentation::Documentation ReadSpeckTask::Documentation() {

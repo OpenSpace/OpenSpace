@@ -65,10 +65,9 @@ private:
         ParallelConnection::Message message;
     };
 
-    bool isConnected(std::shared_ptr<Peer> peer) const;
+    bool isConnected(const Peer& peer) const;
 
-    void sendMessage(std::shared_ptr<Peer> peer,
-        ParallelConnection::MessageType messageType,
+    void sendMessage(Peer& peer, ParallelConnection::MessageType messageType,
         const std::vector<char>& message);
 
     void sendMessageToAll(ParallelConnection::MessageType messageType,
@@ -77,17 +76,17 @@ private:
     void sendMessageToClients(ParallelConnection::MessageType messageType,
         const std::vector<char>& message);
 
-    void disconnect(std::shared_ptr<Peer> peer);
-    void setName(std::shared_ptr<Peer> peer, std::string name);
+    void disconnect(Peer& peer);
+    void setName(Peer& peer, std::string name);
     void assignHost(std::shared_ptr<Peer> newHost);
-    void setToClient(std::shared_ptr<Peer> peer);
+    void setToClient(Peer& peer);
     void setNConnections(size_t nConnections);
-    void sendConnectionStatus(std::shared_ptr<Peer> peer);
+    void sendConnectionStatus(Peer& peer);
 
     void handleAuthentication(std::shared_ptr<Peer> peer, std::vector<char> message);
-    void handleData(std::shared_ptr<Peer> peer, std::vector<char> data);
+    void handleData(const Peer& peer, std::vector<char> data);
     void handleHostshipRequest(std::shared_ptr<Peer> peer, std::vector<char> message);
-    void handleHostshipResignation(std::shared_ptr<Peer> peer, std::vector<char> data);
+    void handleHostshipResignation(Peer& peer);
     void handleDisconnection(std::shared_ptr<Peer> peer);
 
     void handleNewPeers();
