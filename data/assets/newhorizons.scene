@@ -18,6 +18,8 @@ asset.require('util/default_joystick')
 
 asset.require('util/webgui')
 
+asset.request('customization/globebrowsing')
+
 -- Custom Keybindings
 local Keybindings = {
     {
@@ -195,6 +197,10 @@ assetHelper.registerDashboardItems(asset, {
     }
 })
 
+assetHelper.registerInterestingNodes(asset, {
+    "Pluto", "NewHorizons", "Charon"
+})
+
 asset.onInitialize(function ()
     openspace.time.setTime("2015-07-14T08:00:00.00")
     sceneHelper.bindKeys(Keybindings)
@@ -204,10 +210,6 @@ asset.onInitialize(function ()
     sceneHelper.setDeltaTimeKeys({
         1, 5, 10, 20, 40, 60, 120, 360, 540, 1080,
         2160, 4320, 8640
-    })
-
-    openspace.markInterestingNodes({
-        "Pluto", "NewHorizons", "Charon"
     })
 
     openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.FollowFocusNodeRotationDistance', 20.000000);
@@ -233,7 +235,4 @@ asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
 
     openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
-    openspace.removeInterestingNodes({
-        "Pluto", "NewHorizons", "Charon"
-    })
 end)
