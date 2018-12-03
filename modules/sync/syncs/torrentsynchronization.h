@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_MODULE_SYNC___TORRENTSYNCHRONIZATION___H__
 #define __OPENSPACE_MODULE_SYNC___TORRENTSYNCHRONIZATION___H__
 
+#ifdef SYNC_USE_LIBTORRENT
+
 #include <openspace/util/resourcesynchronization.h>
 
 #include <modules/sync/torrentclient.h>
@@ -69,5 +71,7 @@ private:
 };
 
 } // namespace openspace
+
+#endif // SYNC_USE_LIBTORRENT
 
 #endif // __OPENSPACE_MODULE_SYNC___TORRENTSYNCHRONIZATION___H__
