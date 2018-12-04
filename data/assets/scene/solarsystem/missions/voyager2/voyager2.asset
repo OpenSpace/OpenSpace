@@ -1,7 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local lights = asset.require('scene/solarsystem/general/lightsources')
 local kernels = asset.require('./kernels')
-
 
 local models = asset.syncedResource({
     Name = "Voyager 2 Models",
@@ -10,26 +10,10 @@ local models = asset.syncedResource({
     Version = 1
 })
 
-
 local RotationMatrix = {
     -1, 0, 0,
     0, 0, -1,
     0, -1, 0
-}
-
-
-local LightSources = {
-    {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sunTransforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-    },
-    {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-    }
 }
 
 local Voyager2 = {
@@ -65,7 +49,7 @@ local Voyager2Main = {
         },
         ColorTexture = models .. "/voyager-main.jpg",
         ModelTransform = RotationMatrix,
-        LightSources = LightSources
+        LightSources = lights.LightSources
     },
     GUI = {
         Name = "Voyager 2 Main",
