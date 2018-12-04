@@ -24,22 +24,18 @@
 
 #include <openspace/interaction/navigationhandler.h>
 
-#include <openspace/openspace.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/query/query.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/time.h>
-#include <openspace/util/keys.h>
-
+#include <openspace/scripting/lualibrary.h>
+#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/interaction/keyframenavigator.h>
+#include <openspace/interaction/inputstate.h>
+#include <openspace/network/parallelpeer.h>
+#include <openspace/util/camera.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-
-#include <ghoul/glm.h>
-#include <glm/gtx/quaternion.hpp>
-
 #include <fstream>
 
 namespace {
@@ -49,7 +45,7 @@ namespace {
     constexpr const char* KeyPosition = "Position";
     constexpr const char* KeyRotation = "Rotation";
 
-    static const openspace::properties::Property::PropertyInfo OriginInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo OriginInfo = {
         "Origin",
         "Origin",
         "The name of the scene graph node that is the origin of the camera interaction. "
@@ -57,7 +53,7 @@ namespace {
         "towards this object. Any scene graph node can be the origin node."
     };
 
-    static const openspace::properties::Property::PropertyInfo KeyFrameInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo KeyFrameInfo = {
         "UseKeyFrameInteraction",
         "Use keyframe interaction",
         "If this is set to 'true' the entire interaction is based off key frames rather "
@@ -100,21 +96,21 @@ NavigationHandler::NavigationHandler()
     addPropertySubOwner(*_orbitalNavigator);
 }
 
-NavigationHandler::~NavigationHandler() {}
+NavigationHandler::~NavigationHandler() {} // NOLINT
 
 void NavigationHandler::initialize() {
-    OsEng.parallelPeer().connectionEvent()->subscribe(
+    global::parallelPeer.connectionEvent().subscribe(
         "NavigationHandler",
         "statusChanged",
         [this]() {
-            _useKeyFrameInteraction = (OsEng.parallelPeer().status() ==
+            _useKeyFrameInteraction = (global::parallelPeer.status() ==
                 ParallelConnection::Status::ClientWithHost);
         }
     );
 }
 
 void NavigationHandler::deinitialize() {
-    OsEng.parallelPeer().connectionEvent()->unsubscribe("NavigationHandler");
+    global::parallelPeer.connectionEvent().unsubscribe("NavigationHandler");
 }
 
 void NavigationHandler::setFocusNode(SceneGraphNode* node) {
@@ -124,12 +120,10 @@ void NavigationHandler::setFocusNode(SceneGraphNode* node) {
 
 void NavigationHandler::setCamera(Camera* camera) {
     _camera = camera;
-    //setFocusNode(_camera->parent());
 }
 
 void NavigationHandler::resetCameraDirection() {
-    LINFO("Setting camera direction to point at focus node.");
-    _orbitalNavigator->startInterpolateCameraDirection(*_camera);    
+    _orbitalNavigator->startInterpolateCameraDirection(*_camera);
 }
 
 const OrbitalNavigator& NavigationHandler::orbitalNavigator() const {
@@ -140,25 +134,53 @@ KeyframeNavigator& NavigationHandler::keyframeNavigator() const {
     return *_keyframeNavigator;
 }
 
+bool NavigationHandler::isKeyFrameInteractionEnabled() const {
+    return _useKeyFrameInteraction;
+}
+
+float NavigationHandler::interpolationTime() const {
+    return _orbitalNavigator->rotateToFocusInterpolationTime();
+}
+
+void NavigationHandler::setInterpolationTime(float durationInSeconds) {
+    _orbitalNavigator->setRotateToFocusInterpolationTime(durationInSeconds);
+}
+
 void NavigationHandler::updateCamera(double deltaTime) {
-    ghoul_assert(_inputState != nullptr, "InputState cannot be null!");
-    ghoul_assert(_camera != nullptr, "Camera cannot be null!");
+    ghoul_assert(_inputState != nullptr, "InputState must not be nullptr");
+    ghoul_assert(_camera != nullptr, "Camera must not be nullptr");
 
     if (_cameraUpdatedFromScript) {
         _cameraUpdatedFromScript = false;
     }
-    else {
+    else if ( ! _playbackModeEnabled ) {
         if (_camera && focusNode()) {
             if (_useKeyFrameInteraction) {
-                _keyframeNavigator->updateCamera(*_camera);
+                _keyframeNavigator->updateCamera(*_camera, _playbackModeEnabled);
             }
             else {
                 _orbitalNavigator->updateStatesFromInput(*_inputState, deltaTime);
                 _orbitalNavigator->updateCameraStateFromStates(*_camera, deltaTime);
+                _camera->setFocusPositionVec3(focusNode()->worldPosition());
             }
-            _camera->setFocusPositionVec3(focusNode()->worldPosition());
         }
     }
+}
+
+void NavigationHandler::setEnableKeyFrameInteraction() {
+    _useKeyFrameInteraction = true;
+}
+
+void NavigationHandler::setDisableKeyFrameInteraction() {
+    _useKeyFrameInteraction = false;
+}
+
+void NavigationHandler::triggerPlaybackStart() {
+    _playbackModeEnabled = true;
+}
+
+void NavigationHandler::stopPlayback() {
+    _playbackModeEnabled = false;
 }
 
 SceneGraphNode* NavigationHandler::focusNode() const {
@@ -199,10 +221,6 @@ void NavigationHandler::mouseScrollWheelCallback(double pos) {
 void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
 {
     _inputState->keyboardCallback(key, modifier, action);
-}
-
-void NavigationHandler::setJoystickInputStates(JoystickInputStates& states) {
-    _inputState->setJoystickInputStates(states);
 }
 
 void NavigationHandler::setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict)
@@ -282,8 +300,9 @@ void NavigationHandler::saveCameraStateToFile(const std::string& filepath) {
 
 void NavigationHandler::restoreCameraStateFromFile(const std::string& filepath) {
     LINFO(fmt::format("Reading camera state from file: {}", filepath));
-    if (!FileSys.fileExists(filepath))
+    if (!FileSys.fileExists(filepath)) {
         throw ghoul::FileNotFoundError(filepath, "CameraFilePath");
+    }
 
     ghoul::Dictionary cameraDict;
     try {
@@ -326,13 +345,15 @@ float NavigationHandler::joystickAxisDeadzone(int axis) const {
 
 void NavigationHandler::bindJoystickButtonCommand(int button, std::string command,
                                                   JoystickAction action,
-                                         JoystickCameraStates::ButtonCommandRemote remote)
+                                         JoystickCameraStates::ButtonCommandRemote remote,
+                                                  std::string documentation)
 {
     _orbitalNavigator->joystickStates().bindButtonCommand(
         button,
         std::move(command),
         action,
-        remote
+        remote,
+        std::move(documentation)
     );
 }
 
@@ -343,8 +364,6 @@ void NavigationHandler::clearJoystickButtonCommand(int button) {
 std::vector<std::string> NavigationHandler::joystickButtonCommand(int button) const {
     return _orbitalNavigator->joystickStates().buttonCommand(button);
 }
-
-
 
 scripting::LuaLibrary NavigationHandler::luaLibrary() {
     return {

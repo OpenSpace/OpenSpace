@@ -27,8 +27,9 @@
 
 #include <openspace/util/resourcesynchronization.h>
 
-#include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
+#include <atomic>
+#include <thread>
+#include <vector>
 
 namespace openspace {
 

@@ -26,28 +26,28 @@
 #define __OPENSPACE_MODULE_ISWA___KAMELEONPLANE___H__
 
 #include <modules/iswa/rendering/datacygnet.h>
+
 #include <openspace/properties/selectionproperty.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
 
 /**
- * KameleonPlane is a concrete IswaCygnet with volume data files from
- * disk as input source. An object of this class will provide a cutplane
- * through a volume of space weather data. It will also give the option
- * to create fieldlines around and intersecting the planes. Interaction
- * with the planes is possible through sliders that will move the planes
- * through the data volume.
+ * KameleonPlane is a concrete IswaCygnet with volume data files from disk as input
+ * source. An object of this class will provide a cutplane through a volume of space
+ * weather data. It will also give the option to create fieldlines around and intersecting
+ * the planes. Interaction with the planes is possible through sliders that will move the
+ * planes through the data volume.
  */
 class KameleonPlane : public DataCygnet {
 public:
     KameleonPlane(const ghoul::Dictionary& dictionary);
     ~KameleonPlane();
 
-     void initialize() override;
-     void deinitialize() override;
+     void initializeGL() override;
+     void deinitializeGL() override;
 
 private:
-
     /**
      * Creates a plane geometry
      */
@@ -59,18 +59,18 @@ private:
     std::vector<float*> textureData() override;
 
     void setDimensions();
-    /**
-     * Given a path to the json index of seedpoints file, this
-     * method reads, parses and adds them as checkbox options
-     * in the _fieldlines SelectionProperty
-     *
-     * @param indexFile Path to json index file
-     */
-    void readFieldlinePaths(std::string indexFile);
 
     /**
-     * Updates the _fieldlineState map to match the _fieldlines
-     * SelectionProperty and creates or removes fieldlines in the scene.
+     * Given a path to the json index of seedpoints file, this method reads, parses and
+     * adds them as checkbox options in the _fieldlines SelectionProperty
+     *
+     * \param indexFile Path to json index file
+     */
+    void readFieldlinePaths(const std::string& indexFile);
+
+    /**
+     * Updates the _fieldlineState map to match the _fieldlines SelectionProperty and
+     * creates or removes fieldlines in the scene.
      */
     void updateFieldlineSeeds();
     void subscribeToGroup();
@@ -100,7 +100,13 @@ private:
      */
     std::map<int, std::tuple<std::string, std::string, bool>> _fieldlineState;
     std::string _fieldlineIndexFile;
-    int _cut;
+
+    enum Cut {
+        X = 0,
+        Y,
+        Z
+    };
+    Cut _cut;
 
     GLuint _quad;
     GLuint _vertexPositionBuffer;

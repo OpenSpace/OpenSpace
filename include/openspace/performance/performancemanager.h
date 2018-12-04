@@ -25,36 +25,32 @@
 #ifndef __OPENSPACE_CORE___PERFORMANCEMANAGER___H__
 #define __OPENSPACE_CORE___PERFORMANCEMANAGER___H__
 
-#include <openspace/performance/performancelayout.h>
-
-#include <ghoul/misc/sharedmemory.h>
-
 #include <map>
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace ghoul { class SharedMemory; }
-
 namespace openspace { class SceneGraphNode; }
 
 namespace openspace::performance {
 
+struct PerformanceLayout;
+
 class PerformanceManager {
 public:
-    static void createGlobalSharedMemory();
-    static void destroyGlobalSharedMemory();
-
-    PerformanceManager(std::string loggingDirectory = "${BASE}",
-        std::string prefix = "PM-");
+    static void CreateGlobalSharedMemory();
+    static void DestroyGlobalSharedMemory();
 
     ~PerformanceManager();
 
+    void setEnabled(bool enabled);
+    bool isEnabled() const;
+
     void resetPerformanceMeasurements();
 
-    bool isMeasuringPerformance() const;
-
-    void storeIndividualPerformanceMeasurement(std::string identifier,
-        long long nanoseconds);
+    void storeIndividualPerformanceMeasurement(const std::string& identifier,
+        long long microseconds);
     void storeScenePerformanceMeasurements(
         const std::vector<SceneGraphNode*>& sceneNodes);
 
@@ -65,9 +61,9 @@ public:
     std::string formatLogName(std::string nodeName);
 
     void logDir(std::string dir);
-    std::string logDir() const;
+    const std::string& logDir() const;
     void prefix(std::string prefix);
-    std::string prefix() const;
+    const std::string& prefix() const;
 
     void enableLogging();
     void disableLogging();
@@ -78,19 +74,18 @@ public:
     PerformanceLayout* performanceData();
 
 private:
-    bool _doPerformanceMeasurements;
-    bool _loggingEnabled;
+    bool _performanceMeasurementEnabled = false;
+    bool _loggingEnabled = false;
 
     std::string _logDir;
     std::string _prefix;
-    std::string _suffix;
-    std::string _ext;
+    std::string _ext = "log";
 
     std::map<std::string, size_t> individualPerformanceLocations;
 
     std::unique_ptr<ghoul::SharedMemory> _performanceMemory;
 
-    size_t _tick;
+    size_t _currentTick = 0;
 
     void tick();
     bool createLogDir();

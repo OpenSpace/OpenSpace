@@ -26,16 +26,15 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
-
+#include <openspace/engine/globals.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
-
 namespace {
-    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "URL",
         "Image URL",
         "Sets the URL of the texture that is displayed on this screen space plane. If "
@@ -66,8 +65,6 @@ RenderablePlaneImageOnline::RenderablePlaneImageOnline(
                                                       const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _texturePath(TextureInfo)
-    , _texture(nullptr)
-    , _textureIsDirty(false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -149,9 +146,9 @@ void RenderablePlaneImageOnline::update(const UpdateData&) {
 }
 
 std::future<DownloadManager::MemoryFile>
-RenderablePlaneImageOnline::downloadImageToMemory(std::string url)
+RenderablePlaneImageOnline::downloadImageToMemory(const std::string& url)
 {
-    return OsEng.downloadManager().fetchFile(
+    return global::downloadManager.fetchFile(
         url,
         [url](const DownloadManager::MemoryFile&) {
             LDEBUGC(

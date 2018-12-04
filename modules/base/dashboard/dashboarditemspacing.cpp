@@ -28,7 +28,7 @@
 #include <openspace/documentation/verifier.h>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo SpacingInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SpacingInfo = {
         "Spacing",
         "Spacing",
         "This value determines the spacing (in pixels) that this item represents. The "
@@ -59,7 +59,7 @@ documentation::Documentation DashboardItemSpacing::Documentation() {
     };
 }
 
-DashboardItemSpacing::DashboardItemSpacing(ghoul::Dictionary dictionary)
+DashboardItemSpacing::DashboardItemSpacing(const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
     , _spacing(SpacingInfo, 15.f, 0.f, 2048.f)
 {

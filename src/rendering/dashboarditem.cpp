@@ -27,31 +27,30 @@
 #include <openspace/util/factorymanager.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-    const char* KeyType = "Type";
+    constexpr const char* KeyType = "Type";
 
-    static const openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
         "If this value is set to 'true' this dashboard item is shown in the dashboard"
     };
 
-    static const openspace::properties::Property::PropertyInfo TypeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
         "Type",
         ""
     };
 
-    static const openspace::properties::Property::PropertyInfo IdentifierInfo = {
+    constexpr openspace::properties::Property::PropertyInfo IdentifierInfo = {
         "Identifier",
         "Identifier",
         ""
     };
 
-    static const openspace::properties::Property::PropertyInfo GuiNameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo GuiNameInfo = {
         "GuiName",
         "Gui Name",
         ""
@@ -94,12 +93,12 @@ std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
     auto factory = FactoryManager::ref().factory<DashboardItem>();
     ghoul_assert(factory, "DashboardItem factory did not exist");
 
-    std::string dashboardType = dictionary.value<std::string>(KeyType);
+    const std::string& dashboardType = dictionary.value<std::string>(KeyType);
 
-    return factory->create(dashboardType, dictionary);
+    return factory->create(dashboardType, std::move(dictionary));
 }
 
-DashboardItem::DashboardItem(ghoul::Dictionary dictionary)
+DashboardItem::DashboardItem(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "", "" })
     , _isEnabled(EnabledInfo, true)
 {
@@ -109,14 +108,12 @@ DashboardItem::DashboardItem(ghoul::Dictionary dictionary)
         "DashboardItem"
     );
 
-    const std::string identifier =
-        dictionary.value<std::string>(IdentifierInfo.identifier);
+    std::string identifier = dictionary.value<std::string>(IdentifierInfo.identifier);
+    setIdentifier(std::move(identifier));
 
-    const std::string guiName =
-        dictionary.value<std::string>(GuiNameInfo.identifier);
+    std::string guiName = dictionary.value<std::string>(GuiNameInfo.identifier);
+    setGuiName(std::move(guiName));
 
-    setIdentifier(identifier);
-    setGuiName(guiName);
     addProperty(_isEnabled);
 }
 

@@ -27,7 +27,7 @@
 
 #include <ghoul/misc/boolean.h>
 #include <ghoul/misc/exception.h>
-
+#include <ghoul/misc/stringconversion.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -108,11 +108,13 @@ struct TestResult {
 struct SpecificationError : public ghoul::RuntimeError {
     /**
      * Creates the SpecificationError exception instance.
-     * \param result The offending TestResult that is passed on
-     * \param component The component that initiated the specification test
-     * \pre \p result%'s TestResult::success must be \c false
+     *
+     * \param res The offending TestResult that is passed on
+     * \param comp The component that initiated the specification test
+     *
+     * \pre \p res%'s TestResult::success must be \c false
      */
-    SpecificationError(TestResult result, std::string component);
+    SpecificationError(TestResult res, std::string comp);
 
     /// The TestResult that caused the SpecificationError to be thrown
     TestResult result;
@@ -141,50 +143,54 @@ struct DocumentationEntry {
     static const std::string Wildcard;
 
     /**
-     * The constructor for a DocumentationEntry describing a \p key in a Documentation.
+     * The constructor for a DocumentationEntry describing a key \p k in a Documentation.
      * The value for the key (or each value in the case of the
-     * DocumentationEntry::Wildcard) is tested using the \p verifier, that specifies the
-     * conditions that the \p key%'s value has to fulfill. The textual documentation
+     * DocumentationEntry::Wildcard) is tested using the verifier \p v, that specifies the
+     * conditions that the \p k%'s value has to fulfill. The textual documentation
      * \p doc shall describe the usage of the key-value pair and will be printed for human
      * consumption for example in the DocumentationEngine. Each DocumentationEntry can
-     * further be \p optional.
-     * \param key The key for which this DocumentationEntry is valid. If this valid is
-     * equal to DocumentationEntry::Wildcard, each entry in the Documentation that
-     * contains this DocumentationEntry will be matched
-     * \param verifier The Verifier that is used to test the \p key%'s value to determine
-     * if it is a valid value
+     * further be \p opt.
+     *
+     * \param k The key for which this DocumentationEntry is valid. If this valid is
+     *        equal to DocumentationEntry::Wildcard, each entry in the Documentation that
+     *        contains this DocumentationEntry will be matched
+     * \param v The Verifier that is used to test the \p k%'s value to determine if it is
+     *        a valid value
      * \param doc The textual documentation that describes the DocumentationEntry in a
-     * human readable format
-     * \param optional Determines whether the Documentation containing this
-     * DocumentationEntry must have a key \p key, or whether it is optional
-     * \pre \p key must not be empty
-     * \pre \p verifier must not be nullptr
+     *        human readable format
+     * \param opt Determines whether the Documentation containing this DocumentationEntry
+     *        must have a key \p key, or whether it is optional
+     *
+     * \pre \p k must not be empty
+     * \pre \p v must not be nullptr
      */
-    DocumentationEntry(std::string key, std::shared_ptr<Verifier> verifier,
-        Optional optional, std::string doc = "");
+    DocumentationEntry(std::string k, std::shared_ptr<Verifier> v,
+        Optional opt, std::string doc = "");
 
     /**
-    * The constructor for a DocumentationEntry describing a \p key in a Documentation.
+    * The constructor for a DocumentationEntry describing a key \p k in a Documentation.
     * The value for the key (or each value in the case of the
-    * DocumentationEntry::Wildcard) is tested using the \p verifier, that specifies the
-    * conditions that the \p key%'s value has to fulfill. The textual documentation
+    * DocumentationEntry::Wildcard) is tested using the verifier \p v, that specifies the
+    * conditions that the \p k%'s value has to fulfill. The textual documentation
     * \p doc shall describe the usage of the key-value pair and will be printed for human
     * consumption for example in the DocumentationEngine. Each DocumentationEntry can
-    * further be \p optional.
-    * \param key The key for which this DocumentationEntry is valid. If this valid is
-    * equal to DocumentationEntry::Wildcard, each entry in the Documentation that
-    * contains this DocumentationEntry will be matched
-    * \param verifier The Verifier that is used to test the \p key%'s value to determine
-    * if it is a valid value. The DocumentationEntry will take ownership of the passed
-    * object
+    * further be \p opt.
+    *
+    * \param k The key for which this DocumentationEntry is valid. If this valid is
+    *        equal to DocumentationEntry::Wildcard, each entry in the Documentation that
+    *        contains this DocumentationEntry will be matched
+    * \param v The Verifier that is used to test the \p key%'s value to determine if it is
+    *        a valid value. The DocumentationEntry will take ownership of the passed
+    *        object
     * \param doc The textual documentation that describes the DocumentationEntry in a
-    * human readable format
-    * \param optional Determines whether the Documentation containing this
-    * DocumentationEntry must have a key \p key, or whether it is optional
-    * \pre \p key must not be empty
-    * \pre \p verifier must not be nullptr
+    *        human readable format
+    * \param opt Determines whether the Documentation containing this DocumentationEntry
+    *        must have a key \p key, or whether it is optional
+    *
+    * \pre \p k must not be empty
+    * \pre \p v must not be nullptr
     */
-    DocumentationEntry(std::string key, Verifier* verifier, Optional optional,
+    DocumentationEntry(std::string k, Verifier* v, Optional opt,
         std::string doc = "");
 
     /// The key that is described by this DocumentationEntry
@@ -225,29 +231,33 @@ struct Documentation {
     using DocumentationEntries = std::vector<documentation::DocumentationEntry>;
 
     /**
-     * Creates a Documentation with a human-readable \p name and a list of \p entries.
-     * \param name The human-readable name of this Documentation
-     * \param id A unique identifier which can be used by applications (or other
-     * Documentation%s to reference this entry
-     * \param entries A list of DocumentationEntry%s that describe the individual keys for
-     * this entrie Documentation
+     * Creates a Documentation with a human-readable name \p n and a list of entries
+     * \p ents.
+     *
+     * \param n The human-readable name of this Documentation
+     * \param i A unique identifier which can be used by applications (or other
+     *        Documentation%s to reference this entry
+     * \param ents A list of DocumentationEntry%s that describe the individual keys for
+     *        this entrie Documentation
      */
-    Documentation(std::string name, std::string id, DocumentationEntries entries = {});
+    Documentation(std::string n, std::string i, DocumentationEntries ents = {});
 
     /**
-    * Creates a Documentation with a human-readable \p name.
-    * \param name The human-readable name of this Documentation
-    * \param entries A list of DocumentationEntry%s that describe the individual keys for
-    * this entrie Documentation
+    * Creates a Documentation with a human-readable name \p n.
+    *
+    * \param n The human-readable name of this Documentation
+    * \param ents A list of DocumentationEntry%s that describe the individual keys for
+    *        this entrie Documentation
     */
-    Documentation(std::string name, DocumentationEntries entries = {});
+    Documentation(std::string n, DocumentationEntries ents = {});
 
     /**
     * Creates a Documentation.
+    *
     * \param entries A list of DocumentationEntry%s that describe the individual keys for
-    * this entrie Documentation
+    *        this entrie Documentation
     */
-    Documentation(DocumentationEntries entries = {});
+    Documentation(DocumentationEntries ents = {});
 
     /// The human-readable name of the Documentation
     std::string name;
@@ -263,9 +273,10 @@ struct Documentation {
  * will contain whether the \p dictionary adheres to the \p documentation and, in
  * addition, the list of all offending keys together with the reason why they are
  * offending.
+ *
  * \param documentation The Documentation that the \p dictionary is tested against
  * \param dictionary The ghoul::Dictionary that is to be tested against the
- * \p documentation
+ *        \p documentation
  * \return A TestResult that contains the results of the specification testing
  */
 TestResult testSpecification(const Documentation& documentation,
@@ -277,11 +288,13 @@ TestResult testSpecification(const Documentation& documentation,
 * specification a SpecificationError is thrown, and the exception contains the TestResult
 * that contains more information about the offending keys. If the \p dictionary adheres to
 * the \p documentation, the method returns normally.
+*
 * \param documentation The Documentation that the \p dictionary is tested against
 * \param dictionary The ghoul::Dictionary that is to be tested against the
-* \p documentation
+*        \p documentation
 * \param component The component that is using this method; this argument is passed to the
-* SpecificationError that is thrown in case of not adhering to the \p documentation
+*        SpecificationError that is thrown in case of not adhering to the \p documentation
+*
 * \throw SpecificationError If the \p dictionary does not adhere to the \p documentation
 */
 void testSpecificationAndThrow(const Documentation& documentation,
@@ -292,15 +305,25 @@ void testSpecificationAndThrow(const Documentation& documentation,
 // Make the overload for std::to_string available for the Offense::Reason for easier
 // error logging
 
-namespace std {
+namespace ghoul {
 
-std::string to_string(openspace::documentation::TestResult testResult);
+template <>
+std::string to_string(const openspace::documentation::TestResult& testResult);
 
-std::string to_string(openspace::documentation::TestResult::Offense offense);
-std::string to_string(openspace::documentation::TestResult::Offense::Reason reason);
-std::string to_string(openspace::documentation::TestResult::Warning warning);
-std::string to_string(openspace::documentation::TestResult::Warning::Reason reason);
+template <>
+std::string to_string(const openspace::documentation::TestResult::Offense& offense);
 
-} // namespace std
+template <>
+std::string to_string(
+    const openspace::documentation::TestResult::Offense::Reason& reason);
+
+template <>
+std::string to_string(const openspace::documentation::TestResult::Warning& warning);
+
+template <>
+std::string to_string(
+    const openspace::documentation::TestResult::Warning::Reason& reason);
+
+} // namespace ghoul
 
 #endif // __OPENSPACE_CORE___DOCUMENTATION___H__

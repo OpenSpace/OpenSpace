@@ -25,16 +25,14 @@
 #ifndef __OPENSPACE_CORE___ABUFFERRENDERER___H__
 #define __OPENSPACE_CORE___ABUFFERRENDERER___H__
 
-#include <openspace/rendering/volume.h>
+#ifdef OPENSPACE_WITH_ABUFFER_RENDERER
+
 #include <openspace/rendering/renderer.h>
 #include <openspace/rendering/raycasterlistener.h>
-#include <openspace/util/updatestructures.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/textureunit.h>
-
+#include <ghoul/opengl/ghoul_gl.h>
 #include <map>
 #include <memory>
 #include <string>
@@ -49,14 +47,15 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
+struct RaycasterTask;
 class RenderableVolume;
 class Camera;
 class Scene;
+struct RaycastData;
 
 class ABufferRenderer : public Renderer, public RaycasterListener {
 public:
-    ABufferRenderer();
-    virtual ~ABufferRenderer();
+    virtual ~ABufferRenderer() = default;
 
     void initialize() override;
     void deinitialize() override;
@@ -69,7 +68,7 @@ public:
 
     float hdrBackground() const override;
     int nAaSamples() const override;
-    std::vector<double> mSSAPattern() const override;
+    const std::vector<double>& mSSAPattern() const override;
 
     using Renderer::preRaycast;
     void preRaycast(const RaycasterTask& raycasterTask);
@@ -77,15 +76,15 @@ public:
     void postRaycast(const RaycasterTask& raycasterTask);
 
     void update() override;
-    void render(Scene* scene, Camera* camera, float blackoutFactor,
-        bool doPerformanceMeasurements) override;
+    void render(Scene* scene, Camera* camera, float blackoutFactor) override;
 
     /**
      * Update render data
      * Responsible for calling renderEngine::setRenderData
      */
     virtual void updateRendererData() override;
-    virtual void raycastersChanged(VolumeRaycaster& raycaster, bool attached) override;
+    virtual void raycastersChanged(VolumeRaycaster& raycaster,
+        IsAttached attached) override;
 
 private:
     void clear();
@@ -93,17 +92,17 @@ private:
     void updateRaycastData();
     void updateResolveDictionary();
     void updateMSAASamplingPattern();
-    void saveTextureToMemory(const GLenum color_buffer_attachment,
-        const int width, const int height, std::vector<double> & memory) const;
+    void saveTextureToMemory(GLenum color_buffer_attachment, int width, int height,
+        std::vector<double> & memory) const;
 
-    glm::ivec2 _resolution;
+    glm::ivec2 _resolution = glm::ivec2(0, 0);
 
-    bool _dirtyResolution;
-    bool _dirtyRendererData;
-    bool _dirtyRaycastData;
-    bool _dirtyResolveDictionary;
+    bool _dirtyResolution = true;
+    bool _dirtyRendererData = true;
+    bool _dirtyRaycastData = true;
+    bool _dirtyResolveDictionary = true;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram = nullptr;
 
     /**
      * When a volume is attached or detached from the scene graph,
@@ -122,8 +121,6 @@ private:
 
     GLuint _mainColorTexture;
     GLuint _mainDepthTexture;
-    std::unique_ptr<ghoul::opengl::TextureUnit> _mainColorTextureUnit;
-    std::unique_ptr<ghoul::opengl::TextureUnit> _mainDepthTextureUnit;
 
     GLuint _mainFramebuffer;
     GLuint _screenQuad;
@@ -135,9 +132,9 @@ private:
     GLuint _vertexPositionBuffer;
     int _nAaSamples;
 
-    float _hdrExposure;
-    float _hdrBackground;
-    float _gamma;
+    float _hdrExposure = 0.4f;
+    float _hdrBackground = 2.8f;
+    float _gamma = 2.2f;
     float _blackoutFactor;
 
     std::vector<double> _mSAAPattern;
@@ -146,5 +143,7 @@ private:
 };
 
 } // namespace openspace
+
+#endif // OPENSPACE_WITH_ABUFFER_RENDERER
 
 #endif // __OPENSPACE_CORE___ABUFFERRENDERER___H__

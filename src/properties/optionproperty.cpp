@@ -25,6 +25,8 @@
 
 #include <openspace/properties/optionproperty.h>
 
+#include <ghoul/logging/logmanager.h>
+
 namespace {
     constexpr const char* _loggerCat = "OptionProperty";
 } // namespace
@@ -130,9 +132,15 @@ std::string OptionProperty::generateAdditionalJsonDescription() const {
         "{ \"" + OptionsKey + "\": [";
     for (size_t i = 0; i < _options.size(); ++i) {
         const Option& o = _options[i];
-        result += "{\"" + std::to_string(o.value) + "\": \"" + o.description + "\"}";
-        if (i != _options.size() - 1)
+        std::string v = std::to_string(o.value);
+        std::string vSan = sanitizeString(v);
+        std::string d = o.description;
+        std::string dSan = sanitizeString(d);
+
+        result += "{\"" + vSan + "\": \"" + dSan+ "\"}";
+        if (i != _options.size() - 1) {
             result += ",";
+        }
     }
 
     result += "] }";

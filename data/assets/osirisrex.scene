@@ -13,6 +13,9 @@ asset.require('scene/solarsystem/missions/osirisrex/osirisrex')
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
+asset.require('util/default_joystick')
+
+asset.require('util/webgui')
 
 -- Custom Keybindings
 local Keybindings = {
@@ -66,13 +69,13 @@ local Keybindings = {
     },
     {
         Key = "q",
-        Command = propertyHelper.invert('Scene.SunMarker.renderable.Enabled'),
+        Command = propertyHelper.invert('Scene.SunMarker.Renderable.Enabled'),
         Documentation = "Toggles the visibility of the text marking the location of the Sun.",
         Local = false
     },
     {
         Key = "e",
-        Command = propertyHelper.invert('Scene.EarthMarker.renderable.Enabled'),
+        Command = propertyHelper.invert('Scene.EarthMarker.Renderable.Enabled'),
         Documentation = "Toggles the visibility of the text marking the location of the Earth.",
         Local = false
     }
@@ -123,7 +126,7 @@ asset.onInitialize(function ()
     openspace.addVirtualProperty(
         "BoolProperty",
         "Show Trails",
-        "*Trail.renderable.Enabled",
+        "*Trail.Renderable.Enabled",
         "Disable or enable all trails of the scene at the same time",
         true,
         nil,
@@ -140,9 +143,8 @@ end)
 asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
 
-    openspace.removeVirtualProperty("*Trail.renderable.Enabled")
-    openspace.removeInterestingNodes(
-        "GUI.Interesting",
-        { "OsirisRex", "BennuBarycenter", "Earth" }
-    )
+    openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
+    openspace.removeInterestingNodes({
+        "OsirisRex", "BennuBarycenter", "Earth"
+    })
 end)

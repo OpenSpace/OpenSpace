@@ -31,8 +31,6 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <openspace/util/boxgeometry.h>
-#include <openspace/util/blockplaneintersectiongeometry.h>
 
 namespace openspace {
 

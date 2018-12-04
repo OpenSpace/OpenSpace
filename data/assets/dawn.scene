@@ -4,7 +4,7 @@ local sceneHelper = asset.require('util/scene_helper')
 -- Specifying which other assets should be loaded in this scene
 asset.require('spice/base')
 assetHelper.requestAll(asset, 'scene/solarsystem/sun')
-assetHelper.requestAll(asset, 'scene/solarsystem/planets')
+asset.request('scene/solarsystem/planets')
 asset.request('scene/digitaluniverse/stars')
 asset.request('scene/digitaluniverse/milkyway')
 asset.require('scene/solarsystem/missions/dawn/ceres')
@@ -15,6 +15,7 @@ asset.require('scene/solarsystem/missions/dawn/vesta')
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
 
+asset.require('util/webgui')
 
 local DawnAsset = asset.require('scene/solarsystem/missions/dawn/dawn')
 
@@ -31,7 +32,7 @@ asset.onInitialize(function ()
     openspace.addVirtualProperty(
         "BoolProperty",
         "Show Trails",
-        "*Trail.renderable.Enabled",
+        "*Trail.Renderable.Enabled",
         "Disable or enable all trails of the scene at the same time",
         true,
         nil,
@@ -46,9 +47,8 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-    openspace.removeVirtualProperty("*Trail.renderable.Enabled")
-    openspace.removeInterestingNodes(
-        "GUI.Interesting",
-        { "Dawn", "Ceres", "Vesta" }
-    )
+    openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
+    openspace.removeInterestingNodes({
+        "Dawn", "Ceres", "Vesta"
+    })
 end)

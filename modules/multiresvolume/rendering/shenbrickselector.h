@@ -26,51 +26,42 @@
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___SHENBRICKSELECTOR___H__
 
 #include <modules/multiresvolume/rendering/brickselector.h>
-#include <modules/multiresvolume/rendering/tsp.h>
-#include <modules/multiresvolume/rendering/brickcover.h>
 
+#include <modules/multiresvolume/rendering/brickcover.h>
 #include <vector>
 
 namespace openspace {
 
+class TSP;
+
 class ShenBrickSelector : public BrickSelector {
 public:
     ShenBrickSelector(TSP* tsp, float spatialTolerance, float temporalTolerance);
-    ~ShenBrickSelector();
+    ~ShenBrickSelector() = default;
     void setSpatialTolerance(float spatialTolerance);
     void setTemporalTolerance(float temporalTolerance);
-    void selectBricks(int timestep, std::vector<int>& bricks);
+    void selectBricks(int timestep, std::vector<int>& bricks) override;
 
 private:
     TSP* _tsp;
     float _spatialTolerance;
     float _temporalTolerance;
 
-    void traverseOT(int timestep,
-                    unsigned int brickIndex,
-                    BrickCover coveredBricks,
-                    std::vector<int>& bricks);
+    void traverseOT(int timestep, unsigned int brickIndex, BrickCover coveredBricks,
+        std::vector<int>& bricks);
 
-    void traverseBST(int timestep,
-                     unsigned int brickIndex,
-                     unsigned int bstRootBrickIndex,
-                     int timeSpanStart,
-                     int timeSpanEnd,
-                     BrickCover coveredBricks,
-                     std::vector<int>& bricks);
+    void traverseBST(int timestep, unsigned int brickIndex,
+        unsigned int bstRootBrickIndex, int timeSpanStart, int timeSpanEnd,
+        BrickCover coveredBricks, std::vector<int>& bricks);
 
-    void selectBricks(int timestep,
-                      unsigned int brickIndex,
-                      unsigned int bstRootBrickIndex,
-                      int timeSpanStart,
-                      int timeSpanEnd,
-                      BrickCover coveredBricks,
-                      std::vector<int>& bricks);
+    void selectBricks(int timestep, unsigned int brickIndex,
+        unsigned int bstRootBrickIndex, int timeSpanStart, int timeSpanEnd,
+        BrickCover coveredBricks, std::vector<int>& bricks);
 
-    int linearCoords(int x, int y, int z);
+    int linearCoords(int x, int y, int z) const;
 
     void selectCover(BrickCover coveredBricks, unsigned int brickIndex,
-        std::vector<int>& bricks);
+        std::vector<int>& bricks) const;
 };
 
 } // namespace openspace

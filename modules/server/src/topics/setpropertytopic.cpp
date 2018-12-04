@@ -22,52 +22,104 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <modules/server/include/topics/setpropertytopic.h>
+
+#include <openspace/json.h>
+#include <openspace/engine/globals.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/query/query.h>
-#include <openspace/properties/property.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/util/timemanager.h>
+#include <openspace/util/time.h>
+#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
-#include <modules/server/include/setpropertytopic.h>
 
 namespace {
-const std::string PropertyKey = "property";
-const std::string ValueKey = "value";
-const std::string _loggerCat = "SetPropertyTopic";
-const std::string SpecialKeyTime = "__time";
-}
+    constexpr const char* PropertyKey = "property";
+    constexpr const char* ValueKey = "value";
+    constexpr const char* _loggerCat = "SetPropertyTopic";
+    constexpr const char* SpecialKeyTime = "__time";
+
+    std::string escapedLuaString(const std::string& str) {
+        std::string luaString;
+        for (const char& c : str) {
+            switch (c) {
+                case '\'':
+                    luaString += "\'";
+                    break;
+                default:
+                    luaString += c;
+            }
+        }
+        return luaString;
+    }
+
+    std::string luaLiteralFromJson(nlohmann::json value) {
+        if (value.is_string()) {
+            return "'" + escapedLuaString(value.get<std::string>()) + "'";
+        } else if (value.is_boolean()) {
+            return value.get<bool>() ? "true" : "false";
+        } else if (value.is_number()) {
+            return std::to_string(value.get<double>());
+        } else if (value.is_array()) {
+            std::string literal = "{";
+            for (nlohmann::json::iterator it = value.begin(); it != value.end(); ++it) {
+                literal += luaLiteralFromJson(it.value()) += ",";
+            }
+            literal.pop_back(); // remove last comma
+            literal += "}";
+            return literal;
+        } else if (value.is_object()) {
+            std::string literal = "{";
+            for (nlohmann::json::iterator it = value.begin(); it != value.end(); ++it) {
+                literal += it.key() + "=" + luaLiteralFromJson(it.value()) += ",";
+            }
+            literal.pop_back(); // remove last comma
+            literal += "}";
+            return literal;
+        }{
+            return "null";
+        }
+    }
+} // namespace
 
 namespace openspace {
 
-void SetPropertyTopic::handleJson(nlohmann::json json) {
+void SetPropertyTopic::handleJson(const nlohmann::json& json) {
     try {
-        auto propertyKey = json.at(PropertyKey).get<std::string>();
-        auto value = json.at(ValueKey).get<std::string>();
+        const std::string& propertyKey = json.at(PropertyKey).get<std::string>();
 
         if (propertyKey == SpecialKeyTime) {
-            setTime(value);
+            Time newTime;
+            newTime.setTime(json.at(ValueKey).get<std::string>());
+            global::timeManager.setTimeNextFrame(newTime);
         }
         else {
-            auto prop = property(propertyKey);
-            if (prop != nullptr) {
-                LDEBUG("Setting " + propertyKey + " to " + value + ".");
-                if (!prop->setStringValue(value)) {
-                    LERROR("Failed!");
-                }
-            }
+            nlohmann::json value = json.at(ValueKey);
+            std::string literal = luaLiteralFromJson(value);
+
+            global::scriptEngine.queueScript(
+                fmt::format(
+                    "openspace.setPropertyValueSingle(\"{}\", {})", propertyKey, literal
+                ),
+                 scripting::ScriptEngine::RemoteScripting::Yes
+             );
         }
     }
-    catch (std::out_of_range& e) {
+    catch (const std::out_of_range& e) {
         LERROR("Could not set property -- key or value is missing in payload");
         LERROR(e.what());
     }
-    catch (ghoul::RuntimeError e) {
+    catch (const ghoul::RuntimeError& e) {
         LERROR("Could not set property -- runtime error:");
         LERROR(e.what());
     }
+    catch (...) {
+        LERROR("Could not set property -- unknown error");
+    }
 }
 
-void SetPropertyTopic::setTime(const std::string& timeValue) {
-    OsEng.timeManager().time().setTime(timeValue);
+bool SetPropertyTopic::isDone() const {
+    return true;
 }
 
-}
+} // namespace openspace

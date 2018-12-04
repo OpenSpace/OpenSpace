@@ -74,7 +74,7 @@ bool toLuaConversion(lua_State* state, glm::dmat3x4 value) {
 }
 
 
-glm::dmat3x4 fromStringConversion(std::string val, bool& success) {
+glm::dmat3x4 fromStringConversion(const std::string& val, bool& success) {
     glm::dmat3x4 result;
     std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
     if (tokens.size() !=
@@ -104,13 +104,14 @@ glm::dmat3x4 fromStringConversion(std::string val, bool& success) {
 }
 
 bool toStringConversion(std::string& outValue, glm::dmat3x4 inValue) {
-    outValue = "";
+    outValue = "[";
     for (glm::length_t i = 0; i < ghoul::glm_cols<glm::dmat3x4>::value; ++i) {
         for (glm::length_t j = 0; j < ghoul::glm_rows<glm::dmat3x4>::value; ++j) {
             outValue += std::to_string(inValue[i][j]) + ",";
         }
-        outValue.pop_back();
     }
+    outValue.pop_back();
+    outValue += "]";
     return true;
 }
 

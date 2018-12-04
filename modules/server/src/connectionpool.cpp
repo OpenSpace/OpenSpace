@@ -23,16 +23,14 @@
  ****************************************************************************************/
 
 #include <modules/server/include/connectionpool.h>
+
 #include <ghoul/io/socket/socket.h>
-
-#include <vector>
+#include <ghoul/io/socket/socketserver.h>
 #include <algorithm>
-
 
 namespace openspace {
 
-ConnectionPool::ConnectionPool(
-    std::function<void(std::shared_ptr<ghoul::io::Socket> socket)> handleSocket)
+ConnectionPool::ConnectionPool(SocketHandleFunc handleSocket)
     : _handleSocket(std::move(handleSocket))
 {}
 
@@ -41,13 +39,20 @@ ConnectionPool::~ConnectionPool() {
 }
 
 void ConnectionPool::addServer(std::shared_ptr<ghoul::io::SocketServer> server) {
-    _socketServers.push_back(server);
+    _socketServers.push_back(std::move(server));
 }
 
 void ConnectionPool::removeServer(ghoul::io::SocketServer* server) {
-    std::remove_if(_socketServers.begin(), _socketServers.end(), [server](const auto& s) {
-        return s.get() == server;
-    });
+    _socketServers.erase(
+        std::remove_if(
+            _socketServers.begin(),
+            _socketServers.end(),
+            [server](const std::shared_ptr<ghoul::io::SocketServer>& s) {
+                return s.get() == server;
+            }
+        ),
+        _socketServers.end()
+    );
 }
 
 void ConnectionPool::clearServers() {
@@ -60,33 +65,35 @@ void ConnectionPool::updateConnections() {
 }
 
 void ConnectionPool::acceptNewSockets() {
-    for (auto& server : _socketServers) {
-        std::shared_ptr<ghoul::io::Socket> socket;
-        while (socket = server->nextPendingSocket()) {
-            _handleSocket(socket);
-            _sockets.push_back(socket);
+    for (std::shared_ptr<ghoul::io::SocketServer>& server : _socketServers) {
+        std::unique_ptr<ghoul::io::Socket> socket;
+        while ((socket = server->nextPendingSocket())) {
+            _handleSocket(*socket);
+            _sockets.push_back(std::move(socket));
         }
     }
 }
 
 void ConnectionPool::removeDisconnectedSockets() {
-    std::remove_if(
-        _sockets.begin(),
-        _sockets.end(),
-        [](const std::shared_ptr<ghoul::io::Socket> socket) {
-            return !socket || !socket->isConnected();
-        }
+    _sockets.erase(
+        std::remove_if(
+            _sockets.begin(),
+            _sockets.end(),
+            [](const std::unique_ptr<ghoul::io::Socket>& socket) {
+                return !socket || !socket->isConnected();
+            }
+        ),
+        _sockets.end()
     );
 }
 
 void ConnectionPool::disconnectAllConnections() {
-    for (auto& socket : _sockets) {
+    for (const std::unique_ptr<ghoul::io::Socket>& socket : _sockets) {
         if (socket && socket->isConnected()) {
             socket->disconnect();
         }
     }
     _sockets.clear();
 }
-
 
 } // namespace openspace

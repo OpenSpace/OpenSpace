@@ -24,8 +24,8 @@
 
 #include <modules/touch/include/tuioear.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
@@ -63,7 +63,7 @@ void TuioEar::addTuioCursor(TuioCursor* tcur) {
         _removeList.erase(foundID);
     }
     else {
-        _list.push_back(TuioCursor(*tcur));
+        _list.emplace_back(*tcur);
     }
     _mx.unlock();
 }

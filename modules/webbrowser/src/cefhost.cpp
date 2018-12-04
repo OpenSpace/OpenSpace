@@ -22,23 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "include/cefhost.h"
+#include <modules/webbrowser/include/cefhost.h>
+
+#include <modules/webbrowser/include/webbrowserapp.h>
+#include <openspace/engine/globalscallbacks.h>
+#include <ghoul/logging/logmanager.h>
+#include <fmt/format.h>
+#include <include/wrapper/cef_helpers.h>
 
 namespace {
-const char* _loggerCat = "CefHost";
-}
+    constexpr const char* _loggerCat = "CefHost";
+} // namespace
 
 namespace openspace {
 
 CefHost::CefHost(std::string helperLocation) {
     LDEBUG("Initializing CEF...");
-    CefMainArgs args;
-    CefSettings settings;
 
-    CefString(&settings.browser_subprocess_path).FromASCII(
-        // This is bad as it casts away the const
-        (char*) helperLocation.c_str()
-    );
+    CefSettings settings;
+    CefString(&settings.browser_subprocess_path).FromString(helperLocation);
     attachDebugSettings(settings);
 
 #ifdef WIN32
@@ -47,8 +49,8 @@ CefHost::CefHost(std::string helperLocation) {
 #endif
     CefRefPtr<WebBrowserApp> app(new WebBrowserApp);
 
+    CefMainArgs args;
     CefInitialize(args, settings, app.get(), NULL);
-    initializeCallbacks();
     LDEBUG("Initializing CEF... done!");
 }
 
@@ -58,21 +60,19 @@ CefHost::~CefHost() {
 
 void CefHost::attachDebugSettings(CefSettings &settings) {
     settings.remote_debugging_port = 8088;
+
     LDEBUG(fmt::format(
         "Remote WebBrowser debugging available on http://localhost:{}",
         settings.remote_debugging_port
     ));
-//    settings.single_process = true;
+
+#ifdef __APPLE__
+    settings.single_process = true;
+#endif
 }
 
-void CefHost::initializeCallbacks() {
-    OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::Render,
-            [this](){
-                CefDoMessageLoopWork();
-            }
-    );
+void CefHost::doMessageLoopWork() {
+    CefDoMessageLoopWork();
 }
 
-}
-
+} // namespace openspace

@@ -26,9 +26,8 @@
 #define __OPENSPACE_CORE___PARALLELCONNECTION___H__
 
 #include <openspace/network/messagestructures.h>
-
 #include <ghoul/io/socket/tcpsocket.h>
-
+#include <ghoul/misc/exception.h>
 #include <vector>
 
 namespace openspace {
@@ -54,23 +53,19 @@ public:
     };
 
     struct Message {
-        Message() {};
-        Message(MessageType t, const std::vector<char>& c)
-            : type(t)
-            , content(c)
-        {};
+        Message() = default;
+        Message(MessageType t, std::vector<char> c);
 
         MessageType type;
         std::vector<char> content;
     };
 
     struct DataMessage {
-        DataMessage() {};
-        DataMessage(datamessagestructures::Type t, const std::vector<char>& c)
-            : type(t)
-            , content(c)
-        {};
+        DataMessage() = default;
+        DataMessage(datamessagestructures::Type t, double timestamp, std::vector<char> c);
+
         datamessagestructures::Type type;
+        double timestamp;
         std::vector<char> content;
     };
 
@@ -81,14 +76,15 @@ public:
 
     ParallelConnection(std::unique_ptr<ghoul::io::TcpSocket> socket);
 
-    bool isConnectedOrConnecting();
+    bool isConnectedOrConnecting() const;
     void sendDataMessage(const ParallelConnection::DataMessage& dataMessage);
-    bool sendMessage(const  ParallelConnection::Message& message);
+    bool sendMessage(const ParallelConnection::Message& message);
     void disconnect();
     ghoul::io::TcpSocket* socket();
 
     ParallelConnection::Message receiveMessage();
 
+    static const unsigned int ProtocolVersion;
 private:
     std::unique_ptr<ghoul::io::TcpSocket> _socket;
 };

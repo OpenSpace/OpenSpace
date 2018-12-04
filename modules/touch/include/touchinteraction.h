@@ -38,6 +38,7 @@
 #include <openspace/properties/vector/vec4property.h>
 
 //#define TOUCH_DEBUG_PROPERTIES
+//#define TOUCH_DEBUG_NODE_PICK_MESSAGES
 
 namespace openspace {
 
@@ -45,20 +46,19 @@ class Camera;
 class SceneGraphNode;
 
 //Class used for keeping track of the recent average frame time
-class FrameTimeAverage
-{
+class FrameTimeAverage {
 public:
     //Update the circular buffer with the most recent frame time
     void updateWithNewFrame(double sample);
     //Get the value of the most recent average frame time (seconds)
-    double getAvgFrameTime();
+    double averageFrameTime() const;
 
 private:
-    static const int totalSamples = 10;
+    static const int TotalSamples = 10;
     int _nSamples = 0;
-    double _samples[totalSamples];
+    double _samples[TotalSamples];
     double _runningTotal = 0.0;
-    int index = 0;
+    int _index = 0;
 };
 
 class TouchInteraction : public properties::PropertyOwner {
@@ -135,7 +135,7 @@ public:
     Camera* getCamera();
     SceneGraphNode* getFocusNode();
     void setFocusNode(SceneGraphNode* focusNode);
-    void setCamera(Camera* cam);
+    void setCamera(Camera* camera);
 
 private:
     /* Returns true if the clicked position contains WebGui content and the event will
@@ -189,7 +189,7 @@ private:
     // Resets all properties that can be changed in the GUI to default
     void resetToDefault();
 
-    Camera* _camera;
+    Camera* _camera = nullptr;
     SceneGraphNode* _focusNode = nullptr;
 
     // Property variables
@@ -248,13 +248,14 @@ private:
     int _numOfTests;
     TUIO::TuioTime _time;
     bool _directTouchMode;
+    bool _wasPrevModeDirectTouch;
     bool _tap;
     bool _doubleTap;
     bool _zoomOutTap;
     bool _lmSuccess;
     bool _guiON;
     std::vector<SelectedBody> _selected;
-    SceneGraphNode* _pickingSelected;
+    SceneGraphNode* _pickingSelected = nullptr;
     LMstat _lmstat;
     glm::dquat _toSlerp;
     glm::dvec3 _centroid;

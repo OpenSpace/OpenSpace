@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <ghoul/lua/ghoul_lua.h>
 
 namespace openspace::luascriptfunctions {
@@ -35,13 +35,17 @@ namespace openspace::luascriptfunctions {
 int isLoaded(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::isLoaded");
 
-    const int type = lua_type(L, -1);
+    const int type = lua_type(L, 1);
     if (type != LUA_TSTRING) {
-        return luaL_error(L, "Expected argument of type 'string'");
+        return ghoul::lua::luaError(L, "Expected argument of type 'string'");
     }
-    std::string moduleName = lua_tostring(L, -1);
+    const std::string& moduleName = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
 
-    std::vector<OpenSpaceModule*> modules = OsEng.moduleEngine().modules();
+    const std::vector<OpenSpaceModule*>& modules = global::moduleEngine.modules();
 
     auto it = std::find_if(
         modules.begin(),
@@ -51,12 +55,7 @@ int isLoaded(lua_State* L) {
         }
     );
 
-    if (it != modules.end()) {
-        lua_pushboolean(L, 1);
-    }
-    else {
-        lua_pushboolean(L, 0);
-    }
+    ghoul::lua::push(L, it != modules.end());
 
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;

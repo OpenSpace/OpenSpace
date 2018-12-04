@@ -50,8 +50,8 @@ void MouseCameraStates::updateStateFromInput(const InputState& inputState,
     // Update the mouse states
     if (button1Pressed && !keyShiftPressed && !keyAltPressed) {
         if (keyCtrlPressed) {
-            glm::dvec2 mousePositionDelta =
-                _localRotationState.previousPosition - mousePosition;
+            glm::dvec2 mousePositionDelta = _localRotationState.previousPosition -
+                                             mousePosition;
             _localRotationState.velocity.set(
                 mousePositionDelta * _sensitivity,
                 deltaTime
@@ -61,8 +61,8 @@ void MouseCameraStates::updateStateFromInput(const InputState& inputState,
             _globalRotationState.velocity.decelerate(deltaTime);
         }
         else {
-            glm::dvec2 mousePositionDelta =
-                _globalRotationState.previousPosition - mousePosition;
+            glm::dvec2 mousePositionDelta = _globalRotationState.previousPosition -
+                                            mousePosition;
             _globalRotationState.velocity.set(
                 mousePositionDelta * _sensitivity,
                 deltaTime
@@ -80,8 +80,8 @@ void MouseCameraStates::updateStateFromInput(const InputState& inputState,
         _globalRotationState.velocity.decelerate(deltaTime);
     }
     if (button2Pressed || (keyAltPressed && button1Pressed)) {
-        glm::dvec2 mousePositionDelta =
-            _truckMovementState.previousPosition - mousePosition;
+        glm::dvec2 mousePositionDelta = _truckMovementState.previousPosition -
+                                        mousePosition;
         _truckMovementState.velocity.set(
             mousePositionDelta * _sensitivity,
             deltaTime
@@ -93,8 +93,8 @@ void MouseCameraStates::updateStateFromInput(const InputState& inputState,
     }
     if (button3Pressed || (keyShiftPressed && button1Pressed)) {
         if (keyCtrlPressed) {
-            glm::dvec2 mousePositionDelta =
-                _localRollState.previousPosition - mousePosition;
+            glm::dvec2 mousePositionDelta = _localRollState.previousPosition -
+                                            mousePosition;
             _localRollState.velocity.set(
                 mousePositionDelta * _sensitivity,
                 deltaTime
@@ -104,8 +104,8 @@ void MouseCameraStates::updateStateFromInput(const InputState& inputState,
             _globalRollState.velocity.decelerate(deltaTime);
         }
         else {
-            glm::dvec2 mousePositionDelta =
-                _globalRollState.previousPosition - mousePosition;
+            glm::dvec2 mousePositionDelta = _globalRollState.previousPosition -
+                                            mousePosition;
             _globalRollState.velocity.set(
                 mousePositionDelta * _sensitivity,
                 deltaTime

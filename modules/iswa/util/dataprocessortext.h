@@ -32,19 +32,16 @@ namespace openspace {
 class DataProcessorText : public DataProcessor {
 public:
     DataProcessorText();
-    ~DataProcessorText();
+    virtual ~DataProcessorText();
 
-    virtual std::vector<std::string> readMetadata(std::string data,
+    virtual std::vector<std::string> readMetadata(const std::string& data,
         glm::size3_t& dimensions) override;
-    virtual void addDataValues(std::string data,
-        properties::SelectionProperty& dataOptions) override;
-    virtual std::vector<float*> processData(std::string data,
-        properties::SelectionProperty& dataOptions, glm::size3_t& dimensions) override;
 
-private:
-    // void initialize(int numOptions);
-    // void add(std::vector<std::vector<float>>& optionValues, std::vector<float>& sum);
-    // void calculateFilterValues(std::vector<int> selectedOptions);
+    virtual void addDataValues(const std::string& data,
+        properties::SelectionProperty& dataOptions) override;
+
+    virtual std::vector<float*> processData(const std::string& data,
+        properties::SelectionProperty& dataOptions, glm::size3_t& dimensions) override;
 };
 
 } // namespace openspace

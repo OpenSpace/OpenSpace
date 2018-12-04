@@ -25,12 +25,11 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER___CEF_HOST___H__
 #define __OPENSPACE_MODULE_WEBBROWSER___CEF_HOST___H__
 
-#include <include/wrapper/cef_helpers.h>
-#include <include/cef_app.h>
-#include <fmt/format.h>
-#include <include/openspace/engine/openspaceengine.h>
-#include <ghoul/logging/logmanager.h>
-#include <modules/webbrowser/include/webbrowserapp.h>
+#include <string>
+
+struct CefSettingsTraits;
+template <typename T> class CefStructBase;
+using CefSettings = CefStructBase<CefSettingsTraits>;
 
 namespace openspace {
 
@@ -38,9 +37,9 @@ class CefHost {
 public:
     CefHost(std::string helperLocation);
     ~CefHost();
+    void doMessageLoopWork();
 
 private:
-    void initializeCallbacks();
     void attachDebugSettings(CefSettings&);
 };
 

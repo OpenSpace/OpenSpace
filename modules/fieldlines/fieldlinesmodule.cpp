@@ -24,12 +24,11 @@
 
 #include <modules/fieldlines/fieldlinesmodule.h>
 
+#include <modules/fieldlines/rendering/renderablefieldlines.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
-
 #include <ghoul/misc/assert.h>
-
-#include <modules/fieldlines/rendering/renderablefieldlines.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 

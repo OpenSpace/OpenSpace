@@ -25,19 +25,17 @@
 namespace openspace {
 
 template <typename T>
-Timeline<T>::Timeline()
-    : _nextKeyframeId(1)
+Keyframe<T>::Keyframe(size_t i, double t, T p)
+    : KeyframeBase{ i, t }
+    , data(p)
 {}
-
-template <typename T>
-Timeline<T>::~Timeline() {}
 
 template <typename T>
 void Timeline<T>::addKeyframe(double timestamp, T data) {
     Keyframe<T> keyframe(++_nextKeyframeId, timestamp, data);
-    auto iter = std::upper_bound(
-        _keyframes.begin(),
-        _keyframes.end(),
+    const auto iter = std::upper_bound(
+        _keyframes.cbegin(),
+        _keyframes.cend(),
         keyframe,
         &compareKeyframeTimes
     );
@@ -46,38 +44,46 @@ void Timeline<T>::addKeyframe(double timestamp, T data) {
 
 template <typename T>
 void Timeline<T>::removeKeyframesAfter(double timestamp, bool inclusive) {
-    auto iter = inclusive
-        ? std::lower_bound(
-            _keyframes.begin(),
-            _keyframes.end(),
+    typename std::deque<Keyframe<T>>::const_iterator iter;
+    if (inclusive) {
+        iter = std::lower_bound(
+            _keyframes.cbegin(),
+            _keyframes.cend(),
             timestamp,
             &compareKeyframeTimeWithTime
-        )
-        : std::upper_bound(
-            _keyframes.begin(),
-            _keyframes.end(),
+        );
+    }
+    else {
+        iter = std::upper_bound(
+            _keyframes.cbegin(),
+            _keyframes.cend(),
             timestamp,
             &compareTimeWithKeyframeTime
         );
+    }
 
     _keyframes.erase(iter, _keyframes.end());
 }
 
 template <typename T>
 void Timeline<T>::removeKeyframesBefore(double timestamp, bool inclusive) {
-    auto iter = inclusive
-        ? std::upper_bound(
-            _keyframes.begin(),
-            _keyframes.end(),
+    typename std::deque<Keyframe<T>>::const_iterator iter;
+    if (inclusive) {
+        iter = std::upper_bound(
+            _keyframes.cbegin(),
+            _keyframes.cend(),
             timestamp,
             &compareTimeWithKeyframeTime
-        )
-        : std::lower_bound(
-            _keyframes.begin(),
-            _keyframes.end(),
+        );
+    }
+    else {
+        iter = std::lower_bound(
+            _keyframes.cbegin(),
+            _keyframes.cend(),
             timestamp,
-            &compareKeyframeTimeWithTime)
-    ;
+            &compareKeyframeTimeWithTime
+        );
+    }
 
     _keyframes.erase(_keyframes.begin(), iter);
 }
@@ -86,33 +92,42 @@ template <typename T>
 void Timeline<T>::removeKeyframesBetween(double begin, double end, bool inclusiveBegin,
                                          bool inclusiveEnd)
 {
-    auto beginIter = inclusiveBegin
-        ? std::lower_bound(
-            _keyframes.begin(),
-            _keyframes.end(),
+    typename std::deque<Keyframe<T>>::const_iterator beginIter;
+    if (inclusiveBegin) {
+        beginIter = std::lower_bound(
+            _keyframes.cbegin(),
+            _keyframes.cend(),
             begin,
             &compareKeyframeTimeWithTime
-        )
-        : std::upper_bound(
-            _keyframes.begin(),
-            _keyframes.end(),
+        );
+    }
+    else {
+        beginIter = std::upper_bound(
+            _keyframes.cbegin(),
+            _keyframes.cend(),
             begin,
             &compareTimeWithKeyframeTime
         );
+    }
 
-    auto endIter = inclusiveEnd
-        ? std::upper_bound(
+
+    typename std::deque<Keyframe<T>>::const_iterator endIter;
+    if (inclusiveEnd) {
+        endIter = std::upper_bound(
             beginIter,
-            _keyframes.end(),
+            _keyframes.cend(),
             end,
             &compareTimeWithKeyframeTime
-        )
-        : std::lower_bound(
+        );
+    }
+    else {
+        endIter = std::lower_bound(
             beginIter,
-            _keyframes.end(),
+            _keyframes.cend(),
             end,
             &compareKeyframeTimeWithTime
         );
+    }
 
     _keyframes.erase(beginIter, endIter);
 }
@@ -140,22 +155,25 @@ size_t Timeline<T>::nKeyframes() const {
 }
 
 template <typename T>
-const Keyframe<T>* Timeline<T>::firstKeyframeAfter(double timestamp,
-                                                   bool inclusive) const
+const Keyframe<T>* Timeline<T>::firstKeyframeAfter(double timestamp, bool inclusive) const
 {
-    auto it = inclusive
-        ? std::lower_bound(
+    typename std::deque<Keyframe<T>>::const_iterator it;
+    if (inclusive) {
+        it = std::lower_bound(
             _keyframes.begin(),
             _keyframes.end(),
             timestamp,
             &compareKeyframeTimeWithTime
-        )
-        : std::upper_bound(
+        );
+    }
+    else {
+        it = std::upper_bound(
             _keyframes.begin(),
             _keyframes.end(),
             timestamp,
             &compareTimeWithKeyframeTime
         );
+    }
 
     if (it == _keyframes.end()) {
         return nullptr;
@@ -164,22 +182,25 @@ const Keyframe<T>* Timeline<T>::firstKeyframeAfter(double timestamp,
 }
 
 template <typename T>
-const Keyframe<T>* Timeline<T>::lastKeyframeBefore(double timestamp,
-                                                   bool inclusive) const
+const Keyframe<T>* Timeline<T>::lastKeyframeBefore(double timestamp, bool inclusive) const
 {
-    auto it = inclusive
-        ? std::upper_bound(
+    typename std::deque<Keyframe<T>>::const_iterator it;
+    if (inclusive) {
+        it = std::upper_bound(
             _keyframes.begin(),
             _keyframes.end(),
             timestamp,
             &compareTimeWithKeyframeTime
-        )
-        : std::lower_bound(
+        );
+    }
+    else {
+        it = std::lower_bound(
             _keyframes.begin(),
             _keyframes.end(),
             timestamp,
             &compareKeyframeTimeWithTime
         );
+    }
 
     if (it == _keyframes.begin()) {
         return nullptr;
@@ -187,7 +208,6 @@ const Keyframe<T>* Timeline<T>::lastKeyframeBefore(double timestamp,
     it--;
     return &(*it);
 }
-
 
 template<typename T>
 const std::deque<Keyframe<T>>& Timeline<T>::keyframes() const {

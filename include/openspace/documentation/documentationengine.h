@@ -25,10 +25,9 @@
 #ifndef __OPENSPACE_CORE___DOCUMENTATIONENGINE___H__
 #define __OPENSPACE_CORE___DOCUMENTATIONENGINE___H__
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/documentationgenerator.h>
-#include <ghoul/designpattern/singleton.h>
 
+#include <openspace/documentation/documentation.h>
 #include <ghoul/misc/exception.h>
 
 namespace openspace::documentation {
@@ -38,9 +37,7 @@ namespace openspace::documentation {
  * produced in the application an write them out as a documentation file for human
  * consumption.
  */
-class DocumentationEngine : public ghoul::Singleton<DocumentationEngine>
-                          , public DocumentationGenerator
-{
+class DocumentationEngine : public DocumentationGenerator {
 public:
     /**
      * This exception is thrown by the addDocumentation method if a provided Documentation
@@ -50,10 +47,11 @@ public:
         /**
          * Constructor of a DuplicateDocumentationException storing the offending
          * Documentation for later use.
-         * \param documentation The Documentation whose identifier was previously
-         * registered
+         *
+         * \param doc The Documentation whose identifier was previously
+         *        registered
          */
-        DuplicateDocumentationException(Documentation documentation);
+        DuplicateDocumentationException(Documentation doc);
 
         /// The offending Documentation whose identifier was previously registered
         Documentation documentation;
@@ -64,20 +62,28 @@ public:
     /**
      * Adds the \p documentation to the list of Documentation%s that are written to a
      * documentation file with the writeDocumentation method.
+     *
      * \param documentation The Documentation object that is to be stored for later use
-     * \throws DuplicateDocumentationException If the \p documentation has a non-empty
-     * identifier and it was not unique
+     *
+     * \throw DuplicateDocumentationException If the \p documentation has a non-empty
+     *        identifier and it was not unique
      */
     void addDocumentation(Documentation documentation);
 
     /**
-     * Returns a list of all registered Documentation%s
+     * Returns a list of all registered Documentation%s.
+     *
      * \return A list of all registered Documentation%s
      */
     std::vector<Documentation> documentations() const;
 
+    static void initialize();
+    static void deinitialize();
+    static bool isInitialized();
+
     /**
-     * Returns a static reference to the main singleton DocumentationEngine
+     * Returns a static reference to the main singleton DocumentationEngine.
+     *
      * \return A static reference to the main singleton DocumentationEngine
      */
     static DocumentationEngine& ref();

@@ -27,21 +27,13 @@
 #include <openspace/openspace.h>
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/verifier.h>
-
-#include <ghoul/misc/assert.h>
-#include <ghoul/filesystem/filesystem.h>
-
-#include <algorithm>
-#include <fstream>
-#include <sstream>
-#include <streambuf>
-
 #include <ghoul/fmt.h>
 
 namespace {
-    const char* MainTemplateFilename = "${WEB}/documentation/main.hbs";
-    const char* DocumentationTemplateFilename = "${WEB}/documentation/documentation.hbs";
-    const char* JsFilename = "${WEB}/documentation/script.js";
+    constexpr const char* MainTemplateFilename = "${WEB}/documentation/main.hbs";
+    constexpr const char* DocumentationTemplateFilename =
+                                                 "${WEB}/documentation/documentation.hbs";
+    constexpr const char* JsFilename = "${WEB}/documentation/script.js";
 } // namespace
 
 namespace openspace::documentation {
@@ -70,6 +62,20 @@ DocumentationEngine::DocumentationEngine()
     )
 {}
 
+void DocumentationEngine::initialize() {
+    ghoul_assert(!isInitialized(), "DocumentationEngine is already initialized");
+    _instance = new DocumentationEngine;
+}
+
+void DocumentationEngine::deinitialize() {
+    ghoul_assert(isInitialized(), "DocumentationEngine is not initialized");
+    delete _instance;
+    _instance = nullptr;
+}
+
+bool DocumentationEngine::isInitialized() {
+    return _instance != nullptr;
+}
 
 DocumentationEngine& DocumentationEngine::ref() {
     if (_instance == nullptr) {
@@ -80,11 +86,10 @@ DocumentationEngine& DocumentationEngine::ref() {
 }
 
 std::string generateTextDocumentation(const Documentation& d, int& indentLevel) {
-    using namespace std::string_literals;
-
-    auto indentMessage = [&indentLevel](std::string prefix, std::string msg) {
+    auto indentMessage = [&indentLevel](const std::string& prefix, const std::string& msg)
+    {
         if (msg.empty()) {
-            return ""s;
+            return std::string();
         }
         else {
             return std::string(indentLevel, '\t') + prefix + ": " + msg + '\n';
@@ -96,7 +101,7 @@ std::string generateTextDocumentation(const Documentation& d, int& indentLevel) 
     if (!d.name.empty()) {
         ++indentLevel;
     }
-    for (const auto& p : d.entries) {
+    for (const DocumentationEntry& p : d.entries) {
         result += indentMessage("Key", (p.key == "*") ? p.key : "\"" + p.key + "\"");
         result += indentMessage("Optional", (p.optional ? "true" : "false"));
         result += indentMessage("Type", p.verifier->type());
@@ -107,7 +112,7 @@ std::string generateTextDocumentation(const Documentation& d, int& indentLevel) 
         // We have to check ReferencingVerifier first as a ReferencingVerifier is also a
         // TableVerifier
         if (rv) {
-            std::vector<Documentation> documentations = DocEng.documentations();
+            const std::vector<Documentation>& documentations = DocEng.documentations();
             auto it = std::find_if(
                 documentations.begin(),
                 documentations.end(),
@@ -147,20 +152,20 @@ std::string generateJsonDocumentation(const Documentation& d) {
     std::stringstream result;
     result << "{";
 
-    result << "\"name\": \"" << d.name << "\",";
-    result << "\"id\": \"" << d.id << "\",";
-    result << "\"entries\": [";
-    for (const auto& p : d.entries) {
-        result << "{";
-        result << "\"key\": \"" << p.key << "\",";
-        result << "\"optional\": " << (p.optional ? "true" : "false") << ",";
-        result << "\"type\": \"" << p.verifier->type() << "\",";
-        result << "\"documentation\": \"" << escapedJson(p.documentation) << "\",";
+    result << R"("name": ")" << d.name << "\",";
+    result << R"("id": ")" << d.id << "\",";
+    result << R"("entries": [)";
+    for (const DocumentationEntry& p : d.entries) {
+        result << '{';
+        result << R"("key": ")" << p.key << "\",";
+        result << R"("optional": )" << (p.optional ? "true" : "false") << ',';
+        result << R"("type": ")" << p.verifier->type() << "\",";
+        result << R"("documentation": ")" << escapedJson(p.documentation) << "\",";
         TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
         ReferencingVerifier* rv = dynamic_cast<ReferencingVerifier*>(p.verifier.get());
 
         if (rv) {
-            std::vector<Documentation> documentations = DocEng.documentations();
+            const std::vector<Documentation>& documentations = DocEng.documentations();
             auto it = std::find_if(
                 documentations.begin(),
                 documentations.end(),
@@ -168,24 +173,24 @@ std::string generateJsonDocumentation(const Documentation& d) {
             );
 
             if (it == documentations.end()) {
-                result << "\"reference\": { \"found\": false }";
+                result << R"("reference": { "found": false })";
             } else {
-                result << "\"reference\": {"
-                    << "\"found\": true,"
-                    << "\"name\": \"" << it->name << "\","
-                    << "\"identifier\": \"" << rv->identifier << "\""
-                    << "}";
+                result << R"("reference": {)"
+                    << R"("found": true,)"
+                    << R"("name": ")" << it->name << "\","
+                    << R"("identifier": ")" << rv->identifier << '\"'
+                    << '}';
             }
         }
         else if (tv) {
             std::string json = generateJsonDocumentation({ "", "", tv->documentations });
             // We have a TableVerifier, so we need to recurse
-            result << "\"restrictions\": " << json;
+            result << R"("restrictions": )" << json;
         }
         else {
-            result << "\"description\": \"" << p.verifier->documentation() << "\"";
+            result << R"("description": ")" << p.verifier->documentation() << '\"';
         }
-        result << "}";
+        result << '}';
         if (&p != &d.entries.back()) {
             result << ", ";
         }
@@ -193,7 +198,7 @@ std::string generateJsonDocumentation(const Documentation& d) {
     }
 
     result << ']';
-    result << "}";
+    result << '}';
 
     return result.str();
 }
@@ -204,7 +209,7 @@ std::string generateHtmlDocumentation(const Documentation& d) {
     html << "\t<tr>\n"
          << "\t\t<td colspan=6>" << d.name << "<a name=\"" << d.id << "\"></a></td>\n";
 
-    for (const auto& p : d.entries) {
+    for (const DocumentationEntry& p : d.entries) {
         html << "\t<tr>\n"
              << "\t\t<td></td>\n"
              << "\t\t<td>" << p.key << "</td>\n"
@@ -218,7 +223,7 @@ std::string generateHtmlDocumentation(const Documentation& d) {
         // We have to check ReferencingVerifier first as a ReferencingVerifier is also a
         // TableVerifier
         if (rv) {
-            std::vector<Documentation> documentations = DocEng.documentations();
+            const std::vector<Documentation>& documentations = DocEng.documentations();
             auto it = std::find_if(
                 documentations.begin(),
                 documentations.end(),
@@ -285,22 +290,22 @@ std::string DocumentationEngine::generateJson() const {
     return json.str();
 }
 
-void DocumentationEngine::addDocumentation(Documentation doc) {
-    if (doc.id.empty()) {
-        _documentations.push_back(std::move(doc));
+void DocumentationEngine::addDocumentation(Documentation documentation) {
+    if (documentation.id.empty()) {
+        _documentations.push_back(std::move(documentation));
     }
     else {
         auto it = std::find_if(
             _documentations.begin(),
             _documentations.end(),
-            [doc](const Documentation& d) { return doc.id == d.id; }
+            [documentation](const Documentation& d) { return documentation.id == d.id; }
         );
 
         if (it != _documentations.end()) {
-            throw DuplicateDocumentationException(std::move(doc));
+            throw DuplicateDocumentationException(std::move(documentation));
         }
         else {
-            _documentations.push_back(std::move(doc));
+            _documentations.push_back(std::move(documentation));
         }
     }
 }

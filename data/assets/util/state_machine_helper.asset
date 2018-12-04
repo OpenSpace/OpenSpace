@@ -1,0 +1,59 @@
+
+local goToNextStateFunction = function (machine)
+    if (machine.currentStateIndex >= #machine.states) then
+        machine.currentStateIndex = #machine.states
+        return
+    end
+
+    if (machine.currentStateIndex == 0) then
+        openspace.printInfo("Starting state machine with " ..
+            machine.states[machine.currentStateIndex + 1].Title)
+    elseif (machine.currentStateIndex == #machine.states) then
+        openspace.printInfo("Proceed from " ..
+            machine.states[machine.currentStateIndex].Title
+        )
+    else
+        openspace.printInfo("Proceed from " ..
+            machine.states[machine.currentStateIndex].Title .. " to " ..
+            machine.states[machine.currentStateIndex + 1].Title
+        )
+    end
+
+    machine.currentStateIndex = machine.currentStateIndex + 1
+
+    machine.states[machine.currentStateIndex].Play()
+end
+
+local goToPreviousStateFunction = function (machine)
+    if (machine.currentStateIndex < 1) then
+        machine.currentStateIndex = 0
+        return
+    end
+
+    if (machine.currentStateIndex == 1) then
+        openspace.printInfo("Rewind from " ..
+            machine.states[machine.currentStateIndex].Title
+        )
+    else
+        openspace.printInfo("Rewind from " ..
+            machine.states[machine.currentStateIndex].Title .. " to " ..
+            machine.states[machine.currentStateIndex - 1].Title
+        )
+    end
+
+    machine.states[machine.currentStateIndex].Rewind()
+    machine.currentStateIndex = machine.currentStateIndex - 1
+end
+
+local createStateMachine = function (states)
+    local machine = {
+        states = states,
+        currentStateIndex = 0
+    }
+    machine.goToNextState = function () goToNextStateFunction(machine) end
+    machine.goToPreviousState = function () goToPreviousStateFunction(machine) end
+    return machine
+end
+
+
+asset.export('createStateMachine', createStateMachine)

@@ -25,32 +25,29 @@
 #ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___MULTIRESVOLUMERAYCASTER___H__
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___MULTIRESVOLUMERAYCASTER___H__
 
-#include <ghoul/glm.h>
-#include <string>
-#include <vector>
 #include <openspace/rendering/volumeraycaster.h>
-#include <openspace/util/boxgeometry.h>
-#include <openspace/util/blockplaneintersectiongeometry.h>
-#include <openspace/rendering/transferfunction.h>
-#include <ghoul/opengl/textureunit.h>
-#include <ghoul/opengl/bufferbinding.h>
 
-#include <modules/multiresvolume/rendering/atlasmanager.h>
-#include <modules/multiresvolume/rendering/tsp.h>
+#include <openspace/util/boxgeometry.h>
+#include <ghoul/glm.h>
+#include <ghoul/opengl/bufferbinding.h>
+#include <ghoul/opengl/textureunit.h>
+#include <string>
 
 namespace ghoul::opengl {
     class Texture;
     class ProgramObject;
-}
+} // namespace ghoul::opengl
 
 namespace openspace {
 
+class AtlasManager;
 struct RenderData;
 struct RaycastData;
+class TSP;
+class TransferFunction;
 
 class MultiresVolumeRaycaster : public VolumeRaycaster {
 public:
-
     MultiresVolumeRaycaster(std::shared_ptr<TSP> tsp,
         std::shared_ptr<AtlasManager> atlasManager,
         std::shared_ptr<TransferFunction> transferFunction);
@@ -67,12 +64,12 @@ public:
         ghoul::opengl::ProgramObject& program) override;
     void postRaycast(const RaycastData& data,
         ghoul::opengl::ProgramObject& program) override;
-    bool cameraIsInside(const RenderData& data, glm::vec3& localPosition) override;
+    bool isCameraInside(const RenderData& data, glm::vec3& localPosition) override;
 
-    std::string getBoundsVsPath() const override;
-    std::string getBoundsFsPath() const override;
-    std::string getRaycastPath() const override;
-    std::string getHelperPath() const override;
+    std::string boundsVertexShaderPath() const override;
+    std::string boundsFragmentShaderPath() const override;
+    std::string raycasterPath() const override;
+    std::string helperPath() const override;
 
     void setModelTransform(glm::mat4 transform);
     //void setTime(double time);

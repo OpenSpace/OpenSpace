@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_SPACE___SPICEROTATION___H__
 
 #include <openspace/scene/rotation.h>
+
 #include <openspace/properties/stringproperty.h>
 
 namespace openspace {
@@ -35,8 +36,9 @@ namespace documentation { struct Documentation; }
 class SpiceRotation : public Rotation {
 public:
     SpiceRotation(const ghoul::Dictionary& dictionary);
+
     const glm::dmat3& matrix() const;
-    glm::dmat3 matrix(const Time& time) const override;
+    glm::dmat3 matrix(const UpdateData& data) const override;
 
     static documentation::Documentation Documentation();
 

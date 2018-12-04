@@ -24,7 +24,7 @@
 
 #include <modules/touch/include/touchmarker.h>
 
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
@@ -32,33 +32,35 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    const std::string _loggerCat = "TouchMarker";
+    constexpr const std::array<const char*, 4> UniformNames = {
+        "radius", "transparency", "thickness", "color"
+    };
 
-    static const openspace::properties::Property::PropertyInfo VisibilityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo VisibilityInfo = {
         "Visibility",
         "Toggle visibility of markers",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo RadiusInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
         "Size",
         "Marker radius",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
         "Transparency",
         "Marker transparency",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo ThicknessInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ThicknessInfo = {
         "Thickness",
         "Marker thickness",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "MarkerColor", "Marker color", "" // @TODO Missing documentation
     };
 } // namespace
@@ -87,20 +89,19 @@ TouchMarker::TouchMarker()
     addProperty(_color);
 }
 
+TouchMarker::~TouchMarker() {} // NOLINT
+
 void TouchMarker::initialize() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
 
-    _shader = OsEng.renderEngine().buildRenderProgram(
+    _shader = global::renderEngine.buildRenderProgram(
         "MarkerProgram",
         absPath("${MODULE_TOUCH}/shaders/marker_vs.glsl"),
         absPath("${MODULE_TOUCH}/shaders/marker_fs.glsl")
     );
 
-    _uniformCache.radius = _shader->uniformLocation("radius");
-    _uniformCache.transparency = _shader->uniformLocation("transparency");
-    _uniformCache.thickness = _shader->uniformLocation("thickness");
-    _uniformCache.color = _shader->uniformLocation("color");
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 }
 
 void TouchMarker::deinitialize() {
@@ -110,9 +111,8 @@ void TouchMarker::deinitialize() {
     glDeleteBuffers(1, &_vertexPositionBuffer);
     _vertexPositionBuffer = 0;
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
-        renderEngine.removeRenderProgram(_shader.get());
+        global::renderEngine.removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
 }
@@ -164,7 +164,7 @@ void TouchMarker::createVertexList(const std::vector<TUIO::TuioCursor>& list) {
         GL_FLOAT,
         GL_FALSE,
         0,
-        0
+        nullptr
     );
 }
 

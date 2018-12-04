@@ -25,15 +25,17 @@
 #ifndef __OPENSPACE_MODULE_GALAXY___RENDERABLEGALAXY___H__
 #define __OPENSPACE_MODULE_GALAXY___RENDERABLEGALAXY___H__
 
-#include <openspace/properties/vectorproperty.h>
-#include <openspace/util/boxgeometry.h>
 #include <openspace/rendering/renderable.h>
-#include <modules/galaxy/rendering/galaxyraycaster.h>
-#include <modules/volume/rawvolume.h>
+
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
 
+namespace volume { template <typename T> class RawVolume; }
+
+class GalaxyRaycaster;
 struct RenderData;
 
 class RenderableGalaxy : public Renderable {
@@ -48,7 +50,7 @@ public:
     void update(const UpdateData& data) override;
 
 private:
-    float safeLength(const glm::vec3& vector);
+    float safeLength(const glm::vec3& vector) const;
 
     glm::vec3 _volumeSize;
     glm::vec3 _pointScaling;

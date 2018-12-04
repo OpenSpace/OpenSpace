@@ -25,22 +25,28 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H
 #define __OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H
 
-#include <memory>
-#include <ghoul/logging/logmanager.h>
-#include <fmt/format.h>
+#include <vector>
+#include <ghoul/glm.h>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable : 4100)
+#endif // _MSC_VER
+
 #include <include/cef_render_handler.h>
-#include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/shadermanager.h>
-#include <ghoul/opengl/shaderobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/texturemanager.h>
-#include <ghoul/opengl/textureunit.h>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif // _MSC_VER
+
+#include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
 
 class WebRenderHandler : public CefRenderHandler {
 public:
+    using Pixel = glm::tvec4<char>;
+
     virtual void draw(void) = 0;
     virtual void render() = 0;
 
@@ -51,22 +57,25 @@ public:
         const RectList &dirtyRects, const void* buffer, int width, int height) override;
     bool hasContent(int x, int y);
 
+    bool isTextureReady() const;
+    void updateTexture();
+
 protected:
-    int _width = 0, _height = 0;
     GLuint _texture;
 
+private:
+    glm::ivec2 _windowSize;
+    glm::ivec2 _browserBufferSize;
+
     /**
-     * Alpha mask showing whether or not a pixel is filled with content
-     *
-     * Depending on what config you're running (Debug/Release), use different types here.
-     * This is to increase performance on Debug, since VS is performing lots of extra
-     * checks on vector<bool>.
+     * RGBA buffer from browser
      */
-#if !(defined(NDEBUG) || defined(DEBUG))
-    std::vector<char> _alphaMask;
-#else
-    std::vector<bool> _alphaMask;
-#endif
+    std::vector<Pixel> _browserBuffer;
+    bool _needsRepaint = true;
+    bool _textureSizeIsDirty = true;
+    bool _textureIsDirty = true;
+    glm::ivec2 _lowerDirtyRectBound;
+    glm::ivec2 _upperDirtyRectBound;
 
     IMPLEMENT_REFCOUNTING(WebRenderHandler);
 };

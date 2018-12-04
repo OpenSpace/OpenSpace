@@ -1,0 +1,32 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/sun/transforms')
+asset.require("spice/base")
+local kernels = asset.require('./kernels').PlutoKernels
+
+
+
+local PlutoBarycenterTrail = {
+    Identifier = "PlutoBarycenterTrail",
+    Parent = transforms.SolarSystemBarycenter.Identifier,
+    Renderable = {
+        Type = "RenderableTrailOrbit",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "PLUTO BARYCENTER",
+            Observer = "SUN",
+            Kernels = kernels
+        },
+        Color = { 0.3, 0.7, 0.3 },
+        Period = 365.25,
+        Resolution = 1000
+    },
+    Tag = { "planetTrail_solarSystem", "planetTrail_dwarf" },
+    GUI = {
+        Name = "Pluto Barycenter Trail",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { PlutoBarycenterTrail })

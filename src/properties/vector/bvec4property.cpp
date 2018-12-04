@@ -27,8 +27,8 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/misc.h>
-
 #include <limits>
+#include <sstream>
 
 namespace {
 
@@ -39,11 +39,11 @@ glm::bvec4 fromLuaConversion(lua_State* state, bool& success) {
         int hasNext = lua_next(state, -2);
         if (hasNext != 1) {
             success = false;
-            return glm::bvec4(0);
+            return glm::bvec4(false);
         }
         if (lua_isboolean(state, -1) != 1) {
             success = false;
-            return glm::bvec4(0);
+            return glm::bvec4(false);
         }
         else {
             result[i] = static_cast<glm::bvec4::value_type>(lua_toboolean(state, -1));
@@ -65,7 +65,7 @@ bool toLuaConversion(lua_State* state, glm::bvec4 val) {
     return true;
 }
 
-glm::bvec4 fromStringConversion(std::string val, bool& success) {
+glm::bvec4 fromStringConversion(const std::string& val, bool& success) {
     glm::bvec4 result;
     std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
     if (tokens.size() != static_cast<size_t>(result.length())) {

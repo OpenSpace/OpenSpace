@@ -26,29 +26,34 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
+#include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
-
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/defer.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/textureunit.h>
 
 namespace {
-    const char* KeyType = "Type";
-    const char* KeyTag = "Tag";
-    const float PlaneDepth = -2.f;
+    constexpr const char* KeyType = "Type";
+    constexpr const char* KeyTag = "Tag";
+    constexpr const float PlaneDepth = -2.f;
 
-    static const openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr const std::array<const char*, 5> UniformNames = {
+        "OcclusionDepth", "Alpha", "ModelTransform", "ViewProjectionMatrix", "texture1"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
         "This setting determines whether this sceen space plane will be visible or not."
     };
 
-    static const openspace::properties::Property::PropertyInfo FlatScreenInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FlatScreenInfo = {
         "FlatScreen",
         "Flat Screen specification",
         "This value determines whether the location of this screen space plane will be "
@@ -59,21 +64,21 @@ namespace {
         "useful in a planetarium environment."
     };
 
-    static const openspace::properties::Property::PropertyInfo EuclideanPositionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EuclideanPositionInfo = {
         "EuclideanPosition",
         "Euclidean coordinates",
         "This value determines the position of this screen space plane in Euclidean "
         "two-dimensional coordinates."
     };
 
-    static const openspace::properties::Property::PropertyInfo SphericalPositionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SphericalPositionInfo = {
         "SphericalPosition",
         "Spherical coordinates",
         "This value determines the position of this screen space plane in a spherical "
         "coordinate system."
     };
 
-    static const openspace::properties::Property::PropertyInfo DepthInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DepthInfo = {
         "Depth",
         "Depth value",
         "This value determines the depth of the plane. This value does not change the "
@@ -82,7 +87,7 @@ namespace {
         "value."
     };
 
-    static const openspace::properties::Property::PropertyInfo ScaleInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
         "Scale",
         "Scale value",
         "This value determines a scale factor for the plane. The default size of a plane "
@@ -90,7 +95,7 @@ namespace {
         "the image being displayed."
     };
 
-    static const openspace::properties::Property::PropertyInfo AlphaInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AlphaInfo = {
         "Alpha",
         "Transparency",
         "This value determines the transparency of the screen space plane. If this value "
@@ -98,12 +103,29 @@ namespace {
         "completely transparent."
     };
 
-    static const openspace::properties::Property::PropertyInfo DeleteInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DeleteInfo = {
         "Delete",
         "Delete",
         "If this property is triggered, this screen space plane is removed from the "
         "scene."
     };
+
+    glm::vec2 toEuclidean(const glm::vec2& spherical, float r) {
+        const float x = r * sin(spherical[0]) * sin(spherical[1]);
+        const float y = r * cos(spherical[1]);
+
+        return glm::vec2(x, y);
+    }
+
+    glm::vec3 toSpherical(const glm::vec2& euclidean) {
+        const float r = -sqrt(
+            pow(euclidean[0], 2) + pow(euclidean[1], 2) + pow(PlaneDepth, 2)
+        );
+        const float theta = atan2(-PlaneDepth, euclidean[0]) - glm::half_pi<float>();
+        const float phi = acos(euclidean[1] / r);
+
+        return glm::vec3(theta, phi, r);
+    }
 } // namespace
 
 namespace openspace {
@@ -184,10 +206,7 @@ documentation::Documentation ScreenSpaceRenderable::Documentation() {
             },
             {
                 KeyTag,
-                new OrVerifier(
-                    new StringVerifier,
-                    new StringListVerifier
-                ),
+                new OrVerifier({ new StringVerifier, new StringListVerifier }),
                 Optional::Yes,
                 "Defines either a single or multiple tags that apply to this "
                 "ScreenSpaceRenderable, thus making it possible to address multiple, "
@@ -206,7 +225,7 @@ std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictiona
         "ScreenSpaceRenderable"
     );
 
-    std::string renderableType = dictionary.value<std::string>(KeyType);
+    const std::string& renderableType = dictionary.value<std::string>(KeyType);
     return FactoryManager::ref().factory<ScreenSpaceRenderable>()->create(
         renderableType,
         dictionary
@@ -233,9 +252,6 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     , _scale(ScaleInfo, 0.25f, 0.f, 2.f)
     , _alpha(AlphaInfo, 1.f, 0.f, 1.f)
     , _delete(DeleteInfo)
-    , _quad(0)
-    , _vertexPositionBuffer(0)
-    , _shader(nullptr)
     , _radius(PlaneDepth)
 {
     if (dictionary.hasKey(KeyIdentifier)) {
@@ -310,11 +326,10 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
             addTag(std::move(tagName));
         }
     } else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
-        ghoul::Dictionary tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
-        std::vector<std::string> keys = tagNames.keys();
-        std::string tagName;
+        const ghoul::Dictionary& tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
+        const std::vector<std::string>& keys = tagNames.keys();
         for (const std::string& key : keys) {
-            tagName = tagNames.value<std::string>(key);
+            std::string tagName = tagNames.value<std::string>(key);
             if (!tagName.empty()) {
                 addTag(std::move(tagName));
             }
@@ -324,7 +339,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     _delete.onChange([this](){
         std::string script =
             "openspace.removeScreenSpaceRenderable('" + identifier() + "');";
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             script,
             scripting::ScriptEngine::RemoteScripting::No
         );
@@ -332,14 +347,15 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     addProperty(_delete);
 }
 
+ScreenSpaceRenderable::~ScreenSpaceRenderable() {} // NOLINT
+
 bool ScreenSpaceRenderable::initialize() {
     return true;
 }
 
 bool ScreenSpaceRenderable::initializeGL() {
-    _originalViewportSize = OsEng.windowWrapper().currentWindowResolution();
+    _originalViewportSize = global::windowDelegate.currentWindowResolution();
 
-    createPlane();
     createShaders();
 
     return isReady();
@@ -350,15 +366,8 @@ bool ScreenSpaceRenderable::deinitialize() {
 }
 
 bool ScreenSpaceRenderable::deinitializeGL() {
-    glDeleteVertexArrays(1, &_quad);
-    _quad = 0;
-
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
-
-    RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
-        renderEngine.removeRenderProgram(_shader.get());
+        global::renderEngine.removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
 
@@ -391,72 +400,21 @@ float ScreenSpaceRenderable::depth() const {
     return _depth;
 }
 
-void ScreenSpaceRenderable::createPlane() {
-    glGenVertexArrays(1, &_quad);
-    glGenBuffers(1, &_vertexPositionBuffer);
-
-    const GLfloat data[] = {
-        // x     y    s    t
-        -1.f, -1.f, 0.f, 0.f,
-         1.f,  1.f, 1.f, 1.f,
-        -1.f,  1.f, 0.f, 1.f,
-        -1.f, -1.f, 0.f, 0.f,
-         1.f, -1.f, 1.f, 0.f,
-         1.f,  1.f, 1.f, 1.f,
-    };
-
-    glBindVertexArray(_quad);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
-        0,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 4,
-        nullptr
-    );
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 4,
-        reinterpret_cast<void*>(sizeof(GLfloat) * 2)
-    );
-}
-
 void ScreenSpaceRenderable::useEuclideanCoordinates(bool b) {
     _useEuclideanCoordinates = b;
     if (_useEuclideanCoordinates) {
-        _euclideanPosition = toEuclidean(_sphericalPosition.value(), _radius);
+        _euclideanPosition = toEuclidean(_sphericalPosition, _radius);
     } else {
-        _sphericalPosition = toSpherical(_euclideanPosition.value());
+        glm::vec3 sph = toSpherical(_euclideanPosition);
+        _sphericalPosition = sph;
+        _radius = sph.z;
     }
-}
-
-glm::vec2 ScreenSpaceRenderable::toEuclidean(const glm::vec2& spherical, float r) {
-    float x = r * sin(spherical[0]) * sin(spherical[1]);
-    float y = r * cos(spherical[1]);
-
-    return glm::vec2(x, y);
-}
-
-glm::vec2 ScreenSpaceRenderable::toSpherical(const glm::vec2& euclidean) {
-    _radius = -sqrt(pow(euclidean[0],2) + pow(euclidean[1],2) + pow(PlaneDepth,2));
-    float theta = atan2(-PlaneDepth, euclidean[0]) - glm::half_pi<float>();
-    float phi = acos(euclidean[1]/_radius);
-
-    return glm::vec2(theta, phi);
 }
 
 void ScreenSpaceRenderable::createShaders() {
     ghoul::Dictionary dict = ghoul::Dictionary();
 
-    auto res = OsEng.windowWrapper().currentWindowResolution();
+    auto res = global::windowDelegate.currentWindowResolution();
     ghoul::Dictionary rendererData = {
         { "fragmentRendererPath", "${SHADERS}/framebuffer/renderframebuffer.frag" },
         { "windowWidth" , res.x },
@@ -472,16 +430,11 @@ void ScreenSpaceRenderable::createShaders() {
         dict
     );
 
-    _uniformCache.occlusionDepth = _shader->uniformLocation("OcclusionDepth");
-    _uniformCache.alpha = _shader->uniformLocation("Alpha");
-    _uniformCache.modelTransform = _shader->uniformLocation("ModelTransform");
-    _uniformCache.viewProj = _shader->uniformLocation("ViewProjectionMatrix");
-    _uniformCache.texture = _shader->uniformLocation("texture1");
-
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 }
 
 glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
-    glm::vec2 resolution = OsEng.windowWrapper().currentWindowResolution();
+    glm::vec2 resolution = global::windowDelegate.currentWindowResolution();
 
     //to scale the plane
     float textureRatio =
@@ -501,7 +454,7 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
 
 glm::mat4 ScreenSpaceRenderable::rotationMatrix() {
     // Get the scene transform
-    glm::mat4 rotation = glm::inverse(OsEng.windowWrapper().modelMatrix());
+    glm::mat4 rotation = glm::inverse(global::windowDelegate.modelMatrix());
     if (!_useEuclideanCoordinates) {
         glm::vec2 position = _sphericalPosition.value();
 
@@ -541,21 +494,21 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
 
     _shader->setUniform(
         _uniformCache.viewProj,
-        OsEng.renderEngine().scene()->camera()->viewProjectionMatrix()
+        global::renderEngine.scene()->camera()->viewProjectionMatrix()
     );
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     bindTexture();
-    defer { unbindTexture(); };
     _shader->setUniform(_uniformCache.texture, unit);
 
-    glBindVertexArray(_quad);
+    glBindVertexArray(rendering::helper::vertexObjects.square.vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     glEnable(GL_CULL_FACE);
 
     _shader->deactivate();
+    unbindTexture();
 }
 
 void ScreenSpaceRenderable::bindTexture() {}

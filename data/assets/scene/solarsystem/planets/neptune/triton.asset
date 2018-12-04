@@ -1,7 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local proceduralGlobes = asset.require('util/procedural_globe')
 local transforms = asset.require('./transforms')
-local kernels081 = asset.require('./nep081').Kernels
+local kernel = asset.require('./kernels').nep081
 
 
 
@@ -19,7 +19,7 @@ local Triton = {
     },
     TrailColor = { 0.2, 0.5, 0.75 },
     OrbitPeriod = 5.877,
-    Kernels = kernels081
+    Kernels = kernel
 }
 
 

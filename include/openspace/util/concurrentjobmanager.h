@@ -32,16 +32,7 @@
 
 namespace openspace {
 
-// Templated abstract base class representing a job to be done.
-// Client code derive from this class and implement the virtual execute() method
-template<typename P>
-struct Job {
-    Job();
-    virtual ~Job();
-
-    virtual void execute() = 0;
-    virtual std::shared_ptr<P> product() = 0;
-};
+template <typename T> struct Job;
 
 /*
  * Templated Concurrent Job Manager

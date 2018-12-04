@@ -26,8 +26,7 @@
 
 #include <modules/imgui/include/gui.h>
 #include <modules/imgui/include/imgui_include.h>
-
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/util/timerange.h>
@@ -35,7 +34,7 @@
 #include <openspace/util/timemanager.h>
 
 namespace {
-    static const ImVec2 Size = ImVec2(350, 500);
+    const ImVec2 Size = ImVec2(350, 500);
 
     void renderMission(const openspace::Mission& mission) {
         // The hashname is necessary since ImGui computes a hash based off the name of the
@@ -43,7 +42,7 @@ namespace {
         std::string missionHashname = "##" + mission.name();
 
 
-        double currentTime = OsEng.timeManager().time().j2000Seconds();
+        const double currentTime = openspace::global::timeManager.time().j2000Seconds();
         openspace::MissionPhase::Trace t = mission.phaseTrace(currentTime, 0);
 
         int treeOption = t.empty() ? 0 : ImGuiTreeNodeFlags_DefaultOpen;
@@ -67,15 +66,15 @@ namespace {
             ImGui::Text("%s", startTime.UTC().c_str());
             ImGui::SameLine();
             float v = static_cast<float>(currentTime);
-            float s = static_cast<float>(startTime.j2000Seconds());
-            float e = static_cast<float>(endTime.j2000Seconds());
+            const float s = static_cast<float>(startTime.j2000Seconds());
+            const float e = static_cast<float>(endTime.j2000Seconds());
 
             ImGui::SliderFloat(
                 missionHashname.c_str(),
                 &v,
                 s,
                 e,
-                OsEng.timeManager().time().UTC().c_str()
+                openspace::global::timeManager.time().UTC().c_str()
             );
             ImGui::SameLine();
             ImGui::Text("%s", endTime.UTC().c_str());
@@ -86,7 +85,6 @@ namespace {
                 renderMission(m);
             }
 
-
             ImGui::TreePop();
         }
     }
@@ -95,11 +93,15 @@ namespace {
 
 namespace openspace::gui {
 
-GuiMissionComponent::GuiMissionComponent() :
-    GuiComponent("Missions", "Mission Information")
+GuiMissionComponent::GuiMissionComponent()
+    : GuiComponent("Missions", "Mission Information")
 {}
 
 void GuiMissionComponent::render() {
+    if (!global::missionManager.hasCurrentMission()) {
+        return;
+    }
+
     ImGui::SetNextWindowCollapsed(_isCollapsed);
     bool v = _isEnabled;
     ImGui::Begin(guiName().c_str(), &v, Size, 0.75f);
@@ -107,12 +109,7 @@ void GuiMissionComponent::render() {
 
     _isCollapsed = ImGui::IsWindowCollapsed();
 
-    ghoul_assert(
-        MissionManager::ref().hasCurrentMission(),
-        "Must have a current mission"
-    );
-
-    const Mission& currentMission = MissionManager::ref().currentMission();
+    const Mission& currentMission = global::missionManager.currentMission();
     renderMission(currentMission);
 
     ImGui::End();

@@ -19,7 +19,7 @@ local Nix = {
             Type = "SpiceTranslation",
             Target = "NIX",
             Observer = "PLUTO BARYCENTER",
-            Kernels = kernels.Kernels .. "/new_horizons/spk/NavSE_plu047_od122.bsp"
+            Kernels = kernels.Kernels .. "/NavSE_plu047_od122.bsp"
         }
     },
     Renderable = {

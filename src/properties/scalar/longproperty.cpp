@@ -48,7 +48,7 @@ bool toLuaConversion(lua_State* state, long value) {
     return true;
 }
 
-long fromStringConversion(std::string val, bool& success) {
+long fromStringConversion(const std::string& val, bool& success) {
     std::stringstream s(val);
     long v;
     s >> v;

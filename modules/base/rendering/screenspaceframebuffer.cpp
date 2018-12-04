@@ -25,18 +25,14 @@
 #include <modules/base/rendering/screenspaceframebuffer.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/camera.h>
-
-#include <openspace/rendering/renderer.h>
-#include <openspace/rendering/abufferrenderer.h>
-#include <openspace/rendering/framebufferrenderer.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-
+#include <ghoul/opengl/framebufferobject.h>
+#include <ghoul/opengl/textureunit.h>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "This value explicitly specifies the size of the screen space plane."
@@ -57,7 +53,6 @@ documentation::Documentation ScreenSpaceFramebuffer::Documentation() {
 ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _size(SizeInfo, glm::vec4(0), glm::vec4(0), glm::vec4(16384))
-    , _framebuffer(nullptr)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -82,12 +77,12 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictiona
         setGuiName("ScreenSpaceFramebuffer " + std::to_string(iIdentifier));
     }
 
-    glm::vec2 resolution = OsEng.windowWrapper().currentWindowResolution();
+    glm::vec2 resolution = global::windowDelegate.currentWindowResolution();
     addProperty(_size);
     _size.set(glm::vec4(0, 0, resolution.x,resolution.y));
 }
 
-ScreenSpaceFramebuffer::~ScreenSpaceFramebuffer() {}
+ScreenSpaceFramebuffer::~ScreenSpaceFramebuffer() {} // NOLINT
 
 bool ScreenSpaceFramebuffer::initializeGL() {
     ScreenSpaceRenderable::initializeGL();
@@ -108,13 +103,13 @@ bool ScreenSpaceFramebuffer::deinitializeGL() {
 }
 
 void ScreenSpaceFramebuffer::render() {
-    glm::vec2 resolution = OsEng.windowWrapper().currentWindowResolution();
-    glm::vec4 size = _size.value();
+    const glm::vec2& resolution = global::windowDelegate.currentWindowResolution();
+    const glm::vec4& size = _size.value();
 
-    float xratio = _originalViewportSize.x / (size.z-size.x);
-    float yratio = _originalViewportSize.y / (size.w-size.y);;
+    const float xratio = _originalViewportSize.x / (size.z - size.x);
+    const float yratio = _originalViewportSize.y / (size.w - size.y);;
 
-    if (!_renderFunctions.empty() || !_renderFunctionsShared.empty()) {
+    if (!_renderFunctions.empty()) {
         glViewport(
             static_cast<GLint>(-size.x * xratio),
             static_cast<GLint>(-size.y * yratio),
@@ -126,11 +121,8 @@ void ScreenSpaceFramebuffer::render() {
 
         glClearColor(0.f, 0.f, 0.f, 0.f);
         glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        for (const auto& renderFunction : _renderFunctions) {
+        for (const RenderFunction& renderFunction : _renderFunctions) {
             renderFunction();
-        }
-        for (const auto& renderFunction : _renderFunctionsShared) {
-            (*renderFunction)();
         }
         _framebuffer->deactivate();
 
@@ -142,13 +134,13 @@ void ScreenSpaceFramebuffer::render() {
             static_cast<GLsizei>(resolution.y)
         );
 
-        glm::mat4 rotation = rotationMatrix();
-        glm::mat4 translation = translationMatrix();
-        glm::mat4 scale = glm::scale(
+        const glm::mat4 rotation = rotationMatrix();
+        const glm::mat4 translation = translationMatrix();
+        const glm::mat4 scale = glm::scale(
             scaleMatrix(),
             glm::vec3((1.f / xratio), (1.f / yratio), 1.f)
         );
-        glm::mat4 modelTransform = rotation*translation*scale;
+        const glm::mat4 modelTransform = rotation*translation*scale;
         draw(modelTransform);
     }
 }
@@ -165,22 +157,15 @@ bool ScreenSpaceFramebuffer::isReady() const {
 }
 
 void ScreenSpaceFramebuffer::setSize(glm::vec4 size) {
-    _size.set(size);
+    _size = std::move(size);
 }
 
 void ScreenSpaceFramebuffer::addRenderFunction(std::function<void()> renderFunction) {
     _renderFunctions.push_back(std::move(renderFunction));
 }
 
-void ScreenSpaceFramebuffer::addRenderFunction(
-                                    std::shared_ptr<std::function<void()>> renderFunction)
-{
-    _renderFunctionsShared.push_back(std::move(renderFunction));
-}
-
 void ScreenSpaceFramebuffer::removeAllRenderFunctions() {
     _renderFunctions.clear();
-    _renderFunctionsShared.clear();
 }
 
 void ScreenSpaceFramebuffer::createFramebuffer() {

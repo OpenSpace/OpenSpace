@@ -37,7 +37,7 @@ public:
     void attachRaycaster(VolumeRaycaster& raycaster);
     void detachRaycaster(VolumeRaycaster& raycaster);
     bool isAttached(VolumeRaycaster& raycaster);
-    const std::vector<VolumeRaycaster*>& raycasters();
+    const std::vector<VolumeRaycaster*>& raycasters() const;
 
     void addListener(RaycasterListener& listener);
     void removeListener(RaycasterListener& listener);

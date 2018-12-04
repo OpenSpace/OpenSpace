@@ -25,14 +25,11 @@
 #include <modules/imgui/include/guifilepathcomponent.h>
 
 #include <modules/imgui/include/imgui_include.h>
-
 #include <ghoul/filesystem/filesystem.h>
 
 namespace openspace::gui {
 
-GuiFilePathComponent::GuiFilePathComponent()
-    : GuiComponent("FilePath", "File Path")
-{}
+GuiFilePathComponent::GuiFilePathComponent() : GuiComponent("FilePath", "File Path") {}
 
 void GuiFilePathComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
@@ -50,7 +47,7 @@ void GuiFilePathComponent::render() {
 
     ImGui::Columns(2);
     ImGui::Separator();
-    std::vector<std::string> tokens = FileSys.tokens();
+    const std::vector<std::string>& tokens = FileSys.tokens();
     for (const std::string& t : tokens) {
         ImGui::Text("%s", t.c_str());
         ImGui::NextColumn();

@@ -27,29 +27,30 @@
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
-
+#include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
-#include <ghoul/glm.h>
-
 namespace {
-    const char* KeySource = "Source";
-    const char* KeyTarget = "Target";
-    const char* KeyInstrument = "Instrument";
-    const char* KeyColor = "Color";
-    const char* KeyColorStart = "Start";
-    const char* KeyColorEnd = "End";
+    constexpr const char* KeySource = "Source";
+    constexpr const char* KeyTarget = "Target";
+    constexpr const char* KeyInstrument = "Instrument";
+    constexpr const char* KeyColor = "Color";
+    constexpr const char* KeyColorStart = "Start";
+    constexpr const char* KeyColorEnd = "End";
 
     struct VBOData {
         float position[3];
         float color[4];
     };
 } // namespace
+
+// @TODO:  This clas is not properly working anymore and needs to be substantially
+//         rewritten
 
 namespace openspace {
 
@@ -106,12 +107,6 @@ documentation::Documentation RenderableCrawlingLine::Documentation() {
 
 RenderableCrawlingLine::RenderableCrawlingLine(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _program(nullptr)
-    , _frameCounter(0)
-    , _drawLine(false)
-    , _imageSequenceTime(-1.f)
-    , _vao(0)
-    , _vbo(0)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -133,12 +128,11 @@ RenderableCrawlingLine::RenderableCrawlingLine(const ghoul::Dictionary& dictiona
 }
 
 bool RenderableCrawlingLine::isReady() const {
-    return (_program != nullptr);
+    return _program != nullptr;
 }
 
 void RenderableCrawlingLine::initializeGL() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    _program = renderEngine.buildRenderProgram(
+    _program = global::renderEngine.buildRenderProgram(
         "RenderableCrawlingLine",
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/crawlingline_vs.glsl"),
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/crawlingline_fs.glsl")
@@ -161,7 +155,7 @@ void RenderableCrawlingLine::initializeGL() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(VBOData),
-        reinterpret_cast<void*>(offsetof(VBOData, color))
+        reinterpret_cast<void*>(offsetof(VBOData, color)) // NOLINT
     );
 
     glBindVertexArray(0);
@@ -173,9 +167,8 @@ void RenderableCrawlingLine::deinitializeGL() {
     glDeleteBuffers(1, &_vbo);
     _vbo = 0;
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
     if (_program) {
-        renderEngine.removeRenderProgram(_program.get());
+        global::renderEngine.removeRenderProgram(_program.get());
         _program = nullptr;
     }
 }
@@ -193,28 +186,18 @@ void RenderableCrawlingLine::render(const RenderData& data, RendererTasks&) {
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
-    glm::dmat4 modelViewProjectionTransform =
-        data.camera.projectionMatrix() *
-        glm::mat4(data.camera.combinedViewMatrix() *
-            modelTransform
-        )
-    ;
-    //glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+    glm::dmat4 modelViewProjectionTransform = data.camera.projectionMatrix() *
+                             glm::mat4(data.camera.combinedViewMatrix() * modelTransform);
 
-    // setup the data to the shader
-    //_program->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
-    //_program->setUniform("projectionTransform", data.camera.projectionMatrix());
     _program->setUniform("modelViewProjection", modelViewProjectionTransform);
 
     int frame = _frameCounter % 60;
-    float fadingFactor = static_cast<float>(sin((frame * 3.14159) / 60));
+    float fadingFactor = static_cast<float>(sin((frame * glm::pi<float>()) / 60));
     float alpha = 0.6f + fadingFactor*0.4f;
 
     glLineWidth(2.f);
 
     _program->setUniform("_alpha", alpha);
-    //_program->setUniform("color", _lineColor);
-    //setPscUniforms(*_program.get(), data.camera, data.position);
 
     glBindVertexArray(_vao);
 
@@ -229,42 +212,15 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
         _program->rebuildFromFile();
     }
 
-    // glm::dmat3 transformMatrix = SpiceManager::ref().positionTransformMatrix(
-    //     _source,
-    //     //"ECLIPJ2000",
-    //     "GALACTIC",
-    //     data.time.j2000Seconds()
-    // );
-
-    glm::dmat3 tm = SpiceManager::ref().frameTransformationMatrix(
+    const glm::dmat3 tm = SpiceManager::ref().frameTransformationMatrix(
         _instrumentName,
         "ECLIPJ2000",
         data.time.j2000Seconds()
     );
 
-    //_positions[SourcePosition] = { 0.f, 0.f, 0.f, 0.f };
-
-    glm::dvec3 boresight;
-    //try {
-        SpiceManager::FieldOfViewResult res =
-            SpiceManager::ref().fieldOfView(_source);
-        boresight = res.boresightVector;
-
-    //}
-    //catch (const SpiceManager::SpiceException& e) {
-        //LERROR(e.what());
-    //}
-
-    glm::vec4 target(boresight[0], boresight[1], boresight[2], 12);
-    target = glm::dmat4(tm) * target;
-
-    //_positions[TargetPosition] = target;
-    //_positions[TargetPosition] = {
-    //    target.x * pow(10, target.w),
-    //    target.y * pow(10, target.w),
-    //    target.z * pow(10, target.w),
-    //    0
-    //};
+    const SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(_source);
+    const glm::dvec3 boresight = res.boresightVector;
+    const glm::vec4 target = glm::dmat4(tm) * glm::vec4(boresight, 12);
 
     VBOData vboData[2] = {
         {
@@ -289,10 +245,13 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
         2 * sizeof(VBOData),
         vboData
     );
-    //glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(psc) * 2, _positions);
 
     if (ImageSequencer::ref().isReady()) {
-        _imageSequenceTime = ImageSequencer::ref().instrumentActiveTime(_instrumentName);
+        _imageSequenceTime = ImageSequencer::ref().instrumentActiveTime(
+            data.time.j2000Seconds(),
+            _instrumentName
+        );
+
         _drawLine = _imageSequenceTime != -1.f;
     }
 }

@@ -6,7 +6,7 @@ local textures = asset.syncedResource({
     Name = "Tully Textures",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_tully_textures",
-    Version = 1
+    Version = 2
 })
 
 local speck = asset.syncedResource({

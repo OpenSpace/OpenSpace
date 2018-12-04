@@ -25,44 +25,48 @@
 #ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___ATLASMANAGER___H__
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___ATLASMANAGER___H__
 
-#include <modules/multiresvolume/rendering/tsp.h>
 #include <ghoul/glm.h>
 #include <glm/gtx/std_based_type.hpp>
-
-#include <string>
-#include <vector>
-#include <climits>
 #include <map>
 #include <set>
+#include <string>
+#include <vector>
 
 namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
+class TSP;
+
 class AtlasManager {
 public:
-    enum BUFFER_INDEX { EVEN = 0, ODD = 1 };
+    enum BufferIndex {
+        EVEN = 0,
+        ODD = 1
+    };
 
     AtlasManager(TSP* tsp);
-    ~AtlasManager();
+    ~AtlasManager() = default;
 
-    void updateAtlas(BUFFER_INDEX bufferIndex, std::vector<int>& brickIndices);
+    void updateAtlas(BufferIndex bufferIndex, std::vector<int>& brickIndices);
     void addToAtlas(int firstBrickIndex, int lastBrickIndex, float* mappedBuffer);
     void removeFromAtlas(int brickIndex);
     bool initialize();
-    std::vector<unsigned int> atlasMap();
-    unsigned int atlasMapBuffer();
+    const std::vector<unsigned int>& atlasMap() const;
+    unsigned int atlasMapBuffer() const;
 
-    void pboToAtlas(BUFFER_INDEX bufferIndex);
+    void pboToAtlas(BufferIndex bufferIndex);
     ghoul::opengl::Texture& textureAtlas();
-    glm::size3_t textureSize();
 
-    unsigned int getNumDiskReads();
-    unsigned int getNumUsedBricks();
-    unsigned int getNumStreamedBricks();
+    unsigned int numDiskReads() const;
+    unsigned int numUsedBricks() const;
+    unsigned int numStreamedBricks() const;
+
+    glm::size3_t textureSize() const;
 
 private:
-    const unsigned int NOT_USED = UINT_MAX;
+    const unsigned int NotUsedIndex = std::numeric_limits<unsigned int>::max();
+
     TSP* _tsp;
     unsigned int _pboHandle[2];
     unsigned int _atlasMapBuffer;
@@ -80,17 +84,17 @@ private:
     unsigned int _nStreamedBricks;
     unsigned int _nDiskReads;
 
-    unsigned int _nBricksPerDim,
-                 _nOtLeaves,
-                 _nOtNodes,
-                 _nOtLevels,
-                 _brickSize,
-                 _nBrickVals,
-                 _volumeSize,
-                 _paddedBrickDim,
-                 _nBricksInAtlas,
-                 _nBricksInMap,
-                 _atlasDim;
+    unsigned int _nBricksPerDim;
+    unsigned int _nOtLeaves;
+    unsigned int _nOtNodes;
+    unsigned int _nOtLevels;
+    unsigned int _brickSize;
+    unsigned int _nBrickVals;
+    unsigned int _volumeSize;
+    unsigned int _paddedBrickDim;
+    unsigned int _nBricksInAtlas;
+    unsigned int _nBricksInMap;
+    unsigned int _atlasDim;
 
     void fillVolume(float* in, float* out, unsigned int linearAtlasCoords);
 };

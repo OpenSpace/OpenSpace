@@ -27,17 +27,18 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <ghoul/glm.h>
+#include <glm/gtx/string_cast.hpp>
 
 namespace {
     constexpr const char* ProgramName = "Plane";
@@ -47,7 +48,7 @@ namespace {
         BlendModeAdditive
     };
 
-    static const openspace::properties::Property::PropertyInfo BillboardInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BillboardInfo = {
         "Billboard",
         "Billboard mode",
         "This value specifies whether the plane is a billboard, which means that it is "
@@ -55,13 +56,13 @@ namespace {
         "transformations."
     };
 
-    static const openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
         "This value specifies the size of the plane in meters."
     };
 
-    static const openspace::properties::Property::PropertyInfo BlendModeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending Mode",
         "This determines the blending mode that is applied to this plane."
@@ -103,10 +104,6 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     , _billboard(BillboardInfo, false)
     , _size(SizeInfo, 10.f, 0.f, 1e25f)
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _shader(nullptr)
-    , _quad(0)
-    , _vertexPositionBuffer(0)
-    , _planeIsDirty(false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -167,10 +164,10 @@ void RenderablePlane::initializeGL() {
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
 
-    _shader = BaseModule::ProgramObjectManager.requestProgramObject(
+    _shader = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return OsEng.renderEngine().buildRenderProgram(
+            return global::renderEngine.buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_BASE}/shaders/plane_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/plane_fs.glsl")
@@ -186,10 +183,10 @@ void RenderablePlane::deinitializeGL() {
     glDeleteBuffers(1, &_vertexPositionBuffer);
     _vertexPositionBuffer = 0;
 
-    BaseModule::ProgramObjectManager.releaseProgramObject(
+    BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
     _shader = nullptr;
@@ -200,9 +197,25 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform("opacity", _opacity);
 
-    // Model transform and view transform needs to be in double precision
+    glm::dvec3 objectPositionWorld = glm::dvec3(
+        glm::translate(
+            glm::dmat4(1.0),
+            data.modelTransform.translation) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
+    );
+
+    glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - objectPositionWorld);
+    glm::dvec3 newRight = glm::normalize(
+        glm::cross(data.camera.lookUpVectorWorldSpace(), normal)
+    );
+    glm::dvec3 newUp = glm::cross(normal, newRight);
+
+    glm::dmat4 cameraOrientedRotation;
+    cameraOrientedRotation[0] = glm::dvec4(newRight, 0.0);
+    cameraOrientedRotation[1] = glm::dvec4(newUp, 0.0);
+    cameraOrientedRotation[2] = glm::dvec4(normal, 0.0);
+
     const glm::dmat4 rotationTransform = _billboard ?
-        glm::inverse(glm::dmat4(data.camera.viewRotationMatrix())) :
+        cameraOrientedRotation :
         glm::dmat4(data.modelTransform.rotation);
 
     const glm::dmat4 modelTransform =
@@ -226,19 +239,17 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform("texture1", unit);
 
-    bool usingFramebufferRenderer =
-        OsEng.renderEngine().rendererImplementation() ==
-        RenderEngine::RendererImplementation::Framebuffer;
+    bool usingFramebufferRenderer = global::renderEngine.rendererImplementation() ==
+                                    RenderEngine::RendererImplementation::Framebuffer;
 
-    bool usingABufferRenderer =
-        OsEng.renderEngine().rendererImplementation() ==
-        RenderEngine::RendererImplementation::ABuffer;
+    bool usingABufferRenderer = global::renderEngine.rendererImplementation() ==
+                                RenderEngine::RendererImplementation::ABuffer;
 
     if (usingABufferRenderer) {
         _shader->setUniform("additiveBlending", _blendMode == BlendModeAdditive);
     }
 
-    bool additiveBlending = _blendMode == BlendModeAdditive && usingFramebufferRenderer;
+    bool additiveBlending = (_blendMode == BlendModeAdditive) && usingFramebufferRenderer;
     if (additiveBlending) {
         glDepthMask(false);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -259,7 +270,6 @@ void RenderablePlane::bindTexture() {}
 
 void RenderablePlane::unbindTexture() {}
 
-
 void RenderablePlane::update(const UpdateData&) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
@@ -267,7 +277,6 @@ void RenderablePlane::update(const UpdateData&) {
 
     if (_planeIsDirty) {
         createPlane();
-
     }
 }
 
@@ -287,14 +296,7 @@ void RenderablePlane::createPlane() {
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
-        0,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 6,
-        nullptr
-    );
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
 
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(

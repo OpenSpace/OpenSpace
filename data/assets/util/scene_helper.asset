@@ -6,8 +6,13 @@ local bindKeys = function(t)
         else
             bindFunction = openspace.bindKey
         end
-
-        bindFunction(k.Key, k.Command, k.Documentation)
+        if k.Name == nil then
+            k.Name = k.Key
+        end
+        if k.GuiPath == nil then
+            k.GuiPath = ""
+        end
+        bindFunction(k.Key, k.Command, k.Documentation, k.Name, k.GuiPath)
     end
 end
 asset.export("bindKeys", bindKeys)
@@ -41,10 +46,12 @@ local setDeltaTimeKeys = function(t)
 
     result = {}
     for i, v in ipairs(t) do
-        openspace.bindKey(
+        openspace.bindKeyLocal(
             Keys[i],
-            'openspace.time.setDeltaTime(' .. v .. ")",
-            'Setting the simulation speed to ' .. v .. ' seconds per realtime second'
+            'openspace.time.interpolateDeltaTime(' .. v .. ")",
+            'Setting the simulation speed to ' .. v .. ' seconds per realtime second',
+            'Set sim speed ' .. v,
+            '/Simulation Speed'
         )
         table.insert(result, Keys[i])
     end

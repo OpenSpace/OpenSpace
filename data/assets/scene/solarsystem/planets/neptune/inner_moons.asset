@@ -1,9 +1,10 @@
 local assetHelper = asset.require('util/asset_helper')
 local proceduralGlobes = asset.require('util/procedural_globe')
 local transforms = asset.require('./transforms')
-local kernels081 = asset.require('./nep081').Kernels
-local kernels087 = asset.require('./nep087').Kernels
-local kernels088 = asset.require('./nep088').Kernels
+local kernels = asset.require('./kernels')
+local kernel081 = kernels.nep081
+local kernel087 = kernels.nep087
+local kernel088 = kernels.nep088
 
 
 
@@ -27,7 +28,7 @@ local innerMoons = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.294,
-        Kernels = kernels088
+        Kernels = kernel088
     },
     {
         Identifier = "Thalassa",
@@ -43,7 +44,7 @@ local innerMoons = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.311,
-        Kernels = kernels088
+        Kernels = kernel088
     },
     {
         Identifier = "Despina",
@@ -59,7 +60,7 @@ local innerMoons = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.335,
-        Kernels = kernels088
+        Kernels = kernel088
     },
     {
         Identifier = "Galatea",
@@ -75,7 +76,7 @@ local innerMoons = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.429,
-        Kernels = kernels088
+        Kernels = kernel088
     },
     {
         Identifier = "Larissa",
@@ -91,7 +92,7 @@ local innerMoons = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.555,
-        Kernels = kernels088
+        Kernels = kernel088
     },
     {
         Identifier = "S2004N1",
@@ -108,7 +109,7 @@ local innerMoons = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.936,
-        Kernels = kernels088
+        Kernels = kernel088
     },
     {
         Identifier = "Proteus",
@@ -124,7 +125,7 @@ local innerMoons = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 1.122,
-        Kernels = kernels081
+        Kernels = kernel081
     }
 }
 

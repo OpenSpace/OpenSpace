@@ -27,16 +27,17 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/fmt.h>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
-#include <ghoul/filesystem/filesystem.h>
 
 #include <chrono>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo ScriptInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ScriptInfo = {
         "Script",
         "Script",
         "This value is the path to the Lua script that will be executed to compute the "
@@ -73,11 +74,11 @@ documentation::Documentation LuaTranslation::Documentation() {
 
 LuaTranslation::LuaTranslation()
     : _luaScriptFile(ScriptInfo)
-    , _state(false)
+    , _state(ghoul::lua::LuaState::IncludeStandardLibrary::No)
 {
     addProperty(_luaScriptFile);
 
-    _luaScriptFile.onChange([&](){
+    _luaScriptFile.onChange([&]() {
         requireUpdate();
         _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile);
         _fileHandle->setCallback([&](const ghoul::filesystem::File&) {
@@ -87,9 +88,7 @@ LuaTranslation::LuaTranslation()
     });
 }
 
-LuaTranslation::LuaTranslation(const ghoul::Dictionary& dictionary)
-    : LuaTranslation()
-{
+LuaTranslation::LuaTranslation(const ghoul::Dictionary& dictionary) : LuaTranslation() {
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
@@ -99,12 +98,12 @@ LuaTranslation::LuaTranslation(const ghoul::Dictionary& dictionary)
     _luaScriptFile = absPath(dictionary.value<std::string>(ScriptInfo.identifier));
 }
 
-glm::dvec3 LuaTranslation::position(const Time& time) const {
+glm::dvec3 LuaTranslation::position(const UpdateData& data) const {
     ghoul::lua::runScriptFile(_state, _luaScriptFile);
 
     // Get the scaling function
     lua_getglobal(_state, "translation");
-    bool isFunction = lua_isfunction(_state, -1);
+    const bool isFunction = lua_isfunction(_state, -1);
     if (!isFunction) {
         LERRORC(
             "LuaScale",
@@ -117,33 +116,28 @@ glm::dvec3 LuaTranslation::position(const Time& time) const {
     }
 
     // First argument is the number of seconds past the J2000 epoch in ingame time
-    lua_pushnumber(_state, time.j2000Seconds());
+    ghoul::lua::push(_state, data.time.j2000Seconds());
 
-    // Second argument is the number of milliseconds past the J2000 epoch in wallclock
+    // Second argument is the number of seconds past the J2000 epoch of the last frame
+    ghoul::lua::push(_state, data.previousFrameTime.j2000Seconds());
+
+    // Third argument is the number of milliseconds past the J2000 epoch in wallclock
     using namespace std::chrono;
-    auto now = high_resolution_clock::now();
-    lua_pushnumber(
-        _state,
-        static_cast<lua_Number>(
-            duration_cast<milliseconds>(now.time_since_epoch()).count()
-        )
-    );
+    const auto now = high_resolution_clock::now();
+    ghoul::lua::push(_state, duration_cast<milliseconds>(now.time_since_epoch()).count());
 
     // Execute the scaling function
-    int success = lua_pcall(_state, 2, 3, 0);
+    const int success = lua_pcall(_state, 2, 3, 0);
     if (success != 0) {
         LERRORC(
             "LuaScale",
-            fmt::format(
-                "Error executing 'translation': {}",
-                lua_tostring(_state, -1)
-            )
+            fmt::format("Error executing 'translation': {}", lua_tostring(_state, -1))
         );
     }
 
     double values[3];
-    for (int i = 0; i < 3; ++i) {
-        values[i] = luaL_checknumber(_state, -1 - i);
+    for (int i = 1; i <= 3; ++i) {
+        values[i] = ghoul::lua::value<double>(_state, i);
     }
 
     return glm::make_vec3(values);

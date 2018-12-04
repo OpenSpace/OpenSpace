@@ -23,23 +23,24 @@
  ****************************************************************************************/
 
 #include <modules/kameleonvolume/rendering/renderablekameleonvolume.h>
+
+#include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/kameleonvolume/kameleonvolumereader.h>
-
-#include <openspace/rendering/renderable.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/raycastermanager.h>
-#include <ghoul/glm.h>
-#include <glm/gtc/matrix_transform.hpp>
-
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/logging/logmanager.h>
-
 #include <modules/volume/rawvolumereader.h>
 #include <modules/volume/rawvolumewriter.h>
-#include <modules/volume/rawvolume.h>
+#include <modules/volume/rendering/basicvolumeraycaster.h>
+#include <modules/volume/rendering/volumeclipplanes.h>
+#include <modules/volume/transferfunctionhandler.h>
+#include <modules/volume/volumegridtype.h>
+#include <openspace/engine/globals.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/raycastermanager.h>
+#include <openspace/util/updatestructures.h>
+#include <ghoul/filesystem/cachemanager.h>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/texture.h>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableKameleonVolume";
@@ -59,73 +60,73 @@ namespace {
     constexpr const char* KeyGridType = "GridType";
     constexpr const char* ValueSphericalGridType = "Spherical";
 
-    static const openspace::properties::Property::PropertyInfo DimensionsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DimensionsInfo = {
         "Dimensions",
         "Dimensions",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo VariableInfo = {
+    constexpr openspace::properties::Property::PropertyInfo VariableInfo = {
         "Variable",
         "Variable",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo LowerDomainBoundInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LowerDomainBoundInfo = {
         "LowerDomainBound",
         "Lower Domain Bound",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo UpperDomainBoundInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UpperDomainBoundInfo = {
         "UpperDomainBound",
         "Upper Domain Bound",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo DomainScaleInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DomainScaleInfo = {
         "DomainScale",
         "Domain scale",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo LowerValueBoundInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LowerValueBoundInfo = {
         "LowerValueBound",
         "Lower Value Bound",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo UpperValueBoundInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UpperValueBoundInfo = {
         "UpperValueBound",
         "Upper Value Bound",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo GridTypeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo GridTypeInfo = {
         "GridType",
         "Grid Type",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step Size",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo SourcePathInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SourcePathInfo = {
         "SourcePath",
         "Source Path",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "TransferFunctionPath",
         "Transfer Function Path",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo CacheInfo = {
+    constexpr openspace::properties::Property::PropertyInfo CacheInfo = {
         "Cache",
         "Cache",
         "" // @TODO Missing documentation
@@ -140,87 +141,67 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     , _variable(VariableInfo)
     , _lowerDomainBound(LowerDomainBoundInfo)
     , _upperDomainBound(UpperDomainBoundInfo)
-    , _domainScale(DomainScaleInfo)
-    , _autoDomainBounds(false)
+    , _domainScale(DomainScaleInfo, glm::vec3(1.f))
     , _lowerValueBound(LowerValueBoundInfo, 0.f, 0.f, 1.f)
     , _upperValueBound(UpperValueBoundInfo, 1.f, 0.01f, 1.f)
-    , _autoValueBounds(false)
     , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _autoGridType(false)
-    , _clipPlanes(nullptr)
     , _stepSize(StepSizeInfo, 0.02f, 0.01f, 1.f)
     , _sourcePath(SourcePathInfo)
     , _transferFunctionPath(TransferFunctionInfo)
     , _cache(CacheInfo)
-    , _raycaster(nullptr)
-    , _transferFunctionHandler(nullptr)
 {
-
-    glm::vec3 dimensions;
-    if (dictionary.getValue(KeyDimensions, dimensions)) {
-        _dimensions = dimensions;
-    } else {
+    if (dictionary.hasKeyAndValue<glm::vec3>(KeyDimensions)) {
+        _dimensions = dictionary.value<glm::vec3>(KeyDimensions);
+    }
+    else {
         LWARNING("No dimensions specified for volumetric data, falling back to 32^3");
         _dimensions = glm::uvec3(32, 32, 32);
     }
 
-    float stepSize;
-    if (dictionary.getValue(KeyStepSize, stepSize)) {
-        _stepSize = stepSize;
-    }
+    _stepSize = dictionary.value<float>(KeyStepSize);
 
-    std::string transferFunctionPath;
-    if (dictionary.getValue(KeyTransferFunction, transferFunctionPath)) {
-        _transferFunctionPath = transferFunctionPath;
-        _transferFunctionHandler = std::make_shared<volume::TransferFunctionHandler>(
-            _transferFunctionPath
+    if (dictionary.hasKeyAndValue<std::string>(KeyTransferFunction)) {
+        _transferFunctionPath = dictionary.value<std::string>(KeyTransferFunction);
+        _transferFunction = std::make_shared<openspace::TransferFunction>(
+            _transferFunctionPath, [](const openspace::TransferFunction&) {}
         );
     }
 
-    std::string sourcePath;
-    if (dictionary.getValue(KeySource, sourcePath)) {
-        _sourcePath = absPath(sourcePath);
+    if (dictionary.hasKeyAndValue<std::string>(KeySource)) {
+        _sourcePath = absPath(dictionary.value<std::string>(KeySource));
     }
 
-    std::string variable;
-    if (dictionary.getValue(KeyVariable, variable)) {
-        _variable = variable;
+    if (dictionary.hasKeyAndValue<std::string>(KeyVariable)) {
+        _variable = dictionary.value<std::string>(KeyVariable);
     }
 
-    glm::vec3 lowerDomainBound;
-    if (dictionary.getValue(KeyLowerDomainBound, lowerDomainBound)) {
-        _lowerDomainBound = lowerDomainBound;
+    if (dictionary.hasKeyAndValue<glm::vec3>(KeyLowerDomainBound)) {
+        _lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
     }
     else {
         _autoDomainBounds = true;
     }
 
-    glm::vec3 upperDomainBound;
-    if (dictionary.getValue(KeyUpperDomainBound, upperDomainBound)) {
-        _upperDomainBound = upperDomainBound;
+    if (dictionary.hasKeyAndValue<glm::vec3>(KeyUpperDomainBound)) {
+        _upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
     }
     else {
         _autoDomainBounds = true;
     }
 
-    glm::vec3 domainScale;
-    if (dictionary.getValue(KeyDomainScale, domainScale)) {
-        _domainScale = domainScale;
-    } else {
-        _domainScale = glm::vec3(1, 1, 1); // Assume meters if nothing else is specified.
+    if (dictionary.hasKeyAndValue<glm::vec3>(KeyDomainScale)) {
+        _domainScale = dictionary.value<glm::vec3>(KeyDomainScale);
     }
 
-    float lowerValueBound;
-    if (dictionary.getValue(KeyLowerValueBound, lowerValueBound)) {
-        _lowerValueBound = lowerValueBound;
+    if (dictionary.hasKeyAndValue<float>(KeyLowerValueBound)) {
+        _lowerValueBound = dictionary.value<float>(KeyLowerValueBound);
     }
     else {
         _autoValueBounds = true;
     }
 
-    float upperValueBound;
-    if (dictionary.getValue(KeyUpperValueBound, upperValueBound)) {
-        _upperValueBound = upperValueBound;
+    if (dictionary.hasKeyAndValue<float>(KeyUpperValueBound)) {
+        _upperValueBound = dictionary.value<float>(KeyUpperValueBound);
     }
     else {
         _autoValueBounds = true;
@@ -232,9 +213,8 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     _clipPlanes->setIdentifier("clipPlanes");
     _clipPlanes->setGuiName("Clip Planes");
 
-    bool cache;
-    if (dictionary.getValue(KeyCache, cache)) {
-        _cache = cache;
+    if (dictionary.hasKeyAndValue<bool>(KeyCache)) {
+        _cache = dictionary.value<bool>(KeyCache);
     }
 
     _gridType.addOption(
@@ -247,11 +227,12 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     );
     _gridType.setValue(static_cast<int>(volume::VolumeGridType::Cartesian));
 
-    std::string gridType;
-    if (dictionary.getValue(KeyGridType, gridType)) {
+    if (dictionary.hasKeyAndValue<std::string>(KeyGridType)) {
+        const std::string& gridType = dictionary.value<std::string>(KeyGridType);
         if (gridType == ValueSphericalGridType) {
             _gridType.setValue(static_cast<int>(volume::VolumeGridType::Spherical));
-        } else {
+        }
+        else {
             _autoGridType = true;
         }
     }
@@ -263,41 +244,34 @@ void RenderableKameleonVolume::initializeGL() {
     load();
 
     _volumeTexture->uploadTexture();
-    _transferFunctionHandler->initialize();
 
     _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(
         _volumeTexture,
-        _transferFunctionHandler,
+        _transferFunction,
         _clipPlanes
     );
 
     _raycaster->setStepSize(_stepSize);
-    _gridType.onChange([this] {
-        _raycaster->setStepSize(_stepSize);
-    });
+    _gridType.onChange([this]() { _raycaster->setStepSize(_stepSize); });
     _raycaster->setGridType(static_cast<volume::VolumeGridType>(_gridType.value()));
-    _gridType.onChange([this] {
+    _gridType.onChange([this]() {
         _raycaster->setGridType(static_cast<volume::VolumeGridType>(_gridType.value()));
     });
 
     updateRaycasterModelTransform();
-    _lowerDomainBound.onChange([this] {
-        updateRaycasterModelTransform();
-    });
-    _upperDomainBound.onChange([this] {
-        updateRaycasterModelTransform();
-    });
+    _lowerDomainBound.onChange([this]() { updateRaycasterModelTransform(); });
+    _upperDomainBound.onChange([this]() { updateRaycasterModelTransform(); });
 
     _raycaster->initialize();
 
-    OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
+    global::raycasterManager.attachRaycaster(*_raycaster.get());
 
     auto onChange = [&](bool enabled) {
         if (enabled) {
-            OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
+            global::raycasterManager.attachRaycaster(*_raycaster.get());
         }
         else {
-            OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
+            global::raycasterManager.detachRaycaster(*_raycaster.get());
         }
     };
 
@@ -318,31 +292,32 @@ void RenderableKameleonVolume::initializeGL() {
     addProperty(_gridType);
     addProperty(_cache);
     addPropertySubOwner(_clipPlanes.get());
-    addPropertySubOwner(_transferFunctionHandler.get());
 }
 
 void RenderableKameleonVolume::updateRaycasterModelTransform() {
-    glm::vec3 lowerBoundingBoxBound = _domainScale.value() * _lowerDomainBound.value();
-    glm::vec3 upperBoundingBoxBound = _domainScale.value() * _upperDomainBound.value();
+    const glm::vec3 lBBoxBound = _domainScale.value() * _lowerDomainBound.value();
+    const glm::vec3 uBBoxBound = _domainScale.value() * _upperDomainBound.value();
 
-    glm::vec3 scale = upperBoundingBoxBound - lowerBoundingBoxBound;
-    glm::vec3 translation = (lowerBoundingBoxBound + upperBoundingBoxBound) * 0.5f;
+    const glm::vec3 scale = uBBoxBound - lBBoxBound;
+    const glm::vec3 translation = (lBBoxBound + uBBoxBound) * 0.5f;
 
-    glm::mat4 modelTransform = glm::translate(glm::mat4(1.0), translation);
-    modelTransform = glm::scale(modelTransform, scale);
+    const glm::mat4 modelTransform = glm::scale(
+        glm::translate(glm::mat4(1.0), translation),
+        scale
+    );
     _raycaster->setModelTransform(modelTransform);
 }
 
-bool RenderableKameleonVolume::cachingEnabled() {
+bool RenderableKameleonVolume::isCachingEnabled() const {
     return _cache;
 }
 
 void RenderableKameleonVolume::load() {
     if (!FileSys.fileExists(ghoul::filesystem::File(_sourcePath))) {
-        LERROR(fmt::format("File '{}' does not exist.", _sourcePath.value()));
+        LERROR(fmt::format("File '{}' does not exist", _sourcePath.value()));
         return;
     }
-    if (!cachingEnabled()) {
+    if (!isCachingEnabled()) {
         loadFromPath(_sourcePath);
         return;
     }
@@ -360,12 +335,9 @@ void RenderableKameleonVolume::load() {
     }
 }
 
-std::string RenderableKameleonVolume::cacheSuffix() {
-    glm::vec3 dims = _dimensions.value();
-    return "." + _variable.value() +
-        "." + std::to_string(dims[0]) +
-        "x" + std::to_string(dims[1]) +
-        "x" + std::to_string(dims[2]);
+std::string RenderableKameleonVolume::cacheSuffix() const {
+    glm::uvec3 dims = _dimensions;
+    return fmt::format(".{}.{}x{}x{}", _variable, dims[0], dims[1], dims[2]);
 }
 
 void RenderableKameleonVolume::loadFromPath(const std::string& path) {
@@ -398,21 +370,23 @@ void RenderableKameleonVolume::loadCdf(const std::string& path) {
         _upperValueBound = static_cast<float>(reader.maxValue(_variable));
     }
 
-    std::vector<std::string> variables = reader.gridVariableNames();
+    std::array<std::string, 3> variables = reader.gridVariableNames();
 
-    if (variables.size() == 3 && _autoDomainBounds) {
+    if (_autoDomainBounds) {
         _lowerDomainBound = glm::vec3(
             reader.minValue(variables[0]),
             reader.minValue(variables[1]),
-            reader.minValue(variables[2]));
+            reader.minValue(variables[2])
+        );
 
         _upperDomainBound = glm::vec3(
             reader.maxValue(variables[0]),
             reader.maxValue(variables[1]),
-            reader.maxValue(variables[2]));
+            reader.maxValue(variables[2])
+        );
     }
 
-    if (variables.size() == 3 && _autoGridType) {
+    if (_autoGridType) {
         if (variables[0] == "r" && variables[0] == "theta" && variables[0] == "phi") {
             _gridType.setValue(static_cast<int>(volume::VolumeGridType::Spherical));
         }
@@ -439,7 +413,7 @@ void RenderableKameleonVolume::updateTextureFromVolume() {
     float diff = _upperValueBound - _lowerValueBound;
 
     for (size_t i = 0; i < _normalizedVolume->nCells(); ++i) {
-        out[i] = glm::clamp((in[i] - min) / diff, 0.0f, 1.0f);
+        out[i] = glm::clamp((in[i] - min) / diff, 0.f, 1.f);
     }
 
     _volumeTexture = std::make_shared<ghoul::opengl::Texture>(
@@ -462,7 +436,7 @@ void RenderableKameleonVolume::storeRaw(const std::string& path) {
 
 void RenderableKameleonVolume::deinitializeGL() {
     if (_raycaster) {
-        OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
+        global::raycasterManager.detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
 }

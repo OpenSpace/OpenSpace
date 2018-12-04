@@ -28,14 +28,11 @@
 
 #include <modules/imgui/include/imgui_include.h>
 #include <modules/iswa/util/iswamanager.h>
-
-#include <openspace/engine/downloadmanager.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/scripting/scriptengine.h>
-
+#include <openspace/json.h>
 #include <ghoul/filesystem/filesystem.h>
 
-#include <modules/iswa/ext/json.h>
+#include <openspace/engine/globals.h>
+#include <openspace/scripting/scriptengine.h>
 
 namespace {
     using json = nlohmann::json;
@@ -44,15 +41,13 @@ namespace {
 
 namespace openspace::gui {
 
-GuiIswaComponent::GuiIswaComponent()
-    : GuiPropertyComponent("iSWA")
-{}
+GuiIswaComponent::GuiIswaComponent() : GuiPropertyComponent("iSWA") {}
 
 void GuiIswaComponent::render() {
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    bool oldGmDataValue = _gmData;
-    bool oldGmImageValue = _gmImage;
-    bool oldIonDataValue = _ionData;
+    const bool oldGmDataValue = _gmData;
+    const bool oldGmImageValue = _gmImage;
+    const bool oldIonDataValue = _ionData;
 
     ImGui::SetNextWindowCollapsed(_isCollapsed);
 
@@ -62,19 +57,20 @@ void GuiIswaComponent::render() {
     _isCollapsed = ImGui::IsWindowCollapsed();
 
     ImGui::Text("Global Magnetosphere");
-    ImGui::Checkbox("Gm From Data", &_gmData); ImGui::SameLine();
+    ImGui::Checkbox("Gm From Data", &_gmData);
+    ImGui::SameLine();
     ImGui::Checkbox("Gm From Images", &_gmImage);
 
     ImGui::Text("Ionosphere");
     ImGui::Checkbox("Ion From Data", &_ionData);
 
     ImGui::Spacing();
-    static const int addCygnetBufferSize = 256;
-    static char addCygnetBuffer[addCygnetBufferSize];
-    ImGui::InputText("addCynget", addCygnetBuffer, addCygnetBufferSize);
+    constexpr const int AddCygnetBufferSize = 256;
+    static char addCygnetBuffer[AddCygnetBufferSize];
+    ImGui::InputText("addCynget", addCygnetBuffer, AddCygnetBufferSize);
 
     if (ImGui::SmallButton("Add Cygnet")) {
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             "openspace.iswa.addCygnet(" + std::string(addCygnetBuffer) + ");",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -82,15 +78,17 @@ void GuiIswaComponent::render() {
 
     if (_gmData != oldGmDataValue) {
         if (_gmData) {
-            std::string x = "openspace.iswa.addCygnet(-4, 'Data', 'GMData');";
-            std::string y = "openspace.iswa.addCygnet(-5, 'Data', 'GMData');";
-            std::string z = "openspace.iswa.addCygnet(-6, 'Data', 'GMData');";
-            OsEng.scriptEngine().queueScript(
-                x + y + z,
+            constexpr const char* script = R"(
+                openspace.iswa.addCygnet(-4, 'Data', 'GMData');
+                openspace.iswa.addCygnet(-5, 'Data', 'GMData');
+                openspace.iswa.addCygnet(-6, 'Data', 'GMData');
+            )";
+            global::scriptEngine.queueScript(
+                script,
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
         } else {
-            OsEng.scriptEngine().queueScript(
+            global::scriptEngine.queueScript(
                 "openspace.iswa.removeGroup('GMData');",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
@@ -99,15 +97,17 @@ void GuiIswaComponent::render() {
 
     if (_gmImage != oldGmImageValue) {
         if (_gmImage) {
-            std::string x = "openspace.iswa.addCygnet(-4, 'Texture', 'GMImage');";
-            std::string y = "openspace.iswa.addCygnet(-5, 'Texture', 'GMImage');";
-            std::string z = "openspace.iswa.addCygnet(-6, 'Texture', 'GMImage');";
-            OsEng.scriptEngine().queueScript(
-                x + y + z,
+            constexpr const char* script = R"(
+                openspace.iswa.addCygnet(-4, 'Texture', 'GMImage');
+                openspace.iswa.addCygnet(-5, 'Texture', 'GMImage');
+                openspace.iswa.addCygnet(-6, 'Texture', 'GMImage');
+            )";
+            global::scriptEngine.queueScript(
+                script,
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
         } else {
-            OsEng.scriptEngine().queueScript(
+            global::scriptEngine.queueScript(
                 "openspace.iswa.removeGroup('GMImage');",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
@@ -116,30 +116,33 @@ void GuiIswaComponent::render() {
 
     if(_ionData != oldIonDataValue) {
         if(_ionData) {
-            OsEng.scriptEngine().queueScript(
-                "openspace.iswa.addCygnet(-10,'Data','Ionosphere');",
+            global::scriptEngine.queueScript(
+                "openspace.iswa.addCygnet(-10, 'Data', 'Ionosphere');",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
         } else {
-            OsEng.scriptEngine().queueScript(
+            global::scriptEngine.queueScript(
                 "openspace.iswa.removeGroup('Ionosphere');",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
         }
     }
 
-    if (ImGui::CollapsingHeader("Cdf files")) {
-        const auto& cdfInfo = IswaManager::ref().cdfInformation();
+    if (ImGui::CollapsingHeader("Cdf Files")) {
+        const std::map<std::string, std::vector<CdfInfo>>& cdfInfo =
+            IswaManager::ref().cdfInformation();
 
-        for (const auto& group : cdfInfo) {
-            std::string groupName = group.first;
-            if (_cdfOptionsMap.find(groupName) == _cdfOptionsMap.end()){
+        using K = std::string;
+        using V = std::vector<CdfInfo>;
+        for (const std::pair<const K, V>& group : cdfInfo) {
+            const std::string& groupName = group.first;
+            if (_cdfOptionsMap.find(groupName) == _cdfOptionsMap.end()) {
                 _cdfOptionsMap[groupName] = -1;
             }
 
             if (ImGui::CollapsingHeader(groupName.c_str())) {
                 int cdfOptionValue = _cdfOptionsMap[groupName];
-                const auto& cdfs = group.second;
+                const std::vector<CdfInfo>& cdfs = group.second;
 
                 for (size_t i = 0; i < cdfs.size(); ++i) {
                     ImGui::RadioButton(
@@ -149,28 +152,22 @@ void GuiIswaComponent::render() {
                     );
                 }
 
-                int cdfOption = _cdfOptionsMap[groupName];
+                const int cdfOption = _cdfOptionsMap[groupName];
                 if (cdfOptionValue != cdfOption) {
-                   if (cdfOptionValue >= 0) {
-                        groupName = cdfs[cdfOptionValue].group;
-                    }
-
-                    std::string path  = cdfs[cdfOption].path;
-                    std::string date  = cdfs[cdfOption].date;
-                    groupName = cdfs[cdfOption].group;
-                    OsEng.scriptEngine().queueScript(
+                    const std::string& date = cdfs[cdfOption].date;
+                    global::scriptEngine.queueScript(
                         "openspace.iswa.addKameleonPlanes('" +
-                        groupName +
+                        cdfs[cdfOption].group +
                         "'," +
                         std::to_string(cdfOption) +
                         ");",
                         scripting::ScriptEngine::RemoteScripting::Yes
                     );
-                    OsEng.scriptEngine().queueScript(
+                    global::scriptEngine.queueScript(
                         "openspace.time.setTime('" + date + "');",
                         scripting::ScriptEngine::RemoteScripting::Yes
                     );
-                    OsEng.scriptEngine().queueScript(
+                    global::scriptEngine.queueScript(
                         "openspace.time.setDeltaTime(0);",
                         scripting::ScriptEngine::RemoteScripting::Yes
                     );
@@ -182,32 +179,32 @@ void GuiIswaComponent::render() {
     GuiPropertyComponent::render();
 
     if (ImGui::CollapsingHeader("iSWA screen space cygntes")) {
-        const auto& map = IswaManager::ref().cygnetInformation();
-        for (const auto& cygnetInfo : map) {
-            int id = cygnetInfo.first;
-            auto info = cygnetInfo.second;
+        const std::map<int, std::shared_ptr<CygnetInfo>>& map =
+            IswaManager::ref().cygnetInformation();
 
-            bool selected = info->selected;
-            ImGui::Checkbox(info->name.c_str(), &info->selected);
+        for (const std::pair<int, std::shared_ptr<CygnetInfo>>& cygnetInfo : map) {
+            int id = cygnetInfo.first;
+            CygnetInfo& info = *cygnetInfo.second;
+
+            bool selected = info.selected;
+            ImGui::Checkbox(info.name.c_str(), &info.selected);
             ImGui::SameLine();
 
             if (ImGui::CollapsingHeader(("Description" + std::to_string(id)).c_str())) {
-                ImGui::TextWrapped("%s", info->description.c_str());
+                ImGui::TextWrapped("%s", info.description.c_str());
                 ImGui::Spacing();
             }
 
-            if (selected != info->selected) {
-                if (info->selected) {
-                    OsEng.scriptEngine().queueScript(
-                        "openspace.iswa.addScreenSpaceCygnet("
-                        "{CygnetId = " + std::to_string(id) + " });",
+            if (selected != info.selected) {
+                const std::string idStr = std::to_string(id);
+                if (info.selected) {
+                    global::scriptEngine.queueScript(
+                        "openspace.iswa.addScreenSpaceCygnet({CygnetId=" + idStr + "});",
                         scripting::ScriptEngine::RemoteScripting::Yes
                     );
                 } else {
-                    OsEng.scriptEngine().queueScript(
-                        "openspace.iswa.removeScreenSpaceCygnet(" +
-                        std::to_string(id) +
-                        ");",
+                    global::scriptEngine.queueScript(
+                        "openspace.iswa.removeScreenSpaceCygnet(" + idStr + ");",
                         scripting::ScriptEngine::RemoteScripting::Yes
                     );
                 }

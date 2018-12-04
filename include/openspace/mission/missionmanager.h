@@ -27,9 +27,8 @@
 
 #include <openspace/mission/mission.h>
 
-#include <ghoul/designpattern/singleton.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
-
 #include <map>
 #include <string>
 
@@ -38,9 +37,9 @@ namespace openspace {
 namespace scripting { struct LuaLibrary; }
 
 /**
-* Singleton class keeping track of space missions.
-*/
-class MissionManager : public ghoul::Singleton<MissionManager> {
+ * Class keeping track of space missions.
+ */
+class MissionManager {
 public:
     struct MissionManagerException : public ghoul::RuntimeError {
         explicit MissionManagerException(std::string error);

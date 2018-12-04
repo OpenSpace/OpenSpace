@@ -26,32 +26,37 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
-
+#include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+    constexpr const std::array<const char*, 6> UniformNames = {
+        "modelViewProjectionTransform", "textureOffset", "transparency", "_nightFactor",
+        "sunPosition", "texture1"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "This value is the path to a texture on disk that contains a one-dimensional "
         "texture which is used for these rings."
     };
 
-    static const openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "This value specifies the radius of the rings in meter."
     };
 
-    static const openspace::properties::Property::PropertyInfo OffsetInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OffsetInfo = {
         "Offset",
         "Offset",
         "This value is used to limit the width of the rings.Each of the two values is a "
@@ -60,7 +65,7 @@ namespace {
         "only shown between radius/2 and radius. It defaults to {0.0, 1.0}."
     };
 
-    static const openspace::properties::Property::PropertyInfo NightFactorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo NightFactorInfo = {
         "NightFactor",
         "Night Factor",
         "This value is a multiplicative factor that is applied to the side of the rings "
@@ -68,7 +73,7 @@ namespace {
         "of the night side occurs."
     };
 
-    static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
         "Transparency",
         "Transparency",
         "This value determines the transparency of part of the rings depending on the "
@@ -130,13 +135,6 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     , _offset(OffsetInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
     , _nightFactor(NightFactorInfo, 0.33f, 0.f, 1.f)
     , _transparency(TransparencyInfo, 0.15f, 0.f, 1.f)
-    , _shader(nullptr)
-    , _texture(nullptr)
-    , _textureFile(nullptr)
-    , _textureIsDirty(false)
-    , _quad(0)
-    , _vertexPositionBuffer(0)
-    , _planeIsDirty(false)
 {
     using ghoul::filesystem::File;
 
@@ -154,7 +152,7 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
     _textureFile = std::make_unique<File>(_texturePath);
 
-    if (dictionary.hasKey(OffsetInfo.identifier)) {
+    if (dictionary.hasKeyAndValue<glm::vec2>(OffsetInfo.identifier)) {
         _offset = dictionary.value<glm::vec2>(OffsetInfo.identifier);
     }
     addProperty(_offset);
@@ -164,14 +162,14 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
 
     _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
 
-    if (dictionary.hasKey(NightFactorInfo.identifier)) {
+    if (dictionary.hasKeyAndValue<double>(NightFactorInfo.identifier)) {
         _nightFactor = static_cast<float>(
             dictionary.value<double>(NightFactorInfo.identifier)
         );
     }
     addProperty(_nightFactor);
 
-    if (dictionary.hasKey(TransparencyInfo.identifier)) {
+    if (dictionary.hasKeyAndValue<double>(TransparencyInfo.identifier)) {
         _transparency = static_cast<float>(
             dictionary.value<double>(TransparencyInfo.identifier)
         );
@@ -184,20 +182,13 @@ bool RenderableRings::isReady() const {
 }
 
 void RenderableRings::initializeGL() {
-    _shader = OsEng.renderEngine().buildRenderProgram(
+    _shader = global::renderEngine.buildRenderProgram(
         "RingProgram",
         absPath("${MODULE_SPACE}/shaders/rings_vs.glsl"),
         absPath("${MODULE_SPACE}/shaders/rings_fs.glsl")
     );
 
-    _uniformCache.modelViewProjection = _shader->uniformLocation(
-        "modelViewProjectionTransform"
-    );
-    _uniformCache.textureOffset = _shader->uniformLocation("textureOffset");
-    _uniformCache.transparency = _shader->uniformLocation("transparency");
-    _uniformCache.nightFactor = _shader->uniformLocation("_nightFactor");
-    _uniformCache.sunPosition = _shader->uniformLocation("sunPosition");
-    _uniformCache.texture = _shader->uniformLocation("texture1");
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 
     glGenVertexArrays(1, &_quad);
     glGenBuffers(1, &_vertexPositionBuffer);
@@ -216,7 +207,7 @@ void RenderableRings::deinitializeGL() {
     _textureFile = nullptr;
     _texture = nullptr;
 
-    OsEng.renderEngine().removeRenderProgram(_shader.get());
+    global::renderEngine.removeRenderProgram(_shader.get());
     _shader = nullptr;
 }
 
@@ -238,10 +229,7 @@ void RenderableRings::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform(_uniformCache.transparency, _transparency);
 
     _shader->setUniform(_uniformCache.nightFactor, _nightFactor);
-    _shader->setUniform(
-        _uniformCache.sunPosition,
-        _sunPosition
-    );
+    _shader->setUniform(_uniformCache.sunPosition, _sunPosition);
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
@@ -260,15 +248,7 @@ void RenderableRings::render(const RenderData& data, RendererTasks&) {
 void RenderableRings::update(const UpdateData& data) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
-
-        _uniformCache.modelViewProjection = _shader->uniformLocation(
-            "modelViewProjectionTransform"
-        );
-        _uniformCache.textureOffset = _shader->uniformLocation("textureOffset");
-        _uniformCache.transparency = _shader->uniformLocation("transparency");
-        _uniformCache.nightFactor = _shader->uniformLocation("_nightFactor");
-        _uniformCache.sunPosition = _shader->uniformLocation("sunPosition");
-        _uniformCache.texture = _shader->uniformLocation("texture1");
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
     }
 
     if (_planeIsDirty) {
@@ -281,14 +261,17 @@ void RenderableRings::update(const UpdateData& data) {
         _textureIsDirty = false;
     }
 
-    _sunPosition = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition() -
-        data.modelTransform.translation;
+    _sunPosition = global::renderEngine.scene()->sceneGraphNode("Sun")->worldPosition() -
+                   data.modelTransform.translation;
 }
 
 void RenderableRings::loadTexture() {
-    if (_texturePath.value() != "") {
-        std::unique_ptr<ghoul::opengl::Texture> texture =
-            ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
+    if (!_texturePath.value().empty()) {
+        using namespace ghoul::io;
+        using namespace ghoul::opengl;
+        std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
+            absPath(_texturePath)
+        );
 
         if (texture) {
             LDEBUGC(
@@ -309,7 +292,7 @@ void RenderableRings::loadTexture() {
 }
 
 void RenderableRings::createPlane() {
-    const GLfloat size = _size.value();
+    const GLfloat size = _size;
 
     struct VertexData {
         GLfloat x;
@@ -346,7 +329,7 @@ void RenderableRings::createPlane() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(VertexData),
-        reinterpret_cast<void*>(offsetof(VertexData, s))
+        reinterpret_cast<void*>(offsetof(VertexData, s)) // NOLINT
     );
 }
 

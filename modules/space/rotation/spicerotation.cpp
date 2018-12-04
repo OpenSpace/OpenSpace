@@ -26,22 +26,21 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 
 namespace {
-    const char* KeyKernels = "Kernels";
+    constexpr const char* KeyKernels = "Kernels";
 
-    static const openspace::properties::Property::PropertyInfo SourceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SourceInfo = {
         "SourceFrame",
         "Source",
         "This value specifies the source frame that is used as the basis for the "
         "coordinate transformation. This has to be a valid SPICE name."
     };
 
-    static const openspace::properties::Property::PropertyInfo DestinationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DestinationInfo = {
         "DestinationFrame",
         "Destination",
         "This value specifies the destination frame that is used for the coordinate "
@@ -76,10 +75,7 @@ documentation::Documentation SpiceRotation::Documentation() {
             },
             {
                 KeyKernels,
-                new OrVerifier(
-                    new StringListVerifier,
-                    new StringVerifier
-                ),
+                new OrVerifier({ new StringListVerifier, new StringVerifier }),
                 Optional::Yes,
                 "A single kernel or list of kernels that this SpiceTranslation depends "
                 "on. All provided kernels will be loaded before any other operation is "
@@ -90,7 +86,7 @@ documentation::Documentation SpiceRotation::Documentation() {
 }
 
 SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
-    : _sourceFrame(SourceInfo) // @TODO Missing documentation
+    : _sourceFrame(SourceInfo)
     , _destinationFrame(DestinationInfo)
 {
     documentation::testSpecificationAndThrow(
@@ -120,25 +116,16 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     addProperty(_sourceFrame);
     addProperty(_destinationFrame);
 
-    auto update = [this]() {
-        requireUpdate();
-    };
-
-    _sourceFrame.onChange(update);
-    _destinationFrame.onChange(update);
+    _sourceFrame.onChange([this]() { requireUpdate(); });
+    _destinationFrame.onChange([this]() { requireUpdate(); });
 }
 
-glm::dmat3 SpiceRotation::matrix(const Time& time) const {
-    try {
-        return SpiceManager::ref().positionTransformMatrix(
-            _sourceFrame,
-            _destinationFrame,
-            time.j2000Seconds()
-        );
-    }
-    catch (const SpiceManager::SpiceException&) {
-        return glm::dmat3(1.0);
-    }
+glm::dmat3 SpiceRotation::matrix(const UpdateData& data) const {
+    return SpiceManager::ref().positionTransformMatrix(
+        _sourceFrame,
+        _destinationFrame,
+        data.time.j2000Seconds()
+    );
 }
 
 } // namespace openspace

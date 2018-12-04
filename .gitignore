@@ -36,3 +36,4 @@ customization.lua
 COMMIT.md
 screenshots
 *.idea/
+cache_gdal/

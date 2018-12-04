@@ -26,19 +26,15 @@
 
 #include <openspace/openspace.h>
 #include <openspace/util/time.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/invariants.h>
-
-#include <ghoul/logging/logmanager.h>
-
 #include <fstream>
 
 namespace {
-    const char* HandlebarsFilename = "${WEB}/common/handlebars-v4.0.5.js";
-    const char* BaseLibraryFilename = "${WEB}/common/base.js";
-    const char* BootstrapFilename = "${WEB}/common/bootstrap.min.css";
-    const char* CssFilename = "${WEB}/common/style.css";
+    constexpr const char* HandlebarsFilename = "${WEB}/common/handlebars-v4.0.5.js";
+    constexpr const char* BaseLibraryFilename = "${WEB}/common/base.js";
+    constexpr const char* BootstrapFilename = "${WEB}/common/bootstrap.min.css";
+    constexpr const char* CssFilename = "${WEB}/common/style.css";
 } // namespace
 
 namespace openspace {
@@ -140,7 +136,7 @@ void DocumentationGenerator::writeDocumentation(const std::string& filename) {
 
     file
         << "\t" << "<script id=\"" << DataId
-        << "\" type=\"text/application/json\">" << '\n'
+        << R"(" type="text/application/json">)" << '\n'
         << json << '\n'
         << "\t" << "</script>" << '\n';
 
@@ -165,7 +161,7 @@ void DocumentationGenerator::writeDocumentation(const std::string& filename) {
 }
 
 std::string escapedJson(const std::string& text) {
-    std::string jsonString = "";
+    std::string jsonString;
     for (const char& c : text) {
         switch (c) {
         case '\t':

@@ -1,7 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local kernels = asset.require('./kernels')
 
 
 
@@ -49,6 +48,10 @@ local Pluto = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_PLUTO",
             DestinationFrame = "GALACTIC"
+        },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1.0
         }
     },
     Renderable = {
@@ -74,7 +77,8 @@ local Pluto = {
         Projection = {
             Sequence       = images,
             EventFile      = assets .. "/core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",
-            SequenceType   = "hybrid",
+            -- SequenceType   = "hybrid",
+            SequenceType   = "image-sequence",
             Observer       = "NEW HORIZONS",
             Target         = "PLUTO",
             Aberration     = "NONE",

@@ -44,9 +44,11 @@ public:
     SimpleSphereGeometry(const ghoul::Dictionary& dictionary);
     ~SimpleSphereGeometry();
 
-    bool initialize(Renderable* parent) override;
+    void initialize() override;
     void deinitialize() override;
     void render() override;
+
+    float boundingSphere() const override;
 
     static documentation::Documentation Documentation();
 

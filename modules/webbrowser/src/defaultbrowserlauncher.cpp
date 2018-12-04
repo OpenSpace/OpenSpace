@@ -23,45 +23,36 @@
  ****************************************************************************************/
 
 #include <modules/webbrowser/include/defaultbrowserlauncher.h>
+
 #include <ghoul/logging/logmanager.h>
 
 #ifdef WIN32
-#include <Windows.h>
 #include <shellapi.h>
 #endif
 
 namespace {
-const char* _loggerCat = "DefaultBrowserLauncher";
-}
 
-namespace openspace {
-
-bool DefaultBrowserLauncher::OnBeforePopup(CefRefPtr<CefBrowser> parentBrowser,
-    const CefPopupFeatures& popupFeatures,
-    CefWindowInfo& windowInfo,
-    const CefString& url,
-    CefRefPtr<CefClient>& client,
-    CefBrowserSettings& settings) {
-    // never permit CEF popups, always launch in default browser
-    launchBrowser(url.ToString());
-    return true;
-}
-
-bool DefaultBrowserLauncher::OnOpenURLFromTab(CefRefPtr<CefBrowser> browser,
-    CefRefPtr<CefFrame> frame,
-    const CefString& url,
-    CefRequestHandler::WindowOpenDisposition target_disposition,
-    bool user_gesture) {
-    launchBrowser(url.ToString());
-    // block url opening
-    return true;
-}
-
-void DefaultBrowserLauncher::launchBrowser(const std::string &url) const {
-    LDEBUG("Launching default browser: " + url);
+void launchBrowser(const std::string& url) {
+    LDEBUGC("DefaultBrowserLauncher", "Launching default browser: " + url);
 #ifdef WIN32
     ShellExecute(0, 0, url.c_str(), 0, 0, SW_SHOW);
 #endif
+}
+
+} // namespace
+
+namespace openspace {
+
+bool DefaultBrowserLauncher::OnBeforePopup(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
+                                           const CefString& targetUrl, const CefString&,
+                                           CefLifeSpanHandler::WindowOpenDisposition,
+                                           bool, const CefPopupFeatures&, CefWindowInfo&,
+                                           CefRefPtr<CefClient>&, CefBrowserSettings&,
+                                           bool*)
+{
+    // never permit CEF popups, always launch in default browser
+    launchBrowser(targetUrl.ToString());
+    return true;
 }
 
 } // namespace openspace

@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE___H__
 
 #include <ghoul/misc/exception.h>
+#include <string>
 
 namespace openspace::volume {
 
@@ -36,10 +37,12 @@ enum class VolumeGridType : int {
 
 struct InvalidGridTypeError : public ghoul::RuntimeError {
     explicit InvalidGridTypeError(std::string gridType);
+
     std::string gridType;
 };
 
 VolumeGridType parseGridType(const std::string& gridType);
+std::string gridTypeToString(VolumeGridType);
 
 } // namespace openspace::volume
 

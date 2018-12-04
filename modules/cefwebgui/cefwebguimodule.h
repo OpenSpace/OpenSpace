@@ -26,23 +26,31 @@
 #define __OPENSPACE_MODULE_CEFWEBGUI___CEFWEBGUIMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-#include <include/openspace/engine/configuration.h>
-#include "modules/webbrowser/include/browserinstance.h"
-#include "modules/cefwebgui/include/guirenderhandler.h"
+
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
+
+class BrowserInstance;
 
 class CefWebGuiModule : public OpenSpaceModule {
 public:
     static constexpr const char* Name = "CefWebGui";
+
     CefWebGuiModule();
+
     void internalInitialize(const ghoul::Dictionary& configuration) override;
 
 private:
-    std::shared_ptr<BrowserInstance> _guiInstance;
-    std::string _guiLocation;
+    void startOrStopGui();
+
+    properties::BoolProperty _enabled;
+    properties::BoolProperty _visible;
+    properties::StringProperty _url;
+    std::unique_ptr<BrowserInstance> _instance;
 };
 
-}
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_CEFWEBGUI___CEFWEBGUIMODULE___H__

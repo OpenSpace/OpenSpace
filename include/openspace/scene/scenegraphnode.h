@@ -31,14 +31,16 @@
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
-
 #include <atomic>
 #include <functional>
 #include <memory>
-#include <string>
 #include <vector>
+
+ //#define Debugging_Core_SceneGraphNode_Indices
 
 namespace ghoul { class Dictionary; }
 
@@ -54,6 +56,8 @@ class Scale;
 class Scene;
 struct UpdateData;
 struct SurfacePositionHandle;
+class TimeFrame;
+class Time;
 
 namespace documentation { struct Documentation; }
 
@@ -92,8 +96,8 @@ public:
     void deinitialize();
     void deinitializeGL();
 
-    void traversePreOrder(std::function<void(SceneGraphNode*)> fn);
-    void traversePostOrder(std::function<void(SceneGraphNode*)> fn);
+    void traversePreOrder(const std::function<void(SceneGraphNode*)>& fn);
+    void traversePostOrder(const std::function<void(SceneGraphNode*)>& fn);
     void update(const UpdateData& data);
     void render(const RenderData& data, RendererTasks& tasks);
     void updateCamera(Camera* camera) const;
@@ -128,21 +132,22 @@ public:
     glm::dmat4 modelTransform() const;
     glm::dmat4 inverseModelTransform() const;
     double worldScale() const;
+    bool isTimeFrameActive(const Time& time) const;
 
     SceneGraphNode* parent() const;
     std::vector<SceneGraphNode*> children() const;
 
     float boundingSphere() const;
 
-    SceneGraphNode* childNode(const std::string& name);
+    SceneGraphNode* childNode(const std::string& identifier);
 
-    const PerformanceRecord& performanceRecord() const { return _performanceRecord; }
+    const PerformanceRecord& performanceRecord() const;
 
     void setRenderable(std::unique_ptr<Renderable> renderable);
     const Renderable* renderable() const;
     Renderable* renderable();
 
-    const std::string& guiPath() const;
+    std::string guiPath() const;
     bool hasGuiHintHidden() const;
 
     static documentation::Documentation Documentation();
@@ -152,22 +157,23 @@ private:
     glm::dmat3 calculateWorldRotation() const;
     double calculateWorldScale() const;
 
-    std::atomic<State> _state;
+    std::atomic<State> _state = State::Loaded;
     std::vector<std::unique_ptr<SceneGraphNode>> _children;
-    SceneGraphNode* _parent;
+    SceneGraphNode* _parent = nullptr;
     std::vector<SceneGraphNode*> _dependencies;
     std::vector<SceneGraphNode*> _dependentNodes;
-    Scene* _scene;
+    Scene* _scene = nullptr;
 
     // If this value is 'true' GUIs are asked to hide this node from collections, as it
     // might be a node that is not very interesting (for example barycenters)
-    bool _guiHintHidden = false;
+    properties::BoolProperty _guiHidden;
 
-    PerformanceRecord _performanceRecord;
+    PerformanceRecord _performanceRecord = { 0, 0, 0, 0, 0 };
 
     std::unique_ptr<Renderable> _renderable;
 
-    std::string _guiPath;
+    properties::StringProperty _guiPath;
+    properties::StringProperty _guiDisplayName;
 
     // Transformation defined by ephemeris, rotation and scale
     struct {
@@ -175,6 +181,8 @@ private:
         std::unique_ptr<Rotation> rotation;
         std::unique_ptr<Scale> scale;
     } _transform;
+
+    std::unique_ptr<TimeFrame> _timeFrame;
 
     // Cached transform data
     glm::dvec3 _worldPositionCached;
@@ -189,6 +197,10 @@ private:
     properties::DoubleProperty _distFromCamToNode;
     properties::DoubleProperty _screenSizeRadius;
     properties::FloatProperty _visibilityDistance;
+#ifdef Debugging_Core_SceneGraphNode_Indices
+    int index = 0;
+    static int nextIndex;
+#endif // Debugging_Core_SceneGraphNode_Indices
 };
 
 } // namespace openspace

@@ -30,12 +30,9 @@
 #include <modules/base/rendering/renderableplane.h>
 
 #include <modules/spout/spoutlibrary.h>
-
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/triggerproperty.h>
-
-
 
 namespace openspace {
 
@@ -46,7 +43,6 @@ public:
     RenderablePlaneSpout(const ghoul::Dictionary& dictionary);
 
     void deinitializeGL() override;
-
     void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
@@ -61,8 +57,8 @@ private:
 
     SPOUTHANDLE _receiver;
 
-    bool _isSpoutDirty = false;
-    char _currentSenderName[256];
+    bool _isSpoutDirty = true;
+    char _currentSenderName[256] = {};
     bool _isFirstUpdate = true;
     bool _isErrorMessageDisplayed = false;
 };

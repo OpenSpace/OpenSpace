@@ -1,0 +1,27 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/sun/transforms')
+local kernels = asset.require('./kernels').PlutoKernels
+asset.require("spice/base")
+
+
+
+local PlutoBarycenter = {
+    Identifier = "PlutoBarycenter",
+    Parent = transforms.SolarSystemBarycenter.Identifier,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "PLUTO BARYCENTER",
+            Observer = "SUN",
+            Kernels = kernels
+        }
+    },
+    GUI = {
+        Name = "Pluto Barycenter",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { PlutoBarycenter })

@@ -10,6 +10,7 @@ local Sun = {
     Parent = transforms.SunIAU.Identifier,
     Renderable = {
         Type = "RenderablePlanet",
+        Enabled = false,
         Frame = "IAU_SUN",
         Body = "SUN",
         Geometry = {

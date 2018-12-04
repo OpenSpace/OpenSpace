@@ -23,12 +23,29 @@
  ****************************************************************************************/
 
 #include <openspace/util/transformationmanager.h>
+
 #include <openspace/util/spicemanager.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+
+#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+#ifdef WIN32
+#pragma warning (push)
+#pragma warning (disable : 4619) // #pragma warning: there is no warning number '4675'
+#endif // WIN32
+
+#include <ccmc/Kameleon.h>
+
+#ifdef WIN32
+#pragma warning (pop)
+#endif // WIN32
+#endif
 
 namespace openspace {
 
-TransformationManager::TransformationManager(){
+TransformationManager* TransformationManager::_instance = nullptr;
+
+TransformationManager::TransformationManager() {
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     _kameleon = std::make_shared<ccmc::Kameleon>();
 #else
@@ -43,11 +60,32 @@ TransformationManager::TransformationManager(){
     };
 }
 
-TransformationManager::~TransformationManager(){
+TransformationManager::~TransformationManager() { // NOLINT
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     _kameleon = nullptr;
 #endif
 }
+
+void TransformationManager::initialize() {
+    ghoul_assert(!isInitialized(), "TransformationManager is already initialized");
+    _instance = new TransformationManager;
+}
+
+void TransformationManager::deinitialize() {
+    ghoul_assert(isInitialized(), "TransformationManager is not initialized");
+    delete _instance;
+    _instance = nullptr;
+}
+
+bool TransformationManager::isInitialized() {
+    return _instance != nullptr;
+}
+
+TransformationManager& TransformationManager::ref() {
+    ghoul_assert(isInitialized(), "TransformationManager is not initialized");
+    return *_instance;
+}
+
 
 glm::dmat3 TransformationManager::kameleonTransformationMatrix(
                                                  [[maybe_unused]] const std::string& from,

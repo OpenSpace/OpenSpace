@@ -27,25 +27,24 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/interaction/orbitalnavigator.h>
-#include <openspace/interaction/keyframenavigator.h>
-#include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/joystickcamerastates.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
-
-#include <ghoul/misc/boolean.h>
-#include <ghoul/misc/assert.h>
 
 namespace openspace {
     class Camera;
     class SceneGraphNode;
 } // namespace openspace
 
+namespace openspace::scripting { struct LuaLibrary; }
+
 namespace openspace::interaction {
+
+struct JoystickInputStates;
+class KeyframeNavigator;
+class OrbitalNavigator;
 
 class NavigationHandler : public properties::PropertyOwner {
 public:
@@ -59,10 +58,14 @@ public:
     void setFocusNode(SceneGraphNode* node);
     void setCamera(Camera* camera);
     void resetCameraDirection();
+    void setInterpolationTime(float durationInSeconds);
 
     void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
-
     void updateCamera(double deltaTime);
+    void setEnableKeyFrameInteraction();
+    void setDisableKeyFrameInteraction();
+    void triggerPlaybackStart();
+    void stopPlayback();
 
     // Accessors
     ghoul::Dictionary cameraStateDictionary();
@@ -73,6 +76,8 @@ public:
     const InputState& inputState() const;
     const OrbitalNavigator& orbitalNavigator() const;
     KeyframeNavigator& keyframeNavigator() const;
+    bool isKeyFrameInteractionEnabled() const;
+    float interpolationTime() const;
 
     // Callback functions
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
@@ -81,11 +86,7 @@ public:
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
 
-    void setJoystickInputStates(JoystickInputStates& states);
-
-    void setJoystickAxisMapping(
-        int axis,
-        JoystickCameraStates::AxisType mapping,
+    void setJoystickAxisMapping(int axis, JoystickCameraStates::AxisType mapping,
         JoystickCameraStates::AxisInvert shouldInvert =
             JoystickCameraStates::AxisInvert::No,
         JoystickCameraStates::AxisNormalize shouldNormalize =
@@ -98,7 +99,7 @@ public:
     float joystickAxisDeadzone(int axis) const;
 
     void bindJoystickButtonCommand(int button, std::string command, JoystickAction action,
-        JoystickCameraStates::ButtonCommandRemote remote);
+        JoystickCameraStates::ButtonCommandRemote remote, std::string documentation);
 
     void clearJoystickButtonCommand(int button);
     std::vector<std::string> joystickButtonCommand(int button) const;
@@ -116,14 +117,15 @@ public:
 
 private:
     bool _cameraUpdatedFromScript = false;
+    bool _playbackModeEnabled = false;
 
     std::unique_ptr<InputState> _inputState;
-    Camera* _camera;
+    Camera* _camera = nullptr;
+    std::function<void()> _playbackEndCallback;
 
     std::unique_ptr<OrbitalNavigator> _orbitalNavigator;
     std::unique_ptr<KeyframeNavigator> _keyframeNavigator;
 
-    // Properties
     properties::StringProperty _origin;
     properties::BoolProperty _useKeyFrameInteraction;
 };

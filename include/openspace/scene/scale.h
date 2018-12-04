@@ -28,14 +28,13 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <ghoul/glm.h>
-
 #include <memory>
 
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-class Time;
+struct UpdateData;
 
 namespace documentation { struct Documentation; }
 
@@ -48,18 +47,20 @@ public:
     virtual ~Scale() = default;
 
     virtual bool initialize();
+
     double scaleValue() const;
-    virtual double scaleValue(const Time& time) const = 0;
-    virtual void update(const Time& data);
+    virtual double scaleValue(const UpdateData& data) const = 0;
+    virtual void update(const UpdateData& data);
 
     static documentation::Documentation Documentation();
+
 protected:
     void requireUpdate();
 
 private:
-    bool _needsUpdate;
-    double _cachedTime;
-    double _cachedScale;
+    bool _needsUpdate = true;
+    double _cachedTime = -std::numeric_limits<double>::max();
+    double _cachedScale = 1.0;
 };
 
 }  // namespace openspace

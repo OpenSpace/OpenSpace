@@ -1,5 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/sun/transforms')
+local earth_transforms = asset.require('scene/solarsystem/planets/earth/transforms')
 
 
 local speck = asset.syncedResource({
@@ -9,15 +10,47 @@ local speck = asset.syncedResource({
     Version = 1
 })
 
+local radio = {
+    Identifier = "RadioSphere",
+    Parent = earth_transforms.EarthBarycenter.Identifier,
+    Transform = {
+        Scale = {
+            Type = "TimeDependentScale",
+            -- First TV signals strong enough to leave the ionosphere
+            ReferenceDate = "1936 AUG 01 12:00:00",
+            Speed = 299792458 -- c
+        }
+    },
+    Renderable = {
+        Type = "RenderableSphericalGrid",
+        Enabled = false,
+        GridColor = { 1.0, 1.0, 0.3, 0.75},
+        LineWidth = 2.0,
+        GridMatrix = { -0.05487554,  0.4941095, -0.8676661   , 0.0,
+                       -0.9938214 , -0.1109906, -0.0003515167, 0.0,
+                       -0.09647644,  0.8622859,  0.4971472   , 0.0,
+                        0.0       ,  0.0      ,  0.0         , 1.0 }
+    },
+    GUI = {
+        Name = "Radio Sphere",
+        Path = "/Other/Grids"
+    }
+}
+
 local ecliptic = {
     Identifier = "EclipticSphere",
     Parent = transforms.SolarSystemBarycenter.Name,
+    Transform = {
+        Scale = {
+            Type = "StaticScale",
+            Scale = 9.46377307652E17;
+        }
+    },
     Renderable = {
         Type = "RenderableSphericalGrid",
         Enabled = false,
         GridColor = { 0.7, 0.0, 0.0, 0.5},
         LineWidth = 2.0,
-        Radius = 9.46377307652E17;
         GridMatrix = { -0.05487554,  0.4941095, -0.8676661   , 0.0,
                        -0.9938214 , -0.1109906, -0.0003515167, 0.0,
                        -0.09647644,  0.8622859,  0.4971472   , 0.0,
@@ -38,9 +71,11 @@ local eclipticLabels = {
         Color = { 1.0, 1.0, 1.0 },
         Transparency = 0.65,
         LabelFile = speck .. "/eclip.label",
+        DrawLabels = true,
         TextColor = { 0.5, 0.5, 0.5, 1.0 },
-        TextSize = 15.4,
-        TextMinSize = 5.0,
+        TextSize = 14.75,
+        TextMinSize = 1.3,
+        TextMaxSize = 50.0,
         Unit = "pc",
         TransformationMatrix = {
             -0.05487554,  0.4941095, -0.8676661,    0.0,
@@ -58,12 +93,17 @@ local eclipticLabels = {
 local equatorial = {
     Identifier = "EquatorialSphere",
     Parent = transforms.SolarSystemBarycenter.Name,
+    Transform = {
+        Scale = {
+            Type = "StaticScale",
+            Scale = 6.2440846E17;
+        }
+    },
     Renderable = {
         Type = "RenderableSphericalGrid",
         Enabled = false,
         GridColor = { 0.0, 0.0, 1.0, 0.8},
         LineWidth = 2.0,
-        Radius = 6.2440846E17,
         GridMatrix = { -0.05487554,  0.4941095, -0.8676661, 0.0,
                        -0.8734371 , -0.4448296, -0.1980764, 0.0,
                        -0.483835  ,  0.7469823,  0.4559838, 0.0,
@@ -84,15 +124,17 @@ local equatorialLabels = {
         Color = { 1.0, 1.0, 1.0 },
         Transparency = 0.65,
         LabelFile = speck .. "/radec.label",
+        DrawLabels = true,
         TextColor = { 0.5, 0.5, 0.5, 1.0 },
-        TextSize = 15.3,
-        TextMinSize = 5.0,
+        TextSize = 14.5,
+        TextMinSize = 1.7,
+        TextMaxSize = 70.0,
         Unit = "pc",
         TransformationMatrix = {
-            -0.05487554,  0.4941095, -0.8676661,    0.0,
-            -0.9938214 , -0.1109906, -0.0003515167, 0.0,
-            -0.09647644,  0.8622859,  0.4971472,    0.0,
-            0.0,          0.0,        0.0,          1.0
+            -0.05487554,  0.4941095, -0.8676661, 0.0,
+            -0.8734371 , -0.4448296, -0.1980764, 0.0,
+            -0.483835  ,  0.7469823,  0.4559838, 0.0,
+            0.0       ,  0.0      ,  0.0      , 1.0 
         }
     },
     GUI = {
@@ -104,11 +146,16 @@ local equatorialLabels = {
 local galactic = {
     Identifier = "GalacticSphere",
     Parent = transforms.SolarSystemBarycenter.Name,
+    Transform = {
+        Scale = {
+            Type = "StaticScale",
+            Scale = 9.46377307652E18;
+        }
+    },
     Renderable = {
         Type = "RenderableSphericalGrid",
         Enabled = false,
         LineWidth = 2.0,
-        Radius = 9.46377307652E18;
         GridColor = { 0.0, 0.6, 0.6, 0.6}
     },
     GUI = {
@@ -126,9 +173,11 @@ local galacticLabels = {
         Color = { 1.0, 1.0, 1.0 },
         Transparency = 0.65,
         LabelFile = speck .. "/galac.label",
+        DrawLabels = true,
         TextColor = { 0.5, 0.5, 0.5, 1.0 },
-        TextSize = 16.25,
-        TextMinSize = 5.0,
+        TextSize = 15.8,
+        TextMinSize = 0.5,
+        TextMaxSize = 100.0,
         Unit = "pc"
     },
     GUI = {
@@ -150,7 +199,8 @@ local plane100kly = {
         LabelFile = speck .. "/100kly.label",
         TextColor = { 0.0, 0.2, 0.5, 1.0 },
         TextSize = 18.6,
-        TextMinSize = 7.0,
+        TextMinSize = 0.5,
+        TextMaxSize = 30.0,
         Unit = "Mpc"
     },
     GUI = {
@@ -172,7 +222,8 @@ local plane1Mly = {
         LabelFile = speck .. "/1Mly.label",
         TextColor = { 0.0, 0.2, 0.5, 1.0 },
         TextSize = 19.6,
-        TextMinSize = 7.0,
+        TextMinSize = 0.5,
+        TextMaxSize = 30.0,
         Unit = "Mpc"
     },
     GUI = {
@@ -194,7 +245,8 @@ local plane10Mly = {
         LabelFile = speck .. "/10Mly.label",
         TextColor = { 0.0, 0.2, 0.5, 1.0 },
         TextSize = 20.6,
-        TextMinSize = 7.0,
+        TextMinSize = 0.5,
+        TextMaxSize = 30.0,
         Unit = "Mpc"
     },
     GUI = {
@@ -216,7 +268,8 @@ local plane100Mly = {
         LabelFile = speck .. "/100Mly.label",
         TextColor = { 0.0, 0.2, 0.5, 1.0 },
         TextSize = 21.6,
-        TextMinSize = 7.0,
+        TextMinSize = 0.5,
+        TextMaxSize = 30.0,
         Unit = "Mpc"
     },
     GUI = {
@@ -238,7 +291,8 @@ local plane20Gly = {
         LabelFile = speck .. "/20Gly.label",
         TextColor = { 0.0, 0.2, 0.5, 1.0 },
         TextSize = 23.6,
-        TextMinSize = 7.0,
+        TextMinSize = 0.5,
+        TextMaxSize = 30.0,
         Unit = "Mpc"
     },
     GUI = {
@@ -248,6 +302,6 @@ local plane20Gly = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    ecliptic, eclipticLabels, equatorial, equatorialLabels, galactic, galacticLabels,
-    plane100kly, plane1Mly, plane10Mly, plane100Mly, plane20Gly
+    radio, ecliptic, eclipticLabels, equatorial, equatorialLabels, galactic,
+    galacticLabels, plane100kly, plane1Mly, plane10Mly, plane100Mly, plane20Gly
 })

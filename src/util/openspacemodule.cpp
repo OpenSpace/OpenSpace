@@ -25,15 +25,15 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <openspace/documentation/documentation.h>
-
+#include <openspace/scripting/lualibrary.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <algorithm>
 
 #include <openspace/modulepath.h>
 
-#include <algorithm>
 
 namespace {
     constexpr const char* _loggerCat = "OpenSpaceModule";
@@ -65,7 +65,7 @@ void OpenSpaceModule::initialize(const ModuleEngine* moduleEngine,
 
     std::string path = modulePath();
     LDEBUG(fmt::format("Registering module path {}: {}", moduleToken, path));
-    FileSys.registerPathToken(moduleToken, path);
+    FileSys.registerPathToken(moduleToken, std::move(path));
 
     _moduleEngine = moduleEngine;
     internalInitialize(configuration);
@@ -99,6 +99,10 @@ ghoul::systemcapabilities::Version OpenSpaceModule::requiredOpenGLVersion() cons
     return { 3, 3, 0 };
 }
 
+std::vector<std::string> OpenSpaceModule::requiredOpenGLExtensions() const {
+    return {};
+}
+
 std::string OpenSpaceModule::modulePath() const {
     std::string moduleIdentifier = identifier();
     std::transform(
@@ -114,7 +118,7 @@ std::string OpenSpaceModule::modulePath() const {
     }
     else { // Otherwise, it might be one of the external directories
         for (const char* dir : ModulePaths) {
-            const std::string path = std::string(dir) + '/' + moduleIdentifier;
+            const std::string& path = std::string(dir) + '/' + moduleIdentifier;
             if (FileSys.directoryExists(absPath(path))) {
                 return absPath(path);
             }

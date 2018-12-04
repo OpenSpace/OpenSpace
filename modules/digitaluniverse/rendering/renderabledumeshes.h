@@ -33,17 +33,12 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
-
-#include <ghoul/font/fontrenderer.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
-
 #include <unordered_map>
 
-namespace ghoul::filesystem {
-    class File;
-}
-
+namespace ghoul::filesystem { class File; }
+namespace ghoul::fontrendering { class Font; }
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
@@ -69,7 +64,6 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-
     enum Unit {
         Meter = 0,
         Kilometer = 1,
@@ -77,7 +71,6 @@ private:
         Kiloparsec = 3,
         Megaparsec = 4,
         Gigaparsec = 5,
-
         GigalightYears = 6
     };
 
@@ -100,7 +93,8 @@ private:
         // numV will equal the number of points to connect.
         // If you want a square, 4000×4000 grid with lines every 200 units,
         // then numU numU will both equal 21
-        int numU, numV;
+        int numU;
+        int numV;
         MeshType style;
         std::vector<GLuint> vaoArray;
         std::vector<GLuint> vboArray;
@@ -119,11 +113,11 @@ private:
     bool loadCachedFile(const std::string& file);
     bool saveCachedFile(const std::string& file) const;
 
-    bool _hasSpeckFile;
-    bool _dataIsDirty;
-    bool _textColorIsDirty;
-    bool _hasLabel;
-    bool _labelDataIsDirty;
+    bool _hasSpeckFile = false;
+    bool _dataIsDirty = true;
+    bool _textColorIsDirty = true;
+    bool _hasLabel = false;
+    bool _labelDataIsDirty = true;
 
     properties::FloatProperty _alphaValue;
     //properties::FloatProperty _scaleFactor;
@@ -139,19 +133,19 @@ private:
     // DEBUG:
     properties::OptionProperty _renderOption;
 
-    ghoul::opengl::ProgramObject* _program;
+    ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(modelViewTransform, projectionTransform, alphaValue,
-        /*scaleFactor,*/ color) _uniformCache;
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
+        color) _uniformCache;
+    std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
 
     std::string _speckFile;
     std::string _labelFile;
 
-    Unit _unit;
+    Unit _unit = Parsec;
 
     std::vector<float> _fullData;
     std::vector<std::pair<glm::vec3, std::string>> _labelData;
-    int _nValuesPerAstronomicalObject;
+    int _nValuesPerAstronomicalObject = 0;
 
     glm::dmat4 _transformationMatrix;
 

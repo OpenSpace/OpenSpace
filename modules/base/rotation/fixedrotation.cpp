@@ -26,18 +26,22 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
-
+#include <openspace/scene/scenegraphnode.h>
 #include <ghoul/fmt.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <string>
 
 namespace {
-    const char* KeyXAxis = "XAxis";
-    const char* KeyYAxis = "YAxis";
-    const char* KeyZAxis = "ZAxis";
+    constexpr const char* KeyXAxis = "XAxis";
+    constexpr const char* KeyXAxisOrthogonal = "XAxisOrthogonal";
+    constexpr const char* KeyYAxis = "YAxis";
+    constexpr const char* KeyYAxisOrthogonal = "YAxisOrthogonal";
+    constexpr const char* KeyZAxis = "ZAxis";
+    constexpr const char* KeyZAxisOrthogonal = "ZAxisOrthogonal";
 
-    static const openspace::properties::Property::PropertyInfo EnableInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo EnableInfo = {
         "Enable",
         "Enabled",
         "If this value is 'true', all the machinery of this rotation is used, of it is "
@@ -45,47 +49,136 @@ namespace {
         "undefined behavior."
     };
 
-    static const openspace::properties::Property::PropertyInfo TypeInfo = {
-        "Type",
-        "Specification Type",
+    constexpr const openspace::properties::Property::PropertyInfo XAxisTypeInfo = {
+        "xAxis-Type",
+        "xAxis: Specification Type",
         "This value specifies how this axis is being specified, that is whether it is "
         "referencing another object, specifying an absolute vector, or whether it is "
         "using the right handed coordinate system completion based off the other two "
         "vectors."
     };
 
-    static const openspace::properties::Property::PropertyInfo ObjectInfo = {
-        "Object",
-        "Focus Object",
+    constexpr const openspace::properties::Property::PropertyInfo YAxisTypeInfo = {
+        "yAxis-Type",
+        "yAxis: Specification Type",
+        "This value specifies how this axis is being specified, that is whether it is "
+        "referencing another object, specifying an absolute vector, or whether it is "
+        "using the right handed coordinate system completion based off the other two "
+        "vectors."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo ZAxisTypeInfo = {
+        "zAxis-Type",
+        "zAxis: Specification Type",
+        "This value specifies how this axis is being specified, that is whether it is "
+        "referencing another object, specifying an absolute vector, or whether it is "
+        "using the right handed coordinate system completion based off the other two "
+        "vectors."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo XAxisObjectInfo = {
+        "xAxis-Object",
+        "xAxis: Focus Object",
         "This is the object that the axis will focus on. This object must name an "
         "existing scene graph node in the currently loaded scene and the rotation will "
         "stay fixed to the current position of that object."
     };
 
-    static const openspace::properties::Property::PropertyInfo InvertObjectInfo = {
-        "InvertObject",
-        "Invert Object Point Direction",
+    constexpr const openspace::properties::Property::PropertyInfo YAxisObjectInfo = {
+        "yAxis-Object",
+        "yAxis: Focus Object",
+        "This is the object that the axis will focus on. This object must name an "
+        "existing scene graph node in the currently loaded scene and the rotation will "
+        "stay fixed to the current position of that object."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo ZAxisObjectInfo = {
+        "zAxis-Object",
+        "zAxis: Focus Object",
+        "This is the object that the axis will focus on. This object must name an "
+        "existing scene graph node in the currently loaded scene and the rotation will "
+        "stay fixed to the current position of that object."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo XAxisInvertObjectInfo =
+    {
+        "xAxis-InvertObject",
+        "xAxis: Invert Object Point Direction",
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
         "the pointing direction is used, causing the object to point away from the "
         "referenced object."
     };
 
-    static const openspace::properties::Property::PropertyInfo VectorInfo = {
-        "Vector",
-        "Direction vector",
+    constexpr const openspace::properties::Property::PropertyInfo YAxisInvertObjectInfo =
+    {
+        "yAxis-InvertObject",
+        "yAxis: Invert Object Point Direction",
+        "If this value is set to 'true', and the type is set to 'Object', the inverse of "
+        "the pointing direction is used, causing the object to point away from the "
+        "referenced object."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo ZAxisInvertObjectInfo =
+    {
+        "zAxis-InvertObject",
+        "zAxis: Invert Object Point Direction",
+        "If this value is set to 'true', and the type is set to 'Object', the inverse of "
+        "the pointing direction is used, causing the object to point away from the "
+        "referenced object."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo XAxisVectorInfo = {
+        "xAxis-Vector",
+        "xAxis: Direction vector",
         "This value specifies a static direction vector that is used for a fixed "
         "rotation."
     };
 
-    static const openspace::properties::Property::PropertyInfo OrthogonalVectorInfo = {
-        "Orthogonal",
-        "Vector is orthogonal",
+    constexpr const openspace::properties::Property::PropertyInfo YAxisVectorInfo = {
+        "yAxis-Vector",
+        "yAxis: Direction vector",
+        "This value specifies a static direction vector that is used for a fixed "
+        "rotation."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo ZAxisVectorInfo = {
+        "zAxis-Vector",
+        "zAxis: Direction vector",
+        "This value specifies a static direction vector that is used for a fixed "
+        "rotation."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo
+    XAxisOrthogonalVectorInfo =
+    {
+        "xAxis-Orthogonal",
+        "xAxis: Vector is orthogonal",
         "This value determines whether the vector specified is used directly, or whether "
         "it is used together with another non-coordinate system completion vector to "
         "construct an orthogonal vector instead."
     };
 
-    static const openspace::properties::Property::PropertyInfo AttachedInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo
+    YAxisOrthogonalVectorInfo =
+    {
+        "yAxis-Orthogonal",
+        "yAxis: Vector is orthogonal",
+        "This value determines whether the vector specified is used directly, or whether "
+        "it is used together with another non-coordinate system completion vector to "
+        "construct an orthogonal vector instead."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo
+    ZAxisOrthogonalVectorInfo =
+    {
+        "zAxis-Orthogonal",
+        "zAxis: Vector is orthogonal",
+        "This value determines whether the vector specified is used directly, or whether "
+        "it is used together with another non-coordinate system completion vector to "
+        "construct an orthogonal vector instead."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo AttachedInfo = {
         "Attached",
         "Attached Node",
         "This is the name of the node that this rotation is attached to, this value is "
@@ -109,57 +202,54 @@ documentation::Documentation FixedRotation::Documentation() {
             },
             {
                 KeyXAxis,
-                new OrVerifier(
-                    new StringVerifier,
-                    new DoubleVector3Verifier
-                ),
+                new OrVerifier({ new StringVerifier, new DoubleVector3Verifier, }),
                 Optional::Yes,
                 "This value specifies the direction of the new X axis. If this value is "
                 "not specified, it will be computed by completing a right handed "
                 "coordinate system from the Y and Z axis, which must be specified "
-                "instead."
+                "instead. If this value is a string, it is interpreted as the identifier "
+                "of another scenegraph node. If this value is a 3-vector, it is "
+                "interpreted as a direction vector."
             },
             {
-                KeyXAxis + OrthogonalVectorInfo.identifier,
+                KeyXAxisOrthogonal,
                 new BoolVerifier,
                 Optional::Yes,
-                OrthogonalVectorInfo.description
+                XAxisOrthogonalVectorInfo.description
             },
             {
                 KeyYAxis,
-                new OrVerifier(
-                    new StringVerifier,
-                    new DoubleVector3Verifier
-                ),
+                new OrVerifier({ new StringVerifier, new DoubleVector3Verifier, }),
                 Optional::Yes,
                 "This value specifies the direction of the new Y axis. If this value is "
                 "not specified, it will be computed by completing a right handed "
                 "coordinate system from the X and Z axis, which must be specified "
-                "instead."
+                "instead. If this value is a string, it is interpreted as the identifier "
+                "of another scenegraph node. If this value is a 3-vector, it is "
+                "interpreted as a direction vector."
             },
             {
-                KeyYAxis + OrthogonalVectorInfo.identifier,
+                KeyYAxisOrthogonal,
                 new BoolVerifier,
                 Optional::Yes,
-                OrthogonalVectorInfo.description
+                YAxisOrthogonalVectorInfo.description
             },
             {
                 KeyZAxis,
-                new OrVerifier(
-                    new StringVerifier,
-                    new DoubleVector3Verifier
-                ),
+                new OrVerifier({ new StringVerifier, new DoubleVector3Verifier, }),
                 Optional::Yes,
                 "This value specifies the direction of the new Z axis. If this value is "
                 "not specified, it will be computed by completing a right handed "
                 "coordinate system from the X and Y axis, which must be specified "
-                "instead."
+                "instead. If this value is a string, it is interpreted as the identifier "
+                "of another scenegraph node. If this value is a 3-vector, it is "
+                "interpreted as a direction vector."
             },
             {
-                KeyZAxis + OrthogonalVectorInfo.identifier,
+                KeyZAxisOrthogonal,
                 new BoolVerifier,
                 Optional::Yes,
-                OrthogonalVectorInfo.description
+                ZAxisOrthogonalVectorInfo.description
             },
             {
                 AttachedInfo.identifier,
@@ -175,141 +265,53 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
     : _enabled(EnableInfo, true)
     , _xAxis{
         properties::OptionProperty(
-            {
-                "xAxis-" + TypeInfo.identifier,
-                "xAxis:" + TypeInfo.guiName,
-                TypeInfo.description
-            },
+            XAxisTypeInfo,
             properties::OptionProperty::DisplayType::Dropdown
         ),
-        properties::StringProperty(
-            {
-                "xAxis-" + ObjectInfo.identifier,
-                "xAxis:" + ObjectInfo.guiName,
-                ObjectInfo.description
-            },
-            ""
-        ),
-        properties::BoolProperty(
-            {
-                "xAxis-" + InvertObjectInfo.identifier,
-                "xAxis:" + InvertObjectInfo.guiName,
-                InvertObjectInfo.description
-            },
-            false
-        ),
+        properties::StringProperty(XAxisObjectInfo, ""),
+        properties::BoolProperty(XAxisInvertObjectInfo, false),
         properties::Vec3Property(
-            {
-                "xAxis-" + VectorInfo.identifier,
-                "xAxis:" + VectorInfo.guiName,
-                VectorInfo.description
-            },
+            XAxisVectorInfo,
             glm::vec3(1.f, 0.f, 0.f),
-            glm::vec3(0.f),
+            glm::vec3(-1.f),
             glm::vec3(1.f)
         ),
-        properties::BoolProperty(
-            {
-                "xAxis-" + OrthogonalVectorInfo.identifier,
-                "xAxis:" + OrthogonalVectorInfo.guiName,
-                OrthogonalVectorInfo.description
-            },
-            false
-        ),
+        properties::BoolProperty(XAxisOrthogonalVectorInfo, false),
         nullptr
     }
     , _yAxis{
         properties::OptionProperty(
-            {
-                "yAxis-" + TypeInfo.identifier,
-                "yAxis:" + TypeInfo.guiName,
-                "yAxis:" + TypeInfo.description
-            },
+            YAxisTypeInfo,
             properties::OptionProperty::DisplayType::Dropdown
         ),
-        properties::StringProperty(
-            {
-                "yAxis-" + ObjectInfo.identifier,
-                "yAxis:" + ObjectInfo.guiName,
-                "yAxis:" + ObjectInfo.description
-            },
-            ""
-        ),
-        properties::BoolProperty(
-            {
-                "yAxis-" + InvertObjectInfo.identifier,
-                "yAxis:" + InvertObjectInfo.guiName,
-                InvertObjectInfo.description
-            },
-            false
-        ),
+        properties::StringProperty(YAxisObjectInfo, ""),
+        properties::BoolProperty(YAxisInvertObjectInfo, false),
         properties::Vec3Property(
-            {
-                "yAxis-" + VectorInfo.identifier,
-                "yAxis:" + VectorInfo.guiName,
-                "yAxis:" + VectorInfo.description
-            },
+            YAxisVectorInfo,
             glm::vec3(0.f, 1.f, 0.f),
-            glm::vec3(0.f),
+            glm::vec3(-1.f),
             glm::vec3(1.f)
         ),
-        properties::BoolProperty(
-            {
-                "yAxis-" + OrthogonalVectorInfo.identifier,
-                "yAxis:" + OrthogonalVectorInfo.guiName,
-                OrthogonalVectorInfo.description
-            },
-            false
-        ),
+        properties::BoolProperty(YAxisOrthogonalVectorInfo, false),
         nullptr
     }
     , _zAxis{
         properties::OptionProperty(
-            {
-                "zAxis-" + TypeInfo.identifier,
-                "zAxis:" + TypeInfo.guiName,
-                "zAxis:" + TypeInfo.description
-            },
+            ZAxisTypeInfo,
             properties::OptionProperty::DisplayType::Dropdown
         ),
-        properties::StringProperty(
-            {
-                "zAxis-" + ObjectInfo.identifier,
-                "zAxis:" + ObjectInfo.guiName,
-                "zAxis:" + ObjectInfo.description
-            },
-            ""
-        ),
-        properties::BoolProperty(
-                {
-                "zAxis-" + InvertObjectInfo.identifier,
-                "zAxis:" + InvertObjectInfo.guiName,
-                InvertObjectInfo.description
-            },
-            false
-        ),
+        properties::StringProperty(ZAxisObjectInfo, ""),
+        properties::BoolProperty(ZAxisInvertObjectInfo, false),
         properties::Vec3Property(
-            {
-                "zAxis-" + VectorInfo.identifier,
-                "zAxis:" + VectorInfo.guiName,
-                "zAxis:" + VectorInfo.description
-            },
+            ZAxisVectorInfo,
             glm::vec3(0.f, 0.f, 1.f),
-            glm::vec3(0.f),
+            glm::vec3(-1.f),
             glm::vec3(1.f)
         ),
-        properties::BoolProperty(
-            {
-                "zAxis-" + OrthogonalVectorInfo.identifier,
-                "zAxis:" + OrthogonalVectorInfo.guiName,
-                OrthogonalVectorInfo.description
-            },
-            false
-        ),
+        properties::BoolProperty(ZAxisOrthogonalVectorInfo, false),
         nullptr
     }
     , _attachedObject(AttachedInfo, "")
-    , _attachedNode(nullptr)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -323,8 +325,6 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
     setPropertyGroupName("xAxis", "X Axis");
     setPropertyGroupName("yAxis", "Y Axis");
     setPropertyGroupName("zAxis", "Z Axis");
-
-
 
     _enabled.setGroupIdentifier("global");
     addProperty(_enabled);
@@ -364,9 +364,7 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         { Axis::Type::CoordinateSystemCompletion, "Coordinate System Completion" }
     });
     _xAxis.type.setGroupIdentifier("xAxis");
-    _xAxis.type.onChange([&]() {
-        setPropertyVisibility(_xAxis);
-    });
+    _xAxis.type.onChange([&]() { setPropertyVisibility(_xAxis); });
     addProperty(_xAxis.type);
 
     _xAxis.object.setGroupIdentifier("xAxis");
@@ -389,23 +387,18 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         { Axis::Type::CoordinateSystemCompletion, "Coordinate System Completion" }
     });
     _yAxis.type.setGroupIdentifier("yAxis");
-    _yAxis.type.onChange([&]() {
-        setPropertyVisibility(_yAxis);
-    });
+    _yAxis.type.onChange([&]() { setPropertyVisibility(_yAxis); });
     addProperty(_yAxis.type);
 
     _yAxis.object.setGroupIdentifier("yAxis");
     addProperty(_yAxis.object);
-    _yAxis.object.onChange([this](){
-        _yAxis.node = sceneGraphNode(_yAxis.object);
-    });
+    _yAxis.object.onChange([this]() { _yAxis.node = sceneGraphNode(_yAxis.object); });
 
     _yAxis.invertObject.setGroupIdentifier("yAxis");
     addProperty(_yAxis.invertObject);
 
     _yAxis.vector.setGroupIdentifier("yAxis");
     addProperty(_yAxis.vector);
-
 
     _zAxis.type.addOptions({
         { Axis::Type::Object, "Object" },
@@ -414,16 +407,12 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         { Axis::Type::CoordinateSystemCompletion, "Coordinate System Completion" }
     });
     _zAxis.type.setGroupIdentifier("zAxis");
-    _zAxis.type.onChange([&]() {
-        setPropertyVisibility(_zAxis);
-    });
+    _zAxis.type.onChange([&]() { setPropertyVisibility(_zAxis); });
     addProperty(_zAxis.type);
 
     _zAxis.object.setGroupIdentifier("zAxis");
     addProperty(_zAxis.object);
-    _zAxis.object.onChange([this](){
-        _zAxis.node = sceneGraphNode(_zAxis.object);
-    });
+    _zAxis.object.onChange([this]() { _zAxis.node = sceneGraphNode(_zAxis.object); });
 
     _zAxis.invertObject.setGroupIdentifier("zAxis");
     addProperty(_zAxis.invertObject);
@@ -441,7 +430,7 @@ bool FixedRotation::initialize() {
     // nodes referenced in the dictionary might not exist yet at construction time. At
     // initialization time, however, we know that they already have been created
 
-    bool res = Rotation::initialize();
+    const bool res = Rotation::initialize();
 
     if (_constructorDictionary.hasKey(AttachedInfo.identifier)) {
         _attachedObject = _constructorDictionary.value<std::string>(
@@ -449,7 +438,7 @@ bool FixedRotation::initialize() {
         );
     }
 
-    bool hasXAxis = _constructorDictionary.hasKey(KeyXAxis);
+    const bool hasXAxis = _constructorDictionary.hasKey(KeyXAxis);
     if (hasXAxis) {
         if (_constructorDictionary.hasKeyAndValue<std::string>(KeyXAxis)) {
             _xAxis.type = Axis::Type::Object;
@@ -462,16 +451,14 @@ bool FixedRotation::initialize() {
         }
     }
 
-    if (_constructorDictionary.hasKey(KeyXAxis + OrthogonalVectorInfo.identifier)) {
-        _xAxis.isOrthogonal = _constructorDictionary.value<bool>(
-            KeyXAxis + OrthogonalVectorInfo.identifier
-        );
+    if (_constructorDictionary.hasKey(KeyXAxisOrthogonal)) {
+        _xAxis.isOrthogonal = _constructorDictionary.value<bool>(KeyXAxisOrthogonal);
     }
     if (_xAxis.isOrthogonal) {
         _xAxis.type = Axis::Type::OrthogonalVector;
     }
 
-    bool hasYAxis = _constructorDictionary.hasKey(KeyYAxis);
+    const bool hasYAxis = _constructorDictionary.hasKey(KeyYAxis);
     if (hasYAxis) {
         if (_constructorDictionary.hasKeyAndValue<std::string>(KeyYAxis)) {
             _yAxis.type = Axis::Type::Object;
@@ -484,16 +471,14 @@ bool FixedRotation::initialize() {
         }
     }
 
-    if (_constructorDictionary.hasKey(KeyYAxis + OrthogonalVectorInfo.identifier)) {
-        _yAxis.isOrthogonal = _constructorDictionary.value<bool>(
-            KeyYAxis + OrthogonalVectorInfo.identifier
-        );
+    if (_constructorDictionary.hasKey(KeyYAxisOrthogonal)) {
+        _yAxis.isOrthogonal = _constructorDictionary.value<bool>(KeyYAxisOrthogonal);
     }
     if (_yAxis.isOrthogonal) {
         _yAxis.type = Axis::Type::OrthogonalVector;
     }
 
-    bool hasZAxis = _constructorDictionary.hasKey(KeyZAxis);
+    const bool hasZAxis = _constructorDictionary.hasKey(KeyZAxis);
     if (hasZAxis) {
         if (_constructorDictionary.hasKeyAndValue<std::string>(KeyZAxis)) {
             _zAxis.type = Axis::Type::Object;
@@ -506,10 +491,8 @@ bool FixedRotation::initialize() {
         }
     }
 
-    if (_constructorDictionary.hasKey(KeyZAxis + OrthogonalVectorInfo.identifier)) {
-        _zAxis.isOrthogonal = _constructorDictionary.value<bool>(
-            KeyZAxis + OrthogonalVectorInfo.identifier
-        );
+    if (_constructorDictionary.hasKey(KeyZAxisOrthogonal)) {
+        _zAxis.isOrthogonal = _constructorDictionary.value<bool>(KeyZAxisOrthogonal);
     }
     if (_zAxis.isOrthogonal) {
         _zAxis.type = Axis::Type::OrthogonalVector;
@@ -534,16 +517,16 @@ bool FixedRotation::initialize() {
     return res;
 }
 
-glm::dmat3 FixedRotation::matrix(const Time&) const {
+glm::dmat3 FixedRotation::matrix(const UpdateData&) const {
     if (!_enabled) {
         return glm::dmat3();
     }
 
-    glm::vec3 x = xAxis();
-    glm::vec3 y = yAxis();
-    glm::vec3 z = zAxis();
+    const glm::vec3 x = xAxis();
+    const glm::vec3 y = yAxis();
+    const glm::vec3 z = zAxis();
 
-    static const float Epsilon = 1e-3f;
+    constexpr const float Epsilon = 1e-3f;
 
     if (glm::dot(x, y) > 1.f - Epsilon ||
         glm::dot(y, z) > 1.f - Epsilon ||
@@ -551,11 +534,7 @@ glm::dmat3 FixedRotation::matrix(const Time&) const {
     {
         LWARNINGC(
             "FixedRotation",
-            fmt::format("Dangerously collinear vectors detected: x ({}) y ({}) z ({})",
-                x,
-                y,
-                z
-            )
+            fmt::format("Near-collinear vectors detected: x ({}) y ({}) z ({})", x, y, z)
         );
         return glm::dmat3();
     }
@@ -631,8 +610,9 @@ glm::vec3 FixedRotation::yAxis() const {
         case Axis::Type::Object:
             if (_yAxis.node && _attachedNode) {
                 glm::vec3 dir = glm::vec3(glm::normalize(
-                    _yAxis.node->worldPosition() -
-                    _attachedNode->worldPosition()
+                    // @TODO(abock): This should be changed to be in the coordinate system
+                    // of the attached node // same with xAxis and zAxis ofc
+                    _yAxis.node->worldPosition() - _attachedNode->worldPosition()
                 ));
                 return _yAxis.invertObject ? -dir : dir;
             }
@@ -686,8 +666,7 @@ glm::vec3 FixedRotation::zAxis() const {
         case Axis::Type::Object:
             if (_zAxis.node && _attachedNode) {
                 glm::vec3 dir = glm::vec3(glm::normalize(
-                    _zAxis.node->worldPosition() -
-                    _attachedNode->worldPosition()
+                    _zAxis.node->worldPosition() - _attachedNode->worldPosition()
                 ));
                 return _zAxis.invertObject ? -dir : dir;
             }

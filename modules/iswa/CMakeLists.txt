@@ -25,7 +25,6 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/ext/json.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/iswamanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessor.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessortext.h

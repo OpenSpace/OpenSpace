@@ -38,8 +38,6 @@ function (create_new_module module_name output_library_name library_mode)
     # Create a library name of the style: openspace-module-${name}
     create_library_name(${module_name} library_name)
 
-    message(STATUS "Configuring module ${module_name}: ${library_name}")
-
     # Add the module files to the list of sources
     get_module_files(${module_name} module_files)
 
@@ -105,7 +103,7 @@ endfunction ()
 # External dependencies are found using the find_package function and then linked
 function (handle_module_dependencies target_name module_name)
     # We always want to link against Ghoul and the core library
-    target_link_libraries(${library_name} Ghoul libOpenSpace)
+    target_link_libraries(${library_name} Ghoul openspace-core)
 
     if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include.cmake")
         include(${CMAKE_CURRENT_SOURCE_DIR}/include.cmake)

@@ -24,12 +24,11 @@
 
 #include <modules/multiresvolume/multiresvolumemodule.h>
 
+#include <modules/multiresvolume/rendering/renderablemultiresvolume.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
-
 #include <ghoul/misc/assert.h>
-
-#include <modules/multiresvolume/rendering/renderablemultiresvolume.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 

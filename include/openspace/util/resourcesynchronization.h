@@ -25,13 +25,18 @@
 #ifndef __OPENSPACE_CORE___RESOURCESYNCHRONIZATION___H__
 #define __OPENSPACE_CORE___RESOURCESYNCHRONIZATION___H__
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/util/concurrentjobmanager.h>
-#include <ghoul/filesystem/directory.h>
-#include <ghoul/misc/dictionary.h>
+#include <atomic>
+#include <functional>
+#include <memory>
+#include <mutex>
+#include <string>
 #include <unordered_map>
 
+namespace ghoul { class Dictionary; }
+
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 class ResourceSynchronization {
 public:
@@ -62,7 +67,7 @@ public:
     virtual float progress();
 
     State state() const;
-    std::string name() const;
+    const std::string& name() const;
     bool isResolved();
     bool isRejected();
     bool isSyncing();

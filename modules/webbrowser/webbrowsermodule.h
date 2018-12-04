@@ -26,45 +26,45 @@
 #define __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-#include <ghoul/filesystem/directory.h>
-#include <include/openspace/engine/configuration.h>
-#include <include/wrapper/cef_helpers.h>
-#include <include/cef_browser.h>
-#include "include/eventhandler.h"
-#include "include/browserinstance.h"
-#include "include/cefhost.h"
+
+#include <modules/webbrowser/include/eventhandler.h>
 
 namespace openspace {
 
-    static const std::string SUBPROCESS_NAME = "openspace_web_helper";
-#ifdef WIN32
-static const std::string SUBPROCESS_ENDING = ".exe";
-#else
-static const std::string SUBPROCESS_ENDING = "";
-#endif
+class CefHost;
 
 class WebBrowserModule : public OpenSpaceModule {
 public:
     static constexpr const char* Name = "WebBrowser";
     WebBrowserModule();
-    ~WebBrowserModule();
+    virtual ~WebBrowserModule() = default;
 
-    int addBrowser(std::shared_ptr<BrowserInstance>);
-    void removeBrowser(std::shared_ptr<BrowserInstance>);
+    void addBrowser(BrowserInstance*);
+    void removeBrowser(BrowserInstance*);
 
-    void attachEventHandler(std::shared_ptr<BrowserInstance> browserInstance);
     EventHandler getEventHandler();
+    void attachEventHandler(BrowserInstance* browserInstance);
+    void detachEventHandler();
+    bool isEnabled() const;
 
 protected:
     void internalInitialize(const ghoul::Dictionary& configuration) override;
     void internalDeinitialize() override;
 
 private:
+    /**
+     * Try to find the CEF Helper executable. It looks in the bin/openspace folder.
+     * Therefore, if you change that this might cause a crash here.
+     *
+     * \return the absolute path to the file
+     */
     std::string findHelperExecutable();
 
-    std::vector<std::shared_ptr<BrowserInstance>> _browsers;
+    std::vector<BrowserInstance*> _browsers;
     EventHandler _eventHandler;
     std::unique_ptr<CefHost> _cefHost;
+    std::string _webHelperLocation;
+    bool _enabled = true;
 };
 
 } // namespace openspace

@@ -30,6 +30,7 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace {
     const char* KeyType = "Type";
@@ -62,8 +63,7 @@ std::unique_ptr<Translation> Translation::createFromDictionary(
 {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Translation");
 
-    std::string translationType;
-    dictionary.getValue(KeyType, translationType);
+    const std::string& translationType = dictionary.value<std::string>(KeyType);
     ghoul::TemplateFactory<Translation>* factory
           = FactoryManager::ref().factory<Translation>();
     std::unique_ptr<Translation> result = factory->create(translationType, dictionary);
@@ -71,23 +71,19 @@ std::unique_ptr<Translation> Translation::createFromDictionary(
     return result;
 }
 
-Translation::Translation()
-    : properties::PropertyOwner({ "Translation" })
-    , _needsUpdate(true)
-    , _cachedPosition(glm::dvec3(0.0))
-{}
+Translation::Translation() : properties::PropertyOwner({ "Translation" }) {}
 
 bool Translation::initialize() {
     return true;
 }
 
-void Translation::update(const Time& time) {
-    if (!_needsUpdate && time.j2000Seconds() == _cachedTime) {
+void Translation::update(const UpdateData& data) {
+    if (!_needsUpdate && data.time.j2000Seconds() == _cachedTime) {
         return;
     }
-    glm::dvec3 oldPosition = _cachedPosition;
-    _cachedPosition = position(time);
-    _cachedTime = time.j2000Seconds();
+    const glm::dvec3 oldPosition = _cachedPosition;
+    _cachedPosition = position(data);
+    _cachedTime = data.time.j2000Seconds();
     _needsUpdate = false;
 
     if (oldPosition != _cachedPosition) {

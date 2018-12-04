@@ -24,6 +24,7 @@
 
 #include <openspace/properties/selectionproperty.h>
 
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 
 namespace {
@@ -107,7 +108,7 @@ std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromLuaVa
 template <>
 template <>
 bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toLuaValue(
-                                                 lua_State* state, std::vector<int> value)
+                                          lua_State* state, const std::vector<int>& value)
 {
     //@NOTE Untested ---abock
     lua_newtable(state);
@@ -127,14 +128,15 @@ int PropertyDelegate<TemplateProperty<std::vector<int>>>::typeLua() {
 template <>
 template <>
 std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromString(
-                                                         std::string value, bool& success)
+                                                  const std::string& value, bool& success)
 {
+    std::string v = value;
     std::vector<int> result;
     size_t pos = 0;
-    while ((pos = value.find(Delimiter)) != std::string::npos) {
-        std::string token = value.substr(0, pos);
+    while ((pos = v.find(Delimiter)) != std::string::npos) {
+        std::string token = v.substr(0, pos);
         result.push_back(std::stoi(token));
-        value.erase(0, pos + 1); // 1: Delimiter.length()
+        v.erase(0, pos + 1); // 1: Delimiter.length()
     }
     success = true;
     return result;
@@ -143,7 +145,7 @@ std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromStrin
 template <>
 template <>
 bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toString(
-                                          std::string& outValue, std::vector<int> inValue)
+                                   std::string& outValue, const std::vector<int>& inValue)
 {
     outValue = "[";
     for (int i : inValue) {
@@ -157,8 +159,13 @@ std::string SelectionProperty::generateAdditionalJsonDescription() const {
     std::string result = "{ \"" + OptionsKey + "\": [";
     for (size_t i = 0; i < _options.size(); ++i) {
         const Option& o = _options[i];
+        std::string v = std::to_string(o.value);
+        std::string vSan = sanitizeString(v);
+        std::string d = o.description;
+        std::string dSan = sanitizeString(d);
+
         result += "{";
-        result +=  "\"" + std::to_string(o.value) + "\": \"" + o.description + "\"";
+        result +=  "\"" + vSan + "\": \"" + dSan + "\"";
         result += "}";
         if (i != _options.size() - 1) {
             result += ",";

@@ -29,7 +29,7 @@
 
 #include <openspace/interaction/joystickinputstate.h>
 #include <ghoul/misc/boolean.h>
-#include <ghoul/misc/fromstring.h>
+#include <ghoul/misc/stringconversion.h>
 #include <map>
 #include <vector>
 
@@ -63,14 +63,11 @@ public:
         float deadzone = 0.f;
     };
 
-
     JoystickCameraStates(double sensitivity, double velocityScaleFactor);
 
     void updateStateFromInput(const InputState& inputState, double deltaTime) override;
 
-    void setAxisMapping(
-        int axis,
-        AxisType mapping,
+    void setAxisMapping(int axis, AxisType mapping,
         AxisInvert shouldInvert = AxisInvert::No,
         AxisNormalize shouldNormalize = AxisNormalize::No
     );
@@ -82,7 +79,7 @@ public:
 
 
     void bindButtonCommand(int button, std::string command, JoystickAction action,
-        ButtonCommandRemote local);
+        ButtonCommandRemote remote, std::string documentation);
     void clearButtonCommand(int button);
     std::vector<std::string> buttonCommand(int button) const;
 
@@ -106,13 +103,10 @@ private:
 
 } // namespace openspace::interaction
 
-namespace std {
-
-std::string to_string(const openspace::interaction::JoystickCameraStates::AxisType& type);
-
-} // namespace std
-
 namespace ghoul {
+
+template <>
+std::string to_string(const openspace::interaction::JoystickCameraStates::AxisType& type);
 
 template <>
 openspace::interaction::JoystickCameraStates::AxisType

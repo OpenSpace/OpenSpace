@@ -25,13 +25,12 @@
 #ifndef __OPENSPACE_CORE___ORBITALNAVIGATOR___H__
 #define __OPENSPACE_CORE___ORBITALNAVIGATOR___H__
 
+#include <openspace/properties/propertyowner.h>
+
 #include <openspace/interaction/delayedvariable.h>
-#include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/interpolator.h>
 #include <openspace/interaction/joystickcamerastates.h>
 #include <openspace/interaction/mousecamerastates.h>
-
-#include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/triggerproperty.h>
@@ -47,16 +46,19 @@ namespace openspace {
 
 namespace openspace::interaction {
 
-class OrbitalNavigator : public properties::PropertyOwner  {
+class InputState;
+
+class OrbitalNavigator : public properties::PropertyOwner {
 public:
     OrbitalNavigator();
-    ~OrbitalNavigator();
 
     void updateStatesFromInput(const InputState& inputState, double deltaTime);
     void updateCameraStateFromStates(Camera& camera, double deltaTime);
 
     void setFocusNode(SceneGraphNode* focusNode);
     void startInterpolateCameraDirection(const Camera& camera);
+    float rotateToFocusInterpolationTime() const;
+    void setRotateToFocusInterpolationTime(float durationInSeconds);
 
     JoystickCameraStates& joystickStates();
 
