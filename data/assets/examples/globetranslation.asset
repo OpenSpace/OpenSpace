@@ -17,8 +17,8 @@ local models = asset.syncedResource({
     Version = 1
 })
 
-local NewHorizons_Example_Fixed_Height = {
-    Identifier = "NewHorizons_Example_Fixed_Height",
+local Example_Fixed_Height = {
+    Identifier = "Example_Fixed_Height",
     Parent = earth.Earth.Identifier,
     Transform = {
         Translation = {
@@ -43,15 +43,15 @@ local NewHorizons_Example_Fixed_Height = {
     }
 }
 
-local NewHorizons_Example_Adaptive_Height = {
-    Identifier = "NewHorizons_Example_Adaptive_Height",
+local Example_Adaptive_Height = {
+    Identifier = "Example_Adaptive_Height",
     Parent = earth.Earth.Identifier,
     Transform = {
         Translation = {
             Type = "GlobeTranslation",
             Globe = earth.Earth.Identifier,
-            Longitude = 0.0,
-            Latitude = 0.0
+            Longitude = -74.006,
+            Latitude = 40.7128
         }
     },
     Renderable = {
@@ -69,7 +69,6 @@ local NewHorizons_Example_Adaptive_Height = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    NewHorizons_Example_Fixed_Height,
-    NewHorizons_Example_Adaptive_Height
+    Example_Fixed_Height,
+    Example_Adaptive_Height
 })
-
