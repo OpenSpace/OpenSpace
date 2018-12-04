@@ -46,6 +46,13 @@ class GPULayerGroup;
 class RenderableGlobe;
 struct TileIndex;
 
+struct BoundingHeights {
+    float min;
+    float max;
+    bool available;
+    bool tileOK;
+};
+
 namespace chunklevelevaluator { class Evaluator; }
 namespace culling { class ChunkCuller; }
 
@@ -64,6 +71,9 @@ struct Chunk {
     Status status;
 
     bool isVisible = true;
+    bool colorTileOK = false;
+    bool heightTileOK = false;
+
     std::array<glm::dvec4, 8> corners;
     std::array<Chunk*, 4> children = { { nullptr, nullptr, nullptr, nullptr } };
 };
@@ -130,7 +140,7 @@ private:
      * Goes through all available <code>ChunkCuller</code>s and check if any of them
      * allows culling of the <code>Chunk</code>s in question.
      */
-    bool testIfCullable(const Chunk& chunk, const RenderData& renderData, bool& allChunksAvailable) const;
+    bool testIfCullable(const Chunk& chunk, const RenderData& renderData, const BoundingHeights& heights) const;
 
     /**
      * Gets the desired level which can be used to determine if a chunk should split
@@ -142,7 +152,7 @@ private:
      * <code>Chunk</code>, it wants to split. If it is lower, it wants to merge with
      * its siblings.
      */
-    int desiredLevel(const Chunk& chunk, const RenderData& renderData, bool& allChunkTilesOK) const;
+    int desiredLevel(const Chunk& chunk, const RenderData& renderData, const BoundingHeights& heights) const;
 
     /**
      * Calculates the height from the surface of the reference ellipsoid to the
@@ -186,10 +196,10 @@ private:
         bool renderBounds, bool renderAABB) const;
 
     bool isCullableByFrustum(const Chunk& chunk, const RenderData& renderData) const;
-    bool isCullableByHorizon(const Chunk& chunk, const RenderData& renderData, bool& allChunkTilesOK) const;
+    bool isCullableByHorizon(const Chunk& chunk, const RenderData& renderData, const BoundingHeights& heights) const;
 
-    int desiredLevelByDistance(const Chunk& chunk, const RenderData& data, bool& allChunkTilesOK) const;
-    int desiredLevelByProjectedArea(const Chunk& chunk, const RenderData& data, bool& allChunkTilesOK) const;
+    int desiredLevelByDistance(const Chunk& chunk, const RenderData& data, const BoundingHeights& heights) const;
+    int desiredLevelByProjectedArea(const Chunk& chunk, const RenderData& data, const BoundingHeights& heights) const;
     int desiredLevelByAvailableTileData(const Chunk& chunk) const;
 
 
@@ -206,7 +216,7 @@ private:
     void splitChunkNode(Chunk& cn, int depth);
     void mergeChunkNode(Chunk& cn);
     bool updateChunkTree(Chunk& cn, const RenderData& data);
-    bool updateChunk(Chunk& chunk, const RenderData& data) const;
+    void updateChunk(Chunk& chunk, const RenderData& data) const;
     void freeChunkNode(Chunk* n);
 
     Ellipsoid _ellipsoid;
