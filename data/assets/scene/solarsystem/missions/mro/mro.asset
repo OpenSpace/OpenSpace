@@ -1,12 +1,8 @@
 -- Mars Reconnaissance Orbiter (MRO)
-
--- Kernel files collected from
--- ftp://naif.jpl.nasa.gov/pub/naif/pds/data/mro-m-spice-6-v1.0/mrosp_1000
--- Currently covers the positioning from 2018 JUL 01 - 2018 OCT 01 
-
 local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local marsTransforms = asset.require('scene/solarsystem/planets/mars/transforms')
+local kernels = asset.require('./kernels')
 
 local models = asset.syncedResource({
     Name = "Voyager 1 Models",
@@ -14,17 +10,6 @@ local models = asset.syncedResource({
     Identifier = "voyager1_model",
     Version = 1
 })
-
-local kernels = asset.syncedResource({
-    Name = "Voyager 1 Kernels",
-    Type = "HttpSynchronization",
-    Identifier = "mro_kernels",
-    Version = 1
-})
-
-local Kernels = {
-    kernels .. '/mro_psp48_ssd_mro95a.bsp'
-}
 
 local MarsRecOrbiter = {
     Identifier = "MRO",
@@ -34,7 +19,7 @@ local MarsRecOrbiter = {
             Type = "SpiceTranslation",
             Target = "MARS RECON ORBITER",
             Observer = "MARS BARYCENTER",
-            Kernels = Kernels
+            Kernels = kernels.MroKernels
         }      
     },
     GUI = {
