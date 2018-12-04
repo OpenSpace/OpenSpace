@@ -30,7 +30,6 @@ namespace openspace {
     RadecManager::RadecManager() = default;
    bool RadecManager::extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary){
      bool dataFilesSuccess = DataFileHelper::checkFileNames(identifier, dictionary, _dataFiles);
-     radecParser(0);
      return dataFilesSuccess;
     }
 
