@@ -28,6 +28,7 @@
 #include <modules/globebrowsing/src/dashboarditemglobelocation.h>
 #include <modules/globebrowsing/src/gdalwrapper.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
+#include <modules/globebrowsing/src/globetranslation.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <modules/globebrowsing/src/tileprovider.h>
 #include <openspace/engine/globalscallbacks.h>
@@ -216,18 +217,18 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     // Deinitialize
     global::callback::deinitialize.emplace_back([&]() { GdalWrapper::destroy(); });
 
-    // Get factories
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
-    // Create factory for TileProviders
+    fRenderable->registerClass<globebrowsing::RenderableGlobe>("RenderableGlobe");
+
+    auto fTranslation = FactoryManager::ref().factory<Translation>();
+    ghoul_assert(fTranslation, "Translation factory was not created");
+    fTranslation->registerClass<globebrowsing::GlobeTranslation>("GlobeTranslation");
+
     auto fTileProvider =
         std::make_unique<ghoul::TemplateFactory<tileprovider::TileProvider>>();
     ghoul_assert(fTileProvider, "TileProvider factory was not created");
 
-    // Register renderable class
-    fRenderable->registerClass<globebrowsing::RenderableGlobe>("RenderableGlobe");
-
-    // Register TileProvider classes
     fTileProvider->registerClass<tileprovider::DefaultTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::DefaultTileLayer

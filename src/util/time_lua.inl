@@ -463,9 +463,9 @@ int time_interpolateTimeRelative(lua_State* L) {
             delta,
             global::timeManager.defaultTimeInterpolationDuration()
         );
-        return 0;
-
         ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+
+        return 0;
     }
     else {
         int nArguments = lua_gettop(L);

@@ -59,7 +59,7 @@ include(cef_support)
 set_current_cef_build_platform()
 
 # Download and extract the CEF binary distribution (executes DownloadCEF.cmake).
-DownloadCEF("${CEF_PLATFORM}" "${CEF_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/ext/cef")
+download_cef("${CEF_PLATFORM}" "${CEF_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/ext/cef")
 
 ##########################################################################################
 # Apply cmake patch
@@ -145,7 +145,7 @@ if(OS_MACOSX)
     # Helper executable target.
     add_executable(${CEF_HELPER_TARGET} MACOSX_BUNDLE ${WEBBROWSER_HELPER_SOURCES})
     SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_HELPER_TARGET})
-    ADD_CEF_LOGICAL_TARGET("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
+    add_cef_logical_target("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
     add_dependencies(${CEF_HELPER_TARGET} libcef_dll_wrapper)
     target_link_libraries(${CEF_HELPER_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
     set_target_properties(${CEF_HELPER_TARGET} PROPERTIES
@@ -158,15 +158,15 @@ endif()
 
 if (OS_WINDOWS)
     message(STATUS "Setting up WebBrowser CEF helper executable: ${CEF_HELPER_TARGET}")
-    SET_OPENSPACE_CEF_TARGET_OUT_DIR()
+    set_openspace_cef_target_out_dir()
     add_executable(${CEF_HELPER_TARGET} ${WEBBROWSER_HELPER_SOURCES})
     SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_HELPER_TARGET})
     add_dependencies(${CEF_HELPER_TARGET} libcef_dll_wrapper)
     # Logical target used to link the libcef library.
-    ADD_CEF_LOGICAL_TARGET("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
+    add_cef_logical_target("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
     target_link_libraries(${CEF_HELPER_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
     # Add the custom manifest files to the executable.
-    ADD_WINDOWS_CEF_MANIFEST("${CEF_TARGET_OUT_DIR}" "${WEBBROWSER_MODULE_PATH}" "${CEF_HELPER_TARGET}" "exe")
+    add_windows_cef_manifest("${CEF_TARGET_OUT_DIR}" "${WEBBROWSER_MODULE_PATH}" "${CEF_HELPER_TARGET}" "exe")
 endif (OS_WINDOWS)
 
 

@@ -34,7 +34,7 @@ function(set_cef_targets cef_root main_target)
     find_package(CEF REQUIRED)
 
     # ensure out target dir is set
-    SET_OPENSPACE_CEF_TARGET_OUT_DIR()
+    set_openspace_cef_target_out_dir()
 
     # main CEF executable target
     set(CEF_TARGET ${main_target} PARENT_SCOPE)
@@ -125,8 +125,8 @@ function(run_cef_windows_config CEF_TARGET CEF_ROOT MODULE_PATH)
     endif()
 
     # Add the custom manifest files to the executable.
-    SET_OPENSPACE_CEF_TARGET_OUT_DIR()
-    ADD_WINDOWS_CEF_MANIFEST("${CEF_TARGET_OUT_DIR}" "${MODULE_PATH}" "${CEF_TARGET}" "exe")
+    set_openspace_cef_target_out_dir()
+    add_windows_cef_manifest("${CEF_TARGET_OUT_DIR}" "${MODULE_PATH}" "${CEF_TARGET}" "exe")
 
     # Copy binary and resource files to the target output directory.
     copy_files("${CEF_TARGET}" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR}" "$<TARGET_FILE_DIR:${CEF_TARGET}>")
