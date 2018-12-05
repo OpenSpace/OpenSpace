@@ -12,7 +12,7 @@ local models = asset.syncedResource({
 })
 
 local MarsRecOrbiter = {
-    Identifier = "MRO",
+    Identifier = "MarsRecOrbiter",
     Parent = marsTransforms.MarsBarycenter.Identifier,
     Transform = {
         Translation = {
@@ -39,6 +39,10 @@ local MarsRecOrbiterModel = {
         },
         ColorTexture = models .. "/texture/foil_silver_ramp.png",
         LightSources = lights.StandardLights
+    },
+    GUI = {
+        Name = "3D Model",
+        Path = "/Solar System/Missions/Mars Recon Orbiter"
     }
 }
 
