@@ -53,7 +53,7 @@ namespace openspace {
 
     static struct SignalData {
         //filename is on the format of YYYY-DDDT (excluding '.json')
-        bool isLoaded = false;
+        bool needsUpdate = true;
         double sequenceStartTime;
         // 24 hours from startTime 
         double sequenceEndTime;

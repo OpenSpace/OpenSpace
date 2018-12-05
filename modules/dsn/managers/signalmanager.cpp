@@ -106,7 +106,7 @@ namespace openspace {
         {
             signalParser(index);
             signalParser(index + lightTimeTravelBuffer);
-            signalData.isLoaded = true;
+            signalData.needsUpdate = false;
             signalData.signals.shrink_to_fit();
             return;
         }
@@ -114,7 +114,7 @@ namespace openspace {
 
             signalParser(index- lightTimeTravelBuffer);
             signalParser(index);
-            signalData.isLoaded = true;
+            signalData.needsUpdate = false;
             signalData.signals.shrink_to_fit();
             return;  
         }
@@ -122,7 +122,7 @@ namespace openspace {
             signalParser(index - lightTimeTravelBuffer);
             signalParser(index);
             signalParser(index + lightTimeTravelBuffer);
-            signalData.isLoaded = true;
+            signalData.needsUpdate = false;
             signalData.signals.shrink_to_fit();
         }
     }
