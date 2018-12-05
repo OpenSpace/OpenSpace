@@ -81,15 +81,23 @@ namespace openspace {
        RadecManager::Position position;
        positions.clear();
        positions.reserve(0);
+       int objectCounter = 0;
 
-       for (const auto& pos : j["Positions"]) {
-           position.timeStamp = pos["TimeStamp"].get<std::string>();
-           position.ra = pos["RAUp"].get<double>();
-           position.dec = pos["DecUp"].get<double>();
-           position.range = pos["GeoRngUp"].get<double>();
-          
-           RadecManager::positions.push_back(position);
-       }
+        for (const auto& pos : j["Positions"]) {
+            objectCounter++;
+            try {
+                position.timeStamp = pos["TimeStamp"].get<std::string>();
+                position.ra = pos["RAUp"].get<double>();
+                position.dec = pos["DecUp"].get<double>();
+                position.range = pos["GeoRngUp"].get<double>();
+            }
+            catch (const std::exception& e) {
+                LERROR(fmt::format("{}: Error in json object number {} while reading file '{}'", objectIdentifier, objectCounter, filename));
+            }
+
+            RadecManager::positions.push_back(position);
+        }
+
        return true;
    }
 
