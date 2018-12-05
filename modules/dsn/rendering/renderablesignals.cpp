@@ -281,16 +281,16 @@ void RenderableSignals::update(const UpdateData& data) {
     double currentTime = data.time.j2000Seconds();
 
     //Bool if the current time is within the timeframe for the currently loaded data
-    const bool isTimeInFileInterval = (currentTime >= SignalManager::_signalData.sequenceStartTime) &&
-        (currentTime < SignalManager::_signalData.sequenceEndTime);
+    const bool isTimeInFileInterval = (currentTime >= SignalManager::signalData.sequenceStartTime) &&
+        (currentTime < SignalManager::signalData.sequenceEndTime);
 
     //Reload data if it is not relevant anymore
     if (!isTimeInFileInterval) {
-        SignalManager::_signalData.isLoaded = false;
+        SignalManager::signalData.isLoaded = false;
 
-        int activeFileIndex = DataFileHelper::findFileIndexForCurrentTime(currentTime, SignalManager::_fileStartTimes);
+        int activeFileIndex = DataFileHelper::findFileIndexForCurrentTime(currentTime, SignalManager::fileStartTimes);
         //parse data for that file
-        if (!SignalManager::_signalData.isLoaded)
+        if (!SignalManager::signalData.isLoaded)
         {
             LDEBUG(fmt::format("{}: Reloading SignalData.", _identifier));
             SignalManager::updateSignalData(activeFileIndex, _signalSizeBuffer);
@@ -307,9 +307,9 @@ void RenderableSignals::update(const UpdateData& data) {
     _lineRenderInformation._localTransformSpacecraft = glm::translate(glm::dmat4(1.0), _focusNode->worldPosition());
 
     //Todo; keep track of active index for signalvector, or swap for loop for binary search
-    for (int i = 0; i < SignalManager::_signalData.signals.size(); i++) {
+    for (int i = 0; i < SignalManager::signalData.signals.size(); i++) {
 
-        SignalManager::Signal currentSignal = SignalManager::_signalData.signals[i];
+        SignalManager::Signal currentSignal = SignalManager::signalData.signals[i];
         if (isSignalActive(currentTime, currentSignal)) {
             currentSignal.timeSinceStart = currentTime - (Time::convertTime(currentSignal.startTime) - currentSignal.startTimeExtension);
             pushSignalDataToVertexArray(currentSignal);

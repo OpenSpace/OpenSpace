@@ -62,17 +62,20 @@ namespace openspace {
      };
 
       /* The data that is currently loaded into open space*/
-      static SignalData _signalData;
+      static SignalData signalData;
       /* A vector with all start times for our datafiles*/
-      static std::vector<double> _fileStartTimes;
-      /* A vector with all our datafile paths*/
-      static std::vector<std::string> _dataFiles;
+      static std::vector<double> fileStartTimes;
       /* Extracts all the mandatory information we need from our asset file */
       static bool extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary);
       /* parses signaldata from a file given an index in our preloaded filename vector */
       static bool signalParser(int index);
       /* updates the loaded signal data from disk */
       static void updateSignalData(int index, int sizeBuffer);
+
+
+    private:
+        /* A vector with all our datafile paths*/
+        static std::vector<std::string> _dataFiles;
 
     };
 }
