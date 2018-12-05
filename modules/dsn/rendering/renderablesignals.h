@@ -86,13 +86,13 @@ namespace openspace {
         /* Returns a position relative the current focus node */
         glm::dvec3 getCoordinatePosFromFocusNode(SceneGraphNode* node);
         /*Returns a position for a spacecraft*/
-        glm::vec3 getSuitablePrecisionPositionForSceneGraphNode(std::string id);
+        glm::dvec3 getSuitablePrecisionPositionForSceneGraphNode(std::string id);
         /* Returns a position for a station that has Earth as parent*/
-        glm::vec3 getPositionForGeocentricSceneGraphNode(const char* id);
+        glm::dvec3 getPositionForGeocentricSceneGraphNode(const char* id);
         /* Returns a color based on what site the station is located to */
         glm::vec3 getStationColor(std::string dishidentifier);
         /* Returns a distance between two scenegraphnodes */
-        float getDistance(std::string nodeIdA, std::string nodeIdB);
+        double getDistance(std::string nodeIdA, std::string nodeIdB);
 
         /* The VBO layout of the vertex position */
         struct PositionVBOLayout {

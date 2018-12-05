@@ -362,8 +362,8 @@ void RenderableSignals::extractData(std::unique_ptr<ghoul::Dictionary> &dictiona
 void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal) {
 
     glm::vec4 color = { getStationColor(signal.dishName), 1.0 };
-    glm::vec3 posStation = getPositionForGeocentricSceneGraphNode(signal.dishName.c_str());
-    glm::vec3 posSpacecraft = getSuitablePrecisionPositionForSceneGraphNode(signal.spacecraft.c_str());
+    glm::dvec3 posStation = getPositionForGeocentricSceneGraphNode(signal.dishName.c_str());
+    glm::dvec3 posSpacecraft = getSuitablePrecisionPositionForSceneGraphNode(signal.spacecraft.c_str());
     double distance = getDistance(signal.dishName, signal.spacecraft);
     double timeSinceStart = signal.timeSinceStart;
 
@@ -419,9 +419,9 @@ glm::dvec3 RenderableSignals::getCoordinatePosFromFocusNode(SceneGraphNode* node
     return diff;
 }
 
-glm::vec3 RenderableSignals::getSuitablePrecisionPositionForSceneGraphNode(std::string id) {
+glm::dvec3 RenderableSignals::getSuitablePrecisionPositionForSceneGraphNode(std::string id) {
 
-    glm::vec3 position;
+    glm::dvec3 position;
 
     if (global::renderEngine.scene()->sceneGraphNode(id)) {
         SceneGraphNode* spacecraftNode = global::renderEngine.scene()->sceneGraphNode(id);
@@ -434,7 +434,7 @@ glm::vec3 RenderableSignals::getSuitablePrecisionPositionForSceneGraphNode(std::
     return position;
 }
 
-glm::vec3 RenderableSignals::getPositionForGeocentricSceneGraphNode(const char* id) {
+glm::dvec3 RenderableSignals::getPositionForGeocentricSceneGraphNode(const char* id) {
 
     glm::dvec3 position;
 
@@ -444,7 +444,7 @@ glm::vec3 RenderableSignals::getPositionForGeocentricSceneGraphNode(const char* 
     else {
         LERROR(fmt::format("No scenegraphnode found for the station dish {}, "
                             "drawing line from center of Earth", id));
-        position = glm::vec3(0, 0, 0);
+        position = glm::dvec3(0, 0, 0);
     }
 
     return position;
@@ -469,10 +469,10 @@ glm::vec3 RenderableSignals::getStationColor(std::string dishidentifier) {
     return color;
 }
 
-float RenderableSignals::getDistance(std::string nodeIdA, std::string nodeIdB) {
+double RenderableSignals::getDistance(std::string nodeIdA, std::string nodeIdB) {
 
-    glm::vec3 posA = global::renderEngine.scene()->sceneGraphNode(nodeIdA)->worldPosition();
-    glm::vec3 posB = global::renderEngine.scene()->sceneGraphNode(nodeIdB)->worldPosition();
+    glm::dvec3 posA = global::renderEngine.scene()->sceneGraphNode(nodeIdA)->worldPosition();
+    glm::dvec3 posB = global::renderEngine.scene()->sceneGraphNode(nodeIdB)->worldPosition();
 
     return glm::distance(posA, posB);
 }
