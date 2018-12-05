@@ -6,6 +6,9 @@ local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 local sceneHelper = asset.require('util/scene_helper')
 local propertyHelper = asset.require('util/property_helper')
 
+local globeTranslation = asset.require('examples/globetranslation')
+
+
 local models = asset.syncedResource({
     Name = "Dsn models",
     Type = "HttpSynchronization",
@@ -53,13 +56,33 @@ local stationSiteMap = {
         }
 
 --------------------- Goldstone ------------------------
+local RotationMatrixGoldstone = {
+-0.9740529,  0.1544376, -0.1654387,
+  -0.2245064, -0.7517193,  0.6200927,
+  -0.0285979,  0.6411452,  0.7668866 
+}
+
+local RotationMatrixCanberra = {
+0.7544932,  0.2119603, -0.6211383,
+  -0.6211383,  0.5362649, -0.5714955,
+   0.2119603,  0.8170023,  0.5362649 
+}
+
+local RotationMatrixMadrid = {
+ 0.7257154,  0.1897224, -0.6613188,
+   0.6879883, -0.1958808,  0.6987867,
+   0.0030358, -0.9620999, -0.2726805
+}
+
 local DSS14 = {
     Identifier = "DSS14",
     Parent = earthAsset.Earth.Identifier,
-    Transform = {
-      Translation = {
-         Type = "StaticTranslation",
-         Position = { -2350973.5,-4636119.5, 3697665 }
+    Transform =  {
+    Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 243.11046,
+        Latitude = 35.4259,
       }
    },
     Renderable = {
@@ -68,7 +91,8 @@ local DSS14 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/70m_dish/70m_dish.obj"
         },
-        ColorTexture = models .. "/70m_dish/truss_dish_AO.jpg" 
+        ColorTexture = models .. "/70m_dish/truss_dish_AO.jpg", 
+        ModelTransform = RotationMatrixGoldstone
 
     },
     GUI = {
@@ -82,9 +106,11 @@ local DSS15 = {
     Identifier = "DSS15",
     Parent = earthAsset.Earth.Identifier,
     Transform = {
-      Translation = {
-         Type = "StaticTranslation",
-         Position = { -2350973.5, -4636120, 3697665.5 }
+ Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 243.11046379722,
+        Latitude = 35.42590143888,
       }
    },
     Renderable = {
@@ -93,7 +119,8 @@ local DSS15 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/34m_dish/base_AO.png" 
+        ColorTexture = models .. "/34m_dish/base_AO.png" ,
+        ModelTransform = RotationMatrixGoldstone
 
     },
     GUI = {
@@ -102,14 +129,15 @@ local DSS15 = {
     }
 }
 
-
 local DSS24 = {
     Identifier = "DSS24",
     Parent = earthAsset.Earth.Identifier,
     Transform = {
-      Translation = {
-         Type = "StaticTranslation",
-         Position = {-2352268.0,-4641634.5,3689828.75 }
+     Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 243.12521,
+        Latitude = 35.33989,
       }
    },
     Renderable = {
@@ -118,7 +146,9 @@ local DSS24 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/34m_dish/base_AO.png" 
+        ColorTexture = models .. "/34m_dish/base_AO.png",
+        ModelTransform = RotationMatrixGoldstone
+
 
     },
     GUI = {
@@ -131,9 +161,11 @@ local DSS25 = {
     Identifier = "DSS25",
     Parent = earthAsset.Earth.Identifier,
     Transform = {
-      Translation = {
-         Type = "StaticTranslation",
-         Position = {-2352383.75,-4641748,3689626.25 }
+     Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 243.12464,
+        Latitude = 35.33761,
       }
    },
     Renderable = {
@@ -142,7 +174,8 @@ local DSS25 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/34m_dish/base_AO.png" 
+        ColorTexture = models .. "/34m_dish/base_AO.png",
+        ModelTransform = RotationMatrixGoldstone
 
     },
     GUI = {
@@ -156,8 +189,10 @@ local DSS26 = {
     Parent = earthAsset.Earth.Identifier,
     Transform = {
       Translation = {
-         Type = "StaticTranslation",
-         Position = {-2352253.25,-4641961,3689457.25}
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 243.12698,
+        Latitude = 35.33569,
       }
    },
     Renderable = {
@@ -166,7 +201,8 @@ local DSS26 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/34m_dish/base_AO.png" 
+        ColorTexture = models .. "/34m_dish/base_AO.png", 
+        ModelTransform = RotationMatrixGoldstone
 
     },
     GUI = {
@@ -182,9 +218,11 @@ local DSS43 = {
     Identifier = "DSS43",
     Parent = earthAsset.Earth.Identifier,
     Transform = {
-      Translation = {
-         Type = "StaticTranslation",
-         Position = {-4455882,2679347,-3695353.25 }
+     Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 148.98127,
+        Latitude = -35.40242,
       }
    },
     Renderable = {
@@ -193,7 +231,8 @@ local DSS43 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/70m_dish/70m_dish.obj"
         },
-        ColorTexture = models .. "/70m_dish/truss_dish_AO.jpg" 
+        ColorTexture = models .. "/70m_dish/truss_dish_AO.jpg",
+        ModelTransform = RotationMatrixCanberra
 
     },
     GUI = {
@@ -207,8 +246,10 @@ local DSS34 = {
     Parent = earthAsset.Earth.Identifier,
     Transform = {
       Translation = {
-         Type = "StaticTranslation",
-         Position = {-4456134,2679425.5,-3694997.5}
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 148.98127,
+        Latitude = -35.40242,
       }
    },
     Renderable = {
@@ -217,7 +258,8 @@ local DSS34 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/34m_dish/base_AO.png" 
+        ColorTexture = models .. "/34m_dish/base_AO.png",
+        ModelTransform = RotationMatrixCanberra
 
     },
     GUI = {
@@ -230,9 +272,11 @@ local DSS35 = {
     Identifier = "DSS35",
     Parent = earthAsset.Earth.Identifier,
     Transform = {
-      Translation = {
-         Type = "StaticTranslation",
-         Position = {-4456261,2679554.75,-3694756 }
+       Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 148.98146,
+        Latitude = -35.3958,
       }
    },
     Renderable = {
@@ -241,7 +285,8 @@ local DSS35 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/34m_dish/base_AO.png" 
+        ColorTexture = models .. "/34m_dish/base_AO.png",
+        ModelTransform = RotationMatrixCanberra
 
     },
     GUI = {
@@ -254,9 +299,11 @@ local DSS36 = {
     Identifier = "DSS36",
     Parent = earthAsset.Earth.Identifier,
     Transform = {
-      Translation = {
-         Type = "StaticTranslation",
-         Position = {-4456158,2679802,-3694689.75 }
+       Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 148.97854,
+        Latitude = -35.39511,
       }
    },
     Renderable = {
@@ -265,7 +312,8 @@ local DSS36 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/34m_dish/base_AO.png" 
+        ColorTexture = models .. "/34m_dish/base_AO.png",
+        ModelTransform = RotationMatrixCanberra
 
     },
     GUI = {
@@ -279,9 +327,11 @@ local DSS45 = {
     Identifier = "DSS45",
     Parent = earthAsset.Earth.Identifier,
     Transform = {
-      Translation = {
-         Type = "StaticTranslation",
-         Position = {-4455930.5,2679756.25,-3694974.25}
+       Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 148.97768,
+        Latitude = -35.39846,
       }
    },
     Renderable = {
@@ -290,7 +340,8 @@ local DSS45 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/34m_dish/base_AO.png" 
+        ColorTexture = models .. "/34m_dish/base_AO.png",
+        ModelTransform = RotationMatrixCanberra
 
     },
     GUI = {
@@ -307,8 +358,10 @@ local DSS63 = {
     Parent = earthAsset.Earth.Identifier,
     Transform = {
       Translation = {
-         Type = "StaticTranslation",
-         Position = {4842262,-359673.125,4137003.5}
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 355.75199,
+        Latitude = 40.43121,
       }
    },
     Renderable = {
@@ -317,7 +370,8 @@ local DSS63 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/70m_dish/70m_dish.obj"
         },
-        ColorTexture = models .. "/70m_dish/truss_dish_AO.jpg" 
+        ColorTexture = models .. "/70m_dish/truss_dish_AO.jpg",
+        ModelTransform = RotationMatrixMadrid
 
     },
     GUI = {
@@ -331,8 +385,10 @@ local DSS65 = {
     Parent = earthAsset.Earth.Identifier,
     Transform = {
       Translation = {
-         Type = "StaticTranslation",
-         Position = {4842509.5,-359920.125,4136644.5 }
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 355.7493,
+        Latitude = 40.42721,
       }
    },
     Renderable = {
@@ -341,7 +397,8 @@ local DSS65 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/34m_dish/base_AO.png" 
+        ColorTexture = models .. "/34m_dish/base_AO.png",
+        ModelTransform = RotationMatrixMadrid
 
     },
     GUI = {
@@ -354,9 +411,11 @@ local DSS54 = {
     Identifier = "DSS54",
     Parent = earthAsset.Earth.Identifier,
     Transform = {
-      Translation = {
-         Type = "StaticTranslation",
-         Position = {4842605,-360216.15625,4136511.75 }
+       Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 355.7459,
+        Latitude = 40.42562,
       }
    },
     Renderable = {
@@ -365,7 +424,8 @@ local DSS54 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/34m_dish/base_AO.png" 
+        ColorTexture = models .. "/34m_dish/base_AO.png",
+        ModelTransform = RotationMatrixMadrid
 
     },
     GUI = {
@@ -378,9 +438,11 @@ local DSS55 = {
     Identifier = "DSS55",
     Parent = earthAsset.Earth.Identifier,
     Transform = {
-      Translation = {
-         Type = "StaticTranslation",
-         Position = {4842696,-360097.96875,4136388.25 }
+       Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 355.74737,
+        Latitude = 40.4243,
       }
    },
     Renderable = {
@@ -389,7 +451,8 @@ local DSS55 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/34m_dish/base_AO.png" 
+        ColorTexture = models .. "/34m_dish/base_AO.png",
+        ModelTransform = RotationMatrixMadrid
 
     },
     GUI = {
@@ -397,9 +460,6 @@ local DSS55 = {
         Path = "/Solar System/Stations/Madrid"
     }
 }
-
-
-
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     DSS14, DSS15, DSS24, DSS25, DSS26, DSS43, DSS34, DSS35, DSS36, DSS45, DSS63, DSS65, DSS54, DSS55
