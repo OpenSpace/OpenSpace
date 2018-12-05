@@ -85,8 +85,11 @@ namespace openspace {
         // according to the longest light travel time
         int lightTimeTravelBuffer = 1;
 
-        if (index == -1 || index >= _dataFiles.size())
+        if (index <= -1 || index >= _dataFiles.size())
+        {
+            LERROR(fmt::format("{}: File index {} is out of bounds.", _loggerCat, index));
             return;
+        }
 
         signalData.signals.clear();
         signalData.signals.reserve(sizeBuffer);
