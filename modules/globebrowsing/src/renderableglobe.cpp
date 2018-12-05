@@ -142,6 +142,12 @@ namespace {
         "" // @TODO Missing documentation
     };
 
+    constexpr openspace::properties::Property::PropertyInfo DynamicLodIterationCountInfo = {
+        "DynamicLodIterationCount",
+        "Data availability checks before LOD factor impact",
+        "" // @TODO Missing documentation
+    };
+
     constexpr openspace::properties::Property::PropertyInfo PerformShadingInfo = {
         "PerformShading",
         "Perform shading",
@@ -166,9 +172,15 @@ namespace {
         "Enables the rendering of eclipse shadows using hard shadows"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LodScaleFactorInfo = {
-        "LodScaleFactor",
-        "Level of Detail Scale Factor",
+    constexpr openspace::properties::Property::PropertyInfo TargetLodScaleFactorInfo = {
+        "TargetLodScaleFactorInfo",
+        "Target Level of Detail Scale Factor",
+        "" // @TODO Missing documentation
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo CurrentLodScaleFactorInfo = {
+        "CurrentLodScaleFactor",
+        "Current Level of Detail Scale Factor (Read Only)",
         "" // @TODO Missing documentation
     };
 
@@ -412,14 +424,16 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty(HeightIntensityInfo, false),
         BoolProperty(LevelProjectedAreaInfo, true),
         BoolProperty(ResetTileProviderInfo, false),
-        IntProperty(ModelSpaceRenderingInfo, 14, 1, 22)
+        IntProperty(ModelSpaceRenderingInfo, 14, 1, 22),
+        IntProperty(DynamicLodIterationCountInfo, 16, 4, 128)
     })
     , _generalProperties({
         BoolProperty(PerformShadingInfo, true),
         BoolProperty(AccurateNormalsInfo, false),
         BoolProperty(EclipseInfo, false),
         BoolProperty(EclipseHardShadowsInfo, false),
-        FloatProperty(LodScaleFactorInfo, 15.f, 1.f, 50.f),
+        FloatProperty(TargetLodScaleFactorInfo, 15.f, 1.f, 50.f),
+        FloatProperty(CurrentLodScaleFactorInfo, 15.f, 1.f, 50.f),
         FloatProperty(CameraMinHeightInfo, 100.f, 0.f, 1000.f),
         FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f),
         IntProperty(NActiveLayersInfo, 0, 0, OpenGLCap.maxTextureUnits() / 3)
@@ -429,6 +443,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _leftRoot(Chunk(LeftHemisphereIndex))
     , _rightRoot(Chunk(RightHemisphereIndex))
 {
+    _generalProperties.currentLodScaleFactor.setReadOnly(true);
+
     // Read the radii in to its own dictionary
     if (dictionary.hasKeyAndValue<glm::dvec3>(KeyRadii)) {
         _ellipsoid = Ellipsoid(dictionary.value<glm::vec3>(KeyRadii));
@@ -456,8 +472,12 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.useAccurateNormals);
     addProperty(_generalProperties.eclipseShadowsEnabled);
     addProperty(_generalProperties.eclipseHardShadows);
-    _generalProperties.lodScaleFactor.onChange([this]() { _lodScaleFactorDirty = true; });
-    addProperty(_generalProperties.lodScaleFactor);
+    _generalProperties.targetLodScaleFactor.onChange([this]() { 
+        _generalProperties.currentLodScaleFactor.set(_generalProperties.targetLodScaleFactor.get());
+        _lodScaleFactorDirty = true; 
+    });
+    addProperty(_generalProperties.targetLodScaleFactor);
+    addProperty(_generalProperties.currentLodScaleFactor);
     addProperty(_generalProperties.cameraMinHeight);
     addProperty(_generalProperties.orenNayarRoughness);
     _generalProperties.nActiveLayers.setReadOnly(true);
@@ -473,6 +493,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     );
     _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
+    _debugPropertyOwner.addProperty(_debugProperties.dynamicLodIterationCount);
 
     auto notifyShaderRecompilation = [&]() {
         _shadersNeedRecompilation = true;
@@ -720,7 +741,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     if (_layerManager.hasAnyBlendingLayersEnabled()) {
         if (_lodScaleFactorDirty) {
             const float dsf = static_cast<float>(
-                _generalProperties.lodScaleFactor * _ellipsoid.minimumRadius()
+                _generalProperties.currentLodScaleFactor * _ellipsoid.minimumRadius()
             );
             _globalRenderer.program->setUniform("distanceScaleFactor", dsf);
             _localRenderer.program->setUniform("distanceScaleFactor", dsf);
@@ -771,6 +792,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     updateChunkTree(_leftRoot, data);
     updateChunkTree(_rightRoot, data);
     _chunkCornersDirty = false;
+    _iterationsOfAvailableData = (_allChunksAvailable ? _iterationsOfAvailableData + 1 : 0);
+    _iterationsOfUnavailableData = (_allChunksAvailable ? 0 : _iterationsOfUnavailableData + 1);
 
     // Calculate the MVP matrix
     const glm::dmat4& viewTransform = data.camera.combinedViewMatrix();
@@ -961,6 +984,20 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
                 _debugProperties.showChunkAABB
             );
         }
+    }
+
+    // If our tile cache is very full, we assume we need to adjust the level of detail dynamically
+    // to not keep rendering frames with unavailable data
+    // After certain number of iterations(_debugProperties.dynamicLodIterationCount) of unavailable/available data in a row, we assume that a change could be made.
+    if (_iterationsOfUnavailableData > _debugProperties.dynamicLodIterationCount && _generalProperties.currentLodScaleFactor.value() > _generalProperties.currentLodScaleFactor.minValue()) {
+        _lodScaleFactorDirty = true;
+        _generalProperties.currentLodScaleFactor = _generalProperties.currentLodScaleFactor - 0.1f;
+        _iterationsOfUnavailableData = 0;
+    } // Make 2 times the iterations with available data to move it up again
+    else if (_iterationsOfAvailableData > (_debugProperties.dynamicLodIterationCount * 2) && _generalProperties.currentLodScaleFactor.value() < _generalProperties.targetLodScaleFactor.value()) {
+        _lodScaleFactorDirty = true;
+        _generalProperties.currentLodScaleFactor = _generalProperties.currentLodScaleFactor + 0.1f;
+        _iterationsOfAvailableData = 0;
     }
 }
 
@@ -1810,7 +1847,7 @@ int RenderableGlobe::desiredLevelByDistance(const Chunk& chunk,
     const double distanceToPatch = glm::length(cameraToChunk);
     const double distance = distanceToPatch;
 
-    const double scaleFactor = _generalProperties.lodScaleFactor *
+    const double scaleFactor = _generalProperties.currentLodScaleFactor *
         _ellipsoid.minimumRadius();
     const double projectedScaleFactor = scaleFactor / distance;
     const int desiredLevel = static_cast<int>(ceil(log2(projectedScaleFactor)));
@@ -1895,7 +1932,7 @@ int RenderableGlobe::desiredLevelByProjectedArea(const Chunk& chunk,
     const double areaABC = 0.5 * glm::length(glm::cross(AC, AB));
     const double projectedChunkAreaApprox = 8 * areaABC;
 
-    const double scaledArea = _generalProperties.lodScaleFactor *
+    const double scaledArea = _generalProperties.currentLodScaleFactor *
                               projectedChunkAreaApprox;
     return chunk.tileIndex.level + static_cast<int>(round(scaledArea - 1));
 }
@@ -2075,7 +2112,8 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
         if (cn.status == Chunk::Status::WantSplit) {
             splitChunkNode(cn, 1);
         }
-        else if (cn.status == Chunk::Status::DoNothing && (!cn.colorTileOK || !cn.heightTileOK)) {
+        else if (cn.status == Chunk::Status::DoNothing && (!cn.colorTileOK)) {
+            // Checking cn.heightTileOK caused always not avaiable for certain HiRISE data
             _allChunksAvailable = false;
         }
 
@@ -2098,7 +2136,7 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
         else if (cn.status == Chunk::Status::WantSplit) {
             splitChunkNode(cn, 1);
         }
-        else if (cn.status == Chunk::Status::DoNothing && (!cn.colorTileOK || !cn.heightTileOK)) {
+        else if (cn.status == Chunk::Status::DoNothing && (!cn.colorTileOK)) {
             _allChunksAvailable = false;
         }
 

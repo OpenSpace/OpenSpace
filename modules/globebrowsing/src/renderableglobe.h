@@ -118,6 +118,7 @@ private:
         properties::BoolProperty levelByProjectedAreaElseDistance;
         properties::BoolProperty resetTileProviders;
         properties::IntProperty modelSpaceRenderingCutoffLevel;
+        properties::IntProperty dynamicLodIterationCount;
     } _debugProperties;
 
     struct {
@@ -125,7 +126,8 @@ private:
         properties::BoolProperty useAccurateNormals;
         properties::BoolProperty eclipseShadowsEnabled;
         properties::BoolProperty eclipseHardShadows;
-        properties::FloatProperty lodScaleFactor;
+        properties::FloatProperty targetLodScaleFactor;
+        properties::FloatProperty currentLodScaleFactor;
         properties::FloatProperty cameraMinHeight;
         properties::FloatProperty orenNayarRoughness;
         properties::IntProperty nActiveLayers;
@@ -254,6 +256,8 @@ private:
     bool _chunkCornersDirty = true;
     bool _nLayersIsDirty = true;
     bool _allChunksAvailable = true;
+    size_t _iterationsOfAvailableData = 0;
+    size_t _iterationsOfUnavailableData = 0;
     Layer* _lastChangedLayer = nullptr;
 };
 
