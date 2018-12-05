@@ -22,29 +22,42 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___TIMEFRAMEUNION___H__
-#define __OPENSPACE_MODULE_BASE___TIMEFRAMEUNION___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBETRANSLATION___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBETRANSLATION___H__
 
-#include <openspace/scene/timeframe.h>
+#include <openspace/scene/translation.h>
 
-namespace openspace {
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 
-class Time;
+namespace openspace::globebrowsing {
 
-namespace documentation { struct Documentation; }
+class RenderableGlobe;
 
-class TimeFrameUnion : public TimeFrame {
+class GlobeTranslation : public Translation {
 public:
-    TimeFrameUnion() = default;
-    TimeFrameUnion(const ghoul::Dictionary& dictionary);
-    bool isActive(const Time&) const override;
+    GlobeTranslation(const ghoul::Dictionary& dictionary);
+
+    glm::dvec3 position(const UpdateData& data) const override;
 
     static documentation::Documentation Documentation();
 
 private:
-    std::vector<std::unique_ptr<TimeFrame>> _timeFrames;
+    void fillAttachedNode();
+
+    properties::StringProperty _globe;
+    properties::DoubleProperty _longitude;
+    properties::DoubleProperty _latitude;
+    properties::DoubleProperty _fixedAltitude;
+    properties::BoolProperty _useFixedAltitude;
+
+    RenderableGlobe* _attachedNode = nullptr;
+
+    mutable bool _positionIsDirty = true;
+    mutable glm::dvec3 _position;
 };
 
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
-#endif // __OPENSPACE_MODULE_BASE___TIMEFRAMEUNION___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GLOBETRANSLATION___H__

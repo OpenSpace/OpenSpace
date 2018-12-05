@@ -75,7 +75,6 @@ void LayerGroup::setLayersFromDict(const ghoul::Dictionary& dict) {
                     LERRORC(except.component, except.message);
                 }
             }
-            continue;
         }
     }
 }

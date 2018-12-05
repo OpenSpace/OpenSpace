@@ -272,8 +272,8 @@ void NavigationHandler::saveCameraStateToFile(const std::string& filepath) {
 
         ghoul::Dictionary cameraDict = cameraStateDictionary();
 
-        // TODO : Should get the camera state as a dictionary and save the dictionary to
-        // a file in form of a lua state and not use ofstreams here.
+        // TODO(abock): Should get the camera state as a dictionary and save the
+        // dictionary to a file in form of a lua state and not use ofstreams here.
 
         std::ofstream ofs(fullpath.c_str());
 

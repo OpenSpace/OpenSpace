@@ -68,7 +68,7 @@ void ServerModule::internalInitialize(const ghoul::Dictionary&) {
     _servers.push_back(std::move(tcpServer));
     _servers.push_back(std::move(wsServer));
 
-    global::callback::preSync.push_back([this]() { preSync(); });
+    global::callback::preSync.emplace_back([this]() { preSync(); });
 }
 
 void ServerModule::preSync() {

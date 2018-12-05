@@ -58,8 +58,7 @@ public:
          * \param component The optional compoment that caused this exception to be thrown
          * \pre message may not be empty
         */
-        explicit InvalidSceneError(const std::string& msg,
-            const std::string& comp = "");
+        explicit InvalidSceneError(std::string msg, std::string comp = "");
     };
 
     /// This struct describes a time that has some intrinsic interesting-ness to this

@@ -24,11 +24,11 @@
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
+option(OPENSPACE_MODULE_SYNC_USE_LIBTORRENT "Use libtorrent" OFF)
+
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/syncmodule.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/torrentclient.h
     ${CMAKE_CURRENT_SOURCE_DIR}/syncs/httpsynchronization.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/syncs/torrentsynchronization.h
     ${CMAKE_CURRENT_SOURCE_DIR}/syncs/urlsynchronization.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/syncassettask.h
 )
@@ -36,20 +36,31 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/syncmodule.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/torrentclient.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/syncs/httpsynchronization.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/syncs/torrentsynchronization.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/syncs/urlsynchronization.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/syncassettask.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
+
+if (OPENSPACE_MODULE_SYNC_USE_LIBTORRENT)
+    set(HEADER_FILES
+        ${HEADER_FILES}
+        ${CMAKE_CURRENT_SOURCE_DIR}/torrentclient.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/syncs/torrentsynchronization.h
+    )
+    set(SOURCE_FILES
+        ${SOURCE_FILES}
+        ${CMAKE_CURRENT_SOURCE_DIR}/torrentclient.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/syncs/torrentsynchronization.cpp
+    )
+endif ()
+
 
 create_new_module("Sync" sync_module ${HEADER_FILES} ${SOURCE_FILES})
 
 #####
 # Libtorrent
 #####
-option(OPENSPACE_MODULE_SYNC_USE_LIBTORRENT "Use libtorrent" OFF)
 
 if (OPENSPACE_MODULE_SYNC_USE_LIBTORRENT)
     set(Boost_USE_STATIC_LIBS ON)

@@ -87,6 +87,7 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
         }
     );
 
+#ifdef SYNC_USE_LIBTORRENT
     fSynchronization->registerClass(
         "TorrentSynchronization",
         [this](bool, const ghoul::Dictionary& dictionary) {
@@ -97,6 +98,7 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
             );
         }
     );
+#endif // SYNC_USE_LIBTORRENT
 
     fSynchronization->registerClass(
         "UrlSynchronization",
@@ -112,13 +114,16 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
     ghoul_assert(fTask, "No task factory existed");
     fTask->registerClass<SyncAssetTask>("SyncAssetTask");
 
+#ifdef SYNC_USE_LIBTORRENT
     _torrentClient.initialize();
-
-    global::callback::deinitialize.push_back([&]() { _torrentClient.deinitialize(); });
+    global::callback::deinitialize.emplace_back([&]() { _torrentClient.deinitialize(); });
+#endif // SYNC_USE_LIBTORRENT
 }
 
 void SyncModule::internalDeinitialize() {
+#ifdef SYNC_USE_LIBTORRENT
     _torrentClient.deinitialize();
+#endif // SYNC_USE_LIBTORRENT
 }
 
 std::string SyncModule::synchronizationRoot() const {
@@ -136,7 +141,9 @@ std::vector<std::string> SyncModule::httpSynchronizationRepositories() const {
 std::vector<documentation::Documentation> SyncModule::documentations() const {
     return {
         HttpSynchronization::Documentation(),
+#ifdef SYNC_USE_LIBTORRENT
         TorrentSynchronization::Documentation()
+#endif // SYNC_USE_LIBTORRENT
     };
 }
 

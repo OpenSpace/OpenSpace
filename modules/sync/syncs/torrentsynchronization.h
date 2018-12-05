@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_MODULE_SYNC___TORRENTSYNCHRONIZATION___H__
 #define __OPENSPACE_MODULE_SYNC___TORRENTSYNCHRONIZATION___H__
 
+#ifdef SYNC_USE_LIBTORRENT
+
 #include <openspace/util/resourcesynchronization.h>
 
 #include <modules/sync/torrentclient.h>
@@ -35,8 +37,8 @@ class TorrentSynchronizationJob;
 
 class TorrentSynchronization : public ResourceSynchronization {
 public:
-    TorrentSynchronization(const ghoul::Dictionary& dict,
-        const std::string& synchronizationRoot, TorrentClient& client);
+    TorrentSynchronization(const ghoul::Dictionary& dict, std::string synchronizationRoot,
+        TorrentClient& client);
 
     virtual ~TorrentSynchronization();
 
@@ -59,7 +61,7 @@ private:
 
     std::atomic_bool _enabled = false;
 
-    TorrentClient::TorrentId _torrentId;
+    TorrentClient::TorrentId _torrentId = 0;
     TorrentClient::TorrentProgress _progress;
     std::mutex _progressMutex;
     std::string _identifier;
@@ -69,5 +71,7 @@ private:
 };
 
 } // namespace openspace
+
+#endif // SYNC_USE_LIBTORRENT
 
 #endif // __OPENSPACE_MODULE_SYNC___TORRENTSYNCHRONIZATION___H__

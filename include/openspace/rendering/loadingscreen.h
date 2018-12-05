@@ -68,6 +68,7 @@ public:
     void tickItem();
 
     enum class Phase {
+        PreStart,
         Construction,
         Synchronization,
         Initialization
@@ -97,7 +98,7 @@ private:
     bool _showNodeNames;
     bool _showProgressbar;
 
-    Phase _phase;
+    Phase _phase = Phase::PreStart;
     std::atomic_int _iProgress = 0;
     std::atomic_int _nItems = 0;
 

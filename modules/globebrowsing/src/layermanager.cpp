@@ -104,7 +104,7 @@ bool LayerManager::hasAnyBlendingLayersEnabled() const {
 
 std::array<LayerGroup*, LayerManager::NumLayerGroups> LayerManager::layerGroups() const
 {
-    std::array<LayerGroup*, NumLayerGroups> res;
+    std::array<LayerGroup*, NumLayerGroups> res = {};
     for (int i = 0; i < NumLayerGroups; ++i) {
         res[i] = _layerGroups[i].get();
     }

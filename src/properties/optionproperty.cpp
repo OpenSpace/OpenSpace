@@ -146,7 +146,10 @@ std::string OptionProperty::generateAdditionalJsonDescription() const {
         std::string d = o.description;
         std::string dSan = sanitizeString(d);
 
-        result += "{\"" + vSan + "\": \"" + dSan+ "\"}";
+        result += '{';
+        result += fmt::format(R"("{}": "{}")", vSan, dSan);
+        result += '}';
+
         if (i != _options.size() - 1) {
             result += ",";
         }

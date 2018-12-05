@@ -331,14 +331,14 @@ std::array<double, 6> geoTransform(int rasterX, int rasterY) {
         Geodetic2{ 0.0, 0.0 },
         Geodetic2{ glm::half_pi<double>(), glm::pi<double>() }
     );
-    std::array<double, 6> res;
-    res[0] = glm::degrees(cov.corner(Quad::NORTH_WEST).lon);
-    res[1] = glm::degrees(cov.size().lon) / rasterX;
-    res[2] = 0.0;
-    res[3] = glm::degrees(cov.corner(Quad::NORTH_WEST).lat);
-    res[4] = 0.0;
-    res[5] = glm::degrees(-cov.size().lat) / rasterY;
-    return res;
+    return {
+        glm::degrees(cov.corner(Quad::NORTH_WEST).lon),
+        glm::degrees(cov.size().lon) / rasterX,
+        0.0,
+        glm::degrees(cov.corner(Quad::NORTH_WEST).lat),
+        0.0,
+        glm::degrees(-cov.size().lat) / rasterY
+    };
 }
 
 /**

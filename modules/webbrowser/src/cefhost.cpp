@@ -36,7 +36,7 @@ namespace {
 
 namespace openspace {
 
-CefHost::CefHost(std::string helperLocation) {
+CefHost::CefHost(const std::string& helperLocation) {
     LDEBUG("Initializing CEF...");
 
     CefSettings settings;
@@ -50,7 +50,7 @@ CefHost::CefHost(std::string helperLocation) {
     CefRefPtr<WebBrowserApp> app(new WebBrowserApp);
 
     CefMainArgs args;
-    CefInitialize(args, settings, app.get(), NULL);
+    CefInitialize(args, settings, app.get(), nullptr);
     LDEBUG("Initializing CEF... done!");
 }
 
