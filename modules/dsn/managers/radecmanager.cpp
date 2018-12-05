@@ -26,11 +26,16 @@
 
 namespace openspace {
     constexpr const char* _loggerCat = "RadecManager";
+    constexpr const char* KeyIdentifier = "ObjectIdentifier";
 
     RadecManager::RadecManager() = default;
-   bool RadecManager::extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary){
-     bool dataFilesSuccess = DataFileHelper::checkFileNames(identifier, dictionary, _dataFiles);
-     return dataFilesSuccess;
+    bool RadecManager::extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary){
+        if (dictionary->hasKeyAndValue<std::string>(KeyIdentifier)) {
+            objectIdentifier = dictionary->value<std::string>(KeyIdentifier);
+        }
+
+        bool dataFilesSuccess = DataFileHelper::checkFileNames(identifier, dictionary, _dataFiles);
+        return dataFilesSuccess;
     }
 
    bool RadecManager::correctHour(double time) const{
