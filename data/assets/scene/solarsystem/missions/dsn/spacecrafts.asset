@@ -6,3 +6,4 @@ asset.require('scene/solarsystem/missions/voyager1/trails')
 asset.require('scene/solarsystem/missions/voyager2/voyager2')
 -- added specifically for dsn visualization
 asset.require('scene/solarsystem/missions/dsn/mro/mro')
+asset.require('scene/solarsystem/missions/dsn/marsodyssey/marsodyssey')
