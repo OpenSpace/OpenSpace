@@ -81,10 +81,11 @@ namespace openspace {
     * as well as signals that have a long light travel time. */
     void SignalManager::updateSignalData(int index, int sizeBuffer) {
         
-        // This will all
+        // Currently have to be 1, could be optimized in future
+        // according to the longest light travel time
         int lightTimeTravelBuffer = 1;
 
-        if (index == -1 || index > _dataFiles.size())
+        if (index == -1 || index >= _dataFiles.size())
             return;
 
         signalData.signals.clear();
@@ -106,7 +107,7 @@ namespace openspace {
             signalData.signals.shrink_to_fit();
             return;
         }
-        else if (index == _dataFiles.size()) {
+        else if (index == (_dataFiles.size()-1)) {
 
             signalParser(index- lightTimeTravelBuffer);
             signalParser(index);
