@@ -292,9 +292,8 @@ void RenderableSignals::update(const UpdateData& data) {
             (currentTime < SignalManager::fileStartTimes.back());
 
         if (!haveDataForTime) {
-            LERROR(fmt::format("No signal data available for the time {}", data.time.UTC()));
+            LDEBUG(fmt::format("No signal data available for the time {}", data.time.UTC()));
         }
-
 
         int activeFileIndex = DataFileHelper::findFileIndexForCurrentTime(currentTime, SignalManager::fileStartTimes);
         //parse data for that file
