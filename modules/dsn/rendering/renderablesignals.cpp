@@ -285,18 +285,21 @@ void RenderableSignals::update(const UpdateData& data) {
         (currentTime < SignalManager::signalData.sequenceEndTime);
 
     //Reload data if it is not relevant anymore
-    if (!isTimeInFileInterval) {
-        SignalManager::signalData.isLoaded = false;
+    if (!isTimeInFileInterval || SignalManager::signalData.needsUpdate) {
+
+        //Bool if the current time is within the timeframe for all of our data
+        const bool haveDataForTime = (currentTime >= SignalManager::fileStartTimes.front()) &&
+            (currentTime < SignalManager::fileStartTimes.back());
+
+        if (!haveDataForTime) {
+            LERROR(fmt::format("No signal data available for the time {}", data.time.UTC()));
+        }
+
 
         int activeFileIndex = DataFileHelper::findFileIndexForCurrentTime(currentTime, SignalManager::fileStartTimes);
         //parse data for that file
-        if (!SignalManager::signalData.isLoaded)
-        {
-            LDEBUG(fmt::format("{}: Reloading SignalData.", _identifier));
-            SignalManager::updateSignalData(activeFileIndex, _signalSizeBuffer);
-        }
-        else
-            return;
+        //LDEBUG(fmt::format("{}: Reloading SignalData for time {}", _identifier, data.time.UTC()));
+        SignalManager::updateSignalData(activeFileIndex, _signalSizeBuffer);
     }
 
     // Make space for the vertex renderinformation
