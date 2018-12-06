@@ -33,14 +33,13 @@ namespace openspace {
         if (dictionary->hasKeyAndValue<std::string>(KeyIdentifier)) {
             objectIdentifier = dictionary->value<std::string>(KeyIdentifier);
         }
-
         bool dataFilesSuccess = DataFileHelper::checkFileNames(identifier, dictionary, _dataFiles);
         return dataFilesSuccess;
     }
 
    bool RadecManager::correctHour(double time) const{
-       const bool isTimeInFileInterval = (time >= _checkFileTime) &&
-           (time < _checkFileTime + 3600);
+       const bool isTimeInFileInterval = (time  >= _checkFileTime) &&
+           (time < _checkFileEndTime);
 
        return isTimeInFileInterval;
    }
@@ -53,8 +52,8 @@ namespace openspace {
    glm::vec3 RadecManager::getPosForTime(double time) const {
        if (!correctHour(time)) {
            std::vector<double> timeDoubles = DataFileHelper::getHoursFromFileNames(_dataFiles); 
-           int idx = DataFileHelper::findFileIndexForCurrentTime(time, timeDoubles); 
-           radecParser(idx);
+           int idx = DataFileHelper::findFileIndexForCurrentTime(time, timeDoubles);
+           updateRadecData(idx);
        }
        if(!correctMinute(time)) {
           getPositionInVector(time);
@@ -64,40 +63,19 @@ namespace openspace {
 
    bool RadecManager::radecParser(int index) const{
        std::string filename;
-
-       if (index == -1 || index > _dataFiles.size())
-           return false;
-
        filename = _dataFiles[index];
-
-       std::string startTimeString = DataFileHelper::getHourFromFileName(filename);
-       const double triggerTime = Time::convertTime(startTimeString);
-
-       _checkFileTime = triggerTime;
-
        std::ifstream ifs(filename);
        nlohmann::json j = nlohmann::json::parse(ifs);
 
-       RadecManager::Position position;
-       positions.clear();
-       positions.reserve(0);
-       int objectCounter = 0;
+       for (const auto& pos : j["Positions"]) {
+           position.timeStamp = pos["TimeStamp"].get<std::string>();
+           position.ra = pos["RADn"].get<double>();
+           position.dec = pos["DecDn"].get<double>();
+           position.range = pos["GeoRngDn"].get<double>();
+           position.lightTravelTime = pos["DLT"].get<double>();
 
-        for (const auto& pos : j["Positions"]) {
-            objectCounter++;
-            try {
-                position.timeStamp = pos["TimeStamp"].get<std::string>();
-                position.ra = pos["RAUp"].get<double>();
-                position.dec = pos["DecUp"].get<double>();
-                position.range = pos["GeoRngUp"].get<double>();
-            }
-            catch (const std::exception& e) {
-                LERROR(fmt::format("{}: Error in json object number {} while reading file '{}'", objectIdentifier, objectCounter, filename));
-            }
-
-            RadecManager::positions.push_back(position);
-        }
-
+           RadecManager::positions.push_back(position);
+       }
        return true;
    }
 
@@ -108,9 +86,8 @@ namespace openspace {
        for (int i = 0; i < RadecManager::positions.size(); i++) {
            minuteTimes.push_back(Time::convertTime(positions[i].timeStamp));
        }
-       int idx = DataFileHelper::findFileIndexForCurrentTime(time, minuteTimes);
+       int idx = DataFileHelper::findFileIndexForCurrentTime(time + position.lightTravelTime, minuteTimes);//Compensate for light travel time to the spacecraft
        activeMinute = minuteTimes[idx];
-
        position.timeStamp = positions[idx].timeStamp;
        position.ra = positions[idx].ra;
        position.dec = positions[idx].dec;
@@ -118,6 +95,39 @@ namespace openspace {
 
        return position;
    }
+
+  void  RadecManager::updateRadecData(int index) const {
+      std::string filename;
+      int buffer = 1; 
+      if (index == -1 || index > _dataFiles.size()) {
+          return;
+      }
+      positions.clear();
+      positions.reserve(10);
+
+      filename = _dataFiles[index];
+      std::string startTimeString = DataFileHelper::getHourFromFileName(filename);
+      const double triggerTime = Time::convertTime(startTimeString);
+
+      _checkFileTime = triggerTime;
+      _checkFileEndTime = triggerTime + 3600;
+
+      if (index < buffer) {
+          radecParser(index);
+          radecParser(index + buffer);
+          return;
+      }
+      else if (index == _dataFiles.size() -1) {
+          radecParser(index - buffer);
+          radecParser(index);
+          return;
+      }
+      else {
+          radecParser(index - buffer);
+          radecParser(index);
+          radecParser(index + buffer);
+      }
+  }
 }
 
 
