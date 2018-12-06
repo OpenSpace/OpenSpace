@@ -55,8 +55,8 @@ void ServerModule::internalInitialize(const ghoul::Dictionary&) {
     std::unique_ptr<WebSocketServer> wsServer = std::make_unique<WebSocketServer>();
 
     // Temporary hard coded addresses and ports.
-    tcpServer->listen("localhost", 8010);
-    wsServer->listen("localhost", 8011);
+    tcpServer->listen("localhost", 8000);
+    wsServer->listen("localhost", 8001);
     LDEBUG(fmt::format(
         "TCP Server listening on {}:{}",tcpServer->address(), tcpServer->port()
     ));
