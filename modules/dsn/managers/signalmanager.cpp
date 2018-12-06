@@ -48,24 +48,31 @@ namespace openspace {
         nlohmann::json j = nlohmann::json::parse(ifs);
 
         SignalManager::Signal structSignal;  
+        int objectCounter = 0;
 
         for (const auto& signalsInJson : j["Signals"]) {
-             structSignal.dishName = signalsInJson["facility"].get<std::string>();
-             structSignal.spacecraft = signalsInJson["projuser"].get<std::string>();
-             structSignal.endTime = signalsInJson["eot"].get<std::string>(); 
-             structSignal.startTime = signalsInJson["bot"].get<std::string>();
-             structSignal.direction = signalsInJson["direction"].get<std::string>();
-             structSignal.lightTravelTime = 71397.6659308273;
+            objectCounter++;
+            try {
+                structSignal.dishName = signalsInJson["facility"].get<std::string>();
+                structSignal.spacecraft = signalsInJson["projuser"].get<std::string>();
+                structSignal.endTime = signalsInJson["eot"].get<std::string>();
+                structSignal.startTime = signalsInJson["bot"].get<std::string>();
+                structSignal.direction = signalsInJson["direction"].get<std::string>();
+                structSignal.lightTravelTime = 71397.6659308273;
 
-            if (structSignal.direction == "uplink") {
-                structSignal.endTimeExtension = structSignal.lightTravelTime;
+                if (structSignal.direction == "uplink") {
+                    structSignal.endTimeExtension = structSignal.lightTravelTime;
+                }
+                else if (structSignal.direction == "downlink") {
+                    structSignal.startTimeExtension = structSignal.lightTravelTime;
+                }
+                else if (structSignal.direction == "both") {
+                    structSignal.endTimeExtension = structSignal.lightTravelTime;
+                    structSignal.startTimeExtension = structSignal.lightTravelTime;
+                }
             }
-            else if (structSignal.direction == "downlink") {
-                structSignal.startTimeExtension = structSignal.lightTravelTime;
-            }
-            else if (structSignal.direction == "both") {
-                structSignal.endTimeExtension = structSignal.lightTravelTime;
-                structSignal.startTimeExtension = structSignal.lightTravelTime;
+            catch (const std::exception& e) {
+                LERROR(fmt::format("Error in json object number {} while reading signal data file '{}'", objectCounter, filename));
             }
 
              //Add signal to vector of signals
