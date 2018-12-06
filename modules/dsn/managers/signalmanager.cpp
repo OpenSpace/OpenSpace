@@ -65,18 +65,30 @@ namespace openspace {
                 }
                 else if (structSignal.direction == "downlink") {
                     structSignal.startTimeExtension = structSignal.lightTravelTime;
-                }
+                }// if we have both an uplink and a downlink, handle these like two different signals
                 else if (structSignal.direction == "both") {
+                    // handle ordinary signal like uplink
                     structSignal.endTimeExtension = structSignal.lightTravelTime;
-                    structSignal.startTimeExtension = structSignal.lightTravelTime;
+                    structSignal.direction = "uplink";
+                    // Make an extra downlink
+                    SignalManager::Signal structSignal2;
+                    structSignal2.dishName = structSignal.dishName;
+                    structSignal2.spacecraft = structSignal.spacecraft;
+                    structSignal2.endTime = structSignal.endTime;
+                    structSignal2.startTime = structSignal.startTime;
+                    structSignal2.direction = "downlink";
+                    structSignal2.lightTravelTime = 71397.6659308273;
+                    structSignal2.startTimeExtension = structSignal.lightTravelTime;
+
+                    //Add extra signal to vector of signals
+                    signalData.signals.push_back(structSignal2);
                 }
+                //Add signal to vector of signals
+                signalData.signals.push_back(structSignal);
             }
             catch (const std::exception& e) {
                 LERROR(fmt::format("Error in json object number {} while reading signal data file '{}'", objectCounter, filename));
             }
-
-             //Add signal to vector of signals
-             signalData.signals.push_back(structSignal);
         }
 
       return true;

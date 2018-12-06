@@ -378,7 +378,7 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
     _vertexArray.push_back(color.g);
     _vertexArray.push_back(color.b);
     _vertexArray.push_back(color.a);
-    // Todo: handle case "both"
+
     if (signal.direction == "uplink") {
         _vertexArray.push_back(0.0);
     }
@@ -396,7 +396,6 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
     _vertexArray.push_back(color.b);
     _vertexArray.push_back(color.a);
 
-    // Todo: handle case "both"
     if (signal.direction == "downlink") {
         _vertexArray.push_back(0.0);
     }
