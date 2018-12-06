@@ -1349,9 +1349,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
     };
 }
 
-LoadingScreen& OpenSpaceEngine::loadingScreen() {
-    ghoul_assert(_loadingScreen, "Loading Screen must not be nullptr");
-    return *_loadingScreen;
+LoadingScreen* OpenSpaceEngine::loadingScreen() {
+    return _loadingScreen.get();
 }
 
 AssetManager& OpenSpaceEngine::assetManager() {

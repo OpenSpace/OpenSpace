@@ -233,8 +233,19 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
 
 	std::string data_s;
 	bool iskeplerobject = false;
+    int total = 0;
+    while (getline(csv_file, planet_row)) {
+        ++total;
+    }
+    csv_file.clear();
+    csv_file.seekg(0);
+    getline(csv_file, planet_row); // The first line, containing the data names
+    LINFOC("CSVTOBIN", fmt::format("Loading {} stars", total));
 
+    int count = 0;
 	while (getline(csv_file, planet_row)) {
+        ++count;
+        progressCallback(static_cast<float>(count) / static_cast<float>(total));
 
 		std::istringstream lineStream(planet_row);
 

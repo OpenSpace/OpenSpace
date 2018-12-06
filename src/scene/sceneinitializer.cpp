@@ -52,11 +52,14 @@ MultiThreadedSceneInitializer::MultiThreadedSceneInitializer(unsigned int nThrea
 
 void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
     auto initFunction = [this, node]() {
-        LoadingScreen& loadingScreen = global::openSpaceEngine.loadingScreen();
+        LoadingScreen* loadingScreen = global::openSpaceEngine.loadingScreen();
+        if (!loadingScreen) {
+            return;
+        }
 
         LoadingScreen::ProgressInfo progressInfo;
         progressInfo.progress = 1.f;
-        loadingScreen.updateItem(
+        loadingScreen->updateItem(
             node->identifier(),
             node->guiName(),
             LoadingScreen::ItemStatus::Initializing,
@@ -68,7 +71,7 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
         _initializedNodes.push_back(node);
         _initializingNodes.erase(node);
 
-        loadingScreen.updateItem(
+        loadingScreen->updateItem(
             node->identifier(),
             node->guiName(),
             LoadingScreen::ItemStatus::Finished,
@@ -79,16 +82,18 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
     LoadingScreen::ProgressInfo progressInfo;
     progressInfo.progress = 0.f;
 
-    LoadingScreen& loadingScreen = global::openSpaceEngine.loadingScreen();
-    loadingScreen.setItemNumber(loadingScreen.itemNumber() + 1);
-    loadingScreen.updateItem(
-        node->identifier(),
-        node->guiName(),
-        LoadingScreen::ItemStatus::Started,
-        progressInfo
-    );
+    LoadingScreen* loadingScreen = global::openSpaceEngine.loadingScreen();
+    if (loadingScreen) {
+        loadingScreen->setItemNumber(loadingScreen->itemNumber() + 1);
+        loadingScreen->updateItem(
+            node->identifier(),
+            node->guiName(),
+            LoadingScreen::ItemStatus::Started,
+            progressInfo
+        );
+    }
 
-    std::lock_guard<std::mutex> g(_mutex);
+    std::lock_guard g(_mutex);
     _initializingNodes.insert(node);
     _threadPool.enqueue(initFunction);
 }

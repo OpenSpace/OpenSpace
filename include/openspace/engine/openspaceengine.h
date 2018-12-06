@@ -88,7 +88,9 @@ public:
 
     // Guaranteed to return a valid pointer
     AssetManager& assetManager();
-    LoadingScreen& loadingScreen();
+
+    // Could be nullptr (and will be after startup)
+    LoadingScreen* loadingScreen();
 
     void writeSceneDocumentation();
     void writeStaticDocumentation();

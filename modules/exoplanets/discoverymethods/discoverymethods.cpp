@@ -460,7 +460,7 @@ namespace openspace::exoplanets{
         	    "Type = 'RenderablePlaneImageLocal',"
         	    "Size = 6.957E8," //RSTAR. in meters. 1 solar radii = 6.95700×10e8 m
         	    "Billboard = true,"
-        	    "Texture = 'C:/Users/Karin/Documents/LiU/Exjobb/clone_to_branch/OpenSpace/modules/exoplanets/target-blue-ring.png',"
+        	    "Texture = openspace.absPath('${MODULE_EXOPLANETS}/target-blue-ring.png'),"
         	    "BlendMode = 'Additive'"
         	"},"
             "Transform = {"
@@ -487,7 +487,7 @@ namespace openspace::exoplanets{
                 "Type = 'RenderablePlaneImageLocal',"
                 "Size = 6378137," // in meters
                 "Billboard = true,"
-                "Texture = 'C:/Users/Karin/Documents/LiU/Exjobb/clone_to_branch/OpenSpace/modules/exoplanets/target-blue-ring.png',"
+                "Texture = openspace.absPath('${MODULE_EXOPLANETS}/target-blue-ring.png'),"
                 "BlendMode = 'Additive'"
                 "},"
                 "Transform = {"
@@ -515,7 +515,7 @@ namespace openspace::exoplanets{
                 "Type = 'RenderablePlaneImageLocal',"
                 "Size = 1.496E11," // earths semi-major axis in m
                 "Billboard = false,"
-                "Texture = 'C:/Users/Karin/Documents/LiU/Exjobb/clone_to_branch/OpenSpace/modules/exoplanets/target-blue-ring.png',"
+                "Texture = openspace.absPath('${MODULE_EXOPLANETS}/target-blue-ring.png'),"
                 "BlendMode = 'Additive'"
             "},"
             "Transform = {"

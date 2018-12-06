@@ -43,7 +43,7 @@ namespace openspace{
 std::string getStarColor(float bv) {
 	std::string colorString;
 
-	std::ifstream colormap(absPath("${BASE}/modules/exoplanets/colorbv.cmap"), std::ios::in);
+	std::ifstream colormap(absPath("${MODULE_EXOPLANETS}/colorbv.cmap"), std::ios::in);
 	if (!colormap.good()) {
 		std::cout << "Failed to open colormap data file";
 	}
@@ -332,15 +332,16 @@ int addExoplanetSystem(lua_State* L) {
     std::string starname_csv = getCsvStarname(starname);
     // If user have given name as in EOD, change it to speck-name
     std::string starname_speck = getSpeckStarname(starname);
+    std::replace(starname_speck.begin(), starname_speck.end(), ' ', '_');
 
     global::moduleEngine.module<ExoplanetsModule>()->setStarName(starname_speck);
 
-	std::ifstream data(absPath("${BASE}/modules/exoplanets/expl_data.bin"), std::ios::in | std::ios::binary);
+	std::ifstream data(absPath("${MODULE_EXOPLANETS}/expl_data.bin"), std::ios::in | std::ios::binary);
 	if (!data.good()) {
 		std::cout << "Failed to open exoplanets data file";
 	}
 
-	std::ifstream lut(absPath("${BASE}/modules/exoplanets/lookup.txt"));
+	std::ifstream lut(absPath("${MODULE_EXOPLANETS}/lookup.txt"));
 	if (!lut.good()) {
 		std::cout << "Failed to open exoplanets look-up table file";
 	}
@@ -411,6 +412,9 @@ int addExoplanetSystem(lua_State* L) {
                                                             beta.x, beta.y, beta.z,
                                                     starToSunVec.x, starToSunVec.y, starToSunVec.z);
 
+        std::replace(starname_speck.begin(), starname_speck.end(), ' ', '_');
+
+
 		const std::string starParent = "{"
 			"Identifier = '" + starname_speck + "',"
 			"Parent = 'SolarSystemBarycenter'," 
@@ -458,6 +462,7 @@ int addExoplanetSystem(lua_State* L) {
             }
             else
                 sepoch_star = "2009-05-19T07:11:34.080";
+
 			const std::string starGlobe = "{"
 				"Identifier = '" + starname_speck + "Globe',"
 				"Parent = '" + starname_speck + "',"
@@ -477,7 +482,7 @@ int addExoplanetSystem(lua_State* L) {
 							"},"
 							"{"
 								"Identifier = 'StarTexture',"
-								"FilePath = 'C:/Users/Karin/Documents/LiU/Exjobb/clone_to_branch/OpenSpace/modules/exoplanets/sun.jpg',"
+								"FilePath = openspace.absPath('${MODULE_EXOPLANETS}/sun.jpg'),"
 								"BlendMode = 'Color',"
 								"Enabled = true"
 							"}"
@@ -593,7 +598,7 @@ int addExoplanetSystem(lua_State* L) {
                         "ColorLayers = {"
                             "{"
                                 "Identifier = 'ExoplanetTexture',"
-                                "FilePath = 'C:/Users/Karin/Documents/LiU/Exjobb/clone_to_branch/OpenSpace/data/test3.jpg',"
+                                "FilePath = openspace.absPath('${DATA}/test3.jpg'),"
                                 "Enabled = true"
                             "}"
                         "}"
@@ -669,7 +674,7 @@ int addExoplanetSystem(lua_State* L) {
                     "Enabled = true,"
 					"Renderable = {"
 					    "Type = 'RenderableOrbitdisc',"
-					    "Texture = 'C:/Users/Karin/Documents/LiU/Exjobb/clone_to_branch/OpenSpace/modules/exoplanets/disc3.png',"
+					    "Texture = openspace.absPath('${MODULE_EXOPLANETS}/disc3.png'),"
 					    "Size = " + std::to_string(plsy[i].A) + " * 149597870700," // 149 597 870 700 m = 1 AU. A
 					    "Eccentricity = " + std::to_string(plsy[i].ECC) + ","
 					    "Offset = { " + std::to_string(plsy[i].ALOWER) + ", " + std::to_string(plsy[i].AUPPER) + " }," //min / max extend
@@ -700,7 +705,7 @@ int addExoplanetSystem(lua_State* L) {
 						"Parent = '" + starname_speck + "',"
 						"Renderable = {"
 						    "Type = 'RenderableOrbitdisc',"
-						    "Texture = 'C:/Users/Karin/Documents/LiU/Exjobb/clone_to_branch/OpenSpace/modules/exoplanets/discL.png',"
+						    "Texture = openspace.absPath('${MODULE_EXOPLANETS}/discL.png'),"
 						    "Size = " + std::to_string(plsy[i].A) + " * 149597870700," // 149 597 870 700 m = 1 AU. A
 						    "Eccentricity = " + std::to_string(lower_ecc) + ","
 						    "Offset = { " + std::to_string(plsy[i].ALOWER) + ", " + std::to_string(plsy[i].AUPPER) + " }," //min / max extend
@@ -731,7 +736,7 @@ int addExoplanetSystem(lua_State* L) {
 						"Parent = '" + starname_speck + "',"
 						"Renderable = {"
 						    "Type = 'RenderableOrbitdisc',"
-						    "Texture = 'C:/Users/Karin/Documents/LiU/Exjobb/clone_to_branch/OpenSpace/modules/exoplanets/discU.png',"
+						    "Texture = openspace.absPath('${MODULE_EXOPLANETS}/discU.png'),"
 						    "Size = " + std::to_string(plsy[i].A) + " * 149597870700," // 149 597 870 700 m = 1 AU. A
 						    "Eccentricity = " + std::to_string(upper_ecc) + ","
 						    "Offset = { " + std::to_string(plsy[i].ALOWER) + ", " + std::to_string(plsy[i].AUPPER) + " }," //min / max extend
@@ -771,6 +776,7 @@ int removeExoplanetSystem(lua_State* L) {
 	const int StringLocation = -1;
 	const std::string starname = luaL_checkstring(L, StringLocation);
     std::string starname_speck = getSpeckStarname(starname);
+    std::replace(starname_speck.begin(), starname_speck.end(), ' ', '_');
 	std::string script = "openspace.removeSceneGraphNode('" + starname_speck + "');";
 	openspace::global::scriptEngine.queueScript(
 		script,
