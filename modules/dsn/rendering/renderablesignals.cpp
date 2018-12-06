@@ -39,7 +39,7 @@ namespace {
     constexpr const char* _loggerCat = "RenderableSignals";
     constexpr const char* KeyStationSites = "StationSites";
 
-    constexpr const std::array < const char*, openspace::RenderableSignals::_uniformCacheSize > UniformNames = {
+    constexpr const std::array <const char*, openspace::RenderableSignals::uniformCacheSize> UniformNames = {
         "modelViewStation","modelViewSpacecraft", "projectionTransform", "baseOpacity"
     };
 
@@ -120,7 +120,9 @@ RenderableSignals::RenderableSignals(const ghoul::Dictionary& dictionary)
             };
             std::string site = siteNames[siteIndex];
             glm::vec3 siteColor = siteColorDictionary.value<glm::vec3>(siteNames.at(siteIndex));
-            _siteColors.push_back(std::make_unique<properties::Vec4Property>(SiteColorsInfo, glm::vec4(siteColor,1.0), glm::vec4(0.f), glm::vec4(1.f)));
+            _siteColors.push_back( std::make_unique<properties::Vec4Property>(
+                            SiteColorsInfo,glm::vec4(siteColor,1.0), glm::vec4(0.f), glm::vec4(1.f))
+            );
             _siteToIndex[siteNames.at(siteIndex)] = siteIndex;
             addProperty(_siteColors.back().get());
         }
@@ -148,7 +150,7 @@ RenderableSignals::RenderableSignals(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKeyAndValue<double>(BaseOpacityInfo.identifier)) {
         _baseOpacity = static_cast<float>(dictionary.value<double>(
             BaseOpacityInfo.identifier
-            ));
+        ));
     }
     addProperty(_baseOpacity);
 

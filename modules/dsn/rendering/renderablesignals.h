@@ -109,10 +109,12 @@ namespace openspace {
         };
 
         /// Number of variables in _uniformCache
-        static const GLuint _uniformCacheSize = 4;
+        static const GLuint uniformCacheSize = 4;
 
-        const char* _identifier = "Signals";
+
     protected:
+        const char* _identifier = "Signals";
+
         /// Returns the documentation entries
         static documentation::Documentation Documentation();
 
