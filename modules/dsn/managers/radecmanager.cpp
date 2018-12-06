@@ -67,13 +67,20 @@ namespace openspace {
        std::ifstream ifs(filename);
        nlohmann::json j = nlohmann::json::parse(ifs);
 
+       int objectCounter = 0;
        for (const auto& pos : j["Positions"]) {
-           position.timeStamp = pos["TimeStamp"].get<std::string>();
-           position.ra = pos["RADn"].get<double>();
-           position.dec = pos["DecDn"].get<double>();
-           position.range = pos["GeoRngDn"].get<double>();
-           position.lightTravelTime = pos["DLT"].get<double>();
+           objectCounter++;
+           try {
+               position.timeStamp = pos["TimeStamp"].get<std::string>();
+               position.ra = pos["RADn"].get<double>();
+               position.dec = pos["DecDn"].get<double>();
+               position.range = pos["GeoRngDn"].get<double>();
+               position.lightTravelTime = pos["DLT"].get<double>();
 
+           }
+           catch (const std::exception& e) {
+               LERROR(fmt::format("{}: Error in json object number {} while reading file '{}'", objectIdentifier, objectCounter, filename));
+           }
            RadecManager::positions.push_back(position);
        }
        return true;
