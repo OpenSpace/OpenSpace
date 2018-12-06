@@ -208,28 +208,34 @@ void RenderableSignals::updateVertexAttributes() {
 
     // position attributes
     glVertexAttribPointer(_vaLocVer, _sizeThreeVal, GL_FLOAT, GL_FALSE, 
-                          sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) +
-                          sizeof(DistanceVBOLayout) + sizeof(float),
-                          (void*)0);
+                        sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) +
+                        sizeof(FloatsVBOLayout),
+                        (void*)0);
     glEnableVertexAttribArray(_vaLocVer);
     // color attributes
     glVertexAttribPointer(_vaLocCol, _sizeFourVal, GL_FLOAT, GL_FALSE,
-                          sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) +
-                          sizeof(DistanceVBOLayout) + sizeof(float),
-                          (void*)(sizeof(PositionVBOLayout)));
+                        sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) +
+                        sizeof(FloatsVBOLayout),
+                        (void*)(sizeof(PositionVBOLayout)));
     glEnableVertexAttribArray(_vaLocCol);
     // distance attributes
     glVertexAttribPointer(_vaLocDist, _sizeOneVal, GL_FLOAT, GL_FALSE,
-                          sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) +
-                          sizeof(DistanceVBOLayout) + sizeof(float),
-                          (void*)(sizeof(PositionVBOLayout) + sizeof(ColorVBOLayout)));
+                        sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) +
+                        sizeof(FloatsVBOLayout),
+                        (void*)(sizeof(PositionVBOLayout) + sizeof(ColorVBOLayout)));
     glEnableVertexAttribArray(_vaLocDist);
-    // time attribute
+    // active time attribute
     glVertexAttribPointer(_vaLocTimeSinceStart, _sizeOneVal, GL_FLOAT, GL_FALSE,
-                          sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) +
-                          sizeof(DistanceVBOLayout) + sizeof(float),
-                          (void*)(sizeof(PositionVBOLayout) + sizeof(ColorVBOLayout) + sizeof(float)));
+                        sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) +
+                        sizeof(FloatsVBOLayout),
+                        (void*)(sizeof(PositionVBOLayout) + sizeof(ColorVBOLayout) + sizeof(float)));
     glEnableVertexAttribArray(_vaLocTimeSinceStart);
+    // total transmission time attribute
+    glVertexAttribPointer(_vaLocTransmissionTime, _sizeOneVal, GL_FLOAT, GL_FALSE,
+                        sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) +
+                        sizeof(FloatsVBOLayout),
+                        (void*)(sizeof(PositionVBOLayout) + sizeof(ColorVBOLayout) + 2 * sizeof(float)));
+    glEnableVertexAttribArray(_vaLocTransmissionTime);
 };
 
 void RenderableSignals::render(const RenderData& data, RendererTasks&) {
@@ -334,7 +340,7 @@ void RenderableSignals::update(const UpdateData& data) {
 
     // Update the number of lines to render
     _lineRenderInformation.countLines = static_cast<GLsizei>(_vertexArray.size() / 
-                                (_sizeThreeVal + _sizeFourVal + 2 *_sizeOneVal));
+                                (_sizeThreeVal + _sizeFourVal + 3 *_sizeOneVal));
 
     //unbind vertexArray
     unbindGL();
@@ -387,6 +393,7 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
         _vertexArray.push_back(distance);
     }
     _vertexArray.push_back(timeSinceStart);
+    _vertexArray.push_back(signal.endTransmission-signal.startTransmission);
 
     _vertexArray.push_back(posSpacecraft.x);
     _vertexArray.push_back(posSpacecraft.y);
@@ -404,6 +411,7 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
         _vertexArray.push_back(distance);
     }
     _vertexArray.push_back(timeSinceStart);
+    _vertexArray.push_back(signal.endTransmission - signal.startTransmission);
 }
 
 /* Since our station dishes have a static translation from Earth, we

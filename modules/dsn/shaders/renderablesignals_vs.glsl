@@ -29,6 +29,7 @@ layout(location = 0) in vec3 in_point_position;
 layout(location = 1) in vec4 in_color;
 layout(location = 2) in float in_dist_from_start;
 layout(location = 3) in float in_time_since_start;
+layout(location = 4) in float in_transmission_time;
 
 in int gl_VertexID;
 
@@ -37,6 +38,7 @@ out vec4 vs_gPosition;
 out vec4 vs_color;
 out float distanceFromStart;
 out float timeSinceStart;
+out float transmissionTime;
 
 uniform dmat4 modelViewStation;
 uniform dmat4 modelViewSpacecraft;
@@ -59,7 +61,8 @@ void main() {
     gl_Position.z = 0.f; 
 
     // pass variables with no calculations directly to fragment
-    timeSinceStart = in_time_since_start;    
+    timeSinceStart = in_time_since_start;   
+    transmissionTime = in_transmission_time;
     distanceFromStart = in_dist_from_start;
     vs_color = in_color;
 }

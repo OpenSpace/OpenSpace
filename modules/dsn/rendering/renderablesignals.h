@@ -103,9 +103,9 @@ namespace openspace {
         struct ColorVBOLayout {
             float r, g, b, a;
         };
-        /* The VBO layout of the distance */
-        struct DistanceVBOLayout {
-            float d;
+        /* The summated VBO layout of all the one value float attributes */
+        struct FloatsVBOLayout {
+            float distance, timeSinceStart, transmissionTime;
         };
 
         /// Number of variables in _uniformCache
@@ -168,6 +168,9 @@ namespace openspace {
         /// The vertex attribute location time since signal started sending
         /// must correlate to layout location in vertex shader
         const GLuint _vaLocTimeSinceStart = 3;
+        /// The vertex attribute location for total transmission time
+        /// must correlate to layout location in vertex shader
+        const GLuint _vaLocTransmissionTime = 4;
 
         /// Specifies the number of components per generic vertex attribute
         const GLuint _sizeFourVal = 4;
