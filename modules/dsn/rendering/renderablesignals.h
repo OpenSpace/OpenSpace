@@ -37,6 +37,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
 
 
 namespace ghoul::opengl {
@@ -90,7 +91,7 @@ namespace openspace {
         /* Returns a position for a station that has Earth as parent*/
         glm::dvec3 getPositionForGeocentricSceneGraphNode(const char* id);
         /* Returns a color based on what site the station is located to */
-        glm::vec3 getStationColor(std::string dishidentifier);
+        glm::vec4 getStationColor(std::string dishidentifier);
         /* Returns a distance between two scenegraphnodes */
         double getDistance(std::string nodeIdA, std::string nodeIdB);
 
@@ -102,16 +103,18 @@ namespace openspace {
         struct ColorVBOLayout {
             float r, g, b, a;
         };
-        /* The VBO layout of the distance */
-        struct DistanceVBOLayout {
-            float d;
+        /* The summated VBO layout of all the one value float attributes */
+        struct FloatsVBOLayout {
+            float distance, timeSinceStart, transmissionTime;
         };
 
         /// Number of variables in _uniformCache
-        static const GLuint _uniformCacheSize = 4;
+        static const GLuint uniformCacheSize = 4;
 
-        const char* _identifier = "Signals";
+
     protected:
+        const char* _identifier = "Signals";
+
         /// Returns the documentation entries
         static documentation::Documentation Documentation();
 
@@ -145,7 +148,7 @@ namespace openspace {
         RenderInformation _lineRenderInformation;
 
         /// Specifies the base color for the different sites
-        std::vector<std::unique_ptr<properties::Vec3Property>> _siteColors;
+        std::vector<std::unique_ptr<properties::Vec4Property>> _siteColors;
         
         /// Maps a station identifier to a site location
         std::map<std::string, std::string> _stationToSite;
@@ -165,6 +168,9 @@ namespace openspace {
         /// The vertex attribute location time since signal started sending
         /// must correlate to layout location in vertex shader
         const GLuint _vaLocTimeSinceStart = 3;
+        /// The vertex attribute location for total transmission time
+        /// must correlate to layout location in vertex shader
+        const GLuint _vaLocTransmissionTime = 4;
 
         /// Specifies the number of components per generic vertex attribute
         const GLuint _sizeFourVal = 4;

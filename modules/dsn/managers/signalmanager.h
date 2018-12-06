@@ -43,12 +43,12 @@ namespace openspace {
         std::string dishName;
         std::string spacecraft;
         std::string direction; 
-        std::string startTime;
-        std::string endTime;
-        double startTimeExtension = 0.0;
-        double endTimeExtension = 0.0;
+        std::string startTime; //todo: get rid of? 
+        std::string endTime; //todo: get rid of? 
+        double startTransmission = 0.0;
+        double endTransmission = 0.0;
         double timeSinceStart = 0.0;
-        double lightTravelTime;
+        double lightTravelTime = 0.0;
      };
 
     static struct SignalData {
@@ -71,7 +71,6 @@ namespace openspace {
       static bool signalParser(int index);
       /* updates the loaded signal data from disk */
       static void updateSignalData(int index, int sizeBuffer);
-
 
     private:
         /* A vector with all our datafile paths*/

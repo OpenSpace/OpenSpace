@@ -31,7 +31,6 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/interaction/navigationhandler.h>
 
 namespace {
@@ -39,7 +38,7 @@ namespace {
     constexpr const char* _loggerCat = "RenderableSignals";
     constexpr const char* KeyStationSites = "StationSites";
 
-    constexpr const std::array < const char*, openspace::RenderableSignals::_uniformCacheSize > UniformNames = {
+    constexpr const std::array <const char*, openspace::RenderableSignals::uniformCacheSize> UniformNames = {
         "modelViewStation","modelViewSpacecraft", "projectionTransform", "baseOpacity"
     };
 
@@ -59,7 +58,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo BaseOpacityInfo = {
          "BaseOpacity",
          "Base Opacity",
-         "This value specifies the opacity of the base line. "
+         "This value specifies the base opacity of all the signal transmissions "
     };
 } // namespace
 
@@ -120,7 +119,9 @@ RenderableSignals::RenderableSignals(const ghoul::Dictionary& dictionary)
             };
             std::string site = siteNames[siteIndex];
             glm::vec3 siteColor = siteColorDictionary.value<glm::vec3>(siteNames.at(siteIndex));
-            _siteColors.push_back(std::make_unique<properties::Vec3Property>(SiteColorsInfo, siteColor, glm::vec3(0.f), glm::vec3(1.f)));
+            _siteColors.push_back( std::make_unique<properties::Vec4Property>(
+                            SiteColorsInfo,glm::vec4(siteColor,1.0), glm::vec4(0.f), glm::vec4(1.f))
+            );
             _siteToIndex[siteNames.at(siteIndex)] = siteIndex;
             addProperty(_siteColors.back().get());
         }
@@ -148,7 +149,7 @@ RenderableSignals::RenderableSignals(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKeyAndValue<double>(BaseOpacityInfo.identifier)) {
         _baseOpacity = static_cast<float>(dictionary.value<double>(
             BaseOpacityInfo.identifier
-            ));
+        ));
     }
     addProperty(_baseOpacity);
 
@@ -207,28 +208,34 @@ void RenderableSignals::updateVertexAttributes() {
 
     // position attributes
     glVertexAttribPointer(_vaLocVer, _sizeThreeVal, GL_FLOAT, GL_FALSE, 
-                          sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) +
-                          sizeof(DistanceVBOLayout) + sizeof(float),
-                          (void*)0);
+                        sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) +
+                        sizeof(FloatsVBOLayout),
+                        (void*)0);
     glEnableVertexAttribArray(_vaLocVer);
     // color attributes
     glVertexAttribPointer(_vaLocCol, _sizeFourVal, GL_FLOAT, GL_FALSE,
-                          sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) +
-                          sizeof(DistanceVBOLayout) + sizeof(float),
-                          (void*)(sizeof(PositionVBOLayout)));
+                        sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) +
+                        sizeof(FloatsVBOLayout),
+                        (void*)(sizeof(PositionVBOLayout)));
     glEnableVertexAttribArray(_vaLocCol);
     // distance attributes
     glVertexAttribPointer(_vaLocDist, _sizeOneVal, GL_FLOAT, GL_FALSE,
-                          sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) +
-                          sizeof(DistanceVBOLayout) + sizeof(float),
-                          (void*)(sizeof(PositionVBOLayout) + sizeof(ColorVBOLayout)));
+                        sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) +
+                        sizeof(FloatsVBOLayout),
+                        (void*)(sizeof(PositionVBOLayout) + sizeof(ColorVBOLayout)));
     glEnableVertexAttribArray(_vaLocDist);
-    // time attribute
+    // active time attribute
     glVertexAttribPointer(_vaLocTimeSinceStart, _sizeOneVal, GL_FLOAT, GL_FALSE,
-                          sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) +
-                          sizeof(DistanceVBOLayout) + sizeof(float),
-                          (void*)(sizeof(PositionVBOLayout) + sizeof(ColorVBOLayout) + sizeof(float)));
+                        sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) +
+                        sizeof(FloatsVBOLayout),
+                        (void*)(sizeof(PositionVBOLayout) + sizeof(ColorVBOLayout) + sizeof(float)));
     glEnableVertexAttribArray(_vaLocTimeSinceStart);
+    // total transmission time attribute
+    glVertexAttribPointer(_vaLocTransmissionTime, _sizeOneVal, GL_FLOAT, GL_FALSE,
+                        sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) +
+                        sizeof(FloatsVBOLayout),
+                        (void*)(sizeof(PositionVBOLayout) + sizeof(ColorVBOLayout) + 2 * sizeof(float)));
+    glEnableVertexAttribArray(_vaLocTransmissionTime);
 };
 
 void RenderableSignals::render(const RenderData& data, RendererTasks&) {
@@ -313,7 +320,7 @@ void RenderableSignals::update(const UpdateData& data) {
 
         SignalManager::Signal currentSignal = SignalManager::signalData.signals[i];
         if (isSignalActive(currentTime, currentSignal)) {
-            currentSignal.timeSinceStart = currentTime - (Time::convertTime(currentSignal.startTime) - currentSignal.startTimeExtension);
+            currentSignal.timeSinceStart = currentTime - currentSignal.startTransmission;
             pushSignalDataToVertexArray(currentSignal);
         }
     };
@@ -333,7 +340,7 @@ void RenderableSignals::update(const UpdateData& data) {
 
     // Update the number of lines to render
     _lineRenderInformation.countLines = static_cast<GLsizei>(_vertexArray.size() / 
-                                (_sizeThreeVal + _sizeFourVal + 2 *_sizeOneVal));
+                                (_sizeThreeVal + _sizeFourVal + 3 *_sizeOneVal));
 
     //unbind vertexArray
     unbindGL();
@@ -342,8 +349,8 @@ void RenderableSignals::update(const UpdateData& data) {
 // Todo: handle signalIsSending, not only signalIsActive for the signal segments
 bool RenderableSignals::isSignalActive(double currentTime, SignalManager::Signal signal) {
     
-    double startTimeInSeconds = SpiceManager::ref().ephemerisTimeFromDate(signal.startTime) - signal.startTimeExtension;
-    double endTimeInSeconds = SpiceManager::ref().ephemerisTimeFromDate(signal.endTime) + signal.endTimeExtension;
+    double startTimeInSeconds = signal.startTransmission;
+    double endTimeInSeconds = signal.endTransmission + signal.lightTravelTime;
 
     if (startTimeInSeconds <= currentTime && endTimeInSeconds >= currentTime)
         return true;
@@ -363,7 +370,7 @@ void RenderableSignals::extractData(std::unique_ptr<ghoul::Dictionary> &dictiona
 
 void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal) {
 
-    glm::vec4 color = { getStationColor(signal.dishName), 1.0 };
+    glm::vec4 color = getStationColor(signal.dishName);
     glm::dvec3 posStation = getPositionForGeocentricSceneGraphNode(signal.dishName.c_str());
     glm::dvec3 posSpacecraft = getSuitablePrecisionPositionForSceneGraphNode(signal.spacecraft.c_str());
     double distance = getDistance(signal.dishName, signal.spacecraft);
@@ -378,7 +385,7 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
     _vertexArray.push_back(color.g);
     _vertexArray.push_back(color.b);
     _vertexArray.push_back(color.a);
-    // Todo: handle case "both"
+
     if (signal.direction == "uplink") {
         _vertexArray.push_back(0.0);
     }
@@ -386,6 +393,7 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
         _vertexArray.push_back(distance);
     }
     _vertexArray.push_back(timeSinceStart);
+    _vertexArray.push_back(signal.endTransmission-signal.startTransmission);
 
     _vertexArray.push_back(posSpacecraft.x);
     _vertexArray.push_back(posSpacecraft.y);
@@ -396,7 +404,6 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
     _vertexArray.push_back(color.b);
     _vertexArray.push_back(color.a);
 
-    // Todo: handle case "both"
     if (signal.direction == "downlink") {
         _vertexArray.push_back(0.0);
     }
@@ -404,6 +411,7 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
         _vertexArray.push_back(distance);
     }
     _vertexArray.push_back(timeSinceStart);
+    _vertexArray.push_back(signal.endTransmission - signal.startTransmission);
 }
 
 /* Since our station dishes have a static translation from Earth, we
@@ -452,9 +460,9 @@ glm::dvec3 RenderableSignals::getPositionForGeocentricSceneGraphNode(const char*
     return position;
 }
 
-glm::vec3 RenderableSignals::getStationColor(std::string dishidentifier) {
+glm::vec4 RenderableSignals::getStationColor(std::string dishidentifier) {
 
-    glm::vec3 color(0.0f, 0.0f, 1.0f);
+    glm::vec4 color(0.0f, 0.0f, 0.0f, 0.0f);
     std::string site;
 
     try {

@@ -57,7 +57,7 @@ Fragment getFragment() {
                                   distLightTravel-signalSize+edgeLength,
                                   distanceFromStart);
 
-    frag.color = vec4(vs_color.xyz, min(smoothFront,smoothBack)+baseOpacity);
+    frag.color = vec4(vs_color.rgb, baseOpacity*vs_color.a + vs_color.a*min(smoothFront,smoothBack));
 
     // G-Buffer
     // JCC: The depthCorrection here is a temporary tweak

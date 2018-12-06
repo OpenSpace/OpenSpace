@@ -24,7 +24,7 @@
 
 #include <modules/dsn/managers/signalmanager.h>
 
-
+#include <openspace/util/spicemanager.h>
 namespace openspace {
     constexpr const char* _loggerCat = "SignalManager";
 
@@ -36,7 +36,6 @@ namespace openspace {
     {
         bool dataFilesSuccess = DataFileHelper::checkFileNames(identifier, dictionary, _dataFiles);
         fileStartTimes = DataFileHelper::getDaysFromFileNames(_dataFiles);
-        //SignalManager::updateSignalData(0, 0);
 
         return dataFilesSuccess;
     }
@@ -48,28 +47,56 @@ namespace openspace {
         nlohmann::json j = nlohmann::json::parse(ifs);
 
         SignalManager::Signal structSignal;  
+        int objectCounter = 0;
 
         for (const auto& signalsInJson : j["Signals"]) {
-             structSignal.dishName = signalsInJson["facility"].get<std::string>();
-             structSignal.spacecraft = signalsInJson["projuser"].get<std::string>();
-             structSignal.endTime = signalsInJson["eot"].get<std::string>(); 
-             structSignal.startTime = signalsInJson["bot"].get<std::string>();
-             structSignal.direction = signalsInJson["direction"].get<std::string>();
-             structSignal.lightTravelTime = 71397.6659308273;
+            objectCounter++;
+            try {
+                structSignal.dishName = signalsInJson["facility"].get<std::string>();
+                structSignal.spacecraft = signalsInJson["projuser"].get<std::string>();
+                structSignal.endTime = signalsInJson["eot"].get<std::string>();
+                structSignal.startTime = signalsInJson["bot"].get<std::string>();
+                structSignal.direction = signalsInJson["direction"].get<std::string>();
+                structSignal.lightTravelTime = 71397.6659308273;
 
-            if (structSignal.direction == "uplink") {
-                structSignal.endTimeExtension = structSignal.lightTravelTime;
-            }
-            else if (structSignal.direction == "downlink") {
-                structSignal.startTimeExtension = structSignal.lightTravelTime;
-            }
-            else if (structSignal.direction == "both") {
-                structSignal.endTimeExtension = structSignal.lightTravelTime;
-                structSignal.startTimeExtension = structSignal.lightTravelTime;
-            }
+                if (structSignal.direction == "uplink") {
+                    structSignal.startTransmission = SpiceManager::ref().ephemerisTimeFromDate(structSignal.startTime);
+                    structSignal.endTransmission = SpiceManager::ref().ephemerisTimeFromDate(structSignal.endTime);
+                }
+                else if (structSignal.direction == "downlink") {
+                    structSignal.startTransmission = SpiceManager::ref().ephemerisTimeFromDate(structSignal.startTime) - 
+                                                        structSignal.lightTravelTime;
+                    structSignal.endTransmission = SpiceManager::ref().ephemerisTimeFromDate(structSignal.endTime) -
+                                                        structSignal.lightTravelTime;;
+                }// if we have both an uplink and a downlink, handle these like two different signals
+                else if (structSignal.direction == "both") {
+                   // handle ordinary signal like uplink
+                   // structSignal.endTimeExtension = structSignal.lightTravelTime;
+                    structSignal.startTransmission = SpiceManager::ref().ephemerisTimeFromDate(structSignal.startTime);
+                    structSignal.endTransmission = SpiceManager::ref().ephemerisTimeFromDate(structSignal.endTime);
+                    structSignal.direction = "uplink";
+                    // Make an extra downlink
+                    SignalManager::Signal structSignal2;
+                    structSignal2.dishName = structSignal.dishName;
+                    structSignal2.spacecraft = structSignal.spacecraft;
+                    structSignal2.endTime = structSignal.endTime;
+                    structSignal2.startTime = structSignal.startTime;
+                    structSignal2.direction = "downlink";
+                    structSignal2.lightTravelTime = 71397.6659308273;
+                    structSignal2.startTransmission = SpiceManager::ref().ephemerisTimeFromDate(structSignal.startTime) -
+                        structSignal2.lightTravelTime;
+                    structSignal2.endTransmission = SpiceManager::ref().ephemerisTimeFromDate(structSignal.endTime) -
+                        structSignal2.lightTravelTime;;
 
-             //Add signal to vector of signals
-             signalData.signals.push_back(structSignal);
+                    //Add extra signal to vector of signals
+                    signalData.signals.push_back(structSignal2);
+                }
+                //Add signal to vector of signals
+                signalData.signals.push_back(structSignal);
+            }
+            catch (const std::exception& e) {
+                LERROR(fmt::format("Error in json object number {} while reading signal data file '{}'", objectCounter, filename));
+            }
         }
 
       return true;
