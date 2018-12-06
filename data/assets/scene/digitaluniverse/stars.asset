@@ -57,7 +57,7 @@ local testGrid = {
 }
 assetHelper.registerSceneGraphNodesAndExport(asset, { object, testGrid })
 ]]
-
+--[[
 local newTestGrid = {
     Identifier = "StarsNewTestGrid",
     Renderable = {
@@ -74,5 +74,6 @@ local newTestGrid = {
         Path = "/Milky Way/Stars New Test Grid"
     }
 }
-assetHelper.registerSceneGraphNodesAndExport(asset, { stars, newTestGrid })
---assetHelper.registerSceneGraphNodesAndExport(asset, { stars })
+]]
+--assetHelper.registerSceneGraphNodesAndExport(asset, { stars, newTestGrid })
+assetHelper.registerSceneGraphNodesAndExport(asset, { stars })
