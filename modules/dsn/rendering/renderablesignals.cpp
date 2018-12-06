@@ -59,7 +59,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo BaseOpacityInfo = {
          "BaseOpacity",
          "Base Opacity",
-         "This value specifies the opacity of the base line. "
+         "This value specifies the base opacity of all the signal transmissions "
     };
 } // namespace
 
@@ -120,7 +120,7 @@ RenderableSignals::RenderableSignals(const ghoul::Dictionary& dictionary)
             };
             std::string site = siteNames[siteIndex];
             glm::vec3 siteColor = siteColorDictionary.value<glm::vec3>(siteNames.at(siteIndex));
-            _siteColors.push_back(std::make_unique<properties::Vec3Property>(SiteColorsInfo, siteColor, glm::vec3(0.f), glm::vec3(1.f)));
+            _siteColors.push_back(std::make_unique<properties::Vec4Property>(SiteColorsInfo, glm::vec4(siteColor,1.0), glm::vec4(0.f), glm::vec4(1.f)));
             _siteToIndex[siteNames.at(siteIndex)] = siteIndex;
             addProperty(_siteColors.back().get());
         }
@@ -363,7 +363,7 @@ void RenderableSignals::extractData(std::unique_ptr<ghoul::Dictionary> &dictiona
 
 void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal) {
 
-    glm::vec4 color = { getStationColor(signal.dishName), 1.0 };
+    glm::vec4 color = getStationColor(signal.dishName);
     glm::dvec3 posStation = getPositionForGeocentricSceneGraphNode(signal.dishName.c_str());
     glm::dvec3 posSpacecraft = getSuitablePrecisionPositionForSceneGraphNode(signal.spacecraft.c_str());
     double distance = getDistance(signal.dishName, signal.spacecraft);
@@ -452,9 +452,9 @@ glm::dvec3 RenderableSignals::getPositionForGeocentricSceneGraphNode(const char*
     return position;
 }
 
-glm::vec3 RenderableSignals::getStationColor(std::string dishidentifier) {
+glm::vec4 RenderableSignals::getStationColor(std::string dishidentifier) {
 
-    glm::vec3 color(0.0f, 0.0f, 1.0f);
+    glm::vec4 color(0.0f, 0.0f, 0.0f, 0.0f);
     std::string site;
 
     try {

@@ -37,6 +37,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
 
 
 namespace ghoul::opengl {
@@ -90,7 +91,7 @@ namespace openspace {
         /* Returns a position for a station that has Earth as parent*/
         glm::dvec3 getPositionForGeocentricSceneGraphNode(const char* id);
         /* Returns a color based on what site the station is located to */
-        glm::vec3 getStationColor(std::string dishidentifier);
+        glm::vec4 getStationColor(std::string dishidentifier);
         /* Returns a distance between two scenegraphnodes */
         double getDistance(std::string nodeIdA, std::string nodeIdB);
 
@@ -145,7 +146,7 @@ namespace openspace {
         RenderInformation _lineRenderInformation;
 
         /// Specifies the base color for the different sites
-        std::vector<std::unique_ptr<properties::Vec3Property>> _siteColors;
+        std::vector<std::unique_ptr<properties::Vec4Property>> _siteColors;
         
         /// Maps a station identifier to a site location
         std::map<std::string, std::string> _stationToSite;
