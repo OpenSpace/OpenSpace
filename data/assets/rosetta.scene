@@ -19,6 +19,8 @@ asset.require('util/default_joystick')
 
 asset.require('util/webgui')
 
+asset.request('customization/globebrowsing')
+
 -- Custom Keybindings
 local Keybindings = {
     {
@@ -109,6 +111,10 @@ assetHelper.registerDashboardItems(asset, {
     }
 })
 
+assetHelper.registerInterestingNodes(asset, {
+    "67P", "Rosetta", "Philae"
+})
+
 asset.onInitialize(function ()
     openspace.time.setTime("2014-08-01T03:05:00.000")
     sceneHelper.bindKeys(Keybindings)
@@ -118,10 +124,6 @@ asset.onInitialize(function ()
     sceneHelper.setDeltaTimeKeys({
         1, 5, 10, 20, 40, 90, 360, 720, 2880, 14400,
         28800, 57600, 115200, 230400, 460800, 921600, 1843200, 3686400, 7372800, 14745600
-    })
-
-    openspace.markInterestingNodes({
-        "67P", "Rosetta", "Philae"
     })
 
     openspace.addVirtualProperty(
@@ -147,7 +149,4 @@ asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
 
     openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
-    openspace.removeInterestingNodes({
-        "67PBarycenter", "Rosetta", "Philae"
-    })
 end)

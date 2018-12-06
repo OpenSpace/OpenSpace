@@ -22,37 +22,42 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/webbrowser/include/defaultbrowserlauncher.h>
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBETRANSLATION___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBETRANSLATION___H__
 
-#include <ghoul/logging/logmanager.h>
+#include <openspace/scene/translation.h>
 
-#ifdef WIN32
-#include <shellapi.h>
-#endif
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 
-namespace {
+namespace openspace::globebrowsing {
 
-void launchBrowser(const std::string& url) {
-    LDEBUGC("DefaultBrowserLauncher", "Launching default browser: " + url);
-#ifdef WIN32
-    ShellExecuteA(nullptr, nullptr, url.c_str(), nullptr, nullptr, SW_SHOW);
-#endif
-}
+class RenderableGlobe;
 
-} // namespace
+class GlobeTranslation : public Translation {
+public:
+    GlobeTranslation(const ghoul::Dictionary& dictionary);
 
-namespace openspace {
+    glm::dvec3 position(const UpdateData& data) const override;
 
-bool DefaultBrowserLauncher::OnBeforePopup(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
-                                           const CefString& targetUrl, const CefString&,
-                                           CefLifeSpanHandler::WindowOpenDisposition,
-                                           bool, const CefPopupFeatures&, CefWindowInfo&,
-                                           CefRefPtr<CefClient>&, CefBrowserSettings&,
-                                           bool*)
-{
-    // never permit CEF popups, always launch in default browser
-    launchBrowser(targetUrl.ToString());
-    return true;
-}
+    static documentation::Documentation Documentation();
 
-} // namespace openspace
+private:
+    void fillAttachedNode();
+
+    properties::StringProperty _globe;
+    properties::DoubleProperty _longitude;
+    properties::DoubleProperty _latitude;
+    properties::DoubleProperty _fixedAltitude;
+    properties::BoolProperty _useFixedAltitude;
+
+    RenderableGlobe* _attachedNode = nullptr;
+
+    mutable bool _positionIsDirty = true;
+    mutable glm::dvec3 _position;
+};
+
+} // namespace openspace::globebrowsing
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GLOBETRANSLATION___H__

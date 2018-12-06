@@ -72,6 +72,10 @@ local Keybindings = {
 
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 
+assetHelper.registerInterestingNodes(asset, {
+    "Earth", "Mars", "Moon", "Sun"
+})
+
 asset.onInitialize(function ()
     local now = openspace.time.currentWallTime()
     -- Jump back one day to show a complete planet
@@ -84,10 +88,6 @@ asset.onInitialize(function ()
     openspace.globebrowsing.loadWMSServersFromFile(
         openspace.absPath("${DATA}/globebrowsing_servers.lua")
     )
-
-    openspace.markInterestingNodes({
-        "Earth", "Mars", "Moon", "Sun"
-    })
 
     openspace.addVirtualProperty(
         "BoolProperty",
@@ -112,8 +112,4 @@ asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
 
     openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
-
-    openspace.removeInterestingNodes({
-        "Earth", "Mars", "Moon", "Sun"
-    })
 end)

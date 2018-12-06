@@ -1,4 +1,4 @@
-local has_gaia = openspace.modules.isLoaded('gaia2')
+local has_gaia = openspace.modules.isLoaded('gaia')
 if not has_gaia then
     openspace.printFatal('Could not load scene "' .. asset.filePath .. '" due to missing module "gaia"')
     do return end
@@ -27,19 +27,14 @@ assetHelper.registerDashboardItems(asset, {
     }
 })
 
+assetHelper.registerInterestingNodes(asset, { "Gaia" })
+
 asset.onInitialize(function ()
     openspace.setPropertyValueSingle('Scene.Stars.Renderable.Enabled', false);
-
-    openspace.markInterestingNodes({ "Gaia" })
 
     openspace.navigation.setCameraState({
         Focus = "Gaia",
         Position = { 1000000000000.0, 1000000000000.0, 1000000000000.0 },
         Rotation = { 0.683224, -0.765934, -0.601234, -0.418073 },
     })
-end)
-
--- Remove interesting nodes and added virtual properties
-asset.onDeinitialize(function ()
-    openspace.removeInterestingNodes({ "Gaia" })
 end)
