@@ -31,7 +31,6 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/interaction/navigationhandler.h>
 
 namespace {
@@ -315,7 +314,7 @@ void RenderableSignals::update(const UpdateData& data) {
 
         SignalManager::Signal currentSignal = SignalManager::signalData.signals[i];
         if (isSignalActive(currentTime, currentSignal)) {
-            currentSignal.timeSinceStart = currentTime - (Time::convertTime(currentSignal.startTime) - currentSignal.startTimeExtension);
+            currentSignal.timeSinceStart = currentTime - currentSignal.startTransmission;
             pushSignalDataToVertexArray(currentSignal);
         }
     };
@@ -344,8 +343,8 @@ void RenderableSignals::update(const UpdateData& data) {
 // Todo: handle signalIsSending, not only signalIsActive for the signal segments
 bool RenderableSignals::isSignalActive(double currentTime, SignalManager::Signal signal) {
     
-    double startTimeInSeconds = SpiceManager::ref().ephemerisTimeFromDate(signal.startTime) - signal.startTimeExtension;
-    double endTimeInSeconds = SpiceManager::ref().ephemerisTimeFromDate(signal.endTime) + signal.endTimeExtension;
+    double startTimeInSeconds = signal.startTransmission;
+    double endTimeInSeconds = signal.endTransmission + signal.lightTravelTime;
 
     if (startTimeInSeconds <= currentTime && endTimeInSeconds >= currentTime)
         return true;
