@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_MODULE_SYNC___TORRENTCLIENT___H__
 #define __OPENSPACE_MODULE_SYNC___TORRENTCLIENT___H__
 
+#ifdef SYNC_USE_LIBTORRENT
+
 #include <ghoul/misc/exception.h>
 #include <atomic>
 #include <condition_variable>
@@ -117,5 +119,7 @@ private:
 };
 
 } // namespace openspace
+
+#endif // SYNC_USE_LIBTORRENT
 
 #endif // __OPENSPACE_MODULE_SYNC___TORRENTCLIENT___H__
