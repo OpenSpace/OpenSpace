@@ -281,22 +281,24 @@ void RenderableSignals::update(const UpdateData& data) {
     double currentTime = data.time.j2000Seconds();
 
     //Bool if the current time is within the timeframe for the currently loaded data
-    const bool isTimeInFileInterval = (currentTime >= SignalManager::_signalData.sequenceStartTime) &&
-        (currentTime < SignalManager::_signalData.sequenceEndTime);
+    const bool isTimeInFileInterval = (currentTime >= SignalManager::signalData.sequenceStartTime) &&
+        (currentTime < SignalManager::signalData.sequenceEndTime);
 
     //Reload data if it is not relevant anymore
-    if (!isTimeInFileInterval) {
-        SignalManager::_signalData.isLoaded = false;
+    if (!isTimeInFileInterval || SignalManager::signalData.needsUpdate) {
 
-        int activeFileIndex = DataFileHelper::findFileIndexForCurrentTime(currentTime, SignalManager::_fileStartTimes);
-        //parse data for that file
-        if (!SignalManager::_signalData.isLoaded)
-        {
-            LDEBUG(fmt::format("{}: Reloading SignalData.", _identifier));
-            SignalManager::updateSignalData(activeFileIndex, _signalSizeBuffer);
+        //Bool if the current time is within the timeframe for all of our data
+        const bool haveDataForTime = (currentTime >= SignalManager::fileStartTimes.front()) &&
+            (currentTime < SignalManager::fileStartTimes.back());
+
+        if (!haveDataForTime) {
+            LDEBUG(fmt::format("No signal data available for the time {}", data.time.UTC()));
         }
-        else
-            return;
+
+        int activeFileIndex = DataFileHelper::findFileIndexForCurrentTime(currentTime, SignalManager::fileStartTimes);
+        //parse data for that file
+        //LDEBUG(fmt::format("{}: Reloading SignalData for time {}", _identifier, data.time.UTC()));
+        SignalManager::updateSignalData(activeFileIndex, _signalSizeBuffer);
     }
 
     // Make space for the vertex renderinformation
@@ -307,9 +309,9 @@ void RenderableSignals::update(const UpdateData& data) {
     _lineRenderInformation._localTransformSpacecraft = glm::translate(glm::dmat4(1.0), _focusNode->worldPosition());
 
     //Todo; keep track of active index for signalvector, or swap for loop for binary search
-    for (int i = 0; i < SignalManager::_signalData.signals.size(); i++) {
+    for (int i = 0; i < SignalManager::signalData.signals.size(); i++) {
 
-        SignalManager::Signal currentSignal = SignalManager::_signalData.signals[i];
+        SignalManager::Signal currentSignal = SignalManager::signalData.signals[i];
         if (isSignalActive(currentTime, currentSignal)) {
             currentSignal.timeSinceStart = currentTime - (Time::convertTime(currentSignal.startTime) - currentSignal.startTimeExtension);
             pushSignalDataToVertexArray(currentSignal);
@@ -362,8 +364,8 @@ void RenderableSignals::extractData(std::unique_ptr<ghoul::Dictionary> &dictiona
 void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal) {
 
     glm::vec4 color = { getStationColor(signal.dishName), 1.0 };
-    glm::vec3 posStation = getPositionForGeocentricSceneGraphNode(signal.dishName.c_str());
-    glm::vec3 posSpacecraft = getSuitablePrecisionPositionForSceneGraphNode(signal.spacecraft.c_str());
+    glm::dvec3 posStation = getPositionForGeocentricSceneGraphNode(signal.dishName.c_str());
+    glm::dvec3 posSpacecraft = getSuitablePrecisionPositionForSceneGraphNode(signal.spacecraft.c_str());
     double distance = getDistance(signal.dishName, signal.spacecraft);
     double timeSinceStart = signal.timeSinceStart;
 
@@ -419,9 +421,9 @@ glm::dvec3 RenderableSignals::getCoordinatePosFromFocusNode(SceneGraphNode* node
     return diff;
 }
 
-glm::vec3 RenderableSignals::getSuitablePrecisionPositionForSceneGraphNode(std::string id) {
+glm::dvec3 RenderableSignals::getSuitablePrecisionPositionForSceneGraphNode(std::string id) {
 
-    glm::vec3 position;
+    glm::dvec3 position;
 
     if (global::renderEngine.scene()->sceneGraphNode(id)) {
         SceneGraphNode* spacecraftNode = global::renderEngine.scene()->sceneGraphNode(id);
@@ -434,7 +436,7 @@ glm::vec3 RenderableSignals::getSuitablePrecisionPositionForSceneGraphNode(std::
     return position;
 }
 
-glm::vec3 RenderableSignals::getPositionForGeocentricSceneGraphNode(const char* id) {
+glm::dvec3 RenderableSignals::getPositionForGeocentricSceneGraphNode(const char* id) {
 
     glm::dvec3 position;
 
@@ -444,7 +446,7 @@ glm::vec3 RenderableSignals::getPositionForGeocentricSceneGraphNode(const char* 
     else {
         LERROR(fmt::format("No scenegraphnode found for the station dish {}, "
                             "drawing line from center of Earth", id));
-        position = glm::vec3(0, 0, 0);
+        position = glm::dvec3(0, 0, 0);
     }
 
     return position;
@@ -469,10 +471,10 @@ glm::vec3 RenderableSignals::getStationColor(std::string dishidentifier) {
     return color;
 }
 
-float RenderableSignals::getDistance(std::string nodeIdA, std::string nodeIdB) {
+double RenderableSignals::getDistance(std::string nodeIdA, std::string nodeIdB) {
 
-    glm::vec3 posA = global::renderEngine.scene()->sceneGraphNode(nodeIdA)->worldPosition();
-    glm::vec3 posB = global::renderEngine.scene()->sceneGraphNode(nodeIdB)->worldPosition();
+    glm::dvec3 posA = global::renderEngine.scene()->sceneGraphNode(nodeIdA)->worldPosition();
+    glm::dvec3 posB = global::renderEngine.scene()->sceneGraphNode(nodeIdB)->worldPosition();
 
     return glm::distance(posA, posB);
 }

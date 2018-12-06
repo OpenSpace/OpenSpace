@@ -61,5 +61,4 @@ local MroKernels = {
     Kernels .. '/mro_psp26_ssd_mro95a.bsp'
 }
 
-asset.export("Kernels", Kernels)
 asset.export("MroKernels", MroKernels)

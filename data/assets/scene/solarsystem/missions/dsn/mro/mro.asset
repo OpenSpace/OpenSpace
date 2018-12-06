@@ -1,18 +1,18 @@
 -- Mars Reconnaissance Orbiter (MRO)
 local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local marsTransforms = asset.require('scene/solarsystem/planets/mars/transforms')
 local kernels = asset.require('./kernels')
+local lights = asset.require('scene/solarsystem/general/lightsources')
 
 local models = asset.syncedResource({
-    Name = "Voyager 1 Models",
+    Name = "Mro model",
     Type = "HttpSynchronization",
-    Identifier = "voyager1_model",
+    Identifier = "mro_model",
     Version = 1
 })
 
 local MarsRecOrbiter = {
-    Identifier = "MRO",
+    Identifier = "MarsRecOrbiter",
     Parent = marsTransforms.MarsBarycenter.Identifier,
     Transform = {
         Translation = {
@@ -35,13 +35,18 @@ local MarsRecOrbiterModel = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/voyager-main.obj"
+            GeometryFile = models .. "/mro_main.obj"
         },
-        ColorTexture = models .. "/voyager-main.jpg"
+        ColorTexture = models .. "/texture/foil_silver_ramp.png",
+        LightSources = lights.StandardLights
+    },
+    GUI = {
+        Name = "3D Model",
+        Path = "/Solar System/Missions/Mars Recon Orbiter"
     }
 }
 
-
-
-
-assetHelper.registerSceneGraphNodesAndExport(asset, {MarsRecOrbiter, MarsRecOrbiterModel})
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    MarsRecOrbiter,
+    MarsRecOrbiterModel
+    })

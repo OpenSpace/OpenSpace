@@ -1,0 +1,9 @@
+--This asset file contains the DSN fleet of spacecrafts
+
+-- Added from previous missions
+asset.require('scene/solarsystem/missions/voyager1/voyager1')
+asset.require('scene/solarsystem/missions/voyager1/trails')
+asset.require('scene/solarsystem/missions/voyager2/voyager2')
+-- added specifically for dsn visualization
+asset.require('scene/solarsystem/missions/dsn/mro/mro')
+asset.require('scene/solarsystem/missions/dsn/marsodyssey/marsodyssey')

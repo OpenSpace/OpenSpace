@@ -28,15 +28,15 @@
 namespace openspace {
     constexpr const char* _loggerCat = "SignalManager";
 
-    struct SignalManager::SignalData SignalManager::_signalData;
-    std::vector<double> SignalManager::_fileStartTimes;
+    struct SignalManager::SignalData SignalManager::signalData;
+    std::vector<double> SignalManager::fileStartTimes;
     std::vector<std::string> SignalManager::_dataFiles;
 
     bool SignalManager::extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary)
     {
         bool dataFilesSuccess = DataFileHelper::checkFileNames(identifier, dictionary, _dataFiles);
-        _fileStartTimes = DataFileHelper::getDaysFromFileNames(_dataFiles);
-        SignalManager::updateSignalData(0, 0);
+        fileStartTimes = DataFileHelper::getDaysFromFileNames(_dataFiles);
+        //SignalManager::updateSignalData(0, 0);
 
         return dataFilesSuccess;
     }
@@ -69,7 +69,7 @@ namespace openspace {
             }
 
              //Add signal to vector of signals
-             _signalData.signals.push_back(structSignal);
+             signalData.signals.push_back(structSignal);
         }
 
       return true;
@@ -81,45 +81,49 @@ namespace openspace {
     * as well as signals that have a long light travel time. */
     void SignalManager::updateSignalData(int index, int sizeBuffer) {
         
-        // This will all
+        // Currently have to be 1, could be optimized in future
+        // according to the longest light travel time
         int lightTimeTravelBuffer = 1;
 
-        if (index == -1 || index > _dataFiles.size())
+        if (index <= -1 || index >= _dataFiles.size())
+        {
+            LERROR(fmt::format("{}: File index {} is out of bounds.", _loggerCat, index));
             return;
+        }
 
-        _signalData.signals.clear();
-        _signalData.signals.reserve(sizeBuffer);
+        signalData.signals.clear();
+        signalData.signals.reserve(sizeBuffer);
 
         std::string activeTimeFilename = _dataFiles[index];
         std::string startTimeString = DataFileHelper::getDayFromFileName(activeTimeFilename);
         const double triggerTime = Time::convertTime(startTimeString);
 
-        _signalData.sequenceStartTime = triggerTime;
+        signalData.sequenceStartTime = triggerTime;
         //86400 equals 24hrs in seconds
-        _signalData.sequenceEndTime = triggerTime + 86400; 
+        signalData.sequenceEndTime = triggerTime + 86400; 
 
         if (index < lightTimeTravelBuffer)
         {
             signalParser(index);
             signalParser(index + lightTimeTravelBuffer);
-            _signalData.isLoaded = true;
-            _signalData.signals.shrink_to_fit();
+            signalData.needsUpdate = false;
+            signalData.signals.shrink_to_fit();
             return;
         }
-        else if (index == _dataFiles.size()) {
+        else if (index == (_dataFiles.size()-1)) {
 
             signalParser(index- lightTimeTravelBuffer);
             signalParser(index);
-            _signalData.isLoaded = true;
-            _signalData.signals.shrink_to_fit();
+            signalData.needsUpdate = false;
+            signalData.signals.shrink_to_fit();
             return;  
         }
         else {
             signalParser(index - lightTimeTravelBuffer);
             signalParser(index);
             signalParser(index + lightTimeTravelBuffer);
-            _signalData.isLoaded = true;
-            _signalData.signals.shrink_to_fit();
+            signalData.needsUpdate = false;
+            signalData.signals.shrink_to_fit();
         }
     }
 

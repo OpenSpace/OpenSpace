@@ -18,5 +18,4 @@ local Voyager2Kernels = {
     Kernels .. '/vgr2_super_v2.bc'
 }
 
-asset.export("Kernels", Kernels)
 asset.export("Voyager2Kernels", Voyager2Kernels)

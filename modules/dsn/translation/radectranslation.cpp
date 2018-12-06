@@ -37,7 +37,6 @@ namespace {
 namespace openspace {
 
 constexpr const char* _loggerCat = "RadecTranslation";
-constexpr const char* KeyIdentifier = "ObjectIdentifier";
 
 documentation::Documentation RadecTranslation::Documentation() {
     using namespace documentation;
@@ -67,10 +66,6 @@ RadecTranslation::RadecTranslation(const ghoul::Dictionary& dictionary)
 {
     std::unique_ptr<ghoul::Dictionary> dictionaryPtr = std::make_unique<ghoul::Dictionary>(dictionary);
     
-    if (dictionary.hasKeyAndValue<std::string>(KeyIdentifier)) {
-        _objectIdentifier = dictionary.value<std::string>(KeyIdentifier);
-    }
-
     extractData(dictionaryPtr);
 
     documentation::testSpecificationAndThrow(
@@ -85,10 +80,10 @@ void RadecTranslation::extractData(std::unique_ptr<ghoul::Dictionary> &dictionar
     constexpr const char* _identifier = "RadecTranslation";
 
     if (!radecManager.extractMandatoryInfoFromDictionary(_identifier, dictionary)) {
-        LERROR(fmt::format("{}: Did not manage to extract data for {}.", _identifier, _objectIdentifier.c_str()));
+        LERROR(fmt::format("{}: Did not manage to extract data for {}.", _identifier, radecManager.objectIdentifier.c_str()));
     }
     else {
-        LDEBUG(fmt::format("{}: Successfully read data for {}.", _identifier, _objectIdentifier.c_str()));
+        LDEBUG(fmt::format("{}: Successfully read data for {}.", _identifier, radecManager.objectIdentifier.c_str()));
     }
 }
 

@@ -1,0 +1,61 @@
+-- 2001 Mars Odyssey (M01)
+-- Kernel files collected from
+-- https://naif.jpl.nasa.gov/pub/naif/pds/data/ody-m-spice-6-v1.0/odsp_1000/aareadme.htm
+-- https://naif.jpl.nasa.gov/pub/naif/pds/data/ody-m-spice-6-v1.0/odsp_1000/data/spk/
+-- See spkinfo.txt 
+
+-- ext34         2013-01-01   2013-03-31
+-- ext35         2013-04-01   2013-06-30
+-- ext36         2013-07-01   2013-09-30
+-- ext37         2013-10-01   2013-12-31
+-- ext38         2014-01-01   2014-03-31
+-- ext39         2014-04-01   2014-06-30
+-- ext40         2014-07-01   2014-09-30
+-- ext41         2014-10-01   2014-12-31
+-- ext42         2015-01-01   2015-03-31
+-- ext43         2015-04-01   2015-06-30
+-- ext44         2015-07-01   2015-09-30
+-- ext45         2015-10-01   2015-12-31
+-- ext46         2016-01-01   2016-03-31
+-- ext47         2016-04-01   2016-06-30
+-- ext48         2016-07-01   2016-09-30
+-- ext49         2016-10-01   2016-12-31
+-- ext50         2017-01-01   2017-03-31
+-- ext51         2017-04-01   2017-06-30
+-- ext52         2017-07-01   2017-09-30
+-- ext53         2017-10-01   2017-12-31
+-- ext54         2018-01-01   2018-03-31
+
+local Kernels = asset.syncedResource({
+    Name = "Mars Odyssey Kernels",
+    Type = "HttpSynchronization",
+    Identifier = "marsodyssey_kernels",
+    Version = 1
+})
+
+-- spk kernels
+local MarsOdysseyKernels = {
+    Kernels .. '/m01_ext34.bsp',
+    Kernels .. '/m01_ext35.bsp',
+    Kernels .. '/m01_ext36.bsp',
+    Kernels .. '/m01_ext37.bsp',
+    Kernels .. '/m01_ext38.bsp',
+    Kernels .. '/m01_ext39.bsp',
+    Kernels .. '/m01_ext40.bsp',
+    Kernels .. '/m01_ext41.bsp',
+    Kernels .. '/m01_ext42.bsp',
+    Kernels .. '/m01_ext43.bsp',
+    Kernels .. '/m01_ext44.bsp',
+    Kernels .. '/m01_ext45.bsp',
+    Kernels .. '/m01_ext46.bsp',
+    Kernels .. '/m01_ext47.bsp',
+    Kernels .. '/m01_ext48.bsp',
+    Kernels .. '/m01_ext49.bsp',
+    Kernels .. '/m01_ext50.bsp',
+    Kernels .. '/m01_ext51.bsp',
+    Kernels .. '/m01_ext52.bsp',
+    Kernels .. '/m01_ext53.bsp',
+    Kernels .. '/m01_ext54.bsp'
+}
+
+asset.export("MarsOdysseyKernels", MarsOdysseyKernels)

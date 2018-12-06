@@ -48,6 +48,8 @@ namespace openspace {
        mutable Position position; 
        mutable glm::vec3 currentMinute;
        mutable double activeMinute = 0;
+       /* Identifier for object using the translation, used for logging */
+       std::string objectIdentifier;
 
        /*Used to check if the loaded file is still relevant or if we should look for another one. */
        mutable double _checkFileTime;
