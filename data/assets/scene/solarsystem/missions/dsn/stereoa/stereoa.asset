@@ -1,0 +1,51 @@
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local kernels = asset.require('./kernels')
+local lights = asset.require('scene/solarsystem/general/lightsources')
+
+local models = asset.syncedResource({
+    Name = "StereoA Kernels",
+    Type = "HttpSynchronization",
+    Identifier = "stereo_model",
+    Version = 1
+})
+
+local StereoA = {
+    Identifier = "StereoA",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "STEREO AHEAD",
+            Observer = "SUN",
+            Kernels = kernels.StereoAKernels
+        }      
+    },
+    GUI = {
+        Name = "Stereo A",
+        Path = "/Solar System/Missions/Stereo/Stereo A"
+    }
+}
+
+local StereoAModel = {
+    Identifier = "StereoA_model",
+    Parent = StereoA.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/Stereo_main.obj"
+        },
+        ColorTexture = models .. "/texture.png",
+        LightSources = lights.StandardLights
+    },
+    GUI = {
+        Name = "3D Model",
+        Path = "/Solar System/Missions/Stereo A"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    StereoA,
+    StereoAModel
+    })
