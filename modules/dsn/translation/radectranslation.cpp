@@ -114,6 +114,12 @@ glm::dvec3 RadecTranslation::radecToCartesianCoordinates(glm::vec3 pos) const {
 
 glm::dvec3 RadecTranslation::position(const UpdateData& data) const{
    glm::vec3 pos = radecManager.getPosForTime(data.time.j2000Seconds());
+
+   const bool haveDataForTime = (data.time.j2000Seconds() >= radecManager.timeDoubles.front()) &&
+       (data.time.j2000Seconds() < radecManager.timeDoubles.back());
+   if (!haveDataForTime) {
+       LDEBUG(fmt::format("No positioning data available for spacecraft: {}", radecManager.objectIdentifier.c_str()));
+   }
    _position = radecToCartesianCoordinates(pos);
    return _position;
 }
