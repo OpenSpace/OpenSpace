@@ -445,7 +445,7 @@ void RawTileDataReader::initialize() {
     GlobeBrowsingModule& module = *global::moduleEngine.module<GlobeBrowsingModule>();
 
     std::string content = _datasetFilePath;
-    if (module.isCachingEnabled() && FileSys.fileExists(_datasetFilePath)) {
+    if (module.isWMSCachingEnabled() && FileSys.fileExists(_datasetFilePath)) {
         // Only replace the 'content' if the dataset is an XML file and we want to do
         // caching
         std::ifstream t(_datasetFilePath);
@@ -476,14 +476,14 @@ void RawTileDataReader::initialize() {
                 CPLCreateXMLElementAndValue(
                     cache,
                     "Path",
-                    absPath(module.cacheLocation()).c_str()
+                    absPath(module.wmsCacheLocation()).c_str()
                 );
                 CPLCreateXMLElementAndValue(cache, "Depth", "4");
                 CPLCreateXMLElementAndValue(cache, "Expires", "315576000"); // 10 years
                 CPLCreateXMLElementAndValue(
                     cache,
                     "MaxSize",
-                    std::to_string(module.cacheSize()).c_str()
+                    std::to_string(module.wmsCacheSize()).c_str()
                 );
 
                 // The serialization only needs to be one if the cache didn't exist
