@@ -65,7 +65,9 @@ private:
     void processInputState(const nlohmann::json& json);
     void setFocusNodes();
     void setInterestingTimes();
-    void changeFocus(const nlohmann::json& json);
+    void updateView(const nlohmann::json& json) const;
+    void changeFocus(const nlohmann::json& json) const;
+    void setRenderableEnabled(const nlohmann::json& json) const;
     void processLua(const nlohmann::json& json);
     void setFriction(const nlohmann::json& json) const;
     void setFriction(const bool& roll, const bool& rotation, const bool& zoom) const;

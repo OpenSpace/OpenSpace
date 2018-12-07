@@ -33,6 +33,7 @@
 #include <openspace/interaction/websocketinputstate.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
@@ -54,7 +55,7 @@ namespace {
           Connect = 0
         , Disconnect
         , InputState
-        , ChangeFocus
+        , UpdateView
         , Autopilot
         , Friction
         , Lua
@@ -76,6 +77,11 @@ namespace {
 
     // Change focus JSON keys
     constexpr const char* FocusKey = "focus";
+    constexpr const char* SceneNodeName = "identifier";
+    constexpr const char* SceneNodeEnabled = "enabled";
+
+    constexpr const char* RenderableKey = "renderable";
+    constexpr const char* RenderableEnabled = "Enabled";
 
     // Autopilot JSON keys
     constexpr const char* AutopilotEngagedKey = "engaged";
@@ -111,7 +117,7 @@ namespace {
     const std::string Connect = "connect";
     const std::string Disconnect = "disconnect";
     const std::string InputState = "inputState";
-    const std::string ChangeFocus = "changeFocus";
+    const std::string UpdateView = "updateView";
     const std::string Autopilot = "autopilot";
     const std::string Friction = "friction";
     const std::string Lua = "lua";
@@ -133,7 +139,7 @@ namespace {
           {Connect, Command::Connect}
         , {Disconnect, Command::Disconnect}
         , {InputState, Command::InputState}
-        , {ChangeFocus, Command::ChangeFocus}
+        , {UpdateView, Command::UpdateView}
         , {Autopilot, Command::Autopilot}
         , {Friction, Command::Friction}
         , {Lua, Command::Lua}
@@ -190,8 +196,8 @@ void FlightControllerTopic::handleJson(const nlohmann::json& json) {
         case Command::InputState:
             processInputState(json);
             break;
-        case Command::ChangeFocus:
-            changeFocus(json);
+        case Command::UpdateView:
+            updateView(json);
             break;
         case Command::Autopilot:
             handleAutopilot(json[Autopilot]);
@@ -221,24 +227,43 @@ void FlightControllerTopic::connect() {
 }
 
 void FlightControllerTopic::setFocusNodes() {
+
+    // Get all scene nodes
     std::vector<SceneGraphNode*> nodes =
         global::renderEngine.scene()->allSceneGraphNodes();
 
+    // Remove all nodes with no renderable
+    nodes.erase(std::remove_if(
+           nodes.begin(),
+           nodes.end(),
+           [](SceneGraphNode* node) {
+               return node->renderable() == nullptr;
+           })
+        , nodes.end()
+    );
+
+    // Sort them alphabetically
     std::sort(
           nodes.begin(),
           nodes.end(),
           [](SceneGraphNode* lhs, SceneGraphNode* rhs) {
               return lhs->guiName() < rhs->guiName();
           }
-      );;
+      );
 
+    // Add to interesting nodes list and all nodes list
     for (SceneGraphNode* n : nodes) {
+
+        // Set whether it's enabled
+
         const std::vector<std::string>& tags = n->tags();
         const auto it = std::find(tags.begin(), tags.end(), "GUI.Interesting");
         if (it != tags.end()) {
-            _focusNodes[n->guiName()] = n->identifier();
+            _focusNodes[n->guiName()][SceneNodeName] = n->identifier();
+            _focusNodes[n->guiName()][SceneNodeEnabled] = n->renderable()->isEnabled();
         }
-        _allNodes[n->guiName()] = n->identifier();
+        _allNodes[n->guiName()][SceneNodeName] = n->identifier();
+        _allNodes[n->guiName()][SceneNodeEnabled] = n->renderable()->isEnabled();
     }
 }
 
@@ -259,21 +284,46 @@ void FlightControllerTopic::setInterestingTimes() {
     }
 }
 
-void FlightControllerTopic::changeFocus(const nlohmann::json& json) {
+void FlightControllerTopic::updateView(const nlohmann::json& json) const {
+    if (json.find(FocusKey) != json.end()) {
+        changeFocus(json);
+    }
+    if (json.find(RenderableKey) != json.end()) {
+        setRenderableEnabled(json);
+    }
+}
 
-    if (json[ChangeFocus].find(FocusKey) == json[ChangeFocus].end()) {
+void FlightControllerTopic::changeFocus(const nlohmann::json& json) const {
+
+    if (json[FocusKey].find(SceneNodeName) == json[FocusKey].end()) {
         const std::string j = json;
         LWARNING(fmt::format("Could not find {} key in JSON. JSON was:\n{}", FocusKey, j));
         return;
     }
     
-    const std::string focus = json[ChangeFocus][FocusKey];
+    const std::string focus = json[FocusKey][SceneNodeName];
     const auto node = global::renderEngine.scene()->sceneGraphNode(focus);
     if (node) {
         global::navigationHandler.setFocusNode(node);
         global::navigationHandler.resetCameraDirection();
     } else {
         LWARNING(fmt::format("Could not find node named {}", focus));
+    }
+}
+
+void FlightControllerTopic::setRenderableEnabled(const nlohmann::json& json) const {
+    if (json[RenderableKey].find(SceneNodeName) == json[RenderableKey].end()) {
+        const std::string j = json;
+        LWARNING(fmt::format("Could not find {} key in JSON. JSON was:\n{}", FocusKey, j));
+        return;
+    }
+
+    const std::string name = json[RenderableKey][SceneNodeName];
+    const bool enabled = json[RenderableKey][SceneNodeEnabled];
+
+    const auto node = global::renderEngine.scene()->sceneGraphNode(name);
+    if(node && node->renderable() != nullptr) {
+        node->renderable()->property(RenderableEnabled)->set(enabled);
     }
 }
 
