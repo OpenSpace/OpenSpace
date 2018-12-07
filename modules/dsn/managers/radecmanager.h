@@ -57,6 +57,8 @@ namespace openspace {
        mutable double _checkFileEndTime;
        /* A vector with all our datafile paths*/
        std::vector<std::string> _dataFiles;
+       /* A vector with all our datafile times in j2000*/
+      // mutable std::vector<double> timeDoubles;
        /* Extracts all the mandatory information we need from our asset file */
        bool extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary);
        /*gets the correct datafile, that matches the current time in open space*/

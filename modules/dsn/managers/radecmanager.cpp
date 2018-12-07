@@ -51,7 +51,7 @@ namespace openspace {
 
    glm::vec3 RadecManager::getPosForTime(double time) const {
        if (!correctHour(time)) {
-           std::vector<double> timeDoubles = DataFileHelper::getHoursFromFileNames(_dataFiles); 
+           std::vector<double>timeDoubles = DataFileHelper::getHoursFromFileNames(_dataFiles);
            int idx = DataFileHelper::findFileIndexForCurrentTime(time, timeDoubles);
            updateRadecData(idx);
        }
