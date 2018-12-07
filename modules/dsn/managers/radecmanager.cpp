@@ -93,6 +93,7 @@ namespace openspace {
        for (int i = 0; i < RadecManager::positions.size(); i++) {
            minuteTimes.push_back(Time::convertTime(positions[i].timeStamp));
        }
+
        int idx = DataFileHelper::findFileIndexForCurrentTime(time + position.lightTravelTime, minuteTimes);//Compensate for light travel time to the spacecraft
        activeMinute = minuteTimes[idx];
        position.timeStamp = positions[idx].timeStamp;
@@ -104,36 +105,41 @@ namespace openspace {
    }
 
   void  RadecManager::updateRadecData(int index) const {
-      std::string filename;
-      int buffer = 1; 
-      if (index == -1 || index > _dataFiles.size()) {
-          return;
-      }
-      positions.clear();
-      positions.reserve(10);
+        std::string filename;
 
-      filename = _dataFiles[index];
-      std::string startTimeString = DataFileHelper::getHourFromFileName(filename);
-      const double triggerTime = Time::convertTime(startTimeString);
+        if (index == -1 || index > _dataFiles.size()) return;
 
-      _checkFileTime = triggerTime;
-      _checkFileEndTime = triggerTime + 3600;
+        positions.clear();
+        positions.reserve(10);
 
-      if (index < buffer) {
-          radecParser(index);
-          radecParser(index + buffer);
-          return;
-      }
-      else if (index == _dataFiles.size() -1) {
-          radecParser(index - buffer);
-          radecParser(index);
-          return;
-      }
-      else {
-          radecParser(index - buffer);
-          radecParser(index);
-          radecParser(index + buffer);
-      }
+        filename = _dataFiles[index];
+        std::string startTimeString = DataFileHelper::getHourFromFileName(filename);
+        const double triggerTime = Time::convertTime(startTimeString);
+
+        _checkFileTime = triggerTime;
+        _checkFileEndTime = triggerTime + 3600;
+
+        //Light travel time in hours determines where to search for the correct position
+        int lightTravelHours = ceil(position.lightTravelTime / 3600);
+
+        if (lightTravelHours > 1)
+          index = index + lightTravelHours;
+
+        if (index < lightTravelHours + 1) {
+            radecParser(index);
+            radecParser(index + 1);
+            return;
+        }
+        else if (index == _dataFiles.size() - lightTravelHours) {
+            radecParser(index);
+            radecParser(index -1);
+            return;
+        }
+        else {
+            radecParser(index - 1);
+            radecParser(index);
+            radecParser(index + 1);
+        }
   }
 }
 
