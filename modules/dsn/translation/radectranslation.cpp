@@ -65,8 +65,9 @@ RadecTranslation::RadecTranslation(const ghoul::Dictionary& dictionary)
     : RadecTranslation()
 {
     std::unique_ptr<ghoul::Dictionary> dictionaryPtr = std::make_unique<ghoul::Dictionary>(dictionary);
-    
+
     extractData(dictionaryPtr);
+    radecManager.getPosForTime(0);
 
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -113,15 +114,19 @@ glm::dvec3 RadecTranslation::radecToCartesianCoordinates(glm::vec3 pos) const {
 }
 
 glm::dvec3 RadecTranslation::position(const UpdateData& data) const{
-   glm::vec3 pos = radecManager.getPosForTime(data.time.j2000Seconds());
-
    const bool haveDataForTime = (data.time.j2000Seconds() >= radecManager.timeDoubles.front()) &&
        (data.time.j2000Seconds() < radecManager.timeDoubles.back());
+   
    if (!haveDataForTime) {
        LDEBUG(fmt::format("No positioning data available for spacecraft: {}", radecManager.objectIdentifier.c_str()));
+       return radecToCartesianCoordinates({ 0,0,0 });
    }
-   _position = radecToCartesianCoordinates(pos);
-   return _position;
+   else {
+      glm::dvec3 pos = radecManager.getPosForTime(data.time.j2000Seconds());
+      _position = radecToCartesianCoordinates(pos);
+      return _position;
+   }
+
 }
 
 } // namespace openspace
