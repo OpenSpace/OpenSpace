@@ -30,10 +30,59 @@ in vec4 vs_gPosition;
 in vec4 vs_color;
 in float distanceFromStart;
 in float timeSinceStart;
+in float transmissionTime;
 
 float lightSpeed = 299792458.0; // expressed in m/s
-float signalSizeFactor = 2000;
+float numSignalSegments = 0;
+float signalSpeedFactor = 2.0; // todo: make property
+float segmentSizeFactor = 10.0f; // todo: make property [1,100]
+float spacingSizeFactor = 0.0f; // todo: make property [0,10]
+float fadeFactor = 0.5f; // todo: make property [0.001, 0.5]
 uniform float baseOpacity;
+
+float getSegmentOpacity(const float segmentSize, 
+                        const float spacing, 
+                        const float distSignTravelStart) {
+    
+    float fadeLength = segmentSize * fadeFactor;
+
+    // if fadeLength is zero, the smoothtep does not work, return straight away
+    if(fadeFactor < 0.001f)
+    {
+        return 1.0f;
+    }
+
+    // the maximum number of segments to be drawn
+    int MAXNUMSEGMENTS = 1000; // int(ceil(1000.0f/segmentSizeFactor));
+
+    for(int i = 0; i < MAXNUMSEGMENTS; i++ )
+    {
+    
+        float segmentStart =  distSignTravelStart-i*(segmentSize+spacing);
+        float segmentEnd =  distSignTravelStart-(i+1)*(segmentSize) -i*spacing;
+        
+        // if within a colored segment, calculate opacity
+        if (distanceFromStart < segmentStart && distanceFromStart > segmentEnd){   
+            
+            // Make smooth transitions for both ends of the segment
+            float smoothFront = smoothstep(segmentStart+fadeLength,
+                                        segmentStart-fadeLength,
+                                        distanceFromStart);
+
+            float smoothBack = smoothstep(segmentEnd-fadeLength, 
+                                        segmentEnd+fadeLength,
+                                        distanceFromStart);
+                
+            //generate opacity factor
+            return vs_color.a*(baseOpacity + min(smoothFront,smoothBack));            
+        }
+
+    } // end for loop
+
+    // if within a spacing
+    return baseOpacity;
+}
+
 
 Fragment getFragment() {
 
@@ -41,23 +90,31 @@ Fragment getFragment() {
     frag.depth = vs_positionScreenSpace.w;
     //frag.blend = BLEND_MODE_ADDITIVE;
 
-    // the distance the light has travelled since 
-    // start of signal transmission
-    float distLightTravel = lightSpeed * timeSinceStart;
+    // the distance the first signal transmission has travelled 
+    float distLightTravelStart = lightSpeed * timeSinceStart;
+    // the distance the last signal transmission has travelled 
+    float distLightTravelEnd = lightSpeed * (timeSinceStart-transmissionTime);
+    float signalSize = distLightTravelStart-distLightTravelEnd;
 
-    // signal segment size
-    float signalSize = signalSizeFactor * lightSpeed;
-    float edgeLength = signalSize*0.5;
+    float signalSegmentSize = 100.f * segmentSizeFactor * lightSpeed;
+    
+    // todo: might not be needed after added property
+    if(segmentSizeFactor < 0.001f){
+        signalSegmentSize = signalSize;
+        signalSpeedFactor = 1.0f;
+    }
 
-    // Make smooth transitions for both ends of the segment
-    float smoothFront = smoothstep(distLightTravel+edgeLength,
-                                   distLightTravel-edgeLength,
-                                   distanceFromStart);
-    float smoothBack = smoothstep(distLightTravel-signalSize-edgeLength, 
-                                  distLightTravel-signalSize+edgeLength,
-                                  distanceFromStart);
+    float alpha = 0.0f;
+    // if within the transmission time, change the opacity
+    if(distanceFromStart < distLightTravelStart && distanceFromStart > distLightTravelEnd){
+        // calculate how fast the signal segments travel within transmission
+        float distSignTravelStart = distLightTravelStart * signalSpeedFactor;
+        float spacing = 1000.f * lightSpeed * spacingSizeFactor;
 
-    frag.color = vec4(vs_color.rgb, baseOpacity*vs_color.a + vs_color.a*min(smoothFront,smoothBack));
+        alpha = getSegmentOpacity(signalSegmentSize,spacing, distSignTravelStart);
+    }
+
+    frag.color = vec4(vs_color.rgb, alpha);
 
     // G-Buffer
     // JCC: The depthCorrection here is a temporary tweak
