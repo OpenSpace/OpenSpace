@@ -42,20 +42,23 @@ namespace openspace {
            mutable double ra;
            mutable double dec;
            mutable double range;
+           mutable double lightTravelTime; //Downlink light time travel time in seconds
+
        };
        mutable std::vector<Position> positions;
        mutable std::vector<double> minuteTimes;
        mutable Position position; 
-       mutable glm::vec3 currentMinute;
-       mutable double activeMinute = 0;
+       mutable double activeMinute;
        /* Identifier for object using the translation, used for logging */
        std::string objectIdentifier;
-
        /*Used to check if the loaded file is still relevant or if we should look for another one. */
        mutable double _checkFileTime;
+       /*Time range for the files*/
+       mutable double _checkFileEndTime;
        /* A vector with all our datafile paths*/
        std::vector<std::string> _dataFiles;
-
+       /* A vector with all our datafile times in j2000*/
+       mutable std::vector<double> timeDoubles;
        /* Extracts all the mandatory information we need from our asset file */
        bool extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary);
        /*gets the correct datafile, that matches the current time in open space*/
@@ -68,6 +71,8 @@ namespace openspace {
        bool correctHour(double time) const;
        /*Check if current minute in open space is already loaded*/
        bool correctMinute(double time) const;
+       /*Update and reate buffer of data so that we can compensate for light travel time without getting out of bounce*/
+       void updateRadecData(int index) const;
     };
 }
 

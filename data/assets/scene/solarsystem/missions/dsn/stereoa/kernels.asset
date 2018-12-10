@@ -1,0 +1,13 @@
+local Kernels = asset.syncedResource({
+    Name = "StereoA Kernels",
+    Type = "HttpSynchronization",
+    Identifier = "stereoa_kernels",
+    Version = 1
+})
+
+-- spk kernels
+local StereoAKernels = {
+    Kernels .. '/STEREO_A_merged.bsp',
+}
+
+asset.export("StereoAKernels", StereoAKernels)

@@ -1,5 +1,5 @@
 local assetHelper = asset.require('util/asset_helper')
-local dataFolder = openspace.absPath("../../../sync/http/dsn_data/1/positioning/MRO")
+local dataFolder = openspace.absPath("../../../sync/http/dsn_data/1/positioning/MRO_downlink")
 
 local models = asset.syncedResource({
     Name = "Dsn models",
