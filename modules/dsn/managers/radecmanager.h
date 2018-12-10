@@ -48,7 +48,7 @@ namespace openspace {
        mutable std::vector<Position> positions;
        mutable std::vector<double> minuteTimes;
        mutable Position position; 
-       mutable double activeMinute = 0;
+       mutable double activeMinute;
        /* Identifier for object using the translation, used for logging */
        std::string objectIdentifier;
        /*Used to check if the loaded file is still relevant or if we should look for another one. */
@@ -58,7 +58,7 @@ namespace openspace {
        /* A vector with all our datafile paths*/
        std::vector<std::string> _dataFiles;
        /* A vector with all our datafile times in j2000*/
-      // mutable std::vector<double> timeDoubles;
+       mutable std::vector<double> timeDoubles;
        /* Extracts all the mandatory information we need from our asset file */
        bool extractMandatoryInfoFromDictionary(const char* identifier, std::unique_ptr<ghoul::Dictionary> &dictionary);
        /*gets the correct datafile, that matches the current time in open space*/

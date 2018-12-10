@@ -51,7 +51,8 @@ namespace openspace {
 
    glm::vec3 RadecManager::getPosForTime(double time) const {
        if (!correctHour(time)) {
-           std::vector<double>timeDoubles = DataFileHelper::getHoursFromFileNames(_dataFiles);
+           timeDoubles = DataFileHelper::getHoursFromFileNames(_dataFiles);
+           
            int idx = DataFileHelper::findFileIndexForCurrentTime(time, timeDoubles);
            updateRadecData(idx);
        }
@@ -105,9 +106,10 @@ namespace openspace {
    }
 
   void  RadecManager::updateRadecData(int index) const {
-        std::string filename;
+      std::string filename;
 
-        if (index == -1 || index > _dataFiles.size()) return;
+      if (index < -1 || index > _dataFiles.size())
+          return;
 
         positions.clear();
         positions.reserve(10);
@@ -123,23 +125,24 @@ namespace openspace {
         int lightTravelHours = ceil(position.lightTravelTime / 3600);
 
         if (lightTravelHours > 1)
-          index = index + lightTravelHours;
+           index = index + lightTravelHours;
 
-        if (index < lightTravelHours + 1) {
+        else if (index < 1) {
             radecParser(index);
             radecParser(index + 1);
             return;
         }
-        else if (index == _dataFiles.size() - lightTravelHours) {
+        else if (index == _dataFiles.size() -1) {
             radecParser(index);
             radecParser(index -1);
             return;
         }
-        else {
+        else{
             radecParser(index - 1);
             radecParser(index);
             radecParser(index + 1);
         }
+
   }
 }
 
