@@ -1,0 +1,47 @@
+local assetHelper = asset.require('util/asset_helper')
+local models = asset.syncedResource({
+    Name = "Apollo Models",
+    Type = "HttpSynchronization",
+    Identifier = "apollo_models",
+    Version = 1
+})
+
+
+local moon = asset.require('scene/solarsystem/planets/earth/moon/moon')
+
+
+local Tower = {
+    Identifier = "EifelTower",
+    Parent = moon.Moon.Identifier,
+    Transform = {
+        Translation = {
+            Type = "GlobeTranslation",
+            Globe = moon.Moon.Identifier,
+            Longitude = 20.0,
+            Latitude = 20.0
+        },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 2.0;
+        }
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/etower.obj"
+        },
+        ColorTexture = models .. "/gray.png",
+        PerformShading = false,
+    },
+    GUI = {
+        Hidden = false,
+        Name = "Eifel Tower",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { 
+	Tower,
+})

@@ -1,0 +1,145 @@
+local helper = asset.require('util/slide_deck_helper')
+local deckL = nil
+local deckR = nil
+
+-- images from https://www.lroc.asu.edu/featured_sites/view_site/1
+local slides = asset.syncedResource({
+    Name = "Apollo slides",
+    Type = "HttpSynchronization",
+    Identifier = "apollo_slideshows",
+    Version = 1
+})
+
+asset.onInitialize(function ()
+    deckL = helper.createDeck("slides-apollo15-left", {
+        FlatScreen = false,
+        SphericalPosition = {3.14159, 2.244},
+        Scale = 0.70
+    })
+
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-0a-StGeorge-survey.jpg")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-0-LZ.jpg")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-0-StGeorge-inside.jpg")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-1a-falcon-feather.jpg")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-1-flagIrwin.jpg")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-3-Image-of-Hadley-base.jpg")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-4-station-1.jpg")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-5-station-1-rocks.jpg")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-6-rover-wheels.jpg")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-7-rover-map.jpg")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-8-camera-kick.jpg")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-9-StGeorge-EVA.jpg")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-10-Gen-nomen.jpg")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-11-Genesis-Rock.jpg")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-12-Genesis_Rock.jpg")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-13.jpg")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-14-tracks.jpg")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-15-rover-parked.jpg")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-16-rover-to-LEM.jpg")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-17-LEMtoROVER.png")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-18-tracks-from-inside.jpg")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-19-Endeavor-nose.jpg")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-20-SIM-Bay.png")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-21-sub-sat.png")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-22-Kreiger.jpg")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-23-Worden-Kreiger-hand.jpg")
+    helper.addSlide(deckL, slides .. "/apollo_15/A15-24-Worden.jpg")
+
+    helper.addSlide(deckL, slides .."/apollo_15/M117467833R.jpg")
+    helper.addSlide(deckL, slides .."/apollo_15/M102142784LR.jpg")
+    helper.addSlide(deckL, slides .."/apollo_15/M102135625L.jpg")
+    helper.addSlide(deckL, slides .."/apollo_15/M102128467R.jpg")
+    helper.addSlide(deckL, slides .."/apollo_15/M119829425L.jpg")
+    helper.addSlide(deckL, slides .."/apollo_15/M119822622L.jpg")
+    helper.addSlide(deckL, slides .."/apollo_15/M104490494L.jpg")
+    helper.addSlide(deckL, slides .."/apollo_15/M106855508L.jpg")
+    helper.addSlide(deckL, slides .."/apollo_15/M122184104R.jpg")
+    helper.addSlide(deckL, slides .."/apollo_15/M170538271R.jpg")
+    helper.addSlide(deckL, slides .."/apollo_15/M109215691LR.jpg")
+    helper.addSlide(deckL, slides .."/apollo_15/M111571816L.jpg")
+    helper.addSlide(deckL, slides .."/apollo_15/M126901141R.jpg")
+    helper.addSlide(deckL, slides .."/apollo_15/M175252641LR.jpg")
+    helper.addSlide(deckL, slides .."/apollo_15/M113934743LR.jpg")
+    helper.addSlide(deckL, slides .."/apollo_15/M146959973L.jpg")
+    helper.addSlide(deckL, slides .."/apollo_15/M131623862L.jpg")
+    helper.addSlide(deckL, slides .."/apollo_15/legend.PNG")
+
+    deckR = helper.createDeck("slides-apollo15-right", {
+        FlatScreen = false,
+        SphericalPosition = {-0.12, 2.208},
+        Scale = 0.70
+    })
+
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-0a-StGeorge-survey.jpg")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-0-LZ.jpg")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-0-StGeorge-inside.jpg")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-1a-falcon-feather.jpg")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-1-flagIrwin.jpg")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-3-Image-of-Hadley-base.jpg")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-4-station-1.jpg")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-5-station-1-rocks.jpg")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-6-rover-wheels.jpg")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-7-rover-map.jpg")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-8-camera-kick.jpg")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-9-StGeorge-EVA.jpg")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-10-Gen-nomen.jpg")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-11-Genesis-Rock.jpg")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-12-Genesis_Rock.jpg")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-13.jpg")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-14-tracks.jpg")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-15-rover-parked.jpg")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-16-rover-to-LEM.jpg")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-17-LEMtoROVER.png")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-18-tracks-from-inside.jpg")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-19-Endeavor-nose.jpg")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-20-SIM-Bay.png")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-21-sub-sat.png")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-22-Kreiger.jpg")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-23-Worden-Kreiger-hand.jpg")
+    helper.addSlide(deckR, slides .. "/apollo_15/A15-24-Worden.jpg")
+
+    helper.addSlide(deckR, slides .."/apollo_15/M117467833R.jpg")
+    helper.addSlide(deckR, slides .."/apollo_15/M102142784LR.jpg")
+    helper.addSlide(deckR, slides .."/apollo_15/M102135625L.jpg")
+    helper.addSlide(deckR, slides .."/apollo_15/M102128467R.jpg")
+    helper.addSlide(deckR, slides .."/apollo_15/M119829425L.jpg")
+    helper.addSlide(deckR, slides .."/apollo_15/M119822622L.jpg")
+    helper.addSlide(deckR, slides .."/apollo_15/M104490494L.jpg")
+    helper.addSlide(deckR, slides .."/apollo_15/M106855508L.jpg")
+    helper.addSlide(deckR, slides .."/apollo_15/M122184104R.jpg")
+    helper.addSlide(deckR, slides .."/apollo_15/M170538271R.jpg")
+    helper.addSlide(deckR, slides .."/apollo_15/M109215691LR.jpg")
+    helper.addSlide(deckR, slides .."/apollo_15/M111571816L.jpg")
+    helper.addSlide(deckR, slides .."/apollo_15/M126901141R.jpg")
+    helper.addSlide(deckR, slides .."/apollo_15/M175252641LR.jpg")
+    helper.addSlide(deckR, slides .."/apollo_15/M113934743LR.jpg")
+    helper.addSlide(deckR, slides .."/apollo_15/M146959973L.jpg")
+    helper.addSlide(deckR, slides .."/apollo_15/M131623862L.jpg")
+    helper.addSlide(deckR, slides .."/apollo_15/legend.PNG")
+
+    local interpolationDuration = 0
+
+    function nextSlide()
+        helper.goToNextSlide(deckL, interpolationDuration)
+        helper.goToNextSlide(deckR, interpolationDuration)
+    end
+
+    function previousSlide()
+        helper.goToPreviousSlide(deckL, interpolationDuration)
+        helper.goToPreviousSlide(deckR, interpolationDuration)
+    end
+
+    helper.setCurrentSlide(deckL, 1)
+    helper.setCurrentSlide(deckR, 1)
+    openspace.bindKey("RIGHT", "nextSlide()")
+    openspace.bindKey("LEFT", "previousSlide()")
+
+end)
+
+
+asset.onDeinitialize(function()
+    openspace.clearKey("RIGHT")
+    openspace.clearKey("LEFT")
+    helper.removeDeck(deckL)
+    helper.removeDeck(deckR)
+end)

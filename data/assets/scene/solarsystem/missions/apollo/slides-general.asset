@@ -1,0 +1,55 @@
+local helper = asset.require('util/slide_deck_helper')
+local deck = nil
+
+asset.onInitialize(function ()
+    deckL = helper.createDeck("slides-general-left", {
+        FlatScreen = false,
+        -- SphericalPosition = {0.0, 3.1415 / 2},
+       SphericalPosition = {0.28, 1.43},
+        Scale = 0.35
+    })
+
+    helper.addSlide(deckL, "${DATA}/apollo_photos/0.jpg")
+    helper.addSlide(deckL, "${DATA}/apollo_photos/1.jpg")
+    helper.addSlide(deckL, "${DATA}/apollo_photos/2.jpg")
+    helper.addSlide(deckL, "${DATA}/apollo_photos/3.jpg")
+
+
+    deckR = helper.createDeck("slides-general-right", {
+        FlatScreen = false,
+        SphericalPosition = {-0.28, 1.43},
+        Scale = 0.35
+    })
+
+    helper.addSlide(deckR, "${DATA}/apollo_photos/0.jpg")
+    helper.addSlide(deckR, "${DATA}/apollo_photos/1.jpg")
+    helper.addSlide(deckR, "${DATA}/apollo_photos/2.jpg")
+    helper.addSlide(deckR, "${DATA}/apollo_photos/3.jpg")
+
+
+    local interpolationDuration = 0
+
+    function nextSlide()
+        helper.goToNextSlide(deckL, interpolationDuration)
+        helper.goToNextSlide(deckR, interpolationDuration)
+    end
+
+    function previousSlide()
+        helper.goToPreviousSlide(deckL, interpolationDuration)
+        helper.goToPreviousSlide(deckR, interpolationDuration)
+    end
+
+    helper.setCurrentSlide(deckL, 1)
+    helper.setCurrentSlide(deckR, 1)
+    openspace.bindKey("RIGHT", "nextSlide()")
+    openspace.bindKey("LEFT", "previousSlide()")
+
+end)
+
+
+asset.onDeinitialize(function()
+    openspace.clearKey("RIGHT")
+    openspace.clearKey("LEFT")
+    helper.removeDeck(deckL)
+    helper.removeDeck(deckR)
+end)

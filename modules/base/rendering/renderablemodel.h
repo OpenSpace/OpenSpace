@@ -77,6 +77,7 @@ private:
     properties::FloatProperty _specularIntensity;
 
     properties::BoolProperty _performShading;
+    properties::BoolProperty _disableFaceCulling;
     properties::Mat3Property _modelTransform;
 
     ghoul::opengl::ProgramObject* _program = nullptr;

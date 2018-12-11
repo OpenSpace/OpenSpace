@@ -1,0 +1,829 @@
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+asset.require('spice/base')
+
+local models = asset.syncedResource({
+    Name = "Apollo Models",
+    Type = "HttpSynchronization",
+    Identifier = "apollo_models",
+    Version = 1
+})
+
+local kernels = asset.syncedResource({
+    Name = "Apollo Kernels",
+    Type = "HttpSynchronization",
+    Identifier = "apollo_spice",
+    Version = 1
+})
+
+
+local LocalKernels = {
+    kernels .. "/moon_080317.tf",
+    kernels .. "/apollo8.tf",
+  	kernels .. "/moon_pa_de421_1900-2050.bpc",
+    kernels .. '/apollo8.tsc',
+    kernels .. '/apollo8.bsp',
+    kernels .. '/apollo8_earthrise.bc',
+}
+
+local LightSources = {
+    -- {
+    --     Type = "SceneGraphLightSource",
+    --     Identifier = "Sun",
+    --     Node = sunTransforms.SolarSystemBarycenter.Identifier,
+    --     Intensity = 1.0
+    -- },
+    -- {
+    --     Identifier = "Camera",
+    --     Type = "CameraLightSource",
+    --     Intensity = 0.5
+    -- }
+}
+
+-- 1968 DEC 24 16:37:19.0
+
+
+local Apollo8 = {
+    Identifier = "Apollo8",
+    Parent = "Moon",
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "-908",
+            Observer = "MOON",
+            Frame = "IAU_MOON",
+            Kernels = LocalKernels
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "A8_EARTHRISE",
+            DestinationFrame = "MOON_ME"
+        },
+    },
+    GUI = {
+        Name = "Apollo 8",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+
+
+
+local Apollo_8 = {
+    Identifier = "Apollo_8Model",
+    Parent = Apollo8.Identifier,
+    Transform = {
+        Scale = {
+            Type = "StaticScale",
+            -- The scale of the model is in cm; OpenSpace is in m
+            Scale = 0.01
+        }
+    },
+    GUI = {
+        Name = "Apollo 8 Model",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+
+
+
+local Apollo_8_CSM = {
+    Identifier = "Apollo_8_CSM",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/Apollo_CSM_shrunk_rotated_xy_doubble_size.obj"
+        },
+        ColorTexture = models .. "/gray.png",
+        LightSources = LightSources,
+        PerformShading = false,
+        DisableFaceCulling = true 
+    },
+    GUI = {
+        Hidden = false,
+        Name = "Apollo 8 CSM",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+
+
+-- local RotationMatrix = {
+--     0, 1, 0,
+--     0, 0, 1,
+--     1, 0, 0
+-- }
+
+local AP_hatch_door = {
+    Identifier = "AP_hatch_door",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/AP_hatch_door.obj"
+        },
+        ColorTexture = models .. "/APOLLO_HATCH.jpg",
+        LightSources = LightSources,
+        PerformShading = false,
+        DisableFaceCulling = true 
+		-- ModelTransform = RotationMatrix
+    },
+    GUI = {
+        Hidden = false,
+        Name = "Apollo 8 AP_hatch_door",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+
+
+local AP_cone_command_moduleShape = {
+    Identifier = "AP_cone_command_moduleShape",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/AP_cone_command_moduleShape.obj"
+        },
+        ColorTexture = models .. "/Command_module_diff.png",
+        LightSources = LightSources,
+        PerformShading = false,
+        DisableFaceCulling = true 
+
+        --ModelTransform = RotationMatrix
+    },
+    GUI = {
+        Hidden = false,
+        Name = "Apollo 8 AP_cone_command_moduleShape",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+
+local AP_cone_docking_whiteShape = {
+    Identifier = "AP_cone_docking_whiteShape",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/AP_cone_docking_whiteShape.obj"
+        },
+        ColorTexture = models .. "/gray.png",
+        LightSources = LightSources,
+        PerformShading = false,
+        DisableFaceCulling = true 
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 AP_cone_docking_whiteShape",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local AP_cone_glassShape = {
+    Identifier = "AP_cone_glassShape",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/AP_cone_glassShape.obj"
+        },
+        ColorTexture = models .. "/gray.png",
+        LightSources = LightSources,
+        PerformShading = false,
+        DisableFaceCulling = true 
+
+    },
+    GUI = {
+        Hidden = false,
+        Name = "Apollo 8 AP_cone_glassShape",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local AP_cone_scratched_metalShape = {
+    Identifier = "AP_cone_scratched_metalShape",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/AP_cone_scratched_metalShape.obj"
+        },
+        ColorTexture = models .. "/scratched_metal_gloss.png",
+        LightSources = LightSources,
+        PerformShading = false, 
+        DisableFaceCulling = true        
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 AP_cone_scratched_metalShape",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local AP_cone_vent_blackShape = {
+    Identifier = "AP_cone_vent_blackShape",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/AP_cone_vent_blackShape.obj"
+        },
+        ColorTexture = models .. "/gray.png",
+        LightSources = LightSources,
+        PerformShading = false,     
+        DisableFaceCulling = true    
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 AP_cone_vent_blackShape",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local AP_cone_vent_redShape = {
+    Identifier = "AP_cone_vent_redShape",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/AP_cone_vent_redShape.obj"
+        },
+        ColorTexture = models .. "/gray.png",
+        LightSources = LightSources,
+        PerformShading = false, 
+        DisableFaceCulling = true        
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 AP_cone_vent_redShape",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local AP_service_blackShape = {
+    Identifier = "AP_service_blackShape",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/AP_service_blackShape.obj"
+        },
+        ColorTexture = models .. "/gray.png",
+        LightSources = LightSources,
+        PerformShading = false,   
+        DisableFaceCulling = true      
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 AP_service_blackShape",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local AP_service_blueShape = {
+    Identifier = "AP_service_blueShape",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/AP_service_blueShape.obj"
+        },
+        ColorTexture = models .. "/gray.png",
+        LightSources = LightSources,
+        PerformShading = false,   
+        DisableFaceCulling = true              
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 AP_service_blueShape",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local AP_service_brownShape = {
+    Identifier = "AP_service_brownShape",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/AP_service_brownShape.obj"
+        },
+        ColorTexture = models .. "/gray.png",
+        LightSources = LightSources,
+        PerformShading = false,     
+        DisableFaceCulling = true    
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 AP_service_brownShape",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local AP_service_glassShape = {
+    Identifier = "AP_service_glassShape",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/AP_service_glassShape.obj"
+        },
+        ColorTexture = models .. "/gray.png",
+        LightSources = LightSources,
+        PerformShading = false,   
+        DisableFaceCulling = true      
+    },
+    GUI = {
+        Hidden = false,
+        Name = "Apollo 8 AP_service_glassShape",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local AP_service_greenShape = {
+    Identifier = "AP_service_greenShape",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/AP_service_greenShape.obj"
+        },
+        ColorTexture = models .. "/gray.png",
+        LightSources = LightSources,
+        PerformShading = false,    
+        DisableFaceCulling = true             
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 AP_service_greenShape",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local AP_service_high_gain_antennaShape = {
+    Identifier = "AP_service_high_gain_antennaShape",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/AP_service_high_gain_antennaShape.obj"
+        },
+        ColorTexture = models .. "/Antenna_diff.png",
+        LightSources = LightSources,
+        PerformShading = false,       
+        DisableFaceCulling = true          
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 AP_service_high_gain_antennaShape",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local AP_service_instrumentShape = {
+    Identifier = "AP_service_instrumentShape",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/AP_service_instrumentShape.obj"
+        },
+        ColorTexture = models .. "/instrumentation_module_diff.png",
+        LightSources = LightSources,
+        PerformShading = false,   
+        DisableFaceCulling = true      
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 AP_service_instrumentShape",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local AP_service_module1Shape = {
+    Identifier = "AP_service_module1Shape",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/AP_service_module1Shape.obj"
+        },
+        ColorTexture = models .. "/Service_module_diff.png",
+        LightSources = LightSources,
+        PerformShading = false,  
+        DisableFaceCulling = true       
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 AP_service_module1Shape",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local AP_service_nozzleShape = {
+    Identifier = "AP_service_nozzleShape",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/AP_service_nozzleShape.obj"
+        },
+        ColorTexture = models .. "/Nozzle_diff.png",
+        LightSources = LightSources,
+        PerformShading = false,        
+        DisableFaceCulling = true 
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 AP_service_nozzleShape",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local AP_service_pinkShape = {
+    Identifier = "AP_service_pinkShape",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/AP_service_pinkShape.obj"
+        },
+        ColorTexture = models .. "/gray.png",
+        LightSources = LightSources,
+        PerformShading = false,       
+        DisableFaceCulling = true  
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 AP_service_pinkShape",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local AP_service_purpleShape = {
+    Identifier = "AP_service_purpleShape",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/AP_service_purpleShape.obj"
+        },
+        ColorTexture = models .. "/gray.png",
+        LightSources = LightSources,
+        PerformShading = false, 
+        DisableFaceCulling = true                
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 AP_service_purpleShape",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local AP_service_redShape = {
+    Identifier = "AP_service_redShape",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/AP_service_redShape.obj"
+        },
+        ColorTexture = models .. "/gray.png",
+        LightSources = LightSources,
+        PerformShading = false, 
+        DisableFaceCulling = true        
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 AP_service_redShape",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local AP_service_rubberShape = {
+    Identifier = "AP_service_rubberShape",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/AP_service_rubberShape.obj"
+        },
+        ColorTexture = models .. "/gray.png",
+        LightSources = LightSources,
+        PerformShading = false,   
+        DisableFaceCulling = true      
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 AP_service_rubberShape",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local AP_service_scratched_metalShape = {
+    Identifier = "AP_service_scratched_metalShape",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/AP_service_scratched_metalShape.obj"
+        },
+        ColorTexture = models .. "/scratched_metal_gloss.png",
+        LightSources = LightSources,
+        PerformShading = false,  
+        DisableFaceCulling = true       
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 AP_service_scratched_metalShape",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local AP_service_whiteShape = {
+    Identifier = "AP_service_whiteShape",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/AP_service_whiteShape.obj"
+        },
+        ColorTexture = models .. "/gray.png",
+        LightSources = LightSources,
+        PerformShading = false,  
+        DisableFaceCulling = true               
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 AP_service_whiteShape",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+
+
+
+local Apollo_8_Interior_0 = {
+    Identifier = "Apollo_8_Interior_0",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/apollo_interior_01.obj"
+        },
+        ColorTexture = models .. "/apollo11commandmodule01.jpg",
+        LightSources = LightSources,
+        PerformShading = false,    
+        DisableFaceCulling = true     
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 Interior 0",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local Apollo_8_Interior_1 = {
+    Identifier = "Apollo_8_Interior_1",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/apollo_interior_02.obj"
+        },
+        ColorTexture = models .. "/apollo11commandmodule02.jpg",
+        LightSources = LightSources,
+        PerformShading = false,   
+        DisableFaceCulling = true      
+        --ModelTransform = RotationMatrix
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 Interior 1",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local Apollo_8_Interior_2 = {
+    Identifier = "Apollo_8_Interior_2",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/apollo_interior_03.obj"
+        },
+        ColorTexture = models .. "/apollo11commandmodule03.jpg",
+        LightSources = LightSources,
+        PerformShading = false, 
+        DisableFaceCulling = true        
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 Interior 2",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local Apollo_8_Interior_3 = {
+    Identifier = "Apollo_8_Interior_3",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/apollo_interior_04.obj"
+        },
+        ColorTexture = models .. "/apollo11commandmodule04.jpg",
+        LightSources = LightSources,
+        PerformShading = false,    
+        DisableFaceCulling = true     
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 Interior 3",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local Apollo_8_Interior_4 = {
+    Identifier = "Apollo_8_Interior_4",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/apollo_interior_05.obj"
+        },
+        ColorTexture = models .. "/apollo11commandmodule05.jpg",
+        LightSources = LightSources,
+        PerformShading = false,      
+        DisableFaceCulling = true   
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 Interior 4",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local Apollo_8_Interior_5 = {
+    Identifier = "Apollo_8_Interior_5",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/apollo_interior_06.obj"
+        },
+        ColorTexture = models .. "/apollo11commandmodule06.jpg",
+        LightSources = LightSources,
+        PerformShading = false,   
+        DisableFaceCulling = true      
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 Interior 5",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local Apollo_8_Interior_6 = {
+    Identifier = "Apollo_8_Interior_6",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/apollo_interior_07.obj"
+        },
+        ColorTexture = models .. "/apollo11commandmodule07.jpg",
+        LightSources = LightSources,
+        PerformShading = false,    
+        DisableFaceCulling = true     
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 Interior 6",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local Apollo_8_Interior_7 = {
+    Identifier = "Apollo_8_Interior_7",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/apollo_interior_08.obj"
+        },
+        ColorTexture = models .. "/apollo11commandmodule08.jpg",
+        LightSources = LightSources,
+        PerformShading = false,  
+        DisableFaceCulling = true       
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 Interior 7",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local Apollo_8_Interior_8 = {
+    Identifier = "Apollo_8_Interior_8",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/apollo_interior_09.obj"
+        },
+        ColorTexture = models .. "/apollo11commandmodule09.jpg",
+        LightSources = LightSources,
+        PerformShading = false,    
+        DisableFaceCulling = true     
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 Interior 8",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+local Apollo_8_Interior_9 = {
+    Identifier = "Apollo_8_Interior_9",
+    Parent = Apollo_8.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/apollo_interior_10.obj"
+        },
+        ColorTexture = models .. "/apollo11commandmodule10.jpg",
+        LightSources = LightSources,
+        PerformShading = false,    
+        DisableFaceCulling = true     
+    },
+    GUI = {
+        Hidden = true,
+        Name = "Apollo 8 Interior 9",
+        Path = "/Solar System/Missions/Apollo/Apollo 8"
+    }
+}
+
+local Apollo_8_Trail = {
+    Identifier = "Apollo8Trail",
+    Parent = "Moon",
+    Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "-908",
+            Observer = "MOON",
+            Frame = "IAU_MOON",            
+            Kernels = LocalKernels
+        },
+        Color = { 0.70, 0.50, 0.20 },
+        StartTime = "1968 DEC 21",
+        EndTime = "1968 DEC 28",
+        SampleInterval = 30
+    },
+    GUI = {
+        Name = "Apollo 8 Trail",
+        Path = "/Solar System/Missions/Apollo"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { 
+    Apollo8, 
+    Apollo_8, 
+    -- Apollo_8_CSM,  
+    AP_cone_command_moduleShape,
+    AP_cone_docking_whiteShape,
+    AP_cone_glassShape,
+    AP_cone_scratched_metalShape,
+    AP_cone_vent_blackShape,
+    AP_cone_vent_redShape,
+    AP_service_blackShape,
+    AP_service_blueShape,
+    AP_service_brownShape,
+    AP_service_glassShape,
+    AP_service_greenShape,
+    AP_service_high_gain_antennaShape,
+    AP_service_instrumentShape,
+    AP_service_module1Shape,
+    AP_service_nozzleShape,    
+    AP_service_pinkShape,    
+    AP_service_purpleShape,    
+    AP_service_redShape,    
+    AP_service_rubberShape,
+    AP_service_scratched_metalShape,
+    AP_service_whiteShape,
+    AP_hatch_door,
+
+    Apollo_8_Trail,
+    Apollo_8_Interior_0,
+    Apollo_8_Interior_1,
+    Apollo_8_Interior_2,
+    Apollo_8_Interior_3,
+    Apollo_8_Interior_4,
+    Apollo_8_Interior_5,
+    Apollo_8_Interior_6,
+    Apollo_8_Interior_7,
+    Apollo_8_Interior_8
+})
