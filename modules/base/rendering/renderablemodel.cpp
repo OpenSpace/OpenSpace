@@ -255,6 +255,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_diffuseIntensity);
     addProperty(_specularIntensity);
     addProperty(_performShading);
+    addProperty(_disableFaceCulling);
 }
 
 bool RenderableModel::isReady() const {
