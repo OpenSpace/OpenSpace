@@ -109,7 +109,7 @@ namespace openspace {
         };
 
         /// Number of variables in _uniformCache
-        static const GLuint uniformCacheSize = 4;
+        static const GLuint uniformCacheSize = 8;
 
 
     protected:
@@ -185,10 +185,20 @@ namespace openspace {
         properties::FloatProperty _lineWidth;
         /// Opacity for the base line
         properties::FloatProperty _baseOpacity;
+        /// Speed factor for segments within the transmission time
+        properties::FloatProperty _signalSpeedFactor;
+        /// Size factor for segments within the transmission time
+        properties::FloatProperty _segmentSizeFactor;
+        /// Size factor for the spacing between segments within the transmission time
+        properties::FloatProperty _spacingSizeFactor;
+        /// Edge fading factor for a segment within transmission time
+        properties::FloatProperty _fadeFactor;
+
         /// Program object used to render the data stored in RenderInformation
         ghoul::opengl::ProgramObject* _programObject = nullptr;
         /// Cache for uniform variables, update _uniformCacheSize accordingly
-        UniformCache(modelViewStation, modelViewSpacecraft, projection, baseOpacity) _uniformCache;
+        UniformCache(modelViewStation, modelViewSpacecraft, projection, baseOpacity,
+                     signalSpeedFactor, segmentSizeFactor, spacingSizeFactor, fadeFactor) _uniformCache;
 
         /*Checks if the current time is within a signal's start and endtime*/
         bool isSignalActive(double currentTime, SignalManager::Signal signal);

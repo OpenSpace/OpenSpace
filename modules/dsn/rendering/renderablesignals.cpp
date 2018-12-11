@@ -39,7 +39,8 @@ namespace {
     constexpr const char* KeyStationSites = "StationSites";
 
     constexpr const std::array <const char*, openspace::RenderableSignals::uniformCacheSize> UniformNames = {
-        "modelViewStation","modelViewSpacecraft", "projectionTransform", "baseOpacity"
+        "modelViewStation","modelViewSpacecraft", "projectionTransform", "baseOpacity",
+        "signalSpeedFactor", "segmentSizeFactor", "spacingSizeFactor", "fadeFactor"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SiteColorsInfo = {
@@ -59,6 +60,30 @@ namespace {
          "BaseOpacity",
          "Base Opacity",
          "This value specifies the base opacity of all the signal transmissions "
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SignalSpeedInfo = {
+        "SignalSpeed",
+        "Signal Speed",
+        "Speed of signal transmission segments "
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SegmentSizeInfo = {
+        "SegmentSize",
+        "Segment Size",
+        "Size of signal transmission segments "
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SpacingSizeInfo = {
+        "SpacingSize",
+        "Spacing Size",
+        "Size of spacing between signal transmission segments "
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FadeFactorInfo = {
+        "FadeFactor",
+        "Fade Factor",
+        "Factor of fading at edges of signal transmission segments "
     };
 } // namespace
 
@@ -94,6 +119,30 @@ documentation::Documentation RenderableSignals::Documentation() {
                new DoubleVerifier,
                Optional::Yes,
                BaseOpacityInfo.description
+            },
+            {
+               SignalSpeedInfo.identifier,
+               new DoubleVerifier,
+               Optional::Yes,
+               SignalSpeedInfo.description
+            },
+            {
+               SegmentSizeInfo.identifier,
+               new DoubleVerifier,
+               Optional::Yes,
+               SegmentSizeInfo.description
+            },
+            {
+               SpacingSizeInfo.identifier,
+               new DoubleVerifier,
+               Optional::Yes,
+               SpacingSizeInfo.description
+            },
+            {
+               FadeFactorInfo.identifier,
+               new DoubleVerifier,
+               Optional::Yes,
+               FadeFactorInfo.description
             }
         }
     };
@@ -103,6 +152,10 @@ RenderableSignals::RenderableSignals(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _lineWidth(LineWidthInfo, 2.5f, 1.f, 10.f)
     , _baseOpacity(BaseOpacityInfo, 0.3f, 0.0f, 1.0f)
+    , _signalSpeedFactor(SignalSpeedInfo, 2.0f, 1.0f, 10.0f)
+    , _segmentSizeFactor(SegmentSizeInfo, 10.0f, 1.0f, 100.0f)
+    , _spacingSizeFactor(SpacingSizeInfo, 0.0f, 0.0f, 10.0f)
+    , _fadeFactor(FadeFactorInfo, 0.5f, 0.1f, 0.5f)
 {
     if (dictionary.hasKeyAndValue<ghoul::Dictionary>(SiteColorsInfo.identifier)) {
         ghoul::Dictionary siteColorDictionary = dictionary.value<ghoul::Dictionary>(SiteColorsInfo.identifier);
@@ -152,6 +205,12 @@ RenderableSignals::RenderableSignals(const ghoul::Dictionary& dictionary)
         ));
     }
     addProperty(_baseOpacity);
+
+    addProperty(_signalSpeedFactor);
+    addProperty(_segmentSizeFactor);
+    addProperty(_spacingSizeFactor);
+    addProperty(_fadeFactor);
+
 
     std::unique_ptr<ghoul::Dictionary> dictionaryPtr = std::make_unique<ghoul::Dictionary>(dictionary);
     extractData(dictionaryPtr);
@@ -253,6 +312,10 @@ void RenderableSignals::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform(_uniformCache.projection, data.camera.sgctInternal.projectionMatrix());
 
     _programObject->setUniform(_uniformCache.baseOpacity, _baseOpacity);
+    _programObject->setUniform(_uniformCache.signalSpeedFactor, _signalSpeedFactor);
+    _programObject->setUniform(_uniformCache.segmentSizeFactor, _segmentSizeFactor);
+    _programObject->setUniform(_uniformCache.spacingSizeFactor, _spacingSizeFactor);
+    _programObject->setUniform(_uniformCache.fadeFactor, _fadeFactor);
 
     const bool usingFramebufferRenderer =
         global::renderEngine.rendererImplementation() ==

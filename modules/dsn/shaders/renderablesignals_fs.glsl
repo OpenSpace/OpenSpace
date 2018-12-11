@@ -33,11 +33,11 @@ in float timeSinceStart;
 in float transmissionTime;
 
 float lightSpeed = 299792458.0; // expressed in m/s
-float numSignalSegments = 0;
-float signalSpeedFactor = 2.0; // todo: make property
-float segmentSizeFactor = 10.0f; // todo: make property [1,100]
-float spacingSizeFactor = 0.0f; // todo: make property [0,10]
-float fadeFactor = 0.5f; // todo: make property [0.001, 0.5]
+
+uniform float signalSpeedFactor;
+uniform float segmentSizeFactor;
+uniform float spacingSizeFactor;
+uniform float fadeFactor;
 uniform float baseOpacity;
 
 float getSegmentOpacity(const float segmentSize, 
@@ -97,12 +97,6 @@ Fragment getFragment() {
     float signalSize = distLightTravelStart-distLightTravelEnd;
 
     float signalSegmentSize = 100.f * segmentSizeFactor * lightSpeed;
-    
-    // todo: might not be needed after added property
-    if(segmentSizeFactor < 0.001f){
-        signalSegmentSize = signalSize;
-        signalSpeedFactor = 1.0f;
-    }
 
     float alpha = 0.0f;
     // if within the transmission time, change the opacity
