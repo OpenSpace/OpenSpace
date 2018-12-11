@@ -34,6 +34,8 @@ namespace openspace {
             objectIdentifier = dictionary->value<std::string>(KeyIdentifier);
         }
         bool dataFilesSuccess = DataFileHelper::checkFileNames(identifier, dictionary, _dataFiles);
+        timeDoubles = DataFileHelper::getHoursFromFileNames(_dataFiles);
+
         return dataFilesSuccess;
     }
 
@@ -51,13 +53,14 @@ namespace openspace {
 
    glm::vec3 RadecManager::getPosForTime(double time) const {
        if (!correctHour(time)) {
-           timeDoubles = DataFileHelper::getHoursFromFileNames(_dataFiles);
            
            int idx = DataFileHelper::findFileIndexForCurrentTime(time, timeDoubles);
            updateRadecData(idx);
        }
        if(!correctMinute(time)) {
-          getPositionInVector(time);
+           //Compensate for light travel time to the spacecraft
+            int idx = DataFileHelper::findFileIndexForCurrentTime(time + position.lightTravelTime, minuteTimes);
+            getPositionInVector(idx);
        }
        return glm::vec3(position.ra, position.dec, position.range);
    }
@@ -87,7 +90,7 @@ namespace openspace {
        return true;
    }
 
-  RadecManager::Position RadecManager::getPositionInVector(double time) const{
+  RadecManager::Position RadecManager::getPositionInVector(int index) const{
        minuteTimes.clear();
        minuteTimes.reserve(0);
       
@@ -95,12 +98,11 @@ namespace openspace {
            minuteTimes.push_back(Time::convertTime(positions[i].timeStamp));
        }
 
-       int idx = DataFileHelper::findFileIndexForCurrentTime(time + position.lightTravelTime, minuteTimes);//Compensate for light travel time to the spacecraft
-       activeMinute = minuteTimes[idx];
-       position.timeStamp = positions[idx].timeStamp;
-       position.ra = positions[idx].ra;
-       position.dec = positions[idx].dec;
-       position.range = positions[idx].range;
+       activeMinute = minuteTimes[index];
+       position.timeStamp = positions[index].timeStamp;
+       position.ra = positions[index].ra;
+       position.dec = positions[index].dec;
+       position.range = positions[index].range;
 
        return position;
    }

@@ -66,7 +66,7 @@ namespace openspace {
        /* parses positioningdata from a file given an index in our preloaded filename vector */
        bool radecParser(int index) const;
        /*Find the correct minute in the vector of loaded positions*/
-       RadecManager::Position getPositionInVector(double time) const;
+       RadecManager::Position getPositionInVector(int index) const;
        /*Check if current hour in open space is already loaded*/
        bool correctHour(double time) const;
        /*Check if current minute in open space is already loaded*/
