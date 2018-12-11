@@ -97,12 +97,17 @@ namespace openspace {
        for (int i = 0; i < RadecManager::positions.size(); i++) {
            minuteTimes.push_back(Time::convertTime(positions[i].timeStamp));
        }
+       try{
+           activeMinute = minuteTimes[index];
+           position.timeStamp = positions[index].timeStamp;
+           position.ra = positions[index].ra;
+           position.dec = positions[index].dec;
+           position.range = positions[index].range;
+       }
+       catch (const std::exception& e) {
+           LERROR(fmt::format("{}: Error when reading data from active minute, index {}",objectIdentifier, index));
+       }
 
-       activeMinute = minuteTimes[index];
-       position.timeStamp = positions[index].timeStamp;
-       position.ra = positions[index].ra;
-       position.dec = positions[index].dec;
-       position.range = positions[index].range;
 
        return position;
    }
@@ -110,7 +115,7 @@ namespace openspace {
   void  RadecManager::updateRadecData(int index) const {
       std::string filename;
 
-      if (index < -1 || index > _dataFiles.size())
+      if (index <= -1 || index > _dataFiles.size())
           return;
 
         positions.clear();
