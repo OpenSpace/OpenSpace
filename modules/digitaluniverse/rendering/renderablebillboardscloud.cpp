@@ -259,7 +259,7 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
             {
                 keyColor,
                 new Vector3Verifier<float>,
-                Optional::No,
+                Optional::Yes,
                 "Astronomical Object Color (r,g,b)."
             },
             {
@@ -564,8 +564,6 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         }
         else if (dictionary.hasKey(LabelIdentifierMapInfo.identifier)) {
 
-            //LDEBUG(fmt::format("Hej {}", LabelIdentifierMapInfo.identifier));
-
             _labelIdMap = dictionary.value<ghoul::Dictionary>(LabelIdentifierMapInfo.identifier);
         
             _hasLabel = true;
@@ -584,7 +582,6 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 
         if (dictionary.hasKey(TextColorInfo.identifier)) {
             _textColor = dictionary.value<glm::vec4>(TextColorInfo.identifier);
-            //_hasLabel = true;
         }
         _textColor.setViewOption(properties::Property::ViewOptions::Color);
         addProperty(_textColor);
@@ -1345,18 +1342,16 @@ bool RenderableBillboardsCloud::loadLabelDataFromId() {
         std::string label = _labelIdMap.value<std::string>(keys.at(i));
 
         if (global::renderEngine.scene()->sceneGraphNode(id)) {
-           // LDEBUG(fmt::format("Scenegraphnode found for the spacecraft {}", id));
-
             glm::dvec3 position = global::renderEngine.scene()->sceneGraphNode(id)->worldPosition();
 
-            //glm::vec3 transformedPos = glm::vec3(
-            //    _transformationMatrix * glm::dvec4(position, 1.0)
-           // );
-            _labelData.emplace_back(std::make_pair(position, label));
+            glm::dvec3 transformedPos = glm::dvec3(
+                _transformationMatrix * glm::dvec4(position, 1.0)
+            );
+            _labelData.emplace_back(std::make_pair(transformedPos, label));
 
         }
         else {
-            LERROR(fmt::format("No scenegraphnode found for the spacecraft {}", id));
+            LERROR(fmt::format("No SceneGraphNode found with identifier {}", id));
             return false;
         }
 

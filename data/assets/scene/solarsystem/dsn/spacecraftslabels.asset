@@ -1,30 +1,48 @@
 local assetHelper = asset.require('util/asset_helper')
 local spacecrafts = asset.require('scene/solarsystem/missions/dsn/spacecrafts')
 
-local object = {
-    Identifier = "SpacecraftsLabels",
+local OuterSpaceLabels = {
+    Identifier = "OuterSpaceLabels",
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
-        Color = { 1.0, 1.0, 1.0 },
+        --Color = { 1.0, 1.0, 1.0 },
         Transparency = 1.0,
-        --LabelFile = speck .. "/stars.label",
-        LabelIdentifierMap = spacecrafts.labelMap,
-        TextColor = { 1.0, 0.0, 0.0, 1.0 },
+        LabelIdentifierMap = spacecrafts.labelMapVoyagers,
+        TextColor = { 1.0, 0.6, 0.2, 1.0 },
         DrawLabels = true,
-        --PolygonSides = 4,
-        --ColorMap = colormap .. "/colorbv.cmap",
         TextSize = 10.0,
         TextMinSize = 1.0,
         TextMaxSize = 80.0,
-        Unit = "km" --meters
+        Unit = "m"
     },
     GUI = {
-        Name = "Spacecrafts Labels",
-        Path = "/Milky Way/Spacecrafts"
+        Name = "Outer Space Labels",
+        Path = "/Labels"
+    }
+}
+
+local MarsLabels = {
+    Identifier = "MarsLabels",
+    Renderable = {
+        Type = "RenderableBillboardsCloud",
+        Enabled = false,
+        --Color = { 1.0, 1.0, 1.0 },
+        Transparency = 1.0,
+        LabelIdentifierMap = spacecrafts.labelMapMars,
+        TextColor = { 0.4, 0.4, 0.4, 1.0 },
+        DrawLabels = true,
+        TextSize = 5.0,
+        TextMinSize = 1.0,
+        TextMaxSize = 80.0,
+        Unit = "m" 
+    },
+    GUI = {
+        Name = "Mars Labels",
+        Path = "/Labels"
     }
 }
 
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+assetHelper.registerSceneGraphNodesAndExport(asset, { OuterSpaceLabels, MarsLabels })

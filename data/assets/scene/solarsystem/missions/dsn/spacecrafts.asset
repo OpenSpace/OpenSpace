@@ -10,14 +10,16 @@ asset.require('scene/solarsystem/missions/dsn/mro/mro')
 asset.require('scene/solarsystem/missions/dsn/marsodyssey/marsodyssey')
 asset.require('scene/solarsystem/missions/dsn/stereoa/stereoa')
 
--- needed for the labels
-local labelMap = {  
-                        VGR1 = "Voyager 1",
-                        VGR2 = "Voyager 2",
-                        MarsRecOrbiter = "Mars Recon Orbiter",
-                        --MarsOdyssey = "MarsOdyssey",
-                        StereoA = "StereoA"
-                       -- wdgn = "hej"
-               }
+-- labels
+local labelMapMars = {  
+						MarsRecOrbiter = "Mars Recon Orbiter",
+						MarsOdyssey = "MarsOdyssey",
+					}
 
-asset.export("labelMap", labelMap)
+local labelMapVoyagers = {  
+							VGR1 = "Voyager 1",
+							VGR2 = "Voyager 2",
+               			}
+
+asset.export("labelMapVoyagers", labelMapVoyagers)
+asset.export("labelMapMars", labelMapMars)

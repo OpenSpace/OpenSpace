@@ -75,7 +75,14 @@ local Keybindings = {
                   propertyHelper.invert('Scene.EquatorialSphereLabels.Renderable.Enabled'),  
         Documentation = "Toggles visibility of the equatorial sphere and its labels",
         Local = false
-    },    
+    },
+    {
+        Key = "l",
+        Command = propertyHelper.invert('Scene.OuterSpaceLabels.Renderable.Enabled') ..
+                  propertyHelper.invert('Scene.MarsLabels.Renderable.Enabled'),  
+        Documentation = "Toggles visibility of the spacecraft labels",
+        Local = false
+    }        
 }
 
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
@@ -93,8 +100,7 @@ asset.onInitialize(function ()
     openspace.setDefaultGuiSorting()
 
     openspace.setPropertyValue('Scene.*Trail.Renderable.Enabled', false)
-    openspace.setPropertyValue('Scene.StarsLabels.Renderable.Enabled', true)
-    openspace.setPropertyValue('Scene.SpacecraftsLabels.Renderable.Enabled', true)
+    --openspace.setPropertyValue('Scene.StarsLabels.Renderable.Enabled', true)
 
     openspace.globebrowsing.loadWMSServersFromFile(
         openspace.absPath("${DATA}/globebrowsing_servers.lua")
