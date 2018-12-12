@@ -58,7 +58,8 @@ private:
 
     RadecManager radecManager;
     mutable glm::vec3 _position;
-
+    double dataStart;
+    double dataEnd;
     glm::dmat4 _rotEquatorialSphere = { -0.05487554,  0.4941095, -0.8676661, 0.0,
             -0.8734371 , -0.4448296, -0.1980764, 0.0,
             -0.483835  ,  0.7469823,  0.4559838, 0.0,
