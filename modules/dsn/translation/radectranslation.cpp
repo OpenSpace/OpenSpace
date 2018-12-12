@@ -37,6 +37,8 @@ namespace {
 namespace openspace {
 
 constexpr const char* _loggerCat = "RadecTranslation";
+constexpr const char* keyDataStart = "DataStart";
+constexpr const char* keyDataEnd = "DataEnd";
 
 documentation::Documentation RadecTranslation::Documentation() {
     using namespace documentation;
@@ -65,9 +67,11 @@ RadecTranslation::RadecTranslation(const ghoul::Dictionary& dictionary)
     : RadecTranslation()
 {
     std::unique_ptr<ghoul::Dictionary> dictionaryPtr = std::make_unique<ghoul::Dictionary>(dictionary);
+  
+    _dataStart = Time::convertTime(dictionaryPtr->value<std::string>(keyDataStart));
+    _dataEnd = double(Time::convertTime(dictionaryPtr->value<std::string>(keyDataEnd)));
 
     extractData(dictionaryPtr);
-
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
@@ -113,20 +117,23 @@ glm::dvec3 RadecTranslation::radecToCartesianCoordinates(glm::vec3 pos) const {
 }
 
 glm::dvec3 RadecTranslation::position(const UpdateData& data) const{
+    double time = data.time.j2000Seconds();
 
-    const bool haveDataForTime = (data.time.j2000Seconds() >= radecManager.timeDoubles.front()) &&
-                                (data.time.j2000Seconds() < radecManager.timeDoubles.back());   
+    if (time > _dataStart && time < _dataEnd) {
+         const bool haveDataForTime = (time >= radecManager.timeDoubles.front()) &&
+                                        (time < radecManager.timeDoubles.back());
 
-    if (!haveDataForTime) {
-        LWARNING(fmt::format("No positioning data available for {} at time {}", radecManager.objectIdentifier.c_str(), data.time.UTC()));
-        return radecToCartesianCoordinates({ 0,0,0 });
+            if (!haveDataForTime) {
+                LWARNING(fmt::format("No positioning data available for {} at time {}", radecManager.objectIdentifier.c_str(), data.time.UTC()));
+                return radecToCartesianCoordinates({ 0,0,0 });
+            }
+            else {
+                glm::dvec3 pos = radecManager.getPosForTime(data.time.j2000Seconds());
+                    _position = radecToCartesianCoordinates(pos);
+                return _position;
+            }
     }
-    else {
-        glm::dvec3 pos = radecManager.getPosForTime(data.time.j2000Seconds());
-        _position = radecToCartesianCoordinates(pos);
-        return _position;
-    }
-
+    else return radecToCartesianCoordinates({ 0,0,0 });
 }
 
 } // namespace openspace

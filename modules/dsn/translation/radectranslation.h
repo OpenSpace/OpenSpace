@@ -51,13 +51,15 @@ public:
     static documentation::Documentation Documentation();
  
 private:
-    /* Converts the Ra Dec range coordinates into cartesian coordinates*/
-    glm::dvec3 convertRaDecRangeToCartesian(double ra, double dec, double range) const;
-    /*Transforms the cartesian coordinates with a rotation and a translation*/
-    glm::dvec3 radecToCartesianCoordinates(glm::vec3 pos) const;
-
     RadecManager radecManager;
+    ///Converts the Ra Dec range coordinates into cartesian coordinates
+    glm::dvec3 convertRaDecRangeToCartesian(double ra, double dec, double range) const;
+    ///Transforms the cartesian coordinates with a rotation and a translation
+    glm::dvec3 radecToCartesianCoordinates(glm::vec3 pos) const;
+    ///Translated position
     mutable glm::vec3 _position;
+    ///Determines between what dates there is data available. Set in the asset file. 
+    double _dataStart, _dataEnd;
 
     glm::dmat4 _rotEquatorialSphere = { -0.05487554,  0.4941095, -0.8676661, 0.0,
             -0.8734371 , -0.4448296, -0.1980764, 0.0,
