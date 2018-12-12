@@ -90,7 +90,8 @@ private:
 
     bool loadData();
     bool loadSpeckData();
-    bool loadLabelData();
+    bool loadLabelDataFromFile();
+    bool loadLabelDataFromId();
     bool readSpeckFile();
     bool readColorMapFile();
     bool readLabelFile();
@@ -105,6 +106,8 @@ private:
     bool _hasColorMapFile = false;
     bool _hasPolygon = false;
     bool _hasLabel = false;
+    bool _hasLabelFile = false;
+    bool _hasLabelIdMap = false;
 
     int _polygonSides = 0;
 
@@ -147,6 +150,7 @@ private:
     std::string _colorMapFile;
     std::string _labelFile;
     std::string _colorOptionString;
+    ghoul::Dictionary _labelIdMap;
 
     Unit _unit = Parsec;
 

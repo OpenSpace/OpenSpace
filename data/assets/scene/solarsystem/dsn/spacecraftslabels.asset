@@ -1,0 +1,30 @@
+local assetHelper = asset.require('util/asset_helper')
+local spacecrafts = asset.require('scene/solarsystem/missions/dsn/spacecrafts')
+
+local object = {
+    Identifier = "SpacecraftsLabels",
+    Renderable = {
+        Type = "RenderableBillboardsCloud",
+        Enabled = false,
+        Color = { 1.0, 1.0, 1.0 },
+        Transparency = 1.0,
+        --LabelFile = speck .. "/stars.label",
+        LabelIdentifierMap = spacecrafts.labelMap,
+        TextColor = { 1.0, 0.0, 0.0, 1.0 },
+        DrawLabels = true,
+        --PolygonSides = 4,
+        --ColorMap = colormap .. "/colorbv.cmap",
+        TextSize = 10.0,
+        TextMinSize = 1.0,
+        TextMaxSize = 80.0,
+        Unit = "km" --meters
+    },
+    GUI = {
+        Name = "Spacecrafts Labels",
+        Path = "/Milky Way/Spacecrafts"
+    }
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { object })

@@ -15,7 +15,8 @@ asset.require('scene/solarsystem/dsn/testRADEC')
 asset.require('scene/solarsystem/missions/dsn/spacecrafts')
 
 --labels 
- asset.require('scene/digitaluniverse/starlabels')
+asset.request('scene/digitaluniverse/starlabels')
+asset.require('scene/solarsystem/dsn/spacecraftslabels')
 
 -- Stations
 asset.require('scene/solarsystem/dsn/stations')
@@ -79,17 +80,21 @@ local Keybindings = {
 
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 local equatorial = asset.require('scene/digitaluniverse/grids')   
+    openspace.time.setTime("2018 SEP 03 11:11:00")
 
 asset.onInitialize(function ()
 
-    local now = openspace.time.currentWallTime()
-	openspace.time.setTime("2018 SEP 01 11:11:00")
+
+    --local now = openspace.time.currentWallTime()
+	openspace.time.setTime("2018 SEP 03 11:11:00")
 
     sceneHelper.bindKeys(Keybindings)
 
     openspace.setDefaultGuiSorting()
 
     openspace.setPropertyValue('Scene.*Trail.Renderable.Enabled', false)
+    openspace.setPropertyValue('Scene.StarsLabels.Renderable.Enabled', true)
+    openspace.setPropertyValue('Scene.SpacecraftsLabels.Renderable.Enabled', true)
 
     openspace.globebrowsing.loadWMSServersFromFile(
         openspace.absPath("${DATA}/globebrowsing_servers.lua")
