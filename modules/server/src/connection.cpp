@@ -64,13 +64,23 @@ namespace {
 
 namespace openspace {
 
-Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address)
+Connection::Connection(std::unique_ptr<ghoul::io::Socket> s,
+                       std::string address,
+                       bool authorized,
+                       const std::string& password)
     : _socket(std::move(s))
     , _address(std::move(address))
+    , _isAuthorized(authorized)
 {
     ghoul_assert(_socket, "Socket must not be nullptr");
 
-    _topicFactory.registerClass<AuthorizationTopic>(AuthenticationTopicKey);
+    _topicFactory.registerClass(
+        AuthenticationTopicKey,
+        [password](bool useDictionary, const ghoul::Dictionary& dict) {
+            return new AuthorizationTopic(password);
+        }
+    );
+
     _topicFactory.registerClass<GetPropertyTopic>(GetPropertyTopicKey);
     _topicFactory.registerClass<LuaScriptTopic>(LuaScriptTopicKey);
     _topicFactory.registerClass<SetPropertyTopic>(SetPropertyTopicKey);
@@ -80,9 +90,6 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
     _topicFactory.registerClass<TriggerPropertyTopic>(TriggerPropertyTopicKey);
     _topicFactory.registerClass<BounceTopic>(BounceTopicKey);
     _topicFactory.registerClass<VersionTopic>(VersionTopicKey);
-
-    // see if the default config for requiring auth (on) is overwritten
-    _requireAuthorization = global::configuration.doesRequireSocketAuthentication;
 }
 
 void Connection::handleMessage(const std::string& message) {
@@ -186,8 +193,7 @@ void Connection::sendJson(const nlohmann::json& json) {
 }
 
 bool Connection::isAuthorized() const {
-    // require either auth to be disabled or client to be authenticated
-    return !_requireAuthorization || isWhitelisted() || _isAuthorized;
+    return _isAuthorized;
 }
 
 void Connection::setThread(std::thread&& thread) {
@@ -204,11 +210,6 @@ ghoul::io::Socket* Connection::socket() {
 
 void Connection::setAuthorized(bool status) {
     _isAuthorized = status;
-}
-
-bool Connection::isWhitelisted() const {
-    const std::vector<std::string>& wl = global::configuration.clientAddressWhitelist;
-    return std::find(wl.begin(), wl.end(), _address) != wl.end();
 }
 
 } // namespace openspace

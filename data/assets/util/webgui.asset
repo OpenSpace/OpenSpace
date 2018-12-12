@@ -33,7 +33,7 @@ asset.onInitialize(function ()
             "Modules.WebGui.ServerProcessEntryPoint", backend .. "/backend.js"
         )
         openspace.setPropertyValueSingle(
-            "Modules.WebGui.ServerProcessWorkingDirectory", frontend .. "/frontend"
+            "Modules.WebGui.WebDirectory", frontend .. "/frontend"
         )
         openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", true)
     end

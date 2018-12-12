@@ -24,6 +24,7 @@
 
 #include <openspace/engine/configuration.h>
 
+#include <ghoul/logging/logmanager.h>
 #include <openspace/documentation/documentation.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -57,9 +58,6 @@ namespace {
     constexpr const char* KeyKeyboardShortcuts = "KeyboardShortcuts";
     constexpr const char* KeyDocumentation = "Documentation";
     constexpr const char* KeyFactoryDocumentation = "FactoryDocumentation";
-    constexpr const char* KeyRequireSocketAuthentication = "RequireSocketAuthentication";
-    constexpr const char* KeyServerPasskey = "ServerPasskey";
-    constexpr const char* KeyClientAddressWhitelist = "ClientAddressWhitelist";
     constexpr const char* KeyLicenseDocumentation = "LicenseDocumentation";
     constexpr const char* KeyShutdownCountdown = "ShutdownCountdown";
     constexpr const char* KeyPerSceneCache = "PerSceneCache";
@@ -92,6 +90,8 @@ namespace {
     constexpr const char* KeyShowNodeNames = "ShowNodeNames";
     constexpr const char* KeyShowProgressbar = "ShowProgressbar";
     constexpr const char* KeyModuleConfigurations = "ModuleConfigurations";
+
+    constexpr const char* _loggerCat = "Configration";
 
     template <typename T>
     void getValue(ghoul::lua::LuaState& L, const char* name, T& value) {
@@ -294,9 +294,6 @@ void parseLuaState(Configuration& configuration) {
     getValue(s, KeyDisableSceneOnMaster, c.isSceneTranslationOnMasterDisabled);
     getValue(s, KeyDisableInGameConsole, c.isConsoleDisabled);
     getValue(s, KeyRenderingMethod, c.renderingMethod);
-    getValue(s, KeyServerPasskey, c.serverPasskey);
-    getValue(s, KeyRequireSocketAuthentication, c.doesRequireSocketAuthentication);
-    getValue(s, KeyClientAddressWhitelist, c.clientAddressWhitelist);
 
     getValue(s, KeyLogging, c.logging);
     getValue(s, KeyDocumentation, c.documentation);
