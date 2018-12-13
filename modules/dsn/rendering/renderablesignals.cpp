@@ -157,6 +157,12 @@ RenderableSignals::RenderableSignals(const ghoul::Dictionary& dictionary)
     , _spacingSizeFactor(SpacingSizeInfo, 0.0f, 0.0f, 10.0f)
     , _fadeFactor(FadeFactorInfo, 0.5f, 0.1f, 0.5f)
 {
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "RenderableSignals"
+    );
+
     if (dictionary.hasKeyAndValue<ghoul::Dictionary>(SiteColorsInfo.identifier)) {
         ghoul::Dictionary siteColorDictionary = dictionary.value<ghoul::Dictionary>(SiteColorsInfo.identifier);
         std::vector<std::string> siteNames = siteColorDictionary.keys();
