@@ -38,25 +38,29 @@ namespace openspace {
 
         return dataFilesSuccess;
     }
-
-   bool RadecManager::correctHour(double time) const{
+    
+   bool RadecManager::correctFileInterval(double time) const{
        const bool isTimeInFileInterval = (time  >= _checkFileTime) &&
            (time < _checkFileEndTime);
 
        return isTimeInFileInterval;
    }
 
-   bool RadecManager::correctMinute(double time) const {
-       const bool isTimeInActiveMinute = (time >= activeMinute && time < activeMinute + 60);
+   bool RadecManager::correctUpdateInterval(double time) const {
+       int updateFrequency = 5;
+       const bool isTimeInActiveMinute = (time >= activeMinute - updateFrequency*60 && time < activeMinute + updateFrequency*60);
        return isTimeInActiveMinute;
    }
 
    glm::vec3 RadecManager::getPosForTime(double time) const {
-       if (!correctHour(time)) {
+       if (!correctFileInterval(time)) {
            int idx = DataFileHelper::findFileIndexForCurrentTime(time, timeDoubles);
            updateRadecData(idx);
        }
-       if(!correctMinute(time)) {
+       if(!correctUpdateInterval(time)) {
+           std::string testTime = Time(time).UTC();
+           LDEBUG(fmt::format("updated the minute data for time {}", testTime));
+           
            //Compensate for light travel time to the spacecraft
            int idx = DataFileHelper::findFileIndexForCurrentTime(time, minuteTimes);
 

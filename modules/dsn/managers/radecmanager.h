@@ -70,10 +70,10 @@ namespace openspace {
        void updateActiveMinute(int idx) const;
        /*Find the correct minute in the vector of loaded positions*/
        RadecManager::Position getPositionInVector(int idx) const;
-       /*Check if current hour in open space is already loaded*/
-       bool correctHour(double time) const;
-       /*Check if current minute in open space is already loaded*/
-       bool correctMinute(double time) const;
+       /*Check if current file in open space is already loaded*/
+       bool correctFileInterval(double time) const;
+       /*Check if current time interval is still relevant*/
+       bool correctUpdateInterval(double time) const;
        /*Update and reate buffer of data so that we can compensate for light travel time without getting out of bounce*/
        void updateRadecData(int index) const;
     };
