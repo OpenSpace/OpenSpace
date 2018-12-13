@@ -69,7 +69,7 @@ RadecTranslation::RadecTranslation(const ghoul::Dictionary& dictionary)
     std::unique_ptr<ghoul::Dictionary> dictionaryPtr = std::make_unique<ghoul::Dictionary>(dictionary);
   
     _dataStart = Time::convertTime(dictionaryPtr->value<std::string>(keyDataStart));
-    _dataEnd = double(Time::convertTime(dictionaryPtr->value<std::string>(keyDataEnd)));
+    _dataEnd = Time::convertTime(dictionaryPtr->value<std::string>(keyDataEnd));
 
     extractData(dictionaryPtr);
     documentation::testSpecificationAndThrow(
@@ -129,7 +129,7 @@ glm::dvec3 RadecTranslation::position(const UpdateData& data) const{
             }
             else {
                 glm::dvec3 pos = radecManager.getPosForTime(data.time.j2000Seconds());
-                    _position = radecToCartesianCoordinates(pos);
+                _position = radecToCartesianCoordinates(pos);
                 return _position;
             }
     }
