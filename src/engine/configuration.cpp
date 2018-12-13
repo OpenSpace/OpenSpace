@@ -24,7 +24,6 @@
 
 #include <openspace/engine/configuration.h>
 
-#include <ghoul/logging/logmanager.h>
 #include <openspace/documentation/documentation.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -90,8 +89,6 @@ namespace {
     constexpr const char* KeyShowNodeNames = "ShowNodeNames";
     constexpr const char* KeyShowProgressbar = "ShowProgressbar";
     constexpr const char* KeyModuleConfigurations = "ModuleConfigurations";
-
-    constexpr const char* _loggerCat = "Configration";
 
     template <typename T>
     void getValue(ghoul::lua::LuaState& L, const char* name, T& value) {
