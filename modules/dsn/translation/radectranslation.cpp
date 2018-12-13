@@ -28,9 +28,9 @@
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo ObjectIdentifierInfo = {
-    "ObjectIdentifier",
-    "Object Identifier",
-    "Identifier of the object that this translation is applied to."
+        "ObjectIdentifier",
+        "Object Identifier",
+        "Identifier of the object that this translation is applied to."
     };
 } // namespace
 
@@ -56,6 +56,20 @@ documentation::Documentation RadecTranslation::Documentation() {
                 new StringVerifier,
                 Optional::No,
                 ObjectIdentifierInfo.description
+            },
+            {
+                keyDataStart,
+                new StringVerifier,
+                Optional::No,
+                "The start of the timeframe we expect to have data for, "
+                "no warnings will be thrown outside this timesframe."
+            },
+            {
+                keyDataEnd,
+                new StringVerifier,
+                Optional::No,
+                "The end of the timeframe we expect to have data for, "
+                "no warnings will be thrown outside this timesframe."
             }
         }
     };
@@ -66,17 +80,18 @@ RadecTranslation::RadecTranslation() = default;
 RadecTranslation::RadecTranslation(const ghoul::Dictionary& dictionary)
     : RadecTranslation()
 {
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "RadecTranslation"
+    );
     std::unique_ptr<ghoul::Dictionary> dictionaryPtr = std::make_unique<ghoul::Dictionary>(dictionary);
   
     _dataStart = Time::convertTime(dictionaryPtr->value<std::string>(keyDataStart));
     _dataEnd = Time::convertTime(dictionaryPtr->value<std::string>(keyDataEnd));
 
     extractData(dictionaryPtr);
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RadecTranslation"
-    );
+
 
 }
 
