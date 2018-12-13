@@ -445,7 +445,6 @@ bool TouchInteraction::guiMode(const std::vector<TuioCursor>& list) {
         // pressed invisible button
         _guiON = !_guiON;
         module.gui.setEnabled(_guiON);
-        module.gui.setHidden(!_guiON);
 
         LINFO(fmt::format(
             "GUI mode is {}. Inside box by: ({}%, {}%)",
