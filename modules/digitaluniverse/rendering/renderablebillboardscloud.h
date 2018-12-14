@@ -90,8 +90,7 @@ private:
 
     bool loadData();
     bool loadSpeckData();
-    bool loadLabelDataFromFile();
-    bool loadLabelDataFromId();
+    bool loadLabelData();
     bool readSpeckFile();
     bool readColorMapFile();
     bool readLabelFile();
@@ -106,8 +105,6 @@ private:
     bool _hasColorMapFile = false;
     bool _hasPolygon = false;
     bool _hasLabel = false;
-    bool _hasLabelFile = false;
-    bool _hasLabelIdMap = false;
 
     int _polygonSides = 0;
 
@@ -127,7 +124,7 @@ private:
     properties::Vec2Property _fadeInDistance;
     properties::BoolProperty _disableFadeInDistance;
     properties::FloatProperty _billboardMaxSize;
-    properties::FloatProperty _billboardMinSize;    
+    properties::FloatProperty _billboardMinSize;
     properties::FloatProperty _correctionSizeEndDistance;
     properties::FloatProperty _correctionSizeFactor;
 
@@ -150,7 +147,6 @@ private:
     std::string _colorMapFile;
     std::string _labelFile;
     std::string _colorOptionString;
-    ghoul::Dictionary _labelIdMap;
 
     Unit _unit = Parsec;
 

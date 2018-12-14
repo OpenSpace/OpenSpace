@@ -31,15 +31,16 @@ namespace openspace {
     }
 
     void DsnModule::internalInitialize(const ghoul::Dictionary&) {
-        auto factory = FactoryManager::ref().factory<Renderable>();
-        ghoul_assert(factory, "No renderable factory existed");
+        auto renderableFactory = FactoryManager::ref().factory<Renderable>();
+        ghoul_assert(renderableFactory, "No renderable factory existed");
 
-        factory->registerClass<RenderableSignals>("RenderableSignals");
+        renderableFactory->registerClass<RenderableSignals>("RenderableSignals");
+        renderableFactory->registerClass<RenderableLabel>("RenderableLabel");
 
-		auto fTranslation = FactoryManager::ref().factory<Translation>();
-		ghoul_assert(fTranslation, "Translation factory was not created");
+		auto translationFactory = FactoryManager::ref().factory<Translation>();
+		ghoul_assert(translationFactory, "Translation factory was not created");
 
-		fTranslation->registerClass<RadecTranslation>("RadecTranslation");
+        translationFactory->registerClass<RadecTranslation>("RadecTranslation");
     }
 
 } // namespace openspace
