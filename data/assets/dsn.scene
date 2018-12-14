@@ -15,7 +15,7 @@ asset.require('scene/solarsystem/dsn/testRADEC')
 asset.require('scene/solarsystem/missions/dsn/spacecrafts')
 
 --labels 
-asset.request('scene/digitaluniverse/starlabels')
+ --asset.require('scene/digitaluniverse/starlabels')
 asset.require('scene/solarsystem/dsn/spacecraftslabels')
 
 -- Stations
@@ -100,7 +100,8 @@ asset.onInitialize(function ()
     openspace.setDefaultGuiSorting()
 
     openspace.setPropertyValue('Scene.*Trail.Renderable.Enabled', false)
-    --openspace.setPropertyValue('Scene.StarsLabels.Renderable.Enabled', true)
+
+    openspace.setPropertyValue('Scene.SpacecraftsLabels.Renderable.Enabled', true)
 
     openspace.globebrowsing.loadWMSServersFromFile(
         openspace.absPath("${DATA}/globebrowsing_servers.lua")

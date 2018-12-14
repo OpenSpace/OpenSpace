@@ -34,6 +34,7 @@
 
 #include <modules/dsn/translation/radectranslation.h>
 #include <modules/dsn/rendering/renderablesignals.h>
+#include <modules/dsn/rendering/renderablelabel.h>
 
 namespace openspace {
 
