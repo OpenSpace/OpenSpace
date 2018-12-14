@@ -53,14 +53,19 @@ namespace openspace {
 
    glm::vec3 RadecManager::getPosForTime(double time) const {
        if (!correctHour(time)) {
-           
            int idx = DataFileHelper::findFileIndexForCurrentTime(time, timeDoubles);
            updateRadecData(idx);
        }
        if(!correctMinute(time)) {
            //Compensate for light travel time to the spacecraft
-            int idx = DataFileHelper::findFileIndexForCurrentTime(time + position.lightTravelTime, minuteTimes);
-            getPositionInVector(idx);
+           int idx = DataFileHelper::findFileIndexForCurrentTime(time, minuteTimes);
+
+           updateActiveMinute(idx);
+           double lighttimeCompensation = positions[idx].lightTravelTime;
+
+            int compensatedIdx = DataFileHelper::findFileIndexForCurrentTime(time + lighttimeCompensation, minuteTimes);
+            getPositionInVector(compensatedIdx);
+            
        }
        return glm::vec3(position.ra, position.dec, position.range);
    }
@@ -89,25 +94,29 @@ namespace openspace {
        }
        return true;
    }
-
-  RadecManager::Position RadecManager::getPositionInVector(int index) const{
+   void RadecManager::updateActiveMinute(int idx) const{
        minuteTimes.clear();
        minuteTimes.reserve(0);
-      
+
        for (int i = 0; i < RadecManager::positions.size(); i++) {
            minuteTimes.push_back(Time::convertTime(positions[i].timeStamp));
        }
+
+       activeMinute = minuteTimes[idx];
+  }
+
+  RadecManager::Position RadecManager::getPositionInVector(int compensatedIndex) const{
        try{
-           activeMinute = minuteTimes[index];
-           position.timeStamp = positions[index].timeStamp;
-           position.ra = positions[index].ra;
-           position.dec = positions[index].dec;
-           position.range = positions[index].range;
+
+           position.timeStamp = positions[compensatedIndex].timeStamp;
+           position.ra = positions[compensatedIndex].ra;
+           position.dec = positions[compensatedIndex].dec;
+           position.range = positions[compensatedIndex].range;
+
        }
        catch (const std::exception& e) {
-           LERROR(fmt::format("{}: Error when reading data from active minute, index {}",objectIdentifier, index));
+           LERROR(fmt::format("{}: Error when reading data from active minute, index {}",objectIdentifier, compensatedIndex));
        }
-
 
        return position;
    }
@@ -122,6 +131,7 @@ namespace openspace {
         positions.reserve(10);
 
         filename = _dataFiles[index];
+        
         std::string startTimeString = DataFileHelper::getHourFromFileName(filename);
         const double triggerTime = Time::convertTime(startTimeString);
 
@@ -129,7 +139,7 @@ namespace openspace {
         _checkFileEndTime = triggerTime + 3600;
 
         //Light travel time in hours determines where to search for the correct position
-        int lightTravelHours = ceil(position.lightTravelTime / 3600);
+        int lightTravelHours = ceil(positions[index].lightTravelTime / 3600);
 
         if (lightTravelHours > 1)
            index = index + lightTravelHours;
