@@ -118,10 +118,9 @@ asset.onInitialize(function ()
         2160, 4320, 8640
     })
 
-    openspace.markInterestingNodes(
-        "GUI.Interesting",
-        { "OsirisRex", "BennuBarycenter", "Earth" }
-    )
+    openspace.markInterestingNodes({
+        "OsirisRex", "BennuBarycenter", "Earth"
+    })
 
     openspace.addVirtualProperty(
         "BoolProperty",

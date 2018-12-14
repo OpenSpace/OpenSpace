@@ -1,4 +1,4 @@
-asset.require('./io/io')
+asset.require('./callisto/callisto')
 asset.require('./europa/europa')
 asset.require('./ganymede/ganymede')
-asset.require('./callisto/callisto')
+asset.require('./io/io')

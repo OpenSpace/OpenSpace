@@ -24,10 +24,9 @@ asset.onInitialize(function ()
 
     openspace.setDefaultGuiSorting()
 
-    openspace.markInterestingNodes(
-        "GUI.Interesting",
-        { "Dawn", "Ceres", "Vesta"}
-    )
+    openspace.markInterestingNodes({
+        "Dawn", "Ceres", "Vesta"
+    })
 
     openspace.addVirtualProperty(
         "BoolProperty",

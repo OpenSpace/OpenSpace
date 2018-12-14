@@ -26,13 +26,11 @@
 #define __OPENSPACE_CORE___SCENEGRAPHNODE___H__
 
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
+#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 #include <atomic>

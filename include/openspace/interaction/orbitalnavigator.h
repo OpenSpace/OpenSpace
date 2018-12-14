@@ -90,7 +90,6 @@ private:
     properties::FloatProperty _followFocusNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
 
-    properties::FloatProperty _sensitivity;
     properties::FloatProperty _velocitySensitivity;
     properties::BoolProperty _flyTo;
     properties::BoolProperty _overview;

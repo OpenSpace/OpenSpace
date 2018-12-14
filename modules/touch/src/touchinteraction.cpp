@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/globals.h>
 #include <modules/touch/include/touchinteraction.h>
 #include <modules/imgui/imguimodule.h>
 #include <modules/webbrowser/webbrowsermodule.h>
@@ -431,14 +432,13 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
 }
 
 bool TouchInteraction::webContent(const std::vector<TuioCursor>& list) {
-    WindowWrapper& wrapper = OsEng.windowWrapper();
-    glm::ivec2 res = wrapper.currentWindowSize();
+    glm::ivec2 res = global::windowDelegate.currentWindowSize();
     glm::dvec2 pos = glm::vec2(
         list.at(0).getScreenX(res.x),
         list.at(0).getScreenY(res.y)
     );
 
-    WebBrowserModule& module = *(OsEng.moduleEngine().module<WebBrowserModule>());
+    WebBrowserModule& module = *(global::moduleEngine.module<WebBrowserModule>());
     return module.getEventHandler().hasContentCallback(pos.x, pos.y);
 }
 
@@ -1314,7 +1314,7 @@ void TouchInteraction::step(double dt) {
             planetBoundaryRadius *= _zoomBoundarySphereMultiplier;
             double distToSurface = length(centerToCamera - planetBoundaryRadius);
 
-            WebGuiModule& module = *(OsEng.moduleEngine().module<WebGuiModule>());
+            WebGuiModule& module = *(global::moduleEngine.module<WebGuiModule>());
             float overviewLimit = module.storyHandler.overviewLimit();
             float zoomInLimit = module.storyHandler.zoomInLimit();
 

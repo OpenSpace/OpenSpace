@@ -56,10 +56,6 @@ namespace {
 
 namespace openspace {
 
-WebGuiModule::WebGuiModule() : OpenSpaceModule(WebGuiModule::Name) {
-    addPropertySubOwner(storyHandler);
-}
-
 WebGuiModule::WebGuiModule()
     : OpenSpaceModule(WebGuiModule::Name)
     , _enabled(ServerProcessEnabledInfo, false)
@@ -69,6 +65,7 @@ WebGuiModule::WebGuiModule()
     addProperty(_enabled);
     addProperty(_entryPoint);
     addProperty(_workingDirectory);
+    addPropertySubOwner(storyHandler);
 }
 
 void WebGuiModule::internalInitialize(const ghoul::Dictionary&) {

@@ -28,10 +28,9 @@ asset.onInitialize(function ()
       28800, 57600, 115200, 230400, 460800, 921600, 1843200, 3686400, 7372800, 14745600
     })
 
-    openspace.markInterestingNodes(
-        "GUI.Interesting",
-        {"Jupiter", "Juno"}
-    )
+    openspace.markInterestingNodes({
+        "Jupiter", "Juno"
+    })
 
     openspace.addVirtualProperty(
         "BoolProperty",
@@ -53,8 +52,7 @@ end)
 asset.onDeinitialize(function ()
     openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
 
-    openspace.removeInterestingNodes(
-        "GUI.Interesting",
-        {"Jupiter", "Juno" }
-    )
+    openspace.removeInterestingNodes({
+        "Jupiter", "Juno"
+    })
 end)

@@ -28,6 +28,7 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
@@ -111,14 +112,13 @@ bool TouchModule::hasNewInput() {
 void TouchModule::hasNewWebInput(const std::vector<TuioCursor>& listOfContactPoints) {
     // If one point input and no data in webPosition callback send mouse click to webgui
     if (listOfContactPoints.size() == 1 && (webPositionCallback.x == 0 && webPositionCallback.y == 0)) {
-        WindowWrapper& wrapper = OsEng.windowWrapper();
-        glm::ivec2 res = wrapper.currentWindowSize();
+        glm::ivec2 res = global::windowDelegate.currentWindowSize();
         glm::dvec2 pos = glm::vec2(
             listOfContactPoints.at(0).getScreenX(res.x),
             listOfContactPoints.at(0).getScreenY(res.y)
         );
 
-        WebBrowserModule& module = *(OsEng.moduleEngine().module<WebBrowserModule>());
+        WebBrowserModule& module = *(global::moduleEngine.module<WebBrowserModule>());
         if (module.getEventHandler().hasContentCallback(pos.x, pos.y)) {
             webPositionCallback = glm::vec2(pos.x, pos.y);
             module.getEventHandler().touchPressCallback(pos.x, pos.y);
@@ -126,7 +126,7 @@ void TouchModule::hasNewWebInput(const std::vector<TuioCursor>& listOfContactPoi
     }
     // Send mouse release if not same point input
     else if (listOfContactPoints.size() != 1 && (webPositionCallback.x != 0 && webPositionCallback.y != 0)) {
-        WebBrowserModule& module = *(OsEng.moduleEngine().module<WebBrowserModule>());
+        WebBrowserModule& module = *(global::moduleEngine.module<WebBrowserModule>());
         module.getEventHandler().touchReleaseCallback(webPositionCallback.x, webPositionCallback.y);
         webPositionCallback = glm::vec2(0, 0);
     }

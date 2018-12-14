@@ -22,16 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/globals.h>
 #include <openspace/scene/scenegraphnode.h>
 
 #include <modules/base/scale/staticscale.h>
 #include <modules/base/rotation/staticrotation.h>
 #include <modules/base/translation/statictranslation.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/timeframe.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -45,9 +46,9 @@ namespace {
     constexpr const char* KeyGuiPath = "GUI.Path";
     constexpr const char* KeyGuiHidden = "GUI.Hidden";
 
-    constexpr const char* keyTransformTranslation = "Transform.Translation";
-    constexpr const char* keyTransformRotation = "Transform.Rotation";
-    constexpr const char* keyTransformScale = "Transform.Scale";
+    constexpr const char* KeyTransformTranslation = "Transform.Translation";
+    constexpr const char* KeyTransformRotation = "Transform.Rotation";
+    constexpr const char* KeyTransformScale = "Transform.Scale";
 
     constexpr const char* KeyTimeFrame = "TimeFrame";
 
@@ -75,6 +76,7 @@ namespace {
         "VisibilityDistance",
         "VisibilityDistance",
         "" // @TODO Missing documentation
+    };
 
     constexpr openspace::properties::Property::PropertyInfo GuiPathInfo = {
         "GuiPath",
@@ -641,8 +643,7 @@ void SceneGraphNode::getScreenSpaceData(RenderData& newData) {
          // If the object is not in the screen, we dont want to consider it at all
         if (ndc.x >= -1.0 && ndc.x <= 1.0 && ndc.y >= -1.0 && ndc.y <= 1.0 && clipSpace.z > 0) {
 
-            WindowWrapper& wrapper = OsEng.windowWrapper();
-            glm::ivec2 res = wrapper.currentWindowSize();
+            glm::ivec2 res = global::windowDelegate.currentWindowSize();
             glm::ivec2 screenSpacePosition = glm::ivec2((ndc.x + 1) * res.x / 2, (ndc.y + 1) * res.y / 2);
 
             // Get the radius of node

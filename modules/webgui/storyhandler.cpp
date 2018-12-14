@@ -1,3 +1,4 @@
+#include <openspace/engine/globals.h>
 #include "storyhandler.h"
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/openspace.h>
@@ -24,13 +25,13 @@ namespace {
     static const openspace::properties::Property::PropertyInfo ApplyRemoveTagInfo = {
         "ApplyRemoveTag",
         "ApplyRemoveTag",
-        "Triggering this property will add the Story.Interesting tag to all the nodes listed in"
+        "Triggering this property will add the 'interesting' tag to all the nodes listed in"
         "the focus nodes list."
     };
     static const openspace::properties::Property::PropertyInfo ApplyAddTagInfo = {
         "ApplyAddTag",
         "ApplyAddTag",
-        "Triggering this property will remove the Story.Interesting tag from all the nodes listed"
+        "Triggering this property will remove the 'interesting' tag from all the nodes listed"
         "in the focus nodes list."
     };
     static const openspace::properties::Property::PropertyInfo FocusNodesListInfo = {
@@ -62,15 +63,15 @@ namespace openspace::webgui {
     };
 
     void StoryHandler::removeTags() {
-        OsEng.scriptEngine().queueScript(
-            "openspace.removeInterestingNodes( \"Story.Interesting\" , {" + static_cast<std::string>(_focusNodesList) + "})",
+        openspace::global::scriptEngine.queueScript(
+            "openspace.removeInterestingNodes({" + static_cast<std::string>(_focusNodesList) + "})",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
 
     void StoryHandler::addTags() {
-        OsEng.scriptEngine().queueScript(
-        "openspace.markInterestingNodes( \"Story.Interesting\" , {" + static_cast<std::string>(_focusNodesList) + "})",
+        openspace::global::scriptEngine.queueScript(
+        "openspace.markInterestingNodes({" + static_cast<std::string>(_focusNodesList) + "})",
         scripting::ScriptEngine::RemoteScripting::Yes
       );
    };

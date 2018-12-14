@@ -21,6 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+#include <openspace/engine/globals.h>
 
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/engine/moduleengine.h>
@@ -29,6 +30,9 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 #include <glm/gtx/vector_angle.hpp>
+#include <modules/webgui/webguimodule.h>
+#include <modules/globebrowsing/globebrowsingmodule.h>
+#include <modules/globebrowsing/src/renderableglobe.h>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo RollFrictionInfo = {
@@ -288,7 +292,7 @@ void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
 }
 
 void OrbitalNavigator::updateCameraStateFromStates(Camera& camera, double deltaTime) {
-    GlobeBrowsingModule& module = *(OsEng.moduleEngine().module<GlobeBrowsingModule>());
+    GlobeBrowsingModule& module = *(global::moduleEngine.module<GlobeBrowsingModule>());
     if (_focusNode) {
         // Read the current state of the camera
         glm::dvec3 camPos = camera.positionVec3();
@@ -332,7 +336,7 @@ void OrbitalNavigator::updateCameraStateFromStates(Camera& camera, double deltaT
 
         // Zoom away from the focus node until the entire solar system is in the camera view
         if (_overview) {
-            WebGuiModule& module = *(OsEng.moduleEngine().module<WebGuiModule>());
+            WebGuiModule& module = *(global::moduleEngine.module<WebGuiModule>());
             float overviewLimit = module.storyHandler.overviewLimit();
             _flyTo = false;
 
@@ -495,8 +499,8 @@ void OrbitalNavigator::setFocusNode(SceneGraphNode* focusNode) {
 
     // If the current focusNode is a renderable globe, orientation can be set using goToGeo(),
     // otherwise it can not
-    GlobeBrowsingModule& module = *(OsEng.moduleEngine().module<GlobeBrowsingModule>());
-    globebrowsing::RenderableGlobe* globe = module.castFocusNodeRenderableToGlobe();
+    GlobeBrowsingModule& module = *(global::moduleEngine.module<GlobeBrowsingModule>());
+    const globebrowsing::RenderableGlobe* globe = module.castFocusNodeRenderableToGlobe();
     if (globe) {
         _changeOrientation = true;
     }

@@ -148,7 +148,7 @@ void EventHandler::touchPressCallback(double x, double y) {
         _mousePosition.x = (int)x;
         _mousePosition.y = (int)y;
 
-        int clickCount = BrowserInstance::SINGLE_CLICK;
+        int clickCount = BrowserInstance::SingleClick;
         _browserInstance->sendMouseClickEvent(mouseEvent(), MBT_LEFT, false, clickCount);
     }
 }
@@ -158,7 +158,7 @@ void EventHandler::touchReleaseCallback(double x, double y) {
         _mousePosition.x = (int)x;
         _mousePosition.y = (int)y;
 
-        int clickCount = BrowserInstance::SINGLE_CLICK;
+        int clickCount = BrowserInstance::SingleClick;
         _browserInstance->sendMouseClickEvent(mouseEvent(), MBT_LEFT, true, clickCount);
     }
 }

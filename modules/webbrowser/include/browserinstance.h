@@ -96,7 +96,6 @@ public:
      * \return if this scroll should be blocked or not
      */
     bool sendMouseWheelEvent(const CefMouseEvent& event, const glm::ivec2& delta);
->>>>>>> master
     void reloadBrowser();
 
     const CefRefPtr<CefBrowser>& getBrowser() const;

@@ -170,21 +170,23 @@ openspace.globebrowsing.createGibsGdalXml = function (layerName, date, resolutio
 end
 
 openspace.globebrowsing.parseInfoFile = function (file)
+    Name = nil
+    Identifier = nil
+    Description = nil
+    ColorFile = nil
+    HeightFile = nil
+
     local dir = openspace.directoryForPath(file)
     dofile(file)
 
-    local name = nil
-    if Name then
-        name = Name
-    end
-
-    local identifier = Identifier
+    local name = Name or Identifier
+    local identifier = Identifier or Name
 
     local color = nil
     if ColorFile then
         color = {
-            Identifier = Identifier,
-            Name = Name or Identifier,
+            Identifier = identifier,
+            Name = name,
             Description = Description or "",
             FilePath = dir .. '/' .. ColorFile,
             BlendMode = "Color"
@@ -194,8 +196,8 @@ openspace.globebrowsing.parseInfoFile = function (file)
     local height = nil
     if HeightFile then
         height = {
-            Identifier = Identifier,
-            Name = Name or Identifier,
+            Identifier = identifier,
+            Name = name,
             Description = Description or "",
             FilePath = dir .. '/' .. HeightFile,
             TilePixelSize = 90
