@@ -56,7 +56,8 @@ namespace openspace {
            int idx = DataFileHelper::findFileIndexForCurrentTime(time, timeDoubles);
            updateRadecData(idx);
        }
-       if(!correctMinute(time)) {
+       // positions have to be loaded before we try to update minute
+       if(positions.size() && !correctMinute(time)) {
            //Compensate for light travel time to the spacecraft
            int idx = DataFileHelper::findFileIndexForCurrentTime(time, minuteTimes);
 

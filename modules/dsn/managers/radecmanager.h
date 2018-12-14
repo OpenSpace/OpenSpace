@@ -49,7 +49,7 @@ namespace openspace {
        mutable std::vector<double> minuteTimes;
        mutable Position position; 
 
-       mutable double activeMinute;
+       mutable double activeMinute = -1;
        /* Identifier for object using the translation, used for logging */
        std::string objectIdentifier;
        /*Used to check if the loaded file is still relevant or if we should look for another one. */
@@ -79,4 +79,4 @@ namespace openspace {
     };
 }
 
-#endif 
+#endif // __OPENSPACE_MODULE_DSN___RADECMANAGER___H__
