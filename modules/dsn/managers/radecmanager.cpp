@@ -47,30 +47,35 @@ namespace openspace {
    }
 
    bool RadecManager::correctUpdateInterval(double time) const {
-       const bool isTimeInActiveMinute = (time > activeMinute - updateFrequency*60 && time < activeMinute + updateFrequency*60);
-       return isTimeInActiveMinute;
+       const bool isTimeInActiveMinute = (time > activeMinute - updateFrequency *60 && time < activeMinute + updateFrequency *60);
+           return isTimeInActiveMinute;
    }
 
    void RadecManager::setUpdateFrequency(double updatedFreq) {
+       //Determines how many minutes between updates
        updateFrequency = updatedFreq;
-       LDEBUG(fmt::format("Set mew update frequency {}", updateFrequency));
-
    }
+
    glm::vec3 RadecManager::getPosForTime(double time) const {
        if (!correctFileInterval(time)) {
            int idx = DataFileHelper::findFileIndexForCurrentTime(time, timeDoubles);
            updateRadecData(idx);
+          
+           int index = DataFileHelper::findFileIndexForCurrentTime(time, minuteTimes);
+           updateActiveMinute(index);
        }
-       if(!correctUpdateInterval(time)) {
+
+       if (positions.size() && !correctUpdateInterval(time)) {
            //Compensate for light travel time to the spacecraft
            int idx = DataFileHelper::findFileIndexForCurrentTime(time, minuteTimes);
            updateActiveMinute(idx);
-           double lighttimeCompensation = positions[idx].lightTravelTime;
 
+           double lighttimeCompensation = positions[idx].lightTravelTime;
            int compensatedIdx = DataFileHelper::findFileIndexForCurrentTime(time + lighttimeCompensation, minuteTimes);
            getPositionInVector(compensatedIdx);
-            
-       }
+
+       }  
+
        return glm::vec3(position.ra, position.dec, position.range);
    }
 
@@ -97,6 +102,7 @@ namespace openspace {
        }
        return true;
    }
+
    void RadecManager::updateActiveMinute(int idx) const{
        minuteTimes.clear();
        minuteTimes.reserve(0);
@@ -162,7 +168,6 @@ namespace openspace {
             radecParser(index + 1);
 
         }
-
   }
 }
 

@@ -35,7 +35,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UpdateFrequencyInfo = {
     "UpdateFrequency",
     "Update Frequency",
-    "Determines how many minute open space will wait before looking for new positions"
+    "Determines how many minutes between positioning data reload. "
     };
 } // namespace
 
@@ -86,11 +86,9 @@ documentation::Documentation RadecTranslation::Documentation() {
     };
 }
 
-//RadecTranslation::RadecTranslation() = default;
-
 RadecTranslation::RadecTranslation()
     : _updateFrequency(
-        UpdateFrequencyInfo, 1.f, 1.f, 60.f
+        UpdateFrequencyInfo, 1.f, 1.f, 100.f
     )
 {
     addProperty(_updateFrequency);
@@ -101,7 +99,6 @@ RadecTranslation::RadecTranslation()
         radecManager.setUpdateFrequency(_updateFrequency);
     });
 }
-
 
 RadecTranslation::RadecTranslation(const ghoul::Dictionary& dictionary)
     : RadecTranslation()
