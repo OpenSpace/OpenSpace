@@ -60,6 +60,7 @@ private:
     mutable glm::vec3 _position;
     ///Determines between what dates there is data available. Set in the asset file. 
     double _dataStart, _dataEnd;
+    properties::FloatProperty _updateFrequency;
 
     glm::dmat4 _rotEquatorialSphere = { -0.05487554,  0.4941095, -0.8676661, 0.0,
             -0.8734371 , -0.4448296, -0.1980764, 0.0,

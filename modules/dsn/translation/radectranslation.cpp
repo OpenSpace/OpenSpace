@@ -32,6 +32,11 @@ namespace {
         "Object Identifier",
         "Identifier of the object that this translation is applied to."
     };
+    constexpr openspace::properties::Property::PropertyInfo UpdateFrequencyInfo = {
+    "UpdateFrequency",
+    "Update Frequency",
+    "Determines how many minute open space will wait before looking for new positions"
+    };
 } // namespace
 
 namespace openspace {
@@ -58,6 +63,12 @@ documentation::Documentation RadecTranslation::Documentation() {
                 ObjectIdentifierInfo.description
             },
             {
+                UpdateFrequencyInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                UpdateFrequencyInfo.description
+            },
+            {
                 keyDataStart,
                 new StringVerifier,
                 Optional::No,
@@ -75,10 +86,26 @@ documentation::Documentation RadecTranslation::Documentation() {
     };
 }
 
-RadecTranslation::RadecTranslation() = default;
+//RadecTranslation::RadecTranslation() = default;
+
+RadecTranslation::RadecTranslation()
+    : _updateFrequency(
+        UpdateFrequencyInfo, 1.f, 1.f, 60.f
+    )
+{
+    addProperty(_updateFrequency);
+
+    _updateFrequency.onChange([this]() {
+        requireUpdate();
+        notifyObservers();
+        radecManager.setUpdateFrequency(_updateFrequency);
+    });
+}
+
 
 RadecTranslation::RadecTranslation(const ghoul::Dictionary& dictionary)
     : RadecTranslation()
+
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -87,12 +114,14 @@ RadecTranslation::RadecTranslation(const ghoul::Dictionary& dictionary)
     );
     std::unique_ptr<ghoul::Dictionary> dictionaryPtr = std::make_unique<ghoul::Dictionary>(dictionary);
   
+    if (dictionary.hasKey(UpdateFrequencyInfo.identifier)) {
+        _updateFrequency = dictionary.value<float>(UpdateFrequencyInfo.identifier);
+    }
+
     _dataStart = Time::convertTime(dictionaryPtr->value<std::string>(keyDataStart));
     _dataEnd = Time::convertTime(dictionaryPtr->value<std::string>(keyDataEnd));
 
     extractData(dictionaryPtr);
-
-
 }
 
 void RadecTranslation::extractData(std::unique_ptr<ghoul::Dictionary> &dictionary){

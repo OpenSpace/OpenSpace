@@ -40,35 +40,35 @@ namespace openspace {
     }
     
    bool RadecManager::correctFileInterval(double time) const{
-       const bool isTimeInFileInterval = (time  >= _checkFileTime) &&
+       const bool isTimeInFileInterval = (time  > _checkFileTime) &&
            (time < _checkFileEndTime);
 
        return isTimeInFileInterval;
    }
 
    bool RadecManager::correctUpdateInterval(double time) const {
-       int updateFrequency = 5;
-       const bool isTimeInActiveMinute = (time >= activeMinute - updateFrequency*60 && time < activeMinute + updateFrequency*60);
+       const bool isTimeInActiveMinute = (time > activeMinute - updateFrequency*60 && time < activeMinute + updateFrequency*60);
        return isTimeInActiveMinute;
    }
 
+   void RadecManager::setUpdateFrequency(double updatedFreq) {
+       updateFrequency = updatedFreq;
+       LDEBUG(fmt::format("Set mew update frequency {}", updateFrequency));
+
+   }
    glm::vec3 RadecManager::getPosForTime(double time) const {
        if (!correctFileInterval(time)) {
            int idx = DataFileHelper::findFileIndexForCurrentTime(time, timeDoubles);
            updateRadecData(idx);
        }
        if(!correctUpdateInterval(time)) {
-           std::string testTime = Time(time).UTC();
-           LDEBUG(fmt::format("updated the minute data for time {}", testTime));
-           
            //Compensate for light travel time to the spacecraft
            int idx = DataFileHelper::findFileIndexForCurrentTime(time, minuteTimes);
-
            updateActiveMinute(idx);
            double lighttimeCompensation = positions[idx].lightTravelTime;
 
-            int compensatedIdx = DataFileHelper::findFileIndexForCurrentTime(time + lighttimeCompensation, minuteTimes);
-            getPositionInVector(compensatedIdx);
+           int compensatedIdx = DataFileHelper::findFileIndexForCurrentTime(time + lighttimeCompensation, minuteTimes);
+           getPositionInVector(compensatedIdx);
             
        }
        return glm::vec3(position.ra, position.dec, position.range);
@@ -89,12 +89,11 @@ namespace openspace {
                position.dec = pos["DecDn"].get<double>();
                position.range = pos["GeoRngDn"].get<double>();
                position.lightTravelTime = pos["DLT"].get<double>();
-
            }
            catch (const std::exception& e) {
                LERROR(fmt::format("{}: Error in json object number {} while reading file '{}'", objectIdentifier, objectCounter, filename));
            }
-           RadecManager::positions.push_back(position);
+           RadecManager::positions.push_back(position); 
        }
        return true;
    }
@@ -105,7 +104,6 @@ namespace openspace {
        for (int i = 0; i < RadecManager::positions.size(); i++) {
            minuteTimes.push_back(Time::convertTime(positions[i].timeStamp));
        }
-
        activeMinute = minuteTimes[idx];
   }
 
@@ -148,7 +146,7 @@ namespace openspace {
         if (lightTravelHours > 1)
            index = index + lightTravelHours;
 
-        else if (index < 1) {
+        if (index < 1) {
             radecParser(index);
             radecParser(index + 1);
             return;
@@ -162,6 +160,7 @@ namespace openspace {
             radecParser(index - 1);
             radecParser(index);
             radecParser(index + 1);
+
         }
 
   }

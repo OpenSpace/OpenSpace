@@ -48,7 +48,7 @@ namespace openspace {
        mutable std::vector<Position> positions;
        mutable std::vector<double> minuteTimes;
        mutable Position position; 
-
+       mutable double updateFrequency = 1;
        mutable double activeMinute;
        /* Identifier for object using the translation, used for logging */
        std::string objectIdentifier;
@@ -76,6 +76,7 @@ namespace openspace {
        bool correctUpdateInterval(double time) const;
        /*Update and reate buffer of data so that we can compensate for light travel time without getting out of bounce*/
        void updateRadecData(int index) const;
+       void setUpdateFrequency(double updateFrequency);
     };
 }
 
