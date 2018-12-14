@@ -31,7 +31,6 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/crc32.h>
@@ -127,13 +126,6 @@ namespace {
         "Label File",
         "The path to the label file that contains information about the astronomical "
         "objects being rendered."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LabelIdentifierMapInfo = {
-        "LabelIdentifierMap",
-        "Label Identifier Map",
-        "The mapping of identifiers to text if we want to attach labels to scenegraphnodes "
-        "instead of reading positions from file. "
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelMinSizeInfo = {
@@ -259,7 +251,7 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
             {
                 keyColor,
                 new Vector3Verifier<float>,
-                Optional::Yes,
+                Optional::No,
                 "Astronomical Object Color (r,g,b)."
             },
             {
@@ -309,12 +301,6 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
                 new StringVerifier,
                 Optional::Yes,
                 LabelFileInfo.description
-            },
-            {
-                LabelIdentifierMapInfo.identifier,
-                new TableVerifier,
-                Optional::Yes,
-                LabelIdentifierMapInfo.description
             },
             {
                 LabelMinSizeInfo.identifier,
@@ -551,41 +537,25 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _hasPolygon = true;
     }
 
-    if (dictionary.hasKey(LabelFileInfo.identifier) || dictionary.hasKey(LabelIdentifierMapInfo.identifier)) {
-        
-        if (dictionary.hasKey(LabelFileInfo.identifier)) {
-
-            _labelFile = absPath(dictionary.value<std::string>(
-                LabelFileInfo.identifier
-                ));
-            _hasLabel = true;
-            _hasLabelFile = true;
-        
-        }
-        else if (dictionary.hasKey(LabelIdentifierMapInfo.identifier)) {
-
-            _labelIdMap = dictionary.value<ghoul::Dictionary>(LabelIdentifierMapInfo.identifier);
-        
-            _hasLabel = true;
-            _hasLabelIdMap = true;
-        }
-        else {
-            LERROR(fmt::format("Needs a valid {} or {}", LabelIdentifierMapInfo.identifier, LabelFileInfo.identifier));
-            _hasLabel = false;
-        }
-        
-        
+    if (dictionary.hasKey(LabelFileInfo.identifier)) {
         if (dictionary.hasKey(DrawLabelInfo.identifier)) {
             _drawLabels = dictionary.value<bool>(DrawLabelInfo.identifier);
         }
         addProperty(_drawLabels);
 
+        _labelFile = absPath(dictionary.value<std::string>(
+            LabelFileInfo.identifier
+            ));
+        _hasLabel = true;
+
         if (dictionary.hasKey(TextColorInfo.identifier)) {
             _textColor = dictionary.value<glm::vec4>(TextColorInfo.identifier);
+            _hasLabel = true;
         }
         _textColor.setViewOption(properties::Property::ViewOptions::Color);
         addProperty(_textColor);
         _textColor.onChange([&]() { _textColorIsDirty = true; });
+
 
         if (dictionary.hasKey(TextSizeInfo.identifier)) {
             _textSize = dictionary.value<float>(TextSizeInfo.identifier);
@@ -872,14 +842,10 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
             break;
     }
 
-    if (_hasLabelIdMap) {
-        _labelData.clear();
-        loadLabelDataFromId();
-    }
     glm::vec4 textColor = _textColor;
     textColor.a *= fadeInVariable;
     textColor.a *= _opacity;
-    for (const std::pair<glm::dvec3, std::string>& pair : _labelData) {
+    for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
         //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
         glm::vec3 scaledPos(pair.first);
         scaledPos *= scale;
@@ -1090,25 +1056,17 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
 bool RenderableBillboardsCloud::loadData() {
     bool success = true;
 
-    if (_hasLabelFile) {
-    
-        success &= loadSpeckData();
+    success &= loadSpeckData();
 
-        if (_hasColorMapFile) {
-            if (!_hasSpeckFile) {
-                success = true;
-            }
-            success &= readColorMapFile();
+    if (_hasColorMapFile) {
+        if (!_hasSpeckFile) {
+            success = true;
         }
-
-        success &= loadLabelDataFromFile();
-    
+        success &= readColorMapFile();
     }
 
-    if (_hasLabelIdMap) {
+    success &= loadLabelData();
 
-        success &= loadLabelDataFromId();
-    }
     return success;
 }
 
@@ -1153,7 +1111,7 @@ bool RenderableBillboardsCloud::loadSpeckData() {
     return success;
 }
 
-bool RenderableBillboardsCloud::loadLabelDataFromFile() {
+bool RenderableBillboardsCloud::loadLabelData() {
     bool success = true;
     if (!_labelFile.empty()) {
         // I disabled the cache as it didn't work on Mac --- abock
@@ -1325,36 +1283,6 @@ bool RenderableBillboardsCloud::readColorMapFile() {
         }
 
         _colorMapData.push_back(color);
-    }
-
-    return true;
-}
-
-bool RenderableBillboardsCloud::loadLabelDataFromId() {
-
-    std::vector<std::string> keys = _labelIdMap.keys();
-
-    std::string id = "";
-
-    for (int i = 0; i < keys.size(); i++)
-    {
-        id = keys.at(i);
-        std::string label = _labelIdMap.value<std::string>(keys.at(i));
-
-        if (global::renderEngine.scene()->sceneGraphNode(id)) {
-            glm::dvec3 position = global::renderEngine.scene()->sceneGraphNode(id)->worldPosition();
-
-            glm::dvec3 transformedPos = glm::dvec3(
-                _transformationMatrix * glm::dvec4(position, 1.0)
-            );
-            _labelData.emplace_back(std::make_pair(transformedPos, label));
-
-        }
-        else {
-            LERROR(fmt::format("No SceneGraphNode found with identifier {}", id));
-            return false;
-        }
-
     }
 
     return true;
