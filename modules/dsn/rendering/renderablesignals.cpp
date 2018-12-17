@@ -483,16 +483,13 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
     _vertexArray.push_back(signal.endTransmission - signal.startTransmission);
 }
 
-/* Since our station dishes have a static translation from Earth, we
-* can get their local translation. The reason to handle it differently
-* compared to the spacecrafts is to keep an exact render position
-* for the station line ends even when the focusNode is Earth. */
+
 glm::dvec3 RenderableSignals::getCoordinatePosFromFocusNode(SceneGraphNode* node) {
 
     glm::dvec3 nodePos = node->worldPosition();
     glm::dvec3 focusNodePos = _focusNode->worldPosition();
 
-    glm::dvec3 diff = glm::vec3(nodePos.x - focusNodePos.x, nodePos.y - focusNodePos.y,
+    glm::dvec3 diff = glm::dvec3(nodePos.x - focusNodePos.x, nodePos.y - focusNodePos.y,
         nodePos.z - focusNodePos.z);
 
     return diff;
@@ -512,7 +509,10 @@ glm::dvec3 RenderableSignals::getSuitablePrecisionPositionForSceneGraphNode(std:
 
     return position;
 }
-
+/* Since our station dishes have a static translation from Earth, we
+* can get their local translation. The reason to handle it differently
+* compared to the spacecrafts is to keep an exact render position
+* for the station line ends even when the focusNode is Earth. */
 glm::dvec3 RenderableSignals::getPositionForGeocentricSceneGraphNode(const char* id) {
 
     glm::dvec3 position;
