@@ -52,37 +52,32 @@ namespace openspace {
         bool isReady() const override;
 
         void render(const RenderData& data, RendererTasks& rendererTask) override;
-       // void update(const UpdateData& data) override;
 
         static documentation::Documentation Documentation();
 
     private:
-        //enum Unit {
-        //    Meter = 0,
-        //    Kilometer = 1,
-        //    Parsec = 2,
-        //    Kiloparsec = 3,
-        //    Megaparsec = 4,
-        //    Gigaparsec = 5,
-        //    GigalightYears = 6
-        //};
+
+        const double _maxDistanceUnit = 1E10;
 
         void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-            const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
+            const glm::dvec3& orthoRight, const glm::dvec3& orthoUp);
 
         bool loadData();
         bool loadLabelDataFromId();
 
+        bool _hasStaticLabelSize = false;
         bool _dataIsDirty = true;
         bool _textColorIsDirty = true;
         bool _hasLabel = false;
         bool _hasLabelIdMap = false;
+        double maxMinNormalize(double value, glm::dvec2 newRange, glm::dvec2 oldRange);
 
         properties::FloatProperty _scaleFactor;
         properties::Vec4Property _textColor;
-        properties::FloatProperty _textSize;
-        properties::FloatProperty _textMinSize;
-        properties::FloatProperty _textMaxSize;
+        properties::FloatProperty _labelSize;
+        properties::Vec2Property _labelSizeRange;
+        //properties::FloatProperty _textMinSize;
+        //properties::FloatProperty _textMaxSize;
         properties::BoolProperty _drawLabels;
         properties::Vec2Property _fadeInDistance;
         properties::BoolProperty _disableFadeInDistance;
@@ -92,8 +87,17 @@ namespace openspace {
 
         std::shared_ptr<ghoul::fontrendering::Font> _font;
         ghoul::Dictionary _labelIdMap;
-        std::vector<std::pair<glm::vec3, std::string>> _labelData;
+        std::vector<std::pair<glm::dvec3, std::string>> _labelData;
         glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
+
+        /*The minimal size(in pixels) of the text for the labels 
+        for the astronomical objects being rendered.*/
+        double _textMinSize = 1.0;
+        /*The maximal size(in pixels) of the text for the labels
+        for the astronomical objects being rendered.*/
+        double _textMaxSize = 100.0;
+
+
     };
 
 } // namespace openspace

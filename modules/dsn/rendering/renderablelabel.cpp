@@ -60,20 +60,40 @@ namespace {
         "The text color for the astronomical object."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
-        "TextSize",
-        "Text Size",
-        "The text size for the astronomical object labels."
+    constexpr openspace::properties::Property::PropertyInfo LabelSizeInfo = {
+        "LabelSize",
+        "Label Size",
+        "The static label size if no LabelSizeRange interval are set "
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LabelMinSizeInfo = {
+    //constexpr openspace::properties::Property::PropertyInfo TextMinSizeInfo = {
+    //    "TextMinSize",
+    //    "Text Min Size",
+    //    "The minimal size (in pixels) of the text for the labels for the astronomical "
+    //    "objects being rendered."
+    //};
+
+    //constexpr openspace::properties::Property::PropertyInfo TextMaxSizeInfo = {
+    //    "TextMaxSize",
+    //    "Text Max Size",
+    //    "The maximum size (in pixels) of the text for the labels for the astronomical "
+    //    "objects being rendered."
+    //};
+    constexpr openspace::properties::Property::PropertyInfo LabelSizeRangeInfo = {
+        "LabelSizeRange",
+        "Label Size Range",
+        "These values determine the min and max size of this label when it is "
+        "scaled depending on distance"
+    };
+
+        constexpr openspace::properties::Property::PropertyInfo TextMinSizeInfo = {
         "TextMinSize",
         "Text Min Size",
         "The minimal size (in pixels) of the text for the labels for the astronomical "
         "objects being rendered."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LabelMaxSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TextMaxSizeInfo = {
         "TextMaxSize",
         "Text Max Size",
         "The maximum size (in pixels) of the text for the labels for the astronomical "
@@ -152,22 +172,22 @@ namespace openspace {
                     TextColorInfo.description
                 },
                 {
-                    TextSizeInfo.identifier,
+                    LabelSizeInfo.identifier,
                     new DoubleVerifier,
                     Optional::Yes,
-                    TextSizeInfo.description
+                    LabelSizeInfo.description
                 },
                 {
-                    LabelMinSizeInfo.identifier,
+                    TextMinSizeInfo.identifier,
                     new DoubleVerifier,
                     Optional::Yes,
-                    LabelMinSizeInfo.description
+                    TextMinSizeInfo.description
                 },
                 {
-                    LabelMaxSizeInfo.identifier,
+                    TextMaxSizeInfo.identifier,
                     new DoubleVerifier,
                     Optional::Yes,
-                    LabelMaxSizeInfo.description
+                    TextMaxSizeInfo.description
                 },
                 {
                     FadeInDistancesInfo.identifier,
@@ -193,16 +213,22 @@ namespace openspace {
 
     RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary)
-        , _scaleFactor(ScaleFactorInfo, 10.f, 0.f, 600.f)
+        , _scaleFactor(ScaleFactorInfo, 5.0f, 1.f, 100.f)
         , _textColor(
             TextColorInfo,
             glm::vec4(1.0f, 1.0, 1.0f, 1.f),
             glm::vec4(0.f),
             glm::vec4(1.f)
         )
-        , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)
-        , _textMinSize(LabelMinSizeInfo, 8.f, 0.5f, 24.f)
-        , _textMaxSize(LabelMaxSizeInfo, 20.f, 0.5f, 100.f)
+        , _labelSize(LabelSizeInfo, 20.0, 0.0, 100.0)
+        , _labelSizeRange(
+            LabelSizeRangeInfo,
+            glm::vec2(0.0f),
+            glm::vec2(0.0),
+            glm::vec2(100.0)
+        )
+       // , _textMinSize(TextMinSizeInfo, 5.f, 0.0f, 100.f)
+       // , _textMaxSize(TextMaxSizeInfo, 50.f, 0.0f, 100.f)
         , _drawLabels(DrawLabelInfo, false)
         , _fadeInDistance(
             FadeInDistancesInfo,
@@ -257,20 +283,29 @@ namespace openspace {
             addProperty(_textColor);
             _textColor.onChange([&]() { _textColorIsDirty = true; });
 
-            if (dictionary.hasKey(TextSizeInfo.identifier)) {
-                _textSize = dictionary.value<float>(TextSizeInfo.identifier);
-            }
-            addProperty(_textSize);
+            // Can have either a static size or a scaled interval
+            if (dictionary.hasKey(LabelSizeInfo.identifier)) {
+                _labelSize = dictionary.value<float>(LabelSizeInfo.identifier);
+                addProperty(_labelSize);
+                _hasStaticLabelSize = true;
 
-            if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
-                _textMinSize = dictionary.value<float>(LabelMinSizeInfo.identifier);
+            }else if(dictionary.hasKey(LabelSizeRangeInfo.identifier)) 
+            {
+                glm::vec2 labelsizeRange = dictionary.value<glm::vec2>(LabelSizeRangeInfo.identifier);
+                _labelSizeRange.set(labelsizeRange);
+                addProperty(_labelSizeRange);
             }
-            addProperty(_textMinSize);
 
-            if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
-                _textMaxSize = dictionary.value<float>(LabelMaxSizeInfo.identifier);
-            }
-            addProperty(_textMaxSize);
+            //if (dictionary.hasKey(TextMinSizeInfo.identifier)) {
+            //    _textMinSize = dictionary.value<float>(TextMinSizeInfo.identifier);
+            //}
+            //addProperty(_textMinSize);
+
+            //if (dictionary.hasKey(TextMaxSizeInfo.identifier)) {
+            //    _textMaxSize = dictionary.value<float>(TextMaxSizeInfo.identifier);
+            //}
+            //addProperty(_textMaxSize);
+
         }
         else {
             LERROR(fmt::format("Needs a valid {}", LabelIdentifierMapInfo.identifier));
@@ -301,7 +336,7 @@ namespace openspace {
     void RenderableLabel::initialize() {
         bool success = loadData();
         if (!success) {
-            throw ghoul::RuntimeError("Error loading data");
+            throw ghoul::RuntimeError("Error with identifiers for labels");
         }
     }
 
@@ -320,31 +355,68 @@ namespace openspace {
         }
     }
 
+    /* To combat precision errors when we approach a node very far out in space
+     * we place the label on a set distance from the camera instead of at the node's 
+     * actual world position */
     void RenderableLabel::renderLabels(const RenderData& data,
         const glm::dmat4& modelViewProjectionMatrix,
         const glm::dvec3& orthoRight,
-        const glm::dvec3& orthoUp,
-        float fadeInVariable)
+        const glm::dvec3& orthoUp)
     {
-        float scale = 1.f;
 
         if (_hasLabelIdMap) {
             _labelData.clear();
             loadLabelDataFromId();
         }
         glm::vec4 textColor = _textColor;
-        textColor.a *= fadeInVariable;
+       
+        //float fadeInVariable = 1.f;
+        //if (!_disableFadeInDistance) {
+        //    float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
+        //    const glm::vec2 fadeRange = _fadeInDistance;
+        //    const float a = 1.f / (fadeRange.y - fadeRange.x);
+        //    const float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
+        //    const float funcValue = a * distCamera + b;
+        //    fadeInVariable *= funcValue > 1.f ? 1.f : funcValue;
+
+        //    if (funcValue < 0.01f) {
+        //        return;
+        //    }
+        //}
 
         for (const std::pair<glm::dvec3, std::string>& pair : _labelData) {
-            //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
-            glm::vec3 scaledPos(pair.first);
-            scaledPos *= scale;
+
+            // The world position of the SceneGraphNode
+            glm::dvec3 nodePos = pair.first;
+            std::string labelText = pair.second;
+
+            double distCamera = glm::distance(data.camera.positionVec3(), nodePos);
+
+            double textSize = 0.0;
+            if (!_hasStaticLabelSize) {
+                const glm::vec2 labelSizeRange = _labelSizeRange;
+                // Pass in the labelSizeRanges in opposite order (max,min) since we want the largest value 
+                // when the distance is the smallest
+                textSize = maxMinNormalize(distCamera, glm::dvec2(labelSizeRange.y, labelSizeRange.x), glm::dvec2(20000.0, _maxDistanceUnit));
+            }
+            else {
+                textSize = _labelSize;
+            }
+            double labelPosLength = (1.0 / _scaleFactor) * _maxDistanceUnit;
+            // The direction vector from the camera to the SceneGraphNode
+            glm::dvec3 nodeDir = normalize(data.camera.positionVec3() - nodePos);
+            // The new label position vector, calculated from the camera
+            glm::dvec3 labelPos = data.camera.positionVec3() - (nodeDir * labelPosLength);
+
+            //textColor.a *= fadeInVariable;
+            double textScale = pow(10, textSize);
+
             ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
                 *_font,
-                scaledPos,
-                pair.second,
+                labelPos,
+                labelText,
                 textColor,
-                pow(_scaleFactor, _textSize.value()),
+                textScale,
                 static_cast<int>(_textMinSize),
                 static_cast<int>(_textMaxSize),
                 modelViewProjectionMatrix,
@@ -357,23 +429,26 @@ namespace openspace {
         }
     }
 
+    double RenderableLabel::maxMinNormalize(double value, glm::dvec2 newRange, glm::dvec2 oldRange)
+    {   
+        double newMax = newRange.y;
+        double newMin = newRange.x;
+
+        double oldMax = oldRange.y;
+        double oldMin = oldRange.x;
+
+        if (value >= oldMax)
+            return newMax;
+
+        double nominator = (newMax - newMin) * (value - oldMax);
+        double denominator = oldMax - oldMin;
+
+        double newValue = nominator / denominator + newMax;
+
+        return newValue;
+    }
+
     void RenderableLabel::render(const RenderData& data, RendererTasks&) {
-
-        float scale = 1.f;
-
-        float fadeInVariable = 1.f;
-        if (!_disableFadeInDistance) {
-            float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
-            const glm::vec2 fadeRange = _fadeInDistance;
-            const float a = 1.f / ((fadeRange.y - fadeRange.x) * scale);
-            const float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
-            const float funcValue = a * distCamera + b;
-            fadeInVariable *= funcValue > 1.f ? 1.f : funcValue;
-
-            if (funcValue < 0.01f) {
-                return;
-            }
-        }
 
         glm::dmat4 modelMatrix =
             glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
@@ -407,8 +482,7 @@ namespace openspace {
                 data,
                 modelViewProjectionMatrix,
                 orthoRight,
-                orthoUp,
-                fadeInVariable
+                orthoUp
             );
         }
     }
