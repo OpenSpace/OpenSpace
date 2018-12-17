@@ -49,6 +49,7 @@ namespace openspace {
        mutable std::vector<double> minuteTimes;
        mutable Position position; 
 
+       mutable double updateFrequency = 1;
        mutable double activeMinute = -1;
        /* Identifier for object using the translation, used for logging */
        std::string objectIdentifier;
@@ -70,12 +71,14 @@ namespace openspace {
        void updateActiveMinute(int idx) const;
        /*Find the correct minute in the vector of loaded positions*/
        RadecManager::Position getPositionInVector(int idx) const;
-       /*Check if current hour in open space is already loaded*/
-       bool correctHour(double time) const;
-       /*Check if current minute in open space is already loaded*/
-       bool correctMinute(double time) const;
+       /*Check if current file in open space is already loaded*/
+       bool correctFileInterval(double time) const;
+       /*Check if current time interval is still relevant*/
+       bool correctUpdateInterval(double time) const;
        /*Update and reate buffer of data so that we can compensate for light travel time without getting out of bounce*/
        void updateRadecData(int index) const;
+       /*Sets the update frequency from property*/
+       void setUpdateFrequency(double updateFrequency);
     };
 }
 

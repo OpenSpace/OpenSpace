@@ -101,7 +101,6 @@ asset.onInitialize(function ()
 
     openspace.setPropertyValue('Scene.*Trail.Renderable.Enabled', false)
 
-    openspace.setPropertyValue('Scene.SpacecraftsLabels.Renderable.Enabled', true)
 
     openspace.globebrowsing.loadWMSServersFromFile(
         openspace.absPath("${DATA}/globebrowsing_servers.lua")

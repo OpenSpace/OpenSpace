@@ -38,63 +38,75 @@ namespace openspace {
 
         return dataFilesSuccess;
     }
-
-   bool RadecManager::correctHour(double time) const{
-       const bool isTimeInFileInterval = (time  >= _checkFileTime) &&
+    
+   bool RadecManager::correctFileInterval(double time) const{
+       const bool isTimeInFileInterval = (time  > _checkFileTime) &&
            (time < _checkFileEndTime);
 
        return isTimeInFileInterval;
    }
 
-   bool RadecManager::correctMinute(double time) const {
-       const bool isTimeInActiveMinute = (time >= activeMinute && time < activeMinute + 60);
-       return isTimeInActiveMinute;
+   bool RadecManager::correctUpdateInterval(double time) const {
+       const bool isTimeInActiveMinute = (time > activeMinute - updateFrequency *60 && time < activeMinute + updateFrequency *60);
+           return isTimeInActiveMinute;
+   }
+
+   void RadecManager::setUpdateFrequency(double updatedFreq) {
+       //Determines how many minutes between updates
+       updateFrequency = updatedFreq;
    }
 
    glm::vec3 RadecManager::getPosForTime(double time) const {
-       if (!correctHour(time)) {
+       if (!correctFileInterval(time)) {
            int idx = DataFileHelper::findFileIndexForCurrentTime(time, timeDoubles);
            updateRadecData(idx);
+          
+           int index = DataFileHelper::findFileIndexForCurrentTime(time, minuteTimes);
+           updateActiveMinute(index);
        }
-       // positions have to be loaded before we try to update minute
-       if(positions.size() && !correctMinute(time)) {
+
+       if (positions.size() && !correctUpdateInterval(time)) {
            //Compensate for light travel time to the spacecraft
            int idx = DataFileHelper::findFileIndexForCurrentTime(time, minuteTimes);
-
            updateActiveMinute(idx);
-           double lighttimeCompensation = positions[idx].lightTravelTime;
 
-            int compensatedIdx = DataFileHelper::findFileIndexForCurrentTime(time + lighttimeCompensation, minuteTimes);
-            getPositionInVector(compensatedIdx);
-            
-       }
+           double lighttimeCompensation = positions[idx].lightTravelTime;
+           int compensatedIdx = DataFileHelper::findFileIndexForCurrentTime(time + lighttimeCompensation, minuteTimes);
+           getPositionInVector(compensatedIdx);
+
+       }  
+
        return glm::vec3(position.ra, position.dec, position.range);
    }
 
    bool RadecManager::radecParser(int index) const{
        std::string filename;
-       filename = _dataFiles[index];
-       std::ifstream ifs(filename);
-       nlohmann::json j = nlohmann::json::parse(ifs);
+       if (index > -1 && index < _dataFiles.size()) {
+         filename = _dataFiles[index];
+               std::ifstream ifs(filename);
+               nlohmann::json j = nlohmann::json::parse(ifs);
 
-       int objectCounter = 0;
-       for (const auto& pos : j["Positions"]) {
-           objectCounter++;
-           try {
-               position.timeStamp = pos["TimeStamp"].get<std::string>();
-               position.ra = pos["RADn"].get<double>();
-               position.dec = pos["DecDn"].get<double>();
-               position.range = pos["GeoRngDn"].get<double>();
-               position.lightTravelTime = pos["DLT"].get<double>();
-
-           }
-           catch (const std::exception& e) {
-               LERROR(fmt::format("{}: Error in json object number {} while reading file '{}'", objectIdentifier, objectCounter, filename));
-           }
-           RadecManager::positions.push_back(position);
+               int objectCounter = 0;
+               for (const auto& pos : j["Positions"]) {
+                   objectCounter++;
+                   try {
+                       position.timeStamp = pos["TimeStamp"].get<std::string>();
+                       position.ra = pos["RADn"].get<double>();
+                       position.dec = pos["DecDn"].get<double>();
+                       position.range = pos["GeoRngDn"].get<double>();
+                       position.lightTravelTime = pos["DLT"].get<double>();
+                   }
+                   catch (const std::exception& e) {
+                       LERROR(fmt::format("{}: Error in json object number {} while reading file '{}'", objectIdentifier, objectCounter, filename));
+                   }
+                   RadecManager::positions.push_back(position); 
+               }
+               return true;
        }
-       return true;
+       else return false;
+      
    }
+
    void RadecManager::updateActiveMinute(int idx) const{
        minuteTimes.clear();
        minuteTimes.reserve(0);
@@ -102,7 +114,6 @@ namespace openspace {
        for (int i = 0; i < RadecManager::positions.size(); i++) {
            minuteTimes.push_back(Time::convertTime(positions[i].timeStamp));
        }
-
        activeMinute = minuteTimes[idx];
   }
 
@@ -145,7 +156,7 @@ namespace openspace {
         if (lightTravelHours > 1)
            index = index + lightTravelHours;
 
-        else if (index < 1) {
+        if (index < 1) {
             radecParser(index);
             radecParser(index + 1);
             return;
@@ -159,8 +170,8 @@ namespace openspace {
             radecParser(index - 1);
             radecParser(index);
             radecParser(index + 1);
-        }
 
+        }
   }
 }
 
