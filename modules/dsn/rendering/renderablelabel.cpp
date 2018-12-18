@@ -606,7 +606,6 @@ namespace openspace {
     double RenderableLabel::getUnitFactor(std::string unitString)
     {
         double unit = 0.0;
-        //2.998e+8
 
         std::transform(unitString.begin(), unitString.end(), unitString.begin(), ::tolower);
         
@@ -628,6 +627,9 @@ namespace openspace {
         else if (unitString == "lightminute" || 
                  unitString == "lightminutes") {
             unit = 1.799E10;
+        }
+        else if (unitString == "au") {
+            unit = 1.496E11;
         }
         else if (unitString == "lighthour" ||
             unitString == "lighthours") {
