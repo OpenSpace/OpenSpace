@@ -71,19 +71,6 @@ namespace {
         "The static label size if no LabelSizeRange interval are set. "
     };
 
-    //constexpr openspace::properties::Property::PropertyInfo TextMinSizeInfo = {
-    //    "TextMinSize",
-    //    "Text Min Size",
-    //    "The minimal size (in pixels) of the text for the labels for the astronomical "
-    //    "objects being rendered."
-    //};
-
-    //constexpr openspace::properties::Property::PropertyInfo TextMaxSizeInfo = {
-    //    "TextMaxSize",
-    //    "Text Max Size",
-    //    "The maximum size (in pixels) of the text for the labels for the astronomical "
-    //    "objects being rendered."
-    //};
     constexpr openspace::properties::Property::PropertyInfo LabelSizeRangeInfo = {
         "LabelSizeRange",
         "Label Size Range",
