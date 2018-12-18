@@ -39,6 +39,9 @@
 namespace {
     constexpr const char* _loggerCat = "RenderableLabel";
     constexpr const char* ProgramObjectName = "RenderableLabel";
+    constexpr const char* KeyUnitOut = "FadeOutDistanceUnit";
+    constexpr const char* KeyUnitIn = "FadeInDistanceUnit";
+    constexpr const char* KeyUnitSize = "SizeDistanceUnit";
 
     constexpr openspace::properties::Property::PropertyInfo LabelIdentifierMapInfo = {
         "LabelIdentifierMap",
@@ -47,23 +50,25 @@ namespace {
         "instead of reading positions from file. "
     };
 
+    /* This toggles the distance from the camera of the projection plane that the label is rendered on.
+     * Necessary to combat precision errors for labels on astronomical objects that are far out in space */
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
-        "This value is used as a multiplicative factor that is applied to the apparent "
-        "size of each point."
+        "This value is used as a multiplicative factor that toggles the distance of " 
+        "the label from the camera. "
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
         "TextColor",
         "Text Color",
-        "The text color for the astronomical object."
+        "The text color for the label of the astronomical object."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelSizeInfo = {
         "LabelSize",
         "Label Size",
-        "The static label size if no LabelSizeRange interval are set "
+        "The static label size if no LabelSizeRange interval are set. "
     };
 
     //constexpr openspace::properties::Property::PropertyInfo TextMinSizeInfo = {
@@ -83,22 +88,30 @@ namespace {
         "LabelSizeRange",
         "Label Size Range",
         "These values determine the min and max size of this label when it is "
-        "scaled depending on distance"
+        "scaled depending on distance. Also need to specify the distance range from "
+        "the astronomical object the rescaling occurs. "
     };
 
-        constexpr openspace::properties::Property::PropertyInfo TextMinSizeInfo = {
-        "TextMinSize",
-        "Text Min Size",
-        "The minimal size (in pixels) of the text for the labels for the astronomical "
-        "objects being rendered."
+    constexpr openspace::properties::Property::PropertyInfo SizeDistanceRangeInfo = {
+        "SizeDistanceRange",
+        "Size Distance Range",
+        "The distance range where rescaling from min label size to max label size occurs. "
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextMaxSizeInfo = {
-        "TextMaxSize",
-        "Text Max Size",
-        "The maximum size (in pixels) of the text for the labels for the astronomical "
-        "objects being rendered."
-    };
+
+    //constexpr openspace::properties::Property::PropertyInfo TextMinSizeInfo = {
+    //    "TextMinSize",
+    //    "Text Min Size",
+    //    "The minimal size (in pixels) of the text for the labels for the astronomical "
+    //    "objects being rendered."
+    //};
+
+    //constexpr openspace::properties::Property::PropertyInfo TextMaxSizeInfo = {
+    //    "TextMaxSize",
+    //    "Text Max Size",
+    //    "The maximum size (in pixels) of the text for the labels for the astronomical "
+    //    "objects being rendered."
+    //};
 
     constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
         "DrawLabels",
@@ -118,18 +131,24 @@ namespace {
         "Debug option for rendering of billboards and texts."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
-        "FadeInDistances",
-        "Fade-In Start and End Distances",
-        "These values determine the initial and final distances from the center of "
-        "our galaxy from which the astronomical object will start and end "
-        "fading-in."
+    constexpr openspace::properties::Property::PropertyInfo FadeInDistanceRangeInfo = {
+        "FadeInDistanceRange",
+        "Fade-In Distance Range",
+        "These values determine the start and end of the fade expressed in a distance "
+        "from the astronomical object. {start, end}"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
-        "DisableFadeIn",
-        "Disable Fade-in effect",
-        "Enables/Disables the Fade-in effect."
+    constexpr openspace::properties::Property::PropertyInfo FadeOutDistanceRangeInfo = {
+        "FadeOutDistanceRange",
+        "Fade-Out Distance Range",
+        "These values determine the start and end of the fade expressed in a distance "
+        "from the astronomical object. {start, end}"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DisableFadeDistancesInfo = {
+        "DisableFadeDistances",
+        "Disable Fade-in and Fade-out effects",
+        "Enables/Disables the Fade effects."
     };
 
 }  // namespace
@@ -178,28 +197,34 @@ namespace openspace {
                     LabelSizeInfo.description
                 },
                 {
-                    TextMinSizeInfo.identifier,
-                    new DoubleVerifier,
-                    Optional::Yes,
-                    TextMinSizeInfo.description
-                },
-                {
-                    TextMaxSizeInfo.identifier,
-                    new DoubleVerifier,
-                    Optional::Yes,
-                    TextMaxSizeInfo.description
-                },
-                {
-                    FadeInDistancesInfo.identifier,
+                    SizeDistanceRangeInfo.identifier,
                     new Vector2Verifier<double>,
                     Optional::Yes,
-                    FadeInDistancesInfo.description
+                    SizeDistanceRangeInfo.description
+                },
+                //{
+                //    TextMinSizeInfo.identifier,
+                //    new DoubleVerifier,
+                //    Optional::Yes,
+                //    TextMinSizeInfo.description
+                //},
+                //{
+                //    TextMaxSizeInfo.identifier,
+                //    new DoubleVerifier,
+                //    Optional::Yes,
+                //    TextMaxSizeInfo.description
+                //},
+                {
+                    FadeInDistanceRangeInfo.identifier,
+                    new Vector2Verifier<double>,
+                    Optional::Yes,
+                    FadeInDistanceRangeInfo.description
                 },
                 {
-                    DisableFadeInInfo.identifier,
+                    DisableFadeDistancesInfo.identifier,
                     new BoolVerifier,
                     Optional::Yes,
-                    DisableFadeInInfo.description
+                    DisableFadeDistancesInfo.description
                 },
                 {
                     TransformationMatrixInfo.identifier,
@@ -213,7 +238,7 @@ namespace openspace {
 
     RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary)
-        , _scaleFactor(ScaleFactorInfo, 5.0f, 1.f, 100.f)
+        , _scaleFactor(ScaleFactorInfo, 1.0f, 0.f, 10.f)
         , _textColor(
             TextColorInfo,
             glm::vec4(1.0f, 1.0, 1.0f, 1.f),
@@ -227,16 +252,28 @@ namespace openspace {
             glm::vec2(0.0),
             glm::vec2(100.0)
         )
-       // , _textMinSize(TextMinSizeInfo, 5.f, 0.0f, 100.f)
-       // , _textMaxSize(TextMaxSizeInfo, 50.f, 0.0f, 100.f)
-        , _drawLabels(DrawLabelInfo, false)
-        , _fadeInDistance(
-            FadeInDistancesInfo,
-            glm::vec2(0.0f),
+        , _sizeDistanceRange(
+            SizeDistanceRangeInfo,
+            glm::vec2(0, 100.0f),
             glm::vec2(0.0),
             glm::vec2(100.0)
         )
-        , _disableFadeInDistance(DisableFadeInInfo, true)
+       // , _textMinSize(TextMinSizeInfo, 5.f, 0.0f, 100.f)
+       // , _textMaxSize(TextMaxSizeInfo, 50.f, 0.0f, 100.f)
+        , _drawLabels(DrawLabelInfo, false)
+        , _fadeOutDistance(
+            FadeOutDistanceRangeInfo,
+            glm::vec2(0.01f, 1.0f),
+            glm::vec2(0.0),
+            glm::vec2(10.0)
+        )
+        , _fadeInDistance(
+            FadeInDistanceRangeInfo,
+            glm::vec2(0.01f, 1.0f),
+            glm::vec2(0.0),
+            glm::vec2(10.0)
+        )
+        , _disableFadeDistances(DisableFadeDistancesInfo, false)
         , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     {
         documentation::testSpecificationAndThrow(
@@ -289,11 +326,25 @@ namespace openspace {
                 addProperty(_labelSize);
                 _hasStaticLabelSize = true;
 
-            }else if(dictionary.hasKey(LabelSizeRangeInfo.identifier)) 
+            }else if(dictionary.hasKey(LabelSizeRangeInfo.identifier) && dictionary.hasKey(SizeDistanceRangeInfo.identifier))
             {
                 glm::vec2 labelsizeRange = dictionary.value<glm::vec2>(LabelSizeRangeInfo.identifier);
                 _labelSizeRange.set(labelsizeRange);
                 addProperty(_labelSizeRange);
+
+                if (dictionary.hasKey(KeyUnitSize)) {
+                    std::string unit = dictionary.value<std::string>(KeyUnitOut);
+                    _sizeDistanceUnit = getUnitFactor(unit);
+                }
+
+                glm::vec2 sizeDistanceRange = dictionary.value<glm::vec2>(SizeDistanceRangeInfo.identifier);
+                _sizeDistanceRange.set(sizeDistanceRange);
+                addProperty(_sizeDistanceRange);
+
+            }
+            else {
+                LERROR(fmt::format("Need to specify either a static '{}' or a scalable range '{}' with a distance range '{}'", 
+                                    LabelSizeInfo.identifier, LabelSizeRangeInfo.identifier, SizeDistanceRangeInfo.identifier));
             }
 
             //if (dictionary.hasKey(TextMinSizeInfo.identifier)) {
@@ -318,15 +369,34 @@ namespace openspace {
                 );
         }
 
-        if (dictionary.hasKey(FadeInDistancesInfo.identifier)) {
+        if (dictionary.hasKey(FadeInDistanceRangeInfo.identifier) && dictionary.hasKey(FadeOutDistanceRangeInfo.identifier)) {
+            
             glm::vec2 fadeInValue = dictionary.value<glm::vec2>(
-                FadeInDistancesInfo.identifier
+                FadeInDistanceRangeInfo.identifier
                 );
             _fadeInDistance.set(fadeInValue);
-            _disableFadeInDistance.set(false);
+
+            if (dictionary.hasKey(KeyUnitIn)) {
+                std::string unit = dictionary.value<std::string>(KeyUnitIn);
+                _fadeInDistanceUnit = getUnitFactor(unit);
+            }
+
+            glm::vec2 fadeOutValue = dictionary.value<glm::vec2>(
+                FadeOutDistanceRangeInfo.identifier
+                );
+            _fadeOutDistance.set(fadeOutValue);
+
+            if (dictionary.hasKey(KeyUnitOut)) {
+                std::string unit = dictionary.value<std::string>(KeyUnitOut);
+                _fadeOutDistanceUnit = getUnitFactor(unit);
+            }
+
+            _disableFadeDistances.set(false);
+            addProperty(_fadeInDistance);
+            addProperty(_fadeOutDistance);
+            addProperty(_disableFadeDistances);
         }
-        addProperty(_fadeInDistance);
-        addProperty(_disableFadeInDistance);
+
     }
 
     bool RenderableLabel::isReady() const {
@@ -369,20 +439,6 @@ namespace openspace {
             loadLabelDataFromId();
         }
         glm::vec4 textColor = _textColor;
-       
-        //float fadeInVariable = 1.f;
-        //if (!_disableFadeInDistance) {
-        //    float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
-        //    const glm::vec2 fadeRange = _fadeInDistance;
-        //    const float a = 1.f / (fadeRange.y - fadeRange.x);
-        //    const float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
-        //    const float funcValue = a * distCamera + b;
-        //    fadeInVariable *= funcValue > 1.f ? 1.f : funcValue;
-
-        //    if (funcValue < 0.01f) {
-        //        return;
-        //    }
-        //}
 
         for (const std::pair<glm::dvec3, std::string>& pair : _labelData) {
 
@@ -390,25 +446,41 @@ namespace openspace {
             glm::dvec3 nodePos = pair.first;
             std::string labelText = pair.second;
 
+            // The distance from the camera to the SceneGraphNode of the label
             double distCamera = glm::distance(data.camera.positionVec3(), nodePos);
+
+            if (!_disableFadeDistances) {
+                // fade in when when we are close enough
+                const glm::vec2 fadeInRange = _fadeInDistance;
+                double fadeIn = maxMinNormalize(distCamera, glm::dvec2(1.0, 0.0), glm::dvec2(_fadeInDistanceUnit*fadeInRange.x, _fadeInDistanceUnit*fadeInRange.y));
+
+                // fade out again when we get really close
+                const glm::vec2 fadeOutRange = _fadeOutDistance;
+                double fadeOut = maxMinNormalize(distCamera, glm::dvec2(0.0, 1.0), glm::dvec2(_fadeOutDistanceUnit*fadeOutRange.x, _fadeOutDistanceUnit*fadeOutRange.y));
+
+                textColor.a *= glm::min(fadeIn, fadeOut);
+            }
+
 
             double textSize = 0.0;
             if (!_hasStaticLabelSize) {
                 const glm::vec2 labelSizeRange = _labelSizeRange;
+                const glm::vec2 sizeRange = _sizeDistanceRange;
+
                 // Pass in the labelSizeRanges in opposite order (max,min) since we want the largest value 
                 // when the distance is the smallest
-                textSize = maxMinNormalize(distCamera, glm::dvec2(labelSizeRange.y, labelSizeRange.x), glm::dvec2(20000.0, _maxDistanceUnit));
+                textSize = maxMinNormalize(distCamera, glm::dvec2(labelSizeRange.y, labelSizeRange.x), glm::dvec2(_sizeDistanceUnit*sizeRange.x, _sizeDistanceUnit*sizeRange.y));
             }
             else {
                 textSize = _labelSize;
             }
-            double labelPosLength = (1.0 / _scaleFactor) * _maxDistanceUnit;
+            double labelPosLength = pow(10, _scaleFactor);//(1.0 / _scaleFactor) * 1E10;// length(nodePos) / _fadeInDistanceUnit;// _fadeInDistanceUnit;
             // The direction vector from the camera to the SceneGraphNode
             glm::dvec3 nodeDir = normalize(data.camera.positionVec3() - nodePos);
             // The new label position vector, calculated from the camera
             glm::dvec3 labelPos = data.camera.positionVec3() - (nodeDir * labelPosLength);
 
-            //textColor.a *= fadeInVariable;
+
             double textScale = pow(10, textSize);
 
             ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
@@ -427,25 +499,6 @@ namespace openspace {
                 _renderOption.value()
             );
         }
-    }
-
-    double RenderableLabel::maxMinNormalize(double value, glm::dvec2 newRange, glm::dvec2 oldRange)
-    {   
-        double newMax = newRange.y;
-        double newMin = newRange.x;
-
-        double oldMax = oldRange.y;
-        double oldMin = oldRange.x;
-
-        if (value >= oldMax)
-            return newMax;
-
-        double nominator = (newMax - newMin) * (value - oldMax);
-        double denominator = oldMax - oldMin;
-
-        double newValue = nominator / denominator + newMax;
-
-        return newValue;
     }
 
     void RenderableLabel::render(const RenderData& data, RendererTasks&) {
@@ -526,6 +579,72 @@ namespace openspace {
         }
 
         return true;
+    }
+
+    double RenderableLabel::maxMinNormalize(double value, glm::dvec2 newRange, glm::dvec2 oldRange)
+    {
+
+        double newMax = newRange.y;
+        double newMin = newRange.x;
+
+        double oldMax = glm::max(oldRange.y,oldRange.x);
+        double oldMin = glm::min(oldRange.y, oldRange.x);
+
+        if (value >= oldMax)
+            return newMax;
+        if (value <= oldMin)
+            return newMin;
+
+        double nominator = (newMax - newMin) * (value - oldMax);
+        double denominator = oldMax - oldMin;
+
+        double newValue = nominator / denominator + newMax;
+
+        return newValue;
+    }
+
+    double RenderableLabel::getUnitFactor(std::string unitString)
+    {
+        double unit = 0.0;
+        //2.998e+8
+
+        std::transform(unitString.begin(), unitString.end(), unitString.begin(), ::tolower);
+        
+        // Units expressed in meters
+        if (unitString == "meter" ||
+            unitString == "meters" || 
+            unitString == "m") {
+            unit = 1.0;
+        }
+        else if (unitString == "kilometer" ||
+            unitString == "kilometers" || 
+            unitString == "km") {
+            unit = 1E3;
+        }
+        else if (unitString == "lightsecond" ||
+            unitString == "lightseconds") {
+            unit = 2.998E8;
+        }
+        else if (unitString == "lightminute" || 
+                 unitString == "lightminutes") {
+            unit = 1.799E10;
+        }
+        else if (unitString == "lighthour" ||
+            unitString == "lighthours") {
+            unit = 1.079E12;
+        }
+        else if (unitString == "lightday" ||
+                unitString == "lightdays") {
+            unit = 2.59E13;
+        }
+        else {
+            LWARNING(
+                fmt::format("{} is not a specified unit. Using meters as units.", unitString)
+            );
+            unit = 1.0;
+        }
+
+        return unit;
     }
 
 } // namespace openspace

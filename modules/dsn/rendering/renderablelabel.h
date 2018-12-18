@@ -57,7 +57,9 @@ namespace openspace {
 
     private:
 
-        const double _maxDistanceUnit = 1E10;
+        double _fadeInDistanceUnit = 1E10;
+        double _fadeOutDistanceUnit = 2E3;
+        double _sizeDistanceUnit = 1.0;
 
         void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
             const glm::dvec3& orthoRight, const glm::dvec3& orthoUp);
@@ -76,11 +78,13 @@ namespace openspace {
         properties::Vec4Property _textColor;
         properties::FloatProperty _labelSize;
         properties::Vec2Property _labelSizeRange;
+        properties::Vec2Property _sizeDistanceRange;
         //properties::FloatProperty _textMinSize;
         //properties::FloatProperty _textMaxSize;
         properties::BoolProperty _drawLabels;
         properties::Vec2Property _fadeInDistance;
-        properties::BoolProperty _disableFadeInDistance;
+        properties::Vec2Property _fadeOutDistance;
+        properties::BoolProperty _disableFadeDistances;
 
         // DEBUG:
         properties::OptionProperty _renderOption;
@@ -89,6 +93,8 @@ namespace openspace {
         ghoul::Dictionary _labelIdMap;
         std::vector<std::pair<glm::dvec3, std::string>> _labelData;
         glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
+
+        double getUnitFactor(std::string unitString);
 
         /*The minimal size(in pixels) of the text for the labels 
         for the astronomical objects being rendered.*/
