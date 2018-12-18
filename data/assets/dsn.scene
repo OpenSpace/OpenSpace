@@ -125,8 +125,12 @@ asset.onInitialize(function ()
         Position = { 0, 0, 0 },
         Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 },
     })
-
+    
+    -- Earth view
     openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
+    -- outer space view
+    -- openspace.globebrowsing.goToGeo(0, 90, 20000000000000)
+
 
 end)
 
