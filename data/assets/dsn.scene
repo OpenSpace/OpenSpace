@@ -79,7 +79,8 @@ local Keybindings = {
     {
         Key = "l",
         Command = propertyHelper.invert('Scene.OuterSpaceLabels.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.MarsLabels.Renderable.Enabled'),  
+                  propertyHelper.invert('Scene.MarsMissionsLabels.Renderable.Enabled') ..
+                  propertyHelper.invert('Scene.ClusteredLabels.Renderable.Enabled'),  
         Documentation = "Toggles visibility of the spacecraft labels",
         Local = false
     }        

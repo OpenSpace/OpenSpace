@@ -1,5 +1,22 @@
 local assetHelper = asset.require('util/asset_helper')
-local spacecrafts = asset.require('scene/solarsystem/missions/dsn/spacecrafts')
+--local spacecrafts = asset.require('scene/solarsystem/missions/dsn/spacecrafts')
+
+
+-- label id maps
+local labelMapMarsMissions = {  
+                        MarsRecOrbiter = "Mars Recon Orbiter",
+                        MarsOdyssey = "MarsOdyssey",
+                    }
+
+local labelMapVoyagers = {  
+                            VGR1 = "Voyager 1",
+                            VGR2 = "Voyager 2",
+
+                        }
+
+local labelMapClusters = {  
+                            Mars = "MarsOdyssey, \n Mars Recon Orbiter "
+                    }
 
 local OuterSpaceLabels = {
     Identifier = "OuterSpaceLabels",
@@ -7,7 +24,7 @@ local OuterSpaceLabels = {
         Type = "RenderableLabel",
         Enabled = true,
         ScaleFactor = 9.0,
-        LabelIdentifierMap = spacecrafts.labelMapVoyagers,
+        LabelIdentifierMap = labelMapVoyagers,
         TextColor = { 1.0, 0.6, 0.2, 1.0 },
         DrawLabels = true,
         LabelSizeRange = {5.5, 6.0},
@@ -24,30 +41,52 @@ local OuterSpaceLabels = {
     }
 }
 
-local MarsLabels = {
-    Identifier = "MarsLabels",
+local MarsMissionsLabels = {
+    Identifier = "MarsMissionsLabels",
     Renderable = {
         Type = "RenderableLabel",
         Enabled = true,
-        --ScaleFactor = 1.0,
-        LabelIdentifierMap = spacecrafts.labelMapMars,
-        TextColor = { 0.4, 0.4, 0.4, 1.0 },
+        ScaleFactor = 7.5,
+        LabelIdentifierMap = labelMapMarsMissions,
+        TextColor = { 0.96, 0.4, 0.4, 1.0 },
         DrawLabels = true,
-        --LabelSize = 6.5,
-        LabelSizeRange = {5.8, 6.0},
+        LabelSizeRange = {4.0, 4.5},
         SizeDistanceRange = {2, 1000},
-        SizeDistanceUnit = "kilometer",
-        FadeOutDistanceRange = {0.01, 0.5},
-        FadeOutDistanceUnit = "meter",
-        FadeInDistanceRange = {0.9, 1.0},
-        FadeInDistanceUnit = "lightminutes",
+        SizeDistanceUnit = "km",
+        FadeOutDistanceRange = {2, 0.1}, 
+        FadeOutDistanceUnit = "km",
+        FadeInDistanceRange = {4,400000},
+        FadeInDistanceUnit = "km",
     },
     GUI = {
-        Name = "Mars Labels",
+        Name = "Mars Missions Labels",
+        Path = "/Labels"
+    }
+}
+
+local ClusteredLabels = {
+    Identifier = "ClusteredLabels",
+    Renderable = {
+        Type = "RenderableLabel",
+        Enabled = true,
+        ScaleFactor = 9.0,
+        LabelIdentifierMap = labelMapClusters,
+        TextColor = { 0.96, 0.4, 0.4, 1.0 },
+        DrawLabels = true,
+        LabelSizeRange = {5.5, 5.8},
+        SizeDistanceRange = {2, 100000000},
+        SizeDistanceUnit = "km",
+        FadeOutDistanceRange = {400000, 300000}, 
+        FadeOutDistanceUnit = "km",
+        FadeInDistanceRange = {1.5,1.0},
+        FadeInDistanceUnit = "lightdays",
+    },
+    GUI = {
+        Name = "Clustered Labels",
         Path = "/Labels"
     }
 }
 
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { OuterSpaceLabels, MarsLabels })
+assetHelper.registerSceneGraphNodesAndExport(asset, { OuterSpaceLabels, MarsMissionsLabels, ClusteredLabels })
