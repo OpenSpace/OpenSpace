@@ -1,0 +1,44 @@
+---------------------------------------------------------------------------------------------------
+----- The maps in this file are used to keep the SceneGraphNode identifiers for each spacecraft ---
+----- up to date with labels and dsn signal data among other things 							---
+---------------------------------------------------------------------------------------------------
+
+local Voyager1Asset = asset.require('scene/solarsystem/missions/voyager1/voyager1')
+local Voyager2Asset = asset.require('scene/solarsystem/missions/voyager2/voyager2')
+
+-- added specifically for dsn visualization
+local MarsRecOrbAsset = asset.require('scene/solarsystem/missions/dsn/mro/mro')
+local MarsOdysseyAsset = asset.require('scene/solarsystem/missions/dsn/marsodyssey/marsodyssey')
+local StereoAAsset = asset.require('scene/solarsystem/missions/dsn/stereoa/stereoa')
+
+
+-------------------- dsn signal data map --------------------
+local signalDataIdMap = {
+	VGR1 = Voyager1Asset.spacecraftID,
+	VGR2 = Voyager2Asset.spacecraftID,
+	STA = StereoAAsset.spacecraftID,
+	MRO = MarsRecOrbAsset.spacecraftID,
+	M010 = MarsOdysseyAsset.spacecraftID
+}
+
+-------------------- label id maps --------------------
+local labelMapMarsMissions = {  
+                        MarsRecOrbiter = "Mars Recon Orbiter",
+                        MarsOdyssey = "MarsOdyssey",
+                    }
+
+local labelMapVoyagers = {  
+                            Voyager1 = "Voyager 1",
+                            Voyager2 = "Voyager 2",
+                        }
+
+local labelMapClusters = {  
+                            Mars = "MarsOdyssey, \n Mars Recon Orbiter "
+                    }
+
+------------------------ export -------------------------
+asset.export("signalDataIdMap", signalDataIdMap)
+
+asset.export("labelMapMarsMissions", labelMapMarsMissions)
+asset.export("labelMapVoyagers", labelMapVoyagers)
+asset.export("labelMapClusters", labelMapClusters)
