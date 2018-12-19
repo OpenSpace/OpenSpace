@@ -10,8 +10,10 @@ local models = asset.syncedResource({
     Version = 1
 })
 
+local spacecraftID = "StereoA"
+
 local StereoA = {
-    Identifier = "StereoA",
+    Identifier = spacecraftID,
     Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Transform = {
         Translation = {
@@ -44,6 +46,8 @@ local StereoAModel = {
         Path = "/Solar System/Missions/Stereo A"
     }
 }
+
+asset.export("spacecraftID", spacecraftID)
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     StereoA,

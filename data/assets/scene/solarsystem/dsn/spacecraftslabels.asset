@@ -1,22 +1,5 @@
 local assetHelper = asset.require('util/asset_helper')
---local spacecrafts = asset.require('scene/solarsystem/missions/dsn/spacecrafts')
-
-
--- label id maps
-local labelMapMarsMissions = {  
-                        MarsRecOrbiter = "Mars Recon Orbiter",
-                        MarsOdyssey = "MarsOdyssey",
-                    }
-
-local labelMapVoyagers = {  
-                            VGR1 = "Voyager 1",
-                            VGR2 = "Voyager 2",
-
-                        }
-
-local labelMapClusters = {  
-                            Mars = "MarsOdyssey, \n Mars Recon Orbiter "
-                    }
+local maps = asset.require('scene/solarsystem/dsn/spacecraftsmaps')
 
 local OuterSpaceLabels = {
     Identifier = "OuterSpaceLabels",
@@ -24,7 +7,7 @@ local OuterSpaceLabels = {
         Type = "RenderableLabel",
         Enabled = true,
         ScaleFactor = 9.0,
-        LabelIdentifierMap = labelMapVoyagers,
+        LabelIdentifierMap = maps.labelMapVoyagers,
         TextColor = { 1.0, 0.6, 0.2, 1.0 },
         DrawLabels = true,
         LabelSizeRange = {5.5, 6.0},
@@ -47,7 +30,7 @@ local MarsMissionsLabels = {
         Type = "RenderableLabel",
         Enabled = true,
         ScaleFactor = 7.5,
-        LabelIdentifierMap = labelMapMarsMissions,
+        LabelIdentifierMap = maps.labelMapMarsMissions,
         TextColor = { 0.96, 0.4, 0.4, 1.0 },
         DrawLabels = true,
         LabelSizeRange = {4.0, 4.5},
@@ -70,7 +53,7 @@ local ClusteredLabels = {
         Type = "RenderableLabel",
         Enabled = true,
         ScaleFactor = 9.0,
-        LabelIdentifierMap = labelMapClusters,
+        LabelIdentifierMap = maps.labelMapClusters,
         TextColor = { 0.96, 0.4, 0.4, 1.0 },
         DrawLabels = true,
         LabelSizeRange = {5.5, 5.8},
@@ -86,7 +69,5 @@ local ClusteredLabels = {
         Path = "/Labels"
     }
 }
-
-
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { OuterSpaceLabels, MarsMissionsLabels, ClusteredLabels })
