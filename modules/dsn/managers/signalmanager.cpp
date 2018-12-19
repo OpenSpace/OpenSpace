@@ -52,7 +52,7 @@ namespace openspace {
             }
         }
         else {
-            LERROR("No dictionary!");
+            LERROR("No {} set for {}!", KeySpacecraftIdMap, _loggerCat);
         }
 
 
