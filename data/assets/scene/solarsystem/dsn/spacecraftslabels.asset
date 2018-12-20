@@ -1,13 +1,36 @@
 local assetHelper = asset.require('util/asset_helper')
 local maps = asset.require('scene/solarsystem/dsn/spacecraftsmaps')
 
+local InnerSpaceLabels = {
+    Identifier = "InnerSpaceLabels",
+    Renderable = {
+        Type = "RenderableLabel",
+        Enabled = true,
+        ScaleFactor = 9.0,
+        LabelIdentifierMap = maps.labelMapInnerSpace,
+        TextColor = { 0.0, 0.6, 0.2, 1.0 },
+        DrawLabels = true,
+        LabelSizeRange = {5.5, 6.0},
+        SizeDistanceRange = {2, 100000000},
+        SizeDistanceUnit = "km",
+        FadeOutDistanceRange = {2, 0.1}, 
+        FadeOutDistanceUnit = "km",
+        FadeInDistanceRange = {3,2},
+        FadeInDistanceUnit = "au",
+    },
+    GUI = {
+        Name = "Inner Space Labels",
+        Path = "/Labels"
+    }
+}
+
 local OuterSpaceLabels = {
     Identifier = "OuterSpaceLabels",
     Renderable = {
         Type = "RenderableLabel",
         Enabled = true,
         ScaleFactor = 9.0,
-        LabelIdentifierMap = maps.labelMapVoyagers,
+        LabelIdentifierMap = maps.labelMapOuterSpace,
         TextColor = { 1.0, 0.6, 0.2, 1.0 },
         DrawLabels = true,
         LabelSizeRange = {5.5, 6.0},
@@ -70,4 +93,9 @@ local ClusteredLabels = {
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { OuterSpaceLabels, MarsMissionsLabels, ClusteredLabels })
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    OuterSpaceLabels, 
+    MarsMissionsLabels, 
+    ClusteredLabels, 
+    InnerSpaceLabels 
+ })

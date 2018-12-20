@@ -90,7 +90,13 @@ namespace openspace {
         properties::OptionProperty _renderOption;
 
         std::shared_ptr<ghoul::fontrendering::Font> _font;
-        ghoul::Dictionary _labelIdMap;
+
+        struct LabelInfo {
+            std::string text;
+            std::string attachedId;
+        };
+
+        std::vector<LabelInfo> labelDataInfo;
         std::vector<std::pair<glm::dvec3, std::string>> _labelData;
         glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 
