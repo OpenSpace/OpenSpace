@@ -101,7 +101,7 @@ local DSS14 = {
     }
 }
 
--- Retired?
+-- DSS15 is a 34m dish of the HEF net that is being decomissioned as of 2017
 local DSS15 = {
     Identifier = "DSS15",
     Parent = earthAsset.Earth.Identifier,
@@ -113,16 +113,16 @@ local DSS15 = {
         Latitude = 35.42590143888,
       }
    },
-    Renderable = {
-        Type = "RenderableModel",
-        Geometry = {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/34m_dish/34m_dish.obj"
-        },
-        ColorTexture = models .. "/34m_dish/base_AO.png" ,
-        ModelTransform = RotationMatrixGoldstone
+    -- Renderable = {
+    --     Type = "RenderableModel",
+    --     Geometry = {
+    --         Type = "MultiModelGeometry",
+    --         GeometryFile = models .. "/34m_dish/34m_dish.obj"
+    --     },
+    --     ColorTexture = models .. "/34m_dish/base_AO.png" ,
+    --     ModelTransform = RotationMatrixGoldstone
 
-    },
+    -- },
     GUI = {
         Name = "DSS15",
         Path = "/Solar System/Stations/Goldstone"

@@ -16,8 +16,10 @@ local RotationMatrix = {
     0, -1, 0
 }
 
+local spacecraftID = "Voyager2"
+
 local Voyager2 = {
-    Identifier = "VGR2",
+    Identifier = spacecraftID,
     Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Transform = {
         Translation = {
@@ -75,6 +77,8 @@ local Voyager2Antenna = {
         Path = "/Solar System/Missions/Voyager 2"
     }
 }
+
+asset.export("spacecraftID", spacecraftID)
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Voyager2,

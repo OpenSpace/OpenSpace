@@ -27,6 +27,9 @@
 #include <openspace/util/spicemanager.h>
 namespace openspace {
     constexpr const char* _loggerCat = "SignalManager";
+    constexpr const char* KeySpacecraftIdMap = "SpacecraftIdMap";
+    //The abbreviation in the data(NAIF ID) to the SceneGraphNode identifier of the spacecrafts
+    std::map<std::string, std::string> spacecraftDataToId;
 
     struct SignalManager::SignalData SignalManager::signalData;
     std::vector<double> SignalManager::fileStartTimes;
@@ -36,6 +39,22 @@ namespace openspace {
     {
         bool dataFilesSuccess = DataFileHelper::checkFileNames(identifier, dictionary, _dataFiles);
         fileStartTimes = DataFileHelper::getDaysFromFileNames(_dataFiles);
+
+        ghoul::Dictionary spacecraftDictionary;
+
+        if (dictionary->getValue(KeySpacecraftIdMap, spacecraftDictionary)) {
+            std::vector<std::string> keys = spacecraftDictionary.keys();
+            for (int i = 0; i < keys.size(); i++)
+            {
+                std::string dataAbbr = keys.at(i);
+                std::string nodeId = spacecraftDictionary.value<std::string>(keys.at(i));
+                spacecraftDataToId[dataAbbr] = nodeId;
+            }
+        }
+        else {
+            LERROR("No {} set for {}!", KeySpacecraftIdMap, _loggerCat);
+        }
+
 
         return dataFilesSuccess;
     }
@@ -53,7 +72,7 @@ namespace openspace {
             objectCounter++;
             try {
                 structSignal.dishName = signalsInJson["facility"].get<std::string>();
-                structSignal.spacecraft = signalsInJson["projuser"].get<std::string>();
+                structSignal.spacecraft = spacecraftDataToId.at(signalsInJson["projuser"].get<std::string>());
                 structSignal.endTime = signalsInJson["eot"].get<std::string>();
                 structSignal.startTime = signalsInJson["bot"].get<std::string>();
                 structSignal.direction = signalsInJson["direction"].get<std::string>();

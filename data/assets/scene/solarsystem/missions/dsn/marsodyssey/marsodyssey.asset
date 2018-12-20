@@ -11,8 +11,10 @@ local models = asset.syncedResource({
     Version = 1
 })
 
+local spacecraftID = "MarsOdyssey"
+
 local MarsOdyssey = {
-    Identifier = "MarsOdyssey",
+    Identifier = spacecraftID,
     Parent = marsTransforms.MarsBarycenter.Identifier,
     Transform = {
         Translation = {
@@ -45,6 +47,8 @@ local MarsOdysseyModel = {
         Path = "/Solar System/Missions/Mars Odyssey"
     }
 }
+
+asset.export("spacecraftID", spacecraftID)
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     MarsOdyssey,

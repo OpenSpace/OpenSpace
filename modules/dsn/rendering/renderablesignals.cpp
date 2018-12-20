@@ -37,6 +37,7 @@ namespace {
     constexpr const char* ProgramName = "SignalsProgram";
     constexpr const char* _loggerCat = "RenderableSignals";
     constexpr const char* KeyStationSites = "StationSites";
+    constexpr const char* KeySpacecraftIdMap = "SpacecraftIdMap";
 
     constexpr const std::array <const char*, openspace::RenderableSignals::uniformCacheSize> UniformNames = {
         "modelViewStation","modelViewSpacecraft", "projectionTransform", "baseOpacity",
@@ -107,6 +108,13 @@ documentation::Documentation RenderableSignals::Documentation() {
                 Optional::No,
                 "This is a map of the individual stations to their "
                 "respective site location on Earth."
+            },
+            {
+                KeySpacecraftIdMap,
+                new TableVerifier,
+                Optional::No,
+                "This is a map of the signal data abbreviations "
+                "to the respective spacecraft asset file identifier. "
             },
             {
                 LineWidthInfo.identifier,
