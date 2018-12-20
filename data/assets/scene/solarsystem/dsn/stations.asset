@@ -6,7 +6,7 @@ local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 local sceneHelper = asset.require('util/scene_helper')
 local propertyHelper = asset.require('util/property_helper')
 
-local globeTranslation = asset.require('examples/globetranslation')
+local lights = asset.require('scene/solarsystem/general/lightsources')
 
 
 local models = asset.syncedResource({
@@ -92,7 +92,8 @@ local DSS14 = {
             GeometryFile = models .. "/70m_dish/70m_dish.obj"
         },
         ColorTexture = models .. "/70m_dish/truss_dish_AO.jpg", 
-        ModelTransform = RotationMatrixGoldstone
+        ModelTransform = RotationMatrixGoldstone,
+        LightSources = lights.StandardLights
 
     },
     GUI = {
@@ -147,7 +148,8 @@ local DSS24 = {
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
         ColorTexture = models .. "/34m_dish/base_AO.png",
-        ModelTransform = RotationMatrixGoldstone
+        ModelTransform = RotationMatrixGoldstone,
+        LightSources = lights.StandardLights
 
 
     },
@@ -175,7 +177,8 @@ local DSS25 = {
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
         ColorTexture = models .. "/34m_dish/base_AO.png",
-        ModelTransform = RotationMatrixGoldstone
+        ModelTransform = RotationMatrixGoldstone,
+        LightSources = lights.StandardLights
 
     },
     GUI = {
@@ -202,7 +205,8 @@ local DSS26 = {
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
         ColorTexture = models .. "/34m_dish/base_AO.png", 
-        ModelTransform = RotationMatrixGoldstone
+        ModelTransform = RotationMatrixGoldstone,
+        LightSources = lights.StandardLights
 
     },
     GUI = {
@@ -232,7 +236,8 @@ local DSS43 = {
             GeometryFile = models .. "/70m_dish/70m_dish.obj"
         },
         ColorTexture = models .. "/70m_dish/truss_dish_AO.jpg",
-        ModelTransform = RotationMatrixCanberra
+        ModelTransform = RotationMatrixCanberra,
+        LightSources = lights.StandardLights
 
     },
     GUI = {
@@ -259,7 +264,8 @@ local DSS34 = {
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
         ColorTexture = models .. "/34m_dish/base_AO.png",
-        ModelTransform = RotationMatrixCanberra
+        ModelTransform = RotationMatrixCanberra,
+        LightSources = lights.StandardLights
 
     },
     GUI = {
@@ -286,7 +292,8 @@ local DSS35 = {
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
         ColorTexture = models .. "/34m_dish/base_AO.png",
-        ModelTransform = RotationMatrixCanberra
+        ModelTransform = RotationMatrixCanberra,
+        LightSources = lights.StandardLights
 
     },
     GUI = {
@@ -313,7 +320,8 @@ local DSS36 = {
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
         ColorTexture = models .. "/34m_dish/base_AO.png",
-        ModelTransform = RotationMatrixCanberra
+        ModelTransform = RotationMatrixCanberra,
+        LightSources = lights.StandardLights
 
     },
     GUI = {
@@ -341,7 +349,8 @@ local DSS45 = {
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
         ColorTexture = models .. "/34m_dish/base_AO.png",
-        ModelTransform = RotationMatrixCanberra
+        ModelTransform = RotationMatrixCanberra,
+        LightSources = lights.StandardLights
 
     },
     GUI = {
@@ -371,7 +380,8 @@ local DSS63 = {
             GeometryFile = models .. "/70m_dish/70m_dish.obj"
         },
         ColorTexture = models .. "/70m_dish/truss_dish_AO.jpg",
-        ModelTransform = RotationMatrixMadrid
+        ModelTransform = RotationMatrixMadrid,
+        LightSources = lights.StandardLights
 
     },
     GUI = {
@@ -398,7 +408,8 @@ local DSS65 = {
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
         ColorTexture = models .. "/34m_dish/base_AO.png",
-        ModelTransform = RotationMatrixMadrid
+        ModelTransform = RotationMatrixMadrid,
+        LightSources = lights.StandardLights
 
     },
     GUI = {
@@ -425,7 +436,8 @@ local DSS54 = {
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
         ColorTexture = models .. "/34m_dish/base_AO.png",
-        ModelTransform = RotationMatrixMadrid
+        ModelTransform = RotationMatrixMadrid,
+        LightSources = lights.StandardLights
 
     },
     GUI = {
@@ -452,7 +464,8 @@ local DSS55 = {
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
         ColorTexture = models .. "/34m_dish/base_AO.png",
-        ModelTransform = RotationMatrixMadrid
+        ModelTransform = RotationMatrixMadrid,
+        LightSources = lights.StandardLights
 
     },
     GUI = {
