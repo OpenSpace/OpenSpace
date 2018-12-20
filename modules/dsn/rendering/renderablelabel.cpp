@@ -43,6 +43,9 @@ namespace {
     constexpr const char* KeyUnitIn = "FadeInDistanceUnit";
     constexpr const char* KeyUnitSize = "SizeDistanceUnit";
 
+    constexpr const char* KeyObjectIdentifier = "ObjectIdentifier";
+    constexpr const char* KeyLabelText = "LabelText";
+
     constexpr openspace::properties::Property::PropertyInfo LabelIdentifierMapInfo = {
         "LabelIdentifierMap",
         "Label Identifier Map",
@@ -290,8 +293,19 @@ namespace openspace {
 
         if (dictionary.hasKey(LabelIdentifierMapInfo.identifier)) {
 
-            _labelIdMap = dictionary.value<ghoul::Dictionary>(LabelIdentifierMapInfo.identifier);
+            ghoul::Dictionary tempLabelIdMap = dictionary.value<ghoul::Dictionary>(LabelIdentifierMapInfo.identifier);
 
+            std::vector<std::string> labels = tempLabelIdMap.keys();
+
+            for (int i = 0; i < labels.size(); i++) {
+                ghoul::Dictionary labelInfoDictionary = tempLabelIdMap.value<ghoul::Dictionary>(labels.at(i));
+                LabelInfo labelInfo;
+                labelInfo.text = labelInfoDictionary.value<std::string>(KeyLabelText);
+                labelInfo.attachedId = labelInfoDictionary.value<std::string>(KeyObjectIdentifier);
+
+                labelDataInfo.push_back(labelInfo);
+            }
+            
             _hasLabel = true;
             _hasLabelIdMap = true;
 
@@ -540,29 +554,24 @@ namespace openspace {
 
     bool RenderableLabel::loadLabelDataFromId() {
 
-        std::vector<std::string> keys = _labelIdMap.keys();
+        for (int i = 0; i < labelDataInfo.size(); i++) {
+            LabelInfo labelinfo = labelDataInfo.at(i);
 
-        std::string id = "";
+            if (global::renderEngine.scene()->sceneGraphNode(labelinfo.attachedId)) {
 
-        for (int i = 0; i < keys.size(); i++)
-        {
-            id = keys.at(i);
-            std::string label = _labelIdMap.value<std::string>(keys.at(i));
-
-            if (global::renderEngine.scene()->sceneGraphNode(id)) {
-                glm::dvec3 position = global::renderEngine.scene()->sceneGraphNode(id)->worldPosition();
+                glm::dvec3 position = global::renderEngine.scene()->sceneGraphNode(labelinfo.attachedId)->worldPosition();
 
                 glm::dvec3 transformedPos = glm::dvec3(
                     _transformationMatrix * glm::dvec4(position, 1.0)
                 );
-                _labelData.emplace_back(std::make_pair(transformedPos, label));
+                _labelData.emplace_back(std::make_pair(transformedPos, labelinfo.text));
 
             }
             else {
-                LERROR(fmt::format("No SceneGraphNode found with identifier {}", id));
+                LERROR(fmt::format("No SceneGraphNode found with identifier {}", labelinfo.attachedId));
                 return false;
             }
-
+        
         }
 
         return true;

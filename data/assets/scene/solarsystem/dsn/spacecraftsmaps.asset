@@ -21,24 +21,62 @@ local signalDataIdMap = {
 	M010 = MarsOdysseyAsset.spacecraftID
 }
 
+------------------------ spacecraft labels -----------------------
+local Voyager1Label = {
+	LabelText = "Voyager 1",
+	ObjectIdentifier = Voyager1Asset.spacecraftID
+}
+
+local Voyager2Label = {
+	LabelText = "Voyager 2",
+	ObjectIdentifier = Voyager2Asset.spacecraftID
+}
+
+local StereoALabel = {
+	LabelText = "Stereo A",
+	ObjectIdentifier = StereoAAsset.spacecraftID
+}
+
+local MarsRecOrbLabel = {
+	LabelText = "Mars Recon Orbiter",
+	ObjectIdentifier = MarsRecOrbAsset.spacecraftID
+}
+
+local MarsOdysseyLabel = {
+	LabelText = "Mars Odyssey",
+	ObjectIdentifier = MarsOdysseyAsset.spacecraftID
+}
+
+------------------------ cluster labels -----------------------
+
+local MarsClusterLabel = {
+	LabelText = "MarsOdyssey, \n Mars Recon Orbiter ",
+	ObjectIdentifier = "Mars"
+}
 -------------------- label id maps --------------------
 local labelMapMarsMissions = {  
-                        MarsRecOrbiter = "Mars Recon Orbiter",
-                        MarsOdyssey = "MarsOdyssey",
+                        Label1 = MarsRecOrbLabel,
+                        Label2 = MarsOdysseyLabel
                     }
 
-local labelMapVoyagers = {  
-                            Voyager1 = "Voyager 1",
-                            Voyager2 = "Voyager 2",
+local labelMapOuterSpace = {  
+                            Label1 = Voyager1Label,
+                            Label2 = Voyager2Label,
+                        }
+
+local labelMapInnerSpace = {  
+                        	Label1 = StereoALabel
                         }
 
 local labelMapClusters = {  
-                            Mars = "MarsOdyssey, \n Mars Recon Orbiter "
-                    }
+                            Label1 = MarsClusterLabel
+                    	}
 
 ------------------------ export -------------------------
 asset.export("signalDataIdMap", signalDataIdMap)
 
+
 asset.export("labelMapMarsMissions", labelMapMarsMissions)
-asset.export("labelMapVoyagers", labelMapVoyagers)
+asset.export("labelMapOuterSpace", labelMapOuterSpace)
+asset.export("labelMapInnerSpace", labelMapInnerSpace)
 asset.export("labelMapClusters", labelMapClusters)

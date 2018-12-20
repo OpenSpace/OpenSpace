@@ -32,6 +32,13 @@ local StereoA = {
 local StereoAModel = {
     Identifier = "StereoA_model",
     Parent = StereoA.Identifier,
+    Transform = {
+            Scale = {
+                Type = "StaticScale",
+                -- The scale of the model is too large
+                Scale = 0.00001
+            }
+    },
     Renderable = {
         Type = "RenderableModel",
         Geometry = {
