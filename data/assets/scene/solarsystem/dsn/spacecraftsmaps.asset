@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 ----- The maps in this file are used to keep the SceneGraphNode identifiers for each spacecraft ---
------ up to date with labels and dsn signal data among other things 							---
+----- up to date with the labels and dsn signal data among other things 							---
 ---------------------------------------------------------------------------------------------------
 
 local Voyager1Asset = asset.require('scene/solarsystem/missions/voyager1/voyager1')

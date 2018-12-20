@@ -53,4 +53,4 @@ asset.export("spacecraftID", spacecraftID)
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     MarsOdyssey,
     MarsOdysseyModel
-    })
+})

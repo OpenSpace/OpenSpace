@@ -59,4 +59,4 @@ asset.export("spacecraftID", spacecraftID)
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     StereoA,
     StereoAModel
-    })
+})
