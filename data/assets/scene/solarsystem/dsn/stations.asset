@@ -39,21 +39,81 @@ local siteColorMap = {
 
 -- Map to the site locations above, this will determine the signal colors
 local stationSiteMap = {
-                 DSS14 = "GoldstoneColor",
-                 DSS15 = "GoldstoneColor",
-                 DSS24 = "GoldstoneColor",
-                 DSS25 = "GoldstoneColor",
-                 DSS26 = "GoldstoneColor",
-                 DSS43 = "CanberraColor",
-                 DSS34 = "CanberraColor",
-                 DSS35 = "CanberraColor",
-                 DSS36 = "CanberraColor",
-                 DSS45 = "CanberraColor",
-                 DSS63 = "MadridColor",
-                 DSS65 = "MadridColor",
-                 DSS54 = "MadridColor",
-                 DSS55 = "MadridColor"
+                 DSS14 = {
+                    SiteColor = "GoldstoneColor",
+                    Size = 70
+                    },
+                 DSS15 = {
+                    SiteColor = "GoldstoneColor",
+                    Size = 34
+                    },
+                 DSS24 = {
+                    SiteColor = "GoldstoneColor",
+                    Size = 34
+                    },
+                 DSS25 = {
+                    SiteColor = "GoldstoneColor",
+                    Size = 34
+                    },
+                 DSS26 = {
+                    SiteColor = "GoldstoneColor",
+                    Size = 34
+                    },
+                 DSS43 = {
+                    SiteColor = "CanberraColor",
+                    Size = 70
+                    },
+                 DSS34 = {
+                    SiteColor = "CanberraColor",
+                    Size = 34
+                    },
+                 DSS35 = {
+                    SiteColor = "CanberraColor",
+                    Size = 34
+                    },
+                 DSS36 = {
+                    SiteColor = "CanberraColor",
+                    Size = 34
+                    },
+                 DSS45 = {
+                    SiteColor = "CanberraColor",
+                    Size = 34
+                    },
+                 DSS63 = {
+                    SiteColor = "MadridColor",
+                    Size = 70
+                    },
+                 DSS65 = {
+                    SiteColor = "MadridColor",
+                    Size = 34
+                    },
+                 DSS54 = {
+                    SiteColor = "MadridColor",
+                    Size = 34
+                    },
+                 DSS55 = {
+                    SiteColor = "MadridColor",
+                    Size = 34
+                    }
         }
+
+-- Map to the site locations above, this will determine the signal colors
+-- local stationSizeMap = {
+--                  DSS14 = 70,
+--                  DSS15 = 34,
+--                  DSS24 = 34,
+--                  DSS25 = "GoldstoneColor",
+--                  DSS26 = "GoldstoneColor",
+--                  DSS43 = "CanberraColor",
+--                  DSS34 = "CanberraColor",
+--                  DSS35 = "CanberraColor",
+--                  DSS36 = "CanberraColor",
+--                  DSS45 = "CanberraColor",
+--                  DSS63 = "MadridColor",
+--                  DSS65 = "MadridColor",
+--                  DSS54 = "MadridColor",
+--                  DSS55 = "MadridColor"
+--         }        
 
 --------------------- Goldstone ------------------------
 local RotationMatrixGoldstone = {
