@@ -91,7 +91,7 @@ local DSS14 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/70m_dish/70m_dish.obj"
         },
-        ColorTexture = models .. "/70m_dish/truss_dish_AO.jpg", 
+        ColorTexture = models .. "/70m_dish/texture.png", 
         ModelTransform = RotationMatrixGoldstone,
         LightSources = lights.StandardLights
 
@@ -147,7 +147,7 @@ local DSS24 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/34m_dish/base_AO.png",
+        ColorTexture = models .. "/34m_dish/texture.png",
         ModelTransform = RotationMatrixGoldstone,
         LightSources = lights.StandardLights
 
@@ -176,7 +176,7 @@ local DSS25 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/34m_dish/base_AO.png",
+        ColorTexture = models .. "/34m_dish/texture.png",
         ModelTransform = RotationMatrixGoldstone,
         LightSources = lights.StandardLights
 
@@ -204,7 +204,7 @@ local DSS26 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/34m_dish/base_AO.png", 
+        ColorTexture = models .. "/34m_dish/texture.png", 
         ModelTransform = RotationMatrixGoldstone,
         LightSources = lights.StandardLights
 
@@ -235,7 +235,7 @@ local DSS43 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/70m_dish/70m_dish.obj"
         },
-        ColorTexture = models .. "/70m_dish/truss_dish_AO.jpg",
+        ColorTexture = models .. "/70m_dish/texture.png",
         ModelTransform = RotationMatrixCanberra,
         LightSources = lights.StandardLights
 
@@ -263,7 +263,7 @@ local DSS34 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/34m_dish/base_AO.png",
+        ColorTexture = models .. "/34m_dish/texture.png",
         ModelTransform = RotationMatrixCanberra,
         LightSources = lights.StandardLights
 
@@ -291,7 +291,7 @@ local DSS35 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/34m_dish/base_AO.png",
+        ColorTexture = models .. "/34m_dish/texture.png",
         ModelTransform = RotationMatrixCanberra,
         LightSources = lights.StandardLights
 
@@ -319,7 +319,7 @@ local DSS36 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/34m_dish/base_AO.png",
+        ColorTexture = models .. "/34m_dish/texture.png",
         ModelTransform = RotationMatrixCanberra,
         LightSources = lights.StandardLights
 
@@ -348,7 +348,7 @@ local DSS45 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/34m_dish/base_AO.png",
+        ColorTexture = models .. "/34m_dish/texture.png",
         ModelTransform = RotationMatrixCanberra,
         LightSources = lights.StandardLights
 
@@ -379,7 +379,7 @@ local DSS63 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/70m_dish/70m_dish.obj"
         },
-        ColorTexture = models .. "/70m_dish/truss_dish_AO.jpg",
+        ColorTexture = models .. "/70m_dish/texture.png",
         ModelTransform = RotationMatrixMadrid,
         LightSources = lights.StandardLights
 
@@ -407,7 +407,7 @@ local DSS65 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/34m_dish/base_AO.png",
+        ColorTexture = models .. "/34m_dish/texture.png",
         ModelTransform = RotationMatrixMadrid,
         LightSources = lights.StandardLights
 
@@ -435,7 +435,7 @@ local DSS54 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/34m_dish/base_AO.png",
+        ColorTexture = models .. "/34m_dish/texture.png",
         ModelTransform = RotationMatrixMadrid,
         LightSources = lights.StandardLights
 
@@ -463,7 +463,7 @@ local DSS55 = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/34m_dish/34m_dish.obj"
         },
-        ColorTexture = models .. "/34m_dish/base_AO.png",
+        ColorTexture = models .. "/34m_dish/texture.png",
         ModelTransform = RotationMatrixMadrid,
         LightSources = lights.StandardLights
 
