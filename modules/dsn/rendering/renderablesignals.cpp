@@ -38,6 +38,8 @@ namespace {
     constexpr const char* _loggerCat = "RenderableSignals";
     constexpr const char* KeyStationSites = "StationSites";
     constexpr const char* KeySpacecraftIdMap = "SpacecraftIdMap";
+    constexpr const char* KeyStationSize = "Size";
+    constexpr const char* KeyStationSiteColor = "SiteColor";
 
     constexpr const std::array <const char*, openspace::RenderableSignals::uniformCacheSize> UniformNames = {
         "modelViewStation","modelViewSpacecraft", "projectionTransform", "baseOpacity",
@@ -196,13 +198,20 @@ RenderableSignals::RenderableSignals(const ghoul::Dictionary& dictionary)
 
     if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyStationSites)) {
         ghoul::Dictionary stationDictionary = dictionary.value<ghoul::Dictionary>(KeyStationSites);
-        std::vector<std::string> keys = stationDictionary.keys();
+        std::vector<std::string> stations = stationDictionary.keys();
 
-        for (int i = 0; i < keys.size(); i++)
+        // loop the stations
+        for (int i = 0; i < stations.size(); i++)
         {   
-            std::string station = keys.at(i);
-            std::string site = stationDictionary.value<std::string>(keys.at(i));
-            _stationToSite[station] = site;
+            std::string station = stations.at(i);
+
+            ghoul::Dictionary stationPropertyDictionary = stationDictionary.value<ghoul::Dictionary>(stations.at(i));
+            // loop the properties of the station
+            float size = stationPropertyDictionary.value<float>(KeyStationSize);
+            _stationToSize[stations.at(i)] = size;
+
+            std::string site = stationPropertyDictionary.value<std::string>(KeyStationSiteColor);
+            _stationToSite[stations.at(i)] = site;
         }
     }
  
@@ -315,10 +324,10 @@ void RenderableSignals::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
 
     //The stations are statically translated with respect to Earth
-    glm::dmat4 modelTransformStation = global::renderEngine.scene()->sceneGraphNode("Earth")->modelTransform();
+    //glm::dmat4 modelTransformStation = global::renderEngine.scene()->sceneGraphNode("Earth")->modelTransform();
 
     _programObject->setUniform(_uniformCache.modelViewStation,
-        data.camera.combinedViewMatrix() * modelTransformStation);
+        data.camera.combinedViewMatrix() * _lineRenderInformation._localTransformStation);
 
     _programObject->setUniform(_uniformCache.modelViewSpacecraft,
         data.camera.combinedViewMatrix()  * _lineRenderInformation._localTransformSpacecraft);
@@ -391,6 +400,7 @@ void RenderableSignals::update(const UpdateData& data) {
     //update focusnode information used to calculate spacecraft positions
     _focusNode = global::navigationHandler.focusNode();
     _lineRenderInformation._localTransformSpacecraft = glm::translate(glm::dmat4(1.0), _focusNode->worldPosition());
+    _lineRenderInformation._localTransformStation = glm::translate(glm::dmat4(1.0), global::renderEngine.scene()->sceneGraphNode("Earth")->worldPosition());
 
     //Todo; keep track of active index for signalvector, or swap for loop for binary search
     for (int i = 0; i < SignalManager::signalData.signals.size(); i++) {
@@ -517,16 +527,23 @@ glm::dvec3 RenderableSignals::getSuitablePrecisionPositionForSceneGraphNode(std:
 
     return position;
 }
-/* Since our station dishes have a static translation from Earth, we
-* can get their local translation. The reason to handle it differently
-* compared to the spacecrafts is to keep an exact render position
-* for the station line ends even when the focusNode is Earth. */
+
 glm::dvec3 RenderableSignals::getPositionForGeocentricSceneGraphNode(const char* id) {
 
     glm::dvec3 position;
 
     if (global::renderEngine.scene()->sceneGraphNode(id)) {
-        position = global::renderEngine.scene()->sceneGraphNode(id)->position();
+
+        glm::dvec3 earthPos = global::renderEngine.scene()->sceneGraphNode("Earth")->worldPosition();
+        glm::dvec3 stationPos= global::renderEngine.scene()->sceneGraphNode(id)->worldPosition();
+
+        glm::dvec3 earthSurfacePos = stationPos - earthPos;
+        glm::dvec3 heightAboveSurfacePos = glm::normalize(earthSurfacePos);
+        heightAboveSurfacePos.x = heightAboveSurfacePos.x * _stationToSize.at(id);
+        heightAboveSurfacePos.y = heightAboveSurfacePos.y * _stationToSize.at(id);
+        heightAboveSurfacePos.z = heightAboveSurfacePos.z * _stationToSize.at(id);
+        position = earthSurfacePos + heightAboveSurfacePos;
+
     }
     else {
         LERROR(fmt::format("No scenegraphnode found for the station dish {}, "

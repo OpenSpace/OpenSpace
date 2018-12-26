@@ -138,6 +138,8 @@ namespace openspace {
             GLsizei countLines = 0;
             /// Local model matrix, for spacecraft, dependant on focusnode, used for rendering in camera space
             glm::dmat4 _localTransformSpacecraft = glm::dmat4(1.0);
+            /// Local model matrix, for station, dependant on earth position
+            glm::dmat4 _localTransformStation = glm::dmat4(1.0);
             /// The vertex array object for this RenderInformation
             GLuint _vaoID = 0;
             /// The main vertex buffer object
@@ -152,6 +154,9 @@ namespace openspace {
         
         /// Maps a station identifier to a site location
         std::map<std::string, std::string> _stationToSite;
+
+        /// Maps a station identifier to its size
+        std::map<std::string, float> _stationToSize;
 
         /// Maps a site location to an index in the _siteColors property vector
         std::map<std::string, int> _siteToIndex;
