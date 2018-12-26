@@ -82,7 +82,7 @@ float getSegmentOpacity(const float segmentSize,
     } // end for loop
 
     // if within a spacing
-    return baseOpacity;
+    return vs_color.a*baseOpacity;
 }
 
 
