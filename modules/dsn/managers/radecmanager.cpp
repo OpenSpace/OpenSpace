@@ -57,12 +57,19 @@ namespace openspace {
    }
 
    glm::vec3 RadecManager::getPosForTime(double time) const {
+
        if (!correctFileInterval(time)) {
            int idx = DataFileHelper::findFileIndexForCurrentTime(time, timeDoubles);
-           updateRadecData(idx);
-          
-           int index = DataFileHelper::findFileIndexForCurrentTime(time, minuteTimes);
-           updateActiveMinute(index);
+
+           //If index is same as previous, don't parse the data again
+           if(idx != prevIndex){
+               prevIndex = idx;
+              
+               updateRadecData(idx);
+               int index = DataFileHelper::findFileIndexForCurrentTime(time, minuteTimes);
+               updateActiveMinute(index);
+           }
+
        }
 
        if (positions.size() && !correctUpdateInterval(time)) {
@@ -95,11 +102,14 @@ namespace openspace {
                        position.dec = pos["DecDn"].get<double>();
                        position.range = pos["GeoRngDn"].get<double>();
                        position.lightTravelTime = pos["DLT"].get<double>();
+                       position.lightTravelHours = ceil(position.lightTravelTime / 3600);
                    }
                    catch (const std::exception& e) {
                        LERROR(fmt::format("{}: Error in json object number {} while reading file '{}'", objectIdentifier, objectCounter, filename));
                    }
+
                    RadecManager::positions.push_back(position); 
+
                }
                return true;
        }
