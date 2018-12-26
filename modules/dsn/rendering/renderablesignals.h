@@ -95,19 +95,6 @@ namespace openspace {
         /* Returns a distance between two scenegraphnodes */
         double getDistance(std::string nodeIdA, std::string nodeIdB);
 
-        /* The VBO layout of the vertex position */
-        struct PositionVBOLayout {
-            float x, y, z;
-        };
-        /* The VBO layout of the color */
-        struct ColorVBOLayout {
-            float r, g, b, a;
-        };
-        /* The summated VBO layout of all the one value float attributes */
-        struct FloatsVBOLayout {
-            float distance, timeSinceStart, transmissionTime;
-        };
-
         /// Number of variables in _uniformCache
         static const GLuint uniformCacheSize = 8;
 
@@ -176,6 +163,9 @@ namespace openspace {
         /// The vertex attribute location for total transmission time
         /// must correlate to layout location in vertex shader
         const GLuint _vaLocTransmissionTime = 4;
+        /// The vertex attribute location for signal light travle time
+        /// must correlate to layout location in vertex shader
+        const GLuint _vaLocLightTravelTime = 5;
 
         /// Specifies the number of components per generic vertex attribute
         const GLuint _sizeFourVal = 4;
@@ -186,12 +176,30 @@ namespace openspace {
 
     private:
 
+        /* The VBO layout of the vertex position */
+        struct PositionVBOLayout {
+            float x, y, z;
+        };
+        /* The VBO layout of the color */
+        struct ColorVBOLayout {
+            float r, g, b, a;
+        };
+        /* The summated VBO layout of all the one value float attributes */
+        struct FloatsVBOLayout {
+            float distance, timeSinceStart, transmissionTime, lightTravelTime;
+        };
+
+        /// Number of variables in FloatsVBOLayout
+        static const int _floatsVBOSize = 4;
+        /// Size buffer for signal vector
+        int _signalSizeBuffer = 10;
+
         /// Line width for the line rendering part
         properties::FloatProperty _lineWidth;
         /// Opacity for the base line
         properties::FloatProperty _baseOpacity;
         /// Speed factor for segments within the transmission time
-        properties::FloatProperty _signalSpeedFactor;
+        properties::FloatProperty _flowSpeedFactor;
         /// Size factor for segments within the transmission time
         properties::FloatProperty _segmentSizeFactor;
         /// Size factor for the spacing between segments within the transmission time
@@ -203,13 +211,10 @@ namespace openspace {
         ghoul::opengl::ProgramObject* _programObject = nullptr;
         /// Cache for uniform variables, update _uniformCacheSize accordingly
         UniformCache(modelViewStation, modelViewSpacecraft, projection, baseOpacity,
-                     signalSpeedFactor, segmentSizeFactor, spacingSizeFactor, fadeFactor) _uniformCache;
+                     flowSpeedFactor, segmentSizeFactor, spacingSizeFactor, fadeFactor) _uniformCache;
 
         /*Checks if the current time is within a signal's start and endtime*/
         bool isSignalActive(double currentTime, SignalManager::Signal signal);
-
-        /// Size buffer for signal vector
-        int _signalSizeBuffer = 10;
 
     };
 

@@ -43,7 +43,7 @@ namespace {
 
     constexpr const std::array <const char*, openspace::RenderableSignals::uniformCacheSize> UniformNames = {
         "modelViewStation","modelViewSpacecraft", "projectionTransform", "baseOpacity",
-        "signalSpeedFactor", "segmentSizeFactor", "spacingSizeFactor", "fadeFactor"
+        "flowSpeedFactor", "segmentSizeFactor", "spacingSizeFactor", "fadeFactor"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SiteColorsInfo = {
@@ -65,10 +65,10 @@ namespace {
          "This value specifies the base opacity of all the signal transmissions "
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SignalSpeedInfo = {
-        "SignalSpeed",
-        "Signal Speed",
-        "Speed of signal transmission segments "
+    constexpr openspace::properties::Property::PropertyInfo FlowSpeedInfo = {
+        "FlowSpeed",
+        "Flow Speed",
+        "Speed of signal transmission flow effect, i.e. the segments within the transmission "
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentSizeInfo = {
@@ -131,10 +131,10 @@ documentation::Documentation RenderableSignals::Documentation() {
                BaseOpacityInfo.description
             },
             {
-               SignalSpeedInfo.identifier,
+               FlowSpeedInfo.identifier,
                new DoubleVerifier,
                Optional::Yes,
-               SignalSpeedInfo.description
+               FlowSpeedInfo.description
             },
             {
                SegmentSizeInfo.identifier,
@@ -162,9 +162,9 @@ RenderableSignals::RenderableSignals(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _lineWidth(LineWidthInfo, 2.5f, 1.f, 10.f)
     , _baseOpacity(BaseOpacityInfo, 0.3f, 0.0f, 1.0f)
-    , _signalSpeedFactor(SignalSpeedInfo, 2.0f, 1.0f, 10.0f)
-    , _segmentSizeFactor(SegmentSizeInfo, 10.0f, 1.0f, 100.0f)
-    , _spacingSizeFactor(SpacingSizeInfo, 0.0f, 0.0f, 10.0f)
+    , _flowSpeedFactor(FlowSpeedInfo, 2.0f, 1.0f, 100.0f)
+    , _segmentSizeFactor(SegmentSizeInfo, 0.6f, 0.0f, 1.0f)
+    , _spacingSizeFactor(SpacingSizeInfo, 0.2f, 0.0f, 5.0f)
     , _fadeFactor(FadeFactorInfo, 0.5f, 0.1f, 0.5f)
 {
     documentation::testSpecificationAndThrow(
@@ -229,7 +229,7 @@ RenderableSignals::RenderableSignals(const ghoul::Dictionary& dictionary)
     }
     addProperty(_baseOpacity);
 
-    addProperty(_signalSpeedFactor);
+    addProperty(_flowSpeedFactor);
     addProperty(_segmentSizeFactor);
     addProperty(_spacingSizeFactor);
     addProperty(_fadeFactor);
@@ -318,6 +318,13 @@ void RenderableSignals::updateVertexAttributes() {
                         sizeof(FloatsVBOLayout),
                         (void*)(sizeof(PositionVBOLayout) + sizeof(ColorVBOLayout) + 2 * sizeof(float)));
     glEnableVertexAttribArray(_vaLocTransmissionTime);
+    // light travel time attribute
+    glVertexAttribPointer(_vaLocLightTravelTime, _sizeOneVal, GL_FLOAT, GL_FALSE,
+                        sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout) +
+                        sizeof(FloatsVBOLayout),
+                        (void*)(sizeof(PositionVBOLayout) + sizeof(ColorVBOLayout) + 3 * sizeof(float)));
+    glEnableVertexAttribArray(_vaLocLightTravelTime);
+
 };
 
 void RenderableSignals::render(const RenderData& data, RendererTasks&) {
@@ -335,7 +342,7 @@ void RenderableSignals::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform(_uniformCache.projection, data.camera.sgctInternal.projectionMatrix());
 
     _programObject->setUniform(_uniformCache.baseOpacity, _baseOpacity);
-    _programObject->setUniform(_uniformCache.signalSpeedFactor, _signalSpeedFactor);
+    _programObject->setUniform(_uniformCache.flowSpeedFactor, _flowSpeedFactor);
     _programObject->setUniform(_uniformCache.segmentSizeFactor, _segmentSizeFactor);
     _programObject->setUniform(_uniformCache.spacingSizeFactor, _spacingSizeFactor);
     _programObject->setUniform(_uniformCache.fadeFactor, _fadeFactor);
@@ -427,7 +434,7 @@ void RenderableSignals::update(const UpdateData& data) {
 
     // Update the number of lines to render
     _lineRenderInformation.countLines = static_cast<GLsizei>(_vertexArray.size() / 
-                                (_sizeThreeVal + _sizeFourVal + 3 *_sizeOneVal));
+                                (_sizeThreeVal + _sizeFourVal + _floatsVBOSize * _sizeOneVal));
 
     //unbind vertexArray
     unbindGL();
@@ -462,8 +469,11 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
     glm::dvec3 posSpacecraft = getSuitablePrecisionPositionForSceneGraphNode(signal.spacecraft.c_str());
     double distance = getDistance(signal.dishName, signal.spacecraft);
     double timeSinceStart = signal.timeSinceStart;
+    double lightTravelTime = signal.lightTravelTime;
 
-    //fill the render array
+    // fill the render array
+    
+    // first with station position and its vertex attributes
     _vertexArray.push_back(posStation.x);
     _vertexArray.push_back(posStation.y);
     _vertexArray.push_back(posStation.z);
@@ -481,7 +491,10 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
     }
     _vertexArray.push_back(timeSinceStart);
     _vertexArray.push_back(signal.endTransmission-signal.startTransmission);
+    _vertexArray.push_back(lightTravelTime);
 
+
+    // then with spacecraft position and its vertex attributes
     _vertexArray.push_back(posSpacecraft.x);
     _vertexArray.push_back(posSpacecraft.y);
     _vertexArray.push_back(posSpacecraft.z);
@@ -499,6 +512,7 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
     }
     _vertexArray.push_back(timeSinceStart);
     _vertexArray.push_back(signal.endTransmission - signal.startTransmission);
+    _vertexArray.push_back(lightTravelTime);
 }
 
 

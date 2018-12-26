@@ -31,10 +31,15 @@ in vec4 vs_color;
 in float distanceFromStart;
 in float timeSinceStart;
 in float transmissionTime;
+in float lightTravelTime;
 
-float lightSpeed = 299792458.0; // expressed in m/s
+// light speed expressed in m/s
+float lightSpeed = 299792458.0; 
 
-uniform float signalSpeedFactor;
+// the maximum number of segments to be drawn
+int maxNumSegments = 10000; //int(ceil(lightTravelTime* 10.0f));
+
+uniform float flowSpeedFactor;
 uniform float segmentSizeFactor;
 uniform float spacingSizeFactor;
 uniform float fadeFactor;
@@ -46,16 +51,13 @@ float getSegmentOpacity(const float segmentSize,
     
     float fadeLength = segmentSize * fadeFactor;
 
-    // if fadeLength is zero, the smoothtep does not work, return straight away
+    // if fadeLength is zero, the smoothstep does not work, return straight away
     if(fadeFactor < 0.001f)
     {
         return 1.0f;
     }
 
-    // the maximum number of segments to be drawn
-    int MAXNUMSEGMENTS = 1000; // int(ceil(1000.0f/segmentSizeFactor));
-
-    for(int i = 0; i < MAXNUMSEGMENTS; i++ )
+    for(int i = 0; i < maxNumSegments; i++ )
     {
     
         float segmentStart =  distSignTravelStart-i*(segmentSize+spacing);
@@ -80,7 +82,7 @@ float getSegmentOpacity(const float segmentSize,
     } // end for loop
 
     // if within a spacing
-    return baseOpacity;
+    return vs_color.a*baseOpacity;
 }
 
 
@@ -95,16 +97,15 @@ Fragment getFragment() {
     // the distance the last signal transmission has travelled 
     float distLightTravelEnd = lightSpeed * (timeSinceStart-transmissionTime);
     float signalSize = distLightTravelStart-distLightTravelEnd;
-
-    float signalSegmentSize = 100.f * segmentSizeFactor * lightSpeed;
+    float signalSegmentSize = pow(lightTravelTime,segmentSizeFactor) * lightSpeed;
 
     float alpha = 0.0f;
     // if within the transmission time, change the opacity
     if(distanceFromStart < distLightTravelStart && distanceFromStart > distLightTravelEnd){
         // calculate how fast the signal segments travel within transmission
-        float distSignTravelStart = distLightTravelStart * signalSpeedFactor;
-        float spacing = 1000.f * lightSpeed * spacingSizeFactor;
-
+        float distSignTravelStart = distLightTravelStart * flowSpeedFactor;
+        // make the spacing dependent on the segment size
+        float spacing = signalSegmentSize * spacingSizeFactor;
         alpha = getSegmentOpacity(signalSegmentSize,spacing, distSignTravelStart);
     }
 
