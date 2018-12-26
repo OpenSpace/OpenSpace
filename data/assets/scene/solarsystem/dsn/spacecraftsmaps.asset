@@ -10,6 +10,8 @@ local Voyager2Asset = asset.require('scene/solarsystem/missions/voyager2/voyager
 local MarsRecOrbAsset = asset.require('scene/solarsystem/missions/dsn/mro/mro')
 local MarsOdysseyAsset = asset.require('scene/solarsystem/missions/dsn/marsodyssey/marsodyssey')
 local StereoAAsset = asset.require('scene/solarsystem/missions/dsn/stereoa/stereoa')
+local StereoBAsset = asset.require('scene/solarsystem/missions/dsn/stereob/stereob')
+
 
 
 -------------------- dsn signal data map --------------------
@@ -17,8 +19,9 @@ local signalDataIdMap = {
 	VGR1 = Voyager1Asset.spacecraftID,
 	VGR2 = Voyager2Asset.spacecraftID,
 	STA = StereoAAsset.spacecraftID,
-	MRO = MarsRecOrbAsset.spacecraftID,
-	M010 = MarsOdysseyAsset.spacecraftID
+	STB = StereoBAsset.spacecraftID,
+	MRO = "testRADEC",
+	M010 = MarsOdysseyAsset.spacecraftID 
 }
 
 ------------------------ spacecraft labels -----------------------
@@ -35,6 +38,10 @@ local Voyager2Label = {
 local StereoALabel = {
 	LabelText = "Stereo A",
 	ObjectIdentifier = StereoAAsset.spacecraftID
+}
+local StereoBLabel = {
+	LabelText = "Stereo B",
+	ObjectIdentifier = StereoBAsset.spacecraftID
 }
 
 local MarsRecOrbLabel = {
@@ -62,10 +69,13 @@ local labelMapMarsMissions = {
 local labelMapOuterSpace = {  
                             Label1 = Voyager1Label,
                             Label2 = Voyager2Label,
+                            
                         }
 
 local labelMapInnerSpace = {  
-                        	Label1 = StereoALabel
+                        	Label1 = StereoALabel,
+                        	Label2 = StereoBLabel
+
                         }
 
 local labelMapClusters = {  
