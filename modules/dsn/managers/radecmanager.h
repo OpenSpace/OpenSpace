@@ -43,12 +43,13 @@ namespace openspace {
            mutable double dec;
            mutable double range;
            mutable double lightTravelTime; //Downlink light time travel time in seconds
-
+           mutable int lightTravelHours;
        };
+       mutable int prevIndex;
+
        mutable std::vector<Position> positions;
        mutable std::vector<double> minuteTimes;
        mutable Position position; 
-
        mutable double updateFrequency = 1;
        mutable double activeMinute = -1;
        /* Identifier for object using the translation, used for logging */
