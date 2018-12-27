@@ -84,8 +84,9 @@ local ClusteredLabels = {
         SizeDistanceUnit = "km",
         FadeOutDistanceRange = {400000, 300000}, 
         FadeOutDistanceUnit = "km",
-        FadeInDistanceRange = {1.5,1.0},
-        FadeInDistanceUnit = "lightdays",
+        FadeInDistanceRange = {3,2},
+        FadeInDistanceUnit = "lighthours",
+
     },
     GUI = {
         Name = "Clustered Labels",
