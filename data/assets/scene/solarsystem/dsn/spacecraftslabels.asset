@@ -16,7 +16,7 @@ local InnerSpaceLabels = {
         FadeOutDistanceRange = {2, 0.1}, 
         FadeOutDistanceUnit = "km",
         FadeInDistanceRange = {3,2},
-        FadeInDistanceUnit = "au",
+        FadeInDistanceUnit = "lighthours",
     },
     GUI = {
         Name = "Inner Space Labels",

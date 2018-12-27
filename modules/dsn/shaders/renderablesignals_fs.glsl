@@ -36,9 +36,6 @@ in float lightTravelTime;
 // light speed expressed in m/s
 float lightSpeed = 299792458.0; 
 
-// the maximum number of segments to be drawn
-int maxNumSegments = 10000; //int(ceil(lightTravelTime* 10.0f));
-
 uniform float flowSpeedFactor;
 uniform float segmentSizeFactor;
 uniform float spacingSizeFactor;
@@ -47,7 +44,9 @@ uniform float baseOpacity;
 
 float getSegmentOpacity(const float segmentSize, 
                         const float spacing, 
-                        const float distSignTravelStart) {
+                        const float distFlowTravelStart,
+                        const float signalTravelStart,
+                        const float signalTravelEnd) {
     
     float fadeLength = segmentSize * fadeFactor;
 
@@ -57,16 +56,36 @@ float getSegmentOpacity(const float segmentSize,
         return 1.0f;
     }
 
-    for(int i = 0; i < maxNumSegments; i++ )
+    int firstVisibleSegmentIndex = 0;
+
+    float flowParticleDistance = distFlowTravelStart;
+
+    // find the first flow segment that is within our visibility  
+    while (flowParticleDistance > signalTravelStart){
+        firstVisibleSegmentIndex = firstVisibleSegmentIndex + 1;
+        flowParticleDistance = distFlowTravelStart - firstVisibleSegmentIndex*(segmentSize+spacing);
+    }
+
+    int lastVisibleSegmentIndex = firstVisibleSegmentIndex;
+    // find the last flow segment that is within our visibility  
+    while (flowParticleDistance > signalTravelEnd){
+        lastVisibleSegmentIndex = lastVisibleSegmentIndex + 1;
+        flowParticleDistance = distFlowTravelStart - lastVisibleSegmentIndex*(segmentSize+spacing);
+    }
+
+    // make a compensation so the first visible segment is not cut off
+    firstVisibleSegmentIndex = firstVisibleSegmentIndex-1;
+
+    // look through if our current fragment is within a colored segment and return its opacity
+    for(int i = firstVisibleSegmentIndex; i < lastVisibleSegmentIndex; i++ )
     {
-    
-        float segmentStart =  distSignTravelStart-i*(segmentSize+spacing);
-        float segmentEnd =  distSignTravelStart-(i+1)*(segmentSize) -i*spacing;
+        float segmentStart =  distFlowTravelStart-i*(segmentSize+spacing);
+        float segmentEnd =  distFlowTravelStart-(i+1)*(segmentSize) -i*spacing;
         
         // if within a colored segment, calculate opacity
         if (distanceFromStart < segmentStart && distanceFromStart > segmentEnd){   
             
-            // Make smooth transitions for both ends of the segment
+            // Make smooth transitions at both ends of the segment
             float smoothFront = smoothstep(segmentStart+fadeLength,
                                         segmentStart-fadeLength,
                                         distanceFromStart);
@@ -103,10 +122,10 @@ Fragment getFragment() {
     // if within the transmission time, change the opacity
     if(distanceFromStart < distLightTravelStart && distanceFromStart > distLightTravelEnd){
         // calculate how fast the signal segments travel within transmission
-        float distSignTravelStart = distLightTravelStart * flowSpeedFactor;
+        float distFlowTravelStart = distLightTravelStart * flowSpeedFactor;
         // make the spacing dependent on the segment size
         float spacing = signalSegmentSize * spacingSizeFactor;
-        alpha = getSegmentOpacity(signalSegmentSize,spacing, distSignTravelStart);
+        alpha = getSegmentOpacity(signalSegmentSize,spacing, distFlowTravelStart, distLightTravelStart, distLightTravelEnd);
     }
 
     frag.color = vec4(vs_color.rgb, alpha);
