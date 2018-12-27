@@ -62,24 +62,27 @@ namespace openspace {
            int idx = DataFileHelper::findFileIndexForCurrentTime(time, timeDoubles);
 
            //If index is same as previous, don't parse the data again
-           if(idx != prevIndex){
-               prevIndex = idx;
-              
+           if(idx != prevFileIndex){
+               prevFileIndex = idx;
                updateRadecData(idx);
-               int index = DataFileHelper::findFileIndexForCurrentTime(time, minuteTimes);
-               updateActiveMinute(index);
+               if (positions.size()) {
+                   int index = DataFileHelper::findFileIndexForCurrentTime(time, minuteTimes);
+                   updateActiveMinute(index);
+               }
            }
-
        }
 
        if (positions.size() && !correctUpdateInterval(time)) {
            //Compensate for light travel time to the spacecraft
            int idx = DataFileHelper::findFileIndexForCurrentTime(time, minuteTimes);
-           updateActiveMinute(idx);
+           if (idx != prevMinIndex) {
+               prevMinIndex = idx;
+               updateActiveMinute(idx);
 
-           double lighttimeCompensation = positions[idx].lightTravelTime;
-           int compensatedIdx = DataFileHelper::findFileIndexForCurrentTime(time + lighttimeCompensation, minuteTimes);
-           getPositionInVector(compensatedIdx);
+               double lighttimeCompensation = positions[idx].lightTravelTime;
+               int compensatedIdx = DataFileHelper::findFileIndexForCurrentTime(time + lighttimeCompensation, minuteTimes);
+               getPositionInVector(compensatedIdx);
+           }
 
        }  
 

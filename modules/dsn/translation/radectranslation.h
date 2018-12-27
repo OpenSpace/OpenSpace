@@ -57,7 +57,7 @@ private:
     ///Transforms the cartesian coordinates with a rotation and a translation
     glm::dvec3 radecToCartesianCoordinates(glm::vec3 pos) const;
     ///Translated position
-    mutable glm::vec3 _position;
+    mutable glm::dvec3 _position = {0.0,0.0,0.0};
     ///Determines between what dates there is data available. Set in the asset file. 
     double _dataStart, _dataEnd;
     ///Determines how many minutes between updates in positioning data

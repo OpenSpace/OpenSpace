@@ -45,7 +45,10 @@ namespace openspace {
            mutable double lightTravelTime; //Downlink light time travel time in seconds
            mutable int lightTravelHours;
        };
-       mutable int prevIndex;
+
+       //Used to determine if we need to search for new data
+       mutable int prevFileIndex;
+       mutable int prevMinIndex;
 
        mutable std::vector<Position> positions;
        mutable std::vector<double> minuteTimes;

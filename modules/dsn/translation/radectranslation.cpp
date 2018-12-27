@@ -166,7 +166,7 @@ glm::dvec3 RadecTranslation::position(const UpdateData& data) const{
 
             if (!haveDataForTime) {
                 LWARNING(fmt::format("No positioning data available for {} at time {}", radecManager.objectIdentifier.c_str(), data.time.UTC()));
-                return radecToCartesianCoordinates({ 0,0,0 });
+                return _position;//radecToCartesianCoordinates({ 0,0,0 });
             }
             else {
                 glm::dvec3 pos = radecManager.getPosForTime(data.time.j2000Seconds());
@@ -174,7 +174,7 @@ glm::dvec3 RadecTranslation::position(const UpdateData& data) const{
                 return _position;
             }
     }
-    else return radecToCartesianCoordinates({ 0,0,0 });
+    else return _position;
 }
 
 } // namespace openspace
