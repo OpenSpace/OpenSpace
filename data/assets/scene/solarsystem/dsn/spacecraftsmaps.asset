@@ -18,43 +18,27 @@ local KeplerAsset = asset.require('scene/solarsystem/missions/dsn/kepler/kepler'
 
 -------------------- dsn signal data map --------------------
 local signalDataIdMap = {
-	VGR1 = Voyager1Asset.spacecraftID,
-	VGR2 = Voyager2Asset.spacecraftID,
-	STA = StereoAAsset.spacecraftID,
-	STB = StereoBAsset.spacecraftID,
-	JNO = JunoAsset.spacecraftID,
 	CAS = CassiniAsset.spacecraftID,
+	JNO = JunoAsset.spacecraftID,
 	KEPL = KeplerAsset.spacecraftID,
 	MRO = "testRADEC",
-	M010 = MarsOdysseyAsset.spacecraftID 
+	M010 = MarsOdysseyAsset.spacecraftID,
+	STA = StereoAAsset.spacecraftID,
+	STB = StereoBAsset.spacecraftID,
+	VGR1 = Voyager1Asset.spacecraftID,
+	VGR2 = Voyager2Asset.spacecraftID
+
 }
 
 ------------------------ spacecraft labels -----------------------
-local Voyager1Label = {
-	LabelText = "Voyager 1",
-	ObjectIdentifier = Voyager1Asset.spacecraftID
-}
 
-local Voyager2Label = {
-	LabelText = "Voyager 2",
-	ObjectIdentifier = Voyager2Asset.spacecraftID
-}
-
-local StereoALabel = {
-	LabelText = "Stereo A",
-	ObjectIdentifier = StereoAAsset.spacecraftID
-}
-local StereoBLabel = {
-	LabelText = "Stereo B",
-	ObjectIdentifier = StereoBAsset.spacecraftID
+local CassiniLabel = {
+	LabelText = "Cassini",
+	ObjectIdentifier = CassiniAsset.spacecraftID
 }
 local JunoLabel = {
 	LabelText = "Juno",
 	ObjectIdentifier = JunoAsset.spacecraftID
-}
-local CassiniLabel = {
-	LabelText = "Cassini",
-	ObjectIdentifier = CassiniAsset.spacecraftID
 }
 local KeplerLabel = {
 	LabelText = "Kepler",
@@ -64,10 +48,25 @@ local MarsRecOrbLabel = {
 	LabelText = "Mars Recon Orbiter",
 	ObjectIdentifier = MarsRecOrbAsset.spacecraftID
 }
-
 local MarsOdysseyLabel = {
 	LabelText = "Mars Odyssey",
 	ObjectIdentifier = MarsOdysseyAsset.spacecraftID
+}
+local StereoALabel = {
+	LabelText = "Stereo A",
+	ObjectIdentifier = StereoAAsset.spacecraftID
+}
+local StereoBLabel = {
+	LabelText = "Stereo B",
+	ObjectIdentifier = StereoBAsset.spacecraftID
+}
+local Voyager1Label = {
+	LabelText = "Voyager 1",
+	ObjectIdentifier = Voyager1Asset.spacecraftID
+}
+local Voyager2Label = {
+	LabelText = "Voyager 2",
+	ObjectIdentifier = Voyager2Asset.spacecraftID
 }
 
 ------------------------ cluster labels -----------------------
