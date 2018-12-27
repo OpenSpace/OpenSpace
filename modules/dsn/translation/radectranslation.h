@@ -51,8 +51,8 @@ public:
     static documentation::Documentation Documentation();
  
 private:
-    double _firstTimeWithData = 0;
-    double _lastTimeWithData = 0;
+    double _firstTimeInData = -1;
+    double _lastTimeInData = -1;
 
     RadecManager radecManager;
     ///Converts the Ra Dec range coordinates into cartesian coordinates
