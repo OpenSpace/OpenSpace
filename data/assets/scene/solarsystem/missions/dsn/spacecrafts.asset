@@ -11,6 +11,9 @@ asset.require('scene/solarsystem/missions/dsn/marsodyssey/marsodyssey')
 asset.require('scene/solarsystem/missions/dsn/stereoa/stereoa')
 asset.require('scene/solarsystem/missions/dsn/stereob/stereob')
 asset.require('scene/solarsystem/missions/dsn/juno/juno')
+asset.require('scene/solarsystem/missions/dsn/cassini/cassini')
+asset.require('scene/solarsystem/missions/dsn/kepler/kepler')
+
 
 
 

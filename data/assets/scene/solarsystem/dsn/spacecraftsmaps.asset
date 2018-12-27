@@ -13,9 +13,7 @@ local StereoAAsset = asset.require('scene/solarsystem/missions/dsn/stereoa/stere
 local StereoBAsset = asset.require('scene/solarsystem/missions/dsn/stereob/stereob')
 local JunoAsset = asset.require('scene/solarsystem/missions/dsn/juno/juno')
 local CassiniAsset = asset.require('scene/solarsystem/missions/dsn/cassini/cassini')
-
-
-
+local KeplerAsset = asset.require('scene/solarsystem/missions/dsn/kepler/kepler')
 
 
 -------------------- dsn signal data map --------------------
@@ -26,6 +24,7 @@ local signalDataIdMap = {
 	STB = StereoBAsset.spacecraftID,
 	JNO = JunoAsset.spacecraftID,
 	CAS = CassiniAsset.spacecraftID,
+	KEPL = KeplerAsset.spacecraftID,
 	MRO = "testRADEC",
 	M010 = MarsOdysseyAsset.spacecraftID 
 }
@@ -57,7 +56,10 @@ local CassiniLabel = {
 	LabelText = "Cassini",
 	ObjectIdentifier = CassiniAsset.spacecraftID
 }
-
+local KeplerLabel = {
+	LabelText = "Kepler",
+	ObjectIdentifier = KeplerAsset.spacecraftID
+}
 local MarsRecOrbLabel = {
 	LabelText = "Mars Recon Orbiter",
 	ObjectIdentifier = MarsRecOrbAsset.spacecraftID
@@ -80,21 +82,19 @@ local labelMapMarsMissions = {
                         Label1 = MarsRecOrbLabel,
                         Label2 = MarsOdysseyLabel
                     }
-local labelMapSaturnMissions = {  
-                        Label1 = JunoLabel,
-                        Label2 = CassiniLabel
-                    }
+
 local labelMapOuterSpace = {  
                             Label1 = Voyager1Label,
                             Label2 = Voyager2Label,
-                            Label3 = JunoLabel,
-                        	Label4 = CassiniLabel
+
                         }
 
 local labelMapInnerSpace = {  
                         	Label1 = StereoALabel,
-                        	Label2 = StereoBLabel
-
+                        	Label2 = StereoBLabel,
+                        	Label3 = JunoLabel,
+                       		Label4 = CassiniLabel,
+                        	Label5 = KeplerLabel
                         }
 
 local labelMapClusters = {  
