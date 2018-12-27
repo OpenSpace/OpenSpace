@@ -105,13 +105,11 @@ namespace openspace {
                        position.dec = pos["DecDn"].get<double>();
                        position.range = pos["GeoRngDn"].get<double>();
                        position.lightTravelTime = pos["DLT"].get<double>();
-                       position.lightTravelHours = ceil(position.lightTravelTime / 3600);
+                       _lightTravelHours = ceil(position.lightTravelTime / 3600);
                    }
                    catch (const std::exception& e) {
                        LERROR(fmt::format("{}: Error in json object number {} while reading file '{}'", objectIdentifier, objectCounter, filename));
                    }
-                   ////Light travel time in hours determines where to search for the correct position
-                   position.lightTravelHours = ceil(position.lightTravelTime / 3600);
                    RadecManager::positions.push_back(position); 
 
                }
@@ -164,11 +162,15 @@ namespace openspace {
         _checkFileTime = triggerTime;
         _checkFileEndTime = triggerTime + 3600;
 
+        // if our light travel time is longer than an hour,
+        // compensate the position parsing index
+        if (_lightTravelHours > 1) {
+            index = index + _lightTravelHours;
+        }
 
-        if (position.lightTravelHours > 1)
-           index = index + position.lightTravelHours;
-
-        if (index < 1) {
+        if (index >= _dataFiles.size()) {
+            return;
+        }else if (index < 1) {
             radecParser(index);
             radecParser(index + 1);
             return;
@@ -182,7 +184,6 @@ namespace openspace {
             radecParser(index - 1);
             radecParser(index);
             radecParser(index + 1);
-
         }
   }
 }
