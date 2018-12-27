@@ -1,0 +1,31 @@
+local assetHelper = asset.require('util/asset_helper')
+local dataFolder = openspace.absPath("../../../sync/http/dsn_data/1/positioning/CAS") 
+
+local models = asset.syncedResource({
+    Name = "Dsn models",
+    Type = "HttpSynchronization",
+    Identifier = "dsn_stations",
+    Version = 1
+})
+local spacecraftID = "Cassini";
+
+local Cassini = {
+    Identifier = spacecraftID,
+    Transform = {
+      Translation = {
+          Type = "RadecTranslation", 
+          DataFolder = dataFolder,
+          DataFileType = "json",
+          DataStart = '2014-001T19',
+          DataEnd = '2017-258T13',
+          ObjectIdentifier = spacecraftID
+      }
+
+   },
+    GUI = {
+        Name = "Cassini",
+        Path = "/Solar System/Cassini"
+    }
+}
+asset.export("spacecraftID", spacecraftID)
+assetHelper.registerSceneGraphNodesAndExport(asset, {Cassini})
