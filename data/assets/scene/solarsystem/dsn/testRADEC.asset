@@ -16,8 +16,6 @@ local testRADEC = {
           Type = "RadecTranslation", 
           DataFolder = dataFolder,
           DataFileType = "json",
-          DataStart = '2018-244T12',
-          DataEnd = '2018-325T13',
           ObjectIdentifier = spacecraftIdentifier
       }
 

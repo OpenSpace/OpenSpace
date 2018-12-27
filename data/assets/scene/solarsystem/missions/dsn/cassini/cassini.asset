@@ -16,8 +16,6 @@ local Cassini = {
           Type = "RadecTranslation", 
           DataFolder = dataFolder,
           DataFileType = "json",
-          DataStart = '2014-001T19',
-          DataEnd = '2017-258T13',
           ObjectIdentifier = spacecraftID
       }
 

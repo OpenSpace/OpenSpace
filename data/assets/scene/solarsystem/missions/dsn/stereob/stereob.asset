@@ -16,8 +16,6 @@ local StereoB = {
           Type = "RadecTranslation", 
           DataFolder = dataFolder,
           DataFileType = "json",
-          DataStart = '2014-001T19',
-          DataEnd = '2018-325T13',
           ObjectIdentifier = spacecraftID
       }
 

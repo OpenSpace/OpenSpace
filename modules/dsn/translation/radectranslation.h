@@ -51,6 +51,9 @@ public:
     static documentation::Documentation Documentation();
  
 private:
+    double _firstTimeWithData = 0;
+    double _lastTimeWithData = 0;
+
     RadecManager radecManager;
     ///Converts the Ra Dec range coordinates into cartesian coordinates
     glm::dvec3 convertRaDecRangeToCartesian(double ra, double dec, double range) const;

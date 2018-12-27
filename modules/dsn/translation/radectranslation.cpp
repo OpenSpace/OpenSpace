@@ -33,17 +33,15 @@ namespace {
         "Identifier of the object that this translation is applied to."
     };
     constexpr openspace::properties::Property::PropertyInfo UpdateFrequencyInfo = {
-    "UpdateFrequency",
-    "Update Frequency",
-    "Determines how many minutes between positioning data reload. "
+        "UpdateFrequency",
+        "Update Frequency",
+        "Determines how many minutes between positioning data reload. "
     };
 } // namespace
 
 namespace openspace {
 
 constexpr const char* _loggerCat = "RadecTranslation";
-constexpr const char* keyDataStart = "DataStart";
-constexpr const char* keyDataEnd = "DataEnd";
 
 documentation::Documentation RadecTranslation::Documentation() {
     using namespace documentation;
@@ -67,20 +65,6 @@ documentation::Documentation RadecTranslation::Documentation() {
                 new DoubleVerifier,
                 Optional::Yes,
                 UpdateFrequencyInfo.description
-            },
-            {
-                keyDataStart,
-                new StringVerifier,
-                Optional::No,
-                "The start of the timeframe we expect to have data for, "
-                "no warnings will be thrown outside this timesframe."
-            },
-            {
-                keyDataEnd,
-                new StringVerifier,
-                Optional::No,
-                "The end of the timeframe we expect to have data for, "
-                "no warnings will be thrown outside this timesframe."
             }
         }
     };
@@ -115,9 +99,6 @@ RadecTranslation::RadecTranslation(const ghoul::Dictionary& dictionary)
         _updateFrequency = dictionary.value<float>(UpdateFrequencyInfo.identifier);
     }
 
-    _dataStart = Time::convertTime(dictionaryPtr->value<std::string>(keyDataStart));
-    _dataEnd = Time::convertTime(dictionaryPtr->value<std::string>(keyDataEnd));
-
     extractData(dictionaryPtr);
 }
 
@@ -129,6 +110,8 @@ void RadecTranslation::extractData(std::unique_ptr<ghoul::Dictionary> &dictionar
     }
     else {
         LDEBUG(fmt::format("{}: Successfully read data for {}.", _identifier, radecManager.objectIdentifier.c_str()));
+        _firstTimeWithData = radecManager.timeDoubles.front();
+        _lastTimeWithData = radecManager.timeDoubles.back();
     }
 }
 
@@ -160,21 +143,22 @@ glm::dvec3 RadecTranslation::radecToCartesianCoordinates(glm::vec3 pos) const {
 glm::dvec3 RadecTranslation::position(const UpdateData& data) const{
     double time = data.time.j2000Seconds();
 
-    if (time > _dataStart && time < _dataEnd) {
-         const bool haveDataForTime = (time >= radecManager.timeDoubles.front()) &&
-                                        (time < radecManager.timeDoubles.back());
+    const bool haveDataForTime = (time >= _firstTimeWithData) && (time < _lastTimeWithData);
 
-            if (!haveDataForTime) {
-                LWARNING(fmt::format("No positioning data available for {} at time {}", radecManager.objectIdentifier.c_str(), data.time.UTC()));
-                return _position;//radecToCartesianCoordinates({ 0,0,0 });
-            }
-            else {
-                glm::dvec3 pos = radecManager.getPosForTime(data.time.j2000Seconds());
-                _position = radecToCartesianCoordinates(pos);
-                return _position;
-            }
+    if (haveDataForTime) {
+        glm::dvec3 radecPos = radecManager.getPosForTime(time);
+        _position = radecToCartesianCoordinates(radecPos);
     }
-    else return _position;
+    else if(time < _firstTimeWithData){
+        glm::dvec3 radecPos = radecManager.getPosForTime(_firstTimeWithData);
+        _position = radecToCartesianCoordinates(radecPos);
+    }
+    else { // time > _lastTimeWithData
+        glm::dvec3 radecPos = radecManager.getPosForTime(_lastTimeWithData);
+        _position = radecToCartesianCoordinates(radecPos);
+    }
+
+    return _position;
 }
 
 } // namespace openspace
