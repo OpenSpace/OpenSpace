@@ -1,0 +1,31 @@
+local assetHelper = asset.require('util/asset_helper')
+local dataFolder = openspace.absPath("../../../sync/http/dsn_data/1/positioning/JNO") 
+
+local models = asset.syncedResource({
+    Name = "Dsn models",
+    Type = "HttpSynchronization",
+    Identifier = "dsn_stations",
+    Version = 1
+})
+local spacecraftID = "Juno";
+
+local Juno = {
+    Identifier = spacecraftID,
+    Transform = {
+      Translation = {
+          Type = "RadecTranslation", 
+          DataFolder = dataFolder,
+          DataFileType = "json",
+          DataStart = '2014-001T19',
+          DataEnd = '2018-325T13',
+          ObjectIdentifier = spacecraftID
+      }
+
+   },
+    GUI = {
+        Name = "Juno",
+        Path = "/Solar System/Juno"
+    }
+}
+asset.export("spacecraftID", spacecraftID)
+assetHelper.registerSceneGraphNodesAndExport(asset, {Juno})

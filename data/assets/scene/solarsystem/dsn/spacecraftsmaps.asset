@@ -11,6 +11,10 @@ local MarsRecOrbAsset = asset.require('scene/solarsystem/missions/dsn/mro/mro')
 local MarsOdysseyAsset = asset.require('scene/solarsystem/missions/dsn/marsodyssey/marsodyssey')
 local StereoAAsset = asset.require('scene/solarsystem/missions/dsn/stereoa/stereoa')
 local StereoBAsset = asset.require('scene/solarsystem/missions/dsn/stereob/stereob')
+local JunoAsset = asset.require('scene/solarsystem/missions/dsn/juno/juno')
+local CassiniAsset = asset.require('scene/solarsystem/missions/dsn/cassini/cassini')
+
+
 
 
 
@@ -20,6 +24,8 @@ local signalDataIdMap = {
 	VGR2 = Voyager2Asset.spacecraftID,
 	STA = StereoAAsset.spacecraftID,
 	STB = StereoBAsset.spacecraftID,
+	JNO = JunoAsset.spacecraftID,
+	CAS = CassiniAsset.spacecraftID,
 	MRO = "testRADEC",
 	M010 = MarsOdysseyAsset.spacecraftID 
 }
@@ -43,6 +49,14 @@ local StereoBLabel = {
 	LabelText = "Stereo B",
 	ObjectIdentifier = StereoBAsset.spacecraftID
 }
+local JunoLabel = {
+	LabelText = "Juno",
+	ObjectIdentifier = JunoAsset.spacecraftID
+}
+local CassiniLabel = {
+	LabelText = "Cassini",
+	ObjectIdentifier = CassiniAsset.spacecraftID
+}
 
 local MarsRecOrbLabel = {
 	LabelText = "Mars Recon Orbiter",
@@ -60,16 +74,21 @@ local MarsClusterLabel = {
 	LabelText = "MarsOdyssey, \n Mars Recon Orbiter ",
 	ObjectIdentifier = "Mars"
 }
+
 -------------------- label id maps --------------------
 local labelMapMarsMissions = {  
                         Label1 = MarsRecOrbLabel,
                         Label2 = MarsOdysseyLabel
                     }
-
+local labelMapSaturnMissions = {  
+                        Label1 = JunoLabel,
+                        Label2 = CassiniLabel
+                    }
 local labelMapOuterSpace = {  
                             Label1 = Voyager1Label,
                             Label2 = Voyager2Label,
-                            
+                            Label3 = JunoLabel,
+                        	Label4 = CassiniLabel
                         }
 
 local labelMapInnerSpace = {  
@@ -84,8 +103,6 @@ local labelMapClusters = {
 
 ------------------------ export -------------------------
 asset.export("signalDataIdMap", signalDataIdMap)
-
-
 asset.export("labelMapMarsMissions", labelMapMarsMissions)
 asset.export("labelMapOuterSpace", labelMapOuterSpace)
 asset.export("labelMapInnerSpace", labelMapInnerSpace)
