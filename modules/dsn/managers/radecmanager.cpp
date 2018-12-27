@@ -107,7 +107,8 @@ namespace openspace {
                    catch (const std::exception& e) {
                        LERROR(fmt::format("{}: Error in json object number {} while reading file '{}'", objectIdentifier, objectCounter, filename));
                    }
-
+                   ////Light travel time in hours determines where to search for the correct position
+                   position.lightTravelHours = ceil(position.lightTravelTime / 3600);
                    RadecManager::positions.push_back(position); 
 
                }
@@ -160,11 +161,9 @@ namespace openspace {
         _checkFileTime = triggerTime;
         _checkFileEndTime = triggerTime + 3600;
 
-        //Light travel time in hours determines where to search for the correct position
-        int lightTravelHours = ceil(positions[index].lightTravelTime / 3600);
 
-        if (lightTravelHours > 1)
-           index = index + lightTravelHours;
+        if (position.lightTravelHours > 1)
+           index = index + position.lightTravelHours;
 
         if (index < 1) {
             radecParser(index);
