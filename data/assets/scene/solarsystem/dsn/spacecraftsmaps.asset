@@ -13,12 +13,14 @@ local StereoAAsset = asset.require('scene/solarsystem/missions/dsn/stereoa/stere
 local StereoBAsset = asset.require('scene/solarsystem/missions/dsn/stereob/stereob')
 local JunoAsset = asset.require('scene/solarsystem/missions/dsn/juno/juno')
 local CassiniAsset = asset.require('scene/solarsystem/missions/dsn/cassini/cassini')
+local GaiaAsset = asset.require('scene/solarsystem/missions/dsn/gaia/gaia')
 local KeplerAsset = asset.require('scene/solarsystem/missions/dsn/kepler/kepler')
 
 
 -------------------- dsn signal data map --------------------
 local signalDataIdMap = {
 	CAS = CassiniAsset.spacecraftID,
+	GAIA = GaiaAsset.spacecraftID,
 	JNO = JunoAsset.spacecraftID,
 	KEPL = KeplerAsset.spacecraftID,
 	MRO = "testRADEC",
@@ -35,6 +37,10 @@ local signalDataIdMap = {
 local CassiniLabel = {
 	LabelText = "Cassini",
 	ObjectIdentifier = CassiniAsset.spacecraftID
+}
+local GaiaLabel = {
+	LabelText = "Gaia",
+	ObjectIdentifier = GaiaAsset.spacecraftID
 }
 local JunoLabel = {
 	LabelText = "Juno",
@@ -93,9 +99,13 @@ local labelMapInnerSpace = {
                         	Label2 = StereoBLabel,
                         	Label3 = JunoLabel,
                        		Label4 = CassiniLabel,
-                        	Label5 = KeplerLabel
+                        	Label5 = KeplerLabel,
+
                         }
 
+local labelMapNearEarth = {  
+                        	Label1 = GaiaLabel
+                        }
 local labelMapClusters = {  
                             Label1 = MarsClusterLabel
                     	}
@@ -105,4 +115,5 @@ asset.export("signalDataIdMap", signalDataIdMap)
 asset.export("labelMapMarsMissions", labelMapMarsMissions)
 asset.export("labelMapOuterSpace", labelMapOuterSpace)
 asset.export("labelMapInnerSpace", labelMapInnerSpace)
+asset.export("labelMapNearEarth", labelMapNearEarth)
 asset.export("labelMapClusters", labelMapClusters)

@@ -24,6 +24,29 @@ local InnerSpaceLabels = {
     }
 }
 
+local NearEarthLabels = {
+    Identifier = "NearEarthLabels",
+    Renderable = {
+        Type = "RenderableLabel",
+        Enabled = true,
+        ScaleFactor = 9.0,
+        LabelIdentifierMap = maps.labelMapNearEarth,
+        TextColor = { 1.0, 0.6, 0.2, 1.0 },
+        DrawLabels = true,
+        LabelSizeRange = {5.5, 6.0},
+        SizeDistanceRange = {2, 100000000},
+        SizeDistanceUnit = "km",
+        FadeOutDistanceRange = {15, 10}, 
+        FadeOutDistanceUnit = "m",
+        FadeInDistanceRange = {3,2},
+        FadeInDistanceUnit = "lightminutes"
+    },
+    GUI = {
+        Name = "Near earth Labels",
+        Path = "/Labels"
+    }
+}
+
 local OuterSpaceLabels = {
     Identifier = "OuterSpaceLabels",
     Renderable = {
@@ -98,5 +121,6 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     OuterSpaceLabels, 
     MarsMissionsLabels, 
     ClusteredLabels, 
-    InnerSpaceLabels 
+    InnerSpaceLabels,
+    NearEarthLabels
  })
