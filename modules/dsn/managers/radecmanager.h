@@ -43,6 +43,7 @@ namespace openspace {
            mutable double dec;
            mutable double range;
            mutable double lightTravelTime; //Downlink light time travel time in seconds
+           mutable double lightTravelHours = 1; //Downlink light time travel time in seconds
        };
 
        //Used to determine if we need to search for new data
@@ -85,7 +86,7 @@ namespace openspace {
 
     private:
         /* Our light travel positioning compensation, expressed in hours */
-        mutable int _lightTravelHours = 1;
+      //  mutable int _lightTravelHours = 1;
     };
 }
 

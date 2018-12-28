@@ -51,8 +51,8 @@ public:
     static documentation::Documentation Documentation();
  
 private:
-    double _firstTimeInData = -1;
-    double _lastTimeInData = -1;
+    double _firstTimeInData = 0;
+    double _lastTimeInData = 0;
 
     RadecManager radecManager;
     ///Converts the Ra Dec range coordinates into cartesian coordinates
@@ -61,8 +61,6 @@ private:
     glm::dvec3 radecToCartesianCoordinates(glm::vec3 pos) const;
     ///Translated position
     mutable glm::dvec3 _position = {0.0,0.0,0.0};
-    ///Determines between what dates there is data available. Set in the asset file. 
-    double _dataStart, _dataEnd;
     ///Determines how many minutes between updates in positioning data
     properties::FloatProperty _updateFrequency;
 

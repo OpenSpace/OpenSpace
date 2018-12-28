@@ -105,7 +105,7 @@ namespace openspace {
                        position.dec = pos["DecDn"].get<double>();
                        position.range = pos["GeoRngDn"].get<double>();
                        position.lightTravelTime = pos["DLT"].get<double>();
-                       _lightTravelHours = ceil(position.lightTravelTime / 3600);
+                       position.lightTravelHours = ceil(position.lightTravelTime / 3600);
                    }
                    catch (const std::exception& e) {
                        LERROR(fmt::format("{}: Error in json object number {} while reading file '{}'", objectIdentifier, objectCounter, filename));
@@ -164,8 +164,8 @@ namespace openspace {
 
         // if our light travel time is longer than an hour,
         // compensate the position parsing index
-        if (_lightTravelHours > 1) {
-            index = index + _lightTravelHours;
+        if (position.lightTravelHours > 1) {
+            index = index + position.lightTravelHours;
         }
 
         if (index >= _dataFiles.size()) {

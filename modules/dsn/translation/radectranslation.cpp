@@ -143,15 +143,6 @@ glm::dvec3 RadecTranslation::radecToCartesianCoordinates(glm::vec3 pos) const {
 glm::dvec3 RadecTranslation::position(const UpdateData& data) const{
     double time = data.time.j2000Seconds();
 
-    //if (!radecManager.timeDoubles.size() || time == -1) {
-    //    LERROR(fmt::format("{}: Did not manage to extract position for {}.", _identifier, radecManager.objectIdentifier.c_str()));
-    //    return _position;
-    //}
-
-    if (radecManager.objectIdentifier == "Cassini" || radecManager.objectIdentifier== "StereoB") {
-        LDEBUG(fmt::format("{}: Did not manage to extract position for {}.", _identifier, radecManager.objectIdentifier.c_str()));
-    }
-
     const bool haveDataForTime = (time >= _firstTimeInData) && (time < _lastTimeInData);
 
     if (haveDataForTime) {
@@ -162,7 +153,7 @@ glm::dvec3 RadecTranslation::position(const UpdateData& data) const{
         glm::dvec3 radecPos = radecManager.getPosForTime(_firstTimeInData);
         _position = radecToCartesianCoordinates(radecPos);
     }
-    else { // time > _lastTimeWithData
+    else { 
         glm::dvec3 radecPos = radecManager.getPosForTime(_lastTimeInData);
         _position = radecToCartesianCoordinates(radecPos);
     }
