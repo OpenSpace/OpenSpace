@@ -39,6 +39,10 @@ local siteColorMap = {
 
 -- Map to the site locations above, this will determine the signal colors
 local stationSiteMap = {
+                 DSS13 = {
+                    SiteColor = "GoldstoneColor",
+                    Size = 34
+                    },
                  DSS14 = {
                     SiteColor = "GoldstoneColor",
                     Size = 70
@@ -132,6 +136,35 @@ local RotationMatrixMadrid = {
  -0.642388,  0.001023, 0.766379,
    0.765676, -0.042005,  0.641854,
    0.032848, 0.999117, 0.0262
+}
+
+
+local DSS13 = {
+    Identifier = "DSS13",
+    Parent = earthAsset.Earth.Identifier,
+    Transform =  {
+    Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 243.2055,
+        Latitude = 35.24716,
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/70m_dish/70m_dish.obj"
+        },
+        ColorTexture = models .. "/70m_dish/texture.png", 
+        ModelTransform = RotationMatrixGoldstone,
+        LightSources = lights.StandardLights
+
+    },
+    GUI = {
+        Name = "DSS13",
+        Path = "/Solar System/Stations/Goldstone"
+    }
 }
 
 local DSS14 = {
@@ -535,7 +568,7 @@ local DSS55 = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    DSS14, DSS15, DSS24, DSS25, DSS26, DSS43, DSS34, DSS35, DSS36, DSS45, DSS63, DSS65, DSS54, DSS55
+    DSS13,DSS14, DSS15, DSS24, DSS25, DSS26, DSS43, DSS34, DSS35, DSS36, DSS45, DSS63, DSS65, DSS54, DSS55
 })
 
 asset.export("siteColorMap", siteColorMap)
