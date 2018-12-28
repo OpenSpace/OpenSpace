@@ -43,7 +43,6 @@ namespace openspace {
            mutable double dec;
            mutable double range;
            mutable double lightTravelTime; //Downlink light time travel time in seconds
-           mutable int lightTravelHours;
        };
 
        //Used to determine if we need to search for new data
@@ -83,6 +82,10 @@ namespace openspace {
        void updateRadecData(int index) const;
        /*Sets the update frequency from property*/
        void setUpdateFrequency(double updateFrequency);
+
+    private:
+        /* Our light travel positioning compensation, expressed in hours */
+        mutable int _lightTravelHours = 1;
     };
 }
 

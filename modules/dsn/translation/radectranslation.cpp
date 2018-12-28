@@ -110,8 +110,8 @@ void RadecTranslation::extractData(std::unique_ptr<ghoul::Dictionary> &dictionar
     }
     else {
         LDEBUG(fmt::format("{}: Successfully read data for {}.", _identifier, radecManager.objectIdentifier.c_str()));
-        _firstTimeWithData = radecManager.timeDoubles.front();
-        _lastTimeWithData = radecManager.timeDoubles.back();
+        _firstTimeInData = radecManager.timeDoubles.front();
+        _lastTimeInData = radecManager.timeDoubles.back();
     }
 }
 
@@ -143,18 +143,27 @@ glm::dvec3 RadecTranslation::radecToCartesianCoordinates(glm::vec3 pos) const {
 glm::dvec3 RadecTranslation::position(const UpdateData& data) const{
     double time = data.time.j2000Seconds();
 
-    const bool haveDataForTime = (time >= _firstTimeWithData) && (time < _lastTimeWithData);
+    //if (!radecManager.timeDoubles.size() || time == -1) {
+    //    LERROR(fmt::format("{}: Did not manage to extract position for {}.", _identifier, radecManager.objectIdentifier.c_str()));
+    //    return _position;
+    //}
+
+    if (radecManager.objectIdentifier == "Cassini" || radecManager.objectIdentifier== "StereoB") {
+        LDEBUG(fmt::format("{}: Did not manage to extract position for {}.", _identifier, radecManager.objectIdentifier.c_str()));
+    }
+
+    const bool haveDataForTime = (time >= _firstTimeInData) && (time < _lastTimeInData);
 
     if (haveDataForTime) {
         glm::dvec3 radecPos = radecManager.getPosForTime(time);
         _position = radecToCartesianCoordinates(radecPos);
     }
-    else if(time < _firstTimeWithData){
-        glm::dvec3 radecPos = radecManager.getPosForTime(_firstTimeWithData);
+    else if(time < _firstTimeInData){
+        glm::dvec3 radecPos = radecManager.getPosForTime(_firstTimeInData);
         _position = radecToCartesianCoordinates(radecPos);
     }
     else { // time > _lastTimeWithData
-        glm::dvec3 radecPos = radecManager.getPosForTime(_lastTimeWithData);
+        glm::dvec3 radecPos = radecManager.getPosForTime(_lastTimeInData);
         _position = radecToCartesianCoordinates(radecPos);
     }
 
