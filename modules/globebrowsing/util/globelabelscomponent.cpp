@@ -274,7 +274,7 @@ GlobeLabelsComponent::GlobeLabelsComponent()
 
     _labelAlignmentOption.addOption(0, "Horizontally");
     _labelAlignmentOption.addOption(1, "Circularly");
-    _labelAlignmentOption = 0;
+    _labelAlignmentOption = Horizontally;
     addProperty(_labelAlignmentOption);
 }
 
@@ -385,10 +385,10 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
                     std::string labelAlignment = 
                         dictionary.value<std::string>(LabelAlignmentOptionInfo.identifier);
                     if (labelAlignment == "Horizontally") {
-                        _labelAlignmentOption = 0;
+                        _labelAlignmentOption = Horizontally;
                     }
                     else {
-                        _labelAlignmentOption = 1;
+                        _labelAlignmentOption = Circularly;
                     }
                 }
 
@@ -609,7 +609,7 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
             data.camera.positionVec3();
         double distanceCameraGlobeWorld = glm::length(cameraToGlobeDistanceWorld);
 
-        float fadeInVariable = 1.f;
+        float varyingOpacity = 1.f;
         if (_labelsFadeInEnabled) {
             double averageRadius = (
                 _globe->ellipsoid().radii().x + _globe->ellipsoid().radii().y + 
@@ -622,9 +622,9 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
             double a = 1.0 / (fadeRange.y - fadeRange.x);
             double b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
             double funcValue = a * distanceCameraGlobeWorld + b;
-            fadeInVariable *= funcValue > 1.0 ? 1.f : static_cast<float>(funcValue);
+            varyingOpacity *= funcValue > 1.0 ? 1.f : static_cast<float>(funcValue);
 
-            if (fadeInVariable < 0.009f) {
+            if (varyingOpacity < minTransparencyValueConst) {
                 return;
             }
         }
@@ -634,16 +634,17 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
                 _globe->ellipsoid().radii().x + _globe->ellipsoid().radii().y +
                 _globe->ellipsoid().radii().z
                 ) / 3.0;
+
             glm::dvec2 fadeRange = glm::dvec2(
-                averageRadius + _labelsMinHeight + 1500.0
+                averageRadius + _labelsMinHeight + labelFadeRangeConst
             );
             fadeRange.x += _labelsFadeOutDist;
-            double a = 0.8 / (fadeRange.x - fadeRange.y);
+            double a = rangeAngularCoefConst / (fadeRange.x - fadeRange.y);
             double b = -(fadeRange.y / (fadeRange.x - fadeRange.y));
             double funcValue = a * distanceCameraGlobeWorld + b;
-            fadeInVariable *= funcValue > 1.0 ? 1.f : static_cast<float>(funcValue);
+            varyingOpacity *= funcValue > 1.0 ? 1.f : static_cast<float>(funcValue);
 
-            if (fadeInVariable < 0.009f) {
+            if (varyingOpacity < minTransparencyValueConst) {
                 return;
             }
         }
@@ -652,7 +653,7 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
             data, 
             mvp, 
             static_cast<float>(distanceCameraGlobeWorld), 
-            fadeInVariable
+            varyingOpacity
         );
     }
 }
@@ -720,30 +721,30 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
             draw = true;
         }
 
-        if (_labelAlignmentOption == 1) {
-            glm::dvec3 labelNormalObj = glm::dvec3(
-                invModelMatrix * glm::dvec4(data.camera.positionVec3(), 1.0)
-            ) - glm::dvec3(position);
-
-            glm::dvec3 labelUpDirectionObj = glm::dvec3(position);
-            
-            orthoRight = glm::normalize(
-                glm::cross(labelUpDirectionObj, labelNormalObj)
-            );
-            if (orthoRight == glm::dvec3(0.0)) {
-                glm::dvec3 otherVector(
-                    labelUpDirectionObj.y,
-                    labelUpDirectionObj.x,
-                    labelUpDirectionObj.z
-                );
-                orthoRight = glm::normalize(glm::cross(otherVector, labelNormalObj));
-            }
-            orthoUp = glm::normalize(
-                glm::cross(labelNormalObj, orthoRight)
-            );
-        }
-
         if (draw) {
+            if (_labelAlignmentOption == Circularly) {
+                glm::dvec3 labelNormalObj = glm::dvec3(
+                    invModelMatrix * glm::dvec4(data.camera.positionVec3(), 1.0)
+                ) - glm::dvec3(position);
+
+                glm::dvec3 labelUpDirectionObj = glm::dvec3(position);
+
+                orthoRight = glm::normalize(
+                    glm::cross(labelUpDirectionObj, labelNormalObj)
+                );
+                if (orthoRight == glm::dvec3(0.0)) {
+                    glm::dvec3 otherVector(
+                        labelUpDirectionObj.y,
+                        labelUpDirectionObj.x,
+                        labelUpDirectionObj.z
+                    );
+                    orthoRight = glm::normalize(glm::cross(otherVector, labelNormalObj));
+                }
+                orthoUp = glm::normalize(
+                    glm::cross(labelNormalObj, orthoRight)
+                );
+            }
+
             position += _labelsMinHeight;
             ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
                 *_font,

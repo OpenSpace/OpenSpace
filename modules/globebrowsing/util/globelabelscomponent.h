@@ -48,6 +48,11 @@ namespace openspace {
 
     class GlobeLabelsComponent : public properties::PropertyOwner {
     public:
+        enum labelRenderingAlignmentType {
+            Horizontally = 0,
+            Circularly = 1
+        };
+
         // Labels Structures
         struct LabelEntry {
             char feature[256];
@@ -60,6 +65,10 @@ namespace openspace {
             std::string filename;
             std::vector<LabelEntry> labelsArray;
         };
+
+        const double labelFadeRangeConst = 1500.0;
+        const double rangeAngularCoefConst = 0.8;
+        const float minTransparencyValueConst = 0.009f;
 
         GlobeLabelsComponent();
         ~GlobeLabelsComponent() = default;
