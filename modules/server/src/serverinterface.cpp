@@ -61,21 +61,21 @@ namespace {
         "Sets the default access policy: Allow, RequirePassword or Deny"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AllowInfo = {
-        "Allow",
-        "Allow",
+    constexpr openspace::properties::Property::PropertyInfo AllowAddressesInfo = {
+        "AllowAddresses",
+        "Allow Addresses",
         "Ip addresses or domains that should always be allowed access to this interface"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RequirePasswordInfo = {
-        "RequirePassword",
-        "Require Password",
+    constexpr openspace::properties::Property::PropertyInfo RequirePasswordAddressesInfo = {
+        "RequirePasswordAddresses",
+        "Require Password Addresses",
         "Ip addresses or domains that should be allowed access if they provide a password"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DenyInfo = {
-        "Deny",
-        "Deny",
+    constexpr openspace::properties::Property::PropertyInfo DenyAddressesInfo = {
+        "DenyAddresses",
+        "Deny Addresses",
         "Ip addresses or domains that should never be allowed access to this interface"
     };
 
@@ -101,9 +101,9 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
     , _type(TypeInfo)
     , _port(PortInfo, 0)
     , _defaultAccess(DefaultAccessInfo)
-    , _allowAddresses(AllowInfo)
-    , _requirePasswordAddresses(RequirePasswordInfo)
-    , _denyAddresses(DenyInfo)
+    , _allowAddresses(AllowAddressesInfo)
+    , _requirePasswordAddresses(RequirePasswordAddressesInfo)
+    , _denyAddresses(DenyAddressesInfo)
     , _enabled(EnabledInfo)
     , _password(PasswordInfo)
 {
@@ -129,9 +129,9 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
             }
         };
     
-    readList(AllowInfo.identifier, _allowAddresses);
-    readList(DenyInfo.identifier, _denyAddresses);
-    readList(RequirePasswordInfo.identifier, _requirePasswordAddresses);
+    readList(AllowAddressesInfo.identifier, _allowAddresses);
+    readList(DenyAddressesInfo.identifier, _denyAddresses);
+    readList(RequirePasswordAddressesInfo.identifier, _requirePasswordAddresses);
 
     this->setIdentifier(identifier);
     this->setGuiName(identifier);
