@@ -183,61 +183,61 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
                 Optional::Yes,
                 TransparencyInfo.description
             },
-        /*{
-            ScaleFactorInfo.identifier,
-            new DoubleVerifier,
-            Optional::Yes,
-            ScaleFactorInfo.description
-        },*/
-        {
-            DrawLabelInfo.identifier,
-            new BoolVerifier,
-            Optional::Yes,
-            DrawLabelInfo.description
-        },
-        {
-            TextColorInfo.identifier,
-            new DoubleVector4Verifier,
-            Optional::Yes,
-            TextColorInfo.description
-        },
-        {
-            TextSizeInfo.identifier,
-            new DoubleVerifier,
-            Optional::Yes,
-            TextSizeInfo.description
-        },
-        {
-            LabelFileInfo.identifier,
-            new StringVerifier,
-            Optional::Yes,
-            LabelFileInfo.description
-        },
-        {
-            LabelMinSizeInfo.identifier,
-            new DoubleVerifier,
-            Optional::Yes,
-            LabelMinSizeInfo.description
-        },
-        {
-            LabelMaxSizeInfo.identifier,
-            new DoubleVerifier,
-            Optional::Yes,
-            LabelMaxSizeInfo.description
-        },
-        {
-            TransformationMatrixInfo.identifier,
-            new Matrix4x4Verifier<double>,
-            Optional::Yes,
-            TransformationMatrixInfo.description
-        },
-        {
-            MeshColorInfo.identifier,
-            new Vector3ListVerifier<float>,
-            Optional::No,
-            MeshColorInfo.description
-        },
-    }
+            /*{
+                ScaleFactorInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                ScaleFactorInfo.description
+            },*/
+            {
+                DrawLabelInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                DrawLabelInfo.description
+            },
+            {
+                TextColorInfo.identifier,
+                new DoubleVector4Verifier,
+                Optional::Yes,
+                TextColorInfo.description
+            },
+            {
+                TextSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                TextSizeInfo.description
+            },
+            {
+                LabelFileInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                LabelFileInfo.description
+            },
+            {
+                LabelMinSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelMinSizeInfo.description
+            },
+            {
+                LabelMaxSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelMaxSizeInfo.description
+            },
+            {
+                TransformationMatrixInfo.identifier,
+                new Matrix4x4Verifier<double>,
+                Optional::Yes,
+                TransformationMatrixInfo.description
+            },
+            {
+                MeshColorInfo.identifier,
+                new Vector3ListVerifier<float>,
+                Optional::No,
+                MeshColorInfo.description
+            },
+        }
     };
 }
 
@@ -396,14 +396,13 @@ bool RenderableDUMeshes::isReady() const {
 
 void RenderableDUMeshes::initializeGL() {
     _program = DigitalUniverseModule::ProgramObjectManager.request(
-        ProgramObjectName,
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-        return global::renderEngine.buildRenderProgram(
-            "RenderableDUMeshes",
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_vs.glsl"),
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_fs.glsl")
-        );
-    }
+        ProgramObjectName, []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return global::renderEngine.buildRenderProgram(
+                "RenderableDUMeshes",
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_vs.glsl"),
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_fs.glsl")
+            );
+        }
     );
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
@@ -651,10 +650,6 @@ bool RenderableDUMeshes::loadData() {
         if (!success) {
             return false;
         }
-
-        // LINFO("Saving cache");
-        //success &= saveCachedFile(cachedFile);
-    // }
     }
 
     std::string labelFile = _labelFile;
@@ -1043,9 +1038,7 @@ void RenderableDUMeshes::createMeshes() {
                         GL_FLOAT,
                         GL_FALSE,
                         sizeof(GLfloat) * 7,
-                        reinterpret_cast<GLvoid*>(
-                            sizeof(GLfloat) * 3 * i * p.second.numV
-                            )
+                        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * p.second.numV)
                     );
                 }
                 else { // no U and V:
@@ -1055,9 +1048,7 @@ void RenderableDUMeshes::createMeshes() {
                         GL_FLOAT,
                         GL_FALSE,
                         0,
-                        reinterpret_cast<GLvoid*>(
-                            sizeof(GLfloat) * 3 * i * p.second.numV
-                            )
+                        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * p.second.numV)
                     );
                 }
             }

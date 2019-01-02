@@ -208,11 +208,10 @@ namespace {
         "object."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        CorrectionSizeEndDistanceInfo = {
-            "CorrectionSizeEndDistance",
-            "Distance in 10^X meters where correction size stops acting.",
-            "Distance in 10^X meters where correction size stops acting."
+    constexpr openspace::properties::Property::PropertyInfo CorrectionSizeEndDistanceInfo = {
+        "CorrectionSizeEndDistance",
+        "Distance in 10^X meters where correction size stops acting.",
+        "Distance in 10^X meters where correction size stops acting."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CorrectionSizeFactorInfo = {
@@ -654,15 +653,14 @@ void RenderableBillboardsCloud::initializeGL() {
     );
 
     _renderToPolygonProgram = DigitalUniverseModule::ProgramObjectManager.request(
-        RenderToPolygonProgram,
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-        return ghoul::opengl::ProgramObject::Build(
-            RenderToPolygonProgram,
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl"),
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl"),
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_gs.glsl")
-        );
-    }
+        RenderToPolygonProgram, []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return ghoul::opengl::ProgramObject::Build(
+                RenderToPolygonProgram,
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl"),
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl"),
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_gs.glsl")
+            );
+        }
     );
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
@@ -691,10 +689,9 @@ void RenderableBillboardsCloud::deinitializeGL() {
     _vao = 0;
 
     DigitalUniverseModule::ProgramObjectManager.release(
-        ProgramObjectName,
-        [](ghoul::opengl::ProgramObject* p) {
-        global::renderEngine.removeRenderProgram(p);
-    }
+        ProgramObjectName, [](ghoul::opengl::ProgramObject* p) {
+            global::renderEngine.removeRenderProgram(p);
+        }
     );
     _program = nullptr;
 
@@ -741,8 +738,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
 
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+    
     _program->activate();
 
     const glm::dmat4 projMatrix = glm::dmat4(data.camera.projectionMatrix());
@@ -1037,16 +1033,13 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
         _spriteTexture = DigitalUniverseModule::TextureManager.request(
             std::to_string(hash),
             [path = _spriteTexturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
-            LINFO(fmt::format("Loaded texture from '{}'", absPath(path)));
-            std::unique_ptr<ghoul::opengl::Texture> t =
-                ghoul::io::TextureReader::ref().loadTexture(
-                    absPath(path)
-                );
-
-            t->uploadTexture();
-            t->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-            return t;
-        }
+                LINFO(fmt::format("Loaded texture from '{}'", absPath(path)));
+                std::unique_ptr<ghoul::opengl::Texture> t =
+                    ghoul::io::TextureReader::ref().loadTexture(absPath(path));
+                t->uploadTexture();
+                t->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+                return t;
+            }
         );
 
         DigitalUniverseModule::TextureManager.release(t);

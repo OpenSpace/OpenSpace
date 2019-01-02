@@ -64,7 +64,6 @@ namespace {
 
     struct CommonDataLayout {
         std::array<float, 3> position;
-
         float value;
         float luminance;
         float absoluteMagnitude;
@@ -72,7 +71,7 @@ namespace {
     };
 
     struct ColorVBOLayout : public CommonDataLayout {};
-    
+
     struct VelocityVBOLayout : public CommonDataLayout {
         float vx; // v_x
         float vy; // v_y
@@ -271,90 +270,90 @@ documentation::Documentation RenderableStars::Documentation() {
     return {
         "RenderableStars",
         "space_renderablestars",
-    {
         {
-            "Type",
-            new StringEqualVerifier("RenderableStars"),
-            Optional::No
-        },
-        {
-            KeyFile,
-            new StringVerifier,
-            Optional::No,
-            "The path to the SPECK file that contains information about the stars "
-            "being rendered."
-        },
-        {
-            ColorTextureInfo.identifier,
-            new StringVerifier,
-            Optional::No,
-            ColorTextureInfo.description
-        },
-        {
-            ColorOptionInfo.identifier,
-            new StringInListVerifier({ "Color", "Velocity", "Speed", "Other Data" }),
-            Optional::Yes,
-            ColorOptionInfo.description
-        },
-        {
-            OtherDataOptionInfo.identifier,
-            new StringVerifier,
-            Optional::Yes,
-            OtherDataOptionInfo.description
-        },
-        {
-            OtherDataColorMapInfo.identifier,
-            new StringVerifier,
-            Optional::Yes,
-            OtherDataColorMapInfo.description
-        },
-        {
-            FilterOutOfRangeInfo.identifier,
-            new BoolVerifier,
-            Optional::Yes,
-            FilterOutOfRangeInfo.description
-        },
-        {
-            KeyStaticFilterValue,
-            new DoubleVerifier,
-            Optional::Yes,
-            "This value specifies a value that is always filtered out of the value "
-            "ranges on loading. This can be used to trim the dataset's automatic "
-            "value range."
-        },
-        {
-            KeyStaticFilterReplacement,
-            new DoubleVerifier,
-            Optional::Yes,
-            "This is the value that is used to replace statically filtered values. "
-            "Setting this value only makes sense if 'StaticFilter' is 'true', as "
-            "well."
-        },
-        {
-            MagnitudeExponentInfo.identifier,
-            new DoubleVerifier,
-            Optional::Yes,
-            MagnitudeExponentInfo.description
-        },
-        {
-            EnableTestGridInfo.identifier,
-            new BoolVerifier,
-            Optional::Yes,
-            EnableTestGridInfo.description
-        },
-        {
-            RenderMethodOptionInfo.identifier,
-            new StringVerifier,
-            Optional::No,
-            RenderMethodOptionInfo.description
-        },
-        {
-            SizeCompositionOptionInfo.identifier,
-            new StringVerifier,
-            Optional::No,
-            SizeCompositionOptionInfo.description
-        },
-    }
+            {
+                "Type",
+                new StringEqualVerifier("RenderableStars"),
+                Optional::No
+            },
+            {
+                KeyFile,
+                new StringVerifier,
+                Optional::No,
+                "The path to the SPECK file that contains information about the stars "
+                "being rendered."
+            },
+            {
+                ColorTextureInfo.identifier,
+                new StringVerifier,
+                Optional::No,
+                ColorTextureInfo.description
+            },
+            {
+                ColorOptionInfo.identifier,
+                new StringInListVerifier({ "Color", "Velocity", "Speed", "Other Data" }),
+                Optional::Yes,
+                ColorOptionInfo.description
+            },
+            {
+                OtherDataOptionInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                OtherDataOptionInfo.description
+            },
+            {
+                OtherDataColorMapInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                OtherDataColorMapInfo.description
+            },
+            {
+                FilterOutOfRangeInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                FilterOutOfRangeInfo.description
+            },
+            {
+                KeyStaticFilterValue,
+                new DoubleVerifier,
+                Optional::Yes,
+                "This value specifies a value that is always filtered out of the value "
+                "ranges on loading. This can be used to trim the dataset's automatic "
+                "value range."
+            },
+            {
+                KeyStaticFilterReplacement,
+                new DoubleVerifier,
+                Optional::Yes,
+                "This is the value that is used to replace statically filtered values. "
+                "Setting this value only makes sense if 'StaticFilter' is 'true', as "
+                "well."
+            },
+            {
+                MagnitudeExponentInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                MagnitudeExponentInfo.description
+            },
+            {
+                EnableTestGridInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                EnableTestGridInfo.description
+            },
+            {
+                RenderMethodOptionInfo.identifier,
+                new StringVerifier,
+                Optional::No,
+                RenderMethodOptionInfo.description
+            },
+            {
+                SizeCompositionOptionInfo.identifier,
+                new StringVerifier,
+                Optional::No,
+                SizeCompositionOptionInfo.description
+            },
+        }
     };
 }
 
@@ -493,7 +492,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         else if (renderingMethod == "Texture Based") {
             _renderingMethodOption = 1;
         }
-            
     }
     else {
         _renderingMethodOption = 1;
@@ -552,7 +550,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         else if (sizeCompositionOption == "Distance Modulus") {
             _psfMultiplyOption = 5;
         }
-        
     }
     else {
         _psfMultiplyOption = 5;
@@ -606,9 +603,9 @@ void RenderableStars::initializeGL() {
     );
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
-        
+
     loadData();
-        
+
     if (!_queuedOtherData.empty()) {
         auto it = std::find(_dataNames.begin(), _dataNames.end(), _queuedOtherData);
         if (it == _dataNames.end()) {
@@ -900,7 +897,8 @@ void RenderableStars::update(const UpdateData&) {
         );
 
         GLint positionAttrib = _program->attributeLocation("in_position");
-        GLint brightnessDataAttrib = _program->attributeLocation("in_bvLumAbsMagAppMag");
+        // bvLumAbsMagAppMag = bv color, luminosity, abs magnitude and app magnitude
+        GLint bvLumAbsMagAppMagAttrib = _program->attributeLocation("in_bvLumAbsMagAppMag");
 
         const size_t nStars = _fullData.size() / _nValuesPerStar;
         const size_t nValues = _slicedData.size() / nStars;
@@ -908,7 +906,7 @@ void RenderableStars::update(const UpdateData&) {
         GLsizei stride = static_cast<GLsizei>(sizeof(GLfloat) * nValues);
 
         glEnableVertexAttribArray(positionAttrib);
-        glEnableVertexAttribArray(brightnessDataAttrib);
+        glEnableVertexAttribArray(bvLumAbsMagAppMagAttrib);
         const int colorOption = _colorOption;
         switch (colorOption) {
             case ColorOption::Color:
@@ -921,7 +919,7 @@ void RenderableStars::update(const UpdateData&) {
                     nullptr // = offsetof(ColorVBOLayout, position)
                 );
                 glVertexAttribPointer(
-                    brightnessDataAttrib,
+                    bvLumAbsMagAppMagAttrib,
                     4,
                     GL_FLOAT,
                     GL_FALSE,
@@ -941,7 +939,7 @@ void RenderableStars::update(const UpdateData&) {
                     nullptr // = offsetof(VelocityVBOLayout, position)
                 );
                 glVertexAttribPointer(
-                    brightnessDataAttrib,
+                    bvLumAbsMagAppMagAttrib,
                     4,
                     GL_FLOAT,
                     GL_FALSE,
@@ -959,7 +957,7 @@ void RenderableStars::update(const UpdateData&) {
                     stride,
                     reinterpret_cast<void*>(offsetof(VelocityVBOLayout, vx)) // NOLINT
                 );
-                    
+
                 break;
             }
             case ColorOption::Speed:
@@ -973,7 +971,7 @@ void RenderableStars::update(const UpdateData&) {
                     nullptr // = offsetof(SpeedVBOLayout, position)
                 );
                 glVertexAttribPointer(
-                    brightnessDataAttrib,
+                    bvLumAbsMagAppMagAttrib,
                     4,
                     GL_FLOAT,
                     GL_FALSE,
@@ -1004,7 +1002,7 @@ void RenderableStars::update(const UpdateData&) {
                     nullptr // = offsetof(OtherDataLayout, position)
                 );
                 glVertexAttribPointer(
-                    brightnessDataAttrib,
+                    bvLumAbsMagAppMagAttrib,
                     4,
                     GL_FLOAT,
                     GL_FALSE,
@@ -1141,7 +1139,7 @@ void RenderableStars::loadData() {
     LINFO(fmt::format("Loading Speck file '{}'", _file));
 
     readSpeckFile();
-        
+
     LINFO("Saving cache");
     saveCachedFile(cachedFile);
 }
@@ -1349,7 +1347,7 @@ void RenderableStars::saveCachedFile(const std::string& file) const {
     }
 
     size_t nBytes = nValues * sizeof(_fullData[0]);
-    fileStream.write(reinterpret_cast<const char*>(_fullData.data()), nBytes);  
+    fileStream.write(reinterpret_cast<const char*>(_fullData.data()), nBytes);
 }
 
 void RenderableStars::createDataSlice(ColorOption option) {
