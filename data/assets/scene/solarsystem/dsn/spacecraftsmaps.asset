@@ -2,44 +2,28 @@
 ----- The maps in this file are used to keep the SceneGraphNode identifiers for each spacecraft ---
 ----- up to date with the labels and dsn signal data among other things 							---
 ---------------------------------------------------------------------------------------------------
-
-local Voyager1Asset = asset.require('scene/solarsystem/missions/voyager1/voyager1')
-local Voyager2Asset = asset.require('scene/solarsystem/missions/voyager2/voyager2')
-
--- added specifically for dsn visualization
-
-
-local CassiniAsset = asset.require('scene/solarsystem/missions/dsn/cassini/cassini')
-local ChandraXrayAsset = asset.require('scene/solarsystem/missions/dsn/chandraxray/chandraxray')
-local GaiaAsset = asset.require('scene/solarsystem/missions/dsn/gaia/gaia')
-local JunoAsset = asset.require('scene/solarsystem/missions/dsn/juno/juno')
-local KeplerAsset = asset.require('scene/solarsystem/missions/dsn/kepler/kepler')
-local MarsRecOrbAsset = asset.require('scene/solarsystem/missions/dsn/mro/mro')
-local MarsOdysseyAsset = asset.require('scene/solarsystem/missions/dsn/marsodyssey/marsodyssey')
-local NewHorizonsAsset = asset.require('scene/solarsystem/missions/dsn/newHorizons/newhorizons')
-local StereoAAsset = asset.require('scene/solarsystem/missions/dsn/stereoa/stereoa')
-local StereoBAsset = asset.require('scene/solarsystem/missions/dsn/stereob/stereob')
-local ThemisBAsset = asset.require('scene/solarsystem/missions/dsn/themisb/themisb')
-local ThemisCAsset = asset.require('scene/solarsystem/missions/dsn/themisc/themisc')
-
-
+local SpaceCrafts = asset.require('scene/solarsystem/missions/dsn/spacecrafts')
 
 -------------------- dsn signal data map --------------------
 local signalDataIdMap = {
-	CAS = CassiniAsset.spacecraftID,
-	GAIA = GaiaAsset.spacecraftID,
-	CHDR = ChandraXrayAsset.spacecraftID,
-	JNO = JunoAsset.spacecraftID,
-	KEPL = KeplerAsset.spacecraftID,
-	MRO = MarsRecOrbAsset.spacecraftID,
-	M010 = MarsOdysseyAsset.spacecraftID,
-	NHPC = NewHorizonsAsset.spacecraftID,
-	STA = StereoAAsset.spacecraftID,
-	STB = StereoBAsset.spacecraftID,
-	THB = ThemisBAsset.spacecraftID,
-	THC = ThemisCAsset.spacecraftID,
-	VGR1 = Voyager1Asset.spacecraftID,
-	VGR2 = Voyager2Asset.spacecraftID
+	CAS = SpaceCrafts.CassiniAsset.spacecraftID,
+	GAIA = SpaceCrafts.GaiaAsset.spacecraftID,
+	CHDR = SpaceCrafts.ChandraXrayAsset.spacecraftID,
+	DAWN = SpaceCrafts.DawnAsset.spacecraftID,
+	JNO = SpaceCrafts.JunoAsset.spacecraftID,
+	KEPL = SpaceCrafts.KeplerAsset.spacecraftID,
+	MRO = SpaceCrafts.MarsRecOrbAsset.spacecraftID,
+	M010 = SpaceCrafts.MarsOdysseyAsset.spacecraftID,
+	NHPC = SpaceCrafts.NewHorizonsAsset.spacecraftID,
+	SOHO = SpaceCrafts.SohoAsset.spacecraftID,
+	STF = SpaceCrafts.SpitzerAsset.spacecraftID,
+	STA = SpaceCrafts.StereoAAsset.spacecraftID,
+	STB = SpaceCrafts.StereoBAsset.spacecraftID,
+	THB = SpaceCrafts.ThemisBAsset.spacecraftID,
+	THC = SpaceCrafts.ThemisCAsset.spacecraftID,
+	VGR1 = SpaceCrafts.Voyager1Asset.spacecraftID,
+	VGR2 = SpaceCrafts.Voyager2Asset.spacecraftID,
+	WIND = SpaceCrafts.WindAsset.spacecraftID
 
 }
 
@@ -47,59 +31,75 @@ local signalDataIdMap = {
 
 local CassiniLabel = {
 	LabelText = "Cassini",
-	ObjectIdentifier = CassiniAsset.spacecraftID
+	ObjectIdentifier = SpaceCrafts.CassiniAsset.spacecraftID
 }
 local ChandraXrayLabel = {
 	LabelText = "Chandra Xray",
-	ObjectIdentifier = ChandraXrayAsset.spacecraftID
+	ObjectIdentifier = SpaceCrafts.ChandraXrayAsset.spacecraftID
+}
+local DawnLabel = {
+	LabelText = "Dawn",
+	ObjectIdentifier = SpaceCrafts.DawnAsset.spacecraftID
 }
 local GaiaLabel = {
 	LabelText = "Gaia",
-	ObjectIdentifier = GaiaAsset.spacecraftID
+	ObjectIdentifier = SpaceCrafts.GaiaAsset.spacecraftID
 }
 local JunoLabel = {
 	LabelText = "Juno",
-	ObjectIdentifier = JunoAsset.spacecraftID
+	ObjectIdentifier = SpaceCrafts.JunoAsset.spacecraftID
 }
 local KeplerLabel = {
 	LabelText = "Kepler",
-	ObjectIdentifier = KeplerAsset.spacecraftID
+	ObjectIdentifier = SpaceCrafts.KeplerAsset.spacecraftID
 }
 local MarsRecOrbLabel = {
 	LabelText = "Mars Recon Orbiter",
-	ObjectIdentifier = MarsRecOrbAsset.spacecraftID
+	ObjectIdentifier = SpaceCrafts.MarsRecOrbAsset.spacecraftID
 }
 local MarsOdysseyLabel = {
 	LabelText = "Mars Odyssey",
-	ObjectIdentifier = MarsOdysseyAsset.spacecraftID
+	ObjectIdentifier = SpaceCrafts.MarsOdysseyAsset.spacecraftID
 }
 local NewHorizonsLabel = {
 	LabelText = "New Horizons",
-	ObjectIdentifier = NewHorizonsAsset.spacecraftID
+	ObjectIdentifier = SpaceCrafts.NewHorizonsAsset.spacecraftID
+}
+local SohoLabel = {
+	LabelText = "Solar & Heliospheric Observatory",
+	ObjectIdentifier = SpaceCrafts.SohoAsset.spacecraftID
+}
+local SpitzerLabel = {
+	LabelText = "Spitzer",
+	ObjectIdentifier = SpaceCrafts.SpitzerAsset.spacecraftID
 }
 local StereoALabel = {
 	LabelText = "Stereo A",
-	ObjectIdentifier = StereoAAsset.spacecraftID
+	ObjectIdentifier = SpaceCrafts.StereoAAsset.spacecraftID
 }
 local StereoBLabel = {
 	LabelText = "Stereo B",
-	ObjectIdentifier = StereoBAsset.spacecraftID
+	ObjectIdentifier = SpaceCrafts.StereoBAsset.spacecraftID
 }
 local ThemisBLabel = {
 	LabelText = "Themis B",
-	ObjectIdentifier = ThemisBAsset.spacecraftID
+	ObjectIdentifier = SpaceCrafts.ThemisBAsset.spacecraftID
 }
 local ThemisCLabel = {
 	LabelText = "Themis C",
-	ObjectIdentifier = ThemisCAsset.spacecraftID
+	ObjectIdentifier = SpaceCrafts.ThemisCAsset.spacecraftID
 }
 local Voyager1Label = {
 	LabelText = "Voyager 1",
-	ObjectIdentifier = Voyager1Asset.spacecraftID
+	ObjectIdentifier = SpaceCrafts.Voyager1Asset.spacecraftID
 }
 local Voyager2Label = {
 	LabelText = "Voyager 2",
-	ObjectIdentifier = Voyager2Asset.spacecraftID
+	ObjectIdentifier = SpaceCrafts.Voyager2Asset.spacecraftID
+}
+local WindLabel = {
+	LabelText = "Wind",
+	ObjectIdentifier = SpaceCrafts.WindAsset.spacecraftID
 }
 
 ------------------------ cluster labels -----------------------
@@ -127,16 +127,19 @@ local labelMapInnerSpace = {
                         	Label2 = StereoBLabel,
                         	Label3 = JunoLabel,
                        		Label4 = CassiniLabel,
-                        	Label5 = KeplerLabel
-
+                        	Label5 = KeplerLabel,
+                        	label6 = DawnLabel,
+                        	label7 = SpitzerLabel
                         }
 
 local labelMapNearEarth = {  
                         	Label1 = GaiaLabel,
                         	Label2 = ChandraXrayLabel, 
                         	label3 = ThemisBLabel,
-                        	label4 = ThemisCLabel
-
+                        	label4 = ThemisCLabel,
+                        	label5 = WindLabel,
+                        	label6 = SohoLabel
+                       
                         }
 local labelMapClusters = {  
                             Label1 = MarsClusterLabel
