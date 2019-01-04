@@ -489,6 +489,9 @@ bool GlobeLabelsComponent::readLabelsFile(const std::string& file) {
                         continue;
                     }
                     strncpy(lEntry.feature, token, 256);
+                    // Non-ascii characters aren't displayed correctly by the text rendering 
+                    // (We don't have the non-ascii character in the texture atlas)
+                    // Once this limitation is fixed, we can remove the next piece of code
                     // Removing non ASCII characters:
                     int tokenChar = 0;
                     while (tokenChar < 256) {
