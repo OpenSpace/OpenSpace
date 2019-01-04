@@ -22,56 +22,63 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/topics/authorizationtopic.h>
+#ifndef __OPENSPACE_MODULE_SERVER___SERVERINTERFACE___H__
+#define __OPENSPACE_MODULE_SERVER___SERVERINTERFACE___H__
 
-#include <modules/server/include/connection.h>
-#include <openspace/engine/configuration.h>
-#include <openspace/engine/globals.h>
-#include <ghoul/logging/logmanager.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/stringlistproperty.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 
-namespace {
-    constexpr const char* _loggerCat = "AuthorizationTopic";
-
-    constexpr const char* KeyStatus = "status";
-    constexpr const char* Authorized = "authorized";
-    constexpr const char* IncorrectKey = "incorrectKey";
-    constexpr const char* BadRequest = "badRequest";
-} // namespace
+namespace ghoul::io { class SocketServer; }
 
 namespace openspace {
 
-AuthorizationTopic::AuthorizationTopic(std::string password) 
-    : _password(std::move(password))
-{}
+class ServerInterface : public properties::PropertyOwner {
+public:
+    static std::unique_ptr<ServerInterface> createFromDictionary(
+        const ghoul::Dictionary& dictionary);
 
-bool AuthorizationTopic::isDone() const {
-    return _isAuthenticated;
-}
+    ServerInterface(const ghoul::Dictionary& dictionary);
+    ~ServerInterface();
 
-void AuthorizationTopic::handleJson(const nlohmann::json& json) {
-    if (isDone()) {
-        _connection->sendJson(wrappedPayload({ KeyStatus, Authorized }));
-    } else {
-        try {
-            auto providedKey = json.at("key").get<std::string>();
-            if (authorize(providedKey)) {
-                _connection->setAuthorized(true);
-                _connection->sendJson(wrappedPayload({ KeyStatus, Authorized }));
-                LINFO("Client successfully authorized.");
-            } else {
-                _connection->sendJson(wrappedPayload({ KeyStatus, IncorrectKey }));
-            }
-        } catch (const std::out_of_range&) {
-            _connection->sendJson(wrappedPayload({ KeyStatus, BadRequest }));
-        } catch (const std::domain_error&) {
-            _connection->sendJson(wrappedPayload({ KeyStatus, BadRequest }));
-        }
-    }
-}
+    void initialize();
+    void deinitialize();
+    bool isEnabled() const;
+    bool isActive() const;
+    int port() const;
+    std::string password() const;
+    bool clientHasAccessWithoutPassword(const std::string& address) const;
+    bool clientIsBlocked(const std::string& address) const;
 
-bool AuthorizationTopic::authorize(const std::string& key) {
-    _isAuthenticated = (key == _password);
-    return _isAuthenticated;
-}
+    ghoul::io::SocketServer* server();
+
+private:
+    enum class InterfaceType : int {
+        TcpSocket = 0,
+        WebSocket
+    };
+    
+    enum class Access : int {
+        Deny = 0,
+        RequirePassword,
+        Allow
+    };
+
+    properties::OptionProperty _type;
+    properties::IntProperty _port;
+    properties::BoolProperty _enabled;
+    properties::StringListProperty _allowAddresses;
+    properties::StringListProperty _requirePasswordAddresses;
+    properties::StringListProperty _denyAddresses;
+    properties::OptionProperty _defaultAccess;
+    properties::StringProperty _password;
+
+    std::unique_ptr<ghoul::io::SocketServer> _socketServer;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SERVER___SERVERINTERFACE___H__

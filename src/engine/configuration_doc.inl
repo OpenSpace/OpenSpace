@@ -210,26 +210,6 @@ documentation::Documentation Configuration::Documentation = {
             "All documentations that are generated at application startup."
         },
         {
-            KeyRequireSocketAuthentication,
-            new BoolVerifier,
-            Optional::Yes,
-            "If socket connections should be authenticated or not before they are "
-            "allowed to get or set information. Defaults to 'true'."
-        },
-        {
-            KeyServerPasskey,
-            new StringVerifier,
-            Optional::Yes,
-            "Passkey to limit server access. Used to authorize incoming connections."
-        },
-        {
-            KeyClientAddressWhitelist,
-            new StringListVerifier,
-            Optional::Yes,
-            "String containing white listed client IP addresses that won't need to be"
-            "authorized with the server. Space separated"
-        },
-        {
             KeyShutdownCountdown,
             new DoubleGreaterEqualVerifier(0.0),
             Optional::Yes,
