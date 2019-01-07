@@ -76,8 +76,7 @@ namespace openspace {
                 structSignal.endTime = signalsInJson["eot"].get<std::string>();
                 structSignal.startTime = signalsInJson["bot"].get<std::string>();
                 structSignal.direction = signalsInJson["direction"].get<std::string>();
-                std::string dlt = signalsInJson["DLT"].get<std::string>();
-                structSignal.lightTravelTime = atof(dlt.c_str());
+                structSignal.lightTravelTime = signalsInJson["DLT"].get<double>();
 
                 if (structSignal.direction == "uplink") {
                     structSignal.startTransmission = SpiceManager::ref().ephemerisTimeFromDate(structSignal.startTime);
