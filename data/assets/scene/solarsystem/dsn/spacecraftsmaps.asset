@@ -51,6 +51,18 @@ local GaiaLabel = {
 	LabelText = "Gaia",
 	ObjectIdentifier = SpaceCrafts.GaiaAsset.spacecraftID
 }
+local GenesisLabel = {
+	LabelText = "Genesis",
+	ObjectIdentifier = SpaceCrafts.GenesisAsset.spacecraftID
+}
+local Hayabusa2Label = {
+	LabelText = "Hayabusa 2",
+	ObjectIdentifier = SpaceCrafts.Hayabusa2Asset.spacecraftID
+}
+local IceLabel = {
+	LabelText = "Ice",
+	ObjectIdentifier = SpaceCrafts.IceAsset.spacecraftID
+}
 local JunoLabel = {
 	LabelText = "Juno",
 	ObjectIdentifier = SpaceCrafts.JunoAsset.spacecraftID
@@ -66,6 +78,10 @@ local MarsRecOrbLabel = {
 local MarsOdysseyLabel = {
 	LabelText = "Mars Odyssey",
 	ObjectIdentifier = SpaceCrafts.MarsOdysseyAsset.spacecraftID
+}
+local MessengerLabel = {
+	LabelText = "Messenger",
+	ObjectIdentifier = SpaceCrafts.MessengerAsset.spacecraftID
 }
 local NewHorizonsLabel = {
 	LabelText = "New Horizons",
@@ -87,6 +103,10 @@ local StereoBLabel = {
 	LabelText = "Stereo B",
 	ObjectIdentifier = SpaceCrafts.StereoBAsset.spacecraftID
 }
+local TessLabel = {
+	LabelText = "Transit Exoplanet Survey Satellite",
+	ObjectIdentifier = SpaceCrafts.TessAsset.spacecraftID
+}
 local ThemisBLabel = {
 	LabelText = "Themis B",
 	ObjectIdentifier = SpaceCrafts.ThemisBAsset.spacecraftID
@@ -94,6 +114,10 @@ local ThemisBLabel = {
 local ThemisCLabel = {
 	LabelText = "Themis C",
 	ObjectIdentifier = SpaceCrafts.ThemisCAsset.spacecraftID
+}
+local TraceGasOrbiterLabel = {
+	LabelText = "Trace Gas Orbiter",
+	ObjectIdentifier = SpaceCrafts.TraceGasOrbiterAsset.spacecraftID
 }
 local Voyager1Label = {
 	LabelText = "Voyager 1",
@@ -119,6 +143,7 @@ local MarsClusterLabel = {
 local labelMapMarsMissions = {  
                         Label1 = MarsRecOrbLabel,
                         Label2 = MarsOdysseyLabel
+
                     }
 
 local labelMapOuterSpace = {  
