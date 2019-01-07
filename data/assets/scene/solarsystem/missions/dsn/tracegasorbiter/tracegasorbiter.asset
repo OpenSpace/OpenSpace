@@ -1,0 +1,29 @@
+local assetHelper = asset.require('util/asset_helper')
+local dataFolder = openspace.absPath("../../../sync/http/dsn_data/1/positioning/TGO") 
+
+local models = asset.syncedResource({
+    Name = "Dsn models",
+    Type = "HttpSynchronization",
+    Identifier = "dsn_stations",
+    Version = 1
+})
+local spacecraftID = "TraceGasOrbiter";
+
+local TraceGasOrbiter = {
+    Identifier = spacecraftID,
+    Transform = {
+      Translation = {
+          Type = "RadecTranslation", 
+          DataFolder = dataFolder,
+          DataFileType = "json",
+          ObjectIdentifier = spacecraftID
+      }
+
+   },
+    GUI = {
+        Name = "TraceGasOrbiter",
+        Path = "/Solar System/TraceGasOrbiter"
+    }
+}
+asset.export("spacecraftID", spacecraftID)
+assetHelper.registerSceneGraphNodesAndExport(asset, {TraceGasOrbiter})

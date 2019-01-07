@@ -8,19 +8,25 @@ local SpaceCrafts = asset.require('scene/solarsystem/missions/dsn/spacecrafts')
 local signalDataIdMap = {
 	CAS = SpaceCrafts.CassiniAsset.spacecraftID,
 	GAIA = SpaceCrafts.GaiaAsset.spacecraftID,
+	GNS = SpaceCrafts.GenesisAsset.spacecraftID,
+	HYB2 = SpaceCrafts.Hayabusa2Asset.spacecraftID,
+	ICE = SpaceCrafts.IceAsset.spacecraftID,
 	CHDR = SpaceCrafts.ChandraXrayAsset.spacecraftID,
 	DAWN = SpaceCrafts.DawnAsset.spacecraftID,
 	JNO = SpaceCrafts.JunoAsset.spacecraftID,
 	KEPL = SpaceCrafts.KeplerAsset.spacecraftID,
 	MRO = SpaceCrafts.MarsRecOrbAsset.spacecraftID,
 	M010 = SpaceCrafts.MarsOdysseyAsset.spacecraftID,
+	MSGR = SpaceCrafts.MessengerAsset.spacecraftID,
 	NHPC = SpaceCrafts.NewHorizonsAsset.spacecraftID,
 	SOHO = SpaceCrafts.SohoAsset.spacecraftID,
 	STF = SpaceCrafts.SpitzerAsset.spacecraftID,
 	STA = SpaceCrafts.StereoAAsset.spacecraftID,
 	STB = SpaceCrafts.StereoBAsset.spacecraftID,
+	TESS = SpaceCrafts.TessAsset.spacecraftID,
 	THB = SpaceCrafts.ThemisBAsset.spacecraftID,
 	THC = SpaceCrafts.ThemisCAsset.spacecraftID,
+	TGO = SpaceCrafts.TraceGasOrbiterAsset.spacecraftID,
 	VGR1 = SpaceCrafts.Voyager1Asset.spacecraftID,
 	VGR2 = SpaceCrafts.Voyager2Asset.spacecraftID,
 	WIND = SpaceCrafts.WindAsset.spacecraftID
@@ -129,7 +135,12 @@ local labelMapInnerSpace = {
                        		Label4 = CassiniLabel,
                         	Label5 = KeplerLabel,
                         	label6 = DawnLabel,
-                        	label7 = SpitzerLabel
+                        	label7 = SpitzerLabel,
+                        	label8 = GenesisLabel,
+                        	label9 = Hayabusa2Label,
+                        	label10 = MessengerLabel,
+                       		label11 = TraceGasOrbiterLabel
+
                         }
 
 local labelMapNearEarth = {  
@@ -138,8 +149,10 @@ local labelMapNearEarth = {
                         	label3 = ThemisBLabel,
                         	label4 = ThemisCLabel,
                         	label5 = WindLabel,
-                        	label6 = SohoLabel
-                       
+                        	label6 = SohoLabel,
+                        	label7 = IceLabel,
+                       		label8 = TessLabel
+
                         }
 local labelMapClusters = {  
                             Label1 = MarsClusterLabel
