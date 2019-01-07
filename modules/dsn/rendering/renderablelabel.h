@@ -70,6 +70,7 @@ namespace openspace {
         bool _hasStaticLabelSize = false;
         bool _dataIsDirty = true;
         bool _textColorIsDirty = true;
+        bool _labelHasColor = false;
         bool _hasLabel = false;
         bool _hasLabelIdMap = false;
         double maxMinNormalize(double value, glm::dvec2 newRange, glm::dvec2 oldRange);
@@ -79,8 +80,6 @@ namespace openspace {
         properties::FloatProperty _labelSize;
         properties::Vec2Property _labelSizeRange;
         properties::Vec2Property _sizeDistanceRange;
-        //properties::FloatProperty _textMinSize;
-        //properties::FloatProperty _textMaxSize;
         properties::BoolProperty _drawLabels;
         properties::Vec2Property _fadeInDistance;
         properties::Vec2Property _fadeOutDistance;
@@ -93,11 +92,13 @@ namespace openspace {
 
         struct LabelInfo {
             std::string text;
+            glm::vec4 textColor;
             std::string attachedId;
         };
 
         std::vector<LabelInfo> labelDataInfo;
-        std::vector<std::pair<glm::dvec3, std::string>> _labelData;
+        std::vector< std::tuple<glm::dvec3, std::string, glm::vec4> > _labelData;
+
         glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 
         double getUnitFactor(std::string unitString);
@@ -108,7 +109,6 @@ namespace openspace {
         /*The maximal size(in pixels) of the text for the labels
         for the astronomical objects being rendered.*/
         double _textMaxSize = 100.0;
-
 
     };
 

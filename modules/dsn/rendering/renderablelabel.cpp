@@ -45,6 +45,7 @@ namespace {
 
     constexpr const char* KeyObjectIdentifier = "ObjectIdentifier";
     constexpr const char* KeyLabelText = "LabelText";
+    constexpr const char* KeyTextColor = "TextColor";
 
     constexpr openspace::properties::Property::PropertyInfo LabelIdentifierMapInfo = {
         "LabelIdentifierMap",
@@ -87,21 +88,6 @@ namespace {
         "Size Distance Range",
         "The distance range where rescaling from min label size to max label size occurs. "
     };
-
-
-    //constexpr openspace::properties::Property::PropertyInfo TextMinSizeInfo = {
-    //    "TextMinSize",
-    //    "Text Min Size",
-    //    "The minimal size (in pixels) of the text for the labels for the astronomical "
-    //    "objects being rendered."
-    //};
-
-    //constexpr openspace::properties::Property::PropertyInfo TextMaxSizeInfo = {
-    //    "TextMaxSize",
-    //    "Text Max Size",
-    //    "The maximum size (in pixels) of the text for the labels for the astronomical "
-    //    "objects being rendered."
-    //};
 
     constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
         "DrawLabels",
@@ -192,18 +178,6 @@ namespace openspace {
                     Optional::Yes,
                     SizeDistanceRangeInfo.description
                 },
-                //{
-                //    TextMinSizeInfo.identifier,
-                //    new DoubleVerifier,
-                //    Optional::Yes,
-                //    TextMinSizeInfo.description
-                //},
-                //{
-                //    TextMaxSizeInfo.identifier,
-                //    new DoubleVerifier,
-                //    Optional::Yes,
-                //    TextMaxSizeInfo.description
-                //},
                 {
                     FadeInDistanceRangeInfo.identifier,
                     new Vector2Verifier<double>,
@@ -231,9 +205,9 @@ namespace openspace {
         , _scaleFactor(ScaleFactorInfo, 1.0f, 0.f, 10.f)
         , _textColor(
             TextColorInfo,
-            glm::vec4(1.0f, 1.0, 1.0f, 1.f),
-            glm::vec4(0.f),
-            glm::vec4(1.f)
+            glm::vec4(1.0, 1.0, 1.0, 1.0),
+            glm::vec4(0.0),
+            glm::vec4(1.0)
         )
         , _labelSize(LabelSizeInfo, 20.0, 0.0, 100.0)
         , _labelSizeRange(
@@ -248,8 +222,6 @@ namespace openspace {
             glm::vec2(0.0),
             glm::vec2(100.0)
         )
-       // , _textMinSize(TextMinSizeInfo, 5.f, 0.0f, 100.f)
-       // , _textMaxSize(TextMaxSizeInfo, 50.f, 0.0f, 100.f)
         , _drawLabels(DrawLabelInfo, false)
         , _fadeOutDistance(
             FadeOutDistanceRangeInfo,
@@ -301,8 +273,16 @@ namespace openspace {
                 ghoul::Dictionary labelInfoDictionary = tempLabelIdMap.value<ghoul::Dictionary>(labels.at(i));
                 LabelInfo labelInfo;
                 labelInfo.text = labelInfoDictionary.value<std::string>(KeyLabelText);
-                labelInfo.attachedId = labelInfoDictionary.value<std::string>(KeyObjectIdentifier);
 
+                if (labelInfoDictionary.hasKey(KeyTextColor)) {
+                    labelInfo.textColor = labelInfoDictionary.value<glm::vec4>(KeyTextColor);
+                    _labelHasColor = true;
+                }
+                else if (_labelHasColor == false) {
+                    labelInfo.textColor = dictionary.value<glm::vec4>(KeyTextColor);
+                }
+
+                labelInfo.attachedId = labelInfoDictionary.value<std::string>(KeyObjectIdentifier);
                 labelDataInfo.push_back(labelInfo);
             }
             
@@ -314,9 +294,6 @@ namespace openspace {
             }
             addProperty(_drawLabels);
 
-            if (dictionary.hasKey(TextColorInfo.identifier)) {
-                _textColor = dictionary.value<glm::vec4>(TextColorInfo.identifier);
-            }
             _textColor.setViewOption(properties::Property::ViewOptions::Color);
             addProperty(_textColor);
             _textColor.onChange([&]() { _textColorIsDirty = true; });
@@ -347,16 +324,6 @@ namespace openspace {
                 LERROR(fmt::format("Need to specify either a static '{}' or a scalable range '{}' with a distance range '{}'", 
                                     LabelSizeInfo.identifier, LabelSizeRangeInfo.identifier, SizeDistanceRangeInfo.identifier));
             }
-
-            //if (dictionary.hasKey(TextMinSizeInfo.identifier)) {
-            //    _textMinSize = dictionary.value<float>(TextMinSizeInfo.identifier);
-            //}
-            //addProperty(_textMinSize);
-
-            //if (dictionary.hasKey(TextMaxSizeInfo.identifier)) {
-            //    _textMaxSize = dictionary.value<float>(TextMaxSizeInfo.identifier);
-            //}
-            //addProperty(_textMaxSize);
 
         }
         else {
@@ -439,17 +406,19 @@ namespace openspace {
             _labelData.clear();
             loadLabelDataFromId();
         }
-        glm::vec4 textColor = _textColor;
-
-        for (const std::pair<glm::dvec3, std::string>& pair : _labelData) {
+        for (const std::tuple<glm::dvec3, std::string, glm::vec4>& tuple : _labelData) {
 
             // The world position of the SceneGraphNode
-            glm::dvec3 nodePos = pair.first;
-            std::string labelText = pair.second;
+            glm::dvec3 nodePos = std::get<0>(tuple);
+            std::string labelText = std::get<1>(tuple);
+            glm::vec4 labelTextColor = std::get<2>(tuple);
+          
+            glm::vec4 textColor = labelTextColor;
 
             // The distance from the camera to the SceneGraphNode of the label
             double distCamera = glm::distance(data.camera.positionVec3(), nodePos);
 
+      
             if (!_disableFadeDistances) {
                 // fade in when when we are close enough
                 const glm::vec2 fadeInRange = _fadeInDistance;
@@ -564,7 +533,7 @@ namespace openspace {
                 glm::dvec3 transformedPos = glm::dvec3(
                     _transformationMatrix * glm::dvec4(position, 1.0)
                 );
-                _labelData.emplace_back(std::make_pair(transformedPos, labelinfo.text));
+                _labelData.emplace_back(std::make_tuple(transformedPos, labelinfo.text, labelinfo.textColor));
 
             }
             else {
