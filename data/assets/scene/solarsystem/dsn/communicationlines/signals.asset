@@ -3,7 +3,7 @@ local stationsAsset = asset.require('scene/solarsystem/dsn/stations')
 local maps = asset.require('scene/solarsystem/dsn/spacecraftsmaps')
 
 --Signals data path
-local dataFolder = openspace.absPath("../../../sync/http/dsn_data/1/json")
+local dataFolder = openspace.absPath("${SYNC}/http/dsn_data/1/signaldata")
 
 local Signals = {
     Identifier = "Signals",
