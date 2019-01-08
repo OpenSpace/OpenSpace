@@ -32,9 +32,9 @@ local LightSources = {
 
 -- Colormap for the different sites
 local siteColorMap = {  
-                        GoldstoneColor = {0.0, .7, 1.0}, 
-                        CanberraColor = {1.0, 0.0, 0.0}, 
-                        MadridColor = {0.0, 1.0, 0.0} 
+                        GoldstoneColor = {0.0, .4, 1.0}, --blue
+                        CanberraColor = {1.0, 0.0, 0.0}, -- red
+                        MadridColor = {0.0, 1.0, 0.0}  --green 
                       }
 
 -- stationMap 

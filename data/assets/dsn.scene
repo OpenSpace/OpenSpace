@@ -35,6 +35,24 @@ asset.require('util/webgui')
 
 local Keybindings = {
     {
+        Key = "z",  
+        Command =  "openspace.time.interpolateDeltaTime(3)",
+        Documentation = "Set speed to work for near earth view.",
+        Local = false
+    },
+    {
+        Key = "x",  
+        Command =  "openspace.time.interpolateDeltaTime(360)",
+        Documentation = "Set speed to work for inner space view.",
+        Local = false
+    },    
+    {
+        Key = "c",  
+        Command =  "openspace.time.interpolateDeltaTime(4200)",
+        Documentation = "Set speed to work for outer space.",
+        Local = false
+    },
+    {
         Key = "s",  
         Command = propertyHelper.invert('Scene.Earth.Renderable.Layers.NightLayers.Earth at Night 2012.Enabled') ..
                   propertyHelper.invert('Scene.Earth.Renderable.PerformShading') ..
@@ -101,7 +119,7 @@ asset.onInitialize(function ()
     openspace.setDefaultGuiSorting()
 
     openspace.setPropertyValue('Scene.*Trail.Renderable.Enabled', false)
-
+    openspace.setPropertyValue('Scene.*Trail.Renderable.Color', {0.5,0.5,0.5})
 
     openspace.globebrowsing.loadWMSServersFromFile(
         openspace.absPath("${DATA}/globebrowsing_servers.lua")
