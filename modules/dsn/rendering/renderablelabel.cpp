@@ -248,12 +248,7 @@ namespace openspace {
         _renderOption.addOption(0, "Camera View Direction");
         _renderOption.addOption(1, "Camera Position Normal");
         _renderOption.set(1);
-        if (global::windowDelegate.isFisheyeRendering()) {
-            _renderOption.set(1);
-        }
-        else {
-            _renderOption.set(0);
-        }
+
         addProperty(_renderOption);
 
         if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
