@@ -35,7 +35,7 @@ namespace openspace {
         ghoul_assert(renderableFactory, "No renderable factory existed");
 
         renderableFactory->registerClass<RenderableSignals>("RenderableSignals");
-        renderableFactory->registerClass<RenderableLabel>("RenderableLabel");
+        renderableFactory->registerClass<RenderableDsnLabels>("RenderableDsnLabels");
 
 		auto translationFactory = FactoryManager::ref().factory<Translation>();
 		ghoul_assert(translationFactory, "Translation factory was not created");

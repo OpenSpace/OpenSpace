@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_DSN___RENDERABLELABEL___H__
-#define __OPENSPACE_MODULE_DSN___RENDERABLELABEL___H__
+#ifndef __OPENSPACE_MODULE_DSN___RENDERABLEDSNLABELS___H__
+#define __OPENSPACE_MODULE_DSN___RENDERABLEDSNLABELS___H__
 
 #include <openspace/rendering/renderable.h>
 
@@ -41,10 +41,10 @@ namespace openspace {
 
     namespace documentation { struct Documentation; }
 
-    class RenderableLabel: public Renderable {
+    class RenderableDsnLabels: public Renderable {
     public:
-        explicit RenderableLabel(const ghoul::Dictionary& dictionary);
-        ~RenderableLabel() = default;
+        explicit RenderableDsnLabels(const ghoul::Dictionary& dictionary);
+        ~RenderableDsnLabels() = default;
 
         void initialize() override;
         void initializeGL() override;
@@ -121,4 +121,4 @@ namespace openspace {
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_DSN___RENDERABLELABEL___H__s
+#endif // __OPENSPACE_MODULE_DSN___RENDERABLEDSNLABELS___H__s
