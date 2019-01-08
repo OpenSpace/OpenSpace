@@ -50,6 +50,9 @@ glm::bvec3 fromLuaConversion(lua_State* state, bool& success) {
             lua_pop(state, 1);
         }
     }
+
+    // The last accessor argument is still on the stack
+    lua_pop(state, 1);
     success = true;
     return result;
 }

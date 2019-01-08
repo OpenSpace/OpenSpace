@@ -22,9 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/webbrowser/webbrowsermodule.h>
-
 #include <modules/cefwebgui/cefwebguimodule.h>
+
+#include <modules/webbrowser/webbrowsermodule.h>
+#include <modules/webgui/webguimodule.h>
 #include <modules/cefwebgui/include/guirenderhandler.h>
 #include <modules/cefwebgui/include/guikeyboardhandler.h>
 #include <modules/webbrowser/include/browserinstance.h>
@@ -131,7 +132,14 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         }
     });
 
-    _url = configuration.value<std::string>(GuiUrlInfo.identifier);
+
+    if (configuration.hasValue<std::string>(GuiUrlInfo.identifier)) {
+        _url = configuration.value<std::string>(GuiUrlInfo.identifier);
+    } else {
+        WebGuiModule* webGuiModule = global::moduleEngine.module<WebGuiModule>();
+        _url = "http://localhost:" +
+            std::to_string(webGuiModule->port()) + "/#/onscreen";
+    }
 
     _enabled = configuration.hasValue<bool>(EnabledInfo.identifier) &&
                configuration.value<bool>(EnabledInfo.identifier);
