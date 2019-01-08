@@ -13,7 +13,7 @@ local Signals = {
         DataFileType = "json",
         BaseOpacity = 0.1,
         SiteColors = stationsAsset.siteColorMap, 
-        StationSites = stationsAsset.stationSiteMap,
+        StationSites = stationsAsset.stationMap,
         SpacecraftIdMap = maps.signalDataIdMap
     },
     GUI = {
