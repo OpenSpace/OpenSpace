@@ -68,8 +68,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FlowSpeedInfo = {
         "FlowSpeed",
         "Flow Speed",
-        "Speed of signal transmission flow effect, i.e. the segments within the transmission. "
-        "The speed of the flow particles is decided by the speed of light times this number"
+        "Speed of signal transmission flow effect, i.e. the segments within the "
+        "transmission indicating uplink or downlink. The speed of the flow "
+        "particles is decided by the speed of light multiplied by this number"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentSizeInfo = {
@@ -163,7 +164,7 @@ RenderableSignals::RenderableSignals(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _lineWidth(LineWidthInfo, 2.5f, 1.f, 10.f)
     , _baseOpacity(BaseOpacityInfo, 0.3f, 0.0f, 1.0f)
-    , _flowSpeedFactor(FlowSpeedInfo, 1.0f, 1.0f, 100.0f)
+    , _flowSpeedFactor(FlowSpeedInfo, 1.0f, 1.0f, 400.0f)
     , _segmentSizeFactor(SegmentSizeInfo, 0.6f, 0.0f, 1.0f)
     , _spacingSizeFactor(SpacingSizeInfo, 0.2f, 0.0f, 5.0f)
     , _fadeFactor(FadeFactorInfo, 0.5f, 0.1f, 0.5f)
@@ -576,7 +577,7 @@ glm::vec4 RenderableSignals::getStationColor(std::string dishidentifier) {
     }
     catch (const std::exception& e) {
         LERROR(fmt::format("Station {} has no site location color, "
-               "add it to your stationSiteMap in your asset file.", dishidentifier));
+               "add it to your stationMap in your asset file.", dishidentifier));
     }
 
     int siteIndex = _siteToIndex.at(site);
