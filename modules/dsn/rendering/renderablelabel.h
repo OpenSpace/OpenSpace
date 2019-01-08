@@ -63,6 +63,7 @@ namespace openspace {
 
         void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
             const glm::dvec3& orthoRight, const glm::dvec3& orthoUp);
+        void updateTextColor();
 
         bool loadData();
         bool loadLabelDataFromId();
@@ -70,13 +71,12 @@ namespace openspace {
         bool _hasStaticLabelSize = false;
         bool _dataIsDirty = true;
         bool _textColorIsDirty = true;
-        bool _labelHasColor = false;
         bool _hasLabel = false;
         bool _hasLabelIdMap = false;
         double maxMinNormalize(double value, glm::dvec2 newRange, glm::dvec2 oldRange);
 
         properties::FloatProperty _scaleFactor;
-        properties::Vec4Property _textColor;
+        properties::Vec4Property _textColorProperty;
         properties::FloatProperty _labelSize;
         properties::Vec2Property _labelSizeRange;
         properties::Vec2Property _sizeDistanceRange;
@@ -94,9 +94,14 @@ namespace openspace {
             std::string text;
             glm::vec4 textColor;
             std::string attachedId;
+            bool hasIndividualColor = false;
         };
 
+        /* Contains the necessary info about all labels, set from the asset file */
         std::vector<LabelInfo> labelDataInfo;
+        /* The actual data needed for the rendering, 
+         * this is updated each render step with the
+         * help of labelDataInfo */
         std::vector< std::tuple<glm::dvec3, std::string, glm::vec4> > _labelData;
 
         glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
@@ -109,6 +114,8 @@ namespace openspace {
         /*The maximal size(in pixels) of the text for the labels
         for the astronomical objects being rendered.*/
         double _textMaxSize = 100.0;
+
+        glm::vec4 _defaultTextColor = { 0.4, 0.4, 0.4, 1.0 };
 
     };
 

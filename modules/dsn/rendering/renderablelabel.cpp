@@ -203,9 +203,9 @@ namespace openspace {
     RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary)
         , _scaleFactor(ScaleFactorInfo, 1.0f, 0.f, 10.f)
-        , _textColor(
+        , _textColorProperty(
             TextColorInfo,
-            glm::vec4(1.0, 1.0, 1.0, 1.0),
+            _defaultTextColor,
             glm::vec4(0.0),
             glm::vec4(1.0)
         )
@@ -271,10 +271,13 @@ namespace openspace {
 
                 if (labelInfoDictionary.hasKey(KeyTextColor)) {
                     labelInfo.textColor = labelInfoDictionary.value<glm::vec4>(KeyTextColor);
-                    _labelHasColor = true;
+                    labelInfo.hasIndividualColor = true;
                 }
-                else if (_labelHasColor == false) {
+                else if (dictionary.hasKeyAndValue<glm::vec4>(TextColorInfo.identifier)) {
                     labelInfo.textColor = dictionary.value<glm::vec4>(KeyTextColor);
+                }
+                else {
+                    labelInfo.textColor = _defaultTextColor;
                 }
 
                 labelInfo.attachedId = labelInfoDictionary.value<std::string>(KeyObjectIdentifier);
@@ -289,9 +292,14 @@ namespace openspace {
             }
             addProperty(_drawLabels);
 
-            _textColor.setViewOption(properties::Property::ViewOptions::Color);
-            addProperty(_textColor);
-            _textColor.onChange([&]() { _textColorIsDirty = true; });
+            if (dictionary.hasKeyAndValue<glm::vec4>(TextColorInfo.identifier)) {
+
+                glm::vec4 labelMapTextColor = dictionary.value<glm::vec4>(KeyTextColor);
+                _textColorProperty.setViewOption(properties::Property::ViewOptions::Color);
+                _textColorProperty.setValue(labelMapTextColor);
+                addProperty(_textColorProperty);
+                _textColorProperty.onChange([&]() { _textColorIsDirty = true; });
+            }
 
             // Can have either a static size or a scaled interval
             if (dictionary.hasKey(LabelSizeInfo.identifier)) {
@@ -401,12 +409,12 @@ namespace openspace {
             _labelData.clear();
             loadLabelDataFromId();
         }
-        for (const std::tuple<glm::dvec3, std::string, glm::vec4>& tuple : _labelData) {
+        for (const std::tuple<glm::dvec3, std::string, glm::vec4>& label : _labelData) {
 
             // The world position of the SceneGraphNode
-            glm::dvec3 nodePos = std::get<0>(tuple);
-            std::string labelText = std::get<1>(tuple);
-            glm::vec4 labelTextColor = std::get<2>(tuple);
+            glm::dvec3 nodePos = std::get<0>(label);
+            std::string labelText = std::get<1>(label);
+            glm::vec4 labelTextColor = std::get<2>(label);
           
             glm::vec4 textColor = labelTextColor;
 
@@ -439,7 +447,7 @@ namespace openspace {
             else {
                 textSize = _labelSize;
             }
-            double labelPosLength = pow(10, _scaleFactor);//(1.0 / _scaleFactor) * 1E10;// length(nodePos) / _fadeInDistanceUnit;// _fadeInDistanceUnit;
+            double labelPosLength = pow(10, _scaleFactor);
             // The direction vector from the camera to the SceneGraphNode
             glm::dvec3 nodeDir = normalize(data.camera.positionVec3() - nodePos);
             // The new label position vector, calculated from the camera
@@ -464,6 +472,17 @@ namespace openspace {
                 _renderOption.value()
             );
         }
+    }
+
+    void RenderableLabel::updateTextColor()
+    {
+        for (int i = 0; i < labelDataInfo.size(); i++) {
+
+            if (!labelDataInfo.at(i).hasIndividualColor) {
+                labelDataInfo.at(i).textColor = _textColorProperty.value();       
+            }
+        }
+        _textColorIsDirty = false;
     }
 
     void RenderableLabel::render(const RenderData& data, RendererTasks&) {
@@ -494,6 +513,11 @@ namespace openspace {
         glm::dvec3 orthoUp = glm::normalize(
             glm::cross(cameraViewDirectionWorld, orthoRight)
         );
+
+        if (_textColorIsDirty) {
+        
+            updateTextColor();
+        }
 
         if (_drawLabels && _hasLabel) {
             renderLabels(
