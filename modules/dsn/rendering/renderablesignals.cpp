@@ -331,14 +331,11 @@ void RenderableSignals::updateVertexAttributes() {
 void RenderableSignals::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
 
-    //The stations are statically translated with respect to Earth
-    //glm::dmat4 modelTransformStation = global::renderEngine.scene()->sceneGraphNode("Earth")->modelTransform();
-
     _programObject->setUniform(_uniformCache.modelViewStation,
-        data.camera.combinedViewMatrix() * _lineRenderInformation._localTransformStation);
+        data.camera.combinedViewMatrix() * _lineRenderInformation._localTransform);
 
     _programObject->setUniform(_uniformCache.modelViewSpacecraft,
-        data.camera.combinedViewMatrix()  * _lineRenderInformation._localTransformSpacecraft);
+        data.camera.combinedViewMatrix()  * _lineRenderInformation._localTransform);
 
     _programObject->setUniform(_uniformCache.projection, data.camera.sgctInternal.projectionMatrix());
 
@@ -405,12 +402,10 @@ void RenderableSignals::update(const UpdateData& data) {
     // Make space for the vertex renderinformation
     _vertexArray.clear();
 
-    //update focusnode information used to calculate spacecraft positions
+    // Update focusnode information, used to counter precision problems
     _focusNode = global::navigationHandler.focusNode();
-    _lineRenderInformation._localTransformSpacecraft = glm::translate(glm::dmat4(1.0), _focusNode->worldPosition());
-    _lineRenderInformation._localTransformStation = glm::translate(glm::dmat4(1.0), global::renderEngine.scene()->sceneGraphNode("Earth")->worldPosition());
+    _lineRenderInformation._localTransform = glm::translate(glm::dmat4(1.0), _focusNode->worldPosition());
 
-    //Todo; keep track of active index for signalvector, or swap for loop for binary search
     for (int i = 0; i < SignalManager::signalData.signals.size(); i++) {
 
         SignalManager::Signal currentSignal = SignalManager::signalData.signals[i];
@@ -466,8 +461,8 @@ void RenderableSignals::extractData(std::unique_ptr<ghoul::Dictionary> &dictiona
 void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal) {
 
     glm::vec4 color = getStationColor(signal.dishName);
-    glm::dvec3 posStation = getPositionForGeocentricSceneGraphNode(signal.dishName.c_str());
-    glm::dvec3 posSpacecraft = getSuitablePrecisionPositionForSceneGraphNode(signal.spacecraft.c_str());
+    glm::dvec3 posStation = getPrecisionPositionForStationNode(signal.dishName);
+    glm::dvec3 posSpacecraft = getPrecisionPositionForNode(signal.spacecraft);
     double distance = getDistance(signal.dishName, signal.spacecraft);
     double timeSinceStart = signal.timeSinceStart;
     double lightTravelTime = signal.lightTravelTime;
@@ -516,25 +511,26 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
     _vertexArray.push_back(lightTravelTime);
 }
 
+/*  Returns a position that is relative to the current 
+    focus node. This is a method to handle precision
+    problems that occur when placing our signal line endings. */
+glm::dvec3 RenderableSignals::getCoordinatePosFromFocusNode(glm::dvec3 worldPos) {
 
-glm::dvec3 RenderableSignals::getCoordinatePosFromFocusNode(SceneGraphNode* node) {
-
-    glm::dvec3 nodePos = node->worldPosition();
     glm::dvec3 focusNodePos = _focusNode->worldPosition();
 
-    glm::dvec3 diff = glm::dvec3(nodePos.x - focusNodePos.x, nodePos.y - focusNodePos.y,
-        nodePos.z - focusNodePos.z);
+    glm::dvec3 diffPos = glm::dvec3(worldPos.x - focusNodePos.x, worldPos.y - focusNodePos.y,
+        worldPos.z - focusNodePos.z);
 
-    return diff;
+    return diffPos;
 }
 
-glm::dvec3 RenderableSignals::getSuitablePrecisionPositionForSceneGraphNode(std::string id) {
+glm::dvec3 RenderableSignals::getPrecisionPositionForNode(std::string id) {
 
     glm::dvec3 position;
 
     if (global::renderEngine.scene()->sceneGraphNode(id)) {
         SceneGraphNode* spacecraftNode = global::renderEngine.scene()->sceneGraphNode(id);
-        position = getCoordinatePosFromFocusNode(spacecraftNode);
+        position = getCoordinatePosFromFocusNode(spacecraftNode->worldPosition());
     }
     else {
         LERROR(fmt::format("No scenegraphnode found for the spacecraft {}", id));
@@ -543,7 +539,7 @@ glm::dvec3 RenderableSignals::getSuitablePrecisionPositionForSceneGraphNode(std:
     return position;
 }
 
-glm::dvec3 RenderableSignals::getPositionForGeocentricSceneGraphNode(const char* id) {
+glm::dvec3 RenderableSignals::getPrecisionPositionForStationNode(std::string id) {
 
     glm::dvec3 position;
 
@@ -557,7 +553,8 @@ glm::dvec3 RenderableSignals::getPositionForGeocentricSceneGraphNode(const char*
         heightAboveSurfacePos.x = heightAboveSurfacePos.x * _stationToSize.at(id);
         heightAboveSurfacePos.y = heightAboveSurfacePos.y * _stationToSize.at(id);
         heightAboveSurfacePos.z = heightAboveSurfacePos.z * _stationToSize.at(id);
-        position = earthSurfacePos + heightAboveSurfacePos;
+        glm::dvec3 newWorldPos = earthPos + earthSurfacePos + heightAboveSurfacePos;
+        position = getCoordinatePosFromFocusNode(newWorldPos);
 
     }
     else {

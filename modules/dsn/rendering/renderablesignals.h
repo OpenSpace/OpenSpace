@@ -84,12 +84,12 @@ namespace openspace {
         bool isReady() const override;
         /* Adds the signaldata to _vertexArray*/
         void pushSignalDataToVertexArray(SignalManager::Signal signal);
-        /* Returns a position relative the current focus node */
-        glm::dvec3 getCoordinatePosFromFocusNode(SceneGraphNode* node);
-        /*Returns a position for a spacecraft*/
-        glm::dvec3 getSuitablePrecisionPositionForSceneGraphNode(std::string id);
-        /* Returns a position for a station that has Earth as parent*/
-        glm::dvec3 getPositionForGeocentricSceneGraphNode(const char* id);
+        /* Returns position relative to the current focus node */
+        glm::dvec3 getCoordinatePosFromFocusNode(glm::dvec3 worldPos);
+        /*Returns a position for a spacecraft */
+        glm::dvec3 getPrecisionPositionForNode(std::string id);
+        /* Returns a position for a station placed on Earth with a set height*/
+        glm::dvec3 getPrecisionPositionForStationNode(std::string id);
         /* Returns a color based on what site the station is located to */
         glm::vec4 getStationColor(std::string dishidentifier);
         /* Returns a distance between two scenegraphnodes */
@@ -123,10 +123,8 @@ namespace openspace {
             GLint first = 0;
             /// The number of values to be rendered
             GLsizei countLines = 0;
-            /// Local model matrix, for spacecraft, dependant on focusnode, used for rendering in camera space
-            glm::dmat4 _localTransformSpacecraft = glm::dmat4(1.0);
-            /// Local model matrix, for station, dependant on earth position
-            glm::dmat4 _localTransformStation = glm::dmat4(1.0);
+            /// Local model matrix, dependant on focusnode, used for rendering in camera space
+            glm::dmat4 _localTransform = glm::dmat4(1.0);
             /// The vertex array object for this RenderInformation
             GLuint _vaoID = 0;
             /// The main vertex buffer object
