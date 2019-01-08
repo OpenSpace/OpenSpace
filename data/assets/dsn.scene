@@ -101,7 +101,7 @@ asset.onInitialize(function ()
     openspace.setDefaultGuiSorting()
 
     openspace.setPropertyValue('Scene.*Trail.Renderable.Enabled', false)
-
+    openspace.setPropertyValue('Scene.*Trail.Renderable.Color', {0.5,0.5,0.5})
 
     openspace.globebrowsing.loadWMSServersFromFile(
         openspace.absPath("${DATA}/globebrowsing_servers.lua")
