@@ -322,8 +322,8 @@ local DSS34 = {
       Translation = {
         Type = "GlobeTranslation",
         Globe = earthAsset.Earth.Identifier,
-        Longitude = 148.98127,
-        Latitude = -35.40242,
+        Longitude = 148.981962,
+        Latitude = -35.39848332,
       }
    },
     Renderable = {

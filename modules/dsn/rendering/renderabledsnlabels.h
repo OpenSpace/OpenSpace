@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_DSN___RENDERABLELABEL___H__
-#define __OPENSPACE_MODULE_DSN___RENDERABLELABEL___H__
+#ifndef __OPENSPACE_MODULE_DSN___RENDERABLEDSNLABELS___H__
+#define __OPENSPACE_MODULE_DSN___RENDERABLEDSNLABELS___H__
 
 #include <openspace/rendering/renderable.h>
 
@@ -41,10 +41,10 @@ namespace openspace {
 
     namespace documentation { struct Documentation; }
 
-    class RenderableLabel: public Renderable {
+    class RenderableDsnLabels: public Renderable {
     public:
-        explicit RenderableLabel(const ghoul::Dictionary& dictionary);
-        ~RenderableLabel() = default;
+        explicit RenderableDsnLabels(const ghoul::Dictionary& dictionary);
+        ~RenderableDsnLabels() = default;
 
         void initialize() override;
         void initializeGL() override;
@@ -63,6 +63,7 @@ namespace openspace {
 
         void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
             const glm::dvec3& orthoRight, const glm::dvec3& orthoUp);
+        void updateTextColor();
 
         bool loadData();
         bool loadLabelDataFromId();
@@ -70,13 +71,12 @@ namespace openspace {
         bool _hasStaticLabelSize = false;
         bool _dataIsDirty = true;
         bool _textColorIsDirty = true;
-        bool _labelHasColor = false;
         bool _hasLabel = false;
         bool _hasLabelIdMap = false;
         double maxMinNormalize(double value, glm::dvec2 newRange, glm::dvec2 oldRange);
 
         properties::FloatProperty _scaleFactor;
-        properties::Vec4Property _textColor;
+        properties::Vec4Property _textColorProperty;
         properties::FloatProperty _labelSize;
         properties::Vec2Property _labelSizeRange;
         properties::Vec2Property _sizeDistanceRange;
@@ -94,9 +94,14 @@ namespace openspace {
             std::string text;
             glm::vec4 textColor;
             std::string attachedId;
+            bool hasIndividualColor = false;
         };
 
+        /* Contains the necessary info about all labels, set from the asset file */
         std::vector<LabelInfo> labelDataInfo;
+        /* The actual data needed for the rendering, 
+         * this is updated each render step with the
+         * help of labelDataInfo */
         std::vector< std::tuple<glm::dvec3, std::string, glm::vec4> > _labelData;
 
         //Make label render first character right at scene graph node
@@ -112,8 +117,10 @@ namespace openspace {
         for the astronomical objects being rendered.*/
         double _textMaxSize = 100.0;
 
+        glm::vec4 _defaultTextColor = { 0.4, 0.4, 0.4, 1.0 };
+
     };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_DSN___RENDERABLELABEL___H__s
+#endif // __OPENSPACE_MODULE_DSN___RENDERABLEDSNLABELS___H__s

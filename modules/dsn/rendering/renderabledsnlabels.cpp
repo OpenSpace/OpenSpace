@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/dsn/rendering/renderablelabel.h>
+#include <modules/dsn/rendering/renderabledsnlabels.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -37,8 +37,8 @@
 #include <ghoul/glm.h>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableLabel";
-    constexpr const char* ProgramObjectName = "RenderableLabel";
+    constexpr const char* _loggerCat = "RenderableDsnLabels";
+    constexpr const char* ProgramObjectName = "RenderableLabelsProgram";
     constexpr const char* KeyUnitOut = "FadeOutDistanceUnit";
     constexpr const char* KeyUnitIn = "FadeInDistanceUnit";
     constexpr const char* KeyUnitSize = "SizeDistanceUnit";
@@ -131,15 +131,15 @@ namespace {
 
 namespace openspace {
 
-    documentation::Documentation RenderableLabel::Documentation() {
+    documentation::Documentation RenderableDsnLabels::Documentation() {
         using namespace documentation;
         return {
-            "RenderableLabel",
-            "dsn_renderable_renderablelabel",
+            "RenderableDsnLabels",
+            "dsn_renderable_renderabledsnlabels",
             {
                 {
                     "Type",
-                    new StringEqualVerifier("RenderableLabel"),
+                    new StringEqualVerifier("RenderableDsnLabels"),
                     Optional::No
                 },
                 {
@@ -200,12 +200,12 @@ namespace openspace {
         };
     }
 
-    RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
+    RenderableDsnLabels::RenderableDsnLabels(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary)
         , _scaleFactor(ScaleFactorInfo, 1.0f, 0.f, 10.f)
-        , _textColor(
+        , _textColorProperty(
             TextColorInfo,
-            glm::vec4(1.0, 1.0, 1.0, 1.0),
+            _defaultTextColor,
             glm::vec4(0.0),
             glm::vec4(1.0)
         )
@@ -241,7 +241,7 @@ namespace openspace {
         documentation::testSpecificationAndThrow(
             Documentation(),
             dictionary,
-            "RenderableLabel"
+            "RenderableDsnLabels"
         );
 
         // DEBUG:
@@ -271,10 +271,13 @@ namespace openspace {
 
                 if (labelInfoDictionary.hasKey(KeyTextColor)) {
                     labelInfo.textColor = labelInfoDictionary.value<glm::vec4>(KeyTextColor);
-                    _labelHasColor = true;
+                    labelInfo.hasIndividualColor = true;
                 }
-                else if (_labelHasColor == false) {
+                else if (dictionary.hasKeyAndValue<glm::vec4>(TextColorInfo.identifier)) {
                     labelInfo.textColor = dictionary.value<glm::vec4>(KeyTextColor);
+                }
+                else {
+                    labelInfo.textColor = _defaultTextColor;
                 }
 
                 labelInfo.attachedId = labelInfoDictionary.value<std::string>(KeyObjectIdentifier);
@@ -289,9 +292,14 @@ namespace openspace {
             }
             addProperty(_drawLabels);
 
-            _textColor.setViewOption(properties::Property::ViewOptions::Color);
-            addProperty(_textColor);
-            _textColor.onChange([&]() { _textColorIsDirty = true; });
+            if (dictionary.hasKeyAndValue<glm::vec4>(TextColorInfo.identifier)) {
+
+                glm::vec4 labelMapTextColor = dictionary.value<glm::vec4>(KeyTextColor);
+                _textColorProperty.setViewOption(properties::Property::ViewOptions::Color);
+                _textColorProperty.setValue(labelMapTextColor);
+                addProperty(_textColorProperty);
+                _textColorProperty.onChange([&]() { _textColorIsDirty = true; });
+            }
 
             // Can have either a static size or a scaled interval
             if (dictionary.hasKey(LabelSizeInfo.identifier)) {
@@ -362,18 +370,18 @@ namespace openspace {
 
     }
 
-    bool RenderableLabel::isReady() const {
+    bool RenderableDsnLabels::isReady() const {
         return ( !_labelData.empty() );
     }
 
-    void RenderableLabel::initialize() {
+    void RenderableDsnLabels::initialize() {
         bool success = loadData();
         if (!success) {
             throw ghoul::RuntimeError("Error with identifiers for labels");
         }
     }
 
-    void RenderableLabel::initializeGL() {
+    void RenderableDsnLabels::initializeGL() {
 
         if (_hasLabel) {
             if (_font == nullptr) {
@@ -391,7 +399,7 @@ namespace openspace {
     /* To combat precision errors when we approach a node very far out in space
      * we place the label on a set distance from the camera instead of at the node's 
      * actual world position */
-    void RenderableLabel::renderLabels(const RenderData& data,
+    void RenderableDsnLabels::renderLabels(const RenderData& data,
         const glm::dmat4& modelViewProjectionMatrix,
         const glm::dvec3& orthoRight,
         const glm::dvec3& orthoUp)
@@ -401,12 +409,12 @@ namespace openspace {
             _labelData.clear();
             loadLabelDataFromId();
         }
-        for (const std::tuple<glm::dvec3, std::string, glm::vec4>& tuple : _labelData) {
+        for (const std::tuple<glm::dvec3, std::string, glm::vec4>& label : _labelData) {
 
             // The world position of the SceneGraphNode
-            glm::dvec3 nodePos = std::get<0>(tuple);
-            std::string labelText = std::get<1>(tuple);
-            glm::vec4 labelTextColor = std::get<2>(tuple);
+            glm::dvec3 nodePos = std::get<0>(label);
+            std::string labelText = std::get<1>(label);
+            glm::vec4 labelTextColor = std::get<2>(label);
           
             glm::vec4 textColor = labelTextColor;
 
@@ -439,7 +447,7 @@ namespace openspace {
             else {
                 textSize = _labelSize;
             }
-            double labelPosLength = pow(10, _scaleFactor);//(1.0 / _scaleFactor) * 1E10;// length(nodePos) / _fadeInDistanceUnit;// _fadeInDistanceUnit;
+            double labelPosLength = pow(10, _scaleFactor);
             // The direction vector from the camera to the SceneGraphNode
             glm::dvec3 nodeDir = normalize(data.camera.positionVec3() - nodePos);
             // The new label position vector, calculated from the camera
@@ -467,7 +475,18 @@ namespace openspace {
         }
     }
 
-    void RenderableLabel::render(const RenderData& data, RendererTasks&) {
+    void RenderableDsnLabels::updateTextColor()
+    {
+        for (int i = 0; i < labelDataInfo.size(); i++) {
+
+            if (!labelDataInfo.at(i).hasIndividualColor) {
+                labelDataInfo.at(i).textColor = _textColorProperty.value();       
+            }
+        }
+        _textColorIsDirty = false;
+    }
+
+    void RenderableDsnLabels::render(const RenderData& data, RendererTasks&) {
 
         glm::dmat4 modelMatrix =
             glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
@@ -496,6 +515,11 @@ namespace openspace {
             glm::cross(cameraViewDirectionWorld, orthoRight)
         );
 
+        if (_textColorIsDirty) {
+        
+            updateTextColor();
+        }
+
         if (_drawLabels && _hasLabel) {
             renderLabels(
                 data,
@@ -506,7 +530,7 @@ namespace openspace {
         }
     }
 
-    bool RenderableLabel::loadData() {
+    bool RenderableDsnLabels::loadData() {
         bool success = true;
 
         if (_hasLabelIdMap) {
@@ -517,7 +541,7 @@ namespace openspace {
     }
 
 
-    bool RenderableLabel::loadLabelDataFromId() {
+    bool RenderableDsnLabels::loadLabelDataFromId() {
 
         for (int i = 0; i < labelDataInfo.size(); i++) {
             LabelInfo labelinfo = labelDataInfo.at(i);
@@ -542,7 +566,7 @@ namespace openspace {
         return true;
     }
 
-    double RenderableLabel::maxMinNormalize(double value, glm::dvec2 newRange, glm::dvec2 oldRange)
+    double RenderableDsnLabels::maxMinNormalize(double value, glm::dvec2 newRange, glm::dvec2 oldRange)
     {
 
         double newMax = newRange.y;
@@ -564,7 +588,7 @@ namespace openspace {
         return newValue;
     }
 
-    double RenderableLabel::getUnitFactor(std::string unitString)
+    double RenderableDsnLabels::getUnitFactor(std::string unitString)
     {
         double unit = 0.0;
 

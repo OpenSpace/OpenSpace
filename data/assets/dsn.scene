@@ -11,19 +11,16 @@ asset.request('customization/globebrowsing')
 asset.request('scene/digitaluniverse/grids')
 
 -- Spacecrafts
-asset.require('scene/solarsystem/missions/dsn/spacecrafts')
+asset.require('scene/solarsystem/dsn/spacecrafts')
 
---labels 
- --asset.require('scene/digitaluniverse/starlabels')
+--Labels 
 asset.require('scene/solarsystem/dsn/spacecraftslabels')
 
 -- Stations
 asset.require('scene/solarsystem/dsn/stations')
 
 --Signals
---assetHelper.requestAll(asset, 'scene/solarsystem/dsn')
-asset.require('scene/solarsystem/dsn/communicationlines/signals')
-
+asset.require('scene/solarsystem/dsn/signals')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')

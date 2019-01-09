@@ -2,7 +2,7 @@
 ----- The maps in this file are used to keep the SceneGraphNode identifiers for each spacecraft ---
 ----- up to date with the labels and dsn signal data among other things 							---
 ---------------------------------------------------------------------------------------------------
-local SpaceCrafts = asset.require('scene/solarsystem/missions/dsn/spacecrafts')
+local SpaceCrafts = asset.require('scene/solarsystem/dsn/spacecrafts')
 
 -------------------- dsn signal data map --------------------
 local signalDataIdMap = {
