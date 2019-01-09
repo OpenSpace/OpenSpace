@@ -36,99 +36,99 @@ local signalDataIdMap = {
 ------------------------ spacecraft labels -----------------------
 
 local CassiniLabel = {
-	LabelText = "Cassini",
+	LabelText = ".Cassini",
 	ObjectIdentifier = SpaceCrafts.CassiniAsset.spacecraftID
 }
 local ChandraXrayLabel = {
-	LabelText = "Chandra Xray",
+	LabelText = ".Chandra Xray",
 	ObjectIdentifier = SpaceCrafts.ChandraXrayAsset.spacecraftID
 }
 local DawnLabel = {
-	LabelText = "Dawn",
+	LabelText = ".Dawn",
 	ObjectIdentifier = SpaceCrafts.DawnAsset.spacecraftID
 }
 local GaiaLabel = {
-	LabelText = "Gaia",
+	LabelText = ".Gaia",
 	ObjectIdentifier = SpaceCrafts.GaiaAsset.spacecraftID
 }
 local GenesisLabel = {
-	LabelText = "Genesis",
+	LabelText = ".Genesis",
 	ObjectIdentifier = SpaceCrafts.GenesisAsset.spacecraftID
 }
 local Hayabusa2Label = {
-	LabelText = "Hayabusa 2",
+	LabelText = ".Hayabusa 2",
 	ObjectIdentifier = SpaceCrafts.Hayabusa2Asset.spacecraftID
 }
 local IceLabel = {
-	LabelText = "Ice",
+	LabelText = ".Ice",
 	ObjectIdentifier = SpaceCrafts.IceAsset.spacecraftID
 }
 local JunoLabel = {
-	LabelText = "Juno",
+	LabelText = ".Juno",
 	ObjectIdentifier = SpaceCrafts.JunoAsset.spacecraftID
 }
 local KeplerLabel = {
-	LabelText = "Kepler",
+	LabelText = ".Kepler",
 	ObjectIdentifier = SpaceCrafts.KeplerAsset.spacecraftID
 }
 local MarsRecOrbLabel = {
-	LabelText = "Mars Recon Orbiter",
+	LabelText = ".Mars Recon Orbiter",
 	ObjectIdentifier = SpaceCrafts.MarsRecOrbAsset.spacecraftID
 }
 local MarsOdysseyLabel = {
-	LabelText = "Mars Odyssey",
+	LabelText = ".Mars Odyssey",
 	ObjectIdentifier = SpaceCrafts.MarsOdysseyAsset.spacecraftID
 }
 local MessengerLabel = {
-	LabelText = "Messenger",
+	LabelText = ".Messenger",
 	ObjectIdentifier = SpaceCrafts.MessengerAsset.spacecraftID
 }
 local NewHorizonsLabel = {
-	LabelText = "New Horizons",
+	LabelText = ".New Horizons",
 	ObjectIdentifier = SpaceCrafts.NewHorizonsAsset.spacecraftID
 }
 local SohoLabel = {
-	LabelText = "Solar & Heliospheric Observatory",
+	LabelText = ".Solar & Heliospheric Observatory",
 	ObjectIdentifier = SpaceCrafts.SohoAsset.spacecraftID
 }
 local SpitzerLabel = {
-	LabelText = "Spitzer",
+	LabelText = ".Spitzer",
 	ObjectIdentifier = SpaceCrafts.SpitzerAsset.spacecraftID
 }
 local StereoALabel = {
-	LabelText = "Stereo A",
+	LabelText = ".Stereo A",
 	ObjectIdentifier = SpaceCrafts.StereoAAsset.spacecraftID
 }
 local StereoBLabel = {
-	LabelText = "Stereo B",
+	LabelText = ".Stereo B",
 	ObjectIdentifier = SpaceCrafts.StereoBAsset.spacecraftID
 }
 local TessLabel = {
-	LabelText = "Transit Exoplanet Survey Satellite",
+	LabelText = ".Transit Exoplanet Survey Satellite",
 	ObjectIdentifier = SpaceCrafts.TessAsset.spacecraftID
 }
 local ThemisBLabel = {
-	LabelText = "Themis B",
+	LabelText = ".Themis B",
 	ObjectIdentifier = SpaceCrafts.ThemisBAsset.spacecraftID
 }
 local ThemisCLabel = {
-	LabelText = "Themis C",
+	LabelText = ".Themis C",
 	ObjectIdentifier = SpaceCrafts.ThemisCAsset.spacecraftID
 }
 local TraceGasOrbiterLabel = {
-	LabelText = "Trace Gas Orbiter",
+	LabelText = ".Trace Gas Orbiter",
 	ObjectIdentifier = SpaceCrafts.TraceGasOrbiterAsset.spacecraftID
 }
 local Voyager1Label = {
-	LabelText = "Voyager 1",
+	LabelText = ".Voyager 1",
 	ObjectIdentifier = SpaceCrafts.Voyager1Asset.spacecraftID
 }
 local Voyager2Label = {
-	LabelText = "Voyager 2",
+	LabelText = ".Voyager 2",
 	ObjectIdentifier = SpaceCrafts.Voyager2Asset.spacecraftID
 }
 local WindLabel = {
-	LabelText = "Wind",
+	LabelText = ".Wind",
 	ObjectIdentifier = SpaceCrafts.WindAsset.spacecraftID
 }
 

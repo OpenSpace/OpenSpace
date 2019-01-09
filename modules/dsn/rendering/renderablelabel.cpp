@@ -461,7 +461,8 @@ namespace openspace {
                 orthoUp,
                 data.camera.positionVec3(),
                 data.camera.lookUpVectorWorldSpace(),
-                _renderOption.value()
+                _renderOption.value(),
+                glm::vec2(_offset)
             );
         }
     }

@@ -99,6 +99,8 @@ namespace openspace {
         std::vector<LabelInfo> labelDataInfo;
         std::vector< std::tuple<glm::dvec3, std::string, glm::vec4> > _labelData;
 
+        //Make label render first character right at scene graph node
+        glm::vec2 _offset = { -20.f, -5.f };
         glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 
         double getUnitFactor(std::string unitString);
