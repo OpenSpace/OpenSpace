@@ -2,6 +2,11 @@ local assetHelper = asset.require('util/asset_helper')
 
 assetHelper.registerDashboardItems(asset, {
     {
+        Type = "DashboardItemDate",
+        Identifier = "Date",
+        GuiName = "Date"
+    },
+    {
         Type = "DashboardItemSimulationIncrement",
         Identifier = "SimulationIncrement",
         GuiName = "Simulation Increment"
