@@ -45,6 +45,7 @@ namespace openspace {
            mutable double lightTravelTime; //Downlink light time travel time in seconds
            mutable double lightTravelHours = 1; //Downlink light time travel time in seconds
        };
+       mutable bool isReady = false;
 
        //Used to determine if we need to search for new data
        mutable int prevFileIndex;

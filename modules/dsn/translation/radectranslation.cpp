@@ -141,24 +141,29 @@ glm::dvec3 RadecTranslation::radecToCartesianCoordinates(glm::vec3 pos) const {
 }
 
 glm::dvec3 RadecTranslation::position(const UpdateData& data) const{
-    double time = data.time.j2000Seconds();
 
+    double time = data.time.j2000Seconds();
     const bool haveDataForTime = (time >= _firstTimeInData) && (time < _lastTimeInData);
 
     if (haveDataForTime) {
         glm::dvec3 radecPos = radecManager.getPosForTime(time);
-        _position = radecToCartesianCoordinates(radecPos);
+        if (radecManager.isReady) {
+            _position = radecToCartesianCoordinates(radecPos);
+        }
     }
     else if(time < _firstTimeInData){
         glm::dvec3 radecPos = radecManager.getPosForTime(_firstTimeInData);
-        _position = radecToCartesianCoordinates(radecPos);
+        if (radecManager.isReady) {
+            _position = radecToCartesianCoordinates(radecPos);
+        }
     }
     else { 
         glm::dvec3 radecPos = radecManager.getPosForTime(_lastTimeInData);
-        _position = radecToCartesianCoordinates(radecPos);
+        if (radecManager.isReady) {
+            _position = radecToCartesianCoordinates(radecPos);
+        }
     }
-
     return _position;
-}
 
+}
 } // namespace openspace

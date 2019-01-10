@@ -111,8 +111,8 @@ namespace openspace {
                        LERROR(fmt::format("{}: Error in json object number {} while reading file '{}'", objectIdentifier, objectCounter, filename));
                    }
                    RadecManager::positions.push_back(position); 
-
                }
+               isReady = true;
                return true;
        }
        else return false;
