@@ -22,69 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___RENDERER___H__
-#define __OPENSPACE_CORE___RENDERER___H__
+#version __CONTEXT__
 
-#include <ghoul/glm.h>
-#include <vector>
+void main(void)
+{
+    const vec4 vertices[] = vec4[](vec4(-1.0, -1.0, 0.5, 1.0),
+                                   vec4( 1.0, -1.0, 0.5, 1.0),
+                                   vec4(-1.0,  1.0, 0.5, 1.0),
+                                   vec4( 1.0,  1.0, 0.5, 1.0));
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
-
-namespace openspace {
-
-class RenderableVolume;
-class Camera;
-class Scene;
-
-class Renderer {
-public:
-    virtual ~Renderer() = default;
-
-    virtual void initialize() = 0;
-    virtual void deinitialize() = 0;
-
-    virtual void setResolution(glm::ivec2 res) = 0;
-    virtual void setNAaSamples(int nAaSamples) = 0;
-    virtual void setHDRExposure(float hdrExposure) = 0;
-    virtual void setHDRBackground(float hdrBackground) = 0;
-    virtual void setGamma(float gamma) = 0;
-    virtual void setMaxWhite(float maxWhite) = 0;
-    virtual void setToneMapOperator(int tmOp) = 0;
-    virtual void setBloomThreMin(float minV) = 0;
-    virtual void setBloomThreMax(float maxV) = 0;
-    virtual void setBloomOrigFactor(float origFactor) = 0;
-    virtual void setBloomNewFactor(float newFactor) = 0;
-
-    virtual float hdrBackground() const = 0;
-    virtual int nAaSamples() const = 0;
-    virtual const std::vector<double>& mSSAPattern() const = 0;
-
-    /**
-    * Set raycasting uniforms on the program object, and setup raycasting.
-    */
-    virtual void preRaycast(ghoul::opengl::ProgramObject& /*programObject*/) {};
-
-    /**
-    * Tear down raycasting for the specified program object.
-    */
-    virtual void postRaycast(ghoul::opengl::ProgramObject& /*programObject*/) {};
-
-
-    virtual void update() = 0;
-
-    virtual void render(Scene* scene, Camera* camera, float blackoutFactor) = 0;
-    /**
-     * Update render data
-     * Responsible for calling renderEngine::setRenderData
-     */
-    virtual void updateRendererData() = 0;
-};
-
-} // openspace
-
-#endif // __OPENSPACE_CORE___RENDERER___H__
+    gl_Position = vertices[gl_VertexID];
+}

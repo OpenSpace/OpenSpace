@@ -28,11 +28,29 @@
 layout(location = 0) out vec4 _out_color_;
 layout(location = 1) out vec4 gPosition;
 layout(location = 2) out vec4 gNormal;
+layout(location = 3) out vec4 filterBuffer;
 
 void main() {
      Fragment f   = getFragment();
      _out_color_  = f.color;
      gPosition    = f.gPosition;
      gNormal      = f.gNormal;
+     
+     bool automaticBloom = false;
+     if (automaticBloom) {
+        // Extract luminance
+        float Y = dot(f.color.rgb, vec3(0.299, 0.587, 0.144));
+
+        // Apply Bloom on the bloom threshold range values
+        //vec4 bColor = f.color * 4.0 * smoothstep(bloom_thresh_min, bloom_thresh_max, Y);
+        //filterBuffer = bColor
+        filterBuffer = vec4(f.filterFlag);
+     } else {
+        if (f.filterFlag == 1)
+            filterBuffer = f.color;
+        else
+            filterBuffer = vec4(0);
+     }
+     
      gl_FragDepth = normalizeFloat(f.depth);
 }

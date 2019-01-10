@@ -195,6 +195,43 @@ namespace {
         "Gamma, is the nonlinear operation used to encode and decode luminance or "
         "tristimulus values in the image."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo MaxWhiteInfo = {
+        "MaxWhite",
+        "Max White Value",
+        "Max value for white color [0.01-10.0] to be used by tone mapping operators." 
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BloomThreshouldMinInfo = {
+        "BloomThreshouldMin",
+        "Bloom Threshould Min Value",
+        "Min value a pixel must have to be bloomed."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BloomThreshouldMaxInfo = {
+        "BloomThreshouldMax",
+        "Bloom Threshould Max Value",
+        "Max value a pixel must have to be bloomed."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BloomOrigColorFactorInfo = {
+        "BloomOrigColorFactor",
+        "Bloom Original Color Factor Value",
+        "Bloom Original Color Factor Value."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BloomNewColorFactorInfo = {
+        "BloomNewColorFactor",
+        "Bloom New Color Factor Value",
+        "Bloom New Color Factor Value."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ToneMapOperatorInfo = {
+        "ToneMapOperator",
+        "ToneMap Operator",
+        "ToneMap Operator is the method used to tranform the pixels using a HDR to"
+        "pixels using a LDR distribution."
+    };
 } // namespace
 
 
@@ -216,6 +253,12 @@ RenderEngine::RenderEngine()
     , _hdrExposure(HDRExposureInfo, 0.4f, 0.01f, 10.0f)
     , _hdrBackground(BackgroundExposureInfo, 2.8f, 0.01f, 10.0f)
     , _gamma(GammaInfo, 2.2f, 0.01f, 10.0f)
+    , _bloomThreshouldMin(BloomThreshouldMinInfo, 0.5, 0.0, 100.0)
+    , _bloomThreshouldMax(BloomThreshouldMaxInfo, 1.0, 0.0, 100.0)
+    , _bloomOrigColorFactor(BloomOrigColorFactorInfo, 1.0, 0.0, 100.0)
+    , _bloomNewColorFactor(BloomNewColorFactorInfo, 1.0, 0.0, 100.0)
+    , _maxWhite(MaxWhiteInfo, 4.f, 0.001f, 10000.0f)
+    , _toneMapOperator(ToneMapOperatorInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     _doPerformanceMeasurements.onChange([this](){
         global::performanceManager.setEnabled(_doPerformanceMeasurements);
@@ -254,6 +297,62 @@ RenderEngine::RenderEngine()
         }
     });
     addProperty(_gamma);
+
+    _maxWhite.onChange([this]() {
+        if (_renderer) {
+            _renderer->setMaxWhite(_maxWhite);
+        }
+    });
+    addProperty(_maxWhite);
+
+    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::EXPONENTIAL), "Exponential");
+    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::LINEAR), "Linear");
+    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::SIMPLE_REINHARD), "Simple Reinhard");
+    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::LUM_BASED_REINHARD), "Lum based Reinhard");
+    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::WHITE_PRESERVING), "White Preserving");
+    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::ROM_BIN_DA_HOUSE), "RomBin da House");
+    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::FILMIC), "Filmic");
+    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::UNCHARTED), "Uncharted 2");
+    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::COSTA), "Costa");
+    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::ADAPTIVE), "Adaptive");
+    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::GLOBAL), "Global");
+    _toneMapOperator.set(8);
+
+    _toneMapOperator.onChange([this]() {
+        if (_renderer) {
+            _renderer->setToneMapOperator(_toneMapOperator);
+        }
+    });
+
+    addProperty(_toneMapOperator);
+
+    addProperty(_bloomThreshouldMin);
+    _bloomThreshouldMin.onChange([this]() {
+        if (_renderer) {
+            _renderer->setBloomThreMin(_bloomThreshouldMin);
+        }
+    });
+
+    addProperty(_bloomThreshouldMax);
+    _bloomThreshouldMax.onChange([this]() {
+        if (_renderer) {
+            _renderer->setBloomThreMax(_bloomThreshouldMax);
+        }
+    });
+
+    addProperty(_bloomOrigColorFactor);
+    _bloomOrigColorFactor.onChange([this]() {
+        if (_renderer) {
+            _renderer->setBloomOrigFactor(_bloomOrigColorFactor);
+        }
+    });
+
+    addProperty(_bloomNewColorFactor);
+    _bloomNewColorFactor.onChange([this]() {
+        if (_renderer) {
+            _renderer->setBloomNewFactor(_bloomNewColorFactor);
+        }
+    });
 
     addProperty(_applyWarping);
 

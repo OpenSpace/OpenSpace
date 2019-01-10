@@ -64,6 +64,20 @@ public:
         Invalid
     };
 
+    enum class ToneMapOperators {
+        EXPONENTIAL = 0,
+        LINEAR,
+        SIMPLE_REINHARD,
+        LUM_BASED_REINHARD,
+        WHITE_PRESERVING,
+        ROM_BIN_DA_HOUSE,
+        FILMIC,
+        UNCHARTED,
+        COSTA,
+        ADAPTIVE,
+        GLOBAL
+    };
+
     RenderEngine();
     ~RenderEngine();
 
@@ -193,6 +207,12 @@ private:
     properties::FloatProperty _hdrExposure;
     properties::FloatProperty _hdrBackground;
     properties::FloatProperty _gamma;
+    properties::FloatProperty _maxWhite;
+    properties::FloatProperty _bloomThreshouldMin;
+    properties::FloatProperty _bloomThreshouldMax;
+    properties::FloatProperty _bloomOrigColorFactor;
+    properties::FloatProperty _bloomNewColorFactor;
+    properties::OptionProperty _toneMapOperator;
 
     uint64_t _frameNumber = 0;
 

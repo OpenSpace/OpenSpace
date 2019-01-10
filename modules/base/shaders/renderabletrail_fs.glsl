@@ -71,5 +71,8 @@ Fragment getFragment() {
     // There is no normal here
     frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
 
+    // Bloom filter
+    frag.filterFlag = 1;
+
     return frag;
 }

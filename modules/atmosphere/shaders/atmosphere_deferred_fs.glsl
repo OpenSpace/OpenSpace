@@ -633,7 +633,8 @@ void main() {
                 
                 if (position.xyz != vec3(0.0) && (pixelDepth < offset)) {
                     // ATM Occluded - Something in fron of ATM.
-                    atmosphereFinalColor += vec4(HDR(color.xyz * backgroundConstant, atmExposure), color.a);                  
+                    //atmosphereFinalColor += vec4(HDR(color.xyz * backgroundConstant, atmExposure), color.a);                  
+                    atmosphereFinalColor += vec4(color.xyz * backgroundConstant, color.a);                  
                 } else {
                     // Following paper nomenclature      
                     double t = offset;                  
@@ -682,13 +683,15 @@ void main() {
                     } 
                     
                     // Final Color of ATM plus terrain:
-                    vec4 finalRadiance = vec4(HDR(inscatterColor + groundColorV + sunColorV, atmExposure), 1.0);
-                    
+                    //vec4 finalRadiance = vec4(HDR(inscatterColor + groundColorV + sunColorV, atmExposure), 1.0);
+                    vec4 finalRadiance = vec4(inscatterColor + groundColorV + sunColorV, 1.0);
+
                     atmosphereFinalColor += finalRadiance;
                 }
             } 
             else { // no intersection
-                atmosphereFinalColor += vec4(HDR(color.xyz * backgroundConstant, atmExposure), color.a);
+                //atmosphereFinalColor += vec4(HDR(color.xyz * backgroundConstant, atmExposure), color.a);
+                atmosphereFinalColor += vec4(color.xyz * backgroundConstant, color.a);
             }           
         }  
 
@@ -704,7 +707,8 @@ void main() {
                 bColor += texelFetch(mainColorTexture, fragCoords, f);
             }
             bColor /= float(nAaSamples);
-            renderTarget = vec4(HDR(bColor.xyz * backgroundConstant, atmExposure), bColor.a);
+            //renderTarget = vec4(HDR(bColor.xyz * backgroundConstant, atmExposure), bColor.a);
+            renderTarget = vec4(bColor.xyz * backgroundConstant, bColor.a);
         } 
         else {
             discard;

@@ -22,69 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___RENDERER___H__
-#define __OPENSPACE_CORE___RENDERER___H__
+#version __CONTEXT__
 
-#include <ghoul/glm.h>
-#include <vector>
+layout (location = 0) out vec4 finalColor;
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+uniform float bloomOrigFactor;
+uniform float bloomNewFactor;
+uniform sampler2D renderedImage;
+uniform sampler2D bloomImage;
 
-namespace openspace {
+void main(void)
+{
+    vec4 color = vec4(0.0);
 
-class RenderableVolume;
-class Camera;
-class Scene;
+    color += texelFetch(renderedImage, ivec2(gl_FragCoord.xy), 0) * bloomOrigFactor;
+    float alpha = color.a;
+    color += texelFetch(bloomImage, ivec2(gl_FragCoord.xy), 0) * bloomNewFactor;
 
-class Renderer {
-public:
-    virtual ~Renderer() = default;
-
-    virtual void initialize() = 0;
-    virtual void deinitialize() = 0;
-
-    virtual void setResolution(glm::ivec2 res) = 0;
-    virtual void setNAaSamples(int nAaSamples) = 0;
-    virtual void setHDRExposure(float hdrExposure) = 0;
-    virtual void setHDRBackground(float hdrBackground) = 0;
-    virtual void setGamma(float gamma) = 0;
-    virtual void setMaxWhite(float maxWhite) = 0;
-    virtual void setToneMapOperator(int tmOp) = 0;
-    virtual void setBloomThreMin(float minV) = 0;
-    virtual void setBloomThreMax(float maxV) = 0;
-    virtual void setBloomOrigFactor(float origFactor) = 0;
-    virtual void setBloomNewFactor(float newFactor) = 0;
-
-    virtual float hdrBackground() const = 0;
-    virtual int nAaSamples() const = 0;
-    virtual const std::vector<double>& mSSAPattern() const = 0;
-
-    /**
-    * Set raycasting uniforms on the program object, and setup raycasting.
-    */
-    virtual void preRaycast(ghoul::opengl::ProgramObject& /*programObject*/) {};
-
-    /**
-    * Tear down raycasting for the specified program object.
-    */
-    virtual void postRaycast(ghoul::opengl::ProgramObject& /*programObject*/) {};
-
-
-    virtual void update() = 0;
-
-    virtual void render(Scene* scene, Camera* camera, float blackoutFactor) = 0;
-    /**
-     * Update render data
-     * Responsible for calling renderEngine::setRenderData
-     */
-    virtual void updateRendererData() = 0;
-};
-
-} // openspace
-
-#endif // __OPENSPACE_CORE___RENDERER___H__
+    finalColor = vec4(color.rgb, alpha);
+}

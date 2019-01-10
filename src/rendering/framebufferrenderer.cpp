@@ -55,6 +55,16 @@ namespace {
         "mainColorTexture", "blackoutFactor", "nAaSamples"
     };
 
+    constexpr const std::array<const char*, 8> HDRUniformNames = {
+        "deferredResultsTexture", "blackoutFactor", "backgroundConstant", 
+        "backgroundExposure", "gamma", "toneMapOperator", "aveLum", "maxWhite"
+    };
+
+    constexpr const std::array<const char*, 6> BLoomUniformNames = {
+        "renderedImage", "bloomImage", "bloomThresholdMin", "bloomThresholdMax", 
+        "bloomOrigFactor", "bloomNewFactor"
+    };
+
     constexpr const char* ExitFragmentShaderPath =
         "${SHADERS}/framebuffer/exitframebuffer.frag";
     constexpr const char* RaycastFragmentShaderPath =
@@ -127,6 +137,7 @@ void FramebufferRenderer::initialize() {
     // Main framebuffer
     glGenTextures(1, &_mainColorTexture);
     glGenTextures(1, &_mainDepthTexture);
+    glGenTextures(1, &_mainFilterTexture);
     glGenFramebuffers(1, &_mainFramebuffer);
 
     // Exit framebuffer
@@ -134,16 +145,27 @@ void FramebufferRenderer::initialize() {
     glGenTextures(1, &_exitDepthTexture);
     glGenFramebuffers(1, &_exitFramebuffer);
 
-    // Deferred framebuffer
-    glGenTextures(1, &_deferredColorTexture);
+    // Deferred textures
     glGenTextures(1, &_mainPositionTexture);
     glGenTextures(1, &_mainNormalTexture);
-    glGenFramebuffers(1, &_deferredFramebuffer);
 
+    // HDR / Filtering Framebuffer
+    glGenFramebuffers(1, &_hdrFilteringFramebuffer);
+    glGenTextures(1, &_hdrFilteringTexture);
+
+    // Compute Average Luminosity
+    glGenTextures(1, &_computeAveLumTexture);
+    glGenFramebuffers(1, &_computeAveLumFBO);
+
+    // Bloom Filter
+    glGenFramebuffers(3, _bloomFilterFBO);
+    glGenTextures(3, _bloomTexture);
+    
     updateResolution();
     updateRendererData();
-    updateRaycastData();
+    updateRaycastData();   
 
+    // Builds Main Framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
     glFramebufferTexture2D(
         GL_FRAMEBUFFER,
@@ -152,7 +174,6 @@ void FramebufferRenderer::initialize() {
         _mainColorTexture,
         0
     );
-    // G-buffer
     glFramebufferTexture2D(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT1,
@@ -169,6 +190,13 @@ void FramebufferRenderer::initialize() {
     );
     glFramebufferTexture2D(
         GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT3,
+        GL_TEXTURE_2D_MULTISAMPLE,
+        _mainFilterTexture,
+        0
+    );
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
         GL_DEPTH_ATTACHMENT,
         GL_TEXTURE_2D_MULTISAMPLE,
         _mainDepthTexture,
@@ -180,6 +208,7 @@ void FramebufferRenderer::initialize() {
         LERROR("Main framebuffer is not complete");
     }
 
+    // Builds Exit Framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, _exitFramebuffer);
     glFramebufferTexture2D(
         GL_FRAMEBUFFER,
@@ -201,23 +230,59 @@ void FramebufferRenderer::initialize() {
         LERROR("Exit framebuffer is not complete");
     }
 
-    glBindFramebuffer(GL_FRAMEBUFFER, _deferredFramebuffer);
+    // Builds HDR/Filtering Framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, _hdrFilteringFramebuffer);
     glFramebufferTexture2D(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D,
-        _deferredColorTexture,
+        _hdrFilteringTexture,
         0
     );
 
     status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
-        LERROR("Deferred framebuffer is not complete");
+        LERROR("HDR/Filtering framebuffer is not complete");
+    }
+
+    // Buids Average Lum FBO
+    glBindFramebuffer(GL_FRAMEBUFFER, _computeAveLumFBO);
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D,
+        _computeAveLumTexture,
+        0
+    );
+
+    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LERROR("Average Luminosity framebuffer is not complete");
+    }
+
+    // Builds Bloom Filter FBOs
+    //const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+    const GLenum buffers[] = { GL_COLOR_ATTACHMENT0 };
+    for (int i = 0; i < 3; i++)
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, _bloomFilterFBO[i]);
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _bloomTexture[i], 0);
+        glDrawBuffers(1, buffers);
+    }
+
+    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LERROR("Bloom framebuffer is not complete");
     }
 
     // JCC: Moved to here to avoid NVidia: "Program/shader state performance warning"
-    updateHDRData();
+    // Builds HDR and Filtering programs
+    updateHDRAndFiltering();
+    updateAveLum();
+    updateBloomConfig();
+    // Builds deferred casters programs
     updateDeferredcastData();
+
     _dirtyMsaaSamplingPattern = true;
 
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
@@ -228,8 +293,21 @@ void FramebufferRenderer::initialize() {
         absPath("${SHADERS}/framebuffer/resolveframebuffer.frag")
     );
 
-    ghoul::opengl::updateUniformLocations(*_resolveProgram, _uniformCache, UniformNames);
-
+    ghoul::opengl::updateUniformLocations(
+        *_resolveProgram, 
+        _uniformCache, 
+        UniformNames
+    );
+    ghoul::opengl::updateUniformLocations(
+        *_hdrFilteringProgram, 
+        _hdrUniformCache, 
+        HDRUniformNames
+    );
+    ghoul::opengl::updateUniformLocations(
+        *_bloomResolveProgram, 
+        _bloomUniformCache,
+        BLoomUniformNames
+    );
     global::raycasterManager.addListener(*this);
     global::deferredcasterManager.addListener(*this);
 }
@@ -239,15 +317,18 @@ void FramebufferRenderer::deinitialize() {
 
     glDeleteFramebuffers(1, &_mainFramebuffer);
     glDeleteFramebuffers(1, &_exitFramebuffer);
-    glDeleteFramebuffers(1, &_deferredFramebuffer);
+    glDeleteFramebuffers(1, &_hdrFilteringFramebuffer);
+    glDeleteFramebuffers(1, &_computeAveLumFBO);
+    glDeleteFramebuffers(3, _bloomFilterFBO);
 
     glDeleteTextures(1, &_mainColorTexture);
     glDeleteTextures(1, &_mainDepthTexture);
 
-    // DEBUG: deferred g-buffer
-    glDeleteTextures(1, &_deferredColorTexture);
+    glDeleteTextures(1, &_hdrFilteringTexture);
     glDeleteTextures(1, &_mainPositionTexture);
     glDeleteTextures(1, &_mainNormalTexture);
+    glDeleteTextures(1, &_computeAveLumTexture);
+    glDeleteTextures(3, _bloomTexture);
 
     glDeleteTextures(1, &_exitColorTexture);
     glDeleteTextures(1, &_exitDepthTexture);
@@ -271,6 +352,155 @@ void FramebufferRenderer::deferredcastersChanged(Deferredcaster&,
     _dirtyDeferredcastData = true;
 }
 
+float FramebufferRenderer::computeBufferAveLuminance() {
+    unsigned int texDimension = _resolution.x * _resolution.y;
+    
+    std::unique_ptr<GLfloat[]> texData(new GLfloat[texDimension * 3]);
+
+    ghoul::opengl::TextureUnit hdrTextureUnit;
+    hdrTextureUnit.activate();    
+    glBindTexture(GL_TEXTURE_2D, _hdrFilteringTexture);
+    
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, texData.get());
+    
+    float sum = 0.0f;
+
+    for (unsigned int i = 0; i < texDimension; i++) {
+        float lum = glm::dot(
+            glm::vec3(texData[i * 3 + 0], texData[i * 3 + 1], texData[i * 3 + 2]),
+            glm::vec3(0.2126f, 0.7152f, 0.0722f)
+        );
+        sum += logf(lum + 0.00001f);
+    }
+
+    return expf(sum / texDimension);
+}
+
+float FramebufferRenderer::computeBufferAveLuminanceGPU() {
+    // Capture standard fbo
+    GLint defaultFbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _computeAveLumFBO);
+    GLenum textureBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+    glDrawBuffers(1, textureBuffers);
+    glClear(GL_COLOR_BUFFER_BIT);
+    
+    glViewport(0, 0, 1, 1);
+
+    _aveLumProgram->activate();
+
+    //float averageLuminaceInFB = computeBufferAveLuminance();
+    //std::cout << "=== Average Lum on CPU = " << averageLuminaceInFB << " ===" << std::endl;
+
+    ghoul::opengl::TextureUnit hdrTextureUnit;
+    hdrTextureUnit.activate();
+    glBindTexture(GL_TEXTURE_2D, _hdrFilteringTexture);
+    _aveLumProgram->setUniform("hdrTexture", hdrTextureUnit);
+    _aveLumProgram->setUniform("bufferWidth", _resolution.x);
+    _aveLumProgram->setUniform("bufferHeight", _resolution.y);
+    
+    glBindVertexArray(_screenQuad);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+
+    _aveLumProgram->deactivate();
+
+    std::vector<double> gpuAveLum;
+    saveTextureToMemory(GL_COLOR_ATTACHMENT0, 1, 1, gpuAveLum);
+
+    //std::cout << "=== Average Lum on GPU = " << gpuAveLum[0] << " ===" << std::endl;
+
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+    glViewport(0, 0, _resolution.x, _resolution.y);
+
+    return static_cast<float>(gpuAveLum[0]);
+}
+
+void FramebufferRenderer::applyBloomFilter() {
+    GLint defaultFbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
+
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _bloomFilterFBO[0]);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glViewport(0, 0, _resolution.y, _resolution.x);
+    glBindVertexArray(vao);
+
+    _bloomProgram->activate();    
+
+    {
+        ghoul::opengl::TextureUnit filterTextureUnit;
+        filterTextureUnit.activate();
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainFilterTexture);
+        _bloomProgram->setUniform("pass", 1);
+        _bloomProgram->setUniform("filterImage", filterTextureUnit);
+        ghoul::opengl::TextureUnit dummyTextureUnit;
+        dummyTextureUnit.activate();
+        glBindTexture(GL_TEXTURE_2D, _bloomTexture[0]);
+        _bloomProgram->setUniform("filterFirstPass", dummyTextureUnit);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    }
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, _bloomFilterFBO[1]);
+    glViewport(0, 0, _resolution.x, _resolution.y);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glBindVertexArray(vao);
+
+    {        
+        ghoul::opengl::TextureUnit filterTextureUnit;
+        filterTextureUnit.activate();
+        glBindTexture(GL_TEXTURE_2D, _bloomTexture[0]);
+        _bloomProgram->setUniform("pass", 2);
+        _bloomProgram->setUniform("filterFirstPass", filterTextureUnit);
+        ghoul::opengl::TextureUnit dummyTextureUnit;
+        _bloomProgram->setUniform("filterImage", dummyTextureUnit);
+        
+
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    }
+
+    _bloomProgram->deactivate();
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _bloomFilterFBO[2]);
+    glViewport(0, 0, _resolution.x, _resolution.y);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    _bloomResolveProgram->activate();
+
+    {
+        ghoul::opengl::TextureUnit deferredResultsTextureUnit;
+        deferredResultsTextureUnit.activate();
+        glBindTexture(GL_TEXTURE_2D, _hdrFilteringTexture);
+        _bloomResolveProgram->setUniform(
+            _bloomUniformCache.renderedImage, 
+            deferredResultsTextureUnit
+        );
+
+        ghoul::opengl::TextureUnit bloomTextureUnit;
+        bloomTextureUnit.activate();
+        glBindTexture(GL_TEXTURE_2D, _bloomTexture[1]);
+        _bloomResolveProgram->setUniform(_bloomUniformCache.bloomImage, bloomTextureUnit);
+        
+        _bloomResolveProgram->setUniform(
+            _bloomUniformCache.bloomOrigFactor, 
+            _bloomOrigFactor
+        );
+        _bloomResolveProgram->setUniform(
+            _bloomUniformCache.bloomNewFactor, 
+            _bloomNewFactor
+        );
+
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    }
+
+    _bloomResolveProgram->deactivate();    
+
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+}
+
 void FramebufferRenderer::update() {
     if (_dirtyMsaaSamplingPattern) {
         updateMSAASamplingPattern();
@@ -289,12 +519,6 @@ void FramebufferRenderer::update() {
         updateDeferredcastData();
     }
 
-    // If the resolve dictionary changed (or a file changed on disk)
-    // then rebuild the resolve program.
-    if (_hdrBackGroundProgram && _hdrBackGroundProgram->isDirty()) {
-        _hdrBackGroundProgram->rebuildFromFile();
-    }
-
     if (_resolveProgram->isDirty()) {
         _resolveProgram->rebuildFromFile();
 
@@ -302,6 +526,34 @@ void FramebufferRenderer::update() {
             *_resolveProgram,
             _uniformCache,
             UniformNames
+        );
+
+    }
+    
+    if (_aveLumProgram->isDirty()) {
+        _aveLumProgram->rebuildFromFile();
+    }
+
+    if (_bloomProgram->isDirty()) {
+        _bloomProgram->rebuildFromFile();
+    }
+
+    if (_bloomResolveProgram->isDirty()) {
+        _bloomResolveProgram->rebuildFromFile();
+        ghoul::opengl::updateUniformLocations(
+            *_bloomResolveProgram, 
+            _bloomUniformCache,
+            BLoomUniformNames
+        );
+    }
+
+    if (_hdrFilteringProgram->isDirty()) {
+        _hdrFilteringProgram->rebuildFromFile();
+
+        ghoul::opengl::updateUniformLocations(
+            *_hdrFilteringProgram,
+            _hdrUniformCache,
+            HDRUniformNames
         );
     }
 
@@ -362,14 +614,25 @@ void FramebufferRenderer::updateResolution() {
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
-        GL_RGBA,
+        GL_RGBA32F,
         _resolution.x,
         _resolution.y,
         true
     );
 
-    // G-buffer
-    glBindTexture(GL_TEXTURE_2D, _deferredColorTexture);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainFilterTexture);
+
+    glTexImage2DMultisample(
+        GL_TEXTURE_2D_MULTISAMPLE,
+        _nAaSamples,
+        GL_RGBA32F,
+        _resolution.x,
+        _resolution.y,
+        true
+    );
+
+    // HDR / Filtering
+    glBindTexture(GL_TEXTURE_2D, _hdrFilteringTexture);
 
     glTexImage2D(
         GL_TEXTURE_2D,
@@ -385,6 +648,36 @@ void FramebufferRenderer::updateResolution() {
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    // Average Luminosity Computation Texture
+    glBindTexture(GL_TEXTURE_2D, _computeAveLumTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA32F,
+        1,
+        1,
+        0,
+        GL_RGBA,
+        GL_FLOAT,
+        nullptr
+    );
+
+    // Bloom Filter
+    for (int i = 0; i < 3; i++)
+    {
+        glBindTexture(GL_TEXTURE_2D, _bloomTexture[i]);
+        glTexStorage2D(
+            GL_TEXTURE_2D, 
+            1, 
+            GL_RGBA16F, 
+            i ? _resolution.x : _resolution.y, 
+            i ? _resolution.y : _resolution.x
+        );
+    }
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainPositionTexture);
 
@@ -422,7 +715,7 @@ void FramebufferRenderer::updateResolution() {
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
-        GL_RGBA16,
+        GL_RGBA16F,
         _resolution.x,
         _resolution.y,
         0,
@@ -577,15 +870,45 @@ void FramebufferRenderer::updateDeferredcastData() {
     _dirtyDeferredcastData = false;
 }
 
-void FramebufferRenderer::updateHDRData() {
-    _hdrBackGroundProgram = ghoul::opengl::ProgramObject::Build(
-        "HDR Background Control",
-        absPath("${SHADERS}/framebuffer/hdrBackground.vert"),
-        absPath("${SHADERS}/framebuffer/hdrBackground.frag")
+void FramebufferRenderer::updateAveLum() {
+    _aveLumProgram = ghoul::opengl::ProgramObject::Build(
+        "Computes Average Luminace on GPU",
+        absPath("${SHADERS}/framebuffer/computeAveLum.vert"),
+        absPath("${SHADERS}/framebuffer/computeAveLum.frag")
     );
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    _hdrBackGroundProgram->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
-    _hdrBackGroundProgram->setIgnoreUniformLocationError(IgnoreError::Yes);
+    //_aveLumProgram->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+    //_aveLumProgram->setIgnoreUniformLocationError(IgnoreError::Yes);
+}
+
+void FramebufferRenderer::updateBloomConfig() {
+    _bloomProgram = ghoul::opengl::ProgramObject::Build(
+        "Appies the Bloom Filter",
+        absPath("${SHADERS}/framebuffer/bloomFilter.vert"),
+        absPath("${SHADERS}/framebuffer/bloomFilter.frag")
+    );
+    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+    //_bloomProgram->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+    //_bloomProgram->setIgnoreUniformLocationError(IgnoreError::Yes);
+
+    _bloomResolveProgram = ghoul::opengl::ProgramObject::Build(
+        "Adds bloom to final image",
+        absPath("${SHADERS}/framebuffer/bloomResolveFilter.vert"),
+        absPath("${SHADERS}/framebuffer/bloomResolveFilter.frag")
+    );
+    //_bloomResolveProgram->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+    //_bloomResolveProgram->setIgnoreUniformLocationError(IgnoreError::Yes);
+}
+
+void FramebufferRenderer::updateHDRAndFiltering() {
+    _hdrFilteringProgram = ghoul::opengl::ProgramObject::Build(
+        "HDR and Filtering Program",
+        absPath("${SHADERS}/framebuffer/hdrAndFiltering.vert"),
+        absPath("${SHADERS}/framebuffer/hdrAndfiltering.frag")
+    );
+    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+    //_hdrFilteringProgram->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+    //_hdrFilteringProgram->setIgnoreUniformLocationError(IgnoreError::Yes);
 }
 
 void FramebufferRenderer::updateMSAASamplingPattern() {
@@ -921,9 +1244,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     if (!scene || !camera) {
         return;
-    }
-
-    glEnable(GL_DEPTH_TEST);
+    }    
 
     // Capture standard fbo
     GLint defaultFbo;
@@ -932,18 +1253,20 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
     glEnable(GL_DEPTH_TEST);
 
-    // deferred g-buffer
-    GLenum textureBuffers[3] = {
+    // deferred g-buffer plus filter
+    GLenum textureBuffers[4] = {
         GL_COLOR_ATTACHMENT0,
         GL_COLOR_ATTACHMENT1,
         GL_COLOR_ATTACHMENT2,
+        GL_COLOR_ATTACHMENT3
     };
-    glDrawBuffers(3, textureBuffers);
+    glDrawBuffers(4, textureBuffers);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glEnablei(GL_BLEND, 0);
     glDisablei(GL_BLEND, 1);
     glDisablei(GL_BLEND, 2);
+    glDisablei(GL_BLEND, 3);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     Time time = global::timeManager.time();
@@ -977,9 +1300,11 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         performRaycasterTasks(tasks.raycasterTasks);
     }
 
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+    //glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _hdrFilteringFramebuffer);
     GLenum dBuffer[1] = { GL_COLOR_ATTACHMENT0 };
     glDrawBuffers(1, dBuffer);
+    glClear(GL_COLOR_BUFFER_BIT);
 
     {
         std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
@@ -991,6 +1316,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         performDeferredTasks(tasks.deferredcasterTasks);
     }
 
+    /*
     if (tasks.deferredcasterTasks.empty()) {
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
         _resolveProgram->activate();
@@ -1008,6 +1334,62 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
         _resolveProgram->deactivate();
     }
+    */
+
+    // DEBUG - JCC     
+    {
+        glDisable(GL_DEPTH_TEST);
+
+        applyBloomFilter();
+
+        float averageLuminaceInFB = 0.0;
+        if (_toneMapOperator == 
+            static_cast<int>(openspace::RenderEngine::ToneMapOperators::GLOBAL)
+            )
+        {
+            averageLuminaceInFB = computeBufferAveLuminanceGPU();
+            if (std::isnan(averageLuminaceInFB)) {
+                averageLuminaceInFB = 1000.0;
+            }
+        }
+        
+        //float averageLuminaceInFB = 0.5;
+
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+        glViewport(0, 0, _resolution.x, _resolution.y);
+        _hdrFilteringProgram->activate();
+
+        // No Bloom
+        /*ghoul::opengl::TextureUnit deferredResultsTextureUnit;
+        deferredResultsTextureUnit.activate();
+        glBindTexture(GL_TEXTURE_2D, _hdrFilteringTexture);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.deferredResultsTexture, 
+                                         deferredResultsTextureUnit);*/
+
+        // Bloom Enabled
+        ghoul::opengl::TextureUnit bloomResultsTextureUnit;
+        bloomResultsTextureUnit.activate();
+        glBindTexture(GL_TEXTURE_2D, _bloomTexture[2]);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.deferredResultsTexture,
+            bloomResultsTextureUnit);
+
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutFactor, blackoutFactor);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.backgroundConstant, 
+                                         _hdrBackground);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.backgroundExposure, _hdrExposure);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.gamma, _gamma);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.toneMapOperator, _toneMapOperator);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.aveLum, averageLuminaceInFB);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.maxWhite, _maxWhite);
+
+        glBindVertexArray(_screenQuad);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
+
+        _hdrFilteringProgram->deactivate();
+    }
+    
+    //glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
 }
 
 void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>& tasks) {
@@ -1220,6 +1602,31 @@ void FramebufferRenderer::setHDRBackground(float hdrBackground) {
 void FramebufferRenderer::setGamma(float gamma) {
     ghoul_assert(gamma > 0.f, "Gamma value must be greater than zero");
     _gamma = gamma;
+}
+
+void FramebufferRenderer::setMaxWhite(float maxWhite) {
+    ghoul_assert(gamma > 0.f, "Max White value must be greater than zero");
+    _maxWhite = maxWhite;
+}
+
+void FramebufferRenderer::setToneMapOperator(int tmOp) {
+    _toneMapOperator = tmOp;
+}
+
+void FramebufferRenderer::setBloomThreMin(float minV) {
+    _bloomThresholdMin = minV;
+}
+
+void FramebufferRenderer::setBloomThreMax(float maxV) {
+    _bloomThresholdMax = maxV;
+}
+
+void FramebufferRenderer::setBloomOrigFactor(float origFactor) {
+    _bloomOrigFactor = origFactor;
+}
+
+void FramebufferRenderer::setBloomNewFactor(float newFactor) {
+    _bloomNewFactor = newFactor;
 }
 
 float FramebufferRenderer::hdrBackground() const {

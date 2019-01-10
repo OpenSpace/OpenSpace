@@ -76,7 +76,9 @@ public:
     void updateResolution();
     void updateRaycastData();
     void updateDeferredcastData();
-    void updateHDRData();
+    void updateHDRAndFiltering();
+    void updateAveLum();
+    void updateBloomConfig();
     void updateMSAASamplingPattern();
 
     void setResolution(glm::ivec2 res) override;
@@ -84,6 +86,12 @@ public:
     void setHDRExposure(float hdrExposure) override;
     void setHDRBackground(float hdrBackground) override;
     void setGamma(float gamma) override;
+    void setMaxWhite(float maxWhite) override;
+    void setToneMapOperator(int tmOp) override;
+    void setBloomThreMin(float minV) override;
+    void setBloomThreMax(float maxV) override;
+    void setBloomOrigFactor(float origFactor) override;
+    void setBloomNewFactor(float newFactor) override;
 
     float hdrBackground() const override;
     int nAaSamples() const override;
@@ -106,6 +114,11 @@ public:
         DeferredcasterListener::IsAttached isAttached) override;
 
 private:
+    float computeBufferAveLuminance();
+    float computeBufferAveLuminanceGPU();
+    void applyBloomFilter();
+
+private:
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
     RaycasterProgObjMap _exitPrograms;
     RaycasterProgObjMap _raycastPrograms;
@@ -113,14 +126,26 @@ private:
 
     std::map<Deferredcaster*, DeferredcastData> _deferredcastData;
     DeferredcasterProgObjMap _deferredcastPrograms;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _hdrBackGroundProgram;
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _hdrFilteringProgram;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _aveLumProgram;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _bloomProgram;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _bloomResolveProgram;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
     UniformCache(mainColorTexture, blackoutFactor, nAaSamples) _uniformCache;
+    
+    UniformCache(deferredResultsTexture, blackoutFactor, backgroundConstant, 
+                 backgroundExposure, gamma, toneMapOperator, aveLum, maxWhite) 
+        _hdrUniformCache;
+
+    UniformCache(renderedImage, bloomImage, bloomThresholdMin, bloomThresholdMax, 
+        bloomOrigFactor, bloomNewFactor) _bloomUniformCache;
 
     GLuint _screenQuad;
     GLuint _vertexPositionBuffer;
     GLuint _mainColorTexture;
+    GLuint _mainFilterTexture;
     GLuint _mainPositionTexture;
     GLuint _mainNormalTexture;
     GLuint _mainDepthTexture;
@@ -128,8 +153,14 @@ private:
     GLuint _mainFramebuffer;
     GLuint _exitDepthTexture;
     GLuint _exitFramebuffer;
-    GLuint _deferredFramebuffer;
-    GLuint _deferredColorTexture;
+    GLuint _hdrFilteringFramebuffer;
+    GLuint _hdrFilteringTexture;
+
+    GLuint _bloomFilterFBO[3];
+    GLuint _bloomTexture[3];
+
+    GLuint _computeAveLumFBO; 
+    GLuint _computeAveLumTexture;
 
     bool _dirtyDeferredcastData;
     bool _dirtyRaycastData;
@@ -141,6 +172,12 @@ private:
     float _hdrExposure = 0.4f;
     float _hdrBackground = 2.8f;
     float _gamma = 2.2f;
+    float _maxWhite = 1.0f;
+    float _bloomThresholdMin = 0.0;
+    float _bloomThresholdMax = 1.0;
+    float _bloomOrigFactor = 1.0;
+    float _bloomNewFactor = 1.0;
+    int _toneMapOperator = 0;
 
     std::vector<double> _mSAAPattern;
 

@@ -727,6 +727,34 @@ void ABufferRenderer::setGamma(float gamma) {
     }
 }
 
+void ABufferRenderer::setMaxWhite(float maxWhite) {
+    _maxWhite = maxWhite;
+}
+
+void ABufferRenderer::setToneMapOperator(int tmOp) {
+    _toneMapOperator = tmpOp;
+};
+
+void ABufferRenderer::setToneMapOperator(int tmOp) {
+    _toneMapOperator = tmOp;
+}
+
+void ABufferRenderer::setBloomThreMin(float minV) {
+    _bloomThresholdMin = minV;
+}
+
+void ABufferRenderer::setBloomThreMax(float maxV) {
+    _bloomThresholdMax = maxV;
+}
+
+void ABufferRenderer::setBloomOrigFactor(float origFactor) {
+    _bloomOrigFactor = origFactor;
+}
+
+void ABufferRenderer::setBloomNewFactor(float newFactor) {
+    _bloomNewFactor = newFactor;
+}
+
 float ABufferRenderer::hdrBackground() const {
     return _hdrBackground;
 }

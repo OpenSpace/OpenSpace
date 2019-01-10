@@ -65,6 +65,12 @@ public:
     void setHDRExposure(float hdrExposure) override;
     void setHDRBackground(float hdrBackground) override;
     void setGamma(float gamma) override;
+    void setMaxWhite(float maxWhite) override;
+    void setToneMapOperator(int tmOp) override;
+    void setBloomThreMin(float minV) override;
+    void setBloomThreMax(float maxV) override;
+    void setBloomOrigFactor(float origFactor) override;
+    void setBloomNewFactor(float newFactor) override;
 
     float hdrBackground() const override;
     int nAaSamples() const override;
@@ -135,7 +141,13 @@ private:
     float _hdrExposure = 0.4f;
     float _hdrBackground = 2.8f;
     float _gamma = 2.2f;
+    float _maxWhite = 1.f;
     float _blackoutFactor;
+    float _bloomThresholdMin = 0.0;
+    float _bloomThresholdMax = 1.0;
+    float _bloomOrigFactor = 1.0;
+    float _bloomNewFactor = 1.0;
+    int _toneMapOperator = 0;
 
     std::vector<double> _mSAAPattern;
 

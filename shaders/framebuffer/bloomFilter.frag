@@ -22,69 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___RENDERER___H__
-#define __OPENSPACE_CORE___RENDERER___H__
+#version __CONTEXT__
 
-#include <ghoul/glm.h>
-#include <vector>
+layout (location = 0) out vec4 finalColor;
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+uniform int pass;
+uniform sampler2DMS filterImage;
+uniform sampler2D filterFirstPass;
 
-namespace openspace {
+// Gaussian Weights from OpenGL SuperBible 7 ed.
+const float weights[] = float[](0.0024499299678342,
+                                0.0043538453346397,
+                                0.0073599963704157,
+                                0.0118349786570722,
+                                0.0181026699707781,
+                                0.0263392293891488,
+                                0.0364543006660986,
+                                0.0479932050577658,
+                                0.0601029809166942,
+                                0.0715974486241365,
+                                0.0811305381519717,
+                                0.0874493212267511,
+                                0.0896631113333857,
+                                0.0874493212267511,
+                                0.0811305381519717,
+                                0.0715974486241365,
+                                0.0601029809166942,
+                                0.0479932050577658,
+                                0.0364543006660986,
+                                0.0263392293891488,
+                                0.0181026699707781,
+                                0.0118349786570722,
+                                0.0073599963704157,
+                                0.0043538453346397,
+                                0.0024499299678342);
 
-class RenderableVolume;
-class Camera;
-class Scene;
+void main(void)
+{
+    vec4 color = vec4(0.0);
+    // Transpose the image so the filter can be applied on X and Y
+    ivec2 P = ivec2(gl_FragCoord.yx) - ivec2(0, weights.length() >> 1);
+    
+    for (int i = 0; i < weights.length(); i++)
+    {   
+        if (pass == 1)
+            color += vec4(texelFetch(filterImage, P + ivec2(0, i), 0).rgb, 1.0) * weights[i];
+        else if (pass == 2)
+            color += vec4(texelFetch(filterFirstPass, P + ivec2(0, i), 0).rgb, 1.0) * weights[i];
+    }
 
-class Renderer {
-public:
-    virtual ~Renderer() = default;
-
-    virtual void initialize() = 0;
-    virtual void deinitialize() = 0;
-
-    virtual void setResolution(glm::ivec2 res) = 0;
-    virtual void setNAaSamples(int nAaSamples) = 0;
-    virtual void setHDRExposure(float hdrExposure) = 0;
-    virtual void setHDRBackground(float hdrBackground) = 0;
-    virtual void setGamma(float gamma) = 0;
-    virtual void setMaxWhite(float maxWhite) = 0;
-    virtual void setToneMapOperator(int tmOp) = 0;
-    virtual void setBloomThreMin(float minV) = 0;
-    virtual void setBloomThreMax(float maxV) = 0;
-    virtual void setBloomOrigFactor(float origFactor) = 0;
-    virtual void setBloomNewFactor(float newFactor) = 0;
-
-    virtual float hdrBackground() const = 0;
-    virtual int nAaSamples() const = 0;
-    virtual const std::vector<double>& mSSAPattern() const = 0;
-
-    /**
-    * Set raycasting uniforms on the program object, and setup raycasting.
-    */
-    virtual void preRaycast(ghoul::opengl::ProgramObject& /*programObject*/) {};
-
-    /**
-    * Tear down raycasting for the specified program object.
-    */
-    virtual void postRaycast(ghoul::opengl::ProgramObject& /*programObject*/) {};
-
-
-    virtual void update() = 0;
-
-    virtual void render(Scene* scene, Camera* camera, float blackoutFactor) = 0;
-    /**
-     * Update render data
-     * Responsible for calling renderEngine::setRenderData
-     */
-    virtual void updateRendererData() = 0;
-};
-
-} // openspace
-
-#endif // __OPENSPACE_CORE___RENDERER___H__
+    finalColor = vec4(color.rgb, 1.0);
+}
