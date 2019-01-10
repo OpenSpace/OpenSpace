@@ -42,8 +42,8 @@ namespace {
     constexpr const char* KeyStationSiteColor = "SiteColor";
 
     constexpr const std::array <const char*, openspace::RenderableSignals::uniformCacheSize> UniformNames = {
-        "modelViewStation","modelViewSpacecraft", "projectionTransform", "baseOpacity",
-        "flowSpeedFactor", "segmentSizeFactor", "spacingSizeFactor", "fadeFactor"
+        "modelView", "projectionTransform", "baseOpacity", "flowSpeedFactor",
+        "segmentSizeFactor", "spacingSizeFactor", "fadeFactor"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SiteColorsInfo = {
@@ -332,19 +332,7 @@ void RenderableSignals::updateVertexAttributes() {
 void RenderableSignals::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
 
-    _programObject->setUniform(_uniformCache.modelViewStation,
-        data.camera.combinedViewMatrix() * _lineRenderInformation._localTransform);
-
-    _programObject->setUniform(_uniformCache.modelViewSpacecraft,
-        data.camera.combinedViewMatrix()  * _lineRenderInformation._localTransform);
-
-    _programObject->setUniform(_uniformCache.projection, data.camera.sgctInternal.projectionMatrix());
-
-    _programObject->setUniform(_uniformCache.baseOpacity, _baseOpacity);
-    _programObject->setUniform(_uniformCache.flowSpeedFactor, _flowSpeedFactor);
-    _programObject->setUniform(_uniformCache.segmentSizeFactor, _segmentSizeFactor);
-    _programObject->setUniform(_uniformCache.spacingSizeFactor, _spacingSizeFactor);
-    _programObject->setUniform(_uniformCache.fadeFactor, _fadeFactor);
+    updateUniforms(data);
 
     const bool usingFramebufferRenderer =
         global::renderEngine.rendererImplementation() ==
@@ -437,6 +425,18 @@ void RenderableSignals::update(const UpdateData& data) {
     unbindGL();
 }
 
+void RenderableSignals::updateUniforms(const RenderData& data) {
+
+    _programObject->setUniform(_uniformCache.modelView,
+        data.camera.combinedViewMatrix() * _lineRenderInformation._localTransform);
+    _programObject->setUniform(_uniformCache.projection, data.camera.sgctInternal.projectionMatrix());
+    _programObject->setUniform(_uniformCache.baseOpacity, _baseOpacity);
+    _programObject->setUniform(_uniformCache.flowSpeedFactor, _flowSpeedFactor);
+    _programObject->setUniform(_uniformCache.segmentSizeFactor, _segmentSizeFactor);
+    _programObject->setUniform(_uniformCache.spacingSizeFactor, _spacingSizeFactor);
+    _programObject->setUniform(_uniformCache.fadeFactor, _fadeFactor);
+}
+
 // Todo: handle signalIsSending, not only signalIsActive for the signal segments
 bool RenderableSignals::isSignalActive(double currentTime, SignalManager::Signal signal) {
     
@@ -464,52 +464,44 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
     glm::vec4 color = getStationColor(signal.dishName);
     glm::dvec3 posStation = getPrecisionPositionForStationNode(signal.dishName);
     glm::dvec3 posSpacecraft = getPrecisionPositionForNode(signal.spacecraft);
-    double distance = getDistance(signal.dishName, signal.spacecraft);
-    double timeSinceStart = signal.timeSinceStart;
-    double lightTravelTime = signal.lightTravelTime;
 
-    // fill the render array
-    
-    // first with station position and its vertex attributes
-    _vertexArray.push_back(posStation.x);
-    _vertexArray.push_back(posStation.y);
-    _vertexArray.push_back(posStation.z);
+    double transmissionTime = signal.endTransmission - signal.startTransmission;
 
-    _vertexArray.push_back(color.r);
-    _vertexArray.push_back(color.g);
-    _vertexArray.push_back(color.b);
-    _vertexArray.push_back(color.a);
+    // the distance from the signal start to each end of the line
+    double distSpacecraft = 0.0, distStation = 0.0;
 
     if (signal.direction == "uplink") {
-        _vertexArray.push_back(0.0);
+        distSpacecraft = getDistance(signal.dishName, signal.spacecraft);
     }
-    else {
-        _vertexArray.push_back(distance);
+    else { // downlink
+        distStation = getDistance(signal.dishName, signal.spacecraft);
     }
-    _vertexArray.push_back(timeSinceStart);
-    _vertexArray.push_back(signal.endTransmission-signal.startTransmission);
-    _vertexArray.push_back(lightTravelTime);
 
+    // line ending station
+    addVertexToVertexArray(posStation, color, distStation, signal.timeSinceStart, 
+                            transmissionTime, signal.lightTravelTime);
+    // line ending spacecraft
+    addVertexToVertexArray(posSpacecraft, color, distSpacecraft, signal.timeSinceStart,
+                            transmissionTime, signal.lightTravelTime); 
+}
 
-    // then with spacecraft position and its vertex attributes
-    _vertexArray.push_back(posSpacecraft.x);
-    _vertexArray.push_back(posSpacecraft.y);
-    _vertexArray.push_back(posSpacecraft.z);
-
+void RenderableSignals::addVertexToVertexArray(glm::dvec3 position, glm::vec4 color, 
+                                                double distance, double timeSinceStart, 
+                                                double transmissionTime, double lightTravelTime)
+{
+    // first with station position and its vertex attributes
+    _vertexArray.push_back(position.x);
+    _vertexArray.push_back(position.y);
+    _vertexArray.push_back(position.z);
     _vertexArray.push_back(color.r);
     _vertexArray.push_back(color.g);
     _vertexArray.push_back(color.b);
     _vertexArray.push_back(color.a);
-
-    if (signal.direction == "downlink") {
-        _vertexArray.push_back(0.0);
-    }
-    else {
-        _vertexArray.push_back(distance);
-    }
+    _vertexArray.push_back(distance);
     _vertexArray.push_back(timeSinceStart);
-    _vertexArray.push_back(signal.endTransmission - signal.startTransmission);
+    _vertexArray.push_back(transmissionTime);
     _vertexArray.push_back(lightTravelTime);
+
 }
 
 /*  Returns a position that is relative to the current 

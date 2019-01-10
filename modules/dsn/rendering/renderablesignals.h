@@ -94,7 +94,7 @@ namespace openspace {
         double getDistance(std::string nodeIdA, std::string nodeIdB);
 
         /// Number of variables in _uniformCache
-        static const GLuint uniformCacheSize = 8;
+        static const GLuint uniformCacheSize = 7;
 
 
     protected:
@@ -172,6 +172,10 @@ namespace openspace {
 
     private:
 
+        void updateUniforms(const RenderData& data);
+        void addVertexToVertexArray(glm::dvec3 position, glm::vec4 color, double distance,
+                                    double timeSinceStart, double transmissionTime, double lightTravelTime);
+
         /* The VBO layout of the vertex position */
         struct PositionVBOLayout {
             float x, y, z;
@@ -206,8 +210,8 @@ namespace openspace {
         /// Program object used to render the data stored in RenderInformation
         ghoul::opengl::ProgramObject* _programObject = nullptr;
         /// Cache for uniform variables, update _uniformCacheSize accordingly
-        UniformCache(modelViewStation, modelViewSpacecraft, projection, baseOpacity,
-                     flowSpeedFactor, segmentSizeFactor, spacingSizeFactor, fadeFactor) _uniformCache;
+        UniformCache(modelView, projection, baseOpacity, flowSpeedFactor, 
+                    segmentSizeFactor, spacingSizeFactor, fadeFactor) _uniformCache;
 
         /*Checks if the current time is within a signal's start and endtime*/
         bool isSignalActive(double currentTime, SignalManager::Signal signal);

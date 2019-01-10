@@ -42,23 +42,16 @@ out float timeSinceStart;
 out float transmissionTime;
 out float lightTravelTime;
 
-uniform dmat4 modelViewStation;
-uniform dmat4 modelViewSpacecraft;
+uniform dmat4 modelView;
 uniform mat4 projectionTransform;
-
 
 void main() {
 
-    // calculate the position
-    // We use different modelviews depending on if the vertex is a stationposition or a spacecraftposition
-    if(gl_VertexID % 2 == 0 ){
-        vs_gPosition = vec4(modelViewStation * dvec4(in_point_position, 1));
-    }else{
-        vs_gPosition = vec4(modelViewSpacecraft * dvec4(in_point_position, 1));
-    }
 
+    vs_gPosition = vec4(modelView * dvec4(in_point_position, 1));
     vs_positionScreenSpace = projectionTransform * vs_gPosition;
     gl_Position  = vs_positionScreenSpace;
+
     // Set z to 0 to disable near and far plane, unique handling for perspective in space
     gl_Position.z = 0.f; 
 
