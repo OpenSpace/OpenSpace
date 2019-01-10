@@ -28,6 +28,39 @@ local ThemisCAsset = asset.require('scene/solarsystem/dsn/spacecrafts/themisc/th
 local TraceGasOrbiterAsset = asset.require('scene/solarsystem/dsn/spacecrafts/tracegasorbiter/tracegasorbiter')
 local WindAsset = asset.require('scene/solarsystem/dsn/spacecrafts/wind/wind')
 
+-------------------------------------------------------------------
+----- The map is used to keep the SceneGraphNode identifiers  -----
+----- for each spacecraft up to date with the dsn signal data -----
+-------------------------------------------------------------------
+local signalDataIdMap = {
+    CAS = CassiniAsset.spacecraftID,
+    GAIA = GaiaAsset.spacecraftID,
+    GNS = GenesisAsset.spacecraftID,
+    HYB2 = Hayabusa2Asset.spacecraftID,
+    ICE = IceAsset.spacecraftID,
+    CHDR = ChandraXrayAsset.spacecraftID,
+    DAWN = DawnAsset.spacecraftID,
+    JNO = JunoAsset.spacecraftID,
+    KEPL = KeplerAsset.spacecraftID,
+    MRO = MarsRecOrbAsset.spacecraftID,
+    M010 = MarsOdysseyAsset.spacecraftID,
+    MSGR = MessengerAsset.spacecraftID,
+    NHPC = NewHorizonsAsset.spacecraftID,
+    SOHO = SohoAsset.spacecraftID,
+    STF = SpitzerAsset.spacecraftID,
+    STA = StereoAAsset.spacecraftID,
+    STB = StereoBAsset.spacecraftID,
+    TESS = TessAsset.spacecraftID,
+    THB = ThemisBAsset.spacecraftID,
+    THC = ThemisCAsset.spacecraftID,
+    TGO = TraceGasOrbiterAsset.spacecraftID,
+    VGR1 = Voyager1Asset.spacecraftID,
+    VGR2 = Voyager2Asset.spacecraftID,
+    WIND = WindAsset.spacecraftID
+}
+
+
+asset.export("signalDataIdMap", signalDataIdMap)
 
 asset.export("CassiniAsset", CassiniAsset)
 asset.export("ChandraXrayAsset", ChandraXrayAsset)

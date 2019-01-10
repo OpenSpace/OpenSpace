@@ -1,5 +1,209 @@
 local assetHelper = asset.require('util/asset_helper')
-local maps = asset.require('scene/solarsystem/dsn/spacecraftsmaps')
+local spacecrafts = asset.require('scene/solarsystem/dsn/spacecrafts')
+
+--------------------------------------------------
+--------------------- Labels  --------------------
+--------------------------------------------------
+
+local CassiniLabel = {
+    LabelText = ".Cassini",
+    TimeFrame = { 
+        Start = "2014-002T18:00:00",
+        End = "2017-258T14:00:00"
+    },
+    ObjectIdentifier = spacecrafts.CassiniAsset.spacecraftID
+}
+local ChandraXrayLabel = {
+    LabelText = ".Chandra Xray",
+    ObjectIdentifier = spacecrafts.ChandraXrayAsset.spacecraftID
+}
+local DawnLabel = {
+    LabelText = ".Dawn",
+    TimeFrame = { 
+        Start = "2014-003T16:00:00",
+        End = "2018-257T01:00:00"
+    },
+    ObjectIdentifier = spacecrafts.DawnAsset.spacecraftID
+}
+local GaiaLabel = {
+    LabelText = ".Gaia",
+    TimeFrame = { 
+        Start = "2018-100T15:00:00",
+        End = "2018-154T06:00:00"
+    },
+    ObjectIdentifier = spacecrafts.GaiaAsset.spacecraftID
+}
+local GenesisLabel = {
+    LabelText = ".Genesis",
+    TimeFrame = { 
+        Start = "2015-254T21:00:00",
+        End = "2015-254T22:00:00"
+    },
+    ObjectIdentifier = spacecrafts.GenesisAsset.spacecraftID
+}
+local Hayabusa2Label = {
+    LabelText = ".Hayabusa 2",
+    TimeFrame = { 
+        Start = "2014-337T06:00:00",
+        End = "2018-363T13:00:00"
+    },
+    ObjectIdentifier = spacecrafts.Hayabusa2Asset.spacecraftID
+}
+local IceLabel = {
+    LabelText = ".Ice",
+    TimeFrame = { 
+        Start = "2014-169T20:00:00",
+        End = "2014-192T16:00:00"
+    },
+    ObjectIdentifier = spacecrafts.IceAsset.spacecraftID
+}
+local JunoLabel = {
+    LabelText = ".Juno",
+    ObjectIdentifier = spacecrafts.JunoAsset.spacecraftID
+}
+local KeplerLabel = {
+    LabelText = ".Kepler",
+    ObjectIdentifier = spacecrafts.KeplerAsset.spacecraftID
+}
+local MarsRecOrbLabel = {
+    LabelText = ".Mars Recon Orbiter",
+    ObjectIdentifier = spacecrafts.MarsRecOrbAsset.spacecraftID
+}
+local MarsOdysseyLabel = {
+    LabelText= ".Mars Odyssey",
+    ObjectIdentifier = spacecrafts.MarsOdysseyAsset.spacecraftID
+}
+local MessengerLabel = {
+    LabelText = ".Messenger",
+    TimeFrame = { 
+        Start = "2014-002T01:00:00",
+        End = "2015-121T05:00:00"
+    },
+    ObjectIdentifier = spacecrafts.MessengerAsset.spacecraftID
+}
+local NewHorizonsLabel = {
+    LabelText = ".New Horizons",
+    ObjectIdentifier = spacecrafts.NewHorizonsAsset.spacecraftID
+}
+local SohoLabel = {
+    LabelText = ".Soho",
+    ObjectIdentifier = spacecrafts.SohoAsset.spacecraftID
+}
+local SpitzerLabel = {
+    LabelText = ".Spitzer",
+    ObjectIdentifier = spacecrafts.SpitzerAsset.spacecraftID
+}
+local StereoALabel = {
+    LabelText = ".Stereo A",
+    ObjectIdentifier = spacecrafts.StereoAAsset.spacecraftID
+}
+local StereoBLabel = {
+    LabelText = ".Stereo B",
+    TimeFrame = { 
+        Start = "2014-001T00:00:00",
+        End = "2018-290T09:00:00"
+    },
+    ObjectIdentifier = spacecrafts.StereoBAsset.spacecraftID
+}
+--Transit exoplanet Survey Satellite
+local TessLabel = {
+    LabelText = ".Tess",
+    TimeFrame = { 
+        Start = "2018-108T23:00:00",
+        End = "2019-001T01:00:00"
+    },
+    ObjectIdentifier = spacecrafts.TessAsset.spacecraftID
+}
+local ThemisBLabel = {
+    LabelText = ".Themis B",
+    ObjectIdentifier = spacecrafts.ThemisBAsset.spacecraftID
+}
+local ThemisCLabel = {
+    LabelText = ".Themis C",
+    ObjectIdentifier = spacecrafts.ThemisCAsset.spacecraftID
+}
+local TraceGasOrbiterLabel = {
+    LabelText = ".Trace Gas Orbiter",
+    TimeFrame = { 
+        Start = "2016-012T12:00:00",
+        End = "2018-364T23:00:00"
+    },
+    ObjectIdentifier = spacecrafts.TraceGasOrbiterAsset.spacecraftID
+}
+local Voyager1Label = {
+    LabelText = ".Voyager 1",
+    ObjectIdentifier = spacecrafts.Voyager1Asset.spacecraftID
+}
+local Voyager2Label = {
+    LabelText = ".Voyager 2",
+    ObjectIdentifier = spacecrafts.Voyager2Asset.spacecraftID
+}
+local WindLabel = {
+    LabelText = ".Wind",
+    ObjectIdentifier = spacecrafts.WindAsset.spacecraftID
+}
+
+
+--------------------------------------------------
+----------------- Cluster Labels  ----------------
+--------------------------------------------------
+
+local MarsClusterLabel = {
+    LabelText = "MarsOdyssey, \n Mars Recon Orbiter ",
+    ObjectIdentifier = "Mars"
+}
+
+-----------------------------------------------
+-------------------- Id Maps ------------------
+-----------------------------------------------
+local labelMapMarsMissions = {  
+                        Label1 = MarsRecOrbLabel,
+                        Label2 = MarsOdysseyLabel
+
+                    }
+
+local labelMapOuterSpace = {  
+                            Label1 = Voyager1Label,
+                            Label2 = Voyager2Label,
+                            label3 = NewHorizonsLabel
+
+                        }
+
+local labelMapInnerSpace = {  
+                            Label1 = StereoALabel,
+                            Label2 = StereoBLabel,
+                            Label3 = JunoLabel,
+                            Label4 = CassiniLabel,
+                            Label5 = KeplerLabel,
+                            label6 = DawnLabel,
+                            label7 = SpitzerLabel,
+                            label8 = GenesisLabel,
+                            label9 = Hayabusa2Label,
+                            label10 = MessengerLabel,
+                            label11 = TraceGasOrbiterLabel
+
+                        }
+
+local labelMapNearEarth = {  
+                            Label1 = GaiaLabel,
+                            Label2 = ChandraXrayLabel, 
+                            label3 = ThemisBLabel,
+                            label4 = ThemisCLabel,
+                            label5 = WindLabel,
+                            label6 = SohoLabel,
+                            label7 = IceLabel,
+                            label8 = TessLabel
+
+                        }
+local labelMapClusters = {  
+                            Label1 = MarsClusterLabel
+                        }
+
+
+--------------------------------------------------------------
+---------------------  Dsn Label Groups ----------------------
+-- Allows us to create multiple labels with similar styling --
+--------------------------------------------------------------
 
 local InnerSpaceLabels = {
     Identifier = "InnerSpaceLabels",
@@ -7,7 +211,7 @@ local InnerSpaceLabels = {
         Type = "RenderableDsnLabels",
         Enabled = true,
         ScaleFactor = 9.0,
-        LabelIdentifierMap = maps.labelMapInnerSpace,
+        LabelIdentifierMap = labelMapInnerSpace,
         TextColor = { 0.8, 0.7, 0.6, 1.0 },
         DrawLabels = true,
         LabelSizeRange = {5.5, 6.0},
@@ -30,7 +234,7 @@ local NearEarthLabels = {
         Type = "RenderableDsnLabels",
         Enabled = true,
         ScaleFactor = 9.0,
-        LabelIdentifierMap = maps.labelMapNearEarth,
+        LabelIdentifierMap = labelMapNearEarth,
         TextColor = { 1.0, 0.6, 0.4, 1.0 },
         DrawLabels = true,
         LabelSizeRange = {5.5, 6.0},
@@ -52,11 +256,11 @@ local OuterSpaceLabels = {
     Renderable = {
         Type = "RenderableDsnLabels",
         Enabled = true,
-        ScaleFactor = 9.0,
-        LabelIdentifierMap = maps.labelMapOuterSpace,
+        ScaleFactor = 9.75,
+        LabelIdentifierMap = labelMapOuterSpace,
         TextColor = { 0.8, 0.7, 0.6, 1.0 },
         DrawLabels = true,
-        LabelSizeRange = {5.5, 6.0},
+        LabelSizeRange = {6.3, 6.7},
         SizeDistanceRange = {2, 100000000},
         SizeDistanceUnit = "km",
         FadeOutDistanceRange = {2, 0.1}, 
@@ -76,7 +280,7 @@ local MarsMissionsLabels = {
         Type = "RenderableDsnLabels",
         Enabled = true,
         ScaleFactor = 7.5,
-        LabelIdentifierMap = maps.labelMapMarsMissions,
+        LabelIdentifierMap = labelMapMarsMissions,
         TextColor = { 0.8, 0.7, 0.6, 1.0 },
         DrawLabels = true,
         LabelSizeRange = {4.0, 4.5},
@@ -99,7 +303,7 @@ local ClusteredLabels = {
         Type = "RenderableDsnLabels",
         Enabled = true,
         ScaleFactor = 9.0,
-        LabelIdentifierMap = maps.labelMapClusters,
+        LabelIdentifierMap = labelMapClusters,
         TextColor = { 0.8, 0.7, 0.6, 1.0 },
         DrawLabels = true,
         LabelSizeRange = {5.5, 5.8},

@@ -1,9 +1,11 @@
 local assetHelper = asset.require('util/asset_helper')
 local stationsAsset = asset.require('scene/solarsystem/dsn/stations')
-local maps = asset.require('scene/solarsystem/dsn/spacecraftsmaps')
-
---Signals data path
+local spacecrafts = asset.require('scene/solarsystem/dsn/spacecrafts')
 local dataFolder = openspace.absPath("${SYNC}/http/dsn_data/1/signaldata")
+
+-----------------------------------
+----- The Renderable Signals  -----
+-----------------------------------
 
 local Signals = {
     Identifier = "Signals",
@@ -14,7 +16,7 @@ local Signals = {
         BaseOpacity = 0.1,
         SiteColors = stationsAsset.siteColorMap, 
         StationSites = stationsAsset.stationMap,
-        SpacecraftIdMap = maps.signalDataIdMap
+        SpacecraftIdMap = spacecrafts.signalDataIdMap
     },
     GUI = {
         Name = "Signals",
