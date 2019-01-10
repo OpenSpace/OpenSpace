@@ -29,6 +29,7 @@
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec4property.h>
 
 namespace ghoul::fontrendering { class Font; }
 

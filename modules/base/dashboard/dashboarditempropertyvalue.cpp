@@ -70,7 +70,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo IsColorPropertyInfo = {
         "IsColorProperty",
         "Is Color Property",
-        "Can be set to true to show the property as a colored marker instead of text. "
+        "Can be set to true to show the property as a colored marker instead of text string. "
     };
 } // namespace
 
@@ -186,47 +186,36 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
         _property->getStringValue(valueStr);
 
         penPosition.y -= _font->height();
+
+        if (_isColorProperty) {
+
+            properties::Vec4Property* colorProperty = static_cast<properties::Vec4Property*>(_property);
+            glm::vec4 color = colorProperty->value();
+
+            color.a = ColorDotOpacityFactor * color.a;
+
+            _fontColorDot = global::fontManager.font(_fontName, _fontSize * ColorDotSizeFactor);
+
+            std::string colorDot = ".";
+
+            penPosition.x = 0.0;
+
+            RenderFont(
+                *_fontColorDot,
+                penPosition,
+                colorDot,
+                color
+            );
+
+            penPosition.x = _fontColorDot->boundingBox(colorDot).x;
+        }
+
         RenderFont(
             *_font,
             penPosition,
             fmt::format(_displayString.value(), valueStr)
         );
 
-        if (_isColorProperty) {
-
-            glm::vec4 color(1.0f, 0.0f, 0.0f, 1.0f);
-
-            std::string commaSeparatedValues = valueStr.substr(1, valueStr.size() - 2);
-            std::vector<float> colorValVec;
-
-            std::stringstream ss(commaSeparatedValues);
-
-            float strVal;
-            while (ss >> strVal)
-            {
-                if (ss.peek() == ',')
-                    ss.ignore();
-                colorValVec.push_back(strVal);
-            }
-
-            color.r = colorValVec.at(0);
-            color.g = colorValVec.at(1);
-            color.b = colorValVec.at(2);
-            color.a = ColorDotOpacityFactor * colorValVec.at(3);
-
-            _fontColorDot = global::fontManager.font(_fontName, _fontSize * ColorDotSizeFactor);
-
-            std::string colorDot = ".";
-
-            glm::vec2 offset = _font->boundingBox(fmt::format(_displayString.value() + " ", valueStr));
-
-            RenderFont(
-                *_fontColorDot,
-                glm::vec2(offset.x, penPosition.y),
-                colorDot,
-                color
-            );
-        }
     }
 }
 
