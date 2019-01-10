@@ -352,7 +352,6 @@ void RenderableSignals::render(const RenderData& data, RendererTasks&) {
         _lineRenderInformation.countLines
     );
 
-    //unbind vertex array and buffers
     unbindGL();
 
     if (usingFramebufferRenderer) {
@@ -383,12 +382,10 @@ void RenderableSignals::update(const UpdateData& data) {
         }
 
         int activeFileIndex = DataFileHelper::findFileIndexForCurrentTime(currentTime, SignalManager::fileStartTimes);
-        //parse data for that file
         //LDEBUG(fmt::format("{}: Reloading SignalData for time {}", _identifier, data.time.UTC()));
         SignalManager::updateSignalData(activeFileIndex, _signalSizeBuffer);
     }
 
-    // Make space for the vertex renderinformation
     _vertexArray.clear();
 
     // Update focusnode information, used to counter precision problems
@@ -404,8 +401,6 @@ void RenderableSignals::update(const UpdateData& data) {
         }
     };
 
- 
-    // ... and upload them to the GPU
     glBindVertexArray(_lineRenderInformation._vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _lineRenderInformation._vBufferID);
     glBufferData(
@@ -421,7 +416,6 @@ void RenderableSignals::update(const UpdateData& data) {
     _lineRenderInformation.countLines = static_cast<GLsizei>(_vertexArray.size() / 
                                 (_sizeThreeVal + _sizeFourVal + _floatsVBOSize * _sizeOneVal));
 
-    //unbind vertexArray
     unbindGL();
 }
 
@@ -437,7 +431,6 @@ void RenderableSignals::updateUniforms(const RenderData& data) {
     _programObject->setUniform(_uniformCache.fadeFactor, _fadeFactor);
 }
 
-// Todo: handle signalIsSending, not only signalIsActive for the signal segments
 bool RenderableSignals::isSignalActive(double currentTime, SignalManager::Signal signal) {
     
     double startTimeInSeconds = signal.startTransmission;
@@ -467,7 +460,7 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
 
     double transmissionTime = signal.endTransmission - signal.startTransmission;
 
-    // the distance from the signal start to each end of the line
+    // the distance from the signal starting point
     double distSpacecraft = 0.0, distStation = 0.0;
 
     if (signal.direction == "uplink") {
@@ -477,10 +470,8 @@ void RenderableSignals::pushSignalDataToVertexArray(SignalManager::Signal signal
         distStation = getDistance(signal.dishName, signal.spacecraft);
     }
 
-    // line ending station
     addVertexToVertexArray(posStation, color, distStation, signal.timeSinceStart, 
                             transmissionTime, signal.lightTravelTime);
-    // line ending spacecraft
     addVertexToVertexArray(posSpacecraft, color, distSpacecraft, signal.timeSinceStart,
                             transmissionTime, signal.lightTravelTime); 
 }
@@ -489,7 +480,6 @@ void RenderableSignals::addVertexToVertexArray(glm::dvec3 position, glm::vec4 co
                                                 double distance, double timeSinceStart, 
                                                 double transmissionTime, double lightTravelTime)
 {
-    // first with station position and its vertex attributes
     _vertexArray.push_back(position.x);
     _vertexArray.push_back(position.y);
     _vertexArray.push_back(position.z);
@@ -501,7 +491,6 @@ void RenderableSignals::addVertexToVertexArray(glm::dvec3 position, glm::vec4 co
     _vertexArray.push_back(timeSinceStart);
     _vertexArray.push_back(transmissionTime);
     _vertexArray.push_back(lightTravelTime);
-
 }
 
 /*  Returns a position that is relative to the current 
