@@ -37,6 +37,8 @@
 namespace {
     constexpr const char* KeyFontMono = "Mono";
     constexpr const float DefaultFontSize = 10.f;
+    constexpr const float ColorDotSizeFactor = 4.f;
+    constexpr const float ColorDotOpacityFactor = 0.6f;
 
     constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",
@@ -210,9 +212,9 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
             color.r = colorValVec.at(0);
             color.g = colorValVec.at(1);
             color.b = colorValVec.at(2);
-            color.a = 0.6 * colorValVec.at(3);
+            color.a = ColorDotOpacityFactor * colorValVec.at(3);
 
-            _fontColorDot = global::fontManager.font(_fontName, _fontSize * 4.0);
+            _fontColorDot = global::fontManager.font(_fontName, _fontSize * ColorDotSizeFactor);
 
             std::string colorDot = ".";
 
