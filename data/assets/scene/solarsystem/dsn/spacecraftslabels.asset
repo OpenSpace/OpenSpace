@@ -41,6 +41,10 @@ local GenesisLabel = {
     },
     ObjectIdentifier = spacecrafts.GenesisAsset.spacecraftID
 }
+local GeotailLabel = {
+    LabelText = ".Geotail",
+    ObjectIdentifier = spacecrafts.GeotailAsset.spacecraftID
+}
 local Hayabusa2Label = {
     LabelText = ".Hayabusa 2",
     TimeFrame = { 
@@ -65,6 +69,22 @@ local KeplerLabel = {
     LabelText = ".Kepler",
     ObjectIdentifier = spacecrafts.KeplerAsset.spacecraftID
 }
+local MarsCubeSatALabel = {
+    LabelText = ".MCO A",
+    TimeFrame = { 
+        Start = "2018-125T12:00:00",
+        End = "2018-365T19:00:00"
+    },
+    ObjectIdentifier = spacecrafts.MarsCubeSatAAsset.spacecraftID
+}
+local MarsCubeSatBLabel = {
+    LabelText = ".MCO B",
+    TimeFrame = { 
+        Start = "2018-125T12:00:00",
+        End = "2018-365T19:00:00"
+    },
+    ObjectIdentifier = spacecrafts.MarsCubeSatBAsset.spacecraftID
+}
 local MarsRecOrbLabel = {
     LabelText = ".Mars Recon Orbiter",
     ObjectIdentifier = spacecrafts.MarsRecOrbAsset.spacecraftID
@@ -84,6 +104,10 @@ local MessengerLabel = {
 local NewHorizonsLabel = {
     LabelText = ".New Horizons",
     ObjectIdentifier = spacecrafts.NewHorizonsAsset.spacecraftID
+}
+local OpportunityLabel = {
+    LabelText = ".Oppurtunity",
+    ObjectIdentifier = spacecrafts.OpportunityAsset.spacecraftID
 }
 local SohoLabel = {
     LabelText = ".Soho",
@@ -180,8 +204,10 @@ local labelMapInnerSpace = {
                             label8 = GenesisLabel,
                             label9 = Hayabusa2Label,
                             label10 = MessengerLabel,
-                            label11 = TraceGasOrbiterLabel
-
+                            label11 = TraceGasOrbiterLabel,
+                            label12 = MarsCubeSatALabel,
+                            label13 = MarsCubeSatBLabel,
+                            label14 = OpportunityLabel
                         }
 
 local labelMapNearEarth = {  
@@ -192,7 +218,9 @@ local labelMapNearEarth = {
                             label5 = WindLabel,
                             label6 = SohoLabel,
                             label7 = IceLabel,
-                            label8 = TessLabel
+                            label8 = TessLabel,
+                            label9 = GeotailLabel
+
 
                         }
 local labelMapClusters = {  
@@ -210,7 +238,7 @@ local InnerSpaceLabels = {
     Renderable = {
         Type = "RenderableDsnLabels",
         Enabled = true,
-        ScaleFactor = 9.0,
+        ScaleFactor = 9.2,
         LabelIdentifierMap = labelMapInnerSpace,
         TextColor = { 0.8, 0.7, 0.6, 1.0 },
         DrawLabels = true,
@@ -233,7 +261,7 @@ local NearEarthLabels = {
     Renderable = {
         Type = "RenderableDsnLabels",
         Enabled = true,
-        ScaleFactor = 9.0,
+        ScaleFactor = 9.2,
         LabelIdentifierMap = labelMapNearEarth,
         TextColor = { 1.0, 0.6, 0.4, 1.0 },
         DrawLabels = true,
@@ -302,7 +330,7 @@ local ClusteredLabels = {
     Renderable = {
         Type = "RenderableDsnLabels",
         Enabled = true,
-        ScaleFactor = 9.0,
+        ScaleFactor = 9.2,
         LabelIdentifierMap = labelMapClusters,
         TextColor = { 0.8, 0.7, 0.6, 1.0 },
         DrawLabels = true,
