@@ -143,6 +143,30 @@ void EventHandler::initialize() {
     );
 }
 
+void EventHandler::touchPressCallback(double x, double y) {
+    if (_browserInstance) {
+        _mousePosition.x = (int)x;
+        _mousePosition.y = (int)y;
+
+        int clickCount = BrowserInstance::SingleClick;
+        _browserInstance->sendMouseClickEvent(mouseEvent(), MBT_LEFT, false, clickCount);
+    }
+}
+
+void EventHandler::touchReleaseCallback(double x, double y) {
+    if (_browserInstance) {
+        _mousePosition.x = (int)x;
+        _mousePosition.y = (int)y;
+
+        int clickCount = BrowserInstance::SingleClick;
+        _browserInstance->sendMouseClickEvent(mouseEvent(), MBT_LEFT, true, clickCount);
+    }
+}
+
+bool EventHandler::hasContentCallback(double x, double y) {
+    return _browserInstance->hasContent(x, y);
+}
+
 bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
     if (button != MouseButton::Left && button != MouseButton::Right) {
         return false;

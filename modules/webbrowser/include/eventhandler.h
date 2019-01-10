@@ -51,6 +51,9 @@ public:
     void setBrowser(const CefRefPtr<CefBrowser>& browser);
     void setBrowserInstance(BrowserInstance* browserInstance);
     void detachBrowser();
+    void touchPressCallback(double x, double y);
+    void touchReleaseCallback(double x, double y);
+    bool hasContentCallback(double, double);
 
 private:
     bool mouseButtonCallback(MouseButton button, MouseAction action);
