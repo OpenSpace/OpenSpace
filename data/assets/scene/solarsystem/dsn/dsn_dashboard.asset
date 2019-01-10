@@ -1,0 +1,55 @@
+local assetHelper = asset.require('util/asset_helper')
+
+assetHelper.registerDashboardItems(asset, {
+    {
+        Type = "DashboardItemSimulationIncrement",
+        Identifier = "SimulationIncrement",
+        GuiName = "Simulation Increment"
+    },
+    {
+        Type = "DashboardItemDistance",
+        Identifier = "Distance",
+        GuiName = "Distance"
+    },
+    {
+        Type = "DashboardItemFramerate",
+        Identifier = "Framerate",
+        GuiName = "Framerate"
+    },
+    -- {
+    --     Type = "DashboardItemMission",
+    --     Identifier = "Mission",
+    --     GuiName = "Mission"
+    -- },
+    {
+        Type = "DashboardItemPropertyValue",
+        Identifier = "Signals",
+        GuiName = "Signals",
+        URI = "Scene.Signals.Renderable.FlowSpeed",
+        DisplayString = "Signals' uplink/downlink flowspeed is {} times the speed of light"
+    },
+    {
+        Type = "DashboardItemPropertyValue",
+        Identifier = "Signals",
+        GuiName = "Signals",
+        URI = "Scene.Signals.Renderable.CanberraColor",
+        IsColorProperty = true,
+        DisplayString = "Canberra signal color "
+    },
+    {
+        Type = "DashboardItemPropertyValue",
+        Identifier = "Signals",
+        GuiName = "Signals",
+        URI = "Scene.Signals.Renderable.GoldstoneColor",
+        IsColorProperty = true,
+        DisplayString = "Goldstone signal color "
+    },
+    {
+        Type = "DashboardItemPropertyValue",
+        Identifier = "Signals",
+        GuiName = "Signals",
+        URI = "Scene.Signals.Renderable.MadridColor",
+        IsColorProperty = true,
+        DisplayString = "Madrid signal color "
+    }        
+})

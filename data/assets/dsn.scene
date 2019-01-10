@@ -22,11 +22,12 @@ asset.require('scene/solarsystem/dsn/stations')
 --Signals
 asset.require('scene/solarsystem/dsn/signals')
 
+-- Customized Dashboard
+asset.require('scene/solarsystem/dsn/dsn_dashboard')
+
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
-asset.require('util/default_dashboard')
 asset.require('util/default_joystick')
-
 asset.require('util/webgui')
 
 
