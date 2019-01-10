@@ -148,7 +148,7 @@ local DSS13 = {
 
     },
     GUI = {
-        Name = "DSS13",
+        Name = "DSS13 (Goldstone)",
         Path = "/Solar System/Stations/Goldstone"
     }
 }
@@ -176,25 +176,36 @@ local DSS14 = {
 
     },
     GUI = {
-        Name = "DSS14",
+        Name = "DSS14 (Goldstone)",
         Path = "/Solar System/Stations/Goldstone"
     }
 }
 
--- DSS15 is a 34m dish of the HEF net that is being decomissioned as of 2017
+-- DSS15 is a 34m dish of the HEF net that is being decomissioned as of 2017,
+-- now used for educational purposes
 local DSS15 = {
     Identifier = "DSS15",
     Parent = earthAsset.Earth.Identifier,
     Transform = {
- Translation = {
+        Translation = {
         Type = "GlobeTranslation",
         Globe = earthAsset.Earth.Identifier,
-        Longitude = 243.11046379722,
-        Latitude = 35.42590143888,
+        Longitude = 243.11280,
+        Latitude = 35.42185,
       }
    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
+        },
+        ColorTexture = models .. "/34m_dish/texture.png",
+        ModelTransform = RotationMatrixGoldstone,
+        LightSources = lights.StandardLights
+    },
     GUI = {
-        Name = "DSS15",
+        Name = "DSS15 (Goldstone)",
         Path = "/Solar System/Stations/Goldstone"
     }
 }
@@ -203,7 +214,7 @@ local DSS24 = {
     Identifier = "DSS24",
     Parent = earthAsset.Earth.Identifier,
     Transform = {
-     Translation = {
+        Translation = {
         Type = "GlobeTranslation",
         Globe = earthAsset.Earth.Identifier,
         Longitude = 243.12521,
@@ -223,7 +234,7 @@ local DSS24 = {
 
     },
     GUI = {
-        Name = "DSS24",
+        Name = "DSS24 (Goldstone)",
         Path = "/Solar System/Stations/Goldstone"
     }
 }
@@ -251,7 +262,7 @@ local DSS25 = {
 
     },
     GUI = {
-        Name = "DSS25",
+        Name = "DSS25 (Goldstone)",
         Path = "/Solar System/Stations/Goldstone"
     }
 }
@@ -279,7 +290,7 @@ local DSS26 = {
 
     },
     GUI = {
-        Name = "DSS26",
+        Name = "DSS26 (Goldstone)",
         Path = "/Solar System/Stations/Goldstone"
     }
 }
@@ -310,7 +321,7 @@ local DSS43 = {
 
     },
     GUI = {
-        Name = "DSS43",
+        Name = "DSS43 (Canberra)",
         Path = "/Solar System/Stations/Canberra"
     }
 }
@@ -338,7 +349,7 @@ local DSS34 = {
 
     },
     GUI = {
-        Name = "DSS34",
+        Name = "DSS34 (Canberra)",
         Path = "/Solar System/Stations/Canberra"
     }
 }
@@ -366,7 +377,7 @@ local DSS35 = {
 
     },
     GUI = {
-        Name = "DSS35",
+        Name = "DSS35 (Canberra)",
         Path = "/Solar System/Stations/Canberra"
     }
 }
@@ -394,7 +405,7 @@ local DSS36 = {
 
     },
     GUI = {
-        Name = "DSS36",
+        Name = "DSS36 (Canberra)",
         Path = "/Solar System/Stations/Canberra"
     }
 }
@@ -423,7 +434,7 @@ local DSS45 = {
 
     },
     GUI = {
-        Name = "DSS45",
+        Name = "DSS45 (Canberra)",
         Path = "/Solar System/Stations/Canberra"
     }
 }
@@ -454,7 +465,7 @@ local DSS63 = {
 
     },
     GUI = {
-        Name = "DSS63",
+        Name = "DSS63 (Madrid)",
         Path = "/Solar System/Stations/Madrid"
     }
 }
@@ -482,7 +493,7 @@ local DSS65 = {
 
     },
     GUI = {
-        Name = "DSS65",
+        Name = "DSS65 (Madrid)",
         Path = "/Solar System/Stations/Madrid"
     }
 }
@@ -510,7 +521,7 @@ local DSS54 = {
 
     },
     GUI = {
-        Name = "DSS54",
+        Name = "DSS54 (Madrid)",
         Path = "/Solar System/Stations/Madrid"
     }
 }
@@ -538,7 +549,7 @@ local DSS55 = {
 
     },
     GUI = {
-        Name = "DSS55",
+        Name = "DSS55 (Madrid)",
         Path = "/Solar System/Stations/Madrid"
     }
 }
