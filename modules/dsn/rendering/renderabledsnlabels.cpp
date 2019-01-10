@@ -46,6 +46,7 @@ namespace {
     constexpr const char* KeyObjectIdentifier = "ObjectIdentifier";
     constexpr const char* KeyLabelText = "LabelText";
     constexpr const char* KeyTextColor = "TextColor";
+    constexpr const char* keyTimeFrame = "TimeFrame";
 
     constexpr openspace::properties::Property::PropertyInfo LabelIdentifierMapInfo = {
         "LabelIdentifierMap",
@@ -268,6 +269,18 @@ namespace openspace {
                 ghoul::Dictionary labelInfoDictionary = tempLabelIdMap.value<ghoul::Dictionary>(labels.at(i));
                 LabelInfo labelInfo;
                 labelInfo.text = labelInfoDictionary.value<std::string>(KeyLabelText);
+                
+                if (labelInfoDictionary.hasKey(keyTimeFrame)) {
+                    ghoul::Dictionary timeFrameDictionary = labelInfoDictionary.value<ghoul::Dictionary>(keyTimeFrame);
+
+                    std::string startTime = timeFrameDictionary.value <std::string>("Start");
+                    std::string endTime = timeFrameDictionary.value <std::string>("End");
+
+                    labelInfo.startTime = Time::convertTime(startTime);
+                    labelInfo.endTime = Time::convertTime(endTime);
+
+                    labelInfo.hasKeyTimeFrame = true;
+                }
 
                 if (labelInfoDictionary.hasKey(KeyTextColor)) {
                     labelInfo.textColor = labelInfoDictionary.value<glm::vec4>(KeyTextColor);
@@ -375,7 +388,7 @@ namespace openspace {
     }
 
     void RenderableDsnLabels::initialize() {
-        bool success = loadData();
+        bool success = loadData(0);
         if (!success) {
             throw ghoul::RuntimeError("Error with identifiers for labels");
         }
@@ -407,7 +420,7 @@ namespace openspace {
 
         if (_hasLabelIdMap) {
             _labelData.clear();
-            loadLabelDataFromId();
+            loadLabelDataFromId(data.time);
         }
         for (const std::tuple<glm::dvec3, std::string, glm::vec4>& label : _labelData) {
 
@@ -415,7 +428,7 @@ namespace openspace {
             glm::dvec3 nodePos = std::get<0>(label);
             std::string labelText = std::get<1>(label);
             glm::vec4 labelTextColor = std::get<2>(label);
-          
+
             glm::vec4 textColor = labelTextColor;
 
             // The distance from the camera to the SceneGraphNode of the label
@@ -530,37 +543,38 @@ namespace openspace {
         }
     }
 
-    bool RenderableDsnLabels::loadData() {
+    bool RenderableDsnLabels::loadData(const Time& time) {
         bool success = true;
 
         if (_hasLabelIdMap) {
-
-            success &= loadLabelDataFromId();
+            
+            success &= loadLabelDataFromId(time);
         }
         return success;
     }
 
-
-    bool RenderableDsnLabels::loadLabelDataFromId() {
-
+    bool RenderableDsnLabels::loadLabelDataFromId(const Time& time) {
         for (int i = 0; i < labelDataInfo.size(); i++) {
             LabelInfo labelinfo = labelDataInfo.at(i);
-
-            if (global::renderEngine.scene()->sceneGraphNode(labelinfo.attachedId)) {
-
-                glm::dvec3 position = global::renderEngine.scene()->sceneGraphNode(labelinfo.attachedId)->worldPosition();
-
-                glm::dvec3 transformedPos = glm::dvec3(
-                    _transformationMatrix * glm::dvec4(position, 1.0)
-                );
-                _labelData.emplace_back(std::make_tuple(transformedPos, labelinfo.text, labelinfo.textColor));
-
-            }
-            else {
-                LERROR(fmt::format("No SceneGraphNode found with identifier {}", labelinfo.attachedId));
-                return false;
-            }
+            double currentTime = time.j2000Seconds();
+           
+            bool inTimeFrame = (currentTime > labelinfo.startTime && currentTime < labelinfo.endTime);
+            if ( (labelinfo.hasKeyTimeFrame == true && inTimeFrame) || labelinfo.hasKeyTimeFrame == false) {
         
+                if (global::renderEngine.scene()->sceneGraphNode(labelinfo.attachedId)) {
+
+                    glm::dvec3 position = global::renderEngine.scene()->sceneGraphNode(labelinfo.attachedId)->worldPosition();
+
+                    glm::dvec3 transformedPos = glm::dvec3(
+                        _transformationMatrix * glm::dvec4(position, 1.0)
+                    );
+                    _labelData.emplace_back(std::make_tuple(transformedPos, labelinfo.text, labelinfo.textColor));
+                }
+                else {
+                    LERROR(fmt::format("No SceneGraphNode found with identifier {}", labelinfo.attachedId));
+                    return false;
+                }
+            }
         }
 
         return true;
