@@ -4,8 +4,13 @@ local spacecrafts = asset.require('scene/solarsystem/dsn/spacecrafts')
 --------------------------------------------------
 --------------------- Labels  --------------------
 --------------------------------------------------
+
 local CassiniLabel = {
     LabelText = ".Cassini",
+    TimeFrame = { 
+        Start = "2014-002T18:00:00",
+        End = "2017-258T14:00:00"
+    },
     ObjectIdentifier = spacecrafts.CassiniAsset.spacecraftID
 }
 local ChandraXrayLabel = {
@@ -14,22 +19,42 @@ local ChandraXrayLabel = {
 }
 local DawnLabel = {
     LabelText = ".Dawn",
+    TimeFrame = { 
+        Start = "2014-003T16:00:00",
+        End = "2018-257T01:00:00"
+    },
     ObjectIdentifier = spacecrafts.DawnAsset.spacecraftID
 }
 local GaiaLabel = {
     LabelText = ".Gaia",
+    TimeFrame = { 
+        Start = "2018-100T15:00:00",
+        End = "2018-154T06:00:00"
+    },
     ObjectIdentifier = spacecrafts.GaiaAsset.spacecraftID
 }
 local GenesisLabel = {
     LabelText = ".Genesis",
+    TimeFrame = { 
+        Start = "2015-254T21:00:00",
+        End = "2015-254T22:00:00"
+    },
     ObjectIdentifier = spacecrafts.GenesisAsset.spacecraftID
 }
 local Hayabusa2Label = {
     LabelText = ".Hayabusa 2",
+    TimeFrame = { 
+        Start = "2014-337T06:00:00",
+        End = "2018-363T13:00:00"
+    },
     ObjectIdentifier = spacecrafts.Hayabusa2Asset.spacecraftID
 }
 local IceLabel = {
     LabelText = ".Ice",
+    TimeFrame = { 
+        Start = "2014-169T20:00:00",
+        End = "2014-192T16:00:00"
+    },
     ObjectIdentifier = spacecrafts.IceAsset.spacecraftID
 }
 local JunoLabel = {
@@ -45,11 +70,15 @@ local MarsRecOrbLabel = {
     ObjectIdentifier = spacecrafts.MarsRecOrbAsset.spacecraftID
 }
 local MarsOdysseyLabel = {
-    LabelText = ".Mars Odyssey",
+    LabelText= ".Mars Odyssey",
     ObjectIdentifier = spacecrafts.MarsOdysseyAsset.spacecraftID
 }
 local MessengerLabel = {
     LabelText = ".Messenger",
+    TimeFrame = { 
+        Start = "2014-002T01:00:00",
+        End = "2015-121T05:00:00"
+    },
     ObjectIdentifier = spacecrafts.MessengerAsset.spacecraftID
 }
 local NewHorizonsLabel = {
@@ -57,7 +86,7 @@ local NewHorizonsLabel = {
     ObjectIdentifier = spacecrafts.NewHorizonsAsset.spacecraftID
 }
 local SohoLabel = {
-    LabelText = ".Solar & Heliospheric Observatory",
+    LabelText = ".Soho",
     ObjectIdentifier = spacecrafts.SohoAsset.spacecraftID
 }
 local SpitzerLabel = {
@@ -70,10 +99,19 @@ local StereoALabel = {
 }
 local StereoBLabel = {
     LabelText = ".Stereo B",
+    TimeFrame = { 
+        Start = "2014-001T00:00:00",
+        End = "2018-290T09:00:00"
+    },
     ObjectIdentifier = spacecrafts.StereoBAsset.spacecraftID
 }
+--Transit exoplanet Survey Satellite
 local TessLabel = {
-    LabelText = ".Transit Exoplanet Survey Satellite",
+    LabelText = ".Tess",
+    TimeFrame = { 
+        Start = "2018-108T23:00:00",
+        End = "2019-001T01:00:00"
+    },
     ObjectIdentifier = spacecrafts.TessAsset.spacecraftID
 }
 local ThemisBLabel = {
@@ -86,6 +124,10 @@ local ThemisCLabel = {
 }
 local TraceGasOrbiterLabel = {
     LabelText = ".Trace Gas Orbiter",
+    TimeFrame = { 
+        Start = "2016-012T12:00:00",
+        End = "2018-364T23:00:00"
+    },
     ObjectIdentifier = spacecrafts.TraceGasOrbiterAsset.spacecraftID
 }
 local Voyager1Label = {
@@ -100,6 +142,7 @@ local WindLabel = {
     LabelText = ".Wind",
     ObjectIdentifier = spacecrafts.WindAsset.spacecraftID
 }
+
 
 --------------------------------------------------
 ----------------- Cluster Labels  ----------------

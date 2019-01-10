@@ -34,6 +34,7 @@
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
+#include <openspace/util/updatestructures.h>
 
 namespace ghoul::fontrendering { class Font; }
 
@@ -54,7 +55,6 @@ namespace openspace {
         void render(const RenderData& data, RendererTasks& rendererTask) override;
 
         static documentation::Documentation Documentation();
-
     private:
 
         double _fadeInDistanceUnit = 1E10;
@@ -65,14 +65,16 @@ namespace openspace {
             const glm::dvec3& orthoRight, const glm::dvec3& orthoUp);
         void updateTextColor();
 
-        bool loadData();
-        bool loadLabelDataFromId();
+        bool loadData(const Time& time);
+        bool loadLabelDataFromId(const Time& time);
 
         bool _hasStaticLabelSize = false;
         bool _dataIsDirty = true;
         bool _textColorIsDirty = true;
         bool _hasLabel = false;
         bool _hasLabelIdMap = false;
+      
+
         double maxMinNormalize(double value, glm::dvec2 newRange, glm::dvec2 oldRange);
 
         properties::FloatProperty _scaleFactor;
@@ -94,6 +96,9 @@ namespace openspace {
             std::string text;
             glm::vec4 textColor;
             std::string attachedId;
+            double startTime; 
+            double endTime;
+            bool hasKeyTimeFrame = false;
             bool hasIndividualColor = false;
         };
 
