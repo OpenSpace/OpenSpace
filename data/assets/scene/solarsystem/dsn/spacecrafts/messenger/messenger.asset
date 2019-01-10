@@ -22,7 +22,7 @@ local Messenger = {
    },
     GUI = {
         Name = "Messenger",
-        Path = "/Solar System/Messenger"
+        Path = "/Solar System/Missions/Messenger"
     }
 }
 asset.export("spacecraftID", spacecraftID)

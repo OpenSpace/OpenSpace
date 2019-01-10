@@ -22,7 +22,7 @@ local Wind = {
    },
     GUI = {
         Name = "Wind",
-        Path = "/Solar System/Wind"
+        Path = "/Solar System/Missions/Wind"
     }
 }
 asset.export("spacecraftID", spacecraftID)

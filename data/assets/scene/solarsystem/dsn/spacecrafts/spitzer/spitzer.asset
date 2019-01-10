@@ -22,7 +22,7 @@ local Spitzer = {
    },
     GUI = {
         Name = "Spitzer",
-        Path = "/Solar System/Spitzer"
+        Path = "/Solar System/Missions/Spitzer"
     }
 }
 asset.export("spacecraftID", spacecraftID)

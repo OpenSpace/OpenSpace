@@ -22,7 +22,7 @@ local ChandraXray = {
    },
     GUI = {
         Name = "ChandraXray",
-        Path = "/Solar System/ChandraXray"
+        Path = "/Solar System/Missions/ChandraXray"
     }
 }
 asset.export("spacecraftID", spacecraftID)

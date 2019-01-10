@@ -18,11 +18,10 @@ local Cassini = {
           DataFileType = "json",
           ObjectIdentifier = spacecraftID
       }
-
    },
     GUI = {
         Name = "Cassini",
-        Path = "/Solar System/Cassini"
+        Path = "/Solar System/Missions/Cassini"
     }
 }
 asset.export("spacecraftID", spacecraftID)

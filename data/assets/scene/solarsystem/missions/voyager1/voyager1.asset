@@ -54,8 +54,8 @@ local Voyager1Main = {
         LightSources = lights.StandardLights
     },
     GUI = {
-        Name = "Voyager 1 Main",
-        Path = "/Solar System/Missions/Voyager 1"
+        Name = "Voyager 1 Main model",
+        Path = "/Solar System/Missions/Voyager 1/3D Model"
     }
 }
 
@@ -73,8 +73,8 @@ local Voyager1Antenna = {
         LightSources = lights.StandardLights
     },
     GUI = {
-        Name = "Voyager 1 Antenna",
-        Path = "/Solar System/Missions/Voyager 1"
+        Name = "Voyager 1 Antenna model",
+        Path = "/Solar System/Missions/Voyager 1/3D Model"
     }
 }
 

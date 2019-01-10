@@ -22,7 +22,7 @@ local StereoB = {
    },
     GUI = {
         Name = "StereoB",
-        Path = "/Solar System/StereoB"
+        Path = "/Solar System/Missions/StereoB"
     }
 }
 asset.export("spacecraftID", spacecraftID)

@@ -22,7 +22,7 @@ local Ice = {
    },
     GUI = {
         Name = "Ice",
-        Path = "/Solar System/Ice"
+        Path = "/Solar System/Missions/Ice"
     }
 }
 asset.export("spacecraftID", spacecraftID)

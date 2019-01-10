@@ -22,7 +22,7 @@ local Kepler = {
    },
     GUI = {
         Name = "Kepler",
-        Path = "/Solar System/Kepler"
+        Path = "/Solar System/Missions/Kepler"
     }
 }
 asset.export("spacecraftID", spacecraftID)

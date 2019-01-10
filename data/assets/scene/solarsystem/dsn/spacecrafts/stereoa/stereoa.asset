@@ -25,7 +25,7 @@ local StereoA = {
     },
     GUI = {
         Name = "Stereo A",
-        Path = "/Solar System/Missions/Stereo/Stereo A"
+        Path = "/Solar System/Missions/Stereo A/Stereo A"
     }
 }
 
@@ -49,8 +49,8 @@ local StereoAModel = {
         LightSources = lights.StandardLights
     },
     GUI = {
-        Name = "3D Model",
-        Path = "/Solar System/Missions/Stereo A"
+        Name = "StereoA model",
+        Path = "/Solar System/Missions/Stereo A/3D Model"
     }
 }
 

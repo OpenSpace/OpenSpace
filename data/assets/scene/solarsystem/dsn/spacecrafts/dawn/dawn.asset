@@ -22,7 +22,7 @@ local Dawn = {
    },
     GUI = {
         Name = "Dawn",
-        Path = "/Solar System/Dawn"
+        Path = "/Solar System/Missions/Dawn"
     }
 }
 asset.export("spacecraftID", spacecraftID)

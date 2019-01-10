@@ -22,7 +22,7 @@ local TraceGasOrbiter = {
    },
     GUI = {
         Name = "TraceGasOrbiter",
-        Path = "/Solar System/TraceGasOrbiter"
+        Path = "/Solar System/Missions/TraceGasOrbiter"
     }
 }
 asset.export("spacecraftID", spacecraftID)

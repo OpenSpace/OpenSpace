@@ -22,7 +22,7 @@ local Juno = {
    },
     GUI = {
         Name = "Juno",
-        Path = "/Solar System/Juno"
+        Path = "/Solar System/Missions/Juno"
     }
 }
 asset.export("spacecraftID", spacecraftID)

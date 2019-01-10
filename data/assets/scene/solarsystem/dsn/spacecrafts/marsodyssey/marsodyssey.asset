@@ -43,8 +43,8 @@ local MarsOdysseyModel = {
         LightSources = lights.StandardLights
     },
     GUI = {
-        Name = "3D Model",
-        Path = "/Solar System/Missions/Mars Odyssey"
+        Name = "Mars Odyssey model",
+        Path = "/Solar System/Missions/Mars Odyssey/3D Model"
     }
 }
 

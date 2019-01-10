@@ -22,7 +22,7 @@ local ThemisC = {
    },
     GUI = {
         Name = "ThemisC",
-        Path = "/Solar System/ThemisC"
+        Path = "/Solar System/Missions/ThemisC"
     }
 }
 asset.export("spacecraftID", spacecraftID)

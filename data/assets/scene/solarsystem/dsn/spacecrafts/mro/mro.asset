@@ -11,7 +11,7 @@ local models = asset.syncedResource({
     Version = 1
 })
 
-local spacecraftID = "MarsRecOrbiter"
+local spacecraftID = "MRO"
 
 local MarsRecOrbiter = {
     Identifier = spacecraftID,
@@ -25,8 +25,8 @@ local MarsRecOrbiter = {
         }      
     },
     GUI = {
-        Name = "Mars Recon Orbiter",
-        Path = "/Solar System/Missions/Mars Recon Orbiter"
+        Name = "MRO",
+        Path = "/Solar System/Missions/MRO"
     }
 }
 
@@ -43,8 +43,8 @@ local MarsRecOrbiterModel = {
         LightSources = lights.StandardLights
     },
     GUI = {
-        Name = "3D Model",
-        Path = "/Solar System/Missions/Mars Recon Orbiter"
+        Name = "MRO model",
+        Path = "/Solar System/Missions/MRO/3D Model"
     }
 }
 

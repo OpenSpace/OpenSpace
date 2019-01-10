@@ -22,7 +22,7 @@ local Soho = {
    },
     GUI = {
         Name = "Soho",
-        Path = "/Solar System/Soho"
+        Path = "/Solar System/Missions/Soho"
     }
 }
 asset.export("spacecraftID", spacecraftID)

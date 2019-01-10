@@ -1,3 +1,4 @@
+-- Transit Exoplanet Survey (TESS)
 local assetHelper = asset.require('util/asset_helper')
 local dataFolder = openspace.absPath("${SYNC}/http/dsn_data/1/positioning/TESS") 
 
@@ -7,7 +8,7 @@ local models = asset.syncedResource({
     Identifier = "dsn_stations",
     Version = 1
 })
-local spacecraftID = "TransitExoplanetSurvey";
+local spacecraftID = "Tess";
 
 local TransitExoplanetSurvey = {
     Identifier = spacecraftID,
@@ -21,8 +22,8 @@ local TransitExoplanetSurvey = {
 
    },
     GUI = {
-        Name = "TransitExoplanetSurvey",
-        Path = "/Solar System/TransitExoplanetSurvey"
+        Name = "TESS",
+        Path = "/Solar System/Missions/TESS"
     }
 }
 asset.export("spacecraftID", spacecraftID)

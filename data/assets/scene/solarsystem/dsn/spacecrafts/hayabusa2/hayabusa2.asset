@@ -22,7 +22,7 @@ local Hayabusa2 = {
    },
     GUI = {
         Name = "Hayabusa2",
-        Path = "/Solar System/Hayabusa2"
+        Path = "/Solar System/Missions/Hayabusa2"
     }
 }
 asset.export("spacecraftID", spacecraftID)

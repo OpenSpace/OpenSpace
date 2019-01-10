@@ -22,7 +22,7 @@ local Genesis = {
    },
     GUI = {
         Name = "Genesis",
-        Path = "/Solar System/Genesis"
+        Path = "/Solar System/Missions/Genesis"
     }
 }
 asset.export("spacecraftID", spacecraftID)
