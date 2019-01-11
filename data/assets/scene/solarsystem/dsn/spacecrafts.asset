@@ -20,6 +20,7 @@ local MarsCubeSatBAsset = asset.require('scene/solarsystem/dsn/spacecrafts/marsc
 local MarsRecOrbAsset = asset.require('scene/solarsystem/dsn/spacecrafts/mro/mro')
 local MarsOdysseyAsset = asset.require('scene/solarsystem/dsn/spacecrafts/marsodyssey/marsodyssey')
 local MessengerAsset = asset.require('scene/solarsystem/dsn/spacecrafts/messenger/messenger')
+local MomAsset = asset.require('scene/solarsystem/dsn/spacecrafts/mom/mom')
 local NewHorizonsAsset = asset.require('scene/solarsystem/dsn/spacecrafts/newHorizons/newhorizons')
 local OpportunityAsset = asset.require('scene/solarsystem/dsn/spacecrafts/opportunity/opportunity')
 local SohoAsset = asset.require('scene/solarsystem/dsn/spacecrafts/soho/soho')
@@ -51,6 +52,7 @@ local signalDataIdMap = {
     MCOB = MarsCubeSatBAsset.spacecraftID,
     MRE1 = OpportunityAsset.spacecraftID,
     MRO = MarsRecOrbAsset.spacecraftID,
+    MOM = MomAsset.spacecraftID,
     M010 = MarsOdysseyAsset.spacecraftID,
     MSGR = MessengerAsset.spacecraftID,
     NHPC = NewHorizonsAsset.spacecraftID,
@@ -85,6 +87,7 @@ asset.export("MarsCubeSatBAsset", MarsCubeSatBAsset)
 asset.export("MarsRecOrbAsset", MarsRecOrbAsset)
 asset.export("MarsOdysseyAsset", MarsOdysseyAsset)
 asset.export("MessengerAsset", MessengerAsset)
+asset.export("MomAsset", MomAsset)
 asset.export("NewHorizonsAsset", NewHorizonsAsset)
 asset.export("OpportunityAsset", OpportunityAsset)
 asset.export("SohoAsset", SohoAsset)

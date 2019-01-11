@@ -101,6 +101,10 @@ local MessengerLabel = {
     },
     ObjectIdentifier = spacecrafts.MessengerAsset.spacecraftID
 }
+local MomLabel = {
+    LabelText = ".MOM",
+    ObjectIdentifier = spacecrafts.MomAsset.spacecraftID
+}
 local NewHorizonsLabel = {
     LabelText = ".New Horizons",
     ObjectIdentifier = spacecrafts.NewHorizonsAsset.spacecraftID
@@ -173,7 +177,7 @@ local WindLabel = {
 --------------------------------------------------
 
 local MarsClusterLabel = {
-    LabelText = "MarsOdyssey, \n Mars Recon Orbiter ",
+    LabelText = "MarsOdyssey, MRO, Opportunity, MOM",
     ObjectIdentifier = "Mars"
 }
 
@@ -182,8 +186,10 @@ local MarsClusterLabel = {
 -----------------------------------------------
 local labelMapMarsMissions = {  
                         Label1 = MarsRecOrbLabel,
-                        Label2 = MarsOdysseyLabel
-
+                        Label2 = MarsOdysseyLabel,
+                        label3 = OpportunityLabel,
+                        label4 = MomLabel,
+                        label5 = TraceGasOrbiterLabel
                     }
 
 local labelMapOuterSpace = {  
@@ -204,10 +210,9 @@ local labelMapInnerSpace = {
                             label8 = GenesisLabel,
                             label9 = Hayabusa2Label,
                             label10 = MessengerLabel,
-                            label11 = TraceGasOrbiterLabel,
                             label12 = MarsCubeSatALabel,
-                            label13 = MarsCubeSatBLabel,
-                            label14 = OpportunityLabel
+                            label13 = MarsCubeSatBLabel
+
                         }
 
 local labelMapNearEarth = {  
@@ -220,8 +225,6 @@ local labelMapNearEarth = {
                             label7 = IceLabel,
                             label8 = TessLabel,
                             label9 = GeotailLabel
-
-
                         }
 local labelMapClusters = {  
                             Label1 = MarsClusterLabel
@@ -332,7 +335,7 @@ local ClusteredLabels = {
         Enabled = true,
         ScaleFactor = 9.2,
         LabelIdentifierMap = labelMapClusters,
-        TextColor = { 0.8, 0.7, 0.6, 1.0 },
+        TextColor = { 1.0, 0.7, 0.3, 1.0 },
         DrawLabels = true,
         LabelSizeRange = {5.5, 5.8},
         SizeDistanceRange = {2, 100000000},
