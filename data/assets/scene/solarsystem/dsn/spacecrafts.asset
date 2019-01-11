@@ -7,12 +7,14 @@ local Voyager2Asset = asset.require('scene/solarsystem/missions/voyager2/voyager
 -- added specifically for dsn visualization
 local CassiniAsset = asset.require('scene/solarsystem/dsn/spacecrafts/cassini/cassini')
 local ChandraXrayAsset = asset.require('scene/solarsystem/dsn/spacecrafts/chandraxray/chandraxray')
+local CuriosityAsset = asset.require('scene/solarsystem/dsn/spacecrafts/curiosity/curiosity')
 local DawnAsset = asset.require('scene/solarsystem/dsn/spacecrafts/dawn/dawn')
 local GaiaAsset = asset.require('scene/solarsystem/dsn/spacecrafts/gaia/gaia')
 local GenesisAsset = asset.require('scene/solarsystem/dsn/spacecrafts/genesis/genesis')
 local GeotailAsset = asset.require('scene/solarsystem/dsn/spacecrafts/geotail/geotail')
 local Hayabusa2Asset = asset.require('scene/solarsystem/dsn/spacecrafts/hayabusa2/hayabusa2')
 local IceAsset = asset.require('scene/solarsystem/dsn/spacecrafts/ice/ice')
+local InSightAsset = asset.require('scene/solarsystem/dsn/spacecrafts/insight/insight')
 local JunoAsset = asset.require('scene/solarsystem/dsn/spacecrafts/juno/juno')
 local KeplerAsset = asset.require('scene/solarsystem/dsn/spacecrafts/kepler/kepler')
 local MarsCubeSatAAsset = asset.require('scene/solarsystem/dsn/spacecrafts/marscubesata/marscubesata')
@@ -23,6 +25,8 @@ local MessengerAsset = asset.require('scene/solarsystem/dsn/spacecrafts/messenge
 local MomAsset = asset.require('scene/solarsystem/dsn/spacecrafts/mom/mom')
 local NewHorizonsAsset = asset.require('scene/solarsystem/dsn/spacecrafts/newHorizons/newhorizons')
 local OpportunityAsset = asset.require('scene/solarsystem/dsn/spacecrafts/opportunity/opportunity')
+local OsirisRexAsset = asset.require('scene/solarsystem/dsn/spacecrafts/osirisrex/osirisrex')
+local PlanetCAsset = asset.require('scene/solarsystem/dsn/spacecrafts/planetc/planetc')
 local SohoAsset = asset.require('scene/solarsystem/dsn/spacecrafts/soho/soho')
 local SpitzerAsset = asset.require('scene/solarsystem/dsn/spacecrafts/spitzer/spitzer')
 local StereoAAsset = asset.require('scene/solarsystem/dsn/spacecrafts/stereoa/stereoa')
@@ -48,14 +52,18 @@ local signalDataIdMap = {
     DAWN = DawnAsset.spacecraftID,
     JNO = JunoAsset.spacecraftID,
     KEPL = KeplerAsset.spacecraftID,
+    M010 = MarsOdysseyAsset.spacecraftID,
     MCOA = MarsCubeSatAAsset.spacecraftID,
     MCOB = MarsCubeSatBAsset.spacecraftID,
     MRE1 = OpportunityAsset.spacecraftID,
     MRO = MarsRecOrbAsset.spacecraftID,
     MOM = MomAsset.spacecraftID,
-    M010 = MarsOdysseyAsset.spacecraftID,
     MSGR = MessengerAsset.spacecraftID,
+    MSL = CuriosityAsset.spacecraftID,
     NHPC = NewHorizonsAsset.spacecraftID,
+    NSYT = InSightAsset.spacecraftID,
+    ORX = OsirisRexAsset.spacecraftID,
+    PLC = PlanetCAsset.spacecraftID,
     SOHO = SohoAsset.spacecraftID,
     STF = SpitzerAsset.spacecraftID,
     STA = StereoAAsset.spacecraftID,
@@ -74,12 +82,14 @@ asset.export("signalDataIdMap", signalDataIdMap)
 
 asset.export("CassiniAsset", CassiniAsset)
 asset.export("ChandraXrayAsset", ChandraXrayAsset)
+asset.export("CuriosityAsset", CuriosityAsset)
 asset.export("DawnAsset", DawnAsset)
 asset.export("GaiaAsset", GaiaAsset)
 asset.export("GenesisAsset", GenesisAsset)
 asset.export("GeotailAsset", GeotailAsset)
 asset.export("Hayabusa2Asset", Hayabusa2Asset)
 asset.export("IceAsset", IceAsset)
+asset.export("InSightAsset", InSightAsset)
 asset.export("JunoAsset", JunoAsset)
 asset.export("KeplerAsset", KeplerAsset)
 asset.export("MarsCubeSatAAsset", MarsCubeSatAAsset)
@@ -90,6 +100,8 @@ asset.export("MessengerAsset", MessengerAsset)
 asset.export("MomAsset", MomAsset)
 asset.export("NewHorizonsAsset", NewHorizonsAsset)
 asset.export("OpportunityAsset", OpportunityAsset)
+asset.export("OsirisRexAsset", OsirisRexAsset)
+asset.export("PlanetCAsset", PlanetCAsset)
 asset.export("SohoAsset", SohoAsset)
 asset.export("SpitzerAsset", SpitzerAsset)
 asset.export("StereoAAsset", StereoAAsset)

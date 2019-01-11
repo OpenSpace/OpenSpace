@@ -17,6 +17,10 @@ local ChandraXrayLabel = {
     LabelText = ".Chandra Xray",
     ObjectIdentifier = spacecrafts.ChandraXrayAsset.spacecraftID
 }
+local CuriosityLabel = {
+    LabelText = ".Curiosity",
+    ObjectIdentifier = spacecrafts.CuriosityAsset.spacecraftID
+}
 local DawnLabel = {
     LabelText = ".Dawn",
     TimeFrame = { 
@@ -60,6 +64,14 @@ local IceLabel = {
         End = "2014-192T16:00:00"
     },
     ObjectIdentifier = spacecrafts.IceAsset.spacecraftID
+}
+local InSightLabel = {
+    LabelText = ".InSight",
+    TimeFrame = { 
+        Start = "2017-142T18:00:00",
+        End = "2018-365T11:00:00"
+    },
+    ObjectIdentifier = spacecrafts.InSightAsset.spacecraftID
 }
 local JunoLabel = {
     LabelText = ".Juno",
@@ -112,6 +124,22 @@ local NewHorizonsLabel = {
 local OpportunityLabel = {
     LabelText = ".Oppurtunity",
     ObjectIdentifier = spacecrafts.OpportunityAsset.spacecraftID
+}
+local OsirisRexLabel = {
+    LabelText = ".Osiris Rex",
+    TimeFrame = { 
+        Start = "2016-253T07:00:00",
+        End = "2019-001T04:00:00"
+    },
+    ObjectIdentifier = spacecrafts.OsirisRexAsset.spacecraftID
+}
+local PlanetCLabel = {
+    LabelText = ".Planet C",
+    TimeFrame = { 
+        Start = "2015-019T15:00:00",
+        End = "2018-239T01:00:00"
+    },
+    ObjectIdentifier = spacecrafts.PlanetCAsset.spacecraftID
 }
 local SohoLabel = {
     LabelText = ".Soho",
@@ -177,7 +205,7 @@ local WindLabel = {
 --------------------------------------------------
 
 local MarsClusterLabel = {
-    LabelText = "MarsOdyssey, MRO, Opportunity, MOM",
+    LabelText = "MarsOdyssey, MRO, Opportunity, MOM, TGO, Curiosity",
     ObjectIdentifier = "Mars"
 }
 
@@ -189,7 +217,9 @@ local labelMapMarsMissions = {
                         Label2 = MarsOdysseyLabel,
                         label3 = OpportunityLabel,
                         label4 = MomLabel,
-                        label5 = TraceGasOrbiterLabel
+                        label5 = TraceGasOrbiterLabel,
+                        label6 = CuriosityLabel
+
                     }
 
 local labelMapOuterSpace = {  
@@ -211,7 +241,10 @@ local labelMapInnerSpace = {
                             label9 = Hayabusa2Label,
                             label10 = MessengerLabel,
                             label12 = MarsCubeSatALabel,
-                            label13 = MarsCubeSatBLabel
+                            label13 = MarsCubeSatBLabel,
+                            label14 = InSightLabel,
+                            label15 = OsirisRexLabel,
+                            label16 = PlanetCLabel
 
                         }
 
