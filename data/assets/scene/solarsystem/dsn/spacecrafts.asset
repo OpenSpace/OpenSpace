@@ -6,7 +6,7 @@ local Voyager2Asset = asset.require('scene/solarsystem/missions/voyager2/voyager
 
 -- added specifically for dsn visualization
 local CassiniAsset = asset.require('scene/solarsystem/dsn/spacecrafts/cassini/cassini')
-local ChandraXrayAsset = asset.require('scene/solarsystem/dsn/spacecrafts/chandraxray/chandraxray')
+local ChandraAsset = asset.require('scene/solarsystem/dsn/spacecrafts/chandra/chandra')
 local DawnAsset = asset.require('scene/solarsystem/dsn/spacecrafts/dawn/dawn')
 local GaiaAsset = asset.require('scene/solarsystem/dsn/spacecrafts/gaia/gaia')
 local GenesisAsset = asset.require('scene/solarsystem/dsn/spacecrafts/genesis/genesis')
@@ -44,7 +44,7 @@ local signalDataIdMap = {
     GTL = GeotailAsset.spacecraftID,
     HYB2 = Hayabusa2Asset.spacecraftID,
     ICE = IceAsset.spacecraftID,
-    CHDR = ChandraXrayAsset.spacecraftID,
+    CHDR = ChandraAsset.spacecraftID,
     DAWN = DawnAsset.spacecraftID,
     JNO = JunoAsset.spacecraftID,
     KEPL = KeplerAsset.spacecraftID,
@@ -73,7 +73,7 @@ local signalDataIdMap = {
 asset.export("signalDataIdMap", signalDataIdMap)
 
 asset.export("CassiniAsset", CassiniAsset)
-asset.export("ChandraXrayAsset", ChandraXrayAsset)
+asset.export("ChandraAsset", ChandraAsset)
 asset.export("DawnAsset", DawnAsset)
 asset.export("GaiaAsset", GaiaAsset)
 asset.export("GenesisAsset", GenesisAsset)

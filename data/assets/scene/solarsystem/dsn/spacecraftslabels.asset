@@ -13,9 +13,9 @@ local CassiniLabel = {
     },
     ObjectIdentifier = spacecrafts.CassiniAsset.spacecraftID
 }
-local ChandraXrayLabel = {
-    LabelText = ".Chandra Xray",
-    ObjectIdentifier = spacecrafts.ChandraXrayAsset.spacecraftID
+local ChandraLabel = {
+    LabelText = ".Chandra",
+    ObjectIdentifier = spacecrafts.ChandraAsset.spacecraftID
 }
 local DawnLabel = {
     LabelText = ".Dawn",
@@ -217,7 +217,7 @@ local labelMapInnerSpace = {
 
 local labelMapNearEarth = {  
                             Label1 = GaiaLabel,
-                            Label2 = ChandraXrayLabel, 
+                            Label2 = ChandraLabel, 
                             label3 = ThemisBLabel,
                             label4 = ThemisCLabel,
                             label5 = WindLabel,

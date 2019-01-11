@@ -7,9 +7,9 @@ local models = asset.syncedResource({
     Identifier = "dsn_stations",
     Version = 1
 })
-local spacecraftID = "ChandraXray";
+local spacecraftID = "Chandra";
 
-local ChandraXray = {
+local Chandra = {
     Identifier = spacecraftID,
     Transform = {
       Translation = {
@@ -21,9 +21,9 @@ local ChandraXray = {
 
    },
     GUI = {
-        Name = "ChandraXray",
-        Path = "/Solar System/Missions/ChandraXray"
+        Name = "Chandra",
+        Path = "/Solar System/Missions/Chandra"
     }
 }
 asset.export("spacecraftID", spacecraftID)
-assetHelper.registerSceneGraphNodesAndExport(asset, {ChandraXray})
+assetHelper.registerSceneGraphNodesAndExport(asset, {Chandra})
