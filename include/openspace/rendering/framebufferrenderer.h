@@ -93,6 +93,8 @@ public:
     void setBloomOrigFactor(float origFactor) override;
     void setBloomNewFactor(float newFactor) override;
 
+    void enableBloom(bool enable) override;
+
     float hdrBackground() const override;
     int nAaSamples() const override;
     const std::vector<double>& mSSAPattern() const override;
@@ -173,6 +175,7 @@ private:
     float _hdrBackground = 2.8f;
     float _gamma = 2.2f;
     float _maxWhite = 1.0f;
+    bool _bloomEnabled = false;
     float _bloomThresholdMin = 0.0;
     float _bloomThresholdMax = 1.0;
     float _bloomOrigFactor = 1.0;

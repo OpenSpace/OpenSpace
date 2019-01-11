@@ -38,6 +38,6 @@ void main(void)
     color += texelFetch(renderedImage, ivec2(gl_FragCoord.xy), 0) * bloomOrigFactor;
     float alpha = color.a;
     color += texelFetch(bloomImage, ivec2(gl_FragCoord.xy), 0) * bloomNewFactor;
-
+    
     finalColor = vec4(color.rgb, alpha);
 }

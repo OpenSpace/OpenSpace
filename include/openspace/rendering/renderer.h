@@ -60,6 +60,8 @@ public:
     virtual void setBloomOrigFactor(float origFactor) = 0;
     virtual void setBloomNewFactor(float newFactor) = 0;
 
+    virtual void enableBloom(bool enable) = 0;
+
     virtual float hdrBackground() const = 0;
     virtual int nAaSamples() const = 0;
     virtual const std::vector<double>& mSSAPattern() const = 0;

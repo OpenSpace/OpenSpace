@@ -26,7 +26,7 @@
 
 layout (location = 0) out vec4 finalColor;
 
-uniform int pass;
+uniform int filterStep;
 uniform sampler2DMS filterImage;
 uniform sampler2D filterFirstPass;
 
@@ -62,13 +62,16 @@ void main(void)
     vec4 color = vec4(0.0);
     // Transpose the image so the filter can be applied on X and Y
     ivec2 P = ivec2(gl_FragCoord.yx) - ivec2(0, weights.length() >> 1);
-    
+    float origAlpha = 1.0;
+
     for (int i = 0; i < weights.length(); i++)
     {   
-        if (pass == 1)
+        if (filterStep == 1) {
             color += vec4(texelFetch(filterImage, P + ivec2(0, i), 0).rgb, 1.0) * weights[i];
-        else if (pass == 2)
+            origAlpha = color.a;
+        } else if (filterStep == 2) {
             color += vec4(texelFetch(filterFirstPass, P + ivec2(0, i), 0).rgb, 1.0) * weights[i];
+        } 
     }
 
     finalColor = vec4(color.rgb, 1.0);

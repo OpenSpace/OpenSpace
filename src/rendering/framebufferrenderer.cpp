@@ -266,7 +266,13 @@ void FramebufferRenderer::initialize() {
     for (int i = 0; i < 3; i++)
     {
         glBindFramebuffer(GL_FRAMEBUFFER, _bloomFilterFBO[i]);
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _bloomTexture[i], 0);
+        glFramebufferTexture2D(
+            GL_FRAMEBUFFER, 
+            GL_COLOR_ATTACHMENT0, 
+            GL_TEXTURE_2D, 
+            _bloomTexture[i], 
+            0
+        );
         glDrawBuffers(1, buffers);
     }
 
@@ -425,46 +431,67 @@ void FramebufferRenderer::applyBloomFilter() {
     glGenVertexArrays(1, &vao);
 
     glBindFramebuffer(GL_FRAMEBUFFER, _bloomFilterFBO[0]);
+    GLenum textureBuffer[] = {
+       GL_COLOR_ATTACHMENT0
+    };
+    glDrawBuffers(1, textureBuffer);
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, _resolution.y, _resolution.x);
     glBindVertexArray(vao);
 
-    _bloomProgram->activate();    
+    _bloomProgram->activate();
 
     {
         ghoul::opengl::TextureUnit filterTextureUnit;
         filterTextureUnit.activate();
+        // The filter texture where the gaussian filter will be applied
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainFilterTexture);
-        _bloomProgram->setUniform("pass", 1);
+        _bloomProgram->setUniform("filterStep", 1);
         _bloomProgram->setUniform("filterImage", filterTextureUnit);
+        
+        // Making OpenGL happy...
         ghoul::opengl::TextureUnit dummyTextureUnit;
         dummyTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _bloomTexture[0]);
         _bloomProgram->setUniform("filterFirstPass", dummyTextureUnit);
+
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glFlush();
     }
+
+    _bloomProgram->deactivate();
     
     glBindFramebuffer(GL_FRAMEBUFFER, _bloomFilterFBO[1]);
+    glDrawBuffers(1, textureBuffer);
     glViewport(0, 0, _resolution.x, _resolution.y);
     glClear(GL_COLOR_BUFFER_BIT);
     glBindVertexArray(vao);
 
+    _bloomProgram->activate();
+
     {        
         ghoul::opengl::TextureUnit filterTextureUnit;
         filterTextureUnit.activate();
+        // The results of the previous pass is passed to this pass
         glBindTexture(GL_TEXTURE_2D, _bloomTexture[0]);
-        _bloomProgram->setUniform("pass", 2);
+        _bloomProgram->setUniform("filterStep", 2);
         _bloomProgram->setUniform("filterFirstPass", filterTextureUnit);
+
+        // Making OpenGL happy...
         ghoul::opengl::TextureUnit dummyTextureUnit;
+        dummyTextureUnit.activate();
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainFilterTexture);
         _bloomProgram->setUniform("filterImage", dummyTextureUnit);
         
-
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+        glFlush();
     }
 
     _bloomProgram->deactivate();
 
     glBindFramebuffer(GL_FRAMEBUFFER, _bloomFilterFBO[2]);
+    glDrawBuffers(1, textureBuffer);
     glViewport(0, 0, _resolution.x, _resolution.y);
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -473,6 +500,7 @@ void FramebufferRenderer::applyBloomFilter() {
     {
         ghoul::opengl::TextureUnit deferredResultsTextureUnit;
         deferredResultsTextureUnit.activate();
+        // Original buffer will be summed to the bloom result
         glBindTexture(GL_TEXTURE_2D, _hdrFilteringTexture);
         _bloomResolveProgram->setUniform(
             _bloomUniformCache.renderedImage, 
@@ -481,6 +509,7 @@ void FramebufferRenderer::applyBloomFilter() {
 
         ghoul::opengl::TextureUnit bloomTextureUnit;
         bloomTextureUnit.activate();
+        // Results of the second pass are added to the original buffer
         glBindTexture(GL_TEXTURE_2D, _bloomTexture[1]);
         _bloomResolveProgram->setUniform(_bloomUniformCache.bloomImage, bloomTextureUnit);
         
@@ -493,10 +522,12 @@ void FramebufferRenderer::applyBloomFilter() {
             _bloomNewFactor
         );
 
+        // Write the results to the _bloomDilterFBO[2] texture
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glFlush();
     }
 
-    _bloomResolveProgram->deactivate();    
+    _bloomResolveProgram->deactivate();
 
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
 }
@@ -527,7 +558,6 @@ void FramebufferRenderer::update() {
             _uniformCache,
             UniformNames
         );
-
     }
     
     if (_aveLumProgram->isDirty()) {
@@ -663,10 +693,24 @@ void FramebufferRenderer::updateResolution() {
         nullptr
     );
 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
     // Bloom Filter
     for (int i = 0; i < 3; i++)
     {
         glBindTexture(GL_TEXTURE_2D, _bloomTexture[i]);
+        /*glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RGBA16F,
+            i ? _resolution.x : _resolution.y,
+            i ? _resolution.y : _resolution.x,
+            0,
+            GL_RGBA,
+            GL_FLOAT,
+            nullptr
+        );*/
         glTexStorage2D(
             GL_TEXTURE_2D, 
             1, 
@@ -676,8 +720,44 @@ void FramebufferRenderer::updateResolution() {
         );
     }
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    /*glBindTexture(GL_TEXTURE_2D, _bloomTexture[0]);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA32F,
+        _resolution.y,
+        _resolution.x,
+        0,
+        GL_RGBA,
+        GL_FLOAT,
+        nullptr
+    );
+
+    glBindTexture(GL_TEXTURE_2D, _bloomTexture[1]);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA32F,
+        _resolution.x,
+        _resolution.y,
+        0,
+        GL_RGBA,
+        GL_FLOAT,
+        nullptr
+    );
+
+    glBindTexture(GL_TEXTURE_2D, _bloomTexture[2]);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA32F,
+        _resolution.x,
+        _resolution.y,
+        0,
+        GL_RGBA,
+        GL_FLOAT,
+        nullptr
+    );*/
 
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainPositionTexture);
 
@@ -1340,6 +1420,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     {
         glDisable(GL_DEPTH_TEST);
 
+        // Results of the DeferredTasks as entry for the bloom filter
         applyBloomFilter();
 
         float averageLuminaceInFB = 0.0;
@@ -1359,20 +1440,23 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         glViewport(0, 0, _resolution.x, _resolution.y);
         _hdrFilteringProgram->activate();
 
-        // No Bloom
-        /*ghoul::opengl::TextureUnit deferredResultsTextureUnit;
-        deferredResultsTextureUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, _hdrFilteringTexture);
-        _hdrFilteringProgram->setUniform(_hdrUniformCache.deferredResultsTexture, 
-                                         deferredResultsTextureUnit);*/
+        ghoul::opengl::TextureUnit hdrFeedingTextureUnit;
+        hdrFeedingTextureUnit.activate();
+        if (_bloomEnabled) {
+            // Bloom Enabled
+            glBindTexture(GL_TEXTURE_2D, _bloomTexture[2]);  
+        }
+        else {
+            // No Bloom
+            glBindTexture(GL_TEXTURE_2D, _hdrFilteringTexture);
+        }
 
-        // Bloom Enabled
-        ghoul::opengl::TextureUnit bloomResultsTextureUnit;
-        bloomResultsTextureUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, _bloomTexture[2]);
-        _hdrFilteringProgram->setUniform(_hdrUniformCache.deferredResultsTexture,
-            bloomResultsTextureUnit);
-
+        _hdrFilteringProgram->setUniform(
+            _hdrUniformCache.deferredResultsTexture,
+            hdrFeedingTextureUnit
+        );
+        
+        
         _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutFactor, blackoutFactor);
         _hdrFilteringProgram->setUniform(_hdrUniformCache.backgroundConstant, 
                                          _hdrBackground);
@@ -1627,6 +1711,10 @@ void FramebufferRenderer::setBloomOrigFactor(float origFactor) {
 
 void FramebufferRenderer::setBloomNewFactor(float newFactor) {
     _bloomNewFactor = newFactor;
+}
+
+void FramebufferRenderer::enableBloom(bool enable) {
+    _bloomEnabled = enable;
 }
 
 float FramebufferRenderer::hdrBackground() const {

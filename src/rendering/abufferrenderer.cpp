@@ -755,6 +755,10 @@ void ABufferRenderer::setBloomNewFactor(float newFactor) {
     _bloomNewFactor = newFactor;
 }
 
+void ABufferRenderer::enableBloom(bool enable) {
+    _bloomEnabled = enable;
+}
+
 float ABufferRenderer::hdrBackground() const {
     return _hdrBackground;
 }

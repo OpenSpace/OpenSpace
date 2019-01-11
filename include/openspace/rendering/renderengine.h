@@ -208,6 +208,7 @@ private:
     properties::FloatProperty _hdrBackground;
     properties::FloatProperty _gamma;
     properties::FloatProperty _maxWhite;
+    properties::BoolProperty _enableBloom;
     properties::FloatProperty _bloomThreshouldMin;
     properties::FloatProperty _bloomThreshouldMax;
     properties::FloatProperty _bloomOrigColorFactor;

@@ -232,6 +232,12 @@ namespace {
         "ToneMap Operator is the method used to tranform the pixels using a HDR to"
         "pixels using a LDR distribution."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo EnableBloomInfo = {
+        "EnableBloom",
+        "Enable/Disable Bloom",
+        "Enable/Disable Bloom."
+    };
 } // namespace
 
 
@@ -253,11 +259,12 @@ RenderEngine::RenderEngine()
     , _hdrExposure(HDRExposureInfo, 0.4f, 0.01f, 10.0f)
     , _hdrBackground(BackgroundExposureInfo, 2.8f, 0.01f, 10.0f)
     , _gamma(GammaInfo, 2.2f, 0.01f, 10.0f)
+    , _maxWhite(MaxWhiteInfo, 4.f, 0.001f, 10000.0f)
+    , _enableBloom(EnableBloomInfo, false)
     , _bloomThreshouldMin(BloomThreshouldMinInfo, 0.5, 0.0, 100.0)
     , _bloomThreshouldMax(BloomThreshouldMaxInfo, 1.0, 0.0, 100.0)
     , _bloomOrigColorFactor(BloomOrigColorFactorInfo, 1.0, 0.0, 100.0)
     , _bloomNewColorFactor(BloomNewColorFactorInfo, 1.0, 0.0, 100.0)
-    , _maxWhite(MaxWhiteInfo, 4.f, 0.001f, 10000.0f)
     , _toneMapOperator(ToneMapOperatorInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     _doPerformanceMeasurements.onChange([this](){
@@ -325,6 +332,14 @@ RenderEngine::RenderEngine()
     });
 
     addProperty(_toneMapOperator);
+
+    _enableBloom.onChange([this]() {
+        if (_renderer) {
+            _renderer->enableBloom(_enableBloom);
+        }
+    });
+
+    addProperty(_enableBloom);
 
     addProperty(_bloomThreshouldMin);
     _bloomThreshouldMin.onChange([this]() {
