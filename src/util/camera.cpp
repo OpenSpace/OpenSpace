@@ -36,7 +36,6 @@ Camera::Camera(const Camera& o)
     , _position(o._position)
     , _rotation(o._rotation)
     , _scaling(o._scaling)
-    , _focusPosition(o._focusPosition)
     , _maxFov(o._maxFov)
     , _cachedViewDirection(o._cachedViewDirection)
     , _cachedLookupVector(o._cachedLookupVector)
@@ -47,11 +46,6 @@ void Camera::setPositionVec3(glm::dvec3 pos) {
     _position = std::move(pos);
 
     _cachedCombinedViewMatrix.isDirty = true;
-}
-
-void Camera::setFocusPositionVec3(glm::dvec3 pos) {
-    std::lock_guard<std::mutex> _lock(_mutex);
-    _focusPosition = std::move(pos);
 }
 
 void Camera::setRotation(glm::dquat rotation) {
@@ -116,10 +110,6 @@ const glm::dvec3& Camera::unsynchedPositionVec3() const {
     return _position;
 }
 
-const glm::dvec3& Camera::focusPositionVec3() const {
-    return _focusPosition;
-}
-
 const glm::dvec3& Camera::viewDirectionWorldSpace() const {
     if (_cachedViewDirection.isDirty) {
         _cachedViewDirection.datum = glm::normalize(
@@ -143,6 +133,15 @@ const glm::dvec3& Camera::lookUpVectorWorldSpace() const {
     }
 
     return _cachedLookupVector.datum;
+}
+
+void Camera::setLookUpVectorWorldSpace(glm::dvec3 up) {
+    const glm::dmat4 lookAtMat = glm::lookAt(
+        glm::dvec3(0.0, 0.0, 0.0),
+        viewDirectionWorldSpace(),
+        up
+    );
+    _rotation = glm::normalize(glm::quat_cast(inverse(lookAtMat)));
 }
 
 float Camera::maxFov() const {
@@ -268,29 +267,6 @@ const glm::mat4& Camera::SgctInternal::viewProjectionMatrix() const {
         _cachedViewProjectionMatrix.isDirty = false;
     }
     return _cachedViewProjectionMatrix.datum;
-}
-
-// Deprecated
-void Camera::setPosition(psc pos) {
-    std::lock_guard<std::mutex> _lock(_mutex);
-    _position = pos.dvec3();
-}
-
-void Camera::setFocusPosition(psc pos) {
-    std::lock_guard<std::mutex> _lock(_mutex);
-    _focusPosition = pos.dvec3();
-}
-
-psc Camera::position() const {
-    return psc(static_cast<glm::dvec3>(_position));
-}
-
-psc Camera::unsynchedPosition() const {
-    return psc(static_cast<glm::dvec3>(_position));
-}
-
-psc Camera::focusPosition() const {
-    return psc(_focusPosition);
 }
 
 const glm::mat4& Camera::viewMatrix() const {

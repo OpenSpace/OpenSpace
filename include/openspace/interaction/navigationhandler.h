@@ -55,9 +55,7 @@ public:
     void deinitialize();
 
     // Mutators
-    void setFocusNode(SceneGraphNode* node);
     void setCamera(Camera* camera);
-    void resetCameraDirection();
     void setInterpolationTime(float durationInSeconds);
 
     void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
@@ -69,12 +67,10 @@ public:
 
     // Accessors
     ghoul::Dictionary cameraStateDictionary();
-    SceneGraphNode* focusNode() const;
-    glm::dvec3 focusNodeToCameraVector() const;
-    glm::quat focusNodeToCameraRotation() const;
     Camera* camera() const;
     const InputState& inputState() const;
     const OrbitalNavigator& orbitalNavigator() const;
+    OrbitalNavigator& orbitalNavigator();
     KeyframeNavigator& keyframeNavigator() const;
     bool isKeyFrameInteractionEnabled() const;
     float interpolationTime() const;
@@ -126,7 +122,6 @@ private:
     std::unique_ptr<OrbitalNavigator> _orbitalNavigator;
     std::unique_ptr<KeyframeNavigator> _keyframeNavigator;
 
-    properties::StringProperty _origin;
     properties::BoolProperty _useKeyFrameInteraction;
 };
 

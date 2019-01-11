@@ -28,6 +28,8 @@
 #include <openspace/properties/property.h>
 #include <openspace/query/query.h>
 #include <ghoul/logging/logmanager.h>
+#include <openspace/engine/globals.h>
+#include <openspace/scripting/scriptengine.h>
 
 namespace {
     constexpr const char* PropertyKey = "property";
@@ -40,15 +42,12 @@ namespace openspace {
 void TriggerPropertyTopic::handleJson(const nlohmann::json& json) {
     try {
         const std::string& propertyKey = json.at(PropertyKey).get<std::string>();
-
-        properties::Property* prop = property(propertyKey);
-        if (prop) {
-            LDEBUG("Triggering " + propertyKey);
-            prop->set("poke");
-        }
-        else {
-            LWARNING("Could not find property " + propertyKey);
-        }
+        global::scriptEngine.queueScript(
+            fmt::format(
+                "openspace.setPropertyValueSingle(\"{}\", {})", propertyKey, "poke"
+            ),
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
     }
     catch (const std::out_of_range& e) {
         LERROR("Could not poke property -- key or value is missing in payload");

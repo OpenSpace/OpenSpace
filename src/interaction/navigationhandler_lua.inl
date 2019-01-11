@@ -89,7 +89,7 @@ int saveCameraStateToFile(lua_State* L) {
 int resetCameraDirection(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::resetCameraDirection");
 
-    global::navigationHandler.resetCameraDirection();
+    global::navigationHandler.orbitalNavigator().startInterpolateCameraDirection();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

@@ -96,7 +96,6 @@ public:
     void traversePostOrder(const std::function<void(SceneGraphNode*)>& fn);
     void update(const UpdateData& data);
     void render(const RenderData& data, RendererTasks& tasks);
-    void updateCamera(Camera* camera) const;
 
     void attachChild(std::unique_ptr<SceneGraphNode> child);
     std::unique_ptr<SceneGraphNode> detachChild(SceneGraphNode& child);
@@ -109,7 +108,7 @@ public:
     void setDependencies(const std::vector<SceneGraphNode*>& dependencies);
 
     SurfacePositionHandle calculateSurfacePositionHandle(
-        const glm::dvec3& targetModelSpace);
+        const glm::dvec3& targetModelSpace) const;
 
     const std::vector<SceneGraphNode*>& dependencies() const;
     const std::vector<SceneGraphNode*>& dependentNodes() const;

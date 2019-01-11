@@ -291,7 +291,7 @@ void SessionRecording::cleanUpPlayback() {
     Scene* scene = camera->parent()->scene();
     if (!_timeline.empty()) {
         unsigned int p = _timeline[_idxTimeline_cameraPtrPrev].idxIntoKeyframeTypeArray;
-        global::navigationHandler.setFocusNode(
+        global::navigationHandler.orbitalNavigator().setFocusNode(
             scene->sceneGraphNode(_keyframesCamera[p].focusNode)
         );
     }
@@ -428,8 +428,8 @@ void SessionRecording::saveCameraKeyframe() {
         return;
     }
 
-    SceneGraphNode* focusNode = global::navigationHandler.focusNode();
-    if (!focusNode) {
+    SceneGraphNode* anchorNode = global::navigationHandler.orbitalNavigator().anchorNode();
+    if (!anchorNode) {
         return;
     }
 
@@ -1150,7 +1150,7 @@ bool SessionRecording::processCameraKeyframe(double now) {
     // the rendered objects will be unstable and actually incorrect
     Camera* camera = global::navigationHandler.camera();
     Scene* scene = camera->parent()->scene();
-    global::navigationHandler.setFocusNode(scene->sceneGraphNode(
+    global::navigationHandler.orbitalNavigator().setFocusNode(scene->sceneGraphNode(
         _keyframesCamera[prevIdx].focusNode
     ));
 

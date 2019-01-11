@@ -29,6 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/timemanager.h>
@@ -763,8 +764,8 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
             ));
             return;
         }
-        global::navigationHandler.setFocusNode(node->parent());
-        global::navigationHandler.resetCameraDirection();
+        global::navigationHandler.orbitalNavigator().setFocusNode(node->parent());
+        global::navigationHandler.orbitalNavigator().startInterpolateCameraDirection();
     });
 
     _pJumpToStartBtn.onChange([this] {

@@ -588,7 +588,7 @@ void SceneGraphNode::setDependencies(const std::vector<SceneGraphNode*>& depende
 }
 
 SurfacePositionHandle SceneGraphNode::calculateSurfacePositionHandle(
-                                                       const glm::dvec3& targetModelSpace)
+                                                 const glm::dvec3& targetModelSpace) const
 {
     if (_renderable) {
         return _renderable->calculateSurfacePositionHandle(targetModelSpace);
@@ -807,21 +807,6 @@ SceneGraphNode* SceneGraphNode::childNode(const std::string& identifier) {
 
 const SceneGraphNode::PerformanceRecord& SceneGraphNode::performanceRecord() const {
     return _performanceRecord;
-}
-
-void SceneGraphNode::updateCamera(Camera* camera) const {
-    psc origin(worldPosition());
-    //int i = 0;
-    // the camera position
-
-    psc relative = camera->position();
-    psc focus = camera->focusPosition();
-    psc relative_focus = relative - focus;
-
-    psc target = origin + relative_focus;
-
-    camera->setPosition(target);
-    camera->setFocusPosition(origin);
 }
 
 }  // namespace openspace
