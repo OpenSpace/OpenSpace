@@ -1319,13 +1319,19 @@ void TouchInteraction::step(double dt) {
             float zoomInLimit = module.storyHandler.zoomInLimit();
 
             //Apply the velocity to update camera position
-            if (length(_vel.zoom*dt) < distToSurface &&
-                 length(centerToCamera + directionToCenter*_vel.zoom*dt)
-                 > planetBoundaryRadius &&
-                    length(centerToCamera + directionToCenter * _vel.zoom*dt)
-                    < overviewLimit  &&
-                        length(centerToCamera + directionToCenter * _vel.zoom*dt)
-                        > zoomInLimit)
+            double zoomDistanceIncrement = directionToCenter * _vel.zoom * dt;
+            bool isZoomStepUnderDistToSurface = (length(_vel.zoom*dt) < distToSurface);
+            bool willZoomStepViolatePlanetBoundaryRadius =
+                (length(centerToCamera + zoomDistanceIncrement) < planetBoundaryRadius);
+            bool willNewPositionViolateOverviewLimit =
+                (length(centerToCamera + zoomDistanceIncrement) >= overviewLimit);
+            bool willNewPositionViolateZoomInLimit =
+                (length(centerToCamera + zoomDistanceIncrement) < zoomInLimit);
+
+            if (    isZoomStepUnderDistToSurface
+                && !willZoomStepViolatePlanetBoundaryRadius
+                && !willNewPositionViolateOverviewLimit
+                && !willNewPositionViolateZoomInLimit      )
             {
                 camPos += directionToCenter * _vel.zoom * dt;
             }
