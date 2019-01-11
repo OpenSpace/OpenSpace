@@ -133,6 +133,14 @@ local OsirisRexLabel = {
     },
     ObjectIdentifier = spacecrafts.OsirisRexAsset.spacecraftID
 }
+local ParkerSolarProbeLabel = {
+    LabelText = ".Parker Solar Probe",
+    TimeFrame = { 
+        Start = "2018-224T08:00:00",
+        End = "2018-365T07:00:00"
+    },
+    ObjectIdentifier = spacecrafts.ParkerSolarProbeAsset.spacecraftID
+}
 local PlanetCLabel = {
     LabelText = ".Planet C",
     TimeFrame = { 
@@ -160,6 +168,70 @@ local StereoBLabel = {
         End = "2018-290T09:00:00"
     },
     ObjectIdentifier = spacecrafts.StereoBAsset.spacecraftID
+}
+local RosettaLabel = {
+    LabelText = ".Rosetta",
+    TimeFrame = { 
+        Start = "2014-020T14:00:00",
+        End = "2016-275T21:00:00"
+    },
+    ObjectIdentifier = spacecrafts.RosettaAsset.spacecraftID
+}
+local TD10Label = {
+    LabelText = ".TD10",
+    TimeFrame = { 
+        Start = "2016-222T16:00:00",
+        End = "2016-231T21:00:00"
+    },
+    ObjectIdentifier = spacecrafts.TD10Asset.spacecraftID
+}
+local TD12Label = {
+    LabelText = ".TD12",
+    TimeFrame = { 
+        Start = "2017-230T13:00:00",
+        End = "2018-182T08:00:00"
+    },
+    ObjectIdentifier = spacecrafts.TD12Asset.spacecraftID
+}
+local TD13Label = {
+    LabelText = ".TD13",
+    TimeFrame = { 
+        Start = "2014-020T14:00:00",
+        End = "2016-275T21:00:00"
+    },
+    ObjectIdentifier = spacecrafts.TD13Asset.spacecraftID
+}
+local TDR3Label = {
+    LabelText = ".TDR3",
+    TimeFrame = { 
+        Start = "2014-028T18:00:00",
+        End = "2018-179T19:00:00"
+    },
+    ObjectIdentifier = spacecrafts.TDR3Asset.spacecraftID
+}
+local TDR5Label = {
+    LabelText = ".TDR5",
+    TimeFrame = { 
+        Start = "2017-243T20:00:00",
+        End = "2018-036T09:00:00"
+    },
+    ObjectIdentifier = spacecrafts.TDR5Asset.spacecraftID
+}
+local TDR7Label = {
+    LabelText = ".TDR7",
+    TimeFrame = { 
+        Start = "2017-075T19:00:00",
+        End = "2017-103T17:00:00"
+    },
+    ObjectIdentifier = spacecrafts.TDR7Asset.spacecraftID
+}
+local TDR9Label = {
+    LabelText = ".TDR9",
+    TimeFrame = { 
+        Start = "2015-078T19:00:00",
+        End = "2017-311T20:00:00"
+    },
+    ObjectIdentifier = spacecrafts.TDR9Asset.spacecraftID
 }
 --Transit exoplanet Survey Satellite
 local TessLabel = {
@@ -244,7 +316,10 @@ local labelMapInnerSpace = {
                             label13 = MarCOBLabel,
                             label14 = InSightLabel,
                             label15 = OsirisRexLabel,
-                            label16 = PlanetCLabel
+                            label16 = PlanetCLabel,
+                            label17 = RosettaLabel,
+                            label18 = ParkerSolarProbeLabel 
+
 
                         }
 
@@ -257,7 +332,15 @@ local labelMapNearEarth = {
                             label6 = SohoLabel,
                             label7 = IceLabel,
                             label8 = TessLabel,
-                            label9 = GeotailLabel
+                            label9 = GeotailLabel,
+                            label10 = TD10Label,
+                            label11 = TD12Label,
+                            label12 = TD13Label,
+                            label13 = TDR3Label,
+                            label14 = TDR5Label,
+                            label15 = TDR7Label,
+                            label16 = TDR9Label
+
                         }
 local labelMapClusters = {  
                             Label1 = MarsClusterLabel
