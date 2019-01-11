@@ -1,5 +1,6 @@
+-- Mars Cube One B
 local assetHelper = asset.require('util/asset_helper')
-local dataFolder = openspace.absPath("${SYNC}/http/dsn_data/1/positioning/MCOA") 
+local dataFolder = openspace.absPath("${SYNC}/http/dsn_data/1/positioning/MCOB") 
 
 local models = asset.syncedResource({
     Name = "Dsn models",
@@ -7,9 +8,9 @@ local models = asset.syncedResource({
     Identifier = "dsn_stations",
     Version = 1
 })
-local spacecraftID = "MarsCubeSatA";
+local spacecraftID = "MarCO B";
 
-local MarsCubeSatA = {
+local MarCOB = {
     Identifier = spacecraftID,
     Transform = {
       Translation = {
@@ -21,9 +22,9 @@ local MarsCubeSatA = {
 
    },
     GUI = {
-        Name = "Mars Cubesat A",
-        Path = "/Solar System/Missions/MarsCubeSatA"
+        Name = "MarCO B",
+        Path = "/Solar System/Missions/MarCO B"
     }
 }
 asset.export("spacecraftID", spacecraftID)
-assetHelper.registerSceneGraphNodesAndExport(asset, {MarsCubeSatA})
+assetHelper.registerSceneGraphNodesAndExport(asset, {MarCOB})

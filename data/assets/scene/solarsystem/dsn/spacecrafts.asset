@@ -15,8 +15,8 @@ local Hayabusa2Asset = asset.require('scene/solarsystem/dsn/spacecrafts/hayabusa
 local IceAsset = asset.require('scene/solarsystem/dsn/spacecrafts/ice/ice')
 local JunoAsset = asset.require('scene/solarsystem/dsn/spacecrafts/juno/juno')
 local KeplerAsset = asset.require('scene/solarsystem/dsn/spacecrafts/kepler/kepler')
-local MarsCubeSatAAsset = asset.require('scene/solarsystem/dsn/spacecrafts/marscubesata/marscubesata')
-local MarsCubeSatBAsset = asset.require('scene/solarsystem/dsn/spacecrafts/marscubesatb/marscubesatb')
+local MarCOAAsset = asset.require('scene/solarsystem/dsn/spacecrafts/marcoa/marcoa')
+local MarCOBAsset = asset.require('scene/solarsystem/dsn/spacecrafts/marcob/marcob')
 local MarsRecOrbAsset = asset.require('scene/solarsystem/dsn/spacecrafts/mro/mro')
 local MarsOdysseyAsset = asset.require('scene/solarsystem/dsn/spacecrafts/marsodyssey/marsodyssey')
 local MessengerAsset = asset.require('scene/solarsystem/dsn/spacecrafts/messenger/messenger')
@@ -48,8 +48,8 @@ local signalDataIdMap = {
     DAWN = DawnAsset.spacecraftID,
     JNO = JunoAsset.spacecraftID,
     KEPL = KeplerAsset.spacecraftID,
-    MCOA = MarsCubeSatAAsset.spacecraftID,
-    MCOB = MarsCubeSatBAsset.spacecraftID,
+    MCOA = MarCOAAsset.spacecraftID,
+    MCOB = MarCOBAsset.spacecraftID,
     MRE1 = OpportunityAsset.spacecraftID,
     MRO = MarsRecOrbAsset.spacecraftID,
     MOM = MomAsset.spacecraftID,
@@ -82,8 +82,8 @@ asset.export("Hayabusa2Asset", Hayabusa2Asset)
 asset.export("IceAsset", IceAsset)
 asset.export("JunoAsset", JunoAsset)
 asset.export("KeplerAsset", KeplerAsset)
-asset.export("MarsCubeSatAAsset", MarsCubeSatAAsset)
-asset.export("MarsCubeSatBAsset", MarsCubeSatBAsset)
+asset.export("MarCOAAsset", MarCOAAsset)
+asset.export("MarCOBAsset", MarCOBAsset)
 asset.export("MarsRecOrbAsset", MarsRecOrbAsset)
 asset.export("MarsOdysseyAsset", MarsOdysseyAsset)
 asset.export("MessengerAsset", MessengerAsset)

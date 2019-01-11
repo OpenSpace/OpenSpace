@@ -69,21 +69,21 @@ local KeplerLabel = {
     LabelText = ".Kepler",
     ObjectIdentifier = spacecrafts.KeplerAsset.spacecraftID
 }
-local MarsCubeSatALabel = {
-    LabelText = ".MCO A",
+local MarCOALabel = {
+    LabelText = ".MarCO A",
     TimeFrame = { 
         Start = "2018-125T12:00:00",
         End = "2018-365T19:00:00"
     },
-    ObjectIdentifier = spacecrafts.MarsCubeSatAAsset.spacecraftID
+    ObjectIdentifier = spacecrafts.MarCOAAsset.spacecraftID
 }
-local MarsCubeSatBLabel = {
-    LabelText = ".MCO B",
+local MarCOBLabel = {
+    LabelText = ".MarCO B",
     TimeFrame = { 
         Start = "2018-125T12:00:00",
         End = "2018-365T19:00:00"
     },
-    ObjectIdentifier = spacecrafts.MarsCubeSatBAsset.spacecraftID
+    ObjectIdentifier = spacecrafts.MarCOBAsset.spacecraftID
 }
 local MarsRecOrbLabel = {
     LabelText = ".Mars Recon Orbiter",
@@ -210,8 +210,8 @@ local labelMapInnerSpace = {
                             label8 = GenesisLabel,
                             label9 = Hayabusa2Label,
                             label10 = MessengerLabel,
-                            label12 = MarsCubeSatALabel,
-                            label13 = MarsCubeSatBLabel
+                            label12 = MarCOALabel,
+                            label13 = MarCOBLabel
 
                         }
 
