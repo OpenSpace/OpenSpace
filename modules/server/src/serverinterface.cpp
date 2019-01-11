@@ -117,7 +117,7 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
 
     const std::string identifier = config.value<std::string>(KeyIdentifier);
 
-    std::function readList =
+    std::function<void()> readList =
         [config](const std::string& key, properties::StringListProperty& list) {
             if (config.hasValue<ghoul::Dictionary>(key)) {
                 const ghoul::Dictionary& dict = config.value<ghoul::Dictionary>(key);
