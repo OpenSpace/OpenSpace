@@ -68,7 +68,7 @@ local IceLabel = {
 local InSightLabel = {
     LabelText = ".InSight",
     TimeFrame = { 
-        Start = "2017-142T18:00:00",
+        Start = "2018-125T12:00:00",
         End = "2018-365T11:00:00"
     },
     ObjectIdentifier = spacecrafts.InSightAsset.spacecraftID
@@ -209,6 +209,11 @@ local MarsClusterLabel = {
     ObjectIdentifier = "Mars"
 }
 
+local InsightClusterLabel = {
+    LabelText = "InSight, MarCO A & B ",
+    ObjectIdentifier = spacecrafts.InSightAsset.spacecraftID
+}
+
 -----------------------------------------------
 -------------------- Id Maps ------------------
 -----------------------------------------------
@@ -218,7 +223,10 @@ local labelMapMarsMissions = {
                         label3 = OpportunityLabel,
                         label4 = MomLabel,
                         label5 = TraceGasOrbiterLabel,
-                        label6 = CuriosityLabel
+                        label6 = CuriosityLabel,
+                        label7 = MarCOALabel,
+                        label8 = MarCOBLabel,
+                        label9 = InSightLabel
 
                     }
 
@@ -240,9 +248,6 @@ local labelMapInnerSpace = {
                             label8 = GenesisLabel,
                             label9 = Hayabusa2Label,
                             label10 = MessengerLabel,
-                            label12 = MarCOALabel,
-                            label13 = MarCOBLabel,
-                            label14 = InSightLabel,
                             label15 = OsirisRexLabel,
                             label16 = PlanetCLabel
 
@@ -260,7 +265,8 @@ local labelMapNearEarth = {
                             label9 = GeotailLabel
                         }
 local labelMapClusters = {  
-                            Label1 = MarsClusterLabel
+                            Label1 = MarsClusterLabel,
+                            Label2 = InsightClusterLabel
                         }
 
 
