@@ -65,6 +65,14 @@ local IceLabel = {
     },
     ObjectIdentifier = spacecrafts.IceAsset.spacecraftID
 }
+local ImageLabel = {
+    LabelText = ".Image",
+    TimeFrame = { 
+        Start = "2018-039T06:00:00",
+        End = "2018-041T01:00:00"
+    },
+    ObjectIdentifier = spacecrafts.ImageAsset.spacecraftID
+}
 local InSightLabel = {
     LabelText = ".InSight",
     TimeFrame = { 
@@ -258,6 +266,14 @@ local TraceGasOrbiterLabel = {
     },
     ObjectIdentifier = spacecrafts.TraceGasOrbiterAsset.spacecraftID
 }
+local VenusExpressLabel = {
+    LabelText = ".Venus Express",
+    TimeFrame = { 
+        Start = "2014-020T05:00:00",
+        End = "2014-344T22:00:00"
+    },
+    ObjectIdentifier = spacecrafts.VenusExpressAsset.spacecraftID
+}
 local Voyager1Label = {
     LabelText = ".Voyager 1",
     ObjectIdentifier = spacecrafts.Voyager1Asset.spacecraftID
@@ -270,7 +286,14 @@ local WindLabel = {
     LabelText = ".Wind",
     ObjectIdentifier = spacecrafts.WindAsset.spacecraftID
 }
-
+local XRayLabel = {
+    LabelText = ".X-Ray",
+    TimeFrame = { 
+        Start = "2014-032T15:00:00",
+        End = "2017-323T02:00:00"
+    },
+    ObjectIdentifier = spacecrafts.XRayAsset.spacecraftID
+}
 
 --------------------------------------------------
 ----------------- Cluster Labels  ----------------
@@ -318,9 +341,8 @@ local labelMapInnerSpace = {
                             label15 = OsirisRexLabel,
                             label16 = PlanetCLabel,
                             label17 = RosettaLabel,
-                            label18 = ParkerSolarProbeLabel 
-
-
+                            label18 = ParkerSolarProbeLabel,
+                            label19 = VenusExpressLabel
                         }
 
 local labelMapNearEarth = {  
@@ -339,7 +361,10 @@ local labelMapNearEarth = {
                             label13 = TDR3Label,
                             label14 = TDR5Label,
                             label15 = TDR7Label,
-                            label16 = TDR9Label
+                            label16 = TDR9Label,
+                            label17 = XRayLabel,
+                            label18 = ImageLabel
+
 
                         }
 local labelMapClusters = {  

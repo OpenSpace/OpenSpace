@@ -14,6 +14,7 @@ local GenesisAsset = asset.require('scene/solarsystem/dsn/spacecrafts/genesis/ge
 local GeotailAsset = asset.require('scene/solarsystem/dsn/spacecrafts/geotail/geotail')
 local Hayabusa2Asset = asset.require('scene/solarsystem/dsn/spacecrafts/hayabusa2/hayabusa2')
 local IceAsset = asset.require('scene/solarsystem/dsn/spacecrafts/ice/ice')
+local ImageAsset = asset.require('scene/solarsystem/dsn/spacecrafts/image/image')
 local InSightAsset = asset.require('scene/solarsystem/dsn/spacecrafts/insight/insight')
 local JunoAsset = asset.require('scene/solarsystem/dsn/spacecrafts/juno/juno')
 local KeplerAsset = asset.require('scene/solarsystem/dsn/spacecrafts/kepler/kepler')
@@ -44,7 +45,9 @@ local TessAsset = asset.require('scene/solarsystem/dsn/spacecrafts/transitexopla
 local ThemisBAsset = asset.require('scene/solarsystem/dsn/spacecrafts/themisb/themisb')
 local ThemisCAsset = asset.require('scene/solarsystem/dsn/spacecrafts/themisc/themisc')
 local TraceGasOrbiterAsset = asset.require('scene/solarsystem/dsn/spacecrafts/tracegasorbiter/tracegasorbiter')
+local VenusExpressAsset = asset.require('scene/solarsystem/dsn/spacecrafts/venusexpress/venusexpress')
 local WindAsset = asset.require('scene/solarsystem/dsn/spacecrafts/wind/wind')
+local XRayAsset = asset.require('scene/solarsystem/dsn/spacecrafts/xray/xray')
 
 -------------------------------------------------------------------
 ----- The map is used to keep the SceneGraphNode identifiers  -----
@@ -57,6 +60,7 @@ local signalDataIdMap = {
     GTL = GeotailAsset.spacecraftID,
     HYB2 = Hayabusa2Asset.spacecraftID,
     ICE = IceAsset.spacecraftID,
+    IMAG = ImageAsset.spacecraftID,
     CHDR = ChandraAsset.spacecraftID,
     DAWN = DawnAsset.spacecraftID,
     JNO = JunoAsset.spacecraftID,
@@ -90,9 +94,12 @@ local signalDataIdMap = {
     THB = ThemisBAsset.spacecraftID,
     THC = ThemisCAsset.spacecraftID,
     TGO = TraceGasOrbiterAsset.spacecraftID,
+    VEX = VenusExpressAsset.spacecraftID,
     VGR1 = Voyager1Asset.spacecraftID,
     VGR2 = Voyager2Asset.spacecraftID,
-    WIND = WindAsset.spacecraftID
+    WIND = WindAsset.spacecraftID,
+    XMM = XRayAsset.spacecraftID
+
 }
 
 
@@ -106,6 +113,7 @@ asset.export("GenesisAsset", GenesisAsset)
 asset.export("GeotailAsset", GeotailAsset)
 asset.export("Hayabusa2Asset", Hayabusa2Asset)
 asset.export("IceAsset", IceAsset)
+asset.export("ImageAsset", ImageAsset)
 asset.export("InSightAsset", InSightAsset)
 asset.export("JunoAsset", JunoAsset)
 asset.export("KeplerAsset", KeplerAsset)
@@ -136,8 +144,11 @@ asset.export("TessAsset", TessAsset)
 asset.export("ThemisBAsset", ThemisBAsset)
 asset.export("ThemisCAsset", ThemisCAsset)
 asset.export("TraceGasOrbiterAsset", TraceGasOrbiterAsset)
+asset.export("VenusExpressAsset", VenusExpressAsset)
 asset.export("Voyager1Asset", Voyager1Asset)
 asset.export("Voyager2Asset", Voyager2Asset)
 asset.export("WindAsset", WindAsset)
+asset.export("XRayAsset", XRayAsset)
+
 
 
