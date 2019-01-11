@@ -114,7 +114,7 @@ local OpportunityLabel = {
     ObjectIdentifier = spacecrafts.OpportunityAsset.spacecraftID
 }
 local SohoLabel = {
-    LabelText = ".Soho",
+    LabelText = ".SOHO",
     ObjectIdentifier = spacecrafts.SohoAsset.spacecraftID
 }
 local SpitzerLabel = {
@@ -135,7 +135,7 @@ local StereoBLabel = {
 }
 --Transit exoplanet Survey Satellite
 local TessLabel = {
-    LabelText = ".Tess",
+    LabelText = ".TESS",
     TimeFrame = { 
         Start = "2018-108T23:00:00",
         End = "2019-001T01:00:00"
