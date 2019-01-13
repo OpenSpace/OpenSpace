@@ -65,6 +65,12 @@ namespace {
         "the csv label file"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo LabelsEnableInfo = {
+        "Enable",
+        "Enable",
+        "Enables and disables labels' rendering from the asset file."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo LabelsFontSizeInfo = {
         "LabelsFontSize",
         "Labels Font Size",
@@ -157,6 +163,12 @@ documentation::Documentation GlobeLabelsComponent::Documentation() {
             new BoolVerifier,
             Optional::Yes,
             LabelsInfo.description
+        },
+        {
+            LabelsEnableInfo.identifier,
+            new BoolVerifier,
+            Optional::Yes,
+            LabelsEnableInfo.description
         },
         {
             LabelsFontSizeInfo.identifier,
@@ -298,7 +310,17 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
             _labelsDataPresent = true;
             bool loadSuccess = loadLabelsData(absPath(labelsFile));
             if (loadSuccess) {
-                _labelsEnabled.set(true);
+                if (dictionary.hasKey(LabelsEnableInfo.identifier)) {
+                    // In case of the label's dic is present but is disabled
+                    _labelsEnabled = dictionary.value<bool>(
+                        LabelsEnableInfo.identifier
+                        );
+                }
+                else {
+                    // Is the labels dic is enable in the configuration file,
+                    // enables the label automatically.
+                    _labelsEnabled.set(true);
+                }
          
                 if (dictionary.hasKey(LabelsFontSizeInfo.identifier)) {
                     float fontSize = dictionary.value<float>(
@@ -340,10 +362,9 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
                 }
 
                 if (dictionary.hasKey(LabelsFadeOutEnabledInfo.identifier)) {
-                    bool enabled = dictionary.value<bool>(
+                    _labelsFadeInEnabled = dictionary.value<bool>(
                         LabelsFadeOutEnabledInfo.identifier
                     );
-                    _labelsFadeInEnabled.set(enabled);
                 }
 
                 if (dictionary.hasKey(LabelsFadeOutStartingDistanceInfo.identifier)) {
