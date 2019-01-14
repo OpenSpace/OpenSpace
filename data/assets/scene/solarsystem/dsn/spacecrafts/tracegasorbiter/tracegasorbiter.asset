@@ -11,6 +11,11 @@ local spacecraftID = "TraceGasOrbiter";
 
 local TraceGasOrbiter = {
     Identifier = spacecraftID,
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2016-JAN-12-12:00:00",
+        End = "2018-DEC-30-23:00:00"
+    },
     Transform = {
       Translation = {
           Type = "RadecTranslation", 

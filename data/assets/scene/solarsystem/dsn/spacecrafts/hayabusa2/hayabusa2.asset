@@ -11,6 +11,11 @@ local spacecraftID = "Hayabusa2";
 
 local Hayabusa2 = {
     Identifier = spacecraftID,
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2014-DEC-3-06:00:00",
+        End = "2018-DEC-29-13:00:00"
+    },
     Transform = {
       Translation = {
           Type = "RadecTranslation", 

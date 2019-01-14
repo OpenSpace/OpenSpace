@@ -11,6 +11,11 @@ local spacecraftID = "CLU2";
 
 local CLU2 = {
     Identifier = spacecraftID,
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2014-JAN-04-02:00:00",
+        End = "2015-JUN-13-23:00:00"
+    },
     Transform = {
       Translation = {
           Type = "RadecTranslation", 

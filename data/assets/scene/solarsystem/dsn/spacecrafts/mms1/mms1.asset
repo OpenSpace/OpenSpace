@@ -11,6 +11,11 @@ local spacecraftID = "MMS1";
 
 local MMS1 = {
     Identifier = spacecraftID,
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2014-JAN-15-23:00:00",
+        End = "2018-DEC-30-04:00:00"
+    },
     Transform = {
       Translation = {
           Type = "RadecTranslation", 
