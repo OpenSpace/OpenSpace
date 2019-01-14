@@ -14,17 +14,16 @@ assetHelper.registerDashboardItems(asset, {
     {
         Type = "DashboardItemDistance",
         Identifier = "Distance",
-        GuiName = "Distance"
-    },
-    {
-        Type = "DashboardItemDistance",
-        Identifier = "Distance",
         GuiName = "Distance",
         SourceType = "Node",
         SourceNodeName = "Earth"
 
     },
-
+    {
+        Type = "DashboardItemDistance",
+        Identifier = "Distance",
+        GuiName = "Distance"
+    },
     {
         Type = "DashboardItemFramerate",
         Identifier = "Framerate",
