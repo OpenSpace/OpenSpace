@@ -11,6 +11,11 @@ local spacecraftID = "Rosetta";
 
 local Rosetta = {
     Identifier = spacecraftID,
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2014-JAN-20-14:00:00",
+        End = "2016-OCT-1-21:00:00"
+    },
     Transform = {
       Translation = {
           Type = "RadecTranslation", 

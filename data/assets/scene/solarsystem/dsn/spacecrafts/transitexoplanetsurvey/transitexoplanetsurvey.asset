@@ -12,6 +12,11 @@ local spacecraftID = "Tess";
 
 local TransitExoplanetSurvey = {
     Identifier = spacecraftID,
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2018-APR-18-23:00:00",
+        End = "2019-JAN-1-01:00:00"
+    },
     Transform = {
       Translation = {
           Type = "RadecTranslation", 

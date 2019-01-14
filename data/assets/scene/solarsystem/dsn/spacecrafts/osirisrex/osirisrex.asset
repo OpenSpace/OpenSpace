@@ -11,6 +11,11 @@ local spacecraftID = "OsirisRex";
 
 local OsirisRex = {
     Identifier = spacecraftID,
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2016-SEP-9-07:00:00",
+        End = "2019-JAN-1-04:00:00"
+    },
     Transform = {
       Translation = {
           Type = "RadecTranslation", 

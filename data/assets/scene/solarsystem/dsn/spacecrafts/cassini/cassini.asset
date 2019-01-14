@@ -11,6 +11,11 @@ local spacecraftID = "Cassini";
 
 local Cassini = {
     Identifier = spacecraftID,
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2014-JAN-2-18:00:00",
+        End = "2017-SEP-15-14:00:00"
+    },   
     Transform = {
       Translation = {
           Type = "RadecTranslation", 

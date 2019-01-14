@@ -557,23 +557,25 @@ namespace openspace {
         for (int i = 0; i < labelDataInfo.size(); i++) {
             LabelInfo labelinfo = labelDataInfo.at(i);
             double currentTime = time.j2000Seconds();
-           
-            bool inTimeFrame = (currentTime > labelinfo.startTime && currentTime < labelinfo.endTime);
-            if ( (labelinfo.hasKeyTimeFrame == true && inTimeFrame) || labelinfo.hasKeyTimeFrame == false) {
-        
-                if (global::renderEngine.scene()->sceneGraphNode(labelinfo.attachedId)) {
 
-                    glm::dvec3 position = global::renderEngine.scene()->sceneGraphNode(labelinfo.attachedId)->worldPosition();
+            if (!global::renderEngine.scene()->sceneGraphNode(labelinfo.attachedId)) {
+                LERROR(fmt::format("No SceneGraphNode found with identifier {}", labelinfo.attachedId));
+                return false;
+            }
+            // if the label is timeframe active
+            bool labelIsInTimeFrame = (currentTime > labelinfo.startTime && currentTime < labelinfo.endTime);
+            // if the node it is attached to is timeframe active
+            bool nodeIsInTimeFrame = global::renderEngine.scene()->sceneGraphNode(labelinfo.attachedId)->isTimeFrameActive(time);
 
-                    glm::dvec3 transformedPos = glm::dvec3(
-                        _transformationMatrix * glm::dvec4(position, 1.0)
-                    );
-                    _labelData.emplace_back(std::make_tuple(transformedPos, labelinfo.text, labelinfo.textColor));
-                }
-                else {
-                    LERROR(fmt::format("No SceneGraphNode found with identifier {}", labelinfo.attachedId));
-                    return false;
-                }
+            if ( nodeIsInTimeFrame && 
+                ((labelinfo.hasKeyTimeFrame && labelIsInTimeFrame) || !labelinfo.hasKeyTimeFrame )) {
+
+                glm::dvec3 position = global::renderEngine.scene()->sceneGraphNode(labelinfo.attachedId)->worldPosition();
+
+                glm::dvec3 transformedPos = glm::dvec3(
+                    _transformationMatrix * glm::dvec4(position, 1.0)
+                );
+                _labelData.emplace_back(std::make_tuple(transformedPos, labelinfo.text, labelinfo.textColor));            
             }
         }
 

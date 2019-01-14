@@ -11,6 +11,11 @@ local spacecraftID = "Gaia";
 
 local Gaia = {
     Identifier = spacecraftID,
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2018-APR-10-15:00:00",
+        End = "2018-JUN-03-06:00:00"
+    },
     Transform = {
       Translation = {
           Type = "RadecTranslation", 

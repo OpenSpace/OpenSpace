@@ -11,6 +11,11 @@ local spacecraftID = "ParkerSolarProbe";
 
 local ParkerSolarProbe = {
     Identifier = spacecraftID,
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2018-AUG-12-08:00:00",
+        End = "2018-DEC-31-07:00:00"
+    },
     Transform = {
       Translation = {
           Type = "RadecTranslation", 
