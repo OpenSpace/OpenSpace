@@ -17,6 +17,39 @@ local ChandraLabel = {
     LabelText = ".Chandra",
     ObjectIdentifier = spacecrafts.ChandraAsset.spacecraftID
 }
+local CLU1Label = {
+    LabelText = ".CLU1",
+    TimeFrame = { 
+        Start = "2014-001T06:00:00",
+        End = "2015-171T15:00:00"
+    },
+    ObjectIdentifier = spacecrafts.CLU1Asset.spacecraftID
+}
+local CLU2Label = {
+    LabelText = ".CLU2",
+    TimeFrame = { 
+        Start = "2014-004T02:00:00",
+        End = "2015-164T23:00:00"
+    },
+    ObjectIdentifier = spacecrafts.CLU2Asset.spacecraftID
+}
+local CLU3Label = {
+    LabelText = ".CLU3",
+    TimeFrame = { 
+        Start = "2014-002T17:00:00",
+        End = "2015-061T16:00:00"
+    },
+    ObjectIdentifier = spacecrafts.CLU3Asset.spacecraftID
+}
+local CLU4Label = {
+    LabelText = ".CLU4",
+    TimeFrame = { 
+        Start = "2014-001T10:00:00",
+        End = "2015-152T22:00:00"
+    },
+    ObjectIdentifier = spacecrafts.CLU4Asset.spacecraftID
+}
+
 local CuriosityLabel = {
     LabelText = ".Curiosity",
     ObjectIdentifier = spacecrafts.CuriosityAsset.spacecraftID
@@ -121,6 +154,38 @@ local MessengerLabel = {
     },
     ObjectIdentifier = spacecrafts.MessengerAsset.spacecraftID
 }
+local MMS1Label = {
+    LabelText = ".MMS1",
+    TimeFrame = { 
+        Start = "2014-015T23:00:00",
+        End = "2018-364T04:00:00"
+    },
+    ObjectIdentifier = spacecrafts.MMS1Asset.spacecraftID
+}
+local MMS2Label = {
+    LabelText = ".MMS2",
+    TimeFrame = { 
+        Start = "2014-016T00:00:00",
+        End = "2018-364T05:00:00"
+    },
+    ObjectIdentifier = spacecrafts.MMS2Asset.spacecraftID
+}
+local MMS3Label = {
+    LabelText = ".MMS3",
+    TimeFrame = { 
+        Start = "2014-016T01:00:00",
+        End = "2018-364T07:00:00"
+    },
+    ObjectIdentifier = spacecrafts.MMS3Asset.spacecraftID
+}
+local MMS4Label = {
+    LabelText = ".MMS4",
+    TimeFrame = { 
+        Start = "2014-016T02:00:00",
+        End = "2018-364T09:00:00"
+    },
+    ObjectIdentifier = spacecrafts.MMS4Asset.spacecraftID
+}
 local MomLabel = {
     LabelText = ".MOM",
     ObjectIdentifier = spacecrafts.MomAsset.spacecraftID
@@ -156,6 +221,14 @@ local PlanetCLabel = {
         End = "2018-239T01:00:00"
     },
     ObjectIdentifier = spacecrafts.PlanetCAsset.spacecraftID
+}
+local PRCNCLabel = {
+    LabelText = ".PRCN",
+    TimeFrame = { 
+        Start = "2015-025T11:00:00",
+        End = "2016-078T10:00:00"
+    },
+    ObjectIdentifier = spacecrafts.PRCNAsset.spacecraftID
 }
 local SohoLabel = {
     LabelText = ".SOHO",
@@ -240,6 +313,14 @@ local TDR9Label = {
         End = "2017-311T20:00:00"
     },
     ObjectIdentifier = spacecrafts.TDR9Asset.spacecraftID
+}
+local TERRLabel = {
+    LabelText = ".TERR",
+    TimeFrame = { 
+        Start = "2014-022T04:00:00",
+        End = "2016-306T07:00:00"
+    },
+    ObjectIdentifier = spacecrafts.TERRAsset.spacecraftID
 }
 --Transit exoplanet Survey Satellite
 local TessLabel = {
@@ -342,7 +423,9 @@ local labelMapInnerSpace = {
                             label16 = PlanetCLabel,
                             label17 = RosettaLabel,
                             label18 = ParkerSolarProbeLabel,
-                            label19 = VenusExpressLabel
+                            label19 = VenusExpressLabel,
+                            label20 = PRCNCLabel
+
                         }
 
 local labelMapNearEarth = {  
@@ -363,8 +446,16 @@ local labelMapNearEarth = {
                             label15 = TDR7Label,
                             label16 = TDR9Label,
                             label17 = XRayLabel,
-                            label18 = ImageLabel
-
+                            label18 = ImageLabel,
+                            label19 = CLU1Label,
+                            label20 = CLU2Label,
+                            label21 = CLU3Label,
+                            label22 = CLU4Label,
+                            label23 = MMS1Label,
+                            label24 = MMS2Label,
+                            label25 = MMS3Label,
+                            label26 = MMS4Label,
+                            label27 = TERRLabel
 
                         }
 local labelMapClusters = {  

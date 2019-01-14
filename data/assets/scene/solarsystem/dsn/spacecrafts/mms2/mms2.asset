@@ -1,0 +1,28 @@
+local assetHelper = asset.require('util/asset_helper')
+local dataFolder = openspace.absPath("${SYNC}/http/dsn_data/1/positioning/MMS2") 
+
+local models = asset.syncedResource({
+    Name = "Dsn models",
+    Type = "HttpSynchronization",
+    Identifier = "dsn_stations",
+    Version = 1
+})
+local spacecraftID = "MMS2";
+
+local MMS2 = {
+    Identifier = spacecraftID,
+    Transform = {
+      Translation = {
+          Type = "RadecTranslation", 
+          DataFolder = dataFolder,
+          DataFileType = "json",
+          ObjectIdentifier = spacecraftID
+      }
+   },
+    GUI = {
+        Name = "MMS2",
+        Path = "/Solar System/Missions/MMS2"
+    }
+}
+asset.export("spacecraftID", spacecraftID)
+assetHelper.registerSceneGraphNodesAndExport(asset, {MMS2})
