@@ -1,5 +1,5 @@
 local assetHelper = asset.require('util/asset_helper')
-local dataFolder = openspace.absPath("${SYNC}/http/dsn_data/1/positioning/SPP") 
+local dataFolder = openspace.absPath("${SYNC}/http/dsn_data/1/positioning/CLU2") 
 
 local models = asset.syncedResource({
     Name = "Dsn models",
@@ -7,9 +7,9 @@ local models = asset.syncedResource({
     Identifier = "dsn_stations",
     Version = 1
 })
-local spacecraftID = "ParkerSolarProbe";
+local spacecraftID = "CLU2";
 
-local ParkerSolarProbe = {
+local CLU2 = {
     Identifier = spacecraftID,
     Transform = {
       Translation = {
@@ -18,12 +18,11 @@ local ParkerSolarProbe = {
           DataFileType = "json",
           ObjectIdentifier = spacecraftID
       }
-
    },
     GUI = {
-        Name = "Parker Solar Probe",
-        Path = "/Solar System/Missions/ParkerSolarProbe"
+        Name = "CLU2",
+        Path = "/Solar System/Missions/CLU2"
     }
 }
 asset.export("spacecraftID", spacecraftID)
-assetHelper.registerSceneGraphNodesAndExport(asset, {ParkerSolarProbe})
+assetHelper.registerSceneGraphNodesAndExport(asset, {CLU2})
