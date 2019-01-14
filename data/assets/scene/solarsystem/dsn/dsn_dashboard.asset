@@ -17,6 +17,15 @@ assetHelper.registerDashboardItems(asset, {
         GuiName = "Distance"
     },
     {
+        Type = "DashboardItemDistance",
+        Identifier = "Distance",
+        GuiName = "Distance",
+        SourceType = "Node",
+        SourceNodeName = "Earth"
+
+    },
+
+    {
         Type = "DashboardItemFramerate",
         Identifier = "Framerate",
         GuiName = "Framerate"
