@@ -274,11 +274,11 @@ void FramebufferRenderer::initialize() {
             0
         );
         glDrawBuffers(1, buffers);
-    }
-
-    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        LERROR("Bloom framebuffer is not complete");
+        
+        status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        if (status != GL_FRAMEBUFFER_COMPLETE) {
+            LERROR(fmt::format("Bloom framebuffer {} is not complete", i));
+        }
     }
 
     // JCC: Moved to here to avoid NVidia: "Program/shader state performance warning"
@@ -452,7 +452,7 @@ void FramebufferRenderer::applyBloomFilter() {
         // Making OpenGL happy...
         ghoul::opengl::TextureUnit dummyTextureUnit;
         dummyTextureUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, _bloomTexture[0]);
+        glBindTexture(GL_TEXTURE_2D, _bloomTexture[2]);
         _bloomProgram->setUniform("filterFirstPass", dummyTextureUnit);
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -700,7 +700,7 @@ void FramebufferRenderer::updateResolution() {
     for (int i = 0; i < 3; i++)
     {
         glBindTexture(GL_TEXTURE_2D, _bloomTexture[i]);
-        /*glTexImage2D(
+        glTexImage2D(
             GL_TEXTURE_2D,
             0,
             GL_RGBA16F,
@@ -710,54 +710,11 @@ void FramebufferRenderer::updateResolution() {
             GL_RGBA,
             GL_FLOAT,
             nullptr
-        );*/
-        glTexStorage2D(
-            GL_TEXTURE_2D, 
-            1, 
-            GL_RGBA16F, 
-            i ? _resolution.x : _resolution.y, 
-            i ? _resolution.y : _resolution.x
         );
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     }
-
-    /*glBindTexture(GL_TEXTURE_2D, _bloomTexture[0]);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA32F,
-        _resolution.y,
-        _resolution.x,
-        0,
-        GL_RGBA,
-        GL_FLOAT,
-        nullptr
-    );
-
-    glBindTexture(GL_TEXTURE_2D, _bloomTexture[1]);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA32F,
-        _resolution.x,
-        _resolution.y,
-        0,
-        GL_RGBA,
-        GL_FLOAT,
-        nullptr
-    );
-
-    glBindTexture(GL_TEXTURE_2D, _bloomTexture[2]);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA32F,
-        _resolution.x,
-        _resolution.y,
-        0,
-        GL_RGBA,
-        GL_FLOAT,
-        nullptr
-    );*/
 
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainPositionTexture);
 
