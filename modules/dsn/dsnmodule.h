@@ -33,6 +33,7 @@
 #include <ghoul/logging/logmanager.h>
 
 #include <modules/dsn/translation/radectranslation.h>
+#include <modules/dsn/rendering/renderablecone.h>
 #include <modules/dsn/rendering/renderablesignals.h>
 #include <modules/dsn/rendering/renderabledsnlabels.h>
 

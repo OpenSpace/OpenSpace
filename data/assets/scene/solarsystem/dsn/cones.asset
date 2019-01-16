@@ -1,0 +1,18 @@
+local assetHelper = asset.require('util/asset_helper')
+
+-----------------------------------
+----- The Renderable Cones  -----
+-----------------------------------
+
+local Cones = {
+    Identifier = "Cones",
+    Renderable = {
+        Type = "RenderableCone",
+    },
+    GUI = {
+        Name = "Cones",
+        Path = "/Solar System"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {Cones})

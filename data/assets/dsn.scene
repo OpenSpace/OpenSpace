@@ -22,6 +22,9 @@ asset.require('scene/solarsystem/dsn/stations')
 --Signals
 asset.require('scene/solarsystem/dsn/signals')
 
+--Cones
+asset.require('scene/solarsystem/dsn/cones')
+
 -- Customized Dashboard
 asset.require('scene/solarsystem/dsn/dsn_dashboard')
 

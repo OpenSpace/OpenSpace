@@ -22,26 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/dsn/dsnmodule.h>
+#version __CONTEXT__
 
-namespace openspace {
-    constexpr const char* _loggerCat = "DSN Module";
+// layout locations must correspond to va locations in renderablesignals.cpp
+layout(location = 0) in vec3 in_point_position;
+layout(location = 1) in vec4 in_color;
 
-    DsnModule::DsnModule() : OpenSpaceModule(Name) {
-    }
+out vec4 vs_positionScreenSpace;
+out vec4 vs_gPosition;
+out vec4 vs_color;
 
-    void DsnModule::internalInitialize(const ghoul::Dictionary&) {
-        auto renderableFactory = FactoryManager::ref().factory<Renderable>();
-        ghoul_assert(renderableFactory, "No renderable factory existed");
+uniform dmat4 modelView;
+uniform mat4 projectionTransform;
 
-        renderableFactory->registerClass<RenderableSignals>("RenderableSignals");
-        renderableFactory->registerClass<RenderableCone>("RenderableCone");
-        renderableFactory->registerClass<RenderableDsnLabels>("RenderableDsnLabels");
+void main() {
+    vs_gPosition = vec4(modelView * dvec4(in_point_position, 1));
+    vs_positionScreenSpace = projectionTransform * vs_gPosition;
+    gl_Position  = vs_positionScreenSpace;
 
-		auto translationFactory = FactoryManager::ref().factory<Translation>();
-		ghoul_assert(translationFactory, "Translation factory was not created");
+    // Set z to 0 to disable near and far plane, unique handling for perspective in space
+    gl_Position.z = 0.f; 
 
-        translationFactory->registerClass<RadecTranslation>("RadecTranslation");
-    }
-
-} // namespace openspace
+    // pass variables with no calculations directly to fragment
+    vs_color = in_color;
+}

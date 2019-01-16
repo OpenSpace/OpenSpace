@@ -25,6 +25,7 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablecone.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesignals.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledsnlabels.h
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/radectranslation.h
@@ -35,6 +36,7 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablecone.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesignals.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledsnlabels.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/radectranslation.cpp
@@ -48,7 +50,8 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablesignals_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablesignals_vs.glsl
-   
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablecone_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablecone_vs.glsl  
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 

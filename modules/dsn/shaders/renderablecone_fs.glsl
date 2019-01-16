@@ -22,26 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/dsn/dsnmodule.h>
+#include "fragment.glsl"
+#include "floatoperations.glsl"
 
-namespace openspace {
-    constexpr const char* _loggerCat = "DSN Module";
+in vec4 vs_positionScreenSpace;
+in vec4 vs_gPosition;
+in vec4 vs_color;
 
-    DsnModule::DsnModule() : OpenSpaceModule(Name) {
-    }
+Fragment getFragment() {
 
-    void DsnModule::internalInitialize(const ghoul::Dictionary&) {
-        auto renderableFactory = FactoryManager::ref().factory<Renderable>();
-        ghoul_assert(renderableFactory, "No renderable factory existed");
+    Fragment frag;
+    frag.depth = vs_positionScreenSpace.w;
+    //frag.blend = BLEND_MODE_ADDITIVE;
 
-        renderableFactory->registerClass<RenderableSignals>("RenderableSignals");
-        renderableFactory->registerClass<RenderableCone>("RenderableCone");
-        renderableFactory->registerClass<RenderableDsnLabels>("RenderableDsnLabels");
+    frag.color = vs_color;
 
-		auto translationFactory = FactoryManager::ref().factory<Translation>();
-		ghoul_assert(translationFactory, "Translation factory was not created");
+    // G-Buffer
+    // JCC: The depthCorrection here is a temporary tweak
+    // to fix precision problems.
+    
+    vec4 depthCorrection = vec4(0.0,0.0,100,0.0);
+    frag.gPosition = vs_gPosition + depthCorrection;
 
-        translationFactory->registerClass<RadecTranslation>("RadecTranslation");
-    }
+    // For rendering inside earth atmosphere we need to set a normal for our line
+    // Todo: calculate normal correctly 
+    // currently normal is in object space
+    frag.gNormal= vec4(0.0, 0.0, -1.0, 1.0); 
 
-} // namespace openspace
+    return frag;
+}
