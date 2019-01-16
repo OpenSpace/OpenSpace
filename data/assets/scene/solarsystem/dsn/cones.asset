@@ -8,6 +8,11 @@ local Cones = {
     Identifier = "Cones",
     Renderable = {
         Type = "RenderableCone",
+        ApexPosition = "DSS14",
+        BaseCenterDirection = "Earth",
+        ReverseDirection = true,
+        Resolution = 50,
+        Color = {0.0,0.0,1.0, 0.5}
     },
     GUI = {
         Name = "Cones",

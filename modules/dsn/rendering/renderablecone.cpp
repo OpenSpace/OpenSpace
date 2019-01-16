@@ -33,18 +33,179 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    constexpr const char* ProgramName = "ConesProgram";
+    constexpr const char* ProgramName = "ConeProgram";
     constexpr const char* _loggerCat = "RenderableCone";
 
+
     constexpr const std::array <const char*, openspace::RenderableCone::uniformCacheSize> UniformNames = {
-    "modelView", "projectionTransform"};
+        "modelView", "projectionTransform"};
+
+    constexpr openspace::properties::Property::PropertyInfo ApexPositionInfo = {
+        "ApexPosition",
+        "Apex Position",
+        "This value specifies the position of the cone apex. If this value"
+        "is a string, it is interpreted as the identifier of another "
+        "scenegraph node. If this value is a 3-vector, it is interpreted "
+        "as a 3D world position."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BaseCenterDirectionInfo = {
+        "BaseCenterDirection",
+        "Base Center Direction",
+        "This value specifies the direction from the apex to the base center of "
+        "the cone. If this value is a string, it is interpreted as the identifier " 
+        "of another scenegraph node. If this value is a 3-vector, it is interpreted "
+        "as a 3D direction vector."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ReverseDirectionInfo = {
+        "ReverseDirection",
+        "Reverse Direction",
+        "Reverses the BaseCenterDirection"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+        "Color",
+        "Color",
+        "Color of the cone"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo HeightInfo = {
+        "Height",
+        "Height",
+        "Height of the cone"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
+        "Radius",
+        "Radius",
+        "Radius of the cone base"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {
+        "Resolution",
+        "Resolution",
+        "Resolution of the cone, i.e number of vertices around the base"
+    };
 } // namespace
 
 namespace openspace {
+
+
+
+documentation::Documentation RenderableCone::Documentation() {
+    using namespace documentation;
+    return {
+        "Renderable Cone",
+        "dsn_renderable_renderablecone",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("RenderableCone"),
+                Optional::No
+            },
+            {
+                ApexPositionInfo.identifier,
+                new OrVerifier({ new StringVerifier, new DoubleVector3Verifier, }),
+                Optional::No,
+                ApexPositionInfo.description
+            },
+            {
+                BaseCenterDirectionInfo.identifier,
+                new OrVerifier({ new StringVerifier, new DoubleVector3Verifier, }),
+                Optional::No,
+                BaseCenterDirectionInfo.description
+            },
+            {
+                ReverseDirectionInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                ReverseDirectionInfo.description
+            },
+            {
+                ColorInfo.identifier,
+                new DoubleVector4Verifier,
+                Optional::Yes,
+                ColorInfo.description
+            },
+            {
+                HeightInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                HeightInfo.description
+            },
+            {
+                RadiusInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                RadiusInfo.description
+            },
+            {
+                ResolutionInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                ResolutionInfo.description
+            }
+        }
+    };
+}
+
 RenderableCone::RenderableCone(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
+    , _height(HeightInfo, 0.8, 0.0, 1.0)
+    , _radius(RadiusInfo, 0.8, 0.0, 1.0)
+    , _resolution(ResolutionInfo, 8, 4, 100)
+    , _color(
+        ColorInfo,
+        _defaultColor,
+        glm::vec4(0.0),
+        glm::vec4(1.0)
+    )
 {
 
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "RenderableCone"
+    );
+
+    if (dictionary.hasKey(ApexPositionInfo.identifier)) {
+
+        if (dictionary.hasKeyAndValue<std::string>(ApexPositionInfo.identifier)) {
+            _apexNodeId = dictionary.value<std::string>(ApexPositionInfo.identifier);
+        }
+        else {
+            // We know it has to be a vector now
+            _apexPosition = dictionary.value<glm::dvec3>(ApexPositionInfo.identifier);
+            _apexIsNodeAttached = false;
+        }
+    }
+
+    if (dictionary.hasKey(BaseCenterDirectionInfo.identifier)) {
+
+        if (dictionary.hasKeyAndValue<std::string>(BaseCenterDirectionInfo.identifier)) {
+            _baseDirNodeId = dictionary.value<std::string>(BaseCenterDirectionInfo.identifier);
+        }
+        else {
+            // We know it has to be a vector now
+            _baseCenterDirection = dictionary.value<glm::dvec3>(ApexPositionInfo.identifier);
+            _baseCenterIsNodeAttached = false;
+        }
+
+        if (dictionary.hasKeyAndValue<bool>(ReverseDirectionInfo.identifier)) {
+            _directionIsReversed = dictionary.value<bool>(ReverseDirectionInfo.identifier);
+        }
+    }
+
+    if (dictionary.hasKeyAndValue<glm::vec4>(ColorInfo.identifier)) {
+        _color = dictionary.value<glm::vec4>(ColorInfo.identifier);
+        _color.setViewOption(properties::Property::ViewOptions::Color);
+        addProperty(_color);
+    }
+
+    addProperty(_height);
+    addProperty(_radius);
+    addProperty(_resolution);
 }
 void RenderableCone::initializeGL() {
     _programObject = BaseModule::ProgramObjectManager.request(
@@ -136,7 +297,7 @@ void RenderableCone::render(const RenderData& data, RendererTasks&) {
     glDrawArrays(
         GL_TRIANGLE_FAN,
         0,
-        _lateralSurfaceInfo.count
+        _count
     );
     glFrontFace(GL_CCW);
 
@@ -153,7 +314,7 @@ void RenderableCone::render(const RenderData& data, RendererTasks&) {
     glDrawArrays(
         GL_TRIANGLE_FAN,
         0,
-        _baseInfo.count
+        _count
     );
 
     unbindGL();
@@ -168,53 +329,73 @@ void RenderableCone::render(const RenderData& data, RendererTasks&) {
 void RenderableCone::update(const UpdateData& data) {
     _vertexLateralSurfaceArray.clear();
     _vertexBaseArray.clear();
+    
+    if (_apexIsNodeAttached) {
 
-    glm::dvec3 earthPos = global::renderEngine.scene()->sceneGraphNode("Earth")->worldPosition();
-    glm::dvec3 apex = global::renderEngine.scene()->sceneGraphNode("DSS14")->worldPosition();
-    glm::dvec3 d = glm::normalize(apex - earthPos);
+        if (!global::renderEngine.scene()->sceneGraphNode(_apexNodeId)) {
+            LERROR(fmt::format("No scenegraphnode found with id {}", _apexNodeId));
+            return;
+        }
+        _apexPosition = global::renderEngine.scene()->sceneGraphNode(_apexNodeId)->worldPosition();
+    }
 
-    double h = 20000000;
-    double radius = h/2;
-    int n = 8;
+    if (_baseCenterIsNodeAttached) {
 
-    std::vector<glm::dvec3> points;
-    glm::dvec3 baseCenter = apex + (d * h);
+        if (!global::renderEngine.scene()->sceneGraphNode(_baseDirNodeId)) {
+            LERROR(fmt::format("No scenegraphnode found with id {}", _baseDirNodeId));
+            return;
+        }
 
-    glm::dvec3 e0 = glm::cross(d, glm::dvec3(1.0, 0.0, 0.0));
-    glm::dvec3 e1 = glm::cross(d, e0);
+        glm::dvec3 nodePos = global::renderEngine.scene()->sceneGraphNode(_baseDirNodeId)->worldPosition();
 
-    float angleIncrement = glm::radians(360.0/n);
+        _baseCenterDirection = glm::normalize(_apexPosition - nodePos);
+    }
 
-    for (int i = 0; i < n; ++i) {
+    std::vector<glm::dvec3> baseVertices;
+    glm::dvec3 baseCenterPosition;
+    int numBaseVertices = _resolution;
+    double radius = _radius * _unit;
+    double height = _height * _unit;
+
+    float angleIncrement = glm::radians(360.0 / numBaseVertices);
+    glm::dvec3 e0 = glm::cross(_baseCenterDirection, glm::dvec3(1.0, 0.0, 0.0));
+    glm::dvec3 e1 = glm::cross(_baseCenterDirection, e0);
+
+    if (_directionIsReversed) {
+        baseCenterPosition = _apexPosition + _baseCenterDirection * height;
+    }
+    else {
+        baseCenterPosition = _apexPosition - _baseCenterDirection * height;
+    }
+
+    for (int i = 0; i < numBaseVertices; ++i) {
         double rad = angleIncrement * i;
-        glm::dvec3 p = baseCenter + (((e0 * glm::cos(rad)) + (e1 * glm::sin(rad))) * radius);
-        points.push_back(p);
+        glm::dvec3 p = baseCenterPosition + (((e0 * glm::cos(rad)) + (e1 * glm::sin(rad))) * radius);
+        baseVertices.push_back(p);
     }
     
-    fillVertexArray(_vertexBaseArray, baseCenter, points);
-    fillVertexArray(_vertexLateralSurfaceArray, apex, points);
+    fillVertexArray(_vertexBaseArray, baseCenterPosition, baseVertices);
+    fillVertexArray(_vertexLateralSurfaceArray, _apexPosition, baseVertices);
 
-    // Update the number of lines to render
-    _lateralSurfaceInfo.count = static_cast<GLsizei>(_vertexLateralSurfaceArray.size() / (_sizeThreeVal + _sizeFourVal));
-    _baseInfo.count = static_cast<GLsizei>(_vertexBaseArray.size() / (_sizeThreeVal + _sizeFourVal));
+    // Update the number of lines to render, same for both vertex arrays
+    _count = static_cast<GLsizei>(_vertexLateralSurfaceArray.size() / (_sizeThreeVal + _sizeFourVal));
 
     unbindGL();
 }
 
 void RenderableCone::updateUniforms(const RenderData& data) {
     _programObject->setUniform(_uniformCache.modelView,
-        data.camera.combinedViewMatrix() * _lateralSurfaceInfo._localTransform);
+        data.camera.combinedViewMatrix() * _localTransform);
     _programObject->setUniform(_uniformCache.projection, data.camera.sgctInternal.projectionMatrix());
 }
 
 void RenderableCone::fillVertexArray(std::vector<float> &vertexArray, glm::dvec3 centerPoint, std::vector<glm::dvec3> points) {
-    glm::vec4 color = { 0.0f, 0.0f, 1.0f, 0.2f };
     
-    addVertexToVertexArray(vertexArray, centerPoint, color);
+    addVertexToVertexArray(vertexArray, centerPoint, _color);
     for (int i = 0; i < points.size(); ++i) {
-        addVertexToVertexArray(vertexArray,points[i], color);
+        addVertexToVertexArray(vertexArray,points[i], _color);
     }
-    addVertexToVertexArray(vertexArray,points[0], color);
+    addVertexToVertexArray(vertexArray,points[0], _color);
 }
 
 void RenderableCone::addVertexToVertexArray(std::vector<float> &vertexArray,glm::dvec3 position, glm::vec4 color)

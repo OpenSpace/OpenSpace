@@ -31,6 +31,9 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/vector/vec4property.h>
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -44,15 +47,7 @@ namespace openspace {
     class Translation;
 
     /**
-     * This is the base class for signals that are sent out from an emitter
-     * (such as a station or spacecraft dish).
-     * Signals can be rendered with varying colors and line thicknesses.
-     *
-     * The endpositions for each signal line is provided by checking for
-     * ScenegraphNode positions in OpenSpace. These positions have different origins
-     * depending on if they are representing a station position or a spacecraft position.
-     * The reason for this is because of precision problems occurring due to using very
-     * large numbers representing the distances in space.
+     * This is a class for rendering cones
      **/
     class RenderableCone : public Renderable {
 
@@ -63,12 +58,7 @@ namespace openspace {
         void initializeGL() override;
         void deinitializeGL() override;
         void update(const UpdateData& data) override;
-        /*
-         * The render method will set up the shader information and then render the
-         * information contained in the the \c _lineRenderInformation,
-         * using the provided \p data
-         * \param data The data that is necessary to render this Renderable
-         */
+
         void render(const RenderData& data, RendererTasks& rendererTask) override;
         void fillVertexArray(std::vector<float> &_vertexArray, glm::dvec3 centerPoint, std::vector<glm::dvec3> points);
 
@@ -78,8 +68,11 @@ namespace openspace {
         /// Number of variables in _uniformCache
         static const GLuint uniformCacheSize = 2;
 
+        /// Returns the documentation entries
+        static documentation::Documentation Documentation();
+
     protected:
-        const char* _identifier = "Cones";
+        const char* _identifier = "RenderableCone";
         /// The backend storage for the vertex buffer object containing all points for the
         /// lines to be rendered; position (3 floats) color (4 floats), 
         std::vector<float> _vertexBaseArray;
@@ -126,6 +119,25 @@ namespace openspace {
         struct ColorVBOLayout {
             float r, g, b, a;
         };
+
+        glm::dvec3 _apexPosition;
+        glm::dvec3 _baseCenterDirection;
+
+        // lightdays in meters
+        double _unit = 2.59E13;
+
+        properties::FloatProperty _height;
+        properties::FloatProperty _radius;
+        properties::IntProperty _resolution;
+        properties::Vec4Property _color;
+
+        bool _apexIsNodeAttached = true;
+        bool _baseCenterIsNodeAttached = true;
+        bool _directionIsReversed = false;
+        glm::vec4 _defaultColor = { 0.4,0.4,0.4,0.8 };
+
+        std::string _apexNodeId, _baseDirNodeId = "";
+
         /// Program object used to render the data stored in RenderInformation
         ghoul::opengl::ProgramObject* _programObject = nullptr;
         /// Cache for uniform variables, update _uniformCacheSize accordingly
