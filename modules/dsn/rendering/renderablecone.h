@@ -88,18 +88,11 @@ namespace openspace {
         /// The RenderInformation contains information filled in by the concrete subclasses to
         /// be used by this class.
         struct RenderInformation {
-            /// The first element in the vertex buffer to be rendered
-            GLint first = 0;
-            /// The number of values to be rendered
-            GLsizei count = 0;
-            /// Local model matrix, dependant on focusnode, used for rendering in camera space
-            glm::dmat4 _localTransform = glm::dmat4(1.0);
             /// The vertex array object for this RenderInformation
             GLuint _vaoID = 0;
             /// The main vertex buffer object
             GLuint _vBufferID = 0;
         };
-
         /// Set of information about the lateral surface of the cone
         RenderInformation _lateralSurfaceInfo;
         /// Set of information about the base of the cone
@@ -113,6 +106,13 @@ namespace openspace {
         /// Specifies the number of components per generic vertex attribute
         const GLuint _sizeFourVal = 4;
         const GLuint _sizeThreeVal = 3;
+
+        /// Local model matrix, used for rendering in camera space
+        glm::dmat4 _localTransform = glm::dmat4(1.0);
+        /// The first element in the vertex buffer to be rendered
+        GLint _first = 0;
+        /// The number of values to be rendered
+        GLsizei _count = 0;
 
     private:
         void addVertexToVertexArray(std::vector<float> &_vertexArray,glm::dvec3 position,glm::vec4 color);

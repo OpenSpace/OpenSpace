@@ -208,7 +208,7 @@ void RenderableCone::updateUniforms(const RenderData& data) {
 }
 
 void RenderableCone::fillVertexArray(std::vector<float> &vertexArray, glm::dvec3 centerPoint, std::vector<glm::dvec3> points) {
-    glm::vec4 color = { 0.0f, 0.0f, 1.0f, 1.0f };
+    glm::vec4 color = { 0.0f, 0.0f, 1.0f, 0.2f };
     
     addVertexToVertexArray(vertexArray, centerPoint, color);
     for (int i = 0; i < points.size(); ++i) {
