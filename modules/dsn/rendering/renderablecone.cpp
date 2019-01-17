@@ -75,13 +75,11 @@ namespace {
         "Height",
         "Height of the cone"
     };
-
-    constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
-        "Radius",
-        "Radius",
-        "Radius of the cone base"
+    constexpr openspace::properties::Property::PropertyInfo AngleInfo = {
+        "Angle",
+        "Angle",
+        "Angle of the cone base"
     };
-
     constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {
         "Resolution",
         "Resolution",
@@ -135,10 +133,10 @@ documentation::Documentation RenderableCone::Documentation() {
                 HeightInfo.description
             },
             {
-                RadiusInfo.identifier,
+                AngleInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
-                RadiusInfo.description
+                AngleInfo.description
             },
             {
                 ResolutionInfo.identifier,
@@ -153,7 +151,7 @@ documentation::Documentation RenderableCone::Documentation() {
 RenderableCone::RenderableCone(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _height(HeightInfo, 0.8, 0.0, 1.0)
-    , _radius(RadiusInfo, 0.8, 0.0, 1.0)
+    , _angle(AngleInfo, 50, 0.0, 180)
     , _resolution(ResolutionInfo, 8, 4, 100)
     , _color(
         ColorInfo,
@@ -204,7 +202,7 @@ RenderableCone::RenderableCone(const ghoul::Dictionary& dictionary)
     }
 
     addProperty(_height);
-    addProperty(_radius);
+    addProperty(_angle);
     addProperty(_resolution);
 }
 void RenderableCone::initializeGL() {
@@ -354,8 +352,11 @@ void RenderableCone::update(const UpdateData& data) {
     std::vector<glm::dvec3> baseVertices;
     glm::dvec3 baseCenterPosition;
     int numBaseVertices = _resolution;
-    double radius = _radius * _unit;
     double height = _height * _unit;
+
+    float angle = (_angle * pi) / 180; //Convert from degrees to radians
+    angle = angle / 2; //Half of the full cone angle to get a right -angled triangle
+    double radius = height * tan(angle);
 
     float angleIncrement = glm::radians(360.0 / numBaseVertices);
     glm::dvec3 e0 = glm::cross(_baseCenterDirection, glm::dvec3(1.0, 0.0, 0.0));
