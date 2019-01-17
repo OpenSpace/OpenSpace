@@ -39,7 +39,8 @@ local siteColorMap = {
 
 -- stationMap 
 -- SiteColor: determines color of the signals going to this station
--- Size: The height of the station, either 34 or 70m for modern stations
+-- Size: The height of the station, approximately the same as their 
+--       dish diameter size which is 34m or 70m for modern stations
 local stationMap = {
                  DSS13 = {
                     SiteColor = "GoldstoneColor",

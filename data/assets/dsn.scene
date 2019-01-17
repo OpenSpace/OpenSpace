@@ -9,6 +9,7 @@ asset.require('scene/solarsystem/planets')
 asset.require('scene/solarsystem/dwarf_planets/pluto/pluto')
 asset.require('scene/solarsystem/dwarf_planets/pluto/pluto_trail')
 asset.request('scene/digitaluniverse/stars')
+asset.request('scene/digitaluniverse/milkyway')
 asset.request('customization/globebrowsing')
 asset.request('scene/digitaluniverse/grids')
 
