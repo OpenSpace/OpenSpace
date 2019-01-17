@@ -151,12 +151,12 @@ documentation::Documentation RenderableCone::Documentation() {
 RenderableCone::RenderableCone(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _height(HeightInfo, 0.8, 0.0, 1.0)
-    , _angle(AngleInfo, 50, 0.0, 180)
-    , _resolution(ResolutionInfo, 8, 4, 100)
+    , _angle(AngleInfo, 160, 0.0, 180)
+    , _resolution(ResolutionInfo, 50, 4, 100)
     , _color(
         ColorInfo,
         _defaultColor,
-        glm::vec4(0.0),
+        glm::vec4(0.0), 
         glm::vec4(1.0)
     )
 {
@@ -200,7 +200,9 @@ RenderableCone::RenderableCone(const ghoul::Dictionary& dictionary)
         _color.setViewOption(properties::Property::ViewOptions::Color);
         addProperty(_color);
     }
-
+    if (dictionary.hasKeyAndValue<std::string>(ApexPositionInfo.identifier)) {
+        _resolution = dictionary.value<double>(ResolutionInfo.identifier);
+    }
     addProperty(_height);
     addProperty(_angle);
     addProperty(_resolution);
@@ -288,16 +290,17 @@ void RenderableCone::render(const RenderData& data, RendererTasks&) {
         GL_ARRAY_BUFFER,
         _vertexLateralSurfaceArray.size() * sizeof(float),
         _vertexLateralSurfaceArray.data(),
-        GL_STATIC_DRAW
+        GL_DYNAMIC_DRAW
     );
     updateVertexAttributes();
-    glFrontFace(GL_CW);
+    //glFrontFace(GL_CW);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glDrawArrays(
         GL_TRIANGLE_FAN,
         0,
         _count
     );
-    glFrontFace(GL_CCW);
+   // glFrontFace(GL_CCW);
 
     //Base part of the cone
     glBindVertexArray(_baseInfo._vaoID);
@@ -308,13 +311,15 @@ void RenderableCone::render(const RenderData& data, RendererTasks&) {
         _vertexBaseArray.data(),
         GL_STATIC_DRAW
     );
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     updateVertexAttributes();
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glDrawArrays(
         GL_TRIANGLE_FAN,
         0,
         _count
     );
-
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     unbindGL();
 
     if (usingFramebufferRenderer) {
@@ -353,8 +358,7 @@ void RenderableCone::update(const UpdateData& data) {
     glm::dvec3 baseCenterPosition;
     int numBaseVertices = _resolution;
     double height = _height * _unit;
-
-    float angle = (_angle * pi) / 180; //Convert from degrees to radians
+    double angle = glm::radians(float(_angle));
     angle = angle / 2; //Half of the full cone angle to get a right -angled triangle
     double radius = height * tan(angle);
 

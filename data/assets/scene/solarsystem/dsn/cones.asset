@@ -4,20 +4,50 @@ local assetHelper = asset.require('util/asset_helper')
 ----- The Renderable Cones  -----
 -----------------------------------
 
-local Cones = {
-    Identifier = "Cones",
+local GoldstoneFOV = {
+    Identifier = "GoldstoneFOV",
     Renderable = {
         Type = "RenderableCone",
         ApexPosition = "DSS14",
         BaseCenterDirection = "Earth",
         ReverseDirection = true,
         Resolution = 50,
-        Color = {0.0,0.0,1.0, 0.5}
+        Color = {0.0,0.0,1.0, 0.3}
     },
     GUI = {
-        Name = "Cones",
+        Name = "GoldstoneFOV",
+        Path = "/Solar System"
+    }
+}
+local MadridFOV = {
+    Identifier = "MadridFOV",
+    Renderable = {
+        Type = "RenderableCone",
+        ApexPosition = "DSS63",
+        BaseCenterDirection = "Earth",
+        ReverseDirection = true,
+        Resolution = 50,
+        Color = {0.0,1.0,0.0, 0.3}
+    },
+    GUI = {
+        Name = "MadridFOV",
+        Path = "/Solar System"
+    }
+}
+local CanberraFOV = {
+    Identifier = "CanberraFOV",
+    Renderable = {
+        Type = "RenderableCone",
+        ApexPosition = "DSS43",
+        BaseCenterDirection = "Earth",
+        ReverseDirection = true,
+        Resolution = 50,
+        Color = {1.0,0.0,0.0, 0.3}
+    },
+    GUI = {
+        Name = "CanberraFOV",
         Path = "/Solar System"
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {Cones})
+assetHelper.registerSceneGraphNodesAndExport(asset, {GoldstoneFOV, MadridFOV,CanberraFOV})

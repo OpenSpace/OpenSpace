@@ -125,7 +125,6 @@ namespace openspace {
 
         // lightdays in meters
         double _unit = 2.59E13;
-        double pi = 3.14159265359;
 
         properties::FloatProperty _height;
         properties::FloatProperty _angle;
