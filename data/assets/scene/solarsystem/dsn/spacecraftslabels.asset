@@ -325,8 +325,8 @@ local labelMapClusters = {
 -- Allows us to create multiple labels with similar styling --
 --------------------------------------------------------------
 
-local InnerSpaceLabels = {
-    Identifier = "InnerSpaceLabels",
+local InnerSpaceDsnLabels = {
+    Identifier = "InnerSpaceDsnLabels",
     Renderable = {
         Type = "RenderableDsnLabels",
         Enabled = true,
@@ -335,7 +335,7 @@ local InnerSpaceLabels = {
         TextColor = { 0.8, 0.7, 0.6, 1.0 },
         DrawLabels = true,
         LabelSizeRange = {5.5, 6.0},
-        SizeDistanceRange = {2, 100000000},
+        SizeDistanceRange = {2, 400000000},
         SizeDistanceUnit = "km",
         FadeOutDistanceRange = {2, 0.1}, 
         FadeOutDistanceUnit = "km",
@@ -343,13 +343,13 @@ local InnerSpaceLabels = {
         FadeInDistanceUnit = "lighthours",
     },
     GUI = {
-        Name = "Inner Space Labels",
+        Name = "Inner Space DSN Labels",
         Path = "/Labels"
     }
 }
 
-local NearEarthLabels = {
-    Identifier = "NearEarthLabels",
+local NearEarthDsnLabels = {
+    Identifier = "NearEarthDsnLabels",
     Renderable = {
         Type = "RenderableDsnLabels",
         Enabled = true,
@@ -358,7 +358,7 @@ local NearEarthLabels = {
         TextColor = { 1.0, 0.6, 0.4, 1.0 },
         DrawLabels = true,
         LabelSizeRange = {5.5, 6.0},
-        SizeDistanceRange = {2, 100000000},
+        SizeDistanceRange = {2, 400000000},
         SizeDistanceUnit = "km",
         FadeOutDistanceRange = {15, 10}, 
         FadeOutDistanceUnit = "m",
@@ -366,22 +366,22 @@ local NearEarthLabels = {
         FadeInDistanceUnit = "lightseconds"
     },
     GUI = {
-        Name = "Near earth Labels",
+        Name = "Near Earth DSN Labels",
         Path = "/Labels"
     }
 }
 
-local OuterSpaceLabels = {
-    Identifier = "OuterSpaceLabels",
+local OuterSpaceDsnLabels = {
+    Identifier = "OuterSpaceDsnLabels",
     Renderable = {
         Type = "RenderableDsnLabels",
         Enabled = true,
-        ScaleFactor = 9.75,
+        ScaleFactor = 9.7,
         LabelIdentifierMap = labelMapOuterSpace,
         TextColor = { 0.8, 0.7, 0.6, 1.0 },
         DrawLabels = true,
-        LabelSizeRange = {6.3, 6.7},
-        SizeDistanceRange = {2, 100000000},
+        LabelSizeRange = {5.8, 6.3},
+        SizeDistanceRange = {2, 400000000},
         SizeDistanceUnit = "km",
         FadeOutDistanceRange = {2, 0.1}, 
         FadeOutDistanceUnit = "km",
@@ -389,21 +389,21 @@ local OuterSpaceLabels = {
         FadeInDistanceUnit = "lightdays",
     },
     GUI = {
-        Name = "Outer Space Labels",
+        Name = "Outer Space DSN Labels",
         Path = "/Labels"
     }
 }
 
-local MarsMissionsLabels = {
-    Identifier = "MarsMissionsLabels",
+local MarsMissionsDsnLabels = {
+    Identifier = "MarsMissionsDsnLabels",
     Renderable = {
         Type = "RenderableDsnLabels",
         Enabled = true,
-        ScaleFactor = 7.5,
+        ScaleFactor = 9.2,
         LabelIdentifierMap = labelMapMarsMissions,
         TextColor = { 0.8, 0.7, 0.6, 1.0 },
         DrawLabels = true,
-        LabelSizeRange = {4.0, 4.5},
+        LabelSizeRange = {5.5, 6.0},
         SizeDistanceRange = {2, 1000},
         SizeDistanceUnit = "km",
         FadeOutDistanceRange = {2, 0.1}, 
@@ -412,13 +412,13 @@ local MarsMissionsLabels = {
         FadeInDistanceUnit = "km",
     },
     GUI = {
-        Name = "Mars Missions Labels",
+        Name = "Mars Missions DSN Labels",
         Path = "/Labels"
     }
 }
 
-local ClusteredLabels = {
-    Identifier = "ClusteredLabels",
+local ClusteredDsnLabels = {
+    Identifier = "ClusteredDsnLabels",
     Renderable = {
         Type = "RenderableDsnLabels",
         Enabled = true,
@@ -426,8 +426,8 @@ local ClusteredLabels = {
         LabelIdentifierMap = labelMapClusters,
         TextColor = { 1.0, 0.7, 0.3, 1.0 },
         DrawLabels = true,
-        LabelSizeRange = {5.5, 5.8},
-        SizeDistanceRange = {2, 100000000},
+        LabelSizeRange = {5.5, 6.0},
+        SizeDistanceRange = {2, 400000000},
         SizeDistanceUnit = "km",
         FadeOutDistanceRange = {400000, 300000}, 
         FadeOutDistanceUnit = "km",
@@ -436,15 +436,15 @@ local ClusteredLabels = {
 
     },
     GUI = {
-        Name = "Clustered Labels",
+        Name = "Clustered DSN Labels",
         Path = "/Labels"
     }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    OuterSpaceLabels, 
-    MarsMissionsLabels, 
-    ClusteredLabels, 
-    InnerSpaceLabels,
-    NearEarthLabels
+    OuterSpaceDsnLabels, 
+    MarsMissionsDsnLabels, 
+    ClusteredDsnLabels, 
+    InnerSpaceDsnLabels,
+    NearEarthDsnLabels
  })
