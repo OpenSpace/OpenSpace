@@ -1,9 +1,11 @@
 local assetHelper = asset.require('util/asset_helper')
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+local stationsAsset = asset.require('scene/solarsystem/dsn/stations')
 
 -----------------------------------
 ----- The Renderable Cones  -----
 -----------------------------------
+colors = stationsAsset.siteColorMap
 
 local GoldstoneFOV = {
     Identifier = "GoldstoneFOV",
@@ -14,7 +16,8 @@ local GoldstoneFOV = {
         ReverseDirection = true,
         Enabled = false,
         Resolution = 50,
-        Color = {0.0,0.0,1.0, 0.4}
+        Opacity = 0.4,
+        Color = colors.GoldstoneColor
     },
     GUI = {
         Name = "GoldstoneFOV",
@@ -30,7 +33,8 @@ local MadridFOV = {
         ReverseDirection = true,
         Enabled = false,
         Resolution = 50,
-        Color = {0.0,1.0,0.0, 0.3}
+        Opacity = 0.4,
+        Color = colors.MadridColor
     },
     GUI = {
         Name = "MadridFOV",
@@ -46,7 +50,8 @@ local CanberraFOV = {
         ReverseDirection = true,
         Enabled = false,
         Resolution = 50,
-        Color = {1.0,0.0,0.0, 0.3}
+        Opacity = 0.4,
+        Color = colors.CanberraColor
     },
     GUI = {
         Name = "CanberraFOV",

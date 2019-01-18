@@ -85,10 +85,14 @@ namespace {
         "Resolution",
         "Resolution of the cone, i.e number of vertices around the base"
     };
+    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
+        "Opacity",
+        "Opacity",
+        "This value determines the transparency of this object."
+    };
 } // namespace
 
 namespace openspace {
-
 
 
 documentation::Documentation RenderableCone::Documentation() {
@@ -122,7 +126,7 @@ documentation::Documentation RenderableCone::Documentation() {
             },
             {
                 ColorInfo.identifier,
-                new DoubleVector4Verifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 ColorInfo.description
             },
@@ -143,6 +147,12 @@ documentation::Documentation RenderableCone::Documentation() {
                 new DoubleVerifier,
                 Optional::Yes,
                 ResolutionInfo.description
+            },
+            {
+                OpacityInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                OpacityInfo.description
             }
         }
     };
@@ -156,8 +166,8 @@ RenderableCone::RenderableCone(const ghoul::Dictionary& dictionary)
     , _color(
         ColorInfo,
         _defaultColor,
-        glm::vec4(0.0), 
-        glm::vec4(1.0)
+        glm::vec3(0.0), 
+        glm::vec3(1.0)
     )
 {
 
@@ -195,17 +205,22 @@ RenderableCone::RenderableCone(const ghoul::Dictionary& dictionary)
         }
     }
 
-    if (dictionary.hasKeyAndValue<glm::vec4>(ColorInfo.identifier)) {
-        _color = dictionary.value<glm::vec4>(ColorInfo.identifier);
+    if (dictionary.hasKeyAndValue<glm::vec3>(ColorInfo.identifier)) {
+        _color = dictionary.value<glm::vec3>(ColorInfo.identifier);
         _color.setViewOption(properties::Property::ViewOptions::Color);
         addProperty(_color);
     }
     if (dictionary.hasKeyAndValue<std::string>(ApexPositionInfo.identifier)) {
         _resolution = dictionary.value<double>(ResolutionInfo.identifier);
     }
+
+    if (dictionary.hasKeyAndValue<double>(OpacityInfo.identifier)) {
+        _opacity = dictionary.value<float>(OpacityInfo.identifier);
+    }
     addProperty(_height);
     addProperty(_angle);
     addProperty(_resolution);
+    addProperty(_opacity);
 }
 void RenderableCone::initializeGL() {
     _programObject = BaseModule::ProgramObjectManager.request(
@@ -396,12 +411,14 @@ void RenderableCone::updateUniforms(const RenderData& data) {
 }
 
 void RenderableCone::fillVertexArray(std::vector<float> &vertexArray, glm::dvec3 centerPoint, std::vector<glm::dvec3> points) {
-    
-    addVertexToVertexArray(vertexArray, centerPoint, _color);
+    glm::vec3 color = _color;
+    glm::vec4 colorAndOpacity = { color, _opacity };
+    addVertexToVertexArray(vertexArray, centerPoint, colorAndOpacity);
+  
     for (int i = 0; i < points.size(); ++i) {
-        addVertexToVertexArray(vertexArray,points[i], _color);
+        addVertexToVertexArray(vertexArray,points[i], colorAndOpacity);
     }
-    addVertexToVertexArray(vertexArray,points[0], _color);
+    addVertexToVertexArray(vertexArray,points[0], colorAndOpacity);
 }
 
 void RenderableCone::addVertexToVertexArray(std::vector<float> &vertexArray,glm::dvec3 position, glm::vec4 color)

@@ -34,6 +34,8 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec4property.h>
+#include <openspace/properties/vector/vec3property.h>
+
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -129,12 +131,12 @@ namespace openspace {
         properties::FloatProperty _height;
         properties::FloatProperty _angle;
         properties::IntProperty _resolution;
-        properties::Vec4Property _color;
+        properties::Vec3Property _color;
 
         bool _apexIsNodeAttached = true;
         bool _baseCenterIsNodeAttached = true;
         bool _directionIsReversed = false;
-        glm::vec4 _defaultColor = { 0.4,0.4,0.4,0.8 };
+        glm::vec3 _defaultColor = { 0.4,0.4,0.4};
 
         std::string _apexNodeId, _baseDirNodeId = "";
 
