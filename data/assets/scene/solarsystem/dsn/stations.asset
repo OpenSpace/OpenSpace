@@ -1,6 +1,5 @@
 local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 
 local sceneHelper = asset.require('util/scene_helper')

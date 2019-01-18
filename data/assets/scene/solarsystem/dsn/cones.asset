@@ -1,4 +1,5 @@
 local assetHelper = asset.require('util/asset_helper')
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 
 -----------------------------------
 ----- The Renderable Cones  -----
@@ -9,10 +10,11 @@ local GoldstoneFOV = {
     Renderable = {
         Type = "RenderableCone",
         ApexPosition = "DSS14",
-        BaseCenterDirection = "Earth",
+        BaseCenterDirection = earthAsset.Earth.Identifier,
         ReverseDirection = true,
+        Enabled = false,
         Resolution = 50,
-        Color = {0.0,0.0,1.0, 0.3}
+        Color = {0.0,0.0,1.0, 0.4}
     },
     GUI = {
         Name = "GoldstoneFOV",
@@ -24,8 +26,9 @@ local MadridFOV = {
     Renderable = {
         Type = "RenderableCone",
         ApexPosition = "DSS63",
-        BaseCenterDirection = "Earth",
+        BaseCenterDirection = earthAsset.Earth.Identifier,
         ReverseDirection = true,
+        Enabled = false,
         Resolution = 50,
         Color = {0.0,1.0,0.0, 0.3}
     },
@@ -39,8 +42,9 @@ local CanberraFOV = {
     Renderable = {
         Type = "RenderableCone",
         ApexPosition = "DSS43",
-        BaseCenterDirection = "Earth",
+        BaseCenterDirection = earthAsset.Earth.Identifier,
         ReverseDirection = true,
+        Enabled = false,
         Resolution = 50,
         Color = {1.0,0.0,0.0, 0.3}
     },

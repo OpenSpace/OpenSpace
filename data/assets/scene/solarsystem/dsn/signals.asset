@@ -10,6 +10,7 @@ local dataFolder = openspace.absPath("${SYNC}/http/dsn_data/1/signaldata")
 local Signals = {
     Identifier = "Signals",
     Renderable = {
+        Enabled = true,
         Type = "RenderableSignals",
         DataFolder = dataFolder,
         DataFileType = "json",
