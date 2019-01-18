@@ -9,6 +9,7 @@ asset.require('scene/solarsystem/planets')
 asset.require('scene/solarsystem/dwarf_planets/pluto/pluto')
 asset.require('scene/solarsystem/dwarf_planets/pluto/pluto_trail')
 asset.request('scene/digitaluniverse/stars')
+asset.request('scene/digitaluniverse/milkyway')
 asset.request('customization/globebrowsing')
 asset.request('scene/digitaluniverse/grids')
 
@@ -98,11 +99,11 @@ local Keybindings = {
     },
     {
         Key = "l",
-        Command = propertyHelper.invert('Scene.OuterSpaceLabels.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.InnerSpaceLabels.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.MarsMissionsLabels.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.ClusteredLabels.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.NearEarthLabels.Renderable.Enabled'),  
+        Command = propertyHelper.invert('Scene.OuterSpaceDsnLabels.Renderable.Enabled') ..
+                  propertyHelper.invert('Scene.InnerSpaceDsnLabels.Renderable.Enabled') ..
+                  propertyHelper.invert('Scene.MarsMissionsDsnLabels.Renderable.Enabled') ..
+                  propertyHelper.invert('Scene.ClusteredDsnLabels.Renderable.Enabled') ..
+                  propertyHelper.invert('Scene.NearEarthDsnLabels.Renderable.Enabled'),  
 
         Documentation = "Toggles visibility of the spacecraft labels",
         Local = false

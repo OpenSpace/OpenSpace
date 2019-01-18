@@ -407,7 +407,7 @@ void RenderableSignals::update(const UpdateData& data) {
         GL_ARRAY_BUFFER,
         _vertexArray.size() * sizeof(float),
         _vertexArray.data(),
-        GL_STATIC_DRAW
+        GL_DYNAMIC_DRAW
     );
 
     updateVertexAttributes();
