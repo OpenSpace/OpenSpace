@@ -132,7 +132,9 @@ namespace openspace {
         properties::FloatProperty _angle;
         properties::IntProperty _resolution;
         properties::Vec3Property _color;
+        properties::BoolProperty _wireframe;
 
+        bool _showbase = false;
         bool _apexIsNodeAttached = true;
         bool _baseCenterIsNodeAttached = true;
         bool _directionIsReversed = false;

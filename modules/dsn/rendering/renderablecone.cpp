@@ -90,6 +90,11 @@ namespace {
         "Opacity",
         "This value determines the transparency of this object."
     };
+    constexpr openspace::properties::Property::PropertyInfo WireframeInfo = {
+    "Wireframe",
+    "Wireframe",
+    "This value determines if the FOV is renderd in wireframe or not."
+    };
 } // namespace
 
 namespace openspace {
@@ -153,6 +158,12 @@ documentation::Documentation RenderableCone::Documentation() {
                 new DoubleVerifier,
                 Optional::Yes,
                 OpacityInfo.description
+            },
+            {
+                WireframeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                WireframeInfo.description
             }
         }
     };
@@ -163,6 +174,7 @@ RenderableCone::RenderableCone(const ghoul::Dictionary& dictionary)
     , _height(HeightInfo, 0.8, 0.0, 1.0)
     , _angle(AngleInfo, 160, 0.0, 180)
     , _resolution(ResolutionInfo, 50, 4, 100)
+    , _wireframe(WireframeInfo, true)
     , _color(
         ColorInfo,
         _defaultColor,
@@ -204,23 +216,26 @@ RenderableCone::RenderableCone(const ghoul::Dictionary& dictionary)
             _directionIsReversed = dictionary.value<bool>(ReverseDirectionInfo.identifier);
         }
     }
-
     if (dictionary.hasKeyAndValue<glm::vec3>(ColorInfo.identifier)) {
         _color = dictionary.value<glm::vec3>(ColorInfo.identifier);
         _color.setViewOption(properties::Property::ViewOptions::Color);
         addProperty(_color);
     }
-    if (dictionary.hasKeyAndValue<std::string>(ApexPositionInfo.identifier)) {
+    if (dictionary.hasKeyAndValue<double>(ApexPositionInfo.identifier)) {
         _resolution = dictionary.value<double>(ResolutionInfo.identifier);
     }
-
     if (dictionary.hasKeyAndValue<double>(OpacityInfo.identifier)) {
-        _opacity = dictionary.value<float>(OpacityInfo.identifier);
+        _opacity = dictionary.value<double>(OpacityInfo.identifier);
+    }
+    if (dictionary.hasKeyAndValue<bool>(WireframeInfo.identifier)) {
+        _wireframe = dictionary.value<bool>(WireframeInfo.identifier);
     }
     addProperty(_height);
     addProperty(_angle);
     addProperty(_resolution);
     addProperty(_opacity);
+    addProperty(_wireframe);
+
 }
 void RenderableCone::initializeGL() {
     _programObject = BaseModule::ProgramObjectManager.request(
@@ -308,33 +323,40 @@ void RenderableCone::render(const RenderData& data, RendererTasks&) {
         GL_DYNAMIC_DRAW
     );
     glDisable(GL_CULL_FACE);
-
     updateVertexAttributes();
-   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    if (_wireframe) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
     glDrawArrays(
         GL_TRIANGLE_FAN,
         0,
         _count
     );
-    //Base part of the cone
-    glBindVertexArray(_baseInfo._vaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _baseInfo._vBufferID);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        _vertexBaseArray.size() * sizeof(float),
-        _vertexBaseArray.data(),
-        GL_STATIC_DRAW
-    );
-    glDisable(GL_CULL_FACE);
-
-    updateVertexAttributes();
-    glDrawArrays(
-        GL_TRIANGLE_FAN,
-        0,
-        _count
-    );
-     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     unbindGL();
+   
+    // Base part of the cone
+    if (_showbase) {
+        glBindVertexArray(_baseInfo._vaoID);
+        glBindBuffer(GL_ARRAY_BUFFER, _baseInfo._vBufferID);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            _vertexBaseArray.size() * sizeof(float),
+            _vertexBaseArray.data(),
+            GL_STATIC_DRAW
+        );
+        glDisable(GL_CULL_FACE);
+
+        updateVertexAttributes();
+        glDrawArrays(
+            GL_TRIANGLE_FAN,
+            0,
+            _count
+        );
+    }
+    if (_wireframe) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
 
     if (usingFramebufferRenderer) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
