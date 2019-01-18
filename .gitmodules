@@ -20,7 +20,3 @@
 [submodule "apps/OpenSpace/ext/sgct"]
 	path = apps/OpenSpace/ext/sgct
 	url = https://github.com/opensgct/sgct
-[submodule "modules/webgui/OpenSpace-WebGuiFrontend"]
-	path = modules/webgui/OpenSpace-WebGuiFrontend
-	url = https://github.com/OpenSpace/OpenSpace-WebGuiFrontend.git
-	branch = storyTouch
