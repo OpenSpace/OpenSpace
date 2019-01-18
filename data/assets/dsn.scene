@@ -18,7 +18,7 @@ asset.require('scene/solarsystem/dsn/spacecrafts')
 asset.require('scene/solarsystem/dsn/spacecraftslabels')
 asset.require('scene/solarsystem/dsn/stations')
 asset.require('scene/solarsystem/dsn/signals')
---asset.require('scene/solarsystem/dsn/cones')
+asset.require('scene/solarsystem/dsn/cones')
 asset.require('scene/solarsystem/dsn/dsn_dashboard')
 
 -- Load default key bindings applicable to most scenes
