@@ -2,7 +2,7 @@ local assetHelper = asset.require('util/asset_helper')
 local sceneHelper = asset.require('util/scene_helper')
 local propertyHelper = asset.require('util/property_helper')
 
--- Specifying which other assets should be loaded in this scene
+-- General assets
 asset.require('spice/base')
 assetHelper.requestAll(asset, 'scene/solarsystem/sun')
 asset.require('scene/solarsystem/planets')
@@ -13,22 +13,12 @@ asset.request('scene/digitaluniverse/milkyway')
 asset.request('customization/globebrowsing')
 asset.request('scene/digitaluniverse/grids')
 
--- Spacecrafts
+-- DSN specific assets
 asset.require('scene/solarsystem/dsn/spacecrafts')
-
---Labels 
 asset.require('scene/solarsystem/dsn/spacecraftslabels')
-
--- Stations
 asset.require('scene/solarsystem/dsn/stations')
-
---Signals
 asset.require('scene/solarsystem/dsn/signals')
-
---Cones
-asset.require('scene/solarsystem/dsn/cones')
-
--- Customized Dashboard
+--asset.require('scene/solarsystem/dsn/cones')
 asset.require('scene/solarsystem/dsn/dsn_dashboard')
 
 -- Load default key bindings applicable to most scenes
@@ -80,10 +70,16 @@ local Keybindings = {
     },
     {
         Key = "h",
-        Command = "openspace.setPropertyValue('Scene.*Trail.Renderable.Enabled', true)",
-        Documentation = "Enables visibility of the trails",
+        Command = [[
+                        local propertyValues = openspace.getProperty('Scene.*Trail.Renderable.Enabled')
+
+                        for _, propValue in pairs(propertyValues) do
+                            openspace.setPropertyValue(propValue, not openspace.getPropertyValue(propValue));
+                        end
+                    ]],
+        Documentation = "Toggles visibility of the trails",
         Local = false
-    },
+    }, 
     {
         Key = "j",
         Command = "openspace.setPropertyValue('Scene.*Trail.Renderable.Enabled', false)",
@@ -99,15 +95,16 @@ local Keybindings = {
     },
     {
         Key = "l",
-        Command = propertyHelper.invert('Scene.OuterSpaceDsnLabels.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.InnerSpaceDsnLabels.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.MarsMissionsDsnLabels.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.ClusteredDsnLabels.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.NearEarthDsnLabels.Renderable.Enabled'),  
+        Command = [[
+                        local propertyValues = openspace.getProperty('Scene.*DsnLabels.Renderable.Enabled')
 
+                        for _, propValue in pairs(propertyValues) do
+                            openspace.setPropertyValue(propValue, not openspace.getPropertyValue(propValue));
+                        end
+                    ]],
         Documentation = "Toggles visibility of the spacecraft labels",
         Local = false
-    }
+    }, 
 }
 
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
@@ -133,16 +130,6 @@ asset.onInitialize(function ()
        "Earth", "DSS63", "DSS14", "DSS43", "Voyager1", "Voyager2","MRO", "StereoA"
     })
 
-    openspace.addVirtualProperty(
-        "BoolProperty",
-        "Show Trails",
-        "Scene.*Trail.Renderable.Enabled",
-        "Disable or enable all trails of the scene at the same time",
-        true,
-        nil,
-        nil
-    )
-
     openspace.navigation.setCameraState({
         Focus = earthAsset.Earth.Identifier,
         Position = { 0, 0, 0 },
@@ -151,17 +138,13 @@ asset.onInitialize(function ()
     
     -- Earth view
     openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
-    -- outer space view
+    -- Outer space view
     -- openspace.globebrowsing.goToGeo(0, 90, 20000000000000)
-
-
 end)
 
 
 asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
-
-    openspace.removeVirtualProperty("Scene.*Trail.Renderable.Enabled")
 
     openspace.removeInterestingNodes({
        "Earth", "DSS63", "DSS14", "DSS43", "Voyager1", "Voyager2", "MRO", "StereoA"
