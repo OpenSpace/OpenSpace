@@ -34,9 +34,8 @@ namespace openspace {
 
 class HttpSynchronization : public ResourceSynchronization {
 public:
-    HttpSynchronization(const ghoul::Dictionary& dict,
-        const std::string& synchronizationRoot,
-        const std::vector<std::string>& synchronizationRepositories);
+    HttpSynchronization(const ghoul::Dictionary& dict, std::string synchronizationRoot,
+        std::vector<std::string> synchronizationRepositories);
 
     virtual ~HttpSynchronization();
 

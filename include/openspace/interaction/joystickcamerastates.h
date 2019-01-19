@@ -106,7 +106,8 @@ private:
 namespace ghoul {
 
 template <>
-std::string to_string(const openspace::interaction::JoystickCameraStates::AxisType& type);
+std::string to_string(
+    const openspace::interaction::JoystickCameraStates::AxisType& value);
 
 template <>
 openspace::interaction::JoystickCameraStates::AxisType

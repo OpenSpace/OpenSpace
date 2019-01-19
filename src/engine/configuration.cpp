@@ -57,11 +57,6 @@ namespace {
     constexpr const char* KeyKeyboardShortcuts = "KeyboardShortcuts";
     constexpr const char* KeyDocumentation = "Documentation";
     constexpr const char* KeyFactoryDocumentation = "FactoryDocumentation";
-    constexpr const char* KeyRequireSocketAuthentication = "RequireSocketAuthentication";
-    constexpr const char* KeyServerPasskey = "ServerPasskey";
-    constexpr const char* KeyClientAddressWhitelist = "ClientAddressWhitelist";
-    constexpr const char* KeyWebHelperLocation = "WebHelperLocation";
-    constexpr const char* KeyCefWebGuiUrl = "CefWebGuiUrl";
     constexpr const char* KeyLicenseDocumentation = "LicenseDocumentation";
     constexpr const char* KeyShutdownCountdown = "ShutdownCountdown";
     constexpr const char* KeyPerSceneCache = "PerSceneCache";
@@ -296,13 +291,6 @@ void parseLuaState(Configuration& configuration) {
     getValue(s, KeyDisableSceneOnMaster, c.isSceneTranslationOnMasterDisabled);
     getValue(s, KeyDisableInGameConsole, c.isConsoleDisabled);
     getValue(s, KeyRenderingMethod, c.renderingMethod);
-    getValue(s, KeyServerPasskey, c.serverPasskey);
-    getValue(s, KeyRequireSocketAuthentication, c.doesRequireSocketAuthentication);
-    getValue(s, KeyClientAddressWhitelist, c.clientAddressWhitelist);
-    //GP: Removing after master->touch-gui merge
-    //getValue(s, KeyWebHelperLocation, c.webHelperLocation);
-    //getValue(s, KeyCefWebGuiUrl, c.cefWebGuiUrl);
-
     getValue(s, KeyLogging, c.logging);
     getValue(s, KeyDocumentation, c.documentation);
     getValue(s, KeyLoadingScreen, c.loadingScreen);

@@ -130,8 +130,6 @@ void PerformanceManager::DestroyGlobalSharedMemory() {
     sharedMemory.releaseLock();
 }
 
-PerformanceManager::~PerformanceManager() {}
-
 void PerformanceManager::setEnabled(bool enabled) {
     _logDir = absPath("${BASE}");
     _prefix = "PM-";

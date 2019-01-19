@@ -50,9 +50,8 @@ namespace {
 
 namespace openspace {
 
-Scene::InvalidSceneError::InvalidSceneError(const std::string& msg,
-                                            const std::string& comp)
-    : ghoul::RuntimeError(msg, comp)
+Scene::InvalidSceneError::InvalidSceneError(std::string msg, std::string comp)
+    : ghoul::RuntimeError(std::move(msg), std::move(comp))
 {}
 
 Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
@@ -605,6 +604,14 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "string",
                 "Returns the value the property, identified by "
                 "the provided URI."
+            },
+            {
+                "getProperty",
+                &luascriptfunctions::property_getProperty,
+                {},
+                "string",
+                "Returns a list of property identifiers that match the passed regular "
+                "expression"
             },
             {
                 "loadScene",

@@ -18,7 +18,7 @@ asset.require('util/default_joystick')
 asset.require('util/webgui')
 
 asset.request('customization/globebrowsing')
-asset.require('gui/images')
+-- asset.require('gui/images')
 --asset.require('stories/stories')
 
 -- Keybindings that are specific for this scene

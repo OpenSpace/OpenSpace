@@ -73,7 +73,7 @@ void SessionRecording::setRecordDataFormat(RecordedDataMode dataMode) {
     _recordingDataMode = dataMode;
 }
 
-bool SessionRecording::startRecording(std::string filename) {
+bool SessionRecording::startRecording(const std::string& filename) {
     if (_state == SessionState::Playback) {
         _playbackFile.close();
     }
@@ -315,12 +315,7 @@ void SessionRecording::cleanUpPlayback() {
 }
 
 bool SessionRecording::isDataModeBinary() {
-    if (_recordingDataMode == RecordedDataMode::Binary) {
-        return true;
-    }
-    else {
-        return false;
-    }
+    return _recordingDataMode == RecordedDataMode::Binary;
 }
 
 void SessionRecording::writeToFileBuffer(const double src) {
@@ -353,7 +348,7 @@ void SessionRecording::writeToFileBuffer(const bool b) {
     _bufferIndex += writeSize_bytes;
 }
 
-void SessionRecording::saveStringToFile(const std::string s) {
+void SessionRecording::saveStringToFile(const std::string& s) {
     size_t strLen = s.size();
     size_t writeSize_bytes = sizeof(size_t);
 
@@ -1022,12 +1017,7 @@ void SessionRecording::updateCameraWithOrWithoutNewKeyframes(double currTime) {
 
 bool SessionRecording::isTimeToHandleNextNonCameraKeyframe(double currTime) {
     bool isNonCameraPlaybackActive = (_playbackActive_time || _playbackActive_script);
-    if ((currTime > getNextTimestamp()) && isNonCameraPlaybackActive) {
-        return true;
-    }
-    else {
-        return false;
-    }
+    return (currTime > getNextTimestamp()) && isNonCameraPlaybackActive;
 }
 
 bool SessionRecording::findNextFutureCameraIndex(double currTime) {
@@ -1251,7 +1241,7 @@ void SessionRecording::saveKeyframeToFileBinary(unsigned char* buffer, size_t si
 }
 
 void SessionRecording::saveKeyframeToFile(std::string entry) {
-    _recordFile << entry << std::endl;
+    _recordFile << std::move(entry) << std::endl;
 }
 
 scripting::LuaLibrary SessionRecording::luaLibrary() {

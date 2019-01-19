@@ -7,7 +7,6 @@ if(NOT DEFINED _CEF_ROOT_EXPLICIT)
   message(FATAL_ERROR "Use find_package(CEF) to load this file.")
 endif()
 
-
 #
 # Shared configuration.
 #
@@ -340,7 +339,7 @@ if(OS_WINDOWS)
   list(APPEND CEF_COMPILER_FLAGS
     /MP           # Multiprocess compilation
     /Gy           # Enable function-level linking
-    /GR-          # Disable run-time type information
+    # /GR-          # Disable run-time type information
     /W4           # Warning level 4
     #/WX           # Treat warnings as errors
     /wd4100       # Ignore "unreferenced formal parameter" warning
@@ -384,11 +383,11 @@ if(OS_WINDOWS)
     )
   list(APPEND CEF_COMPILER_DEFINES
     WIN32 _WIN32 _WINDOWS             # Windows platform
-    UNICODE _UNICODE                  # Unicode build
-    WINVER=0x0601 _WIN32_WINNT=0x601  # Targeting Windows 7
+    # UNICODE _UNICODE                  # Unicode build
+    # WINVER=0x0601 _WIN32_WINNT=0x601  # Targeting Windows 7
     NOMINMAX                          # Use the standard's templated min/max
     WIN32_LEAN_AND_MEAN               # Exclude less common API declarations
-    _HAS_EXCEPTIONS=0                 # Disable exceptions
+    # _HAS_EXCEPTIONS=0                 # Disable exceptions
     )
   if(USE_OFFICIAL_BUILD_SANDBOX)
     list(APPEND CEF_COMPILER_DEFINES_DEBUG

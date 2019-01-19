@@ -5,6 +5,8 @@ asset.request('./trail')
 local kernel = asset.require('../kernels').jup310
 
 
+local map_service_configs = asset.localResource("map_service_configs")
+
 
 local textures = asset.syncedResource({
     Name = "Europa Textures",
@@ -39,8 +41,15 @@ local Europa = {
                 {
                     Identifier = "Texture",
                     FilePath = textures .. "/europa.jpg",
+                    -- Enabled = true
+                },
+                {
+                    Identifier = "Voyager_Global_Mosaic",
+                    Name = "Voyager Global Mosaic [Sweden]",
+                    FilePath = map_service_configs .. "/LiU/Voyager_GalileoSSI_global_mosaic_500m.wms",
+                    BlendMode = "Color",
                     Enabled = true
-                }
+                },
             }
         }
     },

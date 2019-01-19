@@ -38,13 +38,12 @@ void WebRenderHandler::reshape(int w, int h) {
     _needsRepaint = true;
 }
 
-bool WebRenderHandler::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect& rect) {
+bool WebRenderHandler::GetViewRect(CefRefPtr<CefBrowser>, CefRect& rect) {
     rect = CefRect(0, 0, _windowSize.x, _windowSize.y);
     return true;
 }
 
-void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser> browser,
-                               CefRenderHandler::PaintElementType,
+void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser>, CefRenderHandler::PaintElementType,
                                const CefRenderHandler::RectList& dirtyRects,
                                const void* buffer, int w, int h)
 {
@@ -61,16 +60,15 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser> browser,
         _lowerDirtyRectBound = lowerUpdatingRectBound = glm::ivec2(0, 0);
     }
 
-    for (auto it = dirtyRects.begin(); it != dirtyRects.end(); ++it) {
-        lowerUpdatingRectBound = glm::min(
-            lowerUpdatingRectBound,
-            glm::ivec2(it->x, it->y)
-        );
+    for (const CefRect& r : dirtyRects) {
+        lowerUpdatingRectBound = glm::min(lowerUpdatingRectBound, glm::ivec2(r.x, r.y));
         upperUpdatingRectBound = glm::max(
             upperUpdatingRectBound,
-            glm::ivec2(it->x + it->width, it->y + it->height)
+            glm::ivec2(r.x + r.width, r.y + r.height)
         );
+
     }
+
     const glm::ivec2 rectSize = upperUpdatingRectBound - lowerUpdatingRectBound;
     if (rectSize.x > 0 && rectSize.y > 0) {
         _textureIsDirty = true;
@@ -92,7 +90,7 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser> browser,
     // Add the dirty rect bounds to the GPU texture dirty rect.
     _lowerDirtyRectBound = glm::min(lowerUpdatingRectBound, _lowerDirtyRectBound);
     _upperDirtyRectBound = glm::max(upperUpdatingRectBound, _upperDirtyRectBound);
-    _needsRepaint = false;    
+    _needsRepaint = false;
 }
 
 void WebRenderHandler::updateTexture() {

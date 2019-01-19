@@ -20,3 +20,9 @@
 [submodule "apps/OpenSpace/ext/sgct"]
 	path = apps/OpenSpace/ext/sgct
 	url = https://github.com/opensgct/sgct
+[submodule "modules/fitsfilereader/ext/CCfits"]
+	path = modules/fitsfilereader/ext/CCfits
+	url = https://github.com/OpenSpace/CCfits.git
+[submodule "modules/fitsfilereader/ext/cfitsio"]
+	path = modules/fitsfilereader/ext/cfitsio
+	url = https://github.com/OpenSpace/cfitsio.git

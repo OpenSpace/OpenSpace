@@ -74,7 +74,13 @@ Layer* LayerManager::addLayer(layergroupid::GroupID groupId,
                               const ghoul::Dictionary& layerDict)
 {
     ghoul_assert(groupId != layergroupid::Unknown, "Layer group ID must be known");
-    return _layerGroups[groupId]->addLayer(layerDict);
+    try {
+        return _layerGroups[groupId]->addLayer(layerDict);
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERRORC(e.component, e.message);
+        return nullptr;
+    }
 }
 
 void LayerManager::deleteLayer(layergroupid::GroupID id, const std::string& layerName) {
@@ -98,7 +104,7 @@ bool LayerManager::hasAnyBlendingLayersEnabled() const {
 
 std::array<LayerGroup*, LayerManager::NumLayerGroups> LayerManager::layerGroups() const
 {
-    std::array<LayerGroup*, NumLayerGroups> res;
+    std::array<LayerGroup*, NumLayerGroups> res = {};
     for (int i = 0; i < NumLayerGroups; ++i) {
         res[i] = _layerGroups[i].get();
     }
@@ -121,7 +127,7 @@ void LayerManager::reset(bool includeDisabled) {
     }
 }
 
-void LayerManager::onChange(std::function<void(void)> callback) {
+void LayerManager::onChange(std::function<void(Layer*)> callback) {
     for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
         layerGroup->onChange(callback);
     }

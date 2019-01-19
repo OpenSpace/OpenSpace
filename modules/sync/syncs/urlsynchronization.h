@@ -35,8 +35,7 @@ namespace openspace {
 
 class UrlSynchronization : public ResourceSynchronization {
 public:
-    UrlSynchronization(const ghoul::Dictionary& dict,
-        const std::string& synchronizationRoot);
+    UrlSynchronization(const ghoul::Dictionary& dict, std::string synchronizationRoot);
 
     virtual ~UrlSynchronization();
 

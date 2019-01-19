@@ -44,25 +44,25 @@ const uint32_t ProtocolVersion = 3;
 const size_t MaxLatencyDiffs = 64;
 const char* _loggerCat = "ExternInteraction";
 
-static const openspace::properties::Property::PropertyInfo BufferTimeInfo = {
+constexpr openspace::properties::Property::PropertyInfo BufferTimeInfo = {
     "BufferTime",
     "Buffer Time",
     "" // @TODO Missing documentation
 };
 
-static const openspace::properties::Property::PropertyInfo TimeKeyFrameInfo = {
+constexpr openspace::properties::Property::PropertyInfo TimeKeyFrameInfo = {
     "TimeKeyframeInterval",
     "Time keyframe interval",
     "" // @TODO Missing documentation
 };
 
-static const openspace::properties::Property::PropertyInfo CameraKeyFrameInfo = {
+constexpr openspace::properties::Property::PropertyInfo CameraKeyFrameInfo = {
     "CameraKeyframeInterval",
     "Camera Keyframe interval",
     "" // @TODO Missing documentation
 };
 
-static const openspace::properties::Property::PropertyInfo TimeToleranceInfo = {
+constexpr openspace::properties::Property::PropertyInfo TimeToleranceInfo = {
     "TimeTolerance",
     "Time tolerance",
     "" // @TODO Missing documentation

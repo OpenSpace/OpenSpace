@@ -22,9 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/webbrowser/webbrowsermodule.h>
-
 #include <modules/cefwebgui/cefwebguimodule.h>
+
+#include <modules/webbrowser/webbrowsermodule.h>
+#include <modules/webgui/webguimodule.h>
 #include <modules/cefwebgui/include/guirenderhandler.h>
 #include <modules/cefwebgui/include/guikeyboardhandler.h>
 #include <modules/webbrowser/include/browserinstance.h>
@@ -131,7 +132,14 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         }
     });
 
-    _url = configuration.value<std::string>(GuiUrlInfo.identifier);
+
+    if (configuration.hasValue<std::string>(GuiUrlInfo.identifier)) {
+        _url = configuration.value<std::string>(GuiUrlInfo.identifier);
+    } else {
+        WebGuiModule* webGuiModule = global::moduleEngine.module<WebGuiModule>();
+        _url = "http://localhost:" +
+            std::to_string(webGuiModule->port()) + "/#/onscreen";
+    }
 
     _enabled = configuration.hasValue<bool>(EnabledInfo.identifier) &&
                configuration.value<bool>(EnabledInfo.identifier);
@@ -139,11 +147,11 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     _visible = configuration.hasValue<bool>(VisibleInfo.identifier) &&
                configuration.value<bool>(VisibleInfo.identifier);
 
-    global::callback::initializeGL.push_back([this]() {
+    global::callback::initializeGL.emplace_back([this]() {
         startOrStopGui();
     });
 
-    global::callback::draw2D.push_back([this](){
+    global::callback::draw2D.emplace_back([this](){
         const bool isGuiWindow =
             global::windowDelegate.hasGuiWindow() ?
             global::windowDelegate.isGuiWindow() :
@@ -160,7 +168,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         }
     });
 
-    global::callback::deinitializeGL.push_back([this]() {
+    global::callback::deinitializeGL.emplace_back([this]() {
         _enabled = false;
         startOrStopGui();
     });

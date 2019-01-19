@@ -524,11 +524,31 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 
     ++_frameNumber;
 
-    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : global::screenSpaceRenderables) {
+    std::vector<ScreenSpaceRenderable*> ssrs;
+    ssrs.reserve(global::screenSpaceRenderables.size());
+    for (const std::unique_ptr<ScreenSpaceRenderable>& ssr :
+         global::screenSpaceRenderables)
+    {
         if (ssr->isEnabled() && ssr->isReady()) {
-            ssr->render();
+            ssrs.push_back(ssr.get());
         }
     }
+
+    std::sort(
+        ssrs.begin(),
+        ssrs.end(),
+        [](ScreenSpaceRenderable* lhs, ScreenSpaceRenderable* rhs) {
+            return lhs->depth() < rhs->depth();
+        }
+    );
+
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    for (ScreenSpaceRenderable* ssr : ssrs) {
+        ssr->render();
+    }
+    glDisable(GL_BLEND);
     LTRACE("RenderEngine::render(end)");
 }
 
@@ -1025,7 +1045,8 @@ void RenderEngine::renderCameraInformation() {
     constexpr const float YSeparation = 5.f;
     constexpr const float XSeparation = 5.f;
 
-    interaction::OrbitalNavigator nav = global::navigationHandler.orbitalNavigator();
+    const interaction::OrbitalNavigator& nav =
+        global::navigationHandler.orbitalNavigator();
 
     _cameraButtonLocations.rotation = {
         fontResolution().x - rotationBox.boundingBox.x - XSeparation,

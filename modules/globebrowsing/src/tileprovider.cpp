@@ -292,7 +292,7 @@ std::string timeStringify(TemporalTileProvider::TimeFormatType type, const Time&
 }
 
 std::unique_ptr<TileProvider> initTileProvider(TemporalTileProvider& t,
-                                               TemporalTileProvider::TimeKey timekey)
+                                             const TemporalTileProvider::TimeKey& timekey)
 {
     static const std::vector<std::string> IgnoredTokens = {
         // From: http://www.gdal.org/frmt_wms.html
@@ -569,8 +569,8 @@ SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
 
 
 
-TextTileProvider::TextTileProvider(const TileTextureInitData& initData, size_t fontSize)
-    : initData(initData)
+TextTileProvider::TextTileProvider(TileTextureInitData initData, size_t fontSize)
+    : initData(std::move(initData))
     , fontSize(fontSize)
 {
     tileCache = global::moduleEngine.module<GlobeBrowsingModule>()->tileCache();
@@ -771,9 +771,9 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
 bool initialize(TileProvider& tp) {
     ghoul_assert(!tp.isInitialized, "TileProvider can only be initialized once.");
 
-    tp.uniqueIdentifier = tp.NumTileProviders++;
-    if (tp.NumTileProviders == std::numeric_limits<unsigned int>::max()) {
-        --tp.NumTileProviders;
+    tp.uniqueIdentifier = TileProvider::NumTileProviders++;
+    if (TileProvider::NumTileProviders == std::numeric_limits<unsigned int>::max()) {
+        --TileProvider::NumTileProviders;
         return false;
     }
 

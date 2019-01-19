@@ -29,6 +29,7 @@
 #include "storyhandler.h"
 
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/misc/process.h>
 #include <memory>
@@ -39,6 +40,8 @@ class WebGuiModule : public OpenSpaceModule {
 public:
     static constexpr const char* Name = "WebGui";
     WebGuiModule();
+    int port() const;
+    std::string address() const;
 
     webgui::StoryHandler storyHandler;
 
@@ -52,7 +55,11 @@ private:
     std::unique_ptr<ghoul::Process> _process;
     properties::BoolProperty _enabled;
     properties::StringProperty _entryPoint;
-    properties::StringProperty _workingDirectory;
+    properties::StringProperty _webDirectory;
+
+    properties::IntProperty _port;
+    properties::StringProperty _address;
+    properties::StringProperty _webSocketInterface;
 };
 
 } // namespace openspace
