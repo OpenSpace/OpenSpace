@@ -35,7 +35,16 @@
 #pragma warning (disable : 4100)
 #endif // _MSC_VER
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#endif // __clang__
+
 #include <include/cef_browser.h>
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif // __clang__
 
 #ifdef _MSC_VER
 #pragma warning (pop)
