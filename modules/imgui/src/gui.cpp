@@ -95,14 +95,6 @@ namespace {
         "Tooltip Delay (in s)",
         "This value determines the delay in seconds after which the tooltip is shown."
     };
-
-    constexpr openspace::properties::Property::PropertyInfo HiddenInfo = {
-        "IsHidden",
-        "Is Hidden",
-        "If this value is true, all GUI items will not be rendered, regardless of their "
-        "status"
-    };
-
 } // namespace
 
 namespace openspace::gui {
