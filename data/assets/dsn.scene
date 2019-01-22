@@ -79,13 +79,7 @@ local Keybindings = {
                     ]],
         Documentation = "Toggles visibility of the trails",
         Local = false
-    }, 
-    {
-        Key = "j",
-        Command = "openspace.setPropertyValue('Scene.*Trail.Renderable.Enabled', false)",
-        Documentation = "Disables visibility of the trails",
-        Local = false
-    },    
+    },   
     {
         Key = "e",
         Command = propertyHelper.invert('Scene.EquatorialSphere.Renderable.Enabled') ..
