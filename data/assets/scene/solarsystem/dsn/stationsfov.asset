@@ -2,9 +2,9 @@ local assetHelper = asset.require('util/asset_helper')
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 local stationsAsset = asset.require('scene/solarsystem/dsn/stations')
 
------------------------------------
------ The Renderable Cones  -----
------------------------------------
+----------------------------------------------------------------------
+---- The Fields Of View of the DSN Ground Station Location Sites  ----
+----------------------------------------------------------------------
 colors = stationsAsset.siteColorMap
 
 local GoldstoneFOV = {
