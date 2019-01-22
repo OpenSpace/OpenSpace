@@ -28,6 +28,7 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
 
 namespace openspace {
@@ -48,6 +49,7 @@ private:
     properties::BoolProperty _enabled;
     properties::BoolProperty _visible;
     properties::StringProperty _url;
+    properties::FloatProperty _guiScale;
     std::unique_ptr<BrowserInstance> _instance;
 };
 
