@@ -32,6 +32,7 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <ghoul/filesystem/filesystem.h>
 
 
 namespace {
@@ -93,9 +94,9 @@ namespace {
         "This value determines the transparency of this object."
     };
     constexpr openspace::properties::Property::PropertyInfo WireframeInfo = {
-    "Wireframe",
-    "Wireframe",
-    "This value determines if the FOV is renderd in wireframe or not."
+        "Wireframe",
+        "Wireframe",
+        "This value determines if the FOV is renderd in wireframe or not."
     };
 } // namespace
 
@@ -111,7 +112,7 @@ documentation::Documentation RenderableCone::Documentation() {
             {
                 "Type",
                 new StringEqualVerifier("RenderableCone"),
-                Optional::No
+                Optional::Yes
             },
             {
                 ApexPositionInfo.identifier,
@@ -185,12 +186,6 @@ RenderableCone::RenderableCone(const ghoul::Dictionary& dictionary)
     )
 {
 
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableCone"
-    );
-
     if (dictionary.hasKey(ApexPositionInfo.identifier)) {
 
         if (dictionary.hasKeyAndValue<std::string>(ApexPositionInfo.identifier)) {
@@ -221,7 +216,6 @@ RenderableCone::RenderableCone(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKeyAndValue<glm::vec3>(ColorInfo.identifier)) {
         _color = dictionary.value<glm::vec3>(ColorInfo.identifier);
         _color.setViewOption(properties::Property::ViewOptions::Color);
-        addProperty(_color);
     }
     if (dictionary.hasKeyAndValue<double>(ApexPositionInfo.identifier)) {
         _resolution = dictionary.value<double>(ResolutionInfo.identifier);
@@ -237,7 +231,7 @@ RenderableCone::RenderableCone(const ghoul::Dictionary& dictionary)
     addProperty(_resolution);
     addProperty(_opacity);
     addProperty(_wireframe);
-
+    addProperty(_color);
 }
 void RenderableCone::initializeGL() {
     _programObject = BaseModule::ProgramObjectManager.request(

@@ -23,72 +23,48 @@
  ****************************************************************************************/
 #include <modules/dsn/rendering/renderablestationfov.h>
 
-#include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <ghoul/logging/logmanager.h>
-//#include <openspace/engine/globals.h>
-//#include <openspace/rendering/renderengine.h>
-//#include <openspace/util/updatestructures.h>
-//#include <ghoul/opengl/programobject.h>
 
-//namespace {
-//    //constexpr const char* ProgramName = "ConeProgram";
-//    constexpr const char* _loggerCat = "RenderableStationFov";
-//} // namespace
+namespace {
+    constexpr const char* _loggerCat = "RenderableStationFov";
+} // namespace
 
 namespace openspace {
 
 
 documentation::Documentation RenderableStationFov::Documentation() {
     using namespace documentation;
-    return {
-        "Renderable Station Fov",
-        "dsn_renderable_renderablestationfov",
-        {
+
+    documentation::Documentation doc{
+            "Renderable Station Fov",
+            "dsn_renderable_renderablestationfov",
             {
-                "Type",
-                new StringEqualVerifier("RenderableStationFov"),
-                Optional::No
+                {
+                    "Type",
+                    new StringEqualVerifier("RenderableStationFov"),
+                    Optional::No
+                }
             }
-        }
     };
-}
 
-    RenderableStationFov::RenderableStationFov(const ghoul::Dictionary& dictionary) : RenderableCone(dictionary)
-{
-
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableStationFov"
+    // @TODO cleanup
+    // Insert the parents documentation entries until we have a verifier that can deal
+    // with class hierarchy
+    documentation::Documentation parentDoc = RenderableCone::Documentation();
+    doc.entries.insert(
+        doc.entries.end(),
+        parentDoc.entries.begin(),
+        parentDoc.entries.end()
     );
 
+    return doc;
 }
 
-    //void RenderableStationFov::initializeGL()
-    //{
-    //    RenderableCone::initializeGL();
-    //}
+RenderableStationFov::RenderableStationFov(const ghoul::Dictionary& dictionary) 
+    : RenderableCone(dictionary)
+{
 
-    //void RenderableStationFov::deinitializeGL()
-    //{
-    //    RenderableCone::deinitializeGL();
-    //}
-
-    //void RenderableStationFov::update(const UpdateData & data)
-    //{
-    //    RenderableCone::update(data);
-    //}
-
-    //void RenderableStationFov::render(const RenderData & data, RendererTasks & rendererTask)
-    //{
-    //    RenderableCone::render(data, rendererTask);
-    //}
-
-    //bool RenderableStationFov::isReady() const
-    //{
-    //    return true;
-    //}
+}
 
 } // namespace openspace

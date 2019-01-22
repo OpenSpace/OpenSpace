@@ -37,8 +37,6 @@
 #include <modules/dsn/rendering/renderablesignals.h>
 #include <modules/dsn/rendering/renderabledsnlabels.h>
 #include <modules/dsn/rendering/renderablestationfov.h>
-//#include <modules/dsn/rendering/renderablecone.h> // circular dependency?
-
 
 namespace openspace {
 

@@ -27,40 +27,18 @@
 
 #include <modules/dsn/rendering/renderablecone.h>
 
-#include <modules/dsn/dsnmodule.h>
-#include <openspace/scene/scene.h>
-//#include <ghoul/logging/logmanager.h>
-//#include <ghoul/opengl/ghoul_gl.h>
-//#include <ghoul/opengl/uniformcache.h>
-
-//namespace ghoul::opengl {
-//    class ProgramObject;
-//    class Texture;
-//} // namespace ghoul::opengl
-
 namespace openspace {
-    class RenderableCone;
 
     namespace documentation { struct Documentation; }
-
-    //class Translation;
-
     /**
      * This is a class for rendering cones
      **/
     class RenderableStationFov : public RenderableCone{
 
     public:
-         RenderableStationFov(const ghoul::Dictionary& dictionary);
+        RenderableStationFov(const ghoul::Dictionary& dictionary);
         ~RenderableStationFov() = default;
         static documentation::Documentation Documentation();
-
-        //void initializeGL();
-        //void deinitializeGL();
-        //void update(const UpdateData & data);
-        //void render(const RenderData & data, RendererTasks & rendererTask);
-        //bool isReady() const;
-
     };
 
 } // namespace openspace

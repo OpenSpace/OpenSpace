@@ -26,7 +26,6 @@
 #define __OPENSPACE_MODULE_DSN___RENDERABLECONE___H__
 
 #include <openspace/rendering/renderable.h>
-#include <modules/dsn/dsnmodule.h>
 #include <openspace/scene/scene.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -55,7 +54,7 @@ namespace openspace {
 
     public:
         RenderableCone(const ghoul::Dictionary& dictionary);
-        ~RenderableCone() = default;
+        virtual ~RenderableCone() = default;
 
         void initializeGL() override;
         void deinitializeGL() override;
