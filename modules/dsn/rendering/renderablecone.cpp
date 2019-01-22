@@ -31,6 +31,8 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
+#include <openspace/interaction/navigationhandler.h>
+
 
 namespace {
     constexpr const char* ProgramName = "ConeProgram";
@@ -414,9 +416,17 @@ void RenderableCone::update(const UpdateData& data) {
     for (int i = 0; i < numBaseVertices; ++i) {
         double rad = angleIncrement * i;
         glm::dvec3 p = baseCenterPosition + (((e0 * glm::cos(rad)) + (e1 * glm::sin(rad))) * radius);
+        p = getCoordinatePosFromFocusNode(p);
         baseVertices.push_back(p);
     }
+
+    // work around for precision errors
+    _focusNodePos = global::navigationHandler.focusNode()->worldPosition();
+    _localTransform = glm::translate(glm::dmat4(1.0), _focusNodePos);
+    _apexPosition = getCoordinatePosFromFocusNode(_apexPosition);
+    baseCenterPosition = getCoordinatePosFromFocusNode(baseCenterPosition);
     
+    // upload all positions to the vertex array
     fillVertexArray(_vertexBaseArray, baseCenterPosition, baseVertices);
     fillVertexArray(_vertexLateralSurfaceArray, _apexPosition, baseVertices);
 
@@ -424,6 +434,17 @@ void RenderableCone::update(const UpdateData& data) {
     _count = static_cast<GLsizei>(_vertexLateralSurfaceArray.size() / (_sizeThreeVal + _sizeFourVal));
 
     unbindGL();
+}
+
+/*  Returns a position that is relative to the current
+    focus node. This is a method to handle precision
+    problems that occur when placing our signal line endings. */
+glm::dvec3 RenderableCone::getCoordinatePosFromFocusNode(glm::dvec3 worldPos) {
+
+    glm::dvec3 diffPos = glm::dvec3(worldPos.x - _focusNodePos.x, worldPos.y - _focusNodePos.y,
+        worldPos.z - _focusNodePos.z);
+
+    return diffPos;
 }
 
 void RenderableCone::updateUniforms(const RenderData& data) {

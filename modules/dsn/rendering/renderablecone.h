@@ -111,6 +111,7 @@ namespace openspace {
 
     private:
         void addVertexToVertexArray(std::vector<float> &_vertexArray,glm::dvec3 position,glm::vec4 color);
+        glm::dvec3 getCoordinatePosFromFocusNode(glm::dvec3 worldPos);
         void updateUniforms(const RenderData& data);
 
         /// The VBO layout of the vertex position
@@ -141,6 +142,7 @@ namespace openspace {
         glm::vec3 _defaultColor = { 0.4,0.4,0.4};
 
         std::string _apexNodeId, _baseDirNodeId = "";
+        glm::dvec3 _focusNodePos;
 
         /// Program object used to render the data stored in RenderInformation
         ghoul::opengl::ProgramObject* _programObject = nullptr;
