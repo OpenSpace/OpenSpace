@@ -21,28 +21,74 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+#include <modules/dsn/rendering/renderablestationfov.h>
 
-#include <modules/dsn/dsnmodule.h>
+#include <modules/base/basemodule.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
+#include <ghoul/logging/logmanager.h>
+//#include <openspace/engine/globals.h>
+//#include <openspace/rendering/renderengine.h>
+//#include <openspace/util/updatestructures.h>
+//#include <ghoul/opengl/programobject.h>
+
+//namespace {
+//    //constexpr const char* ProgramName = "ConeProgram";
+//    constexpr const char* _loggerCat = "RenderableStationFov";
+//} // namespace
 
 namespace openspace {
-    constexpr const char* _loggerCat = "DSN Module";
 
-    DsnModule::DsnModule() : OpenSpaceModule(Name) {
-    }
 
-    void DsnModule::internalInitialize(const ghoul::Dictionary&) {
-        auto renderableFactory = FactoryManager::ref().factory<Renderable>();
-        ghoul_assert(renderableFactory, "No renderable factory existed");
+documentation::Documentation RenderableStationFov::Documentation() {
+    using namespace documentation;
+    return {
+        "Renderable Station Fov",
+        "dsn_renderable_renderablestationfov",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("RenderableStationFov"),
+                Optional::No
+            }
+        }
+    };
+}
 
-        renderableFactory->registerClass<RenderableSignals>("RenderableSignals");
-        renderableFactory->registerClass<RenderableDsnLabels>("RenderableDsnLabels");
-        renderableFactory->registerClass<RenderableCone>("RenderableCone");
-        renderableFactory->registerClass<RenderableStationFov>("RenderableStationFov");
+    RenderableStationFov::RenderableStationFov(const ghoul::Dictionary& dictionary) : RenderableCone(dictionary)
+{
 
-		auto translationFactory = FactoryManager::ref().factory<Translation>();
-		ghoul_assert(translationFactory, "No translation factory existed");
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "RenderableStationFov"
+    );
 
-        translationFactory->registerClass<RadecTranslation>("RadecTranslation");
-    }
+}
+
+    //void RenderableStationFov::initializeGL()
+    //{
+    //    RenderableCone::initializeGL();
+    //}
+
+    //void RenderableStationFov::deinitializeGL()
+    //{
+    //    RenderableCone::deinitializeGL();
+    //}
+
+    //void RenderableStationFov::update(const UpdateData & data)
+    //{
+    //    RenderableCone::update(data);
+    //}
+
+    //void RenderableStationFov::render(const RenderData & data, RendererTasks & rendererTask)
+    //{
+    //    RenderableCone::render(data, rendererTask);
+    //}
+
+    //bool RenderableStationFov::isReady() const
+    //{
+    //    return true;
+    //}
 
 } // namespace openspace

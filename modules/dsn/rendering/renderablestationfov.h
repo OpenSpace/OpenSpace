@@ -22,27 +22,46 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef __OPENSPACE_MODULE_DSN___RENDERABLESTATIONFOV___H__
+#define __OPENSPACE_MODULE_DSN___RENDERABLESTATIONFOV___H__
+
+#include <modules/dsn/rendering/renderablecone.h>
+
 #include <modules/dsn/dsnmodule.h>
+#include <openspace/scene/scene.h>
+//#include <ghoul/logging/logmanager.h>
+//#include <ghoul/opengl/ghoul_gl.h>
+//#include <ghoul/opengl/uniformcache.h>
+
+//namespace ghoul::opengl {
+//    class ProgramObject;
+//    class Texture;
+//} // namespace ghoul::opengl
 
 namespace openspace {
-    constexpr const char* _loggerCat = "DSN Module";
+    class RenderableCone;
 
-    DsnModule::DsnModule() : OpenSpaceModule(Name) {
-    }
+    namespace documentation { struct Documentation; }
 
-    void DsnModule::internalInitialize(const ghoul::Dictionary&) {
-        auto renderableFactory = FactoryManager::ref().factory<Renderable>();
-        ghoul_assert(renderableFactory, "No renderable factory existed");
+    //class Translation;
 
-        renderableFactory->registerClass<RenderableSignals>("RenderableSignals");
-        renderableFactory->registerClass<RenderableDsnLabels>("RenderableDsnLabels");
-        renderableFactory->registerClass<RenderableCone>("RenderableCone");
-        renderableFactory->registerClass<RenderableStationFov>("RenderableStationFov");
+    /**
+     * This is a class for rendering cones
+     **/
+    class RenderableStationFov : public RenderableCone{
 
-		auto translationFactory = FactoryManager::ref().factory<Translation>();
-		ghoul_assert(translationFactory, "No translation factory existed");
+    public:
+         RenderableStationFov(const ghoul::Dictionary& dictionary);
+        ~RenderableStationFov() = default;
+        static documentation::Documentation Documentation();
 
-        translationFactory->registerClass<RadecTranslation>("RadecTranslation");
-    }
+        //void initializeGL();
+        //void deinitializeGL();
+        //void update(const UpdateData & data);
+        //void render(const RenderData & data, RendererTasks & rendererTask);
+        //bool isReady() const;
+
+    };
 
 } // namespace openspace
+#endif //__OPENSPACE_MODULE_DSN___RENDERABLESTATIONFOV___H__

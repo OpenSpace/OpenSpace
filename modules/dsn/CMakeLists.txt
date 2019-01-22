@@ -26,6 +26,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablecone.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestationfov.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesignals.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledsnlabels.h
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/radectranslation.h
@@ -37,6 +38,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablecone.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestationfov.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesignals.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledsnlabels.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/radectranslation.cpp
