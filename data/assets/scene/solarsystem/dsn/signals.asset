@@ -9,6 +9,11 @@ local dataFolder = openspace.absPath("${SYNC}/http/dsn_data/1/signaldata")
 
 local Signals = {
     Identifier = "Signals",
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2014-JAN-01-00:00:00",
+        End = "2018-DEC-31-00:00:00"
+    },
     Renderable = {
         Enabled = true,
         Type = "RenderableSignals",
