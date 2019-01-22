@@ -115,14 +115,16 @@ Fragment getFragment() {
     float distLightTravelStart = lightSpeed * timeSinceStart;
     // the distance the last signal transmission has travelled 
     float distLightTravelEnd = lightSpeed * (timeSinceStart-transmissionTime);
-    float signalSize = distLightTravelStart-distLightTravelEnd;
-    float signalSegmentSize = pow(lightTravelTime,segmentSizeFactor) * lightSpeed;
 
     float alpha = 0.0f;
     // if within the transmission time, change the opacity
     if(distanceFromStart < distLightTravelStart && distanceFromStart > distLightTravelEnd){
         // calculate how fast the signal segments travel within transmission
         float distFlowTravelStart = distLightTravelStart * flowSpeedFactor;
+
+        float signalSize = distLightTravelStart-distLightTravelEnd;
+        float signalSegmentSize = pow(lightTravelTime,segmentSizeFactor) * lightSpeed;
+
         // make the spacing dependent on the segment size
         float spacing = signalSegmentSize * spacingSizeFactor;
         alpha = getSegmentOpacity(signalSegmentSize,spacing, distFlowTravelStart, distLightTravelStart, distLightTravelEnd);
