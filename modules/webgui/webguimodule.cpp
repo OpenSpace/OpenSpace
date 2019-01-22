@@ -85,8 +85,8 @@ WebGuiModule::WebGuiModule()
     , _enabled(ServerProcessEnabledInfo, false)
     , _entryPoint(ServerProcessEntryPointInfo)
     , _webDirectory(WebDirectoryInfo)
-    , _address(AddressInfo, DefaultAddress)
     , _port(PortInfo, DefaultPort)
+    , _address(AddressInfo, DefaultAddress)
     , _webSocketInterface(WebSocketInterfaceInfo, "")
 {
     addProperty(_enabled);

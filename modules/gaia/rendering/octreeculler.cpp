@@ -27,10 +27,6 @@
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 
-namespace {
-    constexpr const char* _loggerCat = "OctreeCuller";
-} // namespace
-
 namespace openspace {
 
 namespace {

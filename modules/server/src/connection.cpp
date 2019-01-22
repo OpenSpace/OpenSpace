@@ -76,7 +76,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s,
 
     _topicFactory.registerClass(
         AuthenticationTopicKey,
-        [password](bool useDictionary, const ghoul::Dictionary& dict) {
+        [password](bool, const ghoul::Dictionary&) {
             return new AuthorizationTopic(password);
         }
     );
