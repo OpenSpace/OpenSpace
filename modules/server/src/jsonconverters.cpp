@@ -24,7 +24,6 @@
 
 #include <modules/server/include/jsonconverters.h>
 
-#include <openspace/json.h>
 #include <openspace/properties/property.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -35,9 +34,15 @@ using json = nlohmann::json;
 namespace openspace::properties {
 
 void to_json(json& j, const Property& p) {
+    std::string description = p.generateBaseJsonDescription();
+    json desc = json::parse(description);
+
+    std::string value = p.jsonValue();
+    json val = json::parse(value);
+
     j = {
-        { "Description", json::parse(p.generateBaseJsonDescription()) },
-        { "Value", p.jsonValue() }
+        { "Description", desc },
+        { "Value", val }
     };
     j["Description"]["description"] = p.description();
 }
@@ -49,6 +54,7 @@ void to_json(json& j, const Property* pP) {
 void to_json(json& j, const PropertyOwner& p) {
     j = {
         { "identifier", p.identifier() },
+        { "guiName", p.guiName() },
         { "description", p.description() },
         { "properties", p.properties() },
         { "subowners", p.propertySubOwners() },

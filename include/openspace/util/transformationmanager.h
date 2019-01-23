@@ -25,8 +25,6 @@
 #ifndef __OPENSPACE_CORE___TRANSFORMATIONMANAGER___H__
 #define __OPENSPACE_CORE___TRANSFORMATIONMANAGER___H__
 
-#include <ghoul/designpattern/singleton.h>
-
 #include <ghoul/glm.h>
 #include <memory>
 #include <set>
@@ -36,12 +34,16 @@ namespace ccmc { class Kameleon; }
 
 namespace openspace {
 
-class TransformationManager : public ghoul::Singleton<TransformationManager> {
-    friend class ghoul::Singleton<TransformationManager>;
-
+class TransformationManager {
 public:
     TransformationManager();
     ~TransformationManager();
+
+    static void initialize();
+    static void deinitialize();
+    static bool isInitialized();
+    static TransformationManager& ref();
+
 
     glm::dmat3 frameTransformationMatrix(const std::string& from, const std::string& to,
         double ephemerisTime) const;
@@ -55,6 +57,8 @@ private:
 //#endif
     std::set<std::string> _kameleonFrames;
     std::set<std::string> _dipoleFrames;
+
+    static TransformationManager* _instance;
 };
 
 } // namespace openspace

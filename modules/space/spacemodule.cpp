@@ -32,6 +32,7 @@
 #include <modules/space/translation/keplertranslation.h>
 #include <modules/space/translation/spicetranslation.h>
 #include <modules/space/translation/tletranslation.h>
+#include <modules/space/translation/horizonstranslation.h>
 #include <modules/space/rotation/spicerotation.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
@@ -86,6 +87,7 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary&) {
     fTranslation->registerClass<KeplerTranslation>("KeplerTranslation");
     fTranslation->registerClass<SpiceTranslation>("SpiceTranslation");
     fTranslation->registerClass<TLETranslation>("TLETranslation");
+    fTranslation->registerClass<HorizonsTranslation>("HorizonsTranslation");
 
     auto fRotation = FactoryManager::ref().factory<Rotation>();
     ghoul_assert(fRotation, "Rotation factory was not created");
@@ -111,6 +113,7 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
         SpiceTranslation::Documentation(),
         KeplerTranslation::Documentation(),
         TLETranslation::Documentation(),
+        HorizonsTranslation::Documentation(),
         planetgeometry::PlanetGeometry::Documentation(),
         planetgeometry::SimpleSphereGeometry::Documentation()
     };

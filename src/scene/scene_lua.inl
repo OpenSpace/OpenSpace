@@ -375,7 +375,7 @@ int property_setValueSingle(lua_State* L) {
 int property_getValue(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::property_getValue");
 
-    const std::string& uri = ghoul::lua::value<std::string>(
+    std::string uri = ghoul::lua::value<std::string>(
         L,
         1,
         ghoul::lua::PopValue::Yes
@@ -398,6 +398,51 @@ int property_getValue(lua_State* L) {
     }
 
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 1;
+}
+
+/**
+ * \ingroup LuaScripts
+ * getProperty
+ * Returns a list of property identifiers that match the passed regular expression
+ */
+int property_getProperty(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::property_getProperty");
+
+    std::string regex = ghoul::lua::value<std::string>(L, 1);
+    lua_pop(L, 1);
+
+
+    // Replace all wildcards * with the correct regex (.*)
+    size_t startPos = regex.find("*");
+    while (startPos != std::string::npos) {
+        regex.replace(startPos, 1, "(.*)");
+        startPos += 4; // (.*)
+        startPos = regex.find("*", startPos);
+    }
+
+
+
+    std::regex r(regex);
+    std::vector<properties::Property*> props = allProperties();
+    std::vector<std::string> res;
+    for (properties::Property* prop : props) {
+        // Check the regular expression for all properties
+        const std::string& id = prop->fullyQualifiedIdentifier();
+
+        if (std::regex_match(id, r)) {
+            res.push_back(id);
+        }
+    }
+
+    lua_newtable(L);
+    int number = 1;
+    for (const std::string& s : res) {
+        lua_pushstring(L, s.c_str());
+        lua_rawseti(L, -2, number);
+        ++number;
+    }
+
     return 1;
 }
 
@@ -459,7 +504,7 @@ int addSceneGraphNode(lua_State* L) {
 int removeSceneGraphNode(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeSceneGraphNode");
 
-    const std::string& nodeName = ghoul::lua::value<std::string>(
+    std::string nodeName = ghoul::lua::value<std::string>(
         L,
         1,
         ghoul::lua::PopValue::Yes
@@ -509,7 +554,7 @@ int removeSceneGraphNode(lua_State* L) {
 int hasSceneGraphNode(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::hasSceneGraphNode");
 
-    const std::string& nodeName = ghoul::lua::value<std::string>(
+    std::string nodeName = ghoul::lua::value<std::string>(
         L,
         1,
         ghoul::lua::PopValue::Yes
@@ -520,6 +565,19 @@ int hasSceneGraphNode(lua_State* L) {
 
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
+}
+
+int addInterestingTime(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addInterestingTime");
+
+    std::string name = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::No);
+    std::string time = ghoul::lua::value<std::string>(L, 2, ghoul::lua::PopValue::No);
+    lua_pop(L, 2);
+
+    global::renderEngine.scene()->addInterestingTime({std::move(name), std::move(time)});
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
 }
 
 }  // namespace openspace::luascriptfunctions

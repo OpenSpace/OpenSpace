@@ -50,8 +50,9 @@ glm::uvec2 fromLuaConversion(lua_State* state, bool& success) {
             lua_pop(state, 1);
         }
     }
-    // The last accessor argument and the table are still on the stack
-    lua_pop(state, 2);
+
+    // The last accessor argument is still on the stack
+    lua_pop(state, 1);
     success = true;
     return result;
 }

@@ -27,6 +27,8 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 #include <atomic>
@@ -137,9 +139,9 @@ public:
 
     void setRenderable(std::unique_ptr<Renderable> renderable);
     const Renderable* renderable() const;
-    //Renderable* renderable();
+    Renderable* renderable();
 
-    const std::string& guiPath() const;
+    std::string guiPath() const;
     bool hasGuiHintHidden() const;
 
     static documentation::Documentation Documentation();
@@ -158,13 +160,14 @@ private:
 
     // If this value is 'true' GUIs are asked to hide this node from collections, as it
     // might be a node that is not very interesting (for example barycenters)
-    bool _guiHintHidden = false;
+    properties::BoolProperty _guiHidden;
 
     PerformanceRecord _performanceRecord = { 0, 0, 0, 0, 0 };
 
     std::unique_ptr<Renderable> _renderable;
 
-    std::string _guiPath;
+    properties::StringProperty _guiPath;
+    properties::StringProperty _guiDisplayName;
 
     // Transformation defined by ephemeris, rotation and scale
     struct {

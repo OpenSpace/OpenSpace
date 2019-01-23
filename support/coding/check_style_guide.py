@@ -633,7 +633,7 @@ check_files(
 )
 check_files(
     [basePath + 'apps/**/*.inl'],
-    [basePath + 'apps/**/ext/**/*.h'],
+    [basePath + 'apps/**/ext/**/*.inl'],
     'openspace_app',
     check_inline_file
 )

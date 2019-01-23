@@ -74,12 +74,12 @@ documentation::Documentation HttpSynchronization::Documentation() {
 }
 
 HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict,
-                                         const std::string& synchronizationRoot,
-                               const std::vector<std::string>& synchronizationRepositories
+                                         std::string synchronizationRoot,
+                                      std::vector<std::string> synchronizationRepositories
 )
     : openspace::ResourceSynchronization(dict)
-    , _synchronizationRoot(synchronizationRoot)
-    , _synchronizationRepositories(synchronizationRepositories)
+    , _synchronizationRoot(std::move(synchronizationRoot))
+    , _synchronizationRepositories(std::move(synchronizationRepositories))
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -184,7 +184,7 @@ bool HttpSynchronization::hasSyncFile() {
 }
 
 bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
-    HttpRequest::RequestOptions opt;
+    HttpRequest::RequestOptions opt = {};
     opt.requestTimeoutSeconds = 0;
 
     SyncHttpMemoryDownload fileListDownload(std::move(listUrl));

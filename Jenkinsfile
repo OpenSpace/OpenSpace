@@ -45,7 +45,7 @@ stage('Build') {
         node('windows') {
             timeout(time: 90, unit: 'MINUTES') {
                 // We specify the workspace directory manually to reduce the path length and thus try to avoid MSB3491 on Visual Studio
-                ws("C:/J/O/${env.BRANCH_NAME}/${env.BUILD_ID}") {
+                ws("${env.JENKINS_BASE}/O/${env.BRANCH_NAME}/${env.BUILD_ID}") {
                     deleteDir()
                     checkout scm
                     bat '''
@@ -79,7 +79,7 @@ stage('Build') {
                     cd ${srcDir}/build
                     /Applications/CMake.app/Contents/bin/cmake -G Xcode ${srcDir} .. ''' +
                     flags + '''
-                    xcodebuild -quiet -parallelizeTargets -jobs 4
+                    xcodebuild -parallelizeTargets -jobs 4 -target OpenSpace
                     '''
             }
         }

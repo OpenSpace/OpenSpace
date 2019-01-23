@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifdef GLOBEBROWSING_USE_GDAL
-
 #include <modules/imgui/include/guiglobebrowsingcomponent.h>
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
@@ -368,5 +366,3 @@ void GuiGlobeBrowsingComponent::render() {
 }
 
 } // namespace openspace::gui
-
-#endif  // GLOBEBROWSING_USE_GDAL

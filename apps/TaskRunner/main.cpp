@@ -111,7 +111,6 @@ int main(int argc, char** argv) {
     openspace::global::openSpaceEngine.registerPathTokens();
     global::openSpaceEngine.initialize();
 
-
     ghoul::cmdparser::CommandlineParser commandlineParser(
         "OpenSpace TaskRunner",
         ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes

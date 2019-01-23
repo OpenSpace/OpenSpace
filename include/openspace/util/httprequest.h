@@ -122,7 +122,6 @@ private:
 
     ReadyState _readyState;
     Progress _progress;
-    RequestOptions _options;
 
     friend size_t curlfunctions::writeCallback(char* ptr, size_t size, size_t nmemb,
         void* userData);

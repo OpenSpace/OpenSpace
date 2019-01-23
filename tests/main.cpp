@@ -72,7 +72,6 @@
 #include <test_timeline.inl>
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-#include <test_aabb.inl>
 #include <test_angle.inl>
 #include <test_concurrentjobmanager.inl>
 #include <test_concurrentqueue.inl>
@@ -105,8 +104,6 @@ namespace {
 
 int main(int argc, char** argv) {
     std::vector<std::string> args;
-    bool close;
-    bool consoleLog = false;
 
     // Workaround for Visual Studio Google Test Adapter:
     // Do not try to initialize osengine if gtest is just listing tests

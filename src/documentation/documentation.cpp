@@ -63,21 +63,21 @@ struct WarningCompare {
 namespace ghoul {
 
 template <>
-std::string to_string(const openspace::documentation::TestResult& testResult) {
+std::string to_string(const openspace::documentation::TestResult& value) {
     using namespace openspace::documentation;
 
-    if (testResult.success) {
+    if (value.success) {
         return "Success";
     }
     else {
         std::stringstream stream;
         stream << "Failure." << '\n';
 
-        for (const TestResult::Offense& offense : testResult.offenses) {
+        for (const TestResult::Offense& offense : value.offenses) {
             stream << "  " << ghoul::to_string(offense) << '\n';
         }
 
-        for (const TestResult::Warning& warning : testResult.warnings) {
+        for (const TestResult::Warning& warning : value.warnings) {
             stream << "  " << ghoul::to_string(warning) << '\n';
         }
 
@@ -86,14 +86,14 @@ std::string to_string(const openspace::documentation::TestResult& testResult) {
 }
 
 template <>
-std::string to_string(const openspace::documentation::TestResult::Offense& offense) {
-    return offense.offender + ": " + ghoul::to_string(offense.reason);
+std::string to_string(const openspace::documentation::TestResult::Offense& value) {
+    return value.offender + ": " + ghoul::to_string(value.reason);
 }
 
 template <>
-std::string to_string(const openspace::documentation::TestResult::Offense::Reason& reason)
+std::string to_string(const openspace::documentation::TestResult::Offense::Reason& value)
 {
-    switch (reason) {
+    switch (value) {
         case openspace::documentation::TestResult::Offense::Reason::ExtraKey:
             return "Extra key";
         case openspace::documentation::TestResult::Offense::Reason::MissingKey:
@@ -110,15 +110,14 @@ std::string to_string(const openspace::documentation::TestResult::Offense::Reaso
 }
 
 template <>
-std::string to_string(const openspace::documentation::TestResult::Warning& warning) {
-    return warning.offender + ": " + ghoul::to_string(warning.reason);
+std::string to_string(const openspace::documentation::TestResult::Warning& value) {
+    return value.offender + ": " + ghoul::to_string(value.reason);
 }
 
 template <>
-std::string to_string(
-                      const openspace::documentation::TestResult::Warning::Reason& reason)
+std::string to_string(const openspace::documentation::TestResult::Warning::Reason& value)
 {
-    switch (reason) {
+    switch (value) {
         case openspace::documentation::TestResult::Warning::Reason::Deprecated:
             return "Deprecated";
         default:

@@ -40,6 +40,8 @@ public:
     bool isDone() const override;
 
 private:
+    void resetCallbacks();
+
     const int UnsetCallbackHandle = -1;
 
     bool _requestedResourceIsSubscribable = false;

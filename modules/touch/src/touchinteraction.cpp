@@ -41,9 +41,8 @@
 #include <glm/gtx/quaternion.hpp>
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-#include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
-#include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/src/basictypes.h>
+#include <modules/globebrowsing/src/renderableglobe.h>
 #endif
 
 #include <cmath>
@@ -242,7 +241,7 @@ TouchInteraction::TouchInteraction()
     , _nodeRadiusThreshold(DirectManipulationInfo, 0.2f, 0.0f, 1.0f)
     , _rollAngleThreshold(RollThresholdInfo, 0.025f, 0.f, 0.05f)
     , _orbitSpeedThreshold(OrbitSpinningThreshold, 0.005f, 0.f, 0.01f)
-    , _spinSensitivity(SpinningSensitivityInfo, 1.f, 0.f, 2.f)
+    , _spinSensitivity(SpinningSensitivityInfo, 0.25f, 0.f, 2.f)
     , _zoomSensitivityExponential(ZoomSensitivityExpInfo, 1.03f, 1.0f, 1.1f)
     , _zoomSensitivityProportionalDist(ZoomSensitivityPropInfo, 11.f, 5.f, 50.f)
     , _zoomSensitivityDistanceThreshold(
@@ -291,6 +290,7 @@ TouchInteraction::TouchInteraction()
     , _timeSlack(0.0)
     , _numOfTests(0)
     , _directTouchMode(false)
+    , _wasPrevModeDirectTouch(false)
     , _tap(false)
     , _doubleTap(false)
     , _zoomOutTap(false)
@@ -387,6 +387,20 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
     }
 
     if (!guiMode(list)) {
+        bool isThisFrameTransitionBetweenTouchModes
+            = (_wasPrevModeDirectTouch != _directTouchMode);
+        if (isThisFrameTransitionBetweenTouchModes) {
+            _vel.orbit = glm::dvec2(0.0, 0.0);
+            _vel.zoom = 0.0;
+            _vel.roll = 0.0;
+            _vel.pan = glm::dvec2(0.0, 0.0);
+            resetAfterInput();
+            /*if( _directTouchMode )
+                LINFO("Touch -> Direct-touch");
+            else
+                LINFO("Direct-touch -> Touch");*/
+        }
+
         if (_directTouchMode && _selected.size() > 0 && list.size() == _selected.size()) {
 #ifdef TOUCH_DEBUG_PROPERTIES
             _debugProperties.interactionMode = "Direct";
@@ -396,6 +410,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
         if (_lmSuccess) {
             findSelectedNode(list);
         }
+
         if (!_directTouchMode) {
 #ifdef TOUCH_DEBUG_PROPERTIES
             _debugProperties.interactionMode = "Velocities";
@@ -403,6 +418,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
             computeVelocities(list, lastProcessed);
         }
 
+        _wasPrevModeDirectTouch = _directTouchMode;
         // evaluates if current frame is in directTouchMode (will be used next frame)
         _directTouchMode =
             (_currentRadius > _nodeRadiusThreshold && _selected.size() == list.size());
@@ -804,10 +820,12 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
                     // If the user touched the planet directly, this is definitely the one
                     // they are interested in  =>  minimum distance
                     if (dist <= 0.0) {
+#ifdef TOUCH_DEBUG_NODE_PICK_MESSAGES
                         LINFOC(
                             node->identifier(),
                             "Picking candidate based on direct touch"
                         );
+#endif //#ifdef TOUCH_DEBUG_NODE_PICK_MESSAGES
                         pickingInfo.push_back({
                             node,
                             -std::numeric_limits<double>::max(),
@@ -816,10 +834,12 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
                     }
                     else {
                         // The node was considered due to minimum picking distance radius
+#ifdef TOUCH_DEBUG_NODE_PICK_MESSAGES
                         LINFOC(
                             node->identifier(),
                             "Picking candidate based on proximity"
                         );
+#endif //#ifdef TOUCH_DEBUG_NODE_PICK_MESSAGES
                         pickingInfo.push_back({
                             node,
                             ndcDist,
@@ -845,7 +865,9 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
     // If an item has been picked, it's in the first position of the vector now
     if (!pickingInfo.empty()) {
         _pickingSelected = pickingInfo.begin()->node;
+#ifdef TOUCH_DEBUG_NODE_PICK_MESSAGES
         LINFOC("Picking", "Picked node: " + _pickingSelected->identifier());
+#endif //#ifdef TOUCH_DEBUG_NODE_PICK_MESSAGES
     }
 
     _selected = std::move(newSelected);

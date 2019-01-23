@@ -393,7 +393,7 @@ void renderIVec2Property(Property* prop, const std::string& ownerName,
     if (changed) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            std::to_string(value),
+            ghoul::to_string(value),
             isRegular
         );
     }
@@ -427,7 +427,7 @@ void renderIVec3Property(Property* prop, const std::string& ownerName,
     if (changed) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            std::to_string(value),
+            ghoul::to_string(value),
             isRegular
         );
     }
@@ -460,7 +460,7 @@ void renderIVec4Property(Property* prop, const std::string& ownerName,
     if (changed) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            std::to_string(value),
+            ghoul::to_string(value),
             isRegular
         );
     }
@@ -526,7 +526,7 @@ void renderVec2Property(Property* prop, const std::string& ownerName,
     if (changed) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            std::to_string(value),
+            ghoul::to_string(value),
             isRegular
         );
     }
@@ -571,7 +571,7 @@ void renderVec3Property(Property* prop, const std::string& ownerName,
     if (changed) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            std::to_string(value),
+            ghoul::to_string(value),
             isRegular
         );
     }
@@ -616,7 +616,7 @@ void renderVec4Property(Property* prop, const std::string& ownerName,
     if (changed) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            std::to_string(value),
+            ghoul::to_string(value),
             isRegular
         );
     }
@@ -651,7 +651,7 @@ void renderDVec2Property(Property* prop, const std::string& ownerName,
     if (changed) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            std::to_string(value),
+            ghoul::to_string(value),
             isRegular
         );
     }
@@ -687,7 +687,7 @@ void renderDVec3Property(Property* prop, const std::string& ownerName,
     if (changed) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            std::to_string(value),
+            ghoul::to_string(value),
             isRegular
         );
     }
@@ -723,7 +723,7 @@ void renderDVec4Property(Property* prop, const std::string& ownerName,
     if (changed) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            std::to_string(value),
+            ghoul::to_string(value),
             isRegular
         );
     }
@@ -780,7 +780,7 @@ void renderDMat2Property(Property* prop, const std::string& ownerName,
     if (changed) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            std::to_string(value),
+            ghoul::to_string(value),
             isRegular
         );
     }
@@ -847,7 +847,7 @@ void renderDMat3Property(Property* prop, const std::string& ownerName,
     if (changed) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            std::to_string(value),
+            ghoul::to_string(value),
             isRegular
         );
     }
@@ -924,7 +924,7 @@ void renderDMat4Property(Property* prop, const std::string& ownerName,
     if (changed) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            std::to_string(value),
+            ghoul::to_string(value),
             isRegular
         );
     }

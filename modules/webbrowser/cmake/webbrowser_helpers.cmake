@@ -27,10 +27,14 @@ function(set_cef_targets cef_root main_target)
     # find cef cmake helpers
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${cef_root}/cmake")
     include(cef_support)
+
+    # Use <PackageName>_ROOT variables
+    # https://cmake.org/cmake/help/git-stage/policy/CMP0074.html
+    cmake_policy(SET CMP0074 NEW)
     find_package(CEF REQUIRED)
 
     # ensure out target dir is set
-    SET_OPENSPACE_CEF_TARGET_OUT_DIR()
+    set_openspace_cef_target_out_dir()
 
     # main CEF executable target
     set(CEF_TARGET ${main_target} PARENT_SCOPE)
@@ -40,6 +44,10 @@ function(run_cef_platform_config cef_root cef_target module_path)
     # find cef cmake helpers
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${cef_root}/cmake")
     include(cef_support)
+
+    # Use <PackageName>_ROOT variables
+    # https://cmake.org/cmake/help/git-stage/policy/CMP0074.html
+    cmake_policy(SET CMP0074 NEW)
     find_package(CEF REQUIRED)
 
     if (OS_MACOSX)
@@ -54,9 +62,8 @@ function(run_cef_platform_config cef_root cef_target module_path)
 endfunction()
 
 function(run_cef_macosx_config CEF_ROOT module_path)
-    set(CEF_APP "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CEF_TARGET}.app")
-    set(CEF_FINAL_APP "${CEF_TARGET_OUT_DIR}/${CEF_TARGET}.app")
-    set(CEF_FINAL_HELPER_APP "${CEF_FINAL_APP}/Contents/Frameworks/${CEF_HELPER_TARGET}.app")
+    set(CEF_FINAL_APP "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/${CEF_TARGET}.app")
+    set(CEF_FINAL_HELPER_APP "${CEF_FINAL_APP}/Contents/${CEF_HELPER_TARGET}.app")
     set(CEF_FRAMEWORK_LOCATION "${CEF_BINARY_DIR}/Chromium Embedded Framework.framework")
     set(CEF_FRAMEWORK_FINAL_LOCATION "${CEF_FINAL_APP}/Contents/Frameworks/Chromium Embedded Framework.framework")
 
@@ -72,12 +79,10 @@ function(run_cef_macosx_config CEF_ROOT module_path)
     add_custom_command(
         TARGET ${CEF_TARGET}
         POST_BUILD
-        # Copy the built app bundle into the proper cmake build type directory.
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CEF_APP}" "${CEF_FINAL_APP}"
         # Copy the helper app bundle into the Frameworks directory.
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CEF_HELPER_APP}" "${CEF_FINAL_HELPER_APP}"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug${CEF_HELPER_APP}" "${CEF_FINAL_HELPER_APP}"
         # Copy the CEF framework into the Frameworks directory.
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_FRAMEWORK_LOCATION}" "${CEF_FRAMEWORK_FINAL_LOCATION}"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CEF_FRAMEWORK_LOCATION}" "${CEF_FRAMEWORK_FINAL_LOCATION}"
         VERBATIM
     )
 
@@ -120,8 +125,8 @@ function(run_cef_windows_config CEF_TARGET CEF_ROOT MODULE_PATH)
     endif()
 
     # Add the custom manifest files to the executable.
-    SET_OPENSPACE_CEF_TARGET_OUT_DIR()
-    ADD_WINDOWS_CEF_MANIFEST("${CEF_TARGET_OUT_DIR}" "${MODULE_PATH}" "${CEF_TARGET}" "exe")
+    set_openspace_cef_target_out_dir()
+    add_windows_cef_manifest("${CEF_TARGET_OUT_DIR}" "${MODULE_PATH}" "${CEF_TARGET}" "exe")
 
     # Copy binary and resource files to the target output directory.
     copy_files("${CEF_TARGET}" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR}" "$<TARGET_FILE_DIR:${CEF_TARGET}>")

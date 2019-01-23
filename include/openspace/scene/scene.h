@@ -58,8 +58,14 @@ public:
          * \param component The optional compoment that caused this exception to be thrown
          * \pre message may not be empty
         */
-        explicit InvalidSceneError(const std::string& msg,
-            const std::string& comp = "");
+        explicit InvalidSceneError(std::string msg, std::string comp = "");
+    };
+
+    /// This struct describes a time that has some intrinsic interesting-ness to this
+    /// scene.
+    struct InterestingTime {
+        std::string name;
+        std::string time;
     };
 
     // constructors & destructor
@@ -210,6 +216,24 @@ public:
     void updateInterpolations();
 
     /**
+     * Adds the provided \p time as an interesting time to this scene. The same time can
+     * be added multiple times.
+     *
+     * \param The time that should be added
+     *
+     * \pre \p time.time must not be empty
+     * \pre \p time.name must not be empty
+     */
+    void addInterestingTime(InterestingTime time);
+
+    /**
+     * Returns the list of all interesting times that are defined for this scene.
+     *
+     * \return The list of all interesting times that are defined for this scene
+     */
+    const std::vector<InterestingTime>& interestingTimes() const;
+
+    /**
      * Returns the Lua library that contains all Lua functions available to change the
      * scene graph. The functions contained are
      * - openspace::luascriptfunctions::property_setValue
@@ -234,6 +258,8 @@ private:
     bool _dirtyNodeRegistry = false;
     SceneGraphNode _rootDummy;
     std::unique_ptr<SceneInitializer> _initializer;
+
+    std::vector<InterestingTime> _interestingTimes;
 
     std::vector<SceneLicense> _licenses;
 

@@ -113,7 +113,7 @@ struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks>
 namespace ghoul {
 
 template <>
-std::string to_string(const openspace::interaction::JoystickAction& action);
+std::string to_string(const openspace::interaction::JoystickAction& value);
 
 template <>
 openspace::interaction::JoystickAction from_string(const std::string& str);

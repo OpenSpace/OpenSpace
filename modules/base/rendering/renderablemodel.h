@@ -51,7 +51,7 @@ namespace modelgeometry { class ModelGeometry; }
 class RenderableModel : public Renderable {
 public:
     RenderableModel(const ghoul::Dictionary& dictionary);
-    ~RenderableModel();
+    ~RenderableModel() = default;
 
     void initialize() override;
     void initializeGL() override;

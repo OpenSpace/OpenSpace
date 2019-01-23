@@ -53,6 +53,7 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/io/texture/texturereadercmap.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringconversion.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
@@ -523,11 +524,31 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 
     ++_frameNumber;
 
-    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : global::screenSpaceRenderables) {
+    std::vector<ScreenSpaceRenderable*> ssrs;
+    ssrs.reserve(global::screenSpaceRenderables.size());
+    for (const std::unique_ptr<ScreenSpaceRenderable>& ssr :
+         global::screenSpaceRenderables)
+    {
         if (ssr->isEnabled() && ssr->isReady()) {
-            ssr->render();
+            ssrs.push_back(ssr.get());
         }
     }
+
+    std::sort(
+        ssrs.begin(),
+        ssrs.end(),
+        [](ScreenSpaceRenderable* lhs, ScreenSpaceRenderable* rhs) {
+            return lhs->depth() < rhs->depth();
+        }
+    );
+
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    for (ScreenSpaceRenderable* ssr : ssrs) {
+        ssr->render();
+    }
+    glDisable(GL_BLEND);
     LTRACE("RenderEngine::render(end)");
 }
 
@@ -662,6 +683,21 @@ void RenderEngine::renderDashboard() {
     );
 
     global::dashboard.render(penPosition);
+
+#ifdef REALTIME_CAMERA_POS_DISPLAY
+    penPosition += glm::vec2(0.f, -50.f);
+
+    glm::dvec3 p = _camera->positionVec3();
+    glm::dquat rot = _camera->rotationQuaternion();
+    std::string fc = global::navigationHandler.focusNode()->identifier();
+    RenderFont(
+        *_fontInfo,
+        penPosition,
+        fmt::format("Pos: {} {} {}\nOrientation: {} {} {} {}\nFocus: {}",
+            p.x, p.y, p.z, rot[0], rot[1], rot[2], rot[3], fc
+            )
+    );
+#endif
 }
 
 void RenderEngine::postDraw() {
@@ -1009,7 +1045,8 @@ void RenderEngine::renderCameraInformation() {
     constexpr const float YSeparation = 5.f;
     constexpr const float XSeparation = 5.f;
 
-    interaction::OrbitalNavigator nav = global::navigationHandler.orbitalNavigator();
+    const interaction::OrbitalNavigator& nav =
+        global::navigationHandler.orbitalNavigator();
 
     _cameraButtonLocations.rotation = {
         fontResolution().x - rotationBox.boundingBox.x - XSeparation,
@@ -1146,7 +1183,7 @@ void RenderEngine::renderScreenLog() {
             break;
         }
 
-        const std::string lvl = "(" + ghoul::logging::stringFromLevel(e->level) + ")";
+        const std::string lvl = "(" + ghoul::to_string(e->level) + ")";
         const std::string& message = e->message.substr(0, MessageLength);
         nr += std::count(message.begin(), message.end(), '\n');
 

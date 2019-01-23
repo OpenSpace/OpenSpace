@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_spawn.h 31287 2015-11-01 18:29:27Z goatbar $
+ * $Id: cpl_spawn.h f5361e0be8e2ae819dde996e6c6aa5985b8fefec 2018-04-02 15:11:21 +0200 Even Rouault $
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Implement CPLSystem().
@@ -44,7 +44,7 @@ int CPL_DLL CPLSpawn( const char * const papszArgv[], VSILFILE* fin, VSILFILE* f
 #ifdef WIN32
 #include <windows.h>
 typedef HANDLE CPL_FILE_HANDLE;
-#define CPL_FILE_INVALID_HANDLE NULL
+#define CPL_FILE_INVALID_HANDLE CPL_NULLPTR
 typedef DWORD  CPL_PID;
 #else
 #include <sys/types.h>

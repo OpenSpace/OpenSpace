@@ -308,8 +308,9 @@ bool NumericalProperty<T>::setLuaValue(lua_State* state) {
     T value = PropertyDelegate<NumericalProperty<T>>::template fromLuaValue<T>(
         state, success
     );
-    if (success)
+    if (success) {
         TemplateProperty<T>::setValue(std::move(value));
+    }
     return success;
 }
 
@@ -340,8 +341,9 @@ bool NumericalProperty<T>::setStringValue(std::string value) {
     T thisValue = PropertyDelegate<NumericalProperty<T>>::template fromString<T>(
         value, success
     );
-    if (success)
+    if (success) {
         TemplateProperty<T>::set(ghoul::any(std::move(thisValue)));
+    }
     return success;
 }
 
@@ -389,20 +391,20 @@ template <typename T>
 std::string NumericalProperty<T>::generateAdditionalJsonDescription() const {
     std::string result = "{ ";
     result +=
-      "\"" + MinimumValueKey + "\": " + luaToJson(std::to_string(_minimumValue)) + ",";
+      "\"" + MinimumValueKey + "\": " + luaToJson(ghoul::to_string(_minimumValue)) + ",";
     result +=
-      "\"" + MaximumValueKey + "\": " + luaToJson(std::to_string(_maximumValue)) + ",";
+      "\"" + MaximumValueKey + "\": " + luaToJson(ghoul::to_string(_maximumValue)) + ",";
     result +=
-      "\"" + SteppingValueKey + "\": " + luaToJson(std::to_string(_stepping)) + ",";
+      "\"" + SteppingValueKey + "\": " + luaToJson(ghoul::to_string(_stepping)) + ",";
     result +=
-      "\"" + ExponentValueKey + "\": " + luaToJson(std::to_string(_exponent));
+      "\"" + ExponentValueKey + "\": " + luaToJson(ghoul::to_string(_exponent));
     result += " }";
     return result;
 }
 
 template <typename T>
 std::string NumericalProperty<T>::luaToJson(std::string luaValue) const {
-    if(luaValue[0] == '{') {
+    if (luaValue[0] == '{') {
         luaValue.replace(0, 1, "[");
     }
     if (luaValue[luaValue.size() - 1] == '}') {

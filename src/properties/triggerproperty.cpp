@@ -51,7 +51,7 @@ std::string TriggerProperty::toJson() const {
 }
 
 std::string TriggerProperty::jsonValue() const {
-    return "";
+    return "true";
 }
 
 } // namespace openspace::properties

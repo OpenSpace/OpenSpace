@@ -55,8 +55,6 @@ DebugRenderer::DebugRenderer(std::unique_ptr<ghoul::opengl::ProgramObject> progr
     // nothing to do
 }
 
-DebugRenderer::~DebugRenderer() { }
-
 const DebugRenderer& DebugRenderer::ref() {
     if (!_reference) {
         try {
@@ -70,7 +68,7 @@ const DebugRenderer& DebugRenderer::ref() {
 }
 
 void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum mode,
-                                   const glm::vec4& rgba) const
+                                   const glm::vec4& color) const
 {
     if (clippingSpacePoints.empty()) {
         return;
@@ -88,7 +86,7 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
 
     // Activate the shader program and set the uniform color within the shader
     _programObject->activate();
-    _programObject->setUniform("color", rgba);
+    _programObject->setUniform("color", color);
 
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
@@ -226,21 +224,6 @@ void DebugRenderer::renderCameraFrustum(const RenderData& data, const Camera& ot
     renderNiceBox(clippingSpaceFrustumCorners, rgba);
     glEnable(GL_CULL_FACE);
 }
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-void DebugRenderer::renderAABB2(const globebrowsing::AABB2& screenSpaceAABB,
-                                const glm::vec4& rgba) const
-{
-    Vertices vertices = {
-        glm::vec4(screenSpaceAABB.min.x, screenSpaceAABB.min.y, 1, 1),
-        glm::vec4(screenSpaceAABB.min.x, screenSpaceAABB.max.y, 1, 1),
-        glm::vec4(screenSpaceAABB.max.x, screenSpaceAABB.min.y, 1, 1),
-        glm::vec4(screenSpaceAABB.max.x, screenSpaceAABB.max.y, 1, 1)
-    };
-
-    renderVertices(vertices, GL_LINES, rgba);
-}
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 const DebugRenderer::Vertices DebugRenderer::verticesFor(

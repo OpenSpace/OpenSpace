@@ -96,7 +96,7 @@ private:
         const glm::dmat4& projectionMatrix, float fadeInVariable);
     void renderLabels(const RenderData& data,
         const glm::dmat4& modelViewProjectionMatrix, const glm::dvec3& orthoRight,
-        const glm::dvec3& orthoUp, float fadeInVarible);
+        const glm::dvec3& orthoUp, float fadeInVariable);
 
     bool loadData();
     bool loadTextures();

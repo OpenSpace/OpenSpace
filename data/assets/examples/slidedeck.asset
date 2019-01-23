@@ -11,7 +11,7 @@ asset.onInitialize(function ()
     helper.addSlide(deck, "${DATA}/test2.jpg")
     helper.addSlide(deck, "${DATA}/test3.jpg")
 
-    local interpolationDuration = 0
+    local interpolationDuration = 0.5
 
     function nextSlide()
         helper.goToNextSlide(deck, interpolationDuration)
@@ -21,9 +21,14 @@ asset.onInitialize(function ()
         helper.goToPreviousSlide(deck, interpolationDuration)
     end
 
+    function toggleSlides()
+        helper.toggleSlides(deck, interpolationDuration)
+    end
+
     helper.setCurrentSlide(deck, 1)
-    openspace.bindKey("RIGHT", "nextSlide()")
-    openspace.bindKey("LEFT", "previousSlide()")
+    openspace.bindKey("RIGHT", "nextSlide()", "Next slide", "Next slide", "/Slides")
+    openspace.bindKey("LEFT", "previousSlide()", "Previous slide", "Previous slide", "/Slides")
+    openspace.bindKey("UP", "toggleSlides()", "Toggle slides", "Toggle slides", "/Slides")
 
 end)
 

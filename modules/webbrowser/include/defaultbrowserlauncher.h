@@ -41,16 +41,18 @@ namespace openspace {
 
 class DefaultBrowserLauncher : public CefLifeSpanHandler, public CefRequestHandler {
 public:
-    bool OnBeforePopup(CefRefPtr<CefBrowser> parentBrowser,
+    bool OnBeforePopup(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
+        const CefString& targetUrl, const CefString& targetFrameName,
+        CefLifeSpanHandler::WindowOpenDisposition targetDisposition, bool userGesture,
         const CefPopupFeatures& popupFeatures, CefWindowInfo& windowInfo,
-        const CefString& url, CefRefPtr<CefClient>& client, CefBrowserSettings& settings);
+        CefRefPtr<CefClient>& client, CefBrowserSettings& settings,
+        bool* noJavascriptAccess) override;
 
-    bool OnOpenURLFromTab(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
-        const CefString& target_url,
-        CefRequestHandler::WindowOpenDisposition target_disposition, bool userGesture);
+    //bool OnOpenURLFromTab(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
+    //    const CefString& target_url,
+    //    CefRequestHandler::WindowOpenDisposition target_disposition, bool userGesture);
 
 private:
-    void launchBrowser(const std::string &url) const;
     IMPLEMENT_REFCOUNTING(DefaultBrowserLauncher);
 };
 

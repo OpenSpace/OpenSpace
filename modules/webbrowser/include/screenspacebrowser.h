@@ -36,7 +36,16 @@
 #pragma warning (disable : 4100)
 #endif // _MSC_VER
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#endif // __clang__
+
 #include <include/cef_client.h>
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif // __clang__
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -48,6 +57,7 @@ namespace openspace {
 
 class BrowserInstance;
 class ScreenSpaceRenderHandler;
+class WebKeyboardHandler;
 
 class ScreenSpaceBrowser : public ScreenSpaceRenderable {
 public:
@@ -71,7 +81,8 @@ private:
     properties::StringProperty _url;
     properties::Vec2Property _dimensions;
     CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
-    std::shared_ptr<BrowserInstance> _browserInstance;
+    CefRefPtr<WebKeyboardHandler> _keyboardHandler;
+    std::unique_ptr<BrowserInstance> _browserInstance;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     bool _isUrlDirty = false;

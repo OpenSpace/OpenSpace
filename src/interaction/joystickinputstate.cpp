@@ -72,8 +72,8 @@ bool JoystickInputStates::button(int button, JoystickAction action) const {
 namespace ghoul {
 
 template <>
-std::string to_string(const openspace::interaction::JoystickAction& action) {
-    switch (action) {
+std::string to_string(const openspace::interaction::JoystickAction& value) {
+    switch (value) {
         case openspace::interaction::JoystickAction::Idle:    return "Idle";
         case openspace::interaction::JoystickAction::Press:   return "Press";
         case openspace::interaction::JoystickAction::Repeat:  return "Repeat";

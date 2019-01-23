@@ -429,14 +429,13 @@ void GuiPropertyComponent::render() {
                 if (!_ignoreHiddenHint && nOwner->hasGuiHintHidden()) {
                     continue;
                 }
-
-                if (nOwner->guiPath().empty()) {
+                const std::string guiPath = nOwner->guiPath();
+                if (guiPath.empty()) {
                     // We know that we are done now since we stable_sort:ed them above
                     break;
                 }
-
                 std::vector<std::string> paths = ghoul::tokenizeString(
-                    nOwner->guiPath().substr(1),
+                    guiPath.substr(1),
                     '/'
                 );
 

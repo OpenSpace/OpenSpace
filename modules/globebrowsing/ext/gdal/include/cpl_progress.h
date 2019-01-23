@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_progress.h 34518 2016-07-02 21:01:34Z goatbar $
+ * $Id: cpl_progress.h bc89bc87f0d97aea76ed8642d92f686ce256f7c0 2013-01-25 17:55:47Z Frank Warmerdam $
  *
  * Project:  CPL - Common Portability Library
  * Author:   Frank Warmerdam, warmerdam@pobox.com

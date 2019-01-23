@@ -42,8 +42,6 @@ public:
     static void CreateGlobalSharedMemory();
     static void DestroyGlobalSharedMemory();
 
-    ~PerformanceManager();
-
     void setEnabled(bool enabled);
     bool isEnabled() const;
 

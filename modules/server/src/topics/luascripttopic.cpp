@@ -39,7 +39,6 @@ namespace openspace {
 void LuaScriptTopic::handleJson(const nlohmann::json& json) {
     try {
         std::string script = json.at(ScriptKey).get<std::string>();
-        LDEBUG("Queueing Lua script: " + script);
         global::scriptEngine.queueScript(
             std::move(script),
             scripting::ScriptEngine::RemoteScripting::No

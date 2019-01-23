@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_libs.h 36883 2016-12-15 13:31:12Z rouault $
+ * $Id: ogr_libs.h 154cc8f02351474a3850bf815a97ffb04acf9443 2016-12-15 13:31:12Z Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Definitions related to support for use of SFCGAL and GEOS in OGR.

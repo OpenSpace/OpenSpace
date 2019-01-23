@@ -24,20 +24,13 @@
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
 
-#include <modules/globebrowsing/cache/memoryawaretilecache.h>
-#include <modules/globebrowsing/dashboard/dashboarditemglobelocation.h>
-#include <modules/globebrowsing/geometry/geodetic3.h>
-#include <modules/globebrowsing/geometry/geodeticpatch.h>
-#include <modules/globebrowsing/tile/rawtiledatareader/gdalwrapper.h>
-#include <modules/globebrowsing/tile/tileprovider/defaulttileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/singleimageprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/sizereferencetileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/texttileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/tileindextileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/tileproviderbylevel.h>
-#include <modules/globebrowsing/tile/tileprovider/tileproviderbyindex.h>
+#include <modules/globebrowsing/src/basictypes.h>
+#include <modules/globebrowsing/src/dashboarditemglobelocation.h>
+#include <modules/globebrowsing/src/gdalwrapper.h>
+#include <modules/globebrowsing/src/geodeticpatch.h>
+#include <modules/globebrowsing/src/globetranslation.h>
+#include <modules/globebrowsing/src/memoryawaretilecache.h>
+#include <modules/globebrowsing/src/tileprovider.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
@@ -48,7 +41,6 @@
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <vector>
 
-#ifdef GLOBEBROWSING_USE_GDAL
 #include <gdal.h>
 
 #ifdef _MSC_VER
@@ -63,14 +55,43 @@
 #pragma warning (pop)
 #endif // _MSC_VER
 
-#endif // GLOBEBROWSING_USE_GDAL
-
 #include "globebrowsingmodule_lua.inl"
 
 namespace {
     constexpr const char* _loggerCat = "GlobeBrowsingModule";
 
-#ifdef GLOBEBROWSING_USE_GDAL
+    constexpr const openspace::properties::Property::PropertyInfo CacheEnabledInfo = {
+        "CacheEnabled",
+        "Cache Enabled",
+        "Determines whether automatic caching of WMS servers is enabled. Changing the "
+        "value of this property will not affect already created WMS datasets."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo OfflineModeInfo = {
+        "OfflineMode",
+        "Offline Mode",
+        "Determines whether loaded WMS servers should be used in offline mode, that is "
+        "not even try to retrieve images through an internet connection. Please note "
+        "that this setting is only reasonable, if the caching is enabled and there is "
+        "available cached data. Changing the value of this property will not affect "
+        "already created WMS datasets."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo CacheLocationInfo = {
+        "CacheLocation",
+        "Cache Location",
+        "The location of the cache folder for WMS servers. Changing the value of this "
+        "property will not affect already created WMS datasets."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo CacheSizeInfo = {
+        "CacheSize",
+        "Cache Size",
+        "The maximum size of the cache for each WMS server. Changing the value of this "
+        "property will not affect already created WMS datasets."
+    };
+
+
     openspace::GlobeBrowsingModule::Capabilities
     parseSubDatasets(char** subDatasets, int nSubdatasets)
     {
@@ -121,84 +142,128 @@ namespace {
 
         return result;
     }
-
-#endif // GLOBEBROWSING_USE_GDAL
-
 } // namespace
 
 namespace openspace {
 
-GlobeBrowsingModule::GlobeBrowsingModule() : OpenSpaceModule(Name) {}
+GlobeBrowsingModule::GlobeBrowsingModule()
+    : OpenSpaceModule(Name)
+    , _cacheEnabled(CacheEnabledInfo, false)
+    , _offlineMode(OfflineModeInfo, false)
+    , _cacheLocation(CacheLocationInfo, "${BASE}/cache_gdal")
+    , _cacheSizeMB(CacheSizeInfo, 1024)
+{
+    addProperty(_cacheEnabled);
+    addProperty(_offlineMode);
+    addProperty(_cacheLocation);
+    addProperty(_cacheSizeMB);
+}
 
-void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
+void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     using namespace globebrowsing;
 
+    if (dict.hasKeyAndValue<bool>(CacheEnabledInfo.identifier)) {
+        _cacheEnabled = dict.value<bool>(CacheEnabledInfo.identifier);
+    }
+    if (dict.hasKeyAndValue<bool>(OfflineModeInfo.identifier)) {
+        _offlineMode = dict.value<bool>(OfflineModeInfo.identifier);
+    }
+    if (dict.hasKeyAndValue<std::string>(CacheLocationInfo.identifier)) {
+        _cacheLocation = dict.value<std::string>(CacheLocationInfo.identifier);
+    }
+    if (dict.hasKeyAndValue<double>(CacheSizeInfo.identifier)) {
+        _cacheSizeMB = static_cast<int>(dict.value<double>(CacheSizeInfo.identifier));
+    }
+
+    // Sanity check
+    const bool noWarning = dict.hasKeyAndValue<bool>("NoWarning") ?
+        dict.value<bool>("NoWarning") :
+        false;
+
+    if (!_cacheEnabled && _offlineMode && !noWarning) {
+        LWARNINGC(
+            "GlobeBrowsingModule",
+            "WMS caching is disabled, but offline mode is enabled. Unless you know "
+            "what you are doing, this will probably cause many servers to stop working. "
+            "If you want to silence this warning, set the 'NoWarning' parameter to "
+            "'true'."
+        );
+    }
+
+
     // Initialize
-    global::callback::initializeGL.push_back([&]() {
+    global::callback::initializeGL.emplace_back([&]() {
         _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>();
         addPropertySubOwner(*_tileCache);
 
-#ifdef GLOBEBROWSING_USE_GDAL
+        tileprovider::initializeDefaultTile();
+
         // Convert from MB to Bytes
         GdalWrapper::create(
-            16ULL * 1024ULL * 1024ULL, // 16 MB
+            512ULL * 1024ULL * 1024ULL, // 512 MB
             static_cast<size_t>(CpuCap.installedMainMemory() * 0.25 * 1024 * 1024)
         );
         addPropertySubOwner(GdalWrapper::ref());
-#endif // GLOBEBROWSING_USE_GDAL
+    });
+
+    global::callback::deinitializeGL.emplace_back([]() {
+        tileprovider::deinitializeDefaultTile();
     });
 
 
     // Render
-    global::callback::render.push_back([&]() { _tileCache->update(); });
+    global::callback::render.emplace_back([&]() { _tileCache->update(); });
 
     // Deinitialize
-#ifdef GLOBEBROWSING_USE_GDAL
-    global::callback::deinitialize.push_back([&]() { GdalWrapper::ref().destroy(); });
-#endif // GLOBEBROWSING_USE_GDAL
+    global::callback::deinitialize.emplace_back([&]() { GdalWrapper::destroy(); });
 
-    // Get factories
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
-    // Create factory for TileProviders
+    fRenderable->registerClass<globebrowsing::RenderableGlobe>("RenderableGlobe");
+
+    auto fTranslation = FactoryManager::ref().factory<Translation>();
+    ghoul_assert(fTranslation, "Translation factory was not created");
+    fTranslation->registerClass<globebrowsing::GlobeTranslation>("GlobeTranslation");
+
     auto fTileProvider =
         std::make_unique<ghoul::TemplateFactory<tileprovider::TileProvider>>();
     ghoul_assert(fTileProvider, "TileProvider factory was not created");
 
-    // Register renderable class
-    fRenderable->registerClass<globebrowsing::RenderableGlobe>("RenderableGlobe");
-
-    // Register TileProvider classes
     fTileProvider->registerClass<tileprovider::DefaultTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::DefaultTileLayer
-        )]);
+        )]
+    );
     fTileProvider->registerClass<tileprovider::SingleImageProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::SingleImageTileLayer
-        )]);
-#ifdef GLOBEBROWSING_USE_GDAL
+        )]
+    );
     fTileProvider->registerClass<tileprovider::TemporalTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::TemporalTileLayer
-        )]);
-#endif // GLOBEBROWSING_USE_GDAL
+        )]
+    );
     fTileProvider->registerClass<tileprovider::TileIndexTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::TileIndexTileLayer
-        )]);
+        )]
+    );
     fTileProvider->registerClass<tileprovider::SizeReferenceTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::SizeReferenceTileLayer
-        )]);
+        )]
+    );
     fTileProvider->registerClass<tileprovider::TileProviderByLevel>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::ByLevelTileLayer
-        )]);
+        )]
+    );
     fTileProvider->registerClass<tileprovider::TileProviderByIndex>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(
             layergroupid::TypeID::ByIndexTileLayer
-        )]);
+        )]
+    );
 
     FactoryManager::ref().addFactory(std::move(fTileProvider));
 
@@ -206,7 +271,6 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fDashboard, "Dashboard factory was not created");
 
     fDashboard->registerClass<DashboardItemGlobeLocation>("DashboardItemGlobeLocation");
-
 }
 
 globebrowsing::cache::MemoryAwareTileCache* GlobeBrowsingModule::tileCache() {
@@ -273,7 +337,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             "Get geographic coordinates of the camera poosition in latitude, "
             "longitude, and altitude"
         },
-#ifdef GLOBEBROWSING_USE_GDAL
         {
             "loadWMSCapabilities",
             &globebrowsing::luascriptfunctions::loadWMSCapabilities,
@@ -304,7 +367,6 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             "component of the returned table can be used in the 'FilePath' argument "
             "for a call to the 'addLayer' function to add the value to a globe."
         }
-#endif  // GLOBEBROWSING_USE_GDAL
     };
     res.scripts = {
         absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua")
@@ -321,9 +383,11 @@ void GlobeBrowsingModule::goToChunk(int x, int y, int level) {
 void GlobeBrowsingModule::goToGeo(double latitude, double longitude) {
     using namespace globebrowsing;
     Camera* cam = global::navigationHandler.camera();
-    goToGeodetic2(*cam, Geodetic2(
-        Angle<double>::fromDegrees(latitude).asRadians(),
-        Angle<double>::fromDegrees(longitude).asRadians()), true);
+    goToGeodetic2(
+        *cam,
+        Geodetic2{ glm::radians(latitude), glm::radians(longitude) },
+        true
+    );
 }
 
 void GlobeBrowsingModule::goToGeo(double latitude, double longitude,
@@ -335,9 +399,7 @@ void GlobeBrowsingModule::goToGeo(double latitude, double longitude,
     goToGeodetic3(
         *cam,
         {
-            Geodetic2(
-                Angle<double>::fromDegrees(latitude).asRadians(),
-                Angle<double>::fromDegrees(longitude).asRadians()),
+            Geodetic2{ glm::radians(latitude), glm::radians(longitude) },
             altitude
         },
         true
@@ -351,10 +413,7 @@ glm::vec3 GlobeBrowsingModule::cartesianCoordinatesFromGeo(
     using namespace globebrowsing;
 
     const Geodetic3 pos = {
-        {
-            Angle<double>::fromDegrees(latitude).asRadians(),
-            Angle<double>::fromDegrees(longitude).asRadians()
-        },
+        { glm::radians(latitude), glm::radians(longitude) },
         altitude
     };
 
@@ -379,7 +438,7 @@ void GlobeBrowsingModule::goToChunk(Camera& camera, const globebrowsing::TileInd
 
     // Camera position in model space
     const glm::dvec3 camPos = camera.positionVec3();
-    const glm::dmat4 inverseModelTransform = globe->inverseModelTransform();
+    const glm::dmat4 inverseModelTransform = glm::inverse(globe->modelTransform());
     const glm::dvec3 cameraPositionModelSpace = glm::dvec3(
         inverseModelTransform * glm::dvec4(camPos, 1)
     );
@@ -389,7 +448,10 @@ void GlobeBrowsingModule::goToChunk(Camera& camera, const globebrowsing::TileInd
     Geodetic2 positionOnPatch = patch.size();
     positionOnPatch.lat *= uv.y;
     positionOnPatch.lon *= uv.x;
-    const Geodetic2 pointPosition = corner + positionOnPatch;
+    const Geodetic2 pointPosition = {
+        corner.lat + positionOnPatch.lat,
+        corner.lon + positionOnPatch.lon
+    };
 
     const glm::dvec3 positionOnEllipsoid = globe->ellipsoid().geodeticSurfaceProjection(
         cameraPositionModelSpace
@@ -467,7 +529,7 @@ void GlobeBrowsingModule::resetCameraDirection(Camera& camera,
         geo2
     );
     const glm::dvec3 slightlyNorth = globe->ellipsoid().cartesianSurfacePosition(
-        Geodetic2(geo2.lat + 0.001, geo2.lon)
+        Geodetic2{ geo2.lat + 0.001, geo2.lon }
     );
     const glm::dvec3 lookUpModelSpace = glm::normalize(
         slightlyNorth - positionModelSpace
@@ -534,12 +596,11 @@ std::string GlobeBrowsingModule::layerTypeNamesList() {
     return listLayerTypes;
 }
 
-#ifdef GLOBEBROWSING_USE_GDAL
-
 void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string globe,
                                               std::string url)
 {
     auto downloadFunction = [](const std::string& downloadUrl) {
+        LDEBUG("Opening WMS capabilities: " + downloadUrl);
         GDALDatasetH dataset = GDALOpen(
             downloadUrl.c_str(),
             GA_ReadOnly
@@ -549,6 +610,7 @@ void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string glob
         const int nSubdatasets = CSLCount(subDatasets);
         Capabilities cap = parseSubDatasets(subDatasets, nSubdatasets);
         GDALClose(dataset);
+        LDEBUG("Finished WMS capabilities: " + downloadUrl);
         return cap;
     };
 
@@ -557,6 +619,8 @@ void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string glob
         downloadFunction,
         url
     );
+
+    //_capabilitiesMap[name] = downloadFunction(url);
 
     _urlList.emplace(std::move(globe), UrlInfo{ std::move(name), std::move(url) });
 }
@@ -624,6 +688,22 @@ bool GlobeBrowsingModule::hasUrlInfo(const std::string& globe) const {
     return _urlList.find(globe) != _urlList.end();
 }
 
-#endif // GLOBEBROWSING_USE_GDAL
+bool GlobeBrowsingModule::isCachingEnabled() const {
+    return _cacheEnabled;
+}
+
+bool GlobeBrowsingModule::isInOfflineMode() const {
+    return _offlineMode;
+}
+
+std::string GlobeBrowsingModule::cacheLocation() const {
+    return _cacheLocation;
+}
+
+uint64_t GlobeBrowsingModule::cacheSize() const {
+    uint64_t size = _cacheSizeMB;
+    return size * 1024 * 1024;
+}
+
 
 } // namespace openspace

@@ -25,6 +25,8 @@
 #include <ghoul/filesystem/directory.h>
 #include <ghoul/filesystem/file.h>
 
+#include <ext/ghoul/ext/assimp/contrib/zip/src/zip.h>
+
 namespace openspace::luascriptfunctions {
 
 namespace {
@@ -34,7 +36,7 @@ template <typename Func>
 int walkCommon(lua_State* L, Func func) {
     int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 1, 3 }, "lua::walkCommon");
 
-    const std::string& path = ghoul::lua::value<std::string>(L, 1);
+    std::string path = ghoul::lua::value<std::string>(L, 1);
 
     std::vector<std::string> result;
     if (nArguments == 1) {
@@ -334,6 +336,45 @@ int directoryForPath(lua_State* L) {
 
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
+}
+
+/**
+ * \ingroup LuaScripts
+ * This function extracts the contents of a zip file. The first
+ * argument is the path to the zip file. The second argument is the
+ * directory where to put the extracted files. If the third argument is
+ * true, the compressed file will be deleted after the decompression
+ * is finished.
+ */
+int unzipFile(lua_State* L) {
+    const int nArguments = ghoul::lua::checkArgumentsAndThrow(
+        L,
+        { 2, 3 },
+        "lua::unzipFile"
+    );
+
+    std::string source = absPath(
+        ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::No)
+    );
+    std::string dest = absPath(
+        ghoul::lua::value<std::string>(L, 2, ghoul::lua::PopValue::No)
+    );
+
+    bool deleteSource = false;
+    if (nArguments == 3) {
+        deleteSource = ghoul::lua::value<bool>(L, 3, ghoul::lua::PopValue::No);
+    }
+
+    auto onExtractEntry = [](const char*, void*) { return 0; };
+    int arg = 2;
+    zip_extract(source.c_str(), dest.c_str(), onExtractEntry, &arg);
+
+    if (deleteSource) {
+        FileSys.deleteFile(source);
+    }
+
+    lua_settop(L, 0);
+    return 0;
 }
 
 } // namespace openspace::luascriptfunctions

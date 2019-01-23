@@ -44,7 +44,7 @@ assetHelper.registerDashboardItems(asset, {
         Type = "DashboardItemPropertyValue",
         Identifier = "asd",
         GuiName = "adasd",
-        URI = "Scene.Earth.RenderableGlobe.Enabled",
+        URI = "Scene.Earth.Renderable.Enabled",
         DisplayString = "Earth is enabled: {}"
     }
 })

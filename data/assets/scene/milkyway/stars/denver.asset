@@ -20,7 +20,7 @@ local colorLUT = asset.syncedResource({
     Name = "Stars Color Table",
     Type = "HttpSynchronization",
     Identifier = "stars-denver_colormap",
-    Version = 1
+    Version = 2
 })
 
 local object = {

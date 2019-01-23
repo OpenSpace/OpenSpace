@@ -50,9 +50,8 @@ namespace {
 
 namespace openspace {
 
-Scene::InvalidSceneError::InvalidSceneError(const std::string& msg,
-                                            const std::string& comp)
-    : ghoul::RuntimeError(msg, comp)
+Scene::InvalidSceneError::InvalidSceneError(std::string msg, std::string comp)
+    : ghoul::RuntimeError(std::move(msg), std::move(comp))
 {}
 
 Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
@@ -540,6 +539,14 @@ void Scene::updateInterpolations() {
     );
 }
 
+void Scene::addInterestingTime(InterestingTime time) {
+    _interestingTimes.push_back(std::move(time));
+}
+
+const std::vector<Scene::InterestingTime>& Scene::interestingTimes() const {
+    return _interestingTimes;
+}
+
 void Scene::writeSceneLicenseDocumentation(const std::string& path) const {
     SceneLicenseWriter writer(_licenses);
     writer.writeDocumentation(path);
@@ -599,6 +606,14 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "the provided URI."
             },
             {
+                "getProperty",
+                &luascriptfunctions::property_getProperty,
+                {},
+                "string",
+                "Returns a list of property identifiers that match the passed regular "
+                "expression"
+            },
+            {
                 "loadScene",
                 &luascriptfunctions::loadScene,
                 {},
@@ -628,6 +643,15 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "string",
                 "Checks whether the specifies SceneGraphNode is present in the current "
                 "scene"
+            },
+            {
+                "addInterestingTime",
+                &luascriptfunctions::addInterestingTime,
+                {},
+                "string, string",
+                "Adds an interesting time to the current scene. The first argument is "
+                "the name of the time and the second argument is the time itself in the "
+                "format YYYY-MM-DDThh:mm:ss.uuu"
             }
         }
     };

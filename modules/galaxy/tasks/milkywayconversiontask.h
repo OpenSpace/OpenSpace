@@ -41,7 +41,7 @@ namespace documentation { struct Documentation; }
 class MilkywayConversionTask : public Task {
 public:
     MilkywayConversionTask(const ghoul::Dictionary& dictionary);
-    virtual ~MilkywayConversionTask();
+    virtual ~MilkywayConversionTask() = default;
     std::string description() override;
     void perform(const Task::ProgressCallback& onProgress) override;
 

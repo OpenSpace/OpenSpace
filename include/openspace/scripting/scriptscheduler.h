@@ -25,8 +25,20 @@
 #ifndef __OPENSPACE_CORE___SCRIPTSCHEDULER___H__
 #define __OPENSPACE_CORE___SCRIPTSCHEDULER___H__
 
+#include <openspace/scripting/lualibrary.h>
+#include <openspace/interaction/keyframenavigator.h>
+
+#include <functional>
+#include <queue>
 #include <string>
 #include <vector>
+
+namespace {
+    constexpr const char* KeyTime = "Time";
+    constexpr const char* KeyForwardScript = "ForwardScript";
+    constexpr const char* KeyBackwardScript = "BackwardScript";
+    constexpr const char* KeyUniversalScript = "Script";
+} // namespace
 
 namespace ghoul { class Dictionary; }
 namespace openspace::documentation { struct Documentation; }
@@ -71,15 +83,16 @@ public:
     void clearSchedule();
 
     /**
-     * Progresses the script schedulers time and returns all scripts that has been
-     * scheduled to run between \param newTime and the time provided in the last
-     * invocation of this method.
-     *
-     * \param newTime A j2000 time value specifying the new time stamp that
-     * the script scheduler should progress to.
-     *
-     * \returns the ordered queue of scripts .
-     */
+    * Progresses the script schedulers time and returns all scripts that has been
+    * scheduled to run between \param newTime and the time provided in the last invocation
+    * of this method.
+    *
+    * \param newTime_simulation A j2000 time value specifying the new time stamp that
+    * the script scheduler should progress to.
+    * \param newTime_application The seconds elapsed since the application started
+    *
+    * \returns the ordered queue of scripts .
+    */
 //    std::queue<std::string> progressTo(double newTime);
 
     /**
@@ -103,8 +116,29 @@ public:
      */
     std::vector<ScheduledScript> allScripts() const;
 
+    /**
+    * Sets the mode for how each scheduled script's timestamp will be interpreted.
+    * \param refType reference mode (for exact syntax, see definition of
+    * openspace::interaction::KeyframeTimeRef) which is either relative to the
+    * application start time, relative to the recorded session playback start time,
+    * or according to the absolute simulation time in seconds from J2000 epoch.
+    */
+    void setTimeReferenceMode(openspace::interaction::KeyframeTimeRef refType);
+
+    /**
+    * Sets the mode for scripts being run from playback
+    */
+    void triggerPlaybackStart();
+
+    /**
+    * Sets the flag for scripts no longer being run from playback
+    */
+    void stopPlayback();
 
     static LuaLibrary luaLibrary();
+    void setModeApplicationTime();
+    void setModeRecordedTime();
+    void setModeSimulationTime();
 
     static documentation::Documentation Documentation();
 
@@ -115,6 +149,10 @@ private:
 
     int _currentIndex = 0;
     double _currentTime = 0;
+    bool _playbackModeEnabled = false;
+
+    openspace::interaction::KeyframeTimeRef _timeframeMode
+        = openspace::interaction::KeyframeTimeRef::Absolute_simTimeJ2000;
 };
 
 } // namespace openspace::scripting

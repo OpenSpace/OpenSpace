@@ -27,7 +27,7 @@
 
 #include <openspace/mission/mission.h>
 
-#include <ghoul/designpattern/singleton.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
 #include <map>
 #include <string>

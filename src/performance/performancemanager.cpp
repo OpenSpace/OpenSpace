@@ -130,8 +130,6 @@ void PerformanceManager::DestroyGlobalSharedMemory() {
     sharedMemory.releaseLock();
 }
 
-PerformanceManager::~PerformanceManager() {}
-
 void PerformanceManager::setEnabled(bool enabled) {
     _logDir = absPath("${BASE}");
     _prefix = "PM-";
@@ -346,6 +344,12 @@ void PerformanceManager::storeIndividualPerformanceMeasurement(
                                                             const std::string& identifier,
                                                                    long long microseconds)
 {
+    if (!_performanceMemory) {
+        // If someone called the PerfMeasure macro without checking whether we are
+        // currently set-up for recording, we don't want to crash, so we just discard
+        return;
+    }
+
     PerformanceLayout* layout = performanceData();
     _performanceMemory->acquireLock();
 

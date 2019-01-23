@@ -37,19 +37,32 @@ SyncEngine::SyncEngine(unsigned int syncBufferSize)
 }
 
 // should be called on sgct master
-void SyncEngine::encodeSyncables() {
+std::vector<char> SyncEngine::encodeSyncables() {
     for (Syncable* syncable : _syncables) {
         syncable->encode(&_syncBuffer);
     }
-    _syncBuffer.write();
+
+    std::vector<char> data = _syncBuffer.data();
+    _syncBuffer.reset();
+    return data;
+
+    //_dataStream.resize(_encodeOffset);
+    //_synchronizationBuffer->setVal(_dataStream);
+    //sgct::SharedData::instance()->writeVector(_synchronizationBuffer.get());
+    //_dataStream.resize(_n);
+    //_encodeOffset = 0;
+    //_decodeOffset = 0;
+    //_syncBuffer.write();
 }
 
 //should be called on sgct slaves
-void SyncEngine::decodeSyncables() {
-    _syncBuffer.read();
+void SyncEngine::decodeSyncables(std::vector<char> data) {
+    _syncBuffer.setData(std::move(data));
     for (Syncable* syncable : _syncables) {
         syncable->decode(&_syncBuffer);
     }
+
+    _syncBuffer.reset();
 }
 
 void SyncEngine::preSynchronization(IsMaster isMaster) {

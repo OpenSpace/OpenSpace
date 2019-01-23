@@ -84,7 +84,7 @@
 #ifdef WIN32
 #define _USE_MATH_DEFINES
 #endif // WIN32
-#include <math.h>
+#include <cmath>
 
 
 namespace {
@@ -1218,8 +1218,9 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     }
 
     // Restores OpenGL blending state
-    if (blendEnabled)
+    if (blendEnabled) {
         glEnable(GL_BLEND);
+    }
 
     glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
     glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);

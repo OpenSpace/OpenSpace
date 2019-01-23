@@ -53,30 +53,31 @@ MultiThreadedSceneInitializer::MultiThreadedSceneInitializer(unsigned int nThrea
 void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
     auto initFunction = [this, node]() {
         LoadingScreen* loadingScreen = global::openSpaceEngine.loadingScreen();
-        if (!loadingScreen) {
-            return;
-        }
 
         LoadingScreen::ProgressInfo progressInfo;
         progressInfo.progress = 1.f;
-        loadingScreen->updateItem(
-            node->identifier(),
-            node->guiName(),
-            LoadingScreen::ItemStatus::Initializing,
-            progressInfo
-        );
+        if (loadingScreen) {
+            loadingScreen->updateItem(
+                node->identifier(),
+                node->guiName(),
+                LoadingScreen::ItemStatus::Initializing,
+                progressInfo
+            );
+        }
 
         node->initialize();
         std::lock_guard<std::mutex> g(_mutex);
         _initializedNodes.push_back(node);
         _initializingNodes.erase(node);
 
-        loadingScreen->updateItem(
-            node->identifier(),
-            node->guiName(),
-            LoadingScreen::ItemStatus::Finished,
-            progressInfo
-        );
+        if (loadingScreen) {
+            loadingScreen->updateItem(
+                node->identifier(),
+                node->guiName(),
+                LoadingScreen::ItemStatus::Finished,
+                progressInfo
+            );
+        }
     };
 
     LoadingScreen::ProgressInfo progressInfo;
@@ -93,7 +94,7 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
         );
     }
 
-    std::lock_guard g(_mutex);
+    std::lock_guard<std::mutex> g(_mutex);
     _initializingNodes.insert(node);
     _threadPool.enqueue(initFunction);
 }

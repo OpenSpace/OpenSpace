@@ -48,7 +48,7 @@ struct UpdateStructure;
 class RenderableDebugPlane : public Renderable {
 public:
     RenderableDebugPlane(const ghoul::Dictionary& dictionary);
-    ~RenderableDebugPlane();
+    ~RenderableDebugPlane() = default;
 
     void initializeGL() override;
     void deinitializeGL() override;

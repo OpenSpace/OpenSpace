@@ -25,35 +25,39 @@
 cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 
 project(OpenSpace)
-message(STATUS "Generating OpenSpace project")
 
 set(OPENSPACE_VERSION_MAJOR 0)
-set(OPENSPACE_VERSION_MINOR 12)
+set(OPENSPACE_VERSION_MINOR 13)
 set(OPENSPACE_VERSION_PATCH 0)
-set(OPENSPACE_VERSION_STRING "Beta-2")
+set(OPENSPACE_VERSION_STRING "Beta-3")
+
 
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
-set(OPENSPACE_APPS_DIR "${OPENSPACE_BASE_DIR}/apps")
-set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
 set(OPENSPACE_CMAKE_EXT_DIR "${OPENSPACE_BASE_DIR}/support/cmake")
 set(GHOUL_BASE_DIR "${OPENSPACE_BASE_DIR}/ext/ghoul")
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_common.cmake)
 include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake) 
 include(${OPENSPACE_CMAKE_EXT_DIR}/handle_applications.cmake)
 include(${OPENSPACE_CMAKE_EXT_DIR}/handle_modules.cmake)
+include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake)
+include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
+include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
+include(${GHOUL_BASE_DIR}/support/cmake/include_gtest.cmake)
+
+begin_header("Configuring OpenSpace project")
 
 ##########################################################################################
 # Cleanup project                                                                        #
 ##########################################################################################
+set(OPENSPACE_APPS_DIR "${OPENSPACE_BASE_DIR}/apps")
+set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
 set_property(GLOBAL PROPERTY USE_FOLDERS On)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER CMake)
 
-# Test compiler
-if (MSVC AND (MSVC_VERSION LESS 1910))
-    message(FATAL_ERROR "OpenSpace requires at least Visual Studio 2017.2")
-endif ()
+mark_as_advanced(CMAKE_BACKWARDS_COMPATIBILITY CMAKE_BUILD_TYPE CMAKE_DEBUG_POSTFIX
+    CMAKE_INSTALL_PREFIX CMAKE_OSX_ARCHITECTURES CMAKE_OSX_DEPLOYMENT_TARGET
+    CMAKE_OSX_SYSROOT CMAKE_RELEASE_POSTFIX)
 
 # Set build output directories
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OPENSPACE_CMAKE_EXT_DIR})
@@ -100,97 +104,50 @@ include(src/CMakeLists.txt)
 ##########################################################################################
 # System libraries
 if (APPLE)
-    target_include_directories(libOpenSpace PUBLIC "/Developer/Headers/FlatCarbon")
+    begin_dependency("Core Libraries")
+    target_include_directories(openspace-core PUBLIC "/Developer/Headers/FlatCarbon")
     find_library(COREFOUNDATION_LIBRARY CoreFoundation)
     find_library(CARBON_LIBRARY Carbon)
     find_library(COCOA_LIBRARY Carbon)
     find_library(APP_SERVICES_LIBRARY ApplicationServices)
     mark_as_advanced(CARBON_LIBRARY COCOA_LIBRARY APP_SERVICES_LIBRARY)
-    target_link_libraries(libOpenSpace
-        ${CARBON_LIBRARY}
-        ${COREFOUNDATION_LIBRARY}
-        ${COCOA_LIBRARY}
-        ${APP_SERVICES_LIBRARY}
-    )
+    target_link_libraries(openspace-core ${CARBON_LIBRARY} ${COREFOUNDATION_LIBRARY}
+        ${COCOA_LIBRARY} ${APP_SERVICES_LIBRARY})
+    end_dependency()
 endif()
 
 # Ghoul
 add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul)
-target_link_libraries(libOpenSpace Ghoul)
-set_property(TARGET Lua PROPERTY FOLDER "External")
-set_property(TARGET lz4 PROPERTY FOLDER "External")
+target_link_libraries(openspace-core Ghoul)
+set_folder_location(Lua "External")
+set_folder_location(lz4 "External")
+set_folder_location(GhoulTest "Unit Tests")
 link_directories("${GHOUL_LIBRARY_DIRS}")
 
-# SGCT
-set(SGCT_TEXT OFF CACHE BOOL "" FORCE)
-set(SGCT_BUILD_CSHARP_PROJECTS OFF CACHE BOOL "" FORCE)
-set(SGCT_LIGHT_ONLY ON CACHE BOOL "" FORCE)
-set(SGCT_CUSTOMOUTPUTDIRS OFF CACHE BOOL "" FORCE)
-set(JPEG_TURBO_WITH_SIMD OFF CACHE BOOL "" FORCE)
-
-add_subdirectory(${OPENSPACE_EXT_DIR}/sgct)
-target_include_directories(libOpenSpace SYSTEM PUBLIC ${OPENSPACE_EXT_DIR}/sgct/include)
-target_link_libraries(
-    libOpenSpace
-    sgct_light glew glfw png16_static quat tinyxml2static turbojpeg-static
-    vrpn
-    ${GLFW_LIBRARIES}
-)
-
-if (TARGET sgct_light)
-    set_property(TARGET sgct_light PROPERTY FOLDER "External")
-endif ()
-if (TARGET glew)
-    set_property(TARGET glew PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET glfw)
-    set_property(TARGET glfw PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET png16_static)
-    set_property(TARGET png16_static PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET quat)
-    set_property(TARGET quat PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET simd)
-    set_property(TARGET simd PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET tinyxml2static)
-    set_property(TARGET tinyxml2static PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET turbojpeg-static)
-    set_property(TARGET turbojpeg-static PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET vrpn)
-    set_property(TARGET vrpn PROPERTY FOLDER "External/SGCT")
-endif ()
-if (TARGET zlibstatic)
-    set_property(TARGET zlibstatic PROPERTY FOLDER "External/SGCT")
-endif ()
-
-if (UNIX AND (NOT APPLE))
-    target_link_libraries(libOpenSpace Xcursor Xinerama X11)
-endif ()
-
 # Spice
+begin_dependency("Spice")
 add_subdirectory(${OPENSPACE_EXT_DIR}/spice)
-target_link_libraries(libOpenSpace Spice)
-set_property(TARGET Spice PROPERTY FOLDER "External")
+target_link_libraries(openspace-core Spice)
+set_folder_location(Spice "External")
+end_dependency()
 
 # Curl
+begin_dependency("CURL")
 if (WIN32)
     set(CURL_ROOT_DIR "${OPENSPACE_EXT_DIR}/curl")
-    target_include_directories(libOpenSpace SYSTEM PUBLIC ${CURL_ROOT_DIR}/include)
-    target_link_libraries(libOpenSpace ${CURL_ROOT_DIR}/lib/libcurl_imp.lib)
-    target_compile_definitions(libOpenSpace PUBLIC "OPENSPACE_CURL_ENABLED" "CURL_STATICLIB")
+    target_include_directories(openspace-core SYSTEM PUBLIC ${CURL_ROOT_DIR}/include)
+    target_link_libraries(openspace-core ${CURL_ROOT_DIR}/lib/libcurl.lib)
+    target_compile_definitions(openspace-core PUBLIC
+        "OPENSPACE_CURL_ENABLED" "CURL_STATICLIB")
 else ()
     find_package(CURL)
     if (CURL_FOUND)
-        target_include_directories(libOpenSpace SYSTEM PUBLIC ${CURL_INCLUDE_DIRS})
-        target_link_libraries(libOpenSpace ${CURL_LIBRARIES})
-        target_compile_definitions(libOpenSpace PUBLIC "OPENSPACE_CURL_ENABLED")
+        target_include_directories(openspace-core SYSTEM PUBLIC ${CURL_INCLUDE_DIRS})
+        target_link_libraries(openspace-core ${CURL_LIBRARIES})
+        target_compile_definitions(openspace-core PUBLIC "OPENSPACE_CURL_ENABLED")
     endif ()
 endif()
+end_dependency()
 
 # Qt
 # Unfortunately, we have to set this value manually; sigh
@@ -200,16 +157,17 @@ if (APPLE)
         "~/Qt/5.6/clang_64/lib/cmake"
         "~/Qt/5.7/clang_64/lib/cmake"
         "~/Qt/5.8/clang_64/lib/cmake"
-        PARENT_SCOPE
     )
 endif ()
 
 if (MSVC)
     option(OPENSPACE_ENABLE_VLD "Enable the Visual Leak Detector" OFF)
     if (OPENSPACE_ENABLE_VLD)
-        target_compile_definitions(libOpenSpace PUBLIC "OPENSPACE_ENABLE_VLD")
-        target_link_libraries(libOpenSpace ${OPENSPACE_EXT_DIR}/vld/lib/vld.lib)
-        target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_EXT_DIR}/vld)
+        begin_dependency("Visual Leak Detector")
+        target_compile_definitions(openspace-core PUBLIC "OPENSPACE_ENABLE_VLD")
+        target_link_libraries(openspace-core ${OPENSPACE_EXT_DIR}/vld/lib/vld.lib)
+        target_include_directories(openspace-core PUBLIC ${OPENSPACE_EXT_DIR}/vld)
+        end_dependency()
     endif ()
 endif ()
 
@@ -219,30 +177,22 @@ endif ()
 ##########################################################################################
 option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
 if (OPENSPACE_HAVE_TESTS)
-    if (NOT TARGET gtest)
-        set(BUILD_GTEST ON CACHE BOOL "")
-        set(BUILD_GMOCK OFF CACHE BOOL "")
-        set(gtest_force_shared_crt ON CACHE BOOL "")
-        add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul/ext/googletest)
-        set_property(TARGET gtest PROPERTY FOLDER "External")
-        set_property(TARGET gtest_main PROPERTY FOLDER "External")
-    endif ()
+    include_gtest("${GHOUL_BASE_DIR}/ext/googletest")
 
     file(GLOB_RECURSE OPENSPACE_TEST_FILES ${OPENSPACE_BASE_DIR}/tests/*.inl)
-
     add_executable(OpenSpaceTest ${OPENSPACE_BASE_DIR}/tests/main.cpp ${OPENSPACE_TEST_FILES})
+
     target_include_directories(OpenSpaceTest PUBLIC
         "${OPENSPACE_BASE_DIR}/include"
         "${OPENSPACE_BASE_DIR}/tests"
         "${OPENSPACE_EXT_DIR}/ghoul/ext/googletest/googletest/include"
     )
     target_compile_definitions(OpenSpaceTest PUBLIC
-        "GHL_THROW_ON_ASSERT"
-        "GTEST_HAS_TR1_TUPLE=0"
+        "GHL_THROW_ON_ASSERT" "GTEST_HAS_TR1_TUPLE=0"
     )
-    target_link_libraries(OpenSpaceTest gtest libOpenSpace)
+    target_link_libraries(OpenSpaceTest gtest openspace-core)
 
-    set_property(TARGET OpenSpaceTest PROPERTY FOLDER "Unit Tests")
+    set_folder_location(OpenSpaceTest "Unit Tests")
 
     if (MSVC)
         set_target_properties(OpenSpaceTest PROPERTIES LINK_FLAGS
@@ -251,37 +201,60 @@ if (OPENSPACE_HAVE_TESTS)
     endif ()
     set_openspace_compile_settings(OpenSpaceTest)
 endif (OPENSPACE_HAVE_TESTS)
-if (TARGET GhoulTest)
-    if (NOT TARGET gtest)
-        set(BUILD_GTEST ON CACHE BOOL "")
-        set(BUILD_GMOCK OFF CACHE BOOL "")
-        set(gtest_force_shared_crt ON CACHE BOOL "")
-        add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul/ext/googletest)
-    endif ()
 
-    set_property(TARGET gtest PROPERTY FOLDER "External")
-    set_property(TARGET GhoulTest PROPERTY FOLDER "Unit Tests")
-endif ()
 
+begin_header("Configuring Modules")
 set(OPENSPACE_EXTERNAL_MODULES_PATHS "" CACHE STRING "List of external modules")
 handle_modules("${OPENSPACE_BASE_DIR}/modules" "${OPENSPACE_EXTERNAL_MODULES_PATHS}")
+end_header("End: Configuring Modules")
+message(STATUS "")
 
+begin_header("Configuring Applications")
 handle_applications()
+end_header("End: Configuring Applications")
+message(STATUS "")
+
+
+# Web Browser and Web gui
+# Why not put these in the module's path? Because they do not have access to the
+# target as of July 2017, which is needed.
+if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
+    # wanted by CEF
+    set(CMAKE_BUILD_TYPE Debug CACHE INTERNAL "CMAKE_BUILD_TYPE")
+
+    if (WIN32)
+        set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/OpenSpace/openspace.rc)
+    endif ()
+
+    # Add the CEF binary distribution's cmake/ directory to the module path and
+    # find CEF to initialize it properly.
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
+    include(webbrowser_helpers)
+
+    if (TARGET OpenSpaceTest)
+        set_cef_targets("${CEF_ROOT}" OpenSpaceTest)
+        run_cef_platform_config("${CEF_ROOT}" "${CEF_TARGET}" "${WEBBROWSER_MODULE_PATH}")
+    endif ()
+elseif (OPENSPACE_MODULE_WEBBROWSER)
+    message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
+endif ()
 
 ##########################################################################################
 # Misc settings                                                                          #
 ##########################################################################################
 option(OPENSPACE_WITH_ABUFFER_RENDERER "Compile ABuffer Renderer" OFF)
 if (OPENSPACE_WITH_ABUFFER_RENDERER)
-    target_compile_definitions(libOpenSpace PUBLIC "OPENSPACE_WITH_ABUFFER_RENDERER")
+    target_compile_definitions(openspace-core PUBLIC "OPENSPACE_WITH_ABUFFER_RENDERER")
 endif ()
 
 
 # Just in case, create the bin directory
 add_custom_command(
-    TARGET libOpenSpace
+    TARGET openspace-core
     PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 )
 
 # Manage the CPack packaging
 include(${OPENSPACE_CMAKE_EXT_DIR}/packaging.cmake)
+
+end_header("End: Configuring OpenSpace project")

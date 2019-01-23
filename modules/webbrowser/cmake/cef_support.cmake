@@ -24,7 +24,6 @@
 
 # This file consists of snippets taken from various CEF projects.
 
-
 # Copyright (c) 2016 The Chromium Embedded Framework Authors. All rights
 # reserved. Use of this source code is governed by a BSD-style license that
 # can be found in the LICENSE file.
@@ -56,7 +55,7 @@ endfunction()
 # Visit http://opensource.spotify.com/cefbuilds/index.html for the list of
 # supported platforms and versions.
 
-function(DownloadCEF platform version download_dir)
+function(download_cef platform version download_dir)
   # Specify the binary distribution type and download directory.
   set(CEF_DISTRIBUTION "cef_binary_${version}_${platform}")
   set(CEF_DOWNLOAD_DIR "${download_dir}")
@@ -94,7 +93,7 @@ function(DownloadCEF platform version download_dir)
   endif()
 endfunction()
 
-macro(SET_OPENSPACE_CEF_TARGET_OUT_DIR)
+macro(set_openspace_cef_target_out_dir)
   if(${CMAKE_GENERATOR} STREQUAL "Ninja" OR
      ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles")
     # By default Ninja and Make builds don't create a subdirectory named after
@@ -111,21 +110,21 @@ macro(SET_OPENSPACE_CEF_TARGET_OUT_DIR)
   endif()
 endmacro()
 
-macro(ADD_WINDOWS_CEF_MANIFEST target_dir manifest_path target extension)
-    add_custom_command(
-        TARGET ${target}
-        POST_BUILD
-        COMMAND "mt.exe" -nologo
-        -manifest \"${manifest_path}/${target}.${extension}.manifest\" \"${manifest_path}/compatibility.manifest\"
-        -outputresource:"${target_dir}/${target}.${extension}"\;\#1
-        COMMENT "Adding manifest..."
-    )
+macro(add_windows_cef_manifest target_dir manifest_path target extension)
+  add_custom_command(
+      TARGET ${target}
+      POST_BUILD
+      COMMAND "mt.exe" -nologo
+      -manifest \"${manifest_path}/${target}.${extension}.manifest\" \"${manifest_path}/compatibility.manifest\"
+      -outputresource:"${target_dir}/${target}.${extension}"\;\#1
+      COMMENT "Adding manifest..."
+  )
 endmacro()
 
 
 # Add a logical target that can be used to link the specified libraries into an
 # executable target.
-macro(ADD_CEF_LOGICAL_TARGET target debug_lib release_lib)
+macro(add_cef_logical_target target debug_lib release_lib)
   add_library(${target} ${CEF_LIBTYPE} IMPORTED GLOBAL)
   set_target_properties(${target} PROPERTIES
     IMPORTED_LOCATION "${release_lib}"

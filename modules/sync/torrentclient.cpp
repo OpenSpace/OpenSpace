@@ -46,12 +46,13 @@
 #pragma warning (pop)
 #endif // _MSC_VER
 
-#endif // SYNC_USE_LIBTORRENT
 
 namespace {
     constexpr const char* _loggerCat = "TorrentClient";
     constexpr const std::chrono::milliseconds PollInterval(1000);
 } // namespace
+
+#endif // SYNC_USE_LIBTORRENT
 
 namespace openspace {
 

@@ -57,9 +57,6 @@ namespace {
     constexpr const char* KeyKeyboardShortcuts = "KeyboardShortcuts";
     constexpr const char* KeyDocumentation = "Documentation";
     constexpr const char* KeyFactoryDocumentation = "FactoryDocumentation";
-    constexpr const char* KeyRequireSocketAuthentication = "RequireSocketAuthentication";
-    constexpr const char* KeyServerPasskey = "ServerPasskey";
-    constexpr const char* KeyClientAddressWhitelist = "ClientAddressWhitelist";
     constexpr const char* KeyLicenseDocumentation = "LicenseDocumentation";
     constexpr const char* KeyShutdownCountdown = "ShutdownCountdown";
     constexpr const char* KeyPerSceneCache = "PerSceneCache";
@@ -294,11 +291,6 @@ void parseLuaState(Configuration& configuration) {
     getValue(s, KeyDisableSceneOnMaster, c.isSceneTranslationOnMasterDisabled);
     getValue(s, KeyDisableInGameConsole, c.isConsoleDisabled);
     getValue(s, KeyRenderingMethod, c.renderingMethod);
-    getValue(s, KeyServerPasskey, c.serverPasskey);
-    getValue(s, KeyRequireSocketAuthentication, c.doesRequireSocketAuthentication);
-    getValue(s, KeyClientAddressWhitelist, c.clientAddressWhitelist);
-    getValue(s, "WebHelperLocation", c.webHelperLocation);
-    getValue(s, "CefWebGuiUrl", c.cefWebGuiUrl);
 
     getValue(s, KeyLogging, c.logging);
     getValue(s, KeyDocumentation, c.documentation);
@@ -311,7 +303,7 @@ void parseLuaState(Configuration& configuration) {
 std::string findConfiguration(const std::string& filename) {
     using ghoul::filesystem::Directory;
 
-    Directory directory = FileSys.currentDirectory();
+    Directory directory = FileSys.absolutePath("${BIN}");
 
     while (true) {
         std::string fullPath = FileSys.pathByAppendingComponent(

@@ -21,6 +21,8 @@ asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
 asset.require('util/default_joystick')
 
+asset.require('util/webgui')
+
 local VoyagerAsset = asset.require('scene/solarsystem/missions/voyager/voyager1')
 
 assetHelper.registerDashboardItems(asset, {
@@ -61,7 +63,7 @@ asset.onInitialize(function ()
     openspace.addVirtualProperty(
         "BoolProperty",
         "Show Trails",
-        "*Trail.renderable.Enabled",
+        "*Trail.Renderable.Enabled",
         "Disable or enable all trails of the scene at the same time",
         true,
         nil,
@@ -76,7 +78,7 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-    openspace.removeVirtualProperty("*Trail.renderable.Enabled")
+    openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
     openspace.removeInterestingNodes({
         "Earth", "Voyager 1", "Voyager 2", "Jupiter", "Saturn", "Uranus", "Neptune"
     })

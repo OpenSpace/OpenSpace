@@ -21,12 +21,12 @@ local Hyperion = {
             Target = "HYPERION",
             Observer = "SATURN BARYCENTER",
             Kernels = kernel
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_HYPERION",
-            DestinationFrame = "GALACTIC"
         }
+        --[[
+         The IAU report does not give an orientation model for Hyperion.
+         Hyperion's rotation is in chaotic and is not predictable for
+         long periods.
+        ]]--
     },
     Renderable = {
         Type = "RenderableGlobe",

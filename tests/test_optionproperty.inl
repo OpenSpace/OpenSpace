@@ -68,9 +68,7 @@ TEST_F(OptionPropertyTest, SingleOptionSinglePositive) {
 TEST_F(OptionPropertyTest, SingleOptionMultipleZero) {
     openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
-    p.addOptions({
-        { 0, "a" }
-    });
+    p.addOptions({ "a" });
     p = 0;
 
     ASSERT_EQ(0, p.option().value);

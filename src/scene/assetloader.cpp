@@ -53,6 +53,7 @@ namespace {
     constexpr const char* OnDeinitializeFunctionName = "onDeinitialize";
 
     constexpr const char* DirectoryConstantName = "directory";
+    constexpr const char* FilePathConstantName = "filePath";
 
     constexpr const char* ExportsTableName = "_exports";
     constexpr const char* AssetTableName = "_asset";
@@ -217,6 +218,11 @@ void AssetLoader::setUpAssetLuaTable(Asset* asset) {
     // string directory
     lua_pushstring(*_luaState, asset->assetDirectory().c_str());
     lua_setfield(*_luaState, assetTableIndex, DirectoryConstantName);
+
+    // Register filePath constant
+    // string filePath
+    lua_pushstring(*_luaState, asset->assetFilePath().c_str());
+    lua_setfield(*_luaState, assetTableIndex, FilePathConstantName);
 
     // Attach Asset table to AssetInfo table
     lua_setfield(*_luaState, assetInfoTableIndex, AssetTableName);

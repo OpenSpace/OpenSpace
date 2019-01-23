@@ -150,6 +150,10 @@ LoadingScreen::~LoadingScreen() {
 }
 
 void LoadingScreen::render() {
+    if (_phase != Phase::PreStart) {
+        return;
+    }
+
     // We have to recalculate the positions here because we will not be informed about a
     // window size change
 
@@ -222,6 +226,8 @@ void LoadingScreen::render() {
 
         glm::vec4 color;
         switch (_phase) {
+            case Phase::PreStart:
+                break;
             case Phase::Construction:
                 color = PhaseColorConstruction;
                 break;
@@ -240,11 +246,6 @@ void LoadingScreen::render() {
             color,
             rendering::helper::Anchor::NW
         );
-
-        LINFOC("P", ghoul::to_string(p));
-        LINFOC("P2", ghoul::to_string(p - progressbarSize / 2.f));
-        LINFOC("S", ghoul::to_string(progressbarSize));
-        LINFOC("S2", ghoul::to_string(progressbarSize * glm::vec2(progress, 1.f)));
     }
 
     //

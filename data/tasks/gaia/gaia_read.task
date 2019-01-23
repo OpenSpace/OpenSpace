@@ -1,0 +1,16 @@
+local dataFolder = "E:/gaia_sync_data"
+return {
+    {
+        Type = "ReadFitsTask",
+        InFileOrFolderPath = "L:/Gaia_DR2/gaia_source/fits/",
+        OutFileOrFolderPath = dataFolder .. "/Gaia_DR2_full_24columns/",
+        SingleFileProcess = false,
+        ThreadsToUse = 8,
+    },
+
+    --{
+    --    Type = "ReadSpeckTask",
+    --    InFilePath = dataFolder .. "/AMNH/GaiaUMS/GaiaUMS.speck",
+    --    OutFilePath = dataFolder .. "/AMNH/Binary/GaiaUMS.bin",
+    --},
+}

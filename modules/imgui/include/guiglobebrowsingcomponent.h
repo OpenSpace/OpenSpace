@@ -25,8 +25,6 @@
 #ifndef __OPENSPACE_MODULE_IMGUI___GUIGLOBEBROWSINGCOMPONENT___H__
 #define __OPENSPACE_MODULE_IMGUI___GUIGLOBEBROWSINGCOMPONENT___H__
 
-#ifdef GLOBEBROWSING_USE_GDAL
-
 #include <modules/imgui/include/guipropertycomponent.h>
 
 #include <string>
@@ -44,7 +42,5 @@ private:
 };
 
 } // namespace openspace::gui
-
-#endif // GLOBEBROWSING_USE_GDAL
 
 #endif // __OPENSPACE_MODULE_IMGUI___GUIGLOBEBROWSINGCOMPONENT___H__

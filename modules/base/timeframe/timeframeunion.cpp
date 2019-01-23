@@ -73,8 +73,6 @@ bool TimeFrameUnion::isActive(const Time& time) const {
     return false;
 }
 
-TimeFrameUnion::TimeFrameUnion() {}
-
 TimeFrameUnion::TimeFrameUnion(const ghoul::Dictionary& dictionary)
     : TimeFrame()
 {

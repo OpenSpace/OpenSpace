@@ -31,9 +31,18 @@
 #include <ghoul/misc/boolean.h>
 #include <glm/gtx/quaternion.hpp>
 
-namespace openspace { class Camera; }
+namespace openspace {
+    class Camera;
+    class TimeManager;
+} // namespace openspace
 
 namespace openspace::interaction {
+
+enum class KeyframeTimeRef {
+    Relative_applicationStart,
+    Relative_recordedStart,
+    Absolute_simTimeJ2000
+};
 
 class KeyframeNavigator {
 public:
@@ -47,16 +56,31 @@ public:
         bool followFocusNodeRotation;
     };
 
-    void updateCamera(Camera& camera);
-    Timeline<CameraPose>& timeline();
+    /**
+    * Update camera position using the next camera pose keyframe from the timeline.
+    * Returns true if camera was set to a pose from the next keyframe.
+    * Returns false if no keyframes are available after the current time.
+    * \param camera A reference to the camera object to have its pose updated.
+    * \param ignoreFutureKeyframes true if only past keyframes are to be used.
+    * \returns true only if a new future keyframe is available to set camera pose.
+    */
+    bool updateCamera(Camera& camera, bool ignoreFutureKeyframes);
+    static bool updateCamera(Camera* camera, const CameraPose prevPose,
+        const CameraPose nextPose, double t, bool ignoreFutureKeyframes);
 
+    Timeline<CameraPose>& timeline();
     void addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose);
     void removeKeyframesAfter(double timestamp, Inclusive inclusive = Inclusive::No);
     void clearKeyframes();
     size_t nKeyframes() const;
+    const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
+    double currentTime() const;
+    void setTimeReferenceMode(KeyframeTimeRef refType, double referenceTimestamp);
 
 private:
     Timeline<CameraPose> _cameraPoseTimeline;
+    KeyframeTimeRef _timeframeMode = KeyframeTimeRef::Relative_applicationStart;
+    double _referenceTimestamp = 0.0;
 };
 
 } // namespace openspace::interaction

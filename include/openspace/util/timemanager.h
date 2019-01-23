@@ -86,6 +86,7 @@ public:
     float defaultUnpauseInterpolationDuration() const;
 
     void interpolateTime(double targetTime, double durationSeconds);
+    void interpolateTimeRelative(double delta, double durationSeconds);
     void interpolateDeltaTime(double targetDeltaTime, double durationSeconds);
     void interpolatePause(bool pause, double durationSeconds);
 
@@ -103,6 +104,7 @@ public:
 
     void removeTimeChangeCallback(CallbackHandle handle);
     void removeDeltaTimeChangeCallback(CallbackHandle handle);
+    void triggerPlaybackStart();
     void removeTimeJumpCallback(CallbackHandle handle);
     void removeTimelineChangeCallback(CallbackHandle handle);
 
@@ -120,6 +122,7 @@ private:
     double _targetDeltaTime = 1.0;
     double _deltaTime = 0.0;
     double _lastTime = 0;
+    bool _lastTimePaused = false;
     double _lastDeltaTime = 0;
 
     properties::FloatProperty _defaultTimeInterpolationDuration;
@@ -134,9 +137,11 @@ private:
 
     double _latestConsumedTimestamp = -std::numeric_limits<double>::max();
     int _nextCallbackHandle = 0;
+    bool _playbackModeEnabled = false;
 
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeChangeCallbacks;
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _deltaTimeChangeCallbacks;
+
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeJumpCallbacks;
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timelineChangeCallbacks;
 };

@@ -114,8 +114,7 @@ TimeFrameInterval::TimeFrameInterval()
 }
 
 TimeFrameInterval::TimeFrameInterval(const ghoul::Dictionary& dictionary)
-    : TimeFrame()
-    , _hasStart(HasStartInfo, false)
+    : _hasStart(HasStartInfo, false)
     , _start(StartInfo, 0, 0, 1E9)
     , _hasEnd(HasEndInfo, false)
     , _end(EndInfo, 0, 0, 1E9)

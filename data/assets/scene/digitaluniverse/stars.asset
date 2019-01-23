@@ -20,10 +20,10 @@ local colorLUT = asset.syncedResource({
     Name = "Stars Color Table",
     Type = "HttpSynchronization",
     Identifier = "stars_colormap",
-    Version = 1
+    Version = 2
 })
 
-local object = {
+local stars = {
     Identifier = "Stars",
     Renderable = {
         Type = "RenderableStars",
@@ -36,6 +36,4 @@ local object = {
     }
 }
 
-
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+assetHelper.registerSceneGraphNodesAndExport(asset, { stars })

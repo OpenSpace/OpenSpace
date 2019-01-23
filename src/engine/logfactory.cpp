@@ -183,7 +183,7 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
                 LogLevelStamping(logLevelStamp),
                 cssFiles,
                 jsFiles,
-                ghoul::logging::levelFromString(logLevel)
+                ghoul::from_string<ghoul::logging::LogLevel>(logLevel)
             );
         }
     }
@@ -206,7 +206,7 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
                 DateStamping(dateStamp),
                 CategoryStamping(categoryStamp),
                 LogLevelStamping(logLevelStamp),
-                ghoul::logging::levelFromString(logLevel)
+                ghoul::from_string<ghoul::logging::LogLevel>(logLevel)
             );
         }
     }

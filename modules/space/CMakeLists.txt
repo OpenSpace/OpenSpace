@@ -34,6 +34,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/keplertranslation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/spicetranslation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/tletranslation.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/translation/horizonstranslation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/spicerotation.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -48,6 +49,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/keplertranslation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/spicetranslation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/tletranslation.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/translation/horizonstranslation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/spicerotation.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

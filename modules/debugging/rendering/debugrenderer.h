@@ -28,7 +28,7 @@
 #include <openspace/util/updatestructures.h>
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-#include <modules/globebrowsing/geometry/aabb.h>
+#include <modules/globebrowsing/src/basictypes.h>
 #endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 
 #include <ghoul/glm.h>
@@ -61,7 +61,7 @@ public:
      *  Instantiate a new DebugRenderer with a custom shader program
      */
     DebugRenderer(std::unique_ptr<ghoul::opengl::ProgramObject> programObject);
-    ~DebugRenderer();
+    ~DebugRenderer() = default;
 
     /**
      *  Access the static reference
@@ -131,15 +131,6 @@ public:
      */
     void renderCameraFrustum(const RenderData& data, const Camera& otherCamera,
         const glm::vec4& rgba = { 1.f, 1.f, 1.f, 0.3f }) const;
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-    /**
-     *  Renders a screen space AABB2 to the screen with the provided color
-     */
-    void renderAABB2(const globebrowsing::AABB2& screenSpaceAABB,
-        const glm::vec4& rgba = { 1.f, 1.f, 1.f, 0.3f }) const;
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
     /**

@@ -466,7 +466,7 @@ bool RenderablePlanetProjection::isReady() const {
 }
 
 void RenderablePlanetProjection::imageProjectGPU(
-                                std::shared_ptr<ghoul::opengl::Texture> projectionTexture)
+                                          const ghoul::opengl::Texture& projectionTexture)
 {
     _projectionComponent.imageProjectBegin();
 
@@ -474,7 +474,7 @@ void RenderablePlanetProjection::imageProjectGPU(
 
     ghoul::opengl::TextureUnit unitFbo;
     unitFbo.activate();
-    projectionTexture->bind();
+    projectionTexture.bind();
     _fboProgramObject->setUniform(_fboUniformCache.projectionTexture, unitFbo);
 
     _fboProgramObject->setUniform(_fboUniformCache.projectorMatrix, _projectorMatrix);
@@ -596,7 +596,9 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
                 break;
             }
             RenderablePlanetProjection::attitudeParameters(img.timeRange.start);
-            imageProjectGPU(_projectionComponent.loadProjectionTexture(img.path));
+            std::shared_ptr<ghoul::opengl::Texture> t =
+                _projectionComponent.loadProjectionTexture(img.path);
+            imageProjectGPU(*t);
             ++nPerformedProjections;
         }
         _imageTimes.erase(

@@ -25,9 +25,10 @@
 #include <modules/webbrowser/include/cefhost.h>
 
 #include <modules/webbrowser/include/webbrowserapp.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <ghoul/logging/logmanager.h>
 #include <fmt/format.h>
+#include <include/wrapper/cef_helpers.h>
 
 namespace {
     constexpr const char* _loggerCat = "CefHost";
@@ -35,7 +36,7 @@ namespace {
 
 namespace openspace {
 
-CefHost::CefHost(std::string helperLocation) {
+CefHost::CefHost(const std::string& helperLocation) {
     LDEBUG("Initializing CEF...");
 
     CefSettings settings;
@@ -49,8 +50,7 @@ CefHost::CefHost(std::string helperLocation) {
     CefRefPtr<WebBrowserApp> app(new WebBrowserApp);
 
     CefMainArgs args;
-    CefInitialize(args, settings, app.get(), NULL);
-    initializeCallbacks();
+    CefInitialize(args, settings, app.get(), nullptr);
     LDEBUG("Initializing CEF... done!");
 }
 
@@ -60,18 +60,19 @@ CefHost::~CefHost() {
 
 void CefHost::attachDebugSettings(CefSettings &settings) {
     settings.remote_debugging_port = 8088;
+
     LDEBUG(fmt::format(
         "Remote WebBrowser debugging available on http://localhost:{}",
         settings.remote_debugging_port
     ));
-//    settings.single_process = true;
+
+#ifdef __APPLE__
+    settings.single_process = true;
+#endif
 }
 
-void CefHost::initializeCallbacks() {
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::Render,
-        [this](){ CefDoMessageLoopWork(); }
-    );
+void CefHost::doMessageLoopWork() {
+    CefDoMessageLoopWork();
 }
 
 } // namespace openspace

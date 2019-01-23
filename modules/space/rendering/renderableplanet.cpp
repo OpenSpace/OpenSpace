@@ -51,9 +51,9 @@ namespace {
     constexpr const char* KeyRadius       = "Radius";
     constexpr const char* _loggerCat      = "RenderablePlanet";
 
-    constexpr const char* keyShadowGroup  = "Shadow_Group";
-    constexpr const char* keyShadowSource = "Source";
-    constexpr const char* keyShadowCaster = "Caster";
+    constexpr const char* KeyShadowGroup  = "Shadow_Group";
+    constexpr const char* KeyShadowSource = "Source";
+    constexpr const char* KeyShadowCaster = "Caster";
 
     constexpr openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorTexture",
@@ -261,7 +261,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     //======== Reads Shadow (Eclipses) Entries in mod file ===========
     //================================================================
     ghoul::Dictionary shadowDictionary;
-    bool success = dictionary.getValue(keyShadowGroup, shadowDictionary);
+    bool success = dictionary.getValue(KeyShadowGroup, shadowDictionary);
     bool disableShadows = false;
     if (success) {
         std::vector<std::pair<std::string, float>> sourceArray;
@@ -269,13 +269,13 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
         while (success) {
             std::string sourceName;
             success = shadowDictionary.getValue(
-                keyShadowSource + std::to_string(sourceCounter) + ".Name",
+                KeyShadowSource + std::to_string(sourceCounter) + ".Name",
                 sourceName
             );
             if (success) {
                 float sourceRadius;
                 success = shadowDictionary.getValue(
-                    keyShadowSource + std::to_string(sourceCounter) + ".Radius",
+                    KeyShadowSource + std::to_string(sourceCounter) + ".Radius",
                     sourceRadius
                 );
                 if (success) {
@@ -301,13 +301,13 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
             while (success) {
                 std::string casterName;
                 success = shadowDictionary.getValue(
-                    keyShadowCaster + std::to_string(casterCounter) + ".Name",
+                    KeyShadowCaster + std::to_string(casterCounter) + ".Name",
                     casterName
                 );
                 if (success) {
                     float casterRadius;
                     success = shadowDictionary.getValue(
-                        keyShadowCaster + std::to_string(casterCounter) + ".Radius",
+                        KeyShadowCaster + std::to_string(casterCounter) + ".Radius",
                         casterRadius
                     );
                     if (success) {

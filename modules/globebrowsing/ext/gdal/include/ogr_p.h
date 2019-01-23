@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_p.h 37564 2017-03-03 09:09:26Z rouault $
+ * $Id: ogr_p.h 205ab0157961d02098fa1955ed353d617b0a73bc 2017-05-15 10:29:33Z Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Some private helper functions and stuff for OGR implementation.
@@ -167,7 +167,7 @@ char CPL_DLL * OGRGeometryToHexEWKB( OGRGeometry * poGeometry, int nSRSId,
 /*                        WKB Type Handling encoding                    */
 /************************************************************************/
 
-OGRErr OGRReadWKBGeometryType( unsigned char * pabyData,
+OGRErr OGRReadWKBGeometryType( const unsigned char * pabyData,
                                OGRwkbVariant wkbVariant,
                                OGRwkbGeometryType *eGeometryType );
 

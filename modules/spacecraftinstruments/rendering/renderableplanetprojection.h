@@ -63,7 +63,7 @@ protected:
     void attitudeParameters(double time);
 
 private:
-    void imageProjectGPU(std::shared_ptr<ghoul::opengl::Texture> projectionTexture);
+    void imageProjectGPU(const ghoul::opengl::Texture& projectionTexture);
 
     void clearProjectionBufferAfterTime(double time);
     void insertImageProjections(const std::vector<Image>& images);

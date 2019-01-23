@@ -591,7 +591,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     _program->setUniform(_uniformCache.galaxyTexture, unit);
     int currentTextureIndex = -1;
 
-    for (const std::unordered_map<int, PlaneAggregate>::reference pAMapItem : _planesMap)
+    for (std::unordered_map<int, PlaneAggregate>::reference pAMapItem : _planesMap)
     {
         // For planes with undefined textures references
         if (pAMapItem.first == 30) {
@@ -873,7 +873,7 @@ bool RenderablePlanesCloud::readSpeckFile() {
     // The beginning of the speck file has a header that either contains comments
     // (signaled by a preceding '#') or information about the structure of the file
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    std::string line = "";
+    std::string line;
     while (true) {
         std::streampos position = file.tellg();
         std::getline(file, line);
@@ -950,7 +950,7 @@ bool RenderablePlanesCloud::readSpeckFile() {
         if (line.substr(0, 8) == "texture ") {
             std::stringstream str(line);
 
-            std::size_t found = line.find("-");
+            std::size_t found = line.find('-');
 
             int textureIndex = 0;
 
@@ -1055,7 +1055,7 @@ bool RenderablePlanesCloud::readLabelFile() {
     // The beginning of the speck file has a header that either contains comments
     // (signaled by a preceding '#') or information about the structure of the file
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    std::string line = "";
+    std::string line;
     while (true) {
         std::streampos position = file.tellg();
         std::getline(file, line);
@@ -1125,7 +1125,7 @@ bool RenderablePlanesCloud::readLabelFile() {
         glm::vec3 transformedPos = glm::vec3(
             _transformationMatrix * glm::dvec4(position, 1.0)
         );
-        _labelData.push_back(std::make_pair(transformedPos, label));
+        _labelData.emplace_back(std::make_pair(transformedPos, label));
 
     } while (!file.eof());
 

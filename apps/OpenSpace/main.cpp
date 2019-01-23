@@ -70,6 +70,7 @@ constexpr const char* SpoutTag = "Spout";
 constexpr const char* OpenVRTag = "OpenVR";
 
 sgct::Engine* SgctEngine;
+sgct::SharedVector<char> _synchronizationBuffer;
 
 #ifdef OPENVR_SUPPORT
 sgct::SGCTWindow* FirstOpenVRWindow = nullptr;
@@ -142,10 +143,10 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
         dumpFile.c_str(),
         GENERIC_READ | GENERIC_WRITE,
         FILE_SHARE_WRITE | FILE_SHARE_READ,
-        0,
+        nullptr,
         CREATE_ALWAYS,
         0,
-        0
+        nullptr
     );
 
     MINIDUMP_EXCEPTION_INFORMATION exceptionParameter;
@@ -309,11 +310,10 @@ void mainInitFunc() {
         std::tm* nowTime = std::localtime(&now);
         char mbstr[128];
         strftime(mbstr, sizeof(mbstr), "%Y-%m-%d-%H-%M", nowTime);
-        screenshotPath += "/" + std::string(mbstr);
 
         FileSys.registerPathToken(
             "${SCREENSHOTS}",
-            absPath(screenshotPath),
+            absPath(screenshotPath + '/' + std::string(mbstr)),
             ghoul::filesystem::FileSystem::Override::Yes
         );
     }
@@ -358,13 +358,13 @@ void mainPreSyncFunc() {
         if (!state.isConnected) {
             // Joystick was added
             state.isConnected = true;
-            state.name = SgctEngine->getJoystickName(i);
+            state.name = sgct::Engine::getJoystickName(i);
 
             std::fill(state.axes.begin(), state.axes.end(), 0.f);
             std::fill(state.buttons.begin(), state.buttons.end(), JoystickAction::Idle);
         }
 
-        const float* axes = SgctEngine->getJoystickAxes(i, &state.nAxes);
+        const float* axes = sgct::Engine::getJoystickAxes(i, &state.nAxes);
         if (state.nAxes > JoystickInputState::MaxAxes) {
             LWARNING(fmt::format(
                 "Joystick/Gamepad {} has {} axes, but only {} axes are supported. "
@@ -375,7 +375,10 @@ void mainPreSyncFunc() {
         }
         std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
 
-        const unsigned char* buttons = SgctEngine->getJoystickButtons(i, &state.nButtons);
+        const unsigned char* buttons = sgct::Engine::getJoystickButtons(
+            i,
+            &state.nButtons
+        );
 
         if (state.nButtons > JoystickInputState::MaxButtons) {
             LWARNING(fmt::format(
@@ -441,7 +444,7 @@ void mainRenderFunc() {
     LTRACE("main::mainRenderFunc(begin)");
 
     glm::mat4 viewMatrix = SgctEngine->getCurrentViewMatrix() *
-                glm::translate(glm::mat4(1.f), SgctEngine->getDefaultUserPtr()->getPos());
+        glm::translate(glm::mat4(1.f), sgct::Engine::getDefaultUserPtr()->getPos());
 
     glm::mat4 projectionMatrix = SgctEngine->getCurrentProjectionMatrix();
 #ifdef OPENVR_SUPPORT
@@ -581,7 +584,9 @@ void mainCharCallback(unsigned int codepoint, int mods) {
 
 void mainEncodeFun() {
     LTRACE("main::mainEncodeFun(begin)");
-    openspace::global::openSpaceEngine.encode();
+    std::vector<char> data = openspace::global::openSpaceEngine.encode();
+    _synchronizationBuffer.setVal(std::move(data));
+    sgct::SharedData::instance()->writeVector(&_synchronizationBuffer);
     LTRACE("main::mainEncodeFun(end)");
 }
 
@@ -589,7 +594,9 @@ void mainEncodeFun() {
 
 void mainDecodeFun() {
     LTRACE("main::mainDecodeFun(begin)");
-    openspace::global::openSpaceEngine.decode();
+    sgct::SharedData::instance()->readVector(&_synchronizationBuffer);
+    std::vector<char> data = _synchronizationBuffer.getVal();
+    openspace::global::openSpaceEngine.decode(std::move(data));
     LTRACE("main::mainDecodeFun(end)");
 }
 
@@ -636,14 +643,14 @@ void setSgctDelegateFunctions() {
     sgctDelegate.mousePosition = []() {
         int id = sgct::Engine::instance()->getCurrentWindowPtr()->getId();
         double posX, posY;
-        sgct::Engine::instance()->getMousePos(id, &posX, &posY);
+        sgct::Engine::getMousePos(id, &posX, &posY);
         return glm::vec2(posX, posY);
     };
     sgctDelegate.mouseButtons = [](int maxNumber) {
         int id = sgct::Engine::instance()->getCurrentWindowPtr()->getId();
         uint32_t result = 0;
         for (int i = 0; i < maxNumber; ++i) {
-            bool button = (sgct::Engine::instance()->getMouseButton(id, i) != 0);
+            bool button = (sgct::Engine::getMouseButton(id, i) != 0);
             if (button) {
                 result |= (1 << i);
             }
@@ -735,10 +742,10 @@ void setSgctDelegateFunctions() {
     };
     sgctDelegate.isMaster = []() { return sgct::Engine::instance()->isMaster(); };
     sgctDelegate.isUsingSwapGroups = []() {
-        return sgct::Engine::instance()->getCurrentWindowPtr()->isUsingSwapGroups();
+        return sgct::SGCTWindow::isUsingSwapGroups();
     };
     sgctDelegate.isSwapGroupMaster = []() {
-        return sgct::Engine::instance()->getCurrentWindowPtr()->isSwapGroupMaster();
+        return sgct::SGCTWindow::isSwapGroupMaster();
     };
     sgctDelegate.viewProjectionMatrix = []() {
         return sgct::Engine::instance()->getCurrentModelViewProjectionMatrix();
@@ -796,6 +803,9 @@ void setSgctDelegateFunctions() {
     sgctDelegate.currentWindowId = []() {
         return sgct::Engine::instance()->getCurrentWindowPtr()->getId();
     };
+    sgctDelegate.openGLProcedureAddress = [](const char* func) {
+        return glfwGetProcAddress(func);
+    };
 }
 
 int main(int argc, char** argv) {
@@ -821,6 +831,14 @@ int main(int argc, char** argv) {
     }
 
     ghoul::initialize();
+
+    // Register the path of the executable,
+    // to make it possible to find other files in the same directory.
+    FileSys.registerPathToken(
+        "${BIN}",
+        ghoul::filesystem::File(absPath(argv[0])).directoryName(),
+        ghoul::filesystem::FileSystem::Override::Yes
+    );
 
     //
     // Parse commandline arguments
@@ -849,13 +867,18 @@ int main(int argc, char** argv) {
         "evaluated before it is passed to OpenSpace."
     ));
 
-    std::vector<std::string> sgctArguments = parser.setCommandLine({ argv, argv + argc });
+    // setCommandLine returns a referece to the vector that will be filled later
+    const std::vector<std::string>& sgctArguments = parser.setCommandLine(
+        { argv, argv + argc }
+    );
 
     bool showHelp = parser.execute();
     if (showHelp) {
         parser.displayHelp(std::cout);
         exit(EXIT_SUCCESS);
     }
+    // Take an actual copy of the arguments
+    std::vector<std::string> arguments = sgctArguments;
 
     //
     // Set up SGCT functions for window delegate
@@ -927,9 +950,9 @@ int main(int argc, char** argv) {
 
     // Prepend the outgoing sgctArguments with the program name
     // as well as the configuration file that sgct is supposed to use
-    sgctArguments.insert(sgctArguments.begin(), argv[0]);
-    sgctArguments.insert(sgctArguments.begin() + 1, "-config");
-    sgctArguments.insert(sgctArguments.begin() + 2, absPath(windowConfiguration));
+    arguments.insert(arguments.begin(), argv[0]);
+    arguments.insert(arguments.begin() + 1, "-config");
+    arguments.insert(arguments.begin() + 2, absPath(windowConfiguration));
 
     // Need to set this before the creation of the sgct::Engine
     sgct::MessageHandler::instance()->setLogToConsole(false);
@@ -942,7 +965,7 @@ int main(int argc, char** argv) {
 #endif
 
     LDEBUG("Creating SGCT Engine");
-    SgctEngine = new sgct::Engine(sgctArguments);
+    SgctEngine = new sgct::Engine(arguments);
 
     // Bind functions
     SgctEngine->setInitOGLFunction(mainInitFunc);
@@ -984,6 +1007,32 @@ int main(int argc, char** argv) {
     std::pair<int, int> version = supportedOpenGLVersion();
     LINFO(fmt::format("Detected OpenGL version: {}.{}", version.first, version.second));
     bool initSuccess = SgctEngine->init(versionMapping[version]);
+
+#ifdef __APPLE__
+    // Workaround for OpenGL bug that Apple introduced in 10.14 Mojave that prevents an
+    // OpenGL context to display anything until it is first moved or resized in dark
+    // mode. So we are going through all windows here and resize them a bit larger and
+    // then back to the desired resolution. Resizing the window to the same size doesn't
+    // work as GLFW probably has a check for setting the current values.
+    // This can be removed once the OpenGL bug is fixed.
+    // In order to check, comment out the following lines and start OpenSpace on a 10.14
+    // machine. If the loading screen shows up without doing anything to the window, it
+    // is fixed. With the bug, the rendering stays gray even well after the main render
+    // loop has started     -- 2018-10-28   abock
+    size_t n = sgct::Engine::instance()->getNumberOfWindows();
+    for (size_t i = 0; i < n; ++i) {
+        GLFWwindow* w = sgct::Engine::instance()->getWindowPtr(i)->getWindowHandle();
+        int x, y;
+        glfwGetWindowPos(w, &x, &y);
+        glfwSetWindowPos(w, x + 1, y + 1);
+        glfwSwapBuffers(w);
+        glfwPollEvents();
+        glfwSetWindowPos(w, x, y);
+        glfwSwapBuffers(w);
+        glfwPollEvents();
+    }
+#endif // __APPLE__
+
 
     // Do not print message if slaves are waiting for the master
     // Only timeout after 15 minutes

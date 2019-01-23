@@ -186,6 +186,14 @@ scripting::LuaLibrary Time::luaLibrary() {
                 "assumed."
             },
             {
+                "interpolateTimeRelative",
+                &luascriptfunctions::time_interpolateTimeRelative,
+                {},
+                "number [, number]",
+                "Increments the current simulation time "
+                "by the specified number of seconds."
+            },
+            {
                 "interpolateDeltaTime",
                 &luascriptfunctions::time_interpolateDeltaTime,
                 {},

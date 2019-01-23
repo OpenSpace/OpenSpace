@@ -45,14 +45,14 @@ struct PerformanceLayout {
         float updateRotation[NumberValues];
         float updateScaling[NumberValues];
     };
-    SceneGraphPerformanceLayout sceneGraphEntries[MaxValues];
+    SceneGraphPerformanceLayout sceneGraphEntries[MaxValues] = {};
     int16_t nScaleGraphEntries = 0;
 
     struct FunctionPerformanceLayout {
         char name[LengthName];
         float time[NumberValues];
     };
-    FunctionPerformanceLayout functionEntries[MaxValues];
+    FunctionPerformanceLayout functionEntries[MaxValues] = {};
     int16_t nFunctionEntries = 0;
 };
 

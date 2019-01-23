@@ -289,6 +289,8 @@ constexpr double convertDistance(double meters, DistanceUnit requestedUnit) {
     }
 }
 
+float convertMasPerYearToMeterPerSecond(float masPerYear, float parallax);
+
 } // namespace openspace
 
 #endif // __OPENSPACE_CORE___DISTANCECONVERSION___H__

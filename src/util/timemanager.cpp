@@ -116,6 +116,18 @@ void TimeManager::interpolateTime(double targetTime, double durationSeconds) {
     addKeyframe(now + durationSeconds, next);
 }
 
+void TimeManager::interpolateTimeRelative(double delta, double durationSeconds) {
+    ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
+
+    const float duration = global::timeManager.defaultTimeInterpolationDuration();
+
+    const TimeKeyframeData predictedTime = interpolate(
+        global::windowDelegate.applicationTime() + duration
+    );
+    const double targetTime = predictedTime.time.j2000Seconds() + delta;
+    interpolateTime(targetTime, durationSeconds);
+}
+
 void TimeManager::preSynchronization(double dt) {
     removeKeyframesBefore(_latestConsumedTimestamp);
     progressTime(dt);
@@ -130,7 +142,7 @@ void TimeManager::preSynchronization(double dt) {
             it.second();
         }
     }
-    if (newDeltaTime != _lastDeltaTime) {
+    if (newDeltaTime != _lastDeltaTime || _timePaused != _lastTimePaused) {
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
         for (const std::pair<K, V>& it : _deltaTimeChangeCallbacks) {
@@ -147,6 +159,7 @@ void TimeManager::preSynchronization(double dt) {
 
     _lastTime = newTime;
     _lastDeltaTime = newDeltaTime;
+    _lastTimePaused = _timePaused;
     _timelineChanged = false;
 }
 
@@ -258,6 +271,7 @@ void TimeManager::progressTime(double dt) {
         // and time is not paused, just advance time.
         _deltaTime = _targetDeltaTime;
         _currentTime.data().advanceTime(dt * _deltaTime);
+        _playbackModeEnabled = false;
     }
 
     if (hasPastKeyframes) {
@@ -432,6 +446,10 @@ void TimeManager::removeDeltaTimeChangeCallback(CallbackHandle handle) {
     );
 
     _deltaTimeChangeCallbacks.erase(it);
+}
+
+void TimeManager::triggerPlaybackStart() {
+    _playbackModeEnabled = true;
 }
 
 void TimeManager::removeTimeJumpCallback(CallbackHandle handle) {

@@ -80,6 +80,12 @@ void OptionProperty::addOptions(std::vector<std::pair<int, std::string>> options
     }
 }
 
+void OptionProperty::addOptions(std::vector<std::string> options) {
+    for (int i = 0; i < static_cast<int>(options.size()); ++i) {
+        addOption(i, std::move(options[i]));
+    }
+}
+
 void OptionProperty::clearOptions() {
     _options.clear();
     _value = 0;
@@ -91,6 +97,9 @@ void OptionProperty::setValue(int value) {
         const Option& o = _options[i];
         if (o.value == value) {
             // If it does, set it by calling the superclasses setValue method
+            // @TODO(abock): This should be setValue(value) instead or otherwise the
+            //               stored indices and option values start to drift if the
+            //               operator T of the OptionProperty is used
             NumericalProperty::setValue(static_cast<int>(i));
             return;
         }
@@ -132,7 +141,15 @@ std::string OptionProperty::generateAdditionalJsonDescription() const {
         "{ \"" + OptionsKey + "\": [";
     for (size_t i = 0; i < _options.size(); ++i) {
         const Option& o = _options[i];
-        result += "{\"" + std::to_string(o.value) + "\": \"" + o.description + "\"}";
+        std::string v = std::to_string(o.value);
+        std::string vSan = sanitizeString(v);
+        std::string d = o.description;
+        std::string dSan = sanitizeString(d);
+
+        result += '{';
+        result += fmt::format(R"("{}": "{}")", vSan, dSan);
+        result += '}';
+
         if (i != _options.size() - 1) {
             result += ",";
         }

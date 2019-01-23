@@ -61,10 +61,10 @@ documentation::Documentation TorrentSynchronization::Documentation() {
 }
 
 TorrentSynchronization::TorrentSynchronization(const ghoul::Dictionary& dict,
-                                               const std::string& synchronizationRoot,
+                                               std::string synchronizationRoot,
                                                TorrentClient& torrentClient)
     : ResourceSynchronization(dict)
-    , _synchronizationRoot(synchronizationRoot)
+    , _synchronizationRoot(std::move(synchronizationRoot))
     , _torrentClient(torrentClient)
 {
     documentation::testSpecificationAndThrow(

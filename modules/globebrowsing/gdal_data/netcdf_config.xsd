@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
 /******************************************************************************
- * $Id$
+ * $Id: netcdf_config.xsd 9fbd2ad2846b1ddd4cbea2633bca01d179959e13 2016-02-18 22:40:34Z Even Rouault $
  *
  * Project:  netCDF driver
  * Purpose:  Schema of netCDF writer configuration files

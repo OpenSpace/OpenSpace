@@ -135,8 +135,6 @@ namespace openspace {
     pointsDictionary.getValue("Scaling", _pointScaling);
 }
 
-RenderableGalaxy::~RenderableGalaxy() {}
-
 void RenderableGalaxy::initializeGL() {
     // Aspect is currently hardcoded to cubic voxels.
     _aspect = static_cast<glm::vec3>(_volumeDimensions);
@@ -167,14 +165,14 @@ void RenderableGalaxy::initializeGL() {
     _raycaster = std::make_unique<GalaxyRaycaster>(*_texture);
     _raycaster->initialize();
 
-    global::raycasterManager.attachRaycaster(*_raycaster.get());
+    global::raycasterManager.attachRaycaster(*_raycaster);
 
     auto onChange = [&](bool enabled) {
         if (enabled) {
-            global::raycasterManager.attachRaycaster(*_raycaster.get());
+            global::raycasterManager.attachRaycaster(*_raycaster);
         }
         else {
-            global::raycasterManager.detachRaycaster(*_raycaster.get());
+            global::raycasterManager.detachRaycaster(*_raycaster);
         }
     };
 
@@ -217,8 +215,8 @@ void RenderableGalaxy::initializeGL() {
         maxdist = std::max(maxdist, glm::length(glm::vec3(x, y, z)));
         //float a = pointData[i * 7 + 6];  alpha is not used.
 
-        pointPositions.push_back(glm::vec3(x, y, z));
-        pointColors.push_back(glm::vec3(r, g, b));
+        pointPositions.emplace_back(x, y, z);
+        pointColors.emplace_back(r, g, b);
     }
 
     std::cout << maxdist << std::endl;
@@ -269,7 +267,7 @@ void RenderableGalaxy::initializeGL() {
 
 void RenderableGalaxy::deinitializeGL() {
     if (_raycaster) {
-        global::raycasterManager.detachRaycaster(*_raycaster.get());
+        global::raycasterManager.detachRaycaster(*_raycaster);
         _raycaster = nullptr;
     }
 }

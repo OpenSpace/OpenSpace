@@ -26,6 +26,7 @@
 
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
+#include <openspace/interaction/sessionrecording.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/syncbuffer.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -449,7 +450,18 @@ void ScriptEngine::addBaseLibrary() {
                 "This function extracts the directory part of the passed path. For "
                 "example, if the parameter is 'C:/OpenSpace/foobar/foo.txt', this "
                 "function returns 'C:/OpenSpace/foobar'."
-            }
+            },
+            {
+                "unzipFile",
+                &luascriptfunctions::unzipFile,
+                {},
+                "string, string [bool]",
+                "This function extracts the contents of a zip file. The first "
+                "argument is the path to the zip file. The second argument is the "
+                "directory where to put the extracted files. If the third argument is "
+                "true, then the compressed file will be deleted after the decompression "
+                 "is finished."
+            },
         }
     };
     addLibrary(lib);
@@ -539,20 +551,23 @@ std::string ScriptEngine::generateJson() const {
 
     bool first = true;
     for (const LuaLibrary& l : _registeredLibraries) {
+        constexpr const char* replStr = R"("{}": "{}", )";
+        constexpr const char* replStr2 = R"("{}": "{}")";
+
         if (!first) {
             json << ",";
         }
         first = false;
 
         json << "{";
-        json << "\"library\": \"" << l.name << "\",";
+        json << fmt::format(replStr, "library", l.name);
         json << "\"functions\": [";
 
         for (const LuaLibrary::Function& f : l.functions) {
             json << "{";
-            json << "\"name\": \"" << f.name << "\", ";
-            json << "\"arguments\": \"" << escapedJson(f.argumentText) << "\", ";
-            json << "\"help\": \"" << escapedJson(f.helpText) << "\"";
+            json << fmt::format(replStr, "library", f.name);
+            json << fmt::format(replStr, "arguments", escapedJson(f.argumentText));
+            json << fmt::format(replStr2, "help", escapedJson(f.helpText));
             json << "}";
             if (&f != &l.functions.back() || !l.documentations.empty()) {
                 json << ",";
@@ -561,9 +576,9 @@ std::string ScriptEngine::generateJson() const {
 
         for (const LuaLibrary::Documentation& doc : l.documentations) {
             json << "{";
-            json << "\"name\": \"" << doc.name << "\", ";
-            json << "\"arguments\": \"" << escapedJson(doc.parameter) << "\", ";
-            json << "\"help\": \"" << escapedJson(doc.description) << "\"";
+            json << fmt::format(replStr, "name", doc.name);
+            json << fmt::format(replStr, "arguments", escapedJson(doc.parameter));
+            json << fmt::format(replStr2, "help", escapedJson(doc.description));
             json << "}";
             if (&doc != &l.documentations.back()) {
                 json << ",";
@@ -635,6 +650,9 @@ void ScriptEngine::preSync(bool isMaster) {
 
         if (global::parallelPeer.isHost() && remoteScripting) {
             global::parallelPeer.sendScript(_currentSyncedScript);
+        }
+        if (global::sessionRecording.isRecording()) {
+            global::sessionRecording.saveScriptKeyframe(_currentSyncedScript);
         }
     }
     _mutex.unlock();

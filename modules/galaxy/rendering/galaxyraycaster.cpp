@@ -48,8 +48,6 @@ GalaxyRaycaster::GalaxyRaycaster(ghoul::opengl::Texture& texture)
     , _textureUnit(nullptr)
 {}
 
-GalaxyRaycaster::~GalaxyRaycaster() {}
-
 void GalaxyRaycaster::initialize() {
     _boundingBox.initialize();
 }

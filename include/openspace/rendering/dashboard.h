@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/rendering/dashboarditem.h>
 #include <ghoul/glm.h>
 #include <memory>
 #include <vector>
@@ -36,12 +37,10 @@ namespace openspace {
 
 namespace scripting { struct LuaLibrary; }
 
-class DashboardItem;
-
 class Dashboard : public properties::PropertyOwner {
 public:
     Dashboard();
-    ~Dashboard();
+    ~Dashboard() = default;
 
     void render(glm::vec2& penPosition);
 

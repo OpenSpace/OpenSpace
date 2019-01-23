@@ -123,7 +123,6 @@ void NavigationHandler::setCamera(Camera* camera) {
 }
 
 void NavigationHandler::resetCameraDirection() {
-    LINFO("Setting camera direction to point at focus node.");
     _orbitalNavigator->startInterpolateCameraDirection(*_camera);
 }
 
@@ -133,6 +132,10 @@ const OrbitalNavigator& NavigationHandler::orbitalNavigator() const {
 
 KeyframeNavigator& NavigationHandler::keyframeNavigator() const {
     return *_keyframeNavigator;
+}
+
+bool NavigationHandler::isKeyFrameInteractionEnabled() const {
+    return _useKeyFrameInteraction;
 }
 
 float NavigationHandler::interpolationTime() const {
@@ -150,18 +153,34 @@ void NavigationHandler::updateCamera(double deltaTime) {
     if (_cameraUpdatedFromScript) {
         _cameraUpdatedFromScript = false;
     }
-    else {
+    else if ( ! _playbackModeEnabled ) {
         if (_camera && focusNode()) {
             if (_useKeyFrameInteraction) {
-                _keyframeNavigator->updateCamera(*_camera);
+                _keyframeNavigator->updateCamera(*_camera, _playbackModeEnabled);
             }
             else {
                 _orbitalNavigator->updateStatesFromInput(*_inputState, deltaTime);
                 _orbitalNavigator->updateCameraStateFromStates(*_camera, deltaTime);
+                _camera->setFocusPositionVec3(focusNode()->worldPosition());
             }
-            _camera->setFocusPositionVec3(focusNode()->worldPosition());
         }
     }
+}
+
+void NavigationHandler::setEnableKeyFrameInteraction() {
+    _useKeyFrameInteraction = true;
+}
+
+void NavigationHandler::setDisableKeyFrameInteraction() {
+    _useKeyFrameInteraction = false;
+}
+
+void NavigationHandler::triggerPlaybackStart() {
+    _playbackModeEnabled = true;
+}
+
+void NavigationHandler::stopPlayback() {
+    _playbackModeEnabled = false;
 }
 
 SceneGraphNode* NavigationHandler::focusNode() const {
@@ -253,8 +272,8 @@ void NavigationHandler::saveCameraStateToFile(const std::string& filepath) {
 
         ghoul::Dictionary cameraDict = cameraStateDictionary();
 
-        // TODO : Should get the camera state as a dictionary and save the dictionary to
-        // a file in form of a lua state and not use ofstreams here.
+        // TODO(abock): Should get the camera state as a dictionary and save the
+        // dictionary to a file in form of a lua state and not use ofstreams here.
 
         std::ofstream ofs(fullpath.c_str());
 

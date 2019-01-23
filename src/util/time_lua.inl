@@ -430,6 +430,69 @@ int time_interpolateTime(lua_State* L) {
     return 0;
 }
 
+
+/**
+* \ingroup LuaScripts
+* interpolateTimeRelative(number [, interpolationDuration]):
+* Interpolates the simulation time relatively, based on the specified number of seconds.
+* If interpolationDuration is not provided, the interpolation time will be based on the
+* `defaultTimeInterpolationDuration` property of the TimeManager.
+*/
+int time_interpolateTimeRelative(lua_State* L) {
+    const bool isFunction = (lua_isfunction(L, -1) != 0);
+    if (isFunction) {
+        // If the top of the stack is a function, it is ourself
+        const char* msg = lua_pushfstring(L, "method called without argument");
+        return ghoul::lua::luaError(L, fmt::format("bad argument #1 ({})", msg));
+    }
+
+    const bool isNumber = (lua_isnumber(L, 1) != 0);
+    if (!isNumber) {
+        const char* msg = lua_pushfstring(
+            L,
+            "%s or expected, got %s",
+            lua_typename(L, LUA_TNUMBER),
+            luaL_typename(L, -1)
+        );
+        return ghoul::lua::luaError(L, fmt::format("bad argument #1 ({})", msg));
+    }
+
+    if (lua_gettop(L) == 1 && isNumber) {
+        double delta = lua_tonumber(L, 1);
+        global::timeManager.interpolateTimeRelative(
+            delta,
+            global::timeManager.defaultTimeInterpolationDuration()
+        );
+        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+
+        return 0;
+    }
+    else {
+        int nArguments = lua_gettop(L);
+        if (nArguments != 2) {
+            return luaL_error(
+                L,
+                "bad number of arguments, expected 1 or 2, got %i",
+                nArguments
+            );
+        }
+
+        double delta;
+        delta = lua_tonumber(L, 1);
+
+        const double duration = lua_tonumber(L, 2);
+        if (duration > 0) {
+            global::timeManager.interpolateTimeRelative(delta, duration);
+        }
+        else {
+            global::timeManager.setTimeNextFrame(
+                global::timeManager.time().j2000Seconds() + delta
+            );
+        }
+    }
+    return 0;
+}
+
 /**
  * \ingroup LuaScripts
  * currentTime():

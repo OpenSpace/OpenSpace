@@ -47,7 +47,7 @@
 #include <glm/gtx/string_cast.hpp>
 #include <array>
 #include <fstream>
-#include <stdint.h>
+#include <cstdint>
 #include <locale>
 #include <string>
 
@@ -395,8 +395,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         glm::vec4(1.f)
     )
     , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)
-    , _textMinSize(LabelMinSizeInfo, 8.0, 0.5, 24.0)
-    , _textMaxSize(LabelMaxSizeInfo, 500.0, 0.0, 1000.0)
+    , _textMinSize(LabelMinSizeInfo, 8.f, 0.5f, 24.f)
+    , _textMaxSize(LabelMaxSizeInfo, 20.f, 0.5f, 100.f)
     , _drawElements(DrawElementsInfo, true)
     , _drawLabels(DrawLabelInfo, false)
     , _pixelSizeControl(PixelSizeControlInfo, false)
@@ -423,8 +423,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     if (dictionary.hasKey(KeyFile)) {
         _speckFile = absPath(dictionary.value<std::string>(KeyFile));
         _hasSpeckFile = true;
-        _drawElements.onChange([&]() {
-            _hasSpeckFile = _hasSpeckFile == true? false : true; });
+        _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
         addProperty(_drawElements);
     }
 
@@ -1163,7 +1162,7 @@ bool RenderableBillboardsCloud::readSpeckFile() {
     // The beginning of the speck file has a header that either contains comments
     // (signaled by a preceding '#') or information about the structure of the file
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    std::string line = "";
+    std::string line;
     while (true) {
         std::streampos position = file.tellg();
         std::getline(file, line);
@@ -1253,7 +1252,7 @@ bool RenderableBillboardsCloud::readColorMapFile() {
     // The beginning of the speck file has a header that either contains comments
     // (signaled by a preceding '#') or information about the structure of the file
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    std::string line = "";
+    std::string line;
     while (true) {
         // std::streampos position = file.tellg();
         std::getline(file, line);
@@ -1300,7 +1299,7 @@ bool RenderableBillboardsCloud::readLabelFile() {
     // The beginning of the speck file has a header that either contains comments
     // (signaled by a preceding '#') or information about the structure of the file
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    std::string line = "";
+    std::string line;
     while (true) {
         std::streampos position = file.tellg();
         std::getline(file, line);
@@ -1375,7 +1374,7 @@ bool RenderableBillboardsCloud::readLabelFile() {
         glm::vec3 transformedPos = glm::vec3(
             _transformationMatrix * glm::dvec4(position, 1.0)
         );
-        _labelData.push_back(std::make_pair(transformedPos, label));
+        _labelData.emplace_back(std::make_pair(transformedPos, label));
     } while (!file.eof());
 
     return true;
@@ -1411,12 +1410,10 @@ bool RenderableBillboardsCloud::loadCachedFile(const std::string& file) {
             for (int i = 0; i < nItems; ++i) {
                 int32_t keySize = 0;
                 fileStream.read(reinterpret_cast<char*>(&keySize), sizeof(int32_t));
-                std::string key;
-                for (int c = 0; c < keySize; ++c) {
-                    char t;
-                    fileStream.read(&t, sizeof(char));
-                    key.append(1, t);
-                }
+                std::vector<char> buffer(keySize);
+                fileStream.read(buffer.data(), keySize);
+
+                std::string key(buffer.begin(), buffer.end());
                 int32_t value = 0;
                 fileStream.read(reinterpret_cast<char*>(&value), sizeof(int32_t));
 
@@ -1461,23 +1458,21 @@ bool RenderableBillboardsCloud::saveCachedFile(const std::string& file) const {
             int32_t nItems = static_cast<int32_t>(_variableDataPositionMap.size());
             fileStream.write(reinterpret_cast<const char*>(&nItems), sizeof(int32_t));
 
-            for (auto pair : _variableDataPositionMap) {
+            for (const std::pair<const std::string, int>& pair :
+                 _variableDataPositionMap)
+            {
                 int32_t keySize = static_cast<int32_t>(pair.first.size());
                 fileStream.write(
                     reinterpret_cast<const char*>(&keySize),
                     sizeof(int32_t)
                 );
-                for (size_t c = 0; c < pair.first.size(); ++c) {
-                    char keyChar = static_cast<int32_t>(pair.first[c]);
-                    fileStream.write(&keyChar, sizeof(char));
-                }
+                fileStream.write(pair.first.data(), keySize);
                 int32_t value = static_cast<int32_t>(pair.second);
                 fileStream.write(reinterpret_cast<const char*>(&value), sizeof(int32_t));
             }
         }
 
-        bool success = fileStream.good();
-        return success;
+        return fileStream.good();
     }
     else {
         LERROR(fmt::format("Error opening file '{}' for save cache file", file));
@@ -1532,8 +1527,9 @@ void RenderableBillboardsCloud::createDataSlice() {
             int c = static_cast<int>(colorBins.size() - 1);
             while (variableColor < colorBins[c]) {
                 --c;
-                if (c == 0)
+                if (c == 0) {
                     break;
+                }
             }
 
             int colorIndex =

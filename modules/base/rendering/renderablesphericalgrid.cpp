@@ -62,12 +62,6 @@ namespace {
         "Line Width",
         "This value specifies the line width of the spherical grid."
     };
-
-    constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
-        "Radius",
-        "Radius",
-        "This value specifies the radius of the grid."
-    };
 } // namespace
 
 namespace openspace {
@@ -101,12 +95,6 @@ documentation::Documentation RenderableSphericalGrid::Documentation() {
                 new DoubleVerifier,
                 Optional::Yes,
                 LineWidthInfo.description
-            },
-            {
-                RadiusInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                RadiusInfo.description
             }
         }
     };
@@ -125,7 +113,6 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     )
     , _segments(SegmentsInfo, 36, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
-    , _radius(RadiusInfo, 1e20f, 1.f, 1e35f)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -159,14 +146,6 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
         );
     }
     addProperty(_lineWidth);
-
-    if (dictionary.hasKey(RadiusInfo.identifier)) {
-        _radius = static_cast<float>(
-            dictionary.value<double>(RadiusInfo.identifier)
-        );
-    }
-    _radius.onChange([&]() { _gridIsDirty = true; });
-    addProperty(_radius);
 }
 
 bool RenderableSphericalGrid::isReady() const {
@@ -235,9 +214,25 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
 
     _gridProgram->setUniform("gridColor", _gridColor);
 
+    // Saves current state:
+    GLboolean isBlendEnabled = glIsEnabledi(GL_BLEND, 0);
+    GLboolean isLineSmoothEnabled = glIsEnabled(GL_LINE_SMOOTH);
+    GLfloat currentLineWidth;
+    glGetFloatv(GL_LINE_WIDTH, &currentLineWidth);
+
+    GLenum blendEquationRGB, blendEquationAlpha, blendDestAlpha,
+        blendDestRGB, blendSrcAlpha, blendSrcRGB;
+    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
+    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
+    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
+    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
+    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
+    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
+
+    // Changes GL state:
     glLineWidth(_lineWidth);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_BLEND);
+    glEnablei(GL_BLEND, 0);
     glEnable(GL_LINE_SMOOTH);
 
     glBindVertexArray(_vaoID);
@@ -246,6 +241,17 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     glBindVertexArray(0);
 
     _gridProgram->deactivate();
+
+    // Restores GL State
+    glLineWidth(currentLineWidth);
+    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
+    glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
+    if (!isBlendEnabled) {
+        glDisablei(GL_BLEND, 0);
+    }
+    if (!isLineSmoothEnabled) {
+        glDisable(GL_LINE_SMOOTH);
+    }
 }
 
 void RenderableSphericalGrid::update(const UpdateData&) {
@@ -257,7 +263,6 @@ void RenderableSphericalGrid::update(const UpdateData&) {
 
         int nr = 0;
         const float fsegments = static_cast<float>(_segments);
-        const float r = _radius;
 
         for (int nSegment = 0; nSegment <= _segments; ++nSegment) {
             // define an extra vertex around the y-axis due to texture mapping
@@ -271,9 +276,9 @@ void RenderableSphericalGrid::update(const UpdateData&) {
                 // azimuth angle (east to west)
                 const float phi = fj * glm::pi<float>() * 2.0f / fsegments;  // 0 -> 2*PI
 
-                const float x = r * sin(phi) * sin(theta);  //
-                const float y = r * cos(theta);             // up
-                const float z = r * cos(phi) * sin(theta);  //
+                const float x = sin(phi) * sin(theta);  //
+                const float y = cos(theta);             // up
+                const float z = cos(phi) * sin(theta);  //
 
                 glm::vec3 normal = glm::vec3(x, y, z);
                 if (!(x == 0.f && y == 0.f && z == 0.f)) {

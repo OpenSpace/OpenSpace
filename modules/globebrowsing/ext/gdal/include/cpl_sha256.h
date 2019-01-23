@@ -1,4 +1,4 @@
-/* $Id: cpl_sha256.h 34921 2016-08-04 22:26:31Z rouault $ */
+/* $Id: cpl_sha256.h 4066b56114dce5dd680e28b43526396ce43a6d7e 2018-02-14 12:47:28Z Even Rouault $ */
 
 /* The MIT License
 
@@ -64,6 +64,12 @@ void CPL_DLL CPL_SHA256(const void *data, size_t len, GByte hash[CPL_SHA256_HASH
 void CPL_DLL CPL_HMAC_SHA256(const void *pKey, size_t nKeyLen,
                              const void *pabyMessage, size_t nMessageLen,
                              GByte abyDigest[CPL_SHA256_HASH_SIZE]);
+
+// Not exported for now
+GByte* CPL_RSA_SHA256_Sign(const char* pszPrivateKey,
+                                  const void* pabyData,
+                                  unsigned int nDataLen,
+                                  unsigned int* pnSignatureLen);
 
 CPL_C_END
 

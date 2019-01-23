@@ -27,15 +27,20 @@
 
 // keep in sync with renderablestars.h:ColorOption enum
 const int COLOROPTION_COLOR = 0;
-const int COLOROPTION_VELOCITY = 1; 
+const int COLOROPTION_VELOCITY = 1;
 const int COLOROPTION_SPEED = 2;
- 
+const int COLOROPTION_OTHERDATA = 3;
+
 uniform sampler2D psfTexture;
 uniform sampler1D colorTexture;
 uniform float minBillboardSize;
 
 uniform float alphaValue;
 uniform int colorOption;
+
+uniform sampler1D otherDataTexture;
+uniform vec2 otherDataRange;
+uniform bool filterOutOfRange;
 
 in vec4 vs_position;
 in vec4 ge_gPosition;
@@ -57,21 +62,39 @@ vec4 bv2rgb(float bv) {
     return texture(colorTexture, t);
 }
 
+bool isOtherDataValueInRange() {
+    float t = (ge_brightness.x - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
+    return t >= 0.0 && t <= 1.0;
+}
+vec4 otherDataValue() {
+    float t = (ge_brightness.x - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
+    t = clamp(t, 0.0, 1.0);
+    return texture(otherDataTexture, t);
+}
+
 Fragment getFragment() {
     // Something in the color calculations need to be changed because before it was dependent
     // on the gl blend functions since the abuffer was not involved
         
     vec4 color = vec4(0.0);
     switch (colorOption) {
-        case COLOROPTION_COLOR: 
+        case COLOROPTION_COLOR:
             color = bv2rgb(ge_brightness.x);
             break;
         case COLOROPTION_VELOCITY:
-            color = vec4(abs(ge_velocity), 0.5); 
+            color = vec4(abs(ge_velocity), 0.5);
             break;
         case COLOROPTION_SPEED:
             // @TODO Include a transfer function here ---abock
             color = vec4(vec3(ge_speed), 0.5);
+            break;
+        case COLOROPTION_OTHERDATA:
+            if (filterOutOfRange && !isOtherDataValueInRange()) {
+                discard;
+            }
+            else {
+                color = otherDataValue();
+            }
             break;
     }
 

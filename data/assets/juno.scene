@@ -14,7 +14,13 @@ asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
 asset.require('util/default_joystick')
 
+asset.require('util/webgui')
+
 local junoAsset = asset.require('scene/solarsystem/missions/juno/juno')
+
+assetHelper.registerInterestingNodes(asset, {
+    "Jupiter", "Juno"
+})
 
 asset.onInitialize(function ()
     openspace.time.setTime("2016-07-01T10:05:00.00")
@@ -26,14 +32,10 @@ asset.onInitialize(function ()
       28800, 57600, 115200, 230400, 460800, 921600, 1843200, 3686400, 7372800, 14745600
     })
 
-    openspace.markInterestingNodes({
-        "Jupiter", "Juno"
-    })
-
     openspace.addVirtualProperty(
         "BoolProperty",
         "Show Trails",
-        "*Trail.renderable.Enabled",
+        "*Trail.Renderable.Enabled",
         "Disable or enable all trails of the scene at the same time",
         true,
         nil,
@@ -48,9 +50,5 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-    openspace.removeVirtualProperty("*Trail.renderable.Enabled")
-
-    openspace.removeInterestingNodes({
-        "Jupiter", "Juno"
-    })
+    openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
 end)

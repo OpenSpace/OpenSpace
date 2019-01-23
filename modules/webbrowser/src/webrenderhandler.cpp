@@ -25,58 +25,137 @@
 #include <modules/webbrowser/include/webrenderhandler.h>
 
 #include <ghoul/glm.h>
+#include <fmt/format.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace openspace {
 
 void WebRenderHandler::reshape(int w, int h) {
-    _width = w;
-    _height = h;
-    _alphaMask.clear();
-    _alphaMask.resize(w * h);
+    if (w == _windowSize.x && h == _windowSize.y) {
+        return;
+    }
+    _windowSize = glm::ivec2(w, h);
+    _needsRepaint = true;
 }
 
-bool WebRenderHandler::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect& rect) {
-    rect = CefRect(0, 0, _width, _height);
+bool WebRenderHandler::GetViewRect(CefRefPtr<CefBrowser>, CefRect& rect) {
+    rect = CefRect(0, 0, _windowSize.x, _windowSize.y);
     return true;
 }
 
-void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser> browser,
-                               CefRenderHandler::PaintElementType,
+void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser>, CefRenderHandler::PaintElementType,
                                const CefRenderHandler::RectList& dirtyRects,
                                const void* buffer, int w, int h)
 {
-    glBindTexture(GL_TEXTURE_2D, _texture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA,
-        _width,
-        _height,
-        0,
-        GL_BGRA_EXT,
-        GL_UNSIGNED_BYTE,
-        buffer
-    );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    const size_t bufferSize = static_cast<size_t>(w * h);
 
-    // copy alpha channel from buffer into the alpha mask
-    const unsigned char* bf = reinterpret_cast<const unsigned char*>(buffer);
-    for (int maskIndex = 0, bufferIndex = 3;
-         maskIndex < w * h;
-         bufferIndex += 4, ++maskIndex)
-    {
-        _alphaMask[maskIndex] = bf[bufferIndex] > 0;
+    glm::ivec2 upperUpdatingRectBound = glm::ivec2(0, 0);
+    glm::ivec2 lowerUpdatingRectBound = glm::ivec2(w, h);
+
+    if (_needsRepaint || _browserBuffer.size() != bufferSize) {
+        _browserBufferSize = glm::ivec2(w, h);
+        _browserBuffer.resize(w * h, Pixel(0));
+        _textureSizeIsDirty = true;
+        _upperDirtyRectBound = upperUpdatingRectBound = glm::ivec2(w, h);
+        _lowerDirtyRectBound = lowerUpdatingRectBound = glm::ivec2(0, 0);
     }
+
+    for (const CefRect& r : dirtyRects) {
+        lowerUpdatingRectBound = glm::min(lowerUpdatingRectBound, glm::ivec2(r.x, r.y));
+        upperUpdatingRectBound = glm::max(
+            upperUpdatingRectBound,
+            glm::ivec2(r.x + r.width, r.y + r.height)
+        );
+
+    }
+
+    const glm::ivec2 rectSize = upperUpdatingRectBound - lowerUpdatingRectBound;
+    if (rectSize.x > 0 && rectSize.y > 0) {
+        _textureIsDirty = true;
+    } else {
+        return;
+    }
+
+    // Copy the updated rectangle line by line.
+    for (int y = lowerUpdatingRectBound.y; y < upperUpdatingRectBound.y; ++y) {
+        int lineOffset = y * w + lowerUpdatingRectBound.x;
+        int rectWidth = upperUpdatingRectBound.x - lowerUpdatingRectBound.x;
+        std::copy(
+            reinterpret_cast<const Pixel*>(buffer) + lineOffset,
+            reinterpret_cast<const Pixel*>(buffer) + lineOffset + rectWidth,
+            _browserBuffer.data() + lineOffset
+        );
+    }
+
+    // Add the dirty rect bounds to the GPU texture dirty rect.
+    _lowerDirtyRectBound = glm::min(lowerUpdatingRectBound, _lowerDirtyRectBound);
+    _upperDirtyRectBound = glm::max(upperUpdatingRectBound, _upperDirtyRectBound);
+    _needsRepaint = false;
+}
+
+void WebRenderHandler::updateTexture() {
+    if (_needsRepaint) {
+        return;
+    }
+
+    if (_textureSizeIsDirty) {
+        glBindTexture(GL_TEXTURE_2D, _texture);
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RGBA,
+            _browserBufferSize.x,
+            _browserBufferSize.y,
+            0,
+            GL_BGRA_EXT,
+            GL_UNSIGNED_BYTE,
+            reinterpret_cast<char*>(_browserBuffer.data())
+        );
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    } else if (_textureIsDirty) {
+        glBindTexture(GL_TEXTURE_2D, _texture);
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, _browserBufferSize.x);
+
+        glTexSubImage2D(
+            GL_TEXTURE_2D,
+            0,
+            _lowerDirtyRectBound.x,
+            _lowerDirtyRectBound.y,
+            _upperDirtyRectBound.x - _lowerDirtyRectBound.x,
+            _upperDirtyRectBound.y - _lowerDirtyRectBound.y,
+            GL_BGRA_EXT,
+            GL_UNSIGNED_BYTE,
+            reinterpret_cast<char*>(
+                _browserBuffer.data() +
+                _lowerDirtyRectBound.y * _browserBufferSize.x + _lowerDirtyRectBound.x
+            )
+        );
+
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    _upperDirtyRectBound = glm::ivec2(0, 0);
+    _lowerDirtyRectBound = glm::ivec2(_browserBufferSize.x, _browserBufferSize.y);
+    _textureSizeIsDirty = false;
+    _textureIsDirty = false;
 }
 
 bool WebRenderHandler::hasContent(int x, int y) {
-    int index = x + (_width * y);
-    index = glm::clamp(index, 0, static_cast<int>(_alphaMask.size() - 1));
-    return _alphaMask[index];
+    if (_browserBuffer.empty()) {
+        return false;
+    }
+    int index = x + (_browserBufferSize.x * y);
+    index = glm::clamp(index, 0, static_cast<int>(_browserBuffer.size() - 1));
+    return _browserBuffer[index].a;
+}
+
+bool WebRenderHandler::isTextureReady() const {
+    return !_needsRepaint;
 }
 
 } // namespace openspace

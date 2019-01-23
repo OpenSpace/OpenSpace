@@ -96,7 +96,7 @@ std::unique_ptr<Renderable> Renderable::createFromDictionary(
 }
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "renderable" })
+    : properties::PropertyOwner({ "Renderable" })
     , _enabled(EnabledInfo, true)
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
 {

@@ -7,12 +7,22 @@
 [submodule "ext/spice"]
 	path = ext/spice
 	url = https://github.com/OpenSpace/Spice.git
-[submodule "ext/sgct"]
-	path = ext/sgct
-	url = https://github.com/opensgct/sgct.git
 [submodule "modules/touch/ext/libTUIO11"]
 	path = modules/touch/ext/libTUIO11
 	url = https://github.com/mkalten/TUIO11_CPP
 [submodule "modules/sync/ext/libtorrent"]
 	path = modules/sync/ext/libtorrent
 	url = https://github.com/OpenSpace/libtorrent.git
+[submodule "apps/OpenSpace-MinVR/ext/minvr"]
+	path = apps/OpenSpace-MinVR/ext/minvr
+	url = https://github.com/OpenSpace/minvr
+	branch = OpenSpace
+[submodule "apps/OpenSpace/ext/sgct"]
+	path = apps/OpenSpace/ext/sgct
+	url = https://github.com/opensgct/sgct
+[submodule "modules/fitsfilereader/ext/CCfits"]
+	path = modules/fitsfilereader/ext/CCfits
+	url = https://github.com/OpenSpace/CCfits.git
+[submodule "modules/fitsfilereader/ext/cfitsio"]
+	path = modules/fitsfilereader/ext/cfitsio
+	url = https://github.com/OpenSpace/cfitsio.git

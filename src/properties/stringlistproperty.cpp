@@ -28,6 +28,8 @@
 #include <ghoul/misc/misc.h>
 #include <numeric>
 
+#include <openspace/json.h>
+
 namespace {
 
 std::vector<std::string> fromLuaConversion(lua_State* state, bool& success) {
@@ -81,15 +83,18 @@ std::vector<std::string> fromStringConversion(const std::string& val, bool& succ
 }
 
 bool toStringConversion(std::string& outValue, const std::vector<std::string>& inValue) {
-    outValue = "";
+    outValue = "[";
     for (const std::string& v : inValue) {
+        std::string str;
+        nlohmann::json json;
+        nlohmann::to_json(json, v);
+        str = json.dump();
         if (&v != &*inValue.cbegin()) {
-            outValue += ", " + v;
+            outValue += ", ";
         }
-        else {
-            outValue += v;
-        }
+        outValue += str;
     }
+    outValue += "]";
 
     // outValue = std::accumulate(
     //     inValue.begin(),

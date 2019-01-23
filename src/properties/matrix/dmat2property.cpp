@@ -103,13 +103,14 @@ glm::dmat2x2 fromStringConversion(const std::string& val, bool& success) {
 }
 
 bool toStringConversion(std::string& outValue, glm::dmat2x2 inValue) {
-    outValue = "";
+    outValue = "[";
     for (glm::length_t i = 0; i < ghoul::glm_cols<glm::dmat2x2>::value; ++i) {
         for (glm::length_t j = 0; j < ghoul::glm_rows<glm::dmat2x2>::value; ++j) {
             outValue += std::to_string(inValue[i][j]) + ",";
         }
-        outValue.pop_back();
     }
+    outValue.pop_back();
+    outValue += "]";
     return true;
 }
 

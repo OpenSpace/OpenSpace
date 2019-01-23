@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_MODULE_SYNC___TORRENTCLIENT___H__
 #define __OPENSPACE_MODULE_SYNC___TORRENTCLIENT___H__
 
+#ifdef SYNC_USE_LIBTORRENT
+
 #include <ghoul/misc/exception.h>
 #include <atomic>
 #include <condition_variable>
@@ -102,10 +104,12 @@ private:
     void notify(TorrentId id);
     void pollAlerts();
 
+#ifdef SYNC_USE_LIBTORRENT
     libtorrent::session _session;
     bool _isInitialized = false;
-
     std::atomic_bool _isActive = false;
+#endif // SYNC_USE_LIBTORRENT
+
     std::thread _torrentThread;
     std::condition_variable _abortNotifier;
     std::mutex _abortMutex;
@@ -115,5 +119,7 @@ private:
 };
 
 } // namespace openspace
+
+#endif // SYNC_USE_LIBTORRENT
 
 #endif // __OPENSPACE_MODULE_SYNC___TORRENTCLIENT___H__

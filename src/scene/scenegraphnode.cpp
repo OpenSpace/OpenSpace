@@ -48,6 +48,31 @@ namespace {
     constexpr const char* KeyTransformScale = "Transform.Scale";
 
     constexpr const char* KeyTimeFrame = "TimeFrame";
+
+    constexpr openspace::properties::Property::PropertyInfo GuiPathInfo = {
+        "GuiPath",
+        "Gui Path",
+        "This is the path for the scene graph node in the gui "
+        "example: /Solar System/Planets/Earth",
+        openspace::properties::Property::Visibility::Hidden
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo GuiNameInfo = {
+        "GuiName",
+        "Gui Name",
+        "This is the name for the scene graph node in the gui "
+        "example: Earth",
+        openspace::properties::Property::Visibility::Hidden
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo GuiHiddenInfo = {
+        "GuiHidden",
+        "Gui Hidden",
+        "This represents if the scene graph node should be shown in the gui "
+        "example: false",
+        openspace::properties::Property::Visibility::Hidden
+    };
+
 } // namespace
 
 namespace openspace {
@@ -75,10 +100,13 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
     if (dictionary.hasKey(KeyGuiName)) {
         result->setGuiName(dictionary.value<std::string>(KeyGuiName));
+        result->_guiDisplayName = result->guiName();
+        result->addProperty(result->_guiDisplayName);
     }
 
     if (dictionary.hasKey(KeyGuiHidden)) {
-        result->_guiHintHidden = dictionary.value<bool>(KeyGuiHidden);
+        result->_guiHidden = dictionary.value<bool>(KeyGuiHidden);
+        result->addProperty(result->_guiHidden);
     }
 
     if (dictionary.hasKey(KeyTransformTranslation)) {
@@ -152,7 +180,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         ghoul::Dictionary renderableDictionary;
         dictionary.getValue(KeyRenderable, renderableDictionary);
 
-        renderableDictionary.setValue(KeyIdentifier, identifier);
+        renderableDictionary.setValue(KeyIdentifier, result->_identifier);
 
         result->_renderable = Renderable::createFromDictionary(renderableDictionary);
         if (result->_renderable == nullptr) {
@@ -189,6 +217,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
     if (dictionary.hasKey(KeyGuiPath)) {
         result->_guiPath = dictionary.value<std::string>(KeyGuiPath);
+        result->addProperty(result->_guiPath);
     }
 
     LDEBUG(fmt::format("Successfully created SceneGraphNode '{}'", result->identifier()));
@@ -197,6 +226,9 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
 SceneGraphNode::SceneGraphNode()
     : properties::PropertyOwner({ "" })
+    , _guiHidden(GuiHiddenInfo)
+    , _guiPath(GuiPathInfo)
+    , _guiDisplayName(GuiNameInfo)
     , _transform {
         std::make_unique<StaticTranslation>(),
         std::make_unique<StaticRotation>(),
@@ -610,12 +642,12 @@ double SceneGraphNode::worldScale() const {
     return _worldScaleCached;
 }
 
-const std::string& SceneGraphNode::guiPath() const {
+std::string SceneGraphNode::guiPath() const {
     return _guiPath;
 }
 
 bool SceneGraphNode::hasGuiHintHidden() const {
-    return _guiHintHidden;
+    return _guiHidden;
 }
 
 glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
@@ -721,9 +753,9 @@ const Renderable* SceneGraphNode::renderable() const {
     return _renderable.get();
 }
 
-//Renderable* SceneGraphNode::renderable() {
-//    return _renderable.get();
-//}
+Renderable* SceneGraphNode::renderable() {
+    return _renderable.get();
+}
 
 /*
 bool SceneGraphNode::sphereInsideFrustum(const psc& s_pos, const PowerScaledScalar& s_rad,

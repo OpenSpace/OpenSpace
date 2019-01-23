@@ -159,8 +159,13 @@ std::string SelectionProperty::generateAdditionalJsonDescription() const {
     std::string result = "{ \"" + OptionsKey + "\": [";
     for (size_t i = 0; i < _options.size(); ++i) {
         const Option& o = _options[i];
+        std::string v = std::to_string(o.value);
+        std::string vSan = sanitizeString(v);
+        std::string d = o.description;
+        std::string dSan = sanitizeString(d);
+
         result += "{";
-        result +=  "\"" + std::to_string(o.value) + "\": \"" + o.description + "\"";
+        result += fmt::format(R"("{}": "{}")", vSan, dSan);
         result += "}";
         if (i != _options.size() - 1) {
             result += ",";
