@@ -58,17 +58,18 @@ namespace openspace {
 
         void initializeGL() override;
         void deinitializeGL() override;
-        void update(const UpdateData& data) override;
+
+        virtual void update(const UpdateData& data) override;
+        virtual void createShaderProgram();
+        virtual void fillVertexArrays();
+        virtual void updateVertexAttributes();
 
         void render(const RenderData& data, RendererTasks& rendererTask) override;
-        void fillVertexArray(std::vector<float> &_vertexArray, glm::dvec3 centerPoint, std::vector<glm::dvec3> points);
-
-        void updateVertexAttributes();
+        void addVertexToVertexArray(std::vector<float> &_vertexArray, glm::dvec3 position, glm::vec4 color);
         bool isReady() const override;
 
         /// Number of variables in _uniformCache
         static const GLuint uniformCacheSize = 2;
-
         /// Returns the documentation entries
         static documentation::Documentation Documentation();
 
@@ -100,6 +101,7 @@ namespace openspace {
         /// Specifies the number of components per generic vertex attribute
         const GLuint _sizeFourVal = 4;
         const GLuint _sizeThreeVal = 3;
+        const GLuint _sizeOneVal = 1;
 
         /// Local model matrix, used for rendering in camera space
         glm::dmat4 _localTransform = glm::dmat4(1.0);
@@ -107,9 +109,11 @@ namespace openspace {
         GLint _first = 0;
         /// The number of values to be rendered
         GLsizei _count = 0;
+        /// Program object used to render the data stored in RenderInformation
+        ghoul::opengl::ProgramObject* _programObject = nullptr;
+        /// Cache for uniform variables, update _uniformCacheSize accordingly
+        UniformCache(modelView, projection) _uniformCache;
 
-    private:
-        void addVertexToVertexArray(std::vector<float> &_vertexArray,glm::dvec3 position,glm::vec4 color);
         glm::dvec3 getCoordinatePosFromFocusNode(glm::dvec3 worldPos);
         void updateUniforms(const RenderData& data);
 
@@ -124,6 +128,8 @@ namespace openspace {
 
         glm::dvec3 _apexPosition;
         glm::dvec3 _baseCenterDirection;
+        std::vector<glm::dvec3> _baseVertices;
+        glm::dvec3 _baseCenterPosition;
 
         // lightdays in meters
         double _unit = 2.59E13;
@@ -134,7 +140,7 @@ namespace openspace {
         properties::Vec3Property _color;
         properties::BoolProperty _wireframe;
 
-        bool _showbase = false;
+        bool _showbase = true;
         bool _apexIsNodeAttached = true;
         bool _baseCenterIsNodeAttached = true;
         bool _directionIsReversed = false;
@@ -143,10 +149,6 @@ namespace openspace {
         std::string _apexNodeId, _baseDirNodeId = "";
         glm::dvec3 _focusNodePos;
 
-        /// Program object used to render the data stored in RenderInformation
-        ghoul::opengl::ProgramObject* _programObject = nullptr;
-        /// Cache for uniform variables, update _uniformCacheSize accordingly
-        UniformCache(modelView, projection) _uniformCache;
     };
 
 } // namespace openspace

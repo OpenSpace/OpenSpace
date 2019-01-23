@@ -217,7 +217,7 @@ RenderableCone::RenderableCone(const ghoul::Dictionary& dictionary)
         _color = dictionary.value<glm::vec3>(ColorInfo.identifier);
         _color.setViewOption(properties::Property::ViewOptions::Color);
     }
-    if (dictionary.hasKeyAndValue<double>(ApexPositionInfo.identifier)) {
+    if (dictionary.hasKeyAndValue<double>(ResolutionInfo.identifier)) {
         _resolution = dictionary.value<double>(ResolutionInfo.identifier);
     }
     if (dictionary.hasKeyAndValue<double>(OpacityInfo.identifier)) {
@@ -234,16 +234,8 @@ RenderableCone::RenderableCone(const ghoul::Dictionary& dictionary)
     addProperty(_color);
 }
 void RenderableCone::initializeGL() {
-    _programObject = BaseModule::ProgramObjectManager.request(
-        ProgramName,
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine.buildRenderProgram(
-                ProgramName,
-                absPath("${MODULE_DSN}/shaders/renderablecone_vs.glsl"),
-                absPath("${MODULE_DSN}/shaders/renderablecone_fs.glsl")
-            );
-        }
-    );
+
+    createShaderProgram();
 
     ghoul::opengl::updateUniformLocations(*_programObject, _uniformCache, UniformNames);
     setRenderBin(Renderable::RenderBin::Overlay);
@@ -295,6 +287,9 @@ void RenderableCone::updateVertexAttributes() {
                         sizeof(ColorVBOLayout) + sizeof(PositionVBOLayout),
                         (void*)(sizeof(PositionVBOLayout)));
     glEnableVertexAttribArray(_vaLocCol);
+
+    // Update the number of lines to render, same for both vertex arrays
+    _count = static_cast<GLsizei>(_vertexLateralSurfaceArray.size() / (_sizeThreeVal + _sizeFourVal));
 };
 
 void RenderableCone::render(const RenderData& data, RendererTasks&) {
@@ -361,6 +356,20 @@ void RenderableCone::render(const RenderData& data, RendererTasks&) {
     _programObject->deactivate();
 }
 
+void RenderableCone::createShaderProgram()
+{
+    _programObject = BaseModule::ProgramObjectManager.request(
+        ProgramName,
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        return global::renderEngine.buildRenderProgram(
+            ProgramName,
+            absPath("${MODULE_DSN}/shaders/renderablecone_vs.glsl"),
+            absPath("${MODULE_DSN}/shaders/renderablecone_fs.glsl")
+        );
+    }
+    );
+}
+
 void RenderableCone::update(const UpdateData& data) {
     _vertexLateralSurfaceArray.clear();
     _vertexBaseArray.clear();
@@ -386,8 +395,7 @@ void RenderableCone::update(const UpdateData& data) {
         _baseCenterDirection = glm::normalize(_apexPosition - nodePos);
     }
 
-    std::vector<glm::dvec3> baseVertices;
-    glm::dvec3 baseCenterPosition;
+    _baseVertices.clear();
     int numBaseVertices = _resolution;
     double height = _height * _unit;
 
@@ -401,31 +409,27 @@ void RenderableCone::update(const UpdateData& data) {
     glm::dvec3 e1 = glm::normalize(glm::cross(_baseCenterDirection, e0));
 
     if (_directionIsReversed) {
-        baseCenterPosition = _apexPosition + _baseCenterDirection * height;
+        _baseCenterPosition = _apexPosition + _baseCenterDirection * height;
     }
     else {
-        baseCenterPosition = _apexPosition - _baseCenterDirection * height;
+        _baseCenterPosition = _apexPosition - _baseCenterDirection * height;
     }
 
     for (int i = 0; i < numBaseVertices; ++i) {
         double rad = angleIncrement * i;
-        glm::dvec3 p = baseCenterPosition + (((e0 * glm::cos(rad)) + (e1 * glm::sin(rad))) * radius);
+        glm::dvec3 p = _baseCenterPosition + (((e0 * glm::cos(rad)) + (e1 * glm::sin(rad))) * radius);
         p = getCoordinatePosFromFocusNode(p);
-        baseVertices.push_back(p);
+        _baseVertices.push_back(p);
     }
 
     // work around for precision errors
     _focusNodePos = global::navigationHandler.focusNode()->worldPosition();
     _localTransform = glm::translate(glm::dmat4(1.0), _focusNodePos);
     _apexPosition = getCoordinatePosFromFocusNode(_apexPosition);
-    baseCenterPosition = getCoordinatePosFromFocusNode(baseCenterPosition);
+    _baseCenterPosition = getCoordinatePosFromFocusNode(_baseCenterPosition);
     
-    // upload all positions to the vertex array
-    fillVertexArray(_vertexBaseArray, baseCenterPosition, baseVertices);
-    fillVertexArray(_vertexLateralSurfaceArray, _apexPosition, baseVertices);
-
-    // Update the number of lines to render, same for both vertex arrays
-    _count = static_cast<GLsizei>(_vertexLateralSurfaceArray.size() / (_sizeThreeVal + _sizeFourVal));
+    // upload all positions to the vertex arrays
+    fillVertexArrays();
 
     unbindGL();
 }
@@ -447,15 +451,25 @@ void RenderableCone::updateUniforms(const RenderData& data) {
     _programObject->setUniform(_uniformCache.projection, data.camera.sgctInternal.projectionMatrix());
 }
 
-void RenderableCone::fillVertexArray(std::vector<float> &vertexArray, glm::dvec3 centerPoint, std::vector<glm::dvec3> points) {
+void RenderableCone::fillVertexArrays() {
     glm::vec3 color = _color;
     glm::vec4 colorAndOpacity = { color, _opacity };
-    addVertexToVertexArray(vertexArray, centerPoint, colorAndOpacity);
-  
-    for (int i = 0; i < points.size(); ++i) {
-        addVertexToVertexArray(vertexArray,points[i], colorAndOpacity);
+   
+    // add base vertices
+    addVertexToVertexArray(_vertexBaseArray, _baseCenterPosition, colorAndOpacity);
+
+    for (int i = 0; i < _baseVertices.size(); ++i) {
+        addVertexToVertexArray(_vertexBaseArray, _baseVertices[i], colorAndOpacity);
     }
-    addVertexToVertexArray(vertexArray,points[0], colorAndOpacity);
+    addVertexToVertexArray(_vertexBaseArray, _baseVertices[0], colorAndOpacity);
+
+    //add lateral surface vertices
+    addVertexToVertexArray(_vertexLateralSurfaceArray, _apexPosition, colorAndOpacity);
+
+    for (int i = 0; i < _baseVertices.size(); ++i) {
+        addVertexToVertexArray(_vertexLateralSurfaceArray, _baseVertices[i], colorAndOpacity);
+    }
+    addVertexToVertexArray(_vertexLateralSurfaceArray, _baseVertices[0], colorAndOpacity);
 }
 
 void RenderableCone::addVertexToVertexArray(std::vector<float> &vertexArray,glm::dvec3 position, glm::vec4 color)

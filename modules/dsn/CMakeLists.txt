@@ -52,6 +52,8 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablesignals_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablesignals_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablestationfov_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablestationfov_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablecone_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablecone_vs.glsl  
 )

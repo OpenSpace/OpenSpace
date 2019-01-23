@@ -22,40 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_DSN___RENDERABLESTATIONFOV___H__
-#define __OPENSPACE_MODULE_DSN___RENDERABLESTATIONFOV___H__
+#version __CONTEXT__
 
-#include <modules/dsn/rendering/renderablecone.h>
-
-namespace openspace {
-
-    namespace documentation { struct Documentation; }
-    /**
-     * This is a class for rendering a station field of view. 
-     * It is based off of RenderableCone but includes some extra
-     * functionality such as defining the base radius with an angle
-     * and having a distance fade from the apex point.
-     **/
-    class RenderableStationFov : public RenderableCone{
-
-    public:
-        RenderableStationFov(const ghoul::Dictionary& dictionary);
-        ~RenderableStationFov() = default;
-        static documentation::Documentation Documentation();
-
-        void updateVertexAttributes() override;
-        void fillVertexArrays() override;
-        void createShaderProgram() override;
-        void addVertexToVertexArray(std::vector<float> &vertexArray, glm::dvec3 position,
-                                    glm::vec4 color, float distance);
+// layout locations must correspond to va locations in renderablesignals.cpp
+layout(location = 0) in vec3 in_point_position;
+layout(location = 1) in vec4 in_color;
+layout(location = 2) in float in_distance_from_apex;
 
 
-    private:
-        /// The vertex attribute location for position
-        /// must correlate to layout location in vertex shader
-        const GLuint _vaLocDist = 2;
+out vec4 vs_positionScreenSpace;
+out vec4 vs_gPosition;
+out vec4 vs_color;
 
-    };
+uniform dmat4 modelView;
+uniform mat4 projectionTransform;
 
-} // namespace openspace
-#endif //__OPENSPACE_MODULE_DSN___RENDERABLESTATIONFOV___H__
+void main() {
+    vs_gPosition = vec4(modelView * dvec4(in_point_position, 1));
+    vs_positionScreenSpace = projectionTransform * vs_gPosition;
+    gl_Position  = vs_positionScreenSpace;
+
+    // Set z to 0 to disable near and far plane, unique handling for perspective in space
+    gl_Position.z = 0.f; 
+
+    // pass variables with no calculations directly to fragment
+    vs_color = vec4(in_color.rgb, in_distance_from_apex);
+}

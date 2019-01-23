@@ -22,40 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_DSN___RENDERABLESTATIONFOV___H__
-#define __OPENSPACE_MODULE_DSN___RENDERABLESTATIONFOV___H__
+#include "fragment.glsl"
+#include "floatoperations.glsl"
 
-#include <modules/dsn/rendering/renderablecone.h>
+in vec4 vs_positionScreenSpace;
+in vec4 vs_gPosition;
+in vec4 vs_color;
 
-namespace openspace {
+Fragment getFragment() {
 
-    namespace documentation { struct Documentation; }
-    /**
-     * This is a class for rendering a station field of view. 
-     * It is based off of RenderableCone but includes some extra
-     * functionality such as defining the base radius with an angle
-     * and having a distance fade from the apex point.
-     **/
-    class RenderableStationFov : public RenderableCone{
+    Fragment frag;
+    frag.depth = vs_positionScreenSpace.w;
+    //frag.blend = BLEND_MODE_ADDITIVE;
 
-    public:
-        RenderableStationFov(const ghoul::Dictionary& dictionary);
-        ~RenderableStationFov() = default;
-        static documentation::Documentation Documentation();
+    frag.color = vs_color;
 
-        void updateVertexAttributes() override;
-        void fillVertexArrays() override;
-        void createShaderProgram() override;
-        void addVertexToVertexArray(std::vector<float> &vertexArray, glm::dvec3 position,
-                                    glm::vec4 color, float distance);
+    // G-Buffer
+    // JCC: The depthCorrection here is a temporary tweak
+    // to fix precision problems.
+    
+    vec4 depthCorrection = vec4(0.0,0.0,100,0.0);
+    frag.gPosition = vs_gPosition + depthCorrection;
 
+    // For rendering inside earth atmosphere we need to set a normal for our line
+    // Todo: calculate normal correctly 
+    // currently normal is in object space
+    frag.gNormal= vec4(0.0, 0.0, -1.0, 1.0); 
 
-    private:
-        /// The vertex attribute location for position
-        /// must correlate to layout location in vertex shader
-        const GLuint _vaLocDist = 2;
-
-    };
-
-} // namespace openspace
-#endif //__OPENSPACE_MODULE_DSN___RENDERABLESTATIONFOV___H__
+    return frag;
+}
