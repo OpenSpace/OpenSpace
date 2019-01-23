@@ -99,6 +99,18 @@ local Keybindings = {
         Documentation = "Toggles visibility of the spacecraft labels",
         Local = false
     }, 
+    {
+        Key = "v",
+        Command = [[
+                        local propertyValues = openspace.getProperty('Scene.*FOV.Renderable.Enabled')
+
+                        for _, propValue in pairs(propertyValues) do
+                            openspace.setPropertyValue(propValue, not openspace.getPropertyValue(propValue));
+                        end
+                    ]],
+        Documentation = "Toggles visibility of the stations field of view",
+        Local = false
+    }, 
 }
 
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
