@@ -108,17 +108,23 @@ local Keybindings = {
         Local = false
     }, 
     {
-        Key = "v",
-        Command = [[
-                        local propertyValues = openspace.getProperty('Scene.*FOV.Renderable.Enabled')
-
-                        for _, propValue in pairs(propertyValues) do
-                            openspace.setPropertyValue(propValue, not openspace.getPropertyValue(propValue));
-                        end
-                    ]],
-        Documentation = "Toggles visibility of the stations field of view",
+        Key = "Shift+c",
+        Command = propertyHelper.invert('Scene.CanberraFOV.Renderable.Enabled'),
+        Documentation = "Toggles visibility of the Canberra ground station field of view",
         Local = false
     }, 
+    {
+        Key = "Shift+m",
+        Command = propertyHelper.invert('Scene.MadridFOV.Renderable.Enabled'),
+        Documentation = "Toggles visibility of the Madrid ground station field of view",
+        Local = false
+    },
+    {
+        Key = "Shift+g",
+        Command = propertyHelper.invert('Scene.GoldstoneFOV.Renderable.Enabled'),
+        Documentation = "Toggles visibility of the Goldstone ground station field of view",
+        Local = false
+    }
 }
 
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
