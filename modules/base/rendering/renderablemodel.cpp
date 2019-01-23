@@ -99,9 +99,9 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationVecInfo = {
-    "RotationVec",
-    "Rotation Vector",
-    "Rotation vector "
+        "RotationVector",
+        "Rotation Vector",
+        "Rotation Vector using degrees"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourcesInfo = {
@@ -198,7 +198,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _performShading(ShadingInfo, true)
     , _disableFaceCulling(DisableFaceCullingInfo, false)
     , _modelTransform(ModelTransformInfo, glm::dmat3(1.0), glm::dmat3(-1.0), glm::dmat3(1.0))
-    , _rotationVec(RotationVecInfo, glm::dvec3(3.14), glm::dvec3(-3.14), glm::dvec3(2*(3.1415)))
+    , _rotationVec(RotationVecInfo, glm::dvec3(0), glm::dvec3(0), glm::dvec3(360))
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
 {
     documentation::testSpecificationAndThrow(
@@ -273,8 +273,11 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_rotationVec);
 
     _rotationVec.onChange([this]() {
+        glm::vec3 degreeVector = _rotationVec;
+        glm::vec3 radianVector = glm::vec3(glm::radians(degreeVector.x), 
+                                 glm::radians(degreeVector.y), glm::radians(degreeVector.z));
         _modelTransform = glm::mat4_cast(
-            glm::quat(_rotationVec));
+            glm::quat(radianVector));
     });
 }
 
