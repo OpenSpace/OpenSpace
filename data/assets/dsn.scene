@@ -29,6 +29,13 @@ asset.require('util/webgui')
 
 local Keybindings = {
     {
+        Key = "a",  
+        Command = propertyHelper.invert('Scene.EarthAtmosphere.Renderable.Enabled') ..
+                  propertyHelper.invert('Scene.MarsAtmosphere.Renderable.Enabled'),
+        Documentation = "Toggles visibility of atmospheres",
+        Local = false
+    },
+    {
         Key = "z",  
         Command =  "openspace.time.interpolateDeltaTime(3)",
         Documentation = "Set speed to work for near earth view.",
@@ -48,9 +55,10 @@ local Keybindings = {
     },
     {
         Key = "s",  
-        Command = propertyHelper.invert('Scene.Earth.Renderable.Layers.NightLayers.Earth at Night 2012.Enabled') ..
+        Command = propertyHelper.invert('Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Enabled') ..
                   propertyHelper.invert('Scene.Earth.Renderable.PerformShading') ..
-                  propertyHelper.invert('Scene.Earth.Renderable.Atmosphere') ..
+                  propertyHelper.invert('Scene.EarthAtmosphere.Renderable.Enabled') ..
+                  propertyHelper.invert('Scene.MarsAtmosphere.Renderable.Enabled') ..
                   propertyHelper.invert('Scene.Earth.Renderable.Layers.WaterMasks.MODIS_Water_Mask.Enabled'),
         Documentation = "Toggle night texture, shading, atmosphere, and water for Earth.",
         Local = false
@@ -125,7 +133,7 @@ asset.onInitialize(function ()
 
     openspace.setDefaultGuiSorting()
 
-    openspace.setPropertyValue('Scene.*Trail.Renderable.Enabled', false)
+    openspace.setPropertyValue('Scene.*Trail.Renderable.Enabled', true)
     openspace.setPropertyValue('Scene.*Trail.Renderable.Color', {0.5,0.5,0.5})
 
     openspace.globebrowsing.loadWMSServersFromFile(
