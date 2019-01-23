@@ -1,11 +1,9 @@
 local assetHelper = asset.require('util/asset_helper')
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
-local stationsAsset = asset.require('scene/solarsystem/dsn/stations')
 
 ----------------------------------------------------------------------
 ---- The Fields Of View of the DSN Ground Station Location Sites  ----
 ----------------------------------------------------------------------
-colors = stationsAsset.siteColorMap
 
 local GoldstoneFOV = {
     Identifier = "GoldstoneFOV",
@@ -16,7 +14,7 @@ local GoldstoneFOV = {
         BaseCenterDirection = earthAsset.Earth.Identifier,
         ReverseDirection = true,
         Resolution = 50,
-        Color = colors.GoldstoneColor,
+        ColorPropertyURI = "Scene.Signals.Renderable.GoldstoneColor", -- keep in sync with stationsAsset siteColorMap
         ViewAngle = 160.0
     },
     GUI = {
@@ -33,7 +31,7 @@ local MadridFOV = {
         BaseCenterDirection = earthAsset.Earth.Identifier,
         ReverseDirection = true,
         Resolution = 50,
-        Color = colors.MadridColor,
+        ColorPropertyURI = "Scene.Signals.Renderable.MadridColor", -- keep in sync with stationsAsset siteColorMap
         ViewAngle = 160.0
     },
     GUI = {
@@ -50,7 +48,7 @@ local CanberraFOV = {
         BaseCenterDirection = earthAsset.Earth.Identifier,
         ReverseDirection = true,
         Resolution = 50,
-        Color = colors.CanberraColor,
+        ColorPropertyURI = "Scene.Signals.Renderable.CanberraColor", -- keep in sync with stationsAsset siteColorMap
         ViewAngle = 160.0
     },
     GUI = {
@@ -59,4 +57,4 @@ local CanberraFOV = {
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {GoldstoneFOV, MadridFOV,CanberraFOV})
+assetHelper.registerSceneGraphNodesAndExport(asset, {GoldstoneFOV, MadridFOV, CanberraFOV})

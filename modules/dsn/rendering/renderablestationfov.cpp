@@ -29,6 +29,8 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/query/query.h>
+
 
 namespace {
     constexpr const char* ProgramName = "StationFovProgram";
@@ -47,6 +49,12 @@ namespace {
         "DistanceFade",
         "Distance Fade",
         "Fade applied linearly from viewpoint"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ColorPropertyUriInfo = {
+        "ColorPropertyURI",
+        "Color Property URI",
+        "Color property URI that makes the station field of view update with the station site colors."
     };
 } // namespace
 
@@ -68,7 +76,7 @@ documentation::Documentation RenderableStationFov::Documentation() {
                 {
                     ViewAngleInfo.identifier,
                     new DoubleVerifier,
-                    Optional::Yes,
+                    Optional::No,
                     ViewAngleInfo.description
                 },
                 {
@@ -76,6 +84,12 @@ documentation::Documentation RenderableStationFov::Documentation() {
                     new BoolVerifier,
                     Optional::Yes,
                     ViewAngleInfo.description
+                },
+                {
+                    ColorPropertyUriInfo.identifier,
+                    new StringVerifier,
+                    Optional::Yes,
+                    ColorPropertyUriInfo.description
                 }
             }
     };
@@ -97,6 +111,7 @@ RenderableStationFov::RenderableStationFov(const ghoul::Dictionary& dictionary)
     : RenderableCone(dictionary)
     , _angle(ViewAngleInfo, 160.0, 0.0, 180.0)
     , _distanceFade(DistanceFadeInfo, true)
+    , _colorPropertyUri(ColorPropertyUriInfo)
 {
     _showbase = false;
     _directionIsReversed = true;
@@ -105,6 +120,15 @@ RenderableStationFov::RenderableStationFov(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKeyAndValue<double>(ViewAngleInfo.identifier)) {
         _angle = dictionary.value<double>(ViewAngleInfo.identifier);
     } 
+
+    if (dictionary.hasKeyAndValue<std::string>(ColorPropertyUriInfo.identifier)) {
+        _colorPropertyUri = dictionary.value<std::string>(ColorPropertyUriInfo.identifier);
+        _colorPropertyPointer = openspace::property(_colorPropertyUri);
+        addProperty(_colorPropertyUri);
+        _hasUriColor = true;
+        removeProperty(_color);
+    }
+
     addProperty(_distanceFade);
     addProperty(_angle);
     removeProperty(_radius);
@@ -149,6 +173,11 @@ void RenderableStationFov::updateVertexAttributes()
 
 void RenderableStationFov::fillVertexArrays()
 {
+    if (_hasUriColor) {
+        properties::Vec4Property* colorProperty = static_cast<properties::Vec4Property*>(_colorPropertyPointer);
+        glm::vec4 color = colorProperty->value();
+        _color.setValue(glm::vec3(color.x, color.y, color.z));
+    }
     glm::vec4 colorAndOpacity = { glm::vec3(_color), _opacity };
 
     float apexFade = 1.0;

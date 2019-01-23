@@ -52,6 +52,10 @@ namespace openspace {
 
         properties::FloatProperty _angle;
         properties::BoolProperty _distanceFade;
+        properties::StringProperty _colorPropertyUri;
+        properties::Property* _colorPropertyPointer = nullptr;
+
+        bool _hasUriColor = false;
 
     private:
         /// The vertex attribute location for position
