@@ -79,7 +79,7 @@ stage('Build') {
                     cd ${srcDir}/build
                     /Applications/CMake.app/Contents/bin/cmake -G Xcode ${srcDir} .. ''' +
                     flags + '''
-                    xcodebuild -quiet -parallelizeTargets -jobs 4
+                    xcodebuild -parallelizeTargets -jobs 4
                     '''
             }
         }
