@@ -321,6 +321,49 @@ void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
 
 void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     if (_anchorNode && _aimNode) {
+        if (_anchorNode != _aimNode) {
+
+            const glm::dvec3 prevCameraPosition = _camera->positionVec3();
+            const glm::dvec3 prevCameraToAnchor = _previousAnchorNodePosition - prevCameraPosition;
+            const glm::dvec3 prevCameraToAim = _previousAimNodePosition - prevCameraPosition;
+            const glm::dvec3 prevAnchorToAim = _previousAimNodePosition - _previousAnchorNodePosition;
+
+            const glm::dvec3 newAnchorToAim = _aimNode->worldPosition() - _anchorNode->worldPosition();
+
+            const glm::dvec3 anchorDisplacement = _anchorNode->worldPosition() - _previousAnchorNodePosition;
+            const glm::dvec3 aimDisplacement = _aimNode->worldPosition() - _previousAimNodePosition;
+
+            Camera offsetCamera = *_camera;
+            offsetCamera.setPositionVec3(_camera->positionVec3() + aimDisplacement);
+            CameraRotationDecomposition prevDecomp = decomposeCameraRotation(offsetCamera, *_aimNode);
+            const glm::dquat localRot = prevDecomp.localRotation;
+            const glm::dquat globalRot = prevDecomp.globalRotation;
+
+            const glm::dvec3 prevUp = prevDecomp.globalRotation * glm::dvec3(0.0, 1.0, 0.0);
+
+            const double angle = glm::angle(glm::normalize(newAnchorToAim), glm::normalize(prevAnchorToAim));
+            const glm::dvec3 normal = glm::cross(prevAnchorToAim, newAnchorToAim);
+            const glm::dquat rotation = glm::angleAxis(angle, glm::normalize(normal));
+
+            const glm::dvec3 newCameraPosition = _anchorNode->worldPosition() - rotation * prevCameraToAnchor;
+
+            _camera->setPositionVec3(newCameraPosition);
+            glm::dquat newGlobalRot = glm::quat_cast(glm::inverse(glm::lookAt(glm::dvec3(0.0), _aimNode->worldPosition() - newCameraPosition, prevUp)));
+
+            CameraRotationDecomposition newDecomp;
+            newDecomp.localRotation = localRot;
+            newDecomp.globalRotation = newGlobalRot;
+
+            _camera->setRotation(composeCameraRotation(newDecomp));
+
+            _previousAimNodePosition = _aimNode->worldPosition();
+            _previousAimNodeRotation = _aimNode->worldRotationMatrix();
+            _previousAnchorNodePosition = _anchorNode->worldPosition();
+            _previousAnchorNodeRotation = _anchorNode->worldRotationMatrix();
+
+            return;
+        }
+
         // Read the current state of the camera
         glm::dvec3 camPos = _camera->positionVec3();
         const glm::dvec3 anchorPos = _anchorNode->worldPosition();
@@ -394,29 +437,15 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         // Recalculate posHandle since horizontal position changed
         posHandle = calculateSurfacePositionHandle(*_anchorNode, camPos);
 
-        if (_aimNode == _anchorNode) {
-            // Rotate globally to keep camera rotation fixed
-            // in the rotating reference frame of the anchor object.
-            camRotAim.globalRotation = rotateGlobally(
-                camRotAim.globalRotation,
-                anchorNodeRotationDiff,
-                posHandle
-            );
-        } else {
-            // Recompute global rotation based on always following the aim node
-            // and keeping the up vector from previous global rotation.
-            glm::dvec3 globalUpWorldSpace =
-                glm::dquat(camRotAim.globalRotation) * glm::dvec3(0.0, 1.0, 0.0);
-            const glm::dmat4 lookAtMat = glm::lookAt(
-                glm::dvec3(0.0, 0.0, 0.0),
-                glm::normalize(aimPos - camPos),
-                glm::normalize(globalUpWorldSpace)
-            );
-            const glm::dquat globalCameraRotation = glm::normalize(
-                glm::quat_cast(inverse(lookAtMat))
-            );
-            camRotAim.globalRotation = globalCameraRotation;
-        }
+
+        // Rotate globally to keep camera rotation fixed
+        // in the rotating reference frame of the anchor object.
+        camRotAim.globalRotation = rotateGlobally(
+            camRotAim.globalRotation,
+            anchorNodeRotationDiff,
+            posHandle
+        );
+
 
         // Rotate around the surface out direction
         camRotAim.globalRotation = rotateHorizontally(
