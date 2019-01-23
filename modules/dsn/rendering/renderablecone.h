@@ -63,6 +63,7 @@ namespace openspace {
         virtual void createShaderProgram();
         virtual void fillVertexArrays();
         virtual void updateVertexAttributes();
+        virtual float calculateBaseRadius();
 
         void render(const RenderData& data, RendererTasks& rendererTask) override;
         void addVertexToVertexArray(std::vector<float> &_vertexArray, glm::dvec3 position, glm::vec4 color);
@@ -135,7 +136,7 @@ namespace openspace {
         double _unit = 2.59E13;
 
         properties::FloatProperty _height;
-        properties::FloatProperty _angle;
+        properties::FloatProperty _radius;
         properties::IntProperty _resolution;
         properties::Vec3Property _color;
         properties::BoolProperty _wireframe;

@@ -48,7 +48,10 @@ namespace openspace {
         void createShaderProgram() override;
         void addVertexToVertexArray(std::vector<float> &vertexArray, glm::dvec3 position,
                                     glm::vec4 color, float distance);
+        float calculateBaseRadius() override;
 
+        properties::FloatProperty _angle;
+        properties::BoolProperty _distanceFade;
 
     private:
         /// The vertex attribute location for position

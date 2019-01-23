@@ -37,6 +37,17 @@ namespace {
     constexpr const std::array <const char*, openspace::RenderableCone::uniformCacheSize> UniformNames = {
     "modelView", "projectionTransform" };
 
+    constexpr openspace::properties::Property::PropertyInfo ViewAngleInfo = {
+        "ViewAngle",
+        "View Angle",
+        "Field of view angle"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DistanceFadeInfo = {
+        "DistanceFade",
+        "Distance Fade",
+        "Fade applied linearly from viewpoint"
+    };
 } // namespace
 
 namespace openspace {
@@ -53,6 +64,18 @@ documentation::Documentation RenderableStationFov::Documentation() {
                     "Type",
                     new StringEqualVerifier("RenderableStationFov"),
                     Optional::No
+                },
+                {
+                    ViewAngleInfo.identifier,
+                    new DoubleVerifier,
+                    Optional::Yes,
+                    ViewAngleInfo.description
+                },
+                {
+                    DistanceFadeInfo.identifier,
+                    new BoolVerifier,
+                    Optional::Yes,
+                    ViewAngleInfo.description
                 }
             }
     };
@@ -72,8 +95,19 @@ documentation::Documentation RenderableStationFov::Documentation() {
 
 RenderableStationFov::RenderableStationFov(const ghoul::Dictionary& dictionary)
     : RenderableCone(dictionary)
+    , _angle(ViewAngleInfo, 160.0, 0.0, 180.0)
+    , _distanceFade(DistanceFadeInfo, true)
 {
     _showbase = false;
+    _directionIsReversed = true;
+    _wireframe = false;
+
+    if (dictionary.hasKeyAndValue<double>(ViewAngleInfo.identifier)) {
+        _angle = dictionary.value<double>(ViewAngleInfo.identifier);
+    } 
+    addProperty(_distanceFade);
+    addProperty(_angle);
+    removeProperty(_radius);
 }
 
 void RenderableStationFov::createShaderProgram()
@@ -81,12 +115,12 @@ void RenderableStationFov::createShaderProgram()
     _programObject = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-        return global::renderEngine.buildRenderProgram(
-            ProgramName,
-            absPath("${MODULE_DSN}/shaders/renderablestationfov_vs.glsl"),
-            absPath("${MODULE_DSN}/shaders/renderablestationfov_fs.glsl")
-        );
-    }
+            return global::renderEngine.buildRenderProgram(
+                ProgramName,
+                absPath("${MODULE_DSN}/shaders/renderablestationfov_vs.glsl"),
+                absPath("${MODULE_DSN}/shaders/renderablestationfov_fs.glsl")
+            );
+        }
     );
 }
 
@@ -115,28 +149,32 @@ void RenderableStationFov::updateVertexAttributes()
 
 void RenderableStationFov::fillVertexArrays()
 {
-    glm::vec3 color = _color;
-    glm::vec4 colorAndOpacity = { color, _opacity };
+    glm::vec4 colorAndOpacity = { glm::vec3(_color), _opacity };
 
-    // add base vertices
-    addVertexToVertexArray(_vertexBaseArray, _baseCenterPosition, colorAndOpacity, 1.0);
-
-    for (int i = 0; i < _baseVertices.size(); ++i) {
-        addVertexToVertexArray(_vertexBaseArray, _baseVertices[i], colorAndOpacity, 0.0);
+    float apexFade = 1.0;
+    float baseVerticeFade = 1.0;
+    if(_distanceFade) {
+        baseVerticeFade = 0.0;
     }
-    addVertexToVertexArray(_vertexBaseArray, _baseVertices[0], colorAndOpacity, 0.0);
+    // add base vertices
+    //addVertexToVertexArray(_vertexBaseArray, _baseCenterPosition, colorAndOpacity, apexFade);
+
+    //for (int i = 0; i < _baseVertices.size(); ++i) {
+    //    addVertexToVertexArray(_vertexBaseArray, _baseVertices[i], colorAndOpacity, baseVerticeFade);
+    //}
+    //addVertexToVertexArray(_vertexBaseArray, _baseVertices[0], colorAndOpacity, baseVerticeFade);
 
     //add lateral surface vertices
-    addVertexToVertexArray(_vertexLateralSurfaceArray, _apexPosition, colorAndOpacity, 1.0);
+    addVertexToVertexArray(_vertexLateralSurfaceArray, _apexPosition, colorAndOpacity, apexFade);
 
     for (int i = 0; i < _baseVertices.size(); ++i) {
-        addVertexToVertexArray(_vertexLateralSurfaceArray, _baseVertices[i], colorAndOpacity, 0.0);
+        addVertexToVertexArray(_vertexLateralSurfaceArray, _baseVertices[i], colorAndOpacity, baseVerticeFade);
     }
-    addVertexToVertexArray(_vertexLateralSurfaceArray, _baseVertices[0], colorAndOpacity, 0.0);
+    addVertexToVertexArray(_vertexLateralSurfaceArray, _baseVertices[0], colorAndOpacity, baseVerticeFade);
 
 }
 
-void RenderableStationFov::addVertexToVertexArray(std::vector<float>& vertexArray, glm::dvec3 position, glm::vec4 color, float distance)
+void RenderableStationFov::addVertexToVertexArray(std::vector<float>& vertexArray, glm::dvec3 position, glm::vec4 color, float distanceFade)
 {
     vertexArray.push_back(position.x);
     vertexArray.push_back(position.y);
@@ -145,7 +183,17 @@ void RenderableStationFov::addVertexToVertexArray(std::vector<float>& vertexArra
     vertexArray.push_back(color.g);
     vertexArray.push_back(color.b);
     vertexArray.push_back(color.a);
-    vertexArray.push_back(distance);
+    vertexArray.push_back(distanceFade);
+}
+
+float RenderableStationFov::calculateBaseRadius()
+{
+    double angle = glm::radians(float(_angle));
+    angle = angle / 2.0; //Half of the full cone angle to get a right -angled triangle
+
+    float radius = _height * _unit * tan(angle);
+
+    return radius;
 }
 
 } // namespace openspace

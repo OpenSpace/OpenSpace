@@ -78,10 +78,10 @@ namespace {
         "Height",
         "Height of the cone"
     };
-    constexpr openspace::properties::Property::PropertyInfo AngleInfo = {
-        "Angle",
-        "Angle",
-        "Angle of the cone base"
+    constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
+        "Radius",
+        "Radius",
+        "Radius of the cone base"
     };
     constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {
         "Resolution",
@@ -145,10 +145,10 @@ documentation::Documentation RenderableCone::Documentation() {
                 HeightInfo.description
             },
             {
-                AngleInfo.identifier,
+                RadiusInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
-                AngleInfo.description
+                RadiusInfo.description
             },
             {
                 ResolutionInfo.identifier,
@@ -174,10 +174,10 @@ documentation::Documentation RenderableCone::Documentation() {
 
 RenderableCone::RenderableCone(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _height(HeightInfo, 0.8, 0.0, 1.0)
-    , _angle(AngleInfo, 160, 0.0, 180)
+    , _height(HeightInfo, 0.25, 0.0, 1.0)
+    , _radius(RadiusInfo, 0.8, 0.0, 1.0)
     , _resolution(ResolutionInfo, 50, 4, 100)
-    , _wireframe(WireframeInfo, true)
+    , _wireframe(WireframeInfo, false)
     , _color(
         ColorInfo,
         _defaultColor,
@@ -226,12 +226,16 @@ RenderableCone::RenderableCone(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKeyAndValue<bool>(WireframeInfo.identifier)) {
         _wireframe = dictionary.value<bool>(WireframeInfo.identifier);
     }
+    if (dictionary.hasKeyAndValue<double>(RadiusInfo.identifier)) {
+        _radius = dictionary.value<double>(RadiusInfo.identifier);
+    }
+
     addProperty(_height);
-    addProperty(_angle);
+    addProperty(_radius);
     addProperty(_resolution);
     addProperty(_opacity);
-    addProperty(_wireframe);
     addProperty(_color);
+    addProperty(_wireframe);
 }
 void RenderableCone::initializeGL() {
 
@@ -290,7 +294,11 @@ void RenderableCone::updateVertexAttributes() {
 
     // Update the number of lines to render, same for both vertex arrays
     _count = static_cast<GLsizei>(_vertexLateralSurfaceArray.size() / (_sizeThreeVal + _sizeFourVal));
-};
+}
+float RenderableCone::calculateBaseRadius()
+{
+    return _radius * _unit;
+}
 
 void RenderableCone::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
@@ -361,12 +369,12 @@ void RenderableCone::createShaderProgram()
     _programObject = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-        return global::renderEngine.buildRenderProgram(
-            ProgramName,
-            absPath("${MODULE_DSN}/shaders/renderablecone_vs.glsl"),
-            absPath("${MODULE_DSN}/shaders/renderablecone_fs.glsl")
-        );
-    }
+            return global::renderEngine.buildRenderProgram(
+                ProgramName,
+                absPath("${MODULE_DSN}/shaders/renderablecone_vs.glsl"),
+                absPath("${MODULE_DSN}/shaders/renderablecone_fs.glsl")
+            );
+        }
     );
 }
 
@@ -399,10 +407,7 @@ void RenderableCone::update(const UpdateData& data) {
     int numBaseVertices = _resolution;
     double height = _height * _unit;
 
-    double angle = glm::radians(float(_angle));
-    angle = angle / 2.0; //Half of the full cone angle to get a right -angled triangle
-
-    double radius = height * tan(angle);
+    double radius = calculateBaseRadius(); 
 
     float angleIncrement = glm::radians(360.0 / numBaseVertices);
     glm::dvec3 e0 = glm::normalize(glm::cross(_baseCenterDirection, glm::dvec3(1.0, 0.0, 0.0)));
@@ -456,13 +461,14 @@ void RenderableCone::fillVertexArrays() {
     glm::vec4 colorAndOpacity = { color, _opacity };
    
     // add base vertices
-    addVertexToVertexArray(_vertexBaseArray, _baseCenterPosition, colorAndOpacity);
+    if (_showbase) {
+        addVertexToVertexArray(_vertexBaseArray, _baseCenterPosition, colorAndOpacity);
 
-    for (int i = 0; i < _baseVertices.size(); ++i) {
-        addVertexToVertexArray(_vertexBaseArray, _baseVertices[i], colorAndOpacity);
+        for (int i = 0; i < _baseVertices.size(); ++i) {
+            addVertexToVertexArray(_vertexBaseArray, _baseVertices[i], colorAndOpacity);
+        }
+        addVertexToVertexArray(_vertexBaseArray, _baseVertices[0], colorAndOpacity);
     }
-    addVertexToVertexArray(_vertexBaseArray, _baseVertices[0], colorAndOpacity);
-
     //add lateral surface vertices
     addVertexToVertexArray(_vertexLateralSurfaceArray, _apexPosition, colorAndOpacity);
 

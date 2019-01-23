@@ -27,7 +27,7 @@
 // layout locations must correspond to va locations in renderablesignals.cpp
 layout(location = 0) in vec3 in_point_position;
 layout(location = 1) in vec4 in_color;
-layout(location = 2) in float in_distance_from_apex;
+layout(location = 2) in float in_distance_fade;
 
 
 out vec4 vs_positionScreenSpace;
@@ -46,5 +46,5 @@ void main() {
     gl_Position.z = 0.f; 
 
     // pass variables with no calculations directly to fragment
-    vs_color = vec4(in_color.rgb, in_distance_from_apex);
+    vs_color = vec4(in_color.rgb, in_color.a * in_distance_fade); 
 }
