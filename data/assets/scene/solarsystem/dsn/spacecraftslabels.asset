@@ -4,7 +4,14 @@ local spacecrafts = asset.require('scene/solarsystem/dsn/spacecrafts')
 --------------------------------------------------
 --------------------- Labels  --------------------
 --------------------------------------------------
-
+local AceLabel = {
+    LabelText = ".Ace",
+    ObjectIdentifier = spacecrafts.AceAsset.spacecraftID
+}
+local BepiLabel = {
+    LabelText = ".Bepi",
+    ObjectIdentifier = spacecrafts.BepiAsset.spacecraftID
+}
 local CassiniLabel = {
     LabelText = ".Cassini",
     ObjectIdentifier = spacecrafts.CassiniAsset.spacecraftID
@@ -12,6 +19,10 @@ local CassiniLabel = {
 local ChandraLabel = {
     LabelText = ".Chandra",
     ObjectIdentifier = spacecrafts.ChandraAsset.spacecraftID
+}
+local Ch2oLabel = {
+    LabelText = ".Ch2o",
+    ObjectIdentifier = spacecrafts.Ch2oAsset.spacecraftID
 }
 local CLU1Label = {
     LabelText = ".CLU1",
@@ -69,9 +80,17 @@ local JunoLabel = {
     LabelText = ".Juno",
     ObjectIdentifier = spacecrafts.JunoAsset.spacecraftID
 }
+local JwstLabel = {
+    LabelText = ".JWST",
+    ObjectIdentifier = spacecrafts.JwstAsset.spacecraftID
+}
 local KeplerLabel = {
     LabelText = ".Kepler",
     ObjectIdentifier = spacecrafts.KeplerAsset.spacecraftID
+}
+local LadeLabel = {
+    LabelText = ".LADE",
+    ObjectIdentifier = spacecrafts.LadeAsset.spacecraftID
 }
 local MarCOALabel = {
     LabelText = ".MarCO A",
@@ -280,7 +299,8 @@ local labelMapInnerSpace = {
                             label17 = RosettaLabel,
                             label18 = ParkerSolarProbeLabel,
                             label19 = VenusExpressLabel,
-                            label20 = PRCNCLabel
+                            label20 = PRCNCLabel,
+                            label21 = BepiLabel
 
                         }
 
@@ -311,7 +331,12 @@ local labelMapNearEarth = {
                             label24 = MMS2Label,
                             label25 = MMS3Label,
                             label26 = MMS4Label,
-                            label27 = TERRLabel
+                            label27 = TERRLabel,
+                            label28 = AceLabel,
+                            label29 = Ch2oLabel,
+                            label30 = JwstLabel,
+                            label31 = LadeLabel
+
 
                         }
 local labelMapClusters = {  

@@ -1,4 +1,4 @@
-local assetHelper = asset.require('util/asset_helper')
+  local assetHelper = asset.require('util/asset_helper')
 local dataFolder = openspace.absPath("${SYNC}/http/dsn_data/1/positioning/CAS") 
 
 local models = asset.syncedResource({
@@ -13,7 +13,7 @@ local Cassini = {
     Identifier = spacecraftID,
     TimeFrame = {
         Type = "TimeFrameInterval",
-        Start = "2014-JAN-2-18:00:00",
+        Start = "2014-JAN-01-00:00:00",
         End = "2017-SEP-15-14:00:00"
     },   
     Transform = {

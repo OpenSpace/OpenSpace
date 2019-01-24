@@ -5,9 +5,12 @@ local Voyager1Asset = asset.require('scene/solarsystem/missions/voyager1/voyager
 local Voyager2Asset = asset.require('scene/solarsystem/missions/voyager2/voyager2')
 
 -- added specifically for dsn visualization
+local AceAsset = asset.require('scene/solarsystem/dsn/spacecrafts/ace/ace')
+local BepiAsset = asset.require('scene/solarsystem/dsn/spacecrafts/bepi/bepi')
 local CassiniAsset = asset.require('scene/solarsystem/dsn/spacecrafts/cassini/cassini')
-local CuriosityAsset = asset.require('scene/solarsystem/dsn/spacecrafts/curiosity/curiosity')
 local ChandraAsset = asset.require('scene/solarsystem/dsn/spacecrafts/chandra/chandra')
+local Ch2oAsset = asset.require('scene/solarsystem/dsn/spacecrafts/ch20/ch2o')
+local CuriosityAsset = asset.require('scene/solarsystem/dsn/spacecrafts/curiosity/curiosity')
 local CLU1Asset = asset.require('scene/solarsystem/dsn/spacecrafts/clu1/clu1')
 local CLU2Asset = asset.require('scene/solarsystem/dsn/spacecrafts/clu2/clu2')
 local CLU3Asset = asset.require('scene/solarsystem/dsn/spacecrafts/clu3/clu3')
@@ -21,7 +24,9 @@ local IceAsset = asset.require('scene/solarsystem/dsn/spacecrafts/ice/ice')
 local ImageAsset = asset.require('scene/solarsystem/dsn/spacecrafts/image/image')
 local InSightAsset = asset.require('scene/solarsystem/dsn/spacecrafts/insight/insight')
 local JunoAsset = asset.require('scene/solarsystem/dsn/spacecrafts/juno/juno')
+local JwstAsset = asset.require('scene/solarsystem/dsn/spacecrafts/jwst/jwst')
 local KeplerAsset = asset.require('scene/solarsystem/dsn/spacecrafts/kepler/kepler')
+local LadeAsset = asset.require('scene/solarsystem/dsn/spacecrafts/lade/lade')
 local MarCOAAsset = asset.require('scene/solarsystem/dsn/spacecrafts/marcoa/marcoa')
 local MarCOBAsset = asset.require('scene/solarsystem/dsn/spacecrafts/marcob/marcob')
 local MarsRecOrbAsset = asset.require('scene/solarsystem/dsn/spacecrafts/mro/mro')
@@ -64,8 +69,11 @@ local XRayAsset = asset.require('scene/solarsystem/dsn/spacecrafts/xray/xray')
 ----- for each spacecraft up to date with the dsn signal data -----
 -------------------------------------------------------------------
 local signalDataIdMap = {
+    ACE = AceAsset.spacecraftID,
+    BEPI = BepiAsset.spacecraftID,
     CAS = CassiniAsset.spacecraftID,
     CHDR = ChandraAsset.spacecraftID,
+    CH2O = Ch2oAsset.spacecraftID,
     CLU1 = CLU1Asset.spacecraftID,
     CLU2 = CLU2Asset.spacecraftID,
     CLU3 = CLU3Asset.spacecraftID,
@@ -78,7 +86,9 @@ local signalDataIdMap = {
     ICE = IceAsset.spacecraftID,
     IMAG = ImageAsset.spacecraftID,
     JNO = JunoAsset.spacecraftID,
+    JWST = JwstAsset.spacecraftID,
     KEPL = KeplerAsset.spacecraftID,
+    LADE = LadeAsset.spacecraftID,
     M010 = MarsOdysseyAsset.spacecraftID,
     MCOA = MarCOAAsset.spacecraftID,
     MCOB = MarCOBAsset.spacecraftID,
@@ -124,9 +134,12 @@ local signalDataIdMap = {
 
 
 asset.export("signalDataIdMap", signalDataIdMap)
+asset.export("AceAsset", AceAsset)
+asset.export("BepiAsset", BepiAsset)
 asset.export("CassiniAsset", CassiniAsset)
-asset.export("CuriosityAsset", CuriosityAsset)
 asset.export("ChandraAsset", ChandraAsset)
+asset.export("Ch2oAsset", Ch2oAsset)
+asset.export("CuriosityAsset", CuriosityAsset)
 asset.export("CLU1Asset", CLU1Asset)
 asset.export("CLU2Asset", CLU2Asset)
 asset.export("CLU3Asset", CLU3Asset)
@@ -140,7 +153,9 @@ asset.export("IceAsset", IceAsset)
 asset.export("ImageAsset", ImageAsset)
 asset.export("InSightAsset", InSightAsset)
 asset.export("JunoAsset", JunoAsset)
+asset.export("JwstAsset", JwstAsset)
 asset.export("KeplerAsset", KeplerAsset)
+asset.export("LadeAsset", LadeAsset)
 asset.export("MarCOAAsset", MarCOAAsset)
 asset.export("MarCOBAsset", MarCOBAsset)
 asset.export("MarsRecOrbAsset", MarsRecOrbAsset)

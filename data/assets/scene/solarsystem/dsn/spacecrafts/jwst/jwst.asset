@@ -1,5 +1,5 @@
 local assetHelper = asset.require('util/asset_helper')
-local dataFolder = openspace.absPath("${SYNC}/http/dsn_data/1/positioning/ICE") 
+local dataFolder = openspace.absPath("${SYNC}/http/dsn_data/1/positioning/JWST") 
 
 local models = asset.syncedResource({
     Name = "Dsn models",
@@ -7,14 +7,14 @@ local models = asset.syncedResource({
     Identifier = "dsn_stations",
     Version = 1
 })
-local spacecraftID = "Ice";
+local spacecraftID = "Jwst";
 
-local Ice = {
+local Jwst = {
     Identifier = spacecraftID,
     TimeFrame = {
         Type = "TimeFrameInterval",
-        Start = "2014-JUN-01-01:00:00",
-        End = "2014-NOV-01-16:00:00"
+        Start = "2018-JUL-01-01:00:00",
+        End = "2019-JAN-01-00:00:00"
     },
     Transform = {
       Translation = {
@@ -26,9 +26,9 @@ local Ice = {
 
    },
     GUI = {
-        Name = "Ice",
-        Path = "/Solar System/Missions/Ice"
+        Name = "Jwst",
+        Path = "/Solar System/Missions/Jwst"
     }
 }
 asset.export("spacecraftID", spacecraftID)
-assetHelper.registerSceneGraphNodesAndExport(asset, {Ice})
+assetHelper.registerSceneGraphNodesAndExport(asset, {Jwst})
