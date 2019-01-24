@@ -101,7 +101,7 @@ local MarCOBLabel = {
     ObjectIdentifier = spacecrafts.MarCOBAsset.spacecraftID
 }
 local MarsRecOrbLabel = {
-    LabelText = ".Mars Recon Orbiter",
+    LabelText = ".MRO",
     ObjectIdentifier = spacecrafts.MarsRecOrbAsset.spacecraftID
 }
 local MarsOdysseyLabel = {
@@ -222,7 +222,7 @@ local ThemisCLabel = {
     ObjectIdentifier = spacecrafts.ThemisCAsset.spacecraftID
 }
 local TraceGasOrbiterLabel = {
-    LabelText = ".Trace Gas Orbiter",
+    LabelText = ".TGO",
     ObjectIdentifier = spacecrafts.TraceGasOrbiterAsset.spacecraftID
 }
 local VenusExpressLabel = {
