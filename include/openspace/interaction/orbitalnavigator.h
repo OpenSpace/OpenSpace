@@ -153,7 +153,17 @@ private:
      * from the global to the current total rotation so that
      * <code>cameraRotation = globalRotation * localRotation</code>.
      */
-    CameraRotationDecomposition decomposeCameraRotation(const Camera& camera,
+    CameraRotationDecomposition decomposeCameraRotationSurface(const Camera& camera,
+        const SceneGraphNode& reference);
+
+    /**
+     * Decomposes the cameras rotation in to a global and a local rotation defined by
+     * CameraRotationDecomposition. The global rotation defines the rotation so that the
+     * camera points towards the reference node's origin.
+     * The local rotation defines the differential from the global to the current total
+     * rotation so that <code>cameraRotation = globalRotation * localRotation</code>.
+     */
+    CameraRotationDecomposition decomposeCameraRotationOrigin(const Camera& camera,
         const SceneGraphNode& reference);
 
     /**
