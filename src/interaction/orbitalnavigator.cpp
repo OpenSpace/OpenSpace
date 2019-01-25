@@ -360,18 +360,29 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
             const glm::dvec3 intermediateCameraToProjectedAim = projectedAim - _camera->positionVec3();
 
             double alpha = glm::angle(glm::normalize(intermediateCameraToAnchor), glm::normalize(intermediateCameraToProjectedAim));
-            double ratio = glm::sin(alpha) / glm::length(newAnchorToAim) * glm::length(_anchorNode->worldPosition() - _camera->positionVec3());
+            double ratio = glm::sin(alpha) * glm::length(intermediateCameraToAnchor) / glm::length(newAnchorToAim);
 
             if (ratio < -1.0 || ratio > 1.0) {
-                std::cout << "Warning: ratio " << ratio << " outside bounds." << std::endl;
-                std::cout << "alpha: " << alpha << ", denominator:" << (glm::length(newAnchorToAim) / glm::length(_anchorNode->worldPosition() - _camera->positionVec3())) << std::endl;
+                //std::cout << "Warning: ratio " << ratio << " outside bounds." << std::endl;
+                //std::cout << "alpha: " << alpha << ", denominator:" << (glm::length(newAnchorToAim) / glm::length(_anchorNode->worldPosition() - _camera->positionVec3())) << std::endl;
             }
             ratio = glm::clamp(ratio, -1.0, 1.0);
 
-            const double delta = glm::asin(ratio);
-            const double beta = glm::angle(glm::normalize(-intermediateCameraToAnchor), glm::normalize(newAnchorToProjectedAim));
+            double sign = 1.0;
+            double delta = glm::asin(ratio);
+            if (glm::length(intermediateCameraToAnchor) > glm::length(intermediateCameraToProjectedAim)) {
+                delta = -glm::asin(ratio) + glm::pi<double>();
+                // TODO: Find out if this is really correct.
+                //std::cout << delta << " inverted." << std::endl;
+            }
+
+            double beta = glm::angle(glm::normalize(-intermediateCameraToAnchor), glm::normalize(newAnchorToProjectedAim));
+
             const double gamma = glm::pi<double>() - alpha - delta;
-            const double distanceRotationAngle = gamma - beta;
+            double distanceRotationAngle = gamma - beta;
+
+            //std::cout << distanceRotationAngle << std::endl;
+            //distanceRotationAngle *= sign;
 
             if (distanceRotationAngle > AngleEpsilon) {
                 glm::dvec3 distanceRotationAxis = glm::normalize(glm::cross(intermediateCameraToAnchor, newAnchorToProjectedAim));
