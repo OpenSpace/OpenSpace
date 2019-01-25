@@ -21,7 +21,7 @@ local ChandraLabel = {
     ObjectIdentifier = spacecrafts.ChandraAsset.spacecraftID
 }
 local Ch2oLabel = {
-    LabelText = ".Ch2o",
+    LabelText = ".Ch2O",
     ObjectIdentifier = spacecrafts.Ch2oAsset.spacecraftID
 }
 local CLU1Label = {
@@ -108,6 +108,10 @@ local MarsOdysseyLabel = {
     LabelText= ".Mars Odyssey",
     ObjectIdentifier = spacecrafts.MarsOdysseyAsset.spacecraftID
 }
+local MavenLabel = {
+    LabelText = ".MAVEN",
+    ObjectIdentifier = spacecrafts.MavenAsset.spacecraftID
+}
 local MessengerLabel = {
     LabelText = ".Messenger",
     ObjectIdentifier = spacecrafts.MessengerAsset.spacecraftID
@@ -160,6 +164,10 @@ local SohoLabel = {
     LabelText = ".SOHO",
     ObjectIdentifier = spacecrafts.SohoAsset.spacecraftID
 }
+local SpilLabel = {
+    LabelText = ".SPIL",
+    ObjectIdentifier = spacecrafts.SpilAsset.spacecraftID
+}
 local SpitzerLabel = {
     LabelText = ".Spitzer",
     ObjectIdentifier = spacecrafts.SpitzerAsset.spacecraftID
@@ -178,6 +186,10 @@ local RosettaLabel = {
 }
 local TD10Label = {
     LabelText = ".TD10",
+    ObjectIdentifier = spacecrafts.TD10Asset.spacecraftID
+}
+local TD11Label = {
+    LabelText = ".TD11",
     ObjectIdentifier = spacecrafts.TD10Asset.spacecraftID
 }
 local TD12Label = {
@@ -224,6 +236,10 @@ local ThemisCLabel = {
 local TraceGasOrbiterLabel = {
     LabelText = ".TGO",
     ObjectIdentifier = spacecrafts.TraceGasOrbiterAsset.spacecraftID
+}
+local UlyssesLabel = {
+    LabelText = ".Ulysses",
+    ObjectIdentifier = spacecrafts.UlyssesAsset.spacecraftID
 }
 local VenusExpressLabel = {
     LabelText = ".Venus Express",
@@ -272,7 +288,8 @@ local labelMapMarsMissions = {
                         label6 = CuriosityLabel,
                         label7 = MarCOALabel,
                         label8 = MarCOBLabel,
-                        label9 = InSightLabel
+                        label9 = MavenLabel,
+                        label10 = InSightLabel
 
                     }
 
@@ -300,7 +317,9 @@ local labelMapInnerSpace = {
                             label18 = ParkerSolarProbeLabel,
                             label19 = VenusExpressLabel,
                             label20 = PRCNCLabel,
-                            label21 = BepiLabel
+                            label21 = BepiLabel,
+                            label22 = SpilLabel,
+                            label23 = UlyssesLabel
 
                         }
 
@@ -315,27 +334,28 @@ local labelMapNearEarth = {
                             label8 = TessLabel,
                             label9 = GeotailLabel,
                             label10 = TD10Label,
-                            label11 = TD12Label,
-                            label12 = TD13Label,
-                            label13 = TDR3Label,
-                            label14 = TDR5Label,
-                            label15 = TDR7Label,
-                            label16 = TDR9Label,
-                            label17 = XRayLabel,
-                            label18 = ImageLabel,
-                            label19 = CLU1Label,
-                            label20 = CLU2Label,
-                            label21 = CLU3Label,
-                            label22 = CLU4Label,
-                            label23 = MMS1Label,
-                            label24 = MMS2Label,
-                            label25 = MMS3Label,
-                            label26 = MMS4Label,
-                            label27 = TERRLabel,
-                            label28 = AceLabel,
-                            label29 = Ch2oLabel,
-                            label30 = JwstLabel,
-                            label31 = LadeLabel
+                            label11 = TD11Label,
+                            label12 = TD12Label,
+                            label13 = TD13Label,
+                            label14 = TDR3Label,
+                            label15 = TDR5Label,
+                            label16 = TDR7Label,
+                            label17 = TDR9Label,
+                            label18 = XRayLabel,
+                            label19 = ImageLabel,
+                            label20 = CLU1Label,
+                            label21 = CLU2Label,
+                            label22 = CLU3Label,
+                            label23 = CLU4Label,
+                            label24 = MMS1Label,
+                            label25 = MMS2Label,
+                            label26 = MMS3Label,
+                            label27 = MMS4Label,
+                            label28 = TERRLabel,
+                            label29 = AceLabel,
+                            label30 = Ch2oLabel,
+                            label31 = JwstLabel,
+                            label32 = LadeLabel
 
 
                         }
