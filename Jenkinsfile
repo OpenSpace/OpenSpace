@@ -54,9 +54,7 @@ stage('Build') {
                         cd build
                         cmake -G "Visual Studio 15 2017 Win64" .. ''' +
                         flags + ''' ..
-                        msbuild.exe OpenSpace.sln /nologo /verbosity:minimal /p:Configuration=Debug /target:OpenSpace
-                        msbuild.exe OpenSpace.sln /nologo /verbosity:minimal /p:Configuration=Debug /target:GhoulTest
-                        msbuild.exe OpenSpace.sln /nologo /verbosity:minimal /p:Configuration=Debug /target:OpenSpaceTest
+                        msbuild.exe OpenSpace.sln /nologo /verbosity:minimal /p:Configuration=Debug /target:OpenSpace /target:"Unit Tests"\GhoulTest /target:"Unit Tests"\OpenSpaceTest
                     '''
                 }
             }
@@ -81,7 +79,7 @@ stage('Build') {
                     cd ${srcDir}/build
                     /Applications/CMake.app/Contents/bin/cmake -G Xcode ${srcDir} .. ''' +
                     flags + '''
-                    xcodebuild -parallelizeTargets -jobs 4 -target OpenSpace GhoulTest OpenSpaceTest
+                    xcodebuild -parallelizeTargets -jobs 4 -target OpenSpace -target GhoulTest -target OpenSpaceTest
                     '''
             }
         }
