@@ -1,0 +1,24 @@
+local assetHelper = asset.require('util/asset_helper')
+local dataFolder = openspace.absPath("${SYNC}/http/dsn_data/1/positioning/TDR6") 
+
+
+local spacecraftID = "TDR6";
+
+local TDR6 = {
+    Identifier = spacecraftID,
+    Transform = {
+      Translation = {
+          Type = "RadecTranslation", 
+          DataFolder = dataFolder,
+          DataFileType = "json",
+          ObjectIdentifier = spacecraftID
+      }
+
+   },
+    GUI = {
+        Name = "TDR6",
+        Path = "/Solar System/Missions/TDR6"
+    }
+}
+asset.export("spacecraftID", spacecraftID)
+assetHelper.registerSceneGraphNodesAndExport(asset, {TDR6})

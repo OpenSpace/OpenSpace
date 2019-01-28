@@ -57,6 +57,7 @@ local TD12Asset = asset.require('scene/solarsystem/dsn/spacecrafts/td12/td12')
 local TD13Asset = asset.require('scene/solarsystem/dsn/spacecrafts/td13/td13')
 local TDR3Asset = asset.require('scene/solarsystem/dsn/spacecrafts/tdr3/tdr3')
 local TDR5Asset = asset.require('scene/solarsystem/dsn/spacecrafts/tdr5/tdr5')
+local TDR6Asset = asset.require('scene/solarsystem/dsn/spacecrafts/tdr6/tdr6')
 local TDR7Asset = asset.require('scene/solarsystem/dsn/spacecrafts/tdr7/tdr7')
 local TDR9Asset = asset.require('scene/solarsystem/dsn/spacecrafts/tdr9/tdr9')
 local TERRAsset = asset.require('scene/solarsystem/dsn/spacecrafts/terr/terr')
@@ -126,6 +127,7 @@ local signalDataIdMap = {
     TD13 = TD13Asset.spacecraftID,
     TDR3 = TDR3Asset.spacecraftID,
     TDR5 = TDR5Asset.spacecraftID,
+    TDR6 = TDR6Asset.spacecraftID,
     TDR7 = TDR7Asset.spacecraftID,
     TDR9 = TDR9Asset.spacecraftID,
     TESS = TessAsset.spacecraftID,
@@ -196,6 +198,7 @@ asset.export("TD12Asset", TD12Asset)
 asset.export("TD13Asset", TD13Asset)
 asset.export("TDR3Asset", TDR3Asset)
 asset.export("TDR5Asset", TDR5Asset)
+asset.export("TDR6Asset", TDR6Asset)
 asset.export("TDR7Asset", TDR7Asset)
 asset.export("TDR9Asset", TDR9Asset)
 asset.export("TERRAsset", TERRAsset)
