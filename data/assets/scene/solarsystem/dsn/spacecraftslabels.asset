@@ -283,6 +283,10 @@ local InsightClusterLabel = {
     LabelText = "InSight, MarCO A & B ",
     ObjectIdentifier = spacecrafts.InSightAsset.spacecraftID
 }
+local LunarClusterLabel = {
+    LabelText = "LRO, Themis B & C ",
+    ObjectIdentifier = "Moon"
+}
 
 -----------------------------------------------
 -------------------- Id Maps ------------------
@@ -333,8 +337,6 @@ local labelMapInnerSpace = {
 local labelMapNearEarth = {  
                             Label1 = GaiaLabel,
                             Label2 = ChandraLabel, 
-                            label3 = ThemisBLabel,
-                            label4 = ThemisCLabel,
                             label5 = WindLabel,
                             label6 = SohoLabel,
                             label7 = IceLabel,
@@ -365,11 +367,17 @@ local labelMapNearEarth = {
                             label32 = JwstLabel,
                             label33 = LadeLabel,
                             label34 = SpilLabel,
-                            label35 = LroLabel
+
                         }
+local labelMapLunarMissions = {  
+                            label1 = LroLabel,
+                            label2 = ThemisBLabel,
+                            label3 = ThemisCLabel
+                        }
+
 local labelMapClusters = {  
                             Label1 = MarsClusterLabel,
-                            Label2 = InsightClusterLabel
+                            Label2 = InsightClusterLabel,
                         }
 
 
@@ -378,25 +386,49 @@ local labelMapClusters = {
 -- Allows us to create multiple labels with similar styling --
 --------------------------------------------------------------
 
-local InnerSpaceDsnLabels = {
-    Identifier = "InnerSpaceDsnLabels",
+local NearEarthClusterDsnLabels = {
+    Identifier = "NearEarthClusterDsnLabels",
     Renderable = {
         Type = "RenderableDsnLabels",
         Enabled = true,
         ScaleFactor = 9.2,
-        LabelIdentifierMap = labelMapInnerSpace,
-        TextColor = { 0.8, 0.7, 0.6, 1.0 },
+        LabelIdentifierMap = { label3 = LunarClusterLabel },
+        TextColor = { 1.0, 0.6, 0.4, 1.0 },
         DrawLabels = true,
         LabelSizeRange = {5.5, 6.0},
-        SizeDistanceRange = {2, 400000000},
+        SizeDistanceRange = {2, 400000},
+        SizeDistanceUnit = "km",
+        FadeOutDistanceRange = {400000, 300000},
+        FadeOutDistanceUnit = "km",
+        FadeInDistanceRange = {20,25},
+        FadeInDistanceUnit = "lightseconds"
+    },
+    GUI = {
+        Name = "Near Earth Cluster DSN Labels",
+        Path = "/Labels"
+    }
+}
+
+
+local LunarMissionsDsnLabels = {
+    Identifier = "LunarMissionsDsnLabels",
+    Renderable = {
+        Type = "RenderableDsnLabels",
+        Enabled = true,
+        ScaleFactor = 9.2,
+        LabelIdentifierMap = labelMapLunarMissions,
+        TextColor = { 1.0, 0.6, 0.4, 1.0 },
+        DrawLabels = true,
+        LabelSizeRange = {5.5, 6.0},
+        SizeDistanceRange = {2, 1000},
         SizeDistanceUnit = "km",
         FadeOutDistanceRange = {2, 0.1}, 
         FadeOutDistanceUnit = "km",
-        FadeInDistanceRange = {2,1},
-        FadeInDistanceUnit = "lighthours",
+        FadeInDistanceRange = {4,400000},
+        FadeInDistanceUnit = "km",
     },
     GUI = {
-        Name = "Inner Space DSN Labels",
+        Name = "Lunar Missions DSN Labels",
         Path = "/Labels"
     }
 }
@@ -424,25 +456,25 @@ local NearEarthDsnLabels = {
     }
 }
 
-local OuterSpaceDsnLabels = {
-    Identifier = "OuterSpaceDsnLabels",
+local InnerSpaceDsnLabels = {
+    Identifier = "InnerSpaceDsnLabels",
     Renderable = {
         Type = "RenderableDsnLabels",
         Enabled = true,
-        ScaleFactor = 9.7,
-        LabelIdentifierMap = labelMapOuterSpace,
+        ScaleFactor = 9.2,
+        LabelIdentifierMap = labelMapInnerSpace,
         TextColor = { 0.8, 0.7, 0.6, 1.0 },
         DrawLabels = true,
-        LabelSizeRange = {5.8, 6.3},
+        LabelSizeRange = {5.5, 6.0},
         SizeDistanceRange = {2, 400000000},
         SizeDistanceUnit = "km",
         FadeOutDistanceRange = {2, 0.1}, 
         FadeOutDistanceUnit = "km",
-        FadeInDistanceRange = {3,2},
-        FadeInDistanceUnit = "lightdays",
+        FadeInDistanceRange = {2,1},
+        FadeInDistanceUnit = "lighthours",
     },
     GUI = {
-        Name = "Outer Space DSN Labels",
+        Name = "Inner Space DSN Labels",
         Path = "/Labels"
     }
 }
@@ -494,10 +526,35 @@ local ClusteredDsnLabels = {
     }
 }
 
+local OuterSpaceDsnLabels = {
+    Identifier = "OuterSpaceDsnLabels",
+    Renderable = {
+        Type = "RenderableDsnLabels",
+        Enabled = true,
+        ScaleFactor = 9.7,
+        LabelIdentifierMap = labelMapOuterSpace,
+        TextColor = { 0.8, 0.7, 0.6, 1.0 },
+        DrawLabels = true,
+        LabelSizeRange = {5.8, 6.3},
+        SizeDistanceRange = {2, 400000000},
+        SizeDistanceUnit = "km",
+        FadeOutDistanceRange = {2, 0.1}, 
+        FadeOutDistanceUnit = "km",
+        FadeInDistanceRange = {3,2},
+        FadeInDistanceUnit = "lightdays",
+    },
+    GUI = {
+        Name = "Outer Space DSN Labels",
+        Path = "/Labels"
+    }
+}
+
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     OuterSpaceDsnLabels, 
     MarsMissionsDsnLabels, 
     ClusteredDsnLabels, 
     InnerSpaceDsnLabels,
-    NearEarthDsnLabels
+    NearEarthClusterDsnLabels,
+    NearEarthDsnLabels,
+    LunarMissionsDsnLabels,
  })
