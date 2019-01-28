@@ -27,6 +27,7 @@
 
 #include <ghoul/io/socket/tcpsocketserver.h>
 #include <ghoul/io/socket/websocketserver.h>
+#include <functional>
 
 namespace {
 

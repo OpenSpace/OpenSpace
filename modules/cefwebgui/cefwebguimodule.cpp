@@ -104,7 +104,7 @@ void CefWebGuiModule::startOrStopGui() {
             webBrowserModule->attachEventHandler(_instance.get());
         }
 
-        _instance->setZoom(2.0);
+        _instance->setZoom(_guiScale);
 
         webBrowserModule->addBrowser(_instance.get());
     } else if (_instance) {
