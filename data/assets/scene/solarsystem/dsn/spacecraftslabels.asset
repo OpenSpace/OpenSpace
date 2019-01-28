@@ -92,6 +92,10 @@ local LadeLabel = {
     LabelText = ".LADE",
     ObjectIdentifier = spacecrafts.LadeAsset.spacecraftID
 }
+local LroLabel = {
+    LabelText = ".LRO",
+    ObjectIdentifier = spacecrafts.LroAsset.spacecraftID
+}
 local MarCOALabel = {
     LabelText = ".MarCO A",
     ObjectIdentifier = spacecrafts.MarCOAAsset.spacecraftID
@@ -318,8 +322,7 @@ local labelMapInnerSpace = {
                             label19 = VenusExpressLabel,
                             label20 = PRCNCLabel,
                             label21 = BepiLabel,
-                            label22 = SpilLabel,
-                            label23 = UlyssesLabel
+                            label22 = UlyssesLabel
 
                         }
 
@@ -355,9 +358,9 @@ local labelMapNearEarth = {
                             label29 = AceLabel,
                             label30 = Ch2oLabel,
                             label31 = JwstLabel,
-                            label32 = LadeLabel
-
-
+                            label32 = LadeLabel,
+                            label33 = SpilLabel,
+                            label34 = LroLabel
                         }
 local labelMapClusters = {  
                             Label1 = MarsClusterLabel,

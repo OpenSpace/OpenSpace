@@ -27,6 +27,7 @@ local JunoAsset = asset.require('scene/solarsystem/dsn/spacecrafts/juno/juno')
 local JwstAsset = asset.require('scene/solarsystem/dsn/spacecrafts/jwst/jwst')
 local KeplerAsset = asset.require('scene/solarsystem/dsn/spacecrafts/kepler/kepler')
 local LadeAsset = asset.require('scene/solarsystem/dsn/spacecrafts/lade/lade')
+local LroAsset = asset.require('scene/solarsystem/dsn/spacecrafts/lro/lro')
 local MarCOAAsset = asset.require('scene/solarsystem/dsn/spacecrafts/marcoa/marcoa')
 local MarCOBAsset = asset.require('scene/solarsystem/dsn/spacecrafts/marcob/marcob')
 local MarsRecOrbAsset = asset.require('scene/solarsystem/dsn/spacecrafts/mro/mro')
@@ -93,6 +94,7 @@ local signalDataIdMap = {
     JWST = JwstAsset.spacecraftID,
     KEPL = KeplerAsset.spacecraftID,
     LADE = LadeAsset.spacecraftID,
+    LRO = LroAsset.spacecraftID,
     M010 = MarsOdysseyAsset.spacecraftID,
     MCOA = MarCOAAsset.spacecraftID,
     MCOB = MarCOBAsset.spacecraftID,
@@ -164,6 +166,7 @@ asset.export("JunoAsset", JunoAsset)
 asset.export("JwstAsset", JwstAsset)
 asset.export("KeplerAsset", KeplerAsset)
 asset.export("LadeAsset", LadeAsset)
+asset.export("LroAsset", LroAsset)
 asset.export("MarCOAAsset", MarCOAAsset)
 asset.export("MarCOBAsset", MarCOBAsset)
 asset.export("MarsRecOrbAsset", MarsRecOrbAsset)
