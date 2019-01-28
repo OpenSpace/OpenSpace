@@ -337,7 +337,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
             const glm::dvec3 prevCameraToAim = _previousAimNodePosition - prevCameraPosition;
             const glm::dvec3 prevAnchorToAim = _previousAimNodePosition - _previousAnchorNodePosition;
             const glm::dvec3 newAnchorToAim = _aimNode->worldPosition() - _anchorNode->worldPosition();
-            
+
             const glm::dvec3 newAnchorToProjectedAim = glm::length(prevAnchorToAim) * glm::normalize(_aimNode->worldPosition() - _anchorNode->worldPosition());
 
             // Rotation based on projected aim spin around anchor (aim is projected on a sphere around the anchor)
@@ -350,7 +350,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
                 const glm::dvec3 newCameraPosition = _anchorNode->worldPosition() - spinRotation * prevCameraToAnchor;
 
                 _camera->setPositionVec3(newCameraPosition);
-                decomp.globalRotation = spinRotation * decomp.globalRotation;  
+                decomp.globalRotation = spinRotation * decomp.globalRotation;
             }
 
             const glm::dvec3 projectedAim = _anchorNode->worldPosition() + newAnchorToProjectedAim;
@@ -361,19 +361,19 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
             double alpha = glm::angle(glm::normalize(intermediateCameraToAnchor), glm::normalize(intermediateCameraToProjectedAim));
             double ratio = glm::sin(alpha) * glm::length(intermediateCameraToAnchor) / glm::length(newAnchorToAim);
-
-            if (ratio < -1.0 || ratio > 1.0) {
-                //std::cout << "Warning: ratio " << ratio << " outside bounds." << std::endl;
-                //std::cout << "alpha: " << alpha << ", denominator:" << (glm::length(newAnchorToAim) / glm::length(_anchorNode->worldPosition() - _camera->positionVec3())) << std::endl;
-            }
             ratio = glm::clamp(ratio, -1.0, 1.0);
 
-            double sign = 1.0;
             double delta = glm::asin(ratio);
-            if (glm::length(intermediateCameraToAnchor) > glm::length(intermediateCameraToProjectedAim)) {
+            bool hasSolution = true;
+            if (glm::dot(intermediateCameraToAnchor, prevAnchorToAim) < 0 && // Camera on right half-plane
+                glm::dot(intermediateCameraToProjectedAim, newAnchorToAim) < 0) // Camera is past aim in right half-plane
+            {
+                // TODO: This is not really correct yet: should also take into account the delta, so that interaction never hangs on this edge.
                 delta = -glm::asin(ratio) + glm::pi<double>();
-                // TODO: Find out if this is really correct.
-                //std::cout << delta << " inverted." << std::endl;
+                if (glm::length(newAnchorToAim) < glm::length(prevAnchorToAim)) //Aim moving towards anchor
+                {
+                    hasSolution = false;
+                }
             }
 
             double beta = glm::angle(glm::normalize(-intermediateCameraToAnchor), glm::normalize(newAnchorToProjectedAim));
@@ -381,10 +381,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
             const double gamma = glm::pi<double>() - alpha - delta;
             double distanceRotationAngle = gamma - beta;
 
-            //std::cout << distanceRotationAngle << std::endl;
-            //distanceRotationAngle *= sign;
-
-            if (distanceRotationAngle > AngleEpsilon) {
+            if (hasSolution && glm::abs(distanceRotationAngle) > AngleEpsilon) {
                 glm::dvec3 distanceRotationAxis = glm::normalize(glm::cross(intermediateCameraToAnchor, newAnchorToProjectedAim));
                 const glm::dquat orbitRotation = glm::angleAxis(distanceRotationAngle, distanceRotationAxis);
 
