@@ -57,6 +57,12 @@ namespace {
         "GUI URL",
         "The URL of the webpage that is used to load the WebGUI from."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo GuiScaleInfo = {
+        "GuiScale",
+        "Gui Scale",
+        "GUI scale multiplier."
+    };
 } // namespace
 
 namespace openspace {
@@ -66,10 +72,12 @@ CefWebGuiModule::CefWebGuiModule()
     , _enabled(EnabledInfo, true)
     , _visible(VisibleInfo, true)
     , _url(GuiUrlInfo, "")
+    , _guiScale(GuiScaleInfo, 1.0, 0.1, 3.0)
 {
     addProperty(_enabled);
     addProperty(_visible);
     addProperty(_url);
+    addProperty(_guiScale);
 }
 
 void CefWebGuiModule::startOrStopGui() {
@@ -95,6 +103,9 @@ void CefWebGuiModule::startOrStopGui() {
         if (_visible) {
             webBrowserModule->attachEventHandler(_instance.get());
         }
+
+        _instance->setZoom(_guiScale);
+
         webBrowserModule->addBrowser(_instance.get());
     } else if (_instance) {
         _instance->close(true);
@@ -124,6 +135,12 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         }
     });
 
+    _guiScale.onChange([this]() {
+        if (_instance) {
+            _instance->setZoom(_guiScale);
+        }
+    });
+
     _visible.onChange([this, webBrowserModule]() {
         if (_visible && _instance) {
             webBrowserModule->attachEventHandler(_instance.get());
@@ -132,13 +149,16 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         }
     });
 
-
     if (configuration.hasValue<std::string>(GuiUrlInfo.identifier)) {
         _url = configuration.value<std::string>(GuiUrlInfo.identifier);
     } else {
         WebGuiModule* webGuiModule = global::moduleEngine.module<WebGuiModule>();
         _url = "http://localhost:" +
             std::to_string(webGuiModule->port()) + "/#/onscreen";
+    }
+
+    if (configuration.hasValue<float>(GuiScaleInfo.identifier)) {
+        _guiScale = configuration.value<float>(GuiScaleInfo.identifier);
     }
 
     _enabled = configuration.hasValue<bool>(EnabledInfo.identifier) &&
