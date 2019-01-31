@@ -1,10 +1,9 @@
 local assetHelper = asset.require('util/asset_helper')
-local dataFolder = openspace.absPath("${SYNC}/http/dsn_data/1/positioning/ACE") 
 
-local models = asset.syncedResource({
-    Name = "Dsn models",
+local dataFolder = asset.syncedResource({
+    Name = "Dsn positioning data",
     Type = "HttpSynchronization",
-    Identifier = "dsn_stations",
+    Identifier = "dsn_data",
     Version = 1
 })
 local spacecraftID = "Ace";
@@ -19,7 +18,7 @@ local Ace = {
     Transform = {
       Translation = {
           Type = "RadecTranslation", 
-          DataFolder = dataFolder,
+          DataFolder = dataFolder .. "/positioning/ACE/",
           DataFileType = "json",
           ObjectIdentifier = spacecraftID
       }
