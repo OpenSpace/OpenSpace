@@ -1,0 +1,39 @@
+-- This asset file contains some spacecrafts created with position 
+-- data recieved from JPL, but that do not seem to be active/launched during 
+-- the timeframe 1 JAN 2014 until 1 JAN 2019 and don't have any valid 
+-- signal transmissions associated with them
+
+-- Added from previous missions
+local BepiAsset = asset.require('scene/solarsystem/dsn/spacecrafts/bepi/bepi')
+local Ch2oAsset = asset.require('scene/solarsystem/dsn/spacecrafts/ch2o/ch2o')
+local GenesisAsset = asset.require('scene/solarsystem/dsn/spacecrafts/genesis/genesis')
+local JwstAsset = asset.require('scene/solarsystem/dsn/spacecrafts/jwst/jwst')
+local TERRAsset = asset.require('scene/solarsystem/dsn/spacecrafts/terr/terr')
+local TD10Asset = asset.require('scene/solarsystem/dsn/spacecrafts/td10/td10')
+local TD11Asset = asset.require('scene/solarsystem/dsn/spacecrafts/td11/td11')
+local SpilAsset = asset.require('scene/solarsystem/dsn/spacecrafts/spil/spil')
+local UlyssesAsset = asset.require('scene/solarsystem/dsn/spacecrafts/ulysses/ulysses')
+
+--     BEPI = BepiAsset.spacecraftID,
+--     CH2O = Ch2oAsset.spacecraftID,
+--     GNS = GenesisAsset.spacecraftID,
+--     JWST = JwstAsset.spacecraftID,
+--     TERR = TERRAsset.spacecraftID,
+--     TD10 = TD10Asset.spacecraftID,
+--     TD11 = TD11Asset.spacecraftID,   
+--     SPIL = SpilAsset.spacecraftID,
+--     ULYS = UlyssesAsset.spacecraftID
+
+asset.export("BepiAsset", BepiAsset)
+asset.export("Ch2oAsset", Ch2oAsset)
+asset.export("GenesisAsset", GenesisAsset)
+asset.export("JwstAsset", JwstAsset)
+asset.export("SpilAsset", SpilAsset)
+asset.export("TD10Asset", TD10Asset)
+asset.export("TD11Asset", TD11Asset)
+asset.export("TERRAsset", TERRAsset)
+asset.export("UlyssesAsset", UlyssesAsset)
+
+
+
+

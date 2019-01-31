@@ -8,10 +8,6 @@ local AceLabel = {
     LabelText = ".Ace",
     ObjectIdentifier = spacecrafts.AceAsset.spacecraftID
 }
-local BepiLabel = {
-    LabelText = ".Bepi",
-    ObjectIdentifier = spacecrafts.BepiAsset.spacecraftID
-}
 local CassiniLabel = {
     LabelText = ".Cassini",
     ObjectIdentifier = spacecrafts.CassiniAsset.spacecraftID
@@ -19,10 +15,6 @@ local CassiniLabel = {
 local ChandraLabel = {
     LabelText = ".Chandra",
     ObjectIdentifier = spacecrafts.ChandraAsset.spacecraftID
-}
-local Ch2oLabel = {
-    LabelText = ".Ch2O",
-    ObjectIdentifier = spacecrafts.Ch2oAsset.spacecraftID
 }
 local CLU1Label = {
     LabelText = ".CLU1",
@@ -52,10 +44,6 @@ local GaiaLabel = {
     LabelText = ".Gaia",
     ObjectIdentifier = spacecrafts.GaiaAsset.spacecraftID
 }
-local GenesisLabel = {
-    LabelText = ".Genesis",
-    ObjectIdentifier = spacecrafts.GenesisAsset.spacecraftID
-}
 local GeotailLabel = {
     LabelText = ".Geotail",
     ObjectIdentifier = spacecrafts.GeotailAsset.spacecraftID
@@ -79,10 +67,6 @@ local InSightLabel = {
 local JunoLabel = {
     LabelText = ".Juno",
     ObjectIdentifier = spacecrafts.JunoAsset.spacecraftID
-}
-local JwstLabel = {
-    LabelText = ".JWST",
-    ObjectIdentifier = spacecrafts.JwstAsset.spacecraftID
 }
 local KeplerLabel = {
     LabelText = ".Kepler",
@@ -168,10 +152,6 @@ local SohoLabel = {
     LabelText = ".SOHO",
     ObjectIdentifier = spacecrafts.SohoAsset.spacecraftID
 }
-local SpilLabel = {
-    LabelText = ".SPIL",
-    ObjectIdentifier = spacecrafts.SpilAsset.spacecraftID
-}
 local SpitzerLabel = {
     LabelText = ".Spitzer",
     ObjectIdentifier = spacecrafts.SpitzerAsset.spacecraftID
@@ -187,14 +167,6 @@ local StereoBLabel = {
 local RosettaLabel = {
     LabelText = ".Rosetta",
     ObjectIdentifier = spacecrafts.RosettaAsset.spacecraftID
-}
-local TD10Label = {
-    LabelText = ".TD10",
-    ObjectIdentifier = spacecrafts.TD10Asset.spacecraftID
-}
-local TD11Label = {
-    LabelText = ".TD11",
-    ObjectIdentifier = spacecrafts.TD10Asset.spacecraftID
 }
 local TD12Label = {
     LabelText = ".TD12",
@@ -224,10 +196,6 @@ local TDR9Label = {
     LabelText = ".TDR9",
     ObjectIdentifier = spacecrafts.TDR9Asset.spacecraftID
 }
-local TERRLabel = {
-    LabelText = ".TERR",
-    ObjectIdentifier = spacecrafts.TERRAsset.spacecraftID
-}
 --Transit exoplanet Survey Satellite
 local TessLabel = {
     LabelText = ".TESS",
@@ -244,10 +212,6 @@ local ThemisCLabel = {
 local TraceGasOrbiterLabel = {
     LabelText = ".TGO",
     ObjectIdentifier = spacecrafts.TraceGasOrbiterAsset.spacecraftID
-}
-local UlyssesLabel = {
-    LabelText = ".Ulysses",
-    ObjectIdentifier = spacecrafts.UlyssesAsset.spacecraftID
 }
 local VenusExpressLabel = {
     LabelText = ".Venus Express",
@@ -320,7 +284,6 @@ local labelMapInnerSpace = {
                             Label5 = KeplerLabel,
                             label6 = DawnLabel,
                             label7 = SpitzerLabel,
-                            label8 = GenesisLabel,
                             label9 = Hayabusa2Label,
                             label10 = MessengerLabel,
                             label15 = OsirisRexLabel,
@@ -329,9 +292,6 @@ local labelMapInnerSpace = {
                             label18 = ParkerSolarProbeLabel,
                             label19 = VenusExpressLabel,
                             label20 = PRCNCLabel,
-                            label21 = BepiLabel,
-                            label22 = UlyssesLabel
-
                         }
 
 local labelMapNearEarth = {  
@@ -342,8 +302,6 @@ local labelMapNearEarth = {
                             label7 = IceLabel,
                             label8 = TessLabel,
                             label9 = GeotailLabel,
-                            label10 = TD10Label,
-                            label11 = TD11Label,
                             label12 = TD12Label,
                             label13 = TD13Label,
                             label14 = TDR3Label,
@@ -361,12 +319,8 @@ local labelMapNearEarth = {
                             label26 = MMS2Label,
                             label27 = MMS3Label,
                             label28 = MMS4Label,
-                            label29 = TERRLabel,
                             label30 = AceLabel,
-                            label31 = Ch2oLabel,
-                            label32 = JwstLabel,
                             label33 = LadeLabel,
-                            label34 = SpilLabel,
 
                         }
 local labelMapLunarMissions = {  
