@@ -62,7 +62,7 @@ public:
     void detachBrowser();
 
 private:
-    bool mouseButtonCallback(MouseButton button, MouseAction action);
+    bool mouseButtonCallback(MouseButton button, MouseAction action, KeyModifier mods);
     bool mousePositionCallback(double x, double y);
     bool mouseWheelCallback(glm::ivec2 delta);
     bool charCallback(unsigned int charCode, KeyModifier modifier);
@@ -82,7 +82,7 @@ private:
      *
      * \return
      */
-    CefMouseEvent mouseEvent();
+    CefMouseEvent mouseEvent(KeyModifier mods = KeyModifier::NoModifier);
 
     /**
      * Find the CEF key event to use for a given action.
