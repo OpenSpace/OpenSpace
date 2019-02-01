@@ -361,23 +361,24 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
             double alpha = glm::angle(glm::normalize(intermediateCameraToAnchor), glm::normalize(intermediateCameraToProjectedAim));
             double ratio = glm::sin(alpha) * glm::length(intermediateCameraToAnchor) / glm::length(newAnchorToAim);
 
+
+            ratio = glm::clamp(ratio, -1.0, 1.0);
             // Equation has no solution if ratio > 1.
             // To avoid a discontinuity in the camera behavior,
             // fade out the distance correction influence when ratio approaches 1.
-            double bailOutFactor = glm::clamp(1.0 - glm::pow(ratio, 10.0), 0.0, 1.0);
-
-            double delta = glm::asin(glm::clamp(ratio, -1.0, 1.0));
+            double correctionFactor = glm::clamp(1.0 - glm::pow(ratio, 50.0), 0.0, 1.0);
+            double delta = glm::asin(ratio);
 
             if (glm::dot(intermediateCameraToAnchor, newAnchorToAim) <= 0 && // Camera on right half-plane
                 glm::dot(intermediateCameraToProjectedAim, newAnchorToAim) <= 0) // Camera is past aim in right half-plane
             {
-                delta = -glm::asin(glm::clamp(ratio, -1.0, 1.0)) + glm::pi<double>();
+                delta = -glm::asin(ratio) + glm::pi<double>();
             }
 
             double beta = glm::angle(glm::normalize(-intermediateCameraToAnchor), glm::normalize(newAnchorToProjectedAim));
 
             const double gamma = glm::pi<double>() - alpha - delta;
-            double distanceRotationAngle = bailOutFactor * (gamma - beta);
+            double distanceRotationAngle = correctionFactor * (gamma - beta);
 
             if (glm::abs(distanceRotationAngle) > AngleEpsilon) {
                 glm::dvec3 distanceRotationAxis = glm::normalize(glm::cross(intermediateCameraToAnchor, newAnchorToProjectedAim));
