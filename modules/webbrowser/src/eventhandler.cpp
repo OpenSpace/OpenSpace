@@ -125,9 +125,9 @@ void EventHandler::initialize() {
         }
     );
     global::callback::mouseButton.emplace_back(
-        [this](MouseButton button, MouseAction action) -> bool {
+        [this](MouseButton button, MouseAction action, KeyModifier mods) -> bool {
             if (_browserInstance) {
-                return mouseButtonCallback(button, action);
+                return mouseButtonCallback(button, action, mods);
             }
             return false;
         }
@@ -143,7 +143,10 @@ void EventHandler::initialize() {
     );
 }
 
-bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
+bool EventHandler::mouseButtonCallback(MouseButton button,
+                                       MouseAction action,
+                                       KeyModifier mods)
+{
     if (button != MouseButton::Left && button != MouseButton::Right) {
         return false;
     }
@@ -167,7 +170,7 @@ bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
     }
 
     return _browserInstance->sendMouseClickEvent(
-        mouseEvent(),
+        mouseEvent(mods),
         (button == MouseButton::Left) ? MBT_LEFT : MBT_RIGHT,
         !state.down,
         clickCount
@@ -250,7 +253,7 @@ cef_key_event_type_t EventHandler::keyEventType(KeyAction action) {
     }
 }
 
-CefMouseEvent EventHandler::mouseEvent() {
+CefMouseEvent EventHandler::mouseEvent(KeyModifier mods) {
     CefMouseEvent event;
     event.x = static_cast<int>(_mousePosition.x);
     event.y = static_cast<int>(_mousePosition.y);
@@ -263,6 +266,7 @@ CefMouseEvent EventHandler::mouseEvent() {
         event.modifiers = EVENTFLAG_RIGHT_MOUSE_BUTTON;
     }
 
+    event.modifiers |= static_cast<uint32_t>(mapToCefModifiers(mods));
     return event;
 }
 

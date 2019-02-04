@@ -205,7 +205,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
     );
 
     global::callback::mouseButton.emplace_back(
-        [&](MouseButton button, MouseAction action) -> bool {
+        [&](MouseButton button, MouseAction action, KeyModifier) -> bool {
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||
                 gui._sceneProperty.isEnabled())
