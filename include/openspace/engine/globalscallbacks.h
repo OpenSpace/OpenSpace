@@ -49,7 +49,7 @@ std::vector<std::function<void()>>& gPostDraw();
 std::vector<std::function<bool(Key, KeyModifier, KeyAction)>>& gKeyboard();
 std::vector<std::function<bool(unsigned int, KeyModifier)>>& gCharacter();
 
-std::vector<std::function<bool(MouseButton, MouseAction)>>& gMouseButton();
+std::vector<std::function<bool(MouseButton, MouseAction, KeyModifier)>>& gMouseButton();
 std::vector<std::function<void(double, double)>>& gMousePosition();
 std::vector<std::function<bool(double, double)>>& gMouseScrollWheel();
 
@@ -70,8 +70,8 @@ static std::vector<std::function<bool(Key, KeyModifier, KeyAction)>>& keyboard =
     detail::gKeyboard();
 static std::vector<std::function<bool(unsigned int, KeyModifier)>>& character =
     detail::gCharacter();
-static std::vector<std::function<bool(MouseButton, MouseAction)>>& mouseButton =
-    detail::gMouseButton();
+static std::vector<std::function<bool(MouseButton, MouseAction, KeyModifier)>>&
+    mouseButton = detail::gMouseButton();
 static std::vector<std::function<void(double, double)>>& mousePosition =
     detail::gMousePosition();
 static std::vector<std::function<bool(double, double)>>& mouseScrollWheel =
