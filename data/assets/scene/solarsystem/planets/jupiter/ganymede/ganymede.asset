@@ -28,7 +28,11 @@ local Ganymede = {
             Target = "GANYMEDE",
             Observer = "JUPITER BARYCENTER",
             Kernels = kernel
-        }
+        },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1
+        }        
     },
     Renderable = {
         Type = "RenderableGlobe",

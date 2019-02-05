@@ -7,6 +7,13 @@ openspace.documentation = {
         "featured properties."
     },
     {
+        Name = "markInteratingStoryNodes",
+        Arguments = "List of nodes",
+        Documentation = "This function marks the scene graph nodes identified by name " ..
+        "as interesting, which will provide shortcut access to focus buttons and " .. 
+        "featured properties. This is specific to interesting nodes in the story mode."
+    },
+    {
         Name = "markInterestingTimes",
         Arguments = "List of { Name = '...', Time = '...' } or { '<name>', '<time>' }",
         Documentation = "This function marks interesting times for the current scene, " ..
@@ -46,6 +53,14 @@ openspace.markInterestingNodes = function(nodes)
     for _, n in pairs(nodes) do
         if openspace.hasSceneGraphNode(n) then
             openspace.addTag(n, "GUI.Interesting")
+        end
+    end
+end
+
+openspace.markInterestingStoryNodes = function(nodes)
+    for _, n in pairs(nodes) do
+        if openspace.hasSceneGraphNode(n) then
+            openspace.addTag(n, "Story.Interesting")
         end
     end
 end

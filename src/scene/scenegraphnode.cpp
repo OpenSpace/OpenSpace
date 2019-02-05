@@ -250,6 +250,8 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     }
 
     LDEBUG(fmt::format("Successfully created SceneGraphNode '{}'", result->identifier()));
+
+    result->test = std::chrono::high_resolution_clock::now();
     return result;
 }
 
@@ -263,9 +265,9 @@ SceneGraphNode::SceneGraphNode()
         std::make_unique<StaticRotation>(),
         std::make_unique<StaticScale>()
     }
-    , _screenSpacePosition(properties::IVec2Property(ScreenSpacePositionInfo, glm::ivec2(-1,-1)))
+    ,_screenSpacePosition(properties::IVec2Property(ScreenSpacePositionInfo, glm::ivec2(-1,-1)))
     ,_screenVisibility(properties::BoolProperty(ScreenVisibilityInfo, false))
-    , _distFromCamToNode(properties::DoubleProperty(DistanceFromCamToNodeInfo, -1.0))
+    ,_distFromCamToNode(properties::DoubleProperty(DistanceFromCamToNodeInfo, -1.0))
     ,_screenSizeRadius(properties::DoubleProperty(ScreenSizeRadiusInfo, 0))
     ,_visibilityDistance(properties::FloatProperty(VisibilityDistanceInfo, 6e+10))
 {
@@ -494,6 +496,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     }
     else {
         _renderable->render(newData, tasks);
+        getScreenSpaceData(newData);
     }
 }
 
@@ -628,6 +631,14 @@ void SceneGraphNode::setDependencies(const std::vector<SceneGraphNode*>& depende
 }
 
 void SceneGraphNode::getScreenSpaceData(RenderData& newData) {
+    //Purposely slow the update rate of screen space position in order to reduce the
+    // effects of jittering in the position of information icon markers in web gui.
+    auto now = std::chrono::high_resolution_clock::now();
+    if ((now - test) < std::chrono::milliseconds(100)) {
+        return;
+    }
+    test = now;
+
    
     std::vector<std::string> tags = this->tags();
     const std::string tag = "Story.Interesting";

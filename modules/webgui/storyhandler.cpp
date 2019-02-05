@@ -25,13 +25,13 @@ namespace {
     static const openspace::properties::Property::PropertyInfo ApplyRemoveTagInfo = {
         "ApplyRemoveTag",
         "ApplyRemoveTag",
-        "Triggering this property will add the 'interesting' tag to all the nodes listed in"
+        "Triggering this property will remove the 'interesting' tag to all the nodes listed in"
         "the focus nodes list."
     };
     static const openspace::properties::Property::PropertyInfo ApplyAddTagInfo = {
         "ApplyAddTag",
         "ApplyAddTag",
-        "Triggering this property will remove the 'interesting' tag from all the nodes listed"
+        "Triggering this property will add the 'interesting' tag from all the nodes listed"
         "in the focus nodes list."
     };
     static const openspace::properties::Property::PropertyInfo FocusNodesListInfo = {
@@ -71,7 +71,7 @@ namespace openspace::webgui {
 
     void StoryHandler::addTags() {
         openspace::global::scriptEngine.queueScript(
-        "openspace.markInterestingNodes({" + static_cast<std::string>(_focusNodesList) + "})",
+        "openspace.markInterestingStoryNodes({" + static_cast<std::string>(_focusNodesList) + "})",
         scripting::ScriptEngine::RemoteScripting::Yes
       );
    };

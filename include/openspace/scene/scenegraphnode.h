@@ -37,6 +37,7 @@
 #include <functional>
 #include <memory>
 #include <vector>
+#include <chrono>
 
  //#define Debugging_Core_SceneGraphNode_Indices
 
@@ -199,6 +200,8 @@ private:
     int index = 0;
     static int nextIndex;
 #endif // Debugging_Core_SceneGraphNode_Indices
+
+    std::chrono::high_resolution_clock::time_point test;
 };
 
 } // namespace openspace

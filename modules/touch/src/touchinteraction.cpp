@@ -1318,7 +1318,7 @@ void TouchInteraction::step(double dt) {
             float zoomInLimit = module.storyHandler.zoomInLimit();
 
             //Apply the velocity to update camera position
-            double zoomDistanceIncrement = directionToCenter * _vel.zoom * dt;
+            glm::dvec3 zoomDistanceIncrement = directionToCenter * _vel.zoom * dt;
             bool isZoomStepUnderDistToSurface = (length(_vel.zoom*dt) < distToSurface);
             bool willZoomStepViolatePlanetBoundaryRadius =
                 (length(centerToCamera + zoomDistanceIncrement) < planetBoundaryRadius);

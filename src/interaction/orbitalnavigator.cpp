@@ -94,40 +94,44 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo VelocityZoomControlInfo = {
+    constexpr openspace::properties::Property::PropertyInfo VelocityZoomControlInfo = {
         "VelocityZoomControl",
         "Velocity zoom control",
         "Controls the velocity of the camera motion when zooming in to the focus node. "
         "The higher the value the faster the camera will move towards the focus."
     };
 
-    static const openspace::properties::Property::PropertyInfo FlyToNodeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FlyToNodeInfo = {
         "FlyToNode",
         "Fly to focus node",
         "Determines whether to fly to the focus node or just focus on it."
     };
 
-    static const openspace::properties::Property::PropertyInfo OverviewInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OverviewInfo = {
         "Overview",
         "Overview",
         "Determines whether to zoom out to an overview or not."
     };
-    static const openspace::properties::Property::PropertyInfo OrientationInfo = {
+
+    constexpr openspace::properties::Property::PropertyInfo OrientationInfo = {
         "Orientation",
         "Orientation",
         "Determines whether to change the orientation of the focus node or not."
     };
-    static const openspace::properties::Property::PropertyInfo ApplyOverviewInfo = {
+
+    constexpr openspace::properties::Property::PropertyInfo ApplyOverviewInfo = {
         "ApplyOverview",
         "Apply overview ",
         "Triggering this property makes the camera move to an overview."
     };
-    static const openspace::properties::Property::PropertyInfo ApplyFlyToInfo = {
+
+    constexpr openspace::properties::Property::PropertyInfo ApplyFlyToInfo = {
         "ApplyFlyTo",
         "Apply fly to node",
         "Triggering this property makes the camera move to the focus node."
     };
-    static const openspace::properties::Property::PropertyInfo
+
+    constexpr openspace::properties::Property::PropertyInfo
         StereoInterpolationTimeInfo = {
         "StereoInterpolationTime",
         "Stereo interpolation time",
