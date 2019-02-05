@@ -708,8 +708,8 @@ void main() {
             }
             bColor /= float(nAaSamples);
             //renderTarget = vec4(HDR(bColor.xyz * backgroundConstant, atmExposure), bColor.a);
-            //renderTarget = vec4(bColor.xyz * backgroundConstant, bColor.a);
-            renderTarget = vec4(bColor.xyz , bColor.a);
+            renderTarget = vec4(bColor.xyz * backgroundConstant, bColor.a);
+            //renderTarget = vec4(bColor.xyz , bColor.a);
         } 
         else {
             discard;

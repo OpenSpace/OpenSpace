@@ -75,7 +75,8 @@ public:
         UNCHARTED,
         COSTA,
         ADAPTIVE,
-        GLOBAL
+        GLOBAL,
+        PHOTOGRAPHIC_REINHARD
     };
 
     RenderEngine();

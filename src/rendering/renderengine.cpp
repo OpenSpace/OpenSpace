@@ -323,6 +323,7 @@ RenderEngine::RenderEngine()
     _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::COSTA), "Costa");
     _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::ADAPTIVE), "Adaptive");
     _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::GLOBAL), "Global");
+    _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::PHOTOGRAPHIC_REINHARD), "Photographic Reinhard");
     _toneMapOperator.set(8);
 
     _toneMapOperator.onChange([this]() {

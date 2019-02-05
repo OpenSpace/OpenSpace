@@ -33,6 +33,7 @@
 #define COSTA 8
 #define ADAPTIVE 9
 #define GLOBAL 10
+#define PHOTOGRAPHIC_REINHARD 11
 
 const mat3 rgb2xyz = mat3( 
   0.4124564, 0.2126729, 0.0193339,
@@ -92,6 +93,10 @@ vec3 lumaBasedReinhardToneMapping(vec3 color, float exposure) {
   float toneMappedLuma = luma / (1.f + luma);
   color *= toneMappedLuma / luma;
   return color;
+}
+
+vec3 photographicReinhardToneMapping(vec3 color, float exposure) {
+  return color / (color + vec3(1.0));
 }
 
 vec3 whitePreservingLumaBasedReinhardToneMapping(vec3 color, float exposure, float maxWhite) {

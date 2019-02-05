@@ -116,5 +116,8 @@ void main() {
     } else if (toneMapOperator == GLOBAL) {
         vec3 tColor = globalToneMappingOperatorRTR(color.rgb, backgroundExposure, maxWhite, aveLum);
         finalColor = vec4(gammaCorrection(tColor, gamma), color.a);
+    } else if (toneMapOperator == PHOTOGRAPHIC_REINHARD) {
+        vec3 tColor = photographicReinhardToneMapping(color.rgb, backgroundExposure);
+        finalColor = vec4(gammaCorrection(tColor, gamma), color.a);
     }
 }
