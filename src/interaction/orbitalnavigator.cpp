@@ -36,6 +36,7 @@ namespace {
     constexpr const char* _loggerCat = "OrbitalNavigator";
 
     constexpr const double AngleEpsilon = 1E-7;
+    constexpr const double DistanceEpsilon = 1E-7;
 
     constexpr const openspace::properties::Property::PropertyInfo AnchorInfo = {
         "Anchor",
@@ -353,64 +354,66 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
             const glm::dvec3 prevAnchorToAim = _previousAimNodePosition - _previousAnchorNodePosition;
             const glm::dvec3 newAnchorToAim = _aimNode->worldPosition() - _anchorNode->worldPosition();
 
-            const glm::dvec3 newAnchorToProjectedAim = glm::length(prevAnchorToAim) * glm::normalize(_aimNode->worldPosition() - _anchorNode->worldPosition());
+            if (glm::length(newAnchorToAim) > DistanceEpsilon) {
+                glm::dvec3 newAnchorToProjectedAim = glm::length(prevAnchorToAim) * glm::normalize(newAnchorToAim);
 
-            // Rotation based on projected aim spin around anchor (aim is projected on a sphere around the anchor)
-            const double spinRotationAngle = glm::angle(glm::normalize(prevAnchorToAim), glm::normalize(newAnchorToProjectedAim));
+                // Rotation based on projected aim spin around anchor (aim is projected on a sphere around the anchor)
+                const double spinRotationAngle = glm::angle(glm::normalize(prevAnchorToAim), glm::normalize(newAnchorToProjectedAim));
 
-            // By default, let the camera follow the anchor
-            _camera->setPositionVec3(_anchorNode->worldPosition() - prevCameraToAnchor);
+                // By default, let the camera follow the anchor
+                _camera->setPositionVec3(_anchorNode->worldPosition() - prevCameraToAnchor);
 
-            if (spinRotationAngle > AngleEpsilon) {
-                const glm::dvec3 spinRotationAxis = glm::cross(prevAnchorToAim, newAnchorToProjectedAim);
-                const glm::dquat spinRotation = glm::angleAxis(spinRotationAngle, glm::normalize(spinRotationAxis));
+                if (spinRotationAngle > AngleEpsilon) {
+                    const glm::dvec3 spinRotationAxis = glm::cross(prevAnchorToAim, newAnchorToProjectedAim);
+                    const glm::dquat spinRotation = glm::angleAxis(spinRotationAngle, glm::normalize(spinRotationAxis));
 
-                const glm::dvec3 newCameraPosition = _anchorNode->worldPosition() - spinRotation * prevCameraToAnchor;
+                    const glm::dvec3 newCameraPosition = _anchorNode->worldPosition() - spinRotation * prevCameraToAnchor;
 
-                _camera->setPositionVec3(newCameraPosition);
-                decomp.globalRotation = spinRotation * decomp.globalRotation;
+                    _camera->setPositionVec3(newCameraPosition);
+                    decomp.globalRotation = spinRotation * decomp.globalRotation;
+                }
+
+                const glm::dvec3 projectedAim = _anchorNode->worldPosition() + newAnchorToProjectedAim;
+
+                // Rotation based on increased aim distance from anchor
+                const glm::dvec3 intermediateCameraToAnchor = _anchorNode->worldPosition() - _camera->positionVec3();
+                const glm::dvec3 intermediateCameraToProjectedAim = projectedAim - _camera->positionVec3();
+
+                double alpha = glm::angle(glm::normalize(intermediateCameraToAnchor), glm::normalize(intermediateCameraToProjectedAim));
+                double ratio = glm::sin(alpha) * glm::length(intermediateCameraToAnchor) / glm::length(newAnchorToAim);
+
+
+                ratio = glm::clamp(ratio, -1.0, 1.0);
+                // Equation has no solution if ratio > 1.
+                // To avoid a discontinuity in the camera behavior,
+                // fade out the distance correction influence when ratio approaches 1.
+                double correctionFactor = glm::clamp(1.0 - glm::pow(ratio, 50.0), 0.0, 1.0);
+                double delta = glm::asin(ratio);
+
+                if (glm::dot(intermediateCameraToAnchor, newAnchorToAim) <= 0 && // Camera on right half-plane
+                    glm::dot(intermediateCameraToProjectedAim, newAnchorToAim) <= 0) // Camera is past aim in right half-plane
+                {
+                    delta = -glm::asin(ratio) + glm::pi<double>();
+                }
+
+                double beta = glm::angle(glm::normalize(-intermediateCameraToAnchor), glm::normalize(newAnchorToProjectedAim));
+
+                const double gamma = glm::pi<double>() - alpha - delta;
+                double distanceRotationAngle = correctionFactor * (gamma - beta);
+
+                if (glm::abs(distanceRotationAngle) > AngleEpsilon) {
+                    glm::dvec3 distanceRotationAxis = glm::normalize(glm::cross(intermediateCameraToAnchor, newAnchorToProjectedAim));
+                    const glm::dquat orbitRotation = glm::angleAxis(distanceRotationAngle, distanceRotationAxis);
+
+                    const glm::dvec3 newCameraPosition = _anchorNode->worldPosition() - orbitRotation * intermediateCameraToAnchor;
+                    _camera->setPositionVec3(newCameraPosition);
+
+                    const glm::dquat aimAdjustRotation = glm::angleAxis(distanceRotationAngle, distanceRotationAxis);
+                    decomp.globalRotation = aimAdjustRotation * decomp.globalRotation;
+                }
+
+                _camera->setRotation(composeCameraRotation(decomp));
             }
-
-            const glm::dvec3 projectedAim = _anchorNode->worldPosition() + newAnchorToProjectedAim;
-
-            // Rotation based on increased aim distance from anchor
-            const glm::dvec3 intermediateCameraToAnchor = _anchorNode->worldPosition() - _camera->positionVec3();
-            const glm::dvec3 intermediateCameraToProjectedAim = projectedAim - _camera->positionVec3();
-
-            double alpha = glm::angle(glm::normalize(intermediateCameraToAnchor), glm::normalize(intermediateCameraToProjectedAim));
-            double ratio = glm::sin(alpha) * glm::length(intermediateCameraToAnchor) / glm::length(newAnchorToAim);
-
-
-            ratio = glm::clamp(ratio, -1.0, 1.0);
-            // Equation has no solution if ratio > 1.
-            // To avoid a discontinuity in the camera behavior,
-            // fade out the distance correction influence when ratio approaches 1.
-            double correctionFactor = glm::clamp(1.0 - glm::pow(ratio, 50.0), 0.0, 1.0);
-            double delta = glm::asin(ratio);
-
-            if (glm::dot(intermediateCameraToAnchor, newAnchorToAim) <= 0 && // Camera on right half-plane
-                glm::dot(intermediateCameraToProjectedAim, newAnchorToAim) <= 0) // Camera is past aim in right half-plane
-            {
-                delta = -glm::asin(ratio) + glm::pi<double>();
-            }
-
-            double beta = glm::angle(glm::normalize(-intermediateCameraToAnchor), glm::normalize(newAnchorToProjectedAim));
-
-            const double gamma = glm::pi<double>() - alpha - delta;
-            double distanceRotationAngle = correctionFactor * (gamma - beta);
-
-            if (glm::abs(distanceRotationAngle) > AngleEpsilon) {
-                glm::dvec3 distanceRotationAxis = glm::normalize(glm::cross(intermediateCameraToAnchor, newAnchorToProjectedAim));
-                const glm::dquat orbitRotation = glm::angleAxis(distanceRotationAngle, distanceRotationAxis);
-
-                const glm::dvec3 newCameraPosition = _anchorNode->worldPosition() - orbitRotation * intermediateCameraToAnchor;
-                _camera->setPositionVec3(newCameraPosition);
-
-                const glm::dquat aimAdjustRotation = glm::angleAxis(distanceRotationAngle, distanceRotationAxis);
-                decomp.globalRotation = aimAdjustRotation * decomp.globalRotation;
-            }
-
-            _camera->setRotation(composeCameraRotation(decomp));
 
             _previousAimNodePosition = _aimNode->worldPosition();
             _previousAimNodeRotation = _aimNode->worldRotationMatrix();
