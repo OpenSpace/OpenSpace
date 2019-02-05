@@ -54,12 +54,21 @@ namespace {
     };
 
     constexpr const openspace::properties::Property::PropertyInfo
-        ResetCameraDirectionInfo =
+        RetargetAnchorInfo =
     {
-        "ResetCameraDirection",
-        "Reset Camera Direction",
+        "RetargetAnchor",
+        "Retarget Anchor",
         "When triggered, this property starts an interpolation to reset the "
-        "camera direction."
+        "camera direction to the anchor node."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo
+        RetargetAimInfo =
+    {
+        "RetargetAim",
+        "Retarget Aim",
+        "When triggered, this property starts an interpolation to reset the "
+        "camera direction to the aim node."
     };
 
     constexpr openspace::properties::Property::PropertyInfo RollFrictionInfo = {
@@ -184,7 +193,8 @@ OrbitalNavigator::OrbitalNavigator()
     : properties::PropertyOwner({ "OrbitalNavigator" })
     , _anchor(AnchorInfo)
     , _aim(AimInfo)
-    , _resetCameraDirection(ResetCameraDirectionInfo)
+    , _retargetAnchor(RetargetAnchorInfo)
+    , _retargetAim(RetargetAimInfo)
     , _followAnchorNodeRotationDistance(FollowAnchorNodeInfo, 5.0f, 0.0f, 20.f)
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
     , _mouseSensitivity(MouseSensitivityInfo, 15.0f, 1.0f, 50.f)
@@ -192,7 +202,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _useAdaptiveStereoscopicDepth(UseAdaptiveStereoscopicDepthInfo, true)
     , _stereoscopicDepthOfFocusSurface(StereoscopicDepthOfFocusSurfaceInfo, 8, 0.25, 100)
     , _staticViewScaleExponent(StaticViewScaleExponentInfo, 0.f, -30, 10)
-    , _rotateToAimInterpolationTime(RotateToAimInterpolationTimeInfo, 2.0, 0.0, 10.0)
+    , _rotateInterpolationTime(RotateToAimInterpolationTimeInfo, 2.0, 0.0, 10.0)
     , _stereoInterpolationTime(StereoInterpolationTimeInfo, 8.0, 0.0, 10.0)
     , _mouseStates(_mouseSensitivity * 0.0001, 1 / (_friction.friction + 0.0000001))
     , _joystickStates(_joystickSensitivity * 0.1, 1 / (_friction.friction + 0.0000001))
@@ -228,8 +238,12 @@ OrbitalNavigator::OrbitalNavigator()
         }
     });
 
-    _resetCameraDirection.onChange([this]() {
-        startInterpolateCameraDirection();
+    _retargetAnchor.onChange([this]() {
+        startRetargetAnchor();
+    });
+
+    _retargetAim.onChange([this]() {
+        startRetargetAim();
     });
 
     _followRotationInterpolator.setTransferFunction([](double t) {
@@ -254,6 +268,7 @@ OrbitalNavigator::OrbitalNavigator()
     auto smoothStepDerivedTranferFunction = [](double t) {
         return (6 * (t + t*t) / (1 - 3 * t*t + 2 * t*t*t));
     };
+    _rotateToAnchorInterpolator.setTransferFunction(smoothStepDerivedTranferFunction);
     _rotateToAimInterpolator.setTransferFunction(smoothStepDerivedTranferFunction);
     _cameraToSurfaceDistanceInterpolator.setTransferFunction(
         smoothStepDerivedTranferFunction
@@ -289,7 +304,8 @@ OrbitalNavigator::OrbitalNavigator()
 
     addProperty(_anchor);
     addProperty(_aim);
-    addProperty(_resetCameraDirection);
+    addProperty(_retargetAnchor);
+    addProperty(_retargetAim);
     addProperty(_followAnchorNodeRotationDistance);
     addProperty(_minimumAllowedDistance);
 
@@ -297,7 +313,7 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_staticViewScaleExponent);
     addProperty(_stereoscopicDepthOfFocusSurface);
 
-    addProperty(_rotateToAimInterpolationTime);
+    addProperty(_rotateInterpolationTime);
     addProperty(_stereoInterpolationTime);
     addProperty(_mouseSensitivity);
     addProperty(_joystickSensitivity);
@@ -341,6 +357,9 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
             // Rotation based on projected aim spin around anchor (aim is projected on a sphere around the anchor)
             const double spinRotationAngle = glm::angle(glm::normalize(prevAnchorToAim), glm::normalize(newAnchorToProjectedAim));
+
+            // By default, let the camera follow the anchor
+            _camera->setPositionVec3(_anchorNode->worldPosition() - prevCameraToAnchor);
 
             if (spinRotationAngle > AngleEpsilon) {
                 const glm::dvec3 spinRotationAxis = glm::cross(prevAnchorToAim, newAnchorToProjectedAim);
@@ -426,7 +445,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
         // Rotate with the object by finding a differential rotation from the previous
         // to the current rotation.
-        const glm::dquat anchorRotation =
+        glm::dquat anchorRotation =
             glm::quat_cast(_anchorNode->worldRotationMatrix());
 
         glm::dquat anchorNodeRotationDiff =
@@ -447,7 +466,11 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
         // Update local rotation
         camRotAnchor.localRotation = roll(deltaTime, camRotAnchor.localRotation);
-        camRotAnchor.localRotation = interpolateLocalRotation(deltaTime, camRotAnchor.localRotation);
+
+        _camera->setRotation(composeCameraRotation(camRotAnchor));
+        _camera->setRotation(interpolateLocalRotation(deltaTime, *_camera));
+        camRotAnchor = decomposeCameraRotationSurface(*_camera, *_anchorNode);
+
         camRotAnchor.localRotation = rotateLocally(deltaTime, camRotAnchor.localRotation);
 
         // Horizontal translation
@@ -596,7 +619,27 @@ void OrbitalNavigator::setAimNode(const std::string& aimNode) {
     _aim.set(aimNode);
 }
 
-void OrbitalNavigator::startInterpolateCameraDirection() {
+void OrbitalNavigator::startRetargetAnchor() {
+    const glm::dvec3 camPos = _camera->positionVec3();
+    const glm::dvec3 camDir = glm::normalize(
+        _camera->rotationQuaternion() * glm::dvec3(0.0, 0.0, -1.0)
+    );
+    const glm::dvec3 centerPos = _anchorNode->worldPosition();
+    const glm::dvec3 directionToCenter = glm::normalize(centerPos - camPos);
+
+    const double angle = glm::angle(camDir, directionToCenter);
+
+    // Minimum is two second. Otherwise proportional to angle
+    _rotateToAnchorInterpolator.setInterpolationTime(static_cast<float>(
+        glm::max(angle, 1.0) * _rotateInterpolationTime
+    ));
+    _rotateToAnchorInterpolator.start();
+
+    _cameraToSurfaceDistanceInterpolator.setInterpolationTime(_stereoInterpolationTime);
+    _cameraToSurfaceDistanceInterpolator.start();
+}
+
+void OrbitalNavigator::startRetargetAim() {
     const glm::dvec3 camPos = _camera->positionVec3();
     const glm::dvec3 camDir = glm::normalize(
         _camera->rotationQuaternion() * glm::dvec3(0.0, 0.0, -1.0)
@@ -608,20 +651,21 @@ void OrbitalNavigator::startInterpolateCameraDirection() {
 
     // Minimum is two second. Otherwise proportional to angle
     _rotateToAimInterpolator.setInterpolationTime(static_cast<float>(
-        glm::max(angle, 1.0) * _rotateToAimInterpolationTime
-    ));
+        glm::max(angle, 1.0) * _rotateInterpolationTime
+        ));
     _rotateToAimInterpolator.start();
 
     _cameraToSurfaceDistanceInterpolator.setInterpolationTime(_stereoInterpolationTime);
     _cameraToSurfaceDistanceInterpolator.start();
 }
 
+
 float OrbitalNavigator::rotateToAimInterpolationTime() const {
-    return _rotateToAimInterpolationTime;
+    return _rotateInterpolationTime;
 }
 
-void OrbitalNavigator::setRotateToAimInterpolationTime(float durationInSeconds) {
-    _rotateToAimInterpolationTime = durationInSeconds;
+void OrbitalNavigator::setRotateInterpolationTime(float durationInSeconds) {
+    _rotateInterpolationTime = durationInSeconds;
 }
 
 bool OrbitalNavigator::followingNodeRotation() const {
@@ -735,14 +779,40 @@ glm::dquat OrbitalNavigator::rotateLocally(double deltaTime,
 }
 
 glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
-                                                    const glm::dquat& localCameraRotation)
+                                                      const Camera& camera)
 {
+    if (_rotateToAnchorInterpolator.isInterpolating()) {
+        CameraRotationDecomposition decomp =
+            decomposeCameraRotationSurface(camera, *_anchorNode);
+
+        const double t = _rotateToAnchorInterpolator.value();
+        _rotateToAnchorInterpolator.setDeltaTime(static_cast<float>(deltaTime));
+        _rotateToAnchorInterpolator.step();
+        const glm::dquat result = glm::slerp(
+            decomp.localRotation,
+            glm::dquat(glm::dvec3(0.0)),
+            glm::min(t * _rotateToAnchorInterpolator.deltaTimeScaled(), 1.0));
+
+        // Retrieving the angle of a quaternion uses acos on the w component, which can
+        // have numerical instability for values close to 1.0
+        constexpr double Epsilon = 1.0e-13;
+        if (abs((abs(result.w) - 1.0)) < Epsilon || angle(result) < 0.01) {
+            _rotateToAnchorInterpolator.end();
+        }
+
+        decomp.localRotation = result;
+        return composeCameraRotation(decomp);
+    }
+
     if (_rotateToAimInterpolator.isInterpolating()) {
+        CameraRotationDecomposition decomp =
+            decomposeCameraRotationOrigin(camera, *_aimNode);
+
         const double t = _rotateToAimInterpolator.value();
         _rotateToAimInterpolator.setDeltaTime(static_cast<float>(deltaTime));
         _rotateToAimInterpolator.step();
         const glm::dquat result = glm::slerp(
-            localCameraRotation,
+            decomp.localRotation,
             glm::dquat(glm::dvec3(0.0)),
             glm::min(t * _rotateToAimInterpolator.deltaTimeScaled(), 1.0));
 
@@ -752,11 +822,11 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
         if (abs((abs(result.w) - 1.0)) < Epsilon || angle(result) < 0.01) {
             _rotateToAimInterpolator.end();
         }
-        return result;
+
+        decomp.localRotation = result;
+        return composeCameraRotation(decomp);
     }
-    else {
-        return localCameraRotation;
-    }
+    return camera.rotationQuaternion();
 }
 
 double OrbitalNavigator::interpolateCameraToSurfaceDistance(double deltaTime,

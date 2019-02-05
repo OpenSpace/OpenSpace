@@ -765,7 +765,7 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
             return;
         }
         global::navigationHandler.orbitalNavigator().setFocusNode(node->parent());
-        global::navigationHandler.orbitalNavigator().startInterpolateCameraDirection();
+        global::navigationHandler.orbitalNavigator().startRetargetAnchor();
     });
 
     _pJumpToStartBtn.onChange([this] {

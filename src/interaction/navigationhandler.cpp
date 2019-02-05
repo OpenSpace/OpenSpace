@@ -113,7 +113,7 @@ float NavigationHandler::interpolationTime() const {
 }
 
 void NavigationHandler::setInterpolationTime(float durationInSeconds) {
-    _orbitalNavigator->setRotateToAimInterpolationTime(durationInSeconds);
+    _orbitalNavigator->setRotateInterpolationTime(durationInSeconds);
 }
 
 void NavigationHandler::updateCamera(double deltaTime) {
@@ -346,11 +346,18 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
                 "Restore the camera state from file"
             },
             {
-                "resetCameraDirection",
-                &luascriptfunctions::resetCameraDirection,
+                "retargetAnchor",
+                &luascriptfunctions::retargetAnchor,
                 {},
                 "void",
-                "Reset the camera direction to point at the focus node"
+                "Reset the camera direction to point at the anchor node"
+            },
+            {
+                "retargetAim",
+                &luascriptfunctions::retargetAim,
+                {},
+                "void",
+                "Reset the camera direction to point at the aim node"
             },
             {
                 "bindJoystickAxis",

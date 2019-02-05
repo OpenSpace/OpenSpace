@@ -66,9 +66,10 @@ public:
     void setAimNode(const std::string& aimNode);
     void setAimNode(SceneGraphNode* aimNode);
 
-    void startInterpolateCameraDirection();
+    void startRetargetAnchor();
+    void startRetargetAim();
     float rotateToAimInterpolationTime() const;
-    void setRotateToAimInterpolationTime(float durationInSeconds);
+    void setRotateInterpolationTime(float durationInSeconds);
 
     JoystickCameraStates& joystickStates();
 
@@ -110,8 +111,10 @@ private:
     // If these are the same node we call it the `focus` node.
     properties::StringProperty _aim;
 
-    // Reset camera direction: look at the aim-node.
-    properties::TriggerProperty _resetCameraDirection;
+    // Reset camera direction to the anchor node.
+    properties::TriggerProperty _retargetAnchor;
+    // Reset camera direction to the aim node.
+    properties::TriggerProperty _retargetAim;
 
     properties::FloatProperty _followAnchorNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
@@ -123,7 +126,7 @@ private:
     properties::FloatProperty _stereoscopicDepthOfFocusSurface;
     properties::FloatProperty _staticViewScaleExponent;
 
-    properties::FloatProperty _rotateToAimInterpolationTime;
+    properties::FloatProperty _rotateInterpolationTime;
     properties::FloatProperty _stereoInterpolationTime;
 
     MouseCameraStates _mouseStates;
@@ -142,6 +145,7 @@ private:
     bool _directlySetStereoDistance = false;
 
     Interpolator<double> _rotateToAimInterpolator;
+    Interpolator<double> _rotateToAnchorInterpolator;
     Interpolator<double> _cameraToSurfaceDistanceInterpolator;
     Interpolator<double> _followRotationInterpolator;
 
@@ -186,11 +190,10 @@ private:
         const glm::dquat& localCameraRotation) const;
 
     /**
-     * Interpolates the local rotation towards a 0 rotation.
-     * \returns a modified local rotation interpolated towards 0.
+     * Interpolates the camera rotation based on active interpolators.
+     * \returns a new rotation quaternion
      */
-    glm::dquat interpolateLocalRotation(double deltaTime,
-        const glm::dquat& localCameraRotation);
+    glm::dquat interpolateLocalRotation(double deltaTime, const Camera& camera);
 
 
     double interpolateCameraToSurfaceDistance(double deltaTime,
