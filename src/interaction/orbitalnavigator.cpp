@@ -342,7 +342,6 @@ void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
 void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     if (_anchorNode && _aimNode) {
         if (_anchorNode != _aimNode) {
-
             const glm::dvec3 anchorDisplacement = _anchorNode->worldPosition() - _previousAnchorNodePosition;
             Camera offsetCamera = *_camera;
             offsetCamera.setPositionVec3(_camera->positionVec3() + anchorDisplacement);
@@ -350,9 +349,35 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
             const glm::dvec3 prevCameraPosition = _camera->positionVec3();
             const glm::dvec3 prevCameraToAnchor = _previousAnchorNodePosition - prevCameraPosition;
-            const glm::dvec3 prevCameraToAim = _previousAimNodePosition - prevCameraPosition;
-            const glm::dvec3 prevAnchorToAim = _previousAimNodePosition - _previousAnchorNodePosition;
-            const glm::dvec3 newAnchorToAim = _aimNode->worldPosition() - _anchorNode->worldPosition();
+
+            glm::dvec3 prevCameraToAim = _previousAimNodePosition - prevCameraPosition;
+            glm::dvec3 prevAnchorToAim = _previousAimNodePosition - _previousAnchorNodePosition;
+            glm::dvec3 newAnchorToAim = _aimNode->worldPosition() - _anchorNode->worldPosition();
+
+            if (_rotateToAimInterpolator.isInterpolating()) {
+                double t = _rotateToAimInterpolator.value();
+                _rotateToAimInterpolator.setDeltaTime(static_cast<float>(deltaTime));
+                _rotateToAimInterpolator.step();
+
+                CameraRotationDecomposition decomp = decomposeCameraRotationOrigin(offsetCamera, *_aimNode);
+
+                const glm::dquat prevRotation = _camera->rotationQuaternion();
+                const glm::dquat interpolatedRotation = glm::slerp(
+                    prevRotation,
+                    decomp.globalRotation,
+                    glm::min(t * _rotateToAimInterpolator.deltaTimeScaled(), 1.0));
+
+                const double aimDistance = prevCameraToAim.x * glm::length(prevCameraToAim / prevCameraToAim.x);
+
+                prevCameraToAim = 
+                    aimDistance * (prevRotation * glm::dvec3(0.0, 0.0, -1.0));
+
+                const glm::dvec3 recomputedCameraToAim =
+                    aimDistance * (interpolatedRotation * glm::dvec3(0.0, 0.0, -1.0));
+
+                prevAnchorToAim = prevCameraToAim - prevCameraToAnchor;
+                newAnchorToAim = recomputedCameraToAim - prevCameraToAnchor;
+            }
 
             if (glm::length(newAnchorToAim) > DistanceEpsilon) {
                 glm::dvec3 newAnchorToProjectedAim = glm::length(prevAnchorToAim) * glm::normalize(newAnchorToAim);
@@ -807,28 +832,6 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
         return composeCameraRotation(decomp);
     }
 
-    if (_rotateToAimInterpolator.isInterpolating()) {
-        CameraRotationDecomposition decomp =
-            decomposeCameraRotationOrigin(camera, *_aimNode);
-
-        const double t = _rotateToAimInterpolator.value();
-        _rotateToAimInterpolator.setDeltaTime(static_cast<float>(deltaTime));
-        _rotateToAimInterpolator.step();
-        const glm::dquat result = glm::slerp(
-            decomp.localRotation,
-            glm::dquat(glm::dvec3(0.0)),
-            glm::min(t * _rotateToAimInterpolator.deltaTimeScaled(), 1.0));
-
-        // Retrieving the angle of a quaternion uses acos on the w component, which can
-        // have numerical instability for values close to 1.0
-        constexpr double Epsilon = 1.0e-13;
-        if (abs((abs(result.w) - 1.0)) < Epsilon || angle(result) < 0.01) {
-            _rotateToAimInterpolator.end();
-        }
-
-        decomp.localRotation = result;
-        return composeCameraRotation(decomp);
-    }
     return camera.rotationQuaternion();
 }
 
