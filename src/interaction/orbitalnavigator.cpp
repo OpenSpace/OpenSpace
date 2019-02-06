@@ -468,7 +468,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         // individually. Then we combine them again when finished.
         // Compensate for relative movement of aim node, in order to maintain the old global/local rotation.
         _camera->setPositionVec3(camPos + relativeAimNodeDiff);
-        CameraRotationDecomposition camRotAnchor = decomposeCameraRotationSurface(*_camera, *_anchorNode);
+        CameraRotationDecomposition camRot = decomposeCameraRotationSurface(*_camera, *_anchorNode);
 
 
         // Rotate with the object by finding a differential rotation from the previous
@@ -493,13 +493,9 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         );
 
         // Update local rotation
-        camRotAnchor.localRotation = roll(deltaTime, camRotAnchor.localRotation);
-
-        _camera->setRotation(composeCameraRotation(camRotAnchor));
-        _camera->setRotation(interpolateLocalRotation(deltaTime, *_camera));
-        camRotAnchor = decomposeCameraRotationSurface(*_camera, *_anchorNode);
-
-        camRotAnchor.localRotation = rotateLocally(deltaTime, camRotAnchor.localRotation);
+        camRot.localRotation = roll(deltaTime, camRot.localRotation);
+        camRot.localRotation = interpolateLocalRotation(deltaTime, camRot.localRotation);
+        camRot.localRotation = rotateLocally(deltaTime, camRot.localRotation);
 
         // Horizontal translation
         camPos = translateHorizontally(
@@ -507,7 +503,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
             camPos,
             anchorPos,
             anchorNodeRotationDiff,
-            camRotAnchor.globalRotation,
+            camRot.globalRotation,
             posHandle
         );
 
@@ -524,17 +520,17 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
         // Rotate globally to keep camera rotation fixed
         // in the rotating reference frame of the anchor object.
-        camRotAnchor.globalRotation = rotateGlobally(
-            camRotAnchor.globalRotation,
+        camRot.globalRotation = rotateGlobally(
+            camRot.globalRotation,
             anchorNodeRotationDiff,
             posHandle
         );
 
 
         // Rotate around the surface out direction
-        camRotAnchor.globalRotation = rotateHorizontally(
+        camRot.globalRotation = rotateHorizontally(
             deltaTime,
-            camRotAnchor.globalRotation,
+            camRot.globalRotation,
             camPos,
             posHandle
         );
@@ -550,7 +546,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
         // Update the camera state
         _camera->setPositionVec3(camPos);
-        _camera->setRotation(composeCameraRotation(camRotAnchor));
+        _camera->setRotation(composeCameraRotation(camRot));
 
         if (_useAdaptiveStereoscopicDepth) {
             double targetCameraToSurfaceDistance = glm::length(
@@ -805,19 +801,15 @@ glm::dquat OrbitalNavigator::rotateLocally(double deltaTime,
 
     return localCameraRotation * joystickRotationDiff * mouseRotationDiff;
 }
-
 glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
-                                                      const Camera& camera)
+    const glm::dquat& localCameraRotation)
 {
     if (_rotateToAnchorInterpolator.isInterpolating()) {
-        CameraRotationDecomposition decomp =
-            decomposeCameraRotationSurface(camera, *_anchorNode);
-
         const double t = _rotateToAnchorInterpolator.value();
         _rotateToAnchorInterpolator.setDeltaTime(static_cast<float>(deltaTime));
         _rotateToAnchorInterpolator.step();
         const glm::dquat result = glm::slerp(
-            decomp.localRotation,
+            localCameraRotation,
             glm::dquat(glm::dvec3(0.0)),
             glm::min(t * _rotateToAnchorInterpolator.deltaTimeScaled(), 1.0));
 
@@ -827,12 +819,11 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
         if (abs((abs(result.w) - 1.0)) < Epsilon || angle(result) < 0.01) {
             _rotateToAnchorInterpolator.end();
         }
-
-        decomp.localRotation = result;
-        return composeCameraRotation(decomp);
+        return result;
     }
-
-    return camera.rotationQuaternion();
+    else {
+        return localCameraRotation;
+    }
 }
 
 double OrbitalNavigator::interpolateCameraToSurfaceDistance(double deltaTime,

@@ -193,8 +193,8 @@ private:
      * Interpolates the camera rotation based on active interpolators.
      * \returns a new rotation quaternion
      */
-    glm::dquat interpolateLocalRotation(double deltaTime, const Camera& camera);
-
+    glm::dquat interpolateLocalRotation(double deltaTime,
+        const glm::dquat& localCameraRotation);
 
     double interpolateCameraToSurfaceDistance(double deltaTime,
                                               double currentDistance,
