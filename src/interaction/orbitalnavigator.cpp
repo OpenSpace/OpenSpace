@@ -36,7 +36,7 @@ namespace {
     constexpr const char* _loggerCat = "OrbitalNavigator";
 
     constexpr const double AngleEpsilon = 1E-7;
-    constexpr const double DistanceEpsilon = 1E-7;
+    constexpr const double DistanceRatioAimThreshold = 1E-4;
 
     constexpr const openspace::properties::Property::PropertyInfo AnchorInfo = {
         "Anchor",
@@ -152,7 +152,7 @@ namespace {
             "UseAdaptiveStereoscopicDepth",
             "Adaptive Steroscopic Depth",
             "Dynamically adjust the view scaling based on the distance to the surface of "
-            "the anhor and aim nodes. If enabled, view scale will be set to "
+            "the anchor and aim nodes. If enabled, view scale will be set to "
             "StereoscopicDepthOfFocusSurface / min(anchorDistance, aimDistance). "
             "If disabled, view scale will be set to 10^StaticViewScaleExponent."
         };
@@ -226,6 +226,7 @@ OrbitalNavigator::OrbitalNavigator()
 
     _aim.onChange([this]() {
         if (_aim.value().empty()) {
+            setAimNode(_anchorNode);
             return;
         }
         SceneGraphNode* node = sceneGraphNode(_aim.value());
@@ -340,235 +341,286 @@ void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
 }
 
 void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
-    if (_anchorNode && _aimNode) {
-        if (_anchorNode != _aimNode) {
-            const glm::dvec3 anchorDisplacement = _anchorNode->worldPosition() - _previousAnchorNodePosition;
-            Camera offsetCamera = *_camera;
-            offsetCamera.setPositionVec3(_camera->positionVec3() + anchorDisplacement);
-            CameraRotationDecomposition decomp = decomposeCameraRotationOrigin(offsetCamera, *_anchorNode);
+    if (!(_anchorNode && _aimNode)) {
+        // Bail out if either the anchor node or aim node are not set.
+        return;
+    }
 
-            const glm::dvec3 prevCameraPosition = _camera->positionVec3();
-            const glm::dvec3 prevCameraToAnchor = _previousAnchorNodePosition - prevCameraPosition;
+    if (_anchorNode != _aimNode) {
+        const glm::dvec3 anchorDisplacement =
+            _anchorNode->worldPosition() - _previousAnchorNodePosition;
+        Camera offsetCamera = *_camera;
+        offsetCamera.setPositionVec3(_camera->positionVec3() + anchorDisplacement);
 
-            glm::dvec3 prevCameraToAim = _previousAimNodePosition - prevCameraPosition;
-            glm::dvec3 prevAnchorToAim = _previousAimNodePosition - _previousAnchorNodePosition;
-            glm::dvec3 newAnchorToAim = _aimNode->worldPosition() - _anchorNode->worldPosition();
+        CameraRotationDecomposition decomp =
+            decomposeCameraRotationOrigin(offsetCamera, *_anchorNode);
 
-            if (_rotateToAimInterpolator.isInterpolating()) {
-                double t = _rotateToAimInterpolator.value();
-                _rotateToAimInterpolator.setDeltaTime(static_cast<float>(deltaTime));
-                _rotateToAimInterpolator.step();
+        const glm::dvec3 prevCameraPosition = _camera->positionVec3();
 
-                CameraRotationDecomposition decomp = decomposeCameraRotationOrigin(offsetCamera, *_aimNode);
+        const glm::dvec3 prevCameraToAnchor =
+            _previousAnchorNodePosition - prevCameraPosition;
 
-                const glm::dquat prevRotation = _camera->rotationQuaternion();
-                const glm::dquat interpolatedRotation = glm::slerp(
-                    prevRotation,
-                    decomp.globalRotation,
-                    glm::min(t * _rotateToAimInterpolator.deltaTimeScaled(), 1.0));
+        glm::dvec3 prevCameraToAim = _previousAimNodePosition - prevCameraPosition;
 
-                const double aimDistance = prevCameraToAim.x * glm::length(prevCameraToAim / prevCameraToAim.x);
+        glm::dvec3 prevAnchorToAim =
+            _previousAimNodePosition - _previousAnchorNodePosition;
 
-                prevCameraToAim = 
-                    aimDistance * (prevRotation * glm::dvec3(0.0, 0.0, -1.0));
+        glm::dvec3 newAnchorToAim =
+            _aimNode->worldPosition() - _anchorNode->worldPosition();
 
-                const glm::dvec3 recomputedCameraToAim =
-                    aimDistance * (interpolatedRotation * glm::dvec3(0.0, 0.0, -1.0));
+        if (_rotateToAimInterpolator.isInterpolating()) {
 
-                prevAnchorToAim = prevCameraToAim - prevCameraToAnchor;
-                newAnchorToAim = recomputedCameraToAim - prevCameraToAnchor;
-            }
+            double t = _rotateToAimInterpolator.value();
+            _rotateToAimInterpolator.setDeltaTime(static_cast<float>(deltaTime));
+            _rotateToAimInterpolator.step();
 
-            if (glm::length(newAnchorToAim) > DistanceEpsilon) {
-                glm::dvec3 newAnchorToProjectedAim = glm::length(prevAnchorToAim) * glm::normalize(newAnchorToAim);
+            CameraRotationDecomposition decomp =
+                decomposeCameraRotationOrigin(offsetCamera, *_aimNode);
 
-                // Rotation based on projected aim spin around anchor (aim is projected on a sphere around the anchor)
-                const double spinRotationAngle = glm::angle(glm::normalize(prevAnchorToAim), glm::normalize(newAnchorToProjectedAim));
+            const glm::dquat prevRotation = _camera->rotationQuaternion();
+            const glm::dquat interpolatedRotation = glm::slerp(
+                prevRotation,
+                decomp.globalRotation,
+                glm::min(t * _rotateToAimInterpolator.deltaTimeScaled(), 1.0));
 
-                // By default, let the camera follow the anchor
-                _camera->setPositionVec3(_anchorNode->worldPosition() - prevCameraToAnchor);
+            const double aimDistance = glm::length(prevCameraToAim);
 
-                if (spinRotationAngle > AngleEpsilon) {
-                    const glm::dvec3 spinRotationAxis = glm::cross(prevAnchorToAim, newAnchorToProjectedAim);
-                    const glm::dquat spinRotation = glm::angleAxis(spinRotationAngle, glm::normalize(spinRotationAxis));
+            prevCameraToAim = 
+                aimDistance * (prevRotation * glm::dvec3(0.0, 0.0, -1.0));
 
-                    const glm::dvec3 newCameraPosition = _anchorNode->worldPosition() - spinRotation * prevCameraToAnchor;
+            const glm::dvec3 recomputedCameraToAim =
+                aimDistance * (interpolatedRotation * glm::dvec3(0.0, 0.0, -1.0));
 
-                    _camera->setPositionVec3(newCameraPosition);
-                    decomp.globalRotation = spinRotation * decomp.globalRotation;
-                }
-
-                const glm::dvec3 projectedAim = _anchorNode->worldPosition() + newAnchorToProjectedAim;
-
-                // Rotation based on increased aim distance from anchor
-                const glm::dvec3 intermediateCameraToAnchor = _anchorNode->worldPosition() - _camera->positionVec3();
-                const glm::dvec3 intermediateCameraToProjectedAim = projectedAim - _camera->positionVec3();
-
-                double alpha = glm::angle(glm::normalize(intermediateCameraToAnchor), glm::normalize(intermediateCameraToProjectedAim));
-                double ratio = glm::sin(alpha) * glm::length(intermediateCameraToAnchor) / glm::length(newAnchorToAim);
-
-
-                ratio = glm::clamp(ratio, -1.0, 1.0);
-                // Equation has no solution if ratio > 1.
-                // To avoid a discontinuity in the camera behavior,
-                // fade out the distance correction influence when ratio approaches 1.
-                double correctionFactor = glm::clamp(1.0 - glm::pow(ratio, 50.0), 0.0, 1.0);
-                double delta = glm::asin(ratio);
-
-                if (glm::dot(intermediateCameraToAnchor, newAnchorToAim) <= 0 && // Camera on right half-plane
-                    glm::dot(intermediateCameraToProjectedAim, newAnchorToAim) <= 0) // Camera is past aim in right half-plane
-                {
-                    delta = -glm::asin(ratio) + glm::pi<double>();
-                }
-
-                double beta = glm::angle(glm::normalize(-intermediateCameraToAnchor), glm::normalize(newAnchorToProjectedAim));
-
-                const double gamma = glm::pi<double>() - alpha - delta;
-                double distanceRotationAngle = correctionFactor * (gamma - beta);
-
-                if (glm::abs(distanceRotationAngle) > AngleEpsilon) {
-                    glm::dvec3 distanceRotationAxis = glm::normalize(glm::cross(intermediateCameraToAnchor, newAnchorToProjectedAim));
-                    const glm::dquat orbitRotation = glm::angleAxis(distanceRotationAngle, distanceRotationAxis);
-
-                    const glm::dvec3 newCameraPosition = _anchorNode->worldPosition() - orbitRotation * intermediateCameraToAnchor;
-                    _camera->setPositionVec3(newCameraPosition);
-
-                    const glm::dquat aimAdjustRotation = glm::angleAxis(distanceRotationAngle, distanceRotationAxis);
-                    decomp.globalRotation = aimAdjustRotation * decomp.globalRotation;
-                }
-
-                _camera->setRotation(composeCameraRotation(decomp));
-            }
-
-            _previousAimNodePosition = _aimNode->worldPosition();
-            _previousAimNodeRotation = _aimNode->worldRotationMatrix();
-            _previousAnchorNodePosition = _anchorNode->worldPosition();
-            _previousAnchorNodeRotation = _anchorNode->worldRotationMatrix();
+            prevAnchorToAim = prevCameraToAim - prevCameraToAnchor;
+            newAnchorToAim = recomputedCameraToAim - prevCameraToAnchor;
         }
 
-        // Read the current state of the camera
-        glm::dvec3 camPos = _camera->positionVec3();
-        const glm::dvec3 anchorPos = _anchorNode->worldPosition();
-        const glm::dvec3 aimPos = _aimNode->worldPosition();
+        const double distanceRatio =
+            glm::length(newAnchorToAim) / glm::length(prevCameraToAim);
 
-        // Follow focus nodes movement
-        glm::dvec3 anchorNodeDiff = anchorPos - _previousAnchorNodePosition;
-        glm::dvec3 aimNodeDiff = aimPos - _previousAimNodePosition;
-        glm::dvec3 relativeAimNodeDiff = aimNodeDiff - anchorNodeDiff;
+        if (distanceRatio > DistanceRatioAimThreshold) {
+            glm::dvec3 newAnchorToProjectedAim =
+                glm::length(prevAnchorToAim) * glm::normalize(newAnchorToAim);
 
-        _previousAnchorNodePosition = anchorPos;
-        _previousAimNodePosition = aimPos;
-        camPos += anchorNodeDiff;
-
-        // Calculate a position handle based on the camera position in world space
-        SurfacePositionHandle posHandle =
-            calculateSurfacePositionHandle(*_anchorNode, camPos);
-
-        // Decompose camera rotation so that we can handle global and local rotation
-        // individually. Then we combine them again when finished.
-        // Compensate for relative movement of aim node, in order to maintain the old global/local rotation.
-        _camera->setPositionVec3(camPos + relativeAimNodeDiff);
-        CameraRotationDecomposition camRot = decomposeCameraRotationSurface(*_camera, *_anchorNode);
-
-
-        // Rotate with the object by finding a differential rotation from the previous
-        // to the current rotation.
-        glm::dquat anchorRotation =
-            glm::quat_cast(_anchorNode->worldRotationMatrix());
-
-        glm::dquat anchorNodeRotationDiff =
-            _previousAnchorNodeRotation * glm::inverse(anchorRotation);
-
-        _previousAnchorNodeRotation = anchorRotation;
-
-        // Interpolate rotation differential so that the camera rotates with the object
-        // only if close enough
-        anchorNodeRotationDiff = interpolateRotationDifferential(
-            deltaTime,
-            1.0,
-            anchorNodeRotationDiff,
-            anchorPos,
-            camPos,
-            posHandle
-        );
-
-        // Update local rotation
-        camRot.localRotation = roll(deltaTime, camRot.localRotation);
-        camRot.localRotation = interpolateLocalRotation(deltaTime, camRot.localRotation);
-        camRot.localRotation = rotateLocally(deltaTime, camRot.localRotation);
-
-        // Horizontal translation
-        camPos = translateHorizontally(
-            deltaTime,
-            camPos,
-            anchorPos,
-            anchorNodeRotationDiff,
-            camRot.globalRotation,
-            posHandle
-        );
-
-        // Horizontal translation by focus node rotation
-        camPos = followAnchorNodeRotation(
-            camPos,
-            anchorPos,
-            anchorNodeRotationDiff
-        );
-
-        // Recalculate posHandle since horizontal position changed
-        posHandle = calculateSurfacePositionHandle(*_anchorNode, camPos);
-
-
-        // Rotate globally to keep camera rotation fixed
-        // in the rotating reference frame of the anchor object.
-        camRot.globalRotation = rotateGlobally(
-            camRot.globalRotation,
-            anchorNodeRotationDiff,
-            posHandle
-        );
-
-
-        // Rotate around the surface out direction
-        camRot.globalRotation = rotateHorizontally(
-            deltaTime,
-            camRot.globalRotation,
-            camPos,
-            posHandle
-        );
-
-        // Perform the vertical movements
-        camPos = translateVertically(deltaTime, camPos, anchorPos, posHandle);
-        camPos = pushToSurface(
-            _minimumAllowedDistance,
-            camPos,
-            anchorPos,
-            posHandle
-        );
-
-        // Update the camera state
-        _camera->setPositionVec3(camPos);
-        _camera->setRotation(composeCameraRotation(camRot));
-
-        if (_useAdaptiveStereoscopicDepth) {
-            double targetCameraToSurfaceDistance = glm::length(
-                cameraToSurfaceVector(camPos, anchorPos, posHandle)
+            // Rotation based on projected aim spin around anchor
+            // (aim is projected on a sphere around the anchor)
+            const double spinRotationAngle = glm::angle(
+                glm::normalize(prevAnchorToAim), glm::normalize(newAnchorToProjectedAim)
             );
-            if (_directlySetStereoDistance) {
-                _currentCameraToSurfaceDistance = targetCameraToSurfaceDistance;
-                _directlySetStereoDistance = false;
-            } else {
-                _currentCameraToSurfaceDistance = interpolateCameraToSurfaceDistance(
-                    deltaTime,
-                    _currentCameraToSurfaceDistance,
-                    targetCameraToSurfaceDistance);
+
+            // By default, let the camera follow the anchor
+            _camera->setPositionVec3(_anchorNode->worldPosition() - prevCameraToAnchor);
+
+            if (spinRotationAngle > AngleEpsilon) {
+                const glm::dvec3 spinRotationAxis =
+                    glm::cross(prevAnchorToAim, newAnchorToProjectedAim);
+
+                const glm::dquat spinRotation =
+                    glm::angleAxis(spinRotationAngle, glm::normalize(spinRotationAxis));
+
+                const glm::dvec3 newCameraPosition =
+                    _anchorNode->worldPosition() - spinRotation * prevCameraToAnchor;
+
+                _camera->setPositionVec3(newCameraPosition);
+                decomp.globalRotation = spinRotation * decomp.globalRotation;
             }
 
-            _camera->setScaling(
-                _stereoscopicDepthOfFocusSurface /
-                static_cast<float>(_currentCameraToSurfaceDistance)
+            const glm::dvec3 projectedAim =
+                _anchorNode->worldPosition() + newAnchorToProjectedAim;
+
+            // Rotation based on increased aim distance from anchor
+            const glm::dvec3 intermediateCameraToAnchor =
+                _anchorNode->worldPosition() - _camera->positionVec3();
+
+            const glm::dvec3 intermediateCameraToProjectedAim =
+                projectedAim - _camera->positionVec3();
+
+            const double alpha = glm::angle(
+                glm::normalize(intermediateCameraToAnchor),
+                glm::normalize(intermediateCameraToProjectedAim)
             );
+            double ratio = 
+                glm::sin(alpha) * glm::length(intermediateCameraToAnchor) /
+                glm::length(newAnchorToAim);
+
+            // Equation has no solution if ratio > 1.
+            // To avoid a discontinuity in the camera behavior,
+            // fade out the distance correction influence when ratio approaches 1.
+            // CorrectionFactorExponent = 50.0 is picked arbitrarily,
+            // and gives a smooth result.
+            ratio = glm::clamp(ratio, -1.0, 1.0);
+            double CorrectionFactorExponent = 50.0;
+            double correctionFactor =
+                glm::clamp(1.0 - glm::pow(ratio, CorrectionFactorExponent), 0.0, 1.0);
+
+
+            // Delta has two solutions, depending on whether the camera is
+            // in the half-space closest to the anchor or aim.
+            double delta = glm::asin(ratio);
+            if (glm::dot(intermediateCameraToAnchor, newAnchorToAim) <= 0 && 
+                glm::dot(intermediateCameraToProjectedAim, newAnchorToAim) <= 0) 
+            {
+                delta = -glm::asin(ratio) + glm::pi<double>();
+            }
+
+            const double beta = glm::angle(
+                glm::normalize(-intermediateCameraToAnchor),
+                glm::normalize(newAnchorToProjectedAim)
+            );
+
+            const double gamma = glm::pi<double>() - alpha - delta;
+            double distanceRotationAngle = correctionFactor * (gamma - beta);
+
+            if (glm::abs(distanceRotationAngle) > AngleEpsilon) {
+                glm::dvec3 distanceRotationAxis = glm::normalize(
+                    glm::cross(intermediateCameraToAnchor, newAnchorToProjectedAim)
+                );
+                const glm::dquat orbitRotation =
+                    glm::angleAxis(distanceRotationAngle, distanceRotationAxis);
+
+                const glm::dvec3 newCameraPosition =
+                    _anchorNode->worldPosition() -
+                    orbitRotation * intermediateCameraToAnchor;
+
+                _camera->setPositionVec3(newCameraPosition);
+
+                const glm::dquat aimAdjustRotation =
+                    glm::angleAxis(distanceRotationAngle, distanceRotationAxis);
+
+                decomp.globalRotation = aimAdjustRotation * decomp.globalRotation;
+            }
+
+            _camera->setRotation(composeCameraRotation(decomp));
+        }
+
+        _previousAimNodePosition = _aimNode->worldPosition();
+        _previousAimNodeRotation = _aimNode->worldRotationMatrix();
+        _previousAnchorNodePosition = _anchorNode->worldPosition();
+        _previousAnchorNodeRotation = _anchorNode->worldRotationMatrix();
+    }
+
+    // Read the current state of the camera
+    glm::dvec3 camPos = _camera->positionVec3();
+    const glm::dvec3 anchorPos = _anchorNode->worldPosition();
+    const glm::dvec3 aimPos = _aimNode->worldPosition();
+
+    // Follow focus nodes movement
+    glm::dvec3 anchorNodeDiff = anchorPos - _previousAnchorNodePosition;
+    glm::dvec3 aimNodeDiff = aimPos - _previousAimNodePosition;
+    glm::dvec3 relativeAimNodeDiff = aimNodeDiff - anchorNodeDiff;
+
+    _previousAnchorNodePosition = anchorPos;
+    _previousAimNodePosition = aimPos;
+    camPos += anchorNodeDiff;
+
+    // Calculate a position handle based on the camera position in world space
+    SurfacePositionHandle posHandle =
+        calculateSurfacePositionHandle(*_anchorNode, camPos);
+
+    // Decompose camera rotation so that we can handle global and local rotation
+    // individually. Then we combine them again when finished.
+    // Compensate for relative movement of aim node, in order to maintain the old global/local rotation.
+    _camera->setPositionVec3(camPos + relativeAimNodeDiff);
+    CameraRotationDecomposition camRot = decomposeCameraRotationSurface(*_camera, *_anchorNode);
+
+
+    // Rotate with the object by finding a differential rotation from the previous
+    // to the current rotation.
+    glm::dquat anchorRotation =
+        glm::quat_cast(_anchorNode->worldRotationMatrix());
+
+    glm::dquat anchorNodeRotationDiff =
+        _previousAnchorNodeRotation * glm::inverse(anchorRotation);
+
+    _previousAnchorNodeRotation = anchorRotation;
+
+    // Interpolate rotation differential so that the camera rotates with the object
+    // only if close enough
+    anchorNodeRotationDiff = interpolateRotationDifferential(
+        deltaTime,
+        1.0,
+        anchorNodeRotationDiff,
+        anchorPos,
+        camPos,
+        posHandle
+    );
+
+    // Update local rotation
+    camRot.localRotation = roll(deltaTime, camRot.localRotation);
+    camRot.localRotation = interpolateLocalRotation(deltaTime, camRot.localRotation);
+    camRot.localRotation = rotateLocally(deltaTime, camRot.localRotation);
+
+    // Horizontal translation
+    camPos = translateHorizontally(
+        deltaTime,
+        camPos,
+        anchorPos,
+        anchorNodeRotationDiff,
+        camRot.globalRotation,
+        posHandle
+    );
+
+    // Horizontal translation by focus node rotation
+    camPos = followAnchorNodeRotation(
+        camPos,
+        anchorPos,
+        anchorNodeRotationDiff
+    );
+
+    // Recalculate posHandle since horizontal position changed
+    posHandle = calculateSurfacePositionHandle(*_anchorNode, camPos);
+
+
+    // Rotate globally to keep camera rotation fixed
+    // in the rotating reference frame of the anchor object.
+    camRot.globalRotation = rotateGlobally(
+        camRot.globalRotation,
+        anchorNodeRotationDiff,
+        posHandle
+    );
+
+
+    // Rotate around the surface out direction
+    camRot.globalRotation = rotateHorizontally(
+        deltaTime,
+        camRot.globalRotation,
+        camPos,
+        posHandle
+    );
+
+    // Perform the vertical movements
+    camPos = translateVertically(deltaTime, camPos, anchorPos, posHandle);
+    camPos = pushToSurface(
+        _minimumAllowedDistance,
+        camPos,
+        anchorPos,
+        posHandle
+    );
+
+    // Update the camera state
+    _camera->setPositionVec3(camPos);
+    _camera->setRotation(composeCameraRotation(camRot));
+
+    if (_useAdaptiveStereoscopicDepth) {
+        double targetCameraToSurfaceDistance = std::min(glm::length(
+            cameraToSurfaceVector(camPos, anchorPos, posHandle)
+        ), glm::distance(camPos, aimPos));
+        if (_directlySetStereoDistance) {
+            _currentCameraToSurfaceDistance = targetCameraToSurfaceDistance;
+            _directlySetStereoDistance = false;
         } else {
-            _camera->setScaling(glm::pow(10.f, _staticViewScaleExponent));
+            _currentCameraToSurfaceDistance = interpolateCameraToSurfaceDistance(
+                deltaTime,
+                _currentCameraToSurfaceDistance,
+                targetCameraToSurfaceDistance);
         }
+
+        _camera->setScaling(
+            _stereoscopicDepthOfFocusSurface /
+            static_cast<float>(_currentCameraToSurfaceDistance)
+        );
+    } else {
+        _camera->setScaling(glm::pow(10.f, _staticViewScaleExponent));
     }
 }
 
@@ -653,7 +705,7 @@ void OrbitalNavigator::startRetargetAnchor() {
 
     const double angle = glm::angle(camDir, directionToCenter);
 
-    // Minimum is two second. Otherwise proportional to angle
+    // Minimum is _rotateInterpolationTime seconds. Otherwise proportional to angle.
     _rotateToAnchorInterpolator.setInterpolationTime(static_cast<float>(
         glm::max(angle, 1.0) * _rotateInterpolationTime
     ));
@@ -673,7 +725,7 @@ void OrbitalNavigator::startRetargetAim() {
 
     const double angle = glm::angle(camDir, directionToCenter);
 
-    // Minimum is two second. Otherwise proportional to angle
+    // Minimum is _rotateInterpolationTime seconds. Otherwise proportional to angle.
     _rotateToAimInterpolator.setInterpolationTime(static_cast<float>(
         glm::max(angle, 1.0) * _rotateInterpolationTime
         ));
@@ -715,10 +767,10 @@ bool OrbitalNavigator::hasRollFriction() const {
 OrbitalNavigator::CameraRotationDecomposition OrbitalNavigator::decomposeCameraRotationSurface(
     const Camera& camera, const SceneGraphNode& reference)
 {
-    glm::dvec3 cameraPosition = camera.positionVec3();
-    glm::dquat cameraRotation = camera.rotationQuaternion();
-    glm::dvec3 cameraLookUp = camera.lookUpVectorWorldSpace();
-    glm::dvec3 cameraViewDirection = camera.viewDirectionWorldSpace();
+    const glm::dvec3 cameraPosition = camera.positionVec3();
+    const glm::dquat cameraRotation = camera.rotationQuaternion();
+    const glm::dvec3 cameraLookUp = camera.lookUpVectorWorldSpace();
+    const glm::dvec3 cameraViewDirection = camera.viewDirectionWorldSpace();
 
     const glm::dmat4 inverseModelTransform = reference.inverseModelTransform();
     const glm::dmat4 modelTransform = reference.modelTransform();
@@ -752,10 +804,10 @@ OrbitalNavigator::CameraRotationDecomposition OrbitalNavigator::decomposeCameraR
 OrbitalNavigator::CameraRotationDecomposition OrbitalNavigator::decomposeCameraRotationOrigin(
     const Camera& camera, const SceneGraphNode& reference)
 {
-    glm::dvec3 cameraPosition = camera.positionVec3();
-    glm::dquat cameraRotation = camera.rotationQuaternion();
-    glm::dvec3 cameraLookUp = camera.lookUpVectorWorldSpace();
-    glm::dvec3 cameraViewDirection = camera.viewDirectionWorldSpace();
+    const glm::dvec3 cameraPosition = camera.positionVec3();
+    const glm::dquat cameraRotation = camera.rotationQuaternion();
+    const glm::dvec3 cameraLookUp = camera.lookUpVectorWorldSpace();
+    const glm::dvec3 cameraViewDirection = camera.viewDirectionWorldSpace();
 
     // To avoid problem with lookup in up direction we adjust is with the view direction
     const glm::dmat4 lookAtMat = glm::lookAt(
@@ -879,8 +931,8 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
     const double distFromSurfaceToCamera = glm::length(actualSurfaceToCamera);
 
     // Final values to be used
-    const double distFromCenterToSurface = length(centerToActualSurface);
-    const double distFromCenterToCamera = length(posDiff);
+    const double distFromCenterToSurface = glm::length(centerToActualSurface);
+    const double distFromCenterToCamera = glm::length(posDiff);
 
     const double speedScale =
         distFromCenterToSurface > 0.0 ?
@@ -1029,7 +1081,7 @@ glm::dquat OrbitalNavigator::interpolateRotationDifferential(double deltaTime,
     const double maximumDistanceForRotation = glm::length(
         glm::dmat3(modelTransform) * positionHandle.centerToReferenceSurface
     ) * _followAnchorNodeRotationDistance;
-    const double distanceToCamera = glm::length(cameraPosition - objectPosition);
+    const double distanceToCamera = glm::distance(cameraPosition, objectPosition);
 
     // Interpolate with a negative delta time if distance is too large to follow
     const double interpolationSign = glm::sign(

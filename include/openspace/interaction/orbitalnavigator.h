@@ -103,7 +103,7 @@ private:
 
     Friction _friction;
 
-    // Aim: Node to follow and orbit.
+    // Anchor: Node to follow and orbit.
     properties::StringProperty _anchor;
 
     // Aim: Node to look at (when camera direction is reset), 
@@ -220,8 +220,8 @@ private:
         const glm::dvec3& objectPosition, const glm::dquat& anchorNodeRotationDiff) const;
 
     /**
-     * Updates the global rotation so that it points towards the aim node.
-     * \returns a global rotation quaternion defining a rotation towards the aim node.
+     * Updates the global rotation so that it points towards the anchor node.
+     * \returns a global rotation quaternion defining a rotation towards the anchor node.
      */
     glm::dquat rotateGlobally(const glm::dquat& globalCameraRotation,
         const glm::dquat& aimNodeRotationDiff,
