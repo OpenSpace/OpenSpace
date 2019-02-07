@@ -215,6 +215,7 @@ bool EventHandler::mouseWheelCallback(glm::ivec2 delta) {
 bool EventHandler::charCallback(unsigned int charCode, KeyModifier modifier) {
     CefKeyEvent keyEvent;
     keyEvent.windows_key_code = charCode;
+    keyEvent.character = charCode;
     keyEvent.modifiers = static_cast<uint32>(modifier);
     keyEvent.type = KEYEVENT_CHAR;
     // TODO(klas): figure out when to block
