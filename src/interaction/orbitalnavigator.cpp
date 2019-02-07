@@ -369,30 +369,45 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
             _aimNode->worldPosition() - _anchorNode->worldPosition();
 
         if (_rotateToAimInterpolator.isInterpolating()) {
-
             double t = _rotateToAimInterpolator.value();
             _rotateToAimInterpolator.setDeltaTime(static_cast<float>(deltaTime));
             _rotateToAimInterpolator.step();
 
-            CameraRotationDecomposition decomp =
-                decomposeCameraRotationOrigin(offsetCamera, *_aimNode);
-
-            const glm::dquat prevRotation = _camera->rotationQuaternion();
-            const glm::dquat interpolatedRotation = glm::slerp(
-                prevRotation,
-                decomp.globalRotation,
-                glm::min(t * _rotateToAimInterpolator.deltaTimeScaled(), 1.0));
-
             const double aimDistance = glm::length(prevCameraToAim);
+            const glm::dquat prevRotation = _camera->rotationQuaternion();
 
-            prevCameraToAim = 
+            const glm::dvec3 prevCameraToVirtualAim =
                 aimDistance * (prevRotation * glm::dvec3(0.0, 0.0, -1.0));
 
-            const glm::dvec3 recomputedCameraToAim =
-                aimDistance * (interpolatedRotation * glm::dvec3(0.0, 0.0, -1.0));
+            const double maxAngle =
+                glm::atan(glm::length(prevAnchorToAim), glm::length(prevCameraToAnchor));
 
-            prevAnchorToAim = prevCameraToAim - prevCameraToAnchor;
-            newAnchorToAim = recomputedCameraToAim - prevCameraToAnchor;
+            const double requestedAngle = glm::angle(
+                glm::normalize(prevCameraToVirtualAim),
+                glm::normalize(prevCameraToAnchor)
+            );
+
+            if (requestedAngle <= maxAngle) {
+                CameraRotationDecomposition decomp =
+                    decomposeCameraRotationOrigin(offsetCamera, *_aimNode);
+
+                const glm::dquat interpolatedRotation = glm::slerp(
+                    prevRotation,
+                    decomp.globalRotation,
+                    glm::min(t * _rotateToAimInterpolator.deltaTimeScaled(), 1.0));
+
+                const glm::dvec3 recomputedCameraToVirtualAim =
+                    aimDistance * (interpolatedRotation * glm::dvec3(0.0, 0.0, -1.0));
+
+                prevCameraToAim = prevCameraToVirtualAim;
+                prevAnchorToAim = prevCameraToAim - prevCameraToAnchor;
+                newAnchorToAim = recomputedCameraToVirtualAim - prevCameraToAnchor;
+            } else {
+                // Bail out.
+                // Cannot put aim in center without moving anchor in screen space.
+                // Todo: Rotate aim to center of screen anyways, but allow moving anchor?
+                _rotateToAimInterpolator.end();
+            }
         }
 
         const double distanceRatio =
