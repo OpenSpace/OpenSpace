@@ -137,8 +137,6 @@ public:
         mutable std::mutex _mutex;
     } sgctInternal;
 
-
-    const glm::mat4& sceneMatrix() const;
     // @TODO use Camera::SgctInternal interface instead
     // [[deprecated("Replaced by Camera::SgctInternal::viewMatrix()")]]
     const glm::mat4& viewMatrix() const;

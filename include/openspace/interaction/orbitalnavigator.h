@@ -89,6 +89,11 @@ private:
         glm::dquat globalRotation;
     };
 
+    struct CameraPose {
+        glm::dvec3 position;
+        glm::dquat rotation;
+    };
+
     struct Friction : public properties::PropertyOwner {
         Friction();
 
@@ -150,14 +155,14 @@ private:
     Interpolator<double> _followRotationInterpolator;
 
     /**
-     * Decomposes the cameras rotation in to a global and a local rotation defined by
+     * Decomposes the camera's rotation in to a global and a local rotation defined by
      * CameraRotationDecomposition. The global rotation defines the rotation so that the
      * camera points towards the reference node in the direction opposite to the direction
      * out from the surface of the object. The local rotation defines the differential
      * from the global to the current total rotation so that
      * <code>cameraRotation = globalRotation * localRotation</code>.
      */
-    CameraRotationDecomposition decomposeCameraRotationSurface(const Camera& camera,
+    CameraRotationDecomposition decomposeCameraRotationSurface(const CameraPose pose,
         const SceneGraphNode& reference);
 
     /**
@@ -167,14 +172,21 @@ private:
      * The local rotation defines the differential from the global to the current total
      * rotation so that <code>cameraRotation = globalRotation * localRotation</code>.
      */
-    CameraRotationDecomposition decomposeCameraRotationOrigin(const Camera& camera,
-        const SceneGraphNode& reference);
+    CameraRotationDecomposition decomposeCameraRotation(const CameraPose pose,
+        glm::dvec3 reference);
 
     /**
      * Composes a pair of global and local rotations into a quaternion that can be used
      * as the world rotation for a camera.
      */
     glm::dquat composeCameraRotation(const CameraRotationDecomposition& composition);
+
+    /*
+     * Moves and rotates the camera around the anchor node in order to maintain the
+     * screen space position of the aim node. Also interpolates to the aim node, when
+     * retargeting the aim.
+     */
+    CameraPose followAim(CameraPose pose, glm::dvec3 prevCameraToAnchor, glm::dvec3 prevCameraToAim, glm::dvec3 prevAnchorToAim, glm::dvec3 newAnchorToAim);
 
     /*
      * Perform a camera roll on the local camera rotation
