@@ -366,8 +366,6 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         const glm::dvec3 prevCameraToAnchor =
             _previousAnchorNodePosition - prevCameraPosition;
 
-        glm::dvec3 prevCameraToAim = _previousAimNodePosition - prevCameraPosition;
-
         glm::dvec3 prevAnchorToAim =
             _previousAimNodePosition - _previousAnchorNodePosition;
 
@@ -378,6 +376,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
             _rotateToAimInterpolator.setDeltaTime(static_cast<float>(deltaTime));
             _rotateToAimInterpolator.step();
 
+            const glm::dvec3 prevCameraToAim = _previousAimNodePosition - prevCameraPosition;
             const double aimDistance = glm::length(prevCameraToAim);
             const glm::dquat prevRotation = pose.rotation;
 
@@ -412,8 +411,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
                 const glm::dvec3 recomputedCameraToVirtualAim =
                     aimDistance * (interpolatedRotation * glm::dvec3(0.0, 0.0, -1.0));
 
-                prevCameraToAim = prevCameraToVirtualAim;
-                prevAnchorToAim = prevCameraToAim - prevCameraToAnchor;
+                prevAnchorToAim = prevCameraToVirtualAim - prevCameraToAnchor;
                 newAnchorToAim = recomputedCameraToVirtualAim - prevCameraToAnchor;
             }
             else {
@@ -424,7 +422,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
             }
         }
 
-        pose = followAim(pose, prevCameraToAnchor, prevCameraToAim, prevAnchorToAim, newAnchorToAim);
+        pose = followAim(pose, prevCameraToAnchor, prevAnchorToAim, newAnchorToAim);
         _camera->setPositionVec3(pose.position);
         _camera->setRotation(pose.rotation); 
 
@@ -740,8 +738,10 @@ OrbitalNavigator::CameraRotationDecomposition
     return { localCameraRotation, globalCameraRotation };
 }
 
-OrbitalNavigator::CameraPose OrbitalNavigator::followAim(CameraPose pose, glm::dvec3 prevCameraToAnchor, glm::dvec3 prevCameraToAim, glm::dvec3 prevAnchorToAim, glm::dvec3 newAnchorToAim) {
+OrbitalNavigator::CameraPose OrbitalNavigator::followAim(CameraPose pose, glm::dvec3 prevCameraToAnchor, glm::dvec3 prevAnchorToAim, glm::dvec3 newAnchorToAim) {
     CameraRotationDecomposition decomp = decomposeCameraRotation(pose, pose.position + prevCameraToAnchor);
+
+    const glm::dvec3 prevCameraToAim = prevCameraToAnchor + prevAnchorToAim;
     const double distanceRatio =
         glm::length(newAnchorToAim) / glm::length(prevCameraToAim);
 

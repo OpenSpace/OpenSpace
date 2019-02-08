@@ -186,7 +186,7 @@ private:
      * screen space position of the aim node. Also interpolates to the aim node, when
      * retargeting the aim.
      */
-    CameraPose followAim(CameraPose pose, glm::dvec3 prevCameraToAnchor, glm::dvec3 prevCameraToAim, glm::dvec3 prevAnchorToAim, glm::dvec3 newAnchorToAim);
+    CameraPose followAim(CameraPose pose, glm::dvec3 prevCameraToAnchor, glm::dvec3 prevAnchorToAim, glm::dvec3 newAnchorToAim);
 
     /*
      * Perform a camera roll on the local camera rotation
