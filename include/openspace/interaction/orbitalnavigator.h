@@ -94,6 +94,8 @@ private:
         glm::dquat rotation;
     };
 
+    using Displacement = std::pair<glm::dvec3, glm::dvec3>;
+
     struct Friction : public properties::PropertyOwner {
         Friction();
 
@@ -186,7 +188,9 @@ private:
      * screen space position of the aim node. Also interpolates to the aim node, when
      * retargeting the aim.
      */
-    CameraPose followAim(CameraPose pose, glm::dvec3 prevCameraToAnchor, glm::dvec3 prevAnchorToAim, glm::dvec3 newAnchorToAim);
+    CameraPose followAim(CameraPose pose,
+                         glm::dvec3 prevCameraToAnchor,
+                         Displacement anchorToAim);
 
     /*
      * Perform a camera roll on the local camera rotation
@@ -207,6 +211,12 @@ private:
      */
     glm::dquat interpolateLocalRotation(double deltaTime,
         const glm::dquat& localCameraRotation);
+
+
+    Displacement interpolateRetargetAim(double deltaTime,
+                                        CameraPose pose,
+                                        glm::dvec3 prevCameraToAnchor,
+                                        Displacement anchorToAim);
 
     double interpolateCameraToSurfaceDistance(double deltaTime,
                                               double currentDistance,
