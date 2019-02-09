@@ -168,7 +168,7 @@ private:
         const SceneGraphNode& reference);
 
     /**
-     * Decomposes the cameras rotation in to a global and a local rotation defined by
+     * Decomposes the camera's rotation in to a global and a local rotation defined by
      * CameraRotationDecomposition. The global rotation defines the rotation so that the
      * camera points towards the reference node's origin.
      * The local rotation defines the differential from the global to the current total
@@ -189,7 +189,7 @@ private:
      * retargeting the aim.
      */
     CameraPose followAim(CameraPose pose,
-                         glm::dvec3 prevCameraToAnchor,
+                         glm::dvec3 cameraToAnchor,
                          Displacement anchorToAim);
 
     /*
@@ -215,7 +215,7 @@ private:
 
     Displacement interpolateRetargetAim(double deltaTime,
                                         CameraPose pose,
-                                        glm::dvec3 prevCameraToAnchor,
+                                        glm::dvec3 cameraToAnchor,
                                         Displacement anchorToAim);
 
     double interpolateCameraToSurfaceDistance(double deltaTime,
@@ -229,7 +229,7 @@ private:
      * \returns a position vector adjusted in the horizontal direction.
      */
     glm::dvec3 translateHorizontally(double deltaTime, const glm::dvec3& cameraPosition,
-        const glm::dvec3& objectPosition, const glm::dquat& anchorNodeRotationDiff,
+        const glm::dvec3& objectPosition,
         const glm::dquat& globalCameraRotation,
         const SurfacePositionHandle& positionHandle) const;
 
