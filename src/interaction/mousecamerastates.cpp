@@ -26,6 +26,11 @@
 
 #include <openspace/interaction/inputstate.h>
 
+namespace {
+    const double SENSITIVITY_ADJUSTMENT_INCREASE = 8.0;
+    const double SENSITIVITY_ADJUSTMENT_DECREASE = 0.5;
+}
+
 namespace openspace::interaction {
 
 MouseCameraStates::MouseCameraStates(double sensitivity, double velocityScaleFactor)
@@ -82,8 +87,17 @@ void MouseCameraStates::updateStateFromInput(const InputState& inputState,
     if (button2Pressed || (keyAltPressed && button1Pressed)) {
         glm::dvec2 mousePositionDelta = _truckMovementState.previousPosition -
                                         mousePosition;
+
+        double sensitivity = _sensitivity;
+        if (keyCtrlPressed) {
+            sensitivity *= SENSITIVITY_ADJUSTMENT_INCREASE;
+        }
+        else if (keyShiftPressed) {
+            sensitivity *= SENSITIVITY_ADJUSTMENT_DECREASE;
+        }
+
         _truckMovementState.velocity.set(
-            mousePositionDelta * _sensitivity,
+            mousePositionDelta * sensitivity,
             deltaTime
         );
     }
