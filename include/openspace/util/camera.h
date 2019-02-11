@@ -76,7 +76,6 @@ public:
     void setScaling(float scaling);
     void setMaxFov(float fov);
     void setParent(SceneGraphNode* parent);
-    void setLookUpVectorWorldSpace(glm::dvec3 up);
 
     // Relative mutators
     void rotate(glm::dquat rotation);

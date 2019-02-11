@@ -135,15 +135,6 @@ const glm::dvec3& Camera::lookUpVectorWorldSpace() const {
     return _cachedLookupVector.datum;
 }
 
-void Camera::setLookUpVectorWorldSpace(glm::dvec3 up) {
-    const glm::dmat4 lookAtMat = glm::lookAt(
-        glm::dvec3(0.0, 0.0, 0.0),
-        viewDirectionWorldSpace(),
-        up
-    );
-    _rotation = glm::normalize(glm::quat_cast(inverse(lookAtMat)));
-}
-
 float Camera::maxFov() const {
     return _maxFov;
 }
