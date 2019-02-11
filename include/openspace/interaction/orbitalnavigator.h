@@ -68,8 +68,8 @@ public:
 
     void startRetargetAnchor();
     void startRetargetAim();
-    float rotateToAimInterpolationTime() const;
-    void setRotateInterpolationTime(float durationInSeconds);
+    float retargetInterpolationTime() const;
+    void setRetargetInterpolationTime(float durationInSeconds);
 
     JoystickCameraStates& joystickStates();
 
@@ -133,7 +133,7 @@ private:
     properties::FloatProperty _stereoscopicDepthOfFocusSurface;
     properties::FloatProperty _staticViewScaleExponent;
 
-    properties::FloatProperty _rotateInterpolationTime;
+    properties::FloatProperty _retargetInterpolationTime;
     properties::FloatProperty _stereoInterpolationTime;
 
     MouseCameraStates _mouseStates;
@@ -151,8 +151,8 @@ private:
     double _currentCameraToSurfaceDistance = 0.0;
     bool _directlySetStereoDistance = false;
 
-    Interpolator<double> _rotateToAimInterpolator;
-    Interpolator<double> _rotateToAnchorInterpolator;
+    Interpolator<double> _retargetAimInterpolator;
+    Interpolator<double> _retargetAnchorInterpolator;
     Interpolator<double> _cameraToSurfaceDistanceInterpolator;
     Interpolator<double> _followRotationInterpolator;
 

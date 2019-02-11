@@ -109,11 +109,11 @@ bool NavigationHandler::isKeyFrameInteractionEnabled() const {
 }
 
 float NavigationHandler::interpolationTime() const {
-    return _orbitalNavigator->rotateToAimInterpolationTime();
+    return _orbitalNavigator->retargetInterpolationTime();
 }
 
 void NavigationHandler::setInterpolationTime(float durationInSeconds) {
-    _orbitalNavigator->setRotateInterpolationTime(durationInSeconds);
+    _orbitalNavigator->setRetargetInterpolationTime(durationInSeconds);
 }
 
 void NavigationHandler::updateCamera(double deltaTime) {

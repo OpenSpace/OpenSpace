@@ -147,10 +147,11 @@ public:
 
     std::vector<Syncable*> getSyncables();
 
-private:
     // Static constants
     static const glm::dvec3 ViewDirectionCameraSpace;
-    static const glm::dvec3 LookupVectorCameraSpace;
+    static const glm::dvec3 UpDirectionCameraSpace;
+
+private:
 
     SyncData<glm::dvec3> _position = glm::dvec3(1.0, 1.0, 1.0);
     SyncData<glm::dquat> _rotation  = glm::dquat(glm::dvec3(1.0, 1.0, 1.0));
