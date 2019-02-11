@@ -134,7 +134,7 @@ namespace {
         "StereoInterpolationTime",
         "Stereo interpolation time",
         "The time to interpolate to a new stereoscopic depth "
-        "when the anchor node is changed"
+        "when the anchor node is changed."
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -142,7 +142,14 @@ namespace {
             "RetargetAnchorInterpolationTime",
             "Retarget interpolation time",
             "The time to interpolate the camera rotation "
-            "when the anchor or aim node is changed"
+            "when the anchor or aim node is changed."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo
+        FollowRotationInterpolationTimeInfo = {
+            "FollowRotationInterpolationTime",
+            "Follow rotation interpolation time",
+            "The interpolation time when toggling following focus node rotation."
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -203,6 +210,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _staticViewScaleExponent(StaticViewScaleExponentInfo, 0.f, -30, 10)
     , _retargetInterpolationTime(RetargetInterpolationTimeInfo, 2.0, 0.0, 10.0)
     , _stereoInterpolationTime(StereoInterpolationTimeInfo, 8.0, 0.0, 10.0)
+    , _followRotationInterpolationTime(FollowRotationInterpolationTimeInfo, 1.0, 0.0, 10.0)
     , _mouseStates(_mouseSensitivity * 0.0001, 1 / (_friction.friction + 0.0000001))
     , _joystickStates(_joystickSensitivity * 0.1, 1 / (_friction.friction + 0.0000001))
 {
@@ -319,6 +327,8 @@ OrbitalNavigator::OrbitalNavigator()
 
     addProperty(_retargetInterpolationTime);
     addProperty(_stereoInterpolationTime);
+    addProperty(_followRotationInterpolationTime);
+
     addProperty(_mouseSensitivity);
     addProperty(_joystickSensitivity);
 }
@@ -405,7 +415,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     // only if close enough
     anchorNodeRotationDiff = interpolateRotationDifferential(
         deltaTime,
-        1.0,
+        _followRotationInterpolationTime,
         anchorNodeRotationDiff,
         anchorPos,
         pose.position,

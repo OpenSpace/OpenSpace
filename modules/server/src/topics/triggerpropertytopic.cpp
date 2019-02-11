@@ -44,17 +44,17 @@ void TriggerPropertyTopic::handleJson(const nlohmann::json& json) {
         const std::string& propertyKey = json.at(PropertyKey).get<std::string>();
         global::scriptEngine.queueScript(
             fmt::format(
-                "openspace.setPropertyValueSingle(\"{}\", {})", propertyKey, "poke"
+                "openspace.setPropertyValueSingle(\"{}\", nil)", propertyKey
             ),
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
     catch (const std::out_of_range& e) {
-        LERROR("Could not poke property -- key or value is missing in payload");
+        LERROR("Could not trigger property -- key or value is missing in payload");
         LERROR(e.what());
     }
     catch (const ghoul::RuntimeError& e) {
-        LERROR("Could not poke property -- runtime error:");
+        LERROR("Could not trigger property -- runtime error:");
         LERROR(e.what());
     }
 }
