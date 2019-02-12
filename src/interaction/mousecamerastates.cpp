@@ -89,10 +89,10 @@ void MouseCameraStates::updateStateFromInput(const InputState& inputState,
                                         mousePosition;
 
         double sensitivity = _sensitivity;
-        if (keyCtrlPressed) {
+        if (inputState.isKeyPressed(Key::Z)) {
             sensitivity *= SENSITIVITY_ADJUSTMENT_INCREASE;
         }
-        else if (keyShiftPressed) {
+        else if (inputState.isKeyPressed(Key::X)) {
             sensitivity *= SENSITIVITY_ADJUSTMENT_DECREASE;
         }
 
