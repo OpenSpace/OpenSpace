@@ -633,6 +633,10 @@ SceneGraphNode* OrbitalNavigator::anchorNode() const {
     return _anchorNode;
 }
 
+SceneGraphNode* OrbitalNavigator::aimNode() const {
+    return _aimNode;
+}
+
 bool OrbitalNavigator::hasRotationalFriction() const {
     return _friction.rotational;
 }

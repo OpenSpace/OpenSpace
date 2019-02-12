@@ -82,10 +82,11 @@ openspace.globebrowsing.documentation = {
     },
     {
         Name = "addFocusNodeFromLatLong",
-        Arguments = "string, number, number, string",
+        Arguments = "string, string, number, number, number",
         Documentation =
             "Creates a new SceneGraphNode that can be used as focus node. " ..
-            "Usage: openspace.globebrowsing.addFocusNodeFromLatLong(\"Olympus Mons\", -18.65, 226.2, \"Mars\")"
+            "Usage: openspace.globebrowsing.addFocusNodeFromLatLong(" ..
+            "\"Olympus Mons\", \"Mars\", -18.65, 226.2, optionalAltitude)"
     },
     {
         Name = "loadWMSServersFromFile",
@@ -289,10 +290,12 @@ openspace.globebrowsing.addFocusNodesFromDirectory = function (dir, node_name)
     end
 end
 
-openspace.globebrowsing.addFocusNodeFromLatLong = function (name, lat, long, globe_identifier)  
-    openspace.printInfo("Creating focus node for '" .. name .. "'")
+openspace.globebrowsing.addFocusNodeFromLatLong = function (name, globe_identifier, lat, long, altitude)
+    if not altitude then
+        altitude = 0
+    end
 
-    local a, b, c = openspace.globebrowsing.getGeoPosition(globe_identifier, lat, long, 0.0)
+    local a, b, c = openspace.globebrowsing.getGeoPosition(globe_identifier, lat, long, altitude)
     local p = { a, b, c }
     local identifier = globe_identifier .. "-" .. name
 
@@ -301,8 +304,11 @@ openspace.globebrowsing.addFocusNodeFromLatLong = function (name, lat, long, glo
         Parent = globe_identifier,
         Transform = {
             Translation = {
-                Type = "StaticTranslation",
-                Position = { p[1], p[2], p[3] }
+                Type = "GlobeTranslation",
+                Globe = globe_identifier,
+                Latitude = lat,
+                Longitude = long,
+                FixedAltitude = altitude
             }
         },
         GUI = {

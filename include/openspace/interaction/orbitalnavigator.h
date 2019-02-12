@@ -75,6 +75,7 @@ public:
 
     bool followingNodeRotation() const;
     SceneGraphNode* anchorNode() const;
+    SceneGraphNode* aimNode() const;
 
     bool hasRotationalFriction() const;
     bool hasZoomFriction() const;

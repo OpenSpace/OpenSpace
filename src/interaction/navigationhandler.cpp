@@ -40,7 +40,8 @@
 namespace {
     constexpr const char* _loggerCat = "NavigationHandler";
 
-    constexpr const char* KeyFocus = "Focus";
+    constexpr const char* KeyAnchor = "Anchor";
+    constexpr const char* KeyAim = "Aim";
     constexpr const char* KeyPosition = "Position";
     constexpr const char* KeyRotation = "Rotation";
 
@@ -181,13 +182,15 @@ void NavigationHandler::setCameraStateFromDictionary(const ghoul::Dictionary& ca
 {
     bool readSuccessful = true;
 
-    std::string focus;
+    std::string anchor;
+    std::string aim;
     glm::dvec3 cameraPosition;
     glm::dvec4 cameraRotation; // Need to read the quaternion as a vector first.
 
-    readSuccessful &= cameraDict.getValue(KeyFocus, focus);
+    readSuccessful &= cameraDict.getValue(KeyAnchor, anchor);
     readSuccessful &= cameraDict.getValue(KeyPosition, cameraPosition);
     readSuccessful &= cameraDict.getValue(KeyRotation, cameraRotation);
+    cameraDict.getValue(KeyAim, aim); // Aim is not required
 
     if (!readSuccessful) {
         throw ghoul::RuntimeError(
@@ -196,7 +199,9 @@ void NavigationHandler::setCameraStateFromDictionary(const ghoul::Dictionary& ca
     }
 
     // Set state
-    _orbitalNavigator->setFocusNode(focus);
+    _orbitalNavigator->setAnchorNode(anchor);
+    _orbitalNavigator->setAimNode(aim);
+
     _camera->setPositionVec3(cameraPosition);
     _camera->setRotation(glm::dquat(
         cameraRotation.x, cameraRotation.y, cameraRotation.z, cameraRotation.w));
@@ -214,7 +219,10 @@ ghoul::Dictionary NavigationHandler::cameraStateDictionary() {
     ghoul::Dictionary cameraDict;
     cameraDict.setValue(KeyPosition, cameraPosition);
     cameraDict.setValue(KeyRotation, cameraRotation);
-    cameraDict.setValue(KeyFocus, _orbitalNavigator->anchorNode()->identifier());
+    cameraDict.setValue(KeyAnchor, _orbitalNavigator->anchorNode()->identifier());
+    if (_orbitalNavigator->aimNode()) {
+        cameraDict.setValue(KeyAim, _orbitalNavigator->aimNode()->identifier());
+    }
 
     return cameraDict;
 }
@@ -235,9 +243,16 @@ void NavigationHandler::saveCameraStateToFile(const std::string& filepath) {
         glm::dquat q = _camera->rotationQuaternion();
 
         ofs << "return {" << std::endl;
-        ofs << "    " << KeyFocus << " = " << "\"" << 
+        ofs << "    " << KeyAnchor << " = " << "\"" << 
             _orbitalNavigator->anchorNode()->identifier() << "\""
             << "," << std::endl;
+
+        if (_orbitalNavigator->aimNode()) {
+            ofs << "    " << KeyAim << " = " << "\"" <<
+                _orbitalNavigator->aimNode()->identifier() << "\""
+                << "," << std::endl;
+        }
+
         ofs << "    " << KeyPosition << " = {"
             << std::to_string(p.x) << ", "
             << std::to_string(p.y) << ", "

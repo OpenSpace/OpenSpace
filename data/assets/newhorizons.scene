@@ -212,7 +212,7 @@ asset.onInitialize(function ()
         2160, 4320, 8640
     })
 
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.FollowFocusNodeRotationDistance', 20.000000);
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotationDistance', 20.000000);
 
     openspace.addVirtualProperty(
         "BoolProperty",
@@ -225,7 +225,7 @@ asset.onInitialize(function ()
     )
 
     openspace.navigation.setCameraState({
-        Focus = NewHorizonsAsset.NewHorizons.Identifier,
+        Anchor = NewHorizonsAsset.NewHorizons.Identifier,
         Position = { 4662120063743.592773, 1263245003503.724854, -955413856565.788086 },
         Rotation = { 0.683224, -0.165934, 0.701234, 0.118073 },
     })
