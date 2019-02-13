@@ -218,6 +218,7 @@ protected:
     size_t handleData(HttpRequest::Data d) override;
 
     static std::mutex _directoryCreationMutex;
+    std::atomic_bool _hasHandle = false;
 
 private:
     std::string _destination;
