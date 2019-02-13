@@ -41,7 +41,7 @@ namespace openspace {
 void ParallelServer::start(int port, const std::string& password,
                            const std::string& changeHostPassword)
 {
-    _socketServer.listen("localhost", port);
+    _socketServer.listen(port);
     _passwordHash = std::hash<std::string>{}(password);
     _changeHostPasswordHash = std::hash<std::string>{}(changeHostPassword);
 

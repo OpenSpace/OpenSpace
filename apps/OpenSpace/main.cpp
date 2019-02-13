@@ -548,11 +548,12 @@ void mainKeyboardCallback(int key, int, int action, int mods) {
 
 
 
-void mainMouseButtonCallback(int key, int action) {
+void mainMouseButtonCallback(int key, int action, int modifiers) {
     LTRACE("main::mainMouseButtonCallback(begin)");
     openspace::global::openSpaceEngine.mouseButtonCallback(
         openspace::MouseButton(key),
-        openspace::MouseAction(action)
+        openspace::MouseAction(action),
+        openspace::KeyModifier(modifiers)
     );
     LTRACE("main::mainMouseButtonCallback(end)");
 }

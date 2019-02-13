@@ -30,6 +30,7 @@ set(HEADER_FILES
     include/connection.h
     include/connectionpool.h
     include/jsonconverters.h
+    include/serverinterface.h
     include/topics/authorizationtopic.h
     include/topics/bouncetopic.h
     include/topics/getpropertytopic.h
@@ -50,6 +51,7 @@ set(SOURCE_FILES
     src/connection.cpp
     src/connectionpool.cpp
     src/jsonconverters.cpp
+    src/serverinterface.cpp
     src/topics/authorizationtopic.cpp
     src/topics/bouncetopic.cpp
     src/topics/getpropertytopic.cpp

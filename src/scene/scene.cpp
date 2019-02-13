@@ -606,6 +606,14 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "the provided URI."
             },
             {
+                "getProperty",
+                &luascriptfunctions::property_getProperty,
+                {},
+                "string",
+                "Returns a list of property identifiers that match the passed regular "
+                "expression"
+            },
+            {
                 "loadScene",
                 &luascriptfunctions::loadScene,
                 {},

@@ -22,61 +22,63 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/gaia/rendering/octreeculler.h>
+#ifndef __OPENSPACE_MODULE_SERVER___SERVERINTERFACE___H__
+#define __OPENSPACE_MODULE_SERVER___SERVERINTERFACE___H__
 
-#include <ghoul/glm.h>
-#include <ghoul/logging/logmanager.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/stringlistproperty.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+
+namespace ghoul::io { class SocketServer; }
 
 namespace openspace {
 
-namespace {
-    bool intersects(const globebrowsing::AABB3& bb, const globebrowsing::AABB3& o) {
-        return (bb.min.x <= o.max.x) && (o.min.x <= bb.max.x)
-            && (bb.min.y <= o.max.y) && (o.min.y <= bb.max.y)
-            && (bb.min.z <= o.max.z) && (o.min.z <= bb.max.z);
-    }
+class ServerInterface : public properties::PropertyOwner {
+public:
+    static std::unique_ptr<ServerInterface> createFromDictionary(
+        const ghoul::Dictionary& dictionary);
 
-    void expand(globebrowsing::AABB3& bb, const glm::vec3& p) {
-        bb.min = glm::min(bb.min, p);
-        bb.max = glm::max(bb.max, p);
-    }
-} // namespace
+    ServerInterface(const ghoul::Dictionary& dictionary);
+    ~ServerInterface();
 
-OctreeCuller::OctreeCuller(globebrowsing::AABB3 viewFrustum)
-    : _viewFrustum(std::move(viewFrustum))
-{}
+    void initialize();
+    void deinitialize();
+    bool isEnabled() const;
+    bool isActive() const;
+    int port() const;
+    std::string password() const;
+    bool clientHasAccessWithoutPassword(const std::string& address) const;
+    bool clientIsBlocked(const std::string& address) const;
 
-bool OctreeCuller::isVisible(const std::vector<glm::dvec4>& corners,
-                             const glm::dmat4& mvp)
-{
-    createNodeBounds(corners, mvp);
-    return intersects(_viewFrustum, _nodeBounds);
-}
+    ghoul::io::SocketServer* server();
 
-glm::vec2 OctreeCuller::getNodeSizeInPixels(const std::vector<glm::dvec4>& corners,
-                                            const glm::dmat4& mvp,
-                                            const glm::vec2& screenSize)
-{
+private:
+    enum class InterfaceType : int {
+        TcpSocket = 0,
+        WebSocket
+    };
+    
+    enum class Access : int {
+        Deny = 0,
+        RequirePassword,
+        Allow
+    };
 
-    createNodeBounds(corners, mvp);
+    properties::OptionProperty _type;
+    properties::IntProperty _port;
+    properties::BoolProperty _enabled;
+    properties::StringListProperty _allowAddresses;
+    properties::StringListProperty _requirePasswordAddresses;
+    properties::StringListProperty _denyAddresses;
+    properties::OptionProperty _defaultAccess;
+    properties::StringProperty _password;
 
-    // Screen space is mapped to [-1, 1] so divide by 2 and multiply with screen size.
-    glm::vec3 size = (_nodeBounds.max - _nodeBounds.min) / 2.f;
-    size = glm::abs(size);
-    return glm::vec2(size.x * screenSize.x, size.y * screenSize.y);
-}
-
-void OctreeCuller::createNodeBounds(const std::vector<glm::dvec4>& corners,
-                                    const glm::dmat4& mvp)
-{
-    // Create a bounding box in clipping space from node boundaries.
-    _nodeBounds = globebrowsing::AABB3();
-
-    for (size_t i = 0; i < 8; ++i) {
-        glm::dvec4 cornerClippingSpace = mvp * corners[i];
-        glm::dvec4 ndc = (1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace;
-        expand(_nodeBounds, glm::dvec3(ndc));
-    }
-}
+    std::unique_ptr<ghoul::io::SocketServer> _socketServer;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SERVER___SERVERINTERFACE___H__

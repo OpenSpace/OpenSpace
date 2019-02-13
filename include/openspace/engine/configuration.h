@@ -105,10 +105,6 @@ struct Configuration {
     };
     OpenGLDebugContext openGLDebugContext;
 
-    std::string serverPasskey = "17308";
-    bool doesRequireSocketAuthentication = true;
-    std::vector<std::string> clientAddressWhitelist = {};
-
     struct HTTPProxy {
         bool usingHttpProxy = false;
         std::string address;

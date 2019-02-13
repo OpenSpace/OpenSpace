@@ -308,8 +308,9 @@ bool NumericalProperty<T>::setLuaValue(lua_State* state) {
     T value = PropertyDelegate<NumericalProperty<T>>::template fromLuaValue<T>(
         state, success
     );
-    if (success)
+    if (success) {
         TemplateProperty<T>::setValue(std::move(value));
+    }
     return success;
 }
 
@@ -340,8 +341,9 @@ bool NumericalProperty<T>::setStringValue(std::string value) {
     T thisValue = PropertyDelegate<NumericalProperty<T>>::template fromString<T>(
         value, success
     );
-    if (success)
+    if (success) {
         TemplateProperty<T>::set(ghoul::any(std::move(thisValue)));
+    }
     return success;
 }
 
@@ -402,7 +404,7 @@ std::string NumericalProperty<T>::generateAdditionalJsonDescription() const {
 
 template <typename T>
 std::string NumericalProperty<T>::luaToJson(std::string luaValue) const {
-    if(luaValue[0] == '{') {
+    if (luaValue[0] == '{') {
         luaValue.replace(0, 1, "[");
     }
     if (luaValue[luaValue.size() - 1] == '}') {
