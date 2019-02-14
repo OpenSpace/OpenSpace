@@ -27,6 +27,7 @@
 
 #include <ghoul/io/socket/tcpsocketserver.h>
 #include <ghoul/io/socket/websocketserver.h>
+#include <functional>
 
 namespace {
 
@@ -89,22 +90,22 @@ namespace {
 namespace openspace {
 
 std::unique_ptr<ServerInterface> ServerInterface::createFromDictionary(
-    const ghoul::Dictionary& config)
+                                                          const ghoul::Dictionary& config)
 {
     // TODO: Use documentation to verify dictionary
     std::unique_ptr<ServerInterface> si = std::make_unique<ServerInterface>(config);
-    return std::move(si);
+    return si;
 }
 
 ServerInterface::ServerInterface(const ghoul::Dictionary& config) 
     : properties::PropertyOwner({ "", "", "" })
     , _type(TypeInfo)
     , _port(PortInfo, 0)
-    , _defaultAccess(DefaultAccessInfo)
+    , _enabled(EnabledInfo)
     , _allowAddresses(AllowAddressesInfo)
     , _requirePasswordAddresses(RequirePasswordAddressesInfo)
     , _denyAddresses(DenyAddressesInfo)
-    , _enabled(EnabledInfo)
+    , _defaultAccess(DefaultAccessInfo)
     , _password(PasswordInfo)
 {
 
@@ -117,7 +118,7 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
 
     const std::string identifier = config.value<std::string>(KeyIdentifier);
 
-    std::function readList =
+    auto readList =
         [config](const std::string& key, properties::StringListProperty& list) {
             if (config.hasValue<ghoul::Dictionary>(key)) {
                 const ghoul::Dictionary& dict = config.value<ghoul::Dictionary>(key);

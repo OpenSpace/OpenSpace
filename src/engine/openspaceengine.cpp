@@ -1180,10 +1180,13 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier)
     global::luaConsole.charCallback(codepoint, modifier);
 }
 
-void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action) {
-    using F = std::function<bool (MouseButton, MouseAction)>;
+void OpenSpaceEngine::mouseButtonCallback(MouseButton button,
+                                          MouseAction action,
+                                          KeyModifier mods)
+{
+    using F = std::function<bool (MouseButton, MouseAction, KeyModifier)>;
     for (const F& func : global::callback::mouseButton) {
-        bool isConsumed = func(button, action);
+        bool isConsumed = func(button, action, mods);
         if (isConsumed) {
             // If the mouse was released, we still want to forward it to the navigation
             // handler in order to reliably terminate a rotation or zoom. Accidentally
