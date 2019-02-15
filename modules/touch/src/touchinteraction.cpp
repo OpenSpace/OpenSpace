@@ -368,7 +368,6 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
 
     bool hasWebContent = webContent(list);
 
-
     //Code for lower-right corner double-tap to zoom-out
     glm::ivec2 res = global::windowDelegate.currentWindowSize();
     glm::dvec2 pos = glm::vec2(
@@ -383,8 +382,8 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
         res.y * (1.0f - bottomCornerSizeForZoomTap_fraction)
     );
 
-    bool isTapInLowerRightCorner = std::abs(pos.x) > zoomTapThresholdX &&
-                              std::abs(pos.y) > zoomTapThresholdY;
+    bool isTapInLowerRightCorner =
+        (std::abs(pos.x) > zoomTapThresholdX && std::abs(pos.y) > zoomTapThresholdY);
 
     if (_doubleTap && isTapInLowerRightCorner) {
         _zoomOutTap = true;
@@ -439,7 +438,7 @@ bool TouchInteraction::webContent(const std::vector<TuioCursor>& list) {
     );
 
     WebBrowserModule& module = *(global::moduleEngine.module<WebBrowserModule>());
-    return module.getEventHandler().hasContentCallback(pos.x, pos.y);
+    return module.eventHandler().hasContentCallback(pos.x, pos.y);
 }
 
 // Activates/Deactivates gui input mode (if active it voids all other interactions)
@@ -462,7 +461,6 @@ bool TouchInteraction::guiMode(const std::vector<TuioCursor>& list) {
         // pressed invisible button
         _guiON = !_guiON;
         module.gui.setEnabled(_guiON);
-        //module.gui.setHidden(!_guiON);
 
         LINFO(fmt::format(
             "GUI mode is {}. Inside box by: ({}%, {}%)",
@@ -1317,11 +1315,12 @@ void TouchInteraction::step(double dt) {
             WebGuiModule& module = *(global::moduleEngine.module<WebGuiModule>());
 
             //Apply the velocity to update camera position
-            if (length(_vel.zoom*dt) < distToSurface &&
-                 length(centerToCamera + directionToCenter*_vel.zoom*dt)
-                 > planetBoundaryRadius )
-            {
-                camPos += directionToCenter * _vel.zoom * dt;
+            glm::dvec3 velocityIncr = directionToCenter * _vel.zoom * dt;
+            bool isDeltaLessThanDistToSurface = (length(_vel.zoom * dt) < distToSurface);
+            bool isNewPosOutsidePlanetRadius =
+                (length(centerToCamera + velocityIncr) > planetBoundaryRadius);
+            if (isDeltaLessThanDistToSurface && isNewPosOutsidePlanetRadius) {
+                camPos += velocityIncr;
             }
             else {
 #ifdef TOUCH_DEBUG_PROPERTIES

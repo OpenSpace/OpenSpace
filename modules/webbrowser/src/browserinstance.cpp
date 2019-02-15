@@ -132,12 +132,12 @@ bool BrowserInstance::sendMouseClickEvent(const CefMouseEvent& event,
 }
 
 void BrowserInstance::sendTouchPressEvent(const CefMouseEvent &event, CefBrowserHost::MouseButtonType button,
-    int clickCount) {
+    const int clickCount) {
     _browser->GetHost()->SendMouseClickEvent(event, button, false, clickCount);
 }
 
 void BrowserInstance::sendResleasePressEvent(const CefMouseEvent &event, CefBrowserHost::MouseButtonType button,
-    int clickCount) {
+    const int clickCount) {
     _browser->GetHost()->SendMouseClickEvent(event, button, true, clickCount);
 }
 

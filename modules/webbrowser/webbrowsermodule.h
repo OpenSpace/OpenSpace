@@ -42,7 +42,7 @@ public:
     void addBrowser(BrowserInstance*);
     void removeBrowser(BrowserInstance*);
 
-    EventHandler getEventHandler();
+    EventHandler eventHandler();
     void attachEventHandler(BrowserInstance* browserInstance);
     void detachEventHandler();
     bool isEnabled() const;

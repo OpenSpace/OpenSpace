@@ -85,10 +85,10 @@ public:
     void close(bool force = false);
 
     void sendTouchPressEvent(const CefMouseEvent & event,
-        CefBrowserHost::MouseButtonType button, int clickCount);
+        CefBrowserHost::MouseButtonType button, const int clickCount);
 
     void sendResleasePressEvent(const CefMouseEvent & event,
-        CefBrowserHost::MouseButtonType button, int clickCount);
+        CefBrowserHost::MouseButtonType button, const int clickCount);
 
     bool sendKeyEvent(const CefKeyEvent& event);
     bool sendMouseClickEvent(const CefMouseEvent& event,
