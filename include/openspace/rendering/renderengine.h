@@ -205,16 +205,31 @@ private:
     float _currentFadeTime = 0.f;
     int _fadeDirection = 0;
     properties::IntProperty _nAaSamples;
-    properties::FloatProperty _hdrExposure;
-    properties::FloatProperty _hdrBackground;
-    properties::FloatProperty _gamma;
-    properties::FloatProperty _maxWhite;
+    
+
+    properties::PropertyOwner _bloomOwner;
     properties::BoolProperty _enableBloom;
     properties::FloatProperty _bloomThreshouldMin;
     properties::FloatProperty _bloomThreshouldMax;
     properties::FloatProperty _bloomOrigColorFactor;
     properties::FloatProperty _bloomNewColorFactor;
+    
+    properties::PropertyOwner _tmoOwner;
+    properties::FloatProperty _hdrExposure;
+    properties::FloatProperty _hdrBackground;    
+    properties::FloatProperty _maxWhite;
     properties::OptionProperty _toneMapOperator;
+    properties::FloatProperty _tmoKey;
+    properties::FloatProperty _tmoYwhite;
+    properties::FloatProperty _tmoSaturation;
+    
+    properties::PropertyOwner _imageOwner;
+    properties::FloatProperty _gamma;
+    properties::FloatProperty _hue;
+    properties::FloatProperty _saturation;
+    properties::FloatProperty _value;
+    properties::FloatProperty _lightness;
+
 
     uint64_t _frameNumber = 0;
 

@@ -73,6 +73,7 @@ public:
     void setBloomNewFactor(float newFactor) override;
 
     void enableBloom(bool enable) override;
+    void enableHistogram(bool enable) override;
 
     float hdrBackground() const override;
     int nAaSamples() const override;
@@ -151,6 +152,7 @@ private:
     float _bloomOrigFactor = 1.0;
     float _bloomNewFactor = 1.0;
     int _toneMapOperator = 0;
+    bool _histogramEnabled = false;
 
     std::vector<double> _mSAAPattern;
 

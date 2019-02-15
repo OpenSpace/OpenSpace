@@ -55,14 +55,23 @@ namespace {
         "mainColorTexture", "blackoutFactor", "nAaSamples"
     };
 
-    constexpr const std::array<const char*, 8> HDRUniformNames = {
+    constexpr const std::array<const char*, 12> HDRUniformNames = {
         "deferredResultsTexture", "blackoutFactor", "backgroundConstant", 
-        "backgroundExposure", "gamma", "toneMapOperator", "aveLum", "maxWhite"
+        "backgroundExposure", "gamma", "toneMapOperator", "aveLum", "maxWhite",
+        "Hue", "Saturation", "Value", "Lightness"
     };
 
-    constexpr const std::array<const char*, 6> BLoomUniformNames = {
+    constexpr const std::array<const char*, 6> BloomUniformNames  = {
         "renderedImage", "bloomImage", "bloomThresholdMin", "bloomThresholdMax", 
         "bloomOrigFactor", "bloomNewFactor"
+    };
+
+    constexpr const std::array<const char*, 4> HistoUniformNames = {
+        "renderedImage", "maxWhite", "imageWidth", "imageHeight"
+    };
+
+    constexpr const std::array<const char*, 4> TMOUniformNames = {
+        "hdrSampler", "key", "Ywhite", "sat"
     };
 
     constexpr const char* ExitFragmentShaderPath =
@@ -160,7 +169,20 @@ void FramebufferRenderer::initialize() {
     // Bloom Filter
     glGenFramebuffers(3, _bloomFilterFBO);
     glGenTextures(3, _bloomTexture);
-    
+
+    // Histogram
+    glGenFramebuffers(1, &_histoFramebuffer);
+    glGenTextures(1, &_histoTexture);
+    glGenVertexArrays(1, &_histoVao);
+    glBindVertexArray(_histoVao);
+    glGenBuffers(1, &_histoVbo);
+
+    // TMO via mipmapping
+    glGenFramebuffers(1, &_tmoFramebuffer);
+    glGenTextures(1, &_tmoTexture);
+    glGenSamplers(1, &_tmoHdrSampler);
+    glSamplerParameteri(_tmoHdrSampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+
     updateResolution();
     updateRendererData();
     updateRaycastData();   
@@ -281,13 +303,45 @@ void FramebufferRenderer::initialize() {
         }
     }
 
+    // Builds Histogram FBO
+    glBindFramebuffer(GL_FRAMEBUFFER, _histoFramebuffer);
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D,
+        _histoTexture,
+        0
+    );
+
+    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LERROR("Histogram framebuffer is not complete");
+    }
+
+    // Buids TMO via mipmapping FBO    
+    glBindFramebuffer(GL_FRAMEBUFFER, _tmoFramebuffer);
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D,
+        _tmoTexture,
+        0
+    );
+
+    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LERROR("Histogram framebuffer is not complete");
+    }
+
     // JCC: Moved to here to avoid NVidia: "Program/shader state performance warning"
     // Builds HDR and Filtering programs
     updateHDRAndFiltering();
     updateAveLum();
     updateBloomConfig();
+    updateHistogramConfig();
     // Builds deferred casters programs
     updateDeferredcastData();
+    updateTMOViaMipMappingConfig();
 
     _dirtyMsaaSamplingPattern = true;
 
@@ -312,8 +366,27 @@ void FramebufferRenderer::initialize() {
     ghoul::opengl::updateUniformLocations(
         *_bloomResolveProgram, 
         _bloomUniformCache,
-        BLoomUniformNames
+        BloomUniformNames 
     );
+
+    ghoul::opengl::updateUniformLocations(
+        *_histoProgram,
+        _histoUniformCache,
+        HistoUniformNames
+    );
+    
+   //    /*ghoul::opengl::updateUniformLocations(
+   //        *_histoApplyProgram,
+   //        _histoApplyUniformCache,
+   //        HistoApplyUniformNames
+   //    );*/
+   
+    ghoul::opengl::updateUniformLocations(
+        *_tmoProgram,
+        _tmoUniformCache,
+        TMOUniformNames
+    );
+
     global::raycasterManager.addListener(*this);
     global::deferredcasterManager.addListener(*this);
 }
@@ -326,6 +399,8 @@ void FramebufferRenderer::deinitialize() {
     glDeleteFramebuffers(1, &_hdrFilteringFramebuffer);
     glDeleteFramebuffers(1, &_computeAveLumFBO);
     glDeleteFramebuffers(3, _bloomFilterFBO);
+    glDeleteFramebuffers(1, &_histoFramebuffer);
+    glDeleteFramebuffers(1, &_tmoFramebuffer);
 
     glDeleteTextures(1, &_mainColorTexture);
     glDeleteTextures(1, &_mainDepthTexture);
@@ -335,12 +410,16 @@ void FramebufferRenderer::deinitialize() {
     glDeleteTextures(1, &_mainNormalTexture);
     glDeleteTextures(1, &_computeAveLumTexture);
     glDeleteTextures(3, _bloomTexture);
+    glDeleteTextures(1, &_histoTexture);
+    glDeleteTextures(1, &_tmoTexture);
 
     glDeleteTextures(1, &_exitColorTexture);
     glDeleteTextures(1, &_exitDepthTexture);
 
     glDeleteBuffers(1, &_vertexPositionBuffer);
     glDeleteVertexArrays(1, &_screenQuad);
+
+    glDeleteSamplers(1, &_tmoHdrSampler);
 
     global::raycasterManager.removeListener(*this);
     global::deferredcasterManager.removeListener(*this);
@@ -532,6 +611,114 @@ void FramebufferRenderer::applyBloomFilter() {
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
 }
 
+void FramebufferRenderer::computeImageHistogram() {
+    glBindFramebuffer(GL_FRAMEBUFFER, _histoFramebuffer);
+    GLenum textureBuffer[] = {
+       GL_COLOR_ATTACHMENT0
+    };
+    glDrawBuffers(1, textureBuffer);
+
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glViewport(0, 0, _resolution.x, _resolution.y);
+
+    GLboolean depthTestEnabled = glIsEnabled(GL_DEPTH_TEST);
+    
+    glDisable(GL_DEPTH_TEST);
+
+    // Saving Blending State
+    GLboolean blendEnabled = glIsEnabled(GL_BLEND);
+    GLenum blendEquationRGB;
+    GLenum blendEquationAlpha;
+    GLenum blendDestAlpha;
+    GLenum blendDestRGB;
+    GLenum blendSrcAlpha;
+    GLenum blendSrcRGB;
+
+    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
+    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
+    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
+    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
+    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
+    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
+
+    // Changing blending functions for histogram computation
+    glBlendEquation(GL_FUNC_ADD);
+    glBlendFunc(GL_ONE, GL_ONE);
+    glEnable(GL_BLEND);
+
+    glBindVertexArray(_histoVao);
+    
+    _histoProgram->activate();
+
+    ghoul::opengl::TextureUnit renderedImage;
+    renderedImage.activate();
+    glBindTexture(GL_TEXTURE_2D, _hdrFilteringTexture);
+    _histoProgram->setUniform(_histoUniformCache.renderedImage, renderedImage);
+    _histoProgram->setUniform(_histoUniformCache.imageWidth, static_cast<float>(_resolution.x));
+    _histoProgram->setUniform(_histoUniformCache.imageHeight, static_cast<float>(_resolution.y));
+    _histoProgram->setUniform(_histoUniformCache.maxWhite, _maxWhite);
+
+    glDrawArrays(GL_POINTS, 0, _resolution.x * _resolution.y);
+    
+    glFlush();
+
+    _histoProgram->deactivate();
+
+    // Testing
+    std::vector<double> gpuHistogram;
+    saveTextureToMemory(GL_COLOR_ATTACHMENT0, _numberOfBins, 1, gpuHistogram);
+
+    
+    // Restores blending state
+    if (!blendEnabled) {
+        glDisable(GL_BLEND);
+    }
+    else {
+        glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
+        glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
+    }
+
+    // Restores Depth test state
+    if (depthTestEnabled) {
+        glEnable(GL_DEPTH_TEST);
+    }
+}
+
+void FramebufferRenderer::computeMipMappingFromHDRBuffer(GLuint oglImageBuffer) {
+    ghoul::opengl::TextureUnit samplerUnit;    
+    glBindSampler(samplerUnit, _tmoHdrSampler);
+    samplerUnit.activate();
+    glBindTexture(GL_TEXTURE_2D, oglImageBuffer);
+
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    _tmoProgram->setUniform(_tmoUniformCache.hdrSampler, samplerUnit);
+    _tmoProgram->setUniform(_tmoUniformCache.key, _tmoKey);
+    _tmoProgram->setUniform(_tmoUniformCache.Ywhite, _tmoYwhite);
+    _tmoProgram->setUniform(_tmoUniformCache.sat, _tmoSaturation);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _tmoFramebuffer);
+    GLenum textureBuffer[] = {
+       GL_COLOR_ATTACHMENT0
+    };
+    glDrawBuffers(1, textureBuffer);
+
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glViewport(0, 0, _resolution.x, _resolution.y);
+
+    glBindVertexArray(_screenQuad);
+
+    _tmoProgram->activate();
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    
+    _tmoProgram->deactivate();
+
+    glBindVertexArray(0);
+}
+
 void FramebufferRenderer::update() {
     if (_dirtyMsaaSamplingPattern) {
         updateMSAASamplingPattern();
@@ -552,7 +739,6 @@ void FramebufferRenderer::update() {
 
     if (_resolveProgram->isDirty()) {
         _resolveProgram->rebuildFromFile();
-
         ghoul::opengl::updateUniformLocations(
             *_resolveProgram,
             _uniformCache,
@@ -573,9 +759,27 @@ void FramebufferRenderer::update() {
         ghoul::opengl::updateUniformLocations(
             *_bloomResolveProgram, 
             _bloomUniformCache,
-            BLoomUniformNames
+            BloomUniformNames 
         );
     }
+
+    if (_histoProgram->isDirty()) {
+        _histoProgram->rebuildFromFile();
+        ghoul::opengl::updateUniformLocations(
+            *_histoProgram,
+            _histoUniformCache,
+            HistoUniformNames
+        );
+    }
+
+    //if (_histoApplyProgram->isDirty()) {
+    //    _histoApplyProgram->rebuildFromFile();
+    //    /*ghoul::opengl::updateUniformLocations(
+    //        *_histoApplyProgram,
+    //        _histoApplyUniformCache,
+    //        HistoApplyUniformNames
+    //    );*/
+    //}
 
     if (_hdrFilteringProgram->isDirty()) {
         _hdrFilteringProgram->rebuildFromFile();
@@ -584,6 +788,15 @@ void FramebufferRenderer::update() {
             *_hdrFilteringProgram,
             _hdrUniformCache,
             HDRUniformNames
+        );
+    }
+
+    if (_tmoProgram->isDirty()) {
+        _tmoProgram->rebuildFromFile();
+        ghoul::opengl::updateUniformLocations(
+            *_tmoProgram,
+            _tmoUniformCache,
+            TMOUniformNames
         );
     }
 
@@ -716,8 +929,63 @@ void FramebufferRenderer::updateResolution() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     }
 
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainPositionTexture);
+    // Histogram Texture
+    glBindTexture(GL_TEXTURE_2D, _histoTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA32F,
+        _numberOfBins,
+        1,
+        0,
+        GL_RGBA,
+        GL_FLOAT,
+        nullptr
+    );
+    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
+    glBindVertexArray(_histoVao);
+    glBindBuffer(GL_ARRAY_BUFFER, _histoVbo);
+
+    _histoPoints.clear();
+    _histoPoints.reserve(_resolution.x * _resolution.y);
+    for (int i = 0; i < _resolution.x * _resolution.y; ++i) {
+        _histoPoints.push_back(i);
+    }
+
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sizeof(float) * _histoPoints.size(), 
+        _histoPoints.data(), 
+        GL_DYNAMIC_DRAW
+    );
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 1, GL_FLOAT, GL_FALSE, 0, nullptr);    
+
+    glBindVertexArray(0);
+
+    // TMO via mipmapping
+    glBindTexture(GL_TEXTURE_2D, _tmoTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_SRGB8,
+        _resolution.x,
+        _resolution.y,
+        0,
+        GL_RGB,
+        GL_UNSIGNED_BYTE,
+        nullptr
+    );
+    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    // G-Buffer main position
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainPositionTexture);
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
@@ -935,6 +1203,36 @@ void FramebufferRenderer::updateBloomConfig() {
     );
     //_bloomResolveProgram->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     //_bloomResolveProgram->setIgnoreUniformLocationError(IgnoreError::Yes);
+}
+
+void FramebufferRenderer::updateHistogramConfig() {
+    _histoProgram = ghoul::opengl::ProgramObject::Build(
+        "Computes Histogram from Image",
+        absPath("${SHADERS}/framebuffer/computeHistogram_vs.glsl"),
+        absPath("${SHADERS}/framebuffer/computeHistogram_fs.glsl")
+    );
+    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+    //_histoProgram->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+    //_histoProgram->setIgnoreUniformLocationError(IgnoreError::Yes);
+
+    /*_histoApplyProgram = ghoul::opengl::ProgramObject::Build(
+        "Applies histogram on the image",
+        absPath("${SHADERS}/framebuffer/applyHistogram.vert"),
+        absPath("${SHADERS}/framebuffer/applyHistogram.frag")
+    );*/
+    //_histoApplyProgram->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+    //_histoApplyProgram->setIgnoreUniformLocationError(IgnoreError::Yes);
+}
+
+void FramebufferRenderer::updateTMOViaMipMappingConfig() {
+    _tmoProgram = ghoul::opengl::ProgramObject::Build(
+        "Computes TMO via MipMapping",
+        absPath("${SHADERS}/framebuffer/computeTMO_vs.glsl"),
+        absPath("${SHADERS}/framebuffer/computeTMO_fs.glsl")
+    );
+    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+    //_tmoProgram ->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+    //_tmoProgram ->setIgnoreUniformLocationError(IgnoreError::Yes);
 }
 
 void FramebufferRenderer::updateHDRAndFiltering() {
@@ -1422,12 +1720,27 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         _hdrFilteringProgram->setUniform(_hdrUniformCache.toneMapOperator, _toneMapOperator);
         _hdrFilteringProgram->setUniform(_hdrUniformCache.aveLum, averageLuminaceInFB);
         _hdrFilteringProgram->setUniform(_hdrUniformCache.maxWhite, _maxWhite);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.Hue, _hue);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.Saturation, _saturation);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.Value, _value);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.Lightness, _lightness);
 
         glBindVertexArray(_screenQuad);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
 
         _hdrFilteringProgram->deactivate();
+
+        //================================
+        // Adjusting color and brightness
+        //================================
+        
+        // Histogram Equalization
+        computeImageHistogram();
+
+        computeMipMappingFromHDRBuffer(_hdrFilteringTexture);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
     }
     
     //glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
@@ -1670,8 +1983,40 @@ void FramebufferRenderer::setBloomNewFactor(float newFactor) {
     _bloomNewFactor = newFactor;
 }
 
+void FramebufferRenderer::setKey(float key) {
+    _tmoKey = key;
+}
+
+void FramebufferRenderer::setYwhite(float white) {
+    _tmoYwhite = white;
+}
+
+void FramebufferRenderer::setTmoSaturation(float sat) {
+    _tmoSaturation = sat;
+}
+
+void FramebufferRenderer::setHue(float hue) {
+    _hue = hue;
+}
+
+void FramebufferRenderer::setValue(float value) {
+    _value = value;
+}
+
+void FramebufferRenderer::setSaturation(float sat) {
+    _saturation = sat;
+}
+
+void FramebufferRenderer::setLightness(float lightness) {
+    _lightness = lightness;
+}
+
 void FramebufferRenderer::enableBloom(bool enable) {
     _bloomEnabled = enable;
+}
+
+void FramebufferRenderer::enableHistogram(bool enable) {
+    _histogramEnabled = enable;
 }
 
 float FramebufferRenderer::hdrBackground() const {

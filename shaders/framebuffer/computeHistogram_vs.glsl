@@ -24,28 +24,40 @@
 
 #version __CONTEXT__
 
-layout (location = 0) out vec4 finalColor;
+layout(location = 0) in vec4 pixelCoord;
 
-uniform int bufferWidth;
-uniform int bufferHeight;
-uniform sampler2D hdrTexture;
+uniform float maxWhite;
+//uniform int numberOfPixels;
+//uniform int numberOfBins;
+uniform float imageWidth;
+uniform float imageHeight;
 
-in vec2 texCoord;
+uniform sampler2D renderedImage;
 
-void main() {
-    vec4 color = vec4(0.0);
-    float fH = float(bufferHeight);
-    float fW = float(bufferWidth);
+flat out vec3 pColor;
 
-    float sum = 0.f;
-    for (int i = 0; i < bufferHeight; ++i) {
-        for (int j = 0; j < bufferWidth; ++j) {
-            vec2 texCoord = vec2(float(i) / fH, float(j) / fW);
-            vec4 tmpColor = texture(hdrTexture, texCoord);    
-            float lum = dot(tmpColor.xyz, vec3(0.2126f, 0.7152f, 0.0722f));
-            sum += log(lum + 0.00001); // 0.00001 to avoid log(0) from black pixels
-        }
-    }
+void main()
+{
+    vec2 texCoord;
+    texCoord.x = float(int(pixelCoord.x / imageWidth)) / imageWidth;
+    texCoord.y = float(int(pixelCoord.x) % int(imageWidth)) / imageHeight;
+    vec3 pixelColor = texture(renderedImage, texCoord).xyz;
+    pColor = pixelColor;
+    float pixelLuminosity = dot(pixelColor, vec3(0.2126f, 0.7152f, 0.0722f));
 
-    finalColor = vec4(vec3(exp(sum / (fH * fW))), 1.0);
+    //gl_Position = vec4(-1.0 + (2.0 * pixelLuminosity / maxWhite), 0.0, 0.0, 1.0);    
+
+    //gl_Position = vec4(2.0 * texCoord - vec2(1.0), 0.0, 1.0);
+
+    //gl_Position = vec4(0.5, 2.0 * texCoord.y - 1.0, 0.0, 1.0);
+
+    //gl_Position = vec4(-1.0 + (pixelLuminosity * 0.0078125), -1.0, 0.0, 1.0);
+
+    //gl_Position = vec4(0.5, -1.0 + (pixelLuminosity * 0.0078125), 0.0, 1.0);
+
+    //gl_Position = vec4(0.0, -1.0 + (2.0 * pixelLuminosity / maxWhite), 0.0, 1.0);    
+
+    gl_Position = vec4((2.0 * pixelLuminosity / maxWhite) - 1.0, 2.0 * texCoord.y - 1.0, 0.0, 1.0);
+
+    gl_PointSize = 1.0;
 }

@@ -35,19 +35,130 @@
 #define GLOBAL 10
 #define PHOTOGRAPHIC_REINHARD 11
 
-const mat3 rgb2xyz = mat3( 
-  0.4124564, 0.2126729, 0.0193339,
-  0.3575761, 0.7151522, 0.1191920,
-  0.1804375, 0.0721750, 0.9503041 );
+const float HCV_EPSILON = 1e-10;
+const float HSL_EPSILON = 1e-10;
+const float HCY_EPSILON = 1e-10;
 
-const mat3 xyz2rgb = mat3(
-  3.2404542, -0.9692660, 0.0556434,
-  -1.5371385, 1.8760108, -0.2040259,
-  -0.4985314, 0.0415560, 1.0572252 );
+// White given by D65
+const mat3 RGB2XYZ = mat3(
+        vec3(0.4124, 0.2126, 0.0193),
+        vec3(0.3576, 0.7152, 0.1192),
+        vec3(0.1805, 0.0722, 0.9505)
+    );
+
+const mat3 XYZ2RGB = mat3(
+        vec3(3.2406, -0.9689, 0.0557),
+        vec3(-1.5372, 1.8758, -0.2040),
+        vec3(-0.4986, 0.0415, 1.0570)
+    );
+
+// Gamma correction for linear RGB to sRGB
+// See wiki: https://en.wikipedia.org/wiki/SRGB#The_sRGB_transfer_function_.28.22gamma.22.29
+float gammaF(const float u) {
+    if (u < 0.0031308) {
+        return 12.92 * u;
+    } else {
+        return 1.055 * pow(u, 1.0/2.4) - 0.055;
+    }
+}
+
+float invgammaF(const float u) {
+    if (u < 0.04045) {
+        return u / 12.92;
+    } else {
+        return pow((u+0.055)/1.055, 2.4);
+    }
+}
+
+vec3 rgbToSRGB(const vec3 rgb) {
+    return vec3(gammaF(rgb.r), gammaF(rgb.g), gammaF(rgb.b));
+}
+
+vec3 srgbToRGB(const vec3 srgb) {
+    return vec3(invgammaF(srgb.r), invgammaF(srgb.g), invgammaF(srgb.b));
+}
+
+vec3 srgbToXYZ(const vec3 srgb) {
+    //return RGB2XYZ * srgb;
+    vec3 rgb = srgbToRGB(srgb);
+    return RGB2XYZ * rgb;
+}
+
+vec3 XYZToSRGB(const vec3 XYZ) {
+    vec3 rgb = XYZ2RGB * XYZ;
+    return rgbToSRGB(rgb);
+}
+
+// HSV code taken from http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl.
+vec3 rgb2hsv(const vec3 c)
+{
+    vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+    vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+    vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+
+    float d = q.x - min(q.w, q.y);
+    float e = 1.0e-10;
+    return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+}
+
+// All components are in the range [0…1], including hue.
+vec3 hsv2rgb(const vec3 c)
+{
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
+// Code to convert from rgb to hsl is licensed by:
+/*
+GLSL Color Space Utility Functions
+(c) 2015 tobspr
+-------------------------------------------------------------------------------
+The MIT License (MIT)
+Copyright (c) 2015
+
+See top of the file for full license terms.
+*/
+
+// Converts from pure Hue to linear RGB
+vec3 hue2rgb(float hue)
+{
+    float R = abs(hue * 6 - 3) - 1;
+    float G = 2 - abs(hue * 6 - 2);
+    float B = 2 - abs(hue * 6 - 4);
+    return clamp(vec3(R,G,B), 0, 1);
+}
+// Converts a value from linear RGB to HCV (Hue, Chroma, Value)
+vec3 rgb2hcv(vec3 rgb)
+{
+    // Based on work by Sam Hocevar and Emil Persson
+    vec4 P = (rgb.g < rgb.b) ? vec4(rgb.bg, -1.0, 2.0/3.0) : vec4(rgb.gb, 0.0, -1.0/3.0);
+    vec4 Q = (rgb.r < P.x) ? vec4(P.xyw, rgb.r) : vec4(rgb.r, P.yzx);
+    float C = Q.x - min(Q.w, Q.y);
+    float H = abs((Q.w - Q.y) / (6 * C + HCV_EPSILON) + Q.z);
+    return vec3(H, C, Q.x);
+}
+
+// Converts from HSL to linear RGB
+vec3 hsl2rgb(vec3 hsl)
+{
+    vec3 rgb = hue2rgb(hsl.x);
+    float C = (1 - abs(2 * hsl.z - 1)) * hsl.y;
+    return (rgb - 0.5) * C + hsl.z;
+}
+
+// Converts from linear rgb to HSL
+vec3 rgb2hsl(vec3 rgb)
+{
+    vec3 HCV = rgb2hcv(rgb);
+    float L = HCV.z - HCV.y * 0.5;
+    float S = HCV.y / (1 - abs(L * 2 - 1) + HSL_EPSILON);
+    return vec3(HCV.x, S, L);
+}
 
 vec3 globalToneMappingOperatorRTR(vec3 color, float exposure, float maxWhite, float aveLum) {
   // Convert color to XYZ
-  vec3 xyzCol = rgb2xyz * color;
+  vec3 xyzCol = RGB2XYZ * color;
 
   // Convert from XYZ to xyY
   float xyzSum = xyzCol.x + xyzCol.y + xyzCol.z;
@@ -63,7 +174,7 @@ vec3 globalToneMappingOperatorRTR(vec3 color, float exposure, float maxWhite, fl
   xyzCol.z = (L * (1 - xyYCol.x - xyYCol.y))/xyYCol.y;
 
   // Convert back to RGB and send to output buffer
-  return xyz2rgb * xyzCol;
+  return XYZ2RGB * xyzCol;
 }
 
 vec3 exponentialToneMapping(vec3 color, float exposure, float gamma) {
@@ -89,6 +200,7 @@ vec3 simpleReinhardToneMapping(vec3 color, float exposure) {
 }
 
 vec3 lumaBasedReinhardToneMapping(vec3 color, float exposure) {
+  
   float luma = dot(color, vec3(0.2126f, 0.7152f, 0.0722f));
   float toneMappedLuma = luma / (1.f + luma);
   color *= toneMappedLuma / luma;

@@ -24,28 +24,59 @@
 
 #version __CONTEXT__
 
+#include "hdr.glsl"
+
 layout (location = 0) out vec4 finalColor;
 
-uniform int bufferWidth;
-uniform int bufferHeight;
-uniform sampler2D hdrTexture;
+uniform float key;
+uniform float Ywhite;
+uniform float sat;
+
+uniform sampler2D hdrSampler;
 
 in vec2 texCoord;
 
-void main() {
-    vec4 color = vec4(0.0);
-    float fH = float(bufferHeight);
-    float fW = float(bufferWidth);
+vec3 toneMapGlobal(vec3 hdrColor, float logAvgLum) {
+    vec3 XYZ = srgbToXYZ(hdrColor);
 
-    float sum = 0.f;
-    for (int i = 0; i < bufferHeight; ++i) {
-        for (int j = 0; j < bufferWidth; ++j) {
-            vec2 texCoord = vec2(float(i) / fH, float(j) / fW);
-            vec4 tmpColor = texture(hdrTexture, texCoord);    
-            float lum = dot(tmpColor.xyz, vec3(0.2126f, 0.7152f, 0.0722f));
-            sum += log(lum + 0.00001); // 0.00001 to avoid log(0) from black pixels
+    float Y = (key / logAvgLum) * XYZ.y;
+    float Yd = (Y * (1.0 + Y/(Ywhite * Ywhite))) / (1.0 + Y);
+
+    return pow(hdrColor / XYZ.y, vec3(sat)) * Yd;
+}
+
+vec3 toneMapLocal(vec3 hdrColor, float logAvgLum) {
+    vec3 XYZ = srgbToXYZ(hdrColor);
+
+    float Y = (key / logAvgLum) * XYZ.y;
+    float LocalAdaptation;
+    float factor = key / logAvgLum;
+    float epsilon = 0.05;
+    float phi = 8.0;
+    float scale[7] = float[7](1, 2, 4, 8, 16, 32, 64);
+    
+    for (int i = 0; i < 7; ++i) {
+        float V1 = exp(texture(hdrSampler, texCoord, i).a) * factor;
+        float V2 = exp(texture(hdrSampler, texCoord, i+1).a) * factor;
+
+        if ( abs(V1-V2) / ((key * pow(2, phi) / (scale[i] * scale[i])) + V1)
+        > epsilon ) {
+            LocalAdaptation = V1;
+            break;
+        } else {
+            LocalAdaptation = V2;
         }
     }
 
-    finalColor = vec4(vec3(exp(sum / (fH * fW))), 1.0);
+    float Yd = Y / (1.0 + LocalAdaptation);
+
+    return pow(hdrColor / XYZ.y, vec3(sat)) * Yd;
+}
+
+void main() {
+    vec3 hdrColor = texture(hdrSampler, texCoord).rgb;
+
+    float logAvgLum = exp(texture(hdrSampler, texCoord, 20).a);
+
+    finalColor.rgb = toneMapGlobal(hdrColor, logAvgLum);
 }

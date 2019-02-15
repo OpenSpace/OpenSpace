@@ -79,6 +79,8 @@ public:
     void updateHDRAndFiltering();
     void updateAveLum();
     void updateBloomConfig();
+    void updateHistogramConfig();
+    void updateTMOViaMipMappingConfig();
     void updateMSAASamplingPattern();
 
     void setResolution(glm::ivec2 res) override;
@@ -92,8 +94,16 @@ public:
     void setBloomThreMax(float maxV) override;
     void setBloomOrigFactor(float origFactor) override;
     void setBloomNewFactor(float newFactor) override;
+    void setKey(float key);
+    void setYwhite(float white);
+    void setTmoSaturation(float sat);
+    void setHue(float hue);
+    void setValue(float value);
+    void setSaturation(float sat);
+    void setLightness(float lightness);
 
     void enableBloom(bool enable) override;
+    void enableHistogram(bool enable) override;
 
     float hdrBackground() const override;
     int nAaSamples() const override;
@@ -119,6 +129,8 @@ private:
     float computeBufferAveLuminance();
     float computeBufferAveLuminanceGPU();
     void applyBloomFilter();
+    void computeImageHistogram();
+    void computeMipMappingFromHDRBuffer(GLuint oglImageBuffer);
 
 private:
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
@@ -133,16 +145,25 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _aveLumProgram;
     std::unique_ptr<ghoul::opengl::ProgramObject> _bloomProgram;
     std::unique_ptr<ghoul::opengl::ProgramObject> _bloomResolveProgram;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _histoProgram;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _histoApplyProgram;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _tmoProgram;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
     UniformCache(mainColorTexture, blackoutFactor, nAaSamples) _uniformCache;
     
     UniformCache(deferredResultsTexture, blackoutFactor, backgroundConstant, 
-                 backgroundExposure, gamma, toneMapOperator, aveLum, maxWhite) 
+                 backgroundExposure, gamma, toneMapOperator, aveLum, maxWhite,
+                 Hue, Saturation, Value, Lightness)
         _hdrUniformCache;
 
     UniformCache(renderedImage, bloomImage, bloomThresholdMin, bloomThresholdMax, 
         bloomOrigFactor, bloomNewFactor) _bloomUniformCache;
+
+    UniformCache(renderedImage, maxWhite, imageWidth, 
+                 imageHeight) _histoUniformCache;
+
+    UniformCache(hdrSampler, key, Ywhite, sat) _tmoUniformCache;
 
     GLuint _screenQuad;
     GLuint _vertexPositionBuffer;
@@ -157,12 +178,21 @@ private:
     GLuint _exitFramebuffer;
     GLuint _hdrFilteringFramebuffer;
     GLuint _hdrFilteringTexture;
+    GLuint _histoFramebuffer;
+    GLuint _histoTexture;
+    GLuint _histoVao;
+    GLuint _histoVbo;
 
     GLuint _bloomFilterFBO[3];
     GLuint _bloomTexture[3];
 
     GLuint _computeAveLumFBO; 
     GLuint _computeAveLumTexture;
+
+    // New TMO via mipmapping
+    GLuint _tmoTexture;
+    GLuint _tmoFramebuffer;
+    GLuint _tmoHdrSampler;
 
     bool _dirtyDeferredcastData;
     bool _dirtyRaycastData;
@@ -181,8 +211,18 @@ private:
     float _bloomOrigFactor = 1.0;
     float _bloomNewFactor = 1.0;
     int _toneMapOperator = 0;
+    bool _histogramEnabled = false;
+    int _numberOfBins = 1024; // JCC TODO: Add a parameter control for this.
+    float _tmoKey = 0.18f;
+    float _tmoYwhite = 1e6f;
+    float _tmoSaturation = 1.0f;
+    float _hue = 1.f;
+    float _saturation = 1.f;
+    float _value = 1.f;
+    float _lightness = 1.f;
 
     std::vector<double> _mSAAPattern;
+    std::vector<float> _histoPoints;
 
     ghoul::Dictionary _rendererData;
 };

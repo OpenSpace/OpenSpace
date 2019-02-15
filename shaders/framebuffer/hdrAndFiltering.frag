@@ -34,6 +34,10 @@ uniform float blackoutFactor;
 uniform float gamma;
 uniform float maxWhite;
 uniform float aveLum;
+uniform float Hue;
+uniform float Saturation;
+uniform float Value;
+uniform float Lightness;
 uniform int toneMapOperator;
 
 uniform sampler2D deferredResultsTexture;
@@ -85,7 +89,13 @@ void main() {
     
     if (toneMapOperator == EXPONENTIAL) {
         vec3 tColor = exponentialToneMapping(color.rgb, backgroundExposure, gamma);
-        finalColor = vec4(tColor, color.a);    
+        vec3 hslColor = rgb2hsl(tColor);
+        hslColor.x *= Hue;
+        hslColor.y *= Saturation;
+        hslColor.z *= Lightness;
+
+        finalColor = vec4(hsl2rgb(hslColor), color.a); 
+           
     } else if (toneMapOperator == LINEAR) {
         vec3 tColor = linearToneMapping(color.rgb, backgroundExposure);
         finalColor = vec4(gammaCorrection(tColor, gamma), color.a);
@@ -109,7 +119,13 @@ void main() {
         finalColor = vec4(gammaCorrection(tColor, gamma), color.a);
     } else if (toneMapOperator == COSTA) {
         vec3 tColor = jToneMapping(color.rgb, backgroundExposure);
-        finalColor = vec4(gammaCorrection(tColor, gamma), color.a);
+        vec3 hsvColor = rgb2hsv(tColor);
+        hsvColor.x *= Hue;
+        hsvColor.y *= Saturation;
+        hsvColor.z *= Value;
+
+        finalColor = vec4(gammaCorrection(hsv2rgb(hsvColor), gamma), color.a);
+        
     } else if (toneMapOperator == ADAPTIVE) {
         vec3 tColor = vec3(adaptiveToneMap());
         finalColor = vec4(gammaCorrection(tColor, gamma), color.a);

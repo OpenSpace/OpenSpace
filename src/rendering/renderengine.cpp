@@ -189,6 +189,24 @@ namespace {
         "equivalent of an electronic image sensor for the background image."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo TMOSaturationInfo = {
+        "TMOSaturation",
+        "TMO Saturation",
+        "TMO Saturation"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TMOYWhiteInfo = {
+        "TMOYWhite",
+        "Ywhite",
+        "Ywhite"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TMOKeyInfo = {
+        "TMOKey",
+        "Key",
+        "Key"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
         "Gamma",
         "Gamma Correction",
@@ -238,6 +256,48 @@ namespace {
         "Enable/Disable Bloom",
         "Enable/Disable Bloom."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo HueInfo = {
+        "Hue",
+        "Hue",
+        "Hue"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SaturationInfo = {
+        "Saturation",
+        "Saturation",
+        "Saturation"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ValueInfo = {
+        "Value",
+        "Value",
+        "Value"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LightnessInfo = {
+        "Lightness",
+        "Lightness",
+        "Lightness"
+    };
+
+    openspace::properties::PropertyOwner::PropertyOwnerInfo BloomInfo = {
+        "BloomOp",
+        "Bloom Options",
+        ""
+    };
+
+    openspace::properties::PropertyOwner::PropertyOwnerInfo TMOInfo = {
+        "ToneMappingOp",
+        "Tone Mapping Options",
+        ""
+    };
+
+    openspace::properties::PropertyOwner::PropertyOwnerInfo ImageInfo = {
+        "ImageOp",
+        "Rendered Image Options",
+        ""
+    };    
 } // namespace
 
 
@@ -255,17 +315,28 @@ RenderEngine::RenderEngine()
     , _showFrameNumber(ShowFrameNumberInfo, false)
     , _disableMasterRendering(DisableMasterInfo, false)
     , _disableSceneTranslationOnMaster(DisableTranslationInfo, false)
-    , _nAaSamples(AaSamplesInfo, 4, 1, 8)
-    , _hdrExposure(HDRExposureInfo, 0.4f, 0.01f, 10.0f)
-    , _hdrBackground(BackgroundExposureInfo, 2.8f, 0.01f, 10.0f)
-    , _gamma(GammaInfo, 2.2f, 0.01f, 10.0f)
-    , _maxWhite(MaxWhiteInfo, 4.f, 0.001f, 10000.0f)
+    , _nAaSamples(AaSamplesInfo, 4, 1, 8)        
+    , _bloomOwner(BloomInfo)
     , _enableBloom(EnableBloomInfo, false)
     , _bloomThreshouldMin(BloomThreshouldMinInfo, 0.5, 0.0, 100.0)
     , _bloomThreshouldMax(BloomThreshouldMaxInfo, 1.0, 0.0, 100.0)
     , _bloomOrigColorFactor(BloomOrigColorFactorInfo, 1.0, 0.0, 100.0)
     , _bloomNewColorFactor(BloomNewColorFactorInfo, 1.0, 0.0, 100.0)
+    , _tmoOwner(TMOInfo)
+    , _hdrExposure(HDRExposureInfo, 0.4f, 0.01f, 10.0f)
+    , _hdrBackground(BackgroundExposureInfo, 2.8f, 0.01f, 10.0f)
+    , _maxWhite(MaxWhiteInfo, 4.f, 0.001f, 10000.0f)
     , _toneMapOperator(ToneMapOperatorInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _tmoKey(TMOKeyInfo, 0.18f, 0.0f, 1.0f)
+    , _tmoYwhite(TMOYWhiteInfo, 1e6f, 0.0f, 1e10f)
+    , _tmoSaturation(TMOSaturationInfo, 1.f, 0.0f, 1.0f)
+    , _imageOwner(ImageInfo)
+    , _gamma(GammaInfo, 2.2f, 0.01f, 10.0f)
+    , _hue(HueInfo, 1.f, 0.0f, 10.0f)
+    , _saturation(SaturationInfo, 1.f, 0.0f, 10.0f)
+    , _value(ValueInfo, 1.f, 0.0f, 10.0f)
+    , _lightness(LightnessInfo, 1.f, 0.0f, 10.0f)
+
 {
     _doPerformanceMeasurements.onChange([this](){
         global::performanceManager.setEnabled(_doPerformanceMeasurements);
@@ -284,6 +355,7 @@ RenderEngine::RenderEngine()
     });
     addProperty(_nAaSamples);
 
+    
     _hdrExposure.onChange([this]() {
         if (_renderer) {
             _renderer->setHDRExposure(_hdrExposure);
@@ -298,20 +370,14 @@ RenderEngine::RenderEngine()
     });
     addProperty(_hdrBackground);
 
-    _gamma.onChange([this]() {
-        if (_renderer) {
-            _renderer->setGamma(_gamma);
-        }
-    });
-    addProperty(_gamma);
-
     _maxWhite.onChange([this]() {
         if (_renderer) {
             _renderer->setMaxWhite(_maxWhite);
         }
     });
+    
     addProperty(_maxWhite);
-
+    
     _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::EXPONENTIAL), "Exponential");
     _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::LINEAR), "Linear");
     _toneMapOperator.addOption(static_cast<int>(ToneMapOperators::SIMPLE_REINHARD), "Simple Reinhard");
@@ -333,6 +399,73 @@ RenderEngine::RenderEngine()
     });
 
     addProperty(_toneMapOperator);
+    
+    _tmoKey.onChange([this]() {
+        if (_renderer) {
+            _renderer->setKey(_tmoKey);
+        }
+    });
+
+    addProperty(_tmoKey);
+
+    _tmoYwhite.onChange([this]() {
+        if (_renderer) {
+            _renderer->setYwhite(_tmoYwhite);
+        }
+    });
+
+    addProperty(_tmoYwhite);
+    
+    _tmoSaturation.onChange([this]() {
+        if (_renderer) {
+            _renderer->setTmoSaturation(_tmoSaturation);
+        }
+    });
+
+    addProperty(_tmoSaturation);
+    
+    //this->addPropertySubOwner(_tmoOwner);
+
+
+    _gamma.onChange([this]() {
+        if (_renderer) {
+            _renderer->setGamma(_gamma);
+        }
+    });
+    addProperty(_gamma);
+
+    _hue.onChange([this]() {
+        if (_renderer) {
+            _renderer->setHue(_hue);
+        }
+    });
+
+    addProperty(_hue);
+    
+    _saturation.onChange([this]() {
+        if (_renderer) {
+            _renderer->setSaturation(_saturation);
+        }
+    });
+
+    addProperty(_saturation);
+    
+    _value.onChange([this]() {
+        if (_renderer) {
+            _renderer->setValue(_value);
+        }
+    });
+
+    addProperty(_value);
+    
+    _lightness.onChange([this]() {
+        if (_renderer) {
+            _renderer->setLightness(_lightness);
+        }
+    });
+    addProperty(_lightness);
+    
+    //this->addPropertySubOwner(_imageOwner);
 
     _enableBloom.onChange([this]() {
         if (_renderer) {
@@ -369,6 +502,8 @@ RenderEngine::RenderEngine()
             _renderer->setBloomNewFactor(_bloomNewColorFactor);
         }
     });
+    
+    //this->addPropertySubOwner(_bloomOwner);
 
     addProperty(_applyWarping);
 

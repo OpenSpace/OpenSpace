@@ -759,6 +759,10 @@ void ABufferRenderer::enableBloom(bool enable) {
     _bloomEnabled = enable;
 }
 
+void ABufferRenderer::enableHistogram(bool enable) {
+    _histogramEnabled = enable;
+}
+
 float ABufferRenderer::hdrBackground() const {
     return _hdrBackground;
 }

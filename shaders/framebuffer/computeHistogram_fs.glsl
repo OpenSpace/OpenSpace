@@ -26,26 +26,10 @@
 
 layout (location = 0) out vec4 finalColor;
 
-uniform int bufferWidth;
-uniform int bufferHeight;
-uniform sampler2D hdrTexture;
+in vec3 pColor;
 
-in vec2 texCoord;
-
-void main() {
-    vec4 color = vec4(0.0);
-    float fH = float(bufferHeight);
-    float fW = float(bufferWidth);
-
-    float sum = 0.f;
-    for (int i = 0; i < bufferHeight; ++i) {
-        for (int j = 0; j < bufferWidth; ++j) {
-            vec2 texCoord = vec2(float(i) / fH, float(j) / fW);
-            vec4 tmpColor = texture(hdrTexture, texCoord);    
-            float lum = dot(tmpColor.xyz, vec3(0.2126f, 0.7152f, 0.0722f));
-            sum += log(lum + 0.00001); // 0.00001 to avoid log(0) from black pixels
-        }
-    }
-
-    finalColor = vec4(vec3(exp(sum / (fH * fW))), 1.0);
+void main()
+{
+    //finalColor = vec4(1.0, 0.0, 0.0, 1.0);
+    finalColor = vec4(pColor, 1.0);
 }

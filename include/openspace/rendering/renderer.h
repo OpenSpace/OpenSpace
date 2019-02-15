@@ -59,8 +59,16 @@ public:
     virtual void setBloomThreMax(float maxV) = 0;
     virtual void setBloomOrigFactor(float origFactor) = 0;
     virtual void setBloomNewFactor(float newFactor) = 0;
-
+    virtual void setKey(float key) = 0;
+    virtual void setYwhite(float white) = 0;
+    virtual void setTmoSaturation(float sat) = 0;
+    virtual void setHue(float hue) = 0;
+    virtual void setValue(float value) = 0;
+    virtual void setSaturation(float sat) = 0;
+    virtual void setLightness(float lightness) = 0;
+    
     virtual void enableBloom(bool enable) = 0;
+    virtual void enableHistogram(bool enable) = 0;
 
     virtual float hdrBackground() const = 0;
     virtual int nAaSamples() const = 0;
