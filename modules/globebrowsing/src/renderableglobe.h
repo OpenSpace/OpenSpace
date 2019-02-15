@@ -68,6 +68,11 @@ struct Chunk {
     std::array<Chunk*, 4> children = { { nullptr, nullptr, nullptr, nullptr } };
 };
 
+enum ShadowCompType {
+    GLOBAL_SHADOW,
+    LOCAL_SHADOW
+};
+
 /**
  * A RenderableGlobe is a globe modeled as an ellipsoid using a chunked LOD algorithm for
  * rendering.
@@ -93,7 +98,7 @@ public:
     LayerManager& layerManager();
     const glm::dmat4& modelTransform() const;
 
-private:
+private:    
     constexpr static const int MinSplitDepth = 2;
     constexpr static const int MaxSplitDepth = 22;
 
@@ -192,7 +197,7 @@ private:
 
 
     void calculateEclipseShadows(ghoul::opengl::ProgramObject& programObject,
-        const RenderData& data);
+        const RenderData& data, ShadowCompType stype);
 
     void setCommonUniforms(ghoul::opengl::ProgramObject& programObject,
         const Chunk& chunk, const RenderData& data);
