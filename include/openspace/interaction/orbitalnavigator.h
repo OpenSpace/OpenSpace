@@ -264,7 +264,7 @@ private:
      * \returns a quaternion adjusted to rotate around the out vector of the surface.
      */
     glm::dquat rotateHorizontally(double deltaTime,
-        const glm::dquat& globalCameraRotation, const glm::dvec3& cameraPosition,
+        const glm::dquat& globalCameraRotation,
         const SurfacePositionHandle& positionHandle) const;
 
     /**

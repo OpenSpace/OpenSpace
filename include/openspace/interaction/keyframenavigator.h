@@ -26,7 +26,6 @@
 #define __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
 
 #include <openspace/util/timeline.h>
-#include <openspace/properties/propertyowner.h>
 #include <openspace/network/messagestructures.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
