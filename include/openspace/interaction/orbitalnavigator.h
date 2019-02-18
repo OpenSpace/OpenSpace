@@ -74,8 +74,8 @@ public:
     JoystickCameraStates& joystickStates();
 
     bool followingNodeRotation() const;
-    SceneGraphNode* anchorNode() const;
-    SceneGraphNode* aimNode() const;
+    const SceneGraphNode* anchorNode() const;
+    const SceneGraphNode* aimNode() const;
 
     bool hasRotationalFriction() const;
     bool hasZoomFriction() const;
@@ -190,9 +190,8 @@ private:
      * screen space position of the aim node. Also interpolates to the aim node, when
      * retargeting the aim.
      */
-    CameraPose followAim(CameraPose pose,
-                         glm::dvec3 cameraToAnchor,
-                         Displacement anchorToAim);
+    CameraPose followAim(CameraPose pose, glm::dvec3 cameraToAnchor,
+        Displacement anchorToAim);
 
     /*
      * Perform a camera roll on the local camera rotation
@@ -215,14 +214,11 @@ private:
         const glm::dquat& localCameraRotation);
 
 
-    Displacement interpolateRetargetAim(double deltaTime,
-                                        CameraPose pose,
-                                        glm::dvec3 cameraToAnchor,
-                                        Displacement anchorToAim);
+    Displacement interpolateRetargetAim(double deltaTime, CameraPose pose,
+        glm::dvec3 cameraToAnchor, Displacement anchorToAim);
 
-    double interpolateCameraToSurfaceDistance(double deltaTime,
-                                              double currentDistance,
-                                              double targetDistance);
+    double interpolateCameraToSurfaceDistance(double deltaTime, double currentDistance,
+        double targetDistance);
 
     /**
      * Translates the horizontal direction. If far from the anchor object, this will
@@ -231,8 +227,7 @@ private:
      * \returns a position vector adjusted in the horizontal direction.
      */
     glm::dvec3 translateHorizontally(double deltaTime, const glm::dvec3& cameraPosition,
-        const glm::dvec3& objectPosition,
-        const glm::dquat& globalCameraRotation,
+        const glm::dvec3& objectPosition, const glm::dquat& globalCameraRotation,
         const SurfacePositionHandle& positionHandle) const;
 
     /*
@@ -249,7 +244,7 @@ private:
      */
     glm::dquat rotateGlobally(const glm::dquat& globalCameraRotation,
         const glm::dquat& aimNodeRotationDiff,
-        const SurfacePositionHandle& positionHandle) const;
+const SurfacePositionHandle& positionHandle) const;
 
     /**
      * Translates the camera position towards or away from the anchor node.
@@ -287,16 +282,13 @@ private:
     /**
      * Get the vector from the camera to the surface of the anchor object in world space.
      */
-    glm::dvec3 cameraToSurfaceVector(
-        const glm::dvec3& cameraPos,
-        const glm::dvec3& centerPos,
-        const SurfacePositionHandle& posHandle);
+    glm::dvec3 cameraToSurfaceVector(const glm::dvec3& cameraPos,
+        const glm::dvec3& centerPos, const SurfacePositionHandle& posHandle);
 
     /**
      * Calculates a SurfacePositionHandle given a camera position in world space.
      */
-    SurfacePositionHandle calculateSurfacePositionHandle(
-        SceneGraphNode& node,
+    SurfacePositionHandle calculateSurfacePositionHandle(SceneGraphNode& node,
         const glm::dvec3 cameraPositionWorldSpace);
 };
 

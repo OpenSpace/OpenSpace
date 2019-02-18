@@ -106,7 +106,7 @@ void ExternInteraction::scriptInteraction(datamessagestructures::ScriptMessage s
 
 datamessagestructures::CameraKeyframe ExternInteraction::generateCameraKeyframe() {
     datamessagestructures::CameraKeyframe kf;
-    SceneGraphNode* focusNode = 
+    const SceneGraphNode* focusNode = 
         global::navigationHandler.orbitalNavigator().anchorNode();
 
     if (!focusNode) {

@@ -114,7 +114,7 @@ void GuiSpaceTimeComponent::render() {
     ImGui::NewLine();
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
 
-    SceneGraphNode* currentFocus =
+    const SceneGraphNode* currentFocus =
         global::navigationHandler.orbitalNavigator().anchorNode();
 
     std::string nodeNames;

@@ -291,9 +291,7 @@ openspace.globebrowsing.addFocusNodesFromDirectory = function (dir, node_name)
 end
 
 openspace.globebrowsing.addFocusNodeFromLatLong = function (name, globe_identifier, lat, long, altitude)
-    if not altitude then
-        altitude = 0
-    end
+    altitude = altitude or 0;
 
     local a, b, c = openspace.globebrowsing.getGeoPosition(globe_identifier, lat, long, altitude)
     local p = { a, b, c }

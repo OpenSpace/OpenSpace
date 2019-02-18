@@ -428,7 +428,8 @@ void SessionRecording::saveCameraKeyframe() {
         return;
     }
 
-    SceneGraphNode* anchorNode = global::navigationHandler.orbitalNavigator().anchorNode();
+    const SceneGraphNode* anchorNode =
+        global::navigationHandler.orbitalNavigator().anchorNode();
     if (!anchorNode) {
         return;
     }

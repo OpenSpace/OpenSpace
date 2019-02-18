@@ -585,7 +585,8 @@ const std::string& ParallelPeer::hostName() {
 }
 
 void ParallelPeer::sendCameraKeyframe() {
-    SceneGraphNode* focusNode = global::navigationHandler.orbitalNavigator().anchorNode();
+    const SceneGraphNode* focusNode =
+        global::navigationHandler.orbitalNavigator().anchorNode();
     if (!focusNode) {
         return;
     }

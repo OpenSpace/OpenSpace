@@ -377,10 +377,12 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
             aimPos - anchorPos
         };
 
-        anchorToAim = interpolateRetargetAim(deltaTime,
-                                             pose,
-                                             cameraToAnchor,
-                                             anchorToAim);
+        anchorToAim = interpolateRetargetAim(
+            deltaTime,
+            pose,
+            cameraToAnchor,
+            anchorToAim
+        );
 
         pose = followAim(pose, cameraToAnchor, anchorToAim);
 
@@ -628,11 +630,11 @@ bool OrbitalNavigator::followingNodeRotation() const {
     return _followRotationInterpolator.value() >= 1.0;
 }
 
-SceneGraphNode* OrbitalNavigator::anchorNode() const {
+const SceneGraphNode* OrbitalNavigator::anchorNode() const {
     return _anchorNode;
 }
 
-SceneGraphNode* OrbitalNavigator::aimNode() const {
+const SceneGraphNode* OrbitalNavigator::aimNode() const {
     return _aimNode;
 }
 
