@@ -550,7 +550,7 @@ void OrbitalNavigator::setFocusNode(const std::string& focusNode) {
     _aim.set(std::string(""));
 }
 
-void OrbitalNavigator::setAnchorNode(SceneGraphNode* anchorNode) {
+void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode) {
     if (!_anchorNode) {
         _directlySetStereoDistance = true;
     }
@@ -563,7 +563,7 @@ void OrbitalNavigator::setAnchorNode(SceneGraphNode* anchorNode) {
     }
 }
 
-void OrbitalNavigator::setAimNode(SceneGraphNode* aimNode) {
+void OrbitalNavigator::setAimNode(const SceneGraphNode* aimNode) {
     _retargetAimInterpolator.end();
     _aimNode = aimNode;
 
@@ -1177,7 +1177,7 @@ glm::dquat OrbitalNavigator::interpolateRotationDifferential(double deltaTime,
 }
 
 SurfacePositionHandle OrbitalNavigator::calculateSurfacePositionHandle(
-                                                SceneGraphNode& node,
+                                                const SceneGraphNode& node,
                                                 const glm::dvec3 cameraPositionWorldSpace)
 {
     const glm::dmat4 inverseModelTransform = node.inverseModelTransform();

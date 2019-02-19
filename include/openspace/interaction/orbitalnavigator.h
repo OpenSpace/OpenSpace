@@ -62,9 +62,9 @@ public:
     void setFocusNode(SceneGraphNode* focusNode);
 
     void setAnchorNode(const std::string& anchorNode);
-    void setAnchorNode(SceneGraphNode* anchorNode);
+    void setAnchorNode(const SceneGraphNode* anchorNode);
     void setAimNode(const std::string& aimNode);
-    void setAimNode(SceneGraphNode* aimNode);
+    void setAimNode(const SceneGraphNode* aimNode);
 
     void startRetargetAnchor();
     void startRetargetAim();
@@ -141,8 +141,8 @@ private:
     MouseCameraStates _mouseStates;
     JoystickCameraStates _joystickStates;
 
-    SceneGraphNode* _anchorNode = nullptr;
-    SceneGraphNode* _aimNode = nullptr;
+    const SceneGraphNode* _anchorNode = nullptr;
+    const SceneGraphNode* _aimNode = nullptr;
 
     glm::dvec3 _previousAnchorNodePosition;
     glm::dquat _previousAnchorNodeRotation;
@@ -288,7 +288,7 @@ const SurfacePositionHandle& positionHandle) const;
     /**
      * Calculates a SurfacePositionHandle given a camera position in world space.
      */
-    SurfacePositionHandle calculateSurfacePositionHandle(SceneGraphNode& node,
+    SurfacePositionHandle calculateSurfacePositionHandle(const SceneGraphNode& node,
         const glm::dvec3 cameraPositionWorldSpace);
 };
 
