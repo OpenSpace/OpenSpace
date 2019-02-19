@@ -764,7 +764,9 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
             ));
             return;
         }
-        global::navigationHandler.orbitalNavigator().setFocusNode(node->parent());
+        global::navigationHandler.orbitalNavigator().setFocusNode(
+            node->parent()->identifier()
+        );
         global::navigationHandler.orbitalNavigator().startRetargetAnchor();
     });
 

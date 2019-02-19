@@ -540,7 +540,7 @@ glm::dvec3 OrbitalNavigator::cameraToSurfaceVector(const glm::dvec3& cameraPos,
     return centerToActualSurface - posDiff;
 }
 
-void OrbitalNavigator::setFocusNode(SceneGraphNode* focusNode) {
+void OrbitalNavigator::setFocusNode(const SceneGraphNode* focusNode) {
     setAnchorNode(focusNode);
     setAimNode(nullptr);
 }
