@@ -55,10 +55,10 @@ namespace {
         "mainColorTexture", "blackoutFactor", "nAaSamples"
     };
 
-    constexpr const std::array<const char*, 12> HDRUniformNames = {
+    constexpr const std::array<const char*, 13> HDRUniformNames = {
         "deferredResultsTexture", "blackoutFactor", "backgroundConstant", 
-        "backgroundExposure", "gamma", "toneMapOperator", "aveLum", "maxWhite",
-        "Hue", "Saturation", "Value", "Lightness"
+        "hdrExposure", "gamma", "toneMapOperator", "aveLum", "maxWhite",
+        "Hue", "Saturation", "Value", "Lightness", "colorSpace"
     };
 
     constexpr const std::array<const char*, 6> BloomUniformNames  = {
@@ -1651,9 +1651,9 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         performDeferredTasks(tasks.deferredcasterTasks);
     }
 
-    /*
+    
     if (tasks.deferredcasterTasks.empty()) {
-        glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+        //glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
         _resolveProgram->activate();
 
         ghoul::opengl::TextureUnit mainColorTextureUnit;
@@ -1669,27 +1669,27 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
         _resolveProgram->deactivate();
     }
-    */
+    
 
     // DEBUG - JCC     
     {
         glDisable(GL_DEPTH_TEST);
 
-        // Results of the DeferredTasks as entry for the bloom filter
-        applyBloomFilter();
+        //// Results of the DeferredTasks as entry for the bloom filter
+        //applyBloomFilter();
 
         float averageLuminaceInFB = 0.0;
-        if (_toneMapOperator == 
-            static_cast<int>(openspace::RenderEngine::ToneMapOperators::GLOBAL)
-            )
-        {
-            averageLuminaceInFB = computeBufferAveLuminanceGPU();
-            if (std::isnan(averageLuminaceInFB)) {
-                averageLuminaceInFB = 1000.0;
-            }
-        }
-        
-        //float averageLuminaceInFB = 0.5;
+        //if (_toneMapOperator == 
+        //    static_cast<int>(openspace::RenderEngine::ToneMapOperators::GLOBAL)
+        //    )
+        //{
+        //    averageLuminaceInFB = computeBufferAveLuminanceGPU();
+        //    if (std::isnan(averageLuminaceInFB)) {
+        //        averageLuminaceInFB = 1000.0;
+        //    }
+        //}
+        //
+        ////float averageLuminaceInFB = 0.5;
 
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
         glViewport(0, 0, _resolution.x, _resolution.y);
@@ -1697,14 +1697,14 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
         ghoul::opengl::TextureUnit hdrFeedingTextureUnit;
         hdrFeedingTextureUnit.activate();
-        if (_bloomEnabled) {
-            // Bloom Enabled
-            glBindTexture(GL_TEXTURE_2D, _bloomTexture[2]);  
-        }
-        else {
+        //if (_bloomEnabled) {
+        //    // Bloom Enabled
+        //    glBindTexture(GL_TEXTURE_2D, _bloomTexture[2]);  
+        //}
+        //else {
             // No Bloom
             glBindTexture(GL_TEXTURE_2D, _hdrFilteringTexture);
-        }
+        /*}*/
 
         _hdrFilteringProgram->setUniform(
             _hdrUniformCache.deferredResultsTexture,
@@ -1715,7 +1715,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutFactor, blackoutFactor);
         _hdrFilteringProgram->setUniform(_hdrUniformCache.backgroundConstant, 
                                          _hdrBackground);
-        _hdrFilteringProgram->setUniform(_hdrUniformCache.backgroundExposure, _hdrExposure);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.hdrExposure, _hdrExposure);
         _hdrFilteringProgram->setUniform(_hdrUniformCache.gamma, _gamma);
         _hdrFilteringProgram->setUniform(_hdrUniformCache.toneMapOperator, _toneMapOperator);
         _hdrFilteringProgram->setUniform(_hdrUniformCache.aveLum, averageLuminaceInFB);
@@ -1724,6 +1724,8 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         _hdrFilteringProgram->setUniform(_hdrUniformCache.Saturation, _saturation);
         _hdrFilteringProgram->setUniform(_hdrUniformCache.Value, _value);
         _hdrFilteringProgram->setUniform(_hdrUniformCache.Lightness, _lightness);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.colorSpace, _colorSpace);
+
 
         glBindVertexArray(_screenQuad);
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -1734,13 +1736,13 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         //================================
         // Adjusting color and brightness
         //================================
-        
-        // Histogram Equalization
-        computeImageHistogram();
+        //
+        //// Histogram Equalization
+        //computeImageHistogram();
 
-        computeMipMappingFromHDRBuffer(_hdrFilteringTexture);
+        //computeMipMappingFromHDRBuffer(_hdrFilteringTexture);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+        //glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
     }
     
     //glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
@@ -2009,6 +2011,10 @@ void FramebufferRenderer::setSaturation(float sat) {
 
 void FramebufferRenderer::setLightness(float lightness) {
     _lightness = lightness;
+}
+
+void FramebufferRenderer::setColorSpace(unsigned int colorspace) {
+    _colorSpace = colorspace;
 }
 
 void FramebufferRenderer::enableBloom(bool enable) {

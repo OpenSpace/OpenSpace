@@ -94,13 +94,14 @@ public:
     void setBloomThreMax(float maxV) override;
     void setBloomOrigFactor(float origFactor) override;
     void setBloomNewFactor(float newFactor) override;
-    void setKey(float key);
-    void setYwhite(float white);
-    void setTmoSaturation(float sat);
-    void setHue(float hue);
-    void setValue(float value);
-    void setSaturation(float sat);
-    void setLightness(float lightness);
+    void setKey(float key) override;
+    void setYwhite(float white) override;
+    void setTmoSaturation(float sat) override;
+    void setHue(float hue) override;
+    void setValue(float value) override;
+    void setSaturation(float sat) override;
+    void setLightness(float lightness) override;
+    void setColorSpace(unsigned int colorspace) override;
 
     void enableBloom(bool enable) override;
     void enableHistogram(bool enable) override;
@@ -153,8 +154,8 @@ private:
     UniformCache(mainColorTexture, blackoutFactor, nAaSamples) _uniformCache;
     
     UniformCache(deferredResultsTexture, blackoutFactor, backgroundConstant, 
-                 backgroundExposure, gamma, toneMapOperator, aveLum, maxWhite,
-                 Hue, Saturation, Value, Lightness)
+                 hdrExposure, gamma, toneMapOperator, aveLum, maxWhite,
+                 Hue, Saturation, Value, Lightness, colorSpace)
         _hdrUniformCache;
 
     UniformCache(renderedImage, bloomImage, bloomThresholdMin, bloomThresholdMax, 
@@ -220,6 +221,7 @@ private:
     float _saturation = 1.f;
     float _value = 1.f;
     float _lightness = 1.f;
+    unsigned int _colorSpace = 1;
 
     std::vector<double> _mSAAPattern;
     std::vector<float> _histoPoints;

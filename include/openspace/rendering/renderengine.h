@@ -79,6 +79,11 @@ public:
         PHOTOGRAPHIC_REINHARD
     };
 
+    enum class COLORSPACE {
+        HSV = 0,
+        HSL
+    };
+
     RenderEngine();
     ~RenderEngine();
 
@@ -230,7 +235,8 @@ private:
     properties::FloatProperty _value;
     properties::FloatProperty _lightness;
 
-
+    properties::OptionProperty _colorSpace;
+    
     uint64_t _frameNumber = 0;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;

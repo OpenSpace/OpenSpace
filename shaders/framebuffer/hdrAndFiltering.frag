@@ -26,10 +26,13 @@
 
 #include "hdr.glsl"
 
+#define HSV_COLOR 0u
+#define HSL_COLOR 1u
+
 layout (location = 0) out vec4 finalColor;
 
 uniform float backgroundConstant;
-uniform float backgroundExposure;
+uniform float hdrExposure;
 uniform float blackoutFactor;
 uniform float gamma;
 uniform float maxWhite;
@@ -39,6 +42,7 @@ uniform float Saturation;
 uniform float Value;
 uniform float Lightness;
 uniform int toneMapOperator;
+uniform uint colorSpace;
 
 uniform sampler2D deferredResultsTexture;
 
@@ -87,53 +91,46 @@ void main() {
     //color = texelFetch(deferredResultsTexture, ivec2(gl_FragCoord.xy), 0);
     color.a *= blackoutFactor;
     
+    vec3 tColor = vec3(0.0);
     if (toneMapOperator == EXPONENTIAL) {
-        vec3 tColor = exponentialToneMapping(color.rgb, backgroundExposure, gamma);
-        vec3 hslColor = rgb2hsl(tColor);
+        tColor = exponentialToneMapping(color.rgb, hdrExposure, gamma);   
+    } else if (toneMapOperator == LINEAR) {
+        tColor = linearToneMapping(color.rgb, hdrExposure);
+    } else if (toneMapOperator == SIMPLE_REINHARD) {
+        tColor = simpleReinhardToneMapping(color.rgb, hdrExposure);
+    } else if (toneMapOperator == LUM_BASED_REINHARD) {
+        tColor = lumaBasedReinhardToneMapping(color.rgb);
+    } else if (toneMapOperator == WHITE_PRESERVING) {
+        tColor = whitePreservingLumaBasedReinhardToneMapping(color.rgb, maxWhite);
+    } else if (toneMapOperator == ROM_BIN_DA_HOUSE) {
+        tColor = RomBinDaHouseToneMapping(color.rgb);
+    } else if (toneMapOperator == FILMIC) {
+        tColor = filmicToneMapping(color.rgb);
+    } else if (toneMapOperator == UNCHARTED) {
+        tColor = Uncharted2ToneMapping(color.rgb, hdrExposure);
+    } else if (toneMapOperator == COSTA) {
+        tColor = jToneMapping(color.rgb, hdrExposure);
+    } else if (toneMapOperator == ADAPTIVE) {
+        tColor = vec3(adaptiveToneMap());
+    } else if (toneMapOperator == GLOBAL) {
+        tColor = globalToneMappingOperatorRTR(color.rgb, hdrExposure, maxWhite, aveLum);
+    } else if (toneMapOperator == PHOTOGRAPHIC_REINHARD) {
+        tColor = photographicReinhardToneMapping(color.rgb);
+    }
+
+    if (colorSpace == HSL_COLOR) {
+         vec3 hslColor = rgb2hsl(tColor);
         hslColor.x *= Hue;
         hslColor.y *= Saturation;
         hslColor.z *= Lightness;
 
-        finalColor = vec4(hsl2rgb(hslColor), color.a); 
-           
-    } else if (toneMapOperator == LINEAR) {
-        vec3 tColor = linearToneMapping(color.rgb, backgroundExposure);
-        finalColor = vec4(gammaCorrection(tColor, gamma), color.a);
-    } else if (toneMapOperator == SIMPLE_REINHARD) {
-        vec3 tColor = simpleReinhardToneMapping(color.rgb, backgroundExposure);
-        finalColor = vec4(gammaCorrection(tColor, gamma), color.a);
-    } else if (toneMapOperator == LUM_BASED_REINHARD) {
-        vec3 tColor = lumaBasedReinhardToneMapping(color.rgb, backgroundExposure);
-        finalColor = vec4(gammaCorrection(tColor, gamma), color.a);
-    } else if (toneMapOperator == WHITE_PRESERVING) {
-        vec3 tColor = whitePreservingLumaBasedReinhardToneMapping(color.rgb, backgroundExposure, maxWhite);
-        finalColor = vec4(gammaCorrection(tColor, gamma), color.a);
-    } else if (toneMapOperator == ROM_BIN_DA_HOUSE) {
-        vec3 tColor = RomBinDaHouseToneMapping(color.rgb, backgroundExposure);
-        finalColor = vec4(gammaCorrection(tColor, gamma), color.a);
-    } else if (toneMapOperator == FILMIC) {
-        vec3 tColor = filmicToneMapping(color.rgb, backgroundExposure);
-        finalColor = vec4(gammaCorrection(tColor, gamma), color.a);
-    } else if (toneMapOperator == UNCHARTED) {
-        vec3 tColor = Uncharted2ToneMapping(color.rgb, backgroundExposure);
-        finalColor = vec4(gammaCorrection(tColor, gamma), color.a);
-    } else if (toneMapOperator == COSTA) {
-        vec3 tColor = jToneMapping(color.rgb, backgroundExposure);
+        finalColor = vec4(gammaCorrection(hsl2rgb(hslColor), gamma), color.a); 
+    } else if (colorSpace == HSV_COLOR) {
         vec3 hsvColor = rgb2hsv(tColor);
         hsvColor.x *= Hue;
         hsvColor.y *= Saturation;
         hsvColor.z *= Value;
 
         finalColor = vec4(gammaCorrection(hsv2rgb(hsvColor), gamma), color.a);
-        
-    } else if (toneMapOperator == ADAPTIVE) {
-        vec3 tColor = vec3(adaptiveToneMap());
-        finalColor = vec4(gammaCorrection(tColor, gamma), color.a);
-    } else if (toneMapOperator == GLOBAL) {
-        vec3 tColor = globalToneMappingOperatorRTR(color.rgb, backgroundExposure, maxWhite, aveLum);
-        finalColor = vec4(gammaCorrection(tColor, gamma), color.a);
-    } else if (toneMapOperator == PHOTOGRAPHIC_REINHARD) {
-        vec3 tColor = photographicReinhardToneMapping(color.rgb, backgroundExposure);
-        finalColor = vec4(gammaCorrection(tColor, gamma), color.a);
     }
 }

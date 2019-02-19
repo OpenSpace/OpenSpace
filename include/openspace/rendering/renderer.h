@@ -41,7 +41,7 @@ class RenderableVolume;
 class Camera;
 class Scene;
 
-class Renderer {
+class Renderer {    
 public:
     virtual ~Renderer() = default;
 
@@ -66,7 +66,8 @@ public:
     virtual void setValue(float value) = 0;
     virtual void setSaturation(float sat) = 0;
     virtual void setLightness(float lightness) = 0;
-    
+    virtual void setColorSpace(unsigned int colorspace) = 0;
+
     virtual void enableBloom(bool enable) = 0;
     virtual void enableHistogram(bool enable) = 0;
 

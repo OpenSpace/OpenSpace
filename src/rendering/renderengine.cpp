@@ -297,7 +297,13 @@ namespace {
         "ImageOp",
         "Rendered Image Options",
         ""
-    };    
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ColorSpaceInfo = {
+        "ColorSpace",
+        "Color Space",
+        "Sets the color space for image adjusts."
+    };
 } // namespace
 
 
@@ -323,19 +329,20 @@ RenderEngine::RenderEngine()
     , _bloomOrigColorFactor(BloomOrigColorFactorInfo, 1.0, 0.0, 100.0)
     , _bloomNewColorFactor(BloomNewColorFactorInfo, 1.0, 0.0, 100.0)
     , _tmoOwner(TMOInfo)
-    , _hdrExposure(HDRExposureInfo, 0.4f, 0.01f, 10.0f)
+    , _hdrExposure(HDRExposureInfo, 0.4f, 0.01f, 4.0f)
     , _hdrBackground(BackgroundExposureInfo, 2.8f, 0.01f, 10.0f)
-    , _maxWhite(MaxWhiteInfo, 4.f, 0.001f, 10000.0f)
+    , _maxWhite(MaxWhiteInfo, 4.f, 0.001f, 100.0f)
     , _toneMapOperator(ToneMapOperatorInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _tmoKey(TMOKeyInfo, 0.18f, 0.0f, 1.0f)
     , _tmoYwhite(TMOYWhiteInfo, 1e6f, 0.0f, 1e10f)
     , _tmoSaturation(TMOSaturationInfo, 1.f, 0.0f, 1.0f)
     , _imageOwner(ImageInfo)
-    , _gamma(GammaInfo, 2.2f, 0.01f, 10.0f)
-    , _hue(HueInfo, 1.f, 0.0f, 10.0f)
-    , _saturation(SaturationInfo, 1.f, 0.0f, 10.0f)
-    , _value(ValueInfo, 1.f, 0.0f, 10.0f)
-    , _lightness(LightnessInfo, 1.f, 0.0f, 10.0f)
+    , _gamma(GammaInfo, 2.2f, 0.01f, 5.0f)
+    , _hue(HueInfo, 1.f, 0.0f, 5.0f)
+    , _saturation(SaturationInfo, 1.f, 0.0f, 5.0f)
+    , _value(ValueInfo, 1.f, 0.0f, 5.0f)
+    , _lightness(LightnessInfo, 1.f, 0.0f, 5.0f)
+    , _colorSpace(ColorSpaceInfo, properties::OptionProperty::DisplayType::Dropdown)
 
 {
     _doPerformanceMeasurements.onChange([this](){
@@ -433,6 +440,18 @@ RenderEngine::RenderEngine()
         }
     });
     addProperty(_gamma);
+
+    _colorSpace.addOption(static_cast<int>(COLORSPACE::HSV), "HSV");
+    _colorSpace.addOption(static_cast<int>(COLORSPACE::HSL), "HSL");
+    _colorSpace.set(1);
+
+    _colorSpace.onChange([this]() {
+        if (_renderer) {
+            _renderer->setColorSpace(_colorSpace);
+        }
+    });
+
+    addProperty(_colorSpace);
 
     _hue.onChange([this]() {
         if (_renderer) {
