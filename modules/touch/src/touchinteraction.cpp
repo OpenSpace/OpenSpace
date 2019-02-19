@@ -1501,7 +1501,7 @@ void TouchInteraction::setCamera(Camera* camera) {
     _camera = camera;
 }
 void TouchInteraction::setFocusNode(const SceneGraphNode* focusNode) {
-    global::navigationHandler.orbitalNavigator().setAnchorNode(focusNode);
+    global::navigationHandler.orbitalNavigator().setAnchorNode(focusNode->identifier());
 }
 
 void FrameTimeAverage::updateWithNewFrame(double sample) {
