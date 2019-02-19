@@ -244,7 +244,7 @@ private:
      */
     glm::dquat rotateGlobally(const glm::dquat& globalCameraRotation,
         const glm::dquat& aimNodeRotationDiff,
-const SurfacePositionHandle& positionHandle) const;
+        const SurfacePositionHandle& positionHandle) const;
 
     /**
      * Translates the camera position towards or away from the anchor node.
