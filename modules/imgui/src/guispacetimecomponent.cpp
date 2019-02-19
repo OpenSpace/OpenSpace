@@ -29,6 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
@@ -113,7 +114,8 @@ void GuiSpaceTimeComponent::render() {
     ImGui::NewLine();
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
 
-    SceneGraphNode* currentFocus = global::navigationHandler.focusNode();
+    const SceneGraphNode* currentFocus =
+        global::navigationHandler.orbitalNavigator().anchorNode();
 
     std::string nodeNames;
     for (SceneGraphNode* n : nodes) {

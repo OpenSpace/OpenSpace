@@ -28,6 +28,7 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <ghoul/logging/logmanager.h>
@@ -119,7 +120,7 @@ TouchModule::TouchModule() : OpenSpaceModule("Touch") {
 
     global::callback::preSync.push_back([&]() {
         touch.setCamera(global::navigationHandler.camera());
-        touch.setFocusNode(global::navigationHandler.focusNode());
+        touch.setFocusNode(global::navigationHandler.orbitalNavigator().anchorNode());
 
         if (hasNewInput() && global::windowDelegate.isMaster()) {
             touch.updateStateFromInput(listOfContactPoints, lastProcessed);

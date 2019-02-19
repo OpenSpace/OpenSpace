@@ -133,8 +133,8 @@ public:
 
     // Get & Setters
     Camera* getCamera();
-    SceneGraphNode* getFocusNode();
-    void setFocusNode(SceneGraphNode* focusNode);
+    const SceneGraphNode* getFocusNode();
+    void setFocusNode(const SceneGraphNode* focusNode);
     void setCamera(Camera* camera);
 
 private:
@@ -185,7 +185,6 @@ private:
     void resetToDefault();
 
     Camera* _camera = nullptr;
-    SceneGraphNode* _focusNode = nullptr;
 
     // Property variables
     properties::StringProperty _origin;
