@@ -46,6 +46,8 @@ public:
     void detachEventHandler();
     bool isEnabled() const;
 
+    void doMessageLoopWork();
+
 protected:
     void internalInitialize(const ghoul::Dictionary& dictionary) override;
     void internalDeinitialize() override;

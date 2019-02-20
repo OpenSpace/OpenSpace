@@ -114,6 +114,12 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     fScreenSpaceRenderable->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
 }
 
+void WebBrowserModule::doMessageLoopWork() {
+    if (_cefHost && !_browsers.empty()) {
+        _cefHost->doMessageLoopWork();
+    }
+}
+
 void WebBrowserModule::addBrowser(BrowserInstance* browser) {
     if (_enabled) {
         _browsers.push_back(browser);

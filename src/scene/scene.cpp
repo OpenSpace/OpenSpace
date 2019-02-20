@@ -34,6 +34,8 @@
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/camera.h>
 
+#include <openspace/engine/moduleengine.h>
+#include <modules/webbrowser/webbrowsermodule.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/logging/logmanager.h>
 
@@ -304,10 +306,17 @@ void Scene::update(const UpdateData& data) {
 }
 
 void Scene::render(const RenderData& data, RendererTasks& tasks) {
+    WebBrowserModule* webBrowserModule = global::moduleEngine.module<WebBrowserModule>();
+
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
             LTRACE("Scene::render(begin '" + node->identifier() + "')");
+            webBrowserModule->doMessageLoopWork();
             node->render(data, tasks);
+
+            using namespace std::chrono_literals;
+            //std::this_thread::sleep_for(0.001ms);
+
             LTRACE("Scene::render(end '" + node->identifier() + "')");
         }
         catch (const ghoul::RuntimeError& e) {
