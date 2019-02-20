@@ -49,6 +49,8 @@ namespace {
 
     constexpr const char* KeyTimeFrame = "TimeFrame";
 
+    constexpr const char* KeyFixedBoundingSphere = "FixedBoundingSphere";
+
     constexpr openspace::properties::Property::PropertyInfo GuiPathInfo = {
         "GuiPath",
         "Gui Path",
@@ -218,6 +220,12 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     if (dictionary.hasKey(KeyGuiPath)) {
         result->_guiPath = dictionary.value<std::string>(KeyGuiPath);
         result->addProperty(result->_guiPath);
+    }
+
+    if (dictionary.hasKey(KeyFixedBoundingSphere)) {
+        result->_fixedBoundingSphere = static_cast<float>(
+            dictionary.value<double>(KeyFixedBoundingSphere)
+        );
     }
 
     LDEBUG(fmt::format("Successfully created SceneGraphNode '{}'", result->identifier()));
@@ -737,11 +745,11 @@ std::vector<SceneGraphNode*> SceneGraphNode::children() const {
     return nodes;
 }
 
-float SceneGraphNode::boundingSphere() const{
+float SceneGraphNode::boundingSphere() const {
     if (_renderable) {
         return _renderable->boundingSphere();
     }
-    return 0.0;
+    return _fixedBoundingSphere;
 }
 
 // renderable
