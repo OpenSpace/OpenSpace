@@ -64,6 +64,11 @@ namespace {
         }
     }
 
+    constexpr const char* AnchorProperty = "NavigationHandler.OrbitalNavigator.Anchor";
+
+    constexpr const char* RetargetAnchorProperty =
+        "NavigationHandler.OrbitalNavigator.RetargetAnchor";
+
 } // namespace
 
 namespace openspace::gui {
@@ -103,8 +108,14 @@ void GuiSpaceTimeComponent::render() {
             ImGui::SameLine();
             if (pressed) {
                 global::scriptEngine.queueScript(
-                    "openspace.setPropertyValue('NavigationHandler.Origin', '" +
+                    "openspace.setPropertyValue('" +
+                    std::string(AnchorProperty) + "', '" +
                     n->identifier() + "');",
+                    scripting::ScriptEngine::RemoteScripting::Yes
+                );
+                global::scriptEngine.queueScript(
+                    "openspace.setPropertyValue('" +
+                    std::string(RetargetAnchorProperty) + "', nil);",
                     scripting::ScriptEngine::RemoteScripting::Yes
                 );
             }
@@ -133,8 +144,13 @@ void GuiSpaceTimeComponent::render() {
     const bool hasChanged = ImGui::Combo("", &currentPosition, nodeNames.c_str());
     if (hasChanged) {
         global::scriptEngine.queueScript(
-            "openspace.setPropertyValue('NavigationHandler.Origin', '" +
+            "openspace.setPropertyValue('" + std::string(AnchorProperty) + "', '" +
             nodes[currentPosition]->identifier() + "');",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+        global::scriptEngine.queueScript(
+            "openspace.setPropertyValue('" +
+            std::string(RetargetAnchorProperty) + "', nil);",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
@@ -142,15 +158,9 @@ void GuiSpaceTimeComponent::render() {
     ImGui::SameLine();
     const bool pressed = ImGui::Button("Refocus");
     if (pressed) {
-        // To refocus, we are first clearing the origin property before setting it back
-        // to its old value. The property mechanism's onChange does not fire if the same
-        // value is set again, hence the need for the clearing
         global::scriptEngine.queueScript(
-            R"(
-                local o = openspace.getPropertyValue('NavigationHandler.Origin');
-                openspace.setPropertyValue('NavigationHandler.Origin', '');
-                openspace.setPropertyValue('NavigationHandler.Origin', o);
-            )",
+            "openspace.setPropertyValue('" +
+            std::string(RetargetAnchorProperty) + "', nil);",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
