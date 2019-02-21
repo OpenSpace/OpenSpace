@@ -101,6 +101,10 @@ std::vector<std::function<void()>>& gFrequent() {
     return g;
 }
 
-void (*webBrowserPerformanceHotfix)() = nullptr;
-
 } // namespace openspace::global::detail
+
+namespace openspace::global::callback {
+
+void(*webBrowserPerformanceHotfix)() = nullptr;
+
+} // namespace openspace::global::callback

@@ -25,7 +25,6 @@
 #include <modules/webbrowser/webbrowsermodule.h>
 
 #include <modules/webbrowser/include/browserinstance.h>
-#include <modules/webbrowser/include/cefhost.h>
 #include <modules/webbrowser/include/screenspacebrowser.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
@@ -66,7 +65,7 @@ WebBrowserModule::WebBrowserModule()
 
     _browserUpdateInterval.onChange([this]() {
         webbrowser::interval = std::chrono::microseconds(
-            static_cast<long long>(_browserUpdateInterval / 1000.0)
+            static_cast<long long>(_browserUpdateInterval * 1000.0)
         );
     });
 
@@ -141,7 +140,8 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 void WebBrowserModule::addBrowser(BrowserInstance* browser) {
     if (_enabled) {
         _browsers.push_back(browser);
-        global::callback::webBrowserPerformanceHotfix = &webbrowser::update;
+        global::callback::webBrowserPerformanceHotfix = webbrowser::update;
+        webbrowser::cefHost = _cefHost.get();
     }
 }
 
@@ -181,6 +181,10 @@ bool WebBrowserModule::isEnabled() const {
 
 namespace webbrowser {
 
+std::chrono::microseconds interval = std::chrono::microseconds(0);
+std::chrono::time_point<std::chrono::high_resolution_clock> latestCall;
+CefHost* cefHost = nullptr;
+
 void update() {
     const std::chrono::time_point<std::chrono::high_resolution_clock> timeBefore =
         std::chrono::high_resolution_clock::now();
@@ -194,9 +198,7 @@ void update() {
         latestCall = timeAfter;
     }
 }
-
-}  // namespace webbrowser
-
+}
 
 } // namespace openspace
 

@@ -79,8 +79,7 @@ static std::vector<std::function<void(double, double)>>& mousePosition =
 static std::vector<std::function<bool(double, double)>>& mouseScrollWheel =
     detail::gMouseScrollWheel();
 
-static void (*webBrowserPerformanceHotfix)();
-
+extern void (*webBrowserPerformanceHotfix)();
 
 } // namespace callback
 

@@ -25,10 +25,10 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
 #define __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
 
-#include <openspace/util/openspacemodule.h>
 #include <modules/webbrowser/include/eventhandler.h>
+#include <modules/webbrowser/include/cefhost.h>
+#include <openspace/util/openspacemodule.h>
 #include <openspace/properties/scalar/floatproperty.h>
-
 #include <chrono>
 
 namespace openspace {
@@ -36,10 +36,10 @@ namespace openspace {
 class CefHost;
 
 namespace webbrowser {
-    static std::chrono::microseconds interval = std::chrono::microseconds(100000);
-    static std::chrono::time_point<std::chrono::high_resolution_clock> latestCall;
-    static CefHost* cefHost;
-    static void update();
+    extern std::chrono::microseconds interval;
+    extern std::chrono::time_point<std::chrono::high_resolution_clock> latestCall;
+    extern CefHost* cefHost;
+    void update();
 }
 
 class WebBrowserModule : public OpenSpaceModule {
