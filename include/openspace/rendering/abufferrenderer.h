@@ -71,7 +71,16 @@ public:
     void setBloomThreMax(float maxV) override;
     void setBloomOrigFactor(float origFactor) override;
     void setBloomNewFactor(float newFactor) override;
+    void setKey(float key) override;
+    void setYwhite(float white) override;
+    void setTmoSaturation(float sat) override;
+    void setHue(float hue) override;
+    void setValue(float value) override;
+    void setSaturation(float sat) override;
+    void setLightness(float lightness) override;
+    void setColorSpace(unsigned int colorspace) override;
 
+    
     void enableBloom(bool enable) override;
     void enableHistogram(bool enable) override;
 
@@ -153,6 +162,15 @@ private:
     float _bloomNewFactor = 1.0;
     int _toneMapOperator = 0;
     bool _histogramEnabled = false;
+    int _numberOfBins = 1024; // JCC TODO: Add a parameter control for this.
+    float _tmoKey = 0.18f;
+    float _tmoYwhite = 1e6f;
+    float _tmoSaturation = 1.0f;
+    float _hue = 1.f;
+    float _saturation = 1.f;
+    float _value = 1.f;
+    float _lightness = 1.f;
+    unsigned int _colorSpace = 1;
 
     std::vector<double> _mSAAPattern;
 

@@ -102,10 +102,16 @@ asset.onInitialize(function ()
     })
 
     openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
+
+     -- HDR / Image options:
+    openspace.setPropertyValueSingle('RenderEngine.Gamma', 1.8);
+
+    
 end)
 
 asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
 
     openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
+   
 end)

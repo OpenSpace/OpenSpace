@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+// The next defines must being synchronized with the enum defined in file renderengine.h
 #define EXPONENTIAL 0
 #define LINEAR 1
 #define SIMPLE_REINHARD 2
@@ -34,6 +35,7 @@
 #define ADAPTIVE 9
 #define GLOBAL 10
 #define PHOTOGRAPHIC_REINHARD 11
+#define MIPMAPPING 12
 
 const float HCV_EPSILON = 1e-10;
 const float HSL_EPSILON = 1e-10;

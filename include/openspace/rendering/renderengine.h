@@ -64,6 +64,8 @@ public:
         Invalid
     };
 
+    // The next enum should be synchronized with the 
+    // defines in hdr.glsl file.
     enum class ToneMapOperators {
         EXPONENTIAL = 0,
         LINEAR,
@@ -76,7 +78,8 @@ public:
         COSTA,
         ADAPTIVE,
         GLOBAL,
-        PHOTOGRAPHIC_REINHARD
+        PHOTOGRAPHIC_REINHARD,
+        MIPMAPPING
     };
 
     enum class COLORSPACE {

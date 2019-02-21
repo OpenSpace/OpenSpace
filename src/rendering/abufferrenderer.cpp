@@ -755,6 +755,38 @@ void ABufferRenderer::setBloomNewFactor(float newFactor) {
     _bloomNewFactor = newFactor;
 }
 
+void ABufferRenderer::setKey(float key) {
+    _tmoKey = key;
+}
+
+void ABufferRenderer::setYwhite(float white) {
+    _tmoYwhite = white;
+}
+
+void ABufferRenderer::setTmoSaturation(float sat) {
+    _tmoSaturation = sat;
+}
+
+void ABufferRenderer::setHue(float hue) {
+    _hue = hue;
+}
+
+void ABufferRenderer::setValue(float value) {
+    _value = value;
+}
+
+void ABufferRenderer::setSaturation(float sat) {
+    _saturation = sat;
+}
+
+void ABufferRenderer::setLightness(float lightness) {
+    _lightness = lightness;
+}
+
+void ABufferRenderer::setColorSpace(unsigned int colorspace) {
+    _colorSpace = colorspace;
+}
+
 void ABufferRenderer::enableBloom(bool enable) {
     _bloomEnabled = enable;
 }
