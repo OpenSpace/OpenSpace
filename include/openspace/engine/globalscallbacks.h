@@ -46,7 +46,6 @@ std::vector<std::function<void()>>& gPostSyncPreDraw();
 std::vector<std::function<void()>>& gRender();
 std::vector<std::function<void()>>& gDraw2D();
 std::vector<std::function<void()>>& gPostDraw();
-std::vector<std::function<void()>>& gFrequent();
 
 std::vector<std::function<bool(Key, KeyModifier, KeyAction)>>& gKeyboard();
 std::vector<std::function<bool(unsigned int, KeyModifier)>>& gCharacter();

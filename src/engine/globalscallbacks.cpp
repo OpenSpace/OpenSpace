@@ -96,11 +96,6 @@ std::vector<std::function<bool(double, double)>>& gMouseScrollWheel() {
     return g;
 }
 
-std::vector<std::function<void()>>& gFrequent() {
-    static std::vector<std::function<void()>> g;
-    return g;
-}
-
 } // namespace openspace::global::detail
 
 namespace openspace::global::callback {

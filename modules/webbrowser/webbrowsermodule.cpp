@@ -185,7 +185,7 @@ bool WebBrowserModule::isEnabled() const {
 
 namespace webbrowser {
 
-std::chrono::microseconds interval = std::chrono::microseconds(0);
+std::chrono::microseconds interval = std::chrono::microseconds(1);
 std::chrono::time_point<std::chrono::high_resolution_clock> latestCall;
 CefHost* cefHost = nullptr;
 
