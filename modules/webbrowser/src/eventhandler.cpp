@@ -143,6 +143,30 @@ void EventHandler::initialize() {
     );
 }
 
+void EventHandler::touchPressCallback(const double x, const double y) {
+    if (_browserInstance) {
+        _mousePosition.x = static_cast<float>(x);
+        _mousePosition.y = static_cast<float>(y);
+
+        int clickCount = BrowserInstance::SingleClick;
+        _browserInstance->sendMouseClickEvent(mouseEvent(), MBT_LEFT, false, clickCount);
+    }
+}
+
+void EventHandler::touchReleaseCallback(const double x, const double y) {
+    if (_browserInstance) {
+        _mousePosition.x = static_cast<float>(x);
+        _mousePosition.y = static_cast<float>(y);
+
+        int clickCount = BrowserInstance::SingleClick;
+        _browserInstance->sendMouseClickEvent(mouseEvent(), MBT_LEFT, true, clickCount);
+    }
+}
+
+bool EventHandler::hasContentCallback(const double x, const double y) {
+    return _browserInstance->hasContent(static_cast<int>(x), static_cast<int>(y));
+}
+
 bool EventHandler::mouseButtonCallback(MouseButton button,
                                        MouseAction action,
                                        KeyModifier mods)

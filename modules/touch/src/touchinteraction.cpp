@@ -22,8 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/globals.h>
 #include <modules/touch/include/touchinteraction.h>
 #include <modules/imgui/imguimodule.h>
+#include <modules/webbrowser/webbrowsermodule.h>
+#include <modules/webgui/webguimodule.h>
 
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/engine/globals.h>
@@ -363,6 +366,8 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
         _time.initSession();
     }
 
+    bool hasWebContent = webContent(list);
+
     //Code for lower-right corner double-tap to zoom-out
     glm::ivec2 res = global::windowDelegate.currentWindowSize();
     glm::dvec2 pos = glm::vec2(
@@ -377,16 +382,16 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
         res.y * (1.0f - bottomCornerSizeForZoomTap_fraction)
     );
 
-    bool isTapInLowerCorner = std::abs(pos.x) > zoomTapThresholdX &&
-                              std::abs(pos.y) > zoomTapThresholdY;
+    bool isTapInLowerRightCorner =
+        (std::abs(pos.x) > zoomTapThresholdX && std::abs(pos.y) > zoomTapThresholdY);
 
-    if (_doubleTap && isTapInLowerCorner) {
+    if (_doubleTap && isTapInLowerRightCorner) {
         _zoomOutTap = true;
         _tap = false;
         _doubleTap = false;
     }
 
-    if (!guiMode(list)) {
+    if (!guiMode(list) && !hasWebContent) {
         bool isThisFrameTransitionBetweenTouchModes
             = (_wasPrevModeDirectTouch != _directTouchMode);
         if (isThisFrameTransitionBetweenTouchModes) {
@@ -423,6 +428,17 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
         _directTouchMode =
             (_currentRadius > _nodeRadiusThreshold && _selected.size() == list.size());
     }
+}
+
+bool TouchInteraction::webContent(const std::vector<TuioCursor>& list) {
+    glm::ivec2 res = global::windowDelegate.currentWindowSize();
+    glm::dvec2 pos = glm::vec2(
+        list.at(0).getScreenX(res.x),
+        list.at(0).getScreenY(res.y)
+    );
+
+    WebBrowserModule& module = *(global::moduleEngine.module<WebBrowserModule>());
+    return module.eventHandler().hasContentCallback(pos.x, pos.y);
 }
 
 // Activates/Deactivates gui input mode (if active it voids all other interactions)
@@ -1305,12 +1321,15 @@ void TouchInteraction::step(double dt) {
             planetBoundaryRadius *= _zoomBoundarySphereMultiplier;
             double distToSurface = length(centerToCamera - planetBoundaryRadius);
 
+            WebGuiModule& module = *(global::moduleEngine.module<WebGuiModule>());
+
             //Apply the velocity to update camera position
-            if (length(_vel.zoom*dt) < distToSurface &&
-                 length(centerToCamera + directionToCenter*_vel.zoom*dt)
-                 > planetBoundaryRadius)
-            {
-                camPos += directionToCenter * _vel.zoom * dt;
+            glm::dvec3 velocityIncr = directionToCenter * _vel.zoom * dt;
+            bool isDeltaLessThanDistToSurface = (length(_vel.zoom * dt) < distToSurface);
+            bool isNewPosOutsidePlanetRadius =
+                (length(centerToCamera + velocityIncr) > planetBoundaryRadius);
+            if (isDeltaLessThanDistToSurface && isNewPosOutsidePlanetRadius) {
+                camPos += velocityIncr;
             }
             else {
 #ifdef TOUCH_DEBUG_PROPERTIES
