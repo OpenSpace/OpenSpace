@@ -51,7 +51,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo BrowserUpdateIntervalInfo = {
         "BrowserUpdateInterval",
         "Browser Update Interval",
-        "The time in milliseconds between running the message loop of the browser"
+        "The time in microseconds between running the message loop of the browser"
     };
 } // namespace
 
@@ -59,13 +59,13 @@ namespace openspace {
 
 WebBrowserModule::WebBrowserModule()
     : OpenSpaceModule(WebBrowserModule::Name)
-    , _browserUpdateInterval(BrowserUpdateIntervalInfo, 1.f, 0.001f, 100.f)
+    , _browserUpdateInterval(BrowserUpdateIntervalInfo, 1.f, 1.0f, 1000.f)
 {
     global::callback::deinitialize.emplace_back([this]() { deinitialize(); });
 
     _browserUpdateInterval.onChange([this]() {
         webbrowser::interval = std::chrono::microseconds(
-            static_cast<long long>(_browserUpdateInterval * 1000.0)
+            static_cast<long long>(_browserUpdateInterval)
         );
     });
 
@@ -121,6 +121,10 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     global::callback::preSync.emplace_back([this]() {
         if (_cefHost && !_browsers.empty()) {
             _cefHost->doMessageLoopWork();
+
+            const std::chrono::time_point<std::chrono::high_resolution_clock> timeAfter =
+                std::chrono::high_resolution_clock::now();
+            webbrowser::latestCall = timeAfter;
         }
     });
 
@@ -189,7 +193,10 @@ void update() {
     const std::chrono::time_point<std::chrono::high_resolution_clock> timeBefore =
         std::chrono::high_resolution_clock::now();
 
-    if (timeBefore - latestCall > interval) {
+    std::chrono::microseconds duration =
+        std::chrono::duration_cast<std::chrono::microseconds>(timeBefore - latestCall);
+
+    if (duration > interval) {
         cefHost->doMessageLoopWork();
 
         const std::chrono::time_point<std::chrono::high_resolution_clock> timeAfter =

@@ -303,9 +303,6 @@ void Scene::update(const UpdateData& data) {
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.what());
         }
-        if (global::callback::webBrowserPerformanceHotfix) {
-            (*global::callback::webBrowserPerformanceHotfix)();
-        }
     }
 }
 
