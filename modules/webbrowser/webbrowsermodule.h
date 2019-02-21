@@ -28,6 +28,7 @@
 #include <modules/webbrowser/include/eventhandler.h>
 #include <modules/webbrowser/include/cefhost.h>
 #include <openspace/util/openspacemodule.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <chrono>
 
@@ -68,6 +69,7 @@ private:
      */
     std::string findHelperExecutable();
 
+    properties::BoolProperty _updateBrowserBetweenRenderables;
     properties::FloatProperty _browserUpdateInterval;
 
     std::vector<BrowserInstance*> _browsers;

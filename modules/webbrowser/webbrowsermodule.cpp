@@ -46,12 +46,20 @@ namespace {
         constexpr const char* SubprocessSuf = "";
     #endif
 
-    constexpr const char* KeyBrowserUpdateInterval = "BrowserUpdateInterval";
+    constexpr openspace::properties::Property::PropertyInfo
+    UpdateBrowserBetweenRenderablesInfo = {
+        "UpdateBrowserBetweenRenderables",
+        "Update Browser Between Renderables",
+        "Run the message loop of the browser between calls to render individual "
+        "renderables. When disabled, the browser message loop only runs "
+        "once per frame."
+    };
 
     constexpr openspace::properties::Property::PropertyInfo BrowserUpdateIntervalInfo = {
         "BrowserUpdateInterval",
         "Browser Update Interval",
-        "The time in microseconds between running the message loop of the browser"
+        "The time in microseconds between running the message loop of the browser. "
+        "Only used if UpdateBrowserBetweenRenderables is true."
     };
 } // namespace
 
@@ -59,6 +67,7 @@ namespace openspace {
 
 WebBrowserModule::WebBrowserModule()
     : OpenSpaceModule(WebBrowserModule::Name)
+    , _updateBrowserBetweenRenderables(UpdateBrowserBetweenRenderablesInfo, true)
     , _browserUpdateInterval(BrowserUpdateIntervalInfo, 1.f, 1.0f, 1000.f)
 {
     global::callback::deinitialize.emplace_back([this]() { deinitialize(); });
@@ -69,6 +78,16 @@ WebBrowserModule::WebBrowserModule()
         );
     });
 
+    _updateBrowserBetweenRenderables.onChange([this]() {
+        if (_updateBrowserBetweenRenderables && !_browsers.empty()) {
+            global::callback::webBrowserPerformanceHotfix = webbrowser::update;
+        }
+        else {
+            global::callback::webBrowserPerformanceHotfix = nullptr;
+        }
+    });
+
+    addProperty(_updateBrowserBetweenRenderables);
     addProperty(_browserUpdateInterval);
 }
 
@@ -116,6 +135,7 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     std::string helperLocation = findHelperExecutable();
     LDEBUG("Using web helper executable: " + helperLocation);
     _cefHost = std::make_unique<CefHost>(std::move(helperLocation));
+    webbrowser::cefHost = _cefHost.get();
     LDEBUG("Starting CEF... done!");
 
     global::callback::preSync.emplace_back([this]() {
@@ -128,10 +148,16 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
         }
     });
 
-    if (dictionary.hasValue<double>(KeyBrowserUpdateInterval)) {
-        _browserUpdateInterval =
-            static_cast<float>(dictionary.value<double>(KeyBrowserUpdateInterval));
-    } 
+    if (dictionary.hasValue<bool>(UpdateBrowserBetweenRenderablesInfo.identifier)) {
+        _updateBrowserBetweenRenderables =
+            dictionary.value<bool>(UpdateBrowserBetweenRenderablesInfo.identifier);
+    }
+
+    if (dictionary.hasValue<double>(BrowserUpdateIntervalInfo.identifier)) {
+        _browserUpdateInterval = static_cast<float>(
+            dictionary.value<double>(BrowserUpdateIntervalInfo.identifier)
+        );
+    }
 
     _eventHandler.initialize();
 
@@ -144,8 +170,9 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 void WebBrowserModule::addBrowser(BrowserInstance* browser) {
     if (_enabled) {
         _browsers.push_back(browser);
-        global::callback::webBrowserPerformanceHotfix = webbrowser::update;
-        webbrowser::cefHost = _cefHost.get();
+        if (_updateBrowserBetweenRenderables) {
+            global::callback::webBrowserPerformanceHotfix = webbrowser::update;
+        }
     }
 }
 
