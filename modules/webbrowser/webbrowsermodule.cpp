@@ -46,12 +46,31 @@ namespace {
     #else
         constexpr const char* SubprocessSuf = "";
     #endif
+
+    constexpr const char* KeyBrowserUpdateInterval = "BrowserUpdateInterval";
+
+    constexpr openspace::properties::Property::PropertyInfo BrowserUpdateIntervalInfo = {
+        "BrowserUpdateInterval",
+        "Browser Update Interval",
+        "The time in milliseconds between running the message loop of the browser"
+    };
 } // namespace
 
 namespace openspace {
 
-WebBrowserModule::WebBrowserModule() : OpenSpaceModule(WebBrowserModule::Name) {
+WebBrowserModule::WebBrowserModule()
+    : OpenSpaceModule(WebBrowserModule::Name)
+    , _browserUpdateInterval(BrowserUpdateIntervalInfo, 1.f, 0.001f, 100.f)
+{
     global::callback::deinitialize.emplace_back([this]() { deinitialize(); });
+
+    _browserUpdateInterval.onChange([this]() {
+        webbrowser::interval = std::chrono::microseconds(
+            static_cast<long long>(_browserUpdateInterval / 1000.0)
+        );
+    });
+
+    addProperty(_browserUpdateInterval);
 }
 
 void WebBrowserModule::internalDeinitialize() {
@@ -100,11 +119,16 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     _cefHost = std::make_unique<CefHost>(std::move(helperLocation));
     LDEBUG("Starting CEF... done!");
 
-    global::callback::frequent.emplace_back([this]() {
+    global::callback::preSync.emplace_back([this]() {
         if (_cefHost && !_browsers.empty()) {
             _cefHost->doMessageLoopWork();
         }
     });
+
+    if (dictionary.hasValue<double>(KeyBrowserUpdateInterval)) {
+        _browserUpdateInterval =
+            static_cast<float>(dictionary.value<double>(KeyBrowserUpdateInterval));
+    } 
 
     _eventHandler.initialize();
 
@@ -114,15 +138,10 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     fScreenSpaceRenderable->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
 }
 
-void WebBrowserModule::doMessageLoopWork() {
-    if (_cefHost && !_browsers.empty()) {
-        _cefHost->doMessageLoopWork();
-    }
-}
-
 void WebBrowserModule::addBrowser(BrowserInstance* browser) {
     if (_enabled) {
         _browsers.push_back(browser);
+        global::callback::webBrowserPerformanceHotfix = &webbrowser::update;
     }
 }
 
@@ -135,6 +154,10 @@ void WebBrowserModule::removeBrowser(BrowserInstance* browser) {
         _browsers.erase(p);
     } else {
         LWARNING("Could not find browser in list of browsers.");
+    }
+
+    if (_browsers.empty()) {
+        global::callback::webBrowserPerformanceHotfix = nullptr;
     }
 
     LDEBUG(fmt::format("Number of browsers stored: {}", _browsers.size()));
@@ -156,4 +179,24 @@ bool WebBrowserModule::isEnabled() const {
     return _enabled;
 }
 
+namespace webbrowser {
+
+void update() {
+    const std::chrono::time_point<std::chrono::high_resolution_clock> timeBefore =
+        std::chrono::high_resolution_clock::now();
+
+    if (timeBefore - latestCall > interval) {
+        cefHost->doMessageLoopWork();
+
+        const std::chrono::time_point<std::chrono::high_resolution_clock> timeAfter =
+            std::chrono::high_resolution_clock::now();
+
+        latestCall = timeAfter;
+    }
+}
+
+}  // namespace webbrowser
+
+
 } // namespace openspace
+

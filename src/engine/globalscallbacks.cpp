@@ -24,10 +24,6 @@
 
 #include <openspace/engine/globalscallbacks.h>
 
-namespace {
-    std::chrono::microseconds FrequentCallbackInterval = std::chrono::microseconds(10);
-}
-
 namespace openspace::global::detail {
 
 std::vector<std::function<void()>>& gInitialize() {
@@ -105,21 +101,6 @@ std::vector<std::function<void()>>& gFrequent() {
     return g;
 }
 
+void (*webBrowserPerformanceHotfix)() = nullptr;
+
 } // namespace openspace::global::detail
-
-namespace openspace::global::callback {
-
-void runFrequentCallbacks() {
-    const std::chrono::time_point<std::chrono::high_resolution_clock> tBeforeCalls = std::chrono::high_resolution_clock::now();
-
-    if (tBeforeCalls - callback::latestFrequentCall > FrequentCallbackInterval) {
-        for (auto cb : global::callback::frequent) {
-            cb();
-        }
-
-        const std::chrono::time_point<std::chrono::high_resolution_clock> tAfterCalls = std::chrono::high_resolution_clock::now();
-        callback::latestFrequentCall = tAfterCalls;
-    }
-}
-
-} // namespace openspace::global::callback

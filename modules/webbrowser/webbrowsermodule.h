@@ -26,12 +26,21 @@
 #define __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-
 #include <modules/webbrowser/include/eventhandler.h>
+#include <openspace/properties/scalar/floatproperty.h>
+
+#include <chrono>
 
 namespace openspace {
 
 class CefHost;
+
+namespace webbrowser {
+    static std::chrono::microseconds interval = std::chrono::microseconds(100000);
+    static std::chrono::time_point<std::chrono::high_resolution_clock> latestCall;
+    static CefHost* cefHost;
+    static void update();
+}
 
 class WebBrowserModule : public OpenSpaceModule {
 public:
@@ -46,8 +55,6 @@ public:
     void detachEventHandler();
     bool isEnabled() const;
 
-    void doMessageLoopWork();
-
 protected:
     void internalInitialize(const ghoul::Dictionary& dictionary) override;
     void internalDeinitialize() override;
@@ -60,6 +67,8 @@ private:
      * \return the absolute path to the file
      */
     std::string findHelperExecutable();
+
+    properties::FloatProperty _browserUpdateInterval;
 
     std::vector<BrowserInstance*> _browsers;
     EventHandler _eventHandler;

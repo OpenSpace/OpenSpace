@@ -303,7 +303,9 @@ void Scene::update(const UpdateData& data) {
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.what());
         }
-        global::callback::runFrequentCallbacks();
+        if (global::callback::webBrowserPerformanceHotfix) {
+            (*global::callback::webBrowserPerformanceHotfix)();
+        }
     }
 }
 
@@ -317,7 +319,9 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.what());
         }
-        global::callback::runFrequentCallbacks();
+        if (global::callback::webBrowserPerformanceHotfix) {
+            (*global::callback::webBrowserPerformanceHotfix)();
+        }
     }
 }
 

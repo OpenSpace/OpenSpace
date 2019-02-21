@@ -78,9 +78,9 @@ static std::vector<std::function<void(double, double)>>& mousePosition =
     detail::gMousePosition();
 static std::vector<std::function<bool(double, double)>>& mouseScrollWheel =
     detail::gMouseScrollWheel();
-static std::vector<std::function<void()>>& frequent = detail::gFrequent();
-static std::chrono::time_point<std::chrono::high_resolution_clock> latestFrequentCall;
-void runFrequentCallbacks();
+
+static void (*webBrowserPerformanceHotfix)();
+
 
 } // namespace callback
 

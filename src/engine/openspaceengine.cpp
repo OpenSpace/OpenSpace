@@ -1000,7 +1000,6 @@ void OpenSpaceEngine::preSynchronization() {
     for (const std::function<void()>& func : global::callback::preSync) {
         func();
     }
-    global::callback::runFrequentCallbacks();
     LTRACE("OpenSpaceEngine::preSynchronization(end)");
 }
 
