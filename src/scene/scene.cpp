@@ -25,6 +25,7 @@
 #include <openspace/scene/scene.h>
 
 #include <openspace/engine/globals.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
@@ -302,26 +303,21 @@ void Scene::update(const UpdateData& data) {
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.what());
         }
+        global::callback::runFrequentCallbacks();
     }
 }
 
 void Scene::render(const RenderData& data, RendererTasks& tasks) {
-    WebBrowserModule* webBrowserModule = global::moduleEngine.module<WebBrowserModule>();
-
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
             LTRACE("Scene::render(begin '" + node->identifier() + "')");
-            webBrowserModule->doMessageLoopWork();
             node->render(data, tasks);
-
-            using namespace std::chrono_literals;
-            //std::this_thread::sleep_for(0.001ms);
-
             LTRACE("Scene::render(end '" + node->identifier() + "')");
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.what());
         }
+        global::callback::runFrequentCallbacks();
     }
 }
 

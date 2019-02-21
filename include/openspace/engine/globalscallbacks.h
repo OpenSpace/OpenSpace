@@ -29,6 +29,7 @@
 #include <openspace/util/mouse.h>
 #include <functional>
 #include <vector>
+#include <chrono>
 
 namespace openspace::global {
 
@@ -45,6 +46,7 @@ std::vector<std::function<void()>>& gPostSyncPreDraw();
 std::vector<std::function<void()>>& gRender();
 std::vector<std::function<void()>>& gDraw2D();
 std::vector<std::function<void()>>& gPostDraw();
+std::vector<std::function<void()>>& gFrequent();
 
 std::vector<std::function<bool(Key, KeyModifier, KeyAction)>>& gKeyboard();
 std::vector<std::function<bool(unsigned int, KeyModifier)>>& gCharacter();
@@ -76,6 +78,9 @@ static std::vector<std::function<void(double, double)>>& mousePosition =
     detail::gMousePosition();
 static std::vector<std::function<bool(double, double)>>& mouseScrollWheel =
     detail::gMouseScrollWheel();
+static std::vector<std::function<void()>>& frequent = detail::gFrequent();
+static std::chrono::time_point<std::chrono::high_resolution_clock> latestFrequentCall;
+void runFrequentCallbacks();
 
 } // namespace callback
 

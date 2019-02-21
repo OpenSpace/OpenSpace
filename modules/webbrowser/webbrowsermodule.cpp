@@ -100,7 +100,7 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     _cefHost = std::make_unique<CefHost>(std::move(helperLocation));
     LDEBUG("Starting CEF... done!");
 
-    global::callback::preSync.emplace_back([this]() {
+    global::callback::frequent.emplace_back([this]() {
         if (_cefHost && !_browsers.empty()) {
             _cefHost->doMessageLoopWork();
         }
