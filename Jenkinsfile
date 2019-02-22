@@ -11,6 +11,7 @@ def modules = [
     "multiresvolume",
     "spacecraftinstruments",
     "space",
+    "touch",
     "toyvolume",
     "volume"
 ];

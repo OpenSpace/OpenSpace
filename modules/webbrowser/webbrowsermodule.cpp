@@ -140,6 +140,10 @@ void WebBrowserModule::attachEventHandler(BrowserInstance* browserInstance) {
     }
 }
 
+EventHandler WebBrowserModule::eventHandler() {
+    return _eventHandler;
+}
+
 void WebBrowserModule::detachEventHandler() {
     if (_enabled) {
         _eventHandler.setBrowserInstance(nullptr);

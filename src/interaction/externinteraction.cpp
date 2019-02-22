@@ -106,19 +106,22 @@ void ExternInteraction::scriptInteraction(datamessagestructures::ScriptMessage s
 
 datamessagestructures::CameraKeyframe ExternInteraction::generateCameraKeyframe() {
     datamessagestructures::CameraKeyframe kf;
-    SceneGraphNode* focusNode = global::navigationHandler.focusNode();
+    const SceneGraphNode* focusNode = 
+        global::navigationHandler.orbitalNavigator().anchorNode();
+
     if (!focusNode) {
         return kf;
     }
 
     //kf._position = global::navigationHandler.camera()->positionVec3();
-    kf._position = global::navigationHandler.focusNodeToCameraVector();
+    kf._position = global::navigationHandler.orbitalNavigator().anchorNodeToCameraVector();
 
     kf._followNodeRotation =
         global::navigationHandler.orbitalNavigator().followingNodeRotation();
     if (kf._followNodeRotation) {
         kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
-        kf._rotation = global::navigationHandler.focusNodeToCameraRotation();
+        kf._rotation =
+            global::navigationHandler.orbitalNavigator().anchorNodeToCameraVector();
     }
     else {
         kf._rotation = global::navigationHandler.camera()->rotationQuaternion();
