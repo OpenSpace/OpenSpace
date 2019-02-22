@@ -63,7 +63,7 @@ asset.onInitialize(function ()
     )
 
     openspace.navigation.setCameraState({
-        Focus = "Mercury",
+        Anchor = "Mercury",
         Position = { 526781518487.171326, 257168309890.072144, -1381125204152.817383 },
         Rotation = {0.180662, 0.021334, 0.979084, 0.091111},
     })

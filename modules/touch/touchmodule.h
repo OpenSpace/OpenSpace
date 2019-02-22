@@ -42,6 +42,10 @@ namespace openspace {
         * Returns true if new touch input occured since the last frame
         */
         bool hasNewInput();
+        /**
+        * Checks if touchevent should be parsed to the webgui
+        */
+        void hasNewWebInput(const std::vector<TUIO::TuioCursor>& listOfContactPoints);
 
         TuioEar ear;
         TouchInteraction touch;
@@ -49,6 +53,7 @@ namespace openspace {
         std::vector<TUIO::TuioCursor> listOfContactPoints;
         // contains an id and the TuioPoint that was processed last frame
         std::vector<Point> lastProcessed;
+        glm::ivec2 webPositionCallback = glm::ivec2(0,0);
     };
 
 } // namespace openspace

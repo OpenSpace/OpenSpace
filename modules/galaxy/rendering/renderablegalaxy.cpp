@@ -309,7 +309,7 @@ void RenderableGalaxy::update(const UpdateData& data) {
 void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
     RaycasterTask task { _raycaster.get(), data };
 
-    const glm::vec3 position = data.camera.position().vec3();
+    const glm::vec3 position = data.camera.positionVec3();
     const float length = safeLength(position);
     const glm::vec3 galaxySize = _volumeSize;
 

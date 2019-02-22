@@ -28,6 +28,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -402,7 +403,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
         }
         case Type::Focus:
             return {
-                global::navigationHandler.focusNode()->worldPosition(),
+                global::navigationHandler.orbitalNavigator().anchorNode()->worldPosition(),
                 "focus"
             };
         case Type::Camera:
