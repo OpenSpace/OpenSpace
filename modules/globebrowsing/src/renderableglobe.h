@@ -68,7 +68,7 @@ struct Chunk {
     std::array<Chunk*, 4> children = { { nullptr, nullptr, nullptr, nullptr } };
 };
 
-enum ShadowCompType {
+enum class ShadowCompType {
     GLOBAL_SHADOW,
     LOCAL_SHADOW
 };
@@ -98,7 +98,7 @@ public:
     LayerManager& layerManager();
     const glm::dmat4& modelTransform() const;
 
-private:    
+private:
     constexpr static const int MinSplitDepth = 2;
     constexpr static const int MaxSplitDepth = 22;
 

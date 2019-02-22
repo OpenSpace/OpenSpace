@@ -989,7 +989,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     if (_generalProperties.eclipseShadowsEnabled &&
         !_ellipsoid.shadowConfigurationArray().empty())
     {
-        calculateEclipseShadows(program, data, GLOBAL_SHADOW);
+        calculateEclipseShadows(program, data, ShadowCompType::GLOBAL_SHADOW);
     }
 
     glEnable(GL_DEPTH_TEST);
@@ -1103,7 +1103,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     if (_generalProperties.eclipseShadowsEnabled &&
         !_ellipsoid.shadowConfigurationArray().empty())
     {
-        calculateEclipseShadows(program, data, LOCAL_SHADOW);
+        calculateEclipseShadows(program, data, ShadowCompType::LOCAL_SHADOW);
     }
 
     glEnable(GL_DEPTH_TEST);
@@ -1747,13 +1747,13 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
         counter++;
     }
 
-    if (stype == LOCAL_SHADOW) {
+    if (stype == ShadowCompType::LOCAL_SHADOW) {
         programObject.setUniform(
             "inverseViewTransform",
             glm::inverse(data.camera.combinedViewMatrix())
         );
     }
-    else if (stype == GLOBAL_SHADOW) {
+    else if (stype == ShadowCompType::GLOBAL_SHADOW) {
         programObject.setUniform("modelTransform", _cachedModelTransform);
     }
     
