@@ -65,10 +65,6 @@ void CefHost::attachDebugSettings(CefSettings &settings) {
         "Remote WebBrowser debugging available on http://localhost:{}",
         settings.remote_debugging_port
     ));
-
-#ifdef __APPLE__
-    settings.single_process = true;
-#endif
 }
 
 void CefHost::doMessageLoopWork() {

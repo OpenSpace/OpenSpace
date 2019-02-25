@@ -39,11 +39,12 @@ namespace {
     constexpr const char* _loggerCat = "WebBrowser";
 
     #ifdef _MSC_VER
-        constexpr const char* SubprocessSuf = ".exe";
+        constexpr const char* SubprocessPath = "openspace_web_helper.exe";
     #elif __APPLE__
-        constexpr const char* SubprocessSuf = ".app/Contents/MacOS/openspace_web_helper";
+        constexpr const char* SubprocessPath =
+            "../Frameworks/openspace_web_helper.app/Contents/MacOs/openspace_web_helper";
     #else
-        constexpr const char* SubprocessSuf = "";
+        constexpr const char* SubprocessPath = "";
     #endif
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -105,7 +106,7 @@ void WebBrowserModule::internalDeinitialize() {
 }
 
 std::string WebBrowserModule::findHelperExecutable() {
-    std::string execLocation = absPath(_webHelperLocation + SubprocessSuf);
+    std::string execLocation = absPath("${BIN}/" + std::string(SubprocessPath));
     if (!FileSys.fileExists(execLocation)) {
         LERROR(fmt::format(
             "Could not find web helper executable at location: {}" , execLocation
@@ -116,7 +117,12 @@ std::string WebBrowserModule::findHelperExecutable() {
 }
 
 void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
-    _webHelperLocation = dictionary.value<std::string>("WebHelperLocation");
+    if (dictionary.hasKeyAndValue<bool>("WebHelperLocation")) {
+        _webHelperLocation = absPath(dictionary.value<std::string>("WebHelperLocation"));
+    } else {
+        _webHelperLocation = findHelperExecutable();
+    }
+
     if (dictionary.hasKeyAndValue<bool>("Enabled")) {
         _enabled = dictionary.value<bool>("Enabled");
     }
@@ -131,11 +137,8 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
         return;
     }
 
-    LDEBUG("Starting CEF...");
-    std::string helperLocation = findHelperExecutable();
-    LDEBUG("Using web helper executable: " + helperLocation);
-    _cefHost = std::make_unique<CefHost>(std::move(helperLocation));
-    webbrowser::cefHost = _cefHost.get();
+    LDEBUG("CEF using web helper executable: " + _webHelperLocation);
+    _cefHost = std::make_unique<CefHost>(_webHelperLocation);
     LDEBUG("Starting CEF... done!");
 
     global::callback::preSync.emplace_back([this]() {
