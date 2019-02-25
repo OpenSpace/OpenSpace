@@ -144,6 +144,9 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
     using namespace globebrowsing;
 
     const SceneGraphNode* n = global::navigationHandler.orbitalNavigator().anchorNode();
+    if (!n) {
+        return;
+    }
     const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
     if (!globe) {
         return;

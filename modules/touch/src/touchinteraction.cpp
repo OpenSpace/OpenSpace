@@ -1039,6 +1039,9 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
     const int action = interpretInteraction(list, lastProcessed);
     const SceneGraphNode* anchor =
         global::navigationHandler.orbitalNavigator().anchorNode();
+    if (!anchor) {
+        return;
+    }
 
 #ifdef TOUCH_DEBUG_PROPERTIES
     const std::map<int, std::string> interactionNames = {
@@ -1223,6 +1226,9 @@ double TouchInteraction::computeConstTimeDecayCoefficient(double velocity) {
 double TouchInteraction::computeTapZoomDistance(double zoomGain) {
     const SceneGraphNode* anchor =
         global::navigationHandler.orbitalNavigator().anchorNode();
+    if (!anchor) {
+        return 0.0;
+    }
 
     double dist = glm::distance(
         _camera->positionVec3(),
@@ -1520,7 +1526,13 @@ void TouchInteraction::setCamera(Camera* camera) {
     _camera = camera;
 }
 void TouchInteraction::setFocusNode(const SceneGraphNode* focusNode) {
-    global::navigationHandler.orbitalNavigator().setAnchorNode(focusNode->identifier());
+    if (focusNode) {
+        global::navigationHandler.orbitalNavigator().setAnchorNode(
+            focusNode->identifier()
+        );
+    } else {
+        global::navigationHandler.orbitalNavigator().setAnchorNode("");
+    }
 }
 
 void FrameTimeAverage::updateWithNewFrame(double sample) {
