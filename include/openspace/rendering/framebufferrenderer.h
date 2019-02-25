@@ -211,7 +211,7 @@ private:
     float _bloomThresholdMax = 1.0;
     float _bloomOrigFactor = 1.0;
     float _bloomNewFactor = 1.0;
-    int _toneMapOperator = 0;
+    int _toneMapOperator = 8; // JCC TODO: temporarilly set to 8 because setProperty seems not to be working for OptionProperty
     bool _histogramEnabled = false;
     int _numberOfBins = 1024; // JCC TODO: Add a parameter control for this.
     float _tmoKey = 0.18f;

@@ -119,7 +119,7 @@ void main() {
     }
 
     if (colorSpace == HSL_COLOR) {
-         vec3 hslColor = rgb2hsl(tColor);
+        vec3 hslColor = rgb2hsl(tColor);
         hslColor.x *= Hue;
         hslColor.y *= Saturation;
         hslColor.z *= Lightness;

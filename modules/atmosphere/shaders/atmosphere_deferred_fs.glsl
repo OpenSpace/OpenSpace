@@ -422,6 +422,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     // we can change it on the fly with no precomputations)
     // return radiance * sunRadiance;
     vec3 finalScatteringRadiance = radiance * sunIntensity;
+    
     if (groundHit) {
         return finalScatteringRadiance;
     } else {
@@ -542,6 +543,7 @@ void main() {
 
     if (cullAtmosphere == 0) {
         vec4 atmosphereFinalColor = vec4(0.0f);
+        vec4 backgroundFinalColor = vec4(0.0f);
         int nSamples = 1;
         
         // First we determine if the pixel is complex (different fragments on it)
@@ -691,14 +693,18 @@ void main() {
             } 
             else { // no intersection
                 //atmosphereFinalColor += vec4(HDR(color.xyz * backgroundConstant, atmExposure), color.a);
-                atmosphereFinalColor += vec4(color.xyz * backgroundConstant, color.a);
+                //atmosphereFinalColor += vec4(color.xyz * backgroundConstant, color.a);
+                //backgroundFinalColor += color;
+                discard;
             }           
         }  
 
-        renderTarget = atmosphereFinalColor / float(nSamples);        
+        renderTarget = atmosphereFinalColor / float(nSamples);
 
-        // if (complex)
-        //     renderTarget = vec4(1.0, 0.0, 0.0, 1.0);
+        // renderTarget = vec4(
+        //     (atmosphereFinalColor.xyz + (backgroundFinalColor.xyz * backgroundConstant)) / float(nSamples), 
+        //     (atmosphereFinalColor.a + backgroundFinalColor.a) / float(nSamples)
+        //     );
     } 
     else { // culling
         if (firstPaint) {
@@ -714,8 +720,6 @@ void main() {
         else {
             discard;
         }
-        //renderTarget = vec4(1.0, 0.0, 0.0, 1.0);
-        
     }
 }
 

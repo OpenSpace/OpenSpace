@@ -68,18 +68,18 @@ public:
     // defines in hdr.glsl file.
     enum class ToneMapOperators {
         EXPONENTIAL = 0,
-        LINEAR,
-        SIMPLE_REINHARD,
-        LUM_BASED_REINHARD,
-        WHITE_PRESERVING,
-        ROM_BIN_DA_HOUSE,
-        FILMIC,
-        UNCHARTED,
-        COSTA,
-        ADAPTIVE,
-        GLOBAL,
-        PHOTOGRAPHIC_REINHARD,
-        MIPMAPPING
+        LINEAR, //1
+        SIMPLE_REINHARD, //2
+        LUM_BASED_REINHARD, //3
+        WHITE_PRESERVING, //4
+        ROM_BIN_DA_HOUSE, //5
+        FILMIC, //6
+        UNCHARTED, //7
+        COSTA, //8
+        ADAPTIVE, //8
+        GLOBAL, //9
+        PHOTOGRAPHIC_REINHARD, //10
+        MIPMAPPING //11
     };
 
     enum class COLORSPACE {
