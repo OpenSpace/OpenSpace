@@ -686,18 +686,7 @@ void FramebufferRenderer::computeImageHistogram() {
 }
 
 void FramebufferRenderer::computeMipMappingFromHDRBuffer(GLuint oglImageBuffer) {
-    ghoul::opengl::TextureUnit samplerUnit;    
-    glBindSampler(samplerUnit, _tmoHdrSampler);
-    samplerUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, oglImageBuffer);
-
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    _tmoProgram->setUniform(_tmoUniformCache.hdrSampler, samplerUnit);
-    _tmoProgram->setUniform(_tmoUniformCache.key, _tmoKey);
-    _tmoProgram->setUniform(_tmoUniformCache.Ywhite, _tmoYwhite);
-    _tmoProgram->setUniform(_tmoUniformCache.sat, _tmoSaturation);
-
+    glEnable(GL_FRAMEBUFFER_SRGB);
     /*glBindFramebuffer(GL_FRAMEBUFFER, _tmoFramebuffer);
     GLenum textureBuffer[] = {
        GL_COLOR_ATTACHMENT0
@@ -708,13 +697,27 @@ void FramebufferRenderer::computeMipMappingFromHDRBuffer(GLuint oglImageBuffer) 
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, _resolution.x, _resolution.y);*/
 
-    glBindVertexArray(_screenQuad);
+    ghoul::opengl::TextureUnit samplerUnit;
+    samplerUnit.activate();
+    glBindTexture(GL_TEXTURE_2D, oglImageBuffer);
+    glBindSampler(samplerUnit.operator GLint(), _tmoHdrSampler);
+
+    glGenerateMipmap(GL_TEXTURE_2D);
 
     _tmoProgram->activate();
 
+    _tmoProgram->setUniform(_tmoUniformCache.hdrSampler, samplerUnit);
+    _tmoProgram->setUniform(_tmoUniformCache.key, _tmoKey);
+    _tmoProgram->setUniform(_tmoUniformCache.Ywhite, _tmoYwhite);
+    _tmoProgram->setUniform(_tmoUniformCache.sat, _tmoSaturation);
+
+    glBindVertexArray(_screenQuad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+    
     _tmoProgram->deactivate();
+    
     glBindVertexArray(0);
+    glBindSampler(oglImageBuffer, 0);
 }
 
 void FramebufferRenderer::update() {
@@ -878,7 +881,7 @@ void FramebufferRenderer::updateResolution() {
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
-        GL_RGBA16F,
+        GL_RGBA32F,
         _resolution.x,
         _resolution.y,
         0,
@@ -1695,13 +1698,12 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     
     if (_toneMapOperator ==
         static_cast<int>(openspace::RenderEngine::ToneMapOperators::MIPMAPPING)) {
-
         if (_bloomEnabled) {
             computeMipMappingFromHDRBuffer(_bloomTexture[2]);
         }
         else {
             computeMipMappingFromHDRBuffer(_hdrFilteringTexture);
-        }
+        }       
     }
     else {
         _hdrFilteringProgram->activate();

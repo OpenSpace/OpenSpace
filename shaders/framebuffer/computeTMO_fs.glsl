@@ -78,5 +78,8 @@ void main() {
 
     float logAvgLum = exp(texture(hdrSampler, texCoord, 20).a);
 
-    finalColor.rgb = toneMapGlobal(hdrColor, logAvgLum);
+    //finalColor.rgb = toneMapGlobal(hdrColor, logAvgLum);
+
+    finalColor = vec4(toneMapGlobal(hdrColor, logAvgLum), 1.0);
+    finalColor = vec4(1.0, 0.0, 0.0, 1.0);
 }
