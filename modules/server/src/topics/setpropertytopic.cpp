@@ -77,7 +77,7 @@ namespace {
             literal += "}";
             return literal;
         }{
-            return "null";
+            return "nil";
         }
     }
 } // namespace

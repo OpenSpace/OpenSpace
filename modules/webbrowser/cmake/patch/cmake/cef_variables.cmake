@@ -7,6 +7,7 @@ if(NOT DEFINED _CEF_ROOT_EXPLICIT)
   message(FATAL_ERROR "Use find_package(CEF) to load this file.")
 endif()
 
+
 #
 # Shared configuration.
 #
@@ -36,9 +37,14 @@ if(NOT DEFINED PROJECT_ARCH)
   endif()
 endif()
 
+if(${CMAKE_GENERATOR} STREQUAL "Ninja")
+  set(GEN_NINJA 1)
+elseif(${CMAKE_GENERATOR} STREQUAL "Unix Makefiles")
+  set(GEN_MAKEFILES 1)
+endif()
+
 # Determine the build type.
-if(NOT CMAKE_BUILD_TYPE AND
-   (${CMAKE_GENERATOR} STREQUAL "Ninja" OR ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles"))
+if(NOT CMAKE_BUILD_TYPE AND (GEN_NINJA OR GEN_MAKEFILES))
   # CMAKE_BUILD_TYPE should be specified when using Ninja or Unix Makefiles.
   set(CMAKE_BUILD_TYPE Release)
   message(WARNING "No CMAKE_BUILD_TYPE value selected, using ${CMAKE_BUILD_TYPE}")
@@ -58,6 +64,10 @@ list(APPEND CEF_COMPILER_DEFINES
   # in the C++ standard (e.g. UINT8_MAX, INT64_MIN, etc)
   __STDC_CONSTANT_MACROS __STDC_FORMAT_MACROS
   )
+
+
+# Configure use of the sandbox.
+option(USE_SANDBOX "Enable or disable use of the sandbox." ON)
 
 
 #
@@ -80,6 +90,8 @@ if(OS_LINUX)
     #-Werror                         # Treat warnings as errors
     -Wno-missing-field-initializers # Don't warn about missing field initializers
     -Wno-unused-parameter           # Don't warn about unused parameters
+    -Wno-error=comment              # Don't warn about code in comments
+    -Wno-comment                    # Don't warn about code in comments
     )
   list(APPEND CEF_C_COMPILER_FLAGS
     -std=c99                        # Use the C99 language standard
@@ -191,8 +203,12 @@ if(OS_LINUX)
   set(CEF_BINARY_FILES
     chrome-sandbox
     libcef.so
+    libEGL.so
+    libGLESv2.so
     natives_blob.bin
     snapshot_blob.bin
+    v8_context_snapshot.bin
+    swiftshader
     )
 
   # List of CEF resource files.
@@ -205,6 +221,12 @@ if(OS_LINUX)
     icudtl.dat
     locales
     )
+
+    if(USE_SANDBOX)
+      list(APPEND CEF_COMPILER_DEFINES
+        CEF_USE_SANDBOX   # Used by apps to test if the sandbox is enabled
+        )
+    endif()
 endif()
 
 
@@ -302,9 +324,15 @@ if(OS_MACOSX)
   set(CEF_BINARY_DIR_DEBUG    "${_CEF_ROOT}/Debug")
   set(CEF_BINARY_DIR_RELEASE  "${_CEF_ROOT}/Release")
 
-  # CEF library paths.
-  set(CEF_LIB_DEBUG   "${CEF_BINARY_DIR_DEBUG}/Chromium Embedded Framework.framework/Chromium Embedded Framework")
-  set(CEF_LIB_RELEASE "${CEF_BINARY_DIR_RELEASE}/Chromium Embedded Framework.framework/Chromium Embedded Framework")
+ if(USE_SANDBOX)
+    list(APPEND CEF_COMPILER_DEFINES
+      CEF_USE_SANDBOX   # Used by apps to test if the sandbox is enabled
+      )
+
+    # CEF sandbox library paths.
+    set(CEF_SANDBOX_LIB_DEBUG "${CEF_BINARY_DIR_DEBUG}/cef_sandbox.a")
+    set(CEF_SANDBOX_LIB_RELEASE "${CEF_BINARY_DIR_RELEASE}/cef_sandbox.a")
+  endif()
 endif()
 
 
@@ -313,35 +341,52 @@ endif()
 #
 
 if(OS_WINDOWS)
-  # Configure use of the sandbox.
-  option(USE_SANDBOX "Enable or disable use of the sandbox." ON)
-  if(USE_SANDBOX AND NOT MSVC_VERSION EQUAL 1900)
-    # The cef_sandbox.lib static library is currently built with VS2015. It will
-    # not link successfully with other VS versions.
-    set(USE_SANDBOX OFF)
+  if (GEN_NINJA)
+    # When using the Ninja generator clear the CMake defaults to avoid excessive
+    # console warnings (see issue #2120).
+    set(CMAKE_CXX_FLAGS "")
+    set(CMAKE_CXX_FLAGS_DEBUG "")
+    set(CMAKE_CXX_FLAGS_RELEASE "")
   endif()
 
-  # Configure use of official build compiler settings.
-  # When using an official build the "Debug" build is actually a Release build
-  # with DCHECKs enabled. In order to link the sandbox the Debug build must
-  # be configured with some Release-related compiler settings.
-  option(USE_OFFICIAL_BUILD_SANDBOX "Enable or disable use of an official build sandbox." ON)
-  if(NOT USE_SANDBOX)
-    # Don't need official build settings when the sandbox is off.
-    set(USE_OFFICIAL_BUILD_SANDBOX OFF)
+  if(USE_SANDBOX)
+    # Check if the current MSVC version is compatible with the cef_sandbox.lib
+    # static library. For a list of all version numbers see
+    # https://en.wikipedia.org/wiki/Microsoft_Visual_C%2B%2B#Internal_version_numbering
+    list(APPEND supported_msvc_versions
+      1900  # VS2015 and updates 1, 2, & 3
+      1910  # VS2017 version 15.1 & 15.2
+      1911  # VS2017 version 15.3 & 15.4
+      1912  # VS2017 version 15.5
+      1913  # VS2017 version 15.6
+      1914  # VS2017 version 15.7
+      1915  # VS2017 version 15.8
+      )
+    list(FIND supported_msvc_versions ${MSVC_VERSION} _index)
+    if (${_index} EQUAL -1)
+      message(WARNING "CEF sandbox is not compatible with the current MSVC version (${MSVC_VERSION})")
+      set(USE_SANDBOX OFF)
+    endif()
   endif()
 
   # Consumers who run into LNK4099 warnings can pass /Z7 instead (see issue #385).
   set(CEF_DEBUG_INFO_FLAG "/Zi" CACHE STRING "Optional flag specifying specific /Z flag to use")
+
+  # Consumers using different runtime types may want to pass different flags
+  set(CEF_RUNTIME_LIBRARY_FLAG "" CACHE STRING "Optional flag specifying which runtime to use") #OpenSpace patch, remove /MT
+  if (CEF_RUNTIME_LIBRARY_FLAG)
+    list(APPEND CEF_COMPILER_FLAGS_DEBUG ${CEF_RUNTIME_LIBRARY_FLAG}d)
+    list(APPEND CEF_COMPILER_FLAGS_RELEASE ${CEF_RUNTIME_LIBRARY_FLAG})
+  endif()
 
   # Platform-specific compiler/linker flags.
   set(CEF_LIBTYPE STATIC)
   list(APPEND CEF_COMPILER_FLAGS
     /MP           # Multiprocess compilation
     /Gy           # Enable function-level linking
-    # /GR-          # Disable run-time type information
+    #/GR-          # Disable run-time type information # OpenSpace patch
     /W4           # Warning level 4
-    #/WX           # Treat warnings as errors
+    #/WX           # Treat warnings as errors # OpenSpace patch
     /wd4100       # Ignore "unreferenced formal parameter" warning
     /wd4127       # Ignore "conditional expression is constant" warning
     /wd4244       # Ignore "conversion possible loss of data" warning
@@ -352,24 +397,11 @@ if(OS_WINDOWS)
     /wd4996       # Ignore "function or variable may be unsafe" warning
     ${CEF_DEBUG_INFO_FLAG}
     )
-  if(USE_OFFICIAL_BUILD_SANDBOX)
-    # CMake adds /RTC1, /D"_DEBUG" and a few other values by default for Debug
-    # builds. We can't link the sandbox with those values so clear the CMake
-    # defaults here.
-    set(CMAKE_CXX_FLAGS_DEBUG "")
-
-    #list(APPEND CEF_COMPILER_FLAGS_DEBUG
-    #  /MT           # Multithreaded release runtime
-    #  )
-  else()
-    list(APPEND CEF_COMPILER_FLAGS_DEBUG
-      #/MTd          # Multithreaded debug runtime
-      /RTC1         # Disable optimizations
-      /Od           # Enable basic run-time checks
-      )
-  endif()
+  list(APPEND CEF_COMPILER_FLAGS_DEBUG
+    /RTC1         # Disable optimizations
+    /Od           # Enable basic run-time checks
+    )
   list(APPEND CEF_COMPILER_FLAGS_RELEASE
-    #/MT           # Multithreaded release runtime
     /O2           # Optimize for maximum speed
     /Ob2          # Inline any suitable function
     /GF           # Enable string pooling
@@ -383,18 +415,12 @@ if(OS_WINDOWS)
     )
   list(APPEND CEF_COMPILER_DEFINES
     WIN32 _WIN32 _WINDOWS             # Windows platform
-    # UNICODE _UNICODE                  # Unicode build
-    # WINVER=0x0601 _WIN32_WINNT=0x601  # Targeting Windows 7
+    UNICODE _UNICODE                  # Unicode build
+    WINVER=0x0601 _WIN32_WINNT=0x601  # Targeting Windows 7
     NOMINMAX                          # Use the standard's templated min/max
     WIN32_LEAN_AND_MEAN               # Exclude less common API declarations
-    # _HAS_EXCEPTIONS=0                 # Disable exceptions
+    _HAS_EXCEPTIONS=0                 # Disable exceptions
     )
-  if(USE_OFFICIAL_BUILD_SANDBOX)
-    list(APPEND CEF_COMPILER_DEFINES_DEBUG
-      NDEBUG _NDEBUG                    # Not a debug build
-      DCHECK_ALWAYS_ON=1                # DCHECKs are enabled
-      )
-  endif()
   list(APPEND CEF_COMPILER_DEFINES_RELEASE
     NDEBUG _NDEBUG                    # Not a debug build
     )
@@ -427,6 +453,8 @@ if(OS_WINDOWS)
     libGLESv2.dll
     natives_blob.bin
     snapshot_blob.bin
+    v8_context_snapshot.bin
+    swiftshader
     )
 
   # List of CEF resource files.
@@ -451,6 +479,7 @@ if(OS_WINDOWS)
       dbghelp.lib
       psapi.lib
       version.lib
+      wbemuuid.lib
       winmm.lib
       )
 
@@ -462,10 +491,26 @@ if(OS_WINDOWS)
   # Configure use of ATL.
   option(USE_ATL "Enable or disable use of ATL." ON)
   if(USE_ATL)
+    # Locate the atlmfc directory if it exists. It may be at any depth inside
+    # the VC directory. The cl.exe path returned by CMAKE_CXX_COMPILER may also
+    # be at different depths depending on the toolchain version
+    # (e.g. "VC/bin/cl.exe", "VC/bin/amd64_x86/cl.exe",
+    # "VC/Tools/MSVC/14.10.25017/bin/HostX86/x86/cl.exe", etc).
+    set(HAS_ATLMFC 0)
+    get_filename_component(VC_DIR ${CMAKE_CXX_COMPILER} DIRECTORY)
+    get_filename_component(VC_DIR_NAME ${VC_DIR} NAME)
+    while(NOT ${VC_DIR_NAME} STREQUAL "VC")
+      get_filename_component(VC_DIR ${VC_DIR} DIRECTORY)
+      if(IS_DIRECTORY "${VC_DIR}/atlmfc")
+        set(HAS_ATLMFC 1)
+        break()
+      endif()
+      get_filename_component(VC_DIR_NAME ${VC_DIR} NAME)
+    endwhile()
+
     # Determine if the Visual Studio install supports ATL.
-    get_filename_component(VC_BIN_DIR ${CMAKE_CXX_COMPILER} DIRECTORY)
-    get_filename_component(VC_DIR ${VC_BIN_DIR} DIRECTORY)
-    if(NOT IS_DIRECTORY "${VC_DIR}/atlmfc")
+    if(NOT HAS_ATLMFC)
+      message(WARNING "ATL is not supported by your VC installation.")
       set(USE_ATL OFF)
     endif()
   endif()

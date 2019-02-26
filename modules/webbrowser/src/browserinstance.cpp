@@ -50,7 +50,7 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
 
     CefWindowInfo windowInfo;
     const bool renderTransparent = true;
-    windowInfo.SetAsWindowless(nullptr, renderTransparent);
+    windowInfo.SetAsWindowless(nullptr);
 
     CefBrowserSettings browserSettings;
     browserSettings.windowless_frame_rate = 60;

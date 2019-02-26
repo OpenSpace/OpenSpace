@@ -52,7 +52,7 @@ public:
 
     void reshape(int, int);
 
-    bool GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) override;
+    void GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) override;
     void OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type,
         const RectList &dirtyRects, const void* buffer, int width, int height) override;
     bool hasContent(int x, int y);
