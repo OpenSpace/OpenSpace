@@ -153,7 +153,7 @@ if(OS_MACOSX)
     )
 
     # Fix the framework rpath in the helper executable.
-    FIX_MACOSX_HELPER_FRAMEWORK_RPATH(${CEF_HELPER_TARGET})
+    # FIX_MACOSX_HELPER_FRAMEWORK_RPATH(${CEF_HELPER_TARGET})
 endif()
 
 if (OS_WINDOWS)

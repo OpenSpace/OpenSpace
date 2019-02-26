@@ -99,7 +99,7 @@ function(run_cef_macosx_config CEF_ROOT module_path)
     endforeach ()
 
     # Fix the framework rpath in the main executable.
-    FIX_MACOSX_MAIN_FRAMEWORK_RPATH(${CEF_TARGET})
+    #FIX_MACOSX_MAIN_FRAMEWORK_RPATH(${CEF_TARGET})
 
     if(NOT ${CMAKE_GENERATOR} STREQUAL "Xcode")
         # Manually process and copy over resource files.

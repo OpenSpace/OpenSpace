@@ -35,7 +35,6 @@ void WebRenderHandler::reshape(int w, int h) {
         return;
     }
     _windowSize = glm::ivec2(w, h);
-    _windowHasResized = true;
     _needsRepaint = true;
 }
 
