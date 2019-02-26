@@ -98,8 +98,20 @@ function(run_cef_macosx_config CEF_ROOT module_path)
         )
     endforeach ()
 
+    # Fix the framework link in the helper executable.
+    add_custom_command(
+        TARGET ${CEF_TARGET}
+        POST_BUILD
+        COMMAND install_name_tool -change 
+        "@executable_path/../Frameworks/Chromium Embedded\ Framework.framework/Chromium\ Embedded\ Framework"
+        "@executable_path/../../../../Frameworks/Chromium\ Embedded\ Framework.framework/Chromium\ Embedded\ Framework"
+        "${CEF_FINAL_HELPER_APP}/Contents/MacOS/openspace_web_helper"
+        VERBATIM
+    )
+
     # Fix the framework rpath in the main executable.
-    #FIX_MACOSX_MAIN_FRAMEWORK_RPATH(${CEF_TARGET})
+    set_target_properties(${CEF_TARGET} PROPERTIES INSTALL_RPATH "@executable_path/..")
+    set_target_properties(${CEF_TARGET} PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
 
     if(NOT ${CMAKE_GENERATOR} STREQUAL "Xcode")
         # Manually process and copy over resource files.
