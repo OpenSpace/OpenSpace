@@ -28,7 +28,5 @@
 	<string>NSApplication</string>
 	<key>NSSupportsAutomaticGraphicsSwitching</key>
 	<true/>
-	<key>NSAppleEventsUsageDescription</key>
-	<true/>
 </dict>
 </plist>

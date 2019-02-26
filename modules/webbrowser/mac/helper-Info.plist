@@ -26,7 +26,5 @@
 	<string>1</string>
 	<key>NSSupportsAutomaticGraphicsSwitching</key>
 	<true/>
-	<key>NSAppleEventsUsageDescription</key>
-	<true/>
 </dict>
 </plist>
