@@ -1,0 +1,172 @@
+local assetHelper = asset.require('util/asset_helper')
+local sceneHelper = asset.require('util/scene_helper')
+local propertyHelper = asset.require('util/property_helper')
+
+-- General assets
+asset.require('spice/base')
+assetHelper.requestAll(asset, 'scene/solarsystem/sun')
+asset.require('scene/solarsystem/planets')
+asset.require('scene/solarsystem/dwarf_planets/pluto/pluto')
+asset.require('scene/solarsystem/dwarf_planets/pluto/pluto_trail')
+asset.request('scene/digitaluniverse/stars')
+asset.request('scene/digitaluniverse/milkyway')
+asset.request('customization/globebrowsing')
+asset.request('scene/digitaluniverse/grids')
+
+-- DSN specific assets
+asset.require('scene/solarsystem/dsn/spacecrafts')
+asset.require('scene/solarsystem/dsn/spacecraftslabels')
+asset.require('scene/solarsystem/dsn/stations')
+asset.require('scene/solarsystem/dsn/signals')
+asset.require('scene/solarsystem/dsn/stationsfov')
+asset.require('scene/solarsystem/dsn/dsn_dashboard')
+
+-- Load default key bindings applicable to most scenes
+asset.require('util/default_keybindings')
+asset.require('util/default_joystick')
+asset.require('util/webgui')
+
+
+local Keybindings = {
+    {
+        Key = "a",  
+        Command = propertyHelper.invert('Scene.EarthAtmosphere.Renderable.Enabled') ..
+                  propertyHelper.invert('Scene.MarsAtmosphere.Renderable.Enabled'),
+        Documentation = "Toggles visibility of atmospheres",
+        Local = false
+    },
+    {
+        Key = "z",  
+        Command =  "openspace.time.interpolateDeltaTime(3)",
+        Documentation = "Set speed to work for near earth view.",
+        Local = false
+    },
+    {
+        Key = "x",  
+        Command =  "openspace.time.interpolateDeltaTime(360)",
+        Documentation = "Set speed to work for inner space view.",
+        Local = false
+    },    
+    {
+        Key = "c",  
+        Command =  "openspace.time.interpolateDeltaTime(4200)",
+        Documentation = "Set speed to work for outer space.",
+        Local = false
+    },
+    {
+        Key = "s",  
+        Command = propertyHelper.invert('Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Enabled') ..
+                  propertyHelper.invert('Scene.Earth.Renderable.PerformShading') ..
+                  propertyHelper.invert('Scene.EarthAtmosphere.Renderable.Enabled') ..
+                  propertyHelper.invert('Scene.MarsAtmosphere.Renderable.Enabled') ..
+                  propertyHelper.invert('Scene.Earth.Renderable.Layers.WaterMasks.MODIS_Water_Mask.Enabled'),
+        Documentation = "Toggle night texture, shading, atmosphere, and water for Earth.",
+        Local = false
+    },
+    {
+        Key = "g",
+        Command = propertyHelper.invert('Scene.MilkyWay.Renderable.Enabled') ..
+                  propertyHelper.invert('Scene.Stars.Renderable.Enabled') ..
+                  propertyHelper.invert('Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Enabled') ..
+                  propertyHelper.invert('Scene.EarthAtmosphere.Renderable.Enabled') ..
+                  propertyHelper.invert('Scene.MarsAtmosphere.Renderable.Enabled') ..
+                  propertyHelper.invert('Scene.Earth.Renderable.Layers.WaterMasks.MODIS_Water_Mask.Enabled') ..
+                  propertyHelper.invert('Scene.Moon.Renderable.Enabled') ..
+                  propertyHelper.invert('Scene.Sun.Renderable.Enabled'),
+        Documentation = "Toogles background and shading mode on the Earth and Mars alongside visibility of the Moon and the Sun",
+        Local = false
+    },
+    {
+        Key = "h",
+        Command = [[
+                        local propertyValues = openspace.getProperty('Scene.*Trail.Renderable.Enabled')
+
+                        for _, propValue in pairs(propertyValues) do
+                            openspace.setPropertyValue(propValue, not openspace.getPropertyValue(propValue));
+                        end
+                    ]],
+        Documentation = "Toggles visibility of the trails",
+        Local = false
+    },   
+    {
+        Key = "e",
+        Command = propertyHelper.invert('Scene.EquatorialSphere.Renderable.Enabled') ..
+                  propertyHelper.invert('Scene.EquatorialSphereLabels.Renderable.Enabled'),  
+        Documentation = "Toggles visibility of the equatorial sphere and its labels",
+        Local = false
+    },
+    {
+        Key = "l",
+        Command = [[
+                        local propertyValues = openspace.getProperty('Scene.*DsnLabels.Renderable.Enabled')
+
+                        for _, propValue in pairs(propertyValues) do
+                            openspace.setPropertyValue(propValue, not openspace.getPropertyValue(propValue));
+                        end
+                    ]],
+        Documentation = "Toggles visibility of the spacecraft labels",
+        Local = false
+    }, 
+    {
+        Key = "Shift+c",
+        Command = propertyHelper.invert('Scene.CanberraFOV.Renderable.Enabled'),
+        Documentation = "Toggles visibility of the Canberra ground station field of view",
+        Local = false
+    }, 
+    {
+        Key = "Shift+m",
+        Command = propertyHelper.invert('Scene.MadridFOV.Renderable.Enabled'),
+        Documentation = "Toggles visibility of the Madrid ground station field of view",
+        Local = false
+    },
+    {
+        Key = "Shift+g",
+        Command = propertyHelper.invert('Scene.GoldstoneFOV.Renderable.Enabled'),
+        Documentation = "Toggles visibility of the Goldstone ground station field of view",
+        Local = false
+    }
+}
+
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+local equatorial = asset.require('scene/digitaluniverse/grids')   
+
+
+asset.onInitialize(function ()
+    --local now = openspace.time.currentWallTime()
+	openspace.time.setTime("2018 SEP 03 11:11:00")
+
+    sceneHelper.bindKeys(Keybindings)
+
+    openspace.setDefaultGuiSorting()
+
+    openspace.setPropertyValue('Scene.*Trail.Renderable.Enabled', true)
+    openspace.setPropertyValue('Scene.*Trail.Renderable.Color', {0.5,0.5,0.5})
+
+    openspace.globebrowsing.loadWMSServersFromFile(
+        openspace.absPath("${DATA}/globebrowsing_servers.lua")
+    )
+
+    openspace.markInterestingNodes({
+       "Earth", "DSS63", "DSS14", "DSS43", "Voyager1", "Voyager2","MRO", "StereoA"
+    })
+
+    openspace.navigation.setCameraState({
+        Focus = earthAsset.Earth.Identifier,
+        Position = { 0, 0, 0 },
+        Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 },
+    })
+    
+    -- Earth view
+    openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
+    -- Outer space view
+    -- openspace.globebrowsing.goToGeo(0, 90, 20000000000000)
+end)
+
+
+asset.onDeinitialize(function ()
+    sceneHelper.unbindKeys(Keybindings)
+
+    openspace.removeInterestingNodes({
+       "Earth", "DSS63", "DSS14", "DSS43", "Voyager1", "Voyager2", "MRO", "StereoA"
+    })
+end)

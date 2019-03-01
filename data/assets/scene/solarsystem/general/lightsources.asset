@@ -1,0 +1,20 @@
+-- This is a basic reusable lightsource (from sun and camera)
+-- that can be used for lighting of 3D models. 
+
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+
+local StandardLights = {
+    {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sunTransforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+    },
+    {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+    }
+}
+
+asset.export("StandardLights", StandardLights)

@@ -29,6 +29,7 @@
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec4property.h>
 
 namespace ghoul::fontrendering { class Font; }
 
@@ -55,13 +56,13 @@ private:
 
     properties::Property* _property = nullptr;
     bool _propertyIsDirty = true;
+    bool _isColorProperty = false;
 
     properties::StringProperty _propertyUri;
     properties::StringProperty _displayString;
 
-
-
     std::shared_ptr<ghoul::fontrendering::Font> _font;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontColorDot;
 };
 
 } // namespace openspace

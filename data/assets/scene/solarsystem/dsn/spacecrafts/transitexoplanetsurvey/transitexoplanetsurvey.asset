@@ -1,0 +1,35 @@
+-- Transit Exoplanet Survey (TESS)
+local assetHelper = asset.require('util/asset_helper')
+local dataFolder = openspace.absPath("${SYNC}/http/dsn_data/1/positioning/TESS") 
+
+local models = asset.syncedResource({
+    Name = "Dsn models",
+    Type = "HttpSynchronization",
+    Identifier = "dsn_stations",
+    Version = 1
+})
+local spacecraftID = "Tess";
+
+local TransitExoplanetSurvey = {
+    Identifier = spacecraftID,
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2018-APR-18-23:00:00",
+        End = "2019-JAN-1-01:00:00"
+    },
+    Transform = {
+      Translation = {
+          Type = "RadecTranslation", 
+          DataFolder = dataFolder,
+          DataFileType = "json",
+          ObjectIdentifier = spacecraftID
+      }
+
+   },
+    GUI = {
+        Name = "TESS",
+        Path = "/Solar System/Missions/TESS"
+    }
+}
+asset.export("spacecraftID", spacecraftID)
+assetHelper.registerSceneGraphNodesAndExport(asset, {TransitExoplanetSurvey})

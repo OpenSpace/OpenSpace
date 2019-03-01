@@ -32,10 +32,13 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <iostream>
 
 namespace {
     constexpr const char* KeyFontMono = "Mono";
     constexpr const float DefaultFontSize = 10.f;
+    constexpr const float ColorDotSizeFactor = 4.f;
+    constexpr const float ColorDotOpacityFactor = 0.6f;
 
     constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",
@@ -62,6 +65,12 @@ namespace {
         "The String that is being displayed. It must either be empty (in which case only "
         "the value itself will be displayed), or it must contain extact one instance of "
         "{}, which will be replaced with the value of the property during rendering."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo IsColorPropertyInfo = {
+        "IsColorProperty",
+        "Is Color Property",
+        "Can be set to true to show the property as a colored marker instead of text string. "
     };
 } // namespace
 
@@ -101,7 +110,13 @@ documentation::Documentation DashboardItemPropertyValue::Documentation() {
                 new StringVerifier,
                 Optional::Yes,
                 DisplayStringInfo.description
-            }
+            },
+            {
+                IsColorPropertyInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                IsColorPropertyInfo.description
+            },
         }
     };
 }
@@ -119,6 +134,10 @@ DashboardItemPropertyValue::DashboardItemPropertyValue(
         dictionary,
         "DashboardItemPropertyValue"
     );
+
+    if (dictionary.hasKey(IsColorPropertyInfo.identifier)) {
+        _isColorProperty = dictionary.value<bool>(IsColorPropertyInfo.identifier);
+    }
 
     if (dictionary.hasKey(FontNameInfo.identifier)) {
         _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
@@ -155,21 +174,48 @@ DashboardItemPropertyValue::DashboardItemPropertyValue(
 }
 
 void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
+    
     if (_propertyIsDirty) {
         _property = openspace::property(_propertyUri);
         _propertyIsDirty = false;
     }
 
     if (_property) {
-        std::string value;
-        _property->getStringValue(value);
+
+        std::string valueStr;
+        _property->getStringValue(valueStr);
 
         penPosition.y -= _font->height();
+
+        if (_isColorProperty) {
+
+            properties::Vec4Property* colorProperty = static_cast<properties::Vec4Property*>(_property);
+            glm::vec4 color = colorProperty->value();
+
+            color.a = ColorDotOpacityFactor * color.a;
+
+            _fontColorDot = global::fontManager.font(_fontName, _fontSize * ColorDotSizeFactor);
+
+            std::string colorDot = ".";
+
+            penPosition.x = 0.0;
+
+            RenderFont(
+                *_fontColorDot,
+                penPosition,
+                colorDot,
+                color
+            );
+
+            penPosition.x = _fontColorDot->boundingBox(colorDot).x;
+        }
+
         RenderFont(
             *_font,
             penPosition,
-            fmt::format(_displayString.value(), value)
+            fmt::format(_displayString.value(), valueStr)
         );
+
     }
 }
 

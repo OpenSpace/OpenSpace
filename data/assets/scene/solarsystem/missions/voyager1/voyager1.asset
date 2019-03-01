@@ -1,0 +1,87 @@
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local lights = asset.require('scene/solarsystem/general/lightsources')
+local kernels = asset.require('./kernels')
+
+local models = asset.syncedResource({
+    Name = "Voyager 1 Models",
+    Type = "HttpSynchronization",
+    Identifier = "voyager1_model",
+    Version = 1
+})
+
+local RotationMatrix = {
+    -1, 0, 0,
+    0, 0, -1,
+    0, -1, 0
+}
+
+local spacecraftID = "Voyager1"
+
+local Voyager1 = {
+    Identifier = spacecraftID,
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "VOYAGER 1",
+            Observer = "SUN",
+            Kernels = kernels.Voyager1Kernels
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "VG1_SC_BUS",
+            DestinationFrame = "GALACTIC"
+        }
+    },
+    GUI = {
+        Name = "Voyager 1",
+        Path = "/Solar System/Missions/Voyager 1"
+    }
+}
+
+local Voyager1Main = {
+    Identifier = "Voyager_1_Main",
+    Parent = Voyager1.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/voyager-main.obj"
+        },
+        ColorTexture = models .. "/voyager-main.jpg",
+        ModelTransform = RotationMatrix,
+        LightSources = lights.StandardLights
+    },
+    GUI = {
+        Name = "Voyager 1 Main model",
+        Path = "/Solar System/Missions/Voyager 1/3D Model"
+    }
+}
+
+local Voyager1Antenna = {
+    Identifier = "Voyager_1_Antenna",
+    Parent = Voyager1.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/voyager-antenna.obj"
+        },
+        ColorTexture = models .. "/voyager-antenna.png",
+        ModelTransform = RotationMatrix,
+        LightSources = lights.StandardLights
+    },
+    GUI = {
+        Name = "Voyager 1 Antenna model",
+        Path = "/Solar System/Missions/Voyager 1/3D Model"
+    }
+}
+
+asset.export("spacecraftID", spacecraftID)
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    Voyager1,
+    Voyager1Main,
+    Voyager1Antenna
+})

@@ -430,6 +430,15 @@ public:
         std::vector<double>& v) const;
 
     /**
+    * Helper function that returns a cartesian coordinate position vector from ra, dec, range.
+    *
+    * \param ra The right ascension expressed in radians
+    * \param dec The declination expressed in radians
+    * \param range The range expressed in meters
+    */
+    static glm::dvec3 getPositionFromRaDecRange(double ra, double dec, double range);
+
+    /**
      * Converts the value \p craftTicks of the internal clock for the spacecraft
      * identified by \p craft into standard ephemeris time and returns the value.
      *

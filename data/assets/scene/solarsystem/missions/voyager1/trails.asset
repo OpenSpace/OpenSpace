@@ -1,112 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-
-
-
-local models = asset.syncedResource({
-    Name = "Voyager 1 Models",
-    Type = "HttpSynchronization",
-    Identifier = "voyager1_model",
-    Version = 1
-})
-
-local kernels = asset.syncedResource({
-    Name = "Voyager 1 Kernels",
-    Type = "HttpSynchronization",
-    Identifier = "voyager1_spice",
-    Version = 1
-})
-
-local Kernels = {
-    kernels .. '/vg1_v02.tf',
-    kernels .. '/vg100019.tsc',
-    kernels .. '/Voyager_1.a54206u_V0.2_merged.bsp',
-    kernels .. '/voyager_1.ST+1991_a54418u.merged.bsp',
-    kernels .. '/vgr1_jup230.bsp',
-    kernels .. '/vgr1_sat337.bsp',
-    kernels .. '/vgr1_super.bc',
-    kernels .. '/vgr1_super_v2.bc'
-}
-
-local RotationMatrix = {
-    -1, 0, 0,
-    0, 0, -1,
-    0, -1, 0
-}
-
-local LightSources = {
-    {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sunTransforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-    },
-    {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-    }
-}
-
-local Voyager1 = {
-    Identifier = "Voyager_1",
-    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "VOYAGER 1",
-            Observer = "SUN",
-            Kernels = Kernels
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "VG1_SC_BUS",
-            DestinationFrame = "GALACTIC"
-        }
-    },
-    GUI = {
-        Name = "Voyager 1",
-        Path = "/Solar System/Missions/Voyager 1"
-    }
-}
-
-local Voyager1Main = {
-    Identifier = "Voyager_1_Main",
-    Parent = Voyager1.Identifier,
-    Renderable = {
-        Type = "RenderableModel",
-        Geometry = {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/voyager-main.obj"
-        },
-        ColorTexture = models .. "/voyager-main.jpg",
-        ModelTransform = RotationMatrix,
-        LightSources = LightSources
-    },
-    GUI = {
-        Name = "Voyager 1 Main",
-        Path = "/Solar System/Missions/Voyager 1"
-    }
-}
-
-local Voyager1Antenna = {
-    Identifier = "Voyager_1_Antanna",
-    Parent = Voyager1.Identifier,
-    Renderable = {
-        Type = "RenderableModel",
-        Geometry = {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/voyager-antenna.obj"
-        },
-        ColorTexture = models .. "/voyager-antenna.png",
-        ModelTransform = RotationMatrix,
-        LightSources = LightSources
-    },
-    GUI = {
-        Name = "Voyager 1 Antanna",
-        Path = "/Solar System/Missions/Voyager 1"
-    }
-}
+local kernels = asset.require('./kernels')
 
     -- The trails are organized as follows.  The cruise phases can be resolved in relatively
     -- low resolution since they are just straight lines
@@ -120,7 +14,7 @@ local VoyagerTrailCruiseEarthJupiter = {
             Type = "SpiceTranslation",
             Target = "VOYAGER 1",
             Observer = "SUN",
-            Kernels = Kernels
+            Kernels = kernels.Voyager1Kernels
         },
         Color = { 0.70, 0.50, 0.20 },
         StartTime = "1977 SEP 05",
@@ -142,7 +36,7 @@ local VoyagerTrailEncounterJupiter = {
             Type = "SpiceTranslation",
             Target = "VOYAGER 1",
             Observer = "SUN",
-            Kernels = Kernels
+            Kernels = kernels.Voyager1Kernels
         },
         Color = { 0.70, 0.50, 0.20 },
         EnableFade = false,
@@ -165,7 +59,7 @@ local VoyagerTrailCruiseJupiterSaturn = {
             Type = "SpiceTranslation",
             Target = "VOYAGER 1",
             Observer = "SUN",
-            Kernels = Kernels
+            Kernels = kernels.Voyager1Kernels
         },
         EnableFade = false,
         Color = { 0.70, 0.50, 0.20 },
@@ -188,7 +82,7 @@ local VoyagerTrailEncounterSaturn = {
             Type = "SpiceTranslation",
             Target = "VOYAGER 1",
             Observer = "SUN",
-            Kernels = Kernels
+            Kernels = kernels.Voyager1Kernels
         },
         EnableFade = false,
         Color = { 0.70, 0.50, 0.20 },
@@ -211,7 +105,7 @@ local VoyagerTrailCruiseSaturnInf = {
             Type = "SpiceTranslation",
             Target = "VOYAGER 1",
             Observer = "SUN",
-            Kernels = Kernels
+            Kernels = kernels.Voyager1Kernels
         },
         EnableFade = false,
         Color = { 0.70, 0.50, 0.20 },
@@ -225,12 +119,7 @@ local VoyagerTrailCruiseSaturnInf = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    Voyager1,
-    Voyager1Main,
-    Voyager1Antenna,
     VoyagerTrailCruiseEarthJupiter,
     VoyagerTrailEncounterJupiter,
     VoyagerTrailCruiseJupiterSaturn,

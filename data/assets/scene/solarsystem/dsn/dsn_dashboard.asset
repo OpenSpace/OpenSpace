@@ -1,0 +1,68 @@
+local assetHelper = asset.require('util/asset_helper')
+
+assetHelper.registerDashboardItems(asset, {
+    {
+        Type = "DashboardItemDate",
+        Identifier = "Date",
+        GuiName = "Date"
+    },
+    {
+        Type = "DashboardItemSimulationIncrement",
+        Identifier = "SimulationIncrement",
+        GuiName = "Simulation Increment"
+    },
+    {
+        Type = "DashboardItemDistance",
+        Identifier = "Distance",
+        GuiName = "Distance",
+        SourceType = "Node",
+        SourceNodeName = "Earth"
+
+    },
+    {
+        Type = "DashboardItemDistance",
+        Identifier = "Distance",
+        GuiName = "Distance"
+    },
+    {
+        Type = "DashboardItemFramerate",
+        Identifier = "Framerate",
+        GuiName = "Framerate"
+    },
+    -- {
+    --     Type = "DashboardItemMission",
+    --     Identifier = "Mission",
+    --     GuiName = "Mission"
+    -- },
+    {
+        Type = "DashboardItemPropertyValue",
+        Identifier = "Signals",
+        GuiName = "Signals",
+        URI = "Scene.Signals.Renderable.FlowSpeed",
+        DisplayString = "Uplink/downlink flowspeed is {} times the speed of light"
+    },
+    {
+        Type = "DashboardItemPropertyValue",
+        Identifier = "Signals",
+        GuiName = "Signals",
+        URI = "Scene.Signals.Renderable.CanberraColor",
+        IsColorProperty = true,
+        DisplayString = "Canberra"
+    },
+    {
+        Type = "DashboardItemPropertyValue",
+        Identifier = "Signals",
+        GuiName = "Signals",
+        URI = "Scene.Signals.Renderable.GoldstoneColor",
+        IsColorProperty = true,
+        DisplayString = "Goldstone"
+    },
+    {
+        Type = "DashboardItemPropertyValue",
+        Identifier = "Signals",
+        GuiName = "Signals",
+        URI = "Scene.Signals.Renderable.MadridColor",
+        IsColorProperty = true,
+        DisplayString = "Madrid"
+    }        
+})

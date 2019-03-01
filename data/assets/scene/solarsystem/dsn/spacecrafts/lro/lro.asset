@@ -1,0 +1,25 @@
+-- Mars Cube One A
+local assetHelper = asset.require('util/asset_helper')
+local dataFolder = openspace.absPath("${SYNC}/http/dsn_data/1/positioning/LRO") 
+
+
+local spacecraftID = "LRO";
+
+local Lro = {
+    Identifier = spacecraftID,
+    Transform = {
+      Translation = {
+          Type = "RadecTranslation", 
+          DataFolder = dataFolder,
+          DataFileType = "json",
+          ObjectIdentifier = spacecraftID
+      }
+
+   },
+    GUI = {
+        Name = "LRO",
+        Path = "/Solar System/Missions/LRO"
+    }
+}
+asset.export("spacecraftID", spacecraftID)
+assetHelper.registerSceneGraphNodesAndExport(asset, {Lro})

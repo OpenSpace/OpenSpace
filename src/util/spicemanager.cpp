@@ -461,6 +461,15 @@ void SpiceManager::getValue(const std::string& body, const std::string& value,
     getValueInternal(body, value, static_cast<int>(v.size()), v.data());
 }
 
+glm::dvec3 SpiceManager::getPositionFromRaDecRange(double ra, double dec, double range) {
+
+    double cartesianCoordinates[3];
+    radrec_c(range, ra, dec, cartesianCoordinates);
+    glm::dvec3 cartesianPos = { cartesianCoordinates[0],cartesianCoordinates[1], cartesianCoordinates[2] };
+  
+    return cartesianPos;
+}
+
 double SpiceManager::spacecraftClockToET(const std::string& craft, double craftTicks) {
     ghoul_assert(!craft.empty(), "Empty craft");
 

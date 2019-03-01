@@ -13,8 +13,10 @@ asset.require('scene/solarsystem/planets/neptune/irregular_prograde_moons')
 asset.require('scene/solarsystem/planets/neptune/irregular_retrograde_moons')
 asset.request('scene/digitaluniverse/stars')
 asset.request('scene/digitaluniverse/milkyway')
-asset.require('scene/solarsystem/missions/voyager/voyager1')
-asset.require('scene/solarsystem/missions/voyager/voyager2')
+asset.require('scene/solarsystem/missions/voyager1/voyager1')
+asset.require('scene/solarsystem/missions/voyager1/trails')
+asset.require('scene/solarsystem/missions/voyager2/voyager2')
+asset.require('scene/solarsystem/missions/voyager2/trails')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
@@ -24,6 +26,7 @@ asset.require('util/default_joystick')
 asset.require('util/webgui')
 
 local VoyagerAsset = asset.require('scene/solarsystem/missions/voyager/voyager1')
+
 
 assetHelper.registerDashboardItems(asset, {
     {

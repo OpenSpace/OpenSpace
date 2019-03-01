@@ -1,0 +1,33 @@
+local assetHelper = asset.require('util/asset_helper')
+local stationsAsset = asset.require('scene/solarsystem/dsn/stations')
+local spacecrafts = asset.require('scene/solarsystem/dsn/spacecrafts')
+local dataFolder = openspace.absPath("${SYNC}/http/dsn_data/1/signaldata")
+
+-----------------------------------
+----- The Renderable Signals  -----
+-----------------------------------
+
+local Signals = {
+    Identifier = "Signals",
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2014-JAN-01-00:00:00",
+        End = "2018-DEC-31-00:00:00"
+    },
+    Renderable = {
+        Enabled = true,
+        Type = "RenderableSignals",
+        DataFolder = dataFolder,
+        DataFileType = "json",
+        BaseOpacity = 0.1,
+        SiteColors = stationsAsset.siteColorMap, 
+        StationSites = stationsAsset.stationMap,
+        SpacecraftIdMap = spacecrafts.signalDataIdMap
+    },
+    GUI = {
+        Name = "Signals",
+        Path = "/Solar System"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {Signals})

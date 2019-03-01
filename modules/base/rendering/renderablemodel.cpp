@@ -92,6 +92,12 @@ namespace {
         "all other transformations are applied."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo RotationVecInfo = {
+        "RotationVector",
+        "Rotation Vector",
+        "Rotation Vector using degrees"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo LightSourcesInfo = {
         "LightSources",
         "Light Sources",
@@ -149,6 +155,12 @@ documentation::Documentation RenderableModel::Documentation() {
                 Optional::Yes,
                 ModelTransformInfo.description
             },
+           {
+                RotationVecInfo.identifier,
+                new DoubleVector3Verifier,
+                Optional::Yes,
+                RotationVecInfo.description
+            },
             {
                 LightSourcesInfo.identifier,
                 new TableVerifier({
@@ -172,7 +184,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _diffuseIntensity(DiffuseIntensityInfo, 1.f, 0.f, 1.f)
     , _specularIntensity(SpecularIntensityInfo, 1.f, 0.f, 1.f)
     , _performShading(ShadingInfo, true)
-    , _modelTransform(ModelTransformInfo, glm::mat3(1.f))
+    , _modelTransform(ModelTransformInfo, glm::dmat3(1.0), glm::dmat3(-1.0), glm::dmat3(1.0))
+    , _rotationVec(RotationVecInfo, glm::dvec3(0), glm::dvec3(0), glm::dvec3(360))
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
 {
     documentation::testSpecificationAndThrow(
@@ -238,6 +251,16 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_diffuseIntensity);
     addProperty(_specularIntensity);
     addProperty(_performShading);
+    addProperty(_modelTransform);
+    addProperty(_rotationVec);
+
+    _rotationVec.onChange([this]() {
+        glm::vec3 degreeVector = _rotationVec;
+        glm::vec3 radianVector = glm::vec3(glm::radians(degreeVector.x), 
+                                 glm::radians(degreeVector.y), glm::radians(degreeVector.z));
+        _modelTransform = glm::mat4_cast(
+            glm::quat(radianVector));
+    });
 }
 
 bool RenderableModel::isReady() const {

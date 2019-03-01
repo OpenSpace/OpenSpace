@@ -1,0 +1,21 @@
+local Kernels = asset.syncedResource({
+    Name = "Voyager 2 Kernels",
+    Type = "HttpSynchronization",
+    Identifier = "voyager2_spice",
+    Version = 1
+})
+
+local Voyager2Kernels = {
+    Kernels .. '/vg2_v02.tf',
+    Kernels .. '/vg200022.tsc',
+    Kernels .. '/Voyager_2.m05016u.merged.bsp',
+    Kernels .. '/voyager_2.ST+1992_m05208u.merged.bsp',
+    Kernels .. '/vgr2_jup230.bsp',
+    Kernels .. '/vgr2_sat337.bsp',
+    Kernels .. '/vgr2_ura083.bsp',
+    Kernels .. '/vgr2_nep081.bsp',
+    Kernels .. '/vgr2_super.bc',
+    Kernels .. '/vgr2_super_v2.bc'
+}
+
+asset.export("Voyager2Kernels", Voyager2Kernels)

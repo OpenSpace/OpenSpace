@@ -1,0 +1,566 @@
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+
+local sceneHelper = asset.require('util/scene_helper')
+local propertyHelper = asset.require('util/property_helper')
+
+local lights = asset.require('scene/solarsystem/general/lightsources')
+
+
+local models = asset.syncedResource({
+    Name = "Dsn models",
+    Type = "HttpSynchronization",
+    Identifier = "dsn_stations",
+    Version = 1
+})
+
+local LightSources = {
+    {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sunTransforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+    },
+    {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+    }
+}
+
+-- Colormap for the different sites
+local siteColorMap = {  
+                        GoldstoneColor = {0.0, .4, 1.0}, --blue
+                        CanberraColor = {1.0, 0.0, 0.0}, -- red
+                        MadridColor = {0.0, 1.0, 0.0}  --green 
+                      }
+
+-- stationMap 
+-- SiteColor: determines color of the signals going to this station
+-- Size: The height of the station, approximately the same as their 
+--       dish diameter size which is 34m or 70m for modern stations
+local stationMap = {
+                 DSS13 = {
+                    SiteColor = "GoldstoneColor",
+                    Size = 34
+                    },
+                 DSS14 = {
+                    SiteColor = "GoldstoneColor",
+                    Size = 70
+                    },
+                 DSS15 = {
+                    SiteColor = "GoldstoneColor",
+                    Size = 34
+                    },
+                 DSS24 = {
+                    SiteColor = "GoldstoneColor",
+                    Size = 34
+                    },
+                 DSS25 = {
+                    SiteColor = "GoldstoneColor",
+                    Size = 34
+                    },
+                 DSS26 = {
+                    SiteColor = "GoldstoneColor",
+                    Size = 34
+                    },
+                 DSS43 = {
+                    SiteColor = "CanberraColor",
+                    Size = 70
+                    },
+                 DSS34 = {
+                    SiteColor = "CanberraColor",
+                    Size = 34
+                    },
+                 DSS35 = {
+                    SiteColor = "CanberraColor",
+                    Size = 34
+                    },
+                 DSS36 = {
+                    SiteColor = "CanberraColor",
+                    Size = 34
+                    },
+                 DSS45 = {
+                    SiteColor = "CanberraColor",
+                    Size = 34
+                    },
+                 DSS63 = {
+                    SiteColor = "MadridColor",
+                    Size = 70
+                    },
+                 DSS65 = {
+                    SiteColor = "MadridColor",
+                    Size = 34
+                    },
+                 DSS54 = {
+                    SiteColor = "MadridColor",
+                    Size = 34
+                    },
+                 DSS55 = {
+                    SiteColor = "MadridColor",
+                    Size = 34
+                    }
+        }
+
+
+
+local RotationMatrixGoldstone = {
+    0.899052,  -0.437829,   0.003185,
+   -0.355059,  -0.724795,   0.590428,
+   -0.256198,  -0.531957,  -0.807084 
+}
+
+local RotationMatrixCanberra = {
+    0.524722,   0.851272,  -0.001593,
+   -0.692531,  0.425785,  -0.58233,
+   -0.495043,  0.306664,   0.812951 
+}
+
+local RotationMatrixMadrid = {
+   -0.642388,  0.001023,   0.766379,
+    0.765676, -0.042005,   0.641854,
+    0.032848,  0.999117,   0.026200
+}
+
+--------------------- Goldstone ------------------------
+
+local DSS13 = {
+    Identifier = "DSS13",
+    Parent = earthAsset.Earth.Identifier,
+    Transform =  {
+    Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 243.2055,
+        Latitude = 35.24716,
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/70m_dish/70m_dish.obj"
+        },
+        ColorTexture = models .. "/70m_dish/texture.png", 
+        ModelTransform = RotationMatrixGoldstone,
+        LightSources = lights.StandardLights
+
+    },
+    GUI = {
+        Name = "DSS13 (Goldstone)",
+        Path = "/Solar System/Stations/Goldstone"
+    }
+}
+
+local DSS14 = {
+    Identifier = "DSS14",
+    Parent = earthAsset.Earth.Identifier,
+    Transform =  {
+    Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 243.11046,
+        Latitude = 35.4259,
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/70m_dish/70m_dish.obj"
+        },
+        ColorTexture = models .. "/70m_dish/texture.png", 
+        ModelTransform = RotationMatrixGoldstone,
+        LightSources = lights.StandardLights
+
+    },
+    GUI = {
+        Name = "DSS14 (Goldstone)",
+        Path = "/Solar System/Stations/Goldstone"
+    }
+}
+
+-- DSS15 is a 34m dish of the HEF net that is being decomissioned as of 2017,
+-- now used for educational purposes
+local DSS15 = {
+    Identifier = "DSS15",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+        Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 243.11280,
+        Latitude = 35.42185,
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
+        },
+        ColorTexture = models .. "/34m_dish/texture.png",
+        ModelTransform = RotationMatrixGoldstone,
+        LightSources = lights.StandardLights
+    },
+    GUI = {
+        Name = "DSS15 (Goldstone)",
+        Path = "/Solar System/Stations/Goldstone"
+    }
+}
+
+local DSS24 = {
+    Identifier = "DSS24",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+        Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 243.12521,
+        Latitude = 35.33989,
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
+        },
+        ColorTexture = models .. "/34m_dish/texture.png",
+        ModelTransform = RotationMatrixGoldstone,
+        LightSources = lights.StandardLights
+
+
+    },
+    GUI = {
+        Name = "DSS24 (Goldstone)",
+        Path = "/Solar System/Stations/Goldstone"
+    }
+}
+
+local DSS25 = {
+    Identifier = "DSS25",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+     Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 243.12464,
+        Latitude = 35.33761,
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
+        },
+        ColorTexture = models .. "/34m_dish/texture.png",
+        ModelTransform = RotationMatrixGoldstone,
+        LightSources = lights.StandardLights
+
+    },
+    GUI = {
+        Name = "DSS25 (Goldstone)",
+        Path = "/Solar System/Stations/Goldstone"
+    }
+}
+
+local DSS26 = {
+    Identifier = "DSS26",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+      Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 243.12698,
+        Latitude = 35.33569,
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
+        },
+        ColorTexture = models .. "/34m_dish/texture.png", 
+        ModelTransform = RotationMatrixGoldstone,
+        LightSources = lights.StandardLights
+
+    },
+    GUI = {
+        Name = "DSS26 (Goldstone)",
+        Path = "/Solar System/Stations/Goldstone"
+    }
+}
+
+
+--------------------- Canberra ------------------------
+
+local DSS43 = {
+    Identifier = "DSS43",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+     Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 148.98127,
+        Latitude = -35.40242,
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/70m_dish/70m_dish.obj"
+        },
+        ColorTexture = models .. "/70m_dish/texture.png",
+        ModelTransform = RotationMatrixCanberra,
+        LightSources = lights.StandardLights
+
+    },
+    GUI = {
+        Name = "DSS43 (Canberra)",
+        Path = "/Solar System/Stations/Canberra"
+    }
+}
+ 
+local DSS34 = {
+    Identifier = "DSS34",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+      Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 148.981962,
+        Latitude = -35.39848332,
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
+        },
+        ColorTexture = models .. "/34m_dish/texture.png",
+        ModelTransform = RotationMatrixCanberra,
+        LightSources = lights.StandardLights
+
+    },
+    GUI = {
+        Name = "DSS34 (Canberra)",
+        Path = "/Solar System/Stations/Canberra"
+    }
+}
+
+local DSS35 = {
+    Identifier = "DSS35",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+       Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 148.98146,
+        Latitude = -35.3958,
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
+        },
+        ColorTexture = models .. "/34m_dish/texture.png",
+        ModelTransform = RotationMatrixCanberra,
+        LightSources = lights.StandardLights
+
+    },
+    GUI = {
+        Name = "DSS35 (Canberra)",
+        Path = "/Solar System/Stations/Canberra"
+    }
+}
+
+local DSS36 = {
+    Identifier = "DSS36",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+       Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 148.97854,
+        Latitude = -35.39511,
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
+        },
+        ColorTexture = models .. "/34m_dish/texture.png",
+        ModelTransform = RotationMatrixCanberra,
+        LightSources = lights.StandardLights
+
+    },
+    GUI = {
+        Name = "DSS36 (Canberra)",
+        Path = "/Solar System/Stations/Canberra"
+    }
+}
+
+-- Retired 2016
+local DSS45 = {
+    Identifier = "DSS45",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+       Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 148.97768,
+        Latitude = -35.39846,
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
+        },
+        ColorTexture = models .. "/34m_dish/texture.png",
+        ModelTransform = RotationMatrixCanberra,
+        LightSources = lights.StandardLights
+
+    },
+    GUI = {
+        Name = "DSS45 (Canberra)",
+        Path = "/Solar System/Stations/Canberra"
+    }
+}
+
+
+--------------------- Madrid ------------------------
+
+local DSS63 = {
+    Identifier = "DSS63",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+      Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 355.75199,
+        Latitude = 40.43121,
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/70m_dish/70m_dish.obj"
+        },
+        ColorTexture = models .. "/70m_dish/texture.png",
+        ModelTransform = RotationMatrixMadrid,
+        LightSources = lights.StandardLights
+
+    },
+    GUI = {
+        Name = "DSS63 (Madrid)",
+        Path = "/Solar System/Stations/Madrid"
+    }
+}
+
+local DSS65 = {
+    Identifier = "DSS65",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+      Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 355.7493,
+        Latitude = 40.42721,
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
+        },
+        ColorTexture = models .. "/34m_dish/texture.png",
+        ModelTransform = RotationMatrixMadrid,
+        LightSources = lights.StandardLights
+
+    },
+    GUI = {
+        Name = "DSS65 (Madrid)",
+        Path = "/Solar System/Stations/Madrid"
+    }
+}
+
+local DSS54 = {
+    Identifier = "DSS54",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+       Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 355.7459,
+        Latitude = 40.42562,
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
+        },
+        ColorTexture = models .. "/34m_dish/texture.png",
+        ModelTransform = RotationMatrixMadrid,
+        LightSources = lights.StandardLights
+
+    },
+    GUI = {
+        Name = "DSS54 (Madrid)",
+        Path = "/Solar System/Stations/Madrid"
+    }
+}
+
+local DSS55 = {
+    Identifier = "DSS55",
+    Parent = earthAsset.Earth.Identifier,
+    Transform = {
+       Translation = {
+        Type = "GlobeTranslation",
+        Globe = earthAsset.Earth.Identifier,
+        Longitude = 355.74737,
+        Latitude = 40.4243,
+      }
+   },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/34m_dish/34m_dish.obj"
+        },
+        ColorTexture = models .. "/34m_dish/texture.png",
+        ModelTransform = RotationMatrixMadrid,
+        LightSources = lights.StandardLights
+
+    },
+    GUI = {
+        Name = "DSS55 (Madrid)",
+        Path = "/Solar System/Stations/Madrid"
+    }
+}
+
+---------------------- EXPORT ------------------
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    DSS13,DSS14, DSS15, DSS24, DSS25, DSS26, 
+    DSS43, DSS34, DSS35, DSS36, DSS45, 
+    DSS63, DSS65, DSS54, DSS55
+})
+
+asset.export("siteColorMap", siteColorMap)
+asset.export("stationMap", stationMap)

@@ -1,0 +1,187 @@
+--This asset file contains the DSN fleet of spacecrafts
+
+-- Added from previous missions
+local Voyager1Asset = asset.require('scene/solarsystem/missions/voyager1/voyager1')
+local Voyager2Asset = asset.require('scene/solarsystem/missions/voyager2/voyager2')
+
+-- added specifically for dsn visualization
+local AceAsset = asset.require('scene/solarsystem/dsn/spacecrafts/ace/ace')
+local CassiniAsset = asset.require('scene/solarsystem/dsn/spacecrafts/cassini/cassini')
+local ChandraAsset = asset.require('scene/solarsystem/dsn/spacecrafts/chandra/chandra')
+local CuriosityAsset = asset.require('scene/solarsystem/dsn/spacecrafts/curiosity/curiosity')
+local CLU1Asset = asset.require('scene/solarsystem/dsn/spacecrafts/clu1/clu1')
+local CLU2Asset = asset.require('scene/solarsystem/dsn/spacecrafts/clu2/clu2')
+local CLU3Asset = asset.require('scene/solarsystem/dsn/spacecrafts/clu3/clu3')
+local CLU4Asset = asset.require('scene/solarsystem/dsn/spacecrafts/clu4/clu4')
+local DawnAsset = asset.require('scene/solarsystem/dsn/spacecrafts/dawn/dawn')
+local GaiaAsset = asset.require('scene/solarsystem/dsn/spacecrafts/gaia/gaia')
+local GeotailAsset = asset.require('scene/solarsystem/dsn/spacecrafts/geotail/geotail')
+local Hayabusa2Asset = asset.require('scene/solarsystem/dsn/spacecrafts/hayabusa2/hayabusa2')
+local IceAsset = asset.require('scene/solarsystem/dsn/spacecrafts/ice/ice')
+local ImageAsset = asset.require('scene/solarsystem/dsn/spacecrafts/image/image')
+local InSightAsset = asset.require('scene/solarsystem/dsn/spacecrafts/insight/insight')
+local JunoAsset = asset.require('scene/solarsystem/dsn/spacecrafts/juno/juno')
+local KeplerAsset = asset.require('scene/solarsystem/dsn/spacecrafts/kepler/kepler')
+local LadeAsset = asset.require('scene/solarsystem/dsn/spacecrafts/lade/lade')
+local LroAsset = asset.require('scene/solarsystem/dsn/spacecrafts/lro/lro')
+local MarCOAAsset = asset.require('scene/solarsystem/dsn/spacecrafts/marcoa/marcoa')
+local MarCOBAsset = asset.require('scene/solarsystem/dsn/spacecrafts/marcob/marcob')
+local MarsRecOrbAsset = asset.require('scene/solarsystem/dsn/spacecrafts/mro/mro')
+local MarsOdysseyAsset = asset.require('scene/solarsystem/dsn/spacecrafts/marsodyssey/marsodyssey')
+local MavenAsset = asset.require('scene/solarsystem/dsn/spacecrafts/maven/maven')
+local MessengerAsset = asset.require('scene/solarsystem/dsn/spacecrafts/messenger/messenger')
+local MMS1Asset = asset.require('scene/solarsystem/dsn/spacecrafts/mms1/mms1')
+local MMS2Asset = asset.require('scene/solarsystem/dsn/spacecrafts/mms2/mms2')
+local MMS3Asset = asset.require('scene/solarsystem/dsn/spacecrafts/mms3/mms3')
+local MMS4Asset = asset.require('scene/solarsystem/dsn/spacecrafts/mms4/mms4')
+local MomAsset = asset.require('scene/solarsystem/dsn/spacecrafts/mom/mom')
+local NewHorizonsAsset = asset.require('scene/solarsystem/dsn/spacecrafts/newHorizons/newhorizons')
+local OpportunityAsset = asset.require('scene/solarsystem/dsn/spacecrafts/opportunity/opportunity')
+local OsirisRexAsset = asset.require('scene/solarsystem/dsn/spacecrafts/osirisrex/osirisrex')
+local ParkerSolarProbeAsset = asset.require('scene/solarsystem/dsn/spacecrafts/parkersolarprobe/parkersolarprobe')
+local PlanetCAsset = asset.require('scene/solarsystem/dsn/spacecrafts/planetc/planetc')
+local PRCNAsset = asset.require('scene/solarsystem/dsn/spacecrafts/prcn/prcn')
+local SohoAsset = asset.require('scene/solarsystem/dsn/spacecrafts/soho/soho')
+local SpitzerAsset = asset.require('scene/solarsystem/dsn/spacecrafts/spitzer/spitzer')
+local StereoAAsset = asset.require('scene/solarsystem/dsn/spacecrafts/stereoa/stereoa')
+local StereoBAsset = asset.require('scene/solarsystem/dsn/spacecrafts/stereob/stereob')
+local RosettaAsset = asset.require('scene/solarsystem/dsn/spacecrafts/rosetta/rosetta')
+local TD12Asset = asset.require('scene/solarsystem/dsn/spacecrafts/td12/td12')
+local TD13Asset = asset.require('scene/solarsystem/dsn/spacecrafts/td13/td13')
+local TDR3Asset = asset.require('scene/solarsystem/dsn/spacecrafts/tdr3/tdr3')
+local TDR5Asset = asset.require('scene/solarsystem/dsn/spacecrafts/tdr5/tdr5')
+local TDR6Asset = asset.require('scene/solarsystem/dsn/spacecrafts/tdr6/tdr6')
+local TDR7Asset = asset.require('scene/solarsystem/dsn/spacecrafts/tdr7/tdr7')
+local TDR9Asset = asset.require('scene/solarsystem/dsn/spacecrafts/tdr9/tdr9')
+local TessAsset = asset.require('scene/solarsystem/dsn/spacecrafts/transitexoplanetsurvey/transitexoplanetsurvey')
+local ThemisBAsset = asset.require('scene/solarsystem/dsn/spacecrafts/themisb/themisb')
+local ThemisCAsset = asset.require('scene/solarsystem/dsn/spacecrafts/themisc/themisc')
+local TraceGasOrbiterAsset = asset.require('scene/solarsystem/dsn/spacecrafts/tracegasorbiter/tracegasorbiter')
+local VenusExpressAsset = asset.require('scene/solarsystem/dsn/spacecrafts/venusexpress/venusexpress')
+local WindAsset = asset.require('scene/solarsystem/dsn/spacecrafts/wind/wind')
+local XRayAsset = asset.require('scene/solarsystem/dsn/spacecrafts/xray/xray')
+
+-------------------------------------------------------------------
+----- The map is used to keep the SceneGraphNode identifiers  -----
+----- for each spacecraft up to date with the dsn signal data -----
+-------------------------------------------------------------------
+local signalDataIdMap = {
+    ACE = AceAsset.spacecraftID,
+    CAS = CassiniAsset.spacecraftID,
+    CHDR = ChandraAsset.spacecraftID,
+    CLU1 = CLU1Asset.spacecraftID,
+    CLU2 = CLU2Asset.spacecraftID,
+    CLU3 = CLU3Asset.spacecraftID,
+    CLU4 = CLU4Asset.spacecraftID,
+    DAWN = DawnAsset.spacecraftID,
+    GAIA = GaiaAsset.spacecraftID,
+    GTL = GeotailAsset.spacecraftID,
+    HYB2 = Hayabusa2Asset.spacecraftID,
+    ICE = IceAsset.spacecraftID,
+    IMAG = ImageAsset.spacecraftID,
+    JNO = JunoAsset.spacecraftID,
+    KEPL = KeplerAsset.spacecraftID,
+    LADE = LadeAsset.spacecraftID,
+    LRO = LroAsset.spacecraftID,
+    M010 = MarsOdysseyAsset.spacecraftID,
+    MCOA = MarCOAAsset.spacecraftID,
+    MCOB = MarCOBAsset.spacecraftID,
+    MMS1 = MMS1Asset.spacecraftID,
+    MMS2 = MMS2Asset.spacecraftID,
+    MMS3 = MMS3Asset.spacecraftID,
+    MMS4 = MMS4Asset.spacecraftID,
+    MOM = MomAsset.spacecraftID,
+    MER1 = OpportunityAsset.spacecraftID,
+    MRO = MarsRecOrbAsset.spacecraftID,
+    MSGR = MessengerAsset.spacecraftID,
+    MSL = CuriosityAsset.spacecraftID,
+    MVN = MavenAsset.spacecraftID,
+    NHPC = NewHorizonsAsset.spacecraftID,
+    NSYT = InSightAsset.spacecraftID,
+    ORX = OsirisRexAsset.spacecraftID,
+    PLC = PlanetCAsset.spacecraftID,
+    PRCN = PRCNAsset.spacecraftID,
+    SOHO = SohoAsset.spacecraftID,
+    SPP = ParkerSolarProbeAsset.spacecraftID,
+    STF = SpitzerAsset.spacecraftID,
+    STA = StereoAAsset.spacecraftID,
+    STB = StereoBAsset.spacecraftID,
+    ROSE = RosettaAsset.spacecraftID,
+    TD12 = TD12Asset.spacecraftID,
+    TD13 = TD13Asset.spacecraftID,
+    TDR3 = TDR3Asset.spacecraftID,
+    TDR5 = TDR5Asset.spacecraftID,
+    TDR6 = TDR6Asset.spacecraftID,
+    TDR7 = TDR7Asset.spacecraftID,
+    TDR9 = TDR9Asset.spacecraftID,
+    TESS = TessAsset.spacecraftID,
+    THB = ThemisBAsset.spacecraftID,
+    THC = ThemisCAsset.spacecraftID,
+    TGO = TraceGasOrbiterAsset.spacecraftID,
+    VEX = VenusExpressAsset.spacecraftID,
+    VGR1 = Voyager1Asset.spacecraftID,
+    VGR2 = Voyager2Asset.spacecraftID,
+    WIND = WindAsset.spacecraftID,
+    XMM = XRayAsset.spacecraftID
+
+}
+
+
+asset.export("signalDataIdMap", signalDataIdMap)
+asset.export("AceAsset", AceAsset)
+asset.export("CassiniAsset", CassiniAsset)
+asset.export("ChandraAsset", ChandraAsset)
+asset.export("CuriosityAsset", CuriosityAsset)
+asset.export("CLU1Asset", CLU1Asset)
+asset.export("CLU2Asset", CLU2Asset)
+asset.export("CLU3Asset", CLU3Asset)
+asset.export("CLU4Asset", CLU4Asset)
+asset.export("DawnAsset", DawnAsset)
+asset.export("GaiaAsset", GaiaAsset)
+asset.export("GeotailAsset", GeotailAsset)
+asset.export("Hayabusa2Asset", Hayabusa2Asset)
+asset.export("IceAsset", IceAsset)
+asset.export("ImageAsset", ImageAsset)
+asset.export("InSightAsset", InSightAsset)
+asset.export("JunoAsset", JunoAsset)
+asset.export("KeplerAsset", KeplerAsset)
+asset.export("LadeAsset", LadeAsset)
+asset.export("LroAsset", LroAsset)
+asset.export("MarCOAAsset", MarCOAAsset)
+asset.export("MarCOBAsset", MarCOBAsset)
+asset.export("MarsRecOrbAsset", MarsRecOrbAsset)
+asset.export("MarsOdysseyAsset", MarsOdysseyAsset)
+asset.export("MavenAsset", MavenAsset)
+asset.export("MessengerAsset", MessengerAsset)
+asset.export("MMS1Asset", MMS1Asset)
+asset.export("MMS2Asset", MMS2Asset)
+asset.export("MMS3Asset", MMS3Asset)
+asset.export("MMS4Asset", MMS4Asset)
+asset.export("MomAsset", MomAsset)
+asset.export("NewHorizonsAsset", NewHorizonsAsset)
+asset.export("OpportunityAsset", OpportunityAsset)
+asset.export("OsirisRexAsset", OsirisRexAsset)
+asset.export("ParkerSolarProbeAsset", ParkerSolarProbeAsset)
+asset.export("PlanetCAsset", PlanetCAsset)
+asset.export("PRCNAsset", PRCNAsset)
+asset.export("SohoAsset", SohoAsset)
+asset.export("SpitzerAsset", SpitzerAsset)
+asset.export("StereoAAsset", StereoAAsset)
+asset.export("StereoBAsset", StereoBAsset)
+asset.export("RosettaAsset", RosettaAsset)
+asset.export("TD12Asset", TD12Asset)
+asset.export("TD13Asset", TD13Asset)
+asset.export("TDR3Asset", TDR3Asset)
+asset.export("TDR5Asset", TDR5Asset)
+asset.export("TDR6Asset", TDR6Asset)
+asset.export("TDR7Asset", TDR7Asset)
+asset.export("TDR9Asset", TDR9Asset)
+asset.export("TessAsset", TessAsset)
+asset.export("ThemisBAsset", ThemisBAsset)
+asset.export("ThemisCAsset", ThemisCAsset)
+asset.export("TraceGasOrbiterAsset", TraceGasOrbiterAsset)
+asset.export("VenusExpressAsset", VenusExpressAsset)
+asset.export("Voyager1Asset", Voyager1Asset)
+asset.export("Voyager2Asset", Voyager2Asset)
+asset.export("WindAsset", WindAsset)
+asset.export("XRayAsset", XRayAsset)

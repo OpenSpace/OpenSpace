@@ -1,0 +1,56 @@
+-- 2001 Mars Odyssey (M01)
+local assetHelper = asset.require('util/asset_helper')
+local marsTransforms = asset.require('scene/solarsystem/planets/mars/transforms')
+local kernels = asset.require('./kernels')
+local lights = asset.require('scene/solarsystem/general/lightsources')
+
+local models = asset.syncedResource({
+    Name = "Mro model",
+    Type = "HttpSynchronization",
+    Identifier = "marsodyssey_model",
+    Version = 1
+})
+
+local spacecraftID = "MarsOdyssey"
+
+local MarsOdyssey = {
+    Identifier = spacecraftID,
+    Parent = marsTransforms.MarsBarycenter.Identifier,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "MARS ODYSSEY",
+            Observer = "MARS BARYCENTER",
+            Kernels = kernels.MarsOdysseyKernels
+        }      
+    },
+    GUI = {
+        Name = "Mars Odyssey",
+        Path = "/Solar System/Missions/Mars Odyssey"
+    }
+}
+
+local MarsOdysseyModel = {
+    Identifier = "Mars_Odyssey_model",
+    Parent = MarsOdyssey.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/mars_odyssey_main.obj"
+        },
+        ColorTexture = models .. "/texture/foil_silver_ramp.png",
+        LightSources = lights.StandardLights
+    },
+    GUI = {
+        Name = "Mars Odyssey model",
+        Path = "/Solar System/Missions/Mars Odyssey/3D Model"
+    }
+}
+
+asset.export("spacecraftID", spacecraftID)
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    MarsOdyssey,
+    MarsOdysseyModel
+})

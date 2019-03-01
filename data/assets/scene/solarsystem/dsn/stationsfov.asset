@@ -1,0 +1,60 @@
+local assetHelper = asset.require('util/asset_helper')
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+
+----------------------------------------------------------------------
+---- The Fields Of View of the DSN Ground Station Location Sites  ----
+----------------------------------------------------------------------
+
+local GoldstoneFOV = {
+    Identifier = "GoldstoneFOV",
+    Renderable = {
+        Type = "RenderableStationFov",
+        Enabled = false,
+        ApexPosition = "DSS14",
+        BaseCenterDirection = earthAsset.Earth.Identifier,
+        ReverseDirection = true,
+        Resolution = 50,
+        ColorPropertyURI = "Scene.Signals.Renderable.GoldstoneColor", -- keep in sync with stationsAsset siteColorMap
+        ViewAngle = 160.0
+    },
+    GUI = {
+        Name = "GoldstoneFOV",
+        Path = "/Solar System"
+    }
+}
+local MadridFOV = {
+    Identifier = "MadridFOV",
+    Renderable = {
+        Type = "RenderableStationFov",
+        Enabled = false,
+        ApexPosition = "DSS63",
+        BaseCenterDirection = earthAsset.Earth.Identifier,
+        ReverseDirection = true,
+        Resolution = 50,
+        ColorPropertyURI = "Scene.Signals.Renderable.MadridColor", -- keep in sync with stationsAsset siteColorMap
+        ViewAngle = 160.0
+    },
+    GUI = {
+        Name = "MadridFOV",
+        Path = "/Solar System"
+    }
+}
+local CanberraFOV = {
+    Identifier = "CanberraFOV",
+    Renderable = {
+        Type = "RenderableStationFov",
+        Enabled = false,
+        ApexPosition = "DSS43",
+        BaseCenterDirection = earthAsset.Earth.Identifier,
+        ReverseDirection = true,
+        Resolution = 50,
+        ColorPropertyURI = "Scene.Signals.Renderable.CanberraColor", -- keep in sync with stationsAsset siteColorMap
+        ViewAngle = 160.0
+    },
+    GUI = {
+        Name = "CanberraFOV",
+        Path = "/Solar System"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {GoldstoneFOV, MadridFOV, CanberraFOV})

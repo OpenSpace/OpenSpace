@@ -1,0 +1,64 @@
+-- Mars Reconnaissance Orbiter (MRO)
+-- Kernel files collected from
+-- ftp://naif.jpl.nasa.gov/pub/naif/pds/data/mro-m-spice-6-v1.0/mrosp_1000
+-- See spkinfo.txt 
+
+-- psp26  2013 JAN 01  2013 APR 01
+-- psp27  2013 APR 01  2013 JUL 01
+-- psp28  2013 JUL 01  2013 OCT 01
+-- psp29  2013 OCT 01  2014 JAN 01
+-- psp30  2014 JAN 01  2014 APR 01
+-- psp31  2014 APR 01  2014 JUL 01
+-- psp32  2014 JUL 01  2014 OCT 01
+-- psp33  2014 OCT 01  2015 JAN 01
+-- psp34  2015 JAN 01  2015 APR 01
+-- psp35  2015 APR 01  2015 JUL 01
+-- psp36  2015 JUL 01  2015 OCT 01
+-- psp37  2015 OCT 01  2016 JAN 01
+-- psp38  2016 JAN 01  2016 APR 01
+-- psp39  2016 APR 01  2016 JUL 01
+-- psp40  2016 JUL 01  2016 OCT 01
+-- psp41  2016 OCT 01  2017 JAN 01
+-- psp42  2017 JAN 01  2017 APR 01
+-- psp43  2017 APR 01  2017 JUL 01
+-- psp44  2017 JUL 01  2017 OCT 01
+-- psp45  2017 OCT 01  2018 JAN 01
+-- psp46  2018 JAN 01  2018 APR 01
+-- psp47  2018 APR 01  2018 JUL 01
+-- psp48  2018 JUL 01  2018 OCT 01
+
+local Kernels = asset.syncedResource({
+    Name = "Mro Kernels",
+    Type = "HttpSynchronization",
+    Identifier = "mro_kernels",
+    Version = 1
+})
+
+-- spk kernels
+local MroKernels = {
+    Kernels .. '/mro_psp48_ssd_mro95a.bsp',
+    Kernels .. '/mro_psp47_ssd_mro95a.bsp',
+    Kernels .. '/mro_psp46_ssd_mro95a.bsp',
+    Kernels .. '/mro_psp45_ssd_mro95a.bsp',
+    Kernels .. '/mro_psp44_ssd_mro95a.bsp',
+    Kernels .. '/mro_psp43_ssd_mro95a.bsp',
+    Kernels .. '/mro_psp42_ssd_mro95a.bsp',
+    Kernels .. '/mro_psp41_ssd_mro95a.bsp',
+    Kernels .. '/mro_psp40_ssd_mro95a.bsp',
+    Kernels .. '/mro_psp39_ssd_mro95a.bsp',
+    Kernels .. '/mro_psp38_ssd_mro95a.bsp',
+    Kernels .. '/mro_psp37_ssd_mro95a.bsp',
+    Kernels .. '/mro_psp36_ssd_mro95a.bsp',
+    Kernels .. '/mro_psp35_ssd_mro95a.bsp',
+    Kernels .. '/mro_psp34_ssd_mro95a.bsp',
+    Kernels .. '/mro_psp33_ssd_mro95a.bsp',
+    Kernels .. '/mro_psp32_ssd_mro95a.bsp',
+    Kernels .. '/mro_psp31_ssd_mro95a.bsp',
+    Kernels .. '/mro_psp30_ssd_mro95a.bsp',
+    Kernels .. '/mro_psp29_ssd_mro95a.bsp',
+    Kernels .. '/mro_psp28_ssd_mro95a.bsp',
+    Kernels .. '/mro_psp27_ssd_mro95a.bsp',
+    Kernels .. '/mro_psp26_ssd_mro95a.bsp'
+}
+
+asset.export("MroKernels", MroKernels)

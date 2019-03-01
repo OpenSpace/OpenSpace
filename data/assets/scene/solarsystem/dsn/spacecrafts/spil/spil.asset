@@ -1,0 +1,30 @@
+local assetHelper = asset.require('util/asset_helper')
+local dataFolder = openspace.absPath("${SYNC}/http/dsn_data/1/positioning/SPIL") 
+
+-- local models = asset.syncedResource({
+--     Name = "Dsn models",
+--     Type = "HttpSynchronization",
+--     Identifier = "dsn_data",
+--     Version = 1
+-- })
+
+local spacecraftID = "Spil";
+
+local Spil = {
+    Identifier = spacecraftID,
+    Transform = {
+      Translation = {
+          Type = "RadecTranslation", 
+          DataFolder = dataFolder,
+          DataFileType = "json",
+          ObjectIdentifier = spacecraftID
+      }
+
+   },
+    GUI = {
+        Name = "SPIL",
+        Path = "/Solar System/Missions/SPIL"
+    }
+}
+asset.export("spacecraftID", spacecraftID)
+assetHelper.registerSceneGraphNodesAndExport(asset, {Spil})

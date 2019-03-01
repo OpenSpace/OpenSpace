@@ -1,0 +1,56 @@
+-- Mars Reconnaissance Orbiter (MRO)
+local assetHelper = asset.require('util/asset_helper')
+local marsTransforms = asset.require('scene/solarsystem/planets/mars/transforms')
+local kernels = asset.require('./kernels')
+local lights = asset.require('scene/solarsystem/general/lightsources')
+
+local models = asset.syncedResource({
+    Name = "Mro model",
+    Type = "HttpSynchronization",
+    Identifier = "mro_model",
+    Version = 1
+})
+
+local spacecraftID = "MRO"
+
+local MarsRecOrbiter = {
+    Identifier = spacecraftID,
+    Parent = marsTransforms.MarsBarycenter.Identifier,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "MARS RECON ORBITER",
+            Observer = "MARS BARYCENTER",
+            Kernels = kernels.MroKernels
+        }      
+    },
+    GUI = {
+        Name = "MRO",
+        Path = "/Solar System/Missions/MRO"
+    }
+}
+
+local MarsRecOrbiterModel = {
+    Identifier = "Mro_model",
+    Parent = MarsRecOrbiter.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/mro_main.obj"
+        },
+        ColorTexture = models .. "/texture/foil_silver_ramp.png",
+        LightSources = lights.StandardLights
+    },
+    GUI = {
+        Name = "MRO model",
+        Path = "/Solar System/Missions/MRO/3D Model"
+    }
+}
+
+asset.export("spacecraftID", spacecraftID)
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    MarsRecOrbiter,
+    MarsRecOrbiterModel
+    })

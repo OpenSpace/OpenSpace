@@ -1,0 +1,33 @@
+local assetHelper = asset.require('util/asset_helper')
+local dataFolder = openspace.absPath("${SYNC}/http/dsn_data/1/positioning/ULYS") 
+
+-- local models = asset.syncedResource({
+--     Name = "Dsn models",
+--     Type = "HttpSynchronization",
+--     Identifier = "dsn_stations",
+--     Version = 1
+-- })
+local spacecraftID = "Ulysses";
+
+local Ulysses = {
+    Identifier = spacecraftID,
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2014-JAN-01-00:00:00",
+        End = "2014-DEC-01-00:00:00"
+    },
+    Transform = {
+      Translation = {
+          Type = "RadecTranslation", 
+          DataFolder = dataFolder,
+          DataFileType = "json",
+          ObjectIdentifier = spacecraftID
+      }
+   },
+    GUI = {
+        Name = "Ulysses",
+        Path = "/Solar System/Missions/Ulysses"
+    }
+}
+asset.export("spacecraftID", spacecraftID)
+assetHelper.registerSceneGraphNodesAndExport(asset, {Ulysses})

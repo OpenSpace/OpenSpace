@@ -1,0 +1,33 @@
+local assetHelper = asset.require('util/asset_helper')
+
+local dataFolder = asset.syncedResource({
+    Name = "Dsn positioning data",
+    Type = "HttpSynchronization",
+    Identifier = "dsn_data",
+    Version = 1
+})
+local spacecraftID = "Ace";
+
+local Ace = {
+    Identifier = spacecraftID,
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2014-JAN-01-00:00:00",
+        End = "2019-JAN-01-00:00:00"
+    },
+    Transform = {
+      Translation = {
+          Type = "RadecTranslation", 
+          DataFolder = dataFolder .. "/positioning/ACE/",
+          DataFileType = "json",
+          ObjectIdentifier = spacecraftID
+      }
+
+   },
+    GUI = {
+        Name = "Ace",
+        Path = "/Solar System/Missions/Ace"
+    }
+}
+asset.export("spacecraftID", spacecraftID)
+assetHelper.registerSceneGraphNodesAndExport(asset, {Ace})
