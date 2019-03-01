@@ -25,7 +25,6 @@
 #include <openspace/interaction/navigationhandler.h>
 
 #include <openspace/engine/globals.h>
-#include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/interaction/orbitalnavigator.h>
@@ -41,17 +40,10 @@
 namespace {
     constexpr const char* _loggerCat = "NavigationHandler";
 
-    constexpr const char* KeyFocus = "Focus";
+    constexpr const char* KeyAnchor = "Anchor";
+    constexpr const char* KeyAim = "Aim";
     constexpr const char* KeyPosition = "Position";
     constexpr const char* KeyRotation = "Rotation";
-
-    constexpr const openspace::properties::Property::PropertyInfo OriginInfo = {
-        "Origin",
-        "Origin",
-        "The name of the scene graph node that is the origin of the camera interaction. "
-        "The camera is always focussed on this object and every interaction is relative "
-        "towards this object. Any scene graph node can be the origin node."
-    };
 
     constexpr const openspace::properties::Property::PropertyInfo KeyFrameInfo = {
         "UseKeyFrameInteraction",
@@ -67,31 +59,14 @@ namespace openspace::interaction {
 
 NavigationHandler::NavigationHandler()
     : properties::PropertyOwner({ "NavigationHandler" })
-    , _origin(OriginInfo)
     , _useKeyFrameInteraction(KeyFrameInfo, false)
 {
-    _origin.onChange([this]() {
-        if (_origin.value().empty()) {
-            return;
-        }
-
-        SceneGraphNode* node = sceneGraphNode(_origin.value());
-        if (!node) {
-            LWARNING(fmt::format(
-                "Could not find a node in scenegraph called '{}'", _origin.value()
-            ));
-            return;
-        }
-        setFocusNode(node);
-        resetCameraDirection();
-    });
 
     _inputState = std::make_unique<InputState>();
     _orbitalNavigator = std::make_unique<OrbitalNavigator>();
     _keyframeNavigator = std::make_unique<KeyframeNavigator>();
 
     // Add the properties
-    addProperty(_origin);
     addProperty(_useKeyFrameInteraction);
     addPropertySubOwner(*_orbitalNavigator);
 }
@@ -113,20 +88,16 @@ void NavigationHandler::deinitialize() {
     global::parallelPeer.connectionEvent().unsubscribe("NavigationHandler");
 }
 
-void NavigationHandler::setFocusNode(SceneGraphNode* node) {
-    _orbitalNavigator->setFocusNode(node);
-    _camera->setFocusPositionVec3(focusNode()->worldPosition());
-}
-
 void NavigationHandler::setCamera(Camera* camera) {
     _camera = camera;
-}
-
-void NavigationHandler::resetCameraDirection() {
-    _orbitalNavigator->startInterpolateCameraDirection(*_camera);
+    _orbitalNavigator->setCamera(camera);
 }
 
 const OrbitalNavigator& NavigationHandler::orbitalNavigator() const {
+    return *_orbitalNavigator;
+}
+
+OrbitalNavigator& NavigationHandler::orbitalNavigator() {
     return *_orbitalNavigator;
 }
 
@@ -139,11 +110,11 @@ bool NavigationHandler::isKeyFrameInteractionEnabled() const {
 }
 
 float NavigationHandler::interpolationTime() const {
-    return _orbitalNavigator->rotateToFocusInterpolationTime();
+    return _orbitalNavigator->retargetInterpolationTime();
 }
 
 void NavigationHandler::setInterpolationTime(float durationInSeconds) {
-    _orbitalNavigator->setRotateToFocusInterpolationTime(durationInSeconds);
+    _orbitalNavigator->setRetargetInterpolationTime(durationInSeconds);
 }
 
 void NavigationHandler::updateCamera(double deltaTime) {
@@ -154,14 +125,13 @@ void NavigationHandler::updateCamera(double deltaTime) {
         _cameraUpdatedFromScript = false;
     }
     else if ( ! _playbackModeEnabled ) {
-        if (_camera && focusNode()) {
+        if (_camera) {
             if (_useKeyFrameInteraction) {
                 _keyframeNavigator->updateCamera(*_camera, _playbackModeEnabled);
             }
             else {
                 _orbitalNavigator->updateStatesFromInput(*_inputState, deltaTime);
-                _orbitalNavigator->updateCameraStateFromStates(*_camera, deltaTime);
-                _camera->setFocusPositionVec3(focusNode()->worldPosition());
+                _orbitalNavigator->updateCameraStateFromStates(deltaTime);
             }
         }
     }
@@ -181,21 +151,6 @@ void NavigationHandler::triggerPlaybackStart() {
 
 void NavigationHandler::stopPlayback() {
     _playbackModeEnabled = false;
-}
-
-SceneGraphNode* NavigationHandler::focusNode() const {
-    return _orbitalNavigator->focusNode();
-}
-
-glm::dvec3 NavigationHandler::focusNodeToCameraVector() const {
-    return _camera->positionVec3() - focusNode()->worldPosition();
-}
-
-glm::quat NavigationHandler::focusNodeToCameraRotation() const {
-    glm::dmat4 invWorldRotation = glm::dmat4(
-        glm::inverse(focusNode()->worldRotationMatrix())
-    );
-    return glm::quat(invWorldRotation) * glm::quat(_camera->rotationQuaternion());
 }
 
 Camera* NavigationHandler::camera() const {
@@ -227,13 +182,15 @@ void NavigationHandler::setCameraStateFromDictionary(const ghoul::Dictionary& ca
 {
     bool readSuccessful = true;
 
-    std::string focus;
+    std::string anchor;
+    std::string aim;
     glm::dvec3 cameraPosition;
     glm::dvec4 cameraRotation; // Need to read the quaternion as a vector first.
 
-    readSuccessful &= cameraDict.getValue(KeyFocus, focus);
+    readSuccessful &= cameraDict.getValue(KeyAnchor, anchor);
     readSuccessful &= cameraDict.getValue(KeyPosition, cameraPosition);
     readSuccessful &= cameraDict.getValue(KeyRotation, cameraRotation);
+    cameraDict.getValue(KeyAim, aim); // Aim is not required
 
     if (!readSuccessful) {
         throw ghoul::RuntimeError(
@@ -242,7 +199,9 @@ void NavigationHandler::setCameraStateFromDictionary(const ghoul::Dictionary& ca
     }
 
     // Set state
-    _origin = focus;
+    _orbitalNavigator->setAnchorNode(anchor);
+    _orbitalNavigator->setAimNode(aim);
+
     _camera->setPositionVec3(cameraPosition);
     _camera->setRotation(glm::dquat(
         cameraRotation.x, cameraRotation.y, cameraRotation.z, cameraRotation.w));
@@ -260,7 +219,10 @@ ghoul::Dictionary NavigationHandler::cameraStateDictionary() {
     ghoul::Dictionary cameraDict;
     cameraDict.setValue(KeyPosition, cameraPosition);
     cameraDict.setValue(KeyRotation, cameraRotation);
-    cameraDict.setValue(KeyFocus, focusNode()->identifier());
+    cameraDict.setValue(KeyAnchor, _orbitalNavigator->anchorNode()->identifier());
+    if (_orbitalNavigator->aimNode()) {
+        cameraDict.setValue(KeyAim, _orbitalNavigator->aimNode()->identifier());
+    }
 
     return cameraDict;
 }
@@ -281,8 +243,16 @@ void NavigationHandler::saveCameraStateToFile(const std::string& filepath) {
         glm::dquat q = _camera->rotationQuaternion();
 
         ofs << "return {" << std::endl;
-        ofs << "    " << KeyFocus << " = " << "\"" << focusNode()->identifier() << "\""
+        ofs << "    " << KeyAnchor << " = " << "\"" << 
+            _orbitalNavigator->anchorNode()->identifier() << "\""
             << "," << std::endl;
+
+        if (_orbitalNavigator->aimNode()) {
+            ofs << "    " << KeyAim << " = " << "\"" <<
+                _orbitalNavigator->aimNode()->identifier() << "\""
+                << "," << std::endl;
+        }
+
         ofs << "    " << KeyPosition << " = {"
             << std::to_string(p.x) << ", "
             << std::to_string(p.y) << ", "
@@ -405,11 +375,18 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
                 "Restore the camera state from file"
             },
             {
-                "resetCameraDirection",
-                &luascriptfunctions::resetCameraDirection,
+                "retargetAnchor",
+                &luascriptfunctions::retargetAnchor,
                 {},
                 "void",
-                "Reset the camera direction to point at the focus node"
+                "Reset the camera direction to point at the anchor node"
+            },
+            {
+                "retargetAim",
+                &luascriptfunctions::retargetAim,
+                {},
+                "void",
+                "Reset the camera direction to point at the aim node"
             },
             {
                 "bindJoystickAxis",

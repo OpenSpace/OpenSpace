@@ -49,6 +49,8 @@ namespace {
 
     constexpr const char* KeyTimeFrame = "TimeFrame";
 
+    constexpr const char* KeyFixedBoundingSphere = "FixedBoundingSphere";
+
     constexpr openspace::properties::Property::PropertyInfo GuiPathInfo = {
         "GuiPath",
         "Gui Path",
@@ -218,6 +220,12 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     if (dictionary.hasKey(KeyGuiPath)) {
         result->_guiPath = dictionary.value<std::string>(KeyGuiPath);
         result->addProperty(result->_guiPath);
+    }
+
+    if (dictionary.hasKey(KeyFixedBoundingSphere)) {
+        result->_fixedBoundingSphere = static_cast<float>(
+            dictionary.value<double>(KeyFixedBoundingSphere)
+        );
     }
 
     LDEBUG(fmt::format("Successfully created SceneGraphNode '{}'", result->identifier()));
@@ -588,7 +596,7 @@ void SceneGraphNode::setDependencies(const std::vector<SceneGraphNode*>& depende
 }
 
 SurfacePositionHandle SceneGraphNode::calculateSurfacePositionHandle(
-                                                       const glm::dvec3& targetModelSpace)
+                                                 const glm::dvec3& targetModelSpace) const
 {
     if (_renderable) {
         return _renderable->calculateSurfacePositionHandle(targetModelSpace);
@@ -737,11 +745,11 @@ std::vector<SceneGraphNode*> SceneGraphNode::children() const {
     return nodes;
 }
 
-float SceneGraphNode::boundingSphere() const{
+float SceneGraphNode::boundingSphere() const {
     if (_renderable) {
         return _renderable->boundingSphere();
     }
-    return 0.0;
+    return _fixedBoundingSphere;
 }
 
 // renderable
@@ -807,21 +815,6 @@ SceneGraphNode* SceneGraphNode::childNode(const std::string& identifier) {
 
 const SceneGraphNode::PerformanceRecord& SceneGraphNode::performanceRecord() const {
     return _performanceRecord;
-}
-
-void SceneGraphNode::updateCamera(Camera* camera) const {
-    psc origin(worldPosition());
-    //int i = 0;
-    // the camera position
-
-    psc relative = camera->position();
-    psc focus = camera->focusPosition();
-    psc relative_focus = relative - focus;
-
-    psc target = origin + relative_focus;
-
-    camera->setPosition(target);
-    camera->setFocusPosition(origin);
 }
 
 }  // namespace openspace

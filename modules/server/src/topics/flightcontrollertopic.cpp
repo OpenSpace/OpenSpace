@@ -304,8 +304,8 @@ void FlightControllerTopic::changeFocus(const nlohmann::json& json) const {
     const std::string focus = json[FocusKey][SceneNodeName];
     const auto node = global::renderEngine.scene()->sceneGraphNode(focus);
     if (node) {
-        global::navigationHandler.setFocusNode(node);
-        global::navigationHandler.resetCameraDirection();
+        global::navigationHandler.orbitalNavigator().setFocusNode(node->identifier());
+        global::navigationHandler.orbitalNavigator().startRetargetAnchor();
     } else {
         LWARNING(fmt::format("Could not find node named {}", focus));
     }

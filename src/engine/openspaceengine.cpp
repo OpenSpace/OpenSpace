@@ -39,6 +39,7 @@
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/performance/performancemeasurement.h>
@@ -651,7 +652,14 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
     global::renderEngine.setCamera(camera);
     global::navigationHandler.setCamera(camera);
-    global::navigationHandler.setFocusNode(camera->parent());
+    const SceneGraphNode* parent = camera->parent();
+    if (parent) {
+        global::navigationHandler.orbitalNavigator().setFocusNode(parent->identifier());
+    } else {
+        global::navigationHandler.orbitalNavigator().setFocusNode(
+            _scene->root()->identifier()
+        );
+    }
 
     global::renderEngine.setScene(_scene.get());
 

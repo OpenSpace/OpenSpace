@@ -1,4 +1,4 @@
-local has_gaia = openspace.modules.isLoaded('gaia')
+local has_gaia = openspace.modules.isLoaded('Gaia')
 if not has_gaia then
     openspace.printFatal('Could not load scene "' .. asset.filePath .. '" due to missing module "gaia"')
     do return end
@@ -33,7 +33,7 @@ asset.onInitialize(function ()
     openspace.setPropertyValueSingle('Scene.Stars.Renderable.Enabled', false);
 
     openspace.navigation.setCameraState({
-        Focus = "Gaia",
+        Anchor = "Gaia",
         Position = { 1000000000000.0, 1000000000000.0, 1000000000000.0 },
         Rotation = { 0.683224, -0.765934, -0.601234, -0.418073 },
     })
