@@ -182,6 +182,8 @@ private:
     glm::dmat3 _worldRotationCached;
     double _worldScaleCached = 1.0;
 
+    float _fixedBoundingSphere = 0.f;
+
     glm::dmat4 _modelTransformCached;
     glm::dmat4 _inverseModelTransformCached;
 
