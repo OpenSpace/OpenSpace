@@ -22,63 +22,56 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
-#define __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
+#include <modules/server/include/topics/documentationtopic.h>
 
-#include <openspace/documentation/documentationgenerator.h>
+#include <modules/server/include/connection.h>
+#include <modules/server/include/jsonconverters.h>
+#include <openspace/engine/globals.h>
 
-#include <openspace/util/keys.h>
-#include <ghoul/misc/boolean.h>
+#include <openspace/scripting/scriptengine.h>
+#include <openspace/util/factorymanager.h>
+#include <openspace/interaction/keybindingmanager.h>
+#include <ghoul/logging/logmanager.h>
+
+
+using nlohmann::json;
+
+namespace {
+const constexpr char* _loggerCat = "DocumentationTopic";
+const constexpr char* KeyType = "type";
+const constexpr char* TypeLua = "lua";
+const constexpr char* TypeFactories = "factories";
+const constexpr char* TypeKeyboard = "keyboard";
+const constexpr char* TypeLicense = "licence";
+const constexpr char* TypeProperties = "properties";
+const constexpr char* TypeScene = "scene";
+}
 
 namespace openspace {
-    class Camera;
-    class SceneGraphNode;
-} // namespace openspace
 
-namespace openspace::scripting { struct LuaLibrary; }
+void DocumentationTopic::handleJson(const nlohmann::json& json) {
+    std::string requestedType = json.at(KeyType).get<std::string>();
 
-namespace openspace::interaction {
+    nlohmann::json response;
+    if (requestedType == TypeLua) {
+        response = json::parse(global::scriptEngine.generateJson());
+    } else if (requestedType == TypeFactories) {
+        response = json::parse(FactoryManager::ref().generateJson());
+    } else if (requestedType == TypeKeyboard) {
+        response = json::parse(global::keybindingManager.generateJson());
+    } else if (requestedType == TypeLicense) {
+        //rensponse = json::parse(global::li)
+    } else if (requestedType == TypeProperties) {
 
-class KeybindingManager : public DocumentationGenerator {
-public:
-    BooleanType(IsSynchronized);
+    } else if (requestedType == TypeScene) {
 
-    struct KeyInformation {
-        std::string command;
-        IsSynchronized synchronization;
-        std::string documentation;
-        std::string name;
-        std::string guiPath;
-    };
-
-    KeybindingManager();
-
-    void resetKeyBindings();
-
-    void bindKeyLocal(Key key, KeyModifier modifier, std::string luaCommand,
-        std::string documentation = "", std::string name = "", std::string guiPath = "");
-
-    void bindKey(Key key, KeyModifier modifier, std::string luaCommand,
-        std::string documentation = "", std::string name = "", std::string guiPath = "");
-
-    void removeKeyBinding(const std::string& key);
-
-    std::vector<std::pair<KeyWithModifier, KeyInformation>> keyBinding(
-        const std::string& key) const;
-
-    static scripting::LuaLibrary luaLibrary();
-
-    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
+    }
     
-    std::string generateJson() const override;
+    _connection->sendJson(wrappedPayload(response));
+}
 
-    const std::multimap<KeyWithModifier, KeyInformation>& keyBindings() const;
+bool DocumentationTopic::isDone() const {
+    return true;
+}
 
-private:
-
-    std::multimap<KeyWithModifier, KeyInformation> _keyLua;
-};
-
-} // namespace openspace::interaction
-
-#endif // __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
+} // namespace openspace
