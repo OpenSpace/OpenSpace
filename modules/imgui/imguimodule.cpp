@@ -154,6 +154,10 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             const glm::ivec2 windowSize = delegate.currentWindowSize();
             const glm::ivec2 resolution = delegate.currentWindowResolution();
 
+            if (windowSize.x <= 0 || windowSize.y <= 0) {
+                return;
+            }
+
             glm::vec2 mousePosition = delegate.mousePosition();
             uint32_t mouseButtons = delegate.mouseButtons(2);
 
