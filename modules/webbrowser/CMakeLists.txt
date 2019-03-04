@@ -132,7 +132,7 @@ set(WEBBROWSER_RESOURCES_SRCS
 )
 
 # place helper in separate executable
-set(CEF_HELPER_TARGET "openspace_web_helper" CACHE INTERNAL "CEF_HELPER_TARGET")
+set(CEF_HELPER_TARGET "OpenSpace Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
 
 #
 # CEF platform-specific config
@@ -147,13 +147,16 @@ if(OS_MACOSX)
     SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_HELPER_TARGET})
     add_cef_logical_target("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
     add_dependencies(${CEF_HELPER_TARGET} libcef_dll_wrapper)
-    target_link_libraries(${CEF_HELPER_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
+    target_link_libraries(${CEF_HELPER_TARGET} libcef_dll_wrapper ${CEF_STANDARD_LIBS})
     set_target_properties(${CEF_HELPER_TARGET} PROPERTIES
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/mac/helper-Info.plist
     )
 
-    # Fix the framework rpath in the helper executable.
-    # FIX_MACOSX_HELPER_FRAMEWORK_RPATH(${CEF_HELPER_TARGET})
+    if(USE_SANDBOX)
+        # Logical target used to link the cef_sandbox library.
+        ADD_LOGICAL_TARGET("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
+        target_link_libraries(${CEF_HELPER_TARGET} cef_sandbox_lib)
+    endif()
 endif()
 
 if (OS_WINDOWS)

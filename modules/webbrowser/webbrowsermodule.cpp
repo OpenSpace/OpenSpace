@@ -42,7 +42,7 @@ namespace {
         constexpr const char* SubprocessPath = "openspace_web_helper.exe";
     #elif __APPLE__
         constexpr const char* SubprocessPath =
-            "../Frameworks/openspace_web_helper.app/Contents/MacOS/openspace_web_helper";
+            "../Frameworks/OpenSpace Helper.app/Contents/MacOS/OpenSpace Helper";
     #else
         constexpr const char* SubprocessPath = "";
     #endif
