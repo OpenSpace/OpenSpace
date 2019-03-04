@@ -88,6 +88,8 @@ public:
     std::vector<std::string> cachedScripts();
 
     std::vector<std::string> allLuaFunctions() const;
+    
+    std::string generateJson() const override;
 
 private:
     BooleanType(Replace);
@@ -99,8 +101,6 @@ private:
 
     void addBaseLibrary();
     void remapPrintFunction();
-
-    std::string generateJson() const override;
 
     ghoul::lua::LuaState _state;
     std::vector<LuaLibrary> _registeredLibraries;
