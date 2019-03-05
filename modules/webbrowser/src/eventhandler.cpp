@@ -67,6 +67,10 @@ namespace {
             case openspace::Key::LeftControl: return 59;
             case openspace::Key::LeftSuper:   return 55;
             case openspace::Key::Enter:       return 36;
+            case openspace::Key::Left:        return 123;
+            case openspace::Key::Right:       return 124;
+            case openspace::Key::Up:          return 126;
+            case openspace::Key::Down:        return 127;
             case openspace::Key::A:           return 97;
             case openspace::Key::Num0:        return 82;
             case openspace::Key::Num1:        return 83;
