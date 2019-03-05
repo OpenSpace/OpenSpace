@@ -131,7 +131,8 @@ set(WEBBROWSER_RESOURCES_SRCS
     ${WEBBROWSER_RESOURCES_MAC_ENGLISH_LPROJ_SRCS}
 )
 
-# place helper in separate executable
+# Place Helper in separate executable
+# The naming style "<ApplicionName> Helper" is required by Chromium.
 set(CEF_HELPER_TARGET "OpenSpace Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
 
 #
