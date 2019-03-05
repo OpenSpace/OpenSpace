@@ -49,7 +49,7 @@ set_property(GLOBAL PROPERTY OS_FOLDERS ON)
 cmake_policy(SET CMP0074 NEW)
 
 # Specify the CEF distribution version.
-set(CEF_VERSION "3.3578.1867.g0f6d65a")
+set(CEF_VERSION "3.3626.1894.g90eb8cc")
 
 # Add this project's cmake/ directory to the module path.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
