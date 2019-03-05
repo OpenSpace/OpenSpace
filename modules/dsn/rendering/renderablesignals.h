@@ -37,7 +37,6 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 
-
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
@@ -82,8 +81,8 @@ namespace openspace {
         bool isReady() const override;
         /* Adds the signaldata to _vertexArray*/
         void pushSignalDataToVertexArray(SignalManager::Signal signal);
-        /* Returns position relative to the current focus node */
-        glm::dvec3 getCoordinatePosFromFocusNode(glm::dvec3 worldPos);
+        /* Returns position relative to the current anchor node */
+        glm::dvec3 getCoordinatePosFromAnchorNode(glm::dvec3 worldPos);
         /*Returns a position for a spacecraft */
         glm::dvec3 getPrecisionPositionForNode(std::string id);
         /* Returns a position for a station placed on Earth with a set height*/
@@ -121,7 +120,7 @@ namespace openspace {
             GLint first = 0;
             /// The number of values to be rendered
             GLsizei countLines = 0;
-            /// Local model matrix, dependant on focusnode, used for rendering in camera space
+            /// Local model matrix, dependant on anchor node, used for rendering in camera space
             glm::dmat4 _localTransform = glm::dmat4(1.0);
             /// The vertex array object for this RenderInformation
             GLuint _vaoID = 0;
@@ -167,8 +166,6 @@ namespace openspace {
         const GLuint _sizeFourVal = 4;
         const GLuint _sizeThreeVal = 3;
         const GLuint _sizeOneVal = 1;
-
-        SceneGraphNode* _focusNode;
 
     private:
 

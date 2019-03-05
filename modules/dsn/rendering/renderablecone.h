@@ -35,7 +35,6 @@
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/properties/vector/vec3property.h>
 
-
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
@@ -115,7 +114,7 @@ namespace openspace {
         /// Cache for uniform variables, update _uniformCacheSize accordingly
         UniformCache(modelView, projection) _uniformCache;
 
-        glm::dvec3 getCoordinatePosFromFocusNode(glm::dvec3 worldPos);
+        glm::dvec3 getCoordinatePosFromAnchorNode(glm::dvec3 worldPos);
         void updateUniforms(const RenderData& data);
 
         /// The VBO layout of the vertex position
@@ -148,7 +147,6 @@ namespace openspace {
         glm::vec3 _defaultColor = { 0.4,0.4,0.4};
 
         std::string _apexNodeId, _baseDirNodeId = "";
-        glm::dvec3 _focusNodePos;
 
     };
 

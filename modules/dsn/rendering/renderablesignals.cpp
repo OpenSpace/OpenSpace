@@ -32,6 +32,7 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/orbitalnavigator.h>
 
 namespace {
     constexpr const char* ProgramName = "SignalsProgram";
@@ -388,9 +389,10 @@ void RenderableSignals::update(const UpdateData& data) {
 
     _vertexArray.clear();
 
-    // Update focusnode information, used to counter precision problems
-    _focusNode = global::navigationHandler.focusNode();
-    _lineRenderInformation._localTransform = glm::translate(glm::dmat4(1.0), _focusNode->worldPosition());
+    // Update anchor node information, used to counter precision problems
+    if (global::navigationHandler.orbitalNavigator().anchorNode()) {
+        _lineRenderInformation._localTransform = glm::translate(glm::dmat4(1.0), global::navigationHandler.orbitalNavigator().anchorNode()->worldPosition());
+    }
 
     for (int i = 0; i < SignalManager::signalData.signals.size(); i++) {
 
@@ -494,14 +496,17 @@ void RenderableSignals::addVertexToVertexArray(glm::dvec3 position, glm::vec4 co
 }
 
 /*  Returns a position that is relative to the current 
-    focus node. This is a method to handle precision
+    anchor node. This is a method to handle precision
     problems that occur when placing our signal line endings. */
-glm::dvec3 RenderableSignals::getCoordinatePosFromFocusNode(glm::dvec3 worldPos) {
+glm::dvec3 RenderableSignals::getCoordinatePosFromAnchorNode(glm::dvec3 worldPos) {
 
-    glm::dvec3 focusNodePos = _focusNode->worldPosition();
+    glm::dvec3 anchorNodePos(0);
 
-    glm::dvec3 diffPos = glm::dvec3(worldPos.x - focusNodePos.x, worldPos.y - focusNodePos.y,
-        worldPos.z - focusNodePos.z);
+    if (global::navigationHandler.orbitalNavigator().anchorNode()) {
+        anchorNodePos = global::navigationHandler.orbitalNavigator().anchorNode()->worldPosition();
+    }
+    glm::dvec3 diffPos = glm::dvec3(worldPos.x - anchorNodePos.x, worldPos.y - anchorNodePos.y,
+        worldPos.z - anchorNodePos.z);
 
     return diffPos;
 }
@@ -512,7 +517,7 @@ glm::dvec3 RenderableSignals::getPrecisionPositionForNode(std::string id) {
 
     if (global::renderEngine.scene()->sceneGraphNode(id)) {
         SceneGraphNode* spacecraftNode = global::renderEngine.scene()->sceneGraphNode(id);
-        position = getCoordinatePosFromFocusNode(spacecraftNode->worldPosition());
+        position = getCoordinatePosFromAnchorNode(spacecraftNode->worldPosition());
     }
     else {
         LERROR(fmt::format("No scenegraphnode found for the spacecraft {}", id));
@@ -536,7 +541,7 @@ glm::dvec3 RenderableSignals::getPrecisionPositionForStationNode(std::string id)
         heightAboveSurfacePos.y = heightAboveSurfacePos.y * _stationToSize.at(id);
         heightAboveSurfacePos.z = heightAboveSurfacePos.z * _stationToSize.at(id);
         glm::dvec3 newWorldPos = earthPos + earthSurfacePos + heightAboveSurfacePos;
-        position = getCoordinatePosFromFocusNode(newWorldPos);
+        position = getCoordinatePosFromAnchorNode(newWorldPos);
 
     }
     else {

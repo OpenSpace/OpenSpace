@@ -194,7 +194,7 @@ void NavigationHandler::setCameraStateFromDictionary(const ghoul::Dictionary& ca
 
     if (!readSuccessful) {
         throw ghoul::RuntimeError(
-            "Position, Rotation and Focus need to be defined for camera dictionary."
+            "Position, Rotation and Anchor need to be defined for camera dictionary."
         );
     }
 

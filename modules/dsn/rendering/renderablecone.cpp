@@ -32,8 +32,8 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/programobject.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/orbitalnavigator.h>
 #include <ghoul/filesystem/filesystem.h>
-
 
 namespace {
     constexpr const char* ProgramName = "ConeProgram";
@@ -423,15 +423,17 @@ void RenderableCone::update(const UpdateData& data) {
     for (int i = 0; i < numBaseVertices; ++i) {
         double rad = angleIncrement * i;
         glm::dvec3 p = _baseCenterPosition + (((e0 * glm::cos(rad)) + (e1 * glm::sin(rad))) * radius);
-        p = getCoordinatePosFromFocusNode(p);
+        p = getCoordinatePosFromAnchorNode(p);
         _baseVertices.push_back(p);
     }
 
     // work around for precision errors
-    _focusNodePos = global::navigationHandler.focusNode()->worldPosition();
-    _localTransform = glm::translate(glm::dmat4(1.0), _focusNodePos);
-    _apexPosition = getCoordinatePosFromFocusNode(_apexPosition);
-    _baseCenterPosition = getCoordinatePosFromFocusNode(_baseCenterPosition);
+    if (global::navigationHandler.orbitalNavigator().anchorNode()) {
+        _localTransform = glm::translate(glm::dmat4(1.0), 
+                          global::navigationHandler.orbitalNavigator().anchorNode()->worldPosition());
+    }
+    _apexPosition = getCoordinatePosFromAnchorNode(_apexPosition);
+    _baseCenterPosition = getCoordinatePosFromAnchorNode(_baseCenterPosition);
     
     // upload all positions to the vertex arrays
     fillVertexArrays();
@@ -440,12 +442,18 @@ void RenderableCone::update(const UpdateData& data) {
 }
 
 /*  Returns a position that is relative to the current
-    focus node. This is a method to handle precision
+    anchor node. This is a method to handle precision
     problems that occur when placing our signal line endings. */
-glm::dvec3 RenderableCone::getCoordinatePosFromFocusNode(glm::dvec3 worldPos) {
+glm::dvec3 RenderableCone::getCoordinatePosFromAnchorNode(glm::dvec3 worldPos) {
 
-    glm::dvec3 diffPos = glm::dvec3(worldPos.x - _focusNodePos.x, worldPos.y - _focusNodePos.y,
-        worldPos.z - _focusNodePos.z);
+    glm::dvec3 anchorNodePos(0);
+
+    if (global::navigationHandler.orbitalNavigator().anchorNode()) {
+        anchorNodePos = global::navigationHandler.orbitalNavigator().anchorNode()->worldPosition();
+    }
+
+    glm::dvec3 diffPos = glm::dvec3(worldPos.x - anchorNodePos.x, worldPos.y - anchorNodePos.y,
+        worldPos.z - anchorNodePos.z);
 
     return diffPos;
 }
