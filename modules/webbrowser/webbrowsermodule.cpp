@@ -26,6 +26,7 @@
 
 #include <modules/webbrowser/include/browserinstance.h>
 #include <modules/webbrowser/include/screenspacebrowser.h>
+#include <modules/webbrowser/include/cefhost.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>

@@ -26,7 +26,6 @@
 #define __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
 
 #include <modules/webbrowser/include/eventhandler.h>
-#include <modules/webbrowser/include/cefhost.h>
 #include <openspace/util/openspacemodule.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
