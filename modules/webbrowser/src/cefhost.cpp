@@ -50,6 +50,7 @@ CefHost::CefHost(const std::string& helperLocation) {
     CefString(&settings.browser_subprocess_path).FromString(helperLocation);
 #endif
 
+    settings.windowless_rendering_enabled = true;
     attachDebugSettings(settings);
 
 #ifdef WIN32
