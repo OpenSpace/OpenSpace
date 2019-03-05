@@ -114,6 +114,8 @@ public:
 
     void reloadBrowser();
 
+    void selectAll();
+
     const CefRefPtr<CefBrowser>& getBrowser() const;
 
     bool hasContent(int x, int y);

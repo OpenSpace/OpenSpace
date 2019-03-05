@@ -172,6 +172,12 @@ void BrowserInstance::reloadBrowser() {
     _browser->Reload();
 }
 
+void BrowserInstance::selectAll() {
+    if (_browser->GetFocusedFrame()) {
+        _browser->GetFocusedFrame()->SelectAll();
+    }
+}
+
 bool BrowserInstance::hasContent(int x, int y) {
     return _renderHandler->hasContent(x, y);
 }

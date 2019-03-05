@@ -34,13 +34,13 @@ namespace {
     constexpr const char* _loggerCat = "WebBrowser:EventHandler";
 
     /**
-    * Map from GLFW key codes to "regular" key codes, supported by JS and CEF.
+    * Map from GLFW key codes to windows key codes, supported by JS and CEF.
     * See http://keycode.info/ for lookup
     *
     * \param key
     * \return the key code, if mapped or the GLFW key code
     */
-    int mapFromGlfwToNative(openspace::Key key) {
+    int mapFromGlfwToWindows(openspace::Key key) {
         switch (key) {
             case openspace::Key::BackSpace:   return 8;
             case openspace::Key::Tab:         return 9;
@@ -50,6 +50,49 @@ namespace {
             case openspace::Key::Right:       return 39;
             case openspace::Key::Down:        return 40;
             case openspace::Key::Delete:      return 46;
+            default:                          return static_cast<int>(key);
+        }
+    }
+
+    // Map from GLFW key codes to native key codes for Mac.
+    // The keys inserted here are based from setting breakpoints in
+    // the CEF-bundled 'cefclient' (browser_window_osr_mac.mm)
+    // as well as trial and error.
+    // There is an issue for proper cross-platform key events in CEF:
+    // https://bitbucket.org/chromiumembedded/cef/issues/1750
+    // For now, the 'important' keys are inserted here manually.
+    int mapFromGlfwToNative(openspace::Key key) {
+        switch (key) {
+            case openspace::Key::BackSpace:   return 51;
+            case openspace::Key::LeftControl: return 59;
+            case openspace::Key::LeftSuper:   return 55;
+            case openspace::Key::Enter:       return 36;
+            case openspace::Key::A:           return 97;
+            case openspace::Key::Num0:        return 82;
+            case openspace::Key::Num1:        return 83;
+            case openspace::Key::Num2:        return 84;
+            case openspace::Key::Num3:        return 85;
+            case openspace::Key::Num4:        return 86;
+            case openspace::Key::Num5:        return 87;
+            case openspace::Key::Num6:        return 88;
+            case openspace::Key::Num7:        return 89;
+            case openspace::Key::Num8:        return 91; // Note: 91, not 90.
+            case openspace::Key::Num9:        return 92;
+            default:                          return static_cast<int>(key);
+        }
+    }
+
+    int mapFromGlfwToCharacter(openspace::Key key) {
+        switch (key) {
+            default:                          return static_cast<int>(key);
+        }
+    }
+
+    // This is needed to avoid the backspace up event to trigger backspace.
+    int mapFromGlfwToUnmodifiedCharacter(openspace::Key key) {
+        switch (key) {
+            case openspace::Key::BackSpace:   return 127;
+            case openspace::Key::A:           return 97;
             default:                          return static_cast<int>(key);
         }
     }
@@ -65,6 +108,9 @@ namespace {
         }
         if (hasKeyModifier(modifiers, openspace::KeyModifier::Alt)) {
             cefModifiers |= 1 << 3;
+        }
+        if (hasKeyModifier(modifiers, openspace::KeyModifier::Super)) {
+            cefModifiers |= 1 << 7;
         }
         return cefModifiers;
     }
@@ -238,33 +284,42 @@ bool EventHandler::mouseWheelCallback(glm::ivec2 delta) {
 
 bool EventHandler::charCallback(unsigned int charCode, KeyModifier modifier) {
     CefKeyEvent keyEvent;
-    keyEvent.windows_key_code = charCode;
-    keyEvent.character = charCode;
+    keyEvent.windows_key_code = mapFromGlfwToWindows(Key(charCode));
+    keyEvent.character = mapFromGlfwToCharacter(Key(charCode));
+    keyEvent.native_key_code = mapFromGlfwToNative(Key(charCode));
     keyEvent.modifiers = static_cast<uint32>(modifier);
     keyEvent.type = KEYEVENT_CHAR;
-    // TODO(klas): figure out when to block
+
     return _browserInstance->sendKeyEvent(keyEvent);
 }
 
 bool EventHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
-    if (specialKeyEvent(key)) {
+    if (specialKeyEvent(key, modifier, action)) {
         return true;
     }
 
     CefKeyEvent keyEvent;
+
     // TODO(klas): Use something less platform specific?
-    keyEvent.windows_key_code = mapFromGlfwToNative(key);
-    keyEvent.modifiers        = mapToCefModifiers(modifier);
-    keyEvent.type             = keyEventType(action);
-    // TODO(klas): figure out when to block
+    keyEvent.windows_key_code     = mapFromGlfwToWindows(key);
+    keyEvent.native_key_code      = mapFromGlfwToNative(key);
+    keyEvent.unmodified_character = mapFromGlfwToUnmodifiedCharacter(key);
+    keyEvent.modifiers            = mapToCefModifiers(modifier);
+    keyEvent.type                 = keyEventType(action);
+
     return _browserInstance->sendKeyEvent(keyEvent);
 }
 
-bool EventHandler::specialKeyEvent(Key key) {
+bool EventHandler::specialKeyEvent(Key key, KeyModifier mod, KeyAction action) {
     switch (key) {
         case Key::F5:
             _browserInstance->reloadBrowser();
             return true;
+        case Key::A:
+            if (hasKeyModifier(mod, KeyModifier::Super)) {
+                _browserInstance->selectAll();
+            }
+            break;
         default:
             return false;
     }
