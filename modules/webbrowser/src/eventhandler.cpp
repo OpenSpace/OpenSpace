@@ -86,18 +86,16 @@ namespace {
         }
     }
 
-    int mapFromGlfwToCharacter(openspace::Key key) {
-        switch (key) {
-            default:                          return static_cast<int>(key);
-        }
+    int16_t mapFromGlfwToCharacter(openspace::Key key) {
+        return static_cast<int16_t>(key);
     }
 
     // This is needed to avoid the backspace up event to trigger backspace.
-    int mapFromGlfwToUnmodifiedCharacter(openspace::Key key) {
+    int16_t mapFromGlfwToUnmodifiedCharacter(openspace::Key key) {
         switch (key) {
             case openspace::Key::BackSpace:   return 127;
             case openspace::Key::A:           return 97;
-            default:                          return static_cast<int>(key);
+            default:                          return static_cast<int16_t>(key);
         }
     }
 
@@ -314,7 +312,7 @@ bool EventHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction act
     return _browserInstance->sendKeyEvent(keyEvent);
 }
 
-bool EventHandler::specialKeyEvent(Key key, KeyModifier mod, KeyAction action) {
+bool EventHandler::specialKeyEvent(Key key, KeyModifier mod, KeyAction) {
     switch (key) {
         case Key::F5:
             _browserInstance->reloadBrowser();
@@ -322,8 +320,9 @@ bool EventHandler::specialKeyEvent(Key key, KeyModifier mod, KeyAction action) {
         case Key::A:
             if (hasKeyModifier(mod, KeyModifier::Super)) {
                 _browserInstance->selectAll();
+                return true;
             }
-            break;
+            return false;
         default:
             return false;
     }
