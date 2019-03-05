@@ -7,7 +7,6 @@ if(NOT DEFINED _CEF_ROOT_EXPLICIT)
   message(FATAL_ERROR "Use find_package(CEF) to load this file.")
 endif()
 
-
 #
 # Shared configuration.
 #

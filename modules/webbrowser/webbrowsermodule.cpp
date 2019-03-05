@@ -219,6 +219,11 @@ bool WebBrowserModule::isEnabled() const {
 
 namespace webbrowser {
 
+/**
+ * Logic for the webbrowser performance hotfix,
+ * described in more detail in globalscallbacks.h.
+ */
+
 std::chrono::microseconds interval = std::chrono::microseconds(1);
 std::chrono::time_point<std::chrono::high_resolution_clock> latestCall;
 CefHost* cefHost = nullptr;

@@ -98,10 +98,6 @@ function(run_cef_macosx_config CEF_ROOT module_path)
         )
     endforeach ()
 
-    # Fix the framework rpath in the main executable.
-    set_target_properties(${CEF_TARGET} PROPERTIES INSTALL_RPATH "@executable_path/..")
-    set_target_properties(${CEF_TARGET} PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
-
     if(NOT ${CMAKE_GENERATOR} STREQUAL "Xcode")
         # Manually process and copy over resource files.
         # The Xcode generator handles this via the set_target_properties RESOURCE directive.
