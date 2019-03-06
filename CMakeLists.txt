@@ -48,11 +48,23 @@ include(${GHOUL_BASE_DIR}/support/cmake/include_gtest.cmake)
 begin_header("Configuring OpenSpace project")
 message(STATUS "CMake version: ${CMAKE_VERSION}")
 
+# Bail out if the user tries to generate a 32 bit project.
+if (NOT ${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+    message(FATAL_ERROR "OpenSpace can only be generated for 64 bit architectures.")
+endif()
+
 ##########################################################################################
 # Cleanup project                                                                        #
 ##########################################################################################
 set(OPENSPACE_APPS_DIR "${OPENSPACE_BASE_DIR}/apps")
 set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
+
+IF(NOT EXISTS ${OPENSPACE_EXT_DIR}/ghoul/CMakeLists.txt)
+    message(FATAL_ERROR "Git submodules are missing. Please run \n "
+                        "git submodule update --init --recursive \n"
+                        "to download the missing dependencies.")
+endif()
+
 set_property(GLOBAL PROPERTY USE_FOLDERS On)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER CMake)
 
