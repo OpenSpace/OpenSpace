@@ -76,3 +76,8 @@ target_include_directories(libTUIO11 PUBLIC
     ${PROJECT_SOURCE_DIR}/libTUIO11/
     ${PROJECT_SOURCE_DIR}/libTUIO11/oscpack
     ${PROJECT_SOURCE_DIR}/libTUIO11/TUIO)
+
+if (WIN32)
+    # Tuio dependencies
+    target_link_libraries(libTUIO11 PRIVATE winmm.lib wininet.lib ws2_32.lib)
+endif()

@@ -86,10 +86,19 @@ int saveCameraStateToFile(lua_State* L) {
     return 0;
 }
 
-int resetCameraDirection(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::resetCameraDirection");
+int retargetAnchor(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::retargetAnchor");
 
-    global::navigationHandler.resetCameraDirection();
+    global::navigationHandler.orbitalNavigator().startRetargetAnchor();
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+int retargetAim(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::retargetAim");
+
+    global::navigationHandler.orbitalNavigator().startRetargetAim();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

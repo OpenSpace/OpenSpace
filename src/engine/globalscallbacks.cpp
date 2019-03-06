@@ -81,8 +81,8 @@ std::vector<std::function<bool(unsigned int, KeyModifier)>>& gCharacter() {
     return g;
 }
 
-std::vector<std::function<bool(MouseButton, MouseAction)>>& gMouseButton() {
-    static std::vector<std::function<bool(MouseButton, MouseAction)>> g;
+std::vector<std::function<bool(MouseButton, MouseAction, KeyModifier)>>& gMouseButton() {
+    static std::vector<std::function<bool(MouseButton, MouseAction, KeyModifier)>> g;
     return g;
 }
 

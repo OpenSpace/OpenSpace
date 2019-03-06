@@ -85,8 +85,8 @@ WebGuiModule::WebGuiModule()
     , _enabled(ServerProcessEnabledInfo, false)
     , _entryPoint(ServerProcessEntryPointInfo)
     , _webDirectory(WebDirectoryInfo)
-    , _address(AddressInfo, DefaultAddress)
     , _port(PortInfo, DefaultPort)
+    , _address(AddressInfo, DefaultAddress)
     , _webSocketInterface(WebSocketInterfaceInfo, "")
 {
     addProperty(_enabled);
@@ -158,8 +158,8 @@ void WebGuiModule::startProcess() {
 #endif
 
     const std::string command = "\"" + nodePath + "\" "
-        + "\"" + _entryPoint.value() + "\"" +
-        " --directory \"" + _webDirectory.value() + "\"" +
+        + "\"" + absPath(_entryPoint.value()) + "\"" +
+        " --directory \"" + absPath(_webDirectory.value()) + "\"" +
         " --http-port \"" + std::to_string(_port.value()) + "\" " +
         " --ws-address \"" + _address.value() + "\"" +
         " --ws-port \"" + std::to_string(webSocketPort) + "\"" +

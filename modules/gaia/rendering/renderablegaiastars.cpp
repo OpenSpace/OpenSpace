@@ -620,6 +620,9 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
 #endif // __APPLE__
 
     if (dictionary.hasKey(ShaderOptionInfo.identifier)) {
+        // Default shader option:
+        _shaderOption = gaia::ShaderOption::Billboard_VBO;
+
         const std::string shaderOption = dictionary.value<std::string>(
             ShaderOptionInfo.identifier
         );
@@ -639,7 +642,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         if (shaderOption == "Point_VBO") {
             _shaderOption = gaia::ShaderOption::Point_VBO;
         }
-        else {
+        else if (shaderOption == "Billboard_VBO") {
             _shaderOption = gaia::ShaderOption::Billboard_VBO;
         }
     }
