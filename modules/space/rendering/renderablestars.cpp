@@ -72,26 +72,18 @@ namespace {
         float apparentMagnitude;
     };
 
-    struct VelocityVBOLayout {
-        std::array<float, 4> position; // (x,y,z,e)
-        float value;
-        float luminance;
-        float absoluteMagnitude;
+    struct ColorVBOLayout : public CommonDataLayout {};
 
+    struct VelocityVBOLayout : public CommonDataLayout {
         float vx; // v_x
         float vy; // v_y
         float vz; // v_z
     };
 
-    struct SpeedVBOLayout {
-        std::array<float, 4> position; // (x,y,z,e)
-        float value;
-        float luminance;
-        float absoluteMagnitude;
-
+    struct SpeedVBOLayout : public CommonDataLayout {
         float speed;
     };
-    
+
     struct OtherDataLayout : public CommonDataLayout {};
 
     constexpr openspace::properties::Property::PropertyInfo SpeckFileInfo = {
