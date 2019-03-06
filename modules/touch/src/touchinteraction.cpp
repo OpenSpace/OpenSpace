@@ -50,7 +50,6 @@
 #include <modules/webbrowser/webbrowsermodule.h>
 #endif
 
-
 #include <cmath>
 #include <ghoul/fmt.h>
 #include <functional>
