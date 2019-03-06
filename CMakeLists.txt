@@ -22,7 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 project(OpenSpace)
 
@@ -46,6 +46,7 @@ include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/include_gtest.cmake)
 
 begin_header("Configuring OpenSpace project")
+message(STATUS "CMake version: ${CMAKE_VERSION}")
 
 ##########################################################################################
 # Cleanup project                                                                        #
