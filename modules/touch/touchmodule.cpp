@@ -23,9 +23,8 @@
  ****************************************************************************************/
 
 #include <modules/touch/touchmodule.h>
-#include <modules/webbrowser/webbrowsermodule.h>
-#include <modules/webgui/webguimodule.h>
 
+#include <modules/webgui/webguimodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/moduleengine.h>
@@ -38,6 +37,10 @@
 #include <sstream>
 #include <string>
 #include <iostream>
+
+#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
+#include <modules/webbrowser/webbrowsermodule.h>
+#endif
 
 using namespace TUIO;
 
