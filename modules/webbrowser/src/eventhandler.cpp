@@ -125,9 +125,9 @@ void EventHandler::initialize() {
         }
     );
     global::callback::mouseButton.emplace_back(
-        [this](MouseButton button, MouseAction action) -> bool {
+        [this](MouseButton button, MouseAction action, KeyModifier mods) -> bool {
             if (_browserInstance) {
-                return mouseButtonCallback(button, action);
+                return mouseButtonCallback(button, action, mods);
             }
             return false;
         }
@@ -143,7 +143,34 @@ void EventHandler::initialize() {
     );
 }
 
-bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
+void EventHandler::touchPressCallback(const double x, const double y) {
+    if (_browserInstance) {
+        _mousePosition.x = static_cast<float>(x);
+        _mousePosition.y = static_cast<float>(y);
+
+        int clickCount = BrowserInstance::SingleClick;
+        _browserInstance->sendMouseClickEvent(mouseEvent(), MBT_LEFT, false, clickCount);
+    }
+}
+
+void EventHandler::touchReleaseCallback(const double x, const double y) {
+    if (_browserInstance) {
+        _mousePosition.x = static_cast<float>(x);
+        _mousePosition.y = static_cast<float>(y);
+
+        int clickCount = BrowserInstance::SingleClick;
+        _browserInstance->sendMouseClickEvent(mouseEvent(), MBT_LEFT, true, clickCount);
+    }
+}
+
+bool EventHandler::hasContentCallback(const double x, const double y) {
+    return _browserInstance->hasContent(static_cast<int>(x), static_cast<int>(y));
+}
+
+bool EventHandler::mouseButtonCallback(MouseButton button,
+                                       MouseAction action,
+                                       KeyModifier mods)
+{
     if (button != MouseButton::Left && button != MouseButton::Right) {
         return false;
     }
@@ -167,7 +194,7 @@ bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
     }
 
     return _browserInstance->sendMouseClickEvent(
-        mouseEvent(),
+        mouseEvent(mods),
         (button == MouseButton::Left) ? MBT_LEFT : MBT_RIGHT,
         !state.down,
         clickCount
@@ -212,6 +239,7 @@ bool EventHandler::mouseWheelCallback(glm::ivec2 delta) {
 bool EventHandler::charCallback(unsigned int charCode, KeyModifier modifier) {
     CefKeyEvent keyEvent;
     keyEvent.windows_key_code = charCode;
+    keyEvent.character = charCode;
     keyEvent.modifiers = static_cast<uint32>(modifier);
     keyEvent.type = KEYEVENT_CHAR;
     // TODO(klas): figure out when to block
@@ -250,7 +278,7 @@ cef_key_event_type_t EventHandler::keyEventType(KeyAction action) {
     }
 }
 
-CefMouseEvent EventHandler::mouseEvent() {
+CefMouseEvent EventHandler::mouseEvent(KeyModifier mods) {
     CefMouseEvent event;
     event.x = static_cast<int>(_mousePosition.x);
     event.y = static_cast<int>(_mousePosition.y);
@@ -263,6 +291,7 @@ CefMouseEvent EventHandler::mouseEvent() {
         event.modifiers = EVENTFLAG_RIGHT_MOUSE_BUTTON;
     }
 
+    event.modifiers |= static_cast<uint32_t>(mapToCefModifiers(mods));
     return event;
 }
 

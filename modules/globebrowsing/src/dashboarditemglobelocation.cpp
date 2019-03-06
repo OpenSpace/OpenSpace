@@ -30,6 +30,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/distanceconversion.h>
 #include <openspace/util/updatestructures.h>
@@ -142,7 +143,10 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
 void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
     using namespace globebrowsing;
 
-    SceneGraphNode* n = global::navigationHandler.focusNode();
+    const SceneGraphNode* n = global::navigationHandler.orbitalNavigator().anchorNode();
+    if (!n) {
+        return;
+    }
     const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
     if (!globe) {
         return;

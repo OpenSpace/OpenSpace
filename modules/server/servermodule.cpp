@@ -37,7 +37,6 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-    constexpr const char* _loggerCat = "ServerModule";
     constexpr const char* KeyInterfaces = "Interfaces";
 } // namespace
 

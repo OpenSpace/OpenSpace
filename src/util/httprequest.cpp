@@ -197,6 +197,7 @@ void SyncHttpDownload::download(HttpRequest::RequestOptions opt) {
 
     if (!initDownload()) {
         LERROR(fmt::format("Failed sync download '{}'", _httpRequest.url()));
+        deinitDownload();
         markAsFailed();
         return;
     }
@@ -211,14 +212,15 @@ void SyncHttpDownload::download(HttpRequest::RequestOptions opt) {
     _httpRequest.onReadyStateChange([this](HttpRequest::ReadyState rs) {
         if (rs == HttpRequest::ReadyState::Success) {
             LTRACE(fmt::format("Finished sync download '{}'", _httpRequest.url()));
+            deinitDownload();
             markAsSuccessful();
         } else if (rs == HttpRequest::ReadyState::Fail) {
             LERROR(fmt::format("Failed sync download '{}'", _httpRequest.url()));
+            deinitDownload();
             markAsFailed();
         }
     });
     _httpRequest.perform(opt);
-    deinitDownload();
 
     LTRACE(fmt::format("End sync download '{}'", _httpRequest.url()));
 }
@@ -286,21 +288,25 @@ void AsyncHttpDownload::download(HttpRequest::RequestOptions opt) {
     _httpRequest.onReadyStateChange([this](HttpRequest::ReadyState rs) {
         if (rs == HttpRequest::ReadyState::Success) {
             LTRACE(fmt::format("Finished async download '{}'", _httpRequest.url()));
+            deinitDownload();
             markAsSuccessful();
         }
         else if (rs == HttpRequest::ReadyState::Fail) {
             LTRACE(fmt::format("Failed async download '{}'", _httpRequest.url()));
+            deinitDownload();
             markAsFailed();
         }
     });
 
     _httpRequest.perform(opt);
     if (!hasSucceeded()) {
+        deinitDownload();
         markAsFailed();
     }
-    _downloadFinishCondition.notify_all();
-    deinitDownload();
+
     LTRACE(fmt::format("End async download '{}'", _httpRequest.url()));
+
+    _downloadFinishCondition.notify_all();
 }
 
 const std::string& AsyncHttpDownload::url() const {
@@ -351,6 +357,7 @@ bool HttpFileDownload::initDownload() {
     }
 
     ++nCurrentFilehandles;
+    _hasHandle = true;
     _file = std::ofstream(_destination, std::ofstream::binary);
 
     if (_file.fail()) {
@@ -414,8 +421,11 @@ const std::string& HttpFileDownload::destination() const {
 }
 
 bool HttpFileDownload::deinitDownload() {
-    _file.close();
-    --nCurrentFilehandles;
+    if (_hasHandle) {
+        _hasHandle = false;
+        _file.close();
+        --nCurrentFilehandles;
+    }
     return _file.good();
 }
 

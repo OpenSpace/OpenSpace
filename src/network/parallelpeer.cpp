@@ -585,20 +585,22 @@ const std::string& ParallelPeer::hostName() {
 }
 
 void ParallelPeer::sendCameraKeyframe() {
-    SceneGraphNode* focusNode = global::navigationHandler.focusNode();
+    const SceneGraphNode* focusNode =
+        global::navigationHandler.orbitalNavigator().anchorNode();
     if (!focusNode) {
         return;
     }
 
     // Create a keyframe with current position and orientation of camera
     datamessagestructures::CameraKeyframe kf;
-    kf._position = global::navigationHandler.focusNodeToCameraVector();
+    kf._position = global::navigationHandler.orbitalNavigator().anchorNodeToCameraVector();
 
     kf._followNodeRotation =
         global::navigationHandler.orbitalNavigator().followingNodeRotation();
     if (kf._followNodeRotation) {
         kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
-        kf._rotation = global::navigationHandler.focusNodeToCameraRotation();
+        kf._rotation = 
+            global::navigationHandler.orbitalNavigator().anchorNodeToCameraRotation();
     }
     else {
         kf._rotation = global::navigationHandler.camera()->rotationQuaternion();

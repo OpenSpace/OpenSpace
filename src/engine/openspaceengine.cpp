@@ -39,6 +39,7 @@
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/performance/performancemeasurement.h>
@@ -644,6 +645,8 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     }
 
     _scene = std::make_unique<Scene>(std::move(sceneInitializer));
+    global::renderEngine.setScene(_scene.get());
+
     global::rootPropertyOwner.addPropertySubOwner(_scene.get());
     _scene->setCamera(std::make_unique<Camera>());
     Camera* camera = _scene->camera();
@@ -651,9 +654,14 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
     global::renderEngine.setCamera(camera);
     global::navigationHandler.setCamera(camera);
-    global::navigationHandler.setFocusNode(camera->parent());
-
-    global::renderEngine.setScene(_scene.get());
+    const SceneGraphNode* parent = camera->parent();
+    if (parent) {
+        global::navigationHandler.orbitalNavigator().setFocusNode(parent->identifier());
+    } else {
+        global::navigationHandler.orbitalNavigator().setFocusNode(
+            _scene->root()->identifier()
+        );
+    }
 
     _assetManager->removeAll();
     _assetManager->add(assetPath);
@@ -1180,10 +1188,13 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier)
     global::luaConsole.charCallback(codepoint, modifier);
 }
 
-void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action) {
-    using F = std::function<bool (MouseButton, MouseAction)>;
+void OpenSpaceEngine::mouseButtonCallback(MouseButton button,
+                                          MouseAction action,
+                                          KeyModifier mods)
+{
+    using F = std::function<bool (MouseButton, MouseAction, KeyModifier)>;
     for (const F& func : global::callback::mouseButton) {
-        bool isConsumed = func(button, action);
+        bool isConsumed = func(button, action, mods);
         if (isConsumed) {
             // If the mouse was released, we still want to forward it to the navigation
             // handler in order to reliably terminate a rotation or zoom. Accidentally

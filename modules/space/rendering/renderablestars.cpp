@@ -45,6 +45,8 @@
 #include <stdint.h>
 #include <limits>
 
+#include <type_traits>
+
 namespace {
     constexpr const char* _loggerCat = "RenderableStars";
 
@@ -70,15 +72,23 @@ namespace {
         float apparentMagnitude;
     };
 
-    struct ColorVBOLayout : public CommonDataLayout {};
+    struct VelocityVBOLayout {
+        std::array<float, 4> position; // (x,y,z,e)
+        float value;
+        float luminance;
+        float absoluteMagnitude;
 
-    struct VelocityVBOLayout : public CommonDataLayout {
         float vx; // v_x
         float vy; // v_y
         float vz; // v_z
     };
 
-    struct SpeedVBOLayout : public CommonDataLayout {
+    struct SpeedVBOLayout {
+        std::array<float, 4> position; // (x,y,z,e)
+        float value;
+        float luminance;
+        float absoluteMagnitude;
+
         float speed;
     };
     
@@ -612,7 +622,7 @@ void RenderableStars::initializeGL() {
             LERROR(fmt::format("Could not find other data column {}", _queuedOtherData));
         }
         else {
-            _otherDataOption = std::distance(_dataNames.begin(), it);
+            _otherDataOption = static_cast<int>(std::distance(_dataNames.begin(), it));
             _queuedOtherData.clear();
         }
     }
