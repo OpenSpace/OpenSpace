@@ -79,7 +79,7 @@ CefWebGuiModule::CefWebGuiModule()
     , _visible(VisibleInfo, true)
     , _url(GuiUrlInfo, "")
     , _reload(ReloadInfo)
-    , _guiScale(GuiScaleInfo, 1.0, 0.1, 3.0)
+    , _guiScale(GuiScaleInfo, 1.f, 0.1f, 3.f)
 {
     addProperty(_enabled);
     addProperty(_visible);
