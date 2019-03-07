@@ -114,7 +114,6 @@ bool TouchModule::hasNewInput() {
 }
 
 void TouchModule::hasNewWebInput(const std::vector<TuioCursor>& listOfContactPoints) {
-#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
     // If one point input and no data in webPosition callback send mouse click to webgui
     bool isWebPositionCallbackZero =
         (webPositionCallback.x == 0 && webPositionCallback.y == 0);
@@ -126,6 +125,7 @@ void TouchModule::hasNewWebInput(const std::vector<TuioCursor>& listOfContactPoi
             listOfContactPoints.at(0).getScreenY(res.y)
         );
 
+#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
         WebBrowserModule& module = *(global::moduleEngine.module<WebBrowserModule>());
         if (module.eventHandler().hasContentCallback(pos.x, pos.y)) {
             webPositionCallback = glm::vec2(pos.x, pos.y);
@@ -138,8 +138,8 @@ void TouchModule::hasNewWebInput(const std::vector<TuioCursor>& listOfContactPoi
         module.eventHandler().touchReleaseCallback(webPositionCallback.x,
             webPositionCallback.y);
         webPositionCallback = glm::vec2(0, 0);
-    }
 #endif
+    }
 }
 
 TouchModule::TouchModule()
