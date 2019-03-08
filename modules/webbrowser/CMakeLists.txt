@@ -22,6 +22,8 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
+
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 
