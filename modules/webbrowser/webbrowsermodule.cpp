@@ -140,7 +140,7 @@ void WebBrowserModule::attachEventHandler(BrowserInstance* browserInstance) {
     }
 }
 
-EventHandler WebBrowserModule::getEventHandler() {
+EventHandler WebBrowserModule::eventHandler() {
     return _eventHandler;
 }
 

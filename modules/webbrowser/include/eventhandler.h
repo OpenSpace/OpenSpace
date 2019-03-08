@@ -60,12 +60,12 @@ public:
     void setBrowser(const CefRefPtr<CefBrowser>& browser);
     void setBrowserInstance(BrowserInstance* browserInstance);
     void detachBrowser();
-    void touchPressCallback(double x, double y);
-    void touchReleaseCallback(double x, double y);
-    bool hasContentCallback(double, double);
+    void touchPressCallback(const double x, const double y);
+    void touchReleaseCallback(const double x, const double y);
+    bool hasContentCallback(const double, const double);
 
 private:
-    bool mouseButtonCallback(MouseButton button, MouseAction action);
+    bool mouseButtonCallback(MouseButton button, MouseAction action, KeyModifier mods);
     bool mousePositionCallback(double x, double y);
     bool mouseWheelCallback(glm::ivec2 delta);
     bool charCallback(unsigned int charCode, KeyModifier modifier);
@@ -85,7 +85,7 @@ private:
      *
      * \return
      */
-    CefMouseEvent mouseEvent();
+    CefMouseEvent mouseEvent(KeyModifier mods = KeyModifier::NoModifier);
 
     /**
      * Find the CEF key event to use for a given action.

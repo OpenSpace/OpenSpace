@@ -133,7 +133,7 @@ asset.onInitialize(function ()
     )
 
     openspace.navigation.setCameraState({
-        Focus = OsirisRexAsset.OsirisRex.Identifier,
+        Anchor = OsirisRexAsset.OsirisRex.Identifier,
         Position = { 26974590199.661884, 76314608558.908020, -127086452897.101791 },
         Rotation = { 0.729548, -0.126024, 0.416827, 0.527382 },
     })

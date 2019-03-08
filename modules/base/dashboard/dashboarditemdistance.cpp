@@ -28,6 +28,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -409,11 +410,17 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
 
             return { thisPos + dirLength, "surface of " + mainComp.node->guiName() };
         }
-        case Type::Focus:
+        case Type::Focus: {
+            const SceneGraphNode* anchor =
+                global::navigationHandler.orbitalNavigator().anchorNode();
+            if (!anchor) {
+                return { glm::dvec3(0.0), "Unknown" };
+            }
             return {
-                global::navigationHandler.focusNode()->worldPosition(),
+                global::navigationHandler.orbitalNavigator().anchorNode()->worldPosition(),
                 "focus"
             };
+        }
         case Type::Camera:
             return { global::renderEngine.scene()->camera()->positionVec3(), "camera" };
         default:

@@ -37,6 +37,9 @@ Scene* sceneGraph() {
 
 SceneGraphNode* sceneGraphNode(const std::string& name) {
     const Scene* graph = sceneGraph();
+    if (!graph) {
+        return nullptr;
+    }
     return graph->sceneGraphNode(name);
 }
 

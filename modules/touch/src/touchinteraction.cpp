@@ -368,7 +368,6 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
 
     bool hasWebContent = webContent(list);
 
-
     //Code for lower-right corner double-tap to zoom-out
     glm::ivec2 res = global::windowDelegate.currentWindowSize();
     glm::dvec2 pos = glm::vec2(
@@ -383,10 +382,10 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
         res.y * (1.0f - bottomCornerSizeForZoomTap_fraction)
     );
 
-    bool isTapInLowerCorner = std::abs(pos.x) > zoomTapThresholdX &&
-                              std::abs(pos.y) > zoomTapThresholdY;
+    bool isTapInLowerRightCorner =
+        (std::abs(pos.x) > zoomTapThresholdX && std::abs(pos.y) > zoomTapThresholdY);
 
-    if (_doubleTap && isTapInLowerCorner) {
+    if (_doubleTap && isTapInLowerRightCorner) {
         _zoomOutTap = true;
         _tap = false;
         _doubleTap = false;
@@ -439,7 +438,7 @@ bool TouchInteraction::webContent(const std::vector<TuioCursor>& list) {
     );
 
     WebBrowserModule& module = *(global::moduleEngine.module<WebBrowserModule>());
-    return module.getEventHandler().hasContentCallback(pos.x, pos.y);
+    return module.eventHandler().hasContentCallback(pos.x, pos.y);
 }
 
 // Activates/Deactivates gui input mode (if active it voids all other interactions)
@@ -1038,6 +1037,11 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
 {
     const TuioCursor& cursor = list.at(0);
     const int action = interpretInteraction(list, lastProcessed);
+    const SceneGraphNode* anchor =
+        global::navigationHandler.orbitalNavigator().anchorNode();
+    if (!anchor) {
+        return;
+    }
 
 #ifdef TOUCH_DEBUG_PROPERTIES
     const std::map<int, std::string> interactionNames = {
@@ -1099,11 +1103,11 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
             ) / lastProcessed.size();
 
             glm::dvec3 camPos = _camera->positionVec3();
-            glm::dvec3 centerPos = _focusNode->worldPosition();
+            glm::dvec3 centerPos = anchor->worldPosition();
             glm::dvec3 currDistanceToFocusNode = camPos - centerPos;
 
             double distanceFromFocusSurface =
-                length(currDistanceToFocusNode) - _focusNode->boundingSphere();
+                length(currDistanceToFocusNode) - anchor->boundingSphere();
             double zoomFactor = (distance - lastDistance);
 #ifdef TOUCH_DEBUG_PROPERTIES
             pinchConsecCt++;
@@ -1178,12 +1182,9 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
              // pick something in the scene as focus node
             if (_pickingSelected) {
                 setFocusNode(_pickingSelected);
-                 // cant do setFocusNode() since TouchInteraction is not subclass of
-                 // InteractionMode
-                global::navigationHandler.setFocusNode(_focusNode);
 
                 // rotate camera to look at new focus, using slerp quat
-                glm::dvec3 camToFocus = _focusNode->worldPosition() -
+                glm::dvec3 camToFocus = _pickingSelected->worldPosition() -
                                         _camera->positionVec3();
                 glm::dvec3 forward = glm::normalize(_camera->viewDirectionWorldSpace());
                 double angle = glm::angle(forward, camToFocus);
@@ -1223,8 +1224,18 @@ double TouchInteraction::computeConstTimeDecayCoefficient(double velocity) {
 }
 
 double TouchInteraction::computeTapZoomDistance(double zoomGain) {
-    double dist = glm::distance(_camera->positionVec3(), _camera->focusPositionVec3());
-    dist -= _focusNode->boundingSphere();
+    const SceneGraphNode* anchor =
+        global::navigationHandler.orbitalNavigator().anchorNode();
+    if (!anchor) {
+        return 0.0;
+    }
+
+    double dist = glm::distance(
+        _camera->positionVec3(),
+        global::navigationHandler.orbitalNavigator().anchorNode()->worldPosition()
+    );
+
+    dist -= anchor->boundingSphere();
 
     double newVelocity = dist * _tapZoomFactor;
     newVelocity *= std::max(_touchScreenSize.value() * 0.1, 1.0);
@@ -1238,13 +1249,16 @@ double TouchInteraction::computeTapZoomDistance(double zoomGain) {
 void TouchInteraction::step(double dt) {
     using namespace glm;
 
+    const SceneGraphNode* anchor =
+        global::navigationHandler.orbitalNavigator().anchorNode();
+
      // since functions cant be called directly (TouchInteraction not a subclass of
      // InteractionMode)
-    setFocusNode(global::navigationHandler.focusNode());
-    if (_focusNode && _camera) {
+    setFocusNode(global::navigationHandler.orbitalNavigator().anchorNode());
+    if (anchor && _camera) {
         // Create variables from current state
         dvec3 camPos = _camera->positionVec3();
-        dvec3 centerPos = _focusNode->worldPosition();
+        dvec3 centerPos = anchor->worldPosition();
 
         dvec3 directionToCenter = normalize(centerPos - camPos);
         dvec3 centerToCamera = camPos - centerPos;
@@ -1262,7 +1276,7 @@ void TouchInteraction::step(double dt) {
         dquat globalCamRot = normalize(quat_cast(inverse(lookAtMat)));
         dquat localCamRot = inverse(globalCamRot) * _camera->rotationQuaternion();
 
-        double boundingSphere = _focusNode->boundingSphere();
+        double boundingSphere = anchor->boundingSphere();
         dvec3 centerToBoundingSphere;
         double distance = std::max(length(centerToCamera) - boundingSphere, 0.0);
         _currentRadius = boundingSphere /
@@ -1314,25 +1328,32 @@ void TouchInteraction::step(double dt) {
             double distToSurface = length(centerToCamera - planetBoundaryRadius);
 
             WebGuiModule& module = *(global::moduleEngine.module<WebGuiModule>());
+
+#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
             float overviewLimit = module.storyHandler.overviewLimit();
             float zoomInLimit = module.storyHandler.zoomInLimit();
+#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
 
             //Apply the velocity to update camera position
             glm::dvec3 zoomDistanceIncrement = directionToCenter * _vel.zoom * dt;
             bool isZoomStepUnderDistToSurface = (length(_vel.zoom*dt) < distToSurface);
             bool willZoomStepViolatePlanetBoundaryRadius =
                 (length(centerToCamera + zoomDistanceIncrement) < planetBoundaryRadius);
+#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
             bool willNewPositionViolateOverviewLimit =
                 (length(centerToCamera + zoomDistanceIncrement) >= overviewLimit);
             bool willNewPositionViolateZoomInLimit =
                 (length(centerToCamera + zoomDistanceIncrement) < zoomInLimit);
+#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
 
             if (    isZoomStepUnderDistToSurface
-                && !willZoomStepViolatePlanetBoundaryRadius
+#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
                 && !willNewPositionViolateOverviewLimit
-                && !willNewPositionViolateZoomInLimit      )
+                && !willNewPositionViolateZoomInLimit
+#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+                && !willZoomStepViolatePlanetBoundaryRadius )
             {
-                camPos += directionToCenter * _vel.zoom * dt;
+                camPos += zoomDistanceIncrement;
             }
             else {
 #ifdef TOUCH_DEBUG_PROPERTIES
@@ -1430,10 +1451,6 @@ void TouchInteraction::decelerate(double dt) {
     _vel.roll  *= computeDecayCoeffFromFrametime(_constTimeDecayCoeff.roll,  times);
     _vel.pan   *= computeDecayCoeffFromFrametime(_constTimeDecayCoeff.pan,   times);
     _vel.zoom  *= computeDecayCoeffFromFrametime(_constTimeDecayCoeff.zoom,  times);
-
-    glm::dvec3 camPos = _camera->positionVec3();
-    glm::dvec3 centerPos = _focusNode->worldPosition();
-    glm::dvec3 centerToCamera = camPos - centerPos;
 }
 
 double TouchInteraction::computeDecayCoeffFromFrametime(double coeff, int times) {
@@ -1520,14 +1537,20 @@ Camera* TouchInteraction::getCamera() {
     return _camera;
 }
 
-SceneGraphNode* TouchInteraction::getFocusNode() {
-    return _focusNode;
+const SceneGraphNode* TouchInteraction::getFocusNode() {
+    return global::navigationHandler.orbitalNavigator().anchorNode();
 }
 void TouchInteraction::setCamera(Camera* camera) {
     _camera = camera;
 }
-void TouchInteraction::setFocusNode(SceneGraphNode* focusNode) {
-    _focusNode = focusNode;
+void TouchInteraction::setFocusNode(const SceneGraphNode* focusNode) {
+    if (focusNode) {
+        global::navigationHandler.orbitalNavigator().setAnchorNode(
+            focusNode->identifier()
+        );
+    } else {
+        global::navigationHandler.orbitalNavigator().setAnchorNode("");
+    }
 }
 
 void FrameTimeAverage::updateWithNewFrame(double sample) {

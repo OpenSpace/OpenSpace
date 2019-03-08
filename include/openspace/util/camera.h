@@ -72,7 +72,6 @@ public:
 
     // Mutators
     void setPositionVec3(glm::dvec3 pos);
-    void setFocusPositionVec3(glm::dvec3 pos);
     void setRotation(glm::dquat rotation);
     void setScaling(float scaling);
     void setMaxFov(float fov);
@@ -86,7 +85,6 @@ public:
     const glm::dvec3& positionVec3() const;
     glm::dvec3 eyePositionVec3() const;
     const glm::dvec3& unsynchedPositionVec3() const;
-    const glm::dvec3& focusPositionVec3() const;
     const glm::dvec3& viewDirectionWorldSpace() const;
     const glm::dvec3& lookUpVectorCameraSpace() const;
     const glm::dvec3& lookUpVectorWorldSpace() const;
@@ -139,18 +137,6 @@ public:
         mutable std::mutex _mutex;
     } sgctInternal;
 
-    // Deprecated
-    // [[deprecated("Replaced by Camera::setPositionVec3()")]]
-    void setPosition(psc pos);
-    // [[deprecated("Replaced by Camera::setFocusPositionVec3()")]]
-    void setFocusPosition(psc pos);
-    // [[deprecated("Replaced by Camera::positionVec3()")]]
-    psc position() const;
-    // [[deprecated("Replaced by Camera::unsynchedPositionVec3()")]]
-    psc unsynchedPosition() const;
-    // [[deprecated("Replaced by Camera::focusPositionVec3()")]]
-    psc focusPosition() const;
-    const glm::mat4& sceneMatrix() const;
     // @TODO use Camera::SgctInternal interface instead
     // [[deprecated("Replaced by Camera::SgctInternal::viewMatrix()")]]
     const glm::mat4& viewMatrix() const;
@@ -161,10 +147,11 @@ public:
 
     std::vector<Syncable*> getSyncables();
 
-private:
     // Static constants
     static const glm::dvec3 ViewDirectionCameraSpace;
-    static const glm::dvec3 LookupVectorCameraSpace;
+    static const glm::dvec3 UpDirectionCameraSpace;
+
+private:
 
     SyncData<glm::dvec3> _position = glm::dvec3(1.0, 1.0, 1.0);
     SyncData<glm::dquat> _rotation  = glm::dquat(glm::dvec3(1.0, 1.0, 1.0));

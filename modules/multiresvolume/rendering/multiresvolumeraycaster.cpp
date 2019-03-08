@@ -133,7 +133,7 @@ bool MultiresVolumeRaycaster::isCameraInside(const RenderData& data,
                                              glm::vec3& localPosition)
 {
     // Camera rig position in world coordinates.
-    glm::vec4 rigWorldPos = glm::vec4(data.camera.position().vec3(), 1.0);
+    glm::vec4 rigWorldPos = glm::vec4(data.camera.positionVec3(), 1.0);
     //rigWorldPos /= data.camera.scaling().x * pow(10.0, data.camera.scaling().y);
     //glm::mat4 invSgctMatrix = glm::inverse(data.camera.viewMatrix());
 

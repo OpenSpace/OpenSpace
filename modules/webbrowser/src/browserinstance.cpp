@@ -97,6 +97,9 @@ void BrowserInstance::reshape(const glm::ivec2& windowSize) {
 }
 
 void BrowserInstance::draw() {
+    if (_zoomLevel != _browser->GetHost()->GetZoomLevel()) {
+        _browser->GetHost()->SetZoomLevel(_zoomLevel);
+    }
     _renderHandler->draw();
 }
 
@@ -129,12 +132,14 @@ bool BrowserInstance::sendMouseClickEvent(const CefMouseEvent& event,
 }
 
 void BrowserInstance::sendTouchPressEvent(const CefMouseEvent &event, CefBrowserHost::MouseButtonType button,
-    int clickCount) {
+                                          const int clickCount)
+{
     _browser->GetHost()->SendMouseClickEvent(event, button, false, clickCount);
 }
 
 void BrowserInstance::sendResleasePressEvent(const CefMouseEvent &event, CefBrowserHost::MouseButtonType button,
-    int clickCount) {
+                                             const int clickCount)
+{
     _browser->GetHost()->SendMouseClickEvent(event, button, true, clickCount);
 }
 
@@ -150,6 +155,13 @@ bool BrowserInstance::sendMouseWheelEvent(const CefMouseEvent& event,
 {
     _browser->GetHost()->SendMouseWheelEvent(event, delta.x, delta.y);
     return hasContent(event.x, event.y);
+}
+
+void BrowserInstance::setZoom(float ratio) {
+    //Zooming in CEF is non-linear according to this:
+    //https://www.magpcss.org/ceforum/viewtopic.php?f=6&t=11491
+    _zoomLevel = glm::log(static_cast<double>(ratio))/glm::log(1.2);
+    _browser->GetHost()->SetZoomLevel(_zoomLevel);
 }
 
 void BrowserInstance::reloadBrowser() {
