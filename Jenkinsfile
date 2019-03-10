@@ -16,10 +16,10 @@ def modules = [
     "volume"
 ];
 
-def flags = "-DGHOUL_USE_DEVIL=OFF "
+def flags = "-D GHOUL_USE_DEVIL=OFF "
 
 for (module in modules) {
-    flags += "-DOPENSPACE_MODULE_" + module.toUpperCase() + "=ON "
+    flags += "-D OPENSPACE_MODULE_" + module.toUpperCase() + "=ON "
 }
 
 echo flags
@@ -59,8 +59,8 @@ windows: {
             buildDir: 'build',
             installation: 'InSearchPath',
             steps: [
-              [ args: flags + ' -- /p:Configuration=Debug /target:OpenSpace /nologo /verbosity:minimal /m:2', withCmake: true ],
-              [ args: flags + ' -- /p:Configuration=Debug /target:"Unit Tests"\\OpenSpaceTest /nologo /verbosity:minimal /m:2', withCmake: true ]
+              [ args: flags + ' -- /p:Configuration=Debug /target:OpenSpace /nologo /verbosity:minimal /m:4', withCmake: true ],
+              [ args: flags + ' -- /p:Configuration=Debug /target:"Unit Tests"\\OpenSpaceTest /nologo /verbosity:minimal /m:4', withCmake: true ]
             ]
           ])
         }
@@ -100,9 +100,9 @@ osx: {
 //                 sh '''
 //                     mkdir -p build
 //                     cd build
-//                     cmake .. ''' +
-//                     flags + ''' ..
-//                 make -j4 OpenSpace GhoulTest OpenSpaceTest
+                    // cmake .. ''' +
+                    // flags + ''' ..
+                // make -j4 OpenSpace GhoulTest OpenSpaceTest
 //                 '''
 //             }
 //         }
