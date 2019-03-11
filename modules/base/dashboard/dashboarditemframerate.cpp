@@ -54,6 +54,71 @@ namespace {
         "Type of the frame time display",
         "This value determines the units in which the frame time is displayed."
     };
+
+    std::string formatDt() {
+        return fmt::format(
+            "Avg. Frametime: {:.2f} ms",
+            openspace::global::windowDelegate.averageDeltaTime() * 1000.0
+        );
+    }
+
+    std::string formatDtExtremes() {
+        return fmt::format(
+            "Frametimes between: {:.2f} and {:.2f} ms",
+            openspace::global::windowDelegate.minDeltaTime() * 1000.0,
+            openspace::global::windowDelegate.maxDeltaTime() * 1000.0
+        );
+    }
+
+    std::string formatDtStandardDeviation() {
+        return fmt::format(
+            "Frametime standard deviation : {:.2f} ms",
+            openspace::global::windowDelegate.deltaTimeStandardDeviation() * 1000.0
+        );
+    }
+
+    std::string formatDtCoefficientOfVariation() {
+        return fmt::format(
+            "Frametime coefficient of variation : {:.2f} %",
+            openspace::global::windowDelegate.deltaTimeStandardDeviation() /
+            openspace::global::windowDelegate.averageDeltaTime() * 100.0
+        );
+    }
+
+    std::string formatFps() {
+        return fmt::format(
+            "FPS: {:3.2f}",
+            1.0 / openspace::global::windowDelegate.deltaTime()
+        );
+    }
+
+    std::string formatAverageFps() {
+        return fmt::format(
+            "Avg. FPS: {:3.2f}",
+            1.0 / openspace::global::windowDelegate.averageDeltaTime()
+        );
+    }
+
+    std::string format(openspace::DashboardItemFramerate::FrametimeType frametimeType) {
+        using namespace openspace;
+        switch (frametimeType) {
+        case DashboardItemFramerate::FrametimeType::DtTimeAvg:
+            return formatDt();
+        case DashboardItemFramerate::FrametimeType::DtTimeExtremes:
+            return formatDtExtremes();
+        case DashboardItemFramerate::FrametimeType::DtStandardDeviation:
+            return formatDtStandardDeviation();
+        case DashboardItemFramerate::FrametimeType::DtCoefficientOfVariation:
+            return formatDtCoefficientOfVariation();
+        case DashboardItemFramerate::FrametimeType::FPS:
+            return formatFps();
+        case DashboardItemFramerate::FrametimeType::FPSAvg:
+            return formatAverageFps();
+        default:
+            return "";
+        }
+    }
+
 } // namespace
 
 namespace openspace {
@@ -132,12 +197,10 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
         {
             static_cast<int>(FrametimeType::DtStandardDeviation),
             "Deltatime standard deviation"
-
         },
         {
             static_cast<int>(FrametimeType::DtCoefficientOfVariation),
             "Deltatime coefficient of variation"
-
         },
         { static_cast<int>(FrametimeType::FPS), "Frames per second" },
         { static_cast<int>(FrametimeType::FPSAvg), "Average frames per second" },
@@ -180,105 +243,33 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
 
 void DashboardItemFramerate::render(glm::vec2& penPosition) {
     FrametimeType frametimeType = FrametimeType(_frametimeType.value());
-    switch (frametimeType) {
-        case FrametimeType::DtTimeAvg:
-            penPosition.y -= _font->height();
-            RenderFont(
-                *_font,
-                penPosition,
-                fmt::format(
-                    "Avg. Frametime: {:.2f} ms",
-                    global::windowDelegate.averageDeltaTime() * 1000.0
-                )
-            );
-            break;
-        case FrametimeType::DtTimeExtremes:
-            penPosition.y -= _font->height();
-            RenderFont(
-                *_font,
-                penPosition,
-                fmt::format(
-                    "Frametimes between: {:.2f} and {:.2f} ms",
-                    global::windowDelegate.minDeltaTime() * 1000.0,
-                    global::windowDelegate.maxDeltaTime() * 1000.0
-                )
-            );
-            break;
-        case FrametimeType::DtStandardDeviation:
-            penPosition.y -= _font->height();
-            RenderFont(
-                *_font,
-                penPosition,
-                fmt::format(
-                   "Frametime standard deviation : {:.2f} ms",
-                   global::windowDelegate.deltaTimeStandardDeviation() * 1000.0
-                )
-            );
-            break;
-        case FrametimeType::DtCoefficientOfVariation:
-            penPosition.y -= _font->height();
-            RenderFont(
-                *_font,
-                penPosition,
-                fmt::format(
-                    "Frametime coefficient of variation : {:.2f} %",
-                    global::windowDelegate.deltaTimeStandardDeviation() /
-                    global::windowDelegate.averageDeltaTime() * 100.0
-                )
-            );
-            break;
-        case FrametimeType::FPS:
-            penPosition.y -= _font->height();
-            RenderFont(
-                *_font,
-                penPosition,
-                fmt::format("FPS: {:3.2f}", 1.0 / global::windowDelegate.deltaTime())
-            );
-            break;
-        case FrametimeType::FPSAvg:
-            penPosition.y -= _font->height();
-            RenderFont(
-                *_font,
-                penPosition,
-                fmt::format(
-                    "Avg. FPS: {:3.2f}", 1.0 / global::windowDelegate.averageDeltaTime()
-                )
-            );
-            break;
-        case FrametimeType::None:
-            break;
-    }
+
+    const std::string output = format(frametimeType);
+
+    int nLines = output.empty() ? 0 :
+        (std::count(output.begin(), output.end(), '\n') + 1);
+
+    penPosition.y -= _font->height() * static_cast<float>(nLines);
+
+    ghoul::fontrendering::FontRenderer::defaultRenderer().render(
+        *_font,
+        penPosition,
+        output
+    );
 }
 
 glm::vec2 DashboardItemFramerate::size() const {
     FrametimeType frametimeType = FrametimeType(_frametimeType.value());
-    switch (frametimeType) {
-        case FrametimeType::DtTimeAvg:
-            return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-                *_font,
-                fmt::format(
-                    "Avg. Frametime: {:.5f}", global::windowDelegate.averageDeltaTime()
-                )
-            ).boundingBox;
-        case FrametimeType::FPS:
-            return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-                *_font,
-                fmt::format(
-                    "FPS: {:3.2f}", 1.0 / global::windowDelegate.deltaTime()
-                )
-            ).boundingBox;
-        case FrametimeType::FPSAvg:
-            return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-                *_font,
-                fmt::format(
-                    "Avg. FPS: %3.2f", 1.0 / global::windowDelegate.averageDeltaTime()
-                )
-            ).boundingBox;
-        case FrametimeType::None:
-            return { 0.f, 0.f };
-        default:
-            return { 0.f, 0.f };
+    const std::string output = format(frametimeType);
+
+    if (output.empty()) {
+        return { 0.f, 0.f };
     }
+
+    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
+        *_font,
+        output
+    ).boundingBox;
 }
 
 } // namespace openspace
