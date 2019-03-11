@@ -42,6 +42,9 @@ class DashboardItemFramerate : public DashboardItem {
 public:
     enum class FrametimeType {
         DtTimeAvg = 0,
+        DtTimeExtremes,
+        DtStandardDeviation,
+        DtCoefficientOfVariation,
         FPS,
         FPSAvg,
         None

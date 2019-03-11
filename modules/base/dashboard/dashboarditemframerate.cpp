@@ -85,8 +85,9 @@ documentation::Documentation DashboardItemFramerate::Documentation() {
             {
                 FrametimeInfo.identifier,
                 new StringInListVerifier({
-                    "Average Deltatime", "Frames per second", "Average frames per second",
-                    "None"
+                    "Average Deltatime", "Deltatime Extremes", "Deltatime standard deviation",
+                    "Deltatime coefficient of variation", "Frames per second",
+                    "Average frames per second", "None"
                 }),
                 Optional::Yes,
                 FrametimeInfo.description
@@ -127,6 +128,17 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
 
     _frametimeType.addOptions({
         { static_cast<int>(FrametimeType::DtTimeAvg), "Average Deltatime" },
+        { static_cast<int>(FrametimeType::DtTimeExtremes), "Deltatime Extremes" },
+        {
+            static_cast<int>(FrametimeType::DtStandardDeviation),
+            "Deltatime standard deviation"
+
+        },
+        {
+            static_cast<int>(FrametimeType::DtCoefficientOfVariation),
+            "Deltatime coefficient of variation"
+
+        },
         { static_cast<int>(FrametimeType::FPS), "Frames per second" },
         { static_cast<int>(FrametimeType::FPSAvg), "Average frames per second" },
         { static_cast<int>(FrametimeType::None), "None" }
@@ -136,6 +148,17 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
         const std::string& v = dictionary.value<std::string>(FrametimeInfo.identifier);
         if (v == "Average Deltatime") {
             _frametimeType = static_cast<int>(FrametimeType::DtTimeAvg);
+        }
+        else if (v == "Deltatime Extremes") {
+            _frametimeType = static_cast<int>(FrametimeType::DtTimeExtremes);
+        }
+        else if (v == "Deltatime standard deviation") {
+            _frametimeType =
+            static_cast<int>(FrametimeType::DtStandardDeviation);
+        }
+        else if (v == "Deltatime coefficient of variation") {
+            _frametimeType =
+            static_cast<int>(FrametimeType::DtCoefficientOfVariation);
         }
         else if (v == "Frames per second") {
             _frametimeType = static_cast<int>(FrametimeType::FPS);
@@ -164,7 +187,43 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
                 *_font,
                 penPosition,
                 fmt::format(
-                    "Avg. Frametime: {:.5f}", global::windowDelegate.averageDeltaTime()
+                    "Avg. Frametime: {:.2f} ms",
+                    global::windowDelegate.averageDeltaTime() * 1000.0
+                )
+            );
+            break;
+        case FrametimeType::DtTimeExtremes:
+            penPosition.y -= _font->height();
+            RenderFont(
+                *_font,
+                penPosition,
+                fmt::format(
+                    "Frametimes between: {:.2f} and {:.2f} ms",
+                    global::windowDelegate.minDeltaTime() * 1000.0,
+                    global::windowDelegate.maxDeltaTime() * 1000.0
+                )
+            );
+            break;
+        case FrametimeType::DtStandardDeviation:
+            penPosition.y -= _font->height();
+            RenderFont(
+                *_font,
+                penPosition,
+                fmt::format(
+                   "Frametime standard deviation : {:.2f} ms",
+                   global::windowDelegate.deltaTimeStandardDeviation() * 1000.0
+                )
+            );
+            break;
+        case FrametimeType::DtCoefficientOfVariation:
+            penPosition.y -= _font->height();
+            RenderFont(
+                *_font,
+                penPosition,
+                fmt::format(
+                    "Frametime coefficient of variation : {:.2f} %",
+                    global::windowDelegate.deltaTimeStandardDeviation() /
+                    global::windowDelegate.averageDeltaTime() * 100.0
                 )
             );
             break;

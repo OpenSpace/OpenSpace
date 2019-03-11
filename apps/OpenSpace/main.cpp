@@ -639,6 +639,15 @@ void setSgctDelegateFunctions() {
         return sgct::Engine::instance()->getCurrentWindowPtr()->isWindowResized();
     };
     sgctDelegate.averageDeltaTime = []() { return sgct::Engine::instance()->getAvgDt(); };
+    sgctDelegate.deltaTimeStandardDeviation = []() {
+        return sgct::Engine::instance()->getDtStandardDeviation();
+    };
+    sgctDelegate.minDeltaTime = []() {
+        return sgct::Engine::instance()->getMinDt();
+    };
+    sgctDelegate.maxDeltaTime = []() {
+        return sgct::Engine::instance()->getMaxDt();
+    };
     sgctDelegate.deltaTime = []() { return sgct::Engine::instance()->getDt(); };
     sgctDelegate.applicationTime = []() { return sgct::Engine::getTime(); };
     sgctDelegate.mousePosition = []() {

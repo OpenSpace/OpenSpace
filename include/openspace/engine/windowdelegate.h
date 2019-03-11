@@ -44,6 +44,12 @@ struct WindowDelegate {
 
     double (*averageDeltaTime)() = []() { return 0.0; };
 
+    double (*minDeltaTime)() = []() { return 0.0; };
+
+    double (*maxDeltaTime)() = []() { return 0.0; };
+
+    double (*deltaTimeStandardDeviation)() = []() { return 0.0; };
+
     double (*deltaTime)() = []() { return 0.0; };
 
     double (*applicationTime)() = []() { return 0.0; };
