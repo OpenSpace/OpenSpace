@@ -121,9 +121,10 @@ private:
     bool _timePaused = false;
     double _targetDeltaTime = 1.0;
     double _deltaTime = 0.0;
-    double _lastTime = 0;
+    double _lastTime = 0.0;
     bool _lastTimePaused = false;
-    double _lastDeltaTime = 0;
+    double _lastDeltaTime = 0.0;
+    double _lastTargetDeltaTime = 0.0;
 
     properties::FloatProperty _defaultTimeInterpolationDuration;
     properties::FloatProperty _defaultDeltaTimeInterpolationDuration;
