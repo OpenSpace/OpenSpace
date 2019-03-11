@@ -55,6 +55,14 @@ namespace {
         "This value determines the units in which the frame time is displayed."
     };
 
+    constexpr const char* ValueDtAvg = "Average Deltatime";
+    constexpr const char* ValueDtExtremes = "Deltatime extremes";
+    constexpr const char* ValueDtStandardDeviation = "Deltatime standard deviation";
+    constexpr const char* ValueDtCov = "Deltatime coefficient of variation";
+    constexpr const char* ValueFps = "Frames per second";
+    constexpr const char* ValueFpsAvg = "Average frames per second";
+    constexpr const char* ValueNone = "None";
+
     std::string formatDt() {
         return fmt::format(
             "Avg. Frametime: {:.2f} ms",
@@ -150,9 +158,13 @@ documentation::Documentation DashboardItemFramerate::Documentation() {
             {
                 FrametimeInfo.identifier,
                 new StringInListVerifier({
-                    "Average Deltatime", "Deltatime Extremes", "Deltatime standard deviation",
-                    "Deltatime coefficient of variation", "Frames per second",
-                    "Average frames per second", "None"
+                    ValueDtAvg,
+                    ValueDtExtremes,
+                    ValueDtStandardDeviation,
+                    ValueDtCov,
+                    ValueFps,
+                    ValueFpsAvg,
+                    ValueNone
                 }),
                 Optional::Yes,
                 FrametimeInfo.description
@@ -192,41 +204,41 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
     addProperty(_fontSize);
 
     _frametimeType.addOptions({
-        { static_cast<int>(FrametimeType::DtTimeAvg), "Average Deltatime" },
-        { static_cast<int>(FrametimeType::DtTimeExtremes), "Deltatime Extremes" },
+        { static_cast<int>(FrametimeType::DtTimeAvg), ValueDtAvg },
+        { static_cast<int>(FrametimeType::DtTimeExtremes), ValueDtExtremes },
         {
             static_cast<int>(FrametimeType::DtStandardDeviation),
-            "Deltatime standard deviation"
+            ValueDtStandardDeviation
         },
         {
             static_cast<int>(FrametimeType::DtCoefficientOfVariation),
-            "Deltatime coefficient of variation"
+            ValueDtCov
         },
-        { static_cast<int>(FrametimeType::FPS), "Frames per second" },
-        { static_cast<int>(FrametimeType::FPSAvg), "Average frames per second" },
-        { static_cast<int>(FrametimeType::None), "None" }
+        { static_cast<int>(FrametimeType::FPS), ValueFps },
+        { static_cast<int>(FrametimeType::FPSAvg), ValueFpsAvg },
+        { static_cast<int>(FrametimeType::None), ValueNone }
     });
 
     if (dictionary.hasKey(FrametimeInfo.identifier)) {
         const std::string& v = dictionary.value<std::string>(FrametimeInfo.identifier);
-        if (v == "Average Deltatime") {
+        if (v == ValueDtAvg) {
             _frametimeType = static_cast<int>(FrametimeType::DtTimeAvg);
         }
-        else if (v == "Deltatime Extremes") {
+        else if (v == ValueDtExtremes) {
             _frametimeType = static_cast<int>(FrametimeType::DtTimeExtremes);
         }
-        else if (v == "Deltatime standard deviation") {
+        else if (v == ValueDtStandardDeviation) {
             _frametimeType =
-            static_cast<int>(FrametimeType::DtStandardDeviation);
+                static_cast<int>(FrametimeType::DtStandardDeviation);
         }
-        else if (v == "Deltatime coefficient of variation") {
+        else if (v == ValueDtCov) {
             _frametimeType =
-            static_cast<int>(FrametimeType::DtCoefficientOfVariation);
+                static_cast<int>(FrametimeType::DtCoefficientOfVariation);
         }
-        else if (v == "Frames per second") {
+        else if (v == ValueFps) {
             _frametimeType = static_cast<int>(FrametimeType::FPS);
         }
-        else if (v == "Average frames per second") {
+        else if (v == ValueFpsAvg) {
             _frametimeType = static_cast<int>(FrametimeType::FPSAvg);
         }
         else {
