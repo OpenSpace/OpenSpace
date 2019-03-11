@@ -690,7 +690,7 @@ bool SceneGraphNode::isTimeFrameActive(const Time& time) const {
 glm::dmat3 SceneGraphNode::calculateWorldRotation() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
-        return rotationMatrix() * _parent->calculateWorldRotation();
+        return _parent->calculateWorldRotation() * rotationMatrix();
     }
     else {
         return rotationMatrix();
