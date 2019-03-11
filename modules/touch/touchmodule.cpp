@@ -23,8 +23,9 @@
  ****************************************************************************************/
 
 #include <modules/touch/touchmodule.h>
+#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
 #include <modules/webbrowser/webbrowsermodule.h>
-#include <modules/webgui/webguimodule.h>
+#endif
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
@@ -122,6 +123,7 @@ void TouchModule::hasNewWebInput(const std::vector<TuioCursor>& listOfContactPoi
             listOfContactPoints.at(0).getScreenY(res.y)
         );
 
+#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
         WebBrowserModule& module = *(global::moduleEngine.module<WebBrowserModule>());
         if (module.eventHandler().hasContentCallback(pos.x, pos.y)) {
             webPositionCallback = glm::vec2(pos.x, pos.y);
@@ -134,6 +136,7 @@ void TouchModule::hasNewWebInput(const std::vector<TuioCursor>& listOfContactPoi
         module.eventHandler().touchReleaseCallback(webPositionCallback.x,
             webPositionCallback.y);
         webPositionCallback = glm::vec2(0, 0);
+#endif
     }
 }
 
