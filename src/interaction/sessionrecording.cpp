@@ -74,8 +74,7 @@ void SessionRecording::setRecordDataFormat(RecordedDataMode dataMode) {
 }
 
 bool SessionRecording::startRecording(const std::string& filename) {
-
-    std::string absFilename = absPath(filename);
+    const std::string absFilename = absPath(filename);
 
     if (_state == SessionState::Playback) {
         _playbackFile.close();
@@ -124,7 +123,7 @@ void SessionRecording::stopRecording() {
 bool SessionRecording::startPlayback(const std::string& filename,
                                      KeyframeTimeRef timeMode, bool forceSimTimeAtStart)
 {
-    std::string absFilename = absPath(filename);
+    const std::string absFilename = absPath(filename);
 
     if (_state == SessionState::Recording) {
         LERROR("Unable to start playback while in session recording mode");
