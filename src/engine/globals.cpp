@@ -37,7 +37,6 @@
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/shortcutmanager.h>
 #include <openspace/mission/missionmanager.h>
-#include <openspace/network/networkengine.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/performance/performancemanager.h>
 #include <openspace/properties/propertyowner.h>
@@ -91,11 +90,6 @@ MissionManager& gMissionManager() {
 
 ModuleEngine& gModuleEngine() {
     static ModuleEngine g;
-    return g;
-}
-
-NetworkEngine& gNetworkEngine() {
-    static NetworkEngine g;
     return g;
 }
 
