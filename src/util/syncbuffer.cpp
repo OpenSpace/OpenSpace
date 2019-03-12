@@ -84,20 +84,4 @@ void SyncBuffer::reset() {
     _decodeOffset = 0;
 }
 
-//void SyncBuffer::write() {
-//    _dataStream.resize(_encodeOffset);
-//    _synchronizationBuffer->setVal(_dataStream);
-//    sgct::SharedData::instance()->writeVector(_synchronizationBuffer.get());
-//    _dataStream.resize(_n);
-//    _encodeOffset = 0;
-//    _decodeOffset = 0;
-//}
-//
-//void SyncBuffer::read() {
-//    sgct::SharedData::instance()->readVector(_synchronizationBuffer.get());
-//    _dataStream = _synchronizationBuffer->getVal();
-//    _encodeOffset = 0;
-//    _decodeOffset = 0;
-//}
-
 } // namespace openspace

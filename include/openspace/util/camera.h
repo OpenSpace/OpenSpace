@@ -33,7 +33,6 @@
 namespace openspace {
 
 class SceneGraphNode;
-class SyncBuffer;
 
 /**
  * This class still needs some more love. Suggested improvements:

@@ -36,7 +36,7 @@ SyncEngine::SyncEngine(unsigned int syncBufferSize)
     ghoul_assert(syncBufferSize > 0, "syncBufferSize must be bigger than 0");
 }
 
-// should be called on sgct master
+// Should be called on sgct master
 std::vector<char> SyncEngine::encodeSyncables() {
     for (Syncable* syncable : _syncables) {
         syncable->encode(&_syncBuffer);
@@ -45,17 +45,9 @@ std::vector<char> SyncEngine::encodeSyncables() {
     std::vector<char> data = _syncBuffer.data();
     _syncBuffer.reset();
     return data;
-
-    //_dataStream.resize(_encodeOffset);
-    //_synchronizationBuffer->setVal(_dataStream);
-    //sgct::SharedData::instance()->writeVector(_synchronizationBuffer.get());
-    //_dataStream.resize(_n);
-    //_encodeOffset = 0;
-    //_decodeOffset = 0;
-    //_syncBuffer.write();
 }
 
-//should be called on sgct slaves
+// Should be called on sgct slaves
 void SyncEngine::decodeSyncables(std::vector<char> data) {
     _syncBuffer.setData(std::move(data));
     for (Syncable* syncable : _syncables) {
@@ -78,14 +70,14 @@ void SyncEngine::postSynchronization(IsMaster isMaster) {
 }
 
 void SyncEngine::addSyncable(Syncable* syncable) {
-    ghoul_assert(syncable, "synable must not be nullptr");
+    ghoul_assert(syncable, "Syncable must not be nullptr");
 
     _syncables.push_back(syncable);
 }
 
 void SyncEngine::addSyncables(const std::vector<Syncable*>& syncables) {
     for (Syncable* syncable : syncables) {
-        ghoul_assert(syncable, "syncables must not contain any nullptr");
+        ghoul_assert(syncable, "Syncables must not contain any nullptr");
         addSyncable(syncable);
     }
 }
