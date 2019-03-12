@@ -134,14 +134,18 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
         if (script != json.end() && script->is_string()) {
             std::string luaScript = script->get<std::string>();
             nlohmann::json::const_iterator ret = json.find(KeyReturn);
-            bool shouldReturn = ret->is_boolean() && ret->get<bool>();
+            bool shouldReturn = (ret != json.end()) &&
+                                 ret->is_boolean() &&
+                                 ret->get<bool>();
 
             runScript(luaScript, shouldReturn);
 
         } else if (function != json.end() && function->is_string()) {
             std::string luaFunction = function->get<std::string>();
             nlohmann::json::const_iterator ret = json.find(KeyReturn);
-            bool shouldReturn = ret->is_boolean() && ret->get<bool>();
+            bool shouldReturn = (ret != json.end()) &&
+                                 ret->is_boolean() &&
+                                 ret->get<bool>();
 
             nlohmann::json::const_iterator args = json.find(KeyArguments);
             if (!args->is_array()) {
