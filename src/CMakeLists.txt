@@ -451,4 +451,9 @@ if (APPLE)
     target_link_libraries(openspace-core ${APPKIT_LIBRARY})
 endif ()
 
+set(OPENSPACE_BEHAVIOR_KIOSK true CACHE BOOL "OpenSpace behavior (navigation, etc.) set to kiosk mode")
+if(OPENSPACE_BEHAVIOR_KIOSK)
+    add_definitions(-DOPENSPACE_BEHAVIOR_KIOSK)
+endif()
+
 set_openspace_compile_settings(openspace-core)

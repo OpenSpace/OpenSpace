@@ -58,6 +58,8 @@ public:
     Camera* camera() const;
     void setCamera(Camera* camera);
 
+    SceneGraphNode* focusNode() const;
+    void setFocusNode(const SceneGraphNode* focusNode);
     void setFocusNode(const std::string& focusNode);
     void setAnchorNode(const std::string& anchorNode);
     void setAimNode(const std::string& aimNode);
@@ -103,7 +105,6 @@ private:
         properties::FloatProperty friction;
     };
 
-    void setFocusNode(const SceneGraphNode* focusNode);
     void setAnchorNode(const SceneGraphNode* anchorNode);
     void setAimNode(const SceneGraphNode* aimNode);
 
@@ -128,11 +129,13 @@ private:
     properties::FloatProperty _minimumAllowedDistance;
 
     properties::FloatProperty _velocitySensitivity;
+#ifdef OPENSPACE_BEHAVIOR_KIOSK
     properties::BoolProperty _flyTo;
     properties::BoolProperty _overview;
     properties::BoolProperty _changeOrientation;
     properties::TriggerProperty _applyOverview;
     properties::TriggerProperty _applyFlyTo;
+#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;
 
@@ -248,7 +251,7 @@ private:
                                      const double distFromCameraToFocus,
                                      const glm::dvec3 camPosToCenterPosDiff,
                                      const double focusLimit,
-                                     const bool _flyTo) const;
+                                     const bool flyTo) const;
 
     /*
      * Adds rotation to the camera position so that it follows the rotation of the anchor

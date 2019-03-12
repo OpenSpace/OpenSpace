@@ -55,6 +55,10 @@ public:
     void deinitialize();
 
     // Mutators
+#ifdef OPENSPACE_BEHAVIOR_KIOSK
+    void setFocusNode(SceneGraphNode* node);
+    void resetCameraDirection();
+#endif
     void setCamera(Camera* camera);
     void setInterpolationTime(float durationInSeconds);
 
@@ -68,6 +72,7 @@ public:
     // Accessors
     ghoul::Dictionary cameraStateDictionary();
     Camera* camera() const;
+    const SceneGraphNode* anchorNode() const;
     const InputState& inputState() const;
     const OrbitalNavigator& orbitalNavigator() const;
     OrbitalNavigator& orbitalNavigator();
@@ -121,7 +126,9 @@ private:
 
     std::unique_ptr<OrbitalNavigator> _orbitalNavigator;
     std::unique_ptr<KeyframeNavigator> _keyframeNavigator;
-
+#ifdef OPENSPACE_BEHAVIOR_KIOSK
+    properties::StringProperty _origin;
+#endif
     properties::BoolProperty _useKeyFrameInteraction;
 };
 

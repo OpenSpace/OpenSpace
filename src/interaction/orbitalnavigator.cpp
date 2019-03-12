@@ -23,21 +23,21 @@
  ****************************************************************************************/
 
 #include <openspace/interaction/orbitalnavigator.h>
-#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+#ifdef OPENSPACE_BEHAVIOR_KIOSK
  #include <openspace/engine/globals.h>
  #include <openspace/engine/moduleengine.h>
  #include <openspace/engine/openspaceengine.h>
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/query/query.h>
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/vector_angle.hpp>
-#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+#ifdef OPENSPACE_BEHAVIOR_KIOSK
  #include <modules/webgui/webguimodule.h>
  #include <modules/globebrowsing/globebrowsingmodule.h>
  #include <modules/globebrowsing/src/renderableglobe.h>
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
 
 namespace {
     constexpr const char* _loggerCat = "OrbitalNavigator";
@@ -138,7 +138,6 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
     constexpr openspace::properties::Property::PropertyInfo VelocityZoomControlInfo = {
         "VelocityZoomControl",
         "Velocity zoom control",
@@ -146,6 +145,7 @@ namespace {
         "The higher the value the faster the camera will move towards the focus."
     };
 
+#ifdef OPENSPACE_BEHAVIOR_KIOSK
     constexpr openspace::properties::Property::PropertyInfo FlyToNodeInfo = {
         "FlyToNode",
         "Fly to focus node",
@@ -175,7 +175,7 @@ namespace {
         "Apply fly to node",
         "Triggering this property makes the camera move to the focus node."
     };
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
 
     constexpr openspace::properties::Property::PropertyInfo
         StereoInterpolationTimeInfo = {
@@ -251,14 +251,14 @@ OrbitalNavigator::OrbitalNavigator()
     , _retargetAim(RetargetAimInfo)
     , _followAnchorNodeRotationDistance(FollowAnchorNodeInfo, 5.0f, 0.0f, 20.f)
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
-#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
     , _velocitySensitivity(VelocityZoomControlInfo, 0.02f, 0.01f, 0.15f)
+#ifdef OPENSPACE_BEHAVIOR_KIOSK
     , _flyTo(FlyToNodeInfo, true)
     , _overview(OverviewInfo, false)
     , _changeOrientation(OrientationInfo, true)
     , _applyOverview(ApplyOverviewInfo)
     , _applyFlyTo(ApplyFlyToInfo)
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
     , _mouseSensitivity(MouseSensitivityInfo, 15.0f, 1.0f, 50.f)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.0f, 1.0f, 50.f)
     , _useAdaptiveStereoscopicDepth(UseAdaptiveStereoscopicDepthInfo, true)
@@ -319,12 +319,12 @@ OrbitalNavigator::OrbitalNavigator()
         return glm::clamp(res, 0.0, 1.0);
     });
 
-#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+#ifdef OPENSPACE_BEHAVIOR_KIOSK
     addProperty(_applyOverview);
     addProperty(_applyFlyTo);
     _applyOverview.onChange([this]() { _overview = true; });
     _applyFlyTo.onChange([this]() { _flyTo = true; });
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
 
     // The transfer function is used here to get a different interpolation than the one
     // obtained from newValue = lerp(0, currentValue, dt). That one will result in an
@@ -383,12 +383,12 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_retargetAim);
     addProperty(_followAnchorNodeRotationDistance);
     addProperty(_minimumAllowedDistance);
-#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+#ifdef OPENSPACE_BEHAVIOR_KIOSK
     addProperty(_velocitySensitivity);
     addProperty(_flyTo);
     addProperty(_overview);
     addProperty(_changeOrientation);
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
 
     addProperty(_useAdaptiveStereoscopicDepth);
     addProperty(_staticViewScaleExponent);
@@ -428,18 +428,19 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     }
 
     const glm::dvec3 anchorPos = _anchorNode->worldPosition();
-    const glm::dvec3 prevCameraPosition = _camera->positionVec3();
+    glm::dvec3 prevCameraPosition = _camera->positionVec3();
     const glm::dvec3 anchorDisplacement = anchorPos - _previousAnchorNodePosition;
     CameraPose pose;
-    
-#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+    SurfacePositionHandle posHandle;
+
+#ifdef OPENSPACE_BEHAVIOR_KIOSK
     pose = {
         _camera->positionVec3() + anchorDisplacement,
         _camera->rotationQuaternion()
     };
     
     // Calculate a position handle based on the camera position in world space
-    SurfacePositionHandle posHandle =
+    posHandle =
         calculateSurfacePositionHandle(*_anchorNode, pose.position);
 
     //_previousAnchorNodePosition = anchorPos;
@@ -464,7 +465,8 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     // or to zoom further out 
     if (_flyTo) {
         if (distFromCameraToFocus > focusLimit) {
-            prevCameraPosition = moveCameraAlongVector(prevCameraPosition, distFromCameraToFocus, camPosToAnchorPosDiff, focusLimit, _flyTo);
+            prevCameraPosition = moveCameraAlongVector(prevCameraPosition,
+                distFromCameraToFocus, camPosToAnchorPosDiff, focusLimit, _flyTo);
         }
         else {
             _flyTo = false;
@@ -484,7 +486,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
             _overview = false;
         }
     }
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
     pose = {
         _camera->positionVec3() + anchorDisplacement,
         _camera->rotationQuaternion()
@@ -625,11 +627,12 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         _camera->setScaling(
             _stereoscopicDepthOfFocusSurface /
             static_cast<float>(_currentCameraToSurfaceDistance)
+
         );
     } else {
         _camera->setScaling(glm::pow(10.f, _staticViewScaleExponent));
     }
-#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+#ifdef OPENSPACE_BEHAVIOR_KIOSK
     // Change orientation such that the planet's north pole is upwards, i.e.
     // the planet is oriented such that it is not tilted in an incorrect way
     if (_changeOrientation) {
@@ -638,18 +641,18 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
         GlobeBrowsingModule& module = *(global::moduleEngine.module<GlobeBrowsingModule>());
         module.goToGeo(longitude, latitude);
-        glm::dvec3 prevCamPos = camera.positionVec3();
+        glm::dvec3 prevCamPos = _camera->positionVec3();
 
         // Looking at the "NIGHT"-side of the focus node
-        if (length(_anchorNode->worldPosition()) < length(camera.positionVec3())) {
+        if (glm::length(_anchorNode->worldPosition()) < glm::length(_camera->positionVec3())) {
             module.goToGeo(longitude, latitude-180);
-            if (length(prevCamPos) < length(camera.positionVec3())) {
+            if (glm::length(prevCamPos) < glm::length(_camera->positionVec3())) {
                 module.goToGeo(longitude, latitude);
             }
         }
         _changeOrientation = false;
     }
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
 }
 
 glm::dquat OrbitalNavigator::composeCameraRotation(
@@ -699,7 +702,7 @@ void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode) {
     }
 
     _anchorNode = anchorNode;
-#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+#ifdef OPENSPACE_BEHAVIOR_KIOSK
     _flyTo = true;
 
     // If the current focusNode is a renderable globe, orientation can be set using goToGeo(),
@@ -709,7 +712,7 @@ void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode) {
     if (globe) {
         _changeOrientation = true;
     }
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
 
     if (_anchorNode) {
         _previousAnchorNodePosition = _anchorNode->worldPosition();
@@ -1207,14 +1210,14 @@ glm::dvec3 OrbitalNavigator::moveCameraAlongVector(const glm::dvec3& camPos,
                                              const double distFromCameraToFocus,
                                              const glm::dvec3 camPosToAnchorPosDiff,
                                              const double focusLimit,
-                                             const bool _flyTo) const
+                                             const bool flyTo) const
 {
     double velocityFactor = 0;
     const double focusLimitBuffer = 0.1;
 
     // Calculate and truncate the factor which determines the velocity of the 
     // camera movement towards the focus node
-    if (_flyTo) {
+    if (flyTo) {
         velocityFactor = (1 - ((focusLimit * (1.0 - focusLimitBuffer))
 	    / distFromCameraToFocus));
     }

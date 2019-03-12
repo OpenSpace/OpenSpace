@@ -24,6 +24,9 @@
 
 #include <openspace/interaction/navigationhandler.h>
 
+#ifdef OPENSPACE_BEHAVIOR_KIOSK
+ #include <openspace/query/query.h>
+#endif
 #include <openspace/engine/globals.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
@@ -45,6 +48,16 @@ namespace {
     constexpr const char* KeyPosition = "Position";
     constexpr const char* KeyRotation = "Rotation";
 
+#ifdef OPENSPACE_BEHAVIOR_KIOSK
+    constexpr const openspace::properties::Property::PropertyInfo OriginInfo = {
+        "Origin",
+        "Origin",
+        "The name of the scene graph node that is the origin of the camera interaction. "
+        "The camera is always focussed on this object and every interaction is relative "
+        "towards this object. Any scene graph node can be the origin node."
+    };
+#endif
+
     constexpr const openspace::properties::Property::PropertyInfo KeyFrameInfo = {
         "UseKeyFrameInteraction",
         "Use keyframe interaction",
@@ -60,8 +73,9 @@ namespace openspace::interaction {
 NavigationHandler::NavigationHandler()
     : properties::PropertyOwner({ "NavigationHandler" })
     , _useKeyFrameInteraction(KeyFrameInfo, false)
+#ifdef OPENSPACE_BEHAVIOR_KIOSK
+    , _origin(OriginInfo)
 {
-#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
     _origin.onChange([this]() {
         if (_origin.value().empty()) {
             return;
@@ -77,7 +91,9 @@ NavigationHandler::NavigationHandler()
         setFocusNode(node);
         resetCameraDirection();
     });
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+#else
+{
+#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
 
     _inputState = std::make_unique<InputState>();
     _orbitalNavigator = std::make_unique<OrbitalNavigator>();
@@ -104,6 +120,17 @@ void NavigationHandler::initialize() {
 void NavigationHandler::deinitialize() {
     global::parallelPeer.connectionEvent().unsubscribe("NavigationHandler");
 }
+
+#ifdef OPENSPACE_BEHAVIOR_KIOSK
+void NavigationHandler::setFocusNode(SceneGraphNode* node) {
+    _orbitalNavigator->setFocusNode(node);
+    _camera->setPositionVec3(anchorNode()->worldPosition());
+}
+
+void NavigationHandler::resetCameraDirection() {
+    _orbitalNavigator->startRetargetAnchor();
+}
+#endif
 
 void NavigationHandler::setCamera(Camera* camera) {
     _camera = camera;
@@ -148,7 +175,7 @@ void NavigationHandler::updateCamera(double deltaTime) {
             }
             else {
                 _orbitalNavigator->updateStatesFromInput(*_inputState, deltaTime);
-                _orbitalNavigator->updateCameraStateFromStates(*_camera, deltaTime);
+                _orbitalNavigator->updateCameraStateFromStates(deltaTime);
             }
         }
     }
@@ -168,6 +195,10 @@ void NavigationHandler::triggerPlaybackStart() {
 
 void NavigationHandler::stopPlayback() {
     _playbackModeEnabled = false;
+}
+
+const SceneGraphNode* NavigationHandler::anchorNode() const {
+    return _orbitalNavigator->anchorNode();
 }
 
 Camera* NavigationHandler::camera() const {

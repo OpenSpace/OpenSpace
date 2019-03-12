@@ -1329,28 +1329,28 @@ void TouchInteraction::step(double dt) {
 
             WebGuiModule& module = *(global::moduleEngine.module<WebGuiModule>());
 
-#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+#if OPENSPACE_BEHAVIOR_KIOSK
             float overviewLimit = module.storyHandler.overviewLimit();
             float zoomInLimit = module.storyHandler.zoomInLimit();
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+#endif //#if OPENSPACE_BEHAVIOR_KIOSK
 
             //Apply the velocity to update camera position
             glm::dvec3 zoomDistanceIncrement = directionToCenter * _vel.zoom * dt;
             bool isZoomStepUnderDistToSurface = (length(_vel.zoom*dt) < distToSurface);
             bool willZoomStepViolatePlanetBoundaryRadius =
                 (length(centerToCamera + zoomDistanceIncrement) < planetBoundaryRadius);
-#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+#if OPENSPACE_BEHAVIOR_KIOSK
             bool willNewPositionViolateOverviewLimit =
                 (length(centerToCamera + zoomDistanceIncrement) >= overviewLimit);
             bool willNewPositionViolateZoomInLimit =
                 (length(centerToCamera + zoomDistanceIncrement) < zoomInLimit);
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+#endif //#if OPENSPACE_BEHAVIOR_KIOSK
 
             if (    isZoomStepUnderDistToSurface
-#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+#if OPENSPACE_BEHAVIOR_KIOSK
                 && !willNewPositionViolateOverviewLimit
                 && !willNewPositionViolateZoomInLimit
-#endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK_ENABLED
+#endif //#if OPENSPACE_BEHAVIOR_KIOSK
                 && !willZoomStepViolatePlanetBoundaryRadius )
             {
                 camPos += zoomDistanceIncrement;
