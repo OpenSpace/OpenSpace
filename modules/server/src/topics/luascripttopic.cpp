@@ -31,8 +31,6 @@
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/dictionaryjsonformatter.h>
-
 
 namespace {
     constexpr const char* KeyScript = "script";
@@ -68,14 +66,12 @@ namespace {
         return "\"" + escapeLuaString(s) + "\"";
     }
 
-    std::string formatKeyValuePair(const nlohmann::json::const_iterator& it)
-    {
+    std::string formatKeyValuePair(const nlohmann::json::const_iterator& it) {
         return "[" + formatLuaString(it.key()) + "] = " + formatLua(it);
     }
 
     std::string formatLuaTable(const nlohmann::json& json) {
         std::string output = "{";
-
         auto it = json.begin();
         for (size_t i = 0; i < json.size(); ++i, ++it) {
             output += formatKeyValuePair(it);
@@ -83,7 +79,6 @@ namespace {
                 output += ",";
             }
         }
-
         return output + "}";
     }
 
@@ -107,7 +102,7 @@ namespace {
     }
 
     std::string generateScript(const std::string& function,
-        const std::vector<std::string>& args)
+                               const std::vector<std::string>& args)
     {
         std::string script = "return " + function + "(";
         auto it = args.begin();
