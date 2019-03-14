@@ -38,7 +38,6 @@ namespace {
     constexpr const char* KeyScript = "script";
     constexpr const char* KeyFunction = "function";
     constexpr const char* KeyArguments = "arguments";
-
     constexpr const char* KeyReturn = "return";
     constexpr const char* TypeKey = "type";
     constexpr const char* _loggerCat = "LuaScriptTopic";

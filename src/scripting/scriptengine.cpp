@@ -176,10 +176,8 @@ bool ScriptEngine::runScript(const std::string& script, ScriptCallback callback)
         if (callback) {
             ghoul::Dictionary returnValue =
                 ghoul::lua::loadArrayDictionaryFromString(script, _state);
-
             callback.value()(returnValue);
-        }
-        else {
+        } else {
             ghoul::lua::runScript(_state, script);
         }
     }

@@ -37,14 +37,11 @@
 using nlohmann::json;
 
 namespace {
-const constexpr char* _loggerCat = "DocumentationTopic";
-const constexpr char* KeyType = "type";
-const constexpr char* TypeLua = "lua";
-const constexpr char* TypeFactories = "factories";
-const constexpr char* TypeKeyboard = "keyboard";
-const constexpr char* TypeLicense = "licence";
-const constexpr char* TypeProperties = "properties";
-const constexpr char* TypeScene = "scene";
+    const constexpr char* _loggerCat = "DocumentationTopic";
+    const constexpr char* KeyType = "type";
+    const constexpr char* TypeLua = "lua";
+    const constexpr char* TypeFactories = "factories";
+    const constexpr char* TypeKeyboard = "keyboard";
 }
 
 namespace openspace {
@@ -59,12 +56,6 @@ void DocumentationTopic::handleJson(const nlohmann::json& json) {
         response = json::parse(FactoryManager::ref().generateJson());
     } else if (requestedType == TypeKeyboard) {
         response = json::parse(global::keybindingManager.generateJson());
-    } else if (requestedType == TypeLicense) {
-        //rensponse = json::parse(global::li)
-    } else if (requestedType == TypeProperties) {
-
-    } else if (requestedType == TypeScene) {
-
     }
     
     _connection->sendJson(wrappedPayload(response));
