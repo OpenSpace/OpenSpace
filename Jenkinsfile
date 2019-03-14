@@ -96,6 +96,7 @@ windows: {
         testHelper.runUnitTests('build\\Debug\\OpenSpaceTest')
       }
     } // node('windows')
+  }
 },
 osx: {
   node('osx') {
