@@ -19,6 +19,9 @@ def moduleCMakeFlags() {
     'debugging',
     'digitaluniverse',
     'fieldlines',
+    'fieldlinessequence',
+    'fitsfilereader',
+    'gaia',
     'galaxy',
     'globebrowsing',
     'imgui',
@@ -26,16 +29,22 @@ def moduleCMakeFlags() {
     'kameleon',
     'kameleonvolume',
     'multiresvolume',
+    'server',
+    'space',
     'spacecraftinstruments',
     'space',
+    'spout',
+    'sync',
     'touch',
     'toyvolume',
-    'volume'
+    'volume',
+    'webbrowser',
+    'webgui'
   ];
 
   def flags = '';
-  for (module in modules) {
-      flags += "-D OPENSPACE_MODULE_" + module.toUpperCase() + "=ON "
+  for (module in moduleFlags) {
+      flags += "-D OPENSPACE_MODULE_${module.toUpperCase()}=ON "
   }
   return flags;
 }
