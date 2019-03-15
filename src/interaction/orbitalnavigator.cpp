@@ -600,6 +600,9 @@ void OrbitalNavigator::setAimNode(const std::string& aimNode) {
 }
 
 void OrbitalNavigator::startRetargetAnchor() {
+    if (!_anchorNode) {
+        return;
+    }
     const glm::dvec3 camPos = _camera->positionVec3();
     const glm::dvec3 camDir = _camera->viewDirectionWorldSpace();
 
@@ -619,6 +622,10 @@ void OrbitalNavigator::startRetargetAnchor() {
 }
 
 void OrbitalNavigator::startRetargetAim() {
+    if (!_aimNode) {
+        return;
+    }
+
     const glm::dvec3 camPos = _camera->positionVec3();
     const glm::dvec3 camDir = _camera->viewDirectionWorldSpace();
     const glm::dvec3 centerPos = _aimNode->worldPosition();

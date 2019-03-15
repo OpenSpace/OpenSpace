@@ -645,6 +645,8 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     }
 
     _scene = std::make_unique<Scene>(std::move(sceneInitializer));
+    global::renderEngine.setScene(_scene.get());
+
     global::rootPropertyOwner.addPropertySubOwner(_scene.get());
     _scene->setCamera(std::make_unique<Camera>());
     Camera* camera = _scene->camera();
@@ -660,8 +662,6 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
             _scene->root()->identifier()
         );
     }
-
-    global::renderEngine.setScene(_scene.get());
 
     _assetManager->removeAll();
     _assetManager->add(assetPath);

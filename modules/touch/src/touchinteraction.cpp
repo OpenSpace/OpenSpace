@@ -25,8 +25,9 @@
 #include <openspace/engine/globals.h>
 #include <modules/touch/include/touchinteraction.h>
 #include <modules/imgui/imguimodule.h>
+#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
 #include <modules/webbrowser/webbrowsermodule.h>
-#include <modules/webgui/webguimodule.h>
+#endif
 
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/engine/globals.h>
@@ -437,8 +438,12 @@ bool TouchInteraction::webContent(const std::vector<TuioCursor>& list) {
         list.at(0).getScreenY(res.y)
     );
 
+#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
     WebBrowserModule& module = *(global::moduleEngine.module<WebBrowserModule>());
     return module.eventHandler().hasContentCallback(pos.x, pos.y);
+#else
+    return false;
+#endif
 }
 
 // Activates/Deactivates gui input mode (if active it voids all other interactions)
@@ -1326,8 +1331,6 @@ void TouchInteraction::step(double dt) {
             double planetBoundaryRadius = length(centerToBoundingSphere);
             planetBoundaryRadius *= _zoomBoundarySphereMultiplier;
             double distToSurface = length(centerToCamera - planetBoundaryRadius);
-
-            WebGuiModule& module = *(global::moduleEngine.module<WebGuiModule>());
 
             //Apply the velocity to update camera position
             glm::dvec3 velocityIncr = directionToCenter * _vel.zoom * dt;
