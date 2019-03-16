@@ -102,7 +102,7 @@ windows: {
       }
       stage('windows/test') {
         // Currently, the unit tests are failing on Windows
-        testHelper.runUnitTests('build\\Debug\\OpenSpaceTest')
+        testHelper.runUnitTests('bin\\Debug\\OpenSpaceTest')
       }
     } // node('windows')
   }
