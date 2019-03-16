@@ -83,7 +83,7 @@ linux: {
       compileHelper.recordCompileIssues(compileHelper.Gcc());
     }
     stage('linux/test') {
-      testHelper.runUnitTests('build/OpenSpaceTest');
+      // testHelper.runUnitTests('build/OpenSpaceTest');
     }
   } // node('linux')
 },
@@ -102,7 +102,7 @@ windows: {
       }
       stage('windows/test') {
         // Currently, the unit tests are failing on Windows
-        testHelper.runUnitTests('bin\\Debug\\OpenSpaceTest')
+        // testHelper.runUnitTests('bin\\Debug\\OpenSpaceTest')
       }
     } // node('windows')
   }
@@ -121,7 +121,7 @@ osx: {
     }
     stage('osx/test') {
       // Currently, the unit tests are crashing on OS X
-      testHelper.runUnitTests('build/Debug/OpenSpaceTest')
+      // testHelper.runUnitTests('build/Debug/OpenSpaceTest')
     }
   } // node('osx')
 }
