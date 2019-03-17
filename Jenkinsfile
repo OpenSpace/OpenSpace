@@ -15,7 +15,7 @@ def moduleCMakeFlags() {
   def moduleFlags = [
     'atmosphere',
     'base',
-    'cefwebgui',
+    // 'cefwebgui',
     'debugging',
     'digitaluniverse',
     'fieldlines',
@@ -38,8 +38,8 @@ def moduleCMakeFlags() {
     'touch',
     'toyvolume',
     'volume',
-    'webbrowser',
-    'webgui'
+    // 'webbrowser',
+    // 'webgui'
   ];
 
   def flags = '';
@@ -77,7 +77,7 @@ linux: {
       gitHelper.checkoutGit(url, branch);
     }
     stage('linux/build') {
-        compileHelper.build(compileHelper.Make(), compileHelper.Gcc(), moduleCMakeFlags(), '');
+        compileHelper.build(compileHelper.Make(), compileHelper.Gcc(), moduleCMakeFlags(), '', 'build-all');
     }
     stage('linux/warnings') {
       compileHelper.recordCompileIssues(compileHelper.Gcc());
@@ -95,7 +95,7 @@ windows: {
         gitHelper.checkoutGit(url, branch);
       }
       stage('windows/build') {
-        compileHelper.build(compileHelper.VisualStudio(), compileHelper.VisualStudio(), moduleCMakeFlags(), '');
+        compileHelper.build(compileHelper.VisualStudio(), compileHelper.VisualStudio(), moduleCMakeFlags(), '', 'build-all');
       }
       stage('windows/warnings') {
         compileHelper.recordCompileIssues(compileHelper.VisualStudio());
@@ -114,7 +114,7 @@ osx: {
       gitHelper.checkoutGit(url, branch);
     }
     stage('osx/build') {
-        compileHelper.build(compileHelper.Xcode(), compileHelper.Clang(), moduleCMakeFlags(), '');
+        compileHelper.build(compileHelper.Xcode(), compileHelper.Clang(), moduleCMakeFlags(), '', 'build-all');
     }
     stage('osx/warnings') {
       compileHelper.recordCompileIssues(compileHelper.Clang());
