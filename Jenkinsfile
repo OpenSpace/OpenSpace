@@ -77,7 +77,8 @@ linux: {
       gitHelper.checkoutGit(url, branch);
     }
     stage('linux/build') {
-        compileHelper.build(compileHelper.Make(), compileHelper.Gcc(), moduleCMakeFlags(), '', 'build-all');
+        // Not sure why the linking of OpenSpaceTest takes so long
+        compileHelper.build(compileHelper.Make(), compileHelper.Gcc(), moduleCMakeFlags(), '--target OpenSpace', 'build-all');
     }
     stage('linux/warnings') {
       compileHelper.recordCompileIssues(compileHelper.Gcc());
