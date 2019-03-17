@@ -131,7 +131,7 @@ osx: {
 //
 node('master') {
   stage('master/cppcheck/publish') {
-    publishCppcheck(pattern: 'build/cppcheck.xml');
+    // publishCppcheck(pattern: 'build/cppcheck.xml');
   }
   stage('master/cloc/publish') {
     sloccountPublish(encoding: '', pattern: 'build/cloc.xml');
