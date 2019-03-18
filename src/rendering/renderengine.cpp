@@ -502,6 +502,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
             _camera->sgctInternal.setSceneMatrix(sceneMatrix);
         }
         _camera->sgctInternal.setProjectionMatrix(projectionMatrix);
+        _camera->invalidateCache();
     }
 
     const bool masterEnabled = delegate.isMaster() ? !_disableMasterRendering : true;
