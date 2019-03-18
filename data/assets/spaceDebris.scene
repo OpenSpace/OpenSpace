@@ -5,7 +5,7 @@ local propertyHelper = asset.require('util/property_helper')
 -- Specifying which other assets should be loaded in this scene
 asset.require('spice/base')
 assetHelper.requestAll(asset, 'scene/solarsystem/sun')
-asset.require('scene/solarsystem/planets/earth/earth')
+asset.require('scene/solarsystem/planets/earth')
 assetHelper.requestAll(asset, 'scene/digitaluniverse')
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
@@ -14,9 +14,8 @@ asset.require('util/default_joystick')
 
 asset.require('util/webgui')
 
---asset.request('customization/globebrowsing')
+asset.request('customization/globebrowsing')
 
--- asset.request('scene/solarsystem/planets/earth/satellites/satellites_all')
 asset.request('scene/solarsystem/planets/earth/satellites/satellites_debris')
 
 -- Keybindings that are specific for this scene
