@@ -1,4 +1,4 @@
 asset.request('./debris/debris_breezem')
--- asset.request('./debris/debris_fengyun')
-asset.request('./debris/debris_iridium33')
-asset.request('./debris/debris_kosmos2251')
+--asset.request('./debris/debris_fengyun')
+--asset.request('./debris/debris_iridium33')
+--asset.request('./debris/debris_kosmos2251')
