@@ -37,7 +37,6 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
-#include <glm/gtx/euler_angles.hpp>
 
 namespace {
     constexpr const char* KeyType = "Type";
@@ -575,7 +574,7 @@ glm::mat4 ScreenSpaceRenderable::localRotationMatrix() {
     float roll = _localRotation.value().x;
     float pitch = _localRotation.value().y;
     float yaw = _localRotation.value().z;
-    return rotation * glm::eulerAngleYXZ(yaw, pitch, roll);
+    return rotation * glm::mat4(glm::quat(glm::vec3(pitch, yaw, roll)));
 }
 
 glm::mat4 ScreenSpaceRenderable::translationMatrix() {
