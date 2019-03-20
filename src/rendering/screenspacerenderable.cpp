@@ -564,11 +564,11 @@ glm::mat4 ScreenSpaceRenderable::localRotationMatrix() {
             sphericalToCartesian(raeToSpherical(_raePosition)) :
             _cartesianPosition;
 
-        glm::vec3 rThetaPhi = _useRadiusAzimuthElevation ?
-            raeToSpherical(_raePosition.value()) :
-            cartesianToSpherical(_cartesianPosition);
-
-        rotation = glm::inverse(glm::lookAt(glm::vec3(0.f), glm::normalize(translation), glm::vec3(0.f, 1.f, 0.f)));
+        rotation = glm::inverse(glm::lookAt(
+            glm::vec3(0.f),
+            glm::normalize(translation),
+            glm::vec3(0.f, 1.f, 0.f)
+        ));
     }
 
     float roll = _localRotation.value().x;
