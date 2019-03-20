@@ -79,13 +79,13 @@ void main(void) {
   vec3 opDepth = vec3(0.0);
   
   if (ozoneLayerEnabled) {
-    opDepth = betaOzoneExtinction * (0.0000006) * opticalDepth(r, muSun, HO) + 
-    betaMieExtinction * opticalDepth(r, muSun, HM) +
-    betaRayleigh * opticalDepth(r, muSun, HR);
+    opDepth = (betaOzoneExtinction * opticalDepth(r, muSun, HO)) + 
+    (betaMieExtinction * opticalDepth(r, muSun, HM)) +
+    (betaRayleigh * opticalDepth(r, muSun, HR));
   } else {
     opDepth = betaMieExtinction * opticalDepth(r, muSun, HM) + 
     betaRayleigh * opticalDepth(r, muSun, HR);
   }
   
-  renderTableColor = vec4( exp( -opDepth ), 0.0f );
+  renderTableColor = vec4( exp( -opDepth ), 1.0f );
 }

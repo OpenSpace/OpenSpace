@@ -123,7 +123,7 @@ float opticalDepth(const float localH, const float r, const float mu, const floa
 vec3 analyticTransmittance(const float r, const float mu, const float d) {
   if (ozoneLayerEnabled) {
     return exp(-betaRayleigh * opticalDepth(HR, r, mu, d) -
-             betaOzoneExtinction * (0.0000006) * opticalDepth(HO, r, mu, d) -
+             betaOzoneExtinction * opticalDepth(HO, r, mu, d) -
              betaMieExtinction * opticalDepth(HM, r, mu, d));
   } else {
     return exp(-betaRayleigh * opticalDepth(HR, r, mu, d) -

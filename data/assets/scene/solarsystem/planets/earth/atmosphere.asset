@@ -27,15 +27,13 @@ local Atmosphere = {
               -- Thichkness of atmosphere if its density were uniform, in Km
               H_R = 8.0
             },
-            --[[
-              Ozone = {
+            Ozone = {
               Coefficients = {
                 -- Extinction coefficients 
                 Extinction = {3.426, 8.298, 0.356}
               },
               H_O = 8.0,
             },
-            ]]
             -- Default
             Mie = {
                Coefficients = {

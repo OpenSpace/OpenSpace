@@ -599,16 +599,16 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             _ozoneHeightScaleP.onChange(updateAtmosphere);
             addProperty(_ozoneHeightScaleP);
 
-            _ozoneCoeffXP = _ozoneExtinctionCoeff.x * 100000.0f;
+            _ozoneCoeffXP = _ozoneExtinctionCoeff.x;
             _ozoneCoeffXP.onChange(updateAtmosphere);
             addProperty(_ozoneCoeffXP);
 
-            _ozoneCoeffYP = _ozoneExtinctionCoeff.y * 100000.0f;
+            _ozoneCoeffYP = _ozoneExtinctionCoeff.y;
             _ozoneCoeffYP.onChange(updateAtmosphere);
             addProperty(_ozoneCoeffYP);
 
 
-            _ozoneCoeffZP = _ozoneExtinctionCoeff.z * 100000.0f;
+            _ozoneCoeffZP = _ozoneExtinctionCoeff.z;
             _ozoneCoeffZP.onChange(updateAtmosphere);
             addProperty(_ozoneCoeffZP);
 
@@ -762,6 +762,7 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
     _ozoneExtinctionCoeff = glm::vec3(_ozoneCoeffXP.value() * 0.00001f,
         _ozoneCoeffYP.value() * 0.00001f,
         _ozoneCoeffZP.value() * 0.00001f);
+
     _mieHeightScale     = _mieHeightScaleP;
     _mieScatteringCoeff = glm::vec3(
         _mieScatteringCoeffXP * 0.001f,
