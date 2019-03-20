@@ -30,7 +30,7 @@
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
@@ -45,7 +45,7 @@ namespace documentation { struct Documentation; }
  * The base class for screen space images and screen space framebuffers.
  * This base class handles general functionality specific to planes that are rendered in
  * front of the camera. It implements protected methods and properties for converting
- * the planes from Spherical to Euclidean coordinates and back. It also specifies the
+ * the planes from Spherical to Cartesian coordinates and back. It also specifies the
  * interface that its children need to implement.
  */
 class ScreenSpaceRenderable : public properties::PropertyOwner {
@@ -69,36 +69,16 @@ public:
     virtual void update();
     virtual bool isReady() const;
     bool isEnabled() const;
-
-    glm::vec3 euclideanPosition() const;
-    glm::vec3 sphericalPosition() const;
-    float depth() const;
+    float depth();
 
     static documentation::Documentation Documentation();
 
 protected:
-    void useEuclideanCoordinates(bool b);
-
-    /**
-     * Converts Spherical coordinates to Euclidean.
-     * \param spherical The coordinates theta and phi
-     * \param radius The radius position value of the plane
-     * \return The x and y position value of the plane
-     */
-    //glm::vec2 toEuclidean(const glm::vec2& spherical, float radius);
-
-    /**
-     * Converts Euclidean coordinates to Spherical.
-     * \param euclidean The coordinates x and y
-     * \return The spherical coordinates theta and phi.
-     */
-    //glm::vec2 toSpherical(const glm::vec2& euclidean);
-
-
     void createShaders();
     glm::mat4 scaleMatrix();
-    glm::mat4 rotationMatrix();
+    glm::mat4 globalRotationMatrix();
     glm::mat4 translationMatrix();
+    glm::mat4 localRotationMatrix();
 
     void draw(glm::mat4 modelTransform);
 
@@ -106,10 +86,20 @@ protected:
     virtual void unbindTexture();
 
     properties::BoolProperty _enabled;
-    properties::BoolProperty _useFlatScreen;
-    properties::Vec2Property _euclideanPosition;
-    properties::Vec2Property _sphericalPosition;
-    properties::FloatProperty _depth;
+    properties::BoolProperty _usePerspectiveProjection;
+    properties::BoolProperty _useRadiusAzimuthElevation;
+
+    // x, y, z
+    properties::Vec3Property _cartesianPosition;
+
+    // Radius, azimuth, elevation,
+    // where azimuth is relative to negative y axis and
+    // elevation is angle from plane with normal z.
+    properties::Vec3Property _raePosition;
+
+    // Local rotation (roll, pitch, yaw)
+    properties::Vec3Property _localRotation;
+
     properties::FloatProperty _scale;
     properties::FloatProperty _alpha;
     properties::TriggerProperty _delete;
@@ -118,10 +108,7 @@ protected:
     UniformCache(occlusionDepth, alpha, modelTransform, viewProj, texture) _uniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 
-    bool _useEuclideanCoordinates = true;
     glm::vec2 _originalViewportSize;
-
-    float _radius;
 };
 
 } // namespace openspace
