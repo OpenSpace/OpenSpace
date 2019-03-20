@@ -88,6 +88,7 @@ protected:
     properties::BoolProperty _enabled;
     properties::BoolProperty _usePerspectiveProjection;
     properties::BoolProperty _useRadiusAzimuthElevation;
+    properties::BoolProperty _faceCamera;
 
     // x, y, z
     properties::Vec3Property _cartesianPosition;

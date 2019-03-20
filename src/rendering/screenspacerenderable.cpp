@@ -117,6 +117,13 @@ namespace {
         "scene."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo FaceCameraInfo = {
+        "FaceCamera",
+        "Face Camera",
+        "If enabled, the local rotation is applied after the plane is rotated to face "
+        "the camera."
+    };
+
     float wrap(float value, float min, float max) {
         return glm::mod(value - min, max - min) + min;
     }
@@ -135,23 +142,32 @@ namespace {
         return glm::vec3(r, theta, phi);
     }
 
-    // ISO convention spherical coordinates according to 
-    // https://en.wikipedia.org/wiki/Spherical_coordinate_system
-    // (radius, theta, phi), where theta is the polar angle, and phi is the azimuth.
+
     glm::vec3 sphericalToCartesian(glm::vec3 spherical) {
+        // First convert to ISO convention spherical coordinates according to 
+        // https://en.wikipedia.org/wiki/Spherical_coordinate_system
+        // (radius, theta, phi), where theta is the polar angle from the z axis,
+        // and phi is the azimuth.
+
         const glm::vec3 sanitized = sanitizeSphericalCoordinates(std::move(spherical));
         const float x = sanitized[0] * sin(sanitized[1]) * cos(sanitized[2]);
         const float y = sanitized[0] * sin(sanitized[1]) * sin(sanitized[2]);
         const float z = sanitized[0] * cos(sanitized[1]);
-        return glm::vec3(x, y, z);
+
+        // Now, convert rotate the coordinate system, so that z maps to y,
+        // and y maps to -z. We want the pole to be in y instead of z.
+        return glm::vec3(x, -z, y);
     }
 
     glm::vec3 cartesianToSpherical(const glm::vec3& cartesian) {
+        // Rotate cartesian coordinates.
+        glm::vec3 rotated = glm::vec3(cartesian.x, cartesian.z, -cartesian.y);
+
         const float r = sqrt(
-            pow(cartesian.x, 2.f) + pow(cartesian.y, 2.f) + pow(cartesian.z, 2.f)
+            pow(rotated.x, 2.f) + pow(rotated.y, 2.f) + pow(rotated.z, 2.f)
         );
-        const float theta = acos(cartesian.z/r);
-        const float phi = atan2(cartesian.y, cartesian.x);
+        const float theta = acos(rotated.z/r);
+        const float phi = atan2(rotated.y, rotated.x);
         return sanitizeSphericalCoordinates(glm::vec3(r, theta, phi));
     }
 
@@ -242,6 +258,12 @@ documentation::Documentation ScreenSpaceRenderable::Documentation() {
                 UseRadiusAzimuthElevationInfo.description
             },
             {
+                FaceCameraInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                FaceCameraInfo.description
+            },
+            {
                 CartesianPositionInfo.identifier,
                 new DoubleVector3Verifier,
                 Optional::Yes,
@@ -298,6 +320,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     , _enabled(EnabledInfo, true)
     , _useRadiusAzimuthElevation(UseRadiusAzimuthElevationInfo, false)
     , _usePerspectiveProjection(UsePerspectiveProjectionInfo, false)
+    , _faceCamera(FaceCameraInfo, true)
     , _cartesianPosition(
         CartesianPositionInfo,
         glm::vec3(0.f),
@@ -332,6 +355,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     addProperty(_enabled);
     addProperty(_useRadiusAzimuthElevation);
     addProperty(_usePerspectiveProjection);
+    addProperty(_faceCamera);
     addProperty(_cartesianPosition);
     addProperty(_raePosition);
 
@@ -385,6 +409,12 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     if (dictionary.hasKey(UsePerspectiveProjectionInfo.identifier)) {
         _usePerspectiveProjection = static_cast<bool>(
             dictionary.value<bool>(UsePerspectiveProjectionInfo.identifier)
+        );
+    }
+
+    if (dictionary.hasKey(FaceCameraInfo.identifier)) {
+        _faceCamera = static_cast<bool>(
+            dictionary.value<bool>(FaceCameraInfo.identifier)
         );
     }
 
@@ -507,10 +537,6 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
         scale = glm::scale(scale, glm::vec3(depth()));
     }
 
-    if (_useRadiusAzimuthElevation) {
-        scale = glm::scale(scale, glm::vec3(1.f, -1.f, 1.f));
-    }
-
     return scale;
 }
 
@@ -518,41 +544,46 @@ glm::mat4 ScreenSpaceRenderable::globalRotationMatrix() {
     // Get the scene transform
     glm::mat4 rotation = glm::inverse(global::windowDelegate.modelMatrix());
 
-    if (_useRadiusAzimuthElevation) {
-        glm::vec3 rThetaPhi = raeToSpherical(_raePosition.value());
+    /*if (_faceCamera) {
+        glm::vec3 rThetaPhi = _useRadiusAzimuthElevation ?
+            raeToSpherical(_raePosition.value()) :
+            cartesianToSpherical(_cartesianPosition);
         // Based on ISO standard for spherical coordaintes,
         // position is acquired from a rotation around z and y.
         rotation = glm::rotate(rotation, rThetaPhi.z, glm::vec3(0.f, 0.f, 1.f));
         rotation = glm::rotate(rotation, rThetaPhi.y, glm::vec3(0.f, 1.f, 0.f));
         rotation = glm::rotate(rotation, glm::half_pi<float>(), glm::vec3(0.f, 0.f, 1.0));
-    }
+    }*/
 
     return rotation;
 }
 
 glm::mat4 ScreenSpaceRenderable::localRotationMatrix() {
+    glm::mat4 rotation = glm::mat4(1.f);
+    if (_faceCamera) {
+        glm::vec3 translation = _useRadiusAzimuthElevation ?
+            sphericalToCartesian(raeToSpherical(_raePosition)) :
+            _cartesianPosition;
+
+        glm::vec3 rThetaPhi = _useRadiusAzimuthElevation ?
+            raeToSpherical(_raePosition.value()) :
+            cartesianToSpherical(_cartesianPosition);
+
+        rotation = glm::inverse(glm::lookAt(glm::vec3(0.f), glm::normalize(translation), glm::vec3(0.f, 1.f, 0.f)));
+    }
+
     float roll = _localRotation.value().x;
     float pitch = _localRotation.value().y;
     float yaw = _localRotation.value().z;
-    glm::mat4 rotation = glm::eulerAngleYXZ(yaw, pitch, roll);
-    return rotation;
+    return rotation * glm::eulerAngleYXZ(yaw, pitch, roll);
 }
 
 glm::mat4 ScreenSpaceRenderable::translationMatrix() {
-    glm::mat4 translation(1.0);
+    glm::vec3 translation = _useRadiusAzimuthElevation ?
+        sphericalToCartesian(raeToSpherical(_raePosition)) :
+        _cartesianPosition;
 
-    if (_useRadiusAzimuthElevation) {
-        translation = glm::translate(
-            translation,
-            glm::vec3(0.0f, 0.0f, _raePosition.value().x)
-        );
-    } else {
-        translation = glm::translate(
-            translation,
-            _cartesianPosition.value()
-        );
-    }
-    return translation;
+    return glm::translate(glm::mat4(1.f), translation);
 }
 
 void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
