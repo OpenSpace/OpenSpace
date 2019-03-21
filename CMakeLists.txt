@@ -90,7 +90,7 @@ execute_process(
   RESULT_VARIABLE OPENSPACE_GIT_STATUS_RETURN
 )
 if (NOT OPENSPACE_GIT_STATUS_RETURN EQUAL 0) 
-    set(OPENSPACE_GIT_STATUS "uncomitted changes")
+    set(OPENSPACE_GIT_STATUS "uncommitted changes")
 else()
     set(OPENSPACE_GIT_STATUS "")
 endif()
