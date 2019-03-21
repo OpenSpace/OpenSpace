@@ -56,7 +56,7 @@ create_new_module(
     set(KAMELEON_INCLUDES ${KAMELEON_ROOT_DIR}/src)
     add_subdirectory(${KAMELEON_ROOT_DIR})
     target_include_directories(${kameleon_module} SYSTEM PUBLIC ${KAMELEON_INCLUDES})
-    target_link_libraries(${kameleon_module} ccmc)
+    target_link_libraries(${kameleon_module} PRIVATE ccmc)
     mark_as_advanced(CDF_BUILD_ZLIB CDF_INCLUDES CDF_LIBRARY CDF_USE_STATIC_LIBS
         CDF_USE_ZLIB HDF5_DIR HDF5_USE_STATIC_LIBRARIES KAMELEON_LIBRARY_ONLY
         KAMELEON_USE_HDF5)

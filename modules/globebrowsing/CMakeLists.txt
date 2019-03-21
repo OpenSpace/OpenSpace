@@ -120,6 +120,7 @@ if (WIN32)
 
     target_link_libraries(
         openspace-module-globebrowsing
+        PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib
     )
     register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal203.dll")
@@ -132,7 +133,7 @@ else (WIN32)
         ${GDAL_INCLUDE_DIR}
     )
 
-    target_link_libraries(openspace-module-globebrowsing ${GDAL_LIBRARY})
+    target_link_libraries(openspace-module-globebrowsing PRIVATE ${GDAL_LIBRARY})
 
     mark_as_advanced(GDAL_CONFIG GDAL_INCLUDE_DIR GDAL_LIBRARY)
 

@@ -58,5 +58,5 @@ add_subdirectory(${CCFITS_ROOT_DIR})
 set_folder_location(CCfits "External")
 
 
-TARGET_INCLUDE_DIRECTORIES(${MODULE_NAME} SYSTEM PUBLIC ${INCLUDES_FOR_TARGET})
-TARGET_LINK_LIBRARIES(${MODULE_NAME} CCfits)
+target_include_directories(${MODULE_NAME} SYSTEM PUBLIC ${INCLUDES_FOR_TARGET})
+target_link_libraries(${MODULE_NAME} PRIVATE CCfits)

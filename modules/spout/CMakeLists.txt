@@ -47,7 +47,7 @@ create_new_module(
 )
 
 target_include_directories(openspace-module-spout SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout)
-target_link_libraries(openspace-module-spout ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.lib)
+target_link_libraries(openspace-module-spout PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.lib)
 register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.dll")
 
 target_compile_definitions(openspace-module-spout PUBLIC "OPENSPACE_HAS_SPOUT")
