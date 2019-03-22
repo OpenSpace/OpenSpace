@@ -487,8 +487,8 @@ bool ScreenSpaceRenderable::isEnabled() const {
 
 float ScreenSpaceRenderable::depth() {
     return _useRadiusAzimuthElevation ?
-        -sphericalToCartesian(raeToSpherical(_raePosition)).z :
-        -_cartesianPosition.value().z;
+        _raePosition.value().x :
+        cartesianToSpherical(_cartesianPosition).x;
 }
 
 void ScreenSpaceRenderable::createShaders() {
@@ -533,7 +533,10 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
 
     // Simulate orthographic projection by distance to plane.
     if (!_usePerspectiveProjection) {
-        scale = glm::scale(scale, glm::vec3(glm::abs(depth())));
+        float distance = _useRadiusAzimuthElevation ?
+            _raePosition.value().x :
+            -_cartesianPosition.value().z;
+        scale = glm::scale(scale, glm::vec3(distance));
     }
 
     return scale;
