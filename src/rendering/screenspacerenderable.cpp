@@ -322,13 +322,13 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     , _faceCamera(FaceCameraInfo, true)
     , _cartesianPosition(
         CartesianPositionInfo,
-        glm::vec3(0.f),
-        glm::vec3(-4.f),
+        glm::vec3(0.f, 0.f, -2.f),
+        glm::vec3(-4.f, -4.f, -10.f),
         glm::vec3(4.f, 4.f, 0.f)
     )
     , _raePosition(
         RadiusAzimuthElevationInfo,
-        glm::vec3(2.f, 0.f, glm::half_pi<float>()),
+        glm::vec3(2.f, 0.f, 0.f),
         glm::vec3(0.f, -glm::pi<float>(), -glm::half_pi<float>()),
         glm::vec3(10.f, glm::pi<float>(), glm::half_pi<float>())
     )
@@ -487,8 +487,8 @@ bool ScreenSpaceRenderable::isEnabled() const {
 
 float ScreenSpaceRenderable::depth() {
     return _useRadiusAzimuthElevation ?
-        _raePosition.value()[0] :
-        cartesianToSpherical(_cartesianPosition)[0];
+        -sphericalToCartesian(raeToSpherical(_raePosition)).z :
+        -_cartesianPosition.value().z;
 }
 
 void ScreenSpaceRenderable::createShaders() {
@@ -533,7 +533,7 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
 
     // Simulate orthographic projection by distance to plane.
     if (!_usePerspectiveProjection) {
-        scale = glm::scale(scale, glm::vec3(depth()));
+        scale = glm::scale(scale, glm::vec3(glm::abs(depth())));
     }
 
     return scale;

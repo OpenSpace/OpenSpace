@@ -574,7 +574,8 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         ssrs.begin(),
         ssrs.end(),
         [](ScreenSpaceRenderable* lhs, ScreenSpaceRenderable* rhs) {
-            return lhs->depth() < rhs->depth();
+            // Render back to front.
+            return lhs->depth() > rhs->depth();
         }
     );
 
