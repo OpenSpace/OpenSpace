@@ -4,7 +4,7 @@ local shared = asset.require('../satellites_shared')
 local group = {
     Title = "Fengyun Debris",
     Url = "http://www.celestrak.com/NORAD/elements/1999-025.txt",
-    TrailColor = { 0.25, 0.35, 0.45 }
+    TrailColor = { 0.784, 1.0, 0.737 }
 }
 
 local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
