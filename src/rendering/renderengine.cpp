@@ -158,14 +158,21 @@ namespace {
         "master node is not required and performance can be gained by disabling it."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableTranslationInfo = {
-        "DisableSceneTranslationOnMaster",
-        "Disable Scene Translation on Master",
-        "If this value is enabled, any scene translations such as specified in, for "
-        "example an SGCT configuration, is disabled for the master node. This setting "
-        "can be useful if a planetarium environment requires a scene translation to be "
-        "applied, which would otherwise make interacting through the master node "
-        "difficult."
+    constexpr openspace::properties::Property::PropertyInfo GlobalRotationinfo = {
+        "GlobalRotation",
+        "Global Rotation",
+        "Applies a global view rotation. Use this to rotate the position of the "
+        "focus node away from the default location on the screen. This setting "
+        "persists even when a new focus node is selected. Defined using roll, pitch, "
+        "yaw in radians"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MasterRotationInfo = {
+        "MasterRotation",
+        "Master Rotation",
+        "Applies a view rotation for only the master node, defined using "
+        "roll, pitch yaw in radians. This can be used to compensate the master view "
+        "direction for tilted display systems in clustered immersive environments."
     };
 
     constexpr openspace::properties::Property::PropertyInfo AaSamplesInfo = {
@@ -211,7 +218,18 @@ RenderEngine::RenderEngine()
     , _applyWarping(ApplyWarpingInfo, false)
     , _showFrameNumber(ShowFrameNumberInfo, false)
     , _disableMasterRendering(DisableMasterInfo, false)
-    , _disableSceneTranslationOnMaster(DisableTranslationInfo, false)
+    , _globalRotation(
+        GlobalRotationinfo,
+        glm::vec3(0.f),
+        glm::vec3(-glm::pi<float>()),
+        glm::vec3(glm::pi<float>())
+    )
+    , _masterRotation(
+        MasterRotationInfo,
+        glm::vec3(0.f),
+        glm::vec3(-glm::pi<float>()),
+        glm::vec3(glm::pi<float>())
+    )
     , _nAaSamples(AaSamplesInfo, 4, 1, 8)
     , _hdrExposure(HDRExposureInfo, 0.4f, 0.01f, 10.0f)
     , _hdrBackground(BackgroundExposureInfo, 2.8f, 0.01f, 10.0f)
@@ -264,7 +282,8 @@ RenderEngine::RenderEngine()
 
     addProperty(_showFrameNumber);
 
-    addProperty(_disableSceneTranslationOnMaster);
+    addProperty(_globalRotation);
+    addProperty(_masterRotation);
     addProperty(_disableMasterRendering);
 }
 
@@ -294,8 +313,8 @@ void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
 void RenderEngine::initialize() {
     // We have to perform these initializations here as the OsEng has not been initialized
     // in our constructor
-    _disableSceneTranslationOnMaster =
-        global::configuration.isSceneTranslationOnMasterDisabled;
+    _globalRotation = static_cast<glm::vec3>(global::configuration.globalRotation);
+    _masterRotation = static_cast<glm::vec3>(global::configuration.masterRotation);
     _disableMasterRendering = global::configuration.isRenderingOnMasterDisabled;
 
 #ifdef GHOUL_USE_DEVIL
@@ -450,6 +469,19 @@ glm::ivec2 RenderEngine::fontResolution() const {
     }
 }
 
+glm::mat4 RenderEngine::globalRotation() const {
+    glm::vec3 rot = _globalRotation.value();
+    return glm::mat4_cast(glm::normalize(glm::quat(glm::vec3(rot.y, rot.x, rot.z))));
+}
+
+glm::mat4 RenderEngine::globalNodeRotation() const {
+    if (!global::windowDelegate.isMaster()) {
+        return glm::mat4(1.f);
+    }
+    glm::vec3 rot = _masterRotation.value();
+    return glm::mat4_cast(glm::normalize(glm::quat(glm::vec3(rot.y, rot.x, rot.z))));
+}
+
 void RenderEngine::updateFade() {
     // Temporary fade funtionality
     constexpr const float FadedIn = 1.0;
@@ -492,15 +524,18 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
                           const glm::mat4& projectionMatrix)
 {
     LTRACE("RenderEngine::render(begin)");
+
     const WindowDelegate& delegate = global::windowDelegate;
+
+    const glm::mat4 globalRot = globalRotation();
+    const glm::mat4 nodeRot = globalNodeRotation();
+    glm::mat4 combinedGlobalRot = nodeRot * globalRot;
+
     if (_camera) {
-        if (_disableSceneTranslationOnMaster && delegate.isMaster()) {
-            _camera->sgctInternal.setViewMatrix(viewMatrix);
-        }
-        else {
-            _camera->sgctInternal.setViewMatrix(viewMatrix * sceneMatrix);
-            _camera->sgctInternal.setSceneMatrix(sceneMatrix);
-        }
+        _camera->sgctInternal.setViewMatrix(
+            viewMatrix * combinedGlobalRot * sceneMatrix
+        );
+        _camera->sgctInternal.setSceneMatrix(combinedGlobalRot * sceneMatrix);
         _camera->sgctInternal.setProjectionMatrix(projectionMatrix);
         _camera->invalidateCache();
     }

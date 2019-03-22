@@ -540,19 +540,17 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
 }
 
 glm::mat4 ScreenSpaceRenderable::globalRotationMatrix() {
-    // Get the scene transform
-    glm::mat4 rotation = glm::inverse(global::windowDelegate.modelMatrix());
+    // We do not want the screen space planes to be affected by
+    // 1) sgct's scene matrix (also called model matrix by sgct)
+    // 2) The global rotation of the view applied in the render engine
+    // 3) The rotation that may be applied to the master cluster node, to compensate for
+    //    any tilt on the display system, which is not applied to the master.
 
-    /*if (_faceCamera) {
-        glm::vec3 rThetaPhi = _useRadiusAzimuthElevation ?
-            raeToSpherical(_raePosition.value()) :
-            cartesianToSpherical(_cartesianPosition);
-        // Based on ISO standard for spherical coordaintes,
-        // position is acquired from a rotation around z and y.
-        rotation = glm::rotate(rotation, rThetaPhi.z, glm::vec3(0.f, 0.f, 1.f));
-        rotation = glm::rotate(rotation, rThetaPhi.y, glm::vec3(0.f, 1.f, 0.f));
-        rotation = glm::rotate(rotation, glm::half_pi<float>(), glm::vec3(0.f, 0.f, 1.0));
-    }*/
+    glm::mat4 rotation = glm::inverse(
+        global::renderEngine.globalNodeRotation() *
+        global::renderEngine.globalRotation() *
+        global::windowDelegate.modelMatrix()
+    );
 
     return rotation;
 }
