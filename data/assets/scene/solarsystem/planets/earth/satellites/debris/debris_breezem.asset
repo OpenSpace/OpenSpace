@@ -4,7 +4,7 @@ local shared = asset.require('../satellites_shared')
 local group = {
     Title = "Breeze-M Breakup",
     Url = "http://www.celestrak.com/NORAD/elements/2012-044.txt",
-    TrailColor = { 0.25, 0.35, 0.45 }
+    TrailColor = { 1.0, 0.98, 0.984 }
 }
 
 local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
