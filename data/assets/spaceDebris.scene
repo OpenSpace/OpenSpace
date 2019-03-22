@@ -16,6 +16,7 @@ asset.require('util/webgui')
 
 asset.request('customization/globebrowsing')
 
+-- asset.request('scene/solarsystem/planets/earth/satellites/satellites_all')
 asset.request('scene/solarsystem/planets/earth/satellites/satellites_debris')
 
 -- Keybindings that are specific for this scene
