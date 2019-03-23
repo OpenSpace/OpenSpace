@@ -23,10 +23,10 @@ def moduleCMakeFlags() {
   // using new File doesn't work as it is not allowed in the sandbox
   
   if (isUnix()) {
-     modules = sh(returnStdout: true, script: 'ls -d modules/*').trim().split(System.getProperty('line.separator'));
+     modules = sh(returnStdout: true, script: 'ls -d modules/*').trim().split('\n');
   };
   else {
-    modules = bat(returnStdout: true, script: 'dir modules /b /ad /on').trim().split(System.getProperty('line.separator'));
+    modules = bat(returnStdout: true, script: 'dir modules /b /ad /on').trim().split('\r\n'));
   }
 
   // def dirs = readDir();
