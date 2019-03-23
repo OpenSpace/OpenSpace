@@ -26,8 +26,7 @@ def moduleCMakeFlags() {
      modules = sh(returnStdout: true, script: 'ls -d modules/*').trim().split('\n');
   };
   else {
-    modules = bat(returnStdout: true, script: 'dir modules /b /ad /on').trim().split('\r\n');
-    modules = modules.remove(0);
+    modules = bat(returnStdout: true, script: '@echo off dir modules /b /ad /on').trim().split('\r\n');
   }
 
   // def dirs = readDir();
