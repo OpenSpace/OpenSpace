@@ -6,12 +6,25 @@ library('sharedSpace'); // jenkins-pipeline-lib
 def url = 'https://github.com/OpenSpace/OpenSpace';
 def branch = env.BRANCH_NAME;
 
-def moduleCMakeFlags() {
-  def currentDir = new File('.')
-  def dirs = []
-  currentDir.eachFile FileType.DIRECTORIES, {
-      dirs << it.name
+@NonCPS
+def readDir() {
+  def dirsl = [];
+  new File("${workspace}").eachDir() {
+    dirs -> println dirs.getName() 
+    if (!dirs.getName().startsWith('.')) {
+      dirsl.add(dirs.getName());
+    }
   }
+  return dirs;
+}
+
+def moduleCMakeFlags() {
+  def dirs = readDir();
+  // def currentDir = new File('.')
+  // def dirs = []
+  // currentDir.eachFile FileType.DIRECTORIES, {
+  //     dirs << it.name
+  // }
   // def moduleFlags = [
   //   'atmosphere',
   //   'base',
