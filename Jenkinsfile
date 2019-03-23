@@ -19,7 +19,17 @@ def readDir() {
 }
 
 def moduleCMakeFlags() {
-  def dirs = readDir();
+  def modules = [];
+  // using new File doesn't work as it is not allowed in the sandbox
+  
+  if (isUnix()) {
+     modules = sh(returnStdout: true, script: 'ls -d modules/*').trim().split(System.getProperty('line.separator'));
+  };
+  else {
+    modules = bat(returnStdout: true, script: 'dir modules /b /ad /on').trim().split(System.getProperty('line.separator'));
+  }
+
+  // def dirs = readDir();
   // def currentDir = new File('.')
   // def dirs = []
   // currentDir.eachFile FileType.DIRECTORIES, {
@@ -56,7 +66,7 @@ def moduleCMakeFlags() {
   // ];
 
   def flags = '';
-  for (module in dirs) {
+  for (module in modules) {
       flags += "-D OPENSPACE_MODULE_${module.toUpperCase()}=ON "
   }
   return flags;
