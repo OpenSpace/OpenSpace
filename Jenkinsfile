@@ -7,43 +7,43 @@ def url = 'https://github.com/OpenSpace/OpenSpace';
 def branch = env.BRANCH_NAME;
 
 def moduleCMakeFlags() {
-//   def currentDir = new File('.')
-// def dirs = []
-// currentDir.eachFile FileType.DIRECTORIES, {
-//     dirs << it.name
-// }
-  def moduleFlags = [
-    'atmosphere',
-    'base',
-    // 'cefwebgui',
-    'debugging',
-    'digitaluniverse',
-    'fieldlines',
-    'fieldlinessequence',
-    'fitsfilereader',
-    'gaia',
-    'galaxy',
-    'globebrowsing',
-    'imgui',
-    'iswa',
-    'kameleon',
-    'kameleonvolume',
-    'multiresvolume',
-    'server',
-    'space',
-    'spacecraftinstruments',
-    'space',
-    'spout',
-    'sync',
-    'touch',
-    'toyvolume',
-    'volume',
-    // 'webbrowser',
-    // 'webgui'
-  ];
+  def currentDir = new File('.')
+  def dirs = []
+  currentDir.eachFile FileType.DIRECTORIES, {
+      dirs << it.name
+  }
+  // def moduleFlags = [
+  //   'atmosphere',
+  //   'base',
+  //   // 'cefwebgui',
+  //   'debugging',
+  //   'digitaluniverse',
+  //   'fieldlines',
+  //   'fieldlinessequence',
+  //   'fitsfilereader',
+  //   'gaia',
+  //   'galaxy',
+  //   'globebrowsing',
+  //   'imgui',
+  //   'iswa',
+  //   'kameleon',
+  //   'kameleonvolume',
+  //   'multiresvolume',
+  //   'server',
+  //   'space',
+  //   'spacecraftinstruments',
+  //   'space',
+  //   'spout',
+  //   'sync',
+  //   'touch',
+  //   'toyvolume',
+  //   'volume',
+  //   // 'webbrowser',
+  //   // 'webgui'
+  // ];
 
   def flags = '';
-  for (module in moduleFlags) {
+  for (module in dirs) {
       flags += "-D OPENSPACE_MODULE_${module.toUpperCase()}=ON "
   }
   return flags;
