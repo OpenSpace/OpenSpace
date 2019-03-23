@@ -56,8 +56,8 @@ set_property(GLOBAL PROPERTY USE_FOLDERS On)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER CMake)
 
 mark_as_advanced(CMAKE_BACKWARDS_COMPATIBILITY CMAKE_BUILD_TYPE CMAKE_DEBUG_POSTFIX
-    CMAKE_INSTALL_PREFIX CMAKE_OSX_ARCHITECTURES CMAKE_OSX_DEPLOYMENT_TARGET
-    CMAKE_OSX_SYSROOT CMAKE_RELEASE_POSTFIX)
+  CMAKE_INSTALL_PREFIX CMAKE_OSX_ARCHITECTURES CMAKE_OSX_DEPLOYMENT_TARGET
+  CMAKE_OSX_SYSROOT CMAKE_RELEASE_POSTFIX)
 
 # Set build output directories
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OPENSPACE_CMAKE_EXT_DIR})
@@ -90,9 +90,9 @@ execute_process(
   RESULT_VARIABLE OPENSPACE_GIT_STATUS_RETURN
 )
 if (NOT OPENSPACE_GIT_STATUS_RETURN EQUAL 0) 
-    set(OPENSPACE_GIT_STATUS "uncommitted changes")
+  set(OPENSPACE_GIT_STATUS "uncommitted changes")
 else()
-    set(OPENSPACE_GIT_STATUS "")
+  set(OPENSPACE_GIT_STATUS "")
 endif()
 
 option(OPENSPACE_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
@@ -105,15 +105,15 @@ include(src/CMakeLists.txt)
 # System libraries
 if (APPLE)
     begin_dependency("Core Libraries")
-    target_include_directories(openspace-core PUBLIC "/Developer/Headers/FlatCarbon")
-    find_library(COREFOUNDATION_LIBRARY CoreFoundation)
-    find_library(CARBON_LIBRARY Carbon)
-    find_library(COCOA_LIBRARY Carbon)
-    find_library(APP_SERVICES_LIBRARY ApplicationServices)
-    mark_as_advanced(CARBON_LIBRARY COCOA_LIBRARY APP_SERVICES_LIBRARY)
-    target_link_libraries(openspace-core ${CARBON_LIBRARY} ${COREFOUNDATION_LIBRARY}
-        ${COCOA_LIBRARY} ${APP_SERVICES_LIBRARY})
-    end_dependency()
+  target_include_directories(openspace-core PUBLIC "/Developer/Headers/FlatCarbon")
+  find_library(COREFOUNDATION_LIBRARY CoreFoundation)
+  find_library(CARBON_LIBRARY Carbon)
+  find_library(COCOA_LIBRARY Carbon)
+  find_library(APP_SERVICES_LIBRARY ApplicationServices)
+  mark_as_advanced(CARBON_LIBRARY COCOA_LIBRARY APP_SERVICES_LIBRARY)
+  target_link_libraries(openspace-core ${CARBON_LIBRARY} ${COREFOUNDATION_LIBRARY}
+    ${COCOA_LIBRARY} ${APP_SERVICES_LIBRARY})
+  end_dependency()
 endif()
 
 # Ghoul
@@ -134,18 +134,17 @@ end_dependency()
 # Curl
 begin_dependency("CURL")
 if (WIN32)
-    set(CURL_ROOT_DIR "${OPENSPACE_EXT_DIR}/curl")
-    target_include_directories(openspace-core SYSTEM PUBLIC ${CURL_ROOT_DIR}/include)
-    target_link_libraries(openspace-core ${CURL_ROOT_DIR}/lib/libcurl.lib)
-    target_compile_definitions(openspace-core PUBLIC
-        "OPENSPACE_CURL_ENABLED" "CURL_STATICLIB")
+  set(CURL_ROOT_DIR "${OPENSPACE_EXT_DIR}/curl")
+  target_include_directories(openspace-core SYSTEM PUBLIC ${CURL_ROOT_DIR}/include)
+  target_link_libraries(openspace-core ${CURL_ROOT_DIR}/lib/libcurl.lib)
+  target_compile_definitions(openspace-core PUBLIC "OPENSPACE_CURL_ENABLED" "CURL_STATICLIB")
 else ()
-    find_package(CURL)
-    if (CURL_FOUND)
-        target_include_directories(openspace-core SYSTEM PUBLIC ${CURL_INCLUDE_DIRS})
-        target_link_libraries(openspace-core ${CURL_LIBRARIES})
-        target_compile_definitions(openspace-core PUBLIC "OPENSPACE_CURL_ENABLED")
-    endif ()
+  find_package(CURL)
+  if (CURL_FOUND)
+    target_include_directories(openspace-core SYSTEM PUBLIC ${CURL_INCLUDE_DIRS})
+    target_link_libraries(openspace-core ${CURL_LIBRARIES})
+    target_compile_definitions(openspace-core PUBLIC "OPENSPACE_CURL_ENABLED")
+  endif ()
 endif()
 end_dependency()
 
@@ -153,22 +152,26 @@ end_dependency()
 # Unfortunately, we have to set this value manually; sigh
 # In the future, if the Qt version is updated, just add to this variable ---abock
 if (APPLE)
-    set(CMAKE_PREFIX_PATH
-        "~/Qt/5.6/clang_64/lib/cmake"
-        "~/Qt/5.7/clang_64/lib/cmake"
-        "~/Qt/5.8/clang_64/lib/cmake"
-    )
+  set(CMAKE_PREFIX_PATH
+    "~/Qt/5.6/clang_64/lib/cmake"
+    "~/Qt/5.7/clang_64/lib/cmake"
+    "~/Qt/5.8/clang_64/lib/cmake"
+    "~/Qt/5.9/clang_64/lib/cmake"
+    "~/Qt/5.10/clang_64/lib/cmake"
+    "~/Qt/5.11/clang_64/lib/cmake"
+    "~/Qt/5.12/clang_64/lib/cmake"
+  )
 endif ()
 
 if (MSVC)
-    option(OPENSPACE_ENABLE_VLD "Enable the Visual Leak Detector" OFF)
-    if (OPENSPACE_ENABLE_VLD)
-        begin_dependency("Visual Leak Detector")
-        target_compile_definitions(openspace-core PUBLIC "OPENSPACE_ENABLE_VLD")
-        target_link_libraries(openspace-core ${OPENSPACE_EXT_DIR}/vld/lib/vld.lib)
-        target_include_directories(openspace-core PUBLIC ${OPENSPACE_EXT_DIR}/vld)
-        end_dependency()
-    endif ()
+  option(OPENSPACE_ENABLE_VLD "Enable the Visual Leak Detector" OFF)
+  if (OPENSPACE_ENABLE_VLD)
+    begin_dependency("Visual Leak Detector")
+    target_compile_definitions(openspace-core PUBLIC "OPENSPACE_ENABLE_VLD")
+    target_link_libraries(openspace-core ${OPENSPACE_EXT_DIR}/vld/lib/vld.lib)
+    target_include_directories(openspace-core PUBLIC ${OPENSPACE_EXT_DIR}/vld)
+    end_dependency()
+  endif ()
 endif ()
 
 
@@ -177,29 +180,29 @@ endif ()
 ##########################################################################################
 option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
 if (OPENSPACE_HAVE_TESTS)
-    include_gtest("${GHOUL_BASE_DIR}/ext/googletest")
+  include_gtest("${GHOUL_BASE_DIR}/ext/googletest")
 
-    file(GLOB_RECURSE OPENSPACE_TEST_FILES ${OPENSPACE_BASE_DIR}/tests/*.inl)
-    add_executable(OpenSpaceTest ${OPENSPACE_BASE_DIR}/tests/main.cpp ${OPENSPACE_TEST_FILES})
+  file(GLOB_RECURSE OPENSPACE_TEST_FILES ${OPENSPACE_BASE_DIR}/tests/*.inl)
+  add_executable(OpenSpaceTest ${OPENSPACE_BASE_DIR}/tests/main.cpp ${OPENSPACE_TEST_FILES})
 
-    target_include_directories(OpenSpaceTest PUBLIC
-        "${OPENSPACE_BASE_DIR}/include"
-        "${OPENSPACE_BASE_DIR}/tests"
-        "${OPENSPACE_EXT_DIR}/ghoul/ext/googletest/googletest/include"
+  target_include_directories(OpenSpaceTest PUBLIC
+    "${OPENSPACE_BASE_DIR}/include"
+    "${OPENSPACE_BASE_DIR}/tests"
+    "${OPENSPACE_EXT_DIR}/ghoul/ext/googletest/googletest/include"
+  )
+  target_compile_definitions(OpenSpaceTest PUBLIC
+    "GHL_THROW_ON_ASSERT" "GTEST_HAS_TR1_TUPLE=0"
+  )
+  target_link_libraries(OpenSpaceTest gtest openspace-core)
+
+  set_folder_location(OpenSpaceTest "Unit Tests")
+
+  if (MSVC)
+    set_target_properties(OpenSpaceTest PROPERTIES LINK_FLAGS
+      "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
     )
-    target_compile_definitions(OpenSpaceTest PUBLIC
-        "GHL_THROW_ON_ASSERT" "GTEST_HAS_TR1_TUPLE=0"
-    )
-    target_link_libraries(OpenSpaceTest gtest openspace-core)
-
-    set_folder_location(OpenSpaceTest "Unit Tests")
-
-    if (MSVC)
-        set_target_properties(OpenSpaceTest PROPERTIES LINK_FLAGS
-            "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
-        )
-    endif ()
-    set_openspace_compile_settings(OpenSpaceTest)
+  endif ()
+  set_openspace_compile_settings(OpenSpaceTest)
 endif (OPENSPACE_HAVE_TESTS)
 
 
@@ -219,24 +222,24 @@ message(STATUS "")
 # Why not put these in the module's path? Because they do not have access to the
 # target as of July 2017, which is needed.
 if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
-    # wanted by CEF
-    set(CMAKE_BUILD_TYPE Debug CACHE INTERNAL "CMAKE_BUILD_TYPE")
+  # wanted by CEF
+  set(CMAKE_BUILD_TYPE Debug CACHE INTERNAL "CMAKE_BUILD_TYPE")
 
-    if (WIN32)
-        set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/OpenSpace/openspace.rc)
-    endif ()
+  if (WIN32)
+    set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/OpenSpace/openspace.rc)
+  endif ()
 
-    # Add the CEF binary distribution's cmake/ directory to the module path and
-    # find CEF to initialize it properly.
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
-    include(webbrowser_helpers)
+  # Add the CEF binary distribution's cmake/ directory to the module path and
+  # find CEF to initialize it properly.
+  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
+  include(webbrowser_helpers)
 
-    if (TARGET OpenSpaceTest)
-        set_cef_targets("${CEF_ROOT}" OpenSpaceTest)
-        run_cef_platform_config("${CEF_ROOT}" "${CEF_TARGET}" "${WEBBROWSER_MODULE_PATH}")
-    endif ()
+  if (TARGET OpenSpaceTest)
+    set_cef_targets("${CEF_ROOT}" OpenSpaceTest)
+    run_cef_platform_config("${CEF_ROOT}" "${CEF_TARGET}" "${WEBBROWSER_MODULE_PATH}")
+  endif ()
 elseif (OPENSPACE_MODULE_WEBBROWSER)
-    message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
+  message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
 endif ()
 
 ##########################################################################################
@@ -244,14 +247,14 @@ endif ()
 ##########################################################################################
 option(OPENSPACE_WITH_ABUFFER_RENDERER "Compile ABuffer Renderer" OFF)
 if (OPENSPACE_WITH_ABUFFER_RENDERER)
-    target_compile_definitions(openspace-core PUBLIC "OPENSPACE_WITH_ABUFFER_RENDERER")
+  target_compile_definitions(openspace-core PUBLIC "OPENSPACE_WITH_ABUFFER_RENDERER")
 endif ()
 
 
 # Just in case, create the bin directory
 add_custom_command(
-    TARGET openspace-core
-    PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  TARGET openspace-core
+  PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 )
 
 # Manage the CPack packaging

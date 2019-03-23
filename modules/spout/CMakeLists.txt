@@ -40,10 +40,10 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 set(SGCT_SPOUT_SUPPORT ON CACHE BOOL "" FORCE)
 
 create_new_module(
-    "Spout"
-    spout_module
-    STATIC
-    ${HEADER_FILES} ${SOURCE_FILES}
+  "Spout"
+  spout_module
+  STATIC
+  ${HEADER_FILES} ${SOURCE_FILES}
 )
 
 target_include_directories(openspace-module-spout SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout)

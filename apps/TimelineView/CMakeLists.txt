@@ -28,20 +28,20 @@ set(APPLICATION_NAME TimelineView)
 set(APPLICATION_LINK_TO_OPENSPACE OFF)
 
 set(SOURCE_FILES
-    ${OPENSPACE_APPS_DIR}/TimelineView/main.cpp
-    ${OPENSPACE_APPS_DIR}/TimelineView/mainwindow.cpp
-    ${OPENSPACE_APPS_DIR}/TimelineView/configurationwidget.cpp
-    ${OPENSPACE_APPS_DIR}/TimelineView/informationwidget.cpp
-    ${OPENSPACE_APPS_DIR}/TimelineView/controlwidget.cpp
-    ${OPENSPACE_APPS_DIR}/TimelineView/timelinewidget.cpp
+  ${OPENSPACE_APPS_DIR}/TimelineView/main.cpp
+  ${OPENSPACE_APPS_DIR}/TimelineView/mainwindow.cpp
+  ${OPENSPACE_APPS_DIR}/TimelineView/configurationwidget.cpp
+  ${OPENSPACE_APPS_DIR}/TimelineView/informationwidget.cpp
+  ${OPENSPACE_APPS_DIR}/TimelineView/controlwidget.cpp
+  ${OPENSPACE_APPS_DIR}/TimelineView/timelinewidget.cpp
 )
 
 set(HEADER_FILES
-    ${OPENSPACE_APPS_DIR}/TimelineView/mainwindow.h
-    ${OPENSPACE_APPS_DIR}/TimelineView/configurationwidget.h
-    ${OPENSPACE_APPS_DIR}/TimelineView/informationwidget.h
-    ${OPENSPACE_APPS_DIR}/TimelineView/controlwidget.h
-    ${OPENSPACE_APPS_DIR}/TimelineView/timelinewidget.h
+  ${OPENSPACE_APPS_DIR}/TimelineView/mainwindow.h
+  ${OPENSPACE_APPS_DIR}/TimelineView/configurationwidget.h
+  ${OPENSPACE_APPS_DIR}/TimelineView/informationwidget.h
+  ${OPENSPACE_APPS_DIR}/TimelineView/controlwidget.h
+  ${OPENSPACE_APPS_DIR}/TimelineView/timelinewidget.h
 ) 
 
 find_package(Qt5Widgets)
@@ -52,10 +52,7 @@ qt5_wrap_cpp(MOC_FILES ${HEADER_FILES})
 
 create_new_application(${APPLICATION_NAME} MACOSX_BUNDLE ${SOURCE_FILES} ${HEADER_FILES} ${MOC_FILES})
 
-target_link_libraries(${APPLICATION_NAME}
-    Qt5::Widgets
-    Qt5::Network
-)
+target_link_libraries(${APPLICATION_NAME} Qt5::Widgets Qt5::Network)
 
 #if (APPLE)
 #    INSTALL(CODE "
