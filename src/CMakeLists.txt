@@ -40,10 +40,12 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/engine/moduleengine.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/moduleengine_lua.inl
   ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine.cpp
+  ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine_lua.inl
   ${OPENSPACE_BASE_DIR}/src/engine/syncengine.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/virtualpropertymanager.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/camerainteractionstates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/inputstate.cpp
+  ${OPENSPACE_BASE_DIR}/src/interaction/inputdevicestates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/joystickinputstate.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/joystickcamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager.cpp
@@ -205,6 +207,7 @@ if (APPLE)
 endif ()
 
 set(OPENSPACE_HEADER
+  ${OPENSPACE_BASE_DIR}/include/openspace/json.h
   ${OPENSPACE_BASE_DIR}/include/openspace/documentation/core_registration.h
   ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentation.h
   ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentationengine.h
@@ -225,6 +228,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/camerainteractionstates.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/inputdevicestates.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/inputstate.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.inl
@@ -237,6 +241,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/orbitalnavigator.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externinteraction.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/sessionrecording.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/sessionrecording.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/shortcutmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/mission/mission.h
   ${OPENSPACE_BASE_DIR}/include/openspace/mission/missionmanager.h

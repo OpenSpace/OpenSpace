@@ -39,8 +39,9 @@ set(SOURCE_FILES
 set(HEADER_FILES
   ${OPENSPACE_APPS_DIR}/TimelineView/mainwindow.h
   ${OPENSPACE_APPS_DIR}/TimelineView/configurationwidget.h
-  ${OPENSPACE_APPS_DIR}/TimelineView/informationwidget.h
   ${OPENSPACE_APPS_DIR}/TimelineView/controlwidget.h
+  ${OPENSPACE_APPS_DIR}/TimelineView/informationwidget.h
+  ${OPENSPACE_APPS_DIR}/TimelineView/mainwindow.h
   ${OPENSPACE_APPS_DIR}/TimelineView/timelinewidget.h
 ) 
 
