@@ -110,23 +110,22 @@ namespace {
     std::string format(openspace::DashboardItemFramerate::FrametimeType frametimeType) {
         using namespace openspace;
         switch (frametimeType) {
-        case DashboardItemFramerate::FrametimeType::DtTimeAvg:
-            return formatDt();
-        case DashboardItemFramerate::FrametimeType::DtTimeExtremes:
-            return formatDtExtremes();
-        case DashboardItemFramerate::FrametimeType::DtStandardDeviation:
-            return formatDtStandardDeviation();
-        case DashboardItemFramerate::FrametimeType::DtCoefficientOfVariation:
-            return formatDtCoefficientOfVariation();
-        case DashboardItemFramerate::FrametimeType::FPS:
-            return formatFps();
-        case DashboardItemFramerate::FrametimeType::FPSAvg:
-            return formatAverageFps();
-        default:
-            return "";
+            case DashboardItemFramerate::FrametimeType::DtTimeAvg:
+                return formatDt();
+            case DashboardItemFramerate::FrametimeType::DtTimeExtremes:
+                return formatDtExtremes();
+            case DashboardItemFramerate::FrametimeType::DtStandardDeviation:
+                return formatDtStandardDeviation();
+            case DashboardItemFramerate::FrametimeType::DtCoefficientOfVariation:
+                return formatDtCoefficientOfVariation();
+            case DashboardItemFramerate::FrametimeType::FPS:
+                return formatFps();
+            case DashboardItemFramerate::FrametimeType::FPSAvg:
+                return formatAverageFps();
+            default:
+                return "";
         }
     }
-
 } // namespace
 
 namespace openspace {
@@ -157,14 +156,8 @@ documentation::Documentation DashboardItemFramerate::Documentation() {
             },
             {
                 FrametimeInfo.identifier,
-                new StringInListVerifier({
-                    ValueDtAvg,
-                    ValueDtExtremes,
-                    ValueDtStandardDeviation,
-                    ValueDtCov,
-                    ValueFps,
-                    ValueFpsAvg,
-                    ValueNone
+                new StringInListVerifier({ ValueDtAvg, ValueDtExtremes,
+                    ValueDtStandardDeviation, ValueDtCov, ValueFps, ValueFpsAvg, ValueNone
                 }),
                 Optional::Yes,
                 FrametimeInfo.description
