@@ -103,7 +103,7 @@ endfunction ()
 # External dependencies are found using the find_package function and then linked
 function (handle_module_dependencies target_name module_name)
     # We always want to link against Ghoul and the core library
-    target_link_libraries(${library_name} Ghoul openspace-core)
+    target_link_libraries(${library_name} PRIVATE Ghoul openspace-core)
 
     if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include.cmake")
         include(${CMAKE_CURRENT_SOURCE_DIR}/include.cmake)
@@ -112,7 +112,7 @@ function (handle_module_dependencies target_name module_name)
         foreach (dep ${OPENSPACE_DEPENDENCIES})
             create_library_name(${dep} dep_library)
             message(STATUS "Link: ${target_name} <- ${dep_library}")
-            target_link_libraries(${target_name} ${dep_library})
+            target_link_libraries(${target_name} PRIVATE ${dep_library})
         endforeach ()
 
         # Handle external dependencies
@@ -123,7 +123,7 @@ function (handle_module_dependencies target_name module_name)
                 ${${dep_upper}_INCLUDE_DIR} ${${dep_upper}_INCLUDE_DIRS}
             )
             message(STATUS "Link: ${target_name} <- ${${dep_upper}_LIBRARIES}")
-            target_link_libraries(${target_name}  ${${dep_upper}_LIBRARIES})
+            target_link_libraries(${target_name} PRIVATE ${${dep_upper}_LIBRARIES})
         endforeach ()
     endif ()
 endfunction ()

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -74,6 +74,8 @@ void SessionRecording::setRecordDataFormat(RecordedDataMode dataMode) {
 }
 
 bool SessionRecording::startRecording(const std::string& filename) {
+    const std::string absFilename = absPath(filename);
+
     if (_state == SessionState::Playback) {
         _playbackFile.close();
     }
@@ -82,15 +84,15 @@ bool SessionRecording::startRecording(const std::string& filename) {
     _playbackActive_time = false;
     _playbackActive_script = false;
     if (isDataModeBinary()) {
-        _recordFile.open(filename, std::ios::binary);
+        _recordFile.open(absFilename, std::ios::binary);
     }
     else {
-        _recordFile.open(filename);
+        _recordFile.open(absFilename);
     }
 
     if (!_recordFile.is_open() || !_recordFile.good()) {
         LERROR(fmt::format(
-            "Unable to open file {} for keyframe recording", filename.c_str()
+            "Unable to open file {} for keyframe recording", absFilename.c_str()
         ));
         return false;
     }
@@ -121,12 +123,14 @@ void SessionRecording::stopRecording() {
 bool SessionRecording::startPlayback(const std::string& filename,
                                      KeyframeTimeRef timeMode, bool forceSimTimeAtStart)
 {
+    const std::string absFilename = absPath(filename);
+
     if (_state == SessionState::Recording) {
         LERROR("Unable to start playback while in session recording mode");
         return false;
     }
     else if (_state == SessionState::Playback) {
-        if (_playbackFilename == filename) {
+        if (_playbackFilename == absFilename) {
             LERROR(fmt::format(
                 "Unable to start playback on file {} since it is already in playback",
                 filename)
@@ -135,14 +139,14 @@ bool SessionRecording::startPlayback(const std::string& filename,
         }
     }
 
-    if (!FileSys.fileExists(filename)) {
+    if (!FileSys.fileExists(absFilename)) {
         LERROR("Cannot find the specified playback file.");
         cleanUpPlayback();
         return false;
     }
 
     _playbackLineNum = 1;
-    _playbackFilename = filename;
+    _playbackFilename = absFilename;
 
     //Open in ASCII first
     _playbackFile.open(_playbackFilename, std::ifstream::in);
@@ -182,7 +186,7 @@ bool SessionRecording::startPlayback(const std::string& filename,
 
     if (!_playbackFile.is_open() || !_playbackFile.good()) {
         LERROR(fmt::format("Unable to open file {} for keyframe playback",
-               filename.c_str()));
+            absFilename.c_str()));
         stopPlayback();
         cleanUpPlayback();
         return false;
