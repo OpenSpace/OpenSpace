@@ -134,7 +134,7 @@ void TimeManager::preSynchronization(double dt) {
 
     // Notify observers about time changes if any.
     const double newTime = time().j2000Seconds();
-    const double newDeltaTime = _deltaTime;
+
     if (newTime != _lastTime) {
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
@@ -142,7 +142,10 @@ void TimeManager::preSynchronization(double dt) {
             it.second();
         }
     }
-    if (newDeltaTime != _lastDeltaTime || _timePaused != _lastTimePaused) {
+    if (_deltaTime != _lastDeltaTime ||
+        _timePaused != _lastTimePaused ||
+        _targetDeltaTime != _lastTargetDeltaTime)
+    {
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
         for (const std::pair<K, V>& it : _deltaTimeChangeCallbacks) {
@@ -158,7 +161,8 @@ void TimeManager::preSynchronization(double dt) {
     }
 
     _lastTime = newTime;
-    _lastDeltaTime = newDeltaTime;
+    _lastDeltaTime = _deltaTime;
+    _lastTargetDeltaTime = _targetDeltaTime;
     _lastTimePaused = _timePaused;
     _timelineChanged = false;
 }
