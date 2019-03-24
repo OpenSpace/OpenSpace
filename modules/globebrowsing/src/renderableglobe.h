@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -67,6 +67,11 @@ struct Chunk {
     bool isVisible = true;
     std::array<glm::dvec4, 8> corners;
     std::array<Chunk*, 4> children = { { nullptr, nullptr, nullptr, nullptr } };
+};
+
+enum class ShadowCompType {
+    GLOBAL_SHADOW,
+    LOCAL_SHADOW
 };
 
 /**
@@ -193,7 +198,7 @@ private:
 
 
     void calculateEclipseShadows(ghoul::opengl::ProgramObject& programObject,
-        const RenderData& data);
+        const RenderData& data, ShadowCompType stype);
 
     void setCommonUniforms(ghoul::opengl::ProgramObject& programObject,
         const Chunk& chunk, const RenderData& data);
