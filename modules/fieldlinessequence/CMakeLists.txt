@@ -25,29 +25,29 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefieldlinessequence.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/fieldlinesstate.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/commons.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/kameleonfieldlinehelper.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefieldlinessequence.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/util/fieldlinesstate.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/util/commons.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/util/kameleonfieldlinehelper.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefieldlinessequence.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/fieldlinesstate.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/commons.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/kameleonfieldlinehelper.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefieldlinessequence.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/util/fieldlinesstate.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/util/commons.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/util/kameleonfieldlinehelper.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldlinessequence_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldlinessequence_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldlinessequence_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldlinessequence_fs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
-    "FieldlinesSequence"
-    fieldlinessequence_module
-    ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+  "FieldlinesSequence"
+  fieldlinessequence_module
+  ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
