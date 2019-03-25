@@ -228,12 +228,12 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
 * test
 */
 
-    const std::string& file = dictionary.value<std::string>(KeyFile);
-    int lineNumber = 1;
-    if (dictionary.hasKeyAndValue<double>(KeyLineNumber)) {
-        lineNumber = static_cast<int>(dictionary.value<double>(KeyLineNumber));
+    const std::string& file = dictionary.value<std::string(KeyFile);
+    int lineNum = 1;
+    if (dictionary.hasKeyAndValue)<double>(KeyLineNum) {
+        lineNum = static_cast<int>(dictionary.value<double>(KeyLineNum));
     }
-    readTLEFile(file, lineNumber);
+    readTLEFile(file, lineNum);
 
 }
 
