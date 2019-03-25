@@ -237,9 +237,9 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _rayleighScatteringCoeffZP(RayleighScatteringCoeffZInfo, 1.0f, 0.01f, 100.0f)
     , _ozoneEnabledP(OzoneLayerInfo, true)
     , _ozoneHeightScaleP(OzoneHeightScaleInfo, 8.0f, 0.1f, 20.0f)
-    , _ozoneCoeffXP(OzoneLayerCoeffXInfo, 3.426f, 0.01f, 100.0f)
-    , _ozoneCoeffYP(OzoneLayerCoeffYInfo, 8.298f, 0.01f, 100.0f)
-    , _ozoneCoeffZP(OzoneLayerCoeffZInfo, 0.356f, 0.01f, 100.0f)
+    , _ozoneCoeffXP(OzoneLayerCoeffXInfo, 2.44f, 0.01f, 100.0f)
+    , _ozoneCoeffYP(OzoneLayerCoeffYInfo, 5.91f, 0.01f, 100.0f)
+    , _ozoneCoeffZP(OzoneLayerCoeffZInfo, 24.25f, 0.01f, 100.0f)
     , _mieHeightScaleP(MieHeightScaleInfo, 1.2f, 0.1f, 20.0f)
     , _mieScatteringCoeffXP(MieScatteringCoeffXInfo, 4.0f, 0.01f, 1000.0f)
     , _mieScatteringCoeffYP(MieScatteringCoeffYInfo, 4.0f, 0.01f, 1000.0f)
@@ -579,6 +579,8 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             _rayleighHeightScaleP.onChange(updateAtmosphere);
             addProperty(_rayleighHeightScaleP);
 
+            // We multiply the scattering coefficients by 1000.0 to have a good
+            // display value in the GUI.
             _rayleighScatteringCoeffXP = _rayleighScatteringCoeff.x * 1000.0f;
             _rayleighScatteringCoeffXP.onChange(updateAtmosphere);
             addProperty(_rayleighScatteringCoeffXP);
@@ -599,16 +601,17 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             _ozoneHeightScaleP.onChange(updateAtmosphere);
             addProperty(_ozoneHeightScaleP);
 
-            _ozoneCoeffXP = _ozoneExtinctionCoeff.x;
+            // We multiply the absorption coefficients by 1000.0 to have a good
+            // display value in the GUI.
+            _ozoneCoeffXP = _ozoneExtinctionCoeff.x * 1000.0f;
             _ozoneCoeffXP.onChange(updateAtmosphere);
             addProperty(_ozoneCoeffXP);
 
-            _ozoneCoeffYP = _ozoneExtinctionCoeff.y;
+            _ozoneCoeffYP = _ozoneExtinctionCoeff.y * 1000.0f;
             _ozoneCoeffYP.onChange(updateAtmosphere);
             addProperty(_ozoneCoeffYP);
 
-
-            _ozoneCoeffZP = _ozoneExtinctionCoeff.z;
+            _ozoneCoeffZP = _ozoneExtinctionCoeff.z * 1000.0f;
             _ozoneCoeffZP.onChange(updateAtmosphere);
             addProperty(_ozoneCoeffZP);
 
@@ -616,6 +619,8 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             _mieHeightScaleP.onChange(updateAtmosphere);
             addProperty(_mieHeightScaleP);
 
+            // We multiply the scattering coefficients by 1000.0 to have a good
+            // display value in the GUI.
             _mieScatteringCoeffXP = _mieScatteringCoeff.x * 1000.0f;
             _mieScatteringCoeffXP.onChange(updateAtmosphere);
             addProperty(_mieScatteringCoeffXP);
@@ -650,6 +655,8 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             if (_shadowEnabled) {
                 addProperty(_hardShadowsEnabledP);
             }
+
+            updateAtmosphereParameters();
         }
     }
 }
@@ -759,9 +766,9 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
     );
     _ozoneLayerEnabled    = _ozoneEnabledP;
     _ozoneHeightScale     = _ozoneHeightScaleP;
-    _ozoneExtinctionCoeff = glm::vec3(_ozoneCoeffXP.value() * 0.00001f,
-        _ozoneCoeffYP.value() * 0.00001f,
-        _ozoneCoeffZP.value() * 0.00001f);
+    _ozoneExtinctionCoeff = glm::vec3(_ozoneCoeffXP.value() * 0.001f,
+        _ozoneCoeffYP.value() * 0.001f,
+        _ozoneCoeffZP.value() * 0.001f);
 
     _mieHeightScale     = _mieHeightScaleP;
     _mieScatteringCoeff = glm::vec3(

@@ -65,7 +65,7 @@ uniform float AverageGroundReflectance;
 uniform float groundRadianceEmittion;
 uniform float HR;
 uniform vec3 betaRayleigh;
-uniform float HO;
+//uniform float HO;
 uniform vec3 betaOzoneExtinction;
 uniform float HM;
 uniform vec3 betaMieScattering;
@@ -122,9 +122,10 @@ float opticalDepth(const float localH, const float r, const float mu, const floa
 
 vec3 analyticTransmittance(const float r, const float mu, const float d) {
   if (ozoneLayerEnabled) {
-    return exp(-betaRayleigh * opticalDepth(HR, r, mu, d) -
-             betaOzoneExtinction * opticalDepth(HO, r, mu, d) -
-             betaMieExtinction * opticalDepth(HM, r, mu, d));
+    return exp(
+      -(betaRayleigh + betaOzoneExtinction) * opticalDepth(HR, r, mu, d) - 
+        betaMieExtinction * opticalDepth(HM, r, mu, d)
+        );
   } else {
     return exp(-betaRayleigh * opticalDepth(HR, r, mu, d) -
                betaMieExtinction * opticalDepth(HM, r, mu, d));

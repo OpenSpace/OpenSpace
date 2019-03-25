@@ -65,13 +65,8 @@ void integrand(const float r, const float mu, const float muSun, const float nu,
     // at x (r) to y (ri).
     vec3 transmittanceY = transmittance(r, mu, y) * transmittanceLUT(ri, muSun_i);
     // exp(-h/H)*T(x,v)
-    if (ozoneLayerEnabled) {
-      S_R = (exp(-(ri - Rg) / HO) + exp( -(ri - Rg) / HR )) * transmittanceY;
-      S_M = exp( -(ri - Rg) / HM ) * transmittanceY;
-    } else {
-      S_R = exp( -(ri - Rg) / HR ) * transmittanceY;
-      S_M = exp( -(ri - Rg) / HM ) * transmittanceY;
-    }
+    S_R = exp( -(ri - Rg) / HR ) * transmittanceY;
+    S_M = exp( -(ri - Rg) / HM ) * transmittanceY;
     // The L0 (sun radiance) is added in real-time.
   }
 }
