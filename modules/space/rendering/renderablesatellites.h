@@ -27,7 +27,7 @@
 #include <modules/base/rendering/renderabletrail.h>
 #include <modules/space/translation/keplertranslation.h>
 
-#include <openspace/util/circlegeometry.h>
+//#include <openspace/util/circlegeometry.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
 
@@ -117,7 +117,11 @@ private:
 #endif // __OPENSPACE_MODULE_BASE___RenderableSatellites___H__
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 }
 =======
 }
 >>>>>>> some code to test 1 sgn, more renderables
+=======
+}
+>>>>>>> merge
