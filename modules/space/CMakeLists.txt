@@ -28,6 +28,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableconstellationbounds.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanet.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesatellites.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablerings.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.h
@@ -41,8 +42,9 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometry.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableconstellationbounds.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableconstellationbounds.cpp 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanet.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesatellites.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablerings.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.cpp
@@ -59,6 +61,8 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/constellationbounds_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/nighttexture_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/nighttexture_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablekeplerorbits_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablekeplerorbits_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderableplanet_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderableplanet_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/rings_vs.glsl

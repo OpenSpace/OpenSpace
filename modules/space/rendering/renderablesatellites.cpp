@@ -228,16 +228,16 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
 * test
 */
 
-    const std::string& file = dictionary.value<str::string(KeyFile);
+    const std::string& file = dictionary.value<std::string>(KeyFile);
     int lineNumber = 1;
-    if (dictionary.hasKeyAndValue)<double>(KeyLineNumber) {
+    if (dictionary.hasKeyAndValue<double>(KeyLineNumber)) {
         lineNumber = static_cast<int>(dictionary.value<double>(KeyLineNumber));
     }
     readTLEFile(file, lineNumber);
 
 }
 
-void RenderableSatellites::readTLEFile(const std::string& filename, int lineNumber){
+void RenderableSatellites::readTLEFile(const std::string& filename, int lineNum){
     ghoul_assert(FileSys.fileExists(filename), "The filename must exist");
 
     std::ifstream file;

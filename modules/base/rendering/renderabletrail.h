@@ -71,6 +71,23 @@ class Translation;
  */
 class RenderableTrail : public Renderable {
 public:
+
+struct Appearance : properties::PropertyOwner {
+        Appearance();
+        /// Specifies the base color of the line before fading
+        properties::Vec3Property lineColor;
+        /// Settings that enables or disables the line fading
+        properties::BoolProperty useLineFade;
+        /// Specifies a multiplicative factor that fades out the line
+        properties::FloatProperty lineFade;
+        /// Line width for the line rendering part
+        properties::FloatProperty lineWidth;
+        /// Point size for the point rendering part
+        properties::IntProperty pointSize;
+        /// The option determining which rendering method to use
+        properties::OptionProperty renderingModes;
+    };
+
     ~RenderableTrail() = default;
 
     void initializeGL() override;
@@ -143,6 +160,8 @@ protected:
     RenderInformation _floatingRenderInformation;
 
 private:
+
+/*
     /// Specifies the base color of the line before fading
     properties::Vec3Property _lineColor;
     /// Settings that enables or disables the line fading
@@ -155,6 +174,9 @@ private:
     properties::IntProperty _pointSize;
     /// The option determining which rendering method to use
     properties::OptionProperty _renderingModes;
+
+    */
+   Appearance _appearance;
 
     /// Program object used to render the data stored in RenderInformation
     ghoul::opengl::ProgramObject* _programObject = nullptr;
