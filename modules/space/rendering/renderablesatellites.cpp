@@ -232,7 +232,6 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     int lineNum = 1;
     if (dictionary.hasKeyAndValue)<double>(KeyLineNum) {
         lineNum = static_cast<int>(dictionary.value<double>(KeyLineNum));
-    }
     readTLEFile(file, lineNum);
 
 }
