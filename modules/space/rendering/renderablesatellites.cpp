@@ -44,8 +44,6 @@
 #include <fstream>
 
 
-#include <ghoul/misc/csvreader.h>
-
 // Todo:
 // Parse epoch correctly
 // read distances using correct unit
@@ -550,17 +548,16 @@ void RenderableSatellites::readTLEFile(const std::string& filename, int lineNum)
     using namespace std::chrono;
     double period = seconds(hours(24)).count() / keplerElements.meanMotion;
 
-
-    setKeplerElements(
-        keplerElements.eccentricity,
-        keplerElements.semiMajorAxis,
-        keplerElements.inclination,
-        keplerElements.ascendingNode,
-        keplerElements.argumentOfPeriapsis,
-        keplerElements.meanAnomaly,
-        period,
-        keplerElements.epoch
-    );
+    // setKeplerElements(
+    //     keplerElements.eccentricity,
+    //     keplerElements.semiMajorAxis,
+    //     keplerElements.inclination,
+    //     keplerElements.ascendingNode,
+    //     keplerElements.argumentOfPeriapsis,
+    //     keplerElements.meanAnomaly,
+    //     period,
+    //     keplerElements.epoch
+    // );
 
 }
 
