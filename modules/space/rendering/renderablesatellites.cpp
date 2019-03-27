@@ -117,132 +117,132 @@ namespace {
 }
 
 namespace openspace {
- 
-documentation::Documentation RenderableSatellites::Documentation() {
-    using namespace documentation;
-    return {
-        "Renderable Kepler Orbits",
-        "space_renderable_kepler_orbits",
-        {
+    
+    documentation::Documentation RenderableSatellites::Documentation() {
+        using namespace documentation;
+        return {
+            "Renderable Kepler Orbits",
+            "space_renderable_kepler_orbits",
             {
-                SegmentsInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                SegmentsInfo.description
-            },
-            {
-                PathInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                PathInfo.description
-            },
-            {
-                EccentricityColumnInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                EccentricityColumnInfo.description
-            },
-            {
-                SemiMajorAxisColumnInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                SemiMajorAxisColumnInfo.description
-            },
-            {
-                SemiMajorAxisUnitInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                SemiMajorAxisUnitInfo.description
-            },
-            {
-                InclinationColumnInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                InclinationColumnInfo.description
-            },
-            {
-                AscendingNodeColumnInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                AscendingNodeColumnInfo.description
-            },
-            {
-                ArgumentOfPeriapsisColumnInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                ArgumentOfPeriapsisColumnInfo.description
-            },
-            {
-                MeanAnomalyAtEpochColumnInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                MeanAnomalyAtEpochColumnInfo.description
-            },
-            {
-                EpochColumnInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                EpochColumnInfo.description
+                {
+                    SegmentsInfo.identifier,
+                    new DoubleVerifier,
+                    Optional::No,
+                    SegmentsInfo.description
+                },
+                {
+                    PathInfo.identifier,
+                    new StringVerifier,
+                    Optional::No,
+                    PathInfo.description
+                },
+                {
+                    EccentricityColumnInfo.identifier,
+                    new StringVerifier,
+                    Optional::No,
+                    EccentricityColumnInfo.description
+                },
+                {
+                    SemiMajorAxisColumnInfo.identifier,
+                    new StringVerifier,
+                    Optional::No,
+                    SemiMajorAxisColumnInfo.description
+                },
+                {
+                    SemiMajorAxisUnitInfo.identifier,
+                    new DoubleVerifier,
+                    Optional::No,
+                    SemiMajorAxisUnitInfo.description
+                },
+                {
+                    InclinationColumnInfo.identifier,
+                    new StringVerifier,
+                    Optional::No,
+                    InclinationColumnInfo.description
+                },
+                {
+                    AscendingNodeColumnInfo.identifier,
+                    new StringVerifier,
+                    Optional::No,
+                    AscendingNodeColumnInfo.description
+                },
+                {
+                    ArgumentOfPeriapsisColumnInfo.identifier,
+                    new StringVerifier,
+                    Optional::No,
+                    ArgumentOfPeriapsisColumnInfo.description
+                },
+                {
+                    MeanAnomalyAtEpochColumnInfo.identifier,
+                    new StringVerifier,
+                    Optional::No,
+                    MeanAnomalyAtEpochColumnInfo.description
+                },
+                {
+                    EpochColumnInfo.identifier,
+                    new StringVerifier,
+                    Optional::No,
+                    EpochColumnInfo.description
+                }
             }
-        }
-    };
-}
-    
-RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
-    , _path(PathInfo)
-    , _nSegments(SegmentsInfo)
-    , _eccentricityColumnName(EccentricityColumnInfo)
-    , _semiMajorAxisColumnName(SemiMajorAxisColumnInfo)
-    , _semiMajorAxisUnit(SemiMajorAxisUnitInfo)
-    , _inclinationColumnName(InclinationColumnInfo)
-    , _ascendingNodeColumnName(AscendingNodeColumnInfo)
-    , _argumentOfPeriapsisColumnName(ArgumentOfPeriapsisColumnInfo)
-    , _meanAnomalyAtEpochColumnName(MeanAnomalyAtEpochColumnInfo)
-    , _epochColumnName(EpochColumnInfo)
-{
-    documentation::testSpecificationAndThrow(
-         Documentation(),
-         dictionary,
-         "RenderableSatellites"
-         );
-
-    _nSegments =
-        static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
-    _path =
-        dictionary.value<std::string>(PathInfo.identifier);
-    _eccentricityColumnName =
-        dictionary.value<std::string>(EccentricityColumnInfo.identifier);
-    _semiMajorAxisColumnName =
-        dictionary.value<std::string>(SemiMajorAxisColumnInfo.identifier);
-    _inclinationColumnName =
-        dictionary.value<std::string>(InclinationColumnInfo.identifier);
-    _ascendingNodeColumnName =
-        dictionary.value<std::string>(AscendingNodeColumnInfo.identifier);
-    _argumentOfPeriapsisColumnName =
-        dictionary.value<std::string>(ArgumentOfPeriapsisColumnInfo.identifier);
-    _meanAnomalyAtEpochColumnName =
-        dictionary.value<std::string>(MeanAnomalyAtEpochColumnInfo.identifier);
-    _epochColumnName =
-        dictionary.value<std::string>(EpochColumnInfo.identifier);
-    _semiMajorAxisUnit =
-        dictionary.value<double>(SemiMajorAxisUnitInfo.identifier);
-    
-    addPropertySubOwner(_appearance);
-    addProperty(_path);
-    addProperty(_nSegments);
-    addProperty(_semiMajorAxisUnit);
-
-/*
-* test
-*/
-
-    const std::string& file = dictionary.value<std::string>(KeyFile);
-    int lineNum = 1;
-    if (dictionary.hasKeyAndValue<double>(KeyLineNum)) {
-        lineNum = static_cast<int>(dictionary.value<double>(KeyLineNum));
+        };
     }
-    readTLEFile(file, lineNum);
+        
+    RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
+        : Renderable(dictionary)
+        , _path(PathInfo)
+        , _nSegments(SegmentsInfo)
+        , _eccentricityColumnName(EccentricityColumnInfo)
+        , _semiMajorAxisColumnName(SemiMajorAxisColumnInfo)
+        , _semiMajorAxisUnit(SemiMajorAxisUnitInfo)
+        , _inclinationColumnName(InclinationColumnInfo)
+        , _ascendingNodeColumnName(AscendingNodeColumnInfo)
+        , _argumentOfPeriapsisColumnName(ArgumentOfPeriapsisColumnInfo)
+        , _meanAnomalyAtEpochColumnName(MeanAnomalyAtEpochColumnInfo)
+        , _epochColumnName(EpochColumnInfo)
+    {
+        documentation::testSpecificationAndThrow(
+            Documentation(),
+            dictionary,
+            "RenderableSatellites"
+            );
+
+        _nSegments =
+            static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
+        _path =
+            dictionary.value<std::string>(PathInfo.identifier);
+        _eccentricityColumnName =
+            dictionary.value<std::string>(EccentricityColumnInfo.identifier);
+        _semiMajorAxisColumnName =
+            dictionary.value<std::string>(SemiMajorAxisColumnInfo.identifier);
+        _inclinationColumnName =
+            dictionary.value<std::string>(InclinationColumnInfo.identifier);
+        _ascendingNodeColumnName =
+            dictionary.value<std::string>(AscendingNodeColumnInfo.identifier);
+        _argumentOfPeriapsisColumnName =
+            dictionary.value<std::string>(ArgumentOfPeriapsisColumnInfo.identifier);
+        _meanAnomalyAtEpochColumnName =
+            dictionary.value<std::string>(MeanAnomalyAtEpochColumnInfo.identifier);
+        _epochColumnName =
+            dictionary.value<std::string>(EpochColumnInfo.identifier);
+        _semiMajorAxisUnit =
+            dictionary.value<double>(SemiMajorAxisUnitInfo.identifier);
+        
+        addPropertySubOwner(_appearance);
+        addProperty(_path);
+        addProperty(_nSegments);
+        addProperty(_semiMajorAxisUnit);
+
+    /*
+    * test
+    */
+
+        const std::string& file = dictionary.value<std::string>(KeyFile);
+        int lineNum = 1;
+        if (dictionary.hasKeyAndValue<double>(KeyLineNum)) {
+            lineNum = static_cast<int>(dictionary.value<double>(KeyLineNum));
+        }
+        readTLEFile(file, lineNum);
     }
 }
     // The list of leap years only goes until 2056 as we need to touch this file then
