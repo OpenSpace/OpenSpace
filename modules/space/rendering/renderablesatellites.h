@@ -32,6 +32,7 @@
 // #include <openspace/properties/scalar/uintproperty.h>
 
 // #include <ghoul/opengl/programobject.h>
+// #include <ghoul/misc/objectmanager.h>
 
 // #ifndef __OPENSPACE_MODULE_BASE___RenderableSatellites___H__
 // #define __OPENSPACE_MODULE_BASE___RenderableSatellites___H__
@@ -82,8 +83,10 @@
 //     void readFromCsvFile();
 //     void updateBuffers();
     
-//     std::vector<KeplerTranslation::KeplerOrbit> _orbits;
-//     ghoul::opengl::ProgramObject* _programObject;
+//    std::vector<KeplerTranslation::KeplerOrbit> _orbits;
+//    ghoul::opengl::ProgramObject* _programObject;
+    //ghoul::ObjectManager* _objectManager;
+
     
 //     properties::StringProperty _path;
 //     properties::UIntProperty _nSegments;
