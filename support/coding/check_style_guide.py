@@ -57,7 +57,7 @@ import os
 import re
 import sys
 
-current_year = '2018'
+current_year = '2019'
 is_strict_mode = False
 is_silent_mode = False
 

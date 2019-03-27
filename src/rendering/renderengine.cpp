@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -502,6 +502,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
             _camera->sgctInternal.setSceneMatrix(sceneMatrix);
         }
         _camera->sgctInternal.setProjectionMatrix(projectionMatrix);
+        _camera->invalidateCache();
     }
 
     const bool masterEnabled = delegate.isMaster() ? !_disableMasterRendering : true;

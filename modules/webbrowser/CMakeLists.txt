@@ -70,8 +70,8 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/cmake/patch/cmake/cef_variables.cmake DEST
 
 # CEF does not provide RelWithDebInfo libs, so we use the ones without Debug information
 file(COPY ${CEF_ROOT}/Release/
-    DESTINATION ${CEF_ROOT}/RelWithDebInfo
-    FILES_MATCHING PATTERN *
+  DESTINATION ${CEF_ROOT}/RelWithDebInfo
+  FILES_MATCHING PATTERN *
 )
 
 ##########################################################################################
@@ -91,17 +91,17 @@ mark_as_advanced(CEF_DEBUG_INFO_FLAG USE_ATL USE_OFFICIAL_BUILD_SANDBOX USE_SAND
 # Add CEF client files
 
 set(WEBBROWSER_SOURCES
-    webbrowsermodule.cpp
-    src/browserclient.cpp
-    src/eventhandler.cpp
-    src/webbrowserapp.cpp
-    src/defaultbrowserlauncher.cpp
+  webbrowsermodule.cpp
+  src/browserclient.cpp
+  src/eventhandler.cpp
+  src/webbrowserapp.cpp
+  src/defaultbrowserlauncher.cpp
 )
 set(WEBBROWSER_SOURCES_WINDOWS
-    OpenSpace.exe.manifest
-    cef_webgui.rc
-    resource.h
-    simple_handler_win.cc
+  OpenSpace.exe.manifest
+  cef_webgui.rc
+  resource.h
+  simple_handler_win.cc
 )
 APPEND_PLATFORM_SOURCES(WEBBROWSER_SOURCES)
 APPEND_PLATFORM_SOURCES(WEBBROWSER_RESOURCES_SOURCES)
@@ -115,20 +115,20 @@ set(WEBBROWSER_HELPER_SOURCES_WINDOWS src/processhelperwindows.cpp)
 APPEND_PLATFORM_SOURCES(WEBBROWSER_HELPER_SOURCES)
 
 set(WEBBROWSER_RESOURCES_MAC_SOURCES_MACOSX
-    mac/Info.plist
-    mac/webgui.icns
+  mac/Info.plist
+  mac/webgui.icns
 )
 APPEND_PLATFORM_SOURCES(WEBBROWSER_RESOURCES_MAC_SOURCES)
 
 set(WEBBROWSER_RESOURCES_MAC_ENGLISH_LPROJ_SRCS_MACOSX
-    mac/English.lproj/InfoPlist.strings
-    mac/English.lproj/MainMenu.xib
+  mac/English.lproj/InfoPlist.strings
+  mac/English.lproj/MainMenu.xib
 )
 APPEND_PLATFORM_SOURCES(WEBBROWSER_RESOURCES_MAC_ENGLISH_LPROJ_SRCS)
 
 set(WEBBROWSER_RESOURCES_SRCS
-    ${WEBBROWSER_RESOURCES_MAC_SOURCES}
-    ${WEBBROWSER_RESOURCES_MAC_ENGLISH_LPROJ_SRCS}
+  ${WEBBROWSER_RESOURCES_MAC_SOURCES}
+  ${WEBBROWSER_RESOURCES_MAC_ENGLISH_LPROJ_SRCS}
 )
 
 # place helper in separate executable
@@ -139,74 +139,74 @@ set(CEF_HELPER_TARGET "openspace_web_helper" CACHE INTERNAL "CEF_HELPER_TARGET")
 #
 
 if(OS_MACOSX)
-    # set global CEF helper app target
-    set(CEF_HELPER_APP "${CEF_TARGET_OUT_DIR}/${CEF_HELPER_TARGET}.app" CACHE INTERNAL "CEF_HELPER_APP")
+  # set global CEF helper app target
+  set(CEF_HELPER_APP "${CEF_TARGET_OUT_DIR}/${CEF_HELPER_TARGET}.app" CACHE INTERNAL "CEF_HELPER_APP")
 
-    # Helper executable target.
-    add_executable(${CEF_HELPER_TARGET} MACOSX_BUNDLE ${WEBBROWSER_HELPER_SOURCES})
-    SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_HELPER_TARGET})
-    add_cef_logical_target("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
-    add_dependencies(${CEF_HELPER_TARGET} libcef_dll_wrapper)
-    target_link_libraries(${CEF_HELPER_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
-    set_target_properties(${CEF_HELPER_TARGET} PROPERTIES
-        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/mac/helper-Info.plist
-    )
+  # Helper executable target.
+  add_executable(${CEF_HELPER_TARGET} MACOSX_BUNDLE ${WEBBROWSER_HELPER_SOURCES})
+  SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_HELPER_TARGET})
+  add_cef_logical_target("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
+  add_dependencies(${CEF_HELPER_TARGET} libcef_dll_wrapper)
+  target_link_libraries(${CEF_HELPER_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
+  set_target_properties(${CEF_HELPER_TARGET} PROPERTIES
+      MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/mac/helper-Info.plist
+  )
 
-    # Fix the framework rpath in the helper executable.
-    FIX_MACOSX_HELPER_FRAMEWORK_RPATH(${CEF_HELPER_TARGET})
+  # Fix the framework rpath in the helper executable.
+  FIX_MACOSX_HELPER_FRAMEWORK_RPATH(${CEF_HELPER_TARGET})
 endif()
 
 if (OS_WINDOWS)
-    message(STATUS "Setting up WebBrowser CEF helper executable: ${CEF_HELPER_TARGET}")
-    set_openspace_cef_target_out_dir()
-    add_executable(${CEF_HELPER_TARGET} ${WEBBROWSER_HELPER_SOURCES})
-    SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_HELPER_TARGET})
-    add_dependencies(${CEF_HELPER_TARGET} libcef_dll_wrapper)
-    # Logical target used to link the libcef library.
-    add_cef_logical_target("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
-    target_link_libraries(${CEF_HELPER_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
-    # Add the custom manifest files to the executable.
-    add_windows_cef_manifest("${CEF_TARGET_OUT_DIR}" "${WEBBROWSER_MODULE_PATH}" "${CEF_HELPER_TARGET}" "exe")
+  message(STATUS "Setting up WebBrowser CEF helper executable: ${CEF_HELPER_TARGET}")
+  set_openspace_cef_target_out_dir()
+  add_executable(${CEF_HELPER_TARGET} ${WEBBROWSER_HELPER_SOURCES})
+  SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_HELPER_TARGET})
+  add_dependencies(${CEF_HELPER_TARGET} libcef_dll_wrapper)
+  # Logical target used to link the libcef library.
+  add_cef_logical_target("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
+  target_link_libraries(${CEF_HELPER_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
+  # Add the custom manifest files to the executable.
+  add_windows_cef_manifest("${CEF_TARGET_OUT_DIR}" "${WEBBROWSER_MODULE_PATH}" "${CEF_HELPER_TARGET}" "exe")
 endif (OS_WINDOWS)
 
 
 ##########################################################################################
 # Create OpenSpace module.
 set(HEADER_FILES
-    webbrowsermodule.h
-    include/webrenderhandler.h
-    include/webkeyboardhandler.h
-    include/browserclient.h
-    include/screenspacebrowser.h
-    include/browserinstance.h
-    include/eventhandler.h
-    include/webbrowserapp.h
-    include/defaultbrowserlauncher.h
-    include/cefhost.h
+  webbrowsermodule.h
+  include/webrenderhandler.h
+  include/webkeyboardhandler.h
+  include/browserclient.h
+  include/screenspacebrowser.h
+  include/browserinstance.h
+  include/eventhandler.h
+  include/webbrowserapp.h
+  include/defaultbrowserlauncher.h
+  include/cefhost.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    webbrowsermodule.cpp
-    src/webrenderhandler.cpp
-    src/webkeyboardhandler.cpp
-    src/browserclient.cpp
-    src/screenspacebrowser.cpp
-    src/browserinstance.cpp
-    src/eventhandler.cpp
-    src/webbrowserapp.cpp
-    src/defaultbrowserlauncher.cpp
-    src/cefhost.cpp
+  webbrowsermodule.cpp
+  src/webrenderhandler.cpp
+  src/webkeyboardhandler.cpp
+  src/browserclient.cpp
+  src/screenspacebrowser.cpp
+  src/browserinstance.cpp
+  src/eventhandler.cpp
+  src/webbrowserapp.cpp
+  src/defaultbrowserlauncher.cpp
+  src/cefhost.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 create_new_module(
-    ${WEBBROWSER_MODULE_NAME}
-    webbrowser_module
-    STATIC
-    ${HEADER_FILES} ${SOURCE_FILES}
+  ${WEBBROWSER_MODULE_NAME}
+  webbrowser_module
+  STATIC
+  ${HEADER_FILES} ${SOURCE_FILES}
 )
 
 set_folder_location(libcef_dll_wrapper "Helper")

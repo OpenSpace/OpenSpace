@@ -26,22 +26,22 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/fitsfilereadermodule.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/fitsfilereader.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/fitsfilereadermodule.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/fitsfilereader.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES 
-    ${CMAKE_CURRENT_SOURCE_DIR}/fitsfilereadermodule.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/fitsfilereader.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/fitsfilereadermodule.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/fitsfilereader.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 create_new_module(
-    "FitsFileReader"
-    fitsfilereader
-    ${HEADER_FILES}
-    ${SOURCE_FILES}
+  "FitsFileReader"
+  fitsfilereader
+  ${HEADER_FILES}
+  ${SOURCE_FILES}
 )
 
 # Set root directories for external libraries.
@@ -57,6 +57,5 @@ set_folder_location(cfitsio "External")
 add_subdirectory(${CCFITS_ROOT_DIR})
 set_folder_location(CCfits "External")
 
-
-TARGET_INCLUDE_DIRECTORIES(${MODULE_NAME} SYSTEM PUBLIC ${INCLUDES_FOR_TARGET})
-TARGET_LINK_LIBRARIES(${MODULE_NAME} CCfits)
+target_include_directories(${MODULE_NAME} SYSTEM PUBLIC ${INCLUDES_FOR_TARGET})
+target_link_libraries(${MODULE_NAME} PRIVATE CCfits)
