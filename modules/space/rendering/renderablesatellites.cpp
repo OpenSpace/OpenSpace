@@ -28,11 +28,14 @@
 
 #include <modules/space/rendering/renderablesatellites.h>
 #include <modules/space/translation/keplertranslation.h>
+#include <modules/space/spacemodule.h>
+
 
 #include <modules/base/basemodule.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
@@ -41,6 +44,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/misc/csvreader.h>
 #include <ghoul/opengl/programobject.h>
+
 
 #include <fstream>
 
@@ -552,7 +556,8 @@ void RenderableSatellites::readTLEFile(const std::string& filename, int lineNum)
     using namespace std::chrono;
     double period = seconds(hours(24)).count() / keplerElements.meanMotion;
 
-
+  
+    /*
     setKeplerElements(
         keplerElements.eccentricity,
         keplerElements.semiMajorAxis,
@@ -563,7 +568,7 @@ void RenderableSatellites::readTLEFile(const std::string& filename, int lineNum)
         period,
         keplerElements.epoch
     );
-
+    */
 }
 
 /*
@@ -601,10 +606,10 @@ void RenderableSatellites::initializeGL() {
     glGenBuffers(1, &_vertexBuffer);
     glGenBuffers(1, &_indexBuffer);
     
-    _programObject = BaseModule::ProgramObjectManager.requestProgramObject(
+    _programObject = SpaceModule::ProgramObjectManager.request(
        ProgramName,
        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-           return OsEng.renderEngine().buildRenderProgram(
+           return global::renderEngine.buildRenderProgram(
                ProgramName,
                absPath("${MODULE_SPACE}/shaders/RenderableKeplerOrbits_vs.glsl"),
                absPath("${MODULE_SPACE}/shaders/RenderableKeplerOrbits_fs.glsl")
@@ -623,7 +628,7 @@ void RenderableSatellites::initializeGL() {
 }
     
 void RenderableSatellites::deinitializeGL() {
-    BaseModule::ProgramObjectManager.releaseProgramObject(ProgramName);
+    SpaceModule::ProgramObjectManager.release(ProgramName);
     
     glDeleteBuffers(1, &_vertexBuffer);
     glDeleteBuffers(1, &_indexBuffer);
