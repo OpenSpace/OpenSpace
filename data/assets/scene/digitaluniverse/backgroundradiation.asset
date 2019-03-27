@@ -26,7 +26,7 @@ local wmap = {
         Opacity = 0.5,
         Texture = textures .. "/wmap_ilc_7yr_v4_200uK_RGB_sos.png",
         Orientation = "Inside/Outside",
-        FadeInThreshould = 8E26
+        FadeInThreshold = 8E26
 
     },
     GUI = {
@@ -45,7 +45,7 @@ local cbe = {
         Opacity = 0.5,
         Texture = textures .. "/COBErect.png",
         Orientation = "Inside/Outside",
-        FadeInThreshould = 8E26
+        FadeInThreshold = 8E26
     },
     GUI = {
         Name = "Cosmic Background Explorer",
@@ -63,7 +63,7 @@ local planck = {
         Opacity = 0.3,
         Texture = textures .. "/cmb4k.jpg",
         Orientation = "Inside/Outside",
-        FadeInThreshould = 8E26
+        FadeInThreshold = 8E26
     },
     GUI = {
         Path = "/Universe/Cosmic Microwave Background"

@@ -71,8 +71,8 @@ private:
 
     properties::BoolProperty _disableFadeInDistance;
 
-    float _fadeOutThreshold = -1.0;
-    float _fadeInThreshold = 0.0;
+    properties::FloatProperty _fadeInThreshold;
+    properties::FloatProperty _fadeOutThreshold;
 
     ghoul::opengl::ProgramObject* _shader = nullptr;
     std::unique_ptr<ghoul::opengl::Texture> _texture;

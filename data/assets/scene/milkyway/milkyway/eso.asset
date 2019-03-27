@@ -18,7 +18,7 @@ local object = {
         Opacity = 0.4,
         Texture = textures .. "/eso0932a_blend.png",
         Orientation = "Inside/Outside",
-        FadeOutThreshould = 0.01
+        FadeOutThreshold = 0.01
     },
     GUI = {
         Name = "Milky Way (ESO)",

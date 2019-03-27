@@ -79,22 +79,22 @@ namespace {
         "This value specifies the radius of the sphere in meters."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeOutThreshouldInfo = {
-        "FadeOutThreshould",
-        "Fade-Out Threshould",
+    constexpr openspace::properties::Property::PropertyInfo FadeOutThresholdInfo = {
+        "FadeOutThreshold",
+        "Fade-Out Threshold",
         "This value determines percentage of the sphere is visible before starting "
         "fading-out it."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeInThreshouldInfo = {
-        "FadeInThreshould",
-        "Fade-In Threshould",
+    constexpr openspace::properties::Property::PropertyInfo FadeInThresholdInfo = {
+        "FadeInThreshold",
+        "Fade-In Threshold",
         "Distance from center of MilkyWay from where the astronomical object starts to "
         "fade in."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableFadeInOuInfo = {
-        "DisableFadeInOu",
+    constexpr openspace::properties::Property::PropertyInfo DisableFadeInOutInfo = {
+        "DisableFadeInOut",
         "Disable Fade-In/Fade-Out effects",
         "Enables/Disables the Fade-In/Out effects."
     };
@@ -133,22 +133,22 @@ documentation::Documentation RenderableSphere::Documentation() {
                 OrientationInfo.description
             },
             {
-                FadeOutThreshouldInfo.identifier,
+                FadeOutThresholdInfo.identifier,
                 new DoubleInRangeVerifier(0.0, 1.0),
                 Optional::Yes,
-                FadeOutThreshouldInfo.description
+                FadeOutThresholdInfo.description
             },
             {
-                FadeInThreshouldInfo.identifier,
+                FadeInThresholdInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
-                FadeInThreshouldInfo.description
+                FadeInThresholdInfo.description
             },
             {
-                DisableFadeInOuInfo.identifier,
+                DisableFadeInOutInfo.identifier,
                 new BoolVerifier,
                 Optional::Yes,
-                DisableFadeInOuInfo.description
+                DisableFadeInOutInfo.description
             },
         }
     };
@@ -161,7 +161,9 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     , _orientation(OrientationInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _size(SizeInfo, 1.f, 0.f, 1e35f)
     , _segments(SegmentsInfo, 8, 4, 1000)
-    , _disableFadeInDistance(DisableFadeInOuInfo, true)
+    , _disableFadeInDistance(DisableFadeInOutInfo, true)
+    , _fadeInThreshold(FadeInThresholdInfo, 0.f, 0.f, 1.f)
+    , _fadeOutThreshold(FadeOutThresholdInfo, -1.f, 0.f, 1.f)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -211,20 +213,22 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     addProperty(_texturePath);
     _texturePath.onChange([this]() { loadTexture(); });
 
-    if (dictionary.hasKey(FadeOutThreshouldInfo.identifier)) {
+    if (dictionary.hasKey(FadeOutThresholdInfo.identifier)) {
         _fadeOutThreshold = static_cast<float>(
-            dictionary.value<double>(FadeOutThreshouldInfo.identifier)
+            dictionary.value<double>(FadeOutThresholdInfo.identifier)
         );
+        addProperty(_fadeOutThreshold);
     }
 
-    if (dictionary.hasKey(FadeInThreshouldInfo.identifier)) {
+    if (dictionary.hasKey(FadeInThresholdInfo.identifier)) {
         _fadeInThreshold = static_cast<float>(
-            dictionary.value<double>(FadeInThreshouldInfo.identifier)
+            dictionary.value<double>(FadeInThresholdInfo.identifier)
         );
+        addProperty(_fadeInThreshold);
     }
 
-    if (dictionary.hasKey(FadeOutThreshouldInfo.identifier) ||
-        dictionary.hasKey(FadeInThreshouldInfo.identifier)) {
+    if (dictionary.hasKey(FadeOutThresholdInfo.identifier) ||
+        dictionary.hasKey(FadeInThresholdInfo.identifier)) {
         _disableFadeInDistance.set(false);
         addProperty(_disableFadeInDistance);
     }
@@ -296,15 +300,24 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     }
 
     if (_fadeOutThreshold > -1.0) {
-        const double distCamera = glm::distance(
-            data.camera.positionVec3(),
-            data.position.dvec3()
-        );
-        const double term = std::exp(
-            (-distCamera + _size * _fadeOutThreshold) / (_size * _fadeOutThreshold)
-        );
+        const float logDistCamera = glm::log(static_cast<float>(
+            glm::distance(data.camera.positionVec3(), data.position.dvec3())
+        ));
+        const float startLogFadeDistance = glm::log(_size * _fadeOutThreshold);
+        const float stopLogFadeDistance = startLogFadeDistance + 1.f;
 
-        adjustedTransparency *= static_cast<float>(term / (term + 1.0));
+        if (logDistCamera > startLogFadeDistance && logDistCamera < stopLogFadeDistance) {
+            const float fadeFactor = glm::clamp(
+                (logDistCamera - startLogFadeDistance) /
+                (stopLogFadeDistance - startLogFadeDistance),
+                0.f,
+                1.f
+            );
+            adjustedTransparency *= (1.f - fadeFactor);
+        }
+        else if (logDistCamera >= stopLogFadeDistance) {
+            adjustedTransparency = 0.f;
+        }
     }
 
     // Performance wise
@@ -312,7 +325,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
         return;
     }
 
-    _shader->setUniform(_uniformCache.opacity, _opacity);
+    _shader->setUniform(_uniformCache.opacity, adjustedTransparency);
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
