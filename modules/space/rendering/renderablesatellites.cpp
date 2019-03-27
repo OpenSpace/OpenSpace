@@ -40,6 +40,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/misc/csvreader.h>
+#include <ghoul/opengl/programobject.h>
 
 #include <fstream>
 
@@ -241,7 +242,6 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     int lineNum = 1;
     if (dictionary.hasKeyAndValue<double>(KeyLineNum)) {
         lineNum = static_cast<int>(dictionary.value<double>(KeyLineNum));
-    }
     readTLEFile(file, lineNum);
     }
 }
@@ -548,16 +548,17 @@ void RenderableSatellites::readTLEFile(const std::string& filename, int lineNum)
     using namespace std::chrono;
     double period = seconds(hours(24)).count() / keplerElements.meanMotion;
 
-    // setKeplerElements(
-    //     keplerElements.eccentricity,
-    //     keplerElements.semiMajorAxis,
-    //     keplerElements.inclination,
-    //     keplerElements.ascendingNode,
-    //     keplerElements.argumentOfPeriapsis,
-    //     keplerElements.meanAnomaly,
-    //     period,
-    //     keplerElements.epoch
-    // );
+
+    setKeplerElements(
+        keplerElements.eccentricity,
+        keplerElements.semiMajorAxis,
+        keplerElements.inclination,
+        keplerElements.ascendingNode,
+        keplerElements.argumentOfPeriapsis,
+        keplerElements.meanAnomaly,
+        period,
+        keplerElements.epoch
+    );
 
 }
 
