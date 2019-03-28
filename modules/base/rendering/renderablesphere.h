@@ -69,6 +69,8 @@ private:
     properties::FloatProperty _size;
     properties::IntProperty _segments;
 
+    properties::BoolProperty _mirrorTexture;
+    properties::BoolProperty _useAdditiveBlending;
     properties::BoolProperty _disableFadeInDistance;
 
     properties::FloatProperty _fadeInThreshold;
@@ -79,7 +81,8 @@ private:
 
     std::unique_ptr<PowerScaledSphere> _sphere;
 
-    UniformCache(opacity, viewProjection, modelTransform, texture) _uniformCache;
+    UniformCache(opacity, modelViewProjection, modelViewRotation, colorTexture,
+        _mirrorTexture) _uniformCache;
 
     bool _sphereIsDirty = false;
 };

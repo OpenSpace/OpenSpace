@@ -51,23 +51,24 @@ documentation::Documentation StaticRotation::Documentation() {
             },
             {
                 RotationInfo.identifier,
-                new OrVerifier({
-                    new DoubleVector3Verifier(),
-                    new DoubleMatrix3Verifier()
-                }),
+                new DoubleVector3Verifier(),
                 Optional::No,
-                "Stores the static rotation as either a vector containing Euler angles "
-                "or by specifiying the 3x3 rotation matrix directly"
+                "Stores the static rotation as either a vector containing Euler angles."
             }
         }
     };
 }
 
 StaticRotation::StaticRotation()
-    : _rotationMatrix(RotationInfo, glm::dmat3(1.0), glm::dmat3(-1.0), glm::dmat3(1.0))
+    : _eulerRotation(
+        RotationInfo,
+        glm::vec3(0.f),
+        glm::vec3(-glm::pi<float>()),
+        glm::vec3(glm::pi<float>())
+    )
 {
-    addProperty(_rotationMatrix);
-    _rotationMatrix.onChange([this]() { requireUpdate(); });
+    addProperty(_eulerRotation);
+    _eulerRotation.onChange([this]() { requireUpdate(); });
 }
 
 StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary) : StaticRotation() {
@@ -77,20 +78,24 @@ StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary) : StaticRota
         "StaticRotation"
     );
 
-
     if (dictionary.hasKeyAndValue<glm::dvec3>(RotationInfo.identifier)) {
-        _rotationMatrix = glm::mat3_cast(
-            glm::dquat(dictionary.value<glm::dvec3>(RotationInfo.identifier))
+        _eulerRotation = static_cast<glm::vec3>(
+            dictionary.value<glm::dvec3>(RotationInfo.identifier)
         );
+        _matrixIsDirty = true;
     }
-    else {
-        // Must be glm::dmat3 due to specification restriction
-        _rotationMatrix = dictionary.value<glm::dmat3>(RotationInfo.identifier);
-    }
+
+    _eulerRotation.onChange([this]() {
+        _matrixIsDirty = true;
+    });
 }
 
 glm::dmat3 StaticRotation::matrix(const UpdateData&) const {
-    return _rotationMatrix;
+    if (_matrixIsDirty) {
+        _cachedMatrix = glm::mat3_cast(glm::quat(_eulerRotation.value()));
+        _matrixIsDirty = false;
+    }
+    return _cachedMatrix;
 }
 
 } // namespace openspace

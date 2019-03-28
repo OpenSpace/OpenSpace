@@ -25,7 +25,6 @@
 #include <openspace/util/powerscaledsphere.h>
 
 #include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/powerscaledscalar.h>
 #include <ghoul/logging/logmanager.h>
 #include <cstring>
 
@@ -35,89 +34,9 @@ namespace {
 
 namespace openspace {
 
-PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segments)
-    : _isize(6 * segments * segments)
-    , _vsize((segments + 1) * (segments + 1))
-    , _varray(new Vertex[_vsize])
-    , _iarray(new int[_isize])
-{
-    int nr = 0;
-    const float fsegments = static_cast<float>(segments);
-    const float r = radius[0];
-
-    for (int i = 0; i <= segments; i++) {
-        // define an extra vertex around the y-axis due to texture mapping
-        for (int j = 0; j <= segments; j++) {
-            const float fi = static_cast<float>(i);
-            const float fj = static_cast<float>(j);
-            // inclination angle (north to south)
-            const float theta = fi * glm::pi<float>() / fsegments;  // 0 -> PI
-
-            // azimuth angle (east to west)
-            const float phi = fj * glm::pi<float>() * 2.f / fsegments;  // 0 -> 2*PI
-
-            const float x = r * sin(phi) * sin(theta);  //
-            const float y = r * cos(theta);             // up
-            const float z = r * cos(phi) * sin(theta);  //
-
-            glm::vec3 normal = glm::vec3(x, y, z);
-            if (!(x == 0.f && y == 0.f && z == 0.f)) {
-                normal = glm::normalize(normal);
-            }
-
-            const float t1 = (fj / fsegments);
-            const float t2 = 1.f - (fi / fsegments);
-
-            //double tp = 1.0 / pow(10, static_cast<GLfloat>(radius[1]));
-
-            _varray[nr].location[0] = x;
-            _varray[nr].location[1] = y;
-            _varray[nr].location[2] = z;
-            _varray[nr].location[3] = radius[1];
-            _varray[nr].normal[0] = normal[0];
-            _varray[nr].normal[1] = normal[1];
-            _varray[nr].normal[2] = normal[2];
-
-            _varray[nr].tex[0] = t1;
-            _varray[nr].tex[1] = t2;
-            ++nr;
-        }
-    }
-
-    nr = 0;
-    // define indices for all triangles
-    for (int i = 1; i <= segments; ++i) {
-        for (int j = 0; j < segments; ++j) {
-            const int t = segments + 1;
-            _iarray[nr] = t * (i - 1) + j + 0; //1
-            ++nr;
-            _iarray[nr] = t * (i + 0) + j + 0; //2
-            ++nr;
-            _iarray[nr] = t * (i + 0) + j + 1; //3
-            ++nr;
-
-            _iarray[nr] = t * (i - 1) + j + 0; //4
-            ++nr;
-            _iarray[nr] = t * (i + 0) + j + 1; //5
-            ++nr;
-            _iarray[nr] = t * (i - 1) + j + 1; //6
-            ++nr;
-
-            /*
-            _iarray[nr] = t * (i - 1) + j + 0; //1
-            ++nr;
-            _iarray[nr] = t * (i + 0) + j + 0; //2
-            ++nr;
-            _iarray[nr] = t * (i + 0) + j + 1; //3
-            ++nr;
-            _iarray[nr] = t * (i - 1) + j + 1; //6
-            ++nr;
-            _iarray[nr] = t * (i - 1) + j + 0; //4
-            ++nr;
-            */
-        }
-    }
-}
+PowerScaledSphere::PowerScaledSphere(float radius, int segments)
+    : PowerScaledSphere(glm::vec3(radius), segments)
+{}
 
 // Alternative Constructor for using accurate triaxial ellipsoid
 PowerScaledSphere::PowerScaledSphere(glm::vec3 radius, int segments)
@@ -139,14 +58,17 @@ PowerScaledSphere::PowerScaledSphere(glm::vec3 radius, int segments)
             // azimuth angle (east to west)
             const float phi = fj * glm::pi<float>() * 2.f / fsegments;  // 0 -> 2*PI
 
-            const float x = radius[0] * sin(phi) * sin(theta);  //
-            const float y = radius[1] * cos(theta);             // up
-            const float z = radius[2] * cos(phi) * sin(theta);  //
+            // Spherical coordinates based on ISO standard.
+            // https://en.wikipedia.org/wiki/Spherical_coordinate_system
+
+            const float x = radius[0] * sin(theta) * cos(phi);
+            const float y = radius[1] * sin(theta) * sin(phi);
+            const float z = radius[2] * cos(theta); // Z points towards pole (theta = 0)
 
             _varray[nr].location[0] = x;
             _varray[nr].location[1] = y;
             _varray[nr].location[2] = z;
-            _varray[nr].location[3] = 0.0;
+            _varray[nr].location[3] = 1.0;
 
             glm::vec3 normal = glm::vec3(x, y, z);
             if (!(x == 0.f && y == 0.f && z == 0.f)) {

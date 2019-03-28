@@ -177,7 +177,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/util/keys.cpp
   ${OPENSPACE_BASE_DIR}/src/util/openspacemodule.cpp
   ${OPENSPACE_BASE_DIR}/src/util/powerscaledcoordinate.cpp
-  ${OPENSPACE_BASE_DIR}/src/util/powerscaledscalar.cpp
   ${OPENSPACE_BASE_DIR}/src/util/powerscaledsphere.cpp
   ${OPENSPACE_BASE_DIR}/src/util/progressbar.cpp
   ${OPENSPACE_BASE_DIR}/src/util/resourcesynchronization.cpp
@@ -371,7 +370,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/mouse.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/openspacemodule.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/powerscaledcoordinate.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/util/powerscaledscalar.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/powerscaledsphere.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/progressbar.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/resourcesynchronization.h

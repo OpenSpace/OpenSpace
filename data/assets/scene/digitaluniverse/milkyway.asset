@@ -25,13 +25,21 @@ local planeSpeck = asset.syncedResource({
 
 local sphere = {
     Identifier = "MilkyWay",
+    Transform = {
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = {0, 0, 3.14159265359}
+        }
+    },
     Renderable = {
         Type = "RenderableSphere",
         Size = 9.2E21,
         Segments = 40,
         Opacity = 0.4,
         Texture = sphereTextures .. "/DarkUniverse_mellinger_4k.jpg",
-        Orientation = "Inside/Outside",
+        Orientation = "Inside",
+        UseAdditiveBlending = true,
+        MirrorTexture = true,
         FadeOutThreshold = 0.025
     },
     GUI = {
