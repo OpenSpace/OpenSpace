@@ -78,7 +78,7 @@ local planck = {
     },
     Renderable = {
         Type = "RenderableSphere",
-        Enabled = false,
+        Enabled = true,
         Size = 3975.41417036064E23,
         Segments = 80,
         Opacity = 0.3,
