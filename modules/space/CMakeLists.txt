@@ -25,7 +25,8 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesatellites.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/elonstest.h
+#    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesatellites.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableconstellationbounds.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanet.h
@@ -43,6 +44,8 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/elonstest.cpp
+#   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesatellites.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableconstellationbounds.cpp 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanet.cpp

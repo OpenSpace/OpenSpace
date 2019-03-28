@@ -21,9 +21,9 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-/*
-#ifndef __OPENSPACE_MODULE_SPACE___ELONSTEST___H__
-#define __OPENSPACE_MODULE_SPACE___ELONSTEST___H__
+
+#ifndef __OPENSPACE_MODULE_SPACE___RENDERABLEPLANET___H__
+#define __OPENSPACE_MODULE_SPACE___RENDERABLEPLANET___H__
 
 #include <openspace/rendering/renderable.h>
 #include <modules/space/translation/keplertranslation.h>
@@ -32,35 +32,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
 
-#include <ghoul/glm.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/misc/exception.h>
-
-
-
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
-
 namespace openspace {
-        // The layout of the VBOs
-    struct TrailVBOLayout {
-        float x, y, z, time;
-    };
-        // All of the Kepler element information
-    struct KeplerParameters{
-        double inclination = 0.0;
-        double semiMajorAxis = 0.0;
-        double ascendingNode = 0.0;
-        double eccentricity = 0.0;
-        double argumentOfPeriapsis = 0.0;
-        double meanAnomaly = 0.0;
-        double meanMotion = 0.0;
-        double epoch = 0.0;
-    };
-
-namespace documentation { struct Documentation; }
 
 class ElonsTest : public Renderable { 
 public:
@@ -71,40 +43,20 @@ public:
     void initialize() override;
     void initializeGL() override;
     // void deinitialize();
-    void deinitializeGL() override;
+    // void deinitialize();
     //
-    bool isReady() const;
+    // bool isReady() const;
 
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
-
 protected:
 private:
-  
-    
-    // TLETranslation _tleTranslator;
-    // std::vector<KeplerTranslation::KeplerOrbit> _orbits;
+    TLETranslation _tleTranslator;
+    std::vector<KeplerTranslation::KeplerOrbit> _orbits;
     ghoul::opengl::ProgramObject* _programObject;
 
-    KeplerTranslation _keplerTranslator;
-
-    std::vector<KeplerParameters> _TLEData;
-
-
-    /// The backend storage for the vertex buffer object containing all points for this
-    /// trail.
-    std::vector<TrailVBOLayout> _vertexBufferData;
-    /// The index array that is potentially used in the draw call. If this is empty, no
-    /// element draw call is used.
-    std::vector<unsigned int> _indexBufferData;
-
-    GLuint _vertexArray;
-    GLuint _vertexBuffer;
-    GLuint _indexBuffer;
-    
     properties::StringProperty _path;
     properties::UIntProperty _nSegments;
     
@@ -116,19 +68,8 @@ private:
     properties::StringProperty _argumentOfPeriapsisColumnName;
     properties::StringProperty _meanAnomalyAtEpochColumnName;
     properties::StringProperty _epochColumnName;
-
-
-    void readTLEFile(const std::string& filename);
-    void updateBuffers();
-
-    /// Dirty flag for the _orbitPlaneRotation parameters
-    mutable bool _orbitPlaneDirty = true;
-    // glm::dvec3 calculatePosition(const Time& time, double epoch) const; 
-
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SPACE___ELONSTEST___H__
-
-*/
+#endif // __OPENSPACE_MODULE_SPACE___RENDERABLEPLANET___H__
