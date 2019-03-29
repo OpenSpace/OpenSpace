@@ -28,6 +28,7 @@
 
 #include <modules/space/rendering/renderablesatellites.h>
 #include <modules/space/translation/keplertranslation.h>
+#include <modules/space/translation/TLEtranslation.h>
 #include <modules/space/spacemodule.h>
 
 
@@ -550,11 +551,25 @@ void RenderableSatellites::readTLEFile(const std::string& filename, int lineNum)
 
     // Converting the mean motion (revolutions per day) to period (seconds per revolution)
     using namespace std::chrono;
-    double period = seconds(hours(24)).count() / keplerElements.meanMotion;
+    double period = seconds(hours(24)).count() / keplerElements.meanMotion;      
+    
 
-  
+    //TODO: fix obv
+    size_t i = 0;
+
+    _orbits[i++] = KeplerTranslation::KeplerOrbit{
+        keplerElements.eccentricity,
+        keplerElements.semiMajorAxis,
+        keplerElements.inclination,
+        keplerElements.ascendingNode,
+        keplerElements.argumentOfPeriapsis,
+        keplerElements.meanAnomaly,
+        period,
+        keplerElements.epoch
+    };
+
     /*
-    setKeplerElements(
+    KeplerTranslation setKeplerElements(
         keplerElements.eccentricity,
         keplerElements.semiMajorAxis,
         keplerElements.inclination,
