@@ -24,8 +24,10 @@
 
 // #include <openspace/rendering/renderable.h>
 
-// #include <modules/base/rendering/renderabletrail.h>
-// #include <modules/space/translation/keplertranslation.h>
+#include <modules/base/rendering/renderabletrail.h>
+#include <modules/space/translation/keplertranslation.h>
+#include <modules/space/translation/TLEtranslation.h>
+
 
 // // #include <openspace/util/circlegeometry.h>
 // #include <openspace/properties/stringproperty.h>
@@ -50,14 +52,8 @@
     
 //     bool isReady() const override;
     
-//     void render(const RenderData& data, RendererTasks& rendererTask) override;
-//     void update(const UpdateData& data) override;
-
-//     /*
-//     void setKeplerElements(double eccentricity, double semiMajorAxis, double inclination,
-//         double ascendingNode, double argumentOfPeriapsis, double meanAnomalyAtEpoch,
-//         double orbitalPeriod, double epoch);
-//     */
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void update(const UpdateData& data) override;
     
 //     static documentation::Documentation Documentation();
 
@@ -82,8 +78,9 @@
 //     void readFromCsvFile();
 //     void updateBuffers();
     
-//     std::vector<KeplerTranslation::KeplerOrbit> _orbits;
-//     ghoul::opengl::ProgramObject* _programObject;
+    std::vector<KeplerTranslation::KeplerOrbit> _orbits;
+    ghoul::opengl::ProgramObject* _programObject;
+    //ghoul::ObjectManager* _objectManager;
     
 //     properties::StringProperty _path;
 //     properties::UIntProperty _nSegments;
