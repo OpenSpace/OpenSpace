@@ -97,11 +97,7 @@ public:
      *         be passed to the constructor
      */
     static documentation::Documentation Documentation();
-
-protected:
-    /// Default construct that initializes all the properties and member variables
-    KeplerTranslation();
-
+    
     /**
      * Sets the internal values for the Keplerian elements and the epoch as a string of
      * the form YYYY MM DD HH:mm:ss.
@@ -143,6 +139,12 @@ protected:
     void setKeplerElements(double eccentricity, double semiMajorAxis, double inclination,
         double ascendingNode, double argumentOfPeriapsis, double meanAnomalyAtEpoch,
         double orbitalPeriod, double epoch);
+    
+    /// Default construct that initializes all the properties and member variables
+    KeplerTranslation();
+
+protected:
+
 
 private:
     /// Recombutes the rotation matrix used in the update method
