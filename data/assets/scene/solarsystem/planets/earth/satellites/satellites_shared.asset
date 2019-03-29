@@ -43,72 +43,20 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
         return true
     end
 -- -------------------------------------------------------------------------------------
-    function getSat(title, file, lineNum, textureFile, group)
-        return {
-            Identifier = title,
-            Parent = transforms.EarthInertial.Identifier,
-            Renderable = {
-                Type = "RenderablePlaneImageLocal",
-                Enabled = true,
-                Size = 3e4,
-                Origin = "Center",
-                Body = "TLE",
-                Billboard = true,
-                Texture = textureFile
-            },
-            Transform = {
-                Translation = {
-                    Type = "TLETranslation",
-                    Body = title,
-                    Observer = transforms.EarthInertial.Identifier,
-                    File = file,
-                    LineNumber = lineNum
-                },
-                Scale = {
-                    Type = "StaticScale",
-                    Scale = 1
-                }
-            },
-            Tag = { "earth_satellite_" .. group, "earth_satellite_" .. group .. "_marker" },
-            GUI = {
-                Path = "/Solar System/Planets/Earth/Satellites"
-            }
-        }
-    end
-
-    function getSatTrail(title, file, lineNum, per, color, group)
-        return {
-            Identifier = title .. "_trail",
-            Parent = transforms.EarthInertial.Identifier,
-            Renderable = {
-                Type = "RenderableTrailOrbit",
-                Translation = {
-                    Type = "TLETranslation",
-                    Body = title,
-                    Observer = transforms.EarthInertial.Identifier,
-                    File = file,
-                    LineNumber = lineNum
-                },
-                Color = color,
-                Period = per,
-                Resolution = 160
-            },
-            Tag = { "earth_satellite_" .. group, "earth_satellite_" .. group .. "_trail"},
-            GUI = {
-                Path = "/Solar System/Planets/Earth/Satellites"
-            }
-        }
-    end
--- -------------------------------------------------------------------------------------
---    function test(title, file, lineNum, per, color, group)
---       return {
---           Identifier = title,
---           Parent = transforms.EarthInertial.Identifier,
---           Renderable = {
---               Type = "RenderableSatellites",
---                Color = color,
---                Period = per,
---                Resolution = 160,
+--    function getSat(title, file, lineNum, textureFile, group)
+--        return {
+--            Identifier = title,
+--            Parent = transforms.EarthInertial.Identifier,
+--            Renderable = {
+--                Type = "RenderablePlaneImageLocal",
+--                Enabled = true,
+--                Size = 3e4,
+--                Origin = "Center",
+--                Body = "TLE",
+--                Billboard = true,
+--                Texture = textureFile
+--            },
+--            Transform = {
 --                Translation = {
 --                    Type = "TLETranslation",
 --                    Body = title,
@@ -116,19 +64,71 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
 --                    File = file,
 --                    LineNumber = lineNum
 --                },
+--                Scale = {
+--                    Type = "StaticScale",
+--                    Scale = 1
+--                }
+--           },
+--            Tag = { "earth_satellite_" .. group, "earth_satellite_" .. group .. "_marker" },
+--            GUI = {
+--                Path = "/Solar System/Planets/Earth/Satellites"
+--            }
+--        }
+--    end
 --
+--    function getSatTrail(title, file, lineNum, per, color, group)
+--        return {
+--            Identifier = title .. "_trail",
+--            Parent = transforms.EarthInertial.Identifier,
+--            Renderable = {
+--                Type = "RenderableTrailOrbit",
+--                Translation = {
+--                    Type = "TLETranslation",
+--                    Body = title,
+--                    Observer = transforms.EarthInertial.Identifier,
+--                    File = file,
+--                   LineNumber = lineNum
+--                },
+--                Color = color,
+--                Period = per,
+--                Resolution = 160
+--            },
+--            Tag = { "earth_satellite_" .. group, "earth_satellite_" .. group .. "_trail"},
+--            GUI = {
+--                Path = "/Solar System/Planets/Earth/Satellites"
+--            }
+--        }
+--    end
+-- -------------------------------------------------------------------------------------
+    function test(title, file, lineNum, per, color, group)
+       return {
+           Identifier = title,
+           Parent = transforms.EarthInertial.Identifier,
+           Renderable = {
+               Type = "ElonsTest",
+                Color = color,
+                Period = per,
+                Resolution = 160,
+                Translation = {
+                    Type = "TLETranslation",
+                    Body = title,
+                    Observer = transforms.EarthInertial.Identifier,
+                    File = file,
+                    LineNumber = lineNum
+                },
+
 --                Size = 3e4,
 --                Origin = "Center",
 --                Body = "TLE",
 --                Billboard = true,
 --                Texture = textureFile
---
---            },
---            GUI = {
---                Path = "/Solar System/Planets/Earth/Satellites"
---           }
---        }
---    end
+
+            },
+            GUI = {
+                Path = "/Solar System/Planets/Earth/Satellites"
+           }
+        }
+    end
 -- -------------------------------------------------------------------------------------
 
     local filename = group.Url:match("([^/]+)$")
@@ -181,17 +181,17 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
 
        if shouldAddNotes then
             -- Register satellite object and trail
---            local test_var = test(satName, path, n, per, group.TrailColor, group.Title)
---            openspace.addSceneGraphNode(test_var)
---            table.insert(obj, test_var.Identifier)
+            local test_var = test(satName, path, n, per, group.TrailColor, group.Title)
+            openspace.addSceneGraphNode(test_var)
+            table.insert(obj, test_var.Identifier)
 
-            local sat_var = getSat(satName, path, n, texture, group.Title)
-            openspace.addSceneGraphNode(sat_var)
-            table.insert(obj, sat_var.Identifier)
+--            local sat_var = getSat(satName, path, n, texture, group.Title)
+--            openspace.addSceneGraphNode(sat_var)
+--           table.insert(obj, sat_var.Identifier)
 
-            local satTrail_var = getSatTrail(satName, path, n, per, group.TrailColor, group.Title)
-            openspace.addSceneGraphNode(satTrail_var)
-            table.insert(obj, satTrail_var.Identifier)
+--            local satTrail_var = getSatTrail(satName, path, n, per, group.TrailColor, group.Title)
+--            openspace.addSceneGraphNode(satTrail_var)
+--            table.insert(obj, satTrail_var.Identifier)
         end
     end
 

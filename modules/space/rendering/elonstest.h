@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___RENDERABLEPLANET___H__
-#define __OPENSPACE_MODULE_SPACE___RENDERABLEPLANET___H__
+#ifndef __OPENSPACE_MODULE_SPACE___ELONSTEST___H__
+#define __OPENSPACE_MODULE_SPACE___ELONSTEST___H__
 
 #include <openspace/rendering/renderable.h>
 #include <modules/space/translation/keplertranslation.h>
@@ -33,6 +33,8 @@
 #include <openspace/properties/scalar/uintproperty.h>
 
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 class ElonsTest : public Renderable { 
 public:
@@ -51,11 +53,15 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
+    static documentation::Documentation Documentation();
+
 protected:
 private:
     TLETranslation _tleTranslator;
     std::vector<KeplerTranslation::KeplerOrbit> _orbits;
     ghoul::opengl::ProgramObject* _programObject;
+
+    KeplerTranslation _keplerTranslator;
 
     properties::StringProperty _path;
     properties::UIntProperty _nSegments;
@@ -68,8 +74,11 @@ private:
     properties::StringProperty _argumentOfPeriapsisColumnName;
     properties::StringProperty _meanAnomalyAtEpochColumnName;
     properties::StringProperty _epochColumnName;
+
+    void readTLEFile(const std::string& filename);
+
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SPACE___RENDERABLEPLANET___H__
+#endif // __OPENSPACE_MODULE_SPACE___ELONSTEST___H__
