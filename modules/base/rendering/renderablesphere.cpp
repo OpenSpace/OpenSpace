@@ -399,7 +399,6 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     // Setting these states should not be necessary,
     // since they are the default state in OpenSpace.
     glEnable(GL_CULL_FACE);
-    glEnable(GL_DEPTH_TEST);
     glCullFace(GL_BACK);
 
     if (orientation == Orientation::Inside) {
@@ -443,8 +442,8 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 void RenderableSphere::update(const UpdateData&) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
     }
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 
     if (_sphereIsDirty) {
         _sphere = std::make_unique<PowerScaledSphere>(_size, _segments);
