@@ -32,6 +32,11 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
 
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace ghoul::opengl
+
 namespace openspace {
 
 namespace documentation { struct Documentation; }
@@ -47,7 +52,7 @@ public:
     // void deinitialize();
     // void deinitialize();
     //
-    // bool isReady() const;
+    bool isReady() const;
 
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
@@ -58,7 +63,7 @@ public:
 protected:
 private:
     TLETranslation _tleTranslator;
-    std::vector<KeplerTranslation::KeplerOrbit> _orbits;
+    // std::vector<KeplerTranslation::KeplerOrbit> _orbits;
     ghoul::opengl::ProgramObject* _programObject;
 
     KeplerTranslation _keplerTranslator;
