@@ -41,28 +41,28 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pointssprite_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pointssprite_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_sprite_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_gs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_gs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboardpolygon_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboardpolygon_gs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboardpolygon_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/dumesh_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/dumesh_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/plane_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/plane_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pointssprite_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pointssprite_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_sprite_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_gs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_gs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboardpolygon_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboardpolygon_gs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboardpolygon_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/dumesh_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/dumesh_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/plane_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/plane_fs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
-    "DigitalUniverse"
-    digitaluniverse_module
-    STATIC
-    ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+  "DigitalUniverse"
+  digitaluniverse_module
+  STATIC
+  ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
