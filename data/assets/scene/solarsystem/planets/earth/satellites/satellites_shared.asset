@@ -100,7 +100,7 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
 --        }
 --    end
 -- -------------------------------------------------------------------------------------
-    function test(title, file, lineNum, per, color, group)
+    function test(title, file, per, color, group)
        return {
            Identifier = title,
            Parent = transforms.EarthInertial.Identifier,
@@ -113,8 +113,7 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
                     Type = "TLETranslation",
                     Body = title,
                     Observer = transforms.EarthInertial.Identifier,
-                    File = file,
-                    LineNumber = lineNum
+                    File = file
                 },
 
 --                Size = 3e4,
@@ -181,7 +180,7 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
 
        if shouldAddNotes then
             -- Register satellite object and trail
-            local test_var = test(satName, path, n, per, group.TrailColor, group.Title)
+            local test_var = test(satName, path, per, group.TrailColor, group.Title)
             openspace.addSceneGraphNode(test_var)
             table.insert(obj, test_var.Identifier)
 
