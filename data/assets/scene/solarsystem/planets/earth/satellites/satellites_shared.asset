@@ -114,7 +114,6 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
                     Body = title,
                     Observer = transforms.EarthInertial.Identifier,
                     File = file,
-                    LineNumber = lineNum
                 },
 
 --                Size = 3e4,

@@ -244,11 +244,8 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
 */
 
     const std::string& file = dictionary.value<std::string>(KeyFile);
-    int lineNum = 1;
-    if (dictionary.hasKeyAndValue<double>(KeyLineNum)) {
-        lineNum = static_cast<int>(dictionary.value<double>(KeyLineNum));
-    readTLEFile(file, lineNum);
-    }
+    readTLEFile(file);
+
 }
     // The list of leap years only goes until 2056 as we need to touch this file then
     // again anyway ;)
@@ -442,7 +439,7 @@ double epochFromSubstring(const std::string& epochString) {
         return epoch;
     }
     
-void RenderableSatellites::readTLEFile(const std::string& filename, int lineNum){
+void RenderableSatellites::readTLEFile(const std::string& filename){
     ghoul_assert(FileSys.fileExists(filename), "The filename must exist");
 
     std::ifstream file;
@@ -553,20 +550,6 @@ void RenderableSatellites::readTLEFile(const std::string& filename, int lineNum)
     using namespace std::chrono;
     double period = seconds(hours(24)).count() / keplerElements.meanMotion;      
     
-
-    //TODO: fix obv
-    size_t i = 0;
-
-    _orbits[i++] = KeplerTranslation::KeplerOrbit{
-        keplerElements.eccentricity,
-        keplerElements.semiMajorAxis,
-        keplerElements.inclination,
-        keplerElements.ascendingNode,
-        keplerElements.argumentOfPeriapsis,
-        keplerElements.meanAnomaly,
-        period,
-        keplerElements.epoch
-    };
 
     /*
     KeplerTranslation setKeplerElements(
@@ -694,8 +677,9 @@ void RenderableSatellites::updateBuffers() {
     
     size_t orbitIndex = 0;
     size_t elementIndex = 0;
-    for (const auto& orbit : _orbits) {
-        KeplerTranslation keplerTranslation(orbit);
+    for (const auto& orbit : _orbits) { // _orbits blir TLEData
+        // KeplerTranslation setKeplerElements(TLEData);
+        KeplerTranslation keplerTranslation(orbit); // Existerar inte längre
         const double period = orbit.period();
         for (size_t i = 0; i <= _nSegments; ++i) {
             size_t index = orbitIndex * nVerticesPerOrbit + i;
@@ -704,6 +688,8 @@ void RenderableSatellites::updateBuffers() {
                 static_cast<float>(i) / static_cast<float>(_nSegments);
             glm::vec3 position =
                 keplerTranslation.position(Time(orbit.epoch + timeOffset));
+                //keplerTranslation.position(orbit.epoch + timeOffset);
+
 
             _vertexBufferData[index].x = position.x;
             _vertexBufferData[index].y = position.y;
