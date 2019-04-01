@@ -105,6 +105,12 @@ namespace {
     constexpr const char* KeyFile = "File";
     constexpr const char* KeyLineNumber = "LineNumber";
 
+    
+
+} // namespace
+
+namespace openspace {
+
     // The list of leap years only goes until 2056 as we need to touch this file then
     // again anyway ;)
     const std::vector<int> LeapYears = {
@@ -297,300 +303,305 @@ namespace {
         return semiMajorAxis / 1000.0;
     }
 
-} // namespace
-
-namespace openspace {
-
-documentation::Documentation ElonsTest::Documentation() {
-    using namespace documentation;
-    return {
-        "ElonsTest",
-        "space_elons_test",
-        {
+    documentation::Documentation ElonsTest::Documentation() {
+        using namespace documentation;
+        return {
+            "ElonsTest",
+            "space_elons_test",
             {
-                SegmentsInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                SegmentsInfo.description
-            },
-            {
-                PathInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                PathInfo.description
-            },
-            {
-                EccentricityColumnInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                EccentricityColumnInfo.description
-            },
-            {
-                SemiMajorAxisColumnInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                SemiMajorAxisColumnInfo.description
-            },
-            {
-                SemiMajorAxisUnitInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                SemiMajorAxisUnitInfo.description
-            },
-            {
-                InclinationColumnInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                InclinationColumnInfo.description
-            },
-            {
-                AscendingNodeColumnInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                AscendingNodeColumnInfo.description
-            },
-            {
-                ArgumentOfPeriapsisColumnInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                ArgumentOfPeriapsisColumnInfo.description
-            },
-            {
-                MeanAnomalyAtEpochColumnInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                MeanAnomalyAtEpochColumnInfo.description
-            },
-            {
-                EpochColumnInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                EpochColumnInfo.description
+                {
+                    SegmentsInfo.identifier,
+                    new DoubleVerifier,
+                    Optional::No,
+                    SegmentsInfo.description
+                },
+                {
+                    PathInfo.identifier,
+                    new StringVerifier,
+                    Optional::No,
+                    PathInfo.description
+                },
+                {
+                    EccentricityColumnInfo.identifier,
+                    new StringVerifier,
+                    Optional::No,
+                    EccentricityColumnInfo.description
+                },
+                {
+                    SemiMajorAxisColumnInfo.identifier,
+                    new StringVerifier,
+                    Optional::No,
+                    SemiMajorAxisColumnInfo.description
+                },
+                {
+                    SemiMajorAxisUnitInfo.identifier,
+                    new DoubleVerifier,
+                    Optional::No,
+                    SemiMajorAxisUnitInfo.description
+                },
+                {
+                    InclinationColumnInfo.identifier,
+                    new StringVerifier,
+                    Optional::No,
+                    InclinationColumnInfo.description
+                },
+                {
+                    AscendingNodeColumnInfo.identifier,
+                    new StringVerifier,
+                    Optional::No,
+                    AscendingNodeColumnInfo.description
+                },
+                {
+                    ArgumentOfPeriapsisColumnInfo.identifier,
+                    new StringVerifier,
+                    Optional::No,
+                    ArgumentOfPeriapsisColumnInfo.description
+                },
+                {
+                    MeanAnomalyAtEpochColumnInfo.identifier,
+                    new StringVerifier,
+                    Optional::No,
+                    MeanAnomalyAtEpochColumnInfo.description
+                },
+                {
+                    EpochColumnInfo.identifier,
+                    new StringVerifier,
+                    Optional::No,
+                    EpochColumnInfo.description
+                }
             }
-        }
-    };
-}    
+        };
+    }    
 
-ElonsTest::ElonsTest(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
-    , _path(PathInfo)
-    , _nSegments(SegmentsInfo)
-    , _eccentricityColumnName(EccentricityColumnInfo)
-    , _semiMajorAxisColumnName(SemiMajorAxisColumnInfo)
-    , _semiMajorAxisUnit(SemiMajorAxisUnitInfo)
-    , _inclinationColumnName(InclinationColumnInfo)
-    , _ascendingNodeColumnName(AscendingNodeColumnInfo)
-    , _argumentOfPeriapsisColumnName(ArgumentOfPeriapsisColumnInfo)
-    , _meanAnomalyAtEpochColumnName(MeanAnomalyAtEpochColumnInfo)
-    , _epochColumnName(EpochColumnInfo)
-{
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "ElonsTest"
-    );
-
-    _path =
-        dictionary.value<std::string>(PathInfo.identifier);
-    _nSegments =
-        static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
-    _eccentricityColumnName =
-        dictionary.value<std::string>(EccentricityColumnInfo.identifier);
-    _semiMajorAxisColumnName =
-        dictionary.value<std::string>(SemiMajorAxisColumnInfo.identifier);
-    _semiMajorAxisUnit =
-        dictionary.value<double>(SemiMajorAxisUnitInfo.identifier);
-    _inclinationColumnName =
-        dictionary.value<std::string>(InclinationColumnInfo.identifier);
-    _ascendingNodeColumnName =
-        dictionary.value<std::string>(AscendingNodeColumnInfo.identifier);
-    _argumentOfPeriapsisColumnName =
-        dictionary.value<std::string>(ArgumentOfPeriapsisColumnInfo.identifier);
-    _meanAnomalyAtEpochColumnName =
-        dictionary.value<std::string>(MeanAnomalyAtEpochColumnInfo.identifier);
-    _epochColumnName =
-        dictionary.value<std::string>(EpochColumnInfo.identifier);
-
-    addProperty(_path);
-    addProperty(_nSegments);
-    addProperty(_semiMajorAxisUnit);
-
-    // TLE
-    // documentation::testSpecificationAndThrow(
-    // Documentation(),
-    // dictionary,
-    // "TLETranslation"
-    // );
-
-    const std::string& file = dictionary.value<std::string>(KeyFile);
-    ElonsTest::readTLEFile(file);
-
-    // !TLE
-} // !constructor
-// uses Renderables destructor?
-
-void ElonsTest::readTLEFile(const std::string& filename) {
-    ghoul_assert(FileSys.fileExists(filename), "The filename must exist");
-
-    std::ifstream file;
-    file.exceptions(std::ofstream::failbit | std::ofstream::badbit);
-    file.open(filename);
- 
-    // All of the Kepler element information
-    struct KeplerParameters{
-        double inclination = 0.0;
-        double semiMajorAxis = 0.0;
-        double ascendingNode = 0.0;
-        double eccentricity = 0.0;
-        double argumentOfPeriapsis = 0.0;
-        double meanAnomaly = 0.0;
-        double meanMotion = 0.0;
-        double epoch = 0.0;
-    };
-
-    std::vector<KeplerParameters> TLEData;
-
-    LINFO("");
-    // int numberOfLines = std::count(std::istreambuf_iterator<char>(file), 
-    //                               std::istreambuf_iterator<char>(), '\n' );
-    // 3 because a TLE has 3 lines per element/ object.
-    // int numberOfObjects = numberOfLines/3;
-    // for(int i=0 ; i<numberOfObjects; ++i){
-        
-
-    //     TLEData.push_back();
-
-    // }
-
-
-    std::string line;
-    while(std::getline(file, line)) {
-
-        KeplerParameters keplerElements;
-        
-        std::getline(file, line);
-        if (line[0] == '1') {
-            // First line
-            // Field Columns   Content
-            //     1   01-01   Line number
-            //     2   03-07   Satellite number
-            //     3   08-08   Classification (U = Unclassified)
-            //     4   10-11   International Designator (Last two digits of launch year)
-            //     5   12-14   International Designator (Launch number of the year)
-            //     6   15-17   International Designator(piece of the launch)    A
-            //     7   19-20   Epoch Year(last two digits of year)
-            //     8   21-32   Epoch(day of the year and fractional portion of the day)
-            //     9   34-43   First Time Derivative of the Mean Motion divided by two
-            //    10   45-52   Second Time Derivative of Mean Motion divided by six
-            //    11   54-61   BSTAR drag term(decimal point assumed)[10] - 11606 - 4
-            //    12   63-63   The "Ephemeris type"
-            //    13   65-68   Element set  number.Incremented when a new TLE is generated
-            //    14   69-69   Checksum (modulo 10)
-            keplerElements.epoch = epochFromSubstring(line.substr(18, 14));
-        } else {
-            throw ghoul::RuntimeError(fmt::format(
-                "File {} @ line {} does not have '1' header", filename // linNum + 1
-            ));
-        }
-        std::getline(file, line);
-        if (line[0] == '2') {
-            // Second line
-            // Field    Columns   Content
-            //     1      01-01   Line number
-            //     2      03-07   Satellite number
-            //     3      09-16   Inclination (degrees)
-            //     4      18-25   Right ascension of the ascending node (degrees)
-            //     5      27-33   Eccentricity (decimal point assumed)
-            //     6      35-42   Argument of perigee (degrees)
-            //     7      44-51   Mean Anomaly (degrees)
-            //     8      53-63   Mean Motion (revolutions per day)
-            //     9      64-68   Revolution number at epoch (revolutions)
-            //    10      69-69   Checksum (modulo 10)
-
-            std::stringstream stream;
-            stream.exceptions(std::ios::failbit);
-
-            // Get inclination
-            stream.str(line.substr(8, 8));
-            stream >> keplerElements.inclination;
-            stream.clear();
-
-            // Get Right ascension of the ascending node
-            stream.str(line.substr(17, 8));
-            stream >> keplerElements.ascendingNode;
-            stream.clear();
-
-            // Get Eccentricity
-            stream.str("0." + line.substr(26, 7));
-            stream >> keplerElements.eccentricity;
-            stream.clear();
-
-            // Get argument of periapsis
-            stream.str(line.substr(34, 8));
-            stream >> keplerElements.argumentOfPeriapsis;
-            stream.clear();
-
-            // Get mean anomaly
-            stream.str(line.substr(43, 8));
-            stream >> keplerElements.meanAnomaly;
-            stream.clear();
-
-            // Get mean motion
-            stream.str(line.substr(52, 11));
-            stream >> keplerElements.meanMotion;
-        } else {
-            throw ghoul::RuntimeError(fmt::format(
-                "File {} @ line {} does not have '2' header", filename  // , lineNum + 2
-            ));
-        }
-
-        // Calculate the semi major axis based on the mean motion using kepler's laws
-        keplerElements.semiMajorAxis = calculateSemiMajorAxis(keplerElements.meanMotion);
-       
-        // Converting the mean motion (revolutions per day) to period (seconds per revolution)
-        using namespace std::chrono;
-        double period = seconds(hours(24)).count() / keplerElements.meanMotion;
-
-        _keplerTranslator.setKeplerElements(
-            keplerElements.eccentricity,
-            keplerElements.semiMajorAxis,
-            keplerElements.inclination,
-            keplerElements.ascendingNode,
-            keplerElements.argumentOfPeriapsis,
-            keplerElements.meanAnomaly,
-            period,
-            keplerElements.epoch
+    ElonsTest::ElonsTest(const ghoul::Dictionary& dictionary)
+        : Renderable(dictionary)
+        , _path(PathInfo)
+        , _nSegments(SegmentsInfo)
+        , _eccentricityColumnName(EccentricityColumnInfo)
+        , _semiMajorAxisColumnName(SemiMajorAxisColumnInfo)
+        , _semiMajorAxisUnit(SemiMajorAxisUnitInfo)
+        , _inclinationColumnName(InclinationColumnInfo)
+        , _ascendingNodeColumnName(AscendingNodeColumnInfo)
+        , _argumentOfPeriapsisColumnName(ArgumentOfPeriapsisColumnInfo)
+        , _meanAnomalyAtEpochColumnName(MeanAnomalyAtEpochColumnInfo)
+        , _epochColumnName(EpochColumnInfo)
+    {
+        documentation::testSpecificationAndThrow(
+            Documentation(),
+            dictionary,
+            "ElonsTest"
         );
 
-        TLEData.push_back(keplerElements); 
-    } // !while loop
+        _path =
+            dictionary.value<std::string>(PathInfo.identifier);
+        _nSegments =
+            static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
+        _eccentricityColumnName =
+            dictionary.value<std::string>(EccentricityColumnInfo.identifier);
+        _semiMajorAxisColumnName =
+            dictionary.value<std::string>(SemiMajorAxisColumnInfo.identifier);
+        _semiMajorAxisUnit =
+            dictionary.value<double>(SemiMajorAxisUnitInfo.identifier);
+        _inclinationColumnName =
+            dictionary.value<std::string>(InclinationColumnInfo.identifier);
+        _ascendingNodeColumnName =
+            dictionary.value<std::string>(AscendingNodeColumnInfo.identifier);
+        _argumentOfPeriapsisColumnName =
+            dictionary.value<std::string>(ArgumentOfPeriapsisColumnInfo.identifier);
+        _meanAnomalyAtEpochColumnName =
+            dictionary.value<std::string>(MeanAnomalyAtEpochColumnInfo.identifier);
+        _epochColumnName =
+            dictionary.value<std::string>(EpochColumnInfo.identifier);
+
+        addProperty(_path);
+        addProperty(_nSegments);
+        // addProperty(_semiMajorAxisUnit);
+
+        // TLE
+        // documentation::testSpecificationAndThrow(
+        // Documentation(),
+        // dictionary,
+        // "TLETranslation"
+        // );
+
+        const std::string& file = dictionary.value<std::string>(KeyFile);
+        readTLEFile(file);
+
+        // !TLE
+    } // !constructor
+    // uses Renderables destructor?
+
+    void ElonsTest::readTLEFile(const std::string& filename) {
+        ghoul_assert(FileSys.fileExists(filename), "The filename must exist");
+
+        std::ifstream file;
+        file.exceptions(std::ofstream::failbit | std::ofstream::badbit);
+        file.open(filename);
     
-    file.close();
-}
+        // All of the Kepler element information
+        struct KeplerParameters{
+            double inclination = 0.0;
+            double semiMajorAxis = 0.0;
+            double ascendingNode = 0.0;
+            double eccentricity = 0.0;
+            double argumentOfPeriapsis = 0.0;
+            double meanAnomaly = 0.0;
+            double meanMotion = 0.0;
+            double epoch = 0.0;
+        };
 
-void ElonsTest::initialize(){
-    // note to self, se vad Gene skrev. Fyll _vertexArray i init och 
-        // rendera bara orbits, inga rörliga delar.
-}
+        std::vector<KeplerParameters> TLEData;
 
-void ElonsTest::initializeGL() {
-    _programObject = SpaceModule::ProgramObjectManager.request(
-        ProgramName,
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine.buildRenderProgram(
-                ProgramName,
-                absPath("${MODULE_SPACE}/shaders/renderablekeplerorbits_vs.glsl"),
-                absPath("${MODULE_SPACE}/shaders/renderablekeplerorbits_fs.glsl")
+        // int numberOfLines = std::count(std::istreambuf_iterator<char>(file), 
+        //                               std::istreambuf_iterator<char>(), '\n' );
+        // 3 because a TLE has 3 lines per element/ object.
+        // int numberOfObjects = numberOfLines/3;
+        // LINFO("Number of data elements: " + numberOfObjects);
+
+        // for(int i=0 ; i<numberOfObjects; ++i){
+            
+
+        //     TLEData.push_back();
+
+        // }
+
+
+        std::string line;
+        while(std::getline(file, line)) {
+
+            KeplerParameters keplerElements;
+            
+            std::getline(file, line);
+            if (line[0] == '1') {
+                // First line
+                // Field Columns   Content
+                //     1   01-01   Line number
+                //     2   03-07   Satellite number
+                //     3   08-08   Classification (U = Unclassified)
+                //     4   10-11   International Designator (Last two digits of launch year)
+                //     5   12-14   International Designator (Launch number of the year)
+                //     6   15-17   International Designator(piece of the launch)    A
+                //     7   19-20   Epoch Year(last two digits of year)
+                //     8   21-32   Epoch(day of the year and fractional portion of the day)
+                //     9   34-43   First Time Derivative of the Mean Motion divided by two
+                //    10   45-52   Second Time Derivative of Mean Motion divided by six
+                //    11   54-61   BSTAR drag term(decimal point assumed)[10] - 11606 - 4
+                //    12   63-63   The "Ephemeris type"
+                //    13   65-68   Element set  number.Incremented when a new TLE is generated
+                //    14   69-69   Checksum (modulo 10)
+                keplerElements.epoch = epochFromSubstring(line.substr(18, 14));
+            } else {
+                throw ghoul::RuntimeError(fmt::format(
+                    "File {} @ line {} does not have '1' header", filename // linNum + 1
+                ));
+            }
+            std::getline(file, line);
+            if (line[0] == '2') {
+                // Second line
+                // Field    Columns   Content
+                //     1      01-01   Line number
+                //     2      03-07   Satellite number
+                //     3      09-16   Inclination (degrees)
+                //     4      18-25   Right ascension of the ascending node (degrees)
+                //     5      27-33   Eccentricity (decimal point assumed)
+                //     6      35-42   Argument of perigee (degrees)
+                //     7      44-51   Mean Anomaly (degrees)
+                //     8      53-63   Mean Motion (revolutions per day)
+                //     9      64-68   Revolution number at epoch (revolutions)
+                //    10      69-69   Checksum (modulo 10)
+
+                std::stringstream stream;
+                stream.exceptions(std::ios::failbit);
+
+                // Get inclination
+                stream.str(line.substr(8, 8));
+                stream >> keplerElements.inclination;
+                stream.clear();
+
+                // Get Right ascension of the ascending node
+                stream.str(line.substr(17, 8));
+                stream >> keplerElements.ascendingNode;
+                stream.clear();
+
+                // Get Eccentricity
+                stream.str("0." + line.substr(26, 7));
+                stream >> keplerElements.eccentricity;
+                stream.clear();
+
+                // Get argument of periapsis
+                stream.str(line.substr(34, 8));
+                stream >> keplerElements.argumentOfPeriapsis;
+                stream.clear();
+
+                // Get mean anomaly
+                stream.str(line.substr(43, 8));
+                stream >> keplerElements.meanAnomaly;
+                stream.clear();
+
+                // Get mean motion
+                stream.str(line.substr(52, 11));
+                stream >> keplerElements.meanMotion;
+            } else {
+                throw ghoul::RuntimeError(fmt::format(
+                    "File {} @ line {} does not have '2' header", filename  // , lineNum + 2
+                ));
+            }
+
+            // Calculate the semi major axis based on the mean motion using kepler's laws
+            keplerElements.semiMajorAxis = calculateSemiMajorAxis(keplerElements.meanMotion);
+        
+            // Converting the mean motion (revolutions per day) to period (seconds per revolution)
+            using namespace std::chrono;
+            double period = seconds(hours(24)).count() / keplerElements.meanMotion;
+
+            _keplerTranslator.setKeplerElements(
+                keplerElements.eccentricity,
+                keplerElements.semiMajorAxis,
+                keplerElements.inclination,
+                keplerElements.ascendingNode,
+                keplerElements.argumentOfPeriapsis,
+                keplerElements.meanAnomaly,
+                period,
+                keplerElements.epoch
             );
-        }
-    );
 
-}
+            TLEData.push_back(keplerElements); 
+        } // !while loop
+        
+        file.close();
+    }
 
-void ElonsTest::render(const RenderData& data, RendererTasks& rendererTask)  {
+    void ElonsTest::initialize(){
+        // note to self, se vad Gene skrev. Fyll _vertexArray i init och 
+            // rendera bara orbits, inga rörliga delar.
+    }
 
-}
+    void ElonsTest::initializeGL() {
+        _programObject = SpaceModule::ProgramObjectManager.request(
+            ProgramName,
+            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+                return global::renderEngine.buildRenderProgram(
+                    ProgramName,
+                    absPath("${MODULE_SPACE}/shaders/renderablekeplerorbits_vs.glsl"),
+                    absPath("${MODULE_SPACE}/shaders/renderablekeplerorbits_fs.glsl")
+                );
+            }
+        );
 
-void ElonsTest::update(const UpdateData& data) {}
+    }
+
+    void ElonsTest::render(const RenderData& data, RendererTasks& rendererTask)  {
+        _programObject->activate();
+        LINFO("render data: ", data);
+
+    }
+
+    void ElonsTest::update(const UpdateData& data) {
+
+    }
+
+    bool ElonsTest::isReady() const {
+        return true;
+    }
 
 }
