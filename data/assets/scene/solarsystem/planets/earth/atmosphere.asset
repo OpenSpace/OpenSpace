@@ -30,8 +30,8 @@ local Atmosphere = {
             Ozone = {
               Coefficients = {
                 -- Absorption coefficients (in 1/cm)
-                --Extinction = {2.44E-4, 5.91E-4, 24.25E-4}
-                Extinction = {2.055E-3, 4.979E-3, 0.2136E-3}
+                Extinction = {2.44E-3, 5.91E-3, 2.425E-4}
+                --Extinction = {2.055E-3, 4.979E-3, 0.2136E-3}
               },
               H_O = 8.0,
             },

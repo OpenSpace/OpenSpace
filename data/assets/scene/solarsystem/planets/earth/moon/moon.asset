@@ -22,6 +22,10 @@ local Moon = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_MOON",
             DestinationFrame = "GALACTIC"
+        },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1.0
         }
     },
     Renderable = {

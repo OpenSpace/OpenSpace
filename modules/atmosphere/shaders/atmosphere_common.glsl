@@ -344,7 +344,7 @@ float miePhaseFunction(const float mu) {
   float mieG2 = mieG * mieG;
   return 0.1193662072 * (1.0f - mieG2) *
     pow(1.0f + mieG2 - 2.0f * mieG * mu, -1.5f) * (1.0f + mu * mu) / (2.0f + mieG2);
-}
+  }
 
 // -- Given the height rm view-zenith angle (cosine) mu,
 // sun-zenith angle (cosine) muSun and the angle (cosine)

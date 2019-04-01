@@ -9,30 +9,34 @@ local Atmosphere = {
     Renderable = {
         Type = "RenderableAtmosphere",
         Atmosphere = {
-            -- Atmosphere radius in Km
+            -- Atmosphere and planet radius in Km
             AtmosphereRadius = 3463.17495,
-            --PlanetRadius    = 3396.19,
-            --PlanetRadius = 3393.0,
-            PlanetRadius = 3386.190,
+            --PlanetRadius = 3386.190,
+            -- Paper values
+            PlanetRadius = 3389.5,
             PlanetAverageGroundReflectance = 0.1,
             GroundRadianceEmittion = 0.37,
             Rayleigh = {
                 Coefficients = {
                     -- Wavelengths are given in 10^-9m
                     Wavelengths = { 680, 550, 440 },
-                    -- Reflection coefficients are given in km^-1
-                    Scattering = { 19.918E-3, 13.57E-3, 5.75E-3 }
+                    -- Reflection coefficients are given in cm^-1
+                    --Scattering = { 19.918E-3, 13.57E-3, 5.75E-3 }
                     -- In Rayleigh scattering, the coefficients of 
                     -- absorption and scattering are the same.
+                    -- Paper Values:
+                    Scattering = { 0.5E-3, 2.32E-3, 5.58E-3 }
                 },
             -- Thichkness of atmosphere if its density were uniform, in Km
-                H_R = 10.43979
+                H_R = 11.1
             },
             -- Default
             Mie = {
                 Coefficients = {
-                    -- Reflection coefficients are given in km^-1
-                    Scattering = { 53.61771e-3, 53.61771e-3, 53.61771e-3 },
+                    -- Reflection coefficients are given in cm^-1
+                    --Scattering = { 53.61771e-3, 53.61771e-3, 53.61771e-3 },
+                    -- Paper Values
+                    Scattering = { 19.918E-3, 13.57E-3, 5.75E-3 },
                     -- Extinction coefficients are a fraction of the Scattering coefficients
                     Extinction = { 53.61771e-3/0.98979, 53.61771e-3/0.98979, 53.61771e-3/0.98979 }
                 },

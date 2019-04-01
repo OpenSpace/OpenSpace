@@ -33,6 +33,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec3property.h>
 #include <openspace/util/updatestructures.h>
 
 #include <ghoul/opengl/textureunit.h>
@@ -104,6 +105,7 @@ private:
     properties::FloatProperty _mieScatteringCoeffXP;
     properties::FloatProperty _mieScatteringCoeffYP;
     properties::FloatProperty _mieScatteringCoeffZP;
+    properties::Vec3Property _mieAbsorptionCoeffP;
     properties::FloatProperty _mieScatteringExtinctionPropCoefficientP;
     properties::FloatProperty _mieAsymmetricFactorGP;
     properties::FloatProperty _sunIntensityP;

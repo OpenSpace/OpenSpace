@@ -188,6 +188,12 @@ namespace {
         "Mie Scattering/Extinction Proportion Coefficient (%)"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo MieAbsorptionCoeffInfo = {
+        "MieAbsorptionCoeff",
+        "Mie Absorption Coeff (x10e-3)",
+        "Mie sea-level absorption coefficients in centimeters^1"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo MieAsymmetricFactorGInfo = {
         "MieAsymmetricFactorG",
         "Mie Asymmetric Factor G",
@@ -241,9 +247,15 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _ozoneCoeffYP(OzoneLayerCoeffYInfo, 5.91f, 0.01f, 100.0f)
     , _ozoneCoeffZP(OzoneLayerCoeffZInfo, 24.25f, 0.01f, 100.0f)
     , _mieHeightScaleP(MieHeightScaleInfo, 1.2f, 0.1f, 20.0f)
-    , _mieScatteringCoeffXP(MieScatteringCoeffXInfo, 4.0f, 0.01f, 1000.0f)
-    , _mieScatteringCoeffYP(MieScatteringCoeffYInfo, 4.0f, 0.01f, 1000.0f)
-    , _mieScatteringCoeffZP(MieScatteringCoeffZInfo, 4.0f, 0.01f, 1000.0f)
+    , _mieScatteringCoeffXP(MieScatteringCoeffXInfo, 4.0f, 0.01f, 100.0f)
+    , _mieScatteringCoeffYP(MieScatteringCoeffYInfo, 4.0f, 0.01f, 100.0f)
+    , _mieScatteringCoeffZP(MieScatteringCoeffZInfo, 4.0f, 0.01f, 100.0f)
+    , _mieAbsorptionCoeffP(
+        MieAbsorptionCoeffInfo, 
+        glm::vec3(0.0f), 
+        glm::vec3(0.01f), 
+        glm::vec3(100.f)
+    )
     , _mieScatteringExtinctionPropCoefficientP(
         MieScatteringExtinctionPropCoeffInfo,
         0.9f,
@@ -501,14 +513,17 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             }
 
             if (!mieDictionary.getValue("Coefficients.Extinction", _mieExtinctionCoeff)) {
-                errorReadingAtmosphereData = true;
-                LWARNINGC(
-                    identifier,
-                    "No Mie Extinction parameters specified for Atmosphere Effects. "
-                    "Disabling atmosphere effects for this planet."
-                );
-            }
-
+                if (!mieDictionary.getValue(MieAbsorptionCoeffInfo.identifier,
+                    _mieAbsorptionCoeffP)) {
+                    errorReadingAtmosphereData = true;
+                    LWARNINGC(
+                        identifier,
+                        "No Mie Extinction or Absorption parameters specified for "
+                        "Atmosphere Effects. Disabling atmosphere effects for this planet."
+                    );
+                }
+            } 
+            
             if (!mieDictionary.getValue(keyMiePhaseConstant, _miePhaseConstant)) {
                 errorReadingAtmosphereData = true;
                 LWARNINGC(
@@ -632,6 +647,9 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             _mieScatteringCoeffZP = _mieScatteringCoeff.z * 1000.0f;
             _mieScatteringCoeffZP.onChange(updateAtmosphere);
             addProperty(_mieScatteringCoeffZP);
+
+            _mieAbsorptionCoeffP.onChange(updateAtmosphere);
+            addProperty(_mieAbsorptionCoeffP);
 
             _mieScatteringExtinctionPropCoefficientP =
                 _mieScatteringCoeff.x / _mieExtinctionCoeff.x;
@@ -776,8 +794,18 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
         _mieScatteringCoeffYP * 0.001f,
         _mieScatteringCoeffZP * 0.001f
     );
-    _mieExtinctionCoeff         = _mieScatteringCoeff * (1.0f /
-                            static_cast<float>(_mieScatteringExtinctionPropCoefficientP));
+
+    glm::vec3 mieA = _mieAbsorptionCoeffP;
+    if (mieA.x != 0.0f ||
+        mieA.y != 0.0f ||
+        mieA.z != 0.0f) {
+        _mieScatteringCoeff = mieA * 0.001f + _mieScatteringCoeff;
+    }
+    else {
+        _mieExtinctionCoeff = _mieScatteringCoeff * (1.0f /
+            static_cast<float>(_mieScatteringExtinctionPropCoefficientP));
+    }
+
     _miePhaseConstant           = _mieAsymmetricFactorGP;
     _sunRadianceIntensity       = _sunIntensityP;
     _sunFollowingCameraEnabled  = _sunFollowingCameraEnabledP;
@@ -801,6 +829,8 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
         _deferredcaster->setOzoneExtinctionCoefficients(_ozoneExtinctionCoeff);
         _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
         _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
+        glm::vec3 mieAbsorptionCoeff = _mieAbsorptionCoeffP;
+        _deferredcaster->setMieAbsorptionCoefficients(mieAbsorptionCoeff * glm::vec3(0.001f));
         _deferredcaster->enableSunFollowing(_sunFollowingCameraEnabled);
         //_deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
 

@@ -83,6 +83,7 @@ public:
     void setRayleighScatteringCoefficients(const glm::vec3& rayScattCoeff);
     void setOzoneExtinctionCoefficients(const glm::vec3& ozoneExtCoeff);
     void setMieScatteringCoefficients(const glm::vec3& mieScattCoeff);
+    void setMieAbsorptionCoefficients(const glm::vec3& mieAbsorbCoeff);
     void setMieExtinctionCoefficients(const glm::vec3& mieExtCoeff);
     void setEllipsoidRadii(const glm::dvec3& radii);
     void setShadowConfigArray(const std::vector<ShadowConfiguration>& shadowConfigArray);
@@ -170,6 +171,7 @@ private:
     glm::vec3 _rayleighScatteringCoeff;
     glm::vec3 _ozoneExtinctionCoeff;
     glm::vec3 _mieScatteringCoeff;
+    glm::vec3 _mieAbsorptionCoeff;
     glm::vec3 _mieExtinctionCoeff;
     glm::dvec3 _ellipsoidRadii;
 
