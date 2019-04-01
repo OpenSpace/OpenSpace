@@ -113,7 +113,7 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
                     Type = "TLETranslation",
                     Body = title,
                     Observer = transforms.EarthInertial.Identifier,
-                    File = file
+                    File = file,
                 },
 
 --                Size = 3e4,
