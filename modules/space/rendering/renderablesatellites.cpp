@@ -244,7 +244,8 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
 */
 
     const std::string& file = dictionary.value<std::string>(KeyFile);
-    readTLEFile(file);
+    int lineNum = 1;
+    readTLEFile(file, lineNum);
 
 }
     // The list of leap years only goes until 2056 as we need to touch this file then
@@ -439,7 +440,7 @@ double epochFromSubstring(const std::string& epochString) {
         return epoch;
     }
     
-void RenderableSatellites::readTLEFile(const std::string& filename){
+void RenderableSatellites::readTLEFile(const std::string& filename, int lineNum){
     ghoul_assert(FileSys.fileExists(filename), "The filename must exist");
 
     std::ifstream file;
@@ -677,9 +678,9 @@ void RenderableSatellites::updateBuffers() {
     
     size_t orbitIndex = 0;
     size_t elementIndex = 0;
-    for (const auto& orbit : _orbits) { // _orbits blir TLEData
-        // KeplerTranslation setKeplerElements(TLEData);
-        KeplerTranslation keplerTranslation(orbit); // Existerar inte längre
+    for (const auto& orbit : _orbits) {
+        // Existerar inte längre, ersätt med annan struct
+        KeplerTranslation keplerTranslation(orbit);
         const double period = orbit.period();
         for (size_t i = 0; i <= _nSegments; ++i) {
             size_t index = orbitIndex * nVerticesPerOrbit + i;
