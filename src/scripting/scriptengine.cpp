@@ -575,7 +575,7 @@ std::string ScriptEngine::generateJson() const {
 
         for (const LuaLibrary::Function& f : l.functions) {
             json << "{";
-            json << fmt::format(replStr, "library", f.name);
+            json << fmt::format(replStr, "name", f.name);
             json << fmt::format(replStr, "arguments", escapedJson(f.argumentText));
             json << fmt::format(replStr2, "help", escapedJson(f.helpText));
             json << "}";
