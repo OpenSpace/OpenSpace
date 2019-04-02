@@ -62,7 +62,7 @@ public:
 
 protected:
 private:
-    TLETranslation _tleTranslator;
+    // TLETranslation _tleTranslator;
     // std::vector<KeplerTranslation::KeplerOrbit> _orbits;
     ghoul::opengl::ProgramObject* _programObject;
 
@@ -70,7 +70,6 @@ private:
 
     properties::StringProperty _path;
     properties::UIntProperty _nSegments;
-    
     properties::StringProperty _eccentricityColumnName;
     properties::StringProperty _semiMajorAxisColumnName;
     properties::DoubleProperty _semiMajorAxisUnit;
