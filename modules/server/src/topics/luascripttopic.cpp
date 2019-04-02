@@ -133,8 +133,8 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
                                  ret->get<bool>();
 
             runScript(luaScript, shouldReturn);
-
-        } else if (function != json.end() && function->is_string()) {
+        }
+        else if (function != json.end() && function->is_string()) {
             std::string luaFunction = function->get<std::string>();
             nlohmann::json::const_iterator ret = json.find(KeyReturn);
             bool shouldReturn = (ret != json.end()) &&
@@ -162,11 +162,9 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
     }
 }
 
-void LuaScriptTopic::runScript(const std::string& script, bool returnValue) {
-
+void LuaScriptTopic::runScript(const std::string& script, bool shouldReturn) {
     scripting::ScriptEngine::ScriptCallback callback;
-
-    if (returnValue) {
+    if (shouldReturn) {
         callback = [this](ghoul::Dictionary data) {
             nlohmann::json j = data;
             _connection->sendJson(wrappedPayload(j));
