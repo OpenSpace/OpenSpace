@@ -1,4 +1,7 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> runtime error, lua, satellites_shared
 // // /****************************************************************************************
 // //  *                                                                                       *
 // //  * OpenSpace                                                                             *
@@ -121,12 +124,17 @@
 //          *        the valid range supported by Kepler::setKeplerElements
 //          * \pre The \p filename must exist
 //          */
+<<<<<<< HEAD
 //         void readTLEFile(const std::string& filename, int lineNum);
+=======
+//         void readTLEFile(const std::string& filename);
+>>>>>>> runtime error, lua, satellites_shared
 //     };
 
 // #endif // __OPENSPACE_MODULE_BASE___RenderableSatellites___H__
 
 // }
+<<<<<<< HEAD
 =======
 // /****************************************************************************************
 //  *                                                                                       *
@@ -257,3 +265,5 @@ namespace openspace {
 
 }
 >>>>>>> merge
+=======
+>>>>>>> runtime error, lua, satellites_shared
