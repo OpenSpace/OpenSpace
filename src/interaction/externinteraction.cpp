@@ -121,7 +121,7 @@ datamessagestructures::CameraKeyframe ExternInteraction::generateCameraKeyframe(
     if (kf._followNodeRotation) {
         kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
         kf._rotation =
-            global::navigationHandler.orbitalNavigator().anchorNodeToCameraVector();
+            global::navigationHandler.orbitalNavigator().anchorNodeToCameraRotation();
     }
     else {
         kf._rotation = global::navigationHandler.camera()->rotationQuaternion();
