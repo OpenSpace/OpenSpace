@@ -85,7 +85,7 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderablePlanet>("RenderablePlanet");
     fRenderable->registerClass<RenderableRings>("RenderableRings");
     fRenderable->registerClass<RenderableStars>("RenderableStars");
-    fRenderable->registerClass<ElonsTest>("ElonsTest");
+    fRenderable->registerClass<RenderableSatellites>("RenderableSatellites");
 
     auto fTranslation = FactoryManager::ref().factory<Translation>();
     ghoul_assert(fTranslation, "Ephemeris factory was not created");
@@ -115,7 +115,7 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
         RenderablePlanet::Documentation(),
         RenderableRings::Documentation(),
         RenderableStars::Documentation(),
-        ElonsTest::Documentation(),
+        RenderableSatellites::Documentation(),
         SpiceRotation::Documentation(),
         SpiceTranslation::Documentation(),
         KeplerTranslation::Documentation(),
