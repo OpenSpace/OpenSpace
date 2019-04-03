@@ -1,38 +1,29 @@
+asset.require('default');
+
+asset.require('scene/solarsystem/missions/newhorizons/newhorizons')
+local NewHorizonsAsset = asset.require('scene/solarsystem/missions/newhorizons/model')
+
 local assetHelper = asset.require('util/asset_helper')
-local sceneHelper = asset.require('util/scene_helper')
 local propertyHelper = asset.require('util/property_helper')
+local sceneHelper = asset.require('util/scene_helper')
 local renderableHelper = asset.require('util/renderable_helper')
 
--- Specifying which other assets should be loaded in this scene
-asset.require('spice/base')
-assetHelper.requestAll(asset, 'scene/solarsystem/sun')
-asset.require('scene/solarsystem/planets')
-asset.request('scene/digitaluniverse/stars')
-asset.request('scene/digitaluniverse/milkyway')
-asset.require('scene/solarsystem/missions/newhorizons/newhorizons')
-
--- Load default key bindings applicable to most scenes
-asset.require('util/default_keybindings')
-asset.require('util/default_dashboard')
-asset.require('util/default_joystick')
-
-asset.require('util/webgui')
-
-asset.request('customization/globebrowsing')
-
--- Custom Keybindings
 local Keybindings = {
     {
         Key = "a",
-        Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'NewHorizons')",
+        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'NewHorizons');" ..
+            "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', 'Pluto');" ..
+            "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
         Documentation = "Sets the focus of the camera on 'NewHorizons'.",
-        Name = "Focus on New Horizons",
+        Name = "Anchor at New Horizons, Aim at Pluto",
         GuiPath = "/New Horizons",
         Local = false
     },
     {
         Key = "s",
-        Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'Pluto')",
+        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Pluto');"..
+            "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');" ..
+            "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
         Documentation = "Sets the focus of the camera on 'Pluto'",
         Name = "Focus on Pluto",
         GuiPath = "/New Horizons",
@@ -40,7 +31,9 @@ local Keybindings = {
     },
     {
         Key = "d",
-        Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'Charon')",
+        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Charon');"..
+            "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');" ..
+            "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
         Documentation = "Sets the focus of the camera on 'Charon'.",
         Name = "Focus on New Charon",
         GuiPath = "/New Horizons",
@@ -169,10 +162,8 @@ openspace.setPropertyValueSingle("Dashboard.NewHorizonsInstruments.Enabled", not
         GuiPath = "/New Horizons",
         Local = false
     }
-
 }
 
-local NewHorizonsAsset = asset.require('scene/solarsystem/missions/newhorizons/model')
 
 assetHelper.registerDashboardItems(asset, {
     {
@@ -188,7 +179,7 @@ assetHelper.registerDashboardItems(asset, {
         SourceType = "Node",
         SourceNodeName = "NewHorizons",
         DestinationType = "Node Surface",
-        DestinationNodeName = "Pluto"
+        DestinationNodeName = "PlutoProjection"
     },
     {
         Type = "DashboardItemInstruments",
@@ -213,6 +204,9 @@ asset.onInitialize(function ()
     })
 
     openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotationDistance', 20.000000);
+    openspace.setPropertyValueSingle('Scene.Pluto.Renderable.Enabled', false)
+    openspace.setPropertyValueSingle('Scene.Charon.Renderable.Enabled', false)
+    openspace.setPropertyValueSingle("Scene.PlutoBarycenterTrail.Renderable.Enabled", false)
 
     openspace.addVirtualProperty(
         "BoolProperty",
@@ -233,6 +227,9 @@ end)
 
 asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
+    openspace.setPropertyValueSingle('Scene.Pluto.Renderable.Enabled', true)
+    openspace.setPropertyValueSingle('Scene.Charon.Renderable.Enabled', true)
+    openspace.setPropertyValueSingle('Scene.PlutoBarycenterTrail.Renderable.Enabled', true)
 
     openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
 end)

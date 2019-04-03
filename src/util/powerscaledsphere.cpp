@@ -68,7 +68,7 @@ PowerScaledSphere::PowerScaledSphere(glm::vec3 radius, int segments)
             _varray[nr].location[0] = x;
             _varray[nr].location[1] = y;
             _varray[nr].location[2] = z;
-            _varray[nr].location[3] = 1.0;
+            _varray[nr].location[3] = 0.0;
 
             glm::vec3 normal = glm::vec3(x, y, z);
             if (!(x == 0.f && y == 0.f && z == 0.f)) {

@@ -512,20 +512,7 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
         _projectionComponent.instrumentId(), _mainFrame, time
     );
 
-    _transform = glm::mat4(1);
-    //90 deg rotation w.r.t spice req.
-    glm::mat4 rot = glm::rotate(
-        _transform,
-        glm::half_pi<float>(),
-        glm::vec3(1, 0, 0)
-    );
-    glm::mat4 roty = glm::rotate(
-        _transform,
-        glm::half_pi<float>(),
-        glm::vec3(0, -1, 0)
-    );
-
-    _transform = glm::mat4(_stateMatrix) * rot * roty;
+    _transform = glm::mat4(_stateMatrix);
 
     glm::dvec3 bs;
     try {
@@ -632,24 +619,6 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-    // This is apparently the transform needed to get the model in the coordinate system
-    // Used by SPICE. Don't ask me why, it was defined in the function attitudeParameters.
-    // SPICE needs a planet to be defined with z in the north pole, x in the prime
-    // meridian and y completes the right handed coordinate system.
-    // Doing this is part of changing from using the transforms defined by the
-    // scenegraph node (data.modelTransform) to achieve higher precision rendering. //KB
-    glm::dmat4 rot = glm::rotate(
-        glm::dmat4(1.0),
-        glm::half_pi<double>(),
-        glm::dvec3(1.0, 0.0, 0.0)
-    );
-    glm::dmat4 roty = glm::rotate(
-        glm::dmat4(1.0),
-        glm::half_pi<double>(),
-        glm::dvec3(0.0, -1.0, 0.0)
-    );
-    modelTransform = modelTransform * rot * roty;
 
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 

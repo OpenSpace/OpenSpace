@@ -13,9 +13,9 @@ local textures = asset.syncedResource({
 
 local charonRadius = 6.035E5
 
-local Charon = {
-    Identifier = "Charon",
-    Parent = transforms.PlutoBarycenter.Identifier,
+local CharonProjection = {
+    Identifier = "CharonProjection",
+    Parent = transforms.PlutoBarycenterAccurate.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -72,7 +72,7 @@ local Charon = {
 
 local CharonText = {
     Identifier = "CharonText",
-    Parent = Charon.Identifier,
+    Parent = CharonProjection.Identifier,
     Transform = {
         Translation = {
             Type = "StaticTranslation",
@@ -95,7 +95,7 @@ local CharonText = {
 
 local CharonShadow = {
     Identifier = "CharonShadow",
-    Parent = Charon.Identifier,
+    Parent = CharonProjection .Identifier,
     Renderable = {
         Type = "RenderableShadowCylinder",
         TerminatorType = "PENUMBRAL",
@@ -113,7 +113,7 @@ local CharonShadow = {
 
 local CharonTrail = {
     Identifier = "CharonTrail",
-    Parent = transforms.PlutoBarycenter.Identifier,
+    Parent = transforms.PlutoBarycenterAccurate.Identifier,
     Renderable = {
         Type = "RenderableTrailOrbit",
         Translation = {
@@ -131,10 +131,8 @@ local CharonTrail = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    Charon,
+    CharonProjection,
     CharonText,
     CharonShadow,
     CharonTrail
