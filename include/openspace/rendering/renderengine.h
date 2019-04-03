@@ -53,8 +53,6 @@ class SceneManager;
 class ScreenLog;
 class ScreenSpaceRenderable;
 struct ShutdownInformation;
-class Syncable;
-class SyncBuffer;
 
 class RenderEngine : public properties::PropertyOwner {
 public:
