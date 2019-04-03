@@ -569,6 +569,15 @@ namespace openspace {
     void ElonsTest::initialize(){
             //Fyll _vertexArray i init och 
             // rendera bara orbits, inga rörliga delar.
+
+
+
+
+
+
+
+
+
     }
 
     void ElonsTest::initializeGL() {
@@ -582,6 +591,13 @@ namespace openspace {
                 );
             }
         );
+
+    }
+
+    void ElonsTest::deinitializeGL() {
+
+
+
 
     }
 

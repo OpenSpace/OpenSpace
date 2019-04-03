@@ -50,7 +50,7 @@ public:
     void initialize() override;
     void initializeGL() override;
     // void deinitialize();
-    // void deinitialize();
+    void deinitializeGL() override;
     //
     bool isReady() const;
 
