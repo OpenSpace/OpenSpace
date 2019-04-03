@@ -41,7 +41,7 @@ namespace {
     constexpr const char* ProgramName = "ElonsTest";
     constexpr const char* _loggerCat = "SpaceDebris";
 
-    
+   
     static const openspace::properties::Property::PropertyInfo PathInfo = {
         "Path",
         "Path",
@@ -417,13 +417,7 @@ namespace openspace {
         addProperty(_nSegments);
         // addProperty(_semiMajorAxisUnit);
 
-        // TLE
-        // documentation::testSpecificationAndThrow(
-        // Documentation(),
-        // dictionary,
-        // "TLETranslation"
-        // );
-
+     
         const std::string& file = dictionary.value<std::string>(KeyFile);
         readTLEFile(file);
 
@@ -573,7 +567,7 @@ namespace openspace {
     }
 
     void ElonsTest::initialize(){
-        // note to self, se vad Gene skrev. Fyll _vertexArray i init och 
+            //Fyll _vertexArray i init och 
             // rendera bara orbits, inga rörliga delar.
     }
 

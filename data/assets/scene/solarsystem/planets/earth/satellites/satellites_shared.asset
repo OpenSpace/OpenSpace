@@ -1,4 +1,5 @@
 local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local assetHelper = asset.require('util/asset_helper')
 
 local satImageFolder = asset.syncedResource({
     Name = "Satellite Image Files",
@@ -42,162 +43,41 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
         end
         return true
     end
--- -------------------------------------------------------------------------------------
---    function getSat(title, file, lineNum, textureFile, group)
---        return {
---            Identifier = title,
---            Parent = transforms.EarthInertial.Identifier,
---            Renderable = {
---                Type = "RenderablePlaneImageLocal",
---                Enabled = true,
---                Size = 3e4,
---                Origin = "Center",
---                Body = "TLE",
---                Billboard = true,
---                Texture = textureFile
---            },
---            Transform = {
---                Translation = {
---                    Type = "TLETranslation",
---                    Body = title,
---                    Observer = transforms.EarthInertial.Identifier,
---                    File = file,
---                    LineNumber = lineNum
---                },
---                Scale = {
---                    Type = "StaticScale",
---                    Scale = 1
---                }
---           },
---            Tag = { "earth_satellite_" .. group, "earth_satellite_" .. group .. "_marker" },
---            GUI = {
---                Path = "/Solar System/Planets/Earth/Satellites"
---            }
---        }
---    end
---
---    function getSatTrail(title, file, lineNum, per, color, group)
---        return {
---            Identifier = title .. "_trail",
---            Parent = transforms.EarthInertial.Identifier,
---            Renderable = {
---                Type = "RenderableTrailOrbit",
---                Translation = {
---                    Type = "TLETranslation",
---                    Body = title,
---                    Observer = transforms.EarthInertial.Identifier,
---                    File = file,
---                   LineNumber = lineNum
---                },
---                Color = color,
---                Period = per,
---                Resolution = 160
---            },
---            Tag = { "earth_satellite_" .. group, "earth_satellite_" .. group .. "_trail"},
---            GUI = {
---                Path = "/Solar System/Planets/Earth/Satellites"
---            }
---        }
---    end
--- -------------------------------------------------------------------------------------
+
     function test(title, file, per, color, group)
-       return {
+        return {
            Identifier = title,
            Parent = transforms.EarthInertial.Identifier,
            Renderable = {
-               Type = "ElonsTest",
-                Color = color,
-                Period = per,
-                Resolution = 160,
+                Type = "ElonsTest",
+                
+                PathInfo = "bubbis",
+                SegmentsInfo = 1,
+                EccentricityColumnInfo = "bubbis",
+                SemiMajorAxisColumnInfo = "bubbis",
+                SemiMajorAxisUnitInfo = 1,
+                InclinationColumnInfo = "bubbis",
+                AscendingNodeColumnInfo = "bubbis",
+                ArgumentOfPeriapsisColumnInfo = "bubbis",
+                MeanAnomalyAtEpochColumnInfo = "bubbis",
+                EpochColumnInfo = "bubbis",
+
                 Translation = {
                     Type = "TLETranslation",
                     Body = title,
                     Observer = transforms.EarthInertial.Identifier,
-                    File = file,
-
+                    File = file
                 },
-
---                Size = 3e4,
---                Origin = "Center",
---                Body = "TLE",
---                Billboard = true,
---                Texture = textureFile
-
             },
             GUI = {
                 Path = "/Solar System/Planets/Earth/Satellites"
            }
         }
     end
--- -------------------------------------------------------------------------------------
-
-    local filename = group.Url:match("([^/]+)$")
-    local filenameSansExt = filename:gsub(filename:match("(%.%w+)$"), "")
-
-    local path = tleFolder .. "/" .. filename
-    local texture = satImageFolder .. "/" .. "satB.png"
-
-
-    local file = io.open(path, "r")
-    assert(file, "File not found: " .. path)
-
-    local obj = {}
-
-    --now loop through the tle file and get each set of 3 lines
-    for n = 1, numLinesInFile(path), 3 do
-        local line = {
-            file:read('*l'), --title line
-            file:read('*l'),
-            file:read('*l')
-        }
-        assert(isValidTLEFileFormat(line), "TLE file syntax error on line " .. n .. ": " .. path)
-
-        -- Trim string
-        line[1] = line[1]:gsub("^%s*(.-)%s*$", "%1")
-        line[1] = line[1]:gsub("%s+", "_")
-        line[1] = line[1]:gsub("[%-()]", "")
-        local title = line[1]
-
-        -- Get period from correct location of the string
-        local per = tonumber(string.sub(line[3], 53, 63))
-        -- Trail for 2x a single revolution
-        per = 1.0 / per * 2.0
-
-        local satName = filenameSansExt .. "_" .. title
-
-        local shouldAddNotes = true
-        if openspace.hasSceneGraphNode(satName) then
-            if shouldAddDuplicates then
-                local originalSatName = satName
-                local i = 1
-                while openspace.hasSceneGraphNode(satName) do
-                    satName = originalSatName .. "_" .. tostring(i)
-                    i = i + 1
-                end
-            else
-                shouldAddNotes = false
-            end
-       end
-
-       if shouldAddNotes then
-            -- Register satellite object and trail
-            local test_var = test(satName, path, per, group.TrailColor, group.Title)
-            openspace.addSceneGraphNode(test_var)
-            table.insert(obj, test_var.Identifier)
-
---            local sat_var = getSat(satName, path, n, texture, group.Title)
---            openspace.addSceneGraphNode(sat_var)
---           table.insert(obj, sat_var.Identifier)
-
---            local satTrail_var = getSatTrail(satName, path, n, per, group.TrailColor, group.Title)
---            openspace.addSceneGraphNode(satTrail_var)
---            table.insert(obj, satTrail_var.Identifier)
-        end
-    end
-
-    return obj
 end
 
-asset.export("satImageFolder", satImageFolder)
+assetHelper.registerSceneGraphNodesAndExport(asset, { Debris })
+
+-- asset.export("satImageFolder", satImageFolder)
 asset.export("downloadTLEFile", downloadTLEFile)
 asset.export("addSatelliteGroupObjects", addSatelliteGroupObjects)
