@@ -91,7 +91,7 @@ public:
     virtual void decode(SyncBuffer* syncBuffer) override;
     virtual void postSync(bool isMaster) override;
 
-    void queueScript(const std::string &script, RemoteScripting remoteScripting,
+    void queueScript(const std::string& script, RemoteScripting remoteScripting,
         ScriptCallback cb = ScriptCallback());
 
     std::vector<std::string> allLuaFunctions() const;

@@ -722,17 +722,9 @@ void ScriptEngine::queueScript(const std::string& script,
                                ScriptEngine::RemoteScripting remoteScripting,
                                ScriptCallback callback)
 {
-    if (script.empty()) {
-        return;
+    if (!script.empty()) {
+        _incomingScripts.push({ script, remoteScripting, callback });
     }
-
-    _incomingScripts.push(
-        {
-            script,
-            remoteScripting,
-            callback
-        }
-    );
 }
 
 } // namespace openspace::scripting
