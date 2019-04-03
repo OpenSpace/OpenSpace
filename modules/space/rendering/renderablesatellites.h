@@ -54,12 +54,6 @@ namespace openspace {
         void render(const RenderData& data, RendererTasks& rendererTask) override;
         void update(const UpdateData& data) override;
 
-        /*
-        void setKeplerElements(double eccentricity, double semiMajorAxis, double inclination,
-            double ascendingNode, double argumentOfPeriapsis, double meanAnomalyAtEpoch,
-            double orbitalPeriod, double epoch);
-        */
-
         static documentation::Documentation Documentation();
 
     private:
@@ -70,7 +64,6 @@ namespace openspace {
 
         KeplerTranslation _keplerTranslator;
         std::vector<KeplerTranslation::KeplerOrbit> TLEData;
-
 
         /// The backend storage for the vertex buffer object containing all points for this
         /// trail.

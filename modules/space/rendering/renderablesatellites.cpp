@@ -598,7 +598,6 @@ RenderableSatellites::~RenderableSatellites() {
 }
     
 void RenderableSatellites::initialize() {
-    /*
     readFromCsvFile();
     updateBuffers();
 
@@ -615,7 +614,6 @@ void RenderableSatellites::initialize() {
     _nSegments.onChange([this]() {
         updateBuffers();
     });
-    */
 }
 
 void RenderableSatellites::deinitialize() {
@@ -623,7 +621,6 @@ void RenderableSatellites::deinitialize() {
 }
  
 void RenderableSatellites::initializeGL() {
-    /*
     glGenVertexArrays(1, &_vertexArray);
     glGenBuffers(1, &_vertexBuffer);
     glGenBuffers(1, &_indexBuffer);
@@ -647,17 +644,14 @@ void RenderableSatellites::initializeGL() {
     _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
     
     setRenderBin(Renderable::RenderBin::Overlay);
-    */
 }
     
 void RenderableSatellites::deinitializeGL() {
-    /*
     SpaceModule::ProgramObjectManager.release(ProgramName);
     
     glDeleteBuffers(1, &_vertexBuffer);
     glDeleteBuffers(1, &_indexBuffer);
     glDeleteVertexArrays(1, &_vertexArray);
-    */
 }
 
     
@@ -668,7 +662,6 @@ bool RenderableSatellites::isReady() const {
 void RenderableSatellites::update(const UpdateData&) {}
     
 void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
-    /*
     _programObject->activate();
     _programObject->setUniform(_uniformCache.opacity, _opacity);
     
@@ -689,7 +682,6 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
     /*if (_appearance.useLineFade) {
         _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
     }*/
-    /*
 
     glDepthMask(false);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -701,17 +693,16 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
                    0);
     glBindVertexArray(0);
     _programObject->deactivate();
-    */
 }
 
 void RenderableSatellites::updateBuffers() {
-/*
     const size_t nVerticesPerOrbit = _nSegments + 1;
     _vertexBufferData.resize(TLEData.size() * nVerticesPerOrbit);
     _indexBufferData.resize(TLEData.size() * _nSegments * 2);
     
     size_t orbitIndex = 0;
     size_t elementIndex = 0;
+
     for (const auto& orbit : TLEData) {
         // KeplerTranslation setKeplerElements(orbit);
         _keplerTranslator.setKeplerElements(
@@ -731,10 +722,16 @@ void RenderableSatellites::updateBuffers() {
 
             double timeOffset = period *
                 static_cast<float>(i) / static_cast<float>(_nSegments);
-            glm::vec3 position =
-                _keplerTranslator.position(Time(orbit.epoch + timeOffset));
-                //keplerTranslation.position(orbit.epoch + timeOffset);
 
+            // _updateData.time.setTime(orbit.epoch + timeOffset);
+            // UpdateData::time(Time(orbit.epoch + timeOffset));
+
+            UpdateData updateTime;
+            updateTime.time = Time(orbit.epoch + timeOffset);
+            
+            glm::vec3 position = _keplerTranslator.position(updateTime);
+             // _keplerTranslator.position(_updateData.time); 
+            
 
             _vertexBufferData[index].x = position.x;
             _vertexBufferData[index].y = position.y;
@@ -766,7 +763,7 @@ void RenderableSatellites::updateBuffers() {
                  );
     
     glBindVertexArray(0);
-*/
+
 }
 
 void RenderableSatellites::readFromCsvFile() {
