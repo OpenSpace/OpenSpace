@@ -82,7 +82,6 @@ public:
      */
     void writeDocumentation(const std::string& filename);
 
-protected:
     /**
      * This abstract method is used by concrete subclasses to provide the actual data that
      * is used in the documentation written by this DocumentationGenerator class. The JSON
