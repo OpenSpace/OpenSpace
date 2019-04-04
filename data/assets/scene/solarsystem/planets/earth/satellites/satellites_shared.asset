@@ -49,13 +49,20 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
         return true
     end
 
-    function test(title, file, per, color, group)
+    function test(title, file)
         return {
            Identifier = title,
            Parent = transforms.EarthInertial.Identifier,
            Renderable = {
                 Type = "ElonsTest",
-                
+                --Translation = {
+
+--                    Type = "TLETranslation",
+--                    Body = title,
+--                    Observer = transforms.EarthInertial.Identifier,
+--                    File = file
+--                },
+
                 PathInfo = "bubbis",
                 SegmentsInfo = 1,
                 EccentricityColumnInfo = "bubbis",
@@ -66,24 +73,21 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
                 ArgumentOfPeriapsisColumnInfo = "bubbis",
                 MeanAnomalyAtEpochColumnInfo = "bubbis",
                 EpochColumnInfo = "bubbis",
-
-                Translation = {
-                    Type = "TLETranslation",
-                    Body = title,
-                    Observer = transforms.EarthInertial.Identifier,
-                    File = file
-                },
+                
             },
             GUI = {
                 Path = "/Solar System/Planets/Earth/Satellites"
            }
         }
     end
+
+    local Debris = test(filenameSansExt, path)
+    assetHelper.registerSceneGraphNodesAndExport(asset, { Debris })
+
+    -- asset.export("satImageFolder", satImageFolder)
+
 end
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Debris })
-
--- asset.export("satImageFolder", satImageFolder)
 asset.export("downloadTLEFile", downloadTLEFile)
 asset.export("addSatelliteGroupObjects", addSatelliteGroupObjects)
 
