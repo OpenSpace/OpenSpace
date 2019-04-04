@@ -534,19 +534,12 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
         _projectionComponent.aberration(),
         time,
         lightTime
-    );
-    psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
+    ) * 1000.0;
 
-    //change to KM and add psc camera scaling.
-    position[3] += (3 + _camScaling[1]);
-    //position[3] += 3;
-    glm::vec3 cpos = position.vec3();
-
-    float distance = glm::length(cpos);
+    float distance = glm::length(p);
     float radius = boundingSphere();
-
     _projectorMatrix = _projectionComponent.computeProjectorMatrix(
-        cpos,
+        p,
         bs,
         _up,
         _instrumentMatrix,
@@ -597,8 +590,8 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
     }
     attitudeParameters(data.time.j2000Seconds());
 
-    double  lt;
-    glm::dvec3 p = SpiceManager::ref().targetPosition(
+    double lt;
+    glm::dvec3 sunPos = SpiceManager::ref().targetPosition(
         "SUN",
         _projectionComponent.projecteeId(),
         "GALACTIC",
@@ -606,13 +599,13 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
         data.time.j2000Seconds(),
         lt
     );
-    psc sun_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
     // Main renderpass
     _programObject->activate();
-    _programObject->setUniform(_mainUniformCache.sunPos, sun_pos.vec3());
-    //_program->setUniform("ViewProjection" ,  data.camera.viewProjectionMatrix());
-    //_program->setUniform("ModelTransform" , _transform);
+    _programObject->setUniform(
+        _mainUniformCache.sunPos,
+        static_cast<glm::vec3>(sunPos)
+    );
 
     // Model transform and view transform needs to be in double precision
     glm::dmat4 modelTransform =

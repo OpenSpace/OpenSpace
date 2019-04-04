@@ -343,7 +343,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 
     if (_fadeInThreshold > -1.0) {
         const float logDistCamera = glm::log(static_cast<float>(
-            glm::distance(data.camera.positionVec3(), data.position.dvec3())
+            glm::distance(data.camera.positionVec3(), data.modelTransform.translation)
             ));
         const float startLogFadeDistance = glm::log(_size * _fadeInThreshold);
         const float stopLogFadeDistance = startLogFadeDistance + 1.f;
@@ -364,7 +364,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 
     if (_fadeOutThreshold > -1.0) {
         const float logDistCamera = glm::log(static_cast<float>(
-            glm::distance(data.camera.positionVec3(), data.position.dvec3())
+            glm::distance(data.camera.positionVec3(), data.modelTransform.translation)
         ));
         const float startLogFadeDistance = glm::log(_size * _fadeOutThreshold);
         const float stopLogFadeDistance = startLogFadeDistance + 1.f;
