@@ -1,129 +1,129 @@
-/****************************************************************************************
- *                                                                                       *
- * OpenSpace                                                                             *
- *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
- *                                                                                       *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
- * software and associated documentation files (the "Software"), to deal in the Software *
- * without restriction, including without limitation the rights to use, copy, modify,    *
- * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
- * permit persons to whom the Software is furnished to do so, subject to the following   *
- * conditions:                                                                           *
- *                                                                                       *
- * The above copyright notice and this permission notice shall be included in all copies *
- * or substantial portions of the Software.                                              *
- *                                                                                       *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
- * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
- * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
- * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
- ****************************************************************************************/
-#include <fstream>
-#include <chrono>
-#include <vector>
+// /****************************************************************************************
+//  *                                                                                       *
+//  * OpenSpace                                                                             *
+//  *                                                                                       *
+//  * Copyright (c) 2014-2018                                                               *
+//  *                                                                                       *
+//  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+//  * software and associated documentation files (the "Software"), to deal in the Software *
+//  * without restriction, including without limitation the rights to use, copy, modify,    *
+//  * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+//  * permit persons to whom the Software is furnished to do so, subject to the following   *
+//  * conditions:                                                                           *
+//  *                                                                                       *
+//  * The above copyright notice and this permission notice shall be included in all copies *
+//  * or substantial portions of the Software.                                              *
+//  *                                                                                       *
+//  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+//  * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+//  * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+//  * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+//  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+//  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+//  ****************************************************************************************/
+// #include <fstream>
+// #include <chrono>
+// #include <vector>
 
 
-#include <modules/space/rendering/renderablesatellites.h>
-#include <modules/space/translation/keplertranslation.h>
-#include <modules/space/translation/TLEtranslation.h>
-#include <modules/space/spacemodule.h>
+// #include <modules/space/rendering/renderablesatellites.h>
+// #include <modules/space/translation/keplertranslation.h>
+// #include <modules/space/translation/TLEtranslation.h>
+// #include <modules/space/spacemodule.h>
 
 
-#include <modules/base/basemodule.h>
+// #include <modules/base/basemodule.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/engine/globals.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/util/time.h>
-#include <openspace/util/updatestructures.h>
+// #include <openspace/engine/openspaceengine.h>
+// #include <openspace/rendering/renderengine.h>
+// #include <openspace/engine/globals.h>
+// #include <openspace/documentation/verifier.h>
+// #include <openspace/util/time.h>
+// #include <openspace/util/updatestructures.h>
 
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/misc/csvreader.h>
-#include <ghoul/opengl/programobject.h>
-
-
-#include <fstream>
+// #include <ghoul/filesystem/filesystem.h>
+// #include <ghoul/filesystem/file.h>
+// #include <ghoul/misc/csvreader.h>
+// #include <ghoul/opengl/programobject.h>
 
 
-// Todo:
-// Parse epoch correctly
-// read distances using correct unit
-// ...
+// #include <fstream>
 
-namespace {
-    constexpr const char* ProgramName = "KeplerTrails";
-    constexpr const char* KeyFile = "File";
-    constexpr const char* KeyLineNum = "LineNumber";
+
+// // Todo:
+// // Parse epoch correctly
+// // read distances using correct unit
+// // ...
+
+// namespace {
+//     constexpr const char* ProgramName = "KeplerTrails";
+//     constexpr const char* KeyFile = "File";
+//     constexpr const char* KeyLineNum = "LineNumber";
 
     
-    static const openspace::properties::Property::PropertyInfo PathInfo = {
-        "Path",
-        "Path",
-        "The file path to the CSV file to read"
-    };
+//     static const openspace::properties::Property::PropertyInfo PathInfo = {
+//         "Path",
+//         "Path",
+//         "The file path to the CSV file to read"
+//     };
     
-    static const openspace::properties::Property::PropertyInfo SegmentsInfo = {
-        "Segments",
-        "Segments",
-        "The number of segments to use for each orbit ellipse"
-    };
+//     static const openspace::properties::Property::PropertyInfo SegmentsInfo = {
+//         "Segments",
+//         "Segments",
+//         "The number of segments to use for each orbit ellipse"
+//     };
     
-    static const openspace::properties::Property::PropertyInfo EccentricityColumnInfo = {
-        "EccentricityColumn",
-        "EccentricityColumn",
-        "The header of the column where the eccentricity is stored"
-    };
+//     static const openspace::properties::Property::PropertyInfo EccentricityColumnInfo = {
+//         "EccentricityColumn",
+//         "EccentricityColumn",
+//         "The header of the column where the eccentricity is stored"
+//     };
     
-    static const openspace::properties::Property::PropertyInfo SemiMajorAxisColumnInfo = {
-        "SemiMajorAxisColumn",
-        "SemiMajorAxisColumn",
-        "The header of the column where the semi-major axis is stored"
-    };
+//     static const openspace::properties::Property::PropertyInfo SemiMajorAxisColumnInfo = {
+//         "SemiMajorAxisColumn",
+//         "SemiMajorAxisColumn",
+//         "The header of the column where the semi-major axis is stored"
+//     };
     
-    static const openspace::properties::Property::PropertyInfo SemiMajorAxisUnitInfo = {
-        "SemiMajorAxisUnit",
-        "SemiMajorAxisUnit",
-        "The unit of the semi major axis. For example: If specified in km, set this to 1000."
-    };
+//     static const openspace::properties::Property::PropertyInfo SemiMajorAxisUnitInfo = {
+//         "SemiMajorAxisUnit",
+//         "SemiMajorAxisUnit",
+//         "The unit of the semi major axis. For example: If specified in km, set this to 1000."
+//     };
     
-    static const openspace::properties::Property::PropertyInfo InclinationColumnInfo = {
-        "InclinationColumn",
-        "InclinationColumn",
-        "The header of the column where the inclination is stored"
-    };
+//     static const openspace::properties::Property::PropertyInfo InclinationColumnInfo = {
+//         "InclinationColumn",
+//         "InclinationColumn",
+//         "The header of the column where the inclination is stored"
+//     };
     
-    static const openspace::properties::Property::PropertyInfo AscendingNodeColumnInfo = {
-        "AscendingNodeColumn",
-        "AscendingNodeColumn",
-        "The header of the column where the ascending node is stored"
-    };
+//     static const openspace::properties::Property::PropertyInfo AscendingNodeColumnInfo = {
+//         "AscendingNodeColumn",
+//         "AscendingNodeColumn",
+//         "The header of the column where the ascending node is stored"
+//     };
     
-    static const openspace::properties::Property::PropertyInfo ArgumentOfPeriapsisColumnInfo = {
-        "ArgumentOfPeriapsisColumn",
-        "ArgumentOfPeriapsisColumn",
-        "The header of the column where the argument of periapsis is stored"
-    };
+//     static const openspace::properties::Property::PropertyInfo ArgumentOfPeriapsisColumnInfo = {
+//         "ArgumentOfPeriapsisColumn",
+//         "ArgumentOfPeriapsisColumn",
+//         "The header of the column where the argument of periapsis is stored"
+//     };
     
-    static const openspace::properties::Property::PropertyInfo MeanAnomalyAtEpochColumnInfo = {
-        "MeanAnomalyAtEpochColumn",
-        "MeanAnomalyAtEpochColumn",
-        "The header of the column where the mean anomaly at epoch is stored"
-    };
+//     static const openspace::properties::Property::PropertyInfo MeanAnomalyAtEpochColumnInfo = {
+//         "MeanAnomalyAtEpochColumn",
+//         "MeanAnomalyAtEpochColumn",
+//         "The header of the column where the mean anomaly at epoch is stored"
+//     };
     
-    static const openspace::properties::Property::PropertyInfo EpochColumnInfo = {
-        "EpochColumn",
-        "EpochColumn",
-        "The header of the column where the epoch is stored"
-    };
-}
+//     static const openspace::properties::Property::PropertyInfo EpochColumnInfo = {
+//         "EpochColumn",
+//         "EpochColumn",
+//         "The header of the column where the epoch is stored"
+//     };
+// }
 
-namespace openspace {
- 
+// namespace openspace {
+
 documentation::Documentation RenderableSatellites::Documentation() {
     using namespace documentation;
     return {
