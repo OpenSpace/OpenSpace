@@ -123,7 +123,6 @@
 // }
 
 // namespace openspace {
-
 documentation::Documentation RenderableSatellites::Documentation() {
     using namespace documentation;
     return {
