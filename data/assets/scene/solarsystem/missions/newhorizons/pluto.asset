@@ -71,7 +71,7 @@ local PlutoProjection = {
             textures .. "/NH_Pluto_DTM_16384.png",
             textures .. "/NH_Pluto_DTM_8192.png"
         },
-        MeridianShift = true,
+        MeridianShift = false,
         Projection = {
             Sequence       = images,
             EventFile      = assets .. "/core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",
@@ -243,30 +243,9 @@ local PlutoShadow = {
     }
 }
 
-local PlutoTrailBarycentricAccurate = {
-    Identifier = "PlutoBarycentricTrailAccurate",
-    Parent = transforms.PlutoBarycenterAccurate.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "PLUTO",
-            Observer = "PLUTO BARYCENTER"
-        },
-        Color = { 0.00, 0.62, 1.00 },
-        Period = 6.38723,
-        Resolution = 1000
-    },
-    GUI = {
-        Name = "Pluto Barycenteric Trail Accurate",
-        Path = "/Solar System/Dwarf Planets/Pluto"
-    }
-}
-
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     PlutoProjection,
     PlutoBarycenterLabel,
     PlutoText,
-    PlutoShadow,
-    PlutoTrailBarycentricAccurate,
+    PlutoShadow
 })

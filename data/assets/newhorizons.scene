@@ -53,8 +53,8 @@ openspace.setPropertyValueSingle("Dashboard.NewHorizonsInstruments.Enabled", not
     },
     {
         Key = "F8",
-        Command = "openspace.setPropertyValue('Scene.Pluto.Renderable.ProjectionComponent.ClearAllProjections', true);" ..
-                  "openspace.setPropertyValue('Scene.Charon.Renderable.ProjectionComponent.ClearAllProjections', true);",
+        Command = "openspace.setPropertyValue('Scene.PlutoProjection.Renderable.ProjectionComponent.ClearAllProjections', true);" ..
+                  "openspace.setPropertyValue('Scene.CharonProjection.Renderable.ProjectionComponent.ClearAllProjections', true);",
         Documentation = "Removes all image projections from Pluto and Charon.",
         Name = "Clear image projections",
         GuiPath = "/New Horizons",
@@ -63,8 +63,8 @@ openspace.setPropertyValueSingle("Dashboard.NewHorizonsInstruments.Enabled", not
     {
         Key = "F9",
         Command = "openspace.time.setTime('2015-07-14T09:00:00.00');" ..
-                  "openspace.setPropertyValue('Scene.Pluto.Renderable.ClearAllProjections', true);" ..
-                  "openspace.setPropertyValue('Scene.Charon.Renderable.ClearAllProjections', true);",
+                  "openspace.setPropertyValue('Scene.PlutoProjection.Renderable.ClearAllProjections', true);" ..
+                  "openspace.setPropertyValue('Scene.CharonProjection.Renderable.ClearAllProjections', true);",
         Documentation = "Jumps to the 14th of July 2015 at 0900 UTC and clears all projections.",
         Name = "Reset time and projections",
         GuiPath = "/New Horizons",
@@ -72,7 +72,7 @@ openspace.setPropertyValueSingle("Dashboard.NewHorizonsInstruments.Enabled", not
     },
     {
         Key = "KP_8",
-        Command = propertyHelper.increment('Scene.Pluto.Renderable.HeightExaggeration', 5000),
+        Command = propertyHelper.increment('Scene.PlutoProjection.Renderable.HeightExaggeration', 5000),
         Documentation = "Increases the height map exaggeration on Pluto.",
         Name = "Pluto HeightExaggeration +",
         GuiPath = "/New Horizons",
@@ -80,7 +80,7 @@ openspace.setPropertyValueSingle("Dashboard.NewHorizonsInstruments.Enabled", not
     },
     {
         Key = "KP_2",
-        Command = propertyHelper.decrement('Scene.Pluto.Renderable.HeightExaggeration', 5000),
+        Command = propertyHelper.decrement('Scene.PlutoProjection.Renderable.HeightExaggeration', 5000),
         Documentation = "Decreases the height map exaggeration on Pluto.",
         Name = "Pluto HeightExaggeration -",
         GuiPath = "/New Horizons",
@@ -88,7 +88,7 @@ openspace.setPropertyValueSingle("Dashboard.NewHorizonsInstruments.Enabled", not
     },
     {
         Key = "KP_9",
-        Command = propertyHelper.increment('Scene.Charon.Renderable.HeightExaggeration', 5000),
+        Command = propertyHelper.increment('Scene.CharonProjection.Renderable.HeightExaggeration', 5000),
         Documentation = "Increases the height map exaggeration on Charon.",
         Name = "Charon HeightExaggeration +",
         GuiPath = "/New Horizons",
@@ -96,7 +96,7 @@ openspace.setPropertyValueSingle("Dashboard.NewHorizonsInstruments.Enabled", not
     },
     {
         Key = "KP_3",
-        Command = propertyHelper.decrement('Scene.Charon.Renderable.HeightExaggeration', 5000),
+        Command = propertyHelper.decrement('Scene.CharonProjection.Renderable.HeightExaggeration', 5000),
         Documentation = "Decreases the height map exaggeration on Charon.",
         Name = "Charon HeightExaggeration -",
         GuiPath = "/New Horizons",
@@ -104,7 +104,7 @@ openspace.setPropertyValueSingle("Dashboard.NewHorizonsInstruments.Enabled", not
     },
     {
         Key = "o",
-        Command = propertyHelper.invert('Scene.PlutoTrail.Renderable.Enabled'),
+        Command = propertyHelper.invert('Scene.PlutoBarycentricTrail.Renderable.Enabled'),
         Documentation = "Toggles the visibility of the trail behind Pluto.",
         Name = "Toggle Pluto Trail",
         GuiPath = "/New Horizons",
