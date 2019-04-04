@@ -554,7 +554,6 @@ namespace openspace {
             using namespace std::chrono;
             double period = seconds(hours(24)).count() / keplerElements.meanMotion;
 
-            // not really sure what this is used for. /elon
             _keplerTranslator.setKeplerElements(
                 keplerElements.eccentricity,
                 keplerElements.semiMajorAxis,
@@ -594,8 +593,6 @@ namespace openspace {
     void ElonsTest::render(const RenderData& data, RendererTasks& rendererTask)  {
         _programObject->activate();
         LINFO("render data: ", data);
-
-        _programObject->deactivate();
 
     }
 
