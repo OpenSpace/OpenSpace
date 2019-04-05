@@ -1,0 +1,21 @@
+local assetHelper = asset.require('util/asset_helper')
+local sceneHelper = asset.require('util/scene_helper')
+local propertyHelper = asset.require('util/property_helper')
+
+-- At this point, a sceene needs basic spice data to load.
+asset.require('spice/base')
+
+asset.require('util/default_keybindings')
+asset.require('util/default_dashboard')
+asset.require('util/default_joystick')
+
+asset.require('util/webgui')
+local spheres = asset.require('examples/spheres')
+
+asset.onInitialize(function ()   
+    openspace.navigation.setCameraState({
+        Anchor = spheres.ExampleSphere0.Identifier,
+        Position = { 20, 0, 0 },
+        Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 }
+    })
+end)
