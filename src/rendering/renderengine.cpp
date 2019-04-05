@@ -163,15 +163,15 @@ namespace {
         "Global Rotation",
         "Applies a global view rotation. Use this to rotate the position of the "
         "focus node away from the default location on the screen. This setting "
-        "persists even when a new focus node is selected. Defined using roll, pitch, "
-        "yaw in radians"
+        "persists even when a new focus node is selected. Defined using pitch, yaw, "
+        "roll in radians"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MasterRotationInfo = {
         "MasterRotation",
         "Master Rotation",
         "Applies a view rotation for only the master node, defined using "
-        "roll, pitch yaw in radians. This can be used to compensate the master view "
+        "pitch, yaw, roll in radians. This can be used to compensate the master view "
         "direction for tilted display systems in clustered immersive environments."
     };
 
@@ -471,15 +471,25 @@ glm::ivec2 RenderEngine::fontResolution() const {
 
 glm::mat4 RenderEngine::globalRotation() const {
     glm::vec3 rot = _globalRotation.value();
-    return glm::mat4_cast(glm::normalize(glm::quat(glm::vec3(rot.y, rot.x, rot.z))));
+
+    glm::quat pitch = glm::angleAxis(rot.x, glm::vec3(1, 0, 0));
+    glm::quat yaw = glm::angleAxis(rot.y, glm::vec3(0, 1, 0));
+    glm::quat roll = glm::angleAxis(rot.z, glm::vec3(0, 0, 1));
+
+    return glm::mat4_cast(glm::normalize(pitch * yaw * roll));
 }
 
-glm::mat4 RenderEngine::globalNodeRotation() const {
+glm::mat4 RenderEngine::nodeRotation() const {
     if (!global::windowDelegate.isMaster()) {
         return glm::mat4(1.f);
     }
     glm::vec3 rot = _masterRotation.value();
-    return glm::mat4_cast(glm::normalize(glm::quat(glm::vec3(rot.y, rot.x, rot.z))));
+
+    glm::quat pitch = glm::angleAxis(rot.x, glm::vec3(1, 0, 0));
+    glm::quat yaw = glm::angleAxis(rot.y, glm::vec3(0, 1, 0));
+    glm::quat roll = glm::angleAxis(rot.z, glm::vec3(0, 0, 1));
+
+    return glm::mat4_cast(glm::normalize(pitch * yaw * roll));
 }
 
 void RenderEngine::updateFade() {
@@ -528,7 +538,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     const WindowDelegate& delegate = global::windowDelegate;
 
     const glm::mat4 globalRot = globalRotation();
-    const glm::mat4 nodeRot = globalNodeRotation();
+    const glm::mat4 nodeRot = nodeRotation();
     glm::mat4 combinedGlobalRot = nodeRot * globalRot;
 
     if (_camera) {

@@ -452,9 +452,7 @@ bool ScreenSpaceRenderable::initialize() {
 
 bool ScreenSpaceRenderable::initializeGL() {
     _originalViewportSize = global::windowDelegate.currentWindowResolution();
-
     createShaders();
-
     return isReady();
 }
 
@@ -544,13 +542,13 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
 
 glm::mat4 ScreenSpaceRenderable::globalRotationMatrix() {
     // We do not want the screen space planes to be affected by
-    // 1) sgct's scene matrix (also called model matrix by sgct)
-    // 2) The global rotation of the view applied in the render engine
-    // 3) The rotation that may be applied to the master cluster node, to compensate for
+    // 1) The rotation that may be applied to the master cluster node, to compensate for
     //    any tilt on the display system, which is not applied to the master.
+    // 2) The global rotation of the view applied in the render engine
+    // 3) sgct's scene matrix (also called model matrix by sgct)
 
     glm::mat4 rotation = glm::inverse(
-        global::renderEngine.globalNodeRotation() *
+        global::renderEngine.nodeRotation() *
         global::renderEngine.globalRotation() *
         global::windowDelegate.modelMatrix()
     );
@@ -587,7 +585,6 @@ glm::mat4 ScreenSpaceRenderable::translationMatrix() {
 }
 
 void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
-    //glEnable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
     _shader->activate();

@@ -152,7 +152,7 @@ public:
     glm::ivec2 fontResolution() const;
 
     glm::mat4 globalRotation() const;
-    glm::mat4 globalNodeRotation() const;
+    glm::mat4 nodeRotation() const;
 
 private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
