@@ -377,7 +377,7 @@ if(OS_WINDOWS)
   set(CEF_DEBUG_INFO_FLAG "/Zi" CACHE STRING "Optional flag specifying specific /Z flag to use")
 
   # Consumers using different runtime types may want to pass different flags
-  set(CEF_RUNTIME_LIBRARY_FLAG "" CACHE STRING "Optional flag specifying which runtime to use") #OpenSpace patch, remove /MT
+  set(CEF_RUNTIME_LIBRARY_FLAG "/MD" CACHE STRING "Optional flag specifying which runtime to use") #OpenSpace patch, replace MT with MD
   if (CEF_RUNTIME_LIBRARY_FLAG)
     list(APPEND CEF_COMPILER_FLAGS_DEBUG ${CEF_RUNTIME_LIBRARY_FLAG}d)
     list(APPEND CEF_COMPILER_FLAGS_RELEASE ${CEF_RUNTIME_LIBRARY_FLAG})
