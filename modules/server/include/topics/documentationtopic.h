@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,30 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___WAVEFRONTGEOMETRY___H__
-#define __OPENSPACE_MODULE_BASE___WAVEFRONTGEOMETRY___H__
+#ifndef __OPENSPACE_MODULE_SERVER___DOCUMENTATION_TOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___DOCUMENTATION_TOPIC___H__
 
-#include <modules/base/rendering/modelgeometry.h>
+#include <modules/server/include/topics/topic.h>
 
 namespace openspace {
 
-class RenderableModel;
-class RenderableModelProjection;
+class DocumentationTopic : public Topic {
+public:
+    DocumentationTopic() = default;
+    virtual ~DocumentationTopic() = default;
 
-namespace modelgeometry {
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
+};
 
-    class WavefrontGeometry : public ModelGeometry {
-    public:
-        WavefrontGeometry(const ghoul::Dictionary& dictionary);
-
-        bool initialize(Renderable* parent) override;
-        void deinitialize() override;
-
-    private:
-        bool loadModel(const std::string& filename);
-    };
-
-} // namespace modelgeometry
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___WAVEFRONTGEOMETRY___H__
+#endif // __OPENSPACE_MODULE_SERVER___DOCUMENTATION_TOPIC___H__

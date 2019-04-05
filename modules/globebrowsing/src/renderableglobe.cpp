@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -989,7 +989,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     if (_generalProperties.eclipseShadowsEnabled &&
         !_ellipsoid.shadowConfigurationArray().empty())
     {
-        calculateEclipseShadows(program, data);
+        calculateEclipseShadows(program, data, ShadowCompType::GLOBAL_SHADOW);
     }
 
     glEnable(GL_DEPTH_TEST);
@@ -1103,7 +1103,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     if (_generalProperties.eclipseShadowsEnabled &&
         !_ellipsoid.shadowConfigurationArray().empty())
     {
-        calculateEclipseShadows(program, data);
+        calculateEclipseShadows(program, data, ShadowCompType::LOCAL_SHADOW);
     }
 
     glEnable(GL_DEPTH_TEST);
@@ -1632,7 +1632,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
 }
 
 void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& programObject,
-                                              const RenderData& data)
+                                              const RenderData& data, ShadowCompType stype)
 {
     constexpr const double KM_TO_M = 1000.0;
 
@@ -1747,16 +1747,22 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
         counter++;
     }
 
-    programObject.setUniform(
-        "inverseViewTransform",
-        glm::inverse(data.camera.combinedViewMatrix())
-    );
-    programObject.setUniform("modelTransform", _cachedModelTransform);
-    programObject.setUniform(
+    if (stype == ShadowCompType::LOCAL_SHADOW) {
+        programObject.setUniform(
+            "inverseViewTransform",
+            glm::inverse(data.camera.combinedViewMatrix())
+        );
+    }
+    else if (stype == ShadowCompType::GLOBAL_SHADOW) {
+        programObject.setUniform("modelTransform", _cachedModelTransform);
+    }
+    
+    // JCC: Removed in favor of: #define USE_ECLIPSE_HARD_SHADOWS #{useEclipseHardShadows}
+    /*programObject.setUniform(
         "hardShadows",
         _generalProperties.eclipseHardShadows
-    );
-    programObject.setUniform("calculateEclipseShadows", true);
+    );*/
+    //programObject.setUniform("calculateEclipseShadows", true);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

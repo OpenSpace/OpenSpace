@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,8 +37,6 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* PlaybookIdentifierName = "HongKang";
-
     double ephemerisTimeFromMissionElapsedTime(double met, double metReference) {
         const double referenceET = openspace::SpiceManager::ref().ephemerisTimeFromDate(
             "2015-07-14T11:50:00.00"
@@ -144,13 +142,11 @@ bool HongKangParser::create() {
     }
     size_t position = _fileName.find_last_of('.') + 1;
     if (position == 0 || position == std::string::npos) {
-        sendPlaybookInformation(PlaybookIdentifierName);
         return true;
     }
 
     const std::string& extension = ghoul::filesystem::File(_fileName).fileExtension();
     if (extension != "txt") {
-        sendPlaybookInformation(PlaybookIdentifierName);
         return true;
     }
 
@@ -279,7 +275,6 @@ bool HongKangParser::create() {
         }
     }
 
-    sendPlaybookInformation(PlaybookIdentifierName);
     return true;
 }
 

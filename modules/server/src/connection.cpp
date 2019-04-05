@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 
 #include <modules/server/include/topics/authorizationtopic.h>
 #include <modules/server/include/topics/bouncetopic.h>
+#include <modules/server/include/topics/documentationtopic.h>
 #include <modules/server/include/topics/getpropertytopic.h>
 #include <modules/server/include/topics/luascripttopic.h>
 #include <modules/server/include/topics/setpropertytopic.h>
@@ -52,6 +53,7 @@ namespace {
 
     constexpr const char* VersionTopicKey = "version";
     constexpr const char* AuthenticationTopicKey = "authorize";
+    constexpr const char* DocumentationTopicKey = "documentation";
     constexpr const char* GetPropertyTopicKey = "get";
     constexpr const char* LuaScriptTopicKey = "luascript";
     constexpr const char* SetPropertyTopicKey = "set";
@@ -81,6 +83,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s,
         }
     );
 
+    _topicFactory.registerClass<DocumentationTopic>(DocumentationTopicKey);
     _topicFactory.registerClass<GetPropertyTopic>(GetPropertyTopicKey);
     _topicFactory.registerClass<LuaScriptTopic>(LuaScriptTopicKey);
     _topicFactory.registerClass<SetPropertyTopic>(SetPropertyTopicKey);

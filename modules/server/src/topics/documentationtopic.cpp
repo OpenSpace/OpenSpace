@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,28 +22,51 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/imgui/include/guitimecomponent.h>
+#include <modules/server/include/topics/documentationtopic.h>
 
-#include <modules/imgui/include/imgui_include.h>
+#include <modules/server/include/connection.h>
+#include <modules/server/include/jsonconverters.h>
+#include <openspace/engine/globals.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/util/timemanager.h>
-#include <openspace/util/time.h>
+#include <openspace/scripting/scriptengine.h>
+#include <openspace/util/factorymanager.h>
+#include <openspace/interaction/keybindingmanager.h>
+#include <ghoul/logging/logmanager.h>
 
-namespace openspace::gui {
 
-GuiTimeComponent::GuiTimeComponent() : GuiComponent("Time") {}
+using nlohmann::json;
 
-void GuiTimeComponent::render() {
-    float deltaTime = static_cast<float>(OsEng.timeManager().time().deltaTime());
+namespace {
+    constexpr const char* _loggerCat = "DocumentationTopic";
+    constexpr const char* KeyType = "type";
+    constexpr const char* TypeLua = "lua";
+    constexpr const char* TypeFactories = "factories";
+    constexpr const char* TypeKeyboard = "keyboard";
+} // namespace
 
-    bool changed = ImGui::SliderFloat("Delta Time", &deltaTime, -50000.f, 50000.f);
-    if (changed) {
-        OsEng.scriptEngine().queueScript(
-            "openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
+namespace openspace {
+
+void DocumentationTopic::handleJson(const nlohmann::json& json) {
+    std::string requestedType = json.at(KeyType).get<std::string>();
+
+    nlohmann::json response;
+
+    // @emiax: Proposed future refector.
+    // Do not parse generated json. Instead implement ability to get
+    // ghoul::Dictionary objects from ScriptEngine, FactoryManager, and KeybindingManager.
+    if (requestedType == TypeLua) {
+        response = json::parse(global::scriptEngine.generateJson());
+    } else if (requestedType == TypeFactories) {
+        response = json::parse(FactoryManager::ref().generateJson());
+    } else if (requestedType == TypeKeyboard) {
+        response = json::parse(global::keybindingManager.generateJson());
     }
+
+    _connection->sendJson(wrappedPayload(response));
 }
 
-} // namespace openspace gui
+bool DocumentationTopic::isDone() const {
+    return true;
+}
+
+} // namespace openspace

@@ -87,7 +87,7 @@ local Keybindings = {
         Command = propertyHelper.invert('Modules.CefWebGui.Visible'),
         Documentation = "Toggles the main GUI",
         GuiPath = "/GUI",
-        Local = false
+        Local = true
     },
     {
         Key = "Shift+Tab",
@@ -100,7 +100,7 @@ openspace.setPropertyValueSingle("RenderEngine.ShowVersion", not isEnabled);
 openspace.setPropertyValueSingle("RenderEngine.ShowCamera", not isEnabled)]],
         Documentation = "Toggles the dashboard and overlays",
         GuiPath = "/GUI",
-        Local = false
+        Local = true
     },
     {
         Key = "Alt+R",
@@ -108,7 +108,7 @@ openspace.setPropertyValueSingle("RenderEngine.ShowCamera", not isEnabled)]],
         Command = propertyHelper.invert('RenderEngine.DisableMasterRendering'),
         Documentation = "Toggles the rendering on master",
         GuiPath = "/Rendering",
-        Local = false
+        Local = true
     }
 }
 

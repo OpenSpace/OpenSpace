@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,9 @@
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/boolean.h>
 #include <mutex>
+#include <queue>
+#include <optional>
+#include <functional>
 
 namespace openspace { class SyncBuffer; }
 
@@ -47,7 +50,14 @@ namespace openspace::scripting {
  */
 class ScriptEngine : public Syncable, public DocumentationGenerator {
 public:
+    using ScriptCallback = std::optional<std::function<void(ghoul::Dictionary)>>;
     BooleanType(RemoteScripting);
+
+    struct QueueItem {
+        std::string script;
+        RemoteScripting remoteScripting;
+        ScriptCallback callback;
+    };
 
     static constexpr const char* OpenSpaceLibraryName = "openspace";
 
@@ -71,7 +81,7 @@ public:
     void addLibrary(LuaLibrary library);
     bool hasLibrary(const std::string& name);
 
-    bool runScript(const std::string& script);
+    bool runScript(const std::string& script, ScriptCallback callback = ScriptCallback());
     bool runScriptFile(const std::string& filename);
 
     bool writeLog(const std::string& script);
@@ -81,13 +91,12 @@ public:
     virtual void decode(SyncBuffer* syncBuffer) override;
     virtual void postSync(bool isMaster) override;
 
-    void queueScript(const std::string &script, RemoteScripting remoteScripting);
-
-    void setLogFile(const std::string& filename, const std::string& type);
-
-    std::vector<std::string> cachedScripts();
+    void queueScript(const std::string& script, RemoteScripting remoteScripting,
+        ScriptCallback cb = ScriptCallback());
 
     std::vector<std::string> allLuaFunctions() const;
+    
+    std::string generateJson() const override;
 
 private:
     BooleanType(Replace);
@@ -100,23 +109,20 @@ private:
     void addBaseLibrary();
     void remapPrintFunction();
 
-    std::string generateJson() const override;
-
     ghoul::lua::LuaState _state;
     std::vector<LuaLibrary> _registeredLibraries;
 
+    std::queue<QueueItem> _incomingScripts;
 
-    //sync variables
-    std::mutex _mutex;
-    std::vector<std::pair<std::string, bool>> _queuedScripts;
-    std::vector<std::string> _receivedScripts;
-    std::string _currentSyncedScript;
+    // Slave scripts are mutex protected since decode and rendering may
+    // happen asynchronously.
+    std::mutex _slaveScriptsMutex;
+    std::queue<std::string> _slaveScriptQueue;
+    std::queue<QueueItem> _masterScriptQueue;
 
-    //parallel variables
-    //std::map<std::string, std::map<std::string, std::string>> _cachedScripts;
-    //std::mutex _cachedScriptsMutex;
+    std::vector<std::string> _scriptsToSync;
 
-    //logging variables
+    // Logging variables
     bool _logFileExists = false;
     bool _logScripts = true;
     std::string _logType;

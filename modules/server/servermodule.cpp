@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,8 @@
 #include <modules/server/include/connection.h>
 #include <modules/server/include/topics/topic.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <ghoul/fmt.h>
 #include <ghoul/io/socket/socket.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
@@ -86,7 +88,10 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
             std::unique_ptr<ServerInterface> serverInterface =
                 ServerInterface::createFromDictionary(interfaceDictionary);
 
-            serverInterface->initialize();
+
+            if (global::windowDelegate.isMaster()) {
+                serverInterface->initialize();
+            }
 
             _interfaceOwner.addPropertySubOwner(serverInterface.get());
             
@@ -101,6 +106,10 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
 }
 
 void ServerModule::preSync() {
+    if (!global::windowDelegate.isMaster()) {
+        return;
+    }
+
     // Set up new connections.
     for (std::unique_ptr<ServerInterface>& serverInterface : _interfaces) {
         if (!serverInterface->isEnabled()) {
@@ -165,7 +174,9 @@ void ServerModule::cleanUpFinishedThreads() {
 
 void ServerModule::disconnectAll() {
     for (std::unique_ptr<ServerInterface>& serverInterface : _interfaces) {
-        serverInterface->deinitialize();
+        if (global::windowDelegate.isMaster()) {
+            serverInterface->deinitialize();
+        }
     }
 
     for (ConnectionData& connectionData : _connections) {
