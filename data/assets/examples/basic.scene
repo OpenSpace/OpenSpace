@@ -14,7 +14,7 @@ local spheres = asset.require('examples/spheres')
 
 asset.onInitialize(function ()   
     openspace.navigation.setCameraState({
-        Anchor = spheres.ExampleSphere0.Identifier,
+        Anchor = spheres.ExampleSphere1.Identifier,
         Position = { 20, 0, 0 },
         Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 }
     })
