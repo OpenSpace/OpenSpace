@@ -364,8 +364,7 @@ unsigned int ErrorHistogramManager::brickToInnerNodeIndex(unsigned int brickInde
 unsigned int ErrorHistogramManager::innerNodeToBrickIndex(
                                                         unsigned int innerNodeIndex) const
 {
-    // @TODO(abock): innerNodeIndex is an unsigned int, so it will never be < 0
-    if (innerNodeIndex < 0 || innerNodeIndex >= _numInnerNodes) {
+    if (innerNodeIndex >= _numInnerNodes) {
         return std::numeric_limits<unsigned int>::max(); // Not an inner node
     }
 
