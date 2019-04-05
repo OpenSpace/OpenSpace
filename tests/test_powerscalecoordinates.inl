@@ -25,7 +25,6 @@
 #include <openspace/scene/scene.h>
 
 #include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/powerscaledscalar.h>
 
 class PowerscaleCoordinatesTest : public testing::Test {
 protected:
@@ -60,23 +59,5 @@ TEST_F(PowerscaleCoordinatesTest, psc) {
     
 }
 
-TEST_F(PowerscaleCoordinatesTest, pss) {
-    
-    openspace::pss first(1.f, 1.f);
-    openspace::pss second(1.f, -1.f);
-    EXPECT_EQ(openspace::pss(1.01f, 1.f), first + second);
-    EXPECT_EQ(openspace::pss(1.01f, 1.f), second + first);
-    /*
-    EXPECT_TRUE(first < (first + second));
-    bool retu =(second < (first + second));
-    
-    std::cout << "retu: " << retu << std::endl;
-    EXPECT_TRUE(retu);
-    
-    EXPECT_FALSE(first > (first + second));
-    EXPECT_FALSE(second > (first + second));
-    
-    */
-}
 
 
