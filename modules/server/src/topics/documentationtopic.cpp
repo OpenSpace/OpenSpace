@@ -22,42 +22,51 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/spacecraftinstruments/util/sequenceparser.h>
+#include <modules/server/include/topics/documentationtopic.h>
 
+#include <modules/server/include/connection.h>
+#include <modules/server/include/jsonconverters.h>
 #include <openspace/engine/globals.h>
-#include <openspace/util/spicemanager.h>
 
+#include <openspace/scripting/scriptengine.h>
+#include <openspace/util/factorymanager.h>
+#include <openspace/interaction/keybindingmanager.h>
 #include <ghoul/logging/logmanager.h>
 
-#include <cstring>
+
+using nlohmann::json;
 
 namespace {
-    constexpr const char* _loggerCat = "SequenceParser";
+    constexpr const char* _loggerCat = "DocumentationTopic";
+    constexpr const char* KeyType = "type";
+    constexpr const char* TypeLua = "lua";
+    constexpr const char* TypeFactories = "factories";
+    constexpr const char* TypeKeyboard = "keyboard";
 } // namespace
 
 namespace openspace {
 
-std::map<std::string, ImageSubset>& SequenceParser::getSubsetMap() {
-    return _subsetMap;
+void DocumentationTopic::handleJson(const nlohmann::json& json) {
+    std::string requestedType = json.at(KeyType).get<std::string>();
+
+    nlohmann::json response;
+
+    // @emiax: Proposed future refector.
+    // Do not parse generated json. Instead implement ability to get
+    // ghoul::Dictionary objects from ScriptEngine, FactoryManager, and KeybindingManager.
+    if (requestedType == TypeLua) {
+        response = json::parse(global::scriptEngine.generateJson());
+    } else if (requestedType == TypeFactories) {
+        response = json::parse(FactoryManager::ref().generateJson());
+    } else if (requestedType == TypeKeyboard) {
+        response = json::parse(global::keybindingManager.generateJson());
+    }
+
+    _connection->sendJson(wrappedPayload(response));
 }
 
-const std::vector<std::pair<std::string, TimeRange>>&
-SequenceParser::getInstrumentTimes() const
-{
-    return _instrumentTimes;
-}
-const std::vector<std::pair<double, std::string>>&
-SequenceParser::getTargetTimes() const
-{
-    return _targetTimes;
-}
-
-const std::vector<double>& SequenceParser::getCaptureProgression() const {
-    return _captureProgression;
-}
-
-std::map<std::string, std::unique_ptr<Decoder>>& SequenceParser::translations() {
-    return _fileTranslation;
+bool DocumentationTopic::isDone() const {
+    return true;
 }
 
 } // namespace openspace

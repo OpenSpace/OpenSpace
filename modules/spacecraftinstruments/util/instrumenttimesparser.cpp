@@ -36,7 +36,6 @@
 namespace {
     constexpr const char* _loggerCat = "InstrumentTimesParser";
 
-    constexpr const char* PlaybookIdentifierName = "InstrumentTimesParser";
     constexpr const char* KeyTargetBody = "Target.Body";
     constexpr const char* KeyInstruments = "Instruments";
     constexpr const char* KeyInstrument = "Instrument";
@@ -156,7 +155,6 @@ bool InstrumentTimesParser::create() {
         }
     );
 
-    sendPlaybookInformation(PlaybookIdentifierName);
     return true;
 }
 
