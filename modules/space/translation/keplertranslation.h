@@ -148,11 +148,14 @@ public:
     /// Default construct that initializes all the properties and member variables
     KeplerTranslation();
 
+    /// Recombutes the rotation matrix used in the update method
+    void computeOrbitPlane() const;
+
 protected:
 
 
-    /// Recombutes the rotation matrix used in the update method
-    void computeOrbitPlane() const;
+private:
+   
 
 protected:
 
