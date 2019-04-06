@@ -32,6 +32,8 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/util/time.h>
+#include <openspace/util/updatestructures.h>
 
 
 #include <fstream>
@@ -102,7 +104,7 @@ namespace {
         "The header of the column where the epoch is stored"
     };
 
-    constexpr const char* KeyFile = "File";
+    constexpr const char* KeyFile = "Path";
     constexpr const char* KeyLineNumber = "LineNumber";
 
     
@@ -118,6 +120,7 @@ namespace openspace {
         2000, 2004, 2008, 2012, 2016, 2020, 2024, 2028, 2032, 2036, 2040,
         2044, 2048, 2052, 2056
     };
+  
 
     // Count the number of full days since the beginning of 2000 to the beginning of
     // the parameter 'year'
@@ -302,7 +305,7 @@ namespace openspace {
         // We need the semi major axis in km instead of m
         return semiMajorAxis / 1000.0;
     }
-
+    
     documentation::Documentation ElonsTest::Documentation() {
         using namespace documentation;
         return {
@@ -416,6 +419,7 @@ namespace openspace {
         addProperty(_path);
         addProperty(_nSegments);
         // addProperty(_semiMajorAxisUnit);
+        // addPropertySubOwner(_appearance);
 
      
         const std::string& file = dictionary.value<std::string>(KeyFile);
@@ -431,20 +435,6 @@ namespace openspace {
         std::ifstream file;
         file.exceptions(std::ofstream::failbit | std::ofstream::badbit);
         file.open(filename);
-    
-        // All of the Kepler element information
-        struct KeplerParameters{
-            double inclination = 0.0;
-            double semiMajorAxis = 0.0;
-            double ascendingNode = 0.0;
-            double eccentricity = 0.0;
-            double argumentOfPeriapsis = 0.0;
-            double meanAnomaly = 0.0;
-            double meanMotion = 0.0;
-            double epoch = 0.0;
-        };
-
-        std::vector<KeplerParameters> TLEData;
 
         // int numberOfLines = std::count(std::istreambuf_iterator<char>(file), 
         //                               std::istreambuf_iterator<char>(), '\n' );
@@ -452,17 +442,13 @@ namespace openspace {
         // int numberOfObjects = numberOfLines/3;
         // LINFO("Number of data elements: " + numberOfObjects);
 
-        // for(int i=0 ; i<numberOfObjects; ++i){
-            
-
-        //     TLEData.push_back();
-
-        // }
-
-
         std::string line;
-        while(std::getline(file, line)) {
+        while(true) {
+            
+            if(file.eof())
+                break;
 
+            std::getline(file, line);    // get rid of title
             KeplerParameters keplerElements;
             
             std::getline(file, line);
@@ -544,22 +530,19 @@ namespace openspace {
             // Calculate the semi major axis based on the mean motion using kepler's laws
             keplerElements.semiMajorAxis = calculateSemiMajorAxis(keplerElements.meanMotion);
         
-            // Converting the mean motion (revolutions per day) to period (seconds per revolution)
-            using namespace std::chrono;
-            double period = seconds(hours(24)).count() / keplerElements.meanMotion;
+        
+            // _keplerTranslator.setKeplerElements(
+            //     keplerElements.eccentricity,
+            //     keplerElements.semiMajorAxis,
+            //     keplerElements.inclination,
+            //     keplerElements.ascendingNode,
+            //     keplerElements.argumentOfPeriapsis,
+            //     keplerElements.meanAnomaly,
+            //     period,
+            //     keplerElements.epoch
+            // );
 
-            _keplerTranslator.setKeplerElements(
-                keplerElements.eccentricity,
-                keplerElements.semiMajorAxis,
-                keplerElements.inclination,
-                keplerElements.ascendingNode,
-                keplerElements.argumentOfPeriapsis,
-                keplerElements.meanAnomaly,
-                period,
-                keplerElements.epoch
-            );
-
-            TLEData.push_back(keplerElements); 
+            _TLEData.push_back(keplerElements); 
         } // !while loop
         
         file.close();
@@ -568,18 +551,17 @@ namespace openspace {
     void ElonsTest::initialize(){
             //Fyll _vertexArray i init och 
             // rendera bara orbits, inga rörliga delar.
+            // eventuella callback functions
 
-
-
-
-
-
-
-
+            updateBuffers();
 
     }
 
     void ElonsTest::initializeGL() {
+        glGenVertexArrays(1, &_vertexArray);
+        glGenBuffers(1, &_vertexBuffer);
+        glGenBuffers(1, &_indexBuffer);
+
         _programObject = SpaceModule::ProgramObjectManager.request(
             ProgramName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
@@ -593,17 +575,21 @@ namespace openspace {
 
     }
 
-    void ElonsTest::deinitializeGL() {
+    void ElonsTest::deinitializeGL() {    
 
+        // todo. release object
 
-
-
+        glDeleteBuffers(1, &_vertexBuffer);
+        glDeleteBuffers(1, &_indexBuffer);
+        glDeleteVertexArrays(1, &_vertexArray);
     }
 
     void ElonsTest::render(const RenderData& data, RendererTasks& rendererTask)  {
         _programObject->activate();
-        LINFO("render data: ", data);
+        // LINFO("render data: ");
 
+
+        _programObject->deactivate();
     }
 
     void ElonsTest::update(const UpdateData& data) {
@@ -612,6 +598,88 @@ namespace openspace {
 
     bool ElonsTest::isReady() const {
         return true;
+    }
+
+
+    void ElonsTest::updateBuffers(){
+
+        const size_t nVerticesPerOrbit = _nSegments + 1;
+        _vertexBufferData.resize(_TLEData.size() * nVerticesPerOrbit);
+        _indexBufferData.resize(_TLEData.size() * _nSegments * 2);
+        
+        size_t orbitIndex = 0;
+        size_t elementIndex = 0;
+
+        for (const auto& orbit : _TLEData) {
+             // Converting the mean motion (revolutions per day) to period (seconds per revolution)
+             using namespace std::chrono;
+             double period = seconds(hours(24)).count() / orbit.meanMotion;
+
+        //     // KeplerTranslation setKeplerElements(orbit);
+        //     _keplerTranslator.setKeplerElements(
+        //         orbit.eccentricity,
+        //         orbit.semiMajorAxis,
+        //         orbit.inclination,
+        //         orbit.ascendingNode,
+        //         orbit.argumentOfPeriapsis,
+        //         orbit.meanAnomaly,
+        //         period,
+        //         orbit.epoch
+        //     );
+        //     // KeplerTranslation keplerTranslation(orbit);
+        //     const double period = orbit.period();
+             for (size_t i = 0; i <= _nSegments; ++i) {
+                 size_t index = orbitIndex * nVerticesPerOrbit + i;
+
+                 double timeOffset = period *
+                     static_cast<float>(i) / static_cast<float>(_nSegments);
+
+                 // positionAtTime.time = Time(orbit.epoch + timeOffset);
+                
+                 glm::vec3 position = calculatePosition(Time(orbit.epoch + timeOffset), orbit.epoch);              
+
+                _vertexBufferData[index].x = position.x;
+                _vertexBufferData[index].y = position.y;
+                _vertexBufferData[index].z = position.z;
+                _vertexBufferData[index].time = timeOffset;
+                if (i > 0) {
+                    _indexBufferData[elementIndex++] = static_cast<unsigned int>(index) - 1;
+                    _indexBufferData[elementIndex++] = static_cast<unsigned int>(index);
+                }
+             }
+             ++orbitIndex;
+        }
+        
+        // glBindVertexArray(_vertexArray);
+        
+        // glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+        // glBufferData(GL_ARRAY_BUFFER,
+        //                 _vertexBufferData.size() * sizeof(TrailVBOLayout),
+        //                 _vertexBufferData.data(),
+        //                 GL_STATIC_DRAW
+        //                 );
+        
+
+        // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
+        // glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+        //                 _indexBufferData.size() * sizeof(int),
+        //                 _indexBufferData.data(),
+        //                 GL_STATIC_DRAW
+        //                 );
+        
+        // glBindVertexArray(0);
+
+        
+    }
+
+    glm::dvec3 ElonsTest::calculatePosition(const Time& time, double epoch) const {
+        if (_orbitPlaneDirty) {
+            _keplerTranslator.computeOrbitPlane();
+            _orbitPlaneDirty = false;
+        }
+        const double t = time.j2000Seconds() - epoch;
+   
+
     }
 
 }

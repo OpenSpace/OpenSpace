@@ -63,16 +63,17 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
 --                    File = file
 --                },
 
-                PathInfo = "bubbis",
-                SegmentsInfo = 1,
-                EccentricityColumnInfo = "bubbis",
-                SemiMajorAxisColumnInfo = "bubbis",
-                SemiMajorAxisUnitInfo = 1,
-                InclinationColumnInfo = "bubbis",
-                AscendingNodeColumnInfo = "bubbis",
-                ArgumentOfPeriapsisColumnInfo = "bubbis",
-                MeanAnomalyAtEpochColumnInfo = "bubbis",
-                EpochColumnInfo = "bubbis",
+                Path = file,
+
+                Segments = 160,
+                EccentricityColumn = "bubbis",
+                SemiMajorAxisColumn = "bubbis",
+                SemiMajorAxisUnit = 1,
+                InclinationColumn = "bubbis",
+                AscendingNodeColumn = "bubbis",
+                ArgumentOfPeriapsisColumn = "bubbis",
+                MeanAnomalyAtEpochColumn = "bubbis",
+                EpochColumn = "bubbis",
                 
             },
             GUI = {
