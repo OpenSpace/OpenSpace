@@ -143,12 +143,14 @@ public:
     /// Default construct that initializes all the properties and member variables
     KeplerTranslation();
 
+    /// Recombutes the rotation matrix used in the update method
+    void computeOrbitPlane() const;
+
 protected:
 
 
 private:
-    /// Recombutes the rotation matrix used in the update method
-    void computeOrbitPlane() const;
+   
 
     /**
      * This method computes the eccentric anomaly (location of the space craft taking the
