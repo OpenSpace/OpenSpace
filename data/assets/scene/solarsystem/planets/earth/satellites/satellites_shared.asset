@@ -54,7 +54,7 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
            Identifier = title,
            Parent = transforms.EarthInertial.Identifier,
            Renderable = {
-                Type = "ElonsTest",
+                Type = "RenderableSatellites",
                 --Translation = {
 
 --                    Type = "TLETranslation",
@@ -62,17 +62,16 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
 --                    Observer = transforms.EarthInertial.Identifier,
 --                    File = file
 --                },
-
-                PathInfo = "bubbis",
-                SegmentsInfo = 1,
-                EccentricityColumnInfo = "bubbis",
-                SemiMajorAxisColumnInfo = "bubbis",
-                SemiMajorAxisUnitInfo = 1,
-                InclinationColumnInfo = "bubbis",
-                AscendingNodeColumnInfo = "bubbis",
-                ArgumentOfPeriapsisColumnInfo = "bubbis",
-                MeanAnomalyAtEpochColumnInfo = "bubbis",
-                EpochColumnInfo = "bubbis",
+                Path = file,
+                Segments = 1,
+                EccentricityColumn = "bubbis",
+                SemiMajorAxisColumn = "bubbis",
+                SemiMajorAxisUnit = 1,
+                InclinationColumn = "bubbis",
+                AscendingNodeColumn = "bubbis",
+                ArgumentOfPeriapsisColumn = "bubbis",
+                MeanAnomalyAtEpochColumn = "bubbis",
+                EpochColumn = "bubbis",
                 
             },
             GUI = {
