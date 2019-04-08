@@ -62,8 +62,10 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
 --                    Observer = transforms.EarthInertial.Identifier,
 --                    File = file
 --                },
+
                 Path = file,
-                Segments = 1,
+
+                Segments = 160,
                 EccentricityColumn = "bubbis",
                 SemiMajorAxisColumn = "bubbis",
                 SemiMajorAxisUnit = 1,
