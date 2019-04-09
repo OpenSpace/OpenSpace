@@ -434,15 +434,12 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     _epochColumnName =
         dictionary.value<std::string>(EpochColumnInfo.identifier);
     
-    //addPropertySubOwner(_appearance);
+    addPropertySubOwner(_appearance);
     addProperty(_path);
     addProperty(_nSegments);
-    //addProperty(_semiMajorAxisUnit);
+    addProperty(_semiMajorAxisUnit);
 
-/*
-* test
 
-*/
     LINFO(fmt::format("KeyFile: {} ",  KeyFile));
     const std::string& file = dictionary.value<std::string>(KeyFile);
     LINFO(fmt::format("file: {} ", file));
@@ -462,7 +459,8 @@ void RenderableSatellites::readTLEFile(const std::string& filename) {
 
     int numberOfLines = std::count(std::istreambuf_iterator<char>(file), 
                                    std::istreambuf_iterator<char>(), '\n' );
-    file.seekg(std::ios_base::beg);
+    file.seekg(std::ios_base::beg); // reset iterator to beginning of file
+
     // 3 because a TLE has 3 lines per element/ object.
     int numberOfObjects = numberOfLines/3;
     LINFO(fmt::format("Number of data elements: {}", numberOfObjects));
@@ -560,17 +558,6 @@ void RenderableSatellites::readTLEFile(const std::string& filename) {
         double period = seconds(hours(24)).count() / keplerElements.meanMotion;
         keplerElements.period = period;
 
-        // _keplerTranslator.setKeplerElements(
-        //     keplerElements.eccentricity,
-        //     keplerElements.semiMajorAxis,
-        //     keplerElements.inclination,
-        //     keplerElements.ascendingNode,
-        //     keplerElements.argumentOfPeriapsis,
-        //     keplerElements.meanAnomaly,
-        //     period,
-        //     keplerElements.epoch
-        // );
-
         _TLEData.push_back(keplerElements);
 
     } // !while loop
@@ -579,14 +566,10 @@ void RenderableSatellites::readTLEFile(const std::string& filename) {
 }
 /*
 RenderableSatellites::~RenderableSatellites() {
-            using namespace std::chrono;
-            double period = seconds(hours(24)).count() / keplerElements.meanMotion;
-            keplerElements.period = period;
 
 }
  */  
 void RenderableSatellites::initialize() {
-    //readFromCsvFile();
     LINFO(fmt::format("_path: {} ", _path));
     readTLEFile(_path);
     updateBuffers();
@@ -625,7 +608,7 @@ void RenderableSatellites::initializeGL() {
            );
        }
    );
-    /*
+    
     _uniformCache.opacity = _programObject->uniformLocation("opacity");
     _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
     _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
@@ -634,12 +617,12 @@ void RenderableSatellites::initializeGL() {
     _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
     
     setRenderBin(Renderable::RenderBin::Overlay);
-    */
+    
 }
     
 void RenderableSatellites::deinitializeGL() {
 
-    // SpaceModule::ProgramObjectManager.release(ProgramName);
+    SpaceModule::ProgramObjectManager.release(ProgramName);
     
     glDeleteBuffers(1, &_vertexBuffer);
     glDeleteBuffers(1, &_indexBuffer);
@@ -671,11 +654,11 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
-    //_programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
+    _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
 
-    /*if (_appearance.useLineFade) {
+    if (_appearance.useLineFade) {
         _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
-    }*/
+    }
 
     glDepthMask(false);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -698,17 +681,6 @@ void RenderableSatellites::updateBuffers() {
     size_t elementindex = 0;
 
     for (const auto& orbit : _TLEData) {
-        // keplertranslation setkeplerelements(orbit);
-        //_keplerTranslator.setKeplerElements(
-        //    orbit.eccentricity,
-        //    orbit.semiMajorAxis,
-        //    orbit.inclination,
-        //    orbit.ascendingNode,
-        //    orbit.argumentOfPeriapsis,
-        //    orbit.meanAnomalyAtEpoch,
-        //    orbit.period,
-        //    orbit.epoch
-        //);
 
         _keplerTranslator.setKeplerElements(
             orbit.eccentricity,
@@ -720,25 +692,14 @@ void RenderableSatellites::updateBuffers() {
             orbit.period,
             orbit.epoch
         );
-        // keplertranslation keplertranslation(orbit);
 
-        // period() does not seem to exist!?!?!
-        // const double period = orbit.period();
         for (size_t i = 0; i <= _nSegments; ++i) {
             size_t index = orbitindex * nVerticesPerOrbit + i;
 
             float timeOffset = orbit.period *
                 static_cast<float>(i) / static_cast<float>(_nSegments);
 
-            // _updatedata.time.settime(orbit.epoch + timeoffset);
-            // updatedata::time(time(orbit.epoch + timeoffset));
-
-            
-            // time = Time(orbit.epoch + timeoffset);
-            
-            glm::vec3 position = _keplerTranslator.debrisPos(Time(orbit.epoch + timeOffset));
-             // _keplertranslator.position(_updatedata.time); 
-            
+            glm::vec3 position = _keplerTranslator.debrisPos(Time(orbit.epoch + timeOffset));            
 
             _vertexBufferData[index].x = position.x;
             _vertexBufferData[index].y = position.y;
@@ -771,36 +732,6 @@ void RenderableSatellites::updateBuffers() {
     
     glBindVertexArray(0);
 
-}
-
-void RenderableSatellites::readFromCsvFile() {
-//    std::vector<std::string> columns = {
-//        _eccentricityColumnName,
-//        _semiMajorAxisColumnName,
-//        _inclinationColumnName,
-//        _ascendingNodeColumnName,
-//        _argumentOfPeriapsisColumnName,
-//        _meanAnomalyAtEpochColumnName,
-//        _epochColumnName,
-//    };
-//    
-//    std::vector<std::vector<std::string>> data =
-//        ghoul::loadCSVFile(_path, columns, false);
-//
-//    _orbits.resize(data.size());
-//    
-//    size_t i = 0;
-//    for (const std::vector<std::string>& line : data) {
-//        _orbits[i++] = KeplerTranslation::KeplerOrbit{
-//            std::stof(line[0]),
-//            _semiMajorAxisUnit * std::stof(line[1]) / 1000.0,
-//            std::stof(line[2]),
-//            std::stof(line[3]),
-//            std::stof(line[4]),
-//            std::stof(line[5]),
-//            std::stof(line[6])
-//        };
-//    }
 }
     
 }
