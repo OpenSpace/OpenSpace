@@ -39,6 +39,18 @@
 
 namespace openspace {
 
+    struct KeplerParameters {
+        double inclination = 0.0;
+        double semiMajorAxis = 0.0;
+        double ascendingNode = 0.0;
+        double eccentricity = 0.0;
+        double argumentOfPeriapsis = 0.0;
+        double meanAnomaly = 0.0;
+        double meanMotion = 0.0;
+        double epoch = 0.0;
+        double period = 0.0;
+    };
+
     class RenderableSatellites : public Renderable {
     public:
         RenderableSatellites(const ghoul::Dictionary& dictionary);
@@ -63,7 +75,7 @@ namespace openspace {
         };
 
         KeplerTranslation _keplerTranslator;
-        std::vector<KeplerTranslation::KeplerOrbit> TLEData;
+        std::vector<KeplerParameters> _TLEData;
 
         /// The backend storage for the vertex buffer object containing all points for this
         /// trail.
@@ -97,10 +109,10 @@ namespace openspace {
         properties::StringProperty _meanAnomalyAtEpochColumnName;
         properties::StringProperty _epochColumnName;
 
-        //RenderableTrail::Appearance _appearance;
+        RenderableTrail::Appearance _appearance;
 
-       // UniformCache(opacity, modelView, projection, color, useLineFade, lineFade)
-        //    _uniformCache;
+        UniformCache(opacity, modelView, projection, color, useLineFade, lineFade)
+           _uniformCache;
 
         /**
          * Reads the provided TLE file and calles the KeplerTranslation::setKeplerElments
