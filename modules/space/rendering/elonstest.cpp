@@ -421,6 +421,7 @@ namespace openspace {
         // addProperty(_semiMajorAxisUnit);
         // addPropertySubOwner(_appearance);
 
+        KeplerTranslation _keplerTranslator;
      
         const std::string& file = dictionary.value<std::string>(KeyFile);
         readTLEFile(file);
@@ -442,13 +443,11 @@ namespace openspace {
         // int numberOfObjects = numberOfLines/3;
         // LINFO("Number of data elements: " + numberOfObjects);
 
-        std::string line;
-        while(true) {
-            
-            if(file.eof())
-                break;
+        std::string line = "notEmpty";
+        while(true) { 
 
-            std::getline(file, line);    // get rid of title
+            std::getline(file, line);  // get rid of title
+            
             KeplerParameters keplerElements;
             
             std::getline(file, line);
@@ -636,7 +635,7 @@ namespace openspace {
 
                  // positionAtTime.time = Time(orbit.epoch + timeOffset);
                 
-                 glm::vec3 position = calculatePosition(Time(orbit.epoch + timeOffset), orbit.epoch);              
+                 glm::vec3 position = _keplerTranslator.position(Time(orbit.epoch + timeOffset));              
 
                 _vertexBufferData[index].x = position.x;
                 _vertexBufferData[index].y = position.y;
@@ -671,15 +670,6 @@ namespace openspace {
 
         
     }
-
-    glm::dvec3 ElonsTest::calculatePosition(const Time& time, double epoch) const {
-        if (_orbitPlaneDirty) {
-            _keplerTranslator.computeOrbitPlane();
-            _orbitPlaneDirty = false;
-        }
-        const double t = time.j2000Seconds() - epoch;
-   
-
-    }
+    // }
 
 }
