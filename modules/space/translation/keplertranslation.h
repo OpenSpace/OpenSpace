@@ -30,6 +30,8 @@
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/exception.h>
+#include <openspace/util/time.h>
+
 
 namespace openspace {
 
@@ -88,6 +90,12 @@ public:
     * \param time The time to use when doing the position lookup
     */
     glm::dvec3 position(const UpdateData& data) const override;
+
+    // Is only used in renderableDebris so far
+    // glm::dvec3 position(const Time& time) const;
+
+    glm::dvec3 debrisPos(const Time& time) const;
+
 
     /**
      * Method returning the openspace::Documentation that describes the ghoul::Dictinoary

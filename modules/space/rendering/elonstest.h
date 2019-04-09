@@ -21,7 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-
+/*
 #ifndef __OPENSPACE_MODULE_SPACE___ELONSTEST___H__
 #define __OPENSPACE_MODULE_SPACE___ELONSTEST___H__
 
@@ -123,10 +123,11 @@ private:
 
     /// Dirty flag for the _orbitPlaneRotation parameters
     mutable bool _orbitPlaneDirty = true;
-    glm::dvec3 calculatePosition(const Time& time, double epoch) const; 
+    // glm::dvec3 calculatePosition(const Time& time, double epoch) const; 
 
 };
 
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SPACE___ELONSTEST___H__
+*/

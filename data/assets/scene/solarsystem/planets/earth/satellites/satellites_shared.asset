@@ -55,6 +55,8 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
            Parent = transforms.EarthInertial.Identifier,
            Renderable = {
                 Type = "RenderableSatellites",
+                --Type = "ElonsTest",
+
                 --Translation = {
 
 --                    Type = "TLETranslation",

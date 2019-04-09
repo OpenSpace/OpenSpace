@@ -304,6 +304,26 @@ glm::dvec3 KeplerTranslation::position(const UpdateData& data) const {
     return _orbitPlaneRotation * p;
 }
 
+glm::dvec3 KeplerTranslation::debrisPos(const Time& time) const {
+    if (_orbitPlaneDirty) {
+        computeOrbitPlane();
+        _orbitPlaneDirty = false;
+    }
+
+    const double t = time.j2000Seconds() - _epoch;
+    const double meanMotion = glm::two_pi<double>() / _period;
+    const double meanAnomaly = glm::radians(_meanAnomalyAtEpoch.value()) + t * meanMotion;
+    const double e = eccentricAnomaly(meanAnomaly);
+
+    // Use the eccentric anomaly to compute the actual location
+    const glm::dvec3 p = {
+        _semiMajorAxis * 1000.0 * (cos(e) - _eccentricity),
+        _semiMajorAxis * 1000.0 * sin(e) * sqrt(1.0 - _eccentricity * _eccentricity),
+        0.0
+    };
+    return _orbitPlaneRotation * p;
+}
+
 void KeplerTranslation::computeOrbitPlane() const {
     // We assume the following coordinate system:
     // z = axis of rotation
