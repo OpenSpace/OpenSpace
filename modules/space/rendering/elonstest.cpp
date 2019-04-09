@@ -21,7 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-
+/*
 #include <modules/space/rendering/elonstest.h>
 #include <ghoul/logging/logmanager.h>
 
@@ -627,6 +627,7 @@ namespace openspace {
         //     );
         //     // KeplerTranslation keplerTranslation(orbit);
         //     const double period = orbit.period();
+        
              for (size_t i = 0; i <= _nSegments; ++i) {
                  size_t index = orbitIndex * nVerticesPerOrbit + i;
 
@@ -635,7 +636,7 @@ namespace openspace {
 
                  // positionAtTime.time = Time(orbit.epoch + timeOffset);
                 
-                 glm::vec3 position = _keplerTranslator.position(Time(orbit.epoch + timeOffset));              
+                 // glm::vec3 position = calculatePosition(Time(orbit.epoch + timeOffset), orbit.epoch);              
 
                 _vertexBufferData[index].x = position.x;
                 _vertexBufferData[index].y = position.y;
@@ -673,3 +674,4 @@ namespace openspace {
     // }
 
 }
+*/
