@@ -439,6 +439,10 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     addProperty(_nSegments);
     addProperty(_semiMajorAxisUnit);
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> General code cleanup
     LINFO(fmt::format("KeyFile: {} ",  KeyFile));
     const std::string& file = dictionary.value<std::string>(KeyFile);
     LINFO(fmt::format("file: {} ", file));
@@ -455,7 +459,8 @@ void RenderableSatellites::readTLEFile(const std::string& filename) {
 
     int numberOfLines = std::count(std::istreambuf_iterator<char>(file), 
                                    std::istreambuf_iterator<char>(), '\n' );
-    file.seekg(std::ios_base::beg);
+    file.seekg(std::ios_base::beg); // reset iterator to beginning of file
+
     // 3 because a TLE has 3 lines per element/ object.
     int numberOfObjects = numberOfLines/3;
     LINFO(fmt::format("Number of data elements: {}", numberOfObjects));
@@ -553,17 +558,6 @@ void RenderableSatellites::readTLEFile(const std::string& filename) {
         double period = seconds(hours(24)).count() / keplerElements.meanMotion;
         keplerElements.period = period;
 
-        // _keplerTranslator.setKeplerElements(
-        //     keplerElements.eccentricity,
-        //     keplerElements.semiMajorAxis,
-        //     keplerElements.inclination,
-        //     keplerElements.ascendingNode,
-        //     keplerElements.argumentOfPeriapsis,
-        //     keplerElements.meanAnomaly,
-        //     period,
-        //     keplerElements.epoch
-        // );
-
         _TLEData.push_back(keplerElements);
 
     } // !for loop
@@ -571,14 +565,10 @@ void RenderableSatellites::readTLEFile(const std::string& filename) {
 }
 /*
 RenderableSatellites::~RenderableSatellites() {
-            using namespace std::chrono;
-            double period = seconds(hours(24)).count() / keplerElements.meanMotion;
-            keplerElements.period = period;
 
 }
  */  
 void RenderableSatellites::initialize() {
-    //readFromCsvFile();
     LINFO(fmt::format("_path: {} ", _path));
     readTLEFile(_path);
     updateBuffers();
@@ -618,12 +608,12 @@ void RenderableSatellites::initializeGL() {
        }
    );
     
-//    _uniformCache.opacity = _programObject->uniformLocation("opacity");
-//    _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
-//    _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
-//    _uniformCache.color = _programObject->uniformLocation("color");
-//    _uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
-//    _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
+    _uniformCache.opacity = _programObject->uniformLocation("opacity");
+    _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
+    _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
+    _uniformCache.color = _programObject->uniformLocation("color");
+    _uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
+    _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
     
     setRenderBin(Renderable::RenderBin::Overlay);
     
@@ -631,7 +621,7 @@ void RenderableSatellites::initializeGL() {
     
 void RenderableSatellites::deinitializeGL() {
 
-    // SpaceModule::ProgramObjectManager.release(ProgramName);
+    SpaceModule::ProgramObjectManager.release(ProgramName);
     
     // glDeleteBuffers(1, &_vertexBuffer);
     // glDeleteBuffers(1, &_indexBuffer);
@@ -661,13 +651,13 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
     //    data.camera.combinedViewMatrix() * modelTransform
     // );
 
-    // _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
-    // _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
-    //_programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
+    _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
+    _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
+    _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
 
-    /*if (_appearance.useLineFade) {
+    if (_appearance.useLineFade) {
         _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
-    }*/
+    }
 
     // glDepthMask(false);
     // //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -690,7 +680,6 @@ void RenderableSatellites::updateBuffers() {
     size_t elementindex = 0;
 
     for (const auto& orbit : _TLEData) {
-       
         _keplerTranslator.setKeplerElements(
             orbit.eccentricity,
             orbit.semiMajorAxis,
@@ -702,16 +691,14 @@ void RenderableSatellites::updateBuffers() {
             orbit.epoch
         );
 
-        // period() does not seem to exist!?!?!
-        // const double period = orbit.period();
         for (size_t i = 0; i <= _nSegments; ++i) {
             size_t index = orbitindex * nVerticesPerOrbit + i;
 
             float timeOffset = orbit.period *
                 static_cast<float>(i) / static_cast<float>(_nSegments);
-            
-            glm::vec3 position = _keplerTranslator.debrisPos(Time(orbit.epoch + timeOffset));
-            
+
+            glm::vec3 position = _keplerTranslator.debrisPos(Time(orbit.epoch + timeOffset));            
+
             _vertexBufferData[index].x = position.x;
             _vertexBufferData[index].y = position.y;
             _vertexBufferData[index].z = position.z;
@@ -741,7 +728,7 @@ void RenderableSatellites::updateBuffers() {
                  GL_STATIC_DRAW
                  );
     
-    // glBindVertexArray(0);
+    glBindVertexArray(0);
 
 }
     
