@@ -74,7 +74,17 @@ void SessionRecording::setRecordDataFormat(RecordedDataMode dataMode) {
 }
 
 bool SessionRecording::startRecording(const std::string& filename) {
-    const std::string absFilename = absPath(filename);
+    if (filename.find("/") != std::string::npos) {
+        LERROR("Recording filename must not contain path (/) elements");
+        return false;
+    }
+    if (!FileSys.directoryExists(absPath("${RECORDINGS}"))) {
+        FileSys.createDirectory(
+            absPath("${RECORDINGS}"),
+            ghoul::filesystem::FileSystem::Recursive::Yes
+        );
+    }
+    const std::string absFilename = absPath("${RECORDINGS}/") + filename;
 
     if (_state == SessionState::Playback) {
         _playbackFile.close();
@@ -123,7 +133,11 @@ void SessionRecording::stopRecording() {
 bool SessionRecording::startPlayback(const std::string& filename,
                                      KeyframeTimeRef timeMode, bool forceSimTimeAtStart)
 {
-    const std::string absFilename = absPath(filename);
+    if (filename.find("/") != std::string::npos) {
+        LERROR("Playback filename must not contain path (/) elements");
+        return false;
+    }
+    const std::string absFilename = absPath("${RECORDINGS}/") + filename;
 
     if (_state == SessionState::Recording) {
         LERROR("Unable to start playback while in session recording mode");

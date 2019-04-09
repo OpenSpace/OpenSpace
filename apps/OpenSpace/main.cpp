@@ -321,8 +321,8 @@ void mainInitFunc() {
     std::string sessionRecordingPath = "${RECORDINGS}";
     FileSys.registerPathToken(
         "${RECORDINGS}",
-	absPath(sessionRecordingPath),
-	ghoul::filesystem::FileSystem::Override::Yes
+        absPath(sessionRecordingPath),
+        ghoul::filesystem::FileSystem::Override::Yes
     );
 
     for (size_t i = 0; i < nWindows; ++i) {
