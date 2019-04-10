@@ -104,10 +104,10 @@ namespace openspace {
         properties::StringProperty _meanAnomalyAtEpochColumnName;
         properties::StringProperty _epochColumnName;
 
-        //RenderableTrail::Appearance _appearance;
+        RenderableTrail::Appearance _appearance;
 
-        //UniformCache(opacity, modelView, projection, color, useLineFade, lineFade)
-        //   _uniformCache;
+        UniformCache(opacity, modelView, projection, color, useLineFade, lineFade)
+           _uniformCache;
 
         /**
          * Reads the provided TLE file and calles the KeplerTranslation::setKeplerElments
