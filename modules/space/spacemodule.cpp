@@ -86,7 +86,6 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableRings>("RenderableRings");
     fRenderable->registerClass<RenderableStars>("RenderableStars");
     fRenderable->registerClass<RenderableSatellites>("RenderableSatellites");
-    //fRenderable->registerClass<ElonsTest>("ElonsTest");
 
 
     auto fTranslation = FactoryManager::ref().factory<Translation>();
@@ -118,7 +117,6 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
         RenderableRings::Documentation(),
         RenderableStars::Documentation(),
         RenderableSatellites::Documentation(),
-        //ElonsTest::Documentation(),
         SpiceRotation::Documentation(),
         SpiceTranslation::Documentation(),
         KeplerTranslation::Documentation(),

@@ -49,31 +49,25 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
         return true
     end
 
-    function test(title, file)
+    function debris(title, file)
         return {
            Identifier = title,
            Parent = transforms.EarthInertial.Identifier,
            Renderable = {
                 Type = "RenderableSatellites",
-                --Type = "ElonsTest",
-
-                --Translation = {
-
---                    Type = "TLETranslation",
---                    Body = title,
---                    Observer = transforms.EarthInertial.Identifier,
---                    File = file
---                },
                 Path = file,
-                Segments = 1,
-                EccentricityColumn = "bubbis",
-                SemiMajorAxisColumn = "bubbis",
+
+                -- The initialization with "-" is just a placeholder.
+                -- (needed to be initialized)
+                Segments = 160,
+                EccentricityColumn = "-",
+                SemiMajorAxisColumn = "-",
                 SemiMajorAxisUnit = 1,
-                InclinationColumn = "bubbis",
-                AscendingNodeColumn = "bubbis",
-                ArgumentOfPeriapsisColumn = "bubbis",
-                MeanAnomalyAtEpochColumn = "bubbis",
-                EpochColumn = "bubbis",
+                InclinationColumn = "-",
+                AscendingNodeColumn = "-",
+                ArgumentOfPeriapsisColumn = "-",
+                MeanAnomalyAtEpochColumn = "-",
+                EpochColumn = "-",
                 
             },
             GUI = {
@@ -82,7 +76,7 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
         }
     end
 
-    local Debris = test(filenameSansExt, path)
+    local Debris = debris(filenameSansExt, path)
     assetHelper.registerSceneGraphNodesAndExport(asset, { Debris })
 
     -- asset.export("satImageFolder", satImageFolder)
