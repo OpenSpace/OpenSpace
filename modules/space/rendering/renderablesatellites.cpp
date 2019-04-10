@@ -604,12 +604,12 @@ void RenderableSatellites::initializeGL() {
        }
    );
     
-    _uniformCache.opacity = _programObject->uniformLocation("opacity");
-    _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
-    _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
-    _uniformCache.color = _programObject->uniformLocation("color");
-    _uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
-    _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
+    // _uniformCache.opacity = _programObject->uniformLocation("opacity");
+    // _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
+    // _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
+    // _uniformCache.color = _programObject->uniformLocation("color");
+    // _uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
+    // _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
     
     setRenderBin(Renderable::RenderBin::Overlay);
     
@@ -647,13 +647,13 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
     //    data.camera.combinedViewMatrix() * modelTransform
     // );
 
-    _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
-    _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
-    _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
+    // _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
+    // _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
+    // _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
 
-    if (_appearance.useLineFade) {
-        _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
-    }
+    // if (_appearance.useLineFade) {
+    //     _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
+    // }
 
     // glDepthMask(false);
     // //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
