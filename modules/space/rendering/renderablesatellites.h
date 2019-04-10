@@ -22,20 +22,20 @@
 //  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 //  ****************************************************************************************/
 
+#ifndef __OPENSPACE_MODULE_BASE___RenderableSatellites___H__
+#define __OPENSPACE_MODULE_BASE___RenderableSatellites___H__
+
 #include <openspace/rendering/renderable.h>
 
 #include <modules/base/rendering/renderabletrail.h>
 #include <modules/space/translation/keplertranslation.h>
 
-// #include <openspace/util/circlegeometry.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
 
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/misc/objectmanager.h>
 
-#ifndef __OPENSPACE_MODULE_BASE___RenderableSatellites___H__
-#define __OPENSPACE_MODULE_BASE___RenderableSatellites___H__
 
 namespace openspace {
 
@@ -54,7 +54,6 @@ namespace openspace {
     class RenderableSatellites : public Renderable {
     public:
         RenderableSatellites(const ghoul::Dictionary& dictionary);
-        //virtual ~RenderableSatellites();
 
         void initialize() override;
         void deinitialize() override;
@@ -89,13 +88,9 @@ namespace openspace {
         GLuint _vertexBuffer;
         GLuint _indexBuffer;
 
-        void readFromCsvFile();
         void updateBuffers();
 
-        std::vector<KeplerTranslation::KeplerOrbit> _orbits;
         ghoul::opengl::ProgramObject* _programObject;
-        //ghoul::ObjectManager* _objectManager;
-
 
         properties::StringProperty _path;
         properties::UIntProperty _nSegments;
@@ -111,8 +106,8 @@ namespace openspace {
 
         RenderableTrail::Appearance _appearance;
 
-        UniformCache(opacity, modelView, projection, color, useLineFade, lineFade)
-           _uniformCache;
+        //UniformCache(opacity, modelView, projection, color, useLineFade, lineFade)
+        //   _uniformCache;
 
         /**
          * Reads the provided TLE file and calles the KeplerTranslation::setKeplerElments

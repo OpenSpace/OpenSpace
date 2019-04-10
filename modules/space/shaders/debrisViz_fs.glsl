@@ -22,19 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// uniform vec3 color;
+in vec3 vs_position;
+in vec3 vs_color;
+in vec2 vs_texcoord;
 
-// in vec3 vs_position;
-// in vec3 vs_color;
-// in vec2 vs_texcoord;
+out vec4 fs_color;
 
-// out vec4 fs_color;
-
-// Fragment getFragment() {
-//     Fragment frag;
-//     frag.color = vec4(color, 1.f);
-//     return frag;
-// }
+void main {
+    fs_color = vec4(vs_color, 1.f);
+}
 
 
 
