@@ -130,4 +130,5 @@ private:
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SPACE___ELONSTEST___H__
+
 */
