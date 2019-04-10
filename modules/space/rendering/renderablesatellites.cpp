@@ -602,8 +602,8 @@ void RenderableSatellites::initializeGL() {
        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
            return global::renderEngine.buildRenderProgram(
                ProgramName,
-               absPath("${MODULE_SPACE}/shaders/debrisViz_vs.glsl"),
-               absPath("${MODULE_SPACE}/shaders/debrisViz_fs.glsl")
+               absPath("${MODULE_SPACE}/shaders/renderablekeplerorbits_vs.glsl"),
+               absPath("${MODULE_SPACE}/shaders/renderablekeplerorbits_fs.glsl")
            );
        }
    );
