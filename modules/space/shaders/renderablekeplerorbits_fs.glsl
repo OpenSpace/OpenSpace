@@ -43,4 +43,6 @@ Fragment getFragment() {
     frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
 
     return frag;
+    
 }
+

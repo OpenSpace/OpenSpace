@@ -36,6 +36,7 @@ uniform int pointSize;
 out vec4 viewSpacePosition;
 
 void main() {
+    
     dvec4 position = dvec4(vertexData.xyz, 1.0);
     float timeOffset = vertexData.w;
 
