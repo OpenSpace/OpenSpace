@@ -604,42 +604,26 @@ void RenderableSatellites::initializeGL() {
            );
        }
    );
-<<<<<<< HEAD
-     /*
+     
     _uniformCache.opacity = _programObject->uniformLocation("opacity");
     _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
     _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
     _uniformCache.color = _programObject->uniformLocation("color");
     _uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
     _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
-=======
-    
-    // _uniformCache.opacity = _programObject->uniformLocation("opacity");
-    // _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
-    // _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
-    // _uniformCache.color = _programObject->uniformLocation("color");
-    // _uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
-    // _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
->>>>>>> e4734ae0b3148cae1f230b00570b5e8c723d5b4b
     
     setRenderBin(Renderable::RenderBin::Overlay);
-    */
+    
 }
     
 void RenderableSatellites::deinitializeGL() {
     
     SpaceModule::ProgramObjectManager.release(ProgramName);
     
-<<<<<<< HEAD
     glDeleteBuffers(1, &_vertexBuffer);
     glDeleteBuffers(1, &_indexBuffer);
     glDeleteVertexArrays(1, &_vertexArray);
-    
-=======
-    // glDeleteBuffers(1, &_vertexBuffer);
-    // glDeleteBuffers(1, &_indexBuffer);
-    // glDeleteVertexArrays(1, &_vertexArray);
->>>>>>> e4734ae0b3148cae1f230b00570b5e8c723d5b4b
+
 }
 
     
@@ -652,9 +636,9 @@ bool RenderableSatellites::isReady() const {
 void RenderableSatellites::update(const UpdateData&) {}
     
 void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
-<<<<<<< HEAD
-    /*
+
     _programObject->activate();
+
     _programObject->setUniform(_uniformCache.opacity, _opacity);
 
     glm::dmat4 modelTransform =
@@ -666,59 +650,32 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
         _uniformCache.modelView,
         data.camera.combinedViewMatrix() * modelTransform
     );
+    
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
-    //_programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
+    _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
+    if (_appearance.useLineFade) {
+        _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
+    }
 
-    //if (_appearance.useLineFade) {
-    //    _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
-    //}
 
     glDepthMask(false);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
+    // Crashes in here
     glBindVertexArray(_vertexArray);
-    glDrawElements(GL_LINES,
-        static_cast<unsigned int>(_indexBufferData.size()),
-        GL_UNSIGNED_INT,
-        0);
+     //glDrawElements(GL_LINES,
+      //  static_cast<GLsizei>(_indexBufferData.size()),
+       // GL_UNSIGNED_INT,
+       // 0);
+    glDrawArrays(GL_LINES,
+        0,
+        static_cast<unsigned int>(_indexBufferData.size()));
     glBindVertexArray(0);
+
     _programObject->deactivate();
-    */
-=======
-    // _programObject->activate();
-    // _programObject->setUniform(_uniformCache.opacity, _opacity);
 
-    // glm::dmat4 modelTransform =
-    //     glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-    //     glm::dmat4(data.modelTransform.rotation) *
-    //     glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-    // _programObject->setUniform(
-    //    _uniformCache.modelView,
-    //    data.camera.combinedViewMatrix() * modelTransform
-    // );
-
-    // _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
-    // _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
-    // _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
-
-    // if (_appearance.useLineFade) {
-    //     _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
-    // }
-
-    // glDepthMask(false);
-    // //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
-    // glBindVertexArray(_vertexArray);
-    // glDrawElements(GL_LINES,
-    //     static_cast<unsigned int>(_indexBufferData.size()),
-    //     GL_UNSIGNED_INT,
-    //     0);
-    // glBindVertexArray(0);
-    // _programObject->deactivate();
->>>>>>> e4734ae0b3148cae1f230b00570b5e8c723d5b4b
 }
 
 void RenderableSatellites::updateBuffers() {
