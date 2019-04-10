@@ -636,7 +636,7 @@ namespace openspace {
 
                  // positionAtTime.time = Time(orbit.epoch + timeOffset);
                 
-                 // glm::vec3 position = calculatePosition(Time(orbit.epoch + timeOffset), orbit.epoch);              
+                 glm::vec3 position = _keplerTranslator.position(Time(orbit.epoch + timeOffset));              
 
                 _vertexBufferData[index].x = position.x;
                 _vertexBufferData[index].y = position.y;

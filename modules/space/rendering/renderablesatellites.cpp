@@ -439,10 +439,6 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     addProperty(_nSegments);
     addProperty(_semiMajorAxisUnit);
 
-<<<<<<< HEAD
-=======
-
->>>>>>> General code cleanup
     LINFO(fmt::format("KeyFile: {} ",  KeyFile));
     const std::string& file = dictionary.value<std::string>(KeyFile);
     LINFO(fmt::format("file: {} ", file));
