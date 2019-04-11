@@ -666,12 +666,12 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
     // Crashes in here
     glBindVertexArray(_vertexArray);
      //glDrawElements(GL_LINES,
-      //  static_cast<GLsizei>(_indexBufferData.size()),
-       // GL_UNSIGNED_INT,
-       // 0);
+       //static_cast<unsigned int>(_indexBufferData.size()),
+      //GL_UNSIGNED_INT,
+      //0);
     glDrawArrays(GL_LINES,
         0,
-        static_cast<unsigned int>(_indexBufferData.size()));
+        20); //static_cast<unsigned int>(_indexBufferData.size()));
     glBindVertexArray(0);
 
     _programObject->deactivate();
@@ -716,7 +716,7 @@ void RenderableSatellites::updateBuffers() {
         }
         ++orbitindex;
     }
-    
+
     glBindVertexArray(_vertexArray);
     
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
