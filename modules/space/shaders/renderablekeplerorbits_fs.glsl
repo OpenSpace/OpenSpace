@@ -34,7 +34,7 @@ in vec4 viewSpacePosition;
 
 Fragment getFragment() {
     Fragment frag;
-    frag.color = vec4(color, opacity);
+    frag.color = vec4(0.0, 0.0, 0.5, opacity);
     frag.depth = safeLength(viewSpacePosition);
     frag.blend = BLEND_MODE_ADDITIVE;
     frag.gPosition = viewSpacePosition;
