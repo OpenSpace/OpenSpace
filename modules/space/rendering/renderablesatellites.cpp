@@ -123,6 +123,13 @@
          "EpochColumn",
          "The header of the column where the epoch is stored"
      };
+     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+        "LineWidth",
+        "Line Width",
+        "This value specifies the line width of the trail if the selected rendering "
+        "method includes lines. If the rendering mode is set to Points, this value is "
+        "ignored."
+    };
      
      constexpr const char* KeyFile = "Path";
      constexpr const char* KeyLineNum = "LineNumber";
@@ -389,6 +396,12 @@ documentation::Documentation RenderableSatellites::Documentation() {
                 new StringVerifier,
                 Optional::No,
                 EpochColumnInfo.description
+            },
+            {
+                LineWidthInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LineWidthInfo.description
             }
         }
     };
@@ -437,8 +450,9 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_appearance);
     addProperty(_path);
     addProperty(_nSegments);
-    addProperty(_semiMajorAxisUnit);
+    // addProperty(_semiMajorAxisUnit);
 
+    
     LINFO(fmt::format("KeyFile: {} ",  KeyFile));
     const std::string& file = dictionary.value<std::string>(KeyFile);
     LINFO(fmt::format("file: {} ", file));
@@ -461,7 +475,7 @@ void RenderableSatellites::readTLEFile(const std::string& filename) {
     int numberOfObjects = numberOfLines/3;
     LINFO(fmt::format("Number of data elements: {}", numberOfObjects));
 
-    std::string line = "hej";
+    std::string line = "-";
     for (int i = 0; i < numberOfObjects; i++) {
 
         std::getline(file, line); // get rid of title
@@ -589,28 +603,41 @@ void RenderableSatellites::deinitialize() {
 }
  
 void RenderableSatellites::initializeGL() {
-    glGenVertexArrays(1, &_vertexArray);
-    glGenBuffers(1, &_vertexBuffer);
-    glGenBuffers(1, &_indexBuffer);
-
     _programObject = SpaceModule::ProgramObjectManager.request(
        ProgramName,
        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
            return global::renderEngine.buildRenderProgram(
                ProgramName,
-               absPath("${MODULE_SPACE}/shaders/renderablekeplerorbits_vs.glsl"),
-               absPath("${MODULE_SPACE}/shaders/renderablekeplerorbits_fs.glsl")
+               absPath("${MODULE_SPACE}/shaders/debrisViz_vs.glsl"),
+               absPath("${MODULE_SPACE}/shaders/debrisViz_fs.glsl")
            );
        }
    );
     
-    // _uniformCache.opacity = _programObject->uniformLocation("opacity");
-    // _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
-    // _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
-    // _uniformCache.color = _programObject->uniformLocation("color");
-    // _uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
-    // _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
+    _uniformCache.opacity = _programObject->uniformLocation("opacity");
+    _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
+    _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
+    _uniformCache.color = _programObject->uniformLocation("color");
+    //_uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
+    //_uniformCache.lineFade = _programObject->uniformLocation("lineFade");
     
+    glGenVertexArrays(1, &_vertexArray);
+    glBindVertexArray(_vertexArray);
+
+    glGenBuffers(1, &_vertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        _vertexBufferData.size() * sizeof(TrailVBOLayout),
+        _vertexBufferData.data(),
+        GL_STATIC_DRAW    
+    );
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), nullptr);
+
+    glBindVertexArray(0);
+
     setRenderBin(Renderable::RenderBin::Overlay);
     
 }
@@ -619,9 +646,9 @@ void RenderableSatellites::deinitializeGL() {
 
     SpaceModule::ProgramObjectManager.release(ProgramName);
     
-    // glDeleteBuffers(1, &_vertexBuffer);
-    // glDeleteBuffers(1, &_indexBuffer);
-    // glDeleteVertexArrays(1, &_vertexArray);
+    glDeleteBuffers(1, &_vertexBuffer);
+    glDeleteBuffers(1, &_indexBuffer);
+    //glDeleteVertexArrays(1, &_vertexArray);
 }
 
     
@@ -634,40 +661,42 @@ bool RenderableSatellites::isReady() const {
 void RenderableSatellites::update(const UpdateData&) {}
     
 void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
-    // _programObject->activate();
-    // _programObject->setUniform(_uniformCache.opacity, _opacity);
+    //if (_TLEData.empty())
+    //    return;
 
-    // glm::dmat4 modelTransform =
-    //     glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-    //     glm::dmat4(data.modelTransform.rotation) *
-    //     glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+    _programObject->activate();
+    _programObject->setUniform(_uniformCache.opacity, _opacity);
 
-    // _programObject->setUniform(
-    //    _uniformCache.modelView,
-    //    data.camera.combinedViewMatrix() * modelTransform
-    // );
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
-    // _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
-    // _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
-    // _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
+    _programObject->setUniform(
+       _uniformCache.modelView,
+       data.camera.combinedViewMatrix() * modelTransform
+    );
 
-    // if (_appearance.useLineFade) {
-    //     _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
-    // }
+    _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
+    _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
+    //_programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
 
-    // glDepthMask(false);
-    // //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    //if (_appearance.useLineFade) {
+    //    _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
+    //}
 
-    // glBindVertexArray(_vertexArray);
-    // glDrawElements(GL_LINES,
-    //     static_cast<unsigned int>(_indexBufferData.size()),
-    //     GL_UNSIGNED_INT,
-    //     0);
-    // glBindVertexArray(0);
-    // _programObject->deactivate();
+    glLineWidth(_appearance.lineWidth);
+
+    glBindVertexArray(_vertexArray);
+    glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(_vertexBufferData.size()));
+    glBindVertexArray(0);
+    
+    _programObject->deactivate();
+
 }
 
 void RenderableSatellites::updateBuffers() {
+
     const size_t nVerticesPerOrbit = _nSegments + 1;
     _vertexBufferData.resize(_TLEData.size() * nVerticesPerOrbit);
     _indexBufferData.resize(_TLEData.size() * _nSegments * 2);
@@ -695,6 +724,8 @@ void RenderableSatellites::updateBuffers() {
 
             glm::vec3 position = _keplerTranslator.debrisPos(Time(orbit.epoch + timeOffset));            
 
+            // LINFO(fmt::format("SegmentPosition: {} ",  position));
+
             _vertexBufferData[index].x = position.x;
             _vertexBufferData[index].y = position.y;
             _vertexBufferData[index].z = position.z;
@@ -706,26 +737,6 @@ void RenderableSatellites::updateBuffers() {
         }
         ++orbitindex;
     }
-    
-    glBindVertexArray(_vertexArray);
-    
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER,
-                 _vertexBufferData.size() * sizeof(TrailVBOLayout),
-                 _vertexBufferData.data(),
-                 GL_STATIC_DRAW
-                 );
-    
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 _indexBufferData.size() * sizeof(int),
-                 _indexBufferData.data(),
-                 GL_STATIC_DRAW
-                 );
-    
-    glBindVertexArray(0);
-
 }
     
 }

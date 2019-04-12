@@ -27,8 +27,8 @@
 
 uniform vec3 color;
 uniform float opacity = 1.0;
-uniform bool useLineFade;
-uniform float lineFade;
+//uniform bool useLineFade;
+//uniform float lineFade;
 
 in vec4 viewSpacePosition;
 

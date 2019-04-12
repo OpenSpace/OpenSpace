@@ -36,8 +36,17 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/misc/objectmanager.h>
 
+#include <glm/glm.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec2.hpp>
 
 namespace openspace {
+
+    struct Vertex {
+        glm::vec3 position;
+        glm::vec3 color;
+        glm::vec2 texcoord;
+    };
 
     struct KeplerParameters {
         double inclination = 0.0;
@@ -88,6 +97,10 @@ namespace openspace {
         GLuint _vertexBuffer;
         GLuint _indexBuffer;
 
+        //GLuint _vaoTest; // vertexArrayObject
+        //GLuint _vboTest; // vertextBufferObject
+        //GLuint _eboTest; // elementBufferObject/ indexBufferObject       
+
         void updateBuffers();
 
         ghoul::opengl::ProgramObject* _programObject;
@@ -106,8 +119,8 @@ namespace openspace {
 
         RenderableTrail::Appearance _appearance;
 
-        //UniformCache(opacity, modelView, projection, color, useLineFade, lineFade)
-        //   _uniformCache;
+        UniformCache(opacity, modelView, projection, color) //, useLineFade, lineFade)
+           _uniformCache;
 
         /**
          * Reads the provided TLE file and calles the KeplerTranslation::setKeplerElments
