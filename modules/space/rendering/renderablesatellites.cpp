@@ -613,8 +613,8 @@ void RenderableSatellites::initializeGL() {
     _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
     _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
     _uniformCache.color = _programObject->uniformLocation("color");
-    _uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
-    _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
+    //_uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
+    //_uniformCache.lineFade = _programObject->uniformLocation("lineFade");
     
     setRenderBin(Renderable::RenderBin::Overlay);
     
@@ -651,10 +651,10 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
-    _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
-    if (_appearance.useLineFade) {
-        _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
-    }
+    //_programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
+    //if (_appearance.useLineFade) {
+    //    _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
+    //}
 
 
     glDepthMask(false);
@@ -662,13 +662,22 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
 
     // Crashes in here
     glBindVertexArray(_vertexArray);
-     //glDrawElements(GL_LINES,
-       //static_cast<unsigned int>(_indexBufferData.size()),
-      //GL_UNSIGNED_INT,
-      //0);
-    glDrawArrays(GL_LINES,
-        0,
-        20); //static_cast<unsigned int>(_indexBufferData.size()));
+     glDrawElements(GL_LINES,
+        //static_cast<unsigned int>(_indexBufferData.size()),
+         20,
+        GL_UNSIGNED_INT,
+        &_indexBufferData.front());
+    //glDrawArrays(GL_LINES,
+      //  0,
+       // 20); //static_cast<unsigned int>(_indexBufferData.size()));
+   /*
+    glBegin (GL_LINES);
+        glVertex3f (_vertexBufferData[0].x, _vertexBufferData[0].y, _vertexBufferData[0].z);
+        glVertex3f (_vertexBufferData[1].x, _vertexBufferData[1].y, _vertexBufferData[1].z);
+        glVertex3f (_vertexBufferData[2].x, _vertexBufferData[2].y, _vertexBufferData[2].z);
+        glVertex3f (_vertexBufferData[3].x, _vertexBufferData[3].y, _vertexBufferData[3].z);
+    glEnd ();
+    */
     glBindVertexArray(0);
 
     _programObject->deactivate();
@@ -721,7 +730,6 @@ void RenderableSatellites::updateBuffers() {
                  _vertexBufferData.data(),
                  GL_STATIC_DRAW
                  );
-    
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
@@ -729,8 +737,9 @@ void RenderableSatellites::updateBuffers() {
                  _indexBufferData.data(),
                  GL_STATIC_DRAW
                  );
-    
     glBindVertexArray(0);
+
+    
 
 }
     
