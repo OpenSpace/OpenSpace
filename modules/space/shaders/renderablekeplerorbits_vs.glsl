@@ -30,12 +30,13 @@ uniform dmat4 modelViewTransform;
 uniform mat4 projectionTransform;
 // uniform bool useLineFade;
 // uniform float lineFade;
-uniform int vertexSortingMethod;
+// uniform int vertexSortingMethod;
 uniform int pointSize;
 
 out vec4 viewSpacePosition;
 
 void main() {
+    
     dvec4 position = dvec4(vertexData.xyz, 1.0);
     float timeOffset = vertexData.w;
 

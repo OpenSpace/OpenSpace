@@ -447,7 +447,7 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     _epochColumnName =
         dictionary.value<std::string>(EpochColumnInfo.identifier);
     
-    addPropertySubOwner(_appearance);
+    //addPropertySubOwner(_appearance);
     addProperty(_path);
     addProperty(_nSegments);
     // addProperty(_semiMajorAxisUnit);
@@ -643,12 +643,12 @@ void RenderableSatellites::initializeGL() {
 }
     
 void RenderableSatellites::deinitializeGL() {
-
+    
     SpaceModule::ProgramObjectManager.release(ProgramName);
     
     glDeleteBuffers(1, &_vertexBuffer);
-    glDeleteBuffers(1, &_indexBuffer);
-    //glDeleteVertexArrays(1, &_vertexArray);
+    //glDeleteBuffers(1, &_indexBuffer);
+    glDeleteVertexArrays(1, &_vertexArray);
 }
 
     
@@ -680,7 +680,6 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
     //_programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
-
     //if (_appearance.useLineFade) {
     //    _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
     //}
@@ -699,8 +698,7 @@ void RenderableSatellites::updateBuffers() {
 
     const size_t nVerticesPerOrbit = _nSegments + 1;
     _vertexBufferData.resize(_TLEData.size() * nVerticesPerOrbit);
-    _indexBufferData.resize(_TLEData.size() * _nSegments * 2);
-    
+    //_indexBufferData.resize(_TLEData.size() * _nSegments * 2);
     size_t orbitindex = 0;
     size_t elementindex = 0;
 
@@ -722,7 +720,7 @@ void RenderableSatellites::updateBuffers() {
             float timeOffset = orbit.period *
                 static_cast<float>(i) / static_cast<float>(_nSegments);
 
-            glm::vec3 position = _keplerTranslator.debrisPos(Time(orbit.epoch + timeOffset));            
+            glm::vec3 position = _keplerTranslator.debrisPos(Time(orbit.epoch + timeOffset)); 
 
             // LINFO(fmt::format("SegmentPosition: {} ",  position));
 
@@ -730,10 +728,10 @@ void RenderableSatellites::updateBuffers() {
             _vertexBufferData[index].y = position.y;
             _vertexBufferData[index].z = position.z;
             _vertexBufferData[index].time = timeOffset;
-            if (i > 0) {
-                _indexBufferData[elementindex++] = static_cast<unsigned int>(index) - 1;
-                _indexBufferData[elementindex++] = static_cast<unsigned int>(index);
-            }
+            //if (i > 0) {
+                //_indexBufferData[elementindex++] = static_cast<unsigned int>(index) - 1;
+                //_indexBufferData[elementindex++] = static_cast<unsigned int>(index);
+            //}
         }
         ++orbitindex;
     }
