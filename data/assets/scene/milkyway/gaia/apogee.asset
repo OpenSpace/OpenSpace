@@ -35,6 +35,7 @@ local gaia_abundance_apogee = {
         SizeComposition = "Distance Modulus",
         RenderMethod = "Texture Based",
         Texture = textures .. "/halo.png",
+        ShapeTexture = textures .. "/disc.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
         OtherDataColorMap = colorLUT .. "/viridis.cmap",
         StaticFilter = -9999,

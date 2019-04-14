@@ -30,6 +30,7 @@ local gaia_abundance_galah = {
         Enabled = false,
         File = speck .. "/GaiaAbundGalah.speck",
         Texture = textures .. "/halo.png",
+        ShapeTexture = textures .. "/disc.png",
         MagnitudeExponent = 6.2,
         SizeComposition = "Distance Modulus",
         RenderMethod = "Texture Based",

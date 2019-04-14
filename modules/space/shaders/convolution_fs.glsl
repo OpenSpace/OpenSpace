@@ -31,14 +31,14 @@ in vec2 texturesCoords;
 
 uniform int psfTextureSize;
 uniform sampler2D psfTexture;
-uniform sampler2D discShapeTexture;
+uniform sampler2D shapeTexture;
 
 void main(void) {
     vec4 fullColor = vec4(0.0, 0.0, 0.0, 1.0);
     
     // Kernel Center
-    vec2 psfTextureCoords = float(psfTextureSize/2 + 1) / float(psfTextureSize);
-    fullColor + texture2D(discShapeTexture, texturesCoords) * 
+    vec2 psfTextureCoords = vec2(float(psfTextureSize/2 + 1) / float(psfTextureSize));
+    fullColor + texture2D(shapeTexture, texturesCoords) * 
                 texture2D(psfTexture, psfTextureCoords);
 
     // vec4 sum = vec4(0.0);
