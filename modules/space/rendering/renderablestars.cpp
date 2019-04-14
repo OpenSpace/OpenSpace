@@ -734,11 +734,50 @@ void RenderableStars::renderPSFToTexture() {
     program->setUniform("FWHM", _FWHMConst);
     program->setUniform("betaConstant", _moffatBetaConst);
 
+    // Draws psf to texture
     glBindVertexArray(_psfVao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
         
     program->deactivate();
+
+    // Now convolves with a disc shape for final shape
+
+    GLuint convolveFBO;
+    glGenFramebuffers(1, &convolveFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, convolveFBO);
+    glDrawBuffers(1, drawBuffers);
+
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _convolvedTexture, 0);
+
+    glViewport(0, 0, _convolvedfTextureSize, _convolvedfTextureSize);
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> programConvolve =
+        ghoul::opengl::ProgramObject::Build("ConvolvePSFandStarShape",
+            absPath("${MODULE_SPACE}/shaders/convolution_vs.glsl"),
+            absPath("${MODULE_SPACE}/shaders/convolution_fs.glsl")
+        );
+
+    programConvolve->activate();
+    glClearBufferfv(GL_COLOR, 0, black);
+
+    ghoul::opengl::TextureUnit psfTextureUnit;
+    psfTextureUnit.activate();
+    glBindTexture(GL_TEXTURE_2D, _psfTexture);
+    programConvolve->setUniform("psftexture", psfTextureUnit);
+    
+    ghoul::opengl::TextureUnit discTextureUnit;
+    discTextureUnit.activate();
+    glBindTexture(GL_TEXTURE_2D, _discTexture);
+    programConvolve->setUniform("discShapeTexture", discTextureUnit);
+
+
+    // Convolves to texture
+    glBindVertexArray(_psfVao);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+
+    programConvolve->deactivate();
 
     // Restores system state
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
