@@ -628,13 +628,13 @@ void RenderableStars::initializeGL() {
     glBindBuffer(GL_ARRAY_BUFFER, _psfVbo);
 
     const GLfloat vertex_data[] = {
-        //x      y     z     w
-        -1.0f, -1.0f, 0.0f, 1.0f,
-        1.0f,  1.0f, 0.0f, 1.0f,
+        //x      y     s     t
+        -1.0f, -1.0f, 0.0f, 0.0f,
+         1.0f,  1.0f, 1.0f, 1.0f,
         -1.0f,  1.0f, 0.0f, 1.0f,
-        -1.0f, -1.0f, 0.0f, 1.0f,
-        1.0f, -1.0f, 0.0f, 1.0f,
-        1.0f,  1.0f, 0.0f, 1.0f
+        -1.0f, -1.0f, 0.0f, 0.0f,
+         1.0f, -1.0f, 1.0f, 0.0f,
+         1.0f,  1.0f, 1.0f, 1.0f
     };
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);

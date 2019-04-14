@@ -27,8 +27,10 @@
 layout(location = 0) in vec4 in_position;
 
 out vec2 psfCoords;
+out vec2 texturesCoords;
 
 void main() {
-    gl_Position = in_position;
+    gl_Position = vec4(in_position.xy, 0.f, 1.f);
     psfCoords = vec2(in_position);
+    texturesCoords = vec2(in_position.zw);
 }
