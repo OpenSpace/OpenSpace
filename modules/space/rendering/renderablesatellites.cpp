@@ -434,7 +434,7 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     _epochColumnName =
         dictionary.value<std::string>(EpochColumnInfo.identifier);
     
-    //addPropertySubOwner(_appearance);
+    addPropertySubOwner(_appearance);
     addProperty(_path);
     addProperty(_nSegments);
     addProperty(_semiMajorAxisUnit);
@@ -589,12 +589,15 @@ void RenderableSatellites::deinitialize() {
 }
  
 void RenderableSatellites::initializeGL() {
-   
-    glGenVertexArrays(1, &_vertexArray);
-    glGenBuffers(1, &_vertexBuffer);
-    glGenBuffers(1, &_indexBuffer);
 
-    _programObject = SpaceModule::ProgramObjectManager.request(
+
+    glGenVertexArrays(1, &_vertexArray);
+    glBindVertexArray(_vertexArray);
+
+    glGenBuffers(1, &_vertexBuffer);
+    //glGenBuffers(1, &_indexBuffer);
+
+   _programObject = SpaceModule::ProgramObjectManager.request(
        ProgramName,
        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
            return global::renderEngine.buildRenderProgram(
@@ -604,16 +607,26 @@ void RenderableSatellites::initializeGL() {
            );
        }
    );
+    
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER,
+        _vertexBufferData.size() * sizeof(TrailVBOLayout),
+        _vertexBufferData.data(),
+        GL_STATIC_DRAW
+    );
+
+    glEnableVertexAttribArray(0);    // We like submitting vertices on stream 0 for no special reason
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), 0);
      
     _uniformCache.opacity = _programObject->uniformLocation("opacity");
     _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
     _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
     _uniformCache.color = _programObject->uniformLocation("color");
-    //_uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
-    //_uniformCache.lineFade = _programObject->uniformLocation("lineFade");
+    _uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
+    _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
     
     setRenderBin(Renderable::RenderBin::Overlay);
-    
+    glBindVertexArray(0);
 }
     
 void RenderableSatellites::deinitializeGL() {
@@ -623,7 +636,7 @@ void RenderableSatellites::deinitializeGL() {
     glDeleteBuffers(1, &_vertexBuffer);
     glDeleteBuffers(1, &_indexBuffer);
     glDeleteVertexArrays(1, &_vertexArray);
-
+    _vertexArray = 0;
 }
 
     
@@ -650,26 +663,37 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
         _uniformCache.modelView,
         data.camera.combinedViewMatrix() * modelTransform
     );
-    
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
-    //_programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
-    //if (_appearance.useLineFade) {
-    //    _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
-    //}
+    _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
+    if (_appearance.useLineFade) {
+        _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
+    }
 
-
-    glDepthMask(false);
+    // Gives weird artifacts, but not for Elon??
+    glDepthMask(true);
+    //glDepthMask(false);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    //glBlendFunc(GL_ONE, GL_SRC_ALPHA);
 
-    // Crashes in here
+
+    //glEnableVertexAttribArray(0);    // We like submitting vertices on stream 0 for no special reason
+    //glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), 0);
+
     glBindVertexArray(_vertexArray);
-     glDrawElements(GL_LINES,
-        //static_cast<unsigned int>(_indexBufferData.size()),
-         20,
+    //glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
+
+    glDrawArrays(GL_LINE_LOOP, 0, static_cast<unsigned int>(_vertexBufferData.size()));
+
+    /*glDrawElements(GL_LINES,
+        static_cast<unsigned int>(_indexBufferData.size()),
+        //20,
         GL_UNSIGNED_INT,
-        &_indexBufferData.front());
+        0);
+    */
+        //&_indexBufferData.front());
     //glDrawArrays(GL_LINES,
       //  0,
        // 20); //static_cast<unsigned int>(_indexBufferData.size()));
@@ -681,6 +705,7 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
         glVertex3f (_vertexBufferData[3].x, _vertexBufferData[3].y, _vertexBufferData[3].z);
     glEnd ();
     */
+    
     glBindVertexArray(0);
 
     _programObject->deactivate();
@@ -726,8 +751,8 @@ void RenderableSatellites::updateBuffers() {
         ++orbitindex;
     }
 
-    glBindVertexArray(_vertexArray);
-    
+    //glBindVertexArray(_vertexArray);
+    /*
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER,
                  _vertexBufferData.size() * sizeof(TrailVBOLayout),
@@ -737,12 +762,12 @@ void RenderableSatellites::updateBuffers() {
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 _indexBufferData.size() * sizeof(int),
+                 _indexBufferData.size() * sizeof(unsigned int),
                  _indexBufferData.data(),
                  GL_STATIC_DRAW
                  );
-    glBindVertexArray(0);
-
+    //glBindVertexArray(0);
+    */
     
 
 }
