@@ -119,7 +119,7 @@ namespace openspace {
 
         RenderableTrail::Appearance _appearance;
 
-        UniformCache(opacity, modelView, projection, color) //, useLineFade, lineFade)
+        UniformCache(opacity, modelView, projection, color, useLineFade, lineFade)
            _uniformCache;
 
         /**

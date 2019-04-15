@@ -713,31 +713,16 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
     //glEnableVertexAttribArray(0);    // We like submitting vertices on stream 0 for no special reason
     //glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), 0);
 
+    const size_t orbits = static_cast<GLsizei>(_vertexBufferData.size()) / _nSegments;
+    size_t vertices = 0;
+
+
     glBindVertexArray(_vertexArray);
-    //glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
-
-    glDrawArrays(GL_LINE_LOOP, 0, static_cast<unsigned int>(_vertexBufferData.size()));
-
-    /*glDrawElements(GL_LINES,
-        static_cast<unsigned int>(_indexBufferData.size()),
-        //20,
-        GL_UNSIGNED_INT,
-        0);
-    */
-        //&_indexBufferData.front());
-    //glDrawArrays(GL_LINES,
-      //  0,
-       // 20); //static_cast<unsigned int>(_indexBufferData.size()));
-   /*
-    glBegin (GL_LINES);
-        glVertex3f (_vertexBufferData[0].x, _vertexBufferData[0].y, _vertexBufferData[0].z);
-        glVertex3f (_vertexBufferData[1].x, _vertexBufferData[1].y, _vertexBufferData[1].z);
-        glVertex3f (_vertexBufferData[2].x, _vertexBufferData[2].y, _vertexBufferData[2].z);
-        glVertex3f (_vertexBufferData[3].x, _vertexBufferData[3].y, _vertexBufferData[3].z);
-    glEnd ();
-    */
-    
+    for (size_t i = 0; i <= orbits; ++i) {
+        //glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(_vertexBufferData.size()));
+        glDrawArrays(GL_LINE_LOOP, vertices, _nSegments);
+        vertices = vertices + _nSegments + 1;
+    }
     glBindVertexArray(0);
     
     _programObject->deactivate();
