@@ -22,21 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// uniform vec3 color;
+#include "fragment.glsl"
+#include "floatoperations.glsl"
 
-// in vec3 vs_position;
-// in vec3 vs_color;
-// in vec2 vs_texcoord;
+uniform vec3 color;
+uniform float opacity = 1.0;
 
-// out vec4 fs_color;
+in vec4 viewSpacePosition;
 
-// Fragment getFragment() {
-//     Fragment frag;
-//     frag.color = vec4(color, 1.f);
-//     return frag;
-// }
+in vec3 vs_position;
+in vec3 vs_color;
+in vec2 vs_texcoord;
 
-
+Fragment getFragment() {
+    Fragment frag;
+    frag.color = vec4(color, opacity);
+    frag.gPosition = viewSpacePosition;
+    return frag;
+}
 
 
 

@@ -28,9 +28,9 @@ layout(location = 0) in vec4 vertexData;
 
 uniform dmat4 modelViewTransform;
 uniform mat4 projectionTransform;
-uniform bool useLineFade;
-uniform float lineFade;
-uniform int vertexSortingMethod;
+// uniform bool useLineFade;
+// uniform float lineFade;
+// uniform int vertexSortingMethod;
 uniform int pointSize;
 
 out vec4 viewSpacePosition;
