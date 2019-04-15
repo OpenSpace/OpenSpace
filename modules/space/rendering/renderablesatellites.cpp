@@ -686,8 +686,16 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
 
     glLineWidth(_appearance.lineWidth);
 
+    const size_t orbits = static_cast<GLsizei>(_vertexBufferData.size()) / _nSegments;
+    size_t vertices = 0;
+
+
     glBindVertexArray(_vertexArray);
-    glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(_vertexBufferData.size()));
+    for (size_t i = 0; i <= orbits; ++i) {
+        //glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(_vertexBufferData.size()));
+        glDrawArrays(GL_LINE_LOOP, vertices, _nSegments);
+        vertices = vertices + _nSegments + 1;
+    }
     glBindVertexArray(0);
     
     _programObject->deactivate();
