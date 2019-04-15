@@ -147,6 +147,25 @@ namespace openspace {
         2044, 2048, 2052, 2056
     };
 
+    void calculateMaxApoAndMinPeri(std::vector<KeplerParameters> fileVector){
+        //int n = fileVector.size();
+        double maxApogee = 0;
+        double minPerigee = 5000;
+        for (const auto& dataElement : fileVector){     //(int i=0 ; i < n ; ++i ) {    
+            double ph = dataElement.semiMajorAxis * (1 - dataElement.eccentricity);
+            double ah = dataElement.semiMajorAxis *(1 + dataElement.eccentricity);
+
+            if (ph < minPerigee) 
+                minPerigee = ph;
+
+            if (ah > maxApogee)
+                maxApogee = ah;
+        }
+        LINFO(fmt::format("Min Perigee: {} ",  minPerigee));
+        LINFO(fmt::format("Max Apogee: {} ",  maxApogee));
+        
+    }
+
     // Count the number of full days since the beginning of 2000 to the beginning of
     // the parameter 'year'
     int countDays(int year) {
@@ -572,6 +591,10 @@ void RenderableSatellites::readTLEFile(const std::string& filename) {
 
     } // !for loop
     file.close();
+
+    // get max apergee and min perigee
+    calculateMaxApoAndMinPeri(_TLEData);
+
 }
 /*
 RenderableSatellites::~RenderableSatellites() {
