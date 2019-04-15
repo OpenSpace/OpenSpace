@@ -466,7 +466,7 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     _epochColumnName =
         dictionary.value<std::string>(EpochColumnInfo.identifier);
     
-    //addPropertySubOwner(_appearance);
+    addPropertySubOwner(_appearance);
     addProperty(_path);
     addProperty(_nSegments);
     // addProperty(_semiMajorAxisUnit);
@@ -641,8 +641,8 @@ void RenderableSatellites::initializeGL() {
     _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
     _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
     _uniformCache.color = _programObject->uniformLocation("color");
-    //_uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
-    //_uniformCache.lineFade = _programObject->uniformLocation("lineFade");
+    _uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
+    _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
     
     glGenVertexArrays(1, &_vertexArray);
     glBindVertexArray(_vertexArray);
@@ -662,7 +662,7 @@ void RenderableSatellites::initializeGL() {
     glBindVertexArray(0);
 
     setRenderBin(Renderable::RenderBin::Overlay);
-    
+    glBindVertexArray(0);
 }
     
 void RenderableSatellites::deinitializeGL() {
@@ -709,8 +709,16 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
 
     glLineWidth(_appearance.lineWidth);
 
+    const size_t orbits = static_cast<GLsizei>(_vertexBufferData.size()) / _nSegments;
+    size_t vertices = 0;
+
+
     glBindVertexArray(_vertexArray);
-    glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(_vertexBufferData.size()));
+    for (size_t i = 0; i <= orbits; ++i) {
+        //glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(_vertexBufferData.size()));
+        glDrawArrays(GL_LINE_LOOP, vertices, _nSegments);
+        vertices = vertices + _nSegments + 1;
+    }
     glBindVertexArray(0);
     
     _programObject->deactivate();
