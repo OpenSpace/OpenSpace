@@ -845,6 +845,18 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
     glm::vec4 textColor = _textColor;
     textColor.a *= fadeInVariable;
     textColor.a *= _opacity;
+
+    ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
+    labelInfo.orthoRight = orthoRight;
+    labelInfo.orthoUp = orthoUp;
+    labelInfo.minSize = static_cast<int>(_textMinSize);
+    labelInfo.maxSize = static_cast<int>(_textMaxSize);
+    labelInfo.cameraPos = data.camera.positionVec3();
+    labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
+    labelInfo.renderType = _renderOption;
+    labelInfo.mvpMatrix = modelViewProjectionMatrix;
+    labelInfo.scale = pow(10.f, _textSize);
+
     for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
         //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
         glm::vec3 scaledPos(pair.first);
@@ -854,15 +866,7 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
             scaledPos,
             pair.second,
             textColor,
-            pow(10.f, _textSize.value()),
-            static_cast<int>(_textMinSize),
-            static_cast<int>(_textMaxSize),
-            modelViewProjectionMatrix,
-            orthoRight,
-            orthoUp,
-            data.camera.positionVec3(),
-            data.camera.lookUpVectorWorldSpace(),
-            _renderOption.value()
+            labelInfo
         );
     }
 }

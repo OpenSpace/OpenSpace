@@ -770,20 +770,32 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
             }
 
             position += _labelsMinHeight;
+
+            ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
+            labelInfo.orthoRight = orthoRight;
+            labelInfo.orthoUp = orthoUp;
+            labelInfo.minSize = _labelsMinSize;
+            labelInfo.maxSize = _labelsMaxSize;
+            labelInfo.cameraPos = data.camera.positionVec3();
+            labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
+            labelInfo.renderType = 0;
+            labelInfo.mvpMatrix = modelViewProjectionMatrix;
+            labelInfo.scale = powf(2.f, _labelsSize);
+
+            // Testing
+            glm::dmat4 modelviewTransform = glm::dmat4(data.camera.combinedViewMatrix()) *
+                _globe->modelTransform();
+            labelInfo.modelViewMatrix = modelviewTransform;
+            labelInfo.projectionMatrix = glm::dmat4(
+                data.camera.sgctInternal.projectionMatrix()
+            );
+
             ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
                 *_font,
                 position,
                 lEntry.feature,
                 textColor,
-                powf(2.f, _labelsSize),
-                _labelsMinSize,
-                _labelsMaxSize,
-                modelViewProjectionMatrix,
-                orthoRight,
-                orthoUp,
-                cameraPosObj,
-                cameraLookUpObj,
-                0
+                labelInfo
             );
         }
     }
