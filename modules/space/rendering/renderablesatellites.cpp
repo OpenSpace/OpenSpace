@@ -465,6 +465,9 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
         dictionary.value<std::string>(MeanAnomalyAtEpochColumnInfo.identifier);
     _epochColumnName =
         dictionary.value<std::string>(EpochColumnInfo.identifier);
+
+    // fungerar inte
+    //_appearance.lineColor = glm::vec3(1.f), glm::vec3(0.f), glm::vec3(0.f);
     
     addPropertySubOwner(_appearance);
     addProperty(_path);
@@ -626,6 +629,9 @@ void RenderableSatellites::deinitialize() {
 }
  
 void RenderableSatellites::initializeGL() {
+    glGenVertexArrays(1, &_vertexArray);
+    glGenBuffers(1, &_vertexBuffer);
+
     _programObject = SpaceModule::ProgramObjectManager.request(
        ProgramName,
        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
@@ -644,25 +650,9 @@ void RenderableSatellites::initializeGL() {
     _uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
     _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
     
-    glGenVertexArrays(1, &_vertexArray);
-    glBindVertexArray(_vertexArray);
-
-    glGenBuffers(1, &_vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        _vertexBufferData.size() * sizeof(TrailVBOLayout),
-        _vertexBufferData.data(),
-        GL_STATIC_DRAW    
-    );
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), nullptr);
-
-    glBindVertexArray(0);
+    updateBuffers();
 
     setRenderBin(Renderable::RenderBin::Overlay);
-    glBindVertexArray(0);
 }
     
 void RenderableSatellites::deinitializeGL() {
@@ -684,8 +674,8 @@ bool RenderableSatellites::isReady() const {
 void RenderableSatellites::update(const UpdateData&) {}
     
 void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
-    //if (_TLEData.empty())
-    //    return;
+    if (_TLEData.empty())
+        return;
 
     _programObject->activate();
     _programObject->setUniform(_uniformCache.opacity, _opacity);
@@ -702,10 +692,10 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
-    //_programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
-    //if (_appearance.useLineFade) {
-    //    _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
-    //}
+    _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
+    if (_appearance.useLineFade) {
+        _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
+    }
 
     glLineWidth(_appearance.lineWidth);
 
@@ -766,6 +756,22 @@ void RenderableSatellites::updateBuffers() {
         }
         ++orbitindex;
     }
+
+    glBindVertexArray(_vertexArray);
+
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        _vertexBufferData.size() * sizeof(TrailVBOLayout),
+        _vertexBufferData.data(),
+        GL_STATIC_DRAW    
+    );
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), nullptr);
+
+    glBindVertexArray(0);
+
 }
     
 }
