@@ -156,16 +156,52 @@ namespace openspace {
         //int n = fileVector.size();
         double maxApogee = 0;
         double minPerigee = 5000;
+        int intervalDistribution[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        double intervalSegment = 4575.32/10;
         for (const auto& dataElement : fileVector){     //(int i=0 ; i < n ; ++i ) {    
-            double ph = dataElement.semiMajorAxis * (1 - dataElement.eccentricity);
-            double ah = dataElement.semiMajorAxis *(1 + dataElement.eccentricity);
+            double ph = dataElement.semiMajorAxis * (1 - dataElement.eccentricity)- 6371;
+            double ah = dataElement.semiMajorAxis * (1 + dataElement.eccentricity)- 6371;
 
             if (ph < minPerigee) 
                 minPerigee = ph;
 
             if (ah > maxApogee)
                 maxApogee = ah;
+
+            if(ph < (intervalSegment))
+                intervalDistribution[0]++;
+            else if(ph < (intervalSegment*2))
+                intervalDistribution[1]++;
+            else if(ph < (intervalSegment*3))
+                intervalDistribution[2]++;
+            else if(ph < (intervalSegment*4))
+                intervalDistribution[3]++;
+            else if(ph < (intervalSegment*5))
+                intervalDistribution[4]++;
+            else if(ph < (intervalSegment*6))
+                intervalDistribution[5]++;
+            else if(ph < (intervalSegment*7))
+                intervalDistribution[6]++;
+            else if(ph < (intervalSegment*8))
+                intervalDistribution[7]++;
+            else if(ph < (intervalSegment*9))
+                intervalDistribution[8]++;
+            else if(ph < (intervalSegment*10))
+                intervalDistribution[9]++;
+            
         }
+        LINFO(fmt::format("fileVector.size: {} ",  fileVector.size()));
+        LINFO(fmt::format("Interval Distrubution 10% of max apogee: {} ", (intervalDistribution[0])));
+        LINFO(fmt::format("Interval Distrubution 20% of max apogee: {} ", (intervalDistribution[1])));
+        LINFO(fmt::format("Interval Distrubution 30% of max apogee: {} ", (intervalDistribution[2])));
+        LINFO(fmt::format("Interval Distrubution 40% of max apogee: {} ", (intervalDistribution[3])));
+        LINFO(fmt::format("Interval Distrubution 50% of max apogee: {} ", (intervalDistribution[4])));
+        LINFO(fmt::format("Interval Distrubution 60% of max apogee: {} ", (intervalDistribution[5])));
+        LINFO(fmt::format("Interval Distrubution 70% of max apogee: {} ", (intervalDistribution[6])));
+        LINFO(fmt::format("Interval Distrubution 80% of max apogee: {} ", (intervalDistribution[7])));
+        LINFO(fmt::format("Interval Distrubution 90% of max apogee: {} ", (intervalDistribution[8])));
+        LINFO(fmt::format("Interval Distrubution 100% of max apogee: {} ", (intervalDistribution[9])));
+
         LINFO(fmt::format("Min Perigee: {} ",  minPerigee));
         LINFO(fmt::format("Max Apogee: {} ",  maxApogee));
         
@@ -614,7 +650,7 @@ void RenderableSatellites::readTLEFile(const std::string& filename) {
     file.close();
 
     // get max apergee and min perigee
-    calculateMaxApoAndMinPeri(_TLEData);
+    // calculateMaxApoAndMinPeri(_TLEData);
 
 }
 /*

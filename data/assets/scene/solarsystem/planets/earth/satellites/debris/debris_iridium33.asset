@@ -1,5 +1,5 @@
 local assetHelper = asset.require('util/asset_helper')
-local shared = asset.require('../satellites_shared')
+local shared = asset.require('../debris_shared')
 
 local group = {
     Title = "Iridium 33 Debris",
