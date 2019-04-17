@@ -2,8 +2,8 @@ local assetHelper = asset.require('util/asset_helper')
 local shared = asset.require('../satellites_shared')
 
 local group = {
-    Title = "Breeze-M Breakup",
-    Url = "http://www.celestrak.com/NORAD/elements/2012-044.txt",
+    Title = "Indian ASAT test Debris",
+    Url = "http://www.celestrak.com/NORAD/elements/2019-006.txt",
     TrailColor = { 0.0, 0.0, 1.0 }
 }
 

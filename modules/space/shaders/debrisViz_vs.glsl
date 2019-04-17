@@ -24,22 +24,27 @@
 
 #version __CONTEXT__
 
-layout (location = 0) in vec4 vertex_data;
+//#include "D:\OpenSpace\shaders\PowerScaling\powerScalingMath.hglsl"
+#include "C:\Users\Jonathan\Documents\exjobb\OpenSpace\shaders\PowerScaling\powerScalingMath.hglsl"
+
+
+layout(location = 0) in vec4 vertex_data;
 
 uniform dmat4 modelViewTransform;
 uniform mat4 projectionTransform;
 
 out vec4 viewSpacePosition;
+out vec4 vs_position;
 
 void main() {
-    dvec4 position = dvec4(vertex_data.xyz, 1.0);
-    float timeOffset = vertex_data.w;
-
+    vec4 position = vec4(vertex_data.xyz, 1.0);
     viewSpacePosition = vec4(modelViewTransform * position);
-    gl_Position = projectionTransform * viewSpacePosition;
+    vs_position = z_normalization(projectionTransform * viewSpacePosition);
+    //vec4 vs_position = z_normalization(position);
+    gl_Position = vs_position;
+    // float timeOffset = vertex_data.w;
+    //gl_Position = projectionTransform * viewSpacePosition;
 }
-
-
 
 
 
