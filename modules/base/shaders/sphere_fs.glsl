@@ -46,10 +46,10 @@ Fragment getFragment() {
     frag.depth = pscDepth(position);
 
     // G-Buffer
-    frag.gPosition  = vs_gPosition;
+    frag.gPosition = vs_gPosition;
     // There is no normal here
     // TODO: Add the correct normal (JCC)
-    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+    frag.gNormal = vec4(0.0, 0.0, 1.0, 0.0);
 
     return frag;
     }

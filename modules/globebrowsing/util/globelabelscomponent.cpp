@@ -327,6 +327,9 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
                         LabelsFontSizeInfo.identifier
                     );
                     _labelsFontSize.set(fontSize);
+                    _labelsFontSize.onChange([this] {
+                            initializeFonts();
+                        });
                 }
 
                 if (dictionary.hasKey(LabelsSizeInfo.identifier)) {
@@ -425,14 +428,12 @@ bool GlobeLabelsComponent::initializeGL() {
 }
 
 void GlobeLabelsComponent::initializeFonts() {
-    if (_font == nullptr) {
-        _font = openspace::global::fontManager.font(
-            "Mono",
-            static_cast<float>(_labelsFontSize),
-            ghoul::fontrendering::FontManager::Outline::Yes,
-            ghoul::fontrendering::FontManager::LoadGlyphs::No
-        );
-    }
+    _font = openspace::global::fontManager.font(
+        "Mono",
+        static_cast<float>(_labelsFontSize),
+        ghoul::fontrendering::FontManager::Outline::Yes,
+        ghoul::fontrendering::FontManager::LoadGlyphs::No
+    );
 }
 
 
@@ -781,6 +782,9 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
             labelInfo.renderType = 0;
             labelInfo.mvpMatrix = modelViewProjectionMatrix;
             labelInfo.scale = powf(2.f, _labelsSize);
+            labelInfo.enableDepth = true;
+            labelInfo.enableFalseDepth = true;
+            labelInfo.disableTransmittance = true;
 
             // Testing
             glm::dmat4 modelviewTransform = glm::dmat4(data.camera.combinedViewMatrix()) *
