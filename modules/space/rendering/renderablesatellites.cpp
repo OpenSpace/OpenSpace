@@ -152,6 +152,25 @@ namespace openspace {
         2044, 2048, 2052, 2056
     };
 
+    void calculateMaxApoAndMinPeri(std::vector<KeplerParameters> fileVector){
+        //int n = fileVector.size();
+        double maxApogee = 0;
+        double minPerigee = 5000;
+        for (const auto& dataElement : fileVector){     //(int i=0 ; i < n ; ++i ) {    
+            double ph = dataElement.semiMajorAxis * (1 - dataElement.eccentricity);
+            double ah = dataElement.semiMajorAxis *(1 + dataElement.eccentricity);
+
+            if (ph < minPerigee) 
+                minPerigee = ph;
+
+            if (ah > maxApogee)
+                maxApogee = ah;
+        }
+        LINFO(fmt::format("Min Perigee: {} ",  minPerigee));
+        LINFO(fmt::format("Max Apogee: {} ",  maxApogee));
+        
+    }
+
     // Count the number of full days since the beginning of 2000 to the beginning of
     // the parameter 'year'
     int countDays(int year) {
@@ -461,7 +480,6 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     _color =
         dictionary.value<glm::vec3>(ColorInfo.identifier);
 
-
     //_appearance.lineColor = _color;
     addPropertySubOwner(_appearance);
     addProperty(_path);
@@ -586,6 +604,10 @@ void RenderableSatellites::readTLEFile(const std::string& filename) {
 
     } // !for loop
     file.close();
+
+    // get max apergee and min perigee
+    calculateMaxApoAndMinPeri(_TLEData);
+
 }
 /*
 RenderableSatellites::~RenderableSatellites() {
@@ -617,6 +639,9 @@ void RenderableSatellites::deinitialize() {
 }
  
 void RenderableSatellites::initializeGL() {
+    glGenVertexArrays(1, &_vertexArray);
+    glGenBuffers(1, &_vertexBuffer);
+
     _programObject = SpaceModule::ProgramObjectManager.request(
        ProgramName,
        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
@@ -635,25 +660,9 @@ void RenderableSatellites::initializeGL() {
     _uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
     _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
     
-    glGenVertexArrays(1, &_vertexArray);
-    glBindVertexArray(_vertexArray);
-
-    glGenBuffers(1, &_vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        _vertexBufferData.size() * sizeof(TrailVBOLayout),
-        _vertexBufferData.data(),
-        GL_STATIC_DRAW    
-    );
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), nullptr);
-
-    glBindVertexArray(0);
+    updateBuffers();
 
     setRenderBin(Renderable::RenderBin::Overlay);
-    glBindVertexArray(0);
 }
     
 void RenderableSatellites::deinitializeGL() {
@@ -675,8 +684,8 @@ bool RenderableSatellites::isReady() const {
 void RenderableSatellites::update(const UpdateData&) {}
     
 void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
-    //if (_TLEData.empty())
-    //    return;
+    if (_TLEData.empty())
+        return;
 
     _programObject->activate();
     _programObject->setUniform(_uniformCache.opacity, _opacity);
@@ -693,10 +702,10 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
-    //_programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
-    //if (_appearance.useLineFade) {
-    //    _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
-    //}
+    _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
+    if (_appearance.useLineFade) {
+        _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
+    }
 
     glLineWidth(_appearance.lineWidth);
 
@@ -759,6 +768,22 @@ void RenderableSatellites::updateBuffers() {
         }
         ++orbitindex;
     }
+
+    glBindVertexArray(_vertexArray);
+
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        _vertexBufferData.size() * sizeof(TrailVBOLayout),
+        _vertexBufferData.data(),
+        GL_STATIC_DRAW    
+    );
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), nullptr);
+
+    glBindVertexArray(0);
+
 }
     
 }
