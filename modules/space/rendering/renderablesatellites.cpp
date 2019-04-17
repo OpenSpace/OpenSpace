@@ -130,6 +130,11 @@
         "method includes lines. If the rendering mode is set to Points, this value is "
         "ignored."
     };
+     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+        "Color",
+        "Color",
+        "Färg."
+     };
      
      constexpr const char* KeyFile = "Path";
      constexpr const char* KeyLineNum = "LineNumber";
@@ -421,6 +426,12 @@ documentation::Documentation RenderableSatellites::Documentation() {
                 new DoubleVerifier,
                 Optional::Yes,
                 LineWidthInfo.description
+            },
+            {
+                ColorInfo.identifier,
+                new DoubleVector3Verifier,
+                Optional::Yes,
+                ColorInfo.description
             }
         }
     };
@@ -438,6 +449,7 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     , _argumentOfPeriapsisColumnName(ArgumentOfPeriapsisColumnInfo)
     , _meanAnomalyAtEpochColumnName(MeanAnomalyAtEpochColumnInfo)
     , _epochColumnName(EpochColumnInfo)
+    , _color(ColorInfo)
 {
     documentation::testSpecificationAndThrow(
          Documentation(),
@@ -465,17 +477,23 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
         dictionary.value<std::string>(MeanAnomalyAtEpochColumnInfo.identifier);
     _epochColumnName =
         dictionary.value<std::string>(EpochColumnInfo.identifier);
+<<<<<<< HEAD
 
     // fungerar inte
     //_appearance.lineColor = glm::vec3(1.f), glm::vec3(0.f), glm::vec3(0.f);
     
+=======
+    _color =
+        dictionary.value<glm::vec3>(ColorInfo.identifier);
+
+
+    //_appearance.lineColor = _color;
+>>>>>>> New debris data
     addPropertySubOwner(_appearance);
     addProperty(_path);
     addProperty(_nSegments);
     // addProperty(_semiMajorAxisUnit);
 
-    
-    LINFO(fmt::format("KeyFile: {} ",  KeyFile));
     const std::string& file = dictionary.value<std::string>(KeyFile);
     LINFO(fmt::format("file: {} ", file));
 
@@ -714,6 +732,8 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
     const size_t orbits = static_cast<GLsizei>(_vertexBufferData.size()) / _nSegments;
     size_t vertices = 0;
 
+    //glDepthMask(false);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
     glBindVertexArray(_vertexArray);
     for (size_t i = 0; i <= orbits; ++i) {

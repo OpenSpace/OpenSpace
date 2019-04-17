@@ -116,6 +116,7 @@ namespace openspace {
         properties::StringProperty _argumentOfPeriapsisColumnName;
         properties::StringProperty _meanAnomalyAtEpochColumnName;
         properties::StringProperty _epochColumnName;
+        properties::Vec3Property _color;
 
         RenderableTrail::Appearance _appearance;
 
