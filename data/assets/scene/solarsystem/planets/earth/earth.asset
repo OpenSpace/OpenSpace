@@ -273,8 +273,8 @@ local Earth = {
             Enable = false,
             FileName = labelsPath .. "/Earth.labels",
             LabelAlignmentOption = "Horizontally", -- or Circularly
-            LabelsFontSize = 40.0,
-            LabelsSize = 2.0,
+            LabelsFontSize = 300.0,
+            LabelsSize = 0.5,
             LabelsMinSize = 1.0,
             LabelsMaxSize = 1500.0,
             ProximityEnabled = false,
@@ -284,7 +284,7 @@ local Earth = {
             FadeOutStartingDistance = 80000.0,
             LabelsForceDomeRendering = true,
             LabelsDistanceEPS = 1500000.0,
-            LabelsColor = {1.0, 1.0, 0.0, 1.0}
+            LabelsColor = {1.0, 0.0, 0.0, 1.0}
         }
     },
     Tag = { "planet_solarSystem", "planet_terrestrial" },
