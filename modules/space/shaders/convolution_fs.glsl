@@ -37,9 +37,25 @@ void main(void) {
     vec4 fullColor = vec4(0.0, 0.0, 0.0, 1.0);
     
     // Kernel Center
-    vec2 psfTextureCoords = vec2(float(psfTextureSize/2 + 1) / float(psfTextureSize));
-    fullColor + texture2D(shapeTexture, texturesCoords) * 
+    vec2 psfTextureCoords = vec2((float(psfTextureSize)/2.0 + 1.0) / float(psfTextureSize));
+    fullColor += texture2D(shapeTexture, texturesCoords) * 
                 texture2D(psfTexture, psfTextureCoords);
+
+    float maxConvSize = float(psfTextureSize);
+    float middleConvSize = maxConvSize / 2.0;
+    float convStep = 1.0 / maxConvSize;
+    for (float i = 0.0; i < maxConvSize; i += convStep) {
+        for (float j = 0.0; j < maxConvSize; j += convStep) {
+            vec2 newTexCoords = texturesCoords;
+            newTexCoords.x = i < middleConvSize ? texturesCoords.x - i : texturesCoords.x + i;
+            newTexCoords.y = j < middleConvSize ? texturesCoords.y - j : texturesCoords.y + j;
+            newTexCoords.x = newTexCoords.x > 1.0 ? 1.0 : newTexCoords.x < 0.0 ? 0.0 : newTexCoords.x;
+            newTexCoords.y = newTexCoords.y > 1.0 ? 1.0 : newTexCoords.y < 0.0 ? 0.0 : newTexCoords.y;
+            fullColor += texture2D(shapeTexture, newTexCoords) * 
+                texture2D(psfTexture, vec2(i, j));
+        }
+    }
+    //fullColor = texture2D(shapeTexture, texturesCoords);
 
     // vec4 sum = vec4(0.0);
  

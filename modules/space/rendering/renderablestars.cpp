@@ -686,6 +686,22 @@ void RenderableStars::initializeGL() {
         _psfTextureSize, 0, GL_RGBA, GL_BYTE, nullptr
     );
 
+
+    LDEBUG("Creating Convolution Texture");
+
+    glGenTextures(1, &_convolvedTexture);
+    glBindTexture(GL_TEXTURE_2D, _convolvedTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    // Stopped using a buffer object for GL_PIXEL_UNPACK_BUFFER
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_RGBA8, _convolvedfTextureSize,
+        _convolvedfTextureSize, 0, GL_RGBA, GL_BYTE, nullptr
+    );
+
     loadShapeTexture();
 
     renderPSFToTexture();
@@ -798,6 +814,7 @@ void RenderableStars::renderPSFToTexture() {
     _shapeTexture->bind();
     programConvolve->setUniform("shapeTexture", shapeTextureUnit);
 
+    programConvolve->setUniform("psfTextureSize", _psfTextureSize);
 
     // Convolves to texture
     glBindVertexArray(_psfVao);
@@ -815,10 +832,16 @@ void RenderableStars::renderPSFToTexture() {
         m_viewport[3]
     );
     glDeleteFramebuffers(1, &psfFBO);
+    glDeleteFramebuffers(1, &convolveFBO);
 
     // Restores OpenGL blending state
     glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
     glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
+
+    //TEST
+    std::cout << "============= PSF Texture Size: " << _psfTextureSize << " =============" << std::endl;
+    std::cout << "============= PSF Texture: " << _psfTexture << " =============" << std::endl;
+    std::cout << "============= Conv Texture: " << _convolvedTexture << " =============" << std::endl;
 }
 
 void RenderableStars::render(const RenderData& data, RendererTasks&) {
@@ -883,7 +906,8 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     psfUnit.activate();
 
     if (_renderingMethodOption.value() == 0) { // PSF Based Methods
-        glBindTexture(GL_TEXTURE_2D, _psfTexture);
+        //glBindTexture(GL_TEXTURE_2D, _psfTexture);
+        glBindTexture(GL_TEXTURE_2D, _convolvedTexture);
     }
     else if (_renderingMethodOption.value() == 1) { // Textured based Method
         _pointSpreadFunctionTexture->bind();
