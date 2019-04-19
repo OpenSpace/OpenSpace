@@ -157,7 +157,7 @@ namespace openspace {
         double maxApogee = 0;
         double minPerigee = 5000;
         int intervalDistribution[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        double intervalSegment = 4575.32/10;
+        double intervalSegment = (4575.32 - 171.013)/10; // max - min of total interval span where there is debris
         for (const auto& dataElement : fileVector){     //(int i=0 ; i < n ; ++i ) {    
             double ph = dataElement.semiMajorAxis * (1 - dataElement.eccentricity)- 6371;
             double ah = dataElement.semiMajorAxis * (1 + dataElement.eccentricity)- 6371;
@@ -168,6 +168,7 @@ namespace openspace {
             if (ah > maxApogee)
                 maxApogee = ah;
 
+            //Perigee
             if(ph < (intervalSegment))
                 intervalDistribution[0]++;
             else if(ph < (intervalSegment*2))
@@ -189,6 +190,32 @@ namespace openspace {
             else if(ph < (intervalSegment*10))
                 intervalDistribution[9]++;
             
+            // Position
+            // currentAltitud = sqrt( dataelement position.x ^ 2 + dataelement position.y ^ 2 + dataelement position.z ^ 2 );
+            // if (currentAltitud <= (171.013 + intervalSegment))
+            //     intervalDistribution[0]++;
+            // else if (currentAltitud <= (171.013 + 2*intervalSegment))
+            //     intervalDistribution[1]++;
+            // else if (currentAltitud <= (171.013 + 3*intervalSegment))
+            //     intervalDistribution[2]++; 
+            // else if (currentAltitud <= (171.013 + 4*intervalSegment))
+            //     intervalDistribution[3]++; 
+            // else if (currentAltitud <= (171.013 + 5*intervalSegment))
+            //     intervalDistribution[4]++; 
+            // else if (currentAltitud <= (171.013 + 6*intervalSegment))
+            //     intervalDistribution[5]++; 
+            // else if (currentAltitud <= (171.013 + 7*intervalSegment))
+            //     intervalDistribution[6]++; 
+            // else if (currentAltitud <= (171.013 + 8*intervalSegment))
+            //     intervalDistribution[7]++; 
+            // else if (currentAltitud <= (171.013 + 9*intervalSegment))
+            //     intervalDistribution[8]++;
+            // else if (currentAltitud <= (171.013 + 10*intervalSegment))
+            //     intervalDistribution[9]++; 
+                
+                
+                                          
+
         }
         LINFO(fmt::format("fileVector.size: {} ",  fileVector.size()));
         LINFO(fmt::format("Interval Distrubution 10% of max apogee: {} ", (intervalDistribution[0])));
