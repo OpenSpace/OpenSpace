@@ -75,8 +75,8 @@ private:
         OtherData = 3
     };
 
-    static const int _psfTextureSize = 32;
-    static const int _convolvedfTextureSize = 513;
+    static const int _psfTextureSize = 64;
+    static const int _convolvedfTextureSize = 257;
 
     void createDataSlice(ColorOption option);
 

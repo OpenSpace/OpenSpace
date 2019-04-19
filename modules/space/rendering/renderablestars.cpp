@@ -815,6 +815,7 @@ void RenderableStars::renderPSFToTexture() {
     programConvolve->setUniform("shapeTexture", shapeTextureUnit);
 
     programConvolve->setUniform("psfTextureSize", _psfTextureSize);
+    programConvolve->setUniform("convolvedfTextureSize", _convolvedfTextureSize);
 
     // Convolves to texture
     glBindVertexArray(_psfVao);
