@@ -600,6 +600,17 @@ void SessionRecording::preSynchronization() {
     else if (_cleanupNeeded) {
         cleanUpPlayback();
     }
+
+    //Handle callback(s)
+    if (_state != _lastState)
+    {
+        using K = const CallbackHandle;
+        using V = StateChangeCallback;
+        for (const std::pair<K, V>& it : _stateChangeCallbacks) {
+            it.second();
+        }
+    }
+    _lastState = _state;
 }
 
 bool SessionRecording::isRecording() const {
@@ -608,6 +619,10 @@ bool SessionRecording::isRecording() const {
 
 bool SessionRecording::isPlayingBack() const {
     return (_state == SessionState::Playback);
+}
+
+SessionRecording::SessionState SessionRecording::state() const {
+    return _state;
 }
 
 bool SessionRecording::playbackAddEntriesToTimeline() {
@@ -1267,6 +1282,29 @@ void SessionRecording::saveKeyframeToFileBinary(unsigned char* buffer, size_t si
 
 void SessionRecording::saveKeyframeToFile(std::string entry) {
     _recordFile << std::move(entry) << std::endl;
+}
+
+SessionRecording::CallbackHandle SessionRecording::addStateChangeCallback(StateChangeCallback cb) {
+    CallbackHandle handle = _nextCallbackHandle++;
+    _stateChangeCallbacks.emplace_back(handle, std::move(cb));
+    return handle;
+}
+
+void SessionRecording::removeStateChangeCallback(CallbackHandle handle) {
+    const auto it = std::find_if(
+        _stateChangeCallbacks.begin(),
+        _stateChangeCallbacks.end(),
+        [handle](const std::pair<CallbackHandle, std::function<void()>>& cb) {
+        return cb.first == handle;
+    }
+    );
+
+    ghoul_assert(
+        it != _stateChangeCallbacks.end(),
+        "handle must be a valid callback handle"
+    );
+
+    _stateChangeCallbacks.erase(it);
 }
 
 scripting::LuaLibrary SessionRecording::luaLibrary() {

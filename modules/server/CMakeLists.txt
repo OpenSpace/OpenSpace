@@ -35,6 +35,7 @@ set(HEADER_FILES
   include/topics/bouncetopic.h
   include/topics/getpropertytopic.h
   include/topics/luascripttopic.h
+  include/topics/sessionrecordingtopic.h
   include/topics/setpropertytopic.h
   include/topics/shortcuttopic.h
   include/topics/subscriptiontopic.h
@@ -55,6 +56,7 @@ set(SOURCE_FILES
   src/topics/bouncetopic.cpp
   src/topics/getpropertytopic.cpp
   src/topics/luascripttopic.cpp
+  src/topics/sessionrecordingtopic.cpp
   src/topics/setpropertytopic.cpp
   src/topics/shortcuttopic.cpp
   src/topics/subscriptiontopic.cpp
