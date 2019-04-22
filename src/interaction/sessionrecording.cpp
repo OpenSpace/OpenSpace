@@ -1307,6 +1307,20 @@ void SessionRecording::removeStateChangeCallback(CallbackHandle handle) {
     _stateChangeCallbacks.erase(it);
 }
 
+std::string SessionRecording::playbackList() {
+    std::string fileList;
+    std::string recordingsPath = absPath("${RECORDINGS}");
+
+    ghoul::filesystem::Directory currentDir(recordingsPath);
+    std::vector<std::string> allInputFiles = currentDir.readFiles();
+    for (std::string f : allInputFiles) {
+        fileList.append(f.substr(recordingsPath.length(), (f.length() - recordingsPath.length())));
+        fileList.append("\n");
+    }
+    return fileList.substr(0, fileList.size() - 1);
+    //return "Test string line1\nTest string line2";
+}
+
 scripting::LuaLibrary SessionRecording::luaLibrary() {
     return {
         "sessionRecording",

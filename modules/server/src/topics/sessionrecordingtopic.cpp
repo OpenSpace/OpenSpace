@@ -37,6 +37,7 @@ namespace {
     constexpr const char* EventKey = "event";
     constexpr const char* UnsubscribeEvent = "stop_subscription";
     constexpr const char* StateKey = "recState";
+    constexpr const char* PlaybackListKey = "playbackList";
 } // namespace
 
 using nlohmann::json;
@@ -82,6 +83,9 @@ void SessionRecordingTopic::handleJson(const nlohmann::json& json) {
         );
         _connection->sendJson(state());
     }
+    else if (requestedKey == PlaybackListKey) {
+        _connection->sendJson(playbackList());
+    }
     else {
         LWARNING("Cannot get " + requestedKey);
         _isDone = true;
@@ -90,6 +94,11 @@ void SessionRecordingTopic::handleJson(const nlohmann::json& json) {
 
 json SessionRecordingTopic::state() {
     json statJson = { { "state", static_cast<int>(global::sessionRecording.state()) } };
+    return wrappedPayload(statJson);
+}
+
+json SessionRecordingTopic::playbackList() {
+    json statJson = { { "playbackList", "Test string line1\nTest string line2" } };
     return wrappedPayload(statJson);
 }
 

@@ -156,9 +156,16 @@ public:
     */
     static openspace::scripting::LuaLibrary luaLibrary();
 
+    /**
+    * Used to add a callback to web gui to notify when palyback state changes.
+    * \param cb function handle for callback.
+    * \returns CallbackHandle value of callback number.
+    */
     CallbackHandle addStateChangeCallback(StateChangeCallback cb);
 
     void removeStateChangeCallback(CallbackHandle handle);
+
+    std::string playbackList();
 
 private:
     enum class RecordedType {

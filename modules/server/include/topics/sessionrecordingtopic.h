@@ -42,6 +42,7 @@ private:
     const int UnsetOnChangeHandle = -1;
 
     nlohmann::json state();
+    nlohmann::json playbackList();
 
     int _stateCallbackHandle = UnsetOnChangeHandle;
     bool _isDone = false;

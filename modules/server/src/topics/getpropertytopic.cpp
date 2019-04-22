@@ -31,6 +31,7 @@
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/sessionrecording.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/luaconsole.h>
@@ -69,6 +70,11 @@ void GetPropertyTopic::handleJson(const nlohmann::json& json) {
     }
     else if (requestedKey == RootPropertyOwner) {
         response = wrappedPayload(global::rootPropertyOwner);
+    }
+    else if (requestedKey == "playbackList") {
+        std::string fileList = global::sessionRecording.playbackList();
+        nlohmann::json getJson = { { "playbackList", fileList } };
+        response = wrappedPayload(getJson);
     }
     else {
         response = propertyFromKey(requestedKey);
