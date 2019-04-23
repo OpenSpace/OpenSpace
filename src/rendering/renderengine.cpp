@@ -995,11 +995,28 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
 }
 
 void RenderEngine::addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderable> s) {
+
+    const std::string identifier = s->identifier();
+
+    if (std::find_if(
+        global::screenSpaceRenderables.begin(),
+        global::screenSpaceRenderables.end(),
+        [&identifier](const std::unique_ptr<ScreenSpaceRenderable>& ssr) {
+            return ssr->identifier() == identifier;
+        }) != global::screenSpaceRenderables.end()
+    ) {
+        LERROR(fmt::format(
+            "Cannot add scene space renderable. "
+            "An element with identifier '{}' already exists",
+            identifier
+        ));
+        return;
+    }
+
     s->initialize();
     s->initializeGL();
 
     global::screenSpaceRootPropertyOwner.addPropertySubOwner(s.get());
-
     global::screenSpaceRenderables.push_back(std::move(s));
 }
 
