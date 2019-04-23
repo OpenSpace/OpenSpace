@@ -64,6 +64,7 @@ namespace {
     constexpr const char* KeyRenderingMethod = "RenderingMethod";
     constexpr const char* KeyDisableRenderingOnMaster = "DisableRenderingOnMaster";
     constexpr const char* KeyGlobalRotation = "GlobalRotation";
+    constexpr const char* KeyScreenSpaceRotation = "ScreenSpaceRotation";
     constexpr const char* KeyMasterRotation = "MasterRotation";
     constexpr const char* KeyDisableInGameConsole = "DisableInGameConsole";
     constexpr const char* KeyScreenshotUseDate = "ScreenshotUseDate";
@@ -299,6 +300,7 @@ void parseLuaState(Configuration& configuration) {
     getValue(s, KeyDisableRenderingOnMaster, c.isRenderingOnMasterDisabled);
 
     getValue(s, KeyGlobalRotation, c.globalRotation);
+    getValue(s, KeyScreenSpaceRotation, c.screenSpaceRotation);
     getValue(s, KeyMasterRotation, c.masterRotation);
     getValue(s, KeyDisableInGameConsole, c.isConsoleDisabled);
     getValue(s, KeyRenderingMethod, c.renderingMethod);

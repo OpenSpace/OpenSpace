@@ -37,7 +37,7 @@ Fragment getFragment() {
     Fragment frag;
 
     frag.color = texture(texture1, vs_st);
-    frag.color.a = (frag.color.a != 0.0) ? Alpha : frag.color.a;
+    frag.color.a = Alpha * frag.color.a;
     if (frag.color.a == 0.0) {
         discard;
     }

@@ -86,6 +86,7 @@ struct Configuration {
 
     bool isRenderingOnMasterDisabled = false;
     glm::dvec3 globalRotation;
+    glm::dvec3 screenSpaceRotation;
     glm::dvec3 masterRotation;
     bool isConsoleDisabled = false;
 

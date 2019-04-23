@@ -542,18 +542,16 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
 
 glm::mat4 ScreenSpaceRenderable::globalRotationMatrix() {
     // We do not want the screen space planes to be affected by
-    // 1) The rotation that may be applied to the master cluster node, to compensate for
-    //    any tilt on the display system, which is not applied to the master.
-    // 2) The global rotation of the view applied in the render engine
-    // 3) sgct's scene matrix (also called model matrix by sgct)
+    // 1) The global rotation of the view applied in the render engine
+    // 2) sgct's scene matrix (also called model matrix by sgct)
 
-    glm::mat4 rotation = glm::inverse(
-        global::renderEngine.nodeRotation() *
+    glm::mat4 inverseRotation = glm::inverse(
         global::renderEngine.globalRotation() *
         global::windowDelegate.modelMatrix()
     );
 
-    return rotation;
+    // The rotation of all screen space renderables is adjustable in the render engine:
+    return global::renderEngine.screenSpaceRotation() * inverseRotation;
 }
 
 glm::mat4 ScreenSpaceRenderable::localRotationMatrix() {

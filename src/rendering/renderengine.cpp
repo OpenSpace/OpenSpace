@@ -158,13 +158,20 @@ namespace {
         "master node is not required and performance can be gained by disabling it."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GlobalRotationinfo = {
+    constexpr openspace::properties::Property::PropertyInfo GlobalRotationInfo = {
         "GlobalRotation",
         "Global Rotation",
         "Applies a global view rotation. Use this to rotate the position of the "
         "focus node away from the default location on the screen. This setting "
         "persists even when a new focus node is selected. Defined using pitch, yaw, "
         "roll in radians"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ScreenSpaceRotationInfo = {
+        "ScreenSpaceRotation",
+        "Screen Space Rotation",
+        "Applies a rotation to all screen space renderables. "
+        "Defined using pitch, yaw, roll in radians."
     };
 
     constexpr openspace::properties::Property::PropertyInfo MasterRotationInfo = {
@@ -219,7 +226,13 @@ RenderEngine::RenderEngine()
     , _showFrameNumber(ShowFrameNumberInfo, false)
     , _disableMasterRendering(DisableMasterInfo, false)
     , _globalRotation(
-        GlobalRotationinfo,
+        GlobalRotationInfo,
+        glm::vec3(0.f),
+        glm::vec3(-glm::pi<float>()),
+        glm::vec3(glm::pi<float>())
+    )
+    , _screenSpaceRotation(
+        ScreenSpaceRotationInfo,
         glm::vec3(0.f),
         glm::vec3(-glm::pi<float>()),
         glm::vec3(glm::pi<float>())
@@ -283,6 +296,7 @@ RenderEngine::RenderEngine()
     addProperty(_showFrameNumber);
 
     addProperty(_globalRotation);
+    addProperty(_screenSpaceRotation);
     addProperty(_masterRotation);
     addProperty(_disableMasterRendering);
 }
@@ -314,6 +328,8 @@ void RenderEngine::initialize() {
     // We have to perform these initializations here as the OsEng has not been initialized
     // in our constructor
     _globalRotation = static_cast<glm::vec3>(global::configuration.globalRotation);
+    _screenSpaceRotation =
+        static_cast<glm::vec3>(global::configuration.screenSpaceRotation);
     _masterRotation = static_cast<glm::vec3>(global::configuration.masterRotation);
     _disableMasterRendering = global::configuration.isRenderingOnMasterDisabled;
 
@@ -471,6 +487,16 @@ glm::ivec2 RenderEngine::fontResolution() const {
 
 glm::mat4 RenderEngine::globalRotation() const {
     glm::vec3 rot = _globalRotation.value();
+
+    glm::quat pitch = glm::angleAxis(rot.x, glm::vec3(1, 0, 0));
+    glm::quat yaw = glm::angleAxis(rot.y, glm::vec3(0, 1, 0));
+    glm::quat roll = glm::angleAxis(rot.z, glm::vec3(0, 0, 1));
+
+    return glm::mat4_cast(glm::normalize(pitch * yaw * roll));
+}
+
+glm::mat4 RenderEngine::screenSpaceRotation() const {
+    glm::vec3 rot = _screenSpaceRotation.value();
 
     glm::quat pitch = glm::angleAxis(rot.x, glm::vec3(1, 0, 0));
     glm::quat yaw = glm::angleAxis(rot.y, glm::vec3(0, 1, 0));

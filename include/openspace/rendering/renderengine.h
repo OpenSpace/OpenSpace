@@ -152,6 +152,7 @@ public:
     glm::ivec2 fontResolution() const;
 
     glm::mat4 globalRotation() const;
+    glm::mat4 screenSpaceRotation() const;
     glm::mat4 nodeRotation() const;
 
 private:
@@ -196,6 +197,7 @@ private:
     properties::FloatProperty _gamma;
 
     properties::Vec3Property _globalRotation;
+    properties::Vec3Property _screenSpaceRotation;
     properties::Vec3Property _masterRotation;
 
     uint64_t _frameNumber = 0;
