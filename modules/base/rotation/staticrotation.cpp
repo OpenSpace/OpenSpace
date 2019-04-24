@@ -34,6 +34,27 @@ namespace {
         "This value is the used as a 3x3 rotation matrix that is applied to the scene "
         "graph node that this transformation is attached to relative to its parent."
     };
+
+    // Conversion from rotation matrix to euler angles,
+    // given that the rotation is a pure rotation matrix.
+    // Inspired by:
+    // https://www.learnopencv.com/rotation-matrix-to-euler-angles/
+    glm::dvec3 rotationMatrixToEulerAngles(glm::dmat4 mat) {
+        double sy = glm::sqrt(mat[0][0] * mat[0][0] + mat[0][1] * mat[0][1]);
+        bool singular = sy < 1e-6;
+
+        double x, y, z;
+        if (singular) {
+            x = glm::atan(-mat[2][1], mat[1][1]);
+            y = glm::atan(-mat[0][2], sy);
+            z = 0;
+        } else {
+            x = glm::atan(mat[1][2], mat[2][2]);
+            y = glm::atan(-mat[0][2], sy);
+            z = glm::atan(mat[0][1], mat[0][0]);
+        }
+        return glm::dvec3(x, y, z);
+    }
 } // namespace
 
 namespace openspace {
@@ -51,9 +72,14 @@ documentation::Documentation StaticRotation::Documentation() {
             },
             {
                 RotationInfo.identifier,
-                new DoubleVector3Verifier(),
+                new OrVerifier({
+                    new DoubleVector3Verifier(),
+                    new DoubleVector4Verifier(),
+                    new DoubleMatrix3Verifier()
+                }),
                 Optional::No,
-                "Stores the static rotation as either a vector containing Euler angles."
+                "Stores the static rotation as a vector containing Euler angles, "
+                " a quaternion or a rotation matrix."
             }
         }
     };
@@ -81,6 +107,17 @@ StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary) : StaticRota
     if (dictionary.hasKeyAndValue<glm::dvec3>(RotationInfo.identifier)) {
         _eulerRotation = static_cast<glm::vec3>(
             dictionary.value<glm::dvec3>(RotationInfo.identifier)
+        );
+        _matrixIsDirty = true;
+    } else if (dictionary.hasKeyAndValue<glm::dvec4>(RotationInfo.identifier)) {
+        glm::dvec4 data = dictionary.value<glm::dvec4>(RotationInfo.identifier);
+        _eulerRotation = rotationMatrixToEulerAngles(
+            glm::mat3_cast(glm::dquat(data.w, data.x, data.y, data.z))
+        );
+        _matrixIsDirty = true;
+    } else if (dictionary.hasKeyAndValue<glm::dmat3>(RotationInfo.identifier)) {
+        _eulerRotation = rotationMatrixToEulerAngles(
+            dictionary.value<glm::dmat3>(RotationInfo.identifier)
         );
         _matrixIsDirty = true;
     }
