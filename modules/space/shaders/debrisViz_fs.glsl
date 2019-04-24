@@ -28,14 +28,16 @@
 uniform vec3 color;
 uniform float opacity = 1.0;
 
+
 in vec4 viewSpacePosition;
 in vec4 vs_position;
+in float fade;
 //in vec3 vs_color;
 //in vec2 vs_texcoord;
 
 Fragment getFragment() {
     Fragment frag;
-    frag.color = vec4(color, opacity);
+    frag.color = vec4(color * fade, fade * opacity);
     frag.depth = vs_position.w;
     frag.gPosition = viewSpacePosition;
     frag.gNormal = vec4(1, 1, 1 , 0);

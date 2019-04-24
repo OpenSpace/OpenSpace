@@ -31,10 +31,31 @@ layout (location = 0) in vec4 vertex_data;
 uniform dmat4 modelViewTransform;
 uniform mat4 projectionTransform;
 
+uniform int numberOfSegments;
+uniform float lineFade;
+uniform vec3 debrisPosition;
+uniform int* VertexIDs;
+uniform int numberOfOrbits;
+
 out vec4 viewSpacePosition;
 out vec4 vs_position;
+out float fade;
 
 void main() {    
+    // ta in en vector med vilka index i vertexbufferten som positionen är =.
+    // dela vectorns längd med antalet orbits för att få vilket index i den lilla
+    // vectorn vi ska använda värdet från.
+
+    int vertexID = gl_VertexID;
+    float id = float(vertexID) / float(numberOfSegments);
+    fade = clamp(id * lineFade, 0.0, 1.0); 
+
+    int orbit = vertexID/numberOfSegments;
+    // will this iterate or add onto the value in vertexIDs?:  VertexIDs = VertexIDs + orbit;
+    // should it be VertexIDs[orbit] - gl_VertexID, OR gl_VertexID - VertexIDs[orbit]:
+                        // int offset = VertexIDs[orbit] - gl_VertexID
+                        // to know the direction of the debris
+    // if(debrisPosition == vs_position)
     
     viewSpacePosition = vec4(modelViewTransform * dvec4(vertex_data.xyz, 1));
     vs_position = z_normalization( projectionTransform * viewSpacePosition);

@@ -91,7 +91,7 @@ public:
     glm::dvec3 position(const UpdateData& data) const override;
 
     // Is only used in renderableDebris so far. May rename if needed
-    glm::dvec3 debrisPos(const Time& time) const;
+    glm::dvec3 debrisPos(const double& time) const;
 
 
     /**

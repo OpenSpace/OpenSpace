@@ -135,6 +135,13 @@
         "Color",
         "Färg."
      };
+    constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
+        "Fade",
+        "Line fade",
+        "The fading factor that is applied to the trail if the 'EnableFade' value is "
+        "'true'. If it is 'false', this setting has no effect. The higher the number, "
+        "the less fading is applied."
+    };
      
      constexpr const char* KeyFile = "Path";
      constexpr const char* KeyLineNum = "LineNumber";
@@ -495,6 +502,12 @@ documentation::Documentation RenderableSatellites::Documentation() {
                 new DoubleVector3Verifier,
                 Optional::Yes,
                 ColorInfo.description
+            },
+            {
+                FadeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                FadeInfo.description
             }
         }
     };
@@ -512,7 +525,9 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     , _argumentOfPeriapsisColumnName(ArgumentOfPeriapsisColumnInfo)
     , _meanAnomalyAtEpochColumnName(MeanAnomalyAtEpochColumnInfo)
     , _epochColumnName(EpochColumnInfo)
-    , _color(ColorInfo)
+    , _color(ColorInfo)    
+    , _lineFade(FadeInfo)
+
 {
     documentation::testSpecificationAndThrow(
          Documentation(),
@@ -542,11 +557,14 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
         dictionary.value<std::string>(EpochColumnInfo.identifier);
     _color =
         dictionary.value<glm::vec3>(ColorInfo.identifier);
+    _lineFade = 
+        static_cast<float>(dictionary.value<double>(FadeInfo.identifier));
 
-    //_appearance.lineColor = _color;
+    // _appearance.lineColor = _color; 
     addPropertySubOwner(_appearance);
     addProperty(_path);
     addProperty(_nSegments);
+    // addProperty(_lineFade);
     // addProperty(_semiMajorAxisUnit);
 
     const std::string& file = dictionary.value<std::string>(KeyFile);
@@ -678,7 +696,6 @@ RenderableSatellites::~RenderableSatellites() {
 }
  */  
 void RenderableSatellites::initialize() {
-    LINFO(fmt::format("_path: {} ", _path));
     readTLEFile(_path);
     updateBuffers();
 
@@ -716,12 +733,16 @@ void RenderableSatellites::initializeGL() {
        }
    );
     
-    _uniformCache.opacity = _programObject->uniformLocation("opacity");
-    _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
-    _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
-    _uniformCache.color = _programObject->uniformLocation("color");
-    _uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
-    _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
+    _uniformCache.opacity       = _programObject->uniformLocation("opacity");
+    _uniformCache.modelView     = _programObject->uniformLocation("modelViewTransform");
+    _uniformCache.projection    = _programObject->uniformLocation("projectionTransform");
+    _uniformCache.color         = _programObject->uniformLocation("color");
+    //_uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
+    _uniformCache.lineFade      = _programObject->uniformLocation("lineFade");
+    _uniformCache.segments      = _programObject->uniformLocation("numberOfSegments");
+    _uniformCache.position      = _programObject->uniformLocation("debrisPosition");
+    _uniformCache.numberOfOrbits    = _programObject->uniformLocation("numberOfOrbits");
+    _uniformCache.vertexIDs         = _programObject->uniformLocation("vertexIDs");
     
     updateBuffers();
 
@@ -744,13 +765,72 @@ bool RenderableSatellites::isReady() const {
     return true;
 }
 
-void RenderableSatellites::update(const UpdateData&) {}
+void RenderableSatellites::update(const UpdateData& data) { 
+}
+
+int getNearestVertexNeighbour(int whatOrbit) {
     
+    return 0;
+
+}    
+
 void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
     if (_TLEData.empty())
         return;
+    _inGameTime = data.time.j2000Seconds(); 
 
+    std::vector<TrailVBOLayout>::iterator it = _vertexBufferData.begin();
+    std::vector<unsigned int> vertexIDs;
+    unsigned int whatOrbit = 0;
+    for (const auto& orbit : _TLEData) {
+        _keplerTranslator.setKeplerElements(
+            orbit.eccentricity,
+            orbit.semiMajorAxis,
+            orbit.inclination,
+            orbit.ascendingNode,
+            orbit.argumentOfPeriapsis,
+            orbit.meanAnomaly,
+            orbit.period,
+            orbit.epoch
+        );
+    
+        glm::vec3 position = _keplerTranslator.debrisPos(_inGameTime);
+        _position.x = position.x;
+        _position.y = position.y;
+        _position.z = position.z;
+
+        // LINFO(fmt::format("atm position: {} ",  position));
+ 
+        float closestDistance = 10000000;
+        unsigned int whatIndex = 0;
+        for(int i=0 ; i<_nSegments ; ++i) {            
+            float positionDistance = glm::distance(
+                                         glm::vec3(_position.x, _position.y, _position.z) 
+                                        ,glm::vec3(it->x, it->y, it->z)); 
+            if( positionDistance < closestDistance ) 
+            {
+                closestDistance = positionDistance;
+                whatIndex = i;
+            }
+            ++it;
+        }
+        vertexIDs.push_back(whatIndex + (whatOrbit * _nSegments));
+       ++whatOrbit;
+    }
+    
+
+    // 1 loopa vertex buffer
+    // 1,5 jämföra positionen på _position med vertexens position.
+    // 2 hitta vilket id i bufferten som positionen har.
+    // 3 skicka vidare det idt 
+
+    /////// TEST
     _programObject->activate();
+
+    _programObject->setUniform(_uniformCache.vertexIDs, vertexIDs.data());
+
+    _programObject->setUniform(_uniformCache.numberOfOrbits, _TLEData.size());
+
     _programObject->setUniform(_uniformCache.opacity, _opacity);
 
     glm::dmat4 modelTransform =
@@ -765,10 +845,12 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
-    _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
-    if (_appearance.useLineFade) {
+    //_programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
+    //if (_appearance.useLineFade) {
         _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
-    }
+    //}
+    _programObject->setUniform(_uniformCache.segments, _nSegments);
+    _programObject->setUniform(_uniformCache.position, _position);
 
     glLineWidth(_appearance.lineWidth);
 
@@ -796,7 +878,7 @@ void RenderableSatellites::updateBuffers() {
     _vertexBufferData.resize(_TLEData.size() * nVerticesPerOrbit);
     //_indexBufferData.resize(_TLEData.size() * _nSegments * 2);
     size_t orbitindex = 0;
-    size_t elementindex = 0;
+    // size_t elementindex = 0;
 
     for (const auto& orbit : _TLEData) {
         _keplerTranslator.setKeplerElements(
@@ -816,8 +898,7 @@ void RenderableSatellites::updateBuffers() {
             float timeOffset = orbit.period *
                 static_cast<float>(i) / static_cast<float>(_nSegments);
 
-            glm::vec3 position = _keplerTranslator.debrisPos(Time(orbit.epoch + timeOffset)); 
-
+            glm::vec3 position = _keplerTranslator.debrisPos(static_cast<double>(orbit.epoch + timeOffset)); 
             // LINFO(fmt::format("SegmentPosition: {} ",  position));
 
             _vertexBufferData[index].x = position.x;
@@ -831,7 +912,6 @@ void RenderableSatellites::updateBuffers() {
         }
         ++orbitindex;
     }
-
     glBindVertexArray(_vertexArray);
 
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);

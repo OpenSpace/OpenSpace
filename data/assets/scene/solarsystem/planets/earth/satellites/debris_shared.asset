@@ -68,7 +68,8 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
                 ArgumentOfPeriapsisColumn = "-",
                 MeanAnomalyAtEpochColumn = "-",
                 EpochColumn = "-",
-                Color = color
+                Color = color,
+                Fade = 0.5
                 
             },
             GUI = {
