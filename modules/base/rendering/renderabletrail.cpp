@@ -175,10 +175,10 @@ documentation::Documentation RenderableTrail::Documentation() {
 
 RenderableTrail::Appearance::Appearance()
     : properties::PropertyOwner(AppearanceInfo)
-    , lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , lineColor(LineColorInfo, glm::vec3(0.9f, 0.45f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
     , useLineFade(EnableFadeInfo, true)
     , lineFade(FadeInfo, 1.f, 0.f, 30.f)
-    , lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
+    , lineWidth(LineWidthInfo, 1.35f, 1.f, 20.f)
     , pointSize(PointSizeInfo, 1, 1, 64)
     , renderingModes(
           RenderingModeInfo,

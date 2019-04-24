@@ -43,30 +43,6 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
         return true
     end
 
-<<<<<<< HEAD
-    function debris(title, file, color)
-        return {
-           Identifier = title,
-           Parent = transforms.EarthInertial.Identifier,
-           Renderable = {
-                Type = "RenderableSatellites",
-                Path = file,
-
-                -- The initialization with "-" is just a placeholder.
-                -- (needed to be initialized)
-                Segments = 160,
-                EccentricityColumn = "-",
-                SemiMajorAxisColumn = "-",
-                SemiMajorAxisUnit = 1,
-                InclinationColumn = "-",
-                AscendingNodeColumn = "-",
-                ArgumentOfPeriapsisColumn = "-",
-                MeanAnomalyAtEpochColumn = "-",
-                EpochColumn = "-",
-                Color = color
-            },
-            
-=======
     function getSat(title, file, lineNum, textureFile, group)
         return {
             Identifier = title,
@@ -94,17 +70,12 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
                 }
             },
             Tag = { "earth_satellite_" .. group, "earth_satellite_" .. group .. "_marker" },
->>>>>>> debris_shared and satellite_shared
             GUI = {
                 Path = "/Solar System/Planets/Earth/Satellites"
             }
         }
     end
 
-<<<<<<< HEAD
-    local Debris = debris(filenameSansExt, path, group.TrailColor)
-    assetHelper.registerSceneGraphNodesAndExport(asset, { Debris })
-=======
     function getSatTrail(title, file, lineNum, per, color, group)
         return {
             Identifier = title .. "_trail",
@@ -128,7 +99,6 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
             }
         }
     end
->>>>>>> debris_shared and satellite_shared
 
 
     local filename = group.Url:match("([^/]+)$")

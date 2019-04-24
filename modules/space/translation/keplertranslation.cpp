@@ -304,13 +304,13 @@ glm::dvec3 KeplerTranslation::position(const UpdateData& data) const {
     return _orbitPlaneRotation * p;
 }
 // !!! is only used in module/space/rendering/renderablesatellites 
-glm::dvec3 KeplerTranslation::debrisPos(const Time& time) const {
+glm::dvec3 KeplerTranslation::debrisPos(const double& time) const {
     if (_orbitPlaneDirty) {
         computeOrbitPlane();
         _orbitPlaneDirty = false;
     }
 
-    const double t = time.j2000Seconds() - _epoch;
+    const double t = time - _epoch;
     const double meanMotion = glm::two_pi<double>() / _period;
     const double meanAnomaly = glm::radians(_meanAnomalyAtEpoch.value()) + t * meanMotion;
     const double e = eccentricAnomaly(meanAnomaly);

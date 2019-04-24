@@ -117,11 +117,17 @@ namespace openspace {
         properties::StringProperty _meanAnomalyAtEpochColumnName;
         properties::StringProperty _epochColumnName;
         properties::Vec3Property _color;
+        properties::DoubleProperty _lineFade;
 
         RenderableTrail::Appearance _appearance;
 
-        UniformCache(opacity, modelView, projection, color, useLineFade, lineFade)
-           _uniformCache;
+        glm::vec3 _position;
+
+        double _inGameTime = 0.0;
+
+        UniformCache(opacity, modelView, projection, color, useLineFade, lineFade,
+            segments, position, vertexIDs, numberOfOrbits)
+            _uniformCache;
 
         /**
          * Reads the provided TLE file and calles the KeplerTranslation::setKeplerElments
