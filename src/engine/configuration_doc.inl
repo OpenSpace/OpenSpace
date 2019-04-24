@@ -258,7 +258,7 @@ documentation::Documentation Configuration::Documentation = {
         },
         {
             KeyGlobalRotation,
-            new Vector3Verifier<double>,
+            new DoubleVector3Verifier,
             Optional::Yes,
             "Applies a global view rotation. Use this to rotate the position of the "
             "focus node away from the default location on the screen. This setting "
@@ -267,7 +267,7 @@ documentation::Documentation Configuration::Documentation = {
         },
         {
             KeyMasterRotation,
-            new Vector3Verifier<double>,
+            new DoubleVector3Verifier,
             Optional::Yes,
             "Applies a view rotation for only the master node, defined using "
             "roll, pitch yaw in radians. This can be used to compensate the master view "
