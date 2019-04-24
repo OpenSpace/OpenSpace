@@ -274,6 +274,13 @@ documentation::Documentation Configuration::Documentation = {
             "direction for tilted display systems in clustered immersive environments."
         },
         {
+            KeyScreenSpaceRotation,
+            new DoubleVector3Verifier,
+            Optional::Yes,
+            "Applies a global rotation for all screenspace renderables. Defined using "
+            "roll, pitch, yaw in radians."
+        },
+        {
             KeyScreenshotUseDate,
             new BoolVerifier,
             Optional::Yes,
