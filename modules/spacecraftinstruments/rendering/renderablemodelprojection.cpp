@@ -377,8 +377,7 @@ void RenderableModelProjection::update(const UpdateData& data) {
         global::renderEngine.scene()->sceneGraphNode("Sun")->worldPosition() -
         data.modelTransform.translation;
 
-    _sunPosition =
-        PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z).vec3();
+    _sunPosition = static_cast<glm::vec3>(p);
 }
 
 void RenderableModelProjection::imageProjectGPU(

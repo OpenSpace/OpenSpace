@@ -902,6 +902,12 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.brightnessCent, _brightnessCent);
 
     _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+    _program->setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
+    _program->setUniform("objpos", glm::vec4(data.modelTransform.translation, 0.f));
+    _program->setUniform("camrot", glm::mat4(data.camera.viewRotationMatrix()));
+    _program->setUniform("scaling", glm::vec2(1.f, 0.f));
+    // abock:  This was part of a merge conflict, so I commented it out
+    //_program->setUniform(_uniformCache.scaling, scaling);
 
     ghoul::opengl::TextureUnit psfUnit;
     psfUnit.activate();

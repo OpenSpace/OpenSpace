@@ -85,7 +85,9 @@ struct Configuration {
     bool usePerSceneCache = false;
 
     bool isRenderingOnMasterDisabled = false;
-    bool isSceneTranslationOnMasterDisabled = false;
+    glm::dvec3 globalRotation;
+    glm::dvec3 screenSpaceRotation;
+    glm::dvec3 masterRotation;
     bool isConsoleDisabled = false;
 
     std::map<std::string, ghoul::Dictionary> moduleConfigurations;

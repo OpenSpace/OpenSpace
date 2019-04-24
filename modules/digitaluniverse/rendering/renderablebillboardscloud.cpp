@@ -426,16 +426,21 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         addProperty(_drawElements);
     }
 
-    // DEBUG:
     _renderOption.addOption(0, "Camera View Direction");
     _renderOption.addOption(1, "Camera Position Normal");
+
     _renderOption.set(1);
-    if (global::windowDelegate.isFisheyeRendering()) {
-        _renderOption.set(1);
+    if (dictionary.hasKeyAndValue<std::string>(RenderOptionInfo.identifier)) {
+        const std::string option =
+            dictionary.value<std::string>(RenderOptionInfo.identifier);
+
+        if (option == "Camera View Direction") {
+            _renderOption.set(0);
+        } else if (option == "Camera Position Normal") {
+            _renderOption.set(1);
+        }
     }
-    else {
-        _renderOption.set(0);
-    }
+
     addProperty(_renderOption);
 
     if (dictionary.hasKey(keyUnit)) {

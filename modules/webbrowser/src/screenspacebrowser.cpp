@@ -137,7 +137,12 @@ void ScreenSpaceBrowser::render() {
         return;
     }
     _renderHandler->updateTexture();
-    draw(rotationMatrix() * translationMatrix() * scaleMatrix());
+    draw(
+        globalRotationMatrix() *
+        translationMatrix() *
+        localRotationMatrix() *
+        scaleMatrix()
+    );
 }
 
 void ScreenSpaceBrowser::update() {

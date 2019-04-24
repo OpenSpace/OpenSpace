@@ -950,7 +950,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     RenderData data = {
         *camera,
-        psc(),
         std::move(time),
         doPerformanceMeasurements,
         0,
