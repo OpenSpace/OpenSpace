@@ -61,7 +61,7 @@ public:
     BrowserInstance(WebRenderHandler* renderer, WebKeyboardHandler* keyboardHandler);
     ~BrowserInstance();
 
-    void loadUrl(const std::string& url);
+    void loadUrl(std::string url);
     /**
      * Load a local file.
      *
@@ -113,6 +113,8 @@ public:
     void setZoom(float ratio);
 
     void reloadBrowser();
+
+    void selectAll();
 
     const CefRefPtr<CefBrowser>& getBrowser() const;
 

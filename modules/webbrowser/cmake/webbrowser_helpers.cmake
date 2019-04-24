@@ -63,7 +63,7 @@ endfunction()
 
 function(run_cef_macosx_config CEF_ROOT module_path)
     set(CEF_FINAL_APP "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/${CEF_TARGET}.app")
-    set(CEF_FINAL_HELPER_APP "${CEF_FINAL_APP}/Contents/${CEF_HELPER_TARGET}.app")
+    set(CEF_FINAL_HELPER_APP "${CEF_FINAL_APP}/Contents/Frameworks/${CEF_HELPER_TARGET}.app")
     set(CEF_FRAMEWORK_LOCATION "${CEF_BINARY_DIR}/Chromium Embedded Framework.framework")
     set(CEF_FRAMEWORK_FINAL_LOCATION "${CEF_FINAL_APP}/Contents/Frameworks/Chromium Embedded Framework.framework")
 
@@ -97,9 +97,6 @@ function(run_cef_macosx_config CEF_ROOT module_path)
             "${CEF_FINAL_APP}/Contents/${file_name}"
         )
     endforeach ()
-
-    # Fix the framework rpath in the main executable.
-    FIX_MACOSX_MAIN_FRAMEWORK_RPATH(${CEF_TARGET})
 
     if(NOT ${CMAKE_GENERATOR} STREQUAL "Xcode")
         # Manually process and copy over resource files.

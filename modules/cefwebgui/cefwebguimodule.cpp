@@ -46,6 +46,12 @@ namespace {
         "This setting determines whether the browser should be enabled or not."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
+        "Reload",
+        "Reload",
+        "Trigger this property to reload the browser."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo VisibleInfo = {
         "Visible",
         "Is Visible",
@@ -72,10 +78,12 @@ CefWebGuiModule::CefWebGuiModule()
     , _enabled(EnabledInfo, true)
     , _visible(VisibleInfo, true)
     , _url(GuiUrlInfo, "")
-    , _guiScale(GuiScaleInfo, 1.0, 0.1, 3.0)
+    , _reload(ReloadInfo)
+    , _guiScale(GuiScaleInfo, 1.f, 0.1f, 3.f)
 {
     addProperty(_enabled);
     addProperty(_visible);
+    addProperty(_reload);
     addProperty(_url);
     addProperty(_guiScale);
 }
@@ -132,6 +140,12 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     _url.onChange([this]() {
         if (_instance) {
             _instance->loadUrl(_url);
+        }
+    });
+
+    _reload.onChange([this]() {
+        if (_instance) {
+            _instance->reloadBrowser();
         }
     });
 
