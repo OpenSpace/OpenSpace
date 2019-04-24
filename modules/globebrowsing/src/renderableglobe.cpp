@@ -1677,7 +1677,7 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
 
         // First we determine if the caster is shadowing the current planet (all
         // calculations in World Coordinates):
-        const glm::dvec3 planetCasterVec = casterPos - data.position.dvec3();
+        const glm::dvec3 planetCasterVec = casterPos - data.modelTransform.translation;
         const glm::dvec3 sourceCasterVec = casterPos - sourcePos;
         const double sc_length = glm::length(sourceCasterVec);
         const glm::dvec3 planetCaster_proj =
@@ -1698,7 +1698,8 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
             lt
         );
         const double casterDistSun = glm::length(casterPos - sunPos);
-        const double planetDistSun = glm::length(data.position.dvec3() - sunPos);
+        const double planetDistSun =
+            glm::length(data.modelTransform.translation - sunPos);
 
         ShadowRenderingStruct shadowData;
         shadowData.isShadowing = false;

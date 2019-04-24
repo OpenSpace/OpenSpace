@@ -229,7 +229,10 @@ bool RenderableConstellationBounds::isReady() const {
 void RenderableConstellationBounds::render(const RenderData& data, RendererTasks&) {
     _program->activate();
 
-    setPscUniforms(*_program, data.camera, data.position);
+    _program->setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
+    _program->setUniform("objpos", glm::vec4(data.modelTransform.translation, 0.f));
+    _program->setUniform("camrot", glm::mat4(data.camera.viewRotationMatrix()));
+    _program->setUniform("scaling", glm::vec2(1.f, 0.f));
 
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *

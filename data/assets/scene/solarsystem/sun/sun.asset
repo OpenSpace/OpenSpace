@@ -3,29 +3,28 @@ local transforms = asset.require("./transforms")
 local textures = asset.require('./sun_textures').TexturesPath
 asset.require("spice/base")
 
-
-
 local Sun = {
     Identifier = "Sun",
     Parent = transforms.SunIAU.Identifier,
     Renderable = {
-        Type = "RenderablePlanet",
+        Type = "RenderableGlobe",
         Enabled = false,
-        Frame = "IAU_SUN",
-        Body = "SUN",
-        Geometry = {
-            Type = "SimpleSphere",
-            Radius = 6.957E8,
-            Segments = 100
+        Radii = { 6.957E8, 6.957E8, 6.957E8 },
+        SegmentsPerPatch = 64,
+        Layers = {
+            ColorLayers = {
+                {
+                    Identifier = "Texture",
+                    FilePath = textures .. "/sun.jpg",
+                    Enabled = true
+                }
+            }
         },
-        ColorTexture = textures .. "/sun.jpg",
         PerformShading = false
     },
     GUI = {
         Path = "/Solar System/Sun"
     }
 }
-
-
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Sun })

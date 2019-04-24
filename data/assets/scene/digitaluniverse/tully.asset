@@ -20,7 +20,7 @@ local tullyPoints = {
     Identifier = "TullyGalaxies",
     Renderable = {
         Type = "RenderableBillboardsCloud",
-        Enabled = false,
+        Enabled = true,
         Color = { 1.0, 0.4, 0.2 },
         Transparency = 0.99,
         ScaleFactor = 502.77,
@@ -45,8 +45,8 @@ local tullyPoints = {
         -- Max size in pixels
         BillboardMaxSize = 50.0,
         BillboardMinSize = 0.0,
-        CorrectionSizeEndDistance = 20.55,
-        CorrectionSizeFactor = 10.45,
+        CorrectionSizeEndDistance = 22.0,
+        CorrectionSizeFactor = 10.45
     },
     GUI = {
         Name = "Tully Galaxies",

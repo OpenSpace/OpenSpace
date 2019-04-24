@@ -26,7 +26,6 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/powerscaledscalar.h>
 #include <openspace/util/powerscaledsphere.h>
 #include <modules/iswa/util/dataprocessorjson.h>
 #include <modules/iswa/rendering/iswabasegroup.h>
@@ -87,7 +86,7 @@ void DataSphere::initializeGL() {
 }
 
 bool DataSphere::createGeometry() {
-    PowerScaledScalar radius =  PowerScaledScalar(6.371f * _radius, 6.0);
+    const float radius = 6.371f * _radius * glm::pow(10.f, 6.f);
     int segments = 100;
     _sphere = std::make_unique<PowerScaledSphere>(radius, segments);
     _sphere->initialize();

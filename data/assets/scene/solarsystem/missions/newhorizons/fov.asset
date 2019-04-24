@@ -355,11 +355,7 @@ local Rex = {
     Transform = {
         Rotation = {
             Type = "StaticRotation",
-            Rotation = {
-                0.0, 1.0, 0.0,
-                0.0, 0.0, 1.0,
-                1.0, 0.0, 0.0
-            }
+            Rotation = {-3.141502/2, 0, -3.141502/2}
         },
         Translation = {
             Type = "StaticTranslation",

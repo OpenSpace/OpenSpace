@@ -5,10 +5,8 @@ asset.require('./trail')
 
 asset.require('./pluto')
 asset.require('./charon')
-asset.require('./hydra')
-asset.require('./nix')
-asset.require('./styx')
 
+asset.require('./othermoons')
 
 local mission = asset.localResource("newhorizons.mission")
 local missionName

@@ -161,16 +161,6 @@ SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
     };
 }
 
-void Renderable::setPscUniforms(ghoul::opengl::ProgramObject& program,
-                                const Camera& camera,
-                                const PowerScaledCoordinate& position)
-{
-    program.setUniform("campos", glm::vec4(camera.positionVec3(), 1.f));
-    program.setUniform("objpos", position.vec4());
-    program.setUniform("camrot", glm::mat4(camera.viewRotationMatrix()));
-    program.setUniform("scaling", glm::vec2(1.f, 0.f));
-}
-
 Renderable::RenderBin Renderable::renderBin() const {
     return _renderBin;
 }
