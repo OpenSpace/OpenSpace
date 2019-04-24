@@ -59,7 +59,10 @@ void GalaxyRaycaster::renderEntryPoints(const RenderData& data,
     program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
     program.setUniform("blendMode", static_cast<unsigned int>(1));
 
-    Renderable::setPscUniforms(program, data.camera, data.position);
+    program.setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
+    program.setUniform("objpos", glm::vec4(data.modelTransform.translation, 0.f));
+    program.setUniform("camrot", glm::mat4(data.camera.viewRotationMatrix()));
+    program.setUniform("scaling", glm::vec2(1.f, 0.f));
 
     // Cull back face
     glEnable(GL_CULL_FACE);
@@ -76,7 +79,11 @@ void GalaxyRaycaster::renderExitPoints(const RenderData& data,
     program.setUniform("modelTransform", _modelTransform);
     program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
     program.setUniform("blendMode", static_cast<unsigned int>(1));
-    Renderable::setPscUniforms(program, data.camera, data.position);
+
+    program.setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
+    program.setUniform("objpos", glm::vec4(data.modelTransform.translation, 0.f));
+    program.setUniform("camrot", glm::mat4(data.camera.viewRotationMatrix()));
+    program.setUniform("scaling", glm::vec2(1.f, 0.f));
 
     // Cull front face
     glEnable(GL_CULL_FACE);
