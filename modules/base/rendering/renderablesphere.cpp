@@ -277,10 +277,7 @@ bool RenderableSphere::isReady() const {
 }
 
 void RenderableSphere::initializeGL() {
-    _sphere = std::make_unique<PowerScaledSphere>(
-        _size,
-        _segments
-    );
+    _sphere = std::make_unique<PowerScaledSphere>(_size, _segments);
     _sphere->initialize();
 
     _shader = BaseModule::ProgramObjectManager.request(
@@ -328,10 +325,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     _shader->setIgnoreUniformLocationError(IgnoreError::Yes);
 
     glm::mat4 modelViewProjection = data.camera.projectionMatrix() *
-        glm::mat4(
-            data.camera.combinedViewMatrix() *
-            modelTransform
-        );
+                             glm::mat4(data.camera.combinedViewMatrix() * modelTransform);
     _shader->setUniform(_uniformCache.modelViewProjection, modelViewProjection);
 
     glm::mat4 modelViewRotation = glm::mat3(
@@ -344,7 +338,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     if (_fadeInThreshold > -1.0) {
         const float logDistCamera = glm::log(static_cast<float>(
             glm::distance(data.camera.positionVec3(), data.modelTransform.translation)
-            ));
+        ));
         const float startLogFadeDistance = glm::log(_size * _fadeInThreshold);
         const float stopLogFadeDistance = startLogFadeDistance + 1.f;
 

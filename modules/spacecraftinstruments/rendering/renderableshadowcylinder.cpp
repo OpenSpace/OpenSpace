@@ -388,11 +388,9 @@ void RenderableShadowCylinder::createCylinder(double time) {
     vecLightSource *= _shadowLength;
     _vertices.clear();
 
-    const glm::vec3 endpoint = vecLightSource;
-
     for (const glm::vec3& v : terminatorPoints) {
         _vertices.push_back({ v[0], v[1], v[2], 0.f });
-        glm::vec3 f = v + endpoint;
+        glm::vec3 f = v + glm::vec3(vecLightSource);
         _vertices.push_back({ f[0], f[1], f[2], 0.f });
     }
     _vertices.push_back(_vertices[0]);

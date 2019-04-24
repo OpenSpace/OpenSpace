@@ -602,10 +602,7 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
 
     // Main renderpass
     _programObject->activate();
-    _programObject->setUniform(
-        _mainUniformCache.sunPos,
-        static_cast<glm::vec3>(sunPos)
-    );
+    _programObject->setUniform(_mainUniformCache.sunPos, static_cast<glm::vec3>(sunPos));
 
     // Model transform and view transform needs to be in double precision
     glm::dmat4 modelTransform =
@@ -727,9 +724,7 @@ void RenderablePlanetProjection::clearProjectionBufferAfterTime(double time) {
     const auto& it = std::find_if(
         _imageTimes.begin(),
         _imageTimes.end(),
-        [time](const Image& image) {
-            return image.timeRange.end > time;
-        }
+        [time](const Image& image) { return image.timeRange.end > time; }
     );
     if (it != _imageTimes.end()) {
         _imageTimes.erase(it, _imageTimes.end());
@@ -744,7 +739,6 @@ void RenderablePlanetProjection::insertImageProjections(const std::vector<Image>
     );
     _projectionsInBuffer = static_cast<int>(_imageTimes.size());
 }
-
 
 void RenderablePlanetProjection::loadColorTexture() {
     using ghoul::opengl::Texture;

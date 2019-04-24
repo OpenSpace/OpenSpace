@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___SYNCBUFFER___H__
 
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace openspace {
