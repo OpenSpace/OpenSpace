@@ -49,6 +49,7 @@ const char* AllNodesValue = "__allNodes";
 const char* AllScreenSpaceRenderablesValue = "__screenSpaceRenderables";
 const char* PropertyKey = "property";
 const char* RootPropertyOwner = "__rootOwner";
+const char* SessionRecordingPlaybackList = "playbackList";
 }
 
 namespace openspace {
@@ -71,9 +72,9 @@ void GetPropertyTopic::handleJson(const nlohmann::json& json) {
     else if (requestedKey == RootPropertyOwner) {
         response = wrappedPayload(global::rootPropertyOwner);
     }
-    else if (requestedKey == "playbackList") {
+    else if (requestedKey == SessionRecordingPlaybackList) {
         std::string fileList = global::sessionRecording.playbackList();
-        nlohmann::json getJson = { { "playbackList", fileList } };
+        nlohmann::json getJson = { { SessionRecordingPlaybackList, fileList } };
         response = wrappedPayload(getJson);
     }
     else {

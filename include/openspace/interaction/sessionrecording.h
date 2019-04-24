@@ -125,7 +125,7 @@ public:
     bool isPlayingBack() const;
 
     /**
-    * Used to check the state of idle/recording/playback.
+    * Used to obtain the state of idle/recording/playback.
     * \returns int value of state as defined by struct SessionState.
     */
     SessionState state() const;
@@ -157,14 +157,22 @@ public:
     static openspace::scripting::LuaLibrary luaLibrary();
 
     /**
-    * Used to add a callback to web gui to notify when palyback state changes.
+    * Used to request a callback for notification of playback state change.
     * \param cb function handle for callback.
     * \returns CallbackHandle value of callback number.
     */
     CallbackHandle addStateChangeCallback(StateChangeCallback cb);
 
+    /**
+     * Removes the callback for notification of playback state change.
+     * \param callback function handle for the callback.
+    */
     void removeStateChangeCallback(CallbackHandle handle);
 
+    /**
+     * Provides list of available playback files.
+     * \returns string of newline-delimited filenames in recordings dir.
+     */
     std::string playbackList();
 
 private:

@@ -601,7 +601,7 @@ void SessionRecording::preSynchronization() {
         cleanUpPlayback();
     }
 
-    //Handle callback(s)
+    //Handle callback(s) for change in idle/record/playback state
     if (_state != _lastState)
     {
         using K = const CallbackHandle;
@@ -1314,11 +1314,12 @@ std::string SessionRecording::playbackList() {
     ghoul::filesystem::Directory currentDir(recordingsPath);
     std::vector<std::string> allInputFiles = currentDir.readFiles();
     for (std::string f : allInputFiles) {
+        //Remove path and keep only the filename, and add newline after
         fileList.append(f.substr(recordingsPath.length(), (f.length() - recordingsPath.length())));
         fileList.append("\n");
     }
+    //Remove the final trailing newline from the list and return it.
     return fileList.substr(0, fileList.size() - 1);
-    //return "Test string line1\nTest string line2";
 }
 
 scripting::LuaLibrary SessionRecording::luaLibrary() {
