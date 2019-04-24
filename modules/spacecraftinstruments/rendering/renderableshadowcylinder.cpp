@@ -28,7 +28,6 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -106,19 +105,6 @@ namespace {
         "This value determines the aberration method that is used to compute the shadow "
         "cylinder."
     };
-
-    glm::vec4 psc_addition(glm::vec4 v1, glm::vec4 v2) {
-        const float k = 10.f;
-        const float ds = v2.w - v1.w;
-        if (ds >= 0) {
-            float p = pow(k, -ds);
-            return glm::vec4(v1.x*p + v2.x, v1.y*p + v2.y, v1.z*p + v2.z, v2.w);
-        }
-        else {
-            float p = pow(k, ds);
-            return glm::vec4(v1.x + v2.x*p, v1.y + v2.y*p, v1.z + v2.z*p, v1.w);
-        }
-    }
 } // namespace
 
 namespace openspace {
@@ -374,15 +360,13 @@ void RenderableShadowCylinder::createCylinder(double time) {
         _numberOfPoints
     );
 
-    std::vector<psc> terminatorPoints;
+    std::vector<glm::vec3> terminatorPoints;
     std::transform(
         res.terminatorPoints.begin(),
         res.terminatorPoints.end(),
         std::back_inserter(terminatorPoints),
         [](const glm::dvec3& p) {
-            psc coord = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-            coord[3] += 3;
-            return coord;
+            return p * 1000.0;
         }
     );
 
@@ -404,15 +388,10 @@ void RenderableShadowCylinder::createCylinder(double time) {
     vecLightSource *= _shadowLength;
     _vertices.clear();
 
-    const psc endpoint = psc::CreatePowerScaledCoordinate(
-        vecLightSource.x,
-        vecLightSource.y,
-        vecLightSource.z
-    );
-    for (const psc& v : terminatorPoints) {
-        _vertices.push_back({ v[0], v[1], v[2], v[3] });
-        glm::vec4 f = psc_addition(v.vec4(), endpoint.vec4());
-        _vertices.push_back({ f[0], f[1], f[2], f[3] });
+    for (const glm::vec3& v : terminatorPoints) {
+        _vertices.push_back({ v[0], v[1], v[2], 0.f });
+        glm::vec3 f = v + glm::vec3(vecLightSource);
+        _vertices.push_back({ f[0], f[1], f[2], 0.f });
     }
     _vertices.push_back(_vertices[0]);
     _vertices.push_back(_vertices[1]);

@@ -124,7 +124,7 @@ void SimpleSphereGeometry::createSphere() {
     const glm::vec3 radius = _radius.value();
 
     delete _sphere;
-    _sphere = new PowerScaledSphere(glm::vec4(radius, 0.0), _segments);
+    _sphere = new PowerScaledSphere(radius, _segments);
     _sphere->initialize();
 }
 

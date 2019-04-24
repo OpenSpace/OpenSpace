@@ -41,7 +41,6 @@
 namespace {
     constexpr const char* KeyType = "Type";
     constexpr const char* KeyTag = "Tag";
-    constexpr const float PlaneDepth = -2.f;
 
     constexpr const std::array<const char*, 5> UniformNames = {
         "OcclusionDepth", "Alpha", "ModelTransform", "ViewProjectionMatrix", "texture1"
@@ -53,38 +52,38 @@ namespace {
         "This setting determines whether this sceen space plane will be visible or not."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FlatScreenInfo = {
-        "FlatScreen",
-        "Flat Screen specification",
+    constexpr openspace::properties::Property::PropertyInfo
+    UseRadiusAzimuthElevationInfo = {
+        "UseRadiusAzimuthElevation",
+        "Use Radius Azimuth and Elevation",
         "This value determines whether the location of this screen space plane will be "
-        "specified in a two-dimensional Euclidean plane (if this is set to 'true') or "
-        "specified in spherical coordinates. By switching this value, the correct "
-        "property will be shown or hidden. The Euclidean coordinate system is useful if "
-        "a regular rendering is applied, whereas the spherical coordinates are most "
-        "useful in a planetarium environment."
+        "specified using radius, azimuth and elevation (if this is set to 'true') or "
+        "using cartesian coordinates. By switching this value, the correct property will "
+        "be shown or hidden. The Cartesian coordinate system is useful if a regular "
+        "rendering is applied, whereas the radius azimuth elevation are most useful in a "
+        "planetarium environment."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EuclideanPositionInfo = {
-        "EuclideanPosition",
-        "Euclidean coordinates",
-        "This value determines the position of this screen space plane in Euclidean "
-        "two-dimensional coordinates."
+    constexpr openspace::properties::Property::PropertyInfo
+    UsePerspectiveProjectionInfo = {
+        "UsePerspectiveProjection",
+        "Use Perspective Projection",
+        "Determines whetether the z/radius values affects the size of the plane or not."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SphericalPositionInfo = {
-        "SphericalPosition",
-        "Spherical coordinates",
-        "This value determines the position of this screen space plane in a spherical "
-        "coordinate system."
+    constexpr openspace::properties::Property::PropertyInfo CartesianPositionInfo = {
+        "CartesianPosition",
+        "Cartesian coordinates",
+        "This value determines the position of this screen space plane in Cartesian "
+        "three-dimensional coordinates (meters)."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DepthInfo = {
-        "Depth",
-        "Depth value",
-        "This value determines the depth of the plane. This value does not change the "
-        "apparent size of the plane, but is only used to sort the planes correctly. The "
-        "plane with a lower value will be shown in front of a plane with a higher depth "
-        "value."
+    constexpr openspace::properties::Property::PropertyInfo RadiusAzimuthElevationInfo = {
+        "RadiusAzimuthElevation",
+        "Radius Azimuth Elevation",
+        "This value determines the position of this screen space plane in a "
+        "coordinate system based on radius (meters), azimuth (radians) and elevation "
+        "(radians)."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
@@ -94,6 +93,13 @@ namespace {
         "is determined by the concrete instance and reflects, for example, the size of "
         "the image being displayed."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo LocalRotationInfo = {
+        "Rotation",
+        "Local rotation",
+        "An euler rotation (x, y, z) to apply to the plane."
+    };
+
 
     constexpr openspace::properties::Property::PropertyInfo AlphaInfo = {
         "Alpha",
@@ -110,22 +116,98 @@ namespace {
         "scene."
     };
 
-    glm::vec2 toEuclidean(const glm::vec2& spherical, float r) {
-        const float x = r * sin(spherical[0]) * sin(spherical[1]);
-        const float y = r * cos(spherical[1]);
+    constexpr openspace::properties::Property::PropertyInfo FaceCameraInfo = {
+        "FaceCamera",
+        "Face Camera",
+        "If enabled, the local rotation is applied after the plane is rotated to face "
+        "the camera."
+    };
 
-        return glm::vec2(x, y);
+    float wrap(float value, float min, float max) {
+        return glm::mod(value - min, max - min) + min;
     }
 
-    glm::vec3 toSpherical(const glm::vec2& euclidean) {
-        const float r = -sqrt(
-            pow(euclidean[0], 2) + pow(euclidean[1], 2) + pow(PlaneDepth, 2)
+    glm::vec3 sanitizeSphericalCoordinates(glm::vec3 spherical) {
+        const float r = spherical.x;
+        float phi = spherical.z;
+
+        // Sanitize coordinates.
+        float theta = wrap(spherical.y, 0.0, glm::two_pi<float>());
+        if (theta > glm::pi<float>()) {
+            theta = glm::two_pi<float>() - theta;
+            phi += glm::pi<float>();
+        }
+
+        return glm::vec3(r, theta, phi);
+    }
+
+
+    glm::vec3 sphericalToCartesian(glm::vec3 spherical) {
+        // First convert to ISO convention spherical coordinates according to 
+        // https://en.wikipedia.org/wiki/Spherical_coordinate_system
+        // (radius, theta, phi), where theta is the polar angle from the z axis,
+        // and phi is the azimuth.
+
+        const glm::vec3 sanitized = sanitizeSphericalCoordinates(std::move(spherical));
+        const float x = sanitized[0] * sin(sanitized[1]) * cos(sanitized[2]);
+        const float y = sanitized[0] * sin(sanitized[1]) * sin(sanitized[2]);
+        const float z = sanitized[0] * cos(sanitized[1]);
+
+        // Now, convert rotate the coordinate system, so that z maps to y,
+        // and y maps to -z. We want the pole to be in y instead of z.
+        return glm::vec3(x, -z, y);
+    }
+
+    glm::vec3 cartesianToSpherical(const glm::vec3& cartesian) {
+        // Rotate cartesian coordinates.
+        glm::vec3 rotated = glm::vec3(cartesian.x, cartesian.z, -cartesian.y);
+
+        const float r = sqrt(
+            pow(rotated.x, 2.f) + pow(rotated.y, 2.f) + pow(rotated.z, 2.f)
         );
-        const float theta = atan2(-PlaneDepth, euclidean[0]) - glm::half_pi<float>();
-        const float phi = acos(euclidean[1] / r);
-
-        return glm::vec3(theta, phi, r);
+        const float theta = acos(rotated.z/r);
+        const float phi = atan2(rotated.y, rotated.x);
+        return sanitizeSphericalCoordinates(glm::vec3(r, theta, phi));
     }
+
+    // Radius, azimiuth, elevation to spherical coordinates.
+    glm::vec3 raeToSpherical(glm::vec3 rae) {
+        //return rae;
+         const float r = rae.x;
+
+         // Polar angle, theta, is elevation + pi/2.
+         const float theta = rae.z + glm::half_pi<float>();
+
+         // Azimuth in ISO spherical coordiantes (phi) is angle from x,
+         // as opposed to from negative y on screen.
+         const float phi = rae.y - glm::half_pi<float>();
+
+         return glm::vec3(r, theta, phi);
+    }
+
+    // Spherical coordinates to radius, azimuth and elevation.
+    glm::vec3 sphericalToRae(glm::vec3 spherical) {
+        //return spherical;
+        const float r = spherical.x;
+
+        // Azimuth on screen is angle from negative y, as opposed to from x.
+        float azimuth = spherical.z + glm::half_pi<float>();
+
+        // Elevation is polar angle - pi/2
+        float elevation = wrap(
+            spherical.y - glm::half_pi<float>(),
+            -glm::pi<float>(),
+            glm::pi<float>()
+        );
+
+        return glm::vec3(
+            r,
+            wrap(azimuth, -glm::pi<float>(), glm::pi<float>()),
+            wrap(elevation, -glm::pi<float>(), glm::pi<float>())
+        );
+    }
+
+
 } // namespace
 
 namespace openspace {
@@ -169,28 +251,28 @@ documentation::Documentation ScreenSpaceRenderable::Documentation() {
                 EnabledInfo.description
             },
             {
-                FlatScreenInfo.identifier,
+                UseRadiusAzimuthElevationInfo.identifier,
                 new BoolVerifier,
                 Optional::Yes,
-                FlatScreenInfo.description
+                UseRadiusAzimuthElevationInfo.description
             },
             {
-                EuclideanPositionInfo.identifier,
-                new DoubleVector2Verifier,
+                FaceCameraInfo.identifier,
+                new BoolVerifier,
                 Optional::Yes,
-                EuclideanPositionInfo.description
+                FaceCameraInfo.description
             },
             {
-                SphericalPositionInfo.identifier,
-                new DoubleVector2Verifier,
+                CartesianPositionInfo.identifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
-                SphericalPositionInfo.description
+                CartesianPositionInfo.description
             },
             {
-                DepthInfo.identifier,
-                new DoubleVerifier,
+                RadiusAzimuthElevationInfo.identifier,
+                new DoubleVector3Verifier,
                 Optional::Yes,
-                DepthInfo.description
+                RadiusAzimuthElevationInfo.description
             },
             {
                 ScaleInfo.identifier,
@@ -235,24 +317,30 @@ std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictiona
 ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "" })
     , _enabled(EnabledInfo, true)
-    , _useFlatScreen(FlatScreenInfo, true)
-    , _euclideanPosition(
-        EuclideanPositionInfo,
-        glm::vec2(0.f),
-        glm::vec2(-4.f),
-        glm::vec2(4.f)
+    , _useRadiusAzimuthElevation(UseRadiusAzimuthElevationInfo, false)
+    , _usePerspectiveProjection(UsePerspectiveProjectionInfo, false)
+    , _faceCamera(FaceCameraInfo, true)
+    , _cartesianPosition(
+        CartesianPositionInfo,
+        glm::vec3(0.f, 0.f, -2.f),
+        glm::vec3(-4.f, -4.f, -10.f),
+        glm::vec3(4.f, 4.f, 0.f)
     )
-    , _sphericalPosition(
-        SphericalPositionInfo,
-        glm::vec2(0.f, glm::half_pi<float>()),
-        glm::vec2(-glm::pi<float>()),
-        glm::vec2(glm::pi<float>())
+    , _raePosition(
+        RadiusAzimuthElevationInfo,
+        glm::vec3(2.f, 0.f, 0.f),
+        glm::vec3(0.f, -glm::pi<float>(), -glm::half_pi<float>()),
+        glm::vec3(10.f, glm::pi<float>(), glm::half_pi<float>())
     )
-    , _depth(DepthInfo, 0.f, 0.f, 1.f)
+    , _localRotation(
+        LocalRotationInfo,
+        glm::vec3(0.f),
+        glm::vec3(-glm::pi<float>()),
+        glm::vec3(glm::pi<float>())
+    )
     , _scale(ScaleInfo, 0.25f, 0.f, 2.f)
     , _alpha(AlphaInfo, 1.f, 0.f, 1.f)
     , _delete(DeleteInfo)
-    , _radius(PlaneDepth)
 {
     if (dictionary.hasKey(KeyIdentifier)) {
         setIdentifier(dictionary.value<std::string>(KeyIdentifier));
@@ -264,46 +352,47 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
 
 
     addProperty(_enabled);
-    addProperty(_useFlatScreen);
-    addProperty(_euclideanPosition);
+    addProperty(_useRadiusAzimuthElevation);
+    addProperty(_usePerspectiveProjection);
+    addProperty(_faceCamera);
+    addProperty(_cartesianPosition);
+    addProperty(_raePosition);
 
     // Setting spherical/euclidean onchange handler
-    _useFlatScreen.onChange([this]() {
-        if (_useFlatScreen) {
-            addProperty(_euclideanPosition);
-            removeProperty(_sphericalPosition);
+    _useRadiusAzimuthElevation.onChange([this]() {
+        if (_useRadiusAzimuthElevation) {
+            _raePosition = sphericalToRae(cartesianToSpherical(_cartesianPosition));
         }
         else {
-            removeProperty(_euclideanPosition);
-            addProperty(_sphericalPosition);
+            _cartesianPosition = sphericalToCartesian(raeToSpherical(_raePosition));
         }
-        useEuclideanCoordinates(_useFlatScreen);
     });
 
-    addProperty(_depth);
     addProperty(_scale);
     addProperty(_alpha);
+    addProperty(_localRotation);
 
     if (dictionary.hasKey(EnabledInfo.identifier)) {
         _enabled = dictionary.value<bool>(EnabledInfo.identifier);
     }
 
-    if (dictionary.hasKey(FlatScreenInfo.identifier)) {
-        _useFlatScreen = dictionary.value<bool>(FlatScreenInfo.identifier);
+    if (dictionary.hasKey(UseRadiusAzimuthElevationInfo.identifier)) {
+        _useRadiusAzimuthElevation = dictionary.value<bool>(
+            UseRadiusAzimuthElevationInfo.identifier
+        );
     }
-    useEuclideanCoordinates(_useFlatScreen);
 
-    if (_useFlatScreen) {
-        if (dictionary.hasKey(EuclideanPositionInfo.identifier)) {
-            _euclideanPosition = dictionary.value<glm::vec2>(
-                EuclideanPositionInfo.identifier
+    if (_useRadiusAzimuthElevation) {
+        if (dictionary.hasKey(RadiusAzimuthElevationInfo.identifier)) {
+            _raePosition = dictionary.value<glm::vec3>(
+                RadiusAzimuthElevationInfo.identifier
             );
         }
     }
     else {
-        if (dictionary.hasKey(SphericalPositionInfo.identifier)) {
-            _sphericalPosition = dictionary.value<glm::vec2>(
-                SphericalPositionInfo.identifier
+        if (dictionary.hasKey(CartesianPositionInfo.identifier)) {
+            _cartesianPosition = dictionary.value<glm::vec3>(
+                CartesianPositionInfo.identifier
             );
         }
     }
@@ -312,12 +401,20 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         _scale = static_cast<float>(dictionary.value<double>(ScaleInfo.identifier));
     }
 
-    if (dictionary.hasKey(DepthInfo.identifier)) {
-        _depth = static_cast<float>(dictionary.value<double>(DepthInfo.identifier));
-    }
-
     if (dictionary.hasKey(AlphaInfo.identifier)) {
         _alpha = static_cast<float>(dictionary.value<double>(AlphaInfo.identifier));
+    }
+
+    if (dictionary.hasKey(UsePerspectiveProjectionInfo.identifier)) {
+        _usePerspectiveProjection = static_cast<bool>(
+            dictionary.value<bool>(UsePerspectiveProjectionInfo.identifier)
+        );
+    }
+
+    if (dictionary.hasKey(FaceCameraInfo.identifier)) {
+        _faceCamera = static_cast<bool>(
+            dictionary.value<bool>(FaceCameraInfo.identifier)
+        );
     }
 
     if (dictionary.hasKeyAndValue<std::string>(KeyTag)) {
@@ -355,9 +452,7 @@ bool ScreenSpaceRenderable::initialize() {
 
 bool ScreenSpaceRenderable::initializeGL() {
     _originalViewportSize = global::windowDelegate.currentWindowResolution();
-
     createShaders();
-
     return isReady();
 }
 
@@ -375,7 +470,7 @@ bool ScreenSpaceRenderable::deinitializeGL() {
 }
 
 void ScreenSpaceRenderable::render() {
-    draw(rotationMatrix() * translationMatrix() * scaleMatrix());
+    draw(globalRotationMatrix() * translationMatrix() * localRotationMatrix() * scaleMatrix());
 }
 
 bool ScreenSpaceRenderable::isReady() const {
@@ -388,27 +483,10 @@ bool ScreenSpaceRenderable::isEnabled() const {
     return _enabled;
 }
 
-glm::vec3 ScreenSpaceRenderable::euclideanPosition() const {
-    return glm::vec3(_euclideanPosition.value(), _depth.value());
-}
-
-glm::vec3 ScreenSpaceRenderable::sphericalPosition() const {
-    return glm::vec3(_sphericalPosition.value(), _depth.value());
-}
-
-float ScreenSpaceRenderable::depth() const {
-    return _depth;
-}
-
-void ScreenSpaceRenderable::useEuclideanCoordinates(bool b) {
-    _useEuclideanCoordinates = b;
-    if (_useEuclideanCoordinates) {
-        _euclideanPosition = toEuclidean(_sphericalPosition, _radius);
-    } else {
-        glm::vec3 sph = toSpherical(_euclideanPosition);
-        _sphericalPosition = sph;
-        _radius = sph.z;
-    }
+float ScreenSpaceRenderable::depth() {
+    return _useRadiusAzimuthElevation ?
+        _raePosition.value().x :
+        cartesianToSpherical(_cartesianPosition).x;
 }
 
 void ScreenSpaceRenderable::createShaders() {
@@ -442,7 +520,7 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
 
     float scalingRatioX = _originalViewportSize.x / resolution.x;
     float scalingRatioY = _originalViewportSize.y / resolution.y;
-    return glm::scale(
+    glm::mat4 scale = glm::scale(
         glm::mat4(1.f),
         glm::vec3(
             _scale * scalingRatioX,
@@ -450,45 +528,65 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
             1.f
         )
     );
-}
 
-glm::mat4 ScreenSpaceRenderable::rotationMatrix() {
-    // Get the scene transform
-    glm::mat4 rotation = glm::inverse(global::windowDelegate.modelMatrix());
-    if (!_useEuclideanCoordinates) {
-        glm::vec2 position = _sphericalPosition.value();
-
-        rotation = glm::rotate(rotation, position.x, glm::vec3(0.f, 1.f, 0.f));
-        rotation = glm::rotate(
-            rotation,
-            position.y - glm::half_pi<float>(),
-            glm::vec3(1.f, 0.f, 0.f)
-        );
+    // Simulate orthographic projection by distance to plane.
+    if (!_usePerspectiveProjection) {
+        float distance = _useRadiusAzimuthElevation ?
+            _raePosition.value().x :
+            -_cartesianPosition.value().z;
+        scale = glm::scale(scale, glm::vec3(distance));
     }
 
-    return rotation;
+    return scale;
+}
+
+glm::mat4 ScreenSpaceRenderable::globalRotationMatrix() {
+    // We do not want the screen space planes to be affected by
+    // 1) The global rotation of the view applied in the render engine
+    // 2) sgct's scene matrix (also called model matrix by sgct)
+
+    glm::mat4 inverseRotation = glm::inverse(
+        global::renderEngine.globalRotation() *
+        global::windowDelegate.modelMatrix()
+    );
+
+    // The rotation of all screen space renderables is adjustable in the render engine:
+    return global::renderEngine.screenSpaceRotation() * inverseRotation;
+}
+
+glm::mat4 ScreenSpaceRenderable::localRotationMatrix() {
+    glm::mat4 rotation = glm::mat4(1.f);
+    if (_faceCamera) {
+        glm::vec3 translation = _useRadiusAzimuthElevation ?
+            sphericalToCartesian(raeToSpherical(_raePosition)) :
+            _cartesianPosition;
+
+        rotation = glm::inverse(glm::lookAt(
+            glm::vec3(0.f),
+            glm::normalize(translation),
+            glm::vec3(0.f, 1.f, 0.f)
+        ));
+    }
+
+    float roll = _localRotation.value().x;
+    float pitch = _localRotation.value().y;
+    float yaw = _localRotation.value().z;
+    return rotation * glm::mat4(glm::quat(glm::vec3(pitch, yaw, roll)));
 }
 
 glm::mat4 ScreenSpaceRenderable::translationMatrix() {
-    glm::mat4 translation(1.0);
-    if (!_useEuclideanCoordinates) {
-        translation = glm::translate(translation, glm::vec3(0.0f, 0.0f, PlaneDepth));
-    } else {
-        translation = glm::translate(
-            glm::mat4(1.f),
-            glm::vec3(_euclideanPosition.value(), PlaneDepth)
-        );
-    }
+    glm::vec3 translation = _useRadiusAzimuthElevation ?
+        sphericalToCartesian(raeToSpherical(_raePosition)) :
+        _cartesianPosition;
 
-    return translation;
+    return glm::translate(glm::mat4(1.f), translation);
 }
 
 void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
-    //glEnable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
     _shader->activate();
-    _shader->setUniform(_uniformCache.occlusionDepth, 1.f - _depth);
+
     _shader->setUniform(_uniformCache.alpha, _alpha);
     _shader->setUniform(_uniformCache.modelTransform, modelTransform);
 

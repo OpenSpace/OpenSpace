@@ -1,4 +1,4 @@
 set (OPENSPACE_DEPENDENCIES
-    volume
-    space
+  volume
+  space
 )

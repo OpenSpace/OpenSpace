@@ -157,10 +157,12 @@ void IswaCygnet::render(const RenderData& data, RendererTasks&) {
     }
     transform = transform * _rotation;
 
-    psc position = data.position + transform * glm::vec4(
-        _data.spatialScale.x * _data.offset,
-        _data.spatialScale.w
-    );
+    psc position =
+        static_cast<glm::vec4>(glm::dvec4(data.modelTransform.translation, 0.0)) +
+        transform * glm::vec4(
+            _data.spatialScale.x * _data.offset,
+            _data.spatialScale.w
+        );
 
     // Activate shader
     _shader->activate();
@@ -170,7 +172,11 @@ void IswaCygnet::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _shader->setUniform("ModelTransform", transform);
 
-    setPscUniforms(*_shader.get(), data.camera, position);
+    _shader->setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
+    _shader->setUniform("objpos", glm::vec4(position.vec3(), 0.f));
+    _shader->setUniform("camrot", glm::mat4(data.camera.viewRotationMatrix()));
+    _shader->setUniform("scaling", glm::vec2(1.f, 0.f));
+
 
     setUniforms();
     renderGeometry();
