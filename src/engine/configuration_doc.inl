@@ -257,14 +257,28 @@ documentation::Documentation Configuration::Documentation = {
             "the master computer does not have the resources to render a scene."
         },
         {
-            KeyDisableSceneOnMaster,
-            new BoolVerifier,
+            KeyGlobalRotation,
+            new DoubleVector3Verifier,
             Optional::Yes,
-            "Toggles whether a potential scene transformation matrix, for example as "
-            "specified in an SGCT configuration file, should apply to the master node. "
-            "With some configurations, applying such a transformation complicates the "
-            "interaction and it is thus desired to disable the transformation. The "
-            "default is false."
+            "Applies a global view rotation. Use this to rotate the position of the "
+            "focus node away from the default location on the screen. This setting "
+            "persists even when a new focus node is selected. Defined using roll, pitch, "
+            "yaw in radians"
+        },
+        {
+            KeyMasterRotation,
+            new DoubleVector3Verifier,
+            Optional::Yes,
+            "Applies a view rotation for only the master node, defined using "
+            "roll, pitch yaw in radians. This can be used to compensate the master view "
+            "direction for tilted display systems in clustered immersive environments."
+        },
+        {
+            KeyScreenSpaceRotation,
+            new DoubleVector3Verifier,
+            Optional::Yes,
+            "Applies a global rotation for all screenspace renderables. Defined using "
+            "roll, pitch, yaw in radians."
         },
         {
             KeyScreenshotUseDate,

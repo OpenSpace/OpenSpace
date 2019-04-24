@@ -3,8 +3,10 @@ local deck = nil
 
 asset.onInitialize(function ()
     deck = helper.createDeck("example", {
-        FlatScreen = false,
-        SphericalPosition = {0.0, 3.1415 / 2},
+        UseRadiusAzimuthElevation = true,
+        RadiusAzimuthElevation = {1.0, 0.0, 0.0}, -- use for dome
+        UsePerspectiveProjection = true,
+        FaceCamera = true,
         Scale = 0.7
     })
 
