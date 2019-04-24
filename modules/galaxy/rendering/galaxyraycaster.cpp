@@ -129,7 +129,7 @@ bool GalaxyRaycaster::isCameraInside(const RenderData& data, glm::vec3& localPos
 
     // Camera position in world coordinates.
     const glm::vec4 camWorldPos = rigWorldPos;
-    const glm::vec3 objPos = data.position.vec3();
+    const glm::vec3 objPos = static_cast<glm::vec3>(data.modelTransform.translation);
 
     const glm::mat4 modelTransform = glm::translate(_modelTransform, objPos);
 
