@@ -25,9 +25,6 @@
 #include <openspace/engine/globals.h>
 #include <modules/touch/include/touchinteraction.h>
 #include <modules/imgui/imguimodule.h>
-#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
-#include <modules/webbrowser/webbrowsermodule.h>
-#endif
 
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/engine/globals.h>
@@ -47,6 +44,10 @@
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
+#endif
+
+#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
+#include <modules/webbrowser/webbrowsermodule.h>
 #endif
 
 #include <cmath>
@@ -432,13 +433,13 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
 }
 
 bool TouchInteraction::webContent(const std::vector<TuioCursor>& list) {
+#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
     glm::ivec2 res = global::windowDelegate.currentWindowSize();
     glm::dvec2 pos = glm::vec2(
         list.at(0).getScreenX(res.x),
         list.at(0).getScreenY(res.y)
     );
 
-#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
     WebBrowserModule& module = *(global::moduleEngine.module<WebBrowserModule>());
     return module.eventHandler().hasContentCallback(pos.x, pos.y);
 #else

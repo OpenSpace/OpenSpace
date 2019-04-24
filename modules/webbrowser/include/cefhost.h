@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER___CEF_HOST___H__
 #define __OPENSPACE_MODULE_WEBBROWSER___CEF_HOST___H__
 
+#include <include/wrapper/cef_helpers.h>
 #include <string>
 
 struct CefSettingsTraits;

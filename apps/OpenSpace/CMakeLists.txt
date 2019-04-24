@@ -153,6 +153,7 @@ end_header("Dependency: SGCT")
 if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   # wanted by CEF
   set(CMAKE_BUILD_TYPE Debug CACHE INTERNAL "CMAKE_BUILD_TYPE")
+  set(PROJECT_ARCH "x86_64")
 
   if (WIN32)
     set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/OpenSpace/openspace.rc)

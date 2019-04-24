@@ -22,7 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
 project(OpenSpace)
 
@@ -46,12 +46,26 @@ include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/include_gtest.cmake)
 
 begin_header("Configuring OpenSpace project")
+message(STATUS "CMake version: ${CMAKE_VERSION}")
+
+# Bail out if the user tries to generate a 32 bit project.
+if (NOT ${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+  message(FATAL_ERROR "OpenSpace can only be generated for 64 bit architectures.")
+endif()
 
 ##########################################################################################
 # Cleanup project                                                                        #
 ##########################################################################################
 set(OPENSPACE_APPS_DIR "${OPENSPACE_BASE_DIR}/apps")
 set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
+
+if (NOT EXISTS ${OPENSPACE_EXT_DIR}/ghoul/CMakeLists.txt)
+  message(FATAL_ERROR "Git submodules are missing. Please run \n"
+    "git submodule update --init --recursive \n"
+    "to download the missing dependencies."
+  )
+endif()
+
 set_property(GLOBAL PROPERTY USE_FOLDERS On)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER CMake)
 
@@ -224,6 +238,8 @@ message(STATUS "")
 if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   # wanted by CEF
   set(CMAKE_BUILD_TYPE Debug CACHE INTERNAL "CMAKE_BUILD_TYPE")
+
+  set(PROJECT_ARCH "x86_64")
 
   if (WIN32)
     set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/OpenSpace/openspace.rc)

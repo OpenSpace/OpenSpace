@@ -30,6 +30,10 @@
 #include <fmt/format.h>
 #include <include/wrapper/cef_helpers.h>
 
+#ifdef __APPLE__
+#include <include/wrapper/cef_library_loader.h>
+#endif
+
 namespace {
     constexpr const char* _loggerCat = "CefHost";
 } // namespace
@@ -40,13 +44,29 @@ CefHost::CefHost(const std::string& helperLocation) {
     LDEBUG("Initializing CEF...");
 
     CefSettings settings;
+
+#ifndef __APPLE__
+    // Apple will always look for helper in a fixed location.
     CefString(&settings.browser_subprocess_path).FromString(helperLocation);
+#endif
+
+    settings.windowless_rendering_enabled = true;
     attachDebugSettings(settings);
 
 #ifdef WIN32
     // Enable High-DPI support on Windows 7 or newer.
     CefEnableHighDPISupport();
 #endif
+
+#ifdef __APPLE__
+    // Load the CEF framework library at runtime instead of linking directly
+    // as required by the macOS sandbox implementation.
+    CefScopedLibraryLoader library_loader;
+    if (!library_loader.LoadInMain()) {
+        return;
+    }
+#endif
+
     CefRefPtr<WebBrowserApp> app(new WebBrowserApp);
 
     CefMainArgs args;
@@ -65,10 +85,6 @@ void CefHost::attachDebugSettings(CefSettings &settings) {
         "Remote WebBrowser debugging available on http://localhost:{}",
         settings.remote_debugging_port
     ));
-
-#ifdef __APPLE__
-    settings.single_process = true;
-#endif
 }
 
 void CefHost::doMessageLoopWork() {

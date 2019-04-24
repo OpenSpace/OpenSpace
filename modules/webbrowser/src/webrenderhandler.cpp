@@ -38,9 +38,8 @@ void WebRenderHandler::reshape(int w, int h) {
     _needsRepaint = true;
 }
 
-bool WebRenderHandler::GetViewRect(CefRefPtr<CefBrowser>, CefRect& rect) {
+void WebRenderHandler::GetViewRect(CefRefPtr<CefBrowser>, CefRect& rect) {
     rect = CefRect(0, 0, _windowSize.x, _windowSize.y);
-    return true;
 }
 
 void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser>, CefRenderHandler::PaintElementType,

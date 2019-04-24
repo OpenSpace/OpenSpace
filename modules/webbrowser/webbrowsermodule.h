@@ -25,13 +25,22 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
 #define __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
 
-#include <openspace/util/openspacemodule.h>
-
 #include <modules/webbrowser/include/eventhandler.h>
+#include <openspace/util/openspacemodule.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <chrono>
 
 namespace openspace {
 
 class CefHost;
+
+namespace webbrowser {
+    extern std::chrono::microseconds interval;
+    extern std::chrono::time_point<std::chrono::high_resolution_clock> latestCall;
+    extern CefHost* cefHost;
+    void update();
+}
 
 class WebBrowserModule : public OpenSpaceModule {
 public:
@@ -59,6 +68,9 @@ private:
      * \return the absolute path to the file
      */
     std::string findHelperExecutable();
+
+    properties::BoolProperty _updateBrowserBetweenRenderables;
+    properties::FloatProperty _browserUpdateInterval;
 
     std::vector<BrowserInstance*> _browsers;
     EventHandler _eventHandler;
