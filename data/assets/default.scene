@@ -22,17 +22,6 @@ asset.request('customization/globebrowsing')
 -- Keybindings that are specific for this scene
 local Keybindings = {
     {
-        Key = "s",
-        Command = propertyHelper.invert('Scene.Earth.Renderable.Layers.NightLayers.Earth at Night 2012.Enabled') ..
-                  propertyHelper.invert('Scene.Earth.Renderable.PerformShading') ..
-                  propertyHelper.invert('Scene.Earth.Renderable.Atmosphere') ..
-                  propertyHelper.invert('Scene.Earth.Renderable.Layers.WaterMasks.MODIS_Water_Mask.Enabled'),
-        Name = "Night for earth",
-        Documentation = "Toggle night texture, shading, atmosphere, and water for Earth.",
-        GuiPath = "/Rendering",
-        Local = false
-    },
-    {
         Key = "b",
         Name = "Toggle background",
         Command = propertyHelper.invert('Scene.MilkyWay.Renderable.Enabled') ..

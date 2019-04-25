@@ -49,8 +49,7 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
     _client = new BrowserClient(_renderHandler, _keyboardHandler);
 
     CefWindowInfo windowInfo;
-    const bool renderTransparent = true;
-    windowInfo.SetAsWindowless(0, renderTransparent);
+    windowInfo.SetAsWindowless(nullptr);
 
     CefBrowserSettings browserSettings;
     browserSettings.windowless_frame_rate = 60;
@@ -63,6 +62,10 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
         browserSettings,
         nullptr
     );
+
+    if (!_browser) {
+        LERROR("Error when creating browser");
+    }
 }
 
 BrowserInstance::~BrowserInstance() {
@@ -74,11 +77,12 @@ void BrowserInstance::initialize() {
     _isInitialized = true;
 }
 
-void BrowserInstance::loadUrl(const std::string& url) {
+void BrowserInstance::loadUrl(std::string url) {
     ghoul_assert(_isInitialized, "BrowserInstance should be initialized");
 
     LDEBUG(fmt::format("Loading URL: {}", url));
-    _browser->GetMainFrame()->LoadURL(url);
+    CefString cefUrl = std::move(url);
+    _browser->GetMainFrame()->LoadURL(cefUrl);
 }
 
 bool BrowserInstance::loadLocalPath(std::string path) {
@@ -166,6 +170,12 @@ void BrowserInstance::setZoom(float ratio) {
 
 void BrowserInstance::reloadBrowser() {
     _browser->Reload();
+}
+
+void BrowserInstance::selectAll() {
+    if (_browser->GetFocusedFrame()) {
+        _browser->GetFocusedFrame()->SelectAll();
+    }
 }
 
 bool BrowserInstance::hasContent(int x, int y) {

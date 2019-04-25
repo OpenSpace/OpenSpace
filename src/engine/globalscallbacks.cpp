@@ -96,4 +96,10 @@ std::vector<std::function<bool(double, double)>>& gMouseScrollWheel() {
     return g;
 }
 
+} // namespace openspace::global::detail
+
+namespace openspace::global::callback {
+
+void(*webBrowserPerformanceHotfix)() = nullptr;
+
 } // namespace openspace::global::callback

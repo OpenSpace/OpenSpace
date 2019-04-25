@@ -25,6 +25,7 @@
 #include <openspace/scene/scene.h>
 
 #include <openspace/engine/globals.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
@@ -33,7 +34,6 @@
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/camera.h>
-
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/logging/logmanager.h>
 
@@ -312,6 +312,9 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.what());
+        }
+        if (global::callback::webBrowserPerformanceHotfix) {
+            (*global::callback::webBrowserPerformanceHotfix)();
         }
     }
 }

@@ -25,7 +25,6 @@
 #include <modules/space/spacemodule.h>
 
 #include <modules/space/rendering/renderableconstellationbounds.h>
-#include <modules/space/rendering/renderableplanet.h>
 #include <modules/space/rendering/renderablerings.h>
 #include <modules/space/rendering/renderablestars.h>
 #include <modules/space/rendering/simplespheregeometry.h>
@@ -77,7 +76,7 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableConstellationBounds>(
         "RenderableConstellationBounds"
     );
-    fRenderable->registerClass<RenderablePlanet>("RenderablePlanet");
+
     fRenderable->registerClass<RenderableRings>("RenderableRings");
     fRenderable->registerClass<RenderableStars>("RenderableStars");
 
@@ -106,7 +105,6 @@ void SpaceModule::internalDeinitializeGL() {
 std::vector<documentation::Documentation> SpaceModule::documentations() const {
     return {
         RenderableConstellationBounds::Documentation(),
-        RenderablePlanet::Documentation(),
         RenderableRings::Documentation(),
         RenderableStars::Documentation(),
         SpiceRotation::Documentation(),

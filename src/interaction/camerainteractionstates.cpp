@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/inputdevicestates.h>
+#include <openspace/interaction/camerainteractionstates.h>
 
 #include <openspace/interaction/inputstate.h>
 
