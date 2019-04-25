@@ -51,7 +51,15 @@ set_property(GLOBAL PROPERTY OS_FOLDERS ON)
 cmake_policy(SET CMP0074 NEW)
 
 # Specify the CEF distribution version.
+
+# Release from 04/24/2019 verified to work on Windows.
 set(CEF_VERSION "73.1.13+g6e3c989+chromium-73.0.3683.75")
+
+# 73.1.13 has an issue on MacOS: The GUI freezing upon interaction.
+# Therefore, we fall back to 3.3578.1867 from 01/29/2019
+if (APPLE)
+  set(CEF_VERSION "3.3578.1867.g0f6d65a")
+endif ()
 
 # Add this project's cmake/ directory to the module path.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
