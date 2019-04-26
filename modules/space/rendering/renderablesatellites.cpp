@@ -50,6 +50,7 @@
 
 
 
+
  #include <fstream>
 
 
@@ -742,7 +743,7 @@ void RenderableSatellites::initializeGL() {
     _uniformCache.segments      = _programObject->uniformLocation("numberOfSegments");
     _uniformCache.position      = _programObject->uniformLocation("debrisPosition");
     _uniformCache.numberOfOrbits    = _programObject->uniformLocation("numberOfOrbits");
-    _uniformCache.vertexIDs         = _programObject->uniformLocation("vertexIDs");
+    _uniformCache.inGameTime    = _programObject->uniformLocation("inGameTime");
     
     updateBuffers();
 
@@ -775,9 +776,30 @@ int getNearestVertexNeighbour(int whatOrbit) {
 }    
 
 void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
-    if (_TLEData.empty())
-        return;
-    _inGameTime = data.time.j2000Seconds(); 
+    //if (_TLEData.empty())
+    //    return;
+    _inGameTime = static_cast<float>(data.time.j2000Seconds());
+    // -----------------
+    double nrOfPeriods = (_inGameTime - _vertexBufferData[4].epoch) / _vertexBufferData[4].period;
+    double periodFraction = std::fmod(nrOfPeriods, 1);
+
+    float offsetPeriods = _vertexBufferData[4].time / float(_vertexBufferData[4].period);
+    float offsetFraction = std::fmod(offsetPeriods, 1);
+
+    float vertexDistance = float(periodFraction) - offsetFraction;
+
+    if (vertexDistance < 0) {
+        vertexDistance += 1;
+    }
+
+    // int vertexID = gl_VertexID;
+    // float id = float(vertexID) / float(numberOfSegments*numberOfOrbits);
+
+    double kuken = (1 - vertexDistance);
+    double fade = std::min(std::max(kuken, 0.0), 1.0);
+    LINFO(fmt::format("fade: {}", fade));
+
+    // -----------------
 
     std::vector<TrailVBOLayout>::iterator it = _vertexBufferData.begin();
     std::vector<unsigned int> vertexIDs;
@@ -829,9 +851,11 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
 
     _programObject->setUniform(_uniformCache.vertexIDs, vertexIDs.data());
 
-    _programObject->setUniform(_uniformCache.numberOfOrbits, _TLEData.size());
+    //_programObject->setUniform(_uniformCache.numberOfOrbits, _TLEData.size());
 
     _programObject->setUniform(_uniformCache.opacity, _opacity);
+    _programObject->setUniform(_uniformCache.inGameTime, _inGameTime);
+
 
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
@@ -905,6 +929,9 @@ void RenderableSatellites::updateBuffers() {
             _vertexBufferData[index].y = position.y;
             _vertexBufferData[index].z = position.z;
             _vertexBufferData[index].time = timeOffset;
+            _vertexBufferData[index].epoch = static_cast<float>(orbit.epoch);
+            _vertexBufferData[index].period = static_cast<float>(orbit.period);
+
             //if (i > 0) {
                 //_indexBufferData[elementindex++] = static_cast<unsigned int>(index) - 1;
                 //_indexBufferData[elementindex++] = static_cast<unsigned int>(index);
@@ -912,6 +939,9 @@ void RenderableSatellites::updateBuffers() {
         }
         ++orbitindex;
     }
+
+    
+
     glBindVertexArray(_vertexArray);
 
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
