@@ -175,4 +175,15 @@ if (MSVC)
   # This library is used for being able to output the callstack if an exception escapes
   target_link_libraries(OpenSpace Dbghelp.lib)
   end_header()
+
+  option(OPENSPACE_VTUNE_ENABLED "Include VTune support" OFF)
+  set(OPENSPACE_VTUNE_PATH "C:/Program Files (x86)/IntelSWTools/VTune Amplifier 2019" CACHE STRING "Path to VTune installation")
+  if (OPENSPACE_VTUNE_ENABLED)
+    begin_header("Dependency: Intel VTune")
+    target_compile_definitions(OpenSpace PRIVATE "OPENSPACE_HAS_VTUNE")
+    target_include_directories(OpenSpace PRIVATE "${OPENSPACE_VTUNE_PATH}/include")
+    target_link_libraries(OpenSpace "${OPENSPACE_VTUNE_PATH}/lib64/libittnotify.lib")
+    end_header()
+  endif ()
 endif ()
+
