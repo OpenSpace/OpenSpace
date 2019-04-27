@@ -194,7 +194,10 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
 
         if (isGuiWindow && isMaster && _instance) {
             if (global::windowDelegate.windowHasResized()) {
-                _instance->reshape(global::windowDelegate.currentWindowSize());
+                _instance->reshape(static_cast<glm::ivec2>(
+                    static_cast<glm::vec2>(global::windowDelegate.currentWindowSize()) *
+                    global::windowDelegate.dpiScaling()
+                ));
             }
             if (_visible) {
                 _instance->draw();
