@@ -1315,7 +1315,7 @@ std::string SessionRecording::playbackList() {
     std::vector<std::string> allInputFiles = currentDir.readFiles();
     for (std::string f : allInputFiles) {
         //Remove path and keep only the filename, and add newline after
-        fileList.append(f.substr(recordingsPath.length(), (f.length() - recordingsPath.length())));
+        fileList.append(f.substr(recordingsPath.length() + 1, (f.length() - recordingsPath.length()) - 1));
         fileList.append("\n");
     }
     //Remove the final trailing newline from the list and return it.
