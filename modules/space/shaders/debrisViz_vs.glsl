@@ -24,8 +24,8 @@
 
 #version __CONTEXT__
 
-//#include "D:\OpenSpace\shaders\PowerScaling\powerScalingMath.hglsl"
-#include "C:\Users\Jonathan\Documents\exjobb\OpenSpace\shaders\PowerScaling\powerScalingMath.hglsl"
+#include "D:\OpenSpace\shaders\PowerScaling\powerScalingMath.hglsl"
+// #include "C:\Users\Jonathan\Documents\exjobb\OpenSpace\shaders\PowerScaling\powerScalingMath.hglsl"
 
 
 layout (location = 0) in vec4 vertex_data; // 1: x, 2: y, 3: z, 4: time
@@ -38,48 +38,27 @@ uniform mat4 projectionTransform;
 
 //uniform int numberOfSegments;
 uniform float lineFade;
-<<<<<<< HEAD
-uniform vec3 debrisPosition;
-// uniform int* VertexIDs;
-uniform int numberOfOrbits;
-uniform double inGameTime;
-=======
 //uniform vec3 debrisPosition;
 //uniform int* VertexIDs;
 //uniform int numberOfOrbits;
 uniform  /*double*/float inGameTime;
->>>>>>> f621c069631d25554b1832436924d5bb66e8f060
 
 out vec4 viewSpacePosition;
 out vec4 vs_position;
 out float fade;
 
 void main() {    
-<<<<<<< HEAD
-
-
-    int vertexID = gl_VertexID;
-    double timeOffset = vertex_data.w;  // epoch + period fraction
-    float id = float(vertexID) / float(numberOfSegments);
-    fade = clamp(id * lineFade, 0.0, 1.0); 
-
-
-
-    int orbit = vertexID/numberOfSegments;
-=======
 
     // The error is in line 33 at "location 1"!!
 
     // calculate nr of periods, get fractional part to know where
     // the vertex closest to the debris part is right now
-    //float nrOfPeriods = (609590465 - 609590465/4.5) / 9000;
     float nrOfPeriods = (inGameTime - orbit_data.x) / orbit_data.y;
-   float periodFraction = fract(nrOfPeriods); //mod(nrOfPeriods, 1.0);
+    float periodFraction = fract(nrOfPeriods); //mod(nrOfPeriods, 1.0);
 
-   // same procedure for the current vertex
-    //float offsetPeriods = vertex_data.w / 9000;
+    // same procedure for the current vertex
     float offsetPeriods = vertex_data.w / orbit_data.y;
-    float offsetFraction = fract(offsetPeriods);                //mod(offsetPeriods, 1.0);
+    float offsetFraction = offsetPeriods;                //mod(offsetPeriods, 1.0);
 
     // check difference of these two locations
     float vertexDistance = periodFraction - offsetFraction;
@@ -88,7 +67,6 @@ void main() {
         vertexDistance += 1.0;
     }
   
-
     // int vertexID = gl_VertexID;
     // float id = float(vertexID) / float(numberOfSegments*numberOfOrbits);
 
@@ -99,14 +77,12 @@ void main() {
 //    if (test >= 1.0) {
 //        test = 1.0;
 //    }
-    fade = test;
-
-    //fade = clamp( test, 0.0, 1.0);
+    
+    fade = clamp(test * lineFade, 0.0, 1.0) ;
 
     //fade = 0.5 * lineFade;
 
     // int orbit = vertexID/numberOfSegments;
->>>>>>> f621c069631d25554b1832436924d5bb66e8f060
     // will this iterate or add onto the value in vertexIDs?:  VertexIDs = VertexIDs + orbit;
     // should it be VertexIDs[orbit] - gl_VertexID, OR gl_VertexID - VertexIDs[orbit]:
                         // int offset = VertexIDs[orbit] - gl_VertexID
