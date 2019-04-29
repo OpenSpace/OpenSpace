@@ -37,7 +37,7 @@ in float fade;
 
 Fragment getFragment() {
     Fragment frag;
-    frag.color = vec4(color * fade, fade * opacity);
+    frag.color = vec4(color, fade * opacity);
     frag.depth = vs_position.w;
     frag.gPosition = viewSpacePosition;
     frag.gNormal = vec4(1, 1, 1 , 0);
