@@ -48,6 +48,8 @@
  #include <ghoul/opengl/programobject.h>
 #include <ghoul/logging/logmanager.h>
 
+#include <math.h>
+
 
 
  #include <fstream>
@@ -743,6 +745,8 @@ void RenderableSatellites::initializeGL() {
     _uniformCache.position      = _programObject->uniformLocation("debrisPosition");
     _uniformCache.numberOfOrbits    = _programObject->uniformLocation("numberOfOrbits");
     _uniformCache.vertexIDs         = _programObject->uniformLocation("vertexIDs");
+    _uniformCache.inGameTime        = _programObject->uniformLocation("inGameTime");
+    
     
     updateBuffers();
 
@@ -778,6 +782,7 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
     if (_TLEData.empty())
         return;
     _inGameTime = data.time.j2000Seconds(); 
+    
 
     std::vector<TrailVBOLayout>::iterator it = _vertexBufferData.begin();
     std::vector<unsigned int> vertexIDs;
@@ -801,21 +806,21 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
 
         // LINFO(fmt::format("atm position: {} ",  position));
  
-        float closestDistance = 10000000;
-        unsigned int whatIndex = 0;
-        for(int i=0 ; i<_nSegments ; ++i) {            
-            float positionDistance = glm::distance(
-                                         glm::vec3(_position.x, _position.y, _position.z) 
-                                        ,glm::vec3(it->x, it->y, it->z)); 
-            if( positionDistance < closestDistance ) 
-            {
-                closestDistance = positionDistance;
-                whatIndex = i;
-            }
-            ++it;
-        }
-        vertexIDs.push_back(whatIndex + (whatOrbit * _nSegments));
-       ++whatOrbit;
+    //     float closestDistance = 10000000;
+    //     unsigned int whatIndex = 0;
+    //     for(int i=0 ; i<_nSegments ; ++i) {            
+    //         float positionDistance = glm::distance(
+    //                                      glm::vec3(_position.x, _position.y, _position.z) 
+    //                                     ,glm::vec3(it->x, it->y, it->z)); 
+    //         if( positionDistance < closestDistance ) 
+    //         {
+    //             closestDistance = positionDistance;
+    //             whatIndex = i;
+    //         }
+    //         ++it;
+    //     }
+    //     vertexIDs.push_back(whatIndex + (whatOrbit * _nSegments));
+    //    ++whatOrbit;
     }
     
 
@@ -827,9 +832,9 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
     /////// TEST
     _programObject->activate();
 
-    _programObject->setUniform(_uniformCache.vertexIDs, vertexIDs.data());
+    //_programObject->setUniform(_uniformCache.vertexIDs, vertexIDs.data());
 
-    _programObject->setUniform(_uniformCache.numberOfOrbits, _TLEData.size());
+    _programObject->setUniform(_uniformCache.numberOfOrbits, static_cast<GLsizei>(_TLEData.size()));
 
     _programObject->setUniform(_uniformCache.opacity, _opacity);
 
@@ -851,6 +856,8 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
     //}
     _programObject->setUniform(_uniformCache.segments, _nSegments);
     _programObject->setUniform(_uniformCache.position, _position);
+    _programObject->setUniform(_uniformCache.inGameTime, _inGameTime);
+    
 
     glLineWidth(_appearance.lineWidth);
 
@@ -901,14 +908,16 @@ void RenderableSatellites::updateBuffers() {
             glm::vec3 position = _keplerTranslator.debrisPos(static_cast<double>(orbit.epoch + timeOffset)); 
             // LINFO(fmt::format("SegmentPosition: {} ",  position));
 
+            float periodOffset = static_cast<float>(i) / static_cast<float>(_nSegments); // remainder((_inGameTime - orbit.epoch), orbit.period);
+            
             _vertexBufferData[index].x = position.x;
             _vertexBufferData[index].y = position.y;
             _vertexBufferData[index].z = position.z;
-            _vertexBufferData[index].time = timeOffset;
-            //if (i > 0) {
-                //_indexBufferData[elementindex++] = static_cast<unsigned int>(index) - 1;
-                //_indexBufferData[elementindex++] = static_cast<unsigned int>(index);
-            //}
+            _vertexBufferData[index].time = orbit.epoch + timeOffset;
+            _vertexBufferData[index].epoch = orbit.epoch;
+            _vertexBufferData[index].period = orbit.period;
+
+
         }
         ++orbitindex;
     }

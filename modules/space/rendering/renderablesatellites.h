@@ -79,7 +79,7 @@ namespace openspace {
     private:
         /// The layout of the VBOs
         struct TrailVBOLayout {
-            float x, y, z, time;
+            float x, y, z, time, epoch, period;
         };
 
         KeplerTranslation _keplerTranslator;
@@ -126,7 +126,7 @@ namespace openspace {
         double _inGameTime = 0.0;
 
         UniformCache(opacity, modelView, projection, color, useLineFade, lineFade,
-            segments, position, vertexIDs, numberOfOrbits)
+            segments, position, vertexIDs, numberOfOrbits, inGameTime)
             _uniformCache;
 
         /**
