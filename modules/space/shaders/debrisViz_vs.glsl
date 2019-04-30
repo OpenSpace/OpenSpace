@@ -47,7 +47,7 @@ uniform float lineFade;
 //uniform vec3 debrisPosition;
 //uniform int* VertexIDs;
 //uniform int numberOfOrbits;
-uniform  float inGameTime;
+uniform float inGameTime;
 
 out vec4 viewSpacePosition;
 out vec4 vs_position;
