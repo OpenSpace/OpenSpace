@@ -34,6 +34,11 @@ layout (location = 0) in vec4 vertex_data; // 1: x, 2: y, 3: z, 4: time
 layout (location = 1) in vec2 orbit_data; // 1: epoch, 2: period
 
 
+//layout(location = 0) out vec4 vertex_data; // 1: x, 2: y, 3: z, 4: time
+// This doesn't work, plz help
+//layout(location = 1) out vec2 orbit_data; // 1: epoch, 2: period
+
+
 uniform dmat4 modelViewTransform;
 uniform mat4 projectionTransform;
 
@@ -42,15 +47,15 @@ uniform float lineFade;
 //uniform vec3 debrisPosition;
 //uniform int* VertexIDs;
 //uniform int numberOfOrbits;
-uniform  /*double*/float inGameTime;
+uniform  float inGameTime;
 
 out vec4 viewSpacePosition;
 out vec4 vs_position;
+//out float nrOfPeriods;
+//out float offsetPeriods;
 out float fade;
 
 void main() {    
-
-    // The error is in line 33 at "location 1"!!
 
     // calculate nr of periods, get fractional part to know where
     // the vertex closest to the debris part is right now
@@ -65,7 +70,7 @@ void main() {
     float vertexDistance = periodFraction - offsetFraction;
 
     if(vertexDistance < 0.0) {
-        vertexDistance += 1.0;
+      vertexDistance += 1.0;
     }
   
     // int vertexID = gl_VertexID;

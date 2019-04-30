@@ -781,7 +781,7 @@ int getNearestVertexNeighbour(int whatOrbit) {
 void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
     //if (_TLEData.empty())
     //    return;
-    _inGameTime = static_cast<float>(data.time.j2000Seconds());
+    _inGameTime = data.time.j2000Seconds();
     // -----------------
     // double nrOfPeriods = (_inGameTime - _vertexBufferData[4].epoch) / _vertexBufferData[4].period;
     // double periodFraction = std::fmod(nrOfPeriods, 1);
