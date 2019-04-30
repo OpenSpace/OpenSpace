@@ -25,17 +25,45 @@
 #include "fragment.glsl"
 #include "floatoperations.glsl"
 
+//layout(location = 0) in vec4 vertex; // 1: x, 2: y, 3: z, 4: time
+// This doesn't work, plz help
+//layout(location = 1) in vec2 orbit; // 1: epoch, 2: period
+
 uniform vec3 color;
 uniform float opacity = 1.0;
+
+uniform float lineFade;
+uniform float inGameTime;
 
 
 in vec4 viewSpacePosition;
 in vec4 vs_position;
+//in float nrOfPeriods;
+//in float offsetPeriods;
 in float fade;
 //in vec3 vs_color;
 //in vec2 vs_texcoord;
 
 Fragment getFragment() {
+    
+    float nrOfPeriods = (inGameTime - orbit.x) / orbit.y;
+    float periodFraction = fract(nrOfPeriods);
+
+    float offsetPeriods = vertex.w / orbit.y;
+    float offsetFraction = offsetPeriods;
+
+    // check difference of these two locations
+    float vertexDistance = periodFraction - offsetFraction;
+
+    if (vertexDistance < 0.0) {
+        vertexDistance += 1.0;
+    }
+
+    float invert = 1.0 - vertexDistance;
+
+    float fade = clamp(invert * lineFade, 0.0, 1.0);
+    
+
     Fragment frag;
     frag.color = vec4(color, fade * opacity);
     frag.depth = vs_position.w;
