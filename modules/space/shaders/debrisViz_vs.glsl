@@ -24,7 +24,8 @@
 
 #version __CONTEXT__
 
-#include "D:\OpenSpace\shaders\PowerScaling\powerScalingMath.hglsl"
+
+#include "PowerScaling/powerScalingMath.hglsl"
 // #include "C:\Users\Jonathan\Documents\exjobb\OpenSpace\shaders\PowerScaling\powerScalingMath.hglsl"
 
 
