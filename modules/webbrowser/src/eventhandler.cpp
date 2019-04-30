@@ -26,6 +26,8 @@
 
 #include <modules/webbrowser/include/browserinstance.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <fmt/format.h>
@@ -268,8 +270,9 @@ bool EventHandler::isDoubleClick(const MouseButtonState& button) const {
 }
 
 bool EventHandler::mousePositionCallback(double x, double y) {
-    _mousePosition.x = floor(static_cast<float>(x));
-    _mousePosition.y = floor(static_cast<float>(y));
+    const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
+    _mousePosition.x = floor(static_cast<float>(x) * dpiScaling.x);
+    _mousePosition.y = floor(static_cast<float>(y) * dpiScaling.y);
     _browserInstance->sendMouseMoveEvent(mouseEvent());
     // Let the mouse event trickle on
     return false;
