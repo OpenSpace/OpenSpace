@@ -60,7 +60,7 @@ private:
         TcpSocket = 0,
         WebSocket
     };
-    
+
     enum class Access : int {
         Deny = 0,
         RequirePassword,

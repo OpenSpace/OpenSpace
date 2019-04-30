@@ -243,7 +243,7 @@ void NavigationHandler::saveCameraStateToFile(const std::string& filepath) {
         glm::dquat q = _camera->rotationQuaternion();
 
         ofs << "return {" << std::endl;
-        ofs << "    " << KeyAnchor << " = " << "\"" << 
+        ofs << "    " << KeyAnchor << " = " << "\"" <<
             _orbitalNavigator->anchorNode()->identifier() << "\""
             << "," << std::endl;
 

@@ -95,7 +95,7 @@ public:
         ScriptCallback cb = ScriptCallback());
 
     std::vector<std::string> allLuaFunctions() const;
-    
+
     std::string generateJson() const override;
 
 private:
