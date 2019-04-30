@@ -853,7 +853,7 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
     //_programObject->setUniform(_uniformCache.numberOfOrbits, _TLEData.size());
 
     _programObject->setUniform(_uniformCache.opacity, _opacity);
-    _programObject->setUniform(_uniformCache.inGameTime, _inGameTime);
+    _programObject->setUniform(_uniformCache.inGameTime, static_cast<float>(_inGameTime));
 
 
     glm::dmat4 modelTransform =

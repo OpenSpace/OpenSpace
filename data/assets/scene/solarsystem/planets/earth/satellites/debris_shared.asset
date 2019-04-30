@@ -21,7 +21,7 @@ function downloadTLEFile(sceneAsset, url, name)
     })
 end
 
-local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
+local registerSatelliteGroupObjects = function(containingAsset, group, tleFolder, shouldAddDuplicates)
      local filename = group.Url:match("([^/]+)$")
      local filenameSansExt = filename:gsub(filename:match("(%.%w+)$"), "")
 
@@ -79,14 +79,11 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
     end
 
     local Debris = debris(filenameSansExt, path, group.TrailColor)
-    assetHelper.registerSceneGraphNodesAndExport(asset, { Debris })
-
-    -- asset.export("satImageFolder", satImageFolder)
-
+    assetHelper.registerSceneGraphNodesAndExport(containingAsset, { Debris })
 end
 
 asset.export("downloadTLEFile", downloadTLEFile)
-asset.export("addSatelliteGroupObjects", addSatelliteGroupObjects)
+asset.export("registerSatelliteGroupObjects", registerSatelliteGroupObjects)
 
 
 
