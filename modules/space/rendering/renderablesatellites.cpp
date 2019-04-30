@@ -874,7 +874,6 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
     //}
     // _programObject->setUniform(_uniformCache.segments, _nSegments);
     // _programObject->setUniform(_uniformCache.position, _position);
-    _programObject->setUniform(_uniformCache.inGameTime, _inGameTime);
     
 
     //glEnableVertexAttribArray(0);    // We like submitting vertices on stream 0 for no special reason
