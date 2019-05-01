@@ -317,8 +317,8 @@ std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictiona
 ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "" })
     , _enabled(EnabledInfo, true)
-    , _useRadiusAzimuthElevation(UseRadiusAzimuthElevationInfo, false)
     , _usePerspectiveProjection(UsePerspectiveProjectionInfo, false)
+    , _useRadiusAzimuthElevation(UseRadiusAzimuthElevationInfo, false)
     , _faceCamera(FaceCameraInfo, true)
     , _cartesianPosition(
         CartesianPositionInfo,

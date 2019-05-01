@@ -48,6 +48,9 @@ CefHost::CefHost(const std::string& helperLocation) {
 #ifndef __APPLE__
     // Apple will always look for helper in a fixed location.
     CefString(&settings.browser_subprocess_path).FromString(helperLocation);
+#else
+    // Silence a warning about unused variable
+    (void)helperLocation;
 #endif
 
     settings.windowless_rendering_enabled = true;
