@@ -81,6 +81,7 @@ namespace openspace {
         struct TrailVBOLayout {
             float x, y, z, time, epoch, period;
         };
+        // static_assert(sizeof(struct TrailVBOLayout)==4*sizeof(float)+2*sizeof(double),"Implementation error!");
 
         KeplerTranslation _keplerTranslator;
         std::vector<KeplerParameters> _TLEData;
