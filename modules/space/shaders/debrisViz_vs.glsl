@@ -24,82 +24,45 @@
 
 #version __CONTEXT__
 
-
 #include "PowerScaling/powerScalingMath.hglsl"
-// #include "C:\Users\Jonathan\Documents\exjobb\OpenSpace\shaders\PowerScaling\powerScalingMath.hglsl"
 
-
-layout (location = 0) in vec4 vertex_data; // 1: x, 2: y, 3: z, 4: time
-// This doesn't work, plz help
+layout (location = 0) in vec4 vertex_data; // 1: x, 2: y, 3: z, 4: timeOffset
 layout (location = 1) in vec2 orbit_data; // 1: epoch, 2: period
-
-
-layout(location = 0) out vec4 vertex; // 1: x, 2: y, 3: z, 4: time
-// This doesn't work, plz help
-layout(location = 1) out vec2 orbit; // 1: epoch, 2: period
-
 
 uniform dmat4 modelViewTransform;
 uniform mat4 projectionTransform;
 
-//uniform int numberOfSegments;
-//uniform float lineFade;
-//uniform vec3 debrisPosition;
-//uniform int* VertexIDs;
-//uniform int numberOfOrbits;
-uniform float inGameTime;
+uniform float lineFade;
+uniform double inGameTime;
 
 out vec4 viewSpacePosition;
 out vec4 vs_position;
-//out float nrOfPeriods;
-//out float offsetPeriods;
-//out float fade;
+out float fade;
 
-void main() {    
-
+void main() {
     // calculate nr of periods, get fractional part to know where
     // the vertex closest to the debris part is right now
-    //float nrOfPeriods = (inGameTime - orbit_data.x) / orbit_data.y;
-    //float periodFraction = fract(nrOfPeriods); //mod(nrOfPeriods, 1.0);
+    double nrOfPeriods = (inGameTime - orbit_data.x) / orbit_data.y;
+    double periodFraction = fract(nrOfPeriods); //mod(nrOfPeriods, 1.0);
+    float periodFraction_f = float(periodFraction);
 
     // same procedure for the current vertex
-    //float offsetPeriods = vertex_data.w / orbit_data.y;
-    //float offsetFraction = offsetPeriods;                //mod(offsetPeriods, 1.0);
+    float offsetPeriods = vertex_data.w / orbit_data.y;
 
     // check difference of these two locations
-    //float vertexDistance = periodFraction - offsetFraction;
+    float vertexDistance = periodFraction_f - offsetPeriods;
 
-    //if(vertexDistance < 0.0) {
-    //  vertexDistance += 1.0;
-    //}
+    if(vertexDistance < 0.0) { 
+      vertexDistance += 1.0;
+    }
   
-    // int vertexID = gl_VertexID;
-    // float id = float(vertexID) / float(numberOfSegments*numberOfOrbits);
+    float invert = 1.0 - vertexDistance; // * lineFade;
+    fade = clamp(invert * lineFade, 0.0, 1.0) ;
 
-    //float test = 1.0 - vertexDistance; // * lineFade;
-//    if (test < 1.0 ) {
-//        test = 0.4;
-//    }
-//    if (test >= 1.0) {
-//        test = 1.0;
-//    }
-    
-    //fade = clamp(test * lineFade, 0.0, 1.0) ;
-
-    //fade = 0.5 * lineFade;
-
-    // int orbit = vertexID/numberOfSegments;
-    // will this iterate or add onto the value in vertexIDs?:  VertexIDs = VertexIDs + orbit;
-    // should it be VertexIDs[orbit] - gl_VertexID, OR gl_VertexID - VertexIDs[orbit]:
-                        // int offset = VertexIDs[orbit] - gl_VertexID
-                        // to know the direction of the debris
-    // if(debrisPosition == vs_position)
-    vertex = vertex_data;
-    orbit = orbit_data;
     
     viewSpacePosition = vec4(modelViewTransform * dvec4(vertex_data.xyz, 1));
     vs_position = z_normalization( projectionTransform * viewSpacePosition);
-    gl_Position = vs_position;      
+    gl_Position = vs_position;
 
 }
 

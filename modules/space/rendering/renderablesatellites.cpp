@@ -21,136 +21,130 @@
   * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
   * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
   ****************************************************************************************/
- #include <fstream>
- #include <chrono>
- #include <vector>
+#include <fstream>
+#include <chrono>
+#include <vector>
 
+#include <modules/space/rendering/renderablesatellites.h>
+#include <modules/space/translation/keplertranslation.h>
+#include <modules/space/translation/TLEtranslation.h>
+#include <modules/space/spacemodule.h>
 
- #include <modules/space/rendering/renderablesatellites.h>
- #include <modules/space/translation/keplertranslation.h>
- #include <modules/space/translation/TLEtranslation.h>
- #include <modules/space/spacemodule.h>
+#include <modules/base/basemodule.h>
 
-
- #include <modules/base/basemodule.h>
-
- #include <openspace/engine/openspaceengine.h>
- #include <openspace/rendering/renderengine.h>
- #include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/documentation/documentation.h>
- #include <openspace/documentation/verifier.h>
- #include <openspace/util/time.h>
- #include <openspace/util/updatestructures.h>
+#include <openspace/documentation/verifier.h>
+#include <openspace/util/time.h>
+#include <openspace/util/updatestructures.h>
 
- #include <ghoul/filesystem/filesystem.h>
- #include <ghoul/filesystem/file.h>
- #include <ghoul/misc/csvreader.h>
- #include <ghoul/opengl/programobject.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/misc/csvreader.h>
+#include <ghoul/opengl/programobject.h>
 #include <ghoul/logging/logmanager.h>
 
 #include <math.h>
+#include <fstream>
+
+// Todo:
+// Parse epoch correctly?
+// read distances using correct unit
+// Make the linefade go from the closest vertex to the actuall position
+//         instead of to the next vertex
+
+namespace {
+    constexpr const char* ProgramName = "RenderableSatellites";
+    constexpr const char* _loggerCat = "SpaceDebris";
 
 
 
-
- #include <fstream>
-
-
- // Todo:
- // Parse epoch correctly
- // read distances using correct unit
- // ...
-
- namespace {
-     constexpr const char* ProgramName = "RenderableSatellites";
-     constexpr const char* _loggerCat = "SpaceDebris";
-    
-
-    
-     static const openspace::properties::Property::PropertyInfo PathInfo = {
-        "Path",
-        "Path",
-        "The file path to the CSV file to read"
-     };
-
-     static const openspace::properties::Property::PropertyInfo SegmentsInfo = {
-         "Segments",
-         "Segments",
-         "The number of segments to use for each orbit ellipse"
-     };
-
-     static const openspace::properties::Property::PropertyInfo EccentricityColumnInfo = {
-         "EccentricityColumn",
-         "EccentricityColumn",
-         "The header of the column where the eccentricity is stored"
-     };
-
-     static const openspace::properties::Property::PropertyInfo SemiMajorAxisColumnInfo = {
-         "SemiMajorAxisColumn",
-         "SemiMajorAxisColumn",
-         "The header of the column where the semi-major axis is stored"
-     };
-
-     static const openspace::properties::Property::PropertyInfo SemiMajorAxisUnitInfo = {
-         "SemiMajorAxisUnit",
-         "SemiMajorAxisUnit",
-         "The unit of the semi major axis. For example: If specified in km, set this to 1000."
-     };
-
-     static const openspace::properties::Property::PropertyInfo InclinationColumnInfo = {
-         "InclinationColumn",
-         "InclinationColumn",
-         "The header of the column where the inclination is stored"
-     };
-
-     static const openspace::properties::Property::PropertyInfo AscendingNodeColumnInfo = {
-         "AscendingNodeColumn",
-         "AscendingNodeColumn",
-         "The header of the column where the ascending node is stored"
-     };
-
-     static const openspace::properties::Property::PropertyInfo ArgumentOfPeriapsisColumnInfo = {
-         "ArgumentOfPeriapsisColumn",
-         "ArgumentOfPeriapsisColumn",
-         "The header of the column where the argument of periapsis is stored"
-     };
-
-     static const openspace::properties::Property::PropertyInfo MeanAnomalyAtEpochColumnInfo = {
-         "MeanAnomalyAtEpochColumn",
-         "MeanAnomalyAtEpochColumn",
-         "The header of the column where the mean anomaly at epoch is stored"
-     };
-
-     static const openspace::properties::Property::PropertyInfo EpochColumnInfo = {
-         "EpochColumn",
-         "EpochColumn",
-         "The header of the column where the epoch is stored"
-     };
-     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line Width",
-        "This value specifies the line width of the trail if the selected rendering "
-        "method includes lines. If the rendering mode is set to Points, this value is "
-        "ignored."
+    static const openspace::properties::Property::PropertyInfo PathInfo = {
+    "Path",
+    "Path",
+    "The file path to the CSV file to read"
     };
-     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "Färg."
-     };
-    constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
-        "Fade",
-        "Line fade",
-        "The fading factor that is applied to the trail if the 'EnableFade' value is "
-        "'true'. If it is 'false', this setting has no effect. The higher the number, "
-        "the less fading is applied."
-    };
-     
-     constexpr const char* KeyFile = "Path";
-     constexpr const char* KeyLineNum = "LineNumber";
 
-     // LINFO("Keyfile: " + KeyFile);
- }
+    static const openspace::properties::Property::PropertyInfo SegmentsInfo = {
+        "Segments",
+        "Segments",
+        "The number of segments to use for each orbit ellipse"
+    };
+
+    static const openspace::properties::Property::PropertyInfo EccentricityColumnInfo = {
+        "EccentricityColumn",
+        "EccentricityColumn",
+        "The header of the column where the eccentricity is stored"
+    };
+
+    static const openspace::properties::Property::PropertyInfo SemiMajorAxisColumnInfo = {
+        "SemiMajorAxisColumn",
+        "SemiMajorAxisColumn",
+        "The header of the column where the semi-major axis is stored"
+    };
+
+    static const openspace::properties::Property::PropertyInfo SemiMajorAxisUnitInfo = {
+        "SemiMajorAxisUnit",
+        "SemiMajorAxisUnit",
+        "The unit of the semi major axis. For example: If specified in km, set this to 1000."
+    };
+
+    static const openspace::properties::Property::PropertyInfo InclinationColumnInfo = {
+        "InclinationColumn",
+        "InclinationColumn",
+        "The header of the column where the inclination is stored"
+    };
+
+    static const openspace::properties::Property::PropertyInfo AscendingNodeColumnInfo = {
+        "AscendingNodeColumn",
+        "AscendingNodeColumn",
+        "The header of the column where the ascending node is stored"
+    };
+
+    static const openspace::properties::Property::PropertyInfo ArgumentOfPeriapsisColumnInfo = {
+        "ArgumentOfPeriapsisColumn",
+        "ArgumentOfPeriapsisColumn",
+        "The header of the column where the argument of periapsis is stored"
+    };
+
+    static const openspace::properties::Property::PropertyInfo MeanAnomalyAtEpochColumnInfo = {
+        "MeanAnomalyAtEpochColumn",
+        "MeanAnomalyAtEpochColumn",
+        "The header of the column where the mean anomaly at epoch is stored"
+    };
+
+    static const openspace::properties::Property::PropertyInfo EpochColumnInfo = {
+        "EpochColumn",
+        "EpochColumn",
+        "The header of the column where the epoch is stored"
+    };
+    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    "LineWidth",
+    "Line Width",
+    "This value specifies the line width of the trail if the selected rendering "
+    "method includes lines. If the rendering mode is set to Points, this value is "
+    "ignored."
+};
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    "Color",
+    "Color",
+    "Färg."
+    };
+constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
+    "Fade",
+    "Line fade",
+    "The fading factor that is applied to the trail if the 'EnableFade' value is "
+    "'true'. If it is 'false', this setting has no effect. The higher the number, "
+    "the less fading is applied."
+};
+    
+    constexpr const char* KeyFile = "Path";
+    constexpr const char* KeyLineNum = "LineNumber";
+
+    // LINFO("Keyfile: " + KeyFile);
+}
 
 namespace openspace {
     
@@ -563,16 +557,9 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     _lineFade = 
         static_cast<float>(dictionary.value<double>(FadeInfo.identifier));
 
-    // _appearance.lineColor = _color; 
     addPropertySubOwner(_appearance);
     addProperty(_path);
     addProperty(_nSegments);
-    // addProperty(_lineFade);
-    // addProperty(_semiMajorAxisUnit);
-
-    const std::string& file = dictionary.value<std::string>(KeyFile);
-    LINFO(fmt::format("file: {} ", file));
-
 }
    
     
@@ -689,26 +676,27 @@ void RenderableSatellites::readTLEFile(const std::string& filename) {
     } // !for loop
     file.close();
 
-    // get max apergee and min perigee
-    // calculateMaxApoAndMinPeri(_TLEData);
 
 }
+
 /*
 RenderableSatellites::~RenderableSatellites() {
 
 }
  */  
+
 void RenderableSatellites::initialize() {
+    
     readTLEFile(_path);
     updateBuffers();
 
     //_path.onChange([this]() {
-    //    readFromCsvFile();
+    //    readTLEFile(_path);
     //    updateBuffers();
     //});
     //
     //_semiMajorAxisUnit.onChange([this]() {
-    //    readFromCsvFile();
+    //    readTLEFile(_path);
     //    updateBuffers();
     //});
 
@@ -736,17 +724,14 @@ void RenderableSatellites::initializeGL() {
        }
    );
     
-    _uniformCache.opacity       = _programObject->uniformLocation("opacity");
     _uniformCache.modelView     = _programObject->uniformLocation("modelViewTransform");
     _uniformCache.projection    = _programObject->uniformLocation("projectionTransform");
-    _uniformCache.color         = _programObject->uniformLocation("color");
-    //_uniformCache.useLineFade = _programObject->uniformLocation("useLineFade");
     _uniformCache.lineFade      = _programObject->uniformLocation("lineFade");
-    _uniformCache.segments      = _programObject->uniformLocation("numberOfSegments");
-    _uniformCache.position      = _programObject->uniformLocation("debrisPosition");
-    _uniformCache.numberOfOrbits    = _programObject->uniformLocation("numberOfOrbits");
     _uniformCache.inGameTime    = _programObject->uniformLocation("inGameTime");
     
+    _uniformCache.color         = _programObject->uniformLocation("color");
+    _uniformCache.opacity       = _programObject->uniformLocation("opacity");
+
     updateBuffers();
 
     setRenderBin(Renderable::RenderBin::Overlay);
@@ -772,88 +757,15 @@ bool RenderableSatellites::isReady() const {
 void RenderableSatellites::update(const UpdateData& data) { 
 }
 
-int getNearestVertexNeighbour(int whatOrbit) {
-    
-    return 0;
-
-}    
-
 void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
-    //if (_TLEData.empty())
-    //    return;
+    if (_TLEData.empty())
+        return;
     _inGameTime = data.time.j2000Seconds();
-    // -----------------
-    // double nrOfPeriods = (_inGameTime - _vertexBufferData[4].epoch) / _vertexBufferData[4].period;
-    // double periodFraction = std::fmod(nrOfPeriods, 1);
 
-    // float offsetPeriods = _vertexBufferData[4].time / float(_vertexBufferData[4].period);
-    // float offsetFraction = std::fmod(offsetPeriods, 1);
-
-    // float vertexDistance = float(periodFraction) - offsetFraction;
-
-    // if (vertexDistance < 0) {
-    //     vertexDistance += 1;
-    // }
-
-    // // int vertexID = gl_VertexID;
-    // // float id = float(vertexID) / float(numberOfSegments*numberOfOrbits);
-
-    // -----------------
-
-    // std::vector<TrailVBOLayout>::iterator it = _vertexBufferData.begin();
-    // std::vector<unsigned int> vertexIDs;
-    // unsigned int whatOrbit = 0;
-    // for (const auto& orbit : _TLEData) {
-    //     _keplerTranslator.setKeplerElements(
-    //         orbit.eccentricity,
-    //         orbit.semiMajorAxis,
-    //         orbit.inclination,
-    //         orbit.ascendingNode,
-    //         orbit.argumentOfPeriapsis,
-    //         orbit.meanAnomaly,
-    //         orbit.period,
-    //         orbit.epoch
-    //     );
-    
-    //     glm::vec3 position = _keplerTranslator.debrisPos(_inGameTime);
-    //     _position.x = position.x;
-    //     _position.y = position.y;
-    //     _position.z = position.z;
-
-        // LINFO(fmt::format("atm position: {} ",  position));
- 
-    //     float closestDistance = 10000000;
-    //     unsigned int whatIndex = 0;
-    //     for(int i=0 ; i<_nSegments ; ++i) {            
-    //         float positionDistance = glm::distance(
-    //                                      glm::vec3(_position.x, _position.y, _position.z) 
-    //                                     ,glm::vec3(it->x, it->y, it->z)); 
-    //         if( positionDistance < closestDistance ) 
-    //         {
-    //             closestDistance = positionDistance;
-    //             whatIndex = i;
-    //         }
-    //         ++it;
-    //     }
-    //     vertexIDs.push_back(whatIndex + (whatOrbit * _nSegments));
-    //    ++whatOrbit;
-    // }
-    
-
-    // 1 loopa vertex buffer
-    // 1,5 jämföra positionen på _position med vertexens position.
-    // 2 hitta vilket id i bufferten som positionen har.
-    // 3 skicka vidare det idt 
-
-    /////// TEST
     _programObject->activate();
 
-    //_programObject->setUniform(_uniformCache.vertexIDs, vertexIDs.data());
-
-    //_programObject->setUniform(_uniformCache.numberOfOrbits, _TLEData.size());
-
     _programObject->setUniform(_uniformCache.opacity, _opacity);
-    _programObject->setUniform(_uniformCache.inGameTime, static_cast<float>(_inGameTime));
+    _programObject->setUniform(_uniformCache.inGameTime, _inGameTime);
 
 
     glm::dmat4 modelTransform =
@@ -868,13 +780,7 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
-    //_programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
-    //if (_appearance.useLineFade) {
-        _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
-    //}
-    // _programObject->setUniform(_uniformCache.segments, _nSegments);
-    // _programObject->setUniform(_uniformCache.position, _position);
-    
+    _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
 
     //glEnableVertexAttribArray(0);    // We like submitting vertices on stream 0 for no special reason
     //glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), 0);
@@ -901,9 +807,7 @@ void RenderableSatellites::updateBuffers() {
 
     const size_t nVerticesPerOrbit = _nSegments + 1;
     _vertexBufferData.resize(_TLEData.size() * nVerticesPerOrbit);
-    _indexBufferData.resize(_TLEData.size() * _nSegments * 2);
     size_t orbitindex = 0;
-    // size_t elementindex = 0;
 
     for (const auto& orbit : _TLEData) {
         _keplerTranslator.setKeplerElements(
@@ -920,14 +824,11 @@ void RenderableSatellites::updateBuffers() {
         for (size_t i = 0; i <= _nSegments; ++i) {
             size_t index = orbitindex * nVerticesPerOrbit + i;
 
-            float timeOffset = orbit.period *
-                static_cast<float>(i) / static_cast<float>(_nSegments);
+            float timeOffset = orbit.period * 
+                    static_cast<float>(i)/ static_cast<float>(_nSegments);
 
-            glm::vec3 position = _keplerTranslator.debrisPos(static_cast<double>(orbit.epoch + timeOffset)); 
-            // LINFO(fmt::format("SegmentPosition: {} ",  position));
+            glm::vec3 position = _keplerTranslator.debrisPos(static_cast<float>(orbit.epoch) + timeOffset); 
 
-            float periodOffset = static_cast<float>(i) / static_cast<float>(_nSegments); // remainder((_inGameTime - orbit.epoch), orbit.period);
-            
             _vertexBufferData[index].x = position.x;
             _vertexBufferData[index].y = position.y;
             _vertexBufferData[index].z = position.z;
@@ -935,10 +836,6 @@ void RenderableSatellites::updateBuffers() {
             _vertexBufferData[index].epoch = static_cast<float>(orbit.epoch);
             _vertexBufferData[index].period = static_cast<float>(orbit.period);
 
-            //if (i > 0) {
-                //_indexBufferData[elementindex++] = static_cast<unsigned int>(index) - 1;
-                //_indexBufferData[elementindex++] = static_cast<unsigned int>(index);
-            //}
         }
         ++orbitindex;
     }
@@ -956,10 +853,10 @@ void RenderableSatellites::updateBuffers() {
     );
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 6*sizeof(GL_FLOAT), (GLvoid*)0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), (GLvoid*)0); // stride : 4*sizeof(GL_FLOAT) + 2*sizeof(GL_DOUBLE)
 
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6*sizeof(GL_FLOAT), (GLvoid*)(4*sizeof(GL_FLOAT)) );
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), (GLvoid*)(4*sizeof(GL_FLOAT)) );
 
 
     glBindVertexArray(0);
