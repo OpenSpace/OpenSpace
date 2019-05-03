@@ -140,8 +140,8 @@ std::shared_ptr<TableData<T>> FitsFileReader::readTable(std::string& path,
         // Make sure FITS file is not a Primary HDU Object (aka an image).
         if (!isPrimaryHDU()) {
             ExtHDU& table = _infile->extension(hduIdx);
-            int numCols = columnNames.size();
-            int numRowsInTable = table.rows();
+            int numCols = static_cast<int>(columnNames.size());
+            int numRowsInTable = static_cast<int>(table.rows());
             std::unordered_map<string, std::vector<T>> contents;
             //LINFO("Read file: " + _infile->name());
 
@@ -238,8 +238,8 @@ std::vector<float> FitsFileReader::readFitsFile(std::string filePath, int& nValu
     int nStars = table->readRows - firstRow + 1;
 
     int nNullArr = 0;
-    size_t nColumnsRead = allColumnNames.size();
-    size_t defaultCols = 17; // Number of columns that are copied by predefined code.
+    int nColumnsRead = static_cast<int>(allColumnNames.size());
+    int defaultCols = 17; // Number of columns that are copied by predefined code.
     if (nColumnsRead != defaultCols) {
         LINFO("Additional columns will be read! Consider add column in code for "
             "significant speedup!");
@@ -330,7 +330,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::string filePath, int& nValu
             values[idx++] = vecData[i];
         }
 
-        for (size_t j = 0; j < nValuesPerStar; ++j) {
+        for (int j = 0; j < nValuesPerStar; ++j) {
             // The astronomers in Vienna use -999 as default value. Change it to 0.
             if (values[j] == -999) {
                 values[j] = 0.f;

@@ -94,7 +94,7 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
             }
 
             _interfaceOwner.addPropertySubOwner(serverInterface.get());
-            
+
             if (serverInterface) {
                 _interfaces.push_back(std::move(serverInterface));
             }

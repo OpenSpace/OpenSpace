@@ -69,7 +69,7 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
-    
+
     std::string generateJson() const override;
 
     const std::multimap<KeyWithModifier, KeyInformation>& keyBindings() const;

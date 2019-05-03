@@ -145,7 +145,7 @@ std::string KeybindingManager::generateJson() const {
     std::stringstream json;
     json << "[";
     bool first = true;
-    for (const std::pair<KeyWithModifier, KeyInformation>& p : _keyLua) {
+    for (const std::pair<const KeyWithModifier, KeyInformation>& p : _keyLua) {
         if (!first) {
             json << ",";
         }

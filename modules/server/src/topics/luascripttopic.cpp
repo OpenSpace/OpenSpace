@@ -37,7 +37,6 @@ namespace {
     constexpr const char* KeyFunction = "function";
     constexpr const char* KeyArguments = "arguments";
     constexpr const char* KeyReturn = "return";
-    constexpr const char* TypeKey = "type";
     constexpr const char* _loggerCat = "LuaScriptTopic";
 
     std::string formatLua(const nlohmann::json::const_iterator& it);

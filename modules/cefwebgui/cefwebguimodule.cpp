@@ -38,8 +38,6 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    constexpr const char* _loggerCat = "CefWebGui";
-
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
@@ -77,8 +75,8 @@ CefWebGuiModule::CefWebGuiModule()
     : OpenSpaceModule(CefWebGuiModule::Name)
     , _enabled(EnabledInfo, true)
     , _visible(VisibleInfo, true)
-    , _url(GuiUrlInfo, "")
     , _reload(ReloadInfo)
+    , _url(GuiUrlInfo, "")
     , _guiScale(GuiScaleInfo, 1.f, 0.1f, 3.f)
 {
     addProperty(_enabled);

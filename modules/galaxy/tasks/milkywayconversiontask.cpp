@@ -45,7 +45,7 @@ namespace {
 
 namespace openspace {
 
-MilkywayConversionTask::MilkywayConversionTask(const ghoul::Dictionary& dictionary) 
+MilkywayConversionTask::MilkywayConversionTask(const ghoul::Dictionary& dictionary)
     : _inFirstIndex(0)
     , _inNSlices(0)
 {
