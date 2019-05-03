@@ -65,7 +65,15 @@
 
 #ifdef OPENSPACE_HAS_VTUNE
 #include <ittnotify.h>
+
+// If this is set to 'true', it will disable all frame markers in this file and expect
+// you to place them in the code you actually want to inspect
+constexpr const bool EnableDetailedVtune = false;
 #endif // OPENSPACE_HAS_VTUNE
+
+#ifdef OPENSPACE_HAS_NVTOOLS
+#include "nvToolsExt.h"
+#endif // OPENSPACE_HAS_NVTOOLS
 
 namespace {
 
@@ -244,7 +252,9 @@ std::pair<int, int> supportedOpenGLVersion() {
 //
 void mainInitFunc() {
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_begin_v3(_vTune.init, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_begin_v3(_vTune.init, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainInitFunc(begin)");
 
@@ -363,7 +373,9 @@ void mainInitFunc() {
 
     LTRACE("main::mainInitFunc(end)");
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_end_v3(_vTune.init, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_end_v3(_vTune.init, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
 }
 
@@ -371,7 +383,9 @@ void mainInitFunc() {
 
 void mainPreSyncFunc() {
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_begin_v3(_vTune.preSync, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_begin_v3(_vTune.preSync, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainPreSyncFunc(begin)");
 
@@ -455,7 +469,9 @@ void mainPreSyncFunc() {
 
     LTRACE("main::mainPreSyncFunc(end)");
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_end_v3(_vTune.preSync, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_end_v3(_vTune.preSync, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
 }
 
@@ -463,8 +479,13 @@ void mainPreSyncFunc() {
 
 void mainPostSyncPreDrawFunc() {
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_begin_v3(_vTune.postSyncPreDraw, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_begin_v3(_vTune.postSyncPreDraw, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
+#ifdef OPENSPACE_HAS_NVTOOLS
+    nvtxRangePush("postSyncPreDraw");
+#endif // OPENSPACE_HAS_NVTOOLS
     LTRACE("main::postSynchronizationPreDraw(begin)");
 
     openspace::global::openSpaceEngine.postSynchronizationPreDraw();
@@ -477,8 +498,14 @@ void mainPostSyncPreDrawFunc() {
 #endif // OPENVR_SUPPORT
 
     LTRACE("main::postSynchronizationPreDraw(end)");
+
+#ifdef OPENSPACE_HAS_NVTOOLS
+    nvtxRangePop();
+#endif // OPENSPACE_HAS_NVTOOLS
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_end_v3(_vTune.postSyncPreDraw, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_end_v3(_vTune.postSyncPreDraw, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
 }
 
@@ -486,8 +513,13 @@ void mainPostSyncPreDrawFunc() {
 
 void mainRenderFunc() {
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_begin_v3(_vTune.render, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_begin_v3(_vTune.render, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
+#ifdef OPENSPACE_HAS_NVTOOLS
+    nvtxRangePush("render");
+#endif // OPENSPACE_HAS_NVTOOLS
     LTRACE("main::mainRenderFunc(begin)");
 
     glm::mat4 viewMatrix = SgctEngine->getCurrentViewMatrix() *
@@ -515,8 +547,13 @@ void mainRenderFunc() {
     }
 
     LTRACE("main::mainRenderFunc(end)");
+#ifdef OPENSPACE_HAS_NVTOOLS
+    nvtxRangePop();
+#endif // OPENSPACE_HAS_NVTOOLS
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_end_v3(_vTune.render, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_end_v3(_vTune.render, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
 }
 
@@ -524,7 +561,9 @@ void mainRenderFunc() {
 
 void mainDraw2DFunc() {
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_begin_v3(_vTune.draw2D, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_begin_v3(_vTune.draw2D, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainDraw2DFunc(begin)");
 
@@ -542,7 +581,9 @@ void mainDraw2DFunc() {
 
     LTRACE("main::mainDraw2DFunc(end)");
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_end_v3(_vTune.draw2D, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_end_v3(_vTune.draw2D, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
 }
 
@@ -550,7 +591,9 @@ void mainDraw2DFunc() {
 
 void mainPostDrawFunc() {
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_begin_v3(_vTune.postDraw, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_begin_v3(_vTune.postDraw, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainPostDrawFunc(begin)");
 
@@ -593,7 +636,9 @@ void mainPostDrawFunc() {
 
     LTRACE("main::mainPostDrawFunc(end)");
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_end_v3(_vTune.postDraw, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_end_v3(_vTune.postDraw, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
 }
 
@@ -601,7 +646,9 @@ void mainPostDrawFunc() {
 
 void mainKeyboardCallback(int key, int, int action, int mods) {
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_begin_v3(_vTune.keyboard, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_begin_v3(_vTune.keyboard, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainKeyboardCallback(begin)");
 
@@ -613,7 +660,9 @@ void mainKeyboardCallback(int key, int, int action, int mods) {
 
     LTRACE("main::mainKeyboardCallback(begin)");
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_end_v3(_vTune.keyboard, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_end_v3(_vTune.keyboard, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
 }
 
@@ -621,7 +670,9 @@ void mainKeyboardCallback(int key, int, int action, int mods) {
 
 void mainMouseButtonCallback(int key, int action, int modifiers) {
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_begin_v3(_vTune.mouseButton, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_begin_v3(_vTune.mouseButton, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainMouseButtonCallback(begin)");
 
@@ -633,7 +684,9 @@ void mainMouseButtonCallback(int key, int action, int modifiers) {
 
     LTRACE("main::mainMouseButtonCallback(end)");
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_end_v3(_vTune.mouseButton, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_end_v3(_vTune.mouseButton, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
 }
 
@@ -641,13 +694,17 @@ void mainMouseButtonCallback(int key, int action, int modifiers) {
 
 void mainMousePosCallback(double x, double y) {
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_begin_v3(_vTune.mousePos, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_begin_v3(_vTune.mousePos, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
 
     openspace::global::openSpaceEngine.mousePositionCallback(x, y);
 
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_end_v3(_vTune.mousePos, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_end_v3(_vTune.mousePos, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
 }
 
@@ -655,7 +712,9 @@ void mainMousePosCallback(double x, double y) {
 
 void mainMouseScrollCallback(double posX, double posY) {
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_begin_v3(_vTune.mouseScroll, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_begin_v3(_vTune.mouseScroll, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainMouseScrollCallback(begin");
 
@@ -663,7 +722,9 @@ void mainMouseScrollCallback(double posX, double posY) {
 
     LTRACE("main::mainMouseScrollCallback(end)");
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_end_v3(_vTune.mouseScroll, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_end_v3(_vTune.mouseScroll, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
 }
 
@@ -671,7 +732,9 @@ void mainMouseScrollCallback(double posX, double posY) {
 
 void mainCharCallback(unsigned int codepoint, int mods) {
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_begin_v3(_vTune.character, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_begin_v3(_vTune.character, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
 
     openspace::global::openSpaceEngine.charCallback(
@@ -680,7 +743,9 @@ void mainCharCallback(unsigned int codepoint, int mods) {
     );
 
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_end_v3(_vTune.character, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_end_v3(_vTune.character, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
 }
 
@@ -688,7 +753,9 @@ void mainCharCallback(unsigned int codepoint, int mods) {
 
 void mainEncodeFun() {
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_begin_v3(_vTune.encode, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_begin_v3(_vTune.encode, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainEncodeFun(begin)");
 
@@ -698,7 +765,9 @@ void mainEncodeFun() {
 
     LTRACE("main::mainEncodeFun(end)");
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_end_v3(_vTune.encode, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_end_v3(_vTune.encode, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
 }
 
@@ -706,7 +775,9 @@ void mainEncodeFun() {
 
 void mainDecodeFun() {
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_begin_v3(_vTune.decode, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_begin_v3(_vTune.decode, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
     LTRACE("main::mainDecodeFun(begin)");
 
@@ -716,7 +787,9 @@ void mainDecodeFun() {
 
     LTRACE("main::mainDecodeFun(end)");
 #ifdef OPENSPACE_HAS_VTUNE
-    __itt_frame_end_v3(_vTune.decode, nullptr);
+    if (EnableDetailedVtune) {
+        __itt_frame_end_v3(_vTune.decode, nullptr);
+    }
 #endif // OPENSPACE_HAS_VTUNE
 }
 
@@ -946,19 +1019,21 @@ int main(int argc, char** argv) {
 #endif // WIN32
 
 #ifdef OPENSPACE_HAS_VTUNE
-    _vTune.init = __itt_domain_create("init");
-    _vTune.preSync = __itt_domain_create("preSync");
-    _vTune.postSyncPreDraw = __itt_domain_create("postSyncPreDraw");
-    _vTune.render = __itt_domain_create("render");
-    _vTune.draw2D = __itt_domain_create("draw2D");
-    _vTune.postDraw = __itt_domain_create("postDraw");
-    _vTune.keyboard = __itt_domain_create("keyboard");
-    _vTune.mouseButton = __itt_domain_create("mouseButton");
-    _vTune.mousePos = __itt_domain_create("mousePos");
-    _vTune.mouseScroll = __itt_domain_create("mouseScroll");
-    _vTune.character = __itt_domain_create("character");
-    _vTune.encode = __itt_domain_create("encode");
-    _vTune.decode = __itt_domain_create("decode");
+    if (EnableDetailedVtune) {
+        _vTune.init = __itt_domain_create("init");
+        _vTune.preSync = __itt_domain_create("preSync");
+        _vTune.postSyncPreDraw = __itt_domain_create("postSyncPreDraw");
+        _vTune.render = __itt_domain_create("render");
+        _vTune.draw2D = __itt_domain_create("draw2D");
+        _vTune.postDraw = __itt_domain_create("postDraw");
+        _vTune.keyboard = __itt_domain_create("keyboard");
+        _vTune.mouseButton = __itt_domain_create("mouseButton");
+        _vTune.mousePos = __itt_domain_create("mousePos");
+        _vTune.mouseScroll = __itt_domain_create("mouseScroll");
+        _vTune.character = __itt_domain_create("character");
+        _vTune.encode = __itt_domain_create("encode");
+        _vTune.decode = __itt_domain_create("decode");
+    }
 #endif // OPENSPACE_HAS_VTUNE
 
 

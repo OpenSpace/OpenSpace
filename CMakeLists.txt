@@ -186,8 +186,27 @@ if (MSVC)
     target_include_directories(openspace-core PUBLIC ${OPENSPACE_EXT_DIR}/vld)
     end_dependency()
   endif ()
-endif ()
 
+  option(OPENSPACE_VTUNE_ENABLED "Include VTune support" OFF)
+  set(OPENSPACE_VTUNE_PATH "C:/Program Files (x86)/IntelSWTools/VTune Amplifier 2019" CACHE STRING "Path to VTune installation")
+  if (OPENSPACE_VTUNE_ENABLED)
+    begin_dependency("Intel VTune")
+    target_compile_definitions(openspace-core PUBLIC "OPENSPACE_HAS_VTUNE")
+    target_include_directories(openspace-core PUBLIC "${OPENSPACE_VTUNE_PATH}/include")
+    target_link_libraries(openspace-core "${OPENSPACE_VTUNE_PATH}/lib64/libittnotify.lib")
+    end_dependency()
+  endif ()
+
+  option(OPENSPACE_NVTOOLS_ENABLED "Include support for Nvidia Tools Extensions" OFF)
+  set(OPENSPACE_NVTOOLS_PATH "C:/Program Files/NVIDIA Corporation/NvToolsExt")
+  if (OPENSPACE_NVTOOLS_ENABLED)
+    begin_dependency("Nvidia Tools Extension")
+    target_compile_definitions(openspace-core PUBLIC "OPENSPACE_HAS_NVTOOLS")
+    target_include_directories(openspace-core PUBLIC "${OPENSPACE_NVTOOLS_PATH}/include")
+    end_dependency()
+  endif ()
+
+endif ()
 
 ##########################################################################################
 # Tests                                                                                  #
