@@ -35,7 +35,6 @@ unsigned char fromLuaConversion(lua_State* state, bool& success) {
     success = (lua_isnumber(state, -1) == 1);
     if (success) {
         unsigned char val = static_cast<unsigned char>(lua_tonumber(state, -1));
-        lua_pop(state, 1);
         return val;
     }
     else {
