@@ -408,7 +408,7 @@ int addExoplanetSystem(lua_State* L) {
 
         glm::dvec3 beta = normalize(cross(starToSunVec, northProjected));
 
-        glm::dmat3 exoplanetSystemRot = glm::dmat3(northProjected.x, northProjected.y, northProjected.z,
+        const glm::dmat3 exoplanetSystemRot = glm::dmat3(northProjected.x, northProjected.y, northProjected.z,
                                                             beta.x, beta.y, beta.z,
                                                     starToSunVec.x, starToSunVec.y, starToSunVec.z);
 
@@ -421,11 +421,11 @@ int addExoplanetSystem(lua_State* L) {
 			"Transform = {"
                 "Rotation = {"
                     "Type = 'StaticRotation',"
-                    "Rotation = " + std::to_string(exoplanetSystemRot) + ","
+                    "Rotation = " + ghoul::to_string(exoplanetSystemRot) + ","
                 "},"
 				"Translation = {"
 					"Type = 'StaticTranslation',"
-					"Position = " + std::to_string(position) + ","
+					"Position = " + ghoul::to_string(position) + ","
 				"},"
 			"}"
 		"}";
@@ -683,7 +683,7 @@ int addExoplanetSystem(lua_State* L) {
 					"Transform = {"
 					    "Rotation = {"
 					        "Type = 'StaticRotation',"
-					        "Rotation =  " + std::to_string(rot) + ","
+					        "Rotation =  " + ghoul::to_string(rot) + ","
 					    "}"
 					"},"
 				"}";
@@ -715,7 +715,7 @@ int addExoplanetSystem(lua_State* L) {
 						"Transform = {"
 						    "Rotation = {"
 						        "Type = 'StaticRotation',"
-                                "Rotation =  " + std::to_string(rot) + ","
+                                "Rotation =  " + ghoul::to_string(rot) + ","
 						    "}"
 						"},"
 					"}";
@@ -746,7 +746,7 @@ int addExoplanetSystem(lua_State* L) {
 						"Transform = {"
 						    "Rotation = {"
 						        "Type = 'StaticRotation',"
-                                "Rotation =  " + std::to_string(rot) + ","
+                                "Rotation =  " + ghoul::to_string(rot) + ","
 						    "}"
 						"},"
 					"}";

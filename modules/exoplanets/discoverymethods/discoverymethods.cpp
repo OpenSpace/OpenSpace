@@ -37,6 +37,9 @@
 #include <openspace/util/camera.h>
 #include <openspace/scene/scene.h>
 
+#include <ghoul/glm.h>
+
+
 namespace {
 	constexpr const char* _loggerCat = "DiscoveryMethods";
 
@@ -87,7 +90,7 @@ namespace openspace::exoplanets{
             "Transform = {"
                 "Translation = {"
                     "Type = 'StaticTranslation',"
-                    "Position = " + std::to_string(viewDirecionPos) + ","
+                    "Position = " + ghoul::to_string(viewDirecionPos) + ","
                 "},"
             "},"
         "}";
@@ -120,7 +123,7 @@ namespace openspace::exoplanets{
             "Transform = {"
                 "Translation = {"
                     "Type = 'StaticTranslation',"
-                    "Position = " + std::to_string(northDirectionPos) + ","
+                    "Position = " + ghoul::to_string(northDirectionPos) + ","
                 "},"
             "},"
         "}";
@@ -521,7 +524,7 @@ namespace openspace::exoplanets{
             "Transform = {"
                 "Rotation = {"
                     "Type = 'StaticRotation',"
-                    "Rotation =  " + std::to_string(rotation) + ","
+                    "Rotation =  " + ghoul::to_string(rotation) + ","
                 "}"
             "},"
         "}";
