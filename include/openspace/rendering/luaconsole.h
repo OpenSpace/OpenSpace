@@ -67,8 +67,6 @@ private:
     properties::BoolProperty _remoteScripting;
 
     properties::Vec4Property _backgroundColor;
-    properties::Vec4Property _highlightColor;
-    properties::Vec4Property _separatorColor;
     properties::Vec4Property _entryTextColor;
     properties::Vec4Property _historyTextColor;
     properties::IntProperty _historyLength;
@@ -90,12 +88,6 @@ private:
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
     std::shared_ptr<ghoul::fontrendering::Font> _historyFont;
-
-    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-    GLuint _vao = 0;
-    GLuint _vbo = 0;
-
-    UniformCache(res, color, height, ortho) _uniformCache;
 };
 
 } // namespace openspace

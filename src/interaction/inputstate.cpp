@@ -24,6 +24,7 @@
 
 #include <openspace/interaction/inputstate.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <ghoul/fmt.h>
 #include <algorithm>
@@ -69,10 +70,6 @@ void InputState::mouseScrollWheelCallback(double mouseScrollDelta) {
     _mouseScrollDelta = mouseScrollDelta;
 }
 
-void InputState::setJoystickInputStates(JoystickInputStates& states) {
-    _joystickInputStates = &states;
-}
-
 const std::vector<std::pair<Key, KeyModifier>>& InputState::pressedKeys() const {
     return _keysDown;
 }
@@ -106,16 +103,12 @@ bool InputState::isMouseButtonPressed(MouseButton mouseButton) const {
     return it != _mouseButtonsDown.end();
 }
 
-const JoystickInputStates& InputState::joystickInputStates() const {
-    return *_joystickInputStates;
-}
-
 float InputState::joystickAxis(int i) const {
-    return _joystickInputStates->axis(i);
+    return global::joystickInputStates.axis(i);
 }
 
 bool InputState::joystickButton(int i) const {
-    return _joystickInputStates->button(i, JoystickAction::Press);
+    return global::joystickInputStates.button(i, JoystickAction::Press);
 }
 
 } // namespace openspace::interaction

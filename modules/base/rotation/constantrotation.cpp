@@ -116,8 +116,7 @@ glm::dmat3 ConstantRotation::matrix(const UpdateData& data) const {
     if (_accumulatedRotation < -glm::tau<double>()) {
         _accumulatedRotation += glm::tau<double>();
     }
-    
-    const glm::dvec3 axis = _rotationAxis;
+
     glm::dquat q = glm::angleAxis(_accumulatedRotation, _rotationAxis.value());
     return glm::toMat3(q);
 }

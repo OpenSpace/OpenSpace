@@ -25,17 +25,15 @@
 #include <modules/spacecraftinstruments/rendering/renderablemodelprojection.h>
 
 #include <modules/base/rendering/modelgeometry.h>
-
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
@@ -182,8 +180,7 @@ bool RenderableModelProjection::isReady() const {
 }
 
 void RenderableModelProjection::initializeGL() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    _programObject = renderEngine.buildRenderProgram(
+    _programObject = global::renderEngine.buildRenderProgram(
         "ModelShader",
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModel_vs.glsl"),
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModel_fs.glsl")
@@ -241,7 +238,7 @@ void RenderableModelProjection::deinitializeGL() {
 
     _projectionComponent.deinitialize();
 
-    OsEng.renderEngine().removeRenderProgram(_programObject.get());
+    global::renderEngine.removeRenderProgram(_programObject.get());
     _programObject = nullptr;
 }
 
@@ -377,7 +374,7 @@ void RenderableModelProjection::update(const UpdateData& data) {
 
     // @TODO:  Change this to remove PSC
     glm::dvec3 p =
-        OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition() -
+        global::renderEngine.scene()->sceneGraphNode("Sun")->worldPosition() -
         data.modelTransform.translation;
 
     _sunPosition =

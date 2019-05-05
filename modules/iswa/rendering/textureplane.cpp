@@ -24,7 +24,7 @@
 
 #include <modules/iswa/rendering/textureplane.h>
 
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/texture.h>
@@ -39,7 +39,7 @@ TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
 
 void TexturePlane::initializeGL() {
     if (!_shader) {
-        _shader = OsEng.renderEngine().buildRenderProgram(
+        _shader = global::renderEngine.buildRenderProgram(
             "PlaneProgram",
             absPath("${MODULE_ISWA}/shaders/textureplane_vs.glsl"),
             absPath("${MODULE_ISWA}/shaders/textureplane_fs.glsl")

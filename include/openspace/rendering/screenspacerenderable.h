@@ -77,7 +77,6 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    void createPlane();
     void useEuclideanCoordinates(bool b);
 
     /**
@@ -115,8 +114,6 @@ protected:
     properties::FloatProperty _alpha;
     properties::TriggerProperty _delete;
 
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
     glm::ivec2 _objectSize;
     UniformCache(occlusionDepth, alpha, modelTransform, viewProj, texture) _uniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;

@@ -24,8 +24,9 @@
 
 #include <openspace/rendering/framebufferrenderer.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
+#include <openspace/performance/performancemanager.h>
 #include <openspace/performance/performancemeasurement.h>
 #include <openspace/rendering/deferredcaster.h>
 #include <openspace/rendering/deferredcastermanager.h>
@@ -229,8 +230,8 @@ void FramebufferRenderer::initialize() {
 
     ghoul::opengl::updateUniformLocations(*_resolveProgram, _uniformCache, UniformNames);
 
-    OsEng.renderEngine().raycasterManager().addListener(*this);
-    OsEng.renderEngine().deferredcasterManager().addListener(*this);
+    global::raycasterManager.addListener(*this);
+    global::deferredcasterManager.addListener(*this);
 }
 
 void FramebufferRenderer::deinitialize() {
@@ -254,8 +255,8 @@ void FramebufferRenderer::deinitialize() {
     glDeleteBuffers(1, &_vertexPositionBuffer);
     glDeleteVertexArrays(1, &_screenQuad);
 
-    OsEng.renderEngine().raycasterManager().removeListener(*this);
-    OsEng.renderEngine().deferredcasterManager().removeListener(*this);
+    global::raycasterManager.removeListener(*this);
+    global::deferredcasterManager.removeListener(*this);
 }
 
 void FramebufferRenderer::raycastersChanged(VolumeRaycaster&,
@@ -460,7 +461,8 @@ void FramebufferRenderer::updateRaycastData() {
     _insideRaycastPrograms.clear();
 
     const std::vector<VolumeRaycaster*>& raycasters =
-        OsEng.renderEngine().raycasterManager().raycasters();
+        global::raycasterManager.raycasters();
+
     int nextId = 0;
     for (VolumeRaycaster* raycaster : raycasters) {
         RaycastData data = { nextId++, "Helper" };
@@ -529,7 +531,7 @@ void FramebufferRenderer::updateDeferredcastData() {
     _deferredcastPrograms.clear();
 
     const std::vector<Deferredcaster*>& deferredcasters =
-        OsEng.renderEngine().deferredcasterManager().deferredcasters();
+        global::deferredcasterManager.deferredcasters();
     int nextId = 0;
     for (Deferredcaster* caster : deferredcasters) {
         DeferredcastData data = { nextId++, "HELPER" };
@@ -907,14 +909,13 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
     _dirtyMsaaSamplingPattern = false;
 }
 
-void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor,
-                                 bool doPerformanceMeasurements)
-{
+void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor) {
+    const bool doPerformanceMeasurements = global::performanceManager.isEnabled();
+
     std::unique_ptr<performance::PerformanceMeasurement> perf;
     if (doPerformanceMeasurements) {
         perf = std::make_unique<performance::PerformanceMeasurement>(
-            "FramebufferRenderer::render",
-            OsEng.renderEngine().performanceManager()
+            "FramebufferRenderer::render"
         );
     }
 
@@ -946,7 +947,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     glDisablei(GL_BLEND, 2);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    Time time = OsEng.timeManager().time();
+    Time time = global::timeManager.time();
 
     RenderData data = {
         *camera,
@@ -971,8 +972,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
         if (doPerformanceMeasurements) {
             perfInternal = std::make_unique<performance::PerformanceMeasurement>(
-                "FramebufferRenderer::render::raycasterTasks",
-                OsEng.renderEngine().performanceManager()
+                "FramebufferRenderer::render::raycasterTasks"
             );
         }
         performRaycasterTasks(tasks.raycasterTasks);
@@ -986,8 +986,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
         if (doPerformanceMeasurements) {
             perfInternal = std::make_unique<performance::PerformanceMeasurement>(
-                "FramebufferRenderer::render::deferredTasks",
-                OsEng.renderEngine().performanceManager()
+                "FramebufferRenderer::render::deferredTasks"
             );
         }
         performDeferredTasks(tasks.deferredcasterTasks);
@@ -1240,7 +1239,7 @@ void FramebufferRenderer::updateRendererData() {
     ghoul::Dictionary dict;
     dict.setValue("fragmentRendererPath", std::string(RenderFragmentShaderPath));
     _rendererData = dict;
-    OsEng.renderEngine().setRendererData(dict);
+    global::renderEngine.setRendererData(dict);
 }
 
 //KRISTIN

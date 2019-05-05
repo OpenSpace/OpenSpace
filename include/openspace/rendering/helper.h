@@ -22,14 +22,75 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_CORE___HELPER___H__
+#define __OPENSPACE_CORE___HELPER___H__
 
-in vec2 in_position;
-in vec2 in_st;
+#include <ghoul/opengl/uniformcache.h>
 
-out vec2 st;
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace ghoul::opengl
 
-void main() {
-    gl_Position = vec4(in_position, 0.0, 1.0);
-    st = in_st;
-}
+namespace openspace::rendering::helper {
+
+enum class Anchor {
+    Center,
+    NW,
+    NE,
+    SW,
+    SE
+};
+
+void initialize();
+void deinitialize();
+
+glm::mat4 ortho(const glm::vec2& position, const glm::vec2& size,
+    Anchor anchor = Anchor::NW);
+
+void renderBox(ghoul::opengl::ProgramObject& program, GLint orthoLocation,
+    GLint colorLocation, const glm::vec2& position, const glm::vec2& size,
+    const glm::vec4& color, Anchor anchor = Anchor::NW);
+
+void renderBox(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color,
+    Anchor anchor = Anchor::NW);
+
+void renderBox(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color,
+    const ghoul::opengl::Texture& texture, Anchor anchor = Anchor::NW);
+
+struct Shaders {
+    struct {
+        std::unique_ptr<ghoul::opengl::ProgramObject> program;
+        UniformCache(tex, hasTexture, shouldFlipTexture, ortho, color) cache;
+    } xyuvrgba;
+
+    struct {
+        std::unique_ptr<ghoul::opengl::ProgramObject> program;
+        UniformCache(tex, hasTexture, shouldFlipTexture, ortho, color) cache;
+    } screenfilling;
+};
+
+struct VertexObjects {
+    struct {
+        GLuint vao;
+        GLuint vbo;
+    } square;
+
+    struct {
+        GLuint vao;
+    } empty;
+};
+
+namespace detail {
+
+Shaders& gShadersConstructor();
+VertexObjects& gVertexObjectsConstructor();
+
+} // namespace detail
+
+static Shaders& shaders = detail::gShadersConstructor();
+static VertexObjects& vertexObjects = detail::gVertexObjectsConstructor();
+
+} // namespace openspace::rendering::helper
+
+#endif // __OPENSPACE_CORE___HELPER___H__

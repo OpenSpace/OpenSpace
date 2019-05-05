@@ -13,7 +13,7 @@ local planeTextures = asset.syncedResource({
     Name = "Milky Way Plane Textures",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_milkyway_textures",
-    Version = 1
+    Version = 2
 })
 
 local planeSpeck = asset.syncedResource({

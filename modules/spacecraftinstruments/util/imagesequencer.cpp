@@ -24,7 +24,6 @@
 
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -236,7 +235,7 @@ bool ImageSequencer::imagePaths(std::vector<Image>& captures,
     const bool instrumentActive = isInstrumentActive(time, instrumentRequest);
     const bool hasCurrentTime = _subsetMap[projectee]._range.includes(time);
     const bool hasSinceTime = _subsetMap[projectee]._range.includes(sinceTime);
-    
+
     if (!instrumentActive || (!hasCurrentTime && !hasSinceTime)) {
         return false;
     }

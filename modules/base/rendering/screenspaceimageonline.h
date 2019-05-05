@@ -41,6 +41,8 @@ public:
     ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary);
     ~ScreenSpaceImageOnline();
 
+    bool deinitializeGL() override;
+
     void update() override;
 
     static documentation::Documentation Documentation();

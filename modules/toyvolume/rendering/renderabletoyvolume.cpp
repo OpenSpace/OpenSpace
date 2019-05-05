@@ -25,7 +25,7 @@
 #include <modules/toyvolume/rendering/renderabletoyvolume.h>
 
 #include <modules/toyvolume/rendering/toyvolumeraycaster.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/util/updatestructures.h>
@@ -112,14 +112,14 @@ void RenderableToyVolume::initializeGL() {
     _raycaster = std::make_unique<ToyVolumeRaycaster>(_color);
     _raycaster->initialize();
 
-    OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
+    global::raycasterManager.attachRaycaster(*_raycaster.get());
 
     std::function<void(bool)> onChange = [&](bool enabled) {
         if (enabled) {
-            OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
+            global::raycasterManager.attachRaycaster(*_raycaster.get());
         }
         else {
-            OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
+            global::raycasterManager.detachRaycaster(*_raycaster.get());
         }
     };
 
@@ -135,7 +135,7 @@ void RenderableToyVolume::initializeGL() {
 
 void RenderableToyVolume::deinitializeGL() {
     if (_raycaster) {
-        OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
+        global::raycasterManager.detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
 }

@@ -92,8 +92,7 @@ public:
     void update() override;
     void performRaycasterTasks(const std::vector<RaycasterTask>& tasks);
     void performDeferredTasks(const std::vector<DeferredcasterTask>& tasks);
-    void render(Scene* scene, Camera* camera, float blackoutFactor,
-        bool doPerformanceMeasurements) override;
+    void render(Scene* scene, Camera* camera, float blackoutFactor) override;
 
     /**
      * Update render data

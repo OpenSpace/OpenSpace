@@ -29,7 +29,7 @@
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/tile/asynctiledataprovider.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/gdalrawtiledatareader.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <ghoul/logging/logmanager.h>
 
@@ -64,7 +64,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     , _filePath(FilePathInfo, "")
     , _tilePixelSize(TilePixelSizeInfo, 32, 32, 2048)
 {
-    _tileCache = OsEng.moduleEngine().module<GlobeBrowsingModule>()->tileCache();
+    _tileCache = global::moduleEngine.module<GlobeBrowsingModule>()->tileCache();
     _name = "Name unspecified";
     dictionary.getValue("Name", _name);
     std::string _loggerCat = "DefaultTileProvider : " + _name;

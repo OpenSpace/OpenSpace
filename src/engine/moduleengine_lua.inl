@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <ghoul/lua/ghoul_lua.h>
 
 namespace openspace::luascriptfunctions {
@@ -45,7 +45,7 @@ int isLoaded(lua_State* L) {
         ghoul::lua::PopValue::Yes
     );
 
-    const std::vector<OpenSpaceModule*>& modules = OsEng.moduleEngine().modules();
+    const std::vector<OpenSpaceModule*>& modules = global::moduleEngine.modules();
 
     auto it = std::find_if(
         modules.begin(),

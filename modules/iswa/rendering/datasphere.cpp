@@ -24,7 +24,7 @@
 
 #include <modules/iswa/rendering/datasphere.h>
 
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/powerscaledscalar.h>
 #include <openspace/util/powerscaledsphere.h>
@@ -48,7 +48,7 @@ void DataSphere::initializeGL() {
     IswaCygnet::initializeGL();
 
     if (!_shader) {
-        _shader = OsEng.renderEngine().buildRenderProgram(
+        _shader = global::renderEngine.buildRenderProgram(
             "DataSphereProgram",
             absPath("${MODULE_ISWA}/shaders/datasphere_vs.glsl"),
             absPath("${MODULE_ISWA}/shaders/datasphere_fs.glsl")

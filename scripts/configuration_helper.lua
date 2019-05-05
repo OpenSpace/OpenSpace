@@ -784,11 +784,11 @@ function sgct.config.fisheye(arg)
     end
 
     if arg["tilt"] == nil then
-        arg["tilt"] = 0
+        arg["tilt"] = 90
     end
 
     if arg["background"] == nil then
-        arg["background"] = { r = 0.1, g = 0.1, b = 0.1, a = 1.0 }
+        arg["background"] = { r = 0.0, g = 0.0, b = 0.0, a = 1.0 }
     end
 
     if (arg["tracked"] ~= nil and arg["tracked"] == true) then
@@ -871,7 +871,7 @@ function sgct.config.cube(arg)
 
 
     res = 1024
-    size = {640, 360}
+    size = { 640, 360 }
     
     arg["scene"] = generateScene(arg)
     arg["settings"] = generateSettings(arg)

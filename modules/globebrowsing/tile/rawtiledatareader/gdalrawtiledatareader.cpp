@@ -49,11 +49,6 @@
 
 namespace openspace::globebrowsing {
 
-std::ostream& operator<<(std::ostream& os, const PixelRegion& pr) {
-    return os << pr.start.x << ", " << pr.start.y << " with size " << pr.numPixels.x <<
-        ", " << pr.numPixels.y;
-}
-
 GdalRawTileDataReader::GdalRawTileDataReader(const std::string& filePath,
                                              const TileTextureInitData& initData,
                                        RawTileDataReader::PerformPreprocessing preprocess)

@@ -193,7 +193,10 @@ bool HttpDownload::callOnProgress(HttpRequest::Progress p) {
 SyncHttpDownload::SyncHttpDownload(std::string url) : _httpRequest(std::move(url)) {}
 
 void SyncHttpDownload::download(HttpRequest::RequestOptions opt) {
+    LTRACE(fmt::format("Start sync download '{}'", _httpRequest.url()));
+
     if (!initDownload()) {
+        LERROR(fmt::format("Failed sync download '{}'", _httpRequest.url()));
         markAsFailed();
         return;
     }
@@ -207,13 +210,17 @@ void SyncHttpDownload::download(HttpRequest::RequestOptions opt) {
     });
     _httpRequest.onReadyStateChange([this](HttpRequest::ReadyState rs) {
         if (rs == HttpRequest::ReadyState::Success) {
+            LTRACE(fmt::format("Finished sync download '{}'", _httpRequest.url()));
             markAsSuccessful();
         } else if (rs == HttpRequest::ReadyState::Fail) {
+            LERROR(fmt::format("Failed sync download '{}'", _httpRequest.url()));
             markAsFailed();
         }
     });
     _httpRequest.perform(opt);
     deinitDownload();
+
+    LTRACE(fmt::format("End sync download '{}'", _httpRequest.url()));
 }
 
 const std::string& SyncHttpDownload::url() const {
@@ -254,6 +261,8 @@ void AsyncHttpDownload::wait() {
 }
 
 void AsyncHttpDownload::download(HttpRequest::RequestOptions opt) {
+    LTRACE(fmt::format("Start async download '{}'", _httpRequest.url()));
+
     initDownload();
 
     _httpRequest.onData([this](HttpRequest::Data d) {
@@ -276,9 +285,11 @@ void AsyncHttpDownload::download(HttpRequest::RequestOptions opt) {
 
     _httpRequest.onReadyStateChange([this](HttpRequest::ReadyState rs) {
         if (rs == HttpRequest::ReadyState::Success) {
+            LTRACE(fmt::format("Finished async download '{}'", _httpRequest.url()));
             markAsSuccessful();
         }
         else if (rs == HttpRequest::ReadyState::Fail) {
+            LTRACE(fmt::format("Failed async download '{}'", _httpRequest.url()));
             markAsFailed();
         }
     });
@@ -289,6 +300,7 @@ void AsyncHttpDownload::download(HttpRequest::RequestOptions opt) {
     }
     _downloadFinishCondition.notify_all();
     deinitDownload();
+    LTRACE(fmt::format("End async download '{}'", _httpRequest.url()));
 }
 
 const std::string& AsyncHttpDownload::url() const {

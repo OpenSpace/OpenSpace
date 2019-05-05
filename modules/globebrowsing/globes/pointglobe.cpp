@@ -25,7 +25,7 @@
 #include <modules/globebrowsing/globes/pointglobe.h>
 
 #include <modules/globebrowsing/globes/renderableglobe.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -67,7 +67,7 @@ PointGlobe::~PointGlobe() {
 }
 
 void PointGlobe::initialize() {
-    _programObject = OsEng.renderEngine().buildRenderProgram(
+    _programObject = global::renderEngine.buildRenderProgram(
         "PointGlobe",
         absPath("${MODULE_GLOBEBROWSING}/shaders/pointglobe_vs.glsl"),
         absPath("${MODULE_GLOBEBROWSING}/shaders/pointglobe_fs.glsl")

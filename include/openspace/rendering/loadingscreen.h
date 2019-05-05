@@ -29,6 +29,7 @@
 #include <ghoul/misc/boolean.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <atomic>
 #include <memory>
 #include <mutex>
 #include <random>
@@ -81,8 +82,15 @@ public:
         Failed
     };
 
+    struct ProgressInfo {
+        float progress = 0.f;
+
+        int currentSize = -1;
+        int totalSize = -1;
+    };
+
     void updateItem(const std::string& itemIdentifier, const std::string& itemName,
-        ItemStatus newStatus, float newProgress);
+        ItemStatus newStatus, ProgressInfo progressInfo);
 
 private:
     bool _showMessage;
@@ -90,30 +98,14 @@ private:
     bool _showProgressbar;
 
     Phase _phase;
-    int _iProgress = 0;
-    int _nItems = 0;
-
-    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-    UniformCache(logoTexture, useTexture, color) _uniformCache;
+    std::atomic_int _iProgress = 0;
+    std::atomic_int _nItems = 0;
 
     std::unique_ptr<ghoul::opengl::Texture> _logoTexture;
 
     std::shared_ptr<ghoul::fontrendering::Font> _loadingFont;
     std::shared_ptr<ghoul::fontrendering::Font> _messageFont;
     std::shared_ptr<ghoul::fontrendering::Font> _itemFont;
-
-    struct {
-        GLuint vao = 0;
-        GLuint vbo = 0;
-    } _logo;
-
-    struct {
-        GLuint vaoFill = 0;
-        GLuint vboFill = 0;
-
-        GLuint vaoBox = 0;
-        GLuint vboBox = 0;
-    } _progressbar;
 
     bool _hasCatastrophicErrorOccurred = false;
     std::string _message;
@@ -123,7 +115,8 @@ private:
         std::string identifier;
         std::string name;
         ItemStatus status;
-        float progress;
+
+        ProgressInfo progress;
 
         bool hasLocation;
         glm::vec2 ll;

@@ -26,7 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
@@ -182,7 +182,7 @@ bool RenderableRings::isReady() const {
 }
 
 void RenderableRings::initializeGL() {
-    _shader = OsEng.renderEngine().buildRenderProgram(
+    _shader = global::renderEngine.buildRenderProgram(
         "RingProgram",
         absPath("${MODULE_SPACE}/shaders/rings_vs.glsl"),
         absPath("${MODULE_SPACE}/shaders/rings_fs.glsl")
@@ -207,7 +207,7 @@ void RenderableRings::deinitializeGL() {
     _textureFile = nullptr;
     _texture = nullptr;
 
-    OsEng.renderEngine().removeRenderProgram(_shader.get());
+    global::renderEngine.removeRenderProgram(_shader.get());
     _shader = nullptr;
 }
 
@@ -261,7 +261,7 @@ void RenderableRings::update(const UpdateData& data) {
         _textureIsDirty = false;
     }
 
-    _sunPosition = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition() -
+    _sunPosition = global::renderEngine.scene()->sceneGraphNode("Sun")->worldPosition() -
                    data.modelTransform.translation;
 }
 

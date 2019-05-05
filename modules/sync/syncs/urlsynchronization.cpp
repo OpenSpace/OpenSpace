@@ -27,7 +27,6 @@
 #include <modules/sync/syncmodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/util/httprequest.h>
 #include <ghoul/fmt.h>

@@ -55,7 +55,7 @@ SubscriptionTopic::~SubscriptionTopic() {
 }
 
 bool SubscriptionTopic::isDone() const {
-    return _requestedResourceIsSubscribable && _isSubscribedTo;
+    return !_requestedResourceIsSubscribable || !_isSubscribedTo;
 }
 
 void SubscriptionTopic::handleJson(const nlohmann::json& json) {

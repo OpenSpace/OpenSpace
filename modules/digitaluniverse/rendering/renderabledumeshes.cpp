@@ -28,8 +28,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -145,7 +145,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
-        "RenderOptionInfo",
+        "RenderOption",
         "Render Option",
         "Debug option for rendering of billboards and texts."
     };
@@ -275,7 +275,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
 
     _renderOption.addOption(0, "Camera View Direction");
     _renderOption.addOption(1, "Camera Position Normal");
-    if (OsEng.windowWrapper().isFisheyeRendering()) {
+    if (global::windowDelegate.isFisheyeRendering()) {
         _renderOption.set(1);
     }
     else {
@@ -399,7 +399,7 @@ void RenderableDUMeshes::initializeGL() {
     _program = DigitalUniverseModule::ProgramObjectManager.request(
         ProgramObjectName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return OsEng.renderEngine().buildRenderProgram(
+            return global::renderEngine.buildRenderProgram(
                 "RenderableDUMeshes",
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_vs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_fs.glsl")
@@ -419,7 +419,7 @@ void RenderableDUMeshes::initializeGL() {
     if (_hasLabel) {
         if (!_font) {
             constexpr const int FontSize = 50;
-            _font = OsEng.fontManager().font(
+            _font = global::fontManager.font(
                 "Mono",
                 static_cast<float>(FontSize),
                 ghoul::fontrendering::FontManager::Outline::Yes,
@@ -440,7 +440,7 @@ void RenderableDUMeshes::deinitializeGL() {
     DigitalUniverseModule::ProgramObjectManager.release(
         ProgramObjectName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
 }

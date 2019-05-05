@@ -26,8 +26,8 @@
 
 #include <modules/globebrowsing/tile/rawtiledatareader/gdalwrapper.h>
 
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/configuration.h>
+#include <openspace/engine/globals.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/ghoul.h>
@@ -131,12 +131,12 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
 }
 
 void GdalWrapper::setGdalProxyConfiguration() {
-    if (OsEng.configuration().httpProxy.usingHttpProxy) {
-        const std::string address = OsEng.configuration().httpProxy.address;
-        const unsigned int port = OsEng.configuration().httpProxy.port;
-        const std::string user = OsEng.configuration().httpProxy.user;
-        const std::string password = OsEng.configuration().httpProxy.password;
-        std::string auth = OsEng.configuration().httpProxy.authentication;
+    if (global::configuration.httpProxy.usingHttpProxy) {
+        const std::string address = global::configuration.httpProxy.address;
+        const unsigned int port = global::configuration.httpProxy.port;
+        const std::string user = global::configuration.httpProxy.user;
+        const std::string password = global::configuration.httpProxy.password;
+        std::string auth = global::configuration.httpProxy.authentication;
         std::transform(
             auth.begin(),
             auth.end(),

@@ -25,8 +25,7 @@
 #include <modules/spacecraftinstruments/rendering/renderableplaneprojection.h>
 
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
-
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
@@ -79,8 +78,7 @@ void RenderablePlaneProjection::initializeGL() {
     glGenVertexArrays(1, &_quad);
     glGenBuffers(1, &_vertexPositionBuffer);
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    _shader = renderEngine.buildRenderProgram(
+    _shader = global::renderEngine.buildRenderProgram(
         "Image Plane",
         absPath("${MODULE_BASE}/shaders/imageplane_vs.glsl"),
         absPath("${MODULE_BASE}/shaders/imageplane_fs.glsl")
@@ -91,9 +89,8 @@ void RenderablePlaneProjection::initializeGL() {
 }
 
 void RenderablePlaneProjection::deinitializeGL() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
-        renderEngine.removeRenderProgram(_shader.get());
+        global::renderEngine.removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
 
@@ -258,8 +255,8 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
     }
 
     if (!_moving) {
-        SceneGraphNode* thisNode = OsEng.renderEngine().scene()->sceneGraphNode(_name);
-        SceneGraphNode* newParent = OsEng.renderEngine().scene()->sceneGraphNode(
+        SceneGraphNode* thisNode = global::renderEngine.scene()->sceneGraphNode(_name);
+        SceneGraphNode* newParent = global::renderEngine.scene()->sceneGraphNode(
             _target.node
         );
         if (thisNode && newParent) {

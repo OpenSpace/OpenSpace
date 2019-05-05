@@ -12,6 +12,7 @@ assetHelper.requireAll(asset, 'scene/solarsystem/missions/juno')
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
+asset.require('util/default_joystick')
 
 local junoAsset = asset.require('scene/solarsystem/missions/juno/juno')
 

@@ -24,22 +24,17 @@
 
 #include <openspace/performance/performancemeasurement.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/performance/performancemanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
-#include <iostream>
 
 namespace openspace::performance {
 
-PerformanceMeasurement::PerformanceMeasurement(std::string identifier,
-                                 std::shared_ptr<performance::PerformanceManager> manager)
+PerformanceMeasurement::PerformanceMeasurement(std::string identifier)
     : _identifier(std::move(identifier))
-    , _manager(std::move(manager))
 {
-    if (_manager.lock()) {
-        glFinish();
-
-        _startTime = std::chrono::high_resolution_clock::now();
-    }
+    glFinish();
+    _startTime = std::chrono::high_resolution_clock::now();
 }
 
 PerformanceMeasurement::~PerformanceMeasurement() {
@@ -49,9 +44,10 @@ PerformanceMeasurement::~PerformanceMeasurement() {
         endTime - _startTime
     ).count();
 
-    if (std::shared_ptr<performance::PerformanceManager> m = _manager.lock()) {
-        m->storeIndividualPerformanceMeasurement(std::move(_identifier), duration);
-    }
+    global::performanceManager.storeIndividualPerformanceMeasurement(
+        std::move(_identifier),
+        duration
+    );
 }
 
 } // namespace openspace::performance

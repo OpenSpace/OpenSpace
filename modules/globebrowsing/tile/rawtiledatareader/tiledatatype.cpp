@@ -417,7 +417,9 @@ GDALDataType getGdalDataType(GLenum glType) {
         case GL_DOUBLE:
             return GDT_Float64;
         default:
-            LERROR(fmt::format("OpenGL data type unknown to GDAL: {}", glType));
+            LERROR(fmt::format(
+                "OpenGL data type unknown to GDAL: {}", static_cast<int>(glType)
+            ));
             throw ghoul::MissingCaseException();
     }
 }

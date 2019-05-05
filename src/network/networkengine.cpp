@@ -24,8 +24,8 @@
 
 #include <openspace/network/networkengine.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
@@ -61,7 +61,7 @@ bool NetworkEngine::handleMessage(const std::string& message) {
     const char type = message[0];
     switch (type) {
         case MessageTypeLuaScript:  // LuaScript
-            OsEng.scriptEngine().queueScript(
+            global::scriptEngine.queueScript(
                 message.substr(1),
                 scripting::ScriptEngine::RemoteScripting::No
             );
@@ -79,7 +79,7 @@ bool NetworkEngine::handleMessage(const std::string& message) {
 
 void NetworkEngine::publishStatusMessage() {
     if (!_shouldPublishStatusMessage ||
-        !OsEng.windowWrapper().isExternalControlConnected())
+        !global::windowDelegate.isExternalControlConnected())
     {
         return;
     }
@@ -89,13 +89,13 @@ void NetworkEngine::publishStatusMessage() {
     // 8 bytes: delta time as double
     // Total: 40
 
-    const Time& currentTime = OsEng.timeManager().time();
+    const Time& currentTime = global::timeManager.time();
 
     uint16_t messageSize = 0;
 
     const double time = currentTime.j2000Seconds();
     const std::string timeString = currentTime.UTC();
-    double delta = OsEng.timeManager().deltaTime();
+    double delta = global::timeManager.deltaTime();
 
 
     messageSize += sizeof(time);
@@ -169,7 +169,7 @@ void NetworkEngine::publishMessage(MessageIdentifier identifier,
 }
 
 void NetworkEngine::sendMessages() {
-    if (!OsEng.windowWrapper().isExternalControlConnected()) {
+    if (!global::windowDelegate.isExternalControlConnected()) {
         return;
     }
 
@@ -186,7 +186,7 @@ void NetworkEngine::sendMessages() {
 
         // Prepending the message identifier to the front
         m.body.insert(m.body.begin(), identifier.data.begin(), identifier.data.end());
-        OsEng.windowWrapper().sendMessageToExternalControl(m.body);
+        global::windowDelegate.sendMessageToExternalControl(m.body);
     }
 
     _messagesToSend.clear();
@@ -204,7 +204,7 @@ void NetworkEngine::sendInitialInformation() {
 
         std::vector<char> payload = m.body;
         payload.insert(payload.begin(), identifier.data.begin(), identifier.data.end());
-        OsEng.windowWrapper().sendMessageToExternalControl(payload);
+        global::windowDelegate.sendMessageToExternalControl(payload);
         LINFO(fmt::format(
             "Sent initial message: (s={}) [i={}]", m.body.size(), identifier.value
         ));
@@ -224,7 +224,7 @@ void NetworkEngine::sendInitialInformation() {
     std::vector<char> d;
     d.insert(d.begin(), identifier.data.begin(), identifier.data.end());
 
-    OsEng.windowWrapper().sendMessageToExternalControl(d);
+    global::windowDelegate.sendMessageToExternalControl(d);
     _shouldPublishStatusMessage = true;
 }
 

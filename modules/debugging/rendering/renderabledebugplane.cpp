@@ -29,7 +29,7 @@
 #include <modules/spacecraftinstruments/rendering/renderableplanetprojection.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -189,8 +189,7 @@ void RenderableDebugPlane::initializeGL() {
     createPlane();
 
     if (!_shader) {
-        RenderEngine& renderEngine = OsEng.renderEngine();
-        _shader = renderEngine.buildRenderProgram("PlaneProgram",
+        _shader = global::renderEngine.buildRenderProgram("PlaneProgram",
             absPath("${MODULE_BASE}/shaders/plane_vs.glsl"),
             absPath("${MODULE_BASE}/shaders/plane_fs.glsl")
         );
@@ -204,9 +203,8 @@ void RenderableDebugPlane::deinitializeGL() {
     glDeleteBuffers(1, &_vertexPositionBuffer);
     _vertexPositionBuffer = 0;
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
-        renderEngine.removeRenderProgram(_shader.get());
+        global::renderEngine.removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
 }

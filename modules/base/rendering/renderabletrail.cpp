@@ -27,7 +27,7 @@
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/updatestructures.h>
@@ -234,7 +234,7 @@ void RenderableTrail::initializeGL() {
     _programObject = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return OsEng.renderEngine().buildRenderProgram(
+            return global::renderEngine.buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_BASE}/shaders/renderabletrail_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/renderabletrail_fs.glsl")
@@ -251,7 +251,7 @@ void RenderableTrail::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
     _programObject = nullptr;
@@ -286,7 +286,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     };
 
     const bool usingFramebufferRenderer =
-        OsEng.renderEngine().rendererImplementation() ==
+        global::renderEngine.rendererImplementation() ==
         RenderEngine::RendererImplementation::Framebuffer;
 
     if (usingFramebufferRenderer) {

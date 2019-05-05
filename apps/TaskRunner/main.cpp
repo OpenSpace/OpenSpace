@@ -38,7 +38,9 @@
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
 
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/configuration.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/dashboarditem.h>
@@ -102,9 +104,12 @@ void performTasks(const std::string& path) {
 int main(int argc, char** argv) {
     using namespace openspace;
 
-    std::vector<std::string> remainingArguments;
-    bool unusedBool;
-    OpenSpaceEngine::create(argc, argv, nullptr, remainingArguments, unusedBool);
+    ghoul::initialize();
+
+    std::string configFile = configuration::findConfiguration();
+    global::configuration = configuration::loadConfigurationFromFile(configFile);
+    global::openSpaceEngine.initialize();
+
 
     ghoul::cmdparser::CommandlineParser commandlineParser(
         "OpenSpace TaskRunner",
@@ -118,10 +123,10 @@ int main(int argc, char** argv) {
             "--task",
             "-t",
             "Provides the path to a task file to execute"
-            )
+        )
     );
 
-    commandlineParser.setCommandLine(remainingArguments);
+    commandlineParser.setCommandLine({ argv, argv + argc });
     commandlineParser.execute();
 
     //FileSys.setCurrentDirectory(launchDirectory);

@@ -22,9 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
 #include <modules/base/rendering/screenspacedashboard.h>
+#include <openspace/engine/globals.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace openspace::luascriptfunctions {
@@ -49,7 +48,7 @@ int addDashboardItem(lua_State* L) {
         }
         lua_settop(L, 0);
 
-        OsEng.dashboard().addDashboardItem(DashboardItem::createFromDictionary(d));
+        global::dashboard.addDashboardItem(DashboardItem::createFromDictionary(d));
 
         ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
         return 0;
@@ -70,7 +69,7 @@ int removeDashboardItem(lua_State* L) {
 
     std::string identifier = luaL_checkstring(L, -1);
 
-    OsEng.dashboard().removeDashboardItem(identifier);
+    global::dashboard.removeDashboardItem(identifier);
 
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -85,7 +84,7 @@ int removeDashboardItem(lua_State* L) {
 int clearDashboardItems(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clearDashboardItems");
 
-    OsEng.dashboard().clearDashboardItems();
+    global::dashboard.clearDashboardItems();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

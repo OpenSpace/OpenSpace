@@ -26,8 +26,8 @@
 #include <modules/imgui/imguimodule.h>
 
 #include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -62,7 +62,8 @@
 #pragma warning (pop)
 #endif // WIN32
 
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
 
 namespace {
@@ -363,8 +364,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
     }
 
     //Code for lower-right corner double-tap to zoom-out
-    WindowWrapper& wrapper = OsEng.windowWrapper();
-    glm::ivec2 res = wrapper.currentWindowSize();
+    glm::ivec2 res = global::windowDelegate.currentWindowSize();
     glm::dvec2 pos = glm::vec2(
         list.at(0).getScreenX(res.x),
         list.at(0).getScreenY(res.y)
@@ -414,14 +414,13 @@ bool TouchInteraction::guiMode(const std::vector<TuioCursor>& list) {
     if (_ignoreGui) {
         return false;
     }
-    WindowWrapper& wrapper = OsEng.windowWrapper();
-    glm::ivec2 res = wrapper.currentWindowSize();
+    glm::ivec2 res = global::windowDelegate.currentWindowSize();
     glm::dvec2 pos = glm::vec2(
         list.at(0).getScreenX(res.x),
         list.at(0).getScreenY(res.y)
     );
 
-    ImGUIModule& module = *(OsEng.moduleEngine().module<ImGUIModule>());
+    ImGUIModule& module = *(global::moduleEngine.module<ImGUIModule>());
     _guiON = module.gui.isEnabled();
 
     if (_tap && list.size() == 1 &&
@@ -637,7 +636,7 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
              // normalized -1 to 1 coordinates on screen
             screenPoints.emplace_back(2 * (c->getX() - 0.5), -2 * (c->getY() - 0.5));
         } else {
-            OsEng.moduleEngine().module<ImGUIModule>()->touchInput = {
+            global::moduleEngine.module<ImGUIModule>()->touchInput = {
                 true,
                 glm::dvec2(0.0, 0.0),
                 1
@@ -695,7 +694,7 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
     else {
         // prevents touch to infinitely be active (due to windows bridge case where event
         // doesnt get consumed sometimes when LMA fails to converge)
-        OsEng.moduleEngine().module<ImGUIModule>()->touchInput = {
+        global::moduleEngine.module<ImGUIModule>()->touchInput = {
             true,
             glm::dvec2(0.0, 0.0),
             1
@@ -715,7 +714,7 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
         "Kerberos", "Hydra", "Charon", "Tethys", "OsirisRex", "Bennu"
     };
     std::vector<SceneGraphNode*> selectableNodes;
-    for (SceneGraphNode* node : OsEng.renderEngine().scene()->allSceneGraphNodes()) {
+    for (SceneGraphNode* node : global::renderEngine.scene()->allSceneGraphNodes()) {
         for (const std::string& name : selectables) {
             if (node->identifier() == name) {
                 selectableNodes.push_back(node);
@@ -1142,7 +1141,7 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
                 setFocusNode(_pickingSelected);
                  // cant do setFocusNode() since TouchInteraction is not subclass of
                  // InteractionMode
-                OsEng.navigationHandler().setFocusNode(_focusNode);
+                global::navigationHandler.setFocusNode(_focusNode);
 
                 // rotate camera to look at new focus, using slerp quat
                 glm::dvec3 camToFocus = _focusNode->worldPosition() -
@@ -1202,7 +1201,7 @@ void TouchInteraction::step(double dt) {
 
      // since functions cant be called directly (TouchInteraction not a subclass of
      // InteractionMode)
-    setFocusNode(OsEng.navigationHandler().focusNode());
+    setFocusNode(global::navigationHandler.focusNode());
     if (_focusNode && _camera) {
         // Create variables from current state
         dvec3 camPos = _camera->positionVec3();
@@ -1400,14 +1399,14 @@ void TouchInteraction::resetAfterInput() {
     _debugProperties.interactionMode = "None";
 #endif
     if (_directTouchMode && !_selected.empty() && _lmSuccess) {
-        double spinDelta = _spinSensitivity / OsEng.windowWrapper().averageDeltaTime();
+        double spinDelta = _spinSensitivity / global::windowDelegate.averageDeltaTime();
         if (glm::length(_lastVel.orbit) > _orbitSpeedThreshold) {
              // allow node to start "spinning" after direct-manipulation finger is let go
             _vel.orbit = _lastVel.orbit * spinDelta;
         }
     }
     // Reset emulated mouse values
-    ImGUIModule& module = *(OsEng.moduleEngine().module<ImGUIModule>());
+    ImGUIModule& module = *(global::moduleEngine.module<ImGUIModule>());
     if (_guiON) {
         bool activeLastFrame = module.touchInput.action;
         module.touchInput.active = false;

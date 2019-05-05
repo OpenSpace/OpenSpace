@@ -113,7 +113,6 @@ void AtlasManager::updateAtlas(BufferIndex bufferIndex, std::vector<int>& brickI
 
     if (!mappedBuffer) {
         LERRORC("AtlasManager", "Failed to map PBO");
-        std::cout << glGetError() << std::endl;
         return;
     }
 

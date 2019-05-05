@@ -25,7 +25,7 @@
 #include <modules/imgui/include/renderproperties.h>
 
 #include <modules/imgui/include/imgui_include.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/selectionproperty.h>
 #include <openspace/properties/stringproperty.h>
@@ -69,14 +69,14 @@ void renderTooltip(Property* prop, double delay) {
 }
 
 void executeScriptSingle(const std::string& id, const std::string& value) {
-    OsEng.scriptEngine().queueScript(
+    global::scriptEngine.queueScript(
         "openspace.setPropertyValueSingle('" + id + "', " + value + ");",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 }
 
 void executeScriptGroup(const std::string& id, const std::string& value) {
-    OsEng.scriptEngine().queueScript(
+    global::scriptEngine.queueScript(
         "openspace.setPropertyValue('" + id + "', " + value + ");",
         scripting::ScriptEngine::RemoteScripting::Yes
     );

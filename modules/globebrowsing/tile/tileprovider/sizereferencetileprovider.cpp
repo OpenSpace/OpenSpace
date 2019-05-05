@@ -26,7 +26,7 @@
 
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <ghoul/fmt.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -48,7 +48,7 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
     )
 {
     _fontSize = 50;
-    _font = OsEng.fontManager().font("Mono", static_cast<float>(_fontSize));
+    _font = global::fontManager.font("Mono", static_cast<float>(_fontSize));
 
     if (dictionary.hasKeyAndValue<glm::dvec3>(KeyRadii)) {
         _ellipsoid = dictionary.value<glm::dvec3>(KeyRadii);

@@ -117,7 +117,7 @@ void RenderablePlaneImageLocal::loadTexture() {
         ghoul::opengl::Texture* t = _texture;
 
         unsigned int hash = ghoul::hashCRC32File(_texturePath);
-        
+
         _texture = BaseModule::TextureManager.request(
             std::to_string(hash),
             [path = _texturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {

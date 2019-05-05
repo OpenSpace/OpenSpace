@@ -26,8 +26,9 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
+#include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scene/scene.h>
@@ -338,7 +339,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     _delete.onChange([this](){
         std::string script =
             "openspace.removeScreenSpaceRenderable('" + identifier() + "');";
-        OsEng.scriptEngine().queueScript(
+        global::scriptEngine.queueScript(
             script,
             scripting::ScriptEngine::RemoteScripting::No
         );
@@ -353,9 +354,8 @@ bool ScreenSpaceRenderable::initialize() {
 }
 
 bool ScreenSpaceRenderable::initializeGL() {
-    _originalViewportSize = OsEng.windowWrapper().currentWindowResolution();
+    _originalViewportSize = global::windowDelegate.currentWindowResolution();
 
-    createPlane();
     createShaders();
 
     return isReady();
@@ -366,15 +366,8 @@ bool ScreenSpaceRenderable::deinitialize() {
 }
 
 bool ScreenSpaceRenderable::deinitializeGL() {
-    glDeleteVertexArrays(1, &_quad);
-    _quad = 0;
-
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
-
-    RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
-        renderEngine.removeRenderProgram(_shader.get());
+        global::renderEngine.removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
 
@@ -407,44 +400,6 @@ float ScreenSpaceRenderable::depth() const {
     return _depth;
 }
 
-void ScreenSpaceRenderable::createPlane() {
-    glGenVertexArrays(1, &_quad);
-    glGenBuffers(1, &_vertexPositionBuffer);
-
-    const GLfloat data[] = {
-        // x     y    s    t
-        -1.f, -1.f, 0.f, 0.f,
-         1.f,  1.f, 1.f, 1.f,
-        -1.f,  1.f, 0.f, 1.f,
-        -1.f, -1.f, 0.f, 0.f,
-         1.f, -1.f, 1.f, 0.f,
-         1.f,  1.f, 1.f, 1.f,
-    };
-
-    glBindVertexArray(_quad);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
-        0,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 4,
-        nullptr
-    );
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 4,
-        reinterpret_cast<void*>(sizeof(GLfloat) * 2)
-    );
-}
-
 void ScreenSpaceRenderable::useEuclideanCoordinates(bool b) {
     _useEuclideanCoordinates = b;
     if (_useEuclideanCoordinates) {
@@ -459,7 +414,7 @@ void ScreenSpaceRenderable::useEuclideanCoordinates(bool b) {
 void ScreenSpaceRenderable::createShaders() {
     ghoul::Dictionary dict = ghoul::Dictionary();
 
-    auto res = OsEng.windowWrapper().currentWindowResolution();
+    auto res = global::windowDelegate.currentWindowResolution();
     ghoul::Dictionary rendererData = {
         { "fragmentRendererPath", "${SHADERS}/framebuffer/renderframebuffer.frag" },
         { "windowWidth" , res.x },
@@ -479,7 +434,7 @@ void ScreenSpaceRenderable::createShaders() {
 }
 
 glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
-    glm::vec2 resolution = OsEng.windowWrapper().currentWindowResolution();
+    glm::vec2 resolution = global::windowDelegate.currentWindowResolution();
 
     //to scale the plane
     float textureRatio =
@@ -499,7 +454,7 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
 
 glm::mat4 ScreenSpaceRenderable::rotationMatrix() {
     // Get the scene transform
-    glm::mat4 rotation = glm::inverse(OsEng.windowWrapper().modelMatrix());
+    glm::mat4 rotation = glm::inverse(global::windowDelegate.modelMatrix());
     if (!_useEuclideanCoordinates) {
         glm::vec2 position = _sphericalPosition.value();
 
@@ -539,21 +494,21 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
 
     _shader->setUniform(
         _uniformCache.viewProj,
-        OsEng.renderEngine().scene()->camera()->viewProjectionMatrix()
+        global::renderEngine.scene()->camera()->viewProjectionMatrix()
     );
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     bindTexture();
-    defer { unbindTexture(); };
     _shader->setUniform(_uniformCache.texture, unit);
 
-    glBindVertexArray(_quad);
+    glBindVertexArray(rendering::helper::vertexObjects.square.vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     glEnable(GL_CULL_FACE);
 
     _shader->deactivate();
+    unbindTexture();
 }
 
 void ScreenSpaceRenderable::bindTexture() {}

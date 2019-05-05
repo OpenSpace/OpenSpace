@@ -24,6 +24,7 @@
 
 #include <openspace/scene/sceneinitializer.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -51,13 +52,15 @@ MultiThreadedSceneInitializer::MultiThreadedSceneInitializer(unsigned int nThrea
 
 void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
     auto initFunction = [this, node]() {
-        LoadingScreen& loadingScreen = OsEng.loadingScreen();
+        LoadingScreen& loadingScreen = global::openSpaceEngine.loadingScreen();
 
+        LoadingScreen::ProgressInfo progressInfo;
+        progressInfo.progress = 1.f;
         loadingScreen.updateItem(
             node->identifier(),
             node->guiName(),
             LoadingScreen::ItemStatus::Initializing,
-            1.f
+            progressInfo
         );
 
         node->initialize();
@@ -69,17 +72,20 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
             node->identifier(),
             node->guiName(),
             LoadingScreen::ItemStatus::Finished,
-            1.f
+            progressInfo
         );
     };
 
-    LoadingScreen& loadingScreen = OsEng.loadingScreen();
+    LoadingScreen::ProgressInfo progressInfo;
+    progressInfo.progress = 0.f;
+
+    LoadingScreen& loadingScreen = global::openSpaceEngine.loadingScreen();
     loadingScreen.setItemNumber(loadingScreen.itemNumber() + 1);
     loadingScreen.updateItem(
         node->identifier(),
         node->guiName(),
         LoadingScreen::ItemStatus::Started,
-        0.f
+        progressInfo
     );
 
     std::lock_guard<std::mutex> g(_mutex);

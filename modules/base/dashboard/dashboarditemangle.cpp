@@ -26,7 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
@@ -219,12 +219,12 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
     }
 
     _fontName.onChange([this]() {
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
     _fontSize.onChange([this]() {
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
@@ -356,7 +356,7 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
     }
     addProperty(_destination.nodeName);
 
-    _font = OsEng.fontManager().font(_fontName, _fontSize);
+    _font = global::fontManager.font(_fontName, _fontSize);
 }
 
 std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
@@ -364,7 +364,7 @@ std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
 {
     if (comp.type == Type::Node) {
         if (!comp.node) {
-            comp.node = OsEng.renderEngine().scene()->sceneGraphNode(comp.nodeName);
+            comp.node = global::renderEngine.scene()->sceneGraphNode(comp.nodeName);
 
             if (!comp.node) {
                 LERRORC(
@@ -380,9 +380,9 @@ std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
         case Type::Node:
             return { comp.node->worldPosition(), comp.node->guiName() };
         case Type::Focus:
-            return { OsEng.navigationHandler().focusNode()->worldPosition(), "focus" };
+            return { global::navigationHandler.focusNode()->worldPosition(), "focus" };
         case Type::Camera:
-            return { OsEng.renderEngine().scene()->camera()->positionVec3(), "camera" };
+            return { global::renderEngine.scene()->camera()->positionVec3(), "camera" };
         default:
             return { glm::dvec3(0.0), "Unknown" };
     }

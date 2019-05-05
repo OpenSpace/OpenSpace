@@ -130,62 +130,72 @@ void PerformanceManager::DestroyGlobalSharedMemory() {
     sharedMemory.releaseLock();
 }
 
-PerformanceManager::PerformanceManager(std::string loggingDirectory, std::string prefix)
-    : _logDir(absPath(std::move(loggingDirectory)))
-    , _prefix(std::move(prefix))
-{
-    PerformanceManager::CreateGlobalSharedMemory();
+PerformanceManager::~PerformanceManager() {}
 
-    ghoul::SharedMemory sharedMemory(GlobalSharedMemoryName);
-    sharedMemory.acquireLock();
-    defer {
-        sharedMemory.releaseLock();
-    };
+void PerformanceManager::setEnabled(bool enabled) {
+    _logDir = absPath("${BASE}");
+    _prefix = "PM-";
 
-    GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
+    _performanceMeasurementEnabled = enabled;
 
-    // The the first free block (which also coincides with the number of blocks
-    uint8_t blockIndex = m->number;
-    ++(m->number);
+    if (enabled) {
+        PerformanceManager::CreateGlobalSharedMemory();
 
-    const std::string& localName = LocalSharedMemoryNameBase + std::to_string(blockIndex);
-
-    // Compute the total size
-    const int totalSize = sizeof(PerformanceLayout);
-    LINFO(fmt::format("Create shared memory '{}' of {} bytes", localName, totalSize));
-
-    if (ghoul::SharedMemory::exists(localName)) {
-        throw ghoul::RuntimeError(
-            "Shared Memory '" + localName + "' block already existed"
-        );
-    }
-
-    ghoul::SharedMemory::create(localName, totalSize);
-
-    _performanceMemory = std::make_unique<ghoul::SharedMemory>(localName);
-    // Using the placement-new to create a PerformanceLayout in the shared memory
-    new (_performanceMemory->memory()) PerformanceLayout;
-}
-
-PerformanceManager::~PerformanceManager() {
-    if (loggingEnabled()) {
-        outputLogs();
-    }
-
-    if (_performanceMemory) {
         ghoul::SharedMemory sharedMemory(GlobalSharedMemoryName);
         sharedMemory.acquireLock();
+        defer {
+            sharedMemory.releaseLock();
+        };
+
         GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
-        --(m->number);
-        sharedMemory.releaseLock();
 
-        LINFO(fmt::format("Remove shared memory '{}'", _performanceMemory->name()));
-        ghoul::SharedMemory::remove(_performanceMemory->name());
+        // The the first free block (which also coincides with the number of blocks
+        uint8_t blockIndex = m->number;
+        ++(m->number);
 
-        _performanceMemory = nullptr;
+        const std::string& localName = LocalSharedMemoryNameBase +
+                                       std::to_string(blockIndex);
+
+        // Compute the total size
+        const int totalSize = sizeof(PerformanceLayout);
+        LINFO(fmt::format("Create shared memory '{}' of {} bytes", localName, totalSize));
+
+        if (ghoul::SharedMemory::exists(localName)) {
+            throw ghoul::RuntimeError(
+                "Shared Memory '" + localName + "' block already existed"
+            );
+        }
+
+        ghoul::SharedMemory::create(localName, totalSize);
+
+        _performanceMemory = std::make_unique<ghoul::SharedMemory>(localName);
+        // Using the placement-new to create a PerformanceLayout in the shared memory
+        new (_performanceMemory->memory()) PerformanceLayout;
     }
+    else {
+        if (loggingEnabled()) {
+            outputLogs();
+        }
 
-    PerformanceManager::DestroyGlobalSharedMemory();
+        if (_performanceMemory) {
+            ghoul::SharedMemory sharedMemory(GlobalSharedMemoryName);
+            sharedMemory.acquireLock();
+            GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
+            --(m->number);
+            sharedMemory.releaseLock();
+
+            LINFO(fmt::format("Remove shared memory '{}'", _performanceMemory->name()));
+            ghoul::SharedMemory::remove(_performanceMemory->name());
+
+            _performanceMemory = nullptr;
+        }
+
+        PerformanceManager::DestroyGlobalSharedMemory();
+    }
+}
+
+bool PerformanceManager::isEnabled() const {
+    return _performanceMeasurementEnabled;
 }
 
 void PerformanceManager::resetPerformanceMeasurements() {

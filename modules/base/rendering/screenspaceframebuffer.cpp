@@ -25,8 +25,8 @@
 #include <modules/base/rendering/screenspaceframebuffer.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/textureunit.h>
@@ -77,7 +77,7 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictiona
         setGuiName("ScreenSpaceFramebuffer " + std::to_string(iIdentifier));
     }
 
-    glm::vec2 resolution = OsEng.windowWrapper().currentWindowResolution();
+    glm::vec2 resolution = global::windowDelegate.currentWindowResolution();
     addProperty(_size);
     _size.set(glm::vec4(0, 0, resolution.x,resolution.y));
 }
@@ -103,7 +103,7 @@ bool ScreenSpaceFramebuffer::deinitializeGL() {
 }
 
 void ScreenSpaceFramebuffer::render() {
-    const glm::vec2& resolution = OsEng.windowWrapper().currentWindowResolution();
+    const glm::vec2& resolution = global::windowDelegate.currentWindowResolution();
     const glm::vec4& size = _size.value();
 
     const float xratio = _originalViewportSize.x / (size.z - size.x);

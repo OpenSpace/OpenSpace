@@ -27,9 +27,9 @@
 #include <modules/digitaluniverse/digitaluniversemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/util/updatestructures.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -152,7 +152,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
-        "RenderOptionInfo",
+        "RenderOption",
         "Render Option",
         "Debug option for rendering of billboards and texts."
     };
@@ -494,7 +494,7 @@ void RenderablePlanesCloud::initializeGL() {
     _program = DigitalUniverseModule::ProgramObjectManager.request(
         ProgramObjectName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return OsEng.renderEngine().buildRenderProgram(
+            return global::renderEngine.buildRenderProgram(
                 "RenderablePlanesCloud",
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/plane_vs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/plane_fs.glsl")
@@ -511,7 +511,7 @@ void RenderablePlanesCloud::initializeGL() {
     if (_hasLabel) {
         if (!_font) {
             constexpr const int FontSize = 30;
-            _font = OsEng.fontManager().font(
+            _font = global::fontManager.font(
                 "Mono",
                 static_cast<float>(FontSize),
                 ghoul::fontrendering::FontManager::Outline::Yes,
@@ -537,7 +537,7 @@ void RenderablePlanesCloud::deinitializeGL() {
     DigitalUniverseModule::ProgramObjectManager.release(
         ProgramObjectName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
 }
@@ -591,7 +591,8 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     _program->setUniform(_uniformCache.galaxyTexture, unit);
     int currentTextureIndex = -1;
 
-    for (const std::unordered_map<int, PlaneAggregate>::reference pAMapItem : _planesMap) {
+    for (const std::unordered_map<int, PlaneAggregate>::reference pAMapItem : _planesMap)
+    {
         // For planes with undefined textures references
         if (pAMapItem.first == 30) {
             continue;
@@ -604,7 +605,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
         glBindVertexArray(pAMapItem.second.vao);
         glDrawArrays(GL_TRIANGLES, 0, 6 * pAMapItem.second.numberOfPlanes);
     }
-    
+
     glBindVertexArray(0);
     _program->deactivate();
 
@@ -1294,7 +1295,7 @@ void RenderablePlanesCloud::createPlanes() {
             };
 
             int textureIndex = static_cast<int>(_fullData[p + _textureVariableIndex]);
-            std::unordered_map<int, PlaneAggregate>::iterator found = 
+            std::unordered_map<int, PlaneAggregate>::iterator found =
                 _planesMap.find(textureIndex);
             if (found != _planesMap.end()) {
                 for (int i = 0; i < PLANES_VERTEX_DATA_SIZE; ++i) {
@@ -1312,7 +1313,7 @@ void RenderablePlanesCloud::createPlanes() {
                     pA.planesCoordinates.push_back(vertexData[i]);
                 }
                 _planesMap.insert(std::pair<int, PlaneAggregate>(textureIndex, pA));
-            }            
+            }
         }
 
         // Send data to GPU
@@ -1321,7 +1322,8 @@ void RenderablePlanesCloud::createPlanes() {
             glBindBuffer(GL_ARRAY_BUFFER, pAMapItem.second.vbo);
             glBufferData(
                 GL_ARRAY_BUFFER,
-                sizeof(GLfloat) * PLANES_VERTEX_DATA_SIZE * pAMapItem.second.numberOfPlanes,
+                sizeof(GLfloat) * PLANES_VERTEX_DATA_SIZE *
+                    pAMapItem.second.numberOfPlanes,
                 pAMapItem.second.planesCoordinates.data(),
                 GL_STATIC_DRAW
             );
@@ -1348,7 +1350,7 @@ void RenderablePlanesCloud::createPlanes() {
             );
 
             glBindVertexArray(0);
-        }        
+        }
 
         _dataIsDirty = false;
 

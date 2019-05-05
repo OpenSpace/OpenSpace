@@ -28,7 +28,7 @@
 
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
 #include <modules/globebrowsing/tile/tileprovider/defaulttileprovider.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -302,7 +302,7 @@ void TemporalTileProvider::ensureUpdated() {
 void TemporalTileProvider::update() {
     if (_successfulInitialization) {
         std::shared_ptr<TileProvider> newCurrent = getTileProvider(
-            OsEng.timeManager().time()
+            global::timeManager.time()
         );
         if (newCurrent) {
             _currentTileProvider = newCurrent;

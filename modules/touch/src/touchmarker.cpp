@@ -24,7 +24,7 @@
 
 #include <modules/touch/include/touchmarker.h>
 
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
@@ -95,7 +95,7 @@ void TouchMarker::initialize() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
 
-    _shader = OsEng.renderEngine().buildRenderProgram(
+    _shader = global::renderEngine.buildRenderProgram(
         "MarkerProgram",
         absPath("${MODULE_TOUCH}/shaders/marker_vs.glsl"),
         absPath("${MODULE_TOUCH}/shaders/marker_fs.glsl")
@@ -111,9 +111,8 @@ void TouchMarker::deinitialize() {
     glDeleteBuffers(1, &_vertexPositionBuffer);
     _vertexPositionBuffer = 0;
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
-        renderEngine.removeRenderProgram(_shader.get());
+        global::renderEngine.removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
 }

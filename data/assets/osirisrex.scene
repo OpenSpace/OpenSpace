@@ -13,6 +13,7 @@ asset.require('scene/solarsystem/missions/osirisrex/osirisrex')
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
+asset.require('util/default_joystick')
 
 -- Custom Keybindings
 local Keybindings = {

@@ -27,7 +27,7 @@
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
@@ -132,8 +132,7 @@ bool RenderableCrawlingLine::isReady() const {
 }
 
 void RenderableCrawlingLine::initializeGL() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    _program = renderEngine.buildRenderProgram(
+    _program = global::renderEngine.buildRenderProgram(
         "RenderableCrawlingLine",
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/crawlingline_vs.glsl"),
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/crawlingline_fs.glsl")
@@ -168,9 +167,8 @@ void RenderableCrawlingLine::deinitializeGL() {
     glDeleteBuffers(1, &_vbo);
     _vbo = 0;
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
     if (_program) {
-        renderEngine.removeRenderProgram(_program.get());
+        global::renderEngine.removeRenderProgram(_program.get());
         _program = nullptr;
     }
 }

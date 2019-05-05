@@ -29,7 +29,7 @@
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -360,7 +360,7 @@ void RenderablePlanetProjection::initializeGL() {
         SpacecraftInstrumentsModule::ProgramObjectManager.request(
             ProjectiveProgramName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                return OsEng.renderEngine().buildRenderProgram(
+                return global::renderEngine.buildRenderProgram(
                     ProjectiveProgramName,
                     absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
                             "renderablePlanet_vs.glsl"
@@ -450,7 +450,7 @@ void RenderablePlanetProjection::deinitializeGL() {
     SpacecraftInstrumentsModule::ProgramObjectManager.release(
         ProjectiveProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
     _programObject = nullptr;
@@ -697,7 +697,7 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
 void RenderablePlanetProjection::update(const UpdateData& data) {
     if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
-        
+
         ghoul::opengl::updateUniformLocations(
             *_programObject,
             _mainUniformCache,

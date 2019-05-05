@@ -27,9 +27,9 @@
 #include <modules/server/include/connection.h>
 #include <modules/server/include/jsonconverters.h>
 #include <modules/volume/transferfunctionhandler.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/virtualpropertymanager.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/query/query.h>
@@ -64,11 +64,11 @@ void GetPropertyTopic::handleJson(const nlohmann::json& json) {
     }
     else if (requestedKey == AllScreenSpaceRenderablesValue) {
         response = wrappedPayload({
-            { "value", OsEng.renderEngine().screenSpaceRenderables() }
+            { "value", global::renderEngine.screenSpaceRenderables() }
         });
     }
     else if (requestedKey == RootPropertyOwner) {
-        response = wrappedPayload(OsEng.rootPropertyOwner());
+        response = wrappedPayload(global::rootPropertyOwner);
     }
     else {
         response = propertyFromKey(requestedKey);
@@ -85,12 +85,11 @@ json GetPropertyTopic::allProperties() {
         {
             "value",
             {
-                OsEng.renderEngine(),
-                OsEng.console(),
-                OsEng.parallelPeer(),
-                OsEng.windowWrapper(),
-                OsEng.navigationHandler(),
-                OsEng.virtualPropertyManager(),
+                global::renderEngine,
+                global::luaConsole,
+                global::parallelPeer,
+                global::navigationHandler,
+                global::virtualPropertyManager,
             }
         }
     };

@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/globals.h>
+
 namespace openspace::luascriptfunctions {
 
 int loadFile(lua_State* L) {
@@ -36,7 +38,7 @@ int loadFile(lua_State* L) {
         return ghoul::lua::luaError(L, "filepath string is empty");
     }
 
-    OsEng.scriptScheduler().loadScripts(
+    global::scriptScheduler.loadScripts(
         ghoul::lua::loadDictionaryFromFile(missionFileName, L)
     );
 
@@ -55,7 +57,7 @@ int loadScheduledScript(lua_State* L) {
     std::string forwardScript = ghoul::lua::value<std::string>(L, 2);
 
     if (nArguments == 2) {
-        OsEng.scriptScheduler().loadScripts({
+        global::scriptScheduler.loadScripts({
             {
                 "1",
                 ghoul::Dictionary {
@@ -67,7 +69,7 @@ int loadScheduledScript(lua_State* L) {
     }
     else if (nArguments == 3) {
         std::string backwardScript = ghoul::lua::value<std::string>(L, 3);
-        OsEng.scriptScheduler().loadScripts({
+        global::scriptScheduler.loadScripts({
             {
                 "1",
                 ghoul::Dictionary {
@@ -82,7 +84,7 @@ int loadScheduledScript(lua_State* L) {
         std::string backwardScript = ghoul::lua::value<std::string>(L, 3);
         std::string universalScript = ghoul::lua::value<std::string>(L, 4);
 
-        OsEng.scriptScheduler().loadScripts({
+        global::scriptScheduler.loadScripts({
             {
                 "1",
                 ghoul::Dictionary {
@@ -104,7 +106,7 @@ int loadScheduledScript(lua_State* L) {
 int clear(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clear");
 
-    OsEng.scriptScheduler().clearSchedule();
+    global::scriptScheduler.clearSchedule();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

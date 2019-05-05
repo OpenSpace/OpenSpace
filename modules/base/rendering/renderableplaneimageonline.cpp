@@ -26,7 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
@@ -148,7 +148,7 @@ void RenderablePlaneImageOnline::update(const UpdateData&) {
 std::future<DownloadManager::MemoryFile>
 RenderablePlaneImageOnline::downloadImageToMemory(const std::string& url)
 {
-    return OsEng.downloadManager().fetchFile(
+    return global::downloadManager.fetchFile(
         url,
         [url](const DownloadManager::MemoryFile&) {
             LDEBUGC(

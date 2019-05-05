@@ -24,8 +24,8 @@
 
 #include <openspace/util/timemanager.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/timeline.h>
 #include <ghoul/logging/logmanager.h>
@@ -64,8 +64,6 @@ namespace {
         "The default duration taken to transition to the unpaused state, "
         "when interpolating"
     };
-
-    constexpr const char* _loggerCat = "TimeManager";
 }
 
 namespace openspace {
@@ -107,8 +105,8 @@ TimeManager::TimeManager()
 void TimeManager::interpolateTime(double targetTime, double durationSeconds) {
     ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
 
-    const double now = OsEng.windowWrapper().applicationTime();
-    const bool pause = OsEng.timeManager().isPaused();
+    const double now = global::windowDelegate.applicationTime();
+    const bool pause = isPaused();
 
     const TimeKeyframeData current = { time(), deltaTime(), false, false };
     const TimeKeyframeData next = { targetTime, targetDeltaTime(), pause, false };
@@ -221,7 +219,7 @@ void TimeManager::progressTime(double dt) {
         return;
     }
 
-    const double now = OsEng.windowWrapper().applicationTime();
+    const double now = global::windowDelegate.applicationTime();
     const std::deque<Keyframe<TimeKeyframeData>>& keyframes = _timeline.keyframes();
 
     auto firstFutureKeyframe = std::lower_bound(
@@ -511,7 +509,7 @@ void TimeManager::interpolateDeltaTime(double newDeltaTime, double interpolation
         return;
     }
 
-    const double now = OsEng.windowWrapper().applicationTime();
+    const double now = global::windowDelegate.applicationTime();
 
     Time newTime = time().j2000Seconds() +
         (_deltaTime + newDeltaTime) * 0.5 * interpolationDuration;
@@ -534,7 +532,7 @@ void TimeManager::interpolatePause(bool pause, double interpolationDuration) {
         return;
     }
 
-    const double now = OsEng.windowWrapper().applicationTime();
+    const double now = global::windowDelegate.applicationTime();
     double targetDelta = pause ? 0.0 : _targetDeltaTime;
     Time newTime = time().j2000Seconds() +
         (_deltaTime + targetDelta) * 0.5 * interpolationDuration;

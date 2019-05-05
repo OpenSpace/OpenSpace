@@ -24,47 +24,38 @@
 
 #include <modules/multiresvolume/rendering/renderablemultiresvolume.h>
 
-#include <openspace/engine/openspaceengine.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
+#include <modules/multiresvolume/rendering/atlasmanager.h>
+#include <modules/multiresvolume/rendering/errorhistogrammanager.h>
+#include <modules/multiresvolume/rendering/histogrammanager.h>
+#include <modules/multiresvolume/rendering/localerrorhistogrammanager.h>
+#include <modules/multiresvolume/rendering/localtfbrickselector.h>
+#include <modules/multiresvolume/rendering/multiresvolumeraycaster.h>
+#include <modules/multiresvolume/rendering/shenbrickselector.h>
+#include <modules/multiresvolume/rendering/simpletfbrickselector.h>
+#include <modules/multiresvolume/rendering/tfbrickselector.h>
+#include <modules/multiresvolume/rendering/tsp.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycastermanager.h>
-#include <openspace/util/updatestructures.h>
-#include <ghoul/misc/dictionary.h>
-
-#include <ghoul/glm.h>
 #include <openspace/rendering/transferfunction.h>
-#include <modules/multiresvolume/rendering/multiresvolumeraycaster.h>
-
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/file.h>
+#include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
+#include <openspace/util/updatestructures.h>
+#include <ghoul/fmt.h>
+#include <ghoul/glm.h>
 #include <ghoul/filesystem/cachemanager.h>
-
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/texture.h>
-
-#include <modules/multiresvolume/rendering/tsp.h>
-#include <modules/multiresvolume/rendering/atlasmanager.h>
-#include <modules/multiresvolume/rendering/shenbrickselector.h>
-#include <modules/multiresvolume/rendering/tfbrickselector.h>
-#include <modules/multiresvolume/rendering/simpletfbrickselector.h>
-#include <modules/multiresvolume/rendering/localtfbrickselector.h>
-
-#include <modules/multiresvolume/rendering/histogrammanager.h>
-#include <modules/multiresvolume/rendering/errorhistogrammanager.h>
-#include <modules/multiresvolume/rendering/localerrorhistogrammanager.h>
-
-#include <openspace/util/time.h>
-#include <openspace/util/spicemanager.h>
-
-#include <algorithm>
-#include <iterator>
-#include <fstream>
 #include <algorithm>
 #include <chrono>
-
-#include <ghoul/fmt.h>
+#include <fstream>
+#include <iterator>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableMultiresVolume";
@@ -426,14 +417,14 @@ void RenderableMultiresVolume::initializeGL() {
     );
     _raycaster->initialize();
 
-    OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster);
+    global::raycasterManager.attachRaycaster(*_raycaster);
 
     auto onChange = [&](bool enabled) {
         if (enabled) {
-            OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster);
+            global::raycasterManager.attachRaycaster(*_raycaster);
         }
         else {
-            OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster);
+            global::raycasterManager.detachRaycaster(*_raycaster);
         }
     };
 

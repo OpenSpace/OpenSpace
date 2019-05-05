@@ -33,7 +33,7 @@
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
 
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/rendering/renderable.h>
 

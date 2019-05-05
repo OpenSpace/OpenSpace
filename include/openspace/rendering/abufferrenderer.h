@@ -76,8 +76,7 @@ public:
     void postRaycast(const RaycasterTask& raycasterTask);
 
     void update() override;
-    void render(Scene* scene, Camera* camera, float blackoutFactor,
-        bool doPerformanceMeasurements) override;
+    void render(Scene* scene, Camera* camera, float blackoutFactor) override;
 
     /**
      * Update render data

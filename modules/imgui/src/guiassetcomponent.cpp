@@ -26,6 +26,7 @@
 
 #include <modules/imgui/include/imgui_include.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/asset.h>
@@ -74,7 +75,7 @@ void GuiAssetComponent::render() {
     ImGui::Begin("Assets", &e);
     _isEnabled = e;
 
-    AssetManager& assetManager = OsEng.assetManager();
+    AssetManager& assetManager = global::openSpaceEngine.assetManager();
 
     std::string rootPath;
 

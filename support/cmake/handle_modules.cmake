@@ -66,16 +66,21 @@ function (handle_modules internal_module_path external_modules_paths)
         list(GET all_module_names ${val} name)
         list(GET all_module_paths ${val} path)
 
+        get_module_attribute_supported(${path} is_module_supported)
+        if (NOT ${is_module_supported})
+            message(STATUS "Skipping module ${path} as it is not supported on this machine")
+            continue()
+        endif ()
+
         get_module_attribute_default(${path} is_default_module)
         create_option_name(${name} optionName)
-        option(${optionName} "Build ${dir} Module" ${is_default_module})
+        option(${optionName} "Build ${path} Module" ${is_default_module})
 
         if (${optionName})
             list(APPEND enabled_module_names ${name})
             list(APPEND enabled_module_paths ${path})
         endif ()
     endforeach ()
-
 
     #
     # Step 3:  For each module that is default or enabled by the user, get the dependencies
@@ -266,6 +271,18 @@ function (get_module_attribute_dependencies path result)
         include(${path}/${dir}/include.cmake)
         if (DEFINED OPENSPACE_DEPENDENCIES)
             set(${result} ${OPENSPACE_DEPENDENCIES} PARENT_SCOPE)
+        endif ()
+    endif ()
+endfunction()
+
+# Returns the state whether the module located at 'path' is supported on this machine
+function (get_module_attribute_supported path result)
+    set(${result} ON PARENT_SCOPE)
+    if (EXISTS "${path}/include.cmake")
+        unset(SUPPORTED)
+        include(${path}/${dir}/include.cmake)
+        if (DEFINED SUPPORTED)
+            set(${result} ${SUPPORTED} PARENT_SCOPE)
         endif ()
     endif ()
 endfunction()

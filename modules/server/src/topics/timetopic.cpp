@@ -25,7 +25,7 @@
 #include "modules/server/include/topics/timetopic.h"
 
 #include <modules/server/include/connection.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/properties/property.h>
 #include <openspace/query/query.h>
 #include <openspace/util/timemanager.h>
@@ -53,10 +53,10 @@ TimeTopic::TimeTopic()
 
 TimeTopic::~TimeTopic() {
     if (_timeCallbackHandle != UnsetOnChangeHandle) {
-        OsEng.timeManager().removeTimeChangeCallback(_timeCallbackHandle);
+        global::timeManager.removeTimeChangeCallback(_timeCallbackHandle);
     }
     if (_deltaTimeCallbackHandle != UnsetOnChangeHandle) {
-        OsEng.timeManager().removeDeltaTimeChangeCallback(_deltaTimeCallbackHandle);
+        global::timeManager.removeDeltaTimeChangeCallback(_deltaTimeCallbackHandle);
     }
 }
 
@@ -75,7 +75,7 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
     LDEBUG("Subscribing to " + requestedKey);
 
     if (requestedKey == CurrentTimeKey) {
-        _timeCallbackHandle = OsEng.timeManager().addTimeChangeCallback([this]() {
+        _timeCallbackHandle = global::timeManager.addTimeChangeCallback([this]() {
             std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
             if (now - _lastUpdateTime > TimeUpdateInterval) {
                 _connection->sendJson(currentTime());
@@ -85,7 +85,7 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
         _connection->sendJson(currentTime());
     }
     else if (requestedKey == DeltaTimeKey) {
-        _deltaTimeCallbackHandle = OsEng.timeManager().addDeltaTimeChangeCallback(
+        _deltaTimeCallbackHandle = global::timeManager.addDeltaTimeChangeCallback(
             [this]() {
                 _connection->sendJson(deltaTime());
                 if (_timeCallbackHandle != UnsetOnChangeHandle) {
@@ -103,12 +103,12 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
 }
 
 json TimeTopic::currentTime() {
-    json timeJson = { { "time", OsEng.timeManager().time().ISO8601() } };
+    json timeJson = { { "time", global::timeManager.time().ISO8601() } };
     return wrappedPayload(timeJson);
 }
 
 json TimeTopic::deltaTime() {
-    json timeJson = { { "deltaTime", OsEng.timeManager().deltaTime() } };
+    json timeJson = { { "deltaTime", global::timeManager.deltaTime() } };
     return wrappedPayload(timeJson);
 }
 

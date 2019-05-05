@@ -24,8 +24,8 @@
 
 #include <openspace/network/parallelconnection.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 
 #include <ghoul/fmt.h>
 #include <ghoul/io/socket/tcpsocket.h>

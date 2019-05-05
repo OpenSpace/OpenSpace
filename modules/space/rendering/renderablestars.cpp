@@ -27,7 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 
 #include <ghoul/filesystem/cachemanager.h>
@@ -294,8 +294,7 @@ bool RenderableStars::isReady() const {
 }
 
 void RenderableStars::initializeGL() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    _program = renderEngine.buildRenderProgram("Star",
+    _program = global::renderEngine.buildRenderProgram("Star",
         absPath("${MODULE_SPACE}/shaders/star_vs.glsl"),
         absPath("${MODULE_SPACE}/shaders/star_fs.glsl"),
         absPath("${MODULE_SPACE}/shaders/star_ge.glsl")
@@ -318,9 +317,8 @@ void RenderableStars::deinitializeGL() {
     _pointSpreadFunctionTexture = nullptr;
     _colorTexture = nullptr;
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
     if (_program) {
-        renderEngine.removeRenderProgram(_program.get());
+        global::renderEngine.removeRenderProgram(_program.get());
         _program = nullptr;
     }
 }
@@ -342,7 +340,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.minBillboardSize, _minBillboardSize);
     _program->setUniform(
         _uniformCache.screenSize,
-        glm::vec2(OsEng.renderEngine().renderingResolution())
+        glm::vec2(global::renderEngine.renderingResolution())
     );
 
     setPscUniforms(*_program.get(), data.camera, data.position);

@@ -30,7 +30,7 @@
 #include <modules/globebrowsing/rendering/layer/layer.h>
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
@@ -141,8 +141,7 @@ LayerShaderManager::LayerShaderManager(std::string shaderName, std::string vsPat
 
 LayerShaderManager::~LayerShaderManager() {
     if (_programObject) {
-        RenderEngine& renderEngine = OsEng.renderEngine();
-        renderEngine.removeRenderProgram(_programObject.get());
+        global::renderEngine.removeRenderProgram(_programObject.get());
         _programObject = nullptr;
     }
 }
@@ -231,9 +230,9 @@ void LayerShaderManager::recompileShaderProgram(
     }
 
     // Remove old program
-    OsEng.renderEngine().removeRenderProgram(_programObject.get());
+    global::renderEngine.removeRenderProgram(_programObject.get());
 
-    _programObject = OsEng.renderEngine().buildRenderProgram(
+    _programObject = global::renderEngine.buildRenderProgram(
         _shaderName,
         absPath(_vsPath),
         absPath(_fsPath),

@@ -27,7 +27,7 @@
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timeconversion.h>
@@ -144,7 +144,7 @@ DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dict
         glm::vec3(0.f),
         glm::vec3(1.f)
     )
-    , _font(OsEng.fontManager().font(KeyFontMono, 10))
+    , _font(global::fontManager.font(KeyFontMono, 10))
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -160,12 +160,12 @@ DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dict
     }
 
     _fontName.onChange([this]() {
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
     _fontSize.onChange([this]() {
-        _font = OsEng.fontManager().font(_fontName, _fontSize);
+        _font = global::fontManager.font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
@@ -174,11 +174,11 @@ DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dict
     _activeFlash.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_activeFlash);
 
-    _font = OsEng.fontManager().font(_fontName, _fontSize);
+    _font = global::fontManager.font(_fontName, _fontSize);
 }
 
 void DashboardItemInstruments::render(glm::vec2& penPosition) {
-    double currentTime = OsEng.timeManager().time().j2000Seconds();
+    double currentTime = global::timeManager.time().j2000Seconds();
 
     if (!ImageSequencer::ref().isReady()) {
         return;
@@ -228,7 +228,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
         );
 
         std::string str = SpiceManager::ref().dateFromEphemerisTime(
-            sequencer.nextCaptureTime(OsEng.timeManager().time().j2000Seconds()),
+            sequencer.nextCaptureTime(global::timeManager.time().j2000Seconds()),
             "YYYY MON DD HR:MN:SC"
         );
 
@@ -312,7 +312,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
 glm::vec2 DashboardItemInstruments::size() const {
     glm::vec2 size = { 0.f, 0.f };
     //return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-    double currentTime = OsEng.timeManager().time().j2000Seconds();
+    double currentTime = global::timeManager.time().j2000Seconds();
 
     if (!ImageSequencer::ref().isReady()) {
         return { 0.f, 0.f };

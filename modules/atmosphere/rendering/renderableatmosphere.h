@@ -75,7 +75,6 @@ class RenderableAtmosphere : public Renderable {
 public:
     RenderableAtmosphere(const ghoul::Dictionary& dictionary);
 
-    void deinitialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
     bool isReady() const override;

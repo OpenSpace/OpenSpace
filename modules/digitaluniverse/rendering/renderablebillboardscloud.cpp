@@ -27,9 +27,9 @@
 #include <modules/digitaluniverse/digitaluniversemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -82,13 +82,6 @@ namespace {
         "Texture",
         "Point Sprite Texture",
         "The path to the texture that should be used as the point sprite."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
-        "Transparency",
-        "Transparency",
-        "This value is a multiplicative factor that is applied to the transparency of "
-        "all points."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
@@ -182,7 +175,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
-        "RenderOptionInfo",
+        "RenderOption",
         "Render Option",
         "Debug option for rendering of billboards and texts."
     };
@@ -266,12 +259,6 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
                 new StringVerifier,
                 Optional::Yes,
                 SpriteTextureInfo.description
-            },
-            {
-                TransparencyInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                TransparencyInfo.description
             },
             {
                 ScaleFactorInfo.identifier,
@@ -393,7 +380,6 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
 
 RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 600.f)
     , _pointColor(
         ColorInfo,
@@ -446,7 +432,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     _renderOption.addOption(0, "Camera View Direction");
     _renderOption.addOption(1, "Camera Position Normal");
     _renderOption.set(1);
-    if (OsEng.windowWrapper().isFisheyeRendering()) {
+    if (global::windowDelegate.isFisheyeRendering()) {
         _renderOption.set(1);
     }
     else {
@@ -536,12 +522,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         addProperty(_pointColor);
     }
 
-    if (dictionary.hasKey(TransparencyInfo.identifier)) {
-        _alphaValue = static_cast<float>(
-            dictionary.value<double>(TransparencyInfo.identifier)
-        );
-    }
-    addProperty(_alphaValue);
+    addProperty(_opacity);
 
     if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
         _scaleFactor = static_cast<float>(
@@ -664,7 +645,7 @@ void RenderableBillboardsCloud::initializeGL() {
     _program = DigitalUniverseModule::ProgramObjectManager.request(
         ProgramObjectName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return OsEng.renderEngine().buildRenderProgram(
+            return global::renderEngine.buildRenderProgram(
                 ProgramObjectName,
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_vs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_fs.glsl"),
@@ -694,7 +675,7 @@ void RenderableBillboardsCloud::initializeGL() {
     if (_hasLabel) {
         if (_font == nullptr) {
             size_t _fontSize = 50;
-            _font = OsEng.fontManager().font(
+            _font = global::fontManager.font(
                 "Mono",
                 static_cast<float>(_fontSize),
                 ghoul::fontrendering::FontManager::Outline::Yes,
@@ -713,7 +694,7 @@ void RenderableBillboardsCloud::deinitializeGL() {
     DigitalUniverseModule::ProgramObjectManager.release(
         ProgramObjectName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
     _program = nullptr;
@@ -768,7 +749,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     const glm::dmat4 projMatrix = glm::dmat4(data.camera.projectionMatrix());
     _program->setUniform(
         "screenSize",
-        glm::vec2(OsEng.renderEngine().renderingResolution())
+        glm::vec2(global::renderEngine.renderingResolution())
     );
 
     _program->setUniform(_uniformCache.cameraPos, data.camera.positionVec3());
@@ -783,7 +764,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.minBillboardSize, _billboardMinSize); // in pixels
     _program->setUniform(_uniformCache.maxBillboardSize, _billboardMaxSize); // in pixels
     _program->setUniform(_uniformCache.color, _pointColor);
-    _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+    _program->setUniform(_uniformCache.alphaValue, _opacity);
     _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
     _program->setUniform(_uniformCache.up, orthoUp);
     _program->setUniform(_uniformCache.right, orthoRight);
@@ -864,6 +845,7 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
 
     glm::vec4 textColor = _textColor;
     textColor.a *= fadeInVariable;
+    textColor.a *= _opacity;
     for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
         //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
         glm::vec3 scaledPos(pair.first);
@@ -873,9 +855,9 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
             scaledPos,
             pair.second,
             textColor,
-            pow(10.0, _textSize.value()),
-            _textMinSize,
-            _textMaxSize,
+            pow(10.f, _textSize.value()),
+            static_cast<int>(_textMinSize),
+            static_cast<int>(_textMaxSize),
             modelViewProjectionMatrix,
             orthoRight,
             orthoUp,
@@ -915,7 +897,7 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
 
     float fadeInVariable = 1.f;
     if (!_disableFadeInDistance) {
-        float distCamera = glm::length(data.camera.positionVec3());
+        float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
         const glm::vec2 fadeRange = _fadeInDistance;
         const float a = 1.f / ((fadeRange.y - fadeRange.x) * scale);
         const float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
@@ -1060,7 +1042,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                     ghoul::io::TextureReader::ref().loadTexture(
                         absPath(path)
                     );
-             
+
                 t->uploadTexture();
                 t->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
                 return t;
