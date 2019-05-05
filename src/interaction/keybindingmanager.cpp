@@ -153,10 +153,10 @@ std::string KeybindingManager::generateJson() const {
         json << "{";
         json << R"("key": ")" << ghoul::to_string(p.first) << "\",";
         json << R"("script": ")" << escapedJson(p.second.command) << "\",";
-        json << R"("remoteScripting: ")"
+        json << R"("remoteScripting": )"
              << (p.second.synchronization ? "true," : "false,");
         json << R"("documentation": ")" << escapedJson(p.second.documentation) << "\",";
-        json << R"("name: ")" << escapedJson(p.second.name) << "\"";
+        json << R"("name": ")" << escapedJson(p.second.name) << "\"";
         json << "}";
     }
     json << "]";
