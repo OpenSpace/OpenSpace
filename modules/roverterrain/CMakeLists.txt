@@ -56,7 +56,7 @@ option(OPENSPACE_MODULE_ROVERTERRAIN_USE_PCL "Use PCL" ON)
 
 if( OPENSPACE_MODULE_ROVERTERRAIN_USE_PCL )
     # Find Packages
-    find_package( PCL 1.8 )
+    find_package( PCL 1.8 REQUIRED)
 
     target_compile_definitions(openspace-module-roverterrain PRIVATE GLOBEBROWSING_USE_PCL)
 

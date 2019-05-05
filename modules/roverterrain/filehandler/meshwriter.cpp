@@ -163,7 +163,7 @@ void MeshWriter::writeObjFileNoTex(const std::string filename, std::string outpu
 
     // Close obj file
     fs.close();
-    LERROR("GENERATED FILE: " << obj_path.c_str());
+    LERROR("GENERATED FILE: " + obj_path);
     return;
 }
 

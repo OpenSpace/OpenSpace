@@ -28,6 +28,7 @@
 #include <openspace/util/task.h>
 
 #include <openspace/scene/asset.h>
+#include <openspace/scene/assetlistener.h>
 #include <openspace/scene/assetloader.h>
 
 #include <string>

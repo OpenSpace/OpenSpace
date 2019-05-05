@@ -31,6 +31,8 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <glm/gtx/quaternion.hpp>
+#include <ghoul/misc/stringconversion.h>
+#include <ghoul/filesystem/file.h>
 
 #include <pcl/common/common.h>
 #include <pcl/filters/filter.h>
@@ -128,8 +130,8 @@ void CollapsedMeshGeneration::generateMeshFromBinaries(ghoul::Dictionary diction
     Eigen::Vector4f maxDist;
 
     pcl::getMaxDistance(*fullSite, Eigen::Vector4f(0, 0, 0, 1), maxDist);
-    LINFO("Distance from camera is : " << maxDist.norm());
-    LINFO("Max distance from camera: " << maxDist.x() << ", " << maxDist.y() << ", " << maxDist.z());
+    LINFO("Distance from camera is : " + ghoul::to_string(maxDist.norm()));
+    LINFO("Max distance from camera: " + ghoul::to_string(maxDist.x()) + ", " + ghoul::to_string(maxDist.y()) + ", " + ghoul::to_string(maxDist.z()));
 
     writeMatrixFile(pathToDriveFolder, outputMatrix);
 
@@ -160,9 +162,9 @@ void CollapsedMeshGeneration::generateMeshFromBinaries(ghoul::Dictionary diction
     mls.setUpsamplingStepSize(0.05);
 
     // Reconstruct
-    LINFO("Points before moving least squares size : " << fullSite->points.size());
+    LINFO("Points before moving least squares size : " + ghoul::to_string(fullSite->points.size()));
     //mls.process(*movingLeastSquaresCloud);
-    LINFO("Points after moving least squares: " << movingLeastSquaresCloud->points.size());
+    LINFO("Points after moving least squares: " + ghoul::to_string(movingLeastSquaresCloud->points.size()));
 
 
     // =======================================================================================
@@ -301,7 +303,7 @@ void CollapsedMeshGeneration::generateMeshFromBinaries(ghoul::Dictionary diction
     pcl::PointCloud<pcl::PointNormal>::Ptr cloud_smoothed_normals(new pcl::PointCloud<pcl::PointNormal>());
     concatenateFields(*zf_cloud6, *cloud_normals, *cloud_smoothed_normals);
 
-    LERROR("AFTER POINTCLOUD NORMALS: " << cloud_smoothed_normals->points.size());
+    LERROR("AFTER POINTCLOUD NORMALS: " + ghoul::to_string(cloud_smoothed_normals->points.size()));
 
     pcl::search::KdTree<pcl::PointNormal>::Ptr kdTree(new pcl::search::KdTree<pcl::PointNormal>);
     kdTree->setInputCloud(cloud_smoothed_normals);
@@ -327,7 +329,7 @@ void CollapsedMeshGeneration::generateMeshFromBinaries(ghoul::Dictionary diction
 
     gp3.reconstruct(triangles);
 
-    LINFO("Number of triangles in mesh: " << triangles.polygons.size());
+    LINFO("Number of triangles in mesh: " + ghoul::to_string(triangles.polygons.size()));
     std::string outputFile = "OBJ";
     MeshWriter::writeObjFileNoTex(outputFile, pathToDriveFolder, triangles);
 }

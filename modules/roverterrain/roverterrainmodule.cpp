@@ -26,6 +26,7 @@
 
 #include <modules/roverterrain/tasks/roverterraintask.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
 
 #include <ghoul/logging/logmanager.h>
