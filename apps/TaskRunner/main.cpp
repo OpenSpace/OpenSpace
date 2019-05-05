@@ -108,8 +108,8 @@ int main(int argc, char** argv) {
 
     std::string configFile = configuration::findConfiguration();
     global::configuration = configuration::loadConfigurationFromFile(configFile);
+    openspace::global::openSpaceEngine.registerPathTokens();
     global::openSpaceEngine.initialize();
-
 
     ghoul::cmdparser::CommandlineParser commandlineParser(
         "OpenSpace TaskRunner",

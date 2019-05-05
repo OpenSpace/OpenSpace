@@ -1,6 +1,8 @@
 asset.request('./dione/dione')
 asset.request('./enceladus/enceladus')
+asset.request('./hyperion/hyperion')
 asset.request('./iapetus/iapetus')
+asset.request('./mimas/mimas')
 asset.request('./rhea/rhea')
 asset.request('./tethys/tethys')
 asset.request('./titan/titan')

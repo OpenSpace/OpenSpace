@@ -215,13 +215,13 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
             },
             {
                 LabelMinSizeInfo.identifier,
-                new IntVerifier,
+                new DoubleVerifier,
                 Optional::Yes,
                 LabelMinSizeInfo.description
             },
             {
                 LabelMaxSizeInfo.identifier,
-                new IntVerifier,
+                new DoubleVerifier,
                 Optional::Yes,
                 LabelMaxSizeInfo.description
             },

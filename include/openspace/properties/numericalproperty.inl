@@ -389,13 +389,13 @@ template <typename T>
 std::string NumericalProperty<T>::generateAdditionalJsonDescription() const {
     std::string result = "{ ";
     result +=
-      "\"" + MinimumValueKey + "\": " + luaToJson(std::to_string(_minimumValue)) + ",";
+      "\"" + MinimumValueKey + "\": " + luaToJson(ghoul::to_string(_minimumValue)) + ",";
     result +=
-      "\"" + MaximumValueKey + "\": " + luaToJson(std::to_string(_maximumValue)) + ",";
+      "\"" + MaximumValueKey + "\": " + luaToJson(ghoul::to_string(_maximumValue)) + ",";
     result +=
-      "\"" + SteppingValueKey + "\": " + luaToJson(std::to_string(_stepping)) + ",";
+      "\"" + SteppingValueKey + "\": " + luaToJson(ghoul::to_string(_stepping)) + ",";
     result +=
-      "\"" + ExponentValueKey + "\": " + luaToJson(std::to_string(_exponent));
+      "\"" + ExponentValueKey + "\": " + luaToJson(ghoul::to_string(_exponent));
     result += " }";
     return result;
 }

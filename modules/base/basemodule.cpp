@@ -33,6 +33,7 @@
 #include <modules/base/dashboard/dashboarditempropertyvalue.h>
 #include <modules/base/dashboard/dashboarditemsimulationincrement.h>
 #include <modules/base/dashboard/dashboarditemspacing.h>
+#include <modules/base/dashboard/dashboarditemvelocity.h>
 #include <modules/base/lightsource/cameralightsource.h>
 #include <modules/base/lightsource/scenegraphlightsource.h>
 #include <modules/base/rendering/renderablemodel.h>
@@ -54,6 +55,7 @@
 #include <modules/base/rotation/staticrotation.h>
 #include <modules/base/scale/luascale.h>
 #include <modules/base/scale/staticscale.h>
+#include <modules/base/scale/timedependentscale.h>
 #include <modules/base/translation/luatranslation.h>
 #include <modules/base/translation/statictranslation.h>
 #include <modules/base/timeframe/timeframeinterval.h>
@@ -109,6 +111,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
         "DashboardItemSimulationIncrement"
     );
     fDashboard->registerClass<DashboardItemSpacing>("DashboardItemSpacing");
+    fDashboard->registerClass<DashboardItemVelocity>("DashboardItemVelocity");
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
@@ -140,6 +143,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
 
     fScale->registerClass<LuaScale>("LuaScale");
     fScale->registerClass<StaticScale>("StaticScale");
+    fScale->registerClass<TimeDependentScale>("TimeDependentScale");
 
     auto fTimeFrame = FactoryManager::ref().factory<TimeFrame>();
     ghoul_assert(fTimeFrame, "Scale factory was not created");
@@ -173,6 +177,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         DashboardItemParallelConnection::Documentation(),
         DashboardItemSimulationIncrement::Documentation(),
         DashboardItemSpacing::Documentation(),
+        DashboardItemVelocity::Documentation(),
 
         RenderableModel::Documentation(),
         RenderablePlane::Documentation(),
@@ -191,6 +196,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
 
         LuaScale::Documentation(),
         StaticScale::Documentation(),
+        TimeDependentScale::Documentation(),
 
         LuaTranslation::Documentation(),
         StaticTranslation::Documentation(),

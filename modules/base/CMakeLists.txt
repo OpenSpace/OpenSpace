@@ -34,6 +34,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditempropertyvalue.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemsimulationincrement.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemspacing.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemvelocity.h
     ${CMAKE_CURRENT_SOURCE_DIR}/lightsource/cameralightsource.h
     ${CMAKE_CURRENT_SOURCE_DIR}/lightsource/scenegraphlightsource.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/asyncmultimodelgeometry.h
@@ -60,6 +61,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/staticrotation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/luascale.h
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/staticscale.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/scale/timedependentscale.h
     ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeinterval.h
     ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeunion.h
 )
@@ -75,6 +77,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditempropertyvalue.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemsimulationincrement.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemspacing.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemvelocity.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/lightsource/cameralightsource.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/lightsource/scenegraphlightsource.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/asyncmultimodelgeometry.cpp
@@ -101,6 +104,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/staticrotation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/luascale.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/staticscale.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/scale/timedependentscale.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeinterval.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeunion.cpp
 )

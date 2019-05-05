@@ -123,6 +123,12 @@ KeybindingManager::keyBinding(const std::string& key) const
     return result;
 }
 
+const std::multimap<KeyWithModifier, KeybindingManager::KeyInformation>&
+KeybindingManager::keyBindings() const
+{
+    return _keyLua;
+}
+
 std::string KeybindingManager::generateJson() const {
     std::stringstream json;
     json << "[";

@@ -28,11 +28,6 @@
 #include <memory>
 #include <vector>
 
-namespace sgct {
-    template <typename T>
-    class SharedVector;
-} // namespace sgct
-
 namespace openspace {
 
 class SyncBuffer {
@@ -56,16 +51,19 @@ public:
     template <typename T>
     void decode(T& value);
 
-    void write();
+    void reset();
 
-    void read();
+    //void write();
+    //void read();
+
+    void setData(std::vector<char> data);
+    std::vector<char> data();
 
 private:
     size_t _n;
     size_t _encodeOffset = 0;
     size_t _decodeOffset = 0;
     std::vector<char> _dataStream;
-    std::unique_ptr<sgct::SharedVector<char>> _synchronizationBuffer;
 };
 
 } // namespace openspace

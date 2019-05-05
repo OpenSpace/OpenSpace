@@ -34,6 +34,7 @@
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/shortcutmanager.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelpeer.h>
@@ -159,6 +160,11 @@ interaction::KeybindingManager& gKeybindingManager() {
 
 interaction::NavigationHandler& gNavigationHandler() {
     static interaction::NavigationHandler g;
+    return g;
+}
+
+interaction::ShortcutManager& gShortcutManager() {
+    static interaction::ShortcutManager g;
     return g;
 }
 

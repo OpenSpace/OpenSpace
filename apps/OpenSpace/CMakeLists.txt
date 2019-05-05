@@ -23,6 +23,7 @@
 ##########################################################################################
 
 include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake)
+include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
 include(${OPENSPACE_CMAKE_EXT_DIR}/application_definition.cmake)
 include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
 
@@ -32,50 +33,43 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
 option(OPENSPACE_OPENVR_SUPPORT "Build OpenSpace application with OpenVR support" OFF)
 
 if (OPENSPACE_OPENVR_SUPPORT)
+    begin_header("Dependency: OpenVR")
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${OPENSPACE_EXT_DIR}/sgct/cmake/modules/")
 
     find_package(OpenVR REQUIRED)
 
     set(SGCT_OPENVR_DEFINITIONS OPENVR_SUPPORT)
-
     if (NOT SGCT_OPENVR_INCLUDE_DIRECTORY)
         if (WIN32)
             find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
                 NAMES SGCTOpenVR.h
-                PATHS
-                    $ENV{SGCT_ROOT_DIR}/additional_includes/openvr
-                    ${OPENSPACE_EXT_DIR}/sgct/additional_includes/openvr
-                    NO_DEFAULT_PATH
+                PATHS ${OPENSPACE_EXT_DIR}/sgct/additional_includes/openvr NO_DEFAULT_PATH
                 REQUIRED
             )
         else ()
             find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
                 NAMES SGCTOpenVR.h
                 PATH_SUFFIXES SGCTOpenVR
-                PATHS
-                    $ENV{SGCT_ROOT_DIR}/additional_includes/openvr
-                    ${OPENSPACE_EXT_DIR}/sgct/additional_includes/openvr
+                PATHS ${OPENSPACE_EXT_DIR}/sgct/additional_includes/openvr
                 REQUIRED
             )
         endif ()
-    else()
-        set(
-            SGCT_OPENVR_FILES
+    else ()
+        set(SGCT_OPENVR_FILES
             ${SGCT_OPENVR_INCLUDE_DIRECTORY}/SGCTOpenVR.h
             ${SGCT_OPENVR_INCLUDE_DIRECTORY}/SGCTOpenVR.cpp
         )
-    endif()
+    endif ()
+    end_header("Dependency: OpenVR")
 endif()
 
 #####
-# Spout 
+# Spout
 #####
 if (SGCT_SPOUT_SUPPORT AND NOT OPENSPACE_MODULE_SPOUT)
-    set(SPOUT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout)
-    set(SPOUT_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.lib)
-    set(SPOUT_DEFINITIONS "OPENSPACE_HAS_SPOUT")
-
-    add_external_library_dependencies(${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.dll)
+    message(WARNING "Spout support from SGCT was requested, but OpenSpace Spout module was disabled")
+    message(STATUS "Enabling module as dependency")
+    set(OPENSPACE_MODULE_SPOUT ON CACHE BOOL "Build OPENSPACE_MODULE_SPOUTModule" FORCE)
 endif ()
 
 set(MACOSX_BUNDLE_ICON_FILE openspace.icns)
@@ -99,16 +93,57 @@ target_include_directories(
     ${SPOUT_INCLUDE_DIRS}
 )
 
-target_link_libraries(OpenSpace
-    libOpenSpace
-    ${OPENVR_LIBRARY}
-    ${SPOUT_LIBRARY}
-)
+target_link_libraries(OpenSpace openspace-core ${OPENVR_LIBRARY} ${SPOUT_LIBRARY})
 
 target_compile_definitions(OpenSpace PRIVATE
     ${SGCT_OPENVR_DEFINITIONS}
     ${SPOUT_DEFINITIONS}
 )
+
+begin_header("Dependency: SGCT")
+
+set(SGCT_TEXT OFF CACHE BOOL "" FORCE)
+set(SGCT_BUILD_CSHARP_PROJECTS OFF CACHE BOOL "" FORCE)
+set(SGCT_LIGHT_ONLY ON CACHE BOOL "" FORCE)
+set(SGCT_CUSTOMOUTPUTDIRS OFF CACHE BOOL "" FORCE)
+set(JPEG_TURBO_WITH_SIMD OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct)
+target_include_directories(OpenSpace SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct/include)
+target_link_libraries(
+    OpenSpace
+    sgct_light glew glfw png16_static quat tinyxml2static turbojpeg-static
+    vrpn
+    ${GLFW_LIBRARIES}
+)
+
+mark_as_advanced(EXECUTABLE_OUTPUT_PATH GLFW_BUILD_DOCS GLFW_BUILD_EXAMPLES
+    GLFW_BUILD_TESTS GLFW_INSTALL GLFW_USE_HYBRID_HPG GLFW_USE_OSMESA GLFW_VULKAN_STATIC
+    INSTALL_BIN_DIR INSTALL_INC_DIR INSTALL_LIB_DIR INSTALL_MAN_DIR INSTALL_PKGCONFIG_DIR
+    IOKIT_LIBRARY JPEG_TURBO_FORCE32bit JPEG_TURBO_WITH_12BIT JPEG_TURBO_WITH_ARITH_DEC
+    JPEG_TURBO_WITH_ARITH_ENC JPEG_TURBO_WITH_JPEG7 JPEG_TURBO_WITH_JPEG8
+    JPEG_TURBO_WITH_MEM_SRCDST JPEG_TURBO_WITH_SIMD JPEG_TURBO_WITH_TURBOJPEG LIB_SUFFIX
+    LIBRARY_OUTPUT_PATH M_LIBRARY SGCT_BUILD_ALUT SGCT_BUILD_CSHARP_PROJECTS
+    SGCT_CUSTOMOUTPUTDIRS SGCT_DOXYGEN SGCT_DOXYGEN_QUIET SGCT_EXAMPLES SGCT_INSTALL
+    SGCT_LIGHT_ONLY SGCT_NO_EXTERNAL_LIBRARIES SGCT_SPOUT_SUPPORT SGCT_TEXT
+    SGCT_USE_MSVC_RUNTIMES USE_MSVC_RUNTIME_LIBRARY_DLL)
+
+set_folder_location(sgct_light "External")
+set_folder_location(glew "External/SGCT")
+set_folder_location(glfw "External/SGCT")
+set_folder_location(png16_static "External/SGCT")
+set_folder_location(quat "External/SGCT")
+set_folder_location(simd "External/SGCT")
+set_folder_location(tinyxml2static "External/SGCT")
+set_folder_location(turbojpeg-static "External/SGCT")
+set_folder_location(vrpn "External/SGCT")
+set_folder_location(zlibstatic "External/SGCT")
+
+if (UNIX AND (NOT APPLE))
+    target_link_libraries(OpenSpace Xcursor Xinerama X11)
+endif ()
+
+end_header("Dependency: SGCT")
 
 
 # Web Browser and Web gui
@@ -134,15 +169,19 @@ elseif (OPENSPACE_MODULE_WEBBROWSER)
 endif ()
 
 if (OPENSPACE_MODULE_WEBGUI AND WEBGUI_MODULE_PATH)
+    begin_header("Building WebGUI source")
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBGUI_MODULE_PATH}/cmake")
     include(webgui_helpers)
     build_webgui_source(OpenSpace)
-elseif(OPENSPACE_MODULE_WEBGUI)
+    end_header("End: Building WebGUI source")
+elseif (OPENSPACE_MODULE_WEBGUI)
     message(WARNING "WebGui is configured to be included, but the web source could not be found. Try configuring CMake again.")
 endif()
 # End Web Browser and Web gui
 
 if (MSVC)
+    begin_header("Dependency: Dbghelp")
     # This library is used for being able to output the callstack if an exception escapes
     target_link_libraries(OpenSpace Dbghelp.lib)
-endif()
+    end_header()
+endif ()

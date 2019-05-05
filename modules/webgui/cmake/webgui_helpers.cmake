@@ -24,6 +24,7 @@
 
 function(build_webgui_source target_name)
     set(NPM_COMMAND "npm" CACHE STRING "Location of NPM executable unless in PATH.")
+    mark_as_advanced(NPM_COMMAND)
     # copy webgui source
     add_custom_command(
         TARGET ${target_name} POST_BUILD

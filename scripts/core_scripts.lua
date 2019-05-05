@@ -7,6 +7,12 @@ openspace.documentation = {
         "featured properties."
     },
     {
+        Name = "markInterestingTimes",
+        Arguments = "List of { Name = '...', Time = '...' } or { '<name>', '<time>' }",
+        Documentation = "This function marks interesting times for the current scene, " ..
+        "which will create shortcuts for a quick access."
+    },
+    {
         Name = "removeInterestingNodes",
         Arguments = "List of nodes",
         Documentation = "This function removes unmarks the scene graph nodes " ..
@@ -41,6 +47,14 @@ openspace.markInterestingNodes = function(nodes)
         if openspace.hasSceneGraphNode(n) then
             openspace.addTag(n, "GUI.Interesting")
         end
+    end
+end
+
+openspace.markInterestingTimes = function(times)
+    for _, n in pairs(times) do
+        local name = n["Name"] or n[1]
+        local time = n["Time"] or n[2]
+        openspace.addInterestingTime(name, time)
     end
 end
 

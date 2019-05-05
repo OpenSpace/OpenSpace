@@ -30,6 +30,7 @@
 #include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/tiledatatype.h>
 #include <modules/globebrowsing/tile/tilemetadata.h>
+#include <cstring>
 
 namespace openspace::globebrowsing {
 
@@ -55,20 +56,20 @@ std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
 
     if (dataDestination && !pboMappedDataDestination) {
         // Write only to cpu data destination
-        memset(dataDestination, 255, _initData.totalNumBytes());
+        std::memset(dataDestination, 255, _initData.totalNumBytes());
         readImageData(io, worstError, dataDestination);
     }
     else if (!dataDestination && pboMappedDataDestination) {
         // Write only to pbo mapped data destination
-        memset(pboMappedDataDestination, 255, _initData.totalNumBytes());
+        std::memset(pboMappedDataDestination, 255, _initData.totalNumBytes());
         readImageData(io, worstError, pboMappedDataDestination);
     }
     else if (dataDestination && pboMappedDataDestination) {
         // Write to both data destinations
-        memset(dataDestination, 255, _initData.totalNumBytes());
+        std::memset(dataDestination, 255, _initData.totalNumBytes());
         readImageData(io, worstError, dataDestination);
         size_t numBytes = _initData.totalNumBytes();
-        memcpy(pboMappedDataDestination, dataDestination, numBytes);
+        std::memcpy(pboMappedDataDestination, dataDestination, numBytes);
     }
     else {
         ghoul_assert(false, "Need to specify a data destination");

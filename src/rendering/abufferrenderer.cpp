@@ -986,4 +986,6 @@ void ABufferRenderer::saveTextureToMemory(GLenum color_buffer_attachment, int wi
 
 } // namespace openspace
 
+#else
+int _StubToPreventLinkerWarningAboutMissingExportSymbols;
 #endif // OPENSPACE_WITH_ABUFFER_RENDERER

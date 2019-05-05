@@ -706,5 +706,9 @@ void GUI::renderAndUpdatePropertyVisibility() {
     _featuredProperties.setVisibility(_currentVisibility);
 }
 
+void GUI::setHidden(bool isHidden) {
+    _allHidden = isHidden;
+}
+
 
 } // namespace openspace::gui

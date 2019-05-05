@@ -66,7 +66,6 @@ protected:
     properties::Vec4Property _gridColor;
     properties::IntProperty _segments;
     properties::FloatProperty _lineWidth;
-    properties::FloatProperty _radius;
 
     bool _gridIsDirty = true;
 

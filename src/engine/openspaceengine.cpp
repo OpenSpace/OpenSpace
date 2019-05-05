@@ -82,10 +82,6 @@
 #include <numeric>
 #include <sstream>
 
-// @TODO(abock): Replace this with callback in windowdelegate
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
-
 #if defined(_MSC_VER) && defined(OPENSPACE_ENABLE_VLD)
 #include <vld.h>
 #endif
@@ -339,8 +335,8 @@ void OpenSpaceEngine::initialize() {
 void OpenSpaceEngine::initializeGL() {
     LTRACE("OpenSpaceEngine::initializeGL(begin)");
 
+    glbinding::Binding::initialize(global::windowDelegate.openGLProcedureAddress);
     //glbinding::Binding::useCurrentContext();
-    glbinding::Binding::initialize(glfwGetProcAddress);
 
     rendering::helper::initialize();
 
@@ -816,6 +812,7 @@ void OpenSpaceEngine::deinitializeGL() {
 
     global::openSpaceEngine.assetManager().deinitialize();
     global::openSpaceEngine._scene = nullptr;
+    global::renderEngine.setScene(nullptr);
 
     for (const std::function<void()>& func : global::callback::deinitializeGL) {
         func();
@@ -1229,26 +1226,16 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
     global::navigationHandler.mouseScrollWheelCallback(posY);
 }
 
-void OpenSpaceEngine::encode() {
-    global::syncEngine.encodeSyncables();
+std::vector<char> OpenSpaceEngine::encode() {
+    std::vector<char> buffer = global::syncEngine.encodeSyncables();
     global::networkEngine.publishStatusMessage();
     global::networkEngine.sendMessages();
+
+    return buffer;
 }
 
-void OpenSpaceEngine::decode() {
-    global::syncEngine.decodeSyncables();
-}
-
-void OpenSpaceEngine::externalControlCallback(const char* receivedChars, int size,
-                                              int /*clientId*/)
-{
-    // Not currently used anymore;  should be replaced with a non-SGCT relient socket
-
-    if (size == 0) {
-        return;
-    }
-
-    global::networkEngine.handleMessage(std::string(receivedChars, size));
+void OpenSpaceEngine::decode(std::vector<char> data) {
+    global::syncEngine.decodeSyncables(std::move(data));
 }
 
 void OpenSpaceEngine::toggleShutdownMode() {
@@ -1338,6 +1325,7 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 "clusterId",
                 &luascriptfunctions::clusterId,
                 {},
+                "",
                 "Returns the zero-based identifier for this OpenSpace instance in a "
                 "cluster configuration. If this instance is not part of a cluster, this "
                 "identifier is always 0."

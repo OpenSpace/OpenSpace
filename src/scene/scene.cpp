@@ -540,6 +540,14 @@ void Scene::updateInterpolations() {
     );
 }
 
+void Scene::addInterestingTime(InterestingTime time) {
+    _interestingTimes.push_back(std::move(time));
+}
+
+const std::vector<Scene::InterestingTime>& Scene::interestingTimes() const {
+    return _interestingTimes;
+}
+
 void Scene::writeSceneLicenseDocumentation(const std::string& path) const {
     SceneLicenseWriter writer(_licenses);
     writer.writeDocumentation(path);
@@ -628,6 +636,15 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "string",
                 "Checks whether the specifies SceneGraphNode is present in the current "
                 "scene"
+            },
+            {
+                "addInterestingTime",
+                &luascriptfunctions::addInterestingTime,
+                {},
+                "string, string",
+                "Adds an interesting time to the current scene. The first argument is "
+                "the name of the time and the second argument is the time itself in the "
+                "format YYYY-MM-DDThh:mm:ss.uuu"
             }
         }
     };

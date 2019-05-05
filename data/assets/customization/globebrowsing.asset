@@ -1,6 +1,9 @@
 -- Add require statements for assets exporting the neccessary globes
 -- example:
--- asset.require('../scene/solarsystem/planets/mars/mars')
+asset.require('../scene/solarsystem/planets/mars/mars')
+asset.require('../scene/solarsystem/planets/earth/moon/moon')
+asset.require('../scene/solarsystem/planets/mercury/mercury')
+
 
 local CreateFocusNodes = false
 
@@ -14,11 +17,12 @@ local vrt_folders = {
         -- Add folders here whose contents will be automatically added to the Mars globe
         -- If multiple folders are added, the results will be added sequentially, meaning that
         -- if areas overlap (for example CTX and HiRISE) and CTX is specified *after* HiRISE,
-        -- CTX will stomp over the HiRISE
-        --
+        -- CTX will stomp over the HiRISE.
+
         -- tl;dr:  Specify CTX folders first, then HiRISE 
         -- example:   'C:/OpenSpace/GlobeBrowsingData/Mars/CTX'
-        '',
+        openspace.absPath('${BASE}/../OpenSpaceData/Mars/CTX'),
+        openspace.absPath('${BASE}/../OpenSpaceData/Mars/HiRISE'),
         '',
     },
     Moon = {
@@ -27,6 +31,16 @@ local vrt_folders = {
         -- if areas overlap, images from the lower results will overwrite the images from former
         -- results
         -- example:  'C:/OpenSpace/GlobeBrowsingData/Moon'
+        openspace.absPath('${BASE}/../OpenSpaceData/Moon'),
+        ''
+    },
+    Mercury = {
+        -- Add folders here whose contents will be automatically added to the Mercury globe
+        -- If multiple folders are added, the results will be added sequentially, meaning that
+        -- if areas overlap, images from the lower results will overwrite the images from former
+        -- results
+        -- example:  'C:/OpenSpace/GlobeBrowsingData/Mercury'
+        openspace.absPath('${BASE}/../OpenSpaceData/Mercury'),
         ''
     }
 }
