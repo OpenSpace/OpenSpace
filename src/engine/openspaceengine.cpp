@@ -155,10 +155,9 @@ void OpenSpaceEngine::registerPathTokens() {
     LTRACE("OpenSpaceEngine::initialize(begin)");
 
     // Registering Path tokens. If the BASE path is set, it is the only one that will
-// overwrite the default path of the cfg directory
-    for (const std::pair<std::string, std::string>& path :
-        global::configuration.pathTokens)
-    {
+    // overwrite the default path of the cfg directory
+    using T = std::string;
+    for (const std::pair<const T, T>& path : global::configuration.pathTokens) {
         std::string fullKey = ghoul::filesystem::FileSystem::TokenOpeningBraces +
             path.first +
             ghoul::filesystem::FileSystem::TokenClosingBraces;
@@ -881,7 +880,8 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
 void OpenSpaceEngine::loadFonts() {
     global::fontManager.initialize();
 
-    for (const std::pair<std::string, std::string>& font : global::configuration.fonts) {
+    using T = std::string;
+    for (const std::pair<const T, T>& font : global::configuration.fonts) {
         std::string key = font.first;
         std::string fontName = absPath(font.second);
 

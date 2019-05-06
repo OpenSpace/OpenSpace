@@ -18,6 +18,12 @@ local speck = asset.syncedResource({
 
 local wmap = {
     Identifier = "WMAP",
+    Transform = {
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = {0, 0, 3.14159265359}
+        }
+    },
     Renderable = {
         Type = "RenderableSphere",
         Enabled = false,
@@ -25,9 +31,10 @@ local wmap = {
         Segments = 80,
         Opacity = 0.5,
         Texture = textures .. "/wmap_ilc_7yr_v4_200uK_RGB_sos.png",
-        Orientation = "Inside/Outside",
-        FadeInThreshould = 8E26
-
+        Orientation = "Both",
+        MirrorTexture = true,
+        UseAdditiveBlending = true,
+        FadeInThreshold = 0.4
     },
     GUI = {
         Name = "Wilkinson Microwave Anisotropy Probe (WMAP)",
@@ -37,6 +44,12 @@ local wmap = {
 
 local cbe = {
     Identifier = "CBE",
+    Transform = {
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = {0, 0, 3.14159265359}
+        }
+    },
     Renderable = {
         Type = "RenderableSphere",
         Enabled = false,
@@ -44,8 +57,10 @@ local cbe = {
         Segments = 80,
         Opacity = 0.5,
         Texture = textures .. "/COBErect.png",
-        Orientation = "Inside/Outside",
-        FadeInThreshould = 8E26
+        Orientation = "Both",
+        MirrorTexture = true,
+        UseAdditiveBlending = true,
+        FadeInThreshold = 0.4
     },
     GUI = {
         Name = "Cosmic Background Explorer",
@@ -55,15 +70,23 @@ local cbe = {
 
 local planck = {
     Identifier = "Planck",
+    Transform = {
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = {0, 0, 3.14159265359}
+        }
+    },
     Renderable = {
         Type = "RenderableSphere",
-        Enabled = false,
+        Enabled = true,
         Size = 3975.41417036064E23,
         Segments = 80,
         Opacity = 0.3,
         Texture = textures .. "/cmb4k.jpg",
-        Orientation = "Inside/Outside",
-        FadeInThreshould = 8E26
+        Orientation = "Both",
+        MirrorTexture = true,
+        UseAdditiveBlending = true,
+        FadeInThreshold = 0.4
     },
     GUI = {
         Path = "/Universe/Cosmic Microwave Background"

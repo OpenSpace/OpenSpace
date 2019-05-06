@@ -364,7 +364,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
 
                     // First we determine if the caster is shadowing the current planet
                     // (all calculations in World Coordinates):
-                    glm::dvec3 planetCasterVec = casterPos - renderData.position.dvec3();
+                    glm::dvec3 planetCasterVec =
+                        casterPos - renderData.modelTransform.translation;
                     glm::dvec3 sourceCasterVec = casterPos - sourcePos;
                     double sc_length = glm::length(sourceCasterVec);
                     glm::dvec3 planetCaster_proj = (
@@ -378,7 +379,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
 
                     double casterDistSun = glm::length(casterPos - sunPosWorld);
                     double planetDistSun = glm::length(
-                        renderData.position.dvec3() - sunPosWorld
+                        renderData.modelTransform.translation - sunPosWorld
                     );
 
                     ShadowRenderingStruct shadowData;

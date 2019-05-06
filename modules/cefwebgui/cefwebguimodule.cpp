@@ -38,8 +38,6 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    constexpr const char* _loggerCat = "CefWebGui";
-
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
@@ -77,8 +75,8 @@ CefWebGuiModule::CefWebGuiModule()
     : OpenSpaceModule(CefWebGuiModule::Name)
     , _enabled(EnabledInfo, true)
     , _visible(VisibleInfo, true)
-    , _url(GuiUrlInfo, "")
     , _reload(ReloadInfo)
+    , _url(GuiUrlInfo, "")
     , _guiScale(GuiScaleInfo, 1.f, 0.1f, 3.f)
 {
     addProperty(_enabled);
@@ -194,7 +192,10 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
 
         if (isGuiWindow && isMaster && _instance) {
             if (global::windowDelegate.windowHasResized()) {
-                _instance->reshape(global::windowDelegate.currentWindowSize());
+                _instance->reshape(static_cast<glm::ivec2>(
+                    static_cast<glm::vec2>(global::windowDelegate.currentWindowSize()) *
+                    global::windowDelegate.dpiScaling()
+                ));
             }
             if (_visible) {
                 _instance->draw();

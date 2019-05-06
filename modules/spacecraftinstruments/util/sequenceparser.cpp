@@ -26,14 +26,8 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/util/spicemanager.h>
-
 #include <ghoul/logging/logmanager.h>
-
 #include <cstring>
-
-namespace {
-    constexpr const char* _loggerCat = "SequenceParser";
-} // namespace
 
 namespace openspace {
 

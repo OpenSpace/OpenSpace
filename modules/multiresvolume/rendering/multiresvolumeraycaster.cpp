@@ -67,7 +67,10 @@ void MultiresVolumeRaycaster::renderEntryPoints(const RenderData& data,
 {
     program.setUniform("modelTransform", _modelTransform);
     program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
-    Renderable::setPscUniforms(program, data.camera, data.position);
+    program.setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
+    program.setUniform("objpos", glm::vec4(data.modelTransform.translation, 0.f));
+    program.setUniform("camrot", glm::mat4(data.camera.viewRotationMatrix()));
+    program.setUniform("scaling", glm::vec2(1.f, 0.f));
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -80,7 +83,10 @@ void MultiresVolumeRaycaster::renderExitPoints(const RenderData& data,
 {
     program.setUniform("modelTransform", _modelTransform);
     program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
-    Renderable::setPscUniforms(program, data.camera, data.position);
+    program.setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
+    program.setUniform("objpos", glm::vec4(data.modelTransform.translation, 0.f));
+    program.setUniform("camrot", glm::mat4(data.camera.viewRotationMatrix()));
+    program.setUniform("scaling", glm::vec2(1.f, 0.f));
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_FRONT);
@@ -139,7 +145,7 @@ bool MultiresVolumeRaycaster::isCameraInside(const RenderData& data,
 
     // Camera position in world coordinates.
     glm::vec4 camWorldPos = rigWorldPos;
-    glm::vec3 objPos = data.position.vec3();
+    glm::vec3 objPos = static_cast<glm::vec3>(data.modelTransform.translation);
 
     glm::mat4 modelTransform = glm::translate(_modelTransform, objPos);
 

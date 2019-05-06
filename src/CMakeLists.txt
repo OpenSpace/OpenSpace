@@ -45,7 +45,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/engine/virtualpropertymanager.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/camerainteractionstates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/inputstate.cpp
-  ${OPENSPACE_BASE_DIR}/src/interaction/inputdevicestates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/joystickinputstate.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/joystickcamerastates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager.cpp
@@ -176,7 +175,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/util/keys.cpp
   ${OPENSPACE_BASE_DIR}/src/util/openspacemodule.cpp
   ${OPENSPACE_BASE_DIR}/src/util/powerscaledcoordinate.cpp
-  ${OPENSPACE_BASE_DIR}/src/util/powerscaledscalar.cpp
   ${OPENSPACE_BASE_DIR}/src/util/powerscaledsphere.cpp
   ${OPENSPACE_BASE_DIR}/src/util/progressbar.cpp
   ${OPENSPACE_BASE_DIR}/src/util/resourcesynchronization.cpp
@@ -227,7 +225,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/camerainteractionstates.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/inputdevicestates.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/inputstate.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.inl
@@ -369,7 +366,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/mouse.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/openspacemodule.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/powerscaledcoordinate.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/util/powerscaledscalar.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/powerscaledsphere.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/progressbar.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/resourcesynchronization.h

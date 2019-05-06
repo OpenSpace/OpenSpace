@@ -37,7 +37,6 @@
 using nlohmann::json;
 
 namespace {
-    constexpr const char* _loggerCat = "DocumentationTopic";
     constexpr const char* KeyType = "type";
     constexpr const char* TypeLua = "lua";
     constexpr const char* TypeFactories = "factories";

@@ -13,9 +13,9 @@ local textures = asset.syncedResource({
 
 local charonRadius = 6.035E5
 
-local Charon = {
-    Identifier = "Charon",
-    Parent = transforms.PlutoBarycenter.Identifier,
+local CharonProjection = {
+    Identifier = "CharonProjection",
+    Parent = transforms.PlutoBarycenterAccurate.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -43,6 +43,7 @@ local Charon = {
             textures .. "/NH_Charon_DTM.png",
             textures .. "/NH_Charon_DTM_8192.png"
         },
+        MeridianShift = true,
         Projection = {
             Observer   = "NEW HORIZONS",
             Target     = "CHARON",
@@ -66,13 +67,14 @@ local Charon = {
         }
     },
     GUI = {
-        Path = "/Solar System/Dwarf Planets/Pluto"
+        Path = "/Solar System/Dwarf Planets/Pluto",
+        Name = "Charon Projection"
     }
 }
 
 local CharonText = {
     Identifier = "CharonText",
-    Parent = Charon.Identifier,
+    Parent = CharonProjection.Identifier,
     Transform = {
         Translation = {
             Type = "StaticTranslation",
@@ -95,7 +97,7 @@ local CharonText = {
 
 local CharonShadow = {
     Identifier = "CharonShadow",
-    Parent = Charon.Identifier,
+    Parent = CharonProjection .Identifier,
     Renderable = {
         Type = "RenderableShadowCylinder",
         TerminatorType = "PENUMBRAL",
@@ -111,31 +113,8 @@ local CharonShadow = {
     }
 }
 
-local CharonTrail = {
-    Identifier = "CharonTrail",
-    Parent = transforms.PlutoBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "CHARON",
-            Observer = "PLUTO BARYCENTER"
-        },
-        Color = { 0.00, 0.62, 1.00 },
-        Period = 6.38725,
-        Resolution = 1000
-    },
-    GUI = {
-        Name = "Charon Trail",
-        Path = "/Solar System/Dwarf Planets/Pluto"
-    }
-}
-
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    Charon,
+    CharonProjection,
     CharonText,
-    CharonShadow,
-    CharonTrail
+    CharonShadow
 })

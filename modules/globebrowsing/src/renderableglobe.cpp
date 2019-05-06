@@ -1641,7 +1641,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
 }
 
 void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& programObject,
-                                              const RenderData& data, ShadowCompType stype)
+                                             const RenderData& data, ShadowCompType stype)
 {
     constexpr const double KM_TO_M = 1000.0;
 
@@ -1686,7 +1686,7 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
 
         // First we determine if the caster is shadowing the current planet (all
         // calculations in World Coordinates):
-        const glm::dvec3 planetCasterVec = casterPos - data.position.dvec3();
+        const glm::dvec3 planetCasterVec = casterPos - data.modelTransform.translation;
         const glm::dvec3 sourceCasterVec = casterPos - sourcePos;
         const double sc_length = glm::length(sourceCasterVec);
         const glm::dvec3 planetCaster_proj =
@@ -1707,7 +1707,8 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
             lt
         );
         const double casterDistSun = glm::length(casterPos - sunPos);
-        const double planetDistSun = glm::length(data.position.dvec3() - sunPos);
+        const double planetDistSun =
+            glm::length(data.modelTransform.translation - sunPos);
 
         ShadowRenderingStruct shadowData;
         shadowData.isShadowing = false;
@@ -1765,7 +1766,7 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
     else if (stype == ShadowCompType::GLOBAL_SHADOW) {
         programObject.setUniform("modelTransform", _cachedModelTransform);
     }
-    
+
     // JCC: Removed in favor of: #define USE_ECLIPSE_HARD_SHADOWS #{useEclipseHardShadows}
     /*programObject.setUniform(
         "hardShadows",
