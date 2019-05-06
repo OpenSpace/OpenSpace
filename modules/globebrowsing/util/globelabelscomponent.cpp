@@ -365,7 +365,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
                 }
 
                 if (dictionary.hasKey(LabelsFadeOutEnabledInfo.identifier)) {
-                    _labelsFadeInEnabled = dictionary.value<bool>(
+                    _labelsFadeOutEnabled = dictionary.value<bool>(
                         LabelsFadeOutEnabledInfo.identifier
                     );
                 }
