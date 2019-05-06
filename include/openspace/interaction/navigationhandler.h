@@ -114,6 +114,7 @@ public:
 private:
     bool _cameraUpdatedFromScript = false;
     bool _playbackModeEnabled = false;
+    bool _firstFrameAfterPlaybackFinished = false;
 
     std::unique_ptr<InputState> _inputState;
     Camera* _camera = nullptr;

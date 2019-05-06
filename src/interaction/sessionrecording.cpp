@@ -313,7 +313,6 @@ void SessionRecording::cleanUpPlayback() {
         if (node) {
             global::navigationHandler.orbitalNavigator().setFocusNode(node->identifier());
         }
-
     }
     global::scriptScheduler.stopPlayback();
 

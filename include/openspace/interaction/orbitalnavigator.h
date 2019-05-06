@@ -52,8 +52,10 @@ class OrbitalNavigator : public properties::PropertyOwner {
 public:
     OrbitalNavigator();
 
-    void updateStatesFromInput(const InputState& inputState, double deltaTime);
-    void updateCameraStateFromStates(double deltaTime);
+    void updateStatesFromInput(const InputState& inputState, double deltaTime,
+                               bool resetVelocities);
+    void updateCameraStateFromStates(double deltaTime,
+                                     bool firstFrameAfterPlaybackFinished);
 
     Camera* camera() const;
     void setCamera(Camera* camera);

@@ -78,6 +78,14 @@ void CameraInteractionStates::setVelocityScaleFactor(double scaleFactor) {
     _globalRollState.setVelocityScaleFactor(scaleFactor);
 }
 
+void CameraInteractionStates::resetVelocities() {
+    _globalRotationState.velocity.setHard({ 0.0, 0.0 });
+    _localRotationState.velocity.setHard({ 0.0, 0.0 });
+    _truckMovementState.velocity.setHard({ 0.0, 0.0 });
+    _localRollState.velocity.setHard({ 0.0, 0.0 });
+    _globalRollState.velocity.setHard({ 0.0, 0.0 });
+}
+
 glm::dvec2 CameraInteractionStates::globalRotationVelocity() const{
     return _globalRotationState.velocity.get();
 }

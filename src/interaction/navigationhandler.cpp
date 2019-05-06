@@ -124,15 +124,23 @@ void NavigationHandler::updateCamera(double deltaTime) {
     if (_cameraUpdatedFromScript) {
         _cameraUpdatedFromScript = false;
     }
-    else if ( ! _playbackModeEnabled ) {
-        if (_camera) {
-            if (_useKeyFrameInteraction) {
-                _keyframeNavigator->updateCamera(*_camera, _playbackModeEnabled);
+    else {
+        if ( ! _playbackModeEnabled ) {
+            if (_camera) {
+                if (_useKeyFrameInteraction) {
+                    _keyframeNavigator->updateCamera(*_camera, _playbackModeEnabled);
+                }
+                else {
+                    _orbitalNavigator->updateStatesFromInput(*_inputState, deltaTime,
+                        _firstFrameAfterPlaybackFinished);
+                    _orbitalNavigator->updateCameraStateFromStates(deltaTime,
+                        _firstFrameAfterPlaybackFinished);
+                }
             }
-            else {
-                _orbitalNavigator->updateStatesFromInput(*_inputState, deltaTime);
-                _orbitalNavigator->updateCameraStateFromStates(deltaTime);
-            }
+            _firstFrameAfterPlaybackFinished = false;
+        }
+        else {
+            _firstFrameAfterPlaybackFinished = true;
         }
     }
 }

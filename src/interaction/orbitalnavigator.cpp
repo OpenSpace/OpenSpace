@@ -346,13 +346,21 @@ glm::quat OrbitalNavigator::anchorNodeToCameraRotation() const {
 
 
 void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
-                                             double deltaTime)
+                                             double deltaTime, bool resetVelocities)
 {
-    _mouseStates.updateStateFromInput(inputState, deltaTime);
-    _joystickStates.updateStateFromInput(inputState, deltaTime);
+    if (resetVelocities) {
+        _mouseStates.resetVelocities();
+        _joystickStates.resetVelocities();
+    }
+    else {
+        _mouseStates.updateStateFromInput(inputState, deltaTime);
+        _joystickStates.updateStateFromInput(inputState, deltaTime);
+    }
 }
 
-void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
+void OrbitalNavigator::updateCameraStateFromStates(double deltaTime,
+                                                   bool firstFrameAfterPlaybackFinished)
+{
     if (!(_anchorNode)) {
         // Bail out if the anchor node is not set.
         return;
@@ -360,7 +368,10 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
     const glm::dvec3 anchorPos = _anchorNode->worldPosition();
     const glm::dvec3 prevCameraPosition = _camera->positionVec3();
-    const glm::dvec3 anchorDisplacement = anchorPos - _previousAnchorNodePosition;
+    glm::dvec3 anchorDisplacement = { 0.0, 0.0, 0.0 };
+    if (!firstFrameAfterPlaybackFinished) {
+        anchorDisplacement = anchorPos - _previousAnchorNodePosition;
+    }
 
     CameraPose pose = {
         _camera->positionVec3() + anchorDisplacement,
