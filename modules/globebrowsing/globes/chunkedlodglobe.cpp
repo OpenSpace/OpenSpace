@@ -43,7 +43,6 @@
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/debugging/rendering/debugrenderer.h>
 #include <openspace/util/time.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/texture.h>
 //#include <math.h>
@@ -315,8 +314,6 @@ void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
                     viewTransform;
     const glm::dmat4 mvp = vp * _owner.modelTransform();
 
-    _subsites.clear();
-
     // Render function
     auto renderJob = [this, &data, &mvp](const ChunkNode& chunkNode) {
 #ifdef DEBUG_GLOBEBROWSING_STATSRECORD
@@ -334,7 +331,6 @@ void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
 #endif // DEBUG_GLOBEBROWSING_STATSRECORD
                 _renderer->renderChunk(chunkNode.chunk(), data);
                 debugRenderChunk(chunk, mvp);
-                _subsites.push_back(chunkNode.getSubsites());
             }
         }
     };
@@ -350,15 +346,6 @@ void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
     auto ms2 = std::chrono::duration_cast<std::chrono::milliseconds>(duration2).count();
     stats.i["chunk globe render time"] = ms2 - millis;
 #endif // DEBUG_GLOBEBROWSING_STATSRECORD
-}
-
-void ChunkedLodGlobe::addSites(const std::vector<std::shared_ptr<Subsite>> subSites) {
-    _leftRoot->addSites(subSites);
-    _rightRoot->addSites(subSites);
-}
-
-std::vector<std::vector<std::shared_ptr<Subsite>>> ChunkedLodGlobe::subsites() {
-    return _subsites;
 }
 
 void ChunkedLodGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const {

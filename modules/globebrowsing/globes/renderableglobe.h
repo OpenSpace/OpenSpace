@@ -125,8 +125,6 @@ public:
     virtual SurfacePositionHandle calculateSurfacePositionHandle(
                                        const glm::dvec3& targetModelSpace) const override;
 
-    std::string getName();
-
 private:
     std::unique_ptr<ChunkedLodGlobe> _chunkedLodGlobe;
 
@@ -144,8 +142,6 @@ private:
     DebugProperties _debugProperties;
     GeneralProperties _generalProperties;
     properties::PropertyOwner _debugPropertyOwner;
-
-    std::string _name;
 };
 
 } // namespace openspace::globebrowsing

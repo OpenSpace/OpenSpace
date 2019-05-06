@@ -33,6 +33,7 @@
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/powerscaledsphere.h>
 #include <openspace/util/powerscaledscalar.h>
+#include <openspace/engine/globals.h>
 
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -246,7 +247,7 @@ void RenderableMarsrover::initializeGL() {
     _shader = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return OsEng.renderEngine().buildRenderProgram(
+            return global::renderEngine.buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_MARSROVER}/shaders/sphere_vs.glsl"),
                 absPath("${MODULE_MARSROVER}/shaders/sphere_fs.glsl")
@@ -268,7 +269,7 @@ void RenderableMarsrover::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
     _shader = nullptr;
@@ -328,11 +329,11 @@ void RenderableMarsrover::render(const RenderData& data, RendererTasks&) {
     glCullFace(GL_BACK);
 
     bool usingFramebufferRenderer =
-        OsEng.renderEngine().rendererImplementation() ==
+        global::renderEngine.rendererImplementation() ==
         RenderEngine::RendererImplementation::Framebuffer;
 
     bool usingABufferRenderer =
-        OsEng.renderEngine().rendererImplementation() ==
+        global::renderEngine.rendererImplementation() ==
         RenderEngine::RendererImplementation::ABuffer;
 
     if (usingABufferRenderer) {

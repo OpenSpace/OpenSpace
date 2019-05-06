@@ -29,6 +29,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
+#include <openspace/engine/globals.h>
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/geometry/geodetic3.h>
@@ -170,15 +171,14 @@ void RoverTerrain::initializeGL() {
     }
 
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    _programObject = renderEngine.buildRenderProgram("RoverTerrain",
+    _programObject = global::renderEngine.buildRenderProgram("RoverTerrain",
         absPath("${MODULE_ROVERTERRAINRENDERER}/shaders/fullsubsite_vs.glsl"),
         absPath("${MODULE_ROVERTERRAINRENDERER}/shaders/fullsubsite_fs.glsl")
     );
     
     // std::string ownerName = owner()->name();
 
-    _parent = OsEng.renderEngine().scene()->sceneGraphNode("Mars");
+    _parent = global::renderEngine.scene()->sceneGraphNode("Mars");
 
     _globe = (globebrowsing::RenderableGlobe*)_parent->renderable();
 
@@ -196,7 +196,7 @@ void RoverTerrain::initialize() {
 
     // std::string ownerName = owner()->name();
 
-    _parent = OsEng.renderEngine().scene()->sceneGraphNode("Mars");
+    _parent = global::renderEngine.scene()->sceneGraphNode("Mars");
 
     _globe = (globebrowsing::RenderableGlobe*)_parent->renderable();
     

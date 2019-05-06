@@ -25,6 +25,8 @@
 #include <modules/roverterrainrenderer/loadjob/surfacemodelloadjob.h>
 #include <modules/base/rendering/multimodelgeometry.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 
 namespace {
     const std::string _loggerCat = "SurfaceModelLoadJob";
@@ -60,7 +62,7 @@ void SurfaceModelLoadJob::execute() {
     _subsiteModels->model = std::make_shared<modelgeometry::AsyncMultiModelGeometry>(dictionary);
 
     glbinding::Binding::useCurrentContext();
-    glbinding::Binding::initialize();
+    glbinding::Binding::initialize(global::windowDelegate.openGLProcedureAddress);
 
     for (auto fileName : _subsite->fileNames) {
         // Load all textures

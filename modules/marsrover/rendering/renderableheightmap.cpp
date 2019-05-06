@@ -34,6 +34,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <modules/marsrover/marsrovermodule.h>
+#include <openspace/engine/globals.h>
 #include <ghoul/fmt.h>
 
 #include <freeimage.h>
@@ -124,15 +125,14 @@ void RenderableHeightMap::initializeGL() {
     //    }
     //);
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    _shader = renderEngine.buildRenderProgram("HeightMap",
+    _shader = global::renderEngine.buildRenderProgram("HeightMap",
         absPath("${MODULE_MARSROVER}/shaders/heightmap_vs.glsl"),
         absPath("${MODULE_MARSROVER}/shaders/heightmap_fs.glsl") 
     );
     
-    _mars = OsEng.renderEngine().scene()->sceneGraphNode("Mars"); //change name?
+    _mars = global::renderEngine.scene()->sceneGraphNode("Mars"); //change name?
     _globe = (globebrowsing::RenderableGlobe*)_mars->renderable();
-    _orthoCamera = OsEng.navigationHandler().camera();   //gets the main camera object for the scene
+    _orthoCamera = global::navigationHandler.camera();   //gets the main camera object for the scene
 
     /***************************************/
 
@@ -324,7 +324,7 @@ void RenderableHeightMap::deinitializeGL() {
     MarsroverModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            OsEng.renderEngine().removeRenderProgram(p);
+            global::renderEngine.removeRenderProgram(p);
         }
     );
 
@@ -410,7 +410,7 @@ bool RenderableHeightMap::renderTexture() {
     renderer.setNAaSamples(1);
     renderer.initialize();
     //renderer.render(OsEng.renderEngine().scene(), _orthoCamera, 1.0, false);
-    renderer.render(OsEng.renderEngine().scene(), OsEng.navigationHandler().camera(), 1.0, true);
+    renderer.render(global::renderEngine.scene(), global::navigationHandler.camera(), 1.0);
 
 
 
@@ -470,7 +470,7 @@ bool RenderableHeightMap::renderTexture() {
 
         std::vector<float> pixels;
 
-        pixels = renderer.getDepthTexture(OsEng.renderEngine().scene(), _orthoCamera, glm::ivec2(width, height));
+        pixels = renderer.getDepthTexture(global::renderEngine.scene(), _orthoCamera, glm::ivec2(width, height));
 
         //float max = pixels[0];
         //float min = pixels[0];

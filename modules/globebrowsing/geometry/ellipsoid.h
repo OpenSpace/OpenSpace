@@ -74,9 +74,7 @@ public:
 
     glm::dvec3 geodeticSurfaceNormalForGeocentricallyProjectedPoint(
         const glm::dvec3& p) const;
-
     glm::dvec3 geodeticSurfaceNormal(const Geodetic2& geodetic2) const;
-    glm::dvec3 geodeticSurfaceNorthPoleTangent(glm::dvec3 positionWorldSpace) const;
 
     const glm::dvec3& radii() const;
     const glm::dvec3& radiiSquared() const;

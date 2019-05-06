@@ -27,11 +27,6 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/globebrowsing/geometry/geodeticpatch.h>
-
-// TODO: remove this dependency towards roverterrainrenderer
-#include <modules/roverterrainrenderer/filehandler/subsite.h>
-
 #include <memory>
 
 //#define DEBUG_GLOBEBROWSING_STATSRECORD
@@ -120,14 +115,10 @@ public:
      */
     void recompileShaders();
 
-    void addSites(const std::vector<std::shared_ptr<Subsite>> subsites);
-
     constexpr static const int MinSplitDepth = 2;
     constexpr static const int MaxSplitDepth = 22;
 
     std::shared_ptr<LayerManager> layerManager() const;
-
-    std::vector<std::vector<std::shared_ptr<Subsite>>> subsites();
 
 #ifdef DEBUG_GLOBEBROWSING_STATSRECORD
     StatsCollector stats;
@@ -156,7 +147,6 @@ private:
     std::shared_ptr<LayerManager> _layerManager;
 
     bool _shadersNeedRecompilation = true;
-    std::vector<std::vector<std::shared_ptr<Subsite>>> _subsites;
 };
 
 } // namespace openspace::globebrowsing

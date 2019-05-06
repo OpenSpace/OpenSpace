@@ -29,6 +29,7 @@
 #include <openspace/scene/scene.h>
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
+#include <openspace/engine/globals.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -48,7 +49,7 @@ void LodModelSwitch::initialize(RenderableGlobe * owner) {
 
     //TODO: Rickard fix this!!!
     std::string planetName = "Mars";
-    _parent = OsEng.renderEngine().scene()->sceneGraphNode(planetName)->parent();
+    _parent = global::renderEngine.scene()->sceneGraphNode(planetName)->parent();
     _ellipsoidShrinkTerm = 10000.0;// _owner->interactionDepthBelowEllipsoid();
 }
 

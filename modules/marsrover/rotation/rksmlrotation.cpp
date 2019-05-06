@@ -35,8 +35,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
@@ -86,7 +86,7 @@ RksmlRotation::RksmlRotation(const ghoul::Dictionary& dictionary)
     , _rotationAxis(AxisInfo, 1)
 {
     //Fix: move down to matrix?
-    double now = OsEng.windowWrapper().applicationTime();
+    double now = global::windowDelegate.applicationTime();
 
     _dataPath = dictionary.value<std::string>(DataPathInfo.identifier);
     _objectPart = dictionary.value<std::string>(ObjectPartInfo.identifier);
@@ -217,7 +217,7 @@ void RksmlRotation::openFile() {
 }
 
 void RksmlRotation::parseFile(std::string path) {
-	//call file that will parse the data
+    //call file that will parse the data
     double val;
     double e;
     std::ifstream myfile (path);

@@ -29,6 +29,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
+#include <openspace/engine/globals.h>
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/geometry/geodetic3.h>
@@ -74,7 +75,7 @@ bool RenderableExplorationPath::initialize(
     std::replace(fs_path.begin(), fs_path.end(), '\\', '/');
     // Shaders for the path (GL_LINES)
     if (_pathShader == nullptr) {
-        _pathShader = OsEng.renderEngine().buildRenderProgram(
+        _pathShader = global::renderEngine.buildRenderProgram(
             "RoverPath",
             vs_path,
             fs_path
@@ -88,7 +89,7 @@ bool RenderableExplorationPath::initialize(
 
     // Shaders for the sites (GL_POINTS)
     if (_siteShader == nullptr) {
-        _siteShader = OsEng.renderEngine().buildRenderProgram(
+        _siteShader = global::renderEngine.buildRenderProgram(
             "RoverPath",
             vs_path2,
             fs_path2
@@ -127,13 +128,12 @@ bool RenderableExplorationPath::initialize(
 }
 
 bool RenderableExplorationPath::deinitialize() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
     if (_pathShader) {
-        renderEngine.removeRenderProgram(_pathShader.get());
+        global::renderEngine.removeRenderProgram(_pathShader.get());
         _pathShader = nullptr;
     }
     if (_siteShader) {
-        renderEngine.removeRenderProgram(_siteShader.get());
+        global::renderEngine.removeRenderProgram(_siteShader.get());
         _siteShader = nullptr;
     }
 
