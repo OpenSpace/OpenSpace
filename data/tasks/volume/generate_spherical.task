@@ -5,7 +5,7 @@ local fn =
 
 return {{
     Type = "GenerateRawVolumeTask",
-    Dimensions = {32, 32, 32},
+    Dimensions = {8, 8, 8},
     LowerDomainBound = {0, 0, 0},
     UpperDomainBound = {1, math.pi, 2 * math.pi},
     ValueFunction = fn,
