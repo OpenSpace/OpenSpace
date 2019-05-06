@@ -576,7 +576,6 @@ void RenderableSatellites::readTLEFile(const std::string& filename) {
 
     // 3 because a TLE has 3 lines per element/ object.
     int numberOfObjects = numberOfLines/3;
-    LINFO(fmt::format("Number of data elements: {}", numberOfObjects));
 
     std::string line = "-";
     for (int i = 0; i < numberOfObjects; i++) {
