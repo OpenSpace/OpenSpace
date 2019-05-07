@@ -419,6 +419,11 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime,
     glm::dquat anchorRotation =
         glm::quat_cast(_anchorNode->worldRotationMatrix());
 
+    // If just returned from playback, don't use the previous anchor node rotation
+    // from before playback started, otherwise will cause a jump in position/rotation
+    if (firstFrameAfterPlaybackFinished) {
+        _previousAnchorNodeRotation = anchorRotation;
+    }
     glm::dquat anchorNodeRotationDiff =
         _previousAnchorNodeRotation * glm::inverse(anchorRotation);
 
