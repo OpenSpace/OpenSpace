@@ -1,0 +1,20 @@
+local length = 60
+local tasks = {}
+
+for i=1,length do
+	local radius = 0.5 * (1 - i/length)
+	local step = string.format("%02d", i-1)
+	tasks[#tasks+1] = {
+	    Type = "GenerateRawVolumeTask", -- fix name
+        Input = input
+	    Dimensions = {32, 32, 32},
+	    LowerDomainBound = {-0.5, -0.5, -0.5},
+	    UpperDomainBound = {0.5, 0.5, 0.5},
+	    ValueFunction = fn,
+	    Time = "2018-05-04T00:00:" .. step,
+	    RawVolumeOutput = "${DATA}/assets/scene/solarsystem/planets/earth/satellites/debris/volume/generated/" .. step .. ".rawvolume",
+	    DictionaryOutput = "${DATA}/assets/scene/solarsystem/planets/earth/satellites/debris/volume/generated/" .. step .. ".dictionary"
+	}
+end
+
+return tasks
