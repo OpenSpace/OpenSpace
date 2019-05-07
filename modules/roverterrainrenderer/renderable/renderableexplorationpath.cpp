@@ -100,7 +100,8 @@ bool RenderableExplorationPath::initialize(
     _geodeticsWithModel = coordinatesWithModels;
 
     _stationPointsModelCoordinates = calculateModelCoordinates(_allGeodetics, 0);
-    _stationPointsModelCoordinates = calculateModelCoordinates(_allGeodetics, 0);
+    //_stationPointsModelCoordinates = calculateModelCoordinates(_allGeodetics, 0);
+    _stationPointsModelCoordinatesWithModel = calculateModelCoordinates(_geodeticsWithModel, 0);
 
     if (_allGeodetics.size() == 0) return false;
 

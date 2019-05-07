@@ -166,6 +166,7 @@ void RenderableHeightMap::initializeGL() {
 
 
 void RenderableHeightMap::render(const RenderData& data, RendererTasks&) {  //data is the camera object
+    return;
 
     _shader->activate();
 

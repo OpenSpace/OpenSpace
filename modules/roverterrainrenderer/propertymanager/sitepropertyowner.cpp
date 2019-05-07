@@ -36,7 +36,7 @@ namespace {
 
 namespace openspace {
 SitePropertyOwner::SitePropertyOwner(SiteWithDrives swd) 
-    : properties::PropertyOwner(openspace::properties::PropertyOwner::PropertyOwnerInfo{ "siteEnabled", "Site" + swd._site })
+    : properties::PropertyOwner(openspace::properties::PropertyOwner::PropertyOwnerInfo{ "site" + swd._site, "Site" + swd._site })
     , _enabled(properties::BoolProperty(enabledPropertyInfo, false))
 {
     _site = swd._site;

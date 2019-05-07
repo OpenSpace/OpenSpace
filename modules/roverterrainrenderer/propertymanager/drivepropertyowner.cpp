@@ -38,15 +38,15 @@ namespace {
         "" // @TODO Missing documentation
     };
     static const openspace::properties::Property::PropertyInfo triggerPropertyInfo = {
-        "driveEnabled",
-        "Drive enabled",
+        "trigger",
+        "Go to Subsite",
         "" // @TODO Missing documentation
     };
 }
 
 namespace openspace {
     DrivePropertyOwner::DrivePropertyOwner(std::string drive, std::string sol, glm::dvec2 driveCoords)
-        : properties::PropertyOwner(openspace::properties::PropertyOwner::PropertyOwnerInfo{ "driveEnabled", "Drive" + drive + " (Sol: " + sol + ")" })
+        : properties::PropertyOwner(openspace::properties::PropertyOwner::PropertyOwnerInfo{ "drive" + drive, "Drive" + drive + " (Sol: " + sol + ")" })
     , _enabled(properties::BoolProperty(enabledPropertyInfo, false))
     , _goToSubSite(properties::TriggerProperty(triggerPropertyInfo))
     , _drive(drive)

@@ -753,6 +753,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     updateChunkTree(_rightRoot, data);
     _chunkCornersDirty = false;
 
+    _subsites.clear();
+
     // Calculate the MVP matrix
     const glm::dmat4& viewTransform = data.camera.combinedViewMatrix();
     const glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
@@ -911,6 +913,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     // Render all chunks that want to be rendered globally
     _globalRenderer.program->activate();
     for (int i = 0; i < std::min(globalCount, ChunkBufferSize); ++i) {
+        _subsites.push_back(global[i]->subsites);
         renderChunkGlobally(*global[i], data);
     }
     _globalRenderer.program->deactivate();
@@ -919,6 +922,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     // Render all chunks that need to be rendered locally
     _localRenderer.program->activate();
     for (int i = 0; i < std::min(localCount, ChunkBufferSize); ++i) {
+        _subsites.push_back(local[i]->subsites);
         renderChunkLocally(*local[i], data);
     }
     _localRenderer.program->deactivate();
@@ -2027,6 +2031,15 @@ void RenderableGlobe::splitChunkNode(Chunk& cn, int depth) {
                 _layerManager,
                 _ellipsoid
             );
+
+            std::vector<std::shared_ptr<Subsite>> tempSites;
+            for (int k = 0; k < cn.subsites.size(); ++k) {
+                if (cn.surfacePatch.contains(cn.subsites[k]->geodetic)) {
+                    tempSites.push_back(cn.subsites[k]);
+                }
+            }
+
+            addSites(*cn.children[i], std::move(tempSites));
         }
     }
 

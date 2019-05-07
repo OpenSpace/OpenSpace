@@ -668,8 +668,8 @@ local Submodules = {
         Type = "RoverTerrain",
         RoverLocationPath = dataPath .. "/path/rover_locations.shp",
         --//"/modelsEasy/" and "/texturesEasy/" contains data for site048 and drive1570 only, to load all models use path "/models/" and "/textures/"
-        ModelPath = "K:/MSL/RoverTerrain-Models&Textures/models/",    
-        TexturePath = "K:/MSL/RoverTerrain-Models&Textures/textures/",
+        ModelPath = "E:/rover/RoverTerrain-Models&Textures/models/",
+        TexturePath = "E:/rover/RoverTerrain-Models&Textures/textures/",
     },
     GuiPath = "/Solar System/Curiosity"
 }
