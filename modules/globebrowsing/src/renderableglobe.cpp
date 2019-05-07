@@ -1117,6 +1117,16 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     }
 }
 
+void RenderableGlobe::addSites(const std::vector<std::shared_ptr<Subsite>> subSites) {
+    addSites(_leftRoot, subSites);
+    addSites(_rightRoot, subSites);
+}
+
+std::vector<std::vector<std::shared_ptr<Subsite>>> RenderableGlobe::subsites() {
+    return _subsites;
+}
+
+
 void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
                                        bool renderBounds, bool renderAABB) const {
     const std::array<glm::dvec4, 8>& modelSpaceCorners = chunk.corners;
@@ -2024,6 +2034,13 @@ void RenderableGlobe::splitChunkNode(Chunk& cn, int depth) {
         for (Chunk* child : cn.children) {
             splitChunkNode(*child, depth - 1);
         }
+    }
+}
+
+void RenderableGlobe::addSites(Chunk& cn, std::vector<std::shared_ptr<Subsite>> subSites)
+{
+    if (!subSites.empty()) {
+        cn.subsites = std::move(subSites);
     }
 }
 

@@ -92,7 +92,7 @@ asset.onInitialize(function ()
     )
 
     openspace.navigation.setCameraState({
-        Focus = MSLAsset.CuriosityModel.Identifier,
+        Anchor = MSLAsset.CuriosityModel.Identifier,
         Position = { 10.0, 10.0, 10.0 },
         Rotation = { 0.0, -0.0, 0.0, 0.0 },
     })

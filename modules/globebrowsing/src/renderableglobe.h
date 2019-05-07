@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/roverterrainrenderer/filehandler/subsite.h>
 #include <modules/globebrowsing/src/ellipsoid.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
 #include <modules/globebrowsing/src/gpulayergroup.h>
@@ -66,6 +67,7 @@ struct Chunk {
     bool isVisible = true;
     std::array<glm::dvec4, 8> corners;
     std::array<Chunk*, 4> children = { { nullptr, nullptr, nullptr, nullptr } };
+    std::vector<std::shared_ptr<Subsite>> subsites;
 };
 
 enum class ShadowCompType {
@@ -98,6 +100,8 @@ public:
     LayerManager& layerManager();
     const glm::dmat4& modelTransform() const;
 
+    void addSites(const std::vector<std::shared_ptr<Subsite>> subsites);
+    std::vector<std::vector<std::shared_ptr<Subsite>>> subsites();
 
     /**
      * Calculates the height from the surface of the reference ellipsoid to the
@@ -208,6 +212,8 @@ private:
 
 
     void splitChunkNode(Chunk& cn, int depth);
+    void addSites(Chunk& cn, std::vector<std::shared_ptr<Subsite>> subSites);
+
     void mergeChunkNode(Chunk& cn);
     bool updateChunkTree(Chunk& cn, const RenderData& data);
     void updateChunk(Chunk& chunk, const RenderData& data) const;
@@ -216,6 +222,8 @@ private:
     Ellipsoid _ellipsoid;
     SkirtedGrid _grid;
     LayerManager _layerManager;
+
+    std::vector<std::vector<std::shared_ptr<Subsite>>> _subsites;
 
     glm::dmat4 _cachedModelTransform;
     glm::dmat4 _cachedInverseModelTransform;

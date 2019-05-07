@@ -64,8 +64,9 @@ LodModelSwitch::Mode LodModelSwitch::getLevel(const RenderData& data) {
     _owner->ellipsoid().geodeticSurfaceNormal(
     _owner->ellipsoid().cartesianToGeodetic2(cameraPositionModelSpace));
 
-    glm::dvec3 centerToEllipsoidSurface = glm::dmat3(globeModelTransform)  * (_owner->projectOnEllipsoid(cameraPositionModelSpace) -
-    directionFromSurfaceToCameraModelSpace * _ellipsoidShrinkTerm);
+    glm::dvec3 centerToEllipsoidSurface = glm::dmat3(globeModelTransform) *
+        (_owner->ellipsoid().geodeticSurfaceProjection(cameraPositionModelSpace) -
+        directionFromSurfaceToCameraModelSpace * _ellipsoidShrinkTerm);
 
     glm::dvec3 ellipsoidSurfaceToCamera = cameraPos - (center + centerToEllipsoidSurface);
     double distFromEllipsoidSurfaceToCamera = glm::length(ellipsoidSurfaceToCamera);
