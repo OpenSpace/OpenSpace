@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -377,12 +377,11 @@ void RenderableModelProjection::update(const UpdateData& data) {
         global::renderEngine.scene()->sceneGraphNode("Sun")->worldPosition() -
         data.modelTransform.translation;
 
-    _sunPosition =
-        PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z).vec3();
+    _sunPosition = static_cast<glm::vec3>(p);
 }
 
 void RenderableModelProjection::imageProjectGPU(
-                                std::shared_ptr<ghoul::opengl::Texture> projectionTexture)
+                                          const ghoul::opengl::Texture& projectionTexture)
 {
     if (_projectionComponent.needsShadowMap()) {
         _projectionComponent.depthMapRenderBegin();
@@ -408,7 +407,7 @@ void RenderableModelProjection::imageProjectGPU(
 
     ghoul::opengl::TextureUnit unitFbo;
     unitFbo.activate();
-    projectionTexture->bind();
+    projectionTexture.bind();
     _fboProgramObject->setUniform(_fboUniformCache.projectionTexture, unitFbo);
 
     _fboProgramObject->setUniform(
@@ -489,7 +488,7 @@ void RenderableModelProjection::project() {
         attitudeParameters(img.timeRange.start);
         std::shared_ptr<ghoul::opengl::Texture> projTexture =
             _projectionComponent.loadProjectionTexture(img.path, img.isPlaceholder);
-        imageProjectGPU(projTexture);
+        imageProjectGPU(*projTexture);
     }
     _shouldCapture = false;
 }

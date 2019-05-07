@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,28 +25,22 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER___CEF_HOST___H__
 #define __OPENSPACE_MODULE_WEBBROWSER___CEF_HOST___H__
 
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable : 4100)
-#endif // _MSC_VER
-
 #include <include/wrapper/cef_helpers.h>
-
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif // _MSC_VER
-
 #include <string>
+
+struct CefSettingsTraits;
+template <typename T> class CefStructBase;
+using CefSettings = CefStructBase<CefSettingsTraits>;
 
 namespace openspace {
 
 class CefHost {
 public:
-    CefHost(std::string helperLocation);
+    CefHost(const std::string& helperLocation);
     ~CefHost();
+    void doMessageLoopWork();
 
 private:
-    void initializeCallbacks();
     void attachDebugSettings(CefSettings&);
 };
 

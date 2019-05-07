@@ -26,8 +26,8 @@
 #define __OPENSPACE_MODULE_ROVER_TERRAIN_RENDERER___CACHING_SURFACE_MODEL_PROVIDER__H_
 
 #include <modules/roverterrainrenderer/renderable/asyncsurfacemodelprovider.h>
-#include <modules/globebrowsing/cache/lrucache.h>
-#include <modules/globebrowsing/tile/tileindex.h>
+#include <modules/globebrowsing/src/lrucache.h>
+#include <modules/globebrowsing/src/tileindex.h>
 #include <modules/roverterrainrenderer/renderable/subsitemodels.h>
 #include <modules/roverterrainrenderer/filehandler/subsite.h>
 

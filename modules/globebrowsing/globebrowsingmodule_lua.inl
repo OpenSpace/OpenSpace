@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,17 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/globes/renderableglobe.h>
+#include <modules/globebrowsing/src/renderableglobe.h>
 
-#include <modules/globebrowsing/geometry/angle.h>
-#include <modules/globebrowsing/rendering/layer/layermanager.h>
-#include <modules/globebrowsing/rendering/layer/layer.h>
-
-#include <openspace/interaction/navigationhandler.h>
+#include <modules/globebrowsing/src/layer.h>
+#include <modules/globebrowsing/src/layermanager.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/rendering/renderengine.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
@@ -58,13 +56,15 @@ int addLayer(lua_State* L) {
     }
 
     // Get the renderable globe
-    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
+    RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
     if (!globe) {
         return ghoul::lua::luaError(L, "Renderable is not a globe: " + globeName);
     }
 
     // Get the layer group
-    layergroupid::GroupID groupID = layergroupid::getGroupIDFromName(layerGroupName);
+    layergroupid::GroupID groupID = ghoul::from_string<layergroupid::GroupID>(
+        layerGroupName
+    );
     if (groupID == layergroupid::GroupID::Unknown) {
         return ghoul::lua::luaError(L, "Unknown layer group: " + layerGroupName);
     }
@@ -81,7 +81,7 @@ int addLayer(lua_State* L) {
     }
     lua_settop(L, 0);
 
-    std::shared_ptr<Layer> layer = globe->layerManager()->addLayer(groupID, d);
+    Layer* layer = globe->layerManager().addLayer(groupID, d);
     if (layer) {
         layer->initialize();
     }
@@ -108,18 +108,20 @@ int deleteLayer(lua_State* L) {
     }
 
     // Get the renderable globe
-    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
+    RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
     if (!globe) {
         return ghoul::lua::luaError(L, "Renderable is not a globe: " + globeName);
     }
 
     // Get the layer group
-    layergroupid::GroupID groupID = layergroupid::getGroupIDFromName(layerGroupName);
+    layergroupid::GroupID groupID = ghoul::from_string<layergroupid::GroupID>(
+        layerGroupName
+    );
     if (groupID == layergroupid::GroupID::Unknown) {
         return ghoul::lua::luaError(L, "Unknown layer group: " + layerGroupName);
     }
 
-    globe->layerManager()->deleteLayer(groupID, layerName);
+    globe->layerManager().deleteLayer(groupID, layerName);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -205,8 +207,9 @@ int getGeoPositionForCamera(lua_State* L) {
     }
 
     const glm::dvec3 cameraPosition = global::navigationHandler.camera()->positionVec3();
-    const glm::dmat4 inverseModelTransform =
-        global::navigationHandler.focusNode()->inverseModelTransform();
+    const SceneGraphNode* anchor = 
+        global::navigationHandler.orbitalNavigator().anchorNode();
+    const glm::dmat4 inverseModelTransform = anchor->inverseModelTransform();
     const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
     const SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
@@ -219,18 +222,12 @@ int getGeoPositionForCamera(lua_State* L) {
     const double altitude = glm::length(cameraPositionModelSpace -
                                   posHandle.centerToReferenceSurface);
 
-    ghoul::lua::push(
-        L,
-        Angle<double>::fromRadians(geo2.lat).asDegrees(),
-        Angle<double>::fromRadians(geo2.lon).asDegrees(),
-        altitude
-    );
+    ghoul::lua::push(L, glm::degrees(geo2.lat), glm::degrees(geo2.lon), altitude);
 
     ghoul_assert(lua_gettop(L) == 3, "Incorrect number of items left on stack");
     return 3;
 }
 
-#ifdef GLOBEBROWSING_USE_GDAL
 int loadWMSCapabilities(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::loadWMSCapabilities");
 
@@ -294,6 +291,5 @@ int capabilities(lua_State* L) {
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
-#endif // GLOBEBROWSING_USE_GDAL
 
 } // namespace openspace::globebrowsing::luascriptfunctions

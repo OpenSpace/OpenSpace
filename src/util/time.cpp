@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -184,6 +184,14 @@ scripting::LuaLibrary Time::luaLibrary() {
                 "valid ISO 8601-like date string of the format YYYY-MM-DDTHH:MN:SS. "
                 "Note: providing time zone using the Z format is not supported. UTC is "
                 "assumed."
+            },
+            {
+                "interpolateTimeRelative",
+                &luascriptfunctions::time_interpolateTimeRelative,
+                {},
+                "number [, number]",
+                "Increments the current simulation time "
+                "by the specified number of seconds."
             },
             {
                 "interpolateDeltaTime",

@@ -1,29 +1,39 @@
+# Core Team
 Alexander Bock
-Joakim Kilby
 Emil Axelsson
-Eric Myers
-Jonathas Costa
-Matthew Territo
-Gene Payne
 Kalle Bladin
+Micah Acinapura
+Jonathas Costa
+Joakim Kilby
+Gene Payne
 Erik Sundén
+Eric Myers
 
-Jonas Strandstedt
-Hans-Christian Helltegen
-Michal Marcinkowski
-Anton Arbring
-Tomas Forsyth Rosin
-Erik Broberg
-Michael Nilsson
 Sebastian Piwell
+Erik Broberg
+Jonas Strandstedt
+Michal Marcinkowski
+Jonathan Bosson
+Michael Nilsson
+Hans-Christian Helltegen
+Anton Arbring
+Oskar Carlbaum
+Matthew Territo
+Jonathan Grangien
+Klas Eskilson
+Tomas Forsyth Rosin
 Niclas Hultberg
 Rickard Lindtstedt
 Michael Sjöström
 Michael Novén
-Oskar Carlbaum
-Jonathan Bosson
-Klas Eskilson
 Christoffer Särevall
 
+
+# Community Support
+mingenuity
+nealmcb
+nbartzokas
+mik3caprio
+arfon
 Anteige
 noahdasanaike

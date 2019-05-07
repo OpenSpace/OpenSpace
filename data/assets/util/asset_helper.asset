@@ -88,6 +88,15 @@ local registerSceneGraphNodesAndExport = function (sceneAsset, nodes, override)
     end
 end
 
+local registerInterestingNodes = function (sceneAsset, nodes)
+    sceneAsset.onInitialize(function ()
+        openspace.markInterestingNodes(nodes)
+    end)
+    sceneAsset.onDeinitialize(function ()
+        openspace.removeInterestingNodes(nodes)
+    end)
+end
+
 local requireAll = function (sceneAsset, directory)
     function string.ends(String,End)
        return End=='' or string.sub(String,-string.len(End))==End
@@ -125,5 +134,6 @@ asset.export("registerSceneGraphNodes", registerSceneGraphNodes)
 asset.export("registerSceneGraphNodesAndExport", registerSceneGraphNodesAndExport)
 asset.export("registerSpiceKernels", registerSpiceKernels)
 asset.export("registerDashboardItems", registerDashboardItems)
+asset.export("registerInterestingNodes", registerInterestingNodes)
 asset.export("requireAll", requireAll)
 asset.export("requestAll", requestAll)

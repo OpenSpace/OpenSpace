@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -252,7 +252,9 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
         }
     }
 
-    for (const std::pair<std::string, std::vector<Property*>>& p : propertiesByGroup) {
+    using K = std::string;
+    using V = std::vector<Property*>;
+    for (const std::pair<const K, V>& p : propertiesByGroup) {
         const std::string& groupName = owner->propertyGroupName(p.first);
         if (ImGui::TreeNode(groupName.c_str())) {
             for (properties::Property* prop : p.second) {
@@ -429,14 +431,13 @@ void GuiPropertyComponent::render() {
                 if (!_ignoreHiddenHint && nOwner->hasGuiHintHidden()) {
                     continue;
                 }
-
-                if (nOwner->guiPath().empty()) {
+                const std::string guiPath = nOwner->guiPath();
+                if (guiPath.empty()) {
                     // We know that we are done now since we stable_sort:ed them above
                     break;
                 }
-
                 std::vector<std::string> paths = ghoul::tokenizeString(
-                    nOwner->guiPath().substr(1),
+                    guiPath.substr(1),
                     '/'
                 );
 

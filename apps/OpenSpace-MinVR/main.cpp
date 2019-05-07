@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,13 +45,6 @@
 // @TODO:  Prevent a third window to open that immediately crashes
 
 // @TODO:  Proper check if the current instance is the master:
-
-        // Print whether a the vrsetup is a host or a client
-//std::cout << vrMain->getConfig()->getAttributeValue(vrMain->getName(), "hostType") << std::endl;
-//if (vrMain->getConfig()->exists("NumClients", vrMain->getName())) {
-    // How to read configuration settings for the specific vrsetup
-    //std::cout << "Number of Clients: " << (std::string)vrMain->getConfig()->getValue("NumClients", vrMain->getName()) << std::endl;
-//}
 
 using namespace MinVR;
 using namespace openspace;
@@ -258,7 +251,7 @@ void Handler::onVRRenderContext(const VRDataIndex& stateData) {
             );
             windowingGlobals.windowSize.x = stateData.getValue("WindowWidth");
             windowingGlobals.windowSize.y = stateData.getValue("WindowHeight");
-            
+
             windowingGlobals.framebufferSize.x = stateData.getValue("FramebufferWidth");
             windowingGlobals.framebufferSize.y = stateData.getValue("FramebufferHeight");
 
@@ -279,7 +272,8 @@ void Handler::onVRRenderScene(const VRDataIndex& stateData) {
         glm::mat4 viewMatrix = glm::make_mat4(state.getViewMatrix());
         try {
             openspace::global::openSpaceEngine.render(
-                glm::mat4(1.f), // @TODO(abock) we should probably use the user position here?
+                // @TODO(abock) we should probably use the user position here?
+                glm::mat4(1.f),
                 viewMatrix,
                 projectionMatrix
             );
@@ -297,12 +291,9 @@ void Handler::appendNewInputEventsSinceLastCall(VRDataQueue* queue) {
     eventQueue.clear();
 }
 
-
 void setupMinVrDelegateFunctions(VRMain& main) {
     // Sets up the OpenSpace WindowDelegate callback functions
     WindowDelegate& delegate = global::windowDelegate;
-
-
 
     delegate.nWindows = []() { return windowingGlobals.nWindows; };
     delegate.currentWindowSize = []() { return windowingGlobals.windowSize; };
@@ -490,10 +481,8 @@ int main(int argc, char** argv) {
         engine.renderOnAllDisplays();
     } while (!engine.getShutdown());
 
-
- 
     global::openSpaceEngine.deinitializeGL();
-    
+
     // This assumes that `shutdown` destroys the OpenGL state and thus have to happen
     // after the deinitializeGL function
     engine.shutdown();

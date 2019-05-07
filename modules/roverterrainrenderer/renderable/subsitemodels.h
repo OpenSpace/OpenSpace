@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_MODULE_ROVER_TERRAIN_RENDERER___SUBSITEMODELS__H_
 #define __OPENSPACE_MODULE_ROVER_TERRAIN_RENDERER___SUBSITEMODELS__H_
 
-#include <modules/globebrowsing/tile/tileindex.h>
+#include <modules/globebrowsing/src/basictypes.h>
+#include <modules/globebrowsing/src/tileindex.h>
 #include <modules/base/rendering/modelgeometry.h>
-#include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/roverterrainrenderer/renderable/model.h>
 #include <modules/roverterrainrenderer/opengl/texturearray.h>
 #include <modules/roverterrainrenderer/filehandler/pointcloudinfo.h>

@@ -34,8 +34,8 @@ void SubsiteInitializationJob::execute() {
     _subsiteModels->model->uploadData();
 }
 
-std::shared_ptr<SubsiteModels> SubsiteInitializationJob::product() {
-    return _subsiteModels;
+SubsiteModels SubsiteInitializationJob::product() {
+    return *_subsiteModels;
 }
 
 } // openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
@@ -62,6 +63,11 @@ namespace {
             ImGui::EndTooltip();
         }
     }
+
+    constexpr const char* AnchorProperty = "NavigationHandler.OrbitalNavigator.Anchor";
+
+    constexpr const char* RetargetAnchorProperty =
+        "NavigationHandler.OrbitalNavigator.RetargetAnchor";
 
 } // namespace
 
@@ -102,8 +108,14 @@ void GuiSpaceTimeComponent::render() {
             ImGui::SameLine();
             if (pressed) {
                 global::scriptEngine.queueScript(
-                    "openspace.setPropertyValue('NavigationHandler.Origin', '" +
+                    "openspace.setPropertyValue('" +
+                    std::string(AnchorProperty) + "', '" +
                     n->identifier() + "');",
+                    scripting::ScriptEngine::RemoteScripting::Yes
+                );
+                global::scriptEngine.queueScript(
+                    "openspace.setPropertyValue('" +
+                    std::string(RetargetAnchorProperty) + "', nil);",
                     scripting::ScriptEngine::RemoteScripting::Yes
                 );
             }
@@ -113,7 +125,8 @@ void GuiSpaceTimeComponent::render() {
     ImGui::NewLine();
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
 
-    SceneGraphNode* currentFocus = global::navigationHandler.focusNode();
+    const SceneGraphNode* currentFocus =
+        global::navigationHandler.orbitalNavigator().anchorNode();
 
     std::string nodeNames;
     for (SceneGraphNode* n : nodes) {
@@ -131,8 +144,13 @@ void GuiSpaceTimeComponent::render() {
     const bool hasChanged = ImGui::Combo("", &currentPosition, nodeNames.c_str());
     if (hasChanged) {
         global::scriptEngine.queueScript(
-            "openspace.setPropertyValue('NavigationHandler.Origin', '" +
+            "openspace.setPropertyValue('" + std::string(AnchorProperty) + "', '" +
             nodes[currentPosition]->identifier() + "');",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+        global::scriptEngine.queueScript(
+            "openspace.setPropertyValue('" +
+            std::string(RetargetAnchorProperty) + "', nil);",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
@@ -140,15 +158,9 @@ void GuiSpaceTimeComponent::render() {
     ImGui::SameLine();
     const bool pressed = ImGui::Button("Refocus");
     if (pressed) {
-        // To refocus, we are first clearing the origin property before setting it back
-        // to its old value. The property mechanism's onChange does not fire if the same
-        // value is set again, hence the need for the clearing
         global::scriptEngine.queueScript(
-            R"(
-                local o = openspace.getPropertyValue('NavigationHandler.Origin');
-                openspace.setPropertyValue('NavigationHandler.Origin', '');
-                openspace.setPropertyValue('NavigationHandler.Origin', o);
-            )",
+            "openspace.setPropertyValue('" +
+            std::string(RetargetAnchorProperty) + "', nil);",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,8 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/misc.h>
 #include <numeric>
+
+#include <openspace/json.h>
 
 namespace {
 
@@ -81,15 +83,18 @@ std::vector<std::string> fromStringConversion(const std::string& val, bool& succ
 }
 
 bool toStringConversion(std::string& outValue, const std::vector<std::string>& inValue) {
-    outValue = "";
+    outValue = "[";
     for (const std::string& v : inValue) {
+        std::string str;
+        nlohmann::json json;
+        nlohmann::to_json(json, v);
+        str = json.dump();
         if (&v != &*inValue.cbegin()) {
-            outValue += ", " + v;
+            outValue += ", ";
         }
-        else {
-            outValue += v;
-        }
+        outValue += str;
     }
+    outValue += "]";
 
     // outValue = std::accumulate(
     //     inValue.begin(),

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -159,6 +159,12 @@ public:
      * \return \c true if the \p uri refers to a Property; \c false otherwise.
      */
     bool hasProperty(const std::string& uri) const;
+
+    /**
+    * This method checks if a Property exists in this PropertyOwner.
+    * \return <code>true</code> if the Property existed, <code>false</code> otherwise.
+    */
+    bool hasProperty(const Property* prop) const;
 
     void setPropertyOwner(PropertyOwner* owner) { _owner = owner; }
     PropertyOwner* owner() const { return _owner; }

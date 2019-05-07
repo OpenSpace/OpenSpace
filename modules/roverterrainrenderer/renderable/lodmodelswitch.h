@@ -21,11 +21,12 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
+
 #ifndef __OPENSPACE_MODULE_ROVER_TERRAIN_RENDERER___LOD_MODEL_SWITCH___H__
 #define __OPENSPACE_MODULE_ROVER_TERRAIN_RENDERER___LOD_MODEL_SWITCH___H__
 
 #include <ghoul/ghoul.h>
-#include <modules/globebrowsing/globes/renderableglobe.h>
+#include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 

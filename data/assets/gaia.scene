@@ -1,0 +1,40 @@
+local has_gaia = openspace.modules.isLoaded('Gaia')
+if not has_gaia then
+    openspace.printFatal('Could not load scene "' .. asset.filePath .. '" due to missing module "gaia"')
+    do return end
+end
+
+local assetHelper = asset.require('util/asset_helper')
+
+asset.require('default')
+
+-- Augment default scene with gaia data, 3D model and trail
+asset.require('scene/milkyway/gaia/gaiastars')
+asset.require('scene/milkyway/gaia/apogee')
+asset.require('scene/milkyway/gaia/galah')
+asset.require('scene/solarsystem/missions/gaia/gaia')
+asset.require('scene/solarsystem/missions/gaia/trail')
+
+assetHelper.registerDashboardItems(asset, {
+    {
+        Type = "DashboardItemDistance",
+        Identifier = "GaiaEarthDistance",
+        GuiName = "Gaia Earth Distance",
+        SourceType = "Node",
+        SourceNodeName = "Gaia",
+        DestinationType = "Node Surface",
+        DestinationNodeName = "Earth"
+    }
+})
+
+assetHelper.registerInterestingNodes(asset, { "Gaia" })
+
+asset.onInitialize(function ()
+    openspace.setPropertyValueSingle('Scene.Stars.Renderable.Enabled', false);
+
+    openspace.navigation.setCameraState({
+        Anchor = "Gaia",
+        Position = { 1000000000000.0, 1000000000000.0, 1000000000000.0 },
+        Rotation = { 0.683224, -0.765934, -0.601234, -0.418073 },
+    })
+end)

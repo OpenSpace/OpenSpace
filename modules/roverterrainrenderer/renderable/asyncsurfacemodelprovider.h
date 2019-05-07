@@ -25,13 +25,13 @@
 #ifndef __OPENSPACE_MODULE_ROVER_TERRAIN_RENDERER___ASYNC_SURFACE_MODEL_PROVIDER__H_
 #define __OPENSPACE_MODULE_ROVER_TERRAIN_RENDERER___ASYNC_SURFACE_MODEL_PROVIDER__H_
 
-#include <modules/globebrowsing/cache/lrucache.h>
-#include <modules/globebrowsing/other/lruthreadpool.h>
+#include <modules/globebrowsing/src/lrucache.h>
+#include <modules/globebrowsing/src/lruthreadpool.h>
 
 #include <modules/roverterrainrenderer/loadjob/surfacemodelloadjob.h>
 #include <modules/roverterrainrenderer/renderable/subsitemodels.h>
 #include <modules/roverterrainrenderer/filehandler/subsite.h>
-#include <modules/globebrowsing/other/prioritizingconcurrentjobmanager.h>
+#include <modules/globebrowsing/src/prioritizingconcurrentjobmanager.h>
 
 namespace openspace {
 

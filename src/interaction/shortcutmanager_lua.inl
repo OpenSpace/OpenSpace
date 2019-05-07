@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,8 +35,11 @@ openspace::interaction::ShortcutManager::ShortcutInformation extractInfo(lua_Sta
         ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::No),
         ghoul::lua::value<std::string>(L, 2, ghoul::lua::PopValue::No),
         openspace::interaction::ShortcutManager::IsSynchronized(isSync),
-        nArguments == 3 ?
+        nArguments >= 3 ?
             ghoul::lua::value<std::string>(L, 3, ghoul::lua::PopValue::No) :
+            "",
+        nArguments == 4 ?
+            ghoul::lua::value<std::string>(L, 4, ghoul::lua::PopValue::No) :
             ""
     };
     lua_pop(L, nArguments);
@@ -54,7 +57,7 @@ int clearShortcuts(lua_State* L) {
 }
 
 int bindShortcut(lua_State* L) {
-    int n = ghoul::lua::checkArgumentsAndThrow(L, 2, 3, "lua::bindKeyLocal");
+    int n = ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::bindShortcut");
 
     interaction::ShortcutManager::ShortcutInformation info = extractInfo(L, n, true);
     global::shortcutManager.addShortcut(std::move(info));
@@ -64,7 +67,7 @@ int bindShortcut(lua_State* L) {
 }
 
 int bindShortcutLocal(lua_State* L) {
-    int n = ghoul::lua::checkArgumentsAndThrow(L, 2, 3, "lua::bindKeyLocal");
+    int n = ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::bindShortcutLocal");
 
     interaction::ShortcutManager::ShortcutInformation info = extractInfo(L, n, false);
     global::shortcutManager.addShortcut(std::move(info));

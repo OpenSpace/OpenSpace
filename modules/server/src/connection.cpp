@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,13 +26,16 @@
 
 #include <modules/server/include/topics/authorizationtopic.h>
 #include <modules/server/include/topics/bouncetopic.h>
+#include <modules/server/include/topics/documentationtopic.h>
 #include <modules/server/include/topics/getpropertytopic.h>
 #include <modules/server/include/topics/luascripttopic.h>
 #include <modules/server/include/topics/setpropertytopic.h>
+#include <modules/server/include/topics/shortcuttopic.h>
 #include <modules/server/include/topics/subscriptiontopic.h>
 #include <modules/server/include/topics/timetopic.h>
 #include <modules/server/include/topics/topic.h>
 #include <modules/server/include/topics/triggerpropertytopic.h>
+#include <modules/server/include/topics/versiontopic.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/io/socket/socket.h>
@@ -48,10 +51,13 @@ namespace {
     constexpr const char* MessageKeyPayload = "payload";
     constexpr const char* MessageKeyTopic = "topic";
 
+    constexpr const char* VersionTopicKey = "version";
     constexpr const char* AuthenticationTopicKey = "authorize";
+    constexpr const char* DocumentationTopicKey = "documentation";
     constexpr const char* GetPropertyTopicKey = "get";
     constexpr const char* LuaScriptTopicKey = "luascript";
     constexpr const char* SetPropertyTopicKey = "set";
+    constexpr const char* ShortcutTopicKey = "shortcuts";
     constexpr const char* SubscriptionTopicKey = "subscribe";
     constexpr const char* TimeTopicKey = "time";
     constexpr const char* TriggerPropertyTopicKey = "trigger";
@@ -60,23 +66,33 @@ namespace {
 
 namespace openspace {
 
-Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address)
+Connection::Connection(std::unique_ptr<ghoul::io::Socket> s,
+                       std::string address,
+                       bool authorized,
+                       const std::string& password)
     : _socket(std::move(s))
     , _address(std::move(address))
+    , _isAuthorized(authorized)
 {
     ghoul_assert(_socket, "Socket must not be nullptr");
 
-    _topicFactory.registerClass<AuthorizationTopic>(AuthenticationTopicKey);
+    _topicFactory.registerClass(
+        AuthenticationTopicKey,
+        [password](bool, const ghoul::Dictionary&) {
+            return new AuthorizationTopic(password);
+        }
+    );
+
+    _topicFactory.registerClass<DocumentationTopic>(DocumentationTopicKey);
     _topicFactory.registerClass<GetPropertyTopic>(GetPropertyTopicKey);
     _topicFactory.registerClass<LuaScriptTopic>(LuaScriptTopicKey);
     _topicFactory.registerClass<SetPropertyTopic>(SetPropertyTopicKey);
+    _topicFactory.registerClass<ShortcutTopic>(ShortcutTopicKey);
     _topicFactory.registerClass<SubscriptionTopic>(SubscriptionTopicKey);
     _topicFactory.registerClass<TimeTopic>(TimeTopicKey);
     _topicFactory.registerClass<TriggerPropertyTopic>(TriggerPropertyTopicKey);
     _topicFactory.registerClass<BounceTopic>(BounceTopicKey);
-
-    // see if the default config for requiring auth (on) is overwritten
-    _requireAuthorization = global::configuration.doesRequireSocketAuthentication;
+    _topicFactory.registerClass<VersionTopic>(VersionTopicKey);
 }
 
 void Connection::handleMessage(const std::string& message) {
@@ -84,10 +100,14 @@ void Connection::handleMessage(const std::string& message) {
         nlohmann::json j = nlohmann::json::parse(message.c_str());
         try {
             handleJson(j);
+        } catch (const std::domain_error& e) {
+            LERROR(fmt::format("JSON handling error from: {}. {}", message, e.what()));
         }
-        catch (...) {
-            LERROR(fmt::format("JSON handling error from: {}", message));
+        } catch (const std::out_of_range& e) {
+            LERROR(fmt::format("JSON handling error from: {}. {}", message, e.what()));
         }
+        catch (const std::exception& e) {
+            LERROR(e.what());
     } catch (...) {
         if (!isAuthorized()) {
             _socket->disconnect();
@@ -97,7 +117,16 @@ void Connection::handleMessage(const std::string& message) {
             ));
             return;
         } else {
-            LERROR(fmt::format("Could not parse JSON: '{}'", message));
+            std::string sanitizedString = message;
+            std::transform(
+                message.begin(),
+                message.end(),
+                sanitizedString.begin(),
+                [](const unsigned char& c) {
+                    return std::isprint(c) ? c : ' ';
+                }
+            );
+            LERROR(fmt::format("Could not parse JSON: '{}'", sanitizedString));
         }
     }
 }
@@ -167,8 +196,7 @@ void Connection::sendJson(const nlohmann::json& json) {
 }
 
 bool Connection::isAuthorized() const {
-    // require either auth to be disabled or client to be authenticated
-    return !_requireAuthorization || isWhitelisted() || _isAuthorized;
+    return _isAuthorized;
 }
 
 void Connection::setThread(std::thread&& thread) {
@@ -185,11 +213,6 @@ ghoul::io::Socket* Connection::socket() {
 
 void Connection::setAuthorized(bool status) {
     _isAuthorized = status;
-}
-
-bool Connection::isWhitelisted() const {
-    const std::vector<std::string>& wl = global::configuration.clientAddressWhitelist;
-    return std::find(wl.begin(), wl.end(), _address) != wl.end();
 }
 
 } // namespace openspace

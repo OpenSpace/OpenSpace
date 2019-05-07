@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -214,9 +214,25 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
 
     _gridProgram->setUniform("gridColor", _gridColor);
 
+    // Saves current state:
+    GLboolean isBlendEnabled = glIsEnabledi(GL_BLEND, 0);
+    GLboolean isLineSmoothEnabled = glIsEnabled(GL_LINE_SMOOTH);
+    GLfloat currentLineWidth;
+    glGetFloatv(GL_LINE_WIDTH, &currentLineWidth);
+
+    GLenum blendEquationRGB, blendEquationAlpha, blendDestAlpha,
+        blendDestRGB, blendSrcAlpha, blendSrcRGB;
+    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
+    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
+    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
+    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
+    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
+    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
+
+    // Changes GL state:
     glLineWidth(_lineWidth);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_BLEND);
+    glEnablei(GL_BLEND, 0);
     glEnable(GL_LINE_SMOOTH);
 
     glBindVertexArray(_vaoID);
@@ -225,6 +241,17 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     glBindVertexArray(0);
 
     _gridProgram->deactivate();
+
+    // Restores GL State
+    glLineWidth(currentLineWidth);
+    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
+    glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
+    if (!isBlendEnabled) {
+        glDisablei(GL_BLEND, 0);
+    }
+    if (!isLineSmoothEnabled) {
+        glDisable(GL_LINE_SMOOTH);
+    }
 }
 
 void RenderableSphericalGrid::update(const UpdateData&) {

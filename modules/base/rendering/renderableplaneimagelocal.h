@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -57,7 +57,7 @@ private:
     void loadTexture();
 
     properties::StringProperty _texturePath;
-    ghoul::opengl::Texture* _texture;
+    ghoul::opengl::Texture* _texture = nullptr;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
 
     bool _textureIsDirty = false;

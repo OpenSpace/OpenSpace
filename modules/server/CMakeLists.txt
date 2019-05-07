@@ -26,41 +26,49 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 set(HEADER_FILES
-    servermodule.h
-    include/connection.h
-    include/connectionpool.h
-    include/jsonconverters.h
-    include/topics/authorizationtopic.h
-    include/topics/bouncetopic.h
-    include/topics/getpropertytopic.h
-    include/topics/luascripttopic.h
-    include/topics/setpropertytopic.h
-    include/topics/subscriptiontopic.h
-    include/topics/timetopic.h
-    include/topics/topic.h
-    include/topics/triggerpropertytopic.h
+  servermodule.h
+  include/connection.h
+  include/connectionpool.h
+  include/jsonconverters.h
+  include/serverinterface.h
+  include/topics/authorizationtopic.h
+  include/topics/bouncetopic.h
+  include/topics/documentationtopic.h
+  include/topics/getpropertytopic.h
+  include/topics/luascripttopic.h
+  include/topics/setpropertytopic.h
+  include/topics/shortcuttopic.h
+  include/topics/subscriptiontopic.h
+  include/topics/timetopic.h
+  include/topics/topic.h
+  include/topics/triggerpropertytopic.h
+  include/topics/versiontopic.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    servermodule.cpp
-    src/connection.cpp
-    src/connectionpool.cpp
-    src/jsonconverters.cpp
-    src/topics/authorizationtopic.cpp
-    src/topics/bouncetopic.cpp
-    src/topics/getpropertytopic.cpp
-    src/topics/luascripttopic.cpp
-    src/topics/setpropertytopic.cpp
-    src/topics/subscriptiontopic.cpp
-    src/topics/timetopic.cpp
-    src/topics/topic.cpp
-    src/topics/triggerpropertytopic.cpp
+  servermodule.cpp
+  src/connection.cpp
+  src/connectionpool.cpp
+  src/jsonconverters.cpp
+  src/serverinterface.cpp
+  src/topics/authorizationtopic.cpp
+  src/topics/bouncetopic.cpp
+  src/topics/documentationtopic.cpp
+  src/topics/getpropertytopic.cpp
+  src/topics/luascripttopic.cpp
+  src/topics/setpropertytopic.cpp
+  src/topics/shortcuttopic.cpp
+  src/topics/subscriptiontopic.cpp
+  src/topics/timetopic.cpp
+  src/topics/topic.cpp
+  src/topics/triggerpropertytopic.cpp
+  src/topics/versiontopic.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 create_new_module(
-    "Server"
-    server_module
-    ${HEADER_FILES} ${SOURCE_FILES}
+  "Server"
+  server_module
+  ${HEADER_FILES} ${SOURCE_FILES}
 )

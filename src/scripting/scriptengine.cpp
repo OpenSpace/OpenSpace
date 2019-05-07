@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
+#include <openspace/interaction/sessionrecording.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/syncbuffer.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -160,7 +161,7 @@ bool ScriptEngine::hasLibrary(const std::string& name) {
     return (it != _registeredLibraries.end());
 }
 
-bool ScriptEngine::runScript(const std::string& script) {
+bool ScriptEngine::runScript(const std::string& script, ScriptCallback callback) {
     if (script.empty()) {
         LWARNING("Script was empty");
         return false;
@@ -172,13 +173,23 @@ bool ScriptEngine::runScript(const std::string& script) {
     }
 
     try {
-        ghoul::lua::runScript(_state, script);
+        if (callback) {
+            ghoul::Dictionary returnValue =
+                ghoul::lua::loadArrayDictionaryFromString(script, _state);
+            callback.value()(returnValue);
+        } else {
+            ghoul::lua::runScript(_state, script);
+        }
     }
     catch (const ghoul::lua::LuaLoadingException& e) {
         LERRORC(e.component, e.message);
         return false;
     }
     catch (const ghoul::lua::LuaExecutionException& e) {
+        LERRORC(e.component, e.message);
+        return false;
+    }
+    catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
         return false;
     }
@@ -449,7 +460,18 @@ void ScriptEngine::addBaseLibrary() {
                 "This function extracts the directory part of the passed path. For "
                 "example, if the parameter is 'C:/OpenSpace/foobar/foo.txt', this "
                 "function returns 'C:/OpenSpace/foobar'."
-            }
+            },
+            {
+                "unzipFile",
+                &luascriptfunctions::unzipFile,
+                {},
+                "string, string [bool]",
+                "This function extracts the contents of a zip file. The first "
+                "argument is the path to the zip file. The second argument is the "
+                "directory where to put the extracted files. If the third argument is "
+                "true, then the compressed file will be deleted after the decompression "
+                 "is finished."
+            },
         }
     };
     addLibrary(lib);
@@ -539,20 +561,23 @@ std::string ScriptEngine::generateJson() const {
 
     bool first = true;
     for (const LuaLibrary& l : _registeredLibraries) {
+        constexpr const char* replStr = R"("{}": "{}", )";
+        constexpr const char* replStr2 = R"("{}": "{}")";
+
         if (!first) {
             json << ",";
         }
         first = false;
 
         json << "{";
-        json << "\"library\": \"" << l.name << "\",";
+        json << fmt::format(replStr, "library", l.name);
         json << "\"functions\": [";
 
         for (const LuaLibrary::Function& f : l.functions) {
             json << "{";
-            json << "\"name\": \"" << f.name << "\", ";
-            json << "\"arguments\": \"" << escapedJson(f.argumentText) << "\", ";
-            json << "\"help\": \"" << escapedJson(f.helpText) << "\"";
+            json << fmt::format(replStr, "name", f.name);
+            json << fmt::format(replStr, "arguments", escapedJson(f.argumentText));
+            json << fmt::format(replStr2, "help", escapedJson(f.helpText));
             json << "}";
             if (&f != &l.functions.back() || !l.documentations.empty()) {
                 json << ",";
@@ -561,9 +586,9 @@ std::string ScriptEngine::generateJson() const {
 
         for (const LuaLibrary::Documentation& doc : l.documentations) {
             json << "{";
-            json << "\"name\": \"" << doc.name << "\", ";
-            json << "\"arguments\": \"" << escapedJson(doc.parameter) << "\", ";
-            json << "\"help\": \"" << escapedJson(doc.description) << "\"";
+            json << fmt::format(replStr, "name", doc.name);
+            json << fmt::format(replStr, "arguments", escapedJson(doc.parameter));
+            json << fmt::format(replStr2, "help", escapedJson(doc.description));
             json << "}";
             if (&doc != &l.documentations.back()) {
                 json << ",";
@@ -624,69 +649,82 @@ void ScriptEngine::preSync(bool isMaster) {
         return;
     }
 
-    _mutex.lock();
-    if (!_queuedScripts.empty()) {
-        _currentSyncedScript = _queuedScripts.back().first;
-        const bool remoteScripting = _queuedScripts.back().second;
+    std::lock_guard<std::mutex> guard(_slaveScriptsMutex);
+    while (!_incomingScripts.empty()) {
+        QueueItem item = std::move(_incomingScripts.front());
+        _incomingScripts.pop();
+
+        _scriptsToSync.push_back(item.script);
+        const bool remoteScripting = item.remoteScripting;
 
         // Not really a received script but the master also needs to run the script...
-        _receivedScripts.push_back(_currentSyncedScript);
-        _queuedScripts.pop_back();
+        _masterScriptQueue.push(item);
 
         if (global::parallelPeer.isHost() && remoteScripting) {
-            global::parallelPeer.sendScript(_currentSyncedScript);
+            global::parallelPeer.sendScript(item.script);
+        }
+        if (global::sessionRecording.isRecording()) {
+            global::sessionRecording.saveScriptKeyframe(item.script);
         }
     }
-    _mutex.unlock();
 }
 
 void ScriptEngine::encode(SyncBuffer* syncBuffer) {
-    syncBuffer->encode(_currentSyncedScript);
-    _currentSyncedScript.clear();
+    size_t nScripts = _scriptsToSync.size();
+    syncBuffer->encode(nScripts);
+    for (const std::string& s : _scriptsToSync) {
+        syncBuffer->encode(s);
+    }
+    _scriptsToSync.clear();
 }
 
 void ScriptEngine::decode(SyncBuffer* syncBuffer) {
-    syncBuffer->decode(_currentSyncedScript);
+    std::lock_guard<std::mutex> guard(_slaveScriptsMutex);
+    size_t nScripts;
+    syncBuffer->decode(nScripts);
 
-    if (!_currentSyncedScript.empty()) {
-        _mutex.lock();
-        _receivedScripts.push_back(_currentSyncedScript);
-        _mutex.unlock();
+    for (size_t i = 0; i < nScripts; ++i) {
+        std::string script;
+        syncBuffer->decode(script);
+        _slaveScriptQueue.push(std::move(script));
     }
 }
 
-void ScriptEngine::postSync(bool) {
-    std::vector<std::string> scripts;
-
-    _mutex.lock();
-    scripts.assign(_receivedScripts.begin(), _receivedScripts.end());
-    _receivedScripts.clear();
-    _mutex.unlock();
-
-    while (!scripts.empty()) {
-        try {
-            runScript(scripts.back());
+void ScriptEngine::postSync(bool isMaster) {
+    if (isMaster) {
+        while (!_masterScriptQueue.empty()) {
+            std::string script = std::move(_masterScriptQueue.front().script);
+            ScriptCallback callback = std::move(_masterScriptQueue.front().callback);
+            _masterScriptQueue.pop();
+            try {
+                runScript(script, callback);
+            }
+            catch (const ghoul::RuntimeError& e) {
+                LERRORC(e.component, e.message);
+                continue;
+            }
         }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC(e.component, e.message);
+    } else {
+        std::lock_guard<std::mutex> guard(_slaveScriptsMutex);
+        while (!_slaveScriptQueue.empty()) {
+            try {
+                runScript(_slaveScriptQueue.front());
+                _slaveScriptQueue.pop();
+            }
+            catch (const ghoul::RuntimeError& e) {
+                LERRORC(e.component, e.message);
+            }
         }
-        scripts.pop_back();
     }
 }
 
 void ScriptEngine::queueScript(const std::string& script,
-                               ScriptEngine::RemoteScripting remoteScripting)
+                               ScriptEngine::RemoteScripting remoteScripting,
+                               ScriptCallback callback)
 {
-    if (script.empty()) {
-        return;
+    if (!script.empty()) {
+        _incomingScripts.push({ script, remoteScripting, callback });
     }
-
-    _mutex.lock();
-    _queuedScripts.insert(
-        _queuedScripts.begin(),
-        std::make_pair(script, remoteScripting)
-    );
-    _mutex.unlock();
 }
 
 } // namespace openspace::scripting

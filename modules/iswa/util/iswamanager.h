@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,6 @@
 #define __OPENSPACE_MODULE_ISWA___ISWAMANAGER___H__
 
 #include <openspace/properties/propertyowner.h>
-#include <ghoul/designpattern/singleton.h>
 
 #include <openspace/engine/downloadmanager.h>
 #include <ghoul/designpattern/event.h>
@@ -68,16 +67,18 @@ struct MetadataFuture {
     bool isFinished;
 };
 
-class IswaManager : public ghoul::Singleton<IswaManager>, public properties::PropertyOwner
-{
-    friend class ghoul::Singleton<IswaManager>;
-
+class IswaManager : public properties::PropertyOwner {
 public:
     enum CygnetType { Texture, Data, Kameleon, NoType };
     enum CygnetGeometry { Plane, Sphere };
 
     IswaManager();
     ~IswaManager();
+
+    static void initialize();
+    static void deinitialize();
+    static bool isInitialized();
+    static IswaManager& ref();
 
     void addIswaCygnet(int id, const std::string& type = "Texture",
         std::string group = "");
@@ -127,6 +128,8 @@ private:
     ghoul::Event<> _iswaEvent;
 
     std::string _baseUrl;
+
+    static IswaManager* _instance;
 };
 
 } //namespace openspace

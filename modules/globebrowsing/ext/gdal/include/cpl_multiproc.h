@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_multiproc.h 35921 2016-10-25 02:28:29Z goatbar $
+ * $Id: cpl_multiproc.h b5fb552a68377945dc4bff235f0e1af3728c75c6 2018-03-11 23:57:13Z Even Rouault $
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  CPL Multi-Threading, and process handling portability functions.
@@ -122,7 +122,7 @@ void  CPL_DLL  CPLLockSetDebugPerf( CPLLock*, int bEnableIn ); /* only available
 
 CPL_C_END
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(CPL_SUPRESS_CPLUSPLUS)
 
 /* Instantiates the mutex if not already done. The parameter x should be a (void**). */
 #define CPLMutexHolderD(x)  CPLMutexHolder oHolder(x,1000.0,__FILE__,__LINE__);
@@ -205,7 +205,7 @@ class CPL_DLL CPLLockHolder
 #define CTLS_ERRORCONTEXT                5         /* cpl_error.cpp */
 #define CTLS_GDALDATASET_REC_PROTECT_MAP 6        /* gdaldataset.cpp */
 #define CTLS_PATHBUF                     7         /* cpl_path.cpp */
-#define CTLS_UNUSED3                     8
+#define CTLS_ABSTRACTARCHIVE_SPLIT       8         /* cpl_vsil_abstract_archive.cpp */
 #define CTLS_UNUSED4                     9
 #define CTLS_CPLSPRINTF                 10         /* cpl_string.h */
 #define CTLS_RESPONSIBLEPID             11         /* gdaldataset.cpp */

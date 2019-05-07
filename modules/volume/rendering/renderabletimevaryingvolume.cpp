@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,23 +49,20 @@ namespace {
 } // namespace
 
 namespace {
-    constexpr const char* KeyDimensions = "Dimensions";
-    constexpr const char* KeyStepSize = "StepSize";
-    constexpr const char* KeyTransferFunction = "TransferFunction";
-    constexpr const char* KeySourceDirectory = "SourceDirectory";
-    constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
-    constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
-    constexpr const char* KeyClipPlanes = "ClipPlanes";
-    constexpr const char* KeySecondsBefore = "SecondsBefore";
-    constexpr const char* KeySecondsAfter = "SecondsAfter";
-    constexpr const char* KeyGridType = "GridType";
-    constexpr const char* KeyMinValue = "MinValue";
-    constexpr const char* KeyMaxValue = "MaxValue";
-    constexpr const char* KeyTime = "Time";
-    constexpr const char* KeyUnit = "VisUnit";
-    constexpr const float SecondsInOneDay = 60 * 60 * 24;
 
-    constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
+    const char* KeyStepSize = "StepSize";
+    const char* KeyGridType = "GridType";
+    const char* KeyTransferFunction = "TransferFunction";
+    const char* KeySourceDirectory = "SourceDirectory";
+
+    const char* KeyClipPlanes = "ClipPlanes";
+    const char* KeySecondsBefore = "SecondsBefore";
+    const char* KeySecondsAfter = "SecondsAfter";
+
+    const float SecondsInOneDay = 60 * 60 * 24;
+    constexpr const float VolumeMaxOpacity = 500;
+
+    static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "stepSize",
         "Step Size",
         "" // @TODO Missing documentation
@@ -116,12 +113,6 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo CurrentTimeStepInfo = {
         "currentTimestep",
         "Current timestep",
-        "" // @TODO Missing documentation
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
-        "opacity",
-        "Opacity",
         "" // @TODO Missing documentation
     };
 
@@ -176,59 +167,11 @@ namespace openspace::volume {
     };
 }
 
-
-//documentation::Documentation RenderableTimeVaryingVolume::TimestepDocumentation() {
-//    using namespace documentation;
-//    return {
-//        "TimevaryingVolumeTimestep",
-//        "volume_timevaryingvolumetimestep",
-//        {
-//            {
-//                KeyLowerDomainBound,
-//                new Vector3Verifier<float>,
-//                Optional::No,
-//                "Specifies the lower domain bounds in the model coordinate system",
-//            },
-//            {
-//                KeyUpperDomainBound,
-//                new Vector3Verifier<float>,
-//                Optional::No,
-//                "Specifies the upper domain bounds in the model coordinate system",
-//            },
-//            {
-//                KeyDimensions,
-//                new Vector3Verifier<float>,
-//                Optional::No,
-//                "Specifies the number of grid cells in each dimension",
-//            },
-//            {
-//                KeyTime,
-//                new StringVerifier,
-//                Optional::No,
-//                "Specifies the time on the format YYYY-MM-DDTHH:MM:SS.000Z",
-//            },
-//            {
-//                KeyMinValue,
-//                new DoubleVerifier,
-//                Optional::No,
-//                "Specifies the minimum value stored in the volume"
-//            },
-//            {
-//                KeyMaxValue,
-//                new DoubleVerifier,
-//                Optional::No,
-//                "Specifies the maximum value stored in the volume"
-//            }
-//        }
-//    };
-//}
-
 RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _stepSize(StepSizeInfo, 0.02f, 0.001f, 1.f)
-    , _opacity(OpacityInfo, 10.f, 0.f, 500.f)
+    , _stepSize(StepSizeInfo, 0.02f, 0.001f, 0.1f)
     , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
     , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
     , _secondsBefore(SecondsBeforeInfo, 0.f, 0.01f, SecondsInOneDay)
@@ -279,6 +222,8 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
         );
         _gridType = static_cast<std::underlying_type_t<VolumeGridType>>(gridType);
     }
+
+    addProperty(_opacity);
 }
 
 RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
@@ -343,7 +288,6 @@ void RenderableTimeVaryingVolume::initializeGL() {
         t.texture->uploadTexture();
     }
 
-    //_transferFunction->initialize();
     _clipPlanes->initialize();
 
     _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(
@@ -381,7 +325,6 @@ void RenderableTimeVaryingVolume::initializeGL() {
     addProperty(_triggerTimeJump);
     addProperty(_jumpToTimestep);
     addProperty(_currentTimestep);
-    addProperty(_opacity);
     addProperty(_rNormalization);
     addProperty(_rUpperBound);
     addProperty(_gridType);
@@ -488,6 +431,8 @@ void RenderableTimeVaryingVolume::jumpToTimestep(int target) {
 }
 
 void RenderableTimeVaryingVolume::update(const UpdateData&) {
+    _transferFunction->update();
+
     if (_raycaster) {
         Timestep* t = currentTimestep();
         _currentTimestep = timestepIndex(t);
@@ -517,16 +462,11 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
                 );
             }
             _raycaster->setVolumeTexture(t->texture);
-            //_transferFunctionHandler->setUnit(t->metadata.valueUnit);
-            //_transferFunctionHandler->setMinAndMaxValue(
-            //    t->metadata.minValue, t->metadata.maxValue);
-
-            //_transferFunctionHandler->setHistogramProperty(t->histogram);
         } else {
             _raycaster->setVolumeTexture(nullptr);
         }
         _raycaster->setStepSize(_stepSize);
-        _raycaster->setOpacity(_opacity);
+        _raycaster->setOpacity(_opacity * VolumeMaxOpacity);
         _raycaster->setRNormalization(_rNormalization);
         _raycaster->setRUpperBound(_rUpperBound);
     }

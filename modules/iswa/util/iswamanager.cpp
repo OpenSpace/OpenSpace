@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -94,6 +94,8 @@ namespace {
 
 namespace openspace {
 
+IswaManager* IswaManager::_instance = nullptr;
+
 IswaManager::IswaManager()
     : properties::PropertyOwner({ "IswaManager" })
     , _baseUrl("https://iswa-demo-server.herokuapp.com/")
@@ -116,6 +118,27 @@ IswaManager::IswaManager()
 IswaManager::~IswaManager() {
     _groups.clear();
     _cygnetInformation.clear();
+}
+
+
+void IswaManager::initialize() {
+    ghoul_assert(!isInitialized(), "IswaManager is already initialized");
+    _instance = new IswaManager;
+}
+
+void IswaManager::deinitialize() {
+    ghoul_assert(isInitialized(), "IswaManager is not initialized");
+    delete _instance;
+    _instance = nullptr;
+}
+
+bool IswaManager::isInitialized() {
+    return _instance != nullptr;
+}
+
+IswaManager& IswaManager::ref() {
+    ghoul_assert(isInitialized(), "IswaManager is not initialized");
+    return *_instance;
 }
 
 void IswaManager::addIswaCygnet(int id, const std::string& type, std::string group) {

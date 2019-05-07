@@ -32,7 +32,6 @@
 #include <openspace/util/powerscaledsphere.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/powerscaledsphere.h>
-#include <openspace/util/powerscaledscalar.h>
 #include <openspace/engine/globals.h>
 
 #include <ghoul/glm.h>
@@ -239,9 +238,7 @@ bool RenderableMarsrover::isReady() const {
 }
 
 void RenderableMarsrover::initializeGL() {
-    _marsrover = std::make_unique<PowerScaledSphere>(
-        PowerScaledScalar::CreatePSS(_size), _segments
-    );
+    _marsrover = std::make_unique<PowerScaledSphere>(_size, _segments);
     _marsrover->initialize();
 
     _shader = BaseModule::ProgramObjectManager.request(
@@ -288,7 +285,10 @@ void RenderableMarsrover::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform(_uniformCache.viewProjection, data.camera.viewProjectionMatrix());
     _shader->setUniform(_uniformCache.modelTransform, transform);
 
-    setPscUniforms(*_shader, data.camera, data.position);
+    _shader->setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
+    _shader->setUniform("objpos", glm::vec4(data.modelTransform.translation, 0.f));
+    _shader->setUniform("camrot", glm::mat4(data.camera.viewRotationMatrix()));
+    _shader->setUniform("scaling", glm::vec2(1.f, 0.f));
 
     float adjustedTransparency = _opacity;
 
@@ -304,7 +304,7 @@ void RenderableMarsrover::render(const RenderData& data, RendererTasks&) {
     if (_fadeOutThreshold > -1.0) {
         double distCamera = glm::distance(
             data.camera.positionVec3(),
-            data.position.dvec3()
+            data.modelTransform.translation            
         );
         double term = std::exp(
             (-distCamera + _size * _fadeOutThreshold) / (_size * _fadeOutThreshold)
@@ -365,9 +365,7 @@ void RenderableMarsrover::update(const UpdateData&) {
     }
 
     if (_sphereIsDirty) {
-        _marsrover = std::make_unique<PowerScaledSphere>(
-            PowerScaledScalar::CreatePSS(_size), _segments
-        );
+        _marsrover = std::make_unique<PowerScaledSphere>(_size, _segments);
         _marsrover->initialize();
         _sphereIsDirty = false;
     }

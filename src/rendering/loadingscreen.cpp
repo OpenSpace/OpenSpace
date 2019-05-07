@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -150,6 +150,10 @@ LoadingScreen::~LoadingScreen() {
 }
 
 void LoadingScreen::render() {
+    if (_phase != Phase::PreStart) {
+        return;
+    }
+
     // We have to recalculate the positions here because we will not be informed about a
     // window size change
 
@@ -222,6 +226,8 @@ void LoadingScreen::render() {
 
         glm::vec4 color;
         switch (_phase) {
+            case Phase::PreStart:
+                break;
             case Phase::Construction:
                 color = PhaseColorConstruction;
                 break;

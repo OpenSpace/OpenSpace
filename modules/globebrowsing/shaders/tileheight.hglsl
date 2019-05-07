@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,6 @@
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 #include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
-#include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
 
 #ifndef USE_HEIGHTMAP
 #define USE_HEIGHTMAP #{useAccurateNormals}
@@ -51,7 +50,7 @@ uniform float deltaPhi1;
 uniform float tileDelta;
 #endif //USE_ACCURATE_NORMALS && USE_HEIGHTMAP
 
-float getUntransformedTileHeight(vec2 uv, LevelWeights levelWeights) {
+float getUntransformedTileHeight(vec2 uv, vec3 levelWeights) {
     float height = CHUNK_DEFAULT_HEIGHT;
 
 #if USE_HEIGHTMAP
@@ -67,7 +66,7 @@ float getUntransformedTileHeight(vec2 uv, LevelWeights levelWeights) {
     return height;
 }
 
-float getTileHeight(vec2 uv, LevelWeights levelWeights) {
+float getTileHeight(vec2 uv, vec3 levelWeights) {
     float height = CHUNK_DEFAULT_HEIGHT;
 
 #if USE_HEIGHTMAP
@@ -83,7 +82,7 @@ float getTileHeight(vec2 uv, LevelWeights levelWeights) {
     return height;
 }
 
-float getTileHeightScaled(vec2 uv, LevelWeights levelWeights) {
+float getTileHeightScaled(vec2 uv, vec3 levelWeights) {
     float height = getTileHeight(uv, levelWeights);
     
 #if USE_HEIGHTMAP
@@ -93,7 +92,7 @@ float getTileHeightScaled(vec2 uv, LevelWeights levelWeights) {
     return height;
 }
 
-vec3 getTileNormal(vec2 uv, LevelWeights levelWeights, vec3 ellipsoidNormalCameraSpace,
+vec3 getTileNormal(vec2 uv, vec3 levelWeights, vec3 ellipsoidNormalCameraSpace,
                    vec3 ellipsoidTangentThetaCameraSpace,
                    vec3 ellipsoidTangentPhiCameraSpace)
 {

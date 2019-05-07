@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,8 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 #include <atomic>
@@ -94,7 +96,6 @@ public:
     void traversePostOrder(const std::function<void(SceneGraphNode*)>& fn);
     void update(const UpdateData& data);
     void render(const RenderData& data, RendererTasks& tasks);
-    void updateCamera(Camera* camera) const;
 
     void attachChild(std::unique_ptr<SceneGraphNode> child);
     std::unique_ptr<SceneGraphNode> detachChild(SceneGraphNode& child);
@@ -107,7 +108,7 @@ public:
     void setDependencies(const std::vector<SceneGraphNode*>& dependencies);
 
     SurfacePositionHandle calculateSurfacePositionHandle(
-        const glm::dvec3& targetModelSpace);
+        const glm::dvec3& targetModelSpace) const;
 
     const std::vector<SceneGraphNode*>& dependencies() const;
     const std::vector<SceneGraphNode*>& dependentNodes() const;
@@ -137,9 +138,9 @@ public:
 
     void setRenderable(std::unique_ptr<Renderable> renderable);
     const Renderable* renderable() const;
-    //Renderable* renderable();
+    Renderable* renderable();
 
-    const std::string& guiPath() const;
+    std::string guiPath() const;
     bool hasGuiHintHidden() const;
 
     static documentation::Documentation Documentation();
@@ -158,13 +159,14 @@ private:
 
     // If this value is 'true' GUIs are asked to hide this node from collections, as it
     // might be a node that is not very interesting (for example barycenters)
-    bool _guiHintHidden = false;
+    properties::BoolProperty _guiHidden;
 
     PerformanceRecord _performanceRecord = { 0, 0, 0, 0, 0 };
 
     std::unique_ptr<Renderable> _renderable;
 
-    std::string _guiPath;
+    properties::StringProperty _guiPath;
+    properties::StringProperty _guiDisplayName;
 
     // Transformation defined by ephemeris, rotation and scale
     struct {
@@ -179,6 +181,8 @@ private:
     glm::dvec3 _worldPositionCached;
     glm::dmat3 _worldRotationCached;
     double _worldScaleCached = 1.0;
+
+    float _fixedBoundingSphere = 0.f;
 
     glm::dmat4 _modelTransformCached;
     glm::dmat4 _inverseModelTransformCached;

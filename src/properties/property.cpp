@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,6 +38,7 @@ namespace {
     constexpr const char* MetaDataKeyReadOnly = "isReadOnly";
 
     constexpr const char* _metaDataKeyViewPrefix = "view.";
+
 } // namespace
 
 namespace openspace::properties {
@@ -55,6 +56,43 @@ const char* Property::DescriptionKey = "Description";
 const char* Property::JsonValueKey = "Value";
 const char* Property::MetaDataKey = "MetaData";
 const char* Property::AdditionalDataKey = "AdditionalData";
+
+
+
+std::string sanitizeString(const std::string& s) {
+    std::string result;
+
+    for (const char& c : s) {
+        switch (c) {
+            case '"':
+                result += "\\\"";
+                break;
+            case '\\':
+                result += "\\\\";
+                break;
+            case '\b':
+                result += "\\b";
+                break;
+            case '\f':
+                result += "\\f";
+                break;
+            case '\n':
+                result += "\\n";
+                break;
+            case '\r':
+                result += "\\r";
+                break;
+            case '\t':
+                result += "\\t";
+                break;
+            default:
+                result += c;
+        }
+    }
+
+    return result;
+}
+
 
 #ifdef _DEBUG
 uint64_t Property::Identifier = 0;
@@ -196,13 +234,7 @@ std::string Property::toJson() const {
 }
 
 std::string Property::jsonValue() const {
-    std::string value = getStringValue();
-    if (value[0] == '"' && value[value.size() - 1] == '"') {
-        return value.substr(1, value.size() - 2);
-    }
-    else {
-        return value;
-    }
+    return getStringValue();
 }
 
 Property::OnChangeHandle Property::onChange(std::function<void()> callback) {
@@ -281,15 +313,21 @@ void Property::notifyDeleteListeners() {
 }
 
 std::string Property::generateBaseJsonDescription() const {
+    std::string cName = className();
+    std::string cNameSan = sanitizeString(cName);
+    std::string identifier = fullyQualifiedIdentifier();
+    std::string identifierSan = sanitizeString(identifier);
+    std::string gName = guiName();
+    std::string gNameSan = sanitizeString(gName);
+    std::string metaData = generateMetaDataJsonDescription();
+    std::string description = generateAdditionalJsonDescription();
+
     return
-        "{ \"" + std::string(TypeKey) + "\": \"" + className() + "\", " +
-        "\"" + std::string(IdentifierKey) + "\": \"" +
-            fullyQualifiedIdentifier() + "\", " +
-        "\"" + std::string(NameKey) + "\": \"" + guiName() + "\", " +
-        "\"" + std::string(MetaDataKey) + "\": " +
-            generateMetaDataJsonDescription() + ", " +
-        "\"" + std::string(AdditionalDataKey) + "\": " +
-            generateAdditionalJsonDescription() + " }";
+        "{ \"" + std::string(TypeKey) + "\": \"" + cNameSan + "\", " +
+        "\"" + std::string(IdentifierKey) + "\": \"" + identifierSan + "\", " +
+        "\"" + std::string(NameKey) + "\": \"" + gNameSan + "\", " +
+        "\"" + std::string(MetaDataKey) + "\": " + metaData + ", " +
+        "\"" + std::string(AdditionalDataKey) + "\": " + description + " }";
 }
 
 std::string Property::generateMetaDataJsonDescription() const {
@@ -308,9 +346,12 @@ std::string Property::generateMetaDataJsonDescription() const {
         isReadOnly = _metaData.value<bool>(MetaDataKeyReadOnly);
     }
 
+    std::string gIdent = groupIdentifier();
+    std::string gIdentSan = sanitizeString(gIdent);
+
     std::string result = "{ ";
     result +=
-        "\"" + std::string(MetaDataKeyGroup) + "\": \"" + groupIdentifier() + "\", ";
+        "\"" + std::string(MetaDataKeyGroup) + "\": \"" + gIdentSan + "\", ";
     result +=
         "\"" + std::string(MetaDataKeyVisibility) + "\": \"" + vis + "\", ";
     result +=

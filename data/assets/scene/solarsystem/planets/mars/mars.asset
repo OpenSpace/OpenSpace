@@ -79,24 +79,6 @@ local color_layers = {
         FilePath = mapServiceConfigs .. "/LiU/Mola_HRSC.wms"
     },
     {
-        Identifier = "CTX_Mosaic_Utah",
-        Name = "CTX Mosaic [Utah]",
-        FilePath = mapServiceConfigs .. "/Utah/CTX.wms",
-        BlendMode = "Color"
-    },
-    {
-        Identifier = "CTX_Mosaic_Sweden",
-        Name = "CTX Mosaic [Sweden]",
-        FilePath = mapServiceConfigs .. "/LiU/CTX.wms",
-        BlendMode = "Color"
-    },
-    {
-        Identifier = "CTX_Mosaic_AWS",
-        Name = "CTX Mosaic [AWS]",
-        FilePath = mapServiceConfigs .. "/AWS/CTX.wms",
-        BlendMode = "Color"
-    },
-    {
         Identifier = "Themis_IR_Day_Utah",
         Name = "Themis IR Day [Utah]",
         FilePath = mapServiceConfigs .. "/Utah/Themis_IR_Day.wms",
@@ -130,6 +112,24 @@ local color_layers = {
         Identifier = "Themis_IR_Night_AWS",
         Name = "Themis IR Night [AWS]",
         FilePath = mapServiceConfigs .. "/AWS/Themis_IR_Night.wms",
+        BlendMode = "Color"
+    },
+    {
+        Identifier = "CTX_Mosaic_Utah",
+        Name = "CTX Mosaic [Utah]",
+        FilePath = mapServiceConfigs .. "/Utah/CTX.wms",
+        BlendMode = "Color"
+    },
+    {
+        Identifier = "CTX_Mosaic_Sweden",
+        Name = "CTX Mosaic [Sweden]",
+        FilePath = mapServiceConfigs .. "/LiU/CTX.wms",
+        BlendMode = "Color"
+    },
+    {
+        Identifier = "CTX_Mosaic_AWS",
+        Name = "CTX Mosaic [AWS]",
+        FilePath = mapServiceConfigs .. "/AWS/CTX.wms",
         BlendMode = "Color"
     }
 }

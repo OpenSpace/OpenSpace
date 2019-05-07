@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,8 +47,6 @@ Dashboard::Dashboard()
 {
     addProperty(_isEnabled);
 }
-
-Dashboard::~Dashboard() {}
 
 void Dashboard::addDashboardItem(std::unique_ptr<DashboardItem> item) {
     const std::string& originalIdentifier = item->identifier();

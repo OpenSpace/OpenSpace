@@ -4,21 +4,21 @@ states = {
     {
         Title = "Highlight EarthTrail",
         Play = function ()
-            openspace.setPropertyValue("Scene.EarthTrail.renderable.LineWidth", 10, 1)
+            openspace.setPropertyValue("Scene.EarthTrail.Renderable.LineWidth", 10, 1)
         end,
         Rewind = function ()
-            openspace.setPropertyValue("Scene.EarthTrail.renderable.LineWidth", 2, 1)
+            openspace.setPropertyValue("Scene.EarthTrail.Renderable.LineWidth", 2, 1)
         end
     }, 
     {
         Title = "Highlight MarsTrail",
         Play = function ()
-            openspace.setPropertyValue("Scene.EarthTrail.renderable.LineWidth", 2, 1)
-            openspace.setPropertyValue("Scene.MarsTrail.renderable.LineWidth", 10, 1)
+            openspace.setPropertyValue("Scene.EarthTrail.Renderable.LineWidth", 2, 1)
+            openspace.setPropertyValue("Scene.MarsTrail.Renderable.LineWidth", 10, 1)
         end,
         Rewind = function ()
-            openspace.setPropertyValue("Scene.MarsTrail.renderable.LineWidth", 2, 1)
-            openspace.setPropertyValue("Scene.EarthTrail.renderable.LineWidth", 10, 1)
+            openspace.setPropertyValue("Scene.MarsTrail.Renderable.LineWidth", 2, 1)
+            openspace.setPropertyValue("Scene.EarthTrail.Renderable.LineWidth", 10, 1)
         end
     }
 }

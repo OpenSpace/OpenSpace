@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -128,6 +128,16 @@ Property* PropertyOwner::property(const std::string& uri) const {
 
 bool PropertyOwner::hasProperty(const std::string& uri) const {
     return property(uri) != nullptr;
+}
+
+bool PropertyOwner::hasProperty(const Property* prop) const {
+    ghoul_precondition(prop != nullptr, "prop must not be nullptr");
+
+    std::vector<Property*>::const_iterator it = std::find(
+        _properties.begin(), _properties.end(), prop
+    );
+
+    return it != _properties.end();
 }
 
 const std::vector<PropertyOwner*>& PropertyOwner::propertySubOwners() const {
@@ -354,19 +364,23 @@ std::string PropertyOwner::generateJson() const {
     std::function<std::string(properties::PropertyOwner*)> createJson =
         [&createJson](properties::PropertyOwner* owner) -> std::string
     {
+        constexpr const char* replStr = R"("{}": "{}")";
+
         std::stringstream json;
         json << "{";
-        json << "\"name\": \"" << owner->identifier() << "\",";
+        json << fmt::format(replStr, "name", owner->identifier()) << ",";
 
         json << "\"properties\": [";
-        auto properties = owner->properties();
+        const std::vector<properties::Property*>& properties = owner->properties();
         for (properties::Property* p : properties) {
             json << "{";
-            json << "\"id\": \"" << p->identifier() << "\",";
-            json << "\"type\": \"" << p->className() << "\",";
-            json << "\"fullyQualifiedId\": \"" << p->fullyQualifiedIdentifier() << "\",";
-            json << "\"guiName\": \"" << p->guiName() << "\",";
-            json << "\"description\": \"" << escapedJson(p->description()) << "\"";
+            json << fmt::format(replStr, "id", p->identifier()) << ",";
+            json << fmt::format(replStr, "type", p->className()) << ",";
+            json << fmt::format(
+                replStr, "fullyQualifiedId", p->fullyQualifiedIdentifier()
+            ) << ",";
+            json << fmt::format(replStr, "guiName", p->guiName()) << ",";
+            json << fmt::format(replStr, "description", escapedJson(p->description()));
             json << "}";
             if (p != properties.back()) {
                 json << ",";

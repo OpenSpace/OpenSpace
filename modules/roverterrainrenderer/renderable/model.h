@@ -25,9 +25,8 @@
 #ifndef __OPENSPACE_MODULE_ROVER_TERRAIN_RENDERER___MODEL__H_
 #define __OPENSPACE_MODULE_ROVER_TERRAIN_RENDERER___MODEL__H_
 
-#include <modules/globebrowsing/tile/tileindex.h>
+#include <modules/globebrowsing/src/tileindex.h>
 #include <modules/base/rendering/asyncmultimodelgeometry.h>
-#include <modules/globebrowsing/geometry/geodetic2.h>
 #include <ghoul/opengl/texture.h>
 #include <memory>
 

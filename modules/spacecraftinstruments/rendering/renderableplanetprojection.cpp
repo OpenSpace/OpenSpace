@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -466,7 +466,7 @@ bool RenderablePlanetProjection::isReady() const {
 }
 
 void RenderablePlanetProjection::imageProjectGPU(
-                                std::shared_ptr<ghoul::opengl::Texture> projectionTexture)
+                                          const ghoul::opengl::Texture& projectionTexture)
 {
     _projectionComponent.imageProjectBegin();
 
@@ -474,7 +474,7 @@ void RenderablePlanetProjection::imageProjectGPU(
 
     ghoul::opengl::TextureUnit unitFbo;
     unitFbo.activate();
-    projectionTexture->bind();
+    projectionTexture.bind();
     _fboProgramObject->setUniform(_fboUniformCache.projectionTexture, unitFbo);
 
     _fboProgramObject->setUniform(_fboUniformCache.projectorMatrix, _projectorMatrix);
@@ -512,20 +512,7 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
         _projectionComponent.instrumentId(), _mainFrame, time
     );
 
-    _transform = glm::mat4(1);
-    //90 deg rotation w.r.t spice req.
-    glm::mat4 rot = glm::rotate(
-        _transform,
-        glm::half_pi<float>(),
-        glm::vec3(1, 0, 0)
-    );
-    glm::mat4 roty = glm::rotate(
-        _transform,
-        glm::half_pi<float>(),
-        glm::vec3(0, -1, 0)
-    );
-
-    _transform = glm::mat4(_stateMatrix) * rot * roty;
+    _transform = glm::mat4(_stateMatrix);
 
     glm::dvec3 bs;
     try {
@@ -547,19 +534,12 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
         _projectionComponent.aberration(),
         time,
         lightTime
-    );
-    psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
+    ) * 1000.0;
 
-    //change to KM and add psc camera scaling.
-    position[3] += (3 + _camScaling[1]);
-    //position[3] += 3;
-    glm::vec3 cpos = position.vec3();
-
-    float distance = glm::length(cpos);
+    float distance = glm::length(p);
     float radius = boundingSphere();
-
     _projectorMatrix = _projectionComponent.computeProjectorMatrix(
-        cpos,
+        p,
         bs,
         _up,
         _instrumentMatrix,
@@ -596,7 +576,9 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
                 break;
             }
             RenderablePlanetProjection::attitudeParameters(img.timeRange.start);
-            imageProjectGPU(_projectionComponent.loadProjectionTexture(img.path));
+            std::shared_ptr<ghoul::opengl::Texture> t =
+                _projectionComponent.loadProjectionTexture(img.path);
+            imageProjectGPU(*t);
             ++nPerformedProjections;
         }
         _imageTimes.erase(
@@ -608,8 +590,8 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
     }
     attitudeParameters(data.time.j2000Seconds());
 
-    double  lt;
-    glm::dvec3 p = SpiceManager::ref().targetPosition(
+    double lt;
+    glm::dvec3 sunPos = SpiceManager::ref().targetPosition(
         "SUN",
         _projectionComponent.projecteeId(),
         "GALACTIC",
@@ -617,37 +599,16 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
         data.time.j2000Seconds(),
         lt
     );
-    psc sun_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
     // Main renderpass
     _programObject->activate();
-    _programObject->setUniform(_mainUniformCache.sunPos, sun_pos.vec3());
-    //_program->setUniform("ViewProjection" ,  data.camera.viewProjectionMatrix());
-    //_program->setUniform("ModelTransform" , _transform);
+    _programObject->setUniform(_mainUniformCache.sunPos, static_cast<glm::vec3>(sunPos));
 
     // Model transform and view transform needs to be in double precision
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-    // This is apparently the transform needed to get the model in the coordinate system
-    // Used by SPICE. Don't ask me why, it was defined in the function attitudeParameters.
-    // SPICE needs a planet to be defined with z in the north pole, x in the prime
-    // meridian and y completes the right handed coordinate system.
-    // Doing this is part of changing from using the transforms defined by the
-    // scenegraph node (data.modelTransform) to achieve higher precision rendering. //KB
-    glm::dmat4 rot = glm::rotate(
-        glm::dmat4(1.0),
-        glm::half_pi<double>(),
-        glm::dvec3(1.0, 0.0, 0.0)
-    );
-    glm::dmat4 roty = glm::rotate(
-        glm::dmat4(1.0),
-        glm::half_pi<double>(),
-        glm::dvec3(0.0, -1.0, 0.0)
-    );
-    modelTransform = modelTransform * rot * roty;
 
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
@@ -763,9 +724,7 @@ void RenderablePlanetProjection::clearProjectionBufferAfterTime(double time) {
     const auto& it = std::find_if(
         _imageTimes.begin(),
         _imageTimes.end(),
-        [time](const Image& image) {
-            return image.timeRange.end > time;
-        }
+        [time](const Image& image) { return image.timeRange.end > time; }
     );
     if (it != _imageTimes.end()) {
         _imageTimes.erase(it, _imageTimes.end());
@@ -780,7 +739,6 @@ void RenderablePlanetProjection::insertImageProjections(const std::vector<Image>
     );
     _projectionsInBuffer = static_cast<int>(_imageTimes.size());
 }
-
 
 void RenderablePlanetProjection::loadColorTexture() {
     using ghoul::opengl::Texture;

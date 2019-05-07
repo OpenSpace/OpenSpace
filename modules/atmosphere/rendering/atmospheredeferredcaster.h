@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -186,7 +186,7 @@ private:
     int _nu_samples;
 
     glm::dmat4 _modelTransform;
-    double _time;
+    double _time = 0.0;
 
     // Eclipse Shadows
     std::vector<ShadowConfiguration> _shadowConfArray;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,7 +43,7 @@
 #include <ghoul/opengl/textureunit.h>
 #include <array>
 #include <fstream>
-#include <stdint.h>
+#include <cstdint>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableDUMeshes";
@@ -268,8 +268,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKey(KeyFile)) {
         _speckFile = absPath(dictionary.value<std::string>(KeyFile));
         _hasSpeckFile = true;
-        _drawElements.onChange([&]() {
-            _hasSpeckFile = _hasSpeckFile == true ? false : true; });
+        _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
         addProperty(_drawElements);
     }
 
@@ -706,7 +705,7 @@ bool RenderableDUMeshes::readSpeckFile() {
     // The beginning of the speck file has a header that either contains comments
     // (signaled by a preceding '#') or information about the structure of the file
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    std::string line = "";
+    std::string line;
     while (true) {
         std::streampos position = file.tellg();
         std::getline(file, line);
@@ -827,7 +826,7 @@ bool RenderableDUMeshes::readLabelFile() {
     // The beginning of the speck file has a header that either contains comments
     // (signaled by a preceding '#') or information about the structure of the file
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    std::string line = "";
+    std::string line;
     while (true) {
         std::streampos position = file.tellg();
         std::getline(file, line);
@@ -899,7 +898,7 @@ bool RenderableDUMeshes::readLabelFile() {
         glm::vec3 transformedPos = glm::vec3(
             _transformationMatrix * glm::dvec4(position, 1.0)
         );
-        _labelData.push_back(std::make_pair(transformedPos, label));
+        _labelData.emplace_back(std::make_pair(transformedPos, label));
 
     } while (!file.eof());
 

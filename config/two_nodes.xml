@@ -34,3 +34,8 @@
         <Pos x="0.0" y="0.0" z="4.0" />
     </User>
 </Cluster>
+<!--
+Usage:
+for master: <executable> -local 0
+for slave: <executable> -local 1 --slave
+-->

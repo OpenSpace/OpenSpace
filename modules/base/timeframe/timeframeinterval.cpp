@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -114,8 +114,7 @@ TimeFrameInterval::TimeFrameInterval()
 }
 
 TimeFrameInterval::TimeFrameInterval(const ghoul::Dictionary& dictionary)
-    : TimeFrame()
-    , _hasStart(HasStartInfo, false)
+    : _hasStart(HasStartInfo, false)
     , _start(StartInfo, 0, 0, 1E9)
     , _hasEnd(HasEndInfo, false)
     , _end(EndInfo, 0, 0, 1E9)

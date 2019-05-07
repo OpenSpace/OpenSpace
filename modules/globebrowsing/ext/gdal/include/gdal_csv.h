@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_csv.h 33844 2016-04-01 08:42:13Z rouault $
+ * $Id: gdal_csv.h 8473217f278e7d65d5880d2160aea2231dc47db6 2016-04-01 08:42:13Z Even Rouault $
  *
  * Project:  Common Portability Library
  * Purpose:  Functions for reading and scanning CSV (comma separated,

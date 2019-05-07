@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -116,37 +116,54 @@ void TimeManager::interpolateTime(double targetTime, double durationSeconds) {
     addKeyframe(now + durationSeconds, next);
 }
 
+void TimeManager::interpolateTimeRelative(double delta, double durationSeconds) {
+    ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
+
+    const float duration = global::timeManager.defaultTimeInterpolationDuration();
+
+    const TimeKeyframeData predictedTime = interpolate(
+        global::windowDelegate.applicationTime() + duration
+    );
+    const double targetTime = predictedTime.time.j2000Seconds() + delta;
+    interpolateTime(targetTime, durationSeconds);
+}
+
 void TimeManager::preSynchronization(double dt) {
     removeKeyframesBefore(_latestConsumedTimestamp);
     progressTime(dt);
 
     // Notify observers about time changes if any.
     const double newTime = time().j2000Seconds();
-    const double newDeltaTime = _deltaTime;
+
     if (newTime != _lastTime) {
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
-        for (const std::pair<K, V>& it : _timeChangeCallbacks) {
+        for (const std::pair<const K, V>& it : _timeChangeCallbacks) {
             it.second();
         }
     }
-    if (newDeltaTime != _lastDeltaTime) {
+    if (_deltaTime != _lastDeltaTime ||
+        _timePaused != _lastTimePaused ||
+        _targetDeltaTime != _lastTargetDeltaTime)
+    {
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
-        for (const std::pair<K, V>& it : _deltaTimeChangeCallbacks) {
+        for (const std::pair<const K, V>& it : _deltaTimeChangeCallbacks) {
             it.second();
         }
     }
     if (_timelineChanged) {
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
-        for (const std::pair<K, V>& it : _timelineChangeCallbacks) {
+        for (const std::pair<const K, V>& it : _timelineChangeCallbacks) {
             it.second();
         }
     }
 
     _lastTime = newTime;
-    _lastDeltaTime = newDeltaTime;
+    _lastDeltaTime = _deltaTime;
+    _lastTargetDeltaTime = _targetDeltaTime;
+    _lastTimePaused = _timePaused;
     _timelineChanged = false;
 }
 
@@ -213,7 +230,7 @@ void TimeManager::progressTime(double dt) {
 
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
-        for (const std::pair<K, V>& it : _timeJumpCallbacks) {
+        for (const std::pair<const K, V>& it : _timeJumpCallbacks) {
             it.second();
         }
         return;
@@ -258,6 +275,7 @@ void TimeManager::progressTime(double dt) {
         // and time is not paused, just advance time.
         _deltaTime = _targetDeltaTime;
         _currentTime.data().advanceTime(dt * _deltaTime);
+        _playbackModeEnabled = false;
     }
 
     if (hasPastKeyframes) {
@@ -432,6 +450,10 @@ void TimeManager::removeDeltaTimeChangeCallback(CallbackHandle handle) {
     );
 
     _deltaTimeChangeCallbacks.erase(it);
+}
+
+void TimeManager::triggerPlaybackStart() {
+    _playbackModeEnabled = true;
 }
 
 void TimeManager::removeTimeJumpCallback(CallbackHandle handle) {

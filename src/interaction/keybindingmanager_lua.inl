@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,7 +37,7 @@ namespace openspace::luascriptfunctions {
 int bindKey(lua_State* L) {
     using ghoul::lua::luaTypeToString;
 
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, 2, 3, "lua::bindKey");
+    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 2, 5 }, "lua::bindKey");
 
     const std::string& key = ghoul::lua::value<std::string>(L, 1);
     const std::string& command = ghoul::lua::value<std::string>(L, 2);
@@ -56,13 +56,17 @@ int bindKey(lua_State* L) {
         return ghoul::lua::luaError(L, error);
     }
 
-    std::string doc = (nArguments == 3) ? ghoul::lua::value<std::string>(L, 3) : "";
+    std::string doc = (nArguments >= 3) ? ghoul::lua::value<std::string>(L, 3) : "";
+    std::string name = (nArguments >= 4) ? ghoul::lua::value<std::string>(L, 4) : "";
+    std::string guiPath = (nArguments == 5) ? ghoul::lua::value<std::string>(L, 5) : "";
 
     global::keybindingManager.bindKey(
         iKey.key,
         iKey.modifier,
         std::move(command),
-        std::move(doc)
+        std::move(doc),
+        std::move(name),
+        std::move(guiPath)
     );
 
     lua_settop(L, 0);
@@ -78,7 +82,7 @@ int bindKey(lua_State* L) {
 int bindKeyLocal(lua_State* L) {
     using ghoul::lua::luaTypeToString;
 
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, 2, 3, "lua::bindKeyLocal");
+    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 2, 5 }, "lua::bindKeyLocal");
 
     const std::string& key = ghoul::lua::value<std::string>(L, 1);
     const std::string& command = ghoul::lua::value<std::string>(L, 2);
@@ -95,13 +99,21 @@ int bindKeyLocal(lua_State* L) {
         return ghoul::lua::luaError(L, error);
     }
 
-    std::string doc = nArguments == 3 ? ghoul::lua::value<std::string>(L, 3) : "";
+    std::string doc = nArguments >= 3 ? ghoul::lua::value<std::string>(L, 3) : "";
+    std::string name = (nArguments >= 4) ?
+        ghoul::lua::value<std::string>(L, 4) :
+        "";
+    std::string guiPath = (nArguments == 5) ?
+        ghoul::lua::value<std::string>(L, 5) :
+        "";
 
     global::keybindingManager.bindKeyLocal(
         iKey.key,
         iKey.modifier,
         std::move(command),
-        std::move(doc)
+        std::move(doc),
+        std::move(name),
+        std::move(guiPath)
     );
 
     lua_settop(L, 0);

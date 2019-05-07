@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,12 @@ class Topic;
 
 class Connection {
 public:
-    Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address);
+    Connection(
+        std::unique_ptr<ghoul::io::Socket> s,
+        std::string address,
+        bool authorized = false,
+        const std::string& password = ""
+    );
 
     void handleMessage(const std::string& message);
     void sendMessage(const std::string& message);
@@ -62,12 +67,9 @@ private:
     std::thread _thread;
 
     std::string _address;
-    bool _requireAuthorization;
     bool _isAuthorized = false;
     std::map<TopicId, std::string> _messageQueue;
     std::map<TopicId, std::chrono::system_clock::time_point> _sentMessages;
-
-    bool isWhitelisted() const;
 };
 
 } // namespace openspace

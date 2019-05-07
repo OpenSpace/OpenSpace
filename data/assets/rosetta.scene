@@ -17,6 +17,10 @@ asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
 asset.require('util/default_joystick')
 
+asset.require('util/webgui')
+
+asset.request('customization/globebrowsing')
+
 -- Custom Keybindings
 local Keybindings = {
     {
@@ -45,13 +49,13 @@ local Keybindings = {
     },
     {
         Key = "F8",
-        Command = "openspace.setPropertyValue('Scene.67P.renderable.ProjectionComponent.clearAllProjections', true)",
+        Command = "openspace.setPropertyValue('Scene.67P.Renderable.ProjectionComponent.clearAllProjections', true)",
         Documentation = "Removes all image projections from 67P.",
         Local = false
     },
     {
         Key = "q",
-        Command = propertyHelper.invert('Scene.SunMarker.renderable.Enabled'),
+        Command = propertyHelper.invert('Scene.SunMarker.Renderable.Enabled'),
         Documentation = "Toggles the visibility of the text marking the location of the Sun.",
         Local = false
     },
@@ -76,7 +80,7 @@ local Keybindings = {
     },
     {
         Key = "p",
-        Command = propertyHelper.invert('Scene.67P.renderable.ProjectionComponent.performProjection'),
+        Command = propertyHelper.invert('Scene.67P.Renderable.ProjectionComponent.performProjection'),
         Documentation = "Enables or disables the image projection on 67P.",
         Local = false
     }
@@ -107,6 +111,10 @@ assetHelper.registerDashboardItems(asset, {
     }
 })
 
+assetHelper.registerInterestingNodes(asset, {
+    "67P", "Rosetta", "Philae"
+})
+
 asset.onInitialize(function ()
     openspace.time.setTime("2014-08-01T03:05:00.000")
     sceneHelper.bindKeys(Keybindings)
@@ -118,14 +126,10 @@ asset.onInitialize(function ()
         28800, 57600, 115200, 230400, 460800, 921600, 1843200, 3686400, 7372800, 14745600
     })
 
-    openspace.markInterestingNodes({
-        "67P", "Rosetta", "Philae"
-    })
-
     openspace.addVirtualProperty(
         "BoolProperty",
         "Show Trails",
-        "*Trail.renderable.Enabled",
+        "*Trail.Renderable.Enabled",
         "Disable or enable all trails of the scene at the same time",
         true,
         nil,
@@ -133,19 +137,16 @@ asset.onInitialize(function ()
     )
 
     openspace.navigation.setCameraState({
-        Focus = Comet67PAsset.Comet67P.Identifier,
+        Anchor = Comet67PAsset.Comet67P.Identifier,
         Position = { 526781518487.171326, 257168309890.072144, -1381125204152.817383 },
         Rotation = { -0.106166, 0.981574, -0.084545, 0.134513 },
     })
 
-    openspace.setPropertyValue('Scene.67P.renderable.PerformShading', false);
+    openspace.setPropertyValue('Scene.67P.Renderable.PerformShading', false);
 end)
 
 asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
 
-    openspace.removeVirtualProperty("*Trail.renderable.Enabled")
-    openspace.removeInterestingNodes({
-        "67PBarycenter", "Rosetta", "Philae"
-    })
+    openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
 end)

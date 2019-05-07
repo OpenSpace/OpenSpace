@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -95,14 +95,6 @@ namespace {
         "Tooltip Delay (in s)",
         "This value determines the delay in seconds after which the tooltip is shown."
     };
-
-    constexpr openspace::properties::Property::PropertyInfo HiddenInfo = {
-        "IsHidden",
-        "Is Hidden",
-        "If this value is true, all GUI items will not be rendered, regardless of their "
-        "status"
-    };
-
 } // namespace
 
 namespace openspace::gui {
@@ -130,12 +122,10 @@ GUI::GUI()
     )
     , _showHelpText(ShowHelpInfo, true)
     , _helpTextDelay(HelpTextDelayInfo, 1.0, 0.0, 10.0)
-    , _allHidden(HiddenInfo, true)
 {
     for (GuiComponent* comp : _components) {
         addPropertySubOwner(comp);
     }
-    _featuredProperties.setEnabled(true);
     _spaceTime.setEnabled(true);
 
     {
@@ -159,8 +149,6 @@ GUI::GUI()
         _helpTextDelay.onChange(std::move(helpTextDelayFunc));
         addProperty(_helpTextDelay);
     }
-
-    addProperty(_allHidden);
 }
 
 GUI::~GUI() {} // NOLINT
@@ -427,10 +415,8 @@ void GUI::endFrame() {
         _performance.render();
     }
 
-    if (!_allHidden) {
-        if (_isEnabled) {
-            render();
-        }
+    if (_isEnabled) {
+        render();
 
         for (GuiComponent* comp : _components) {
             if (comp->isEnabled()) {
@@ -441,6 +427,10 @@ void GUI::endFrame() {
 
     ImGui::Render();
 
+    const bool shouldRender = _performance.isEnabled() || _isEnabled;
+    if (!shouldRender) {
+        return;
+    }
 
     // Drawing
     ImDrawData* drawData = ImGui::GetDrawData();
@@ -705,10 +695,5 @@ void GUI::renderAndUpdatePropertyVisibility() {
     _virtualProperty.setVisibility(_currentVisibility);
     _featuredProperties.setVisibility(_currentVisibility);
 }
-
-void GUI::setHidden(bool isHidden) {
-    _allHidden = isHidden;
-}
-
 
 } // namespace openspace::gui

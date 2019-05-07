@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,6 @@
 
 #include <modules/server/include/jsonconverters.h>
 
-#include <openspace/json.h>
 #include <openspace/properties/property.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -35,9 +34,15 @@ using json = nlohmann::json;
 namespace openspace::properties {
 
 void to_json(json& j, const Property& p) {
+    std::string description = p.generateBaseJsonDescription();
+    json desc = json::parse(description);
+
+    std::string value = p.jsonValue();
+    json val = json::parse(value);
+
     j = {
-        { "Description", json::parse(p.generateBaseJsonDescription()) },
-        { "Value", p.jsonValue() }
+        { "Description", desc },
+        { "Value", val }
     };
     j["Description"]["description"] = p.description();
 }
@@ -49,6 +54,7 @@ void to_json(json& j, const Property* pP) {
 void to_json(json& j, const PropertyOwner& p) {
     j = {
         { "identifier", p.identifier() },
+        { "guiName", p.guiName() },
         { "description", p.description() },
         { "properties", p.properties() },
         { "subowners", p.propertySubOwners() },
@@ -61,6 +67,68 @@ void to_json(json& j, const PropertyOwner* p) {
 }
 
 } // namespace openspace::properties
+
+namespace ghoul {
+
+void to_json(json& j, const Dictionary& dictionary) {
+    json object;
+    for (const std::string& key : dictionary.keys()) {
+        if (dictionary.hasValue<glm::vec4>(key)) {
+            const glm::vec4 v = dictionary.value<glm::vec4>(key);
+            object[key] = json::array({ v[0], v[1], v[2], v[3] });
+        }
+        else if (dictionary.hasValue<glm::vec3>(key)) {
+            const glm::vec3 v = dictionary.value<glm::vec3>(key);
+            object[key] = json::array({ v[0], v[1], v[2] });
+        }
+        else if (dictionary.hasValue<glm::vec2>(key)) {
+            const glm::vec2 v = dictionary.value<glm::vec2>(key);
+            object[key] = json::array({ v[0], v[1] });
+        }
+        else if (dictionary.hasValue<glm::dvec4>(key)) {
+            const glm::dvec4 v = dictionary.value<glm::dvec4>(key);
+            object[key] = json::array({ v[0], v[1], v[2], v[3] });
+        }
+        else if (dictionary.hasValue<glm::dvec3>(key)) {
+            const glm::dvec3 v = dictionary.value<glm::dvec3>(key);
+            object[key] = json::array({ v[0], v[1], v[2] });
+        }
+        else if (dictionary.hasValue<glm::dvec2>(key)) {
+            const glm::dvec2 v = dictionary.value<glm::dvec2>(key);
+            object[key] = json::array({ v[0], v[1] });
+        }
+        else if (dictionary.hasValue<float>(key)) {
+            object[key] = dictionary.value<float>(key);
+        }
+        else if (dictionary.hasValue<double>(key)) {
+            object[key] = dictionary.value<double>(key);
+        }
+        else if (dictionary.hasValue<int>(key)) {
+            object[key] = dictionary.value<int>(key);
+        }
+        else if (dictionary.hasValue<unsigned int>(key)) {
+            object[key] = dictionary.value<unsigned int>(key);
+        }
+        else if (dictionary.hasValue<std::string>(key)) {
+            object[key] = dictionary.value<std::string>(key);
+        }
+        else if (dictionary.hasValue<Dictionary>(key)) {
+            json child;
+            to_json(child, dictionary.value<Dictionary>(key));
+            object[key] = child;
+        }
+        else {
+            object[key] = nullptr;
+        }
+    }
+    j = object;
+}
+
+void to_json(json& j, const Dictionary* d) {
+    j = *d;
+}
+
+} // namespace ghoul
 
 namespace openspace {
 

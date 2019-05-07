@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -113,7 +113,7 @@ struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks>
 namespace ghoul {
 
 template <>
-std::string to_string(const openspace::interaction::JoystickAction& action);
+std::string to_string(const openspace::interaction::JoystickAction& value);
 
 template <>
 openspace::interaction::JoystickAction from_string(const std::string& str);

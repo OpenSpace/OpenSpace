@@ -9,10 +9,10 @@ return {
         },
     },
     Moon = {
-        {
-            Name = "OnMoon LMMP",
-            URL  = "https://onmoon.lmmp.nasa.gov/wms.cgi?request=GetCapabilities"
-        },
+        -- {
+        --     Name = "OnMoon LMMP",
+        --     URL  = "https://onmoon.lmmp.nasa.gov/wms.cgi?request=GetCapabilities"
+        -- },
     },
     Mercury = {
         {

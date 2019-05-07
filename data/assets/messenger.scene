@@ -13,6 +13,8 @@ asset.request('scene/digitaluniverse/milkyway')
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
 
+asset.require('util/webgui')
+
 local MessengerAsset = asset.require('scene/solarsystem/missions/messenger/messengerSC')
 
 if not openspace.modules.isLoaded("Volume") then
@@ -35,6 +37,9 @@ assetHelper.registerDashboardItems(asset, {
     }
 })
 
+assetHelper.registerInterestingNodes(asset, {
+    "Mercury", "Messenger", "Earth", "Sun"
+})
 
 asset.onInitialize(function ()
 
@@ -47,31 +52,19 @@ asset.onInitialize(function ()
         28800, 57600, 115200, 230400, 460800, 921600, 1843200, 3686400, 7372800, 14745600
     })
 
-    openspace.markInterestingNodes({
-        "Mercury", "Messenger", "Earth", "Sun"
-    })
-
-     openspace.addVirtualProperty(
+    openspace.addVirtualProperty(
         "BoolProperty",
         "Show Trails",
-        "Scene.*Trail.renderable.Enabled",
+        "Scene.*Trail.Renderable.Enabled",
         "Disable or enable all trails of the scene at the same time",
         true,
         nil,
         nil
     )
 
-
     openspace.navigation.setCameraState({
-        Focus = "Mercury",
+        Anchor = "Mercury",
         Position = { 526781518487.171326, 257168309890.072144, -1381125204152.817383 },
         Rotation = {0.180662, 0.021334, 0.979084, 0.091111},
     })
 end)
-
-asset.onDeinitialize(function ()
-    openspace.removeInterestingNodes({
-        "Mercury", "Messenger", "Earth", "Sun"
-    })
-end)
-

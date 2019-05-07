@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -159,8 +159,13 @@ std::string SelectionProperty::generateAdditionalJsonDescription() const {
     std::string result = "{ \"" + OptionsKey + "\": [";
     for (size_t i = 0; i < _options.size(); ++i) {
         const Option& o = _options[i];
+        std::string v = std::to_string(o.value);
+        std::string vSan = sanitizeString(v);
+        std::string d = o.description;
+        std::string dSan = sanitizeString(d);
+
         result += "{";
-        result +=  "\"" + std::to_string(o.value) + "\": \"" + o.description + "\"";
+        result += fmt::format(R"("{}": "{}")", vSan, dSan);
         result += "}";
         if (i != _options.size() - 1) {
             result += ",";

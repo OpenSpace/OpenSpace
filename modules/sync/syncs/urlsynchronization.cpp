@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -96,9 +96,9 @@ documentation::Documentation UrlSynchronization::Documentation() {
 }
 
 UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
-                                       const std::string& synchronizationRoot)
+                                       std::string synchronizationRoot)
     : ResourceSynchronization(dict)
-    , _synchronizationRoot(synchronizationRoot)
+    , _synchronizationRoot(std::move(synchronizationRoot))
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -225,7 +225,7 @@ void UrlSynchronization::start() {
                 return !_shouldCancel;
             });
 
-            HttpRequest::RequestOptions opt;
+            HttpRequest::RequestOptions opt = {};
             opt.requestTimeoutSeconds = 0;
             fileDownload->start(opt);
         }

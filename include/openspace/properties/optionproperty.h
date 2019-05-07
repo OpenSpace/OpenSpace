@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -102,12 +102,20 @@ public:
     void addOption(int value, std::string desc);
 
     /**
-    * Adds multiple options to the OptionProperty. Each value in the vector consists of
-    * an integer value and a string description.
-    *
-    * \param options Pairs of <option, description> that are added to the OptionProperty
-    */
+     * Adds multiple options to the OptionProperty. Each value in the vector consists of
+     * an integer value and a string description.
+     *
+     * \param options Pairs of <option, description> that are added to the OptionProperty
+     */
     void addOptions(std::vector<std::pair<int, std::string>> options);
+
+    /**
+     * Adds multiple options to the OptionProperty. Each value in the vector is assigned
+     * to its location.
+     *
+     * \param options A list of options that should be added to the OptionProperty
+     */
+    void addOptions(std::vector<std::string> options);
 
     /**
      * Returns the list of available options.

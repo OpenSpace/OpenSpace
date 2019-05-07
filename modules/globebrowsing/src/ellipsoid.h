@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -77,13 +77,9 @@ public:
     glm::dvec3 geodeticSurfaceNormal(const Geodetic2& geodetic2) const;
 
     const glm::dvec3& radii() const;
-    const glm::dvec3& radiiSquared() const;
-    const glm::dvec3& oneOverRadiiSquared() const;
-    const glm::dvec3& radiiToTheFourth() const;
 
     double minimumRadius() const;
     double maximumRadius() const;
-    double averageRadius() const;
 
     double longitudalDistance(double lat, double lon1, double lon2) const;
     double greatCircleDistance(const Geodetic2& p1, const Geodetic2& p2) const;
@@ -93,19 +89,17 @@ public:
     glm::dvec3 cartesianPosition(const Geodetic3& geodetic3) const;
 
     void setShadowConfigurationArray(
-        const std::vector<Ellipsoid::ShadowConfiguration>& shadowConfArray
+        std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray
     );
-    std::vector<Ellipsoid::ShadowConfiguration> shadowConfigurationArray() const;
-    bool hasEclipseShadows() const;
+    const std::vector<Ellipsoid::ShadowConfiguration>& shadowConfigurationArray() const;
 
 private:
     struct EllipsoidCache {
-        glm::dvec3 _radiiSquared;
-        glm::dvec3 _oneOverRadiiSquared;
-        glm::dvec3 _radiiToTheFourth;
-        double _minimumRadius;
-        double _maximumRadius;
-        double _medianRadius;
+        glm::dvec3 radiiSquared;
+        glm::dvec3 oneOverRadiiSquared;
+        glm::dvec3 radiiToTheFourth;
+        double minimumRadius;
+        double maximumRadius;
     } _cached;
 
     void updateInternalCache();

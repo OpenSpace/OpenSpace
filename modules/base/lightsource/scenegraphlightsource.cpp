@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -76,8 +76,7 @@ documentation::Documentation SceneGraphLightSource::Documentation() {
 }
 
 SceneGraphLightSource::SceneGraphLightSource()
-    : LightSource()
-    , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
+    : _intensity(IntensityInfo, 1.f, 0.f, 1.f)
     , _sceneGraphNodeReference(NodeInfo, "")
 {
     addProperty(_intensity);

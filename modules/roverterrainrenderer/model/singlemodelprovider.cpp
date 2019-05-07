@@ -24,9 +24,8 @@
 
 #include <modules/roverterrainrenderer/model/singlemodelprovider.h>
 
-#include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/geometry/geodetic3.h>
+#include <modules/globebrowsing/src/renderableglobe.h>
+#include <modules/globebrowsing/src/basictypes.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -58,7 +57,7 @@ std::vector<std::shared_ptr<Subsite>> SingleModelProvider::calculate(
 
     glm::dvec3 center = parent->worldPosition();
     glm::dmat4 globeModelTransform = rg->modelTransform();
-    glm::dmat4 globeModelInverseTransform = rg->inverseModelTransform();
+    glm::dmat4 globeModelInverseTransform = glm::inverse(globeModelTransform);
     glm::dvec3 cameraPos = data.camera.positionVec3();
     glm::dvec4 cameraPositionModelSpace = globeModelInverseTransform * glm::dvec4(cameraPos, 1.0);
     glm::dvec3 cameraPositionProjected = rg->ellipsoid().geodeticSurfaceProjection(cameraPositionModelSpace);

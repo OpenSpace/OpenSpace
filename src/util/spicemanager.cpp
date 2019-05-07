@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -84,8 +84,10 @@ namespace {
 
 namespace openspace {
 
-SpiceManager::SpiceException::SpiceException(const std::string& msg)
-    : ghoul::RuntimeError(msg, "Spice")
+SpiceManager* SpiceManager::_instance = nullptr;
+
+SpiceManager::SpiceException::SpiceException(std::string msg)
+    : ghoul::RuntimeError(std::move(msg), "Spice")
 {
     ghoul_assert(
         SpiceManager::ref().exceptionHandling() == SpiceManager::UseException::Yes,
@@ -178,6 +180,26 @@ SpiceManager::~SpiceManager() {
     // Set values back to default
     erract_c("SET", 0, const_cast<char*>("DEFAULT")); // NOLINT
     errprt_c("SET", 0, const_cast<char*>("DEFAULT")); // NOLINT
+}
+
+void SpiceManager::initialize() {
+    ghoul_assert(!isInitialized(), "SpiceManager is already initialized");
+    _instance = new SpiceManager;
+}
+
+void SpiceManager::deinitialize() {
+    ghoul_assert(isInitialized(), "SpiceManager is not initialized");
+    delete _instance;
+    _instance = nullptr;
+}
+
+bool SpiceManager::isInitialized() {
+    return _instance != nullptr;
+}
+
+SpiceManager& SpiceManager::ref() {
+    ghoul_assert(isInitialized(), "SpiceManager is not initialized");
+    return *_instance;
 }
 
 SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {

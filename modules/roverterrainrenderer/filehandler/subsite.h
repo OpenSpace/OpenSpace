@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_ROVER_TERRAIN_RENDERER___SUBSITE___H__
 #define __OPENSPACE_MODULE_ROVER_TERRAIN_RENDERER___SUBSITE___H__
 
-#include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/src/basictypes.h>
 #include <modules/roverterrainrenderer/filehandler/pointcloudinfo.h>
 
 #include <stdint.h>

@@ -2,8 +2,8 @@ local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local kernels = asset.require('./kernels')
 
-local PlutoBarycenter = {
-    Identifier = "PlutoBarycenter",
+local PlutoBarycenterAccurate = {
+    Identifier = "PlutoBarycenterAccurate",
     Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     TimeFrame = {
         Type = "TimeFrameInterval",
@@ -19,14 +19,14 @@ local PlutoBarycenter = {
         },
     },
     GUI = {
-        Name = "Pluto Barycenter",
+        Name = "Pluto Barycenter Accurate",
         Path = "/Solar System/Dwarf Planets/Pluto"
     }
 }
 
 local NewHorizonsPosition = {
     Identifier = "NewHorizonsPosition",
-    Parent = PlutoBarycenter.Identifier,
+    Parent = PlutoBarycenterAccurate.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -49,6 +49,6 @@ local NewHorizonsPosition = {
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    PlutoBarycenter,
+    PlutoBarycenterAccurate,
     NewHorizonsPosition 
 })

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,7 @@
 #include <array>
 #include <fstream>
 #include <locale>
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 
 namespace {
@@ -406,7 +406,7 @@ void RenderablePoints::update(const UpdateData&) {
     if (_hasSpriteTexture && _spriteTextureIsDirty) {
         LDEBUG("Reloading Sprite Texture");
         _spriteTexture = nullptr;
-        if (_spriteTexturePath.value() != "") {
+        if (!_spriteTexturePath.value().empty()) {
             _spriteTexture = ghoul::io::TextureReader::ref().loadTexture(
                 absPath(_spriteTexturePath)
             );
@@ -489,7 +489,7 @@ bool RenderablePoints::readSpeckFile() {
     // The beginning of the speck file has a header that either contains comments
     // (signaled by a preceding '#') or information about the structure of the file
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    std::string line = "";
+    std::string line;
     while (true) {
         std::streampos position = file.tellg();
         std::getline(file, line);
@@ -556,7 +556,7 @@ bool RenderablePoints::readColorMapFile() {
     // The beginning of the speck file has a header that either contains comments
     // (signaled by a preceding '#') or information about the structure of the file
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    std::string line = "";
+    std::string line;
     while (true) {
         // std::streampos position = file.tellg();
         std::getline(file, line);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -68,6 +68,7 @@ public:
     void tickItem();
 
     enum class Phase {
+        PreStart,
         Construction,
         Synchronization,
         Initialization
@@ -97,7 +98,7 @@ private:
     bool _showNodeNames;
     bool _showProgressbar;
 
-    Phase _phase;
+    Phase _phase = Phase::PreStart;
     std::atomic_int _iProgress = 0;
     std::atomic_int _nItems = 0;
 

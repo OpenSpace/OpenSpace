@@ -15,6 +15,7 @@ asset.require('scene/solarsystem/missions/dawn/vesta')
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
 
+asset.require('util/webgui')
 
 local DawnAsset = asset.require('scene/solarsystem/missions/dawn/dawn')
 
@@ -30,7 +31,7 @@ asset.onInitialize(function ()
     openspace.addVirtualProperty(
         "BoolProperty",
         "Show Trails",
-        "*Trail.renderable.Enabled",
+        "*Trail.Renderable.Enabled",
         "Disable or enable all trails of the scene at the same time",
         true,
         nil,
@@ -38,14 +39,14 @@ asset.onInitialize(function ()
     )
 
     openspace.navigation.setCameraState({
-        Focus = DawnAsset.Dawn.Identifier,
+        Anchor = DawnAsset.Dawn.Identifier,
         Position = { 526781518487.171326, 257168309890.072144, -1381125204152.817383 },
         Rotation = { -0.106166, 0.981574, -0.084545, 0.134513 },
     })
 end)
 
 asset.onDeinitialize(function ()
-    openspace.removeVirtualProperty("*Trail.renderable.Enabled")
+    openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
     openspace.removeInterestingNodes({
         "Dawn", "Ceres", "Vesta"
     })

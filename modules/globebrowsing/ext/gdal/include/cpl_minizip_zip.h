@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_minizip_zip.h 35921 2016-10-25 02:28:29Z goatbar $
+ * $Id: cpl_minizip_zip.h 44e0c0ecc2e12f7885d8572d0f18dd94e7fbda1c 2016-10-25 02:28:29Z Kurt Schwehr $
  *
  * Project:  CPL - Common Portability Library
  * Author:   Frank Warmerdam, warmerdam@pobox.com

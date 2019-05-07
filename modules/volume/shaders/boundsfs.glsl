@@ -30,10 +30,9 @@ in vec4 positionCameraSpace;
 
 Fragment getFragment() {
     vec4 position = positionCameraSpace;
-    float depth = safeLength(position);
 
     Fragment frag;
     frag.color = vec4(positionLocalSpace.xyz + 0.5, 1.0);
-    frag.depth = depth;
+    frag.depth = -position.z;
     return frag;
 }

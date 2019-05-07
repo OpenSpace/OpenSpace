@@ -32,7 +32,7 @@
 #include <iostream>
 #include <string>
 
-#include <modules/globebrowsing/globes/renderableglobe.h>
+#include <modules/globebrowsing/src/renderableglobe.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -46,7 +46,7 @@ WheelDataProvider::WheelDataProvider(const ghoul::Dictionary& dictionary)
 }
 
 void WheelDataProvider::loadData(std::string path) {
-	std::string fileName;
+    std::string fileName;
 
     const int start = 28;
     const int end = 2072;
@@ -75,7 +75,7 @@ void WheelDataProvider::loadData(std::string path) {
 
 void WheelDataProvider::parseFile(std::string path) 
 {
-	double val;
+    double val;
     double e;
     std::ifstream myfile (path);
     std::istringstream iss;
@@ -138,9 +138,9 @@ void WheelDataProvider::parseFile(std::string path)
                 }
                 else {
                     nodeObject.rotValue = atof(value.c_str());
-                	//If not empty, fix: make correct
-                	if (getNode(std::to_string(nodeObject.name + "_Timeline")->data.name =! "")
-                    	getNode(std::to_string(nodeObject.name + "_Timeline").addKeyframe(nodeObject.frameTime, nodeObject)));
+                    //If not empty, fix: make correct
+                    if (getNode(std::to_string(nodeObject.name + "_Timeline")->data.name =! "")
+                        getNode(std::to_string(nodeObject.name + "_Timeline").addKeyframe(nodeObject.frameTime, nodeObject)));
                 }
             } 
             iss.clear();

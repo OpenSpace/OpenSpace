@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -112,7 +112,7 @@ void Asset::setState(Asset::State state) {
 
     for (const std::weak_ptr<Asset>& requiringAsset : _requiringAssets) {
         if (std::shared_ptr<Asset> a = requiringAsset.lock()) {
-            a->requiredAssetChangedState(thisAsset, state);
+            a->requiredAssetChangedState(state);
         }
     }
 
@@ -123,7 +123,7 @@ void Asset::setState(Asset::State state) {
     }
 }
 
-void Asset::requiredAssetChangedState(std::shared_ptr<Asset>, Asset::State childState) {
+void Asset::requiredAssetChangedState(Asset::State childState) {
     if (!isLoaded()) {
         // Prohibit state change to SyncResolved if additional requirements
         // may still be added.

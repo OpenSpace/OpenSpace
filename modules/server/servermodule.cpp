@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,9 +24,12 @@
 
 #include <modules/server/servermodule.h>
 
+#include <modules/server/include/serverinterface.h>
 #include <modules/server/include/connection.h>
 #include <modules/server/include/topics/topic.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <ghoul/fmt.h>
 #include <ghoul/io/socket/socket.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
@@ -36,54 +39,109 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-    constexpr const char* _loggerCat = "ServerModule";
+    constexpr const char* KeyInterfaces = "Interfaces";
 } // namespace
 
 namespace openspace {
 
-ServerModule::ServerModule() : OpenSpaceModule(ServerModule::Name) {}
+ServerModule::ServerModule()
+    : OpenSpaceModule(ServerModule::Name)
+    , _interfaceOwner({"Interfaces", "Interfaces", "Server Interfaces"})
+{
+    addPropertySubOwner(_interfaceOwner);
+}
 
 ServerModule::~ServerModule() {
     disconnectAll();
     cleanUpFinishedThreads();
 }
 
-void ServerModule::internalInitialize(const ghoul::Dictionary&) {
+ServerInterface* ServerModule::serverInterfaceByIdentifier(const std::string& identifier)
+{
+    const auto si = std::find_if(
+        _interfaces.begin(),
+        _interfaces.end(),
+        [identifier](std::unique_ptr<ServerInterface>& i) {
+            return i->identifier() == identifier;
+        }
+    );
+    if (si == _interfaces.end()) {
+        return nullptr;
+    }
+    return si->get();
+}
+
+void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
     using namespace ghoul::io;
 
-    std::unique_ptr<TcpSocketServer> tcpServer = std::make_unique<TcpSocketServer>();
-    std::unique_ptr<WebSocketServer> wsServer = std::make_unique<WebSocketServer>();
+    if (configuration.hasValue<ghoul::Dictionary>(KeyInterfaces)) {
+        ghoul::Dictionary interfaces =
+            configuration.value<ghoul::Dictionary>(KeyInterfaces);
 
-    // Temporary hard coded addresses and ports.
-    tcpServer->listen("localhost", 8000);
-    wsServer->listen("localhost", 8001);
-    LDEBUG(fmt::format(
-        "TCP Server listening on {}:{}",tcpServer->address(), tcpServer->port()
-    ));
+        for (std::string& key : interfaces.keys()) {
+            if (!interfaces.hasValue<ghoul::Dictionary>(key)) {
+                continue;
+            }
+            ghoul::Dictionary interfaceDictionary =
+                interfaces.value<ghoul::Dictionary>(key);
 
-    LDEBUG(fmt::format(
-        "WS Server listening on {}:{}", wsServer->address(), wsServer->port()
-    ));
+            std::unique_ptr<ServerInterface> serverInterface =
+                ServerInterface::createFromDictionary(interfaceDictionary);
 
-    _servers.push_back(std::move(tcpServer));
-    _servers.push_back(std::move(wsServer));
 
-    global::callback::preSync.push_back([this]() { preSync(); });
+            if (global::windowDelegate.isMaster()) {
+                serverInterface->initialize();
+            }
+
+            _interfaceOwner.addPropertySubOwner(serverInterface.get());
+
+            if (serverInterface) {
+                _interfaces.push_back(std::move(serverInterface));
+            }
+        }
+
+    }
+
+    global::callback::preSync.emplace_back([this]() { preSync(); });
 }
 
 void ServerModule::preSync() {
+    if (!global::windowDelegate.isMaster()) {
+        return;
+    }
+
     // Set up new connections.
-    for (std::unique_ptr<ghoul::io::SocketServer>& server : _servers) {
+    for (std::unique_ptr<ServerInterface>& serverInterface : _interfaces) {
+        if (!serverInterface->isEnabled()) {
+            continue;
+        }
+
+        ghoul::io::SocketServer* socketServer = serverInterface->server();
+
+        if (!socketServer) {
+            continue;
+        }
+
         std::unique_ptr<ghoul::io::Socket> socket;
-        while ((socket = server->nextPendingSocket())) {
+        while ((socket = socketServer->nextPendingSocket())) {
+            std::string address = socket->address();
+            if (serverInterface->clientIsBlocked(address)) {
+                // Drop connection if the address is blocked.
+                continue;
+            }
             socket->startStreams();
             std::shared_ptr<Connection> connection = std::make_shared<Connection>(
                 std::move(socket),
-                server->address()
+                address,
+                false,
+                serverInterface->password()
             );
             connection->setThread(std::thread(
                 [this, connection] () { handleConnection(connection); }
             ));
+            if (serverInterface->clientHasAccessWithoutPassword(address)) {
+                connection->setAuthorized(true);
+            }
             _connections.push_back({ std::move(connection), false });
         }
     }
@@ -115,6 +173,12 @@ void ServerModule::cleanUpFinishedThreads() {
 }
 
 void ServerModule::disconnectAll() {
+    for (std::unique_ptr<ServerInterface>& serverInterface : _interfaces) {
+        if (global::windowDelegate.isMaster()) {
+            serverInterface->deinitialize();
+        }
+    }
+
     for (ConnectionData& connectionData : _connections) {
         Connection& connection = *connectionData.connection;
         if (connection.socket() && connection.socket()->isConnected()) {

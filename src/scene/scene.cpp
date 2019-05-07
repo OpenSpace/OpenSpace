@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #include <openspace/scene/scene.h>
 
 #include <openspace/engine/globals.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
@@ -33,7 +34,6 @@
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/camera.h>
-
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/logging/logmanager.h>
 
@@ -50,9 +50,8 @@ namespace {
 
 namespace openspace {
 
-Scene::InvalidSceneError::InvalidSceneError(const std::string& msg,
-                                            const std::string& comp)
-    : ghoul::RuntimeError(msg, comp)
+Scene::InvalidSceneError::InvalidSceneError(std::string msg, std::string comp)
+    : ghoul::RuntimeError(std::move(msg), std::move(comp))
 {}
 
 Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
@@ -313,6 +312,9 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.what());
+        }
+        if (global::callback::webBrowserPerformanceHotfix) {
+            (*global::callback::webBrowserPerformanceHotfix)();
         }
     }
 }
@@ -605,6 +607,14 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "string",
                 "Returns the value the property, identified by "
                 "the provided URI."
+            },
+            {
+                "getProperty",
+                &luascriptfunctions::property_getProperty,
+                {},
+                "string",
+                "Returns a list of property identifiers that match the passed regular "
+                "expression"
             },
             {
                 "loadScene",

@@ -16,7 +16,5 @@
   <BlockSizeX>256</BlockSizeX>
   <BlockSizeY>256</BlockSizeY>
   <BandsCount>2</BandsCount>
-  <OfflineMode>false</OfflineMode>
-  <Path>./gdal-cache/ctx</Path>
   <Timeout>5</Timeout>
 </GDAL_WMS>

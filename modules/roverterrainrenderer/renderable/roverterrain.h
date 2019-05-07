@@ -38,8 +38,6 @@
 #include <modules/roverterrainrenderer/renderable/renderableexplorationpath.h>
 #include <modules/roverterrainrenderer/renderable/lodmodelswitch.h>
 
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
-
 struct RenderData;
 struct UpdateData;
 struct Subsite;
@@ -93,7 +91,6 @@ private:
     openspace::SceneGraphNode* _parent;
 
     globebrowsing::RenderableGlobe* _globe;
-    globebrowsing::ChunkedLodGlobe* _chunkedLodGlobe;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 

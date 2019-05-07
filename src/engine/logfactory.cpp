@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -183,7 +183,7 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
                 LogLevelStamping(logLevelStamp),
                 cssFiles,
                 jsFiles,
-                ghoul::logging::levelFromString(logLevel)
+                ghoul::from_string<ghoul::logging::LogLevel>(logLevel)
             );
         }
     }
@@ -206,7 +206,7 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
                 DateStamping(dateStamp),
                 CategoryStamping(categoryStamp),
                 LogLevelStamping(logLevelStamp),
-                ghoul::logging::levelFromString(logLevel)
+                ghoul::from_string<ghoul::logging::LogLevel>(logLevel)
             );
         }
     }

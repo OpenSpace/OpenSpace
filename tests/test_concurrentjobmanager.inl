@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,8 +48,8 @@ struct TestJob : public openspace::Job<int> {
         std::cout << "Finished job" << std::endl;
     }
 
-    virtual std::shared_ptr<int> product() {
-        return std::make_shared<int>(prod);
+    virtual int product() {
+        return int(prod);
     }
 
 private:
@@ -83,13 +83,13 @@ TEST_F(ConcurrentJobManagerTest, Basic) {
 
     auto finishedJob = jobManager.popFinishedJob();
 
-    int product = *finishedJob->product();
+    int product = finishedJob->product();
     EXPECT_EQ(product, 1337) << "Expecting product to be 1337";
 }
 
 struct VerboseProduct {
     VerboseProduct(int v)
-    : val(v){
+    : val(v) {
         std::cout << "VerboseProduct constructor" << std::endl;
     }
 
@@ -101,9 +101,11 @@ struct VerboseProduct {
 };
 
 
-struct VerboseJob : public openspace::Job<VerboseProduct>{
+struct VerboseJob : public openspace::Job<VerboseProduct> {
     VerboseJob(int jobExecutingTime)
-        : _jobExecutingTime(jobExecutingTime) {
+        : _jobExecutingTime(jobExecutingTime)
+        , _product(-1)
+    {
         std::cout << "VerboseTestJob constructor" << std::endl;
     }
 
@@ -114,16 +116,16 @@ struct VerboseJob : public openspace::Job<VerboseProduct>{
     virtual void execute() {
         std::cout << " ** Executing job ... " << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(_jobExecutingTime));
-        _product = std::shared_ptr<VerboseProduct>(new VerboseProduct(1337));
+        _product = VerboseProduct(1337);
         std::cout << " ** Finished job" << std::endl;
     }
 
-    virtual std::shared_ptr<VerboseProduct> product() {
+    virtual VerboseProduct product() {
         return _product;
     }
 
     int _jobExecutingTime;
-    std::shared_ptr<VerboseProduct> _product;
+    VerboseProduct _product;
 
 };
 

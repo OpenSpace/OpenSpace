@@ -27,7 +27,7 @@
 #include <modules\marsrover\surfaceprojection\spacecraftprojection.h>
 //#include <modules\marsrover\surfaceprojection\mslterrain.h>
 
-#include <modules/globebrowsing/globes/renderableglobe.h>
+#include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -96,7 +96,7 @@ std::unique_ptr<Renderable> Renderable::createFromDictionary(
 }
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "renderable" })
+    : properties::PropertyOwner({ "Renderable" })
     , _enabled(EnabledInfo, true)
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
 {
@@ -159,16 +159,6 @@ SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
         directionFromCenterToTarget,
         0.0
     };
-}
-
-void Renderable::setPscUniforms(ghoul::opengl::ProgramObject& program,
-                                const Camera& camera,
-                                const PowerScaledCoordinate& position)
-{
-    program.setUniform("campos", camera.position().vec4());
-    program.setUniform("objpos", position.vec4());
-    program.setUniform("camrot", glm::mat4(camera.viewRotationMatrix()));
-    program.setUniform("scaling", glm::vec2(1.f, 0.f));
 }
 
 Renderable::RenderBin Renderable::renderBin() const {

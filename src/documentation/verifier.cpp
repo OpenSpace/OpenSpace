@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -292,10 +292,10 @@ std::string ReferencingVerifier::documentation() const {
     return "Referencing Documentation: '" + identifier + "'";
 }
 
-AndVerifier::AndVerifier(const std::vector<Verifier*> vs) {
-    ghoul_assert(!vs.empty(), "values must not be empty");
-    for (Verifier* v : vs) {
-        values.push_back(std::shared_ptr<Verifier>(v));
+AndVerifier::AndVerifier(const std::vector<Verifier*> values) {
+    ghoul_assert(!values.empty(), "values must not be empty");
+    for (Verifier* v : values) {
+        this->values.push_back(std::shared_ptr<Verifier>(v));
     }
 }
 
@@ -354,10 +354,10 @@ std::string AndVerifier::documentation() const {
     return ghoul::join(documentations, ", ");
 }
 
-OrVerifier::OrVerifier(const std::vector<Verifier*> vs) {
-    ghoul_assert(!vs.empty(), "values must not be empty");
-    for (Verifier* v : vs) {
-        values.push_back(std::shared_ptr<Verifier>(v));
+OrVerifier::OrVerifier(const std::vector<Verifier*> values) {
+    ghoul_assert(!values.empty(), "values must not be empty");
+    for (Verifier* v : values) {
+        this->values.push_back(std::shared_ptr<Verifier>(v));
     }
 }
 

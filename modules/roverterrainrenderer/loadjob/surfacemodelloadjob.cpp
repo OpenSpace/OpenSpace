@@ -85,8 +85,8 @@ void SurfaceModelLoadJob::execute() {
     }
 }
 
-std::shared_ptr<SubsiteModels> SurfaceModelLoadJob::product() {
-    return _subsiteModels;
+SubsiteModels SurfaceModelLoadJob::product() {
+    return *_subsiteModels;
 }
 
 std::string SurfaceModelLoadJob::textureFormat(const std::string site) {

@@ -31,8 +31,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/engine/globals.h>
 
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/geometry/geodetic3.h>
+#include <modules/globebrowsing/src/basictypes.h>
 
 #include <ghoul/filesystem/filesystem.h>
 

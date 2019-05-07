@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -129,8 +129,6 @@ void PerformanceManager::DestroyGlobalSharedMemory() {
     }
     sharedMemory.releaseLock();
 }
-
-PerformanceManager::~PerformanceManager() {}
 
 void PerformanceManager::setEnabled(bool enabled) {
     _logDir = absPath("${BASE}");
@@ -346,6 +344,12 @@ void PerformanceManager::storeIndividualPerformanceMeasurement(
                                                             const std::string& identifier,
                                                                    long long microseconds)
 {
+    if (!_performanceMemory) {
+        // If someone called the PerfMeasure macro without checking whether we are
+        // currently set-up for recording, we don't want to crash, so we just discard
+        return;
+    }
+
     PerformanceLayout* layout = performanceData();
     _performanceMemory->acquireLock();
 

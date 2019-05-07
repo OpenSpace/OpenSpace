@@ -29,9 +29,8 @@
 #include <fstream>
 #include <sstream>
 #include <gdal_priv.h>
-#include "ogrsf_frmts.h"
 #include "ogr_feature.h"
-
+#include <ogrsf_frmts.h>
 
 namespace ghoul::filesystem { class File; }
 
@@ -106,9 +105,11 @@ std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractAllSubsites(co
             subsite->site = convertString(site, type);
             type = "drive";
             subsite->drive = convertString(drive, type);
-            subsite->geodetic = globebrowsing::Geodetic2{ lat, lon } / 180.0 * glm::pi<double>();
+            subsite->geodetic.lat = lat / 180.0 * glm::pi<double>();
+            subsite->geodetic.lon = lon / 180.0 * glm::pi<double>();
             subsite->frame = frame;
-            subsite->siteGeodetic = globebrowsing::Geodetic2{ siteLat, siteLon } / 180.0 * glm::pi<double>();
+            subsite->siteGeodetic.lat = siteLat / 180.0 * glm::pi<double>();
+            subsite->siteGeodetic.lon = siteLon / 180.0 * glm::pi<double>();
             subsite->sol = sol;
 
             // All features with the the frame is "Site" will have "Drive" that is -1.

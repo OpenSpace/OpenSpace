@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,6 @@ class DownloadManager;
 class LuaConsole;
 class MissionManager;
 class ModuleEngine;
-class NetworkEngine;
 class OpenSpaceEngine;
 class ParallelPeer;
 class RaycasterManager;
@@ -54,6 +53,7 @@ namespace interaction {
     struct JoystickInputStates;
     class KeybindingManager;
     class NavigationHandler;
+    class SessionRecording;
     class ShortcutManager;
 } // namespace interaction
 namespace performance { class PerformanceManager; }
@@ -74,7 +74,6 @@ DownloadManager& gDownloadManager();
 LuaConsole& gLuaConsole();
 MissionManager& gMissionManager();
 ModuleEngine& gModuleEngine();
-NetworkEngine& gNetworkEngine();
 OpenSpaceEngine& gOpenSpaceEngine();
 ParallelPeer& gParallelPeer();
 RaycasterManager& gRaycasterManager();
@@ -88,6 +87,7 @@ configuration::Configuration& gConfiguration();
 interaction::JoystickInputStates& gJoystickInputStates();
 interaction::KeybindingManager& gKeybindingManager();
 interaction::NavigationHandler& gNavigationHandler();
+interaction::SessionRecording& gSessionRecording();
 interaction::ShortcutManager& gShortcutManager();
 performance::PerformanceManager& gPerformanceManager();
 properties::PropertyOwner& gRootPropertyOwner();
@@ -104,7 +104,6 @@ static DownloadManager& downloadManager = detail::gDownloadManager();
 static LuaConsole& luaConsole = detail::gLuaConsole();
 static MissionManager& missionManager = detail::gMissionManager();
 static ModuleEngine& moduleEngine = detail::gModuleEngine();
-static NetworkEngine& networkEngine = detail::gNetworkEngine();
 static OpenSpaceEngine& openSpaceEngine = detail::gOpenSpaceEngine();
 static ParallelPeer& parallelPeer = detail::gParallelPeer();
 static RaycasterManager& raycasterManager = detail::gRaycasterManager();
@@ -120,6 +119,7 @@ static interaction::JoystickInputStates& joystickInputStates =
     detail::gJoystickInputStates();
 static interaction::KeybindingManager& keybindingManager = detail::gKeybindingManager();
 static interaction::NavigationHandler& navigationHandler = detail::gNavigationHandler();
+static interaction::SessionRecording& sessionRecording = detail::gSessionRecording();
 static interaction::ShortcutManager& shortcutManager = detail::gShortcutManager();
 static performance::PerformanceManager& performanceManager =
     detail::gPerformanceManager();

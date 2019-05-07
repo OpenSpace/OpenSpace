@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,16 @@
 #pragma warning (disable : 4100)
 #endif // _MSC_VER
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#endif // __clang__
+
 #include <include/cef_browser.h>
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif // __clang__
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -49,15 +58,14 @@ class EventHandler {
 public:
     void initialize();
     void setBrowser(const CefRefPtr<CefBrowser>& browser);
-    void setBrowserInstance(const std::shared_ptr<BrowserInstance>& browserInstance);
+    void setBrowserInstance(BrowserInstance* browserInstance);
     void detachBrowser();
+    void touchPressCallback(const double x, const double y);
+    void touchReleaseCallback(const double x, const double y);
+    bool hasContentCallback(const double, const double);
 
 private:
-#if !defined(WIN32)
-    static const int MaxDoubleClickDistance = 4;
-#endif
-
-    bool mouseButtonCallback(MouseButton button, MouseAction action);
+    bool mouseButtonCallback(MouseButton button, MouseAction action, KeyModifier mods);
     bool mousePositionCallback(double x, double y);
     bool mouseWheelCallback(glm::ivec2 delta);
     bool charCallback(unsigned int charCode, KeyModifier modifier);
@@ -70,14 +78,14 @@ private:
      * \param key the pressed key
      * \return true if event found, false otherwise
      */
-    bool specialKeyEvent(Key key);
+    bool specialKeyEvent(Key key, KeyModifier mods, KeyAction action);
 
     /**
      * Create a mouse event on the current cursor position.
      *
      * \return
      */
-    CefMouseEvent mouseEvent();
+    CefMouseEvent mouseEvent(KeyModifier mods = KeyModifier::NoModifier);
 
     /**
      * Find the CEF key event to use for a given action.
@@ -87,34 +95,24 @@ private:
      */
     cef_key_event_type_t keyEventType(KeyAction action);
 
-    bool _leftMouseDown = false;
-
-    std::shared_ptr<BrowserInstance> _browserInstance = nullptr;
+    BrowserInstance* _browserInstance = nullptr;
     glm::vec2 _mousePosition = { 0.f, 0.f };
-    glm::vec2 _lastClickPosition = { 0.f, 0.f };
-    std::chrono::high_resolution_clock::time_point _lastClickTime;
+
+    struct MouseButtonState {
+        bool down = false;
+        glm::vec2 lastClickPosition = { 0.f, 0.f };
+        std::chrono::high_resolution_clock::time_point lastClickTime;
+    };
+
+    MouseButtonState _leftButton;
+    MouseButtonState _rightButton;
 
     /**
      * determines if a click should be sent as a double click or not
      * @return
      */
-    bool isDoubleClick() const;
-
-    /**
-     * get the number of milliseconds that is allowed between two clicks for it to count
-     * as a double click
-     * @return
-     */
-    static int doubleClickTime();
-
-    /**
-     * get the rectangle width around the first click in a double click that the second
-     * click has to be _within_
-     * @return
-     */
-    static int maxDoubleClickDistance();
+    bool isDoubleClick(const MouseButtonState& button) const;
 };
-
 
 } // namespace openspace
 

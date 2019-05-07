@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 
 #include <openspace/util/spicemanager.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 #ifdef WIN32
@@ -42,7 +43,9 @@
 
 namespace openspace {
 
-TransformationManager::TransformationManager(){
+TransformationManager* TransformationManager::_instance = nullptr;
+
+TransformationManager::TransformationManager() {
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     _kameleon = std::make_shared<ccmc::Kameleon>();
 #else
@@ -62,6 +65,27 @@ TransformationManager::~TransformationManager() { // NOLINT
     _kameleon = nullptr;
 #endif
 }
+
+void TransformationManager::initialize() {
+    ghoul_assert(!isInitialized(), "TransformationManager is already initialized");
+    _instance = new TransformationManager;
+}
+
+void TransformationManager::deinitialize() {
+    ghoul_assert(isInitialized(), "TransformationManager is not initialized");
+    delete _instance;
+    _instance = nullptr;
+}
+
+bool TransformationManager::isInitialized() {
+    return _instance != nullptr;
+}
+
+TransformationManager& TransformationManager::ref() {
+    ghoul_assert(isInitialized(), "TransformationManager is not initialized");
+    return *_instance;
+}
+
 
 glm::dmat3 TransformationManager::kameleonTransformationMatrix(
                                                  [[maybe_unused]] const std::string& from,

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,13 +49,12 @@ glm::dmat4x2 fromLuaConversion(lua_State* state, bool& success) {
             }
             else {
                 result[i][j] = lua_tonumber(state, -1);
-                lua_pop(state, 1);
                 ++number;
             }
         }
     }
     // The last accessor argument and the table are still on the stack
-    lua_pop(state, 2);
+    lua_pop(state, 1);
     success = true;
     return result;
 }
@@ -103,13 +102,14 @@ glm::dmat4x2 fromStringConversion(const std::string& val, bool& success) {
 }
 
 bool toStringConversion(std::string& outValue, glm::dmat4x2 inValue) {
-    outValue = "";
+    outValue = "[";
     for (glm::length_t i = 0; i < ghoul::glm_cols<glm::dmat4x2>::value; ++i) {
         for (glm::length_t j = 0; j < ghoul::glm_rows<glm::dmat4x2>::value; ++j) {
             outValue += std::to_string(inValue[i][j]) + ",";
         }
-        outValue.pop_back();
     }
+    outValue.pop_back();
+    outValue += "]";
     return true;
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -62,11 +62,8 @@ namespace openspace::gui {
 
 namespace detail {
     constexpr int nComponents() {
-        const int nRegularComponents = 15;
+        const int nRegularComponents = 16;
         int totalComponents = nRegularComponents;
-#ifdef GLOBEBROWSING_USE_GDAL
-        ++totalComponents;
-#endif
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
         ++totalComponents;
@@ -97,17 +94,13 @@ public:
         uint32_t mouseButtonsPressed);
     void endFrame();
 
-    void setHidden(bool isHidden);
-
     void render() override;
 
 //protected:
     GuiHelpComponent _help;
     GuiFilePathComponent _filePath;
     GuiAssetComponent _asset;
-#ifdef GLOBEBROWSING_USE_GDAL
     GuiGlobeBrowsingComponent _globeBrowsing;
-#endif //  GLOBEBROWSING_USE_GDAL
     GuiPerformanceComponent _performance;
 
     GuiPropertyComponent _globalProperty;
@@ -145,9 +138,7 @@ private:
         &_spaceTime,
         &_mission,
         &_parallel,
-#ifdef GLOBEBROWSING_USE_GDAL
         &_globeBrowsing,
-#endif
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
         &_iswa,
 #endif
@@ -176,7 +167,6 @@ private:
 
     properties::Property::Visibility _currentVisibility =
         properties::Property::Visibility::Developer;
-    properties::BoolProperty _allHidden;
 
     std::vector<ImGuiContext*> _contexts;
 };

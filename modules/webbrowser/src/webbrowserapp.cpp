@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,14 +31,20 @@ CefRefPtr<CefRenderProcessHandler> WebBrowserApp::GetRenderProcessHandler() {
     return this;
 }
 
-void WebBrowserApp::OnContextCreated(CefRefPtr<CefBrowser> browser,
-                                     CefRefPtr<CefFrame> frame,
-                                     CefRefPtr<CefV8Context> context)
+void WebBrowserApp::OnContextCreated(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
+                                     CefRefPtr<CefV8Context>)
 {
-    CEF_REQUIRE_UI_THREAD();
-    CefRefPtr<CefV8Value> val = CefV8Value::CreateBool(true);
-    CefRefPtr<CefV8Value> global = context->GetGlobal();
-    global->SetValue("IsWithinCEF", val, V8_PROPERTY_ATTRIBUTE_NONE);
+//    CEF_REQUIRE_UI_THREAD();
+//    CefRefPtr<CefV8Value> val = CefV8Value::CreateBool(true);
+//    CefRefPtr<CefV8Value> global = context->GetGlobal();
+//    global->SetValue("IsWithinCEF", val, V8_PROPERTY_ATTRIBUTE_NONE);
+}
+
+void WebBrowserApp::OnBeforeCommandLineProcessing(const CefString&,
+                                                  CefRefPtr<CefCommandLine>)
+{
+//    command_line->AppendSwitch("disable-gpu");
+//    command_line->AppendSwitch("disable-gpu-compositing");
 }
 
 } // namespace openspace

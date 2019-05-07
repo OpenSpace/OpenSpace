@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,6 +23,9 @@
  ****************************************************************************************/
 
 #include <openspace/util/distanceconversion.h>
+
+#include <openspace/util/distanceconstants.h>
+#include <openspace/util/timeconversion.h>
 
 #include <ghoul/glm.h>
 
@@ -91,6 +94,15 @@ std::pair<double, std::string> simplifyDistance(double meters, bool forceSingula
     else {
         return { meters / 1000.0, "km" };
     }
+}
+
+float convertMasPerYearToMeterPerSecond(float masPerYear, float parallax) {
+    double degreeFromMas = 1.0 / 3600000.0;
+    double radiusInMeter = (distanceconstants::Parsec * 1000.0) / parallax;
+    double perYearToPerSecond = 1.0 / SecondsPerYear;
+    double meterPerSecond = masPerYear * degreeFromMas * radiusInMeter *
+                            perYearToPerSecond;
+    return static_cast<float>(meterPerSecond);
 }
 
 } // namespace openspace

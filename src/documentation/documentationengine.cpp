@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -61,6 +61,21 @@ DocumentationEngine::DocumentationEngine()
         JsFilename
     )
 {}
+
+void DocumentationEngine::initialize() {
+    ghoul_assert(!isInitialized(), "DocumentationEngine is already initialized");
+    _instance = new DocumentationEngine;
+}
+
+void DocumentationEngine::deinitialize() {
+    ghoul_assert(isInitialized(), "DocumentationEngine is not initialized");
+    delete _instance;
+    _instance = nullptr;
+}
+
+bool DocumentationEngine::isInitialized() {
+    return _instance != nullptr;
+}
 
 DocumentationEngine& DocumentationEngine::ref() {
     if (_instance == nullptr) {

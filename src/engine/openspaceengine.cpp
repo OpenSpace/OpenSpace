@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,8 +37,9 @@
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/keybindingmanager.h>
+#include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/navigationhandler.h>
-#include <openspace/network/networkengine.h>
+#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/performance/performancemeasurement.h>
 #include <openspace/performance/performancemanager.h>
@@ -72,6 +73,7 @@
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
+#include <ghoul/misc/stringconversion.h>
 #include <ghoul/opengl/debugcontext.h>
 #include <ghoul/opengl/shaderpreprocessor.h>
 #include <ghoul/opengl/texture.h>
@@ -153,10 +155,9 @@ void OpenSpaceEngine::registerPathTokens() {
     LTRACE("OpenSpaceEngine::initialize(begin)");
 
     // Registering Path tokens. If the BASE path is set, it is the only one that will
-// overwrite the default path of the cfg directory
-    for (const std::pair<std::string, std::string>& path :
-        global::configuration.pathTokens)
-    {
+    // overwrite the default path of the cfg directory
+    using T = std::string;
+    for (const std::pair<const T, T>& path : global::configuration.pathTokens) {
         std::string fullKey = ghoul::filesystem::FileSystem::TokenOpeningBraces +
             path.first +
             ghoul::filesystem::FileSystem::TokenClosingBraces;
@@ -222,7 +223,7 @@ void OpenSpaceEngine::initialize() {
         ghoul::logging::LogManager::deinitialize();
     }
 
-    ghoul::logging::LogLevel level = ghoul::logging::levelFromString(
+    ghoul::logging::LogLevel level = ghoul::from_string<ghoul::logging::LogLevel>(
         global::configuration.logging.level
     );
     bool immediateFlush = global::configuration.logging.forceImmediateFlush;
@@ -288,6 +289,20 @@ void OpenSpaceEngine::initialize() {
     LDEBUG("Registering Lua libraries");
     registerCoreClasses(global::scriptEngine);
 
+    // Set up asset loader
+    std::unique_ptr<SynchronizationWatcher> w =
+        std::make_unique<SynchronizationWatcher>();
+    SynchronizationWatcher* rawWatcher = w.get();
+
+    global::openSpaceEngine._assetManager = std::make_unique<AssetManager>(
+        std::make_unique<AssetLoader>(
+            *global::scriptEngine.luaState(),
+            rawWatcher,
+            FileSys.absPath("${ASSETS}")
+        ),
+        std::move(w)
+    );
+
     global::scriptEngine.addLibrary(global::openSpaceEngine._assetManager->luaLibrary());
 
     for (OpenSpaceModule* module : global::moduleEngine.modules()) {
@@ -311,20 +326,6 @@ void OpenSpaceEngine::initialize() {
     for (const std::function<void()>& func : global::callback::initialize) {
         func();
     }
-
-    // Set up asset loader
-    std::unique_ptr<SynchronizationWatcher> w =
-        std::make_unique<SynchronizationWatcher>();
-    SynchronizationWatcher* rawWatcher = w.get();
-
-    global::openSpaceEngine._assetManager = std::make_unique<AssetManager>(
-        std::make_unique<AssetLoader>(
-            *global::scriptEngine.luaState(),
-            rawWatcher,
-            FileSys.absPath("${ASSETS}")
-        ),
-        std::move(w)
-    );
 
     global::openSpaceEngine._assetManager->initialize();
     scheduleLoadSingleAsset(global::configuration.asset);
@@ -549,8 +550,8 @@ void OpenSpaceEngine::initializeGL() {
 
     if (global::configuration.isLoggingOpenGLCalls) {
         using namespace ghoul::logging;
-        LogLevel level = levelFromString(global::configuration.logging.level);
-        if (level > LogLevel::Trace) {
+        LogLevel lvl = ghoul::from_string<LogLevel>(global::configuration.logging.level);
+        if (lvl > LogLevel::Trace) {
             LWARNING(
                 "Logging OpenGL calls is enabled, but the selected log level does "
                 "not include TRACE, so no OpenGL logs will be printed");
@@ -642,6 +643,8 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     }
 
     _scene = std::make_unique<Scene>(std::move(sceneInitializer));
+    global::renderEngine.setScene(_scene.get());
+
     global::rootPropertyOwner.addPropertySubOwner(_scene.get());
     _scene->setCamera(std::make_unique<Camera>());
     Camera* camera = _scene->camera();
@@ -649,9 +652,14 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
     global::renderEngine.setCamera(camera);
     global::navigationHandler.setCamera(camera);
-    global::navigationHandler.setFocusNode(camera->parent());
-
-    global::renderEngine.setScene(_scene.get());
+    const SceneGraphNode* parent = camera->parent();
+    if (parent) {
+        global::navigationHandler.orbitalNavigator().setFocusNode(parent->identifier());
+    } else {
+        global::navigationHandler.orbitalNavigator().setFocusNode(
+            _scene->root()->identifier()
+        );
+    }
 
     _assetManager->removeAll();
     _assetManager->add(assetPath);
@@ -785,6 +793,7 @@ void OpenSpaceEngine::deinitialize() {
             global::renderEngine.scene()->camera()->getSyncables()
         );
     }
+    global::sessionRecording.deinitialize();
 
     global::deinitialize();
 
@@ -871,7 +880,8 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
 void OpenSpaceEngine::loadFonts() {
     global::fontManager.initialize();
 
-    for (const std::pair<std::string, std::string>& font : global::configuration.fonts) {
+    using T = std::string;
+    for (const std::pair<const T, T>& font : global::configuration.fonts) {
         std::string key = font.first;
         std::string fontName = absPath(font.second);
 
@@ -931,6 +941,8 @@ void OpenSpaceEngine::writeSceneDocumentation() {
 void OpenSpaceEngine::preSynchronization() {
     LTRACE("OpenSpaceEngine::preSynchronization(begin)");
 
+    //std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
     std::unique_ptr<performance::PerformanceMeasurement> perf;
     if (global::performanceManager.isEnabled()) {
         perf = std::make_unique<performance::PerformanceMeasurement>(
@@ -972,6 +984,7 @@ void OpenSpaceEngine::preSynchronization() {
         global::renderEngine.updateScene();
         //_navigationHandler->updateCamera(dt);
 
+
         if (_scene) {
             Camera* camera = _scene->camera();
             if (camera) {
@@ -979,6 +992,7 @@ void OpenSpaceEngine::preSynchronization() {
                 camera->invalidateCache();
             }
         }
+        global::sessionRecording.preSynchronization();
         global::parallelPeer.preSynchronization();
     }
 
@@ -1173,10 +1187,13 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier)
     global::luaConsole.charCallback(codepoint, modifier);
 }
 
-void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action) {
-    using F = std::function<bool (MouseButton, MouseAction)>;
+void OpenSpaceEngine::mouseButtonCallback(MouseButton button,
+                                          MouseAction action,
+                                          KeyModifier mods)
+{
+    using F = std::function<bool (MouseButton, MouseAction, KeyModifier)>;
     for (const F& func : global::callback::mouseButton) {
-        bool isConsumed = func(button, action);
+        bool isConsumed = func(button, action, mods);
         if (isConsumed) {
             // If the mouse was released, we still want to forward it to the navigation
             // handler in order to reliably terminate a rotation or zoom. Accidentally
@@ -1228,9 +1245,6 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
 
 std::vector<char> OpenSpaceEngine::encode() {
     std::vector<char> buffer = global::syncEngine.encodeSyncables();
-    global::networkEngine.publishStatusMessage();
-    global::networkEngine.sendMessages();
-
     return buffer;
 }
 
@@ -1337,9 +1351,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
     };
 }
 
-LoadingScreen& OpenSpaceEngine::loadingScreen() {
-    ghoul_assert(_loadingScreen, "Loading Screen must not be nullptr");
-    return *_loadingScreen;
+LoadingScreen* OpenSpaceEngine::loadingScreen() {
+    return _loadingScreen.get();
 }
 
 AssetManager& OpenSpaceEngine::assetManager() {

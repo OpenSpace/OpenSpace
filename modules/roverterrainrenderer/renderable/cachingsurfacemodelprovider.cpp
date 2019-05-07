@@ -23,7 +23,7 @@
 ****************************************************************************************/
 
 #include <modules/roverterrainrenderer/renderable/cachingsurfacemodelprovider.h>
-#include <modules/globebrowsing/other/lruthreadpool.h>
+#include <modules/globebrowsing/src/lruthreadpool.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/io/texture/texturereader.h>
 

@@ -31,8 +31,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/engine/globals.h>
 
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/geometry/geodetic3.h>
+#include <modules/globebrowsing/src/basictypes.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -184,8 +183,6 @@ void RoverTerrain::initializeGL() {
 
     _renderableExplorationPath->initialize(_globe, allCoordinates, coordinatesWithModel);
 
-    _chunkedLodGlobe = _globe->chunkedLodGlobe();
-
     _modelSwitch.initialize(_globe);
 }
 
@@ -200,11 +197,9 @@ void RoverTerrain::initialize() {
 
     _globe = (globebrowsing::RenderableGlobe*)_parent->renderable();
     
-    _chunkedLodGlobe = _globe->chunkedLodGlobe();
-
     _modelSwitch.initialize(_globe);
 
-    _chunkedLodGlobe->addSites(_subsitesWithModels);
+    _globe->addSites(_subsitesWithModels);
 }
 
 void RoverTerrain::deinitializeGL() {
@@ -214,7 +209,7 @@ void RoverTerrain::render(const RenderData& data, RendererTasks& rendererTask) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    std::vector<std::vector<std::shared_ptr<Subsite>>> subSitesVector = _chunkedLodGlobe->subsites();
+    std::vector<std::vector<std::shared_ptr<Subsite>>> subSitesVector = _globe->subsites();
     
     if (subSitesVector.size() < 1) {
         return;

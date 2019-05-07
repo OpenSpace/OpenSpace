@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,6 +47,8 @@ public:
         std::string command;
         IsSynchronized synchronization;
         std::string documentation;
+        std::string name;
+        std::string guiPath;
     };
 
     KeybindingManager();
@@ -54,10 +56,10 @@ public:
     void resetKeyBindings();
 
     void bindKeyLocal(Key key, KeyModifier modifier, std::string luaCommand,
-        std::string documentation = "");
+        std::string documentation = "", std::string name = "", std::string guiPath = "");
 
     void bindKey(Key key, KeyModifier modifier, std::string luaCommand,
-        std::string documentation = "");
+        std::string documentation = "", std::string name = "", std::string guiPath = "");
 
     void removeKeyBinding(const std::string& key);
 
@@ -68,10 +70,11 @@ public:
 
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 
+    std::string generateJson() const override;
+
     const std::multimap<KeyWithModifier, KeyInformation>& keyBindings() const;
 
 private:
-    std::string generateJson() const override;
 
     std::multimap<KeyWithModifier, KeyInformation> _keyLua;
 };

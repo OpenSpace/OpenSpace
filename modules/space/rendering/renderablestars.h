@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,9 +30,10 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-
+#include <openspace/properties/vector/vec2property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <optional>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
@@ -63,28 +64,32 @@ private:
     enum ColorOption {
         Color = 0,
         Velocity = 1,
-        Speed = 2
+        Speed = 2,
+        OtherData = 3
     };
 
     void createDataSlice(ColorOption option);
 
-    bool loadData();
-    bool readSpeckFile();
+    void loadData();
+    void readSpeckFile();
     bool loadCachedFile(const std::string& file);
-    bool saveCachedFile(const std::string& file) const;
+    void saveCachedFile(const std::string& file) const;
+
+    properties::StringProperty _speckFile;
 
     properties::StringProperty _pointSpreadFunctionTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
     std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
-    bool _pointSpreadFunctionTextureIsDirty;
 
     properties::StringProperty _colorTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
     std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
-    bool _colorTextureIsDirty;
-
     properties::OptionProperty _colorOption;
-    bool _dataIsDirty;
+    properties::OptionProperty _otherDataOption;
+    properties::StringProperty _otherDataColorMapPath;
+    properties::Vec2Property _otherDataRange;
+    std::unique_ptr<ghoul::opengl::Texture> _otherDataColorMapTexture;
+    properties::BoolProperty _filterOutOfRange;
 
     properties::FloatProperty _alphaValue;
     properties::FloatProperty _scaleFactor;
@@ -92,16 +97,27 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(view, projection, colorOption, alphaValue, scaleFactor,
-        minBillboardSize, screenSize, scaling, psfTexture, colorTexture) _uniformCache;
+        minBillboardSize, screenSize, scaling, psfTexture, colorTexture,
+        otherDataTexture, otherDataRange, filterOutOfRange) _uniformCache;
 
-    std::string _speckFile;
+    bool _speckFileIsDirty = true;
+    bool _pointSpreadFunctionTextureIsDirty = true;
+    bool _colorTextureIsDirty = true;
+    bool _dataIsDirty = true;
+    bool _otherDataColorMapIsDirty = true;
 
     std::vector<float> _slicedData;
     std::vector<float> _fullData;
-    int _nValuesPerStar;
+    int _nValuesPerStar = 0;
+    std::string _queuedOtherData;
+    std::vector<std::string> _dataNames;
 
-    GLuint _vao;
-    GLuint _vbo;
+    std::optional<float> _staticFilterValue;
+    float _staticFilterReplacementValue = 0.f;
+
+
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 };
 
 } // namespace openspace

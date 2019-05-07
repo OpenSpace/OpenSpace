@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,13 +27,17 @@
 
 #include <openspace/util/openspacemodule.h>
 
+#include <modules/server/include/serverinterface.h>
+
 #include <deque>
 #include <memory>
 #include <mutex>
 
-namespace ghoul::io { class SocketServer; }
-
 namespace openspace {
+
+constexpr int SOCKET_API_VERSION_MAJOR = 0;
+constexpr int SOCKET_API_VERSION_MINOR = 1;
+constexpr int SOCKET_API_VERSION_PATCH = 0;
 
 class Connection;
 
@@ -48,6 +52,8 @@ public:
 
     ServerModule();
     virtual ~ServerModule();
+
+    ServerInterface* serverInterfaceByIdentifier(const std::string& identifier);
 
 protected:
     void internalInitialize(const ghoul::Dictionary& configuration) override;
@@ -68,7 +74,8 @@ private:
     std::deque<Message> _messageQueue;
 
     std::vector<ConnectionData> _connections;
-    std::vector<std::unique_ptr<ghoul::io::SocketServer>> _servers;
+    std::vector<std::unique_ptr<ServerInterface>> _interfaces;
+    properties::PropertyOwner _interfaceOwner;
 };
 
 } // namespace openspace

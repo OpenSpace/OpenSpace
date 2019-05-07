@@ -32,7 +32,7 @@
 //FUNCTIONALITY
 // look at the x,y,z values of each vertex point
 // check if there is several z values for the same point (maybe this is better done in fullsite_vs.glsl?)
-	//decide which z value is the heighest.
+    //decide which z value is the heighest.
 // save the correct and sampled x,y,z values
 //write to a txt file (or maybe png??)
 
@@ -49,12 +49,11 @@
 #include <modules/roverterrainrenderer/renderable/sitemanager.h>
 
 #include <modules/roverterrainrenderer/filehandler/roverpathfilereader.h>
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
 
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/optionproperty.h>
 
-#include <modules/globebrowsing/globes/renderableglobe.h>
+#include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/scene/scenegraphnode.h>
 
 #include <ghoul/io/texture/texturewriter.h>
@@ -69,19 +68,19 @@
 
 namespace openspace {
 
-	struct RenderData;
-	struct UpdateData;
-	class Camera;
+    struct RenderData;
+    struct UpdateData;
+    class Camera;
 
-	namespace documentation { struct Documentation; }
+    namespace documentation { struct Documentation; }
 
 class RenderableHeightMap : public Renderable{
 public:
 
-	RenderableHeightMap(const ghoul::Dictionary& dictionary);
+    RenderableHeightMap(const ghoul::Dictionary& dictionary);
 
-	void initializeGL() override;
-	void deinitializeGL() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
     bool isReady() const override;
 
@@ -90,42 +89,42 @@ public:
 
     
 
-	static documentation::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 private:
-	bool renderTexture();
-	void renderOrthoCamera();
+    bool renderTexture();
+    void renderOrthoCamera();
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 
 
     properties::Vec2Property _frustumSize;
-	//ghoul::opengl::ProgramObject* _shader;
-	properties::TriggerProperty _triggerHeightmap;
+    //ghoul::opengl::ProgramObject* _shader;
+    properties::TriggerProperty _triggerHeightmap;
 
- 	UniformCache(viewmatte, projectionMatrix, texture) _uniformCache;
+    UniformCache(viewmatte, projectionMatrix, texture) _uniformCache;
 
- 	openspace::SceneGraphNode* _mars;
+    openspace::SceneGraphNode* _mars;
 
- 	globebrowsing::RenderableGlobe* _globe;
+    globebrowsing::RenderableGlobe* _globe;
 
- 	GLuint _vertexArrayID;
- 	//GLuint _vertexPositionBuffer;
- 	//GLuint _heightmap;
- 	//GLuint _depthTexture;
+    GLuint _vertexArrayID;
+    //GLuint _vertexPositionBuffer;
+    //GLuint _heightmap;
+    //GLuint _depthTexture;
 
- 	//GLuint _rbo;
- 	GLuint _fbo;
- 	GLuint _zbuffer;
+    //GLuint _rbo;
+    GLuint _fbo;
+    GLuint _zbuffer;
 
- 	//glm::dmat4 mvp;
+    //glm::dmat4 mvp;
 
- 	Camera* _orthoCamera;	//camera object
+    Camera* _orthoCamera;	//camera object
 
- 	//const int windowWidth = 1920;
- 	//const int windowHeight = 1080;
+    //const int windowWidth = 1920;
+    //const int windowHeight = 1080;
 
- 	bool succeded = false;
+    bool succeded = false;
 
 
 };

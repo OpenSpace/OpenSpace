@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -308,21 +308,19 @@ void testSpecificationAndThrow(const Documentation& documentation,
 namespace ghoul {
 
 template <>
-std::string to_string(const openspace::documentation::TestResult& testResult);
+std::string to_string(const openspace::documentation::TestResult& value);
 
 template <>
-std::string to_string(const openspace::documentation::TestResult::Offense& offense);
+std::string to_string(const openspace::documentation::TestResult::Offense& value);
 
 template <>
-std::string to_string(
-    const openspace::documentation::TestResult::Offense::Reason& reason);
+std::string to_string(const openspace::documentation::TestResult::Offense::Reason& value);
 
 template <>
-std::string to_string(const openspace::documentation::TestResult::Warning& warning);
+std::string to_string(const openspace::documentation::TestResult::Warning& value);
 
 template <>
-std::string to_string(
-    const openspace::documentation::TestResult::Warning::Reason& reason);
+std::string to_string(const openspace::documentation::TestResult::Warning::Reason& value);
 
 } // namespace ghoul
 

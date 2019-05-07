@@ -23,7 +23,7 @@
 ****************************************************************************************/
 
 #include <modules/roverterrainrenderer/filehandler/subsite.h>
-#include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/src/basictypes.h>
 
 namespace openspace {
 

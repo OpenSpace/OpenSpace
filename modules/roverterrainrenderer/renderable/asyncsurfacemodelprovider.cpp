@@ -53,16 +53,17 @@ bool AsyncSurfaceModelProvider::enqueueModelIO(const std::shared_ptr<Subsite> su
 
 std::vector<std::shared_ptr<SubsiteModels>> AsyncSurfaceModelProvider::getLoadedModels() {
     if (_diskToRamJobManager.numFinishedJobs() > 0) {
-        std::shared_ptr<SubsiteModels> subsiteModels = _diskToRamJobManager.popFinishedJob()->product();
-        enqueueSubsiteInitialization(subsiteModels);
+        SubsiteModels subsiteModels = _diskToRamJobManager.popFinishedJob()->product();
+        enqueueSubsiteInitialization(std::make_shared<SubsiteModels>(subsiteModels));
     }
 
     std::vector<std::shared_ptr<SubsiteModels>> initializedModels;
     if (_ramToGpuJobManager.numFinishedJobs() > 0) {
-        std::shared_ptr<SubsiteModels> subsiteModels = _ramToGpuJobManager.popFinishedJob()->product();
-        unmapBuffers(subsiteModels);
-        initializedModels.push_back(subsiteModels);
-        _enqueuedModelRequests.erase(subsiteModels->hashKey());
+        SubsiteModels subsiteModels = _ramToGpuJobManager.popFinishedJob()->product();
+        std::shared_ptr<SubsiteModels> m = std::make_shared<SubsiteModels>(subsiteModels);
+        unmapBuffers(m);
+        initializedModels.push_back(m);
+        _enqueuedModelRequests.erase(m->hashKey());
     }
     return initializedModels;
 }

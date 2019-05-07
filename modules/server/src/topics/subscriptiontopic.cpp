@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,35 +46,45 @@ using nlohmann::json;
 namespace openspace {
 
 SubscriptionTopic::~SubscriptionTopic() {
-    if (_prop && _onChangeHandle != UnsetCallbackHandle) {
-        _prop->removeOnChange(_onChangeHandle);
-    }
-    if (_prop && !_onDeleteHandle) {
-        _prop->removeOnDelete(_onDeleteHandle);
-    }
+    resetCallbacks();
 }
 
 bool SubscriptionTopic::isDone() const {
     return !_requestedResourceIsSubscribable || !_isSubscribedTo;
 }
 
+void SubscriptionTopic::resetCallbacks() {
+    if (!_prop) {
+        return;
+    }
+    if (_onChangeHandle != UnsetCallbackHandle) {
+        _prop->removeOnChange(_onChangeHandle);
+        _onChangeHandle = UnsetCallbackHandle;
+    }
+    if (_onDeleteHandle != UnsetCallbackHandle) {
+        _prop->removeOnDelete(_onDeleteHandle);
+        _onDeleteHandle = UnsetCallbackHandle;
+    }
+}
+
 void SubscriptionTopic::handleJson(const nlohmann::json& json) {
-    std::string key = json.at(PropertyKey).get<std::string>();
     const std::string& event = json.at(EventKey).get<std::string>();
 
     if (event == StartSubscription) {
-        LDEBUG(fmt::format("Subscribing to property '{}'", key));
+        std::string key = json.at(PropertyKey).get<std::string>();
 
         _prop = property(key);
+        resetCallbacks();
+
         if (_prop) {
             _requestedResourceIsSubscribable = true;
             _isSubscribedTo = true;
             auto onChange = [this, k = std::move(key)]() {
-                LDEBUG("Updating subscription '" + k + "'.");
                 _connection->sendJson(wrappedPayload(_prop));
             };
+
             _onChangeHandle = _prop->onChange(onChange);
-            _prop->onDelete([this]() {
+            _onDeleteHandle = _prop->onDelete([this]() {
                 _onChangeHandle = UnsetCallbackHandle;
                 _onDeleteHandle = UnsetCallbackHandle;
                 _isSubscribedTo = false;
@@ -89,6 +99,14 @@ void SubscriptionTopic::handleJson(const nlohmann::json& json) {
     }
     if (event == StopSubscription) {
         _isSubscribedTo = false;
+        if (_prop && _onChangeHandle != UnsetCallbackHandle) {
+            _prop->removeOnChange(_onChangeHandle);
+            _onChangeHandle = UnsetCallbackHandle;
+        }
+        if (_prop && !_onDeleteHandle) {
+            _prop->removeOnDelete(_onDeleteHandle);
+            _onDeleteHandle = UnsetCallbackHandle;
+        }
     }
 }
 

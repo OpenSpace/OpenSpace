@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,35 +25,39 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
 #define __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
 
-#include <openspace/util/openspacemodule.h>
-
 #include <modules/webbrowser/include/eventhandler.h>
+#include <openspace/util/openspacemodule.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <chrono>
 
 namespace openspace {
 
 class CefHost;
 
-constexpr const char* SUBPROCESS_NAME = "openspace_web_helper";
-
-#ifdef WIN32
-constexpr const char* SUBPROCESS_ENDING = ".exe";
-#else
-constexpr const char* SUBPROCESS_ENDING = "";
-#endif
+namespace webbrowser {
+    extern std::chrono::microseconds interval;
+    extern std::chrono::time_point<std::chrono::high_resolution_clock> latestCall;
+    extern CefHost* cefHost;
+    void update();
+}
 
 class WebBrowserModule : public OpenSpaceModule {
 public:
     static constexpr const char* Name = "WebBrowser";
     WebBrowserModule();
-    virtual ~WebBrowserModule();
+    virtual ~WebBrowserModule() = default;
 
-    int addBrowser(std::shared_ptr<BrowserInstance>);
-    void removeBrowser(std::shared_ptr<BrowserInstance>);
+    void addBrowser(BrowserInstance*);
+    void removeBrowser(BrowserInstance*);
 
-    void attachEventHandler(std::shared_ptr<BrowserInstance> browserInstance);
+    EventHandler eventHandler();
+    void attachEventHandler(BrowserInstance* browserInstance);
+    void detachEventHandler();
+    bool isEnabled() const;
 
 protected:
-    void internalInitialize(const ghoul::Dictionary& configuration) override;
+    void internalInitialize(const ghoul::Dictionary& dictionary) override;
     void internalDeinitialize() override;
 
 private:
@@ -65,9 +69,14 @@ private:
      */
     std::string findHelperExecutable();
 
-    std::vector<std::shared_ptr<BrowserInstance>> _browsers;
+    properties::BoolProperty _updateBrowserBetweenRenderables;
+    properties::FloatProperty _browserUpdateInterval;
+
+    std::vector<BrowserInstance*> _browsers;
     EventHandler _eventHandler;
     std::unique_ptr<CefHost> _cefHost;
+    std::string _webHelperLocation;
+    bool _enabled = true;
 };
 
 } // namespace openspace

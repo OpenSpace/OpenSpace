@@ -41,7 +41,7 @@ local StyxTrail = {
         Resolution = 1000
     },
     GUI = {
-        Name = "Hydra Trail",
+        Name = "Styx Trail",
         Path = "/Solar System/Dwarf Planets/Pluto"
     }
 }

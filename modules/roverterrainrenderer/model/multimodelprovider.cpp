@@ -29,52 +29,50 @@
 #include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
 
-#include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/geometry/geodetic3.h>
+#include <modules/globebrowsing/src/renderableglobe.h>
+#include <modules/globebrowsing/src/basictypes.h>
 
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-	const std::string _loggerCat = "MultiModelProvider";
+    const std::string _loggerCat = "MultiModelProvider";
 }
 
 namespace openspace {
 MultiModelProvider::MultiModelProvider(const ghoul::Dictionary& dictionary)
-	: ModelProvider(dictionary)
+    : ModelProvider(dictionary)
 {}
 
 std::vector<std::shared_ptr<Subsite>> MultiModelProvider::calculate(
-	const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites,
- 	const RenderData& data, const SceneGraphNode* parent)
+    const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites,
+    const RenderData& data, const SceneGraphNode* parent)
 {
 
-	std::vector<std::shared_ptr<Subsite>> subsitesInsideRadius;
-	float radius = 20;
+    std::vector<std::shared_ptr<Subsite>> subsitesInsideRadius;
+    float radius = 20;
 
-	globebrowsing::RenderableGlobe* rg = (globebrowsing::RenderableGlobe*)parent->renderable();
+    globebrowsing::RenderableGlobe* rg = (globebrowsing::RenderableGlobe*)parent->renderable();
 
-	glm::dvec3 center = parent->worldPosition();
-	glm::dmat4 globeModelTransform = rg->modelTransform();
-	glm::dmat4 globeModelInverseTransform = rg->inverseModelTransform();
-	glm::dvec3 cameraPos = data.camera.positionVec3();
-	glm::dvec4 cameraPositionModelSpace = globeModelInverseTransform * glm::dvec4(cameraPos, 1.0);
-	glm::dvec3 cameraPositionProjected = rg->ellipsoid().geodeticSurfaceProjection(cameraPositionModelSpace);
+    glm::dvec3 center = parent->worldPosition();
+    glm::dmat4 globeModelTransform = rg->modelTransform();
+    glm::dvec3 cameraPos = data.camera.positionVec3();
+    glm::dvec4 cameraPositionModelSpace = glm::inverse(globeModelTransform) * glm::dvec4(cameraPos, 1.0);
+    glm::dvec3 cameraPositionProjected = rg->ellipsoid().geodeticSurfaceProjection(cameraPositionModelSpace);
 
-	for (auto s : subsites) {
-		for (auto s1 : s) {
-			glm::dvec3 temp = rg->ellipsoid().cartesianPosition({ s1->geodetic , 0 });
-			if (glm::distance(cameraPositionProjected, temp) < radius) {
-			subsitesInsideRadius.push_back(s1);
-			}
-		}
-	}
+    for (auto s : subsites) {
+        for (auto s1 : s) {
+            glm::dvec3 temp = rg->ellipsoid().cartesianPosition({ s1->geodetic , 0 });
+            if (glm::distance(cameraPositionProjected, temp) < radius) {
+            subsitesInsideRadius.push_back(s1);
+            }
+        }
+    }
 
-	 return subsitesInsideRadius;
+     return subsitesInsideRadius;
 }
 
 void MultiModelProvider::initialize() {
-	return;
+    return;
 }
 
 } // namespace openspace

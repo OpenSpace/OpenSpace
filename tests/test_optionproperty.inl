@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -68,9 +68,7 @@ TEST_F(OptionPropertyTest, SingleOptionSinglePositive) {
 TEST_F(OptionPropertyTest, SingleOptionMultipleZero) {
     openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
-    p.addOptions({
-        { 0, "a" }
-    });
+    p.addOptions({ "a" });
     p = 0;
 
     ASSERT_EQ(0, p.option().value);

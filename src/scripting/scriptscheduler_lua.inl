@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -98,6 +98,33 @@ int loadScheduledScript(lua_State* L) {
     }
 
     lua_settop(L, 0);
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+int setModeApplicationTime(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::setModeApplicationTime");
+
+    global::scriptScheduler.setModeApplicationTime();
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+int setModeRecordedTime(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::setModeRecordedTime");
+
+    global::scriptScheduler.setModeRecordedTime();
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+int setModeSimulationTime(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::setModeSimulationTime");
+
+    global::scriptScheduler.setModeSimulationTime();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

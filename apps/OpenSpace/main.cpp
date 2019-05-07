@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -143,10 +143,10 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
         dumpFile.c_str(),
         GENERIC_READ | GENERIC_WRITE,
         FILE_SHARE_WRITE | FILE_SHARE_READ,
-        0,
+        nullptr,
         CREATE_ALWAYS,
         0,
-        0
+        nullptr
     );
 
     MINIDUMP_EXCEPTION_INFORMATION exceptionParameter;
@@ -358,13 +358,13 @@ void mainPreSyncFunc() {
         if (!state.isConnected) {
             // Joystick was added
             state.isConnected = true;
-            state.name = SgctEngine->getJoystickName(i);
+            state.name = sgct::Engine::getJoystickName(i);
 
             std::fill(state.axes.begin(), state.axes.end(), 0.f);
             std::fill(state.buttons.begin(), state.buttons.end(), JoystickAction::Idle);
         }
 
-        const float* axes = SgctEngine->getJoystickAxes(i, &state.nAxes);
+        const float* axes = sgct::Engine::getJoystickAxes(i, &state.nAxes);
         if (state.nAxes > JoystickInputState::MaxAxes) {
             LWARNING(fmt::format(
                 "Joystick/Gamepad {} has {} axes, but only {} axes are supported. "
@@ -375,7 +375,10 @@ void mainPreSyncFunc() {
         }
         std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
 
-        const unsigned char* buttons = SgctEngine->getJoystickButtons(i, &state.nButtons);
+        const unsigned char* buttons = sgct::Engine::getJoystickButtons(
+            i,
+            &state.nButtons
+        );
 
         if (state.nButtons > JoystickInputState::MaxButtons) {
             LWARNING(fmt::format(
@@ -441,7 +444,7 @@ void mainRenderFunc() {
     LTRACE("main::mainRenderFunc(begin)");
 
     glm::mat4 viewMatrix = SgctEngine->getCurrentViewMatrix() *
-                glm::translate(glm::mat4(1.f), SgctEngine->getDefaultUserPtr()->getPos());
+        glm::translate(glm::mat4(1.f), sgct::Engine::getDefaultUserPtr()->getPos());
 
     glm::mat4 projectionMatrix = SgctEngine->getCurrentProjectionMatrix();
 #ifdef OPENVR_SUPPORT
@@ -545,11 +548,12 @@ void mainKeyboardCallback(int key, int, int action, int mods) {
 
 
 
-void mainMouseButtonCallback(int key, int action) {
+void mainMouseButtonCallback(int key, int action, int modifiers) {
     LTRACE("main::mainMouseButtonCallback(begin)");
     openspace::global::openSpaceEngine.mouseButtonCallback(
         openspace::MouseButton(key),
-        openspace::MouseAction(action)
+        openspace::MouseAction(action),
+        openspace::KeyModifier(modifiers)
     );
     LTRACE("main::mainMouseButtonCallback(end)");
 }
@@ -635,19 +639,28 @@ void setSgctDelegateFunctions() {
         return sgct::Engine::instance()->getCurrentWindowPtr()->isWindowResized();
     };
     sgctDelegate.averageDeltaTime = []() { return sgct::Engine::instance()->getAvgDt(); };
+    sgctDelegate.deltaTimeStandardDeviation = []() {
+        return sgct::Engine::instance()->getDtStandardDeviation();
+    };
+    sgctDelegate.minDeltaTime = []() {
+        return sgct::Engine::instance()->getMinDt();
+    };
+    sgctDelegate.maxDeltaTime = []() {
+        return sgct::Engine::instance()->getMaxDt();
+    };
     sgctDelegate.deltaTime = []() { return sgct::Engine::instance()->getDt(); };
     sgctDelegate.applicationTime = []() { return sgct::Engine::getTime(); };
     sgctDelegate.mousePosition = []() {
         int id = sgct::Engine::instance()->getCurrentWindowPtr()->getId();
         double posX, posY;
-        sgct::Engine::instance()->getMousePos(id, &posX, &posY);
+        sgct::Engine::getMousePos(id, &posX, &posY);
         return glm::vec2(posX, posY);
     };
     sgctDelegate.mouseButtons = [](int maxNumber) {
         int id = sgct::Engine::instance()->getCurrentWindowPtr()->getId();
         uint32_t result = 0;
         for (int i = 0; i < maxNumber; ++i) {
-            bool button = (sgct::Engine::instance()->getMouseButton(id, i) != 0);
+            bool button = (sgct::Engine::getMouseButton(id, i) != 0);
             if (button) {
                 result |= (1 << i);
             }
@@ -739,10 +752,10 @@ void setSgctDelegateFunctions() {
     };
     sgctDelegate.isMaster = []() { return sgct::Engine::instance()->isMaster(); };
     sgctDelegate.isUsingSwapGroups = []() {
-        return sgct::Engine::instance()->getCurrentWindowPtr()->isUsingSwapGroups();
+        return sgct::SGCTWindow::isUsingSwapGroups();
     };
     sgctDelegate.isSwapGroupMaster = []() {
-        return sgct::Engine::instance()->getCurrentWindowPtr()->isSwapGroupMaster();
+        return sgct::SGCTWindow::isSwapGroupMaster();
     };
     sgctDelegate.viewProjectionMatrix = []() {
         return sgct::Engine::instance()->getCurrentModelViewProjectionMatrix();
@@ -828,6 +841,14 @@ int main(int argc, char** argv) {
     }
 
     ghoul::initialize();
+
+    // Register the path of the executable,
+    // to make it possible to find other files in the same directory.
+    FileSys.registerPathToken(
+        "${BIN}",
+        ghoul::filesystem::File(absPath(argv[0])).directoryName(),
+        ghoul::filesystem::FileSystem::Override::Yes
+    );
 
     //
     // Parse commandline arguments

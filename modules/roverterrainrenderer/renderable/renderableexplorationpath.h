@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_ROVER_TERRAIN_RENDERER___RENDERABLE_EXPLORATION_PATH___H__
 
 #include <ghoul/opengl/programobject.h>
-#include <modules/globebrowsing/globes/renderableglobe.h>
+#include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/util/updatestructures.h>
 
 #include <map>

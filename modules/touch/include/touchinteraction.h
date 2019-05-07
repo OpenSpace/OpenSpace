@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -133,11 +133,16 @@ public:
 
     // Get & Setters
     Camera* getCamera();
-    SceneGraphNode* getFocusNode();
-    void setFocusNode(SceneGraphNode* focusNode);
+    const SceneGraphNode* getFocusNode();
+    void setFocusNode(const SceneGraphNode* focusNode);
     void setCamera(Camera* camera);
 
 private:
+    /* Returns true if the clicked position contains WebGui content and the event will
+    * be parsed to the webbrowser
+    */
+    bool webContent(const std::vector<TUIO::TuioCursor>& list);
+
     /* Returns true if we have the GUI window open. If so, emulates the incoming touch
      * input to a mouse such that we can interact with the GUI
      */
@@ -185,7 +190,6 @@ private:
     void resetToDefault();
 
     Camera* _camera = nullptr;
-    SceneGraphNode* _focusNode = nullptr;
 
     // Property variables
     properties::StringProperty _origin;

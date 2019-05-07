@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,7 @@ namespace openspace {
 void ParallelServer::start(int port, const std::string& password,
                            const std::string& changeHostPassword)
 {
-    _socketServer.listen("localhost", port);
+    _socketServer.listen(port);
     _passwordHash = std::hash<std::string>{}(password);
     _changeHostPasswordHash = std::hash<std::string>{}(changeHostPassword);
 
@@ -144,16 +144,16 @@ void ParallelServer::handlePeerMessage(PeerMessage peerMessage) {
             handleAuthentication(peer, std::move(data));
             break;
         case ParallelConnection::MessageType::Data:
-            handleData(peer, std::move(data));
+            handleData(*peer, std::move(data));
             break;
         case ParallelConnection::MessageType::HostshipRequest:
             handleHostshipRequest(peer, std::move(data));
             break;
         case ParallelConnection::MessageType::HostshipResignation:
-            handleHostshipResignation(peer, std::move(data));
+            handleHostshipResignation(*peer);
             break;
         case ParallelConnection::MessageType::Disconnection:
-            disconnect(peer);
+            disconnect(*peer);
             break;
         default:
             LERROR(fmt::format(
@@ -174,7 +174,7 @@ void ParallelServer::handleAuthentication(std::shared_ptr<Peer> peer,
 
     if (passwordHash != _passwordHash) {
         LERROR(fmt::format("Connection {} provided incorrect passcode.", peer->id));
-        disconnect(peer);
+        disconnect(*peer);
         return;
     }
 
@@ -190,7 +190,7 @@ void ParallelServer::handleAuthentication(std::shared_ptr<Peer> peer,
         name = "Anonymous";
     }
 
-    setName(peer, name);
+    setName(*peer, name);
 
     LINFO(fmt::format("Connection established with {} \"{}\"", peer->id, name));
 
@@ -208,20 +208,20 @@ void ParallelServer::handleAuthentication(std::shared_ptr<Peer> peer,
         assignHost(peer);
         for (std::pair<const size_t, std::shared_ptr<Peer>>& it : _peers) {
             // sendConnectionStatus(it->second) ?
-            sendConnectionStatus(peer);
+            sendConnectionStatus(*peer);
         }
     }
     else {
-        setToClient(peer);
+        setToClient(*peer);
     }
 
     setNConnections(nConnections() + 1);
 }
 
-void ParallelServer::handleData(std::shared_ptr<Peer> peer, std::vector<char> data) {
-    if (peer->id != _hostPeerId) {
+void ParallelServer::handleData(const Peer& peer, std::vector<char> data) {
+    if (peer.id != _hostPeerId) {
         LINFO(fmt::format(
-            "Connection {} tried to send data without being the host. Ignoring", peer->id
+            "Connection {} tried to send data without being the host. Ignoring", peer.id
         ));
     }
     sendMessageToClients(ParallelConnection::MessageType::Data, data);
@@ -258,10 +258,8 @@ void ParallelServer::handleHostshipRequest(std::shared_ptr<Peer> peer,
     LINFO(fmt::format("Switched host from {} to {}.", oldHostPeerId, peer->id));
 }
 
-void ParallelServer::handleHostshipResignation(std::shared_ptr<Peer> peer,
-                                               std::vector<char>)
-{
-    LINFO(fmt::format("Connection {} wants to resign its hostship.", peer->id));
+void ParallelServer::handleHostshipResignation(Peer& peer) {
+    LINFO(fmt::format("Connection {} wants to resign its hostship.", peer.id));
 
     size_t oldHostPeerId = 0;
     {
@@ -271,26 +269,26 @@ void ParallelServer::handleHostshipResignation(std::shared_ptr<Peer> peer,
 
     setToClient(peer);
 
-    LINFO(fmt::format("Connection {} resigned as host.", peer->id));
+    LINFO(fmt::format("Connection {} resigned as host.", peer.id));
 }
 
-bool ParallelServer::isConnected(std::shared_ptr<Peer> peer) const {
-    return peer->status != ParallelConnection::Status::Connecting &&
-           peer->status != ParallelConnection::Status::Disconnected;
+bool ParallelServer::isConnected(const Peer& peer) const {
+    return peer.status != ParallelConnection::Status::Connecting &&
+           peer.status != ParallelConnection::Status::Disconnected;
 }
 
-void ParallelServer::sendMessage(std::shared_ptr<Peer> peer,
+void ParallelServer::sendMessage(Peer& peer,
                                  ParallelConnection::MessageType messageType,
                                  const std::vector<char>& message)
 {
-    peer->parallelConnection.sendMessage({ messageType, message });
+    peer.parallelConnection.sendMessage({ messageType, message });
 }
 
 void ParallelServer::sendMessageToAll(ParallelConnection::MessageType messageType,
                                       const std::vector<char>& message)
 {
     for (std::pair<const size_t, std::shared_ptr<Peer>>& it : _peers) {
-        if (isConnected(it.second)) {
+        if (isConnected(*it.second)) {
             it.second->parallelConnection.sendMessage({ messageType, message });
         }
     }
@@ -306,7 +304,7 @@ void ParallelServer::sendMessageToClients(ParallelConnection::MessageType messag
     }
 }
 
-void ParallelServer::disconnect(std::shared_ptr<Peer> peer) {
+void ParallelServer::disconnect(Peer& peer) {
     if (isConnected(peer)) {
         setNConnections(nConnections() - 1);
     }
@@ -319,27 +317,27 @@ void ParallelServer::disconnect(std::shared_ptr<Peer> peer) {
 
     // Make sure any disconnecting host is first degraded to client,
     // in order to notify other clients about host disconnection.
-    if (peer->id == hostPeerId) {
+    if (peer.id == hostPeerId) {
         setToClient(peer);
     }
 
-    peer->parallelConnection.disconnect();
-    peer->thread.join();
-    _peers.erase(peer->id);
+    peer.parallelConnection.disconnect();
+    peer.thread.join();
+    _peers.erase(peer.id);
 }
 
-void ParallelServer::setName(std::shared_ptr<Peer> peer, std::string name) {
-    peer->name = name;
+void ParallelServer::setName(Peer& peer, std::string name) {
+    peer.name = name;
     size_t hostPeerId = 0;
     {
-        std::lock_guard<std::mutex> lock(_hostInfoMutex);
+        std::lock_guard lock(_hostInfoMutex);
         hostPeerId = _hostPeerId;
     }
 
     // Make sure everyone gets the new host name.
-    if (peer->id == hostPeerId) {
+    if (peer.id == hostPeerId) {
         {
-            std::lock_guard<std::mutex> lock(_hostInfoMutex);
+            std::lock_guard lock(_hostInfoMutex);
             _hostName = name;
         }
 
@@ -352,7 +350,7 @@ void ParallelServer::setName(std::shared_ptr<Peer> peer, std::string name) {
 
 void ParallelServer::assignHost(std::shared_ptr<Peer> newHost) {
     {
-        std::lock_guard<std::mutex> lock(_hostInfoMutex);
+        std::lock_guard lock(_hostInfoMutex);
         std::shared_ptr<ParallelServer::Peer> oldHost = peer(_hostPeerId);
 
         if (oldHost) {
@@ -367,14 +365,14 @@ void ParallelServer::assignHost(std::shared_ptr<Peer> newHost) {
         if (it.second != newHost) {
             it.second->status = ParallelConnection::Status::ClientWithHost;
         }
-        sendConnectionStatus(it.second);
+        sendConnectionStatus(*it.second);
     }
 }
 
-void ParallelServer::setToClient(std::shared_ptr<Peer> peer) {
-    if (peer->status == ParallelConnection::Status::Host) {
+void ParallelServer::setToClient(Peer& peer) {
+    if (peer.status == ParallelConnection::Status::Host) {
         {
-            std::lock_guard<std::mutex> lock(_hostInfoMutex);
+            std::lock_guard lock(_hostInfoMutex);
             _hostPeerId = 0;
             _hostName = "";
         }
@@ -382,10 +380,10 @@ void ParallelServer::setToClient(std::shared_ptr<Peer> peer) {
         // If host becomes client, make all clients hostless.
         for (std::pair<const size_t, std::shared_ptr<Peer>>& it : _peers) {
             it.second->status = ParallelConnection::Status::ClientWithoutHost;
-            sendConnectionStatus(it.second);
+            sendConnectionStatus(*it.second);
         }
     } else {
-        peer->status = (_hostPeerId > 0) ?
+        peer.status = (_hostPeerId > 0) ?
             ParallelConnection::Status::ClientWithHost :
             ParallelConnection::Status::ClientWithoutHost;
         sendConnectionStatus(peer);
@@ -404,9 +402,9 @@ void ParallelServer::setNConnections(size_t nConnections) {
     sendMessageToAll(ParallelConnection::MessageType::NConnections, data);
 }
 
-void ParallelServer::sendConnectionStatus(std::shared_ptr<Peer> peer) {
+void ParallelServer::sendConnectionStatus(Peer& peer) {
     std::vector<char> data;
-    const uint32_t outStatus = static_cast<uint32_t>(peer->status);
+    const uint32_t outStatus = static_cast<uint32_t>(peer.status);
     data.insert(
         data.end(),
         reinterpret_cast<const char*>(&outStatus),

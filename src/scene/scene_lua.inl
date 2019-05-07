@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -398,6 +398,51 @@ int property_getValue(lua_State* L) {
     }
 
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 1;
+}
+
+/**
+ * \ingroup LuaScripts
+ * getProperty
+ * Returns a list of property identifiers that match the passed regular expression
+ */
+int property_getProperty(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::property_getProperty");
+
+    std::string regex = ghoul::lua::value<std::string>(L, 1);
+    lua_pop(L, 1);
+
+
+    // Replace all wildcards * with the correct regex (.*)
+    size_t startPos = regex.find("*");
+    while (startPos != std::string::npos) {
+        regex.replace(startPos, 1, "(.*)");
+        startPos += 4; // (.*)
+        startPos = regex.find("*", startPos);
+    }
+
+
+
+    std::regex r(regex);
+    std::vector<properties::Property*> props = allProperties();
+    std::vector<std::string> res;
+    for (properties::Property* prop : props) {
+        // Check the regular expression for all properties
+        const std::string& id = prop->fullyQualifiedIdentifier();
+
+        if (std::regex_match(id, r)) {
+            res.push_back(id);
+        }
+    }
+
+    lua_newtable(L);
+    int number = 1;
+    for (const std::string& s : res) {
+        lua_pushstring(L, s.c_str());
+        lua_rawseti(L, -2, number);
+        ++number;
+    }
+
     return 1;
 }
 

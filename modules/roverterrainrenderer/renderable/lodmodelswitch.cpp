@@ -28,7 +28,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 
-#include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/src/basictypes.h>
 #include <openspace/engine/globals.h>
 
 #include <ghoul/logging/logmanager.h>
@@ -56,7 +56,7 @@ void LodModelSwitch::initialize(RenderableGlobe * owner) {
 LodModelSwitch::Mode LodModelSwitch::getLevel(const RenderData& data) {
     glm::dvec3 center = _parent->worldPosition();
     glm::dmat4 globeModelTransform = _owner->modelTransform();
-    glm::dmat4 globeModelInverseTransform = _owner->inverseModelTransform();
+    glm::dmat4 globeModelInverseTransform = glm::inverse(globeModelTransform);
     glm::dvec3 cameraPos = data.camera.positionVec3();
     glm::dvec4 cameraPositionModelSpace = globeModelInverseTransform * glm::dvec4(cameraPos, 1.0);
 

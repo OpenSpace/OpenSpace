@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,24 +55,24 @@ public:
     void deinitialize();
 
     // Mutators
-    void setFocusNode(SceneGraphNode* node);
     void setCamera(Camera* camera);
-    void resetCameraDirection();
     void setInterpolationTime(float durationInSeconds);
 
     void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
-
     void updateCamera(double deltaTime);
+    void setEnableKeyFrameInteraction();
+    void setDisableKeyFrameInteraction();
+    void triggerPlaybackStart();
+    void stopPlayback();
 
     // Accessors
     ghoul::Dictionary cameraStateDictionary();
-    SceneGraphNode* focusNode() const;
-    glm::dvec3 focusNodeToCameraVector() const;
-    glm::quat focusNodeToCameraRotation() const;
     Camera* camera() const;
     const InputState& inputState() const;
     const OrbitalNavigator& orbitalNavigator() const;
+    OrbitalNavigator& orbitalNavigator();
     KeyframeNavigator& keyframeNavigator() const;
+    bool isKeyFrameInteractionEnabled() const;
     float interpolationTime() const;
 
     // Callback functions
@@ -113,14 +113,15 @@ public:
 
 private:
     bool _cameraUpdatedFromScript = false;
+    bool _playbackModeEnabled = false;
 
     std::unique_ptr<InputState> _inputState;
     Camera* _camera = nullptr;
+    std::function<void()> _playbackEndCallback;
 
     std::unique_ptr<OrbitalNavigator> _orbitalNavigator;
     std::unique_ptr<KeyframeNavigator> _keyframeNavigator;
 
-    properties::StringProperty _origin;
     properties::BoolProperty _useKeyFrameInteraction;
 };
 

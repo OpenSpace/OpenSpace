@@ -46,7 +46,7 @@ struct SurfaceModelLoadJob : LoadJob {
 
     virtual void execute() override;
 
-    virtual std::shared_ptr<SubsiteModels> product() override;
+    virtual SubsiteModels product() override;
 
 protected:
     std::shared_ptr<Subsite> _subsite;

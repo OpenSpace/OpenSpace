@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/performance/performancemanager.h>
 #include <openspace/performance/performancemeasurement.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderengine.h>
@@ -543,6 +544,8 @@ void ABufferRenderer::updateMSAASamplingPattern() {
 }
 
 void ABufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor) {
+    const bool doPerformanceMeasurements = global::performanceManager.isEnabled();
+
     PerfMeasure("ABufferRenderer::render");
 
     if (!scene || !camera) {
@@ -877,7 +880,7 @@ void ABufferRenderer::updateRaycastData() {
     _helperPaths.clear();
 
     const std::vector<VolumeRaycaster*>& raycasters =
-        global::renderEngine.raycasterManager().raycasters();
+        global::raycasterManager.raycasters();
 
     std::map<std::string, int> namespaceIndices;
     // raycaster ids are positive integers starting at 0. (for raycasters,

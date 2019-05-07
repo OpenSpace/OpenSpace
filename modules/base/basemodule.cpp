@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,9 +33,11 @@
 #include <modules/base/dashboard/dashboarditempropertyvalue.h>
 #include <modules/base/dashboard/dashboarditemsimulationincrement.h>
 #include <modules/base/dashboard/dashboarditemspacing.h>
+#include <modules/base/rendering/renderableboxgrid.h>
 #include <modules/base/dashboard/dashboarditemvelocity.h>
 #include <modules/base/lightsource/cameralightsource.h>
 #include <modules/base/lightsource/scenegraphlightsource.h>
+#include <modules/base/rendering/renderablecartesianaxes.h>
 #include <modules/base/rendering/renderablemodel.h>
 #include <modules/base/rendering/renderablesphere.h>
 #include <modules/base/rendering/renderablesphericalgrid.h>
@@ -116,6 +118,8 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
 
+    fRenderable->registerClass<RenderableBoxGrid>("RenderableBoxGrid");
+    fRenderable->registerClass<RenderableCartesianAxes>("RenderableCartesianAxes");
     fRenderable->registerClass<RenderableModel>("RenderableModel");
     fRenderable->registerClass<RenderablePlaneImageLocal>("RenderablePlaneImageLocal");
     fRenderable->registerClass<RenderablePlaneImageOnline>("RenderablePlaneImageOnline");
@@ -179,6 +183,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         DashboardItemSpacing::Documentation(),
         DashboardItemVelocity::Documentation(),
 
+        RenderableBoxGrid::Documentation(),
         RenderableModel::Documentation(),
         RenderablePlane::Documentation(),
         RenderableSphere::Documentation(),

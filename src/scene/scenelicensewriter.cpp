@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #include <openspace/scene/scenelicensewriter.h>
 
 #include <openspace/scene/scenelicense.h>
+#include <ghoul/fmt.h>
 #include <sstream>
 
 namespace {
@@ -53,12 +54,14 @@ std::string SceneLicenseWriter::generateJson() const {
     std::stringstream json;
     json << "[";
     for (const SceneLicense& license : _licenses) {
+        constexpr const char* replStr = R"("{}": "{}", )";
+        constexpr const char* replStr2 = R"("{}": "{}")";
         json << "{";
-        json << "\"module\": \"" << escapedJson(license.module) << "\", ";
-        json << "\"name\": \"" << escapedJson(license.name) << "\", ";
-        json << "\"attribution\": \"" << escapedJson(license.attribution) << "\", ";
-        json << "\"url\": \"" << escapedJson(license.url) << "\", ";
-        json << "\"licenseText\": \"" << escapedJson(license.licenseText) << "\"";
+        json << fmt::format(replStr, "module", escapedJson(license.module));
+        json << fmt::format(replStr, "name", escapedJson(license.name));
+        json << fmt::format(replStr, "attribution", escapedJson(license.attribution));
+        json << fmt::format(replStr, "url", escapedJson(license.url));
+        json << fmt::format(replStr2, "licenseText", escapedJson(license.licenseText));
         json << "}";
 
         if (&license != &(_licenses.back())) {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,8 +53,7 @@ void main() {
     
     // G-Buffer
     vs_gPosition = view * (vec4(1E19, 1E19, 1E19, 1.0) * position);
-    
-    position = view * position;
+    position = vec4(1E-19, 1E-19, 1E-19, 1.0) * vs_gPosition;
     
     gl_Position = position;
 }

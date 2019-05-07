@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -242,6 +242,7 @@ double ParallelPeer::convertTimestamp(double messageTimestamp) {
     return messageTimestamp + _initialTimeDiff + _bufferTime;
 }
 
+
 double ParallelPeer::latencyStandardDeviation() const {
     double accumulatedLatencyDiffSquared = 0;
     double accumulatedLatencyDiff = 0;
@@ -312,7 +313,7 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message)
 
             // If there are new keyframes incoming, make sure to erase all keyframes
             // that already exist after the first new keyframe.
-            if (keyframesMessage.size() > 0) {
+            if (!keyframesMessage.empty()) {
                 const double convertedTimestamp =
                     convertTimestamp(keyframesMessage[0]._timestamp);
 
@@ -584,20 +585,22 @@ const std::string& ParallelPeer::hostName() {
 }
 
 void ParallelPeer::sendCameraKeyframe() {
-    SceneGraphNode* focusNode = global::navigationHandler.focusNode();
+    const SceneGraphNode* focusNode =
+        global::navigationHandler.orbitalNavigator().anchorNode();
     if (!focusNode) {
         return;
     }
 
     // Create a keyframe with current position and orientation of camera
     datamessagestructures::CameraKeyframe kf;
-    kf._position = global::navigationHandler.focusNodeToCameraVector();
+    kf._position = global::navigationHandler.orbitalNavigator().anchorNodeToCameraVector();
 
     kf._followNodeRotation =
         global::navigationHandler.orbitalNavigator().followingNodeRotation();
     if (kf._followNodeRotation) {
         kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
-        kf._rotation = global::navigationHandler.focusNodeToCameraRotation();
+        kf._rotation =
+            global::navigationHandler.orbitalNavigator().anchorNodeToCameraRotation();
     }
     else {
         kf._rotation = global::navigationHandler.camera()->rotationQuaternion();
@@ -626,7 +629,7 @@ void ParallelPeer::sendCameraKeyframe() {
 
 void ParallelPeer::sendTimeTimeline() {
     // Create a keyframe with current position and orientation of camera
-    const Timeline<TimeKeyframeData> timeline = global::timeManager.timeline();
+    const Timeline<TimeKeyframeData>& timeline = global::timeManager.timeline();
     std::deque<Keyframe<TimeKeyframeData>> keyframes = timeline.keyframes();
 
     datamessagestructures::TimeTimeline timelineMessage;

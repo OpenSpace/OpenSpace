@@ -37,11 +37,10 @@
 #include <openspace/engine/globals.h>
 #include <ghoul/fmt.h>
 
-#include <freeimage.h>
+//#include <freeimage.h>
 
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/geometry/geodetic3.h>
-#include <modules/globebrowsing/globes/renderableglobe.h>
+#include <modules/globebrowsing/src/basictypes.h>
+#include <modules/globebrowsing/src/renderableglobe.h>
 
 #include <openspace/util/camera.h>
 #include <openspace/rendering/renderengine.h>

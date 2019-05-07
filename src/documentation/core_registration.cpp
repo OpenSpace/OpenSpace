@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/keybindingmanager.h>
+#include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/shortcutmanager.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
@@ -80,6 +81,7 @@ void registerCoreClasses(scripting::ScriptEngine& engine) {
     engine.addLibrary(Time::luaLibrary());
     engine.addLibrary(interaction::KeybindingManager::luaLibrary());
     engine.addLibrary(interaction::NavigationHandler::luaLibrary());
+    engine.addLibrary(interaction::SessionRecording::luaLibrary());
     engine.addLibrary(interaction::ShortcutManager::luaLibrary());
     engine.addLibrary(scripting::ScriptScheduler::luaLibrary());
     engine.addLibrary(scripting::generalSystemCapabilities());

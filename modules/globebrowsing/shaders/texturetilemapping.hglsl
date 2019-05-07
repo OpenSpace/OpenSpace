@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,6 @@
 
 #include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/blending.hglsl>
-#include <${MODULE_GLOBEBROWSING}/shaders/globeshading.hglsl>
 
 // First layer type from LayerShaderManager is height map
 #define NUMLAYERS_HEIGHTMAP #{lastLayerIndexHeightLayers} + 1
@@ -58,7 +57,6 @@
 #define CHUNK_DEFAULT_HEIGHT #{defaultHeight}
 
 // Other key value pairs used for settings
-#define USE_ATMOSPHERE #{useAtmosphere}
 #define USE_ACCURATE_NORMALS #{useAccurateNormals}
 #define PERFORM_SHADING #{performShading}
 #define USE_ECLIPSE_SHADOWS #{useEclipseShadows}
@@ -67,58 +65,88 @@
 #define SHOW_HEIGHT_RESOLUTION #{showHeightResolution}
 #define SHOW_HEIGHT_INTENSITIES #{showHeightIntensities}
 
-float performLayerSettingsRGB(float currentValue, LayerSettings settings) {
-    float newValue = currentValue;
+const vec3 DefaultLevelWeights = vec3(1.0, 0.0, 0.0);
 
-    newValue = sign(newValue) * pow(abs(newValue), settings.gamma);
-    newValue = newValue * settings.multiplier;
-    newValue = newValue + settings.offset;
+float orenNayarDiffuse(vec3 lightDirection, vec3 viewDirection, vec3 surfaceNormal,
+                       float roughness)
+{
+    // calculate intermediary values
+    float NdotL = dot(surfaceNormal, lightDirection);
+    float NdotV = dot(surfaceNormal, viewDirection); 
 
-    return newValue;
-}
-
-vec4 performLayerSettingsRGB(vec4 currentValue, LayerSettings settings) {
-    vec4 newValue = vec4(
-        performLayerSettingsRGB(currentValue.r, settings),
-        performLayerSettingsRGB(currentValue.g, settings),
-        performLayerSettingsRGB(currentValue.b, settings),
-        currentValue.a
+    float angleVN = acos(NdotV);
+    float angleLN = acos(NdotL);
+    
+    float alpha = max(angleVN, angleLN);
+    float beta = min(angleVN, angleLN);
+    float gamma = dot(
+        viewDirection - surfaceNormal * dot(viewDirection, surfaceNormal),
+        lightDirection - surfaceNormal * dot(lightDirection, surfaceNormal)
     );
-
-    return newValue;
-}
-
-float performLayerSettingsAlpha(float currentValue, LayerSettings settings) {
-    return currentValue * settings.opacity;
-}
-
-vec4 performLayerSettingsAlpha(vec4 currentValue, LayerSettings settings) {
-    return vec4(currentValue.rgb, performLayerSettingsAlpha(currentValue.a, settings));
+    
+    float roughnessSquared = roughness * roughness;
+    
+    // calculate A and B
+    float A = 1.0 - 0.5 * (roughnessSquared / (roughnessSquared + 0.57));
+    float B = 0.45 * (roughnessSquared / (roughnessSquared + 0.09));
+    float C = sin(alpha) * tan(beta);
+    
+    // put it all together
+    return max(0.0, NdotL) * (A + B * max(0.0, gamma) * C);
 }
 
 float performLayerSettings(float currentValue, LayerSettings settings) {
-    return performLayerSettingsAlpha(
-        performLayerSettingsRGB(currentValue, settings),
-        settings
-    );
+    float v = sign(currentValue) * pow(abs(currentValue), settings.gamma) *
+              settings.multiplier + settings.offset;
+    return v * settings.opacity;
 }
 
 vec4 performLayerSettings(vec4 currentValue, LayerSettings settings) {
-    return performLayerSettingsAlpha(
-        performLayerSettingsRGB(currentValue, settings),
-        settings
-    );
+    vec3 newValue = sign(currentValue.rgb) * pow(abs(currentValue.rgb), vec3(settings.gamma)) *
+           settings.multiplier + settings.offset;
+    return vec4(newValue, currentValue.a * settings.opacity);
 }
 
+vec2 tileUVToTextureSamplePosition(ChunkTile chunkTile, vec2 tileUV,
+                                   PixelPadding padding)
+{
+    vec2 uv = chunkTile.uvTransform.uvOffset + chunkTile.uvTransform.uvScale * tileUV;
+
+    // compensateSourceTextureSampling
+    ivec2 resolution = textureSize(chunkTile.textureSampler, 0);
+    vec2 sourceSize = vec2(resolution) + padding.sizeDifference;
+    vec2 currentSize = vec2(resolution);
+    vec2 sourceToCurrentSize = currentSize / sourceSize;
+    return sourceToCurrentSize * (uv - padding.startOffset / sourceSize);
+}
+
+vec4 getTexVal(ChunkTilePile chunkTilePile, vec3 w, vec2 uv,
+               PixelPadding padding)
+{
+    vec4 v1 = texture(
+        chunkTilePile.chunkTile0.textureSampler,
+        tileUVToTextureSamplePosition(chunkTilePile.chunkTile0, uv, padding)
+    );
+    vec4 v2 = texture(
+        chunkTilePile.chunkTile1.textureSampler,
+        tileUVToTextureSamplePosition(chunkTilePile.chunkTile1, uv, padding)
+    );
+    vec4 v3 = texture(
+        chunkTilePile.chunkTile2.textureSampler,
+        tileUVToTextureSamplePosition(chunkTilePile.chunkTile2, uv, padding)
+    );
+
+    return w.x * v1 + w.y * v2 + w.z * v3;
+}
 
 #for id, layerGroup in layerGroups
 #for i in 0..#{lastLayerIndex#{layerGroup}}
 
-vec4 getSample#{layerGroup}#{i}(vec2 uv, LevelWeights levelWeights,
+vec4 getSample#{layerGroup}#{i}(vec2 uv, vec3 levelWeights,
                             Layer #{layerGroup}[#{lastLayerIndex#{layerGroup}} + 1])
 {
-    vec4 color = vec4(0,0,0,1);
-    
+    vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
+
     // All tile layers are the same. Sample from texture
 #if (#{#{layerGroup}#{i}LayerType} == 0) // DefaultTileLayer
     color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv, #{layerGroup}[#{i}].padding);
@@ -203,7 +231,7 @@ vec4 performAdjustment#{layerGroup}#{i}(vec4 currentColor,
 #endfor
 #endfor
 
-float calculateUntransformedHeight(vec2 uv, LevelWeights levelWeights,
+float calculateUntransformedHeight(vec2 uv, vec3 levelWeights,
                                    Layer HeightLayers[NUMLAYERS_HEIGHTMAP])
 {
 
@@ -212,7 +240,7 @@ float calculateUntransformedHeight(vec2 uv, LevelWeights levelWeights,
     // The shader compiler will remove unused code when variables are multiplied by
     // a constant 0
 #if !HEIGHTMAP_BLENDING_ENABLED
-    levelWeights = getDefaultLevelWeights();
+    levelWeights = DefaultLevelWeights;
 #endif // HEIGHTMAP_BLENDING_ENABLED
     
     #for i in 0..#{lastLayerIndexHeightLayers}
@@ -227,17 +255,14 @@ float calculateUntransformedHeight(vec2 uv, LevelWeights levelWeights,
     return height;
 }
 
-float calculateHeight(
-    vec2 uv,
-    LevelWeights levelWeights,
-    Layer HeightLayers[NUMLAYERS_HEIGHTMAP]) {
-
+float calculateHeight(vec2 uv, vec3 levelWeights, Layer HeightLayers[NUMLAYERS_HEIGHTMAP])
+{
     float height = 0;
 
     // The shader compiler will remove unused code when variables are multiplied by
     // a constant 0
 #if !HEIGHTMAP_BLENDING_ENABLED
-    levelWeights = getDefaultLevelWeights();
+    levelWeights = DefaultLevelWeights;
 #endif // HEIGHTMAP_BLENDING_ENABLED
 
     
@@ -247,7 +272,9 @@ float calculateHeight(
         colorSample = performAdjustmentHeightLayers#{i}(colorSample, HeightLayers[#{i}].adjustment);
         float untransformedHeight = colorSample.r;
 
-        float heightSample = getTransformedTexVal(HeightLayers[#{i}].depthTransform, untransformedHeight);
+        TileDepthTransform transform = HeightLayers[#{i}].depthTransform;
+        float heightSample =
+            transform.depthScale * untransformedHeight + transform.depthOffset;
         if (heightSample > -100000) {
             heightSample = performLayerSettings(heightSample, HeightLayers[#{i}].settings);
             height = heightSample;
@@ -257,7 +284,7 @@ float calculateHeight(
     return height;
 }
 
-vec4 calculateColor(vec4 currentColor, vec2 uv, LevelWeights levelWeights,
+vec4 calculateColor(vec4 currentColor, vec2 uv, vec3 levelWeights,
                     Layer ColorLayers[NUMLAYERS_COLORTEXTURE])
 {
     vec4 color = currentColor;
@@ -265,7 +292,7 @@ vec4 calculateColor(vec4 currentColor, vec2 uv, LevelWeights levelWeights,
     // The shader compiler will remove unused code when variables are multiplied by
     // a constant 0
 #if !COLORTEXTURE_BLENDING_ENABLED
-    levelWeights = getDefaultLevelWeights();
+    levelWeights = DefaultLevelWeights;
 #endif // COLORTEXTURE_BLENDING_ENABLED
 
     #for i in 0..#{lastLayerIndexColorLayers}
@@ -278,20 +305,20 @@ vec4 calculateColor(vec4 currentColor, vec2 uv, LevelWeights levelWeights,
     }
     #endfor
 
-    return color;   
+    return color;
 }
 
-float gridDots(vec2 uv, vec2 gridResolution){
+float gridDots(vec2 uv, vec2 gridResolution) {
     vec2 uvVertexSpace = fract((gridResolution) * uv) + 0.5;
 
-    vec2 uvDotSpace = abs(2*(uvVertexSpace-0.5));
-    return 1-length(1-uvDotSpace);
+    vec2 uvDotSpace = abs(2.0 * (uvVertexSpace - 0.5));
+    return 1.0 - length(1.0 - uvDotSpace);
 }
 
 vec4 calculateDebugColor(vec2 uv, vec4 fragPos, vec2 vertexResolution) {
     vec2 uvVertexSpace = fract(vertexResolution * uv);
     vec3 colorUv = vec3(0.3 * uv.x, 0.3 * uv.y, 0);
-    vec3 colorDistance = vec3(0, 0, min( 0.4 * log(fragPos.w) - 3.9, 1));
+    vec3 colorDistance = vec3(0.0, 0.0, min(0.4 * log(fragPos.w) - 3.9, 1));
     vec3 colorVertex = (1.0 - length(uvVertexSpace)) * vec3(0.5);
     vec3 colorSum = colorUv + colorDistance + colorVertex;
     return vec4(0.5 * colorSum, 1);
@@ -303,12 +330,12 @@ float tileResolution(vec2 tileUV, ChunkTile chunkTile) {
     padding.sizeDifference = ivec2(0);
 
     vec2 heightResolution = textureSize(chunkTile.textureSampler, 0);
-    vec2 uv = TileUVToTextureSamplePosition(chunkTile, tileUV, padding);
+    vec2 uv = tileUVToTextureSamplePosition(chunkTile, tileUV, padding);
     return gridDots(uv, heightResolution);
 }
 
-vec4 calculateNight(vec4 currentColor, vec2 uv, LevelWeights levelWeights,
-                    Layer NightLayers[NUMLAYERS_NIGHTTEXTURE], 
+vec4 calculateNight(vec4 currentColor, vec2 uv, vec3 levelWeights,
+                    Layer NightLayers[NUMLAYERS_NIGHTTEXTURE],
                     vec3 ellipsoidNormalCameraSpace,
                     vec3 lightDirectionCameraSpace)
 {
@@ -318,7 +345,7 @@ vec4 calculateNight(vec4 currentColor, vec2 uv, LevelWeights levelWeights,
     // The shader compiler will remove unused code when variables are multiplied by
     // a constant 0
 #if !NIGHTTEXTURE_BLENDING_ENABLED
-    levelWeights = getDefaultLevelWeights();
+    levelWeights = DefaultLevelWeights;
 #endif // NIGHTTEXTURE_BLENDING_ENABLED
 
     vec3 n = normalize(ellipsoidNormalCameraSpace);
@@ -363,7 +390,7 @@ vec4 calculateShadedColor(vec4 currentColor, vec3 ellipsoidNormalCameraSpace,
     return color;
 }
 
-vec4 calculateOverlay(vec4 currentColor, vec2 uv, LevelWeights levelWeights,
+vec4 calculateOverlay(vec4 currentColor, vec2 uv, vec3 levelWeights,
                       Layer Overlays[NUMLAYERS_OVERLAY])
 {
     vec4 color = currentColor;
@@ -371,7 +398,7 @@ vec4 calculateOverlay(vec4 currentColor, vec2 uv, LevelWeights levelWeights,
     // The shader compiler will remove unused code when variables are multiplied by
     // a constant 0
 #if !OVERLAY_BLENDING_ENABLED
-    levelWeights = getDefaultLevelWeights();
+    levelWeights = DefaultLevelWeights;
 #endif // OVERLAY_BLENDING_ENABLED
 
     #for i in 0..#{lastLayerIndexOverlays}
@@ -389,7 +416,7 @@ vec4 calculateOverlay(vec4 currentColor, vec2 uv, LevelWeights levelWeights,
     return color;
 }
 
-vec4 calculateWater(vec4 currentColor, vec2 uv, LevelWeights levelWeights, 
+vec4 calculateWater(vec4 currentColor, vec2 uv, vec3 levelWeights, 
                     Layer WaterMasks[NUMLAYERS_WATERMASK],
                     vec3 ellipsoidNormalCameraSpace,
                     vec3 lightDirectionCameraSpace, vec3 positionCameraSpace,
@@ -400,7 +427,7 @@ vec4 calculateWater(vec4 currentColor, vec2 uv, LevelWeights levelWeights,
     // The shader compiler will remove unused code when variables are multiplied by
     // a constant 0
 #if !WATERMASK_BLENDING_ENABLED
-    levelWeights = getDefaultLevelWeights();
+    levelWeights = DefaultLevelWeights;
 #endif // WATERMASK_BLENDING_ENABLED
 
     #for i in 0..#{lastLayerIndexWaterMasks}
@@ -408,8 +435,7 @@ vec4 calculateWater(vec4 currentColor, vec2 uv, LevelWeights levelWeights,
         vec4 colorSample = getSampleWaterMasks#{i}(uv, levelWeights, WaterMasks);
         colorSample = performAdjustmentWaterMasks#{i}(colorSample, WaterMasks[#{i}].adjustment);
 
-        colorSample = performLayerSettingsAlpha(colorSample, WaterMasks[#{i}].settings);
-        colorSample.a = performLayerSettingsRGB(colorSample.a, WaterMasks[#{i}].settings);
+        colorSample.a = performLayerSettings(colorSample.a, WaterMasks[#{i}].settings);
 
         waterColor = blendWaterMasks#{i}(waterColor, colorSample, 1.0);
     }
@@ -420,8 +446,8 @@ vec4 calculateWater(vec4 currentColor, vec2 uv, LevelWeights levelWeights,
     float cosineFactor = clamp(dot(-reflectionDirectionCameraSpace, directionToFragmentCameraSpace), 0, 1);
     cosineFactor = pow(cosineFactor, 100);
 
-    vec3 specularColor = vec3(1, 1, 1);
-    float specularIntensity = 0.4;
+    const vec3 specularColor = vec3(1.0);
+    const float specularIntensity = 0.4;
 
     vec3 specularTotal = specularColor * cosineFactor * specularIntensity * waterColor.a;
 

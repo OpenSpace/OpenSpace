@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,6 +48,33 @@ namespace {
     constexpr const char* KeyTransformScale = "Transform.Scale";
 
     constexpr const char* KeyTimeFrame = "TimeFrame";
+
+    constexpr const char* KeyFixedBoundingSphere = "FixedBoundingSphere";
+
+    constexpr openspace::properties::Property::PropertyInfo GuiPathInfo = {
+        "GuiPath",
+        "Gui Path",
+        "This is the path for the scene graph node in the gui "
+        "example: /Solar System/Planets/Earth",
+        openspace::properties::Property::Visibility::Hidden
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo GuiNameInfo = {
+        "GuiName",
+        "Gui Name",
+        "This is the name for the scene graph node in the gui "
+        "example: Earth",
+        openspace::properties::Property::Visibility::Hidden
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo GuiHiddenInfo = {
+        "GuiHidden",
+        "Gui Hidden",
+        "This represents if the scene graph node should be shown in the gui "
+        "example: false",
+        openspace::properties::Property::Visibility::Hidden
+    };
+
 } // namespace
 
 namespace openspace {
@@ -75,10 +102,13 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
     if (dictionary.hasKey(KeyGuiName)) {
         result->setGuiName(dictionary.value<std::string>(KeyGuiName));
+        result->_guiDisplayName = result->guiName();
+        result->addProperty(result->_guiDisplayName);
     }
 
     if (dictionary.hasKey(KeyGuiHidden)) {
-        result->_guiHintHidden = dictionary.value<bool>(KeyGuiHidden);
+        result->_guiHidden = dictionary.value<bool>(KeyGuiHidden);
+        result->addProperty(result->_guiHidden);
     }
 
     if (dictionary.hasKey(KeyTransformTranslation)) {
@@ -152,7 +182,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         ghoul::Dictionary renderableDictionary;
         dictionary.getValue(KeyRenderable, renderableDictionary);
 
-        renderableDictionary.setValue(KeyIdentifier, identifier);
+        renderableDictionary.setValue(KeyIdentifier, result->_identifier);
 
         result->_renderable = Renderable::createFromDictionary(renderableDictionary);
         if (result->_renderable == nullptr) {
@@ -189,6 +219,13 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
     if (dictionary.hasKey(KeyGuiPath)) {
         result->_guiPath = dictionary.value<std::string>(KeyGuiPath);
+        result->addProperty(result->_guiPath);
+    }
+
+    if (dictionary.hasKey(KeyFixedBoundingSphere)) {
+        result->_fixedBoundingSphere = static_cast<float>(
+            dictionary.value<double>(KeyFixedBoundingSphere)
+        );
     }
 
     LDEBUG(fmt::format("Successfully created SceneGraphNode '{}'", result->identifier()));
@@ -197,6 +234,9 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
 SceneGraphNode::SceneGraphNode()
     : properties::PropertyOwner({ "" })
+    , _guiHidden(GuiHiddenInfo)
+    , _guiPath(GuiPathInfo)
+    , _guiDisplayName(GuiNameInfo)
     , _transform {
         std::make_unique<StaticTranslation>(),
         std::make_unique<StaticRotation>(),
@@ -380,15 +420,9 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     if (_state != State::GLInitialized) {
         return;
     }
-    const psc thisPositionPSC = psc::CreatePowerScaledCoordinate(
-        _worldPositionCached.x,
-        _worldPositionCached.y,
-        _worldPositionCached.z
-    );
 
     RenderData newData = {
         data.camera,
-        thisPositionPSC,
         data.time,
         data.doPerformanceMeasurement,
         data.renderBinMask,
@@ -555,7 +589,7 @@ void SceneGraphNode::setDependencies(const std::vector<SceneGraphNode*>& depende
 }
 
 SurfacePositionHandle SceneGraphNode::calculateSurfacePositionHandle(
-                                                       const glm::dvec3& targetModelSpace)
+                                                 const glm::dvec3& targetModelSpace) const
 {
     if (_renderable) {
         return _renderable->calculateSurfacePositionHandle(targetModelSpace);
@@ -609,12 +643,12 @@ double SceneGraphNode::worldScale() const {
     return _worldScaleCached;
 }
 
-const std::string& SceneGraphNode::guiPath() const {
+std::string SceneGraphNode::guiPath() const {
     return _guiPath;
 }
 
 bool SceneGraphNode::hasGuiHintHidden() const {
-    return _guiHintHidden;
+    return _guiHidden;
 }
 
 glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
@@ -704,11 +738,11 @@ std::vector<SceneGraphNode*> SceneGraphNode::children() const {
     return nodes;
 }
 
-float SceneGraphNode::boundingSphere() const{
+float SceneGraphNode::boundingSphere() const {
     if (_renderable) {
         return _renderable->boundingSphere();
     }
-    return 0.0;
+    return _fixedBoundingSphere;
 }
 
 // renderable
@@ -720,42 +754,9 @@ const Renderable* SceneGraphNode::renderable() const {
     return _renderable.get();
 }
 
-//Renderable* SceneGraphNode::renderable() {
-//    return _renderable.get();
-//}
-
-/*
-bool SceneGraphNode::sphereInsideFrustum(const psc& s_pos, const PowerScaledScalar& s_rad,
-                                         const Camera* camera)
-{
-    // direction the camera is looking at in power scale
-    psc psc_camdir = psc(glm::vec3(camera->viewDirectionWorldSpace()));
-
-    // the position of the camera, moved backwards in the view direction to encapsulate
-    // the sphere radius
-    psc U = camera->position() - psc_camdir * s_rad * (1.0 / camera->sinMaxFov());
-
-    // the vector to the object from the new position
-    psc D = s_pos - U;
-
-    const double a = psc_camdir.angle(D);
-    if (a < camera->maxFov()) {
-        // center is inside K''
-        D = s_pos - camera->position();
-        if (D.length() * psc_camdir.length() * camera->sinMaxFov()
-            <= -psc_camdir.dot(D)) {
-            // center is inside K'' and inside K'
-            return D.length() <= s_rad;
-        } else {
-            // center is inside K'' and outside K'
-            return true;
-        }
-    } else {
-        // outside the maximum angle
-        return false;
-    }
+Renderable* SceneGraphNode::renderable() {
+    return _renderable.get();
 }
-*/
 
 SceneGraphNode* SceneGraphNode::childNode(const std::string& identifier) {
     if (this->identifier() == identifier) {
@@ -774,21 +775,6 @@ SceneGraphNode* SceneGraphNode::childNode(const std::string& identifier) {
 
 const SceneGraphNode::PerformanceRecord& SceneGraphNode::performanceRecord() const {
     return _performanceRecord;
-}
-
-void SceneGraphNode::updateCamera(Camera* camera) const {
-    psc origin(worldPosition());
-    //int i = 0;
-    // the camera position
-
-    psc relative = camera->position();
-    psc focus = camera->focusPosition();
-    psc relative_focus = relative - focus;
-
-    psc target = origin + relative_focus;
-
-    camera->setPosition(target);
-    camera->setFocusPosition(origin);
 }
 
 }  // namespace openspace

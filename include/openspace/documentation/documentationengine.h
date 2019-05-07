@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,6 @@
 #define __OPENSPACE_CORE___DOCUMENTATIONENGINE___H__
 
 #include <openspace/documentation/documentationgenerator.h>
-#include <ghoul/designpattern/singleton.h>
 
 #include <openspace/documentation/documentation.h>
 #include <ghoul/misc/exception.h>
@@ -38,9 +37,7 @@ namespace openspace::documentation {
  * produced in the application an write them out as a documentation file for human
  * consumption.
  */
-class DocumentationEngine : public ghoul::Singleton<DocumentationEngine>
-                          , public DocumentationGenerator
-{
+class DocumentationEngine : public DocumentationGenerator {
 public:
     /**
      * This exception is thrown by the addDocumentation method if a provided Documentation
@@ -79,6 +76,10 @@ public:
      * \return A list of all registered Documentation%s
      */
     std::vector<Documentation> documentations() const;
+
+    static void initialize();
+    static void deinitialize();
+    static bool isInitialized();
 
     /**
      * Returns a static reference to the main singleton DocumentationEngine.
