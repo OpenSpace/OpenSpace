@@ -116,7 +116,7 @@ private:
     // Anchor: Node to follow and orbit.
     properties::StringProperty _anchor;
 
-    // Aim: Node to look at (when camera direction is reset), 
+    // Aim: Node to look at (when camera direction is reset),
     // Empty string means same as anchor.
     // If these are the same node we call it the `focus` node.
     properties::StringProperty _aim;

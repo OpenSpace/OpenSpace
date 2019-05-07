@@ -40,7 +40,7 @@ namespace {
 
 namespace openspace {
 
-AuthorizationTopic::AuthorizationTopic(std::string password) 
+AuthorizationTopic::AuthorizationTopic(std::string password)
     : _password(std::move(password))
 {}
 

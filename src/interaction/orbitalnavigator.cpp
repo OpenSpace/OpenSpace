@@ -153,7 +153,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo
-        FollowRotationInterpolationTimeInfo = {
+        FollowRotationInterpTimeInfo = {
             "FollowRotationInterpolationTime",
             "Follow rotation interpolation time",
             "The interpolation time when toggling following focus node rotation."
@@ -218,7 +218,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _staticViewScaleExponent(StaticViewScaleExponentInfo, 0.f, -30, 10)
     , _retargetInterpolationTime(RetargetInterpolationTimeInfo, 2.0, 0.0, 10.0)
     , _stereoInterpolationTime(StereoInterpolationTimeInfo, 8.0, 0.0, 10.0)
-    , _followRotationInterpolationTime(FollowRotationInterpolationTimeInfo, 1.0, 0.0, 10.0)
+    , _followRotationInterpolationTime(FollowRotationInterpTimeInfo, 1.0, 0.0, 10.0)
     , _mouseStates(_mouseSensitivity * 0.0001, 1 / (_friction.friction + 0.0000001))
     , _joystickStates(_joystickSensitivity * 0.1, 1 / (_friction.friction + 0.0000001))
     , _websocketStates(_websocketSensitivity, 1 / (_friction.friction + 0.0000001))
@@ -758,7 +758,7 @@ OrbitalNavigator::CameraPose OrbitalNavigator::followAim(CameraPose pose,
         // 2. Adjustment of the camera to account for radial displacement of the aim
 
 
-        // Step 1 (Rotation around anchor based on aim's projection)     
+        // Step 1 (Rotation around anchor based on aim's projection)
         glm::dvec3 newAnchorToProjectedAim =
             glm::length(anchorToAim.first) * glm::normalize(anchorToAim.second);
         const double spinRotationAngle = glm::angle(
@@ -824,7 +824,8 @@ OrbitalNavigator::CameraPose OrbitalNavigator::followAim(CameraPose pose,
         const double newCameraAimAngle =
             glm::pi<double>() - anchorAimAngle - newCameraAnchorAngle;
 
-        double distanceRotationAngle = correctionFactor * (newCameraAimAngle - prevCameraAimAngle);
+        double distanceRotationAngle = correctionFactor *
+                                       (newCameraAimAngle - prevCameraAimAngle);
 
         if (glm::abs(distanceRotationAngle) > AngleEpsilon) {
             glm::dvec3 distanceRotationAxis = glm::normalize(
@@ -1077,7 +1078,7 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
                                         glm::inverse(globalCameraRotation);
 
     // Rotate and find the difference vector
-    const glm::dvec3 rotationDiffVec3 = 
+    const glm::dvec3 rotationDiffVec3 =
         (distFromCenterToCamera * outDirection) * rotationDiffWorldSpace -
         (distFromCenterToCamera * outDirection);
 

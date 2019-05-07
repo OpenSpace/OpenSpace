@@ -143,7 +143,7 @@ namespace {
 
 
     glm::vec3 sphericalToCartesian(glm::vec3 spherical) {
-        // First convert to ISO convention spherical coordinates according to 
+        // First convert to ISO convention spherical coordinates according to
         // https://en.wikipedia.org/wiki/Spherical_coordinate_system
         // (radius, theta, phi), where theta is the polar angle from the z axis,
         // and phi is the azimuth.
@@ -317,8 +317,8 @@ std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictiona
 ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "" })
     , _enabled(EnabledInfo, true)
-    , _useRadiusAzimuthElevation(UseRadiusAzimuthElevationInfo, false)
     , _usePerspectiveProjection(UsePerspectiveProjectionInfo, false)
+    , _useRadiusAzimuthElevation(UseRadiusAzimuthElevationInfo, false)
     , _faceCamera(FaceCameraInfo, true)
     , _cartesianPosition(
         CartesianPositionInfo,
@@ -470,7 +470,12 @@ bool ScreenSpaceRenderable::deinitializeGL() {
 }
 
 void ScreenSpaceRenderable::render() {
-    draw(globalRotationMatrix() * translationMatrix() * localRotationMatrix() * scaleMatrix());
+    draw(
+        globalRotationMatrix() *
+        translationMatrix() *
+        localRotationMatrix() *
+        scaleMatrix()
+    );
 }
 
 bool ScreenSpaceRenderable::isReady() const {
