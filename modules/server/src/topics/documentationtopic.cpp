@@ -22,58 +22,50 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___NETWORKENGINE___H__
-#define __OPENSPACE_CORE___NETWORKENGINE___H__
+#include <modules/server/include/topics/documentationtopic.h>
 
-#include <cstdint>
-#include <map>
-#include <string>
-#include <vector>
+#include <modules/server/include/connection.h>
+#include <modules/server/include/jsonconverters.h>
+#include <openspace/engine/globals.h>
+
+#include <openspace/scripting/scriptengine.h>
+#include <openspace/util/factorymanager.h>
+#include <openspace/interaction/keybindingmanager.h>
+#include <ghoul/logging/logmanager.h>
+
+
+using nlohmann::json;
+
+namespace {
+    constexpr const char* KeyType = "type";
+    constexpr const char* TypeLua = "lua";
+    constexpr const char* TypeFactories = "factories";
+    constexpr const char* TypeKeyboard = "keyboard";
+} // namespace
 
 namespace openspace {
 
-class NetworkEngine {
-public:
-    using MessageIdentifier = uint16_t;
+void DocumentationTopic::handleJson(const nlohmann::json& json) {
+    std::string requestedType = json.at(KeyType).get<std::string>();
 
-    NetworkEngine();
+    nlohmann::json response;
 
-    // Receiving messages
-    bool handleMessage(const std::string& message);
+    // @emiax: Proposed future refector.
+    // Do not parse generated json. Instead implement ability to get
+    // ghoul::Dictionary objects from ScriptEngine, FactoryManager, and KeybindingManager.
+    if (requestedType == TypeLua) {
+        response = json::parse(global::scriptEngine.generateJson());
+    } else if (requestedType == TypeFactories) {
+        response = json::parse(FactoryManager::ref().generateJson());
+    } else if (requestedType == TypeKeyboard) {
+        response = json::parse(global::keybindingManager.generateJson());
+    }
 
-    // Sending messages
-    void publishStatusMessage();
-    void publishIdentifierMappingMessage();
-    void publishMessage(MessageIdentifier identifier, std::vector<char> message);
-    void sendMessages();
+    _connection->sendJson(wrappedPayload(response));
+}
 
-    // Initial Connection Messages
-    void setInitialConnectionMessage(MessageIdentifier identifier,
-        std::vector<char> message);
-    void sendInitialInformation();
-
-    // Background
-    MessageIdentifier identifier(std::string name);
-
-private:
-    std::map<std::string, MessageIdentifier> _identifiers;
-    MessageIdentifier _lastAssignedIdentifier = MessageIdentifier(-1);
-
-    struct Message {
-        MessageIdentifier identifer;
-        std::vector<char> body;
-    };
-    std::vector<Message> _messagesToSend;
-
-    std::vector<Message> _initialConnectionMessages;
-
-    bool _shouldPublishStatusMessage = true;
-
-    MessageIdentifier _statusMessageIdentifier;
-    MessageIdentifier _identifierMappingIdentifier;
-    MessageIdentifier _initialMessageFinishedIdentifier;
-};
+bool DocumentationTopic::isDone() const {
+    return true;
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_CORE___NETWORKENGINE___H__

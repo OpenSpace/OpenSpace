@@ -52,7 +52,6 @@ void main() {
     // The normal transform is the transposed inverse of the model transform
     vs_normal = normalize(modelTransform * vec4(in_normal,0));
     
-
     if (_hasHeightMap) {
         vec2 st = vs_st;
         if (_meridianShift) {
@@ -65,7 +64,7 @@ void main() {
     }
 
     // convert from psc to homogeneous coordinates
-    vec4 position = vec4(tmp.xyz * pow(10, tmp.w), 1);
+    vec4 position = vec4(tmp.xyz, 1);
     vec4 positionClipSpace = modelViewProjectionTransform * position;
     vs_positionScreenSpace = z_normalization(positionClipSpace);
 

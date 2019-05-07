@@ -50,13 +50,12 @@ glm::mat2x2 fromLuaConversion(lua_State* state, bool& success) {
                 result[i][j] = static_cast<glm::mat2x2::value_type>(
                     lua_tonumber(state, -1)
                 );
-                lua_pop(state, 1);
                 ++number;
             }
         }
     }
     // The last accessor argument and the table are still on the stack
-    lua_pop(state, 2);
+    lua_pop(state, 1);
     success = true;
     return result;
 }

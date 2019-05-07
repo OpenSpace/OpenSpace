@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___SEQUENCEPARSER___H__
 #define __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___SEQUENCEPARSER___H__
 
-#include <openspace/network/networkengine.h>
 #include <modules/spacecraftinstruments/util/decoder.h>
 #include <openspace/util/timerange.h>
 #include <modules/spacecraftinstruments/util/image.h>
@@ -48,16 +47,12 @@ public:
     const std::vector<double>& getCaptureProgression() const;
 
 protected:
-    void sendPlaybookInformation(const std::string& name);
-
     std::map<std::string, ImageSubset> _subsetMap;
     std::vector<std::pair<std::string, TimeRange>> _instrumentTimes;
     std::vector<std::pair<double, std::string>> _targetTimes;
     std::vector<double> _captureProgression;
 
     std::map<std::string, std::unique_ptr<Decoder>> _fileTranslation;
-
-    NetworkEngine::MessageIdentifier _messageIdentifier;
 };
 
 } // namespace openspace

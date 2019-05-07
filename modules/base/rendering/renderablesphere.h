@@ -69,17 +69,20 @@ private:
     properties::FloatProperty _size;
     properties::IntProperty _segments;
 
+    properties::BoolProperty _mirrorTexture;
+    properties::BoolProperty _useAdditiveBlending;
     properties::BoolProperty _disableFadeInDistance;
 
-    float _fadeOutThreshold = -1.0;
-    float _fadeInThreshold = 0.0;
+    properties::FloatProperty _fadeInThreshold;
+    properties::FloatProperty _fadeOutThreshold;
 
     ghoul::opengl::ProgramObject* _shader = nullptr;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     std::unique_ptr<PowerScaledSphere> _sphere;
 
-    UniformCache(opacity, viewProjection, modelTransform, texture) _uniformCache;
+    UniformCache(opacity, modelViewProjection, modelViewRotation, colorTexture,
+        _mirrorTexture) _uniformCache;
 
     bool _sphereIsDirty = false;
 };

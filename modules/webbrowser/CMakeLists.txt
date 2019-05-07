@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2019                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -21,6 +21,8 @@
 # CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE   #
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
+
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
@@ -49,7 +51,20 @@ set_property(GLOBAL PROPERTY OS_FOLDERS ON)
 cmake_policy(SET CMP0074 NEW)
 
 # Specify the CEF distribution version.
-set(CEF_VERSION "3.3029.1617.gaf831b6")
+
+# Release from 04/24/2019 verified to work on Windows.
+set(CEF_VERSION "73.1.13+g6e3c989+chromium-73.0.3683.75")
+
+# 73.1.13 has an issue on MacOS: The GUI freezing upon interaction.
+# Therefore, we fall back to 3.3578.1867 from 01/29/2019
+if (APPLE)
+  set(CEF_VERSION "3.3578.1867.g0f6d65a")
+endif ()
+
+# CEF Sandbox is not working with the latest Visual Studio, so we disable it for now.
+if (WIN32)
+  option(USE_SANDBOX OFF)
+endif ()
 
 # Add this project's cmake/ directory to the module path.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -59,7 +74,7 @@ include(cef_support)
 set_current_cef_build_platform()
 
 # Download and extract the CEF binary distribution (executes DownloadCEF.cmake).
-download_cef("${CEF_PLATFORM}" "${CEF_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/ext/cef")
+download_cef("${CEF_PLATFORM}" "${CEF_VERSION}" "${CMAKE_CURRENT_BINARY_DIR}/ext/cef")
 
 ##########################################################################################
 # Apply cmake patch
@@ -131,8 +146,9 @@ set(WEBBROWSER_RESOURCES_SRCS
   ${WEBBROWSER_RESOURCES_MAC_ENGLISH_LPROJ_SRCS}
 )
 
-# place helper in separate executable
-set(CEF_HELPER_TARGET "openspace_web_helper" CACHE INTERNAL "CEF_HELPER_TARGET")
+# Place Helper in separate executable
+# The naming style "<ApplicionName> Helper" is required by Chromium.
+set(CEF_HELPER_TARGET "OpenSpace Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
 
 #
 # CEF platform-specific config
@@ -147,13 +163,16 @@ if(OS_MACOSX)
   SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_HELPER_TARGET})
   add_cef_logical_target("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
   add_dependencies(${CEF_HELPER_TARGET} libcef_dll_wrapper)
-  target_link_libraries(${CEF_HELPER_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
+  target_link_libraries(${CEF_HELPER_TARGET} libcef_dll_wrapper ${CEF_STANDARD_LIBS})
   set_target_properties(${CEF_HELPER_TARGET} PROPERTIES
-      MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/mac/helper-Info.plist
+    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/mac/helper-Info.plist
   )
 
-  # Fix the framework rpath in the helper executable.
-  FIX_MACOSX_HELPER_FRAMEWORK_RPATH(${CEF_HELPER_TARGET})
+  if(USE_SANDBOX)
+    # Logical target used to link the cef_sandbox library.
+    ADD_LOGICAL_TARGET("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
+    target_link_libraries(${CEF_HELPER_TARGET} cef_sandbox_lib)
+  endif()
 endif()
 
 if (OS_WINDOWS)

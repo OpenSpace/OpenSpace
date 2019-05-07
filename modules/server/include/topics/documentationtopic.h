@@ -22,39 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
-#include "PowerScaling/powerScaling_fs.hglsl"
+#ifndef __OPENSPACE_MODULE_SERVER___DOCUMENTATION_TOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___DOCUMENTATION_TOPIC___H__
 
-in vec2 vs_st;
-in vec4 vs_normal;
-in vec4 vs_position;
-in vec4 vs_gPosition;
-in vec3 vs_gNormal;
+#include <modules/server/include/topics/topic.h>
 
-uniform vec4 objpos;
-uniform vec3 sun_pos;
-uniform bool _performShading = true;
-uniform float transparency;
-uniform sampler2D texture1;
+namespace openspace {
 
-Fragment getFragment() {
-    vec4 diffuse = texture(texture1, vs_st);
+class DocumentationTopic : public Topic {
+public:
+    DocumentationTopic() = default;
+    virtual ~DocumentationTopic() = default;
 
-    Fragment frag;
-    if (_performShading) {
-        vec4 ambient = vec4(0.0,0.0,0.0,transparency);
-        vec3 n = normalize(vs_normal.xyz);
-        vec3 l_pos = vec3(sun_pos); // sun
-        vec3 l_dir = normalize(l_pos - objpos.xyz);
-        float intensity = min(max(5.0 * dot(n, l_dir), 0.0), 1.0);
-        diffuse = max(intensity * diffuse, ambient);
-    }
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
+};
 
-    frag.color = vec4(diffuse.rgb, transparency);
-    frag.depth = vs_position.w;
+} // namespace openspace
 
-    frag.gPosition  = vs_gPosition;
-    frag.gNormal    = vec4(vs_gNormal, 1.0);
-
-    return frag;
-}
+#endif // __OPENSPACE_MODULE_SERVER___DOCUMENTATION_TOPIC___H__

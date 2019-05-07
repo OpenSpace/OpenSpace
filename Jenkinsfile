@@ -104,7 +104,7 @@ linux: {
         compileHelper.build(compileHelper.Make(), compileHelper.Gcc(), moduleCMakeFlags(), 'OpenSpace', 'build-all');
     }
     stage('linux/warnings') {
-      compileHelper.recordCompileIssues(compileHelper.Gcc());
+      // compileHelper.recordCompileIssues(compileHelper.Gcc());
     }
     stage('linux/test') {
       // testHelper.runUnitTests('build/OpenSpaceTest');
@@ -122,7 +122,7 @@ windows: {
         compileHelper.build(compileHelper.VisualStudio(), compileHelper.VisualStudio(), moduleCMakeFlags(), '', 'build-all');
       }
       stage('windows/warnings') {
-        compileHelper.recordCompileIssues(compileHelper.VisualStudio());
+        // compileHelper.recordCompileIssues(compileHelper.VisualStudio());
       }
       stage('windows/test') {
         // Currently, the unit tests are failing on Windows
@@ -141,7 +141,7 @@ osx: {
         compileHelper.build(compileHelper.Xcode(), compileHelper.Clang(), moduleCMakeFlags(), '', 'build-all');
     }
     stage('osx/warnings') {
-      compileHelper.recordCompileIssues(compileHelper.Clang());
+      // compileHelper.recordCompileIssues(compileHelper.Clang());
     }
     stage('osx/test') {
       // Currently, the unit tests are crashing on OS X

@@ -41,7 +41,7 @@ local NixTrail = {
         Resolution = 1000
     },
     GUI = {
-        Name = "Hydra Trail",
+        Name = "Nix Trail",
         Path = "/Solar System/Dwarf Planets/Pluto"
     }
 }

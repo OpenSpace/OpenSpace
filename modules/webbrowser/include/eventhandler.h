@@ -78,7 +78,7 @@ private:
      * \param key the pressed key
      * \return true if event found, false otherwise
      */
-    bool specialKeyEvent(Key key);
+    bool specialKeyEvent(Key key, KeyModifier mods, KeyAction action);
 
     /**
      * Create a mouse event on the current cursor position.

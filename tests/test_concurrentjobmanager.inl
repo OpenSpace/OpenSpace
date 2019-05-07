@@ -103,8 +103,8 @@ struct VerboseProduct {
 
 struct VerboseJob : public openspace::Job<VerboseProduct> {
     VerboseJob(int jobExecutingTime)
-        : _product(-1)
-        , _jobExecutingTime(jobExecutingTime)
+        : _jobExecutingTime(jobExecutingTime)
+        , _product(-1)
     {
         std::cout << "VerboseTestJob constructor" << std::endl;
     }

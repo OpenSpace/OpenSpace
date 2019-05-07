@@ -111,8 +111,8 @@ public:
     template <class T>
     ghoul::TemplateFactory<T>* factory() const;
 
-private:
     std::string generateJson() const override;
+private:
 
     /// Singleton member for the Factory Manager
     static FactoryManager* _manager;
