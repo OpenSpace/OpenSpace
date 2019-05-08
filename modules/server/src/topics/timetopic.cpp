@@ -35,6 +35,7 @@ namespace {
     constexpr const char* _loggerCat = "TimeTopic";
     constexpr const char* PropertyKey = "property";
     constexpr const char* EventKey = "event";
+    constexpr const char* SubscribeEvent = "start_subscription";
     constexpr const char* UnsubscribeEvent = "stop_subscription";
     constexpr const char* CurrentTimeKey = "currentTime";
     constexpr const char* DeltaTimeKey = "deltaTime";
@@ -47,9 +48,7 @@ namespace openspace {
 
 TimeTopic::TimeTopic()
     : _lastUpdateTime(std::chrono::system_clock::now())
-{
-    LDEBUG("Starting new time subscription");
-}
+{}
 
 TimeTopic::~TimeTopic() {
     if (_timeCallbackHandle != UnsetOnChangeHandle) {
@@ -72,7 +71,18 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
     }
 
     std::string requestedKey = json.at(PropertyKey).get<std::string>();
-    LDEBUG("Subscribing to " + requestedKey);
+
+    if (requestedKey == CurrentTimeKey) {
+        _connection->sendJson(currentTime());
+    }
+    if (requestedKey == DeltaTimeKey) {
+        _connection->sendJson(deltaTime());
+    }
+
+    if (event != SubscribeEvent) {
+        _isDone = true;
+        return;
+    }
 
     if (requestedKey == CurrentTimeKey) {
         _timeCallbackHandle = global::timeManager.addTimeChangeCallback([this]() {
@@ -82,7 +92,6 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
                 _lastUpdateTime = now;
             }
         });
-        _connection->sendJson(currentTime());
     }
     else if (requestedKey == DeltaTimeKey) {
         _deltaTimeCallbackHandle = global::timeManager.addDeltaTimeChangeCallback(
