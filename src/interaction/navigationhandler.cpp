@@ -131,10 +131,12 @@ void NavigationHandler::updateCamera(double deltaTime) {
                     _keyframeNavigator->updateCamera(*_camera, _playbackModeEnabled);
                 }
                 else {
-                    _orbitalNavigator->updateStatesFromInput(*_inputState, deltaTime,
-                        _firstFrameAfterPlaybackFinished);
-                    _orbitalNavigator->updateCameraStateFromStates(deltaTime,
-                        _firstFrameAfterPlaybackFinished);
+                    if (_firstFrameAfterPlaybackFinished) {
+                        _orbitalNavigator->resetVelocities();
+                        _orbitalNavigator->resetNodeMovements();
+                    }
+                    _orbitalNavigator->updateStatesFromInput(*_inputState, deltaTime);
+                    _orbitalNavigator->updateCameraStateFromStates(deltaTime);
                 }
             }
             _firstFrameAfterPlaybackFinished = false;

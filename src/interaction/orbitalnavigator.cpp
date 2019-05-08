@@ -345,21 +345,19 @@ glm::quat OrbitalNavigator::anchorNodeToCameraRotation() const {
 }
 
 
-void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
-                                             double deltaTime, bool resetVelocities)
-{
-    if (resetVelocities) {
-        _mouseStates.resetVelocities();
-        _joystickStates.resetVelocities();
-    }
-    else {
-        _mouseStates.updateStateFromInput(inputState, deltaTime);
-        _joystickStates.updateStateFromInput(inputState, deltaTime);
-    }
+void OrbitalNavigator::resetVelocities() {
+    _mouseStates.resetVelocities();
+    _joystickStates.resetVelocities();
 }
 
-void OrbitalNavigator::updateCameraStateFromStates(double deltaTime,
-                                                   bool firstFrameAfterPlaybackFinished)
+void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
+                                             double deltaTime)
+{
+    _mouseStates.updateStateFromInput(inputState, deltaTime);
+    _joystickStates.updateStateFromInput(inputState, deltaTime);
+}
+
+void OrbitalNavigator::updateCameraStateFromStates(double deltaTime)
 {
     if (!(_anchorNode)) {
         // Bail out if the anchor node is not set.
@@ -368,10 +366,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime,
 
     const glm::dvec3 anchorPos = _anchorNode->worldPosition();
     const glm::dvec3 prevCameraPosition = _camera->positionVec3();
-    glm::dvec3 anchorDisplacement = { 0.0, 0.0, 0.0 };
-    if (!firstFrameAfterPlaybackFinished) {
-        anchorDisplacement = anchorPos - _previousAnchorNodePosition;
-    }
+    glm::dvec3 anchorDisplacement = anchorPos - _previousAnchorNodePosition;
 
     CameraPose pose = {
         _camera->positionVec3() + anchorDisplacement,
@@ -419,11 +414,6 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime,
     glm::dquat anchorRotation =
         glm::quat_cast(_anchorNode->worldRotationMatrix());
 
-    // If just returned from playback, don't use the previous anchor node rotation
-    // from before playback started, otherwise will cause a jump in position/rotation
-    if (firstFrameAfterPlaybackFinished) {
-        _previousAnchorNodeRotation = anchorRotation;
-    }
     glm::dquat anchorNodeRotationDiff =
         _previousAnchorNodeRotation * glm::inverse(anchorRotation);
 
@@ -594,6 +584,21 @@ void OrbitalNavigator::setAnchorNode(const std::string& anchorNode) {
 
 void OrbitalNavigator::setAimNode(const std::string& aimNode) {
     _aim.set(aimNode);
+}
+
+void OrbitalNavigator::resetNodeMovements() {
+    if (_anchorNode) {
+        _previousAnchorNodePosition = _anchorNode->worldPosition();
+        _previousAnchorNodeRotation = glm::quat_cast(_anchorNode->worldRotationMatrix());
+    } else {
+        _previousAnchorNodePosition = glm::dvec3(0.0);
+        _previousAnchorNodeRotation = glm::dquat();
+    }
+    if (_aimNode) {
+        _previousAimNodePosition = _aimNode->worldPosition();
+    } else {
+        _previousAimNodePosition = glm::dvec3(0.0);
+    }
 }
 
 void OrbitalNavigator::startRetargetAnchor() {
