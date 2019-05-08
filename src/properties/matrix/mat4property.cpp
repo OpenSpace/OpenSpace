@@ -51,6 +51,7 @@ glm::mat4x4 fromLuaConversion(lua_State* state, bool& success) {
             } else {
                 result[i][j]
                         = static_cast<glm::mat4x4::value_type>(lua_tonumber(state, -1));
+                lua_pop(state, 1);
                 ++number;
             }
         }
