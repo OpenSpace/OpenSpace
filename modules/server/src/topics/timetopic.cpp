@@ -102,13 +102,11 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
                     _connection->sendJson(deltaTime());
                     if (_timeCallbackHandle != UnsetOnChangeHandle) {
                         _connection->sendJson(currentTime());
-                        _lastUpdateTime = std::chrono::system_clock::now();
                     }
                     _lastUpdateTime = now;
                 }
             }
         );
-        _connection->sendJson(deltaTime());
     }
     else {
         LWARNING("Cannot get " + requestedKey);
