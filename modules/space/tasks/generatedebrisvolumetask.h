@@ -25,7 +25,11 @@
 #define __OPENSPACE_MODULE_SPACE___GENERATERDEBRISVOLUMETASK___H__
 
 #include <openspace/util/task.h>
+#include <openspace/util/time.h>
+
 #include <modules/space/rendering/renderablesatellites.h>
+#include <modules/space/translation/keplertranslation.h>
+
 
 #include <ghoul/glm.h>
 
