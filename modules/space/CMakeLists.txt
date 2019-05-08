@@ -25,8 +25,7 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/elonstest.h
-#    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesatellites.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesatellites.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableconstellationbounds.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanet.h
@@ -38,14 +37,14 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/spicetranslation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/tletranslation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/horizonstranslation.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/generatedebrisvolumetask.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/spicerotation.h
     
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/elonstest.cpp
-#   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesatellites.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesatellites.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/planetgeometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableconstellationbounds.cpp 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanet.cpp
@@ -57,6 +56,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/spicetranslation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/tletranslation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/horizonstranslation.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/generatedebrisvolumetask.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/spicerotation.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

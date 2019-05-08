@@ -59,6 +59,10 @@ namespace {
     constexpr const char* ProgramName = "RenderableSatellites";
     constexpr const char* _loggerCat = "SpaceDebris";
 
+    // constexpr const std::array<const char*, 6> UniformNames = {
+    //     "modelViewTransform", "projectionTransform",
+    //     "lineFade", "inGameTime", "color", "opacity"
+    // };
 
 
     static const openspace::properties::Property::PropertyInfo PathInfo = {
@@ -72,67 +76,14 @@ namespace {
         "Segments",
         "The number of segments to use for each orbit ellipse"
     };
-
-    static const openspace::properties::Property::PropertyInfo EccentricityColumnInfo = {
-        "EccentricityColumn",
-        "EccentricityColumn",
-        "The header of the column where the eccentricity is stored"
-    };
-
-    static const openspace::properties::Property::PropertyInfo SemiMajorAxisColumnInfo = {
-        "SemiMajorAxisColumn",
-        "SemiMajorAxisColumn",
-        "The header of the column where the semi-major axis is stored"
-    };
-
-    static const openspace::properties::Property::PropertyInfo SemiMajorAxisUnitInfo = {
-        "SemiMajorAxisUnit",
-        "SemiMajorAxisUnit",
-        "The unit of the semi major axis. For example: If specified in km, set this to 1000."
-    };
-
-    static const openspace::properties::Property::PropertyInfo InclinationColumnInfo = {
-        "InclinationColumn",
-        "InclinationColumn",
-        "The header of the column where the inclination is stored"
-    };
-
-    static const openspace::properties::Property::PropertyInfo AscendingNodeColumnInfo = {
-        "AscendingNodeColumn",
-        "AscendingNodeColumn",
-        "The header of the column where the ascending node is stored"
-    };
-
-    static const openspace::properties::Property::PropertyInfo ArgumentOfPeriapsisColumnInfo = {
-        "ArgumentOfPeriapsisColumn",
-        "ArgumentOfPeriapsisColumn",
-        "The header of the column where the argument of periapsis is stored"
-    };
-
-    static const openspace::properties::Property::PropertyInfo MeanAnomalyAtEpochColumnInfo = {
-        "MeanAnomalyAtEpochColumn",
-        "MeanAnomalyAtEpochColumn",
-        "The header of the column where the mean anomaly at epoch is stored"
-    };
-
-    static const openspace::properties::Property::PropertyInfo EpochColumnInfo = {
-        "EpochColumn",
-        "EpochColumn",
-        "The header of the column where the epoch is stored"
-    };
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
     "LineWidth",
     "Line Width",
     "This value specifies the line width of the trail if the selected rendering "
     "method includes lines. If the rendering mode is set to Points, this value is "
     "ignored."
-};
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
-    "Color",
-    "Color",
-    "Färg."
     };
-constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
     "Fade",
     "Line fade",
     "The fading factor that is applied to the trail if the 'EnableFade' value is "
@@ -441,65 +392,12 @@ documentation::Documentation RenderableSatellites::Documentation() {
                 PathInfo.description
             },
             {
-                EccentricityColumnInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                EccentricityColumnInfo.description
-            },
-            {
-                SemiMajorAxisColumnInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                SemiMajorAxisColumnInfo.description
-            },
-            {
-                SemiMajorAxisUnitInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                SemiMajorAxisUnitInfo.description
-            },
-            {
-                InclinationColumnInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                InclinationColumnInfo.description
-            },
-            {
-                AscendingNodeColumnInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                AscendingNodeColumnInfo.description
-            },
-            {
-                ArgumentOfPeriapsisColumnInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                ArgumentOfPeriapsisColumnInfo.description
-            },
-            {
-                MeanAnomalyAtEpochColumnInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                MeanAnomalyAtEpochColumnInfo.description
-            },
-            {
-                EpochColumnInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                EpochColumnInfo.description
-            },
-            {
                 LineWidthInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
                 LineWidthInfo.description
             },
-            {
-                ColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                ColorInfo.description
-            },
+
             {
                 FadeInfo.identifier,
                 new DoubleVerifier,
@@ -514,15 +412,6 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _path(PathInfo)
     , _nSegments(SegmentsInfo)
-    , _eccentricityColumnName(EccentricityColumnInfo)
-    , _semiMajorAxisColumnName(SemiMajorAxisColumnInfo)
-    , _semiMajorAxisUnit(SemiMajorAxisUnitInfo)
-    , _inclinationColumnName(InclinationColumnInfo)
-    , _ascendingNodeColumnName(AscendingNodeColumnInfo)
-    , _argumentOfPeriapsisColumnName(ArgumentOfPeriapsisColumnInfo)
-    , _meanAnomalyAtEpochColumnName(MeanAnomalyAtEpochColumnInfo)
-    , _epochColumnName(EpochColumnInfo)
-    , _color(ColorInfo)    
     , _lineFade(FadeInfo)
 
 {
@@ -536,34 +425,17 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
         dictionary.value<std::string>(PathInfo.identifier);
     _nSegments =
         static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
-    _eccentricityColumnName =
-        dictionary.value<std::string>(EccentricityColumnInfo.identifier);
-    _semiMajorAxisColumnName =
-        dictionary.value<std::string>(SemiMajorAxisColumnInfo.identifier);
-    _semiMajorAxisUnit =
-        dictionary.value<double>(SemiMajorAxisUnitInfo.identifier);
-    _inclinationColumnName =
-        dictionary.value<std::string>(InclinationColumnInfo.identifier);
-    _ascendingNodeColumnName =
-        dictionary.value<std::string>(AscendingNodeColumnInfo.identifier);
-    _argumentOfPeriapsisColumnName =
-        dictionary.value<std::string>(ArgumentOfPeriapsisColumnInfo.identifier);
-    _meanAnomalyAtEpochColumnName =
-        dictionary.value<std::string>(MeanAnomalyAtEpochColumnInfo.identifier);
-    _epochColumnName =
-        dictionary.value<std::string>(EpochColumnInfo.identifier);
-    _color =
-        dictionary.value<glm::vec3>(ColorInfo.identifier);
     _lineFade = 
         static_cast<float>(dictionary.value<double>(FadeInfo.identifier));
 
     addPropertySubOwner(_appearance);
     addProperty(_path);
     addProperty(_nSegments);
+    addProperty(_lineFade);
 }
    
     
-void RenderableSatellites::readTLEFile(const std::string& filename) {
+std::vector<KeplerParameters> RenderableSatellites::readTLEFile(const std::string& filename) {
     ghoul_assert(FileSys.fileExists(filename), "The filename must exist");
 
     std::ifstream file;
@@ -674,7 +546,7 @@ void RenderableSatellites::readTLEFile(const std::string& filename) {
 
     } // !for loop
     file.close();
-
+    return _TLEData;
 
 }
 
@@ -686,7 +558,6 @@ RenderableSatellites::~RenderableSatellites() {
 
 void RenderableSatellites::initialize() {
     
-    readTLEFile(_path);
     updateBuffers();
 
     //_path.onChange([this]() {
@@ -732,6 +603,8 @@ void RenderableSatellites::initializeGL() {
     _uniformCache.opacity       = _programObject->uniformLocation("opacity");
 
     updateBuffers();
+
+    //ghoul::opengl::updateUniformLocations(*_programObject, _uniformCache, UniformNames);
 
     setRenderBin(Renderable::RenderBin::Overlay);
 }
@@ -779,7 +652,7 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
-    _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
+    _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);                                                   //!!! WHY DOES _lineFade NOT WORK?
 
     //glEnableVertexAttribArray(0);    // We like submitting vertices on stream 0 for no special reason
     //glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), 0);
@@ -803,6 +676,7 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableSatellites::updateBuffers() {
+    _TLEData = readTLEFile(_path);
 
     const size_t nVerticesPerOrbit = _nSegments + 1;
     _vertexBufferData.resize(_TLEData.size() * nVerticesPerOrbit);

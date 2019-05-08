@@ -75,6 +75,22 @@ namespace openspace {
         void update(const UpdateData& data) override;
 
         static documentation::Documentation Documentation();
+                /**
+         * Reads the provided TLE file and calles the KeplerTranslation::setKeplerElments
+         * method with the correct values. If \p filename is a valid TLE file but contains
+         * disallowed values (see KeplerTranslation::setKeplerElements), a
+         * KeplerTranslation::RangeError is thrown.
+         *
+         * \param filename The path to the file that contains the TLE file.
+         * \param lineNum The line number in the file where the set of 3 TLE lines starts
+         *
+         * \throw std::system_error if the TLE file is malformed (does not contain at least
+         *        two lines that start with \c 1 and \c 2.
+         * \throw KeplerTranslation::RangeError If the Keplerian elements are outside of
+         *        the valid range supported by Kepler::setKeplerElements
+         * \pre The \p filename must exist
+         */
+        std::vector<KeplerParameters> readTLEFile(const std::string& filename);
 
     private:
         /// The layout of the VBOs
@@ -109,15 +125,6 @@ namespace openspace {
         properties::StringProperty _path;
         properties::UIntProperty _nSegments;
 
-        properties::StringProperty _eccentricityColumnName;
-        properties::StringProperty _semiMajorAxisColumnName;
-        properties::DoubleProperty _semiMajorAxisUnit;
-        properties::StringProperty _inclinationColumnName;
-        properties::StringProperty _ascendingNodeColumnName;
-        properties::StringProperty _argumentOfPeriapsisColumnName;
-        properties::StringProperty _meanAnomalyAtEpochColumnName;
-        properties::StringProperty _epochColumnName;
-        properties::Vec3Property _color;
         properties::DoubleProperty _lineFade;
 
         RenderableTrail::Appearance _appearance;
@@ -126,28 +133,11 @@ namespace openspace {
 
         double _inGameTime = 0.0;
 
-        UniformCache(opacity, modelView, projection, color, useLineFade, lineFade,
-            segments, position, vertexIDs, numberOfOrbits, inGameTime)
+        UniformCache(modelView, projection, lineFade, inGameTime, color, opacity)
             _uniformCache;
 
-        /**
-         * Reads the provided TLE file and calles the KeplerTranslation::setKeplerElments
-         * method with the correct values. If \p filename is a valid TLE file but contains
-         * disallowed values (see KeplerTranslation::setKeplerElements), a
-         * KeplerTranslation::RangeError is thrown.
-         *
-         * \param filename The path to the file that contains the TLE file.
-         * \param lineNum The line number in the file where the set of 3 TLE lines starts
-         *
-         * \throw std::system_error if the TLE file is malformed (does not contain at least
-         *        two lines that start with \c 1 and \c 2.
-         * \throw KeplerTranslation::RangeError If the Keplerian elements are outside of
-         *        the valid range supported by Kepler::setKeplerElements
-         * \pre The \p filename must exist
-         */
-        void readTLEFile(const std::string& filename);
     };
 
+}
 #endif // __OPENSPACE_MODULE_BASE___RenderableSatellites___H__
 
-}
