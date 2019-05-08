@@ -357,8 +357,7 @@ void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
     _joystickStates.updateStateFromInput(inputState, deltaTime);
 }
 
-void OrbitalNavigator::updateCameraStateFromStates(double deltaTime)
-{
+void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     if (!(_anchorNode)) {
         // Bail out if the anchor node is not set.
         return;
@@ -366,7 +365,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime)
 
     const glm::dvec3 anchorPos = _anchorNode->worldPosition();
     const glm::dvec3 prevCameraPosition = _camera->positionVec3();
-    glm::dvec3 anchorDisplacement = anchorPos - _previousAnchorNodePosition;
+    const glm::dvec3 anchorDisplacement = anchorPos - _previousAnchorNodePosition;
 
     CameraPose pose = {
         _camera->positionVec3() + anchorDisplacement,
