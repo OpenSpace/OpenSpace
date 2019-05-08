@@ -84,7 +84,7 @@ bool SessionRecording::startRecording(const std::string& filename) {
             ghoul::filesystem::FileSystem::Recursive::Yes
         );
     }
-    const std::string absFilename = absPath("${RECORDINGS}/") + filename;
+    const std::string absFilename = absPath("${RECORDINGS}/" + filename);
 
     if (_state == SessionState::Playback) {
         _playbackFile.close();
@@ -137,7 +137,7 @@ bool SessionRecording::startPlayback(const std::string& filename,
         LERROR("Playback filename must not contain path (/) elements");
         return false;
     }
-    const std::string absFilename = absPath("${RECORDINGS}/") + filename;
+    const std::string absFilename = absPath("${RECORDINGS}/" + filename);
 
     if (_state == SessionState::Recording) {
         LERROR("Unable to start playback while in session recording mode");
