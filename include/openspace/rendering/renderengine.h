@@ -195,6 +195,7 @@ private:
     properties::FloatProperty _hdrExposure;
     properties::FloatProperty _hdrBackground;
     properties::FloatProperty _gamma;
+    properties::FloatProperty _aspectRatio;
 
     properties::Vec3Property _globalRotation;
     properties::Vec3Property _screenSpaceRotation;

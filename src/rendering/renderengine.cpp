@@ -209,6 +209,12 @@ namespace {
         "Gamma, is the nonlinear operation used to encode and decode luminance or "
         "tristimulus values in the image."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo AspectRatioInfo = {
+        "AspectRatio",
+        "Aspect Ratio",
+        "Adjusts the ratio of horizontal-to-vertical field of view."
+    };
 } // namespace
 
 
@@ -247,6 +253,7 @@ RenderEngine::RenderEngine()
         glm::vec3(-glm::pi<float>()),
         glm::vec3(glm::pi<float>())
     )
+    , _aspectRatio(AspectRatioInfo, 1.f, 0.1f, 10.0f)
 {
     _doPerformanceMeasurements.onChange([this](){
         global::performanceManager.setEnabled(_doPerformanceMeasurements);
@@ -287,6 +294,12 @@ RenderEngine::RenderEngine()
     addProperty(_gamma);
 
     addProperty(_applyWarping);
+
+    _aspectRatio.onChange([this]() {
+        if (_renderer) {
+        }
+    });
+    addProperty(_aspectRatio);
 
     _takeScreenshot.onChange([this](){
         _shouldTakeScreenshot = true;
