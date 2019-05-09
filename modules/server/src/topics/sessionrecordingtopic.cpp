@@ -26,7 +26,6 @@
 
 #include <modules/server/include/connection.h>
 #include <openspace/engine/globals.h>
-#include <openspace/properties/property.h>
 #include <openspace/query/query.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <ghoul/logging/logmanager.h>

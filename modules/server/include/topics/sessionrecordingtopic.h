@@ -46,7 +46,6 @@ private:
 
     int _stateCallbackHandle = UnsetOnChangeHandle;
     bool _isDone = false;
-    std::chrono::system_clock::time_point _lastUpdateTime;
     interaction::SessionRecording::SessionState _lastState;
 };
 

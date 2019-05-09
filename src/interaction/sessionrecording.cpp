@@ -601,8 +601,7 @@ void SessionRecording::preSynchronization() {
     }
 
     //Handle callback(s) for change in idle/record/playback state
-    if (_state != _lastState)
-    {
+    if (_state != _lastState) {
         using K = const CallbackHandle;
         using V = StateChangeCallback;
         for (const std::pair<K, V>& it : _stateChangeCallbacks) {
@@ -1294,8 +1293,8 @@ void SessionRecording::removeStateChangeCallback(CallbackHandle handle) {
         _stateChangeCallbacks.begin(),
         _stateChangeCallbacks.end(),
         [handle](const std::pair<CallbackHandle, std::function<void()>>& cb) {
-        return cb.first == handle;
-    }
+            return cb.first == handle;
+        }
     );
 
     ghoul_assert(
@@ -1308,7 +1307,7 @@ void SessionRecording::removeStateChangeCallback(CallbackHandle handle) {
 
 std::string SessionRecording::playbackList() {
     std::string fileList;
-    std::string recordingsPath = absPath("${RECORDINGS}");
+    const std::string recordingsPath = absPath("${RECORDINGS}");
 
     ghoul::filesystem::Directory currentDir(recordingsPath);
     std::vector<std::string> allInputFiles = currentDir.readFiles();
