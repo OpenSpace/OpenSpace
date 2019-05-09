@@ -1,7 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
-
 local modelFolder = asset.syncedResource({
     Name = "Pioneer 10/11 Models",
     Type = "HttpSynchronization",
@@ -21,6 +20,7 @@ local kernelsList = {
     kernelsFolder .. '/p11_sat336.bsp'
 }
 
+local Pioneer11NAIF = "-24"
 
 local Pioneer11 = {
     Identifier = "Pioneer_11",
@@ -28,7 +28,7 @@ local Pioneer11 = {
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
-            Target = "-24",
+            Target = Pioneer11NAIF,
             Observer = "SUN",
             Kernels = kernelsList
         },
@@ -48,7 +48,6 @@ local Pioneer11 = {
     }
 }
 
-
 local Pioneer11Trail = {
     Identifier = "Pioneer11Trail",
     Parent = sunTransforms.SolarSystemBarycenter.Identifier,
@@ -56,7 +55,7 @@ local Pioneer11Trail = {
         Type = "RenderableTrailTrajectory",
         Translation = {
             Type = "SpiceTranslation",
-            Target = "-24",
+            Target = Pioneer11NAIF,
             Observer = "SUN",
             Kernels = kernelsList
         },
@@ -64,7 +63,8 @@ local Pioneer11Trail = {
         StartTime = "1973 APR 06 02:25:00.000",
         EndTime = "1990 JAN 02 00:00:00.000",
         EnableFade = false,
-        SampleInterval = 6180 * 2  -- 6180 is the number of days between the Start and End time
+        SampleInterval = 6087 * 2  
+        --6087 is the number of days between the Start and End time (so sample every 2d)
     },
     GUI = {
         Name = "Pioneer 11 Trail",
