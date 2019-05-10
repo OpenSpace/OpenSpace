@@ -816,6 +816,10 @@ void setSgctDelegateFunctions() {
     sgctDelegate.openGLProcedureAddress = [](const char* func) {
         return glfwGetProcAddress(func);
     };
+    sgctDelegate.setFieldOfViewAspectRatio = [](float ratio) {
+        sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
+        w->setFieldOfViewAspectRatio(ratio);
+    };
 }
 
 int main(int argc, char** argv) {

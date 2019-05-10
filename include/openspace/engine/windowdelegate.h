@@ -113,6 +113,8 @@ struct WindowDelegate {
 
     int (*currentWindowId)() = []() { return 0; };
 
+    void(*setFieldOfViewAspectRatio)(float ratio) = [](float) { };
+
     using GLProcAddress = void(*)(void);
 
     GLProcAddress (*openGLProcedureAddress)(const char*) =

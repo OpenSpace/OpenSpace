@@ -296,8 +296,7 @@ RenderEngine::RenderEngine()
     addProperty(_applyWarping);
 
     _aspectRatio.onChange([this]() {
-        if (_renderer) {
-        }
+        global::windowDelegate.setFieldOfViewAspectRatio(_aspectRatio);
     });
     addProperty(_aspectRatio);
 
@@ -468,6 +467,10 @@ void RenderEngine::updateRenderer() {
         using FR = ghoul::fontrendering::FontRenderer;
         FR::defaultRenderer().setFramebufferSize(fontResolution());
         FR::defaultProjectionRenderer().setFramebufferSize(renderingResolution());
+        //Override the aspect ratio property value to match that of resized window
+        glm::dvec2 winSize = global::windowDelegate.currentWindowSize();
+        float newRatio = winSize.x / winSize.y;
+        _aspectRatio.set(newRatio);
     }
 
     _renderer->update();
