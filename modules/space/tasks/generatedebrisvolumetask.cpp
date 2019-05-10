@@ -358,10 +358,28 @@ std::vector<KeplerParameters> readTLEFile(const std::string& filename){
     return data;
 }
 
-std::vector<glm::vec3> getPositionBuffer(std::vector<KeplerParameters> tleData) {
+std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData, std::string& timeStamp) {
 
-  
-
+    std::vector<glm::dvec3> positionBuffer;
+    for(const auto& orbit : tleData) {
+        KeplerTranslation keplerTranslator;
+        keplerTranslator.setKeplerElements(
+            orbit.eccentricity,
+            orbit.semiMajorAxis,
+            orbit.inclination,
+            orbit.ascendingNode,
+            orbit.argumentOfPeriapsis,
+            orbit.meanAnomaly,
+            orbit.period,
+            orbit.epoch
+        );    
+        double timeInSeconds = Time::convertTime(timeStamp);
+        glm::dvec3 position = keplerTranslator.debrisPos(static_cast<float>(timeInSeconds));
+        positionBuffer.push_back(position);
+        
+    }
+    
+    return positionBuffer;
 }
 
 GenerateDebrisVolumeTask::GenerateDebrisVolumeTask(const ghoul::Dictionary& dictionary)
@@ -392,7 +410,10 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
 
     //1. read TLE-data and position of debris elements.
     _TLEDataVector = readTLEFile(_inputPath);
-    std::vector<glm::vec3> positionBuffer = getPositionBuffer(_TLEDataVector);
+    std::vector<glm::dvec3> startPositionBuffer = getPositionBuffer(_TLEDataVector, _startTime);
+//  if we deside to integrate the density over time
+//  std::vector<glm::dvec3> endPositionBuffer = getPositionBuffer(_TLEDataVector, _endTime);
+    
     //2. create a grid using dimensions and other .task-parameters.
 
     //3. calculate what voxel each debris is within for each time step.
