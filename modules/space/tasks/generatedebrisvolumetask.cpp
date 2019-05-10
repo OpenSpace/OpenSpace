@@ -45,7 +45,8 @@ namespace {
     constexpr const char* KeyStartTime = "StartTime";
     constexpr const char* KeyEndTime = "EndTime";
     constexpr const char* KeyInputPath = "InputPath";
-    
+    constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
+    constexpr const char* KeyUpperDomainBound = "UpperDomainBound";    
 
 }
 
@@ -382,6 +383,48 @@ std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData,
     return positionBuffer;
 }
 
+std::vector<glm::dvec3> generatePositions(int numberOfPositions) {
+    std::vector<glm::dvec3> positions;
+    
+    float radius = 700000;   // meter
+    float degreeStep = 360 / numberOfPositions;
+
+    for(int i=0 ; i<= 360 ; i == degreeStep){
+        glm::dvec3 singlePosition = glm::dvec3(radius* sin(i), radius*cos(i), 0.0);
+        positions.push_back(singlePosition);
+    }
+    return positions;
+}
+
+float getDensityAt(glm::uvec3 cell) {
+    float value;
+    // return value at position cell from _densityPerVoxel
+    return value;
+}
+
+int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim){
+    int index;
+
+    float maxApogee = getMaxApogee();
+    glm::vec3 sizeOfVoxel = maxApogee / static_cast<glm::vec3>(dim);
+
+    index = 
+    // TODO: för varje AXEL!
+
+
+
+    return index;
+}
+
+int* mapDensityToVoxels(int* densityArray, std::vector<glm::dvec3> positions, glm:uvec3 dim) {
+
+    for(const glm::dvec3& position : positions) {
+        int index = getIndexFromPosition(position, dim);
+        ++densityArray[index];
+    }
+    return densityArray;
+}
+
 GenerateDebrisVolumeTask::GenerateDebrisVolumeTask(const ghoul::Dictionary& dictionary)
 {
     openspace::documentation::testSpecificationAndThrow(
@@ -395,7 +438,14 @@ GenerateDebrisVolumeTask::GenerateDebrisVolumeTask(const ghoul::Dictionary& dict
     _dimensions = glm::uvec3(dictionary.value<glm::vec3>(KeyDimensions));
     _startTime = dictionary.value<std::string>(KeyStartTime);
     _endTime = dictionary.value<std::string>(KeyEndTime);
+    // since _inputPath is past from task,
+    // there will have to be either one task per dataset,
+    // or you need to combine the datasets into one file.
     _inputPath = dictionary.value<std::string>(KeyInputPath);
+    _lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
+    _upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
+
+
     _TLEDataVector = {};
 }
 
@@ -405,15 +455,56 @@ std::string GenerateDebrisVolumeTask::description() {
 
 void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCallback) {
 
-    // create object rawVolume
-    volume::RawVolume<float> rawVolume(_dimensions);
-
     //1. read TLE-data and position of debris elements.
     _TLEDataVector = readTLEFile(_inputPath);
     std::vector<glm::dvec3> startPositionBuffer = getPositionBuffer(_TLEDataVector, _startTime);
-//  if we deside to integrate the density over time
-//  std::vector<glm::dvec3> endPositionBuffer = getPositionBuffer(_TLEDataVector, _endTime);
     
+    //  if we deside to integrate the density over time
+    //  std::vector<glm::dvec3> endPositionBuffer = getPositionBuffer(_TLEDataVector, _endTime);
+    
+    int numberOfPoints = 40;
+    std::vector<glm::dvec3> generatedPositions = generatePositions(numberOfPoints);
+    
+    const int size = _dimensions.x *_dimensions.y *_dimensions.z;
+    int *densityArrayp = new int[size];
+    int *densityArray = mapDensityToVoxels(densityArrayp, generatedPositions, _dimensions);
+        
+    // create object rawVolume
+    volume::RawVolume<float> rawVolume(_dimensions);
+    glm::vec3 domainSize = _upperDomainBound - _lowerDomainBound;
+    
+    float minVal = std::numeric_limits<float>::max();
+    float maxVal = std::numeric_limits<float>::min();
+    
+    // TODO: Create a forEachSatallite and set(cell, value) to combine mapDensityToVoxel
+    //      and forEachVoxel for less time complexity.
+    rawVolume.forEachVoxel([&](glm::uvec3 cell, float) {
+    //     glm::vec3 coord = _lowerDomainBound +
+    //        glm::vec3(cell) / glm::vec3(_dimensions) * domainSize;
+        float value = getDensityAt(cell);   // (coord)
+        rawVolume.set(cell, value);
+
+        minVal = std::min(minVal, value);
+        maxVal = std::max(maxVal, value);
+    });
+
+
+  
+
+    
+
+
+
+
+
+
+    // indexed grid with cooresponding xyz: gridIndex
+    // int array with number of slots = number of voxels: densityArray = {0,0,0,0,0,0}
+    for(const glm::dvec3& debris : startPositionBuffer) {
+        // call function to increment densityArray where debris position ~= voxel position
+    }
+    // make raw volume of densityArray.
+
     //2. create a grid using dimensions and other .task-parameters.
 
     //3. calculate what voxel each debris is within for each time step.
