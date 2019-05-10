@@ -47,6 +47,7 @@ glm::dvec3 fromLuaConversion(lua_State* state, bool& success) {
         }
         else {
             result[i] = lua_tonumber(state, -1);
+            lua_pop(state, 1);
         }
     }
 

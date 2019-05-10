@@ -47,6 +47,7 @@ glm::uvec4 fromLuaConversion(lua_State* state, bool& success) {
         }
         else {
             result[i] = static_cast<glm::uvec4::value_type>(lua_tonumber(state, -1));
+            lua_pop(state, 1);
         }
     }
 

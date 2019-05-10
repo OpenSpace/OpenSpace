@@ -47,6 +47,7 @@ glm::vec3 fromLuaConversion(lua_State* state, bool& success) {
         }
         else {
             result[i] = static_cast<glm::vec3::value_type>(lua_tonumber(state, -1));
+            lua_pop(state, 1);
         }
     }
     // The last accessor argument is still on the stack
