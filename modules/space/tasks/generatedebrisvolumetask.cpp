@@ -397,9 +397,11 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
 
     //3. calculate what voxel each debris is within for each time step.
     //   and increment density with one for each debris in that voxel.
-
-    //4. 
-
+    rawVolume.forEachVoxel([&](glm::uvec3 cell, float) {
+        
+    });
+    //4.
+    
 
 
 
