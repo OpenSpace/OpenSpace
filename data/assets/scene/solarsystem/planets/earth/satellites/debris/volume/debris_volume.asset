@@ -7,7 +7,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local earthRadius = 6.371E6
+local earthRadius = 6371000
 
 local volume = {
     Identifier = "DebrisVolume",
@@ -28,8 +28,8 @@ local volume = {
     },
     Transform = {
         Scale = {
-            Type = "StaticScale",
-            Scale = earthRadius
+            Type = "StaticScale",   
+            Scale = earthRadius     -- do not multiply this. That will not show real representation.
         }
     }
 }
