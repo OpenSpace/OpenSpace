@@ -643,6 +643,8 @@ void RenderableBillboardsCloud::initialize() {
         // entry is the one selected by default.
         _colorOption.setValue(static_cast<int>(_colorRangeData.size() - 1));
     }
+
+    setRenderBin(Renderable::RenderBin::Transparent);
 }
 
 void RenderableBillboardsCloud::initializeGL() {
@@ -721,7 +723,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
                                                  const glm::dvec3& orthoUp,
                                                  float fadeInVariable)
 {
-    glDepthMask(false);
+    //glDepthMask(false);
 
     // Saving current OpenGL state
     GLboolean blendEnabled = glIsEnabledi(GL_BLEND, 0);
@@ -745,8 +747,14 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
 
     glEnablei(GL_BLEND, 0);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    //glBlendFunc(GL_SRC_COLOR, GL_ONE_MINUS_DST_COLOR);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
+    //glBlendEquation(GL_MAX);
+
+    glBlendFuncSeparate(GL_SRC_ALPHA, GL_DST_ALPHA, GL_SRC_ALPHA, GL_DST_ALPHA);
+    glBlendEquationSeparate(GL_FUNC_ADD, GL_MIN);
 
     _program->activate();
 

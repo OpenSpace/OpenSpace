@@ -52,8 +52,8 @@ Fragment getFragment() {
 
     fullColor.a *= fadeInValue * ta;
     
-    if (fullColor.a == 0.f || 
-        fullColor.rgb == vec3(0.0)) {
+    float textureOpacity = dot(fullColor.rgb, vec3(1.0));
+    if (fullColor.a == 0.f || textureOpacity < 0.1f) {
         discard;
     }
 
