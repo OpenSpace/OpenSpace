@@ -596,32 +596,35 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 
     ++_frameNumber;
 
-    std::vector<ScreenSpaceRenderable*> ssrs;
-    ssrs.reserve(global::screenSpaceRenderables.size());
-    for (const std::unique_ptr<ScreenSpaceRenderable>& ssr :
-         global::screenSpaceRenderables)
-    {
-        if (ssr->isEnabled() && ssr->isReady()) {
-            ssrs.push_back(ssr.get());
+    if (masterEnabled && !delegate.isGuiWindow() && _globalBlackOutFactor > 0.f) {
+        std::vector<ScreenSpaceRenderable*> ssrs;
+        ssrs.reserve(global::screenSpaceRenderables.size());
+        for (const std::unique_ptr<ScreenSpaceRenderable>& ssr :
+            global::screenSpaceRenderables)
+        {
+            if (ssr->isEnabled() && ssr->isReady()) {
+                ssrs.push_back(ssr.get());
+            }
         }
-    }
 
-    std::sort(
-        ssrs.begin(),
-        ssrs.end(),
-        [](ScreenSpaceRenderable* lhs, ScreenSpaceRenderable* rhs) {
-            // Render back to front.
-            return lhs->depth() > rhs->depth();
+        std::sort(
+            ssrs.begin(),
+            ssrs.end(),
+            [](ScreenSpaceRenderable* lhs, ScreenSpaceRenderable* rhs) {
+                // Render back to front.
+                return lhs->depth() > rhs->depth();
+            }
+        );
+
+
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        for (ScreenSpaceRenderable* ssr : ssrs) {
+            ssr->render();
         }
-    );
-
-    glDisable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    for (ScreenSpaceRenderable* ssr : ssrs) {
-        ssr->render();
+        glDisable(GL_BLEND);
     }
-    glDisable(GL_BLEND);
     LTRACE("RenderEngine::render(end)");
 }
 
