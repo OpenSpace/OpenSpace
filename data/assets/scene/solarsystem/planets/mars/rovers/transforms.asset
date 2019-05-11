@@ -16,6 +16,11 @@ local marsTransforms2 = asset.require('scene/solarsystem/planets/mars/mars')
 local extra_rot = {
     Identifier = "extra_rot",
     Parent =  marsTransforms2.Mars.Identifier,
+    TimeFrame = { -- Using Spice kernels for 1850-2150
+        Type = "TimeFrameInterval",
+        Start = "2013 AUG 22",
+        End = "2018 JAN 24"
+    },
     --Transform = {
     --    Rotation = {  --correct rotation for time "2013-08-22T05:44:00"
     --        Type = "StaticRotation",

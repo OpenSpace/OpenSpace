@@ -661,27 +661,27 @@ local CHEMIN_Bottom = {
 
 local dataPath = asset.localResource("data")
 
-local Submodules = {
-    Identifier = "Submodules",
-    Parent = "Mars",
-    Renderable = {
-        Type = "RoverTerrain",
-        RoverLocationPath = dataPath .. "/path/rover_locations.shp",
-        --//"/modelsEasy/" and "/texturesEasy/" contains data for site048 and drive1570 only, to load all models use path "/models/" and "/textures/"
-        ModelPath = "E:/rover/RoverTerrain-Models&Textures/models/",
-        TexturePath = "E:/rover/RoverTerrain-Models&Textures/textures/",
-    },
-    GuiPath = "/Solar System/Curiosity"
-}
+-- local Submodules = {
+--     Identifier = "Submodules",
+--     Parent = "Mars",
+--     Renderable = {
+--         Type = "RoverTerrain",
+--         RoverLocationPath = dataPath .. "/path/rover_locations.shp",
+--         --//"/modelsEasy/" and "/texturesEasy/" contains data for site048 and drive1570 only, to load all models use path "/models/" and "/textures/"
+--         ModelPath = "E:/rover/RoverTerrain-Models&Textures/models/",
+--         TexturePath = "E:/rover/RoverTerrain-Models&Textures/textures/",
+--     },
+--     GuiPath = "/Solar System/Curiosity"
+-- }
 
-local HeightMap = {
-    Identifier = "HeightMap",
-    Parent = "Submodules",
-    Renderable = {
-        Type = "RenderableHeightMap",
-        FrustumSize = {1, 2}
-    }
-}
+-- local HeightMap = {
+--     Identifier = "HeightMap",
+--     Parent = "Submodules",
+--     Renderable = {
+--         Type = "RenderableHeightMap",
+--         FrustumSize = {1, 2}
+--     }
+-- }
 
 
 --local CuriosityTrail = {
@@ -1228,8 +1228,8 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     SAM_Cover_1,
     SAM_Cover_2,
     CHEMIN_Bottom,
-    Submodules,
-    HeightMap,
+    -- Submodules,
+    -- HeightMap,
 
     Wheel_Base,
     Wheel_Base_2,
