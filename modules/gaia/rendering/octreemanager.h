@@ -232,7 +232,7 @@ private:
      * Private help function for <code>printStarsPerNode()</code>. \returns an accumulated
      * string containing all descendant nodes.
      */
-    std::string printStarsPerNode(const OctreeNode& node, 
+    std::string printStarsPerNode(const OctreeNode& node,
         const std::string& prefix) const;
 
     /**

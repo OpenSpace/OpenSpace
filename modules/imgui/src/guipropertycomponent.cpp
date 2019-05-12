@@ -252,7 +252,9 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
         }
     }
 
-    for (const std::pair<std::string, std::vector<Property*>>& p : propertiesByGroup) {
+    using K = std::string;
+    using V = std::vector<Property*>;
+    for (const std::pair<const K, V>& p : propertiesByGroup) {
         const std::string& groupName = owner->propertyGroupName(p.first);
         if (ImGui::TreeNode(groupName.c_str())) {
             for (properties::Property* prop : p.second) {

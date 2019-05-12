@@ -55,7 +55,7 @@ glm::dmat3x3 fromLuaConversion(lua_State* state, bool& success) {
         }
     }
     // The last accessor argument and the table are still on the stack
-    lua_pop(state, 2);
+    lua_pop(state, 1);
     success = true;
     return result;
 }

@@ -35,7 +35,6 @@ long double fromLuaConversion(lua_State* state, bool& success) {
     success = (lua_isnumber(state, -1) == 1);
     if (success) {
         long double val = static_cast<long double>(lua_tonumber(state, -1));
-        lua_pop(state, 1);
         return val;
     }
     else {

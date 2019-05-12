@@ -1,0 +1,78 @@
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+
+local modelFolder = asset.syncedResource({
+    Name = "Pioneer 10/11 Models",
+    Type = "HttpSynchronization",
+    Identifier = "pioneer_10_11_model",
+    Version = 1
+})
+
+local kernelsFolder = asset.syncedResource({
+    Name = "Pioneer Kernels",
+    Type = "HttpSynchronization",
+    Identifier = "pioneer_11_spice",
+    Version = 1
+})
+
+local kernelsList = {
+    kernelsFolder .. '/p11-a.bsp',
+    kernelsFolder .. '/p11_sat336.bsp'
+}
+
+local Pioneer11NAIF = "-24"
+
+local Pioneer11 = {
+    Identifier = "Pioneer_11",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = Pioneer11NAIF,
+            Observer = "SUN",
+            Kernels = kernelsList
+        },
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = modelFolder .. "/Pioneer.obj"
+        },
+        ColorTexture = modelFolder .. "/gray.png",
+        LightSources = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
+    },
+    GUI = {
+        Name = "Pioneer 11",
+        Path = "/Solar System/Missions/Pioneer/11"
+    }
+}
+
+local Pioneer11Trail = {
+    Identifier = "Pioneer11Trail",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = Pioneer11NAIF,
+            Observer = "SUN",
+            Kernels = kernelsList
+        },
+        Color = { 0.70, 0.50, 0.20 },
+        StartTime = "1973 APR 06 02:25:00.000",
+        EndTime = "1990 JAN 02 00:00:00.000",
+        EnableFade = false,
+        SampleInterval = 6087 * 2  
+        --6087 is the number of days between the Start and End time (so sample every 2d)
+    },
+    GUI = {
+        Name = "Pioneer 11 Trail",
+        Path = "/Solar System/Missions/Pioneer/11"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    Pioneer11,
+    Pioneer11Trail,
+})

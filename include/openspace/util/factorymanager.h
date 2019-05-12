@@ -110,7 +110,7 @@ public:
      */
     template <class T>
     ghoul::TemplateFactory<T>* factory() const;
-    
+
     std::string generateJson() const override;
 private:
 
