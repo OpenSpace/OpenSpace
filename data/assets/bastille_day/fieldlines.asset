@@ -1,0 +1,57 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('./transforms')
+
+local transferFunctions = asset.localResource("transferfunctions")
+local masVelocityColorTable = transferFunctions .. "/velocity_fieldlines.txt"
+local masDensityColorTable = transferFunctions .. "/density_fieldlines.txt"
+
+local fieldlinesDirectory = asset.syncedResource({
+    Name = "Bastille Day MAS Fieldlies",
+    Type = "HttpSynchronization",
+    Identifier = "bastille_day_mas_fieldlines",
+    Version = 1
+})
+
+
+local sunRadius = 695508000
+
+-- Fieldlies from binaries
+local fieldlines = {
+    Identifier = "MAS_MHD_Fieldlines",
+    Parent = transforms.HNMReferenceFrame.Identifier,
+    Renderable = {
+        Type = "RenderableFieldlinesSequence",
+        SourceFolder = fieldlinesDirectory,
+        FlowEnabled = false,
+        AlphaBlendlingEnabled = false,
+        InputFileType = "osfls",
+        ColorTablePaths = {
+            masDensityColorTable,
+            masVelocityColorTable,
+        },
+        ColorTableMinMax = {
+            { 0, 1000000 },
+            { 100, 2000 }
+        },
+        LoadAtRuntime = true,
+        ScaleToMeters = 1.0,
+        SecondsBefore = 24*60*60,
+        SecondsAfter = 24*60*60,
+        SimulationModel = "mas",
+        Color = {
+            Uniform = {0, 0.725, 0.75, 1}
+        }
+    },
+    GUI = {
+        Path = "/Solar System/Heliosphere",
+        Name = "MAS Fieldlines"
+    },
+    Transform = {
+        Scale = {
+            Type = "StaticScale",
+            Scale = sunRadius
+        },
+    }
+} 
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { fieldlines })

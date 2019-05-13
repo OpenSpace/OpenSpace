@@ -72,6 +72,24 @@ std::shared_ptr<ImageData<T>> FitsFileReader::readImage(const std::string& path)
     return nullptr;
 }
 
+std::shared_ptr<ImageData<float>> FitsFileReader::readImageFloat(const std::string& path) {
+    try {
+        _infile = std::make_unique<FITS>(path, Read, true);
+        // Primary HDU Object
+        if (isPrimaryHDU()) {
+            return readImageInternal<float>(_infile->pHDU());
+        }
+        else{
+        // Extension HDU Object
+            return readImageInternal<float>(_infile->currentExtension());
+        }
+    } catch (const FitsException& e){
+        LERROR("Could not read FITS image from table. " + e.message() );
+    }
+}
+
+
+
 template <typename T>
 std::shared_ptr<std::unordered_map<std::string, T>> FitsFileReader::readHeader(
                                                        std::vector<std::string>& keywords)
@@ -122,6 +140,21 @@ std::shared_ptr<T> FitsFileReader::readHeaderValue(const std::string key) {
     return nullptr;
 }
 
+std::shared_ptr<float> FitsFileReader::readHeaderValueFloat(const std::string key) {
+    try {
+        HDU& image = isPrimaryHDU() ?
+        static_cast<HDU&>(_infile->pHDU()) :
+        static_cast<HDU&>(_infile->currentExtension());
+
+        float value;
+        image.readKey(key, value);
+        return std::make_unique<float>(value);
+    } catch (FitsException& e) {
+        LERROR("Could not read FITS key. " + e.message() );
+    }
+    return nullptr;
+}
+
 template<typename T>
 std::shared_ptr<TableData<T>> FitsFileReader::readTable(std::string& path,
                                               const std::vector<std::string>& columnNames,
@@ -140,8 +173,8 @@ std::shared_ptr<TableData<T>> FitsFileReader::readTable(std::string& path,
         // Make sure FITS file is not a Primary HDU Object (aka an image).
         if (!isPrimaryHDU()) {
             ExtHDU& table = _infile->extension(hduIdx);
-            int numCols = static_cast<int>(columnNames.size());
-            int numRowsInTable = static_cast<int>(table.rows());
+            int numCols = columnNames.size();
+            int numRowsInTable = table.rows();
             std::unordered_map<string, std::vector<T>> contents;
             //LINFO("Read file: " + _infile->name());
 
@@ -238,8 +271,8 @@ std::vector<float> FitsFileReader::readFitsFile(std::string filePath, int& nValu
     int nStars = table->readRows - firstRow + 1;
 
     int nNullArr = 0;
-    int nColumnsRead = static_cast<int>(allColumnNames.size());
-    int defaultCols = 17; // Number of columns that are copied by predefined code.
+    size_t nColumnsRead = allColumnNames.size();
+    size_t defaultCols = 17; // Number of columns that are copied by predefined code.
     if (nColumnsRead != defaultCols) {
         LINFO("Additional columns will be read! Consider add column in code for "
             "significant speedup!");
@@ -330,7 +363,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::string filePath, int& nValu
             values[idx++] = vecData[i];
         }
 
-        for (int j = 0; j < nValuesPerStar; ++j) {
+        for (size_t j = 0; j < nValuesPerStar; ++j) {
             // The astronomers in Vienna use -999 as default value. Change it to 0.
             if (values[j] == -999) {
                 values[j] = 0.f;

@@ -1,0 +1,73 @@
+local assetHelper = asset.require('util/asset_helper')
+local sceneHelper = asset.require('util/scene_helper')
+local propertyHelper = asset.require('util/property_helper')
+
+-- Specifying which other assets should be loaded in this scene
+asset.require('spice/base')
+assetHelper.requestAll(asset, 'scene/solarsystem/sun')
+asset.require('scene/solarsystem/planets')
+-- asset.require('scene/solarsystem/planets/mars/moons/phobos')
+-- asset.require('scene/solarsystem/planets/mars/moons/deimos')
+-- asset.require('scene/solarsystem/dwarf_planets/pluto/system')
+assetHelper.requestAll(asset, 'scene/digitaluniverse')
+
+-- Load default key bindings applicable to most scenes
+asset.require('util/default_keybindings')
+asset.require('util/default_dashboard')
+-- asset.require('util/default_joystick')
+
+-- asset.require('util/webgui')
+
+asset.request('customization/globebrowsing')
+
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+local sunAsset = asset.require('scene/solarsystem/sun/sun')
+
+local sunRadius = 695508000
+
+-- The actual fieldlines
+asset.require('./bastille_day/fieldlines')
+
+
+asset.onInitialize(function ()
+    local now = openspace.time.currentWallTime()
+    -- Jump to bastille day
+    openspace.time.setTime("2000 JUL 14 08:33:37.100")
+
+   
+    openspace.setDefaultGuiSorting()
+
+    openspace.globebrowsing.loadWMSServersFromFile(
+        openspace.absPath("${DATA}/globebrowsing_servers.lua")
+    )
+
+    openspace.addVirtualProperty(
+        "BoolProperty",
+        "Show Trails",
+        "Scene.*Trail.Renderable.Enabled",
+        "Disable or enable all trails of the scene at the same time",
+        true,
+        nil,
+        nil
+    )
+
+    openspace.markInterestingNodes({
+        "Earth", "Sun", "Moon", "MAS_MHD_Fieldlines"
+    })
+
+    openspace.setPropertyValue("Scene.Sun.Renderable.Enabled", true)
+    -- openspace.setPropertyValue("Scene.SunGlare.Renderable.Enabled", false)
+
+    -- Place by the sun
+    openspace.navigation.setCameraState({
+        Anchor = sunAsset.Sun.Identifier,
+        Position = { 80*sunRadius, 80*sunRadius, 0 },
+        Rotation = { 0.0, 0.0, 0.7, 0.0 },
+    })
+
+end)
+
+asset.onDeinitialize(function ()
+
+    openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
+end)

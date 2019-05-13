@@ -65,11 +65,15 @@ public:
     template<typename T>
     std::shared_ptr<ImageData<T>> readImage(const std::string& path);
 
+    std::shared_ptr<ImageData<float>> readImageFloat(const std::string& path);
+
     template<typename T>
     std::shared_ptr<std::unordered_map<std::string, T>> readHeader(
         std::vector<std::string>& keywords);
     template<typename T>
     std::shared_ptr<T> readHeaderValue(const std::string key);
+
+    std::shared_ptr<float> readHeaderValueFloat(const std::string key);
 
     /**
      * Read specified table columns from fits file.

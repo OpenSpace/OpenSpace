@@ -1,0 +1,25 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('./transforms')
+local sun = asset.require('scene/solarsystem/sun/sun')
+
+local magnetogramDirectory = asset.syncedResource({
+    Name = "Bastille Day Magnetogram",
+    Type = "HttpSynchronization",
+    Identifier = "bastille_day_magnetogram",
+    Version = 1
+})
+
+local defaultSunTexture
+local texturePropertyUri = "Scene.Sun.Renderable.ColorTexture"
+
+asset.onInitialize(function ()
+    openspace.globebrowsing.addLayer("Sun", "ColorLayers", {
+        Identifier = "Magnetogram100G",
+        FilePath = magnetogramDirectory .. "/br_bas05_100G_inv_redblue.png",
+        Enabled = true
+    })
+end)
+
+asset.onDeinitialize(function ()
+    openspace.globebrowsing.deleteLayer("Sun", "ColorLayers", "Magnetogram100G")
+end)
