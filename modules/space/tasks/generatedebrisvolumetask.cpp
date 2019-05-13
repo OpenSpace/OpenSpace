@@ -45,6 +45,8 @@ namespace {
     constexpr const char* KeyStartTime = "StartTime";
     constexpr const char* KeyEndTime = "EndTime";
     constexpr const char* KeyInputPath = "InputPath";
+    constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
+    constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
     
 
 }
@@ -397,6 +399,8 @@ GenerateDebrisVolumeTask::GenerateDebrisVolumeTask(const ghoul::Dictionary& dict
     _endTime = dictionary.value<std::string>(KeyEndTime);
     _inputPath = dictionary.value<std::string>(KeyInputPath);
     _TLEDataVector = {};
+    _lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
+    _upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
 }
 
 std::string GenerateDebrisVolumeTask::description() {
@@ -418,7 +422,20 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
 
     //3. calculate what voxel each debris is within for each time step.
     //   and increment density with one for each debris in that voxel.
+
+    glm::vec3 domainSize = _upperDomainBound - _lowerDomainBound;
+
     rawVolume.forEachVoxel([&](glm::uvec3 cell, float) {
+        glm::vec3 coord = _lowerDomainBound +
+            glm::vec3(cell) / glm::vec3(_dimensions) * domainSize;
+
+        // TODO: coord is relative to the dimensions of the volume
+        // and the points from getPositionBuffer is relative
+        // to the earth (i think) so we need to convert them to be in the same
+        // coordinate system to be able to compare them
+
+        
+
         
     });
     //4.

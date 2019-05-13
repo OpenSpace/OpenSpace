@@ -55,6 +55,9 @@ private:
     std::string _inputPath;
 
     glm::uvec3 _dimensions;
+    glm::vec3 _lowerDomainBound;
+    glm::vec3 _upperDomainBound;
+
 
     std::vector<KeplerParameters> _TLEDataVector;
 

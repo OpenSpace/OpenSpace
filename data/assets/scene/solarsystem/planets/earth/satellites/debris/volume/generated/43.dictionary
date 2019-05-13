@@ -1,0 +1,1 @@
+return {Dimensions={3.200000E1,3.200000E1,3.200000E1},DomainUnit="m",GridType="Cartesian",LowerDomainBound={-0.500000E0,-0.500000E0,-0.500000E0},MaxValue=0.740741E-1,MinValue=0,Time="2018-05-04T00:00:43.000",UpperDomainBound={0.500000E0,0.500000E0,0.500000E0},ValueUnit="K"}
