@@ -723,7 +723,8 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
                                                  const glm::dvec3& orthoUp,
                                                  float fadeInVariable)
 {
-    //glDepthMask(false);
+    glDepthMask(false);
+    glEnable(GL_DEPTH_TEST);
 
     // Saving current OpenGL state
     GLboolean blendEnabled = glIsEnabledi(GL_BLEND, 0);
@@ -747,15 +748,8 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
 
     glEnablei(GL_BLEND, 0);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    //glBlendFunc(GL_SRC_COLOR, GL_ONE_MINUS_DST_COLOR);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
-    //glBlendEquation(GL_MAX);
-
-    glBlendFuncSeparate(GL_SRC_ALPHA, GL_DST_ALPHA, GL_SRC_ALPHA, GL_DST_ALPHA);
-    glBlendEquationSeparate(GL_FUNC_ADD, GL_MIN);
-
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    
     _program->activate();
 
     const glm::dmat4 projMatrix = glm::dmat4(data.camera.projectionMatrix());

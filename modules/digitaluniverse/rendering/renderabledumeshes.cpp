@@ -475,9 +475,10 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
     glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
 
     glEnablei(GL_BLEND, 0);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //glDepthMask(false);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(false);
+    glEnable(GL_DEPTH_TEST);
 
     _program->activate();
 
@@ -514,7 +515,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
     glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
     glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
 
-    //glDepthMask(true);
+    glDepthMask(true);
 
     if (!blendEnabled) {
         glDisablei(GL_BLEND, 0);
