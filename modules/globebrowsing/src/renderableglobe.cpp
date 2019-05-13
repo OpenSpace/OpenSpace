@@ -1632,7 +1632,7 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
 }
 
 void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& programObject,
-                                              const RenderData& data, ShadowCompType stype)
+                                             const RenderData& data, ShadowCompType stype)
 {
     constexpr const double KM_TO_M = 1000.0;
 
@@ -1757,7 +1757,7 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
     else if (stype == ShadowCompType::GLOBAL_SHADOW) {
         programObject.setUniform("modelTransform", _cachedModelTransform);
     }
-    
+
     // JCC: Removed in favor of: #define USE_ECLIPSE_HARD_SHADOWS #{useEclipseHardShadows}
     /*programObject.setUniform(
         "hardShadows",

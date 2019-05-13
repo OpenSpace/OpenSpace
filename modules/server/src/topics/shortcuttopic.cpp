@@ -66,7 +66,8 @@ std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
     const std::multimap<KeyWithModifier, KeyInformation>& keyBindings =
         global::keybindingManager.keyBindings();
 
-    for (const std::pair<KeyWithModifier, KeyInformation>& keyBinding : keyBindings) {
+    for (const std::pair<const KeyWithModifier, KeyInformation>& keyBinding : keyBindings)
+    {
         const KeyWithModifier& k = keyBinding.first;
         const KeyInformation& info = keyBinding.second;
 

@@ -447,7 +447,6 @@ TEST_F(SpiceManagerTest, getFieldOfView) {
     SpiceInt n;
     SpiceInt cassini_ID;
     double et;
-    glm::dvec3 boresight;
     double bounds_ref[5][3];
     char shape_ref[TYPLEN];
     char name_ref[FILLEN];

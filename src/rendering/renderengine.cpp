@@ -225,6 +225,10 @@ RenderEngine::RenderEngine()
     , _applyWarping(ApplyWarpingInfo, false)
     , _showFrameNumber(ShowFrameNumberInfo, false)
     , _disableMasterRendering(DisableMasterInfo, false)
+    , _nAaSamples(AaSamplesInfo, 4, 1, 8)
+    , _hdrExposure(HDRExposureInfo, 0.4f, 0.01f, 10.0f)
+    , _hdrBackground(BackgroundExposureInfo, 2.8f, 0.01f, 10.0f)
+    , _gamma(GammaInfo, 2.2f, 0.01f, 10.0f)
     , _globalRotation(
         GlobalRotationInfo,
         glm::vec3(0.f),
@@ -243,10 +247,6 @@ RenderEngine::RenderEngine()
         glm::vec3(-glm::pi<float>()),
         glm::vec3(glm::pi<float>())
     )
-    , _nAaSamples(AaSamplesInfo, 4, 1, 8)
-    , _hdrExposure(HDRExposureInfo, 0.4f, 0.01f, 10.0f)
-    , _hdrBackground(BackgroundExposureInfo, 2.8f, 0.01f, 10.0f)
-    , _gamma(GammaInfo, 2.2f, 0.01f, 10.0f)
 {
     _doPerformanceMeasurements.onChange([this](){
         global::performanceManager.setEnabled(_doPerformanceMeasurements);
@@ -596,32 +596,35 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 
     ++_frameNumber;
 
-    std::vector<ScreenSpaceRenderable*> ssrs;
-    ssrs.reserve(global::screenSpaceRenderables.size());
-    for (const std::unique_ptr<ScreenSpaceRenderable>& ssr :
-         global::screenSpaceRenderables)
-    {
-        if (ssr->isEnabled() && ssr->isReady()) {
-            ssrs.push_back(ssr.get());
+    if (masterEnabled && !delegate.isGuiWindow() && _globalBlackOutFactor > 0.f) {
+        std::vector<ScreenSpaceRenderable*> ssrs;
+        ssrs.reserve(global::screenSpaceRenderables.size());
+        for (const std::unique_ptr<ScreenSpaceRenderable>& ssr :
+            global::screenSpaceRenderables)
+        {
+            if (ssr->isEnabled() && ssr->isReady()) {
+                ssrs.push_back(ssr.get());
+            }
         }
-    }
 
-    std::sort(
-        ssrs.begin(),
-        ssrs.end(),
-        [](ScreenSpaceRenderable* lhs, ScreenSpaceRenderable* rhs) {
-            // Render back to front.
-            return lhs->depth() > rhs->depth();
+        std::sort(
+            ssrs.begin(),
+            ssrs.end(),
+            [](ScreenSpaceRenderable* lhs, ScreenSpaceRenderable* rhs) {
+                // Render back to front.
+                return lhs->depth() > rhs->depth();
+            }
+        );
+
+
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        for (ScreenSpaceRenderable* ssr : ssrs) {
+            ssr->render();
         }
-    );
-
-    glDisable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    for (ScreenSpaceRenderable* ssr : ssrs) {
-        ssr->render();
+        glDisable(GL_BLEND);
     }
-    glDisable(GL_BLEND);
     LTRACE("RenderEngine::render(end)");
 }
 

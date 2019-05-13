@@ -599,7 +599,7 @@ void ParallelPeer::sendCameraKeyframe() {
         global::navigationHandler.orbitalNavigator().followingNodeRotation();
     if (kf._followNodeRotation) {
         kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
-        kf._rotation = 
+        kf._rotation =
             global::navigationHandler.orbitalNavigator().anchorNodeToCameraRotation();
     }
     else {
