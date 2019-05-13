@@ -153,7 +153,8 @@ void RenderablePlaneImageLocal::loadTexture() {
 
 
             // Given that the node-part is located just outside the openspace-directory
-            const std::string fitsDir = "../../../../../../node/FITSdata/mrzqs190501/";
+            // const std::string fitsDir = "../../../../../../node/FITSdata/mrzqs190501/";
+            const std::string fitsDir = "../../../node/FITSdata/mrzqs190501/";
             std::string testpath = absPath(fitsDir + "mrzqs190501t0114c2216_006.fits");
             GLenum oneTexture;
                 

@@ -26,13 +26,13 @@ local sunAsset = asset.require('scene/solarsystem/sun/sun')
 local sunRadius = 695508000
 
 -- The actual fieldlines
-asset.require('./bastille_day/fieldlines')
+-- asset.require('./bastille_day/fieldlines')
 
 
 asset.onInitialize(function ()
     local now = openspace.time.currentWallTime()
     -- Jump to bastille day
-    openspace.time.setTime("2000 JUL 14 08:33:37.100")
+    -- openspace.time.setTime("2000 JUL 14 08:33:37.100")
 
    
     openspace.setDefaultGuiSorting()
@@ -52,7 +52,7 @@ asset.onInitialize(function ()
     )
 
     openspace.markInterestingNodes({
-        "Earth", "Sun", "Moon", "MAS_MHD_Fieldlines"
+        "Earth", "Sun", "Moon" --, "MAS_MHD_Fieldlines"
     })
 
     openspace.setPropertyValue("Scene.Sun.Renderable.Enabled", true)
@@ -61,7 +61,7 @@ asset.onInitialize(function ()
     -- Place by the sun
     openspace.navigation.setCameraState({
         Anchor = sunAsset.Sun.Identifier,
-        Position = { 80*sunRadius, 80*sunRadius, 0 },
+        Position = { 40*sunRadius, 40*sunRadius, 0 },
         Rotation = { 0.0, 0.0, 0.7, 0.0 },
     })
 
