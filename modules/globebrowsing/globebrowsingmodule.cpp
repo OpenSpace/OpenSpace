@@ -610,6 +610,10 @@ void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string glob
             GA_ReadOnly
         );
 
+        if (!dataset) {
+            LWARNING("Could not open dataset: " + downloadUrl);
+            return Capabilities();
+        }
         char** subDatasets = GDALGetMetadata(dataset, "SUBDATASETS");
         const int nSubdatasets = CSLCount(subDatasets);
         Capabilities cap = parseSubDatasets(subDatasets, nSubdatasets);
