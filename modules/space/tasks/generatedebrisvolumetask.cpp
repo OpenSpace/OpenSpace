@@ -45,8 +45,8 @@ namespace {
     constexpr const char* KeyStartTime = "StartTime";
     constexpr const char* KeyEndTime = "EndTime";
     constexpr const char* KeyInputPath = "InputPath";
-    constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
-    constexpr const char* KeyUpperDomainBound = "UpperDomainBound";    
+    // constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
+    // constexpr const char* KeyUpperDomainBound = "UpperDomainBound";    
 
 }
 
@@ -402,24 +402,38 @@ float getDensityAt(glm::uvec3 cell) {
     return value;
 }
 
-int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim){
-    int index;
+float getMaxApogee(std::vector<KeplerParameters> inData){
+    double maxApogee = 0.0;
+    for (const auto& dataElement : inData){
+        double ah = dataElement.semiMajorAxis * (1 + dataElement.eccentricity)- 6371;
+        if (ah > maxApogee)
+            maxApogee = ah;
+    }   
 
-    float maxApogee = getMaxApogee();
-    glm::vec3 sizeOfVoxel = maxApogee / static_cast<glm::vec3>(dim);
-
-    index = 
-    // TODO: för varje AXEL!
-
-
-
-    return index;
+    return static_cast<float>(maxApogee);
 }
 
-int* mapDensityToVoxels(int* densityArray, std::vector<glm::dvec3> positions, glm:uvec3 dim) {
+int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim, float maxApogee){
+    // epsilon is to make sure that for example if newPosition.x/maxApogee = 1,
+    // then the index for that dimension will not exceed the range of the grid.
+    float epsilon = static_cast<float>(0.000000001);
+    glm::vec3 newPosition = glm::vec3(position.x + maxApogee
+                                     ,position.y + maxApogee
+                                     ,position.z + maxApogee);
+
+    glm::vec3 coordinateIndex = glm::vec3(newPosition.x * dim.x, 
+                                          newPosition.y * dim.y, 
+                                          newPosition.z * dim.z) / (2*(maxApogee + epsilon));
+
+    
+    return coordinateIndex.z * (dim.x * dim.y) + coordinateIndex.y * dim.x + coordinateIndex.x;
+}
+
+int* mapDensityToVoxels(int* densityArray, std::vector<glm::dvec3> positions,
+                         glm::uvec3 dim, float maxApogee) {
 
     for(const glm::dvec3& position : positions) {
-        int index = getIndexFromPosition(position, dim);
+        int index = getIndexFromPosition(position, dim, maxApogee);
         ++densityArray[index];
     }
     return densityArray;
@@ -442,8 +456,8 @@ GenerateDebrisVolumeTask::GenerateDebrisVolumeTask(const ghoul::Dictionary& dict
     // there will have to be either one task per dataset,
     // or you need to combine the datasets into one file.
     _inputPath = dictionary.value<std::string>(KeyInputPath);
-    _lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
-    _upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
+    //_lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
+    //_upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
 
 
     _TLEDataVector = {};
@@ -458,7 +472,6 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
     //1. read TLE-data and position of debris elements.
     _TLEDataVector = readTLEFile(_inputPath);
     std::vector<glm::dvec3> startPositionBuffer = getPositionBuffer(_TLEDataVector, _startTime);
-    
     //  if we deside to integrate the density over time
     //  std::vector<glm::dvec3> endPositionBuffer = getPositionBuffer(_TLEDataVector, _endTime);
     
@@ -467,7 +480,8 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
     
     const int size = _dimensions.x *_dimensions.y *_dimensions.z;
     int *densityArrayp = new int[size];
-    int *densityArray = mapDensityToVoxels(densityArrayp, generatedPositions, _dimensions);
+    float maxApogee = getMaxApogee(_TLEDataVector);
+    densityArrayp = mapDensityToVoxels(densityArrayp, generatedPositions, _dimensions, maxApogee);
         
     // create object rawVolume
     volume::RawVolume<float> rawVolume(_dimensions);
