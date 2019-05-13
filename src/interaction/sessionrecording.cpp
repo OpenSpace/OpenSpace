@@ -490,7 +490,7 @@ void SessionRecording::saveCameraKeyframe() {
                 << std::fixed << std::setprecision(7) << kf._rotation.y << " "
                 << std::fixed << std::setprecision(7) << kf._rotation.z << " "
                 << std::fixed << std::setprecision(7) << kf._rotation.w << " ";
-            keyframeLine << std::fixed << std::setprecision(7) << kf._scale << " ";
+            keyframeLine << std::scientific << kf._scale << " ";
             if (kf._followNodeRotation) {
                 keyframeLine << "F ";
             }
