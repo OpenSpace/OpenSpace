@@ -21,11 +21,7 @@ for i=1,length do
 
 	tasks[#tasks+1] = {
 	    Type = "GenerateRawVolumeTask", -- fix name
-<<<<<<< HEAD
-		Dimensions = {32, 32, 32},
-=======
 	    Dimensions = {32, 32, 32},
->>>>>>> 3a063a1f8c71b35afb15a9e73b2eee302758c74e
 	    LowerDomainBound = {-0.5, -0.5, -0.5},
 	    UpperDomainBound = {0.5, 0.5, 0.5},
 	    ValueFunction = fn,
