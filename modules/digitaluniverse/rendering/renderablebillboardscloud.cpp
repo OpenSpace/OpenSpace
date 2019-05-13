@@ -861,6 +861,8 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
     labelInfo.renderType = _renderOption;
     labelInfo.mvpMatrix = modelViewProjectionMatrix;
     labelInfo.scale = pow(10.f, _textSize);
+    labelInfo.enableDepth = true;
+    labelInfo.enableFalseDepth = false;
 
     for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
         //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
