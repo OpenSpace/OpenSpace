@@ -784,65 +784,74 @@ void RenderableStars::renderPSFToTexture() {
         
     program->deactivate();
 
-    // Now convolves with a disc shape for final shape
+    // JCC: Convolution is disabled while FFT is not enabled
+    //// Now convolves with a disc shape for final shape
 
-    GLuint convolveFBO;
-    glGenFramebuffers(1, &convolveFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, convolveFBO);
-    glDrawBuffers(1, drawBuffers);
+    //GLuint convolveFBO;
+    //glGenFramebuffers(1, &convolveFBO);
+    //glBindFramebuffer(GL_FRAMEBUFFER, convolveFBO);
+    //glDrawBuffers(1, drawBuffers);
 
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _convolvedTexture, 0);
+    //glFramebufferTexture(
+    //    GL_FRAMEBUFFER, 
+    //    GL_COLOR_ATTACHMENT0, 
+    //    _convolvedTexture, 
+    //    0
+    //);
 
-    glViewport(0, 0, _convolvedfTextureSize, _convolvedfTextureSize);
+    //glViewport(0, 0, _convolvedfTextureSize, _convolvedfTextureSize);
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> programConvolve =
-        ghoul::opengl::ProgramObject::Build("ConvolvePSFandStarShape",
-            absPath("${MODULE_SPACE}/shaders/convolution_vs.glsl"),
-            absPath("${MODULE_SPACE}/shaders/convolution_fs.glsl")
-        );
+    //std::unique_ptr<ghoul::opengl::ProgramObject> programConvolve =
+    //    ghoul::opengl::ProgramObject::Build("ConvolvePSFandStarShape",
+    //        absPath("${MODULE_SPACE}/shaders/convolution_vs.glsl"),
+    //        absPath("${MODULE_SPACE}/shaders/convolution_fs.glsl")
+    //    );
 
-    programConvolve->activate();
-    glClearBufferfv(GL_COLOR, 0, black);
+    //programConvolve->activate();
+    //glClearBufferfv(GL_COLOR, 0, black);
 
-    ghoul::opengl::TextureUnit psfTextureUnit;
-    psfTextureUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, _psfTexture);
-    programConvolve->setUniform("psfTexture", psfTextureUnit);
-    
-    ghoul::opengl::TextureUnit shapeTextureUnit;
-    shapeTextureUnit.activate();
-    _shapeTexture->bind();
-    programConvolve->setUniform("shapeTexture", shapeTextureUnit);
+    //ghoul::opengl::TextureUnit psfTextureUnit;
+    //psfTextureUnit.activate();
+    //glBindTexture(GL_TEXTURE_2D, _psfTexture);
+    //programConvolve->setUniform("psfTexture", psfTextureUnit);
+    //
+    //ghoul::opengl::TextureUnit shapeTextureUnit;
+    //shapeTextureUnit.activate();
+    //_shapeTexture->bind();
+    //programConvolve->setUniform("shapeTexture", shapeTextureUnit);
 
-    programConvolve->setUniform("psfTextureSize", _psfTextureSize);
-    programConvolve->setUniform("convolvedfTextureSize", _convolvedfTextureSize);
+    //programConvolve->setUniform("psfTextureSize", _psfTextureSize);
+    //programConvolve->setUniform(
+    //    "convolvedfTextureSize", 
+    //    _convolvedfTextureSize
+    //);
 
-    // Convolves to texture
-    glBindVertexArray(_psfVao);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
+    //// Convolves to texture
+    //glBindVertexArray(_psfVao);
+    //glDrawArrays(GL_TRIANGLES, 0, 6);
+    //glBindVertexArray(0);
 
-    programConvolve->deactivate();
+    //programConvolve->deactivate();
 
-    // Restores system state
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-    glViewport(
-        m_viewport[0],
-        m_viewport[1],
-        m_viewport[2],
-        m_viewport[3]
-    );
-    glDeleteFramebuffers(1, &psfFBO);
-    glDeleteFramebuffers(1, &convolveFBO);
+    //// Restores system state
+    //glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+    //glViewport(
+    //    m_viewport[0],
+    //    m_viewport[1],
+    //    m_viewport[2],
+    //    m_viewport[3]
+    //);
+    //glDeleteFramebuffers(1, &psfFBO);
+    //glDeleteFramebuffers(1, &convolveFBO);
 
     // Restores OpenGL blending state
     glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
-    glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
-
-    //TEST
-    std::cout << "============= PSF Texture Size: " << _psfTextureSize << " =============" << std::endl;
-    std::cout << "============= PSF Texture: " << _psfTexture << " =============" << std::endl;
-    std::cout << "============= Conv Texture: " << _convolvedTexture << " =============" << std::endl;
+    glBlendFuncSeparate(
+        blendSrcRGB, 
+        blendDestRGB, 
+        blendSrcAlpha, 
+        blendDestAlpha
+    );
 }
 
 void RenderableStars::render(const RenderData& data, RendererTasks&) {
@@ -902,19 +911,14 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.brightnessCent, _brightnessCent);
 
     _program->setUniform(_uniformCache.alphaValue, _alphaValue);
-    _program->setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
-    _program->setUniform("objpos", glm::vec4(data.modelTransform.translation, 0.f));
-    _program->setUniform("camrot", glm::mat4(data.camera.viewRotationMatrix()));
-    _program->setUniform("scaling", glm::vec2(1.f, 0.f));
-    // abock:  This was part of a merge conflict, so I commented it out
-    //_program->setUniform(_uniformCache.scaling, scaling);
-
+    
     ghoul::opengl::TextureUnit psfUnit;
     psfUnit.activate();
 
     if (_renderingMethodOption.value() == 0) { // PSF Based Methods
-        //glBindTexture(GL_TEXTURE_2D, _psfTexture);
-        glBindTexture(GL_TEXTURE_2D, _convolvedTexture);
+        glBindTexture(GL_TEXTURE_2D, _psfTexture);\
+        // Convolutioned texture
+        //glBindTexture(GL_TEXTURE_2D, _convolvedTexture);
     }
     else if (_renderingMethodOption.value() == 1) { // Textured based Method
         _pointSpreadFunctionTexture->bind();
