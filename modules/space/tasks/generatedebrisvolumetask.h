@@ -58,7 +58,6 @@ private:
     glm::vec3 _lowerDomainBound;
     glm::vec3 _upperDomainBound;
 
-
     std::vector<KeplerParameters> _TLEDataVector;
 
     // not sure if it should be local function or hidden function.
