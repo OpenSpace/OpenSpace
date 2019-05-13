@@ -25,10 +25,11 @@
 
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumemetadata.h>
-//#include <modules/volume/rawvolumewriter.h>
+#include <modules/volume/rawvolumewriter.h>
 
 #include <openspace/documentation/verifier.h>
 
+#include <ghoul/misc/dictionaryluaformatter.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
@@ -396,9 +397,12 @@ std::vector<glm::dvec3> generatePositions(int numberOfPositions) {
     return positions;
 }
 
-float getDensityAt(glm::uvec3 cell) {
+float getDensityAt(glm::uvec3 cell,  int* densityArray, RawVolume<float>& raw) {
     float value;
     // return value at position cell from _densityPerVoxel
+    size_t index = raw.coordsToIndex(cell);
+    value = static_cast<float>(densityArray[index]);
+
     return value;
 }
 
@@ -495,53 +499,41 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
     rawVolume.forEachVoxel([&](glm::uvec3 cell, float) {
     //     glm::vec3 coord = _lowerDomainBound +
     //        glm::vec3(cell) / glm::vec3(_dimensions) * domainSize;
-        float value = getDensityAt(cell);   // (coord)
+        float value = getDensityAt(cell, densityArrayp, rawVolume);   // (coord)
         rawVolume.set(cell, value);
 
         minVal = std::min(minVal, value);
         maxVal = std::max(maxVal, value);
     });
 
-
-  
-
-    
-
-
-
-
-
-
-    // indexed grid with cooresponding xyz: gridIndex
-    // int array with number of slots = number of voxels: densityArray = {0,0,0,0,0,0}
-    for(const glm::dvec3& debris : startPositionBuffer) {
-        // call function to increment densityArray where debris position ~= voxel position
+    ghoul::filesystem::File file(_rawVolumeOutputPath);
+    const std::string directory = file.directoryName();
+    if (!FileSys.directoryExists(directory)) {
+        FileSys.createDirectory(directory, ghoul::filesystem::FileSystem::Recursive::Yes);
     }
-    // make raw volume of densityArray.
+  
+    volume::RawVolumeWriter<float> writer(_rawVolumeOutputPath);
+    writer.write(rawVolume);
+    
+    RawVolumeMetadata metadata;
+    // alternatively metadata.hasTime = false;
+    metadata.time = Time::convertTime(_startTime);
+    metadata.dimensions = _dimensions;
+    metadata.hasDomainUnit = false;
+    metadata.hasValueUnit = false;
+    metadata.gridType = VolumeGridType::Cartesian;
+    metadata.hasDomainBounds = false;
+    metadata.hasValueRange = true;
+    metadata.minValue = minVal;
+    metadata.maxValue = maxVal;
 
-    //2. create a grid using dimensions and other .task-parameters.
+    ghoul::Dictionary outputDictionary = metadata.dictionary();
+    ghoul::DictionaryLuaFormatter formatter;
+    std::string metadataString = formatter.format(outputDictionary);
 
-    //3. calculate what voxel each debris is within for each time step.
-    //   and increment density with one for each debris in that voxel.
-
-    //4. 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    std::fstream f(_dictionaryOutputPath, std::ios::out);
+    f << "return " << metadataString;
+    f.close();
 
 }
 

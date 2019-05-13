@@ -3,7 +3,16 @@ local tasks = {}
 
 
 for i=1,length do
+
 	local radius = 0.5 * (1 - i/length)
+	local fn =
+		"return function (x, y, z) " .. "\n" ..
+	    "    local v = math.sqrt(x^2 + y^2 + z^2) - " .. radius .. "\n" ..
+	    "    v = (-v - 0.1) / 0.2 " .. "\n" ..
+	    "    v = math.min(math.max(v, 0), 1) " .. "\n" ..
+	    "    v = 3*v^2 - 2*v^3 " .. "\n" ..
+	    "    return v" .. "\n" ..
+	    "end"
 	local step = string.format("%02d", i-1)
 	local fn =
 	"return function (x, y, z)" ..
