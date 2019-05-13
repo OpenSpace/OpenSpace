@@ -42,7 +42,12 @@ BrowserClient::BrowserClient(WebRenderHandler* handler,
     DefaultBrowserLauncher* browserLauncher = new DefaultBrowserLauncher;
     _lifeSpanHandler = browserLauncher;
     _requestHandler = browserLauncher;
+    _contextMenuHandler = new BrowserClient::NoContextMenuHandler;
 };
+
+CefRefPtr<CefContextMenuHandler> BrowserClient::GetContextMenuHandler() {
+    return _contextMenuHandler;
+}
 
 CefRefPtr<CefRenderHandler> BrowserClient::GetRenderHandler() {
     return _renderHandler;
@@ -58,6 +63,17 @@ CefRefPtr<CefRequestHandler> BrowserClient::GetRequestHandler() {
 
 CefRefPtr<CefKeyboardHandler> BrowserClient::GetKeyboardHandler() {
     return _keyboardHandler;
+}
+
+bool BrowserClient::NoContextMenuHandler::RunContextMenu(
+                                                     CefRefPtr<CefBrowser>,
+                                                     CefRefPtr<CefFrame>,
+                                                     CefRefPtr<CefContextMenuParams>,
+                                                     CefRefPtr<CefMenuModel>,
+                                                     CefRefPtr<CefRunContextMenuCallback>)
+{
+    // Disable the context menu.
+    return true;
 }
 
 } // namespace openspace

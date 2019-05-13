@@ -47,6 +47,7 @@ glm::bvec3 fromLuaConversion(lua_State* state, bool& success) {
         }
         else {
             result[i] = static_cast<glm::bvec3::value_type>(lua_toboolean(state, -1));
+            lua_pop(state, 1);
         }
     }
 

@@ -17,14 +17,16 @@ local model = asset.syncedResource({
     Version = 1
 })
 
+
 local kernels = asset.syncedResource({
     Name = "Juno Kernels",
     Type = "HttpSynchronization",
     Identifier = "juno_kernels",
-    Version = 1
+    Version = 2
 })
 
 local JunoKernels = {
+    kernels .. "/juno_v12.tf",
     kernels .. "/JNO_SCLKSCET.00039.tsc",
     kernels .. "/juno_jade_v00.ti",
     kernels .. "/juno_jedi_v00.ti",
@@ -34,10 +36,10 @@ local JunoKernels = {
     kernels .. "/juno_mwr_v01.ti",
     kernels .. "/juno_struct_v01.ti",
     kernels .. "/juno_uvs_v00.ti",
-    kernels .. "/juno_v08.tf",
     kernels .. "/juno_waves_v00.ti",
     kernels .. "/juno_mwr_v01.ti",
     kernels .. "/spk_merge_110805_171017_130515.bsp",
+    kernels .. "/juno_sc_nom_110807_171016_v01.bc",
     kernels .. "/juno_sc_prl_110930_111028_jc003c01_v01.bc",
     kernels .. "/juno_sc_prl_111028_111125_jc004b00_v01.bc",
     kernels .. "/juno_sc_prl_111125_111223_jc005b00_v01.bc",
@@ -161,19 +163,12 @@ local Juno = {
         }, 
         ColorTexture =  textures .. "/gray.png",
         ModelTransform = RotationMatrix,
-        LightSources = {
-            {
-                Type = "SceneGraphLightSource",
-                Identifier = "Sun",
-                Node = sunTransforms.SolarSystemBarycenter.Identifier,
-                Intensity = 1.0
-            },
-            {
-                Identifier = "Camera",
-                Type = "CameraLightSource",
-                Intensity = 0.5
-            }
-        }
+        LightSources = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
+    },
+    TimeFrame = {
+            Type = "TimeFrameInterval",
+            Start = "2011-08-07T17:15:00",
+            End = "2017-10-16T19:29:24"
     },
     GUI = {
         Path = "/Solar System/Missions/Juno"
