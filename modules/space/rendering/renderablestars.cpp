@@ -1303,7 +1303,7 @@ void RenderableStars::readSpeckFile() {
             // we read a line that doesn't belong to the header, so we have to jump back
             // before the beginning of the current line
             if (_enableTestGrid) {
-                file.seekg(position - static_cast<long long>(8));
+                file.seekg(position - std::streamoff(8));
             }
             else {
                 file.seekg(position);
