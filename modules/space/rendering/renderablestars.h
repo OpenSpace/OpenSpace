@@ -64,8 +64,8 @@ public:
 
     static documentation::Documentation Documentation();
 
-private:
-    void loadShapeTexture();
+//private:
+//    void loadShapeTexture();
 
 private:
     enum ColorOption {
@@ -91,9 +91,9 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
     std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
 
-    properties::StringProperty _shapeTexturePath;
-    std::unique_ptr<ghoul::opengl::Texture> _shapeTexture;
-    std::unique_ptr<ghoul::filesystem::File> _shapeTextureFile;
+    //properties::StringProperty _shapeTexturePath;
+    //std::unique_ptr<ghoul::opengl::Texture> _shapeTexture;
+    //std::unique_ptr<ghoul::filesystem::File> _shapeTextureFile;
         
     properties::OptionProperty _colorOption;        
     properties::OptionProperty _otherDataOption;
@@ -137,7 +137,7 @@ private:
     bool _speckFileIsDirty = true;
     bool _pointSpreadFunctionTextureIsDirty = true;
     bool _colorTextureIsDirty = true;
-    bool _shapeTextureIsDirty = true;
+    //bool _shapeTextureIsDirty = true;
     bool _dataIsDirty = true;
     bool _otherDataColorMapIsDirty = true;
 

@@ -146,11 +146,11 @@ namespace {
         "stars."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShapeTextureInfo = {
+    /*constexpr openspace::properties::Property::PropertyInfo ShapeTextureInfo = {
         "ShapeTexture",
         "Shape Texture to be convolved",
         "The path to the texture that should be used as the base shape for the stars."
-    };
+    };*/
 
     constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
         "Transparency",
@@ -297,12 +297,12 @@ documentation::Documentation RenderableStars::Documentation() {
                 Optional::No,
                 ColorTextureInfo.description
             },
-            {
+            /*{
                 ShapeTextureInfo.identifier,
                 new StringVerifier,
                 Optional::No,
                 ShapeTextureInfo.description
-            },
+            },*/
             {
                 ColorOptionInfo.identifier,
                 new StringInListVerifier({ "Color", "Velocity", "Speed", "Other Data" }),
@@ -375,7 +375,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _speckFile(SpeckFileInfo)
     , _colorTexturePath(ColorTextureInfo)
-    , _shapeTexturePath(ShapeTextureInfo)
+    //, _shapeTexturePath(ShapeTextureInfo)
     , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _otherDataOption(
         OtherDataOptionInfo,
@@ -427,10 +427,10 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         ));
     _colorTextureFile = std::make_unique<File>(_colorTexturePath);
 
-    _shapeTexturePath = absPath(dictionary.value<std::string>(
+    /*_shapeTexturePath = absPath(dictionary.value<std::string>(
         ShapeTextureInfo.identifier
         ));
-    _shapeTextureFile = std::make_unique<File>(_shapeTexturePath);
+    _shapeTextureFile = std::make_unique<File>(_shapeTexturePath);*/
 
     if (dictionary.hasKey(OtherDataColorMapInfo.identifier)) {
         _otherDataColorMapPath = absPath(dictionary.value<std::string>(
@@ -470,11 +470,11 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     });
     addProperty(_colorTexturePath);
 
-    _shapeTexturePath.onChange([&] { _shapeTextureIsDirty = true; });
+    /*_shapeTexturePath.onChange([&] { _shapeTextureIsDirty = true; });
     _shapeTextureFile->setCallback([&](const File&) {
         _shapeTextureIsDirty = true;
         });
-    addProperty(_shapeTexturePath);
+    addProperty(_shapeTexturePath);*/
 
     if (dictionary.hasKey(EnableTestGridInfo.identifier)) {
         _enableTestGrid = dictionary.value<bool>(EnableTestGridInfo.identifier);
@@ -702,7 +702,7 @@ void RenderableStars::initializeGL() {
         _convolvedfTextureSize, 0, GL_RGBA, GL_BYTE, nullptr
     );
 
-    loadShapeTexture();
+    //loadShapeTexture();
 
     renderPSFToTexture();
 }
@@ -714,7 +714,7 @@ void RenderableStars::deinitializeGL() {
     _vao = 0;
 
     _colorTexture = nullptr;
-    _shapeTexture = nullptr;
+    //_shapeTexture = nullptr;
 
     if (_program) {
         global::renderEngine.removeRenderProgram(_program.get());
@@ -1177,7 +1177,7 @@ void RenderableStars::update(const UpdateData&) {
         _colorTextureIsDirty = false;
     }
 
-    loadShapeTexture();
+    //loadShapeTexture();
 
     if (_otherDataColorMapIsDirty) {
         LDEBUG("Reloading Color Texture");
@@ -1204,6 +1204,7 @@ void RenderableStars::update(const UpdateData&) {
     }
 }
 
+/*
 void RenderableStars::loadShapeTexture() {
     if (_shapeTextureIsDirty) {
         LDEBUG("Reloading Shape Texture");
@@ -1230,6 +1231,7 @@ void RenderableStars::loadShapeTexture() {
         _shapeTextureIsDirty = false;
     }
 }
+*/
 
 void RenderableStars::loadData() {
     std::string _file = _speckFile;
