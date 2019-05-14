@@ -464,25 +464,33 @@ bool GlobeLabelsComponent::readLabelsFile(const std::string& file) {
         if (!csvLabelFile.is_open()) {
             return false;
         }
-        char line[4096];
+        
         _labels.labelsArray.clear();
+
+        std::string sline;
         while (!csvLabelFile.eof()) {
-            csvLabelFile.getline(line, 4090);
-            if (strnlen(line, 4090) <= 10) {
+            std::getline(csvLabelFile, sline);
+            if (sline.size() <= 10) {
                 continue;
             }
-            LabelEntry lEntry;
-            char* token = strtok(line, ",");
+
+            std::istringstream iss(sline);
+            std::string token;
+            std::getline(iss, token, ',');
+            
             // First line is just the Header
-            if (strcmp(token, "Feature_Name") == 0) {
+            if (token == "Feature_Name") {
                 continue;
             }
-            strncpy(lEntry.feature, token, 256);
+
+            LabelEntry lEntry;
+            
             // Non-ascii characters aren't displayed correctly by the text
             // rendering (We don't have the non-ascii character in the texture
             // atlas)
             // Once this limitation is fixed, we can remove the next piece of code
             // Removing non ASCII characters:
+            strncpy(lEntry.feature, token.c_str(), 256);
             int tokenChar = 0;
             while (tokenChar < 256) {
                 if ((lEntry.feature[tokenChar] < 0 || lEntry.feature[tokenChar] > 127) &&
@@ -496,18 +504,30 @@ bool GlobeLabelsComponent::readLabelsFile(const std::string& file) {
                 tokenChar++;
             }
 
-            strtok(NULL, ","); // Target is not used
-            lEntry.diameter = static_cast<float>(atof(strtok(NULL, ",")));
-            lEntry.latitude = static_cast<float>(atof(strtok(NULL, ",")));
-            lEntry.longitude = static_cast<float>(atof(strtok(NULL, ",")));
-            char* coordinateSystem = strtok(NULL, ",");
-
-            if (strstr(coordinateSystem, "West") != NULL) {
+            std::getline(iss, token, ','); // Target is not used
+                
+            std::getline(iss, token, ','); // Diameter
+            lEntry.diameter = std::stof(token);
+                
+            std::getline(iss, token, ','); // Latitude
+            lEntry.latitude = std::stof(token);
+                
+            std::getline(iss, token, ','); // Longitude
+            lEntry.longitude = std::stof(token);
+                
+            std::getline(iss, token, ','); // Coord System
+            std::string coordinateSystem(token);
+            std::size_t found = coordinateSystem.find("West");
+            if (found != std::string::npos) {
                 lEntry.longitude = 360.0f - lEntry.longitude;
             }
 
             // Clean white spaces
-            strncpy(lEntry.feature, strtok(lEntry.feature, "="), 256);
+            std::istringstream issFeature(lEntry.feature);
+            std::getline(issFeature, token, '=');
+            if (token == "")
+                std::getline(issFeature, token, '=');
+            strncpy(lEntry.feature, token.c_str(), 256);
 
             GlobeBrowsingModule* _globeBrowsingModule =
                 global::moduleEngine.module<openspace::GlobeBrowsingModule>();
@@ -519,7 +539,9 @@ bool GlobeLabelsComponent::readLabelsFile(const std::string& file) {
             );
 
             _labels.labelsArray.push_back(lEntry);
+            
         }
+       
         return true;
     }
     catch (const std::fstream::failure& e) {

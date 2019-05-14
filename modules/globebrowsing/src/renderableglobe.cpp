@@ -557,7 +557,9 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     }
 
     // Labels Dictionary
-    _labelsDictionary = dictionary.value<ghoul::Dictionary>(KeyLabels);
+    if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyLabels)) {
+        _labelsDictionary = dictionary.value<ghoul::Dictionary>(KeyLabels);
+    }
 }
 
 void RenderableGlobe::initializeGL() {
