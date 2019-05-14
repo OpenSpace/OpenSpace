@@ -32,6 +32,7 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/ellipsoid.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/gdalwrapper.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/geodeticpatch.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/globelabelscomponent.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/globetranslation.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/gpulayergroup.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/layer.h
@@ -56,7 +57,6 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/tileprovider.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/tiletextureinitdata.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/timequantizer.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/util/globelabelscomponent.h
 )
 
 set(SOURCE_FILES
@@ -67,6 +67,7 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/ellipsoid.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/gdalwrapper.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/geodeticpatch.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/globelabelscomponent.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/globetranslation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/gpulayergroup.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/layer.cpp
@@ -85,7 +86,6 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/tileprovider.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/tiletextureinitdata.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/timequantizer.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/util/globelabelscomponent.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

@@ -2,7 +2,7 @@
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
-* Copyright (c) 2014-2018                                                               *
+* Copyright (c) 2014-2019                                                               *
 *                                                                                       *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
 * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,32 +22,26 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/util/globelabelscomponent.h>
+#include <modules/globebrowsing/src/globelabelscomponent.h>
+
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
-
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/util/updatestructures.h>
-
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
-
+#include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/programobject.h>
-
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-
-#include <fstream>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/programobject.h>
 #include <cstdlib>
+#include <fstream>
 #include <locale>
 
 namespace {
@@ -107,31 +101,41 @@ namespace {
         "Labels Color"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LabelsFadeInStartingDistanceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo
+        LabelsFadeInStartingDistanceInfo =
+    {
         "FadeInStartingDistance",
         "Fade In Starting Distance for Labels",
         "Fade In Starting Distance for Labels"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LabelsFadeOutStartingDistanceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo
+        LabelsFadeOutStartingDistanceInfo =
+    {
         "FadeOutStartingDistance",
         "Fade Out Starting Distance for Labels",
         "Fade Out Starting Distance for Labels"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LabelsFadeInEnabledInfo = {
+    constexpr openspace::properties::Property::PropertyInfo
+        LabelsFadeInEnabledInfo =
+    {
         "LabelsFadeInEnabled",
         "Labels fade In enabled",
         "Labels fade In enabled"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LabelsFadeOutEnabledInfo = {
+    constexpr openspace::properties::Property::PropertyInfo
+        LabelsFadeOutEnabledInfo =
+    {
         "LabelsFadeOutEnabled",
         "Labels fade Out enabled",
         "Labels fade Out enabled"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LabelsDisableCullingEnabledInfo = {
+    constexpr openspace::properties::Property::PropertyInfo
+        LabelsDisableCullingEnabledInfo =
+    {
         "LabelsDisableCullingEnabled",
         "Labels culling disabled",
         "Labels culling disabled"
@@ -268,7 +272,10 @@ GlobeLabelsComponent::GlobeLabelsComponent()
     , _labelsFadeOutEnabled(LabelsFadeOutEnabledInfo, false)
     , _labelsDisableCullingEnabled(LabelsDisableCullingEnabledInfo, false)
     , _labelsDistaneEPS(LabelsDistanceEPSInfo, 100000.f, 1000.f, 10000000.f)
-    , _labelAlignmentOption(LabelAlignmentOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _labelAlignmentOption(
+        LabelAlignmentOptionInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
 {
     addProperty(_labelsEnabled);
     addProperty(_labelsFontSize);
@@ -291,7 +298,7 @@ GlobeLabelsComponent::GlobeLabelsComponent()
 }
 
 void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary, 
-    globebrowsing::RenderableGlobe* globe, std::shared_ptr<ghoul::fontrendering::Font> font)
+                                      globebrowsing::RenderableGlobe* globe)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -302,129 +309,107 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
     _globe = globe;
 
     // Reads labels' file and build cache file if necessary
-    _labelsDataPresent = false;
-    if (!dictionary.empty()) {
-        std::string labelsFile;
-        bool successLabels = dictionary.getValue(keyLabelsFileName, labelsFile);
-        if (successLabels) {
-            _labelsDataPresent = true;
-            bool loadSuccess = loadLabelsData(absPath(labelsFile));
-            if (loadSuccess) {
-                if (dictionary.hasKey(LabelsEnableInfo.identifier)) {
-                    // In case of the label's dic is present but is disabled
-                    _labelsEnabled = dictionary.value<bool>(
-                        LabelsEnableInfo.identifier
-                        );
-                }
-                else {
-                    // Is the labels dic is enable in the configuration file,
-                    // enables the label automatically.
-                    _labelsEnabled.set(true);
-                }
+    if (dictionary.empty()) {
+        return;
+    }
+    std::string labelsFile;
+    bool successLabels = dictionary.getValue(keyLabelsFileName, labelsFile);
+    if (!successLabels) {
+        return;
+    }
+    bool loadSuccess = loadLabelsData(absPath(labelsFile));
+    if (!loadSuccess) {
+        return;
+    }
+    if (dictionary.hasKey(LabelsEnableInfo.identifier)) {
+        // In case of the label's dic is present but is disabled
+        _labelsEnabled = dictionary.value<bool>(LabelsEnableInfo.identifier);
+    }
+    else {
+        // Is the labels dic is enable in the configuration file,
+        // enables the label automatically.
+        _labelsEnabled = true;
+    }
          
-                if (dictionary.hasKey(LabelsFontSizeInfo.identifier)) {
-                    float fontSize = dictionary.value<float>(
-                        LabelsFontSizeInfo.identifier
-                    );
-                    _labelsFontSize.set(fontSize);
-                    _labelsFontSize.onChange([this] {
-                            initializeFonts();
-                        });
-                }
+    if (dictionary.hasKey(LabelsFontSizeInfo.identifier)) {
+        float fontSize = dictionary.value<float>(LabelsFontSizeInfo.identifier);
+        _labelsFontSize = fontSize;
+        _labelsFontSize.onChange([this]() { initializeFonts(); });
+    }
 
-                if (dictionary.hasKey(LabelsSizeInfo.identifier)) {
-                    float size = static_cast<float>(
-                        dictionary.value<double>(LabelsSizeInfo.identifier)
-                    );
-                    _labelsSize.set(size);
-                }
+    if (dictionary.hasKey(LabelsSizeInfo.identifier)) {
+        _labelsSize = static_cast<float>(
+            dictionary.value<double>(LabelsSizeInfo.identifier)
+        );
+    }
 
-                if (dictionary.hasKey(LabelsMinHeightInfo.identifier)) {
-                    float height = dictionary.value<float>(LabelsMinHeightInfo.identifier);
-                    _labelsMinHeight.set(height);
-                }
+    if (dictionary.hasKey(LabelsMinHeightInfo.identifier)) {
+        _labelsMinHeight = dictionary.value<float>(LabelsMinHeightInfo.identifier);
+    }
 
-                if (dictionary.hasKey(LabelsColorInfo.identifier)) {
-                    _labelsColor = dictionary.value<glm::vec4>(
-                        LabelsColorInfo.identifier
-                    );
-                }
+    if (dictionary.hasKey(LabelsColorInfo.identifier)) {
+        _labelsColor = dictionary.value<glm::vec4>(LabelsColorInfo.identifier);
+    }
 
-                if (dictionary.hasKey(LabelsFadeInEnabledInfo.identifier)) {
-                    bool enabled = dictionary.value<bool>(
-                        LabelsFadeInEnabledInfo.identifier
-                    );
-                    _labelsFadeInEnabled.set(enabled);
-                }
+    if (dictionary.hasKey(LabelsFadeInEnabledInfo.identifier)) {
+        _labelsFadeInEnabled = dictionary.value<bool>(LabelsFadeInEnabledInfo.identifier);
+    }
 
-                if (dictionary.hasKey(LabelsFadeInStartingDistanceInfo.identifier)) {
-                    float dist = dictionary.value<float>(
-                        LabelsFadeInStartingDistanceInfo.identifier
-                    );
-                    _labelsFadeInDist.set(dist);
-                }
+    if (dictionary.hasKey(LabelsFadeInStartingDistanceInfo.identifier)) {
+        _labelsFadeInDist = dictionary.value<float>(
+            LabelsFadeInStartingDistanceInfo.identifier
+        );
+    }
 
-                if (dictionary.hasKey(LabelsFadeOutEnabledInfo.identifier)) {
-                    _labelsFadeOutEnabled = dictionary.value<bool>(
-                        LabelsFadeOutEnabledInfo.identifier
-                    );
-                }
+    if (dictionary.hasKey(LabelsFadeOutEnabledInfo.identifier)) {
+        _labelsFadeOutEnabled = dictionary.value<bool>(
+            LabelsFadeOutEnabledInfo.identifier
+        );
+    }
 
-                if (dictionary.hasKey(LabelsFadeOutStartingDistanceInfo.identifier)) {
-                    float dist = dictionary.value<float>(
-                        LabelsFadeOutStartingDistanceInfo.identifier
-                    );
-                    _labelsFadeOutDist.set(dist);
-                }
+    if (dictionary.hasKey(LabelsFadeOutStartingDistanceInfo.identifier)) {
+        _labelsFadeOutDist = dictionary.value<float>(
+            LabelsFadeOutStartingDistanceInfo.identifier
+        );
+    }
 
-                if (dictionary.hasKey(LabelsMinSizeInfo.identifier)) {
-                    int size = static_cast<int>(
-                        dictionary.value<float>(LabelsMinSizeInfo.identifier)
-                    );
-                    _labelsMinSize.set(size);
-                }
+    if (dictionary.hasKey(LabelsMinSizeInfo.identifier)) {
+        _labelsMinSize = static_cast<int>(
+            dictionary.value<float>(LabelsMinSizeInfo.identifier)
+        );
+    }
 
-                if (dictionary.hasKey(LabelsMaxSizeInfo.identifier)) {
-                    int size = static_cast<int>(
-                        dictionary.value<float>(LabelsMaxSizeInfo.identifier)
-                    );
-                    _labelsMaxSize.set(size);
-                }
+    if (dictionary.hasKey(LabelsMaxSizeInfo.identifier)) {
+        _labelsMaxSize = static_cast<int>(
+            dictionary.value<float>(LabelsMaxSizeInfo.identifier)
+        );
+    }
 
-                if (dictionary.hasKey(LabelsDisableCullingEnabledInfo.identifier)) {
-                    bool disabled = dictionary.value<bool>(
-                        LabelsDisableCullingEnabledInfo.identifier
-                    );
-                    _labelsDisableCullingEnabled.set(disabled);
-                }
+    if (dictionary.hasKey(LabelsDisableCullingEnabledInfo.identifier)) {
+        bool disabled = dictionary.value<bool>(
+            LabelsDisableCullingEnabledInfo.identifier
+        );
+        _labelsDisableCullingEnabled.set(disabled);
+    }
 
-                if (dictionary.hasKey(LabelsDistanceEPSInfo.identifier)) {
-                    float dist = static_cast<float>(
-                        dictionary.value<double>(LabelsDistanceEPSInfo.identifier)
-                    );
-                    _labelsDistaneEPS.set(dist);
-                }
+    if (dictionary.hasKey(LabelsDistanceEPSInfo.identifier)) {
+        _labelsDistaneEPS = static_cast<float>(
+            dictionary.value<double>(LabelsDistanceEPSInfo.identifier)
+        );
+    }
 
-                if (dictionary.hasKey(LabelAlignmentOptionInfo.identifier)) {
-                    std::string labelAlignment = 
-                        dictionary.value<std::string>(LabelAlignmentOptionInfo.identifier);
-                    if (labelAlignment == "Horizontally") {
-                        _labelAlignmentOption = Horizontally;
-                    }
-                    else {
-                        _labelAlignmentOption = Circularly;
-                    }
-                }
-
-                _font = font;
-                initializeFonts();
-            }
+    if (dictionary.hasKey(LabelAlignmentOptionInfo.identifier)) {
+        std::string alignment =
+            dictionary.value<std::string>(LabelAlignmentOptionInfo.identifier);
+        if (alignment == "Horizontally") {
+            _labelAlignmentOption = Horizontally;
+        }
+        else {
+            _labelAlignmentOption = Circularly;
         }
     }
-}
 
-bool GlobeLabelsComponent::initializeGL() {
-    return true;
+    initializeFonts();
 }
 
 void GlobeLabelsComponent::initializeFonts() {
@@ -436,57 +421,35 @@ void GlobeLabelsComponent::initializeFonts() {
     );
 }
 
-
-bool GlobeLabelsComponent::deinitialize() {
-    return true;
-}
-
-bool GlobeLabelsComponent::isReady() const {
-    return true;
-}
-
-void GlobeLabelsComponent::update() {
-        
-}
-
 bool GlobeLabelsComponent::loadLabelsData(const std::string& file) {
-    bool success = true;
-    if (_labelsDataPresent) {
-        std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-            ghoul::filesystem::File(file),
-            "GlobeLabelsComponent|" + identifier(),
-            ghoul::filesystem::CacheManager::Persistent::Yes
-        );
+    std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+        ghoul::filesystem::File(file),
+        "GlobeLabelsComponent|" + identifier(),
+        ghoul::filesystem::CacheManager::Persistent::Yes
+    );
 
-        bool hasCachedFile = FileSys.fileExists(cachedFile);
-        if (hasCachedFile) {
-            LINFO(fmt::format(
-                "Cached file '{}' used for labels file '{}'",
-                cachedFile,
-                file
-            ));
+    bool hasCachedFile = FileSys.fileExists(cachedFile);
+    if (hasCachedFile) {
+        LINFO(fmt::format("Cached file '{}' used for labels file: {}", cachedFile, file));
 
-            success = loadCachedFile(cachedFile);
-            if (success) {
-                return true;
-            }
-            else {
-                FileSys.cacheManager()->removeCacheFile(file);
-                // Intentional fall-through to the 'else' to generate the cache
-                // file for the next run
-            }
+        const bool hasCache = loadCachedFile(cachedFile);
+        if (hasCache) {
+            return true;
         }
         else {
-            LINFO(fmt::format("Cache for labels file '{}' not found", file));
+            FileSys.cacheManager()->removeCacheFile(file);
+            // Intentional fall-through to the 'else' to generate the cache
+            // file for the next run
         }
-        LINFO(fmt::format("Loading labels file '{}'", file));
+    }
+    else {
+        LINFO(fmt::format("Cache for labels file '{}' not found", file));
+    }
+    LINFO(fmt::format("Loading labels file '{}'", file));
 
-        success = readLabelsFile(file);
-        if (!success) {
-            return false;
-        }
-
-        success &= saveCachedFile(cachedFile);
+    bool success = readLabelsFile(file);
+    if (success) {
+        saveCachedFile(cachedFile);
     }
     return success;
 }
@@ -498,66 +461,66 @@ bool GlobeLabelsComponent::readLabelsFile(const std::string& file) {
             LERROR(fmt::format("Failed to open labels file '{}'", file));
             return false;
         }
-        if (csvLabelFile.is_open()) {
-            char line[4096];
-            _labels.labelsArray.clear();
-            while (!csvLabelFile.eof()) {
-                csvLabelFile.getline(line, 4090);
-                if (strnlen(line, 4090) > 10) {
-                    LabelEntry lEntry;
-                    char *token = strtok(line, ",");
-                    // First line is just the Header
-                    if (strcmp(token, "Feature_Name") == 0) {
-                        continue;
-                    }
-                    strncpy(lEntry.feature, token, 256);
-                    // Non-ascii characters aren't displayed correctly by the text rendering 
-                    // (We don't have the non-ascii character in the texture atlas)
-                    // Once this limitation is fixed, we can remove the next piece of code
-                    // Removing non ASCII characters:
-                    int tokenChar = 0;
-                    while (tokenChar < 256) {
-                        if ((lEntry.feature[tokenChar] < 0 ||
-                            lEntry.feature[tokenChar] > 127) &&
-                            lEntry.feature[tokenChar] != '\0') {
-                            lEntry.feature[tokenChar] = '*';
-                        }
-                        else if (lEntry.feature[tokenChar] == '\"') {
-                            lEntry.feature[tokenChar] = '=';
-                        }
-                        tokenChar++;
-                    }
-
-                    strtok(NULL, ","); // Target is not used
-                    lEntry.diameter = static_cast<float>(atof(strtok(NULL, ",")));
-                    lEntry.latitude = static_cast<float>(atof(strtok(NULL, ",")));
-                    lEntry.longitude = static_cast<float>(atof(strtok(NULL, ",")));
-                    char * coordinateSystem = strtok(NULL, ",");
-
-                    if (strstr(coordinateSystem, "West") != NULL) {
-                        lEntry.longitude = 360.0f - lEntry.longitude;
-                    }
-
-                    // Clean white spaces
-                    strncpy(lEntry.feature, strtok(lEntry.feature, "="), 256);
-
-                    GlobeBrowsingModule* _globeBrowsingModule =
-                        openspace::global::moduleEngine.module<openspace::GlobeBrowsingModule>();
-                    lEntry.geoPosition = _globeBrowsingModule->cartesianCoordinatesFromGeo(
-                        *_globe,
-                        lEntry.latitude,
-                        lEntry.longitude,
-                        lEntry.diameter
-                    );
-
-                    _labels.labelsArray.push_back(lEntry);
-                }
-            }
-            return true;
-        }
-        else {
+        if (!csvLabelFile.is_open()) {
             return false;
         }
+        char line[4096];
+        _labels.labelsArray.clear();
+        while (!csvLabelFile.eof()) {
+            csvLabelFile.getline(line, 4090);
+            if (strnlen(line, 4090) <= 10) {
+                continue;
+            }
+            LabelEntry lEntry;
+            char* token = strtok(line, ",");
+            // First line is just the Header
+            if (strcmp(token, "Feature_Name") == 0) {
+                continue;
+            }
+            strncpy(lEntry.feature, token, 256);
+            // Non-ascii characters aren't displayed correctly by the text
+            // rendering (We don't have the non-ascii character in the texture
+            // atlas)
+            // Once this limitation is fixed, we can remove the next piece of code
+            // Removing non ASCII characters:
+            int tokenChar = 0;
+            while (tokenChar < 256) {
+                if ((lEntry.feature[tokenChar] < 0 || lEntry.feature[tokenChar] > 127) &&
+                    lEntry.feature[tokenChar] != '\0')
+                {
+                    lEntry.feature[tokenChar] = '*';
+                }
+                else if (lEntry.feature[tokenChar] == '\"') {
+                    lEntry.feature[tokenChar] = '=';
+                }
+                tokenChar++;
+            }
+
+            strtok(NULL, ","); // Target is not used
+            lEntry.diameter = static_cast<float>(atof(strtok(NULL, ",")));
+            lEntry.latitude = static_cast<float>(atof(strtok(NULL, ",")));
+            lEntry.longitude = static_cast<float>(atof(strtok(NULL, ",")));
+            char* coordinateSystem = strtok(NULL, ",");
+
+            if (strstr(coordinateSystem, "West") != NULL) {
+                lEntry.longitude = 360.0f - lEntry.longitude;
+            }
+
+            // Clean white spaces
+            strncpy(lEntry.feature, strtok(lEntry.feature, "="), 256);
+
+            GlobeBrowsingModule* _globeBrowsingModule =
+                global::moduleEngine.module<openspace::GlobeBrowsingModule>();
+            lEntry.geoPosition = _globeBrowsingModule->cartesianCoordinatesFromGeo(
+                *_globe,
+                lEntry.latitude,
+                lEntry.longitude,
+                lEntry.diameter
+            );
+
+            _labels.labelsArray.push_back(lEntry);
+        }
+        return true;
     }
     catch (const std::fstream::failure& e) {
         LERROR(fmt::format("Failed reading labels file '{}'", file));
@@ -568,119 +531,112 @@ bool GlobeLabelsComponent::readLabelsFile(const std::string& file) {
 
 bool GlobeLabelsComponent::loadCachedFile(const std::string& file) {
     std::ifstream fileStream(file, std::ifstream::binary);
-    if (fileStream.good()) {
-        int8_t version = 0;
-        fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
-        if (version != CurrentCacheVersion) {
-            LINFO("The format of the cached file has changed: deleting old cache");
-            fileStream.close();
-            FileSys.deleteFile(file);
-            return false;
-        }
-
-        int32_t nValues = 0;
-        fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
-        _labels.labelsArray.resize(nValues);
-
-        fileStream.read(reinterpret_cast<char*>(&_labels.labelsArray[0]),
-            nValues * sizeof(_labels.labelsArray[0]));
-
-        bool success = fileStream.good();
-        return success;
-    }
-    else {
+    if (!fileStream.good()) {
         LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
         return false;
     }
+
+    int8_t version = 0;
+    fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
+    if (version != CurrentCacheVersion) {
+        LINFO("The format of the cached file has changed: deleting old cache");
+        fileStream.close();
+        FileSys.deleteFile(file);
+        return false;
+    }
+
+    int32_t nValues = 0;
+    fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
+    _labels.labelsArray.resize(nValues);
+
+    fileStream.read(
+        reinterpret_cast<char*>(_labels.labelsArray.data()),
+        nValues * sizeof(_labels.labelsArray[0])
+    );
+
+    return fileStream.good();
 }
 
 bool GlobeLabelsComponent::saveCachedFile(const std::string& file) const {
-
     std::ofstream fileStream(file, std::ofstream::binary);
-    if (fileStream.good()) {
-        fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion),
-            sizeof(int8_t));
-
-        int32_t nValues = static_cast<int32_t>(_labels.labelsArray.size());
-        if (nValues == 0) {
-            LERROR("Error writing cache: No values were loaded");
-            return false;
-        }
-        fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
-
-        size_t nBytes = nValues * sizeof(_labels.labelsArray[0]);
-        fileStream.write(reinterpret_cast<const char*>(&_labels.labelsArray[0]), nBytes);
-
-        bool success = fileStream.good();
-        return success;
-    }
-    else {
+    if (!fileStream.good()) {
         LERROR(fmt::format("Error opening file '{}' for save cache file", file));
         return false;
     }
+    fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion),
+        sizeof(int8_t));
+
+    int32_t nValues = static_cast<int32_t>(_labels.labelsArray.size());
+    if (nValues == 0) {
+        LERROR("Error writing cache: No values were loaded");
+        return false;
+    }
+    fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
+
+    size_t nBytes = nValues * sizeof(_labels.labelsArray[0]);
+    fileStream.write(reinterpret_cast<const char*>(&_labels.labelsArray[0]), nBytes);
+
+    return fileStream.good();
 }
 
 void GlobeLabelsComponent::draw(const RenderData& data) {
-    if (_labelsEnabled) {
-        // Calculate the MVP matrix
-        glm::dmat4 viewTransform = glm::dmat4(data.camera.combinedViewMatrix());
-        glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
-            viewTransform;
-        glm::dmat4 mvp = vp * _globe->modelTransform();
-
-        glm::dvec3 globePositionWorld = glm::dvec3(_globe->modelTransform() * 
-            glm::vec4(0.0, 0.0, 0.0, 1.0));
-        glm::dvec3 cameraToGlobeDistanceWorld = globePositionWorld - 
-            data.camera.positionVec3();
-        double distanceCameraGlobeWorld = glm::length(cameraToGlobeDistanceWorld);
-
-        float varyingOpacity = 1.f;
-        if (_labelsFadeInEnabled) {
-            double averageRadius = (
-                _globe->ellipsoid().radii().x + _globe->ellipsoid().radii().y + 
-                _globe->ellipsoid().radii().z
-                ) / 3.0;
-            glm::dvec2 fadeRange = glm::dvec2(
-                averageRadius + _labelsMinHeight
-            );
-            fadeRange.x += _labelsFadeInDist;
-            double a = 1.0 / (fadeRange.y - fadeRange.x);
-            double b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
-            double funcValue = a * distanceCameraGlobeWorld + b;
-            varyingOpacity *= funcValue > 1.0 ? 1.f : static_cast<float>(funcValue);
-
-            if (varyingOpacity < minTransparencyValueConst) {
-                return;
-            }
-        }
-
-        if (_labelsFadeOutEnabled) {
-            double averageRadius = (
-                _globe->ellipsoid().radii().x + _globe->ellipsoid().radii().y +
-                _globe->ellipsoid().radii().z
-                ) / 3.0;
-
-            glm::dvec2 fadeRange = glm::dvec2(
-                averageRadius + _labelsMinHeight + labelFadeRangeConst
-            );
-            fadeRange.x += _labelsFadeOutDist;
-            double a = rangeAngularCoefConst / (fadeRange.x - fadeRange.y);
-            double b = -(fadeRange.y / (fadeRange.x - fadeRange.y));
-            double funcValue = a * distanceCameraGlobeWorld + b;
-            varyingOpacity *= funcValue > 1.0 ? 1.f : static_cast<float>(funcValue);
-
-            if (varyingOpacity < minTransparencyValueConst) {
-                return;
-            }
-        }
-
-        renderLabels(
-            data, 
-            mvp, 
-            static_cast<float>(distanceCameraGlobeWorld), 
-            varyingOpacity
-        );
+    if (!_labelsEnabled) {
+        return;
     }
+
+    // Calculate the MVP matrix
+    glm::dmat4 viewTransform = glm::dmat4(data.camera.combinedViewMatrix());
+    glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
+                    viewTransform;
+    glm::dmat4 mvp = vp * _globe->modelTransform();
+
+    glm::dvec3 globePositionWorld = glm::dvec3(_globe->modelTransform() * 
+                                    glm::vec4(0.f, 0.f, 0.f, 1.f));
+    glm::dvec3 cameraToGlobeDistanceWorld = globePositionWorld - 
+                                            data.camera.positionVec3();
+    double distanceCameraGlobeWorld = glm::length(cameraToGlobeDistanceWorld);
+
+    float varyingOpacity = 1.f;
+    if (_labelsFadeInEnabled) {
+        double averageRadius = (
+            _globe->ellipsoid().radii().x + _globe->ellipsoid().radii().y + 
+            _globe->ellipsoid().radii().z
+            ) / 3.0;
+        glm::dvec2 fadeRange = glm::dvec2(
+            averageRadius + _labelsMinHeight
+        );
+        fadeRange.x += _labelsFadeInDist;
+        double a = 1.0 / (fadeRange.y - fadeRange.x);
+        double b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
+        double funcValue = a * distanceCameraGlobeWorld + b;
+        varyingOpacity *= static_cast<float>(std::min(funcValue, 1.0));
+
+        if (varyingOpacity < minTransparencyValueConst) {
+            return;
+        }
+    }
+
+    if (_labelsFadeOutEnabled) {
+        double averageRadius = (
+            _globe->ellipsoid().radii().x + _globe->ellipsoid().radii().y +
+            _globe->ellipsoid().radii().z
+            ) / 3.0;
+
+        glm::dvec2 fadeRange = glm::dvec2(
+            averageRadius + _labelsMinHeight + labelFadeRangeConst
+        );
+        fadeRange.x += _labelsFadeOutDist;
+        double a = rangeAngularCoefConst / (fadeRange.x - fadeRange.y);
+        double b = -(fadeRange.y / (fadeRange.x - fadeRange.y));
+        double funcValue = a * distanceCameraGlobeWorld + b;
+        varyingOpacity *= static_cast<float>(std::min(funcValue, 1.0));
+
+        if (varyingOpacity < minTransparencyValueConst) {
+            return;
+        }
+    }
+
+    renderLabels(data, mvp, static_cast<float>(distanceCameraGlobeWorld), varyingOpacity);
 }
 
 void GlobeLabelsComponent::renderLabels(const RenderData& data,
@@ -688,11 +644,11 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
                                         float distToCamera,
                                         float fadeInVariable
 ) {
+    constexpr double DIST_EPS = 6000.0;
+    constexpr double SIN_EPS = 0.001;
 
     glm::vec4 textColor = _labelsColor;
     textColor.a *= fadeInVariable;
-    constexpr double DIST_EPS = 6000.0;
-    constexpr double SIN_EPS = 0.001;
 
     glm::dmat4 invMP = glm::inverse(_globe->modelTransform());
     glm::dmat4 invCombinedView = glm::inverse(data.camera.combinedViewMatrix());
@@ -702,10 +658,8 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
     glm::dvec4 cameraUpVecWorld = glm::dvec4(data.camera.lookUpVectorWorldSpace(), 0.0); 
     glm::dvec3 cameraLookUpObj = glm::dvec3(invMP * cameraUpVecWorld);
 
-    glm::dmat4 VP = glm::dmat4(
-        data.camera.sgctInternal.projectionMatrix()
-    ) * data.camera.combinedViewMatrix();
-
+    glm::dmat4 VP = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
+                    data.camera.combinedViewMatrix();
 
     glm::dmat4 invModelMatrix = glm::inverse(_globe->modelTransform());
 
@@ -726,27 +680,19 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
         );
         orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionObj));
     }
-    glm::dvec3 orthoUp = glm::normalize(
-        glm::cross(orthoRight, cameraViewDirectionObj)
-    );
+    glm::dvec3 orthoUp = glm::normalize(glm::cross(orthoRight, cameraViewDirectionObj));
 
-    for (const LabelEntry lEntry : _labels.labelsArray) {
+    for (const LabelEntry& lEntry : _labels.labelsArray) {
         glm::vec3 position = lEntry.geoPosition;
         glm::dvec3 locationPositionWorld =
             glm::dvec3(_globe->modelTransform() * glm::dvec4(position, 1.0));
         double distanceCameraToLabelWorld =
             glm::length(locationPositionWorld - data.camera.positionVec3());
 
-        bool draw = false;
-        if (_labelsDisableCullingEnabled) {
-            draw = true;
-        }
-        else if ((distToCamera > (distanceCameraToLabelWorld + _labelsDistaneEPS)) &&
-            isLabelInFrustum(VP, locationPositionWorld)) { // culling
-            draw = true;
-        }
-
-        if (draw) {
+        if (_labelsDisableCullingEnabled ||
+            ((distToCamera > (distanceCameraToLabelWorld + _labelsDistaneEPS)) &&
+            isLabelInFrustum(VP, locationPositionWorld)))
+        {
             if (_labelAlignmentOption == Circularly) {
                 glm::dvec3 labelNormalObj = glm::dvec3(
                     invModelMatrix * glm::dvec4(data.camera.positionVec3(), 1.0)
@@ -765,9 +711,7 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
                     );
                     orthoRight = glm::normalize(glm::cross(otherVector, labelNormalObj));
                 }
-                orthoUp = glm::normalize(
-                    glm::cross(labelNormalObj, orthoRight)
-                );
+                orthoUp = glm::normalize(glm::cross(labelNormalObj, orthoRight));
             }
 
             position += _labelsMinHeight;
@@ -788,7 +732,7 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
 
             // Testing
             glm::dmat4 modelviewTransform = glm::dmat4(data.camera.combinedViewMatrix()) *
-                _globe->modelTransform();
+                                            _globe->modelTransform();
             labelInfo.modelViewMatrix = modelviewTransform;
             labelInfo.projectionMatrix = glm::dmat4(
                 data.camera.sgctInternal.projectionMatrix()
@@ -806,7 +750,7 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
 }
 
 bool GlobeLabelsComponent::isLabelInFrustum(const glm::dmat4& MVMatrix,
-    const glm::dvec3& position) const
+                                            const glm::dvec3& position) const
 {
 
     // Frustum Planes

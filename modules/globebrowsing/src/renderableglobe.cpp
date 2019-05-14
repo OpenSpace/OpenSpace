@@ -69,7 +69,7 @@ namespace {
     constexpr const char* KeyShadowGroup = "ShadowGroup";
     constexpr const char* KeyShadowSource = "Source";
     constexpr const char* KeyShadowCaster = "Caster";
-    constexpr const char* keyLabels = "Labels";
+    constexpr const char* KeyLabels = "Labels";
 
     const openspace::globebrowsing::AABB3 CullingFrustum{
         glm::vec3(-1.f, -1.f, 0.f),
@@ -543,8 +543,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 
             std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray;
             if (!disableShadows && (!sourceArray.empty() && !casterArray.empty())) {
-                for (const auto & source : sourceArray) {
-                    for (const auto & caster : casterArray) {
+                for (const std::pair<std::string, double>& source : sourceArray) {
+                    for (const std::pair<std::string, double>& caster : casterArray) {
                         Ellipsoid::ShadowConfiguration sc;
                         sc.source = source;
                         sc.caster = caster;
@@ -557,7 +557,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     }
 
     // Labels Dictionary
-    dictionary.getValue(keyLabels, _labelsDictionary);
+    _labelsDictionary = dictionary.value<ghoul::Dictionary>(KeyLabels);
 }
 
 void RenderableGlobe::initializeGL() {
@@ -614,9 +614,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
             _globeLabelsComponent.draw(data);
         }
         catch (const ghoul::opengl::TextureUnit::TextureUnitError&) {
-            std::string layer = _lastChangedLayer ?
-                _lastChangedLayer->guiName() :
-                "";
+            std::string layer = _lastChangedLayer ? _lastChangedLayer->guiName() : "";
 
             LWARNINGC(
                 guiName(),

@@ -216,6 +216,7 @@ local Mercury = {
             ColorLayers = color_layers
         },
         Labels = {
+            Enable = false,
             FileName = labelsPath .. "/Mercury.labels",
             LabelAlignmentOption = "Horizontally", -- or Circularly
             LabelsFontSize = 40.0,
