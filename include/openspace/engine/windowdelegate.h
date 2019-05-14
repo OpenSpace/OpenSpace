@@ -113,7 +113,11 @@ struct WindowDelegate {
 
     int (*currentWindowId)() = []() { return 0; };
 
-    void(*setFieldOfViewAspectRatio)(float ratio) = [](float) { };
+    void (*setFieldOfView)(float horizontal, float vertical) = [](float, float) {};
+
+    std::vector<std::pair<float, float>> (*fieldOfViews)() = []() {
+        return std::vector<std::pair<float, float>>();
+    };
 
     using GLProcAddress = void(*)(void);
 

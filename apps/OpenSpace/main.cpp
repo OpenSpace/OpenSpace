@@ -816,9 +816,34 @@ void setSgctDelegateFunctions() {
     sgctDelegate.openGLProcedureAddress = [](const char* func) {
         return glfwGetProcAddress(func);
     };
-    sgctDelegate.setFieldOfViewAspectRatio = [](float ratio) {
-        sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
-        w->setFieldOfViewAspectRatio(ratio);
+    sgctDelegate.setFieldOfView = [](float horizontal, float vertical) {
+        const float h = horizontal / 2.f;
+        const float v = vertical / 2.f;
+
+        for (size_t i = 0; i < sgct::Engine::instance()->getNumberOfWindows(); ++i) {
+            sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
+            for (std::size_t j = 0; j < w->getNumberOfViewports(); ++j) {
+                sgct_core::Viewport* vpPtr = w->getViewport(j);
+                const float d = vpPtr->getDistance();
+
+                vpPtr->setViewPlaneCoordsUsingFOVs(v, -v, -h, h, vpPtr->getRotation(), d);
+            }
+        }
+    };
+    sgctDelegate.fieldOfViews = []() {
+        std::vector<std::pair<float, float>> result;
+        for (size_t i = 0; i < sgct::Engine::instance()->getNumberOfWindows(); ++i) {
+            sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
+            for (std::size_t j = 0; j < w->getNumberOfViewports(); ++j) {
+                sgct_core::Viewport* vpPtr = w->getViewport(j);
+                glm::vec4 fov = vpPtr->getFOV();
+                const float vertical = abs(fov.x) + abs(fov.y);
+                const float horizontal = abs(fov.z) + abs(fov.w);
+                result.push_back({ vertical, horizontal });
+            }
+        }
+
+        return result;
     };
 }
 

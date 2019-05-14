@@ -31,6 +31,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/triggerproperty.h>
 
@@ -195,7 +196,7 @@ private:
     properties::FloatProperty _hdrExposure;
     properties::FloatProperty _hdrBackground;
     properties::FloatProperty _gamma;
-    properties::FloatProperty _aspectRatio;
+    properties::FloatProperty _horizontalFieldOfView;
 
     properties::Vec3Property _globalRotation;
     properties::Vec3Property _screenSpaceRotation;

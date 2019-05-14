@@ -275,6 +275,10 @@ void Property::removeOnChange(OnChangeHandle handle) {
     }
 }
 
+void Property::setEnableOnChange(bool enable) {
+    _enableOnChangeCallbacks = enable;
+}
+
 void Property::removeOnDelete(OnDeleteHandle handle) {
     auto it = std::find_if(
         _onDeleteCallbacks.begin(),
@@ -301,8 +305,12 @@ void Property::setPropertyOwner(PropertyOwner* owner) {
 }
 
 void Property::notifyChangeListeners() {
-    for (const std::pair<OnChangeHandle, std::function<void()>>& p : _onChangeCallbacks) {
-        p.second();
+    if (_enableOnChangeCallbacks) {
+        using K = OnChangeHandle;
+        using V = std::function<void()>;
+        for (const std::pair<K, V>& p : _onChangeCallbacks) {
+            p.second();
+        }
     }
 }
 

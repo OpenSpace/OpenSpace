@@ -285,6 +285,15 @@ public:
     void removeOnChange(OnChangeHandle handle);
 
     /**
+     * This method enables or disables all registered onChange callbacks without removing
+     * them. This can be used to temporarily disable onChange values when a modified
+     * change should not be propagated.
+     *
+     * \param enable The new state of the onChange method
+     */
+    void setEnableOnChange(bool enable);
+
+    /**
     * This method deregisters a callback that was previously registered with the onDelete
     * method.
     *
@@ -526,6 +535,9 @@ protected:
 
     /// The Dictionary containing all meta data necessary for external applications
     ghoul::Dictionary _metaData;
+    
+    /// If this value is 'false' all onChange callbacks will be ignored
+    bool _enableOnChangeCallbacks = true;
 
     /// The callback function sthat will be invoked whenever the value changes
     std::vector<std::pair<OnChangeHandle, std::function<void()>>> _onChangeCallbacks;

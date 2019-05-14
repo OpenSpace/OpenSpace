@@ -210,10 +210,10 @@ namespace {
         "tristimulus values in the image."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AspectRatioInfo = {
-        "AspectRatio",
-        "Aspect Ratio",
-        "Adjusts the ratio of horizontal-to-vertical field of view."
+    constexpr openspace::properties::Property::PropertyInfo FieldOfViewInfo = {
+        "FieldOfView",
+        "Horizontal Field of View",
+        "Adjusts the horizontal field of view for all viewports on the master."
     };
 } // namespace
 
@@ -253,7 +253,7 @@ RenderEngine::RenderEngine()
         glm::vec3(-glm::pi<float>()),
         glm::vec3(glm::pi<float>())
     )
-    , _aspectRatio(AspectRatioInfo, 1.f, 0.1f, 10.0f)
+    , _horizontalFieldOfView(FieldOfViewInfo, -1.f, 0.001f, 90.f)
 {
     _doPerformanceMeasurements.onChange([this](){
         global::performanceManager.setEnabled(_doPerformanceMeasurements);
@@ -295,10 +295,20 @@ RenderEngine::RenderEngine()
 
     addProperty(_applyWarping);
 
-    _aspectRatio.onChange([this]() {
-        global::windowDelegate.setFieldOfViewAspectRatio(_aspectRatio);
+    _horizontalFieldOfView.onChange([this]() {
+        // Only change the aspect ratio on all windows of the master
+        if (global::windowDelegate.isMaster()) {
+
+            glm::ivec2 res = global::windowDelegate.currentWindowResolution();
+            const float aspect = static_cast<float>(res.x) / static_cast<float>(res.y);
+
+            const float hFov = _horizontalFieldOfView;
+            const float vFov = hFov / aspect;
+
+            global::windowDelegate.setFieldOfView(hFov, vFov);
+        }
     });
-    addProperty(_aspectRatio);
+    addProperty(_horizontalFieldOfView);
 
     _takeScreenshot.onChange([this](){
         _shouldTakeScreenshot = true;
@@ -394,6 +404,29 @@ void RenderEngine::initializeGL() {
     LINFO(fmt::format("Setting renderer from string: {}", renderingMethod));
     setRendererFromString(renderingMethod);
 
+    // Override the aspect ratio property value to match that of resized window
+    // We don't want to force this value on SGCT as it might not be the correct
+    // aspect ratio for all windos
+    _horizontalFieldOfView.setEnableOnChange(false);
+
+    std::vector<std::pair<float, float>> fovs = global::windowDelegate.fieldOfViews();
+
+    ghoul_assert(!fovs.empty(), "No aspect ratios found");
+    if (fovs.size() > 1) {
+
+        if (std::equal(fovs.begin() + 1, fovs.end(), fovs.begin())) {
+            _horizontalFieldOfView = fovs[0].second;
+        }
+        else {
+            // If we have more than one valid field of view pair, we set a dummy value 
+            _horizontalFieldOfView = -1.f;
+        }
+    }
+    else {
+        _horizontalFieldOfView = fovs[0].second;
+    }
+    _horizontalFieldOfView.setEnableOnChange(true);
+
 
 
     // TODO:    Fix the power scaled coordinates in such a way that these
@@ -466,11 +499,7 @@ void RenderEngine::updateRenderer() {
 
         using FR = ghoul::fontrendering::FontRenderer;
         FR::defaultRenderer().setFramebufferSize(fontResolution());
-        FR::defaultProjectionRenderer().setFramebufferSize(renderingResolution());
-        //Override the aspect ratio property value to match that of resized window
-        glm::dvec2 winSize = global::windowDelegate.currentWindowSize();
-        float newRatio = winSize.x / winSize.y;
-        _aspectRatio.set(newRatio);
+        FR::defaultProjectionRenderer().setFramebufferSize(renderingResolution());       
     }
 
     _renderer->update();
