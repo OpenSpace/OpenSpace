@@ -387,6 +387,8 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         }
 
     }
+
+    setRenderBin(Renderable::RenderBin::Opaque);
 }
 
 bool RenderableDUMeshes::isReady() const {
@@ -473,9 +475,10 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
     glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
 
     glEnablei(GL_BLEND, 0);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthMask(false);
+    glEnable(GL_DEPTH_TEST);
 
     _program->activate();
 

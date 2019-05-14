@@ -643,6 +643,8 @@ void RenderableBillboardsCloud::initialize() {
         // entry is the one selected by default.
         _colorOption.setValue(static_cast<int>(_colorRangeData.size() - 1));
     }
+
+    setRenderBin(Renderable::RenderBin::Transparent);
 }
 
 void RenderableBillboardsCloud::initializeGL() {
@@ -722,6 +724,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
                                                  float fadeInVariable)
 {
     glDepthMask(false);
+    glEnable(GL_DEPTH_TEST);
 
     // Saving current OpenGL state
     GLboolean blendEnabled = glIsEnabledi(GL_BLEND, 0);
@@ -746,8 +749,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
 
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+    
     _program->activate();
 
     const glm::dmat4 projMatrix = glm::dmat4(data.camera.projectionMatrix());
