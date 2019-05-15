@@ -26,9 +26,10 @@
 
 // Included for testing purposes
 #include <modules/fitsfilereader/include/fitsfilereader.h>
-//#include <filesystem>
+#include <openspace/engine/globals.h>
 #include <ghoul/opengl/framebufferobject.h>
 #include <cctype>
+#include <openspace/util/timemanager.h>
 // <- End of experimental includes
 
 #include <modules/base/basemodule.h>
@@ -92,6 +93,7 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
     _textureFile->setCallback(
         [this](const ghoul::filesystem::File&) { _textureIsDirty = true; }
     );
+    
 }
 
 bool RenderablePlaneImageLocal::isReady() const {
@@ -113,8 +115,20 @@ void RenderablePlaneImageLocal::deinitializeGL() {
 
 void RenderablePlaneImageLocal::bindTexture() {
 
-    _texture->bind();
-    //glBindTexture(GL_TEXTURE_3D, *_texture);
+    //_texture->bind();
+    if(global::timeManager.isPaused()){
+
+        glBindTexture(GL_TEXTURE_2D, *_textureList[_counter]);
+        _counter2++;
+        if(_counter2 == 50){
+            _counter++;
+            _counter2 = 0;
+            
+        }
+        if(_counter == 23) _counter = 0;
+
+        
+    }else glBindTexture(GL_TEXTURE_2D, *_textureList[1]);
 
 }
 
@@ -132,101 +146,69 @@ void RenderablePlaneImageLocal::loadTexture() {
         ghoul::opengl::Texture* t = _texture;
 
         unsigned int hash = ghoul::hashCRC32File(_texturePath);
+        
+    
+              
+  // Given that the node-part is located just outside the openspace-directory
+  const std::string fitsDir = "../../../../../../node/FITSdata/mrzqs190501/";     //Mac
+  //const std::string fitsDir = "../../../node/FITSdata/mrzqs190501/";            //PC
+  std::string testpath = absPath(fitsDir + "mrzqs190501t0014c2216_007.fits");
+  LERROR(testpath);
+  GLfloat fitsImage[360][180];
+  
+  // All the files in the given directory
+  std::vector<std::string> fitsFiles = ghoul::filesystem::Directory(fitsDir).readFiles();
+  LERROR("antal filer: " + std::to_string(fitsFiles.size()));
+    for (const auto & entry : fitsFiles) {
+        LERROR(entry);
+        
+        FitsFileReader fitsFileReader(false);
 
-        _texture = BaseModule::TextureManager.request(
-            std::to_string(hash),
-            [path = _texturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
-             /*   std::unique_ptr<ghoul::opengl::Texture> texture =
-                    ghoul::io::TextureReader::ref().loadTexture(absPath(path));
+        std::string dateID ="";
+        const auto tempBild = fitsFileReader.readImageFloat(entry);
+        //                const auto tempBild = fitsFileReader.readImageFloat(testpath);
 
-                LDEBUGC(
-                    "RenderablePlaneImageLocal",
-                    fmt::format("Loaded texture from '{}'", absPath(path))
-                );
-                texture->uploadTexture();
-
-                texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-
-             //   return texture; */ //end OG code
-
-
-            FitsFileReader fitsFileReader(false);
-            
-            // Given that the node-part is located just outside the openspace-directory
-            const std::string fitsDir = "../../../../../../node/FITSdata/mrzqs190501/";     //Mac
-            //const std::string fitsDir = "../../../node/FITSdata/mrzqs190501/";            //PC
-            std::string testpath = absPath(fitsDir + "mrzqs190501t0014c2216_007.fits");
-            LERROR(testpath);
-            
-            // All the files in the given directory
-            std::vector<std::string> fitsFiles = ghoul::filesystem::Directory(fitsDir).readFiles();
-            
-//            int zdim = fitsFiles.size();
-            LERROR("antal filer: " + std::to_string(fitsFiles.size()));
-            const int zdim = 4; //can't be varying
-            GLfloat fitsImage[360][180][zdim];
-            int counter = 0;
-                
-            for (const auto & entry : fitsFiles) {
-                LERROR(entry);
-
-                std::string dateID ="";
-                const auto tempBild = fitsFileReader.readImageFloat(entry);
-//                const auto tempBild = fitsFileReader.readImageFloat(testpath);
-
-                int magicalCounter = -6;
-                for (char c : entry) {
-                    if (std::isdigit(c)) {
-                        if (magicalCounter >= 0 && magicalCounter < 10) {
-                            dateID += c;
-                        }
-                        magicalCounter++;
-                    }
+        int magicalCounter = -6;
+        for (char c : entry) {
+            if (std::isdigit(c)) {
+                if (magicalCounter >= 0 && magicalCounter < 10) {
+                    dateID += c;
                 }
-                
-//                const float minvalue = *fitsFileReader.readHeaderValueFloat("IMGMIN01");
-//                const float maxvalue = *fitsFileReader.readHeaderValueFloat("IMGMAX01");
-                const float stdvalue = *fitsFileReader.readHeaderValueFloat("IMGRMS01");
-
-//                const int imageHeight = tempBild->height;
-//                const int imageWidth = tempBild->width;
-
-                float color;
-                for (int i = 0; i < 360; i++) {
-                    for (int j = 0; j < 180; j++) {
-                        color = tempBild->contents[(i * 180) + j];
-//                        color = (color - minvalue) / (maxvalue - minvalue);
-                        color = (color+stdvalue)/stdvalue; //some semirandom operation to actually se something in the texture
-                        fitsImage[i][j][counter] = static_cast<GLfloat>(color);
-                    }
-                }
-                counter++;
-                if(counter == zdim) break;
-                LERROR(dateID + " pixelvärde på position 100 100: " + std::to_string(fitsImage[100][100][counter]));
-                
+                magicalCounter++;
             }
-                
-                
-                auto textureFits = std::make_unique<ghoul::opengl::Texture>(fitsImage, glm::vec3(360, 180, zdim),ghoul::opengl::Texture::Format::Red, GL_R32F,GL_FLOAT, ghoul::opengl::Texture::FilterMode::Nearest);
-                textureFits->setWrapping({ghoul::opengl::Texture::WrappingMode::Repeat, ghoul::opengl::Texture::WrappingMode::Repeat,ghoul::opengl::Texture::WrappingMode::ClampToEdge});
-            textureFits->uploadTexture();
+        }
 
-            //auto testbild = fitsFileReader.readImageFloat(testpath);
+        const float minvalue = *fitsFileReader.readHeaderValueFloat("IMGMIN01");
+        const float maxvalue = *fitsFileReader.readHeaderValueFloat("IMGMAX01");
+        const float stdvalue = *fitsFileReader.readHeaderValueFloat("IMGRMS01");
 
-            //const float minvalue = *fitsFileReader.readHeaderValueFloat("IMGMIN01");
-            //const float maxvalue = *fitsFileReader.readHeaderValueFloat("IMGMAX01");
-            //LERROR(testpath);
-            //LERROR("Min / Max respectively: " + std::to_string(minvalue) + " / " + std::to_string(maxvalue) + " -- Width: " + std::to_string(imageWidth) + " -- Height: " + std::to_string(imageHeight) + " size: "+ std::to_string(testbild->contents.size()));
-            
-                return textureFits;
+        //                const int imageHeight = tempBild->height;
+        //                const int imageWidth = tempBild->width;
+
+        float color;
+        for (int i = 0; i < 360; i++) {
+            for (int j = 0; j < 180; j++) {
+                color = tempBild->contents[(i * 180) + j];
+                color = (color - minvalue) / (maxvalue - minvalue);
+                //color = (color+stdvalue)/stdvalue; //some semirandom operation to actually se something in the texture
+                fitsImage[i][j] = static_cast<GLfloat>(color);
             }
-        );
+        }
+
+
+        LERROR(dateID + " pixelvärde på position 100 100: " + std::to_string(fitsImage[100][100]));
+
+        auto textureFits =  std::make_unique<ghoul::opengl::Texture>(std::move(fitsImage), glm::vec3(360, 180, 1),ghoul::opengl::Texture::Format::Red, GL_R32F,GL_FLOAT);
+        textureFits->uploadTexture();
+
+        LERROR(std::to_string(static_cast<int>(*textureFits)));
+
+
+        _textureList.push_back(std::move(textureFits));
         
-        if(_texture->type() == GL_TEXTURE_3D){
-            LERROR("det är 3d");
-        }else LERROR("ej 3d");
-        
-        
+    }
+        _texture = _textureList[0].get();
+
 
         BaseModule::TextureManager.release(t);
 

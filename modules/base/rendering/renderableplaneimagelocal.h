@@ -59,6 +59,11 @@ private:
     properties::StringProperty _texturePath;
     ghoul::opengl::Texture* _texture = nullptr;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
+    
+    //std::unordered_map<std::string, int>;
+    std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textureList;
+    int _counter = 0;
+    int _counter2 = 0;
 
     bool _textureIsDirty = false;
 };
