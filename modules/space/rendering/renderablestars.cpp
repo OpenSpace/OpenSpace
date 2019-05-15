@@ -42,7 +42,7 @@
 #include <array>
 #include <cstdint>
 #include <fstream>
-#include <stdint.h>
+#include <iostream>
 #include <limits>
 
 #include <type_traits>
