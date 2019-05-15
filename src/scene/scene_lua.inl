@@ -501,50 +501,101 @@ int addSceneGraphNode(lua_State* L) {
     return 0;
 }
 
+#pragma optimize ( "", off)
+
 int removeSceneGraphNode(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeSceneGraphNode");
+    using namespace ghoul::lua;
+    checkArgumentsAndThrow(L, 1, "lua::removeSceneGraphNode");
 
-    std::string nodeName = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
-    SceneGraphNode* node = global::renderEngine.scene()->sceneGraphNode(nodeName);
-    if (!node) {
-        LERRORC(
-            "removeSceneGraphNode",
-            fmt::format(
-                "{}: Could not find node '{}'", ghoul::lua::errorLocation(L), nodeName
-            )
-        );
-        return 0;
-    }
-    SceneGraphNode* parent = node->parent();
-    if (!parent) {
-        LERRORC(
-            "removeSceneGraphNode",
-            fmt::format("{}: Cannot remove root node", ghoul::lua::errorLocation(L))
-        );
-        return 0;
+    std::string nodeName = ghoul::lua::value<std::string>(L, 1, PopValue::Yes);
+
+    const std::vector<SceneGraphNode*>& nodes =
+        global::renderEngine.scene()->allSceneGraphNodes();
+
+    // Replace all wildcards * with the correct regex (.*)
+    size_t startPos = nodeName.find("*");
+    while (startPos != std::string::npos) {
+        nodeName.replace(startPos, 1, "(.*)");
+        startPos += 4; // (.*)
+        startPos = nodeName.find("*", startPos);
     }
 
-    std::function<void (SceneGraphNode*, SceneGraphNode*)> removeNode =
-        [&removeNode](SceneGraphNode* p, SceneGraphNode* localNode) {
-            std::vector<SceneGraphNode*> children = localNode->children();
 
-            std::unique_ptr<SceneGraphNode> n = p->detachChild(*localNode);
-            ghoul_assert(n.get() == localNode, "Wrong node returned from detaching");
 
-            for (SceneGraphNode* c : children) {
-                removeNode(n.get(), c);
+
+    bool foundMatch = false;
+    std::vector<SceneGraphNode*> markedList;
+    std::regex r(nodeName);
+    for (SceneGraphNode* node : nodes) {
+        const std::string& identifier = node->identifier();
+
+        if (std::regex_match(identifier, r)) {
+            foundMatch = true;
+            SceneGraphNode* parent = node->parent();
+            if (!parent) {
+                LERRORC(
+                    "removeSceneGraphNode",
+                    fmt::format("{}: Cannot remove root node")
+                );
             }
+            else {
+                markedList.push_back(node);
+            }
+        }
+    }
 
-            localNode->deinitializeGL();
-            localNode->deinitialize();
-            n = nullptr;
-        };
+    if (!foundMatch) {
+        LERRORC(
+            "removeSceneGraphNode",
+            "Did not find a match for identifier:" + nodeName
+        );
+        return 0;
+    }
 
-    removeNode(parent, node);
+
+    // Add all the children
+    std::function<void(SceneGraphNode*, std::vector<SceneGraphNode*>&)> markNode = 
+        [&markNode](SceneGraphNode* node, std::vector<SceneGraphNode*>& markedList)
+    {
+        std::vector<SceneGraphNode*> children = node->children();
+        for (SceneGraphNode* child : children) {
+            markNode(child, markedList);
+        }
+
+        auto it = std::find(markedList.begin(), markedList.end(), node);
+        if (it == markedList.end()) {
+            markedList.push_back(node);
+        }
+    };
+    for (SceneGraphNode* node : markedList) {
+        markNode(node, markedList);
+    }
+
+    // Remove all marked nodes
+    std::function<void(SceneGraphNode*)> removeNode =
+        [&removeNode, &markedList](SceneGraphNode* localNode) {
+        std::vector<SceneGraphNode*> children = localNode->children();
+
+        std::unique_ptr<SceneGraphNode> n = localNode->parent()->detachChild(*localNode);
+        ghoul_assert(n.get() == localNode, "Wrong node returned from detaching");
+
+        for (SceneGraphNode* c : children) {
+            removeNode(c);
+        }
+
+        markedList.erase(
+            std::remove(markedList.begin(), markedList.end(), localNode),
+            markedList.end()
+        );
+
+        localNode->deinitializeGL();
+        localNode->deinitialize();
+        n = nullptr;
+    };
+
+    while (!markedList.empty()) {
+        removeNode(markedList[0]);
+    }
 
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");

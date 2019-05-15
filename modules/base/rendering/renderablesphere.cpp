@@ -111,6 +111,12 @@ namespace {
         "Disable Fade-In/Fade-Out effects",
         "Enables/Disables the Fade-In/Out effects."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo BackgroundInfo = {
+        "Background",
+        "Sets the current sphere rendering as a background rendering type",
+        "Enables/Disables background rendering."
+    };
 } // namespace
 
 namespace openspace {
@@ -175,6 +181,12 @@ documentation::Documentation RenderableSphere::Documentation() {
                 Optional::Yes,
                 DisableFadeInOutInfo.description
             },
+            {
+                BackgroundInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                BackgroundInfo.description
+            },
         }
     };
 }
@@ -189,6 +201,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     , _mirrorTexture(MirrorTextureInfo, false)
     , _useAdditiveBlending(UseAdditiveBlendingInfo, false)
     , _disableFadeInDistance(DisableFadeInOutInfo, true)
+    , _backgroundRendering(BackgroundInfo, false)
     , _fadeInThreshold(FadeInThresholdInfo, -1.f, 0.f, 1.f)
     , _fadeOutThreshold(FadeOutThresholdInfo, -1.f, 0.f, 1.f)
 {
@@ -249,6 +262,10 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     }
     if (dictionary.hasKey(UseAdditiveBlendingInfo.identifier)) {
         _useAdditiveBlending = dictionary.value<bool>(UseAdditiveBlendingInfo.identifier);
+
+        if (_useAdditiveBlending) {
+            setRenderBin(Renderable::RenderBin::Transparent);
+        }
     }
 
     if (dictionary.hasKey(FadeOutThresholdInfo.identifier)) {
@@ -269,6 +286,14 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
         dictionary.hasKey(FadeInThresholdInfo.identifier)) {
         _disableFadeInDistance.set(false);
         addProperty(_disableFadeInDistance);
+    }
+
+    if (dictionary.hasKey(BackgroundInfo.identifier)) {
+        _backgroundRendering = dictionary.value<bool>(BackgroundInfo.identifier);
+
+        if (_backgroundRendering) {
+            setRenderBin(Renderable::RenderBin::Background);
+        }
     }
 }
 
