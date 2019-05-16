@@ -501,31 +501,25 @@ int addSceneGraphNode(lua_State* L) {
     return 0;
 }
 
-#pragma optimize ( "", off)
-
 int removeSceneGraphNode(lua_State* L) {
-    using namespace ghoul::lua;
-    checkArgumentsAndThrow(L, 1, "lua::removeSceneGraphNode");
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeSceneGraphNode");
 
-    std::string nodeName = ghoul::lua::value<std::string>(L, 1, PopValue::Yes);
+    std::string name = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
 
     const std::vector<SceneGraphNode*>& nodes =
         global::renderEngine.scene()->allSceneGraphNodes();
 
     // Replace all wildcards * with the correct regex (.*)
-    size_t startPos = nodeName.find("*");
+    size_t startPos = name.find("*");
     while (startPos != std::string::npos) {
-        nodeName.replace(startPos, 1, "(.*)");
+        name.replace(startPos, 1, "(.*)");
         startPos += 4; // (.*)
-        startPos = nodeName.find("*", startPos);
+        startPos = name.find("*", startPos);
     }
-
-
-
 
     bool foundMatch = false;
     std::vector<SceneGraphNode*> markedList;
-    std::regex r(nodeName);
+    std::regex r(name);
     for (SceneGraphNode* node : nodes) {
         const std::string& identifier = node->identifier();
 
@@ -547,11 +541,10 @@ int removeSceneGraphNode(lua_State* L) {
     if (!foundMatch) {
         LERRORC(
             "removeSceneGraphNode",
-            "Did not find a match for identifier:" + nodeName
+            "Did not find a match for identifier: " + name
         );
         return 0;
     }
-
 
     // Add all the children
     std::function<void(SceneGraphNode*, std::vector<SceneGraphNode*>&)> markNode = 

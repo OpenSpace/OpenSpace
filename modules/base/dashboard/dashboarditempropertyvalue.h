@@ -59,8 +59,6 @@ private:
     properties::StringProperty _propertyUri;
     properties::StringProperty _displayString;
 
-
-
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
 

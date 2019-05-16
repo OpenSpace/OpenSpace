@@ -152,12 +152,11 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
         _doSimplification = dictionary.value<bool>(SimplificationInfo.identifier);
     }
     _doSimplification.onChange([this]() {
-        if (_doSimplification) {
-            _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
-        }
-        else {
-            _requestedUnit.setVisibility(properties::Property::Visibility::User);
-        }
+        _requestedUnit.setVisibility(
+            _doSimplification ?
+            properties::Property::Visibility::Hidden :
+            properties::Property::Visibility::User
+        );
     });
     addProperty(_doSimplification);
 
@@ -221,8 +220,7 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
             penPosition,
             fmt::format(
                 "Simulation increment: {:.1f} {:s} / second{:s}",
-                targetDeltaTime.first, targetDeltaTime.second,
-                pauseText
+                targetDeltaTime.first, targetDeltaTime.second, pauseText
             )
         );
     }
