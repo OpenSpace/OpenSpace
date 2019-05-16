@@ -675,6 +675,7 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
 
 void RenderableSatellites::updateBuffers() {
     _TLEData = readTLEFile(_path);
+    LINFO(fmt::format("Pathpath: {} ",  _path));
 
     const size_t nVerticesPerOrbit = _nSegments + 1;
     _vertexBufferData.resize(_TLEData.size() * nVerticesPerOrbit);

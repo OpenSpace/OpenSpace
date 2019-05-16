@@ -263,6 +263,10 @@ void RenderableTimeVaryingVolume::initializeGL() {
         float* data = t.rawVolume->data();
         for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
             data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
+            if (data[i] > 0)
+            {
+                LINFO(fmt::format("test: {} ", data[i]));
+            }
         }
 
         t.histogram = std::make_shared<Histogram>(0.f, 1.f, 100);

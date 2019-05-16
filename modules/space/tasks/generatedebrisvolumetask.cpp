@@ -26,6 +26,7 @@
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumemetadata.h>
 #include <modules/volume/rawvolumewriter.h>
+#include <openspace/util/spicemanager.h>
 
 #include <openspace/documentation/verifier.h>
 
@@ -33,21 +34,26 @@
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
+#include <ghoul/logging/logmanager.h>
 //#include <ghoul/misc/dictionaryluaformatter.h>
-//#include <ghoul/misc/defer.h>
+#include <ghoul/misc/defer.h>
 
 #include <fstream>
 
 
 namespace {
+
+    constexpr const char* ProgramName = "RenderableSatellites";
+    constexpr const char* _loggerCat = "SpaceDebris";
+
     constexpr const char* KeyRawVolumeOutput = "RawVolumeOutput";
     constexpr const char* KeyDictionaryOutput = "DictionaryOutput";
     constexpr const char* KeyDimensions = "Dimensions";
     constexpr const char* KeyStartTime = "StartTime";
-    constexpr const char* KeyEndTime = "EndTime";
+    //constexpr const char* KeyEndTime = "EndTime";
     constexpr const char* KeyInputPath = "InputPath";
-    // constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
-    // constexpr const char* KeyUpperDomainBound = "UpperDomainBound";    
+     constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
+     constexpr const char* KeyUpperDomainBound = "UpperDomainBound";    
 
 }
 
@@ -374,7 +380,7 @@ std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData,
             orbit.meanAnomaly,
             orbit.period,
             orbit.epoch
-        );    
+        );
         double timeInSeconds = Time::convertTime(timeStamp);
         glm::dvec3 position = keplerTranslator.debrisPos(static_cast<float>(timeInSeconds));
         positionBuffer.push_back(position);
@@ -402,6 +408,7 @@ float getDensityAt(glm::uvec3 cell,  int* densityArray, RawVolume<float>& raw) {
     // return value at position cell from _densityPerVoxel
     size_t index = raw.coordsToIndex(cell);
     value = static_cast<float>(densityArray[index]);
+    //LINFO(fmt::format("indensity: {} ", index));
 
     return value;
 }
@@ -409,12 +416,12 @@ float getDensityAt(glm::uvec3 cell,  int* densityArray, RawVolume<float>& raw) {
 float getMaxApogee(std::vector<KeplerParameters> inData){
     double maxApogee = 0.0;
     for (const auto& dataElement : inData){
-        double ah = dataElement.semiMajorAxis * (1 + dataElement.eccentricity)- 6371;
+        double ah = dataElement.semiMajorAxis * (1 + dataElement.eccentricity);
         if (ah > maxApogee)
             maxApogee = ah;
     }   
 
-    return static_cast<float>(maxApogee);
+    return static_cast<float>(maxApogee*1000);
 }
 
 int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim, float maxApogee){
@@ -453,15 +460,15 @@ GenerateDebrisVolumeTask::GenerateDebrisVolumeTask(const ghoul::Dictionary& dict
 
     _rawVolumeOutputPath = absPath(dictionary.value<std::string>(KeyRawVolumeOutput));
     _dictionaryOutputPath = absPath(dictionary.value<std::string>(KeyDictionaryOutput));
-    _dimensions = glm::uvec3(dictionary.value<glm::vec3>(KeyDimensions));
+    _dimensions = dictionary.value<glm::vec3>(KeyDimensions);
     _startTime = dictionary.value<std::string>(KeyStartTime);
-    _endTime = dictionary.value<std::string>(KeyEndTime);
+    //_endTime = dictionary.value<std::string>(KeyEndTime);
     // since _inputPath is past from task,
     // there will have to be either one task per dataset,
     // or you need to combine the datasets into one file.
     _inputPath = dictionary.value<std::string>(KeyInputPath);
-    //_lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
-    //_upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
+    _lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
+    _upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
 
 
     _TLEDataVector = {};
@@ -472,6 +479,12 @@ std::string GenerateDebrisVolumeTask::description() {
 }
 
 void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCallback) {
+    SpiceManager::KernelHandle kernel =
+    SpiceManager::ref().loadKernel(absPath("${DATA}/assets/spice/naif0012.tls"));
+
+    defer {
+        SpiceManager::ref().unloadKernel(kernel);
+    };
 
     //1. read TLE-data and position of debris elements.
     _TLEDataVector = readTLEFile(_inputPath);
@@ -480,16 +493,18 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
     //  std::vector<glm::dvec3> endPositionBuffer = getPositionBuffer(_TLEDataVector, _endTime);
     
     int numberOfPoints = 40;
-    std::vector<glm::dvec3> generatedPositions = generatePositions(numberOfPoints);
+    //Needs to be looked at, caused my computer to crash...
+    //std::vector<glm::dvec3> generatedPositions = generatePositions(numberOfPoints);
     
     const int size = _dimensions.x *_dimensions.y *_dimensions.z;
-    int *densityArrayp = new int[size];
+    int *densityArrayp = new int[size]();
     float maxApogee = getMaxApogee(_TLEDataVector);
-    densityArrayp = mapDensityToVoxels(densityArrayp, generatedPositions, _dimensions, maxApogee);
+    //densityArrayp = mapDensityToVoxels(densityArrayp, generatedPositions, _dimensions, maxApogee);
+    densityArrayp = mapDensityToVoxels(densityArrayp, startPositionBuffer, _dimensions, maxApogee);
         
     // create object rawVolume
     volume::RawVolume<float> rawVolume(_dimensions);
-    glm::vec3 domainSize = _upperDomainBound - _lowerDomainBound;
+    //glm::vec3 domainSize = _upperDomainBound - _lowerDomainBound;
     
     float minVal = std::numeric_limits<float>::max();
     float maxVal = std::numeric_limits<float>::min();
@@ -500,10 +515,13 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
     //     glm::vec3 coord = _lowerDomainBound +
     //        glm::vec3(cell) / glm::vec3(_dimensions) * domainSize;
         float value = getDensityAt(cell, densityArrayp, rawVolume);   // (coord)
+        //LINFO(fmt::format("EachVoxel: {} ", value));
         rawVolume.set(cell, value);
 
         minVal = std::min(minVal, value);
         maxVal = std::max(maxVal, value);
+        /*LINFO(fmt::format("min: {} ", minVal));
+        LINFO(fmt::format("max: {} ", maxVal));*/
     });
 
     ghoul::filesystem::File file(_rawVolumeOutputPath);
@@ -522,10 +540,15 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
     metadata.hasDomainUnit = false;
     metadata.hasValueUnit = false;
     metadata.gridType = VolumeGridType::Cartesian;
-    metadata.hasDomainBounds = false;
+    metadata.hasDomainBounds = true;
+    metadata.lowerDomainBound = _lowerDomainBound;
+    metadata.upperDomainBound = _upperDomainBound;
     metadata.hasValueRange = true;
     metadata.minValue = minVal;
     metadata.maxValue = maxVal;
+
+    /*LINFO(fmt::format("min2: {} ", minVal));
+    LINFO(fmt::format("max2: {} ", maxVal));*/
 
     ghoul::Dictionary outputDictionary = metadata.dictionary();
     ghoul::DictionaryLuaFormatter formatter;
@@ -549,13 +572,18 @@ documentation::Documentation GenerateDebrisVolumeTask::documentation() {
                 Optional::No,
                 "The type of this task",
             },
-            // {
-            //     KeyValueFunction,
-            //     new StringAnnotationVerifier("A lua expression that returns a function "
-            //     "taking three numbers as arguments (x, y, z) and returning a number."),
-            //     Optional::No,
-            //     "The lua function used to compute the cell values",
-            // },
+            {
+                KeyStartTime,
+                new StringAnnotationVerifier("start time"),
+                Optional::No,
+                "start time",
+            },
+            {
+                KeyInputPath,
+                new StringAnnotationVerifier("A valid filepath"),
+                Optional::No,
+                "Input path to the TLE-data",
+            },
             {
                 KeyRawVolumeOutput,
                 new StringAnnotationVerifier("A valid filepath"),
@@ -574,18 +602,18 @@ documentation::Documentation GenerateDebrisVolumeTask::documentation() {
                 Optional::No,
                 "A vector representing the number of cells in each dimension",
             },
-            // {
-            //     KeyLowerDomainBound,
-            //     new DoubleVector3Verifier,
-            //     Optional::No,
-            //     "A vector representing the lower bound of the domain"
-            // },
-            // {
-            //     KeyUpperDomainBound,
-            //     new DoubleVector3Verifier,
-            //     Optional::No,
-            //     "A vector representing the upper bound of the domain"
-            // }
+             {
+                 KeyLowerDomainBound,
+                 new DoubleVector3Verifier,
+                 Optional::No,
+                 "A vector representing the lower bound of the domain"
+             },
+             {
+                 KeyUpperDomainBound,
+                 new DoubleVector3Verifier,
+                 Optional::No,
+                 "A vector representing the upper bound of the domain"
+             }
         }
     };
 }
