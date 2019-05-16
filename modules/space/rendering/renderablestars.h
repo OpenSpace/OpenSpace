@@ -33,7 +33,6 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/vector/vec2property.h>
-
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <optional>

@@ -117,7 +117,6 @@ private:
     bool _dataIsDirty = true;
     bool _textColorIsDirty = true;
     bool _hasLabel = false;
-    bool _labelDataIsDirty = true;
 
     properties::FloatProperty _alphaValue;
     //properties::FloatProperty _scaleFactor;

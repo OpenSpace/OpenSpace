@@ -60,11 +60,11 @@ uniform dmat4 modelMatrix;
 
 const double PARSEC = 3.08567756E16;
 
-const vec2 corners[4] = vec2[4]( 
+const vec2 corners[4] = vec2[4](
     vec2(0.0, 0.0),
-    vec2(1.0, 0.0), 
+    vec2(1.0, 0.0),
     vec2(1.0, 1.0),
-    vec2(0.0, 1.0)     
+    vec2(0.0, 1.0)
 );
 
 const float SunTemperature = 5800.0f;
@@ -93,7 +93,8 @@ void main() {
     dvec4 clipTestPos = cameraViewProjectionMatrix * dpos;
     clipTestPos /= clipTestPos.w;
     if ((clipTestPos.x < -1.0 || clipTestPos.x > 1.0) ||
-        (clipTestPos.y < -1.0 || clipTestPos.y > 1.0)) {
+        (clipTestPos.y < -1.0 || clipTestPos.y > 1.0))
+    {
         return;
     }
 
@@ -118,7 +119,7 @@ void main() {
                         (radiusCent * double(starRadius))) * pow(10.0, magnitudeExponent);
     } else if (psfParamConf == 2) {
         double luminosity              = double(1.0 - ge_bvLumAbsMagAppMag.y);
-        double distanceToStarInParsecs = trunc(length(dpos.xyz - eyePosition) / PARSEC);    
+        double distanceToStarInParsecs = trunc(length(dpos.xyz - eyePosition) / PARSEC);
         double apparentBrightness      = luminosity / distanceToStarInParsecs;
         float L_over_Lsun              = pow(2.51f, SunAbsMagnitude - ge_bvLumAbsMagAppMag.z);
         float starTemperature          = bvToKelvin(ge_bvLumAbsMagAppMag.x);
@@ -249,5 +250,5 @@ void main() {
     gl_Position = bottomRightVertex;
     psfCoords   = vec2(1.0, -1.0);
     EmitVertex();
-    EndPrimitive();     
+    EndPrimitive();
 }
