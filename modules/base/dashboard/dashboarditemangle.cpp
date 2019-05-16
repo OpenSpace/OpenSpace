@@ -214,9 +214,7 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
         _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
     }
     if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(
-            dictionary.value<double>(FontSizeInfo.identifier)
-        );
+        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
     }
 
     _fontName.onChange([this]() {
@@ -256,9 +254,7 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
     }
     addProperty(_source.type);
 
-    _source.nodeName.onChange([this]() {
-        _source.node = nullptr;
-    });
+    _source.nodeName.onChange([this]() { _source.node = nullptr; });
     if (_source.type == Type::Node) {
         if (dictionary.hasKey(SourceNodeNameInfo.identifier)) {
             _source.nodeName = dictionary.value<std::string>(
@@ -297,9 +293,7 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
     }
     addProperty(_reference.type);
 
-    _reference.nodeName.onChange([this]() {
-        _reference.node = nullptr;
-    });
+    _reference.nodeName.onChange([this]() { _reference.node = nullptr; });
     if (_reference.type == Type::Node) {
         if (dictionary.hasKey(ReferenceNodeNameInfo.identifier)) {
             _reference.nodeName = dictionary.value<std::string>(
