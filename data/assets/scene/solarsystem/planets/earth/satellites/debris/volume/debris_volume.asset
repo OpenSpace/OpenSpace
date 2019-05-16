@@ -11,7 +11,7 @@ local earthRadius = 6371000
 
 local volume = {
     Identifier = "DebrisVolume",
-    Parent = transforms.EarthBarycenter.Identifier,
+    Parent = transforms.EarthInertial.Identifier,
     Renderable = {
         Type = "RenderableTimeVaryingVolume",
         SourceDirectory = asset.localResource("generated"),
@@ -20,8 +20,8 @@ local volume = {
         MinValue = 0,
         MaxValue = 1,
         GridType = "Cartesian",
-        SecondsBefore = 24*60*60,
-        SecondsAfter = 24*60*60
+        SecondsBefore = 50*365*24*60*60,
+        SecondsAfter = 50*365*24*60*60
     },
     GUI = {
         Path = "/Volumes"
