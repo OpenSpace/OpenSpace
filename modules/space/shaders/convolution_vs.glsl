@@ -24,34 +24,13 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+layout(location = 0) in vec4 in_position;
 
-in vec3 in_position;
-in vec4 in_bvLumAbsMagAppMag;
-in vec3 in_velocity;
-in float in_speed;
-
-out vec4 vs_bvLumAbsMagAppMag;
-out vec3 vs_velocity;
-out float vs_speed;
-out vec4 vs_correctedPositionViewSpace;
-
-out vec4 psc_position;
-out vec3 vs_brightness;
-out vec4 vs_gPosition;
-
-/*
-uniform mat4 view;
-uniform mat4 projection;
-
-uniform float FWHM;
-uniform float betaConstant;
-*/
+out vec2 psfCoords;
+out vec2 texturesCoords;
 
 void main() {
-    vs_bvLumAbsMagAppMag = in_bvLumAbsMagAppMag;
-    vs_velocity          = in_velocity;
-    vs_speed             = in_speed;
-
-    gl_Position = vec4(in_position, 1.0);
+    gl_Position = vec4(in_position.xy, 0.f, 1.f);
+    psfCoords = vec2(in_position);
+    texturesCoords = vec2(in_position.zw);
 }

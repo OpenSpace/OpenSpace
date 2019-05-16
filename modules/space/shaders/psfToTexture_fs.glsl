@@ -24,34 +24,44 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+//layout(location = 1) out vec4 renderTableColor;
+out vec4 renderTableColor;
 
-in vec3 in_position;
-in vec4 in_bvLumAbsMagAppMag;
-in vec3 in_velocity;
-in float in_speed;
+uniform int psfMethod;
 
-out vec4 vs_bvLumAbsMagAppMag;
-out vec3 vs_velocity;
-out float vs_speed;
-out vec4 vs_correctedPositionViewSpace;
-
-out vec4 psc_position;
-out vec3 vs_brightness;
-out vec4 vs_gPosition;
-
-/*
-uniform mat4 view;
-uniform mat4 projection;
+uniform float p0Param;
+uniform float p1Param;
+uniform float p2Param;
+uniform float alphaConst;
 
 uniform float FWHM;
 uniform float betaConstant;
-*/
 
-void main() {
-    vs_bvLumAbsMagAppMag = in_bvLumAbsMagAppMag;
-    vs_velocity          = in_velocity;
-    vs_speed             = in_speed;
+in vec2 psfCoords;
 
-    gl_Position = vec4(in_position, 1.0);
+void main(void) {
+    vec4 fullColor = vec4(0.0, 0.0, 0.0, 1.0);
+    if (psfMethod == 0) { 
+        // PSF Functions from paper: Physically-Based Galre Effects for Digital
+        // Images - Spencer, Shirley, Zimmerman and Greenberg.
+        float theta = sqrt((psfCoords.y*psfCoords.y + psfCoords.x*psfCoords.x)) * 90.0;
+        float f0  = 2.61E6 * exp(-pow(theta/alphaConst, 2.0));
+        float f1  = 20.91/pow(theta + alphaConst, 3.0);
+        float f2  = 72.37/pow(theta + alphaConst, 2.0);
+        float psf_p = p0Param * f0 + p1Param * f1 + p2Param * f2;
+        fullColor = vec4(psf_p);
+    } else if (psfMethod == 1) {
+        // Moffat
+        float r = sqrt((psfCoords.y*psfCoords.y + psfCoords.x*psfCoords.x)) * 90.0;
+        float alpha = FWHM / (2.f * sqrt(pow(2.f, 1.f/betaConstant) - 1));
+        float moffat_psf = pow(1.f + (r/alpha)*(r/alpha), -betaConstant);
+        
+        fullColor = vec4(moffat_psf);
+    }
+    
+    if (fullColor.a == 0) {
+        discard;
+    }
+    
+    renderTableColor = fullColor;
 }
