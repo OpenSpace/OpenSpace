@@ -115,20 +115,33 @@ void RenderablePlaneImageLocal::deinitializeGL() {
 
 void RenderablePlaneImageLocal::bindTexture() {
 
-    //_texture->bind();
-    if(global::timeManager.isPaused()){
-
-        glBindTexture(GL_TEXTURE_2D, *_textureList[_counter]);
-        _counter2++;
-        if(_counter2 == 50){
-            _counter++;
-            _counter2 = 0;
-            
-        }
-        if(_counter == 23) _counter = 0;
-
-        
-    }else glBindTexture(GL_TEXTURE_2D, *_textureList[1]);
+    _texture->bind();
+    
+    std::string current = global::timeManager.time().ISO8601();
+    current.erase(4, 1);
+    current.erase(6, 1);
+    current.erase(8, 1);
+    current.erase(10, 1);
+    current.erase(12);
+    current.erase(0,2);
+    
+    if(_textureList.find(current) != _textureList.end()) _texture = _textureList[current].get();
+    
+    _texture->bind();
+    
+//    if(global::timeManager.isPaused()){
+//
+//        glBindTexture(GL_TEXTURE_2D, *_textureList[_counter]);
+//        _counter2++;
+//        if(_counter2 == 20){
+//            _counter++;
+//            _counter2 = 0;
+//
+//        }
+//        if(_counter == 23) _counter = 0;
+//
+//
+//    }else glBindTexture(GL_TEXTURE_2D, *_textureList[1]);
 
 }
 
@@ -147,10 +160,10 @@ void RenderablePlaneImageLocal::loadTexture() {
 
         unsigned int hash = ghoul::hashCRC32File(_texturePath);
         
-    
+
               
   // Given that the node-part is located just outside the openspace-directory
-  const std::string fitsDir = "../../../../../../node/FITSdata/mrzqs190501/";     //Mac
+  const std::string fitsDir = "../../../../../../node/FITSdata/";     //Mac
   //const std::string fitsDir = "../../../node/FITSdata/mrzqs190501/";            //PC
   std::string testpath = absPath(fitsDir + "mrzqs190501t0014c2216_007.fits");
   LERROR(testpath);
@@ -158,6 +171,8 @@ void RenderablePlaneImageLocal::loadTexture() {
   
   // All the files in the given directory
   std::vector<std::string> fitsFiles = ghoul::filesystem::Directory(fitsDir).readFiles();
+  std::sort(fitsFiles.begin(), fitsFiles.end());
+        
   LERROR("antal filer: " + std::to_string(fitsFiles.size()));
     for (const auto & entry : fitsFiles) {
         LERROR(entry);
@@ -168,7 +183,7 @@ void RenderablePlaneImageLocal::loadTexture() {
         const auto tempBild = fitsFileReader.readImageFloat(entry);
         //                const auto tempBild = fitsFileReader.readImageFloat(testpath);
 
-        int magicalCounter = -6;
+        int magicalCounter = 0;
         for (char c : entry) {
             if (std::isdigit(c)) {
                 if (magicalCounter >= 0 && magicalCounter < 10) {
@@ -189,8 +204,8 @@ void RenderablePlaneImageLocal::loadTexture() {
         for (int i = 0; i < 360; i++) {
             for (int j = 0; j < 180; j++) {
                 color = tempBild->contents[(i * 180) + j];
-                color = (color - minvalue) / (maxvalue - minvalue);
-                //color = (color+stdvalue)/stdvalue; //some semirandom operation to actually se something in the texture
+                //color = (color - minvalue) / (maxvalue - minvalue);
+                color = (color+stdvalue)/stdvalue; //some semirandom operation to actually se something in the texture
                 fitsImage[i][j] = static_cast<GLfloat>(color);
             }
         }
@@ -204,10 +219,10 @@ void RenderablePlaneImageLocal::loadTexture() {
         LERROR(std::to_string(static_cast<int>(*textureFits)));
 
 
-        _textureList.push_back(std::move(textureFits));
+        _textureList[dateID] = std::move(textureFits);
         
     }
-        _texture = _textureList[0].get();
+        _texture = _textureList.begin()->second.get();
 
 
         BaseModule::TextureManager.release(t);

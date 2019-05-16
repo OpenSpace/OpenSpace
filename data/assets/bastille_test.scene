@@ -34,7 +34,9 @@ asset.onInitialize(function ()
     -- Jump to bastille day
     -- openspace.time.setTime("2000 JUL 14 08:33:37.100")
 
-   
+    openspace.time.setTime("2019 MAY 01 00:00:00.000")
+
+  
     openspace.setDefaultGuiSorting()
 
     openspace.globebrowsing.loadWMSServersFromFile(
