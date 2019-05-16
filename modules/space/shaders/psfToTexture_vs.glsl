@@ -22,17 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "floatoperations.glsl"
-#include <#{fragmentPath}>
+#version __CONTEXT__
 
-layout(location = 0) out vec4 _out_color_;
-layout(location = 1) out vec4 gPosition;
-layout(location = 2) out vec4 gNormal;
+layout(location = 0) in vec4 in_position;
+
+out vec2 psfCoords;
 
 void main() {
-     Fragment f   = getFragment();
-     _out_color_  = f.color;
-     gPosition    = f.gPosition;
-     gNormal      = f.gNormal;
-     gl_FragDepth = normalizeFloat(f.depth);
+    gl_Position = vec4(in_position.xy, 0.f, 1.f);
+    psfCoords = vec2(in_position);
 }

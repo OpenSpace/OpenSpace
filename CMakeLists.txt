@@ -103,7 +103,7 @@ execute_process(
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   RESULT_VARIABLE OPENSPACE_GIT_STATUS_RETURN
 )
-if (NOT OPENSPACE_GIT_STATUS_RETURN EQUAL 0) 
+if (NOT OPENSPACE_GIT_STATUS_RETURN EQUAL 0)
   set(OPENSPACE_GIT_STATUS "uncommitted changes")
 else()
   set(OPENSPACE_GIT_STATUS "")
@@ -118,7 +118,7 @@ include(src/CMakeLists.txt)
 ##########################################################################################
 # System libraries
 if (APPLE)
-    begin_dependency("Core Libraries")
+  begin_dependency("Core Libraries")
   target_include_directories(openspace-core PUBLIC "/Developer/Headers/FlatCarbon")
   find_library(COREFOUNDATION_LIBRARY CoreFoundation)
   find_library(CARBON_LIBRARY Carbon)

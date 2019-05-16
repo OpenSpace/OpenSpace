@@ -26,7 +26,8 @@ local object = {
         UseAdditiveBlending = true,
         Orientation = "Inside",
         MirrorTexture = true,
-        FadeOutThreshold = 0.01
+        FadeOutThreshold = 0.01,
+        Background = true
     },
     GUI = {
         Name = "Milky Way (ESO)",
