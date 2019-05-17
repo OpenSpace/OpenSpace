@@ -1010,7 +1010,6 @@ void setSgctDelegateFunctions() {
     };
 }
 
-#pragma optimize ("", off)
 int main(int argc, char** argv) {
 #ifdef WIN32
     SetUnhandledExceptionFilter(generateMiniDump);
