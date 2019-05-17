@@ -1,18 +1,9 @@
-local fn =
-	"return function (x, y, z) " ..
-    "    if math.sqrt(x^2 + y^2 + z^2) < 0.7 then " ..
-    "        return 1.0 " ..
-    "    end " ..
-    "    return 0.0 " ..
-    "end"
 
 return {{
-	Type = "GenerateRawVolumeTask",
+	Type = "GenerateDebrisVolumeTask",
 	Dimensions = {32, 32, 32},
-	-- LowerDomainBound = {-0.5, -0.5, -0.5},
-	-- UpperDomainBound = {0.5, 0.5, 0.5},
-	ValueFunction = fn,
 	StartTime = "2018-05-04T00:00:00",
+	InputPath = "${SYNC}/url/satellite_tle_data_Iridium33Debris(10708435089634408069)/files/iridium-33-debris.txt", 
 	RawVolumeOutput = "${DATA}/assets/scene/solarsystem/planets/earth/satellites/debris/volume/generated/singleDebris.rawvolume",
 	DictionaryOutput = "${DATA}/assets/scene/solarsystem/planets/earth/satellites/debris/volume/generated/singleDebris.dictionary"
 }}
