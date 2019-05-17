@@ -113,7 +113,9 @@ struct WindowDelegate {
 
     int (*currentWindowId)() = []() { return 0; };
 
-    void(*setFieldOfViewAspectRatio)(float ratio) = [](float) { };
+    double (*getHorizFieldOfView)() = []() { return 0.0; };
+
+    void (*setHorizFieldOfView)(float hFovDeg) = [](float) { };
 
     using GLProcAddress = void(*)(void);
 
