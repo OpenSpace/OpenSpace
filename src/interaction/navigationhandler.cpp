@@ -124,14 +124,16 @@ void NavigationHandler::updateCamera(double deltaTime) {
     if (_cameraUpdatedFromScript) {
         _cameraUpdatedFromScript = false;
     }
-    else if ( ! _playbackModeEnabled ) {
-        if (_camera) {
-            if (_useKeyFrameInteraction) {
-                _keyframeNavigator->updateCamera(*_camera, _playbackModeEnabled);
-            }
-            else {
-                _orbitalNavigator->updateStatesFromInput(*_inputState, deltaTime);
-                _orbitalNavigator->updateCameraStateFromStates(deltaTime);
+    else {
+        if ( ! _playbackModeEnabled ) {
+            if (_camera) {
+                if (_useKeyFrameInteraction) {
+                    _keyframeNavigator->updateCamera(*_camera, _playbackModeEnabled);
+                }
+                else {
+                    _orbitalNavigator->updateStatesFromInput(*_inputState, deltaTime);
+                    _orbitalNavigator->updateCameraStateFromStates(deltaTime);
+                }
             }
         }
     }
@@ -150,6 +152,8 @@ void NavigationHandler::triggerPlaybackStart() {
 }
 
 void NavigationHandler::stopPlayback() {
+    _orbitalNavigator->resetVelocities();
+    _orbitalNavigator->resetNodeMovements();
     _playbackModeEnabled = false;
 }
 

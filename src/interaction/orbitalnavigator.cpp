@@ -345,6 +345,11 @@ glm::quat OrbitalNavigator::anchorNodeToCameraRotation() const {
 }
 
 
+void OrbitalNavigator::resetVelocities() {
+    _mouseStates.resetVelocities();
+    _joystickStates.resetVelocities();
+}
+
 void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
                                              double deltaTime)
 {
@@ -578,6 +583,21 @@ void OrbitalNavigator::setAnchorNode(const std::string& anchorNode) {
 
 void OrbitalNavigator::setAimNode(const std::string& aimNode) {
     _aim.set(aimNode);
+}
+
+void OrbitalNavigator::resetNodeMovements() {
+    if (_anchorNode) {
+        _previousAnchorNodePosition = _anchorNode->worldPosition();
+        _previousAnchorNodeRotation = glm::quat_cast(_anchorNode->worldRotationMatrix());
+    } else {
+        _previousAnchorNodePosition = glm::dvec3(0.0);
+        _previousAnchorNodeRotation = glm::dquat();
+    }
+    if (_aimNode) {
+        _previousAimNodePosition = _aimNode->worldPosition();
+    } else {
+        _previousAimNodePosition = glm::dvec3(0.0);
+    }
 }
 
 void OrbitalNavigator::startRetargetAnchor() {

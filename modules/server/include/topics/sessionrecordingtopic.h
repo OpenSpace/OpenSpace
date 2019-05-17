@@ -22,62 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
-#define __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
+#ifndef __OPENSPACE_MODULE_SERVER___SESSION_RECORDING_TOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___SESSION_RECORDING_TOPIC___H__
 
-#include <openspace/interaction/delayedvariable.h>
-#include <ghoul/glm.h>
+#include <modules/server/include/topics/topic.h>
+#include <openspace/interaction/sessionrecording.h>
 
-namespace openspace::interaction {
+namespace openspace {
 
-class InputState;
-
-class CameraInteractionStates {
+class SessionRecordingTopic : public Topic {
 public:
-    /**
-     * \param sensitivity
-     * \param velocityScaleFactor can be set to 60 to remove the inertia of the
-     * interaction. Lower value will make it harder to move the camera.
-     */
-    CameraInteractionStates(double sensitivity, double velocityScaleFactor);
-    virtual ~CameraInteractionStates() = default;
+    SessionRecordingTopic();
+    virtual ~SessionRecordingTopic();
 
-    virtual void updateStateFromInput(const InputState& inputState, double deltaTime) = 0;
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 
-    void setRotationalFriction(double friction);
-    void setHorizontalFriction(double friction);
-    void setVerticalFriction(double friction);
-    void setSensitivity(double sensitivity);
-    void setVelocityScaleFactor(double scaleFactor);
+private:
+    const int UnsetOnChangeHandle = -1;
 
-    glm::dvec2 globalRotationVelocity() const;
-    glm::dvec2 localRotationVelocity() const;
-    glm::dvec2 truckMovementVelocity() const;
-    glm::dvec2 localRollVelocity() const;
-    glm::dvec2 globalRollVelocity() const;
+    //Provides the idle/recording/playback state int value in json message
+    nlohmann::json state();
 
-    void resetVelocities();
-
-protected:
-    struct InteractionState {
-        InteractionState(double scaleFactor);
-        void setFriction(double friction);
-        void setVelocityScaleFactor(double scaleFactor);
-
-        glm::dvec2 previousPosition;
-        DelayedVariable<glm::dvec2, double> velocity;
-    };
-
-
-    double _sensitivity;
-
-    InteractionState _globalRotationState;
-    InteractionState _localRotationState;
-    InteractionState _truckMovementState;
-    InteractionState _localRollState;
-    InteractionState _globalRollState;
+    int _stateCallbackHandle = UnsetOnChangeHandle;
+    bool _isDone = false;
+    interaction::SessionRecording::SessionState _lastState;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
-#endif // __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
+#endif // __OPENSPACE_MODULE_SERVER___SESSION_RECORDING_TOPIC___H__

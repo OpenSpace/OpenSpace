@@ -74,7 +74,17 @@ void SessionRecording::setRecordDataFormat(RecordedDataMode dataMode) {
 }
 
 bool SessionRecording::startRecording(const std::string& filename) {
-    const std::string absFilename = absPath(filename);
+    if (filename.find("/") != std::string::npos) {
+        LERROR("Recording filename must not contain path (/) elements");
+        return false;
+    }
+    if (!FileSys.directoryExists(absPath("${RECORDINGS}"))) {
+        FileSys.createDirectory(
+            absPath("${RECORDINGS}"),
+            ghoul::filesystem::FileSystem::Recursive::Yes
+        );
+    }
+    const std::string absFilename = absPath("${RECORDINGS}/" + filename);
 
     if (_state == SessionState::Playback) {
         _playbackFile.close();
@@ -123,7 +133,11 @@ void SessionRecording::stopRecording() {
 bool SessionRecording::startPlayback(const std::string& filename,
                                      KeyframeTimeRef timeMode, bool forceSimTimeAtStart)
 {
-    const std::string absFilename = absPath(filename);
+    if (filename.find("/") != std::string::npos) {
+        LERROR("Playback filename must not contain path (/) elements");
+        return false;
+    }
+    const std::string absFilename = absPath("${RECORDINGS}/" + filename);
 
     if (_state == SessionState::Recording) {
         LERROR("Unable to start playback while in session recording mode");
@@ -299,7 +313,6 @@ void SessionRecording::cleanUpPlayback() {
         if (node) {
             global::navigationHandler.orbitalNavigator().setFocusNode(node->identifier());
         }
-
     }
     global::scriptScheduler.stopPlayback();
 
@@ -477,7 +490,7 @@ void SessionRecording::saveCameraKeyframe() {
                 << std::fixed << std::setprecision(7) << kf._rotation.y << " "
                 << std::fixed << std::setprecision(7) << kf._rotation.z << " "
                 << std::fixed << std::setprecision(7) << kf._rotation.w << " ";
-            keyframeLine << std::fixed << std::setprecision(7) << kf._scale << " ";
+            keyframeLine << std::scientific << kf._scale << " ";
             if (kf._followNodeRotation) {
                 keyframeLine << "F ";
             }
@@ -586,6 +599,16 @@ void SessionRecording::preSynchronization() {
     else if (_cleanupNeeded) {
         cleanUpPlayback();
     }
+
+    //Handle callback(s) for change in idle/record/playback state
+    if (_state != _lastState) {
+        using K = const CallbackHandle;
+        using V = StateChangeCallback;
+        for (const std::pair<K, V>& it : _stateChangeCallbacks) {
+            it.second();
+        }
+    }
+    _lastState = _state;
 }
 
 bool SessionRecording::isRecording() const {
@@ -594,6 +617,10 @@ bool SessionRecording::isRecording() const {
 
 bool SessionRecording::isPlayingBack() const {
     return (_state == SessionState::Playback);
+}
+
+SessionRecording::SessionState SessionRecording::state() const {
+    return _state;
 }
 
 bool SessionRecording::playbackAddEntriesToTimeline() {
@@ -1253,6 +1280,44 @@ void SessionRecording::saveKeyframeToFileBinary(unsigned char* buffer, size_t si
 
 void SessionRecording::saveKeyframeToFile(std::string entry) {
     _recordFile << std::move(entry) << std::endl;
+}
+
+SessionRecording::CallbackHandle SessionRecording::addStateChangeCallback(StateChangeCallback cb) {
+    CallbackHandle handle = _nextCallbackHandle++;
+    _stateChangeCallbacks.emplace_back(handle, std::move(cb));
+    return handle;
+}
+
+void SessionRecording::removeStateChangeCallback(CallbackHandle handle) {
+    const auto it = std::find_if(
+        _stateChangeCallbacks.begin(),
+        _stateChangeCallbacks.end(),
+        [handle](const std::pair<CallbackHandle, std::function<void()>>& cb) {
+            return cb.first == handle;
+        }
+    );
+
+    ghoul_assert(
+        it != _stateChangeCallbacks.end(),
+        "handle must be a valid callback handle"
+    );
+
+    _stateChangeCallbacks.erase(it);
+}
+
+std::string SessionRecording::playbackList() {
+    std::string fileList;
+    const std::string recordingsPath = absPath("${RECORDINGS}");
+
+    ghoul::filesystem::Directory currentDir(recordingsPath);
+    std::vector<std::string> allInputFiles = currentDir.readFiles();
+    for (std::string f : allInputFiles) {
+        //Remove path and keep only the filename, and add newline after
+        fileList.append(f.substr(recordingsPath.length() + 1, (f.length() - recordingsPath.length()) - 1));
+        fileList.append("\n");
+    }
+    //Remove the final trailing newline from the list and return it.
+    return fileList.substr(0, fileList.size() - 1);
 }
 
 scripting::LuaLibrary SessionRecording::luaLibrary() {
