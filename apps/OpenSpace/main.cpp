@@ -44,6 +44,7 @@
 #include <sgct.h>
 #include <chrono>
 #include <ctime>
+#include <stb_image.h>
 
 #ifdef WIN32
 #include <openspace/openspace.h>
@@ -262,10 +263,45 @@ void mainInitFunc() {
     openspace::global::openSpaceEngine.initialize();
     LDEBUG("Initializing OpenSpace Engine finished");
 
+    {
+        std::string path = absPath("${DATA}/openspace-icon.png");
+        int x;
+        int y;
+        int n;
+        unsigned char* data = stbi_load(path.c_str(), &x, &y, &n, 0);
+
+        GLFWimage icons[1];
+        icons[0].pixels = data;
+        icons[0].width = x;
+        icons[0].height = y;
+
+        const size_t nWindows = SgctEngine->getNumberOfWindows();
+        for (size_t i = 0; i < nWindows; ++i) {
+            const sgct::SGCTWindow* windowPtr = SgctEngine->getWindowPtr(i);
+            glfwSetWindowIcon(windowPtr->getWindowHandle(), 1, icons);
+        }
+
+        stbi_image_free(icons[0].pixels);
+    }
+
+
 
     LDEBUG("Initializing OpenGL in OpenSpace Engine started");
     openspace::global::openSpaceEngine.initializeGL();
     LDEBUG("Initializing OpenGL in OpenSpace Engine finished");
+
+    {
+
+        //using namespace ghoul::opengl;
+        //std::unique_ptr<ghoul::opengl::Texture> t = ghoul::io::TextureReader::ref().loadTexture(absPath("${DATA}/openspace-icon.png"));
+
+
+        //GLFWimage icons[1];
+        //icons[0].pixels =
+    }
+
+
+
 
     // Find if we have at least one OpenVR window
     // Save reference to first OpenVR window, which is the one we will copy to the HMD.
