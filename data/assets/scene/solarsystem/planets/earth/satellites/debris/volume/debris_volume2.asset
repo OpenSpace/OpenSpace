@@ -7,14 +7,14 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local earthRadius = 2 * 10946320;
+local earthRadius = 2 * 8540390;
 
 local volume = {
-    Identifier = "DebrisVolume",
+    Identifier = "DebrisVolume2",
     Parent = transforms.EarthInertial.Identifier,
     Renderable = {
         Type = "RenderableTimeVaryingVolume",
-        SourceDirectory = asset.localResource("generated"),
+        SourceDirectory = asset.localResource("generated2"),
         TransferFunction = asset.localResource("transferfunction.txt"),
         StepSize = 0.01,
         MinValue = 0,

@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 #include <modules/space/tasks/generatedebrisvolumetask.h>
-#include <ghoul/logging/logmanager.h>
 
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumemetadata.h>
@@ -395,9 +394,9 @@ std::vector<glm::dvec3> generatePositions(int numberOfPositions) {
     std::vector<glm::dvec3> positions;
     
     float radius = 700000;   // meter
-    int degreeStep = static_cast<int>(360 / numberOfPositions);
+    float degreeStep = 360 / numberOfPositions;
 
-    for(int i=0 ; i<= 360 ; i += degreeStep){
+    for(int i=0 ; i<= 360 ; i == degreeStep){
         glm::dvec3 singlePosition = glm::dvec3(radius* sin(i), radius*cos(i), 0.0);
         positions.push_back(singlePosition);
     }
@@ -433,9 +432,10 @@ int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim, float maxApogee){
                                      ,position.y + maxApogee
                                      ,position.z + maxApogee);
 
-    glm::uvec3 coordinateIndex = glm::uvec3(static_cast<int>(newPosition.x * dim.x / (2*(maxApogee + epsilon))),
-                                          static_cast<int>(newPosition.y * dim.y / (2 * (maxApogee + epsilon))),
-                                          static_cast<int>(newPosition.z * dim.z / (2 * (maxApogee + epsilon)))); 
+    glm::uvec3 coordinateIndex = glm::uvec3(static_cast<int>(newPosition.x * dim.x / (2 * (maxApogee + epsilon))),
+                                            static_cast<int>(newPosition.y * dim.y / (2 * (maxApogee + epsilon))),
+                                            static_cast<int>(newPosition.z * dim.z / (2 * (maxApogee + epsilon))));
+
     
     return coordinateIndex.z * (dim.x * dim.y) + coordinateIndex.y * dim.x + coordinateIndex.x;
 }
@@ -499,6 +499,7 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
     const int size = _dimensions.x *_dimensions.y *_dimensions.z;
     int *densityArrayp = new int[size]();
     float maxApogee = getMaxApogee(_TLEDataVector);
+    LINFO(fmt::format("maxApp: {} ", maxApogee));
     //densityArrayp = mapDensityToVoxels(densityArrayp, generatedPositions, _dimensions, maxApogee);
     densityArrayp = mapDensityToVoxels(densityArrayp, startPositionBuffer, _dimensions, maxApogee);
         
@@ -516,6 +517,11 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
     //        glm::vec3(cell) / glm::vec3(_dimensions) * domainSize;
         float value = getDensityAt(cell, densityArrayp, rawVolume);   // (coord)
         //LINFO(fmt::format("EachVoxel: {} ", value));
+        // if((cell.x + cell.y + cell.z) % 8 == 0)
+        //     value = 1;
+        // else
+        //     value = 0;
+
         rawVolume.set(cell, value);
 
         minVal = std::min(minVal, value);
@@ -583,12 +589,6 @@ documentation::Documentation GenerateDebrisVolumeTask::documentation() {
                 new StringAnnotationVerifier("A valid filepath"),
                 Optional::No,
                 "Input path to the TLE-data",
-            },
-            {
-                KeyStartTime,
-                new StringAnnotationVerifier("A valid timestamp"),
-                Optional::No,
-                "First timestep of volume",
             },
             {
                 KeyRawVolumeOutput,
