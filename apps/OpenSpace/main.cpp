@@ -1043,6 +1043,15 @@ void setSgctDelegateFunctions() {
     sgctDelegate.openGLProcedureAddress = [](const char* func) {
         return glfwGetProcAddress(func);
     };
+    sgctDelegate.getHorizFieldOfView = []() {
+        return static_cast<double>(
+            sgct::Engine::instance()->getWindowPtr(0)->getHorizFieldOfViewDegrees()
+        );
+    };
+    sgctDelegate.setHorizFieldOfView = [](float hFovDeg) {
+        sgct::SGCTWindow* w = sgct::Engine::instance()->getWindowPtr(0);
+        w->setHorizFieldOfView(hFovDeg);
+    };
 }
 
 int main(int argc, char** argv) {

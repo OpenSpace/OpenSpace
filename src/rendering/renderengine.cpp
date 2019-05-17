@@ -209,6 +209,14 @@ namespace {
         "Gamma, is the nonlinear operation used to encode and decode luminance or "
         "tristimulus values in the image."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo HorizFieldOfViewInfo = {
+        "HorizFieldOfView",
+        "Horizontal Field of View",
+        "Adjusts the degrees of the horizontal field of view. The vertical field of "
+        "view will be automatically adjusted to match, according to the current "
+        "aspect ratio."
+    };
 } // namespace
 
 
@@ -247,6 +255,7 @@ RenderEngine::RenderEngine()
         glm::vec3(-glm::pi<float>()),
         glm::vec3(glm::pi<float>())
     )
+    , _horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.0f)
 {
     _doPerformanceMeasurements.onChange([this](){
         global::performanceManager.setEnabled(_doPerformanceMeasurements);
@@ -287,6 +296,11 @@ RenderEngine::RenderEngine()
     addProperty(_gamma);
 
     addProperty(_applyWarping);
+
+    _horizFieldOfView.onChange([this]() {
+        global::windowDelegate.setHorizFieldOfView(_horizFieldOfView);
+    });
+    addProperty(_horizFieldOfView);
 
     _takeScreenshot.onChange([this](){
         _shouldTakeScreenshot = true;
@@ -391,6 +405,10 @@ void RenderEngine::initializeGL() {
     // development
     global::windowDelegate.setNearFarClippingPlane(0.001f, 1000.f);
 
+    //Set horizontal FOV value with whatever the field of view (in degrees) is of the
+    // initialized window
+    _horizFieldOfView = global::windowDelegate.getHorizFieldOfView();
+
     constexpr const float FontSizeBig = 50.f;
     _fontBig = global::fontManager.font(KeyFontMono, FontSizeBig);
     constexpr const float FontSizeTime = 15.f;
@@ -455,6 +473,8 @@ void RenderEngine::updateRenderer() {
         using FR = ghoul::fontrendering::FontRenderer;
         FR::defaultRenderer().setFramebufferSize(fontResolution());
         FR::defaultProjectionRenderer().setFramebufferSize(renderingResolution());
+        //Override the aspect ratio property value to match that of resized window
+        _horizFieldOfView = global::windowDelegate.getHorizFieldOfView();
     }
 
     _renderer->update();
