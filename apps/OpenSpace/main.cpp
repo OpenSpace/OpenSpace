@@ -1012,8 +1012,6 @@ void setSgctDelegateFunctions() {
 
 #pragma optimize ("", off)
 int main(int argc, char** argv) {
-    void* ptr = CreateThread;
-
 #ifdef WIN32
     SetUnhandledExceptionFilter(generateMiniDump);
 #endif // WIN32
