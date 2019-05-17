@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 #include <modules/space/tasks/generatedebrisvolumetask.h>
+#include <ghoul/logging/logmanager.h>
 
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumemetadata.h>
@@ -49,10 +50,11 @@ namespace {
     constexpr const char* KeyDictionaryOutput = "DictionaryOutput";
     constexpr const char* KeyDimensions = "Dimensions";
     constexpr const char* KeyStartTime = "StartTime";
-    //constexpr const char* KeyEndTime = "EndTime";
+    // constexpr const char* KeyEndTime = "EndTime";
     constexpr const char* KeyInputPath = "InputPath";
-     constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
-     constexpr const char* KeyUpperDomainBound = "UpperDomainBound";    
+    // constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
+    // constexpr const char* KeyUpperDomainBound = "UpperDomainBound";    
+    constexpr const char* _loggerCat = "SpaceDebris";
 
 }
 
@@ -393,9 +395,9 @@ std::vector<glm::dvec3> generatePositions(int numberOfPositions) {
     std::vector<glm::dvec3> positions;
     
     float radius = 700000;   // meter
-    float degreeStep = 360 / numberOfPositions;
+    int degreeStep = static_cast<int>(360 / numberOfPositions);
 
-    for(int i=0 ; i<= 360 ; i == degreeStep){
+    for(int i=0 ; i<= 360 ; i += degreeStep){
         glm::dvec3 singlePosition = glm::dvec3(radius* sin(i), radius*cos(i), 0.0);
         positions.push_back(singlePosition);
     }
@@ -431,10 +433,9 @@ int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim, float maxApogee){
                                      ,position.y + maxApogee
                                      ,position.z + maxApogee);
 
-    glm::vec3 coordinateIndex = glm::vec3(newPosition.x * dim.x, 
-                                          newPosition.y * dim.y, 
-                                          newPosition.z * dim.z) / (2*(maxApogee + epsilon));
-
+    glm::uvec3 coordinateIndex = glm::uvec3(static_cast<int>(newPosition.x * dim.x / (2*(maxApogee + epsilon))),
+                                          static_cast<int>(newPosition.y * dim.y / (2 * (maxApogee + epsilon))),
+                                          static_cast<int>(newPosition.z * dim.z / (2 * (maxApogee + epsilon)))); 
     
     return coordinateIndex.z * (dim.x * dim.y) + coordinateIndex.y * dim.x + coordinateIndex.x;
 }
@@ -462,12 +463,14 @@ GenerateDebrisVolumeTask::GenerateDebrisVolumeTask(const ghoul::Dictionary& dict
     _dimensions = dictionary.value<glm::vec3>(KeyDimensions);
     _startTime = dictionary.value<std::string>(KeyStartTime);
     //_endTime = dictionary.value<std::string>(KeyEndTime);
+   
     // since _inputPath is past from task,
     // there will have to be either one task per dataset,
     // or you need to combine the datasets into one file.
     _inputPath = dictionary.value<std::string>(KeyInputPath);
-    _lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
-    _upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
+
+    //_lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
+    //_upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
 
 
     _TLEDataVector = {};
@@ -498,7 +501,12 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
     //std::vector<glm::dvec3> generatedPositions = generatePositions(numberOfPoints);
     
     const int size = _dimensions.x *_dimensions.y *_dimensions.z;
-    int *densityArrayp = new int[size]();
+    int *densityArrayp = new int[size];
+    for (int i = 0; i < size; ++i) {
+        densityArrayp[i] = 0;
+    }
+    LINFO(fmt::format("densityArray: {} ",  densityArrayp[0]));
+
     float maxApogee = getMaxApogee(_TLEDataVector);
     //densityArrayp = mapDensityToVoxels(densityArrayp, generatedPositions, _dimensions, maxApogee);
     densityArrayp = mapDensityToVoxels(densityArrayp, startPositionBuffer, _dimensions, maxApogee);
@@ -588,7 +596,7 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
     std::fstream f(_dictionaryOutputPath, std::ios::out);
     f << "return " << metadataString;
     f.close();
-
+    delete[] densityArrayp;
 }
 
 documentation::Documentation GenerateDebrisVolumeTask::documentation() {
@@ -614,6 +622,12 @@ documentation::Documentation GenerateDebrisVolumeTask::documentation() {
                 new StringAnnotationVerifier("A valid filepath"),
                 Optional::No,
                 "Input path to the TLE-data",
+            },
+            {
+                KeyStartTime,
+                new StringAnnotationVerifier("A valid timestamp"),
+                Optional::No,
+                "First timestep of volume",
             },
             {
                 KeyRawVolumeOutput,
