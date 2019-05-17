@@ -32,6 +32,7 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/interaction/keyframenavigator.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -40,18 +41,47 @@
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/spicemanager.h>
-
 #include <ghoul/ghoul.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-
-#include <openspace/rendering/renderengine.h>
-
 #include <iterator>
 
 namespace {
     constexpr const char* _loggerCat = "SessionRecording";
+
+    template <typename T>
+    T readFromPlayback(std::ifstream& stream) {
+        T res;
+        stream.read(reinterpret_cast<char*>(&res), sizeof(T));
+        return res;
+    }
+
+    template <>
+    bool readFromPlayback(std::ifstream& stream) {
+        unsigned char b;
+        stream.read(reinterpret_cast<char*>(&b), sizeof(unsigned char));
+        if (b == 0) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+    template <>
+    std::string readFromPlayback(std::ifstream& stream) {
+        std::string res;
+        size_t strLen;
+        //Read string length from file
+        stream.read(reinterpret_cast<char*>(&strLen), sizeof(strLen));
+        //Read back full string
+        std::vector<char> temp(strLen + 1);
+        stream.read(temp.data(), strLen);
+        temp[strLen] = '\0';
+        res = temp.data();
+        return res;
+    }
 } // namespace
 
 #include "sessionrecording_lua.inl"
@@ -143,8 +173,8 @@ bool SessionRecording::startPlayback(const std::string& filename,
         LERROR("Unable to start playback while in session recording mode");
         return false;
     }
-    else if (_state == SessionState::Playback) {
-        if (_playbackFilename == absFilename) {
+    else {
+        if (_state == SessionState::Playback && _playbackFilename == absFilename) {
             LERROR(fmt::format(
                 "Unable to start playback on file {} since it is already in playback",
                 filename)
@@ -190,17 +220,15 @@ bool SessionRecording::startPlayback(const std::string& filename,
         // past the header, version, and data type
         _playbackFile.close();
         _playbackFile.open(_playbackFilename, std::ifstream::in | std::ios::binary);
-        size_t throwAwayHeaderReadSize = _fileHeaderTitle.length() +
-                                               _fileHeaderVersionLength +
-                                               sizeof(dataFormatBinaryTag) +
-                                               sizeof('\n');
-        _playbackFile.read(reinterpret_cast<char*>(&_keyframeBuffer),
-                           throwAwayHeaderReadSize);
+        size_t headerSize = _fileHeaderTitle.length() + _fileHeaderVersionLength +
+                            sizeof(dataFormatBinaryTag) + sizeof('\n');
+        _playbackFile.read(reinterpret_cast<char*>(&_keyframeBuffer), headerSize);
     }
 
     if (!_playbackFile.is_open() || !_playbackFile.good()) {
-        LERROR(fmt::format("Unable to open file {} for keyframe playback",
-            absFilename.c_str()));
+        LERROR(fmt::format(
+            "Unable to open file {} for keyframe playback", absFilename.c_str()
+        ));
         stopPlayback();
         cleanUpPlayback();
         return false;
@@ -337,7 +365,7 @@ bool SessionRecording::isDataModeBinary() {
     return _recordingDataMode == RecordedDataMode::Binary;
 }
 
-void SessionRecording::writeToFileBuffer(const double src) {
+void SessionRecording::writeToFileBuffer(double src) {
     const size_t writeSize_bytes = sizeof(double);
     unsigned char const *p = reinterpret_cast<unsigned char const*>(&src);
     memcpy((_keyframeBuffer + _bufferIndex), p, writeSize_bytes);
@@ -350,13 +378,13 @@ void SessionRecording::writeToFileBuffer(std::vector<char>& cvec) {
     _bufferIndex += writeSize_bytes;
 }
 
-void SessionRecording::writeToFileBuffer(const unsigned char c) {
+void SessionRecording::writeToFileBuffer(unsigned char c) {
     const size_t writeSize_bytes = sizeof(char);
     _keyframeBuffer[_bufferIndex] = c;
     _bufferIndex += writeSize_bytes;
 }
 
-void SessionRecording::writeToFileBuffer(const bool b) {
+void SessionRecording::writeToFileBuffer(bool b) {
     const size_t writeSize_bytes = sizeof(char);
     if (b) {
         _keyframeBuffer[_bufferIndex] = 1;
@@ -378,48 +406,6 @@ void SessionRecording::saveStringToFile(const std::string& s) {
     saveKeyframeToFileBinary(_keyframeBuffer, _bufferIndex);
 
     _recordFile.write(s.c_str(), s.size());
-}
-
-void SessionRecording::readFromPlayback(unsigned char& result) {
-    _playbackFile.read(reinterpret_cast<char*>(&result), sizeof(unsigned char));
-}
-
-void SessionRecording::readFromPlayback(double& result) {
-    _playbackFile.read(reinterpret_cast<char*>(&result), sizeof(double));
-}
-
-void SessionRecording::readFromPlayback(float& result) {
-    _playbackFile.read(reinterpret_cast<char*>(&result), sizeof(float));
-}
-
-void SessionRecording::readFromPlayback(size_t& result) {
-    _playbackFile.read(reinterpret_cast<char*>(&result), sizeof(size_t));
-}
-
-void SessionRecording::readFromPlayback(bool& result) {
-    unsigned char b;
-    _playbackFile.read(reinterpret_cast<char*>(&b), sizeof(unsigned char));
-    if (b == 0) {
-        result = false;
-    }
-    else if (b == 1) {
-        result = true;
-    }
-    else {
-        LERROR(fmt::format("Invalid bool read value at {}", _playbackLineNum - 1));
-    }
-}
-
-void SessionRecording::readFromPlayback(std::string& result) {
-    result.erase();
-    size_t strLen;
-    //Read string length from file
-    _playbackFile.read(reinterpret_cast<char*>(&strLen), sizeof(strLen));
-    //Read back full string
-    std::vector<char> temp(strLen + 1);
-    _playbackFile.read(temp.data(), strLen);
-    temp[strLen] = '\0';
-    result = temp.data();
 }
 
 bool SessionRecording::hasCameraChangedFromPrev(
@@ -631,7 +617,7 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
         bool fileReadOk = true;
 
         while (fileReadOk) {
-            readFromPlayback(frameType);
+            frameType = readFromPlayback<unsigned char>(_playbackFile);
             //Check if have reached EOF
             if (!_playbackFile) {
                 LINFO(fmt::format(
@@ -758,14 +744,16 @@ double SessionRecording::currentTime() const {
 }
 
 void SessionRecording::playbackCamera() {
-    double timeOs, timeRec, timeSim;
+    double timeOs;
+    double timeRec;
+    double timeSim;
     std::string rotationFollowing;
     interaction::KeyframeNavigator::CameraPose pbFrame;
     datamessagestructures::CameraKeyframe kf;
     if (isDataModeBinary()) {
-        readFromPlayback(timeOs);
-        readFromPlayback(timeRec);
-        readFromPlayback(timeSim);
+        timeOs = readFromPlayback<double>(_playbackFile);
+        timeRec = readFromPlayback<double>(_playbackFile);
+        timeSim = readFromPlayback<double>(_playbackFile);
         try {
             kf.read(&_playbackFile);
         }
@@ -838,19 +826,21 @@ void SessionRecording::playbackCamera() {
 }
 
 void SessionRecording::playbackTimeChange() {
-    double timeOs, timeRec, timeSim;
+    double timeOs;
+    double timeRec;
+    double timeSim;
     datamessagestructures::TimeKeyframe pbFrame;
     if (isDataModeBinary()) {
-        readFromPlayback(timeOs);
-        readFromPlayback(timeRec);
-        readFromPlayback(timeSim);
-        readFromPlayback(pbFrame._dt);
-        readFromPlayback(pbFrame._paused);
-        readFromPlayback(pbFrame._requiresTimeJump);
+        timeOs = readFromPlayback<double>(_playbackFile);
+        timeRec = readFromPlayback<double>(_playbackFile);
+        timeSim = readFromPlayback<double>(_playbackFile);
+        pbFrame._dt = readFromPlayback<double>(_playbackFile);
+        pbFrame._paused = readFromPlayback<bool>(_playbackFile);
+        pbFrame._requiresTimeJump = readFromPlayback<bool>(_playbackFile);
+
         if (!_playbackFile) {
             LERROR(fmt::format(
-                "Error reading time playback from keyframe entry {}",
-                _playbackLineNum - 1
+                "Error reading time playback from keyframe entry {}", _playbackLineNum - 1
             ));
             return;
         }
@@ -892,16 +882,18 @@ void SessionRecording::playbackTimeChange() {
 }
 
 void SessionRecording::playbackScript() {
-    double timeOs, timeRec, timeSim;
+    double timeOs;
+    double timeRec;
+    double timeSim;
     unsigned int numScriptLines;
     datamessagestructures::ScriptMessage pbFrame;
 
     if (isDataModeBinary()) {
-        readFromPlayback(timeOs);
-        readFromPlayback(timeRec);
-        readFromPlayback(timeSim);
+        timeOs = readFromPlayback<double>(_playbackFile);
+        timeRec = readFromPlayback<double>(_playbackFile);
+        timeSim = readFromPlayback<double>(_playbackFile);
         try {
-            readFromPlayback(pbFrame._script);
+            pbFrame._script = readFromPlayback<std::string>(_playbackFile);
         }
         catch (std::bad_alloc&) {
             LERROR(fmt::format(

@@ -589,15 +589,13 @@ void OrbitalNavigator::resetNodeMovements() {
     if (_anchorNode) {
         _previousAnchorNodePosition = _anchorNode->worldPosition();
         _previousAnchorNodeRotation = glm::quat_cast(_anchorNode->worldRotationMatrix());
-    } else {
+    }
+    else {
         _previousAnchorNodePosition = glm::dvec3(0.0);
         _previousAnchorNodeRotation = glm::dquat();
     }
-    if (_aimNode) {
-        _previousAimNodePosition = _aimNode->worldPosition();
-    } else {
-        _previousAimNodePosition = glm::dvec3(0.0);
-    }
+
+    _previousAimNodePosition = _aimNode ? _aimNode->worldPosition() : glm::dvec3(0.0);
 }
 
 void OrbitalNavigator::startRetargetAnchor() {

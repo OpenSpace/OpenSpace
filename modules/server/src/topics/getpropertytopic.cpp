@@ -43,14 +43,14 @@
 using nlohmann::json;
 
 namespace {
-const char* _loggerCat = "GetPropertyTopic";
-const char* AllPropertiesValue = "__allProperties";
-const char* AllNodesValue = "__allNodes";
-const char* AllScreenSpaceRenderablesValue = "__screenSpaceRenderables";
-const char* PropertyKey = "property";
-const char* RootPropertyOwner = "__rootOwner";
-const char* SessionRecordingPlaybackList = "playbackList";
-}
+    constexpr const char* _loggerCat = "GetPropertyTopic";
+    constexpr const char* AllPropertiesValue = "__allProperties";
+    constexpr const char* AllNodesValue = "__allNodes";
+    constexpr const char* AllScreenSpaceRenderablesValue = "__screenSpaceRenderables";
+    constexpr const char* PropertyKey = "property";
+    constexpr const char* RootPropertyOwner = "__rootOwner";
+    constexpr const char* SessionRecordingPlaybackList = "playbackList";
+} // namespace
 
 namespace openspace {
 

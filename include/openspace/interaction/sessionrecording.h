@@ -43,14 +43,14 @@ class KeyframeNavigator;
 class SessionRecording : public properties::PropertyOwner {
 public:
     enum class RecordedDataMode {
-        Ascii,
+        Ascii = 0,
         Binary
     };
 
     enum class SessionState {
         Idle = 0,
-        Recording = 1,
-        Playback = 2
+        Recording,
+        Playback
     };
 
     using CallbackHandle = int;
@@ -204,20 +204,14 @@ private:
     void playbackScript();
     bool playbackAddEntriesToTimeline();
     void signalPlaybackFinishedForComponent(RecordedType type);
-    void writeToFileBuffer(const double src);
+    void writeToFileBuffer(double src);
     void writeToFileBuffer(std::vector<char>& cvec);
-    void writeToFileBuffer(const unsigned char c);
+    void writeToFileBuffer(unsigned char c);
     void writeToFileBuffer(bool b);
     void saveStringToFile(const std::string& s);
     void saveKeyframeToFileBinary(unsigned char* bufferSource, size_t size);
     void findFirstCameraKeyframeInTimeline();
     std::string readHeaderElement(size_t readLen_chars);
-    void readFromPlayback(unsigned char& result);
-    void readFromPlayback(double& result);
-    void readFromPlayback(float& result);
-    void readFromPlayback(size_t& result);
-    void readFromPlayback(bool& result);
-    void readFromPlayback(std::string& result);
     void saveKeyframeToFile(std::string entry);
 
     void addKeyframe(double timestamp,

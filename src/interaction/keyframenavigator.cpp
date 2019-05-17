@@ -142,8 +142,10 @@ bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose prevPose,
     t = std::max(0.0, std::min(1.0, t));
     glm::dvec3 nowCameraPosition = prevKeyframeCameraPosition * (1 - t) +
                                    nextKeyframeCameraPosition * t;
-    glm::dquat nowCameraRotation = glm::slerp(prevKeyframeCameraRotation,
-        nextKeyframeCameraRotation, t
+    glm::dquat nowCameraRotation = glm::slerp(
+        prevKeyframeCameraRotation,
+        nextKeyframeCameraRotation,
+        t
     );
 
     camera->setPositionVec3(nowCameraPosition);

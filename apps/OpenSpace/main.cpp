@@ -318,13 +318,6 @@ void mainInitFunc() {
         );
     }
 
-    std::string sessionRecordingPath = "${RECORDINGS}";
-    FileSys.registerPathToken(
-        "${RECORDINGS}",
-        absPath(sessionRecordingPath),
-        ghoul::filesystem::FileSystem::Override::Yes
-    );
-
     for (size_t i = 0; i < nWindows; ++i) {
         sgct::SGCTWindow* w = SgctEngine->getWindowPtr(i);
         constexpr const char* screenshotNames = "OpenSpace";
