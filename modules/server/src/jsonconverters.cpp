@@ -112,6 +112,9 @@ void to_json(json& j, const Dictionary& dictionary) {
         else if (dictionary.hasValue<std::string>(key)) {
             object[key] = dictionary.value<std::string>(key);
         }
+        else if (dictionary.hasValue<bool>(key)) {
+            object[key] = dictionary.value<bool>(key);
+        }
         else if (dictionary.hasValue<Dictionary>(key)) {
             json child;
             to_json(child, dictionary.value<Dictionary>(key));
