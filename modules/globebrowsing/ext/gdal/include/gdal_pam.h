@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_pam.h 773b7550bb86d46bc587f547f5db549566665834 2017-12-18 04:05:13Z Kurt Schwehr $
+ * $Id: gdal_pam.h e37e476c4cf8f4b0df8995e0d95d5d672fca1a9b 2018-05-05 16:54:18 +0200 Even Rouault $
  *
  * Project:  GDAL Core
  * Purpose:  Declaration for Peristable Auxiliary Metadata classes.
@@ -87,22 +87,22 @@ class GDALPamRasterBand;
 class GDALDatasetPamInfo
 {
 public:
-    char        *pszPamFilename;
+    char        *pszPamFilename = nullptr;
 
-    char        *pszProjection;
+    char        *pszProjection = nullptr;
 
-    int         bHaveGeoTransform;
-    double      adfGeoTransform[6];
+    int         bHaveGeoTransform = false;
+    double      adfGeoTransform[6]{0,0,0,0,0,0};
 
-    int         nGCPCount;
-    GDAL_GCP   *pasGCPList;
-    char       *pszGCPProjection;
+    int         nGCPCount = 0;
+    GDAL_GCP   *pasGCPList = nullptr;
+    char       *pszGCPProjection = nullptr;
 
-    CPLString   osPhysicalFilename;
-    CPLString   osSubdatasetName;
-    CPLString   osAuxFilename;
+    CPLString   osPhysicalFilename{};
+    CPLString   osSubdatasetName{};
+    CPLString   osAuxFilename{};
 
-    int         bHasMetadata;
+    int         bHasMetadata = false;
 };
 //! @endcond
 
@@ -122,8 +122,8 @@ class CPL_DLL GDALPamDataset : public GDALDataset
 
                 GDALPamDataset(void);
 //! @cond Doxygen_Suppress
-    int         nPamFlags;
-    GDALDatasetPamInfo *psPam;
+    int         nPamFlags = 0;
+    GDALDatasetPamInfo *psPam = nullptr;
 
     virtual CPLXMLNode *SerializeToXML( const char *);
     virtual CPLErr      XMLInit( CPLXMLNode *, const char * );
@@ -249,7 +249,7 @@ class CPL_DLL GDALPamRasterBand : public GDALRasterBand
     void   PamInitialize();
     void   PamClear();
 
-    GDALRasterBandPamInfo *psPam;
+    GDALRasterBandPamInfo *psPam = nullptr;
 //! @endcond
 
   public:

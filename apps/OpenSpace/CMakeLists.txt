@@ -176,3 +176,7 @@ if (MSVC)
   target_link_libraries(OpenSpace Dbghelp.lib)
   end_header()
 endif ()
+
+if (OPENSPACE_NVTOOLS_ENABLED)
+  target_link_libraries(OpenSpace "${OPENSPACE_NVTOOLS_PATH}/lib/x64/nvToolsExt64_1.lib")
+endif ()

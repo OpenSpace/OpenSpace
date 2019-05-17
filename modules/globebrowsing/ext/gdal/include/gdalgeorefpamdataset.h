@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdalgeorefpamdataset.h 773b7550bb86d46bc587f547f5db549566665834 2017-12-18 04:05:13Z Kurt Schwehr $
+ * $Id: gdalgeorefpamdataset.h e37e476c4cf8f4b0df8995e0d95d5d672fca1a9b 2018-05-05 16:54:18 +0200 Even Rouault $
  *
  * Project:  GDAL
  * Purpose:  GDALPamDataset with internal storage for georeferencing, with
@@ -58,6 +58,8 @@ class CPL_DLL GDALGeorefPamDataset : public GDALPamDataset
 
     bool        m_bPAMLoaded;
     char**      m_papszMainMD;
+
+    CPL_DISALLOW_COPY_ASSIGN(GDALGeorefPamDataset)
 
   public:
     GDALGeorefPamDataset();

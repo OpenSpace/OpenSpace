@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_vsi_virtual.h 07238f4cbcdc1a56c9db7e8dc3a5727346194074 2018-04-02 14:34:13 +0200 Even Rouault $
+ * $Id: cpl_vsi_virtual.h 7b937306fdeb31f6adefa6675d83ccd60f99e619 2018-11-25 23:10:44 +0100 Even Rouault $
  *
  * Project:  VSI Virtual File System
  * Purpose:  Declarations for classes related to the virtual filesystem.
@@ -113,6 +113,14 @@ public:
     virtual const char* GetActualURL(const char* /*pszFilename*/) { return nullptr; }
     virtual const char* GetOptions() { return nullptr; }
     virtual char* GetSignedURL(const char* /*pszFilename*/, CSLConstList /* papszOptions */) { return nullptr; }
+    virtual bool Sync( const char* pszSource, const char* pszTarget,
+                            const char* const * papszOptions,
+                            GDALProgressFunc pProgressFunc,
+                            void *pProgressData,
+                            char*** ppapszOutputs  );
+
+    virtual VSIDIR* OpenDir( const char *pszPath, int nRecurseDepth,
+                             const char* const *papszOptions);
 };
 #endif /* #ifndef DOXYGEN_SKIP */
 
@@ -124,12 +132,14 @@ public:
 class CPL_DLL VSIFileManager
 {
 private:
-    VSIFilesystemHandler *poDefaultHandler;
-    std::map<std::string, VSIFilesystemHandler *> oHandlers;
+    VSIFilesystemHandler *poDefaultHandler = nullptr;
+    std::map<std::string, VSIFilesystemHandler *> oHandlers{};
 
     VSIFileManager();
 
     static VSIFileManager *Get();
+
+    CPL_DISALLOW_COPY_ASSIGN(VSIFileManager)
 
 public:
     ~VSIFileManager();
@@ -170,12 +180,11 @@ typedef struct
 class VSIArchiveContent
 {
 public:
-    time_t       mTime;
-    vsi_l_offset nFileSize;
-    int nEntries;
-    VSIArchiveEntry* entries;
+    time_t       mTime = 0;
+    vsi_l_offset nFileSize = 0;
+    int nEntries = 0;
+    VSIArchiveEntry* entries = nullptr;
 
-    VSIArchiveContent() : mTime(0), nFileSize(0), nEntries(0), entries(nullptr) {}
     ~VSIArchiveContent();
 };
 
@@ -195,12 +204,14 @@ class VSIArchiveReader
 
 class VSIArchiveFilesystemHandler : public VSIFilesystemHandler
 {
+    CPL_DISALLOW_COPY_ASSIGN(VSIArchiveFilesystemHandler)
+
 protected:
-    CPLMutex* hMutex;
+    CPLMutex* hMutex = nullptr;
     /* We use a cache that contains the list of files contained in a VSIArchive file as */
     /* unarchive.c is quite inefficient in listing them. This speeds up access to VSIArchive files */
     /* containing ~1000 files like a CADRG product */
-    std::map<CPLString,VSIArchiveContent*>   oFileList;
+    std::map<CPLString,VSIArchiveContent*>   oFileList{};
 
     virtual const char* GetPrefix() = 0;
     virtual std::vector<CPLString> GetExtensions() = 0;
@@ -224,6 +235,22 @@ public:
     virtual int FindFileInArchive(const char* archiveFilename, const char* fileInArchiveName, const VSIArchiveEntry** archiveEntry);
 };
 
+/************************************************************************/
+/*                              VSIDIR                                  */
+/************************************************************************/
+
+struct CPL_DLL VSIDIR
+{
+    VSIDIR() = default;
+    virtual ~VSIDIR();
+
+    virtual const VSIDIREntry* NextDirEntry() = 0;
+
+  private:
+    VSIDIR(const VSIDIR&) = delete;
+    VSIDIR& operator=(const VSIDIR&) = delete;
+};
+
 #endif /* #ifndef DOXYGEN_SKIP */
 
 VSIVirtualHandle CPL_DLL *VSICreateBufferedReaderHandle(VSIVirtualHandle* poBaseHandle);
@@ -231,6 +258,10 @@ VSIVirtualHandle* VSICreateBufferedReaderHandle(VSIVirtualHandle* poBaseHandle,
                                                 const GByte* pabyBeginningContent,
                                                 vsi_l_offset nCheatFileSize);
 VSIVirtualHandle CPL_DLL *VSICreateCachedFile( VSIVirtualHandle* poBaseHandle, size_t nChunkSize = 32768, size_t nCacheSize = 0 );
-VSIVirtualHandle CPL_DLL *VSICreateGZipWritable( VSIVirtualHandle* poBaseHandle, int bRegularZLibIn, int bAutoCloseBaseHandle );
+
+const int CPL_DEFLATE_TYPE_GZIP = 0;
+const int CPL_DEFLATE_TYPE_ZLIB = 1;
+const int CPL_DEFLATE_TYPE_RAW_DEFLATE = 2;
+VSIVirtualHandle CPL_DLL *VSICreateGZipWritable( VSIVirtualHandle* poBaseHandle, int nDeflateType, int bAutoCloseBaseHandle );
 
 #endif /* ndef CPL_VSI_VIRTUAL_H_INCLUDED */
