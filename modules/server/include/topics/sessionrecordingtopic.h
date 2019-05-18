@@ -41,12 +41,15 @@ public:
 private:
     const int UnsetOnChangeHandle = -1;
 
-    //Provides the idle/recording/playback state int value in json message
-    nlohmann::json state();
+    bool _sendState;
+    bool _sendFiles;
 
+    // Provides the idle/recording/playback state int value in json message
+    void sendJsonData();
+
+    interaction::SessionRecording::SessionState _lastState;
     int _stateCallbackHandle = UnsetOnChangeHandle;
     bool _isDone = false;
-    interaction::SessionRecording::SessionState _lastState;
 };
 
 } // namespace openspace

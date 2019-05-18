@@ -171,9 +171,9 @@ public:
 
     /**
      * Provides list of available playback files.
-     * \returns string of newline-delimited filenames in recordings dir.
+     * \returns vector of filenames in recordings dir.
      */
-    std::string playbackList();
+    std::vector<std::string> playbackList() const;
 
 private:
     enum class RecordedType {
