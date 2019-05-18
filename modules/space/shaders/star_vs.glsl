@@ -34,19 +34,6 @@ in float in_speed;
 out vec4 vs_bvLumAbsMagAppMag;
 out vec3 vs_velocity;
 out float vs_speed;
-out vec4 vs_correctedPositionViewSpace;
-
-out vec4 psc_position;
-out vec3 vs_brightness;
-out vec4 vs_gPosition;
-
-/*
-uniform mat4 view;
-uniform mat4 projection;
-
-uniform float FWHM;
-uniform float betaConstant;
-*/
 
 void main() {
     vs_bvLumAbsMagAppMag = in_bvLumAbsMagAppMag;
