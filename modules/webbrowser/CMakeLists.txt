@@ -32,7 +32,6 @@ set(WEBBROWSER_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "WEBBROWSE
 
 # wanted by CEF
 set(PROJECT_ARCH "x86_64")
-set(CMAKE_BUILD_TYPE Debug)
 
 ##########################################################################################
 # Download CEF
