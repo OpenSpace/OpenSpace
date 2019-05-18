@@ -244,7 +244,7 @@ void RenderableTrail::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_programObject, _uniformCache, UniformNames);
 
-    setRenderBin(Renderable::RenderBin::Overlay);
+    //setRenderBin(Renderable::RenderBin::Overlay);
 }
 
 void RenderableTrail::deinitializeGL() {
