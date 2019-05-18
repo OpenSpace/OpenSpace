@@ -36,7 +36,7 @@ local object = {
     },
     GUI = {
         Name = "Globular Clusters",
-        Path = "/Milky Way/Globular Clusters"
+        Path = "/Milky Way"
     }
 }
 

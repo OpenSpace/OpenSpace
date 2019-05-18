@@ -72,11 +72,6 @@ void GetPropertyTopic::handleJson(const nlohmann::json& json) {
     else if (requestedKey == RootPropertyOwner) {
         response = wrappedPayload(global::rootPropertyOwner);
     }
-    else if (requestedKey == SessionRecordingPlaybackList) {
-        std::string fileList = global::sessionRecording.playbackList();
-        nlohmann::json getJson = { { SessionRecordingPlaybackList, fileList } };
-        response = wrappedPayload(getJson);
-    }
     else {
         response = propertyFromKey(requestedKey);
     }

@@ -38,7 +38,7 @@ local object = {
     },
     GUI = {
         Name = "Supernova Remnants",
-        Path = "/Milky Way/Supernova Remnants"
+        Path = "/Milky Way"
     }
 }
 

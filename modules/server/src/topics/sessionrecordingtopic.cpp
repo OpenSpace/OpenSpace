@@ -32,10 +32,14 @@
 
 namespace {
     constexpr const char* _loggerCat = "SessionRecordingTopic";
-    constexpr const char* PropertyKey = "property";
     constexpr const char* EventKey = "event";
+    constexpr const char* SubscribeEvent = "start_subscription";
     constexpr const char* UnsubscribeEvent = "stop_subscription";
-    constexpr const char* StateKey = "recState";
+    constexpr const char* RefreshEvent = "refresh";
+
+    constexpr const char* PropertiesKey = "properties";
+    constexpr const char* FilesKey = "files";
+    constexpr const char* StateKey = "state";
 } // namespace
 
 using nlohmann::json;
@@ -59,37 +63,87 @@ bool SessionRecordingTopic::isDone() const {
 }
 
 void SessionRecordingTopic::handleJson(const nlohmann::json& json) {
-    std::string event = json.at(EventKey).get<std::string>();
+    using SessionRecording = openspace::interaction::SessionRecording;
+
+    const std::string event = json.at(EventKey).get<std::string>();
+    if (event != SubscribeEvent &&
+        event != UnsubscribeEvent &&
+        event != RefreshEvent)
+    {
+        LERROR("Unsupported event.");
+        _isDone = true;
+        return;
+    }
+
     if (event == UnsubscribeEvent) {
         _isDone = true;
         return;
     }
 
-    std::string requestedKey = json.at(PropertyKey).get<std::string>();
-    LDEBUG("Subscribing to " + requestedKey);
-
-    if (requestedKey == StateKey) {
-        _stateCallbackHandle = global::sessionRecording.addStateChangeCallback(
-            [this]() {
-                openspace::interaction::SessionRecording::SessionState nowState =
-                    global::sessionRecording.state();
-                if (nowState != _lastState) {
-                    _connection->sendJson(state());
-                    _lastState = nowState;
-                }
+    if (json.find(PropertiesKey) != json.end()) {
+        if (!json.at(PropertiesKey).is_array()) {
+            LERROR("Properties must be an array of strings.");
+        }
+        nlohmann::json requestedProperties = json.at(PropertiesKey).get<nlohmann::json>();
+        for (const auto& p : requestedProperties) {
+            if (!p.is_string()) {
+                _isDone = true;
+                LERROR("Properties must be an array of strings.");
+                return;
             }
-        );
-        _connection->sendJson(state());
+            const std::string v = p.get<std::string>();
+            if (v == FilesKey) {
+                _sendFiles = true;
+            }
+            if (v == StateKey) {
+                _sendState = true;
+            }
+        }
     }
-    else {
-        LWARNING("Cannot get " + requestedKey);
-        _isDone = true;
+
+    sendJsonData();
+
+    if (event == SubscribeEvent) {
+        if (_sendState) {
+            _stateCallbackHandle = global::sessionRecording.addStateChangeCallback(
+                [this]() {
+                    SessionRecording::SessionState currentState =
+                    global::sessionRecording.state();
+                    if (currentState != _lastState) {
+                       sendJsonData();
+                       _lastState = currentState;
+                    }
+                }
+            );
+        }
     }
 }
 
-json SessionRecordingTopic::state() {
-    json statJson = { { "state", static_cast<int>(global::sessionRecording.state()) } };
-    return wrappedPayload(statJson);
+void SessionRecordingTopic::sendJsonData() {
+    json stateJson;
+    using SessionRecording = openspace::interaction::SessionRecording;
+    if (_sendState) {
+        SessionRecording::SessionState state = global::sessionRecording.state();
+        std::string stateString;
+        switch (state) {
+        case SessionRecording::SessionState::Recording:
+            stateString = "recording";
+            break;
+        case SessionRecording::SessionState::Playback:
+            stateString = "playing";
+            break;
+        default:
+            stateString = "idle";
+            break;
+        }
+        stateJson[StateKey] = stateString;
+    };
+    if (_sendFiles) {
+        stateJson[FilesKey] = global::sessionRecording.playbackList();
+    }
+    if (stateJson.size() > 0) {
+        _connection->sendJson(wrappedPayload(stateJson));
+    }
 }
 
 } // namespace openspace

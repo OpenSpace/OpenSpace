@@ -36,7 +36,7 @@ local object = {
     },
     GUI = {
         Name = "HII Regions",
-        Path = "/Milky Way/HII"
+        Path = "/Milky Way"
     }
 }
 

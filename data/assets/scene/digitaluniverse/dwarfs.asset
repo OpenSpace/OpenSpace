@@ -35,7 +35,8 @@ local object = {
         Unit = "pc"
     },
     GUI = {
-        Path = "/Milky Way/Brown Dwarfs"
+        Name = "Brown Dwarfs",
+        Path = "/Milky Way"
     }
 }
 
