@@ -130,7 +130,7 @@ documentation::Documentation RenderableTrailOrbit::Documentation() {
                 RenderableTypeInfo.identifier,
                 new StringVerifier,
                 Optional::Yes,
-                RenderableTypeInfo.description,
+                RenderableTypeInfo.description
             }
         }
     };

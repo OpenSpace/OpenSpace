@@ -63,13 +63,13 @@ documentation::Documentation RenderablePlaneImageLocal::Documentation() {
                 TextureInfo.identifier,
                 new StringVerifier,
                 Optional::No,
-                TextureInfo.description,
+                TextureInfo.description
             },
             {
                 RenderableTypeInfo.identifier,
                 new StringVerifier,
                 Optional::Yes,
-                RenderableTypeInfo.description,
+                RenderableTypeInfo.description
             }
         }
     };
