@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
 	<key>CFBundleIconFile</key>
-	<string>webgui.icns</string>
+	<string>openspace.icns</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.openspaceproject.openspace</string>
 	<key>CFBundleInfoDictionaryVersion</key>
