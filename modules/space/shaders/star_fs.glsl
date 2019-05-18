@@ -43,11 +43,11 @@ uniform bool filterOutOfRange;
 
 in vec4 vs_position;
 in vec2 psfCoords;
-in vec4 ge_bvLumAbsMagAppMag;
-in vec3 ge_velocity;
-in float ge_speed;
-in float ge_observationDistance;
-in float gs_screenSpaceDepth;
+flat in vec4 ge_bvLumAbsMagAppMag;
+flat in vec3 ge_velocity;
+flat in float ge_speed;
+flat in float ge_observationDistance;
+flat in float gs_screenSpaceDepth;
 
 vec4 bv2rgb(float bv) {
     // BV is [-0.4,2.0]
