@@ -294,7 +294,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
                        const vec3 v, const vec3 s, out float r, out float mu,
                        out vec3 attenuation, const vec3 fragPosObj, out bool groundHit,
                        const double maxLength, const double pixelDepth,
-                       const vec4 spaceColor, const float sunIntensity) {
+                       const vec4 spaceColor, const float sunIntensity, const vec3 normal) {
 
     const float INTERPOLATION_EPS = 0.004f; // precision const from Brunetton
 
@@ -315,8 +315,8 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     // through the atmosphere. If this ray hits something inside the atmosphere,
     // we will subtract the attenuated scattering light from that path in the
     // current path.
-    vec4 inscatterRadiance = max(texture4D(inscatterTexture, r, mu, muSun, nu), 0.0);    
-      
+    vec4 inscatterRadiance = max(texture4D(inscatterTexture, r, mu, muSun, nu), 0.0);
+    
     // After removing the initial path from camera pos to top of atmosphere (for an
     // observer in the space) we test if the light ray is hitting the atmosphere
     vec3  x0     = fragPosObj;
@@ -363,7 +363,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     if (abs(mu - muHorizon) < INTERPOLATION_EPS) {
         // We want an interpolation value close to 1/2, so the
         // contribution of each radiance value is almost the same
-        // or it has a havey weight if from above or below horizon
+        // or it has a hevy weight if from above or below horizon
         float interpolationValue = ((mu - muHorizon) + INTERPOLATION_EPS) / (2.0f * INTERPOLATION_EPS);
 
         //float t2 = t * t;
@@ -427,7 +427,14 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     if (groundHit) {
         return finalScatteringRadiance;
     } else {
-        return ((r-Rg) * invRtMinusRg)*spaceColor.rgb * backgroundConstant + finalScatteringRadiance;
+        // Linearizing the stars contribution based on the observer's position (height)
+        float cosTheta = dot(normalize(x0), normalize(s));
+        float cosPhi = dot(normalize(v), normalize(s));
+        if (cosTheta == 0.0 && cosPhi < 0.6) {
+            return spaceColor.rgb * backgroundConstant + finalScatteringRadiance;
+        } else {
+            return ((r-Rg) * invRtMinusRg) * spaceColor.rgb * backgroundConstant + finalScatteringRadiance;
+        }
     }
     
 }
@@ -564,7 +571,6 @@ void main() {
         //float Rt2 = Rt * Rt; // in Km
         //float Rg2 = Rg * Rg; // in Km
 
-
         for (int i = 0; i < nSamples; i++) {
             // Color from G-Buffer
             //vec4 color = texelFetch(mainColorTexture, fragCoords, i);
@@ -667,7 +673,8 @@ void main() {
                                                             s, r, mu, attenuation, 
                                                             vec3(positionObjectsCoords.xyz),
                                                             groundHit, maxLength, pixelDepth,
-                                                            color, sunIntensityInscatter); 
+                                                            color, sunIntensityInscatter,
+                                                            normal.xyz); 
                     vec3 groundColorV = vec3(0.0);
                     vec3 sunColorV = vec3(0.0);                                                
                     if (groundHit) {
@@ -712,7 +719,6 @@ void main() {
             discard;
         }
         //renderTarget = vec4(1.0, 0.0, 0.0, 1.0);
-        
     }
 }
 
