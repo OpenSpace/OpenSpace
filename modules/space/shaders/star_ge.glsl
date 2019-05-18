@@ -36,12 +36,13 @@ in vec4 vs_gPosition[];
 in float vs_speed[];
 
 out vec4 vs_position;
-out vec4 ge_bvLumAbsMagAppMag;
-out vec3 ge_velocity;
-out float ge_speed;
 out vec2 psfCoords;
-out float ge_observationDistance;
-out float gs_screenSpaceDepth;
+
+flat out vec4 ge_bvLumAbsMagAppMag;
+flat out vec3 ge_velocity;
+flat out float ge_speed;
+flat out float ge_observationDistance;
+flat out float gs_screenSpaceDepth;
 
 uniform float magnitudeExponent;
 uniform dvec3 eyePosition;
