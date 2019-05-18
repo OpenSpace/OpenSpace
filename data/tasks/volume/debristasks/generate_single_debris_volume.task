@@ -1,6 +1,6 @@
 return {{
 	Type = "GenerateDebrisVolumeTask",
-	Dimensions = {32, 32, 32},
+	Dimensions = {64, 64, 64},
 	LowerDomainBound = {-0.5, -0.5, -0.5},
 	UpperDomainBound = {0.5, 0.5, 0.5},
 	InputPath = "D:/Openspace/sync/url/satellite_tle_data_IndianASATtestDebris(10018654073589624780)/files/2019-006.txt",

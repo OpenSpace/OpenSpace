@@ -422,7 +422,7 @@ float getMaxApogee(std::vector<KeplerParameters> inData){
             maxApogee = ah;
     }   
 
-    return static_cast<float>(maxApogee*1000);
+    return static_cast<float>(maxApogee*1000);  // * 1000 for meters
 }
 
 int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim, float maxApogee){
@@ -499,6 +499,8 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
     const int size = _dimensions.x *_dimensions.y *_dimensions.z;
     int *densityArrayp = new int[size]();
     float maxApogee = getMaxApogee(_TLEDataVector);
+    LINFO(fmt::format("Max Apogee: {} ", maxApogee));
+
     //densityArrayp = mapDensityToVoxels(densityArrayp, generatedPositions, _dimensions, maxApogee);
     densityArrayp = mapDensityToVoxels(densityArrayp, startPositionBuffer, _dimensions, maxApogee);
         

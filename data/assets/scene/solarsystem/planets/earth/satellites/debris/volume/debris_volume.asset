@@ -7,7 +7,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local earthRadius = 6371000
+local earthRadius = 2*10946320
 
 local volume = {
     Identifier = "DebrisVolume",
