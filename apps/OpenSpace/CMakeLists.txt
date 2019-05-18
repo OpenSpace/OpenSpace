@@ -152,7 +152,6 @@ end_header("Dependency: SGCT")
 # target as of July 2017, which is needed.
 if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   # wanted by CEF
-  set(CMAKE_BUILD_TYPE Debug CACHE STRING "CMAKE_BUILD_TYPE")
   set(PROJECT_ARCH "x86_64")
 
   if (WIN32)
