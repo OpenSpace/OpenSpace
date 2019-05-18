@@ -785,7 +785,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
 
         const float dsf = static_cast<float>(
             _generalProperties.lodScaleFactor * _ellipsoid.minimumRadius()
-            );
+        );
         _globalRenderer.program->setUniform("distanceScaleFactor", dsf);
 
 
