@@ -427,14 +427,9 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     if (groundHit) {
         return finalScatteringRadiance;
     } else {
-        // Linearizing the stars contribution based on the observer's position (height)
-        float cosTheta = dot(normalize(x0), normalize(s));
-        float cosPhi = dot(normalize(v), normalize(s));
-        if (cosTheta == 0.0 && cosPhi < 0.6) {
-            return spaceColor.rgb * backgroundConstant + finalScatteringRadiance;
-        } else {
-            return ((r-Rg) * invRtMinusRg) * spaceColor.rgb * backgroundConstant + finalScatteringRadiance;
-        }
+        // The final color is given by the attenuated light arriving at the observer's eye
+        // plus the scattered light in the atmosphere (only inscattered light taken into account here)
+        return attenuation * (spaceColor.rgb * backgroundConstant) + finalScatteringRadiance;
     }
     
 }
