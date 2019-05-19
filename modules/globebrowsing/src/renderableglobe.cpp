@@ -563,8 +563,11 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableGlobe::initializeGL() {
-    _globeLabelsComponent.initialize(_labelsDictionary, this);
-    addPropertySubOwner(_globeLabelsComponent);
+
+    if (!_labelsDictionary.empty()) {
+        _globeLabelsComponent.initialize(_labelsDictionary, this);
+        addPropertySubOwner(_globeLabelsComponent);
+    }
 
     _layerManager.update();
 
@@ -645,6 +648,50 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 }
 
 void RenderableGlobe::update(const UpdateData& data) {
+    if (_localRenderer.program->isDirty()) {
+        _localRenderer.program->rebuildFromFile();
+
+        _localRenderer.program->setUniform("xSegments", _grid.xSegments);
+
+        if (_debugProperties.showHeightResolution) {
+            _localRenderer.program->setUniform(
+                "vertexResolution",
+                glm::vec2(_grid.xSegments, _grid.ySegments)
+            );
+        }
+
+        ghoul::opengl::updateUniformLocations(
+            *_localRenderer.program,
+            _localRenderer.uniformCache,
+            { "skirtLength", "p01", "p11", "p00", "p10", "patchNormalModelSpace",
+              "patchNormalCameraSpace" }
+        );
+    }
+
+    if (_globalRenderer.program->isDirty()) {
+        _globalRenderer.program->rebuildFromFile();
+
+        _globalRenderer.program->setUniform("xSegments", _grid.xSegments);
+
+        if (_debugProperties.showHeightResolution) {
+            _globalRenderer.program->setUniform(
+                "vertexResolution",
+                glm::vec2(_grid.xSegments, _grid.ySegments)
+            );
+        }
+        // Ellipsoid Radius (Model Space)
+        _globalRenderer.program->setUniform(
+            "radiiSquared",
+            glm::vec3(_ellipsoid.radii() * _ellipsoid.radii())
+        );
+
+        ghoul::opengl::updateUniformLocations(
+            *_globalRenderer.program,
+            _globalRenderer.uniformCache,
+            { "skirtLength", "minLatLon", "lonLatScalingFactor" }
+        );
+    }
+
     setBoundingSphere(static_cast<float>(
         _ellipsoid.maximumRadius() * data.modelTransform.scale
     ));
@@ -739,6 +786,12 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
             );
         }
 
+        const float dsf = static_cast<float>(
+            _generalProperties.lodScaleFactor * _ellipsoid.minimumRadius()
+        );
+        _globalRenderer.program->setUniform("distanceScaleFactor", dsf);
+
+
         _globalRenderer.updatedSinceLastCall = false;
     }
 
@@ -754,6 +807,11 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
                 static_cast<int>(i)
             );
         }
+
+        const float dsf = static_cast<float>(
+            _generalProperties.lodScaleFactor * _ellipsoid.minimumRadius()
+        );
+        _localRenderer.program->setUniform("distanceScaleFactor", dsf);
 
         _localRenderer.updatedSinceLastCall = false;
     }
