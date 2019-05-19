@@ -31,7 +31,6 @@
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/sessionrecording.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/luaconsole.h>
@@ -49,7 +48,6 @@ namespace {
     constexpr const char* AllScreenSpaceRenderablesValue = "__screenSpaceRenderables";
     constexpr const char* PropertyKey = "property";
     constexpr const char* RootPropertyOwner = "__rootOwner";
-    constexpr const char* SessionRecordingPlaybackList = "playbackList";
 } // namespace
 
 namespace openspace {
