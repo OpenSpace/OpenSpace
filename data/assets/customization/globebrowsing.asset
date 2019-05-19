@@ -1,6 +1,9 @@
 -- Add require statements for assets exporting the neccessary globes
 -- example:
-asset.require('../scene/solarsystem/planets/mars/mars')
+
+local MarsPath = "scene/solarsystem/planets/mars/";
+
+asset.require('../' .. MarsPath .. 'mars')
 asset.require('../scene/solarsystem/planets/earth/moon/moon')
 asset.require('../scene/solarsystem/planets/mercury/mercury')
 
@@ -22,8 +25,10 @@ local vrt_folders = {
         -- tl;dr:  Specify CTX folders first, then HiRISE 
         -- example:   'C:/OpenSpace/GlobeBrowsingData/Mars/CTX'
         openspace.absPath('${BASE}/../OpenSpaceData/Mars/CTX'),
+        '',--put your CTX in the folder above or put the path to your CTX layers here
+        openspace.absPath('${ASSETS}/' .. MarsPath .. '/map_service_configs/ESRI/'),
+        '',--put your HiRISE in the folder above or put the path to your HiRISE layers here
         openspace.absPath('${BASE}/../OpenSpaceData/Mars/HiRISE'),
-        '',
     },
     Moon = {
         -- Add folders here whose contents will be automatically added to the Moon globe
@@ -32,7 +37,7 @@ local vrt_folders = {
         -- results
         -- example:  'C:/OpenSpace/GlobeBrowsingData/Moon'
         openspace.absPath('${BASE}/../OpenSpaceData/Moon'),
-        ''
+        ''--put your Moon in the folder above or put the path to your Moon layers here
     },
     Mercury = {
         -- Add folders here whose contents will be automatically added to the Mercury globe
