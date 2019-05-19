@@ -28,16 +28,6 @@ asset.onInitialize(function ()
         "Dawn", "Ceres", "Vesta"
     })
 
-    openspace.addVirtualProperty(
-        "BoolProperty",
-        "Show Trails",
-        "*Trail.Renderable.Enabled",
-        "Disable or enable all trails of the scene at the same time",
-        true,
-        nil,
-        nil
-    )
-
     openspace.navigation.setCameraState({
         Anchor = DawnAsset.Dawn.Identifier,
         Position = { 526781518487.171326, 257168309890.072144, -1381125204152.817383 },
@@ -46,7 +36,6 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-    openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
     openspace.removeInterestingNodes({
         "Dawn", "Ceres", "Vesta"
     })
