@@ -28,6 +28,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
+#include <openspace/util/versionchecker.h>
 #include <ghoul/glm.h>
 #include <memory>
 #include <string>
@@ -109,6 +110,7 @@ private:
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
     std::unique_ptr<LoadingScreen> _loadingScreen;
+    std::unique_ptr<VersionChecker> _versionChecker;
 
     bool _hasScheduledAssetLoading = false;
     std::string _scheduledAssetPathToLoad;

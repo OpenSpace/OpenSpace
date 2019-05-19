@@ -194,6 +194,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/util/time_lua.inl
   ${OPENSPACE_BASE_DIR}/src/util/timerange.cpp
   ${OPENSPACE_BASE_DIR}/src/util/transformationmanager.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/versionchecker.cpp
 )
 
 if (APPLE)
@@ -386,6 +387,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timemanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timerange.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/versionchecker.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/transformationmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/threadpool.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/histogram.h

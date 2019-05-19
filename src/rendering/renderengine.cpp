@@ -47,6 +47,7 @@
 #include <openspace/util/timemanager.h>
 #include <openspace/util/screenlog.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/util/versionchecker.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -1218,10 +1219,24 @@ void RenderEngine::renderVersionInformation() {
         return;
     }
 
+    std::string versionString = OPENSPACE_VERSION_STRING_FULL;
+
+    if (global::versionChecker.hasLatestVersionInfo()) {
+        SemanticVersion latestVersion = global::versionChecker.latestVersion();
+        SemanticVersion currentVersion{
+            OPENSPACE_VERSION_MAJOR,
+            OPENSPACE_VERSION_MINOR,
+            OPENSPACE_VERSION_PATCH
+        };
+        if (currentVersion < latestVersion) {
+            versionString += " [" + latestVersion.format() + " is available]";
+        }
+    }
+
     using FR = ghoul::fontrendering::FontRenderer;
     const FR::BoundingBoxInformation versionBox = FR::defaultRenderer().boundingBox(
         *_fontInfo,
-        OPENSPACE_VERSION_STRING_FULL
+        versionString
     );
 
     const FR::BoundingBoxInformation commitBox = FR::defaultRenderer().boundingBox(
@@ -1235,7 +1250,7 @@ void RenderEngine::renderVersionInformation() {
             fontResolution().x - versionBox.boundingBox.x - 10.f,
             5.f
         ),
-        OPENSPACE_VERSION_STRING_FULL,
+        versionString,
         glm::vec4(0.5, 0.5, 0.5, 1.f)
     );
 

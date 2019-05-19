@@ -28,6 +28,10 @@
 #include <modules/server/servermodule.h>
 #include <openspace/openspace.h>
 
+#include <openspace/engine/globals.h>
+#include <openspace/util/versionchecker.h>
+
+
 namespace openspace {
 
 bool VersionTopic::isDone() const {
@@ -53,6 +57,15 @@ void VersionTopic::handleJson(const nlohmann::json&) {
             }
         }
     };
+
+    if (global::versionChecker.hasLatestVersionInfo()) {
+        SemanticVersion latestVersion = global::versionChecker.latestVersion();
+        versionJson["latestOpenSpaceVersion"] = {
+            { "major", latestVersion.major },
+            { "minor", latestVersion.minor },
+            { "patch", latestVersion.patch }
+        };
+    }
 
     _connection->sendJson(wrappedPayload(versionJson));
 }

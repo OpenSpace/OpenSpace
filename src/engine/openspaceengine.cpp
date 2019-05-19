@@ -184,6 +184,10 @@ void OpenSpaceEngine::initialize() {
 
     global::initialize();
 
+    const std::string versionCheckUrl = global::configuration.versionCheckUrl;
+    if (versionCheckUrl != "") {
+        global::versionChecker.requestLatestVersion(versionCheckUrl);
+    }
 
     std::string cacheFolder = absPath("${CACHE}");
     if (global::configuration.usePerSceneCache) {
