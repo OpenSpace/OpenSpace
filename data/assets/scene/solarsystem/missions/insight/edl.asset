@@ -62,6 +62,7 @@ local touchdownTime = openspace.time.advancedTime(entryTimeStart, "389s");
 local panelDeployTime = openspace.time.advancedTime(entryTimeStart, "390s");
 local foreverTime = openspace.time.advancedTime(entryTimeStart, "2327s");
 local kernelTouchdownTime = "2018 NOV 26 19:45:32.3"
+local spiceRotationEndTime = "2018 NOV 26 19:51:39"
 
 local InsightParent = {
     Identifier = "InsightParent",
@@ -79,13 +80,12 @@ local InsightParent = {
             SourceFrame = "INSIGHT_LANDER_CRUISE",
             DestinationFrame = "GALACTIC"
         },
-         TimeFrame = {
+    },
+    TimeFrame = {
         Type = "TimeFrameInterval",
         Start = entryTimeStart,
-        End = "2018 NOV 26 19:51:39"
-        },
+        End = spiceRotationEndTime
     },
-   
     GUI = {
         Hidden = true,
         Name = "InsightParent",
