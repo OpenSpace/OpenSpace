@@ -319,7 +319,14 @@ if(OS_MACOSX)
   endif()
 
   # CEF directory paths.
-  set(CEF_BINARY_DIR          "${_CEF_ROOT}/$<CONFIGURATION>")
+  if (${CMAKE_GENERATOR} STREQUAL "Ninja" OR
+      ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles")
+
+      set(CEF_BINARY_DIR "${_CEF_ROOT}/${CMAKE_BUILD_TYPE}")
+  else()
+      set(CEF_BINARY_DIR "${_CEF_ROOT}/$<CONFIG>")
+  endif()
+
   set(CEF_BINARY_DIR_DEBUG    "${_CEF_ROOT}/Debug")
   set(CEF_BINARY_DIR_RELEASE  "${_CEF_ROOT}/Release")
 
@@ -438,7 +445,7 @@ if(OS_WINDOWS)
 
   # CEF directory paths.
   set(CEF_RESOURCE_DIR        "${_CEF_ROOT}/Resources")
-  set(CEF_BINARY_DIR          "${_CEF_ROOT}/$<CONFIGURATION>")
+  set(CEF_BINARY_DIR          "${_CEF_ROOT}/$<CONFIG>")
   set(CEF_BINARY_DIR_DEBUG    "${_CEF_ROOT}/Debug")
   set(CEF_BINARY_DIR_RELEASE  "${_CEF_ROOT}/Release")
 
