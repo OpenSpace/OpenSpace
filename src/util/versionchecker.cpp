@@ -25,10 +25,11 @@
 #include <openspace/util/versionchecker.h>
 #include <openspace/openspace.h>
 #include <ghoul/fmt.h>
+#include <ghoul/logging/logmanager.h>
 #include <sstream>
 
 namespace {
-
+    constexpr const char* _loggerCat = "VersionChecker";
 } // namespace
 
 namespace openspace {
@@ -42,8 +43,9 @@ void VersionChecker::requestLatestVersion(const std::string& url) {
     opt.requestTimeoutSeconds = 0;
 
     const std::string fullUrl = url +
-        "?client_version=" + OPENSPACE_VERSION_STRING_FULL +
-        "&commit_hash=" + OPENSPACE_GIT_COMMIT;
+        "?client_version=" + OPENSPACE_VERSION_NUMBER;
+        // Add this back in when server supports it.
+        // + "&commit_hash=" + OPENSPACE_GIT_COMMIT;
 
     if (_request) {
         _request->cancel();
@@ -61,6 +63,7 @@ void VersionChecker::requestLatestVersion(const std::string& url) {
     }
     if (_request) {
         if (_request->hasSucceeded()) {
+            _request->wait();
             std::vector<char> data = _request->downloadedData();
             std::string versionString(data.begin(), data.end());
             std::istringstream versionData(versionString);
@@ -74,11 +77,25 @@ void VersionChecker::requestLatestVersion(const std::string& url) {
             int patch = std::atoi(token.c_str());
 
             _latestVersion = { major, minor, patch };
+            _request = nullptr;
+
+            LDEBUG(fmt::format(
+                "Latest availble OpenSpace version is {}. Currently running {}.",
+                _latestVersion->format(),
+                OPENSPACE_VERSION_NUMBER
+            ));
+
             return true;
         }
         if (_request->hasFailed()) {
             _request->cancel();
             _request->wait();
+            std::vector<char> data = _request->downloadedData();
+            std::string response(data.begin(), data.end());
+            LWARNING(fmt::format(
+                "Failed to get latest OpenSpace version information from {}.",
+                _request->url()
+            ));
             _request = nullptr;
             return false;
         }
