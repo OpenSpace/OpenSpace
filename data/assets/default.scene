@@ -1,79 +1,12 @@
-local assetHelper = asset.require('util/asset_helper')
-local sceneHelper = asset.require('util/scene_helper')
-local propertyHelper = asset.require('util/property_helper')
-
--- Specifying which other assets should be loaded in this scene
-asset.require('spice/base')
-assetHelper.requestAll(asset, 'scene/solarsystem/sun')
-asset.require('scene/solarsystem/planets')
-asset.require('scene/solarsystem/planets/mars/moons/phobos')
-asset.require('scene/solarsystem/planets/mars/moons/deimos')
-asset.require('scene/solarsystem/dwarf_planets/pluto/system')
-assetHelper.requestAll(asset, 'scene/digitaluniverse')
-
--- Load default key bindings applicable to most scenes
-asset.require('util/default_keybindings')
-asset.require('util/default_dashboard')
-asset.require('util/default_joystick')
-
-asset.require('util/webgui')
-
-asset.request('customization/globebrowsing')
-
--- Keybindings that are specific for this scene
-local Keybindings = {
-    {
-        Key = "b",
-        Name = "Toggle background",
-        Command = propertyHelper.invert('Scene.MilkyWay.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.Stars.Renderable.Enabled'),
-        Documentation = "Toggle background (Stars and Milkyway).",
-        GuiPath = "/Rendering",
-        Local = false
-    },
-    {
-        Key = "g",
-        Name = "Toggle background/shading",
-        Command = propertyHelper.invert('Scene.MilkyWay.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.Stars.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Enabled') ..
-                  propertyHelper.invert('Scene.EarthAtmosphere.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.MarsAtmosphere.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.Earth.Renderable.Layers.WaterMasks.MODIS_Water_Mask.Enabled') ..
-                  propertyHelper.invert('Scene.Moon.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.Sun.Renderable.Enabled'),
-        Documentation = "Toogles background and shading mode on the Earth and Mars alongside visibility of the Moon and the Sun",
-        GuiPath = "/Rendering",
-        Local = false
-    },
-    {
-        Key = "h",
-        Name="Toggle Trails",
-        Command = "local list = openspace.getProperty('*Trail.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
-        Documentation = "Toggles the visibility of all trails",
-        GuiPath = "/Rendering",
-        Local = false
-    },
-}
+asset.require('./base')
 
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
-
-assetHelper.registerInterestingNodes(asset, {
-    "Earth", "Mars", "Moon", "Sun"
-})
-
 asset.onInitialize(function ()
     local now = openspace.time.currentWallTime()
     -- Jump back one day to show a complete planet
     openspace.time.setTime(openspace.time.advancedTime(now, "-1d"))
 
-    sceneHelper.bindKeys(Keybindings)
-
-    openspace.setDefaultGuiSorting()
-
-    openspace.globebrowsing.loadWMSServersFromFile(
-        openspace.absPath("${DATA}/globebrowsing_servers.lua")
-    )
+    openspace.markInterestingNodes({ "Earth", "Mars", "Moon", "Sun" })
 
     openspace.navigation.setCameraState({
         Anchor = earthAsset.Earth.Identifier,
@@ -85,5 +18,5 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-    sceneHelper.unbindKeys(Keybindings)
+    openspace.removeInterestingNodes({ "Earth", "Mars", "Moon", "Sun" })
 end)

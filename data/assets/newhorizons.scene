@@ -1,4 +1,4 @@
-asset.require('default');
+asset.require('./base');
 
 asset.require('scene/solarsystem/missions/newhorizons/newhorizons')
 local NewHorizonsAsset = asset.require('scene/solarsystem/missions/newhorizons/model')
@@ -197,15 +197,11 @@ assetHelper.registerDashboardItems(asset, {
     }
 })
 
-assetHelper.registerInterestingNodes(asset, {
-    "Pluto", "NewHorizons", "Charon"
-})
-
 asset.onInitialize(function ()
     openspace.time.setTime("2015-07-14T08:00:00.00")
     sceneHelper.bindKeys(Keybindings)
 
-    openspace.setDefaultGuiSorting()
+    openspace.markInterestingNodes({ "Pluto", "NewHorizons", "Charon" })
 
     sceneHelper.setDeltaTimeKeys({
         1, 5, 10, 20, 40, 60, 120, 360, 540, 1080,
@@ -226,6 +222,9 @@ end)
 
 asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
+
+    openspace.removeInterestingNodes({ "Pluto", "NewHorizons", "Charon" })
+
     openspace.setPropertyValueSingle('Scene.Pluto.Renderable.Enabled', true)
     openspace.setPropertyValueSingle('Scene.Charon.Renderable.Enabled', true)
     openspace.setPropertyValueSingle('Scene.PlutoBarycenterTrail.Renderable.Enabled', true)

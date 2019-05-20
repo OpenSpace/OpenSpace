@@ -23,7 +23,7 @@ local registerSceneGraphNodes = function (sceneAsset, nodes, override)
     override = override or false
     if not override then
         if tableLength(nodes) == 0 then
-            openspace.printWarning("Register function was called with an empty node list. Pass 'true' as third argument to silence this warning.")
+            openspace.printWarning(sceneAsset.filePath .. ": Register function was called with an empty node list. Pass 'true' as third argument to silence this warning.")
             return
         end
     end
@@ -43,11 +43,13 @@ local registerSceneGraphNodes = function (sceneAsset, nodes, override)
 end
 
 local registerDashboardItems = function (dashboardAsset, items)
-    dashboardAsset.onInitialize(function ()
+    dashboardAsset.onInitialize(
+        function ()
             for i, item in ipairs(items) do
                 openspace.dashboard.addDashboardItem(item)
             end
-        end)
+        end
+    )
     dashboardAsset.onDeinitialize(function ()
         for i = #items, 1, -1 do
             item = items[i]
@@ -60,7 +62,7 @@ local registerSceneGraphNodesAndExport = function (sceneAsset, nodes, override)
     override = override or false
     if not override then
         if tableLength(nodes) == 0 then
-            openspace.printWarning("Register function was called with an empty node list. Pass 'true' as third argument to silence this warning.")
+            openspace.printWarning(sceneAsset.filePath .. ": Register function was called with an empty node list. Pass 'true' as third argument to silence this warning.")
             return
         end
     end
@@ -86,15 +88,6 @@ local registerSceneGraphNodesAndExport = function (sceneAsset, nodes, override)
     for i, node in ipairs(nodes) do
         sceneAsset.export(node.Identifier, node)
     end
-end
-
-local registerInterestingNodes = function (sceneAsset, nodes)
-    sceneAsset.onInitialize(function ()
-        openspace.markInterestingNodes(nodes)
-    end)
-    sceneAsset.onDeinitialize(function ()
-        openspace.removeInterestingNodes(nodes)
-    end)
 end
 
 local requireAll = function (sceneAsset, directory)
@@ -153,7 +146,6 @@ asset.export("registerSceneGraphNodes", registerSceneGraphNodes)
 asset.export("registerSceneGraphNodesAndExport", registerSceneGraphNodesAndExport)
 asset.export("registerSpiceKernels", registerSpiceKernels)
 asset.export("registerDashboardItems", registerDashboardItems)
-asset.export("registerInterestingNodes", registerInterestingNodes)
 asset.export("requireAll", requireAll)
 asset.export("requestAll", requestAll)
 asset.export("getDefaultLightSources", getDefaultLightSources)
