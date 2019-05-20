@@ -18,7 +18,7 @@ local PlutoTrailBarycentric = {
         Resolution = 1000
     },
     GUI = {
-        Name = "Pluto Barycenteric Trail",
+        Name = "Pluto Barycentric Trail",
         Path = "/Solar System/Dwarf Planets/Pluto"
     }
 }
