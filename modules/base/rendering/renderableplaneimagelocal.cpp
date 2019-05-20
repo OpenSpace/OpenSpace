@@ -30,6 +30,8 @@
 #include <ghoul/opengl/framebufferobject.h>
 #include <cctype>
 #include <openspace/util/timemanager.h>
+#include <openspace/util/httprequest.h>
+#include <modules/sync/syncs/httpsynchronization.h>
 // <- End of experimental includes
 
 #include <modules/base/basemodule.h>
@@ -58,180 +60,251 @@ namespace {
 } // namespace
 
 namespace openspace {
-
-documentation::Documentation RenderablePlaneImageLocal::Documentation() {
-    using namespace documentation;
-    return {
-        "Renderable Plane Image Local",
-        "base_renderable_plane_image_local",
-        {
+    
+    documentation::Documentation RenderablePlaneImageLocal::Documentation() {
+        using namespace documentation;
+        return {
+            "Renderable Plane Image Local",
+            "base_renderable_plane_image_local",
             {
-                TextureInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                TextureInfo.description,
+                {
+                    TextureInfo.identifier,
+                    new StringVerifier,
+                    Optional::No,
+                    TextureInfo.description,
+                }
             }
-        }
-    };
-}
-
-RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary)
+        };
+    }
+    
+    RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _texturePath(TextureInfo)
-{
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderablePlaneImageLocal"
-    );
-
-    _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
-    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
-
-    addProperty(_texturePath);
-    _texturePath.onChange([this]() {loadTexture(); });
-    _textureFile->setCallback(
-        [this](const ghoul::filesystem::File&) { _textureIsDirty = true; }
-    );
-    
-}
-
-bool RenderablePlaneImageLocal::isReady() const {
-    return RenderablePlane::isReady() && (_texture != nullptr);
-}
-
-void RenderablePlaneImageLocal::initializeGL() {
-    RenderablePlane::initializeGL();
-
-    loadTexture();
-}
-
-void RenderablePlaneImageLocal::deinitializeGL() {
-    _textureFile = nullptr;
-
-    BaseModule::TextureManager.release(_texture);
-    RenderablePlane::deinitializeGL();
-}
-
-void RenderablePlaneImageLocal::bindTexture() {
-
-    _texture->bind();
-    
-    std::string current = global::timeManager.time().ISO8601();
-    current.erase(4, 1);
-    current.erase(6, 1);
-    current.erase(8, 1);
-    current.erase(10, 1);
-    current.erase(12);
-    current.erase(0,2);
-    
-    if(_textureList.find(current) != _textureList.end()) _texture = _textureList[current].get();
-    
-    _texture->bind();
-    
-//    if(global::timeManager.isPaused()){
-//
-//        glBindTexture(GL_TEXTURE_2D, *_textureList[_counter]);
-//        _counter2++;
-//        if(_counter2 == 20){
-//            _counter++;
-//            _counter2 = 0;
-//
-//        }
-//        if(_counter == 23) _counter = 0;
-//
-//
-//    }else glBindTexture(GL_TEXTURE_2D, *_textureList[1]);
-
-}
-
-void RenderablePlaneImageLocal::update(const UpdateData& data) {
-    RenderablePlane::update(data);
-
-    if (_textureIsDirty) {
-        loadTexture();
-        _textureIsDirty = false;
+    {
+        documentation::testSpecificationAndThrow(
+                                                 Documentation(),
+                                                 dictionary,
+                                                 "RenderablePlaneImageLocal"
+                                                 );
+        
+        _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
+        _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
+        
+        addProperty(_texturePath);
+        _texturePath.onChange([this]() {loadTexture(); });
+        _textureFile->setCallback(
+                                  [this](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+                                  );
+        
     }
-}
-
-void RenderablePlaneImageLocal::loadTexture() {
-    if (!_texturePath.value().empty()) {
-        ghoul::opengl::Texture* t = _texture;
-
-        unsigned int hash = ghoul::hashCRC32File(_texturePath);
+    
+    bool RenderablePlaneImageLocal::isReady() const {
+        return RenderablePlane::isReady() && (_texture != nullptr);
+    }
+    
+    void RenderablePlaneImageLocal::initializeGL() {
+        RenderablePlane::initializeGL();
         
-
-              
-  // Given that the node-part is located just outside the openspace-directory
-  const std::string fitsDir = "../../../../../../node/FITSdata/";     //Mac
-  //const std::string fitsDir = "../../../node/FITSdata/mrzqs190501/";            //PC
-  std::string testpath = absPath(fitsDir + "mrzqs190501t0014c2216_007.fits");
-  LERROR(testpath);
-  GLfloat fitsImage[360][180];
-  
-  // All the files in the given directory
-  std::vector<std::string> fitsFiles = ghoul::filesystem::Directory(fitsDir).readFiles();
-  std::sort(fitsFiles.begin(), fitsFiles.end());
+        loadTexture();
+    }
+    
+    void RenderablePlaneImageLocal::deinitializeGL() {
+        _textureFile = nullptr;
         
-  LERROR("antal filer: " + std::to_string(fitsFiles.size()));
-    for (const auto & entry : fitsFiles) {
-        LERROR(entry);
+        BaseModule::TextureManager.release(_texture);
+        RenderablePlane::deinitializeGL();
+    }
+    
+    void RenderablePlaneImageLocal::bindTexture() {
         
+        //_texture->bind();
+        
+        
+        if(_texturePath.fullyQualifiedIdentifier() == "Scene.SunGlare.Renderable.Texture"){
+            std::string current = global::timeManager.time().ISO8601();
+            current.erase(4, 1);
+            current.erase(6, 1);
+            current.erase(8, 1);
+            current.erase(10, 1);
+            current.erase(12);
+            
+            if(_textureList.find(current) != _textureList.end()) _texture = _textureList[current].get();
+            
+            _counter++;
+            
+            
+            if(_counter == 1000){
+                LERROR(_texturePath);
+                LERROR("just before thread starts");
+                _dldthread = std::thread([this](){this->startDownloadTexture();});
+                
+            }
+            //LERROR("just after thread starts");
+            
+            if(_counter == 1200){
+                if(_dldthread.joinable()){
+                    LERROR("it's joinable. counter: " + std::to_string(_counter));
+                    _dldthread.join();
+                    startUploadTexture();
+                }
+            }
+            
+            
+        }
+        
+        
+        _texture->bind();
+        
+    }
+    
+    void RenderablePlaneImageLocal::update(const UpdateData& data) {
+        RenderablePlane::update(data);
+        
+        if (_textureIsDirty) {
+            loadTexture();
+            _textureIsDirty = false;
+        }
+    }
+    
+    void RenderablePlaneImageLocal::loadTexture() {
+        if (!_texturePath.value().empty()) {
+            ghoul::opengl::Texture* t = _texture;
+            
+            unsigned int hash = ghoul::hashCRC32File(_texturePath);
+            
+            
+            
+            // Given that the node-part is located just outside the openspace-directory
+            const std::string fitsDir = "../../../../../../litebilder/";     //Mac
+            //const std::string fitsDir = "../../../node/FITSdata/mrzqs190501/";            //PC
+            
+            //const std::string fitsDir = "../../../../../../httpdownload/FITSdata/";
+            
+            
+            GLfloat fitsImage[360 * 180];
+            
+            // All the files in the given directory
+            std::vector<std::string> fitsFiles = ghoul::filesystem::Directory(fitsDir).readFiles();
+            std::sort(fitsFiles.begin(), fitsFiles.end());
+            
+            LERROR("antal filer: " + std::to_string(fitsFiles.size()));
+            for (const auto & entry : fitsFiles) {
+                LERROR(absPath(entry));
+                
+                FitsFileReader fitsFileReader(false);
+                
+                std::string dateID ="";
+                const auto tempBild = fitsFileReader.readImageFloat(entry);
+                //                const auto tempBild = fitsFileReader.readImageFloat(testpath);
+                
+                const std::string datestring = *fitsFileReader.readHeaderValueString("DATE");
+                
+                int magicalCounter = 0;
+                for (char c : datestring) {
+                    if (std::isdigit(c)) {
+                        if (magicalCounter >= 0 && magicalCounter < 12) {
+                            dateID += c;
+                        }
+                        magicalCounter++;
+                    }
+                }
+                
+                const float minvalue = *fitsFileReader.readHeaderValueFloat("IMGMIN01");
+                const float maxvalue = *fitsFileReader.readHeaderValueFloat("IMGMAX01");
+                const float stdvalue = *fitsFileReader.readHeaderValueFloat("IMGRMS01");
+                
+                
+                //                const int imageHeight = tempBild->height;
+                //                const int imageWidth = tempBild->width;
+                
+                for (int i = 0; i < 360; i++) {
+                    for (int j = 0; j < 180; j++) {
+                        float color = tempBild->contents[(i * 180) + j];
+                        //color = (color - minvalue) / (maxvalue - minvalue);
+                        color = (color+stdvalue)/stdvalue; //some semirandom operation to actually se something in the texture
+                        fitsImage[(i * 180) + j] = static_cast<GLfloat>(color);
+                    }
+                }
+                
+                
+                LERROR(dateID + " pixelvärde på position 100 100: " + std::to_string(fitsImage[10000]));
+                
+                auto textureFits =  std::make_unique<ghoul::opengl::Texture>(fitsImage, glm::vec3(360, 180, 1),ghoul::opengl::Texture::Format::Red, GL_R32F,GL_FLOAT);
+                textureFits->uploadTexture();
+                
+                LERROR(std::to_string(static_cast<int>(*textureFits)));
+                
+                
+                _textureList[dateID] = std::move(textureFits);
+                
+            }
+            _texture = _textureList.begin()->second.get();
+            
+            
+            BaseModule::TextureManager.release(t);
+            
+            _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
+            _textureFile->setCallback(
+                                      [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+                                      );
+        }
+    }
+    
+    void RenderablePlaneImageLocal::startDownloadTexture(){
+        std::string url = "http://localhost:3000/getmeafitsimage";
+        std::string testpath = absPath("../../../../../../httpdownload/FITSdata/iam.fits.gz");
+        AsyncHttpFileDownload ashd = AsyncHttpFileDownload(url, testpath, HttpFileDownload::Overwrite::Yes);
+        HttpRequest::RequestOptions opt = {};
+        opt.requestTimeoutSeconds = 0;
+        ashd.start(opt);
+        LERROR("nedladdning startad");
+        ashd.wait();
+        LERROR("efter wait");
+        
+    }
+    
+    void RenderablePlaneImageLocal::startUploadTexture(){
         FitsFileReader fitsFileReader(false);
-
+        
         std::string dateID ="";
-        const auto tempBild = fitsFileReader.readImageFloat(entry);
+        std::string testpath = absPath("../../../../../../httpdownload/FITSdata/iam.fits.gz");
+        const auto tempBild = fitsFileReader.readImageFloat(testpath);
         //                const auto tempBild = fitsFileReader.readImageFloat(testpath);
-
+        
+        const std::string datestring = *fitsFileReader.readHeaderValueString("DATE");
+        
         int magicalCounter = 0;
-        for (char c : entry) {
+        for (char c : datestring) {
             if (std::isdigit(c)) {
-                if (magicalCounter >= 0 && magicalCounter < 10) {
+                if (magicalCounter >= 0 && magicalCounter < 12) {
                     dateID += c;
                 }
                 magicalCounter++;
             }
         }
-
-        const float minvalue = *fitsFileReader.readHeaderValueFloat("IMGMIN01");
-        const float maxvalue = *fitsFileReader.readHeaderValueFloat("IMGMAX01");
+        
+        
         const float stdvalue = *fitsFileReader.readHeaderValueFloat("IMGRMS01");
-
-        //                const int imageHeight = tempBild->height;
-        //                const int imageWidth = tempBild->width;
-
-        float color;
+        
+        GLfloat fitsImage[360 * 180];
         for (int i = 0; i < 360; i++) {
             for (int j = 0; j < 180; j++) {
-                color = tempBild->contents[(i * 180) + j];
-                //color = (color - minvalue) / (maxvalue - minvalue);
+                float color = tempBild->contents[(i * 180) + j];
                 color = (color+stdvalue)/stdvalue; //some semirandom operation to actually se something in the texture
-                fitsImage[i][j] = static_cast<GLfloat>(color);
+                fitsImage[(i * 180) + j] = static_cast<GLfloat>(color);
             }
         }
-
-
-        LERROR(dateID + " pixelvärde på position 100 100: " + std::to_string(fitsImage[100][100]));
-
-        auto textureFits =  std::make_unique<ghoul::opengl::Texture>(std::move(fitsImage), glm::vec3(360, 180, 1),ghoul::opengl::Texture::Format::Red, GL_R32F,GL_FLOAT);
+        
+        auto textureFits =  std::make_unique<ghoul::opengl::Texture>(fitsImage, glm::vec3(360, 180, 1),ghoul::opengl::Texture::Format::Red, GL_R32F,GL_FLOAT);
         textureFits->uploadTexture();
-
-        LERROR(std::to_string(static_cast<int>(*textureFits)));
-
-
+        
+        LERROR("laddat ner och laddar upp: " + dateID);
+        if(_textureList.find(dateID) != _textureList.end()){
+            _textureList[dateID].release();
+        }
+        
         _textureList[dateID] = std::move(textureFits);
         
     }
-        _texture = _textureList.begin()->second.get();
-
-
-        BaseModule::TextureManager.release(t);
-
-        _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
-        _textureFile->setCallback(
-            [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
-        );
-    }
-}
-
+    
 } // namespace openspace

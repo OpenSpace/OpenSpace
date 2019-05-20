@@ -74,6 +74,9 @@ public:
     std::shared_ptr<T> readHeaderValue(const std::string key);
 
     std::shared_ptr<float> readHeaderValueFloat(const std::string key);
+    
+    std::shared_ptr<std::string> readHeaderValueString(const std::string key);
+
 
     /**
      * Read specified table columns from fits file.

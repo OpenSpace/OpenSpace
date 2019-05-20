@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGELOCAL___H__
 
 #include <modules/base/rendering/renderableplane.h>
+#include <thread>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl { class Texture; }
@@ -55,6 +56,10 @@ protected:
 
 private:
     void loadTexture();
+    
+    void startDownloadTexture();
+    
+    void startUploadTexture();
 
     properties::StringProperty _texturePath;
     ghoul::opengl::Texture* _texture = nullptr;
@@ -64,6 +69,7 @@ private:
     std::unordered_map<std::string, std::unique_ptr<ghoul::opengl::Texture>> _textureList;
     int _counter = 0;
     int _counter2 = 0;
+    std::thread _dldthread;
 
     bool _textureIsDirty = false;
 };
