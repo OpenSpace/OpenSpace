@@ -40,9 +40,8 @@ void VersionChecker::requestLatestVersion(const std::string& url) {
     opt.requestTimeoutSeconds = 0;
 
     const std::string fullUrl = url +
-        "?client_version=" + OPENSPACE_VERSION_NUMBER;
-        // Add this back in when server supports it.
-        // + "&commit_hash=" + OPENSPACE_GIT_COMMIT;
+        "?client_version=" + OPENSPACE_VERSION_NUMBER +
+        "&commit_hash=" + OPENSPACE_GIT_COMMIT;
 
     if (_request) {
         _request->cancel();
