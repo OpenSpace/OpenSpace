@@ -1232,12 +1232,6 @@ void RenderEngine::renderVersionInformation() {
             OPENSPACE_VERSION_PATCH
         };
         if (currentVersion < latestVersion) {
-            LINFO(fmt::format(
-                "Current version: {}.{}.{}. Newer version {}.{}.{} is available",
-                currentVersion.major, currentVersion.minor, currentVersion.patch,
-                latestVersion.major, latestVersion.minor, latestVersion.patch
-            ));
-            
             versionString += fmt::format(
                 " [Available: {}.{}.{}]",
                 latestVersion.major, latestVersion.minor, latestVersion.patch

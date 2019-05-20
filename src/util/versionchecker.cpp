@@ -76,12 +76,31 @@ void VersionChecker::requestLatestVersion(const std::string& url) {
             _latestVersion = { major, minor, patch };
             _request = nullptr;
 
-            LDEBUG(fmt::format(
-                "Latest availble OpenSpace version is {}.{}.{}. Currently running {}.",
-                _latestVersion->major, _latestVersion->minor, _latestVersion->patch,
-                OPENSPACE_VERSION_NUMBER
-            ));
+            SemanticVersion currentVersion{
+                OPENSPACE_VERSION_MAJOR,
+                OPENSPACE_VERSION_MINOR,
+                OPENSPACE_VERSION_PATCH
+            };
 
+            if (currentVersion < _latestVersion) {
+                LINFO(fmt::format(
+                    "Newer OpenSpace version {}.{}.{} is available. "
+                    "Currently running {}.{}.{}",
+                    _latestVersion->major,
+                    _latestVersion->minor,
+                    _latestVersion->patch,
+                    currentVersion.major,
+                    currentVersion.minor,
+                    currentVersion.patch
+                ));
+            } else {
+                LINFO(fmt::format(
+                    "OpenSpace version {}.{}.{} is up to date.",
+                    currentVersion.major,
+                    currentVersion.minor,
+                    currentVersion.patch
+                ));
+            }
             return true;
         }
         if (_request->hasFailed()) {
