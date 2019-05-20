@@ -1,27 +1,16 @@
+asset.require('./base')
+
 local assetHelper = asset.require('util/asset_helper')
 local sceneHelper = asset.require('util/scene_helper')
 
--- Specifying which other assets should be loaded in this scene
-asset.require('spice/base')
-assetHelper.requestAll(asset, 'scene/solarsystem/sun')
-asset.require('scene/solarsystem/planets')
 asset.require('scene/solarsystem/planets/jupiter/minor_moons')
 asset.require('scene/solarsystem/planets/saturn/minor_moons')
 asset.require('scene/solarsystem/planets/uranus/minor_moons')
 asset.require('scene/solarsystem/planets/neptune/inner_moons')
 asset.require('scene/solarsystem/planets/neptune/irregular_prograde_moons')
 asset.require('scene/solarsystem/planets/neptune/irregular_retrograde_moons')
-asset.request('scene/digitaluniverse/stars')
-asset.request('scene/digitaluniverse/milkyway')
 asset.require('scene/solarsystem/missions/voyager/voyager1')
 asset.require('scene/solarsystem/missions/voyager/voyager2')
-
--- Load default key bindings applicable to most scenes
-asset.require('util/default_keybindings')
-asset.require('util/default_dashboard')
-asset.require('util/default_joystick')
-
-asset.require('util/webgui')
 
 local VoyagerAsset = asset.require('scene/solarsystem/missions/voyager/voyager1')
 
@@ -48,8 +37,6 @@ assetHelper.registerDashboardItems(asset, {
 
 asset.onInitialize(function ()
     openspace.time.setTime("1977 SEP 10 12:00:00")
-
-    openspace.setDefaultGuiSorting()
 
     sceneHelper.setDeltaTimeKeys({
         1, 5, 10, 20, 40, 90, 360, 720, 2880, 14400,

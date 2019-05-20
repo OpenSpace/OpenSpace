@@ -1,25 +1,13 @@
+asset.require('./base')
+
+
 local assetHelper = asset.require('util/asset_helper')
 local sceneHelper = asset.require('util/scene_helper')
 local propertyHelper = asset.require('util/property_helper')
 local renderableHelper = asset.require('util/renderable_helper')
 
--- Specifying which other assets should be loaded in this scene
-asset.require('spice/base')
-assetHelper.requestAll(asset, 'scene/solarsystem/sun')
-asset.require('scene/solarsystem/planets')
-asset.request('scene/digitaluniverse/stars')
-asset.request('scene/digitaluniverse/milkyway')
 asset.require('scene/solarsystem/missions/rosetta/67p')
 asset.require('scene/solarsystem/missions/rosetta/rosetta')
-
--- Load default key bindings applicable to most scenes
-asset.require('util/default_keybindings')
-asset.require('util/default_dashboard')
-asset.require('util/default_joystick')
-
-asset.require('util/webgui')
-
-asset.request('customization/globebrowsing')
 
 -- Custom Keybindings
 local Keybindings = {
@@ -83,16 +71,7 @@ local Keybindings = {
         Command = propertyHelper.invert('Scene.67P.Renderable.ProjectionComponent.performProjection'),
         Documentation = "Enables or disables the image projection on 67P.",
         Local = false
-    },
-    {
-        Key = "h",
-        Name="Hide Trails",
-        Command = "local list = openspace.getProperty('*Trail.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
-        Documentation = "Disables visibility of the trails",
-        GuiPath = "/Rendering",
-        Local = false
-    },
-
+    }
 }
 
 local Comet67PAsset = asset.require('scene/solarsystem/missions/rosetta/67p')
@@ -120,15 +99,11 @@ assetHelper.registerDashboardItems(asset, {
     }
 })
 
-assetHelper.registerInterestingNodes(asset, {
-    "67P", "Rosetta", "Philae"
-})
-
 asset.onInitialize(function ()
     openspace.time.setTime("2014-08-01T03:05:00.000")
     sceneHelper.bindKeys(Keybindings)
 
-    openspace.setDefaultGuiSorting()
+    openspace.markInterestingNodes({ "67P", "Rosetta", "Philae" })
 
     sceneHelper.setDeltaTimeKeys({
         1, 5, 10, 20, 40, 90, 360, 720, 2880, 14400,
@@ -146,4 +121,5 @@ end)
 
 asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
+    openspace.removeInterestingNodes({ "67P", "Rosetta", "Philae" })
 end)
