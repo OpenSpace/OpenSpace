@@ -28,11 +28,6 @@ local color_layers = {
         Name = "Messenger MDIS [Sweden]",
         FilePath = mapServiceConfigs .. "/LiU/Messenger_MDIS.wms",
     },
-    {
-        Identifier = "Messenger_MDIS_AWS",
-        Name = "Messenger MDIS [AWS]",
-        FilePath = mapServiceConfigs .. "/AWS/MessengerMdis.wms"
-    },
     --mossaic
     {
         Identifier = "Messenger_Mosaic_Utah",
@@ -43,11 +38,6 @@ local color_layers = {
         Identifier = "Messenger_Mosaic_Sweden",
         Name = "Messenger Mosaic [Sweden]",
         FilePath = mapServiceConfigs .. "/LiU/Messenger_Mosaic.wms"
-    },
-    {
-        Identifier = "Messenger_Mosaic_AWS",
-        Name = "Messenger Mosaic [AWS]",
-        FilePath = mapServiceConfigs .. "/AWS/MessengerMosaic.wms"
     },
     --bdr
     {

@@ -902,6 +902,11 @@ local Insight_Trail = {
         EndTime = "2018 NOV 26 19:51:40.890",
         SampleInterval = 2
     },
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = entryTimeStart,
+        End = landerSeperationTime
+    },
     GUI = {
         Name = "Insight Trail",
         Path = "/Solar System/Missions/Insight"
