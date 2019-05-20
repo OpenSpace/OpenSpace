@@ -46,6 +46,7 @@ class RenderEngine;
 class ScreenSpaceRenderable;
 class SyncEngine;
 class TimeManager;
+class VersionChecker;
 class VirtualPropertyManager;
 struct WindowDelegate;
 namespace configuration { struct Configuration; }
@@ -81,6 +82,7 @@ RenderEngine& gRenderEngine();
 std::vector<std::unique_ptr<ScreenSpaceRenderable>>& gScreenspaceRenderables();
 SyncEngine& gSyncEngine();
 TimeManager& gTimeManager();
+VersionChecker& gVersionChecker();
 VirtualPropertyManager& gVirtualPropertyManager();
 WindowDelegate& gWindowDelegate();
 configuration::Configuration& gConfiguration();
@@ -112,6 +114,7 @@ static std::vector<std::unique_ptr<ScreenSpaceRenderable>>& screenSpaceRenderabl
     detail::gScreenspaceRenderables();
 static SyncEngine& syncEngine = detail::gSyncEngine();
 static TimeManager& timeManager = detail::gTimeManager();
+static VersionChecker& versionChecker = detail::gVersionChecker();
 static VirtualPropertyManager& virtualPropertyManager = detail::gVirtualPropertyManager();
 static WindowDelegate& windowDelegate = detail::gWindowDelegate();
 static configuration::Configuration& configuration = detail::gConfiguration();

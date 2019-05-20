@@ -22,52 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "modules/server/include/topics/versiontopic.h"
+#ifndef __OPENSPACE_CORE___VERSIONCHECKER___H__
+#define __OPENSPACE_CORE___VERSIONCHECKER___H__
 
-#include <modules/server/include/connection.h>
-#include <modules/server/servermodule.h>
-#include <openspace/openspace.h>
-#include <openspace/engine/globals.h>
-#include <openspace/util/versionchecker.h>
+#include <openspace/util/httprequest.h>
+#include <memory>
+#include <optional>
+#include <string>
 
 namespace openspace {
 
-bool VersionTopic::isDone() const {
-    return true;
-}
 
-void VersionTopic::handleJson(const nlohmann::json&) {
-    nlohmann::json versionJson = {
-        {
-            "openSpaceVersion",
-            {
-                { "major", OPENSPACE_VERSION_MAJOR },
-                { "minor", OPENSPACE_VERSION_MINOR },
-                { "patch", OPENSPACE_VERSION_PATCH }
-            }
-        },
-        {
-            "socketApiVersion",
-            {
-                { "major", SOCKET_API_VERSION_MAJOR },
-                { "minor", SOCKET_API_VERSION_MINOR },
-                { "patch", SOCKET_API_VERSION_PATCH }
-            }
-        }
+class VersionChecker {
+public:
+    struct SemanticVersion {
+        int major;
+        int minor;
+        int patch;
     };
 
-    if (global::versionChecker.hasLatestVersionInfo()) {
-        VersionChecker::SemanticVersion latestVersion =
-            global::versionChecker.latestVersion();
+    void requestLatestVersion(const std::string& url);
+    bool hasLatestVersionInfo();
+    SemanticVersion latestVersion();
 
-        versionJson["latestOpenSpaceVersion"] = {
-            { "major", latestVersion.major },
-            { "minor", latestVersion.minor },
-            { "patch", latestVersion.patch }
-        };
-    }
+private:
+    std::unique_ptr<AsyncHttpMemoryDownload> _request;
+    std::optional<SemanticVersion> _latestVersion;
+};
 
-    _connection->sendJson(wrappedPayload(versionJson));
-}
+bool operator<(const VersionChecker::SemanticVersion a,
+    const VersionChecker::SemanticVersion b);
 
 } // namespace openspace
+
+#endif // __OPENSPACE_CORE___VERSIONCHECKER___H__
