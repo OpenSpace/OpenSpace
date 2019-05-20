@@ -25,33 +25,34 @@
 #ifndef __OPENSPACE_CORE___VERSIONCHECKER___H__
 #define __OPENSPACE_CORE___VERSIONCHECKER___H__
 
-#include <optional>
-#include <memory>
-#include <string>
 #include <openspace/util/httprequest.h>
+#include <memory>
+#include <optional>
+#include <string>
 
 namespace openspace {
 
-struct SemanticVersion {
-    std::string format() const;
-
-    int major;
-    int minor;
-    int patch;
-};
-
-bool operator<(const SemanticVersion a, const SemanticVersion b);
 
 class VersionChecker {
 public:
+    struct SemanticVersion {
+        int major;
+        int minor;
+        int patch;
+    };
+
     void requestLatestVersion(const std::string& url);
     bool hasLatestVersionInfo();
     SemanticVersion latestVersion();
+
 private:
     std::unique_ptr<AsyncHttpMemoryDownload> _request;
     std::optional<SemanticVersion> _latestVersion;
 };
 
-}
+bool operator<(const VersionChecker::SemanticVersion a,
+    const VersionChecker::SemanticVersion b);
+
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___VERSIONCHECKER___H__

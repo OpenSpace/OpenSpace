@@ -185,7 +185,7 @@ void OpenSpaceEngine::initialize() {
     global::initialize();
 
     const std::string versionCheckUrl = global::configuration.versionCheckUrl;
-    if (versionCheckUrl != "") {
+    if (!versionCheckUrl.empty()) {
         global::versionChecker.requestLatestVersion(versionCheckUrl);
     }
 

@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/util/versionchecker.h>
+
 #include <openspace/openspace.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
@@ -33,10 +34,6 @@ namespace {
 } // namespace
 
 namespace openspace {
-
-std::string SemanticVersion::format() const {
-    return fmt::format("{}.{}.{}", major, minor, patch);
-}
 
 void VersionChecker::requestLatestVersion(const std::string& url) {
     HttpRequest::RequestOptions opt;
@@ -80,8 +77,8 @@ void VersionChecker::requestLatestVersion(const std::string& url) {
             _request = nullptr;
 
             LDEBUG(fmt::format(
-                "Latest availble OpenSpace version is {}. Currently running {}.",
-                _latestVersion->format(),
+                "Latest availble OpenSpace version is {}.{}.{}. Currently running {}.",
+                _latestVersion->major, _latestVersion->minor, _latestVersion->patch,
                 OPENSPACE_VERSION_NUMBER
             ));
 
@@ -103,23 +100,27 @@ void VersionChecker::requestLatestVersion(const std::string& url) {
     return false;
 }
 
-SemanticVersion VersionChecker::latestVersion() {
+ VersionChecker::SemanticVersion VersionChecker::latestVersion() {
     return _latestVersion.value();
 }
 
-bool operator<(const SemanticVersion a, const SemanticVersion b) {
+bool operator<(const VersionChecker::SemanticVersion a,
+               const VersionChecker::SemanticVersion b)
+{
     if (a.major < b.major) {
         return true;
     }
     if (a.major > b.major) {
         return false;
     }
+
     if (a.minor < b.minor) {
         return true;
     }
     if (a.minor > b.minor) {
         return false;
     }
+
     return a.patch < b.patch;
 }
 

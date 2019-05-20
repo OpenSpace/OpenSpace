@@ -27,7 +27,6 @@
 #include <modules/server/include/connection.h>
 #include <modules/server/servermodule.h>
 #include <openspace/openspace.h>
-
 #include <openspace/engine/globals.h>
 #include <openspace/util/versionchecker.h>
 
@@ -58,7 +57,9 @@ void VersionTopic::handleJson(const nlohmann::json&) {
     };
 
     if (global::versionChecker.hasLatestVersionInfo()) {
-        SemanticVersion latestVersion = global::versionChecker.latestVersion();
+        VersionChecker::SemanticVersion latestVersion =
+            global::versionChecker.latestVersion();
+
         versionJson["latestOpenSpaceVersion"] = {
             { "major", latestVersion.major },
             { "minor", latestVersion.minor },

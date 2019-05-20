@@ -1223,14 +1223,25 @@ void RenderEngine::renderVersionInformation() {
     std::string versionString = OPENSPACE_VERSION_STRING_FULL;
 
     if (global::versionChecker.hasLatestVersionInfo()) {
-        SemanticVersion latestVersion = global::versionChecker.latestVersion();
-        SemanticVersion currentVersion{
+        VersionChecker::SemanticVersion latestVersion =
+            global::versionChecker.latestVersion();
+
+        VersionChecker::SemanticVersion currentVersion {
             OPENSPACE_VERSION_MAJOR,
             OPENSPACE_VERSION_MINOR,
             OPENSPACE_VERSION_PATCH
         };
         if (currentVersion < latestVersion) {
-            versionString += " [" + latestVersion.format() + " is available]";
+            LINFO(fmt::format(
+                "Current version: {}.{}.{}. Newer version {}.{}.{} is available",
+                currentVersion.major, currentVersion.minor, currentVersion.patch,
+                latestVersion.major, latestVersion.minor, latestVersion.patch
+            ));
+            
+            versionString += fmt::format(
+                " [Available: {}.{}.{}]",
+                latestVersion.major, latestVersion.minor, latestVersion.patch
+            );
         }
     }
 
