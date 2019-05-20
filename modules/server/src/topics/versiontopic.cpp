@@ -31,7 +31,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/util/versionchecker.h>
 
-
 namespace openspace {
 
 bool VersionTopic::isDone() const {

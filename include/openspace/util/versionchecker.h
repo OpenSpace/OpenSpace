@@ -33,7 +33,7 @@
 namespace openspace {
 
 struct SemanticVersion {
-    std::string format();
+    std::string format() const;
 
     int major;
     int minor;

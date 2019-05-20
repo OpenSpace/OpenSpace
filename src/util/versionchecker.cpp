@@ -34,7 +34,7 @@ namespace {
 
 namespace openspace {
 
-std::string SemanticVersion::format() {
+std::string SemanticVersion::format() const {
     return fmt::format("{}.{}.{}", major, minor, patch);
 }
 
@@ -122,6 +122,5 @@ bool operator<(const SemanticVersion a, const SemanticVersion b) {
     }
     return a.patch < b.patch;
 }
-
 
 } // namespace openspace
