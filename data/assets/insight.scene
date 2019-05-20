@@ -1,22 +1,6 @@
-local assetHelper = asset.require('util/asset_helper')
+asset.require('./base')
+
 local sceneHelper = asset.require('util/scene_helper')
-local propertyHelper = asset.require('util/property_helper')
-
-asset.require('spice/base')
-assetHelper.requestAll(asset, 'scene/solarsystem/sun')
-asset.require('scene/solarsystem/planets')
-asset.require('scene/solarsystem/planets/mars/moons/phobos')
-asset.require('scene/solarsystem/planets/mars/moons/deimos')
-asset.require('scene/solarsystem/dwarf_planets/pluto/system')
-asset.require('scene/digitaluniverse/stars')
-asset.require('scene/digitaluniverse/milkyway')
-
-asset.require('util/default_keybindings')
-asset.require('util/default_dashboard')
-asset.require('util/default_joystick')
-asset.require('util/webgui')
-asset.request('customization/globebrowsing')
-
 
 -- Keybindings that are specific for this scene
 local Keybindings = {
@@ -36,7 +20,7 @@ local Keybindings = {
         Local = false
     }, 
     {
-        Key = "shift+i",
+        Key = "SHIFT+i",
         Command = "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset', 0);" .. 
         "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Settings.Offset', 0);" .. 
         "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Enabled', false);" ..
@@ -49,35 +33,15 @@ local Keybindings = {
         "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Settings.Gamma', 1.0);";
         Documentation = "Undo Insight landing layers setup",
         Local = false
-    },
-    {
-        Key = "h",
-        Name="Hide Trails",
-        Command = "openspace.setPropertyValue('Scene.*Trail.Renderable.Enabled', false)",
-        Documentation = "Disables visibility of the trails",
-        GuiPath = "/Rendering",
-        Local = false
-    },
+    }
 }
 
-local marsAsset = asset.require('scene/solarsystem/planets/mars/mars')
 local insightAsset = asset.require('scene/solarsystem/missions/insight/edl')
 
 asset.onInitialize(function ()
-
     openspace.time.setTime("2018 NOV 26 19:39:03.68")
 
     sceneHelper.bindKeys(Keybindings)
-
-    openspace.addVirtualProperty(
-        "BoolProperty",
-        "Show Trails",
-        "Scene.*Trail.Renderable.Enabled",
-        "Disable or enable all trails of the scene at the same time",
-        true,
-        nil,
-        nil
-    )
 
     openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset', -469.300000);
     openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Settings.Offset', -470.800006);
@@ -90,12 +54,10 @@ asset.onInitialize(function ()
     openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Settings.Gamma', 2.394370); 
     openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Enabled', true);
 
-    openspace.markInterestingNodes({
-        "Insight"
-    })
+    openspace.markInterestingNodes({ "Insight" })
 
     openspace.navigation.setCameraState({
-        Anchor = 'Insight',
+        Anchor = insightAsset.Insight.Identifier,
         Position = { 0, 0, 0 },
         Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 },
     })
@@ -116,8 +78,5 @@ asset.onDeinitialize(function ()
     openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Settings.Gamma', 1.0); 
     openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Enabled', false);
 
-    openspace.removeInterestingNodes({
-        "Insight"
-    })
-
+    openspace.removeInterestingNodes({ "Insight" })
 end)

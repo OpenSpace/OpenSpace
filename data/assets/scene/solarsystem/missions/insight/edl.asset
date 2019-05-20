@@ -77,9 +77,9 @@ local iKernels = {
 }
 
 local RotationMatrix = {
-    -1, 0, 0,
-    0, 0, -1,
-    0, -1, 0
+    -1,  0,  0,
+     0,  0, -1,
+     0, -1,  0
 }
 
 local LightSources = {
@@ -196,7 +196,7 @@ local Insight_Entry_Capsule_Ring = {
             Type = "MultiModelGeometry",
             GeometryFile = models_cruise_cone .. "/insight_cruise_cone_ring_foil_gold.obj"
         },
-       ColorTexture = models_cruise_cone .. "/foil_gold_ramp.png",
+        ColorTexture = models_cruise_cone .. "/foil_gold_ramp.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -221,7 +221,7 @@ local Insight_Entry_Capsule_Plugs = {
             Type = "MultiModelGeometry",
             GeometryFile = models_cruise_cone .. "/insight_cruise_cone_capsule_diffuse.obj"
         },
-       ColorTexture = models_cruise_cone .. "/insight_capsule_diffuse.png",
+        ColorTexture = models_cruise_cone .. "/insight_capsule_diffuse.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -246,7 +246,7 @@ local Insight_Entry_Heatshield = {
             Type = "MultiModelGeometry",
             GeometryFile = models_cruise_cone .. "/insight_cruise_heatshield_foil_gold.obj"
         },
-       ColorTexture = models_cruise_cone .. "/foil_gold_ramp.png",
+        ColorTexture = models_cruise_cone .. "/foil_gold_ramp.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources,
     },
@@ -967,38 +967,15 @@ local Insight_Trail = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    InsightParent,
-    Insight,
-    Insight_Entry_CapsuleA,
-    Insight_Entry_Capsule_Ring,
-    Insight_Entry_Capsule_Plugs,
-    Insight_Entry_Heatshield,
-    Insight_Parachute_0,
-    Insight_Parachute_Cords_0,
-    Insight_Parachute_20,
-    Insight_Parachute_Cords_20,
-    Insight_Parachute_40,
-    Insight_Parachute_Cords_40,
-    Insight_Lander_A001,
-    Insight_Lander_A002,
-    Insight_Lander_A003,
-    Insight_Lander_A004,
-    Insight_Lander_A005,
-    Insight_Lander_A006,
-    Insight_Lander_A007,
-    Insight_Lander_A008,
-    Insight_Lander_foil1,
-    Insight_Lander_Tex01,
-    Insight_Lander_Tex02,
-    Insight_Legs_Stowed_tex,
-    Insight_Legs_Stowed_AO06,
-    Insight_Legs_Deployed_tex,
-    Insight_Legs_Deployed_AO06,
-    Insight_Panels_Stowed_tex,
-    Insight_Panels_Stowed_tex2,
-    Insight_Panels_Stowed_AO01,
-    Insight_Panels_Deployed_tex,
-    Insight_Panels_Deployed_tex2,
-    Insight_Panels_Deployed_AO06,
-    Insight_Trail
+    InsightParent, Insight, Insight_Entry_CapsuleA, Insight_Entry_Capsule_Ring,
+    Insight_Entry_Capsule_Plugs, Insight_Entry_Heatshield, Insight_Parachute_0,
+    Insight_Parachute_Cords_0, Insight_Parachute_20, Insight_Parachute_Cords_20,
+    Insight_Parachute_40, Insight_Parachute_Cords_40, Insight_Lander_A001,
+    Insight_Lander_A002, Insight_Lander_A003, Insight_Lander_A004, Insight_Lander_A005,
+    Insight_Lander_A006, Insight_Lander_A007, Insight_Lander_A008, Insight_Lander_foil1,
+    Insight_Lander_Tex01, Insight_Lander_Tex02, Insight_Legs_Stowed_tex,
+    Insight_Legs_Stowed_AO06, Insight_Legs_Deployed_tex, Insight_Legs_Deployed_AO06,
+    Insight_Panels_Stowed_tex, Insight_Panels_Stowed_tex2, Insight_Panels_Stowed_AO01,
+    Insight_Panels_Deployed_tex, Insight_Panels_Deployed_tex2,
+    Insight_Panels_Deployed_AO06, Insight_Trail
 })
