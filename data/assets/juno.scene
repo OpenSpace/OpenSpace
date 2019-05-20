@@ -1,31 +1,17 @@
+asset.request('./base')
+
 local assetHelper = asset.require('util/asset_helper')
 local sceneHelper = asset.require('util/scene_helper')
 
--- Specifying which other assets should be loaded in this scene
-asset.require('spice/base')
-assetHelper.requestAll(asset, 'scene/solarsystem/sun')
-asset.request('scene/solarsystem/planets')
-asset.request('scene/digitaluniverse/stars')
-asset.request('scene/digitaluniverse/milkyway')
 assetHelper.requireAll(asset, 'scene/solarsystem/missions/juno')
 
--- Load default key bindings applicable to most scenes
-asset.require('util/default_keybindings')
-asset.require('util/default_dashboard')
-asset.require('util/default_joystick')
-
-asset.require('util/webgui')
 
 local junoAsset = asset.require('scene/solarsystem/missions/juno/juno')
-
-assetHelper.registerInterestingNodes(asset, {
-    "Jupiter", "Juno"
-})
 
 asset.onInitialize(function ()
     openspace.time.setTime("2016-07-01T10:05:00.00")
 
-    openspace.setDefaultGuiSorting()
+    openspace.markInterestingNodes({ "Jupiter", "Juno" })
 
     sceneHelper.setDeltaTimeKeys({
       1, 5, 10, 20, 40, 90, 360, 720, 2880, 14400,
@@ -40,4 +26,5 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
+    openspace.removeInterestingNodes({ "Jupiter", "Juno" })
 end)
