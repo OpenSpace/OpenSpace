@@ -33,11 +33,9 @@
 
 namespace {
     constexpr const char* _loggerCat = "TimeTopic";
-    constexpr const char* PropertyKey = "property";
     constexpr const char* EventKey = "event";
+    constexpr const char* SubscribeEvent = "start_subscription";
     constexpr const char* UnsubscribeEvent = "stop_subscription";
-    constexpr const char* CurrentTimeKey = "currentTime";
-    constexpr const char* DeltaTimeKey = "deltaTime";
     constexpr const std::chrono::milliseconds TimeUpdateInterval(50);
 } // namespace
 
@@ -47,9 +45,7 @@ namespace openspace {
 
 TimeTopic::TimeTopic()
     : _lastUpdateTime(std::chrono::system_clock::now())
-{
-    LDEBUG("Starting new time subscription");
-}
+{}
 
 TimeTopic::~TimeTopic() {
     if (_timeCallbackHandle != UnsetOnChangeHandle) {
@@ -71,54 +67,61 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
         return;
     }
 
-    std::string requestedKey = json.at(PropertyKey).get<std::string>();
-    LDEBUG("Subscribing to " + requestedKey);
+    sendFullTimeData();
 
-    if (requestedKey == CurrentTimeKey) {
-        _timeCallbackHandle = global::timeManager.addTimeChangeCallback([this]() {
-            std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-            if (now - _lastUpdateTime > TimeUpdateInterval) {
-                _connection->sendJson(currentTime());
-                _lastUpdateTime = now;
-            }
-        });
-        _connection->sendJson(currentTime());
-    }
-    else if (requestedKey == DeltaTimeKey) {
-        _deltaTimeCallbackHandle = global::timeManager.addDeltaTimeChangeCallback(
-            [this]() {
-                std::chrono::system_clock::time_point now =
-                    std::chrono::system_clock::now();
-                if (now - _lastUpdateTime > TimeUpdateInterval) {
-                    _connection->sendJson(deltaTime());
-                    if (_timeCallbackHandle != UnsetOnChangeHandle) {
-                        _connection->sendJson(currentTime());
-                        _lastUpdateTime = std::chrono::system_clock::now();
-                    }
-                    _lastUpdateTime = now;
-                }
-            }
-        );
-        _connection->sendJson(deltaTime());
-    }
-    else {
-        LWARNING("Cannot get " + requestedKey);
+    if (event != SubscribeEvent) {
         _isDone = true;
+        return;
     }
+
+    _timeCallbackHandle = global::timeManager.addTimeChangeCallback([this]() {
+        std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+        if (now - _lastUpdateTime > TimeUpdateInterval) {
+            sendCurrentTime();
+        }
+    });
+    
+    _deltaTimeCallbackHandle = global::timeManager.addDeltaTimeChangeCallback([this]() {
+        // Throttle by last update,
+        // but force update if pause state or target delta changes.
+
+        std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+        const double targetDeltaTime = global::timeManager.targetDeltaTime();
+        const bool isPaused = global::timeManager.isPaused();
+        const bool forceUpdate =
+            isPaused != _lastPauseState || targetDeltaTime != _lastTargetDeltaTime;
+
+        if (forceUpdate || now - _lastUpdateTime > TimeUpdateInterval) {
+            sendFullTimeData();
+        }
+    });
 }
 
-json TimeTopic::currentTime() {
-    json timeJson = { { "time", global::timeManager.time().ISO8601() } };
-    return wrappedPayload(timeJson);
-}
-
-json TimeTopic::deltaTime() {
-    json timeJson = {
-        { "deltaTime", global::timeManager.deltaTime() },
-        { "targetDeltaTime", global::timeManager.targetDeltaTime() },
-        { "isPaused", global::timeManager.isPaused() },
+void TimeTopic::sendCurrentTime() {
+    const json timeJson = {
+        { "time", global::timeManager.time().ISO8601() }
     };
-    return wrappedPayload(timeJson);
+    _connection->sendJson(wrappedPayload(timeJson));
+    _lastUpdateTime = std::chrono::system_clock::now();
+}
+
+void TimeTopic::sendFullTimeData() {
+    const std::string currentTime = global::timeManager.time().ISO8601();
+    const double deltaTime = global::timeManager.deltaTime();
+    const double targetDeltaTime = global::timeManager.targetDeltaTime();
+    const bool isPaused = global::timeManager.isPaused();
+
+    const json timeJson = {
+        { "time", currentTime },
+        { "deltaTime", deltaTime},
+        { "targetDeltaTime", targetDeltaTime},
+        { "isPaused", isPaused },
+    };
+
+    _connection->sendJson(wrappedPayload(timeJson));
+    _lastUpdateTime = std::chrono::system_clock::now();
+    _lastPauseState = isPaused;
+    _lastTargetDeltaTime = targetDeltaTime;
 }
 
 } // namespace openspace

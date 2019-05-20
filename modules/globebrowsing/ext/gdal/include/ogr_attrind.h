@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_attrind.h 2bc98a67d106359cbf36780cb385979e6c9a3b59 2016-08-04 22:26:31Z Even Rouault $
+ * $Id: ogr_attrind.h e37e476c4cf8f4b0df8995e0d95d5d672fca1a9b 2018-05-05 16:54:18 +0200 Even Rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Classes related to generic implementation of attribute indexing.
@@ -72,6 +72,7 @@ protected:
     char        *pszIndexPath;
 
                 OGRLayerAttrIndex();
+    CPL_DISALLOW_COPY_ASSIGN(OGRLayerAttrIndex)
 
 public:
     virtual     ~OGRLayerAttrIndex();

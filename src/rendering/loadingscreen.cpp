@@ -150,7 +150,7 @@ LoadingScreen::~LoadingScreen() {
 }
 
 void LoadingScreen::render() {
-    if (_phase != Phase::PreStart) {
+    if (_phase == Phase::PreStart) {
         return;
     }
 

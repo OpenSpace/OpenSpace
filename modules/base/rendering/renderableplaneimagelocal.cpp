@@ -57,6 +57,13 @@ namespace {
         "This value specifies an image that is loaded from disk and is used as a texture "
         "that is applied to this plane. This image has to be square."
     };
+    
+    constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
+        "RenderableType",
+        "RenderableType",
+        "This value specifies if the plane should be rendered in the Background,"
+        "Opaque, Transparent, or Overlay rendering step."
+    };
 } // namespace
 
 namespace openspace {
@@ -71,7 +78,13 @@ namespace openspace {
                     TextureInfo.identifier,
                     new StringVerifier,
                     Optional::No,
-                    TextureInfo.description,
+                    TextureInfo.description
+                },
+                {
+                    RenderableTypeInfo.identifier,
+                    new StringVerifier,
+                    Optional::Yes,
+                    RenderableTypeInfo.description
                 }
             }
         };
@@ -96,6 +109,25 @@ namespace openspace {
                                   [this](const ghoul::filesystem::File&) { _textureIsDirty = true; }
                                   );
         
+        if (dictionary.hasKey(RenderableTypeInfo.identifier)) {
+            std::string renderType = dictionary.value<std::string>(
+                                                                   RenderableTypeInfo.identifier
+                                                                   );
+            if (renderType == "Background") {
+                setRenderBin(Renderable::RenderBin::Background);
+            } else if (renderType == "Opaque") {
+                setRenderBin(Renderable::RenderBin::Opaque);
+            }
+            else if (renderType == "Transparent") {
+                setRenderBin(Renderable::RenderBin::Transparent);
+            }
+            else if (renderType == "Overlay") {
+                setRenderBin(Renderable::RenderBin::Overlay);
+            }
+        }
+        else {
+            setRenderBin(Renderable::RenderBin::Opaque);
+        }
     }
     
     bool RenderablePlaneImageLocal::isReady() const {
@@ -114,7 +146,7 @@ namespace openspace {
         BaseModule::TextureManager.release(_texture);
         RenderablePlane::deinitializeGL();
     }
-    
+
     void RenderablePlaneImageLocal::bindTexture() {
         
         //_texture->bind();
@@ -156,7 +188,7 @@ namespace openspace {
         _texture->bind();
         
     }
-    
+
     void RenderablePlaneImageLocal::update(const UpdateData& data) {
         RenderablePlane::update(data);
         

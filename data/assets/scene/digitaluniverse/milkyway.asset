@@ -43,8 +43,8 @@ local sphere = {
         FadeOutThreshold = 0.025
     },
     GUI = {
-        Name = "Milky Way",
-        Path = "/Milky Way/Milky Way"
+        Name = "Milky Way Sphere",
+        Path = "/Milky Way"
     }
 }
 

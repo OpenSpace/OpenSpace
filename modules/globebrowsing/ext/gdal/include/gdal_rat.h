@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_rat.h 3c5e4ec07e57067c187d87dad3b6be5490b76a4e 2018-04-02 23:38:56 +0200 Even Rouault $
+ * $Id: gdal_rat.h 2519a7eb0e1649dbf8625ae8ffc7bb7c3ef9514b 2018-07-10 12:05:23 +0100 Robert Coup $
  *
  * Project:  GDAL Core
  * Purpose:  GDALRasterAttributeTable class declarations.
@@ -60,7 +60,7 @@ public:
      *
      * @return new copy of the RAT as an in-memory implementation.
      */
-    virtual GDALDefaultRasterAttributeTable *Clone() const = 0;
+    virtual GDALRasterAttributeTable *Clone() const = 0;
 
     /**
      * \brief Fetch table column count.
@@ -238,6 +238,25 @@ public:
      */
     virtual int           ChangesAreWrittenToFile() = 0;
 
+    /**
+     * \brief Set the RAT table type.
+     *
+     * Set whether the RAT is thematic or athematic (continuous).
+     *
+     * @since GDAL 2.4
+     */
+    virtual CPLErr        SetTableType(const GDALRATTableType eInTableType) = 0;
+
+    /**
+     * \brief Get the RAT table type.
+     *
+     * Indicates whether the RAT is thematic or athematic (continuous).
+     *
+     * @since GDAL 2.4
+     * @return table type
+     */
+    virtual GDALRATTableType GetTableType() const = 0;
+
     virtual CPLErr        ValuesIO( GDALRWFlag eRWFlag, int iField,
                                     int iStartRow, int iLength,
                                     double *pdfData);
@@ -285,6 +304,13 @@ public:
      */
     static inline GDALRasterAttributeTable* FromHandle(GDALRasterAttributeTableH hRAT)
         { return static_cast<GDALRasterAttributeTable*>(hRAT); }
+
+    /**
+     * \brief Remove statistics from the RAT.
+     *
+     * @since GDAL 2.4
+     */
+    virtual void          RemoveStatistics() = 0;
 };
 
 /************************************************************************/
@@ -296,15 +322,15 @@ public:
 class GDALRasterAttributeField
 {
  public:
-    CPLString         sName;
+    CPLString         sName{};
 
-    GDALRATFieldType  eType;
+    GDALRATFieldType  eType = GFT_Integer;
 
-    GDALRATFieldUsage eUsage;
+    GDALRATFieldUsage eUsage = GFU_Generic;
 
-    std::vector<GInt32> anValues;
-    std::vector<double> adfValues;
-    std::vector<CPLString> aosValues;
+    std::vector<GInt32> anValues{};
+    std::vector<double> adfValues{};
+    std::vector<CPLString> aosValues{};
 };
 //! @endcond
 
@@ -314,28 +340,28 @@ class GDALRasterAttributeField
 
 //! Raster Attribute Table container.
 
-// cppcheck-suppress copyCtorAndEqOperator
 class CPL_DLL GDALDefaultRasterAttributeTable : public GDALRasterAttributeTable
 {
  private:
-    std::vector<GDALRasterAttributeField> aoFields;
+    std::vector<GDALRasterAttributeField> aoFields{};
 
-    int bLinearBinning;  // TODO(schwehr): Can this be a bool?
-    double dfRow0Min;
-    double dfBinSize;
+    int bLinearBinning = false;  // TODO(schwehr): Can this be a bool?
+    double dfRow0Min = -0.5;
+    double dfBinSize = 1.0;
+
+    GDALRATTableType eTableType;
 
     void  AnalyseColumns();
-    int   bColumnsAnalysed;  // TODO(schwehr): Can this be a bool?
-    int   nMinCol;
-    int   nMaxCol;
+    int   bColumnsAnalysed = false;  // TODO(schwehr): Can this be a bool?
+    int   nMinCol = -1;
+    int   nMaxCol = -1;
 
-    int   nRowCount;
+    int   nRowCount = 0;
 
-    CPLString osWorkingResult;
+    CPLString osWorkingResult{};
 
  public:
     GDALDefaultRasterAttributeTable();
-    GDALDefaultRasterAttributeTable( const GDALDefaultRasterAttributeTable& );
     ~GDALDefaultRasterAttributeTable() override;
 
     GDALDefaultRasterAttributeTable *Clone() const override;
@@ -372,6 +398,11 @@ class CPL_DLL GDALDefaultRasterAttributeTable : public GDALRasterAttributeTable
                              double dfBinSize ) override;
     int GetLinearBinning( double *pdfRow0Min,
                           double *pdfBinSize ) const override;
+
+    CPLErr        SetTableType(const GDALRATTableType eInTableType) override;
+    GDALRATTableType GetTableType() const override;
+
+    void          RemoveStatistics() override;
 };
 
 #endif /* ndef GDAL_RAT_H_INCLUDED */

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_mdreader.h 7cbc4992fe78542e3ade2da352b283218f4a5ffb 2017-12-19 16:39:24Z Even Rouault $
+ * $Id: gdal_mdreader.h e37e476c4cf8f4b0df8995e0d95d5d672fca1a9b 2018-05-05 16:54:18 +0200 Even Rouault $
  *
  * Project:  GDAL Core
  * Purpose:  Read metadata (mainly the remote sensing imagery) from files of
@@ -97,6 +97,9 @@ typedef enum {
  * The base class for all metadata readers
  */
 class GDALMDReaderBase{
+
+    CPL_DISALLOW_COPY_ASSIGN(GDALMDReaderBase)
+
 public:
     GDALMDReaderBase(const char *pszPath, char **papszSiblingFiles);
     virtual ~GDALMDReaderBase();
@@ -161,11 +164,11 @@ protected:
                                          const char *pszValue);
 protected:
 //! @cond Doxygen_Suppress
-    char **m_papszIMDMD;
-    char **m_papszRPCMD;
-    char **m_papszIMAGERYMD;
-    char **m_papszDEFAULTMD;
-    bool m_bIsMetadataLoad;
+    char **m_papszIMDMD = nullptr;
+    char **m_papszRPCMD = nullptr;
+    char **m_papszIMAGERYMD = nullptr;
+    char **m_papszDEFAULTMD = nullptr;
+    bool m_bIsMetadataLoad = false;
 //! @endcond
 };
 
@@ -175,6 +178,9 @@ protected:
  * for provided path.
  */
 class CPL_DLL GDALMDReaderManager{
+
+    CPL_DISALLOW_COPY_ASSIGN(GDALMDReaderManager)
+
 public:
     GDALMDReaderManager();
     virtual ~GDALMDReaderManager();
@@ -194,7 +200,7 @@ public:
                                         GUInt32 nType = MDR_ANY);
 protected:
 //! @cond Doxygen_Suppress
-    GDALMDReaderBase *m_pReader;
+    GDALMDReaderBase *m_pReader = nullptr;
 //! @endcond
 };
 

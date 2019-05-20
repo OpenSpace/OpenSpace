@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2019                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -56,9 +56,6 @@ target_link_libraries(OpenSpace-MinVR libOpenSpace MinVR)
 # Why not put these in the module's path? Because they do not have access to the
 # target as of July 2017, which is needed.
 if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
-  # wanted by CEF
-  set(CMAKE_BUILD_TYPE Debug CACHE INTERNAL "CMAKE_BUILD_TYPE")
-
   if (WIN32)
     set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/OpenSpace-MinVR/openspace.rc)
   endif ()

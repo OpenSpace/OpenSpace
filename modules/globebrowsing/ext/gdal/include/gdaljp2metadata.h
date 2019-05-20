@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdaljp2metadata.h 7e07230bbff24eb333608de4dbd460b7312839d0 2017-12-11 19:08:47Z Even Rouault $
+ * $Id: gdaljp2metadata.h e37e476c4cf8f4b0df8995e0d95d5d672fca1a9b 2018-05-05 16:54:18 +0200 Even Rouault $
  *
  * Project:  GDAL
  * Purpose:  JP2 Box Reader (and GMLJP2 Interpreter)
@@ -58,6 +58,8 @@ class CPL_DLL GDALJP2Box
     GByte       abyUUID[16];
 
     GByte      *pabyData;
+
+    CPL_DISALLOW_COPY_ASSIGN(GDALJP2Box)
 
 public:
     explicit    GDALJP2Box( VSILFILE * = nullptr );
@@ -139,6 +141,8 @@ private:
     static CPLXMLNode* CreateGDALMultiDomainMetadataXML(
                                        GDALDataset* poSrcDS,
                                        int bMainMDDomainOnly );
+
+    CPL_DISALLOW_COPY_ASSIGN(GDALJP2Metadata)
 
 public:
     char  **papszGMLMetadata;

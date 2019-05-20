@@ -124,8 +124,8 @@ void NavigationHandler::updateCamera(double deltaTime) {
     if (_cameraUpdatedFromScript) {
         _cameraUpdatedFromScript = false;
     }
-    else if ( ! _playbackModeEnabled ) {
-        if (_camera) {
+    else {
+        if (!_playbackModeEnabled && _camera) {
             if (_useKeyFrameInteraction) {
                 _keyframeNavigator->updateCamera(*_camera, _playbackModeEnabled);
             }
@@ -150,6 +150,8 @@ void NavigationHandler::triggerPlaybackStart() {
 }
 
 void NavigationHandler::stopPlayback() {
+    _orbitalNavigator->resetVelocities();
+    _orbitalNavigator->resetNodeMovements();
     _playbackModeEnabled = false;
 }
 

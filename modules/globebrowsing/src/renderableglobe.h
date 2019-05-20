@@ -29,6 +29,7 @@
 
 #include <modules/globebrowsing/src/ellipsoid.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
+#include <modules/globebrowsing/src/globelabelscomponent.h>
 #include <modules/globebrowsing/src/gpulayergroup.h>
 #include <modules/globebrowsing/src/layermanager.h>
 #include <modules/globebrowsing/src/skirtedgrid.h>
@@ -247,6 +248,10 @@ private:
     bool _chunkCornersDirty = true;
     bool _nLayersIsDirty = true;
     Layer* _lastChangedLayer = nullptr;
+
+    // Labels 
+    GlobeLabelsComponent _globeLabelsComponent;
+    ghoul::Dictionary _labelsDictionary;
 };
 
 } // namespace openspace::globebrowsing
