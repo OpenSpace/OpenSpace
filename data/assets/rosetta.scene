@@ -83,7 +83,16 @@ local Keybindings = {
         Command = propertyHelper.invert('Scene.67P.Renderable.ProjectionComponent.performProjection'),
         Documentation = "Enables or disables the image projection on 67P.",
         Local = false
-    }
+    },
+    {
+        Key = "h",
+        Name="Hide Trails",
+        Command = "local list = openspace.getProperty('*Trail.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
+        Documentation = "Disables visibility of the trails",
+        GuiPath = "/Rendering",
+        Local = false
+    },
+
 }
 
 local Comet67PAsset = asset.require('scene/solarsystem/missions/rosetta/67p')
@@ -126,16 +135,6 @@ asset.onInitialize(function ()
         28800, 57600, 115200, 230400, 460800, 921600, 1843200, 3686400, 7372800, 14745600
     })
 
-    openspace.addVirtualProperty(
-        "BoolProperty",
-        "Show Trails",
-        "*Trail.Renderable.Enabled",
-        "Disable or enable all trails of the scene at the same time",
-        true,
-        nil,
-        nil
-    )
-
     openspace.navigation.setCameraState({
         Anchor = Comet67PAsset.Comet67P.Identifier,
         Position = { 526781518487.171326, 257168309890.072144, -1381125204152.817383 },
@@ -147,6 +146,4 @@ end)
 
 asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
-
-    openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
 end)

@@ -408,7 +408,7 @@ void RenderEngine::initializeGL() {
 
     //Set horizontal FOV value with whatever the field of view (in degrees) is of the
     // initialized window
-    _horizFieldOfView = global::windowDelegate.getHorizFieldOfView();
+    _horizFieldOfView = static_cast<float>(global::windowDelegate.getHorizFieldOfView());
 
     constexpr const float FontSizeBig = 50.f;
     _fontBig = global::fontManager.font(KeyFontMono, FontSizeBig);
@@ -475,7 +475,8 @@ void RenderEngine::updateRenderer() {
         FR::defaultRenderer().setFramebufferSize(fontResolution());
         FR::defaultProjectionRenderer().setFramebufferSize(renderingResolution());
         //Override the aspect ratio property value to match that of resized window
-        _horizFieldOfView = global::windowDelegate.getHorizFieldOfView();
+        _horizFieldOfView =
+            static_cast<float>(global::windowDelegate.getHorizFieldOfView());
     }
 
     _renderer->update();
