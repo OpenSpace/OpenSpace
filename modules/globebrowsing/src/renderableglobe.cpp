@@ -648,7 +648,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 }
 
 void RenderableGlobe::update(const UpdateData& data) {
-    if (_localRenderer.program->isDirty()) {
+    if (_localRenderer.program && _localRenderer.program->isDirty()) {
         _localRenderer.program->rebuildFromFile();
 
         _localRenderer.program->setUniform("xSegments", _grid.xSegments);
@@ -668,7 +668,7 @@ void RenderableGlobe::update(const UpdateData& data) {
         );
     }
 
-    if (_globalRenderer.program->isDirty()) {
+    if (_globalRenderer.program && _globalRenderer.program->isDirty()) {
         _globalRenderer.program->rebuildFromFile();
 
         _globalRenderer.program->setUniform("xSegments", _grid.xSegments);
