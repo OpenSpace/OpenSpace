@@ -20,7 +20,7 @@ local kernels = asset.syncedResource({
 })
 
 local Kernels = {
-      kernels .. "/apollo15.0001.tsc",  
+    kernels .. "/apollo15.0001.tsc",  
 
     -- kernels .. '/AS15-P_v01.bc',
     kernels .. '/apollo15.0001.tf',

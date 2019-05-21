@@ -4,9 +4,8 @@ local propertyHelper = asset.require('util/property_helper')
 local sceneHelper = asset.require('util/scene_helper')
 
 
-local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
-local moonAsset = asset.require('scene/solarsystem/planets/earth/moon/moon')
-local a8Asset = asset.require('scene/solarsystem/missions/apollo/apollo8.asset')
+asset.require('scene/solarsystem/planets/earth/moon/moon')
+asset.require('scene/solarsystem/missions/apollo/apollo8.asset')
 
 -- Custom Keybindings
 local Keybindings = {
@@ -20,10 +19,10 @@ local Keybindings = {
 
     {
         Key = "E",
-        Command =   "openspace.time.setPause(true);" ..
-                    "openspace.setPropertyValue('*Trail.Renderable.Enabled', false)"..
-                    "openspace.setPropertyValue('Scene.Apollo8LaunchTrail.Renderable.Enabled', false)"..
-                    'openspace.sessionRecording.startPlayback("apollo8")',
+        Command = "openspace.time.setPause(true);" ..
+                  "openspace.setPropertyValue('*Trail.Renderable.Enabled', false)"..
+                  "openspace.setPropertyValue('Scene.Apollo8LaunchTrail.Renderable.Enabled', false)"..
+                  "openspace.sessionRecording.startPlayback('apollo8')",
         Documentation = "Jump to right before the earthrise photo",
         Local = false
     },
@@ -84,18 +83,15 @@ local Keybindings = {
     }
 }
 
-
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 asset.onInitialize(function ()
-
     sceneHelper.bindKeys(Keybindings)
 
     openspace.time.setTime("1968-12-21T12:51:51.0")
     -- Earthrise:
     -- openspace.time.setTime("1968-12-24T16:37:19.0")
 
-    openspace.markInterestingNodes({
-        "Earth", "Moon", "Apollo8", "Apollo8Launch"
-    })
+    openspace.markInterestingNodes({ "Earth", "Moon", "Apollo8", "Apollo8Launch" })
 
     openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.MinimumAllowedDistance', 0.000000);
     openspace.setPropertyValueSingle('Scene.Moon.Renderable.LodScaleFactor', 24.0);
@@ -105,13 +101,10 @@ asset.onInitialize(function ()
         Position = { 0, 0, 0 },
         Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 },
     })
-  
-    openspace.globebrowsing.goToGeo(20, -60, 15000000)
 
+    openspace.globebrowsing.goToGeo(20, -60, 15000000)
 end)
 
 asset.onDeinitialize(function ()
-    openspace.removeInterestingNodes({
-        "Earth", "Moon", "Apollo8",
-    })
+    openspace.removeInterestingNodes({ "Earth", "Moon", "Apollo8" })
 end)

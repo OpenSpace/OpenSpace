@@ -1,7 +1,6 @@
---a11_lem.asset
+-- a11_lem.asset
 local assetHelper = asset.require('util/asset_helper')
 
-local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 local moonAsset = asset.require('scene/solarsystem/planets/earth/moon/moon')
 
 local lem = asset.require('./apollo_lem')
@@ -112,5 +111,4 @@ asset.onInitialize(function ()
     -- openspace.setPropertyValueSingle('Scene.Lem_Part_mid_grey7.Renderable.RotationVector', {68.031502,68.031502,8.545990});
     -- openspace.setPropertyValueSingle('Scene.Lem_Part_orange7.Renderable.RotationVector', {68.031502,68.031502,8.545990});
     -- openspace.setPropertyValueSingle('Scene.Lem_Part_yellow_buttons7.Renderable.RotationVector', {68.031502,68.031502,8.545990});
-
 end)
