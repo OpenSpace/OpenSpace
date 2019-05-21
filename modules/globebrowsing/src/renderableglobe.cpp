@@ -49,7 +49,7 @@
 
 namespace {
     // Global flags to modify the RenderableGlobe
-    constexpr const bool LimitLevelByAvailableData = false;
+    constexpr const bool LimitLevelByAvailableData = true;
     constexpr const bool PerformFrustumCulling = true;
     constexpr const bool PreformHorizonCulling = true;
 
