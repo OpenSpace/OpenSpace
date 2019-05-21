@@ -7,7 +7,7 @@ local speck = asset.syncedResource({
     Name = "Grids Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_grids_speck",
-    Version = 1
+    Version = 2
 })
 
 local radio = {
@@ -33,6 +33,31 @@ local radio = {
     },
     GUI = {
         Name = "Radio Sphere",
+        Path = "/Other/Grids"
+    }
+}
+
+local oort = {
+    Identifier = "OortSphere",
+    Parent = transforms.SolarSystemBarycenter.Name,
+    Transform = {
+        Scale = {
+            Type = "StaticScale",
+            Scale = 7.47989845E15;
+        }
+    },
+    Renderable = {
+        Type = "RenderableSphericalGrid",
+        Enabled = false,
+        GridColor = { 0.8, 0.4, 0.4, 0.25},
+        LineWidth = 2.0,
+        GridMatrix = { -0.05487554,  0.4941095, -0.8676661   , 0.0,
+                       -0.9938214 , -0.1109906, -0.0003515167, 0.0,
+                       -0.09647644,  0.8622859,  0.4971472   , 0.0,
+                        0.0       ,  0.0      ,  0.0         , 1.0 }
+    },
+    GUI = {
+        Name = "Oort Sphere",
         Path = "/Other/Grids"
     }
 }
@@ -186,6 +211,244 @@ local galacticLabels = {
     }
 }
 
+local plane1ld = {
+    Identifier = "1ldGrid",
+    Parent = transforms.SolarSystemBarycenter.Name,
+    Transform = {
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = {
+                -0.05487554,  0.4941095, -0.8676661,
+                -0.9938214 , -0.1109906, -0.0003515167,
+                -0.09647644,  0.8622859,  0.4971472
+            }
+        }
+    },
+    Renderable = {
+        Type = "RenderableDUMeshes",
+        Enabled = false,
+        Color = { 1.0, 1.0, 1.0 },
+        Transparency = 0.4,
+        ScaleFactor = 1.0,
+        File = speck .. "/1ld.speck",
+        MeshColor = {{ 0.1, 0.5, 0.6 }},
+        LabelFile = speck .. "/1ld.label",
+        TextColor = { 0.0, 0.2, 0.5, 1.0 },
+        TextSize = 10.3,
+        TextMinSize = 0.5,
+        TextMaxSize = 30.0,
+        Unit = "Km"
+    },
+    GUI = {
+        Name = "1ld Grid",
+        Path = "/Other/Grids"
+    }
+}
+
+local plane1lm = {
+    Identifier = "1lmGrid",
+    Parent = transforms.SolarSystemBarycenter.Name,
+    Transform = {
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = {
+                -0.05487554,  0.4941095, -0.8676661,
+                -0.9938214 , -0.1109906, -0.0003515167,
+                -0.09647644,  0.8622859,  0.4971472
+            }
+        }
+    },
+    Renderable = {
+        Type = "RenderableDUMeshes",
+        Enabled = false,
+        Color = { 1.0, 1.0, 1.0 },
+        Transparency = 0.4,
+        ScaleFactor = 1.0,
+        File = speck .. "/1lm.speck",
+        MeshColor = {{ 0.1, 0.5, 0.6 }},
+        LabelFile = speck .. "/1lm.label",
+        TextColor = { 0.0, 0.2, 0.5, 1.0 },
+        TextSize = 11.8,
+        TextMinSize = 0.5,
+        TextMaxSize = 30.0,
+        Unit = "pc"
+    },
+    GUI = {
+        Name = "1lm Grid",
+        Path = "/Other/Grids"
+    }
+}
+
+local plane1ly = {
+    Identifier = "1lyGrid",
+    Parent = transforms.SolarSystemBarycenter.Name,
+    Transform = {
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = {
+                -0.05487554,  0.4941095, -0.8676661,
+                -0.9938214 , -0.1109906, -0.0003515167,
+                -0.09647644,  0.8622859,  0.4971472
+            }
+        }
+    },
+    Renderable = {
+        Type = "RenderableDUMeshes",
+        Enabled = false,
+        Color = { 1.0, 1.0, 1.0 },
+        Transparency = 0.4,
+        ScaleFactor = 1.0,
+        File = speck .. "/1ly.speck",
+        MeshColor = {{ 0.1, 0.5, 0.6 }},
+        LabelFile = speck .. "/1ly.label",
+        TextColor = { 0.0, 0.2, 0.5, 1.0 },
+        TextSize = 13.0,
+        TextMinSize = 0.5,
+        TextMaxSize = 30.0,
+        Unit = "pc"
+    },
+    GUI = {
+        Name = "1ly Grid",
+        Path = "/Other/Grids"
+    }
+}
+
+local plane10ly = {
+    Identifier = "10lyGrid",
+    Parent = transforms.SolarSystemBarycenter.Name,
+    Transform = {
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = {
+                -0.05487554,  0.4941095, -0.8676661,
+                -0.9938214 , -0.1109906, -0.0003515167,
+                -0.09647644,  0.8622859,  0.4971472
+            }
+        }
+    },
+    Renderable = {
+        Type = "RenderableDUMeshes",
+        Enabled = false,
+        Color = { 1.0, 1.0, 1.0 },
+        Transparency = 0.4,
+        ScaleFactor = 1.0,
+        File = speck .. "/10ly.speck",
+        MeshColor = {{ 0.1, 0.5, 0.6 }},
+        LabelFile = speck .. "/10ly.label",
+        TextColor = { 0.0, 0.2, 0.5, 1.0 },
+        TextSize = 14.17,
+        TextMinSize = 0.5,
+        TextMaxSize = 30.0,
+        Unit = "pc"
+    },
+    GUI = {
+        Name = "10ly Grid",
+        Path = "/Other/Grids"
+    }
+}
+
+local plane100ly = {
+    Identifier = "100lyGrid",
+    Parent = transforms.SolarSystemBarycenter.Name,
+    Transform = {
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = {
+                -0.05487554,  0.4941095, -0.8676661,
+                -0.9938214 , -0.1109906, -0.0003515167,
+                -0.09647644,  0.8622859,  0.4971472
+            }
+        }
+    },
+    Renderable = {
+        Type = "RenderableDUMeshes",
+        Enabled = false,
+        Color = { 1.0, 1.0, 1.0 },
+        Transparency = 0.4,
+        ScaleFactor = 1.0,
+        File = speck .. "/100ly.speck",
+        MeshColor = {{ 0.1, 0.5, 0.6 }},
+        LabelFile = speck .. "/100ly.label",
+        TextColor = { 0.0, 0.2, 0.5, 1.0 },
+        TextSize = 15.0,
+        TextMinSize = 0.5,
+        TextMaxSize = 30.0,
+        Unit = "pc"
+    },
+    GUI = {
+        Name = "100ly Grid",
+        Path = "/Other/Grids"
+    }
+}
+
+local plane1kly = {
+    Identifier = "1klyGrid",
+    Parent = transforms.SolarSystemBarycenter.Name,
+    Transform = {
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = {
+                -0.05487554,  0.4941095, -0.8676661,
+                -0.9938214 , -0.1109906, -0.0003515167,
+                -0.09647644,  0.8622859,  0.4971472
+            }
+        }
+    },
+    Renderable = {
+        Type = "RenderableDUMeshes",
+        Enabled = false,
+        Color = { 1.0, 1.0, 1.0 },
+        Transparency = 0.4,
+        ScaleFactor = 1.0,
+        File = speck .. "/1kly.speck",
+        MeshColor = {{ 0.1, 0.5, 0.6 }},
+        LabelFile = speck .. "/1kly.label",
+        TextColor = { 0.0, 0.2, 0.5, 1.0 },
+        TextSize = 16.0,
+        TextMinSize = 0.5,
+        TextMaxSize = 30.0,
+        Unit = "pc"
+    },
+    GUI = {
+        Name = "1kly Grid",
+        Path = "/Other/Grids"
+    }
+}
+
+local plane10kly = {
+    Identifier = "10klyGrid",
+    Parent = transforms.SolarSystemBarycenter.Name,
+    Transform = {
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = {
+                -0.05487554,  0.4941095, -0.8676661,
+                -0.9938214 , -0.1109906, -0.0003515167,
+                -0.09647644,  0.8622859,  0.4971472
+            }
+        }
+    },
+    Renderable = {
+        Type = "RenderableDUMeshes",
+        Enabled = false,
+        Color = { 1.0, 1.0, 1.0 },
+        Transparency = 0.4,
+        ScaleFactor = 1.0,
+        File = speck .. "/10kly.speck",
+        MeshColor = {{ 0.1, 0.5, 0.6 }},
+        LabelFile = speck .. "/10kly.label",
+        TextColor = { 0.0, 0.2, 0.5, 1.0 },
+        TextSize = 17.25,
+        TextMinSize = 0.5,
+        TextMaxSize = 30.0,
+        Unit = "pc"
+    },
+    GUI = {
+        Name = "10kly Grid",
+        Path = "/Other/Grids"
+    }
+}
+
 local plane100kly = {
     Identifier = "100klyGrid",
     Renderable = {
@@ -302,6 +565,7 @@ local plane20Gly = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    radio, ecliptic, eclipticLabels, equatorial, equatorialLabels, galactic,
-    galacticLabels, plane100kly, plane1Mly, plane10Mly, plane100Mly, plane20Gly
+    radio, oort, ecliptic, eclipticLabels, equatorial, equatorialLabels, galactic,
+    galacticLabels, plane1ld, plane1lm, plane1ly, plane10ly, plane100ly, plane1kly,
+    plane10kly, plane100kly, plane1Mly, plane10Mly, plane100Mly, plane20Gly
 })

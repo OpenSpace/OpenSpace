@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_simplesurf.h 1b31a5ae8474bacb2fb8cce9c7121b390e192c4c 2016-12-04 04:32:31Z Kurt Schwehr $
+ * $Id: gdal_simplesurf.h fe2d81c8819bf9794bce0210098e637565728350 2018-05-06 00:49:51 +0200 Even Rouault $
  * Project:  GDAL
  * Purpose:  Correlator
  * Author:   Andrew Migal, migal.drew@gmail.com
@@ -187,6 +187,8 @@ private:
  */
 class GDALIntegralImage
 {
+    CPL_DISALLOW_COPY_ASSIGN(GDALIntegralImage)
+
 public:
     GDALIntegralImage();
     virtual ~GDALIntegralImage();
@@ -260,9 +262,9 @@ public:
     int GetWidth();
 
 private:
-    double **pMatrix;
-    int nWidth;
-    int nHeight;
+    double **pMatrix = nullptr;
+    int nWidth = 0;
+    int nHeight = 0;
 };
 
 /**
@@ -275,6 +277,8 @@ private:
  */
 class GDALOctaveLayer
 {
+    CPL_DISALLOW_COPY_ASSIGN(GDALOctaveLayer)
+
 public:
     GDALOctaveLayer();
 
@@ -424,12 +428,8 @@ private:
     class MatchedPointPairInfo
     {
     public:
-        MatchedPointPairInfo(int nInd_1, int nInd_2, double dfDist)
-            {
-                ind_1 = nInd_1;
-                ind_2 = nInd_2;
-                euclideanDist = dfDist;
-            }
+        MatchedPointPairInfo(int nInd_1, int nInd_2, double dfDist):
+            ind_1(nInd_1), ind_2(nInd_2), euclideanDist(dfDist) {}
 
         int ind_1;
         int ind_2;

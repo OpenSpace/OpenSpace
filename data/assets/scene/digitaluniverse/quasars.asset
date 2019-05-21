@@ -33,7 +33,7 @@ local object = {
         BillboardMinSize = 0.0,
     },
     GUI = {
-        Path = "/Universe/Quasars"
+        Path = "/Universe"
     }
 }
 

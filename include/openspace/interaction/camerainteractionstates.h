@@ -56,6 +56,8 @@ public:
     glm::dvec2 localRollVelocity() const;
     glm::dvec2 globalRollVelocity() const;
 
+    void resetVelocities();
+
 protected:
     struct InteractionState {
         InteractionState(double scaleFactor);

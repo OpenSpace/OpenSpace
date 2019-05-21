@@ -271,8 +271,8 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
     const std::vector<std::pair<std::string, bool>>& activeMap =
         sequencer.activeInstruments(currentTime);
 
-    glm::vec4 firing(0.58 - t, 1 - t, 1 - t, 1);
-    glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
+    glm::vec4 firing(0.58f - t, 1.f - t, 1.f - t, 1.f);
+    glm::vec4 notFiring(0.5f, 0.5f, 0.5f, 1.f);
 
     RenderFont(
         *_font,
@@ -284,11 +284,11 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
 
     for (const std::pair<std::string, bool>& m : activeMap) {
         if (m.second) {
-            RenderFont(*_font, penPosition, "|", glm::vec4(0.3, 0.3, 0.3, 1));
+            RenderFont(*_font, penPosition, "|", glm::vec4(0.3f, 0.3f, 0.3f, 1.f));
             if (m.first == "NH_LORRI") {
                 RenderFont(*_font, penPosition, " + ", firing);
             }
-            RenderFont(*_font, penPosition, "  |", glm::vec4(0.3, 0.3, 0.3, 1));
+            RenderFont(*_font, penPosition, "  |", glm::vec4(0.3f, 0.3f, 0.3f, 1.f));
             RenderFont(*_font,
                 penPosition,
                 fmt::format("    {:5s}", m.first),
@@ -297,12 +297,12 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             );
         }
         else {
-            RenderFont(*_font, penPosition, "| |", glm::vec4(0.3, 0.3, 0.3, 1));
+            RenderFont(*_font, penPosition, "| |", glm::vec4(0.3f, 0.3f, 0.3f, 1.f));
             RenderFont(
                 *_font,
                 penPosition,
                 fmt::format("    {:5s}", m.first),
-                glm::vec4(0.3, 0.3, 0.3, 1),
+                glm::vec4(0.3f, 0.3f, 0.3f, 1.f),
                 ghoul::fontrendering::CrDirection::Down
             );
         }
@@ -344,7 +344,7 @@ glm::vec2 DashboardItemInstruments::size() const {
             size,
             renderer.boundingBox(
                 *_font,
-                fmt::format("{:.0f} s {:s} {:.1f} %", remaining, progress, t * 100)
+                fmt::format("{:.0f} s {:s} {:.1f} %", remaining, progress, t * 100.f)
             ).boundingBox
         );
 

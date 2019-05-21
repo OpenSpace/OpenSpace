@@ -47,6 +47,7 @@
 #include <openspace/util/timemanager.h>
 #include <openspace/util/screenlog.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/util/versionchecker.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -209,6 +210,14 @@ namespace {
         "Gamma, is the nonlinear operation used to encode and decode luminance or "
         "tristimulus values in the image."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo HorizFieldOfViewInfo = {
+        "HorizFieldOfView",
+        "Horizontal Field of View",
+        "Adjusts the degrees of the horizontal field of view. The vertical field of "
+        "view will be automatically adjusted to match, according to the current "
+        "aspect ratio."
+    };
 } // namespace
 
 
@@ -247,6 +256,7 @@ RenderEngine::RenderEngine()
         glm::vec3(-glm::pi<float>()),
         glm::vec3(glm::pi<float>())
     )
+    , _horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.0f)
 {
     _doPerformanceMeasurements.onChange([this](){
         global::performanceManager.setEnabled(_doPerformanceMeasurements);
@@ -287,6 +297,11 @@ RenderEngine::RenderEngine()
     addProperty(_gamma);
 
     addProperty(_applyWarping);
+
+    _horizFieldOfView.onChange([this]() {
+        global::windowDelegate.setHorizFieldOfView(_horizFieldOfView);
+    });
+    addProperty(_horizFieldOfView);
 
     _takeScreenshot.onChange([this](){
         _shouldTakeScreenshot = true;
@@ -391,6 +406,10 @@ void RenderEngine::initializeGL() {
     // development
     global::windowDelegate.setNearFarClippingPlane(0.001f, 1000.f);
 
+    //Set horizontal FOV value with whatever the field of view (in degrees) is of the
+    // initialized window
+    _horizFieldOfView = static_cast<float>(global::windowDelegate.getHorizFieldOfView());
+
     constexpr const float FontSizeBig = 50.f;
     _fontBig = global::fontManager.font(KeyFontMono, FontSizeBig);
     constexpr const float FontSizeTime = 15.f;
@@ -455,6 +474,9 @@ void RenderEngine::updateRenderer() {
         using FR = ghoul::fontrendering::FontRenderer;
         FR::defaultRenderer().setFramebufferSize(fontResolution());
         FR::defaultProjectionRenderer().setFramebufferSize(renderingResolution());
+        //Override the aspect ratio property value to match that of resized window
+        _horizFieldOfView =
+            static_cast<float>(global::windowDelegate.getHorizFieldOfView());
     }
 
     _renderer->update();
@@ -596,32 +618,35 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 
     ++_frameNumber;
 
-    std::vector<ScreenSpaceRenderable*> ssrs;
-    ssrs.reserve(global::screenSpaceRenderables.size());
-    for (const std::unique_ptr<ScreenSpaceRenderable>& ssr :
-         global::screenSpaceRenderables)
-    {
-        if (ssr->isEnabled() && ssr->isReady()) {
-            ssrs.push_back(ssr.get());
+    if (masterEnabled && !delegate.isGuiWindow() && _globalBlackOutFactor > 0.f) {
+        std::vector<ScreenSpaceRenderable*> ssrs;
+        ssrs.reserve(global::screenSpaceRenderables.size());
+        for (const std::unique_ptr<ScreenSpaceRenderable>& ssr :
+            global::screenSpaceRenderables)
+        {
+            if (ssr->isEnabled() && ssr->isReady()) {
+                ssrs.push_back(ssr.get());
+            }
         }
-    }
 
-    std::sort(
-        ssrs.begin(),
-        ssrs.end(),
-        [](ScreenSpaceRenderable* lhs, ScreenSpaceRenderable* rhs) {
-            // Render back to front.
-            return lhs->depth() > rhs->depth();
+        std::sort(
+            ssrs.begin(),
+            ssrs.end(),
+            [](ScreenSpaceRenderable* lhs, ScreenSpaceRenderable* rhs) {
+                // Render back to front.
+                return lhs->depth() > rhs->depth();
+            }
+        );
+
+
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        for (ScreenSpaceRenderable* ssr : ssrs) {
+            ssr->render();
         }
-    );
-
-    glDisable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    for (ScreenSpaceRenderable* ssr : ssrs) {
-        ssr->render();
+        glDisable(GL_BLEND);
     }
-    glDisable(GL_BLEND);
     LTRACE("RenderEngine::render(end)");
 }
 
@@ -1195,10 +1220,29 @@ void RenderEngine::renderVersionInformation() {
         return;
     }
 
+    std::string versionString = OPENSPACE_VERSION_STRING_FULL;
+
+    if (global::versionChecker.hasLatestVersionInfo()) {
+        VersionChecker::SemanticVersion latestVersion =
+            global::versionChecker.latestVersion();
+
+        VersionChecker::SemanticVersion currentVersion {
+            OPENSPACE_VERSION_MAJOR,
+            OPENSPACE_VERSION_MINOR,
+            OPENSPACE_VERSION_PATCH
+        };
+        if (currentVersion < latestVersion) {
+            versionString += fmt::format(
+                " [Available: {}.{}.{}]",
+                latestVersion.major, latestVersion.minor, latestVersion.patch
+            );
+        }
+    }
+
     using FR = ghoul::fontrendering::FontRenderer;
     const FR::BoundingBoxInformation versionBox = FR::defaultRenderer().boundingBox(
         *_fontInfo,
-        OPENSPACE_VERSION_STRING_FULL
+        versionString
     );
 
     const FR::BoundingBoxInformation commitBox = FR::defaultRenderer().boundingBox(
@@ -1212,7 +1256,7 @@ void RenderEngine::renderVersionInformation() {
             fontResolution().x - versionBox.boundingBox.x - 10.f,
             5.f
         ),
-        OPENSPACE_VERSION_STRING_FULL,
+        versionString,
         glm::vec4(0.5, 0.5, 0.5, 1.f)
     );
 

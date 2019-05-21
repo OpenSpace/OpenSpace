@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_alg_priv.h e13dcd4dc171dfeed63f912ba06b9374ce4f3bb2 2018-03-18 21:37:41Z Even Rouault $
+ * $Id: gdal_alg_priv.h fe2d81c8819bf9794bce0210098e637565728350 2018-05-06 00:49:51 +0200 Even Rouault $
  *
  * Project:  GDAL Image Processing Algorithms
  * Purpose:  Prototypes and definitions for various GDAL based algorithms:
@@ -112,15 +112,17 @@ private:
     void     MergePolygon( int nSrcId, int nDstId );
     int      NewPolygon( DataType nValue );
 
+    CPL_DISALLOW_COPY_ASSIGN(GDALRasterPolygonEnumeratorT)
+
 public:  // these are intended to be readonly.
 
-    GInt32   *panPolyIdMap;
-    DataType   *panPolyValue;
+    GInt32   *panPolyIdMap = nullptr;
+    DataType   *panPolyValue = nullptr;
 
-    int      nNextPolygonId;
-    int      nPolyAlloc;
+    int      nNextPolygonId = 0;
+    int      nPolyAlloc = 0;
 
-    int      nConnectedness;
+    int      nConnectedness = 0;
 
 public:
     explicit GDALRasterPolygonEnumeratorT( int nConnectedness=4 );

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2018                                                                #
+# Copyright (c) 2014-2019                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -152,7 +152,6 @@ end_header("Dependency: SGCT")
 # target as of July 2017, which is needed.
 if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   # wanted by CEF
-  set(CMAKE_BUILD_TYPE Debug CACHE INTERNAL "CMAKE_BUILD_TYPE")
   set(PROJECT_ARCH "x86_64")
 
   if (WIN32)
@@ -175,4 +174,8 @@ if (MSVC)
   # This library is used for being able to output the callstack if an exception escapes
   target_link_libraries(OpenSpace Dbghelp.lib)
   end_header()
+endif ()
+
+if (OPENSPACE_NVTOOLS_ENABLED)
+  target_link_libraries(OpenSpace "${OPENSPACE_NVTOOLS_PATH}/lib/x64/nvToolsExt64_1.lib")
 endif ()

@@ -49,7 +49,7 @@
 
 namespace {
     // Global flags to modify the RenderableGlobe
-    constexpr const bool LimitLevelByAvailableData = false;
+    constexpr const bool LimitLevelByAvailableData = true;
     constexpr const bool PerformFrustumCulling = true;
     constexpr const bool PreformHorizonCulling = true;
 
@@ -69,6 +69,8 @@ namespace {
     constexpr const char* KeyShadowGroup = "ShadowGroup";
     constexpr const char* KeyShadowSource = "Source";
     constexpr const char* KeyShadowCaster = "Caster";
+    constexpr const char* KeyLabels = "Labels";
+
     const openspace::globebrowsing::AABB3 CullingFrustum{
         glm::vec3(-1.f, -1.f, 0.f),
         glm::vec3( 1.f,  1.f, 1e35)
@@ -541,8 +543,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 
             std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray;
             if (!disableShadows && (!sourceArray.empty() && !casterArray.empty())) {
-                for (const auto & source : sourceArray) {
-                    for (const auto & caster : casterArray) {
+                for (const std::pair<std::string, double>& source : sourceArray) {
+                    for (const std::pair<std::string, double>& caster : casterArray) {
                         Ellipsoid::ShadowConfiguration sc;
                         sc.source = source;
                         sc.caster = caster;
@@ -553,9 +555,20 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
             }
         }
     }
+
+    // Labels Dictionary
+    if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyLabels)) {
+        _labelsDictionary = dictionary.value<ghoul::Dictionary>(KeyLabels);
+    }
 }
 
 void RenderableGlobe::initializeGL() {
+
+    if (!_labelsDictionary.empty()) {
+        _globeLabelsComponent.initialize(_labelsDictionary, this);
+        addPropertySubOwner(_globeLabelsComponent);
+    }
+
     _layerManager.update();
 
     _grid.initializeGL();
@@ -603,11 +616,10 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
     if (distanceToCamera < distance) {
         try {
             renderChunks(data, rendererTask);
+            _globeLabelsComponent.draw(data);
         }
         catch (const ghoul::opengl::TextureUnit::TextureUnitError&) {
-            std::string layer = _lastChangedLayer ?
-                _lastChangedLayer->guiName() :
-                "";
+            std::string layer = _lastChangedLayer ? _lastChangedLayer->guiName() : "";
 
             LWARNINGC(
                 guiName(),
@@ -636,6 +648,50 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
 }
 
 void RenderableGlobe::update(const UpdateData& data) {
+    if (_localRenderer.program->isDirty()) {
+        _localRenderer.program->rebuildFromFile();
+
+        _localRenderer.program->setUniform("xSegments", _grid.xSegments);
+
+        if (_debugProperties.showHeightResolution) {
+            _localRenderer.program->setUniform(
+                "vertexResolution",
+                glm::vec2(_grid.xSegments, _grid.ySegments)
+            );
+        }
+
+        ghoul::opengl::updateUniformLocations(
+            *_localRenderer.program,
+            _localRenderer.uniformCache,
+            { "skirtLength", "p01", "p11", "p00", "p10", "patchNormalModelSpace",
+              "patchNormalCameraSpace" }
+        );
+    }
+
+    if (_globalRenderer.program->isDirty()) {
+        _globalRenderer.program->rebuildFromFile();
+
+        _globalRenderer.program->setUniform("xSegments", _grid.xSegments);
+
+        if (_debugProperties.showHeightResolution) {
+            _globalRenderer.program->setUniform(
+                "vertexResolution",
+                glm::vec2(_grid.xSegments, _grid.ySegments)
+            );
+        }
+        // Ellipsoid Radius (Model Space)
+        _globalRenderer.program->setUniform(
+            "radiiSquared",
+            glm::vec3(_ellipsoid.radii() * _ellipsoid.radii())
+        );
+
+        ghoul::opengl::updateUniformLocations(
+            *_globalRenderer.program,
+            _globalRenderer.uniformCache,
+            { "skirtLength", "minLatLon", "lonLatScalingFactor" }
+        );
+    }
+
     setBoundingSphere(static_cast<float>(
         _ellipsoid.maximumRadius() * data.modelTransform.scale
     ));
@@ -730,6 +786,12 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
             );
         }
 
+        const float dsf = static_cast<float>(
+            _generalProperties.lodScaleFactor * _ellipsoid.minimumRadius()
+        );
+        _globalRenderer.program->setUniform("distanceScaleFactor", dsf);
+
+
         _globalRenderer.updatedSinceLastCall = false;
     }
 
@@ -745,6 +807,11 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
                 static_cast<int>(i)
             );
         }
+
+        const float dsf = static_cast<float>(
+            _generalProperties.lodScaleFactor * _ellipsoid.minimumRadius()
+        );
+        _localRenderer.program->setUniform("distanceScaleFactor", dsf);
 
         _localRenderer.updatedSinceLastCall = false;
     }

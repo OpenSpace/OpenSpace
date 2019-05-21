@@ -1,6 +1,8 @@
 local transforms = asset.require('./transforms')
 local assetHelper = asset.require('util/asset_helper')
 local texturesPath = asset.require('./earth_textures').TexturesPath
+local labelsPath = asset.require('./earth_labels').LabelsPath
+
 asset.request('./trail')
 
 
@@ -266,7 +268,24 @@ local Earth = {
                 Radius = 1.737E6
             }
             --Caster2 = { Name = "Independency Day Ship", Radius = 0.0, }
-         }
+        },
+        Labels = {
+            Enable = false,
+            FileName = labelsPath .. "/Earth.labels",
+            LabelAlignmentOption = "Horizontally", -- or Circularly
+            LabelsFontSize = 41.0,
+            LabelsSize = 0.52,
+            LabelsMinSize = 1.0,
+            LabelsMaxSize = 1500.0,
+            ProximityEnabled = false,
+            LabelsFadeInEnabled = true,
+            LabelsFadeOutEnabled = false,
+            FadeInStartingDistance = 50000.0,
+            FadeOutStartingDistance = 80000.0,
+            LabelsForceDomeRendering = true,
+            LabelsDistanceEPS = 1500000.0,
+            LabelsColor = {1.0, 0.0, 0.0, 1.0}
+        }
     },
     Tag = { "planet_solarSystem", "planet_terrestrial" },
     GUI = {

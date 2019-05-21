@@ -31,7 +31,6 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-
 #include <ghoul/glm.h>
 
 namespace openspace {

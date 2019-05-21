@@ -1,4 +1,4 @@
-asset.require('default');
+asset.require('./base');
 
 asset.require('scene/solarsystem/missions/newhorizons/newhorizons')
 local NewHorizonsAsset = asset.require('scene/solarsystem/missions/newhorizons/model')
@@ -161,7 +161,16 @@ openspace.setPropertyValueSingle("Dashboard.NewHorizonsInstruments.Enabled", not
         Name = "Toggle NH Trail",
         GuiPath = "/New Horizons",
         Local = false
-    }
+    },
+    {
+        Key = "h",
+        Name="Hide Trails",
+        Command = "local list = openspace.getProperty('*Trail.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
+        Documentation = "Disables visibility of the trails",
+        GuiPath = "/Rendering",
+        Local = false
+    },
+
 }
 
 
@@ -188,15 +197,11 @@ assetHelper.registerDashboardItems(asset, {
     }
 })
 
-assetHelper.registerInterestingNodes(asset, {
-    "Pluto", "NewHorizons", "Charon"
-})
-
 asset.onInitialize(function ()
     openspace.time.setTime("2015-07-14T08:00:00.00")
     sceneHelper.bindKeys(Keybindings)
 
-    openspace.setDefaultGuiSorting()
+    openspace.markInterestingNodes({ "Pluto", "NewHorizons", "Charon" })
 
     sceneHelper.setDeltaTimeKeys({
         1, 5, 10, 20, 40, 60, 120, 360, 540, 1080,
@@ -208,16 +213,6 @@ asset.onInitialize(function ()
     openspace.setPropertyValueSingle('Scene.Charon.Renderable.Enabled', false)
     openspace.setPropertyValueSingle("Scene.PlutoBarycenterTrail.Renderable.Enabled", false)
 
-    openspace.addVirtualProperty(
-        "BoolProperty",
-        "Show Trails",
-        "*Trail.Renderable.Enabled",
-        "Disable or enable all trails of the scene at the same time",
-        true,
-        nil,
-        nil
-    )
-
     openspace.navigation.setCameraState({
         Anchor = NewHorizonsAsset.NewHorizons.Identifier,
         Position = { 4662120063743.592773, 1263245003503.724854, -955413856565.788086 },
@@ -227,9 +222,10 @@ end)
 
 asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
+
+    openspace.removeInterestingNodes({ "Pluto", "NewHorizons", "Charon" })
+
     openspace.setPropertyValueSingle('Scene.Pluto.Renderable.Enabled', true)
     openspace.setPropertyValueSingle('Scene.Charon.Renderable.Enabled', true)
     openspace.setPropertyValueSingle('Scene.PlutoBarycenterTrail.Renderable.Enabled', true)
-
-    openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
 end)

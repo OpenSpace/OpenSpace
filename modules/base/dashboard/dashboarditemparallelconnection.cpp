@@ -103,9 +103,7 @@ DashboardItemParallelConnection::DashboardItemParallelConnection(
     addProperty(_fontName);
 
     if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(
-            dictionary.value<double>(FontSizeInfo.identifier)
-        );
+        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
     }
     _fontSize.onChange([this](){
         _font = global::fontManager.font(_fontName, _fontSize);
