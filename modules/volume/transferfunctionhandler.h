@@ -28,7 +28,6 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/volume/transferfunctionproperty.h>
-#include <openspace/properties/binaryproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
 #include <memory>
@@ -48,8 +47,6 @@ public:
     TransferFunctionHandler(const properties::StringProperty& prop);
 
     void initialize();
-
-    void setHistogramProperty(openspace::Histogram& histogram);
 
     void setTexture();
     void loadStoredEnvelopes();
@@ -72,7 +69,6 @@ private:
     properties::TriggerProperty _saveTransferFunction;
     std::string _filePath;
     properties::TransferFunctionProperty _transferFunctionProperty;
-    properties::BinaryProperty _histogramProperty;
     std::shared_ptr<openspace::TransferFunction> _transferFunction;
     std::shared_ptr<ghoul::opengl::Texture> _texture;
 };
