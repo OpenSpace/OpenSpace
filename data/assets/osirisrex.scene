@@ -96,8 +96,9 @@ assetHelper.registerDashboardItems(asset, {
 })
 
 asset.onInitialize(function ()
-    -- openspace.time.setTime("2019 APR 16 12:03:00.00")
-    openspace.time.setTime("2016 SEP 8 23:00:00.500")
+
+    openspace.time.setTime("2018 10 30 23:00:00.500")
+
     sceneHelper.bindKeys(Keybindings)
 
     sceneHelper.setDeltaTimeKeys({
