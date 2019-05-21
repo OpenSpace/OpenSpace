@@ -2,6 +2,7 @@ local transforms = asset.require('./transforms')
 local assetHelper = asset.require('util/asset_helper')
 asset.require("spice/base")
 asset.request('./trail')
+local labelsPath = asset.require('./mars_labels').LabelsPath
 
 
 
@@ -164,6 +165,22 @@ local Mars = {
             ColorLayers = color_layers,
             Overlays = overlay_layers,
             HeightLayers = height_layers
+        },
+        Labels = {
+            Enable = false,
+            FileName = labelsPath .. "/mars.labels",
+            LabelAlignmentOption = "Horizontally", -- or Circularly
+            LabelsFontSize = 14.0,
+            LabelsSize = 8.0,
+            LabelsMinSize = 1.0,
+            LabelsMaxSize = 1500.0,
+            ProximityEnabled = false,
+            LabelsFadeInEnabled = true,
+            FadeInStartingDistance = 500000.0,
+            FadeOutStartingDistance = 1000000.0,
+            LabelsForceDomeRendering = true,
+            LabelsDistanceEPS = 1350000.0,
+            LabelsColor = {1.0, 1.0, 0.0, 1.0}
         }
     },
     Tag = { "planet_solarSystem", "planet_terrestrial" },
