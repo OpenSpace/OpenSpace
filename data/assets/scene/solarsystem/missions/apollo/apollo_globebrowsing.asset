@@ -1,18 +1,38 @@
 --apollo_globebrowsing.asset
 
 
-local layers = asset.syncedResource({
+local heightmaps = asset.syncedResource({
     Name = "Apollo Globebrowsing",
     Type = "HttpSynchronization",
-    Identifier = "apollo_globebrowsing",
+    Identifier = "apollo_globebrowsing_heightmaps",
+    Version = 1
+})
+
+local basemaps = asset.syncedResource({
+    Name = "Apollo Globebrowsing",
+    Type = "HttpSynchronization",
+    Identifier = "apollo_globebrowsing_basemaps",
+    Version = 1
+})
+
+local naclighting = asset.syncedResource({
+    Name = "Apollo Globebrowsing",
+    Type = "HttpSynchronization",
+    Identifier = "apollo_globebrowsing_naclighting",
+    Version = 1
+})
+
+local stations = asset.syncedResource({
+    Name = "Apollo Globebrowsing",
+    Type = "HttpSynchronization",
+    Identifier = "apollo_globebrowsing_stations",
     Version = 1
 })
 
 asset.onInitialize(function ()
-
-	openspace.globebrowsing.addBlendingLayersFromDirectory(layers .. "/heightmaps","Moon")
-	openspace.globebrowsing.addBlendingLayersFromDirectory(layers .. "/basemaps","Moon")
-	openspace.globebrowsing.addBlendingLayersFromDirectory(layers .. "/naclighting","Moon")
-	openspace.globebrowsing.addBlendingLayersFromDirectory(layers .. "/stations","Moon")
+	openspace.globebrowsing.addBlendingLayersFromDirectory(heightmaps,"Moon")
+	openspace.globebrowsing.addBlendingLayersFromDirectory(basemaps,"Moon")
+	openspace.globebrowsing.addBlendingLayersFromDirectory(naclighting,"Moon")
+	openspace.globebrowsing.addBlendingLayersFromDirectory(stations,"Moon")
 
 end)
