@@ -29,6 +29,7 @@ Thumbs.db
 /documentation/
 /logs/
 /screenshots/
+/recordings/
 /sync/
 # Customization is not supposed to be committed
 customization.lua

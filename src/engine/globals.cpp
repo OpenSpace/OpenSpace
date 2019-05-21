@@ -49,6 +49,7 @@
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
+#include <openspace/util/versionchecker.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/glm.h>
 #include <ghoul/font/fontmanager.h>
@@ -126,6 +127,11 @@ SyncEngine& gSyncEngine() {
 
 TimeManager& gTimeManager() {
     static TimeManager g;
+    return g;
+}
+
+VersionChecker& gVersionChecker() {
+    static VersionChecker g;
     return g;
 }
 

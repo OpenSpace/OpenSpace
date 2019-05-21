@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /******************************************************************************
- * $Id: gdalvrt.xsd ff896f5762108a473f1f774dbab003d8fa1b0476 2016-09-16 20:34:58Z Even Rouault $
+ * $Id: gdalvrt.xsd 0b660817c8be72e80da43cf98f0a7c20b0371f9e 2018-07-31 17:46:11 +0200 Even Rouault $
  *
  * Project:  GDAL/OGR
  * Purpose:  XML Schema for GDAL VRT files.
@@ -149,6 +149,7 @@
                 <xs:element name="Scale" type="xs:double"/>
                 <xs:element name="CategoryNames" type="CategoryNamesType"/>
                 <xs:element name="ColorTable" type="ColorTableType"/>
+                <xs:element name="GDALRasterAttributeTable" type="GDALRasterAttributeTableType"/>
                 <xs:element name="NoDataValue" type="DoubleOrNanType"/>
                 <xs:element name="NodataValue" type="xs:double"/> <!-- typo: deprecated -->
                 <xs:element name="HideNoDataValue" type="ZeroOrOne"/>
@@ -243,6 +244,29 @@
         <xs:sequence minOccurs="0" maxOccurs="unbounded">
             <xs:element name="Entry" type="ColorTableEntryType"/>
         </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="GDALRasterAttributeTableType">
+        <xs:sequence>
+            <xs:element name="FieldDefn" type="FieldDefnType" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Row" type="RowType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="FieldDefnType">
+        <xs:sequence>
+            <xs:element name="Name" type="xs:string"/>
+            <xs:element name="Type" type="xs:unsignedInt"/>
+            <xs:element name="Usage" type="xs:unsignedInt"/>
+        </xs:sequence>
+        <xs:attribute name="index" type="xs:unsignedInt" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="RowType">
+        <xs:sequence>
+            <xs:element name="F" type="xs:anyType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="index" type="xs:unsignedInt" use="required"/>
     </xs:complexType>
 
     <xs:complexType name="OverviewType">

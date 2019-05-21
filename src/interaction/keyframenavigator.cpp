@@ -35,6 +35,12 @@
 
 #include <glm/gtx/quaternion.hpp>
 
+#ifdef INTERPOLATION_DEBUG_PRINT
+namespace {
+    constexpr const char* _loggerCat = "KeyframeNavigator";
+} // namespace
+#endif
+
 namespace openspace::interaction {
 
 bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes) {
@@ -134,12 +140,16 @@ bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose prevPose,
 
     // Linear interpolation
     t = std::max(0.0, std::min(1.0, t));
-    camera->setPositionVec3(
-        prevKeyframeCameraPosition * (1 - t) + nextKeyframeCameraPosition * t
+    glm::dvec3 nowCameraPosition = prevKeyframeCameraPosition * (1 - t) +
+                                   nextKeyframeCameraPosition * t;
+    glm::dquat nowCameraRotation = glm::slerp(
+        prevKeyframeCameraRotation,
+        nextKeyframeCameraRotation,
+        t
     );
-    camera->setRotation(
-        glm::slerp(prevKeyframeCameraRotation, nextKeyframeCameraRotation, t)
-    );
+
+    camera->setPositionVec3(nowCameraPosition);
+    camera->setRotation(nowCameraRotation);
 
     // We want to affect view scaling, such that we achieve
     // logarithmic interpolation of distance to an imagined focus node.
@@ -155,42 +165,15 @@ bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose prevPose,
 
 #ifdef INTERPOLATION_DEBUG_PRINT
     LINFO(fmt::format(
-        "Cam pos prev={}, next={}",
-        std::to_string(prevKeyframeCameraPosition),
-        std::to_string(nextKeyframeCameraPosition)
+        "Cam pos = {} {} {}  rot = {} {} {} {}",
+        nowCameraPosition.x,
+        nowCameraPosition.y,
+        nowCameraPosition.z,
+        nowCameraRotation.x,
+        nowCameraRotation.y,
+        nowCameraRotation.z,
+        nowCameraRotation.w
     ));
-    LINFO(fmt::format(
-        "Cam rot prev={} {} {} {}  next={} {} {} {}",
-        prevKeyframeCameraRotation.x,
-        prevKeyframeCameraRotation.y,
-        prevKeyframeCameraRotation.z,
-        prevKeyframeCameraRotation.w,
-        nextKeyframeCameraRotation.x,
-        nextKeyframeCameraRotation.y,
-        nextKeyframeCameraRotation.z,
-        nextKeyframeCameraRotation.w
-    ));
-    LINFO(fmt::format("Cam interp = {}", t));
-    LINFO(fmt::format(
-        "camera {} {} {} {} {} {}",
-        global::windowDelegate.applicationTime(),
-        global::windowDelegate.applicationTime() - _timestampPlaybackStarted_application,
-        global::timeManager.time().j2000Seconds(),
-        interpolatedCamera.x,
-        interpolatedCamera.y,
-        interpolatedCamera.z
-    ));
-    // Following is for direct print to save & compare camera positions against recorded
-    // file
-    printf(
-        "camera %8.4f %8.4f %13.3f %16.7f %16.7f %16.7f\n",
-        global::windowDelegate.applicationTime(),
-        global::windowDelegate.applicationTime() - _timestampPlaybackStarted_application,
-        global::timeManager.time().j2000Seconds(),
-        interpolatedCamera.x,
-        interpolatedCamera.y,
-        interpolatedCamera.z
-    );
 #endif
 
     return true;

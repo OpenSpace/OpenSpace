@@ -26,34 +26,19 @@
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
-in vec4 in_position;
-in vec3 in_brightness;
+in vec3 in_position;
+in vec4 in_bvLumAbsMagAppMag;
 in vec3 in_velocity;
 in float in_speed;
 
-out vec4 psc_position;
-out vec3 vs_brightness;
+out vec4 vs_bvLumAbsMagAppMag;
 out vec3 vs_velocity;
 out float vs_speed;
-out vec4 vs_gPosition;
-
-uniform mat4 view;
-uniform mat4 projection;
-
 
 void main() {
-    vec4 p = in_position;
-    psc_position  = p;
-    vs_brightness = in_brightness;
-    vs_velocity = in_velocity;
-    vs_speed = in_speed;
+    vs_bvLumAbsMagAppMag = in_bvLumAbsMagAppMag;
+    vs_velocity          = in_velocity;
+    vs_speed             = in_speed;
 
-    vec4 tmp = p;
-    vec4 position = pscTransform(tmp, mat4(1.0));
-    
-    // G-Buffer
-    vs_gPosition = view * (vec4(1E19, 1E19, 1E19, 1.0) * position);
-    position = vec4(1E-19, 1E-19, 1E-19, 1.0) * vs_gPosition;
-    
-    gl_Position = position;
+    gl_Position = vec4(in_position, 1.0);
 }

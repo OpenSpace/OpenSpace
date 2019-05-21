@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_string.h 2a269ed2b136bd254b213f39846587c1eb237662 2018-04-18 23:42:24 +0200 Even Rouault $
+ * $Id: cpl_string.h e12a0fc61edef91a039e13c7baff2ce58288a552 2018-08-10 00:53:29 +0200 Juergen E. Fischer $
  *
  * Name:     cpl_string.h
  * Project:  CPL - Common Portability Library
@@ -177,6 +177,8 @@ char CPL_DLL ** CSLParseCommandLine(const char* pszCommandLine);
 #define CPLES_XML_BUT_QUOTES    5
 /** Scheme for CPLEscapeString()/CPLUnescapeString() for CSV (forced quoting) */
 #define CPLES_CSV_FORCE_QUOTING 6
+/** Scheme for CPLEscapeString()/CPLUnescapeString() for SQL identifiers */
+#define CPLES_SQLI              7
 
 char CPL_DLL *CPLEscapeString( const char *pszString, int nLength,
                                int nScheme ) CPL_WARN_UNUSED_RESULT;
@@ -304,51 +306,40 @@ extern "C++"
 #include <string>
 #endif
 
-// VC++ implicitly applies __declspec(dllexport) to template base
-// classes of classes marked with __declspec(dllexport).
-// Hence, VC++ would export symbols for the specialization of std::basic_string<char>,
-// since it is a base class of CPLString, which is marked with CPL_DLL.
+// VC++ implicitly applies __declspec(dllexport) to template base classes
+// of classes marked with __declspec(dllexport).
+// Hence, if marked with CPL_DLL, VC++ would export symbols for the specialization
+// of std::basic_string<char>, since it is a base class of CPLString.
 // As a result, if an application linked both gdal.dll and a static library that
 // (implicitly) instantiates std::string (almost all do!), then the linker would
 // emit an error concerning duplicate symbols for std::string.
-// The least intrusive solution is to turn CPLString into a template class
-// (that is not marked with CPL_DLL), make CPLString a typedef for a specialization
-// of that template class, and mark only the few non-inline member functions of
-// CPLStringT with CPL_DLL.
+// The least intrusive solution is to not mark the whole class with
+// __declspec(dllexport) for VC++, but only its non-inline methods.
 #ifdef _MSC_VER
-
-#  define CPLSTRING_DLL CPL_DLL
-
-template< class Dummy = void > class CPLStringT;
-typedef CPLStringT<> CPLString;
-
-template< class Dummy >
-class CPLStringT : public std::string
-
+#  define CPLSTRING_CLASS_DLL
+#  define CPLSTRING_METHOD_DLL CPL_DLL
 #else
-
 /*! @cond Doxygen_Suppress */
-#  define CPLSTRING_DLL
-#  define CPLStringT CPLString
+#  define CPLSTRING_CLASS_DLL CPL_DLL
+#  define CPLSTRING_METHOD_DLL
 /*! @endcond */
+#endif
 
 //! Convenient string class based on std::string.
-class CPL_DLL CPLString : public std::string
-
-#endif
+class CPLSTRING_CLASS_DLL CPLString : public std::string
 {
 public:
 
     /** Constructor */
-    CPLStringT(void) {}
+    CPLString(void) {}
     /** Constructor */
     // cppcheck-suppress noExplicitConstructor
-    CPLStringT( const std::string &oStr ) : std::string( oStr ) {}
+    CPLString( const std::string &oStr ) : std::string( oStr ) {}
     /** Constructor */
     // cppcheck-suppress noExplicitConstructor
-    CPLStringT( const char *pszStr ) : std::string( pszStr ) {}
+    CPLString( const char *pszStr ) : std::string( pszStr ) {}
     /** Constructor */
-    CPLStringT( const char *pszStr, size_t n ) : std::string( pszStr, n ) {}
+    CPLString( const char *pszStr, size_t n ) : std::string( pszStr, n ) {}
 
     /** Return string as zero terminated character array */
     operator const char* (void) const { return c_str(); }
@@ -398,39 +389,39 @@ public:
 
     /* There seems to be a bug in the way the compiler count indices...
      * Should be CPL_PRINT_FUNC_FORMAT (1, 2) */
-    CPLSTRING_DLL CPLString &Printf(
+    CPLSTRING_METHOD_DLL CPLString &Printf(
         CPL_FORMAT_STRING(const char *pszFormat), ... )
         CPL_PRINT_FUNC_FORMAT (2, 3);
-    CPLSTRING_DLL CPLString &vPrintf(
+    CPLSTRING_METHOD_DLL CPLString &vPrintf(
         CPL_FORMAT_STRING(const char *pszFormat), va_list args )
         CPL_PRINT_FUNC_FORMAT(2, 0);
-    CPLSTRING_DLL CPLString &FormatC( double dfValue, const char *pszFormat = nullptr );
-    CPLSTRING_DLL CPLString &Trim();
-    CPLSTRING_DLL CPLString &Recode( const char *pszSrcEncoding, const char *pszDstEncoding );
-    CPLSTRING_DLL CPLString &replaceAll(
+    CPLSTRING_METHOD_DLL CPLString &FormatC( double dfValue, const char *pszFormat = nullptr );
+    CPLSTRING_METHOD_DLL CPLString &Trim();
+    CPLSTRING_METHOD_DLL CPLString &Recode( const char *pszSrcEncoding, const char *pszDstEncoding );
+    CPLSTRING_METHOD_DLL CPLString &replaceAll(
         const std::string &osBefore, const std::string& osAfter );
-    CPLSTRING_DLL CPLString &replaceAll( const std::string &osBefore, char chAfter );
-    CPLSTRING_DLL CPLString &replaceAll( char chBefore, const std::string &osAfter );
-    CPLSTRING_DLL CPLString &replaceAll( char chBefore, char chAfter );
+    CPLSTRING_METHOD_DLL CPLString &replaceAll( const std::string &osBefore, char chAfter );
+    CPLSTRING_METHOD_DLL CPLString &replaceAll( char chBefore, const std::string &osAfter );
+    CPLSTRING_METHOD_DLL CPLString &replaceAll( char chBefore, char chAfter );
 
     /* case insensitive find alternates */
-    CPLSTRING_DLL size_t    ifind( const std::string & str, size_t pos = 0 ) const;
-    CPLSTRING_DLL size_t    ifind( const char * s, size_t pos = 0 ) const;
-    CPLSTRING_DLL CPLString &toupper( void );
-    CPLSTRING_DLL CPLString &tolower( void );
+    CPLSTRING_METHOD_DLL size_t    ifind( const std::string & str, size_t pos = 0 ) const;
+    CPLSTRING_METHOD_DLL size_t    ifind( const char * s, size_t pos = 0 ) const;
+    CPLSTRING_METHOD_DLL CPLString &toupper( void );
+    CPLSTRING_METHOD_DLL CPLString &tolower( void );
 
-    CPLSTRING_DLL bool      endsWith( const std::string& osStr ) const;
+    CPLSTRING_METHOD_DLL bool      endsWith( const std::string& osStr ) const;
 };
 
-#ifndef _MSC_VER
-#  undef CPLStringT
-#endif
+#undef CPLSTRING_CLASS_DLL
+#undef CPLSTRING_METHOD_DLL
 
 CPLString CPL_DLL CPLOPrintf(CPL_FORMAT_STRING(const char *pszFormat), ... )
     CPL_PRINT_FUNC_FORMAT (1, 2);
 CPLString CPL_DLL CPLOvPrintf(
     CPL_FORMAT_STRING(const char *pszFormat), va_list args)
     CPL_PRINT_FUNC_FORMAT (1, 0);
+CPLString CPL_DLL CPLQuotedSQLIdentifier(const char *pszIdent);
 
 /* -------------------------------------------------------------------- */
 /*      URL processing functions, here since they depend on CPLString.  */
@@ -446,22 +437,20 @@ CPLString CPL_DLL CPLURLAddKVP(const char* pszURL, const char* pszKey,
 //! String list class designed around our use of C "char**" string lists.
 class CPL_DLL CPLStringList
 {
-    char **papszList;
-    mutable int nCount;
-    mutable int nAllocation;
-    bool   bOwnList;
-    bool   bIsSorted;
+    char **papszList = nullptr;
+    mutable int nCount = 0;
+    mutable int nAllocation = 0;
+    bool   bOwnList = false;
+    bool   bIsSorted = false;
 
-    void   Initialize();
     void   MakeOurOwnCopy();
     void   EnsureAllocation( int nMaxLength );
     int    FindSortedInsertionPoint( const char *pszLine );
 
   public:
     CPLStringList();
-    CPLStringList( char **papszList, int bTakeOwnership=TRUE );
-    // cppcheck-suppress noExplicitConstructor
-    CPLStringList( CSLConstList papszList );
+    explicit CPLStringList( char **papszList, int bTakeOwnership=TRUE );
+    explicit CPLStringList( CSLConstList papszList );
     CPLStringList( const CPLStringList& oOther );
     ~CPLStringList();
 

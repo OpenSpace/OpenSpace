@@ -26,13 +26,13 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/globebrowsingmodule.h
-
   ${CMAKE_CURRENT_SOURCE_DIR}/src/asynctiledataprovider.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/basictypes.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/dashboarditemglobelocation.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/ellipsoid.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/gdalwrapper.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/geodeticpatch.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/globelabelscomponent.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/globetranslation.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/gpulayergroup.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/layer.h
@@ -62,12 +62,12 @@ set(HEADER_FILES
 set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/globebrowsingmodule.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/globebrowsingmodule_lua.inl
-
   ${CMAKE_CURRENT_SOURCE_DIR}/src/asynctiledataprovider.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/dashboarditemglobelocation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/ellipsoid.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/gdalwrapper.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/geodeticpatch.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/globelabelscomponent.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/globetranslation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/gpulayergroup.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/layer.cpp
@@ -123,7 +123,7 @@ if (WIN32)
     PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib
   )
-  register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal203.dll")
+  register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal241.dll")
 else (WIN32)
   find_package(GDAL REQUIRED)
 

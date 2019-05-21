@@ -27,9 +27,9 @@ cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 project(OpenSpace)
 
 set(OPENSPACE_VERSION_MAJOR 0)
-set(OPENSPACE_VERSION_MINOR 13)
+set(OPENSPACE_VERSION_MINOR 14)
 set(OPENSPACE_VERSION_PATCH 0)
-set(OPENSPACE_VERSION_STRING "Beta-3")
+set(OPENSPACE_VERSION_STRING "Beta-4")
 
 
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
@@ -103,7 +103,7 @@ execute_process(
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   RESULT_VARIABLE OPENSPACE_GIT_STATUS_RETURN
 )
-if (NOT OPENSPACE_GIT_STATUS_RETURN EQUAL 0) 
+if (NOT OPENSPACE_GIT_STATUS_RETURN EQUAL 0)
   set(OPENSPACE_GIT_STATUS "uncommitted changes")
 else()
   set(OPENSPACE_GIT_STATUS "")
@@ -118,7 +118,7 @@ include(src/CMakeLists.txt)
 ##########################################################################################
 # System libraries
 if (APPLE)
-    begin_dependency("Core Libraries")
+  begin_dependency("Core Libraries")
   target_include_directories(openspace-core PUBLIC "/Developer/Headers/FlatCarbon")
   find_library(COREFOUNDATION_LIBRARY CoreFoundation)
   find_library(CARBON_LIBRARY Carbon)
@@ -186,8 +186,27 @@ if (MSVC)
     target_include_directories(openspace-core PUBLIC ${OPENSPACE_EXT_DIR}/vld)
     end_dependency()
   endif ()
-endif ()
 
+  option(OPENSPACE_VTUNE_ENABLED "Include VTune support" OFF)
+  set(OPENSPACE_VTUNE_PATH "C:/Program Files (x86)/IntelSWTools/VTune Amplifier 2019" CACHE STRING "Path to VTune installation")
+  if (OPENSPACE_VTUNE_ENABLED)
+    begin_dependency("Intel VTune")
+    target_compile_definitions(openspace-core PUBLIC "OPENSPACE_HAS_VTUNE")
+    target_include_directories(openspace-core PUBLIC "${OPENSPACE_VTUNE_PATH}/include")
+    target_link_libraries(openspace-core "${OPENSPACE_VTUNE_PATH}/lib64/libittnotify.lib")
+    end_dependency()
+  endif ()
+
+  option(OPENSPACE_NVTOOLS_ENABLED "Include support for Nvidia Tools Extensions" OFF)
+  set(OPENSPACE_NVTOOLS_PATH "C:/Program Files/NVIDIA Corporation/NvToolsExt")
+  if (OPENSPACE_NVTOOLS_ENABLED)
+    begin_dependency("Nvidia Tools Extension")
+    target_compile_definitions(openspace-core PUBLIC "OPENSPACE_HAS_NVTOOLS")
+    target_include_directories(openspace-core PUBLIC "${OPENSPACE_NVTOOLS_PATH}/include")
+    end_dependency()
+  endif ()
+
+endif ()
 
 ##########################################################################################
 # Tests                                                                                  #
@@ -237,7 +256,7 @@ message(STATUS "")
 # target as of July 2017, which is needed.
 if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   # wanted by CEF
-  set(CMAKE_BUILD_TYPE Debug CACHE INTERNAL "CMAKE_BUILD_TYPE")
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING "CMAKE_BUILD_TYPE")
 
   set(PROJECT_ARCH "x86_64")
 

@@ -84,6 +84,7 @@ namespace {
     constexpr const char* KeyFilterSeverity = "FilterSeverity";
     constexpr const char* KeyCheckOpenGLState = "CheckOpenGLState";
     constexpr const char* KeyLogEachOpenGLCall = "LogEachOpenGLCall";
+    constexpr const char* KeyVersionCheckUrl = "VersionCheckUrl";
     constexpr const char* KeyUseMultithreadedInitialization =
                                                          "UseMultithreadedInitialization";
     constexpr const char* KeyLoadingScreen = "LoadingScreen";
@@ -290,6 +291,7 @@ void parseLuaState(Configuration& configuration) {
     getValue(s, KeyPaths, c.pathTokens);
     getValue(s, KeyFonts, c.fonts);
     getValue(s, KeyScriptLog, c.scriptLog);
+    getValue(s, KeyVersionCheckUrl, c.versionCheckUrl);
     getValue(s, KeyUseMultithreadedInitialization, c.useMultithreadedInitialization);
     getValue(s, KeyCheckOpenGLState, c.isCheckingOpenGLState);
     getValue(s, KeyLogEachOpenGLCall, c.isLoggingOpenGLCalls);

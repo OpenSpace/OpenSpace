@@ -1,0 +1,5 @@
+Name="HiRISE Local Set"
+Identifier="OnMarsHiRISELS"
+Description="HiRISE Stereo Pairs"
+ColorFile="HiRISELS.vrt"
+HeightFile="HiRISE_DEM.wms"

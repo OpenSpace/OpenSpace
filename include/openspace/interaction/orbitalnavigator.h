@@ -55,6 +55,7 @@ public:
 
     void updateStatesFromInput(const InputState& inputState, double deltaTime);
     void updateCameraStateFromStates(double deltaTime);
+    void resetVelocities();
 
     Camera* camera() const;
     void setCamera(Camera* camera);
@@ -67,6 +68,7 @@ public:
     void startRetargetAim();
     float retargetInterpolationTime() const;
     void setRetargetInterpolationTime(float durationInSeconds);
+    void resetNodeMovements();
 
     JoystickCameraStates& joystickStates();
     WebsocketCameraStates& websocketStates();
@@ -152,7 +154,6 @@ private:
     glm::dquat _previousAnchorNodeRotation;
 
     glm::dvec3 _previousAimNodePosition;
-    glm::dquat _previousAimNodeRotation;
 
     double _currentCameraToSurfaceDistance = 0.0;
     bool _directlySetStereoDistance = false;

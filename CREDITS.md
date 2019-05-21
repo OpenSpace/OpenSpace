@@ -1,11 +1,11 @@
 # Core Team
 Alexander Bock
 Emil Axelsson
-Kalle Bladin
-Micah Acinapura
 Jonathas Costa
-Joakim Kilby
 Gene Payne
+Micah Acinapura
+Kalle Bladin
+Joakim Kilby
 Erik Sundén
 Eric Myers
 

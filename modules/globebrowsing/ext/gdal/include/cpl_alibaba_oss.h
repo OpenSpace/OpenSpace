@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_alibaba_oss.h e648607661fdd5cbc6bb778c17c20c3e7979a734 2018-04-04 19:27:08 +0200 Even Rouault $
+ * $Id: cpl_alibaba_oss.h c39d156816d937c3139360b11786c769aeabd21e 2018-05-05 19:48:08 +0200 Even Rouault $
  *
  * Name:     cpl_alibaba_oss.h
  * Project:  CPL - Common Portability Library
@@ -45,14 +45,16 @@
 
 class VSIOSSHandleHelper final: public IVSIS3LikeHandleHelper
 {
-        CPLString m_osURL;
-        CPLString m_osSecretAccessKey;
-        CPLString m_osAccessKeyId;
-        CPLString m_osEndpoint;
-        CPLString m_osBucket;
-        CPLString m_osObjectKey;
-        bool m_bUseHTTPS;
-        bool m_bUseVirtualHosting;
+        CPL_DISALLOW_COPY_ASSIGN(VSIOSSHandleHelper)
+
+        CPLString m_osURL{};
+        CPLString m_osSecretAccessKey{};
+        CPLString m_osAccessKeyId{};
+        CPLString m_osEndpoint{};
+        CPLString m_osBucket{};
+        CPLString m_osObjectKey{};
+        bool m_bUseHTTPS = false;
+        bool m_bUseVirtualHosting = false;
 
         void RebuildURL() override;
 
@@ -104,9 +106,9 @@ class VSIOSSHandleHelper final: public IVSIS3LikeHandleHelper
 class VSIOSSUpdateParams
 {
     public:
-        CPLString m_osEndpoint;
+        CPLString m_osEndpoint{};
 
-        VSIOSSUpdateParams() {}
+        VSIOSSUpdateParams() = default;
 
         explicit VSIOSSUpdateParams(const VSIOSSHandleHelper* poHelper) :
             m_osEndpoint(poHelper->GetEndpoint()) {}

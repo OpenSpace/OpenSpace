@@ -85,11 +85,23 @@ namespace {
         "of the Sun."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo DisableFaceCullingInfo = {
+        "DisableFaceCulling",
+        "Disable Face Culling",
+        "Disable OpenGL automatic face culling optimization."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ModelTransformInfo = {
         "ModelTransform",
         "Model Transform",
         "This value specifies the model transform that is applied to the model before "
         "all other transformations are applied."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RotationVecInfo = {
+        "RotationVector",
+        "Rotation Vector",
+        "Rotation Vector using degrees"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourcesInfo = {
@@ -144,10 +156,22 @@ documentation::Documentation RenderableModel::Documentation() {
                 ShadingInfo.description
             },
             {
+                DisableFaceCullingInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                DisableFaceCullingInfo.description
+            },
+            {
                 ModelTransformInfo.identifier,
                 new DoubleMatrix3Verifier,
                 Optional::Yes,
                 ModelTransformInfo.description
+            },
+           {
+                RotationVecInfo.identifier,
+                new DoubleVector3Verifier,
+                Optional::Yes,
+                RotationVecInfo.description
             },
             {
                 LightSourcesInfo.identifier,
@@ -172,7 +196,9 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _diffuseIntensity(DiffuseIntensityInfo, 1.f, 0.f, 1.f)
     , _specularIntensity(SpecularIntensityInfo, 1.f, 0.f, 1.f)
     , _performShading(ShadingInfo, true)
-    , _modelTransform(ModelTransformInfo, glm::mat3(1.f))
+    , _disableFaceCulling(DisableFaceCullingInfo, false)
+    , _modelTransform(ModelTransformInfo, glm::dmat3(1.0), glm::dmat3(-1.0), glm::dmat3(1.0))
+    , _rotationVec(RotationVecInfo, glm::dvec3(0), glm::dvec3(0), glm::dvec3(360))
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
 {
     documentation::testSpecificationAndThrow(
@@ -214,6 +240,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         _performShading = dictionary.value<bool>(ShadingInfo.identifier);
     }
 
+    if (dictionary.hasKey(DisableFaceCullingInfo.identifier)) {
+        _disableFaceCulling = dictionary.value<bool>(DisableFaceCullingInfo.identifier);
+    }
+
     if (dictionary.hasKey(LightSourcesInfo.identifier)) {
         const ghoul::Dictionary& lsDictionary =
             dictionary.value<ghoul::Dictionary>(LightSourcesInfo.identifier);
@@ -238,6 +268,17 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_diffuseIntensity);
     addProperty(_specularIntensity);
     addProperty(_performShading);
+    addProperty(_disableFaceCulling);
+    addProperty(_modelTransform);
+    addProperty(_rotationVec);
+
+    _rotationVec.onChange([this]() {
+        glm::vec3 degreeVector = _rotationVec;
+        glm::vec3 radianVector = glm::vec3(glm::radians(degreeVector.x), 
+                                 glm::radians(degreeVector.y), glm::radians(degreeVector.z));
+        _modelTransform = glm::mat4_cast(
+            glm::quat(radianVector));
+    });
 }
 
 bool RenderableModel::isReady() const {
@@ -361,8 +402,16 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     _texture->bind();
     _program->setUniform(_uniformCache.texture, unit);
 
+    if (_disableFaceCulling) {
+        glDisable(GL_CULL_FACE);
+    }
+    
     _geometry->render();
 
+    if (_disableFaceCulling) {
+        glEnable(GL_CULL_FACE);
+    }
+    
     _program->deactivate();
 }
 
