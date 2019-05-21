@@ -51,7 +51,7 @@ local Keybindings = {
     },
     {
         Key = "f",
-        Name = "Toggle roation friction",
+        Name = "Toggle Rotation friction",
         Command = propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RotationalFriction'),
         Documentation = "Toggles the rotational friction of the camera. If it is disabled, the camera rotates around the focus object indefinitely.",
         GuiPath = "/Navigation",
