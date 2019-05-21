@@ -1,0 +1,53 @@
+--apollo_lem.asset (hopefull title)
+
+
+-- This asset exports a function to create an Apollo Command and Service Module (CSM).
+-- Instead of hard-coding the scene graph node parent,
+-- client assets can decide which object that the CSM should be attached to.
+-- Usage example: registerCsm(asset, Apollo8.Idenfitier)
+-- ...where Apollo8 is the scene graph node identifier to attach the CSM to.
+
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+
+local models = asset.syncedResource({
+    Name = "Apollo Models",
+    Type = "HttpSynchronization",
+    Identifier = "apollo_lem_model",
+    Version = 1
+})
+
+local partsInfo = {
+    -- Data is structured as: Geometry file name (except .obj suffix), texture file name, shading
+    -- Exterior
+    {"black", "black.png", true},
+    {"blue_glass", "blue_glass.png", true},
+    {"booster", "booster3.png", true},
+    {"bright_white", "white.png", true},
+    {"dark_grey_dish", "dark_gray.png", true},
+    {"dull_white", "dull_white.png", true},
+    {"gold", "gold.png", true},
+    {"light_grey", "light_gray.png", true},
+    {"mid_grey", "gray.png", true},
+    {"orange", "orange.png", true},
+    {"texture_lem_flag", "texture_lem_flag.png", true},
+    {"texture_lem_unitedstates", "texture_lem_unitedstates.png", true},
+    {"yellow_buttons", "yellow.png", true},
+}
+
+
+asset.export("registerLem", function (asset, parentNodeIdentifier) 
+    local parts = {}
+    for i, info in ipairs(partsInfo) do
+        parts[#parts + 1] = assetHelper.createModelPart(
+            parentNodeIdentifier,
+            sunTransforms.SolarSystemBarycenter.Identifier,
+            models,
+            info[1],
+            info[2],
+            info[3]
+        )
+    end
+    assetHelper.registerSceneGraphNodesAndExport(asset, parts)
+end)
+

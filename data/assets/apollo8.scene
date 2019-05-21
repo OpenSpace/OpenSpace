@@ -1,0 +1,117 @@
+--apollo.scene
+asset.require('./base')
+local propertyHelper = asset.require('util/property_helper')
+local sceneHelper = asset.require('util/scene_helper')
+
+
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+local moonAsset = asset.require('scene/solarsystem/planets/earth/moon/moon')
+local a8Asset = asset.require('scene/solarsystem/missions/apollo/apollo8.asset')
+
+-- Custom Keybindings
+local Keybindings = {
+    -- {
+    --     Key = "SHIFT+E",
+    --     Command =   "openspace.time.setPause(true);" ..
+    --                 "openspace.time.setTime('1968 DEC 24 16:37:19');",
+    --     Documentation = "Jump to time pre earthrise",
+    --     Local = false
+    -- },
+
+    {
+        Key = "E",
+        Command =   "openspace.time.setPause(true);" ..
+                    "openspace.setPropertyValue('*Trail.Renderable.Enabled', false)"..
+                    "openspace.setPropertyValue('Scene.Apollo8LaunchTrail.Renderable.Enabled', false)"..
+                    'openspace.sessionRecording.startPlayback("apollo8")',
+        Documentation = "Jump to right before the earthrise photo",
+        Local = false
+    },
+    {
+        Key = "U",
+        Command =   "openspace.time.setTime('1968-12-21T12:51:37.00')" ..
+                    "openspace.setPropertyValueSingle('Scene.Apollo8LaunchTrail.Renderable.Enabled', true);",
+        Documentation = "Jump to time right before A8 liftoff",
+        Local = false
+    },
+    {
+        Key = "K",
+        Command = propertyHelper.invert('Scene.Moon.Renderable.Layers.ColorLayers.Kaguya_Utah.Enabled'),
+        Documentation = "Toggles Moon Kaguya color layer",
+        Local = false
+    },
+    {
+        Key = "T",
+        Command = propertyHelper.invert('Scene.Apollo8MoonTrail.Renderable.Enabled'),
+        Documentation = "Toggles the trails of the Apollo8 orbits",
+        Local = false
+    },
+    {
+        Key = "SHIFT+T",
+        Command = propertyHelper.invert('Scene.Apollo8LaunchTrail.Renderable.Enabled'),
+        Documentation = "Toggles the trails of the Apollo8 Launch",
+        Local = false
+    },
+    {
+        Key = "CTRL+T",
+        Command = propertyHelper.invert('Scene.Apollo8EarthBarycenterTrail.Renderable.Enabled'),
+        Documentation = "Toggles the trails of the full Apollo8",
+        Local = false
+    },
+    {
+        Key = "S",
+        Command = propertyHelper.invert('Scene.Moon.RenderableGlobe.PerformShading'),
+        Documentation = "Toggles shading for the moon",
+        Local = false
+    },
+    {
+        Key = "PAGE_UP",
+        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Apollo8');",
+        Documentation = "Focus on apollo 8",
+        Local = false
+    },
+    {
+        Key = "PAGE_DOWN",
+        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Moon');",
+        Documentation = "Focus on moon",
+        Local = false
+    },
+    {
+        Key = "HOME",
+        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');",
+        Documentation = "Focus on earth",
+        Local = false
+    }
+}
+
+
+asset.onInitialize(function ()
+
+    sceneHelper.bindKeys(Keybindings)
+
+    openspace.time.setTime("1968-12-21T12:51:51.0")
+    -- Earthrise:
+    -- openspace.time.setTime("1968-12-24T16:37:19.0")
+
+    openspace.markInterestingNodes({
+        "Earth", "Moon", "Apollo8", "Apollo8Launch"
+    })
+
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.MinimumAllowedDistance', 0.000000);
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.LodScaleFactor', 24.0);
+
+    openspace.navigation.setCameraState({
+        Anchor = earthAsset.Earth.Identifier,
+        Position = { 0, 0, 0 },
+        Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 },
+    })
+  
+    openspace.globebrowsing.goToGeo(20, -60, 15000000)
+
+end)
+
+asset.onDeinitialize(function ()
+    openspace.removeInterestingNodes({
+        "Earth", "Moon", "Apollo8",
+    })
+end)
