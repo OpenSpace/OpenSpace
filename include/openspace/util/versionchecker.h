@@ -22,16 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___BINARYPROPERTY___H__
-#define __OPENSPACE_CORE___BINARYPROPERTY___H__
+#ifndef __OPENSPACE_CORE___VERSIONCHECKER___H__
+#define __OPENSPACE_CORE___VERSIONCHECKER___H__
 
-#include <openspace/properties/templateproperty.h>
-#include <vector>
+#include <openspace/util/httprequest.h>
+#include <memory>
+#include <optional>
+#include <string>
 
-namespace openspace::properties {
+namespace openspace {
 
-REGISTER_TEMPLATEPROPERTY_HEADER(BinaryProperty, std::vector<char>)
 
-} // namespace openspace::properties
+class VersionChecker {
+public:
+    struct SemanticVersion {
+        int major;
+        int minor;
+        int patch;
+    };
 
-#endif // __OPENSPACE_CORE___BINARYPROPERTY___H__
+    void requestLatestVersion(const std::string& url);
+    bool hasLatestVersionInfo();
+    SemanticVersion latestVersion();
+
+private:
+    std::unique_ptr<AsyncHttpMemoryDownload> _request;
+    std::optional<SemanticVersion> _latestVersion;
+};
+
+bool operator<(const VersionChecker::SemanticVersion a,
+    const VersionChecker::SemanticVersion b);
+
+} // namespace openspace
+
+#endif // __OPENSPACE_CORE___VERSIONCHECKER___H__

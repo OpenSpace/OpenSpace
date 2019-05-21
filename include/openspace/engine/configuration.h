@@ -65,6 +65,7 @@ struct Configuration {
     };
     DocumentationInfo documentation;
 
+    std::string versionCheckUrl;
     bool useMultithreadedInitialization = false;
 
     struct LoadingScreen {

@@ -69,7 +69,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/performance/performancemeasurement.cpp
   ${OPENSPACE_BASE_DIR}/src/performance/performancelayout.cpp
   ${OPENSPACE_BASE_DIR}/src/performance/performancemanager.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/binaryproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/optionproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/propertyowner.cpp
@@ -194,6 +193,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/util/time_lua.inl
   ${OPENSPACE_BASE_DIR}/src/util/timerange.cpp
   ${OPENSPACE_BASE_DIR}/src/util/transformationmanager.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/versionchecker.cpp
 )
 
 if (APPLE)
@@ -248,7 +248,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancemeasurement.h
   ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancelayout.h
   ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancemanager.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/binaryproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/optionproperty.h
@@ -386,6 +385,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timemanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/timerange.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/versionchecker.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/transformationmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/threadpool.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/histogram.h
