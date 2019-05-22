@@ -128,8 +128,8 @@ void Connection::handleMessage(const std::string& message) {
                 message.begin(),
                 message.end(),
                 sanitizedString.begin(),
-                [](const unsigned char& c) {
-                    return std::isprint(c) ? c : ' ';
+                [](unsigned char c) {
+                    return std::isprint(c, std::locale("")) ? c : ' ';
                 }
             );
             LERROR(fmt::format("Could not parse JSON: '{}'", sanitizedString));
