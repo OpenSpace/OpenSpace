@@ -646,28 +646,29 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     _programObject->setUniform(
-       _uniformCache.modelView,
-       data.camera.combinedViewMatrix() * modelTransform
+        _uniformCache.modelView,
+        data.camera.combinedViewMatrix() * modelTransform
     );
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
-    _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);                                                   //!!! WHY DOES _lineFade NOT WORK?
+    _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
 
     //glEnableVertexAttribArray(0);    // We like submitting vertices on stream 0 for no special reason
     //glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), 0);
 
-    const size_t orbits = static_cast<GLsizei>(_vertexBufferData.size()) / _nSegments;
+    // const size_t nrOrbits = static_cast<GLsizei>(_vertexBufferData.size()) / _nSegments;
+    const size_t nrOrbits = _TLEData.size();
     size_t vertices = 0;
 
     //glDepthMask(false);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE)
 
     glBindVertexArray(_vertexArray);
-    for (size_t i = 0; i <= orbits; ++i) {
+    for (size_t i = 0; i < nrOrbits; ++i) {
         //glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(_vertexBufferData.size()));
         glDrawArrays(GL_LINE_LOOP, vertices, _nSegments);
-        vertices = vertices + _nSegments + 1;
+        vertices = vertices + _nSegments;
     }
     glBindVertexArray(0);
     
@@ -679,7 +680,7 @@ void RenderableSatellites::updateBuffers() {
     _TLEData = readTLEFile(_path);
     LINFO(fmt::format("Pathpath: {} ",  _path));
 
-    const size_t nVerticesPerOrbit = _nSegments + 1;
+    const size_t nVerticesPerOrbit = _nSegments;
     _vertexBufferData.resize(_TLEData.size() * nVerticesPerOrbit);
     size_t orbitindex = 0;
 
@@ -695,7 +696,8 @@ void RenderableSatellites::updateBuffers() {
             orbit.epoch
         );
 
-        for (size_t i = 0; i <= _nSegments; ++i) {
+
+        for (size_t i = 0; i < nVerticesPerOrbit; ++i) {
             size_t index = orbitindex * nVerticesPerOrbit + i;
 
             float timeOffset = orbit.period * 

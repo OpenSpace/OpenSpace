@@ -25,15 +25,47 @@
 #include "fragment.glsl"
 //#include "floatoperations.glsl"
 
+//layout(location = 0) in vec4 vertex_data; // 1: x, 2: y, 3: z, 4: timeOffset
+//layout(location = 1) in vec2 orbit_data; // 1: epoch, 2: period
+
 uniform vec3 color;
 uniform float opacity = 1.0;
+
+uniform float lineFade;
+//uniform double inGameTime;
+
 
 in vec4 viewSpacePosition;
 
 in vec4 vs_position;
-in float fade;
+//in float fade;
+
+//in vec4 vertex_data_out;
+//in vec2 orbit_data_out;
+in float periodFraction_f;
+in float offsetPeriods;
 
 Fragment getFragment() {
+
+    /*
+    // calculate nr of periods, get fractional part to know where
+    // the vertex closest to the debris part is right now
+    double nrOfPeriods = (inGameTime - orbit_data_out.x) / orbit_data_out.y;
+    double periodFraction = fract(nrOfPeriods); //mod(nrOfPeriods, 1.0);
+    float periodFraction_f = float(periodFraction);
+
+    // same procedure for the current vertex
+    float offsetPeriods = vertex_data_out.w / orbit_data_out.y;
+    // check difference of these two locations
+    */
+    float vertexDistance = periodFraction_f - offsetPeriods;
+
+    if (vertexDistance < 0.0) {
+        vertexDistance += 1.0;
+    }
+
+    float invert = 1.0 - vertexDistance; // * lineFade;
+    float fade = clamp(invert * lineFade, 0.0, 1.0);
 
     Fragment frag;
     frag.color = vec4(color, fade * opacity);
