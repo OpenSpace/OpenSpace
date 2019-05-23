@@ -26,54 +26,43 @@
 #define __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGELOCAL___H__
 
 #include <modules/base/rendering/renderableplane.h>
-#include <thread>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
-
-struct RenderData;
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
-
-class RenderablePlaneImageLocal : public RenderablePlane {
-public:
-    RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary);
-
-    void initializeGL() override;
-    void deinitializeGL() override;
-
-    bool isReady() const override;
-
-    void update(const UpdateData& data) override;
-
-    static documentation::Documentation Documentation();
-
-protected:
-    virtual void bindTexture() override;
-
-private:
-    void loadTexture();
     
-    void startDownloadTexture();
+    struct RenderData;
+    struct UpdateData;
     
-    void startUploadTexture();
-
-    properties::StringProperty _texturePath;
-    ghoul::opengl::Texture* _texture = nullptr;
-    std::unique_ptr<ghoul::filesystem::File> _textureFile;
+    namespace documentation { struct Documentation; }
     
-    //std::unordered_map<std::string, int>;
-    std::unordered_map<std::string, std::unique_ptr<ghoul::opengl::Texture>> _textureList;
-    int _counter = 0;
-    int _counter2 = 0;
-    std::thread _dldthread;
-
-    bool _textureIsDirty = false;
-};
-
+    class RenderablePlaneImageLocal : public RenderablePlane {
+    public:
+        RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary);
+        
+        void initializeGL() override;
+        void deinitializeGL() override;
+        
+        bool isReady() const override;
+        
+        void update(const UpdateData& data) override;
+        
+        static documentation::Documentation Documentation();
+        
+    protected:
+        virtual void bindTexture() override;
+        
+    private:
+        void loadTexture();
+        
+        properties::StringProperty _texturePath;
+        ghoul::opengl::Texture* _texture = nullptr;
+        std::unique_ptr<ghoul::filesystem::File> _textureFile;
+        
+        bool _textureIsDirty = false;
+    };
+    
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGELOCAL___H__

@@ -32,6 +32,8 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <thread>
+
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -62,6 +64,14 @@ public:
 
 private:
     void loadTexture();
+    
+    void startUploadTexture();
+    void startDownloadTexture();
+    std::unordered_map<std::string, std::unique_ptr<ghoul::opengl::Texture>> _textureList;
+    int _counter = 0;
+    int _counter2 = 0;
+    std::thread _dldthread;
+    std::string _activeTextureDate;
 
     properties::StringProperty _texturePath;
     properties::OptionProperty _orientation;

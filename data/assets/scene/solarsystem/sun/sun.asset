@@ -7,19 +7,11 @@ local Sun = {
     Identifier = "Sun",
     Parent = transforms.SunIAU.Identifier,
     Renderable = {
-        Type = "RenderableGlobe",
-        Enabled = false,
-        Radii = { 6.957E8, 6.957E8, 6.957E8 },
-        SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/sun.jpg",
-                    Enabled = true
-                }
-            }
-        },
+        Type = "RenderableSphere",
+        Enabled = true,
+        Size = 6.957E8, -- Radii = { 6.957E8, 6.957E8, 6.957E8 },
+        Segments = 64,
+        Texture = textures .. "/sun.jpg",   
         PerformShading = false
     },
     GUI = {

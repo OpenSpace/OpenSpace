@@ -18,9 +18,9 @@ asset.require('util/default_dashboard')
 
 -- asset.require('util/webgui')
 
-asset.request('customization/globebrowsing')
+-- asset.request('customization/globebrowsing')
 
-local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+-- local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 local sunAsset = asset.require('scene/solarsystem/sun/sun')
 
 local sunRadius = 695508000
@@ -58,7 +58,7 @@ asset.onInitialize(function ()
     })
 
     openspace.setPropertyValue("Scene.Sun.Renderable.Enabled", true)
-    -- openspace.setPropertyValue("Scene.SunGlare.Renderable.Enabled", false)
+    openspace.setPropertyValue("Scene.SunGlare.Renderable.Enabled", false)
 
     -- Place by the sun
     openspace.navigation.setCameraState({
