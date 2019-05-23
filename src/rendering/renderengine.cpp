@@ -308,7 +308,9 @@ RenderEngine::RenderEngine()
     addProperty(_applyWarping);
 
     _horizFieldOfView.onChange([this]() {
-        global::windowDelegate.setHorizFieldOfView(_horizFieldOfView);
+        if (global::windowDelegate.isMaster()) {
+            global::windowDelegate.setHorizFieldOfView(_horizFieldOfView);
+        }
     });
     addProperty(_horizFieldOfView);
 
