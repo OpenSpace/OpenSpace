@@ -760,9 +760,6 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
     global::renderEngine.updateScene();
 
-    global::renderEngine.setGlobalBlackOutFactor(0.f);
-    global::renderEngine.startFading(1, 3.f);
-
     global::syncEngine.addSyncables(global::timeManager.getSyncables());
     if (_scene && _scene->camera()) {
         global::syncEngine.addSyncables(_scene->camera()->getSyncables());
@@ -1043,7 +1040,6 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     }
 
     global::renderEngine.updateScene();
-    global::renderEngine.updateFade();
     global::renderEngine.updateRenderer();
     global::renderEngine.updateScreenSpaceRenderables();
     global::renderEngine.updateShaderPrograms();

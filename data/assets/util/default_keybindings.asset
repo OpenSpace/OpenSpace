@@ -76,7 +76,7 @@ local Keybindings = {
     {
         Key = "w",
         Name = "Fade to/from black",
-        Command = "openspace.toggleFade(3)",
+        Command = "if openspace.getPropertyValue('RenderEngine.BlackoutFactor') > 0.5 then openspace.setPropertyValueSingle('RenderEngine.BlackoutFactor', 0.0, 3) else openspace.setPropertyValueSingle('RenderEngine.BlackoutFactor', 1.0, 3) end",
         Documentation = "Toggles the fade to black within 3 seconds or shows the rendering after 3 seconds.",
         GuiPath = "/Rendering",
         Local = false

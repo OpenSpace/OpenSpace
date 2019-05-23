@@ -78,7 +78,6 @@ public:
     RendererImplementation rendererImplementation() const;
 
     void updateShaderPrograms();
-    void updateFade();
     void updateRenderer();
     void updateScreenSpaceRenderables();
     void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
@@ -145,9 +144,6 @@ public:
      */
     static scripting::LuaLibrary luaLibrary();
 
-    // Temporary fade functionality
-    void startFading(int direction, float fadeDuration);
-
     glm::ivec2 renderingResolution() const;
     glm::ivec2 fontResolution() const;
 
@@ -187,10 +183,7 @@ private:
     properties::BoolProperty _showFrameNumber;
     properties::BoolProperty _disableMasterRendering;
 
-    float _globalBlackOutFactor = 1.f;
-    float _fadeDuration = 2.f;
-    float _currentFadeTime = 0.f;
-    int _fadeDirection = 0;
+    properties::FloatProperty _globalBlackOutFactor;
     properties::IntProperty _nAaSamples;
     properties::FloatProperty _hdrExposure;
     properties::FloatProperty _hdrBackground;

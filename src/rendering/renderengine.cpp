@@ -218,6 +218,13 @@ namespace {
         "view will be automatically adjusted to match, according to the current "
         "aspect ratio."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo GlobalBlackoutFactorInfo = {
+        "BlackoutFactor",
+        "Blackout Factor",
+        "The blackout factor of the rendering. This can be used for fading in or out the "
+        "rendering window"
+    };
 } // namespace
 
 
@@ -234,6 +241,7 @@ RenderEngine::RenderEngine()
     , _applyWarping(ApplyWarpingInfo, false)
     , _showFrameNumber(ShowFrameNumberInfo, false)
     , _disableMasterRendering(DisableMasterInfo, false)
+    , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
     , _nAaSamples(AaSamplesInfo, 4, 1, 8)
     , _hdrExposure(HDRExposureInfo, 0.4f, 0.01f, 10.0f)
     , _hdrBackground(BackgroundExposureInfo, 2.8f, 0.01f, 10.0f)
@@ -296,6 +304,7 @@ RenderEngine::RenderEngine()
     });
     addProperty(_gamma);
 
+    addProperty(_globalBlackOutFactor);
     addProperty(_applyWarping);
 
     _horizFieldOfView.onChange([this]() {
@@ -538,44 +547,6 @@ glm::mat4 RenderEngine::nodeRotation() const {
     glm::quat roll = glm::angleAxis(rot.z, glm::vec3(0.f, 0.f, 1.f));
 
     return glm::mat4_cast(glm::normalize(pitch * yaw * roll));
-}
-
-void RenderEngine::updateFade() {
-    // Temporary fade funtionality
-    constexpr const float FadedIn = 1.0;
-    constexpr const float FadedOut = 0.0;
-    // Don't restart the fade if you've already done it in that direction
-    const bool isFadedIn = (_fadeDirection > 0 && _globalBlackOutFactor == FadedIn);
-    const bool isFadedOut = (_fadeDirection < 0 && _globalBlackOutFactor == FadedOut);
-    if (isFadedIn || isFadedOut) {
-        _fadeDirection = 0;
-    }
-
-    if (_fadeDirection != 0) {
-        if (_currentFadeTime > _fadeDuration) {
-            _globalBlackOutFactor = _fadeDirection > 0 ? FadedIn : FadedOut;
-            _fadeDirection = 0;
-        }
-        else {
-            if (_fadeDirection < 0) {
-                _globalBlackOutFactor = glm::smoothstep(
-                    1.f,
-                    0.f,
-                    _currentFadeTime / _fadeDuration
-                );
-            }
-            else {
-                _globalBlackOutFactor = glm::smoothstep(
-                    0.f,
-                    1.f,
-                    _currentFadeTime / _fadeDuration
-                );
-            }
-            _currentFadeTime += static_cast<float>(
-                global::windowDelegate.averageDeltaTime()
-            );
-        }
-    }
 }
 
 void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
@@ -849,12 +820,6 @@ void RenderEngine::setGlobalBlackOutFactor(float opacity) {
     _globalBlackOutFactor = opacity;
 }
 
-void RenderEngine::startFading(int direction, float fadeDuration) {
-    _fadeDirection = direction;
-    _fadeDuration = fadeDuration;
-    _currentFadeTime = 0.f;
-}
-
 /**
  * Build a program object for rendering with the used renderer
  */
@@ -1003,27 +968,6 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
                 {},
                 "string",
                 "Sets the renderer (ABuffer or FrameBuffer)"
-            },
-            {
-                "toggleFade",
-                &luascriptfunctions::toggleFade,
-                {},
-                "number",
-                "Toggles fading in or out"
-            },
-            {
-                "fadeIn",
-                &luascriptfunctions::fadeIn,
-                {},
-                "number",
-                ""
-            },
-            {
-                "fadeOut",
-                &luascriptfunctions::fadeOut,
-                {},
-                "number",
-                ""
             },
             {
                 "addScreenSpaceRenderable",
