@@ -473,13 +473,7 @@ GenerateDebrisVolumeTask::GenerateDebrisVolumeTask(const ghoul::Dictionary& dict
     // since _inputPath is past from task,
     // there will have to be either one task per dataset,
     // or you need to combine the datasets into one file.
-    _inputPath = dictionary.value<std::string>(KeyInputPath);
-
-    // _inputPath1 = dictionary.value<std::string>(KeyInputPath1);
-    // _inputPath2 = dictionary.value<std::string>(KeyInputPath2);
-    // _inputPath3 = dictionary.value<std::string>(KeyInputPath3);
-    // _inputPath4 = dictionary.value<std::string>(KeyInputPath4);
-
+    _inputPath = absPath(dictionary.value<std::string>(KeyInputPath));
     _lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
     _upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
 

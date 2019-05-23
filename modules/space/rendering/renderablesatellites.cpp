@@ -645,8 +645,8 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     _programObject->setUniform(
-       _uniformCache.modelView,
-       data.camera.combinedViewMatrix() * modelTransform
+        _uniformCache.modelView,
+        data.camera.combinedViewMatrix() * modelTransform
     );
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
@@ -655,20 +655,21 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
 
     glLineWidth(_appearance.lineWidth);
 
-    const size_t numberOfOrbits = static_cast<GLsizei>(_vertexBufferData.size()) / _nSegments;
+    // const size_t nrOrbits = static_cast<GLsizei>(_vertexBufferData.size()) / _nSegments;
+    const size_t nrOrbits = _TLEData.size();
     size_t vertices = 0;
 
     //glDepthMask(false);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE)
 
     glBindVertexArray(_vertexArray);
-    for (size_t i = 0; i <= numberOfOrbits; ++i) {
+    for (size_t i = 0; i < nrOrbits; ++i) {
         //glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(_vertexBufferData.size()));
 
         // koll p[ vad som ska uppdateras
 
         glDrawArrays(GL_LINE_LOOP, vertices, _nSegments);
-        vertices = vertices + _nSegments + 1;
+        vertices = vertices + _nSegments;
     }
     glBindVertexArray(0);
     
@@ -679,7 +680,7 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
 void RenderableSatellites::updateBuffers() {
     _TLEData = readTLEFile(_path);
 
-    const size_t nVerticesPerOrbit = _nSegments + 1;
+    const size_t nVerticesPerOrbit = _nSegments;
     _vertexBufferData.resize(_TLEData.size() * nVerticesPerOrbit);
     size_t orbitindex = 0;
 
@@ -695,7 +696,8 @@ void RenderableSatellites::updateBuffers() {
             orbit.epoch
         );
 
-        for (size_t i = 0; i <= _nSegments; ++i) {
+
+        for (size_t i = 0; i < nVerticesPerOrbit; ++i) {
             size_t index = orbitindex * nVerticesPerOrbit + i;
 
             float timeOffset = orbit.period * 

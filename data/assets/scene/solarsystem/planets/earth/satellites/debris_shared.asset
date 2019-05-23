@@ -59,7 +59,7 @@ local registerSatelliteGroupObjects = function(containingAsset, group, tleFolder
 
                 -- The initialization with "-" is just a placeholder.
                 -- (needed to be initialized)
-                Segments = 160,
+                Segments = 4,
                 EccentricityColumn = "-",
                 SemiMajorAxisColumn = "-",
                 SemiMajorAxisUnit = 1,
