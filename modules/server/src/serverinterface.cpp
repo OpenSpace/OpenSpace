@@ -117,6 +117,19 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
     _defaultAccess.addOption(static_cast<int>(Access::RequirePassword), RequirePassword);
     _defaultAccess.addOption(static_cast<int>(Access::Allow), AllowAccess);
 
+    if (config.hasKey(DefaultAccessInfo.identifier)) {
+        std::string access = config.value<std::string>(DefaultAccessInfo.identifier);
+        if (access == DenyAccess) {
+            _defaultAccess.setValue(static_cast<int>(Access::Deny));
+        }
+        else if (access == RequirePassword) {
+            _defaultAccess.setValue(static_cast<int>(Access::RequirePassword));
+        }
+        else if (access == AllowAccess) {
+            _defaultAccess.setValue(static_cast<int>(Access::Allow));
+        }
+    }
+
     const std::string identifier = config.value<std::string>(KeyIdentifier);
 
     auto readList =
@@ -153,7 +166,7 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
     _port = static_cast<int>(config.value<double>(PortInfo.identifier));
     _enabled = config.value<bool>(EnabledInfo.identifier);
 
-    std::function<void()> reinitialize = [this]() {
+    auto reinitialize = [this]() {
         deinitialize();
         initialize();
     };
