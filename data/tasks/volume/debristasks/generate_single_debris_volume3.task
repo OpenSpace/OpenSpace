@@ -1,0 +1,12 @@
+return {{
+	Type = "GenerateDebrisVolumeTask",
+	Dimensions = {16, 16, 16},
+	LowerDomainBound = {-0.5, -0.5, -0.5},
+	UpperDomainBound = {0.5, 0.5, 0.5},
+	InputPath = "C:/Users/Jonathan/Documents/exjobb/OpenSpace/sync/url/satellite_tle_data_Iridium33Debris(10708435089634408069)/files/iridium-33-debris.txt",
+	StartTime = "2018-05-04T00:00:00",
+	RawVolumeOutput = "${DATA}/assets/scene/solarsystem/planets/earth/satellites/debris/volume/generated3/singleDebris.rawvolume",
+	DictionaryOutput = "${DATA}/assets/scene/solarsystem/planets/earth/satellites/debris/volume/generated3/singleDebris.dictionary"
+}}
+
+-- C:\Users\Jonathan\Documents\exjobb\OpenSpace\sync\url\satellite_tle_data_BreezeMBreakup(18391204735368316775)\files

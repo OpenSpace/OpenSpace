@@ -7,14 +7,14 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local maxApogee = 2 * 10946320;
+local earthRadius = 2 * 7847140;
 
 local volume = {
-    Identifier = "DebrisVolume",
+    Identifier = "DebrisVolume3",
     Parent = transforms.EarthInertial.Identifier,
     Renderable = {
         Type = "RenderableTimeVaryingVolume",
-        SourceDirectory = asset.localResource("generatedSequence"),
+        SourceDirectory = asset.localResource("generated3"),
         TransferFunction = asset.localResource("transferfunction.txt"),
         StepSize = 0.01,
         MinValue = 0,
@@ -29,7 +29,7 @@ local volume = {
     Transform = {
         Scale = {
             Type = "StaticScale",   
-            Scale = maxApogee     -- do not multiply this. That will not show real representation.
+            Scale = earthRadius     -- do not multiply this. That will not show real representation.
         }
     }
 }

@@ -23,7 +23,7 @@
   ****************************************************************************************/
 #include <fstream>
 #include <chrono>
-#include <vector>
+#include <vector> 
 
 #include <modules/space/rendering/renderablesatellites.h>
 #include <modules/space/translation/keplertranslation.h>
@@ -558,7 +558,7 @@ RenderableSatellites::~RenderableSatellites() {
 
 void RenderableSatellites::initialize() {
     
-    updateBuffers();
+// updateBuffers();
 
     //_path.onChange([this]() {
     //    readTLEFile(_path);
@@ -651,19 +651,22 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
-    _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);                                                   //!!! WHY DOES _lineFade NOT WORK?
+    _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
 
     glLineWidth(_appearance.lineWidth);
 
-    const size_t orbits = static_cast<GLsizei>(_vertexBufferData.size()) / _nSegments;
+    const size_t numberOfOrbits = static_cast<GLsizei>(_vertexBufferData.size()) / _nSegments;
     size_t vertices = 0;
 
     //glDepthMask(false);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
     glBindVertexArray(_vertexArray);
-    for (size_t i = 0; i <= orbits; ++i) {
+    for (size_t i = 0; i <= numberOfOrbits; ++i) {
         //glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(_vertexBufferData.size()));
+
+        // koll p[ vad som ska uppdateras
+
         glDrawArrays(GL_LINE_LOOP, vertices, _nSegments);
         vertices = vertices + _nSegments + 1;
     }
@@ -675,7 +678,6 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
 
 void RenderableSatellites::updateBuffers() {
     _TLEData = readTLEFile(_path);
-    LINFO(fmt::format("Pathpath: {} ",  _path));
 
     const size_t nVerticesPerOrbit = _nSegments + 1;
     _vertexBufferData.resize(_TLEData.size() * nVerticesPerOrbit);

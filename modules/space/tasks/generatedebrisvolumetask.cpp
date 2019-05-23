@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 #include <modules/space/tasks/generatedebrisvolumetask.h>
-#include <ghoul/logging/logmanager.h>
 
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumemetadata.h>
@@ -53,6 +52,13 @@ namespace {
     constexpr const char* KeyStartTime = "StartTime";
     //constexpr const char* KeyEndTime = "EndTime";
     constexpr const char* KeyInputPath = "InputPath";
+
+    // constexpr const char* KeyInputPath1 = "InputPath1";
+    // constexpr const char* KeyInputPath2 = "InputPath2";
+    // constexpr const char* KeyInputPath3 = "InputPath3";
+    // constexpr const char* KeyInputPath4 = "InputPath4";
+
+
      constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
      constexpr const char* KeyUpperDomainBound = "UpperDomainBound";    
 
@@ -395,7 +401,7 @@ std::vector<glm::dvec3> generatePositions(int numberOfPositions) {
     std::vector<glm::dvec3> positions;
     
     float radius = 700000;   // meter
-    int degreeStep = static_cast<int>(360 / numberOfPositions);
+    float degreeStep = 360 / numberOfPositions;
 
     for(int i=0 ; i<= 360 ; i += degreeStep){
         glm::dvec3 singlePosition = glm::dvec3(radius* sin(i), radius*cos(i), 0.0);
@@ -433,9 +439,10 @@ int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim, float maxApogee){
                                      ,position.y + maxApogee
                                      ,position.z + maxApogee);
 
-    glm::uvec3 coordinateIndex = glm::uvec3(static_cast<int>(newPosition.x * dim.x / (2*(maxApogee + epsilon))),
-                                          static_cast<int>(newPosition.y * dim.y / (2 * (maxApogee + epsilon))),
-                                          static_cast<int>(newPosition.z * dim.z / (2 * (maxApogee + epsilon)))); 
+    glm::uvec3 coordinateIndex = glm::uvec3(static_cast<int>(newPosition.x * dim.x / (2 * (maxApogee + epsilon))),
+                                            static_cast<int>(newPosition.y * dim.y / (2 * (maxApogee + epsilon))),
+                                            static_cast<int>(newPosition.z * dim.z / (2 * (maxApogee + epsilon))));
+
     
     return coordinateIndex.z * (dim.x * dim.y) + coordinateIndex.y * dim.x + coordinateIndex.x;
 }
@@ -467,6 +474,12 @@ GenerateDebrisVolumeTask::GenerateDebrisVolumeTask(const ghoul::Dictionary& dict
     // there will have to be either one task per dataset,
     // or you need to combine the datasets into one file.
     _inputPath = dictionary.value<std::string>(KeyInputPath);
+
+    // _inputPath1 = dictionary.value<std::string>(KeyInputPath1);
+    // _inputPath2 = dictionary.value<std::string>(KeyInputPath2);
+    // _inputPath3 = dictionary.value<std::string>(KeyInputPath3);
+    // _inputPath4 = dictionary.value<std::string>(KeyInputPath4);
+
     _lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
     _upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
 
@@ -486,21 +499,39 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
         SpiceManager::ref().unloadKernel(kernel);
     };
 
+    ////////// 
     //1. read TLE-data and position of debris elements.
+    // std::vector<KeplerParameters>TLEDataVector = readTLEFile(_inputPath);
+    // std::vector<KeplerParameters>TLEDataVector1 = readTLEFile(_inputPath1);
+    // std::vector<KeplerParameters>TLEDataVector2 = readTLEFile(_inputPath2);
+    // std::vector<KeplerParameters>TLEDataVector3 = readTLEFile(_inputPath3);
+    // std::vector<KeplerParameters>TLEDataVector4 = readTLEFile(_inputPath4);
+
+    // _TLEDataVector.reserve( TLEDataVector.size() + TLEDataVector1.size() + TLEDataVector2.size() + TLEDataVector3.size() + TLEDataVector4.size());
+    // _TLEDataVector.insert(_TLEDataVector.end(), TLEDataVector.begin(), TLEDataVector.end());
+    // _TLEDataVector.insert(_TLEDataVector.end(), TLEDataVector1.begin(), TLEDataVector1.end());
+    // _TLEDataVector.insert(_TLEDataVector.end(), TLEDataVector2.begin(), TLEDataVector2.end());
+    // _TLEDataVector.insert(_TLEDataVector.end(), TLEDataVector3.begin(), TLEDataVector3.end());
+    // _TLEDataVector.insert(_TLEDataVector.end(), TLEDataVector4.begin(), TLEDataVector4.end());
+    // ----- or ----- if only one
     _TLEDataVector = readTLEFile(_inputPath);
+    //////////
+    
+    
     std::vector<glm::dvec3> startPositionBuffer = getPositionBuffer(_TLEDataVector, _startTime);
     //  if we deside to integrate the density over time
     //  std::vector<glm::dvec3> endPositionBuffer = getPositionBuffer(_TLEDataVector, _endTime);
     
-    int numberOfPoints = 40;
+    //int numberOfPoints = 40;
     //Needs to be looked at, caused my computer to crash...
     //std::vector<glm::dvec3> generatedPositions = generatePositions(numberOfPoints);
     
-    const int size = _dimensions.x *_dimensions.y *_dimensions.z;
-    int *densityArrayp = new int[size]();
+ 
     float maxApogee = getMaxApogee(_TLEDataVector);
     LINFO(fmt::format("Max Apogee: {} ", maxApogee));
 
+    const int size = _dimensions.x *_dimensions.y *_dimensions.z;
+    int *densityArrayp = new int[size]();
     //densityArrayp = mapDensityToVoxels(densityArrayp, generatedPositions, _dimensions, maxApogee);
     densityArrayp = mapDensityToVoxels(densityArrayp, startPositionBuffer, _dimensions, maxApogee);
         
@@ -518,6 +549,11 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
     //        glm::vec3(cell) / glm::vec3(_dimensions) * domainSize;
         float value = getDensityAt(cell, densityArrayp, rawVolume);   // (coord)
         //LINFO(fmt::format("EachVoxel: {} ", value));
+        // if((cell.x + cell.y + cell.z) % 8 == 0)
+        //     value = 1;
+        // else
+        //     value = 0;
+
         rawVolume.set(cell, value);
 
         minVal = std::min(minVal, value);
@@ -585,12 +621,6 @@ documentation::Documentation GenerateDebrisVolumeTask::documentation() {
                 new StringAnnotationVerifier("A valid filepath"),
                 Optional::No,
                 "Input path to the TLE-data",
-            },
-            {
-                KeyStartTime,
-                new StringAnnotationVerifier("A valid timestamp"),
-                Optional::No,
-                "First timestep of volume",
             },
             {
                 KeyRawVolumeOutput,

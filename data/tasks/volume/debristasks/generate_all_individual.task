@@ -1,0 +1,16 @@
+return {{
+	Type = "GenerateDebrisVolumeTask",
+	Dimensions = {32, 32, 32},
+	LowerDomainBound = {-0.5, -0.5, -0.5},
+	UpperDomainBound = {0.5, 0.5, 0.5},
+	InputPath = "D:/OpenSpace/sync/url/satellite_tle_data_BreezeMBreakup(18391204735368316775)/files/2012-044.txt",
+	InputPath1 = "D:/OpenSpace/sync/url/satellite_tle_data_FengyunDebris(17139759358359376863)/files/1999-025.txt",
+	InputPath2 = "D:/OpenSpace/sync/url/satellite_tle_data_IndianASATtestDebris(10018654073589624780)/files/2019-006.txt",
+	InputPath3 = "D:/OpenSpace/sync/url/satellite_tle_data_Iridium33Debris(10708435089634408069)/files/iridium-33-debris.txt",
+    InputPath4 = "D:/OpenSpace/sync/url/satellite_tle_data_Kosmos2251Debris(14362705017065532804)/files/cosmos-2251-debris.txt",
+
+	StartTime = "2018-05-04T00:00:00",
+	RawVolumeOutput = "${DATA}/assets/scene/solarsystem/planets/earth/satellites/debris/volume/generatedAllInOne/debris.rawvolume",
+	DictionaryOutput = "${DATA}/assets/scene/solarsystem/planets/earth/satellites/debris/volume/generatedAllInOne/debris.dictionary"
+}}
+
