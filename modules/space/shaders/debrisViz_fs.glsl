@@ -33,6 +33,8 @@ uniform float opacity = 1.0;
 
 uniform float lineFade;
 //uniform double inGameTime;
+uniform int numberOfSegments;
+
 
 
 in vec4 viewSpacePosition;
@@ -43,6 +45,7 @@ in vec4 vs_position;
 //in vec2 orbit_data_out;
 in float periodFraction_f;
 in float offsetPeriods;
+in float vertexID_f;
 
 Fragment getFragment() {
 
@@ -57,7 +60,10 @@ Fragment getFragment() {
     float offsetPeriods = vertex_data_out.w / orbit_data_out.y;
     // check difference of these two locations
     */
-    float vertexDistance = periodFraction_f - offsetPeriods;
+    
+    // float vertexDistance = periodFraction_f - offsetPeriods;
+    float vertexID_perOrbit = mod(vertexID_f, numberOfSegments);
+    float vertexDistance = periodFraction_f - (vertexID_perOrbit/numberOfSegments) ; 
 
     if (vertexDistance < 0.0) {
         vertexDistance += 1.0;
