@@ -34,6 +34,8 @@ uniform mat4 projectionTransform;
 
 //uniform float lineFade;
 uniform double inGameTime;
+// uniform int numberOfSegments;
+
 
 out vec4 viewSpacePosition;
 out vec4 vs_position;
@@ -43,6 +45,7 @@ out vec4 vs_position;
 //out vec2 orbit_data_out;
 out float periodFraction_f;
 out float offsetPeriods;
+out float vertexID_f;
 
 
 void main() {
@@ -55,8 +58,13 @@ void main() {
 
     // same procedure for the current vertex
     offsetPeriods = vertex_data.w / orbit_data.y;
+
+    vertexID_f = float(gl_VertexID);
+
+
+
     /*// check difference of these two locations
-    float vertexDistance = periodFraction_f - offsetPeriods;
+    float vertexDistance = periodFraction_f - offsetPeriods; 
     
     if(vertexDistance < 0.0) { 
       vertexDistance += 1.0;

@@ -133,7 +133,7 @@ namespace openspace {
 
         double _inGameTime = 0.0;
 
-        UniformCache(modelView, projection, lineFade, inGameTime, color, opacity)
+        UniformCache(modelView, projection, lineFade, inGameTime, color, opacity, numberOfSegments)
             _uniformCache;
 
     };

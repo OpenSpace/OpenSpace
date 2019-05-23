@@ -602,6 +602,8 @@ void RenderableSatellites::initializeGL() {
     _uniformCache.color         = _programObject->uniformLocation("color");
     _uniformCache.opacity       = _programObject->uniformLocation("opacity");
 
+    _uniformCache.numberOfSegments = _programObject->uniformLocation("numberOfSegments");
+
     updateBuffers();
 
     //ghoul::opengl::updateUniformLocations(*_programObject, _uniformCache, UniformNames);
@@ -653,6 +655,8 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
     _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
+ 
+    _programObject->setUniform(_uniformCache.numberOfSegments, static_cast<int>(_nSegments));
 
     //glEnableVertexAttribArray(0);    // We like submitting vertices on stream 0 for no special reason
     //glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), 0);
@@ -667,8 +671,8 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
     glBindVertexArray(_vertexArray);
     for (size_t i = 0; i < nrOrbits; ++i) {
         //glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(_vertexBufferData.size()));
-        glDrawArrays(GL_LINE_LOOP, vertices, _nSegments);
-        vertices = vertices + _nSegments;
+        glDrawArrays(GL_LINE_STRIP, vertices, _nSegments + 1);
+        vertices = vertices + _nSegments + 1;
     }
     glBindVertexArray(0);
     
@@ -680,7 +684,7 @@ void RenderableSatellites::updateBuffers() {
     _TLEData = readTLEFile(_path);
     LINFO(fmt::format("Pathpath: {} ",  _path));
 
-    const size_t nVerticesPerOrbit = _nSegments;
+    const size_t nVerticesPerOrbit = _nSegments + 1;
     _vertexBufferData.resize(_TLEData.size() * nVerticesPerOrbit);
     size_t orbitindex = 0;
 
@@ -697,12 +701,19 @@ void RenderableSatellites::updateBuffers() {
         );
 
 
-        for (size_t i = 0; i < nVerticesPerOrbit; ++i) {
-            size_t index = orbitindex * nVerticesPerOrbit + i;
+        for (size_t i=0 ; i < nVerticesPerOrbit; ++i) {
+            size_t index = orbitindex * nVerticesPerOrbit  + i;
 
-            float timeOffset = orbit.period * 
+            float timeOffset;
+
+            if(i == nVerticesPerOrbit -1){
+                timeOffset = orbit.period *
+                    static_cast<float>(0)/ static_cast<float>(_nSegments);
+            }
+            else {
+                timeOffset = orbit.period * 
                     static_cast<float>(i)/ static_cast<float>(_nSegments);
-
+            }
             glm::vec3 position = _keplerTranslator.debrisPos(static_cast<float>(orbit.epoch) + timeOffset); 
 
             _vertexBufferData[index].x = position.x;
