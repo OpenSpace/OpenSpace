@@ -1,26 +1,26 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014-2019                                                               *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2019                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #include <modules/globebrowsing/src/globelabelscomponent.h>
 
@@ -45,10 +45,19 @@
 #include <locale>
 
 namespace {
-    constexpr const char* keyLabels = "Labels";
-    constexpr const char* keyLabelsFileName = "FileName";
+    constexpr const char* KeyLabels = "Labels";
+    constexpr const char* KeyLabelsFileName = "FileName";
 
     constexpr const char* _loggerCat = "GlobeLabels";
+
+    constexpr const double LabelFadeRangeConst = 1500.0;
+    constexpr const double RangeAngularCoefConst = 0.8;
+    constexpr const float MinTransparencyValueConst = 0.009f;
+
+    enum LabelRenderingAlignmentType {
+        Horizontally = 0,
+        Circularly
+    };
 
     constexpr int8_t CurrentCacheVersion = 1;
 
@@ -161,98 +170,98 @@ documentation::Documentation GlobeLabelsComponent::Documentation() {
     return {
         "GlobeLabels Component",
         "globebrowsing_globelabelscomponent",
-    {
         {
-            LabelsInfo.identifier,
-            new BoolVerifier,
-            Optional::Yes,
-            LabelsInfo.description
-        },
-        {
-            LabelsEnableInfo.identifier,
-            new BoolVerifier,
-            Optional::Yes,
-            LabelsEnableInfo.description
-        },
-        {
-            LabelsFontSizeInfo.identifier,
-            new DoubleVerifier,
-            Optional::Yes,
-            LabelsFontSizeInfo.description
-        },
-        {
-            LabelsMaxSizeInfo.identifier,
-            new DoubleVerifier,
-            Optional::Yes,
-            LabelsMaxSizeInfo.description
-        },
-        {
-            LabelsMinSizeInfo.identifier,
-            new DoubleVerifier,
-            Optional::Yes,
-            LabelsMinSizeInfo.description
-        },
-        {
-            LabelsSizeInfo.identifier,
-            new DoubleVerifier,
-            Optional::Yes,
-            LabelsSizeInfo.description
-        },
-        {
-            LabelsMinHeightInfo.identifier,
-            new DoubleVerifier,
-            Optional::Yes,
-            LabelsMinHeightInfo.description
-        },
-        {
-            LabelsColorInfo.identifier,
-            new Vector4Verifier<float>(),
-            Optional::Yes,
-            LabelsColorInfo.description
-        },
-        {
-            LabelsFadeInStartingDistanceInfo.identifier,
-            new DoubleVerifier,
-            Optional::Yes,
-            LabelsFadeInStartingDistanceInfo.description
-        },
-        {
-            LabelsFadeOutStartingDistanceInfo.identifier,
-            new DoubleVerifier,
-            Optional::Yes,
-            LabelsFadeOutStartingDistanceInfo.description
-        },
-        {
-            LabelsFadeInEnabledInfo.identifier,
-            new BoolVerifier,
-            Optional::Yes,
-            LabelsFadeInEnabledInfo.description
-        },
-        {
-            LabelsFadeOutEnabledInfo.identifier,
-            new BoolVerifier,
-            Optional::Yes,
-            LabelsFadeOutEnabledInfo.description
-        },
-        {
-            LabelsDisableCullingEnabledInfo.identifier,
-            new BoolVerifier,
-            Optional::Yes,
-            LabelsDisableCullingEnabledInfo.description
-        },
-        {
-            LabelsDistanceEPSInfo.identifier,
-            new DoubleVerifier,
-            Optional::Yes,
-            LabelsDistanceEPSInfo.description
-        },
-        {
-            LabelAlignmentOptionInfo.identifier,
-            new StringVerifier,
-            Optional::Yes,
-            LabelAlignmentOptionInfo.description
-        },
-    }
+            {
+                LabelsInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                LabelsInfo.description
+            },
+            {
+                LabelsEnableInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                LabelsEnableInfo.description
+            },
+            {
+                LabelsFontSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelsFontSizeInfo.description
+            },
+            {
+                LabelsMaxSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelsMaxSizeInfo.description
+            },
+            {
+                LabelsMinSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelsMinSizeInfo.description
+            },
+            {
+                LabelsSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelsSizeInfo.description
+            },
+            {
+                LabelsMinHeightInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelsMinHeightInfo.description
+            },
+            {
+                LabelsColorInfo.identifier,
+                new Vector4Verifier<float>(),
+                Optional::Yes,
+                LabelsColorInfo.description
+            },
+            {
+                LabelsFadeInStartingDistanceInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelsFadeInStartingDistanceInfo.description
+            },
+            {
+                LabelsFadeOutStartingDistanceInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelsFadeOutStartingDistanceInfo.description
+            },
+            {
+                LabelsFadeInEnabledInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                LabelsFadeInEnabledInfo.description
+            },
+            {
+                LabelsFadeOutEnabledInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                LabelsFadeOutEnabledInfo.description
+            },
+            {
+                LabelsDisableCullingEnabledInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                LabelsDisableCullingEnabledInfo.description
+            },
+            {
+                LabelsDistanceEPSInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LabelsDistanceEPSInfo.description
+            },
+            {
+                LabelAlignmentOptionInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                LabelAlignmentOptionInfo.description
+            },
+        }
     };
 }
 
@@ -291,8 +300,8 @@ GlobeLabelsComponent::GlobeLabelsComponent()
     addProperty(_labelsDisableCullingEnabled);
     addProperty(_labelsDistaneEPS);
 
-    _labelAlignmentOption.addOption(0, "Horizontally");
-    _labelAlignmentOption.addOption(1, "Circularly");
+    _labelAlignmentOption.addOption(Horizontally, "Horizontally");
+    _labelAlignmentOption.addOption(Circularly, "Circularly");
     _labelAlignmentOption = Horizontally;
     addProperty(_labelAlignmentOption);
 }
@@ -313,7 +322,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
         return;
     }
     std::string labelsFile;
-    bool successLabels = dictionary.getValue(keyLabelsFileName, labelsFile);
+    bool successLabels = dictionary.getValue(KeyLabelsFileName, labelsFile);
     if (!successLabels) {
         return;
     }
@@ -332,8 +341,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
     }
          
     if (dictionary.hasKey(LabelsFontSizeInfo.identifier)) {
-        float fontSize = dictionary.value<float>(LabelsFontSizeInfo.identifier);
-        _labelsFontSize = fontSize;
+        _labelsFontSize = dictionary.value<float>(LabelsFontSizeInfo.identifier);
         _labelsFontSize.onChange([this]() { initializeFonts(); });
     }
 
@@ -389,7 +397,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
         bool disabled = dictionary.value<bool>(
             LabelsDisableCullingEnabledInfo.identifier
         );
-        _labelsDisableCullingEnabled.set(disabled);
+        _labelsDisableCullingEnabled = disabled;
     }
 
     if (dictionary.hasKey(LabelsDistanceEPSInfo.identifier)) {
@@ -404,8 +412,11 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
         if (alignment == "Horizontally") {
             _labelAlignmentOption = Horizontally;
         }
-        else {
+        else if (alignment == "Circularly" ) {
             _labelAlignmentOption = Circularly;
+        }
+        else {
+            LERROR("Unknown alignment option: " + alignment);
         }
     }
 
@@ -633,7 +644,7 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
         double funcValue = a * distanceCameraGlobeWorld + b;
         varyingOpacity *= static_cast<float>(std::min(funcValue, 1.0));
 
-        if (varyingOpacity < minTransparencyValueConst) {
+        if (varyingOpacity < MinTransparencyValueConst) {
             return;
         }
     }
@@ -645,15 +656,15 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
             ) / 3.0;
 
         glm::dvec2 fadeRange = glm::dvec2(
-            averageRadius + _labelsMinHeight + labelFadeRangeConst
+            averageRadius + _labelsMinHeight + LabelFadeRangeConst
         );
         fadeRange.x += _labelsFadeOutDist;
-        double a = rangeAngularCoefConst / (fadeRange.x - fadeRange.y);
+        double a = RangeAngularCoefConst / (fadeRange.x - fadeRange.y);
         double b = -(fadeRange.y / (fadeRange.x - fadeRange.y));
         double funcValue = a * distanceCameraGlobeWorld + b;
         varyingOpacity *= static_cast<float>(std::min(funcValue, 1.0));
 
-        if (varyingOpacity < minTransparencyValueConst) {
+        if (varyingOpacity < MinTransparencyValueConst) {
             return;
         }
     }
