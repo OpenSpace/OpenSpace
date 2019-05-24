@@ -65,6 +65,7 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/scale/timedependentscale.h
   ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeinterval.h
   ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeunion.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/suntexturemanager.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -109,6 +110,7 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/scale/timedependentscale.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeinterval.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeunion.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/suntexturemanager.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

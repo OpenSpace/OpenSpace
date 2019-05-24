@@ -22,77 +22,43 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__
+#ifndef __OPENSPACE_MODULE_BASE___SUNTEXTUREMANAGER___H__
+#define __OPENSPACE_MODULE_BASE___SUNTEXTUREMANAGER___H__
 
-#include <openspace/rendering/renderable.h>
+//#include <thread>
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <ghoul/opengl/uniformcache.h>
-
-#include <modules/base/rendering/suntexturemanager.h>
-
+#include <ghoul/opengl/texture.h>
+#include <thread>
 
 namespace ghoul::opengl {
-    class ProgramObject;
     class Texture;
 } // namespace ghoul::opengl
 
 namespace openspace {
 
-class PowerScaledSphere;
-struct RenderData;
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
-
-class RenderableSphere : public Renderable {
+class SunTextureManager {
 public:
-    RenderableSphere(const ghoul::Dictionary& dictionary);
-
-    void initializeGL() override;
-    void deinitializeGL() override;
-
-    bool isReady() const override;
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
-
-    static documentation::Documentation Documentation();
+    SunTextureManager();
+    
+    void update(std::unique_ptr<ghoul::opengl::Texture>& texture);
+    
+    
 
 private:
-    void loadTexture();
+    void startUploadTexture();
+    void startDownloadTexture();
     
-    properties::StringProperty _texturePath;
-    properties::OptionProperty _orientation;
-
-    properties::FloatProperty _size;
-    properties::IntProperty _segments;
-
-    properties::BoolProperty _mirrorTexture;
-    properties::BoolProperty _useAdditiveBlending;
-    properties::BoolProperty _disableFadeInDistance;
-    properties::BoolProperty _backgroundRendering;
-
-    properties::FloatProperty _fadeInThreshold;
-    properties::FloatProperty _fadeOutThreshold;
-
-    ghoul::opengl::ProgramObject* _shader = nullptr;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-
-    std::unique_ptr<PowerScaledSphere> _sphere;
-
-    UniformCache(opacity, modelViewProjection, modelViewRotation, colorTexture,
-        _mirrorTexture) _uniformCache;
-
-    bool _sphereIsDirty = false;
+    int _counter = 0;
+    int _counter2 = 0;
     
-    SunTextureManager _sunTexMgr;
+    std::thread _dldthread;
+    std::string _activeTextureDate = "NODATE";
+    
+    std::unordered_map<std::string, std::unique_ptr<ghoul::opengl::Texture>> _textureList;
+   
+
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__
+#endif // __OPENSPACE_MODULE_BASE___SUNTEXTUREMANAGER___H__
