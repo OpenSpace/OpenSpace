@@ -126,17 +126,13 @@ namespace {
         "Fade Out Starting Distance for Labels"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        LabelsFadeInEnabledInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo LabelsFadeInEnabledInfo = {
         "LabelsFadeInEnabled",
         "Labels fade In enabled",
         "Labels fade In enabled"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        LabelsFadeOutEnabledInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo LabelsFadeOutEnabledInfo = {
         "LabelsFadeOutEnabled",
         "Labels fade Out enabled",
         "Labels fade Out enabled"
@@ -273,10 +269,14 @@ GlobeLabelsComponent::GlobeLabelsComponent()
     , _labelsMinSize(LabelsMinSizeInfo, 4, 1, 100)
     , _labelsSize(LabelsSizeInfo, 2.5, 0, 30)
     , _labelsMinHeight(LabelsMinHeightInfo, 100.0, 0.0, 10000.0)
-    , _labelsColor(LabelsColorInfo, glm::vec4(1.f, 1.f, 0.f, 1.f),
-        glm::vec4(0.f), glm::vec4(1.f))
-    , _labelsFadeInDist(LabelsFadeInStartingDistanceInfo, 1E6, 1E3, 1E8)
-    , _labelsFadeOutDist(LabelsFadeOutStartingDistanceInfo, 1E4, 1, 1E7)
+    , _labelsColor(
+        LabelsColorInfo,
+        glm::vec4(1.f, 1.f, 0.f, 1.f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+    )
+    , _labelsFadeInDist(LabelsFadeInStartingDistanceInfo, 1e6, 1e3, 1e8)
+    , _labelsFadeOutDist(LabelsFadeOutStartingDistanceInfo, 1e4, 1, 1e7)
     , _labelsFadeInEnabled(LabelsFadeInEnabledInfo, false)
     , _labelsFadeOutEnabled(LabelsFadeOutEnabledInfo, false)
     , _labelsDisableCullingEnabled(LabelsDisableCullingEnabledInfo, false)
@@ -536,8 +536,9 @@ bool GlobeLabelsComponent::readLabelsFile(const std::string& file) {
             // Clean white spaces
             std::istringstream issFeature(lEntry.feature);
             std::getline(issFeature, token, '=');
-            if (token == "")
+            if (token.empty()) {
                 std::getline(issFeature, token, '=');
+            }
             strncpy(lEntry.feature, token.c_str(), 256);
 
             GlobeBrowsingModule* _globeBrowsingModule =
@@ -550,7 +551,6 @@ bool GlobeLabelsComponent::readLabelsFile(const std::string& file) {
             );
 
             _labels.labelsArray.push_back(lEntry);
-            
         }
        
         return true;
@@ -584,7 +584,7 @@ bool GlobeLabelsComponent::loadCachedFile(const std::string& file) {
 
     fileStream.read(
         reinterpret_cast<char*>(_labels.labelsArray.data()),
-        nValues * sizeof(_labels.labelsArray[0])
+        nValues * sizeof(LabelEntry)
     );
 
     return fileStream.good();
@@ -606,8 +606,8 @@ bool GlobeLabelsComponent::saveCachedFile(const std::string& file) const {
     }
     fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
 
-    size_t nBytes = nValues * sizeof(_labels.labelsArray[0]);
-    fileStream.write(reinterpret_cast<const char*>(&_labels.labelsArray[0]), nBytes);
+    size_t nBytes = nValues * sizeof(LabelEntry);
+    fileStream.write(reinterpret_cast<const char*>(_labels.labelsArray.data()), nBytes);
 
     return fileStream.good();
 }
@@ -630,14 +630,13 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
     double distanceCameraGlobeWorld = glm::length(cameraToGlobeDistanceWorld);
 
     float varyingOpacity = 1.f;
+
+    double averageRadius = (
+        _globe->ellipsoid().radii().x + _globe->ellipsoid().radii().y +
+        _globe->ellipsoid().radii().z
+    ) / 3.0;
     if (_labelsFadeInEnabled) {
-        double averageRadius = (
-            _globe->ellipsoid().radii().x + _globe->ellipsoid().radii().y + 
-            _globe->ellipsoid().radii().z
-            ) / 3.0;
-        glm::dvec2 fadeRange = glm::dvec2(
-            averageRadius + _labelsMinHeight
-        );
+        glm::dvec2 fadeRange = glm::dvec2(averageRadius + _labelsMinHeight);
         fadeRange.x += _labelsFadeInDist;
         double a = 1.0 / (fadeRange.y - fadeRange.x);
         double b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
@@ -650,11 +649,6 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
     }
 
     if (_labelsFadeOutEnabled) {
-        double averageRadius = (
-            _globe->ellipsoid().radii().x + _globe->ellipsoid().radii().y +
-            _globe->ellipsoid().radii().z
-            ) / 3.0;
-
         glm::dvec2 fadeRange = glm::dvec2(
             averageRadius + _labelsMinHeight + LabelFadeRangeConst
         );
@@ -808,49 +802,49 @@ bool GlobeLabelsComponent::isLabelInFrustum(const glm::dmat4& MVMatrix,
     double farDistance = MVMatrix[3][3] - MVMatrix[3][2];
 
     // Normalize Planes
-    double invMag = 1.0 / glm::length(leftNormal);
-    leftNormal *= invMag;
-    leftDistance *= invMag;
+    const double invMagLeft = 1.0 / glm::length(leftNormal);
+    leftNormal *= invMagLeft;
+    leftDistance *= invMagLeft;
 
-    invMag = 1.0 / glm::length(rightNormal);
-    rightNormal *= invMag;
-    rightDistance *= invMag;
+    const double invMagRight = 1.0 / glm::length(rightNormal);
+    rightNormal *= invMagRight;
+    rightDistance *= invMagRight;
 
-    invMag = 1.0 / glm::length(bottomNormal);
-    bottomNormal *= invMag;
-    bottomDistance *= invMag;
+    const double invMagBottom = 1.0 / glm::length(bottomNormal);
+    bottomNormal *= invMagBottom;
+    bottomDistance *= invMagBottom;
 
-    invMag = 1.0 / glm::length(topNormal);
-    topNormal *= invMag;
-    topDistance *= invMag;
+    const double invMagTop = 1.0 / glm::length(topNormal);
+    topNormal *= invMagTop;
+    topDistance *= invMagTop;
 
-    invMag = 1.0 / glm::length(nearNormal);
-    nearNormal *= invMag;
-    nearDistance *= invMag;
+    const double invMagNear = 1.0 / glm::length(nearNormal);
+    nearNormal *= invMagNear;
+    nearDistance *= invMagNear;
 
-    invMag = 1.0 / glm::length(farNormal);
-    farNormal *= invMag;
-    farDistance *= invMag;
+    const double invMagFar = 1.0 / glm::length(farNormal);
+    farNormal *= invMagFar;
+    farDistance *= invMagFar;
 
-    float radius = 1.0;
+    constexpr const float Radius = 1.0;
 
-    if ((glm::dot(leftNormal, position) + leftDistance) < -radius) {
+    if ((glm::dot(leftNormal, position) + leftDistance) < -Radius) {
         return false;
     }
-    else if ((glm::dot(rightNormal, position) + rightDistance) < -radius) {
+    else if ((glm::dot(rightNormal, position) + rightDistance) < -Radius) {
         return false;
     }
-    else if ((glm::dot(bottomNormal, position) + bottomDistance) < -radius) {
+    else if ((glm::dot(bottomNormal, position) + bottomDistance) < -Radius) {
         return false;
     }
-    else if ((glm::dot(topNormal, position) + topDistance) < -radius) {
+    else if ((glm::dot(topNormal, position) + topDistance) < -Radius) {
         return false;
     }
-    else if ((glm::dot(nearNormal, position) + nearDistance) < -radius) {
+    else if ((glm::dot(nearNormal, position) + nearDistance) < -Radius) {
         return false;
     }
     // The far plane testing is disabled because the atm has no depth.
-    /*else if ((glm::dot(farNormal, position) + farDistance) < -radius) {
+    /*else if ((glm::dot(farNormal, position) + farDistance) < -Radius) {
     return false;
     }*/
 
