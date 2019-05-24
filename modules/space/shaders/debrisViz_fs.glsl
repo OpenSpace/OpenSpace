@@ -64,7 +64,8 @@ Fragment getFragment() {
     
     // float vertexDistance = periodFraction_f - offsetPeriods;
     float vertexID_perOrbit = mod(vertexID_f, numberOfSegments);
-    float vertexDistance = periodFraction_f - (vertexID_perOrbit/numberOfSegments) ; 
+    float nrOfSegments_f = float(numberOfSegments);
+    float vertexDistance = periodFraction_f - (vertexID_perOrbit/nrOfSegments_f) ; 
 
     if (vertexDistance < 0.0) {
         vertexDistance += 1.0;
@@ -77,7 +78,8 @@ Fragment getFragment() {
     frag.color = vec4(color, fade * opacity);
     frag.depth = vs_position.w;
     frag.gPosition = viewSpacePosition;
-    frag.gNormal = vec4(-viewSpacePosition.xyz, 0);
+    frag.gNormal = vec4(1, 1, 1 , 0);
+
     return frag;
 }
 

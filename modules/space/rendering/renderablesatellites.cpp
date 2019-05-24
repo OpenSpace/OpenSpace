@@ -107,88 +107,6 @@ namespace openspace {
         2044, 2048, 2052, 2056
     };
 
-    void calculateMaxApoAndMinPeri(std::vector<KeplerParameters> fileVector){
-        //int n = fileVector.size();
-        double maxApogee = 0;
-        double minPerigee = 5000;
-        int intervalDistribution[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        double intervalSegment = (4575.32 - 171.013)/10; // max - min of total interval span where there is debris
-        for (const auto& dataElement : fileVector){     //(int i=0 ; i < n ; ++i ) {    
-            double ph = dataElement.semiMajorAxis * (1 - dataElement.eccentricity)- 6371;
-            double ah = dataElement.semiMajorAxis * (1 + dataElement.eccentricity)- 6371;
-
-            if (ph < minPerigee) 
-                minPerigee = ph;
-
-            if (ah > maxApogee)
-                maxApogee = ah;
-
-            //Perigee
-            if(ph < (intervalSegment))
-                intervalDistribution[0]++;
-            else if(ph < (intervalSegment*2))
-                intervalDistribution[1]++;
-            else if(ph < (intervalSegment*3))
-                intervalDistribution[2]++;
-            else if(ph < (intervalSegment*4))
-                intervalDistribution[3]++;
-            else if(ph < (intervalSegment*5))
-                intervalDistribution[4]++;
-            else if(ph < (intervalSegment*6))
-                intervalDistribution[5]++;
-            else if(ph < (intervalSegment*7))
-                intervalDistribution[6]++;
-            else if(ph < (intervalSegment*8))
-                intervalDistribution[7]++;
-            else if(ph < (intervalSegment*9))
-                intervalDistribution[8]++;
-            else if(ph < (intervalSegment*10))
-                intervalDistribution[9]++;
-            
-            // Position
-            // currentAltitud = sqrt( dataelement position.x ^ 2 + dataelement position.y ^ 2 + dataelement position.z ^ 2 );
-            // if (currentAltitud <= (171.013 + intervalSegment))
-            //     intervalDistribution[0]++;
-            // else if (currentAltitud <= (171.013 + 2*intervalSegment))
-            //     intervalDistribution[1]++;
-            // else if (currentAltitud <= (171.013 + 3*intervalSegment))
-            //     intervalDistribution[2]++; 
-            // else if (currentAltitud <= (171.013 + 4*intervalSegment))
-            //     intervalDistribution[3]++; 
-            // else if (currentAltitud <= (171.013 + 5*intervalSegment))
-            //     intervalDistribution[4]++; 
-            // else if (currentAltitud <= (171.013 + 6*intervalSegment))
-            //     intervalDistribution[5]++; 
-            // else if (currentAltitud <= (171.013 + 7*intervalSegment))
-            //     intervalDistribution[6]++; 
-            // else if (currentAltitud <= (171.013 + 8*intervalSegment))
-            //     intervalDistribution[7]++; 
-            // else if (currentAltitud <= (171.013 + 9*intervalSegment))
-            //     intervalDistribution[8]++;
-            // else if (currentAltitud <= (171.013 + 10*intervalSegment))
-            //     intervalDistribution[9]++; 
-                
-                
-                                          
-
-        }
-        LINFO(fmt::format("fileVector.size: {} ",  fileVector.size()));
-        LINFO(fmt::format("Interval Distrubution 10% of max apogee: {} ", (intervalDistribution[0])));
-        LINFO(fmt::format("Interval Distrubution 20% of max apogee: {} ", (intervalDistribution[1])));
-        LINFO(fmt::format("Interval Distrubution 30% of max apogee: {} ", (intervalDistribution[2])));
-        LINFO(fmt::format("Interval Distrubution 40% of max apogee: {} ", (intervalDistribution[3])));
-        LINFO(fmt::format("Interval Distrubution 50% of max apogee: {} ", (intervalDistribution[4])));
-        LINFO(fmt::format("Interval Distrubution 60% of max apogee: {} ", (intervalDistribution[5])));
-        LINFO(fmt::format("Interval Distrubution 70% of max apogee: {} ", (intervalDistribution[6])));
-        LINFO(fmt::format("Interval Distrubution 80% of max apogee: {} ", (intervalDistribution[7])));
-        LINFO(fmt::format("Interval Distrubution 90% of max apogee: {} ", (intervalDistribution[8])));
-        LINFO(fmt::format("Interval Distrubution 100% of max apogee: {} ", (intervalDistribution[9])));
-
-        LINFO(fmt::format("Min Perigee: {} ",  minPerigee));
-        LINFO(fmt::format("Max Apogee: {} ",  maxApogee));
-        
-    }
-
     // Count the number of full days since the beginning of 2000 to the beginning of
     // the parameter 'year'
     int countDays(int year) {
@@ -704,17 +622,12 @@ void RenderableSatellites::updateBuffers() {
         for (size_t i=0 ; i < nVerticesPerOrbit; ++i) {
             size_t index = orbitindex * nVerticesPerOrbit  + i;
 
-            float timeOffset;
+            double timeOffset = orbit.period * 
+                    static_cast<double>(i)/ static_cast<double>(_nSegments);
 
-            if(i == nVerticesPerOrbit -1){
-                timeOffset = orbit.period *
-                    static_cast<float>(0)/ static_cast<float>(_nSegments);
-            }
-            else {
-                timeOffset = orbit.period * 
-                    static_cast<float>(i)/ static_cast<float>(_nSegments);
-            }
-            glm::vec3 position = _keplerTranslator.debrisPos(static_cast<float>(orbit.epoch) + timeOffset); 
+            // LINFO(fmt::format("Vertex offset: {} ", timeOffset ));
+            
+            glm::vec3 position = _keplerTranslator.debrisPos(orbit.epoch + timeOffset); 
 
             _vertexBufferData[index].x = position.x;
             _vertexBufferData[index].y = position.y;
@@ -723,11 +636,31 @@ void RenderableSatellites::updateBuffers() {
             _vertexBufferData[index].epoch = static_cast<float>(orbit.epoch);
             _vertexBufferData[index].period = static_cast<float>(orbit.period);
 
-        }
-        ++orbitindex;
-    }
+            // LINFO(fmt::format("Vertex position: {} ", position ));
 
-    
+
+        }
+
+        for(int i=0 ; i < nVerticesPerOrbit ; ++i) {
+            for(int j=0 ; j < nVerticesPerOrbit ; ++j){
+                if (i != 0 && j != 0) {
+                    if (i == j)
+                        continue;
+                }
+                if((i+_nSegments*orbitindex) % _nSegments != 0 ){
+                    if (_vertexBufferData[i + _nSegments*orbitindex].x == _vertexBufferData[j + _nSegments*orbitindex].x) {
+                    LINFO(fmt::format("Same position: {} ", _vertexBufferData[i + _nSegments*orbitindex].x));
+                    LINFO(fmt::format("what index thoudh: {} ", i + _nSegments*orbitindex));
+                    }
+                }    
+                    
+                
+            }
+        }
+
+        ++orbitindex;
+
+    }
 
     glBindVertexArray(_vertexArray);
 

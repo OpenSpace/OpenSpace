@@ -91,8 +91,9 @@ public:
     */
     glm::dvec3 position(const UpdateData& data) const override;
 
-    // Is only used in renderableDebris so far.
-    glm::dvec3 position(const Time& time) const;
+    // Is only used in renderableDebris so far. May rename if needed
+    glm::dvec3 debrisPos(const double& time) const;
+
 
     /**
      * Method returning the openspace::Documentation that describes the ghoul::Dictinoary
