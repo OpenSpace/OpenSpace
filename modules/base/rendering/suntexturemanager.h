@@ -45,8 +45,14 @@ public:
     
 
 private:
-    void startUploadTexture();
-    void startDownloadTexture();
+    void initialDownload();
+    void startUploadTextures();
+    void startDownloadTexture(std::string textureId);
+    void checkFilesInDirectory();
+    void uploadTexturesFromList(std::vector<std::string>& filelist);
+    std::string checkNextTextureId(std::string current);
+    
+    std::string getOpenSpaceDateTime();
     
     int _counter = 0;
     int _counter2 = 0;
@@ -54,8 +60,8 @@ private:
     std::thread _dldthread;
     std::string _activeTextureDate = "NODATE";
     
-    std::unordered_map<std::string, std::unique_ptr<ghoul::opengl::Texture>> _textureList;
-   
+    std::vector<std::string> _textureListDisk;
+    std::unordered_map<std::string, std::unique_ptr<ghoul::opengl::Texture>> _textureListGPU;
 
 };
 

@@ -45,47 +45,74 @@ SunTextureManager::SunTextureManager(){
 }
 
     void SunTextureManager::update(std::unique_ptr<ghoul::opengl::Texture>& texture){
-    std::string current = global::timeManager.time().ISO8601();
-    current.erase(4, 1);
-    current.erase(6, 1);
-    current.erase(8, 1);
-    current.erase(10, 1);
-    current.erase(12);
+        
+        std::string current = getOpenSpaceDateTime();
     
-    if(_textureList.find(current) != _textureList.end()){
-        _textureList[_activeTextureDate] = std::move(texture);
-        texture = std::move(_textureList[current]);
-        _activeTextureDate = current;
-    }
-    
-    _counter++;
-    
-    if(_counter == 800){
-        startUploadTexture();
-    }
-    
-    //        if(_counter == 1000){
-    //            LERROR(_texturePath);
-    //            LERROR("just before thread starts");
-    //            _dldthread = std::thread([this](){this->startDownloadTexture();});
-    //
-    //        }
-    //        //LERROR("just after thread starts");
-    //
-    //        if(_counter == 1200){
-    //            if(_dldthread.joinable()){
-    //                LERROR("it's joinable. counter: " + std::to_string(_counter));
-    //                _dldthread.join();
-    //                startUploadTexture();
-    //            }
-    //        }
+        if(_textureListGPU.find(current) != _textureListGPU.end()){
+            _textureListGPU[_activeTextureDate] = std::move(texture);
+            texture = std::move(_textureListGPU[current]);
+            _activeTextureDate = current;
+            std::string next = checkNextTextureId(current);
+            LERROR(next);
+            //startDownloadTexture(next);
+            
+        }
+        
+        _counter++;
+        
+        if(_counter == 800){
+            startUploadTextures();
+            //LERROR(checkNextTextureId("201905111400"));
+        }
+        
+        //        if(_counter == 1000){
+        //            LERROR(_texturePath);
+        //            LERROR("just before thread starts");
+        //            _dldthread = std::thread([this](){this->startDownloadTexture();});
+        //
+        //        }
+        //        //LERROR("just after thread starts");
+        //
+        //        if(_counter == 1200){
+        //            if(_dldthread.joinable()){
+        //                LERROR("it's joinable. counter: " + std::to_string(_counter));
+        //                _dldthread.join();
+        //                startUploadTexture();
+        //            }
+        //        }
     
 }
     
-    void SunTextureManager::startDownloadTexture(){
+    void SunTextureManager::initialDownload(){
+        // check what files we have in the synd directory
+        checkFilesInDirectory();
+        
+  
+        std::string current = getOpenSpaceDateTime();
+        //fetch a list of the textures we need, based on openspace time, from our server
+        //this is a fake list of textures, which is a sub part of the file we have on disk. namely 500 of them
+        std::vector<std::string> texturesNeeded;
+        std::copy(_textureListDisk.begin() + 200, _textureListDisk.begin() + 600 + 1, std::back_inserter(texturesNeeded));
+        
+        //compare this list to the list of files we have.
+        // we want to download the files that we don't have already
+        // aka we don't want to download the files we have
+        std::sort(_textureListDisk.begin(), _textureListDisk.end());
+        std::sort(texturesNeeded.begin(), texturesNeeded.end());
+        std::vector<std::string> texturesToDownload;
+        std::set_difference(texturesNeeded.begin(), texturesNeeded.end(), _textureListDisk.begin(), _textureListDisk.end(),
+                                         std::inserter(texturesToDownload, texturesToDownload.begin()));
+        
+        for(auto textureId : texturesToDownload){
+            startDownloadTexture(textureId);
+        }
+        
+    }
+    
+    void SunTextureManager::startDownloadTexture(std::string textureId){
         std::string url = "http://localhost:3000/getmeafitsimage";
-        std::string testpath = absPath("../../../../../../httpdownload/FITSdata/iam.fits.gz");
-        AsyncHttpFileDownload ashd = AsyncHttpFileDownload(url, testpath, HttpFileDownload::Overwrite::Yes);
+        std::string destinationpath = absPath("../../../../../sync/magnetograms/" + textureId = ".fits.gz");
+        AsyncHttpFileDownload ashd = AsyncHttpFileDownload(url, destinationpath, HttpFileDownload::Overwrite::Yes);
         HttpRequest::RequestOptions opt = {};
         opt.requestTimeoutSeconds = 0;
         ashd.start(opt);
@@ -95,19 +122,48 @@ SunTextureManager::SunTextureManager(){
         
     }
     
-    void SunTextureManager::startUploadTexture(){
-        // Given that the node-part is located just outside the openspace-directory
-        const std::string fitsDir = "../../../../../../node/FITSdata/";     //Mac
-        //const std::string fitsDir = "../../../node/FITSdata/";            //PC
+    std::string SunTextureManager::checkNextTextureId(std::string current){
+        
+        SyncHttpMemoryDownload mmryDld = SyncHttpMemoryDownload("http://localhost:3000/getmenextfitsimage/" + current + "/1");
+        HttpRequest::RequestOptions opt = {};
+        opt.requestTimeoutSeconds = 0;
+        mmryDld.download(opt);
+        LERROR("nedladdning startad");
+        std::string s;
+        std::transform(mmryDld.downloadedData().begin(), mmryDld.downloadedData().end(), std::back_inserter(s),
+                       [](char c) {
+                           return c;
+                       });
+        return s;
+        
+
+    }
+    
+    void SunTextureManager::startUploadTextures(){
+        
+        checkFilesInDirectory();
+        
+        //std::sort(_textureListDisk.begin(), _textureListDisk.end());
+        
+        uploadTexturesFromList(_textureListDisk);
         
         
+    }
+    
+    void SunTextureManager::checkFilesInDirectory(){
+        const std::string fitsDir = "../../../../../sync/magnetograms/";     //Mac
+        //const std::string fitsDir = "../../sync/magnetograms/";            //PC
+
+        _textureListDisk = ghoul::filesystem::Directory(fitsDir).readFiles();
+        //remove annoying mac file. might want to use a different strategy here
+        _textureListDisk.erase(std::remove(_textureListDisk.begin(), _textureListDisk.end(), ".DS_STORE"), _textureListDisk.end());
         
-        // All the files in the given directory
-        std::vector<std::string> fitsFiles = ghoul::filesystem::Directory(fitsDir).readFiles();
-        std::sort(fitsFiles.begin(), fitsFiles.end());
+    }
+    
+    void SunTextureManager::uploadTexturesFromList(std::vector<std::string>& filelist){
         
-        LERROR("antal filer: " + std::to_string(fitsFiles.size()));
-        for (const auto & entry : fitsFiles) {
+        LERROR("antal filer: " + std::to_string(filelist.size()));
+        for (const auto & entry : filelist) {
             //LERROR(absPath(entry));
             
             FitsFileReader fitsFileReader(false);
@@ -146,19 +202,29 @@ SunTextureManager::SunTextureManager(){
             
             //LERROR(std::to_string(static_cast<int>(*textureFits)));
             
-            if(_textureList.find(dateID) != _textureList.end()){
-                _textureList[dateID].release();
+            if(_textureListGPU.find(dateID) != _textureListGPU.end()){
+                _textureListGPU[dateID].release();
             }
             
-            _textureList[dateID] = std::move(textureFits);
+            _textureListGPU[dateID] = std::move(textureFits);
             
         }
         LERROR("Laddat upp texturerna till GPU:n");
-//        _activeTextureDate = _textureList.begin()->first;
-//        _texture.release();
-//        _texture = std::move(_textureList.begin()->second);
-        
-        
+        //        _activeTextureDate = _textureList.begin()->first;
+        //        _texture.release();
+        //        _texture = std::move(_textureList.begin()->second);
     }
+    
+    std::string SunTextureManager::getOpenSpaceDateTime(){
+        std:: string datetime = global::timeManager.time().ISO8601();
+        datetime.erase(4, 1);
+        datetime.erase(6, 1);
+        datetime.erase(8, 1);
+        datetime.erase(10, 1);
+        datetime.erase(12);
+        return datetime;
+    }
+    
+    
 
 }
