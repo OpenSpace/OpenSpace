@@ -47,8 +47,16 @@ SunTextureManager::SunTextureManager(){
     void SunTextureManager::update(std::unique_ptr<ghoul::opengl::Texture>& texture){
         
         std::string current = getOpenSpaceDateTime();
-    
-        if((_activeTextureDate != current) && (_textureListGPU.find(current) != _textureListGPU.end()) ){
+        
+        if(_counter == 200){ // first time
+            std::string next = checkNextTextureId(current, 1);
+            LERROR(next);
+            if(next != "Not found!"){
+                startDownloadTexture(next);
+                uploadTextureFromName(next);
+            }
+        }
+        else if((_activeTextureDate != current) && (_textureListGPU.find(current) != _textureListGPU.end()) ){
             LERROR(current);
             _textureListGPU[_activeTextureDate] = std::move(texture);
             texture = std::move(_textureListGPU[current]);
@@ -64,15 +72,6 @@ SunTextureManager::SunTextureManager(){
         }
         
         _counter++;
-        
-        if(_counter == 800){
-            //startUploadTextures();
-            const std::string next = checkNextTextureId("201905111400", 1);
-            LERROR(next);
-            startDownloadTexture(next);
-            uploadTextureFromName(next);
-            
-        }
 
         
         //        if(_counter == 1000){
@@ -92,8 +91,9 @@ SunTextureManager::SunTextureManager(){
         //        }
     
 }
-    
-    void SunTextureManager::initialDownload(){
+
+    // not using this right now
+    void SunTextureManager::initialDownloadBatch(){
         // check what files we have in the synd directory
         checkFilesInDirectory();
         
@@ -153,9 +153,7 @@ SunTextureManager::SunTextureManager(){
     void SunTextureManager::startUploadTextures(){
         
         checkFilesInDirectory();
-        
-        //std::sort(_textureListDisk.begin(), _textureListDisk.end());
-        
+ 
         uploadTexturesFromList(_textureListDisk);
         
     }
@@ -197,12 +195,8 @@ SunTextureManager::SunTextureManager(){
             }
         }
         
-        //LERROR(dateID + " pixelvärde på position 100 100: " + std::to_string(fitsImage[10000]));
-        
         auto textureFits =  std::make_unique<ghoul::opengl::Texture>(fitsImage, glm::vec3(360, 180, 1),ghoul::opengl::Texture::Format::Red, GL_R32F,GL_FLOAT);
         textureFits->uploadTexture();
-        
-        //LERROR(std::to_string(static_cast<int>(*textureFits)));
         
         if(_textureListGPU.find(dateID) != _textureListGPU.end()){
             _textureListGPU[dateID].release();
@@ -219,9 +213,7 @@ SunTextureManager::SunTextureManager(){
             
         }
         LERROR("Laddat upp texturerna till GPU:n");
-        //        _activeTextureDate = _textureList.begin()->first;
-        //        _texture.release();
-        //        _texture = std::move(_textureList.begin()->second);
+
     }
     
     std::string SunTextureManager::getOpenSpaceDateTime(){

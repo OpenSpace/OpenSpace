@@ -42,10 +42,11 @@ public:
     
     void update(std::unique_ptr<ghoul::opengl::Texture>& texture);
     
-    
+    void initialDownload(std::unique_ptr<ghoul::opengl::Texture>& texture);
 
 private:
-    void initialDownload();
+    
+    void initialDownloadBatch();
     void startUploadTextures();
     void startDownloadTexture(std::string textureId);
     void checkFilesInDirectory();
