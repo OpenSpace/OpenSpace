@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,12 +38,16 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    constexpr const char* _loggerCat = "CefWebGui";
-
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
         "This setting determines whether the browser should be enabled or not."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
+        "Reload",
+        "Reload",
+        "Trigger this property to reload the browser."
     };
 
     constexpr openspace::properties::Property::PropertyInfo VisibleInfo = {
@@ -71,11 +75,13 @@ CefWebGuiModule::CefWebGuiModule()
     : OpenSpaceModule(CefWebGuiModule::Name)
     , _enabled(EnabledInfo, true)
     , _visible(VisibleInfo, true)
+    , _reload(ReloadInfo)
     , _url(GuiUrlInfo, "")
-    , _guiScale(GuiScaleInfo, 1.0, 0.1, 3.0)
+    , _guiScale(GuiScaleInfo, 1.f, 0.1f, 3.f)
 {
     addProperty(_enabled);
     addProperty(_visible);
+    addProperty(_reload);
     addProperty(_url);
     addProperty(_guiScale);
 }
@@ -135,6 +141,12 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         }
     });
 
+    _reload.onChange([this]() {
+        if (_instance) {
+            _instance->reloadBrowser();
+        }
+    });
+
     _guiScale.onChange([this]() {
         if (_instance) {
             _instance->setZoom(_guiScale);
@@ -180,7 +192,10 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
 
         if (isGuiWindow && isMaster && _instance) {
             if (global::windowDelegate.windowHasResized()) {
-                _instance->reshape(global::windowDelegate.currentWindowSize());
+                _instance->reshape(static_cast<glm::ivec2>(
+                    static_cast<glm::vec2>(global::windowDelegate.currentWindowSize()) *
+                    global::windowDelegate.dpiScaling()
+                ));
             }
             if (_visible) {
                 _instance->draw();

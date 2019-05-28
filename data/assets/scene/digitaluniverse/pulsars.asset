@@ -35,7 +35,7 @@ local object = {
         Unit = "pc"
     },
     GUI = {
-        Path = "/Milky Way/Pulsars"
+        Path = "/Milky Way"
     }
 }
 

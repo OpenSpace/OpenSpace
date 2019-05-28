@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,9 +51,9 @@ vec4 uvToModel(vec2 uv, vec3 radius, float segments){
     float theta = fi * float(M_PI) / segments;  // 0 -> PI
     float phi   = fj * float(M_PI) * 2.0f / segments;
 
-    float x = radius[0] * sin(phi) * sin(theta);  //
-    float y = radius[1] * cos(theta);             // up 
-    float z = radius[2] * cos(phi) * sin(theta);  //
+    float x = radius[0] * sin(theta) * cos(phi);
+    float y = radius[1] * sin(theta) * sin(phi);
+    float z = radius[2] * cos(theta);
     
     return vec4(x, y, z, 0.0);
 }

@@ -29,7 +29,11 @@ local stars = {
         Type = "RenderableStars",
         File = speck .. "/stars.speck",
         Texture = textures .. "/halo.png",
-        ColorMap = colorLUT .. "/colorbv.cmap"
+        --ShapeTexture = textures .. "/disc.png",
+        ColorMap = colorLUT .. "/colorbv.cmap",
+        MagnitudeExponent = 6.2,
+        SizeComposition = "Distance Modulus",
+        RenderMethod = "Texture Based" -- or PSF
     },
     GUI = {
         Path = "/Milky Way/Stars"

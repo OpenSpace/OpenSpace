@@ -10,6 +10,7 @@ asset.require('scene/solarsystem/planets/mars/moons/phobos')
 asset.require('scene/solarsystem/planets/mars/moons/deimos')
 asset.require('scene/solarsystem/dwarf_planets/pluto/system')
 assetHelper.requestAll(asset, 'scene/digitaluniverse')
+
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
@@ -21,17 +22,6 @@ asset.request('customization/globebrowsing')
 
 -- Keybindings that are specific for this scene
 local Keybindings = {
-    {
-        Key = "s",
-        Command = propertyHelper.invert('Scene.Earth.Renderable.Layers.NightLayers.Earth at Night 2012.Enabled') ..
-                  propertyHelper.invert('Scene.Earth.Renderable.PerformShading') ..
-                  propertyHelper.invert('Scene.Earth.Renderable.Atmosphere') ..
-                  propertyHelper.invert('Scene.Earth.Renderable.Layers.WaterMasks.MODIS_Water_Mask.Enabled'),
-        Name = "Night for earth",
-        Documentation = "Toggle night texture, shading, atmosphere, and water for Earth.",
-        GuiPath = "/Rendering",
-        Local = false
-    },
     {
         Key = "b",
         Name = "Toggle background",
@@ -58,9 +48,9 @@ local Keybindings = {
     },
     {
         Key = "h",
-        Name="Hide Trails",
-        Command = "openspace.setPropertyValue('Scene.*Trail.Renderable.Enabled', false)",
-        Documentation = "Disables visibility of the trails",
+        Name="Toggle Trails",
+        Command = "local list = openspace.getProperty('*Trail.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
+        Documentation = "Toggles the visibility of all trails",
         GuiPath = "/Rendering",
         Local = false
     },
@@ -85,16 +75,6 @@ asset.onInitialize(function ()
         openspace.absPath("${DATA}/globebrowsing_servers.lua")
     )
 
-    openspace.addVirtualProperty(
-        "BoolProperty",
-        "Show Trails",
-        "Scene.*Trail.Renderable.Enabled",
-        "Disable or enable all trails of the scene at the same time",
-        true,
-        nil,
-        nil
-    )
-
     openspace.navigation.setCameraState({
         Anchor = earthAsset.Earth.Identifier,
         Position = { 0, 0, 0 },
@@ -106,6 +86,4 @@ end)
 
 asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
-
-    openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
 end)

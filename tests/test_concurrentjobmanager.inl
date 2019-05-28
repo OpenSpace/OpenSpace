@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -103,8 +103,8 @@ struct VerboseProduct {
 
 struct VerboseJob : public openspace::Job<VerboseProduct> {
     VerboseJob(int jobExecutingTime)
-        : _product(-1)
-        , _jobExecutingTime(jobExecutingTime)
+        : _jobExecutingTime(jobExecutingTime)
+        , _product(-1)
     {
         std::cout << "VerboseTestJob constructor" << std::endl;
     }

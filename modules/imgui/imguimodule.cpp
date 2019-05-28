@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -153,6 +153,10 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         if (delegate.isMaster() && showGui) {
             const glm::ivec2 windowSize = delegate.currentWindowSize();
             const glm::ivec2 resolution = delegate.currentWindowResolution();
+
+            if (windowSize.x <= 0 || windowSize.y <= 0) {
+                return;
+            }
 
             glm::vec2 mousePosition = delegate.mousePosition();
             uint32_t mouseButtons = delegate.mouseButtons(2);

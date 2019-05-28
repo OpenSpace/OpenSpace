@@ -205,7 +205,7 @@ local VoyagerTrailEncounterSaturn = {
     }
 }
 
-local VoyagerTrailSaturnUranus = {
+local VoyagerTrailCruiseSaturnUranus = {
     Identifier = "Voyager_2_Trail_Cruise_Saturn_Uranus",
     Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Renderable = {

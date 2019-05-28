@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -145,7 +145,7 @@ std::string KeybindingManager::generateJson() const {
     std::stringstream json;
     json << "[";
     bool first = true;
-    for (const std::pair<KeyWithModifier, KeyInformation>& p : _keyLua) {
+    for (const std::pair<const KeyWithModifier, KeyInformation>& p : _keyLua) {
         if (!first) {
             json << ",";
         }
@@ -153,10 +153,10 @@ std::string KeybindingManager::generateJson() const {
         json << "{";
         json << R"("key": ")" << ghoul::to_string(p.first) << "\",";
         json << R"("script": ")" << escapedJson(p.second.command) << "\",";
-        json << R"("remoteScripting: ")"
+        json << R"("remoteScripting": )"
              << (p.second.synchronization ? "true," : "false,");
         json << R"("documentation": ")" << escapedJson(p.second.documentation) << "\",";
-        json << R"("name: ")" << escapedJson(p.second.name) << "\"";
+        json << R"("name": ")" << escapedJson(p.second.name) << "\"";
         json << "}";
     }
     json << "]";

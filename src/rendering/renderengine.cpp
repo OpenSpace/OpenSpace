@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -158,14 +158,28 @@ namespace {
         "master node is not required and performance can be gained by disabling it."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableTranslationInfo = {
-        "DisableSceneTranslationOnMaster",
-        "Disable Scene Translation on Master",
-        "If this value is enabled, any scene translations such as specified in, for "
-        "example an SGCT configuration, is disabled for the master node. This setting "
-        "can be useful if a planetarium environment requires a scene translation to be "
-        "applied, which would otherwise make interacting through the master node "
-        "difficult."
+    constexpr openspace::properties::Property::PropertyInfo GlobalRotationInfo = {
+        "GlobalRotation",
+        "Global Rotation",
+        "Applies a global view rotation. Use this to rotate the position of the "
+        "focus node away from the default location on the screen. This setting "
+        "persists even when a new focus node is selected. Defined using pitch, yaw, "
+        "roll in radians"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ScreenSpaceRotationInfo = {
+        "ScreenSpaceRotation",
+        "Screen Space Rotation",
+        "Applies a rotation to all screen space renderables. "
+        "Defined using pitch, yaw, roll in radians."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MasterRotationInfo = {
+        "MasterRotation",
+        "Master Rotation",
+        "Applies a view rotation for only the master node, defined using "
+        "pitch, yaw, roll in radians. This can be used to compensate the master view "
+        "direction for tilted display systems in clustered immersive environments."
     };
 
     constexpr openspace::properties::Property::PropertyInfo AaSamplesInfo = {
@@ -195,6 +209,14 @@ namespace {
         "Gamma, is the nonlinear operation used to encode and decode luminance or "
         "tristimulus values in the image."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo HorizFieldOfViewInfo = {
+        "HorizFieldOfView",
+        "Horizontal Field of View",
+        "Adjusts the degrees of the horizontal field of view. The vertical field of "
+        "view will be automatically adjusted to match, according to the current "
+        "aspect ratio."
+    };
 } // namespace
 
 
@@ -211,11 +233,29 @@ RenderEngine::RenderEngine()
     , _applyWarping(ApplyWarpingInfo, false)
     , _showFrameNumber(ShowFrameNumberInfo, false)
     , _disableMasterRendering(DisableMasterInfo, false)
-    , _disableSceneTranslationOnMaster(DisableTranslationInfo, false)
     , _nAaSamples(AaSamplesInfo, 4, 1, 8)
     , _hdrExposure(HDRExposureInfo, 0.4f, 0.01f, 10.0f)
     , _hdrBackground(BackgroundExposureInfo, 2.8f, 0.01f, 10.0f)
     , _gamma(GammaInfo, 2.2f, 0.01f, 10.0f)
+    , _globalRotation(
+        GlobalRotationInfo,
+        glm::vec3(0.f),
+        glm::vec3(-glm::pi<float>()),
+        glm::vec3(glm::pi<float>())
+    )
+    , _screenSpaceRotation(
+        ScreenSpaceRotationInfo,
+        glm::vec3(0.f),
+        glm::vec3(-glm::pi<float>()),
+        glm::vec3(glm::pi<float>())
+    )
+    , _masterRotation(
+        MasterRotationInfo,
+        glm::vec3(0.f),
+        glm::vec3(-glm::pi<float>()),
+        glm::vec3(glm::pi<float>())
+    )
+    , _horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.0f)
 {
     _doPerformanceMeasurements.onChange([this](){
         global::performanceManager.setEnabled(_doPerformanceMeasurements);
@@ -257,6 +297,11 @@ RenderEngine::RenderEngine()
 
     addProperty(_applyWarping);
 
+    _horizFieldOfView.onChange([this]() {
+        global::windowDelegate.setHorizFieldOfView(_horizFieldOfView);
+    });
+    addProperty(_horizFieldOfView);
+
     _takeScreenshot.onChange([this](){
         _shouldTakeScreenshot = true;
     });
@@ -264,7 +309,9 @@ RenderEngine::RenderEngine()
 
     addProperty(_showFrameNumber);
 
-    addProperty(_disableSceneTranslationOnMaster);
+    addProperty(_globalRotation);
+    addProperty(_screenSpaceRotation);
+    addProperty(_masterRotation);
     addProperty(_disableMasterRendering);
 }
 
@@ -294,8 +341,10 @@ void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
 void RenderEngine::initialize() {
     // We have to perform these initializations here as the OsEng has not been initialized
     // in our constructor
-    _disableSceneTranslationOnMaster =
-        global::configuration.isSceneTranslationOnMasterDisabled;
+    _globalRotation = static_cast<glm::vec3>(global::configuration.globalRotation);
+    _screenSpaceRotation =
+        static_cast<glm::vec3>(global::configuration.screenSpaceRotation);
+    _masterRotation = static_cast<glm::vec3>(global::configuration.masterRotation);
     _disableMasterRendering = global::configuration.isRenderingOnMasterDisabled;
 
 #ifdef GHOUL_USE_DEVIL
@@ -355,6 +404,10 @@ void RenderEngine::initializeGL() {
     // set the close clip plane and the far clip plane to extreme values while in
     // development
     global::windowDelegate.setNearFarClippingPlane(0.001f, 1000.f);
+
+    //Set horizontal FOV value with whatever the field of view (in degrees) is of the
+    // initialized window
+    _horizFieldOfView = static_cast<float>(global::windowDelegate.getHorizFieldOfView());
 
     constexpr const float FontSizeBig = 50.f;
     _fontBig = global::fontManager.font(KeyFontMono, FontSizeBig);
@@ -420,6 +473,9 @@ void RenderEngine::updateRenderer() {
         using FR = ghoul::fontrendering::FontRenderer;
         FR::defaultRenderer().setFramebufferSize(fontResolution());
         FR::defaultProjectionRenderer().setFramebufferSize(renderingResolution());
+        //Override the aspect ratio property value to match that of resized window
+        _horizFieldOfView =
+            static_cast<float>(global::windowDelegate.getHorizFieldOfView());
     }
 
     _renderer->update();
@@ -448,6 +504,39 @@ glm::ivec2 RenderEngine::fontResolution() const {
     else {
         return global::windowDelegate.currentWindowSize();
     }
+}
+
+glm::mat4 RenderEngine::globalRotation() const {
+    glm::vec3 rot = _globalRotation;
+
+    glm::quat pitch = glm::angleAxis(rot.x, glm::vec3(1.f, 0.f, 0.f));
+    glm::quat yaw = glm::angleAxis(rot.y, glm::vec3(0.f, 1.f, 0.f));
+    glm::quat roll = glm::angleAxis(rot.z, glm::vec3(0.f, 0.f, 1.f));
+
+    return glm::mat4_cast(glm::normalize(pitch * yaw * roll));
+}
+
+glm::mat4 RenderEngine::screenSpaceRotation() const {
+    glm::vec3 rot = _screenSpaceRotation;
+
+    glm::quat pitch = glm::angleAxis(rot.x, glm::vec3(1.f, 0.f, 0.f));
+    glm::quat yaw = glm::angleAxis(rot.y, glm::vec3(0.f, 1.f, 0.f));
+    glm::quat roll = glm::angleAxis(rot.z, glm::vec3(0.f, 0.f, 1.f));
+
+    return glm::mat4_cast(glm::normalize(pitch * yaw * roll));
+}
+
+glm::mat4 RenderEngine::nodeRotation() const {
+    if (!global::windowDelegate.isMaster()) {
+        return glm::mat4(1.f);
+    }
+    glm::vec3 rot = _masterRotation;
+
+    glm::quat pitch = glm::angleAxis(rot.x, glm::vec3(1.f, 0.f, 0.f));
+    glm::quat yaw = glm::angleAxis(rot.y, glm::vec3(0.f, 1.f, 0.f));
+    glm::quat roll = glm::angleAxis(rot.z, glm::vec3(0.f, 0.f, 1.f));
+
+    return glm::mat4_cast(glm::normalize(pitch * yaw * roll));
 }
 
 void RenderEngine::updateFade() {
@@ -492,15 +581,18 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
                           const glm::mat4& projectionMatrix)
 {
     LTRACE("RenderEngine::render(begin)");
+
     const WindowDelegate& delegate = global::windowDelegate;
+
+    const glm::mat4 globalRot = globalRotation();
+    const glm::mat4 nodeRot = nodeRotation();
+    glm::mat4 combinedGlobalRot = nodeRot * globalRot;
+
     if (_camera) {
-        if (_disableSceneTranslationOnMaster && delegate.isMaster()) {
-            _camera->sgctInternal.setViewMatrix(viewMatrix);
-        }
-        else {
-            _camera->sgctInternal.setViewMatrix(viewMatrix * sceneMatrix);
-            _camera->sgctInternal.setSceneMatrix(sceneMatrix);
-        }
+        _camera->sgctInternal.setViewMatrix(
+            viewMatrix * combinedGlobalRot * sceneMatrix
+        );
+        _camera->sgctInternal.setSceneMatrix(combinedGlobalRot * sceneMatrix);
         _camera->sgctInternal.setProjectionMatrix(projectionMatrix);
         _camera->invalidateCache();
     }
@@ -525,31 +617,35 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 
     ++_frameNumber;
 
-    std::vector<ScreenSpaceRenderable*> ssrs;
-    ssrs.reserve(global::screenSpaceRenderables.size());
-    for (const std::unique_ptr<ScreenSpaceRenderable>& ssr :
-         global::screenSpaceRenderables)
-    {
-        if (ssr->isEnabled() && ssr->isReady()) {
-            ssrs.push_back(ssr.get());
+    if (masterEnabled && !delegate.isGuiWindow() && _globalBlackOutFactor > 0.f) {
+        std::vector<ScreenSpaceRenderable*> ssrs;
+        ssrs.reserve(global::screenSpaceRenderables.size());
+        for (const std::unique_ptr<ScreenSpaceRenderable>& ssr :
+            global::screenSpaceRenderables)
+        {
+            if (ssr->isEnabled() && ssr->isReady()) {
+                ssrs.push_back(ssr.get());
+            }
         }
-    }
 
-    std::sort(
-        ssrs.begin(),
-        ssrs.end(),
-        [](ScreenSpaceRenderable* lhs, ScreenSpaceRenderable* rhs) {
-            return lhs->depth() < rhs->depth();
+        std::sort(
+            ssrs.begin(),
+            ssrs.end(),
+            [](ScreenSpaceRenderable* lhs, ScreenSpaceRenderable* rhs) {
+                // Render back to front.
+                return lhs->depth() > rhs->depth();
+            }
+        );
+
+
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        for (ScreenSpaceRenderable* ssr : ssrs) {
+            ssr->render();
         }
-    );
-
-    glDisable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    for (ScreenSpaceRenderable* ssr : ssrs) {
-        ssr->render();
+        glDisable(GL_BLEND);
     }
-    glDisable(GL_BLEND);
     LTRACE("RenderEngine::render(end)");
 }
 
@@ -949,11 +1045,28 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
 }
 
 void RenderEngine::addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderable> s) {
+
+    const std::string identifier = s->identifier();
+
+    if (std::find_if(
+        global::screenSpaceRenderables.begin(),
+        global::screenSpaceRenderables.end(),
+        [&identifier](const std::unique_ptr<ScreenSpaceRenderable>& ssr) {
+            return ssr->identifier() == identifier;
+        }) != global::screenSpaceRenderables.end()
+    ) {
+        LERROR(fmt::format(
+            "Cannot add scene space renderable. "
+            "An element with identifier '{}' already exists",
+            identifier
+        ));
+        return;
+    }
+
     s->initialize();
     s->initializeGL();
 
     global::screenSpaceRootPropertyOwner.addPropertySubOwner(s.get());
-
     global::screenSpaceRenderables.push_back(std::move(s));
 }
 

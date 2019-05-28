@@ -20,7 +20,7 @@ local object = {
     Identifier = "Quasars",
     Renderable = {
         Type = "RenderableBillboardsCloud",
-        Enabled = false,
+        Enabled = true,
         Color = { 1.0, 0.4, 0.2 },
         Transparency = 1.0,
         File = speck .. "/quasars.speck",
@@ -33,7 +33,7 @@ local object = {
         BillboardMinSize = 0.0,
     },
     GUI = {
-        Path = "/Universe/Quasars"
+        Path = "/Universe"
     }
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,9 +43,18 @@ class KeyframeNavigator;
 class SessionRecording : public properties::PropertyOwner {
 public:
     enum class RecordedDataMode {
-        Ascii,
+        Ascii = 0,
         Binary
     };
+
+    enum class SessionState {
+        Idle = 0,
+        Recording,
+        Playback
+    };
+
+    using CallbackHandle = int;
+    using StateChangeCallback = std::function<void()>;
 
     SessionRecording();
     ~SessionRecording();
@@ -116,6 +125,12 @@ public:
     bool isPlayingBack() const;
 
     /**
+    * Used to obtain the state of idle/recording/playback.
+    * \returns int value of state as defined by struct SessionState.
+    */
+    SessionState state() const;
+
+    /**
     * Used to trigger a save of the camera states (position, rotation, focus node,
     * whether it is following the rotation of a node, and timestamp). The data will
     * be saved to the recording file only if a recording is currently in progress.
@@ -141,12 +156,26 @@ public:
     */
     static openspace::scripting::LuaLibrary luaLibrary();
 
+    /**
+    * Used to request a callback for notification of playback state change.
+    * \param cb function handle for callback.
+    * \returns CallbackHandle value of callback number.
+    */
+    CallbackHandle addStateChangeCallback(StateChangeCallback cb);
+
+    /**
+     * Removes the callback for notification of playback state change.
+     * \param callback function handle for the callback.
+    */
+    void removeStateChangeCallback(CallbackHandle handle);
+
+    /**
+     * Provides list of available playback files.
+     * \returns vector of filenames in recordings dir.
+     */
+    std::vector<std::string> playbackList() const;
+
 private:
-    enum class SessionState {
-        Idle = 0,
-        Recording,
-        Playback
-    };
     enum class RecordedType {
         Camera = 0,
         Time,
@@ -175,20 +204,14 @@ private:
     void playbackScript();
     bool playbackAddEntriesToTimeline();
     void signalPlaybackFinishedForComponent(RecordedType type);
-    void writeToFileBuffer(const double src);
+    void writeToFileBuffer(double src);
     void writeToFileBuffer(std::vector<char>& cvec);
-    void writeToFileBuffer(const unsigned char c);
+    void writeToFileBuffer(unsigned char c);
     void writeToFileBuffer(bool b);
     void saveStringToFile(const std::string& s);
     void saveKeyframeToFileBinary(unsigned char* bufferSource, size_t size);
     void findFirstCameraKeyframeInTimeline();
     std::string readHeaderElement(size_t readLen_chars);
-    void readFromPlayback(unsigned char& result);
-    void readFromPlayback(double& result);
-    void readFromPlayback(float& result);
-    void readFromPlayback(size_t& result);
-    void readFromPlayback(bool& result);
-    void readFromPlayback(std::string& result);
     void saveKeyframeToFile(std::string entry);
 
     void addKeyframe(double timestamp,
@@ -206,6 +229,7 @@ private:
     bool isDataModeBinary();
     unsigned int findIndexOfLastCameraKeyframeInTimeline();
     bool doesTimelineEntryContainCamera(unsigned int index) const;
+    std::vector<std::pair<CallbackHandle, StateChangeCallback>> _stateChangeCallbacks;
 
     RecordedType getNextKeyframeType();
     RecordedType getPrevKeyframeType();
@@ -222,6 +246,7 @@ private:
 
     RecordedDataMode _recordingDataMode = RecordedDataMode::Binary;
     SessionState _state = SessionState::Idle;
+    SessionState _lastState = SessionState::Idle;
     std::string _playbackFilename;
     std::ifstream _playbackFile;
     std::string _playbackLineParsing;
@@ -260,6 +285,8 @@ private:
 
     unsigned int _idxTimeline_cameraFirstInTimeline = 0;
     double _cameraFirstInTimeline_timestamp = 0;
+
+    int _nextCallbackHandle = 0;
 };
 
 } // namespace openspace

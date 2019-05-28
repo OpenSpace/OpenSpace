@@ -130,6 +130,25 @@ local requestAll = function (sceneAsset, directory)
     end
 end
 
+
+local getDefaultLightSources = function (solarSystemBarycenterIdentifier)
+    local sourceList = {
+        {
+            Type = "SceneGraphLightSource",
+            Identifier = "Sun",
+            Node = solarSystemBarycenterIdentifier,
+            Intensity = 1.0
+        },
+        {
+            Identifier = "Camera",
+            Type = "CameraLightSource",
+            Intensity = 0.5
+        }
+    }
+    return sourceList
+end
+
+
 asset.export("registerSceneGraphNodes", registerSceneGraphNodes)
 asset.export("registerSceneGraphNodesAndExport", registerSceneGraphNodesAndExport)
 asset.export("registerSpiceKernels", registerSpiceKernels)
@@ -137,3 +156,4 @@ asset.export("registerDashboardItems", registerDashboardItems)
 asset.export("registerInterestingNodes", registerInterestingNodes)
 asset.export("requireAll", requireAll)
 asset.export("requestAll", requestAll)
+asset.export("getDefaultLightSources", getDefaultLightSources)

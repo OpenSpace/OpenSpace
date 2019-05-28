@@ -78,7 +78,16 @@ local Keybindings = {
         Command = propertyHelper.invert('Scene.EarthMarker.Renderable.Enabled'),
         Documentation = "Toggles the visibility of the text marking the location of the Earth.",
         Local = false
-    }
+    },
+    {
+        Key = "h",
+        Name="Hide Trails",
+        Command = "local list = openspace.getProperty('*Trail.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
+        Documentation = "Disables visibility of the trails",
+        GuiPath = "/Rendering",
+        Local = false
+    },
+
 }
 
 local OsirisRexAsset = asset.require('scene/solarsystem/missions/osirisrex/model')
@@ -122,16 +131,6 @@ asset.onInitialize(function ()
         "OsirisRex", "BennuBarycenter", "Earth"
     })
 
-    openspace.addVirtualProperty(
-        "BoolProperty",
-        "Show Trails",
-        "*Trail.Renderable.Enabled",
-        "Disable or enable all trails of the scene at the same time",
-        true,
-        nil,
-        nil
-    )
-
     openspace.navigation.setCameraState({
         Anchor = OsirisRexAsset.OsirisRex.Identifier,
         Position = { 26974590199.661884, 76314608558.908020, -127086452897.101791 },
@@ -142,7 +141,6 @@ end)
 asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
 
-    openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
     openspace.removeInterestingNodes({
         "OsirisRex", "BennuBarycenter", "Earth"
     })

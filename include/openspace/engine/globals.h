@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,6 @@ class DownloadManager;
 class LuaConsole;
 class MissionManager;
 class ModuleEngine;
-class NetworkEngine;
 class OpenSpaceEngine;
 class ParallelPeer;
 class RaycasterManager;
@@ -75,7 +74,6 @@ DownloadManager& gDownloadManager();
 LuaConsole& gLuaConsole();
 MissionManager& gMissionManager();
 ModuleEngine& gModuleEngine();
-NetworkEngine& gNetworkEngine();
 OpenSpaceEngine& gOpenSpaceEngine();
 ParallelPeer& gParallelPeer();
 RaycasterManager& gRaycasterManager();
@@ -106,7 +104,6 @@ static DownloadManager& downloadManager = detail::gDownloadManager();
 static LuaConsole& luaConsole = detail::gLuaConsole();
 static MissionManager& missionManager = detail::gMissionManager();
 static ModuleEngine& moduleEngine = detail::gModuleEngine();
-static NetworkEngine& networkEngine = detail::gNetworkEngine();
 static OpenSpaceEngine& openSpaceEngine = detail::gOpenSpaceEngine();
 static ParallelPeer& parallelPeer = detail::gParallelPeer();
 static RaycasterManager& raycasterManager = detail::gRaycasterManager();

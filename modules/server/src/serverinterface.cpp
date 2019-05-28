@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -68,7 +68,8 @@ namespace {
         "Ip addresses or domains that should always be allowed access to this interface"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RequirePasswordAddressesInfo = {
+    constexpr openspace::properties::Property::PropertyInfo
+        RequirePasswordAddressesInfo = {
         "RequirePasswordAddresses",
         "Require Password Addresses",
         "Ip addresses or domains that should be allowed access if they provide a password"
@@ -97,7 +98,7 @@ std::unique_ptr<ServerInterface> ServerInterface::createFromDictionary(
     return si;
 }
 
-ServerInterface::ServerInterface(const ghoul::Dictionary& config) 
+ServerInterface::ServerInterface(const ghoul::Dictionary& config)
     : properties::PropertyOwner({ "", "", "" })
     , _type(TypeInfo)
     , _port(PortInfo, 0)
@@ -129,7 +130,7 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
                 list.set(v);
             }
         };
-    
+
     readList(AllowAddressesInfo.identifier, _allowAddresses);
     readList(DenyAddressesInfo.identifier, _denyAddresses);
     readList(RequirePasswordAddressesInfo.identifier, _requirePasswordAddresses);
