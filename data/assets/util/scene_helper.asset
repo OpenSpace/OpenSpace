@@ -31,6 +31,8 @@ local unbindKeys = function(keys)
 end
 asset.export("unbindKeys", unbindKeys)
 
+local deltaTimeKeys = {}
+
 local setDeltaTimeKeys = function(t)
     local Keys = {
         '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
@@ -44,6 +46,8 @@ local setDeltaTimeKeys = function(t)
         return
     end
 
+    unbindKeys(deltaTimeKeys)
+
     result = {}
     for i, v in ipairs(t) do
         openspace.bindKeyLocal(
@@ -55,6 +59,8 @@ local setDeltaTimeKeys = function(t)
         )
         table.insert(result, Keys[i])
     end
+
+    deltaTimeKeys = result
 
     return result
 end

@@ -13,13 +13,17 @@ asset.require('scene/solarsystem/missions/rosetta/rosetta')
 local Keybindings = {
     {
         Key = "a",
-        Command = "openspace.setPropertyValue('NavigationHandler.Origin', '67P')",
+        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', '67P');" ..
+            "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');" ..
+            "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
         Documentation = "Sets the focus of the camera on '67P'.",
         Local = false
     },
     {
         Key = "s",
-        Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'Rosetta')",
+        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Rosetta');" ..
+            "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');" ..
+            "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
         Documentation = "Sets the focus of the camera on 'Rosetta'",
         Local = false
     },
@@ -37,7 +41,7 @@ local Keybindings = {
     },
     {
         Key = "F8",
-        Command = "openspace.setPropertyValue('Scene.67P.Renderable.ProjectionComponent.clearAllProjections', true)",
+        Command = "openspace.setPropertyValue('Scene.67P.Renderable.ProjectionComponent.ClearAllProjections', true)",
         Documentation = "Removes all image projections from 67P.",
         Local = false
     },
@@ -61,14 +65,14 @@ local Keybindings = {
         Local = false
     },
     {
-        Key = "f",
+        Key = "g",
         Command = renderableHelper.toggle('Scene.PhilaeTrail'),
         Documentation = "Toggles the visibility of Philae's trail.",
         Local = false
     },
     {
         Key = "p",
-        Command = propertyHelper.invert('Scene.67P.Renderable.ProjectionComponent.performProjection'),
+        Command = propertyHelper.invert('Scene.67P.Renderable.ProjectionComponent.PerformProjection'),
         Documentation = "Enables or disables the image projection on 67P.",
         Local = false
     }
@@ -117,6 +121,8 @@ asset.onInitialize(function ()
     })
 
     openspace.setPropertyValue('Scene.67P.Renderable.PerformShading', false);
+    openspace.setPropertyValue('Scene.ImagePlaneRosetta.Renderable.Enabled', false);
+
 end)
 
 asset.onDeinitialize(function ()
