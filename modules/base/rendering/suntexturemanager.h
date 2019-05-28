@@ -50,7 +50,8 @@ private:
     void startDownloadTexture(std::string textureId);
     void checkFilesInDirectory();
     void uploadTexturesFromList(std::vector<std::string>& filelist);
-    std::string checkNextTextureId(std::string current);
+    void uploadTextureFromName(std::string);
+    std::string checkNextTextureId(std::string current, float dir);
     
     std::string getOpenSpaceDateTime();
     

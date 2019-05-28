@@ -48,22 +48,32 @@ SunTextureManager::SunTextureManager(){
         
         std::string current = getOpenSpaceDateTime();
     
-        if(_textureListGPU.find(current) != _textureListGPU.end()){
+        if((_activeTextureDate != current) && (_textureListGPU.find(current) != _textureListGPU.end()) ){
+            LERROR(current);
             _textureListGPU[_activeTextureDate] = std::move(texture);
             texture = std::move(_textureListGPU[current]);
             _activeTextureDate = current;
-            std::string next = checkNextTextureId(current);
-            LERROR(next);
-            //startDownloadTexture(next);
             
+            float dir = global::timeManager.deltaTime();
+            std::string next = checkNextTextureId(current, dir);
+            LERROR(next);
+            if(next != "Not found!"){
+                startDownloadTexture(next);
+                uploadTextureFromName(next);
+            }
         }
         
         _counter++;
         
         if(_counter == 800){
-            startUploadTextures();
-            //LERROR(checkNextTextureId("201905111400"));
+            //startUploadTextures();
+            const std::string next = checkNextTextureId("201905111400", 1);
+            LERROR(next);
+            startDownloadTexture(next);
+            uploadTextureFromName(next);
+            
         }
+
         
         //        if(_counter == 1000){
         //            LERROR(_texturePath);
@@ -110,8 +120,11 @@ SunTextureManager::SunTextureManager(){
     }
     
     void SunTextureManager::startDownloadTexture(std::string textureId){
-        std::string url = "http://localhost:3000/getmeafitsimage";
-        std::string destinationpath = absPath("../../../../../sync/magnetograms/" + textureId = ".fits.gz");
+        std::string url = "http://localhost:3000/get/" + textureId;
+        LERROR(url);
+        std::string destinationpath = "../../../../../sync/test/" + textureId;
+        LERROR(destinationpath);
+        LERROR(absPath(destinationpath));
         AsyncHttpFileDownload ashd = AsyncHttpFileDownload(url, destinationpath, HttpFileDownload::Overwrite::Yes);
         HttpRequest::RequestOptions opt = {};
         opt.requestTimeoutSeconds = 0;
@@ -122,9 +135,9 @@ SunTextureManager::SunTextureManager(){
         
     }
     
-    std::string SunTextureManager::checkNextTextureId(std::string current){
+    std::string SunTextureManager::checkNextTextureId(std::string current, float dir){
         
-        SyncHttpMemoryDownload mmryDld = SyncHttpMemoryDownload("http://localhost:3000/getmenextfitsimage/" + current + "/1");
+        SyncHttpMemoryDownload mmryDld = SyncHttpMemoryDownload("http://localhost:3000/getmenextfitsimage/" + current + "/" + std::to_string(dir));
         HttpRequest::RequestOptions opt = {};
         opt.requestTimeoutSeconds = 0;
         mmryDld.download(opt);
@@ -135,8 +148,6 @@ SunTextureManager::SunTextureManager(){
                            return c;
                        });
         return s;
-        
-
     }
     
     void SunTextureManager::startUploadTextures(){
@@ -146,7 +157,6 @@ SunTextureManager::SunTextureManager(){
         //std::sort(_textureListDisk.begin(), _textureListDisk.end());
         
         uploadTexturesFromList(_textureListDisk);
-        
         
     }
     
@@ -159,54 +169,53 @@ SunTextureManager::SunTextureManager(){
         _textureListDisk.erase(std::remove(_textureListDisk.begin(), _textureListDisk.end(), ".DS_STORE"), _textureListDisk.end());
         
     }
-    
+    void SunTextureManager::uploadTextureFromName(std::string filename){
+        FitsFileReader fitsFileReader(false);
+        
+        std::string dateID ="";
+        const auto tempBild = fitsFileReader.readImageFloat("../../../../../sync/magnetograms/" + filename);
+        
+        const std::string datestring = *fitsFileReader.readHeaderValueString("DATE");
+        
+        int magicalCounter = 0;
+        for (char c : datestring) {
+            if (std::isdigit(c)) {
+                if (magicalCounter >= 0 && magicalCounter < 12) {
+                    dateID += c;
+                }
+                magicalCounter++;
+            }
+        }
+        
+        const float stdvalue = *fitsFileReader.readHeaderValueFloat("IMGRMS01");
+        GLfloat fitsImage[360 * 180];
+        for (int i = 0; i < 360; i++) {
+            for (int j = 0; j < 180; j++) {
+                float color = tempBild->contents[(i * 180) + j];
+                color = (color+stdvalue)/stdvalue; //some semirandom operation to actually se something in the texture
+                fitsImage[(i * 180) + j] = static_cast<GLfloat>(color);
+            }
+        }
+        
+        //LERROR(dateID + " pixelvärde på position 100 100: " + std::to_string(fitsImage[10000]));
+        
+        auto textureFits =  std::make_unique<ghoul::opengl::Texture>(fitsImage, glm::vec3(360, 180, 1),ghoul::opengl::Texture::Format::Red, GL_R32F,GL_FLOAT);
+        textureFits->uploadTexture();
+        
+        //LERROR(std::to_string(static_cast<int>(*textureFits)));
+        
+        if(_textureListGPU.find(dateID) != _textureListGPU.end()){
+            _textureListGPU[dateID].release();
+        }
+        
+        _textureListGPU[dateID] = std::move(textureFits);
+    }
+
     void SunTextureManager::uploadTexturesFromList(std::vector<std::string>& filelist){
         
         LERROR("antal filer: " + std::to_string(filelist.size()));
         for (const auto & entry : filelist) {
-            //LERROR(absPath(entry));
-            
-            FitsFileReader fitsFileReader(false);
-            
-            std::string dateID ="";
-            const auto tempBild = fitsFileReader.readImageFloat(entry);
-            //                const auto tempBild = fitsFileReader.readImageFloat(testpath);
-            
-            const std::string datestring = *fitsFileReader.readHeaderValueString("DATE");
-            
-            
-            int magicalCounter = 0;
-            for (char c : datestring) {
-                if (std::isdigit(c)) {
-                    if (magicalCounter >= 0 && magicalCounter < 12) {
-                        dateID += c;
-                    }
-                    magicalCounter++;
-                }
-            }
-            
-            const float stdvalue = *fitsFileReader.readHeaderValueFloat("IMGRMS01");
-            GLfloat fitsImage[360 * 180];
-            for (int i = 0; i < 360; i++) {
-                for (int j = 0; j < 180; j++) {
-                    float color = tempBild->contents[(i * 180) + j];
-                    color = (color+stdvalue)/stdvalue; //some semirandom operation to actually se something in the texture
-                    fitsImage[(i * 180) + j] = static_cast<GLfloat>(color);
-                }
-            }
-            
-            //LERROR(dateID + " pixelvärde på position 100 100: " + std::to_string(fitsImage[10000]));
-            
-            auto textureFits =  std::make_unique<ghoul::opengl::Texture>(fitsImage, glm::vec3(360, 180, 1),ghoul::opengl::Texture::Format::Red, GL_R32F,GL_FLOAT);
-            textureFits->uploadTexture();
-            
-            //LERROR(std::to_string(static_cast<int>(*textureFits)));
-            
-            if(_textureListGPU.find(dateID) != _textureListGPU.end()){
-                _textureListGPU[dateID].release();
-            }
-            
-            _textureListGPU[dateID] = std::move(textureFits);
+            uploadTextureFromName(entry);
             
         }
         LERROR("Laddat upp texturerna till GPU:n");
