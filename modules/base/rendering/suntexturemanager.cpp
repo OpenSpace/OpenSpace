@@ -186,16 +186,14 @@ SunTextureManager::SunTextureManager(){
         }
         
         const float stdvalue = *fitsFileReader.readHeaderValueFloat("IMGRMS01");
-        GLfloat fitsImage[360 * 180];
-        for (int i = 0; i < 360; i++) {
-            for (int j = 0; j < 180; j++) {
-                float color = tempBild->contents[(i * 180) + j];
-                color = (color+stdvalue)/stdvalue; //some semirandom operation to actually se something in the texture
-                fitsImage[(i * 180) + j] = static_cast<GLfloat>(color);
-            }
+        std::vector<float> fitsImage;
+        for(float c : tempBild->contents){
+            fitsImage.push_back((c+stdvalue)/stdvalue);
         }
+
+        LERROR(std::to_string(fitsImage.at(100)));
         
-        auto textureFits =  std::make_unique<ghoul::opengl::Texture>(fitsImage, glm::vec3(360, 180, 1),ghoul::opengl::Texture::Format::Red, GL_R32F,GL_FLOAT);
+        auto textureFits =  std::make_unique<ghoul::opengl::Texture>(fitsImage.data(), glm::vec3(360, 180, 1),ghoul::opengl::Texture::Format::Red, GL_R32F,GL_FLOAT);
         textureFits->uploadTexture();
         
         if(_textureListGPU.find(dateID) != _textureListGPU.end()){
@@ -204,6 +202,8 @@ SunTextureManager::SunTextureManager(){
         
         _textureListGPU[dateID] = std::move(textureFits);
     }
+    
+
 
     void SunTextureManager::uploadTexturesFromList(std::vector<std::string>& filelist){
         
