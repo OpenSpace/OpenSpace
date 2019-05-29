@@ -23,16 +23,13 @@ local Keybindings = {
     },
      {
         Key = "F9",
-        Command = "openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_LEM.Enabled', false);" ..
+        Command = "openspace.setPropertyValue('Scene.Moon.Renderable.Layers.ColorLayers.A17_*.Enabled', false);" ..
                   "openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_11.Enabled', false);" ..
                   "openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A11_M177481212_p_longlat.Enabled', false);" ..
-                  "openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_NAC_Alt_p.Enabled', false);" ..
-                  "openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_17.Enabled', false);" ..
-                  "openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_LEM.Enabled', false);" ..
-                  "openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_travmap.Enabled', false)",
-        Documentation = "Disable site when switching",
-        Name = "Disable apollo site",
-        GuiPath = "/Missions/Apollo/11",
+                  "openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_17.Enabled', false);",
+        Documentation = "Disable apollo site on moon when switching",
+        Name = "Disable Apollo site",
+        GuiPath = "/Missions/Apollo",
         Local = false
     },
     {
@@ -69,16 +66,6 @@ local Keybindings = {
                   "openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_station7.BlendMode', 0.000000);",
         Documentation = "Setup for A17 site",
         Name = "Setup A17 site",
-        GuiPath = "/Missions/Apollo/17",
-        Local = false
-    },
-    {
-        Key = "SHIFT+F7",
-        Command = "openspace.setPropertyValue('Scene.Moon.Renderable.Layers.ColorLayers.A17_*.Enabled', false);" ..
-                  "openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_17.Enabled', false);" ..
-                  "openspace.setPropertyValueSingle('Scene.Moon.Renderable.LodScaleFactor', 20.117);",
-        Documentation = "Setup for A17 site",
-        Name = "Setup A17 layers",
         GuiPath = "/Missions/Apollo/17",
         Local = false
     }
