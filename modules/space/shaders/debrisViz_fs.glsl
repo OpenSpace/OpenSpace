@@ -25,52 +25,38 @@
 #include "fragment.glsl"
 //#include "floatoperations.glsl"
 
-//layout(location = 0) in vec4 vertex_data; // 1: x, 2: y, 3: z, 4: timeOffset
-//layout(location = 1) in vec2 orbit_data; // 1: epoch, 2: period
-
 uniform vec3 color;
 uniform float opacity = 1.0;
 
 uniform float lineFade;
-//uniform double inGameTime;
-uniform int numberOfSegments;
-
-
+// uniform int numberOfSegments;
 
 in vec4 viewSpacePosition;
 in vec4 vs_position;
-//in float fade;
 
-//in vec4 vertex_data_out;
-//in vec2 orbit_data_out;
 in float periodFraction_f;
 in float offsetPeriods;
-in float vertexID_f;
+// in float vertexID_f;
 
 Fragment getFragment() {
-
-    /*
-    // calculate nr of periods, get fractional part to know where
-    // the vertex closest to the debris part is right now
-    double nrOfPeriods = (inGameTime - orbit_data_out.x) / orbit_data_out.y;
-    double periodFraction = fract(nrOfPeriods); //mod(nrOfPeriods, 1.0);
-    float periodFraction_f = float(periodFraction);
-
-    // same procedure for the current vertex
-    float offsetPeriods = vertex_data_out.w / orbit_data_out.y;
-    // check difference of these two locations
-    */
+    // This is now done in the fragment shader instead
+    // to make smooth movement between vertecies.
+    // We want vertexDistance to be double up to this point, I think. 
+    // (hence the unnessesary float to float conversion)
+    float vertexDistance = periodFraction_f - offsetPeriods;
+    float vertexDistance_f = float(vertexDistance);
     
-    // float vertexDistance = periodFraction_f - offsetPeriods;
-    float vertexID_perOrbit = mod(vertexID_f, numberOfSegments);
-    float nrOfSegments_f = float(numberOfSegments);
-    float vertexDistance = periodFraction_f - (vertexID_perOrbit/nrOfSegments_f) ; 
+    // This is the alternative way of calculating 
+    // the offsetPeriods: (vertexID_perOrbit/nrOfSegments_f)
+    // float vertexID_perOrbit = mod(vertexID_f, numberOfSegments);
+    // float nrOfSegments_f = float(numberOfSegments);
+    // float vertexDistance = periodFraction_f - (vertexID_perOrbit/nrOfSegments_f); 
 
-    if (vertexDistance < 0.0) {
-        vertexDistance += 1.0;
+    if (vertexDistance_f < 0.0) {
+        vertexDistance_f += 1.0;
     }
 
-    float invert = 1.0 - vertexDistance; // * lineFade;
+    float invert = 1.0 - vertexDistance_f;
     float fade = clamp(invert * lineFade, 0.0, 1.0);
 
     Fragment frag;
@@ -78,6 +64,11 @@ Fragment getFragment() {
     frag.depth = vs_position.w;
     frag.gPosition = viewSpacePosition;
     frag.gNormal = vec4(1, 1, 1 , 0);
+
+    // to debug using colors use this if-statment.
+    // if( vertexDistance < 0.0 || vertexDistance >= 0.0){
+    //     frag.color = vec4(1, 0, 0, 1);
+    // }
 
     return frag;
 }

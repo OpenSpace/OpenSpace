@@ -95,7 +95,7 @@ namespace openspace {
     private:
         /// The layout of the VBOs
         struct TrailVBOLayout {
-            float x, y, z, time, epoch, period;
+            float x, y, z, time, epoch, period; 
         };
         // static_assert(sizeof(struct TrailVBOLayout)==4*sizeof(float)+2*sizeof(double),"Implementation error!");
 

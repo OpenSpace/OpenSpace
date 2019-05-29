@@ -310,7 +310,7 @@ glm::dvec3 KeplerTranslation::debrisPos(const double& time) const {
         _orbitPlaneDirty = false;
     }
 
-    const double t = time - _epoch;
+    const double t = time -_epoch;
     const double meanMotion = glm::two_pi<double>() / _period;
     const double meanAnomaly = glm::radians(_meanAnomalyAtEpoch.value()) + t * meanMotion;
     const double e = eccentricAnomaly(meanAnomaly);
