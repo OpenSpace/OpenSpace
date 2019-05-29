@@ -382,7 +382,7 @@ std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData,
             orbit.epoch
         );
         double timeInSeconds = Time::convertTime(timeStamp);
-        glm::dvec3 position = keplerTranslator.debrisPos(static_cast<float>(timeInSeconds));
+        glm::dvec3 position = keplerTranslator.debrisPos(timeInSeconds);
         positionBuffer.push_back(position);
         
     }

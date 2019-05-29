@@ -1,0 +1,2 @@
+asset.request('./debris/debris_breezem_old')
+asset.request('./debris/debris_asat_old')

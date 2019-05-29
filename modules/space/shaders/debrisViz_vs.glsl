@@ -26,56 +26,53 @@
 
 #include "PowerScaling/powerScalingMath.hglsl"
 
-layout (location = 0) in vec4 vertex_data; // 1: x, 2: y, 3: z, 4: timeOffset
-layout (location = 1) in vec2 orbit_data; // 1: epoch, 2: period
+layout (location = 0) in vec3 vertex_data; // 1: x, 2: y, 3: z
+layout (location = 1) in vec3 orbit_data; // 1: timeOffset, 2: epoch, 3: period
 
 uniform dmat4 modelViewTransform;
 uniform mat4 projectionTransform;
 
 //uniform float lineFade;
 uniform double inGameTime;
-// uniform int numberOfSegments;
-
 
 out vec4 viewSpacePosition;
 out vec4 vs_position;
-//out float fade;
 
-//out vec4 vertex_data_out;
-//out vec2 orbit_data_out;
 out float periodFraction_f;
 out float offsetPeriods;
-out float vertexID_f;
-
+// out float vertexID_f;
 
 void main() {
+
+    /** The way the position and line fade is calculated is:
+    *   By using inGameTime, epoch and period of this orbit, 
+    *   we get how many revolutions it has done since epoch.
+    *   The fract of that, is how far into a revolution it has traveld since epoch.
+    *   Similarly we do the same but for this vertex, but calculating offsetPeriods.
+    *   In the fragment shader the difference between 
+    *   periodFraction_f and offsetPeriods is calculated to know how much to fade
+    *   that specific fragment.
+    */
+
+    float offset = float(orbit_data.x);
+    float epoch = float(orbit_data.y);
+    float period = float(orbit_data.z);
   
     // calculate nr of periods, get fractional part to know where
     // the vertex closest to the debris part is right now
-    double nrOfPeriods = (inGameTime - orbit_data.x) / orbit_data.y;
-    double periodFraction = fract(nrOfPeriods); //mod(nrOfPeriods, 1.0);
+    double nrOfRevolutions = (inGameTime - epoch) / period;
+    double periodFraction = fract(nrOfRevolutions); //mod(nrOfRevolutions, 1.0);
     periodFraction_f = float(periodFraction);
 
     // same procedure for the current vertex
-    offsetPeriods = vertex_data.w / orbit_data.y;
+    offsetPeriods = offset / period;
 
-    vertexID_f = float(gl_VertexID);
-
-
-
-    /*// check difference of these two locations
-    float vertexDistance = periodFraction_f - offsetPeriods; 
+    // offsetPeriods can also be calculated by passing the vertexID as a float
+    // to the fragment shader and deviding it by nrOfSegments.
+    // vertexID_f = float(gl_VertexID);
     
-    if(vertexDistance < 0.0) { 
-      vertexDistance += 1.0;
-    }
-  
-    float invert = 1.0 - vertexDistance; // * lineFade;
-    fade = clamp(invert * lineFade, 0.0, 1.0) ;*/
-    //vertex_data_out = vertex_data;
-    //orbit_data_out = orbit_data;
-    
-    viewSpacePosition = vec4(modelViewTransform * dvec4(vertex_data.xyz, 1));
+    dvec4 vertexPosition = dvec4(vertex_data.xyz, 1);
+    viewSpacePosition = vec4(modelViewTransform * vertexPosition);
     vs_position = z_normalization( projectionTransform * viewSpacePosition);
     gl_Position = vs_position;
 

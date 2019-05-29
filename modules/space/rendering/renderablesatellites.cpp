@@ -360,15 +360,15 @@ std::vector<KeplerParameters> RenderableSatellites::readTLEFile(const std::strin
     file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     file.open(filename);
 
-    int numberOfLines = std::count(std::istreambuf_iterator<char>(file), 
+    __int64 numberOfLines = std::count(std::istreambuf_iterator<char>(file), 
                                    std::istreambuf_iterator<char>(), '\n' );
     file.seekg(std::ios_base::beg); // reset iterator to beginning of file
 
     // 3 because a TLE has 3 lines per element/ object.
-    int numberOfObjects = numberOfLines/3;
+    __int64 numberOfObjects = numberOfLines/3;
 
     std::string line = "-";
-    for (int i = 0; i < numberOfObjects; i++) {
+    for (__int64 i = 0; i < numberOfObjects; i++) {
 
         std::getline(file, line); // get rid of title
         
@@ -579,9 +579,8 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
     //glEnableVertexAttribArray(0);    // We like submitting vertices on stream 0 for no special reason
     //glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), 0);
 
-    // const size_t nrOrbits = static_cast<GLsizei>(_vertexBufferData.size()) / _nSegments;
     const size_t nrOrbits = _TLEData.size();
-    size_t vertices = 0;
+    gl::GLint vertices = 0;
 
     //glDepthMask(false);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE)
@@ -623,41 +622,23 @@ void RenderableSatellites::updateBuffers() {
             size_t index = orbitindex * nVerticesPerOrbit  + i;
 
             double timeOffset = orbit.period * 
-                    static_cast<double>(i)/ static_cast<double>(_nSegments);
-
-            // LINFO(fmt::format("Vertex offset: {} ", timeOffset ));
+                    static_cast<double>(i)/ static_cast<double>(_nSegments); 
             
-            glm::vec3 position = _keplerTranslator.debrisPos(orbit.epoch + timeOffset); 
+           
+            glm::dvec3 position = _keplerTranslator.debrisPos(timeOffset + orbit.epoch); 
 
-            _vertexBufferData[index].x = position.x;
-            _vertexBufferData[index].y = position.y;
-            _vertexBufferData[index].z = position.z;
-            _vertexBufferData[index].time = timeOffset;
+            _vertexBufferData[index].x = static_cast<float>(_keplerTranslator.debrisPos(timeOffset + orbit.epoch).x);
+            _vertexBufferData[index].y = static_cast<float>(position.y);
+            _vertexBufferData[index].z = static_cast<float>(position.z);
+            _vertexBufferData[index].time = static_cast<float>(timeOffset);
             _vertexBufferData[index].epoch = static_cast<float>(orbit.epoch);
             _vertexBufferData[index].period = static_cast<float>(orbit.period);
 
-            // LINFO(fmt::format("Vertex position: {} ", position ));
-
+            // The difference in the print below resulted in large differences, up to 0.23.
+            //LINFO(fmt::format("diff : {} ", position.x - _vertexBufferData[index].x));
 
         }
-
-        for(int i=0 ; i < nVerticesPerOrbit ; ++i) {
-            for(int j=0 ; j < nVerticesPerOrbit ; ++j){
-                if (i != 0 && j != 0) {
-                    if (i == j)
-                        continue;
-                }
-                if((i+_nSegments*orbitindex) % _nSegments != 0 ){
-                    if (_vertexBufferData[i + _nSegments*orbitindex].x == _vertexBufferData[j + _nSegments*orbitindex].x) {
-                    LINFO(fmt::format("Same position: {} ", _vertexBufferData[i + _nSegments*orbitindex].x));
-                    LINFO(fmt::format("what index thoudh: {} ", i + _nSegments*orbitindex));
-                    }
-                }    
-                    
-                
-            }
-        }
-
+      
         ++orbitindex;
 
     }
@@ -673,10 +654,10 @@ void RenderableSatellites::updateBuffers() {
     );
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), (GLvoid*)0); // stride : 4*sizeof(GL_FLOAT) + 2*sizeof(GL_DOUBLE)
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), (GLvoid*)0); // stride : 4*sizeof(GL_FLOAT) + 2*sizeof(GL_DOUBLE)
 
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), (GLvoid*)(4*sizeof(GL_FLOAT)) );
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), (GLvoid*)(3*sizeof(GL_FLOAT)) );
 
 
     glBindVertexArray(0);
