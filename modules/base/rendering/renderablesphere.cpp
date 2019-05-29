@@ -300,9 +300,9 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
             setRenderBin(Renderable::RenderBin::Background);
         }
     }
-    
-    _sunTexMgr = SunTextureManager();
+
     _sunTexMgr.checkFilesInDirectory();
+
 }
 
 bool RenderableSphere::isReady() const {

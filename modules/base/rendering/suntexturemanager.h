@@ -29,6 +29,7 @@
 
 #include <ghoul/opengl/texture.h>
 #include <thread>
+#include <queue>
 
 namespace ghoul::opengl {
     class Texture;
@@ -56,6 +57,8 @@ private:
  
     void uploadTexturesFromList(std::vector<std::string>& filelist);
     void uploadTextureFromName(std::string);
+    void trimGPUList();
+    std::string parseMagnetogramDate(std::string name);
     std::string checkNextTextureId(std::string current, float dir);
     
     std::string getOpenSpaceDateTime();
@@ -66,8 +69,11 @@ private:
     std::thread _dldthread;
     std::string _activeTextureDate = "NODATE";
     
+    const unsigned int _maxTexturesOnGPU = 5; //every texture is around 250kb in size
+    
     std::vector<std::string> _textureListDisk;
     std::unordered_map<std::string, std::unique_ptr<ghoul::opengl::Texture>> _textureListGPU;
+    std::queue<std::string> _textureQueueGPU;
 
 };
 
