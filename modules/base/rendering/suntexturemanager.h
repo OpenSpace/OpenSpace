@@ -46,9 +46,6 @@ public:
     void initialDownload(std::unique_ptr<ghoul::opengl::Texture>& texture);
     void checkFilesInDirectory();
 
-
-
-
 private:
     
     void initialDownloadBatch();
@@ -66,7 +63,7 @@ private:
     int _counter = 0;
     int _counter2 = 0;
     
-    std::thread _dldthread;
+    //std::thread _dldthread;
     std::string _activeTextureDate = "NODATE";
     
     const unsigned int _maxTexturesOnGPU = 5; //every texture is around 250kb in size

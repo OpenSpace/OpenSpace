@@ -73,19 +73,20 @@ SunTextureManager::SunTextureManager(){
                     uploadTextureFromName(next);
                 }
                 else {
-                    LERROR("Shit already exists!");
+                    if (_textureListGPU.find("20" + parseMagnetogramDate(next).substr(0,10)) == _textureListGPU.end()) {
+                        LERROR("Texture didn't exist on gpu, uploading it:  20" + parseMagnetogramDate(next).substr(0,10));
+                        uploadTextureFromName(next);
+                    }
                 }
             }
         }
         _counter++;
-    
 }
 
     // not using this right now
     void SunTextureManager::initialDownloadBatch(){
         // check what files we have in the synd directory
         checkFilesInDirectory();
-        
   
         std::string current = getOpenSpaceDateTime();
         //fetch a list of the textures we need, based on openspace time, from our server
@@ -163,7 +164,6 @@ SunTextureManager::SunTextureManager(){
     void SunTextureManager::uploadTextureFromName(std::string filename){
         FitsFileReader fitsFileReader(false);
         
-        std::string dateID ="";
         //const auto tempBild = fitsFileReader.readImageFloat("../../../../../sync/magnetograms/" + filename); // mac
         const auto tempBild = fitsFileReader.readImageFloat("../../../sync/magnetograms/" + filename);
         
@@ -175,11 +175,11 @@ SunTextureManager::SunTextureManager(){
             fitsImage.push_back((c+stdvalue)/stdvalue);
         }
 
-        LERROR("laddar upp texture till GPU med id: " + dateID);
+        //LERROR("laddar upp texture till GPU med id: " + dateID);
         
         auto textureFits =  std::make_unique<ghoul::opengl::Texture>(fitsImage.data(), glm::vec3(360, 180, 1),ghoul::opengl::Texture::Format::Red, GL_R32F,GL_FLOAT);
         textureFits->uploadTexture();
-        
+        textureFits->setName(dateID);
         _textureQueueGPU.push(dateID);
         _textureListGPU[dateID] = std::move(textureFits);
         
