@@ -31,6 +31,7 @@
 #include <modules/sync/syncs/httpsynchronization.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <cctype>
 
 
 namespace {
@@ -41,7 +42,7 @@ namespace {
 namespace openspace {
 
 SunTextureManager::SunTextureManager(){
-
+    
 }
 
     void SunTextureManager::update(std::unique_ptr<ghoul::opengl::Texture>& texture){
@@ -64,31 +65,18 @@ SunTextureManager::SunTextureManager(){
             
             float dir = global::timeManager.deltaTime();
             std::string next = checkNextTextureId(current, dir);
-            LERROR(next);
-            if(next != "Not found!"){
-                startDownloadTexture(next);
-                uploadTextureFromName(next);
+
+            if(next != "Not found!" ){
+                if (std::find(_textureListDisk.begin(), _textureListDisk.end(), next) == _textureListDisk.end()) {
+                    startDownloadTexture(next);
+                    uploadTextureFromName(next);
+                }
+                else {
+                    LERROR("Shit already exists!");
+                }
             }
         }
-        
         _counter++;
-
-        
-        //        if(_counter == 1000){
-        //            LERROR(_texturePath);
-        //            LERROR("just before thread starts");
-        //            _dldthread = std::thread([this](){this->startDownloadTexture();});
-        //
-        //        }
-        //        //LERROR("just after thread starts");
-        //
-        //        if(_counter == 1200){
-        //            if(_dldthread.joinable()){
-        //                LERROR("it's joinable. counter: " + std::to_string(_counter));
-        //                _dldthread.join();
-        //                startUploadTexture();
-        //            }
-        //        }
     
 }
 
@@ -122,14 +110,14 @@ SunTextureManager::SunTextureManager(){
     void SunTextureManager::startDownloadTexture(std::string textureId){
         std::string url = "http://localhost:3000/get/" + textureId;
         LERROR(url);
-        std::string destinationpath = "../../../../../sync/test/" + textureId;
-        LERROR(destinationpath);
+        //std::string destinationpath = "../../../../../sync/magnetograms/" + textureId; //mac
+        std::string destinationpath = "../../../sync/magnetograms/" + textureId;
         LERROR(absPath(destinationpath));
-        AsyncHttpFileDownload ashd = AsyncHttpFileDownload(url, destinationpath, HttpFileDownload::Overwrite::Yes);
+        AsyncHttpFileDownload ashd = AsyncHttpFileDownload(url, absPath(destinationpath), HttpFileDownload::Overwrite::Yes);
         HttpRequest::RequestOptions opt = {};
         opt.requestTimeoutSeconds = 0;
         ashd.start(opt);
-        LERROR("nedladdning startad");
+        LERROR("nedladdning i startDownloadTexture");
         ashd.wait();
         LERROR("efter wait");
         
@@ -141,7 +129,6 @@ SunTextureManager::SunTextureManager(){
         HttpRequest::RequestOptions opt = {};
         opt.requestTimeoutSeconds = 0;
         mmryDld.download(opt);
-        LERROR("nedladdning startad");
         std::string s;
         std::transform(mmryDld.downloadedData().begin(), mmryDld.downloadedData().end(), std::back_inserter(s),
                        [](char c) {
@@ -158,20 +145,28 @@ SunTextureManager::SunTextureManager(){
         
     }
     
-    void SunTextureManager::checkFilesInDirectory(){
-        const std::string fitsDir = "../../../../../sync/magnetograms/";     //Mac
-        //const std::string fitsDir = "../../sync/magnetograms/";            //PC
+    // Scans directory and append all FILENAMES to the _textureListDisk member vector
+    void SunTextureManager::checkFilesInDirectory() {
+        //const std::string fitsDir = "../../../../../sync/magnetograms/";     //Mac
+        const std::string fitsDir = "../../../sync/magnetograms/";            //PC
 
-        _textureListDisk = ghoul::filesystem::Directory(fitsDir).readFiles();
+        // Creating a deep copy of the filevector, so we can do whatever we want with it
+        std::vector<std::string> temp = ghoul::filesystem::Directory(fitsDir).readFiles();
+        std::copy(temp.begin(), temp.end(), std::back_inserter(_textureListDisk));
+        // To match both Mac and PC
+        std::transform(begin(_textureListDisk), end(_textureListDisk), begin(_textureListDisk), [](std::string s) -> std::string { if (s.rfind("\\")) return s.substr(s.rfind("\\") + 1); else return s.substr(s.rfind("/") + 1); });
+
         //remove annoying mac file. might want to use a different strategy here
         _textureListDisk.erase(std::remove(_textureListDisk.begin(), _textureListDisk.end(), ".DS_STORE"), _textureListDisk.end());
-        
     }
+
+
     void SunTextureManager::uploadTextureFromName(std::string filename){
         FitsFileReader fitsFileReader(false);
         
         std::string dateID ="";
-        const auto tempBild = fitsFileReader.readImageFloat("../../../../../sync/magnetograms/" + filename);
+        //const auto tempBild = fitsFileReader.readImageFloat("../../../../../sync/magnetograms/" + filename); // mac
+        const auto tempBild = fitsFileReader.readImageFloat("../../../sync/magnetograms/" + filename);
         
         const std::string datestring = *fitsFileReader.readHeaderValueString("DATE");
         

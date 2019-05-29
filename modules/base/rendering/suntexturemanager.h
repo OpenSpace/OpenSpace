@@ -43,13 +43,17 @@ public:
     void update(std::unique_ptr<ghoul::opengl::Texture>& texture);
     
     void initialDownload(std::unique_ptr<ghoul::opengl::Texture>& texture);
+    void checkFilesInDirectory();
+
+
+
 
 private:
     
     void initialDownloadBatch();
     void startUploadTextures();
     void startDownloadTexture(std::string textureId);
-    void checkFilesInDirectory();
+ 
     void uploadTexturesFromList(std::vector<std::string>& filelist);
     void uploadTextureFromName(std::string);
     std::string checkNextTextureId(std::string current, float dir);

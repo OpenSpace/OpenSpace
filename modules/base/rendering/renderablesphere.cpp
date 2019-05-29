@@ -302,6 +302,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     }
     
     _sunTexMgr = SunTextureManager();
+    _sunTexMgr.checkFilesInDirectory();
 }
 
 bool RenderableSphere::isReady() const {
