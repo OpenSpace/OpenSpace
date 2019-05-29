@@ -10,13 +10,15 @@ local Keybindings = {
         "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Settings.Offset', -470.800006);" .. 
         "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Enabled', true);" ..
         "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Enabled', true);" ..
-        "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Settings.Gamma', 3.098590);" ..
-        "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Settings.Multiplier', 3.568080);" ..
+        -- "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Settings.Gamma', 3.098590);" ..
+        -- "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Settings.Multiplier', 3.568080);" ..
         "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Settings.Multiplier', 2.816900);" ..
         "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Settings.Gamma', 0.938970);" ..
         "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Settings.Gamma', 2.394370);" ..
         "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Enabled', true);",
         Documentation = "Setup Insight landing layers",
+        Name = "Setup Insight layers",
+        GuiPath = "/Missions/Insight",
         Local = false
     }, 
     {
@@ -26,12 +28,14 @@ local Keybindings = {
         "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Enabled', false);" ..
         "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Enabled', false);" ..
         "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Enabled', false);",
-        "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Settings.Gamma', 1.0);" ..
-        "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Settings.Multiplier', 1.0);" ..
+        -- "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Settings.Gamma', 1.0);" ..
+        -- "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Settings.Multiplier', 1.0);" ..
         "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Settings.Multiplier', 1.0);" ..
         "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Settings.Gamma', 1.0);" ..
         "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Settings.Gamma', 1.0);";
         Documentation = "Undo Insight landing layers setup",
+        Name = "Unset Insight layers",
+        GuiPath = "/Missions/Insight",
         Local = false
     }
 }

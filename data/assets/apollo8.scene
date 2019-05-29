@@ -64,7 +64,7 @@ local Keybindings = {
     },
     {
         Key = "S",
-        Command = propertyHelper.invert('Scene.Moon.RenderableGlobe.PerformShading'),
+        Command = propertyHelper.invert('Scene.Moon.Renderable.PerformShading'),
         Documentation = "Toggles shading for the Moon",
         Name = "Toggle Moon shading",
         GuiPath = "/Missions/Apollo",
@@ -72,15 +72,19 @@ local Keybindings = {
     },
     {
         Key = "PAGE_UP",
-        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Apollo8');",
+        Command =   "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')" ..
+                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Apollo8')" ..
+                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
         Documentation = "Set focus to Apollo 8",
         Name = "Focus on Apollo 8",
-        GuiPath = "/Missions/Apollo",
+        GuiPath = "/Missions/Apollo/8",
         Local = false
     },
     {
         Key = "PAGE_DOWN",
-        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Moon');",
+        Command =   "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')" ..
+                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Moon')" ..
+                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
         Documentation = "Set focus to the Moon",
         Name = "Focus on Moon",
         GuiPath = "/Missions/Apollo",
@@ -88,7 +92,9 @@ local Keybindings = {
     },
     {
         Key = "HOME",
-        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');",
+        Command =   "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')" ..
+                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')" ..
+                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
         Documentation = "Set focus to the Earth",
         Name = "Focus on Earth",
         GuiPath = "/Missions/Apollo",
