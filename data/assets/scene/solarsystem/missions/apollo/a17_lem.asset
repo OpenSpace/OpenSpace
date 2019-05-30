@@ -48,7 +48,7 @@ lem.registerLem(asset, Apollo17LemModel.Identifier)
 
 
 asset.onInitialize(function ()
---	openspace.setPropertyValueSingle('Scene.Apollo17LemModel.Renderable.RotationVector', {68.031502,68.031502,8.545990});
+
     openspace.setPropertyValueSingle('Scene.Apollo17LemModel-texture_lem_flag.Renderable.RotationVector', {68.031502,68.031502,8.545990});
     openspace.setPropertyValueSingle('Scene.Apollo17LemModel-texture_lem_unitedstates.Renderable.RotationVector', {68.031502,68.031502,8.545990});
     openspace.setPropertyValueSingle('Scene.Apollo17LemModel-booster.Renderable.RotationVector', {68.031502,68.031502,8.545990});

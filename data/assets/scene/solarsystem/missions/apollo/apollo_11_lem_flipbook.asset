@@ -14,24 +14,13 @@ local vrts = asset.syncedResource({
     Version = 1
 })
 
-openspace.printDebug("set up assetfor vrts:" .. vrts);
-
-
 asset.onInitialize(function ()
-
---	openspace.setPropertyValueSingle("Scene.Moon.Renderable.Layers.ColorLayers.LRO_NAC_Apollo_11.Enabled", true)
---	openspace.setPropertyValueSingle("Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_11.Enabled", true)
--- openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", '')
--- openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Anchor", 'Moon')
--- openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
--- openspace.globebrowsing.goToGeo(0.6782993, 23.4664611, 2000)
 
 	openspace.globebrowsing.addBlendingLayersFromDirectory(vrts, assetGlobe);
 
 	flipbook = helper.createFlipbook(assetPrefix, assetGlobe, 19);
 
 	function nextFlip() 
-		openspace.printDebug("Goto next flip" .. flipbook.CurrentFlipIndex)
         helper.nextFlipbookPage(flipbook);
 	end
 
@@ -39,8 +28,8 @@ asset.onInitialize(function ()
         helper.previousFlipbookPage(flipbook);
 	end
 
-    openspace.bindKey("RIGHT", "nextFlip()")
-    openspace.bindKey("LEFT", "previousFlip()")
+    openspace.bindKey("RIGHT", "nextFlip()", "Show the next Apollo 11 flipbook image.", "Next A11 flip", "/Missions/Apollo/11")
+    openspace.bindKey("LEFT", "previousFlip()","Show the previous Apollo 11 flipbook image.", "Prev A11 flip", "/Missions/Apollo/11")
 
 end)
 
