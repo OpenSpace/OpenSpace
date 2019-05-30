@@ -53,8 +53,9 @@ SunTextureManager::SunTextureManager(){
         if(_counter == 200){ // first time
             std::string next = checkNextTextureId(current, 1);
             if(next != "Not found!"){
-                startDownloadTexture(next);
-                uploadTextureFromName(next);
+//                startDownloadTexture(next);
+//                uploadTextureFromName(next);
+                startUploadTextures();
             }
         }
         // check if there's a texture for the current timestamp (minute)
@@ -81,6 +82,7 @@ SunTextureManager::SunTextureManager(){
             }
         }
         _counter++;
+    
 }
 
     // not using this right now
@@ -178,6 +180,7 @@ SunTextureManager::SunTextureManager(){
         //LERROR("laddar upp texture till GPU med id: " + dateID);
         
         auto textureFits =  std::make_unique<ghoul::opengl::Texture>(fitsImage.data(), glm::vec3(360, 180, 1),ghoul::opengl::Texture::Format::Red, GL_R32F,GL_FLOAT);
+        textureFits->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
         textureFits->uploadTexture();
         textureFits->setName(dateID);
         _textureQueueGPU.push(dateID);
@@ -235,5 +238,6 @@ SunTextureManager::SunTextureManager(){
             _textureListGPU.erase(dateId);
         }
     }
+
     
 }
