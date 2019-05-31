@@ -30,6 +30,7 @@
 #include <ghoul/opengl/texture.h>
 #include <thread>
 #include <queue>
+#include <atomic>
 
 namespace ghoul::opengl {
     class Texture;
@@ -45,25 +46,45 @@ public:
     
     void initialDownload(std::unique_ptr<ghoul::opengl::Texture>& texture);
     void checkFilesInDirectory();
+    void getNextTexture(std::string current, float dir, std::string * toReturn);
 
 private:
     
     void initialDownloadBatch();
     void startUploadTextures();
     void startDownloadTexture(std::string textureId);
+
+    void downloadTexture(std::string textureId);
  
     void uploadTexturesFromList(std::vector<std::string>& filelist);
     void uploadTextureFromName(std::string);
     void trimGPUList();
     std::string parseMagnetogramDate(std::string name);
+    bool checkServerAliveness();
     std::string checkNextTextureId(std::string current, float dir);
+
+
     
     std::string getOpenSpaceDateTime();
     
     int _counter = 0;
     int _counter2 = 0;
-    
-    //std::thread _dldthread;
+    bool connected = true;
+    // The _working atomic, is used to notify if a thread is being used and is currently being worked on
+    std::atomic_bool _working = false;
+
+    /* The _stage atomic, is to describe in what stage the suntexture manager is in,
+       Kind of like a queue system if you will:
+            Stage = 0  - Nothing going on right now, at this stage it is allowed to check what to do next
+            Stage = 1  - Is or has downloaded a texture
+            Stage = 2  - Is or has uploaded a texture from file to GPU
+            Stage = 3  - Is ready to swap texture to a texture that has been uploaded to the gpu
+    */ 
+    std::atomic_size_t _stage = 0;
+    mutable std::mutex _GPUListBlock;
+    std::string _next = "";
+    std::string _current;
+    std::thread _dldthread;
     std::string _activeTextureDate = "NODATE";
     
     const unsigned int _maxTexturesOnGPU = 5; //every texture is around 250kb in size

@@ -48,44 +48,117 @@ SunTextureManager::SunTextureManager(){
 }
     void SunTextureManager::update(std::unique_ptr<ghoul::opengl::Texture>& texture){
         
-        std::string current = getOpenSpaceDateTime();
-        
-        if(_counter == 200){ // first time
-            std::string next = checkNextTextureId(current, 1);
-            if(next != "Not found!"){
-                startDownloadTexture(next);
-                uploadTextureFromName(next);
-            }
-        }
-        // check if there's a texture for the current timestamp (minute)
-        else if((_activeTextureDate != current) && (_textureListGPU.find(current) != _textureListGPU.end()) ){
-            LERROR("switching to texture with id: " + current);
-            _textureListGPU[_activeTextureDate] = std::move(texture);
-            texture = std::move(_textureListGPU[current]);
-            _activeTextureDate = current;
-            
-            float dir = global::timeManager.deltaTime();
-            std::string next = checkNextTextureId(current, dir);
+        ////Check if the server is alive, otherwise we dont wany anything to happen!
+        //
+        //std::string current = getOpenSpaceDateTime();
+        //if (_counter == 200) { // first time
+        //    std::string next = checkNextTextureId(current, 1);
+        //    if (next != "Not found!") {
+        //        startDownloadTexture(next);
+        //        uploadTextureFromName(next);
+        //    }
+        //}
+        //// check if there's a texture for the current timestamp (minute)
+        //else if ((_activeTextureDate != current) && (_textureListGPU.find(current) != _textureListGPU.end())) {
+        //    LERROR("switching to texture with id: " + current);
+        //    _textureListGPU[_activeTextureDate] = std::move(texture);
+        //    texture = std::move(_textureListGPU[current]);
+        //    _activeTextureDate = current;
 
-            if(next != "Not found!" ){
-                if (std::find(_textureListDisk.begin(), _textureListDisk.end(), next) == _textureListDisk.end()) {
-                    startDownloadTexture(next);
-                    uploadTextureFromName(next);
-                }
-                else {
-                    if (_textureListGPU.find("20" + parseMagnetogramDate(next).substr(0,10)) == _textureListGPU.end()) {
-                        LERROR("Texture didn't exist on gpu, uploading it:  20" + parseMagnetogramDate(next).substr(0,10));
-                        uploadTextureFromName(next);
+        //    float dir = global::timeManager.deltaTime();
+        //    std::string next = checkNextTextureId(current, dir);
+
+        //    if (next != "Not found!") {
+        //        if (std::find(_textureListDisk.begin(), _textureListDisk.end(), next) == _textureListDisk.end()) {
+        //            startDownloadTexture(next);
+        //            uploadTextureFromName(next);
+        //        }
+        //        else {
+        //            if (_textureListGPU.find("20" + parseMagnetogramDate(next).substr(0, 10)) == _textureListGPU.end()) {
+        //                LERROR("Texture didn't exist on gpu, uploading it:  20" + parseMagnetogramDate(next).substr(0, 10));
+        //                uploadTextureFromName(next);
+        //            }
+        //        }
+        //    }
+        //}
+        //_counter++;
+        switch (_stage)
+        {
+            //This stage just checks what the next image applied should be, 
+        case 0: {
+            _current = getOpenSpaceDateTime();
+            if (_counter % 1000 == 0 && !_working && !_dldthread.joinable()) {
+                _dldthread = std::thread([=] { getNextTexture(_current, 1.0f, &_next); });
+            }
+            if (!_working && _dldthread.joinable()) {
+                _dldthread.join();
+                if (_next != "Not found!") {
+                    if (std::find(_textureListDisk.begin(), _textureListDisk.end(), _next) == _textureListDisk.end()) {
+                        // We didn't find it on disk, proceed to download
+                        _stage = 1;
+                    }
+                    else {
+                        if (_textureListGPU.find("20" + parseMagnetogramDate(_next).substr(0, 10)) == _textureListGPU.end()) {
+                            // Found on disk but not on GPU, proceed to upload to GPU
+                            _stage = 2;
+                        }
+                        else {
+                            // Found on disk, and on the GPU, all we wanted, all week was to swap the texture
+                            _stage = 3;
+                        }
                     }
                 }
             }
+
+            break;
         }
+        case 1: {
+            //LERROR("in case 1");
+            if (!_working && !_dldthread.joinable()) {
+                _dldthread = std::thread([=] { downloadTexture(_next); });
+            }
+
+            if (!_working && _dldthread.joinable()) {
+                _dldthread.join();
+                checkFilesInDirectory();
+                _stage = 2;
+            }
+            break;
+        }
+        case 2: {
+            //LERROR("in case 2");
+            uploadTextureFromName(_next);
+            _stage = 3;
+            
+            break;
+        }
+        case 3: {
+            //LERROR("in case 3");
+            std::string current = "20" + parseMagnetogramDate(_next).substr(0, 10);
+            if ((_activeTextureDate != current) && ((_textureListGPU.find(current) != _textureListGPU.end()))) {
+                _textureListGPU[_activeTextureDate] = std::move(texture);
+                texture = std::move(_textureListGPU[current]);
+                _activeTextureDate = current;
+            }
+            _stage = 0;
+
+            break;
+        }
+        default:
+            break;
+        }
+
+
+        if (_working) {
+            //LERROR("Thread is working");
+        }
+
         _counter++;
 }
 
     // not using this right now
     void SunTextureManager::initialDownloadBatch(){
-        // check what files we have in the synd directory
+        // check what files we have in the sync directory
         checkFilesInDirectory();
   
         std::string current = getOpenSpaceDateTime();
@@ -117,14 +190,28 @@ SunTextureManager::SunTextureManager(){
         HttpRequest::RequestOptions opt = {};
         opt.requestTimeoutSeconds = 0;
         ashd.start(opt);
-        LERROR("nedladdning i startDownloadTexture");
         ashd.wait();
         LERROR("Texture " + textureId + " downloaded to disk" );
         
     }
+
+    //  The same as startDownloadTexture, but uses lock_guard and flags _working
+    void SunTextureManager::downloadTexture(std::string textureId) {
+        _working = true;
+        std::lock_guard<std::mutex> guard(_GPUListBlock);
+        std::string url = "http://localhost:3000/get/" + textureId;
+        //std::string destinationpath = absPath("../../../../../sync/magnetograms/" + textureId); //mac
+        std::string destinationpath = absPath("../../../sync/magnetograms/" + textureId);
+        AsyncHttpFileDownload ashd = AsyncHttpFileDownload(url, destinationpath, HttpFileDownload::Overwrite::Yes);
+        HttpRequest::RequestOptions opt = {};
+        opt.requestTimeoutSeconds = 0;
+        ashd.start(opt);
+        ashd.wait();
+        LERROR("Texture " + textureId + " downloaded to disk");
+        _working = false;
+    }
     
     std::string SunTextureManager::checkNextTextureId(std::string current, float dir){
-        
         SyncHttpMemoryDownload mmryDld = SyncHttpMemoryDownload("http://localhost:3000/getmenextfitsimage/" + current + "/" + std::to_string(dir));
         HttpRequest::RequestOptions opt = {};
         opt.requestTimeoutSeconds = 0;
@@ -135,6 +222,27 @@ SunTextureManager::SunTextureManager(){
                            return c;
                        });
         return s;
+    }
+
+    void SunTextureManager::getNextTexture(std::string current, float dir, std::string *toReturn){
+        _working = true;
+        std::lock_guard<std::mutex> guard(_GPUListBlock);
+        std::string url = "http://localhost:3000/getmenextfitsimage/" + current + "/" + std::to_string(dir);
+        //std::string destinationpath = absPath("../../../../../sync/magnetograms/" + textureId); //mac
+        //std::string destinationpath = absPath("../../../sync/magnetograms/mrzqs190511t1514c2217_226.fits.gz");
+        AsyncHttpMemoryDownload ashd = AsyncHttpMemoryDownload(url);
+        HttpRequest::RequestOptions opt = {};
+        opt.requestTimeoutSeconds = 0;
+        ashd.start(opt);
+        ashd.wait();
+        std::string s;
+        std::transform(ashd.downloadedData().begin(), ashd.downloadedData().end(), std::back_inserter(s),
+            [](char c) {
+                return c;
+            });
+        *toReturn = std::move(s);
+        //LERROR("Texture mrzqs190511t1514c2217_226.fits.gz downloaded to disk");
+        _working = false;
     }
     
     void SunTextureManager::startUploadTextures(){
@@ -162,6 +270,7 @@ SunTextureManager::SunTextureManager(){
 
 
     void SunTextureManager::uploadTextureFromName(std::string filename){
+  
         FitsFileReader fitsFileReader(false);
         
         //const auto tempBild = fitsFileReader.readImageFloat("../../../../../sync/magnetograms/" + filename); // mac
@@ -169,20 +278,21 @@ SunTextureManager::SunTextureManager(){
         
         std::string dateID = parseMagnetogramDate(*fitsFileReader.readHeaderValueString("DATE"));
         
-        const float stdvalue = *fitsFileReader.readHeaderValueFloat("IMGRMS01");
+        const float minvalue = *fitsFileReader.readHeaderValueFloat("IMGMIN01");
+        const float maxvalue = *fitsFileReader.readHeaderValueFloat("IMGMAX01");
+        //const float stdvalue = *fitsFileReader.readHeaderValueFloat("IMGRMS01");
         std::vector<float> fitsImage;
         for(float c : tempBild->contents){
-            fitsImage.push_back((c+stdvalue)/stdvalue);
+            fitsImage.push_back((c - minvalue) / (maxvalue - minvalue)); // Normalized
+            //fitsImage.push_back((c + stdvalue) / stdvalue); // Standard Deviation
         }
 
-        //LERROR("laddar upp texture till GPU med id: " + dateID);
-        
+        LERROR("laddar upp texture till GPU med id: " + dateID);
         auto textureFits =  std::make_unique<ghoul::opengl::Texture>(fitsImage.data(), glm::vec3(360, 180, 1),ghoul::opengl::Texture::Format::Red, GL_R32F,GL_FLOAT);
         textureFits->uploadTexture();
         textureFits->setName(dateID);
         _textureQueueGPU.push(dateID);
         _textureListGPU[dateID] = std::move(textureFits);
-        
         trimGPUList();
     }
     
@@ -190,7 +300,6 @@ SunTextureManager::SunTextureManager(){
 
     void SunTextureManager::uploadTexturesFromList(std::vector<std::string>& filelist){
         
-        LERROR("antal filer: " + std::to_string(filelist.size()));
         for (const auto & entry : filelist) {
             uploadTextureFromName(entry);
             
@@ -222,6 +331,19 @@ SunTextureManager::SunTextureManager(){
             }
         }
         return dateID;
+    }
+
+    bool SunTextureManager::checkServerAliveness() {
+        SyncHttpMemoryDownload mmryDld = SyncHttpMemoryDownload("http://localhost:3000/");
+        HttpRequest::RequestOptions opt = {};
+        opt.requestTimeoutSeconds = 0;
+        mmryDld.download(opt);
+        std::string s;
+        std::transform(mmryDld.downloadedData().begin(), mmryDld.downloadedData().end(), std::back_inserter(s),
+            [](char c) {
+                return c;
+            });
+        return s == "You are at ROOT";
     }
     
     void SunTextureManager::trimGPUList(){
