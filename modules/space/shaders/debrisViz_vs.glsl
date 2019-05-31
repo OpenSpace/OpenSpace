@@ -70,8 +70,8 @@ void main() {
     // offsetPeriods can also be calculated by passing the vertexID as a float
     // to the fragment shader and deviding it by nrOfSegments.
     // vertexID_f = float(gl_VertexID);
-    
-    dvec4 vertexPosition = dvec4(vertex_data.xyz, 1);
+    dvec3 positions = dvec3(vertex_data.x*10000000, vertex_data.y*10000000, vertex_data.z*10000000); 
+    dvec4 vertexPosition = dvec4(positions, 1);
     viewSpacePosition = vec4(modelViewTransform * vertexPosition);
     vs_position = z_normalization( projectionTransform * viewSpacePosition);
     gl_Position = vs_position;
