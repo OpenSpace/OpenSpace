@@ -54,11 +54,6 @@ private:
     std::string _endTime;
     std::string _inputPath;
 
-    // std::string _inputPath1;
-    // std::string _inputPath2;
-    // std::string _inputPath3;
-    // std::string _inputPath4;
-
     glm::uvec3 _dimensions;
     glm::vec3 _lowerDomainBound;
     glm::vec3 _upperDomainBound;

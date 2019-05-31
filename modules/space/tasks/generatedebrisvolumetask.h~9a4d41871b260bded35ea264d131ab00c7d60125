@@ -21,43 +21,58 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+#ifndef __OPENSPACE_MODULE_SPACE___GENERATERDEBRISVOLUMETASK___H__
+#define __OPENSPACE_MODULE_SPACE___GENERATERDEBRISVOLUMETASK___H__
 
-#include <modules/spacecraftinstruments/util/sequenceparser.h>
+#include <openspace/util/task.h>
+#include <openspace/util/time.h>
 
-#include <openspace/engine/globals.h>
-#include <openspace/util/spicemanager.h>
+#include <modules/space/rendering/renderablesatellites.h>
+#include <modules/space/translation/keplertranslation.h>
 
-#include <ghoul/logging/logmanager.h>
 
-#include <cstring>
+#include <ghoul/glm.h>
 
-namespace {
-    constexpr const char* _loggerCat = "SequenceParser";
-} // namespace
+#include <string>
+#include <vector>
 
 namespace openspace {
+namespace volume {
 
-std::map<std::string, ImageSubset>& SequenceParser::getSubsetMap() {
-    return _subsetMap;
-}
 
-const std::vector<std::pair<std::string, TimeRange>>&
-SequenceParser::getInstrumentTimes() const
-{
-    return _instrumentTimes;
-}
-const std::vector<std::pair<double, std::string>>&
-SequenceParser::getTargetTimes() const
-{
-    return _targetTimes;
-}
+class GenerateDebrisVolumeTask : public Task {
+public:
+    GenerateDebrisVolumeTask(const ghoul::Dictionary& dictionary);
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation documentation();
 
-const std::vector<double>& SequenceParser::getCaptureProgression() const {
-    return _captureProgression;
-}
+private:
+    std::string _rawVolumeOutputPath;
+    std::string _dictionaryOutputPath;
+    std::string _startTime;
+    std::string _endTime;
+    std::string _inputPath;
 
-std::map<std::string, std::unique_ptr<Decoder>>& SequenceParser::translations() {
-    return _fileTranslation;
-}
+    // std::string _inputPath1;
+    // std::string _inputPath2;
+    // std::string _inputPath3;
+    // std::string _inputPath4;
 
+    glm::uvec3 _dimensions;
+    glm::vec3 _lowerDomainBound;
+    glm::vec3 _upperDomainBound;
+
+    std::vector<KeplerParameters> _TLEDataVector;
+
+    // not sure if it should be local function or hidden function.
+    //std::vector<KeplerParameters> readTLEFile(const std::string& filename);
+
+};
+
+
+
+} // namespace volume
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SPACE___GENERATEDEBRISVOLUMETASK___H__

@@ -22,58 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___NETWORKENGINE___H__
-#define __OPENSPACE_CORE___NETWORKENGINE___H__
+#ifndef __OPENSPACE_MODULE_SERVER___DOCUMENTATION_TOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___DOCUMENTATION_TOPIC___H__
 
-#include <cstdint>
-#include <map>
-#include <string>
-#include <vector>
+#include <modules/server/include/topics/topic.h>
 
 namespace openspace {
 
-class NetworkEngine {
+class DocumentationTopic : public Topic {
 public:
-    using MessageIdentifier = uint16_t;
+    DocumentationTopic() = default;
+    virtual ~DocumentationTopic() = default;
 
-    NetworkEngine();
-
-    // Receiving messages
-    bool handleMessage(const std::string& message);
-
-    // Sending messages
-    void publishStatusMessage();
-    void publishIdentifierMappingMessage();
-    void publishMessage(MessageIdentifier identifier, std::vector<char> message);
-    void sendMessages();
-
-    // Initial Connection Messages
-    void setInitialConnectionMessage(MessageIdentifier identifier,
-        std::vector<char> message);
-    void sendInitialInformation();
-
-    // Background
-    MessageIdentifier identifier(std::string name);
-
-private:
-    std::map<std::string, MessageIdentifier> _identifiers;
-    MessageIdentifier _lastAssignedIdentifier = MessageIdentifier(-1);
-
-    struct Message {
-        MessageIdentifier identifer;
-        std::vector<char> body;
-    };
-    std::vector<Message> _messagesToSend;
-
-    std::vector<Message> _initialConnectionMessages;
-
-    bool _shouldPublishStatusMessage = true;
-
-    MessageIdentifier _statusMessageIdentifier;
-    MessageIdentifier _identifierMappingIdentifier;
-    MessageIdentifier _initialMessageFinishedIdentifier;
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___NETWORKENGINE___H__
+#endif // __OPENSPACE_MODULE_SERVER___DOCUMENTATION_TOPIC___H__

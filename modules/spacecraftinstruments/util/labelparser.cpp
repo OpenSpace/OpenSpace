@@ -38,8 +38,6 @@ namespace {
     constexpr const char* _loggerCat = "LabelParser";
     constexpr const char* keySpecs   = "Read";
     constexpr const char* keyConvert = "Convert";
-
-    constexpr const char* PlaybookIdentifierName = "LabelParser";
 } // namespace
 
 namespace openspace {
@@ -325,7 +323,6 @@ bool LabelParser::create() {
     for (const std::pair<const std::string, ImageSubset>& target : _subsetMap) {
         _instrumentTimes.emplace_back(lblName, _subsetMap[target.first]._range);
     }
-    sendPlaybookInformation(PlaybookIdentifierName);
     return true;
 }
 
