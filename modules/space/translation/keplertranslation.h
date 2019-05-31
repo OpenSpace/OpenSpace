@@ -158,12 +158,6 @@ protected:
 private:
    
 
-protected:
-
-
-private:
-   
-
     /**
      * This method computes the eccentric anomaly (location of the space craft taking the
      * eccentricity into acount) based on the mean anomaly (location of the space craft

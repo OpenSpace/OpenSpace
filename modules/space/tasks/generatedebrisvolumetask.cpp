@@ -30,6 +30,7 @@
 
 #include <openspace/documentation/verifier.h>
 
+#include <ghoul/misc/dictionaryluaformatter.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
@@ -49,11 +50,17 @@ namespace {
     constexpr const char* KeyDictionaryOutput = "DictionaryOutput";
     constexpr const char* KeyDimensions = "Dimensions";
     constexpr const char* KeyStartTime = "StartTime";
-    // constexpr const char* KeyEndTime = "EndTime";
+    //constexpr const char* KeyEndTime = "EndTime";
     constexpr const char* KeyInputPath = "InputPath";
-    // constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
-    // constexpr const char* KeyUpperDomainBound = "UpperDomainBound";    
-    constexpr const char* _loggerCat = "SpaceDebris";
+
+    // constexpr const char* KeyInputPath1 = "InputPath1";
+    // constexpr const char* KeyInputPath2 = "InputPath2";
+    // constexpr const char* KeyInputPath3 = "InputPath3";
+    // constexpr const char* KeyInputPath4 = "InputPath4";
+
+
+     constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
+     constexpr const char* KeyUpperDomainBound = "UpperDomainBound";    
 
 }
 
@@ -396,14 +403,14 @@ std::vector<glm::dvec3> generatePositions(int numberOfPositions) {
     float radius = 700000;   // meter
     float degreeStep = 360 / numberOfPositions;
 
-    for(int i=0 ; i<= 360 ; i == degreeStep){
+    for(int i=0 ; i<= 360 ; i += degreeStep){
         glm::dvec3 singlePosition = glm::dvec3(radius* sin(i), radius*cos(i), 0.0);
         positions.push_back(singlePosition);
     }
     return positions;
 }
 
-float getDensityAt(glm::uvec3 cell) {
+float getDensityAt(glm::uvec3 cell,  int* densityArray, RawVolume<float>& raw) {
     float value;
     // return value at position cell from _densityPerVoxel
     size_t index = raw.coordsToIndex(cell);
@@ -463,7 +470,6 @@ GenerateDebrisVolumeTask::GenerateDebrisVolumeTask(const ghoul::Dictionary& dict
     _dimensions = dictionary.value<glm::vec3>(KeyDimensions);
     _startTime = dictionary.value<std::string>(KeyStartTime);
     //_endTime = dictionary.value<std::string>(KeyEndTime);
-   
     // since _inputPath is past from task,
     // there will have to be either one task per dataset,
     // or you need to combine the datasets into one file.
@@ -473,8 +479,6 @@ GenerateDebrisVolumeTask::GenerateDebrisVolumeTask(const ghoul::Dictionary& dict
 
 
     _TLEDataVector = {};
-    _lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
-    _upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
 }
 
 std::string GenerateDebrisVolumeTask::description() {
@@ -489,26 +493,39 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
         SpiceManager::ref().unloadKernel(kernel);
     };
 
+    ////////// 
     //1. read TLE-data and position of debris elements.
+    // std::vector<KeplerParameters>TLEDataVector = readTLEFile(_inputPath);
+    // std::vector<KeplerParameters>TLEDataVector1 = readTLEFile(_inputPath1);
+    // std::vector<KeplerParameters>TLEDataVector2 = readTLEFile(_inputPath2);
+    // std::vector<KeplerParameters>TLEDataVector3 = readTLEFile(_inputPath3);
+    // std::vector<KeplerParameters>TLEDataVector4 = readTLEFile(_inputPath4);
+
+    // _TLEDataVector.reserve( TLEDataVector.size() + TLEDataVector1.size() + TLEDataVector2.size() + TLEDataVector3.size() + TLEDataVector4.size());
+    // _TLEDataVector.insert(_TLEDataVector.end(), TLEDataVector.begin(), TLEDataVector.end());
+    // _TLEDataVector.insert(_TLEDataVector.end(), TLEDataVector1.begin(), TLEDataVector1.end());
+    // _TLEDataVector.insert(_TLEDataVector.end(), TLEDataVector2.begin(), TLEDataVector2.end());
+    // _TLEDataVector.insert(_TLEDataVector.end(), TLEDataVector3.begin(), TLEDataVector3.end());
+    // _TLEDataVector.insert(_TLEDataVector.end(), TLEDataVector4.begin(), TLEDataVector4.end());
+    // ----- or ----- if only one
     _TLEDataVector = readTLEFile(_inputPath);
+    //////////
+    
+    
     std::vector<glm::dvec3> startPositionBuffer = getPositionBuffer(_TLEDataVector, _startTime);
     //  if we deside to integrate the density over time
     //  std::vector<glm::dvec3> endPositionBuffer = getPositionBuffer(_TLEDataVector, _endTime);
     
-    int numberOfPoints = 40;
+    //int numberOfPoints = 40;
     //Needs to be looked at, caused my computer to crash...
     //std::vector<glm::dvec3> generatedPositions = generatePositions(numberOfPoints);
     
-    const int size = _dimensions.x *_dimensions.y *_dimensions.z;
-    int *densityArrayp = new int[size];
-    for (int i = 0; i < size; ++i) {
-        densityArrayp[i] = 0;
-    }
-    LINFO(fmt::format("densityArray: {} ",  densityArrayp[0]));
-
+ 
     float maxApogee = getMaxApogee(_TLEDataVector);
     LINFO(fmt::format("Max Apogee: {} ", maxApogee));
 
+    const int size = _dimensions.x *_dimensions.y *_dimensions.z;
+    int *densityArrayp = new int[size]();
     //densityArrayp = mapDensityToVoxels(densityArrayp, generatedPositions, _dimensions, maxApogee);
     densityArrayp = mapDensityToVoxels(densityArrayp, startPositionBuffer, _dimensions, maxApogee);
         
@@ -539,44 +556,14 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
         LINFO(fmt::format("max: {} ", maxVal));*/
     });
 
-
-  
-
-    
-
-
-
-
-
-
-    // indexed grid with cooresponding xyz: gridIndex
-    // int array with number of slots = number of voxels: densityArray = {0,0,0,0,0,0}
-    for(const glm::dvec3& debris : startPositionBuffer) {
-        // call function to increment densityArray where debris position ~= voxel position
+    ghoul::filesystem::File file(_rawVolumeOutputPath);
+    const std::string directory = file.directoryName();
+    if (!FileSys.directoryExists(directory)) {
+        FileSys.createDirectory(directory, ghoul::filesystem::FileSystem::Recursive::Yes);
     }
-    // make raw volume of densityArray.
-
-    //2. create a grid using dimensions and other .task-parameters.
-
-    //3. calculate what voxel each debris is within for each time step.
-    //   and increment density with one for each debris in that voxel.
-
-    glm::vec3 domainSize = _upperDomainBound - _lowerDomainBound;
-
-    rawVolume.forEachVoxel([&](glm::uvec3 cell, float) {
-        glm::vec3 coord = _lowerDomainBound +
-            glm::vec3(cell) / glm::vec3(_dimensions) * domainSize;
-
-        // TODO: coord is relative to the dimensions of the volume
-        // and the points from getPositionBuffer is relative
-        // to the earth (i think) so we need to convert them to be in the same
-        // coordinate system to be able to compare them
-
-        
-
-        
-    });
-    //4.
+  
+    volume::RawVolumeWriter<float> writer(_rawVolumeOutputPath);
+    writer.write(rawVolume);
     
     RawVolumeMetadata metadata;
     // alternatively metadata.hasTime = false;

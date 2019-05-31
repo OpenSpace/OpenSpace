@@ -23,7 +23,7 @@
   ****************************************************************************************/
 #include <fstream>
 #include <chrono>
-#include <vector>
+#include <vector> 
 
 #include <modules/space/rendering/renderablesatellites.h>
 #include <modules/space/translation/keplertranslation.h>
@@ -476,7 +476,7 @@ RenderableSatellites::~RenderableSatellites() {
 
 void RenderableSatellites::initialize() {
     
-    updateBuffers();
+// updateBuffers();
 
     //_path.onChange([this]() {
     //    readTLEFile(_path);
@@ -534,9 +534,8 @@ void RenderableSatellites::deinitializeGL() {
     SpaceModule::ProgramObjectManager.release(ProgramName);
     
     glDeleteBuffers(1, &_vertexBuffer);
-    glDeleteBuffers(1, &_indexBuffer);
+    //glDeleteBuffers(1, &_indexBuffer);
     glDeleteVertexArrays(1, &_vertexArray);
-    _vertexArray = 0;
 }
 
     
@@ -576,8 +575,7 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
  
     _programObject->setUniform(_uniformCache.numberOfSegments, static_cast<int>(_nSegments));
 
-    //glEnableVertexAttribArray(0);    // We like submitting vertices on stream 0 for no special reason
-    //glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), 0);
+    glLineWidth(_appearance.lineWidth);
 
     const size_t nrOrbits = _TLEData.size();
     gl::GLint vertices = 0;
@@ -599,7 +597,6 @@ void RenderableSatellites::render(const RenderData& data, RendererTasks&) {
 
 void RenderableSatellites::updateBuffers() {
     _TLEData = readTLEFile(_path);
-    LINFO(fmt::format("Pathpath: {} ",  _path));
 
     const size_t nVerticesPerOrbit = _nSegments + 1;
     _vertexBufferData.resize(_TLEData.size() * nVerticesPerOrbit);
