@@ -38,7 +38,7 @@ local Keybindings = {
                   "openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_11.Enabled', true);" ..
                   "openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A11_M177481212_p_longlat.Enabled', true);" ..
                   "openspace.setPropertyValueSingle('Scene.Moon.Renderable.LodScaleFactor', 20.11);" ..
-                  "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Apollo11Lem');" ..
+                  "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Apollo11LemModel');" ..
                   "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);",
         Documentation = "Setup for A11 site",
         Name = "Setup A11 site",
@@ -61,7 +61,7 @@ local Keybindings = {
                   "openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_NAC_Alt_p.Enabled', true);" ..
                   "openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_NAC_Alt_p.BlendMode', 0.000000);" ..
                   "openspace.setPropertyValueSingle('Scene.Moon.Renderable.LodScaleFactor', 20.17);" ..
-                  "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Apollo17Lem');" ..
+                  "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Apollo17LemModel');" ..
                   "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);" ..
                   "openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_station7.BlendMode', 0.000000);",
         Documentation = "Setup for A17 site",
@@ -77,7 +77,7 @@ asset.onInitialize(function ()
 
     sceneHelper.bindKeys(Keybindings)
 
-    openspace.markInterestingNodes({ "Apollo11Lem", "Apollo17Lem" })
+    openspace.markInterestingNodes({ "Apollo11LemModel", "Apollo17LemModel" })
 
     -- To enable both sites by default, uncomment these lines
     -- openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_travmap.BlendMode', 0.000000);
