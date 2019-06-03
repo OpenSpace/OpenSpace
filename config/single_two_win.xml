@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <Cluster masterAddress="127.0.0.1">
     <Node address="127.0.0.1" port="20401">
-        <Window fullScreen="false" numberOfSamples="8" border="true">
+        <Window fullScreen="false" numberOfSamples="4" border="true">
             <Pos x="10" y="100" />
             <Size x="1280" y="720" />
             <Viewport tracked="true">
