@@ -614,26 +614,17 @@ void RenderableSatellites::updateBuffers() {
             orbit.epoch
         );
 
-
         for (size_t i=0 ; i < nVerticesPerOrbit; ++i) {
             size_t index = orbitindex * nVerticesPerOrbit  + i;
 
             double timeOffset = orbit.period * 
                     static_cast<double>(i)/ static_cast<double>(_nSegments); 
             
-           
             glm::dvec3 position = _keplerTranslator.debrisPos(timeOffset + orbit.epoch); 
-
+            
             double positionX = position.x / 10000000; // 10 miljon
             double positionY = position.y / 10000000; // 10 miljon
             double positionZ = position.z / 10000000; // 10 miljon 
-
-            LINFO(fmt::format(" real/ :{}", positionX));
-            LINFO(fmt::format(" float :{}", static_cast<float>(positionX)));
-            LINFO(fmt::format(" diff :{}", positionX-static_cast<float>(positionX)));
-
-
-
 
             _vertexBufferData[index].x = static_cast<float>(positionX);
             _vertexBufferData[index].y = static_cast<float>(positionY);
@@ -643,9 +634,13 @@ void RenderableSatellites::updateBuffers() {
             _vertexBufferData[index].period = static_cast<float>(orbit.period);
 
             // The difference in the print below resulted in large differences, up to 0.35.
-            //LINFO(fmt::format("diff : {} ", position.x - _vertexBufferData[index].x));
-            // auto utskrift = positionX-(static_cast<float>(positionX) / 10000000);
-            // LINFO(fmt::format(" vafan!? :{}", utskrift));
+            // LINFO(fmt::format("diff : {} ", position.x - _vertexBufferData[index].x));        
+
+            // So one idea was to make it very small before casting it to a float.            
+            // auto print = positionX-(static_cast<float>(positionX) / 10000000);
+            // LINFO(fmt::format(" smaller distance? :{}", print));
+
+
             // LINFO(fmt::format(" x-positions float :{}", static_cast<float>(position.x)));
             // LINFO(fmt::format(" x-positions float * 10000 :{}", static_cast<float>(position.x * 10000)));
             // LINFO(fmt::format(" x-positions float * 10000 /10000 :{}", static_cast<float>(position.x * 10000)/10000));

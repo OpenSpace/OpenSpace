@@ -54,9 +54,10 @@ void main() {
     *   that specific fragment.
     */
 
-    float offset = float(orbit_data.x);
-    float epoch = float(orbit_data.y);
-    float period = float(orbit_data.z);
+    // If orbit_data is doubles, cast to float first
+    float offset = orbit_data.x;
+    float epoch = orbit_data.y;
+    float period = orbit_data.z;
   
     // calculate nr of periods, get fractional part to know where
     // the vertex closest to the debris part is right now
