@@ -33,6 +33,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <cctype>
 #include <modules/base/basemodule.h>
+#include <windows.h>
 
 
 
@@ -124,25 +125,17 @@ SunTextureManager::SunTextureManager(){
 
             if (!_working && _dldthread.joinable()) {
                 _dldthread.join();
-                checkFilesInDirectory();
+                _textureListDisk.push_back(_next);
                 _stage = 2;
             }
             break;
         }
         case 2: {
-            //LERROR("in case 2");
+            
             if (!_working && !_dldthread.joinable()) {
-                _dldthread = std::thread([=] { uploadTextureFromName(_next); });
- 
-            }
-
-            if (!_working && _dldthread.joinable()) {
-                _dldthread.join();
-                LERROR(std::to_string(_textureListGPU.size()));
-                              
+                uploadTextureFromName(_next);
                 _stage = 3;
             }
-
             break;
         }
         case 3: {
@@ -153,7 +146,6 @@ SunTextureManager::SunTextureManager(){
                     _textureListGPU[_activeTextureDate] = std::move(texture);
                     texture = std::move(_textureListGPU[current]);
                     _activeTextureDate = current;
-                    LERROR("Tried to swap texture");
                 }
                 _stage = 0;
                 _GPUListBlock.unlock();
@@ -289,8 +281,7 @@ SunTextureManager::SunTextureManager(){
 
 
     void SunTextureManager::uploadTextureFromName(std::string filename){
-        _working = true;
-        std::lock_guard<std::mutex> guard(_GPUListBlock);
+
         FitsFileReader fitsFileReader(false);
         
         //const auto tempBild = fitsFileReader.readImageFloat("../../../../../sync/magnetograms/" + filename); // mac
@@ -312,14 +303,13 @@ SunTextureManager::SunTextureManager(){
         }
         
         LERROR("laddar upp texture till GPU med id: " + dateID);
-        auto textureFits =  std::make_unique<ghoul::opengl::Texture>(std::move(fitsImage.data()), glm::vec3(360, 180, 1),ghoul::opengl::Texture::Format::Red, GL_R32F,GL_FLOAT);
+        auto textureFits =  std::make_unique<ghoul::opengl::Texture>(fitsImage.data(), glm::vec3(360, 180, 1),ghoul::opengl::Texture::Format::Red, GL_R32F,GL_FLOAT);
         textureFits->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
         textureFits->uploadTexture();
         textureFits->setName(dateID);
         _textureQueueGPU.push(dateID);
         _textureListGPU[dateID] = std::move(textureFits);
         trimGPUList();
-        _working = false;
     }
     
 
