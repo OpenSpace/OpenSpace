@@ -51,7 +51,7 @@ namespace {
     constexpr const char* KeyImmediateFlush = "ImmediateFlush";
     constexpr const char* KeyLogs = "Logs";
     constexpr const char* KeyCapabilitiesVerbosity = "CapabilitiesVerbosity";
-    constexpr const char* KeyDocumentationPath = "path";
+    constexpr const char* KeyDocumentationPath = "Path";
     constexpr const char* KeyDocumentation = "Documentation";
     constexpr const char* KeyScriptLog = "ScriptLog";
     constexpr const char* KeyShutdownCountdown = "ShutdownCountdown";

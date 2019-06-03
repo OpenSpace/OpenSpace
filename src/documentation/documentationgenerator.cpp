@@ -48,7 +48,9 @@ DocumentationGenerator::DocumentationGenerator(std::string name,
     }
 }
 
-std::vector<DocumentationGenerator::HandlebarTemplate> DocumentationGenerator::templatesToRegister() {
+std::vector<DocumentationGenerator::HandlebarTemplate>
+DocumentationGenerator::templatesToRegister()
+{
     return _handlebarTemplates;
 }
 

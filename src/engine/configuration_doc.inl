@@ -163,7 +163,7 @@ documentation::Documentation Configuration::Documentation = {
                 },
             }),
             Optional::Yes,
-            "Right now only contains the path."
+            "Right now only contains the path where the documentation is written to."
         },
         {
             KeyShutdownCountdown,

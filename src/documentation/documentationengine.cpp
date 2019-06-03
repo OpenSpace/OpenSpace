@@ -33,7 +33,8 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* HandlebarsFilename = "${WEB}/documentation/handlebars-v4.0.5.js";
+    constexpr const char* HandlebarsFilename =
+        "${WEB}/documentation/handlebars-v4.0.5.js";
     constexpr const char* BootstrapFilename = "${WEB}/common/bootstrap.min.css";
     constexpr const char* CssFilename = "${WEB}/documentation/style.css";
     constexpr const char* JsFilename = "${WEB}/documentation/script.js";
@@ -44,7 +45,7 @@ namespace openspace::documentation {
 DocumentationEngine* DocumentationEngine::_instance = nullptr;
 
 DocumentationEngine::DuplicateDocumentationException::DuplicateDocumentationException(
-                    Documentation documentation)
+                                                              Documentation documentation)
     : ghoul::RuntimeError(fmt::format(
         "Duplicate Documentation with name '{}' and id '{}'",
         documentation.name,
@@ -291,7 +292,7 @@ void DocumentationEngine::writeDocumentationHtml(const std::string path, const s
     file
         << "  " << "<script>" << '\n'
         << "    " << jsContent << '\n'
-        << "    " << "var documentation = parseJson('" << DataId << "').documentation;" << '\n'
+        << "    " << "var documentation = parseJson('" << DataId << "').documentation;\n"
         << "    " << "var version = " << Version << ";" << '\n'
         << "    " << "var currentDocumentation = documentation[0];" << '\n'
         << "    " << handlebarsContent << '\n'

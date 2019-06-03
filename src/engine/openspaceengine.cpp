@@ -320,8 +320,8 @@ void OpenSpaceEngine::initialize() {
 
     global::scriptEngine.initialize();
 
-    //To be concluded
-    _documentationJson = "";
+    // To be concluded
+    _documentationJson.clear();
     _documentationJson += "{\"documentation\":[";
 
     writeStaticDocumentation();
