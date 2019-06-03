@@ -12,7 +12,7 @@ local Keybindings = {
         Key = "a",
         Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'OsirisRex')",
         Documentation = "Sets the focus of the camera on 'OsirisRex'.",
-        Name = "Set focus on OsirisRex",
+        Name = "Focus on OsirisRex",
         GuiPath = "/Missions/Osiris Rex",
         Local = false
     },
@@ -20,7 +20,7 @@ local Keybindings = {
         Key = "s",
         Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'BennuBarycenter')",
         Documentation = "Sets the focus of the camera on 'Bennu'",
-        Name = "Set focus on Bennu",
+        Name = "Focus on Bennu",
         GuiPath = "/Missions/Osiris Rex",
         Local = false
     },

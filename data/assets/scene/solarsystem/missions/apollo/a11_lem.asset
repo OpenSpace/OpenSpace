@@ -60,5 +60,5 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
 })
 
 asset.onInitialize(function ()
-    openspace.setPropertyValueSingle('Scene.Apollo11LemModel.Renderable.RotationVector', {91.044090,171.229706,111.666664});
+    openspace.setPropertyValueSingle('Scene.Apollo11LemModel.Renderable.RotationVector', { 91.044090,171.229706,111.666664} );
 end)

@@ -68,7 +68,7 @@ local Keybindings = {
         Command = renderableHelper.toggle('Scene.JupiterTrail') .. renderableHelper.toggle('Scene.SaturnTrail') ..
                   renderableHelper.toggle('Scene.UranusTrail') .. renderableHelper.toggle('Scene.NeptuneTrail'),
         Documentation = "Toggles the visibility of all trails further from the Sun than 67P.",
-        Name = "Toggle outter trails",
+        Name = "Toggle outer planetary trails",
         GuiPath = "/Missions/Rosetta",
         Local = false
     },

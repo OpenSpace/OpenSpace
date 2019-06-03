@@ -15,30 +15,25 @@ local vrts = asset.syncedResource({
 })
 
 asset.onInitialize(function ()
+    openspace.globebrowsing.addBlendingLayersFromDirectory(vrts, assetGlobe);
+    flipbook = helper.createFlipbook(assetPrefix, assetGlobe, 19);
 
-	openspace.globebrowsing.addBlendingLayersFromDirectory(vrts, assetGlobe);
-
-	flipbook = helper.createFlipbook(assetPrefix, assetGlobe, 19);
-
-	function nextFlip() 
+    function nextFlip()
         helper.nextFlipbookPage(flipbook);
-	end
+    end
 
-	function previousFlip() 
+    function previousFlip()
         helper.previousFlipbookPage(flipbook);
-	end
+    end
 
     openspace.bindKey("RIGHT", "nextFlip()", "Show the next Apollo 11 flipbook image.", "Next A11 flip", "/Missions/Apollo/11")
     openspace.bindKey("LEFT", "previousFlip()","Show the previous Apollo 11 flipbook image.", "Prev A11 flip", "/Missions/Apollo/11")
-
 end)
 
 
 asset.onDeinitialize(function ()
-
-	flipbook = nil;
+    flipbook = nil;
 
     openspace.clearKey("RIGHT")
     openspace.clearKey("LEFT")
-
 end)

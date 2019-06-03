@@ -16,7 +16,7 @@ local Keybindings = {
                   "openspace.setPropertyValue('Scene.Apollo8LaunchTrail.Renderable.Enabled', false)"..
                   "openspace.sessionRecording.startPlayback('apollo8')",
         Documentation = "Jump to right before the earthrise photo",
-        Name = "Earthrise",
+        Name = "Set Earthrise time",
         GuiPath = "/Missions/Apollo/8",
         Local = false
 
@@ -25,8 +25,8 @@ local Keybindings = {
         Key = "U",
         Command =   "openspace.time.setTime('1968-12-21T12:51:37.00')" ..
                     "openspace.setPropertyValueSingle('Scene.Apollo8LaunchTrail.Renderable.Enabled', true);",
-        Documentation = "Jump to time right before A8 liftoff, with it's trail enabled",
-        Name = "Set Apollo 8 Launch Time",
+        Documentation = "Jump to time right before Apollo 8 liftoff, with its trail enabled",
+        Name = "Set Apollo 8 launch time",
         GuiPath = "/Missions/Apollo/8",
         Local = false
     },
@@ -34,30 +34,30 @@ local Keybindings = {
         Key = "K",
         Command = propertyHelper.invert('Scene.Moon.Renderable.Layers.ColorLayers.Kaguya_Utah.Enabled'),
         Documentation = "Toggles Moon Kaguya color layer",
-        Name = "Toggle Kaguya",
+        Name = "Toggle Kaguya layer on the Moon",
         GuiPath = "/Missions/Apollo",
         Local = false
     },
     {
         Key = "T",
         Command = propertyHelper.invert('Scene.Apollo8MoonTrail.Renderable.Enabled'),
-        Documentation = "Toggles the trails of the Apollo8 orbits, focused around the moon",
-        Name = "Toggle Apollo 8 Orbits",
+        Documentation = "Toggles the trails of the Apollo 8 orbits, focused around the Moon",
+        Name = "Toggle Apollo 8 orbits",
         GuiPath = "/Missions/Apollo/8",
         Local = false
     },
     {
         Key = "SHIFT+T",
         Command = propertyHelper.invert('Scene.Apollo8LaunchTrail.Renderable.Enabled'),
-        Documentation = "Toggles the trails of the Apollo8 Launch, focused around the earth",
-        Name = "Toggle Apollo 8 Launch trail",
+        Documentation = "Toggles the trails of the Apollo 8 Launch, focused around the Earth",
+        Name = "Toggle Apollo 8 launch trail",
         GuiPath = "/Missions/Apollo/8",
         Local = false
     },
     {
         Key = "CTRL+T",
         Command = propertyHelper.invert('Scene.Apollo8EarthBarycenterTrail.Renderable.Enabled'),
-        Documentation = "Toggles the trails of the full Apollo8, with a galactic frame of reference",
+        Documentation = "Toggles the trails of the full Apollo 8, with Earth's frame of reference",
         Name = "Toggles Apollo 8 full trail",
         GuiPath = "/Missions/Apollo/8",
         Local = false
@@ -75,7 +75,7 @@ local Keybindings = {
         Command =   "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')" ..
                     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Apollo8')" ..
                     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
-        Documentation = "Set focus to Apollo 8",
+        Documentation = "Set camera focus to Apollo 8",
         Name = "Focus on Apollo 8",
         GuiPath = "/Missions/Apollo/8",
         Local = false
@@ -85,7 +85,7 @@ local Keybindings = {
         Command =   "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')" ..
                     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Moon')" ..
                     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
-        Documentation = "Set focus to the Moon",
+        Documentation = "Set camera focus to the Moon",
         Name = "Focus on Moon",
         GuiPath = "/Missions/Apollo",
         Local = false
@@ -95,7 +95,7 @@ local Keybindings = {
         Command =   "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')" ..
                     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')" ..
                     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
-        Documentation = "Set focus to the Earth",
+        Documentation = "Set camera focus to the Earth",
         Name = "Focus on Earth",
         GuiPath = "/Missions/Apollo",
         Local = false
