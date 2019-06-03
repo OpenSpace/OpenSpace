@@ -55,17 +55,18 @@ private:
     void startDownloadTexture(std::string textureId);
 
     void downloadTexture(std::string textureId);
- 
+    void uploadTextureFromName(std::string filename);
     void uploadTexturesFromList(std::vector<std::string>& filelist);
-    void uploadTextureFromName(std::string);
+    void uploadTexture(std::vector<float> imagedata, std::string dateid);
+    void processTextureFromName(std::string filename, std::vector<float>* imagedata, std::string* dateid);
     void trimGPUList();
     std::string parseMagnetogramDate(std::string name);
     bool checkServerAliveness();
     std::string checkNextTextureId(std::string current, float dir);
 
-
-    
     std::string getOpenSpaceDateTime();
+    
+    std::string _syncDir;
     
     int _counter = 0;
     int _counter2 = 0;
@@ -92,6 +93,10 @@ private:
     std::vector<std::string> _textureListDisk;
     std::unordered_map<std::string, std::unique_ptr<ghoul::opengl::Texture>> _textureListGPU;
     std::queue<std::string> _textureQueueGPU;
+    
+    
+    std::vector<float>   _fitsImageToUpload;
+    std::string _dateIDToUpload;
 
 };
 
