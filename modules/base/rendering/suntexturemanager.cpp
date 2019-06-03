@@ -91,7 +91,7 @@ SunTextureManager::SunTextureManager(){
             //This stage just checks what the next image applied should be, 
         case 0: {
             _current = getOpenSpaceDateTime();
-            if (_counter % 1000 == 0 && !_working && !_dldthread.joinable()) {
+            if (_counter % 150 == 0 && !_working && !_dldthread.joinable()) {
                 _dldthread = std::thread([=] { getNextTexture(_current, 1.0f, &_next); });
             }
             if (!_working && _dldthread.joinable()) {
@@ -131,20 +131,34 @@ SunTextureManager::SunTextureManager(){
         }
         case 2: {
             //LERROR("in case 2");
-            uploadTextureFromName(_next);
-            _stage = 3;
-            
+            if (!_working && !_dldthread.joinable()) {
+                _dldthread = std::thread([=] { uploadTextureFromName(_next); });
+ 
+            }
+
+            if (!_working && _dldthread.joinable()) {
+                _dldthread.join();
+                LERROR(std::to_string(_textureListGPU.size()));
+                              
+                _stage = 3;
+            }
+
             break;
         }
         case 3: {
             //LERROR("in case 3");
-            std::string current = "20" + parseMagnetogramDate(_next).substr(0, 10);
-            if ((_activeTextureDate != current) && ((_textureListGPU.find(current) != _textureListGPU.end()))) {
-                _textureListGPU[_activeTextureDate] = std::move(texture);
-                texture = std::move(_textureListGPU[current]);
-                _activeTextureDate = current;
+            if (_GPUListBlock.try_lock()) {
+                std::string current = "20" + parseMagnetogramDate(_next).substr(0, 10);
+                if ((_activeTextureDate != current) && ((_textureListGPU.find(current) != _textureListGPU.end()))) {
+                    _textureListGPU[_activeTextureDate] = std::move(texture);
+                    texture = std::move(_textureListGPU[current]);
+                    _activeTextureDate = current;
+                    LERROR("Tried to swap texture");
+                }
+                _stage = 0;
+                _GPUListBlock.unlock();
             }
-            _stage = 0;
+
 
             break;
         }
@@ -275,7 +289,8 @@ SunTextureManager::SunTextureManager(){
 
 
     void SunTextureManager::uploadTextureFromName(std::string filename){
-  
+        _working = true;
+        std::lock_guard<std::mutex> guard(_GPUListBlock);
         FitsFileReader fitsFileReader(false);
         
         //const auto tempBild = fitsFileReader.readImageFloat("../../../../../sync/magnetograms/" + filename); // mac
@@ -285,21 +300,26 @@ SunTextureManager::SunTextureManager(){
         
         const float minvalue = *fitsFileReader.readHeaderValueFloat("IMGMIN01");
         const float maxvalue = *fitsFileReader.readHeaderValueFloat("IMGMAX01");
-        //const float stdvalue = *fitsFileReader.readHeaderValueFloat("IMGRMS01");
+        const int long0 = *fitsFileReader.readHeaderValueFloat("LONG0");
+        const float stdvalue = *fitsFileReader.readHeaderValueFloat("IMGRMS01");
         std::vector<float> fitsImage;
         for(float c : tempBild->contents){
-            fitsImage.push_back((c - minvalue) / (maxvalue - minvalue)); // Normalized
-            //fitsImage.push_back((c + stdvalue) / stdvalue); // Standard Deviation
+            //fitsImage.push_back((c - minvalue) / (maxvalue - minvalue)); // Normalized
+            fitsImage.push_back((c + stdvalue) / stdvalue); // Standard Deviation
         }
-
+        for (int i = 0; i < 180; i++) {
+            std::rotate(fitsImage.begin() + (i * 360), fitsImage.begin() + ((i * 360) + (360 - long0)), fitsImage.begin() + (i * 360) + 359);
+        }
+        
         LERROR("laddar upp texture till GPU med id: " + dateID);
-        auto textureFits =  std::make_unique<ghoul::opengl::Texture>(fitsImage.data(), glm::vec3(360, 180, 1),ghoul::opengl::Texture::Format::Red, GL_R32F,GL_FLOAT);
+        auto textureFits =  std::make_unique<ghoul::opengl::Texture>(std::move(fitsImage.data()), glm::vec3(360, 180, 1),ghoul::opengl::Texture::Format::Red, GL_R32F,GL_FLOAT);
         textureFits->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
         textureFits->uploadTexture();
         textureFits->setName(dateID);
         _textureQueueGPU.push(dateID);
         _textureListGPU[dateID] = std::move(textureFits);
         trimGPUList();
+        _working = false;
     }
     
 
