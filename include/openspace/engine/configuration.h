@@ -55,13 +55,7 @@ struct Configuration {
     std::string scriptLog = "";
 
     struct DocumentationInfo {
-        std::string lua = "";
-        std::string property = "";
-        std::string sceneProperty = "";
-        std::string keyboard = "";
-        std::string documentation = "";
-        std::string factory = "";
-        std::string license = "";
+        std::string path = "";
     };
     DocumentationInfo documentation;
 

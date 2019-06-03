@@ -1,0 +1,13 @@
+{{#each data}}
+        <div class="row">
+          <div class="col-lg-12">
+            <h2><a class="documentation-name" href="#{{urlify name}}" name="{{urlify name}}">{{name}}</a></h2>
+            {{#each properties}}
+              {{> property}}
+            {{/each}}
+            {{#each propertyOwners}}
+              {{> propertyOwners}}
+            {{/each}}
+          </div>
+        </div>
+{{/each}}

@@ -51,13 +51,9 @@ namespace {
     constexpr const char* KeyImmediateFlush = "ImmediateFlush";
     constexpr const char* KeyLogs = "Logs";
     constexpr const char* KeyCapabilitiesVerbosity = "CapabilitiesVerbosity";
-    constexpr const char* KeyLuaDocumentation = "LuaDocumentation";
-    constexpr const char* KeyPropertyDocumentation = "PropertyDocumentation";
-    constexpr const char* KeyScriptLog = "ScriptLog";
-    constexpr const char* KeyKeyboardShortcuts = "KeyboardShortcuts";
+    constexpr const char* KeyDocumentationPath = "path";
     constexpr const char* KeyDocumentation = "Documentation";
-    constexpr const char* KeyFactoryDocumentation = "FactoryDocumentation";
-    constexpr const char* KeyLicenseDocumentation = "LicenseDocumentation";
+    constexpr const char* KeyScriptLog = "ScriptLog";
     constexpr const char* KeyShutdownCountdown = "ShutdownCountdown";
     constexpr const char* KeyPerSceneCache = "PerSceneCache";
     constexpr const char* KeyOnScreenTextScaling = "OnScreenTextScaling";
@@ -196,13 +192,7 @@ namespace {
                 static_cast<Configuration::DocumentationInfo&>(value);
             ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
 
-            d.getValue(KeyLuaDocumentation, v.lua);
-            d.getValue(KeyPropertyDocumentation, v.property);
-            d.getValue("ScenePropertyDocumentation", v.sceneProperty);
-            d.getValue(KeyKeyboardShortcuts, v.keyboard);
-            d.getValue(KeyDocumentation, v.documentation);
-            d.getValue(KeyFactoryDocumentation, v.factory);
-            d.getValue(KeyLicenseDocumentation, v.license);
+            d.getValue(KeyDocumentationPath, v.path);
         }
         // NOLINTNEXTLINE
         else if constexpr (std::is_same_v<T, Configuration::LoadingScreen>) {
