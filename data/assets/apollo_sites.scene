@@ -82,7 +82,7 @@ asset.onInitialize(function ()
 
     sceneHelper.bindKeys(Keybindings)
 
-    openspace.markInterestingNodes({ "Moon", "Apollo11LemModel", "Apollo17LemModel", "Apollo11", "Apollo11LunarLander"})
+    openspace.markInterestingNodes({ "Moon", "Apollo11LemModel", "Apollo17LemModel", "Apollo11", "Apollo11LunarLander" })
 
     -- To enable both sites by default, uncomment these lines
     -- openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_travmap.BlendMode', 0.000000);
@@ -107,5 +107,5 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-    openspace.removeInterestingNodes({"Moon", "Apollo11Lem", "Apollo17Lem", "Apollo11", "Apollo11LunarLander" })
+    openspace.removeInterestingNodes({ "Moon", "Apollo11Lem", "Apollo17Lem", "Apollo11", "Apollo11LunarLander" })
 end)

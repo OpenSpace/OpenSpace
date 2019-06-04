@@ -41,7 +41,7 @@ local Apollo11Position = {
             Type = "SpiceTranslation",
             Target = apolloSpiceId,
             Observer = "MOON",
-            Frame = "MOON_ME",         
+            Frame = "MOON_ME",
             Kernels = kernels
         },
     },
@@ -91,7 +91,7 @@ local Apollo11MoonTrail = {
             Type = "SpiceTranslation",
             Target = apolloSpiceId,
             Observer = "MOON",
-            Frame = "IAU_MOON",            
+            Frame = "IAU_MOON",
             Kernels = kernels
         },
         Color = { 0.180000,0.510000,0.750000 },
@@ -175,7 +175,7 @@ local Apollo11LemTrail = {
             Type = "SpiceTranslation",
             Target = apolloLemSpiceId,
             Observer = "MOON",
-            Frame = "IAU_MOON",            
+            Frame = "IAU_MOON",
             Kernels = kernels
         },
         Color = {0.780000,0.940000,0.340000 },
