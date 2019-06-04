@@ -622,9 +622,9 @@ void RenderableSatellites::updateBuffers() {
             
             glm::dvec3 position = _keplerTranslator.debrisPos(timeOffset + orbit.epoch); 
             
-            double positionX = position.x / 10000000; // 10 miljon
-            double positionY = position.y / 10000000; // 10 miljon
-            double positionZ = position.z / 10000000; // 10 miljon 
+            double positionX = position.x; // 10 miljon
+            double positionY = position.y; // 10 miljon
+            double positionZ = position.z; // 10 miljon 
 
             _vertexBufferData[index].x = static_cast<float>(positionX);
             _vertexBufferData[index].y = static_cast<float>(positionY);

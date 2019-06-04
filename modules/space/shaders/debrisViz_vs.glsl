@@ -42,8 +42,15 @@ out float periodFraction_f;
 out float offsetPeriods;
 // out float vertexID_f;
 
+// debugers :
+// out float offset;
+// out float epoch;
+// out float period;
+// out double tajm;
+
 void main() {
 
+    // tajm = inGameTime;
     /** The way the position and line fade is calculated is:
     *   By using inGameTime, epoch and period of this orbit, 
     *   we get how many revolutions it has done since epoch.
@@ -71,7 +78,7 @@ void main() {
     // offsetPeriods can also be calculated by passing the vertexID as a float
     // to the fragment shader and deviding it by nrOfSegments.
     // vertexID_f = float(gl_VertexID);
-    dvec3 positions = dvec3(vertex_data.x*10000000, vertex_data.y*10000000, vertex_data.z*10000000); 
+    dvec3 positions = dvec3(vertex_data.x, vertex_data.y, vertex_data.z); 
     dvec4 vertexPosition = dvec4(positions, 1);
     viewSpacePosition = vec4(modelViewTransform * vertexPosition);
     vs_position = z_normalization( projectionTransform * viewSpacePosition);

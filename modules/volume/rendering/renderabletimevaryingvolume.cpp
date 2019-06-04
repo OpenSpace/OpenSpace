@@ -265,7 +265,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
             data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
             if (data[i] > 0)
             {
-                LINFO(fmt::format("test: {} ", data[i]));
+                // LINFO(fmt::format("test: {} ", data[i]));
             }
         }
 

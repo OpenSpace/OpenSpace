@@ -51,6 +51,7 @@ private:
     std::string _rawVolumeOutputPath;
     std::string _dictionaryOutputPath;
     std::string _startTime;
+    std::string _timeStep;
     std::string _endTime;
     std::string _inputPath;
 
@@ -59,6 +60,8 @@ private:
     glm::vec3 _upperDomainBound;
 
     std::vector<KeplerParameters> _TLEDataVector;
+
+    float _maxApogee;
 
     // not sure if it should be local function or hidden function.
     //std::vector<KeplerParameters> readTLEFile(const std::string& filename);

@@ -39,6 +39,8 @@
 #include <ghoul/misc/defer.h>
 
 #include <fstream>
+#include <queue>
+
 
 
 namespace {
@@ -50,7 +52,8 @@ namespace {
     constexpr const char* KeyDictionaryOutput = "DictionaryOutput";
     constexpr const char* KeyDimensions = "Dimensions";
     constexpr const char* KeyStartTime = "StartTime";
-    //constexpr const char* KeyEndTime = "EndTime";
+    constexpr const char* KeyTimeStep = "TimeStep";
+    constexpr const char* KeyEndTime = "EndTime";
     constexpr const char* KeyInputPath = "InputPath";
 
     // constexpr const char* KeyInputPath1 = "InputPath1";
@@ -373,7 +376,7 @@ std::vector<KeplerParameters> readTLEFile(const std::string& filename){
     return data;
 }
 
-std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData, std::string& timeStamp) {
+std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData, double timeInSeconds) {
 
     std::vector<glm::dvec3> positionBuffer;
     for(const auto& orbit : tleData) {
@@ -388,7 +391,7 @@ std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData,
             orbit.period,
             orbit.epoch
         );
-        double timeInSeconds = Time::convertTime(timeStamp);
+        // double timeInSeconds = Time::convertTime(timeStamp);
         glm::dvec3 position = keplerTranslator.debrisPos(timeInSeconds);
         positionBuffer.push_back(position);
         
@@ -397,18 +400,18 @@ std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData,
     return positionBuffer;
 }
 
-std::vector<glm::dvec3> generatePositions(int numberOfPositions) {
-    std::vector<glm::dvec3> positions;
+// std::vector<glm::dvec3> generatePositions(int numberOfPositions) {
+//     std::vector<glm::dvec3> positions;
     
-    float radius = 700000;   // meter
-    float degreeStep = 360 / numberOfPositions;
+//     float radius = 700000;   // meter
+//     float degreeStep = 360 / numberOfPositions;
 
-    for(int i=0 ; i<= 360 ; i += degreeStep){
-        glm::dvec3 singlePosition = glm::dvec3(radius* sin(i), radius*cos(i), 0.0);
-        positions.push_back(singlePosition);
-    }
-    return positions;
-}
+//     for(int i=0 ; i<= 360 ; i += degreeStep){
+//         glm::dvec3 singlePosition = glm::dvec3(radius* sin(i), radius*cos(i), 0.0);
+//         positions.push_back(singlePosition);
+//     }
+//     return positions;
+// }
 
 float getDensityAt(glm::uvec3 cell,  int* densityArray, RawVolume<float>& raw) {
     float value;
@@ -447,8 +450,7 @@ int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim, float maxApogee){
     return coordinateIndex.z * (dim.x * dim.y) + coordinateIndex.y * dim.x + coordinateIndex.x;
 }
 
-int* mapDensityToVoxels(int* densityArray, std::vector<glm::dvec3> positions,
-                         glm::uvec3 dim, float maxApogee) {
+int* mapDensityToVoxels(int* densityArray, std::vector<glm::dvec3> positions, glm::uvec3 dim, float maxApogee) {
 
     for(const glm::dvec3& position : positions) {
         int index = getIndexFromPosition(position, dim, maxApogee);
@@ -467,18 +469,20 @@ GenerateDebrisVolumeTask::GenerateDebrisVolumeTask(const ghoul::Dictionary& dict
 
     _rawVolumeOutputPath = absPath(dictionary.value<std::string>(KeyRawVolumeOutput));
     _dictionaryOutputPath = absPath(dictionary.value<std::string>(KeyDictionaryOutput));
-    _dimensions = dictionary.value<glm::vec3>(KeyDimensions);
+    _dimensions = dictionary.value<glm::vec3>(KeyDimensions); // must not be <glm::uvec3> for some reason.
     _startTime = dictionary.value<std::string>(KeyStartTime);
-    //_endTime = dictionary.value<std::string>(KeyEndTime);
+    _timeStep = dictionary.value<std::string>(KeyTimeStep); // Todo: send KeyTimeStep in as a int or float correctly.
+    _endTime = dictionary.value<std::string>(KeyEndTime);
     // since _inputPath is past from task,
     // there will have to be either one task per dataset,
     // or you need to combine the datasets into one file.
     _inputPath = absPath(dictionary.value<std::string>(KeyInputPath));
     _lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
     _upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
-
-
-    _TLEDataVector = {};
+ 
+    _TLEDataVector = readTLEFile(_inputPath);
+    _maxApogee = getMaxApogee(_TLEDataVector);
+   
 }
 
 std::string GenerateDebrisVolumeTask::description() {
@@ -508,88 +512,120 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
     // _TLEDataVector.insert(_TLEDataVector.end(), TLEDataVector3.begin(), TLEDataVector3.end());
     // _TLEDataVector.insert(_TLEDataVector.end(), TLEDataVector4.begin(), TLEDataVector4.end());
     // ----- or ----- if only one
-    _TLEDataVector = readTLEFile(_inputPath);
-    //////////
-    
-    
-    std::vector<glm::dvec3> startPositionBuffer = getPositionBuffer(_TLEDataVector, _startTime);
-    //  if we deside to integrate the density over time
-    //  std::vector<glm::dvec3> endPositionBuffer = getPositionBuffer(_TLEDataVector, _endTime);
-    
-    //int numberOfPoints = 40;
-    //Needs to be looked at, caused my computer to crash...
-    //std::vector<glm::dvec3> generatedPositions = generatePositions(numberOfPoints);
-    
- 
-    float maxApogee = getMaxApogee(_TLEDataVector);
-    LINFO(fmt::format("Max Apogee: {} ", maxApogee));
 
-    const int size = _dimensions.x *_dimensions.y *_dimensions.z;
-    int *densityArrayp = new int[size]();
-    //densityArrayp = mapDensityToVoxels(densityArrayp, generatedPositions, _dimensions, maxApogee);
-    densityArrayp = mapDensityToVoxels(densityArrayp, startPositionBuffer, _dimensions, maxApogee);
-        
-    // create object rawVolume
-    volume::RawVolume<float> rawVolume(_dimensions);
-    //glm::vec3 domainSize = _upperDomainBound - _lowerDomainBound;
+        // _TLEDataVector = readTLEFile(_inputPath);
     
+    //////////
+
+        // float maxApogee = getMaxApogee(_TLEDataVector);
+    LINFO(fmt::format("Max Apogee: {} ", _maxApogee));
+
+    /**  SEQUENCE
+    *   1. handle timeStep
+    *       1.1 either ignore last timeperiod from the latest whole timestep to _endTime
+    *       1.2 or extend endTime to be equal to next full timestep 
+    *   2. loop to create a rawVolume for each timestep.
+    */
+
+    // 1
+    double startTimeInSeconds = Time::convertTime(_startTime);
+    double endTimeInSeconds = Time::convertTime(_endTime);
+    double timeSpan = endTimeInSeconds - startTimeInSeconds;
+
+    float timeStep = std::stof(_timeStep);
+
+    // 1.1
+     int numberOfIterations = static_cast<int>(timeSpan/timeStep);
+    LINFO(fmt::format("timestep: {} ", numberOfIterations));
+
+    std::queue<volume::RawVolume<float>> rawVolumeQueue = {};
+    const int size = _dimensions.x *_dimensions.y *_dimensions.z;
     float minVal = std::numeric_limits<float>::max();
     float maxVal = std::numeric_limits<float>::min();
-    
-    // TODO: Create a forEachSatallite and set(cell, value) to combine mapDensityToVoxel
-    //      and forEachVoxel for less time complexity.
-    rawVolume.forEachVoxel([&](glm::uvec3 cell, float) {
-    //     glm::vec3 coord = _lowerDomainBound +
-    //        glm::vec3(cell) / glm::vec3(_dimensions) * domainSize;
-        float value = getDensityAt(cell, densityArrayp, rawVolume);   // (coord)
-        //LINFO(fmt::format("EachVoxel: {} ", value));
-        // if((cell.x + cell.y + cell.z) % 8 == 0)
-        //     value = 1;
-        // else
-        //     value = 0;
+    // 2.
+    for(int i=0 ; i<=numberOfIterations ; ++i) {
 
-        rawVolume.set(cell, value);
+        std::vector<glm::dvec3> startPositionBuffer = getPositionBuffer(_TLEDataVector, startTimeInSeconds+(i*timeStep));   //+(i*timeStep)     
 
-        minVal = std::min(minVal, value);
-        maxVal = std::max(maxVal, value);
-        /*LINFO(fmt::format("min: {} ", minVal));
-        LINFO(fmt::format("max: {} ", maxVal));*/
-    });
+        int *densityArrayp = new int[size]();
+        //densityArrayp = mapDensityToVoxels(densityArrayp, generatedPositions, _dimensions, maxApogee);
+        densityArrayp = mapDensityToVoxels(densityArrayp, startPositionBuffer, _dimensions, _maxApogee);
+            
+        // create object rawVolume
+        volume::RawVolume<float> rawVolume(_dimensions);
+        //glm::vec3 domainSize = _upperDomainBound - _lowerDomainBound;
+             
+        // TODO: Create a forEachSatallite and set(cell, value) to combine mapDensityToVoxel
+        //      and forEachVoxel for less time complexity.
+        rawVolume.forEachVoxel([&](glm::uvec3 cell, float) {
+        //     glm::vec3 coord = _lowerDomainBound +
+        //        glm::vec3(cell) / glm::vec3(_dimensions) * domainSize;
+            float value = getDensityAt(cell, densityArrayp, rawVolume);   // (coord)
+            //LINFO(fmt::format("EachVoxel: {} ", value));
+            // if((cell.x + cell.y + cell.z) % 8 == 0)
+            //     value = 1;
+            // else
+            //     value = 0;
 
-    ghoul::filesystem::File file(_rawVolumeOutputPath);
-    const std::string directory = file.directoryName();
-    if (!FileSys.directoryExists(directory)) {
-        FileSys.createDirectory(directory, ghoul::filesystem::FileSystem::Recursive::Yes);
+            rawVolume.set(cell, value);
+
+            minVal = std::min(minVal, value);
+            maxVal = std::max(maxVal, value);
+            /*LINFO(fmt::format("min: {} ", minVal));
+            LINFO(fmt::format("max: {} ", maxVal));*/
+        });
+        rawVolumeQueue.push(rawVolume);
+        delete[] densityArrayp;
     }
-  
-    volume::RawVolumeWriter<float> writer(_rawVolumeOutputPath);
-    writer.write(rawVolume);
+
+    // two loops is used to get a global min and max value for voxels.
+    for(int i=0 ; i<=numberOfIterations ; ++i){
+        // LINFO(fmt::format("raw file output name: {} ", _rawVolumeOutputPath));
+
+        size_t lastIndex = _rawVolumeOutputPath.find_last_of(".");
+        std::string rawOutputName = _rawVolumeOutputPath.substr(0, lastIndex);
+        rawOutputName += std::to_string(i) + ".rawvolume"; 
+
+        lastIndex = _dictionaryOutputPath.find_last_of(".");
+        std::string dictionaryOutputName = _dictionaryOutputPath.substr(0, lastIndex);
+        dictionaryOutputName += std::to_string(i) + ".dictionary"; 
+
+        ghoul::filesystem::File file(rawOutputName);
+        const std::string directory = file.directoryName();
+        if (!FileSys.directoryExists(directory)) {
+            FileSys.createDirectory(directory, ghoul::filesystem::FileSystem::Recursive::Yes);
+        }
     
-    RawVolumeMetadata metadata;
-    // alternatively metadata.hasTime = false;
-    metadata.time = Time::convertTime(_startTime);
-    metadata.dimensions = _dimensions;
-    metadata.hasDomainUnit = false;
-    metadata.hasValueUnit = false;
-    metadata.gridType = VolumeGridType::Cartesian;
-    metadata.hasDomainBounds = true;
-    metadata.lowerDomainBound = _lowerDomainBound;
-    metadata.upperDomainBound = _upperDomainBound;
-    metadata.hasValueRange = true;
-    metadata.minValue = minVal;
-    metadata.maxValue = maxVal;
+        volume::RawVolumeWriter<float> writer(rawOutputName);
+        writer.write(rawVolumeQueue.front());
+        rawVolumeQueue.pop();
+        
+        RawVolumeMetadata metadata;
+        // alternatively metadata.hasTime = false;
+        metadata.time = Time::convertTime(_startTime)+(i*timeStep);
+        metadata.dimensions = _dimensions;
+        metadata.hasDomainUnit = false;
+        metadata.hasValueUnit = false;
+        metadata.gridType = VolumeGridType::Cartesian;
+        metadata.hasDomainBounds = true;
+        metadata.lowerDomainBound = _lowerDomainBound;
+        metadata.upperDomainBound = _upperDomainBound;
+        metadata.hasValueRange = true;
+        metadata.minValue = minVal;
+        metadata.maxValue = maxVal;
 
-    /*LINFO(fmt::format("min2: {} ", minVal));
-    LINFO(fmt::format("max2: {} ", maxVal));*/
+        /*LINFO(fmt::format("min2: {} ", minVal));
+        LINFO(fmt::format("max2: {} ", maxVal));*/
 
-    ghoul::Dictionary outputDictionary = metadata.dictionary();
-    ghoul::DictionaryLuaFormatter formatter;
-    std::string metadataString = formatter.format(outputDictionary);
+        ghoul::Dictionary outputDictionary = metadata.dictionary();
+        ghoul::DictionaryLuaFormatter formatter;
+        std::string metadataString = formatter.format(outputDictionary);
 
-    std::fstream f(_dictionaryOutputPath, std::ios::out);
-    f << "return " << metadataString;
-    f.close();
-    delete[] densityArrayp;
+        std::fstream f(dictionaryOutputName, std::ios::out);
+        f << "return " << metadataString;
+        f.close();
+    
+    }
 }
 
 documentation::Documentation GenerateDebrisVolumeTask::documentation() {

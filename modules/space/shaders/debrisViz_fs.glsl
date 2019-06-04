@@ -31,6 +31,7 @@ uniform float opacity = 1.0;
 uniform float lineFade;
 // uniform int numberOfSegments;
 
+
 in vec4 viewSpacePosition;
 in vec4 vs_position;
 
@@ -38,7 +39,13 @@ in float periodFraction_f;
 in float offsetPeriods;
 // in float vertexID_f;
 
+// debuggers :
+// in float offset;
+// in float epoch;
+// in float period;
+// in flat double tajm;
 Fragment getFragment() {
+    // float offsetPeriods = offset / period;
     // This is now done in the fragment shader instead
     // to make smooth movement between vertecies.
     // We want vertexDistance to be double up to this point, I think. 
@@ -63,10 +70,13 @@ Fragment getFragment() {
     frag.color = vec4(color, fade * opacity);
     frag.depth = vs_position.w;
     frag.gPosition = viewSpacePosition;
-    frag.gNormal = vec4(1, 1, 1 , 0);
+    frag.gNormal = vec4(1, 1, 1, 0);
+    // frag.blend = BLEND_MODE_ADDITIVE;
+
 
     // to debug using colors use this if-statment.
-    // if( vertexDistance < 0.0 || vertexDistance >= 0.0){
+    // float ep = 0.001;
+    // if(vertexDistance_f < ep ){ //periodFraction < ep
     //     frag.color = vec4(1, 0, 0, 1);
     // }
 
