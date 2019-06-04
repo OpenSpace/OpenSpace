@@ -186,7 +186,7 @@ scripting::LuaLibrary KeybindingManager::luaLibrary() {
                 "bindKey",
                 &luascriptfunctions::bindKey,
                 {},
-                "string, string [,string]",
+                "string, string [, string]",
                 "Binds a key by name to a lua string command to execute both locally "
                 "and to broadcast to clients if this is the host of a parallel session. "
                 "The first argument is the key, the second argument is the Lua command "
@@ -197,7 +197,7 @@ scripting::LuaLibrary KeybindingManager::luaLibrary() {
                 "bindKeyLocal",
                 &luascriptfunctions::bindKeyLocal,
                 {},
-                "string, string [,string]",
+                "string, string [, string]",
                 "Binds a key by name to a lua string command to execute only locally. "
                 "The first argument is the key, the second argument is the Lua command "
                 "that is to be executed, and the optional third argument is a human "
@@ -211,7 +211,6 @@ scripting::LuaLibrary KeybindingManager::luaLibrary() {
                 "Returns a list of information about the keybindings for the provided "
                 "key. Each element in the list is a table describing the 'Command' that "
                 "was bound and whether it was a 'Remote' script or not."
-
             }
         }
     };
