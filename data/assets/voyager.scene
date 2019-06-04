@@ -1,27 +1,16 @@
+asset.require('./base')
+
 local assetHelper = asset.require('util/asset_helper')
 local sceneHelper = asset.require('util/scene_helper')
 
--- Specifying which other assets should be loaded in this scene
-asset.require('spice/base')
-assetHelper.requestAll(asset, 'scene/solarsystem/sun')
-asset.require('scene/solarsystem/planets')
 asset.require('scene/solarsystem/planets/jupiter/minor_moons')
 asset.require('scene/solarsystem/planets/saturn/minor_moons')
 asset.require('scene/solarsystem/planets/uranus/minor_moons')
 asset.require('scene/solarsystem/planets/neptune/inner_moons')
 asset.require('scene/solarsystem/planets/neptune/irregular_prograde_moons')
 asset.require('scene/solarsystem/planets/neptune/irregular_retrograde_moons')
-asset.request('scene/digitaluniverse/stars')
-asset.request('scene/digitaluniverse/milkyway')
 asset.require('scene/solarsystem/missions/voyager/voyager1')
 asset.require('scene/solarsystem/missions/voyager/voyager2')
-
--- Load default key bindings applicable to most scenes
-asset.require('util/default_keybindings')
-asset.require('util/default_dashboard')
-asset.require('util/default_joystick')
-
-asset.require('util/webgui')
 
 local VoyagerAsset = asset.require('scene/solarsystem/missions/voyager/voyager1')
 
@@ -49,8 +38,6 @@ assetHelper.registerDashboardItems(asset, {
 asset.onInitialize(function ()
     openspace.time.setTime("1977 SEP 10 12:00:00")
 
-    openspace.setDefaultGuiSorting()
-
     sceneHelper.setDeltaTimeKeys({
         1, 5, 10, 20, 40, 90, 360, 720, 2880, 14400,
         28800, 57600, 115200, 230400, 460800, 921600, 1843200, 3686400, 7372800, 14745600
@@ -60,25 +47,14 @@ asset.onInitialize(function ()
         "Earth", "Voyager 1", "Voyager 2", "Jupiter", "Saturn", "Uranus", "Neptune"
     })
 
-    openspace.addVirtualProperty(
-        "BoolProperty",
-        "Show Trails",
-        "*Trail.Renderable.Enabled",
-        "Disable or enable all trails of the scene at the same time",
-        true,
-        nil,
-        nil
-    )
-
     openspace.navigation.setCameraState({
-        Focus = VoyagerAsset.Voyager_1.Identifier,
+        Anchor = VoyagerAsset.Voyager_1.Identifier,
         Position = { 526781518487.171326, 257168309890.072144, -1381125204152.817383 },
         Rotation = { -0.106166, 0.981574, -0.084545, 0.134513 },
     })
 end)
 
 asset.onDeinitialize(function ()
-    openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
     openspace.removeInterestingNodes({
         "Earth", "Voyager 1", "Voyager 2", "Jupiter", "Saturn", "Uranus", "Neptune"
     })

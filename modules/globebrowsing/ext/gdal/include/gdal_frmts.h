@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_frmts.h cc3abf4797c390d97322b20caac26099104f0b58 2017-12-21 13:19:20Z Even Rouault $
+ * $Id: gdal_frmts.h 91d70b77cc330670d972f2317dbdf3a5b424f845 2018-10-15 00:43:04 +0200 Even Rouault $
  *
  * Project:  GDAL
  * Purpose:  Prototypes for all format specific driver initialization.
@@ -157,6 +157,7 @@ void CPL_DLL GDALRegister_KMLSUPEROVERLAY(void);
 void CPL_DLL GDALRegister_GTX(void);
 void CPL_DLL GDALRegister_LOSLAS(void);
 void CPL_DLL GDALRegister_Istar(void);
+void CPL_DLL GDALRegister_NTv1(void);
 void CPL_DLL GDALRegister_NTv2(void);
 void CPL_DLL GDALRegister_CTable2(void);
 void CPL_DLL GDALRegister_JP2OpenJPEG(void);
@@ -192,6 +193,11 @@ void CPL_DLL GDALRegister_JP2Lura(void);
 void CPL_DLL GDALRegister_PRF(void);
 void CPL_DLL GDALRegister_NULL(void);
 void CPL_DLL GDALRegister_RDA(void);
+void CPL_DLL GDALRegister_EEDAI(void);
+void CPL_DLL GDALRegister_EEDA(void);
+void CPL_DLL GDALRegister_SIGDEM(void);
+void CPL_DLL GDALRegister_BYN(void);
+void CPL_DLL GDALRegister_IGNFHeightASCIIGrid(void);
 CPL_C_END
 
 #endif /* ndef GDAL_FRMTS_H_INCLUDED */

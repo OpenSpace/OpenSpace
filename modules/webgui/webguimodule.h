@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/misc/process.h>
 #include <memory>
@@ -38,6 +39,8 @@ class WebGuiModule : public OpenSpaceModule {
 public:
     static constexpr const char* Name = "WebGui";
     WebGuiModule();
+    int port() const;
+    std::string address() const;
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
@@ -49,7 +52,11 @@ private:
     std::unique_ptr<ghoul::Process> _process;
     properties::BoolProperty _enabled;
     properties::StringProperty _entryPoint;
-    properties::StringProperty _workingDirectory;
+    properties::StringProperty _webDirectory;
+
+    properties::IntProperty _port;
+    properties::StringProperty _address;
+    properties::StringProperty _webSocketInterface;
 };
 
 } // namespace openspace

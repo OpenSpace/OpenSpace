@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdaljp2abstractdataset.h d10f99bfacb1d7c3331a539c4667d1c95199313d 2017-12-18 12:00:18Z Kurt Schwehr $
+ * $Id: gdaljp2abstractdataset.h e37e476c4cf8f4b0df8995e0d95d5d672fca1a9b 2018-05-05 16:54:18 +0200 Even Rouault $
  *
  * Project:  GDAL
  * Purpose:  GDALGeorefPamDataset with helper to read georeferencing and other
@@ -36,11 +36,13 @@
 
 class CPL_DLL GDALJP2AbstractDataset: public GDALGeorefPamDataset
 {
-    char*               pszWldFilename;
+    char*               pszWldFilename = nullptr;
 
-    GDALDataset*        poMemDS;
-    char**              papszMetadataFiles;
-    int                 m_nWORLDFILEIndex;
+    GDALDataset*        poMemDS = nullptr;
+    char**              papszMetadataFiles = nullptr;
+    int                 m_nWORLDFILEIndex = -1;
+
+    CPL_DISALLOW_COPY_ASSIGN(GDALJP2AbstractDataset)
 
   protected:
     int CloseDependentDatasets() override;

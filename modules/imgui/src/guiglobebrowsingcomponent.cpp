@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
@@ -122,7 +123,9 @@ void GuiGlobeBrowsingComponent::render() {
         // node
 
         // Check if the focus node is a RenderableGlobe
-        const SceneGraphNode* const focus = global::navigationHandler.focusNode();
+        const SceneGraphNode* const focus =
+            global::navigationHandler.orbitalNavigator().anchorNode();
+
         const auto it = std::find(nodes.cbegin(), nodes.cend(), focus);
         if (it != nodes.end()) {
             _currentNode = focus->identifier();
@@ -145,7 +148,9 @@ void GuiGlobeBrowsingComponent::render() {
     ImGui::SameLine();
     bool selectFocusNode = ImGui::Button("From Focus");
     if (selectFocusNode) {
-        const SceneGraphNode* const focus = global::navigationHandler.focusNode();
+        const SceneGraphNode* const focus =
+            global::navigationHandler.orbitalNavigator().anchorNode();
+
         const auto it = std::find(nodes.cbegin(), nodes.cend(), focus);
         if (it != nodes.end()) {
             _currentNode = focus->identifier();

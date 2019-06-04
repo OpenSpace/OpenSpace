@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,13 +41,16 @@ public:
 private:
     const int UnsetOnChangeHandle = -1;
 
-    nlohmann::json currentTime();
-    nlohmann::json deltaTime();
+    void sendCurrentTime();
+    void sendFullTimeData();
 
     int _timeCallbackHandle = UnsetOnChangeHandle;
     int _deltaTimeCallbackHandle = UnsetOnChangeHandle;
     bool _isDone = false;
     std::chrono::system_clock::time_point _lastUpdateTime;
+
+    bool _lastPauseState = false;
+    double _lastTargetDeltaTime = 0.0;
 };
 
 } // namespace openspace

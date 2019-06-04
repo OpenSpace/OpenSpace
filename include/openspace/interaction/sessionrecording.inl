@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,13 +25,13 @@
 namespace openspace::interaction {
 
 template <class T>
-T nextKeyframeObj(unsigned int index,
-                  const std::vector<T>& keyframeContainer,
+T nextKeyframeObj(unsigned int index, const std::vector<T>& keyframeContainer,
                   std::function<void()> finishedCallback)
 {
     if (index >= (keyframeContainer.size() - 1)) {
-        if( index == (keyframeContainer.size() - 1) )
+        if (index == (keyframeContainer.size() - 1)) {
             finishedCallback();
+        }
         return keyframeContainer.back();
     } else if (index < keyframeContainer.size()) {
         return keyframeContainer[index];
@@ -41,9 +41,7 @@ T nextKeyframeObj(unsigned int index,
 }
 
 template <class T>
-T prevKeyframeObj(unsigned int index,
-                  const std::vector<T>& keyframeContainer)
-{
+T prevKeyframeObj(unsigned int index, const std::vector<T>& keyframeContainer) {
     if (index >= keyframeContainer.size()) {
         return keyframeContainer.back();
     } else if (index > 0) {
@@ -52,6 +50,5 @@ T prevKeyframeObj(unsigned int index,
         return keyframeContainer.front();
     }
 }
-
 
 } // namespace openspace::interaction

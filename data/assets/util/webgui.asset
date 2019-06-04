@@ -1,8 +1,8 @@
 local guiCustomization = asset.require('customization/gui')
 
 -- Select which commit hashes to use for the frontend and backend
-local frontendHash = "f6db6a5dd79df1e310a75d50f8b1f97aea8a9596"
-local backendHash = "3e862a67ff2869d83187ad8bda05746b583d13d4"
+local frontendHash = "f6c17563e5fc3b3e16d18b50e8932f258b34a3bc"
+local backendHash = "408142f26d3fa3d041399fcf58645874589d5b64"
 
 local dataProvider = "data.openspaceproject.com/files/webgui"
 
@@ -10,7 +10,7 @@ local backend = asset.syncedResource({
     Identifier = "WebGuiBackend",
     Name = "Web Gui Backend",
     Type = "UrlSynchronization",
-    Url = dataProvider .. "/backend/" ..  backendHash .. "/backend.js"
+    Url = dataProvider .. "/backend/" ..  backendHash .. "/backend.zip"
 })
 
 local frontend = asset.syncedResource({
@@ -26,14 +26,21 @@ asset.onInitialize(function ()
     if not openspace.directoryExists(dest) then
         openspace.unzipFile(frontend .. "/frontend.zip", dest, true)
     end
+
+    -- Unzip the frontend bundle
+    dest = backend .. "/backend"
+    if not openspace.directoryExists(dest) then
+        openspace.unzipFile(backend .. "/backend.zip", dest, true)
+    end
+
     -- Do not serve the files if we are in webgui development mode.
     -- In that case, you have to serve the webgui manually, using `npm start`.
     if not guiCustomization.webguiDevelopmentMode then
         openspace.setPropertyValueSingle(
-            "Modules.WebGui.ServerProcessEntryPoint", backend .. "/backend.js"
+            "Modules.WebGui.ServerProcessEntryPoint", backend .. "/backend/backend.js"
         )
         openspace.setPropertyValueSingle(
-            "Modules.WebGui.ServerProcessWorkingDirectory", frontend .. "/frontend"
+            "Modules.WebGui.WebDirectory", frontend .. "/frontend"
         )
         openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", true)
     end

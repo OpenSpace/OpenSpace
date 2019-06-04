@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -95,14 +95,6 @@ namespace {
         "Tooltip Delay (in s)",
         "This value determines the delay in seconds after which the tooltip is shown."
     };
-
-    constexpr openspace::properties::Property::PropertyInfo HiddenInfo = {
-        "IsHidden",
-        "Is Hidden",
-        "If this value is true, all GUI items will not be rendered, regardless of their "
-        "status"
-    };
-
 } // namespace
 
 namespace openspace::gui {

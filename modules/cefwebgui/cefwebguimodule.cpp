@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,9 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/webbrowser/webbrowsermodule.h>
-
 #include <modules/cefwebgui/cefwebguimodule.h>
+
+#include <modules/webbrowser/webbrowsermodule.h>
+#include <modules/webgui/webguimodule.h>
 #include <modules/cefwebgui/include/guirenderhandler.h>
 #include <modules/cefwebgui/include/guikeyboardhandler.h>
 #include <modules/webbrowser/include/browserinstance.h>
@@ -37,12 +38,16 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    constexpr const char* _loggerCat = "CefWebGui";
-
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
         "This setting determines whether the browser should be enabled or not."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
+        "Reload",
+        "Reload",
+        "Trigger this property to reload the browser."
     };
 
     constexpr openspace::properties::Property::PropertyInfo VisibleInfo = {
@@ -56,6 +61,12 @@ namespace {
         "GUI URL",
         "The URL of the webpage that is used to load the WebGUI from."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo GuiScaleInfo = {
+        "GuiScale",
+        "Gui Scale",
+        "GUI scale multiplier."
+    };
 } // namespace
 
 namespace openspace {
@@ -64,11 +75,15 @@ CefWebGuiModule::CefWebGuiModule()
     : OpenSpaceModule(CefWebGuiModule::Name)
     , _enabled(EnabledInfo, true)
     , _visible(VisibleInfo, true)
+    , _reload(ReloadInfo)
     , _url(GuiUrlInfo, "")
+    , _guiScale(GuiScaleInfo, 1.f, 0.1f, 3.f)
 {
     addProperty(_enabled);
     addProperty(_visible);
+    addProperty(_reload);
     addProperty(_url);
+    addProperty(_guiScale);
 }
 
 void CefWebGuiModule::startOrStopGui() {
@@ -94,6 +109,9 @@ void CefWebGuiModule::startOrStopGui() {
         if (_visible) {
             webBrowserModule->attachEventHandler(_instance.get());
         }
+
+        _instance->setZoom(_guiScale);
+
         webBrowserModule->addBrowser(_instance.get());
     } else if (_instance) {
         _instance->close(true);
@@ -123,6 +141,18 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         }
     });
 
+    _reload.onChange([this]() {
+        if (_instance) {
+            _instance->reloadBrowser();
+        }
+    });
+
+    _guiScale.onChange([this]() {
+        if (_instance) {
+            _instance->setZoom(_guiScale);
+        }
+    });
+
     _visible.onChange([this, webBrowserModule]() {
         if (_visible && _instance) {
             webBrowserModule->attachEventHandler(_instance.get());
@@ -131,7 +161,17 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         }
     });
 
-    _url = configuration.value<std::string>(GuiUrlInfo.identifier);
+    if (configuration.hasValue<std::string>(GuiUrlInfo.identifier)) {
+        _url = configuration.value<std::string>(GuiUrlInfo.identifier);
+    } else {
+        WebGuiModule* webGuiModule = global::moduleEngine.module<WebGuiModule>();
+        _url = "http://localhost:" +
+            std::to_string(webGuiModule->port()) + "/#/onscreen";
+    }
+
+    if (configuration.hasValue<float>(GuiScaleInfo.identifier)) {
+        _guiScale = configuration.value<float>(GuiScaleInfo.identifier);
+    }
 
     _enabled = configuration.hasValue<bool>(EnabledInfo.identifier) &&
                configuration.value<bool>(EnabledInfo.identifier);
@@ -152,7 +192,10 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
 
         if (isGuiWindow && isMaster && _instance) {
             if (global::windowDelegate.windowHasResized()) {
-                _instance->reshape(global::windowDelegate.currentWindowSize());
+                _instance->reshape(static_cast<glm::ivec2>(
+                    static_cast<glm::vec2>(global::windowDelegate.currentWindowSize()) *
+                    global::windowDelegate.dpiScaling()
+                ));
             }
             if (_visible) {
                 _instance->draw();

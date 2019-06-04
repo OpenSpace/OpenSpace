@@ -28,4 +28,4 @@ local HyperionTrail = {
 
 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { MimasTrail })
+assetHelper.registerSceneGraphNodesAndExport(asset, { HyperionTrail })

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +30,16 @@
 #pragma warning (disable : 4100)
 #endif // _MSC_VER
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#endif // __clang__
+
 #include <include/cef_client.h>
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif // __clang__
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -52,7 +61,7 @@ public:
     BrowserInstance(WebRenderHandler* renderer, WebKeyboardHandler* keyboardHandler);
     ~BrowserInstance();
 
-    void loadUrl(const std::string& url);
+    void loadUrl(std::string url);
     /**
      * Load a local file.
      *
@@ -75,6 +84,12 @@ public:
     void draw();
     void close(bool force = false);
 
+    void sendTouchPressEvent(const CefMouseEvent & event,
+        CefBrowserHost::MouseButtonType button, const int clickCount);
+
+    void sendResleasePressEvent(const CefMouseEvent & event,
+        CefBrowserHost::MouseButtonType button, const int clickCount);
+
     bool sendKeyEvent(const CefKeyEvent& event);
     bool sendMouseClickEvent(const CefMouseEvent& event,
         CefBrowserHost::MouseButtonType button, bool mouseUp,
@@ -90,7 +105,16 @@ public:
      * \return if this scroll should be blocked or not
      */
     bool sendMouseWheelEvent(const CefMouseEvent& event, const glm::ivec2& delta);
+
+    /**
+     * Set the browser zoom level.
+     * 1.0 = default, 2.0 = double, etc.
+     */
+    void setZoom(float ratio);
+
     void reloadBrowser();
+
+    void selectAll();
 
     const CefRefPtr<CefBrowser>& getBrowser() const;
 
@@ -102,6 +126,7 @@ private:
     CefRefPtr<BrowserClient> _client;
     CefRefPtr<CefBrowser> _browser;
     bool _isInitialized = false;
+    double _zoomLevel = 1.0;
 };
 
 } // namespace openspace

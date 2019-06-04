@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -210,26 +210,6 @@ documentation::Documentation Configuration::Documentation = {
             "All documentations that are generated at application startup."
         },
         {
-            KeyRequireSocketAuthentication,
-            new BoolVerifier,
-            Optional::Yes,
-            "If socket connections should be authenticated or not before they are "
-            "allowed to get or set information. Defaults to 'true'."
-        },
-        {
-            KeyServerPasskey,
-            new StringVerifier,
-            Optional::Yes,
-            "Passkey to limit server access. Used to authorize incoming connections."
-        },
-        {
-            KeyClientAddressWhitelist,
-            new StringListVerifier,
-            Optional::Yes,
-            "String containing white listed client IP addresses that won't need to be"
-            "authorized with the server. Space separated"
-        },
-        {
             KeyShutdownCountdown,
             new DoubleGreaterEqualVerifier(0.0),
             Optional::Yes,
@@ -277,14 +257,28 @@ documentation::Documentation Configuration::Documentation = {
             "the master computer does not have the resources to render a scene."
         },
         {
-            KeyDisableSceneOnMaster,
-            new BoolVerifier,
+            KeyGlobalRotation,
+            new DoubleVector3Verifier,
             Optional::Yes,
-            "Toggles whether a potential scene transformation matrix, for example as "
-            "specified in an SGCT configuration file, should apply to the master node. "
-            "With some configurations, applying such a transformation complicates the "
-            "interaction and it is thus desired to disable the transformation. The "
-            "default is false."
+            "Applies a global view rotation. Use this to rotate the position of the "
+            "focus node away from the default location on the screen. This setting "
+            "persists even when a new focus node is selected. Defined using roll, pitch, "
+            "yaw in radians"
+        },
+        {
+            KeyMasterRotation,
+            new DoubleVector3Verifier,
+            Optional::Yes,
+            "Applies a view rotation for only the master node, defined using "
+            "roll, pitch yaw in radians. This can be used to compensate the master view "
+            "direction for tilted display systems in clustered immersive environments."
+        },
+        {
+            KeyScreenSpaceRotation,
+            new DoubleVector3Verifier,
+            Optional::Yes,
+            "Applies a global rotation for all screenspace renderables. Defined using "
+            "roll, pitch, yaw in radians."
         },
         {
             KeyScreenshotUseDate,

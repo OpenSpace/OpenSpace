@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -950,7 +950,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     RenderData data = {
         *camera,
-        psc(),
         std::move(time),
         doPerformanceMeasurements,
         0,
@@ -988,7 +987,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
                 "FramebufferRenderer::render::deferredTasks"
             );
         }
-        performDeferredTasks(tasks.deferredcasterTasks);
+        performDeferredTasks(tasks.deferredcasterTasks, blackoutFactor);
     }
 
     if (tasks.deferredcasterTasks.empty()) {
@@ -1099,7 +1098,9 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
 }
 
 void FramebufferRenderer::performDeferredTasks(
-                                             const std::vector<DeferredcasterTask>& tasks)
+                                             const std::vector<DeferredcasterTask>& tasks,
+                                                                     float blackoutFactor
+                                              )
 {
     bool firstPaint = true;
 
@@ -1149,6 +1150,9 @@ void FramebufferRenderer::performDeferredTasks(
             deferredcastProgram->setUniform("firstPaint", firstPaint);
             deferredcastProgram->setUniform("atmExposure", _hdrExposure);
             deferredcastProgram->setUniform("backgroundConstant", _hdrBackground);
+
+            deferredcastProgram->setUniform("blackoutFactor", blackoutFactor);
+
 
             deferredcaster->preRaycast(
                 deferredcasterTask.renderData,

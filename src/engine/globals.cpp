@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,7 +37,6 @@
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/shortcutmanager.h>
 #include <openspace/mission/missionmanager.h>
-#include <openspace/network/networkengine.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/performance/performancemanager.h>
 #include <openspace/properties/propertyowner.h>
@@ -49,6 +48,7 @@
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
+#include <openspace/util/versionchecker.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/glm.h>
 #include <ghoul/font/fontmanager.h>
@@ -94,11 +94,6 @@ ModuleEngine& gModuleEngine() {
     return g;
 }
 
-NetworkEngine& gNetworkEngine() {
-    static NetworkEngine g;
-    return g;
-}
-
 OpenSpaceEngine& gOpenSpaceEngine() {
     static OpenSpaceEngine g;
     return g;
@@ -131,6 +126,11 @@ SyncEngine& gSyncEngine() {
 
 TimeManager& gTimeManager() {
     static TimeManager g;
+    return g;
+}
+
+VersionChecker& gVersionChecker() {
+    static VersionChecker g;
     return g;
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -445,14 +445,21 @@ void RawTileDataReader::initialize() {
     GlobeBrowsingModule& module = *global::moduleEngine.module<GlobeBrowsingModule>();
 
     std::string content = _datasetFilePath;
-    if (module.isWMSCachingEnabled() && FileSys.fileExists(_datasetFilePath)) {
-        // Only replace the 'content' if the dataset is an XML file and we want to do
-        // caching
-        std::ifstream t(_datasetFilePath);
-        std::string c(
-            (std::istreambuf_iterator<char>(t)),
-            std::istreambuf_iterator<char>()
-        );
+    if (module.isWMSCachingEnabled()) {
+        std::string c;
+        if (FileSys.fileExists(_datasetFilePath)) {
+            // Only replace the 'content' if the dataset is an XML file and we want to do
+            // caching
+            std::ifstream t(_datasetFilePath);
+            c.append(
+                (std::istreambuf_iterator<char>(t)),
+                std::istreambuf_iterator<char>()
+            );
+        }
+        else {
+            //GDAL input case for configuration string (e.g. temporal data)
+            c = _datasetFilePath;
+        }
 
         if (c.size() > 10 && c.substr(0, 10) == "<GDAL_WMS>") {
             // We know that _datasetFilePath is an XML file, so now we add a Cache line

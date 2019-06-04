@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,11 @@
 #include <openspace/interaction/mousecamerastates.h>
 
 #include <openspace/interaction/inputstate.h>
+
+namespace {
+    const double SENSITIVITY_ADJUSTMENT_INCREASE = 8.0;
+    const double SENSITIVITY_ADJUSTMENT_DECREASE = 0.5;
+}
 
 namespace openspace::interaction {
 
@@ -82,8 +87,17 @@ void MouseCameraStates::updateStateFromInput(const InputState& inputState,
     if (button2Pressed || (keyAltPressed && button1Pressed)) {
         glm::dvec2 mousePositionDelta = _truckMovementState.previousPosition -
                                         mousePosition;
+
+        double sensitivity = _sensitivity;
+        if (inputState.isKeyPressed(Key::Z)) {
+            sensitivity *= SENSITIVITY_ADJUSTMENT_INCREASE;
+        }
+        else if (inputState.isKeyPressed(Key::X)) {
+            sensitivity *= SENSITIVITY_ADJUSTMENT_DECREASE;
+        }
+
         _truckMovementState.velocity.set(
-            mousePositionDelta * _sensitivity,
+            mousePositionDelta * sensitivity,
             deltaTime
         );
     }

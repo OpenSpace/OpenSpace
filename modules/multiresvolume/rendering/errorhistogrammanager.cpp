@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -364,8 +364,7 @@ unsigned int ErrorHistogramManager::brickToInnerNodeIndex(unsigned int brickInde
 unsigned int ErrorHistogramManager::innerNodeToBrickIndex(
                                                         unsigned int innerNodeIndex) const
 {
-    // @TODO(abock): innerNodeIndex is an unsigned int, so it will never be < 0
-    if (innerNodeIndex < 0 || innerNodeIndex >= _numInnerNodes) {
+    if (innerNodeIndex >= _numInnerNodes) {
         return std::numeric_limits<unsigned int>::max(); // Not an inner node
     }
 

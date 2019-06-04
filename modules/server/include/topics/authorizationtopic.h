@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,7 +31,7 @@ namespace openspace {
 
 class AuthorizationTopic : public Topic {
 public:
-    AuthorizationTopic() = default;
+    AuthorizationTopic(std::string password);
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
@@ -39,6 +39,7 @@ public:
 private:
     bool authorize(const std::string& key);
 
+    std::string _password;
     bool _isAuthenticated = false;
 };
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,6 +46,12 @@ namespace {
         "This value specifies the destination frame that is used for the coordinate "
         "transformation. This has to be a valid SPICE name."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo TimeFrameInfo = {
+        "TimeFrame",
+        "Time Frame",
+        "The time frame in which the spice kernels are valid."
+    };
 } // namespace
 
 namespace openspace {
@@ -80,7 +86,13 @@ documentation::Documentation SpiceRotation::Documentation() {
                 "A single kernel or list of kernels that this SpiceTranslation depends "
                 "on. All provided kernels will be loaded before any other operation is "
                 "performed."
-            }
+            },
+            {
+                TimeFrameInfo.identifier,
+                new ReferencingVerifier("core_time_frame"),
+                Optional::Yes,
+                TimeFrameInfo.description
+            },
         }
     };
 }
@@ -113,6 +125,16 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
         }
     }
 
+    if (dictionary.hasKey(TimeFrameInfo.identifier)) {
+        ghoul::Dictionary timeFrameDictionary;
+        dictionary.getValue(TimeFrameInfo.identifier, timeFrameDictionary);
+        _timeFrame = TimeFrame::createFromDictionary(timeFrameDictionary);
+        if (_timeFrame == nullptr) {
+            throw ghoul::RuntimeError("Invalid dictionary for TimeFrame.");
+        }
+        addPropertySubOwner(_timeFrame.get());
+    }
+
     addProperty(_sourceFrame);
     addProperty(_destinationFrame);
 
@@ -121,6 +143,9 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
 }
 
 glm::dmat3 SpiceRotation::matrix(const UpdateData& data) const {
+    if (_timeFrame && !_timeFrame->isActive(data.time)) {
+        return glm::dmat3(1.0);
+    }
     return SpiceManager::ref().positionTransformMatrix(
         _sourceFrame,
         _destinationFrame,

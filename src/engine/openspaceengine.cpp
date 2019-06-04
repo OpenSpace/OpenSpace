@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,7 @@
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/navigationhandler.h>
-#include <openspace/network/networkengine.h>
+#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/performance/performancemeasurement.h>
 #include <openspace/performance/performancemanager.h>
@@ -155,10 +155,9 @@ void OpenSpaceEngine::registerPathTokens() {
     LTRACE("OpenSpaceEngine::initialize(begin)");
 
     // Registering Path tokens. If the BASE path is set, it is the only one that will
-// overwrite the default path of the cfg directory
-    for (const std::pair<std::string, std::string>& path :
-        global::configuration.pathTokens)
-    {
+    // overwrite the default path of the cfg directory
+    using T = std::string;
+    for (const std::pair<const T, T>& path : global::configuration.pathTokens) {
         std::string fullKey = ghoul::filesystem::FileSystem::TokenOpeningBraces +
             path.first +
             ghoul::filesystem::FileSystem::TokenClosingBraces;
@@ -185,6 +184,10 @@ void OpenSpaceEngine::initialize() {
 
     global::initialize();
 
+    const std::string versionCheckUrl = global::configuration.versionCheckUrl;
+    if (!versionCheckUrl.empty()) {
+        global::versionChecker.requestLatestVersion(versionCheckUrl);
+    }
 
     std::string cacheFolder = absPath("${CACHE}");
     if (global::configuration.usePerSceneCache) {
@@ -644,6 +647,8 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     }
 
     _scene = std::make_unique<Scene>(std::move(sceneInitializer));
+    global::renderEngine.setScene(_scene.get());
+
     global::rootPropertyOwner.addPropertySubOwner(_scene.get());
     _scene->setCamera(std::make_unique<Camera>());
     Camera* camera = _scene->camera();
@@ -651,9 +656,14 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
     global::renderEngine.setCamera(camera);
     global::navigationHandler.setCamera(camera);
-    global::navigationHandler.setFocusNode(camera->parent());
-
-    global::renderEngine.setScene(_scene.get());
+    const SceneGraphNode* parent = camera->parent();
+    if (parent) {
+        global::navigationHandler.orbitalNavigator().setFocusNode(parent->identifier());
+    } else {
+        global::navigationHandler.orbitalNavigator().setFocusNode(
+            _scene->root()->identifier()
+        );
+    }
 
     _assetManager->removeAll();
     _assetManager->add(assetPath);
@@ -749,9 +759,6 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     _loadingScreen = nullptr;
 
     global::renderEngine.updateScene();
-
-    global::renderEngine.setGlobalBlackOutFactor(0.f);
-    global::renderEngine.startFading(1, 3.f);
 
     global::syncEngine.addSyncables(global::timeManager.getSyncables());
     if (_scene && _scene->camera()) {
@@ -874,7 +881,8 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
 void OpenSpaceEngine::loadFonts() {
     global::fontManager.initialize();
 
-    for (const std::pair<std::string, std::string>& font : global::configuration.fonts) {
+    using T = std::string;
+    for (const std::pair<const T, T>& font : global::configuration.fonts) {
         std::string key = font.first;
         std::string fontName = absPath(font.second);
 
@@ -1036,7 +1044,6 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     }
 
     global::renderEngine.updateScene();
-    global::renderEngine.updateFade();
     global::renderEngine.updateRenderer();
     global::renderEngine.updateScreenSpaceRenderables();
     global::renderEngine.updateShaderPrograms();
@@ -1184,10 +1191,13 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier)
     global::luaConsole.charCallback(codepoint, modifier);
 }
 
-void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action) {
-    using F = std::function<bool (MouseButton, MouseAction)>;
+void OpenSpaceEngine::mouseButtonCallback(MouseButton button,
+                                          MouseAction action,
+                                          KeyModifier mods)
+{
+    using F = std::function<bool (MouseButton, MouseAction, KeyModifier)>;
     for (const F& func : global::callback::mouseButton) {
-        bool isConsumed = func(button, action);
+        bool isConsumed = func(button, action, mods);
         if (isConsumed) {
             // If the mouse was released, we still want to forward it to the navigation
             // handler in order to reliably terminate a rotation or zoom. Accidentally
@@ -1239,9 +1249,6 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
 
 std::vector<char> OpenSpaceEngine::encode() {
     std::vector<char> buffer = global::syncEngine.encodeSyncables();
-    global::networkEngine.publishStatusMessage();
-    global::networkEngine.sendMessages();
-
     return buffer;
 }
 
