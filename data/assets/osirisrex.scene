@@ -10,7 +10,9 @@ asset.require('scene/solarsystem/missions/osirisrex/osirisrex')
 local Keybindings = {
     {
         Key = "a",
-        Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'OsirisRex')",
+        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'OsirisRex')" ..
+                  "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');" ..
+                  "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
         Documentation = "Sets the focus of the camera on 'OsirisRex'.",
         Name = "Focus on OsirisRex",
         GuiPath = "/Missions/Osiris Rex",
@@ -18,7 +20,9 @@ local Keybindings = {
     },
     {
         Key = "s",
-        Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'BennuBarycenter')",
+        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'BennuBarycenter')" ..
+                  "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');" ..
+                  "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
         Documentation = "Sets the focus of the camera on 'Bennu'",
         Name = "Focus on Bennu",
         GuiPath = "/Missions/Osiris Rex",
