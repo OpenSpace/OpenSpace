@@ -6,6 +6,7 @@ local sceneHelper = asset.require('util/scene_helper')
 -- local station2 = asset.require('scene/solarsystem/missions/apollo/bouldersstation2')
 -- local station6 = asset.require('scene/solarsystem/missions/apollo/bouldersstation6')
 -- local station7 = asset.require('scene/solarsystem/missions/apollo/bouldersstation7')
+asset.require('scene/solarsystem/missions/apollo/apollo11')
 asset.require('scene/solarsystem/missions/apollo/a11_lem')
 asset.require('scene/solarsystem/missions/apollo/a17_lem')
 asset.require('scene/solarsystem/missions/apollo/apollo_globebrowsing')
@@ -26,6 +27,8 @@ local Keybindings = {
         Command = "openspace.setPropertyValue('Scene.Moon.Renderable.Layers.ColorLayers.A17_*.Enabled', false);" ..
                   "openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_11.Enabled', false);" ..
                   "openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A11_M177481212_p_longlat.Enabled', false);" ..
+                  "openspace.setPropertyValueSingle('Scene.Apollo11MoonTrail.Renderable.Enabled', false);" ..
+                  "openspace.setPropertyValueSingle('Scene.Apollo11LemTrail.Renderable.Enabled', false);"..
                   "openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.HeightLayers.LRO_NAC_Apollo_17.Enabled', false);",
         Documentation = "Disable apollo site on moon when switching",
         Name = "Disable Apollo site",
@@ -39,7 +42,9 @@ local Keybindings = {
                   "openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A11_M177481212_p_longlat.Enabled', true);" ..
                   "openspace.setPropertyValueSingle('Scene.Moon.Renderable.LodScaleFactor', 20.11);" ..
                   "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Apollo11LemModel');" ..
-                  "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);",
+                  "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);" ..
+                  "openspace.setPropertyValueSingle('Scene.Apollo11MoonTrail.Renderable.Enabled', true);" ..
+                  "openspace.setPropertyValueSingle('Scene.Apollo11LemTrail.Renderable.Enabled', true);",
         Documentation = "Setup for A11 site",
         Name = "Setup A11 site",
         GuiPath = "/Missions/Apollo/11",
@@ -77,7 +82,7 @@ asset.onInitialize(function ()
 
     sceneHelper.bindKeys(Keybindings)
 
-    openspace.markInterestingNodes({ "Apollo11LemModel", "Apollo17LemModel" })
+    openspace.markInterestingNodes({ "Moon", "Apollo11LemModel", "Apollo17LemModel", "Apollo11", "Apollo11LunarLander" })
 
     -- To enable both sites by default, uncomment these lines
     -- openspace.setPropertyValueSingle('Scene.Moon.Renderable.Layers.ColorLayers.A17_travmap.BlendMode', 0.000000);
@@ -102,5 +107,5 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-    openspace.removeInterestingNodes({ "Apollo11Lem", "Apollo17Lem" })
+    openspace.removeInterestingNodes({ "Moon", "Apollo11Lem", "Apollo17Lem", "Apollo11", "Apollo11LunarLander" })
 end)
