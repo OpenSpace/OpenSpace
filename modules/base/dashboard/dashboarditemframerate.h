@@ -29,6 +29,7 @@
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
 namespace ghoul { class Dictionary; }
@@ -60,8 +61,13 @@ private:
     properties::StringProperty _fontName;
     properties::FloatProperty _fontSize;
     properties::OptionProperty _frametimeType;
+    properties::TriggerProperty _clearCache;
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
+
+    double _minDeltaTimeCache = 1.0;
+    double _maxDeltaTimeCache = -1.0;
+    bool _shouldClearCache = true;
 };
 
 } // openspace

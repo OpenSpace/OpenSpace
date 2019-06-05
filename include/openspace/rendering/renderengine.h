@@ -151,6 +151,8 @@ public:
     glm::mat4 screenSpaceRotation() const;
     glm::mat4 nodeRotation() const;
 
+    uint64_t frameNumber() const;
+
 private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
     RendererImplementation rendererFromString(const std::string& renderingMethod) const;
