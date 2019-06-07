@@ -55,6 +55,7 @@ namespace {
     constexpr const char* KeyTimeStep = "TimeStep";
     constexpr const char* KeyEndTime = "EndTime";
     constexpr const char* KeyInputPath = "InputPath";
+    constexpr const char* KeyGridType = "GridType";
 
     // constexpr const char* KeyInputPath1 = "InputPath1";
     // constexpr const char* KeyInputPath2 = "InputPath2";
@@ -376,7 +377,16 @@ std::vector<KeplerParameters> readTLEFile(const std::string& filename){
     return data;
 }
 
-std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData, double timeInSeconds) {
+glm::dvec3 cartesianToSphericalCoord(glm::dvec3 position){
+    glm::dvec3 sphericalPosition;
+    sphericalPosition.x = pow(pow(position.x,2)+pow(position.y,2)+pow(position.z,2) , 0.5);  //abs(position.x + position.y + position.z);  // r
+    sphericalPosition.y = atan(position.y/position.x);  // theta
+    sphericalPosition.z = atan(pow(pow(position.x,2)+pow(position.y,2),0.5)/position.z);  // abs(position.x + position.y) // p
+    return sphericalPosition;
+}
+
+
+std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData, double timeInSeconds, std::string gridType) {
 
     std::vector<glm::dvec3> positionBuffer;
     for(const auto& orbit : tleData) {
@@ -393,6 +403,9 @@ std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData,
         );
         // double timeInSeconds = Time::convertTime(timeStamp);
         glm::dvec3 position = keplerTranslator.debrisPos(timeInSeconds);
+        if( gridType == "Spherical"){
+            position = cartesianToSphericalCoord(position);
+        }
         positionBuffer.push_back(position);
         
     }
@@ -434,28 +447,34 @@ float getMaxApogee(std::vector<KeplerParameters> inData){
     return static_cast<float>(maxApogee*1000);  // * 1000 for meters
 }
 
-int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim, float maxApogee){
+int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim, float maxApogee, std::string gridType){
     // epsilon is to make sure that for example if newPosition.x/maxApogee = 1,
     // then the index for that dimension will not exceed the range of the grid.
     float epsilon = static_cast<float>(0.000000001);
-    glm::vec3 newPosition = glm::vec3(position.x + maxApogee
-                                     ,position.y + maxApogee
-                                     ,position.z + maxApogee);
+    if(gridType == "Cartesian" || gridType == "Spherical"){
+        glm::dvec3 newPosition = glm::dvec3(position.x + maxApogee
+                                        ,position.y + maxApogee
+                                        ,position.z + maxApogee);
 
-    glm::uvec3 coordinateIndex = glm::uvec3(static_cast<int>(newPosition.x * dim.x / (2 * (maxApogee + epsilon))),
-                                            static_cast<int>(newPosition.y * dim.y / (2 * (maxApogee + epsilon))),
-                                            static_cast<int>(newPosition.z * dim.z / (2 * (maxApogee + epsilon))));
+        glm::uvec3 coordinateIndex = glm::uvec3(static_cast<int>(newPosition.x * dim.x / (2 * (maxApogee + epsilon)))
+                                                ,static_cast<int>(newPosition.y * dim.y / (2 * (maxApogee + epsilon)))
+                                                ,static_cast<int>(newPosition.z * dim.z / (2 * (maxApogee + epsilon))));
 
-    
-    return coordinateIndex.z * (dim.x * dim.y) + coordinateIndex.y * dim.x + coordinateIndex.x;
+        
+        return coordinateIndex.z * (dim.x * dim.y) + coordinateIndex.y * dim.x + coordinateIndex.x;
+    }
+    //else if(gridType == "Spherical"){
+
+//    }
 }
 
-int* mapDensityToVoxels(int* densityArray, std::vector<glm::dvec3> positions, glm::uvec3 dim, float maxApogee) {
+int* mapDensityToVoxels(int* densityArray, std::vector<glm::dvec3> positions, glm::uvec3 dim, float maxApogee, std::string gridType) {
 
     for(const glm::dvec3& position : positions) {
-        int index = getIndexFromPosition(position, dim, maxApogee);
+        int index = getIndexFromPosition(position, dim, maxApogee, gridType);
         ++densityArray[index];
     }
+
     return densityArray;
 }
 
@@ -477,6 +496,7 @@ GenerateDebrisVolumeTask::GenerateDebrisVolumeTask(const ghoul::Dictionary& dict
     // there will have to be either one task per dataset,
     // or you need to combine the datasets into one file.
     _inputPath = absPath(dictionary.value<std::string>(KeyInputPath));
+    _gridType = dictionary.value<std::string>(KeyGridType);
     _lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
     _upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
  
@@ -516,8 +536,16 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
         // _TLEDataVector = readTLEFile(_inputPath);
     
     //////////
+    VolumeGridType GridType = VolumeGridType::Cartesian;
+    if(_gridType == "Spherical"){
+        GridType = VolumeGridType::Spherical;
+    }
+    else if(_gridType != "Cartesian"){
+        // TODO:: Error message
+        return;
+    }
 
-        // float maxApogee = getMaxApogee(_TLEDataVector);
+    // float maxApogee = getMaxApogee(_TLEDataVector);
     LINFO(fmt::format("Max Apogee: {} ", _maxApogee));
 
     /**  SEQUENCE
@@ -527,7 +555,7 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
     *   2. loop to create a rawVolume for each timestep.
     */
 
-    // 1
+    // 1    // todo: handle if endTime is earlyer than startTime
     double startTimeInSeconds = Time::convertTime(_startTime);
     double endTimeInSeconds = Time::convertTime(_endTime);
     double timeSpan = endTimeInSeconds - startTimeInSeconds;
@@ -545,11 +573,11 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
     // 2.
     for(int i=0 ; i<=numberOfIterations ; ++i) {
 
-        std::vector<glm::dvec3> startPositionBuffer = getPositionBuffer(_TLEDataVector, startTimeInSeconds+(i*timeStep));   //+(i*timeStep)     
+        std::vector<glm::dvec3> startPositionBuffer = getPositionBuffer(_TLEDataVector, startTimeInSeconds+(i*timeStep), _gridType);   //+(i*timeStep)     
 
         int *densityArrayp = new int[size]();
         //densityArrayp = mapDensityToVoxels(densityArrayp, generatedPositions, _dimensions, maxApogee);
-        densityArrayp = mapDensityToVoxels(densityArrayp, startPositionBuffer, _dimensions, _maxApogee);
+        densityArrayp = mapDensityToVoxels(densityArrayp, startPositionBuffer, _dimensions, _maxApogee, _gridType);
             
         // create object rawVolume
         volume::RawVolume<float> rawVolume(_dimensions);
@@ -561,12 +589,7 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
         //     glm::vec3 coord = _lowerDomainBound +
         //        glm::vec3(cell) / glm::vec3(_dimensions) * domainSize;
             float value = getDensityAt(cell, densityArrayp, rawVolume);   // (coord)
-            //LINFO(fmt::format("EachVoxel: {} ", value));
-            // if((cell.x + cell.y + cell.z) % 8 == 0)
-            //     value = 1;
-            // else
-            //     value = 0;
-
+      
             rawVolume.set(cell, value);
 
             minVal = std::min(minVal, value);
@@ -606,7 +629,7 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
         metadata.dimensions = _dimensions;
         metadata.hasDomainUnit = false;
         metadata.hasValueUnit = false;
-        metadata.gridType = VolumeGridType::Cartesian;
+        metadata.gridType = GridType;
         metadata.hasDomainBounds = true;
         metadata.lowerDomainBound = _lowerDomainBound;
         metadata.upperDomainBound = _upperDomainBound;

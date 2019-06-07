@@ -47,6 +47,10 @@ public:
     void perform(const Task::ProgressCallback& progressCallback) override;
     static documentation::Documentation documentation();
 
+    std::string _gridType;
+
+protected:
+
 private:
     std::string _rawVolumeOutputPath;
     std::string _dictionaryOutputPath;
@@ -54,7 +58,7 @@ private:
     std::string _timeStep;
     std::string _endTime;
     std::string _inputPath;
-
+    
     glm::uvec3 _dimensions;
     glm::vec3 _lowerDomainBound;
     glm::vec3 _upperDomainBound;
