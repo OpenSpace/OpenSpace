@@ -49,6 +49,8 @@ Fragment getFragment() {
     // G-Buffer
     frag.gPosition = vs_position;
     frag.gNormal = vec4(vs_normal, 1.0);
+    
+    frag.color = vec4(frag.color.r,frag.color.r,frag.color.r, frag.color.a);
 
     return frag;
 }

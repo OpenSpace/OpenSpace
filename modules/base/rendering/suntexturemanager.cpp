@@ -46,21 +46,32 @@ namespace openspace {
 
 SunTextureManager::SunTextureManager(){
     
-    _syncDir = "../../../../../sync/magnetograms/"; //mac
-    //_syncDir = absPath("../../../sync/magnetograms/"); //pc;
+    //_syncDir = "../../../../../sync/magnetograms/"; //mac
+    _syncDir = absPath("../../../sync/magnetograms/"); //pc;
     
 }
     void SunTextureManager::update(std::unique_ptr<ghoul::opengl::Texture>& texture){
-        
+        std::string currentTime = getOpenSpaceDateTime();
+        if (_textureToUpload.empty() && currentTime != _activeTextureDate && _textureListGPU[currentTime]) {
+            _textureToUpload = currentTime;
+        }
+
         //_counter++;
         switch (_stage)
         {
             //This stage just checks what the next image applied should be, 
         case 0: {
             _current = getOpenSpaceDateTime();
+
+            if (!_textureToUpload.empty()) {
+                _stage = 3;
+                break;
+            }
+
             if (_counter % 150 == 0 && !_working && !_dldthread.joinable()) {
                 _dldthread = std::thread([=] { getNextTexture(_current, 1.0f, &_next); });
             }
+
             if (!_working && _dldthread.joinable()) {
                 _dldthread.join();
                 if (_next != "Not found!") {
@@ -98,35 +109,39 @@ SunTextureManager::SunTextureManager(){
         }
         case 2: {
 
-            if (!_working && !_dldthread.joinable()) {
+            /*if (!_working && !_dldthread.joinable()) {
                 _dldthread = std::thread([=] { processTextureFromName(_next, &_fitsImageToUpload, &_dateIDToUpload); });
-
             }
 
             if (!_working && _dldthread.joinable()) {
                 _dldthread.join();
-                LERROR(std::to_string(_textureListGPU.size()));
                 uploadTexture(_fitsImageToUpload, _dateIDToUpload);
                 _fitsImageToUpload.clear();
                 _dateIDToUpload.clear();
                 _stage = 3;
-            }
-
+            } 
+            */
+             uploadTextureFromName(_next);
+            _stage = 3;
+            
             break;
         }
         case 3: {
             //LERROR("in case 3");
-            if (_GPUListBlock.try_lock()) {
-                std::string current = "20" + parseMagnetogramDate(_next).substr(0, 10);
-                if ((_activeTextureDate != current) && ((_textureListGPU.find(current) != _textureListGPU.end()))) {
-                    _textureListGPU[_activeTextureDate] = std::move(texture);
-                    texture = std::move(_textureListGPU[current]);
-                    _activeTextureDate = current;
-                }
-                _stage = 0;
-                _GPUListBlock.unlock();
+
+            //std::string current = "20" + parseMagnetogramDate(_next).substr(0, 10);
+
+            //LERROR(current);
+
+            if (((_textureListGPU.find(_textureToUpload) != _textureListGPU.end())) ) {
+                _textureListGPU[_activeTextureDate] = std::move(texture);
+                texture = std::move(_textureListGPU[_textureToUpload]);
+                _activeTextureDate = _textureToUpload;
+                LERROR("Swapped texture to: " + _activeTextureDate);
+                _textureToUpload = "";
             }
 
+            _stage = 0;
 
             break;
         }
@@ -192,7 +207,7 @@ SunTextureManager::SunTextureManager(){
         opt.requestTimeoutSeconds = 0;
         ashd.start(opt);
         ashd.wait();
-        LERROR("Texture " + textureId + " downloaded to disk to " + destinationpath);
+        //LERROR("Texture " + textureId + " downloaded to disk to " + destinationpath);
         _working = false;
     }
     
@@ -253,12 +268,12 @@ SunTextureManager::SunTextureManager(){
 
 
     void SunTextureManager::uploadTexture(std::vector<float> imagedata, std::string id){
-        LERROR("laddar upp texture till GPU med id: " + id);
+        //LERROR("laddar upp texture till GPU med id: " + id);
         auto textureFits =  std::make_unique<ghoul::opengl::Texture>(std::move(imagedata.data()), glm::vec3(360, 180, 1),ghoul::opengl::Texture::Format::Red, GL_R32F,GL_FLOAT);
         textureFits->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
         textureFits->uploadTexture();
         textureFits->setName(id);
-        textureFits->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
+        //textureFits->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
         _textureQueueGPU.push(id);
         _textureListGPU[id] = std::move(textureFits);
         trimGPUList();
@@ -274,14 +289,14 @@ SunTextureManager::SunTextureManager(){
         
         *id = parseMagnetogramDate(*fitsFileReader.readHeaderValueString("DATE"));
         
-        //        const float minvalue = *fitsFileReader.readHeaderValueFloat("IMGMIN01");
-        //        const float maxvalue = *fitsFileReader.readHeaderValueFloat("IMGMAX01");
+                const float minvalue = *fitsFileReader.readHeaderValueFloat("IMGMIN01");
+                const float maxvalue = *fitsFileReader.readHeaderValueFloat("IMGMAX01");
         const int long0 = *fitsFileReader.readHeaderValueFloat("LONG0");
         const float stdvalue = *fitsFileReader.readHeaderValueFloat("IMGRMS01");
 
         for(float c : tempBild->contents){
-            //fitsImage.push_back((c - minvalue) / (maxvalue - minvalue)); // Normalized
-            imagedata->push_back((c + stdvalue) / stdvalue); // Standard Deviation
+            imagedata->push_back((c - minvalue) / (maxvalue - minvalue)); // Normalized
+            //imagedata->push_back((c + stdvalue) / stdvalue); // Standard Deviation
         }
         for (int i = 0; i < 180; i++) {
             std::rotate(imagedata->begin() + (i * 360), imagedata->begin() + ((i * 360) + (360 - long0)), imagedata->begin() + (i * 360) + 359);
@@ -305,10 +320,9 @@ SunTextureManager::SunTextureManager(){
     }
     
     void SunTextureManager::uploadTextureFromName(std::string filename){
-        _working = true;
-        std::lock_guard<std::mutex> guard(_GPUListBlock);
+
         FitsFileReader fitsFileReader(false);
-        LERROR("l;ser upp texture till GPU med id: från filväg " + absPath(_syncDir + filename));
+        //LERROR("l;ser upp texture till GPU med id: från filväg " + absPath(_syncDir + filename));
         const auto tempBild = fitsFileReader.readImageFloat(_syncDir + filename);
         
         std::string dateID = parseMagnetogramDate(*fitsFileReader.readHeaderValueString("DATE"));
@@ -319,15 +333,15 @@ SunTextureManager::SunTextureManager(){
         const float stdvalue = *fitsFileReader.readHeaderValueFloat("IMGRMS01");
         std::vector<float> fitsImage;
         for(float c : tempBild->contents){
-            //fitsImage.push_back((c - minvalue) / (maxvalue - minvalue)); // Normalized
-            fitsImage.push_back((c + stdvalue) / stdvalue); // Standard Deviation
+            fitsImage.push_back((c - minvalue) / (maxvalue - minvalue)); // Normalized
+            //fitsImage.push_back((c + stdvalue) / stdvalue); // Standard Deviation
         }
         for (int i = 0; i < 180; i++) {
             std::rotate(fitsImage.begin() + (i * 360), fitsImage.begin() + ((i * 360) + (360 - long0)), fitsImage.begin() + (i * 360) + 359);
         }
         
 
-        LERROR("laddar upp texture till GPU med id: " + dateID + "från filväg " + absPath(_syncDir + filename));
+        //LERROR("laddar upp texture till GPU med id: " + dateID + "från filväg " + absPath(_syncDir + filename));
         auto textureFits =  std::make_unique<ghoul::opengl::Texture>(std::move(fitsImage.data()), glm::vec3(360, 180, 1),ghoul::opengl::Texture::Format::Red, GL_R32F,GL_FLOAT);
 
         textureFits->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
@@ -336,6 +350,7 @@ SunTextureManager::SunTextureManager(){
         _textureQueueGPU.push(dateID);
         _textureListGPU[dateID] = std::move(textureFits);
         trimGPUList();
+
     }
     
     std::string SunTextureManager::getOpenSpaceDateTime(){
@@ -381,7 +396,7 @@ SunTextureManager::SunTextureManager(){
             
             std::string dateId = _textureQueueGPU.front();
             _textureQueueGPU.pop();
-            LERROR("popped dateId : " + dateId);
+            //LERROR("popped dateId : " + dateId);
             _textureListGPU.at(dateId).release();
             //BaseModule::TextureManager.release(_textureListGPU.at(dateId).get());
             _textureListGPU.erase(dateId);

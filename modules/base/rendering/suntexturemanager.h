@@ -69,10 +69,11 @@ private:
     std::string _syncDir;
     
     int _counter = 0;
-    int _counter2 = 0;
-    bool connected = true;
+
     // The _working atomic, is used to notify if a thread is being used and is currently being worked on
     std::atomic_bool _working = false;
+
+    std::string _textureToUpload = "";
 
     /* The _stage atomic, is to describe in what stage the suntexture manager is in,
        Kind of like a queue system if you will:
