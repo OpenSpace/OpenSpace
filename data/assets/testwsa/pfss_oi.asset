@@ -1,0 +1,43 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('./transforms')
+
+local fieldlinesDirectory = asset.localResource("fl_pfss_oi")
+
+local sunRadius = 695508000
+
+-- Fieldlies from json
+local fieldlines = {
+    Identifier = "WSA_Fieldlines_PFSS_OI",
+    Parent = transforms.HNMReferenceFrame.Identifier,
+    Renderable = {
+        Type = "RenderableFieldlinesSequence",
+        SourceFolder = fieldlinesDirectory,
+        FlowEnabled = false,
+        AlphaBlendlingEnabled = false,
+        InputFileType = "json",
+        ColorTableMinMax = {
+            { 0, 1000000 },
+            { 100, 2000 }
+        },
+        LoadAtRuntime = true,
+        ScaleToMeters = 1.0,
+        SecondsBefore = 24*60*60,
+        SecondsAfter = 24*60*60,
+        SimulationModel = "wsa",
+        Color = {
+            Uniform = {0.725, 0.1, 0, 1}
+        }
+    },
+    GUI = {
+        Path = "/Solar System/Heliosphere",
+        Name = "WSA Fieldlines PFSS Out to In"
+    },
+    Transform = {
+        Scale = {
+            Type = "StaticScale",
+            Scale = sunRadius
+        },
+    }
+} 
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { fieldlines })
