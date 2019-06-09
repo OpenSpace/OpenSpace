@@ -99,7 +99,7 @@ asset.onInitialize(function ()
     )
 
     openspace.navigation.setCameraState({
-        Focus = earthAsset.Earth.Identifier,
+        Anchor = earthAsset.Earth.Identifier,
         Position = { 0, 0, 0 },
         Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 },
     })

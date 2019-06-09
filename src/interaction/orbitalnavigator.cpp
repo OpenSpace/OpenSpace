@@ -430,15 +430,13 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     const glm::dvec3 anchorPos = _anchorNode->worldPosition();
     glm::dvec3 prevCameraPosition = _camera->positionVec3();
     const glm::dvec3 anchorDisplacement = anchorPos - _previousAnchorNodePosition;
-    CameraPose pose;
     SurfacePositionHandle posHandle;
 
-#ifdef OPENSPACE_BEHAVIOR_KIOSK
-    pose = {
+    CameraPose pose = {
         _camera->positionVec3() + anchorDisplacement,
         _camera->rotationQuaternion()
     };
-    
+#ifdef OPENSPACE_BEHAVIOR_KIOSK
     // Calculate a position handle based on the camera position in world space
     posHandle =
         calculateSurfacePositionHandle(*_anchorNode, pose.position);
@@ -465,8 +463,13 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     // or to zoom further out 
     if (_flyTo) {
         if (distFromCameraToFocus > focusLimit) {
-            prevCameraPosition = moveCameraAlongVector(prevCameraPosition,
-                distFromCameraToFocus, camPosToAnchorPosDiff, focusLimit, _flyTo);
+            pose.position = moveCameraAlongVector(
+                pose.position,
+                distFromCameraToFocus,
+                camPosToAnchorPosDiff,
+                focusLimit,
+                _flyTo
+            );
         }
         else {
             _flyTo = false;
@@ -480,22 +483,24 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
         _flyTo = false;
 
         if (distFromCameraToFocus <= overviewLimit) {
-            prevCameraPosition = moveCameraAlongVector(prevCameraPosition, distFromCameraToFocus, -camPosToAnchorPosDiff, overviewLimit, _flyTo);
+            pose.position = moveCameraAlongVector(
+                pose.position,
+                distFromCameraToFocus,
+                -camPosToAnchorPosDiff,
+                overviewLimit,
+                _flyTo
+            );
         }
         else {
             _overview = false;
         }
     }
 #endif //#ifdef OPENSPACE_BEHAVIOR_KIOSK
-    pose = {
-        _camera->positionVec3() + anchorDisplacement,
-        _camera->rotationQuaternion()
-    };
 
     if (_aimNode && _aimNode != _anchorNode) {
         const glm::dvec3 aimPos = _aimNode->worldPosition();
         const glm::dvec3 cameraToAnchor =
-            _previousAnchorNodePosition - prevCameraPosition;
+            _previousAnchorNodePosition - pose.position;
 
         Displacement anchorToAim = {
             _previousAimNodePosition - _previousAnchorNodePosition,
