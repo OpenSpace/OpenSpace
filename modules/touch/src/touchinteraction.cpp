@@ -1346,14 +1346,15 @@ void TouchInteraction::step(double dt) {
                 (length(centerToCamera + zoomDistanceIncrement) < zoomInLimit);
 #endif //#if OPENSPACE_BEHAVIOR_KIOSK
 
-            if (    isZoomStepUnderDistToSurface
-#if OPENSPACE_BEHAVIOR_KIOSK
-                && !willNewPositionViolateOverviewLimit
-                && !willNewPositionViolateZoomInLimit
-#endif //#if OPENSPACE_BEHAVIOR_KIOSK
-                && !willZoomStepViolatePlanetBoundaryRadius )
+            if (isZoomStepUnderDistToSurface
+                && !willZoomStepViolatePlanetBoundaryRadius)
             {
-                camPos += zoomDistanceIncrement;
+#if OPENSPACE_BEHAVIOR_KIOSK
+                if (willNewPositionViolateOverviewLimit)
+                    camPos -= zoomDistanceIncrement;
+                else
+#endif //#if OPENSPACE_BEHAVIOR_KIOSK
+                    camPos += zoomDistanceIncrement;
             }
             else {
 #ifdef TOUCH_DEBUG_PROPERTIES
