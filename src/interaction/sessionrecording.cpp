@@ -30,6 +30,7 @@
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/interaction/keyframenavigator.h>
 #include <openspace/rendering/luaconsole.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
@@ -281,6 +282,11 @@ bool SessionRecording::startPlayback(const std::string& filename,
     //Hide the lua console
     global::luaConsole.keyboardCallback(Key::GraveAccent, KeyModifier::NoModifier, KeyAction::Press);
 
+    //Hide the GUI if we render out frames
+    if (isSavingFramesDuringPlayback()) {
+        global::luaConsole.keyboardCallback(Key::Tab, KeyModifier::NoModifier, KeyAction::Press);
+    }
+        
     return true;
 }
 
@@ -1023,7 +1029,7 @@ void SessionRecording::moveAheadInTime() {
         if (focusRenderable->renderedWithDesiredData())
         {
             _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
-            //global::renderEngine.takeScreenShot();
+            global::renderEngine.takeScreenShot();
         }       
     }
 }
