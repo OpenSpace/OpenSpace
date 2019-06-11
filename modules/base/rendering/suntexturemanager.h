@@ -73,8 +73,6 @@ private:
     // The _working atomic, is used to notify if a thread is being used and is currently being worked on
     std::atomic_bool _working = false;
 
-    std::string _textureToUpload = "";
-
     /* The _stage atomic, is to describe in what stage the suntexture manager is in,
        Kind of like a queue system if you will:
             Stage = 0  - Nothing going on right now, at this stage it is allowed to check what to do next
@@ -84,10 +82,23 @@ private:
     */ 
     std::atomic_size_t _stage = 0;
     mutable std::mutex _GPUListBlock;
+    // _next is a string containing the name of the next image given the current timestep and direction
     std::string _next = "";
+
+    // Probably can remove this soon.
     std::string _current;
+
+    // _textureToUpload is the queued image to swap to, once that timestep has passed in openspace time.
+    std::string _textureToUpload = "";
+
+    // The thread used for downloading images.
     std::thread _dldthread;
+
+    // First texture, a dummy image.
     std::string _activeTextureDate = "NODATE";
+
+    // _direction is the Delta time of openspace, used for knowing what to do next.
+    float _direction;
     
     const unsigned int _maxTexturesOnGPU = 5; //every texture is around 250kb in size
     
