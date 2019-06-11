@@ -124,14 +124,20 @@ void FramebufferRenderer::initialize() {
     GLint defaultFbo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
 
+    glGenTextures(1, &_renderBuffer.colorTexture);
+    glGenTextures(1, &_renderBuffer.depthTexture);
+    glGenTextures(1, &_renderBuffer.positionTexture);
+    glGenTextures(1, &_renderBuffer.normalTexture);
+    glGenFramebuffers(1, &_renderBuffer.framebuffer);
 
-    for (int i = 0; i < 2; ++i) {
-        glGenTextures(1, &_renderBuffers[i].colorTexture);
-        glGenTextures(1, &_renderBuffers[i].depthTexture);
-        glGenTextures(1, &_renderBuffers[i].positionTexture);
-        glGenTextures(1, &_renderBuffers[i].normalTexture);
-        glGenFramebuffers(1, &_renderBuffers[i].framebuffer);
-    }
+    // The first pingpong buffer shares the color texture with the renderbuffer:
+    _pingPongBuffers[0].colorTexture = _renderBuffer.colorTexture;
+
+    // The second one has its own texture:
+    glGenTextures(1, &_pingPongBuffers[1].colorTexture);
+
+    glGenFramebuffers(1, &_pingPongBuffers[0].framebuffer);
+    glGenFramebuffers(1, &_pingPongBuffers[1].framebuffer);
 
     // Exit framebuffer
     glGenTextures(1, &_exitColorTexture);
@@ -143,43 +149,84 @@ void FramebufferRenderer::initialize() {
     updateRendererData();
     updateRaycastData();
 
-    for (int i = 0; i < 2; ++i) {
-        glBindFramebuffer(GL_FRAMEBUFFER, _renderBuffers[i].framebuffer);
-        glFramebufferTexture2D(
-            GL_FRAMEBUFFER,
-            GL_COLOR_ATTACHMENT0,
-            GL_TEXTURE_2D_MULTISAMPLE,
-            _renderBuffers[i].colorTexture,
-            0
-        );
-        // G-buffer
-        glFramebufferTexture2D(
-            GL_FRAMEBUFFER,
-            GL_COLOR_ATTACHMENT1,
-            GL_TEXTURE_2D_MULTISAMPLE,
-            _renderBuffers[i].positionTexture,
-            0
-        );
-        glFramebufferTexture2D(
-            GL_FRAMEBUFFER,
-            GL_COLOR_ATTACHMENT2,
-            GL_TEXTURE_2D_MULTISAMPLE,
-            _renderBuffers[i].normalTexture,
-            0
-        );
-        glFramebufferTexture2D(
-            GL_FRAMEBUFFER,
-            GL_DEPTH_ATTACHMENT,
-            GL_TEXTURE_2D_MULTISAMPLE,
-            _renderBuffers[i].depthTexture,
-            0
-        );
+    glBindFramebuffer(GL_FRAMEBUFFER, _renderBuffer.framebuffer);
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D_MULTISAMPLE,
+        _renderBuffer.colorTexture,
+        0
+    );
+    // G-buffer
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT1,
+        GL_TEXTURE_2D_MULTISAMPLE,
+        _renderBuffer.positionTexture,
+        0
+    );
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT2,
+        GL_TEXTURE_2D_MULTISAMPLE,
+        _renderBuffer.normalTexture,
+        0
+    );
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        GL_TEXTURE_2D_MULTISAMPLE,
+        _renderBuffer.depthTexture,
+        0
+    );
 
-        GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-        if (status != GL_FRAMEBUFFER_COMPLETE) {
-            LERROR("Main framebuffer is not complete");
-        }
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LERROR("Main framebuffer is not complete");
     }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers[0].framebuffer);
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D_MULTISAMPLE,
+        _pingPongBuffers[0].colorTexture,
+        0
+    );
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        GL_TEXTURE_2D_MULTISAMPLE,
+        _renderBuffer.depthTexture,
+        0
+    );
+
+    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LERROR("First ping pong buffer is not complete");
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers[1].framebuffer);
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D_MULTISAMPLE,
+        _pingPongBuffers[1].colorTexture,
+        0
+    );
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        GL_TEXTURE_2D_MULTISAMPLE,
+        _renderBuffer.depthTexture,
+        0
+    );
+
+    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LERROR("Second ping pong buffer is not complete");
+    }
+
 
     glBindFramebuffer(GL_FRAMEBUFFER, _exitFramebuffer);
     glFramebufferTexture2D(
@@ -197,7 +244,7 @@ void FramebufferRenderer::initialize() {
         0
     );
 
-    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("Exit framebuffer is not complete");
     }
@@ -224,19 +271,21 @@ void FramebufferRenderer::initialize() {
 void FramebufferRenderer::deinitialize() {
     LINFO("Deinitializing FramebufferRenderer");
 
-    glDeleteFramebuffers(1, &_renderBuffers[0].framebuffer);
-    glDeleteFramebuffers(1, &_renderBuffers[1].framebuffer);
+    glDeleteFramebuffers(1, &_renderBuffer.framebuffer);
+    glDeleteFramebuffers(1, &_pingPongBuffers[0].framebuffer);
+    glDeleteFramebuffers(1, &_pingPongBuffers[1].framebuffer);
+
     glDeleteFramebuffers(1, &_exitFramebuffer);
 
+    glDeleteTextures(1, &_renderBuffer.colorTexture);
+    glDeleteTextures(1, &_renderBuffer.depthTexture);
+    glDeleteTextures(1, &_renderBuffer.positionTexture);
+    glDeleteTextures(1, &_renderBuffer.normalTexture);
 
-    glDeleteTextures(1, &_renderBuffers[0].colorTexture);
-    glDeleteTextures(1, &_renderBuffers[0].depthTexture);
-    glDeleteTextures(1, &_renderBuffers[0].positionTexture);
-    glDeleteTextures(1, &_renderBuffers[0].normalTexture);
-    glDeleteTextures(1, &_renderBuffers[1].colorTexture);
-    glDeleteTextures(1, &_renderBuffers[1].depthTexture);
-    glDeleteTextures(1, &_renderBuffers[1].positionTexture);
-    glDeleteTextures(1, &_renderBuffers[1].normalTexture);
+    // No need to delete &_pingPongBuffers[0].colorTexture,
+    // since this texture is the same as the renderbuffer color texture.
+
+    glDeleteTextures(1, &_pingPongBuffers[1].colorTexture);
 
     glDeleteTextures(1, &_exitColorTexture);
     glDeleteTextures(1, &_exitDepthTexture);
@@ -347,7 +396,7 @@ void FramebufferRenderer::update() {
 
 void FramebufferRenderer::updateResolution() {
     // Ping
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _renderBuffers[0].colorTexture);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _renderBuffer.colorTexture);
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
@@ -357,7 +406,7 @@ void FramebufferRenderer::updateResolution() {
         true
     );
 
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _renderBuffers[0].positionTexture);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _renderBuffer.positionTexture);
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
@@ -367,7 +416,7 @@ void FramebufferRenderer::updateResolution() {
         true
     );
 
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _renderBuffers[0].normalTexture);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _renderBuffer.normalTexture);
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
@@ -377,7 +426,7 @@ void FramebufferRenderer::updateResolution() {
         true
     );
 
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _renderBuffers[0].depthTexture);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _renderBuffer.depthTexture);
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
@@ -388,42 +437,11 @@ void FramebufferRenderer::updateResolution() {
     );
 
     // Pong
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _renderBuffers[1].colorTexture);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _pingPongBuffers[1].colorTexture);
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
         GL_RGBA,
-        _resolution.x,
-        _resolution.y,
-        true
-    );
-
-    // G-buffer
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _renderBuffers[1].positionTexture);
-    glTexImage2DMultisample(
-        GL_TEXTURE_2D_MULTISAMPLE,
-        _nAaSamples,
-        GL_RGBA32F,
-        _resolution.x,
-        _resolution.y,
-        true
-    );
-
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _renderBuffers[1].normalTexture);
-    glTexImage2DMultisample(
-        GL_TEXTURE_2D_MULTISAMPLE,
-        _nAaSamples,
-        GL_RGBA32F,
-        _resolution.x,
-        _resolution.y,
-        true
-    );
-
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _renderBuffers[1].depthTexture);
-    glTexImage2DMultisample(
-        GL_TEXTURE_2D_MULTISAMPLE,
-        _nAaSamples,
-        GL_DEPTH_COMPONENT32F,
         _resolution.x,
         _resolution.y,
         true
@@ -941,7 +959,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     GLint defaultFbo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, _renderBuffers[_pingPongIndex].framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, _renderBuffer.framebuffer);
     glEnable(GL_DEPTH_TEST);
 
     // deferred g-buffer
@@ -1004,7 +1022,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     //_pingPongIndex = _pingPongIndex == 0 ? 1 : 0;
 
-    glBindFramebuffer(GL_FRAMEBUFFER, _renderBuffers[_pingPongIndex].framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers[_pingPongIndex].framebuffer);
     glColorMaski(1, false, false, false, false);
     glColorMaski(2, false, false, false, false);
 
@@ -1024,7 +1042,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     ghoul::opengl::TextureUnit mainColorTextureUnit;
     mainColorTextureUnit.activate();
 
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _renderBuffers[_pingPongIndex].colorTexture);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _pingPongBuffers[_pingPongIndex].colorTexture);
     _resolveProgram->setUniform(_uniformCache.mainColorTexture, mainColorTextureUnit);
     _resolveProgram->setUniform(_uniformCache.blackoutFactor, blackoutFactor);
     _resolveProgram->setUniform(_uniformCache.nAaSamples, _nAaSamples);
@@ -1049,7 +1067,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             exitProgram->deactivate();
         }
 
-        glBindFramebuffer(GL_FRAMEBUFFER, _renderBuffers[_pingPongIndex].framebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers[_pingPongIndex].framebuffer);
         glm::vec3 cameraPosition;
         bool isCameraInside = raycaster->isCameraInside(
             raycasterTask.renderData,
@@ -1097,7 +1115,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             mainDepthTextureUnit.activate();
             glBindTexture(
                 GL_TEXTURE_2D_MULTISAMPLE, 
-                _renderBuffers[_pingPongIndex].framebuffer
+                _pingPongBuffers[_pingPongIndex].framebuffer
             );
             raycastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
 
@@ -1144,7 +1162,7 @@ void FramebufferRenderer::performDeferredTasks(
         if (deferredcastProgram) {
             _pingPongIndex = _pingPongIndex == 0 ? 1 : 0;
             int fromIndex = _pingPongIndex == 0 ? 1 : 0;
-            glBindFramebuffer(GL_FRAMEBUFFER, _renderBuffers[_pingPongIndex].framebuffer);
+            glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers[_pingPongIndex].framebuffer);
 
             deferredcastProgram->activate();
 
@@ -1153,7 +1171,7 @@ void FramebufferRenderer::performDeferredTasks(
             mainDColorTextureUnit.activate();
             glBindTexture(
                 GL_TEXTURE_2D_MULTISAMPLE,
-                _renderBuffers[fromIndex].colorTexture
+                _pingPongBuffers[fromIndex].colorTexture
             );
             deferredcastProgram->setUniform(
                 "mainColorTexture",
@@ -1164,7 +1182,7 @@ void FramebufferRenderer::performDeferredTasks(
             mainPositionTextureUnit.activate();
             glBindTexture(
                 GL_TEXTURE_2D_MULTISAMPLE,
-                _renderBuffers[fromIndex].positionTexture
+                _renderBuffer.positionTexture
             );
             deferredcastProgram->setUniform(
                 "mainPositionTexture",
@@ -1175,7 +1193,7 @@ void FramebufferRenderer::performDeferredTasks(
             mainNormalTextureUnit.activate();
             glBindTexture(
                 GL_TEXTURE_2D_MULTISAMPLE,
-                _renderBuffers[fromIndex].normalTexture
+                _renderBuffer.normalTexture
             );
             deferredcastProgram->setUniform(
                 "mainNormalTexture",

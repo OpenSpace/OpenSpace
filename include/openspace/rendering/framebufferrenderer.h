@@ -120,7 +120,6 @@ private:
 
     GLuint _screenQuad;
     GLuint _vertexPositionBuffer;
-    
 
     struct RenderBuffer {
         GLuint framebuffer;
@@ -130,7 +129,15 @@ private:
         GLuint depthTexture;
     };
 
-    RenderBuffer _renderBuffers[2];
+    struct PingPongBuffer {
+        GLuint framebuffer;
+        GLuint colorTexture;
+    };
+
+    RenderBuffer _renderBuffer;
+    PingPongBuffer _pingPongBuffers[2];
+    // The first PingPong buffer shares the color texture with the RenderBuffer.
+
     int _pingPongIndex = 0;
 
     GLuint _exitColorTexture;
