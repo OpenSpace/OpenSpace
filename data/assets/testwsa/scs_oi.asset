@@ -26,11 +26,12 @@ local fieldlines = {
         SimulationModel = "wsa",
         Color = {
             Uniform = {0, 0.725, 0.75, 1}
-        }
+        },
+        --OutputFolder = asset.localResource("TestMedSCSOI")
     },
     GUI = {
         Path = "/Solar System/Heliosphere",
-        Name = "WSA Fieldlines SCS Out to In"
+        Name = "WSA SCS Out to In Boundary Lines"
     },
     Transform = {
         Scale = {

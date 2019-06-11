@@ -30,7 +30,7 @@ local fieldlines = {
     },
     GUI = {
         Path = "/Solar System/Heliosphere",
-        Name = "WSA Fieldlines PFSS Out to In"
+        Name = "WSA PFSS Out to In Boundary Lines"
     },
     Transform = {
         Scale = {

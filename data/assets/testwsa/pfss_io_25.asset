@@ -1,13 +1,13 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 
-local fieldlinesDirectory = asset.localResource("fl_pfss_io")
+local fieldlinesDirectory = asset.localResource("fl_pfss_io_25")
 
 local sunRadius = 695508000
 
 -- Fieldlies from json
 local fieldlines = {
-    Identifier = "WSA_Fieldlines_PFSS_IO",
+    Identifier = "WSA_Fieldlines_PFSS_IO_25",
     Parent = transforms.HNMReferenceFrame.Identifier,
     Renderable = {
         Type = "RenderableFieldlinesSequence",
@@ -30,7 +30,7 @@ local fieldlines = {
     },
     GUI = {
         Path = "/Solar System/Heliosphere",
-        Name = "WSA PFSS In to Out Closed Lines"
+        Name = "WSA PFSS In to Out Step 25"
     },
     Transform = {
         Scale = {

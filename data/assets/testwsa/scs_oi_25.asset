@@ -1,13 +1,13 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 
-local fieldlinesDirectory = asset.localResource("fl_pfss_io")
+local fieldlinesDirectory = asset.localResource("fl_scs_oi_25")
 
 local sunRadius = 695508000
 
 -- Fieldlies from json
 local fieldlines = {
-    Identifier = "WSA_Fieldlines_PFSS_IO",
+    Identifier = "WSA_Fieldlines_SCS_OI_25",
     Parent = transforms.HNMReferenceFrame.Identifier,
     Renderable = {
         Type = "RenderableFieldlinesSequence",
@@ -25,12 +25,12 @@ local fieldlines = {
         SecondsAfter = 24*60*60,
         SimulationModel = "wsa",
         Color = {
-            Uniform = {0.1, 0.725, 0, 1}
+            Uniform = {0, 0.725, 0.75, 1}
         }
     },
     GUI = {
         Path = "/Solar System/Heliosphere",
-        Name = "WSA PFSS In to Out Closed Lines"
+        Name = "WSA SCS Out to In Step 25"
     },
     Transform = {
         Scale = {
