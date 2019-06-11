@@ -110,9 +110,6 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _renderableType(RenderableTypeInfo, "Renderable")
 {
-    // I can't come up with a good reason not to do this for all renderables
-    registerUpdateRenderBinFromOpacity();
-
     if (dictionary.hasKeyAndValue<std::string>(KeyTag)) {
         std::string tagName = dictionary.value<std::string>(KeyTag);
         if (!tagName.empty()) {
@@ -207,14 +204,18 @@ void Renderable::onEnabledChange(std::function<void(bool)> callback) {
     });
 }
 
+void Renderable::setRenderBinFromOpacity() {
+    if (_opacity > 0.f && _opacity < 1.f) {
+        setRenderBin(Renderable::RenderBin::Transparent);
+    }
+    else {
+        setRenderBin(Renderable::RenderBin::Opaque);
+    }
+}
+
 void Renderable::registerUpdateRenderBinFromOpacity() {
     _opacity.onChange([this](){
-        if (_opacity > 0.f && _opacity < 1.f) {
-            setRenderBin(Renderable::RenderBin::Transparent);
-        }
-        else {
-            setRenderBin(Renderable::RenderBin::Opaque);
-        }
+        setRenderBinFromOpacity();
     });
 }
 

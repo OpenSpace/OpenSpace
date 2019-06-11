@@ -92,8 +92,6 @@ uniform dmat4 dSgctProjectionToModelTransformMatrix;
 uniform dvec4 dCamPosObj;
 uniform dvec3 sunDirectionObj;
 
-uniform float blackoutFactor;
-
 /*******************************************************************************
  ***** ALL CALCULATIONS FOR ECLIPSE ARE IN METERS AND IN WORLD SPACE SYSTEM ****
  *******************************************************************************/
@@ -695,7 +693,6 @@ void main() {
         }  
 
         renderTarget = atmosphereFinalColor / float(nSamples);        
-        renderTarget.a *= blackoutFactor;
         // if (complex)
         //     renderTarget = vec4(1.0, 0.0, 0.0, 1.0);
     } 
@@ -706,13 +703,16 @@ void main() {
                 bColor += texelFetch(mainColorTexture, fragCoords, f);
             }
             bColor /= float(nAaSamples);
-            renderTarget = vec4(HDR(bColor.xyz * backgroundConstant, atmExposure), bColor.a * blackoutFactor);
+            renderTarget = vec4(HDR(bColor.xyz * backgroundConstant, atmExposure), bColor.a);
         } 
         else {
-            discard;
+            vec4 bColor = vec4(0.0f);
+            for (int f = 0; f < nAaSamples; f++) {
+                bColor += texelFetch(mainColorTexture, fragCoords, f);
+            }
+            bColor /= float(nAaSamples);
+            renderTarget = bColor;
         }
-        //renderTarget = vec4(1.0, 0.0, 0.0, 1.0);
-        
     }
 }
 

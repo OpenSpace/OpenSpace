@@ -91,8 +91,7 @@ public:
 
     void update() override;
     void performRaycasterTasks(const std::vector<RaycasterTask>& tasks);
-    void performDeferredTasks(const std::vector<DeferredcasterTask>& tasks, 
-        float blackoutFactor);
+    void performDeferredTasks(const std::vector<DeferredcasterTask>& tasks);
     void render(Scene* scene, Camera* camera, float blackoutFactor) override;
 
     /**
@@ -121,16 +120,22 @@ private:
 
     GLuint _screenQuad;
     GLuint _vertexPositionBuffer;
-    GLuint _mainColorTexture;
-    GLuint _mainPositionTexture;
-    GLuint _mainNormalTexture;
-    GLuint _mainDepthTexture;
+    
+
+    struct RenderBuffer {
+        GLuint framebuffer;
+        GLuint colorTexture;
+        GLuint positionTexture;
+        GLuint normalTexture;
+        GLuint depthTexture;
+    };
+
+    RenderBuffer _renderBuffers[2];
+    int _pingPongIndex = 0;
+
     GLuint _exitColorTexture;
-    GLuint _mainFramebuffer;
     GLuint _exitDepthTexture;
     GLuint _exitFramebuffer;
-    GLuint _deferredFramebuffer;
-    GLuint _deferredColorTexture;
 
     bool _dirtyDeferredcastData;
     bool _dirtyRaycastData;

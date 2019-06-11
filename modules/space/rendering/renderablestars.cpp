@@ -628,6 +628,8 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_userProvidedTextureOwner);
     addPropertySubOwner(_parametersOwner);
     addPropertySubOwner(_moffatMethodOwner);
+
+    setRenderBin(RenderBin::Transparent);
 }
 
 RenderableStars::~RenderableStars() {}
