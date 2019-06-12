@@ -766,7 +766,7 @@ double SessionRecording::fixedDeltaTimeDuringFrameOutput() const {
     // do not adjust time while we are doing this
     const SceneGraphNode* focusNode = global::navigationHandler.orbitalNavigator().anchorNode();
     const Renderable* focusRenderable = focusNode->renderable();
-    if (focusRenderable->renderedWithDesiredData())
+    if (!focusRenderable || focusRenderable->renderedWithDesiredData())
     {
         return _saveRenderingDeltaTime;
     }
@@ -1026,7 +1026,7 @@ void SessionRecording::moveAheadInTime() {
         // do not adjust time while we are doing this, or take screenshot
         const SceneGraphNode* focusNode = global::navigationHandler.orbitalNavigator().anchorNode();
         const Renderable* focusRenderable = focusNode->renderable();
-        if (focusRenderable->renderedWithDesiredData())
+        if (!focusRenderable || focusRenderable->renderedWithDesiredData())
         {
             _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
             global::renderEngine.takeScreenShot();
