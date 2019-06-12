@@ -409,7 +409,7 @@ void FramebufferRenderer::updateResolution() {
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
-        GL_RGBA32F,
+        GL_RGBA16F,
         _resolution.x,
         _resolution.y,
         true
@@ -450,7 +450,7 @@ void FramebufferRenderer::updateResolution() {
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
-        GL_RGBA32F,
+        GL_RGBA16F,
         _resolution.x,
         _resolution.y,
         true
