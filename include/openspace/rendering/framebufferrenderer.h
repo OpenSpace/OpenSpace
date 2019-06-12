@@ -116,7 +116,15 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _hdrBackGroundProgram;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
-    UniformCache(mainColorTexture, blackoutFactor, nAaSamples) _uniformCache;
+
+    UniformCache(
+        mainColorTexture,
+        blackoutFactor,
+        nAaSamples,
+        backgroundConstant,
+        exposure,
+        gamma
+    ) _uniformCache;
 
     GLuint _screenQuad;
     GLuint _vertexPositionBuffer;
@@ -151,9 +159,9 @@ private:
 
     glm::ivec2 _resolution = glm::ivec2(0);
     int _nAaSamples;
-    float _hdrExposure = 0.4f;
-    float _hdrBackground = 2.8f;
-    float _gamma = 2.2f;
+    float _hdrExposure = 1.f;
+    float _hdrBackground = 1.f;
+    float _gamma = 1.f;
 
     std::vector<double> _mSAAPattern;
 

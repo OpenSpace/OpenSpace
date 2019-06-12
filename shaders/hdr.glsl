@@ -97,7 +97,7 @@ vec3 Uncharted2ToneMapping(vec3 color, float exposure) {
 }
 
 vec3 jToneMapping(vec3 color, float exposure) {
-  return 1.0 - exp(-exposure * color);
+  return pow(color * exposure, vec3(gamma)); // 1.0 - exp(-exposure * color);
 }
 
 vec3 HDR(vec3 color, float exposure) {

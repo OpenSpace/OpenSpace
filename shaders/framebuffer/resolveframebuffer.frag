@@ -24,11 +24,16 @@
 
 #version __CONTEXT__
 
+#include "hdr.glsl"
+
 layout (location = 0) out vec4 finalColor;
 
 uniform float blackoutFactor;
 uniform int nAaSamples;
 uniform sampler2DMS mainColorTexture;
+
+uniform float backgroundConstant;
+uniform float exposure;
 
 void main() {
      vec4 color = vec4(0.0);
@@ -38,6 +43,7 @@ void main() {
 
      color /= nAaSamples;
      color.rgb *= blackoutFactor;
-     
-     finalColor = vec4(color.rgb, 1.0);
+
+//     finalColor = color;
+     finalColor = vec4(HDR(color.rgb * backgroundConstant, exposure), 1.0);
 }

@@ -51,8 +51,13 @@
 namespace {
     constexpr const char* _loggerCat = "FramebufferRenderer";
 
-    constexpr const std::array<const char*, 3> UniformNames = {
-        "mainColorTexture", "blackoutFactor", "nAaSamples"
+    constexpr const std::array<const char*, 6> UniformNames = {
+        "mainColorTexture",
+        "blackoutFactor",
+        "nAaSamples",
+        "backgroundConstant",
+        "exposure",
+        "gamma"
     };
 
     constexpr const char* ExitFragmentShaderPath =
@@ -101,14 +106,18 @@ namespace openspace {
 void FramebufferRenderer::initialize() {
     LDEBUG("Initializing FramebufferRenderer");
 
+    glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
+    glClampColor(GL_CLAMP_VERTEX_COLOR, GL_FALSE);
+    glClampColor(GL_CLAMP_FRAGMENT_COLOR, GL_FALSE);
+
     const GLfloat vertexData[] = {
         // x     y
         -1.f, -1.f,
-         1.f,  1.f,
+        1.f,  1.f,
         -1.f,  1.f,
         -1.f, -1.f,
-         1.f, -1.f,
-         1.f,  1.f,
+        1.f, -1.f,
+        1.f,  1.f,
     };
 
     glGenVertexArrays(1, &_screenQuad);
@@ -400,7 +409,7 @@ void FramebufferRenderer::updateResolution() {
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
-        GL_RGBA,
+        GL_RGBA32F,
         _resolution.x,
         _resolution.y,
         true
@@ -441,7 +450,7 @@ void FramebufferRenderer::updateResolution() {
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
-        GL_RGBA,
+        GL_RGBA32F,
         _resolution.x,
         _resolution.y,
         true
@@ -940,6 +949,8 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
 }
 
 void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor) {
+    _pingPongIndex = 0;
+
     const bool doPerformanceMeasurements = global::performanceManager.isEnabled();
 
     std::unique_ptr<performance::PerformanceMeasurement> perf;
@@ -1003,13 +1014,8 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     }
 
     //glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
-    //GLenum dBuffer[1] = { GL_COLOR_ATTACHMENT0 };
-    //glDrawBuffers(1, dBuffer);
-
-    glEnablei(GL_BLEND, 0);
-    glDisablei(GL_BLEND, 1);
-    glDisablei(GL_BLEND, 2);
-
+    GLenum dBuffer[1] = { GL_COLOR_ATTACHMENT0 };
+    glDrawBuffers(1, dBuffer);
     {
         std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
         if (doPerformanceMeasurements) {
@@ -1020,9 +1026,11 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         performDeferredTasks(tasks.deferredcasterTasks);
     }
 
-    //_pingPongIndex = _pingPongIndex == 0 ? 1 : 0;
-
     glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers[_pingPongIndex].framebuffer);
+    glEnablei(GL_BLEND, 0);
+    glDisablei(GL_BLEND, 1);
+    glDisablei(GL_BLEND, 2);
+
     glColorMaski(1, false, false, false, false);
     glColorMaski(2, false, false, false, false);
 
@@ -1046,6 +1054,11 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     _resolveProgram->setUniform(_uniformCache.mainColorTexture, mainColorTextureUnit);
     _resolveProgram->setUniform(_uniformCache.blackoutFactor, blackoutFactor);
     _resolveProgram->setUniform(_uniformCache.nAaSamples, _nAaSamples);
+    _resolveProgram->setUniform(_uniformCache.backgroundConstant, _hdrBackground);
+    _resolveProgram->setUniform(_uniformCache.exposure, _hdrExposure);
+    _resolveProgram->setUniform(_uniformCache.gamma, _gamma);
+    _resolveProgram->setUniform(_uniformCache.nAaSamples, _nAaSamples);
+
     glBindVertexArray(_screenQuad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
@@ -1164,6 +1177,9 @@ void FramebufferRenderer::performDeferredTasks(
             int fromIndex = _pingPongIndex == 0 ? 1 : 0;
             glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers[_pingPongIndex].framebuffer);
 
+            glDisablei(GL_BLEND, 0);
+            glClear(GL_COLOR_BUFFER_BIT);
+
             deferredcastProgram->activate();
 
             // adding G-Buffer
@@ -1204,8 +1220,8 @@ void FramebufferRenderer::performDeferredTasks(
             // 48 = 16 samples * 3 coords
             deferredcastProgram->setUniform("msaaSamplePatter", &_mSAAPattern[0], 48);
 
-            deferredcastProgram->setUniform("firstPaint", firstPaint);
-            deferredcastProgram->setUniform("atmExposure", _hdrExposure);
+            //deferredcastProgram->setUniform("firstPaint", firstPaint);
+            //deferredcastProgram->setUniform("atmExposure", _hdrExposure);
             deferredcastProgram->setUniform("backgroundConstant", _hdrBackground);
 
             deferredcaster->preRaycast(

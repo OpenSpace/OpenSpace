@@ -61,7 +61,6 @@
 
 #include "floatoperations.glsl"
 
-#include "hdr.glsl"
 #include "atmosphere_common.glsl"
 
 out vec4 renderTarget;
@@ -75,8 +74,6 @@ uniform int cullAtmosphere;
 // set into the current Renderer
 // Background exposure hack
 uniform float backgroundConstant;
-uniform bool firstPaint;
-uniform float atmExposure;
 
 uniform sampler2D irradianceTexture;
 uniform sampler3D inscatterTexture;
@@ -633,7 +630,7 @@ void main() {
                 
                 if (position.xyz != vec3(0.0) && (pixelDepth < offset)) {
                     // ATM Occluded - Something in fron of ATM.
-                    atmosphereFinalColor += vec4(HDR(color.xyz * backgroundConstant, atmExposure), color.a);                  
+                    atmosphereFinalColor += color;
                 } else {
                     // Following paper nomenclature      
                     double t = offset;                  
@@ -680,39 +677,27 @@ void main() {
                         // the ground.
                         sunColorV = sunColor(x, tF, v, s, r, mu, irradianceFactor); 
                     } 
-                    
+
                     // Final Color of ATM plus terrain:
-                    vec4 finalRadiance = vec4(HDR(inscatterColor + groundColorV + sunColorV, atmExposure), 1.0);
+                    vec4 finalRadiance = vec4(inscatterColor + groundColorV + sunColorV, 1.0);
                     
                     atmosphereFinalColor += finalRadiance;
                 }
             } 
             else { // no intersection
-                atmosphereFinalColor += vec4(HDR(color.xyz * backgroundConstant, atmExposure), color.a);
+                atmosphereFinalColor += color;
             }           
         }  
 
         renderTarget = atmosphereFinalColor / float(nSamples);        
-        // if (complex)
-        //     renderTarget = vec4(1.0, 0.0, 0.0, 1.0);
     } 
-    else { // culling
-        if (firstPaint) {
-            vec4 bColor = vec4(0.0f);
-            for (int f = 0; f < nAaSamples; f++) {
-                bColor += texelFetch(mainColorTexture, fragCoords, f);
-            }
-            bColor /= float(nAaSamples);
-            renderTarget = vec4(HDR(bColor.xyz * backgroundConstant, atmExposure), bColor.a);
-        } 
-        else {
-            vec4 bColor = vec4(0.0f);
-            for (int f = 0; f < nAaSamples; f++) {
-                bColor += texelFetch(mainColorTexture, fragCoords, f);
-            }
-            bColor /= float(nAaSamples);
-            renderTarget = bColor;
+    else { // culling      
+        vec4 bColor = vec4(0.0f);
+        for (int f = 0; f < nAaSamples; f++) {
+            bColor += texelFetch(mainColorTexture, fragCoords, f);
         }
+        bColor /= float(nAaSamples);
+        renderTarget = bColor;
     }
 }
 
