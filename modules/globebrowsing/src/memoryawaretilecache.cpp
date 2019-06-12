@@ -266,7 +266,7 @@ MemoryAwareTileCache::MemoryAwareTileCache()
     addProperty(_clearTileCache);
 
     _applyTileCacheSize.onChange([&](){
-        setSizeEstimated(_tileCacheSize * 1024 * 1024);
+        setSizeEstimated(uint64_t(_tileCacheSize) * 1024ul * 1024ul);
     });
     addProperty(_applyTileCacheSize);
 
