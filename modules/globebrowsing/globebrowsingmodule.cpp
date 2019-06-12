@@ -61,6 +61,7 @@
 
 namespace {
     constexpr const char* _loggerCat = "GlobeBrowsingModule";
+    constexpr const char* _factoryName = "TileProvider";
 
     constexpr const openspace::properties::Property::PropertyInfo WMSCacheEnabledInfo = {
         "WMSCacheEnabled",
@@ -278,7 +279,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
         )]
     );
 
-    FactoryManager::ref().addFactory(std::move(fTileProvider));
+    FactoryManager::ref().addFactory(std::move(fTileProvider), _factoryName);
 
     auto fDashboard = FactoryManager::ref().factory<DashboardItem>();
     ghoul_assert(fDashboard, "Dashboard factory was not created");

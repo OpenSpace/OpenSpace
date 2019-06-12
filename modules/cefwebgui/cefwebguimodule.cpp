@@ -165,7 +165,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         _url = configuration.value<std::string>(GuiUrlInfo.identifier);
     } else {
         WebGuiModule* webGuiModule = global::moduleEngine.module<WebGuiModule>();
-        _url = "http://localhost:" +
+        _url = "http://127.0.0.1:" +
             std::to_string(webGuiModule->port()) + "/#/onscreen";
     }
 

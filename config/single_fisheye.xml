@@ -6,7 +6,7 @@
         <Scale value="1.0" />
     </Scene> -->
     <Node address="localhost" port="20401">
-        <Window fullScreen="false" numberOfSamples="8" name="OpenSpace">
+        <Window fullScreen="false" numberOfSamples="4" name="OpenSpace">
             <Stereo type="none" />
             <!-- 16:9 aspect ratio -->
             <Size x="1024" y="1024" />

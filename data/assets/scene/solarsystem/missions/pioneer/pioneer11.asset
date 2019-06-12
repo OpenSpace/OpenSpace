@@ -5,7 +5,7 @@ local modelFolder = asset.syncedResource({
     Name = "Pioneer 10/11 Models",
     Type = "HttpSynchronization",
     Identifier = "pioneer_10_11_model",
-    Version = 1
+    Version = 2
 })
 
 local kernelsFolder = asset.syncedResource({
