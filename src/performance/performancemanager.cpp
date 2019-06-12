@@ -210,6 +210,7 @@ void PerformanceManager::outputLogs() {
     PerformanceLayout* layout = performanceData();
     const size_t writeStart = (PerformanceLayout::NumberValues - 1) - _currentTick;
 
+
     // Log function performance
     for (int16_t n = 0; n < layout->nFunctionEntries; n++) {
         const PerformanceLayout::FunctionPerformanceLayout& function =
@@ -253,6 +254,40 @@ void PerformanceManager::outputLogs() {
         }
         out.close();
     }
+}
+
+void PerformanceManager::debrisLog() {
+    PerformanceLayout* layout = performanceData();
+    const size_t writeStart = (PerformanceLayout::NumberValues - 1) - _currentTick;
+    
+     //for (int16_t n = 0; n < layout->nScaleGraphEntries; n++) {
+      for (int16_t n = 7; n < 12; n++) {
+           //lol fult
+        const PerformanceLayout::SceneGraphPerformanceLayout node =
+            layout->sceneGraphEntries[n];
+            
+        // Open file
+        std::string filename = formatLogName(node.name);
+
+        std::ofstream out = std::ofstream(
+            absPath(std::move(filename)),
+            std::ofstream::out | std::ofstream::app
+        );
+
+        // Comma separate data
+        for (size_t i = writeStart; i < PerformanceLayout::NumberValues; i++) {
+            const std::vector<float> data = {
+                node.renderTime[i],
+                node.updateRenderable[i],
+                node.updateRotation[i],
+                node.updateScaling[i],
+                node.updateTranslation[i]
+            };
+            writeData(out, data);
+        }
+        out.close();
+    }
+
 }
 
 void PerformanceManager::writeData(std::ofstream& out, const std::vector<float>& data) {
@@ -450,7 +485,8 @@ void PerformanceManager::storeScenePerformanceMeasurements(
     _performanceMemory->releaseLock();
 
     if (_loggingEnabled && _currentTick == PerformanceLayout::NumberValues - 1) {
-        outputLogs();
+        //outputLogs();
+        debrisLog();
     }
 
     tick();

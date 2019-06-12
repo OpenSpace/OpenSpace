@@ -1,12 +1,12 @@
 return {{
 	Type = "GenerateDebrisVolumeTask",
-	Dimensions = {28, 28, 28},
+	Dimensions = {64, 64, 64},
 	LowerDomainBound = {0, 0, 0},
 	UpperDomainBound = {1, math.pi, 2 * math.pi},
 	InputPath = "${SYNC}/url/satellite_tle_data_DebrisAll/files/allDebrisInOneTLE.txt",
 	StartTime = "2018-05-04T00:00:00",
-	TimeStep = "1",
-	EndTime = "2018-05-04T00:00:00",
+	TimeStep = "25",
+	EndTime = "2018-05-04T00:01:00",
 	GridType = "Spherical",
 	RawVolumeOutput = "${DATA}/assets/scene/solarsystem/planets/earth/satellites/debris/volume/generated/singleDebris.rawvolume",
 	DictionaryOutput = "${DATA}/assets/scene/solarsystem/planets/earth/satellites/debris/volume/generated/singleDebris.dictionary"

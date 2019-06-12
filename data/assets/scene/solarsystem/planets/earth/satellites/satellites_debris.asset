@@ -1,7 +1,7 @@
---asset.request('./debris/debris_asat')
+asset.request('./debris/debris_asat')
 asset.request('./debris/debris_breezem')
---asset.request('./debris/debris_fengyun')
---asset.request('./debris/debris_iridium33')
---asset.request('./debris/debris_kosmos2251')
+asset.request('./debris/debris_fengyun')
+asset.request('./debris/debris_iridium33')
+asset.request('./debris/debris_kosmos2251')
 
-asset.request('./satellites_debris_old')
+--asset.request('./satellites_debris_old')
