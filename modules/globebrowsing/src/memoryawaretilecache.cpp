@@ -215,7 +215,7 @@ void MemoryAwareTileCache::TextureContainer::reset() {
 
         tex->setDataOwnership(Texture::TakeOwnership::Yes);
         tex->uploadTexture();
-        tex->setFilter(Texture::FilterMode::AnisotropicMipMap);
+        tex->setFilter(Texture::FilterMode::Linear);
 
         _textures.push_back(std::move(tex));
     }
@@ -266,7 +266,7 @@ MemoryAwareTileCache::MemoryAwareTileCache(int tileCacheSize)
     addProperty(_clearTileCache);
 
     _applyTileCacheSize.onChange([&](){
-        setSizeEstimated(_tileCacheSize * 1024 * 1024);
+        setSizeEstimated(uint64_t(_tileCacheSize) * 1024ul * 1024ul);
     });
     addProperty(_applyTileCacheSize);
 
@@ -287,7 +287,7 @@ MemoryAwareTileCache::MemoryAwareTileCache(int tileCacheSize)
     );
     addProperty(_tileCacheSize);
 
-    setSizeEstimated(_tileCacheSize * 1024 * 1024);
+    setSizeEstimated(uint64_t(_tileCacheSize) * 1024ul * 1024ul);
 }
 
 void MemoryAwareTileCache::clear() {
