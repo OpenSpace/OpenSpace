@@ -284,7 +284,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
                        const vec3 v, const vec3 s, out float r, out float mu,
                        out vec3 attenuation, const vec3 fragPosObj, out bool groundHit,
                        const double maxLength, const double pixelDepth,
-                       const vec4 spaceColor, const float sunIntensity) {
+                       const vec4 spaceColor, const float sunIntensity, const vec3 normal) {
 
     const float INTERPOLATION_EPS = 0.004f; // precision const from Brunetton
 
@@ -305,7 +305,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     // through the atmosphere. If this ray hits something inside the atmosphere,
     // we will subtract the attenuated scattering light from that path in the
     // current path.
-    vec4 inscatterRadiance = max(texture4D(inscatterTexture, r, mu, muSun, nu), 0.0);    
+    vec4 inscatterRadiance = max(texture4D(inscatterTexture, r, mu, muSun, nu), 0.0);
       
     // After removing the initial path from camera pos to top of atmosphere (for an
     // observer in the space) we test if the light ray is hitting the atmosphere
@@ -353,7 +353,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     if (abs(mu - muHorizon) < INTERPOLATION_EPS) {
         // We want an interpolation value close to 1/2, so the
         // contribution of each radiance value is almost the same
-        // or it has a havey weight if from above or below horizon
+        // or it has a heavy weight if from above or below horizon
         float interpolationValue = ((mu - muHorizon) + INTERPOLATION_EPS) / (2.0f * INTERPOLATION_EPS);
 
         //float t2 = t * t;
@@ -417,7 +417,9 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     if (groundHit) {
         return finalScatteringRadiance;
     } else {
-        return ((r-Rg) * invRtMinusRg)*spaceColor.rgb + finalScatteringRadiance;
+        // The final color is given by the attenuated light arriving at the observer's eye
+        // plus the scattered light in the atmosphere (only inscattered light taken into account here)
+        return attenuation * spaceColor.rgb + finalScatteringRadiance;
     }
     
 }
@@ -657,7 +659,8 @@ void main() {
                                                             s, r, mu, attenuation, 
                                                             vec3(positionObjectsCoords.xyz),
                                                             groundHit, maxLength, pixelDepth,
-                                                            color, sunIntensityInscatter); 
+                                                            color, sunIntensityInscatter,
+                                                            normal.xyz); 
                     vec3 groundColorV = vec3(0.0);
                     vec3 sunColorV = vec3(0.0);                                                
                     if (groundHit) {
