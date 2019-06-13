@@ -192,7 +192,7 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
         }
     }
     else {
-        setRenderBin(Renderable::RenderBin::Transparent);
+        setRenderBin(Renderable::RenderBin::Overlay);
     }
 }
 

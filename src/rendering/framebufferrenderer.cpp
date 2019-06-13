@@ -1101,10 +1101,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
 
             ghoul::opengl::TextureUnit mainDepthTextureUnit;
             mainDepthTextureUnit.activate();
-            glBindTexture(
-                GL_TEXTURE_2D_MULTISAMPLE, 
-                _renderBuffer.depthTexture
-            );
+            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _renderBuffer.depthTexture);
             raycastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
 
             raycastProgram->setUniform("nAaSamples", _nAaSamples);
@@ -1153,8 +1150,6 @@ void FramebufferRenderer::performDeferredTasks(
             glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers[_pingPongIndex].framebuffer);
 
             glDisablei(GL_BLEND, 0);
-            glClear(GL_COLOR_BUFFER_BIT);
-
             deferredcastProgram->activate();
 
             // adding G-Buffer
