@@ -97,7 +97,7 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary&) {
     fTranslation->registerClass<HorizonsTranslation>("HorizonsTranslation");
 
     auto fTasks = FactoryManager::ref().factory<Task>();
-    ghoul_assert(fTask, "No task factory existed");
+    ghoul_assert(fTasks, "No task factory existed");
     fTasks->registerClass<volume::GenerateDebrisVolumeTask>("GenerateDebrisVolumeTask");
 
     auto fRotation = FactoryManager::ref().factory<Rotation>();

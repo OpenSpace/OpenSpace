@@ -10,16 +10,16 @@ local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local maxApogee = 2 * 10946320;
 
 local volume = {
-    Identifier = "DebrisVolume",
+    Identifier = "DebrisVolume - Cartesian",
     Parent = transforms.EarthInertial.Identifier,
     Renderable = {
         Type = "RenderableTimeVaryingVolume",
-        SourceDirectory = asset.localResource("generated"),
+        SourceDirectory = asset.localResource("generatedCartesian"),
         TransferFunction = asset.localResource("transferfunction.txt"),
         StepSize = 0.01,
         MinValue = 0,
         MaxValue = 1,
-        GridType = "Spherical",
+        GridType = "Cartesian",
         SecondsBefore = 50*365*24*60*60,
         SecondsAfter = 50*365*24*60*60
     },
