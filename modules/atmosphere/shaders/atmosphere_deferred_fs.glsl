@@ -70,11 +70,6 @@ uniform int nAaSamples;
 uniform double msaaSamplePatter[48];
 uniform int cullAtmosphere;
 
-// The following uniforms are
-// set into the current Renderer
-// Background exposure hack
-uniform float backgroundConstant;
-
 uniform sampler2D irradianceTexture;
 uniform sampler3D inscatterTexture;
 uniform sampler2DMS mainPositionTexture;
@@ -422,7 +417,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     if (groundHit) {
         return finalScatteringRadiance;
     } else {
-        return ((r-Rg) * invRtMinusRg)*spaceColor.rgb * backgroundConstant + finalScatteringRadiance;
+        return ((r-Rg) * invRtMinusRg)*spaceColor.rgb + finalScatteringRadiance;
     }
     
 }

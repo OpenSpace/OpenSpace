@@ -186,7 +186,6 @@ private:
     properties::FloatProperty _globalBlackOutFactor;
     properties::IntProperty _nAaSamples;
     properties::FloatProperty _hdrExposure;
-    properties::FloatProperty _hdrBackground;
     properties::FloatProperty _gamma;
     properties::FloatProperty _horizFieldOfView;
 

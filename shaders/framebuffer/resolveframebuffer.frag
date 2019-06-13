@@ -32,7 +32,6 @@ uniform float blackoutFactor;
 uniform int nAaSamples;
 uniform sampler2DMS mainColorTexture;
 
-uniform float backgroundConstant;
 uniform float exposure;
 
 void main() {
@@ -45,5 +44,5 @@ void main() {
      color.rgb *= blackoutFactor;
 
 //     finalColor = color;
-     finalColor = vec4(HDR(color.rgb * backgroundConstant, exposure), 1.0);
+     finalColor = vec4(HDR(color.rgb, exposure), 1.0);
 }

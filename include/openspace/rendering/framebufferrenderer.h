@@ -76,16 +76,13 @@ public:
     void updateResolution();
     void updateRaycastData();
     void updateDeferredcastData();
-    void updateHDRData();
     void updateMSAASamplingPattern();
 
     void setResolution(glm::ivec2 res) override;
     void setNAaSamples(int nAaSamples) override;
     void setHDRExposure(float hdrExposure) override;
-    void setHDRBackground(float hdrBackground) override;
     void setGamma(float gamma) override;
 
-    float hdrBackground() const override;
     int nAaSamples() const override;
     const std::vector<double>& mSSAPattern() const override;
 
@@ -113,7 +110,6 @@ private:
 
     std::map<Deferredcaster*, DeferredcastData> _deferredcastData;
     DeferredcasterProgObjMap _deferredcastPrograms;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _hdrBackGroundProgram;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
 
@@ -121,7 +117,6 @@ private:
         mainColorTexture,
         blackoutFactor,
         nAaSamples,
-        backgroundConstant,
         exposure,
         gamma
     ) _uniformCache;
@@ -160,7 +155,6 @@ private:
     glm::ivec2 _resolution = glm::ivec2(0);
     int _nAaSamples;
     float _hdrExposure = 1.f;
-    float _hdrBackground = 1.f;
     float _gamma = 1.f;
 
     std::vector<double> _mSAAPattern;

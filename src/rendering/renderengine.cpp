@@ -197,13 +197,6 @@ namespace {
         "equivalent of an electronic image sensor."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BackgroundExposureInfo = {
-        "Background Exposure",
-        "BackgroundExposure",
-        "This value determines the amount of light per unit area reaching the "
-        "equivalent of an electronic image sensor for the background image."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
         "Gamma",
         "Gamma Correction",
@@ -244,8 +237,7 @@ RenderEngine::RenderEngine()
     , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
     , _nAaSamples(AaSamplesInfo, 4, 1, 8)
     , _hdrExposure(HDRExposureInfo, 1.f, 0.01f, 10.0f)
-    , _hdrBackground(BackgroundExposureInfo, 1.f, 0.01f, 10.0f)
-    , _gamma(GammaInfo, 1.f, 0.01f, 10.0f)
+    , _gamma(GammaInfo, 1.f, 0.2f, 10.0f)
     , _globalRotation(
         GlobalRotationInfo,
         glm::vec3(0.f),
@@ -289,13 +281,6 @@ RenderEngine::RenderEngine()
         }
     });
     addProperty(_hdrExposure);
-
-    _hdrBackground.onChange([this]() {
-        if (_renderer) {
-            _renderer->setHDRBackground(_hdrBackground);
-        }
-    });
-    addProperty(_hdrBackground);
 
     _gamma.onChange([this]() {
         if (_renderer) {

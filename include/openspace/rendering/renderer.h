@@ -51,10 +51,8 @@ public:
     virtual void setResolution(glm::ivec2 res) = 0;
     virtual void setNAaSamples(int nAaSamples) = 0;
     virtual void setHDRExposure(float hdrExposure) = 0;
-    virtual void setHDRBackground(float hdrBackground) = 0;
     virtual void setGamma(float gamma) = 0;
 
-    virtual float hdrBackground() const = 0;
     virtual int nAaSamples() const = 0;
     virtual const std::vector<double>& mSSAPattern() const = 0;
 

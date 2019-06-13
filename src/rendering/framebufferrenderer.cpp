@@ -34,7 +34,6 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/volumeraycaster.h>
-#include <openspace/rendering/volumeraycaster.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/timemanager.h>
@@ -51,11 +50,10 @@
 namespace {
     constexpr const char* _loggerCat = "FramebufferRenderer";
 
-    constexpr const std::array<const char*, 6> UniformNames = {
+    constexpr const std::array<const char*, 5> UniformNames = {
         "mainColorTexture",
         "blackoutFactor",
         "nAaSamples",
-        "backgroundConstant",
         "exposure",
         "gamma"
     };
@@ -259,7 +257,6 @@ void FramebufferRenderer::initialize() {
     }
 
     // JCC: Moved to here to avoid NVidia: "Program/shader state performance warning"
-    updateHDRData();
     updateDeferredcastData();
     _dirtyMsaaSamplingPattern = true;
 
@@ -334,12 +331,6 @@ void FramebufferRenderer::update() {
 
     if (_dirtyDeferredcastData) {
         updateDeferredcastData();
-    }
-
-    // If the resolve dictionary changed (or a file changed on disk)
-    // then rebuild the resolve program.
-    if (_hdrBackGroundProgram && _hdrBackGroundProgram->isDirty()) {
-        _hdrBackGroundProgram->rebuildFromFile();
     }
 
     if (_resolveProgram->isDirty()) {
@@ -614,17 +605,6 @@ void FramebufferRenderer::updateDeferredcastData() {
         }
     }
     _dirtyDeferredcastData = false;
-}
-
-void FramebufferRenderer::updateHDRData() {
-    _hdrBackGroundProgram = ghoul::opengl::ProgramObject::Build(
-        "HDR Background Control",
-        absPath("${SHADERS}/framebuffer/hdrBackground.vert"),
-        absPath("${SHADERS}/framebuffer/hdrBackground.frag")
-    );
-    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    _hdrBackGroundProgram->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
-    _hdrBackGroundProgram->setIgnoreUniformLocationError(IgnoreError::Yes);
 }
 
 void FramebufferRenderer::updateMSAASamplingPattern() {
@@ -1003,6 +983,11 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     data.renderBinMask = static_cast<int>(Renderable::RenderBin::Opaque);
     scene->render(data, tasks);
 
+    glDrawBuffers(1, textureBuffers);
+
+    data.renderBinMask = static_cast<int>(Renderable::RenderBin::Transparent);
+    scene->render(data, tasks);
+
     {
         std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
         if (doPerformanceMeasurements) {
@@ -1012,10 +997,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         }
         performRaycasterTasks(tasks.raycasterTasks);
     }
-
-    //glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
-    GLenum dBuffer[1] = { GL_COLOR_ATTACHMENT0 };
-    glDrawBuffers(1, dBuffer);
     {
         std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
         if (doPerformanceMeasurements) {
@@ -1031,16 +1012,11 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     glDisablei(GL_BLEND, 1);
     glDisablei(GL_BLEND, 2);
 
-    glColorMaski(1, false, false, false, false);
-    glColorMaski(2, false, false, false, false);
 
-    data.renderBinMask = static_cast<int>(Renderable::RenderBin::Transparent);
-    scene->render(data, tasks);
     data.renderBinMask = static_cast<int>(Renderable::RenderBin::Overlay);
     scene->render(data, tasks);
 
-    glColorMaski(1, true, true, true, true);
-    glColorMaski(2, true, true, true, true);
+    glDrawBuffers(3, textureBuffers);
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
 
     // As a last step, copy the rendering to the final default framebuffer.
@@ -1054,7 +1030,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     _resolveProgram->setUniform(_uniformCache.mainColorTexture, mainColorTextureUnit);
     _resolveProgram->setUniform(_uniformCache.blackoutFactor, blackoutFactor);
     _resolveProgram->setUniform(_uniformCache.nAaSamples, _nAaSamples);
-    _resolveProgram->setUniform(_uniformCache.backgroundConstant, _hdrBackground);
     _resolveProgram->setUniform(_uniformCache.exposure, _hdrExposure);
     _resolveProgram->setUniform(_uniformCache.gamma, _gamma);
     _resolveProgram->setUniform(_uniformCache.nAaSamples, _nAaSamples);
@@ -1128,7 +1103,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             mainDepthTextureUnit.activate();
             glBindTexture(
                 GL_TEXTURE_2D_MULTISAMPLE, 
-                _pingPongBuffers[_pingPongIndex].framebuffer
+                _renderBuffer.depthTexture
             );
             raycastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
 
@@ -1220,10 +1195,6 @@ void FramebufferRenderer::performDeferredTasks(
             // 48 = 16 samples * 3 coords
             deferredcastProgram->setUniform("msaaSamplePatter", &_mSAAPattern[0], 48);
 
-            //deferredcastProgram->setUniform("firstPaint", firstPaint);
-            //deferredcastProgram->setUniform("atmExposure", _hdrExposure);
-            deferredcastProgram->setUniform("backgroundConstant", _hdrBackground);
-
             deferredcaster->preRaycast(
                 deferredcasterTask.renderData,
                 _deferredcastData[deferredcaster],
@@ -1286,18 +1257,9 @@ void FramebufferRenderer::setHDRExposure(float hdrExposure) {
     _hdrExposure = hdrExposure;
 }
 
-void FramebufferRenderer::setHDRBackground(float hdrBackground) {
-    ghoul_assert(hdrBackground > 0.f, "HDR Background must be greater than zero");
-    _hdrBackground = hdrBackground;
-}
-
 void FramebufferRenderer::setGamma(float gamma) {
     ghoul_assert(gamma > 0.f, "Gamma value must be greater than zero");
     _gamma = gamma;
-}
-
-float FramebufferRenderer::hdrBackground() const {
-    return _hdrBackground;
 }
 
 int FramebufferRenderer::nAaSamples() const {
