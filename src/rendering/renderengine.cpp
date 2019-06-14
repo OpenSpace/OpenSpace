@@ -536,6 +536,10 @@ glm::mat4 RenderEngine::nodeRotation() const {
     return glm::mat4_cast(glm::normalize(pitch * yaw * roll));
 }
 
+uint64_t RenderEngine::frameNumber() const {
+    return _frameNumber;
+}
+
 void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
                           const glm::mat4& projectionMatrix)
 {
