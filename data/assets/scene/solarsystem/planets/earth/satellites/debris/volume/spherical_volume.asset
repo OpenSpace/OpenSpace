@@ -7,10 +7,10 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local maxApogee = 2 * 10946320;
+local maxApogee = 10946320;
 
 local volume = {
-    Identifier = "DebrisVolume",
+    Identifier = "DebrisVolume - Spherical",
     Parent = transforms.EarthInertial.Identifier,
     Renderable = {
         Type = "RenderableTimeVaryingVolume",
@@ -29,7 +29,7 @@ local volume = {
     Transform = {
         Scale = {
             Type = "StaticScale",   
-            Scale = maxApogee     -- do not multiply this. That will not show real representation.
+            Scale = maxApogee    --do not multiply this. That will not show real representation.
         }
     }
 }
