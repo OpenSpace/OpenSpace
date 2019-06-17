@@ -61,6 +61,10 @@ local Earth = {
                     },
                     Enabled = true,
                     PadTiles = false,
+                    Settings = {
+                        Multiplier = 0.75,
+                        Gamma = 0.75
+                    },
                     Fallback = {
                         Identifier = "Blue_Marble",
                         Name = "Blue Marble",
@@ -89,7 +93,11 @@ local Earth = {
                         "1d",
                         "250m",
                         "jpg"
-                    )
+                    ),
+                    Settings = {
+                        Multiplier = 0.75,
+                        Gamma = 0.75
+                    }
                 },
                 {
                     Identifier = "Aqua_Modis_Temporal",
@@ -199,17 +207,26 @@ local Earth = {
                     Identifier = "MODIS_Water_Mask",
                     Name = "MODIS Water Mask",
                     FilePath = mapServiceConfigsPath .. "/GIBS/water/MODIS_Water_Mask.wms",
-                    Enabled = true
+                    Enabled = true,
+                    Settings = {
+                        Multiplier = 0.3
+                    }
                 },
                 {
                     Name = "Gebco [Utah]",
                     Identifier = "Gebco_Utah",
-                    FilePath = mapServiceConfigsPath .. "/Utah/Gebco.wms"
+                    FilePath = mapServiceConfigsPath .. "/Utah/Gebco.wms",
+                    Settings = {
+                        Multiplier = 0.3
+                    }
                 },
                 {
                     Name = "Gebco [Sweden]",
                     Identifier = "Gebco_Sweden",
-                    FilePath = mapServiceConfigsPath .. "/LiU/Gebco.wms"
+                    FilePath = mapServiceConfigsPath .. "/LiU/Gebco.wms",
+                    Settings = {
+                        Multiplier = 0.3
+                    }
                 },
             },
             Overlays = {
