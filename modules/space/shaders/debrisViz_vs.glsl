@@ -40,7 +40,7 @@ out vec4 vs_position;
 
 out float periodFraction_f;
 out float offsetPeriods;
-// out float vertexID_f;
+out float vertexID_f;
 
 // debugers :
 // out float offset;
@@ -68,8 +68,13 @@ void main() {
   
     // calculate nr of periods, get fractional part to know where
     // the vertex closest to the debris part is right now
-    double nrOfRevolutions = (inGameTime - epoch) / period;
-    double periodFraction = fract(nrOfRevolutions); //mod(nrOfRevolutions, 1.0);
+    // double nrOfRevolutions = (inGameTime - epoch)/period;
+    double nrOfRevolutions = inGameTime/period - epoch/period;  
+    // double periodFraction = fract(nrOfRevolutions); //mod(nrOfRevolutions, 1.0);
+    int nrOfRevolutions_i = int(nrOfRevolutions);
+    double periodFraction = nrOfRevolutions - nrOfRevolutions_i;
+
+
     periodFraction_f = float(periodFraction);
 
     // same procedure for the current vertex
@@ -77,7 +82,7 @@ void main() {
 
     // offsetPeriods can also be calculated by passing the vertexID as a float
     // to the fragment shader and deviding it by nrOfSegments.
-    // vertexID_f = float(gl_VertexID);
+    vertexID_f = float(gl_VertexID);
     dvec3 positions = dvec3(vertex_data.x, vertex_data.y, vertex_data.z); 
     dvec4 vertexPosition = dvec4(positions, 1);
     viewSpacePosition = vec4(modelViewTransform * vertexPosition);

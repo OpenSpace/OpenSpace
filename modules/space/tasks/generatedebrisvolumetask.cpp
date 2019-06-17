@@ -383,14 +383,21 @@ glm::dvec3 cartesianToSphericalCoord(glm::dvec3 position){
     //sphericalPosition.y = atan(position.y/position.x);  // theta
     //sphericalPosition.z = atan(pow(pow(position.x,2)+pow(position.y,2),0.5)/position.z);  // abs(position.x + position.y) // p
 
-    sphericalPosition.x = pow(pow(position.x,2)+pow(position.y,2)+pow(position.z,2) , 0.5);  //abs(position.x + position.y + position.z);  // r
-    sphericalPosition.y = acos(position.z/sphericalPosition.x);  // theta
-    sphericalPosition.z = atan(position.y/position.x);  // abs(position.x + position.y) // p
+    sphericalPosition.x = sqrt(pow(position.x,2)+pow(position.y,2)+pow(position.z,2));  // r [0, MaxApogee]
+    sphericalPosition.y = acos(position.z/sphericalPosition.x);  // theta [0, pi]
+    sphericalPosition.z = atan2(position.y,position.x);  // phi [-pi, pi] -> [0, 2*pi]
+    // if(sphericalPosition.y < 0)
+        sphericalPosition.z += 3.14159265358979323846264338327950288;
     return sphericalPosition;
 }
 
 
 std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData, double timeInSeconds, std::string gridType) {
+
+    float minTheta = 0.0;
+    float minPhi = 0.0;
+    float maxTheta = 0.0;
+    float maxPhi = 0.0;
 
     std::vector<glm::dvec3> positionBuffer;
     for(const auto& orbit : tleData) {
@@ -407,15 +414,38 @@ std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData,
         );
         // double timeInSeconds = Time::convertTime(timeStamp);
         glm::dvec3 position = keplerTranslator.debrisPos(timeInSeconds);
+        // LINFO(fmt::format("cart: {} ", position));
+        glm::dvec3 sphPos;
         if( gridType == "Spherical"){
-            position = cartesianToSphericalCoord(position);
-            //LINFO(fmt::format("pos: {} ", position));
-
+            sphPos = cartesianToSphericalCoord(position);
+            if(sphPos.y < minTheta){
+                minTheta = sphPos.y;
+            }
+            if(sphPos.z < minPhi){
+                minPhi = sphPos.z;
+            }
+            if(sphPos.y > maxTheta){
+                maxTheta = sphPos.y;
+            }
+            if(sphPos.z > maxPhi){
+                maxPhi = sphPos.z;
+            }
+            // LINFO(fmt::format("pos: {} ", sphPos));
+            positionBuffer.push_back(sphPos);
+        
         }
-        positionBuffer.push_back(position);
+        else
+        {
+            positionBuffer.push_back(position);
+        }
+        
         
     }
-    
+    LINFO(fmt::format("max theta: {} ", maxTheta));
+    LINFO(fmt::format("max phi: {} ", maxPhi));
+    LINFO(fmt::format("min theta: {} ", minTheta));
+    LINFO(fmt::format("min phi: {} ", minPhi));
+
     return positionBuffer;
 }
 
@@ -469,17 +499,20 @@ int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim, float maxApogee, s
         
         return coordinateIndex.z * (dim.x * dim.y) + coordinateIndex.y * dim.x + coordinateIndex.x;
     }
-    else if(gridType == "Spherical"){
-        glm::dvec3 newPosition = glm::dvec3(position.x + maxApogee
-                                        ,position.y + maxApogee
-                                        ,position.z + maxApogee);
+    else if(gridType == "Spherical"){        
+        glm::uvec3 coordinateIndex = glm::uvec3(static_cast<int>(position.x * dim.x / (maxApogee))
+                                                ,static_cast<int>(position.y * dim.y / (3.14159265358979323846264338327950288))
+                                                ,static_cast<int>(position.z * dim.z / (2*3.14159265358979323846264338327950288)));
+
         
-        glm::uvec3 coordinateIndex = glm::uvec3(static_cast<int>(newPosition.x * dim.x / (2 * (maxApogee + epsilon)))
-                                                ,static_cast<int>(newPosition.y * dim.y / (2 * (maxApogee + epsilon)))
-                                                ,static_cast<int>(newPosition.z * dim.z / (2 * (maxApogee + epsilon))));
+        // LINFO(fmt::format("index coords: {} ", coordinateIndex));
+        // LINFO(fmt::format("index dim: {} ", dim));
+        // LINFO(fmt::format("index va: {} ", coordinateIndex.y * (dim.x * dim.y) + coordinateIndex.z * dim.x + coordinateIndex.x));
 
         return coordinateIndex.z * (dim.x * dim.y) + coordinateIndex.y * dim.x + coordinateIndex.x;
     }
+
+    return -1;
 }
 
 int* mapDensityToVoxels(int* densityArray, std::vector<glm::dvec3> positions, glm::uvec3 dim, float maxApogee, std::string gridType) {
@@ -594,11 +627,11 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
         int *densityArrayp = new int[size]();
         //densityArrayp = mapDensityToVoxels(densityArrayp, generatedPositions, _dimensions, maxApogee);
         //densityArrayp = mapDensityToVoxels(densityArrayp, startPositionBuffer, _dimensions, _maxApogee, _gridType);
-        std::vector<glm::dvec3> testBuffer;
-        testBuffer.push_back(glm::dvec3(0,0,0));
-        testBuffer.push_back(glm::dvec3(100,100,100));
+        // std::vector<glm::dvec3> testBuffer;
+        // testBuffer.push_back(glm::dvec3(0,0,0));
+        // testBuffer.push_back(glm::dvec3(100,100,100));
 
-        densityArrayp = mapDensityToVoxels(densityArrayp, testBuffer, _dimensions, _maxApogee, _gridType);
+        densityArrayp = mapDensityToVoxels(densityArrayp, startPositionBuffer, _dimensions, _maxApogee, _gridType);
             
         // create object rawVolume
         volume::RawVolume<float> rawVolume(_dimensions);

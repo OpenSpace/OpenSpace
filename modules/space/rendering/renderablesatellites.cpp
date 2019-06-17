@@ -643,12 +643,10 @@ void RenderableSatellites::updateBuffers() {
 
             // LINFO(fmt::format(" x-positions float :{}", static_cast<float>(position.x)));
             // LINFO(fmt::format(" x-positions float * 10000 :{}", static_cast<float>(position.x * 10000)));
-            // LINFO(fmt::format(" x-positions float * 10000 /10000 :{}", static_cast<float>(position.x * 10000)/10000));
-
+            // LINFO(fmt::format(" x-positions float * 10000 /10000 :{}", static_cast<float>(position.x * 10000)/10000));       
         }
       
         ++orbitindex;
-
     }
 
     glBindVertexArray(_vertexArray);
