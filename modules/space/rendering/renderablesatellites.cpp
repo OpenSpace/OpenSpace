@@ -630,8 +630,8 @@ void RenderableSatellites::updateBuffers() {
             _vertexBufferData[index].y = static_cast<float>(positionY);
             _vertexBufferData[index].z = static_cast<float>(positionZ);
             _vertexBufferData[index].time = static_cast<float>(timeOffset);
-            _vertexBufferData[index].epoch = static_cast<float>(orbit.epoch);
-            _vertexBufferData[index].period = static_cast<float>(orbit.period);
+            _vertexBufferData[index].epoch = orbit.epoch;
+            _vertexBufferData[index].period = orbit.period;
 
             // The difference in the print below resulted in large differences, up to 0.35.
             // LINFO(fmt::format("diff : {} ", position.x - _vertexBufferData[index].x));        
@@ -660,10 +660,10 @@ void RenderableSatellites::updateBuffers() {
     );
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), (GLvoid*)0); // stride : 4*sizeof(GL_FLOAT) + 2*sizeof(GL_DOUBLE)
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), (GLvoid*)0); // stride : 4*sizeof(GL_FLOAT) + 2*sizeof(GL_DOUBLE)
 
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), (GLvoid*)(3*sizeof(GL_FLOAT)) );
+    glVertexAttribPointer(1, 2, GL_DOUBLE, GL_FALSE, sizeof(TrailVBOLayout), (GLvoid*)(4*sizeof(GL_FLOAT)) );
 
 
     glBindVertexArray(0);

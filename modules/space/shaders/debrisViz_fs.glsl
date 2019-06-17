@@ -33,7 +33,7 @@ uniform float lineFade;
 
 
 in vec4 viewSpacePosition;
-in vec4 vs_position;
+in float vs_position_w;
 
 in float periodFraction_f;
 in float offsetPeriods;
@@ -68,7 +68,7 @@ Fragment getFragment() {
 
     Fragment frag;
     frag.color = vec4(color, fade * opacity);
-    frag.depth = vs_position.w;
+    frag.depth = vs_position_w;
     frag.gPosition = viewSpacePosition;
     frag.gNormal = vec4(1, 1, 1, 0);
     // frag.blend = BLEND_MODE_ADDITIVE;

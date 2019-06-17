@@ -26,8 +26,8 @@
 
 #include "PowerScaling/powerScalingMath.hglsl"
 
-layout (location = 0) in vec3 vertex_data; // 1: x, 2: y, 3: z
-layout (location = 1) in vec3 orbit_data; // 1: timeOffset, 2: epoch, 3: period
+layout (location = 0) in vec4 vertex_data; // 1: x, 2: y, 3: z
+layout (location = 1) in vec2 orbit_data; // 1: timeOffset, 2: epoch, 3: period
 
 uniform dmat4 modelViewTransform;
 uniform mat4 projectionTransform;
@@ -36,7 +36,7 @@ uniform mat4 projectionTransform;
 uniform double inGameTime;
 
 out vec4 viewSpacePosition;
-out vec4 vs_position;
+out float vs_position_w;
 
 out float periodFraction_f;
 out float offsetPeriods;
@@ -62,23 +62,22 @@ void main() {
     */
 
     // If orbit_data is doubles, cast to float first
-    float offset = orbit_data.x;
-    float epoch = orbit_data.y;
-    float period = orbit_data.z;
+    float offset = vertex_data.w;
+    double epoch = orbit_data.x;
+    double period = orbit_data.y;
   
     // calculate nr of periods, get fractional part to know where
     // the vertex closest to the debris part is right now
-    // double nrOfRevolutions = (inGameTime - epoch)/period;
-    double nrOfRevolutions = inGameTime/period - epoch/period;  
-    // double periodFraction = fract(nrOfRevolutions); //mod(nrOfRevolutions, 1.0);
-    int nrOfRevolutions_i = int(nrOfRevolutions);
-    double periodFraction = nrOfRevolutions - nrOfRevolutions_i;
-
-
+    double nrOfRevolutions = (inGameTime - epoch) / period;
+    //double periodFraction = fract(nrOfRevolutions); //mod(nrOfRevolutions, 1.0);
+    int intfrac = int(nrOfRevolutions);
+    double doublefrac = double(intfrac);
+    double periodFraction = nrOfRevolutions - doublefrac;
     periodFraction_f = float(periodFraction);
 
     // same procedure for the current vertex
-    offsetPeriods = offset / period;
+    float period_f = float(period);
+    offsetPeriods = offset / period_f;
 
     // offsetPeriods can also be calculated by passing the vertexID as a float
     // to the fragment shader and deviding it by nrOfSegments.
@@ -86,8 +85,9 @@ void main() {
     dvec3 positions = dvec3(vertex_data.x, vertex_data.y, vertex_data.z); 
     dvec4 vertexPosition = dvec4(positions, 1);
     viewSpacePosition = vec4(modelViewTransform * vertexPosition);
-    vs_position = z_normalization( projectionTransform * viewSpacePosition);
+    vec4 vs_position = z_normalization( projectionTransform * viewSpacePosition);
     gl_Position = vs_position;
+    vs_position_w = vs_position.w;
 
 }
 
