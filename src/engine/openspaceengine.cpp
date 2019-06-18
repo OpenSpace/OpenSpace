@@ -995,8 +995,9 @@ void OpenSpaceEngine::preSynchronization() {
     if (master) {
         double dt = global::windowDelegate.averageDeltaTime();
 
-        if (global::sessionRecording.isSavingFramesDuringPlayback())
+        if (global::sessionRecording.isSavingFramesDuringPlayback()) {
             dt = global::sessionRecording.fixedDeltaTimeDuringFrameOutput();
+        }
 
         global::timeManager.preSynchronization(dt);
 

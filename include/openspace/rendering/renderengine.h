@@ -139,8 +139,8 @@ public:
     void setResolveData(ghoul::Dictionary resolveData);
 
     /**
-    * Mark that one screenshot should be taken
-    */
+     * Mark that one screenshot should be taken
+     */
     void takeScreenShot();
 
     /**

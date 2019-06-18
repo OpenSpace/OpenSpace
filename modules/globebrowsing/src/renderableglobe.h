@@ -148,7 +148,8 @@ private:
      * Goes through all available <code>ChunkCuller</code>s and check if any of them
      * allows culling of the <code>Chunk</code>s in question.
      */
-    bool testIfCullable(const Chunk& chunk, const RenderData& renderData, const BoundingHeights& heights) const;
+    bool testIfCullable(const Chunk& chunk, const RenderData& renderData,
+        const BoundingHeights& heights) const;
 
     /**
      * Gets the desired level which can be used to determine if a chunk should split
@@ -160,7 +161,8 @@ private:
      * <code>Chunk</code>, it wants to split. If it is lower, it wants to merge with
      * its siblings.
      */
-    int desiredLevel(const Chunk& chunk, const RenderData& renderData, const BoundingHeights& heights) const;
+    int desiredLevel(const Chunk& chunk, const RenderData& renderData,
+        const BoundingHeights& heights) const;
 
     /**
      * Calculates the height from the surface of the reference ellipsoid to the
@@ -204,10 +206,13 @@ private:
         bool renderBounds, bool renderAABB) const;
 
     bool isCullableByFrustum(const Chunk& chunk, const RenderData& renderData) const;
-    bool isCullableByHorizon(const Chunk& chunk, const RenderData& renderData, const BoundingHeights& heights) const;
+    bool isCullableByHorizon(const Chunk& chunk, const RenderData& renderData,
+        const BoundingHeights& heights) const;
 
-    int desiredLevelByDistance(const Chunk& chunk, const RenderData& data, const BoundingHeights& heights) const;
-    int desiredLevelByProjectedArea(const Chunk& chunk, const RenderData& data, const BoundingHeights& heights) const;
+    int desiredLevelByDistance(const Chunk& chunk, const RenderData& data,
+        const BoundingHeights& heights) const;
+    int desiredLevelByProjectedArea(const Chunk& chunk, const RenderData& data,
+        const BoundingHeights& heights) const;
     int desiredLevelByAvailableTileData(const Chunk& chunk) const;
 
 

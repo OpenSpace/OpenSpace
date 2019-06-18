@@ -144,7 +144,8 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DynamicLodIterationCountInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DynamicLodIterationCountInfo =
+    {
         "DynamicLodIterationCount",
         "Data availability checks before LOD factor impact",
         "" // @TODO Missing documentation
@@ -475,7 +476,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.eclipseShadowsEnabled);
     addProperty(_generalProperties.eclipseHardShadows);
     _generalProperties.targetLodScaleFactor.onChange([this]() { 
-        _generalProperties.currentLodScaleFactor.set(_generalProperties.targetLodScaleFactor.get());
+        float sf = _generalProperties.targetLodScaleFactor;
+        _generalProperties.currentLodScaleFactor = sf;
         _lodScaleFactorDirty = true; 
     });
     addProperty(_generalProperties.targetLodScaleFactor);
@@ -490,9 +492,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _debugPropertyOwner.addProperty(_debugProperties.showChunkAABB);
     _debugPropertyOwner.addProperty(_debugProperties.showHeightResolution);
     _debugPropertyOwner.addProperty(_debugProperties.showHeightIntensities);
-    _debugPropertyOwner.addProperty(
-        _debugProperties.levelByProjectedAreaElseDistance
-    );
+    _debugPropertyOwner.addProperty(_debugProperties.levelByProjectedAreaElseDistance);
     _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
     _debugPropertyOwner.addProperty(_debugProperties.dynamicLodIterationCount);
@@ -859,8 +859,10 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
     updateChunkTree(_leftRoot, data);
     updateChunkTree(_rightRoot, data);
     _chunkCornersDirty = false;
-    _iterationsOfAvailableData = (_allChunksAvailable ? _iterationsOfAvailableData + 1 : 0);
-    _iterationsOfUnavailableData = (_allChunksAvailable ? 0 : _iterationsOfUnavailableData + 1);
+    _iterationsOfAvailableData =
+        (_allChunksAvailable ? _iterationsOfAvailableData + 1 : 0);
+    _iterationsOfUnavailableData =
+        (_allChunksAvailable ? 0 : _iterationsOfUnavailableData + 1);
 
     // Calculate the MVP matrix
     const glm::dmat4& viewTransform = data.camera.combinedViewMatrix();
@@ -1053,18 +1055,27 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&) {
         }
     }
 
-    // If our tile cache is very full, we assume we need to adjust the level of detail dynamically
-    // to not keep rendering frames with unavailable data
-    // After certain number of iterations(_debugProperties.dynamicLodIterationCount) of unavailable/available data in a row, we assume that a change could be made.
-    if (_iterationsOfUnavailableData > _debugProperties.dynamicLodIterationCount && _generalProperties.currentLodScaleFactor.value() > _generalProperties.currentLodScaleFactor.minValue()) {
-        _lodScaleFactorDirty = true;
-        _generalProperties.currentLodScaleFactor = _generalProperties.currentLodScaleFactor - 0.1f;
+    // If our tile cache is very full, we assume we need to adjust the level of detail
+    // dynamically to not keep rendering frames with unavailable data
+    // After certain number of iterations(_debugProperties.dynamicLodIterationCount) of
+    // unavailable/available data in a row, we assume that a change could be made.
+    const int iterCount = _debugProperties.dynamicLodIterationCount;
+    const bool exceededIterations = _iterationsOfUnavailableData > iterCount;
+    const float clf = _generalProperties.currentLodScaleFactor;
+    const float clfMin = _generalProperties.currentLodScaleFactor.minValue();
+    const float targetLod = _generalProperties.targetLodScaleFactor;
+    const bool validLodFactor = clf > clfMin;
+    if (exceededIterations && validLodFactor) {
+        _generalProperties.currentLodScaleFactor =
+            _generalProperties.currentLodScaleFactor - 0.1f;
         _iterationsOfUnavailableData = 0;
-    } // Make 2 times the iterations with available data to move it up again
-    else if (_iterationsOfAvailableData > (_debugProperties.dynamicLodIterationCount * 2) && _generalProperties.currentLodScaleFactor.value() < _generalProperties.targetLodScaleFactor.value()) {
         _lodScaleFactorDirty = true;
-        _generalProperties.currentLodScaleFactor = _generalProperties.currentLodScaleFactor + 0.1f;
+    } // Make 2 times the iterations with available data to move it up again
+    else if (_iterationsOfAvailableData > (iterCount * 2) && clf < targetLod) {
+        _generalProperties.currentLodScaleFactor =
+            _generalProperties.currentLodScaleFactor + 0.1f;
         _iterationsOfAvailableData = 0;
+        _lodScaleFactorDirty = true;
     }
 }
 
@@ -1590,7 +1601,8 @@ bool RenderableGlobe::testIfCullable(const Chunk& chunk,
            (PerformFrustumCulling && isCullableByFrustum(chunk, renderData));
 }
 
-int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderData, const BoundingHeights& heights) const
+int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderData,
+                                  const BoundingHeights& heights) const
 {
     const int desiredLevel = _debugProperties.levelByProjectedAreaElseDistance ?
         desiredLevelByProjectedArea(chunk, renderData, heights) :
@@ -2137,7 +2149,10 @@ void RenderableGlobe::splitChunkNode(Chunk& cn, int depth) {
             cn.children[i] = new (memory[i]) Chunk(
                 cn.tileIndex.child(static_cast<Quad>(i))
             );
-            const BoundingHeights& heights = boundingHeightsForChunk(*(cn.children[i]), _layerManager);
+            const BoundingHeights& heights = boundingHeightsForChunk(
+                *(cn.children[i]),
+                _layerManager
+            );
             cn.children[i]->corners = boundingCornersForChunk(
                 *cn.children[i],
                 _ellipsoid,
@@ -2247,7 +2262,7 @@ void RenderableGlobe::updateChunk(Chunk& chunk, const RenderData& data) const {
     }
     else {
         chunk.status = Chunk::Status::DoNothing;
-    }   
+    }
 }
 
 } // namespace openspace::globebrowsing

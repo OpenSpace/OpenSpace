@@ -26,12 +26,12 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/keyframenavigator.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
-#include <openspace/interaction/keyframenavigator.h>
 #include <openspace/rendering/luaconsole.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
@@ -279,14 +279,6 @@ bool SessionRecording::startPlayback(const std::string& filename,
     global::timeManager.triggerPlaybackStart();
     _state = SessionState::Playback;
 
-    //Hide the lua console
-    global::luaConsole.keyboardCallback(Key::GraveAccent, KeyModifier::NoModifier, KeyAction::Press);
-
-    //Hide the GUI if we render out frames
-    if (isSavingFramesDuringPlayback()) {
-        global::luaConsole.keyboardCallback(Key::Tab, KeyModifier::NoModifier, KeyAction::Press);
-    }
-        
     return true;
 }
 
@@ -764,10 +756,10 @@ double SessionRecording::currentTime() const {
 double SessionRecording::fixedDeltaTimeDuringFrameOutput() const {
     // Check if renderable in focus is still resolving tile loading
     // do not adjust time while we are doing this
-    const SceneGraphNode* focusNode = global::navigationHandler.orbitalNavigator().anchorNode();
+    const SceneGraphNode* focusNode =
+        global::navigationHandler.orbitalNavigator().anchorNode();
     const Renderable* focusRenderable = focusNode->renderable();
-    if (!focusRenderable || focusRenderable->renderedWithDesiredData())
-    {
+    if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {
         return _saveRenderingDeltaTime;
     }
     else {
@@ -1024,10 +1016,10 @@ void SessionRecording::moveAheadInTime() {
     if (isSavingFramesDuringPlayback()) {
         // Check if renderable in focus is still resolving tile loading
         // do not adjust time while we are doing this, or take screenshot
-        const SceneGraphNode* focusNode = global::navigationHandler.orbitalNavigator().anchorNode();
+        const SceneGraphNode* focusNode =
+            global::navigationHandler.orbitalNavigator().anchorNode();
         const Renderable* focusRenderable = focusNode->renderable();
-        if (!focusRenderable || focusRenderable->renderedWithDesiredData())
-        {
+        if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {
             _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
             global::renderEngine.takeScreenShot();
         }       
@@ -1061,9 +1053,9 @@ void SessionRecording::updateCameraWithOrWithoutNewKeyframes(double currTime) {
     bool didFindFutureCameraKeyframes = findNextFutureCameraIndex(currTime);
 
     bool isPrevAtFirstKeyframe = (_idxTimeline_cameraPtrPrev ==
-                                    _idxTimeline_cameraFirstInTimeline);
+                                  _idxTimeline_cameraFirstInTimeline);
     bool isFirstTimelineCameraKeyframeInFuture = (currTime <
-                                                    _cameraFirstInTimeline_timestamp);
+                                                  _cameraFirstInTimeline_timestamp);
 
     if (! (isPrevAtFirstKeyframe && isFirstTimelineCameraKeyframeInFuture)) {
         processCameraKeyframe(currTime);

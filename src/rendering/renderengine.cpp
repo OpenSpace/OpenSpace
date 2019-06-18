@@ -314,9 +314,7 @@ RenderEngine::RenderEngine()
     });
     addProperty(_horizFieldOfView);
 
-    _takeScreenshot.onChange([this](){
-        _shouldTakeScreenshot = true;
-    });
+    _takeScreenshot.onChange([this](){ _shouldTakeScreenshot = true; });
     addProperty(_takeScreenshot);
 
     addProperty(_showFrameNumber);

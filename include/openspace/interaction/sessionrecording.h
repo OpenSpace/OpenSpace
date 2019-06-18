@@ -66,22 +66,24 @@ public:
     void preSynchronization();
 
     /**
-    * Current time based on playback mode
-    */
+     * Current time based on playback mode
+     */
     double currentTime() const;
 
     /**
-    * Fixed delta time set by user for use during saving of frame during playback mode
-    */
+     * Fixed delta time set by user for use during saving of frame during playback mode
+     */
     double fixedDeltaTimeDuringFrameOutput() const;
 
     /**
-    * Starts a recording session, which will save data to the provided filename
-    * according to the data format specified, and will continue until recording is
-    * stopped using stopRecording() method.
-    * \param filename file saved with recorded keyframes.
-    * \returns true if recording to file starts without errors.
-    */
+     * Starts a recording session, which will save data to the provided filename
+     * according to the data format specified, and will continue until recording is
+     * stopped using stopRecording() method.
+     *
+     * \param filename file saved with recorded keyframes.
+     *
+     * \returns true if recording to file starts without errors.
+     */
     bool startRecording(const std::string& filename);
 
     /**
@@ -128,25 +130,25 @@ public:
     void stopPlayback();
 
     /**
-       * Enables that rendered frames should be saved during playback
-       * \param fps Number of frames per second.
-    */
+     * Enables that rendered frames should be saved during playback
+     * \param fps Number of frames per second.
+     */
     void enableTakeScreenShotDuringPlayback(int fps);
 
     /**
-    * Used to disable that renderings are saved during playback
-    */
+     * Used to disable that renderings are saved during playback
+     */
     void disableTakeScreenShotDuringPlayback();
 
     /**
-    * Used to check if a session playback is in progress.
-    * \returns true if playback is in progress.
-    */
+     * Used to check if a session playback is in progress.
+     * \returns true if playback is in progress.
+     */
     bool isPlayingBack() const;
 
     /**
-    * Is saving frames during playback
-    */
+     * Is saving frames during playback
+     */
     bool isSavingFramesDuringPlayback() const;
 
     /**
@@ -283,7 +285,7 @@ private:
     bool _setSimulationTimeWithNextCameraKeyframe = false;
     
     bool _saveRenderingDuringPlayback = false;
-    double _saveRenderingDeltaTime = 1.0/30.0;
+    double _saveRenderingDeltaTime = 1.0 / 30.0;
     double _saveRenderingCurrentRecordedTime;
 
     static const size_t keyframeHeaderSize_bytes = 33;
