@@ -314,9 +314,7 @@ RenderEngine::RenderEngine()
     });
     addProperty(_horizFieldOfView);
 
-    _takeScreenshot.onChange([this](){
-        _shouldTakeScreenshot = true;
-    });
+    _takeScreenshot.onChange([this](){ _shouldTakeScreenshot = true; });
     addProperty(_takeScreenshot);
 
     addProperty(_showFrameNumber);
@@ -933,6 +931,13 @@ void RenderEngine::setResolveData(ghoul::Dictionary resolveData) {
         dict.setValue("resolveData", _resolveData);
         program->setDictionary(dict);
     }
+}
+
+/**
+  * Mark that one screenshot should be taken
+*/
+void RenderEngine::takeScreenShot() {
+    _shouldTakeScreenshot = true;
 }
 
 /**

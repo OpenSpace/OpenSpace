@@ -26,8 +26,12 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/keyframenavigator.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/rendering/luaconsole.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
@@ -318,6 +322,15 @@ void SessionRecording::signalPlaybackFinishedForComponent(RecordedType type) {
     }
 }
 
+void SessionRecording::enableTakeScreenShotDuringPlayback(int fps) {
+    _saveRenderingDuringPlayback = true;
+    _saveRenderingDeltaTime = 1.0 / fps;
+}
+
+void SessionRecording::disableTakeScreenShotDuringPlayback() {
+    _saveRenderingDuringPlayback = false;
+}
+
 void SessionRecording::stopPlayback() {
     if (_state == SessionState::Playback) {
         _state = SessionState::Idle;
@@ -354,6 +367,7 @@ void SessionRecording::cleanUpPlayback() {
     _idxTimeline_cameraPtrNext = 0;
     _idxTimeline_cameraPtrPrev = 0;
     _hasHitEndOfCameraKeyframes = false;
+    _saveRenderingDuringPlayback = false;
 
     _cleanupNeeded = false;
 }
@@ -593,6 +607,10 @@ bool SessionRecording::isPlayingBack() const {
     return (_state == SessionState::Playback);
 }
 
+bool SessionRecording::isSavingFramesDuringPlayback() const {
+    return (_state == SessionState::Playback && _saveRenderingDuringPlayback);
+}
+
 SessionRecording::SessionState SessionRecording::state() const {
     return _state;
 }
@@ -720,7 +738,10 @@ double SessionRecording::equivalentApplicationTime(double timeOs, double timeRec
 }
 
 double SessionRecording::currentTime() const {
-    if (_playbackTimeReferenceMode == KeyframeTimeRef::Relative_recordedStart) {
+    if (isSavingFramesDuringPlayback()) {
+        return _saveRenderingCurrentRecordedTime;
+    }
+    else if (_playbackTimeReferenceMode == KeyframeTimeRef::Relative_recordedStart) {
         return (global::windowDelegate.applicationTime() -
                 _timestampPlaybackStarted_application);
     }
@@ -730,6 +751,20 @@ double SessionRecording::currentTime() const {
     else {
         return global::windowDelegate.applicationTime();
     }
+}
+
+double SessionRecording::fixedDeltaTimeDuringFrameOutput() const {
+    // Check if renderable in focus is still resolving tile loading
+    // do not adjust time while we are doing this
+    const SceneGraphNode* focusNode =
+        global::navigationHandler.orbitalNavigator().anchorNode();
+    const Renderable* focusRenderable = focusNode->renderable();
+    if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {
+        return _saveRenderingDeltaTime;
+    }
+    else {
+        return 0;
+    }   
 }
 
 void SessionRecording::playbackCamera() {
@@ -803,6 +838,7 @@ void SessionRecording::playbackCamera() {
     if (_setSimulationTimeWithNextCameraKeyframe) {
         global::timeManager.setTimeNextFrame(timeSim);
         _setSimulationTimeWithNextCameraKeyframe = false;
+        _saveRenderingCurrentRecordedTime = timeRec;
     }
     double timeRef = appropriateTimestamp(timeOs, timeRec, timeSim);
 
@@ -977,6 +1013,17 @@ void SessionRecording::moveAheadInTime() {
     double currTime = currentTime();
     lookForNonCameraKeyframesThatHaveComeDue(currTime);
     updateCameraWithOrWithoutNewKeyframes(currTime);
+    if (isSavingFramesDuringPlayback()) {
+        // Check if renderable in focus is still resolving tile loading
+        // do not adjust time while we are doing this, or take screenshot
+        const SceneGraphNode* focusNode =
+            global::navigationHandler.orbitalNavigator().anchorNode();
+        const Renderable* focusRenderable = focusNode->renderable();
+        if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {
+            _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
+            global::renderEngine.takeScreenShot();
+        }       
+    }
 }
 
 void SessionRecording::lookForNonCameraKeyframesThatHaveComeDue(double currTime) {
@@ -1006,9 +1053,9 @@ void SessionRecording::updateCameraWithOrWithoutNewKeyframes(double currTime) {
     bool didFindFutureCameraKeyframes = findNextFutureCameraIndex(currTime);
 
     bool isPrevAtFirstKeyframe = (_idxTimeline_cameraPtrPrev ==
-                                    _idxTimeline_cameraFirstInTimeline);
+                                  _idxTimeline_cameraFirstInTimeline);
     bool isFirstTimelineCameraKeyframeInFuture = (currTime <
-                                                    _cameraFirstInTimeline_timestamp);
+                                                  _cameraFirstInTimeline_timestamp);
 
     if (! (isPrevAtFirstKeyframe && isFirstTimelineCameraKeyframeInFuture)) {
         processCameraKeyframe(currTime);
@@ -1369,6 +1416,20 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
                 {},
                 "void",
                 "Stops a playback session before playback of all keyframes is complete"
+            },
+            {
+                "enableTakeScreenShotDuringPlayback",
+                &luascriptfunctions::enableTakeScreenShotDuringPlayback,
+                {},
+                "int",
+                "Enables that rendered frames should be saved during playback."
+            },
+            {
+                "disableTakeScreenShotDuringPlayback",
+                &luascriptfunctions::disableTakeScreenShotDuringPlayback,
+                {},
+                "void",
+                "Used to disable that renderings are saved during playback"
             }
         }
     };

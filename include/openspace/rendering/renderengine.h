@@ -139,6 +139,11 @@ public:
     void setResolveData(ghoul::Dictionary resolveData);
 
     /**
+     * Mark that one screenshot should be taken
+     */
+    void takeScreenShot();
+
+    /**
      * Returns the Lua library that contains all Lua functions available to affect the
      * rendering.
      */

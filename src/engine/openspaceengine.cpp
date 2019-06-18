@@ -994,6 +994,11 @@ void OpenSpaceEngine::preSynchronization() {
     global::syncEngine.preSynchronization(SyncEngine::IsMaster(master));
     if (master) {
         double dt = global::windowDelegate.averageDeltaTime();
+
+        if (global::sessionRecording.isSavingFramesDuringPlayback()) {
+            dt = global::sessionRecording.fixedDeltaTimeDuringFrameOutput();
+        }
+
         global::timeManager.preSynchronization(dt);
 
         using Iter = std::vector<std::string>::const_iterator;

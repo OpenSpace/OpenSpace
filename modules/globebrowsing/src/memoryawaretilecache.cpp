@@ -251,12 +251,12 @@ size_t MemoryAwareTileCache::TextureContainer::size() const {
 // MemoryAwareTileCache
 //
 
-MemoryAwareTileCache::MemoryAwareTileCache()
+MemoryAwareTileCache::MemoryAwareTileCache(int tileCacheSize)
     : PropertyOwner({ "TileCache" })
     , _numTextureBytesAllocatedOnCPU(0)
-    , _cpuAllocatedTileData(CpuAllocatedDataInfo, 1024, 128, 16384, 1)
-    , _gpuAllocatedTileData(GpuAllocatedDataInfo, 1024, 128, 16384, 1)
-    , _tileCacheSize(TileCacheSizeInfo, 2048, 128, 16384, 1)
+    , _cpuAllocatedTileData(CpuAllocatedDataInfo, tileCacheSize, 128, 16384, 1)
+    , _gpuAllocatedTileData(GpuAllocatedDataInfo, tileCacheSize, 128, 16384, 1)
+    , _tileCacheSize(TileCacheSizeInfo, tileCacheSize, 128, 16384, 1)
     , _applyTileCacheSize(ApplyTileCacheInfo)
     , _clearTileCache(ClearTileCacheInfo)
 {
