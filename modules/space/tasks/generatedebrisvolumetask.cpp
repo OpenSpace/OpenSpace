@@ -418,6 +418,7 @@ std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData,
         glm::dvec3 sphPos;
         if( gridType == "Spherical"){
             sphPos = cartesianToSphericalCoord(position);
+
             if(sphPos.y < minTheta){
                 minTheta = sphPos.y;
             }
@@ -445,6 +446,8 @@ std::vector<glm::dvec3> getPositionBuffer(std::vector<KeplerParameters> tleData,
     LINFO(fmt::format("max phi: {} ", maxPhi));
     LINFO(fmt::format("min theta: {} ", minTheta));
     LINFO(fmt::format("min phi: {} ", minPhi));
+
+    return positionBuffer;
 }
 
 // std::vector<glm::dvec3> generatePositions(int numberOfPositions) {
@@ -499,10 +502,10 @@ int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim, float maxApogee, s
     }
     else if(gridType == "Spherical"){
 
-        if(position.y >= 3.141592){
+        if(position.y >= 3.1415926535897932384626433832795028){
             position.y = 0;
         }
-        if(position.z >= (2 * 3.141592)){
+        if(position.z >= (2 * 3.1415926535897932384626433832795028)){
             position.z = 0;
         }
 
