@@ -235,11 +235,11 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
  *  7. site_t                 - Number of total bytes that ALL _extraQuantityNames
  *                              consists of (Each such name is stored as a c_str which
  *                              means it ends with the null char '\0' )
- *  7. std::vector<GLint>     - _lineStart
- *  8. std::vector<GLsizei>   - _lineCount
- *  9. std::vector<glm::vec3> - _vertexPositions
- * 10. std::vector<float>     - _extraQuantities
- * 11. array of c_str         - Strings naming the extra quantities (elements of
+ *  8. std::vector<GLint>     - _lineStart
+ *  9. std::vector<GLsizei>   - _lineCount
+ *  10. std::vector<glm::vec3> - _vertexPositions
+ *  11. std::vector<float>     - _extraQuantities
+ *  12. array of c_str         - Strings naming the extra quantities (elements of
  *                              _extraQuantityNames). Each string ends with null char '\0'
  */
 void FieldlinesState::saveStateToOsfls(const std::string& absPath) {

@@ -27,9 +27,9 @@ local sunRadius = 695508000
 
 -- The actual fieldlines
 -- asset.require('./bastille_day/fieldlines')
-asset.require('./testwsa/scs_oi')
-asset.require('./testwsa/pfss_oi')
-asset.require('./testwsa/pfss_io')
+--asset.require('./testwsa/scs_oi')
+--asset.require('./testwsa/pfss_oi')
+--asset.require('./testwsa/pfss_io')
 asset.require('./testwsa/scs_oi_25')
 asset.require('./testwsa/pfss_oi_25')
 asset.require('./testwsa/pfss_io_25')

@@ -14,7 +14,7 @@ local fieldlines = {
         SourceFolder = fieldlinesDirectory,
         FlowEnabled = false,
         AlphaBlendlingEnabled = false,
-        InputFileType = "json",
+        InputFileType = "osfls",
         ColorTableMinMax = {
             { 0, 1000000 },
             { 100, 2000 }

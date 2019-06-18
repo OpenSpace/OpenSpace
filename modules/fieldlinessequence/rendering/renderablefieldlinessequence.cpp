@@ -807,6 +807,9 @@ void RenderableFieldlinesSequence::setModelDependentConstants() {
             _scalingFactor = fls::RsToMeter;
             limit = 100; // Just a default value far away from the solar surface
             break;
+        case fls::Model::Wsa:
+            // should something go here?
+            break;
         default:
             break;
     }

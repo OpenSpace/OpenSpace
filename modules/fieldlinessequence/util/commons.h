@@ -33,6 +33,7 @@ enum class Model : int {
     Batsrus = 0,
     Enlil,
     Pfss,
+    Wsa,
     Invalid
 };
 
