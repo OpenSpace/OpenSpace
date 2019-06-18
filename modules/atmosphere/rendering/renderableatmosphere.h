@@ -107,6 +107,8 @@ private:
     properties::FloatProperty _mieScatteringExtinctionPropCoefficientP;
     properties::FloatProperty _mieAsymmetricFactorGP;
     properties::FloatProperty _sunIntensityP;
+    properties::FloatProperty _nightsideExposureP;
+    properties::FloatProperty _gammaP;
     properties::BoolProperty  _sunFollowingCameraEnabledP;
     properties::BoolProperty  _hardShadowsEnabledP;
 
@@ -122,6 +124,9 @@ private:
     float _mieHeightScale;
     float _miePhaseConstant;
     float _sunRadianceIntensity;
+    float _gamma = 1.f;
+    float _nightsideExposure = 1.f;
+    // emiax: TODO, remove the above duplicate storage of atmosphere parameters.
 
     glm::vec3 _mieExtinctionCoeff;
     glm::vec3 _rayleighScatteringCoeff;

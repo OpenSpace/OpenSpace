@@ -200,6 +200,18 @@ namespace {
         "Unitless for now"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
+        "Gamma",
+        "Atmosphere Gamma",
+        "Exponent used in tone mapping the atmosphere"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo NightsideExposureInfo = {
+        "NightsideExposure",
+        "Nightside Exposure",
+        "Exposure multiplier for the night side"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo
         EnableSunOnCameraPositionInfo =
     {
@@ -251,7 +263,9 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         1.0f
     )
     , _mieAsymmetricFactorGP(MieAsymmetricFactorGInfo, 0.85f, -1.0f, 1.0f)
-    , _sunIntensityP(SunIntensityInfo, 8.f, 0.1f, 1000.0f)
+    , _sunIntensityP(SunIntensityInfo, 10.f, 0.1f, 20.0f)
+    , _gammaP(GammaInfo, 1.f, 0.1f, 4.0f)
+    , _nightsideExposureP(NightsideExposureInfo, 1.f, 1.f, 500.0f)
     , _sunFollowingCameraEnabledP(EnableSunOnCameraPositionInfo, false)
     , _hardShadowsEnabledP(EclipseHardShadowsInfo, false)
     , _atmosphereEnabled(false)
@@ -265,7 +279,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _ozoneHeightScale(0.f)
     , _mieHeightScale(0.f)
     , _miePhaseConstant(0.f)
-    , _sunRadianceIntensity(8.f)
+    , _sunRadianceIntensity(10.f)
     , _mieExtinctionCoeff(glm::vec3(0.f))
     , _rayleighScatteringCoeff(glm::vec3(0.f))
     , _ozoneExtinctionCoeff(glm::vec3(0.f))
@@ -538,6 +552,27 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             }
         }
 
+        const bool hasIntensity =
+            atmosphereDictionary.hasValue<double>(SunIntensityInfo.identifier);
+
+        if (hasIntensity) {
+            _sunIntensityP = _sunRadianceIntensity =
+                atmosphereDictionary.value<double>(SunIntensityInfo.identifier);
+        }
+
+        const bool hasGamma =
+            atmosphereDictionary.hasValue<double>(GammaInfo.identifier);
+        if (hasGamma) {
+            _gammaP = _gamma = atmosphereDictionary.value<double>(GammaInfo.identifier);
+        }
+
+        const bool hasNightsideExposure =
+            atmosphereDictionary.hasValue<double>(NightsideExposureInfo.identifier);
+        if (hasNightsideExposure) {
+            _nightsideExposureP = _nightsideExposure =
+                atmosphereDictionary.value<double>(NightsideExposureInfo.identifier);
+        }
+
         ghoul::Dictionary debugDictionary;
         success = atmosphereDictionary.getValue(keyATMDebug, debugDictionary);
         if (success) {
@@ -641,6 +676,12 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             _sunIntensityP.onChange(updateAtmosphere);
             addProperty(_sunIntensityP);
 
+            addProperty(_gammaP);
+            _gammaP.onChange(updateAtmosphere);
+
+            addProperty(_nightsideExposureP);
+            _nightsideExposureP.onChange(updateAtmosphere);
+
             _sunFollowingCameraEnabledP = _sunFollowingCameraEnabled;
             _sunFollowingCameraEnabledP.onChange(updateAtmosphere);
             addProperty(_sunFollowingCameraEnabledP);
@@ -679,6 +720,8 @@ void RenderableAtmosphere::initializeGL() {
             _deferredcaster->setMieHeightScale(_mieHeightScale);
             _deferredcaster->setMiePhaseConstant(_miePhaseConstant);
             _deferredcaster->setSunRadianceIntensity(_sunRadianceIntensity);
+            _deferredcaster->setGamma(_gamma);
+            _deferredcaster->setNightsideExposure(_nightsideExposure);
             _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
             _deferredcaster->setOzoneExtinctionCoefficients(_ozoneExtinctionCoeff);
             _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
@@ -742,11 +785,20 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
     bool executeComputation = true;
 
     if (_sunRadianceIntensity != _sunIntensityP ||
+        _gamma != _gammaP ||
+        _nightsideExposure != _nightsideExposureP ||
         _planetGroundRadianceEmittion != _groundRadianceEmittionP ||
         _sunFollowingCameraEnabled != _sunFollowingCameraEnabledP ||
-        _hardShadows != _hardShadowsEnabledP) {
+        _hardShadows != _hardShadowsEnabledP)
+    {
         executeComputation = false;
     }
+    // emiax: There is a bug in the above if-statement:
+    // If two parameters change during the same frame
+    // (one that needs new computation and one that does not) this will bail out of
+    // recomputation even though it is actually needed.
+    // TODO: Change to checking the params that need computation
+    // instead of the ones that don't.
 
     _atmosphereRadius               = _atmospherePlanetRadius + _atmosphereHeightP;
     _planetAverageGroundReflectance = _groundAverageReflectanceP;
@@ -772,9 +824,10 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
                             static_cast<float>(_mieScatteringExtinctionPropCoefficientP));
     _miePhaseConstant           = _mieAsymmetricFactorGP;
     _sunRadianceIntensity       = _sunIntensityP;
+    _gamma                      = _gammaP;
+    _nightsideExposure          = _nightsideExposureP;
     _sunFollowingCameraEnabled  = _sunFollowingCameraEnabledP;
     _hardShadows                = _hardShadowsEnabledP;
-
 
     if (_deferredcaster) {
         _deferredcaster->setAtmosphereRadius(_atmosphereRadius);
@@ -789,6 +842,8 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
         _deferredcaster->setMieHeightScale(_mieHeightScale);
         _deferredcaster->setMiePhaseConstant(_miePhaseConstant);
         _deferredcaster->setSunRadianceIntensity(_sunRadianceIntensity);
+        _deferredcaster->setGamma(_gamma);
+        _deferredcaster->setNightsideExposure(_nightsideExposureP);
         _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
         _deferredcaster->setOzoneExtinctionCoefficients(_ozoneExtinctionCoeff);
         _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);

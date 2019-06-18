@@ -80,6 +80,8 @@ public:
     void setMieHeightScale(float mieHeightScale);
     void setMiePhaseConstant(float miePhaseConstant);
     void setSunRadianceIntensity(float sunRadiance);
+    void setGamma(float gamma);
+    void setNightsideExposure(float nightsideExposure);
     void setRayleighScatteringCoefficients(const glm::vec3& rayScattCoeff);
     void setOzoneExtinctionCoefficients(const glm::vec3& ozoneExtCoeff);
     void setMieScatteringCoefficients(const glm::vec3& mieScattCoeff);
@@ -131,7 +133,7 @@ private:
 
     UniformCache(cullAtmosphere, Rg, Rt,
         groundRadianceEmittion, HR, betaRayleigh, HM,
-        betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled,
+        betaMieExtinction, mieG, sunRadiance, gamma, nightsideExposure, ozoneLayerEnabled,
         HO, betaOzoneExtinction, SAMPLES_R,
         SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU) _uniformCache;
     UniformCache(dInverseModelTransformMatrix, dModelTransformMatrix,
@@ -166,6 +168,8 @@ private:
     float _mieHeightScale;
     float _miePhaseConstant;
     float _sunRadianceIntensity;
+    float _gamma;
+    float _nightsideExposure;
 
     glm::vec3 _rayleighScatteringCoeff;
     glm::vec3 _ozoneExtinctionCoeff;

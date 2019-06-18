@@ -72,6 +72,8 @@ uniform vec3 betaMieScattering;
 uniform vec3 betaMieExtinction;
 uniform float mieG;
 uniform float sunRadiance;
+uniform float gamma;
+uniform float nightsideExposure;
 
 uniform bool ozoneLayerEnabled;
 

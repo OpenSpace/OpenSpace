@@ -61,10 +61,6 @@ local Earth = {
                     },
                     Enabled = true,
                     PadTiles = false,
-                    Settings = {
-                        Multiplier = 0.75,
-                        Gamma = 0.75
-                    },
                     Fallback = {
                         Identifier = "Blue_Marble",
                         Name = "Blue Marble",
@@ -93,11 +89,7 @@ local Earth = {
                         "1d",
                         "250m",
                         "jpg"
-                    ),
-                    Settings = {
-                        Multiplier = 0.75,
-                        Gamma = 0.75
-                    }
+                    )
                 },
                 {
                     Identifier = "Aqua_Modis_Temporal",

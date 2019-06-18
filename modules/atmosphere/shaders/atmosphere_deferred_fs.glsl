@@ -284,7 +284,8 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
                        const vec3 v, const vec3 s, out float r, out float mu,
                        out vec3 attenuation, const vec3 fragPosObj, out bool groundHit,
                        const double maxLength, const double pixelDepth,
-                       const vec4 spaceColor, const float sunIntensity, const vec3 normal) {
+                       const vec4 spaceColor, const float sunIntensity, float gamma,
+                       const vec3 normal) {
 
     const float INTERPOLATION_EPS = 0.004f; // precision const from Brunetton
 
@@ -415,11 +416,15 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     // return radiance * sunRadiance;
     vec3 finalScatteringRadiance = radiance * sunIntensity;
     if (groundHit) {
-        return finalScatteringRadiance;
+        return pow(finalScatteringRadiance, vec3(gamma));
     } else {
         // The final color is given by the attenuated light arriving at the observer's eye
-        // plus the scattered light in the atmosphere (only inscattered light taken into account here)
-        return attenuation * spaceColor.rgb + finalScatteringRadiance;
+        // plus the scattered light in the atmosphere (only inscattered light taken into account here).
+        // There is also a linear interpolation between gamma application and no gamma application,
+        // in order to avoid a sharp edge between the atmosphere and space.
+        return attenuation * spaceColor.rgb +
+            1.0 * attenuation * finalScatteringRadiance +
+            (vec3(1.0) - attenuation) * pow(finalScatteringRadiance, vec3(gamma));
     }
     
 }
@@ -479,7 +484,7 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
     vec3 groundRadiance;
     vec3 RLStar = (muSun * transmittanceL0 + irradianceReflected) * sunIntensity / M_PI;
     if (dotNS < 0.05f) {
-        groundRadiance = groundReflectance.rgb * mix(30.0f, 1.0f, smoothstep(-1.0f, 0.05f, dotNS)) * RLStar;
+        groundRadiance = groundReflectance.rgb * mix(nightsideExposure, 1.0f, smoothstep(-1.0f, 0.05f, dotNS)) * RLStar;
     } else {
         groundRadiance = groundReflectance.rgb * RLStar;
     }
@@ -660,7 +665,8 @@ void main() {
                                                             vec3(positionObjectsCoords.xyz),
                                                             groundHit, maxLength, pixelDepth,
                                                             color, sunIntensityInscatter,
-                                                            normal.xyz); 
+                                                            gamma, normal.xyz);
+
                     vec3 groundColorV = vec3(0.0);
                     vec3 sunColorV = vec3(0.0);                                                
                     if (groundHit) {

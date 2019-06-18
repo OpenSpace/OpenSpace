@@ -90,10 +90,11 @@
 namespace {
     constexpr const char* _loggerCat = "AtmosphereDeferredcaster";
 
-    constexpr const std::array<const char*, 17> UniformNames1 = {
+    constexpr const std::array<const char*, 19> UniformNames1 = {
         "cullAtmosphere", "Rg", "Rt", "groundRadianceEmittion", "HR", "betaRayleigh",
-        "HM", "betaMieExtinction", "mieG", "sunRadiance", "ozoneLayerEnabled", "HO",
-        "betaOzoneExtinction", "SAMPLES_R", "SAMPLES_MU", "SAMPLES_MU_S", "SAMPLES_NU"
+        "HM", "betaMieExtinction", "mieG", "sunRadiance", "gamma", "nightsideExposure",
+        "ozoneLayerEnabled", "HO", "betaOzoneExtinction", "SAMPLES_R", "SAMPLES_MU",
+        "SAMPLES_MU_S", "SAMPLES_NU"
     };
 
     constexpr const std::array<const char*, 10> UniformNames2 = {
@@ -244,6 +245,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             program.setUniform(_uniformCache.betaMieExtinction, _mieExtinctionCoeff);
             program.setUniform(_uniformCache.mieG, _miePhaseConstant);
             program.setUniform(_uniformCache.sunRadiance, _sunRadianceIntensity);
+            program.setUniform(_uniformCache.gamma, _gamma);
+            program.setUniform(_uniformCache.nightsideExposure, _nightsideExposure);
             program.setUniform(_uniformCache.ozoneLayerEnabled, _ozoneEnabled);
             program.setUniform(_uniformCache.HO, _ozoneHeightScale);
             program.setUniform(_uniformCache.betaOzoneExtinction, _ozoneExtinctionCoeff);
@@ -534,6 +537,14 @@ void AtmosphereDeferredcaster::setMiePhaseConstant(float miePhaseConstant) {
 
 void AtmosphereDeferredcaster::setSunRadianceIntensity(float sunRadiance) {
     _sunRadianceIntensity = sunRadiance;
+}
+
+void AtmosphereDeferredcaster::setGamma(float gamma) {
+    _gamma = gamma;
+}
+
+void AtmosphereDeferredcaster::setNightsideExposure(float nightsideExposure) {
+    _nightsideExposure = nightsideExposure;
 }
 
 void AtmosphereDeferredcaster::setRayleighScatteringCoefficients(

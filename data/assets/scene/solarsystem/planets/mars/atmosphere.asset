@@ -9,6 +9,8 @@ local Atmosphere = {
     Renderable = {
         Type = "RenderableAtmosphere",
         Atmosphere = {
+            SunIntensity = 11,
+            Gamma = 0.6,
             -- Atmosphere radius in Km
             AtmosphereRadius = 3463.17495,
             --PlanetRadius    = 3396.19,
