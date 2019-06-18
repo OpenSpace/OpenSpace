@@ -51,29 +51,29 @@ void SunTextureManager::update(std::unique_ptr<ghoul::opengl::Texture> &texture)
 {
     std::string currentTime = getOpenSpaceDateTime();
 
+    if (_textureToUpload.empty() && currentTime != _activeTextureDate && (_textureListGPU.find(currentTime) != _textureListGPU.end()))
+    {
+        _textureToUpload = currentTime;
+    }
+    if ((global::timeManager.deltaTime() * _direction) < 0)
+    {
+        _textureToUpload = "";
+    }
 
+    _direction = global::timeManager.deltaTime();
 
+    switch (_stage)
+    {
+    //This stage just checks what the next image applied should be,
+    case 0:
+    {
+        _current = getOpenSpaceDateTime();
 
-        if (_textureToUpload.empty() && currentTime != _activeTextureDate && _textureListGPU[currentTime]) {
-            _textureToUpload = currentTime;
-        }
-        if ((global::timeManager.deltaTime() * _direction) < 0) {
-            _textureToUpload = "";
-        }
-
-        _direction = global::timeManager.deltaTime();
-
-        //_counter++;
-        switch (_stage)
+        if (!_textureToUpload.empty())
         {
-            //This stage just checks what the next image applied should be, 
-        case 0: {
-            _current = getOpenSpaceDateTime();
-
-            if (!_textureToUpload.empty()) {
-                _stage = 3;
-                break;
-            }
+            _stage = 3;
+            break;
+        }
         if (_counter % 150 == 0 && !_working && !_dldthread.joinable())
         {
             _dldthread = std::thread([=] { getNextTexture(_current, 1.0f, &_next); });
@@ -145,18 +145,15 @@ void SunTextureManager::update(std::unique_ptr<ghoul::opengl::Texture> &texture)
     case 3:
     {
         //LERROR("in case 3");
-        if (_GPUListBlock.try_lock())
+        if (((_textureListGPU.find(_textureToUpload) != _textureListGPU.end())))
         {
-            if (((_textureListGPU.find(_textureToUpload) != _textureListGPU.end())) ) {
-                _textureListGPU[_activeTextureDate] = std::move(texture);
-                texture = std::move(_textureListGPU[_textureToUpload]);
-                _activeTextureDate = _textureToUpload;
-                _textureToUpload = "";
-            }
-            _stage = 0;
-            _GPUListBlock.unlock();
-            
+            LERROR("changing to texture " + _textureToUpload);
+            _textureListGPU[_activeTextureDate] = std::move(texture);
+            texture = std::move(_textureListGPU[_textureToUpload]);
+            _activeTextureDate = _textureToUpload;
+            _textureToUpload = "";
         }
+        _stage = 0;
 
         break;
     }
