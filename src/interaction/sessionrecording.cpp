@@ -126,9 +126,21 @@ bool SessionRecording::startRecording(const std::string& filename) {
     }
     const std::string absFilename = absPath("${RECORDINGS}/" + filename);
 
-    if (_state == SessionState::Playback) {
-        _playbackFile.close();
+    if (FileSys.fileExists(absFilename)) {
+        LERROR(fmt::format(
+            "Unable to start recording; file {} already exists.", absFilename.c_str()
+        ));
+        return false;
     }
+    if (_state == SessionState::Recording) {
+        LERROR("Unable to start recording while already in recording mode");
+        return false;
+    }
+    else if (_state == SessionState::Playback) {
+        LERROR("Unable to start recording while in session playback mode");
+        return false;
+    }
+
     _state = SessionState::Recording;
     _playbackActive_camera = false;
     _playbackActive_time = false;
@@ -183,14 +195,9 @@ bool SessionRecording::startPlayback(const std::string& filename,
         LERROR("Unable to start playback while in session recording mode");
         return false;
     }
-    else {
-        if (_state == SessionState::Playback && _playbackFilename == absFilename) {
-            LERROR(fmt::format(
-                "Unable to start playback on file {} since it is already in playback",
-                filename
-            ));
-            return false;
-        }
+    else if (_state == SessionState::Playback) {
+        LERROR("Unable to start new playback while in session playback mode");
+        return false;
     }
 
     if (!FileSys.fileExists(absFilename)) {
