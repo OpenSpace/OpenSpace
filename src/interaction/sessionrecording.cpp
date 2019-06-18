@@ -48,7 +48,9 @@ namespace {
     constexpr const bool UsingTimeKeyframes = false;
     const std::string FileHeaderTitle = "OpenSpace_record/playback";
     constexpr const size_t FileHeaderVersionLength = 5;
-    constexpr const char FileHeaderVersion[FileHeaderVersionLength] = { '0', '0', '.', '8', '5' };
+    constexpr const char FileHeaderVersion[FileHeaderVersionLength] = {
+        '0', '0', '.', '8', '5'
+    };
     constexpr const char DataFormatAsciiTag = 'A';
     constexpr const char DataFormatBinaryTag = 'B';
 
@@ -203,7 +205,10 @@ bool SessionRecording::startPlayback(const std::string& filename,
     // Open in ASCII first
     _playbackFile.open(_playbackFilename, std::ifstream::in);
     // Read header
-    std::string readBackHeaderString = readHeaderElement(_playbackFile, FileHeaderTitle.length());
+    std::string readBackHeaderString = readHeaderElement(
+        _playbackFile,
+        FileHeaderTitle.length()
+    );
     if (readBackHeaderString != FileHeaderTitle) {
         LERROR("Specified playback file does not contain expected header.");
         cleanUpPlayback();
@@ -764,7 +769,7 @@ double SessionRecording::fixedDeltaTimeDuringFrameOutput() const {
     }
     else {
         return 0;
-    }   
+    }
 }
 
 void SessionRecording::playbackCamera() {
@@ -1022,7 +1027,7 @@ void SessionRecording::moveAheadInTime() {
         if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {
             _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
             global::renderEngine.takeScreenShot();
-        }       
+        }
     }
 }
 

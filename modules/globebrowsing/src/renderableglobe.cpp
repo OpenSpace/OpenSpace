@@ -475,10 +475,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.useAccurateNormals);
     addProperty(_generalProperties.eclipseShadowsEnabled);
     addProperty(_generalProperties.eclipseHardShadows);
-    _generalProperties.targetLodScaleFactor.onChange([this]() { 
+    _generalProperties.targetLodScaleFactor.onChange([this]() {
         float sf = _generalProperties.targetLodScaleFactor;
         _generalProperties.currentLodScaleFactor = sf;
-        _lodScaleFactorDirty = true; 
+        _lodScaleFactorDirty = true;
     });
     addProperty(_generalProperties.targetLodScaleFactor);
     addProperty(_generalProperties.currentLodScaleFactor);
@@ -2197,7 +2197,6 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data) {
     if (isLeaf(cn)) {
         updateChunk(cn, data);
 
-        
         if (cn.status == Chunk::Status::WantSplit) {
             splitChunkNode(cn, 1);
         }

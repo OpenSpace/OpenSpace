@@ -921,7 +921,7 @@ void OpenSpaceEngine::loadFonts() {
 }
 
 void OpenSpaceEngine::writeSceneDocumentation() {
-    // Write documentation to json files if config file supplies path for doc files to be placed.
+    // Write documentation to json files if config file supplies path for doc files
 
     std::string path = global::configuration.documentation.path;
     if (!path.empty()) {

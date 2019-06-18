@@ -207,7 +207,7 @@ int getGeoPositionForCamera(lua_State* L) {
     }
 
     const glm::dvec3 cameraPosition = global::navigationHandler.camera()->positionVec3();
-    const SceneGraphNode* anchor = 
+    const SceneGraphNode* anchor =
         global::navigationHandler.orbitalNavigator().anchorNode();
     const glm::dmat4 inverseModelTransform = anchor->inverseModelTransform();
     const glm::dvec3 cameraPositionModelSpace =

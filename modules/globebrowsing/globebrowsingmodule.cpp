@@ -183,10 +183,14 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
         _wmsCacheLocation = dict.value<std::string>(WMSCacheLocationInfo.identifier);
     }
     if (dict.hasKeyAndValue<double>(WMSCacheSizeInfo.identifier)) {
-        _wmsCacheSizeMB = static_cast<int>(dict.value<double>(WMSCacheSizeInfo.identifier));
+        _wmsCacheSizeMB = static_cast<int>(
+            dict.value<double>(WMSCacheSizeInfo.identifier)
+        );
     }
     if (dict.hasKeyAndValue<double>(TileCacheSizeInfo.identifier)) {
-        _tileCacheSizeMB = static_cast<int>(dict.value<double>(TileCacheSizeInfo.identifier));
+        _tileCacheSizeMB = static_cast<int>(
+            dict.value<double>(TileCacheSizeInfo.identifier)
+        );
     }
 
     // Sanity check
@@ -207,7 +211,9 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
 
     // Initialize
     global::callback::initializeGL.emplace_back([&]() {
-        _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>(_tileCacheSizeMB);
+        _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>(
+            _tileCacheSizeMB
+        );
         addPropertySubOwner(*_tileCache);
 
         tileprovider::initializeDefaultTile();
@@ -486,9 +492,10 @@ void GlobeBrowsingModule::goToGeodetic2(Camera& camera, globebrowsing::Geodetic2
         return;
     }
 
-    const glm::dvec3 cameraPosition = global::navigationHandler.camera()->positionVec3();
+    interaction::NavigationHandler& nav = global::navigationHandler;
+    const glm::dvec3 cameraPosition = nav.camera()->positionVec3();
     const glm::dmat4 inverseModelTransform =
-        global::navigationHandler.orbitalNavigator().anchorNode()->inverseModelTransform();
+        nav.orbitalNavigator().anchorNode()->inverseModelTransform();
     const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
     const SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(

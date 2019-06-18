@@ -117,7 +117,7 @@ private:
 
     //grabs json from each module to pass to the documentation engine.
     std::string _documentationJson;
-    
+
     ShutdownInformation _shutdown;
 
     // The first frame might take some more time in the update loop, so we need to know to

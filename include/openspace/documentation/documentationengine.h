@@ -105,7 +105,7 @@ public:
     * will just contain one item, but some modules may wish to provide
     * multiple templates for subtypes, etc
     */
-    void writeDocumentationHtml(const std::string path, const std::string data);
+    void writeDocumentationHtml(const std::string& path, std::string data);
 
     std::string generateJson() const override;
 

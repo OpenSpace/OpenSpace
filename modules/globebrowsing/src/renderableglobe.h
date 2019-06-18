@@ -271,7 +271,7 @@ private:
     size_t _iterationsOfUnavailableData = 0;
     Layer* _lastChangedLayer = nullptr;
 
-    // Labels 
+    // Labels
     GlobeLabelsComponent _globeLabelsComponent;
     ghoul::Dictionary _labelsDictionary;
 };

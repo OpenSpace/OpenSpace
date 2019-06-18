@@ -306,7 +306,7 @@ GlobeLabelsComponent::GlobeLabelsComponent()
     addProperty(_labelAlignmentOption);
 }
 
-void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary, 
+void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
                                       globebrowsing::RenderableGlobe* globe)
 {
     documentation::testSpecificationAndThrow(
@@ -314,7 +314,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
         dictionary,
         "GlobeLabelsComponent"
     );
-        
+
     _globe = globe;
 
     // Reads labels' file and build cache file if necessary
@@ -339,7 +339,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
         // enables the label automatically.
         _labelsEnabled = true;
     }
-         
+
     if (dictionary.hasKey(LabelsFontSizeInfo.identifier)) {
         _labelsFontSize = dictionary.value<float>(LabelsFontSizeInfo.identifier);
         _labelsFontSize.onChange([this]() { initializeFonts(); });
@@ -475,7 +475,7 @@ bool GlobeLabelsComponent::readLabelsFile(const std::string& file) {
         if (!csvLabelFile.is_open()) {
             return false;
         }
-        
+
         _labels.labelsArray.clear();
 
         std::string sline;
@@ -488,14 +488,14 @@ bool GlobeLabelsComponent::readLabelsFile(const std::string& file) {
             std::istringstream iss(sline);
             std::string token;
             std::getline(iss, token, ',');
-            
+
             // First line is just the Header
             if (token == "Feature_Name") {
                 continue;
             }
 
             LabelEntry lEntry;
-            
+
             // Non-ascii characters aren't displayed correctly by the text
             // rendering (We don't have the non-ascii character in the texture
             // atlas)
@@ -516,16 +516,16 @@ bool GlobeLabelsComponent::readLabelsFile(const std::string& file) {
             }
 
             std::getline(iss, token, ','); // Target is not used
-                
+
             std::getline(iss, token, ','); // Diameter
             lEntry.diameter = std::stof(token);
-                
+
             std::getline(iss, token, ','); // Latitude
             lEntry.latitude = std::stof(token);
-                
+
             std::getline(iss, token, ','); // Longitude
             lEntry.longitude = std::stof(token);
-                
+
             std::getline(iss, token, ','); // Coord System
             std::string coordinateSystem(token);
             std::size_t found = coordinateSystem.find("West");
@@ -552,7 +552,7 @@ bool GlobeLabelsComponent::readLabelsFile(const std::string& file) {
 
             _labels.labelsArray.push_back(lEntry);
         }
-       
+
         return true;
     }
     catch (const std::fstream::failure& e) {
@@ -623,9 +623,9 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
                     viewTransform;
     glm::dmat4 mvp = vp * _globe->modelTransform();
 
-    glm::dvec3 globePositionWorld = glm::dvec3(_globe->modelTransform() * 
+    glm::dvec3 globePositionWorld = glm::dvec3(_globe->modelTransform() *
                                     glm::vec4(0.f, 0.f, 0.f, 1.f));
-    glm::dvec3 cameraToGlobeDistanceWorld = globePositionWorld - 
+    glm::dvec3 cameraToGlobeDistanceWorld = globePositionWorld -
                                             data.camera.positionVec3();
     double distanceCameraGlobeWorld = glm::length(cameraToGlobeDistanceWorld);
 
@@ -667,7 +667,7 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
 }
 
 void GlobeLabelsComponent::renderLabels(const RenderData& data,
-                                        const glm::dmat4& modelViewProjectionMatrix, 
+                                        const glm::dmat4& modelViewProjectionMatrix,
                                         float distToCamera,
                                         float fadeInVariable
 ) {
@@ -682,7 +682,7 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
 
     glm::dvec4 cameraPosWorld = invCombinedView * glm::dvec4(0.0, 0.0, 0.0, 1.0);
     glm::dvec3 cameraPosObj = glm::dvec3(invMP * cameraPosWorld);
-    glm::dvec4 cameraUpVecWorld = glm::dvec4(data.camera.lookUpVectorWorldSpace(), 0.0); 
+    glm::dvec4 cameraUpVecWorld = glm::dvec4(data.camera.lookUpVectorWorldSpace(), 0.0);
     glm::dvec3 cameraLookUpObj = glm::dvec3(invMP * cameraUpVecWorld);
 
     glm::dmat4 VP = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *

@@ -283,7 +283,7 @@ private:
     bool _playbackActive_script = false;
     bool _hasHitEndOfCameraKeyframes = false;
     bool _setSimulationTimeWithNextCameraKeyframe = false;
-    
+
     bool _saveRenderingDuringPlayback = false;
     double _saveRenderingDeltaTime = 1.0 / 30.0;
     double _saveRenderingCurrentRecordedTime;

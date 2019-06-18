@@ -555,7 +555,7 @@ int removeSceneGraphNode(lua_State* L) {
     }
 
     // Add all the children
-    std::function<void(SceneGraphNode*, std::vector<SceneGraphNode*>&)> markNode = 
+    std::function<void(SceneGraphNode*, std::vector<SceneGraphNode*>&)> markNode =
         [&markNode](SceneGraphNode* node, std::vector<SceneGraphNode*>& markedList)
     {
         std::vector<SceneGraphNode*> children = node->children();

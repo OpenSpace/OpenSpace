@@ -178,16 +178,21 @@ void DocumentationEngine::addDocumentation(Documentation documentation) {
     }
 }
 
-void DocumentationEngine::addHandlebarTemplates(std::vector<HandlebarTemplate> templates) {
-    _handlebarTemplates.insert(std::end(_handlebarTemplates), std::begin(templates), std::end(templates));
+void DocumentationEngine::addHandlebarTemplates(std::vector<HandlebarTemplate> templates)
+{
+    _handlebarTemplates.insert(
+        std::end(_handlebarTemplates),
+        std::begin(templates), std::end(templates)
+    );
 }
 
 std::vector<Documentation> DocumentationEngine::documentations() const {
     return _documentations;
 }
 
-void DocumentationEngine::writeDocumentationHtml(const std::string path, const std::string data) {
-
+void DocumentationEngine::writeDocumentationHtml(const std::string& path,
+                                                 std::string data)
+{
     std::ifstream handlebarsInput;
     handlebarsInput.exceptions(~std::ofstream::goodbit);
     handlebarsInput.open(absPath(HandlebarsFilename));
@@ -285,7 +290,7 @@ void DocumentationEngine::writeDocumentationHtml(const std::string path, const s
     file
         << "    " << "<script id=\"" << DataId
         << "\" type=\"text/application/json\">" << '\n'
-        << "      " << data << '\n'
+        << "      " << std::move(data) << '\n'
         << "    " << "</script>" << '\n';
 
 

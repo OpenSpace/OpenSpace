@@ -80,7 +80,7 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
             sendCurrentTime();
         }
     });
-    
+
     _deltaTimeCallbackHandle = global::timeManager.addDeltaTimeChangeCallback([this]() {
         // Throttle by last update,
         // but force update if pause state or target delta changes.
