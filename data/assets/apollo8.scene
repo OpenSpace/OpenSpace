@@ -1,0 +1,129 @@
+--apollo.scene
+asset.require('./base')
+local propertyHelper = asset.require('util/property_helper')
+local sceneHelper = asset.require('util/scene_helper')
+
+
+asset.require('scene/solarsystem/planets/earth/moon/moon')
+asset.require('scene/solarsystem/missions/apollo/apollo8.asset')
+
+-- Custom Keybindings
+local Keybindings = {
+    {
+        Key = "E",
+        Command = "openspace.time.setPause(true);" ..
+                  "openspace.setPropertyValue('*Trail.Renderable.Enabled', false)"..
+                  "openspace.setPropertyValue('Scene.Apollo8LaunchTrail.Renderable.Enabled', false)"..
+                  "openspace.sessionRecording.startPlayback('apollo8')",
+        Documentation = "Jump to right before the earthrise photo",
+        Name = "Set Earthrise time",
+        GuiPath = "/Missions/Apollo/8",
+        Local = false
+
+    },
+    {
+        Key = "U",
+        Command =   "openspace.time.setTime('1968-12-21T12:51:37.00')" ..
+                    "openspace.setPropertyValueSingle('Scene.Apollo8LaunchTrail.Renderable.Enabled', true);",
+        Documentation = "Jump to time right before Apollo 8 liftoff, with its trail enabled",
+        Name = "Set Apollo 8 launch time",
+        GuiPath = "/Missions/Apollo/8",
+        Local = false
+    },
+    {
+        Key = "K",
+        Command = propertyHelper.invert('Scene.Moon.Renderable.Layers.ColorLayers.Kaguya_Utah.Enabled'),
+        Documentation = "Toggles Moon Kaguya color layer",
+        Name = "Toggle Kaguya layer on the Moon",
+        GuiPath = "/Missions/Apollo",
+        Local = false
+    },
+    {
+        Key = "T",
+        Command = propertyHelper.invert('Scene.Apollo8MoonTrail.Renderable.Enabled'),
+        Documentation = "Toggles the trails of the Apollo 8 orbits, focused around the Moon",
+        Name = "Toggle Apollo 8 orbits",
+        GuiPath = "/Missions/Apollo/8",
+        Local = false
+    },
+    {
+        Key = "SHIFT+T",
+        Command = propertyHelper.invert('Scene.Apollo8LaunchTrail.Renderable.Enabled'),
+        Documentation = "Toggles the trails of the Apollo 8 Launch, focused around the Earth",
+        Name = "Toggle Apollo 8 launch trail",
+        GuiPath = "/Missions/Apollo/8",
+        Local = false
+    },
+    {
+        Key = "CTRL+T",
+        Command = propertyHelper.invert('Scene.Apollo8EarthBarycenterTrail.Renderable.Enabled'),
+        Documentation = "Toggles the trails of the full Apollo 8, with Earth's frame of reference",
+        Name = "Toggles Apollo 8 full trail",
+        GuiPath = "/Missions/Apollo/8",
+        Local = false
+    },
+    {
+        Key = "S",
+        Command = propertyHelper.invert('Scene.Moon.Renderable.PerformShading'),
+        Documentation = "Toggles shading for the Moon",
+        Name = "Toggle Moon shading",
+        GuiPath = "/Missions/Apollo",
+        Local = false
+    },
+    {
+        Key = "PAGE_UP",
+        Command =   "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')" ..
+                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Apollo8')" ..
+                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
+        Documentation = "Set camera focus to Apollo 8",
+        Name = "Focus on Apollo 8",
+        GuiPath = "/Missions/Apollo/8",
+        Local = false
+    },
+    {
+        Key = "PAGE_DOWN",
+        Command =   "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')" ..
+                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Moon')" ..
+                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
+        Documentation = "Set camera focus to the Moon",
+        Name = "Focus on Moon",
+        GuiPath = "/Missions/Apollo",
+        Local = false
+    },
+    {
+        Key = "HOME",
+        Command =   "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')" ..
+                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')" ..
+                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
+        Documentation = "Set camera focus to the Earth",
+        Name = "Focus on Earth",
+        GuiPath = "/Missions/Apollo",
+        Local = false
+    }
+}
+
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+asset.onInitialize(function ()
+    sceneHelper.bindKeys(Keybindings)
+
+    openspace.time.setTime("1968-12-21T12:51:51.0")
+    -- Earthrise:
+    -- openspace.time.setTime("1968-12-24T16:37:19.0")
+
+    openspace.markInterestingNodes({ "Earth", "Moon", "Apollo8", "Apollo8Launch" })
+
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.MinimumAllowedDistance', 0.000000);
+    openspace.setPropertyValueSingle('Scene.Moon.Renderable.LodScaleFactor', 24.0);
+
+    openspace.navigation.setCameraState({
+        Anchor = earthAsset.Earth.Identifier,
+        Position = { 0, 0, 0 },
+        Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 },
+    })
+
+    openspace.globebrowsing.goToGeo(20, -60, 15000000)
+end)
+
+asset.onDeinitialize(function ()
+    openspace.removeInterestingNodes({ "Earth", "Moon", "Apollo8" })
+end)

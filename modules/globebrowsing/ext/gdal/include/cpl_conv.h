@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_conv.h dfac92801bd83819cbae2501803e02e06b361a43 2018-04-23 18:07:32 +0200 Martin Landa $
+ * $Id: cpl_conv.h c39d156816d937c3139360b11786c769aeabd21e 2018-05-05 19:48:08 +0200 Even Rouault $
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Convenience functions declarations.
@@ -296,13 +296,10 @@ extern "C++"
 {
 class CPL_DLL CPLLocaleC
 {
+    CPL_DISALLOW_COPY_ASSIGN(CPLLocaleC)
 public:
     CPLLocaleC();
     ~CPLLocaleC();
-
-    /* Make it non-copyable */
-    CPLLocaleC(const CPLLocaleC&) = delete;
-    CPLLocaleC& operator=(const CPLLocaleC&) = delete;
 
 private:
     char *pszOldLocale;
@@ -315,13 +312,11 @@ private:
 class CPLThreadLocaleCPrivate;
 class CPL_DLL CPLThreadLocaleC
 {
+    CPL_DISALLOW_COPY_ASSIGN(CPLThreadLocaleC)
+
 public:
     CPLThreadLocaleC();
     ~CPLThreadLocaleC();
-
-    /* Make it non-copyable */
-    CPLThreadLocaleC(const CPLThreadLocaleC&) = delete;
-    CPLThreadLocaleC& operator=(const CPLThreadLocaleC&) = delete;
 
 private:
     CPLThreadLocaleCPrivate* m_private;
@@ -344,14 +339,11 @@ extern "C++"
 {
 class CPL_DLL CPLConfigOptionSetter
 {
+    CPL_DISALLOW_COPY_ASSIGN(CPLConfigOptionSetter)
 public:
     CPLConfigOptionSetter(const char* pszKey, const char* pszValue,
                           bool bSetOnlyIfUndefined);
     ~CPLConfigOptionSetter();
-
-    /* Make it non-copyable */
-    CPLConfigOptionSetter(const CPLConfigOptionSetter&) = delete;
-    CPLConfigOptionSetter& operator=(const CPLConfigOptionSetter&) = delete;
 
 private:
     char* m_pszKey;

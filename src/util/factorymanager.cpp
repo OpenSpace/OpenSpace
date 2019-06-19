@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,12 +26,6 @@
 
 #include <sstream>
 
-namespace {
-    constexpr const char* MainTemplateFilename = "${WEB}/factories/main.hbs";
-    constexpr const char* FactoryTemplateFilename = "${WEB}/factories/factory.hbs";
-    constexpr const char* JsFilename = "${WEB}/factories/script.js";
-} // namespace
-
 namespace openspace {
 
 FactoryManager* FactoryManager::_manager = nullptr;
@@ -46,12 +40,10 @@ FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
 FactoryManager::FactoryManager()
     : DocumentationGenerator(
         "Factory Documentation",
-        "factories",
+        "factory",
         {
-            { "mainTemplate", MainTemplateFilename },
-            { "factoryTemplate", FactoryTemplateFilename }
-        },
-        JsFilename
+            { "factoryTemplate", "${WEB}/documentation/factory.hbs" }
+        }
     )
 {}
 

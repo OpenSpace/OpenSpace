@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,6 +46,14 @@ namespace {
         "Transparency",
         "This value determines the transparency of this object."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
+        "Type",
+        "Renderable Type",
+        "This tells the type of the renderable.",
+        openspace::properties::Property::Visibility::Hidden
+    };
+
 } // namespace
 
 namespace openspace {
@@ -95,10 +103,12 @@ std::unique_ptr<Renderable> Renderable::createFromDictionary(
     return result;
 }
 
+
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "Renderable" })
     , _enabled(EnabledInfo, true)
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
+    , _renderableType(RenderableTypeInfo, "Renderable")
 {
     // I can't come up with a good reason not to do this for all renderables
     registerUpdateRenderBinFromOpacity();
@@ -128,6 +138,12 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     }
 
     addProperty(_enabled);
+
+    //set type for UI
+    if (dictionary.hasKey(RenderableTypeInfo.identifier)) {
+        _renderableType = dictionary.value<std::string>(RenderableTypeInfo.identifier);
+    }
+    addProperty(_renderableType);
 }
 
 void Renderable::initialize() {}
@@ -161,14 +177,8 @@ SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
     };
 }
 
-void Renderable::setPscUniforms(ghoul::opengl::ProgramObject& program,
-                                const Camera& camera,
-                                const PowerScaledCoordinate& position)
-{
-    program.setUniform("campos", glm::vec4(camera.positionVec3(), 1.f));
-    program.setUniform("objpos", position.vec4());
-    program.setUniform("camrot", glm::mat4(camera.viewRotationMatrix()));
-    program.setUniform("scaling", glm::vec2(1.f, 0.f));
+bool Renderable::renderedWithDesiredData() const {
+    return true;
 }
 
 Renderable::RenderBin Renderable::renderBin() const {

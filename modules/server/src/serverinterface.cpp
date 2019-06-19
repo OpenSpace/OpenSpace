@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -68,7 +68,8 @@ namespace {
         "Ip addresses or domains that should always be allowed access to this interface"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RequirePasswordAddressesInfo = {
+    constexpr openspace::properties::Property::PropertyInfo
+        RequirePasswordAddressesInfo = {
         "RequirePasswordAddresses",
         "Require Password Addresses",
         "Ip addresses or domains that should be allowed access if they provide a password"
@@ -97,7 +98,7 @@ std::unique_ptr<ServerInterface> ServerInterface::createFromDictionary(
     return si;
 }
 
-ServerInterface::ServerInterface(const ghoul::Dictionary& config) 
+ServerInterface::ServerInterface(const ghoul::Dictionary& config)
     : properties::PropertyOwner({ "", "", "" })
     , _type(TypeInfo)
     , _port(PortInfo, 0)
@@ -116,6 +117,19 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
     _defaultAccess.addOption(static_cast<int>(Access::RequirePassword), RequirePassword);
     _defaultAccess.addOption(static_cast<int>(Access::Allow), AllowAccess);
 
+    if (config.hasKey(DefaultAccessInfo.identifier)) {
+        std::string access = config.value<std::string>(DefaultAccessInfo.identifier);
+        if (access == DenyAccess) {
+            _defaultAccess.setValue(static_cast<int>(Access::Deny));
+        }
+        else if (access == RequirePassword) {
+            _defaultAccess.setValue(static_cast<int>(Access::RequirePassword));
+        }
+        else if (access == AllowAccess) {
+            _defaultAccess.setValue(static_cast<int>(Access::Allow));
+        }
+    }
+
     const std::string identifier = config.value<std::string>(KeyIdentifier);
 
     auto readList =
@@ -129,7 +143,7 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
                 list.set(v);
             }
         };
-    
+
     readList(AllowAddressesInfo.identifier, _allowAddresses);
     readList(DenyAddressesInfo.identifier, _denyAddresses);
     readList(RequirePasswordAddressesInfo.identifier, _requirePasswordAddresses);
@@ -152,7 +166,7 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
     _port = static_cast<int>(config.value<double>(PortInfo.identifier));
     _enabled = config.value<bool>(EnabledInfo.identifier);
 
-    std::function<void()> reinitialize = [this]() {
+    auto reinitialize = [this]() {
         deinitialize();
         initialize();
     };

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -462,15 +462,9 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     if (_state != State::GLInitialized) {
         return;
     }
-    const psc thisPositionPSC = psc::CreatePowerScaledCoordinate(
-        _worldPositionCached.x,
-        _worldPositionCached.y,
-        _worldPositionCached.z
-    );
 
     RenderData newData = {
         data.camera,
-        thisPositionPSC,
         data.time,
         data.doPerformanceMeasurement,
         data.renderBinMask,
@@ -809,7 +803,7 @@ bool SceneGraphNode::isTimeFrameActive(const Time& time) const {
 glm::dmat3 SceneGraphNode::calculateWorldRotation() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
-        return rotationMatrix() * _parent->calculateWorldRotation();
+        return _parent->calculateWorldRotation() * rotationMatrix();
     }
     else {
         return rotationMatrix();
@@ -883,39 +877,6 @@ const Renderable* SceneGraphNode::renderable() const {
 Renderable* SceneGraphNode::renderable() {
     return _renderable.get();
 }
-
-/*
-bool SceneGraphNode::sphereInsideFrustum(const psc& s_pos, const PowerScaledScalar& s_rad,
-                                         const Camera* camera)
-{
-    // direction the camera is looking at in power scale
-    psc psc_camdir = psc(glm::vec3(camera->viewDirectionWorldSpace()));
-
-    // the position of the camera, moved backwards in the view direction to encapsulate
-    // the sphere radius
-    psc U = camera->position() - psc_camdir * s_rad * (1.0 / camera->sinMaxFov());
-
-    // the vector to the object from the new position
-    psc D = s_pos - U;
-
-    const double a = psc_camdir.angle(D);
-    if (a < camera->maxFov()) {
-        // center is inside K''
-        D = s_pos - camera->position();
-        if (D.length() * psc_camdir.length() * camera->sinMaxFov()
-            <= -psc_camdir.dot(D)) {
-            // center is inside K'' and inside K'
-            return D.length() <= s_rad;
-        } else {
-            // center is inside K'' and outside K'
-            return true;
-        }
-    } else {
-        // outside the maximum angle
-        return false;
-    }
-}
-*/
 
 SceneGraphNode* SceneGraphNode::childNode(const std::string& identifier) {
     if (this->identifier() == identifier) {

@@ -1,0 +1,86 @@
+asset.require('./base')
+
+local sceneHelper = asset.require('util/scene_helper')
+
+-- Keybindings that are specific for this scene
+local Keybindings = {
+    {
+        Key = "i",
+        Command = "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset', -469.300000);" .. 
+        "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Settings.Offset', -470.800006);" .. 
+        "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Enabled', true);" ..
+        "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Enabled', true);" ..
+        -- "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Settings.Gamma', 3.098590);" ..
+        -- "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Settings.Multiplier', 3.568080);" ..
+        "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Settings.Multiplier', 2.816900);" ..
+        "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Settings.Gamma', 0.938970);" ..
+        "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Settings.Gamma', 2.394370);" ..
+        "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Enabled', true);",
+        Documentation = "Setup Insight landing layers",
+        Name = "Setup Insight layers",
+        GuiPath = "/Missions/Insight",
+        Local = false
+    }, 
+    {
+        Key = "SHIFT+i",
+        Command = "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset', 0);" .. 
+        "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Settings.Offset', 0);" .. 
+        "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Enabled', false);" ..
+        "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Enabled', false);" ..
+        "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Enabled', false);",
+        -- "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Settings.Gamma', 1.0);" ..
+        -- "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Settings.Multiplier', 1.0);" ..
+        "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Settings.Multiplier', 1.0);" ..
+        "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Settings.Gamma', 1.0);" ..
+        "openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Settings.Gamma', 1.0);";
+        Documentation = "Undo Insight landing layers setup",
+        Name = "Unset Insight layers",
+        GuiPath = "/Missions/Insight",
+        Local = false
+    }
+}
+
+local insightAsset = asset.require('scene/solarsystem/missions/insight/edl')
+
+asset.onInitialize(function ()
+    openspace.time.setTime("2018 NOV 26 19:39:03.68")
+
+    sceneHelper.bindKeys(Keybindings)
+
+    openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset', -469.300000);
+    openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Settings.Offset', -470.800006);
+    openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Enabled', true);
+    -- openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Enabled', true);
+    -- openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Settings.Gamma', 3.098590);
+    -- openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Settings.Multiplier', 3.568080);
+    openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Settings.Multiplier', 2.81690);
+    openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Settings.Gamma', 0.938970);
+    openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Settings.Gamma', 2.394370); 
+    openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Enabled', true);
+
+    openspace.markInterestingNodes({ "Insight" })
+
+    openspace.navigation.setCameraState({
+        Anchor = insightAsset.Insight.Identifier,
+        Position = { 0, 0, 0 },
+        Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 },
+    })
+
+end)
+
+asset.onDeinitialize(function ()
+    sceneHelper.unbindKeys(Keybindings)
+
+    openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.Mola_Utah.Settings.Offset', 0);
+    openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Settings.Offset', 0);
+    openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.HeightLayers.OnMarsHiRISELS.Enabled', false);
+    -- openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Enabled', false);
+    -- openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Settings.Gamma', 1.0);
+    -- openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.insight_ctx.Settings.Multiplier', 1.0);
+    openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Settings.Multiplier', 1.0);
+    openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Settings.Gamma', 1.0);
+    openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.MOC_WA_Color_Utah.Settings.Gamma', 1.0); 
+    openspace.setPropertyValueSingle('Scene.Mars.Renderable.Layers.ColorLayers.OnMarsHiRISELS.Enabled', false);
+
+    openspace.removeInterestingNodes({ "Insight" })
+end)

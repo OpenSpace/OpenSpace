@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -134,13 +134,14 @@ void ScreenSpaceFramebuffer::render() {
             static_cast<GLsizei>(resolution.y)
         );
 
-        const glm::mat4 rotation = rotationMatrix();
+        const glm::mat4 globalRotation = globalRotationMatrix();
         const glm::mat4 translation = translationMatrix();
+        const glm::mat4 localRotation = localRotationMatrix();
         const glm::mat4 scale = glm::scale(
             scaleMatrix(),
             glm::vec3((1.f / xratio), (1.f / yratio), 1.f)
         );
-        const glm::mat4 modelTransform = rotation*translation*scale;
+        const glm::mat4 modelTransform = globalRotation*translation*localRotation*scale;
         draw(modelTransform);
     }
 }

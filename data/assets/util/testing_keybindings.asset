@@ -1,0 +1,23 @@
+--testing_keybindings.asset
+
+local sceneHelper = asset.require('./scene_helper')
+local propertyHelper = asset.require('./property_helper')
+
+local Keybindings = {
+    {
+        Key = "F7",
+        Name = "Take Screenshot",
+        Command = "openspace.setPropertyValueSingle('RenderEngine.TakeScreenshot', nil)",
+        Documentation = "Saves the contents of the screen to a file in the working directory.",
+        GuiPath = "/Rendering",
+        Local = true
+    }
+}
+
+asset.onInitialize(function()
+    Keys = sceneHelper.bindKeys(Keybindings)
+end)
+
+asset.onDeinitialize(function ()
+    sceneHelper.unbindKeys(Keybindings)
+end)

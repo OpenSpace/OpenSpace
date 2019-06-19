@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -91,6 +91,8 @@ uniform dmat4 dSgctProjectionToModelTransformMatrix;
 
 uniform dvec4 dCamPosObj;
 uniform dvec3 sunDirectionObj;
+
+uniform float blackoutFactor;
 
 /*******************************************************************************
  ***** ALL CALCULATIONS FOR ECLIPSE ARE IN METERS AND IN WORLD SPACE SYSTEM ****
@@ -693,7 +695,7 @@ void main() {
         }  
 
         renderTarget = atmosphereFinalColor / float(nSamples);        
-
+        renderTarget.a *= blackoutFactor;
         // if (complex)
         //     renderTarget = vec4(1.0, 0.0, 0.0, 1.0);
     } 
@@ -704,7 +706,7 @@ void main() {
                 bColor += texelFetch(mainColorTexture, fragCoords, f);
             }
             bColor /= float(nAaSamples);
-            renderTarget = vec4(HDR(bColor.xyz * backgroundConstant, atmExposure), bColor.a);
+            renderTarget = vec4(HDR(bColor.xyz * backgroundConstant, atmExposure), bColor.a * blackoutFactor);
         } 
         else {
             discard;

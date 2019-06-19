@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,19 +52,14 @@ struct Configuration {
     };
     Logging logging;
 
-    std::string scriptLog = "";
+    std::string scriptLog;
 
     struct DocumentationInfo {
-        std::string lua = "";
-        std::string property = "";
-        std::string sceneProperty = "";
-        std::string keyboard = "";
-        std::string documentation = "";
-        std::string factory = "";
-        std::string license = "";
+        std::string path;
     };
     DocumentationInfo documentation;
 
+    std::string versionCheckUrl;
     bool useMultithreadedInitialization = false;
 
     struct LoadingScreen {
@@ -85,7 +80,9 @@ struct Configuration {
     bool usePerSceneCache = false;
 
     bool isRenderingOnMasterDisabled = false;
-    bool isSceneTranslationOnMasterDisabled = false;
+    glm::dvec3 globalRotation;
+    glm::dvec3 screenSpaceRotation;
+    glm::dvec3 masterRotation;
     bool isConsoleDisabled = false;
 
     std::map<std::string, ghoul::Dictionary> moduleConfigurations;
@@ -96,8 +93,8 @@ struct Configuration {
         bool isActive = false;
         bool isSynchronous = true;
         struct IdentifierFilter {
-            std::string type = "";
-            std::string source = "";
+            std::string type;
+            std::string source;
             unsigned int identifier = 0;
         };
         std::vector<IdentifierFilter> identifierFilters;

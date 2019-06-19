@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_aws.h 1d0f559204e90d0e54d4aebe6ea8b65f0851be69 2018-06-20 16:38:42 +0200 Even Rouault $
+ * $Id: cpl_aws.h 5318f6d39d2006a10cb6c1410334c56d76a74aa6 2018-06-20 16:38:42 +0200 Even Rouault $
  *
  * Name:     cpl_aws.h
  * Project:  CPL - Common Portability Library
@@ -83,15 +83,17 @@ CPLString CPLGetAWS_SIGN4_Authorization(const CPLString& osSecretAccessKey,
 
 class IVSIS3LikeHandleHelper
 {
+        CPL_DISALLOW_COPY_ASSIGN(IVSIS3LikeHandleHelper)
+
 protected:
-        std::map<CPLString, CPLString> m_oMapQueryParameters;
+        std::map<CPLString, CPLString> m_oMapQueryParameters{};
 
         virtual void RebuildURL() = 0;
         CPLString GetQueryString(bool bAddEmptyValueAfterEqual) const;
 
 public:
-        IVSIS3LikeHandleHelper() {}
-        virtual ~IVSIS3LikeHandleHelper() {}
+        IVSIS3LikeHandleHelper() = default;
+        virtual ~IVSIS3LikeHandleHelper() = default;
 
         void ResetQueryParameters();
         void AddQueryParameter(const CPLString& osKey, const CPLString& osValue);
@@ -123,17 +125,19 @@ public:
 
 class VSIS3HandleHelper final: public IVSIS3LikeHandleHelper
 {
-        CPLString m_osURL;
-        CPLString m_osSecretAccessKey;
-        CPLString m_osAccessKeyId;
-        CPLString m_osSessionToken;
-        CPLString m_osEndpoint;
-        CPLString m_osRegion;
-        CPLString m_osRequestPayer;
-        CPLString m_osBucket;
-        CPLString m_osObjectKey;
-        bool m_bUseHTTPS;
-        bool m_bUseVirtualHosting;
+        CPL_DISALLOW_COPY_ASSIGN(VSIS3HandleHelper)
+
+        CPLString m_osURL{};
+        CPLString m_osSecretAccessKey{};
+        CPLString m_osAccessKeyId{};
+        CPLString m_osSessionToken{};
+        CPLString m_osEndpoint{};
+        CPLString m_osRegion{};
+        CPLString m_osRequestPayer{};
+        CPLString m_osBucket{};
+        CPLString m_osObjectKey{};
+        bool m_bUseHTTPS = false;
+        bool m_bUseVirtualHosting = false;
 
         void RebuildURL() override;
 
@@ -208,13 +212,12 @@ class VSIS3HandleHelper final: public IVSIS3LikeHandleHelper
 class VSIS3UpdateParams
 {
     public:
-        CPLString m_osRegion;
-        CPLString m_osEndpoint;
-        CPLString m_osRequestPayer;
-        bool m_bUseVirtualHosting;
+        CPLString m_osRegion{};
+        CPLString m_osEndpoint{};
+        CPLString m_osRequestPayer{};
+        bool m_bUseVirtualHosting = false;
 
-        VSIS3UpdateParams() :
-            m_bUseVirtualHosting(false) {}
+        VSIS3UpdateParams() = default;
 
         explicit VSIS3UpdateParams(const VSIS3HandleHelper* poHelper) :
             m_osRegion(poHelper->GetRegion()),

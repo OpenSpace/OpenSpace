@@ -21,8 +21,10 @@ local images = asset.syncedResource({
     Name = "Rosetta Images",
     Type = "HttpSynchronization",
     Identifier = "rosettaimages",
-    Version = 1
+    Version = 2
 })
+
+local imagesDestination = images .. "/images"
 
 local Barycenter = {
     Identifier = "67PBarycenter",
@@ -58,7 +60,7 @@ local Comet67P = {
         }, 
         ColorTexture = textures .. "/gray.jpg",
         Projection = {
-            Sequence   = { images },
+            Sequence   = { imagesDestination },
             SequenceType = "image-sequence",
             Observer   = "ROSETTA",
             Target     = "CHURYUMOV-GERASIMENKO",
@@ -132,6 +134,13 @@ local Trail67P = {
         Path = "/Solar System/Comets/67P Churymov-Gerasimenko"
     }
 }
+
+asset.onInitialize(function()
+    if not openspace.directoryExists(imagesDestination) then
+        openspace.printInfo("Extracting Rosetta images")
+        openspace.unzipFile(images .. "/images_v1_v2.zip", imagesDestination, true)
+    end
+end)
 
 
 

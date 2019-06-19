@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -105,30 +105,28 @@ void ExternInteraction::scriptInteraction(datamessagestructures::ScriptMessage s
 }
 
 datamessagestructures::CameraKeyframe ExternInteraction::generateCameraKeyframe() {
+    interaction::NavigationHandler& navHandler = global::navigationHandler;
     datamessagestructures::CameraKeyframe kf;
-    const SceneGraphNode* focusNode = 
-        global::navigationHandler.orbitalNavigator().anchorNode();
+    const SceneGraphNode* focusNode = navHandler.orbitalNavigator().anchorNode();
 
     if (!focusNode) {
         return kf;
     }
 
     //kf._position = global::navigationHandler.camera()->positionVec3();
-    kf._position = global::navigationHandler.orbitalNavigator().anchorNodeToCameraVector();
+    kf._position = navHandler.orbitalNavigator().anchorNodeToCameraVector();
 
-    kf._followNodeRotation =
-        global::navigationHandler.orbitalNavigator().followingNodeRotation();
+    kf._followNodeRotation = navHandler.orbitalNavigator().followingNodeRotation();
     if (kf._followNodeRotation) {
         kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
-        kf._rotation =
-            global::navigationHandler.orbitalNavigator().anchorNodeToCameraVector();
+        kf._rotation = navHandler.orbitalNavigator().anchorNodeToCameraRotation();
     }
     else {
-        kf._rotation = global::navigationHandler.camera()->rotationQuaternion();
+        kf._rotation = navHandler.camera()->rotationQuaternion();
     }
 
     kf._focusNode = focusNode->identifier();
-    kf._scale = global::navigationHandler.camera()->scaling();
+    kf._scale = navHandler.camera()->scaling();
 
     // Timestamp as current runtime of OpenSpace instance
     kf._timestamp = global::windowDelegate.applicationTime();

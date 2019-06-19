@@ -5,7 +5,7 @@ local transforms = asset.require('./transforms')
 
 local TrailAtPluto = {
     Identifier = "NewHorizonsTrailPluto",
-    Parent = transforms.PlutoBarycenter.Identifier,
+    Parent = transforms.PlutoBarycenterAccurate.Identifier,
     Renderable = {
         Type = "RenderableTrailTrajectory",
         Translation = {

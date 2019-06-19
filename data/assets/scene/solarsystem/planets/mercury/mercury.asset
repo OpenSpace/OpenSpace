@@ -1,5 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
+local labelsPath = asset.require('./mercury_labels').LabelsPath
+
 
 asset.require("spice/base")
 asset.request('./trail')
@@ -26,11 +28,6 @@ local color_layers = {
         Name = "Messenger MDIS [Sweden]",
         FilePath = mapServiceConfigs .. "/LiU/Messenger_MDIS.wms",
     },
-    {
-        Identifier = "Messenger_MDIS_AWS",
-        Name = "Messenger MDIS [AWS]",
-        FilePath = mapServiceConfigs .. "/AWS/MessengerMdis.wms"
-    },
     --mossaic
     {
         Identifier = "Messenger_Mosaic_Utah",
@@ -41,11 +38,6 @@ local color_layers = {
         Identifier = "Messenger_Mosaic_Sweden",
         Name = "Messenger Mosaic [Sweden]",
         FilePath = mapServiceConfigs .. "/LiU/Messenger_Mosaic.wms"
-    },
-    {
-        Identifier = "Messenger_Mosaic_AWS",
-        Name = "Messenger Mosaic [AWS]",
-        FilePath = mapServiceConfigs .. "/AWS/MessengerMosaic.wms"
     },
     --bdr
     {
@@ -214,9 +206,18 @@ local Mercury = {
             ColorLayers = color_layers
         },
         Labels = {
-            FileName = "Mercury.labels",
-            LabelsSize = 9.0,
+            Enable = false,
+            FileName = labelsPath .. "/Mercury.labels",
+            LabelAlignmentOption = "Horizontally", -- or Circularly
+            LabelsFontSize = 40.0,
+            LabelsSize = 10.0,
+            LabelsMinSize = 1.0,
+            LabelsMaxSize = 1500.0,
             ProximityEnabled = false,
+            FadeInStartingDistance = 40000000.0,
+            FadeOutStartingDistance = 80000.0,
+            LabelsForceDomeRendering = true,
+            LabelsDistanceEPS = 1500000.0,
             LabelsColor = {1.0, 1.0, 0.0, 1.0}
         }
     },

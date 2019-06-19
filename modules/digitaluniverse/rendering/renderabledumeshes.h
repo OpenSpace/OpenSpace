@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -117,7 +117,6 @@ private:
     bool _dataIsDirty = true;
     bool _textColorIsDirty = true;
     bool _hasLabel = false;
-    bool _labelDataIsDirty = true;
 
     properties::FloatProperty _alphaValue;
     //properties::FloatProperty _scaleFactor;
@@ -152,8 +151,6 @@ private:
     std::unordered_map<int, glm::vec3> _meshColorMap;
     std::unordered_map<int, RenderingMesh> _renderingMeshesMap;
 };
-
-
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_DIGITALUNIVERSE___RENDERABLEDUMESHES___H__

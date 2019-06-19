@@ -48,8 +48,8 @@ include(nodejs_support)
 DownloadNodeJs("${NODEJS_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/ext/nodejs")
 
 create_new_module(
-    WebGui
-    webgui_module
-    STATIC
-    ${OPENSPACE_HEADER_FILES} ${OPENSPACE_SOURCE_FILES}
+  WebGui
+  webgui_module
+  STATIC
+  ${OPENSPACE_HEADER_FILES} ${OPENSPACE_SOURCE_FILES}
 )

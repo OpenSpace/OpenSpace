@@ -1,38 +1,39 @@
-.DS_Store
-.vscode
-/bin/
+# Build and editor thing
 /build/
-/cache/
-/doc
-/documentation
-/ext/SGCT
-/logs
-/sync/
-tmp/
-Thumbs.db
+/build-ninja/
+/build-xcode/
+/build-make/
 *~
-*.swp
-*.gglsl
-*.GhoulGenerated.glsl
-*.OpenSpaceGenerated.glsl
-shaders/generated/*
-# CMake stuff
-CMakeCache.txt
-CMakeFiles
-Makefile
-cmake_install.cmake
-install_manifest.txt
-# Eclipse stuff
+*.dir
+*.idea/
+.build-vs/
 .cproject
 .project
-shaders/ABuffer/constants.hglsl
-*.idea/
 .vs/
-.build-vs/
-*.dir
+.vscode
+CMakeCache.txt
+CMakeFiles
 cmake-build-*
-x64/
+cmake_install.cmake
+install_manifest.txt
+Makefile
+
+# OS specific things
+.DS_Store
+Thumbs.db
+
+# OpenSpace-generated folders and files
+/bin/
+/cache/
+/cache_gdal/
+/documentation/
+/logs/
+/screenshots/
+/recordings/
+/sync/
+# Customization is not supposed to be committed
 customization.lua
+# The COMMIT info is generated everytime CMake is run
 COMMIT.md
 screenshots
 *.idea/

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,8 @@
 #include <modules/server/include/connection.h>
 #include <modules/server/servermodule.h>
 #include <openspace/openspace.h>
+#include <openspace/engine/globals.h>
+#include <openspace/util/versionchecker.h>
 
 namespace openspace {
 
@@ -53,6 +55,17 @@ void VersionTopic::handleJson(const nlohmann::json&) {
             }
         }
     };
+
+    if (global::versionChecker.hasLatestVersionInfo()) {
+        VersionChecker::SemanticVersion latestVersion =
+            global::versionChecker.latestVersion();
+
+        versionJson["latestOpenSpaceVersion"] = {
+            { "major", latestVersion.major },
+            { "minor", latestVersion.minor },
+            { "patch", latestVersion.patch }
+        };
+    }
 
     _connection->sendJson(wrappedPayload(versionJson));
 }

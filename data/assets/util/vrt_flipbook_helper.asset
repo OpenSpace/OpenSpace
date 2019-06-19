@@ -1,0 +1,51 @@
+--vrt_slideshow_helper.asset
+local createFlipbook = function (assetPrefix, assetGlobe, count)
+    return {
+        AssetPrefix = assetPrefix,
+        AssetGlobe = assetGlobe,
+        TotalCount = count,
+        CurrentFlipIndex = -1,
+    }
+end
+
+local nextFlipbookPage = function (flipbook)
+
+	if (flipbook.CurrentFlipIndex >= 0) then
+		local assetSring = flipbook.AssetPrefix .. flipbook.CurrentFlipIndex; 
+		openspace.setPropertyValueSingle("Scene." .. flipbook.AssetGlobe .. ".Renderable.Layers.ColorLayers.".. assetSring .. ".Enabled", false)
+	end
+
+	if (flipbook.CurrentFlipIndex < flipbook.TotalCount - 1) then
+		flipbook.CurrentFlipIndex = flipbook.CurrentFlipIndex + 1;
+		local assetSring = flipbook.AssetPrefix .. flipbook.CurrentFlipIndex; 
+		openspace.setPropertyValueSingle("Scene." .. flipbook.AssetGlobe .. ".Renderable.Layers.ColorLayers.".. assetSring .. ".Enabled", true)
+	end
+end
+
+local previousFlipbookPage = function (flipbook)
+
+	if (localIndex == -1) then
+		return
+	end
+
+	local localIndex = flipbook.CurrentFlipIndex;
+
+	local assetSring = flipbook.AssetPrefix .. localIndex; 
+	openspace.setPropertyValueSingle("Scene." .. flipbook.AssetGlobe .. ".Renderable.Layers.ColorLayers.".. assetSring .. ".Enabled", false)
+	localIndex = localIndex - 1;
+
+	if (localIndex >= 0 ) then
+		assetSring = flipbook.AssetPrefix .. localIndex; 
+		openspace.setPropertyValueSingle("Scene." .. flipbook.AssetGlobe .. ".Renderable.Layers.ColorLayers.".. assetSring .. ".Enabled", true)
+	end
+
+	if (localIndex < -1) then
+		localIndex = -1
+	end
+	flipbook.CurrentFlipIndex = localIndex;
+
+end
+
+asset.export('nextFlipbookPage', nextFlipbookPage)
+asset.export('previousFlipbookPage', previousFlipbookPage)
+asset.export('createFlipbook', createFlipbook)
