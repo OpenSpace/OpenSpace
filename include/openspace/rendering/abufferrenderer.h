@@ -63,7 +63,6 @@ public:
     void setResolution(glm::ivec2 res) override;
     void setNAaSamples(int nAaSamples) override;
     void setHDRExposure(float hdrExposure) override;
-    void setHDRBackground(float hdrBackground) override;
     void setGamma(float gamma) override;
     void setMaxWhite(float maxWhite) override;
     void setToneMapOperator(int tmOp) override;
@@ -84,7 +83,6 @@ public:
     void enableBloom(bool enable) override;
     void enableHistogram(bool enable) override;
 
-    float hdrBackground() const override;
     int nAaSamples() const override;
     const std::vector<double>& mSSAPattern() const override;
 

@@ -55,10 +55,10 @@ namespace {
         "mainColorTexture", "blackoutFactor", "nAaSamples"
     };
 
-    constexpr const std::array<const char*, 13> HDRUniformNames = {
-        "deferredResultsTexture", "blackoutFactor", "backgroundConstant", 
-        "hdrExposure", "gamma", "toneMapOperator", "aveLum", "maxWhite",
-        "Hue", "Saturation", "Value", "Lightness", "colorSpace"
+    constexpr const std::array<const char*, 12> HDRUniformNames = {
+        "deferredResultsTexture", "blackoutFactor", "hdrExposure", "gamma", 
+        "toneMapOperator", "aveLum", "maxWhite", "Hue", "Saturation", "Value", 
+        "Lightness", "colorSpace"
     };
 
     constexpr const std::array<const char*, 6> BloomUniformNames  = {
@@ -147,16 +147,15 @@ void FramebufferRenderer::initialize() {
     glGenTextures(1, &_mainColorTexture);
     glGenTextures(1, &_mainDepthTexture);
     glGenTextures(1, &_mainFilterTexture);
+    // Deferred textures used in Main framebuffer
+    glGenTextures(1, &_mainPositionTexture);
+    glGenTextures(1, &_mainNormalTexture);
     glGenFramebuffers(1, &_mainFramebuffer);
 
     // Exit framebuffer
     glGenTextures(1, &_exitColorTexture);
     glGenTextures(1, &_exitDepthTexture);
     glGenFramebuffers(1, &_exitFramebuffer);
-
-    // Deferred textures
-    glGenTextures(1, &_mainPositionTexture);
-    glGenTextures(1, &_mainNormalTexture);
 
     // HDR / Filtering Framebuffer
     glGenFramebuffers(1, &_hdrFilteringFramebuffer);
@@ -389,6 +388,16 @@ void FramebufferRenderer::initialize() {
 
     global::raycasterManager.addListener(*this);
     global::deferredcasterManager.addListener(*this);
+
+    // Default GL State for Blending
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glGetIntegerv(GL_BLEND_EQUATION_RGB, &_osDefaultGLState.blendEquationRGB);
+    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &_osDefaultGLState.blendEquationAlpha);
+    glGetIntegerv(GL_BLEND_DST_ALPHA, &_osDefaultGLState.blendDestAlpha);
+    glGetIntegerv(GL_BLEND_DST_RGB, &_osDefaultGLState.blendDestRGB);
+    glGetIntegerv(GL_BLEND_SRC_ALPHA, &_osDefaultGLState.blendSrcAlpha);
+    glGetIntegerv(GL_BLEND_SRC_RGB, &_osDefaultGLState.blendSrcRGB);
+
 }
 
 void FramebufferRenderer::deinitialize() {
@@ -881,7 +890,7 @@ void FramebufferRenderer::updateResolution() {
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
-        GL_RGBA32F,
+        GL_RGBA16F,
         _resolution.x,
         _resolution.y,
         0,
@@ -1583,11 +1592,37 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     }    
 
     // Capture standard fbo
-    GLint defaultFbo;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
-
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_osDefaultGLState.defaultFBO);
+    
+    glEnablei(GL_BLEND, 0);
+    glDisablei(GL_BLEND, 1);
+    glDisablei(GL_BLEND, 2);
+    glDisablei(GL_BLEND, 3);    
+    
+    _osDefaultGLState.blendEnabled = true;
+    _osDefaultGLState.blend0Enabled = true;
+    _osDefaultGLState.blend1Enabled = false;
+    _osDefaultGLState.blend2Enabled = false;
+    _osDefaultGLState.blend3Enabled = false;
+    
+    glBlendEquationSeparate(
+        _osDefaultGLState.blendEquationRGB, 
+        _osDefaultGLState.blendEquationAlpha
+    );
+    glBlendFuncSeparate(
+        _osDefaultGLState.blendSrcRGB, 
+        _osDefaultGLState.blendDestRGB, 
+        _osDefaultGLState.blendSrcAlpha, 
+        _osDefaultGLState.blendDestAlpha
+    );
+    
     glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
     glEnable(GL_DEPTH_TEST);
+    _osDefaultGLState.depthTestEnabled = true;
+
+    // Update the default OS GL state to the RenderEngine to be
+    // available to all renderables
+    global::renderEngine.setGLDefaultState(_osDefaultGLState);
 
     // deferred g-buffer plus filter
     GLenum textureBuffers[4] = {
@@ -1598,13 +1633,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     };
     glDrawBuffers(4, textureBuffers);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glEnablei(GL_BLEND, 0);
-    glDisablei(GL_BLEND, 1);
-    glDisablei(GL_BLEND, 2);
-    glDisablei(GL_BLEND, 3);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+    
     Time time = global::timeManager.time();
 
     RenderData data = {
@@ -1693,7 +1722,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     //
     ////float averageLuminaceInFB = 0.5;
 
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _osDefaultGLState.defaultFBO);
     glViewport(0, 0, _resolution.x, _resolution.y);
     
     if (_toneMapOperator ==
@@ -1724,8 +1753,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
 
         _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutFactor, blackoutFactor);
-        _hdrFilteringProgram->setUniform(_hdrUniformCache.backgroundConstant,
-            _hdrBackground);
         _hdrFilteringProgram->setUniform(_hdrUniformCache.hdrExposure, _hdrExposure);
         _hdrFilteringProgram->setUniform(_hdrUniformCache.gamma, _gamma);
         _hdrFilteringProgram->setUniform(_hdrUniformCache.toneMapOperator, _toneMapOperator);
@@ -1890,13 +1917,13 @@ void FramebufferRenderer::performDeferredTasks(
             );
 
             deferredcastProgram->setUniform("nAaSamples", _nAaSamples);
+            
             // 48 = 16 samples * 3 coords
             deferredcastProgram->setUniform("msaaSamplePatter", &_mSAAPattern[0], 48);
 
             deferredcastProgram->setUniform("firstPaint", firstPaint);
             deferredcastProgram->setUniform("atmExposure", _hdrExposure);
-            deferredcastProgram->setUniform("backgroundConstant", _hdrBackground);
-
+            
             deferredcaster->preRaycast(
                 deferredcasterTask.renderData,
                 _deferredcastData[deferredcaster],
@@ -1957,11 +1984,6 @@ void FramebufferRenderer::setNAaSamples(int nAaSamples) {
 void FramebufferRenderer::setHDRExposure(float hdrExposure) {
     ghoul_assert(hdrExposure > 0.f, "HDR exposure must be greater than zero");
     _hdrExposure = hdrExposure;
-}
-
-void FramebufferRenderer::setHDRBackground(float hdrBackground) {
-    ghoul_assert(hdrBackground > 0.f, "HDR Background must be greater than zero");
-    _hdrBackground = hdrBackground;
 }
 
 void FramebufferRenderer::setGamma(float gamma) {
@@ -2032,10 +2054,6 @@ void FramebufferRenderer::enableBloom(bool enable) {
 
 void FramebufferRenderer::enableHistogram(bool enable) {
     _histogramEnabled = enable;
-}
-
-float FramebufferRenderer::hdrBackground() const {
-    return _hdrBackground;
 }
 
 int FramebufferRenderer::nAaSamples() const {

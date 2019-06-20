@@ -710,15 +710,6 @@ void ABufferRenderer::setHDRExposure(float hdrExposure) {
     }
 }
 
-void ABufferRenderer::setHDRBackground(float hdrBackground) {
-    _hdrBackground = hdrBackground;
-    if (_hdrBackground < 0.f) {
-        LERROR("HDR Background constant must be greater than zero.");
-        _hdrBackground = 1.0;
-    }
-}
-
-
 void ABufferRenderer::setGamma(float gamma) {
     _gamma = gamma;
     if (_gamma < 0.f) {
@@ -793,10 +784,6 @@ void ABufferRenderer::enableBloom(bool enable) {
 
 void ABufferRenderer::enableHistogram(bool enable) {
     _histogramEnabled = enable;
-}
-
-float ABufferRenderer::hdrBackground() const {
-    return _hdrBackground;
 }
 
 int ABufferRenderer::nAaSamples() const {

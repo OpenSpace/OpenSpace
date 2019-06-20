@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___FRAMEBUFFERRENDERER___H__
 
 #include <openspace/rendering/renderer.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycasterlistener.h>
 #include <openspace/rendering/deferredcasterlistener.h>
 
@@ -86,7 +87,6 @@ public:
     void setResolution(glm::ivec2 res) override;
     void setNAaSamples(int nAaSamples) override;
     void setHDRExposure(float hdrExposure) override;
-    void setHDRBackground(float hdrBackground) override;
     void setGamma(float gamma) override;
     void setMaxWhite(float maxWhite) override;
     void setToneMapOperator(int tmOp) override;
@@ -106,7 +106,6 @@ public:
     void enableBloom(bool enable) override;
     void enableHistogram(bool enable) override;
 
-    float hdrBackground() const override;
     int nAaSamples() const override;
     const std::vector<double>& mSSAPattern() const override;
 
@@ -153,16 +152,14 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
     UniformCache(mainColorTexture, blackoutFactor, nAaSamples) _uniformCache;
     
-    UniformCache(deferredResultsTexture, blackoutFactor, backgroundConstant, 
-                 hdrExposure, gamma, toneMapOperator, aveLum, maxWhite,
-                 Hue, Saturation, Value, Lightness, colorSpace)
-        _hdrUniformCache;
+    UniformCache(deferredResultsTexture, blackoutFactor, hdrExposure, gamma, 
+                 toneMapOperator, aveLum, maxWhite, Hue, Saturation, Value, 
+                 Lightness, colorSpace) _hdrUniformCache;
 
     UniformCache(renderedImage, bloomImage, bloomThresholdMin, bloomThresholdMax, 
-        bloomOrigFactor, bloomNewFactor) _bloomUniformCache;
+                 bloomOrigFactor, bloomNewFactor) _bloomUniformCache;
 
-    UniformCache(renderedImage, maxWhite, imageWidth, 
-                 imageHeight) _histoUniformCache;
+    UniformCache(renderedImage, maxWhite, imageWidth, imageHeight) _histoUniformCache;
 
     UniformCache(hdrSampler, key, Ywhite, sat) _tmoUniformCache;
 
@@ -202,9 +199,8 @@ private:
 
     glm::ivec2 _resolution = glm::ivec2(0);
     int _nAaSamples;
-    float _hdrExposure = 0.4f;
-    float _hdrBackground = 2.8f;
-    float _gamma = 2.2f;
+    float _hdrExposure = 1.68f;
+    float _gamma = 0.86f;
     float _maxWhite = 1.0f;
     bool _bloomEnabled = false;
     float _bloomThresholdMin = 0.0;
@@ -218,15 +214,18 @@ private:
     float _tmoYwhite = 1e6f;
     float _tmoSaturation = 1.0f;
     float _hue = 1.f;
-    float _saturation = 1.f;
+    float _saturation = 1.45f;
     float _value = 1.f;
-    float _lightness = 1.f;
+    float _lightness = 1.1f;
     unsigned int _colorSpace = 1;
 
     std::vector<double> _mSAAPattern;
     std::vector<float> _histoPoints;
 
     ghoul::Dictionary _rendererData;
+
+    // Capture Default OpenSpace GL State
+    RenderEngine::GLDefaultState _osDefaultGLState;
 };
 
 } // namespace openspace

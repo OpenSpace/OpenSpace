@@ -182,9 +182,9 @@ vec3 globalToneMappingOperatorRTR(vec3 color, const float exposure, const float 
 vec3 exponentialToneMapping(vec3 color, const float exposure, const float gamma) {
   color *= exposure;
   
-  color.r = color.r < 1.413 ? pow(color.r * 0.38317, 1.0 / gamma) : 1.0 - exp(-color.r);
-  color.g = color.g < 1.413 ? pow(color.g * 0.38317, 1.0 / gamma) : 1.0 - exp(-color.g);
-  color.b = color.b < 1.413 ? pow(color.b * 0.38317, 1.0 / gamma) : 1.0 - exp(-color.b);
+  color.r = color.r < 1.413 ? pow(color.r * 0.38317, 1.0 / gamma) : 1.0 - exp2(-exposure * color.r);
+  color.g = color.g < 1.413 ? pow(color.g * 0.38317, 1.0 / gamma) : 1.0 - exp2(-exposure * color.g);
+  color.b = color.b < 1.413 ? pow(color.b * 0.38317, 1.0 / gamma) : 1.0 - exp2(-exposure * color.b);
     
   return color;
 }
@@ -220,7 +220,7 @@ vec3 whitePreservingLumaBasedReinhardToneMapping(vec3 color, const float maxWhit
 }
 
 vec3 RomBinDaHouseToneMapping(vec3 color) {
-  color = exp( -1.f / ( 2.72f * color + 0.15f ) );
+  color = exp2( -1.f / ( 2.72f * color + 0.15f ) );
   return color;
 }
 
@@ -247,7 +247,7 @@ vec3 Uncharted2ToneMapping(vec3 color, const float exposure) {
 }
 
 vec3 jToneMapping(vec3 color, const float exposure) {
-  return 1.0 - exp(-exposure * color);
+  return 1.0 - exp2(-exposure * color);
 }
 
 vec3 gammaCorrection(vec3 color, const float gamma) {

@@ -104,12 +104,12 @@ asset.onInitialize(function ()
     openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
 
      -- HDR / Image options:
-    openspace.setPropertyValueSingle('RenderEngine.Gamma', 0.47);
-    openspace.setPropertyValueSingle('RenderEngine.HDRExposure', 0.47);
-    openspace.setPropertyValueSingle('RenderEngine.Background Exposure', 7.85);
+    openspace.setPropertyValueSingle('RenderEngine.Gamma', 0.86);
+    openspace.setPropertyValueSingle('RenderEngine.HDRExposure', 1.68);
     openspace.setPropertyValueSingle('RenderEngine.ToneMapOperator', 8);
-    openspace.setPropertyValueSingle('RenderEngine.Lightness', 0.995);
-    openspace.setPropertyValueSingle('RenderEngine.BloomNewColorFactor', 9.0);
+    openspace.setPropertyValueSingle('RenderEngine.Lightness', 1.1);
+    openspace.setPropertyValueSingle('RenderEngine.Saturation', 1.45);
+    openspace.setPropertyValueSingle('RenderEngine.BloomNewColorFactor', 6.0);
     --openspace.setPropertyValueSingle('RenderEngine.', );
     
 end)

@@ -182,13 +182,6 @@ namespace {
         "equivalent of an electronic image sensor."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BackgroundExposureInfo = {
-        "Background Exposure",
-        "BackgroundExposure",
-        "This value determines the amount of light per unit area reaching the "
-        "equivalent of an electronic image sensor for the background image."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo TMOSaturationInfo = {
         "TMOSaturation",
         "TMO Saturation",
@@ -329,19 +322,18 @@ RenderEngine::RenderEngine()
     , _bloomOrigColorFactor(BloomOrigColorFactorInfo, 1.0, 0.0, 100.0)
     , _bloomNewColorFactor(BloomNewColorFactorInfo, 1.0, 0.0, 100.0)
     , _tmoOwner(TMOInfo)
-    , _hdrExposure(HDRExposureInfo, 0.4f, 0.01f, 4.0f)
-    , _hdrBackground(BackgroundExposureInfo, 2.8f, 0.01f, 10.0f)
+    , _hdrExposure(HDRExposureInfo, 1.68f, 0.01f, 10.0f)
     , _maxWhite(MaxWhiteInfo, 4.f, 0.001f, 100.0f)
     , _toneMapOperator(ToneMapOperatorInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _tmoKey(TMOKeyInfo, 0.18f, 0.0f, 1.0f)
     , _tmoYwhite(TMOYWhiteInfo, 1e6f, 0.0f, 1e10f)
     , _tmoSaturation(TMOSaturationInfo, 1.f, 0.0f, 1.0f)
     , _imageOwner(ImageInfo)
-    , _gamma(GammaInfo, 2.2f, 0.01f, 5.0f)
+    , _gamma(GammaInfo, 0.86f, 0.01f, 5.0f)
     , _hue(HueInfo, 1.f, 0.0f, 5.0f)
-    , _saturation(SaturationInfo, 1.f, 0.0f, 5.0f)
+    , _saturation(SaturationInfo, 1.45f, 0.0f, 5.0f)
     , _value(ValueInfo, 1.f, 0.0f, 5.0f)
-    , _lightness(LightnessInfo, 1.f, 0.0f, 5.0f)
+    , _lightness(LightnessInfo, 1.1f, 0.0f, 5.0f)
     , _colorSpace(ColorSpaceInfo, properties::OptionProperty::DisplayType::Dropdown)
 
 {
@@ -369,13 +361,6 @@ RenderEngine::RenderEngine()
         }
     });
     addProperty(_hdrExposure);
-
-    _hdrBackground.onChange([this]() {
-        if (_renderer) {
-            _renderer->setHDRBackground(_hdrBackground);
-        }
-    });
-    addProperty(_hdrBackground);
 
     _maxWhite.onChange([this]() {
         if (_renderer) {
@@ -1215,6 +1200,14 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
             },
         },
     };
+}
+
+const RenderEngine::GLDefaultState& RenderEngine::glDefaultState() const {
+    return _glDefaultState;
+}
+
+void RenderEngine::setGLDefaultState(RenderEngine::GLDefaultState glDS) {
+    _glDefaultState = std::move(glDS);
 }
 
 void RenderEngine::addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderable> s) {

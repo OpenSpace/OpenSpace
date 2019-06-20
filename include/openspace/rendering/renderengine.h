@@ -33,6 +33,8 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/triggerproperty.h>
 
+#include <ghoul/opengl/ghoul_gl.h>
+
 namespace ghoul {
     class Dictionary;
     class SharedMemory;
@@ -87,6 +89,23 @@ public:
         HSL
     };
 
+    struct GLDefaultState {
+        GLboolean blendEnabled;
+        GLboolean blend0Enabled;
+        GLboolean blend1Enabled;
+        GLboolean blend2Enabled;
+        GLboolean blend3Enabled;
+        GLboolean cullFaceEnabled;
+        GLboolean depthTestEnabled;
+        GLint defaultFBO;
+        GLenum blendEquationRGB;
+        GLenum blendEquationAlpha;
+        GLenum blendDestAlpha;
+        GLenum blendDestRGB;
+        GLenum blendSrcAlpha;
+        GLenum blendSrcRGB;
+    };
+    
     RenderEngine();
     ~RenderEngine();
 
@@ -169,6 +188,10 @@ public:
      */
     static scripting::LuaLibrary luaLibrary();
 
+    const RenderEngine::GLDefaultState& glDefaultState() const;
+    void setGLDefaultState(RenderEngine::GLDefaultState glDS);
+
+
     // Temporary fade functionality
     void startFading(int direction, float fadeDuration);
 
@@ -187,6 +210,8 @@ private:
 
     Camera* _camera = nullptr;
     Scene* _scene = nullptr;
+
+    GLDefaultState _glDefaultState;
 
     properties::BoolProperty _doPerformanceMeasurements;
 
@@ -224,7 +249,6 @@ private:
     
     properties::PropertyOwner _tmoOwner;
     properties::FloatProperty _hdrExposure;
-    properties::FloatProperty _hdrBackground;    
     properties::FloatProperty _maxWhite;
     properties::OptionProperty _toneMapOperator;
     properties::FloatProperty _tmoKey;

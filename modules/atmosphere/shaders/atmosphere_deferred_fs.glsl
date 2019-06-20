@@ -73,8 +73,6 @@ uniform int cullAtmosphere;
 
 // The following uniforms are
 // set into the current Renderer
-// Background exposure hack
-uniform float backgroundConstant;
 uniform bool firstPaint;
 uniform float atmExposure;
 
@@ -426,7 +424,8 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     if (groundHit) {
         return finalScatteringRadiance;
     } else {
-        return ((r-Rg) * invRtMinusRg)*spaceColor.rgb * backgroundConstant + finalScatteringRadiance;
+        //return ((r-Rg) * invRtMinusRg)*spaceColor.rgb + finalScatteringRadiance;
+        return attenuation * spaceColor.rgb + finalScatteringRadiance;
     }
     
 }
@@ -568,8 +567,7 @@ void main() {
         for (int i = 0; i < nSamples; i++) {
             // Color from G-Buffer
             //vec4 color = texelFetch(mainColorTexture, fragCoords, i);
-            vec4 color = colorArray[i];
-            
+            vec4 color = vec4(-log2(vec3(1.0) - colorArray[i].rgb), colorArray[i].a);
             // Ray in object space
             dRay ray;
             dvec4 planetPositionObjectCoords = dvec4(0.0);
@@ -633,10 +631,10 @@ void main() {
                 pixelDepth                *= 0.001;
                 positionObjectsCoords.xyz *= 0.001;
                 
-                if (position.xyz != vec3(0.0) && (pixelDepth < offset)) {
+                if (dot(position.xyz, vec3(1.0)) > 0.0 && (pixelDepth < offset)) {
                     // ATM Occluded - Something in fron of ATM.
                     //atmosphereFinalColor += vec4(HDR(color.xyz * backgroundConstant, atmExposure), color.a);                  
-                    atmosphereFinalColor += vec4(color.xyz * backgroundConstant, color.a);                  
+                    atmosphereFinalColor += vec4(color.xyz, color.a);                  
                 } else {
                     // Following paper nomenclature      
                     double t = offset;                  
@@ -714,10 +712,13 @@ void main() {
             }
             bColor /= float(nAaSamples);
             //renderTarget = vec4(HDR(bColor.xyz * backgroundConstant, atmExposure), bColor.a);
-            renderTarget = vec4(bColor.xyz * backgroundConstant, bColor.a);
-            //renderTarget = vec4(bColor.xyz , bColor.a);
+            //renderTarget = vec4(bColor.xyz * backgroundConstant, bColor.a);
+            renderTarget = vec4(-log2(vec3(1.0) - bColor.rgb), bColor.a);
+            //renderTarget = bColor;
+
         } 
         else {
+            //renderTarget = vec4(vec3(1.0, 0.0, 0.0), 1.0);
             discard;
         }
     }
