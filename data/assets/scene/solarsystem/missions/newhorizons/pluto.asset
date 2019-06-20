@@ -2,8 +2,6 @@ local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
-
-
 local assets = asset.syncedResource({
     Name = "Pluto Assets",
     Type = "HttpSynchronization",
@@ -34,9 +32,9 @@ local images = asset.syncedResource({
 
 local plutoRadius = 1.173E6
 
-local Pluto = {
-    Identifier = "Pluto",
-    Parent = transforms.PlutoBarycenter.Identifier,
+local PlutoProjection = {
+    Identifier = "PlutoProjection",
+    Parent = transforms.PlutoBarycenterAccurate.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -73,7 +71,7 @@ local Pluto = {
             textures .. "/NH_Pluto_DTM_16384.png",
             textures .. "/NH_Pluto_DTM_8192.png"
         },
-        MeridianShift = true,
+        MeridianShift = false,
         Projection = {
             Sequence       = images,
             EventFile      = assets .. "/core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",
@@ -183,13 +181,14 @@ local Pluto = {
         }
     },
     GUI = {
+        Name = "Pluto Projection",
         Path = "/Solar System/Dwarf Planets/Pluto"
     }
 }
 
 local PlutoBarycenterLabel = {
     Identifier = "PlutoBarycenterLabel",
-    Parent = transforms.PlutoBarycenter.Identifier,
+    Parent = transforms.PlutoBarycenterAccurate.Identifier,
     Renderable = {
         Type = "RenderablePlaneImageLocal",
         Billboard = true,
@@ -205,7 +204,7 @@ local PlutoBarycenterLabel = {
 
 local PlutoText = {
     Identifier = "PlutoText",
-    Parent = Pluto.Identifier,
+    Parent = PlutoProjection.Identifier,
     Transform = {
         Translation = {
             Type = "StaticTranslation",
@@ -228,7 +227,7 @@ local PlutoText = {
 
 local PlutoShadow = {
     Identifier = "PlutoShadow",
-    Parent = Pluto.Identifier,
+    Parent = PlutoProjection.Identifier,
     Renderable = {
         Type = "RenderableShadowCylinder",
         TerminatorType = "PENUMBRAL", 
@@ -244,56 +243,9 @@ local PlutoShadow = {
     }
 }
 
-local PlutoTrailBarycentric = {
-    Identifier = "PlutoBarycentricTrail",
-    Parent = transforms.PlutoBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "PLUTO",
-            Observer = "PLUTO BARYCENTER"
-        },
-        Color = { 0.00, 0.62, 1.00 },
-        Period = 6.38723,
-        Resolution = 1000
-    },
-    GUI = {
-        Name = "Pluto Barycenteric Trail",
-        Path = "/Solar System/Dwarf Planets/Pluto"
-    }
-}
-
-local PlutoTrail = {
-    Identifier = "PlutoTrail",
-    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Enabled = false,
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "PLUTO BARYCENTER",
-            Observer = "SUN"
-        },
-        Color = { 0.3, 0.7, 0.3 },
-        -- Not the actual Period, but the SPICE kernels we have only
-        -- go back to 1850, about 150 yeays ago
-        Period = 160 * 365.242,
-        Resolution = 1000
-    },
-    GUI = {
-        Name = "Pluto Trail",
-        Path = "/Solar System/Dwarf Planets/Pluto"
-    }
-}
-
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    Pluto,
+    PlutoProjection,
     PlutoBarycenterLabel,
     PlutoText,
-    PlutoShadow,
-    PlutoTrailBarycentric,
-    PlutoTrail
+    PlutoShadow
 })

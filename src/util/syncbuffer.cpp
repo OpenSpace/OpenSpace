@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -83,21 +83,5 @@ void SyncBuffer::reset() {
     _encodeOffset = 0;
     _decodeOffset = 0;
 }
-
-//void SyncBuffer::write() {
-//    _dataStream.resize(_encodeOffset);
-//    _synchronizationBuffer->setVal(_dataStream);
-//    sgct::SharedData::instance()->writeVector(_synchronizationBuffer.get());
-//    _dataStream.resize(_n);
-//    _encodeOffset = 0;
-//    _decodeOffset = 0;
-//}
-//
-//void SyncBuffer::read() {
-//    sgct::SharedData::instance()->readVector(_synchronizationBuffer.get());
-//    _dataStream = _synchronizationBuffer->getVal();
-//    _encodeOffset = 0;
-//    _decodeOffset = 0;
-//}
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 
 #include <modules/globebrowsing/src/ellipsoid.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
+#include <modules/globebrowsing/src/globelabelscomponent.h>
 #include <modules/globebrowsing/src/gpulayergroup.h>
 #include <modules/globebrowsing/src/layermanager.h>
 #include <modules/globebrowsing/src/skirtedgrid.h>
@@ -45,6 +46,13 @@ namespace openspace::globebrowsing {
 class GPULayerGroup;
 class RenderableGlobe;
 struct TileIndex;
+
+struct BoundingHeights {
+    float min;
+    float max;
+    bool available;
+    bool tileOK;
+};
 
 namespace chunklevelevaluator { class Evaluator; }
 namespace culling { class ChunkCuller; }
@@ -64,8 +72,16 @@ struct Chunk {
     Status status;
 
     bool isVisible = true;
+    bool colorTileOK = false;
+    bool heightTileOK = false;
+
     std::array<glm::dvec4, 8> corners;
     std::array<Chunk*, 4> children = { { nullptr, nullptr, nullptr, nullptr } };
+};
+
+enum class ShadowCompType {
+    GLOBAL_SHADOW,
+    LOCAL_SHADOW
 };
 
 /**
@@ -88,6 +104,8 @@ public:
     SurfacePositionHandle calculateSurfacePositionHandle(
         const glm::dvec3& targetModelSpace) const override;
 
+    bool renderedWithDesiredData() const override;
+
     const Ellipsoid& ellipsoid() const;
     const LayerManager& layerManager() const;
     LayerManager& layerManager();
@@ -106,6 +124,7 @@ private:
         properties::BoolProperty levelByProjectedAreaElseDistance;
         properties::BoolProperty resetTileProviders;
         properties::IntProperty modelSpaceRenderingCutoffLevel;
+        properties::IntProperty dynamicLodIterationCount;
     } _debugProperties;
 
     struct {
@@ -113,7 +132,8 @@ private:
         properties::BoolProperty useAccurateNormals;
         properties::BoolProperty eclipseShadowsEnabled;
         properties::BoolProperty eclipseHardShadows;
-        properties::FloatProperty lodScaleFactor;
+        properties::FloatProperty targetLodScaleFactor;
+        properties::FloatProperty currentLodScaleFactor;
         properties::FloatProperty cameraMinHeight;
         properties::FloatProperty orenNayarRoughness;
         properties::IntProperty nActiveLayers;
@@ -128,7 +148,8 @@ private:
      * Goes through all available <code>ChunkCuller</code>s and check if any of them
      * allows culling of the <code>Chunk</code>s in question.
      */
-    bool testIfCullable(const Chunk& chunk, const RenderData& renderData) const;
+    bool testIfCullable(const Chunk& chunk, const RenderData& renderData,
+        const BoundingHeights& heights) const;
 
     /**
      * Gets the desired level which can be used to determine if a chunk should split
@@ -140,7 +161,8 @@ private:
      * <code>Chunk</code>, it wants to split. If it is lower, it wants to merge with
      * its siblings.
      */
-    int desiredLevel(const Chunk& chunk, const RenderData& renderData) const;
+    int desiredLevel(const Chunk& chunk, const RenderData& renderData,
+        const BoundingHeights& heights) const;
 
     /**
      * Calculates the height from the surface of the reference ellipsoid to the
@@ -184,15 +206,18 @@ private:
         bool renderBounds, bool renderAABB) const;
 
     bool isCullableByFrustum(const Chunk& chunk, const RenderData& renderData) const;
-    bool isCullableByHorizon(const Chunk& chunk, const RenderData& renderData) const;
+    bool isCullableByHorizon(const Chunk& chunk, const RenderData& renderData,
+        const BoundingHeights& heights) const;
 
-    int desiredLevelByDistance(const Chunk& chunk, const RenderData& data) const;
-    int desiredLevelByProjectedArea(const Chunk& chunk, const RenderData& data) const;
+    int desiredLevelByDistance(const Chunk& chunk, const RenderData& data,
+        const BoundingHeights& heights) const;
+    int desiredLevelByProjectedArea(const Chunk& chunk, const RenderData& data,
+        const BoundingHeights& heights) const;
     int desiredLevelByAvailableTileData(const Chunk& chunk) const;
 
 
     void calculateEclipseShadows(ghoul::opengl::ProgramObject& programObject,
-        const RenderData& data);
+        const RenderData& data, ShadowCompType stype);
 
     void setCommonUniforms(ghoul::opengl::ProgramObject& programObject,
         const Chunk& chunk, const RenderData& data);
@@ -241,7 +266,14 @@ private:
     bool _lodScaleFactorDirty = true;
     bool _chunkCornersDirty = true;
     bool _nLayersIsDirty = true;
+    bool _allChunksAvailable = true;
+    size_t _iterationsOfAvailableData = 0;
+    size_t _iterationsOfUnavailableData = 0;
     Layer* _lastChangedLayer = nullptr;
+
+    // Labels
+    GlobeLabelsComponent _globeLabelsComponent;
+    ghoul::Dictionary _labelsDictionary;
 };
 
 } // namespace openspace::globebrowsing

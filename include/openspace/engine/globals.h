@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,6 @@ class DownloadManager;
 class LuaConsole;
 class MissionManager;
 class ModuleEngine;
-class NetworkEngine;
 class OpenSpaceEngine;
 class ParallelPeer;
 class RaycasterManager;
@@ -47,6 +46,7 @@ class RenderEngine;
 class ScreenSpaceRenderable;
 class SyncEngine;
 class TimeManager;
+class VersionChecker;
 class VirtualPropertyManager;
 struct WindowDelegate;
 namespace configuration { struct Configuration; }
@@ -75,7 +75,6 @@ DownloadManager& gDownloadManager();
 LuaConsole& gLuaConsole();
 MissionManager& gMissionManager();
 ModuleEngine& gModuleEngine();
-NetworkEngine& gNetworkEngine();
 OpenSpaceEngine& gOpenSpaceEngine();
 ParallelPeer& gParallelPeer();
 RaycasterManager& gRaycasterManager();
@@ -83,6 +82,7 @@ RenderEngine& gRenderEngine();
 std::vector<std::unique_ptr<ScreenSpaceRenderable>>& gScreenspaceRenderables();
 SyncEngine& gSyncEngine();
 TimeManager& gTimeManager();
+VersionChecker& gVersionChecker();
 VirtualPropertyManager& gVirtualPropertyManager();
 WindowDelegate& gWindowDelegate();
 configuration::Configuration& gConfiguration();
@@ -106,7 +106,6 @@ static DownloadManager& downloadManager = detail::gDownloadManager();
 static LuaConsole& luaConsole = detail::gLuaConsole();
 static MissionManager& missionManager = detail::gMissionManager();
 static ModuleEngine& moduleEngine = detail::gModuleEngine();
-static NetworkEngine& networkEngine = detail::gNetworkEngine();
 static OpenSpaceEngine& openSpaceEngine = detail::gOpenSpaceEngine();
 static ParallelPeer& parallelPeer = detail::gParallelPeer();
 static RaycasterManager& raycasterManager = detail::gRaycasterManager();
@@ -115,6 +114,7 @@ static std::vector<std::unique_ptr<ScreenSpaceRenderable>>& screenSpaceRenderabl
     detail::gScreenspaceRenderables();
 static SyncEngine& syncEngine = detail::gSyncEngine();
 static TimeManager& timeManager = detail::gTimeManager();
+static VersionChecker& versionChecker = detail::gVersionChecker();
 static VirtualPropertyManager& virtualPropertyManager = detail::gVirtualPropertyManager();
 static WindowDelegate& windowDelegate = detail::gWindowDelegate();
 static configuration::Configuration& configuration = detail::gConfiguration();

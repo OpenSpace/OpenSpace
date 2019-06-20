@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #include <modules/imgui/include/guiglobebrowsingcomponent.h>
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
+#include <modules/globebrowsing/src/renderableglobe.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
@@ -72,8 +73,10 @@ void GuiGlobeBrowsingComponent::render() {
             nodes.begin(),
             nodes.end(),
             [](SceneGraphNode* n) {
+                using namespace globebrowsing;
                 const Renderable* r = n->renderable();
-                return !r || r->identifier() != "RenderableGlobe";
+                const RenderableGlobe* rg = dynamic_cast<const RenderableGlobe*>(r);
+                return rg == nullptr;
             }
         ),
         nodes.end()

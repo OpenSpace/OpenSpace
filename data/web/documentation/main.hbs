@@ -8,8 +8,10 @@
       </li>
       {{#each documentation}}
         <li>
-          <a href="#{{id}}">{{name}}</a>
+          <a href="#" onclick="sidebarNavigate({{@index}});">{{name}}</a>
         </li>
+        <ul id='index{{@index}}-subtree' class="sidebar-subtree">
+        </ul>
       {{/each}}
     </ul>
   </div>
@@ -18,15 +20,8 @@
     <div class="container-fluid documentation-container">
       <h1>OpenSpace Documentation</h1>
       <p>Version: {{version.[0]}}.{{version.[1]}}.{{version.[2]}}</p>
-
-    	{{#each documentation}}
-        <div class="row">
-          <div class="col-lg-12">
-            <h2><a class="documentation-name" href="#{{id}}" name="{{id}}">{{name}}</a></h2>
-            {{> documentation}}
-          </div>
-        </div>
-      {{/each}}
+      <div id="current-documentation-container">
+      </div>
     </div>
   </div>
 </div>

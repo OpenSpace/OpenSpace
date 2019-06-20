@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,8 +25,6 @@
 #include <openspace/engine/globals.h>
 #include <modules/touch/include/touchinteraction.h>
 #include <modules/imgui/imguimodule.h>
-#include <modules/webbrowser/webbrowsermodule.h>
-#include <modules/webgui/webguimodule.h>
 
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/engine/globals.h>
@@ -46,6 +44,10 @@
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
+#endif
+
+#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
+#include <modules/webbrowser/webbrowsermodule.h>
 #endif
 
 #include <cmath>
@@ -431,6 +433,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
 }
 
 bool TouchInteraction::webContent(const std::vector<TuioCursor>& list) {
+#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
     glm::ivec2 res = global::windowDelegate.currentWindowSize();
     glm::dvec2 pos = glm::vec2(
         list.at(0).getScreenX(res.x),
@@ -439,6 +442,9 @@ bool TouchInteraction::webContent(const std::vector<TuioCursor>& list) {
 
     WebBrowserModule& module = *(global::moduleEngine.module<WebBrowserModule>());
     return module.eventHandler().hasContentCallback(pos.x, pos.y);
+#else
+    return false;
+#endif
 }
 
 // Activates/Deactivates gui input mode (if active it voids all other interactions)
@@ -1326,8 +1332,6 @@ void TouchInteraction::step(double dt) {
             double planetBoundaryRadius = length(centerToBoundingSphere);
             planetBoundaryRadius *= _zoomBoundarySphereMultiplier;
             double distToSurface = length(centerToCamera - planetBoundaryRadius);
-
-            WebGuiModule& module = *(global::moduleEngine.module<WebGuiModule>());
 
             //Apply the velocity to update camera position
             glm::dvec3 velocityIncr = directionToCenter * _vel.zoom * dt;

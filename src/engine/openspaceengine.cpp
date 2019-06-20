@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,7 +40,6 @@
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
-#include <openspace/network/networkengine.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/performance/performancemeasurement.h>
 #include <openspace/performance/performancemanager.h>
@@ -59,6 +58,7 @@
 #include <openspace/scene/lightsource.h>
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scene/translation.h>
+#include <openspace/scene/scenelicensewriter.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/camera.h>
@@ -156,10 +156,9 @@ void OpenSpaceEngine::registerPathTokens() {
     LTRACE("OpenSpaceEngine::initialize(begin)");
 
     // Registering Path tokens. If the BASE path is set, it is the only one that will
-// overwrite the default path of the cfg directory
-    for (const std::pair<std::string, std::string>& path :
-        global::configuration.pathTokens)
-    {
+    // overwrite the default path of the cfg directory
+    using T = std::string;
+    for (const std::pair<const T, T>& path : global::configuration.pathTokens) {
         std::string fullKey = ghoul::filesystem::FileSystem::TokenOpeningBraces +
             path.first +
             ghoul::filesystem::FileSystem::TokenClosingBraces;
@@ -186,6 +185,10 @@ void OpenSpaceEngine::initialize() {
 
     global::initialize();
 
+    const std::string versionCheckUrl = global::configuration.versionCheckUrl;
+    if (!versionCheckUrl.empty()) {
+        global::versionChecker.requestLatestVersion(versionCheckUrl);
+    }
 
     std::string cacheFolder = absPath("${CACHE}");
     if (global::configuration.usePerSceneCache) {
@@ -316,6 +319,10 @@ void OpenSpaceEngine::initialize() {
     }
 
     global::scriptEngine.initialize();
+
+    // To be concluded
+    _documentationJson.clear();
+    _documentationJson += "{\"documentation\":[";
 
     writeStaticDocumentation();
 
@@ -645,6 +652,8 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     }
 
     _scene = std::make_unique<Scene>(std::move(sceneInitializer));
+    global::renderEngine.setScene(_scene.get());
+
     global::rootPropertyOwner.addPropertySubOwner(_scene.get());
     _scene->setCamera(std::make_unique<Camera>());
     Camera* camera = _scene->camera();
@@ -660,8 +669,6 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
             _scene->root()->identifier()
         );
     }
-
-    global::renderEngine.setScene(_scene.get());
 
     _assetManager->removeAll();
     _assetManager->add(assetPath);
@@ -758,9 +765,6 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
     global::renderEngine.updateScene();
 
-    global::renderEngine.setGlobalBlackOutFactor(0.f);
-    global::renderEngine.startFading(1, 3.f);
-
     global::syncEngine.addSyncables(global::timeManager.getSyncables());
     if (_scene && _scene->camera()) {
         global::syncEngine.addSyncables(_scene->camera()->getSyncables());
@@ -837,24 +841,27 @@ void OpenSpaceEngine::deinitializeGL() {
 }
 
 void OpenSpaceEngine::writeStaticDocumentation() {
-    // If a LuaDocumentationFile was specified, generate it now
-    if (!global::configuration.documentation.lua.empty()) {
-        global::scriptEngine.writeDocumentation(
-            absPath(global::configuration.documentation.lua)
-        );
-    }
+    std::string path = global::configuration.documentation.path;
+    if (!path.empty()) {
 
-    // If a general documentation was specified, generate it now
-    if (!global::configuration.documentation.documentation.empty()) {
-        DocEng.writeDocumentation(
-            absPath(global::configuration.documentation.documentation)
-        );
-    }
+        DocEng.addHandlebarTemplates(global::scriptEngine.templatesToRegister());
+        DocEng.addHandlebarTemplates(FactoryManager::ref().templatesToRegister());
+        DocEng.addHandlebarTemplates(DocEng.templatesToRegister());
 
-    if (!global::configuration.documentation.factory.empty()) {
-        FactoryManager::ref().writeDocumentation(
-            absPath(global::configuration.documentation.factory)
-        );
+        _documentationJson += "{\"name\":\"Scripting\",";
+        _documentationJson += "\"identifier\":\"" + global::scriptEngine.jsonName();
+        _documentationJson += "\",\"data\":" + global::scriptEngine.generateJson();
+        _documentationJson += "},";
+
+        _documentationJson += "{\"name\":\"Top Level\",";
+        _documentationJson += "\"identifier\":\"" + DocEng.jsonName();
+        _documentationJson += "\",\"data\":" + DocEng.generateJson();
+        _documentationJson += "},";
+
+        _documentationJson += "{\"name\":\"Factory\",";
+        _documentationJson += "\"identifier\":\"" + FactoryManager::ref().jsonName();
+        _documentationJson += "\",\"data\":" + FactoryManager::ref().generateJson();
+        _documentationJson += "},";
     }
 }
 
@@ -882,7 +889,8 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
 void OpenSpaceEngine::loadFonts() {
     global::fontManager.initialize();
 
-    for (const std::pair<std::string, std::string>& font : global::configuration.fonts) {
+    using T = std::string;
+    for (const std::pair<const T, T>& font : global::configuration.fonts) {
         std::string key = font.first;
         std::string fontName = absPath(font.second);
 
@@ -913,30 +921,47 @@ void OpenSpaceEngine::loadFonts() {
 }
 
 void OpenSpaceEngine::writeSceneDocumentation() {
-    // Write keyboard documentation.
-    if (!global::configuration.documentation.keyboard.empty()) {
-        global::keybindingManager.writeDocumentation(
-            absPath(global::configuration.documentation.keyboard)
-        );
-    }
+    // Write documentation to json files if config file supplies path for doc files
 
-    if (!global::configuration.documentation.license.empty()) {
-        _scene->writeSceneLicenseDocumentation(
-            absPath(global::configuration.documentation.license)
-        );
-    }
+    std::string path = global::configuration.documentation.path;
+    if (!path.empty()) {
+        path = absPath(path) + "/";
+        _documentationJson += "{\"name\":\"Keybindings\",\"identifier\":\"";
+        _documentationJson += global::keybindingManager.jsonName() + "\",";
+        _documentationJson += "\"data\":";
+        _documentationJson += global::keybindingManager.generateJson();
+        _documentationJson += "},";
+        _documentationJson += "{\"name\":\"Scene License Information\",";
+        _documentationJson += "\"identifier\":\"sceneLicense";
+        _documentationJson += "\",\"data\":";
+        _documentationJson += _scene->generateSceneLicenseDocumentationJson();
+        _documentationJson += "},";
+        _documentationJson += "{\"name\":\"Scene Properties\",";
+        _documentationJson += "\"identifier\":\"propertylist";// + _scene->jsonName();
+        _documentationJson += "\",\"data\":" + global::rootPropertyOwner.generateJson();
+        _documentationJson += "},";
+        _documentationJson += "{\"name\":\"Scene Graph Information\",";
+        _documentationJson += "\"identifier\":\"propertylist";
+        _documentationJson += "\",\"data\":" + _scene->generateJson();
+        _documentationJson += "}";
 
-    if (!global::configuration.documentation.sceneProperty.empty()) {
-        _scene->writeDocumentation(
-            absPath(global::configuration.documentation.sceneProperty)
-        );
-    }
+        //add templates for the jsons we just registered
+        DocEng.addHandlebarTemplates(global::keybindingManager.templatesToRegister());
+        //TODO this is in efficaiant, here i am just instaning the class to get
+        //at a member variable which is staticly defined. How do i just get that
+        const std::vector<SceneLicense> licenses;
+        SceneLicenseWriter writer(licenses);
+        DocEng.addHandlebarTemplates(writer.templatesToRegister());
+        DocEng.addHandlebarTemplates(global::rootPropertyOwner.templatesToRegister());
 
-    if (!global::configuration.documentation.property.empty()) {
-        global::rootPropertyOwner.writeDocumentation(
-            absPath(global::configuration.documentation.property)
-        );
+        //the static documentation shoudl be finished already
+        //so now that we wrote the static and secene json files
+        //we should write the html file that uses them.
+        _documentationJson += "]}";
+
+        DocEng.writeDocumentationHtml(path, _documentationJson);
     }
+    //no else, if path was empty, that means that no documentation is requested
 }
 
 void OpenSpaceEngine::preSynchronization() {
@@ -969,6 +994,11 @@ void OpenSpaceEngine::preSynchronization() {
     global::syncEngine.preSynchronization(SyncEngine::IsMaster(master));
     if (master) {
         double dt = global::windowDelegate.averageDeltaTime();
+
+        if (global::sessionRecording.isSavingFramesDuringPlayback()) {
+            dt = global::sessionRecording.fixedDeltaTimeDuringFrameOutput();
+        }
+
         global::timeManager.preSynchronization(dt);
 
         using Iter = std::vector<std::string>::const_iterator;
@@ -1040,7 +1070,6 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     }
 
     global::renderEngine.updateScene();
-    global::renderEngine.updateFade();
     global::renderEngine.updateRenderer();
     global::renderEngine.updateScreenSpaceRenderables();
     global::renderEngine.updateShaderPrograms();
@@ -1246,9 +1275,6 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
 
 std::vector<char> OpenSpaceEngine::encode() {
     std::vector<char> buffer = global::syncEngine.encodeSyncables();
-    global::networkEngine.publishStatusMessage();
-    global::networkEngine.sendMessages();
-
     return buffer;
 }
 

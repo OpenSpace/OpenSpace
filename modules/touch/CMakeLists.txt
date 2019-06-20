@@ -25,35 +25,34 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/ext/levmarq.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/tuioear.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/touchinteraction.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/touchmarker.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ext/levmarq.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/tuioear.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/touchinteraction.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/touchmarker.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/ext/levmarq.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/tuioear.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/touchinteraction.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/touchmarker.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ext/levmarq.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/tuioear.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/touchinteraction.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/touchmarker.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/marker_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/marker_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/marker_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/marker_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
-    "Touch"
-    touch_module
-    STATIC
-    ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+  "Touch"
+  touch_module
+  STATIC
+  ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
-include_external_library(${touch_module} libTUIO11 ${CMAKE_CURRENT_SOURCE_DIR}/ext)
+include_external_library(${touch_module} PUBLIC libTUIO11 ${CMAKE_CURRENT_SOURCE_DIR}/ext)
 
 disable_external_warnings_for_file(${CMAKE_CURRENT_SOURCE_DIR}/ext/levmarq.cpp)
-

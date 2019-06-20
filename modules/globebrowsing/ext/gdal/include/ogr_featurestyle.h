@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_featurestyle.h 5da1c4d1b6c7e38f7f5917fff3ddbc8ad42af7aa 2018-03-30 21:59:13 +0200 Even Rouault $
+ * $Id: ogr_featurestyle.h 1e082b59d067cf2edf5713e15101c0b369d37e9a 2018-12-02 22:16:23 +0300 drons $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Define of Feature Representation
@@ -84,10 +84,12 @@ typedef struct ogr_style_value
 class CPL_DLL OGRStyleTable
 {
   private:
-    char **m_papszStyleTable;
+    char **m_papszStyleTable = nullptr;
 
-    CPLString osLastRequestedStyleName;
-    int iNextStyle;
+    CPLString osLastRequestedStyleName{};
+    int iNextStyle = 0;
+
+    CPL_DISALLOW_COPY_ASSIGN(OGRStyleTable)
 
   public:
     OGRStyleTable();
@@ -117,8 +119,10 @@ class OGRStyleTool;
 class CPL_DLL OGRStyleMgr
 {
   private:
-    OGRStyleTable   *m_poDataSetStyleTable;
-    char            *m_pszStyleString;
+    OGRStyleTable   *m_poDataSetStyleTable = nullptr;
+    char            *m_pszStyleString = nullptr;
+
+    CPL_DISALLOW_COPY_ASSIGN(OGRStyleMgr)
 
   public:
     explicit OGRStyleMgr(OGRStyleTable *poDataSetStyleTable = nullptr);
@@ -161,14 +165,16 @@ class CPL_DLL OGRStyleMgr
 class CPL_DLL OGRStyleTool
 {
   private:
-    GBool m_bModified;
-    GBool m_bParsed;
-    double m_dfScale;
-    OGRSTUnitId m_eUnit;
-    OGRSTClassId m_eClassId;
-    char *m_pszStyleString;
+    GBool m_bModified = false;
+    GBool m_bParsed = false;
+    double m_dfScale = 1.0;
+    OGRSTUnitId m_eUnit = OGRSTUMM;
+    OGRSTClassId m_eClassId = OGRSTCNone;
+    char *m_pszStyleString = nullptr;
 
     virtual GBool Parse() = 0;
+
+    CPL_DISALLOW_COPY_ASSIGN(OGRStyleTool)
 
   protected:
 #ifndef DOXYGEN_SKIP
@@ -264,6 +270,8 @@ class CPL_DLL OGRStylePen : public OGRStyleTool
 
     GBool Parse() override;
 
+    CPL_DISALLOW_COPY_ASSIGN(OGRStylePen)
+
   public:
 
     OGRStylePen();
@@ -312,6 +320,8 @@ class CPL_DLL OGRStyleBrush : public OGRStyleTool
 
     GBool Parse() override;
 
+    CPL_DISALLOW_COPY_ASSIGN(OGRStyleBrush)
+
   public:
 
     OGRStyleBrush();
@@ -358,6 +368,8 @@ class CPL_DLL OGRStyleSymbol : public OGRStyleTool
 
     GBool Parse() override;
 
+    CPL_DISALLOW_COPY_ASSIGN(OGRStyleSymbol)
+
   public:
 
     OGRStyleSymbol();
@@ -387,6 +399,10 @@ class CPL_DLL OGRStyleSymbol : public OGRStyleTool
     void SetPerp(double dfPerp){SetParamDbl(OGRSTSymbolPerp,dfPerp  );}
     int  Priority(GBool &bDefault){return GetParamNum(OGRSTSymbolPriority,bDefault);}
     void SetPriority(int nPriority){SetParamNum(OGRSTSymbolPriority,nPriority);}
+    const char *FontName(GBool &bDefault)
+        {return GetParamStr(OGRSTSymbolFontName,bDefault);}
+    void SetFontName(const char *pszFontName)
+        {SetParamStr(OGRSTSymbolFontName,pszFontName);}
     const char *OColor(GBool &bDefault){return GetParamStr(OGRSTSymbolOColor,bDefault);}
     void SetOColor(const char *pszColor){SetParamStr(OGRSTSymbolOColor,pszColor);}
 
@@ -411,6 +427,8 @@ class CPL_DLL OGRStyleLabel : public OGRStyleTool
     OGRStyleValue    *m_pasStyleValue;
 
     GBool Parse() override;
+
+    CPL_DISALLOW_COPY_ASSIGN(OGRStyleLabel)
 
   public:
 

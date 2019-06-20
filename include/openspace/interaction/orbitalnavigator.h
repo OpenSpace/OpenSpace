@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,6 +54,7 @@ public:
 
     void updateStatesFromInput(const InputState& inputState, double deltaTime);
     void updateCameraStateFromStates(double deltaTime);
+    void resetVelocities();
 
     Camera* camera() const;
     void setCamera(Camera* camera);
@@ -66,6 +67,7 @@ public:
     void startRetargetAim();
     float retargetInterpolationTime() const;
     void setRetargetInterpolationTime(float durationInSeconds);
+    void resetNodeMovements();
 
     JoystickCameraStates& joystickStates();
 
@@ -114,7 +116,7 @@ private:
     // Anchor: Node to follow and orbit.
     properties::StringProperty _anchor;
 
-    // Aim: Node to look at (when camera direction is reset), 
+    // Aim: Node to look at (when camera direction is reset),
     // Empty string means same as anchor.
     // If these are the same node we call it the `focus` node.
     properties::StringProperty _aim;
@@ -148,7 +150,6 @@ private:
     glm::dquat _previousAnchorNodeRotation;
 
     glm::dvec3 _previousAimNodePosition;
-    glm::dquat _previousAimNodeRotation;
 
     double _currentCameraToSurfaceDistance = 0.0;
     bool _directlySetStereoDistance = false;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -228,9 +228,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             filename + TempSuffix;
 
         if (sizeData.find(line) != sizeData.end()) {
-            LWARNING(fmt::format(
-                "{}: Duplicate entries: {}", _identifier, line
-            ));
+            LWARNING(fmt::format("{}: Duplicate entries: {}", _identifier, line));
             continue;
         }
 
@@ -242,11 +240,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
 
         std::unique_ptr<AsyncHttpFileDownload>& fileDownload = downloads.back();
 
-        sizeData[line] = {
-            false,
-            0,
-            0,
-        };
+        sizeData[line] = { false, 0, 0 };
 
         fileDownload->onProgress(
             [this, line, &sizeData, &sizeDataMutex,
@@ -258,11 +252,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
 
             std::lock_guard<std::mutex> guard(sizeDataMutex);
 
-            sizeData[line] = {
-                p.totalBytesKnown,
-                p.totalBytes,
-                p.downloadedBytes,
-            };
+            sizeData[line] = { p.totalBytesKnown, p.totalBytes, p.downloadedBytes };
 
             SizeData size = std::accumulate(
                 sizeData.begin(),
@@ -312,9 +302,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             }
         }
         else {
-            LERROR(fmt::format(
-                "Error downloading file from URL {}", d->url()
-            ));
+            LERROR(fmt::format("Error downloading file from URL {}", d->url()));
             failed = true;
         }
     }

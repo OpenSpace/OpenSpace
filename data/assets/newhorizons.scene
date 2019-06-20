@@ -1,38 +1,39 @@
+asset.require('./base');
+
+asset.require('scene/solarsystem/missions/newhorizons/newhorizons')
+local NewHorizonsAsset = asset.require('scene/solarsystem/missions/newhorizons/model')
+
 local assetHelper = asset.require('util/asset_helper')
-local sceneHelper = asset.require('util/scene_helper')
 local propertyHelper = asset.require('util/property_helper')
+local sceneHelper = asset.require('util/scene_helper')
 local renderableHelper = asset.require('util/renderable_helper')
 
--- Specifying which other assets should be loaded in this scene
-asset.require('spice/base')
-assetHelper.requestAll(asset, 'scene/solarsystem/sun')
-asset.require('scene/solarsystem/planets')
-asset.request('scene/digitaluniverse/stars')
-asset.request('scene/digitaluniverse/milkyway')
-asset.require('scene/solarsystem/missions/newhorizons/newhorizons')
-
--- Load default key bindings applicable to most scenes
-asset.require('util/default_keybindings')
-asset.require('util/default_dashboard')
-asset.require('util/default_joystick')
-
-asset.require('util/webgui')
-
-asset.request('customization/globebrowsing')
-
--- Custom Keybindings
 local Keybindings = {
     {
         Key = "a",
-        Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'NewHorizons')",
+        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'NewHorizons');" ..
+            "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');" ..
+            "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
         Documentation = "Sets the focus of the camera on 'NewHorizons'.",
         Name = "Focus on New Horizons",
         GuiPath = "/New Horizons",
         Local = false
     },
     {
+        Key = "SHIFT+a",
+        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'NewHorizons');" ..
+            "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', 'Pluto');" ..
+            "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
+        Documentation = "Sets the focus of the camera on 'NewHorizons'.",
+        Name = "Anchor at New Horizons, Aim at Pluto",
+        GuiPath = "/New Horizons",
+        Local = false
+    },
+    {
         Key = "s",
-        Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'Pluto')",
+        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Pluto');"..
+            "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');" ..
+            "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
         Documentation = "Sets the focus of the camera on 'Pluto'",
         Name = "Focus on Pluto",
         GuiPath = "/New Horizons",
@@ -40,7 +41,9 @@ local Keybindings = {
     },
     {
         Key = "d",
-        Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'Charon')",
+        Command = "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Charon');"..
+            "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');" ..
+            "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)",
         Documentation = "Sets the focus of the camera on 'Charon'.",
         Name = "Focus on New Charon",
         GuiPath = "/New Horizons",
@@ -49,9 +52,9 @@ local Keybindings = {
     {
         Key = "F7",
         Command = 
-[[local enabled = openspace.getPropertyValue('Scene.Pluto.Renderable.ProjectionComponent.PerformProjection')
-openspace.setPropertyValue('Scene.Pluto.Renderable.ProjectionComponent.PerformProjection', not enabled)
-openspace.setPropertyValue('Scene.Charon.Renderable.ProjectionComponent.PerformProjection', not enabled)
+[[local enabled = openspace.getPropertyValue('Scene.PlutoProjection.Renderable.ProjectionComponent.PerformProjection')
+openspace.setPropertyValue('Scene.PlutoProjection.Renderable.ProjectionComponent.PerformProjection', not enabled)
+openspace.setPropertyValue('Scene.CharonProjection.Renderable.ProjectionComponent.PerformProjection', not enabled)
 openspace.setPropertyValueSingle("Dashboard.NewHorizonsInstruments.Enabled", not enabled)]],
         Documentation = "Toggles New Horizons image projection.",
         Name = "Toggle NH Image Projection",
@@ -60,8 +63,8 @@ openspace.setPropertyValueSingle("Dashboard.NewHorizonsInstruments.Enabled", not
     },
     {
         Key = "F8",
-        Command = "openspace.setPropertyValue('Scene.Pluto.Renderable.ProjectionComponent.ClearAllProjections', true);" ..
-                  "openspace.setPropertyValue('Scene.Charon.Renderable.ProjectionComponent.ClearAllProjections', true);",
+        Command = "openspace.setPropertyValue('Scene.PlutoProjection.Renderable.ProjectionComponent.ClearAllProjections', true);" ..
+                  "openspace.setPropertyValue('Scene.CharonProjection.Renderable.ProjectionComponent.ClearAllProjections', true);",
         Documentation = "Removes all image projections from Pluto and Charon.",
         Name = "Clear image projections",
         GuiPath = "/New Horizons",
@@ -70,8 +73,8 @@ openspace.setPropertyValueSingle("Dashboard.NewHorizonsInstruments.Enabled", not
     {
         Key = "F9",
         Command = "openspace.time.setTime('2015-07-14T09:00:00.00');" ..
-                  "openspace.setPropertyValue('Scene.Pluto.Renderable.ClearAllProjections', true);" ..
-                  "openspace.setPropertyValue('Scene.Charon.Renderable.ClearAllProjections', true);",
+                  "openspace.setPropertyValue('Scene.PlutoProjection.Renderable.ProjectionComponent.ClearAllProjections', true);" ..
+                  "openspace.setPropertyValue('Scene.CharonProjection.Renderable.ProjectionComponent.ClearAllProjections', true);",
         Documentation = "Jumps to the 14th of July 2015 at 0900 UTC and clears all projections.",
         Name = "Reset time and projections",
         GuiPath = "/New Horizons",
@@ -79,7 +82,15 @@ openspace.setPropertyValueSingle("Dashboard.NewHorizonsInstruments.Enabled", not
     },
     {
         Key = "KP_8",
-        Command = propertyHelper.increment('Scene.Pluto.Renderable.HeightExaggeration', 5000),
+        Command = propertyHelper.increment('Scene.PlutoProjection.Renderable.HeightExaggeration', 5000),
+        Documentation = "Increases the height map exaggeration on Pluto.",
+        Name = "Pluto HeightExaggeration +",
+        GuiPath = "/New Horizons",
+        Local = false
+    },
+    {
+        Key = "CTRL+I",
+        Command = propertyHelper.increment('Scene.PlutoProjection.Renderable.HeightExaggeration', 5000),
         Documentation = "Increases the height map exaggeration on Pluto.",
         Name = "Pluto HeightExaggeration +",
         GuiPath = "/New Horizons",
@@ -87,7 +98,15 @@ openspace.setPropertyValueSingle("Dashboard.NewHorizonsInstruments.Enabled", not
     },
     {
         Key = "KP_2",
-        Command = propertyHelper.decrement('Scene.Pluto.Renderable.HeightExaggeration', 5000),
+        Command = propertyHelper.decrement('Scene.PlutoProjection.Renderable.HeightExaggeration', 5000),
+        Documentation = "Decreases the height map exaggeration on Pluto.",
+        Name = "Pluto HeightExaggeration -",
+        GuiPath = "/New Horizons",
+        Local = false
+    },
+    {
+        Key = "CTRL+K",
+        Command = propertyHelper.decrement('Scene.PlutoProjection.Renderable.HeightExaggeration', 5000),
         Documentation = "Decreases the height map exaggeration on Pluto.",
         Name = "Pluto HeightExaggeration -",
         GuiPath = "/New Horizons",
@@ -95,7 +114,15 @@ openspace.setPropertyValueSingle("Dashboard.NewHorizonsInstruments.Enabled", not
     },
     {
         Key = "KP_9",
-        Command = propertyHelper.increment('Scene.Charon.Renderable.HeightExaggeration', 5000),
+        Command = propertyHelper.increment('Scene.CharonProjection.Renderable.HeightExaggeration', 5000),
+        Documentation = "Increases the height map exaggeration on Charon.",
+        Name = "Charon HeightExaggeration +",
+        GuiPath = "/New Horizons",
+        Local = false
+    },
+    {
+        Key = "CTRL+O",
+        Command = propertyHelper.increment('Scene.CharonProjection.Renderable.HeightExaggeration', 5000),
         Documentation = "Increases the height map exaggeration on Charon.",
         Name = "Charon HeightExaggeration +",
         GuiPath = "/New Horizons",
@@ -103,7 +130,15 @@ openspace.setPropertyValueSingle("Dashboard.NewHorizonsInstruments.Enabled", not
     },
     {
         Key = "KP_3",
-        Command = propertyHelper.decrement('Scene.Charon.Renderable.HeightExaggeration', 5000),
+        Command = propertyHelper.decrement('Scene.CharonProjection.Renderable.HeightExaggeration', 5000),
+        Documentation = "Decreases the height map exaggeration on Charon.",
+        Name = "Charon HeightExaggeration -",
+        GuiPath = "/New Horizons",
+        Local = false
+    },
+    {
+        Key = "CTRL+L",
+        Command = propertyHelper.decrement('Scene.CharonProjection.Renderable.HeightExaggeration', 5000),
         Documentation = "Decreases the height map exaggeration on Charon.",
         Name = "Charon HeightExaggeration -",
         GuiPath = "/New Horizons",
@@ -111,7 +146,7 @@ openspace.setPropertyValueSingle("Dashboard.NewHorizonsInstruments.Enabled", not
     },
     {
         Key = "o",
-        Command = propertyHelper.invert('Scene.PlutoTrail.Renderable.Enabled'),
+        Command = propertyHelper.invert('Scene.PlutoBarycentricTrail.Renderable.Enabled'),
         Documentation = "Toggles the visibility of the trail behind Pluto.",
         Name = "Toggle Pluto Trail",
         GuiPath = "/New Horizons",
@@ -168,11 +203,18 @@ openspace.setPropertyValueSingle("Dashboard.NewHorizonsInstruments.Enabled", not
         Name = "Toggle NH Trail",
         GuiPath = "/New Horizons",
         Local = false
-    }
+    },
+    {
+        Key = "h",
+        Name="Hide Trails",
+        Command = "local list = openspace.getProperty('*Trail.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
+        Documentation = "Disables visibility of the trails",
+        GuiPath = "/Rendering",
+        Local = false
+    },
 
 }
 
-local NewHorizonsAsset = asset.require('scene/solarsystem/missions/newhorizons/model')
 
 assetHelper.registerDashboardItems(asset, {
     {
@@ -188,7 +230,7 @@ assetHelper.registerDashboardItems(asset, {
         SourceType = "Node",
         SourceNodeName = "NewHorizons",
         DestinationType = "Node Surface",
-        DestinationNodeName = "Pluto"
+        DestinationNodeName = "PlutoProjection"
     },
     {
         Type = "DashboardItemInstruments",
@@ -197,15 +239,11 @@ assetHelper.registerDashboardItems(asset, {
     }
 })
 
-assetHelper.registerInterestingNodes(asset, {
-    "Pluto", "NewHorizons", "Charon"
-})
-
 asset.onInitialize(function ()
     openspace.time.setTime("2015-07-14T08:00:00.00")
     sceneHelper.bindKeys(Keybindings)
 
-    openspace.setDefaultGuiSorting()
+    openspace.markInterestingNodes({ "Pluto", "NewHorizons", "Charon" })
 
     sceneHelper.setDeltaTimeKeys({
         1, 5, 10, 20, 40, 60, 120, 360, 540, 1080,
@@ -213,16 +251,9 @@ asset.onInitialize(function ()
     })
 
     openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotationDistance', 20.000000);
-
-    openspace.addVirtualProperty(
-        "BoolProperty",
-        "Show Trails",
-        "*Trail.Renderable.Enabled",
-        "Disable or enable all trails of the scene at the same time",
-        true,
-        nil,
-        nil
-    )
+    openspace.setPropertyValueSingle('Scene.Pluto.Renderable.Enabled', false)
+    openspace.setPropertyValueSingle('Scene.Charon.Renderable.Enabled', false)
+    openspace.setPropertyValueSingle("Scene.PlutoBarycenterTrail.Renderable.Enabled", false)
 
     openspace.navigation.setCameraState({
         Anchor = NewHorizonsAsset.NewHorizons.Identifier,
@@ -234,5 +265,9 @@ end)
 asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
 
-    openspace.removeVirtualProperty("*Trail.Renderable.Enabled")
+    openspace.removeInterestingNodes({ "Pluto", "NewHorizons", "Charon" })
+
+    openspace.setPropertyValueSingle('Scene.Pluto.Renderable.Enabled', true)
+    openspace.setPropertyValueSingle('Scene.Charon.Renderable.Enabled', true)
+    openspace.setPropertyValueSingle('Scene.PlutoBarycenterTrail.Renderable.Enabled', true)
 end)

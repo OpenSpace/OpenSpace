@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -89,6 +89,8 @@ uniform dmat4 dSgctProjectionToModelTransformMatrix;
 
 uniform dvec4 dCamPosObj;
 uniform dvec3 sunDirectionObj;
+
+uniform float blackoutFactor;
 
 /*******************************************************************************
  ***** ALL CALCULATIONS FOR ECLIPSE ARE IN METERS AND IN WORLD SPACE SYSTEM ****
@@ -246,11 +248,13 @@ void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray,
     // Compute positions and directions in object space.
     dvec2 samplePos  = dvec2(msaaSamplePatter[mssaSample],
                              msaaSamplePatter[mssaSample+1]);
-    //dvec4 clipCoords = dvec4(interpolatedNDCPos.xy + samplePos, 0.0, 1.0);
-    dvec4 clipCoords = dvec4(interpolatedNDCPos.xy, 0.0, 1.0);
+
+    dvec4 clipCoords = dvec4(interpolatedNDCPos.xy, 1.0, 1.0);
 
     // Clip to Object Coords
     dvec4 objectCoords = dSgctProjectionToModelTransformMatrix * clipCoords;
+
+    objectCoords /= objectCoords.w;
     
     // Planet Position in Object Space
     // JCC: Applying the inverse of the model transformation on the object postion in World 
@@ -562,7 +566,6 @@ void main() {
         // Performance variables:
         //float Rt2 = Rt * Rt; // in Km
         //float Rg2 = Rg * Rg; // in Km
-
 
         for (int i = 0; i < nSamples; i++) {
             // Color from G-Buffer

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -76,7 +76,6 @@ TransferFunctionHandler::TransferFunctionHandler(const properties::StringPropert
     , _maxValue(MaxValueInfo)
     , _saveTransferFunction(SaveTransferFunctionInfo)
     , _transferFunctionProperty(TransferFunctionInfo)
-    , _histogramProperty(HistogramInfo)
 {
     _transferFunction = std::make_shared<openspace::TransferFunction>(
         _transferFunctionPath
@@ -86,7 +85,6 @@ TransferFunctionHandler::TransferFunctionHandler(const properties::StringPropert
 void TransferFunctionHandler::initialize() {
     addProperty(_transferFunctionPath);
     addProperty(_transferFunctionProperty);
-    addProperty(_histogramProperty);
     addProperty(_dataUnit);
     addProperty(_minValue);
     addProperty(_maxValue);
@@ -109,10 +107,6 @@ void TransferFunctionHandler::initialize() {
     _transferFunctionProperty.onChange([this]() { setTexture(); });
 
     _saveTransferFunction.onChange([this]() { saveEnvelopes(); });
-}
-
-void TransferFunctionHandler::setHistogramProperty(openspace::Histogram& histogram) {
-    _histogramProperty.setValue(histogram.getBinaryData());
 }
 
 void TransferFunctionHandler::setTexture() {

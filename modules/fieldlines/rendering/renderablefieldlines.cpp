@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -229,7 +229,10 @@ void RenderableFieldlines::render(const RenderData& data, RendererTasks&) {
         glm::vec3(data.camera.viewDirectionWorldSpace())
     );
     glDisable(GL_CULL_FACE);
-    setPscUniforms(*_program, data.camera, data.position);
+    _program->setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
+    _program->setUniform("objpos", glm::vec4(data.modelTransform.translation, 0.f));
+    _program->setUniform("camrot", glm::mat4(data.camera.viewRotationMatrix()));
+    _program->setUniform("scaling", glm::vec2(1.f, 0.f));
 
     _program->setUniform("classification", _classification);
     if (!_classification) {

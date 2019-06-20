@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -61,10 +61,11 @@
 
 namespace {
     constexpr const char* _loggerCat = "GlobeBrowsingModule";
+    constexpr const char* _factoryName = "TileProvider";
 
-    constexpr const openspace::properties::Property::PropertyInfo CacheEnabledInfo = {
-        "CacheEnabled",
-        "Cache Enabled",
+    constexpr const openspace::properties::Property::PropertyInfo WMSCacheEnabledInfo = {
+        "WMSCacheEnabled",
+        "WMS Cache Enabled",
         "Determines whether automatic caching of WMS servers is enabled. Changing the "
         "value of this property will not affect already created WMS datasets."
     };
@@ -79,18 +80,24 @@ namespace {
         "already created WMS datasets."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo CacheLocationInfo = {
-        "CacheLocation",
-        "Cache Location",
+    constexpr const openspace::properties::Property::PropertyInfo WMSCacheLocationInfo = {
+        "WMSCacheLocation",
+        "WMS Cache Location",
         "The location of the cache folder for WMS servers. Changing the value of this "
         "property will not affect already created WMS datasets."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo CacheSizeInfo = {
-        "CacheSize",
-        "Cache Size",
+    constexpr const openspace::properties::Property::PropertyInfo WMSCacheSizeInfo = {
+        "WMSCacheSize",
+        "WMS Cache Size",
         "The maximum size of the cache for each WMS server. Changing the value of this "
         "property will not affect already created WMS datasets."
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
+        "TileCacheSize",
+        "Tile Cache Size",
+        "The maximum size of the MemoryAwareTileCache, on the CPU and GPU."
     };
 
 
@@ -150,31 +157,40 @@ namespace openspace {
 
 GlobeBrowsingModule::GlobeBrowsingModule()
     : OpenSpaceModule(Name)
-    , _cacheEnabled(CacheEnabledInfo, false)
+    , _wmsCacheEnabled(WMSCacheEnabledInfo, false)
     , _offlineMode(OfflineModeInfo, false)
-    , _cacheLocation(CacheLocationInfo, "${BASE}/cache_gdal")
-    , _cacheSizeMB(CacheSizeInfo, 1024)
+    , _wmsCacheLocation(WMSCacheLocationInfo, "${BASE}/cache_gdal")
+    , _wmsCacheSizeMB(WMSCacheSizeInfo, 1024)
+    , _tileCacheSizeMB(TileCacheSizeInfo, 1024)
 {
-    addProperty(_cacheEnabled);
+    addProperty(_wmsCacheEnabled);
     addProperty(_offlineMode);
-    addProperty(_cacheLocation);
-    addProperty(_cacheSizeMB);
+    addProperty(_wmsCacheLocation);
+    addProperty(_wmsCacheSizeMB);
+    addProperty(_tileCacheSizeMB);
 }
 
 void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     using namespace globebrowsing;
 
-    if (dict.hasKeyAndValue<bool>(CacheEnabledInfo.identifier)) {
-        _cacheEnabled = dict.value<bool>(CacheEnabledInfo.identifier);
+    if (dict.hasKeyAndValue<bool>(WMSCacheEnabledInfo.identifier)) {
+        _wmsCacheEnabled = dict.value<bool>(WMSCacheEnabledInfo.identifier);
     }
     if (dict.hasKeyAndValue<bool>(OfflineModeInfo.identifier)) {
         _offlineMode = dict.value<bool>(OfflineModeInfo.identifier);
     }
-    if (dict.hasKeyAndValue<std::string>(CacheLocationInfo.identifier)) {
-        _cacheLocation = dict.value<std::string>(CacheLocationInfo.identifier);
+    if (dict.hasKeyAndValue<std::string>(WMSCacheLocationInfo.identifier)) {
+        _wmsCacheLocation = dict.value<std::string>(WMSCacheLocationInfo.identifier);
     }
-    if (dict.hasKeyAndValue<double>(CacheSizeInfo.identifier)) {
-        _cacheSizeMB = static_cast<int>(dict.value<double>(CacheSizeInfo.identifier));
+    if (dict.hasKeyAndValue<double>(WMSCacheSizeInfo.identifier)) {
+        _wmsCacheSizeMB = static_cast<int>(
+            dict.value<double>(WMSCacheSizeInfo.identifier)
+        );
+    }
+    if (dict.hasKeyAndValue<double>(TileCacheSizeInfo.identifier)) {
+        _tileCacheSizeMB = static_cast<int>(
+            dict.value<double>(TileCacheSizeInfo.identifier)
+        );
     }
 
     // Sanity check
@@ -182,7 +198,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
         dict.value<bool>("NoWarning") :
         false;
 
-    if (!_cacheEnabled && _offlineMode && !noWarning) {
+    if (!_wmsCacheEnabled && _offlineMode && !noWarning) {
         LWARNINGC(
             "GlobeBrowsingModule",
             "WMS caching is disabled, but offline mode is enabled. Unless you know "
@@ -195,7 +211,9 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
 
     // Initialize
     global::callback::initializeGL.emplace_back([&]() {
-        _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>();
+        _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>(
+            _tileCacheSizeMB
+        );
         addPropertySubOwner(*_tileCache);
 
         tileprovider::initializeDefaultTile();
@@ -267,7 +285,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
         )]
     );
 
-    FactoryManager::ref().addFactory(std::move(fTileProvider));
+    FactoryManager::ref().addFactory(std::move(fTileProvider), _factoryName);
 
     auto fDashboard = FactoryManager::ref().factory<DashboardItem>();
     ghoul_assert(fDashboard, "Dashboard factory was not created");
@@ -474,9 +492,10 @@ void GlobeBrowsingModule::goToGeodetic2(Camera& camera, globebrowsing::Geodetic2
         return;
     }
 
-    const glm::dvec3 cameraPosition = global::navigationHandler.camera()->positionVec3();
+    interaction::NavigationHandler& nav = global::navigationHandler;
+    const glm::dvec3 cameraPosition = nav.camera()->positionVec3();
     const glm::dmat4 inverseModelTransform =
-        global::navigationHandler.orbitalNavigator().anchorNode()->inverseModelTransform();
+        nav.orbitalNavigator().anchorNode()->inverseModelTransform();
     const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
     const SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
@@ -610,6 +629,10 @@ void GlobeBrowsingModule::loadWMSCapabilities(std::string name, std::string glob
             GA_ReadOnly
         );
 
+        if (!dataset) {
+            LWARNING("Could not open dataset: " + downloadUrl);
+            return Capabilities();
+        }
         char** subDatasets = GDALGetMetadata(dataset, "SUBDATASETS");
         const int nSubdatasets = CSLCount(subDatasets);
         Capabilities cap = parseSubDatasets(subDatasets, nSubdatasets);
@@ -692,20 +715,20 @@ bool GlobeBrowsingModule::hasUrlInfo(const std::string& globe) const {
     return _urlList.find(globe) != _urlList.end();
 }
 
-bool GlobeBrowsingModule::isCachingEnabled() const {
-    return _cacheEnabled;
+bool GlobeBrowsingModule::isWMSCachingEnabled() const {
+    return _wmsCacheEnabled;
 }
 
 bool GlobeBrowsingModule::isInOfflineMode() const {
     return _offlineMode;
 }
 
-std::string GlobeBrowsingModule::cacheLocation() const {
-    return _cacheLocation;
+std::string GlobeBrowsingModule::wmsCacheLocation() const {
+    return _wmsCacheLocation;
 }
 
-uint64_t GlobeBrowsingModule::cacheSize() const {
-    uint64_t size = _cacheSizeMB;
+uint64_t GlobeBrowsingModule::wmsCacheSize() const {
+    uint64_t size = _wmsCacheSizeMB;
     return size * 1024 * 1024;
 }
 

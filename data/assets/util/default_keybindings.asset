@@ -34,6 +34,14 @@ local Keybindings = {
         Local = true
     },
     {
+        Key = "F12",
+        Name = "Take Screenshot",
+        Command = "openspace.setPropertyValueSingle('RenderEngine.TakeScreenshot', nil)",
+        Documentation = "Saves the contents of the screen to a file in the working directory.",
+        GuiPath = "/Rendering",
+        Local = true
+    },
+    {
         Key = "SPACE",
         Name = "Toggle Pause (Interpolated)",
         Command = "openspace.time.interpolateTogglePause()",
@@ -51,7 +59,7 @@ local Keybindings = {
     },
     {
         Key = "f",
-        Name = "Toggle roation friction",
+        Name = "Toggle Rotation friction",
         Command = propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RotationalFriction'),
         Documentation = "Toggles the rotational friction of the camera. If it is disabled, the camera rotates around the focus object indefinitely.",
         GuiPath = "/Navigation",
@@ -76,7 +84,7 @@ local Keybindings = {
     {
         Key = "w",
         Name = "Fade to/from black",
-        Command = "openspace.toggleFade(3)",
+        Command = "if openspace.getPropertyValue('RenderEngine.BlackoutFactor') > 0.5 then openspace.setPropertyValueSingle('RenderEngine.BlackoutFactor', 0.0, 3) else openspace.setPropertyValueSingle('RenderEngine.BlackoutFactor', 1.0, 3) end",
         Documentation = "Toggles the fade to black within 3 seconds or shows the rendering after 3 seconds.",
         GuiPath = "/Rendering",
         Local = false
@@ -87,7 +95,7 @@ local Keybindings = {
         Command = propertyHelper.invert('Modules.CefWebGui.Visible'),
         Documentation = "Toggles the main GUI",
         GuiPath = "/GUI",
-        Local = false
+        Local = true
     },
     {
         Key = "Shift+Tab",
@@ -100,7 +108,7 @@ openspace.setPropertyValueSingle("RenderEngine.ShowVersion", not isEnabled);
 openspace.setPropertyValueSingle("RenderEngine.ShowCamera", not isEnabled)]],
         Documentation = "Toggles the dashboard and overlays",
         GuiPath = "/GUI",
-        Local = false
+        Local = true
     },
     {
         Key = "Alt+R",
@@ -108,14 +116,14 @@ openspace.setPropertyValueSingle("RenderEngine.ShowCamera", not isEnabled)]],
         Command = propertyHelper.invert('RenderEngine.DisableMasterRendering'),
         Documentation = "Toggles the rendering on master",
         GuiPath = "/Rendering",
-        Local = false
+        Local = true
     }
 }
 
 local DeltaTimeKeys
 
 asset.onInitialize(function()
-    Keys = sceneHelper.bindKeys(Keybindings)
+    sceneHelper.bindKeys(Keybindings)
 
     DeltaTimeKeys = sceneHelper.setDeltaTimeKeys({
     --  1           2           3           4           5           6           7           8           9           0

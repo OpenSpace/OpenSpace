@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -407,10 +407,9 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
             if (!anchor) {
                 return { glm::dvec3(0.0), "Unknown" };
             }
-            return {
-                global::navigationHandler.orbitalNavigator().anchorNode()->worldPosition(),
-                "focus"
-            };
+            else {
+                return { anchor->worldPosition(), "focus" };
+            }
         }
         case Type::Camera:
             return { global::renderEngine.scene()->camera()->positionVec3(), "camera" };

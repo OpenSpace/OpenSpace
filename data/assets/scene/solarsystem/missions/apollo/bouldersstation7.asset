@@ -1,0 +1,80 @@
+
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local assetHelper = asset.require('util/asset_helper')
+
+local models = asset.syncedResource({
+    Name = "Apollo Models",
+    Type = "HttpSynchronization",
+    Identifier = "apollo_boulders",
+    Version = 1
+})
+
+local LightSources = {
+    {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sunTransforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+    },
+    {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+    }
+}
+
+local moonAsset = asset.require('scene/solarsystem/planets/earth/moon/moon')
+
+local Station7BoulderHolder = {
+    Identifier = "Station_7_Boulder",
+    Parent = moonAsset.Moon.Identifier,
+    Transform = {
+        Translation = {
+            Type = "GlobeTranslation",
+            Globe = moonAsset.Moon.Identifier,
+            Longitude = -360+30.8165882,
+            Latitude = 20.2908556,
+            FixedAltitude = -2593.5,
+            UseFixedAltitude = true
+        }
+    },
+    GUI = {
+        Name = "Station 7 Boulder",
+        Path = "/Solar System/Missions/Apollo/17/Station 7"
+    }
+}
+
+local Station7BoulderModel = {
+    Identifier = "Station7BoulderModel",
+    Parent = Station7BoulderHolder.Identifier,
+    Transform = {
+          Scale = {
+            Type = "StaticScale",
+            Scale = 0.1
+        },
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/b7model.obj"
+        },
+        ColorTexture = models .. "/b7model_u1_v1.jpeg",
+        LightSources = LightSources,
+        PerformShading = false,
+        DisableFaceCulling = true
+    },
+    GUI = {
+        Name = "Station 7 Boulder Model",
+        Path = "/Solar System/Missions/Apollo/17/Station 7"
+    }
+}
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    Station7BoulderHolder, Station7BoulderModel
+})
+
+asset.onInitialize(function ()
+    openspace.setPropertyValueSingle('Scene.Station7BoulderModel.Renderable.RotationVector', {1.945950,274.378387,212.903214});
+end)

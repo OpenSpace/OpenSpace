@@ -11,14 +11,23 @@ local textures = asset.syncedResource({
 
 local object = {
     Identifier = "MilkyWay-ESO",
+    Transform = {
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = {0, 0, 3.14159265359}
+        }
+    },
     Renderable = {
         Type = "RenderableSphere",
         Size = 9.2E20,
         Segments = 40,
         Opacity = 0.4,
         Texture = textures .. "/eso0932a_blend.png",
-        Orientation = "Inside/Outside",
-        FadeOutThreshould = 0.01
+        UseAdditiveBlending = true,
+        Orientation = "Inside",
+        MirrorTexture = true,
+        FadeOutThreshold = 0.01,
+        Background = true
     },
     GUI = {
         Name = "Milky Way (ESO)",

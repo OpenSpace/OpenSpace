@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdalsse_priv.h a82a268adfd10bccfa254f9e416a68c105315d25 2018-04-08 13:53:09 +0200 Even Rouault $
+ * $Id: gdalsse_priv.h e37e476c4cf8f4b0df8995e0d95d5d672fca1a9b 2018-05-05 16:54:18 +0200 Even Rouault $
  *
  * Project:  GDAL
  * Purpose:  SSE2 helper
@@ -96,10 +96,17 @@ class XMMReg2Double
   public:
     __m128d xmm;
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Weffc++"
+#endif
     /* coverity[uninit_member] */
-    XMMReg2Double() {}
+    XMMReg2Double() = default;
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
-    XMMReg2Double(double  val)  { xmm = _mm_load_sd (&val); }
+    XMMReg2Double(double  val): xmm(_mm_load_sd (&val)) {}
     XMMReg2Double(const XMMReg2Double& other) : xmm(other.xmm) {}
 
     static inline XMMReg2Double Zero()
@@ -1001,7 +1008,16 @@ class XMMReg4Double
   public:
     XMMReg2Double low, high;
 
-    XMMReg4Double() {}
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Weffc++"
+#endif
+    /* coverity[uninit_member] */
+    XMMReg4Double() = default;
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
+
     XMMReg4Double(const XMMReg4Double& other) : low(other.low), high(other.high) {}
 
     static inline XMMReg4Double Zero()
