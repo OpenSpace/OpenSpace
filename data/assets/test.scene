@@ -41,7 +41,7 @@ asset.onInitialize(function ()
     -- openspace.time.setTime("2000 JUL 14 08:33:37.100")
 
     -- Sun magnetogram texture testing
-    openspace.time.setTime("2019 MAY 11 14:15:30.000")
+    openspace.time.setTime("2019 MAY 02 07:15:30.000")
 
   
     openspace.setDefaultGuiSorting()

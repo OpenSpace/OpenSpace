@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
+#include <modules/fieldlinessequence/util/webfieldlinesmanager.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
@@ -196,6 +197,11 @@ private:
     properties::TriggerProperty _pFocusOnOriginBtn;
     // Button which executes a time jump to start of sequence
     properties::TriggerProperty _pJumpToStartBtn;
+    
+    
+    // --------------------- Web Fieldlines Manager ----------------------------------- //
+    //WebFieldlinesManager _webFieldlinesManager;
+    
 
     // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //
     void addStateToSequence(FieldlinesState& STATE);

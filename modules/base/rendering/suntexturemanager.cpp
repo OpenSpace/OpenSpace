@@ -50,6 +50,7 @@ SunTextureManager::SunTextureManager()
 void SunTextureManager::update(std::unique_ptr<ghoul::opengl::Texture> &texture)
 {
     std::string currentTime = getOpenSpaceDateTime();
+    
 
     if (_textureToUpload.empty() && currentTime != _activeTextureDate && (_textureListGPU.find(currentTime) != _textureListGPU.end()))
     {
@@ -147,7 +148,6 @@ void SunTextureManager::update(std::unique_ptr<ghoul::opengl::Texture> &texture)
         //LERROR("in case 3");
         if (((_textureListGPU.find(_textureToUpload) != _textureListGPU.end())))
         {
-            LERROR("changing to texture " + _textureToUpload);
             _textureListGPU[_activeTextureDate] = std::move(texture);
             texture = std::move(_textureListGPU[_textureToUpload]);
             _activeTextureDate = _textureToUpload;
