@@ -200,7 +200,14 @@ void Handler::onVREvent(const VRDataIndex& eventData) {
             if (button == MouseButton::Right && action == MouseAction::Press) {
                 windowingGlobals.mouseButtons |= 1 << 2;
             }
-            global::openSpaceEngine.mouseButtonCallback(button, action);
+            
+            using KM = KeyModifier;
+            KM mod = KM::NoModifier;
+            mod |= keyboardState.modifierShift ? KM::Shift : KM::NoModifier;
+            mod |= keyboardState.modifierCtrl ? KM::Control : KM::NoModifier;
+            mod |= keyboardState.modifierAlt ? KM::Alt : KM::NoModifier;
+
+            global::openSpaceEngine.mouseButtonCallback(button, action, mod);
         }
 
     }
