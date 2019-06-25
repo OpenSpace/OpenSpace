@@ -58,9 +58,9 @@ namespace openspace{
         getAvailableTriggertimes();
         
         
-        for (auto& tt : _availableTriggertimes){
-            downloadOsfls(_flsType, tt);
-        }
+//        for (auto& tt : _availableTriggertimes){
+//            downloadOsfls(_flsType, tt);
+//        }
     }
     
     void WebFieldlinesManager::update(){
@@ -129,7 +129,6 @@ namespace openspace{
         Time time = Time();
         time.setTime(s);
         i =  static_cast<int> (time.j2000Seconds() - 69.185013294);
-        
     }
     
     void WebFieldlinesManager::triggerTimeInt2String(int i, std::string& s){

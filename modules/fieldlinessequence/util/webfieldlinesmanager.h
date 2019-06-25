@@ -74,7 +74,7 @@ private:
     // Parse the data from http request
     void parseTriggerTimesList(std::string s);
     
-    // some temporary functions
+    // some temporary functions to translate the filenames to ints
     void triggerTimeString2Int(std::string s, int& d);
     void triggerTimeInt2String(int d, std::string& s);
        
