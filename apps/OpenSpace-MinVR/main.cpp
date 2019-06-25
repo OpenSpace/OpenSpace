@@ -183,6 +183,8 @@ void Handler::onVREvent(const VRDataIndex& eventData) {
             }
 
             MouseAction action;
+            KeyModifier mods;
+
             if (actionName == "Down") {
                 action = MouseAction::Press;
             }
@@ -200,7 +202,7 @@ void Handler::onVREvent(const VRDataIndex& eventData) {
             if (button == MouseButton::Right && action == MouseAction::Press) {
                 windowingGlobals.mouseButtons |= 1 << 2;
             }
-            global::openSpaceEngine.mouseButtonCallback(button, action);
+            openspace::global::openSpaceEngine.mouseButtonCallback(button, action, mods);
         }
 
     }
@@ -233,7 +235,7 @@ void Handler::onVREvent(const VRDataIndex& eventData) {
         std::vector<char> synchronizationBuffer(nBytes);
         std::copy(data, data + nBytes, synchronizationBuffer.begin());
 
-        global::openSpaceEngine.decode(std::move(synchronizationBuffer));
+        openspace::global::openSpaceEngine.decode(std::move(synchronizationBuffer));
     }
     else {
         LERRORC("onVREvent()", fmt::format("Received an event of unknown type {}", type));
@@ -255,7 +257,7 @@ void Handler::onVRRenderContext(const VRDataIndex& stateData) {
             windowingGlobals.framebufferSize.x = stateData.getValue("FramebufferWidth");
             windowingGlobals.framebufferSize.y = stateData.getValue("FramebufferHeight");
 
-            global::openSpaceEngine.initializeGL();
+            openspace::global::openSpaceEngine.initializeGL();
 
             HasInitializedGL = true;
         }
@@ -400,8 +402,8 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    global::openSpaceEngine.registerPathTokens();
-    global::openSpaceEngine.initialize();
+    openspace::global::openSpaceEngine.registerPathTokens();
+    openspace::global::openSpaceEngine.initialize();
 
     engine.addEventHandler(&handler);
     engine.addRenderHandler(&handler);
@@ -444,10 +446,10 @@ int main(int argc, char** argv) {
 
 
 
-            global::openSpaceEngine.preSynchronization();
+            openspace::global::openSpaceEngine.preSynchronization();
 
             if (global::windowDelegate.isMaster()) {
-                std::vector<char> syncBuffer = global::openSpaceEngine.encode();
+                std::vector<char> syncBuffer = openspace::global::openSpaceEngine.encode();
                 VRDataIndex e("OpenSpace_Sync");
 
                 e.addData("EventType", "OpenSpaceMessage");
@@ -473,7 +475,7 @@ int main(int argc, char** argv) {
             engine.updateAllModels();
 
             // @TODO(abock): Not sure if this should be before updateAllModels or here
-            global::openSpaceEngine.postSynchronizationPreDraw();
+            openspace::global::openSpaceEngine.postSynchronizationPreDraw();
 
             ++FrameNumber;
         }
@@ -481,12 +483,12 @@ int main(int argc, char** argv) {
         engine.renderOnAllDisplays();
     } while (!engine.getShutdown());
 
-    global::openSpaceEngine.deinitializeGL();
+    openspace::global::openSpaceEngine.deinitializeGL();
 
     // This assumes that `shutdown` destroys the OpenGL state and thus have to happen
     // after the deinitializeGL function
     engine.shutdown();
-    global::openSpaceEngine.deinitialize();
+    openspace::global::openSpaceEngine.deinitialize();
 
     exit(EXIT_SUCCESS);
 }

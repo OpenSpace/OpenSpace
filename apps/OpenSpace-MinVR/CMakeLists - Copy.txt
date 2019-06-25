@@ -24,7 +24,6 @@
 ##########################################################################################
 
 include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
 include(${OPENSPACE_CMAKE_EXT_DIR}/application_definition.cmake)
 include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
 
@@ -47,7 +46,7 @@ set_source_files_properties(
 # MAJOR DEPENDENCY ON MINVR:
 # Add dependency on main MinVR library
 target_include_directories(OpenSpace-MinVR PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ext/minvr/src)
-target_link_libraries(OpenSpace-MinVR MinVR)
+target_link_libraries(OpenSpace-MinVR libOpenSpace MinVR)
 
 # Additional depends needed for MinVR
 # Note: MinVR's GLFW plugin (a .dll) links with glfw -- we wouldn't ordinarily need to include
@@ -58,8 +57,7 @@ target_include_directories(OpenSpace-MinVR PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ex
 # MAJOR DEPENDENCY ON OPENSPACE
 # Add dependency on main OpenSpace library
 target_include_directories(OpenSpace-MinVR PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
-target_link_libraries(OpenSpace-MinVR openspace-core)
-#target_link_libraries(OpenSpace-MinVR libOpenSpace)
+target_link_libraries(OpenSpace-MinVR libOpenSpace)
 
 # Additional depends needed for OpenSpace
 set(GHOUL_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../ext/ghoul")
