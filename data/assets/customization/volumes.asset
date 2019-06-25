@@ -1,0 +1,25 @@
+-- asset.require('../examples/volume/generated/cartesian.asset')
+
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+local MilkyWayVolumeGalaxy = {
+    Identifier = "Milky Way Volume",
+    Parent = transforms.SolarSystemBarycenter.Identifier,
+    Renderable = {
+        Type = "RenderableGalaxy",
+        StepSize = 0.01,
+        Volume = {
+			Type = "Volume",
+			Filename = "${BASE}/../OpenSpaceData/Milkyway/MilkyWayRGBAVolume1024x1024x128.raw",
+			Dimensions = {1024, 1024, 128},
+			Size = {9.2E21, 9.2E21, 1.15E21}
+		},
+    },
+    GUI = {
+        Path = "/Milky Way"
+    }
+}
+
+local objects = { MilkyWayVolumeGalaxy }
+assetHelper.registerSceneGraphNodesAndExport(asset, objects)
