@@ -25,7 +25,8 @@
 uniform float maxStepSize#{id} = 0.1;
 uniform vec3 aspect#{id} = vec3(1.0);
 uniform float opacityCoefficient#{id} = 1.0; 
-
+uniform float absorptionMultiply#{id} = 50.0;  
+uniform float emissionMultiply#{id} = 1500.0;
 uniform sampler3D galaxyTexture#{id};
 
 void sample#{id}(vec3 samplePos,
@@ -44,48 +45,33 @@ void sample#{id}(vec3 samplePos,
 
     vec3 alphaTint = vec3(0.3, 0.54, 0.85);
 
+	// Source textures currently are square-rooted to avoid dithering in the shadows.
+	// So square them back
     sampledColor = sampledColor*sampledColor;
+	
+	// fudge for the dust "spreading"
     sampledColor.a = pow(sampledColor.a, 0.7);
-    //sampledColor.rgba = min(vec4(1.0), sampledColor.rgba);
+	
+	// absorption probability
+	float scaled_density = sampledColor.a * STEP_SIZE * absorptionMultiply#{id} * 10;
+	vec3 absorption = alphaTint * scaled_density;
+	
+	// extinction
+	vec3 extinction = exp(-absorption);
+	sampledColor.rgb = sampledColor.rgb * extinction;
+	
+	// emission
+	sampledColor.rgb += sampledColor.rgb * STEP_SIZE * emissionMultiply#{id};
+	
+    //sampledColor.a = sampledColor.a * 50; //1.0;
+	
+	vec3 backAlpha = sampledColor.aaa * 10.0;
+    sampledColor.rgb = sampledColor.rgb * backAlpha;
 
-    //sampledColor.a = clamp(sampledColor.a * 10000000000.0, 0.0, 1.0);
-    //sampledColor.a = exp(-sampledColor.a);
-    //
-
-    //sampledColor.rgb = pow(sampledColor.rgb, vec3(10.0));
-    //sampledColor.a = pow(sampledColor.a, 10.0);
-    //sampledColor.a = pow(sampledColor.a, 100000000.0);
-    sampledColor.rgb *= 500.0;
-    sampledColor.a = sampledColor.a * 0.3; //1.0;
-
-    
-    //float emissionCoefficient = 80;
-    //float absorptionCoefficient = 1;
-//    sampledColor = clamp(sampledColor, 0.0, 1.0);
-
-    //backColor = vec3(1.0) - pow(vec3(1.0) - backColor, vec3(STEP_SIZE));    
-    /*if (sampledColor.a > 1.0) {
-        sampledColor.a = 1.0;
-        //accumulatedColor = vec3(1.0, 0.0, 0.0);
-        //accumulatedAlpha = vec3(1.0, 1.0, 1.0);
-        //return;
-        }*/
-    //sampledColor.a = 1.2;
-
-    //sampledColor.a *= 0.00001;
-
-    vec3 backColor = sampledColor.rgb;
-    vec3 backAlpha = sampledColor.a * alphaTint;
-
-    backColor *= STEP_SIZE * opacityCoefficient#{id};
-    backAlpha *= STEP_SIZE * opacityCoefficient#{id};
-
-    backColor = clamp(backColor, 0.0, 1.0);
-    backAlpha = clamp(backAlpha, 0.0, 1.0);
-    
-    vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
-    accumulatedColor += oneMinusFrontAlpha * backColor;
-    accumulatedAlpha += oneMinusFrontAlpha * backAlpha;
+    sampledColor.a = clamp(sampledColor.a, 0.0, 1.0) * opacityCoefficient#{id};
+	vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
+    accumulatedColor += oneMinusFrontAlpha * sampledColor.rgb;
+	accumulatedAlpha += oneMinusFrontAlpha * sampledColor.a;
 }
 
 float stepSize#{id}(vec3 samplePos, vec3 dir) {

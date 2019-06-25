@@ -45,14 +45,32 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* GlslRayCastPath  = "${MODULES}/toyvolume/shaders/rayCast.glsl";
+    /*constexpr const char* GlslRayCastPath  = "${MODULES}/toyvolume/shaders/rayCast.glsl";
     constexpr const char* GlslBoundsVsPath = "${MODULES}/toyvolume/shaders/boundsVs.glsl";
-    constexpr const char* GlslBoundsFsPath = "${MODULES}/toyvolume/shaders/boundsFs.glsl";
+    constexpr const char* GlslBoundsFsPath = "${MODULES}/toyvolume/shaders/boundsFs.glsl";*/
+    constexpr const char* GlslRaycastPath =
+        "${MODULES}/galaxy/shaders/galaxyraycast.glsl";
+    constexpr const char* GlslBoundsVsPath =
+        "${MODULES}/galaxy/shaders/raycasterbounds.vs";
+    constexpr const char* GlslBoundsFsPath =
+        "${MODULES}/galaxy/shaders/raycasterbounds.fs";
     constexpr const char* _loggerCat       = "Renderable Galaxy";
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step Size",
+        "" // @TODO Missing documentation
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo AbsorptionMultiplyInfo = {
+        "AbsorptionMultiply",
+        "Absorption Multiplier",
+        "" // @TODO Missing documentation
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EmissionMultiplyInfo = {
+        "EmissionMultiply",
+        "Emission Multiplier",
         "" // @TODO Missing documentation
     };
 
@@ -86,14 +104,18 @@ namespace openspace {
     RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _stepSize(StepSizeInfo, 0.012f, 0.0005f, 0.05f)
-    , _pointStepSize(PointStepSizeInfo, 0.01f, 0.01f, 0.1f)
+    , _absorptionMultiply(AbsorptionMultiplyInfo, 50.f, 0.0f, 500.0f)
+    , _emissionMultiply(EmissionMultiplyInfo, 1500.f, 0.0f, 3000.0f)
+    //, _pointStepSize(PointStepSizeInfo, 0.01f, 0.01f, 0.1f)
+    //, _enabledPointsRatio(EnabledPointsRatioInfo, 0.2f, 0.f, 1.f)
     , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
     , _rotation(RotationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(6.28f))
-    , _enabledPointsRatio(EnabledPointsRatioInfo, 0.2f, 0.f, 1.f)
 {
+    dictionary.getValue("StepSize", _stepSize);
+    dictionary.getValue("AbsorptionMultiply", _absorptionMultiply);
+    dictionary.getValue("EmissionMultiply", _emissionMultiply);
     dictionary.getValue("Translation", _translation);
     dictionary.getValue("Rotation", _rotation);
-    dictionary.getValue("StepSize", _stepSize);
 
     if (!dictionary.hasKeyAndValue<ghoul::Dictionary>("Volume")) {
         LERROR("No volume dictionary specified.");
@@ -121,7 +143,7 @@ namespace openspace {
         LERROR("No volume dimensions specified.");
     }
 
-    if (!dictionary.hasKeyAndValue<ghoul::Dictionary>("Points")) {
+    /*if (!dictionary.hasKeyAndValue<ghoul::Dictionary>("Points")) {
         LERROR("No points dictionary specified.");
     }
 
@@ -132,7 +154,7 @@ namespace openspace {
     } else {
         LERROR("No points filename specified.");
     }
-    pointsDictionary.getValue("Scaling", _pointScaling);
+    pointsDictionary.getValue("Scaling", _pointScaling);*/
 }
 
 void RenderableGalaxy::initializeGL() {
@@ -140,7 +162,7 @@ void RenderableGalaxy::initializeGL() {
     _aspect = static_cast<glm::vec3>(_volumeDimensions);
     _aspect /= std::max(std::max(_aspect.x, _aspect.y), _aspect.z);
 
-    volume::RawVolumeReader<glm::tvec4<GLfloat>> reader(
+    volume::RawVolumeReader<glm::tvec4<GLubyte>> reader(
         _volumeFilename,
         _volumeDimensions
     );
@@ -149,8 +171,8 @@ void RenderableGalaxy::initializeGL() {
     _texture = std::make_unique<ghoul::opengl::Texture>(
         _volumeDimensions,
         ghoul::opengl::Texture::Format::RGBA,
-        GL_RGBA32F,
-        GL_FLOAT,
+        GL_RGBA,
+        GL_UNSIGNED_BYTE,
         ghoul::opengl::Texture::FilterMode::Linear,
         ghoul::opengl::Texture::WrappingMode::Clamp);
 
@@ -179,13 +201,15 @@ void RenderableGalaxy::initializeGL() {
     onEnabledChange(onChange);
 
     addProperty(_stepSize);
-    addProperty(_pointStepSize);
+    addProperty(_absorptionMultiply);
+    addProperty(_emissionMultiply);
+    //addProperty(_pointStepSize);
+    //addProperty(_enabledPointsRatio);
     addProperty(_translation);
     addProperty(_rotation);
-    addProperty(_enabledPointsRatio);
 
     // initialize points.
-    std::ifstream pointFile(_pointsFilename, std::ios::in | std::ios::binary);
+    /*std::ifstream pointFile(_pointsFilename, std::ios::in | std::ios::binary);
 
     std::vector<glm::vec3> pointPositions;
     std::vector<glm::vec3> pointColors;
@@ -262,7 +286,7 @@ void RenderableGalaxy::initializeGL() {
     glVertexAttribPointer(colorAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    glBindVertexArray(0);*/
 }
 
 void RenderableGalaxy::deinitializeGL() {
@@ -301,7 +325,8 @@ void RenderableGalaxy::update(const UpdateData& data) {
         _raycaster->setStepSize(_stepSize);
         _raycaster->setAspect(_aspect);
         _raycaster->setModelTransform(volumeTransform);
-        // @EMIL: is this correct? ---abock
+        _raycaster->setAbsorptionMultiplier(_absorptionMultiply);
+        _raycaster->setEmissionMultiplier(_emissionMultiply);
         _raycaster->setTime(data.time.j2000Seconds());
     }
 }
