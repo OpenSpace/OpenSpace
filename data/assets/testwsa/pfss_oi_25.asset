@@ -1,7 +1,9 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 
+local transferFunctions = asset.localResource("transferfunctions")
 local fieldlinesDirectory = asset.localResource("fl_pfss_oi_25")
+local polarityColorTable = transferFunctions .. "/pfss_spec.txt"
 
 local sunRadius = 695508000
 
@@ -15,9 +17,11 @@ local fieldlines = {
         FlowEnabled = false,
         AlphaBlendlingEnabled = false,
         InputFileType = "osfls",
-        ColorTableMinMax = {
-            { 0, 1000000 },
-            { 100, 2000 }
+        ColorTablePaths = {
+            polarityColorTable
+        },
+        ColorTableRanges = {
+            { -0.6, 0.6 },
         },
         LoadAtRuntime = true,
         ScaleToMeters = 1.0,

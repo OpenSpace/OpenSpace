@@ -44,8 +44,8 @@ namespace openspace
 
 SunTextureManager::SunTextureManager()
 {
-    _syncDir = "../../../../../sync/magnetograms/"; //mac
-    //_syncDir = absPath("../../../sync/magnetograms/"); //pc;
+    //_syncDir = "../../../../../sync/magnetograms/"; //mac
+    _syncDir = absPath("../../../sync/magnetograms/"); //pc;
 }
 void SunTextureManager::update(std::unique_ptr<ghoul::opengl::Texture> &texture)
 {
@@ -147,7 +147,6 @@ void SunTextureManager::update(std::unique_ptr<ghoul::opengl::Texture> &texture)
         //LERROR("in case 3");
         if (((_textureListGPU.find(_textureToUpload) != _textureListGPU.end())))
         {
-            LERROR("changing to texture " + _textureToUpload);
             _textureListGPU[_activeTextureDate] = std::move(texture);
             texture = std::move(_textureListGPU[_textureToUpload]);
             _activeTextureDate = _textureToUpload;

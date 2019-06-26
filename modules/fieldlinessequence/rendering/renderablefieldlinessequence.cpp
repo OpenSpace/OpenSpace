@@ -857,6 +857,7 @@ void RenderableFieldlinesSequence::extractTriggerTimesFromFileNames() {
         const double triggerTime = Time::convertTime(timeString);
         _startTimes.push_back(triggerTime);
     }
+    
 }
 
 void RenderableFieldlinesSequence::addStateToSequence(FieldlinesState& state) {

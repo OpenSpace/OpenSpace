@@ -1,15 +1,13 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 
-local fieldlinesDirectory = asset.localResource("fl_pfss_oi")
-local transferFunctions = asset.localResource("transferfunctions")
-local polarityColorTable = transferFunctions .. "/pfss_spec.txt"
+local fieldlinesDirectory = asset.localResource("fl_pfss_oi_540")
 
 local sunRadius = 695508000
 
 -- Fieldlies from json
 local fieldlines = {
-    Identifier = "WSA_Fieldlines_PFSS_OI",
+    Identifier = "WSA_Fieldlines_PFSS_OI_540",
     Parent = transforms.HNMReferenceFrame.Identifier,
     Renderable = {
         Type = "RenderableFieldlinesSequence",
@@ -17,13 +15,11 @@ local fieldlines = {
         FlowEnabled = false,
         AlphaBlendlingEnabled = false,
         InputFileType = "osfls",
-        ColorTablePaths = {
-            polarityColorTable
-        }, 
-        ColorTableRanges = {
-            { -0.6, 0.6 },
+        ColorTableMinMax = {
+            { 0, 1000000 },
+            { 100, 2000 }
         },
-        LoadAtRuntime = true,
+        LoadAtRuntime = false,
         ScaleToMeters = 1.0,
         SecondsBefore = 24*60*60,
         SecondsAfter = 24*60*60,
@@ -34,7 +30,7 @@ local fieldlines = {
     },
     GUI = {
         Path = "/Solar System/Heliosphere",
-        Name = "WSA PFSS Out to In Boundary Lines"
+        Name = "WSA PFSS Out to In Sun-Earth Connection"
     },
     Transform = {
         Scale = {

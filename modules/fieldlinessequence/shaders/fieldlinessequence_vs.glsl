@@ -100,7 +100,11 @@ void main() {
     }
 
     if (hasColor) {
-        bool isParticle = usingParticles && isPartOfParticle(time, gl_VertexID,
+        int direction = 1;
+        if(in_color_scalar < 0){
+            direction = -1;
+        }
+        bool isParticle = usingParticles && isPartOfParticle(time * direction, gl_VertexID,
                                                                     particleSize,
                                                                     particleSpeed,
                                                                     particleSpacing);
@@ -113,6 +117,10 @@ void main() {
 
         if (colorMethod == colorByQuantity) {
             vec4 quantityColor = getTransferFunctionColor();
+            bool isParticle = usingParticles && isPartOfParticle(time, gl_VertexID,
+                                                                    particleSize,
+                                                                    particleSpeed,
+                                                                    particleSpacing);
             vs_color = vec4(quantityColor.xyz, vs_color.a * quantityColor.a);
         }
     } else {
