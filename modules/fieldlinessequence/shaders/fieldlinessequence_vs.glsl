@@ -117,10 +117,6 @@ void main() {
 
         if (colorMethod == colorByQuantity) {
             vec4 quantityColor = getTransferFunctionColor();
-            bool isParticle = usingParticles && isPartOfParticle(time, gl_VertexID,
-                                                                    particleSize,
-                                                                    particleSpeed,
-                                                                    particleSpacing);
             vs_color = vec4(quantityColor.xyz, vs_color.a * quantityColor.a);
         }
     } else {
