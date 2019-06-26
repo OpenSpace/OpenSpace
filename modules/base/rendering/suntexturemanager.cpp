@@ -50,6 +50,7 @@ SunTextureManager::SunTextureManager()
 void SunTextureManager::update(std::unique_ptr<ghoul::opengl::Texture> &texture)
 {
     std::string currentTime = getOpenSpaceDateTime();
+    
 
     if (_textureToUpload.empty() && currentTime != _activeTextureDate && (_textureListGPU.find(currentTime) != _textureListGPU.end()))
     {

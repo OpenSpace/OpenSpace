@@ -282,6 +282,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _pJumpToStartBtn(TimeJumpButtonInfo)
 {
     _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
+
 }
 
 void RenderableFieldlinesSequence::initializeGL() {
@@ -316,6 +317,7 @@ void RenderableFieldlinesSequence::initializeGL() {
         case SourceFileType::Osfls:
             extractOsflsInfoFromDictionary();
             if (_loadingStatesDynamically) {
+                //LERROR("Loading dynamically: " + _identifier);
                 if (!prepareForOsflsStreaming()) {
                     return;
                 }
@@ -362,6 +364,9 @@ void RenderableFieldlinesSequence::initializeGL() {
 
     // Needed for additive blending
     setRenderBin(Renderable::RenderBin::Overlay);
+    
+    // ----------------- Initialize Web Fieldlines Manager things ---------------------//
+    WebFieldlinesManager webFieldlinesManager(_sourceFiles[0]);
 }
 
 /**
@@ -594,6 +599,7 @@ void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM(const std::string& out
 {
     // Load states from .osfls files into RAM!
     for (const std::string& filePath : _sourceFiles) {
+        //LERROR("Loading file into RAM: " + filePath);
         FieldlinesState newState;
         if (newState.loadStateFromOsfls(filePath)) {
             addStateToSequence(newState);
@@ -855,6 +861,7 @@ void RenderableFieldlinesSequence::extractTriggerTimesFromFileNames() {
         timeString.replace(16, 1, ":");
         timeString.replace(19, 1, ".");
         const double triggerTime = Time::convertTime(timeString);
+        //LERROR("Adding starttime " + this->_identifier + " : " + std::to_string(triggerTime));
         _startTimes.push_back(triggerTime);
     }
     
@@ -862,7 +869,9 @@ void RenderableFieldlinesSequence::extractTriggerTimesFromFileNames() {
 
 void RenderableFieldlinesSequence::addStateToSequence(FieldlinesState& state) {
     _states.push_back(state);
+    //LERROR("Adding state to list of states : " + std::to_string(state.triggerTime()));
     _startTimes.push_back(state.triggerTime());
+    
     _nStates++;
 }
 
@@ -1233,6 +1242,7 @@ void RenderableFieldlinesSequence::updateActiveTriggerTimeIndex(double currentTi
 // Reading state from disk. Must be thread safe!
 void RenderableFieldlinesSequence::readNewState(const std::string& filePath) {
     _newState = std::make_unique<FieldlinesState>();
+    //LERROR("Creating new state: " + filePath);
     if (_newState->loadStateFromOsfls(filePath)) {
         _newStateIsReady = true;
     }

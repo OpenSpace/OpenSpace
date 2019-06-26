@@ -29,6 +29,7 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/util/fieldlinesstate.h
   ${CMAKE_CURRENT_SOURCE_DIR}/util/commons.h
   ${CMAKE_CURRENT_SOURCE_DIR}/util/kameleonfieldlinehelper.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/util/webfieldlinesmanager.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -37,6 +38,7 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/util/fieldlinesstate.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/util/commons.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/util/kameleonfieldlinehelper.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/util/webfieldlinesmanager.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

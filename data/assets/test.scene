@@ -46,7 +46,6 @@ asset.require('./testwsa/pfss_io')
 -- asset.require('./testwsa/pfss_oi_25')
 -- asset.require('./testwsa/pfss_io_25')
 
-
 asset.onInitialize(function ()
     local now = openspace.time.currentWallTime()
     -- Jump to bastille day

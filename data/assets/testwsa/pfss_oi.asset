@@ -23,7 +23,7 @@ local fieldlines = {
         ColorTableRanges = {
             { -0.6, 0.6 },
         },
-        LoadAtRuntime = true,
+        LoadAtRuntime = false,
         ScaleToMeters = 1.0,
         SecondsBefore = 24*60*60,
         SecondsAfter = 24*60*60,
@@ -34,7 +34,7 @@ local fieldlines = {
     },
     GUI = {
         Path = "/Solar System/Heliosphere",
-        Name = "WSA PFSS Out to In Boundary Lines"
+        Name = "WSA PFSS Out to In Filled Boundary Lines"
     },
     Transform = {
         Scale = {
