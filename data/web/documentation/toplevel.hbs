@@ -1,3 +1,7 @@
+{{#each data}}
+<div class="row">
+  <div class="col-lg-12">
+    <h2><a class="documentation-name" href="#{{urlify name}}" name="{{urlify name}}">{{name}}</a></h2>
 {{#each entries}}
   <div class="documentation-item item-level-{{level name}}">
     <div class="row">
@@ -14,7 +18,7 @@
         <p class="documentation-type">{{description}}</p>
         <p class="documentation-description">{{documentation}}</p>
         {{#with restrictions}}
-        {{>documentation}}
+        {{>toplevel}}
         {{/with}}
         {{#if reference}}
           {{#if reference.found}}
@@ -26,4 +30,7 @@
       </div>
     </div>
   </div>
+{{/each}}
+  </div>
+</div>
 {{/each}}

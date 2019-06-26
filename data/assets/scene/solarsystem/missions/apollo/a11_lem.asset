@@ -1,9 +1,10 @@
 -- a11_lem.asset
 local assetHelper = asset.require('util/asset_helper')
-
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local moonAsset = asset.require('scene/solarsystem/planets/earth/moon/moon')
 
-local lem = asset.require('./apollo_lem')
+local model = asset.require('scene/solarsystem/missions/apollo/lem_model')
+
 
 local Apollo11Lem = {
     Identifier = "Apollo11Lem",
@@ -17,98 +18,43 @@ local Apollo11Lem = {
             FixedAltitude = -1927.65,
             UseFixedAltitude = true
         },
-        Scale = {
-            Type = "StaticScale",
-            Scale = 1.0
-        },
     },
     GUI = {
+        Name = "Apollo 11 Lem Position",
+        Path = "/Solar System/Missions/Apollo/11"
+    }
+}
+
+local Apollo11LemModel = {
+    Identifier = "Apollo11LemModel",
+    Parent = Apollo11Lem.Identifier,
+    Transform = {
+         Scale = {
+            Type = "StaticScale",
+            Scale = 0.24
+        }
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = model.modelFolder .. "/LM-2_ver2clean.obj"
+        },
+        ColorTexture = model.modelFolder .. "/LM-2_ver2clean_u1_v1.jpeg",
+        LightSources = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
+    },
+    GUI = {
+        Hidden = false,
         Name = "Apollo 11 Lem",
         Path = "/Solar System/Missions/Apollo/11"
     }
 }
 
-
-local Apollo11LemModel = {
-    Identifier = "Apollo11LemModel",
-    Parent = Apollo11Lem.Identifier,
-    GUI = {
-        Hidden = true,
-        Name = "Apollo 11 Lem Model",
-        Path = "/Solar System/Missions/Apollo/11"
-    }
-}
-
-
-
--- local Apollo17LemPosition = {
---     Identifier = "Apollo17LemPosition",
---     Parent = moonAsset.Moon.Identifier,
---     Transform = {
---         Translation = {
---             Type = "GlobeTranslation",
---             Globe = moonAsset.Moon.Identifier,
---             Longitude = -360+30.77170,
---             Latitude = 20.19092,
---         }
---     }
--- }
-
-
--- local Apollo17Lem = {
---     Identifier = "Apollo17Lem",
---     Parent = Apollo17LemPosition.Identifier,
---     Transform = {
---           Scale = {
---             Type = "StaticScale",
---             Scale = 1.0
---         },
---     },
---     GUI = {
---         Name = "Apollo 17 Lem",
---         Path = "/Solar System/Missions/Apollo/17/Lem"
---     }
--- }
-
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Apollo11Lem,
-    Apollo11LemModel,
+    Apollo11LemModel
 })
 
-lem.registerLem(asset, Apollo11LemModel.Identifier)
-
-
 asset.onInitialize(function ()
---	openspace.setPropertyValueSingle('Scene.Apollo17Lem.Renderable.RotationVector', {68.031502,68.031502,8.545990});
-
---    openspace.setPropertyValueSingle('Scene.Apollo11LemModel.Renderable.RotationVector', {73.074631,89.194031,8.545990});
-    openspace.setPropertyValueSingle('Scene.Apollo11LemModel-texture_lem_flag.Renderable.RotationVector', {73.074631,89.194031,8.545990});
-    openspace.setPropertyValueSingle('Scene.Apollo11LemModel-texture_lem_unitedstates.Renderable.RotationVector', {73.074631,89.194031,8.545990});
-    openspace.setPropertyValueSingle('Scene.Apollo11LemModel-booster.Renderable.RotationVector', {73.074631,89.194031,8.545990});
-    openspace.setPropertyValueSingle('Scene.Apollo11LemModel-bright_white.Renderable.RotationVector', {73.074631,89.194031,8.545990});
-    openspace.setPropertyValueSingle('Scene.Apollo11LemModel-black.Renderable.RotationVector', {73.074631,89.194031,8.545990});
-    openspace.setPropertyValueSingle('Scene.Apollo11LemModel-blue_glass.Renderable.RotationVector', {73.074631,89.194031,8.545990});
-    openspace.setPropertyValueSingle('Scene.Apollo11LemModel-dark_grey_dish.Renderable.RotationVector', {73.074631,89.194031,8.545990});
-    openspace.setPropertyValueSingle('Scene.Apollo11LemModel-dull_white.Renderable.RotationVector', {73.074631,89.194031,8.545990});
-    openspace.setPropertyValueSingle('Scene.Apollo11LemModel-gold.Renderable.RotationVector', {73.074631,89.194031,8.545990});
-    openspace.setPropertyValueSingle('Scene.Apollo11LemModel-light_grey.Renderable.RotationVector', {73.074631,89.194031,8.545990});
-    openspace.setPropertyValueSingle('Scene.Apollo11LemModel-mid_grey.Renderable.RotationVector', {73.074631,89.194031,8.545990});
-    openspace.setPropertyValueSingle('Scene.Apollo11LemModel-orange.Renderable.RotationVector', {73.074631,89.194031,8.545990});
-    openspace.setPropertyValueSingle('Scene.Apollo11LemModel-yellow_buttons.Renderable.RotationVector', {73.074631,89.194031,8.545990});
-
-    -- openspace.setPropertyValueSingle('Scene.Lem_Part_texture_lem_flag7.Renderable.RotationVector', {68.031502,68.031502,8.545990});
-    -- openspace.setPropertyValueSingle('Scene.Lem_Part_texture_lem_unitedstates7.Renderable.RotationVector', {68.031502,68.031502,8.545990});
-    -- openspace.setPropertyValueSingle('Scene.Lem_Part_booster7.Renderable.RotationVector', {68.031502,68.031502,8.545990});
-    -- openspace.setPropertyValueSingle('Scene.Lem_Part_bright_white7.Renderable.RotationVector', {68.031502,68.031502,8.545990});
-    -- openspace.setPropertyValueSingle('Scene.Lem_Part_Black7.Renderable.RotationVector', {68.031502,68.031502,8.545990});
-    -- openspace.setPropertyValueSingle('Scene.Lem_Part_blue_glass7.Renderable.RotationVector', {68.031502,68.031502,8.545990});
-    -- openspace.setPropertyValueSingle('Scene.Lem_Part_dark_grey_dish7.Renderable.RotationVector', {68.031502,68.031502,8.545990});
-    -- openspace.setPropertyValueSingle('Scene.Lem_Part_dull_white7.Renderable.RotationVector', {68.031502,68.031502,8.545990});
-    -- openspace.setPropertyValueSingle('Scene.Lem_Part_gold7.Renderable.RotationVector', {68.031502,68.031502,8.545990});
-    -- openspace.setPropertyValueSingle('Scene.Lem_Part_light_grey7.Renderable.RotationVector', {68.031502,68.031502,8.545990});
-    -- openspace.setPropertyValueSingle('Scene.Lem_Part_mid_grey7.Renderable.RotationVector', {68.031502,68.031502,8.545990});
-    -- openspace.setPropertyValueSingle('Scene.Lem_Part_orange7.Renderable.RotationVector', {68.031502,68.031502,8.545990});
-    -- openspace.setPropertyValueSingle('Scene.Lem_Part_yellow_buttons7.Renderable.RotationVector', {68.031502,68.031502,8.545990});
+    openspace.setPropertyValueSingle('Scene.Apollo11LemModel.Renderable.RotationVector', { 91.044090,171.229706,111.666664} );
 end)

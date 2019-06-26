@@ -52,16 +52,10 @@ struct Configuration {
     };
     Logging logging;
 
-    std::string scriptLog = "";
+    std::string scriptLog;
 
     struct DocumentationInfo {
-        std::string lua = "";
-        std::string property = "";
-        std::string sceneProperty = "";
-        std::string keyboard = "";
-        std::string documentation = "";
-        std::string factory = "";
-        std::string license = "";
+        std::string path;
     };
     DocumentationInfo documentation;
 
@@ -99,8 +93,8 @@ struct Configuration {
         bool isActive = false;
         bool isSynchronous = true;
         struct IdentifierFilter {
-            std::string type = "";
-            std::string source = "";
+            std::string type;
+            std::string source;
             unsigned int identifier = 0;
         };
         std::vector<IdentifierFilter> identifierFilters;

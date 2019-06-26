@@ -177,6 +177,10 @@ SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
     };
 }
 
+bool Renderable::renderedWithDesiredData() const {
+    return true;
+}
+
 Renderable::RenderBin Renderable::renderBin() const {
     return _renderBin;
 }

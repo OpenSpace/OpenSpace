@@ -197,8 +197,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _specularIntensity(SpecularIntensityInfo, 1.f, 0.f, 1.f)
     , _performShading(ShadingInfo, true)
     , _disableFaceCulling(DisableFaceCullingInfo, false)
-    , _modelTransform(ModelTransformInfo, glm::dmat3(1.0), glm::dmat3(-1.0), glm::dmat3(1.0))
-    , _rotationVec(RotationVecInfo, glm::dvec3(0), glm::dvec3(0), glm::dvec3(360))
+    , _modelTransform(
+        ModelTransformInfo,
+        glm::dmat3(1.0),
+        glm::dmat3(-1.0),
+        glm::dmat3(1.0)
+    )
+    , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
 {
     documentation::testSpecificationAndThrow(
@@ -274,10 +279,12 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     _rotationVec.onChange([this]() {
         glm::vec3 degreeVector = _rotationVec;
-        glm::vec3 radianVector = glm::vec3(glm::radians(degreeVector.x), 
-                                 glm::radians(degreeVector.y), glm::radians(degreeVector.z));
-        _modelTransform = glm::mat4_cast(
-            glm::quat(radianVector));
+        glm::vec3 radianVector = glm::vec3(
+            glm::radians(degreeVector.x),
+            glm::radians(degreeVector.y),
+            glm::radians(degreeVector.z)
+        );
+        _modelTransform = glm::mat4_cast(glm::quat(radianVector));
     });
 }
 
@@ -405,13 +412,13 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     if (_disableFaceCulling) {
         glDisable(GL_CULL_FACE);
     }
-    
+
     _geometry->render();
 
     if (_disableFaceCulling) {
         glEnable(GL_CULL_FACE);
     }
-    
+
     _program->deactivate();
 }
 

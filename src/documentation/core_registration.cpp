@@ -69,6 +69,9 @@ void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(LightSource::Documentation());
 }
 
+// NOTE: should this be in the documentation/core_reg.cpp file? Seems to be here just
+//       because it has the same method name (and similar implementaiton) as the
+//       documentation version.
 void registerCoreClasses(scripting::ScriptEngine& engine) {
     engine.addLibrary(Dashboard::luaLibrary());
     engine.addLibrary(MissionManager::luaLibrary());

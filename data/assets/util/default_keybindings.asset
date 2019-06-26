@@ -34,6 +34,14 @@ local Keybindings = {
         Local = true
     },
     {
+        Key = "F12",
+        Name = "Take Screenshot",
+        Command = "openspace.setPropertyValueSingle('RenderEngine.TakeScreenshot', nil)",
+        Documentation = "Saves the contents of the screen to a file in the working directory.",
+        GuiPath = "/Rendering",
+        Local = true
+    },
+    {
         Key = "SPACE",
         Name = "Toggle Pause (Interpolated)",
         Command = "openspace.time.interpolateTogglePause()",
@@ -76,7 +84,7 @@ local Keybindings = {
     {
         Key = "w",
         Name = "Fade to/from black",
-        Command = "openspace.toggleFade(3)",
+        Command = "if openspace.getPropertyValue('RenderEngine.BlackoutFactor') > 0.5 then openspace.setPropertyValueSingle('RenderEngine.BlackoutFactor', 0.0, 3) else openspace.setPropertyValueSingle('RenderEngine.BlackoutFactor', 1.0, 3) end",
         Documentation = "Toggles the fade to black within 3 seconds or shows the rendering after 3 seconds.",
         GuiPath = "/Rendering",
         Local = false
@@ -115,7 +123,7 @@ openspace.setPropertyValueSingle("RenderEngine.ShowCamera", not isEnabled)]],
 local DeltaTimeKeys
 
 asset.onInitialize(function()
-    Keys = sceneHelper.bindKeys(Keybindings)
+    sceneHelper.bindKeys(Keybindings)
 
     DeltaTimeKeys = sceneHelper.setDeltaTimeKeys({
     --  1           2           3           4           5           6           7           8           9           0

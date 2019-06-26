@@ -49,16 +49,8 @@ ScriptEngine::ScriptEngine()
         "Script Documentation",
         "scripting",
         {
-            {
-                "mainTemplate",
-                "${WEB}/luascripting/main.hbs"
-            },
-            {
-                "scriptingTemplate",
-                "${WEB}/luascripting/scripting.hbs"
-            }
-        },
-        "${WEB}/luascripting/script.js"
+            { "scriptingTemplate","${WEB}/documentation/scripting.hbs" },
+        }
     )
 {}
 

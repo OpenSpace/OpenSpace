@@ -142,4 +142,25 @@ int stopPlayback(lua_State* L) {
     return 0;
 }
 
+int enableTakeScreenShotDuringPlayback(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::enableTakeScreenShotDuringPlayback");
+
+    const int fps = ghoul::lua::value<int>(L, 1);
+
+    global::sessionRecording.enableTakeScreenShotDuringPlayback(fps);
+
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+int disableTakeScreenShotDuringPlayback(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::disableTakeScreenShotDuringPlayback");
+
+    global::sessionRecording.disableTakeScreenShotDuringPlayback();
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
 } // namespace openspace::luascriptfunctions

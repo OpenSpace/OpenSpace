@@ -85,10 +85,10 @@ public:
 
     void removeWMSServer(const std::string& name);
 
-    bool isCachingEnabled() const;
+    bool isWMSCachingEnabled() const;
     bool isInOfflineMode() const;
-    std::string cacheLocation() const;
-    uint64_t cacheSize() const; // bytes
+    std::string wmsCacheLocation() const;
+    uint64_t wmsCacheSize() const; // bytes
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
@@ -113,10 +113,11 @@ private:
     static std::string layerTypeNamesList();
 
 
-    properties::BoolProperty _cacheEnabled;
+    properties::BoolProperty _wmsCacheEnabled;
     properties::BoolProperty _offlineMode;
-    properties::StringProperty _cacheLocation;
-    properties::UIntProperty _cacheSizeMB;
+    properties::StringProperty _wmsCacheLocation;
+    properties::UIntProperty _wmsCacheSizeMB;
+    properties::UIntProperty _tileCacheSizeMB;
 
     std::unique_ptr<globebrowsing::cache::MemoryAwareTileCache> _tileCache;
 

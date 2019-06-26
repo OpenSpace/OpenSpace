@@ -128,7 +128,7 @@ void Connection::handleMessage(const std::string& message) {
                 message.begin(),
                 message.end(),
                 sanitizedString.begin(),
-                [](unsigned char c) {
+                [](wchar_t c) {
                     return std::isprint(c, std::locale("")) ? c : ' ';
                 }
             );

@@ -276,30 +276,11 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             glm::dmat4 dInverseProjection = glm::inverse(
                 glm::dmat4(renderData.camera.projectionMatrix()));
 
-            // SGCT Projection to OS Camera Before Rotation
-            glm::dmat4 dProjectionToTmpRotTransformMatrix =
-                glm::mat4_cast(
-                    static_cast<glm::dquat>(renderData.camera.rotationQuaternion())
-                ) *
-                dSgctEye2OSEye *
-                glm::inverse(renderData.camera.viewScaleMatrix()) *
+            glm::dmat4 inverseWholeMatrixPipeline =
+                inverseModelMatrix *
+                dSGCTViewToWorldMatrix *
                 dInverseProjection;
 
-            // SGCT Projection to World Space
-            glm::dmat4 dSgctProjectionToWorldTransformMatrix(
-                dProjectionToTmpRotTransformMatrix
-            );
-            double* mSource = glm::value_ptr(dSgctProjectionToWorldTransformMatrix);
-
-            mSource[12] += renderData.camera.eyePositionVec3().x;
-            mSource[13] += renderData.camera.eyePositionVec3().y;
-            mSource[14] += renderData.camera.eyePositionVec3().z;
-            mSource[15] = 1.0;
-
-
-            // SGCT Projection to Object Space
-            glm::dmat4 inverseWholeMatrixPipeline = inverseModelMatrix *
-                dSgctProjectionToWorldTransformMatrix;
             program.setUniform(_uniformCache2.dSgctProjectionToModelTransformMatrix,
                 inverseWholeMatrixPipeline);
 

@@ -290,18 +290,6 @@ void mainInitFunc() {
     openspace::global::openSpaceEngine.initializeGL();
     LDEBUG("Initializing OpenGL in OpenSpace Engine finished");
 
-    {
-
-        //using namespace ghoul::opengl;
-        //std::unique_ptr<ghoul::opengl::Texture> t = ghoul::io::TextureReader::ref().loadTexture(absPath("${DATA}/openspace-icon.png"));
-
-
-        //GLFWimage icons[1];
-        //icons[0].pixels =
-    }
-
-
-
 
     // Find if we have at least one OpenVR window
     // Save reference to first OpenVR window, which is the one we will copy to the HMD.

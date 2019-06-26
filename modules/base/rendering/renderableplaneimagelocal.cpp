@@ -42,7 +42,7 @@ namespace {
         "This value specifies an image that is loaded from disk and is used as a texture "
         "that is applied to this plane. This image has to be square."
     };
-    
+
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
        "RenderableType",
        "RenderableType",

@@ -353,7 +353,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
                              glm::mat4(data.camera.combinedViewMatrix() * modelTransform);
     _shader->setUniform(_uniformCache.modelViewProjection, modelViewProjection);
 
-    glm::mat4 modelViewRotation = glm::mat3(
+    glm::mat3 modelViewRotation = glm::mat3(
         glm::dmat3(data.camera.viewRotationMatrix()) * modelRotation
     );
     _shader->setUniform(_uniformCache.modelViewRotation, modelViewRotation);

@@ -55,7 +55,7 @@ void VersionChecker::requestLatestVersion(const std::string& url) {
 
  bool VersionChecker::hasLatestVersionInfo() {
     if (_latestVersion.has_value()) {
-        return true; 
+        return true;
     }
     if (_request) {
         if (_request->hasSucceeded()) {

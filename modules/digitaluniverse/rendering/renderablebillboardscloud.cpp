@@ -747,7 +747,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
 
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    
+
     _program->activate();
 
     const glm::dmat4 projMatrix = glm::dmat4(data.camera.projectionMatrix());

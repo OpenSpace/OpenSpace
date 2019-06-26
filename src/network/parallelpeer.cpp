@@ -585,29 +585,29 @@ const std::string& ParallelPeer::hostName() {
 }
 
 void ParallelPeer::sendCameraKeyframe() {
+    interaction::NavigationHandler& navHandler = global::navigationHandler;
+
     const SceneGraphNode* focusNode =
-        global::navigationHandler.orbitalNavigator().anchorNode();
+        navHandler.orbitalNavigator().anchorNode();
     if (!focusNode) {
         return;
     }
 
     // Create a keyframe with current position and orientation of camera
     datamessagestructures::CameraKeyframe kf;
-    kf._position = global::navigationHandler.orbitalNavigator().anchorNodeToCameraVector();
+    kf._position = navHandler.orbitalNavigator().anchorNodeToCameraVector();
 
-    kf._followNodeRotation =
-        global::navigationHandler.orbitalNavigator().followingNodeRotation();
+    kf._followNodeRotation = navHandler.orbitalNavigator().followingNodeRotation();
     if (kf._followNodeRotation) {
         kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
-        kf._rotation =
-            global::navigationHandler.orbitalNavigator().anchorNodeToCameraRotation();
+        kf._rotation = navHandler.orbitalNavigator().anchorNodeToCameraRotation();
     }
     else {
-        kf._rotation = global::navigationHandler.camera()->rotationQuaternion();
+        kf._rotation = navHandler.camera()->rotationQuaternion();
     }
 
     kf._focusNode = focusNode->identifier();
-    kf._scale = global::navigationHandler.camera()->scaling();
+    kf._scale = navHandler.camera()->scaling();
 
     // Timestamp as current runtime of OpenSpace instance
     kf._timestamp = global::windowDelegate.applicationTime();

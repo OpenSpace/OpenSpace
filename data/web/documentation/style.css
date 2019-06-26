@@ -146,12 +146,12 @@ body {
     width: 280px;
     margin: 0;
     padding: 0;
-    list-style: none;
 }
 
 .sidebar-nav li {
     text-indent: 20px;
     line-height: 40px;
+    list-style: none;
 }
 
 .sidebar-nav li a {
