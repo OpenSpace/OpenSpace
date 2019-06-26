@@ -39,7 +39,7 @@ namespace {
 } // namespace
 
 namespace openspace{
-    
+
     WebFieldlinesManager::WebFieldlinesManager(std::string syncDir){
         
         // Using constructor for some testing
