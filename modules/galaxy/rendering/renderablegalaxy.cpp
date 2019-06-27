@@ -103,12 +103,12 @@ namespace openspace {
 
     RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _stepSize(StepSizeInfo, 0.012f, 0.0005f, 0.05f)
+    , _stepSize(StepSizeInfo, 0.01f, 0.0005f, 0.05f, 0.001f)
     , _absorptionMultiply(AbsorptionMultiplyInfo, 50.f, 0.0f, 500.0f)
     , _emissionMultiply(EmissionMultiplyInfo, 1500.f, 0.0f, 3000.0f)
     //, _pointStepSize(PointStepSizeInfo, 0.01f, 0.01f, 0.1f)
     //, _enabledPointsRatio(EnabledPointsRatioInfo, 0.2f, 0.f, 1.f)
-    , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
+    , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _rotation(RotationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(6.28f))
 {
     dictionary.getValue("StepSize", _stepSize);
@@ -116,6 +116,26 @@ namespace openspace {
     dictionary.getValue("EmissionMultiply", _emissionMultiply);
     dictionary.getValue("Translation", _translation);
     dictionary.getValue("Rotation", _rotation);
+
+    if (dictionary.hasKeyAndValue<double>(StepSizeInfo.identifier)) {
+        _stepSize = static_cast<float>(dictionary.value<double>(StepSizeInfo.identifier));
+    }
+
+    if (dictionary.hasKeyAndValue<double>(AbsorptionMultiplyInfo.identifier)) {
+        _absorptionMultiply = static_cast<float>(dictionary.value<double>(AbsorptionMultiplyInfo.identifier));
+    }
+
+    if (dictionary.hasKeyAndValue<double>(EmissionMultiplyInfo.identifier)) {
+        _emissionMultiply = static_cast<float>(dictionary.value<double>(EmissionMultiplyInfo.identifier));
+    }
+
+    if (dictionary.hasKeyAndValue<glm::vec3>(TranslationInfo.identifier)) {
+        _translation = dictionary.value<glm::vec3>(TranslationInfo.identifier);
+    }
+
+    if (dictionary.hasKeyAndValue<glm::vec3>(RotationInfo.identifier)) {
+        _rotation = dictionary.value<glm::vec3>(RotationInfo.identifier);
+    }
 
     if (!dictionary.hasKeyAndValue<ghoul::Dictionary>("Volume")) {
         LERROR("No volume dictionary specified.");
@@ -315,7 +335,7 @@ void RenderableGalaxy::update(const UpdateData& data) {
         glm::mat4 volumeTransform = glm::scale(transform, _volumeSize);
         _pointTransform = glm::scale(transform, _pointScaling);
 
-        const glm::vec4 translation = glm::vec4(_translation.value(), 0.0);
+        const glm::vec4 translation = glm::vec4(_translation.value()*_volumeSize, 0.0);
 
         // Todo: handle floating point overflow, to actually support translation.
 
