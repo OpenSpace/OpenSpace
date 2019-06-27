@@ -417,9 +417,9 @@ int main(int argc, char** argv) {
     }
 
     openspace::global::openSpaceEngine.registerPathTokens();
-    LDEBUG("Before opensapeceenging::initialize()");
+    LDEBUG("Before openspaceengine::initialize()");
     openspace::global::openSpaceEngine.initialize();
-    LDEBUG("After opensapeceenging::initialize()");
+    LDEBUG("After openspaceengine::initialize()");
 
 
     // Create the MinVR engine (VRMain)
@@ -444,7 +444,7 @@ int main(int argc, char** argv) {
     lastFrameTime = std::chrono::high_resolution_clock::now();
     // run loop-di-loop
     do {
-        LDEBUG("In loop");
+        //LDEBUG("In loop");
 
         if (HasInitializedGL) {
             auto now = std::chrono::high_resolution_clock::now();
@@ -492,9 +492,9 @@ int main(int argc, char** argv) {
             }
         }
 
-        LDEBUG("Before MinVR::VRMain::synchronizeAndProcessEvents()");
+        //LDEBUG("Before MinVR::VRMain::synchronizeAndProcessEvents()");
         engine.synchronizeAndProcessEvents();
-        LDEBUG("After MinVR::VRMain::synchronizeAndProcessEvents()");
+        //LDEBUG("After MinVR::VRMain::synchronizeAndProcessEvents()");
 
         engine.updateAllModels();
 
@@ -504,9 +504,9 @@ int main(int argc, char** argv) {
             ++FrameNumber;
         }
 
-        LDEBUG("Before MinVR::VRMain::renderOnAllDisplays()");
+        //LDEBUG("Before MinVR::VRMain::renderOnAllDisplays()");
         engine.renderOnAllDisplays();
-        LDEBUG("After MinVR::VRMain::renderOnAllDisplays()");
+        //LDEBUG("After MinVR::VRMain::renderOnAllDisplays()");
     } while (!engine.getShutdown());
 
     openspace::global::openSpaceEngine.deinitializeGL();

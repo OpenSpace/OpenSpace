@@ -183,13 +183,16 @@ void OpenSpaceEngine::registerPathTokens() {
 void OpenSpaceEngine::initialize() {
     LTRACE("OpenSpaceEngine::initialize(begin)");
 
+    LDEBUG("Before global::initialize()");
     global::initialize();
+    LDEBUG("After global::initialize()");
 
     const std::string versionCheckUrl = global::configuration.versionCheckUrl;
     if (!versionCheckUrl.empty()) {
         global::versionChecker.requestLatestVersion(versionCheckUrl);
     }
 
+    LDEBUG("Cache section");
     std::string cacheFolder = absPath("${CACHE}");
     if (global::configuration.usePerSceneCache) {
         std::string scene = global::configuration.asset;
@@ -204,6 +207,7 @@ void OpenSpaceEngine::initialize() {
         );
     }
 
+    LDEBUG("Create Directories that don't exist");
     // Create directories that doesn't exist
     for (const std::string& token : FileSys.tokens()) {
         if (!FileSys.directoryExists(token)) {
@@ -220,7 +224,7 @@ void OpenSpaceEngine::initialize() {
         LFATALC(e.component, e.message);
     }
 
-
+    LDEBUG("Initialize requested logs");
     // Initialize the requested logs from the configuration file
     // We previously initialized the LogManager with a console log to provide some logging
     // until we know which logs should be added
@@ -275,9 +279,11 @@ void OpenSpaceEngine::initialize() {
     LINFOC("OpenSpace Version", std::string(OPENSPACE_VERSION_STRING_FULL));
     LINFOC("Commit", std::string(OPENSPACE_GIT_FULL));
 
+    LDEBUG("Register modules");
     // Register modules
     global::moduleEngine.initialize(global::configuration.moduleConfigurations);
-
+    
+    LDEBUG("After register modules");
     // After registering the modules, the documentations for the available classes
     // can be added as well
     for (OpenSpaceModule* m : global::moduleEngine.modules()) {
@@ -287,8 +293,10 @@ void OpenSpaceEngine::initialize() {
     }
     DocEng.addDocumentation(configuration::Configuration::Documentation);
 
+    LDEBUG("Before global::opengl::shaderstuff()");
     // Register the provided shader directories
     ghoul::opengl::ShaderPreprocessor::addIncludePath(absPath("${SHADERS}"));
+    LDEBUG("After global::opengl::shaderstuff()");
 
     // Register Lua script functions
     LDEBUG("Registering Lua libraries");
