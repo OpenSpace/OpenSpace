@@ -844,7 +844,7 @@ bool RenderablePlanesCloud::loadData() {
 
 bool RenderablePlanesCloud::loadTextures() {
     if (!_textureFileMap.empty()) {
-        for (const std::pair<int, std::string>& pair : _textureFileMap) {
+        for (const std::pair<const int, std::string>& pair : _textureFileMap) {
             const auto& p = _textureMap.insert(std::make_pair(
                 pair.first,
                 ghoul::io::TextureReader::ref().loadTexture(pair.second)
