@@ -1184,6 +1184,7 @@ int main(int argc, char** argv) {
         for (const documentation::TestResult::Warning& w : e.result.warnings) {
             LWARNINGC(w.offender, ghoul::to_string(w.reason));
         }
+        ghoul::deinitialize();
         exit(EXIT_FAILURE);
     }
     catch (const ghoul::RuntimeError& e) {
@@ -1192,6 +1193,7 @@ int main(int argc, char** argv) {
         if (ghoul::logging::LogManager::isInitialized()) {
             LogMgr.flushLogs();
         }
+        ghoul::deinitialize();
         return EXIT_FAILURE;
     }
 
@@ -1317,6 +1319,8 @@ int main(int argc, char** argv) {
             }
         }
 #endif // OPENSPACE_HAS_SPOUT
+
+        ghoul::deinitialize();
     };
 
     if (!initSuccess) {
