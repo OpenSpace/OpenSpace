@@ -265,6 +265,12 @@ namespace {
         "Enable/Disable Bloom."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo AutomaticBloomInfo = {
+        "AutomaticBloom",
+        "Enable/Disable Automatic Bloom",
+        "Enable/Disable Automatic Bloom."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo HueInfo = {
         "Hue",
         "Hue",
@@ -347,6 +353,7 @@ RenderEngine::RenderEngine()
     , _nAaSamples(AaSamplesInfo, 4, 1, 8)
     , _bloomOwner(BloomInfo)
     , _enableBloom(EnableBloomInfo, false)
+    , _automaticBloom(AutomaticBloomInfo, false)
     , _bloomThreshouldMin(BloomThreshouldMinInfo, 0.5, 0.0, 100.0)
     , _bloomThreshouldMax(BloomThreshouldMaxInfo, 1.0, 0.0, 100.0)
     , _bloomOrigColorFactor(BloomOrigColorFactorInfo, 1.0, 0.0, 100.0)
@@ -527,6 +534,14 @@ RenderEngine::RenderEngine()
     });
 
     addProperty(_enableBloom);
+
+    _automaticBloom.onChange([this]() {
+        if (_renderer && _automaticBloom) {
+            _renderer->enableBloom(true);
+            _enableBloom = true;
+        }
+        });
+    addProperty(_automaticBloom);
 
     addProperty(_bloomThreshouldMin);
     _bloomThreshouldMin.onChange([this]() {

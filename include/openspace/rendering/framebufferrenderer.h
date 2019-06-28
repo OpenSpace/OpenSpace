@@ -59,6 +59,29 @@ struct UpdateStructures;
 class FramebufferRenderer : public Renderer, public RaycasterListener,
                             public DeferredcasterListener
 {
+private:
+    inline static const GLenum ColorAttachment0Array[1] = {
+       GL_COLOR_ATTACHMENT0
+    };
+
+    inline static const GLenum ColorAttachment01Array[2] = {
+       GL_COLOR_ATTACHMENT0,
+       GL_COLOR_ATTACHMENT1
+    };
+
+    inline static const GLenum ColorAttachment012Array[3] = {
+       GL_COLOR_ATTACHMENT0,
+       GL_COLOR_ATTACHMENT1,
+       GL_COLOR_ATTACHMENT2
+    };
+
+    inline static const GLenum ColorAttachment0123Array[4] = {
+       GL_COLOR_ATTACHMENT0,
+       GL_COLOR_ATTACHMENT1,
+       GL_COLOR_ATTACHMENT2,
+       GL_COLOR_ATTACHMENT3
+    };
+
 public:
     typedef std::map<
         VolumeRaycaster*,
@@ -157,8 +180,8 @@ private:
                  toneMapOperator, aveLum, maxWhite, Hue, Saturation, Value, 
                  Lightness, colorSpace) _hdrUniformCache;
 
-    UniformCache(renderedImage, bloomImage, bloomThresholdMin, bloomThresholdMax, 
-                 bloomOrigFactor, bloomNewFactor) _bloomUniformCache;
+    UniformCache(renderedImage, bloomImage, bloomOrigFactor, bloomNewFactor) 
+        _bloomUniformCache;
 
     UniformCache(renderedImage, maxWhite, imageWidth, imageHeight) _histoUniformCache;
 
@@ -182,6 +205,7 @@ private:
     GLuint _histoVao;
     GLuint _histoVbo;
 
+    GLuint _bloomVAO = 0u;
     GLuint _bloomFilterFBO[3];
     GLuint _bloomTexture[3];
 

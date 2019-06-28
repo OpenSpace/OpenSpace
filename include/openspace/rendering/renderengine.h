@@ -242,6 +242,7 @@ private:
     
     properties::PropertyOwner _bloomOwner;
     properties::BoolProperty _enableBloom;
+    properties::BoolProperty _automaticBloom;
     properties::FloatProperty _bloomThreshouldMin;
     properties::FloatProperty _bloomThreshouldMax;
     properties::FloatProperty _bloomOrigColorFactor;

@@ -61,9 +61,8 @@ namespace {
         "Lightness", "colorSpace"
     };
 
-    constexpr const std::array<const char*, 6> BloomUniformNames  = {
-        "renderedImage", "bloomImage", "bloomThresholdMin", "bloomThresholdMax", 
-        "bloomOrigFactor", "bloomNewFactor"
+    constexpr const std::array<const char*, 4> BloomUniformNames  = {
+        "renderedImage", "bloomImage", "bloomOrigFactor", "bloomNewFactor"
     };
 
     constexpr const std::array<const char*, 4> HistoUniformNames = {
@@ -512,23 +511,20 @@ float FramebufferRenderer::computeBufferAveLuminanceGPU() {
 }
 
 void FramebufferRenderer::applyBloomFilter() {
-    GLint defaultFbo;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
-
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
+    
+    if (!_bloomVAO) {
+        glGenVertexArrays(1, &_bloomVAO);
+    }
 
     glBindFramebuffer(GL_FRAMEBUFFER, _bloomFilterFBO[0]);
-    GLenum textureBuffer[] = {
-       GL_COLOR_ATTACHMENT0
-    };
-    glDrawBuffers(1, textureBuffer);
+    glDrawBuffers(1, ColorAttachment0Array);
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, _resolution.y, _resolution.x);
-    glBindVertexArray(vao);
+    glBindVertexArray(_bloomVAO);
 
     _bloomProgram->activate();
 
+    // First blurring pass (vertical)
     {
         ghoul::opengl::TextureUnit filterTextureUnit;
         filterTextureUnit.activate();
@@ -536,6 +532,7 @@ void FramebufferRenderer::applyBloomFilter() {
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainFilterTexture);
         _bloomProgram->setUniform("filterStep", 1);
         _bloomProgram->setUniform("filterImage", filterTextureUnit);
+        _bloomProgram->setUniform("numberOfSamples", _nAaSamples);
         
         // Making OpenGL happy...
         ghoul::opengl::TextureUnit dummyTextureUnit;
@@ -550,13 +547,14 @@ void FramebufferRenderer::applyBloomFilter() {
     _bloomProgram->deactivate();
     
     glBindFramebuffer(GL_FRAMEBUFFER, _bloomFilterFBO[1]);
-    glDrawBuffers(1, textureBuffer);
+    glDrawBuffers(1, ColorAttachment0Array);
     glViewport(0, 0, _resolution.x, _resolution.y);
     glClear(GL_COLOR_BUFFER_BIT);
-    glBindVertexArray(vao);
+    glBindVertexArray(_bloomVAO);
 
     _bloomProgram->activate();
 
+    // Second blurring pass (horizontal)
     {        
         ghoul::opengl::TextureUnit filterTextureUnit;
         filterTextureUnit.activate();
@@ -564,6 +562,7 @@ void FramebufferRenderer::applyBloomFilter() {
         glBindTexture(GL_TEXTURE_2D, _bloomTexture[0]);
         _bloomProgram->setUniform("filterStep", 2);
         _bloomProgram->setUniform("filterFirstPass", filterTextureUnit);
+        _bloomProgram->setUniform("numberOfSamples", _nAaSamples);
 
         // Making OpenGL happy...
         ghoul::opengl::TextureUnit dummyTextureUnit;
@@ -579,12 +578,16 @@ void FramebufferRenderer::applyBloomFilter() {
     _bloomProgram->deactivate();
 
     glBindFramebuffer(GL_FRAMEBUFFER, _bloomFilterFBO[2]);
-    glDrawBuffers(1, textureBuffer);
+    glDrawBuffers(1, ColorAttachment0Array);
     glViewport(0, 0, _resolution.x, _resolution.y);
     glClear(GL_COLOR_BUFFER_BIT);
 
     _bloomResolveProgram->activate();
 
+    // Adding the result of the blurring processes to the 
+    // hdrFilteringTexture and saving the result in 
+    // the _bloomTexture[2] texture (JCC: That can be
+    // done by blending operation (ONE))
     {
         ghoul::opengl::TextureUnit deferredResultsTextureUnit;
         deferredResultsTextureUnit.activate();
@@ -617,7 +620,7 @@ void FramebufferRenderer::applyBloomFilter() {
 
     _bloomResolveProgram->deactivate();
 
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _osDefaultGLState.defaultFBO);
 }
 
 void FramebufferRenderer::computeImageHistogram() {
@@ -935,8 +938,8 @@ void FramebufferRenderer::updateResolution() {
             nullptr
         );
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     }
 
     // Histogram Texture
@@ -1526,7 +1529,7 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
     nOneStripProgram->activate();
 
     ghoul::opengl::TextureUnit pixelSizeTextureUnit;
-    pixelSizeTextureUnit.activate();
+    pixelSizeTextureUnit.activate ();
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, pixelSizeTexture);
     nOneStripProgram->setUniform("pixelSizeTexture", pixelSizeTextureUnit);
 
@@ -1625,13 +1628,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     global::renderEngine.setGLDefaultState(_osDefaultGLState);
 
     // deferred g-buffer plus filter
-    GLenum textureBuffers[4] = {
-        GL_COLOR_ATTACHMENT0,
-        GL_COLOR_ATTACHMENT1,
-        GL_COLOR_ATTACHMENT2,
-        GL_COLOR_ATTACHMENT3
-    };
-    glDrawBuffers(4, textureBuffers);
+    glDrawBuffers(4, ColorAttachment0123Array);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     Time time = global::timeManager.time();
@@ -1654,6 +1651,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     data.renderBinMask = static_cast<int>(Renderable::RenderBin::Overlay);
     scene->render(data, tasks);
 
+    // Run Volume Tasks
     {
         std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
         if (doPerformanceMeasurements) {
@@ -1664,12 +1662,12 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         performRaycasterTasks(tasks.raycasterTasks);
     }
 
-    //glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+    // Binds the final Framebuffer which will contain the results of the TMOs
     glBindFramebuffer(GL_FRAMEBUFFER, _hdrFilteringFramebuffer);
-    GLenum dBuffer[1] = { GL_COLOR_ATTACHMENT0 };
-    glDrawBuffers(1, dBuffer);
+    glDrawBuffers(1, ColorAttachment0Array);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    // Run Deferred Tasks (resolve step is executed together with these tasks)
     {
         std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
         if (doPerformanceMeasurements) {
@@ -1681,6 +1679,8 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     }
 
     
+    // If no Deferred Task are prensent, the resolve step
+    // is executed in a separated step
     if (tasks.deferredcasterTasks.empty()) {
         //glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
         _resolveProgram->activate();
@@ -1721,6 +1721,9 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     //
     ////float averageLuminaceInFB = 0.5;
 
+
+    // When applying the TMO, the result is saved to the default FBO to be displayed
+    // by the Operating System
     glBindFramebuffer(GL_FRAMEBUFFER, _osDefaultGLState.defaultFBO);
     glViewport(0, 0, _resolution.x, _resolution.y);
     

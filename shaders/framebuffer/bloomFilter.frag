@@ -26,6 +26,7 @@
 
 layout (location = 0) out vec4 finalColor;
 
+uniform int numberOfSamples;
 uniform int filterStep;
 uniform sampler2DMS filterImage;
 uniform sampler2D filterFirstPass;
@@ -67,10 +68,16 @@ void main(void)
     for (int i = 0; i < weights.length(); i++)
     {   
         if (filterStep == 1) {
-            color += vec4(texelFetch(filterImage, P + ivec2(0, i), 0).rgb, 1.0) * weights[i];
+            vec4 tmpColor = vec4(0.0);
+            for (int s = 0; s < numberOfSamples; ++s) {
+                tmpColor += vec4(texelFetch(filterImage, P + ivec2(0, i), 0).rgb, s) * weights[i];    
+            }
+            tmpColor /= numberOfSamples;
+            color += tmpColor;
+            //color += vec4(texelFetch(filterImage, P + ivec2(0, i), 0).rgb, 1) * weights[i];
             origAlpha = color.a;
         } else if (filterStep == 2) {
-            color += vec4(texelFetch(filterFirstPass, P + ivec2(0, i), 0).rgb, 1.0) * weights[i];
+            color += vec4(texelFetch(filterFirstPass, P + ivec2(0, i), 0).rgb, 0) * weights[i];
         } 
     }
 
