@@ -41,7 +41,8 @@ void sample#{id}(vec3 samplePos,
     
     vec4 sampledColor = texture(galaxyTexture#{id}, samplePos.xyz);
 
-    float STEP_SIZE = maxStepSize#{id};
+    //float STEP_SIZE = maxStepSize#{id}*0.5;
+	float STEP_SIZE = 1 / 256.0;
 
     vec3 alphaTint = vec3(0.3, 0.54, 0.85);
 
@@ -50,28 +51,23 @@ void sample#{id}(vec3 samplePos,
     sampledColor = sampledColor*sampledColor;
 	
 	// fudge for the dust "spreading"
+	sampledColor.a = clamp(sampledColor.a, 0.0, 1.0) * opacityCoefficient#{id};
     sampledColor.a = pow(sampledColor.a, 0.7);
 	
 	// absorption probability
-	float scaled_density = sampledColor.a * STEP_SIZE * absorptionMultiply#{id} * 10;
+	float scaled_density = sampledColor.a * STEP_SIZE * absorptionMultiply#{id};
 	vec3 absorption = alphaTint * scaled_density;
 	
 	// extinction
 	vec3 extinction = exp(-absorption);
-	sampledColor.rgb = sampledColor.rgb * extinction;
+	accumulatedColor.rgb *= extinction;
 	
 	// emission
-	sampledColor.rgb += sampledColor.rgb * STEP_SIZE * emissionMultiply#{id};
-	
-    //sampledColor.a = sampledColor.a * 50; //1.0;
-	
-	vec3 backAlpha = sampledColor.aaa * 10.0;
-    sampledColor.rgb = sampledColor.rgb * backAlpha;
+	accumulatedColor.rgb += sampledColor.rgb * STEP_SIZE * emissionMultiply#{id};
 
-    sampledColor.a = clamp(sampledColor.a, 0.0, 1.0) * opacityCoefficient#{id};
 	vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
-    accumulatedColor += oneMinusFrontAlpha * sampledColor.rgb;
-	accumulatedAlpha += oneMinusFrontAlpha * sampledColor.a;
+    //accumulatedColor += oneMinusFrontAlpha * sampledColor.rgb;
+	accumulatedAlpha += oneMinusFrontAlpha * sampledColor.rgb;
 }
 
 float stepSize#{id}(vec3 samplePos, vec3 dir) {
