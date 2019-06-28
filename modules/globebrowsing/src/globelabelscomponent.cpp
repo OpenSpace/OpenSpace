@@ -789,7 +789,7 @@ bool GlobeLabelsComponent::isLabelInFrustum(const glm::dmat4& MVMatrix,
     double bottomDistance = MVMatrix[3][3] + MVMatrix[3][1];
     double topDistance = MVMatrix[3][3] - MVMatrix[3][1];
     double nearDistance = MVMatrix[3][3] + MVMatrix[3][2];
-    double farDistance = MVMatrix[3][3] - MVMatrix[3][2];
+    // double farDistance = MVMatrix[3][3] - MVMatrix[3][2];
 
     // Normalize Planes
     const double invMagLeft = 1.0 / glm::length(leftNormal);
@@ -814,7 +814,7 @@ bool GlobeLabelsComponent::isLabelInFrustum(const glm::dmat4& MVMatrix,
 
     const double invMagFar = 1.0 / glm::length(farNormal);
     farNormal *= invMagFar;
-    farDistance *= invMagFar;
+    // farDistance *= invMagFar;
 
     constexpr const float Radius = 1.0;
 
