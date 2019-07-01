@@ -214,6 +214,7 @@ private:
         std::vector<std::string>& extraMagVars);
     bool extractMandatoryInfoFromDictionary(SourceFileType& sourceFileType);
     void extractOptionalInfoFromDictionary(std::string& outputFolderPath);
+    void extractPropertyInfoFromDictionary();
     void extractOsflsInfoFromDictionary();
     bool extractSeedPointsFromFile(const std::string& path,
         std::vector<glm::vec3>& outVec);

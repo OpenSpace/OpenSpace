@@ -31,6 +31,7 @@ local fieldlines = {
         Color = {
             Uniform = {0, 0.725, 0.75, 1}
         },
+        ColoringMethod = "Quantity",
     },
     GUI = {
         Path = "/Solar System/Heliosphere",

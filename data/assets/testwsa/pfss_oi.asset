@@ -30,7 +30,8 @@ local fieldlines = {
         SimulationModel = "wsa",
         Color = {
             Uniform = {0.725, 0.1, 0, 1}
-        }
+        },
+        ColoringMethod = "Quantity",
     },
     GUI = {
         Path = "/Solar System/Heliosphere",
