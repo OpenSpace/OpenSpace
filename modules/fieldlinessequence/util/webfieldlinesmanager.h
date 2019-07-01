@@ -37,6 +37,10 @@ public:
     
     // What model of FieldlinesSequence is this?
     enum FlsType { PFSSIO, PFSSOI, SCSOI };
+    
+    // For testing purposes
+    void downloadFieldlines(std::vector<std::string>& _sourceFile, std::vector<double>& _startTimes, size_t& _nStates);
+
 
     
 private:
@@ -77,7 +81,6 @@ private:
     // some temporary functions to translate the filenames to ints
     void triggerTimeString2Int(std::string s, int& d);
     void triggerTimeInt2String(int d, std::string& s);
-       
     
 };
 
