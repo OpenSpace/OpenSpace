@@ -34,9 +34,7 @@ class WebFieldlinesManager{
 public:
     WebFieldlinesManager();
     WebFieldlinesManager(std::string syncDir);
-    
-    // What model of FieldlinesSequence is this?
-    enum FlsType { PFSSIO, PFSSOI, SCSOI };
+
     
     // For testing purposes
     void downloadFieldlines(std::vector<std::string>& _sourceFile, std::vector<double>& _startTimes, size_t& _nStates);
@@ -47,19 +45,22 @@ private:
     // for now, it's the same as user entered i asset-file
     std::string _syncDir;
     
-    FlsType _flsType;
     std::string _flsTypeString;
     
+    int _downloadMargin;
+    
     // List of all triggertimes(field lines states) available for download
-    // ***turn into ints later***
-    std::vector<std::string> _availableTriggertimes;
+    std::vector<std::pair<double, std::string>> _availableTriggertimes;
+    
+    // Indices for what fieldlines to download
+    std::vector<int> _filesToDownload;
     
     // Function to run in FieldLinesSequence's update loop
     void update();
     
     // Download one file, given what model type and triggertime in J2000
     // ***turn into ints later***
-    void downloadOsfls(FlsType type, std::string triggertime);
+    std::string downloadOsfls(std::string triggertime);
     
     // Get list of all triggertimes(field lines states) available form the server
     void getAvailableTriggertimes();
@@ -79,7 +80,7 @@ private:
     void parseTriggerTimesList(std::string s);
     
     // some temporary functions to translate the filenames to ints
-    void triggerTimeString2Int(std::string s, int& d);
+    int triggerTimeString2Int(std::string s);
     void triggerTimeInt2String(int d, std::string& s);
     
 };

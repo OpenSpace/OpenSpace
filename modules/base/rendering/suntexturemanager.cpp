@@ -44,7 +44,7 @@ namespace openspace
 
 SunTextureManager::SunTextureManager()
 {
-    _syncDir = FileSys.relativePath("./sync/magnetograms");
+    _syncDir = absPath("${BASE}/sync/magnetograms") + ghoul::filesystem::FileSystem::PathSeparator;
 }
 void SunTextureManager::update(std::unique_ptr<ghoul::opengl::Texture> &texture)
 {

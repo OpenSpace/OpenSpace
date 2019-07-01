@@ -46,45 +46,37 @@ namespace openspace{
 //        ghoul::filesystem::File tempFile = ghoul::filesystem::File(syncDir);
         //_syncDir = tempFile.directoryName();
         _syncDir = "/Users/shuy/Offline-dokument/OpenSpace/Spaceweather/OpenSpace/data/assets/testwsa/fl_pfss_io_25";
-        _flsType = PFSSIO;
-        _flsTypeString = "PFSSIO";
-        
-        std::string testTime;
-        triggerTimeInt2String(610056000, testTime);
-        
-
-        int testInt;
-        triggerTimeString2Int(testTime, testInt);
-        
+        _flsTypeString = "PfssIo";
+        _downloadMargin = 3;
+   
         getAvailableTriggertimes();
         
+        setInitialSet(global::timeManager.time().j2000Seconds());
+        
         LERROR("WebFieldlinesManager initialized");
-        
-        
+    
     }
     
     // For testing purposes
     void WebFieldlinesManager::downloadFieldlines(std::vector<std::string>& _sourceFile, std::vector<double>& _startTimes, size_t& _nStates){
         LERROR("starting download");
-        for (auto& tt : _availableTriggertimes){
+        for (int index : _filesToDownload){
             
-            downloadOsfls(_flsType, tt);
-            
-             //add the timetrigger at the right place in the list
-            std::string sub = tt.substr(6, 23);
-            int temp;
-            triggerTimeString2Int(sub,temp);
-            double timetriggernumber = temp;
-            
-            int i = 0;
-            while(timetriggernumber > _startTimes[i]){
 
+            std::string filename = _availableTriggertimes[index].second;
+            double timetrigger = _availableTriggertimes[index].first;
+            
+            // download fieldlines file
+            std::string destPath = downloadOsfls(filename);
+            
+            //add the timetrigger at the right place in the list
+            int i = 0;
+            while(timetrigger > _startTimes[i]){
                 if( i == _startTimes.size()) break;
                 else i++;
-                
             }
-            _sourceFile.insert(_sourceFile.begin() + i, _syncDir + '/' + tt.substr(6));
-            _startTimes.insert(_startTimes.begin() + i, timetriggernumber);
+            _sourceFile.insert(_sourceFile.begin() + i, destPath);
+            _startTimes.insert(_startTimes.begin() + i, timetrigger);
             _nStates += 1;
         }
     }
@@ -93,7 +85,7 @@ namespace openspace{
         
     }
     
-    void WebFieldlinesManager::downloadOsfls(FlsType type, std::string triggertime){
+    std::string WebFieldlinesManager::downloadOsfls(std::string triggertime){
         std::string url = "http://localhost:3000/WSA/" + triggertime;
         std::string destinationpath = absPath(_syncDir + '/' + triggertime.substr(6));
         AsyncHttpFileDownload ashd = AsyncHttpFileDownload(url, destinationpath, HttpFileDownload::Overwrite::Yes);
@@ -107,6 +99,7 @@ namespace openspace{
         if(ashd.hasFailed() == true ){
             LERROR("failed: " + destinationpath);
         }
+        return destinationpath;
     }
     
     
@@ -117,17 +110,33 @@ namespace openspace{
         opt.requestTimeoutSeconds = 0;
         mmryDld.download(opt);
         
-        // Put the results in a string and remove [ ]
+        // Put the results in a string
         std::string s;
         std::transform(mmryDld.downloadedData().begin(), mmryDld.downloadedData().end(), std::back_inserter(s),
                        [](char c) {
                            return c;
                        });
         parseTriggerTimesList(s);
+        
+        // sort ascending by trigger time
+        std::sort(_availableTriggertimes.begin(), _availableTriggertimes.end());
     }
     
     void WebFieldlinesManager::setInitialSet(double openSpaceTime){
         
+        int openspaceindex = -1;
+        do openspaceindex++;
+        while (openSpaceTime > _availableTriggertimes[openspaceindex].first);
+        
+        int startInd = openspaceindex - _downloadMargin;
+        int endInd = openspaceindex + _downloadMargin;
+        
+        if(startInd < 0) startInd = 0;
+        if(endInd >= _availableTriggertimes.size())
+            endInd = _availableTriggertimes.size()-1;
+        
+        for(int i = startInd; i <= endInd; i++)
+            _filesToDownload.push_back(i);
     }
     
     void WebFieldlinesManager::downloadInitialSequence(std::vector<double> triggertimes){
@@ -142,25 +151,27 @@ namespace openspace{
         // Turn into stringstream to parse the comma-delimited string into vector
         std::stringstream ss(s);
         char c;
-        std::string substr;
+        std::string sub;
         while(ss >> c)
         {
             if (c == '[' || c == ']' || c == '"' ) continue;
             else if (c == ','){
-                _availableTriggertimes.push_back(substr);
-                substr.clear();
+                double tt = triggerTimeString2Int(sub.substr(6, 23));
+                _availableTriggertimes.push_back(std::make_pair(tt, sub));
+                sub.clear();
             }
-            else substr += c;
+            else sub += c;
         }
-        _availableTriggertimes.push_back(substr);
+        double tt = triggerTimeString2Int(sub.substr(6, 23));
+        _availableTriggertimes.push_back(std::make_pair(tt, sub));
     }
     
-    void WebFieldlinesManager::triggerTimeString2Int(std::string s, int& i){
+    int WebFieldlinesManager::triggerTimeString2Int(std::string s){
         s.replace(13, 1, ":");
         s.replace(16, 1, ":");
         Time time = Time();
         time.setTime(s);
-        i =  static_cast<int> (time.j2000Seconds() - 69.185013294);
+        return static_cast<int> (time.j2000Seconds() - 69.185013294);
     }
     
     void WebFieldlinesManager::triggerTimeInt2String(int i, std::string& s){
