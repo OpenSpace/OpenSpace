@@ -43,8 +43,9 @@ namespace openspace{
     WebFieldlinesManager::WebFieldlinesManager(std::string syncDir){
         
         // Using constructor for some testing
-        ghoul::filesystem::File tempFile = ghoul::filesystem::File(syncDir);
-        _syncDir = tempFile.directoryName();
+//        ghoul::filesystem::File tempFile = ghoul::filesystem::File(syncDir);
+        //_syncDir = tempFile.directoryName();
+        _syncDir = "/Users/shuy/Offline-dokument/OpenSpace/Spaceweather/OpenSpace/data/assets/testwsa/fl_pfss_io_25";
         _flsType = PFSSIO;
         _flsTypeString = "PFSSIO";
         
@@ -57,10 +58,35 @@ namespace openspace{
         
         getAvailableTriggertimes();
         
+        LERROR("WebFieldlinesManager initialized");
         
-//        for (auto& tt : _availableTriggertimes){
-//            downloadOsfls(_flsType, tt);
-//        }
+        
+    }
+    
+    // For testing purposes
+    void WebFieldlinesManager::downloadFieldlines(std::vector<std::string>& _sourceFile, std::vector<double>& _startTimes, size_t& _nStates){
+        LERROR("starting download");
+        for (auto& tt : _availableTriggertimes){
+            
+            downloadOsfls(_flsType, tt);
+            
+             //add the timetrigger at the right place in the list
+            std::string sub = tt.substr(6, 23);
+            int temp;
+            triggerTimeString2Int(sub,temp);
+            double timetriggernumber = temp;
+            
+            int i = 0;
+            while(timetriggernumber > _startTimes[i]){
+
+                if( i == _startTimes.size()) break;
+                else i++;
+                
+            }
+            _sourceFile.insert(_sourceFile.begin() + i, _syncDir + '/' + tt.substr(6));
+            _startTimes.insert(_startTimes.begin() + i, timetriggernumber);
+            _nStates += 1;
+        }
     }
     
     void WebFieldlinesManager::update(){
@@ -68,13 +94,19 @@ namespace openspace{
     }
     
     void WebFieldlinesManager::downloadOsfls(FlsType type, std::string triggertime){
-            std::string url = "http://localhost:3000/WSA/" + triggertime;
-            std::string destinationpath = absPath(_syncDir + '/' + triggertime);
-            AsyncHttpFileDownload ashd = AsyncHttpFileDownload(url, destinationpath, HttpFileDownload::Overwrite::Yes);
-            HttpRequest::RequestOptions opt = {};
-            opt.requestTimeoutSeconds = 0;
-            ashd.start(opt);
-            ashd.wait();
+        std::string url = "http://localhost:3000/WSA/" + triggertime;
+        std::string destinationpath = absPath(_syncDir + '/' + triggertime.substr(6));
+        AsyncHttpFileDownload ashd = AsyncHttpFileDownload(url, destinationpath, HttpFileDownload::Overwrite::Yes);
+        HttpRequest::RequestOptions opt = {};
+        opt.requestTimeoutSeconds = 0;
+        ashd.start(opt);
+        ashd.wait();
+        if(ashd.hasSucceeded() == true ){
+            LERROR("succeeeded: " + destinationpath);
+        }
+        if(ashd.hasFailed() == true ){
+            LERROR("failed: " + destinationpath);
+        }
     }
     
     

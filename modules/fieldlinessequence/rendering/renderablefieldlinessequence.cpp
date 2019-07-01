@@ -372,7 +372,7 @@ void RenderableFieldlinesSequence::initializeGL() {
     setRenderBin(Renderable::RenderBin::Overlay);
     
     // ----------------- Initialize Web Fieldlines Manager things ---------------------//
-    WebFieldlinesManager webFieldlinesManager(_sourceFiles[0]);
+    //WebFieldlinesManager webFieldlinesManager(_sourceFiles[0]);
 }
 
 /**
@@ -1168,8 +1168,20 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     }
 
     const double currentTime = data.time.j2000Seconds();
+    
+    // en liten fuling för att testa att trigga nedladdning
+    if(currentTime > 610056120.0 && currentTime < 610056120.2){
+        LERROR("downloading is starting");
+        WebFieldlinesManager webFieldlinesManager(_sourceFiles[0]);
+        webFieldlinesManager.downloadFieldlines(_sourceFiles, _startTimes, _nStates);
+        computeSequenceEndTime();
+    }
+    
+    
     const bool isInInterval = (currentTime >= _startTimes[0]) &&
                               (currentTime < _sequenceEndTime);
+    
+    
 
     // Check if current time in OpenSpace is within sequence interval
     if (isInInterval) {
