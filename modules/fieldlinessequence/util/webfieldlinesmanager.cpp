@@ -40,10 +40,10 @@ namespace {
 
 namespace openspace{
 
-    WebFieldlinesManager::WebFieldlinesManager(int& _activeTriggerTimeIndex, size_t& _nStates, std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes){
+    WebFieldlinesManager::WebFieldlinesManager(std::string syncDir, int& _activeTriggerTimeIndex, size_t& _nStates, std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes){
         
         // change to parameter
-        _syncDir = "/Users/shuy/Offline-dokument/OpenSpace/Spaceweather/OpenSpace/data/assets/testwsa/fl_pfss_io_25";
+        _syncDir = syncDir;
         _flsType = "PfssIo";
         _downloadMargin = 3;
         _timeTriggerDelta = 7200;
@@ -86,6 +86,32 @@ namespace openspace{
             (*rfs_nStates) += 1;
         }
     }
+
+    // ------------------------------- OPERATORS ------------------------------- //
+
+    // Operator ()
+    void WebFieldlinesManager::operator()(std::string identifier, std::string fieldLineModelType)
+    {
+        _flsType = fieldLineModelType;
+        _syncDir = initializeSyncDirectory(identifier);
+
+        std::string testTime;
+        triggerTimeInt2String(610056000, testTime);
+
+        int testInt;
+        triggerTimeString2Int(testTime, testInt);
+
+        getAvailableTriggertimes();
+
+        LERROR("WebFieldlinesManager initialized");
+
+    }
+
+    std::string WebFieldlinesManager::getDirectory(){
+        return _syncDir;
+    }
+
+    // --------------------------- PRIVATE FUNCTIONS --------------------------- //
     
     // this function aint done
     void WebFieldlinesManager::update(){
@@ -120,6 +146,21 @@ namespace openspace{
             LERROR("failed: " + destinationpath);
         }
         return destinationpath;
+    }
+
+    // Make sure that the sync directory exists
+    // Also creates a new directory in the web_fieldlines directory corresponding to the field line identifier
+    std::string WebFieldlinesManager::initializeSyncDirectory(std::string identifier) {
+        std::string path = absPath("${BASE}/sync/http/web_fieldlines") + FileSys.PathSeparator;
+        
+        if (!FileSys.directoryExists(path)) {
+            FileSys.createDirectory(path);
+        }
+        path = absPath(path + identifier);
+        if(!FileSys.directoryExists(path)) {
+            FileSys.createDirectory(path);
+        }
+        return path;
     }
     
     

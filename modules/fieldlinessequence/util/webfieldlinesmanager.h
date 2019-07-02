@@ -32,18 +32,28 @@ namespace openspace {
     
 class WebFieldlinesManager{
 public:
-    WebFieldlinesManager();
-    WebFieldlinesManager(int& _activeTriggerTimeIndex, size_t& _nStates, std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes);
+    // Constructor
+    WebFieldlinesManager() = default;
+    WebFieldlinesManager(std::string syncDir, int& _activeTriggerTimeIndex, size_t& _nStates, std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes);
 
     // download files specified in _filestodownload
     void downloadFieldlines();
 
+    //---------------- OPERATORS ------------------------- //
+
+    // To replace the constructor, takes the identifier of the field line, is used for storing the field lines mainly
+    // Also takes a second parameter containing the name of the field line model used.
+    // These may in the future be the same.
+    void operator ()(std::string identifier, std::string fieldLineModelType);
+
+    // Returns the sync directory
+    std::string getDirectory();
 
     
 private:
-    
     std::string _syncDir;
     
+    // What model is this field line derived from, may come to be the same as the identifier
     std::string _flsType;
     
     int _downloadMargin;
@@ -78,6 +88,8 @@ private:
     // ***turn into ints later***
     std::string downloadOsfls(std::string triggertime);
     
+    std::string initializeSyncDirectory(std::string identifier);
+
     // Get list of all triggertimes(field lines states) available form the server
     void getAvailableTriggertimes();
     
