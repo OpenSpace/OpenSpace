@@ -32,13 +32,12 @@ namespace openspace {
     
 class WebFieldlinesManager{
 public:
-    WebFieldlinesManager() = default;
-
     // Constructor
-    WebFieldlinesManager(std::string identifier, std::string fieldLineModelType);
-    
-    // For testing purposes
-    void downloadFieldlines(std::vector<std::string>& _sourceFile, std::vector<double>& _startTimes, size_t& _nStates);
+    WebFieldlinesManager() = default;
+    WebFieldlinesManager(std::string syncDir);
+
+    // download files specified in _filestodownload
+    void downloadFieldlines(std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes, size_t& _nStates);
 
     //---------------- OPERATORS ------------------------- //
 
@@ -52,28 +51,33 @@ public:
 
     
 private:
-    
+
     // Directory for saving this specific typ of field line, named by the identifier
     std::string _syncDir;
     
     // What model is this field line derived from, may come to be the same as the identifier
     std::string _flsType;
     
+    int _downloadMargin;
+    
+    // How long between the timesteps?
+    double _timeTriggerDelta;
+    
     // List of all triggertimes(field lines states) available for download
-    // ***turn into ints later***
-    std::vector<std::string> _availableTriggertimes;
+    std::vector<std::pair<double, std::string>> _availableTriggertimes;
+    
+    // Indices for what fieldlines to download
+    std::vector<int> _filesToDownload;
     
     // Function to run in FieldLinesSequence's update loop
-    void update();
+    void update(std::vector<double> startTimes, int activeTriggerTimeIndex);
     
     // Download one file, given what model type and triggertime in J2000
     // ***turn into ints later***
-    void downloadOsfls(std::string triggertime);
-
-    // Checks if there is a sync directory for one specific set of field lines
-    // If not creates one and returns the string to that directory
-    std::string initializeSyncDirectory(std::string identifier);
+    std::string downloadOsfls(std::string triggertime);
     
+    std::string initializeSyncDirectory(std::string identifier);
+
     // Get list of all triggertimes(field lines states) available form the server
     void getAvailableTriggertimes();
     
@@ -91,8 +95,8 @@ private:
     // Parse the data from http request
     void parseTriggerTimesList(std::string s);
     
-    // some temporary functions to translate the filenames to ints
-    void triggerTimeString2Int(std::string s, int& d);
+    // some temporary functions to translate the filenames to ints (doubles?)
+    int triggerTimeString2Int(std::string s);
     void triggerTimeInt2String(int d, std::string& s);
     
 };

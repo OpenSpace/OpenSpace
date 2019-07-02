@@ -1196,11 +1196,8 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         computeSequenceEndTime();
     }
     
-    
     const bool isInInterval = (currentTime >= _startTimes[0]) &&
                               (currentTime < _sequenceEndTime);
-    
-    
 
     // Check if current time in OpenSpace is within sequence interval
     if (isInInterval) {

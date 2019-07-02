@@ -19,7 +19,7 @@ local fieldlines = {
             { 0, 1000000 },
             { 100, 2000 }
         },
-        LoadAtRuntime = false,
+        LoadAtRuntime = true,
         ScaleToMeters = 1.0,
         SecondsBefore = 24*60*60,
         SecondsAfter = 24*60*60,
