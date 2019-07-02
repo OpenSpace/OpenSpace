@@ -23,7 +23,7 @@ local fieldlines = {
         ColorTableRanges = {
             { -0.02, 0.02 },
         },
-        LoadAtRuntime = false,
+        LoadAtRuntime = true,
         ScaleToMeters = 1.0,
         SecondsBefore = 24*60*60,
         SecondsAfter = 24*60*60,

@@ -36,7 +36,7 @@ public:
     WebFieldlinesManager(std::string syncDir);
 
     // download files specified in _filestodownload
-    void downloadFieldlines(std::vector<std::string>& _sourceFile, std::vector<double>& _startTimes, size_t& _nStates);
+    void downloadFieldlines(std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes, size_t& _nStates);
 
 
     

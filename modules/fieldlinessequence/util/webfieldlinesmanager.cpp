@@ -59,7 +59,7 @@ namespace openspace{
     // dowload files specified in _filestodownload
     // I'm thinking we can replace the parameters with pointers to the lists that will be
     // initialized in the constuctor instead
-    void WebFieldlinesManager::downloadFieldlines(std::vector<std::string>& _sourceFile, std::vector<double>& _startTimes, size_t& _nStates){
+    void WebFieldlinesManager::downloadFieldlines(std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes, size_t& _nStates){
         LERROR("starting download");
         for (int index : _filesToDownload){
             
@@ -73,10 +73,10 @@ namespace openspace{
             //add the timetrigger at the right place in the list
             int i = 0;
             while(timetrigger > _startTimes[i]){
-                if( i == _startTimes.size()) break;
+                if( i == static_cast<int>(_nStates)) break;
                 else i++;
             }
-            _sourceFile.insert(_sourceFile.begin() + i, destPath);
+            _sourceFiles.insert(_sourceFiles.begin() + i, destPath);
             _startTimes.insert(_startTimes.begin() + i, timetrigger);
             _nStates += 1;
         }

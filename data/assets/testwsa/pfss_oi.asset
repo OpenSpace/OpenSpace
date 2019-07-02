@@ -23,7 +23,7 @@ local fieldlines = {
         ColorTableRanges = {
             { -0.6, 0.6 },
         },
-        LoadAtRuntime = false,
+        LoadAtRuntime = true,
         ScaleToMeters = 1.0,
         SecondsBefore = 24*60*60,
         SecondsAfter = 24*60*60,
@@ -31,7 +31,7 @@ local fieldlines = {
         Color = {
             Uniform = {0.725, 0.1, 0, 1}
         },
-        ColoringMethod = "Quantity",
+        ColoringMethod = "Quantity"
     },
     GUI = {
         Path = "/Solar System/Heliosphere",
