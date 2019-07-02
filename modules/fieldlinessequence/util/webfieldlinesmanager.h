@@ -32,23 +32,32 @@ namespace openspace {
     
 class WebFieldlinesManager{
 public:
-    WebFieldlinesManager();
-    WebFieldlinesManager(std::string syncDir);
-    
-    // What model of FieldlinesSequence is this?
-    enum FlsType { PFSSIO, PFSSOI, SCSOI };
+    WebFieldlinesManager() = default;
+
+    // Constructor
+    WebFieldlinesManager(std::string identifier, std::string fieldLineModelType);
     
     // For testing purposes
     void downloadFieldlines(std::vector<std::string>& _sourceFile, std::vector<double>& _startTimes, size_t& _nStates);
 
+    //---------------- OPERATORS ------------------------- //
+
+    // To replace the constructor, takes the identifier of the field line, is used for storing the field lines mainly
+    // Also takes a second parameter containing the name of the field line model used.
+    // These may in the future be the same.
+    void operator ()(std::string identifier, std::string fieldLineModelType);
+
+    // Returns the sync directory
+    std::string getDirectory();
 
     
 private:
-    // for now, it's the same as user entered i asset-file
+    
+    // Directory for saving this specific typ of field line, named by the identifier
     std::string _syncDir;
     
-    FlsType _flsType;
-    std::string _flsTypeString;
+    // What model is this field line derived from, may come to be the same as the identifier
+    std::string _flsType;
     
     // List of all triggertimes(field lines states) available for download
     // ***turn into ints later***
@@ -59,7 +68,11 @@ private:
     
     // Download one file, given what model type and triggertime in J2000
     // ***turn into ints later***
-    void downloadOsfls(FlsType type, std::string triggertime);
+    void downloadOsfls(std::string triggertime);
+
+    // Checks if there is a sync directory for one specific set of field lines
+    // If not creates one and returns the string to that directory
+    std::string initializeSyncDirectory(std::string identifier);
     
     // Get list of all triggertimes(field lines states) available form the server
     void getAvailableTriggertimes();

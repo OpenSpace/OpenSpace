@@ -54,6 +54,8 @@ namespace {
     constexpr const char* KeyInputFileType = "InputFileType";
     // [STRING] should be path to folder containing the input files
     constexpr const char* KeySourceFolder = "SourceFolder";
+    // [BOOLEAN] should specify whether field line data should be fetched online or not
+    constexpr const char* KeyWebFieldline = "WebFieldline";
 
     // ---------------------- MANDATORY INPUT TYPE SPECIFIC KEYS ---------------------- //
     // [STRING] Path to a .txt file containing seed points
@@ -371,8 +373,6 @@ void RenderableFieldlinesSequence::initializeGL() {
     // Needed for additive blending
     setRenderBin(Renderable::RenderBin::Overlay);
     
-    // ----------------- Initialize Web Fieldlines Manager things ---------------------//
-    //WebFieldlinesManager webFieldlinesManager(_sourceFiles[0]);
 }
 
 /**
@@ -419,9 +419,23 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
     }
 
     std::string sourceFolderPath;
+    bool webFieldLine;
     if (!_dictionary->getValue(KeySourceFolder, sourceFolderPath)) {
-        LERROR(fmt::format("{}: The field {} is missing", _identifier, KeySourceFolder));
-        return false;
+
+        // If this is a web-fieldline, we don't need no sourcefolder
+        if (!_dictionary->getValue(KeyWebFieldline, webFieldLine)) {
+            LERROR(fmt::format("{}: The field {} is missing", _identifier, KeySourceFolder));
+            return false;
+        }
+        else if (!webFieldLine) {
+            LERROR(fmt::format("{}: The field {} is missing", _identifier, KeySourceFolder));
+            return false;
+        }
+    }
+
+    if (webFieldLine) {
+        initializeWebManager();
+        sourceFolderPath = _webFieldlinesManager.getDirectory();
     }
 
     // Ensure that the source folder exists and then extract
@@ -530,7 +544,9 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
     }
 
 }
-
+// The reason this exists is because some values are read from the properties in the GUI.
+// This function may change the default values of those properties, if the user has specified them
+// in the asset file
 void RenderableFieldlinesSequence::extractPropertyInfoFromDictionary() {
     // Specified weather to use uniform coloring or by specified quantity.
     std::string coloringMethodDictionary;
@@ -1162,6 +1178,10 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
     }
 }
 
+void RenderableFieldlinesSequence::initializeWebManager() {
+    _webFieldlinesManager(_identifier, "PfssIo");
+}
+
 void RenderableFieldlinesSequence::update(const UpdateData& data) {
     if (_shaderProgram->isDirty()) {
         _shaderProgram->rebuildFromFile();
@@ -1172,8 +1192,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     // en liten fuling för att testa att trigga nedladdning
     if(currentTime > 610056120.0 && currentTime < 610056120.2){
         LERROR("downloading is starting");
-        WebFieldlinesManager webFieldlinesManager(_sourceFiles[0]);
-        webFieldlinesManager.downloadFieldlines(_sourceFiles, _startTimes, _nStates);
+        _webFieldlinesManager.downloadFieldlines(_sourceFiles, _startTimes, _nStates);
         computeSequenceEndTime();
     }
     

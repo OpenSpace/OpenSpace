@@ -52,6 +52,7 @@ public:
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
+	void initializeWebManager();
     void update(const UpdateData& data) override;
 
 private:
@@ -200,7 +201,9 @@ private:
     
     
     // --------------------- Web Fieldlines Manager ----------------------------------- //
-    //WebFieldlinesManager _webFieldlinesManager;
+    //  Web Fieldlines manager downloads and updates renderable field lines with        //
+    //  field lines downloaded from the web.                                            //
+    WebFieldlinesManager _webFieldlinesManager;
     
 
     // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //

@@ -40,27 +40,21 @@ namespace {
 
 namespace openspace{
 
-    WebFieldlinesManager::WebFieldlinesManager(std::string syncDir){
-        
-        // Using constructor for some testing
-//        ghoul::filesystem::File tempFile = ghoul::filesystem::File(syncDir);
-        //_syncDir = tempFile.directoryName();
-        _syncDir = "/Users/shuy/Offline-dokument/OpenSpace/Spaceweather/OpenSpace/data/assets/testwsa/fl_pfss_io_25";
-        _flsType = PFSSIO;
-        _flsTypeString = "PFSSIO";
-        
+    WebFieldlinesManager::WebFieldlinesManager(std::string identifier, std::string fieldLineModelType):
+        _flsType(fieldLineModelType)
+    {
+        _syncDir = initializeSyncDirectory(identifier);
+                
         std::string testTime;
         triggerTimeInt2String(610056000, testTime);
         
-
         int testInt;
         triggerTimeString2Int(testTime, testInt);
         
         getAvailableTriggertimes();
         
         LERROR("WebFieldlinesManager initialized");
-        
-        
+   
     }
     
     // For testing purposes
@@ -68,7 +62,7 @@ namespace openspace{
         LERROR("starting download");
         for (auto& tt : _availableTriggertimes){
             
-            downloadOsfls(_flsType, tt);
+            downloadOsfls(tt);
             
              //add the timetrigger at the right place in the list
             std::string sub = tt.substr(6, 23);
@@ -88,12 +82,38 @@ namespace openspace{
             _nStates += 1;
         }
     }
+
+    // ------------------------------- OPERATORS ------------------------------- //
+
+    // Operator ()
+    void WebFieldlinesManager::operator()(std::string identifier, std::string fieldLineModelType)
+    {
+        _flsType = fieldLineModelType;
+        _syncDir = initializeSyncDirectory(identifier);
+
+        std::string testTime;
+        triggerTimeInt2String(610056000, testTime);
+
+        int testInt;
+        triggerTimeString2Int(testTime, testInt);
+
+        getAvailableTriggertimes();
+
+        LERROR("WebFieldlinesManager initialized");
+
+    }
+
+    std::string WebFieldlinesManager::getDirectory(){
+        return _syncDir;
+    }
+
+    // --------------------------- PRIVATE FUNCTIONS --------------------------- //
     
     void WebFieldlinesManager::update(){
         
     }
     
-    void WebFieldlinesManager::downloadOsfls(FlsType type, std::string triggertime){
+    void WebFieldlinesManager::downloadOsfls(std::string triggertime){
         std::string url = "http://localhost:3000/WSA/" + triggertime;
         std::string destinationpath = absPath(_syncDir + '/' + triggertime.substr(6));
         AsyncHttpFileDownload ashd = AsyncHttpFileDownload(url, destinationpath, HttpFileDownload::Overwrite::Yes);
@@ -108,10 +128,25 @@ namespace openspace{
             LERROR("failed: " + destinationpath);
         }
     }
+
+    // Make sure that the sync directory exists
+    // Also creates a new directory in the web_fieldlines directory corresponding to the field line identifier
+    std::string WebFieldlinesManager::initializeSyncDirectory(std::string identifier) {
+        std::string path = absPath("${BASE}/sync/http/web_fieldlines") + FileSys.PathSeparator;
+        
+        if (!FileSys.directoryExists(path)) {
+            FileSys.createDirectory(path);
+        }
+        path = absPath(path + identifier);
+        if(!FileSys.directoryExists(path)) {
+            FileSys.createDirectory(path);
+        }
+        return path;
+    }
     
     
     void WebFieldlinesManager::getAvailableTriggertimes(){
-        std::string url = "http://localhost:3000/WSA/available/" + _flsTypeString;
+        std::string url = "http://localhost:3000/WSA/available/" + _flsType;
         SyncHttpMemoryDownload mmryDld = SyncHttpMemoryDownload(url);
         HttpRequest::RequestOptions opt = {};
         opt.requestTimeoutSeconds = 0;
