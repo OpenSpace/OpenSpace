@@ -42,12 +42,11 @@ namespace openspace{
 
     WebFieldlinesManager::WebFieldlinesManager(std::string syncDir){
         
-        // Using constructor for some testing
-//        ghoul::filesystem::File tempFile = ghoul::filesystem::File(syncDir);
-        //_syncDir = tempFile.directoryName();
+        // change to parameter
         _syncDir = "/Users/shuy/Offline-dokument/OpenSpace/Spaceweather/OpenSpace/data/assets/testwsa/fl_pfss_io_25";
-        _flsTypeString = "PfssIo";
+        _flsType = "PfssIo";
         _downloadMargin = 3;
+        _timeTriggerDelta = 7200;
    
         getAvailableTriggertimes();
         
@@ -57,7 +56,9 @@ namespace openspace{
     
     }
     
-    // For testing purposes
+    // dowload files specified in _filestodownload
+    // I'm thinking we can replace the parameters with pointers to the lists that will be
+    // initialized in the constuctor instead
     void WebFieldlinesManager::downloadFieldlines(std::vector<std::string>& _sourceFile, std::vector<double>& _startTimes, size_t& _nStates){
         LERROR("starting download");
         for (int index : _filesToDownload){
@@ -81,8 +82,22 @@ namespace openspace{
         }
     }
     
-    void WebFieldlinesManager::update(){
-        
+    // this function aint done
+    void WebFieldlinesManager::update(std::vector<double> startTimes, int activeTriggerTimeIndex){
+        // check how many are left until fieldlinessequence runs out - add direction information later
+        double nextTheroticalTimeTrigger;
+        double eps = 100;
+        if(activeTriggerTimeIndex == startTimes.size()-1){
+            // if it's at the last index, definetily start some downloading
+            return;
+        }
+        for (int i = activeTriggerTimeIndex; i < startTimes.size(); i++){
+            nextTheroticalTimeTrigger = startTimes[i] +_timeTriggerDelta;
+            if(startTimes[i + 1] > (nextTheroticalTimeTrigger + eps)){
+                // do some downloading
+            }
+            
+        }
     }
     
     std::string WebFieldlinesManager::downloadOsfls(std::string triggertime){
@@ -104,7 +119,7 @@ namespace openspace{
     
     
     void WebFieldlinesManager::getAvailableTriggertimes(){
-        std::string url = "http://localhost:3000/WSA/available/" + _flsTypeString;
+        std::string url = "http://localhost:3000/WSA/available/" + _flsType;
         SyncHttpMemoryDownload mmryDld = SyncHttpMemoryDownload(url);
         HttpRequest::RequestOptions opt = {};
         opt.requestTimeoutSeconds = 0;
@@ -139,10 +154,12 @@ namespace openspace{
             _filesToDownload.push_back(i);
     }
     
+    // TODO
     void WebFieldlinesManager::downloadInitialSequence(std::vector<double> triggertimes){
         
     }
     
+    // TODO
     void WebFieldlinesManager::updateStartTimes(){
         
     }

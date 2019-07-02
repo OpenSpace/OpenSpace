@@ -35,19 +35,20 @@ public:
     WebFieldlinesManager();
     WebFieldlinesManager(std::string syncDir);
 
-    
-    // For testing purposes
+    // download files specified in _filestodownload
     void downloadFieldlines(std::vector<std::string>& _sourceFile, std::vector<double>& _startTimes, size_t& _nStates);
 
 
     
 private:
-    // for now, it's the same as user entered i asset-file
     std::string _syncDir;
     
-    std::string _flsTypeString;
+    std::string _flsType;
     
     int _downloadMargin;
+    
+    // How long between the timesteps?
+    double _timeTriggerDelta;
     
     // List of all triggertimes(field lines states) available for download
     std::vector<std::pair<double, std::string>> _availableTriggertimes;
@@ -56,7 +57,7 @@ private:
     std::vector<int> _filesToDownload;
     
     // Function to run in FieldLinesSequence's update loop
-    void update();
+    void update(std::vector<double> startTimes, int activeTriggerTimeIndex);
     
     // Download one file, given what model type and triggertime in J2000
     // ***turn into ints later***
@@ -79,7 +80,7 @@ private:
     // Parse the data from http request
     void parseTriggerTimesList(std::string s);
     
-    // some temporary functions to translate the filenames to ints
+    // some temporary functions to translate the filenames to ints (doubles?)
     int triggerTimeString2Int(std::string s);
     void triggerTimeInt2String(int d, std::string& s);
     
