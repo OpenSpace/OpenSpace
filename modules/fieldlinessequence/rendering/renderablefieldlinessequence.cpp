@@ -1171,9 +1171,9 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     
     // en liten fuling för att testa att trigga nedladdning
     if(currentTime > 610056120.0 && currentTime < 610056120.2){
-        WebFieldlinesManager webFieldlinesManager(_sourceFiles[0]);
+        WebFieldlinesManager webFieldlinesManager(_activeTriggerTimeIndex, _nStates, _sourceFiles, _startTimes);
         LERROR("downloading is starting");
-        webFieldlinesManager.downloadFieldlines(_sourceFiles, _startTimes, _nStates);
+        webFieldlinesManager.downloadFieldlines();
         computeSequenceEndTime();
     }
     

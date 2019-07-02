@@ -40,13 +40,18 @@ namespace {
 
 namespace openspace{
 
-    WebFieldlinesManager::WebFieldlinesManager(std::string syncDir){
+    WebFieldlinesManager::WebFieldlinesManager(int& _activeTriggerTimeIndex, size_t& _nStates, std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes){
         
         // change to parameter
         _syncDir = "/Users/shuy/Offline-dokument/OpenSpace/Spaceweather/OpenSpace/data/assets/testwsa/fl_pfss_io_25";
         _flsType = "PfssIo";
         _downloadMargin = 3;
         _timeTriggerDelta = 7200;
+        
+        rfs_activeTriggerTimeIndex = &_activeTriggerTimeIndex;
+        rfs_nStates = &_nStates;
+        rfs_sourceFiles = &_sourceFiles;
+        rfs_startTimes = &_startTimes;
    
         getAvailableTriggertimes();
         
@@ -59,7 +64,7 @@ namespace openspace{
     // dowload files specified in _filestodownload
     // I'm thinking we can replace the parameters with pointers to the lists that will be
     // initialized in the constuctor instead
-    void WebFieldlinesManager::downloadFieldlines(std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes, size_t& _nStates){
+    void WebFieldlinesManager::downloadFieldlines(){
         LERROR("starting download");
         for (int index : _filesToDownload){
             
@@ -72,28 +77,28 @@ namespace openspace{
             
             //add the timetrigger at the right place in the list
             int i = 0;
-            while(timetrigger > _startTimes[i]){
-                if( i == static_cast<int>(_nStates)) break;
+            while(timetrigger > (*rfs_startTimes)[i]){
+                if( i == static_cast<int>(*rfs_nStates)-1) break;
                 else i++;
             }
-            _sourceFiles.insert(_sourceFiles.begin() + i, destPath);
-            _startTimes.insert(_startTimes.begin() + i, timetrigger);
-            _nStates += 1;
+            rfs_sourceFiles->insert(rfs_sourceFiles->begin() + i, destPath);
+            rfs_startTimes->insert(rfs_startTimes->begin() + i, timetrigger);
+            (*rfs_nStates) += 1;
         }
     }
     
     // this function aint done
-    void WebFieldlinesManager::update(std::vector<double> startTimes, int activeTriggerTimeIndex){
+    void WebFieldlinesManager::update(){
         // check how many are left until fieldlinessequence runs out - add direction information later
         double nextTheroticalTimeTrigger;
         double eps = 100;
-        if(activeTriggerTimeIndex == startTimes.size()-1){
+        if(*rfs_activeTriggerTimeIndex ==  *rfs_nStates - 1){
             // if it's at the last index, definetily start some downloading
             return;
         }
-        for (int i = activeTriggerTimeIndex; i < startTimes.size(); i++){
-            nextTheroticalTimeTrigger = startTimes[i] +_timeTriggerDelta;
-            if(startTimes[i + 1] > (nextTheroticalTimeTrigger + eps)){
+        for (int i = *rfs_activeTriggerTimeIndex; i < *rfs_nStates; i++){
+            nextTheroticalTimeTrigger = (*rfs_startTimes)[i] +_timeTriggerDelta;
+            if((*rfs_startTimes)[i + 1] > (nextTheroticalTimeTrigger + eps)){
                 // do some downloading
             }
             

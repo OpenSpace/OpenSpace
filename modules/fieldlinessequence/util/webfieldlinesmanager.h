@@ -33,14 +33,15 @@ namespace openspace {
 class WebFieldlinesManager{
 public:
     WebFieldlinesManager();
-    WebFieldlinesManager(std::string syncDir);
+    WebFieldlinesManager(int& _activeTriggerTimeIndex, size_t& _nStates, std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes);
 
     // download files specified in _filestodownload
-    void downloadFieldlines(std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes, size_t& _nStates);
+    void downloadFieldlines();
 
 
     
 private:
+    
     std::string _syncDir;
     
     std::string _flsType;
@@ -50,6 +51,20 @@ private:
     // How long between the timesteps?
     double _timeTriggerDelta;
     
+    /******************************************************************************
+     * Pointers to stuff in RenderableFieldlinesSequence (which own this instance)*
+     ******************************************************************************/
+    // Active index of _startTimes
+    int *rfs_activeTriggerTimeIndex;
+    // Number of states in the sequence
+    size_t *rfs_nStates;
+    // Stores the provided source file paths
+    std::vector<std::string> *rfs_sourceFiles;
+    // Contains the _triggerTimes for all FieldlineStates in the sequence
+    std::vector<double> *rfs_startTimes;
+    
+    /****************************** End of pointers ******************************/
+    
     // List of all triggertimes(field lines states) available for download
     std::vector<std::pair<double, std::string>> _availableTriggertimes;
     
@@ -57,7 +72,7 @@ private:
     std::vector<int> _filesToDownload;
     
     // Function to run in FieldLinesSequence's update loop
-    void update(std::vector<double> startTimes, int activeTriggerTimeIndex);
+    void update();
     
     // Download one file, given what model type and triggertime in J2000
     // ***turn into ints later***
