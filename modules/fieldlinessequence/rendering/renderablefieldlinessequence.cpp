@@ -81,6 +81,8 @@ namespace {
     // [STRING] Value should be path to folder where states are saved (JSON/CDF input
     // => osfls output & oslfs input => JSON output)
     constexpr const char* KeyOutputFolder = "OutputFolder";
+    // [STRING] Value should either be "Quantity" or "Uniform"
+    constexpr const char* KeyColoringMethod = "ColoringMethod";
 
     // ------------- POSSIBLE STRING VALUES FOR CORRESPONDING MODFILE KEY ------------- //
     constexpr const char* ValueInputFileTypeCdf = "cdf";
@@ -330,8 +332,7 @@ void RenderableFieldlinesSequence::initializeGL() {
             return;
     }
 
-    // dictionary is no longer needed as everything is extracted
-    _dictionary.reset();
+    
 
     // No need to store source paths in memory if they are already in RAM!
     if (!_loadingStatesDynamically) {
@@ -348,6 +349,11 @@ void RenderableFieldlinesSequence::initializeGL() {
     setModelDependentConstants();
 
     setupProperties();
+
+    extractPropertyInfoFromDictionary();
+
+    // dictionary is no longer needed as everything is extracted
+    _dictionary.reset();
 
     // Setup shader program
     _shaderProgram = global::renderEngine.buildRenderProgram(
@@ -521,6 +527,16 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
     }
     else {
         _maskingRanges.push_back(glm::vec2(-100000, 100000)); // Just some default values!
+    }
+
+}
+
+void RenderableFieldlinesSequence::extractPropertyInfoFromDictionary() {
+    // Specified weather to use uniform coloring or by specified quantity.
+    std::string coloringMethodDictionary;
+    if (_dictionary->getValue(KeyColoringMethod, coloringMethodDictionary)) {
+        if(coloringMethodDictionary == "Quantity")
+            _pColorMethod = static_cast<int>(ColorMethod::ByQuantity);
     }
 }
 
