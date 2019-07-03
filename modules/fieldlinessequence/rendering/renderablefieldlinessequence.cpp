@@ -55,7 +55,7 @@ namespace {
     // [STRING] should be path to folder containing the input files
     constexpr const char* KeySourceFolder = "SourceFolder";
     // [BOOLEAN] should specify whether field line data should be fetched online or not
-    constexpr const char* KeyWebFieldline = "WebFieldline";
+    constexpr const char* KeyWebFieldlines = "WebFieldlines";
 
     // ---------------------- MANDATORY INPUT TYPE SPECIFIC KEYS ---------------------- //
     // [STRING] Path to a .txt file containing seed points
@@ -293,6 +293,7 @@ void RenderableFieldlinesSequence::initializeGL() {
     // EXTRACT MANDATORY INFORMATION FROM DICTIONARY
     SourceFileType sourceFileType = SourceFileType::Invalid;
     if (!extractMandatoryInfoFromDictionary(sourceFileType)) {
+        //wait for a fieldline
         return;
     }
 
@@ -419,21 +420,21 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
     }
 
     std::string sourceFolderPath;
-    bool webFieldLine;
+    bool webFieldLines;
     if (!_dictionary->getValue(KeySourceFolder, sourceFolderPath)) {
 
         // If this is a web-fieldline, we don't need no sourcefolder
-        if (!_dictionary->getValue(KeyWebFieldline, webFieldLine)) {
-            LERROR(fmt::format("{}: The field {} is missing", _identifier, KeySourceFolder));
+        if (!_dictionary->getValue(KeyWebFieldlines, webFieldLines)) {
+            LERROR(fmt::format("{}: The field {} is missing", _identifier, KeyWebFieldlines));
             return false;
         }
-        else if (!webFieldLine) {
+        else if (!webFieldLines) {
             LERROR(fmt::format("{}: The field {} is missing", _identifier, KeySourceFolder));
             return false;
         }
     }
 
-    if (webFieldLine) {
+    if (webFieldLines) {
         initializeWebManager();
         sourceFolderPath = _webFieldlinesManager.getDirectory();
     }
@@ -466,6 +467,7 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
                 }),
             _sourceFiles.end()
         );
+        
         // Ensure that there are available and valid source files left
         if (_sourceFiles.empty()) {
             LERROR(fmt::format(
@@ -614,6 +616,7 @@ bool RenderableFieldlinesSequence::loadJsonStatesIntoRAM(const std::string& outp
     return true;
 }
 
+//    streaming from means streaming from disk
 bool RenderableFieldlinesSequence::prepareForOsflsStreaming() {
     extractTriggerTimesFromFileNames();
     FieldlinesState newState;
@@ -1179,7 +1182,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
 }
 
 void RenderableFieldlinesSequence::initializeWebManager() {
-    _webFieldlinesManager(_identifier, "PfssIo");
+    _webFieldlinesManager(_identifier, "PfssIo", _activeTriggerTimeIndex, _nStates, _sourceFiles, _startTimes);
 }
 
 void RenderableFieldlinesSequence::update(const UpdateData& data) {
@@ -1192,7 +1195,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     // en liten fuling för att testa att trigga nedladdning
     if(currentTime > 610056120.0 && currentTime < 610056120.2){
         LERROR("downloading is starting");
-        webFieldlinesManager.downloadFieldlines();
+        _webFieldlinesManager.downloadFieldlines();
         computeSequenceEndTime();
     }
     

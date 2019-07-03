@@ -39,27 +39,6 @@ namespace {
 } // namespace
 
 namespace openspace{
-
-    WebFieldlinesManager::WebFieldlinesManager(std::string syncDir, int& _activeTriggerTimeIndex, size_t& _nStates, std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes){
-        
-        // change to parameter
-        _syncDir = syncDir;
-        _flsType = "PfssIo";
-        _downloadMargin = 3;
-        _timeTriggerDelta = 7200;
-        
-        rfs_activeTriggerTimeIndex = &_activeTriggerTimeIndex;
-        rfs_nStates = &_nStates;
-        rfs_sourceFiles = &_sourceFiles;
-        rfs_startTimes = &_startTimes;
-   
-        getAvailableTriggertimes();
-        
-        setInitialSet(global::timeManager.time().j2000Seconds());
-        
-        LERROR("WebFieldlinesManager initialized");
-    
-    }
     
     // dowload files specified in _filestodownload
     // I'm thinking we can replace the parameters with pointers to the lists that will be
@@ -90,19 +69,23 @@ namespace openspace{
     // ------------------------------- OPERATORS ------------------------------- //
 
     // Operator ()
-    void WebFieldlinesManager::operator()(std::string identifier, std::string fieldLineModelType)
+    void WebFieldlinesManager::operator()(std::string identifier, std::string fieldLineModelType, int& _activeTriggerTimeIndex, size_t& _nStates, std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes)
     {
         _flsType = fieldLineModelType;
         _syncDir = initializeSyncDirectory(identifier);
 
-        std::string testTime;
-        triggerTimeInt2String(610056000, testTime);
-
-        int testInt;
-        triggerTimeString2Int(testTime, testInt);
-
+        _downloadMargin = 3;
+        _timeTriggerDelta = 7200;
+        
+        rfs_activeTriggerTimeIndex = &_activeTriggerTimeIndex;
+        rfs_nStates = &_nStates;
+        rfs_sourceFiles = &_sourceFiles;
+        rfs_startTimes = &_startTimes;
+        
         getAvailableTriggertimes();
-
+        
+        setInitialSet(global::timeManager.time().j2000Seconds());
+        
         LERROR("WebFieldlinesManager initialized");
 
     }
@@ -118,11 +101,11 @@ namespace openspace{
         // check how many are left until fieldlinessequence runs out - add direction information later
         double nextTheroticalTimeTrigger;
         double eps = 100;
-        if(*rfs_activeTriggerTimeIndex ==  *rfs_nStates - 1){
+        if(*rfs_activeTriggerTimeIndex ==  static_cast<int>(*rfs_nStates)-1){
             // if it's at the last index, definetily start some downloading
             return;
         }
-        for (int i = *rfs_activeTriggerTimeIndex; i < *rfs_nStates; i++){
+        for (int i = *rfs_activeTriggerTimeIndex; i < static_cast<int>(*rfs_nStates); i++){
             nextTheroticalTimeTrigger = (*rfs_startTimes)[i] +_timeTriggerDelta;
             if((*rfs_startTimes)[i + 1] > (nextTheroticalTimeTrigger + eps)){
                 // do some downloading
@@ -193,8 +176,8 @@ namespace openspace{
         int endInd = openspaceindex + _downloadMargin;
         
         if(startInd < 0) startInd = 0;
-        if(endInd >= _availableTriggertimes.size())
-            endInd = _availableTriggertimes.size()-1;
+        if(endInd >= static_cast<int>(_availableTriggertimes.size()))
+            endInd = static_cast<int>(_availableTriggertimes.size())-1;
         
         for(int i = startInd; i <= endInd; i++)
             _filesToDownload.push_back(i);

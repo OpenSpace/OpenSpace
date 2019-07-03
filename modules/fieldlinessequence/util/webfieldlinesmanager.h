@@ -34,7 +34,6 @@ class WebFieldlinesManager{
 public:
     // Constructor
     WebFieldlinesManager() = default;
-    WebFieldlinesManager(std::string syncDir, int& _activeTriggerTimeIndex, size_t& _nStates, std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes);
 
     // download files specified in _filestodownload
     void downloadFieldlines();
@@ -44,7 +43,7 @@ public:
     // To replace the constructor, takes the identifier of the field line, is used for storing the field lines mainly
     // Also takes a second parameter containing the name of the field line model used.
     // These may in the future be the same.
-    void operator ()(std::string identifier, std::string fieldLineModelType);
+    void operator ()(std::string identifier, std::string fieldLineModelType, int& _activeTriggerTimeIndex, size_t& _nStates, std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes);
 
     // Returns the sync directory
     std::string getDirectory();
@@ -56,6 +55,7 @@ private:
     // What model is this field line derived from, may come to be the same as the identifier
     std::string _flsType;
     
+    // How many fieldlines around the current time point
     int _downloadMargin;
     
     // How long between the timesteps?
