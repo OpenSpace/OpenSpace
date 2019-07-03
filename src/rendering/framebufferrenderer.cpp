@@ -142,90 +142,130 @@ void FramebufferRenderer::initialize() {
     GLint defaultFbo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
 
-    // Main framebuffer
-    glGenTextures(1, &_mainColorTexture);
-    glGenTextures(1, &_mainDepthTexture);
-    glGenTextures(1, &_mainFilterTexture);
-    // Deferred textures used in Main framebuffer
-    glGenTextures(1, &_mainPositionTexture);
-    glGenTextures(1, &_mainNormalTexture);
-    glGenFramebuffers(1, &_mainFramebuffer);
+    // GBuffers
+    glGenTextures(1, &_gBuffers._mainColorTexture);
+    glGenTextures(1, &_gBuffers._mainDepthTexture);
+    glGenTextures(1, &_gBuffers._mainFilterTexture);
+    glGenTextures(1, &_gBuffers._mainPositionTexture);
+    glGenTextures(1, &_gBuffers._mainNormalTexture);
+    glGenFramebuffers(1, &_gBuffers._mainFramebuffer);
 
+    // PingPong Buffers
+    // The first pingpong buffer shares the color texture with the renderbuffer:
+    _pingPongBuffers.colorTexture[0] = _gBuffers._mainColorTexture;
+    glGenTextures(1, &_pingPongBuffers.colorTexture[1]);
+    glGenFramebuffers(1, &_pingPongBuffers.framebuffer);
+    
     // Exit framebuffer
     glGenTextures(1, &_exitColorTexture);
     glGenTextures(1, &_exitDepthTexture);
     glGenFramebuffers(1, &_exitFramebuffer);
 
-    // HDR / Filtering Framebuffer
-    glGenFramebuffers(1, &_hdrFilteringFramebuffer);
-    glGenTextures(1, &_hdrFilteringTexture);
+    // HDR / Filtering Buffers
+    glGenFramebuffers(1, &_hdrBuffers._hdrFilteringFramebuffer);
+    glGenTextures(1, &_hdrBuffers._hdrFilteringTexture);
 
-    // Compute Average Luminosity
-    glGenTextures(1, &_computeAveLumTexture);
-    glGenFramebuffers(1, &_computeAveLumFBO);
+    // Compute Average Luminosity Buffers
+    glGenTextures(1, &_aLumBuffers._computeAveLumTexture);
+    glGenFramebuffers(1, &_aLumBuffers._computeAveLumFBO);
 
-    // Bloom Filter
-    glGenFramebuffers(3, _bloomFilterFBO);
-    glGenTextures(3, _bloomTexture);
+    // Bloom Buffers
+    glGenFramebuffers(3, _bloomBuffers._bloomFilterFBO);
+    glGenTextures(3, _bloomBuffers._bloomTexture);
 
-    // Histogram
-    glGenFramebuffers(1, &_histoFramebuffer);
-    glGenTextures(1, &_histoTexture);
-    glGenVertexArrays(1, &_histoVao);
-    glBindVertexArray(_histoVao);
-    glGenBuffers(1, &_histoVbo);
+    // Histogram Buffers
+    glGenFramebuffers(1, &_histoBuffers._histoFramebuffer);
+    glGenTextures(1, &_histoBuffers._histoTexture);
+    glGenVertexArrays(1, &_histoBuffers._histoVao);
+    glBindVertexArray(_histoBuffers._histoVao);
+    glGenBuffers(1, &_histoBuffers._histoVbo);
 
-    // TMO via mipmapping
-    glGenFramebuffers(1, &_tmoFramebuffer);
-    glGenTextures(1, &_tmoTexture);
-    glGenSamplers(1, &_tmoHdrSampler);
-    glSamplerParameteri(_tmoHdrSampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+    // TMO via mipmapping Buffers
+    glGenFramebuffers(1, &_mMappingTMOBuffers._tmoFramebuffer);
+    glGenTextures(1, &_mMappingTMOBuffers._tmoTexture);
+    glGenSamplers(1, &_mMappingTMOBuffers._tmoHdrSampler);
+    glSamplerParameteri(
+        _mMappingTMOBuffers._tmoHdrSampler, 
+        GL_TEXTURE_MIN_FILTER, 
+        GL_LINEAR_MIPMAP_NEAREST
+    );
 
     updateResolution();
     updateRendererData();
-    updateRaycastData();   
+    updateRaycastData();
 
-    // Builds Main Framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
+    //==============================//
+    //=====  Building Buffers  =====//
+    //==============================//
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers._mainFramebuffer);
     glFramebufferTexture2D(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D_MULTISAMPLE,
-        _mainColorTexture,
+        _gBuffers._mainColorTexture,
         0
     );
     glFramebufferTexture2D(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT1,
         GL_TEXTURE_2D_MULTISAMPLE,
-        _mainPositionTexture,
+        _gBuffers._mainPositionTexture,
         0
     );
     glFramebufferTexture2D(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT2,
         GL_TEXTURE_2D_MULTISAMPLE,
-        _mainNormalTexture,
+        _gBuffers._mainNormalTexture,
         0
     );
     glFramebufferTexture2D(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT3,
         GL_TEXTURE_2D_MULTISAMPLE,
-        _mainFilterTexture,
+        _gBuffers._mainFilterTexture,
         0
     );
     glFramebufferTexture2D(
         GL_FRAMEBUFFER,
         GL_DEPTH_ATTACHMENT,
         GL_TEXTURE_2D_MULTISAMPLE,
-        _mainDepthTexture,
+        _gBuffers._mainDepthTexture,
         0
     );
 
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("Main framebuffer is not complete");
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer);
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D_MULTISAMPLE,
+        _pingPongBuffers.colorTexture[0],
+        0
+    );
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT1,
+        GL_TEXTURE_2D_MULTISAMPLE,
+        _pingPongBuffers.colorTexture[1],
+        0
+    );
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        GL_TEXTURE_2D_MULTISAMPLE,
+        _gBuffers._mainDepthTexture,
+        0
+    );
+
+    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LERROR("Ping pong buffer is not complete");
     }
 
     // Builds Exit Framebuffer
@@ -251,12 +291,12 @@ void FramebufferRenderer::initialize() {
     }
 
     // Builds HDR/Filtering Framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, _hdrFilteringFramebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, _hdrBuffers._hdrFilteringFramebuffer);
     glFramebufferTexture2D(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D,
-        _hdrFilteringTexture,
+        _hdrBuffers._hdrFilteringTexture,
         0
     );
 
@@ -266,12 +306,12 @@ void FramebufferRenderer::initialize() {
     }
 
     // Buids Average Lum FBO
-    glBindFramebuffer(GL_FRAMEBUFFER, _computeAveLumFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, _aLumBuffers._computeAveLumFBO);
     glFramebufferTexture2D(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D,
-        _computeAveLumTexture,
+        _aLumBuffers._computeAveLumTexture,
         0
     );
 
@@ -285,12 +325,12 @@ void FramebufferRenderer::initialize() {
     const GLenum buffers[] = { GL_COLOR_ATTACHMENT0 };
     for (int i = 0; i < 3; i++)
     {
-        glBindFramebuffer(GL_FRAMEBUFFER, _bloomFilterFBO[i]);
+        glBindFramebuffer(GL_FRAMEBUFFER, _bloomBuffers._bloomFilterFBO[i]);
         glFramebufferTexture2D(
             GL_FRAMEBUFFER, 
             GL_COLOR_ATTACHMENT0, 
             GL_TEXTURE_2D, 
-            _bloomTexture[i], 
+            _bloomBuffers._bloomTexture[i], 
             0
         );
         glDrawBuffers(1, buffers);
@@ -302,12 +342,12 @@ void FramebufferRenderer::initialize() {
     }
 
     // Builds Histogram FBO
-    glBindFramebuffer(GL_FRAMEBUFFER, _histoFramebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, _histoBuffers._histoFramebuffer);
     glFramebufferTexture2D(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D,
-        _histoTexture,
+        _histoBuffers._histoTexture,
         0
     );
 
@@ -317,12 +357,12 @@ void FramebufferRenderer::initialize() {
     }
 
     // Buids TMO via mipmapping FBO    
-    glBindFramebuffer(GL_FRAMEBUFFER, _tmoFramebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, _mMappingTMOBuffers._tmoFramebuffer);
     glFramebufferTexture2D(
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D,
-        _tmoTexture,
+        _mMappingTMOBuffers._tmoTexture,
         0
     );
 
@@ -402,24 +442,27 @@ void FramebufferRenderer::initialize() {
 void FramebufferRenderer::deinitialize() {
     LINFO("Deinitializing FramebufferRenderer");
 
-    glDeleteFramebuffers(1, &_mainFramebuffer);
+    glDeleteFramebuffers(1, &_gBuffers._mainFramebuffer);
     glDeleteFramebuffers(1, &_exitFramebuffer);
-    glDeleteFramebuffers(1, &_hdrFilteringFramebuffer);
-    glDeleteFramebuffers(1, &_computeAveLumFBO);
-    glDeleteFramebuffers(3, _bloomFilterFBO);
-    glDeleteFramebuffers(1, &_histoFramebuffer);
-    glDeleteFramebuffers(1, &_tmoFramebuffer);
+    glDeleteFramebuffers(1, &_hdrBuffers._hdrFilteringFramebuffer);
+    glDeleteFramebuffers(1, &_aLumBuffers._computeAveLumFBO);
+    glDeleteFramebuffers(3, _bloomBuffers._bloomFilterFBO);
+    glDeleteFramebuffers(1, &_histoBuffers._histoFramebuffer);
+    glDeleteFramebuffers(1, &_mMappingTMOBuffers._tmoFramebuffer);
+    glDeleteFramebuffers(1, &_pingPongBuffers.framebuffer);
 
-    glDeleteTextures(1, &_mainColorTexture);
-    glDeleteTextures(1, &_mainDepthTexture);
+    glDeleteTextures(1, &_gBuffers._mainColorTexture);
+    glDeleteTextures(1, &_gBuffers._mainDepthTexture);
 
-    glDeleteTextures(1, &_hdrFilteringTexture);
-    glDeleteTextures(1, &_mainPositionTexture);
-    glDeleteTextures(1, &_mainNormalTexture);
-    glDeleteTextures(1, &_computeAveLumTexture);
-    glDeleteTextures(3, _bloomTexture);
-    glDeleteTextures(1, &_histoTexture);
-    glDeleteTextures(1, &_tmoTexture);
+    glDeleteTextures(1, &_hdrBuffers._hdrFilteringTexture);
+    glDeleteTextures(1, &_gBuffers._mainPositionTexture);
+    glDeleteTextures(1, &_gBuffers._mainNormalTexture);
+    glDeleteTextures(1, &_aLumBuffers._computeAveLumTexture);
+    glDeleteTextures(3, _bloomBuffers._bloomTexture);
+    glDeleteTextures(1, &_histoBuffers._histoTexture);
+    glDeleteTextures(1, &_mMappingTMOBuffers._tmoTexture);
+
+    glDeleteTextures(1, &_pingPongBuffers.colorTexture[1]);
 
     glDeleteTextures(1, &_exitColorTexture);
     glDeleteTextures(1, &_exitDepthTexture);
@@ -427,7 +470,7 @@ void FramebufferRenderer::deinitialize() {
     glDeleteBuffers(1, &_vertexPositionBuffer);
     glDeleteVertexArrays(1, &_screenQuad);
 
-    glDeleteSamplers(1, &_tmoHdrSampler);
+    glDeleteSamplers(1, &_mMappingTMOBuffers._tmoHdrSampler);
 
     global::raycasterManager.removeListener(*this);
     global::deferredcasterManager.removeListener(*this);
@@ -445,6 +488,135 @@ void FramebufferRenderer::deferredcastersChanged(Deferredcaster&,
     _dirtyDeferredcastData = true;
 }
 
+void FramebufferRenderer::captureAndSetOpenGLDefaultState() {
+    // Capture standard fbo
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_osDefaultGLState.defaultFBO);
+
+    glEnablei(GL_BLEND, 0);
+    glDisablei(GL_BLEND, 1);
+    glDisablei(GL_BLEND, 2);
+    glDisablei(GL_BLEND, 3);
+
+    _osDefaultGLState.blendEnabled = true;
+    _osDefaultGLState.blend0Enabled = true;
+    _osDefaultGLState.blend1Enabled = false;
+    _osDefaultGLState.blend2Enabled = false;
+    _osDefaultGLState.blend3Enabled = false;
+
+    glBlendEquationSeparate(
+        _osDefaultGLState.blendEquationRGB,
+        _osDefaultGLState.blendEquationAlpha
+    );
+    glBlendFuncSeparate(
+        _osDefaultGLState.blendSrcRGB,
+        _osDefaultGLState.blendDestRGB,
+        _osDefaultGLState.blendSrcAlpha,
+        _osDefaultGLState.blendDestAlpha
+    );
+   
+    glEnable(GL_DEPTH_TEST);
+    _osDefaultGLState.depthTestEnabled = true;
+
+    // Update the default OS GL state to the RenderEngine to be
+    // available to all renderables
+    global::renderEngine.setGLDefaultState(_osDefaultGLState);
+}
+
+void FramebufferRenderer::resolveMSAA(float blackoutFactor) {
+    _resolveProgram->activate();
+
+    ghoul::opengl::TextureUnit mainColorTextureUnit;
+    mainColorTextureUnit.activate();
+
+    //glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._mainColorTexture);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _pingPongBuffers.colorTexture[_pingPongIndex]);
+    _resolveProgram->setUniform(_uniformCache.mainColorTexture, mainColorTextureUnit);
+    _resolveProgram->setUniform(_uniformCache.blackoutFactor, blackoutFactor);
+    _resolveProgram->setUniform(_uniformCache.nAaSamples, _nAaSamples);
+    glBindVertexArray(_screenQuad);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+
+    _resolveProgram->deactivate();
+}
+
+void FramebufferRenderer::applyTMO(float blackoutFactor) {
+    const bool doPerformanceMeasurements = global::performanceManager.isEnabled();
+    float averageLuminaceInFB = 0.0;
+    if (_toneMapOperator ==
+        static_cast<int>(openspace::RenderEngine::ToneMapOperators::GLOBAL)) {
+        std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
+        if (doPerformanceMeasurements) {
+            perfInternal = std::make_unique<performance::PerformanceMeasurement>(
+                "FramebufferRenderer::render::TMO_GLOBAL"
+                );
+        }
+        averageLuminaceInFB = computeBufferAveLuminanceGPU();
+        if (std::isnan(averageLuminaceInFB)) {
+            averageLuminaceInFB = 1000.0;
+        }
+    }
+    else if (
+        _toneMapOperator ==
+        static_cast<int>(openspace::RenderEngine::ToneMapOperators::MIPMAPPING)) {
+        std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
+        if (doPerformanceMeasurements) {
+            perfInternal = std::make_unique<performance::PerformanceMeasurement>(
+                "FramebufferRenderer::render::TMO_Mipmapping"
+                );
+        }
+        if (_bloomEnabled) {
+            computeMipMappingFromHDRBuffer(_bloomBuffers._bloomTexture[2]);
+        }
+        else {
+            computeMipMappingFromHDRBuffer(_hdrBuffers._hdrFilteringTexture);
+        }
+    }
+    else {
+        std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
+        if (doPerformanceMeasurements) {
+            perfInternal = std::make_unique<performance::PerformanceMeasurement>(
+                "FramebufferRenderer::render::TMO"
+                );
+        }
+        _hdrFilteringProgram->activate();
+
+        ghoul::opengl::TextureUnit hdrFeedingTextureUnit;
+        hdrFeedingTextureUnit.activate();
+        if (_bloomEnabled) {
+            glBindTexture(GL_TEXTURE_2D, _bloomBuffers._bloomTexture[2]);
+        }
+        else {
+            glBindTexture(GL_TEXTURE_2D, _hdrBuffers._hdrFilteringTexture);
+        }
+
+        _hdrFilteringProgram->setUniform(
+            _hdrUniformCache.deferredResultsTexture,
+            hdrFeedingTextureUnit
+        );
+
+
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutFactor, blackoutFactor);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.hdrExposure, _hdrExposure);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.gamma, _gamma);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.toneMapOperator, _toneMapOperator);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.aveLum, averageLuminaceInFB);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.maxWhite, _maxWhite);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.Hue, _hue);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.Saturation, _saturation);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.Value, _value);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.Lightness, _lightness);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.colorSpace, _colorSpace);
+
+
+        glBindVertexArray(_screenQuad);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
+
+        _hdrFilteringProgram->deactivate();
+    }
+}
+
 float FramebufferRenderer::computeBufferAveLuminance() {
     unsigned int texDimension = _resolution.x * _resolution.y;
     
@@ -452,8 +624,8 @@ float FramebufferRenderer::computeBufferAveLuminance() {
 
     ghoul::opengl::TextureUnit hdrTextureUnit;
     hdrTextureUnit.activate();    
-    glBindTexture(GL_TEXTURE_2D, _hdrFilteringTexture);
-    
+    glBindTexture(GL_TEXTURE_2D, _hdrBuffers._hdrFilteringTexture);
+    glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, texData.get());
     
     float sum = 0.0f;
@@ -474,7 +646,7 @@ float FramebufferRenderer::computeBufferAveLuminanceGPU() {
     GLint defaultFbo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, _computeAveLumFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, _aLumBuffers._computeAveLumFBO);
     GLenum textureBuffers[1] = { GL_COLOR_ATTACHMENT0 };
     glDrawBuffers(1, textureBuffers);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -488,7 +660,7 @@ float FramebufferRenderer::computeBufferAveLuminanceGPU() {
 
     ghoul::opengl::TextureUnit hdrTextureUnit;
     hdrTextureUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, _hdrFilteringTexture);
+    glBindTexture(GL_TEXTURE_2D, _hdrBuffers._hdrFilteringTexture);
     _aveLumProgram->setUniform("hdrTexture", hdrTextureUnit);
     _aveLumProgram->setUniform("bufferWidth", _resolution.x);
     _aveLumProgram->setUniform("bufferHeight", _resolution.y);
@@ -512,15 +684,15 @@ float FramebufferRenderer::computeBufferAveLuminanceGPU() {
 
 void FramebufferRenderer::applyBloomFilter() {
     
-    if (!_bloomVAO) {
-        glGenVertexArrays(1, &_bloomVAO);
+    if (!_bloomBuffers._bloomVAO) {
+        glGenVertexArrays(1, &_bloomBuffers._bloomVAO);
     }
 
-    glBindFramebuffer(GL_FRAMEBUFFER, _bloomFilterFBO[0]);
+    glBindFramebuffer(GL_FRAMEBUFFER, _bloomBuffers._bloomFilterFBO[0]);
     glDrawBuffers(1, ColorAttachment0Array);
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, _resolution.y, _resolution.x);
-    glBindVertexArray(_bloomVAO);
+    glBindVertexArray(_bloomBuffers._bloomVAO);
 
     _bloomProgram->activate();
 
@@ -529,7 +701,8 @@ void FramebufferRenderer::applyBloomFilter() {
         ghoul::opengl::TextureUnit filterTextureUnit;
         filterTextureUnit.activate();
         // The filter texture where the gaussian filter will be applied
-        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainFilterTexture);
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._mainFilterTexture);
+
         _bloomProgram->setUniform("filterStep", 1);
         _bloomProgram->setUniform("filterImage", filterTextureUnit);
         _bloomProgram->setUniform("numberOfSamples", _nAaSamples);
@@ -537,7 +710,7 @@ void FramebufferRenderer::applyBloomFilter() {
         // Making OpenGL happy...
         ghoul::opengl::TextureUnit dummyTextureUnit;
         dummyTextureUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, _bloomTexture[2]);
+        glBindTexture(GL_TEXTURE_2D, _bloomBuffers._bloomTexture[2]);
         _bloomProgram->setUniform("filterFirstPass", dummyTextureUnit);
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -546,11 +719,11 @@ void FramebufferRenderer::applyBloomFilter() {
 
     _bloomProgram->deactivate();
     
-    glBindFramebuffer(GL_FRAMEBUFFER, _bloomFilterFBO[1]);
+    glBindFramebuffer(GL_FRAMEBUFFER, _bloomBuffers._bloomFilterFBO[1]);
     glDrawBuffers(1, ColorAttachment0Array);
     glViewport(0, 0, _resolution.x, _resolution.y);
     glClear(GL_COLOR_BUFFER_BIT);
-    glBindVertexArray(_bloomVAO);
+    glBindVertexArray(_bloomBuffers._bloomVAO);
 
     _bloomProgram->activate();
 
@@ -559,7 +732,7 @@ void FramebufferRenderer::applyBloomFilter() {
         ghoul::opengl::TextureUnit filterTextureUnit;
         filterTextureUnit.activate();
         // The results of the previous pass is passed to this pass
-        glBindTexture(GL_TEXTURE_2D, _bloomTexture[0]);
+        glBindTexture(GL_TEXTURE_2D, _bloomBuffers._bloomTexture[0]);
         _bloomProgram->setUniform("filterStep", 2);
         _bloomProgram->setUniform("filterFirstPass", filterTextureUnit);
         _bloomProgram->setUniform("numberOfSamples", _nAaSamples);
@@ -567,7 +740,7 @@ void FramebufferRenderer::applyBloomFilter() {
         // Making OpenGL happy...
         ghoul::opengl::TextureUnit dummyTextureUnit;
         dummyTextureUnit.activate();
-        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainFilterTexture);
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._mainFilterTexture);
         _bloomProgram->setUniform("filterImage", dummyTextureUnit);
         
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -577,7 +750,7 @@ void FramebufferRenderer::applyBloomFilter() {
 
     _bloomProgram->deactivate();
 
-    glBindFramebuffer(GL_FRAMEBUFFER, _bloomFilterFBO[2]);
+    glBindFramebuffer(GL_FRAMEBUFFER, _bloomBuffers._bloomFilterFBO[2]);
     glDrawBuffers(1, ColorAttachment0Array);
     glViewport(0, 0, _resolution.x, _resolution.y);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -586,13 +759,13 @@ void FramebufferRenderer::applyBloomFilter() {
 
     // Adding the result of the blurring processes to the 
     // hdrFilteringTexture and saving the result in 
-    // the _bloomTexture[2] texture (JCC: That can be
+    // the _bloomBuffers._bloomTexture[2] texture (JCC: That can be
     // done by blending operation (ONE))
     {
         ghoul::opengl::TextureUnit deferredResultsTextureUnit;
         deferredResultsTextureUnit.activate();
         // Original buffer will be summed to the bloom result
-        glBindTexture(GL_TEXTURE_2D, _hdrFilteringTexture);
+        glBindTexture(GL_TEXTURE_2D, _hdrBuffers._hdrFilteringTexture);
         _bloomResolveProgram->setUniform(
             _bloomUniformCache.renderedImage, 
             deferredResultsTextureUnit
@@ -601,7 +774,7 @@ void FramebufferRenderer::applyBloomFilter() {
         ghoul::opengl::TextureUnit bloomTextureUnit;
         bloomTextureUnit.activate();
         // Results of the second pass are added to the original buffer
-        glBindTexture(GL_TEXTURE_2D, _bloomTexture[1]);
+        glBindTexture(GL_TEXTURE_2D, _bloomBuffers._bloomTexture[1]);
         _bloomResolveProgram->setUniform(_bloomUniformCache.bloomImage, bloomTextureUnit);
         
         _bloomResolveProgram->setUniform(
@@ -619,12 +792,10 @@ void FramebufferRenderer::applyBloomFilter() {
     }
 
     _bloomResolveProgram->deactivate();
-
-    glBindFramebuffer(GL_FRAMEBUFFER, _osDefaultGLState.defaultFBO);
 }
 
 void FramebufferRenderer::computeImageHistogram() {
-    glBindFramebuffer(GL_FRAMEBUFFER, _histoFramebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, _histoBuffers._histoFramebuffer);
     GLenum textureBuffer[] = {
        GL_COLOR_ATTACHMENT0
     };
@@ -659,13 +830,13 @@ void FramebufferRenderer::computeImageHistogram() {
     glBlendFunc(GL_ONE, GL_ONE);
     glEnable(GL_BLEND);
 
-    glBindVertexArray(_histoVao);
+    glBindVertexArray(_histoBuffers._histoVao);
     
     _histoProgram->activate();
 
     ghoul::opengl::TextureUnit renderedImage;
     renderedImage.activate();
-    glBindTexture(GL_TEXTURE_2D, _hdrFilteringTexture);
+    glBindTexture(GL_TEXTURE_2D, _hdrBuffers._hdrFilteringTexture);
     _histoProgram->setUniform(_histoUniformCache.renderedImage, renderedImage);
     _histoProgram->setUniform(_histoUniformCache.imageWidth, static_cast<float>(_resolution.x));
     _histoProgram->setUniform(_histoUniformCache.imageHeight, static_cast<float>(_resolution.y));
@@ -699,7 +870,7 @@ void FramebufferRenderer::computeImageHistogram() {
 
 void FramebufferRenderer::computeMipMappingFromHDRBuffer(GLuint oglImageBuffer) {
     glEnable(GL_FRAMEBUFFER_SRGB);
-    /*glBindFramebuffer(GL_FRAMEBUFFER, _tmoFramebuffer);
+    /*glBindFramebuffer(GL_FRAMEBUFFER, _mMappingTMOBuffers._tmoFramebuffer);
     GLenum textureBuffer[] = {
        GL_COLOR_ATTACHMENT0
     };
@@ -712,7 +883,7 @@ void FramebufferRenderer::computeMipMappingFromHDRBuffer(GLuint oglImageBuffer) 
     ghoul::opengl::TextureUnit samplerUnit;
     samplerUnit.activate();
     glBindTexture(GL_TEXTURE_2D, oglImageBuffer);
-    glBindSampler(samplerUnit.operator GLint(), _tmoHdrSampler);
+    glBindSampler(samplerUnit.operator GLint(), _mMappingTMOBuffers._tmoHdrSampler);
 
     glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -865,8 +1036,7 @@ void FramebufferRenderer::update() {
 }
 
 void FramebufferRenderer::updateResolution() {
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
-
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._mainColorTexture);
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
@@ -876,8 +1046,7 @@ void FramebufferRenderer::updateResolution() {
         true
     );
 
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainFilterTexture);
-
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._mainFilterTexture);
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
@@ -886,9 +1055,20 @@ void FramebufferRenderer::updateResolution() {
         _resolution.y,
         true
     );
+
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _pingPongBuffers.colorTexture[1]);
+    glTexImage2DMultisample(
+        GL_TEXTURE_2D_MULTISAMPLE,
+        _nAaSamples,
+        GL_RGBA16F,
+        _resolution.x,
+        _resolution.y,
+        true
+    );
+
 
     // HDR / Filtering
-    glBindTexture(GL_TEXTURE_2D, _hdrFilteringTexture);
+    glBindTexture(GL_TEXTURE_2D, _hdrBuffers._hdrFilteringTexture);
 
     glTexImage2D(
         GL_TEXTURE_2D,
@@ -906,7 +1086,7 @@ void FramebufferRenderer::updateResolution() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
     // Average Luminosity Computation Texture
-    glBindTexture(GL_TEXTURE_2D, _computeAveLumTexture);
+    glBindTexture(GL_TEXTURE_2D, _aLumBuffers._computeAveLumTexture);
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
@@ -925,7 +1105,7 @@ void FramebufferRenderer::updateResolution() {
     // Bloom Filter
     for (int i = 0; i < 3; i++)
     {
-        glBindTexture(GL_TEXTURE_2D, _bloomTexture[i]);
+        glBindTexture(GL_TEXTURE_2D, _bloomBuffers._bloomTexture[i]);
         glTexImage2D(
             GL_TEXTURE_2D,
             0,
@@ -943,7 +1123,7 @@ void FramebufferRenderer::updateResolution() {
     }
 
     // Histogram Texture
-    glBindTexture(GL_TEXTURE_2D, _histoTexture);
+    glBindTexture(GL_TEXTURE_2D, _histoBuffers._histoTexture);
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
@@ -959,8 +1139,8 @@ void FramebufferRenderer::updateResolution() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    glBindVertexArray(_histoVao);
-    glBindBuffer(GL_ARRAY_BUFFER, _histoVbo);
+    glBindVertexArray(_histoBuffers._histoVao);
+    glBindBuffer(GL_ARRAY_BUFFER, _histoBuffers._histoVbo);
 
     _histoPoints.clear();
     _histoPoints.reserve(_resolution.x * _resolution.y);
@@ -981,7 +1161,7 @@ void FramebufferRenderer::updateResolution() {
     glBindVertexArray(0);
 
     // TMO via mipmapping
-    glBindTexture(GL_TEXTURE_2D, _tmoTexture);
+    glBindTexture(GL_TEXTURE_2D, _mMappingTMOBuffers._tmoTexture);
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
@@ -998,7 +1178,7 @@ void FramebufferRenderer::updateResolution() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
     // G-Buffer main position
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainPositionTexture);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._mainPositionTexture);
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
@@ -1008,7 +1188,7 @@ void FramebufferRenderer::updateResolution() {
         true
     );
 
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainNormalTexture);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._mainNormalTexture);
 
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
@@ -1019,7 +1199,7 @@ void FramebufferRenderer::updateResolution() {
         true
     );
 
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._mainDepthTexture);
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
@@ -1529,7 +1709,7 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
     nOneStripProgram->activate();
 
     ghoul::opengl::TextureUnit pixelSizeTextureUnit;
-    pixelSizeTextureUnit.activate ();
+    pixelSizeTextureUnit.activate();
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, pixelSizeTexture);
     nOneStripProgram->setUniform("pixelSizeTexture", pixelSizeTextureUnit);
 
@@ -1594,40 +1774,12 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         return;
     }    
 
-    // Capture standard fbo
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_osDefaultGLState.defaultFBO);
-    
-    glEnablei(GL_BLEND, 0);
-    glDisablei(GL_BLEND, 1);
-    glDisablei(GL_BLEND, 2);
-    glDisablei(GL_BLEND, 3);    
-    
-    _osDefaultGLState.blendEnabled = true;
-    _osDefaultGLState.blend0Enabled = true;
-    _osDefaultGLState.blend1Enabled = false;
-    _osDefaultGLState.blend2Enabled = false;
-    _osDefaultGLState.blend3Enabled = false;
-    
-    glBlendEquationSeparate(
-        _osDefaultGLState.blendEquationRGB, 
-        _osDefaultGLState.blendEquationAlpha
-    );
-    glBlendFuncSeparate(
-        _osDefaultGLState.blendSrcRGB, 
-        _osDefaultGLState.blendDestRGB, 
-        _osDefaultGLState.blendSrcAlpha, 
-        _osDefaultGLState.blendDestAlpha
-    );
-    
-    glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
-    glEnable(GL_DEPTH_TEST);
-    _osDefaultGLState.depthTestEnabled = true;
-
-    // Update the default OS GL state to the RenderEngine to be
+    // Capture and Update the default OS GL state to the RenderEngine to be
     // available to all renderables
-    global::renderEngine.setGLDefaultState(_osDefaultGLState);
+    captureAndSetOpenGLDefaultState();
 
     // deferred g-buffer plus filter
+    glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers._mainFramebuffer);
     glDrawBuffers(4, ColorAttachment0123Array);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
@@ -1662,10 +1814,17 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         performRaycasterTasks(tasks.raycasterTasks);
     }
 
-    // Binds the final Framebuffer which will contain the results of the TMOs
-    glBindFramebuffer(GL_FRAMEBUFFER, _hdrFilteringFramebuffer);
-    glDrawBuffers(1, ColorAttachment0Array);
-    glClear(GL_COLOR_BUFFER_BIT);
+    //// Binds the final Framebuffer which will contain the results of the TMOs
+    //glBindFramebuffer(GL_FRAMEBUFFER, _hdrBuffers._hdrFilteringFramebuffer);
+    //glDrawBuffers(1, ColorAttachment0Array);
+    //glClear(GL_COLOR_BUFFER_BIT);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer);
+    glDrawBuffers(1, &ColorAttachment01Array[_pingPongIndex]);
+    glEnablei(GL_BLEND, 0);
+    glDisablei(GL_BLEND, 1);
+    glDisablei(GL_BLEND, 2);
+    glDisablei(GL_BLEND, 3);
 
     // Run Deferred Tasks (resolve step is executed together with these tasks)
     {
@@ -1682,108 +1841,64 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     // If no Deferred Task are prensent, the resolve step
     // is executed in a separated step
     if (tasks.deferredcasterTasks.empty()) {
-        //glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
-        _resolveProgram->activate();
-
-        ghoul::opengl::TextureUnit mainColorTextureUnit;
-        mainColorTextureUnit.activate();
-
-        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
-        _resolveProgram->setUniform(_uniformCache.mainColorTexture, mainColorTextureUnit);
-        _resolveProgram->setUniform(_uniformCache.blackoutFactor, blackoutFactor);
-        _resolveProgram->setUniform(_uniformCache.nAaSamples, _nAaSamples);
-        glBindVertexArray(_screenQuad);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
-
-        _resolveProgram->deactivate();
+        resolveMSAA(blackoutFactor);
     }
     
-
     // Disabling depth test for filtering and hdr
     glDisable(GL_DEPTH_TEST);
 
     if (_bloomEnabled) {
+        std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
+        if (doPerformanceMeasurements) {
+            perfInternal = std::make_unique<performance::PerformanceMeasurement>(
+                "FramebufferRenderer::render::applyBloomFilter"
+                );
+        }
+
+        // JCC: PRECISO AJUSTAR A ENTRADA DO BLOOM PARA A NOVA PING PONG.
         // Results of the DeferredTasks as entry for the bloom filter
         applyBloomFilter();
     }
-
-    float averageLuminaceInFB = 0.0;
-    //if (_toneMapOperator == 
-    //    static_cast<int>(openspace::RenderEngine::ToneMapOperators::GLOBAL)
-    //    )
-    //{
-    //    averageLuminaceInFB = computeBufferAveLuminanceGPU();
-    //    if (std::isnan(averageLuminaceInFB)) {
-    //        averageLuminaceInFB = 1000.0;
-    //    }
-    //}
-    //
-    ////float averageLuminaceInFB = 0.5;
-
 
     // When applying the TMO, the result is saved to the default FBO to be displayed
     // by the Operating System
     glBindFramebuffer(GL_FRAMEBUFFER, _osDefaultGLState.defaultFBO);
     glViewport(0, 0, _resolution.x, _resolution.y);
+
+    // JCC: AQUI -> PRECISO FAZER UM RESOLVE COM HDR JUNTO PARA ECONOMIZAR TEMPO
+    // 
     
-    if (_toneMapOperator ==
-        static_cast<int>(openspace::RenderEngine::ToneMapOperators::MIPMAPPING)) {
-        if (_bloomEnabled) {
-            computeMipMappingFromHDRBuffer(_bloomTexture[2]);
-        }
-        else {
-            computeMipMappingFromHDRBuffer(_hdrFilteringTexture);
-        }       
-    }
-    else {
-        _hdrFilteringProgram->activate();
-
-        ghoul::opengl::TextureUnit hdrFeedingTextureUnit;
-        hdrFeedingTextureUnit.activate();
-        if (_bloomEnabled) {
-            glBindTexture(GL_TEXTURE_2D, _bloomTexture[2]);
-        }
-        else {
-            glBindTexture(GL_TEXTURE_2D, _hdrFilteringTexture);
-        }
-
-        _hdrFilteringProgram->setUniform(
-            _hdrUniformCache.deferredResultsTexture,
-            hdrFeedingTextureUnit
-        );
-
-
-        _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutFactor, blackoutFactor);
-        _hdrFilteringProgram->setUniform(_hdrUniformCache.hdrExposure, _hdrExposure);
-        _hdrFilteringProgram->setUniform(_hdrUniformCache.gamma, _gamma);
-        _hdrFilteringProgram->setUniform(_hdrUniformCache.toneMapOperator, _toneMapOperator);
-        _hdrFilteringProgram->setUniform(_hdrUniformCache.aveLum, averageLuminaceInFB);
-        _hdrFilteringProgram->setUniform(_hdrUniformCache.maxWhite, _maxWhite);
-        _hdrFilteringProgram->setUniform(_hdrUniformCache.Hue, _hue);
-        _hdrFilteringProgram->setUniform(_hdrUniformCache.Saturation, _saturation);
-        _hdrFilteringProgram->setUniform(_hdrUniformCache.Value, _value);
-        _hdrFilteringProgram->setUniform(_hdrUniformCache.Lightness, _lightness);
-        _hdrFilteringProgram->setUniform(_hdrUniformCache.colorSpace, _colorSpace);
-
-
-        glBindVertexArray(_screenQuad);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
-
-        _hdrFilteringProgram->deactivate();
-    }
+    // Apply the selected TMO on the results
+    applyTMO(blackoutFactor);
     
-    
+    // JCC: ADJUST HERE SO THE HDR IS TOGETHER WITH THE RESOLVE:
+    // As a last step, copy the rendering to the final default framebuffer.
+    /*_resolveProgram->activate();
+
+    ghoul::opengl::TextureUnit mainColorTextureUnit;
+    mainColorTextureUnit.activate();
+
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _pingPongBuffers[_pingPongIndex].colorTexture);
+    _resolveProgram->setUniform(_uniformCache.mainColorTexture, mainColorTextureUnit);
+    _resolveProgram->setUniform(_uniformCache.blackoutFactor, blackoutFactor);
+    _resolveProgram->setUniform(_uniformCache.nAaSamples, _nAaSamples);
+    _resolveProgram->setUniform(_uniformCache.exposure, _hdrExposure);
+    _resolveProgram->setUniform(_uniformCache.gamma, _gamma);
+    _resolveProgram->setUniform(_uniformCache.nAaSamples, _nAaSamples);
+
+    glBindVertexArray(_screenQuad);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+
+    _resolveProgram->deactivate();*/
+
+
     //================================
     // Adjusting color and brightness
     //================================
     //
     //// Histogram Equalization
     //computeImageHistogram();
-
-
-    //glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
 }
 
 void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>& tasks) {
@@ -1800,7 +1915,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             exitProgram->deactivate();
         }
 
-        glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers._mainFramebuffer);
         glm::vec3 cameraPosition;
         bool isCameraInside = raycaster->isCameraInside(
             raycasterTask.renderData,
@@ -1846,7 +1961,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
 
             ghoul::opengl::TextureUnit mainDepthTextureUnit;
             mainDepthTextureUnit.activate();
-            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture);
+            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._mainDepthTexture);
             raycastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
 
             raycastProgram->setUniform("nAaSamples", _nAaSamples);
@@ -1893,12 +2008,22 @@ void FramebufferRenderer::performDeferredTasks(
         }
 
         if (deferredcastProgram) {
+            _pingPongIndex = _pingPongIndex == 0 ? 1 : 0;
+            int fromIndex = _pingPongIndex == 0 ? 1 : 0;
+            glDrawBuffers(1, &ColorAttachment01Array[_pingPongIndex]);
+            glDisablei(GL_BLEND, 0);
+            glDisablei(GL_BLEND, 1);
+
             deferredcastProgram->activate();
 
             // adding G-Buffer
             ghoul::opengl::TextureUnit mainDColorTextureUnit;
             mainDColorTextureUnit.activate();
-            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
+            //glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._mainColorTexture);
+            glBindTexture(
+                GL_TEXTURE_2D_MULTISAMPLE,
+                _pingPongBuffers.colorTexture[fromIndex]
+            );
             deferredcastProgram->setUniform(
                 "mainColorTexture",
                 mainDColorTextureUnit
@@ -1906,7 +2031,7 @@ void FramebufferRenderer::performDeferredTasks(
 
             ghoul::opengl::TextureUnit mainPositionTextureUnit;
             mainPositionTextureUnit.activate();
-            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainPositionTexture);
+            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._mainPositionTexture);
             deferredcastProgram->setUniform(
                 "mainPositionTexture",
                 mainPositionTextureUnit
@@ -1914,7 +2039,7 @@ void FramebufferRenderer::performDeferredTasks(
 
             ghoul::opengl::TextureUnit mainNormalTextureUnit;
             mainNormalTextureUnit.activate();
-            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainNormalTexture);
+            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._mainNormalTexture);
             deferredcastProgram->setUniform(
                 "mainNormalTexture",
                 mainNormalTextureUnit
@@ -1951,9 +2076,10 @@ void FramebufferRenderer::performDeferredTasks(
 
             deferredcastProgram->deactivate();
 
-            if (firstPaint) {
+            // JCC: No neeeded anymore
+            /*if (firstPaint) {
                 firstPaint = false;
-            }
+            }*/
         }
         else {
             LWARNING(

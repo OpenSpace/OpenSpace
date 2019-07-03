@@ -64,6 +64,10 @@ private:
        GL_COLOR_ATTACHMENT0
     };
 
+    inline static const GLenum ColorAttachment1Array[1] = {
+       GL_COLOR_ATTACHMENT1
+    };
+
     inline static const GLenum ColorAttachment01Array[2] = {
        GL_COLOR_ATTACHMENT0,
        GL_COLOR_ATTACHMENT1
@@ -81,6 +85,49 @@ private:
        GL_COLOR_ATTACHMENT2,
        GL_COLOR_ATTACHMENT3
     };
+
+    typedef struct {
+        GLuint _mainColorTexture;
+        GLuint _mainFilterTexture;
+        GLuint _mainPositionTexture;
+        GLuint _mainNormalTexture;
+        GLuint _mainDepthTexture;
+        GLuint _mainFramebuffer;
+    } GBuffers;
+
+    typedef struct {
+        GLuint framebuffer;
+        GLuint colorTexture[2];
+    } PingPongBuffers;
+ 
+    typedef struct {
+        GLuint _histoVao;
+        GLuint _histoVbo;
+        GLuint _histoTexture;
+        GLuint _histoFramebuffer;
+    } HistoBuffers;
+
+    typedef struct {
+        GLuint _bloomVAO = 0u;
+        GLuint _bloomFilterFBO[3];
+        GLuint _bloomTexture[3];
+    } BloomBuffers;
+
+    typedef struct {
+        GLuint _hdrFilteringFramebuffer;
+        GLuint _hdrFilteringTexture;
+    } HDRBuffers;
+
+    typedef struct {
+        GLuint _computeAveLumFBO;
+        GLuint _computeAveLumTexture;
+    } AverageLumBuffers;
+
+    typedef struct {
+        GLuint _tmoTexture;
+        GLuint _tmoFramebuffer;
+        GLuint _tmoHdrSampler;
+    } MipMappingTMOBuffers;
 
 public:
     typedef std::map<
@@ -150,6 +197,10 @@ public:
         DeferredcasterListener::IsAttached isAttached) override;
 
 private:
+    void captureAndSetOpenGLDefaultState();
+    void resolveMSAA(float blackoutFactor);
+    void applyTMO(float blackoutFactor);
+    
     float computeBufferAveLuminance();
     float computeBufferAveLuminanceGPU();
     void applyBloomFilter();
@@ -189,33 +240,19 @@ private:
 
     GLuint _screenQuad;
     GLuint _vertexPositionBuffer;
-    GLuint _mainColorTexture;
-    GLuint _mainFilterTexture;
-    GLuint _mainPositionTexture;
-    GLuint _mainNormalTexture;
-    GLuint _mainDepthTexture;
     GLuint _exitColorTexture;
-    GLuint _mainFramebuffer;
     GLuint _exitDepthTexture;
     GLuint _exitFramebuffer;
-    GLuint _hdrFilteringFramebuffer;
-    GLuint _hdrFilteringTexture;
-    GLuint _histoFramebuffer;
-    GLuint _histoTexture;
-    GLuint _histoVao;
-    GLuint _histoVbo;
 
-    GLuint _bloomVAO = 0u;
-    GLuint _bloomFilterFBO[3];
-    GLuint _bloomTexture[3];
+    GBuffers _gBuffers;
+    PingPongBuffers _pingPongBuffers;
+    HistoBuffers _histoBuffers;
+    BloomBuffers _bloomBuffers;
+    HDRBuffers _hdrBuffers;
+    AverageLumBuffers _aLumBuffers;
+    MipMappingTMOBuffers _mMappingTMOBuffers;
 
-    GLuint _computeAveLumFBO; 
-    GLuint _computeAveLumTexture;
-
-    // New TMO via mipmapping
-    GLuint _tmoTexture;
-    GLuint _tmoFramebuffer;
-    GLuint _tmoHdrSampler;
+    unsigned int _pingPongIndex = 0u;
 
     bool _dirtyDeferredcastData;
     bool _dirtyRaycastData;
