@@ -61,7 +61,6 @@
 
 #include "floatoperations.glsl"
 
-#include "hdr.glsl"
 #include "atmosphere_common.glsl"
 
 out vec4 renderTarget;
@@ -70,11 +69,6 @@ in vec3 interpolatedNDCPos;
 uniform int nAaSamples;
 uniform double msaaSamplePatter[48];
 uniform int cullAtmosphere;
-
-// The following uniforms are
-// set into the current Renderer
-uniform bool firstPaint;
-uniform float atmExposure;
 
 uniform sampler2D irradianceTexture;
 uniform sampler3D inscatterTexture;
@@ -89,8 +83,6 @@ uniform dmat4 dSgctProjectionToModelTransformMatrix;
 
 uniform dvec4 dCamPosObj;
 uniform dvec3 sunDirectionObj;
-
-uniform float blackoutFactor;
 
 /*******************************************************************************
  ***** ALL CALCULATIONS FOR ECLIPSE ARE IN METERS AND IN WORLD SPACE SYSTEM ****
@@ -315,7 +307,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     // through the atmosphere. If this ray hits something inside the atmosphere,
     // we will subtract the attenuated scattering light from that path in the
     // current path.
-    vec4 inscatterRadiance = max(texture4D(inscatterTexture, r, mu, muSun, nu), 0.0);    
+    vec4 inscatterRadiance = max(texture4D(inscatterTexture, r, mu, muSun, nu), 0.0);
       
     // After removing the initial path from camera pos to top of atmosphere (for an
     // observer in the space) we test if the light ray is hitting the atmosphere
@@ -363,7 +355,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     if (abs(mu - muHorizon) < INTERPOLATION_EPS) {
         // We want an interpolation value close to 1/2, so the
         // contribution of each radiance value is almost the same
-        // or it has a havey weight if from above or below horizon
+        // or it has a heavy weight if from above or below horizon
         float interpolationValue = ((mu - muHorizon) + INTERPOLATION_EPS) / (2.0f * INTERPOLATION_EPS);
 
         //float t2 = t * t;
@@ -429,7 +421,11 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
         return finalScatteringRadiance;
     } else {
         //return ((r-Rg) * invRtMinusRg)*spaceColor.rgb + finalScatteringRadiance;
-        return attenuation * spaceColor.rgb + finalScatteringRadiance;
+        //return attenuation * spaceColor.rgb + finalScatteringRadiance;
+        // JCC: Review next step. I don't like it.
+        return attenuation * spaceColor.rgb +
+            1.0 * attenuation * finalScatteringRadiance +
+            (vec3(1.0) - attenuation) * finalScatteringRadiance;
     }
     
 }
@@ -536,7 +532,8 @@ vec3 sunColor(const vec3 x, const float t, const vec3 v, const vec3 s, const flo
                           vec3(0.0f) : transmittanceLUT(r, mu)) : vec3(1.0f);  
     // JCC: Change this function to a impostor texture with gaussian decay color weighted
     // by tge sunRadiance, transmittance and irradianceColor (11/03/2017)                          
-    float sunFinalColor = step(cos(M_PI / 650.0f), dot(v, s)) * sunRadiance * (1.0f- irradianceFactor); 
+    float sunFinalColor = smoothstep(cos(M_PI / 500.0f), cos(M_PI / 900.0f), dot(v, s)) * 
+                          sunRadiance * (1.0f - irradianceFactor);
 
     return transmittance * sunFinalColor;      
 }
@@ -546,7 +543,6 @@ void main() {
 
     if (cullAtmosphere == 0) {
         vec4 atmosphereFinalColor = vec4(0.0f);
-        vec4 backgroundFinalColor = vec4(0.0f);
         int nSamples = 1;
         
         // First we determine if the pixel is complex (different fragments on it)
@@ -570,7 +566,8 @@ void main() {
         for (int i = 0; i < nSamples; i++) {
             // Color from G-Buffer
             //vec4 color = texelFetch(mainColorTexture, fragCoords, i);
-            vec4 color = vec4(-log2(vec3(1.0) - colorArray[i].rgb), colorArray[i].a);
+            //vec4 color = vec4(-log2(vec3(1.0) - colorArray[i].rgb), colorArray[i].a);
+            vec4 color = colorArray[i];
             // Ray in object space
             dRay ray;
             dvec4 planetPositionObjectCoords = dvec4(0.0);
@@ -636,8 +633,7 @@ void main() {
                 
                 if (dot(position.xyz, vec3(1.0)) > 0.0 && (pixelDepth < offset)) {
                     // ATM Occluded - Something in fron of ATM.
-                    //atmosphereFinalColor += vec4(HDR(color.xyz * backgroundConstant, atmExposure), color.a);                  
-                    atmosphereFinalColor += vec4(color.xyz, color.a);                  
+                    atmosphereFinalColor += color;
                 } else {
                     // Following paper nomenclature      
                     double t = offset;                  
@@ -686,44 +682,27 @@ void main() {
                     } 
                     
                     // Final Color of ATM plus terrain:
-                    //vec4 finalRadiance = vec4(HDR(inscatterColor + groundColorV + sunColorV, atmExposure), 1.0);
                     vec4 finalRadiance = vec4(inscatterColor + groundColorV + sunColorV, 1.0);
 
                     atmosphereFinalColor += finalRadiance;
                 }
             } 
             else { // no intersection
-                //atmosphereFinalColor += vec4(HDR(color.xyz * backgroundConstant, atmExposure), color.a);
-                //atmosphereFinalColor += vec4(color.xyz * backgroundConstant, color.a);
-                //backgroundFinalColor += color;
-                discard;
+                // Buffer color
+                atmosphereFinalColor += color;
             }           
         }  
 
         renderTarget = atmosphereFinalColor / float(nSamples);
-
-        // renderTarget = vec4(
-        //     (atmosphereFinalColor.xyz + (backgroundFinalColor.xyz * backgroundConstant)) / float(nSamples), 
-        //     (atmosphereFinalColor.a + backgroundFinalColor.a) / float(nSamples)
-        //     );
     } 
     else { // culling
-        if (firstPaint) {
-            vec4 bColor = vec4(0.0f);
-            for (int f = 0; f < nAaSamples; f++) {
-                bColor += texelFetch(mainColorTexture, fragCoords, f);
-            }
-            bColor /= float(nAaSamples);
-            //renderTarget = vec4(HDR(bColor.xyz * backgroundConstant, atmExposure), bColor.a);
-            //renderTarget = vec4(bColor.xyz * backgroundConstant, bColor.a);
-            renderTarget = vec4(-log2(vec3(1.0) - bColor.rgb), bColor.a);
-            //renderTarget = bColor;
-
-        } 
-        else {
-            //renderTarget = vec4(vec3(1.0, 0.0, 0.0), 1.0);
-            discard;
+        vec4 bColor = vec4(0.0f);
+        for (int f = 0; f < nAaSamples; f++) {
+            bColor += texelFetch(mainColorTexture, fragCoords, f);
         }
+        bColor /= float(nAaSamples);
+        //renderTarget = vec4(-log2(vec3(1.0) - bColor.rgb), bColor.a);
+        renderTarget = bColor;
     }
 }
 

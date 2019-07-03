@@ -55,10 +55,10 @@ namespace {
         "mainColorTexture", "blackoutFactor", "nAaSamples"
     };
 
-    constexpr const std::array<const char*, 12> HDRUniformNames = {
-        "deferredResultsTexture", "blackoutFactor", "hdrExposure", "gamma", 
+    constexpr const std::array<const char*, 13> HDRUniformNames = {
+        "hdrFeedingTexture", "blackoutFactor", "hdrExposure", "gamma", 
         "toneMapOperator", "aveLum", "maxWhite", "Hue", "Saturation", "Value", 
-        "Lightness", "colorSpace"
+        "Lightness", "colorSpace", "nAaSamples"
     };
 
     constexpr const std::array<const char*, 4> BloomUniformNames  = {
@@ -528,8 +528,7 @@ void FramebufferRenderer::resolveMSAA(float blackoutFactor) {
     ghoul::opengl::TextureUnit mainColorTextureUnit;
     mainColorTextureUnit.activate();
 
-    //glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._mainColorTexture);
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _pingPongBuffers.colorTexture[_pingPongIndex]);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._mainColorTexture);
     _resolveProgram->setUniform(_uniformCache.mainColorTexture, mainColorTextureUnit);
     _resolveProgram->setUniform(_uniformCache.blackoutFactor, blackoutFactor);
     _resolveProgram->setUniform(_uniformCache.nAaSamples, _nAaSamples);
@@ -551,6 +550,7 @@ void FramebufferRenderer::applyTMO(float blackoutFactor) {
                 "FramebufferRenderer::render::TMO_GLOBAL"
                 );
         }
+        // JCC: Mudar aqui para que a entrada do TMO seja MSAA
         averageLuminaceInFB = computeBufferAveLuminanceGPU();
         if (std::isnan(averageLuminaceInFB)) {
             averageLuminaceInFB = 1000.0;
@@ -565,6 +565,7 @@ void FramebufferRenderer::applyTMO(float blackoutFactor) {
                 "FramebufferRenderer::render::TMO_Mipmapping"
                 );
         }
+        // JCC: Mudar aqui para que a entrada do TMO seja MSAA
         if (_bloomEnabled) {
             computeMipMappingFromHDRBuffer(_bloomBuffers._bloomTexture[2]);
         }
@@ -584,14 +585,18 @@ void FramebufferRenderer::applyTMO(float blackoutFactor) {
         ghoul::opengl::TextureUnit hdrFeedingTextureUnit;
         hdrFeedingTextureUnit.activate();
         if (_bloomEnabled) {
+            // JCC: The next texture must be a MSAA texture
             glBindTexture(GL_TEXTURE_2D, _bloomBuffers._bloomTexture[2]);
         }
         else {
-            glBindTexture(GL_TEXTURE_2D, _hdrBuffers._hdrFilteringTexture);
+            glBindTexture(
+                GL_TEXTURE_2D_MULTISAMPLE,
+                _pingPongBuffers.colorTexture[_pingPongIndex]
+            );
         }
 
         _hdrFilteringProgram->setUniform(
-            _hdrUniformCache.deferredResultsTexture,
+            _hdrUniformCache.hdrFeedingTexture,
             hdrFeedingTextureUnit
         );
 
@@ -607,6 +612,7 @@ void FramebufferRenderer::applyTMO(float blackoutFactor) {
         _hdrFilteringProgram->setUniform(_hdrUniformCache.Value, _value);
         _hdrFilteringProgram->setUniform(_hdrUniformCache.Lightness, _lightness);
         _hdrFilteringProgram->setUniform(_hdrUniformCache.colorSpace, _colorSpace);
+        _hdrFilteringProgram->setUniform(_hdrUniformCache.nAaSamples, _nAaSamples);
 
 
         glBindVertexArray(_screenQuad);
@@ -762,13 +768,13 @@ void FramebufferRenderer::applyBloomFilter() {
     // the _bloomBuffers._bloomTexture[2] texture (JCC: That can be
     // done by blending operation (ONE))
     {
-        ghoul::opengl::TextureUnit deferredResultsTextureUnit;
-        deferredResultsTextureUnit.activate();
+        ghoul::opengl::TextureUnit hdrFeedingTextureUnit;
+        hdrFeedingTextureUnit.activate();
         // Original buffer will be summed to the bloom result
         glBindTexture(GL_TEXTURE_2D, _hdrBuffers._hdrFilteringTexture);
         _bloomResolveProgram->setUniform(
             _bloomUniformCache.renderedImage, 
-            deferredResultsTextureUnit
+            hdrFeedingTextureUnit
         );
 
         ghoul::opengl::TextureUnit bloomTextureUnit;
@@ -1761,6 +1767,10 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
 }
 
 void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor) {
+    // Reset ping pong texture rendering
+    _pingPongIndex = 0;
+    
+    // Measurements cache variable
     const bool doPerformanceMeasurements = global::performanceManager.isEnabled();
 
     std::unique_ptr<performance::PerformanceMeasurement> perf;
@@ -1819,34 +1829,38 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     //glDrawBuffers(1, ColorAttachment0Array);
     //glClear(GL_COLOR_BUFFER_BIT);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer);
-    glDrawBuffers(1, &ColorAttachment01Array[_pingPongIndex]);
-    glEnablei(GL_BLEND, 0);
-    glDisablei(GL_BLEND, 1);
-    glDisablei(GL_BLEND, 2);
-    glDisablei(GL_BLEND, 3);
-
-    // Run Deferred Tasks (resolve step is executed together with these tasks)
-    {
-        std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
-        if (doPerformanceMeasurements) {
-            perfInternal = std::make_unique<performance::PerformanceMeasurement>(
-                "FramebufferRenderer::render::deferredTasks"
-            );
-        }
-        performDeferredTasks(tasks.deferredcasterTasks, blackoutFactor);
-    }
-
     
+
     // If no Deferred Task are prensent, the resolve step
     // is executed in a separated step
     if (tasks.deferredcasterTasks.empty()) {
         resolveMSAA(blackoutFactor);
     }
+    else {
+        // We use ping pong rendering in order to be able to
+        // render multiple deferred tasks at same time (e.g.
+        // more than 1 ATM being seen at once)
+        glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer);
+        glDrawBuffers(1, &ColorAttachment01Array[_pingPongIndex]);
+        // JCC: next commands should be in the cache....
+        glEnablei(GL_BLEND, 0);
+        glDisablei(GL_BLEND, 1);
+        glDisablei(GL_BLEND, 2);
+        glDisablei(GL_BLEND, 3);
+
+        std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
+        if (doPerformanceMeasurements) {
+            perfInternal = std::make_unique<performance::PerformanceMeasurement>(
+                "FramebufferRenderer::render::deferredTasks"
+                );
+        }
+        performDeferredTasks(tasks.deferredcasterTasks, blackoutFactor);
+    }
     
     // Disabling depth test for filtering and hdr
     glDisable(GL_DEPTH_TEST);
 
+    // JCC: Change bloom to work in a MSAA environment
     if (_bloomEnabled) {
         std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
         if (doPerformanceMeasurements) {
@@ -1861,37 +1875,12 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     }
 
     // When applying the TMO, the result is saved to the default FBO to be displayed
-    // by the Operating System
+    // by the Operating System. Also, the resolve procedure is executed in this step.
     glBindFramebuffer(GL_FRAMEBUFFER, _osDefaultGLState.defaultFBO);
     glViewport(0, 0, _resolution.x, _resolution.y);
-
-    // JCC: AQUI -> PRECISO FAZER UM RESOLVE COM HDR JUNTO PARA ECONOMIZAR TEMPO
-    // 
-    
     // Apply the selected TMO on the results
     applyTMO(blackoutFactor);
     
-    // JCC: ADJUST HERE SO THE HDR IS TOGETHER WITH THE RESOLVE:
-    // As a last step, copy the rendering to the final default framebuffer.
-    /*_resolveProgram->activate();
-
-    ghoul::opengl::TextureUnit mainColorTextureUnit;
-    mainColorTextureUnit.activate();
-
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _pingPongBuffers[_pingPongIndex].colorTexture);
-    _resolveProgram->setUniform(_uniformCache.mainColorTexture, mainColorTextureUnit);
-    _resolveProgram->setUniform(_uniformCache.blackoutFactor, blackoutFactor);
-    _resolveProgram->setUniform(_uniformCache.nAaSamples, _nAaSamples);
-    _resolveProgram->setUniform(_uniformCache.exposure, _hdrExposure);
-    _resolveProgram->setUniform(_uniformCache.gamma, _gamma);
-    _resolveProgram->setUniform(_uniformCache.nAaSamples, _nAaSamples);
-
-    glBindVertexArray(_screenQuad);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
-
-    _resolveProgram->deactivate();*/
-
 
     //================================
     // Adjusting color and brightness
@@ -1993,9 +1982,7 @@ void FramebufferRenderer::performDeferredTasks(
                                              const std::vector<DeferredcasterTask>& tasks,
                                                                      float blackoutFactor
                                               )
-{
-    bool firstPaint = true;
-
+{   
     for (const DeferredcasterTask& deferredcasterTask : tasks) {
         Deferredcaster* deferredcaster = deferredcasterTask.deferredcaster;
 
@@ -2050,8 +2037,6 @@ void FramebufferRenderer::performDeferredTasks(
             // 48 = 16 samples * 3 coords
             deferredcastProgram->setUniform("msaaSamplePatter", &_mSAAPattern[0], 48);
 
-            deferredcastProgram->setUniform("firstPaint", firstPaint);
-            deferredcastProgram->setUniform("atmExposure", _hdrExposure);
             deferredcaster->preRaycast(
                 deferredcasterTask.renderData,
                 _deferredcastData[deferredcaster],
@@ -2075,11 +2060,6 @@ void FramebufferRenderer::performDeferredTasks(
             );
 
             deferredcastProgram->deactivate();
-
-            // JCC: No neeeded anymore
-            /*if (firstPaint) {
-                firstPaint = false;
-            }*/
         }
         else {
             LWARNING(

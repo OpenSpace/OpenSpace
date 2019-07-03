@@ -227,9 +227,9 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
     UniformCache(mainColorTexture, blackoutFactor, nAaSamples) _uniformCache;
     
-    UniformCache(deferredResultsTexture, blackoutFactor, hdrExposure, gamma, 
+    UniformCache(hdrFeedingTexture, blackoutFactor, hdrExposure, gamma,
                  toneMapOperator, aveLum, maxWhite, Hue, Saturation, Value, 
-                 Lightness, colorSpace) _hdrUniformCache;
+                 Lightness, colorSpace, nAaSamples) _hdrUniformCache;
 
     UniformCache(renderedImage, bloomImage, bloomOrigFactor, bloomNewFactor) 
         _bloomUniformCache;

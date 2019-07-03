@@ -31,13 +31,13 @@ uniform int nAaSamples;
 uniform sampler2DMS mainColorTexture;
 
 void main() {
-     vec4 color = vec4(0.0);
-     for (int i = 0; i < nAaSamples; i++) {
-         color += texelFetch(mainColorTexture, ivec2(gl_FragCoord), i);
-     }
+    vec4 color = vec4(0.0);
+    for (int i = 0; i < nAaSamples; i++) {
+        color += texelFetch(mainColorTexture, ivec2(gl_FragCoord), i);
+    }
 
-     color /= nAaSamples;
-     color.rgb *= blackoutFactor;
+    color /= nAaSamples;
+    color.rgb *= blackoutFactor;
      
-     finalColor = vec4(color.rgb, 1.0);
+    finalColor = vec4(color.rgb, 1.0);
 }
