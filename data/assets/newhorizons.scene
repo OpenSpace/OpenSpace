@@ -255,10 +255,12 @@ asset.onInitialize(function ()
     openspace.setPropertyValueSingle('Scene.Charon.Renderable.Enabled', false)
     openspace.setPropertyValueSingle("Scene.PlutoBarycenterTrail.Renderable.Enabled", false)
 
-    openspace.navigation.setCameraState({
-        Anchor = NewHorizonsAsset.NewHorizons.Identifier,
-        Position = { 4662120063743.592773, 1263245003503.724854, -955413856565.788086 },
-        Rotation = { 0.683224, -0.165934, 0.701234, 0.118073 },
+    openspace.navigation.setNavigationState({
+        Anchor = "NewHorizons",
+        Position = { 3.440965E6, -1.240063E6, 2.267674E6 },
+        Up = { -0.348618, -0.937119, 0.165352E-1 },
+        Pitch = 0.1,
+        Yaw = 0.45
     })
 end)
 

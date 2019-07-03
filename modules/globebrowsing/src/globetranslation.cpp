@@ -161,6 +161,11 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     _latitude.onChange([this]() { _positionIsDirty = true; });
     _fixedAltitude.onChange([this]() { _positionIsDirty = true; });
     _useFixedAltitude.onChange([this]() { _positionIsDirty = true; });
+
+    addProperty(_longitude);
+    addProperty(_latitude);
+    addProperty(_fixedAltitude);
+    addProperty(_useFixedAltitude);
 }
 
 void GlobeTranslation::fillAttachedNode() {

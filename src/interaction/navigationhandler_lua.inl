@@ -26,7 +26,7 @@
 
 namespace openspace::luascriptfunctions {
 
-int restoreCameraStateFromFile(lua_State* L) {
+int loadNavigationState(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::restoreCameraStateFromFile");
 
     const std::string& cameraStateFilePath = ghoul::lua::value<std::string>(
@@ -39,19 +39,19 @@ int restoreCameraStateFromFile(lua_State* L) {
         return ghoul::lua::luaError(L, "filepath string is empty");
     }
 
-    global::navigationHandler.restoreCameraStateFromFile(cameraStateFilePath);
+    global::navigationHandler.loadNavigationState(cameraStateFilePath);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
-int setCameraState(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setCameraState");
+int setNavigationState(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setNavigationState");
 
     try {
         ghoul::Dictionary dictionary;
         ghoul::lua::luaDictionaryFromState(L, dictionary);
-        global::navigationHandler.setCameraStateFromDictionary(dictionary);
+        global::navigationHandler.setNavigationStateNextFrame(dictionary);
     } catch (const ghoul::RuntimeError& e) {
         lua_settop(L, 0);
         return ghoul::lua::luaError(
@@ -67,21 +67,23 @@ int setCameraState(lua_State* L) {
     return 0;
 }
 
-int saveCameraStateToFile(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::saveCameraStateToFile");
+int saveNavigationState(lua_State* L) {
+    const int n = ghoul::lua::checkArgumentsAndThrow(L, { 1, 4 }, "lua::saveCameraState");
 
-    const std::string& cameraStateFilePath = ghoul::lua::value<std::string>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
+    const std::string& cameraStateFilePath = ghoul::lua::value<std::string>(L, 1);
+
+    std::string referenceFrame = "";
+    if (n > 1) {
+        referenceFrame = ghoul::lua::value<std::string>(L, 2);
+    }
 
     if (cameraStateFilePath.empty()) {
         return ghoul::lua::luaError(L, "filepath string is empty");
     }
 
-    global::navigationHandler.saveCameraStateToFile(cameraStateFilePath);
+    global::navigationHandler.saveNavigationState(cameraStateFilePath, referenceFrame);
 
+    lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }

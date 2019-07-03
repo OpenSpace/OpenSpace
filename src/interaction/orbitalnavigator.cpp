@@ -365,20 +365,26 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
     const glm::dvec3 anchorPos = _anchorNode->worldPosition();
     const glm::dvec3 prevCameraPosition = _camera->positionVec3();
-    const glm::dvec3 anchorDisplacement = anchorPos - _previousAnchorNodePosition;
+    const glm::dvec3 anchorDisplacement = _previousAnchorNodePosition.has_value() ?
+        (anchorPos - _previousAnchorNodePosition.value()) :
+        glm::dvec3(0.0);
 
     CameraPose pose = {
         _camera->positionVec3() + anchorDisplacement,
         _camera->rotationQuaternion()
     };
 
-    if (_aimNode && _aimNode != _anchorNode) {
+    const bool hasPreviousPositions =
+        _previousAnchorNodePosition.has_value() &&
+        _previousAimNodePosition.has_value();
+
+    if (_aimNode && _aimNode != _anchorNode && hasPreviousPositions) {
         const glm::dvec3 aimPos = _aimNode->worldPosition();
         const glm::dvec3 cameraToAnchor =
-            _previousAnchorNodePosition - prevCameraPosition;
+            _previousAnchorNodePosition.value() - prevCameraPosition;
 
         Displacement anchorToAim = {
-            _previousAimNodePosition - _previousAnchorNodePosition,
+            _previousAimNodePosition.value() - _previousAnchorNodePosition.value(),
             aimPos - anchorPos
         };
 
@@ -413,8 +419,9 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     glm::dquat anchorRotation =
         glm::quat_cast(_anchorNode->worldRotationMatrix());
 
-    glm::dquat anchorNodeRotationDiff =
-        _previousAnchorNodeRotation * glm::inverse(anchorRotation);
+    glm::dquat anchorNodeRotationDiff = _previousAnchorNodeRotation.has_value() ?
+        _previousAnchorNodeRotation.value() * glm::inverse(anchorRotation) :
+        glm::dquat();
 
     _previousAnchorNodeRotation = anchorRotation;
 
@@ -563,9 +570,15 @@ void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode) {
     _anchorNode = anchorNode;
 
     if (_anchorNode) {
-        _previousAnchorNodePosition = _anchorNode->worldPosition();
-        _previousAnchorNodeRotation = glm::quat_cast(_anchorNode->worldRotationMatrix());
+        _previousAnchorNodePosition.reset();
+        _previousAnchorNodeRotation.reset();
     }
+}
+
+void OrbitalNavigator::clearPreviousState() {
+    _previousAnchorNodePosition.reset();
+    _previousAnchorNodeRotation.reset();
+    _previousAimNodePosition.reset();
 }
 
 void OrbitalNavigator::setAimNode(const SceneGraphNode* aimNode) {

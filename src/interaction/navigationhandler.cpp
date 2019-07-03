@@ -31,10 +31,15 @@
 #include <openspace/interaction/keyframenavigator.h>
 #include <openspace/interaction/inputstate.h>
 #include <openspace/network/parallelpeer.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
+#include <openspace/query/query.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionaryluaformatter.h>
+#include <glm/gtx/vector_angle.hpp>
 #include <fstream>
 
 namespace {
@@ -43,7 +48,11 @@ namespace {
     constexpr const char* KeyAnchor = "Anchor";
     constexpr const char* KeyAim = "Aim";
     constexpr const char* KeyPosition = "Position";
-    constexpr const char* KeyRotation = "Rotation";
+    constexpr const char* KeyUp = "Up";
+    constexpr const char* KeyYaw = "Yaw";
+    constexpr const char* KeyPitch = "Pitch";
+    constexpr const char* KeyReferenceFrame = "ReferenceFrame";
+
 
     constexpr const openspace::properties::Property::PropertyInfo KeyFrameInfo = {
         "UseKeyFrameInteraction",
@@ -51,17 +60,96 @@ namespace {
         "If this is set to 'true' the entire interaction is based off key frames rather "
         "than using the mouse interaction."
     };
+
 } // namespace
 
 #include "navigationhandler_lua.inl"
 
 namespace openspace::interaction {
 
+
+ghoul::Dictionary
+openspace::interaction::NavigationHandler::NavigationState::dictionary() const
+{
+    ghoul::Dictionary cameraDict;
+    cameraDict.setValue(KeyReferenceFrame, referenceFrame);
+    cameraDict.setValue(KeyPosition, cameraPosition);
+    cameraDict.setValue(KeyAnchor, anchor);
+    cameraDict.setValue(KeyAim, aim);
+
+    if (up.has_value()) {
+        cameraDict.setValue(KeyUp, up.value());
+
+        if (yaw != 0.0) {
+            cameraDict.setValue(KeyYaw, yaw);
+        }
+        if (pitch != 0.0) {
+            cameraDict.setValue(KeyPitch, pitch);
+        }
+    }
+
+    return cameraDict;
+}
+
+openspace::interaction::NavigationHandler::NavigationState::NavigationState(
+    const ghoul::Dictionary& dictionary)
+{
+    bool readSuccessful = true;
+
+    readSuccessful &= dictionary.getValue(KeyAnchor, anchor);
+    readSuccessful &= dictionary.getValue(KeyPosition, cameraPosition);
+
+    if (dictionary.hasValue<std::string>(KeyReferenceFrame)) {
+        dictionary.getValue(KeyReferenceFrame, referenceFrame);
+    } else {
+        referenceFrame = anchor;
+    }
+    if (dictionary.hasValue<std::string>(KeyAim)) {
+        dictionary.getValue(KeyAim, aim);
+    }
+
+    if (dictionary.hasValue<glm::dvec3>(KeyUp)) {
+        // Need to extract to temporary value first, since up is a std::optional.
+        glm::dvec3 upValue;
+        dictionary.getValue(KeyUp, upValue);
+        up = upValue;
+        if (dictionary.hasValue<double>(KeyYaw)) {
+            dictionary.getValue(KeyYaw, yaw);
+        }
+        if (dictionary.hasValue<double>(KeyPitch)) {
+            dictionary.getValue(KeyPitch, pitch);
+        }
+    }
+
+    if (!readSuccessful) {
+        throw ghoul::RuntimeError(
+            "Position and Anchor need to be defined for navigation dictionary."
+        );
+    }
+}
+
+openspace::interaction::NavigationHandler::NavigationState::NavigationState(
+    std::string anchor,
+    std::string aim,
+    std::string referenceFrame,
+    glm::dvec3 cameraPosition,
+    std::optional<glm::dvec3> up,
+    double yaw,
+    double pitch
+)
+    : anchor(std::move(anchor))
+    , aim(std::move(aim))
+    , referenceFrame(std::move(referenceFrame))
+    , cameraPosition(std::move(cameraPosition))
+    , up(std::move(up))
+    , yaw(yaw)
+    , pitch(pitch)
+{}
+
 NavigationHandler::NavigationHandler()
     : properties::PropertyOwner({ "NavigationHandler" })
     , _useKeyFrameInteraction(KeyFrameInfo, false)
 {
-
     _inputState = std::make_unique<InputState>();
     _orbitalNavigator = std::make_unique<OrbitalNavigator>();
     _keyframeNavigator = std::make_unique<KeyframeNavigator>();
@@ -93,6 +181,12 @@ void NavigationHandler::setCamera(Camera* camera) {
     _orbitalNavigator->setCamera(camera);
 }
 
+void NavigationHandler::setNavigationStateNextFrame(
+    NavigationHandler::NavigationState state)
+{
+    _pendingNavigationState = std::move(state);
+}
+
 const OrbitalNavigator& NavigationHandler::orbitalNavigator() const {
     return *_orbitalNavigator;
 }
@@ -121,20 +215,89 @@ void NavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(_inputState != nullptr, "InputState must not be nullptr");
     ghoul_assert(_camera != nullptr, "Camera must not be nullptr");
 
-    if (_cameraUpdatedFromScript) {
-        _cameraUpdatedFromScript = false;
-    }
-    else {
-        if (!_playbackModeEnabled && _camera) {
-            if (_useKeyFrameInteraction) {
-                _keyframeNavigator->updateCamera(*_camera, _playbackModeEnabled);
-            }
-            else {
-                _orbitalNavigator->updateStatesFromInput(*_inputState, deltaTime);
-                _orbitalNavigator->updateCameraStateFromStates(deltaTime);
-            }
+    if (_pendingNavigationState.has_value()) {
+        applyNavigationState(_pendingNavigationState.value());
+        _orbitalNavigator->resetVelocities();
+        _pendingNavigationState.reset();
+    } else if (!_playbackModeEnabled && _camera) {
+        if (_useKeyFrameInteraction) {
+            _keyframeNavigator->updateCamera(*_camera, _playbackModeEnabled);
+        }
+        else {
+            _orbitalNavigator->updateStatesFromInput(*_inputState, deltaTime);
+            _orbitalNavigator->updateCameraStateFromStates(deltaTime);
         }
     }
+}
+
+void NavigationHandler::applyNavigationState(const NavigationHandler::NavigationState& ns)
+{
+
+    glm::dmat4 modelTransform(1.0);
+    glm::dmat3 vectorTransform(1.0);
+    const SceneGraphNode* referenceFrame = sceneGraphNode(ns.referenceFrame);
+    if (referenceFrame) {
+        modelTransform = referenceFrame->modelTransform();
+        vectorTransform =
+            referenceFrame->worldScale() * referenceFrame->worldRotationMatrix();
+    }
+    else {
+        LERROR(fmt::format(
+            "Could not find scene graph node '{}' used as reference frame.",
+            ns.referenceFrame)
+        );
+        return;
+    }
+
+    if (!sceneGraphNode(ns.anchor)) {
+        LERROR(fmt::format(
+            "Could not find scene graph node '{}' used as anchor.", ns.referenceFrame
+        ));
+        return;
+    }
+
+    if (!ns.aim.empty() && !sceneGraphNode(ns.aim)) {
+        LERROR(fmt::format(
+            "Could not find scene graph node '{}' used as aim.", ns.referenceFrame
+        ));
+        return;
+    }
+
+    _orbitalNavigator->setAnchorNode(ns.anchor);
+    _orbitalNavigator->setAimNode(ns.aim);
+
+    const SceneGraphNode* anchorNode = _orbitalNavigator->anchorNode();
+    const SceneGraphNode* aimNode = _orbitalNavigator->aimNode();
+    if (!aimNode) {
+        aimNode = anchorNode;
+    }
+
+    const glm::dmat4 inverseModelTransform = glm::inverse(modelTransform);
+    const glm::dvec3 cameraPositionWorld =
+        modelTransform * glm::dvec4(ns.cameraPosition, 1.0);
+
+    glm::dvec3 aimPositionWorld = aimNode->worldPosition();
+
+    glm::dvec3 up = ns.up.has_value() ?
+        glm::normalize(vectorTransform * ns.up.value()) :
+        glm::dvec3(0.0, 1.0, 0.0);
+
+    // Construct vectors of a "neutral" view, i.e. when the aim is centered in view.
+    glm::dvec3 neutralView =
+        glm::normalize(aimNode->worldPosition() - cameraPositionWorld);
+   
+    glm::dquat neutralCameraRotation = glm::inverse(glm::quat_cast(glm::lookAt(
+        glm::dvec3(0.0),
+        neutralView,
+        up
+    )));
+
+    glm::dquat pitchRotation = glm::angleAxis(ns.pitch, glm::dvec3(1.f, 0.f, 0.f));
+    glm::dquat yawRotation = glm::angleAxis(ns.yaw, glm::dvec3(0.f, -1.f, 0.f));
+
+    _camera->setPositionVec3(cameraPositionWorld);
+    _camera->setRotation(neutralCameraRotation * yawRotation * pitchRotation);
+    _orbitalNavigator->clearPreviousState();
 }
 
 void NavigationHandler::setEnableKeyFrameInteraction() {
@@ -180,107 +343,88 @@ void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActio
     _inputState->keyboardCallback(key, modifier, action);
 }
 
-void NavigationHandler::setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict)
+NavigationHandler::NavigationState NavigationHandler::navigationState(
+                                               const SceneGraphNode& referenceFrame) const
 {
-    bool readSuccessful = true;
-
-    std::string anchor;
-    std::string aim;
-    glm::dvec3 cameraPosition;
-    glm::dvec4 cameraRotation; // Need to read the quaternion as a vector first.
-
-    readSuccessful &= cameraDict.getValue(KeyAnchor, anchor);
-    readSuccessful &= cameraDict.getValue(KeyPosition, cameraPosition);
-    readSuccessful &= cameraDict.getValue(KeyRotation, cameraRotation);
-    cameraDict.getValue(KeyAim, aim); // Aim is not required
-
-    if (!readSuccessful) {
-        throw ghoul::RuntimeError(
-            "Position, Rotation and Focus need to be defined for camera dictionary."
-        );
+    const SceneGraphNode* aim = _orbitalNavigator->aimNode();
+    if (!aim) {
+        aim = _orbitalNavigator->anchorNode();
     }
 
-    // Set state
-    _orbitalNavigator->setAnchorNode(anchor);
-    _orbitalNavigator->setAimNode(aim);
+    const glm::dquat invNeutralRotation = glm::quat_cast(glm::lookAt(
+        glm::dvec3(0.0, 0.0, 0.0),
+        (aim->worldPosition() - _camera->positionVec3()),
+        glm::normalize(_camera->lookUpVectorWorldSpace())
+    ));
 
-    _camera->setPositionVec3(cameraPosition);
-    _camera->setRotation(glm::dquat(
-        cameraRotation.x, cameraRotation.y, cameraRotation.z, cameraRotation.w));
+    glm::dquat localRotation = invNeutralRotation * _camera->rotationQuaternion();
+    glm::dvec3 eulerAngles = glm::eulerAngles(localRotation);
+
+    const double pitch = eulerAngles.x;
+    const double yaw = -eulerAngles.y;
+
+    // Need to compensate by redisual roll left in local rotation:
+    const glm::dquat unroll = glm::angleAxis(eulerAngles.z, glm::dvec3(0, 0, 1));
+    const glm::dvec3 neutralUp =
+         glm::inverse(invNeutralRotation) * unroll * _camera->lookUpVectorCameraSpace();
+
+    const glm::dmat4 invModelTransform = referenceFrame.inverseModelTransform();
+    const glm::dmat3 invVectorTransform = glm::inverse(
+        referenceFrame.worldScale() *
+        referenceFrame.worldRotationMatrix()
+    );
+
+    return NavigationState(
+        _orbitalNavigator->anchorNode()->identifier(),
+        _orbitalNavigator->aimNode() ?
+            _orbitalNavigator->aimNode()->identifier() : "",
+        referenceFrame.identifier(),
+        invModelTransform * glm::dvec4(_camera->positionVec3(), 1.0),
+        invVectorTransform * neutralUp, yaw, pitch
+    );
 }
 
-ghoul::Dictionary NavigationHandler::cameraStateDictionary() {
-    glm::dvec3 cameraPosition;
-    glm::dquat quat;
-    glm::dvec4 cameraRotation;
-
-    cameraPosition = _camera->positionVec3();
-    quat = _camera->rotationQuaternion();
-    cameraRotation = glm::dvec4(quat.w, quat.x, quat.y, quat.z);
-
-    ghoul::Dictionary cameraDict;
-    cameraDict.setValue(KeyPosition, cameraPosition);
-    cameraDict.setValue(KeyRotation, cameraRotation);
-    cameraDict.setValue(KeyAnchor, _orbitalNavigator->anchorNode()->identifier());
-    if (_orbitalNavigator->aimNode()) {
-        cameraDict.setValue(KeyAim, _orbitalNavigator->aimNode()->identifier());
+void NavigationHandler::saveNavigationState(const std::string& filepath,
+                                            const std::string& referenceFrameIdentifier)
+{
+    const SceneGraphNode* referenceFrame = _orbitalNavigator->anchorNode();
+    if (!referenceFrameIdentifier.empty()) {
+        referenceFrame = sceneGraphNode(referenceFrameIdentifier);
+        if (!referenceFrame) {
+            LERROR(fmt::format(
+                "Could not find node '{}' to use as reference frame",
+                referenceFrameIdentifier
+            ));
+        }
     }
 
-    return cameraDict;
-}
-
-void NavigationHandler::saveCameraStateToFile(const std::string& filepath) {
     if (!filepath.empty()) {
         std::string fullpath = absPath(filepath);
         LINFO(fmt::format("Saving camera position: {}", filepath));
 
-        ghoul::Dictionary cameraDict = cameraStateDictionary();
-
-        // TODO(abock): Should get the camera state as a dictionary and save the
-        // dictionary to a file in form of a lua state and not use ofstreams here.
+        ghoul::Dictionary cameraDict =
+            navigationState(*referenceFrame).dictionary();
+        ghoul::DictionaryLuaFormatter formatter;
 
         std::ofstream ofs(fullpath.c_str());
-
-        glm::dvec3 p = _camera->positionVec3();
-        glm::dquat q = _camera->rotationQuaternion();
-
-        ofs << "return {" << std::endl;
-        ofs << "    " << KeyAnchor << " = " << "\"" <<
-            _orbitalNavigator->anchorNode()->identifier() << "\""
-            << "," << std::endl;
-
-        if (_orbitalNavigator->aimNode()) {
-            ofs << "    " << KeyAim << " = " << "\"" <<
-                _orbitalNavigator->aimNode()->identifier() << "\""
-                << "," << std::endl;
-        }
-
-        ofs << "    " << KeyPosition << " = {"
-            << std::to_string(p.x) << ", "
-            << std::to_string(p.y) << ", "
-            << std::to_string(p.z) << "}," << std::endl;
-        ofs << "    " << KeyRotation << " = {"
-            << std::to_string(q.w) << ", "
-            << std::to_string(q.x) << ", "
-            << std::to_string(q.y) << ", "
-            << std::to_string(q.z) << "}," << std::endl;
-        ofs << "}"<< std::endl;
-
+        ofs << "return " << formatter.format(cameraDict);
         ofs.close();
     }
 }
 
-void NavigationHandler::restoreCameraStateFromFile(const std::string& filepath) {
+void NavigationHandler::loadNavigationState(const std::string& filepath) {
     LINFO(fmt::format("Reading camera state from file: {}", filepath));
-    if (!FileSys.fileExists(filepath)) {
-        throw ghoul::FileNotFoundError(filepath, "CameraFilePath");
+
+    const std::string absolutePath = absPath(filepath);
+
+    if (!FileSys.fileExists(absolutePath)) {
+        throw ghoul::FileNotFoundError(absolutePath, "NavigationState filepath");
     }
 
-    ghoul::Dictionary cameraDict;
+    ghoul::Dictionary navDict;
     try {
-        ghoul::lua::loadDictionaryFromFile(filepath, cameraDict);
-        setCameraStateFromDictionary(cameraDict);
-        _cameraUpdatedFromScript = true;
+        ghoul::lua::loadDictionaryFromFile(absolutePath, navDict);
+        setNavigationStateNextFrame(NavigationState(navDict));
     }
     catch (ghoul::RuntimeError& e) {
         LWARNING("Unable to set camera position");
@@ -342,25 +486,27 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
         "navigation",
         {
             {
-                "setCameraState",
-                &luascriptfunctions::setCameraState,
+                "setNavigationState",
+                &luascriptfunctions::setNavigationState,
                 {},
                 "object",
-                "Set the camera state"
+                "Set the navigation state"
             },
             {
-                "saveCameraStateToFile",
-                &luascriptfunctions::saveCameraStateToFile,
+                "saveNavigationState",
+                &luascriptfunctions::saveNavigationState,
                 {},
-                "string",
-                "Save the current camera state to file"
+                "string, [string]",
+                "Save the current navigation state to a file with the path given by the "
+                "first argument. The second argument is the scene graph node to use as "
+                "reference frame. By default, the anchor node is used as reference frame."
             },
             {
-                "restoreCameraStateFromFile",
-                &luascriptfunctions::restoreCameraStateFromFile,
+                "loadNavigationState",
+                &luascriptfunctions::loadNavigationState,
                 {},
                 "string",
-                "Restore the camera state from file"
+                "Load a navigation state from file"
             },
             {
                 "retargetAnchor",

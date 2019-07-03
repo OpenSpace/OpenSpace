@@ -128,31 +128,57 @@ int deleteLayer(lua_State* L) {
 }
 
 int goToChunk(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::goToChunk");
+    ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::goToChunk");
 
-    const int x = ghoul::lua::value<int>(L, 1);
-    const int y = ghoul::lua::value<int>(L, 2);
-    const int level = ghoul::lua::value<int>(L, 3);
-    lua_pop(L, 3);
+    const std::string& globeIdentifier = ghoul::lua::value<std::string>(L, 1);
+    const int x = ghoul::lua::value<int>(L, 2);
+    const int y = ghoul::lua::value<int>(L, 3);
+    const int level = ghoul::lua::value<int>(L, 4);
+    lua_pop(L, 4);
 
-    global::moduleEngine.module<GlobeBrowsingModule>()->goToChunk(x, y, level);
+    SceneGraphNode* n = sceneGraphNode(globeIdentifier);
+    if (!n) {
+        return ghoul::lua::luaError(L, "Unknown globe name: " + globeIdentifier);
+    }
+
+    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
+    if (!globe) {
+        return ghoul::lua::luaError(L, "Identifier must be a RenderableGlobe");
+    }
+
+    global::moduleEngine.module<GlobeBrowsingModule>()->goToChunk(*globe, x, y, level);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int goToGeo(lua_State* L) {
-    const int nArguments = ghoul::lua::checkArgumentsAndThrow(L, 2, 3, "lua::goToGeo");
+    const int nArguments = ghoul::lua::checkArgumentsAndThrow(L, 3, 4, "lua::goToGeo");
 
-    const double latitude = ghoul::lua::value<double>(L, 1);
-    const double longitude = ghoul::lua::value<double>(L, 2);
+    const std::string& globeIdentifier = ghoul::lua::value<std::string>(L, 1);
+    const double latitude = ghoul::lua::value<double>(L, 2);
+    const double longitude = ghoul::lua::value<double>(L, 3);
 
-    if (nArguments == 2) {
-        global::moduleEngine.module<GlobeBrowsingModule>()->goToGeo(latitude, longitude);
+    SceneGraphNode* n = sceneGraphNode(globeIdentifier);
+    if (!n) {
+        return ghoul::lua::luaError(L, "Unknown globe name: " + globeIdentifier);
     }
-    else if (nArguments == 3) {
-        const double altitude = ghoul::lua::value<double>(L, 3);
+
+
+    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
+    if (!globe) {
+        return ghoul::lua::luaError(L, "Identifier must be a RenderableGlobe");
+    }
+
+    if (nArguments == 3) {
         global::moduleEngine.module<GlobeBrowsingModule>()->goToGeo(
+            *globe, latitude, longitude
+        );
+    }
+    else if (nArguments == 4) {
+        const double altitude = ghoul::lua::value<double>(L, 4);
+        global::moduleEngine.module<GlobeBrowsingModule>()->goToGeo(
+            *globe,
             latitude,
             longitude,
             altitude
@@ -168,19 +194,19 @@ int goToGeo(lua_State* L) {
 int getGeoPosition(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::getGeoPosition");
 
-    const std::string& name = ghoul::lua::value<std::string>(L, 1);
+    const std::string& globeIdentifier = ghoul::lua::value<std::string>(L, 1);
     const double latitude = ghoul::lua::value<double>(L, 2);
     const double longitude = ghoul::lua::value<double>(L, 3);
     const double altitude = ghoul::lua::value<double>(L, 4);
     lua_pop(L, 4);
 
-    SceneGraphNode* n = sceneGraphNode(name);
+    SceneGraphNode* n = sceneGraphNode(globeIdentifier);
     if (!n) {
-        return ghoul::lua::luaError(L, "Unknown globe name: " + name);
+        return ghoul::lua::luaError(L, "Unknown globe identifier: " + globeIdentifier);
     }
     const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
     if (!globe) {
-        return ghoul::lua::luaError(L, "Name must be a RenderableGlobe");
+        return ghoul::lua::luaError(L, "Identifier must be a RenderableGlobe");
     }
 
     GlobeBrowsingModule& mod = *(global::moduleEngine.module<GlobeBrowsingModule>());
