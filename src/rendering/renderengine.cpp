@@ -246,6 +246,7 @@ RenderEngine::RenderEngine()
     , _hdrExposure(HDRExposureInfo, 0.4f, 0.01f, 10.0f)
     , _hdrBackground(BackgroundExposureInfo, 2.8f, 0.01f, 10.0f)
     , _gamma(GammaInfo, 2.2f, 0.01f, 10.0f)
+    , _horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.0f)
     , _globalRotation(
         GlobalRotationInfo,
         glm::vec3(0.f),
@@ -264,7 +265,6 @@ RenderEngine::RenderEngine()
         glm::vec3(-glm::pi<float>()),
         glm::vec3(glm::pi<float>())
     )
-    , _horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.0f)
 {
     _doPerformanceMeasurements.onChange([this](){
         global::performanceManager.setEnabled(_doPerformanceMeasurements);
