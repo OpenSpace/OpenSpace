@@ -49,9 +49,16 @@ int setNavigationState(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setNavigationState");
 
     try {
-        ghoul::Dictionary dictionary;
-        ghoul::lua::luaDictionaryFromState(L, dictionary);
-        global::navigationHandler.setNavigationStateNextFrame(dictionary);
+        ghoul::Dictionary navigationStateDictionary;
+        ghoul::lua::luaDictionaryFromState(L, navigationStateDictionary);
+
+        openspace::documentation::testSpecificationAndThrow(
+            interaction::NavigationHandler::NavigationState::Documentation(),
+            navigationStateDictionary,
+            "NavigationState"
+        );
+
+        global::navigationHandler.setNavigationStateNextFrame(navigationStateDictionary);
     } catch (const ghoul::RuntimeError& e) {
         lua_settop(L, 0);
         return ghoul::lua::luaError(

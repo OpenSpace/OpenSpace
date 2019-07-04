@@ -338,16 +338,23 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             "goToGeo",
             &globebrowsing::luascriptfunctions::goToGeo,
             {},
-            "number, number, number",
-            "Go to geographic coordinates latitude and longitude"
+            "string, number, number, [number]",
+            "Go to geographic coordinates of a globe. The first argument must be "
+            "the identifier of a scene graph node that has a RenderableGlobe attached. "
+            "The second argument is latitude and the third is longitude (degrees). "
+            "North and East are expressed as positive angles, while South and West are "
+            "negative. The optional fourh argument is the altitude in meters. If no "
+            "altitude is provided, the altitude will be kept as the current distance to "
+            "the surface of the specified globe."
         },
         {
             "getGeoPosition",
             &globebrowsing::luascriptfunctions::getGeoPosition,
             {},
-            "name, latitude, longitude, altitude",
-            "Returns the specified surface position on the globe as three floating point "
-            "values"
+            "string, number, number, number",
+            "Returns the specified surface position on the globe identified by the first "
+            "argument, as three floating point values - latitude, longitude and altitude "
+            "(degrees and meters)."
         },
         {
             "getGeoPositionForCamera",
@@ -355,7 +362,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             {},
             "void",
             "Get geographic coordinates of the camera poosition in latitude, "
-            "longitude, and altitude"
+            "longitude, and altitude (degrees and meters)."
         },
         {
             "loadWMSCapabilities",

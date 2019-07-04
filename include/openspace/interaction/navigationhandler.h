@@ -25,14 +25,13 @@
 #ifndef __OPENSPACE_CORE___NAVIGATIONHANDLER___H__
 #define __OPENSPACE_CORE___NAVIGATIONHANDLER___H__
 
-#include <openspace/properties/propertyowner.h>
-
+#include <openspace/documentation/documentation.h>
 #include <openspace/interaction/joystickcamerastates.h>
+#include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
-
 #include <optional>
 
 namespace openspace {
@@ -62,11 +61,12 @@ public:
             double pitch = 0.0);
 
         ghoul::Dictionary dictionary() const;
+        static documentation::Documentation Documentation();
 
         std::string anchor;
         std::string aim;
         std::string referenceFrame;
-        glm::dvec3 cameraPosition;
+        glm::dvec3 position;
         std::optional<glm::dvec3> up;
         double yaw = 0.0;
         double pitch = 0.0;
@@ -79,7 +79,7 @@ public:
     void deinitialize();
 
     // Mutators
-    void setNavigationStateNextFame(const NavigationState& state);
+    void setNavigationStateNextFame( NavigationState state);
     void setCamera(Camera* camera);
     void setInterpolationTime(float durationInSeconds);
 
