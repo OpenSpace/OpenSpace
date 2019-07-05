@@ -12,14 +12,19 @@ local Keybindings = {
     {
         Key = "E",
         Command = "openspace.time.setPause(true);" ..
-                  "openspace.setPropertyValue('*Trail.Renderable.Enabled', false)"..
-                  "openspace.setPropertyValue('Scene.Apollo8LaunchTrail.Renderable.Enabled', false)"..
-                  "openspace.sessionRecording.startPlayback('apollo8')",
+                  "openspace.time.setDeltaTime(1);" ..
+                  "openspace.time.setTime('1968 DEC 24 16:37:31');" ..
+                  "openspace.navigation.setNavigationState({" ..
+                  "    Anchor = 'Apollo8'," ..
+                  "    Position = { 1.494592E1, 3.236777E1, -4.171296E1 }," ..
+                  "    ReferenceFrame = 'Root'," ..
+                  "    Up = { 0.960608E0, -0.212013E0, 0.179675E0 }" ..
+                  "});" ..
+                  "openspace.setPropertyValue('*Trail.Renderable.Enabled', false)",
         Documentation = "Jump to right before the earthrise photo",
         Name = "Set Earthrise time",
         GuiPath = "/Missions/Apollo/8",
         Local = false
-
     },
     {
         Key = "U",

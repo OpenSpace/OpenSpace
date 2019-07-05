@@ -27,7 +27,7 @@
 namespace openspace::luascriptfunctions {
 
 int loadNavigationState(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::restoreCameraStateFromFile");
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadCameraStateFromFile");
 
     const std::string& cameraStateFilePath = ghoul::lua::value<std::string>(
         L,
