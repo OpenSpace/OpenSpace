@@ -257,10 +257,9 @@ asset.onInitialize(function ()
 
     openspace.navigation.setNavigationState({
         Anchor = "NewHorizons",
-        Position = { 3.440965E6, -1.240063E6, 2.267674E6 },
-        Up = { -0.348618, -0.937119, 0.165352E-1 },
-        Pitch = 0.1,
-        Yaw = 0.45
+        ReferenceFrame = "Root",
+        Position = { -6.572656E1, -7.239404E1, -2.111890E1 },
+        Up = { 0.102164, -0.362945, 0.926193 }
     })
 end)
 

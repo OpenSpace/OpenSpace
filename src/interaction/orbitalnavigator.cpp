@@ -665,6 +665,9 @@ void OrbitalNavigator::setRetargetInterpolationTime(float durationInSeconds) {
 }
 
 bool OrbitalNavigator::followingNodeRotation() const {
+    if (_aimNode != nullptr && _aimNode != _anchorNode) {
+        return false;
+    }
     return _followRotationInterpolator.value() >= 1.0;
 }
 

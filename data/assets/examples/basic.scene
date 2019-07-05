@@ -1,8 +1,9 @@
 local assetHelper = asset.require('util/asset_helper')
 local sceneHelper = asset.require('util/scene_helper')
 local propertyHelper = asset.require('util/property_helper')
+local debugHelper = asset.require('util/debug_helper')
 
--- At this point, a sceene needs basic spice data to load.
+-- At this point, a scene needs basic spice data to load.
 asset.require('spice/base')
 
 asset.require('util/default_keybindings')
@@ -12,10 +13,15 @@ asset.require('util/default_joystick')
 asset.require('util/webgui')
 local spheres = asset.require('examples/spheres')
 
+debugHelper.registerCartesianAxes(asset, {
+    Parent = "Root",
+    Scale = 10
+})
+
 asset.onInitialize(function ()   
-    openspace.navigation.setCameraState({
-        Anchor = spheres.ExampleSphere1.Identifier,
-        Position = { 20, 0, 0 },
-        Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 }
+    openspace.navigation.setNavigationState({
+        Anchor = "Root",
+        Position = { 20, 20, 20 },
+        Up = {0, 1, 0},
     })
 end)

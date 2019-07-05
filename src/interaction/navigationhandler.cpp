@@ -239,23 +239,15 @@ void NavigationHandler::updateCamera(double deltaTime) {
 void NavigationHandler::applyNavigationState(const NavigationHandler::NavigationState& ns)
 {
 
-    glm::dmat4 modelTransform(1.0);
-    glm::dmat3 vectorTransform(1.0);
+    glm::dvec3 anchorWorldPosition(0.0);
+    glm::dmat3 referenceFrameTransform(1.0);
     const SceneGraphNode* referenceFrame = sceneGraphNode(ns.referenceFrame);
-    if (referenceFrame) {
-        modelTransform = referenceFrame->modelTransform();
-        vectorTransform =
-            referenceFrame->worldScale() * referenceFrame->worldRotationMatrix();
+    const SceneGraphNode* anchor = sceneGraphNode(ns.anchor);
+
+    if (anchor) {
+        anchorWorldPosition = anchor->worldPosition();
     }
     else {
-        LERROR(fmt::format(
-            "Could not find scene graph node '{}' used as reference frame.",
-            ns.referenceFrame)
-        );
-        return;
-    }
-
-    if (!sceneGraphNode(ns.anchor)) {
         LERROR(fmt::format(
             "Could not find scene graph node '{}' used as anchor.", ns.referenceFrame
         ));
@@ -269,6 +261,17 @@ void NavigationHandler::applyNavigationState(const NavigationHandler::Navigation
         return;
     }
 
+    if (referenceFrame) {
+        referenceFrameTransform = referenceFrame->worldRotationMatrix();
+    }
+    else {
+        LERROR(fmt::format(
+            "Could not find scene graph node '{}' used as reference frame.",
+            ns.referenceFrame)
+        );
+        return;
+    }
+
     _orbitalNavigator->setAnchorNode(ns.anchor);
     _orbitalNavigator->setAimNode(ns.aim);
 
@@ -278,11 +281,11 @@ void NavigationHandler::applyNavigationState(const NavigationHandler::Navigation
         aimNode = anchorNode;
     }
 
-    const glm::dvec3 cameraPositionWorld =
-        modelTransform * glm::dvec4(ns.position, 1.0);
+    const glm::dvec3 cameraPositionWorld = anchorWorldPosition +
+        glm::dvec3(referenceFrameTransform * glm::dvec4(ns.position, 1.0));
 
     glm::dvec3 up = ns.up.has_value() ?
-        glm::normalize(vectorTransform * ns.up.value()) :
+        glm::normalize(referenceFrameTransform * ns.up.value()) :
         glm::dvec3(0.0, 1.0, 0.0);
 
     // Construct vectors of a "neutral" view, i.e. when the aim is centered in view.
@@ -349,9 +352,11 @@ void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActio
 NavigationHandler::NavigationState NavigationHandler::navigationState(
                                                const SceneGraphNode& referenceFrame) const
 {
+    const SceneGraphNode* anchor = _orbitalNavigator->anchorNode();
     const SceneGraphNode* aim = _orbitalNavigator->aimNode();
+
     if (!aim) {
-        aim = _orbitalNavigator->anchorNode();
+        aim = anchor;
     }
 
     const glm::dquat invNeutralRotation = glm::quat_cast(glm::lookAt(
@@ -371,26 +376,29 @@ NavigationHandler::NavigationState NavigationHandler::navigationState(
     const glm::dvec3 neutralUp =
          glm::inverse(invNeutralRotation) * unroll * _camera->lookUpVectorCameraSpace();
 
-    const glm::dmat4 invModelTransform = referenceFrame.inverseModelTransform();
-    const glm::dmat3 invVectorTransform = glm::inverse(
-        referenceFrame.worldScale() *
-        referenceFrame.worldRotationMatrix()
-    );
+    const glm::dmat3 invReferenceFrameTransform =
+        glm::inverse(referenceFrame.worldRotationMatrix());
+
+    const glm::dvec3 position = invReferenceFrameTransform *
+        (glm::dvec4(_camera->positionVec3() - anchor->worldPosition(), 1.0));
 
     return NavigationState(
         _orbitalNavigator->anchorNode()->identifier(),
         _orbitalNavigator->aimNode() ?
             _orbitalNavigator->aimNode()->identifier() : "",
         referenceFrame.identifier(),
-        invModelTransform * glm::dvec4(_camera->positionVec3(), 1.0),
-        invVectorTransform * neutralUp, yaw, pitch
+        position,
+        invReferenceFrameTransform * neutralUp, yaw, pitch
     );
 }
 
 void NavigationHandler::saveNavigationState(const std::string& filepath,
                                             const std::string& referenceFrameIdentifier)
 {
-    const SceneGraphNode* referenceFrame = _orbitalNavigator->anchorNode();
+    const SceneGraphNode* referenceFrame = _orbitalNavigator->followingNodeRotation() ?
+        _orbitalNavigator->anchorNode() :
+        sceneGraph()->root();
+
     if (!referenceFrameIdentifier.empty()) {
         referenceFrame = sceneGraphNode(referenceFrameIdentifier);
         if (!referenceFrame) {
@@ -518,7 +526,8 @@ documentation::Documentation NavigationHandler::NavigationState::Documentation()
                 KeyPosition,
                 new DoubleVector3Verifier,
                 Optional::No,
-                "The position of the camera in the specified reference frame."
+                "The position of the camera relative to the anchor node, "
+                "expressed in meters in the specified reference frame."
             },
             {
                 KeyUp,
@@ -562,8 +571,11 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
                 {},
                 "string, [string]",
                 "Save the current navigation state to a file with the path given by the "
-                "first argument. The second argument is the scene graph node to use as "
-                "reference frame. By default, the anchor node is used as reference frame."
+                "first argument. The optoinal second argument is the scene graph node to "
+                "use as reference frame. By default, the reference frame will picked "
+                "based on whether the orbital navigator is currently following the "
+                "anchor node rotation. If it is, the anchor will be chosen as reference "
+                "frame. If not, the reference frame will be set to the scene graph root."
             },
             {
                 "loadNavigationState",
