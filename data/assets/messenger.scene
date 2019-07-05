@@ -35,7 +35,9 @@ asset.onInitialize(function ()
 
     openspace.navigation.setNavigationState({
         Anchor = "Mercury",
-        Position = { 526781518487.171326, 257168309890.072144, -1381125204152.817383 },
+        Position = { 2.423690E11, 1.979038E11, -2.241483E10 },
+        ReferenceFrame = "Root",
+        Up = { -0.492046E0, 0.666088E0, 0.560551E0 }
     })
 end)
 

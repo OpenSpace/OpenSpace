@@ -49,6 +49,7 @@ asset.onInitialize(function ()
 
     openspace.navigation.setNavigationState({
         Anchor = VoyagerAsset.Voyager_1.Identifier,
+        ReferenceFrame = "Root",
         Position = { 526781518487.171326, 257168309890.072144, -1381125204152.817383 }
     })
 end)

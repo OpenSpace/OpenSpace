@@ -62,7 +62,9 @@ asset.onInitialize(function ()
 
     openspace.navigation.setNavigationState({
         Anchor = insightAsset.Insight.Identifier,
-        Position = { 20, 0, 0 },
+        Position = { 8.430115E0, -1.791710E1, 2.813660E0 },
+        ReferenceFrame = "Root",
+        Up = { 0.494659E0,0.357162E0,0.792306E0 },
     })
 
 end)

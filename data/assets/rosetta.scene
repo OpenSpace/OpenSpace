@@ -136,7 +136,9 @@ asset.onInitialize(function ()
 
     openspace.navigation.setNavigationState({
         Anchor = Comet67PAsset.Comet67P.Identifier,
-        Position = { 526781518487.171326, 257168309890.072144, -1381125204152.817383 },
+        ReferenceFrame = "Root",
+        Position = { -7.294781E5 , -6.657894E5, 2.509047E6 },
+        Up = { 0.146529E0, 0.944727E0, 0.293290E0 }
     })
 
     openspace.setPropertyValue('Scene.67P.Renderable.PerformShading', false);
