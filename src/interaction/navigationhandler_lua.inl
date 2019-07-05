@@ -75,7 +75,11 @@ int setNavigationState(lua_State* L) {
 }
 
 int saveNavigationState(lua_State* L) {
-    const int n = ghoul::lua::checkArgumentsAndThrow(L, { 1, 4 }, "lua::saveCameraState");
+    const int n = ghoul::lua::checkArgumentsAndThrow(
+        L,
+        { 1, 2 },
+        "lua::saveNavigationState"
+    );
 
     const std::string& cameraStateFilePath = ghoul::lua::value<std::string>(L, 1);
 

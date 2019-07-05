@@ -570,7 +570,9 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
                 &luascriptfunctions::loadNavigationState,
                 {},
                 "string",
-                "Load a navigation state from file"
+                "Load a navigation state from file. The file should be a lua file "
+                "returning the navigation state as a table formatted as a "
+                "Navigation State, such as the output files of saveNavigationState."
             },
             {
                 "retargetAnchor",
