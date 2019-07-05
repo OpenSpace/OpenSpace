@@ -38,6 +38,7 @@
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/fmt.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
@@ -466,7 +467,9 @@ void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
     const glm::dvec3 cameraPosition = global::navigationHandler.camera()->positionVec3();
     SceneGraphNode* globeSceneGraphNode = dynamic_cast<SceneGraphNode*>(globe.owner());
     if (!globeSceneGraphNode) {
-        LERROR("Error finding chunk");
+        LERROR(fmt::format(
+            "Cannot go to chunk. The renderable is not attached to a scene graph node."
+        ));
         return;
     }
     const glm::dmat4 inverseModelTransform = globeSceneGraphNode->inverseModelTransform();

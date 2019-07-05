@@ -79,11 +79,9 @@ openspace::interaction::NavigationHandler::NavigationState::dictionary() const
     if (anchor != referenceFrame) {
         cameraDict.setValue(KeyReferenceFrame, referenceFrame);
     }
-
     if (!aim.empty()) {
         cameraDict.setValue(KeyAim, aim);
     }
-
     if (up.has_value()) {
         cameraDict.setValue(KeyUp, up.value());
 
@@ -238,39 +236,31 @@ void NavigationHandler::updateCamera(double deltaTime) {
 
 void NavigationHandler::applyNavigationState(const NavigationHandler::NavigationState& ns)
 {
-
-    glm::dvec3 anchorWorldPosition(0.0);
-    glm::dmat3 referenceFrameTransform(1.0);
     const SceneGraphNode* referenceFrame = sceneGraphNode(ns.referenceFrame);
     const SceneGraphNode* anchor = sceneGraphNode(ns.anchor);
 
-    if (anchor) {
-        anchorWorldPosition = anchor->worldPosition();
-    }
-    else {
+    if (!anchor) {
         LERROR(fmt::format(
             "Could not find scene graph node '{}' used as anchor.", ns.referenceFrame
         ));
         return;
     }
-
     if (!ns.aim.empty() && !sceneGraphNode(ns.aim)) {
         LERROR(fmt::format(
             "Could not find scene graph node '{}' used as aim.", ns.referenceFrame
         ));
         return;
     }
-
-    if (referenceFrame) {
-        referenceFrameTransform = referenceFrame->worldRotationMatrix();
-    }
-    else {
+    if (!referenceFrame) {
         LERROR(fmt::format(
             "Could not find scene graph node '{}' used as reference frame.",
             ns.referenceFrame)
         );
         return;
     }
+
+    const glm::dvec3 anchorWorldPosition = anchor->worldPosition();
+    const glm::dmat3 referenceFrameTransform = referenceFrame->worldRotationMatrix();
 
     _orbitalNavigator->setAnchorNode(ns.anchor);
     _orbitalNavigator->setAimNode(ns.aim);
@@ -361,7 +351,7 @@ NavigationHandler::NavigationState NavigationHandler::navigationState(
 
     const glm::dquat invNeutralRotation = glm::quat_cast(glm::lookAt(
         glm::dvec3(0.0, 0.0, 0.0),
-        (aim->worldPosition() - _camera->positionVec3()),
+        aim->worldPosition() - _camera->positionVec3(),
         glm::normalize(_camera->lookUpVectorWorldSpace())
     ));
 
