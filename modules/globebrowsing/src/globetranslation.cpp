@@ -178,8 +178,10 @@ void GlobeTranslation::fillAttachedNode() {
             "GlobeTranslation",
             "Could not set attached node as it does not have a RenderableGlobe"
         );
-        // Reset the globe name to it's previous name
-        _globe = _attachedNode->identifier();
+        if (_attachedNode) {
+            // Reset the globe name to it's previous name
+            _globe = _attachedNode->identifier();
+        }
     }
 }
 

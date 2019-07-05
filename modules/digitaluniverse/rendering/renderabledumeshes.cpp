@@ -77,19 +77,6 @@ namespace {
         "all point."
     };
 
-    //constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
-    //    "ScaleFactor",
-    //    "Scale Factor",
-    //    "This value is used as a multiplicative factor that is applied to the apparent "
-    //    "size of each point."
-    //};
-
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
-        "Color",
-        "Color",
-        "This value is used to define the color of the astronomical object."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
         "TextColor",
         "Text Color",
@@ -427,7 +414,7 @@ void RenderableDUMeshes::initializeGL() {
 }
 
 void RenderableDUMeshes::deinitializeGL() {
-    for (const std::pair<int, RenderingMesh>& pair : _renderingMeshesMap) {
+    for (const std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
         for (int i = 0; i < pair.second.numU; ++i) {
             glDeleteVertexArrays(1, &pair.second.vaoArray[i]);
             glDeleteBuffers(1, &pair.second.vboArray[i]);
@@ -483,7 +470,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
     _program->setUniform(_uniformCache.alphaValue, _alphaValue);
     //_program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
 
-    for (const std::pair<int, RenderingMesh>& pair : _renderingMeshesMap) {
+    for (const std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
         _program->setUniform(_uniformCache.color, _meshColorMap[pair.second.colorIndex]);
         for (size_t i = 0; i < pair.second.vaoArray.size(); ++i) {
             glBindVertexArray(pair.second.vaoArray[i]);

@@ -20,7 +20,8 @@ local TeslaRoadsterTrail = {
         Color = { 0.9, 0.9, 0.0 },
         StartTime = "2018 FEB 8 00:00:00",
         EndTime = "2022 FEB 7 00:00:00",
-        SampleInterval = 60
+        SampleInterval = 3000,
+        TimeStampSubsampleFactor = 1
     },
     GUI = {
         Name = "Tesla Roadster Trail",

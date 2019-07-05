@@ -1123,7 +1123,9 @@ void update(TileProvider& tp) {
                 if (newCurrent) {
                     t.currentTileProvider = newCurrent;
                 }
-                update(*t.currentTileProvider);
+                if (t.currentTileProvider) {
+                    update(*t.currentTileProvider);
+                }
             }
             break;
         }
