@@ -55,27 +55,19 @@ struct Keyframe : public KeyframeBase {
     T data;
 };
 
-template <typename T>
-struct Keyframe<T, false> : public Keyframe<T, true> {
-    using Keyframe<T, true>::Keyframe;
-    Keyframe(Keyframe const&) = delete;
-    Keyframe& operator=(Keyframe&&) = default;
-    Keyframe& operator=(Keyframe const&) = default;
-};
-
-
 /**
 * Templated class for timelines
 */
-template <typename T,
-    bool C = std::is_copy_constructible<T>::value>
+template <typename T>
 class Timeline {
 public:
     Timeline() = default;
     virtual ~Timeline() = default;
-    Timeline(Timeline const&) = delete;
+    Timeline(Timeline const&) = default;
     Timeline(Timeline&&) = default;
+    Timeline& operator=(Timeline&&) = default;
 
+    void addKeyframe(double time, const T& data);
     void addKeyframe(double time, T&& data);
     void clearKeyframes();
     void removeKeyframe(size_t id);
@@ -84,34 +76,17 @@ public:
     void removeKeyframesBetween(double begin, double end, bool inclusiveBegin = false,
         bool inclusiveEnd = false);
     size_t nKeyframes() const;
-    const Keyframe<T, C>* firstKeyframeAfter(
+    const Keyframe<T>* firstKeyframeAfter(
         double timestamp, bool inclusive = false) const;
-    const Keyframe<T, C>* lastKeyframeBefore(
+    const Keyframe<T>* lastKeyframeBefore(
         double timestamp, bool inclusive = false) const;
 
-    const std::deque<Keyframe<T, C>>& keyframes() const;
+    const std::deque<Keyframe<T>>& keyframes() const;
 
 private:
     size_t _nextKeyframeId = 1;
-    std::deque<Keyframe<T, C>> _keyframes;
+    std::deque<Keyframe<T>> _keyframes;
 };
-
-/*
-template <typename T>
-struct Timeline<T, true> : public Timeline<T, false> {
-    void addKeyframe(double timestamp, const T& data) {
-        Keyframe<T, true> keyframe(++_nextKeyframeId, timestamp, data);
-        const auto iter = std::upper_bound(
-            _keyframes.cbegin(),
-            _keyframes.cend(),
-            keyframe,
-            &compareKeyframeTimes
-        );
-        _keyframes.insert(iter, keyframe);
-    }
-};
-*/
-
 
 /**
 * Return true if the timestamp of a is smaller the timestamp of b.
