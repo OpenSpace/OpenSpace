@@ -161,8 +161,7 @@ size_t Timeline<T>::nKeyframes() const {
 }
 
 template <typename T>
-const Keyframe<T>* Timeline<T>::firstKeyframeAfter(double timestamp,
-                                                   bool inclusive) const
+const Keyframe<T>* Timeline<T>::firstKeyframeAfter(double timestamp, bool inclusive) const
 {
     typename std::deque<Keyframe<T>>::const_iterator it;
     if (inclusive) {
@@ -189,8 +188,7 @@ const Keyframe<T>* Timeline<T>::firstKeyframeAfter(double timestamp,
 }
 
 template <typename T>
-const Keyframe<T>* Timeline<T>::lastKeyframeBefore(double timestamp,
-                                                   bool inclusive) const
+const Keyframe<T>* Timeline<T>::lastKeyframeBefore(double timestamp, bool inclusive) const
 {
     typename std::deque<Keyframe<T>>::const_iterator it;
     if (inclusive) {
