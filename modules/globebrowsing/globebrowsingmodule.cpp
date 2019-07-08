@@ -339,9 +339,10 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             "goToGeo",
             &globebrowsing::luascriptfunctions::goToGeo,
             {},
-            "string, number, number, [number]",
-            "Go to geographic coordinates of a globe. The first argument must be "
+            "[string], number, number, [number]",
+            "Go to geographic coordinates of a globe. The first (optional) argument is "
             "the identifier of a scene graph node that has a RenderableGlobe attached. "
+            "If no globe is passed in, the current anchor will be used. "
             "The second argument is latitude and the third is longitude (degrees). "
             "North and East are expressed as positive angles, while South and West are "
             "negative. The optional fourh argument is the altitude in meters. If no "

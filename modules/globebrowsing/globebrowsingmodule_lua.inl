@@ -153,30 +153,52 @@ int goToChunk(lua_State* L) {
 }
 
 int goToGeo(lua_State* L) {
-    const int nArguments = ghoul::lua::checkArgumentsAndThrow(L, 3, 4, "lua::goToGeo");
+    const int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::goToGeo");
 
-    const std::string& globeIdentifier = ghoul::lua::value<std::string>(L, 1);
-    const double latitude = ghoul::lua::value<double>(L, 2);
-    const double longitude = ghoul::lua::value<double>(L, 3);
+    // Check if the user provided a Scene graph node identifier as the first argument.
+    // lua_isstring returns true for both numbers and strings, so better use !lua_isnumber
+    const bool providedGlobeIdentifier = !lua_isnumber(L, 1);
+    const int parameterOffset = providedGlobeIdentifier ? 1 : 0;
 
-    SceneGraphNode* n = sceneGraphNode(globeIdentifier);
-    if (!n) {
-        return ghoul::lua::luaError(L, "Unknown globe name: " + globeIdentifier);
+    const SceneGraphNode* n;
+    if (providedGlobeIdentifier) {
+        const std::string& globeIdentifier = ghoul::lua::value<std::string>(L, 1);
+        n = sceneGraphNode(globeIdentifier);
+        if (!n) {
+            return ghoul::lua::luaError(L, "Unknown globe name: " + globeIdentifier);
+        }
+    } else {
+        n = global::navigationHandler.orbitalNavigator().anchorNode();
+        if (!n) {
+            return ghoul::lua::luaError(L, "No anchor node is set.");
+        }
     }
 
+    const double latitude = ghoul::lua::value<double>(L, parameterOffset + 1);
+    const double longitude = ghoul::lua::value<double>(L, parameterOffset + 2);
 
     const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
     if (!globe) {
-        return ghoul::lua::luaError(L, "Identifier must be a RenderableGlobe");
+        if (providedGlobeIdentifier) {
+            return ghoul::lua::luaError(
+                L, "Identifier must be a RenderableGlobe"
+            );
+        } else {
+            return ghoul::lua::luaError(L,
+                "Current anchor node is not a RenderableGlobe. "
+                "Either change the anchor to a globe, or specify a globe identifier "
+                "as the first argument"
+            );
+        }
     }
 
-    if (nArguments == 3) {
+    if (nArguments == parameterOffset + 2) {
         global::moduleEngine.module<GlobeBrowsingModule>()->goToGeo(
             *globe, latitude, longitude
         );
     }
-    else if (nArguments == 4) {
-        const double altitude = ghoul::lua::value<double>(L, 4);
+    else if (nArguments == parameterOffset + 3) {
+        const double altitude = ghoul::lua::value<double>(L, parameterOffset + 3);
         global::moduleEngine.module<GlobeBrowsingModule>()->goToGeo(
             *globe,
             latitude,
