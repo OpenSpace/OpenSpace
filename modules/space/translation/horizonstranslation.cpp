@@ -179,7 +179,7 @@ void HorizonsTranslation::readHorizonsTextFile(const std::string& horizonsTextFi
         );
 
         // Add position to stored timeline.
-        _timeline.addKeyframe(timeInJ2000, gPos);
+        _timeline.addKeyframe(timeInJ2000, std::move(gPos));
 
         std::getline(fileStream, line);
     }

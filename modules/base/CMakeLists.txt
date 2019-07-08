@@ -56,6 +56,7 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimageonline.h
   ${CMAKE_CURRENT_SOURCE_DIR}/translation/luatranslation.h
   ${CMAKE_CURRENT_SOURCE_DIR}/translation/statictranslation.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/translation/timelinetranslation.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rotation/constantrotation.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rotation/fixedrotation.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rotation/luarotation.h
@@ -100,6 +101,7 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimageonline.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/translation/luatranslation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/translation/statictranslation.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/translation/timelinetranslation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rotation/constantrotation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rotation/fixedrotation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rotation/luarotation.cpp

@@ -42,21 +42,41 @@ struct KeyframeBase {
 /**
 * Templated class for keyframes containing data
 */
-template <typename T>
+template <typename T,
+          bool = std::is_copy_constructible<T>::value>
 struct Keyframe : public KeyframeBase {
-    Keyframe(size_t i, double t, T p);
+    Keyframe(size_t i, double t, T d)
+        : KeyframeBase{ i, t }
+        , data(std::move(d)) {}
+    Keyframe(Keyframe const&) = default;
+    Keyframe(Keyframe&&) = default;
+    Keyframe& operator=(Keyframe&&) = default;
+    Keyframe& operator=(Keyframe const&) = default;
     T data;
 };
+
+template <typename T>
+struct Keyframe<T, false> : public Keyframe<T, true> {
+    using Keyframe<T, true>::Keyframe;
+    Keyframe(Keyframe const&) = delete;
+    Keyframe& operator=(Keyframe&&) = default;
+    Keyframe& operator=(Keyframe const&) = default;
+};
+
 
 /**
 * Templated class for timelines
 */
-template <typename T>
+template <typename T,
+    bool C = std::is_copy_constructible<T>::value>
 class Timeline {
 public:
+    Timeline() = default;
     virtual ~Timeline() = default;
+    Timeline(Timeline const&) = delete;
+    Timeline(Timeline&&) = default;
 
-    void addKeyframe(double time, T data);
+    void addKeyframe(double time, T&& data);
     void clearKeyframes();
     void removeKeyframe(size_t id);
     void removeKeyframesBefore(double timestamp, bool inclusive = false);
@@ -64,14 +84,34 @@ public:
     void removeKeyframesBetween(double begin, double end, bool inclusiveBegin = false,
         bool inclusiveEnd = false);
     size_t nKeyframes() const;
-    const Keyframe<T>* firstKeyframeAfter(double timestamp, bool inclusive = false) const;
-    const Keyframe<T>* lastKeyframeBefore(double timestamp, bool inclusive = false) const;
-    const std::deque<Keyframe<T>>& keyframes() const;
+    const Keyframe<T, C>* firstKeyframeAfter(
+        double timestamp, bool inclusive = false) const;
+    const Keyframe<T, C>* lastKeyframeBefore(
+        double timestamp, bool inclusive = false) const;
+
+    const std::deque<Keyframe<T, C>>& keyframes() const;
 
 private:
     size_t _nextKeyframeId = 1;
-    std::deque<Keyframe<T>> _keyframes;
+    std::deque<Keyframe<T, C>> _keyframes;
 };
+
+/*
+template <typename T>
+struct Timeline<T, true> : public Timeline<T, false> {
+    void addKeyframe(double timestamp, const T& data) {
+        Keyframe<T, true> keyframe(++_nextKeyframeId, timestamp, data);
+        const auto iter = std::upper_bound(
+            _keyframes.cbegin(),
+            _keyframes.cend(),
+            keyframe,
+            &compareKeyframeTimes
+        );
+        _keyframes.insert(iter, keyframe);
+    }
+};
+*/
+
 
 /**
 * Return true if the timestamp of a is smaller the timestamp of b.

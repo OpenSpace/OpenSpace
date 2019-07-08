@@ -24,15 +24,9 @@
 
 namespace openspace {
 
-template <typename T>
-Keyframe<T>::Keyframe(size_t i, double t, T p)
-    : KeyframeBase{ i, t }
-    , data(p)
-{}
-
-template <typename T>
-void Timeline<T>::addKeyframe(double timestamp, T data) {
-    Keyframe<T> keyframe(++_nextKeyframeId, timestamp, data);
+template <typename T, bool C>
+void Timeline<T, C>::addKeyframe(double timestamp, T&& data) {
+    Keyframe<T, C> keyframe(++_nextKeyframeId, timestamp, std::move(data));
     const auto iter = std::upper_bound(
         _keyframes.cbegin(),
         _keyframes.cend(),
@@ -42,8 +36,9 @@ void Timeline<T>::addKeyframe(double timestamp, T data) {
     _keyframes.insert(iter, keyframe);
 }
 
-template <typename T>
-void Timeline<T>::removeKeyframesAfter(double timestamp, bool inclusive) {
+
+template <typename T, bool C>
+void Timeline<T, C>::removeKeyframesAfter(double timestamp, bool inclusive) {
     typename std::deque<Keyframe<T>>::const_iterator iter;
     if (inclusive) {
         iter = std::lower_bound(
@@ -65,8 +60,8 @@ void Timeline<T>::removeKeyframesAfter(double timestamp, bool inclusive) {
     _keyframes.erase(iter, _keyframes.end());
 }
 
-template <typename T>
-void Timeline<T>::removeKeyframesBefore(double timestamp, bool inclusive) {
+template <typename T, bool C>
+void Timeline<T, C>::removeKeyframesBefore(double timestamp, bool inclusive) {
     typename std::deque<Keyframe<T>>::const_iterator iter;
     if (inclusive) {
         iter = std::upper_bound(
@@ -88,8 +83,8 @@ void Timeline<T>::removeKeyframesBefore(double timestamp, bool inclusive) {
     _keyframes.erase(_keyframes.begin(), iter);
 }
 
-template <typename T>
-void Timeline<T>::removeKeyframesBetween(double begin, double end, bool inclusiveBegin,
+template <typename T, bool C>
+void Timeline<T, C>::removeKeyframesBetween(double begin, double end, bool inclusiveBegin,
                                          bool inclusiveEnd)
 {
     typename std::deque<Keyframe<T>>::const_iterator beginIter;
@@ -132,13 +127,13 @@ void Timeline<T>::removeKeyframesBetween(double begin, double end, bool inclusiv
     _keyframes.erase(beginIter, endIter);
 }
 
-template <typename T>
-void Timeline<T>::clearKeyframes() {
+template <typename T, bool C>
+void Timeline<T, C>::clearKeyframes() {
     _keyframes.clear();
 }
 
-template <typename T>
-void Timeline<T>::removeKeyframe(size_t id) {
+template <typename T, bool C>
+void Timeline<T, C>::removeKeyframe(size_t id) {
     _keyframes.erase(
         std::remove_if(
             _keyframes.begin(),
@@ -149,15 +144,16 @@ void Timeline<T>::removeKeyframe(size_t id) {
     );
 }
 
-template <typename T>
-size_t Timeline<T>::nKeyframes() const {
+template <typename T, bool C>
+size_t Timeline<T, C>::nKeyframes() const {
     return _keyframes.size();
 }
 
-template <typename T>
-const Keyframe<T>* Timeline<T>::firstKeyframeAfter(double timestamp, bool inclusive) const
+template <typename T, bool C>
+const Keyframe<T, C>* Timeline<T, C>::firstKeyframeAfter(double timestamp,
+                                                         bool inclusive) const
 {
-    typename std::deque<Keyframe<T>>::const_iterator it;
+    typename std::deque<Keyframe<T, C>>::const_iterator it;
     if (inclusive) {
         it = std::lower_bound(
             _keyframes.begin(),
@@ -181,10 +177,11 @@ const Keyframe<T>* Timeline<T>::firstKeyframeAfter(double timestamp, bool inclus
     return &(*it);
 }
 
-template <typename T>
-const Keyframe<T>* Timeline<T>::lastKeyframeBefore(double timestamp, bool inclusive) const
+template <typename T, bool C>
+const Keyframe<T, C>* Timeline<T, C>::lastKeyframeBefore(double timestamp,
+                                                         bool inclusive) const
 {
-    typename std::deque<Keyframe<T>>::const_iterator it;
+    typename std::deque<Keyframe<T, C>>::const_iterator it;
     if (inclusive) {
         it = std::upper_bound(
             _keyframes.begin(),
@@ -209,8 +206,8 @@ const Keyframe<T>* Timeline<T>::lastKeyframeBefore(double timestamp, bool inclus
     return &(*it);
 }
 
-template<typename T>
-const std::deque<Keyframe<T>>& Timeline<T>::keyframes() const {
+template <typename T, bool C>
+const std::deque<Keyframe<T, C>>& Timeline<T, C>::keyframes() const {
     return _keyframes;
 }
 
