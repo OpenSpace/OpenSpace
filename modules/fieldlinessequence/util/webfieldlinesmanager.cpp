@@ -56,9 +56,12 @@ namespace openspace{
             
             //add the timetrigger at the right place in the list
             int i = 0;
-            while(timetrigger > (*rfs_startTimes)[i]){
-                if( i == static_cast<int>(*rfs_nStates)-1) break;
-                else i++;
+            if(*rfs_nStates > 0){
+                while(timetrigger > (*rfs_startTimes)[i]){
+                    i++;
+                    if( i == static_cast<int>(*rfs_nStates)) break;
+                    
+                }
             }
             rfs_sourceFiles->insert(rfs_sourceFiles->begin() + i, destPath);
             rfs_startTimes->insert(rfs_startTimes->begin() + i, timetrigger);
