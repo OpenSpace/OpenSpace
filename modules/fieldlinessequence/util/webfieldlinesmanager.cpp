@@ -77,7 +77,7 @@ namespace openspace{
         _flsType = fieldLineModelType;
         _syncDir = initializeSyncDirectory(identifier);
 
-        _downloadMargin = 3;
+        _downloadMargin = 1;
         _timeTriggerDelta = 7200;
         
         rfs_activeTriggerTimeIndex = &_activeTriggerTimeIndex;
@@ -88,6 +88,7 @@ namespace openspace{
         getAvailableTriggertimes();
         
         setInitialSet(global::timeManager.time().j2000Seconds());
+        downloadInitialSequence();
         
         LERROR("WebFieldlinesManager initialized");
 
@@ -187,8 +188,12 @@ namespace openspace{
     }
     
     // TODO
-    void WebFieldlinesManager::downloadInitialSequence(std::vector<double> triggertimes){
-        
+    void WebFieldlinesManager::downloadInitialSequence(){
+        for (int index : _filesToDownload){
+            // download fieldlines file
+            std::string filename = _availableTriggertimes[index].second;
+            std::string destPath = downloadOsfls(filename);
+        }
     }
     
     // TODO

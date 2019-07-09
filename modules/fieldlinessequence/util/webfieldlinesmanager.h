@@ -98,7 +98,7 @@ private:
     void setInitialSet(double openSpaceTime);
     
     // Download a sequence
-    void downloadInitialSequence(std::vector<double> triggertimes);
+    void downloadInitialSequence();
     
     // Update the list of osfls available on disk. Should be in sync with
     // _startTimes member var in FieldLinesSequence

@@ -1193,11 +1193,11 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     const double currentTime = data.time.j2000Seconds();
     
     // en liten fuling för att testa att trigga nedladdning
-    if(currentTime > 610056120.0 && currentTime < 610056120.2){
-        LERROR("downloading is starting");
-        _webFieldlinesManager.downloadFieldlines();
-        computeSequenceEndTime();
-    }
+//    if(currentTime > 610056120.0 && currentTime < 610056120.2){
+//        LERROR("downloading is starting");
+//        _webFieldlinesManager.downloadFieldlines();
+//        computeSequenceEndTime();
+//    }
     
     const bool isInInterval = (currentTime >= _startTimes[0]) &&
                               (currentTime < _sequenceEndTime);
