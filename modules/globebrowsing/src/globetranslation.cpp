@@ -62,14 +62,14 @@ namespace {
         "Altitude",
         "Altitude",
         "The altitude in meters. "
-        "If the 'UseHeightMap' property is 'true', this is an offset from the actual "
+        "If the 'UseHeightmap' property is 'true', this is an offset from the actual "
         "surface of the globe. If not, this is an offset from the reference ellipsoid."
         "The default value is 0.0"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseHeightMapInfo = {
-        "UseHeightMap",
-        "Use Height Map",
+    constexpr openspace::properties::Property::PropertyInfo UseHeightmapInfo = {
+        "UseHeightmap",
+        "Use Heightmap",
         "If this value is 'true', the altitude specified in 'Altitude' will be treated "
         "as an offset from the heightmap. Otherwise, it will be an offset from the "
         "globe's reference ellipsoid. The default value is 'false'."
@@ -117,10 +117,10 @@ documentation::Documentation GlobeTranslation::Documentation() {
                 AltitudeInfo.description
             },
             {
-                UseHeightMapInfo.identifier,
+                UseHeightmapInfo.identifier,
                 new BoolVerifier,
                 Optional::Yes,
-                UseHeightMapInfo.description
+                UseHeightmapInfo.description
             }
         }
     };
@@ -131,7 +131,7 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     , _longitude(LongitudeInfo, 0.0, -180.0, 180.0)
     , _latitude(LatitudeInfo, 0.0, -90.0, 90.0)
     , _altitude(AltitudeInfo, 0.0, 0.0, 1e12)
-    , _useHeightMap(UseHeightMapInfo, false)
+    , _useHeightmap(UseHeightmapInfo, false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -149,8 +149,8 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKey(AltitudeInfo.identifier)) {
         _altitude = dictionary.value<double>(AltitudeInfo.identifier);
     }
-    if (dictionary.hasKey(UseHeightMapInfo.identifier)) {
-        _useHeightMap = dictionary.value<bool>(UseHeightMapInfo.identifier);
+    if (dictionary.hasKey(UseHeightmapInfo.identifier)) {
+        _useHeightmap = dictionary.value<bool>(UseHeightmapInfo.identifier);
     }
 
     _globe.onChange([this]() {
@@ -161,7 +161,7 @@ GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)
     _longitude.onChange([this]() { _positionIsDirty = true; });
     _latitude.onChange([this]() { _positionIsDirty = true; });
     _altitude.onChange([this]() { _positionIsDirty = true; });
-    _useHeightMap.onChange([this]() { _positionIsDirty = true; });
+    _useHeightmap.onChange([this]() { _positionIsDirty = true; });
 }
 
 void GlobeTranslation::fillAttachedNode() {
@@ -191,7 +191,7 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
         _positionIsDirty = true;
     }
 
-    if (_useHeightMap) {
+    if (_useHeightmap) {
         // If we use the height map, we have to compute the height every frame
         _positionIsDirty = true;
     }
@@ -202,7 +202,7 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
 
     GlobeBrowsingModule& mod = *(global::moduleEngine.module<GlobeBrowsingModule>());
 
-    if (_useHeightMap) {
+    if (_useHeightmap) {
         glm::vec3 groundPos = mod.cartesianCoordinatesFromGeo(
             *_attachedNode,
             _latitude,

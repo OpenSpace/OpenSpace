@@ -50,7 +50,7 @@ private:
     properties::DoubleProperty _longitude;
     properties::DoubleProperty _latitude;
     properties::DoubleProperty _altitude;
-    properties::BoolProperty _useHeightMap;
+    properties::BoolProperty _useHeightmap;
 
     RenderableGlobe* _attachedNode = nullptr;
 
