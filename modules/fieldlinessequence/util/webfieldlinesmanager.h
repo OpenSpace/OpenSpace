@@ -47,6 +47,9 @@ public:
 
     // Returns the sync directory
     std::string getDirectory();
+    
+    // Function to run in FieldLinesSequence's update loop
+    void update();
 
     
 private:
@@ -60,6 +63,9 @@ private:
     
     // How long between the timesteps?
     double _timeTriggerDelta;
+    
+    // active time trigger index in the list of the timetriggers that are available online to fetch
+    int _activeTTIndexWeb;
     
     /******************************************************************************
      * Pointers to stuff in RenderableFieldlinesSequence (which own this instance)*
@@ -81,11 +87,9 @@ private:
     // Indices for what fieldlines to download
     std::vector<int> _filesToDownload;
     
-    // Function to run in FieldLinesSequence's update loop
-    void update();
+    
     
     // Download one file, given what model type and triggertime in J2000
-    // ***turn into ints later***
     std::string downloadOsfls(std::string triggertime);
     
     std::string initializeSyncDirectory(std::string identifier);
@@ -97,19 +101,21 @@ private:
     // (can be empty during start up of openspace)
     void setInitialSet(double openSpaceTime);
     
+    // decide what files to download
+    void setFilesToDownload(int index);
+    
     // Download a sequence
     void downloadInitialSequence();
     
-    // Update the list of osfls available on disk. Should be in sync with
-    // _startTimes member var in FieldLinesSequence
-    void updateStartTimes();
+    // Update index of _activeTTIndexWeb to match the one in renderablefieldlinessequence
+    void updateTTIndexWeb();
     
     // Parse the data from http request
     void parseTriggerTimesList(std::string s);
     
-    // some temporary functions to translate the filenames to ints (doubles?)
-    int triggerTimeString2Int(std::string s);
-    void triggerTimeInt2String(int d, std::string& s);
+    // some temporary functions to translate the filenames to doubles
+    double triggerTimeString2Double(std::string s);
+    void triggerTimeDouble2String(double d, std::string& s);
     
 };
 

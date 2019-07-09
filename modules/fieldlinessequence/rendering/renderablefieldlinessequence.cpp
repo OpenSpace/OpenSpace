@@ -428,7 +428,7 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
             LERROR(fmt::format("{}: The field {} is missing", _identifier, KeyWebFieldlines));
             return false;
         }
-        else if (!webFieldLines) {
+        else if (!_webFieldlines) {
             LERROR(fmt::format("{}: The field {} is missing", _identifier, KeySourceFolder));
             return false;
         }
@@ -1210,6 +1210,9 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
             (nextIdx < _nStates && currentTime >= _startTimes[nextIdx]))
         {
             updateActiveTriggerTimeIndex(currentTime);
+            // WebfieldlinesManager stuff!
+            _webFieldlinesManager.update();
+            computeSequenceEndTime();
 
             if (_loadingStatesDynamically) {
                 _mustLoadNewStateFromDisk = true;

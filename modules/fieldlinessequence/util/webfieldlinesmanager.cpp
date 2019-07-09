@@ -41,8 +41,6 @@ namespace {
 namespace openspace{
     
     // dowload files specified in _filestodownload
-    // I'm thinking we can replace the parameters with pointers to the lists that will be
-    // initialized in the constuctor instead
     void WebFieldlinesManager::downloadFieldlines(){
         LERROR("starting download");
         for (int index : _filesToDownload){
@@ -69,13 +67,13 @@ namespace openspace{
         }
     }
 
-    // Operator ()
+
     void WebFieldlinesManager::initializeWebFieldlinesManager(std::string identifier, std::string fieldLineModelType, int& _activeTriggerTimeIndex, size_t& _nStates, std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes)
     {
         _flsType = fieldLineModelType;
         _syncDir = initializeSyncDirectory(identifier);
 
-        _downloadMargin = 1;
+        _downloadMargin = 2;
         _timeTriggerDelta = 7200;
         
         rfs_activeTriggerTimeIndex = &_activeTriggerTimeIndex;
@@ -100,20 +98,49 @@ namespace openspace{
     
     // this function aint done
     void WebFieldlinesManager::update(){
+        
+        updateTTIndexWeb();
+        
         // check how many are left until fieldlinessequence runs out - add direction information later
-        double nextTheroticalTimeTrigger;
-        double eps = 100;
+        double nextTimeTrigger;
+        double eps = 10.0;
         if(*rfs_activeTriggerTimeIndex ==  static_cast<int>(*rfs_nStates)-1){
             // if it's at the last index, definetily start some downloading
+            LERROR("gonna need some more files");
             return;
         }
-        for (int i = *rfs_activeTriggerTimeIndex; i < static_cast<int>(*rfs_nStates); i++){
-            nextTheroticalTimeTrigger = (*rfs_startTimes)[i] +_timeTriggerDelta;
-            if((*rfs_startTimes)[i + 1] > (nextTheroticalTimeTrigger + eps)){
-                // do some downloading
+        
+        int setsLeftUntilGapOrEnd = 0;
+        for (int i = *rfs_activeTriggerTimeIndex; i < static_cast<int>(*rfs_nStates)-1; i++){
+            setsLeftUntilGapOrEnd++;
+            nextTimeTrigger = _availableTriggertimes[_activeTTIndexWeb + setsLeftUntilGapOrEnd].first;
+            // if the next file in renderablefieldsequence is further away than the actual next timetrigger, download it
+            if((*rfs_startTimes)[i + 1] > (nextTimeTrigger + eps)){
+                break;
             }
-            
+            if(setsLeftUntilGapOrEnd > 2){
+                //we're all gucci
+                break;
+            }
         }
+        if(setsLeftUntilGapOrEnd < 2){
+            LERROR("gonna need some more files");
+            setFilesToDownload(setsLeftUntilGapOrEnd);
+            downloadFieldlines(); // this should be thread with lock
+        }
+    }
+    void WebFieldlinesManager::setFilesToDownload(int setsLeftUntilGapOrEnd){
+        int startInd = _activeTTIndexWeb + setsLeftUntilGapOrEnd + 1;
+        int endInd = startInd + _downloadMargin;
+        
+        if(endInd >= static_cast<int>(_availableTriggertimes.size())){
+            endInd = static_cast<int>(_availableTriggertimes.size()) - 1;
+        }
+        
+        for( int i = startInd; i <= endInd; i++){
+            _filesToDownload.push_back(i);
+        }
+        
     }
     
     std::string WebFieldlinesManager::downloadOsfls(std::string triggertime){
@@ -170,12 +197,12 @@ namespace openspace{
     
     void WebFieldlinesManager::setInitialSet(double openSpaceTime){
         
-        int openspaceindex = -1;
-        do openspaceindex++;
-        while (openSpaceTime > _availableTriggertimes[openspaceindex].first);
+        _activeTTIndexWeb = -1;
+        do _activeTTIndexWeb++;
+        while (openSpaceTime > _availableTriggertimes[_activeTTIndexWeb].first);
         
-        int startInd = openspaceindex - _downloadMargin;
-        int endInd = openspaceindex + _downloadMargin;
+        int startInd = _activeTTIndexWeb - _downloadMargin;
+        int endInd = _activeTTIndexWeb + _downloadMargin;
         
         if(startInd < 0) startInd = 0;
         if(endInd >= static_cast<int>(_availableTriggertimes.size()))
@@ -185,18 +212,28 @@ namespace openspace{
             _filesToDownload.push_back(i);
     }
     
-    // TODO
+    // Download the initial set of fieldlines
     void WebFieldlinesManager::downloadInitialSequence(){
         for (int index : _filesToDownload){
             // download fieldlines file
             std::string filename = _availableTriggertimes[index].second;
             std::string destPath = downloadOsfls(filename);
         }
+        _filesToDownload.clear();
     }
     
-    // TODO
-    void WebFieldlinesManager::updateStartTimes(){
+
+    void WebFieldlinesManager::updateTTIndexWeb(){
+        double rfs_time = (*rfs_startTimes)[*rfs_activeTriggerTimeIndex];
+        _activeTTIndexWeb = 0;
+        double eps = 10.0;
         
+        while(true){
+            if((rfs_time > _availableTriggertimes[_activeTTIndexWeb].first - eps)
+               && (rfs_time < _availableTriggertimes[_activeTTIndexWeb].first + eps))
+                break;
+            _activeTTIndexWeb++;
+        }
     }
     
     void WebFieldlinesManager::parseTriggerTimesList(std::string s){
@@ -208,26 +245,26 @@ namespace openspace{
         {
             if (c == '[' || c == ']' || c == '"' ) continue;
             else if (c == ','){
-                double tt = triggerTimeString2Int(sub.substr(6, 23));
+                double tt = triggerTimeString2Double(sub.substr(6, 23));
                 _availableTriggertimes.push_back(std::make_pair(tt, sub));
                 sub.clear();
             }
             else sub += c;
         }
-        double tt = triggerTimeString2Int(sub.substr(6, 23));
+        double tt = triggerTimeString2Double(sub.substr(6, 23));
         _availableTriggertimes.push_back(std::make_pair(tt, sub));
     }
     
-    int WebFieldlinesManager::triggerTimeString2Int(std::string s){
+    double WebFieldlinesManager::triggerTimeString2Double(std::string s){
         s.replace(13, 1, ":");
         s.replace(16, 1, ":");
         Time time = Time();
         time.setTime(s);
-        return static_cast<int> (time.j2000Seconds() - 69.185013294);
+        return (time.j2000Seconds() /*- 69.185013294*/); // openspace timeconverter gives an error. but we're gonna be consistent with the error
     }
     
-    void WebFieldlinesManager::triggerTimeInt2String(int i, std::string& s){
-        double temp = i + 69.185013294;
+    void WebFieldlinesManager::triggerTimeDouble2String(double i, std::string& s){
+        double temp = i /*+ 69.185013294*/;
         Time time = Time();
         time.setTime(temp);
         s = time.ISO8601();
