@@ -42,8 +42,7 @@ struct KeyframeBase {
 /**
 * Templated class for keyframes containing data
 */
-template <typename T,
-          bool = std::is_copy_constructible<T>::value>
+template <typename T>
 struct Keyframe : public KeyframeBase {
     Keyframe(size_t i, double t, T d)
         : KeyframeBase{ i, t }

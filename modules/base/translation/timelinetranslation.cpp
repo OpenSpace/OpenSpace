@@ -65,7 +65,6 @@ TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary) {
         "TimelineTranslation"
     );
 
-
     const ghoul::Dictionary& keyframes =
         dictionary.value<ghoul::Dictionary>(KeyKeyframes);
 

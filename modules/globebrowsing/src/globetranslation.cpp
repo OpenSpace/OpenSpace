@@ -192,7 +192,7 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
     }
 
     if (_useHeightmap) {
-        // If we use the height map, we have to compute the height every frame
+        // If we use the heightmap, we have to compute the height every frame
         _positionIsDirty = true;
     }
 
