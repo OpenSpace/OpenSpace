@@ -420,11 +420,11 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
     }
 
     std::string sourceFolderPath;
-    bool webFieldLines;
+
     if (!_dictionary->getValue(KeySourceFolder, sourceFolderPath)) {
 
         // If this is a web-fieldline, we don't need no sourcefolder
-        if (!_dictionary->getValue(KeyWebFieldlines, webFieldLines)) {
+        if (!_dictionary->getValue(KeyWebFieldlines, _webFieldlines)) {
             LERROR(fmt::format("{}: The field {} is missing", _identifier, KeyWebFieldlines));
             return false;
         }
@@ -434,7 +434,7 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
         }
     }
 
-    if (webFieldLines) {
+    if (_webFieldlines) {
         initializeWebManager();
         sourceFolderPath = _webFieldlinesManager.getDirectory();
     }
@@ -1182,7 +1182,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
 }
 
 void RenderableFieldlinesSequence::initializeWebManager() {
-    _webFieldlinesManager(_identifier, "PfssIo", _activeTriggerTimeIndex, _nStates, _sourceFiles, _startTimes);
+    _webFieldlinesManager.initializeWebFieldlinesManager(_identifier, "PfssIo", _activeTriggerTimeIndex, _nStates, _sourceFiles, _startTimes);
 }
 
 void RenderableFieldlinesSequence::update(const UpdateData& data) {
@@ -1192,12 +1192,8 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 
     const double currentTime = data.time.j2000Seconds();
     
-    // en liten fuling för att testa att trigga nedladdning
-//    if(currentTime > 610056120.0 && currentTime < 610056120.2){
-//        LERROR("downloading is starting");
-//        _webFieldlinesManager.downloadFieldlines();
-//        computeSequenceEndTime();
-//    }
+    // Webfieldlines is activated
+
     
     const bool isInInterval = (currentTime >= _startTimes[0]) &&
                               (currentTime < _sequenceEndTime);

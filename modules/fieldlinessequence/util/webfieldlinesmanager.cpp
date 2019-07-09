@@ -69,10 +69,8 @@ namespace openspace{
         }
     }
 
-    // ------------------------------- OPERATORS ------------------------------- //
-
     // Operator ()
-    void WebFieldlinesManager::operator()(std::string identifier, std::string fieldLineModelType, int& _activeTriggerTimeIndex, size_t& _nStates, std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes)
+    void WebFieldlinesManager::initializeWebFieldlinesManager(std::string identifier, std::string fieldLineModelType, int& _activeTriggerTimeIndex, size_t& _nStates, std::vector<std::string>& _sourceFiles, std::vector<double>& _startTimes)
     {
         _flsType = fieldLineModelType;
         _syncDir = initializeSyncDirectory(identifier);

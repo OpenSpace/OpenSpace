@@ -87,6 +87,9 @@ private:
     // True when new state is loaded or user change which quantity used for masking out
     // line segments
     bool _shouldUpdateMaskingBuffer = false;
+    // Stated weather the field lines are fetched on demand from the web or not, default
+    // is false.
+    bool _webFieldlines = false;
 
     // --------------------------------- NUMERICALS ----------------------------------- //
     // Active index of _states. If(==-1)=>no state available for current time. Always the
