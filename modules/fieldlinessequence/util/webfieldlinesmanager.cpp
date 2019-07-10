@@ -46,11 +46,11 @@ namespace openspace{
         for (int index : _filesToDownload){
             
 
-            std::string filename = _availableTriggertimes[index].second;
+            std::string downloadkey = _availableTriggertimes[index].second;
             double timetrigger = _availableTriggertimes[index].first;
             
             // download fieldlines file
-            std::string destPath = downloadOsfls(filename);
+            std::string destPath = downloadOsfls(downloadkey);
             
             //add the timetrigger at the right place in the list
             int i = 0;
@@ -143,9 +143,9 @@ namespace openspace{
         
     }
     
-    std::string WebFieldlinesManager::downloadOsfls(std::string triggertime){
-        std::string url = "http://localhost:3000/WSA/" + triggertime;
-        std::string destinationpath = absPath(_syncDir + '/' + triggertime.substr(6));
+    std::string WebFieldlinesManager::downloadOsfls(std::string downloadkey){
+        std::string url = "http://localhost:3000/WSA/" + downloadkey;
+        std::string destinationpath = absPath(_syncDir + '/' + downloadkey.substr(6));
         AsyncHttpFileDownload ashd = AsyncHttpFileDownload(url, destinationpath, HttpFileDownload::Overwrite::Yes);
         HttpRequest::RequestOptions opt = {};
         opt.requestTimeoutSeconds = 0;
@@ -216,8 +216,8 @@ namespace openspace{
     void WebFieldlinesManager::downloadInitialSequence(){
         for (int index : _filesToDownload){
             // download fieldlines file
-            std::string filename = _availableTriggertimes[index].second;
-            std::string destPath = downloadOsfls(filename);
+            std::string downloadkey = _availableTriggertimes[index].second;
+            std::string destPath = downloadOsfls(downloadkey);
         }
         _filesToDownload.clear();
     }

@@ -89,8 +89,8 @@ private:
     
     
     
-    // Download one file, given what model type and triggertime in J2000
-    std::string downloadOsfls(std::string triggertime);
+    // Download one file, given what model type key for downloading
+    std::string downloadOsfls(std::string downloadkey);
     
     std::string initializeSyncDirectory(std::string identifier);
 
