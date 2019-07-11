@@ -5,7 +5,7 @@
 --   * The descent markers in the KML have Point nodes expressed "relaivte to ground"
 --     We assume that the ground is fixed at altitude 1925 meters below the reference ellipsoid,
 --     in order to match height data from a height map constructed from LRO data.
---   * We manually offset the coordiantes slightly, by 0.013736003622689452degrees in longitude and -0.007392581881668803 degrees in latitude, 
+--   * We manually offset the coordiantes slightly, by 0.013736003622689452 degrees in longitude and -0.007392581881668803 degrees in latitude, 
 --     in order to match the landing spot specified at long: 23.4733, lat: 0.6741 extracted from footage from LRO.
 --     The kml file provided 23.45956399637731, lat: 0.6814925818816688 as the landing coordinates - hence the manual offset.
 --     If more accurate height/color maps are aqcuired, these values can be adjusted by running the conversion script again.
