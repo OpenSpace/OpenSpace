@@ -37,7 +37,6 @@ namespace documentation { struct Documentation; }
 class TimelineTranslation : public Translation {
 public:
     TimelineTranslation(const ghoul::Dictionary& dictionary);
-    TimelineTranslation(const TimelineTranslation&) = delete;
 
     glm::dvec3 position(const UpdateData& data) const override;
     static documentation::Documentation Documentation();

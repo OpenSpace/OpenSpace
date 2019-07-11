@@ -207,6 +207,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
 
         LuaTranslation::Documentation(),
         StaticTranslation::Documentation(),
+        TimelineTranslation::Documentation(),
 
         TimeFrameInterval::Documentation(),
         TimeFrameUnion::Documentation(),

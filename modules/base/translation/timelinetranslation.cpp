@@ -52,7 +52,9 @@ documentation::Documentation TimelineTranslation::Documentation() {
                 new TableVerifier({
                     { "*", new TableVerifier(), Optional::No, "Any translation object" }
                 }),
-                Optional::No
+                Optional::No,
+                "A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS"
+                "and values that are valid Translation objects."
             }
         }
     };

@@ -1,6 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local descentKeyframes = asset.require('./apollo11descentStatic')
+local descentKeyframes = asset.require('./apollo11_lem_descent.asset')
 
 asset.require('spice/base')
 
