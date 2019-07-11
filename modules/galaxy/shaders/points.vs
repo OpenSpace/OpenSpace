@@ -26,8 +26,8 @@
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
-in vec3 inPosition;
-in vec3 inColor;
+layout(location = 0) in vec3 inPosition;
+layout(location = 1) in vec3 inColor;
 
 out vec3 vsPosition;
 out vec3 vsColor;

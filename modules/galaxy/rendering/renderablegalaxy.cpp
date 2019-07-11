@@ -163,7 +163,7 @@ namespace openspace {
         LERROR("No volume dimensions specified.");
     }
 
-    /*if (!dictionary.hasKeyAndValue<ghoul::Dictionary>("Points")) {
+    if (!dictionary.hasKeyAndValue<ghoul::Dictionary>("Points")) {
         LERROR("No points dictionary specified.");
     }
 
@@ -174,7 +174,7 @@ namespace openspace {
     } else {
         LERROR("No points filename specified.");
     }
-    pointsDictionary.getValue("Scaling", _pointScaling);*/
+    //pointsDictionary.getValue("Scaling", _pointScaling);
 }
 
 void RenderableGalaxy::initializeGL() {
@@ -229,84 +229,84 @@ void RenderableGalaxy::initializeGL() {
     addProperty(_rotation);
 
     // initialize points.
-    /*std::ifstream pointFile(_pointsFilename, std::ios::in | std::ios::binary);
+    if (!_pointsFilename.empty()) {
+        std::ifstream pointFile(_pointsFilename, std::ios::in);
 
-    std::vector<glm::vec3> pointPositions;
-    std::vector<glm::vec3> pointColors;
+        std::vector<glm::vec3> pointPositions;
+        std::vector<glm::vec3> pointColors;
+        int64_t nPoints;
 
-    int64_t nPoints;
-    pointFile.seekg(0, std::ios::beg); // read heder.
-    pointFile.read(reinterpret_cast<char*>(&nPoints), sizeof(int64_t));
+        // Read header for OFF (Object File Format)
+        std::string line;
+        std::getline(pointFile, line);
 
-    _nPoints = static_cast<size_t>(nPoints);
+        // Read point count
+        std::getline(pointFile, line);
+        std::istringstream iss(line);
+        iss >> nPoints;
 
-    size_t nFloats = _nPoints * 7;
+        // Prepare point reading
+        _nPoints = static_cast<size_t>(nPoints);  
+        float maxdist = 0;
 
-    std::vector<float> pointData(nFloats);
-    pointFile.seekg(sizeof(int64_t), std::ios::beg); // read past heder.
-    pointFile.read(reinterpret_cast<char*>(pointData.data()), nFloats * sizeof(float));
-    pointFile.close();
+        // Read points
+        float x, y, z, r, g, b, a;
+        for (size_t i = 0; i < _nPoints; ++i) {
+            std::getline(pointFile, line);
+            std::istringstream iss(line);
+            iss >> x >> y >> z >> r >> g >> b >> a;
+            maxdist = std::max(maxdist, glm::length(glm::vec3(x, y, z)));
+            pointPositions.emplace_back(x, y, z);
+            pointColors.emplace_back(r, g, b);
+        }
 
-    float maxdist = 0;
+        pointFile.close();
 
-    for (size_t i = 0; i < _nPoints; ++i) {
-        float x = pointData[i * 7 + 0];
-        float y = pointData[i * 7 + 1];
-        float z = pointData[i * 7 + 2];
-        float r = pointData[i * 7 + 3];
-        float g = pointData[i * 7 + 4];
-        float b = pointData[i * 7 + 5];
-        maxdist = std::max(maxdist, glm::length(glm::vec3(x, y, z)));
-        //float a = pointData[i * 7 + 6];  alpha is not used.
+        std::cout << maxdist << std::endl;
 
-        pointPositions.emplace_back(x, y, z);
-        pointColors.emplace_back(r, g, b);
+        glGenVertexArrays(1, &_pointsVao);
+        glGenBuffers(1, &_positionVbo);
+        glGenBuffers(1, &_colorVbo);
+
+        glBindVertexArray(_pointsVao);
+        glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
+        glBufferData(GL_ARRAY_BUFFER,
+            pointPositions.size() * sizeof(glm::vec3),
+            pointPositions.data(),
+            GL_STATIC_DRAW
+        );
+
+        glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
+        glBufferData(GL_ARRAY_BUFFER,
+            pointColors.size() * sizeof(glm::vec3),
+            pointColors.data(),
+            GL_STATIC_DRAW
+        );
+
+        _pointsProgram = global::renderEngine.buildRenderProgram(
+            "Galaxy points",
+            absPath("${MODULE_GALAXY}/shaders/points.vs"),
+            absPath("${MODULE_GALAXY}/shaders/points.fs")
+        );
+
+        _pointsProgram->setIgnoreUniformLocationError(
+            ghoul::opengl::ProgramObject::IgnoreError::Yes
+        );
+
+        GLint positionAttrib = _pointsProgram->attributeLocation("inPosition");
+        GLint colorAttrib = _pointsProgram->attributeLocation("inColor");
+
+        glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
+        glEnableVertexAttribArray(positionAttrib);
+        glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+        glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
+        glEnableVertexAttribArray(colorAttrib);
+        glVertexAttribPointer(colorAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
     }
-
-    std::cout << maxdist << std::endl;
-
-    glGenVertexArrays(1, &_pointsVao);
-    glGenBuffers(1, &_positionVbo);
-    glGenBuffers(1, &_colorVbo);
-
-    glBindVertexArray(_pointsVao);
-    glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
-    glBufferData(GL_ARRAY_BUFFER,
-        pointPositions.size() * sizeof(glm::vec3),
-        pointPositions.data(),
-        GL_STATIC_DRAW
-    );
-
-    glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
-    glBufferData(GL_ARRAY_BUFFER,
-        pointColors.size() * sizeof(glm::vec3),
-        pointColors.data(),
-        GL_STATIC_DRAW
-    );
-
-    _pointsProgram = global::renderEngine.buildRenderProgram(
-        "Galaxy points",
-        absPath("${MODULE_GALAXY}/shaders/points.vs"),
-        absPath("${MODULE_GALAXY}/shaders/points.fs")
-    );
-
-    _pointsProgram->setIgnoreUniformLocationError(
-        ghoul::opengl::ProgramObject::IgnoreError::Yes
-    );
-
-    GLint positionAttrib = _pointsProgram->attributeLocation("inPosition");
-    GLint colorAttrib = _pointsProgram->attributeLocation("inColor");
-
-    glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
-    glEnableVertexAttribArray(positionAttrib);
-    glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-    glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
-    glEnableVertexAttribArray(colorAttrib);
-    glVertexAttribPointer(colorAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);*/
 }
 
 void RenderableGalaxy::deinitializeGL() {
