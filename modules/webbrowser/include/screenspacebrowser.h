@@ -72,11 +72,13 @@ public:
 private:
     class ScreenSpaceRenderHandler : public WebRenderHandler {
     public:
-        void draw();
-        void render();
+        void draw() override;
+        void render() override;
 
         void setTexture(GLuint t);
     };
+
+    void bindTexture() override;
 
     properties::StringProperty _url;
     properties::Vec2Property _dimensions;

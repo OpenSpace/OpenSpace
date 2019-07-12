@@ -35,7 +35,6 @@
 
 namespace {
     constexpr const char* KeyIdentifier = "Indentifier";
-    constexpr const char* KeyUrl = "URL";
     constexpr const char* _loggerCat = "ScreenSpaceBrowser";
 
     const openspace::properties::Property::PropertyInfo DimensionsInfo = {
@@ -44,8 +43,8 @@ namespace {
         "Set the dimensions of the web browser windows."
     };
     const openspace::properties::Property::PropertyInfo UrlInfo = {
+        "Url",
         "URL",
-        "url",
         "The URL to load"
     };
 
@@ -74,8 +73,8 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
         ++id;
     }
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyUrl)) {
-        _url = dictionary.value<std::string>(KeyUrl);
+    if (dictionary.hasKeyAndValue<std::string>(UrlInfo.identifier)) {
+        _url = dictionary.value<std::string>(UrlInfo.identifier);
     }
 
     glm::vec2 windowDimensions = global::windowDelegate.currentSubwindowSize();
@@ -110,6 +109,7 @@ bool ScreenSpaceBrowser::initialize() {
 
     createShaders();
 
+    _browserInstance->initialize();
     _browserInstance->loadUrl(_url);
     return isReady();
 }
@@ -146,6 +146,8 @@ void ScreenSpaceBrowser::render() {
 }
 
 void ScreenSpaceBrowser::update() {
+    _objectSize = _texture->dimensions();
+
     if (_isUrlDirty) {
         _browserInstance->loadUrl(_url);
         _isUrlDirty = false;
@@ -160,6 +162,10 @@ void ScreenSpaceBrowser::update() {
 
 bool ScreenSpaceBrowser::isReady() const {
     return _shader && _texture;
+}
+
+void ScreenSpaceBrowser::bindTexture() {
+    _texture->bind();
 }
 
 } // namespace openspace
