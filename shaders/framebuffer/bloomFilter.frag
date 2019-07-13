@@ -27,12 +27,12 @@
 layout (location = 0) out vec4 finalColor;
 
 uniform int numberOfSamples;
-uniform int filterStep;
-uniform sampler2DMS filterImage;
-uniform sampler2D filterFirstPass;
+uniform int maxResX;
+uniform int maxResY;
+uniform sampler2DMS msaaTexture;
 
 // Gaussian Weights from OpenGL SuperBible 7 ed.
-const float weights[] = float[](0.0024499299678342,
+const float weights2[] = float[](0.0024499299678342,
                                 0.0043538453346397,
                                 0.0073599963704157,
                                 0.0118349786570722,
@@ -58,38 +58,82 @@ const float weights[] = float[](0.0024499299678342,
                                 0.0043538453346397,
                                 0.0024499299678342);
 
-const float weights2[] = float[](0.077847, 
-                                 0.123317, 
-                                 0.077847, 
-                                 0.123317, 
-                                 0.195346, 
-                                 0.123317,
-                                 0.077847,
-                                 0.123317,
-                                 0.077847);
+// Gaussian weights calculated by http://dev.theomader.com/gaussian-kernel-calculator/
+// sigma = 4.4625, kernel size = 5
+const float weights[] = float[](0.190079,
+                                0.204885,
+                                0.210072,
+                                0.204885,
+                                0.190079);
+
+// Gaussian weights calculated by http://dev.theomader.com/gaussian-kernel-calculator/
+// sigma = 8, kernel size = 45
+const float weights3[] = float[](0.001147, 
+                                0.001605, 
+                                0.002209,
+                                0.002995, 
+                                0.003998, 
+                                0.005253, 
+                                0.006795, 
+                                0.008655, 
+                                0.010852, 
+                                0.013397, 
+                                0.016283, 
+                                0.019484, 
+                                0.022952, 
+                                0.02662, 
+                                0.030396, 
+                                0.03417, 
+                                0.037817, 
+                                0.041206, 
+                                0.044204, 
+                                0.046685, 
+                                0.048543, 
+                                0.049692, 
+                                0.050082, 
+                                0.049692, 
+                                0.048543, 
+                                0.046685, 
+                                0.044204, 
+                                0.041206, 
+                                0.037817, 
+                                0.03417, 
+                                0.030396, 
+                                0.02662, 
+                                0.022952, 
+                                0.019484, 
+                                0.016283, 
+                                0.013397, 
+                                0.010852, 
+                                0.008655, 
+                                0.006795, 
+                                0.005253, 
+                                0.003998, 
+                                0.002995, 
+                                0.002209, 
+                                0.001605, 
+                                0.001147);
 
 void main(void)
 {
     vec4 color = vec4(0.0);
     // Transpose the image so the filter can be applied on X and Y
+    // P is the central position in the filter mask
     ivec2 P = ivec2(gl_FragCoord.yx) - ivec2(0, weights.length() >> 1);
-    float origAlpha = 1.0;
-
-    for (int i = 0; i < weights.length(); i++)
+    
+    for (int w = 0; w < weights.length(); w++)
     {   
-        if (filterStep == 1) {
-            vec4 tmpColor = vec4(0.0);
+        ivec2 texelCoord = P + ivec2(0, w);
+        vec4 tmpColor = vec4(0.0);
+        if ((texelCoord.x >= 0 && texelCoord.y >= 0) &&
+            (texelCoord.x < maxResX && texelCoord.y < maxResY)) {
             for (int s = 0; s < numberOfSamples; ++s) {
-                tmpColor += vec4(texelFetch(filterImage, P + ivec2(0, i), 0).rgb, s) * weights[i];    
+                tmpColor += texelFetch(msaaTexture, texelCoord, s);
             }
             tmpColor /= numberOfSamples;
-            color += tmpColor;
-            //color += vec4(texelFetch(filterImage, P + ivec2(0, i), 0).rgb, 1) * weights[i];
-            origAlpha = color.a;
-        } else if (filterStep == 2) {
-            color += vec4(texelFetch(filterFirstPass, P + ivec2(0, i), 0).rgb, 0) * weights[i];
-        } 
+            }
+        color += tmpColor * weights[w]; 
     }
 
-    finalColor = vec4(color.rgb, 1.0);
+    finalColor = color;
 }

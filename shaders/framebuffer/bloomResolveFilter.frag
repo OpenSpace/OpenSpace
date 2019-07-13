@@ -26,18 +26,24 @@
 
 layout (location = 0) out vec4 finalColor;
 
+uniform int numberOfSamples;
 uniform float bloomOrigFactor;
 uniform float bloomNewFactor;
-uniform sampler2D renderedImage;
-uniform sampler2D bloomImage;
+uniform sampler2DMS renderedImage;
+uniform sampler2DMS bloomImage;
 
 void main(void)
 {
     vec4 color = vec4(0.0);
 
-    color += texelFetch(renderedImage, ivec2(gl_FragCoord.xy), 0) * bloomOrigFactor;
-    float alpha = color.a;
-    color += texelFetch(bloomImage, ivec2(gl_FragCoord.xy), 0) * bloomNewFactor;
+    vec4 renderedImageTmpColor = vec4(0.0);
+    vec4 bloomImageTmpColor = vec4(0.0);
+    for (int s = 0; s < numberOfSamples; ++s) {
+        renderedImageTmpColor += texelFetch(renderedImage, ivec2(gl_FragCoord), s);
+        bloomImageTmpColor += texelFetch(bloomImage, ivec2(gl_FragCoord), s);
+    }
+    renderedImageTmpColor /= numberOfSamples;
+    bloomImageTmpColor /= numberOfSamples;
     
-    finalColor = vec4(color.rgb, alpha);
+    finalColor = renderedImageTmpColor * bloomOrigFactor + bloomImageTmpColor * bloomNewFactor;
 }

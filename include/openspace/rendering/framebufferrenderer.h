@@ -87,12 +87,12 @@ private:
     };
 
     typedef struct {
-        GLuint _mainColorTexture;
-        GLuint _mainFilterTexture;
-        GLuint _mainPositionTexture;
-        GLuint _mainNormalTexture;
-        GLuint _mainDepthTexture;
-        GLuint _mainFramebuffer;
+        GLuint _colorTexture;
+        GLuint _filterTexture;
+        GLuint _positionTexture;
+        GLuint _normalTexture;
+        GLuint _depthTexture;
+        GLuint _framebuffer;
     } GBuffers;
 
     typedef struct {
@@ -181,8 +181,7 @@ public:
 
     void update() override;
     void performRaycasterTasks(const std::vector<RaycasterTask>& tasks);
-    void performDeferredTasks(const std::vector<DeferredcasterTask>& tasks,
-        float blackoutFactor);
+    void performDeferredTasks(const std::vector<DeferredcasterTask>& tasks);
     void render(Scene* scene, Camera* camera, float blackoutFactor) override;
 
     /**
