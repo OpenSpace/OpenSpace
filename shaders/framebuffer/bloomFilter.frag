@@ -60,7 +60,7 @@ const float weights2[] = float[](0.0024499299678342,
 
 // Gaussian weights calculated by http://dev.theomader.com/gaussian-kernel-calculator/
 // sigma = 4.4625, kernel size = 5
-const float weights[] = float[](0.190079,
+const float weights3[] = float[](0.190079,
                                 0.204885,
                                 0.210072,
                                 0.204885,
@@ -68,7 +68,7 @@ const float weights[] = float[](0.190079,
 
 // Gaussian weights calculated by http://dev.theomader.com/gaussian-kernel-calculator/
 // sigma = 8, kernel size = 45
-const float weights3[] = float[](0.001147, 
+const float weights[] = float[](0.001147, 
                                 0.001605, 
                                 0.002209,
                                 0.002995, 
@@ -125,13 +125,10 @@ void main(void)
     {   
         ivec2 texelCoord = P + ivec2(0, w);
         vec4 tmpColor = vec4(0.0);
-        if ((texelCoord.x >= 0 && texelCoord.y >= 0) &&
-            (texelCoord.x < maxResX && texelCoord.y < maxResY)) {
-            for (int s = 0; s < numberOfSamples; ++s) {
-                tmpColor += texelFetch(msaaTexture, texelCoord, s);
-            }
-            tmpColor /= numberOfSamples;
-            }
+        for (int s = 0; s < numberOfSamples; ++s) {
+            tmpColor += texelFetch(msaaTexture, texelCoord, s);
+        }
+        tmpColor /= numberOfSamples;
         color += tmpColor * weights[w]; 
     }
 

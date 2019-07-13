@@ -738,9 +738,6 @@ void FramebufferRenderer::applyBloomFilter() {
         _bloomProgram->setUniform("msaaTexture", msaaTextureUnit);
         _bloomProgram->setUniform("numberOfSamples", _nAaSamples);
 
-        _bloomProgram->setUniform("maxResX", _resolution.y);
-        _bloomProgram->setUniform("maxResY", _resolution.x);
-        
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         //glFlush();
     }
@@ -764,9 +761,6 @@ void FramebufferRenderer::applyBloomFilter() {
         
         _bloomProgram->setUniform("msaaTexture", msaaTextureUnit);
         _bloomProgram->setUniform("numberOfSamples", _nAaSamples);
-
-        _bloomProgram->setUniform("maxResX", _resolution.x);
-        _bloomProgram->setUniform("maxResY", _resolution.y);
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
