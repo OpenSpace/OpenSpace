@@ -62,6 +62,7 @@ public:
 
     void setResolution(glm::ivec2 res) override;
     void setNAaSamples(int nAaSamples) override;
+    void setBlurrinessLevel(int level) override;
     void setHDRExposure(float hdrExposure) override;
     void setGamma(float gamma) override;
     void setMaxWhite(float maxWhite) override;
@@ -147,6 +148,7 @@ private:
     GLuint _fragmentTexture;
     GLuint _vertexPositionBuffer;
     int _nAaSamples;
+    int _blurrinessLevel = 1;
 
     float _hdrExposure = 0.4f;
     float _hdrBackground = 2.8f;

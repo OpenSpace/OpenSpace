@@ -27,8 +27,7 @@
 layout (location = 0) out vec4 finalColor;
 
 uniform int numberOfSamples;
-uniform int maxResX;
-uniform int maxResY;
+uniform int blurriness;
 uniform sampler2DMS msaaTexture;
 
 // Gaussian Weights from OpenGL SuperBible 7 ed.
@@ -60,7 +59,7 @@ const float weights2[] = float[](0.0024499299678342,
 
 // Gaussian weights calculated by http://dev.theomader.com/gaussian-kernel-calculator/
 // sigma = 4.4625, kernel size = 5
-const float weights3[] = float[](0.190079,
+const float weights1[] = float[](0.190079,
                                 0.204885,
                                 0.210072,
                                 0.204885,
@@ -68,7 +67,7 @@ const float weights3[] = float[](0.190079,
 
 // Gaussian weights calculated by http://dev.theomader.com/gaussian-kernel-calculator/
 // sigma = 8, kernel size = 45
-const float weights[] = float[](0.001147, 
+const float weights3[] = float[](0.001147, 
                                 0.001605, 
                                 0.002209,
                                 0.002995, 
@@ -114,23 +113,47 @@ const float weights[] = float[](0.001147,
                                 0.001605, 
                                 0.001147);
 
-void main(void)
+vec4 applyConvolution(const int version) 
 {
     vec4 color = vec4(0.0);
     // Transpose the image so the filter can be applied on X and Y
     // P is the central position in the filter mask
-    ivec2 P = ivec2(gl_FragCoord.yx) - ivec2(0, weights.length() >> 1);
     
-    for (int w = 0; w < weights.length(); w++)
+    int weightsLength = 0;
+
+    if (version == 1) {
+        weightsLength = weights1.length();
+    } else if (version == 2) {
+        weightsLength = weights2.length();
+    } else if (version == 3) {
+        weightsLength = weights3.length();
+    }
+    
+    ivec2 P = ivec2(gl_FragCoord.yx) - ivec2(0, weightsLength >> 1);
+    
+    for (int w = 0; w < weightsLength; w++)
     {   
         ivec2 texelCoord = P + ivec2(0, w);
         vec4 tmpColor = vec4(0.0);
+        
         for (int s = 0; s < numberOfSamples; ++s) {
             tmpColor += texelFetch(msaaTexture, texelCoord, s);
         }
         tmpColor /= numberOfSamples;
-        color += tmpColor * weights[w]; 
+        
+        if (version == 1) {
+           color += tmpColor * weights1[w]; 
+        } else if (version == 2) {
+            color += tmpColor * weights2[w]; 
+        } else if (version == 3) {
+            color += tmpColor * weights3[w]; 
+        }
     }
 
-    finalColor = color;
+    return color;
+}
+
+void main(void)
+{
+    finalColor = applyConvolution(blurriness);
 }

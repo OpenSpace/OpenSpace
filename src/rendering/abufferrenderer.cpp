@@ -702,6 +702,14 @@ void ABufferRenderer::setNAaSamples(int nAaSamples) {
     _dirtyResolution = true;
 }
 
+void ABufferRenderer::setBlurrinessLevel(int level) {
+    ghoul_assert(
+        level > 0 && nAaSamples < 4,
+        "Blurriness level has to be between 1 and 3"
+    );
+    _blurrinessLevel = level;
+}
+
 void ABufferRenderer::setHDRExposure(float hdrExposure) {
     _hdrExposure = hdrExposure;
     if (_hdrExposure < 0.f) {

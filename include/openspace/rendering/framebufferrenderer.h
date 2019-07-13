@@ -156,6 +156,7 @@ public:
 
     void setResolution(glm::ivec2 res) override;
     void setNAaSamples(int nAaSamples) override;
+    void setBlurrinessLevel(int level) override;
     void setHDRExposure(float hdrExposure) override;
     void setGamma(float gamma) override;
     void setMaxWhite(float maxWhite) override;
@@ -230,8 +231,11 @@ private:
                  toneMapOperator, aveLum, maxWhite, Hue, Saturation, Value, 
                  Lightness, colorSpace, nAaSamples) _hdrUniformCache;
 
-    UniformCache(renderedImage, bloomImage, bloomOrigFactor, bloomNewFactor) 
-        _bloomUniformCache;
+    UniformCache(renderedImage, bloomImage, bloomOrigFactor, bloomNewFactor, 
+        numberOfSamples) _bloomUniformCache;
+
+    UniformCache(numberOfSamples, msaaTexture, blurriness)
+        _bloomFilterUniformCache;
 
     UniformCache(renderedImage, maxWhite, imageWidth, imageHeight) _histoUniformCache;
 
@@ -260,6 +264,7 @@ private:
 
     glm::ivec2 _resolution = glm::ivec2(0);
     int _nAaSamples;
+    int _blurrinessLevel = 1;
     float _hdrExposure = 1.68f;
     float _gamma = 0.86f;
     float _maxWhite = 1.0f;

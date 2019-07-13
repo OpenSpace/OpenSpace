@@ -271,6 +271,12 @@ namespace {
         "Enable/Disable Automatic Bloom."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo BlurrinessLevelBloomInfo = {
+        "BlurrinessLevelBloom",
+        "Increase/Decrease Bloom Blurriness Level",
+        "Increase/Decrease Bloom Blurriness Level."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo HueInfo = {
         "Hue",
         "Hue",
@@ -354,6 +360,7 @@ RenderEngine::RenderEngine()
     , _bloomOwner(BloomInfo)
     , _enableBloom(EnableBloomInfo, false)
     , _automaticBloom(AutomaticBloomInfo, false)
+    , _bloomBlurrinessLevel(BlurrinessLevelBloomInfo, 1, 1, 3)
     , _bloomThreshouldMin(BloomThreshouldMinInfo, 0.5, 0.0, 100.0)
     , _bloomThreshouldMax(BloomThreshouldMaxInfo, 1.0, 0.0, 100.0)
     , _bloomOrigColorFactor(BloomOrigColorFactorInfo, 1.0, 0.0, 100.0)
@@ -542,6 +549,13 @@ RenderEngine::RenderEngine()
         }
         });
     addProperty(_automaticBloom);
+
+    _bloomBlurrinessLevel.onChange([this]() {
+        if (_renderer) {
+            _renderer->setBlurrinessLevel(_bloomBlurrinessLevel);
+        }
+        });
+    addProperty(_bloomBlurrinessLevel);
 
     addProperty(_bloomThreshouldMin);
     _bloomThreshouldMin.onChange([this]() {

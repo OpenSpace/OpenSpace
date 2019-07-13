@@ -50,6 +50,7 @@ public:
 
     virtual void setResolution(glm::ivec2 res) = 0;
     virtual void setNAaSamples(int nAaSamples) = 0;
+    virtual void setBlurrinessLevel(int level) = 0;
     virtual void setHDRExposure(float hdrExposure) = 0;
     virtual void setGamma(float gamma) = 0;
     virtual void setMaxWhite(float maxWhite) = 0;

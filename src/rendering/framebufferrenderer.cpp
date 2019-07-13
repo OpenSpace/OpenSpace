@@ -61,8 +61,13 @@ namespace {
         "Lightness", "colorSpace", "nAaSamples"
     };
 
-    constexpr const std::array<const char*, 4> BloomUniformNames  = {
-        "renderedImage", "bloomImage", "bloomOrigFactor", "bloomNewFactor"
+    constexpr const std::array<const char*, 5> BloomUniformNames  = {
+        "renderedImage", "bloomImage", "bloomOrigFactor", "bloomNewFactor",
+        "numberOfSamples"
+    };
+
+    constexpr const std::array<const char*, 3> BloomFilterUniformNames = {
+        "numberOfSamples", "msaaTexture", "blurriness"
     };
 
     constexpr const std::array<const char*, 4> HistoUniformNames = {
@@ -429,7 +434,12 @@ void FramebufferRenderer::initialize() {
         _bloomUniformCache,
         BloomUniformNames 
     );
-
+    ghoul::opengl::updateUniformLocations(
+        *_bloomProgram,
+        _bloomFilterUniformCache,
+        BloomFilterUniformNames
+    );
+    
     ghoul::opengl::updateUniformLocations(
         *_histoProgram,
         _histoUniformCache,
@@ -735,8 +745,9 @@ void FramebufferRenderer::applyBloomFilter() {
         // Incoming texture to apply the gaussian filter
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _gBuffers._filterTexture);
 
-        _bloomProgram->setUniform("msaaTexture", msaaTextureUnit);
-        _bloomProgram->setUniform("numberOfSamples", _nAaSamples);
+        _bloomProgram->setUniform(_bloomFilterUniformCache.msaaTexture, msaaTextureUnit);
+        _bloomProgram->setUniform(_bloomFilterUniformCache.numberOfSamples, _nAaSamples);
+        _bloomProgram->setUniform(_bloomFilterUniformCache.blurriness, _blurrinessLevel);
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         //glFlush();
@@ -759,8 +770,9 @@ void FramebufferRenderer::applyBloomFilter() {
         // The results of the previous pass is passed to this pass
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _bloomBuffers._bloomTexture[0]);
         
-        _bloomProgram->setUniform("msaaTexture", msaaTextureUnit);
-        _bloomProgram->setUniform("numberOfSamples", _nAaSamples);
+        _bloomProgram->setUniform(_bloomFilterUniformCache.msaaTexture, msaaTextureUnit);
+        _bloomProgram->setUniform(_bloomFilterUniformCache.numberOfSamples, _nAaSamples);
+        _bloomProgram->setUniform(_bloomFilterUniformCache.blurriness, _blurrinessLevel);
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
@@ -800,7 +812,7 @@ void FramebufferRenderer::applyBloomFilter() {
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _bloomBuffers._bloomTexture[1]);
         _bloomResolveProgram->setUniform(_bloomUniformCache.bloomImage, bloomTextureUnit);
         
-        _bloomResolveProgram->setUniform("numberOfSamples", _nAaSamples);
+        _bloomResolveProgram->setUniform(_bloomUniformCache.numberOfSamples, _nAaSamples);
         
         _bloomResolveProgram->setUniform(
             _bloomUniformCache.bloomOrigFactor, 
@@ -959,10 +971,6 @@ void FramebufferRenderer::update() {
         _aveLumProgram->rebuildFromFile();
     }
 
-    if (_bloomProgram->isDirty()) {
-        _bloomProgram->rebuildFromFile();
-    }
-
     if (_bloomResolveProgram->isDirty()) {
         _bloomResolveProgram->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(
@@ -972,6 +980,15 @@ void FramebufferRenderer::update() {
         );
     }
 
+    if (_bloomProgram->isDirty()) {
+        _bloomProgram->rebuildFromFile();
+        ghoul::opengl::updateUniformLocations(
+            *_bloomProgram,
+            _bloomFilterUniformCache,
+            BloomFilterUniformNames
+        );
+    }
+    
     if (_histoProgram->isDirty()) {
         _histoProgram->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(
@@ -2101,6 +2118,14 @@ void FramebufferRenderer::setNAaSamples(int nAaSamples) {
         _nAaSamples = 8;
     }
     _dirtyMsaaSamplingPattern = true;
+}
+
+void FramebufferRenderer::setBlurrinessLevel(int level) {
+    ghoul_assert(
+        level > 0 && nAaSamples < 4,
+        "Blurriness level has to be between 1 and 3"
+    );
+    _blurrinessLevel = level;
 }
 
 void FramebufferRenderer::setHDRExposure(float hdrExposure) {
