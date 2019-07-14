@@ -543,9 +543,9 @@ RenderEngine::RenderEngine()
     addProperty(_enableBloom);
 
     _automaticBloom.onChange([this]() {
-        if (_renderer && _automaticBloom) {
-            _renderer->enableBloom(true);
-            _enableBloom = true;
+        if (_renderer) {
+            _renderer->enableAutomaticBloom(_automaticBloom);
+            _renderer->enableBloom(_automaticBloom);
         }
         });
     addProperty(_automaticBloom);

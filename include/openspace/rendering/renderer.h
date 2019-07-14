@@ -69,6 +69,7 @@ public:
     virtual void setColorSpace(unsigned int colorspace) = 0;
 
     virtual void enableBloom(bool enable) = 0;
+    virtual void enableAutomaticBloom(bool enable) = 0;
     virtual void enableHistogram(bool enable) = 0;
 
     virtual int nAaSamples() const = 0;

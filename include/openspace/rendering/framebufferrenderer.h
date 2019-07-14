@@ -175,6 +175,7 @@ public:
     void setColorSpace(unsigned int colorspace) override;
 
     void enableBloom(bool enable) override;
+    void enableAutomaticBloom(bool enable) override;
     void enableHistogram(bool enable) override;
 
     int nAaSamples() const override;
@@ -265,22 +266,23 @@ private:
     glm::ivec2 _resolution = glm::ivec2(0);
     int _nAaSamples;
     int _blurrinessLevel = 1;
-    float _hdrExposure = 1.68f;
-    float _gamma = 0.86f;
+    float _hdrExposure = 3.7f;
+    float _gamma = 0.95f;
     float _maxWhite = 1.0f;
     bool _bloomEnabled = false;
-    float _bloomThresholdMin = 0.0;
-    float _bloomThresholdMax = 1.0;
+    bool _automaticBloomEnabled = false;
+    float _bloomThresholdMin = 0.5;
+    float _bloomThresholdMax = 8.1;
     float _bloomOrigFactor = 1.0;
     float _bloomNewFactor = 1.0;
-    int _toneMapOperator = 8; // JCC TODO: temporarilly set to 8 because setProperty seems not to be working for OptionProperty
+    int _toneMapOperator = 8;
     bool _histogramEnabled = false;
     int _numberOfBins = 1024; // JCC TODO: Add a parameter control for this.
     float _tmoKey = 0.18f;
     float _tmoYwhite = 1e6f;
     float _tmoSaturation = 1.0f;
     float _hue = 1.f;
-    float _saturation = 1.45f;
+    float _saturation = 1.2f;
     float _value = 1.f;
     float _lightness = 1.1f;
     unsigned int _colorSpace = 1;

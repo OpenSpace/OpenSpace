@@ -1082,7 +1082,7 @@ void FramebufferRenderer::updateResolution() {
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
-        GL_RGBA16F,
+        GL_RGBA32F,
         _resolution.x,
         _resolution.y,
         GL_TRUE
@@ -1092,7 +1092,7 @@ void FramebufferRenderer::updateResolution() {
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
-        GL_RGBA16F,
+        GL_RGBA32F,
         _resolution.x,
         _resolution.y,
         GL_TRUE
@@ -1133,7 +1133,7 @@ void FramebufferRenderer::updateResolution() {
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
-        GL_RGBA16F,
+        GL_RGBA32F,
         _resolution.x,
         _resolution.y,
         GL_TRUE
@@ -1146,7 +1146,7 @@ void FramebufferRenderer::updateResolution() {
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
-        GL_RGBA16F,
+        GL_RGBA32F,
         _resolution.x,
         _resolution.y,
         0,
@@ -1181,7 +1181,7 @@ void FramebufferRenderer::updateResolution() {
         glTexImage2DMultisample(
             GL_TEXTURE_2D_MULTISAMPLE,
             _nAaSamples,
-            GL_RGBA16F,
+            GL_RGBA32F,
             i ? _resolution.x : _resolution.y,
             i ? _resolution.y : _resolution.x,
             GL_TRUE
@@ -1196,6 +1196,7 @@ void FramebufferRenderer::updateResolution() {
         GL_RGBA32F,
         _numberOfBins,
         1,
+
         0,
         GL_RGBA,
         GL_FLOAT,
@@ -2131,6 +2132,7 @@ void FramebufferRenderer::setBlurrinessLevel(int level) {
 void FramebufferRenderer::setHDRExposure(float hdrExposure) {
     ghoul_assert(hdrExposure > 0.f, "HDR exposure must be greater than zero");
     _hdrExposure = hdrExposure;
+    updateRendererData();
 }
 
 void FramebufferRenderer::setGamma(float gamma) {
@@ -2149,10 +2151,12 @@ void FramebufferRenderer::setToneMapOperator(int tmOp) {
 
 void FramebufferRenderer::setBloomThreMin(float minV) {
     _bloomThresholdMin = minV;
+    updateRendererData();
 }
 
 void FramebufferRenderer::setBloomThreMax(float maxV) {
     _bloomThresholdMax = maxV;
+    updateRendererData();
 }
 
 void FramebufferRenderer::setBloomOrigFactor(float origFactor) {
@@ -2199,6 +2203,14 @@ void FramebufferRenderer::enableBloom(bool enable) {
     _bloomEnabled = enable;
 }
 
+void FramebufferRenderer::enableAutomaticBloom(bool enable) {
+    _automaticBloomEnabled = enable;
+    if (_automaticBloomEnabled) {
+        _bloomEnabled = true;
+    }
+    updateRendererData();
+}
+
 void FramebufferRenderer::enableHistogram(bool enable) {
     _histogramEnabled = enable;
 }
@@ -2214,6 +2226,10 @@ const std::vector<double>& FramebufferRenderer::mSSAPattern() const {
 void FramebufferRenderer::updateRendererData() {
     ghoul::Dictionary dict;
     dict.setValue("fragmentRendererPath", std::string(RenderFragmentShaderPath));
+    dict.setValue("hdrExposure", std::to_string(_hdrExposure));
+    dict.setValue("automaticBloom", std::to_string(_automaticBloomEnabled));
+    dict.setValue("bloom_thresh_min", std::to_string(_bloomThresholdMin));
+    dict.setValue("bloom_thresh_max", std::to_string(_bloomThresholdMax));
     _rendererData = dict;
     global::renderEngine.setRendererData(dict);
 }
