@@ -94,7 +94,7 @@ vec4 adaptiveToneMap() {
 void main() {
     vec4 color = vec4(0.0);
 
-    //color = texture(hdrFeedingTexture, texCoord);    
+    // Resolving...
     for (int i = 0; i < nAaSamples; i++) {
         color += texelFetch(hdrFeedingTexture, ivec2(gl_FragCoord), i);
     }

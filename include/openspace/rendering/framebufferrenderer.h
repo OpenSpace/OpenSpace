@@ -204,7 +204,7 @@ private:
     
     float computeBufferAveLuminance();
     float computeBufferAveLuminanceGPU();
-    void applyBloomFilter();
+    void applyBloomFilter(bool noDeferredTaskExecuted);
     void computeImageHistogram();
     void computeMipMappingFromHDRBuffer(GLuint oglImageBuffer);
 
@@ -271,10 +271,10 @@ private:
     float _maxWhite = 1.0f;
     bool _bloomEnabled = false;
     bool _automaticBloomEnabled = false;
-    float _bloomThresholdMin = 0.5;
-    float _bloomThresholdMax = 8.1;
-    float _bloomOrigFactor = 1.0;
-    float _bloomNewFactor = 1.0;
+    float _bloomThresholdMin = 0.5f;
+    float _bloomThresholdMax = 8.1f;
+    float _bloomOrigFactor = 1.0f;
+    float _bloomNewFactor = 1.0f;
     int _toneMapOperator = 8;
     bool _histogramEnabled = false;
     int _numberOfBins = 1024; // JCC TODO: Add a parameter control for this.

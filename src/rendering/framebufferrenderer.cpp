@@ -598,12 +598,14 @@ void FramebufferRenderer::applyTMO(float blackoutFactor) {
                 "FramebufferRenderer::render::TMO_Mipmapping"
                 );
         }
-        // JCC: Mudar aqui para que a entrada do TMO seja MSAA
+        
         if (_bloomEnabled) {
+            // JCC: Mudar aqui para que a entrada do TMO seja MSAA
             computeMipMappingFromHDRBuffer(_bloomBuffers._bloomTexture[2]);
         }
         else {
-            computeMipMappingFromHDRBuffer(_hdrBuffers._hdrFilteringTexture);
+            // JCC: Mudar aqui para que a entrada do TMO seja MSAA
+            computeMipMappingFromHDRBuffer(_pingPongBuffers.colorTexture[_pingPongIndex]);
         }
     }
     else {
@@ -618,7 +620,7 @@ void FramebufferRenderer::applyTMO(float blackoutFactor) {
         ghoul::opengl::TextureUnit hdrFeedingTextureUnit;
         hdrFeedingTextureUnit.activate();
         if (_bloomEnabled) {
-            // JCC: The next texture must be a MSAA texture
+            // The next texture must be a MSAA texture
             glBindTexture(
                 GL_TEXTURE_2D_MULTISAMPLE, 
                 _bloomBuffers._bloomTexture[2]
@@ -702,7 +704,21 @@ float FramebufferRenderer::computeBufferAveLuminanceGPU() {
 
     ghoul::opengl::TextureUnit hdrTextureUnit;
     hdrTextureUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, _hdrBuffers._hdrFilteringTexture);
+    
+    // JCC: Mudar aveLumProgram para trabalhar com MSAA
+    if (_bloomEnabled) {
+        glBindTexture(
+            GL_TEXTURE_2D_MULTISAMPLE,
+            _bloomBuffers._bloomTexture[2]
+        );
+    }
+    else {
+        glBindTexture(
+            GL_TEXTURE_2D_MULTISAMPLE,
+            _pingPongBuffers.colorTexture[_pingPongIndex]
+        );
+    }
+
     _aveLumProgram->setUniform("hdrTexture", hdrTextureUnit);
     _aveLumProgram->setUniform("bufferWidth", _resolution.x);
     _aveLumProgram->setUniform("bufferHeight", _resolution.y);
@@ -724,7 +740,7 @@ float FramebufferRenderer::computeBufferAveLuminanceGPU() {
     return static_cast<float>(gpuAveLum[0]);
 }
 
-void FramebufferRenderer::applyBloomFilter() {
+void FramebufferRenderer::applyBloomFilter(bool noDeferredTaskExecuted) {
     
     if (!_bloomBuffers._bloomVAO) {
         glGenVertexArrays(1, &_bloomBuffers._bloomVAO);
@@ -732,7 +748,6 @@ void FramebufferRenderer::applyBloomFilter() {
 
     glBindFramebuffer(GL_FRAMEBUFFER, _bloomBuffers._bloomFilterFBO[0]);
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
-    //glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, _resolution.y, _resolution.x);
     glBindVertexArray(_bloomBuffers._bloomVAO);
 
@@ -750,7 +765,6 @@ void FramebufferRenderer::applyBloomFilter() {
         _bloomProgram->setUniform(_bloomFilterUniformCache.blurriness, _blurrinessLevel);
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        //glFlush();
     }
 
     _bloomProgram->deactivate();
@@ -758,7 +772,6 @@ void FramebufferRenderer::applyBloomFilter() {
     glBindFramebuffer(GL_FRAMEBUFFER, _bloomBuffers._bloomFilterFBO[1]);
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glViewport(0, 0, _resolution.x, _resolution.y);
-    //glClear(GL_COLOR_BUFFER_BIT);
     glBindVertexArray(_bloomBuffers._bloomVAO);
 
     _bloomProgram->activate();
@@ -784,9 +797,7 @@ void FramebufferRenderer::applyBloomFilter() {
     glBindFramebuffer(GL_FRAMEBUFFER, _bloomBuffers._bloomFilterFBO[2]);
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glViewport(0, 0, _resolution.x, _resolution.y);
-    // JCC: Do I need the next clear?
-    //glClear(GL_COLOR_BUFFER_BIT);
-
+    
     _bloomResolveProgram->activate();
 
     // Adding the result of the blurring processes to the 
@@ -794,12 +805,21 @@ void FramebufferRenderer::applyBloomFilter() {
     // the _bloomBuffers._bloomTexture[2] texture (JCC: That can be
     // done by blending operation (ONE))
     {
+        // Original buffer will be summed to the bloom result
         ghoul::opengl::TextureUnit hdrFeedingTextureUnit;
         hdrFeedingTextureUnit.activate();
-        // Original buffer will be summed to the bloom result
-        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,
-            _pingPongBuffers.colorTexture[_pingPongIndex]
-        );
+        
+        if (noDeferredTaskExecuted) {
+            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,
+                _pingPongBuffers.colorTexture[0]
+            );
+        }
+        else {
+            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,
+                _pingPongBuffers.colorTexture[_pingPongIndex]
+            );
+        }
+        
 
         _bloomResolveProgram->setUniform(
             _bloomUniformCache.renderedImage, 
@@ -825,7 +845,6 @@ void FramebufferRenderer::applyBloomFilter() {
 
         // Write the results to the _bloomDilterFBO[2] in _bloomTexture[2] texture
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        //glFlush();
     }
 
     _bloomResolveProgram->deactivate();
@@ -1857,19 +1876,9 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         performRaycasterTasks(tasks.raycasterTasks);
     }
 
-    //// Binds the final Framebuffer which will contain the results of the TMOs
-    //glBindFramebuffer(GL_FRAMEBUFFER, _hdrBuffers._hdrFilteringFramebuffer);
-    //glDrawBuffers(1, ColorAttachment0Array);
-    //glClear(GL_COLOR_BUFFER_BIT);
-
-    
-
     // If no Deferred Task are present, the resolve step
     // is executed in a separated step
-    if (tasks.deferredcasterTasks.empty()) {
-        resolveMSAA(blackoutFactor);
-    }
-    else {
+    if (!tasks.deferredcasterTasks.empty()) {
         // We use ping pong rendering in order to be able to
         // render to the same final buffer, multiple 
         // deferred tasks at same time (e.g. more than 1 ATM being seen at once)
@@ -1893,7 +1902,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     // Disabling depth test for filtering and hdr
     glDisable(GL_DEPTH_TEST);
 
-    // JCC: Change bloom to work in a MSAA environment
     if (_bloomEnabled) {
         std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
         if (doPerformanceMeasurements) {
@@ -1902,15 +1910,18 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
                 );
         }
 
-        // Results of the DeferredTasks as entry for the bloom filter
-        applyBloomFilter();
+        // Results of the DeferredTasks as entry for the bloom filter 
+        applyBloomFilter(
+            !tasks.deferredcasterTasks.empty() ? true : false
+        );
     }
 
     // When applying the TMO, the result is saved to the default FBO to be displayed
     // by the Operating System. Also, the resolve procedure is executed in this step.
     glBindFramebuffer(GL_FRAMEBUFFER, _osDefaultGLState.defaultFBO);
     glViewport(0, 0, _resolution.x, _resolution.y);
-    // Apply the selected TMO on the results
+    
+    // Apply the selected TMO on the results and resolve the result for the default FBO
     applyTMO(blackoutFactor);
     
 
