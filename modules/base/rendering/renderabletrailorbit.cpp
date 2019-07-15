@@ -100,8 +100,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
        "RenderableType",
        "RenderableType",
-       "This value specifies if the plane should be rendered in the Background,"
-       "Opaque, Transparent, or Overlay rendering step."
+       "This value specifies if the orbit should be rendered in the Background,"
+       "Opaque, Transparent, or Overlay rendering step. Default is Transparent."
     };
 
 } // namespace
@@ -192,7 +192,7 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
         }
     }
     else {
-        setRenderBin(Renderable::RenderBin::Opaque);
+        setRenderBin(Renderable::RenderBin::Overlay);
     }
 }
 

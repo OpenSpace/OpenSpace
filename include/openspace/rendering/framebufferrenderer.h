@@ -73,6 +73,11 @@ private:
        GL_COLOR_ATTACHMENT1
     };
 
+    inline static const GLenum ColorAttachment03Array[2] = {
+       GL_COLOR_ATTACHMENT0,
+       GL_COLOR_ATTACHMENT3
+    };
+
     inline static const GLenum ColorAttachment012Array[3] = {
        GL_COLOR_ATTACHMENT0,
        GL_COLOR_ATTACHMENT1,

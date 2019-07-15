@@ -30,6 +30,8 @@
 #define bloom_thresh_min #{rendererData.bloom_thresh_min}
 #define bloom_thresh_max #{rendererData.bloom_thresh_max}
 
+#define deltaError 0.00001
+
 layout(location = 0) out vec4 _out_color_;
 layout(location = 1) out vec4 gPosition;
 layout(location = 2) out vec4 gNormal;
@@ -37,7 +39,7 @@ layout(location = 3) out vec4 filterBuffer;
 
 void main() {
      Fragment f   = getFragment();
-     _out_color_  = vec4((log2(vec3(1.0) - f.color.rgb)/(-exposure)), f.color.a);
+     _out_color_  = vec4((log2(vec3(1.0) - (f.color.rgb - vec3(deltaError)))/(-exposure)), f.color.a);
      //_out_color_  = f.color;
      gPosition    = f.gPosition;
      gNormal      = f.gNormal;

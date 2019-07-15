@@ -34,7 +34,6 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/volumeraycaster.h>
-#include <openspace/rendering/volumeraycaster.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/timemanager.h>
@@ -262,6 +261,13 @@ void FramebufferRenderer::initialize() {
         GL_COLOR_ATTACHMENT1,
         GL_TEXTURE_2D_MULTISAMPLE,
         _pingPongBuffers.colorTexture[1],
+        0
+    );
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT3,
+        GL_TEXTURE_2D_MULTISAMPLE,
+        _gBuffers._filterTexture,
         0
     );
     glFramebufferTexture2D(
@@ -529,6 +535,16 @@ void FramebufferRenderer::captureAndSetOpenGLDefaultState() {
     glDisablei(GL_BLEND, 1);
     glDisablei(GL_BLEND, 2);
     glDisablei(GL_BLEND, 3);
+
+    glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
+
+    // JCC: From OpenGL Registry
+    // Note that the FrontFace and ClampColor commands in section 12.2 are not
+    // deprecated, as they still affect other non - deprecated functionality; however,
+    // the ClampColor targets CLAMP_VERTEX_COLOR and CLAMP_FRAGMENT_ -
+    // COLOR are deprecated.
+    //glClampColor(GL_CLAMP_VERTEX_COLOR, GL_FALSE);
+    //glClampColor(GL_CLAMP_FRAGMENT_COLOR, GL_FALSE);
 
     _osDefaultGLState.blendEnabled = true;
     _osDefaultGLState.blend0Enabled = true;
@@ -1860,9 +1876,10 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     scene->render(data, tasks);
     data.renderBinMask = static_cast<int>(Renderable::RenderBin::Opaque);
     scene->render(data, tasks);
+    
+    glDrawBuffers(2, ColorAttachment03Array);
+    
     data.renderBinMask = static_cast<int>(Renderable::RenderBin::Transparent);
-    scene->render(data, tasks);
-    data.renderBinMask = static_cast<int>(Renderable::RenderBin::Overlay);
     scene->render(data, tasks);
 
     // Run Volume Tasks
@@ -1876,19 +1893,12 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         performRaycasterTasks(tasks.raycasterTasks);
     }
 
-    // If no Deferred Task are present, the resolve step
-    // is executed in a separated step
     if (!tasks.deferredcasterTasks.empty()) {
         // We use ping pong rendering in order to be able to
         // render to the same final buffer, multiple 
         // deferred tasks at same time (e.g. more than 1 ATM being seen at once)
         glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer);
         glDrawBuffers(1, &ColorAttachment01Array[_pingPongIndex]);
-        // JCC: next commands should be in the cache....
-        glEnablei(GL_BLEND, 0);
-        glDisablei(GL_BLEND, 1);
-        glDisablei(GL_BLEND, 2);
-        glDisablei(GL_BLEND, 3);
 
         std::unique_ptr<performance::PerformanceMeasurement> perfInternal;
         if (doPerformanceMeasurements) {
@@ -1899,6 +1909,13 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         performDeferredTasks(tasks.deferredcasterTasks);
     }
     
+    glDrawBuffers(4, ColorAttachment0123Array);
+    
+    data.renderBinMask = static_cast<int>(Renderable::RenderBin::Overlay);
+    scene->render(data, tasks);
+
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
     // Disabling depth test for filtering and hdr
     glDisable(GL_DEPTH_TEST);
 

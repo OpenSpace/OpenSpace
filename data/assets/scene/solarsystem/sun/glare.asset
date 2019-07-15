@@ -13,10 +13,10 @@ local SunGlare = {
         Size = 1.3*10^10.5,
         Origin = "Center",
         Billboard = true,
-        Texture = textures .. "/halo.png",
+        Texture = textures .. "/test6.png",
         BlendMode = "Additive",
         Opacity = 0.65,
-        RenderableType = "Transparent"
+        RenderableType = "Transparency"
     },
     Transform = {
         Translation = {
