@@ -48,6 +48,12 @@ namespace {
         "The URL to load"
     };
 
+    const openspace::properties::Property::PropertyInfo ReloadInfo = {
+        "Reload",
+        "Reload",
+        "Reload the web browser"
+    };
+
 } // namespace
 
 namespace openspace {
@@ -64,6 +70,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _url(UrlInfo)
     , _dimensions(DimensionsInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(3000.f))
+    , _reload(ReloadInfo)
 {
     if (dictionary.hasKey(KeyIdentifier)) {
         setIdentifier(dictionary.value<std::string>(KeyIdentifier));
@@ -93,9 +100,11 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
 
     _url.onChange([this]() { _isUrlDirty = true; });
     _dimensions.onChange([this]() { _isDimensionsDirty = true; });
+    _reload.onChange([this]() { _browserInstance->reloadBrowser(); });
 
     addProperty(_url);
     addProperty(_dimensions);
+    addProperty(_reload);
 
     WebBrowserModule* webBrowser = global::moduleEngine.module<WebBrowserModule>();
     if (webBrowser) {

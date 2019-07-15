@@ -30,6 +30,7 @@
 #include <modules/webbrowser/include/webrenderhandler.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/triggerproperty.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -82,6 +83,8 @@ private:
 
     properties::StringProperty _url;
     properties::Vec2Property _dimensions;
+    properties::TriggerProperty _reload;
+
     CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
     CefRefPtr<WebKeyboardHandler> _keyboardHandler;
     std::unique_ptr<BrowserInstance> _browserInstance;

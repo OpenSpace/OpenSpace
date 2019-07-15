@@ -41,10 +41,11 @@ void WebBrowserApp::OnContextCreated(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
 }
 
 void WebBrowserApp::OnBeforeCommandLineProcessing(const CefString&,
-                                                  CefRefPtr<CefCommandLine>)
+                                                  CefRefPtr<CefCommandLine> commandLine)
 {
 //    command_line->AppendSwitch("disable-gpu");
 //    command_line->AppendSwitch("disable-gpu-compositing");
+    commandLine->AppendSwitchWithValue("autoplay-policy", "no-user-gesture-required");
 }
 
 } // namespace openspace
