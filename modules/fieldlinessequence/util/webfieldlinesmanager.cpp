@@ -99,6 +99,8 @@ namespace openspace{
     // this function aint done
     void WebFieldlinesManager::update(){
         
+        int nSetsLeftToTriggerDownload = 2;
+        
         updateTTIndexWeb();
         
         // check how many are left until fieldlinessequence runs out - add direction information later
@@ -118,12 +120,12 @@ namespace openspace{
             if((*rfs_startTimes)[i + 1] > (nextTimeTrigger + eps)){
                 break;
             }
-            if(setsLeftUntilGapOrEnd > 2){
+            if(setsLeftUntilGapOrEnd > nSetsLeftToTriggerDownload){
                 //we're all gucci
                 break;
             }
         }
-        if(setsLeftUntilGapOrEnd < 2){
+        if(setsLeftUntilGapOrEnd <= nSetsLeftToTriggerDownload){
             LERROR("gonna need some more files");
             setFilesToDownload(setsLeftUntilGapOrEnd);
             downloadFieldlines(); // this should be thread with lock

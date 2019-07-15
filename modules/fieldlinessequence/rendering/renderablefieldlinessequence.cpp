@@ -1211,8 +1211,10 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         {
             updateActiveTriggerTimeIndex(currentTime);
             // WebfieldlinesManager stuff!
-            _webFieldlinesManager.update();
-            computeSequenceEndTime();
+            if(_webFieldlines){
+                _webFieldlinesManager.update();
+                computeSequenceEndTime();
+            }
 
             if (_loadingStatesDynamically) {
                 _mustLoadNewStateFromDisk = true;
