@@ -55,6 +55,7 @@
 #include <modules/base/rotation/fixedrotation.h>
 #include <modules/base/rotation/luarotation.h>
 #include <modules/base/rotation/staticrotation.h>
+#include <modules/base/rotation/timelinerotation.h>
 #include <modules/base/scale/luascale.h>
 #include <modules/base/scale/staticscale.h>
 #include <modules/base/scale/timedependentscale.h>
@@ -143,6 +144,8 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRotation->registerClass<FixedRotation>("FixedRotation");
     fRotation->registerClass<LuaRotation>("LuaRotation");
     fRotation->registerClass<StaticRotation>("StaticRotation");
+    fRotation->registerClass<TimelineRotation>("TimelineRotation");
+
 
     auto fScale = FactoryManager::ref().factory<Scale>();
     ghoul_assert(fScale, "Scale factory was not created");
@@ -200,6 +203,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         FixedRotation::Documentation(),
         LuaRotation::Documentation(),
         StaticRotation::Documentation(),
+        TimelineRotation::Documentation(),
 
         LuaScale::Documentation(),
         StaticScale::Documentation(),
