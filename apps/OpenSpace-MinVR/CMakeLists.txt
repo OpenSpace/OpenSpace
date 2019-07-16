@@ -50,7 +50,7 @@ target_include_directories(OpenSpace-MinVR PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ex
 target_include_directories(OpenSpace-MinVR PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ext/minvr/external/GLFW/src/include)
 
 
-target_link_libraries(OpenSpace-MinVR libOpenSpace MinVR)
+target_link_libraries(OpenSpace-MinVR openspace-core MinVR)
 
 # Web Browser and Web gui
 # Why not put these in the module's path? Because they do not have access to the
