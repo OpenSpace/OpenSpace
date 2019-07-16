@@ -60,10 +60,11 @@ asset.onInitialize(function ()
 
     openspace.markInterestingNodes({ "Insight" })
 
-    openspace.navigation.setCameraState({
+    openspace.navigation.setNavigationState({
         Anchor = insightAsset.Insight.Identifier,
-        Position = { 0, 0, 0 },
-        Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 },
+        Position = { 8.430115E0, -1.791710E1, 2.813660E0 },
+        ReferenceFrame = "Root",
+        Up = { 0.494659E0,0.357162E0,0.792306E0 },
     })
 
 end)
