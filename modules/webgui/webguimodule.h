@@ -28,19 +28,27 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/stringlistproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/misc/process.h>
 #include <memory>
+#include <vector>
+#include <unordered_map>
 
 namespace openspace {
 
 class WebGuiModule : public OpenSpaceModule {
 public:
+    using CallbackHandle = int;
+    using EndpointCallback = std::function<void(const std::string&, bool)>;
+
     static constexpr const char* Name = "WebGui";
     WebGuiModule();
     int port() const;
     std::string address() const;
+    CallbackHandle addEndpointChangeCallback(EndpointCallback cb);
+    void removeEndpointChangeCallback(CallbackHandle);
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
@@ -48,15 +56,22 @@ protected:
 private:
     void startProcess();
     void stopProcess();
+    void notifyEndpointListeners(const std::string& endpoint, bool exists);
 
     std::unique_ptr<ghoul::Process> _process;
     properties::BoolProperty _enabled;
     properties::StringProperty _entryPoint;
-    properties::StringProperty _webDirectory;
+    properties::StringListProperty _directories;
+    properties::StringListProperty _servedDirectories;
+
+    std::unordered_map<std::string, std::string> _endpoints;
 
     properties::IntProperty _port;
     properties::StringProperty _address;
     properties::StringProperty _webSocketInterface;
+
+    std::vector<std::pair<CallbackHandle, EndpointCallback>> _endpointChangeCallbacks;
+    int _nextCallbackHandle = 0;
 };
 
 } // namespace openspace

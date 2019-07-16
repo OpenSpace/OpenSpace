@@ -1,17 +1,10 @@
+asset.require('./static_server')
+
 local guiCustomization = asset.require('customization/gui')
 
 -- Select which commit hashes to use for the frontend and backend
 local frontendHash = "c603ad07d1407a7d3def43f1e203244cee1c06f6"
-local backendHash = "84737f9785f12efbb12d2de9d511154c6215fe9c"
-
 local dataProvider = "data.openspaceproject.com/files/webgui"
-
-local backend = asset.syncedResource({
-    Identifier = "WebGuiBackend",
-    Name = "Web Gui Backend",
-    Type = "UrlSynchronization",
-    Url = dataProvider .. "/backend/" ..  backendHash .. "/backend.zip"
-})
 
 local frontend = asset.syncedResource({
     Identifier = "WebGuiFrontend",
@@ -27,22 +20,14 @@ asset.onInitialize(function ()
         openspace.unzipFile(frontend .. "/frontend.zip", dest, true)
     end
 
-    -- Unzip the frontend bundle
-    dest = backend .. "/backend"
-    if not openspace.directoryExists(dest) then
-        openspace.unzipFile(backend .. "/backend.zip", dest, true)
-    end
-
     -- Do not serve the files if we are in webgui development mode.
     -- In that case, you have to serve the webgui manually, using `npm start`.
     if not guiCustomization.webguiDevelopmentMode then
-        openspace.setPropertyValueSingle(
-            "Modules.WebGui.ServerProcessEntryPoint", backend .. "/backend/backend.js"
-        )
-        openspace.setPropertyValueSingle(
-            "Modules.WebGui.WebDirectory", frontend .. "/frontend"
-        )
-        openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", true)
+        local directories = openspace.getPropertyValue("Modules.WebGui.Directories")
+        directories[#directories + 1] = "frontend"
+        directories[#directories + 1] = frontend .. '/frontend'
+
+        openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
     end
 
     -- The GUI contains date and simulation increment,
@@ -54,5 +39,15 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-    openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", false)
+    -- Remove the frontend endpoint
+    local directories = openspace.getPropertyValue("Modules.WebGui.Directories")
+    local newDirectories;
+
+    for i = 0, #directories, 2 do
+        if (string.find(directories[i], "frontend") == nil) then
+            newDirectories[#newDirectories + 1] = directories[i]
+            newDirectories[#newDirectories + 1] = directories[i + 1]
+        end
+    end
+    openspace.setPropertyValueSingle("Modules.WebGui.Directories", newDirectories)
 end)
