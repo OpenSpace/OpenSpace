@@ -27,7 +27,7 @@
 namespace openspace::luascriptfunctions {
 
 int loadNavigationState(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadCameraStateFromFile");
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadNavigationState");
 
     const std::string& cameraStateFilePath = ghoul::lua::value<std::string>(
         L,
@@ -48,24 +48,25 @@ int loadNavigationState(lua_State* L) {
 int setNavigationState(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setNavigationState");
 
-    try {
-        ghoul::Dictionary navigationStateDictionary;
-        ghoul::lua::luaDictionaryFromState(L, navigationStateDictionary);
+    ghoul::Dictionary navigationStateDictionary;
+    ghoul::lua::luaDictionaryFromState(L, navigationStateDictionary);
 
-        openspace::documentation::testSpecificationAndThrow(
-            interaction::NavigationHandler::NavigationState::Documentation(),
-            navigationStateDictionary,
-            "NavigationState"
-        );
+    using namespace openspace::documentation;
 
-        global::navigationHandler.setNavigationStateNextFrame(navigationStateDictionary);
-    } catch (const ghoul::RuntimeError& e) {
+    TestResult r = testSpecification(
+        interaction::NavigationHandler::NavigationState::Documentation(),
+        navigationStateDictionary
+    );
+
+    if (!r.success) {
         lua_settop(L, 0);
         return ghoul::lua::luaError(
             L,
-            fmt::format("Could not set camera state: {}", e.what())
+            fmt::format("Could not set camera state: {}", ghoul::to_string(r))
         );
     }
+
+    global::navigationHandler.setNavigationStateNextFrame(navigationStateDictionary);
 
     // @CLEANUP:  When luaDictionaryFromState doesn't leak space anymore, remove the next
     //            line ---abock(2018-02-15)

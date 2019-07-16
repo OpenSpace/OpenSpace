@@ -73,6 +73,7 @@ public:
     void resetNodeMovements();
 
     JoystickCameraStates& joystickStates();
+    const JoystickCameraStates& joystickStates() const;
 
     bool followingNodeRotation() const;
     const SceneGraphNode* anchorNode() const;

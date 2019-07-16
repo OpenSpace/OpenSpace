@@ -1235,4 +1235,8 @@ JoystickCameraStates& OrbitalNavigator::joystickStates() {
     return _joystickStates;
 }
 
+const JoystickCameraStates& OrbitalNavigator::joystickStates() const {
+    return _joystickStates;
+}
+
 } // namespace openspace::interaction

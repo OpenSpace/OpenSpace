@@ -26,7 +26,10 @@
 #define __OPENSPACE_CORE___NAVIGATIONHANDLER___H__
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/joystickcamerastates.h>
+#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/interaction/keyframenavigator.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -50,15 +53,11 @@ class OrbitalNavigator;
 class NavigationHandler : public properties::PropertyOwner {
 public:
     struct NavigationState {
+        NavigationState() = default;
         NavigationState(const ghoul::Dictionary& dictionary);
-        NavigationState(
-            std::string anchor,
-            std::string aim,
-            std::string referenceFrame,
-            glm::dvec3 position,
-            std::optional<glm::dvec3> up = std::nullopt,
-            double yaw = 0.0,
-            double pitch = 0.0);
+        NavigationState(std::string anchor, std::string aim, std::string referenceFrame,
+            glm::dvec3 position, std::optional<glm::dvec3> up = std::nullopt,
+            double yaw = 0.0, double pitch = 0.0);
 
         ghoul::Dictionary dictionary() const;
         static documentation::Documentation Documentation();
@@ -79,7 +78,7 @@ public:
     void deinitialize();
 
     // Mutators
-    void setNavigationStateNextFame( NavigationState state);
+    void setNavigationStateNextFame(NavigationState state);
     void setCamera(Camera* camera);
     void setInterpolationTime(float durationInSeconds);
 
@@ -94,7 +93,7 @@ public:
     const InputState& inputState() const;
     const OrbitalNavigator& orbitalNavigator() const;
     OrbitalNavigator& orbitalNavigator();
-    KeyframeNavigator& keyframeNavigator() const;
+    KeyframeNavigator& keyframeNavigator();
     bool isKeyFrameInteractionEnabled() const;
     float interpolationTime() const;
 
@@ -143,12 +142,12 @@ private:
 
     bool _playbackModeEnabled = false;
 
-    std::unique_ptr<InputState> _inputState;
+    InputState _inputState;
     Camera* _camera = nullptr;
     std::function<void()> _playbackEndCallback;
 
-    std::unique_ptr<OrbitalNavigator> _orbitalNavigator;
-    std::unique_ptr<KeyframeNavigator> _keyframeNavigator;
+    OrbitalNavigator _orbitalNavigator;
+    KeyframeNavigator _keyframeNavigator;
 
     std::optional<NavigationState> _pendingNavigationState;
 

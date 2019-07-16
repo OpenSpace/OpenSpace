@@ -405,7 +405,8 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
 }
 
 void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
-                                    int x, int y, int level) {
+                                    int x, int y, int level)
+{
     goToChunk(globe, globebrowsing::TileIndex(x, y, level), glm::vec2(0.5f, 0.5f), true);
 }
 
@@ -468,9 +469,9 @@ void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
     const glm::dvec3 cameraPosition = global::navigationHandler.camera()->positionVec3();
     SceneGraphNode* globeSceneGraphNode = dynamic_cast<SceneGraphNode*>(globe.owner());
     if (!globeSceneGraphNode) {
-        LERROR(fmt::format(
+        LERROR(
             "Cannot go to chunk. The renderable is not attached to a scene graph node."
-        ));
+        );
         return;
     }
     const glm::dmat4 inverseModelTransform = globeSceneGraphNode->inverseModelTransform();
@@ -530,21 +531,19 @@ void GlobeBrowsingModule::goToGeodetic3(const globebrowsing::RenderableGlobe& gl
         Geodetic2{ geo3.geodetic2.lat + 0.001, geo3.geodetic2.lon }
     );
 
-    interaction::NavigationHandler::NavigationState state(
-        globe.owner()->identifier(), // Anchor
-        "", // Aim
-        globe.owner()->identifier(), // Reference frame
-        positionModelSpace, // Camera position
-        slightlyNorth
-    );
+    interaction::NavigationHandler::NavigationState state;
+    state.anchor = globe.owner()->identifier();
+    state.referenceFrame = globe.owner()->identifier();
+    state.position = positionModelSpace;
+    state.up = slightlyNorth;
 
     global::navigationHandler.setNavigationStateNextFrame(state);
 }
 
 glm::dquat GlobeBrowsingModule::lookDownCameraRotation(
-    const globebrowsing::RenderableGlobe& globe,
-    glm::dvec3 cameraModelSpace,
-    globebrowsing::Geodetic2 geo2)
+                                              const globebrowsing::RenderableGlobe& globe,
+                                                              glm::dvec3 cameraModelSpace,
+                                                            globebrowsing::Geodetic2 geo2)
 {
     using namespace globebrowsing;
 
@@ -729,6 +728,5 @@ uint64_t GlobeBrowsingModule::wmsCacheSize() const {
     uint64_t size = _wmsCacheSizeMB;
     return size * 1024 * 1024;
 }
-
 
 } // namespace openspace

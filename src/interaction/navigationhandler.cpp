@@ -27,9 +27,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/interaction/orbitalnavigator.h>
-#include <openspace/interaction/keyframenavigator.h>
-#include <openspace/interaction/inputstate.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
@@ -97,50 +94,49 @@ openspace::interaction::NavigationHandler::NavigationState::dictionary() const
 }
 
 openspace::interaction::NavigationHandler::NavigationState::NavigationState(
-    const ghoul::Dictionary& dictionary)
+                                                      const ghoul::Dictionary& dictionary)
 {
-    bool readSuccessful = true;
-    readSuccessful &= dictionary.getValue(KeyAnchor, anchor);
-    readSuccessful &= dictionary.getValue(KeyPosition, position);
-    if (!readSuccessful) {
+    const bool hasAnchor = dictionary.hasValue<std::string>(KeyAnchor);
+    const bool hasPosition = dictionary.hasValue<glm::dvec3>(KeyPosition);
+    if (!hasAnchor || !hasPosition) {
         throw ghoul::RuntimeError(
             "Position and Anchor need to be defined for navigation dictionary."
         );
     }
 
+    anchor = dictionary.value<std::string>(KeyAnchor);
+    position = dictionary.value<glm::dvec3>(KeyPosition);
+
     if (dictionary.hasValue<std::string>(KeyReferenceFrame)) {
-        dictionary.getValue(KeyReferenceFrame, referenceFrame);
-    } else {
+        referenceFrame = dictionary.value<std::string>(KeyReferenceFrame);
+    }
+    else {
         referenceFrame = anchor;
     }
     if (dictionary.hasValue<std::string>(KeyAim)) {
-        dictionary.getValue(KeyAim, aim);
+        aim = dictionary.value<std::string>(KeyAim);
     }
 
     if (dictionary.hasValue<glm::dvec3>(KeyUp)) {
-        // Need to extract to temporary value first, since up is a std::optional.
-        glm::dvec3 upValue;
-        dictionary.getValue(KeyUp, upValue);
-        up = upValue;
+        up = dictionary.value<glm::dvec3>(KeyUp);
 
         if (dictionary.hasValue<double>(KeyYaw)) {
-            dictionary.getValue(KeyYaw, yaw);
+            yaw = dictionary.value<double>(KeyYaw);
         }
         if (dictionary.hasValue<double>(KeyPitch)) {
-            dictionary.getValue(KeyPitch, pitch);
+            pitch = dictionary.value<double>(KeyPitch);
         }
     }
 }
 
 openspace::interaction::NavigationHandler::NavigationState::NavigationState(
-    std::string anchor,
-    std::string aim,
-    std::string referenceFrame,
-    glm::dvec3 position,
-    std::optional<glm::dvec3> up,
-    double yaw,
-    double pitch
-)
+                                                                       std::string anchor,
+                                                                          std::string aim,
+                                                               std::string referenceFrame,
+                                                                      glm::dvec3 position,
+                                                             std::optional<glm::dvec3> up,
+                                                                               double yaw,
+                                                                             double pitch)
     : anchor(std::move(anchor))
     , aim(std::move(aim))
     , referenceFrame(std::move(referenceFrame))
@@ -154,13 +150,9 @@ NavigationHandler::NavigationHandler()
     : properties::PropertyOwner({ "NavigationHandler" })
     , _useKeyFrameInteraction(KeyFrameInfo, false)
 {
-    _inputState = std::make_unique<InputState>();
-    _orbitalNavigator = std::make_unique<OrbitalNavigator>();
-    _keyframeNavigator = std::make_unique<KeyframeNavigator>();
-
     // Add the properties
     addProperty(_useKeyFrameInteraction);
-    addPropertySubOwner(*_orbitalNavigator);
+    addPropertySubOwner(_orbitalNavigator);
 }
 
 NavigationHandler::~NavigationHandler() {} // NOLINT
@@ -182,7 +174,7 @@ void NavigationHandler::deinitialize() {
 
 void NavigationHandler::setCamera(Camera* camera) {
     _camera = camera;
-    _orbitalNavigator->setCamera(camera);
+    _orbitalNavigator.setCamera(camera);
 }
 
 void NavigationHandler::setNavigationStateNextFrame(
@@ -191,16 +183,16 @@ void NavigationHandler::setNavigationStateNextFrame(
     _pendingNavigationState = std::move(state);
 }
 
-const OrbitalNavigator& NavigationHandler::orbitalNavigator() const {
-    return *_orbitalNavigator;
-}
-
 OrbitalNavigator& NavigationHandler::orbitalNavigator() {
-    return *_orbitalNavigator;
+    return _orbitalNavigator;
 }
 
-KeyframeNavigator& NavigationHandler::keyframeNavigator() const {
-    return *_keyframeNavigator;
+const OrbitalNavigator& NavigationHandler::orbitalNavigator() const {
+    return _orbitalNavigator;
+}
+
+KeyframeNavigator& NavigationHandler::keyframeNavigator() {
+    return _keyframeNavigator;
 }
 
 bool NavigationHandler::isKeyFrameInteractionEnabled() const {
@@ -208,28 +200,27 @@ bool NavigationHandler::isKeyFrameInteractionEnabled() const {
 }
 
 float NavigationHandler::interpolationTime() const {
-    return _orbitalNavigator->retargetInterpolationTime();
+    return _orbitalNavigator.retargetInterpolationTime();
 }
 
 void NavigationHandler::setInterpolationTime(float durationInSeconds) {
-    _orbitalNavigator->setRetargetInterpolationTime(durationInSeconds);
+    _orbitalNavigator.setRetargetInterpolationTime(durationInSeconds);
 }
 
 void NavigationHandler::updateCamera(double deltaTime) {
-    ghoul_assert(_inputState != nullptr, "InputState must not be nullptr");
     ghoul_assert(_camera != nullptr, "Camera must not be nullptr");
 
     if (_pendingNavigationState.has_value()) {
         applyNavigationState(_pendingNavigationState.value());
-        _orbitalNavigator->resetVelocities();
+        _orbitalNavigator.resetVelocities();
         _pendingNavigationState.reset();
     } else if (!_playbackModeEnabled && _camera) {
         if (_useKeyFrameInteraction) {
-            _keyframeNavigator->updateCamera(*_camera, _playbackModeEnabled);
+            _keyframeNavigator.updateCamera(*_camera, _playbackModeEnabled);
         }
         else {
-            _orbitalNavigator->updateStatesFromInput(*_inputState, deltaTime);
-            _orbitalNavigator->updateCameraStateFromStates(deltaTime);
+            _orbitalNavigator.updateStatesFromInput(_inputState, deltaTime);
+            _orbitalNavigator.updateCameraStateFromStates(deltaTime);
         }
     }
 }
@@ -262,11 +253,11 @@ void NavigationHandler::applyNavigationState(const NavigationHandler::Navigation
     const glm::dvec3 anchorWorldPosition = anchor->worldPosition();
     const glm::dmat3 referenceFrameTransform = referenceFrame->worldRotationMatrix();
 
-    _orbitalNavigator->setAnchorNode(ns.anchor);
-    _orbitalNavigator->setAimNode(ns.aim);
+    _orbitalNavigator.setAnchorNode(ns.anchor);
+    _orbitalNavigator.setAimNode(ns.aim);
 
-    const SceneGraphNode* anchorNode = _orbitalNavigator->anchorNode();
-    const SceneGraphNode* aimNode = _orbitalNavigator->aimNode();
+    const SceneGraphNode* anchorNode = _orbitalNavigator.anchorNode();
+    const SceneGraphNode* aimNode = _orbitalNavigator.aimNode();
     if (!aimNode) {
         aimNode = anchorNode;
     }
@@ -293,7 +284,7 @@ void NavigationHandler::applyNavigationState(const NavigationHandler::Navigation
 
     _camera->setPositionVec3(cameraPositionWorld);
     _camera->setRotation(neutralCameraRotation * yawRotation * pitchRotation);
-    _orbitalNavigator->clearPreviousState();
+    _orbitalNavigator.clearPreviousState();
 }
 
 void NavigationHandler::setEnableKeyFrameInteraction() {
@@ -309,8 +300,8 @@ void NavigationHandler::triggerPlaybackStart() {
 }
 
 void NavigationHandler::stopPlayback() {
-    _orbitalNavigator->resetVelocities();
-    _orbitalNavigator->resetNodeMovements();
+    _orbitalNavigator.resetVelocities();
+    _orbitalNavigator.resetNodeMovements();
     _playbackModeEnabled = false;
 }
 
@@ -319,31 +310,31 @@ Camera* NavigationHandler::camera() const {
 }
 
 const InputState& NavigationHandler::inputState() const {
-    return *_inputState;
+    return _inputState;
 }
 
 void NavigationHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
-    _inputState->mouseButtonCallback(button, action);
+    _inputState.mouseButtonCallback(button, action);
 }
 
 void NavigationHandler::mousePositionCallback(double x, double y) {
-    _inputState->mousePositionCallback(x, y);
+    _inputState.mousePositionCallback(x, y);
 }
 
 void NavigationHandler::mouseScrollWheelCallback(double pos) {
-    _inputState->mouseScrollWheelCallback(pos);
+    _inputState.mouseScrollWheelCallback(pos);
 }
 
 void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
 {
-    _inputState->keyboardCallback(key, modifier, action);
+    _inputState.keyboardCallback(key, modifier, action);
 }
 
 NavigationHandler::NavigationState NavigationHandler::navigationState(
                                                const SceneGraphNode& referenceFrame) const
 {
-    const SceneGraphNode* anchor = _orbitalNavigator->anchorNode();
-    const SceneGraphNode* aim = _orbitalNavigator->aimNode();
+    const SceneGraphNode* anchor = _orbitalNavigator.anchorNode();
+    const SceneGraphNode* aim = _orbitalNavigator.aimNode();
 
     if (!aim) {
         aim = anchor;
@@ -373,9 +364,9 @@ NavigationHandler::NavigationState NavigationHandler::navigationState(
         (glm::dvec4(_camera->positionVec3() - anchor->worldPosition(), 1.0));
 
     return NavigationState(
-        _orbitalNavigator->anchorNode()->identifier(),
-        _orbitalNavigator->aimNode() ?
-            _orbitalNavigator->aimNode()->identifier() : "",
+        _orbitalNavigator.anchorNode()->identifier(),
+        _orbitalNavigator.aimNode() ?
+            _orbitalNavigator.aimNode()->identifier() : "",
         referenceFrame.identifier(),
         position,
         invReferenceFrameTransform * neutralUp, yaw, pitch
@@ -385,8 +376,8 @@ NavigationHandler::NavigationState NavigationHandler::navigationState(
 void NavigationHandler::saveNavigationState(const std::string& filepath,
                                             const std::string& referenceFrameIdentifier)
 {
-    const SceneGraphNode* referenceFrame = _orbitalNavigator->followingNodeRotation() ?
-        _orbitalNavigator->anchorNode() :
+    const SceneGraphNode* referenceFrame = _orbitalNavigator.followingNodeRotation() ?
+        _orbitalNavigator.anchorNode() :
         sceneGraph()->root();
 
     if (!referenceFrameIdentifier.empty()) {
@@ -441,7 +432,7 @@ void NavigationHandler::setJoystickAxisMapping(int axis,
                                             JoystickCameraStates::AxisInvert shouldInvert,
                                       JoystickCameraStates::AxisNormalize shouldNormalize)
 {
-    _orbitalNavigator->joystickStates().setAxisMapping(
+    _orbitalNavigator.joystickStates().setAxisMapping(
         axis,
         mapping,
         shouldInvert,
@@ -452,15 +443,15 @@ void NavigationHandler::setJoystickAxisMapping(int axis,
 JoystickCameraStates::AxisInformation
 NavigationHandler::joystickAxisMapping(int axis) const
 {
-    return _orbitalNavigator->joystickStates().axisMapping(axis);
+    return _orbitalNavigator.joystickStates().axisMapping(axis);
 }
 
 void NavigationHandler::setJoystickAxisDeadzone(int axis, float deadzone) {
-    _orbitalNavigator->joystickStates().setDeadzone(axis, deadzone);
+    _orbitalNavigator.joystickStates().setDeadzone(axis, deadzone);
 }
 
 float NavigationHandler::joystickAxisDeadzone(int axis) const {
-    return _orbitalNavigator->joystickStates().deadzone(axis);
+    return _orbitalNavigator.joystickStates().deadzone(axis);
 }
 
 void NavigationHandler::bindJoystickButtonCommand(int button, std::string command,
@@ -468,7 +459,7 @@ void NavigationHandler::bindJoystickButtonCommand(int button, std::string comman
                                          JoystickCameraStates::ButtonCommandRemote remote,
                                                   std::string documentation)
 {
-    _orbitalNavigator->joystickStates().bindButtonCommand(
+    _orbitalNavigator.joystickStates().bindButtonCommand(
         button,
         std::move(command),
         action,
@@ -478,13 +469,12 @@ void NavigationHandler::bindJoystickButtonCommand(int button, std::string comman
 }
 
 void NavigationHandler::clearJoystickButtonCommand(int button) {
-    _orbitalNavigator->joystickStates().clearButtonCommand(button);
+    _orbitalNavigator.joystickStates().clearButtonCommand(button);
 }
 
 std::vector<std::string> NavigationHandler::joystickButtonCommand(int button) const {
-    return _orbitalNavigator->joystickStates().buttonCommand(button);
+    return _orbitalNavigator.joystickStates().buttonCommand(button);
 }
-
 
 documentation::Documentation NavigationHandler::NavigationState::Documentation() {
     using namespace documentation;

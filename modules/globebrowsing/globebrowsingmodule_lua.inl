@@ -167,7 +167,8 @@ int goToGeo(lua_State* L) {
         if (!n) {
             return ghoul::lua::luaError(L, "Unknown globe name: " + globeIdentifier);
         }
-    } else {
+    }
+    else {
         n = global::navigationHandler.orbitalNavigator().anchorNode();
         if (!n) {
             return ghoul::lua::luaError(L, "No anchor node is set.");
@@ -180,10 +181,9 @@ int goToGeo(lua_State* L) {
     const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
     if (!globe) {
         if (providedGlobeIdentifier) {
-            return ghoul::lua::luaError(
-                L, "Identifier must be a RenderableGlobe"
-            );
-        } else {
+            return ghoul::lua::luaError(L, "Identifier must be a RenderableGlobe");
+        }
+        else {
             return ghoul::lua::luaError(L,
                 "Current anchor node is not a RenderableGlobe. "
                 "Either change the anchor to a globe, or specify a globe identifier "
