@@ -1,0 +1,24 @@
+local guiCustomization = asset.require('customization/gui')
+
+local backendHash = "84737f9785f12efbb12d2de9d511154c6215fe9c"
+
+local dataProvider = "data.openspaceproject.com/files/webgui"
+
+local backend = asset.syncedResource({
+    Identifier = "WebGuiBackend",
+    Name = "Web Gui Backend",
+    Type = "UrlSynchronization",
+    Url = dataProvider .. "/backend/" ..  backendHash .. "/backend.zip"
+})
+
+asset.onInitialize(function ()
+    -- Unzip the server bundle
+    dest = backend .. "/backend"
+    if not openspace.directoryExists(dest) then
+        openspace.unzipFile(backend .. "/backend.zip", dest, true)
+    end
+
+    openspace.setPropertyValueSingle(
+        "Modules.WebGui.ServerProcessEntryPoint", backend .. "/backend/backend.js"
+    )
+end)
